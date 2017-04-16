@@ -729,6 +729,15 @@ GtkCanvas::deliver_event (GdkEvent* event)
 	return false;
 }
 
+void
+GtkCanvas::item_shown_or_hidden (Item* item)
+{
+	if (item == current_tooltip_item) {
+		stop_tooltip_timeout ();
+	}
+	Canvas::item_shown_or_hidden (item);
+}
+
 /** Called when an item is being destroyed.
  *  @param item Item being destroyed.
  *  @param bounding_box Last known bounding box of the item.
@@ -1136,6 +1145,7 @@ GtkCanvas::on_map ()
 void
 GtkCanvas::on_unmap ()
 {
+	stop_tooltip_timeout ();
 	Gtk::EventBox::on_unmap();
 #ifdef __APPLE__
 	if (_nsglview) {

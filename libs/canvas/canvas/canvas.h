@@ -97,7 +97,7 @@ public:
 
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, Rect) {}
-	void item_shown_or_hidden (Item *);
+	virtual void item_shown_or_hidden (Item *);
         void item_visual_property_changed (Item*);
 	void item_changed (Item *, Rect);
 	void item_moved (Item *, Rect);
@@ -240,6 +240,7 @@ public:
 
 private:
 	void item_going_away (Item *, Rect);
+	void item_shown_or_hidden (Item *);
 	bool send_leave_event (Item const *, double, double) const;
 
 	Cairo::RefPtr<Cairo::Surface> canvas_image;
