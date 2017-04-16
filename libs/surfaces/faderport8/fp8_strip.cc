@@ -360,6 +360,7 @@ FP8Strip::notify_fader_changed ()
 	float val = 0;
 	if (ac) {
 		val = ac->internal_to_interface (ac->get_value()) * 16368.f; /* 16 * 1023 */
+		val = std::max (0.f, std::min (1.f, val));
 	}
 	unsigned short mv = lrintf (val);
 	if (mv == _last_fader) {
