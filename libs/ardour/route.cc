@@ -3614,10 +3614,6 @@ Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*
 void
 Route::flush_processors ()
 {
-	/* XXX shouldn't really try to take this lock, since
-	   this is called from the RT audio thread.
-	*/
-
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -4167,6 +4163,7 @@ Route::set_active (bool yn, void* src)
 		_active = yn;
 		_input->set_active (yn);
 		_output->set_active (yn);
+		flush_processors ();
 		active_changed (); // EMIT SIGNAL
 		_session.set_dirty ();
 	}
