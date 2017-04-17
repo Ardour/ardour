@@ -48,6 +48,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void non_realtime_locate (framepos_t);
+	void realtime_handle_transport_stopped ();
 
 	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);

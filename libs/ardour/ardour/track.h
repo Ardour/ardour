@@ -72,6 +72,8 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	MonitorState monitoring_state () const;
 	MeterState metering_state () const;
 
+	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
+
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                     bool state_changing);
 
@@ -160,6 +162,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	int can_internal_playback_seek (framecnt_t);
 	int internal_playback_seek (framecnt_t);
 	void non_realtime_locate (framepos_t);
+	void realtime_handle_transport_stopped ();
 	void non_realtime_set_speed ();
 	int overwrite_existing_buffers ();
 	framecnt_t get_captured_frames (uint32_t n = 0) const;
@@ -168,7 +171,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	bool realtime_set_speed (double, bool);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
-	double speed () const;
 	void prepare_to_stop (framepos_t, framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();

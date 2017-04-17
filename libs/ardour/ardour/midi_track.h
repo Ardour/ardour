@@ -44,7 +44,6 @@ public:
 
 	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
 
-	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 	void non_realtime_locate (framepos_t);
 

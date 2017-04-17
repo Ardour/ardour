@@ -456,6 +456,7 @@ Route::process_output_buffers (BufferSet& bufs,
 					_initial_delay + latency, longest_session_latency - latency);
 		}
 
+		//cerr << name() << " run " << (*i)->name() << endl;
 		(*i)->run (bufs, start_frame - latency, end_frame - latency, speed, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 
@@ -2824,88 +2825,7 @@ Route::set_processor_state (const XMLNode& node)
 			/* CapturingProcessor should never be restored, it's always
 			   added explicitly when needed */
 		} else {
-			ProcessorList::iterator o;
-
-			for (o = _processors.begin(); o != _processors.end(); ++o) {
-				XMLProperty const * id_prop = (*niter)->property(X_("id"));
-				if (id_prop && (*o)->id() == id_prop->value()) {
-					(*o)->set_state (**niter, Stateful::current_state_version);
-					new_order.push_back (*o);
-					break;
-				}
-			}
-
-			// If the processor (*niter) is not on the route then create it
-
-			if (o == _processors.end()) {
-
-				boost::shared_ptr<Processor> processor;
-
-				if (prop->value() == "intsend") {
-
-					processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), boost::shared_ptr<Route>(), Delivery::Aux, true));
-
-				} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
-				           prop->value() == "lv2" ||
-				           prop->value() == "windows-vst" ||
-				           prop->value() == "mac-vst" ||
-				           prop->value() == "lxvst" ||
-				           prop->value() == "luaproc" ||
-				           prop->value() == "audiounit") {
-
-					if (_session.get_disable_all_loaded_plugins ()) {
-						processor.reset (new UnknownProcessor (_session, **niter));
-					} else {
-						processor.reset (new PluginInsert (_session));
-						processor->set_owner (this);
-						if (_strict_io) {
-							boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
-							pi->set_strict_io (true);
-						}
-
-					}
-				} else if (prop->value() == "port") {
-
-					processor.reset (new PortInsert (_session, _pannable, _mute_master));
-
-				} else if (prop->value() == "send") {
-
-					processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
-					boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
-					send->SelfDestruct.connect_same_thread (*this,
-							boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
-
-				} else {
-					error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
-					continue;
-				}
-
-				if (processor->set_state (**niter, Stateful::current_state_version) != 0) {
-					/* This processor could not be configured.  Turn it into a UnknownProcessor */
-					processor.reset (new UnknownProcessor (_session, **niter));
-				}
-
-				/* subscribe to Sidechain IO changes */
-				boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
-				if (pi && pi->has_sidechain ()) {
-					pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
-				}
-
-				/* we have to note the monitor send here, otherwise a new one will be created
-				   and the state of this one will be lost.
-				*/
-				boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
-				if (isend && isend->role() == Delivery::Listen) {
-					_monitor_send = isend;
-				}
-
-				/* it doesn't matter if invisible processors are added here, as they
-				   will be sorted out by setup_invisible_processors () shortly.
-				*/
-
-				new_order.push_back (processor);
-				must_configure = true;
-			}
+			set_processor_state (**niter, prop, new_order, must_configure);
 		}
 	}
 
@@ -2945,6 +2865,93 @@ Route::set_processor_state (const XMLNode& node)
 	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	set_processor_positions ();
+}
+
+bool
+Route::set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
+{
+	ProcessorList::iterator o;
+
+	for (o = _processors.begin(); o != _processors.end(); ++o) {
+		XMLProperty const * id_prop = node.property(X_("id"));
+		if (id_prop && (*o)->id() == id_prop->value()) {
+			(*o)->set_state (node, Stateful::current_state_version);
+			new_order.push_back (*o);
+			break;
+		}
+	}
+
+	// If the processor (node) is not on the route then create it
+
+	if (o == _processors.end()) {
+
+		boost::shared_ptr<Processor> processor;
+
+		if (prop->value() == "intsend") {
+
+			processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), boost::shared_ptr<Route>(), Delivery::Aux, true));
+
+		} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
+		           prop->value() == "lv2" ||
+		           prop->value() == "windows-vst" ||
+		           prop->value() == "mac-vst" ||
+		           prop->value() == "lxvst" ||
+		           prop->value() == "luaproc" ||
+		           prop->value() == "audiounit") {
+
+			if (_session.get_disable_all_loaded_plugins ()) {
+				processor.reset (new UnknownProcessor (_session, node));
+			} else {
+				processor.reset (new PluginInsert (_session));
+				processor->set_owner (this);
+				if (_strict_io) {
+					boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
+					pi->set_strict_io (true);
+				}
+
+			}
+		} else if (prop->value() == "port") {
+
+			processor.reset (new PortInsert (_session, _pannable, _mute_master));
+
+		} else if (prop->value() == "send") {
+
+			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
+			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
+			send->SelfDestruct.connect_same_thread (*this,
+			                                        boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+
+		} else {
+			return false;
+		}
+
+		if (processor->set_state (node, Stateful::current_state_version) != 0) {
+			/* This processor could not be configured.  Turn it into a UnknownProcessor */
+			processor.reset (new UnknownProcessor (_session, node));
+		}
+
+		/* subscribe to Sidechain IO changes */
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+		if (pi && pi->has_sidechain ()) {
+			pi->sidechain_input ()->changed.connect_same_thread (*this, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
+		}
+
+		/* we have to note the monitor send here, otherwise a new one will be created
+		   and the state of this one will be lost.
+		*/
+		boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
+		if (isend && isend->role() == Delivery::Listen) {
+			_monitor_send = isend;
+		}
+
+		/* it doesn't matter if invisible processors are added here, as they
+		   will be sorted out by setup_invisible_processors () shortly.
+		*/
+
+		new_order.push_back (processor);
+		must_configure = true;
+	}
+	return true;
 }
 
 void
