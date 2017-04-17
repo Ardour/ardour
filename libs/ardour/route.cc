@@ -3568,13 +3568,16 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 		return 0;
 	}
 
-	if (n_outputs().n_total() == 0) {
-		return 0;
-	}
+	//MB has its own signal path, regardless of I/O -- TODO handle !active for tracks & aux-busses)
+	if (!Profile->get_mixbus()) {
+		if (n_outputs().n_total() == 0) {
+			return 0;
+		}
 
-	if (!_active || n_inputs().n_total() == 0) {
-		silence_unlocked (nframes);
-		return 0;
+		if (!_active || n_inputs().n_total() == 0) {
+			silence_unlocked (nframes);
+			return 0;
+		}
 	}
 
 	framepos_t unused = 0;
