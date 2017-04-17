@@ -17,29 +17,6 @@ using namespace std;
 
 CPPUNIT_TEST_SUITE_REGISTRATION (StringConvertTest);
 
-static std::vector<std::string> get_test_locales ()
-{
-	std::vector<std::string> locales;
-
-#ifdef PLATFORM_WINDOWS
-	locales.push_back("French_France.1252"); // must be first
-	locales.push_back("Dutch_Netherlands.1252");
-	locales.push_back("Italian_Italy.1252");
-	locales.push_back("Farsi_Iran.1256");
-	locales.push_back("Chinese_China.936");
-	locales.push_back("Czech_Czech Republic.1250");
-#else
-	locales.push_back("fr_FR"); // French France // must be first
-	locales.push_back("nl_NL"); // Dutch - Netherlands
-	locales.push_back("it_IT"); // Italian
-	locales.push_back("fa_IR"); // Farsi Iran
-	locales.push_back("zh_CN"); // Chinese
-	locales.push_back("cs_CZ"); // Czech
-#endif
-	return locales;
-}
-
-
 namespace {
 
 class LocaleGuard {
@@ -54,9 +31,11 @@ public:
 
 		const char* new_locale = setlocale (LC_ALL, locale.c_str ());
 
-		CPPUNIT_ASSERT (new_locale != NULL);
+		if (new_locale == NULL) {
+			std::cerr << "Failed to set locale to : " << locale << std::endl;
+		}
 
-		CPPUNIT_ASSERT (locale == new_locale);
+		CPPUNIT_ASSERT (new_locale != NULL);
 	}
 
 	~LocaleGuard ()
@@ -68,7 +47,116 @@ private:
 	const char* m_previous_locale;
 };
 
+static
+bool
+check_decimal_mark_is_comma ()
+{
+	char buf[32];
+	double const dnum = 12345.67890;
+	snprintf (buf, sizeof(buf), "%.12g", dnum);
+	bool found = (strchr (buf, ',') != NULL);
+	return found;
+}
+
+static std::vector<std::string> get_locale_list ()
+{
+	std::vector<std::string> locales;
+
+	locales.push_back(""); // User preferred locale
+
+#ifdef PLATFORM_WINDOWS
+	locales.push_back("French_France.1252"); // must be first
+	locales.push_back("Dutch_Netherlands.1252");
+	locales.push_back("Italian_Italy.1252");
+	locales.push_back("Farsi_Iran.1256");
+	locales.push_back("Chinese_China.936");
+	locales.push_back("Czech_Czech Republic.1250");
+#else
+	locales.push_back("fr_FR"); // French France
+	locales.push_back("fr_FR.UTF-8");
+	locales.push_back("de_DE"); // German Germany
+	locales.push_back("de_DE.UTF-8");
+	locales.push_back("nl_NL"); // Dutch - Netherlands
+	locales.push_back("nl_NL.UTF-8");
+	locales.push_back("it_IT"); // Italian
+	locales.push_back("fa_IR"); // Farsi Iran
+	locales.push_back("zh_CN"); // Chinese
+	locales.push_back("cs_CZ"); // Czech
+#endif
+	return locales;
+}
+
+static std::vector<std::string> get_supported_locales ()
+{
+	std::vector<std::string> locales = get_locale_list ();
+	std::vector<std::string> supported_locales;
+
+	const char * m_orig_locale = setlocale (LC_ALL, NULL);
+
+	CPPUNIT_ASSERT (m_orig_locale != NULL);
+
+	std::cerr << std::endl << "Original locale: " << m_orig_locale << std::endl;
+
+	for (std::vector<std::string>::const_iterator it = locales.begin(); it != locales.end(); ++it) {
+
+		const char* locale = it->c_str();
+		const char* new_locale = setlocale (LC_ALL, locale);
+
+		if (new_locale == NULL) {
+			std::cerr << "Unable to set locale : " << locale << ", may not be installed." << std::endl;
+			continue;
+		}
+
+		if (*it != new_locale) {
+			// Setting the locale may be successful but locale has a different
+			// (or longer) name.
+			if (it->empty()) {
+				std::cerr << "User preferred locale is : " << new_locale << std::endl;
+			} else {
+				std::cerr << "locale : " << locale << ", has name : " << new_locale << std::endl;
+			}
+		}
+
+		std::cerr << "Adding locale : " << new_locale << " to test locales" << std::endl;
+
+		supported_locales.push_back (*it);
+	}
+
+	if (setlocale (LC_ALL, m_orig_locale) == NULL) {
+		std::cerr << "ERROR: Unable to restore original locale " << m_orig_locale
+		          << ", further tests may be invalid." << std::endl;
+	}
+
+	return supported_locales;
+}
+
+static std::vector<std::string> get_test_locales ()
+{
+	static std::vector<std::string> locales = get_supported_locales ();
+	return locales;
+}
+
+static bool get_locale_with_comma_decimal_mark (std::string& locale_str) {
+	std::vector<std::string> locales = get_test_locales ();
+
+	for (std::vector<std::string>::const_iterator it = locales.begin(); it != locales.end(); ++it) {
+		LocaleGuard guard (*it);
+		if (check_decimal_mark_is_comma ()) {
+			locale_str = *it;
+			return true;
+		}
+	}
+	return false;
+}
+
 } // anon namespace
+
+void
+StringConvertTest::test_required_locales ()
+{
+	std::string locale_str;
+	CPPUNIT_ASSERT(get_locale_with_comma_decimal_mark(locale_str));
+}
 
 static const std::string MAX_INT16_STR ("32767");
 static const std::string MIN_INT16_STR ("-32768");
@@ -558,7 +646,7 @@ check_double_convert ()
 	return (num == string_to<double>(to_string<double> (num)));
 }
 
-static const int s_iter_count = 500000;
+static const int s_iter_count = 1000000;
 
 void*
 check_int_convert_thread(void*)
@@ -589,20 +677,11 @@ check_double_convert_thread(void*)
 
 static const double s_test_double = 31459.265359;
 
-bool
-check_fr_printf ()
-{
-	char buf[32];
-	snprintf (buf, sizeof(buf), "%.12g", s_test_double);
-	bool found = (strchr (buf, ',') != NULL);
-	return found;
-}
-
 void*
-check_fr_printf_thread (void*)
+check_decimal_mark_is_comma_thread (void*)
 {
 	for (int n = 0; n < s_iter_count; n++) {
-		assert (check_fr_printf ());
+		assert (check_decimal_mark_is_comma ());
 	}
 
 	return NULL;
@@ -617,12 +696,16 @@ check_fr_printf_thread (void*)
 void
 StringConvertTest::test_convert_thread_safety ()
 {
-	LocaleGuard guard (get_test_locales().front());
+	std::string locale_str;
+
+	CPPUNIT_ASSERT(get_locale_with_comma_decimal_mark(locale_str));
+
+	LocaleGuard guard (locale_str);
 
 	CPPUNIT_ASSERT (check_int_convert ());
 	CPPUNIT_ASSERT (check_float_convert ());
 	CPPUNIT_ASSERT (check_double_convert ());
-	CPPUNIT_ASSERT (check_fr_printf ());
+	CPPUNIT_ASSERT (check_decimal_mark_is_comma ());
 
 	pthread_t convert_int_thread;
 	pthread_t convert_float_thread;
@@ -639,7 +722,7 @@ StringConvertTest::test_convert_thread_safety ()
 	    pthread_create (
 	        &convert_double_thread, NULL, check_double_convert_thread, NULL) == 0);
 	CPPUNIT_ASSERT (
-	    pthread_create (&fr_printf_thread, NULL, check_fr_printf_thread, NULL) ==
+	    pthread_create (&fr_printf_thread, NULL, check_decimal_mark_is_comma_thread, NULL) ==
 	    0);
 
 	void* return_value;
