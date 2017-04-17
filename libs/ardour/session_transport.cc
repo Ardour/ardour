@@ -1530,7 +1530,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && tr->realtime_set_speed (tr->speed(), true)) {
+			if (tr && tr->realtime_set_speed (_transport_speed, true)) {
 				todo = PostTransportWork (todo | PostTransportSpeed);
 			}
 		}
@@ -1694,7 +1694,7 @@ Session::start_transport ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->realtime_set_speed (tr->speed(), true);
+			tr->realtime_set_speed (_transport_speed, true);
 		}
 	}
 
@@ -1861,7 +1861,7 @@ Session::use_sync_source (Slave* new_slave)
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->hidden()) {
-			if (tr->realtime_set_speed (tr->speed(), true)) {
+			if (tr->realtime_set_speed (_transport_speed, true)) {
 				non_rt_required = true;
 			}
 			tr->set_slaved (_slave != 0);

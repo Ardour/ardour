@@ -78,7 +78,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool           recordable()  const { return _flags & Recordable; }
 	bool           non_layered()  const { return _flags & NonLayered; }
 	bool           reversed()    const { return _actual_speed < 0.0f; }
-	double         speed()       const { return _visible_speed; }
 
 	virtual void non_realtime_locate (framepos_t);
 
@@ -122,9 +121,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
   protected:
 	Flag         _flags;
 	uint32_t      i_am_the_modifier;
-	double       _visible_speed;
 	double       _actual_speed;
-	double       _speed;
 	double       _target_speed;
 	/* items needed for speed change logic */
 	bool         _buffer_reallocation_required;
