@@ -1090,17 +1090,11 @@ RouteTimeAxisView::route_color_changed ()
 void
 RouteTimeAxisView::set_samples_per_pixel (double fpp)
 {
-	double speed = 1.0;
-
-	if (track()) {
-		speed = track()->speed();
-	}
-
 	if (_view) {
-		_view->set_samples_per_pixel (fpp * speed);
+		_view->set_samples_per_pixel (fpp);
 	}
 
-	StripableTimeAxisView::set_samples_per_pixel (fpp * speed);
+	StripableTimeAxisView::set_samples_per_pixel (fpp);
 }
 
 void
@@ -1368,21 +1362,16 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 void
 RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
-	double speed = 1.0;
-
-	if (track() != 0) {
-		speed = track()->speed();
-	}
-
-	framepos_t const start_adjusted = session_frame_to_track_frame(start, speed);
-	framepos_t const end_adjusted   = session_frame_to_track_frame(end, speed);
-
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
-		_view->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
+		_view->get_selectables (start, end, top, bot, results, within);
 	}
 
 	/* pick up visible automation tracks */
-	StripableTimeAxisView::get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->get_selectables (start, end, top, bot, results, within);
+		}
+	}
 }
 
 void
@@ -1477,13 +1466,6 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 	playlist = tr->playlist();
 
 	TimeSelection time (selection);
-	float const speed = tr->speed();
-	if (speed != 1.0f) {
-		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
-			(*i).start = session_frame_to_track_frame((*i).start, speed);
-			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
-		}
-	}
 
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
@@ -1512,13 +1494,6 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 	playlist = tr->playlist();
 
 	TimeSelection time (selection.time);
-	float const speed = tr->speed();
-	if (speed != 1.0f) {
-		for (TimeSelection::iterator i = time.begin(); i != time.end(); ++i) {
-			(*i).start = session_frame_to_track_frame((*i).start, speed);
-			(*i).end   = session_frame_to_track_frame((*i).end,   speed);
-		}
-	}
 
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
@@ -1594,11 +1569,6 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 	ctx.counts.increase_n_playlists(type);
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
-
-	if (track()->speed() != 1.0f) {
-		pos = session_frame_to_track_frame (pos, track()->speed());
-		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
-	}
 
 	/* add multi-paste offset if applicable */
 	std::pair<framepos_t, framepos_t> extent   = (*p)->get_extent();
