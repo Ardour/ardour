@@ -417,13 +417,13 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	if (DiskIOProcessor::set_state (node, version)) {
 		return -1;
 	}
-
+#if 0 // XXX DISK
 	if ((prop = node.property (X_("capture-alignment"))) != 0) {
                 set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
                 set_align_choice (Automatic, true);
         }
-
+#endif
 
 	if ((prop = node.property ("record-safe")) != 0) {
 	    _record_safe = PBD::string_is_affirmative (prop->value()) ? 1 : 0;
@@ -1701,4 +1701,10 @@ DiskWriter::adjust_buffering ()
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->resize (_session.butler()->audio_diskstream_capture_buffer_size());
 	}
+}
+
+void
+DiskWriter::realtime_handle_transport_stopped ()
+{
+	realtime_set_speed (0.0f, true);
 }

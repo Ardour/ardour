@@ -77,7 +77,6 @@ Track::init ()
         }
 
         _disk_reader.reset (new DiskReader (_session, name(), dflags));
-
         _disk_reader->set_block_size (_session.get_block_size ());
         _disk_reader->set_route (shared_from_this());
 
@@ -342,6 +341,7 @@ Track::set_name (const string& str)
 	_disk_writer->set_write_source_name (diskstream_name);
 
 	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
+
 	if (_playlists[data_type()]->all_regions_empty () && _session.playlists->playlists_for_track (me).size() == 1) {
 		/* Only rename the diskstream (and therefore the playlist) if
 		   a) the playlist has never had a region added to it and
@@ -356,6 +356,12 @@ Track::set_name (const string& str)
 		*/
 		_disk_reader->set_name (str);
 		_disk_writer->set_name (str);
+	}
+
+	for (uint32_t n = 0; n < DataType::num_types; ++n) {
+		if (_playlists[n]) {
+			_playlists[n]->set_name (str);
+		}
 	}
 
 	/* save state so that the statefile fully reflects any filename changes */
@@ -483,9 +489,9 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 			if (no_meter) {
 				BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
 				_meter->run (bufs, start_frame, end_frame, 1.0, nframes, true);
-				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, speed(), nframes);
+				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, _session.transport_speed(), nframes);
 			} else {
-				_input->process_input (_meter, start_frame, end_frame, speed(), nframes);
+				_input->process_input (_meter, start_frame, end_frame, _session.transport_speed(), nframes);
 			}
 		}
 
@@ -498,7 +504,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		fill_buffers_with_input (bufs, _input, nframes);
 
 		if (_meter_point == MeterInput) {
-			_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
+			_meter->run (bufs, start_frame, end_frame, _session.transport_speed(), nframes, true);
 		}
 
 		passthru (bufs, start_frame, end_frame, nframes, false);
@@ -708,6 +714,20 @@ Track::realtime_set_speed (double s, bool g)
 }
 
 void
+Track::realtime_handle_transport_stopped ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked ()) {
+		return;
+	}
+
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->realtime_handle_transport_stopped ();
+	}
+}
+
+void
 Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 {
 	_disk_writer->transport_stopped_wallclock (n, t, g);
@@ -717,12 +737,6 @@ bool
 Track::pending_overwrite () const
 {
 	return _disk_reader->pending_overwrite ();
-}
-
-double
-Track::speed () const
-{
-	return _disk_reader->speed ();
 }
 
 void
@@ -1114,4 +1128,29 @@ Track::metering_state () const
 		rv = _meter_point == MeterInput;
 	}
 	return rv ? MeteringInput : MeteringRoute;
+}
+
+bool
+Track::set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
+{
+	if (Route::set_processor_state (node, prop, new_order, must_configure)) {
+		return true;
+	}
+
+	if (prop->value() == "diskreader") {
+		if (_disk_reader) {
+			_disk_reader->set_state (node, Stateful::current_state_version);
+			new_order.push_back (_disk_reader);
+			return true;
+		}
+	} else if (prop->value() == "diskwriter") {
+		if (_disk_writer) {
+			_disk_writer->set_state (node, Stateful::current_state_version);
+			new_order.push_back (_disk_writer);
+			return true;
+		}
+	}
+
+	error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
+	return false;
 }

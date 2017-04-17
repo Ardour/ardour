@@ -384,7 +384,8 @@ public:
 	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();
-	virtual void set_processor_state (const XMLNode&);
+	void set_processor_state (const XMLNode&);
+	virtual bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
 	boost::weak_ptr<Route> weakroute ();
 

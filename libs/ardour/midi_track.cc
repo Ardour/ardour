@@ -397,20 +397,6 @@ MidiTrack::realtime_locate ()
 }
 
 void
-MidiTrack::realtime_handle_transport_stopped ()
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked ()) {
-		return;
-	}
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->realtime_handle_transport_stopped ();
-	}
-}
-
-void
 MidiTrack::non_realtime_locate (framepos_t pos)
 {
 	Track::non_realtime_locate(pos);
