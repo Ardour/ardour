@@ -1137,6 +1137,10 @@ FaderPort8::spill_plugins ()
 
 	for (uint32_t i = 0; 0 != (proc = r->nth_plugin (i)); ++i) {
 		if (!proc->display_to_user ()) {
+#ifdef MIXBUS
+			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+			if (pi->is_channelstrip ()) // don't skip MB PRE
+#endif
 			continue;
 		}
 		int n_controls = 0;
@@ -1188,7 +1192,7 @@ FaderPort8::spill_plugins ()
 			break;
 		}
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
-		boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, i));
+		boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, procs[i]));
 
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_select_cb (cb);
@@ -1282,7 +1286,6 @@ FaderPort8::assign_sends ()
 		_ctrls.strip(id).set_fader_controllable (send);
 		_ctrls.strip(id).set_text_line (0, s->send_name (i));
 		_ctrls.strip(id).set_mute_controllable (s->send_enable_controllable (i));
-		_ctrls.strip(id).set_solo_controllable (s->master_send_enable_controllable ()); // XXX
 
 		if (++id == 8) {
 			break;
@@ -1292,6 +1295,9 @@ FaderPort8::assign_sends ()
 	for (; id < 8; ++id) {
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 	}
+#ifdef MIXBUS // master-assign on last solo
+	_ctrls.strip(7).set_solo_controllable (s->master_send_enable_controllable ());
+#endif
 	/* set select buttons */
 	assign_stripables (true);
 }
@@ -1602,7 +1608,6 @@ FaderPort8::bank_param (bool down, bool page)
 	if (down) {
 		dt *= -1;
 	}
-	_channel_off += dt;
 	switch (_ctrls.fader_mode ()) {
 		case ModePlugins:
 			if (_proc_params.size() > 0) {
@@ -1614,6 +1619,7 @@ FaderPort8::bank_param (bool down, bool page)
 			}
 			break;
 		case ModeSend:
+			_plugin_off += dt;
 			assign_sends ();
 			break;
 		default:
