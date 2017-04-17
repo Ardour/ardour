@@ -1967,13 +1967,7 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionMoveDrag\n");
 
-	double speed = 1;
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&_primary->get_time_axis_view ());
-	if (rtv && rtv->is_track()) {
-		speed = rtv->track()->speed ();
-	}
-
-	_last_position = MusicFrame (static_cast<framepos_t> (_primary->region()->position() / speed), 0);
+	_last_position = MusicFrame (_primary->region()->position(), 0);
 }
 
 void
@@ -2878,17 +2872,12 @@ TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Region
 void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
-	double speed = 1.0;
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
-	if (tv && tv->is_track()) {
-		speed = tv->track()->speed();
-	}
-
-	framepos_t const region_start = (framepos_t) (_primary->region()->position() / speed);
-	framepos_t const region_end = (framepos_t) (_primary->region()->last_frame() / speed);
-	framecnt_t const region_length = (framecnt_t) (_primary->region()->length() / speed);
+	framepos_t const region_start = _primary->region()->position();
+	framepos_t const region_end = _primary->region()->last_frame();
+	framecnt_t const region_length = _primary->region()->length();
 
 	framepos_t const pf = adjusted_current_frame (event);
 	setup_snap_delta (MusicFrame(region_start, 0));
@@ -2945,15 +2934,11 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
 
-	double speed = 1.0;
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
 	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	frameoffset_t frame_delta = 0;
 
-	if (tv && tv->is_track()) {
-		speed = tv->track()->speed();
-	}
 	MusicFrame adj_frame = adjusted_frame (_drags->current_pointer_frame () + snap_delta (event->button.state), event, true);
 	framecnt_t dt = adj_frame.frame - raw_grab_frame () + _pointer_frame_offset - snap_delta (event->button.state);
 
@@ -3106,10 +3091,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 	case StartTrim:
-		show_verbose_cursor_time ((framepos_t) (rv->region()->position() / speed));
+		show_verbose_cursor_time (rv->region()->position());
 		break;
 	case EndTrim:
-		show_verbose_cursor_duration ((framepos_t)  rv->region()->position() / speed, (framepos_t) rv->region()->last_frame() / speed);
+		show_verbose_cursor_duration (rv->region()->position(), rv->region()->last_frame());
 		break;
 	case ContentsTrim:
 		// show_verbose_cursor_time (frame_delta);
