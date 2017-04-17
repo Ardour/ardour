@@ -265,11 +265,11 @@ FaderPort8::set_active (bool yn)
 void
 FaderPort8::close ()
 {
-	_assigned_strips.clear ();
 	stop_midi_handling ();
 	session_connections.drop_connections ();
 	automation_state_connections.drop_connections ();
 	assigned_stripable_connections.drop_connections ();
+	_assigned_strips.clear ();
 	drop_ctrl_connections ();
 	port_connection.disconnect ();
 	selection_connection.disconnect ();
@@ -1299,6 +1299,8 @@ FaderPort8::assign_sends ()
 	_ctrls.strip(7).set_solo_controllable (s->master_send_enable_controllable ());
 #endif
 	/* set select buttons */
+	assigned_stripable_connections.drop_connections ();
+	_assigned_strips.clear ();
 	assign_stripables (true);
 }
 
@@ -1317,8 +1319,8 @@ FaderPort8::assign_strips (bool reset_bank)
 		_channel_off = 0;
 	}
 
-	_assigned_strips.clear ();
 	assigned_stripable_connections.drop_connections ();
+	_assigned_strips.clear ();
 
 	FaderMode fadermode = _ctrls.fader_mode ();
 	switch (fadermode) {
@@ -1441,7 +1443,19 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 		assert (0); // this should not happen
 		return;
 	}
-	assert (_assigned_strips.find (s) != _assigned_strips.end());
+	if (_assigned_strips.find (s) == _assigned_strips.end()) {
+		/* it can happen that signal emission is delayed.
+		 * A signal may already be in the queue but the
+		 * _assigned_strips has meanwhile changed.
+		 *
+		 * before _assigned_strips changes, the connections are dropped
+		 * but that does not seem to invalidate pending requests :(
+		 *
+		 * Seen when creating a new MB session and Mixbusses are added
+		 * incrementally.
+		 */
+		return;
+	}
 	uint8_t id = _assigned_strips[s];
 
 	if (what_changed.contains (Properties::color)) {
