@@ -3516,13 +3516,16 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		return 0;
 	}
 
-	if (n_outputs().n_total() == 0) {
-		return 0;
-	}
+	//MB has its own output path, regardless of physical outs
+	if (!Profile->get_mixbus()) {
+		if (n_outputs().n_total() == 0) {
+			return 0;
+		}
 
-	if (!_active || n_inputs() == ChanCount::ZERO)  {
-		silence_unlocked (nframes);
-		return 0;
+		if (!_active || n_inputs() == ChanCount::ZERO)  {
+			silence_unlocked (nframes);
+			return 0;
+		}
 	}
 
 	if (session_state_changing) {
