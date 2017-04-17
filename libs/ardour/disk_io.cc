@@ -49,9 +49,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
 	, i_am_the_modifier (false)
-	, _visible_speed (0.0)
 	, _actual_speed (0.0)
-	, _speed (0.0)
 	, _target_speed (0.0)
 	, _buffer_reallocation_required (false)
 	, _seek_required (false)
@@ -170,11 +168,7 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 		midi_interpolation.add_channel_to (0,0);
 	}
 
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (_session.transport_frame() * (double) speed()));
-	} else {
-		seek (_session.transport_frame());
-	}
+	seek (_session.transport_frame());
 
 	return Processor::configure_io (in, out);
 }
@@ -206,11 +200,7 @@ DiskIOProcessor::non_realtime_locate (framepos_t location)
 {
 	/* now refill channel buffers */
 
-	if (speed() != 1.0f || speed() != -1.0f) {
-		seek ((framepos_t) (location * (double) speed()), true);
-	} else {
-		seek (location, true);
-	}
+	seek (location, true);
 }
 
 void
@@ -221,39 +211,27 @@ DiskIOProcessor::non_realtime_set_speed ()
 	}
 
 	if (_seek_required) {
-		if (speed() != 1.0f || speed() != -1.0f) {
-			seek ((framepos_t) (_session.transport_frame() * (double) speed()), true);
-		}
-		else {
-			seek (_session.transport_frame(), true);
-		}
-
+		seek (_session.transport_frame(), true);
 		_seek_required = false;
 	}
 }
 
 bool
-DiskIOProcessor::realtime_set_speed (double sp, bool global)
+DiskIOProcessor::realtime_set_speed (double new_speed, bool global)
 {
 	bool changed = false;
-	double new_speed = sp * _session.transport_speed();
 
-	if (_visible_speed != sp) {
-		_visible_speed = sp;
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("%1 will run at %2\n", name(), new_speed));
+
+	if (_target_speed != new_speed) {
+		_target_speed = new_speed;
 		changed = true;
-	}
 
-	if (new_speed != _actual_speed) {
-
-		framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() *
-                                                                  fabs (new_speed)) + 2;
+		framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * fabs (new_speed)) + 2;
 
 		if (required_wrap_size > wrap_buffer_size) {
 			_buffer_reallocation_required = true;
 		}
-
-		_actual_speed = new_speed;
-		_target_speed = fabs(_actual_speed);
 	}
 
 	if (changed) {

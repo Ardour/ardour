@@ -112,13 +112,11 @@ DiskReader::default_chunk_frames()
 bool
 DiskReader::set_name (string const & str)
 {
-	if (_name != str) {
-		for (uint32_t n = 0; n < DataType::num_types; ++n) {
-			if (_playlists[n]) {
-				_playlists[n]->set_name (str);
-			}
-		}
-		SessionObject::set_name(str);
+	string my_name = X_("reader:");
+	my_name += str;
+
+	if (_name != my_name) {
+		SessionObject::set_name (my_name);
 	}
 
 	return true;
@@ -151,6 +149,7 @@ DiskReader::set_state (const XMLNode& node, int version)
 void
 DiskReader::realtime_handle_transport_stopped ()
 {
+	realtime_set_speed (0.0f, true);
 }
 
 void
@@ -244,14 +243,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
 
 	_need_butler = false;
-
-	if (fabsf (_actual_speed) != 1.0f) {
-		midi_interpolation.set_speed (_target_speed);
-		interpolation.set_speed (_target_speed);
-		playback_distance = midi_interpolation.distance (nframes);
-	} else {
-		playback_distance = nframes;
-	}
+	playback_distance = calculate_playback_distance (nframes);
 
 	if (!need_disk_signal) {
 
@@ -339,7 +331,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		}
 
 		chaninfo->buf->increment_read_ptr (playback_distance);
-		_speed = _target_speed;
 	}
 
 	/* MIDI data handling */
@@ -352,7 +343,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		get_playback (mbuf, playback_distance);
 
 		/* vari-speed */
-		if (_target_speed > 0 && _actual_speed != 1.0f) {
+		if (_actual_speed != 0.0 && fabsf (_actual_speed) != 1.0f) {
 			MidiBuffer& mbuf (bufs.get_midi (0));
 			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
 				MidiBuffer::TimeType *tme = i.timeptr();
@@ -428,6 +419,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		if (frames_read <= frames_written) {
 			if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 				_need_butler = true;
+			} else {
+				cerr << name() << " fr " << frames_read << " > " << frames_written << endl;
 			}
 		} else {
 			_need_butler = true;
@@ -448,16 +441,13 @@ DiskReader::calculate_playback_distance (pframes_t nframes)
 {
 	frameoffset_t playback_distance = nframes;
 
-	if (_actual_speed != 1.0f && _actual_speed != -1.0f) {
+	if (_target_speed != 1.0f && _target_speed != -1.0f) {
 		interpolation.set_speed (_target_speed);
-		boost::shared_ptr<ChannelList> c = channels.reader();
-		int channel = 0;
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++channel) {
-			playback_distance = interpolation.interpolate (channel, nframes, NULL, NULL);
-		}
-	} else {
-		playback_distance = nframes;
+		midi_interpolation.set_speed (_target_speed);
+		playback_distance = midi_interpolation.distance (nframes);
 	}
+
+	_actual_speed = _target_speed;
 
 	if (_actual_speed < 0.0) {
 		return -playback_distance;
@@ -496,7 +486,7 @@ DiskReader::overwrite_existing_buffers ()
 
 		/* AUDIO */
 
-		bool reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+		bool reversed = (_target_speed * _session.transport_speed()) < 0.0f;
 
 		/* assume all are the same size */
 		framecnt_t size = c->front()->buf->bufsize();
@@ -839,7 +829,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	int32_t ret = 0;
 	framecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
-	bool const reversed = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool const reversed = (_target_speed * _session.transport_speed()) < 0.0f;
 	framecnt_t total_space;
 	framecnt_t zero_fill;
 	uint32_t chan_n;
@@ -1401,10 +1391,9 @@ DiskReader::refill_midi ()
 	}
 
 	size_t  write_space = _midi_buf->write_space();
-	bool    reversed    = (_visible_speed * _session.transport_speed()) < 0.0f;
+	bool    reversed    = (_target_speed * _session.transport_speed()) < 0.0f;
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame));
-	//PBD::stacktrace (cerr, 20);
 
 	/* no space to write */
 	if (write_space == 0) {
