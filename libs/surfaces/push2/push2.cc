@@ -40,6 +40,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/types_convert.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -994,10 +995,10 @@ Push2::get_state()
 	child->add_child_nocopy (_async_out->get_state());
 	node.add_child_nocopy (*child);
 
-	node.add_property (X_("root"), to_string (_scale_root, std::dec));
-	node.add_property (X_("root_octave"), to_string (_root_octave, std::dec));
-	node.add_property (X_("in_key"), _in_key ? X_("yes") : X_("no"));
-	node.add_property (X_("mode"), enum_2_string (_mode));
+	node.set_property (X_("root"), _scale_root);
+	node.set_property (X_("root-octave"), _root_octave);
+	node.set_property (X_("in-key"), _in_key);
+	node.set_property (X_("mode"), _mode);
 
 	return node;
 }
@@ -1029,23 +1030,10 @@ Push2::set_state (const XMLNode & node, int version)
 		}
 	}
 
-	XMLProperty const* prop;
-
-	if ((prop = node.property (X_("root"))) != 0) {
-		_scale_root = atoi (prop->value());
-	}
-
-	if ((prop = node.property (X_("root_octave"))) != 0) {
-		_root_octave = atoi (prop->value());
-	}
-
-	if ((prop = node.property (X_("in_key"))) != 0) {
-		_in_key = string_is_affirmative (prop->value());
-	}
-
-	if ((prop = node.property (X_("mode"))) != 0) {
-		_mode = (MusicalMode::Type) string_2_enum (prop->value(), _mode);
-	}
+	node.get_property (X_("root"), _scale_root);
+	node.get_property (X_("root-octave"), _root_octave);
+	node.get_property (X_("in-key"), _in_key);
+	node.get_property (X_("mode"), _mode);
 
 	return retval;
 }
