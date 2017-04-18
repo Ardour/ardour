@@ -128,6 +128,8 @@ private:
 	void set_x_select_controllable (boost::shared_ptr<ARDOUR::AutomationControl>);
 	boost::function<void ()> _select_plugin_functor;
 
+	void drop_automation_controls ();
+
 	PBD::Controllable::GroupControlDisposition group_mode () const;
 
 	/* notifications, update view */

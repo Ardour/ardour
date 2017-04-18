@@ -58,20 +58,30 @@ FP8Strip::FP8Strip (FP8Base& b, uint8_t id)
 
 FP8Strip::~FP8Strip ()
 {
+	drop_automation_controls ();
+	_base_connection.disconnect ();
+	_button_connections.drop_connections ();
+}
+
+void
+FP8Strip::drop_automation_controls ()
+{
 	_fader_connection.disconnect ();
 	_mute_connection.disconnect ();
 	_solo_connection.disconnect ();
 	_rec_connection.disconnect ();
 	_pan_connection.disconnect ();
+	_x_select_connection.disconnect ();
 
 	_fader_ctrl.reset ();
 	_mute_ctrl.reset ();
 	_solo_ctrl.reset ();
 	_rec_ctrl.reset ();
 	_pan_ctrl.reset ();
-
-	_base_connection.disconnect ();
-	_button_connections.drop_connections ();
+	_x_select_ctrl.reset ();
+	_peak_meter.reset ();
+	_redux_ctrl.reset ();
+	_select_plugin_functor.clear ();
 }
 
 void
@@ -87,9 +97,7 @@ FP8Strip::initialize ()
 	_mute.reset ();
 	_solo.reset ();
 
-	/* clear cached values */
-	_last_fader = 65535;
-	_last_meter = _last_redux = _last_barpos = 0xff;
+	drop_automation_controls ();
 
 	select_button ().set_color (0xffffffff);
 	select_button ().set_active (false);
@@ -116,6 +124,10 @@ FP8Strip::initialize ()
 	_base.tx_midi2 (0xd8 + _id, 0); // reset redux
 
 	_base.tx_midi3 (0xe0 + _id, 0, 0); // fader
+
+	/* clear cached values */
+	_last_fader = 65535;
+	_last_meter = _last_redux = _last_barpos = 0xff;
 }
 
 
