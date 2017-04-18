@@ -836,7 +836,7 @@ static bool flt_instrument (boost::shared_ptr<Stripable> s) {
 
 struct FP8SortByNewDisplayOrder
 {
-	// return (a < b)
+	// return strict (a < b)
 	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
 	{
 		if (a->presentation_info().flags () == b->presentation_info().flags ()) {
@@ -846,36 +846,34 @@ struct FP8SortByNewDisplayOrder
 		int cmp_a = 0;
 		int cmp_b = 0;
 
+		// see also gtk2_ardour/route_sorter.h
 		if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
-			cmp_a = 1;
+			cmp_a = 2;
 		}
 #ifdef MIXBUS
 		else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
 			cmp_a = 3;
 		}
 		else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus || a->mixbus()) {
-			cmp_a = 2;
+			cmp_a = 1;
 		}
 #endif
 
 		if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
-			cmp_b = 1;
+			cmp_b = 2;
 		}
 #ifdef MIXBUS
 		else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
 			cmp_b = 3;
 		}
 		else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus || b->mixbus()) {
-			cmp_b = 2;
+			cmp_b = 1;
 		}
 #endif
 
-#ifdef MIXBUS
-		// this can happen with older MB sessions (no PresentationInfo::Mixbus flag)
 		if (cmp_a == cmp_b) {
 			return a->presentation_info().order() < b->presentation_info().order();
 		}
-#endif
 		return cmp_a < cmp_b;
 	}
 };
