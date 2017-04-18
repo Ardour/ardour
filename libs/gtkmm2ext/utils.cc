@@ -20,6 +20,7 @@
 
 #include <map>
 #include <algorithm>
+#include <iostream>
 
 #include <gtk/gtkpaned.h>
 #include <gtk/gtk.h>
