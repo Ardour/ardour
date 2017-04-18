@@ -2561,7 +2561,7 @@ AUPlugin::find_presets ()
 		/* XXX: dubious -- deleting & re-adding a preset -> same URI
 		 * good that we don't support deleting AU presets :)
 		 */
-		string const uri = string_compose ("%1", _presets.size ());
+		string const uri = PBD::to_string<uint32_t> (_presets.size ());
 		_presets.insert (make_pair (uri, Plugin::PresetRecord (uri, i->first, false)));
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose("AU Adding Factory Preset: %1 > %2\n", i->first, i->second));
 	}
@@ -3123,22 +3123,19 @@ AUPluginInfo::save_cached_info ()
 	XMLNode* node;
 
 	node = new XMLNode (X_("AudioUnitPluginCache"));
-	node->add_property( "version", AU_CACHE_VERSION );
+	node->set_property( "version", AU_CACHE_VERSION );
 
 	for (map<string,AUPluginCachedInfo>::iterator i = cached_info.begin(); i != cached_info.end(); ++i) {
 		XMLNode* parent = new XMLNode (X_("plugin"));
-		parent->add_property ("id", i->first);
+		parent->set_property ("id", i->first);
 		node->add_child_nocopy (*parent);
 
 		for (vector<pair<int, int> >::iterator j = i->second.io_configs.begin(); j != i->second.io_configs.end(); ++j) {
 
 			XMLNode* child = new XMLNode (X_("io"));
-			char buf[32];
 
-			snprintf (buf, sizeof (buf), "%d", j->first);
-			child->add_property (X_("in"), buf);
-			snprintf (buf, sizeof (buf), "%d", j->second);
-			child->add_property (X_("out"), buf);
+			child->set_property (X_("in"), j->first);
+			child->set_property (X_("out"), j->second);
 			parent->add_child_nocopy (*child);
 		}
 
@@ -3195,13 +3192,12 @@ AUPluginInfo::load_cached_info ()
 
 			const XMLNode* gchild;
 			const XMLNodeList gchildren = child->children();
-			XMLProperty const * prop = child->property (X_("id"));
 
-			if (!prop) {
+			string id;
+			if (!child->get_property (X_("id"), id)) {
 				continue;
 			}
 
-			string id = prop->value();
 			string fixed;
 			string version;
 
@@ -3231,16 +3227,10 @@ AUPluginInfo::load_cached_info ()
 
 				if (gchild->name() == X_("io")) {
 
-					int in;
-					int out;
-					XMLProperty const * iprop;
-					XMLProperty const * oprop;
+					int32_t in;
+					int32_t out;
 
-					if (((iprop = gchild->property (X_("in"))) != 0) &&
-					    ((oprop = gchild->property (X_("out"))) != 0)) {
-						in = atoi (iprop->value());
-						out = atoi (oprop->value());
-
+					if (gchild->get_property (X_("in"), in) && gchild->get_property (X_("out"), out)) {
 						cinfo.io_configs.push_back (pair<int,int> (in, out));
 					}
 				}
