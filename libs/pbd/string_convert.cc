@@ -210,9 +210,9 @@ bool string_to_double (const std::string& str, double& val)
 bool bool_to_string (bool val, std::string& str)
 {
 	if (val) {
-		str = X_("yes");
+		str = X_("1");
 	} else {
-		str = X_("no");
+		str = X_("0");
 	}
 	return true;
 }

@@ -564,8 +564,8 @@ StringConvertTest::test_double_conversion ()
 }
 
 // we have to use these as CPPUNIT_ASSERT_EQUAL won't accept char arrays
-static const std::string BOOL_TRUE_STR ("yes");
-static const std::string BOOL_FALSE_STR ("no");
+static const std::string BOOL_TRUE_STR ("1");
+static const std::string BOOL_FALSE_STR ("0");
 
 void
 StringConvertTest::test_bool_conversion ()
