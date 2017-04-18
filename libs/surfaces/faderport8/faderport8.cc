@@ -1409,6 +1409,17 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	if (!s) {
 		return;
 	}
+#if 1 /* single exclusive selection by default, toggle via shift */
+	if (shift_mod ()) {
+		ToggleStripableSelection (s);
+	} else {
+		SetStripableSelection (s);
+	}
+#else
+	/* tri-state selection: This allows to set the "first selected"
+	 * with a single click without clearing the selection.
+	 * Single de/select via shift.
+	 */
 	if (shift_mod ()) {
 		if (s->is_selected ()) {
 			RemoveStripableFromSelection (s);
@@ -1423,6 +1434,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	} else {
 		ToggleStripableSelection (s);
 	}
+#endif
 }
 
 /* called from static PresentationInfo::Change */
