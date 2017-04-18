@@ -40,7 +40,6 @@ class LIBARDOUR_API SessionEvent {
 public:
 	enum Type {
 		SetTransportSpeed,
-		SetTrackSpeed,
 		Locate,
 		LocateRoll,
 		LocateRollLocate,

@@ -1706,5 +1706,5 @@ DiskWriter::adjust_buffering ()
 void
 DiskWriter::realtime_handle_transport_stopped ()
 {
-	realtime_set_speed (0.0f, true);
+	realtime_speed_change ();
 }

@@ -133,14 +133,6 @@ Session::request_transport_speed_nonzero (double speed, bool as_default)
 }
 
 void
-Session::request_track_speed (Track* tr, double speed)
-{
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetTrackSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
-	ev->set_ptr (tr);
-	queue_event (ev);
-}
-
-void
 Session::request_stop (bool abort, bool clear_state)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_frame(), 0.0, abort, clear_state);
@@ -542,7 +534,7 @@ Session::non_realtime_set_speed ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->non_realtime_set_speed ();
+			tr->non_realtime_speed_change ();
 		}
 	}
 }
@@ -1530,7 +1522,7 @@ Session::set_transport_speed (double speed, framepos_t destination_frame, bool a
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && tr->realtime_set_speed (_transport_speed, true)) {
+			if (tr && tr->realtime_speed_change()) {
 				todo = PostTransportWork (todo | PostTransportSpeed);
 			}
 		}
@@ -1694,7 +1686,7 @@ Session::start_transport ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->realtime_set_speed (_transport_speed, true);
+			tr->realtime_speed_change ();
 		}
 	}
 
@@ -1861,7 +1853,7 @@ Session::use_sync_source (Slave* new_slave)
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->hidden()) {
-			if (tr->realtime_set_speed (_transport_speed, true)) {
+			if (tr->realtime_speed_change()) {
 				non_rt_required = true;
 			}
 			tr->set_slaved (_slave != 0);
@@ -1951,16 +1943,6 @@ Session::switch_to_sync_source (SyncSource src)
 	};
 
 	request_sync_source (new_slave);
-}
-
-void
-Session::set_track_speed (Track* track, double speed)
-{
-	if (track->realtime_set_speed (speed, false)) {
-		add_post_transport_work (PostTransportSpeed);
-		_butler->schedule_transport_work ();
-		set_dirty ();
-	}
 }
 
 void

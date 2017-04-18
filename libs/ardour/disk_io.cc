@@ -49,8 +49,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
 	, i_am_the_modifier (false)
-	, _actual_speed (0.0)
-	, _target_speed (0.0)
 	, _buffer_reallocation_required (false)
 	, _seek_required (false)
 	, _slaved (false)
@@ -204,7 +202,7 @@ DiskIOProcessor::non_realtime_locate (framepos_t location)
 }
 
 void
-DiskIOProcessor::non_realtime_set_speed ()
+DiskIOProcessor::non_realtime_speed_change ()
 {
 	if (_buffer_reallocation_required) {
 		_buffer_reallocation_required = false;
@@ -217,31 +215,18 @@ DiskIOProcessor::non_realtime_set_speed ()
 }
 
 bool
-DiskIOProcessor::realtime_set_speed (double new_speed, bool global)
+DiskIOProcessor::realtime_speed_change ()
 {
-	bool changed = false;
+	const framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * fabs (_session.transport_speed())) + 2;
+	bool _buffer_reallocation_required;
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose ("%1 will run at %2\n", name(), new_speed));
-
-	if (_target_speed != new_speed) {
-		_target_speed = new_speed;
-		changed = true;
-
-		framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * fabs (new_speed)) + 2;
-
-		if (required_wrap_size > wrap_buffer_size) {
-			_buffer_reallocation_required = true;
-		}
+	if (required_wrap_size > wrap_buffer_size) {
+		_buffer_reallocation_required = true;
+	} else {
+		_buffer_reallocation_required = false;
 	}
 
-	if (changed) {
-		if (!global) {
-			_seek_required = true;
-		}
-		SpeedChanged (); /* EMIT SIGNAL */
-	}
-
-	return _buffer_reallocation_required || _seek_required;
+	return _buffer_reallocation_required;
 }
 
 int
@@ -255,13 +240,6 @@ DiskIOProcessor::set_state (const XMLNode& node, int version)
 		_flags = Flag (string_2_enum (prop->value(), _flags));
 	}
 
-	if ((prop = node.property ("speed")) != 0) {
-		double sp = atof (prop->value().c_str());
-
-		if (realtime_set_speed (sp, false)) {
-			non_realtime_set_speed ();
-		}
-	}
 	return 0;
 }
 

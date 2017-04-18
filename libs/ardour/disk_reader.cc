@@ -149,7 +149,7 @@ DiskReader::set_state (const XMLNode& node, int version)
 void
 DiskReader::realtime_handle_transport_stopped ()
 {
-	realtime_set_speed (0.0f, true);
+	realtime_speed_change ();
 }
 
 void
@@ -239,11 +239,21 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	framecnt_t playback_distance = 0;
 	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
+	frameoffset_t playback_distance = nframes;
 
 	_need_butler = false;
-	playback_distance = calculate_playback_distance (nframes);
+
+
+	if (speed != 1.0f && speed != -1.0f) {
+		interpolation.set_speed (speed);
+		midi_interpolation.set_speed (speed);
+		playback_distance = midi_interpolation.distance (nframes);
+	}
+
+	if (speed < 0.0) {
+		playback_distance = -playback_distance;
+	}
 
 	if (!need_disk_signal) {
 
@@ -277,7 +287,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 		if (playback_distance <= (framecnt_t) chaninfo->rw_vector.len[0]) {
 
-			if (fabsf (_actual_speed) != 1.0f) {
+			if (fabsf (speed) != 1.0f) {
 				(void) interpolation.interpolate (
 					n, nframes,
 					chaninfo->rw_vector.buf[0],
@@ -295,7 +305,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				/* We have enough samples, but not in one lump.
 				*/
 
-				if (fabsf (_actual_speed) != 1.0f) {
+				if (fabsf (speed) != 1.0f) {
 					interpolation.interpolate (n, chaninfo->rw_vector.len[0],
 					                           chaninfo->rw_vector.buf[0],
 					                           outgoing);
@@ -343,7 +353,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		get_playback (mbuf, playback_distance);
 
 		/* vari-speed */
-		if (_actual_speed != 0.0 && fabsf (_actual_speed) != 1.0f) {
+		if (speed != 0.0 && fabsf (speed) != 1.0f) {
 			MidiBuffer& mbuf (bufs.get_midi (0));
 			for (MidiBuffer::iterator i = mbuf.begin(); i != mbuf.end(); ++i) {
 				MidiBuffer::TimeType *tme = i.timeptr();
@@ -352,7 +362,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		}
 	}
 
-	if (_actual_speed < 0.0) {
+	if (speed < 0.0) {
 		playback_sample -= playback_distance;
 	} else {
 		playback_sample += playback_distance;
@@ -436,26 +446,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	bufs.set_count (cnt);
 }
 
-frameoffset_t
-DiskReader::calculate_playback_distance (pframes_t nframes)
-{
-	frameoffset_t playback_distance = nframes;
-
-	if (_target_speed != 1.0f && _target_speed != -1.0f) {
-		interpolation.set_speed (_target_speed);
-		midi_interpolation.set_speed (_target_speed);
-		playback_distance = midi_interpolation.distance (nframes);
-	}
-
-	_actual_speed = _target_speed;
-
-	if (_actual_speed < 0.0) {
-		return -playback_distance;
-	} else {
-		return playback_distance;
-	}
-}
-
 void
 DiskReader::set_pending_overwrite (bool yn)
 {
@@ -486,7 +476,7 @@ DiskReader::overwrite_existing_buffers ()
 
 		/* AUDIO */
 
-		bool reversed = (_target_speed * _session.transport_speed()) < 0.0f;
+		const bool reversed = _session.transport_speed() < 0.0f;
 
 		/* assume all are the same size */
 		framecnt_t size = c->front()->buf->bufsize();
@@ -829,7 +819,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	int32_t ret = 0;
 	framecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
-	bool const reversed = (_target_speed * _session.transport_speed()) < 0.0f;
+	bool const reversed = _session.transport_speed() < 0.0f;
 	framecnt_t total_space;
 	framecnt_t zero_fill;
 	uint32_t chan_n;
@@ -877,8 +867,8 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	   the playback buffer is empty.
 	*/
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: space to refill %2 vs. chunk %3 (speed = %4)\n", name(), total_space, _chunk_frames, _actual_speed));
-	if ((total_space < _chunk_frames) && fabs (_actual_speed) < 2.0f) {
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: space to refill %2 vs. chunk %3 (speed = %4)\n", name(), total_space, _chunk_frames, _session.transport_speed()));
+	if ((total_space < _chunk_frames) && fabs (_session.transport_speed()) < 2.0f) {
 		return 0;
 	}
 
@@ -1391,7 +1381,7 @@ DiskReader::refill_midi ()
 	}
 
 	size_t  write_space = _midi_buf->write_space();
-	bool    reversed    = (_target_speed * _session.transport_speed()) < 0.0f;
+	const bool reversed    = _session.transport_speed() < 0.0f;
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame));
 
