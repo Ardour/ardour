@@ -124,7 +124,9 @@ FaderPort8::FaderPort8 (Session& s)
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
-	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _1, _2, _3, _4, _5), this);
+	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::connection_handler, this, _2, _4), this);
+	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
+	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 
 	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::gui_track_selection_changed, this), this);
 
@@ -265,13 +267,14 @@ FaderPort8::set_active (bool yn)
 void
 FaderPort8::close ()
 {
+	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::close\n");
 	stop_midi_handling ();
 	session_connections.drop_connections ();
 	automation_state_connections.drop_connections ();
 	assigned_stripable_connections.drop_connections ();
 	_assigned_strips.clear ();
 	drop_ctrl_connections ();
-	port_connection.disconnect ();
+	port_connections.drop_connections ();
 	selection_connection.disconnect ();
 }
 
@@ -290,6 +293,12 @@ void
 FaderPort8::connected ()
 {
 	DEBUG_TRACE (DEBUG::FaderPort8, "initializing\n");
+	assert (!_device_active);
+
+	if (_device_active) {
+		stop_midi_handling (); // re-init
+	}
+
 	// ideally check firmware version >= 1.01 (USB bcdDevice 0x0101) (vendor 0x194f prod 0x0202)
 	// but we don't have a handle to the underlying USB device here.
 
@@ -336,8 +345,18 @@ FaderPort8::disconnected ()
 	}
 }
 
+void
+FaderPort8::engine_reset ()
+{
+	/* Port::PortDrop is called when the engine is halted or stopped */
+	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::engine_reset\n");
+	_connection_state = 0;
+	_device_active = false;
+	disconnected ();
+}
+
 bool
-FaderPort8::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+FaderPort8::connection_handler (std::string name1, std::string name2)
 {
 #ifdef VERBOSE_DEBUG
 	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::connection_handler: start\n");
@@ -350,13 +369,21 @@ FaderPort8::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1
 	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
-		if (yn) {
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		if (_input_port->connected ()) {
+			if (_connection_state & InputConnected) {
+				return false;
+			}
 			_connection_state |= InputConnected;
 		} else {
 			_connection_state &= ~InputConnected;
 		}
 	} else if (no == name1 || no == name2) {
-		if (yn) {
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
+		if (_output_port->connected ()) {
+			if (_connection_state & OutputConnected) {
+				return false;
+			}
 			_connection_state |= OutputConnected;
 		} else {
 			_connection_state &= ~OutputConnected;
@@ -382,7 +409,9 @@ FaderPort8::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1
 
 	} else {
 		DEBUG_TRACE (DEBUG::FaderPort8, "Device disconnected (input or output or both) or not yet fully connected\n");
-		disconnected ();
+		if (_device_active) {
+			disconnected ();
+		}
 		_device_active = false;
 	}
 

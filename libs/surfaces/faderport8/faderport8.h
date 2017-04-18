@@ -100,7 +100,7 @@ private:
 	void stop_midi_handling ();
 
 	/* I/O Ports */
-	PBD::ScopedConnection port_connection;
+	PBD::ScopedConnectionList port_connections;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
 	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 	boost::shared_ptr<ARDOUR::Bundle>        _input_bundle;
@@ -108,7 +108,8 @@ private:
 
 	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
 
-	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	bool connection_handler (std::string name1, std::string name2);
+	void engine_reset ();
 
 	enum ConnectionState {
 		InputConnected = 0x1,
