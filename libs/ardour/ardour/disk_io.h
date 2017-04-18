@@ -77,12 +77,11 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
 	bool           non_layered()  const { return _flags & NonLayered; }
-	bool           reversed()    const { return _actual_speed < 0.0f; }
 
 	virtual void non_realtime_locate (framepos_t);
 
-	void non_realtime_set_speed ();
-	bool realtime_set_speed (double sp, bool global);
+	void non_realtime_speed_change ();
+	bool realtime_speed_change ();
 
 	virtual void punch_in()  {}
 	virtual void punch_out() {}
