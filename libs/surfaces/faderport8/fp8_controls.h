@@ -137,7 +137,9 @@ public:
 	bool midi_event (uint8_t id, uint8_t val);
 	bool midi_touch (uint8_t id, uint8_t val);
 	bool midi_fader (uint8_t id, unsigned short val);
+
 	void initialize ();
+	void all_lights_off () const;
 
 	void set_fader_mode (FP8Types::FaderMode);
 protected:

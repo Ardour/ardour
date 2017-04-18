@@ -266,9 +266,7 @@ FP8Controls::initialize ()
 	}
 
 	/* initally turn all lights off */
-	for (CtrlButtonMap::const_iterator i = _ctrlmap.begin (); i != _ctrlmap.end (); ++i) {
-		i->second->set_active (false);
-	}
+	all_lights_off ();
 
 	/* default modes */
 	button (BtnMaster).set_active (true);
@@ -277,6 +275,13 @@ FP8Controls::initialize ()
 	button (BtnTimecode).set_active (_display_timecode);
 
 	FP8ButtonInterface::force_change = false;
+}
+void
+FP8Controls::all_lights_off () const
+{
+	for (CtrlButtonMap::const_iterator i = _ctrlmap.begin (); i != _ctrlmap.end (); ++i) {
+		i->second->set_active (false);
+	}
 }
 
 FP8ButtonInterface&

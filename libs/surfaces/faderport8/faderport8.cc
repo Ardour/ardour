@@ -136,7 +136,7 @@ FaderPort8::FaderPort8 (Session& s)
 FaderPort8::~FaderPort8 ()
 {
 	cerr << "~FP8\n";
-	stop_midi_handling  ();
+	disconnected ();
 	close ();
 
 	if (_input_port) {
@@ -328,8 +328,11 @@ void
 FaderPort8::disconnected ()
 {
 	stop_midi_handling ();
-	for (uint8_t id = 0; id < 8; ++id) {
-		_ctrls.strip(id).unset_controllables ();
+	if (_device_active) {
+		for (uint8_t id = 0; id < 8; ++id) {
+			_ctrls.strip(id).unset_controllables ();
+		}
+		_ctrls.all_lights_off ();
 	}
 }
 
