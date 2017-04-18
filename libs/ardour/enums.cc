@@ -391,7 +391,6 @@ setup_enum_writer ()
 	REGISTER (_Session_RecordState);
 
 	REGISTER_CLASS_ENUM (SessionEvent, SetTransportSpeed);
-	REGISTER_CLASS_ENUM (SessionEvent, SetTrackSpeed);
 	REGISTER_CLASS_ENUM (SessionEvent, Locate);
 	REGISTER_CLASS_ENUM (SessionEvent, LocateRoll);
 	REGISTER_CLASS_ENUM (SessionEvent, LocateRollLocate);

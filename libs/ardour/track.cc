@@ -672,9 +672,9 @@ Track::non_realtime_locate (framepos_t p)
 }
 
 void
-Track::non_realtime_set_speed ()
+Track::non_realtime_speed_change ()
 {
-	_disk_reader->non_realtime_set_speed ();
+	_disk_reader->non_realtime_speed_change ();
 }
 
 int
@@ -705,12 +705,12 @@ Track::transport_looped (framepos_t p)
 }
 
 bool
-Track::realtime_set_speed (double s, bool g)
+Track::realtime_speed_change ()
 {
-	if (_disk_reader->realtime_set_speed (s, g)) {
+	if (_disk_reader->realtime_speed_change ()) {
 		return -1;
 	}
-	return _disk_writer->realtime_set_speed (s, g);
+	return _disk_writer->realtime_speed_change ();
 }
 
 void

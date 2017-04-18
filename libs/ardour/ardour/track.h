@@ -163,12 +163,12 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	int internal_playback_seek (framecnt_t);
 	void non_realtime_locate (framepos_t);
 	void realtime_handle_transport_stopped ();
-	void non_realtime_set_speed ();
+	void non_realtime_speed_change ();
 	int overwrite_existing_buffers ();
 	framecnt_t get_captured_frames (uint32_t n = 0) const;
 	int set_loop (ARDOUR::Location *);
 	void transport_looped (framepos_t);
-	bool realtime_set_speed (double, bool);
+	bool realtime_speed_change ();
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
 	void prepare_to_stop (framepos_t, framepos_t);

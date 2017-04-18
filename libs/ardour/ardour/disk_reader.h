@@ -118,7 +118,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
 	framecnt_t    wrap_buffer_size;
-	framecnt_t    speed_buffer_size;
 	MonitorChoice   _monitoring_choice;
 
 	int _do_refill_with_alloc (bool partial_fill);
