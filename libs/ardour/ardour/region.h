@@ -34,6 +34,7 @@
 #include "ardour/readable.h"
 #include "ardour/session_object.h"
 #include "ardour/trimmable.h"
+#include "ardour/types_convert.h"
 
 class XMLNode;
 

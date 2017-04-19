@@ -20,6 +20,10 @@
 #ifndef ARDOUR_TYPES_CONVERT_H
 #define ARDOUR_TYPES_CONVERT_H
 
+#ifdef COMPILER_MSVC
+#pragma warning(disable:4101)
+#endif
+
 #include "pbd/enum_convert.h"
 
 #include "ardour/types.h"

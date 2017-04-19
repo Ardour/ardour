@@ -26,6 +26,7 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 #include "ardour/utils.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/configuration.h"
 

@@ -1706,6 +1706,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\evoral_types_convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\export_analysis.h"
 				>
 			</File>
@@ -2475,6 +2479,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\types.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\types_convert.h"
 				>
 			</File>
 			<File
