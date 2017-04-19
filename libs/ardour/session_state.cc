@@ -3823,13 +3823,21 @@ Session::restore_history (string snapshot_name)
 
 		XMLNode *t = *it;
 		UndoTransaction* ut = new UndoTransaction ();
-		struct timeval tv;
 
-		ut->set_name(t->property("name")->value());
-		stringstream ss(t->property("tv-sec")->value());
-		ss >> tv.tv_sec;
-		ss.str(t->property("tv-usec")->value());
-		ss >> tv.tv_usec;
+		std::string name;
+		int64_t tv_sec;
+		int64_t tv_usec;
+
+		if (!t->get_property ("name", name) || !t->get_property ("tv-sec", tv_sec) ||
+		    !t->get_property ("tv-usec", tv_usec)) {
+			continue;
+		}
+
+		ut->set_name (name);
+
+		struct timeval tv;
+		tv.tv_sec = tv_sec;
+		tv.tv_usec = tv_usec;
 		ut->set_timestamp(tv);
 
 		for (XMLNodeConstIterator child_it  = t->children().begin();
