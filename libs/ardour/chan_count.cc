@@ -48,18 +48,6 @@ ChanCount::ChanCount(const XMLNode& node)
 	}
 }
 
-ChanCount
-infinity_factory()
-{
-	ChanCount ret;
-
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		ret.set(*t, UINT32_MAX);
-	}
-
-	return ret;
-}
-
 XMLNode*
 ChanCount::state(const std::string& name) const
 {
@@ -77,7 +65,6 @@ ChanCount::state(const std::string& name) const
 }
 
 // Statics
-const ChanCount ChanCount::INFINITE = infinity_factory();
 const ChanCount ChanCount::ZERO     = ChanCount();
 
 } // namespace ARDOUR

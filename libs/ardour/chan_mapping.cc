@@ -34,10 +34,6 @@ namespace ARDOUR {
 
 ChanMapping::ChanMapping(ChanCount identity)
 {
-	if (identity == ChanCount::INFINITE) {
-		return;
-	}
-
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (size_t i = 0; i < identity.get(*t); ++i) {
 			set(*t, i, i);

@@ -26,10 +26,6 @@
 #include "pbd/xml++.h"
 #include "ardour/data_type.h"
 
-#ifdef INFINITE
-#undef INFINITE
-#endif
-
 namespace ARDOUR {
 
 
@@ -205,7 +201,6 @@ public:
 
 	XMLNode* state(const std::string& name) const;
 
-	static const ChanCount INFINITE;
 	static const ChanCount ZERO;
 
 private:
