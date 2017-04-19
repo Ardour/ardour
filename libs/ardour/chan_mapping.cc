@@ -21,8 +21,8 @@
 
 #include <stdint.h>
 #include <iostream>
-#include "ardour/chan_mapping.h"
 #include "ardour/types_convert.h"
+#include "ardour/chan_mapping.h"
 
 #include "pbd/i18n.h"
 
