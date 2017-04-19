@@ -37,6 +37,7 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/statefuldestructible.h"
+#include "pbd/types_convert.h"
 
 class Command;
 
@@ -57,13 +58,8 @@ Session::memento_command_factory(XMLNode *n)
     XMLNode *before = 0, *after = 0;
     XMLNode *child = 0;
 
-    /* get id */
-
     /* XXX: HACK! */
-    bool have_id = n->property("obj-id") != 0;
-    if (have_id) {
-	    id = PBD::ID(n->property("obj-id")->value());
-    }
+    bool have_id = n->get_property ("obj-id", id);
 
     /* get before/after */
 
@@ -89,43 +85,44 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* create command */
-    std::string obj_T = n->property ("type-name")->value();
+    std::string type_name;
+    n->get_property ("type-name", type_name);
 
-    if (obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion" || obj_T == "ARDOUR::Region") {
+    if (type_name == "ARDOUR::AudioRegion" || type_name == "ARDOUR::MidiRegion" || type_name == "ARDOUR::Region") {
 	    boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 	    if (r) {
 		    return new MementoCommand<Region>(*r, before, after);
 	    }
 
-    } else if (obj_T == "ARDOUR::AudioSource" || obj_T == "ARDOUR::MidiSource") {
+    } else if (type_name == "ARDOUR::AudioSource" || type_name == "ARDOUR::MidiSource") {
 	    if (sources.count(id))
 		    return new MementoCommand<Source>(*sources[id], before, after);
 
-    } else if (obj_T == "ARDOUR::Location") {
+    } else if (type_name == "ARDOUR::Location") {
 	    Location* loc = _locations->get_location_by_id(id);
 	    if (loc) {
 		    return new MementoCommand<Location>(*loc, before, after);
 	    }
 
-    } else if (obj_T == "ARDOUR::Locations") {
+    } else if (type_name == "ARDOUR::Locations") {
 	    return new MementoCommand<Locations>(*_locations, before, after);
 
-    } else if (obj_T == "ARDOUR::TempoMap") {
+    } else if (type_name == "ARDOUR::TempoMap") {
 	    return new MementoCommand<TempoMap>(*_tempo_map, before, after);
 
-    } else if (obj_T == "ARDOUR::Playlist" || obj_T == "ARDOUR::AudioPlaylist" || obj_T == "ARDOUR::MidiPlaylist") {
+    } else if (type_name == "ARDOUR::Playlist" || type_name == "ARDOUR::AudioPlaylist" || type_name == "ARDOUR::MidiPlaylist") {
 	    if (boost::shared_ptr<Playlist> pl = playlists->by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
 
-    } else if (obj_T == "ARDOUR::Route" || obj_T == "ARDOUR::AudioTrack" || obj_T == "ARDOUR::MidiTrack") {
+    } else if (type_name == "ARDOUR::Route" || type_name == "ARDOUR::AudioTrack" || type_name == "ARDOUR::MidiTrack") {
 		if (boost::shared_ptr<Route> r = route_by_id(id)) {
 			return new MementoCommand<Route>(*r, before, after);
 		} else {
 			error << string_compose (X_("Route %1 not found in session"), id) << endmsg;
 		}
 
-    } else if (obj_T == "Evoral::Curve" || obj_T == "ARDOUR::AutomationList") {
+    } else if (type_name == "Evoral::Curve" || type_name == "ARDOUR::AutomationList") {
 	    if (have_id) {
 		    std::map<PBD::ID, AutomationList*>::iterator i = automation_lists.find(id);
 		    if (i != automation_lists.end()) {
@@ -145,7 +142,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* we failed */
-    info << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s()) << endmsg;
+    info << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s()) << endmsg;
 
     return 0 ;
 }
@@ -153,16 +150,21 @@ Session::memento_command_factory(XMLNode *n)
 Command *
 Session::stateful_diff_command_factory (XMLNode* n)
 {
-	PBD::ID const id (n->property("obj-id")->value ());
+	PBD::ID id;
+	std::string type_name;
+	if (!n->get_property ("obj-id", id) || !n->get_property ("type-name", type_name)) {
+		error << _("Could get object ID and type name for StatefulDiffCommand from XMLNode.")
+		      << endmsg;
+		      return 0;
+	}
 
-	std::string const obj_T = n->property ("type-name")->value ();
-	if ((obj_T == "ARDOUR::AudioRegion" || obj_T == "ARDOUR::MidiRegion")) {
+	if ((type_name == "ARDOUR::AudioRegion" || type_name == "ARDOUR::MidiRegion")) {
 		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 		if (r) {
 			return new StatefulDiffCommand (r, *n);
 		}
 
-	} else if (obj_T == "ARDOUR::AudioPlaylist" ||  obj_T == "ARDOUR::MidiPlaylist") {
+	} else if (type_name == "ARDOUR::AudioPlaylist" ||  type_name == "ARDOUR::MidiPlaylist") {
 		boost::shared_ptr<Playlist> p = playlists->by_id (id);
 		if (p) {
 			return new StatefulDiffCommand (p, *n);
@@ -174,7 +176,7 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	/* we failed */
 
 	error << string_compose (
-		_("could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), obj_T, id.to_s())
+		_("could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s())
 	      << endmsg;
 
 	return 0;
