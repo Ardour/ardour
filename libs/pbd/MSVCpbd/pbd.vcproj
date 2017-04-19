@@ -665,6 +665,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\enum_convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\ffs.h"
 				>
 			</File>
@@ -822,6 +826,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\transmitter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\types_convert.h"
 				>
 			</File>
 			<File
