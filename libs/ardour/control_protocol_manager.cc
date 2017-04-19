@@ -239,7 +239,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	delete cpi.state;
 	cpi.state = new XMLNode (cpi.protocol->get_state());
-	cpi.state->set_property (X_("active"), "no");
+	cpi.state->set_property (X_("active"), false);
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
@@ -492,16 +492,16 @@ ControlProtocolManager::get_state ()
 
 		if ((*i)->protocol) {
 			XMLNode& child_state ((*i)->protocol->get_state());
-			child_state.set_property (X_("active"), "yes");
+			child_state.set_property (X_("active"), true);
 			root->add_child_nocopy (child_state);
 		} else if ((*i)->state) {
 			XMLNode* child_state = new XMLNode (*(*i)->state);
-			child_state->set_property (X_("active"), "no");
+			child_state->set_property (X_("active"), false);
 			root->add_child_nocopy (*child_state);
 		} else {
 			XMLNode* child_state = new XMLNode (X_("Protocol"));
 			child_state->set_property (X_("name"), (*i)->name);
-			child_state->set_property (X_("active"), "no");
+			child_state->set_property (X_("active"), false);
 			root->add_child_nocopy (*child_state);
 		}
 
