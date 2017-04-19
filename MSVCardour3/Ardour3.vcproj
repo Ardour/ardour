@@ -1534,6 +1534,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\editing_convert.h"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\editing_syms.h"
 				>
 			</File>
@@ -1595,6 +1599,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\enums.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\enums_convert.h"
 				>
 			</File>
 			<File
