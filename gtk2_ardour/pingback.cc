@@ -191,7 +191,9 @@ _pingback (void *arg)
 			}
 		}
 	} else {
-		std::cerr << "curl failed: " << h.error () << std::endl;
+#ifndef NDEBUG
+		std::cerr << "pingback: " << h.error () << std::endl;
+#endif
 	}
 
 	delete cm;
