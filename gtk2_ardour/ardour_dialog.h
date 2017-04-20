@@ -49,11 +49,13 @@ public:
 	void on_show ();
 	virtual void on_response (int);
 
+protected:
+	void pop_splash ();
+
 private:
 	WM::ProxyTemporary* proxy;
 	bool _splash_pushed;
 	void init ();
-	void pop_splash ();
 
 	static sigc::signal<void> CloseAllDialogs;
 };

@@ -2670,6 +2670,7 @@ EngineControl::start_stop_button_clicked ()
 		ARDOUR::AudioEngine::instance()->stop ();
 	} else {
 		if (!ARDOUR_UI::instance()->session_loaded) {
+			pop_splash ();
 			hide ();
 			ARDOUR::GUIIdle ();
 		}
@@ -3084,6 +3085,7 @@ EngineControl::connect_disconnect_click()
 		stop_engine ();
 	} else {
 		if (!ARDOUR_UI::instance()->session_loaded) {
+			pop_splash ();
 			hide ();
 			ARDOUR::GUIIdle ();
 		}
