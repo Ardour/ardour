@@ -63,6 +63,7 @@ ArdourDialog::on_response (int response_id)
 {
 	pop_splash ();
 	hide ();
+	ARDOUR::GUIIdle ();
 	Gtk::Dialog::on_response (response_id);
 }
 

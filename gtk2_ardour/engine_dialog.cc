@@ -2671,6 +2671,7 @@ EngineControl::start_stop_button_clicked ()
 	} else {
 		if (!ARDOUR_UI::instance()->session_loaded) {
 			hide ();
+			ARDOUR::GUIIdle ();
 		}
 		start_engine ();
 		if (!ARDOUR_UI::instance()->session_loaded) {
@@ -3084,6 +3085,7 @@ EngineControl::connect_disconnect_click()
 	} else {
 		if (!ARDOUR_UI::instance()->session_loaded) {
 			hide ();
+			ARDOUR::GUIIdle ();
 		}
 		start_engine ();
 		if (!ARDOUR_UI::instance()->session_loaded) {
