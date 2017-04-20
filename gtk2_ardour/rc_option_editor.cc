@@ -2296,19 +2296,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("General/Translation"), bo);
 
-	_l10n = new ComboOption<ARDOUR::LocaleMode> (
-		"locale-mode",
-		_("Localization"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_locale_mode),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_locale_mode)
-		);
-
-	_l10n->add (ARDOUR::SET_LC_ALL, _("Set complete locale"));
-	_l10n->add (ARDOUR::SET_LC_MESSAGES, _("Enable only message translation"));
-	_l10n->add (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC, _("Translate messages and format numeric format"));
-	_l10n->set_note (_("This setting is provided for plugin compatibility. e.g. some plugins on some systems expect the decimal point to be a dot."));
-
-	add_option (_("General/Translation"), _l10n);
 	parameter_changed ("enable-translation");
 #endif // ENABLE_NLS
 
@@ -3971,10 +3958,6 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "open-gui-after-adding-plugin" || p == "show-inline-display-by-default") {
 #if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
-#endif
-#ifdef ENABLE_NLS
-	} else if (p == "enable-translation") {
-		_l10n->set_sensitive (ARDOUR::translations_are_enabled ());
 #endif
 	}
 }

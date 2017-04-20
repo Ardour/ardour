@@ -304,24 +304,9 @@ int main (int argc, char *argv[])
 #endif
 
 #ifdef ENABLE_NLS
-	/* initialize C and C++ locales to user preference */
-	char* l_msg = NULL;
-	char* l_num = NULL;
+	/* initialize C locale to user preference */
 	if (ARDOUR::translations_are_enabled ()) {
 		setlocale (LC_ALL, "");
-		try {
-			std::locale::global (std::locale (setlocale (LC_ALL, 0)));
-		} catch (...) {
-			std::cerr << "Cannot set C++ locale\n";
-		}
-#ifndef COMPILER_MSVC
-		// LC_MESSAGES isn't a supported locale setting when building
-		// with MSVC (in fact, I doubt if it's valid for Windows at all)
-		l_msg = setlocale (LC_MESSAGES, NULL);
-#endif
-		l_num = setlocale (LC_NUMERIC, NULL);
-		if (l_msg) { l_msg = strdup (l_msg); }
-		if (l_num) { l_num = strdup (l_num); }
 	}
 #endif
 
@@ -398,25 +383,6 @@ int main (int argc, char *argv[])
 	if (curvetest_file) {
 		return curvetest (curvetest_file);
 	}
-
-#ifdef ENABLE_NLS
-	ARDOUR::LocaleMode locale_mode = UIConfiguration::instance().get_locale_mode ();
-	if (l_msg && l_num && locale_mode != ARDOUR::SET_LC_ALL) {
-		try {
-			std::locale cpp_locale (std::locale::classic ());
-			cpp_locale = std::locale (cpp_locale, l_msg, std::locale::messages);
-			if (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC == locale_mode) {
-				cpp_locale = std::locale (cpp_locale, l_num, std::locale::numeric);
-			}
-			std::locale::global (cpp_locale);
-		} catch (...) {
-			std::cerr << "Cannot override C++ locale\n";
-		}
-		info << "LC_ALL: " << setlocale (LC_ALL, NULL) << endmsg;
-	}
-	free (l_msg);
-	free (l_num);
-#endif
 
 #ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {
