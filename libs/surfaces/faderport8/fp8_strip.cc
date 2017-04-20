@@ -315,32 +315,35 @@ FP8Strip::group_mode () const
 void
 FP8Strip::set_mute (bool on)
 {
-	if (_mute_ctrl) {
-		if (_mute_ctrl->automation_state() == Touch && !_mute_ctrl->touching ()) {
-			_mute_ctrl->start_touch (_mute_ctrl->session().transport_frame());
-		}
-		_mute_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
+	if (!_mute_ctrl) {
+		return;
 	}
+	if (_mute_ctrl->automation_state() == Touch && !_mute_ctrl->touching ()) {
+		_mute_ctrl->start_touch (_mute_ctrl->session().transport_frame());
+	}
+	_mute_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 }
 
 void
 FP8Strip::set_solo (bool on)
 {
-	if (_solo_ctrl) {
-		if (_solo_ctrl->automation_state() == Touch && !_solo_ctrl->touching ()) {
-			_solo_ctrl->start_touch (_solo_ctrl->session().transport_frame());
-		}
-		_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
+	if (!_solo_ctrl) {
+		return;
 	}
+	if (_solo_ctrl->automation_state() == Touch && !_solo_ctrl->touching ()) {
+		_solo_ctrl->start_touch (_solo_ctrl->session().transport_frame());
+	}
+	_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 }
 
 void
 FP8Strip::set_recarm ()
 {
-	if (_rec_ctrl) {
-		const bool on = !recarm_button ().is_active();
-		_rec_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
+	if (!_rec_ctrl) {
+		return;
 	}
+	const bool on = !recarm_button ().is_active();
+	_rec_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 }
 
 void
@@ -431,8 +434,6 @@ FP8Strip::notify_x_select_changed ()
 		select_button ().set_active (_x_select_ctrl->get_value() > 0.);
 		select_button ().set_color (0xffff00ff);
 		select_button ().set_blinking (false);
-	} else {
-		; // leave alone.
 	}
 }
 
@@ -562,7 +563,6 @@ FP8Strip::set_strip_mode (uint8_t strip_mode, bool clear)
 	}
 	_strip_mode = strip_mode;
 	_base.tx_sysex (3, 0x13, _id, (_strip_mode & 0x07) | (clear ? 0x10 : 0));
-	//_base.tx_midi3 (0xb0, 0x38 + _id, _bar_mode);
 }
 
 void

@@ -276,6 +276,7 @@ FP8Controls::initialize ()
 
 	FP8ButtonInterface::force_change = false;
 }
+
 void
 FP8Controls::all_lights_off () const
 {

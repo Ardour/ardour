@@ -48,6 +48,11 @@ using namespace ArdourSurface::FP8Types;
 	_ctrls.button (ID).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_user, this, true, ID)); \
 _ctrls.button (ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_user, this, false, ID));
 
+
+/* Bind button signals (press, release) to callback methods
+ * (called once after constructing buttons).
+ * Bound actions are handled the the ctrl-surface thread.
+ */
 void
 FaderPort8::setup_actions ()
 {
@@ -100,6 +105,10 @@ FaderPort8::setup_actions ()
 		BindUserAction ((*i).first);
 	}
 }
+
+/* ****************************************************************************
+ * Direct control callback Actions
+ */
 
 void
 FaderPort8::button_play ()
@@ -255,25 +264,31 @@ FaderPort8::button_mute_clear ()
 }
 
 void
-FaderPort8::button_arm (bool press)
-{
-	FaderMode fadermode = _ctrls.fader_mode ();
-	if (fadermode == ModeTrack || fadermode == ModePan) {
-		_ctrls.button (FP8Controls::BtnArm).set_active (press);
-		ARMButtonChange (press);
-	}
-}
-
-void
 FaderPort8::button_arm_all ()
 {
 	BasicUI::all_tracks_rec_in ();
 }
 
+/* access generic action */
 void
 FaderPort8::button_action (const std::string& group, const std::string& item)
 {
 	AccessAction (group, item);
+}
+
+/* ****************************************************************************
+ * Mode specific and internal callbacks
+ */
+
+/* handle "ARM" press -- act like shift, change "Select" button mode */
+void
+FaderPort8::button_arm (bool press)
+{
+	FaderMode fadermode = _ctrls.fader_mode ();
+	if (fadermode == ModeTrack || fadermode == ModePan) {
+		_ctrls.button (FP8Controls::BtnArm).set_active (press);
+		ARMButtonChange (press); /* EMIT SIGNAL */
+	}
 }
 
 void

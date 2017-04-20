@@ -31,7 +31,7 @@ namespace ArdourSurface {
 #define fp8_context() dynamic_cast<BaseUI*>(&_base)
 #define fp8_protocol() dynamic_cast<ControlProtocol*>(&_base)
 
-/** Virtual abstracte base of the FaderPort8 control surface
+/** Virtual abstract base of the FaderPort8 control surface
  *
  * This is passed as handle to all elements (buttons, lights,..)
  * to inteface common functionality for the current instance:
