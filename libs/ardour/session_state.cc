@@ -193,14 +193,14 @@ Session::pre_engine_init (string fullpath)
 
 	set_history_depth (Config->get_history_depth());
 
-        /* default: assume simple stereo speaker configuration */
+	/* default: assume simple stereo speaker configuration */
 
-        _speakers->setup_default_speakers (2);
+	_speakers->setup_default_speakers (2);
 
-        _solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
-                                                        boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
-                                                        boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
-        add_controllable (_solo_cut_control);
+	_solo_cut_control.reset (new ProxyControllable (_("solo cut control (dB)"), PBD::Controllable::GainLike,
+				boost::bind (&RCConfiguration::set_solo_mute_gain, Config, _1),
+				boost::bind (&RCConfiguration::get_solo_mute_gain, Config)));
+	add_controllable (_solo_cut_control);
 
 	/* These are all static "per-class" signals */
 
@@ -300,7 +300,7 @@ Session::post_engine_init ()
 
 		Config->map_parameters (ff);
 		config.map_parameters (ft);
-                _butler->map_parameters ();
+		_butler->map_parameters ();
 
 		/* Reset all panners */
 
@@ -629,9 +629,9 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	if (Profile->get_trx()) {
 
 		/* set initial start + end point : ARDOUR::Session::session_end_shift long.
-		   Remember that this is a brand new session. Sessions
-		   loaded from saved state will get this range from the saved state.
-		*/
+		 * Remember that this is a brand new session. Sessions
+		 * loaded from saved state will get this range from the saved state.
+		 */
 
 		set_session_range_location (0, 0);
 
@@ -644,23 +644,23 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 	_state_of_the_state = Clean;
 
-        /* set up Master Out and Monitor Out if necessary */
+	/* set up Master Out and Monitor Out if necessary */
 
-        if (bus_profile) {
+	if (bus_profile) {
 
 		RouteList rl;
-                ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
+		ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
-                // Waves Tracks: always create master bus for Tracks
-                if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
-	                boost::shared_ptr<Route> r (new Route (*this, _("Master"), PresentationInfo::MasterOut, DataType::AUDIO));
-                        if (r->init ()) {
-                                return -1;
-                        }
+		// Waves Tracks: always create master bus for Tracks
+		if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
+			boost::shared_ptr<Route> r (new Route (*this, _("Master"), PresentationInfo::MasterOut, DataType::AUDIO));
+			if (r->init ()) {
+				return -1;
+			}
 
-                        BOOST_MARK_ROUTE(r);
+			BOOST_MARK_ROUTE(r);
 
-                        {
+			{
 				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				r->input()->ensure_io (count, false, this);
 				r->output()->ensure_io (count, false, this);
@@ -681,7 +681,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 		if (!ARDOUR::Profile->get_trx()) {
 
 			/* this allows the user to override settings with an environment variable.
-			 */
+			*/
 
 			if (no_auto_connect()) {
 				bus_profile->input_ac = AutoConnectOption (0);
@@ -691,7 +691,7 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 			Config->set_input_auto_connect (bus_profile->input_ac);
 			Config->set_output_auto_connect (bus_profile->output_ac);
 		}
-        }
+	}
 
 	if (Config->get_use_monitor_bus() && bus_profile) {
 		add_monitor_section ();
@@ -703,9 +703,9 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 void
 Session::maybe_write_autosave()
 {
-        if (dirty() && record_status() != Recording) {
-                save_state("", true);
-        }
+	if (dirty() && record_status() != Recording) {
+		save_state("", true);
+	}
 }
 
 void
@@ -799,8 +799,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	_save_queued = false;
 
 	if (!_engine.connected ()) {
-		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"),
-                                         PROGRAM_NAME)
+		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"), PROGRAM_NAME)
 		      << endmsg;
 		return 1;
 	}
@@ -940,7 +939,7 @@ Session::load_state (string snapshot_name)
 
 		/* there is pending state from a crashed capture attempt */
 
-                boost::optional<int> r = AskAboutPendingState();
+		boost::optional<int> r = AskAboutPendingState();
 		if (r.get_value_or (1)) {
 			state_was_pending = true;
 		}
@@ -953,10 +952,10 @@ Session::load_state (string snapshot_name)
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
 		xmlpath = Glib::build_filename (_session_dir->root_path(), legalize_for_path (snapshot_name) + statefile_suffix);
 		if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
-                        error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
-                        return 1;
-                }
-        }
+			error << string_compose(_("%1: session file \"%2\" doesn't exist!"), _name, xmlpath) << endmsg;
+			return 1;
+		}
+	}
 
 	state_tree = new XMLTree;
 
@@ -1227,7 +1226,7 @@ Session::state (bool full_state)
 			/* Don't save information about non-file Sources, or
 			 * about non-destructive file sources that are empty
 			 * and unused by any regions.
-                        */
+			 */
 
 			boost::shared_ptr<FileSource> fs;
 
@@ -1248,18 +1247,18 @@ Session::state (bool full_state)
 
 	if (full_state) {
 		Glib::Threads::Mutex::Lock rl (region_lock);
-                const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
-                for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
-                        boost::shared_ptr<Region> r = i->second;
-                        /* only store regions not attached to playlists */
-                        if (r->playlist() == 0) {
+		const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
+		for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+			boost::shared_ptr<Region> r = i->second;
+			/* only store regions not attached to playlists */
+			if (r->playlist() == 0) {
 				if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
 					child->add_child_nocopy ((boost::dynamic_pointer_cast<AudioRegion>(r))->get_basic_state ());
 				} else {
 					child->add_child_nocopy (r->get_state ());
 				}
-                        }
-                }
+			}
+		}
 
 		RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
 
@@ -1274,8 +1273,6 @@ Session::state (bool full_state)
 			}
 		}
 	}
-
-
 
 	if (full_state) {
 
@@ -1373,7 +1370,7 @@ Session::state (bool full_state)
 		ltc_output_child->add_child_nocopy (_ltc_output->state (full_state));
 	}
 
-        node->add_child_nocopy (_speakers->get_state());
+	node->add_child_nocopy (_speakers->get_state());
 	node->add_child_nocopy (_tempo_map->get_state());
 	node->add_child_nocopy (get_control_protocol_state());
 
@@ -1455,9 +1452,9 @@ Session::set_state (const XMLNode& node, int version)
 		ID::init_counter (counter);
 	} else {
 		/* old sessions used a timebased counter, so fake
-		   the startup ID counter based on a standard
-		   timestamp.
-		*/
+		 * the startup ID counter based on a standard
+		 * timestamp.
+		 */
 		time_t now;
 		time (&now);
 		ID::init_counter (now);
@@ -1501,9 +1498,9 @@ Session::set_state (const XMLNode& node, int version)
 		}
 	}
 
-        if ((child = find_named_node (node, X_("Speakers"))) != 0) {
-                _speakers->set_state (*child, version);
-        }
+	if ((child = find_named_node (node, X_("Speakers"))) != 0) {
+		_speakers->set_state (*child, version);
+	}
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
 		error << _("Session: XML state has no sources section") << endmsg;
@@ -1564,8 +1561,8 @@ Session::set_state (const XMLNode& node, int version)
 			//goto out;
 		} else {
 			/* We can't load Bundles yet as they need to be able
-			   to convert from port names to Port objects, which can't happen until
-			   later */
+			 * to convert from port names to Port objects, which can't happen until
+			 * later */
 			_bundle_xml_node = new XMLNode (*child);
 		}
 	}
@@ -1659,7 +1656,7 @@ Session::set_state (const XMLNode& node, int version)
 	state_tree = 0;
 	return 0;
 
-  out:
+out:
 	delete state_tree;
 	state_tree = 0;
 	return ret;
@@ -1724,31 +1721,31 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 
 		boost::shared_ptr<Track> track;
 
-                if (type == DataType::AUDIO) {
-                        track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
-                } else {
-                        track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
-                }
+		if (type == DataType::AUDIO) {
+			track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
+		} else {
+			track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
+		}
 
-                if (track->init()) {
-                        return ret;
-                }
+		if (track->init()) {
+			return ret;
+		}
 
-                if (track->set_state (node, version)) {
-                        return ret;
-                }
+		if (track->set_state (node, version)) {
+			return ret;
+		}
 
-                BOOST_MARK_TRACK (track);
-                ret = track;
+		BOOST_MARK_TRACK (track);
+		ret = track;
 
 	} else {
 		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
-                if (r->init () == 0 && r->set_state (node, version) == 0) {
-	                BOOST_MARK_ROUTE (r);
-                        ret = r;
-                }
+		if (r->init () == 0 && r->set_state (node, version) == 0) {
+			BOOST_MARK_ROUTE (r);
+			ret = r;
+		}
 	}
 
 	return ret;
@@ -1787,33 +1784,33 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 		boost::shared_ptr<Track> track;
 
-                if (type == DataType::AUDIO) {
-                        track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
-                } else {
-                        track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
-                }
+		if (type == DataType::AUDIO) {
+			track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
+		} else {
+			track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
+		}
 
-                if (track->init()) {
-                        return ret;
-                }
+		if (track->init()) {
+			return ret;
+		}
 
-                if (track->set_state (node, version)) {
-                        return ret;
-                }
+		if (track->set_state (node, version)) {
+			return ret;
+		}
 
 		track->set_diskstream (*i);
 
 		BOOST_MARK_TRACK (track);
-                ret = track;
+		ret = track;
 
 	} else {
 		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
 		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
 
-                if (r->init () == 0 && r->set_state (node, version) == 0) {
-	                BOOST_MARK_ROUTE (r);
-                        ret = r;
-                }
+		if (r->init () == 0 && r->set_state (node, version) == 0) {
+			BOOST_MARK_ROUTE (r);
+			ret = r;
+		}
 	}
 
 	return ret;
@@ -1935,11 +1932,11 @@ Session::XMLRegionFactory (const XMLNode& node, bool full)
 			}
 		}
 
-                if (!type || type->value() == "audio") {
-                        return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
-                } else if (type->value() == "midi") {
-                        return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
-                }
+		if (!type || type->value() == "audio") {
+			return boost::shared_ptr<Region>(XMLAudioRegionFactory (node, full));
+		} else if (type->value() == "midi") {
+			return boost::shared_ptr<Region>(XMLMidiRegionFactory (node, full));
+		}
 
 	} catch (failed_constructor& err) {
 		return boost::shared_ptr<Region> ();
@@ -2438,9 +2435,9 @@ Session::refresh_disk_space ()
 	vector<string> scanned_volumes;
 	vector<string>::iterator j;
 	vector<space_and_path>::iterator i;
-    DWORD nSectorsPerCluster, nBytesPerSector,
-          nFreeClusters, nTotalClusters;
-    char disk_drive[4];
+	DWORD nSectorsPerCluster, nBytesPerSector,
+	      nFreeClusters, nTotalClusters;
+	char disk_drive[4];
 	bool volume_found;
 
 	_total_free_4k_blocks = 0;
@@ -2778,7 +2775,7 @@ Session::route_group_by_name (string name)
 RouteGroup&
 Session::all_route_group() const
 {
-        return *_all_route_group;
+	return *_all_route_group;
 }
 
 void
@@ -2908,27 +2905,27 @@ Session::commit_reversible_command (Command *cmd)
 static bool
 accept_all_audio_files (const string& path, void* /*arg*/)
 {
-        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
-                return false;
-        }
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		return false;
+	}
 
-        if (!AudioFileSource::safe_audio_file_extension (path)) {
-                return false;
-        }
+	if (!AudioFileSource::safe_audio_file_extension (path)) {
+		return false;
+	}
 
-        return true;
+	return true;
 }
 
 static bool
 accept_all_midi_files (const string& path, void* /*arg*/)
 {
-        if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
-                return false;
-        }
+	if (!Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR)) {
+		return false;
+	}
 
-	return ((path.length() > 4 && path.find (".mid") != (path.length() - 4)) ||
-                (path.length() > 4 && path.find (".smf") != (path.length() - 4)) ||
-                (path.length() > 5 && path.find (".midi") != (path.length() - 5)));
+	return (   (path.length() > 4 && path.find (".mid") != (path.length() - 4))
+	        || (path.length() > 4 && path.find (".smf") != (path.length() - 4))
+	        || (path.length() > 5 && path.find (".midi") != (path.length() - 5)));
 }
 
 static bool
@@ -3042,18 +3039,18 @@ Session::find_all_sources_across_snapshots (set<string>& result, bool exclude_th
 }
 
 struct RegionCounter {
-    typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
-    AudioSourceList::iterator iter;
-    boost::shared_ptr<Region> region;
-    uint32_t count;
+	typedef std::map<PBD::ID,boost::shared_ptr<AudioSource> > AudioSourceList;
+	AudioSourceList::iterator iter;
+	boost::shared_ptr<Region> region;
+	uint32_t count;
 
-    RegionCounter() : count (0) {}
+	RegionCounter() : count (0) {}
 };
 
 int
 Session::ask_about_playlist_deletion (boost::shared_ptr<Playlist> p)
 {
-        boost::optional<int> r = AskAboutPlaylistDeletion (p);
+	boost::optional<int> r = AskAboutPlaylistDeletion (p);
 	return r.get_value_or (1);
 }
 
@@ -3111,7 +3108,7 @@ Session::can_cleanup_peakfiles () const
 		warning << _("Cannot cleanup peak-files for read-only session.") << endmsg;
 		return false;
 	}
-        if (record_status() == Recording) {
+	if (record_status() == Recording) {
 		error << _("Cannot cleanup peak-files while recording") << endmsg;
 		return false;
 	}
@@ -3206,10 +3203,9 @@ Session::cleanup_sources (CleanupReport& rep)
 		goto out;
 	}
 
-        /* sync the "all regions" property of each playlist with its current state
-         */
+	/* sync the "all regions" property of each playlist with its current state */
 
-        playlists->sync_all_regions_with_regions ();
+	playlists->sync_all_regions_with_regions ();
 
 	/* find all un-used sources */
 
@@ -3224,8 +3220,8 @@ Session::cleanup_sources (CleanupReport& rep)
 		++tmp;
 
 		/* do not bother with files that are zero size, otherwise we remove the current "nascent"
-		   capture files.
-		*/
+		 * capture files.
+		 */
 
 		if (!i->second->used() && (i->second->length(i->second->timeline_position()) > 0)) {
 			dead_sources.push_back (i->second);
@@ -3256,9 +3252,9 @@ Session::cleanup_sources (CleanupReport& rep)
 	find_files_matching_filter (candidates, midi_path, accept_all_midi_files, (void *) 0, true, true);
 
 	/* add sources from all other snapshots as "used", but don't use this
-	   snapshot because the state file on disk still references sources we
-	   may have already dropped.
-	*/
+		 snapshot because the state file on disk still references sources we
+		 may have already dropped.
+		 */
 
 	find_all_sources_across_snapshots (sources_used_by_all_snapshots, true);
 
@@ -3272,12 +3268,12 @@ Session::cleanup_sources (CleanupReport& rep)
 	playlists->foreach (boost::bind (merge_all_sources, _1, &sources_used_by_this_snapshot));
 
 	/*  add our current source list
-	 */
+	*/
 
 	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
 		boost::shared_ptr<FileSource> fs;
-                SourceMap::iterator tmp = i;
-                ++tmp;
+		SourceMap::iterator tmp = i;
+		++tmp;
 
 		if ((fs = boost::dynamic_pointer_cast<FileSource> (i->second)) == 0) {
 			/* not a file */
@@ -3307,11 +3303,9 @@ Session::cleanup_sources (CleanupReport& rep)
 				cerr << "Source from source list found in used_by_this_snapshot (" << fs->path() << ")\n";
 			} else {
 				cerr << "Source from source list NOT found in used_by_this_snapshot (" << fs->path() << ")\n";
-				/* this source is NOT in use by this snapshot
-				 */
+				/* this source is NOT in use by this snapshot */
 
-				/* remove all related regions from RegionFactory master list
-				 */
+				/* remove all related regions from RegionFactory master list */
 
 				RegionFactory::remove_regions_using_source (i->second);
 
@@ -3327,12 +3321,12 @@ Session::cleanup_sources (CleanupReport& rep)
 			}
 		}
 
-                i = tmp;
+		i = tmp;
 	}
 
 	/* now check each candidate source to see if it exists in the list of
-	   sources_used_by_all_snapshots. If it doesn't, put it into "unused".
-	*/
+	 * sources_used_by_all_snapshots. If it doesn't, put it into "unused".
+	 */
 
 	cerr << "Candidates: " << candidates.size() << endl;
 	cerr << "Used by others: " << sources_used_by_all_snapshots.size() << endl;
@@ -3376,9 +3370,9 @@ Session::cleanup_sources (CleanupReport& rep)
 		string newpath;
 
 		/* don't move the file across filesystems, just
-		   stick it in the `dead_dir_name' directory
-		   on whichever filesystem it was already on.
-		*/
+		 * stick it in the `dead_dir_name' directory
+		 * on whichever filesystem it was already on.
+		 */
 
 		if ((*x).find ("/sounds/") != string::npos) {
 
@@ -3424,8 +3418,8 @@ Session::cleanup_sources (CleanupReport& rep)
 
 			if (version == 999) {
 				error << string_compose (_("there are already 1000 files with names like %1; versioning discontinued"),
-						  newpath)
-				      << endmsg;
+						newpath)
+					<< endmsg;
 			} else {
 				newpath = newpath_v;
 			}
@@ -3434,24 +3428,23 @@ Session::cleanup_sources (CleanupReport& rep)
 
 		if ((g_stat ((*x).c_str(), &statbuf) != 0) || (::g_rename ((*x).c_str(), newpath.c_str()) != 0)) {
 			error << string_compose (_("cannot rename unused file source from %1 to %2 (%3)"), (*x),
-			                         newpath, g_strerror (errno)) << endmsg;
+					newpath, g_strerror (errno)) << endmsg;
 			continue;
 		}
 
-		/* see if there an easy to find peakfile for this file, and remove it.
-		 */
+		/* see if there an easy to find peakfile for this file, and remove it.  */
 
 		string base = Glib::path_get_basename (*x);
 		base += "%A"; /* this is what we add for the channel suffix of all native files,
-		                 or for the first channel of embedded files. it will miss
-		                 some peakfiles for other channels
-		               */
+									 * or for the first channel of embedded files. it will miss
+									 * some peakfiles for other channels
+									 */
 		string peakpath = construct_peak_filepath (base);
 
 		if (Glib::file_test (peakpath.c_str (), Glib::FILE_TEST_EXISTS)) {
 			if (::g_unlink (peakpath.c_str ()) != 0) {
 				error << string_compose (_("cannot remove peakfile %1 for %2 (%3)"), peakpath, _path,
-				                         g_strerror (errno)) << endmsg;
+						g_strerror (errno)) << endmsg;
 				/* try to back out */
 				::g_rename (newpath.c_str (), _path.c_str ());
 				goto out;
@@ -3467,13 +3460,13 @@ Session::cleanup_sources (CleanupReport& rep)
 	_history.clear ();
 
 	/* save state so we don't end up a session file
-	   referring to non-existent sources.
-	*/
+	 * referring to non-existent sources.
+	 */
 
 	save_state ("");
 	ret = 0;
 
-  out:
+out:
 	_state_of_the_state = (StateOfTheState) (_state_of_the_state & ~InCleanup);
 
 	return ret;
@@ -3494,7 +3487,7 @@ Session::cleanup_trash_sources (CleanupReport& rep)
 
 		dead_dir = Glib::build_filename ((*i).path, dead_dir_name);
 
-                clear_directory (dead_dir, &rep.space, &rep.paths);
+		clear_directory (dead_dir, &rep.space, &rep.paths);
 	}
 
 	return 0;
@@ -3648,7 +3641,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 
 	case ControllableDescriptor::Solo:
-                c = s->solo_control();
+		c = s->solo_control();
 		break;
 
 	case ControllableDescriptor::Mute:
@@ -4117,30 +4110,30 @@ Session::set_history_depth (uint32_t d)
 int
 Session::load_diskstreams_2X (XMLNode const & node, int)
 {
-        XMLNodeList          clist;
-        XMLNodeConstIterator citer;
+	XMLNodeList          clist;
+	XMLNodeConstIterator citer;
 
-        clist = node.children();
+	clist = node.children();
 
-        for (citer = clist.begin(); citer != clist.end(); ++citer) {
+	for (citer = clist.begin(); citer != clist.end(); ++citer) {
 
-                try {
-                        /* diskstreams added automatically by DiskstreamCreated handler */
-                        if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
+		try {
+			/* diskstreams added automatically by DiskstreamCreated handler */
+			if ((*citer)->name() == "AudioDiskstream" || (*citer)->name() == "DiskStream") {
 				boost::shared_ptr<AudioDiskstream> dsp (new AudioDiskstream (*this, **citer));
 				_diskstreams_2X.push_back (dsp);
-                        } else {
-                                error << _("Session: unknown diskstream type in XML") << endmsg;
-                        }
-                }
+			} else {
+				error << _("Session: unknown diskstream type in XML") << endmsg;
+			}
+		}
 
-                catch (failed_constructor& err) {
-                        error << _("Session: could not load diskstream via XML state") << endmsg;
-                        return -1;
-                }
-        }
+		catch (failed_constructor& err) {
+			error << _("Session: could not load diskstream via XML state") << endmsg;
+			return -1;
+		}
+	}
 
-        return 0;
+	return 0;
 }
 
 /** Connect things to the MMC object */
@@ -4187,16 +4180,15 @@ Session::setup_midi_machine_control ()
 boost::shared_ptr<Controllable>
 Session::solo_cut_control() const
 {
-        /* the solo cut control is a bit of an anomaly, at least as of Febrary 2011. There are no other
-           controls in Ardour that currently get presented to the user in the GUI that require
-           access as a Controllable and are also NOT owned by some SessionObject (e.g. Route, or MonitorProcessor).
-
-           its actually an RCConfiguration parameter, so we use a ProxyControllable to wrap
-           it up as a Controllable. Changes to the Controllable will just map back to the RCConfiguration
-           parameter.
-        */
-
-        return _solo_cut_control;
+	/* the solo cut control is a bit of an anomaly, at least as of Febrary 2011. There are no other
+	 * controls in Ardour that currently get presented to the user in the GUI that require
+	 * access as a Controllable and are also NOT owned by some SessionObject (e.g. Route, or MonitorProcessor).
+	 *
+	 * its actually an RCConfiguration parameter, so we use a ProxyControllable to wrap
+	 * it up as a Controllable. Changes to the Controllable will just map back to the RCConfiguration
+	 * parameter.
+	 */
+	return _solo_cut_control;
 }
 
 void
@@ -4235,7 +4227,7 @@ Session::rename (const std::string& new_name)
 		error << _("Cannot rename read-only session.") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
-        if (record_status() == Recording) {
+	if (record_status() == Recording) {
 		error << _("Cannot rename session while recording") << endmsg;
 		return 0; // don't show "messed up" warning
 	}
@@ -4365,12 +4357,12 @@ Session::rename (const std::string& new_name)
 
 		if (::g_rename (old_interchange_dir.c_str(), new_interchange_dir.c_str()) != 0) {
 			cerr << string_compose (_("renaming %s as %2 failed (%3)"),
-			                         old_interchange_dir, new_interchange_dir,
-						 g_strerror (errno))
-			      << endl;
+			                        old_interchange_dir, new_interchange_dir,
+			                        g_strerror (errno))
+			     << endl;
 			error << string_compose (_("renaming %s as %2 failed (%3)"),
-						 old_interchange_dir, new_interchange_dir,
-						 g_strerror (errno))
+			                         old_interchange_dir, new_interchange_dir,
+			                         g_strerror (errno))
 			      << endmsg;
 			return 1;
 		}
