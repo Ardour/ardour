@@ -55,36 +55,10 @@ LocaleGuard::LocaleGuard ()
 	char const * const current_c_locale = setlocale (LC_NUMERIC, 0);
 
 	if (strcmp ("C", current_c_locale) != 0) {
-
 		old_c_locale = strdup (current_c_locale);
-
-		try {
-			/* set the C++ global/default locale to whatever we are using
-			 * now, but with "C" numeric handling.
-			 *
-			 * this also sets the C locale, so no additional call to setlocale() is required.
-			 */
-
-			std::locale::global (std::locale (old_cpp_locale, "C", std::locale::numeric));
-			pre_cpp_locale = std::locale();
-			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: change C & C++ locale from '%1' => %2\n", old_cpp_locale.name(), pre_cpp_locale.name()));
-
-		} catch (...) {
-			/* Apple in particular have historically done a
-			 * terrible job supporting setlocale and even more so
-			 * with the C++ API. Using any locale other than "C" or
-			 * "POSIX" will fail, and in the case of the C++ API, 
-			 * will throw an exception. In that case, just try to
-			 * use setlocale() to reset *only* the numeric aspect
-			 * of the current locale settings back to "C", which is
-			 * likely to work everywhere.
-			 */
-
-			setlocale (LC_NUMERIC, "C");
-			pre_cpp_locale = std::locale();
-			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: C++ locale API failed, change just C locale from '%1' => 'C' (C++ locale is %2)\n", old_c_locale, pre_cpp_locale.name()));
-		}
-
+		setlocale (LC_NUMERIC, "C");
+		pre_cpp_locale = std::locale();
+		DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: change C locale from '%1' => 'C' (C++ locale is %2)\n", old_c_locale, pre_cpp_locale.name()));
 	}
 }
 
@@ -95,7 +69,7 @@ LocaleGuard::~LocaleGuard ()
 
 	if (current_cpp_locale != pre_cpp_locale) {
 
-		PBD::warning << string_compose ("LocaleGuard: someone (a plugin) changed the C++ locale from\n\t%1\nto\n\t%2\n, expect non-portable session files. Decimal OK ? %2",
+		PBD::warning << string_compose ("LocaleGuard: someone (a plugin) changed the C++ locale from\n\t%1\nto\n\t%2\n, expect non-portable session files. Decimal OK ? %3",
 		                              old_cpp_locale.name(), current_cpp_locale.name(),
 		                              (std::use_facet<std::numpunct<char> >(std::locale()).decimal_point() == '.'))
 		           << endmsg;
@@ -120,8 +94,8 @@ LocaleGuard::~LocaleGuard ()
 			DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: C++ locale API failed, restore C locale from %1 to\n'%2'\n(C++ is '%3')\n", current_c_locale, old_c_locale, std::locale().name()));
 		}
 
-	} else if (old_c_locale && (strcmp (current_c_locale, old_c_locale) != 0)) {
-
+	}
+	if (old_c_locale && (strcmp (current_c_locale, old_c_locale) != 0)) {
 		/* reset only the C locale */
 		setlocale (LC_NUMERIC, old_c_locale);
 		DEBUG_TRACE (DEBUG::Locale, string_compose ("LG: restore C locale from %1 to\n'%2'\n(C++ is '%3')\n", current_c_locale, old_c_locale, std::locale().name()));
