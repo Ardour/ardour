@@ -249,12 +249,6 @@ namespace ARDOUR {
 		TrackColor
 	};
 
-	enum LocaleMode {
-		SET_LC_ALL,
-		SET_LC_MESSAGES,
-		SET_LC_MESSAGES_AND_LC_NUMERIC
-	};
-
 	enum RoundMode {
 		RoundDownMaybe  = -2,  ///< Round down only if necessary
 		RoundDownAlways = -1,  ///< Always round down, even if on a division
