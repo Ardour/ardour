@@ -198,6 +198,10 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 bool
 Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 {
+	if (!session () || session()->loading () || session()->deletion_in_progress ()) {
+		return false;
+	}
+
 	gint ret = FALSE;
 
 	switch (event->type) {
