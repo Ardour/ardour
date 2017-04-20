@@ -163,7 +163,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	std::string str;
 	if (_own_input && _input) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			if ((*niter)->get_property ("name", str) && _name == str || ignore_name) {
+			if ((*niter)->get_property ("name", str) && (_name == str || ignore_name)) {
 				if ((*niter)->get_property ("direction", str) && str == instr) {
 					io_node = (*niter);
 					break;
@@ -188,7 +188,7 @@ IOProcessor::set_state (const XMLNode& node, int version)
 	if (_own_output && _output) {
 		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 			if ((*niter)->name() == "IO") {
-				if ((*niter)->get_property ("name", str) && _name == str || ignore_name) {
+				if ((*niter)->get_property ("name", str) && (_name == str || ignore_name)) {
 					if ((*niter)->get_property ("direction", str) && str == outstr) {
 						io_node = (*niter);
 						break;
