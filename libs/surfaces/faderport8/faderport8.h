@@ -174,9 +174,10 @@ private:
 	void drop_ctrl_connections ();
 
 	void select_strip (boost::weak_ptr<ARDOUR::Stripable>);
+
 	void notify_pi_property_changed (const PBD::PropertyChange&);
 	void notify_stripable_property_changed (boost::weak_ptr<ARDOUR::Stripable>, const PBD::PropertyChange&);
-	void gui_track_selection_changed ();
+	void notify_gui_track_selection_changed ();
 
 	PBD::ScopedConnection selection_connection;
 	PBD::ScopedConnectionList automation_state_connections;

@@ -31,6 +31,16 @@ namespace ArdourSurface {
 #define fp8_context() dynamic_cast<BaseUI*>(&_base)
 #define fp8_protocol() dynamic_cast<ControlProtocol*>(&_base)
 
+/** Virtual abstracte base of the FaderPort8 control surface
+ *
+ * This is passed as handle to all elements (buttons, lights,..)
+ * to inteface common functionality for the current instance:
+ *  - sending MIDI
+ *  - global events (signals)
+ *  - thread context
+ *
+ * It is implemented by FaderPort8
+ */
 class FP8Base
 {
 public:
@@ -96,9 +106,11 @@ public:
 		 return tx_midi (d);
 	}
 
+	/* modifier keys */
 	PBD::Signal1<void, bool> ShiftButtonChange;
 	PBD::Signal1<void, bool> ARMButtonChange;
 
+	/* timer events */
 	PBD::Signal1<void, bool> BlinkIt;
 	PBD::Signal0<void> Periodic;
 

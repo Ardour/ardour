@@ -128,9 +128,11 @@ FaderPort8::FaderPort8 (Session& s)
 	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::gui_track_selection_changed, this), this);
+	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_gui_track_selection_changed, this), this);
 
+	/* bind button events to call libardour actions */
 	setup_actions ();
+
 	_ctrls.FaderModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::notify_fader_mode_changed, this));
 	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::assign_strips, this, true));
 }
@@ -995,6 +997,10 @@ FaderPort8::assign_stripables (bool select_only)
 	}
 }
 
+/* ****************************************************************************
+ * Plugin selection and parameters
+ */
+
 void
 FaderPort8::assign_processor_ctrls ()
 {
@@ -1274,6 +1280,10 @@ FaderPort8::spill_plugins ()
 	assert (id == 8);
 }
 
+/* ****************************************************************************
+ * Aux Sends and Mixbus assigns
+ */
+
 void
 FaderPort8::assign_sends ()
 {
@@ -1334,13 +1344,9 @@ FaderPort8::assign_sends ()
 	assign_stripables (true);
 }
 
-void
-FaderPort8::set_periodic_display_mode (FP8Strip::DisplayMode m)
-{
-	for (uint8_t id = 0; id < 8; ++id) {
-		_ctrls.strip(id).set_periodic_display_mode (m);
-	}
-}
+/* ****************************************************************************
+ * Main stripable assignment (dispatch depending on mode)
+ */
 
 void
 FaderPort8::assign_strips (bool reset_bank)
@@ -1357,7 +1363,7 @@ FaderPort8::assign_strips (bool reset_bank)
 		case ModeTrack:
 		case ModePan:
 			assign_stripables ();
-			gui_track_selection_changed (); // update selection, automation-state
+			notify_gui_track_selection_changed (); // update selection, automation-state
 			break;
 		case ModePlugins:
 			if (_proc_params.size() > 0) {
@@ -1372,6 +1378,17 @@ FaderPort8::assign_strips (bool reset_bank)
 	}
 }
 
+/* ****************************************************************************
+ * some helper functions
+ */
+
+void
+FaderPort8::set_periodic_display_mode (FP8Strip::DisplayMode m)
+{
+	for (uint8_t id = 0; id < 8; ++id) {
+		_ctrls.strip(id).set_periodic_display_mode (m);
+	}
+}
 
 void
 FaderPort8::drop_ctrl_connections ()
@@ -1379,53 +1396,6 @@ FaderPort8::drop_ctrl_connections ()
 	_proc_params.clear();
 	processor_connections.drop_connections ();
 	_showing_well_known = 0;
-}
-
-void
-FaderPort8::notify_fader_mode_changed ()
-{
-	FaderMode fadermode = _ctrls.fader_mode ();
-
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
-	if (!s && (fadermode == ModePlugins || fadermode == ModeSend)) {
-		_ctrls.set_fader_mode (ModeTrack);
-		return;
-	}
-
-	drop_ctrl_connections ();
-
-	switch (fadermode) {
-		case ModeTrack:
-		case ModePan:
-			break;
-		case ModePlugins:
-		case ModeSend:
-			_plugin_off = 0;
-			_parameter_off = 0;
-			// force unset rec-arm button, see also FaderPort8::button_arm
-			_ctrls.button (FP8Controls::BtnArm).set_active (false);
-			ARMButtonChange (false);
-			break;
-	}
-	assign_strips (false);
-	notify_automation_mode_changed ();
-}
-
-/* ****************************************************************************
- * Assigned Stripable Callbacks
- */
-
-void
-FaderPort8::notify_stripable_added_or_removed ()
-{
-	/* called by
-	 *  - DropReferences
-	 *  - session->RouteAdded
-	 *  - PresentationInfo::Change
-	 *    - Properties::hidden
-	 *    - Properties::order
-	 */
-	assign_strips (false);
 }
 
 /* functor for FP8Strip's select button */
@@ -1457,11 +1427,58 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	}
 	if (s->is_selected () && s != first_selected_stripable ()) {
 		set_first_selected_stripable (s);
-		gui_track_selection_changed ();
+		notify_gui_track_selection_changed ();
 	} else {
 		ToggleStripableSelection (s);
 	}
 #endif
+}
+
+/* ****************************************************************************
+ * Assigned Stripable Callbacks
+ */
+
+void
+FaderPort8::notify_fader_mode_changed ()
+{
+	FaderMode fadermode = _ctrls.fader_mode ();
+
+	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	if (!s && (fadermode == ModePlugins || fadermode == ModeSend)) {
+		_ctrls.set_fader_mode (ModeTrack);
+		return;
+	}
+
+	drop_ctrl_connections ();
+
+	switch (fadermode) {
+		case ModeTrack:
+		case ModePan:
+			break;
+		case ModePlugins:
+		case ModeSend:
+			_plugin_off = 0;
+			_parameter_off = 0;
+			// force unset rec-arm button, see also FaderPort8::button_arm
+			_ctrls.button (FP8Controls::BtnArm).set_active (false);
+			ARMButtonChange (false);
+			break;
+	}
+	assign_strips (false);
+	notify_automation_mode_changed ();
+}
+
+void
+FaderPort8::notify_stripable_added_or_removed ()
+{
+	/* called by
+	 *  - DropReferences
+	 *  - session->RouteAdded
+	 *  - PresentationInfo::Change
+	 *    - Properties::hidden
+	 *    - Properties::order
+	 */
+	assign_strips (false);
 }
 
 /* called from static PresentationInfo::Change */
@@ -1521,8 +1538,14 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 }
 
 void
-FaderPort8::gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*/)
+FaderPort8::notify_gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*/)
 {
+	if (!_device_active) {
+		/* this can be called anytime from the static
+		 * ControlProtocol::StripableSelectionChanged
+		 */
+		return;
+	}
 	automation_state_connections.drop_connections();
 
 	switch (_ctrls.fader_mode ()) {

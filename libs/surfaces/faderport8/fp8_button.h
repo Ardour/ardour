@@ -1,4 +1,5 @@
-/*
+/* FaderPort8 Button Interface
+ *
  * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or
@@ -28,6 +29,7 @@
 
 namespace ArdourSurface {
 
+/* virtual base-class and interface */
 class FP8ButtonInterface
 {
 public:
@@ -58,6 +60,10 @@ public:
 	static bool force_change; // used during init
 };
 
+/* ****************************************************************************
+ * Implementations
+ */
+
 class FP8DummyButton : public FP8ButtonInterface
 {
 public:
@@ -66,6 +72,7 @@ public:
 };
 
 
+/* common implementation */
 class FP8ButtonBase : public FP8ButtonInterface
 {
 public:
@@ -129,6 +136,7 @@ private:
 	bool _blinking;
 };
 
+/* A basic LED or RGB button, not shift sensitive */
 class FP8Button : public FP8ButtonBase
 {
 public:
@@ -169,6 +177,7 @@ protected:
 	bool     _has_color;
 };
 
+/* footswitch and encoder-press buttons */
 class FP8ReadOnlyButton : public FP8Button
 {
 public:
@@ -430,6 +439,9 @@ private:
 	sigc::connection _hold_connection;
 };
 
+/* an auto-repeat button.
+ * press + hold emits continuous "press" events.
+ */
 class FP8RepeatButton : public FP8Button
 {
 public:
@@ -484,7 +496,6 @@ private:
 	int _skip;
 	sigc::connection _press_timeout_connection;
 };
-
 
 } /* namespace */
 #endif /* _ardour_surfaces_fp8button_h_ */
