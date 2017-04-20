@@ -74,6 +74,10 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 
 	void start_updates ();
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
   private:
 	ARDOUR::framecnt_t      original_length;
 	Gtk::Adjustment pitch_octave_adjustment;

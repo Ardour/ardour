@@ -45,6 +45,10 @@ public:
 	void set_encode_option (ARDOUR::Session::ArchiveEncode);
 	void set_only_used_sources (bool);
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
 private:
 	Gtk::FileChooserButton target_folder_selector;
 	Gtk::Entry             name_entry;

@@ -50,6 +50,10 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	VtlTranscodeOption import_option ();
 	bool detect_ltc () { return ltc_detect.get_active (); }
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
   private:
 	void on_show ();
 	void open_browse_dialog ();

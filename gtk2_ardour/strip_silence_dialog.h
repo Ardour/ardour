@@ -49,6 +49,10 @@ public:
 	ARDOUR::framecnt_t minimum_length () const;
 	ARDOUR::framecnt_t fade_length () const;
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
 private:
 	void create_waves ();
 	void canvas_allocation (Gtk::Allocation &);

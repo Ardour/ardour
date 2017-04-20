@@ -189,6 +189,10 @@ public:
 	ExportReport (const std::string & title, const ARDOUR::AnalysisResults & ar);
 	int run ();
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
 private:
 	void init (const ARDOUR::AnalysisResults &, bool);
 	void draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave,

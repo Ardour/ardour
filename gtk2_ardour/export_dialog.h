@@ -64,6 +64,10 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
   protected:
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 

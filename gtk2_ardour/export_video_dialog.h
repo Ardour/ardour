@@ -51,6 +51,10 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	XMLNode& get_state ();
 	void set_state (const XMLNode &);
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
   private:
 	TimeSelection export_range;
 
