@@ -1410,6 +1410,23 @@ AlsaAudioBackend::register_system_audio_ports()
 	return 0;
 }
 
+/* libs/ardouralsautil/devicelist.cc appends either of
+ * " (IO)", " (I)", or " (O)"
+ * depending of the device is full-duples or half-duplex
+ */
+static std::string replace_name_io (std::string const& name, bool in)
+{
+	if (name.empty ()) {
+		return "";
+	}
+	size_t pos = name.find_last_of ('(');
+	if (pos == std::string::npos) {
+		assert (0); // this should never happen.
+		return name;
+	}
+	return name.substr (0, pos) + "(" + (in ? "In" : "Out") + ")";
+}
+
 int
 AlsaAudioBackend::register_system_midi_ports(const std::string device)
 {
@@ -1466,7 +1483,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				set_latency_range (p, true, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 				AlsaPort *ap = static_cast<AlsaPort*>(p);
-				ap->set_pretty_name (i->first);
+				ap->set_pretty_name (replace_name_io (i->first, false));
 				_system_midi_out.push_back (ap);
 				_rmidi_out.push_back (mout);
 			}
@@ -1505,7 +1522,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				AlsaPort *ap = static_cast<AlsaPort*>(p);
-				ap->set_pretty_name (i->first);
+				ap->set_pretty_name (replace_name_io (i->first, true));
 				_system_midi_in.push_back (ap);
 				_rmidi_in.push_back (midin);
 			}
