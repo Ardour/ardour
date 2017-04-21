@@ -172,6 +172,7 @@ ControlProtocolManager::drop_protocols ()
 		if ((*p)->protocol) {
 			(*p)->requested = true;
 			(*p)->protocol = 0;
+			ProtocolStatusChange (*p); /* EMIT SIGNAL */
 		}
 	}
 }
