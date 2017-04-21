@@ -263,8 +263,14 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	cpi.protocol = 0;
 
-	delete cpi.state;
-	cpi.state = 0;
+	if (lock_required) {
+		/* the lock is only required when the protocol is torn down from the GUI.
+		 * If a user disables a protocol, we take this as indicator to forget the
+		 * state.
+		 */
+		delete cpi.state;
+		cpi.state = 0;
+	}
 	delete (Glib::Module*) cpi.descriptor->module;
 	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
 	 * has been performed, and the descriptor is (or could be) a static
@@ -456,22 +462,24 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (cpi) {
-				delete cpi->state;
-				cpi->state = new XMLNode (**citer);
-
 				std::cerr << "protocol " << name << " active ? " << active << std::endl;
 
 				if (active) {
+					delete cpi->state;
+					cpi->state = new XMLNode (**citer);
 					if (_session) {
 						instantiate (*cpi);
 					} else {
 						cpi->requested = true;
 					}
 				} else {
+					if (!cpi->state) {
+						cpi->state = new XMLNode (**citer);
+						cpi->state->set_property (X_("active"), false);
+					}
+					cpi->requested = false;
 					if (_session) {
 						teardown (*cpi, false);
-					} else {
-						cpi->requested = false;
 					}
 				}
 			} else {
