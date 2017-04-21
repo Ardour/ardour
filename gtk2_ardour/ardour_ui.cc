@@ -95,6 +95,7 @@
 #include "ardour/profile.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/record_enable_control.h"
+#include "ardour/revision.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
 #include "ardour/session_state_utils.h"
@@ -695,19 +696,29 @@ ARDOUR_UI::post_engine ()
 		vector<string> keys;
 		vector<Glib::RefPtr<Gtk::Action> > actions;
 
+		cout << "\n<h2>Menu actions</h2>" << endl;
+		cout << "<!-- created by running ardour -b -->" << endl;
+		cout << "<p>\n  Every single menu item in Ardour's GUI is accessible by control" << endl;
+		cout << "  surfaces or scripts.\n</p>\n" << endl;
+		cout << "<p>\n  The list below shows all available values of <em>action-name</em> as of" << endl;
+		cout << "Ardour " << revision << ". You can get the current list at any" << endl;
+		cout << "  time by running Ardour with the -b flag.\n</p>\n" << endl;
+		cout << "<table class=\"dl\">\n  <thead>" << endl;
+		cout << "      <tr><th>Action Name</th><th>Menu Name</th><th>Key Binding</th></tr>" << endl;
+		cout << "  </thead>\n  <tbody>" << endl;
+
 		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
 
 		vector<string>::iterator k;
 		vector<string>::iterator p;
+		vector<string>::iterator l;
 
-		for (p = paths.begin(), k = keys.begin(); p != paths.end(); ++k, ++p) {
-
-			if ((*k).empty()) {
-				cout << *p << endl;
-			} else {
-				cout << *p << " => " << *k << endl;
-			}
+		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
+			cout << "	<tr><th><kbd class=\"osc\">" << (*p).substr (9, string::npos);
+			cout << "</kbd></th><td>" << *l << "</td>";
+			cout << "<td>" << *k << "</td></tr>" << endl;
 		}
+		cout << "  </tbody>\n  </table class=\"dl\">" << endl;
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
