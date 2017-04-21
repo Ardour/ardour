@@ -1374,7 +1374,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				if (!(*i)->mandatory) {
 					TreeModel::Row r = *_store->append ();
 					r[_model.name] = (*i)->name;
-					r[_model.enabled] = ((*i)->protocol || (*i)->requested);
+					r[_model.enabled] = 0 != (*i)->protocol;
 					r[_model.protocol_info] = *i;
 				}
 			}
@@ -1391,8 +1391,9 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 				if ((*x)[_model.protocol_info] == cpi) {
 					_ignore_view_change++;
-					(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+					(*x)[_model.enabled] = 0 != cpi->protocol;
 					_ignore_view_change--;
+					selection_changed (); // update sensitivity
 					break;
 				}
 			}
