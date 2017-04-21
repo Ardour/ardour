@@ -764,7 +764,7 @@ OSC_GUI::save_user ()
 	std::string fullpath = user_preset_directory();
 
 	if (g_mkdir_with_parents (fullpath.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create user MCP profile folder \"%1\" (%2)"), fullpath, strerror (errno)) << endmsg;
+		error << string_compose(_("Session: cannot create user OSC profile folder \"%1\" (%2)"), fullpath, strerror (errno)) << endmsg;
 		return;
 	}
 
@@ -804,7 +804,7 @@ OSC_GUI::save_user ()
 	tree.set_root (node);
 
 	if (!tree.write (fullpath)) {
-		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
+		error << string_compose ("OSC profile not saved to %1", fullpath) << endmsg;
 	}
 	preset_combo.set_active (2);
 	cp.gui_changed();
