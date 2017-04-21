@@ -469,7 +469,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 					}
 				} else {
 					if (_session) {
-						teardown (*cpi, true);
+						teardown (*cpi, false);
 					} else {
 						cpi->requested = false;
 					}
