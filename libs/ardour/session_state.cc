@@ -1126,6 +1126,17 @@ Session::export_track_state (boost::shared_ptr<RouteList> rl, const string& path
 	return tree.write (sn.c_str());
 }
 
+namespace
+{
+struct route_id_compare {
+	bool
+	operator() (const boost::shared_ptr<Route>& r1, const boost::shared_ptr<Route>& r2)
+	{
+		return r1->id () < r2->id ();
+	}
+};
+} // anon namespace
+
 XMLNode&
 Session::state (bool full_state)
 {
@@ -1326,17 +1337,11 @@ Session::state (bool full_state)
 	{
 		boost::shared_ptr<RouteList> r = routes.reader ();
 
-		RoutePublicOrderSorter cmp;
-		RouteList public_order (*r);
-		public_order.sort (cmp);
+		route_id_compare cmp;
+		RouteList xml_node_order (*r);
+		xml_node_order.sort (cmp);
 
-		/* the sort should have put the monitor out first */
-
-		if (_monitor_out) {
-			assert (_monitor_out == public_order.front());
-		}
-
-		for (RouteList::iterator i = public_order.begin(); i != public_order.end(); ++i) {
+		for (RouteList::iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
 			if (!(*i)->is_auditioner()) {
 				if (full_state) {
 					child->add_child_nocopy ((*i)->get_state());
