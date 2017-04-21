@@ -3962,7 +3962,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 
 
-		if (AudioEngine::instance()->connected()) {
+		if (AudioEngine::instance()->running()) {
 
 			/* do this only if we're the engine is connected
 			 * because otherwise this request will never be
