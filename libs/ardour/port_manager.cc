@@ -1192,6 +1192,12 @@ PortManager::fill_midi_port_info_locked ()
 	 * PortManager
 	 */
 
+	// rg: I don't understand what this attempts to solve
+	//
+	// Naming ports should be left to the backend:
+	// Ardour cannot associate numeric IDs with corresponding hardware.
+	// (see also 7dde6c3b)
+
 	for (MidiPortInfo::iterator x = midi_port_info.begin(); x != midi_port_info.end(); ++x) {
 		PortEngine::PortHandle ph = _backend->get_port_by_name (x->first);
 
@@ -1203,7 +1209,7 @@ PortManager::fill_midi_port_info_locked ()
 			continue;
 		}
 
-		if (x->second.pretty_name != x->first) {
+		if (!x->second.pretty_name.empty () && x->second.pretty_name != x->first) {
 			/* name set in port info ... propagate */
 			_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", x->second.pretty_name, string());
 		} else {
