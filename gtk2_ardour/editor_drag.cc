@@ -3972,7 +3972,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 			 */
 
 			s->request_suspend_timecode_transmission ();
-			while (AudioEngine::instance()->connected() && !s->timecode_transmission_suspended ()) {
+			while (AudioEngine::instance()->running() && !s->timecode_transmission_suspended ()) {
 				/* twiddle our thumbs */
 			}
 		}
