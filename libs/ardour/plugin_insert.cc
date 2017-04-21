@@ -2404,7 +2404,7 @@ PluginInsert::set_control_ids (const XMLNode& node, int version)
 				}
 			}
 #endif
-			if (p == (uint32_t)-1 && (*iter)->get_property (X_("parameter"), p)) {
+			if (p != (uint32_t)-1 && (*iter)->get_property (X_("parameter"), p)) {
 
 				/* this may create the new controllable */
 
