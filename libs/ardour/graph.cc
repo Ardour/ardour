@@ -88,6 +88,9 @@ Graph::Graph (Session & session)
 void
 Graph::engine_stopped ()
 {
+#ifndef NDEBUG
+	cerr << "Graph::engine_stopped. n_thread: " << AudioEngine::instance()->process_thread_count() << endl;
+#endif
 	if (AudioEngine::instance()->process_thread_count() != 0) {
 		drop_threads ();
 	}
@@ -162,7 +165,24 @@ Graph::drop_threads ()
 
 	AudioEngine::instance()->join_process_threads ();
 
+	/* signal main process thread if it's waiting for an already terminated thread */
+	_callback_done_sem.signal ();
 	_execution_tokens = 0;
+
+	/* reset semaphores.
+	 * This is somewhat ugly, yet if a thread is killed (e.g jackd terminates
+	 * abnormally), some semaphores are still unlocked.
+	 */
+#ifndef NDEBUG
+	int d1 = _execution_sem.reset ();
+	int d2 = _callback_start_sem.reset ();
+	int d3 = _callback_done_sem.reset ();
+	cerr << "Graph::drop_threads() sema-counts: " << d1 << ", " << d2<< ", " << d3 << endl;
+#else
+	_execution_sem.reset ();
+	_callback_start_sem.reset ();
+	_callback_done_sem.reset ();
+#endif
 }
 
 void
@@ -438,6 +458,8 @@ again:
 	DEBUG_TRACE(DEBUG::ProcessThreads, "main thread is awake\n");
 
 	if (!_threads_active) {
+		pt->drop_buffers();
+		delete (pt);
 		return;
 	}
 
