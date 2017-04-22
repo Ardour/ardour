@@ -57,7 +57,6 @@ Graph::Graph (Session & session)
 	, _execution_sem ("graph_execution", 0)
 	, _callback_start_sem ("graph_start", 0)
 	, _callback_done_sem ("graph_done", 0)
-	, _cleanup_sem ("graph_cleanup", 0)
 {
 	pthread_mutex_init( &_trigger_mutex, NULL);
 

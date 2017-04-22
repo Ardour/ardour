@@ -105,7 +105,6 @@ private:
 	/** Signalled to start a run of the graph for a process callback */
 	PBD::Semaphore _callback_start_sem;
 	PBD::Semaphore _callback_done_sem;
-	PBD::Semaphore _cleanup_sem;
 
 	/** The number of processing threads that are asleep */
 	volatile gint _execution_tokens;
