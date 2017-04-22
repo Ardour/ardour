@@ -57,18 +57,13 @@ class LIBARDOUR_API Graph : public SessionHandleRef
 public:
 	Graph (Session & session);
 
-	void prep();
 	void trigger (GraphNode * n);
 	void rechain (boost::shared_ptr<RouteList>, GraphEdges const &);
 
 	void dump (int chain);
-	void process();
 	void dec_ref();
-	void restart_cycle();
 
-	bool run_one();
 	void helper_thread();
-	void main_thread();
 
 	int silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                           bool& need_butler);
@@ -93,6 +88,10 @@ private:
 
 	void reset_thread_list ();
 	void drop_threads ();
+	void restart_cycle();
+	bool run_one();
+	void main_thread();
+	void prep();
 
 	node_list_t _nodes_rt[2];
 
