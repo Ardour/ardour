@@ -284,6 +284,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	}
 
 	if (hide_stuff) {
+		close_all_dialogs ();
 		editor->hide ();
 		mixer->hide ();
 		meterbridge->hide ();
