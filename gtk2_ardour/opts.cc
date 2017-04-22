@@ -67,7 +67,7 @@ print_help (const char *execname)
 		<< "\n\n"
 		<< _("Options:\n")
 		<< _("  -a, --no-announcements      Do not contact website for announcements\n")
-		<< _("  -b, --bindings              Print all possible keyboard binding names\n")
+		<< _("  -b, --actions               Print all possible menu action names\n")
 		<< _("  -B, --bypass-plugins        Bypass all plugins in an existing session\n")
 		<< _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
 #ifndef NDEBUG
@@ -116,7 +116,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
 		{ "no-announcements", 0, 0, 'a' },
-		{ "bindings", 0, 0, 'b' },
+		{ "actions", 0, 0, 'b' },
 		{ "bypass-plugins", 0, 0, 'B' },
 		{ "disable-plugins", 0, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
