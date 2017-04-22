@@ -55,10 +55,12 @@ class LIBPBD_API Semaphore {
 
 	int signal ();
 	int wait ();
+	int reset ();
 
 #else
 	int signal () { return sem_post (ptr_to_sem()); }
 	int wait () { return sem_wait (ptr_to_sem()); }
+	int reset () { int rv = 0 ; while (sem_trywait (ptr_to_sem()) == 0) ++rv; return rv; }
 #endif
 };
 
