@@ -1387,6 +1387,8 @@ Selection::set_state (XMLNode const & node, int)
 	clear_tracks ();
 	clear_markers ();
 
+	RegionSelection selected_regions;
+
 	PBD::ID id;
 	XMLNodeList children = node.children ();
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
@@ -1411,7 +1413,7 @@ Selection::set_state (XMLNode const & node, int)
 			editor->get_regionviews_by_id (id, rs);
 
 			if (!rs.empty ()) {
-				add (rs);
+				selected_regions.insert (selected_regions.end(), rs.begin(), rs.end());
 			} else {
 				/*
 				  regionviews haven't been constructed - stash the region IDs
@@ -1570,6 +1572,9 @@ Selection::set_state (XMLNode const & node, int)
 		}
 
 	}
+
+	// now add regions to selection at once
+	add (selected_regions);
 
 	return 0;
 }
