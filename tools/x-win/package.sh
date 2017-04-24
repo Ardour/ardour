@@ -542,7 +542,7 @@ Function .onInit
   \${If} \${AtMostWinXP}
     SectionSetFlags \${SecWASAPI} \${SF_RO}
   \${Else}
-    SectionSetFlags \${SecWASAPI} \${SF_SELECTED}
+    SectionSetFlags \${SecWASAPI} 0
   \${EndIf}
 
 FunctionEnd
