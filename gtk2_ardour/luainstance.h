@@ -87,6 +87,7 @@ public:
 	static void register_classes (lua_State* L);
 	static void register_hooks (lua_State* L);
 	static void bind_cairo (lua_State* L);
+	static void bind_dialog (lua_State* L);
 
 	static void render_action_icon (cairo_t* cr, int w, int h, uint32_t c, void* i);
 

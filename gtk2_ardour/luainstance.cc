@@ -34,6 +34,7 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "region_selection.h"
+#include "luadialog.h"
 #include "luainstance.h"
 #include "luasignal.h"
 #include "marker.h"
@@ -549,6 +550,51 @@ LuaInstance::bind_cairo (lua_State* L)
 }
 
 void
+LuaInstance::bind_dialog (lua_State* L)
+{
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("LuaDialog")
+
+		.beginClass <LuaDialog::Message> ("Message")
+		.addConstructor <void (*) (std::string const&, std::string const&, LuaDialog::Message::MessageType, LuaDialog::Message::ButtonType)> ()
+		.addFunction ("run", &LuaDialog::Message::run)
+		.endClass ()
+
+		.beginClass <LuaDialog::Dialog> ("Dialog")
+		.addConstructor <void (*) (std::string const&, luabridge::LuaRef)> ()
+		.addCFunction ("run", &LuaDialog::Dialog::run)
+		.endClass ()
+
+		/* enums */
+		.beginNamespace ("MessageType")
+		.addConst ("Info", LuaDialog::Message::Info)
+		.addConst ("Warning", LuaDialog::Message::Warning)
+		.addConst ("Question", LuaDialog::Message::Question)
+		.addConst ("Error", LuaDialog::Message::Error)
+		.endNamespace ()
+
+		.beginNamespace ("ButtonType")
+		.addConst ("OK", LuaDialog::Message::OK)
+		.addConst ("Close", LuaDialog::Message::Close)
+		.addConst ("Cancel", LuaDialog::Message::Cancel)
+		.addConst ("Yes_No", LuaDialog::Message::Yes_No)
+		.addConst ("OK_Cancel", LuaDialog::Message::OK_Cancel)
+		.endNamespace ()
+
+		.beginNamespace ("Response")
+		.addConst ("OK", 0)
+		.addConst ("Cancel", 1)
+		.addConst ("Close", 2)
+		.addConst ("Yes", 3)
+		.addConst ("No", 4)
+		.addConst ("None", -1)
+		.endNamespace ()
+
+		.endNamespace ();
+
+}
+
+void
 LuaInstance::register_classes (lua_State* L)
 {
 	LuaBindings::stddef (L);
@@ -557,6 +603,7 @@ LuaInstance::register_classes (lua_State* L)
 	LuaBindings::osc (L);
 
 	bind_cairo (L);
+	bind_dialog (L);
 	register_hooks (L);
 
 	luabridge::getGlobalNamespace (L)
