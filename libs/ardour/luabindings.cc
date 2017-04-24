@@ -200,6 +200,7 @@ CLASSKEYS(PBD::StatefulDestructible);
 
 CLASSKEYS(Evoral::Beats);
 CLASSKEYS(Evoral::Event<framepos_t>);
+CLASSKEYS(Evoral::ControlEvent);
 
 
 CLASSKEYS(std::vector<std::string>);
@@ -207,6 +208,8 @@ CLASSKEYS(std::vector<float>);
 CLASSKEYS(std::vector<float*>);
 CLASSKEYS(std::vector<double>);
 CLASSKEYS(std::list<int64_t>);
+
+CLASSKEYS(std::list<Evoral::ControlEvent*>);
 
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
@@ -500,6 +503,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("id", &Evoral::Parameter::id)
 		.endClass ()
 
+		.beginClass <Evoral::ControlEvent> ("ControlEvent")
+		.addData ("when", &Evoral::ControlEvent::when)
+		.addData ("value", &Evoral::ControlEvent::value)
+		.endClass ()
+
 		.beginWSPtrClass <Evoral::ControlList> ("ControlList")
 		.addFunction ("add", &Evoral::ControlList::add)
 		.addFunction ("thin", &Evoral::ControlList::thin)
@@ -510,7 +518,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("truncate_end", &Evoral::ControlList::truncate_end)
 		.addFunction ("truncate_start", &Evoral::ControlList::truncate_start)
 		.addFunction ("clear", (void (Evoral::ControlList::*)(double, double))&Evoral::ControlList::clear)
+		.addFunction ("clear_list", (void (Evoral::ControlList::*)())&Evoral::ControlList::clear)
 		.addFunction ("in_write_pass", &Evoral::ControlList::in_write_pass)
+		.addFunction ("events", &Evoral::ControlList::events)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::ControlSet> ("ControlSet")
@@ -761,10 +771,10 @@ LuaBindings::common (lua_State* L)
 		.deriveClass <PBD::OwnedPropertyList, PBD::PropertyList> ("OwnedPropertyList")
 		.endClass ()
 
-		.beginWSPtrClass <AutomationList> ("AutomationList")
+		.deriveWSPtrClass <AutomationList, Evoral::ControlList> ("AutomationList")
 		.addCast<PBD::Stateful> ("to_stateful")
 		.addCast<PBD::StatefulDestructible> ("to_statefuldestructible")
-		.addCast<Evoral::ControlList> ("list")
+		.addCast<Evoral::ControlList> ("list") // deprecated
 		.addFunction ("get_state", &AutomationList::get_state)
 		.addFunction ("memento_command", &AutomationList::memento_command)
 		.addFunction ("touching", &AutomationList::touching)
@@ -1136,6 +1146,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_video_locked", &Region::set_video_locked)
 		.addFunction ("set_position_locked", &Region::set_position_locked)
 		.addFunction ("source", &Region::source)
+		.addFunction ("control", static_cast<boost::shared_ptr<Evoral::Control>(Region::*)(const Evoral::Parameter&, bool)>(&Region::control))
 		.endClass ()
 
 		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
@@ -1498,6 +1509,9 @@ LuaBindings::common (lua_State* L)
 		.beginStdList <boost::shared_ptr<Evoral::Note<Evoral::Beats> > > ("NotePtrList")
 		.endClass ()
 
+		.beginConstStdList <Evoral::ControlEvent*> ("EventList")
+		.endClass ()
+
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
 	// typedef Evoral::Note<Evoral::Beats> Note;
 	// std::set< boost::weak_ptr<Note> >
@@ -1530,6 +1544,12 @@ LuaBindings::common (lua_State* L)
 		.addConstructor <void (*) (const TempoMap&, framepos_t)> ()
 		.addFunction ("to", &BeatsFramesConverter::to)
 		.addFunction ("from", &BeatsFramesConverter::from)
+		.endClass ()
+
+		.beginClass <DoubleBeatsFramesConverter> ("DoubleBeatsFramesConverter")
+		.addConstructor <void (*) (const TempoMap&, framepos_t)> ()
+		.addFunction ("to", &DoubleBeatsFramesConverter::to)
+		.addFunction ("from", &DoubleBeatsFramesConverter::from)
 		.endClass ()
 
 		.beginClass <TempoMap> ("TempoMap")
