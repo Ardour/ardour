@@ -65,7 +65,7 @@ private:
  * It includes session-specifics (such as automation state), control logic (e.g. touch, signals)
  * and acts as proxy to the underlying ControlList which holds the actual data.
  */
-class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
+class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::StatefulDestructible
 {
   public:
 	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc);
