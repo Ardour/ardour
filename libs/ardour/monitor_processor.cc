@@ -247,8 +247,8 @@ MonitorProcessor::state (bool full)
 		chn_node->set_property ("id", chn);
 
 		// implicitly cast these to bool
-		chn_node->set_property (X_("cut"), (*x)->cut == GAIN_COEFF_UNITY);
-		chn_node->set_property (X_("invert"), (*x)->polarity == GAIN_COEFF_UNITY);
+		chn_node->set_property (X_("cut"), (*x)->cut != GAIN_COEFF_UNITY);
+		chn_node->set_property (X_("invert"), (*x)->polarity != GAIN_COEFF_UNITY);
 		chn_node->set_property (X_("dim"), (*x)->dim == true);
 		chn_node->set_property (X_("solo"), (*x)->soloed == true);
 
