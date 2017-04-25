@@ -74,6 +74,8 @@ function factory () return function ()
 			default = 500
 		},
 
+		{ type = "heading", title = "Heading" },
+
 		{ type = "number", key = "number", title = "Whatever",  min = 0, max = 10, step = 1, digits = 2 }
 	}
 
