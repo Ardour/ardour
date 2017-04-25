@@ -503,4 +503,13 @@ Plugin::set_info (PluginInfoPtr info)
 	_info = info;
 }
 
-
+std::string
+Plugin::parameter_label (uint32_t which) const
+{
+	if (which >= parameter_count ()) {
+		return "";
+	}
+	ParameterDescriptor pd;
+	get_parameter_descriptor (which, pd);
+	return pd.label;
+}

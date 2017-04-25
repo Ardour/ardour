@@ -103,6 +103,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
+	virtual std::string parameter_label (uint32_t which) const;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
 	virtual void flush () { deactivate(); activate(); }
