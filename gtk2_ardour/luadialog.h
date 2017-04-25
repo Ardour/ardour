@@ -62,6 +62,7 @@ public:
 	virtual Gtk::Widget* widget () = 0;
 	virtual void assign (luabridge::LuaRef* rv) const = 0;
 	std::string const& label () const { return _label; }
+	std::string const& key () const { return _key; }
 
 protected:
 	std::string _key;

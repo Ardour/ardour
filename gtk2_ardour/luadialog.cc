@@ -103,6 +103,26 @@ Message::to_gtk_mt (MessageType mt)
  * Lua Dialog Widgets
  */
 
+class LuaDialogLabel : public LuaDialogWidget
+{
+public:
+	LuaDialogLabel (std::string const& title, Gtk::AlignmentEnum xalign)
+		: LuaDialogWidget ("", "")
+		, _lbl ("<b>" + title + "</b>", xalign, Gtk::ALIGN_CENTER, false)
+	{
+		_lbl.set_use_markup ();
+	}
+
+	Gtk::Widget* widget ()
+	{
+		return &_lbl;
+	}
+
+	void assign (luabridge::LuaRef* rv) const { }
+protected:
+	Gtk::Label _lbl;
+};
+
 class LuaDialogCheckbox : public LuaDialogWidget
 {
 public:
@@ -155,9 +175,9 @@ class LuaDialogFader : public LuaDialogWidget
 public:
 	LuaDialogFader (std::string const& key, std::string const& title, double dflt)
 		: LuaDialogWidget (key, title)
-		, _db_adjustment (ARDOUR::gain_to_slider_position_with_max (1.0, ARDOUR::Config->get_max_gain()), 0, 1, 0.01, 0.1)
+		, _db_adjustment (ARDOUR::gain_to_slider_position_with_max (1.0, ARDOUR::Config->get_max_gain ()), 0, 1, 0.01, 0.1)
 	{
-		_db_slider = Gtk::manage (new Gtkmm2ext::HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable>(), 220, 18));
+		_db_slider = Gtk::manage (new Gtkmm2ext::HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable> (), 220, 18));
 
 		_fader_centering_box.pack_start (*_db_slider, true, false);
 
@@ -169,9 +189,9 @@ public:
 
 		Gtkmm2ext::set_size_request_to_display_given_text (_db_display, "-99.00", 12, 0);
 
-		_db_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &LuaDialogFader::db_changed));
-		_db_display.signal_activate().connect (sigc::mem_fun (*this, &LuaDialogFader::on_activate));
-		_db_display.signal_key_press_event().connect (sigc::mem_fun (*this, &LuaDialogFader::on_key_press), false);
+		_db_adjustment.signal_value_changed ().connect (sigc::mem_fun (*this, &LuaDialogFader::db_changed));
+		_db_display.signal_activate ().connect (sigc::mem_fun (*this, &LuaDialogFader::on_activate));
+		_db_display.signal_key_press_event ().connect (sigc::mem_fun (*this, &LuaDialogFader::on_key_press), false);
 
 		double coeff_val = dB_to_coefficient (dflt);
 		_db_adjustment.set_value (ARDOUR::gain_to_slider_position_with_max (coeff_val, ARDOUR::Config->get_max_gain ()));
@@ -185,14 +205,14 @@ public:
 
 	void assign (luabridge::LuaRef* rv) const
 	{
-		double const val = ARDOUR::slider_position_to_gain_with_max (_db_adjustment.get_value (), ARDOUR::Config->get_max_gain());
+		double const val = ARDOUR::slider_position_to_gain_with_max (_db_adjustment.get_value (), ARDOUR::Config->get_max_gain ());
 		(*rv)[_key] = accurate_coefficient_to_dB (val);
 	}
 
 protected:
 	void db_changed ()
 	{
-		double const val = ARDOUR::slider_position_to_gain_with_max (_db_adjustment.get_value (), ARDOUR::Config->get_max_gain());
+		double const val = ARDOUR::slider_position_to_gain_with_max (_db_adjustment.get_value (), ARDOUR::Config->get_max_gain ());
 		char buf[16];
 		if (val == 0.0) {
 			snprintf (buf, sizeof (buf), "-inf");
@@ -270,7 +290,7 @@ public:
 		, _adj (dflt, lower, upper, step, step, 0)
 		, _spin (_adj)
 	{
-		_spin.set_digits(digits);
+		_spin.set_digits (digits);
 	}
 
 	Gtk::Widget* widget ()
@@ -356,7 +376,7 @@ public:
 		: LuaDialogWidget (key, title)
 		, _rv (0)
 	{
-		populate (_dd.items(), values, dflt);
+		populate (_dd.items (), values, dflt);
 	}
 
 	~LuaDialogDropDown ()
@@ -391,13 +411,13 @@ protected:
 			if (i.value ().isTable ())  {
 				Gtk::Menu* menu  = Gtk::manage (new Gtk::Menu);
 				items.push_back (MenuElem (key, *menu));
-				populate (menu->items(), i.value (), dflt);
+				populate (menu->items (), i.value (), dflt);
 				continue;
 			}
 			luabridge::LuaRef* ref = new luabridge::LuaRef (i.value ());
 			_refs.push_back (ref);
 			items.push_back (MenuElem (i.key ().cast<std::string> (),
-						sigc::bind (sigc::mem_fun(*this, &LuaDialogDropDown::dd_select), key, ref)));
+						sigc::bind (sigc::mem_fun (*this, &LuaDialogDropDown::dd_select), key, ref)));
 
 			if (!_rv || key == dflt) {
 				_rv = ref;
@@ -430,13 +450,28 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	for (luabridge::Iterator i (lr); !i.isNil (); ++i) {
 		if (!i.key ().isNumber ())  { continue; }
 		if (!i.value ().isTable ()) { continue; }
-		if (!i.value ()["key"].isString ()) { continue; }
 		if (!i.value ()["title"].isString ()) { continue; }
 		if (!i.value ()["type"].isString ()) { continue; }
 
-		std::string key = i.value ()["key"].cast<std::string> ();
 		std::string title = i.value ()["title"].cast<std::string> ();
 		std::string type = i.value ()["type"].cast<std::string> ();
+
+		if (type == "heading") {
+			Gtk::AlignmentEnum xalign = Gtk::ALIGN_CENTER;
+			if (i.value ()["align"].isString ()) {
+				std::string align = i.value ()["align"].cast <std::string> ();
+				if (align == "left") {
+					xalign = Gtk::ALIGN_LEFT;
+				} else if (align == "right") {
+					xalign = Gtk::ALIGN_RIGHT;
+				}
+			}
+			_widgets.push_back (new LuaDialogLabel (title, xalign));
+			continue;
+		}
+
+		if (!i.value ()["key"].isString ()) { continue; }
+		std::string key = i.value ()["key"].cast<std::string> ();
 
 		if (type == "checkbox") {
 			bool dflt = false;
@@ -514,22 +549,26 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 		}
 	}
 
-	_ad.add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 	_ad.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	_ad.add_button (Gtk::Stock::OK, Gtk::RESPONSE_ACCEPT);
 
-	Gtk::Table* table = Gtk::manage (new Gtk::Table());
-	table->set_spacings (6);
+	Gtk::Table* table = Gtk::manage (new Gtk::Table ());
+	table->set_col_spacings (4);
+	table->set_row_spacings (8);
 	_ad.get_vbox ()->pack_start (*table);
 	int row = 0;
 
-	for (DialogWidgets::const_iterator i = _widgets.begin (); i != _widgets.end () ; ++i) {
+	for (DialogWidgets::const_iterator i = _widgets.begin (); i != _widgets.end (); ++i) {
 		std::string const& label = (*i)->label ();
 		if (!label.empty ()) {
-			Gtk::Label* lbl = Gtk::manage (new Gtk::Label ("<b>" + label + ":</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-			lbl->set_use_markup ();
+			Gtk::Label* lbl = Gtk::manage (new Gtk::Label (label + ":", Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 			table->attach (*lbl, 0, 1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			table->attach (*((*i)->widget ()), 1, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+		} else if ((*i)->key ().empty ()) {
+			table->attach (*((*i)->widget ()), 0, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+		} else {
+			table->attach (*((*i)->widget ()), 1, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 		}
-		table->attach (*((*i)->widget ()), 1, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 		++row;
 	}
 }
