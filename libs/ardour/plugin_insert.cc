@@ -2487,6 +2487,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	}
 
 	boost::shared_ptr<Plugin> plugin = find_plugin (_session, prop->value(), type);
+	bool any_vst = false;
 
 	/* treat VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
@@ -2494,6 +2495,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::LXVST;
 		plugin = find_plugin (_session, prop->value(), type);
+		if (plugin) { any_vst = true; }
 	}
 #endif
 
@@ -2501,6 +2503,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	if (plugin == 0 && (type == ARDOUR::LXVST || type == ARDOUR::MacVST)) {
 		type = ARDOUR::Windows_VST;
 		plugin = find_plugin (_session, prop->value(), type);
+		if (plugin) { any_vst = true; }
 	}
 #endif
 
@@ -2508,6 +2511,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 	if (plugin == 0 && (type == ARDOUR::Windows_VST || type == ARDOUR::LXVST)) {
 		type = ARDOUR::MacVST;
 		plugin = find_plugin (_session, prop->value(), type);
+		if (plugin) { any_vst = true; }
 	}
 #endif
 
@@ -2575,7 +2579,9 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		   and set all plugins to the same state.
 		*/
 
-		if ((*niter)->name() == plugin->state_node_name()) {
+		if (   ((*niter)->name() == plugin->state_node_name())
+		    || (any_vst && ((*niter)->name() == "lxvst" || (*niter)->name() == "windows-vst" || (*niter)->name() == "mac-vst"))
+		   ) {
 
 			for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 				/* Plugin state can include external files which are named after the ID.

@@ -282,11 +282,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 	LocaleGuard lg;
 	int ret = -1;
 
-	if (node.name() != state_node_name()) {
-		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
-		return 0;
-	}
-
 #ifndef NO_PLUGIN_STATE
 	XMLNode* child;
 
