@@ -168,6 +168,7 @@ CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BeatsFramesConverter);
+CLASSKEYS(ARDOUR::DoubleBeatsFramesConverter);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
