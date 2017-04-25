@@ -260,6 +260,12 @@ namespace LuaCairo {
 	class ImageSurface;
 	class PangoLayout;
 }
+
+namespace LuaDialog {
+	class Message;
+	class Dialog;
+}
+
 namespace Cairo {
 	class Context;
 }
@@ -267,6 +273,9 @@ namespace Cairo {
 CLASSKEYS(Cairo::Context);
 CLASSKEYS(LuaCairo::ImageSurface);
 CLASSKEYS(LuaCairo::PangoLayout);
+
+CLASSKEYS(LuaDialog::Message);
+CLASSKEYS(LuaDialog::Dialog);
 
 #endif // end windows special case
 
