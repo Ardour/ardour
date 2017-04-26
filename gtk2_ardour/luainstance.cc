@@ -1235,11 +1235,14 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, param_function);
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
-	switch (spd.run ()) {
-		case Gtk::RESPONSE_ACCEPT:
-			break;
-		default:
-			return false;
+
+	if (!spd.need_interation ()) {
+		switch (spd.run ()) {
+			case Gtk::RESPONSE_ACCEPT:
+				break;
+			default:
+				return false;
+		}
 	}
 
 	LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false));

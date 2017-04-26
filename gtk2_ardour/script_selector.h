@@ -60,9 +60,11 @@ class ScriptParameterDialog : public ArdourDialog
 public:
 	ScriptParameterDialog (std::string title, const ARDOUR::LuaScriptInfoPtr&, const std::vector<std::string>&, ARDOUR::LuaScriptParamList&);
 	std::string name () { return _name_entry.get_text (); }
+	bool need_interation () const;
 
 private:
 	void update_sensitivity ();
+	bool parameters_ok () const;
 	void active_changed (int, Gtk::CheckButton*, Gtk::Entry*);
 	void value_changed (int, Gtk::Entry*);
 

@@ -204,23 +204,38 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	update_sensitivity ();
 }
 
-void
-ScriptParameterDialog::update_sensitivity ()
+bool
+ScriptParameterDialog::need_interation () const
+{
+	if (_lsp.size () > 0) {
+		return false;
+	}
+	if (!parameters_ok ()) {
+		return false;
+	}
+	return true;
+}
+
+bool
+ScriptParameterDialog::parameters_ok () const
 {
 	std::string n = _name_entry.get_text ();
 	if (n.empty() || std::find (_existing_names.begin(), _existing_names.end(), n) != _existing_names.end()) {
-		_add->set_sensitive (false);
-		return;
+		return false;
 	}
 
 	for (size_t i = 0; i < _lsp.size(); ++i) {
 		if (!_lsp[i]->optional && _lsp[i]->value.empty()) {
-			_add->set_sensitive (false);
-			return;
+			return false;
 		}
 	}
+	return true;
+}
 
-	_add->set_sensitive (true);
+void
+ScriptParameterDialog::update_sensitivity ()
+{
+	_add->set_sensitive (parameters_ok ());
 }
 
 void
