@@ -83,8 +83,8 @@ AutomationList::AutomationList (const Evoral::Parameter& id)
 }
 
 AutomationList::AutomationList (const AutomationList& other)
-	: StatefulDestructible()
-	, ControlList(other)
+	: ControlList(other)
+	, StatefulDestructible()
 	, _before (0)
 {
 	_style = other._style;
