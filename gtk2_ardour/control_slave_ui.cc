@@ -111,6 +111,7 @@ ControlSlaveUI::update_vca_display ()
 
 	if (!any) {
 		pack_start (initial_button, true, true);
+		initial_button.show ();
 	}
 
 	show ();
