@@ -24,8 +24,10 @@
 #include <sstream>
 #include <algorithm>
 #include "ardour/automation_list.h"
+#include "ardour/beats_frames_converter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/parameter_types.h"
 #include "ardour/evoral_types_convert.h"
 #include "ardour/types_convert.h"
 #include "evoral/Curve.hpp"
@@ -287,6 +289,31 @@ AutomationList::thaw ()
 		_changed_when_thawed = false;
 		StateChanged(); /* EMIT SIGNAL */
 	}
+}
+
+bool
+AutomationList::paste (const ControlList& alist, double pos, DoubleBeatsFramesConverter const& bfc)
+{
+	AutomationType src_type = (AutomationType)alist.parameter().type();
+	AutomationType dst_type = (AutomationType)_parameter.type();
+
+	if (parameter_is_midi (src_type) == parameter_is_midi (dst_type)) {
+		return ControlList::paste (alist, pos);
+	}
+	bool to_frame = parameter_is_midi (src_type);
+
+	ControlList cl (alist);
+	cl.clear ();
+	for (const_iterator i = alist.begin ();i != alist.end (); ++i) {
+		double when = (*i)->when;
+		if (to_frame) {
+			when = bfc.to ((*i)->when);
+		} else {
+			when = bfc.from ((*i)->when);
+		}
+		cl.fast_simple_add (when, (*i)->value);
+	}
+	return ControlList::paste (cl, pos);
 }
 
 Command*

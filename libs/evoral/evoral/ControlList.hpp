@@ -172,7 +172,7 @@ public:
 	 */
 	void clear (double start, double end);
 
-	bool paste (const ControlList&, double position, float times);
+	bool paste (const ControlList&, double position);
 
 	void set_yrange (double min, double max) {
 		_min_yval = min;

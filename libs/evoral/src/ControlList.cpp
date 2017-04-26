@@ -1652,7 +1652,7 @@ ControlList::clear (double start, double end)
 
 /** @param pos Position in model coordinates */
 bool
-ControlList::paste (const ControlList& alist, double pos, float /*times*/)
+ControlList::paste (const ControlList& alist, double pos)
 {
 	if (alist._events.empty()) {
 		return false;

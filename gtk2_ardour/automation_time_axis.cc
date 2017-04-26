@@ -29,6 +29,7 @@
 #include "pbd/types_convert.h"
 
 #include "ardour/automation_control.h"
+#include "ardour/beats_frames_converter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_types.h"
 #include "ardour/profile.h"
@@ -695,12 +696,23 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 	counts.increase_n_lines(_parameter);
 
 	/* add multi-paste offset if applicable */
-	pos += _editor.get_paste_offset(pos, paste_count, (*p)->length());
 
+	AutomationType src_type = (AutomationType)(*p)->parameter().type ();
+	double len = (*p)->length();
+
+	if (parameter_is_midi (src_type)) {
+		// convert length to samples (incl tempo-ramps)
+		len = DoubleBeatsFramesConverter (_session->tempo_map(), pos).to (len * paste_count);
+		pos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
+	} else {
+		pos += _editor.get_paste_offset (pos, paste_count, len);
+	}
+
+	/* convert sample-position to model's unit and position */
 	double const model_pos = _line->time_converter().from (pos - _line->time_converter().origin_b ());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (**p, model_pos, times);
+	alist->paste (**p, model_pos, DoubleBeatsFramesConverter (_session->tempo_map(), pos));
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;

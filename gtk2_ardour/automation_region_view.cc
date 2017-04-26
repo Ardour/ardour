@@ -210,6 +210,8 @@ AutomationRegionView::paste (framepos_t                                      pos
                              float                                           times,
                              boost::shared_ptr<const ARDOUR::AutomationList> slist)
 {
+	using namespace ARDOUR;
+
 	AutomationTimeAxisView* const             view    = automation_view();
 	boost::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
 
@@ -218,15 +220,24 @@ AutomationRegionView::paste (framepos_t                                      pos
 		return false;
 	}
 
-	/* add multi-paste offset if applicable */
-	pos += view->editor().get_paste_offset(
-		pos, paste_count, _source_relative_time_converter.to(slist->length()));
+	AutomationType src_type = (AutomationType)slist->parameter().type ();
+	double len = slist->length();
 
-	const double model_pos = _source_relative_time_converter.from(
+	/* add multi-paste offset if applicable */
+	if (parameter_is_midi (src_type)) {
+		// convert length to samples (incl tempo-ramps)
+		len = DoubleBeatsFramesConverter (view->session()->tempo_map(), pos).to (len * paste_count);
+		pos += view->editor ().get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
+	} else {
+		pos += view->editor ().get_paste_offset (pos, paste_count, len);
+	}
+
+	/* convert sample-position to model's unit and position */
+	const double model_pos = _source_relative_time_converter.from (
 		pos - _source_relative_time_converter.origin_b());
 
 	XMLNode& before = my_list->get_state();
-	my_list->paste(*slist, model_pos, times);
+	my_list->paste(*slist, model_pos, DoubleBeatsFramesConverter (view->session()->tempo_map(), pos));
 	view->session()->add_command(
 		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
