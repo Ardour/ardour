@@ -230,6 +230,11 @@ VCAMasterStrip::update_bottom_padding ()
 	output_button.set_name ("mixer strip button");
 	comment_button.set_name ("generic button");
 
+	if (viz.find ("VCA") == std::string::npos) {
+		control_slave_ui.hide ();
+	} else {
+		control_slave_ui.show ();
+	}
 
 	int h = 1;
 	if (1) {
