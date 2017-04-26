@@ -732,6 +732,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\luadialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\luainstance.cc"
 				>
 			</File>
@@ -1759,6 +1763,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\lua_script_manager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\luadialog.h"
 				>
 			</File>
 			<File
