@@ -1341,7 +1341,7 @@ Session::state (bool full_state)
 		RouteList xml_node_order (*r);
 		xml_node_order.sort (cmp);
 
-		for (RouteList::iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
+		for (RouteList::const_iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
 			if (!(*i)->is_auditioner()) {
 				if (full_state) {
 					child->add_child_nocopy ((*i)->get_state());
