@@ -69,9 +69,11 @@ Tabbable::use_own_window (bool and_pack_it)
 	if (and_pack_it) {
 		Gtk::Container* parent = _contents.get_parent();
 		if (parent) {
+			_contents.hide ();
 			parent->remove (_contents);
 		}
 		_own_notebook.append_page (_contents);
+		_contents.show ();
 	}
 
 	return win;
@@ -244,6 +246,7 @@ Tabbable::attach ()
 
 		save_pos_and_size ();
 
+		_contents.hide ();
 		_contents.get_parent()->remove (_contents);
 
 		/* leave the window around */
@@ -255,6 +258,7 @@ Tabbable::attach ()
 	_parent_notebook->set_tab_detachable (_contents);
 	_parent_notebook->set_tab_reorderable (_contents);
 	_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+	_contents.show ();
 
 	/* have to force this on, which is semantically correct, since
 	 * the user has effectively asked for it.
@@ -290,6 +294,7 @@ void
 Tabbable::hide_tab ()
 {
 	if (tabbed()) {
+		_contents.hide();
 		_parent_notebook->remove_page (_contents);
 		StateChange (*this);
 	}
@@ -304,6 +309,7 @@ Tabbable::show_tab ()
 			add_to_notebook (*_parent_notebook, _tab_title);
 		}
 		_parent_notebook->set_current_page (_parent_notebook->page_num (_contents));
+		_contents.show ();
 		current_toplevel()->present ();
 	}
 }
