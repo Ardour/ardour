@@ -2985,6 +2985,7 @@ EngineControl::latency_back_button_clicked ()
 void
 EngineControl::use_latency_button_clicked ()
 {
+	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
 	if (_measure_midi) {
 		ARDOUR::MIDIDM* mididm = ARDOUR::AudioEngine::instance()->mididm ();
 		if (!mididm) {
@@ -2995,6 +2996,10 @@ EngineControl::use_latency_button_clicked ()
 		uint32_t one_way = max ((ARDOUR::framecnt_t) 0, extra / 2);
 		_measure_midi->input_latency = one_way;
 		_measure_midi->output_latency = one_way;
+		if (backend->can_change_systemic_latency_when_running ()) {
+			backend->set_systemic_midi_input_latency (_measure_midi->name, one_way);
+			backend->set_systemic_midi_output_latency (_measure_midi->name, one_way);
+		}
 		notebook.set_current_page (midi_tab);
 	} else {
 		MTDM* mtdm = ARDOUR::AudioEngine::instance()->mtdm ();
@@ -3008,6 +3013,10 @@ EngineControl::use_latency_button_clicked ()
 
 		input_latency_adjustment.set_value (one_way);
 		output_latency_adjustment.set_value (one_way);
+		if (backend->can_change_systemic_latency_when_running ()) {
+			backend->set_systemic_input_latency (one_way);
+			backend->set_systemic_output_latency (one_way);
+		}
 
 		/* back to settings page */
 		notebook.set_current_page (0);
