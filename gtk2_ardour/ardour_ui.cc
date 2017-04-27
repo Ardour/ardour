@@ -5397,10 +5397,16 @@ ARDOUR_UI::do_audio_midi_setup (uint32_t desired_sample_rate)
 
 	while (true) {
 		int response = audio_midi_setup->run();
-		printf("RESPONSE %d\n", response);
 		switch (response) {
 		case Gtk::RESPONSE_DELETE_EVENT:
-			return -1;
+			// after latency callibration engine may run,
+			// Running() signal was emitted, but dialog will not
+			// have emitted a response. The user needs to close
+			// the dialog -> Gtk::RESPONSE_DELETE_EVENT
+			if (!AudioEngine::instance()->running()) {
+				return -1;
+			}
+			// fall through
 		default:
 			if (!AudioEngine::instance()->running()) {
 				continue;
