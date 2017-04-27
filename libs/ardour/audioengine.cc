@@ -91,12 +91,12 @@ AudioEngine::AudioEngine ()
 	, _started_for_latency (false)
 	, _in_destructor (false)
 	, _last_backend_error_string(AudioBackend::get_error_string((AudioBackend::ErrorCode)-1))
-    , _hw_reset_event_thread(0)
-    , _hw_reset_request_count(0)
-    , _stop_hw_reset_processing(0)
-    , _hw_devicelist_update_thread(0)
-    , _hw_devicelist_update_count(0)
-    , _stop_hw_devicelist_processing(0)
+	, _hw_reset_event_thread(0)
+	, _hw_reset_request_count(0)
+	, _stop_hw_reset_processing(0)
+	, _hw_devicelist_update_thread(0)
+	, _hw_devicelist_update_count(0)
+	, _stop_hw_devicelist_processing(0)
 #ifdef SILENCE_AFTER_SECONDS
 	, _silence_countdown (0)
 	, _silence_hit_cnt (0)
@@ -296,11 +296,11 @@ AudioEngine::process_callback (pframes_t nframes)
 		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);
 
-                if (_latency_flush_frames > nframes) {
-                        _latency_flush_frames -= nframes;
-                } else {
-                        _latency_flush_frames = 0;
-                }
+		if (_latency_flush_frames > nframes) {
+			_latency_flush_frames -= nframes;
+		} else {
+			_latency_flush_frames = 0;
+		}
 
 		return_after_remove_check = true;
 	}
@@ -366,9 +366,9 @@ AudioEngine::process_callback (pframes_t nframes)
 	PortManager::cycle_start (nframes);
 
 	/* test if we are freewheeling and there are freewheel signals connected.
-           ardour should act normally even when freewheeling unless /it/ is
-           exporting (which is what Freewheel.empty() tests for).
-	*/
+	 * ardour should act normally even when freewheeling unless /it/ is
+	 * exporting (which is what Freewheel.empty() tests for).
+	 */
 
 	if (_freewheeling && !Freewheel.empty()) {
 		Freewheel (nframes);
@@ -466,9 +466,9 @@ AudioEngine::launch_device_control_app()
 void
 AudioEngine::request_backend_reset()
 {
-    Glib::Threads::Mutex::Lock guard (_reset_request_lock);
-    g_atomic_int_inc (&_hw_reset_request_count);
-    _hw_reset_condition.signal ();
+	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
+	g_atomic_int_inc (&_hw_reset_request_count);
+	_hw_reset_condition.signal ();
 }
 
 int
@@ -493,28 +493,28 @@ AudioEngine::do_reset_backend()
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
 			g_atomic_int_dec_and_test (&_hw_reset_request_count);
 
-            std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
-                        DeviceResetStarted(); // notify about device reset to be started
+			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
+			DeviceResetStarted(); // notify about device reset to be started
 
-                        // backup the device name
-                        std::string name = _backend->device_name ();
+			// backup the device name
+			std::string name = _backend->device_name ();
 
-            std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
+			std::cout << "AudioEngine::RESET::Reseting device..." << std::endl;
 			if ( ( 0 == stop () ) &&
-                 ( 0 == _backend->reset_device () ) &&
-                 ( 0 == start () ) ) {
+					( 0 == _backend->reset_device () ) &&
+					( 0 == start () ) ) {
 
 				std::cout << "AudioEngine::RESET::Engine started..." << std::endl;
 
 				// inform about possible changes
 				BufferSizeChanged (_backend->buffer_size() );
-                DeviceResetFinished(); // notify about device reset finish
+				DeviceResetFinished(); // notify about device reset finish
 
-            } else {
+			} else {
 
-                DeviceResetFinished(); // notify about device reset finish
+				DeviceResetFinished(); // notify about device reset finish
 				// we've got an error
-                DeviceError();
+				DeviceError();
 			}
 
 			std::cout << "AudioEngine::RESET::Done." << std::endl;
@@ -528,80 +528,78 @@ AudioEngine::do_reset_backend()
 		}
 	}
 }
+
 void
 AudioEngine::request_device_list_update()
 {
-    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
-    g_atomic_int_inc (&_hw_devicelist_update_count);
-    _hw_devicelist_update_condition.signal ();
+	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+	g_atomic_int_inc (&_hw_devicelist_update_count);
+	_hw_devicelist_update_condition.signal ();
 }
-
 
 void
 AudioEngine::do_devicelist_update()
 {
-    SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
+	SessionEvent::create_per_thread_pool (X_("Device list update processing thread"), 512);
 
-    Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
+	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
 
-    while (!_stop_hw_devicelist_processing) {
+	while (!_stop_hw_devicelist_processing) {
 
-        if (_hw_devicelist_update_count) {
+		if (_hw_devicelist_update_count) {
 
-            _devicelist_update_lock.unlock();
+			_devicelist_update_lock.unlock();
 
-            Glib::Threads::RecMutex::Lock pl (_state_lock);
+			Glib::Threads::RecMutex::Lock pl (_state_lock);
 
-            g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
-            DeviceListChanged (); /* EMIT SIGNAL */
+			g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
+			DeviceListChanged (); /* EMIT SIGNAL */
 
-            _devicelist_update_lock.lock();
+			_devicelist_update_lock.lock();
 
-        } else {
-            _hw_devicelist_update_condition.wait (_devicelist_update_lock);
-        }
-    }
+		} else {
+			_hw_devicelist_update_condition.wait (_devicelist_update_lock);
+		}
+	}
 }
 
 
 void
 AudioEngine::start_hw_event_processing()
 {
-    if (_hw_reset_event_thread == 0) {
-        g_atomic_int_set(&_hw_reset_request_count, 0);
-        g_atomic_int_set(&_stop_hw_reset_processing, 0);
-        _hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
-    }
+	if (_hw_reset_event_thread == 0) {
+		g_atomic_int_set(&_hw_reset_request_count, 0);
+		g_atomic_int_set(&_stop_hw_reset_processing, 0);
+		_hw_reset_event_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
+	}
 
-    if (_hw_devicelist_update_thread == 0) {
-        g_atomic_int_set(&_hw_devicelist_update_count, 0);
-        g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
-        _hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
-    }
+	if (_hw_devicelist_update_thread == 0) {
+		g_atomic_int_set(&_hw_devicelist_update_count, 0);
+		g_atomic_int_set(&_stop_hw_devicelist_processing, 0);
+		_hw_devicelist_update_thread = Glib::Threads::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
+	}
 }
 
 
 void
 AudioEngine::stop_hw_event_processing()
 {
-    if (_hw_reset_event_thread) {
-        g_atomic_int_set(&_stop_hw_reset_processing, 1);
-        g_atomic_int_set(&_hw_reset_request_count, 0);
-        _hw_reset_condition.signal ();
-        _hw_reset_event_thread->join ();
-        _hw_reset_event_thread = 0;
-    }
+	if (_hw_reset_event_thread) {
+		g_atomic_int_set(&_stop_hw_reset_processing, 1);
+		g_atomic_int_set(&_hw_reset_request_count, 0);
+		_hw_reset_condition.signal ();
+		_hw_reset_event_thread->join ();
+		_hw_reset_event_thread = 0;
+	}
 
-    if (_hw_devicelist_update_thread) {
-        g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
-        g_atomic_int_set(&_hw_devicelist_update_count, 0);
-        _hw_devicelist_update_condition.signal ();
-        _hw_devicelist_update_thread->join ();
-        _hw_devicelist_update_thread = 0;
-    }
-
+	if (_hw_devicelist_update_thread) {
+		g_atomic_int_set(&_stop_hw_devicelist_processing, 1);
+		g_atomic_int_set(&_hw_devicelist_update_count, 0);
+		_hw_devicelist_update_condition.signal ();
+		_hw_devicelist_update_thread->join ();
+		_hw_devicelist_update_thread = 0;
+	}
 }
-
 
 void
 AudioEngine::set_session (Session *s)
@@ -928,8 +926,8 @@ AudioEngine::stop (bool for_latency)
 	} else {
 		if (_backend->stop ()) {
 			if (pl.locked ()) {
-                            pl.release ();
-                        }
+				pl.release ();
+			}
 			return -1;
 		}
 	}
@@ -1240,7 +1238,7 @@ AudioEngine::set_systemic_output_latency (uint32_t ol)
 bool
 AudioEngine::thread_initialised_for_audio_processing ()
 {
-    return SessionEvent::has_per_thread_pool () && AsyncMIDIPort::is_process_thread();
+	return SessionEvent::has_per_thread_pool () && AsyncMIDIPort::is_process_thread();
 }
 
 /* END OF BACKEND PROXY API */
@@ -1286,9 +1284,9 @@ AudioEngine::freewheel_callback (bool onoff)
 void
 AudioEngine::latency_callback (bool for_playback)
 {
-        if (_session) {
-                _session->update_latency (for_playback);
-        }
+	if (_session) {
+		_session->update_latency (for_playback);
+	}
 }
 
 void
