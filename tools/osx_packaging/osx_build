@@ -831,7 +831,16 @@ osascript << EOF
       close
       open
       update without registering applications
-      delay 5
+      delay 3
+      set position of item "${APPDIR}" of container window to {90, 100}
+      set position of item "Applications" of container window to {310, 100}
+      ${MIXBUSPOS}
+      ${HARVIDPOS}
+      ${XJADEOPOS}
+      close
+      open
+      update without registering applications
+      delay 3
       eject
     end tell
   end tell
