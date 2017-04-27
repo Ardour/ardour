@@ -922,6 +922,9 @@ AudioEngine::stop (bool for_latency)
 
 	if (for_latency && _backend->can_change_systemic_latency_when_running()) {
 		stop_engine = false;
+		if (_running) {
+			_backend->start (false); // keep running, reload latencies
+		}
 	} else {
 		if (_backend->stop ()) {
 			if (pl.locked ()) {
@@ -943,14 +946,18 @@ AudioEngine::stop (bool for_latency)
 		_session->engine_halted ();
 	}
 
-	if (stop_engine) {
+	if (stop_engine && _running) {
 		_running = false;
+		if (!for_latency) {
+			_started_for_latency = false;
+		} else if (!_started_for_latency) {
+			_stopped_for_latency = true;
+		}
 	}
 	_processed_frames = 0;
 	_measuring_latency = MeasureNone;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
-	_started_for_latency = false;
 
 	if (stop_engine) {
 		Port::PortDrop ();
@@ -1336,16 +1343,16 @@ AudioEngine::prepare_for_latency_measurement ()
 	}
 
 	if (_backend->can_change_systemic_latency_when_running()) {
-		if (start()) {
+		if (_running) {
+			_backend->start (true); // zero latency reporting of running backend
+		} else if (start (true)) {
 			return -1;
 		}
-		_backend->set_systemic_input_latency (0);
-		_backend->set_systemic_output_latency (0);
+		_started_for_latency = true;
 		return 0;
 	}
 
 	if (running()) {
-		_stopped_for_latency = true;
 		stop (true);
 	}
 
@@ -1353,7 +1360,6 @@ AudioEngine::prepare_for_latency_measurement ()
 		return -1;
 	}
 	_started_for_latency = true;
-
 	return 0;
 }
 
@@ -1466,6 +1472,18 @@ AudioEngine::stop_latency_detection ()
 	if (_latency_input_port) {
 		port_engine().unregister_port (_latency_input_port);
 		_latency_input_port = 0;
+	}
+
+	if (_running && _backend->can_change_systemic_latency_when_running()) {
+		if (_started_for_latency) {
+			_running = false; // force reload: reset latencies and emit Running()
+			start ();
+		}
+	}
+
+	if (_running && !_started_for_latency) {
+		assert (!_stopped_for_latency);
+		return;
 	}
 
 	if (!_backend->can_change_systemic_latency_when_running()) {
