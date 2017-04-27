@@ -2978,7 +2978,7 @@ EngineControl::latency_button_clicked ()
 void
 EngineControl::latency_back_button_clicked ()
 {
-	ARDOUR::AudioEngine::instance()->stop(true);
+	ARDOUR::AudioEngine::instance()->stop_latency_detection ();
 	notebook.set_current_page(0);
 }
 
