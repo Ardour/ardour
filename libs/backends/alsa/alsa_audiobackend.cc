@@ -805,7 +805,14 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	if (_active || _run) {
-		PBD::error << _("AlsaAudioBackend: already active.") << endmsg;
+		if (for_latency_measurement != _measure_latency) {
+			_measure_latency = for_latency_measurement;
+			update_systemic_audio_latencies();
+			update_systemic_midi_latencies ();
+			PBD::info << _("AlsaAudioBackend: reload latencies.") << endmsg;
+			return NoError;
+		}
+		PBD::info << _("AlsaAudioBackend: already active.") << endmsg;
 		return BackendReinitializationError;
 	}
 
@@ -1043,6 +1050,7 @@ AlsaAudioBackend::stop ()
 	delete _pcmi; _pcmi = 0;
 	_midi_ins = _midi_outs = 0;
 	release_device();
+	_measure_latency = false;
 
 	return (_active == false) ? 0 : -1;
 }
@@ -1384,7 +1392,7 @@ AlsaAudioBackend::register_system_audio_ports()
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 
 	/* audio ports */
-	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_systemic_audio_input_latency);
 	for (int i = 1; i <= a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i);
@@ -1396,7 +1404,7 @@ AlsaAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back (ap);
 	}
 
-	lr.min = lr.max = lcpp + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = lcpp + (_systemic_audio_output_latency);
 	for (int i = 1; i <= a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i);
@@ -1479,7 +1487,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					delete mout;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_output_latency);
+				lr.min = lr.max = (nfo->systemic_output_latency);
 				set_latency_range (p, true, lr);
 				static_cast<AlsaMidiPort*>(p)->set_n_periods(_periods_per_cycle); // TODO check MIDI alignment
 				AlsaPort *ap = static_cast<AlsaPort*>(p);
@@ -1519,7 +1527,7 @@ AlsaAudioBackend::register_system_midi_ports(const std::string device)
 					continue;
 				}
 				LatencyRange lr;
-				lr.min = lr.max = (_measure_latency ? 0 : nfo->systemic_input_latency);
+				lr.min = lr.max = (nfo->systemic_input_latency);
 				set_latency_range (p, false, lr);
 				AlsaPort *ap = static_cast<AlsaPort*>(p);
 				ap->set_pretty_name (replace_name_io (i->first, true));
