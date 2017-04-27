@@ -956,7 +956,7 @@ AudioEngine::stop (bool for_latency)
 		Port::PortDrop ();
 	}
 
-	if (!for_latency && stop_engine) {
+	if (stop_engine) {
 		Stopped (); /* EMIT SIGNAL */
 	}
 
@@ -1329,6 +1329,10 @@ AudioEngine::prepare_for_latency_measurement ()
 {
 	if (!_backend) {
 		return -1;
+	}
+
+	if (running() && _started_for_latency) {
+		return 0;
 	}
 
 	if (_backend->can_change_systemic_latency_when_running()) {
