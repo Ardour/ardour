@@ -1244,11 +1244,16 @@ SessionDialog::recent_context_mennu (GdkEventButton *ev)
 		return;
 	}
 
+	Gtk::TreeModel::Path tpath = recent_session_model->get_path(iter);
+	const bool is_child = tpath.up () && tpath.up ();
+
 	Gtk::Menu* m = manage (new Menu);
 	MenuList& items = m->items ();
 	items.push_back (MenuElem (s));
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove from recent"), sigc::mem_fun (*this, &SessionDialog::recent_remove_selected)));
+	if (!is_child) {
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remove session from recent list"), sigc::mem_fun (*this, &SessionDialog::recent_remove_selected)));
+	}
 	m->popup (ev->button, ev->time);
 }
 
