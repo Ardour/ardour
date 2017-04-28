@@ -39,6 +39,7 @@ string ARDOUR_COMMAND_LINE::session_name = "";
 string ARDOUR_COMMAND_LINE::backend_client_name = "ardour";
 string ARDOUR_COMMAND_LINE::backend_session_uuid;
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
+bool  ARDOUR_COMMAND_LINE::show_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
 bool ARDOUR_COMMAND_LINE::just_version = false;
 bool ARDOUR_COMMAND_LINE::use_vst = true;
@@ -67,7 +68,8 @@ print_help (const char *execname)
 		<< "\n\n"
 		<< _("Options:\n")
 		<< _("  -a, --no-announcements      Do not contact website for announcements\n")
-		<< _("  -b, --actions               Print all possible menu action names\n")
+		<< _("  -A, --actions               Print all possible menu action names\n")
+		<< _("  -b, --bindings              Display all current key bindings\n")
 		<< _("  -B, --bypass-plugins        Bypass all plugins in an existing session\n")
 		<< _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
 #ifndef NDEBUG
@@ -116,7 +118,8 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
 		{ "no-announcements", 0, 0, 'a' },
-		{ "actions", 0, 0, 'b' },
+		{ "actions", 0, 0, 'A' },
+		{ "bindings", 0, 0, 'b' },
 		{ "bypass-plugins", 0, 0, 'B' },
 		{ "disable-plugins", 0, 0, 'd' },
 		{ "debug", 1, 0, 'D' },
@@ -164,6 +167,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 		case 'a':
 			check_announcements = false;
+			break;
+
+		case 'A':
+			show_actions = true;
 			break;
 
 		case 'b':

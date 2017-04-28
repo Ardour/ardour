@@ -688,6 +688,21 @@ ARDOUR_UI::post_engine ()
 	 */
 
 	if (ARDOUR_COMMAND_LINE::show_key_actions) {
+		stringstream sstr;
+		Bindings::save_all_bindings_as_html (sstr);
+
+		if (sstr.str().empty()) {
+			return;
+		}
+		cout << sstr.str().c_str();
+
+		halt_connection.disconnect ();
+		AudioEngine::instance()->stop ();
+		exit (0);
+
+	}
+
+	if (ARDOUR_COMMAND_LINE::show_actions) {
 
 
 		vector<string> paths;
@@ -699,12 +714,12 @@ ARDOUR_UI::post_engine ()
 		string ver = ver_in.substr(0, ver_in.find("-"));
 
 		cout << "\n<h2>Menu actions</h2>" << endl;
-		cout << "<!-- created by running " << PROGRAM_NAME << " -b -->" << endl;
+		cout << "<!-- created by running " << PROGRAM_NAME << " -A -->" << endl;
 		cout << "<p>\n  Every single menu item in " << PROGRAM_NAME << "'s GUI is accessible by control" << endl;
 		cout << "  surfaces or scripts.\n</p>\n" << endl;
 		cout << "<p>\n  The list below shows all available values of <em>action-name</em> as of" << endl;
 		cout << "  " << PROGRAM_NAME << " " << ver << ". You can get the current list at any" << endl;
-		cout << "  time by running " << PROGRAM_NAME << " with the -b flag.\n</p>\n" << endl;
+		cout << "  time by running " << PROGRAM_NAME << " with the -A flag.\n</p>\n" << endl;
 		cout << "<table class=\"dl\">\n  <thead>" << endl;
 		cout << "      <tr><th>Action Name</th><th>Menu Name</th></tr>" << endl;
 		cout << "  </thead>\n  <tbody>" << endl;
