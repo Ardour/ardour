@@ -1249,7 +1249,7 @@ SessionDialog::recent_context_mennu (GdkEventButton *ev)
 
 	Gtk::Menu* m = manage (new Menu);
 	MenuList& items = m->items ();
-	items.push_back (MenuElem (s));
+	items.push_back (MenuElem (s, sigc::bind (sigc::hide_return (sigc::ptr_fun (&PBD::open_folder)), s)));
 	if (!is_child) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Remove session from recent list"), sigc::mem_fun (*this, &SessionDialog::recent_remove_selected)));
