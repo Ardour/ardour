@@ -1763,7 +1763,9 @@ Editor::set_selection_from_range (Location& loc)
 	selection->set (loc.start(), loc.end());
 	commit_reversible_selection_op ();
 
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+		set_mouse_mode (MouseRange, false);
+	}
 }
 
 void
@@ -2022,8 +2024,11 @@ Editor::select_range_between ()
 		return;
 	}
 
+	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
+		set_mouse_mode (MouseRange, false);
+	}
+
 	begin_reversible_selection_op (X_("Select Range Between"));
-	set_mouse_mode (MouseRange);
 	selection->set (start, end);
 	commit_reversible_selection_op ();
 }
