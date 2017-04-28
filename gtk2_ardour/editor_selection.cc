@@ -1728,7 +1728,9 @@ Editor::set_selection_from_region ()
 
 	selection->set (tvl);
 
-	set_mouse_mode (Editing::MouseRange, false);
+	if (!get_smart_mode () || !mouse_mode == Editing::MouseObject) {
+		set_mouse_mode (Editing::MouseRange, false);
+	}
 }
 
 void
