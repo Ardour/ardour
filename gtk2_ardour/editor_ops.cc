@@ -1451,6 +1451,22 @@ Editor::scroll_tracks_up_line ()
 	reset_y_origin (vertical_adjustment.get_value() - 60);
 }
 
+void
+Editor::select_topmost_track ()
+{
+	const double top_of_trackviews = vertical_adjustment.get_value();
+	for (TrackViewList::iterator t = track_views.begin(); t != track_views.end(); ++t) {
+		if ((*t)->hidden()) {
+			continue;
+		}
+		std::pair<TimeAxisView*,double> res = (*t)->covers_y_position (top_of_trackviews);
+		if (res.first) {
+			selection->set (*t);
+			break;
+		}
+	}
+}
+
 bool
 Editor::scroll_down_one_track (bool skip_child_views)
 {

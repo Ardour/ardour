@@ -394,6 +394,8 @@ public:
 	void scroll_left_half_page ();
 	void scroll_right_half_page ();
 
+	void select_topmost_track ();
+
 	void prepare_for_cleanup ();
 	void finish_cleanup ();
 
