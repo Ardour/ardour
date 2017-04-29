@@ -55,9 +55,9 @@ namespace ARDOUR {
 	class Region;
 	class Playlist;
 	class RouteGroup;
-        class Trimmable;
-        class Movable;
-        class Stripable;
+	class Trimmable;
+	class Movable;
+	class Stripable;
 }
 
 namespace Gtk {
@@ -106,7 +106,7 @@ using ARDOUR::framecnt_t;
  * change.
  */
 class PublicEditor : public Gtkmm2ext::Tabbable {
-  public:
+public:
 	PublicEditor (Gtk::Widget& content);
 	virtual ~PublicEditor ();
 
@@ -310,12 +310,12 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual framecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-        virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
-        virtual void override_visible_track_count () = 0;
+	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
+	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
-        virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
-        virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
+	virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
+	virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (framepos_t frame) = 0;
@@ -360,7 +360,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	sigc::signal<void> Realized;
 	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
 
-        static sigc::signal<void> DropDownKeys;
+	static sigc::signal<void> DropDownKeys;
 
 	struct RegionAction {
 		Glib::RefPtr<Gtk::Action> action;
@@ -419,12 +419,12 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
 
-        virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
+	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
 	virtual TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
 
-        virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
-        virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
+	virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
+	virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (framepos_t) = 0;
 
@@ -432,9 +432,9 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual TrackViewList const & get_track_views () = 0;
 
 	virtual DragManager* drags () const = 0;
-        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
-        virtual bool autoscroll_active() const = 0;
+	virtual bool autoscroll_active() const = 0;
 
 	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
 	virtual void commit_reversible_selection_op () = 0;
@@ -483,7 +483,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	Gtkmm2ext::Bindings* bindings;
 
-  protected:
+protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;

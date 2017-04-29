@@ -142,7 +142,7 @@ class VerboseCursor;
 
 class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
 {
- public:
+public:
 	Editor ();
 	~Editor ();
 
@@ -243,8 +243,8 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 		return pixel * samples_per_pixel;
 	}
 
-        double sample_to_pixel (framepos_t sample) const {
-	        return round (sample / (double) samples_per_pixel);
+	double sample_to_pixel (framepos_t sample) const {
+		return round (sample / (double) samples_per_pixel);
 	}
 
 	double sample_to_pixel_unrounded (framepos_t sample) const {
@@ -556,7 +556,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 
-  protected:
+protected:
 	void map_transport_state ();
 	void map_position_change (framepos_t);
 	void transport_looped ();
@@ -566,7 +566,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	void suspend_route_redisplay ();
 	void resume_route_redisplay ();
 
-  private:
+private:
 
 	void color_handler ();
 
@@ -1624,7 +1624,7 @@ class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARD
 	PBD::Signal0<void> EditorFreeze;
 	PBD::Signal0<void> EditorThaw;
 
-  private:
+private:
 	friend class DragManager;
 	friend class EditorRouteGroups;
 	friend class EditorRegions;
