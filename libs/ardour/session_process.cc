@@ -674,7 +674,7 @@ Session::follow_slave (pframes_t nframes)
 	}
 
 
-	if (_slave_state == Running && !non_realtime_work_pending()) {
+	if (_slave_state == Running && 0 == (post_transport_work () & ~PostTransportSpeed)) {
 		/* speed is set, we're locked, and good to go */
 		return true;
 	}

@@ -1443,7 +1443,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	static const PostTransportWork ProcessCannotProceedMask =
 		PostTransportWork (
 			PostTransportInputChange|
-			PostTransportSpeed|
 			PostTransportReverse|
 			PostTransportCurveRealloc|
 			PostTransportAudition|
