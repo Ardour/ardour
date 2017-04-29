@@ -347,6 +347,8 @@ FaderPort8::button_encoder ()
 			ZoomToSession ();
 			break;
 		case NavChannel:
+			AccessAction ("Editor", "select-topmost");
+			break;
 		case NavBank:
 			move_selected_into_view ();
 			break;
