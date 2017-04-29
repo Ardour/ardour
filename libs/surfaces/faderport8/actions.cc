@@ -409,9 +409,11 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 	switch (_ctrls.nav_mode()) {
 		case NavChannel:
 			if (neg) {
-				StepTracksUp ();
+				AccessAction ("Mixer", "scroll-left");
+				AccessAction ("Editor", "step-tracks-up");
 			} else {
-				StepTracksDown ();
+				AccessAction ("Mixer", "scroll-right");
+				AccessAction ("Editor", "step-tracks-down");
 			}
 			break;
 		case NavZoom:
