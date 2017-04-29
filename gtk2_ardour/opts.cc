@@ -88,9 +88,9 @@ print_help (const char *execname)
 		<< _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
 		<< _("  -P, --no-connect-ports      Do not connect any ports at startup\n")
 		<< _("  -S, --sync                  Draw the GUI synchronously\n")
-		<< _("  -T, --template <name>       Draw the GUI synchronously\n")
+		<< _("  -T, --template <name>       Use given template for new session\n")
 		<< _("  -U, --uuid <uuid>           Set (jack) backend UUID\n")
-		<< _("  -v, --version               Use session template\n")
+		<< _("  -v, --version               Print versoin and exit\n")
 #ifdef WINDOWS_VST_SUPPORT
 		<< _("  -V, --novst                 Disable WindowsVST support\n")
 #endif
