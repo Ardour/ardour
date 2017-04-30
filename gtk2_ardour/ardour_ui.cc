@@ -747,16 +747,16 @@ ARDOUR_UI::post_engine ()
 		string ver_in = revision;
 		string ver = ver_in.substr(0, ver_in.find("-"));
 
-		cout << "\n<h2>Menu actions</h2>" << endl;
-		cout << "<!-- created by running " << PROGRAM_NAME << " -A -->" << endl;
-		cout << "<p>\n  Every single menu item in " << PROGRAM_NAME << "'s GUI is accessible by control" << endl;
-		cout << "  surfaces or scripts.\n</p>\n" << endl;
-		cout << "<p>\n  The list below shows all available values of <em>action-name</em> as of" << endl;
-		cout << "  " << PROGRAM_NAME << " " << ver << ". You can get the current list at any" << endl;
-		cout << "  time by running " << PROGRAM_NAME << " with the -A flag.\n</p>\n" << endl;
-		cout << "<table class=\"dl\">\n  <thead>" << endl;
-		cout << "      <tr><th>Action Name</th><th>Menu Name</th></tr>" << endl;
-		cout << "  </thead>\n  <tbody>" << endl;
+		stringstream output;
+		output << "\n<h2>Menu actions</h2>" << endl;
+		output << "<p>\n  Every single menu item in " << PROGRAM_NAME << "'s GUI is accessible by control" << endl;
+		output << "  surfaces or scripts.\n</p>\n" << endl;
+		output << "<p>\n  The list below shows all available values of <em>action-name</em> as of" << endl;
+		output << "  " << PROGRAM_NAME << " " << ver << ". You can get the current list at any" << endl;
+		output << "  time by running " << PROGRAM_NAME << " with the -A flag.\n</p>\n" << endl;
+		output << "<table class=\"dl\">\n  <thead>" << endl;
+		output << "      <tr><th>Action Name</th><th>Menu Name</th></tr>" << endl;
+		output << "  </thead>\n  <tbody>" << endl;
 
 		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
 
@@ -764,10 +764,49 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator l;
 
 		for (p = paths.begin(), l = labels.begin(); p != paths.end(); ++p, ++l) {
-			cout << "	<tr><th><kbd class=\"osc\">" << (*p).substr (9, string::npos);
-			cout << "</kbd></th><td>" << *l << "</td></tr>" << endl;
+			output << "	<tr><th><kbd class=\"osc\">" << (*p).substr (9, string::npos);
+			output << "</kbd></th><td>" << *l << "</td></tr>" << endl;
 		}
-		cout << "  </tbody>\n  </table class=\"dl\">" << endl;
+		output << "  </tbody>\n  </table>" << endl;
+
+		// output this mess to a browser for easiest X-platform use
+		// it is not pretty HTML, but it works and it's main purpose
+		// is to create raw html to fit in Ardour's manual with no editing
+		gchar* file_name;
+		GError *err = NULL;
+		gint fd;
+
+		if ((fd = g_file_open_tmp ("akprintXXXXXX.html", &file_name, &err)) < 0) {
+			if (err) {
+				error << string_compose (_("Could not open temporary file to print bindings (%1)"), err->message) << endmsg;
+				g_error_free (err);
+			}
+			return;
+		}
+
+#ifdef PLATFORM_WINDOWS
+		::close (fd);
+#endif
+
+		err = NULL;
+
+		if (!g_file_set_contents (file_name, output.str().c_str(), output.str().size(), &err)) {
+#ifndef PLATFORM_WINDOWS
+			::close (fd);
+#endif
+			g_unlink (file_name);
+			if (err) {
+				error << string_compose (_("Could not save bindings to file (%1)"), err->message) << endmsg;
+				g_error_free (err);
+			}
+			return;
+		}
+
+#ifndef PLATFORM_WINDOWS
+		::close (fd);
+#endif
+
+		PBD::open_uri (string_compose ("file:///%1", file_name));
 
 		halt_connection.disconnect ();
 		AudioEngine::instance()->stop ();
