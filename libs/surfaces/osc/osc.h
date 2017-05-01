@@ -184,6 +184,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	uint32_t default_gainmode;
 	bool tick;
 	bool bank_dirty;
+	float scrub_speed;			// Current scrub speed
+	double scrub_place;			// place of play head at latest jog/scrub wheel tick
+	boost::posix_time::ptime scrub_time;	// when did the wheel move last?
 	bool global_init;
 	boost::shared_ptr<ARDOUR::Stripable> _select;	// which stripable out of /surface/stripables is gui selected
 
@@ -371,6 +374,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// pan position needs message info to send feedback
 	PATH_CALLBACK1_MSG(master_set_pan_stereo_position,f);
 
+	PATH_CALLBACK1_MSG(scrub,f);
 	PATH_CALLBACK1_MSG(set_surface_bank_size,i);
 	PATH_CALLBACK1_MSG(set_surface_strip_types,i);
 	PATH_CALLBACK1_MSG(set_surface_feedback,i);
@@ -543,6 +547,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 	int refresh_surface (lo_message msg);
 
+	int scrub (float delta, lo_message msg);
 	int master_set_gain (float dB);
 	int master_set_fader (float position);
 	int master_set_trim (float dB);

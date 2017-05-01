@@ -100,6 +100,7 @@ OSC::OSC (Session& s, uint32_t port)
 	, default_gainmode (0)
 	, tick (true)
 	, bank_dirty (false)
+	, scrub_speed (0)
 	, gui (0)
 {
 	_instance = this;
@@ -421,6 +422,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/goto_start", "f", goto_start);
 		REGISTER_CALLBACK (serv, "/goto_end", "", goto_end);
 		REGISTER_CALLBACK (serv, "/goto_end", "f", goto_end);
+		REGISTER_CALLBACK (serv, "/scrub", "f", scrub);
 		REGISTER_CALLBACK (serv, "/rewind", "", rewind);
 		REGISTER_CALLBACK (serv, "/rewind", "f", rewind);
 		REGISTER_CALLBACK (serv, "/ffwd", "", ffwd);
@@ -1747,6 +1749,52 @@ OSC::record_enabled (lo_message msg)
 	lo_send_message (get_address (msg), "/record_enabled", reply);
 
 	lo_message_free (reply);
+}
+
+int
+OSC::scrub (float delta, lo_message msg)
+{
+	if (!session) return -1;
+
+	scrub_place = session->transport_frame ();
+
+	float speed;
+
+	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+	boost::posix_time::time_duration diff = now - scrub_time;
+	if (diff.total_milliseconds() > 35) {
+		// speed 1 (or 0 if jog wheel supports touch)
+		speed = delta;
+	} else if ((diff.total_milliseconds() > 20) && (fabs(scrub_speed) == 1)) {
+		// add some hysteresis to stop excess speed jumps
+		speed = delta;
+	} else {
+		speed = (int)(delta * 2);
+	}
+	scrub_time = now;
+	if (scrub_speed == speed) {
+		// Already at that speed no change
+		return 0;
+	}
+	scrub_speed = speed;
+
+	if (speed > 0) {
+		if (speed == 1) {
+			session->request_transport_speed (.5);
+		} else {
+			session->request_transport_speed (1);
+		}
+	} else if (speed < 0) {
+		if (speed == -1) {
+			session->request_transport_speed (-.5);
+		} else {
+			session->request_transport_speed (-1);
+		}
+	} else {
+		session->request_transport_speed (0);
+	}
+
+	return 0;
 }
 
 // master and monitor calls
@@ -3561,6 +3609,18 @@ OSC::periodic (void)
 			_recalcbanks ();
 			bank_dirty = false;
 			tick = true;
+		}
+	}
+
+	if (scrub_speed != 0) {
+		// for those jog wheels that don't have 0 on release (touch), time out.
+		boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
+		boost::posix_time::time_duration diff = now - scrub_time;
+		if (diff.total_milliseconds() > 100) {
+			scrub_speed = 0;
+			session->request_transport_speed (0);
+			// locate to the place PH was at last tick
+			session->request_locate (scrub_place, false);
 		}
 	}
 
