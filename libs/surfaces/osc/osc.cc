@@ -1760,12 +1760,12 @@ OSC::scrub (float delta, lo_message msg)
 
 	float speed;
 
-	boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-	boost::posix_time::time_duration diff = now - scrub_time;
-	if (diff.total_milliseconds() > 35) {
+	int64_t now = ARDOUR::get_microseconds ();
+	int64_t diff = now - scrub_time;
+	if (diff > 35) {
 		// speed 1 (or 0 if jog wheel supports touch)
 		speed = delta;
-	} else if ((diff.total_milliseconds() > 20) && (fabs(scrub_speed) == 1)) {
+	} else if ((diff > 20) && (fabs(scrub_speed) == 1)) {
 		// add some hysteresis to stop excess speed jumps
 		speed = delta;
 	} else {
@@ -3614,9 +3614,9 @@ OSC::periodic (void)
 
 	if (scrub_speed != 0) {
 		// for those jog wheels that don't have 0 on release (touch), time out.
-		boost::posix_time::ptime now = boost::posix_time::microsec_clock::local_time();
-		boost::posix_time::time_duration diff = now - scrub_time;
-		if (diff.total_milliseconds() > 100) {
+		int64_t now = ARDOUR::get_microseconds ();
+		int64_t diff = now - scrub_time;
+		if (diff > 100) {
 			scrub_speed = 0;
 			session->request_transport_speed (0);
 			// locate to the place PH was at last tick

@@ -186,7 +186,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool bank_dirty;
 	float scrub_speed;			// Current scrub speed
 	double scrub_place;			// place of play head at latest jog/scrub wheel tick
-	boost::posix_time::ptime scrub_time;	// when did the wheel move last?
+	int64_t scrub_time;	// when did the wheel move last?
 	bool global_init;
 	boost::shared_ptr<ARDOUR::Stripable> _select;	// which stripable out of /surface/stripables is gui selected
 
