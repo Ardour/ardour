@@ -24,6 +24,7 @@
 #include <pbd/controllable.h>
 
 #include <gtkmm2ext/binding_proxy.h>
+#include <gtkmm2ext/keyboard.h>
 
 #include "pbd/i18n.h"
 
@@ -69,7 +70,7 @@ BindingProxy::set_bind_button_state (guint button, guint statemask)
 bool
 BindingProxy::is_bind_action (GdkEventButton *ev)
 {
-	return ( (ev->state & bind_statemask) && ev->button == bind_button );
+	return (Keyboard::modifier_state_equals (ev->state, bind_statemask) && ev->button == bind_button );
 }
 
 
