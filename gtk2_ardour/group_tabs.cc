@@ -749,11 +749,7 @@ GroupTabs::remove_group (RouteGroup* g)
 	RouteList rl (*(g->route_list().get()));
 	_session->remove_route_group (*g);
 
-	PresentationInfo::ChangeSuspender cs;
-
-	for (RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
-		(*i)->presentation_info().PropertyChanged (Properties::color);
-	}
+	emit_gui_changed_for_members (g);
 }
 
 /** Set the color of the tab of a route group */
@@ -761,42 +757,8 @@ void
 GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 {
 	assert (group);
-	uint32_t r, g, b, a;
-
-	UINT_TO_RGBA (color, &r, &g, &b, &a);
-
-	/* Hack to disallow black route groups; force a dark grey instead */
-	const uint32_t dark_gray = 25;
-
-	if (r < dark_gray && g < dark_gray && b < dark_gray) {
-		r = dark_gray;
-		g = dark_gray;
-		b = dark_gray;
-	}
-
-	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
-
-	char buf[64];
-
-	/* for historical reasons the colors must be stored as 16 bit color
-	 * values. Ugh.
-	 */
-
-	snprintf (buf, sizeof (buf), "%d:%d:%d", (r<<8), (g<<8), (b<<8));
-	gui_state.set_property (group_gui_id (group), "color", buf);
-
-	/* the group color change notification */
-
-	PBD::PropertyChange change;
-	change.add (Properties::color);
-	group->PropertyChanged (change);
-
-	/* This is a bit of a hack, but this might change
-	   our route's effective color, so emit gui_changed
-	   for our routes.
-	*/
-
-	emit_gui_changed_for_members (group);
+	PresentationInfo::ChangeSuspender cs;
+	group->set_rgba (color);
 }
 
 /** @return the ID string to use for the GUI state of a route group */
@@ -817,6 +779,14 @@ GroupTabs::group_color (RouteGroup* group)
 {
 	assert (group);
 
+	/* prefer libardour color, if set */
+	uint32_t rgba = group->rgba ();
+	if (rgba != 0) {
+		return rgba;
+	}
+
+	/* backwards compatibility, load old color */
+
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 	string const gui_id = group_gui_id (group);
 	bool empty;
@@ -831,14 +801,16 @@ GroupTabs::group_color (RouteGroup* group)
 
 	int r, g, b;
 
-	/* for historical reasons, colors are stored as 16 bit values.
-	 */
+	/* for historical reasons, colors are stored as 16 bit values.  */
 
 	sscanf (color.c_str(), "%d:%d:%d", &r, &g, &b);
 
 	r /= 256;
 	g /= 256;
 	b /= 256;
+
+	group->migrate_rgba (RGBA_TO_UINT (r, g, b, 255));
+	gui_state.remove_node (gui_id);
 
 	return RGBA_TO_UINT (r, g, b, 255);
 }
