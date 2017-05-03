@@ -150,6 +150,15 @@ public:
 	bool has_control_master() const;
 	bool slaved () const;
 
+	uint32_t rgba () const { return _rgba; }
+
+	/** set route-group color and notify UI about change */
+	void set_rgba (uint32_t);
+
+	/* directly set color only, used to convert old 5.x gui-object-state
+	 * to libardour color */
+	void migrate_rgba (uint32_t color) { _rgba = color; }
+
 private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
@@ -179,6 +188,8 @@ private:
 
 	void post_set (PBD::PropertyChange const &);
 	void push_to_groups ();
+
+	uint32_t _rgba;
 };
 
 } /* namespace */

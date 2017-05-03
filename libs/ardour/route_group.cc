@@ -109,6 +109,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, _rec_enable_group (new ControlGroup (RecEnableAutomation))
 	, _gain_group (new GainControlGroup ())
 	, _monitoring_group (new ControlGroup (MonitoringAutomation))
+	, _rgba (0)
 {
 	_xml_node_name = X_("RouteGroup");
 
@@ -234,6 +235,22 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 	return -1;
 }
 
+void
+RouteGroup::set_rgba (uint32_t color) {
+	_rgba = color;
+
+	PBD::PropertyChange change;
+	change.add (Properties::color);
+	PropertyChanged (change);
+
+	if (!is_color ()) {
+		return;
+	}
+
+	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+		(*i)->presentation_info().PropertyChanged (Properties::color);
+	}
+}
 
 XMLNode&
 RouteGroup::get_state ()
@@ -241,6 +258,7 @@ RouteGroup::get_state ()
 	XMLNode *node = new XMLNode ("RouteGroup");
 
 	node->set_property ("id", id());
+	node->set_property ("rgba", _rgba);
 
 	add_properties (*node);
 
@@ -266,6 +284,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 
 	set_id (node);
 	set_values (node);
+	node.get_property ("rgba", _rgba);
 
 	std::string routes;
 	if (node.get_property ("routes", routes)) {
