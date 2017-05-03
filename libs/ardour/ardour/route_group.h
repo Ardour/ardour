@@ -67,7 +67,7 @@ class Session;
  */
 class LIBARDOUR_API RouteGroup : public SessionObject
 {
-  public:
+public:
 	static void make_property_quarks();
 
 	RouteGroup (Session& s, const std::string &n);
@@ -130,7 +130,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 		changed();
 	}
 
-        bool has_subgroup() const;
+	bool has_subgroup() const;
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
@@ -150,7 +150,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool has_control_master() const;
 	bool slaved () const;
 
-  private:
+private:
 	boost::shared_ptr<RouteList> routes;
 	boost::shared_ptr<Route> subgroup_bus;
 	boost::weak_ptr<VCA> group_master;
