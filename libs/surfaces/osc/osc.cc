@@ -423,6 +423,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/goto_end", "", goto_end);
 		REGISTER_CALLBACK (serv, "/goto_end", "f", goto_end);
 		REGISTER_CALLBACK (serv, "/scrub", "f", scrub);
+		REGISTER_CALLBACK (serv, "/jog", "f", jog);
+		REGISTER_CALLBACK (serv, "/jog/mode", "f", jog_mode);
 		REGISTER_CALLBACK (serv, "/rewind", "", rewind);
 		REGISTER_CALLBACK (serv, "/rewind", "f", rewind);
 		REGISTER_CALLBACK (serv, "/ffwd", "", ffwd);
@@ -1795,6 +1797,126 @@ OSC::scrub (float delta, lo_message msg)
 	}
 
 	return 0;
+}
+
+int
+OSC::jog (float delta, lo_message msg)
+{
+	if (!session) return -1;
+
+	OSCSurface *s = get_surface(get_address (msg));
+
+	string path = "/jog/mode";
+	switch(s->jogmode)
+	{
+		case JOG  :
+			text_message (path, "Jog", get_address (msg));
+			if (delta) {
+				jump_by_seconds (delta / 5);
+			}
+			break;
+		case SCRUB:
+			text_message (path, "Scrub", get_address (msg));
+			scrub (delta, msg);
+			break;
+		case SHUTTLE:
+			text_message (path, "Shuttle", get_address (msg));
+			if (delta) {
+				double speed = get_transport_speed ();
+				set_transport_speed (speed + (delta / 8));
+			} else {
+				set_transport_speed (0);
+			}
+			break;
+		case SCROLL:
+			text_message (path, "Scroll", get_address (msg));
+			if (delta > 0) {
+				access_action ("Editor/scroll-forward");
+			} else if (delta < 0) {
+				access_action ("Editor/scroll-backward");
+			}
+			break;
+		case TRACK:
+			text_message (path, "Track", get_address (msg));
+			if (delta > 0) {
+				set_bank (s->bank + 1, msg);
+			} else if (delta < 0) {
+				set_bank (s->bank - 1, msg);
+			}
+			break;
+		case BANK:
+			text_message (path, "Bank", get_address (msg));
+			if (delta > 0) {
+				bank_up (msg);
+			} else if (delta < 0) {
+				bank_down (msg);
+			}
+			break;
+		case NUDGE:
+			text_message (path, "Nudge", get_address (msg));
+			if (delta > 0) {
+				access_action ("Common/nudge-playhead-forward");
+			} else if (delta < 0) {
+				access_action ("Common/nudge-playhead-backward");
+			}
+			break;
+		case MARKER:
+			text_message (path, "Marker", get_address (msg));
+			if (delta > 0) {
+				next_marker ();
+			} else if (delta < 0) {
+				prev_marker ();
+			}
+			break;
+		default:
+			break;
+
+	}
+	return 0;
+
+}
+
+int
+OSC::jog_mode (float mode, lo_message msg)
+{
+	if (!session) return -1;
+
+	OSCSurface *s = get_surface(get_address (msg));
+
+	switch((uint32_t)mode)
+	{
+		case JOG  :
+			s->jogmode = JOG;
+			break;
+		case SCRUB:
+			s->jogmode = SCRUB;
+			break;
+		case SHUTTLE:
+			s->jogmode = SHUTTLE;
+			break;
+		case SCROLL:
+			s->jogmode = SCROLL;
+			break;
+		case TRACK:
+			s->jogmode = TRACK;
+			break;
+		case BANK:
+			s->jogmode = BANK;
+			break;
+		case NUDGE:
+			s->jogmode = NUDGE;
+			break;
+		case MARKER:
+			s->jogmode = MARKER;
+			break;
+		default:
+			PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
+			break;
+
+	}
+	jog (0, msg);
+	return 0;
+
 }
 
 // master and monitor calls

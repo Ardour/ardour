@@ -95,6 +95,17 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		All
 	};
 
+	enum JogMode {
+		JOG,
+		SCRUB,
+		SHUTTLE,
+		SCROLL,
+		TRACK,
+		BANK,
+		NUDGE,
+		MARKER
+	};
+
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types, bool cue);
 
@@ -103,6 +114,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	public:
 		std::string remote_url;		// the url these setting belong to
 		bool no_clear;				// don't send osc clear messages on strip change
+		JogMode jogmode;			// current jogmode
 		uint32_t bank;				// current bank
 		uint32_t bank_size;			// size of banks for this surface
 		std::bitset<32> strip_types;// what strip types are a part of this bank
@@ -184,9 +196,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	uint32_t default_gainmode;
 	bool tick;
 	bool bank_dirty;
-	float scrub_speed;			// Current scrub speed
-	double scrub_place;			// place of play head at latest jog/scrub wheel tick
-	int64_t scrub_time;	// when did the wheel move last?
+	float scrub_speed;		// Current scrub speed
+	double scrub_place;		// place of play head at latest jog/scrub wheel tick
+	int64_t scrub_time;		// when did the wheel move last?
 	bool global_init;
 	boost::shared_ptr<ARDOUR::Stripable> _select;	// which stripable out of /surface/stripables is gui selected
 
@@ -375,6 +387,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(master_set_pan_stereo_position,f);
 
 	PATH_CALLBACK1_MSG(scrub,f);
+	PATH_CALLBACK1_MSG(jog,f);
+	PATH_CALLBACK1_MSG(jog_mode,f);
 	PATH_CALLBACK1_MSG(set_surface_bank_size,i);
 	PATH_CALLBACK1_MSG(set_surface_strip_types,i);
 	PATH_CALLBACK1_MSG(set_surface_feedback,i);
@@ -548,6 +562,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int refresh_surface (lo_message msg);
 
 	int scrub (float delta, lo_message msg);
+	int jog (float delta, lo_message msg);
+	int jog_mode (float mode, lo_message msg);
 	int master_set_gain (float dB);
 	int master_set_fader (float position);
 	int master_set_trim (float dB);
