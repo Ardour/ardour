@@ -347,10 +347,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		rec_enable_button->show();
 		rec_enable_button->set_controllable (t->rec_enable_control());
 
-                if (is_midi_track()) {
-                        midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
-                                                                    boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
-                }
+		if (is_midi_track()) {
+			midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
+					boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
+		}
 
 	}
 
@@ -400,9 +400,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 void
 RouteUI::polarity_changed ()
 {
-        if (!_route) {
-                return;
-        }
+	if (!_route) {
+		return;
+	}
 
 	set_invert_button_state ();
 }
@@ -1342,11 +1342,11 @@ RouteUI::mute_active_state (Session*, boost::shared_ptr<Stripable> s)
 void
 RouteUI::update_mute_display ()
 {
-        if (!_route) {
-                return;
-        }
+	if (!_route) {
+		return;
+	}
 
-        mute_button->set_active_state (mute_active_state (_session, _route));
+	mute_button->set_active_state (mute_active_state (_session, _route));
 }
 
 
@@ -1378,31 +1378,31 @@ RouteUI::blink_rec_display (bool blinkOn)
 	}
 
 	if (track()->rec_enable_control()->get_value()) {
-                switch (_session->record_status ()) {
-                case Session::Recording:
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                        break;
+		switch (_session->record_status ()) {
+			case Session::Recording:
+				rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
+				break;
 
-                case Session::Disabled:
-                case Session::Enabled:
-	                if (UIConfiguration::instance().get_blink_rec_arm()) {
-	                        rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
-	                } else {
-	                        rec_enable_button->set_active_state ( ImplicitActive );
-	                }
-                        break;
-                }
+			case Session::Disabled:
+			case Session::Enabled:
+				if (UIConfiguration::instance().get_blink_rec_arm()) {
+					rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
+				} else {
+					rec_enable_button->set_active_state ( ImplicitActive );
+				}
+				break;
+		}
 
-                if (step_edit_item) {
-                        step_edit_item->set_sensitive (false);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_sensitive (false);
+		}
 
 	} else {
 		rec_enable_button->unset_active_state ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_sensitive (true);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_sensitive (true);
+		}
 	}
 
 	check_rec_enable_sensitivity ();
@@ -1422,14 +1422,14 @@ RouteUI::build_solo_menu (void)
 	check->set_active (_route->solo_isolate_control()->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+	solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe_control()->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+	solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	//items.push_back (SeparatorElem());
@@ -1606,14 +1606,14 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
-        bool view = check->get_active();
-        bool model = _route->solo_isolate_control()->solo_isolated();
+	bool view = check->get_active();
+	bool model = _route->solo_isolate_control()->solo_isolated();
 
-        /* called AFTER the view has changed */
+	/* called AFTER the view has changed */
 
-        if (model != view) {
-	        _route->solo_isolate_control()->set_value (view ? 1.0 : 0.0, Controllable::UseGroup);
-        }
+	if (model != view) {
+		_route->solo_isolate_control()->set_value (view ? 1.0 : 0.0, Controllable::UseGroup);
+	}
 }
 
 void
@@ -1622,8 +1622,7 @@ RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 	_route->solo_safe_control()->set_value (check->get_active() ? 1.0 : 0.0, Controllable::UseGroup);
 }
 
-/** Ask the user to choose a colour, and then apply that color to my route
- */
+/** Ask the user to choose a colour, and then apply that color to my route */
 void
 RouteUI::choose_color ()
 {
@@ -2179,9 +2178,9 @@ RouteUI::invert_menu_toggled (uint32_t c)
 void
 RouteUI::set_invert_sensitive (bool yn)
 {
-        for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
-                (*b)->set_sensitive (yn);
-        }
+	for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
+		(*b)->set_sensitive (yn);
+	}
 }
 
 void
@@ -2220,9 +2219,8 @@ RouteUI::track_mode_changed (void)
 }
 
 /** @return the color that this route should use; it maybe its own,
-    or it maybe that of its route group.
-*/
-
+ *  or it maybe that of its route group.
+ */
 Gdk::Color
 RouteUI::route_color () const
 {
