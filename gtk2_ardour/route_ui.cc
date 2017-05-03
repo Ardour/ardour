@@ -629,14 +629,21 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
-				// Primary-Secondary-click: exclusively solo this track
+				/* Primary-Secondary-click: exclusively solo this track */
 
 				if (_solo_release) {
 					_solo_release->exclusive = true;
 
-					boost::shared_ptr<RouteList> routes = _session->get_routes();
+					_solo_release->routes_on.reset (new RouteList);
+					_solo_release->routes_off.reset (new RouteList);
 
-					for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+					boost::shared_ptr<RouteList> routes = _session->get_routes();
+					for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+#ifdef MIXBUS
+						if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
+							continue;
+						}
+#endif
 						if ((*i)->soloed ()) {
 							_solo_release->routes_on->push_back (*i);
 						} else {
@@ -644,6 +651,20 @@ RouteUI::solo_press(GdkEventButton* ev)
 						}
 					}
 				}
+
+				boost::shared_ptr<RouteList> rl (new RouteList);
+				boost::shared_ptr<RouteList> routes = _session->get_routes();
+				for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+#ifdef MIXBUS
+					if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
+						continue;
+					}
+#endif
+					if ((*i)->soloed ()) {
+						rl->push_back (*i);
+					}
+				}
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), false, Controllable::UseGroup);
 
 				if (Config->get_solo_control_is_listen_control()) {
 					/* ??? we need a just_one_listen() method */
@@ -723,9 +744,9 @@ bool
 RouteUI::solo_release (GdkEventButton* /*ev*/)
 {
 	if (_solo_release) {
-
 		if (_solo_release->exclusive) {
-
+			_session->set_controls (route_list_to_control_list (_solo_release->routes_off, &Stripable::solo_control), 0.0, Controllable::NoGroup);
+			_session->set_controls (route_list_to_control_list (_solo_release->routes_on, &Stripable::solo_control), 1.0, Controllable::NoGroup);
 		} else {
 			_session->set_controls (route_list_to_control_list (_solo_release->routes, &Stripable::solo_control), _solo_release->active ? 1.0 : 0.0, Controllable::UseGroup);
 		}
