@@ -107,7 +107,7 @@ MixerGroupTabs::compute_tabs () const
 }
 
 void
-MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
+MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 {
 	double const arc_radius = get_height();
 	double r, g, b, a;
@@ -127,20 +127,24 @@ MixerGroupTabs::draw_tab (cairo_t* cr, Tab const & tab) const
 	cairo_line_to (cr, tab.from, get_height());
 	cairo_fill (cr);
 
-	if (tab.group) {
-		pair<string, double> const f = Gtkmm2ext::fit_to_pixels (cr, tab.group->name(), tab.to - tab.from - arc_radius * 2);
+	if (tab.group && (tab.to - tab.from) > arc_radius) {
+		int text_width, text_height;
 
-		cairo_text_extents_t ext;
-		cairo_text_extents (cr, tab.group->name().c_str(), &ext);
+		Glib::RefPtr<Pango::Layout> layout;
+		layout = Pango::Layout::create (get_pango_context ());
+		layout->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
+
+		layout->set_text (tab.group->name ());
+		layout->set_width ((tab.to - tab.from - arc_radius) * PANGO_SCALE);
+		layout->get_pixel_size (text_width, text_height);
+
+		cairo_move_to (cr, tab.from + (tab.to - tab.from - text_width) * .5, (get_height () - text_height) * .5);
 
 		ArdourCanvas::Color c = ArdourCanvas::contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
 		ArdourCanvas::color_to_rgba (c, r, g, b, a);
-
 		cairo_set_source_rgb (cr, r, g, b);
-		cairo_move_to (cr, tab.from + (tab.to - tab.from - f.second) / 2, get_height() - ext.height / 2);
-		cairo_save (cr);
-		cairo_show_text (cr, f.first.c_str());
-		cairo_restore (cr);
+
+		pango_cairo_show_layout (cr, layout->gobj ());
 	}
 }
 

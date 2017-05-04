@@ -81,7 +81,7 @@ private:
 	 *  @param cr Cairo context.
 	 *  @param t Tab.
 	 */
-	virtual void draw_tab (cairo_t* cr, Tab const & t) const = 0;
+	virtual void draw_tab (cairo_t* cr, Tab const & t) = 0;
 
 	/** @param x x coordinate
 	 *  @param y y coordinate

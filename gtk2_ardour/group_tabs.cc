@@ -86,9 +86,8 @@ GroupTabs::set_session (Session* s)
 void
 GroupTabs::on_size_request (Gtk::Requisition *req)
 {
-	/* Use a dummy, small width and the actual height that we want */
-	req->width = 16;
-	req->height = 16;
+	req->width = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
+	req->height = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
 }
 
 bool

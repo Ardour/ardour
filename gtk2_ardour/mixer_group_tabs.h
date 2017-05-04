@@ -31,7 +31,7 @@ public:
 
 private:
 	std::list<Tab> compute_tabs () const;
-	void draw_tab (cairo_t *, Tab const &) const;
+	void draw_tab (cairo_t *, Tab const &);
 	double primary_coordinate (double, double) const;
 	ARDOUR::RouteList routes_for_tab (Tab const *) const;
 	double extent () const {
