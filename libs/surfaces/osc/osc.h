@@ -100,10 +100,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		NUDGE,
 		SCRUB,
 		SHUTTLE,
-		MARKER
+		MARKER,
 		SCROLL,
 		TRACK,
-		BANK,
+		BANK
 	};
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
