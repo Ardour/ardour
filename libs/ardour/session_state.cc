@@ -1190,8 +1190,6 @@ Session::state (bool full_state)
 		node->set_property ("end-is-free", _session_range_end_is_free);
 	}
 
-	node->set_property ("end-is-free", _session_range_end_is_free);
-
 	/* save the ID counter */
 
 	node->set_property ("id-counter", ID::counter());
