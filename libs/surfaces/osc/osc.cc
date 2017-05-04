@@ -1335,7 +1335,8 @@ OSC::clear_devices ()
 	for (CueObservers::iterator x = cue_observers.begin(); x != cue_observers.end();) {
 		OSCCueObserver* co;
 		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
-			delete co;
+			delete *x;
+			x = cue_observers.erase (x);
 		} else {
 			++x;
 		}
@@ -4034,18 +4035,24 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/connect", 12)) {
-		// switch to next Aux bus
-		cue_set (0, msg);
+		// Connect to default Aux bus
+		if (argv[0]->i) {
+			cue_set (1, msg);
+		}
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/next_aux", 13)) {
 		// switch to next Aux bus
-		cue_next (msg);
+		if (argv[0]->i) {
+			cue_next (msg);
+		}
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/previous_aux", 17)) {
 		// switch to previous Aux bus
-		cue_previous (msg);
+		if (argv[0]->i) {
+			cue_previous (msg);
+		}
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
@@ -4067,18 +4074,14 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 		ret = 0;
 	}
 
-	if ((ret && _debugmode == Unhandled)) {
-		debugmsg (_("Unhandled OSC cue message"), path, types, argv, argc);
-	} else if ((!ret && _debugmode == All)) {
-		debugmsg (_("OSC cue"), path, types, argv, argc);
-	}
-
 	return ret;
 }
 
 int
 OSC::cue_set (uint32_t aux, lo_message msg)
 {
+	std::cout << "cue set\n";
+
 	return _cue_set (aux, get_address (msg));
 }
 
@@ -4091,12 +4094,19 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	s->feedback = 0;
 	s->gainmode = 1;
 	s->cue = true;
-	s->aux = aux;
 	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 
 	s->nstrips = s->strips.size();
+
+	if (aux < 1) {
+		aux = 1;
+	} else if (aux > s->nstrips) {
+		aux = s->nstrips;
+	}
+	s->aux = aux;
+
 	// get rid of any old CueObsevers for this address
-	cueobserver_connections.drop_connections ();
+	//cueobserver_connections.drop_connections ();
 	CueObservers::iterator x;
 	for (x = cue_observers.begin(); x != cue_observers.end();) {
 
@@ -4121,6 +4131,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	for (uint32_t n = 0; n < s->nstrips; ++n) {
 		boost::shared_ptr<Stripable> stp = s->strips[n];
 		if (stp) {
+			std::cout << "Aux: " << stp->name() << " number: " << n+1 << " requested: " << aux << "\n";
 			text_message (string_compose ("/cue/name/%1", n+1), stp->name(), addr);
 			if (aux == n+1) {
 				// aux must be at least one
@@ -4130,6 +4141,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 				// make a list of stripables with sends that go to this bus
 				s->sends = cue_get_sorted_stripables(stp, aux, addr);
 				// start cue observer
+				std::cout << "starting cue obsever\n";
 				OSCCueObserver* co = new OSCCueObserver (stp, s->sends, addr);
 				cue_observers.push_back (co);
 			}
@@ -4144,6 +4156,14 @@ int
 OSC::cue_next (lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
+
+	std::cout << "cue next\n";
+	if (!s->cue) {
+	std::cout << "cue next init\n";
+		cue_set (1, msg);
+		return 0;
+	}
+	std::cout << "cue next no init\n";
 	if (s->aux < s->nstrips) {
 		cue_set (s->aux + 1, msg);
 	} else {
@@ -4156,6 +4176,10 @@ int
 OSC::cue_previous (lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
+	if (!s->cue) {
+		cue_set (1, msg);
+		return 0;
+	}
 	if (s->aux > 1) {
 		cue_set (s->aux - 1, msg);
 	}
