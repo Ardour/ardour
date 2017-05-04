@@ -1187,6 +1187,7 @@ Session::state (bool full_state)
 			child = node->add_child ("Path");
 			child->add_content (p);
 		}
+		node->set_property ("end-is-free", _session_range_end_is_free);
 	}
 
 	node->set_property ("end-is-free", _session_range_end_is_free);
