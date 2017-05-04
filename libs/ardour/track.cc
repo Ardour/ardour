@@ -164,6 +164,14 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	/* convert old 3001 state */
+	std::string monitoring;
+	if (node.get_property (X_("monitoring"), monitoring)) {
+		XMLNode mon_node ("backwardscompat");
+		mon_node.set_property (X_("monitoring"), monitoring);
+		_monitoring_control->set_state (mon_node, version);
+	}
+
 	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
 		_saved_meter_point = _meter_point;
 	}
