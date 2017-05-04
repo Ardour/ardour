@@ -27,6 +27,7 @@
 #include "midi_time_axis.h"
 #include "midi_streamview.h"
 #include "public_editor.h"
+#include "ui_config.h"
 
 using namespace std;
 using namespace Gtkmm2ext;
@@ -661,7 +662,7 @@ PianoRollHeader::invalidate_note_range(int lowest, int highest)
 void
 PianoRollHeader::on_size_request(Gtk::Requisition* r)
 {
-	r->width = 20;
+	r->width = std::max (20.f, rintf (20.f * UIConfiguration::instance().get_ui_scale()));
 }
 
 void

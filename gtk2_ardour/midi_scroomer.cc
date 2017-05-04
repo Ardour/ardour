@@ -16,11 +16,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "midi_scroomer.h"
-
+#include <iostream>
 #include <cairomm/context.h>
 
-#include <iostream>
+#include "midi_scroomer.h"
+#include "ui_config.h"
 
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -164,5 +164,5 @@ MidiScroomer::get_colors(double color[], Component comp)
 void
 MidiScroomer::on_size_request(Gtk::Requisition* r)
 {
-	r->width = 12;
+	r->width = std::max (12.f, rintf (12.f * UIConfiguration::instance().get_ui_scale()));
 }
