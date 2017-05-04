@@ -246,7 +246,8 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double end_bpm, d
 	tap_tempo_button.show ();
 	get_vbox()->set_spacing (6);
 	get_vbox()->pack_end (tap_tempo_button);
-	bpm_spinner.grab_focus ();
+	tap_tempo_button.can_focus ();
+	tap_tempo_button.grab_focus ();
 
 	set_name ("MetricDialog");
 
@@ -263,6 +264,7 @@ TempoDialog::init (const Timecode::BBT_Time& when, double bpm, double end_bpm, d
 	tempo_type.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::tempo_type_change));
 	lock_style.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::lock_style_change));
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
+	tap_tempo_button.signal_key_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_key_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
 
 	tempo_type_change();
@@ -412,7 +414,27 @@ TempoDialog::lock_style_change ()
 }
 
 bool
-TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
+TempoDialog::tap_tempo_key_press (GdkEventKey*)
+{
+	tap_tempo ();
+	return false;
+}
+
+bool
+TempoDialog::tap_tempo_button_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return true;
+	}
+	if (ev->button != 1) {
+		return true;
+	}
+	tap_tempo ();
+	return false; // grab focus
+}
+
+void
+TempoDialog::tap_tempo ()
 {
 	double t;
 
@@ -446,8 +468,6 @@ TempoDialog::tap_tempo_button_press (GdkEventButton *ev)
 	}
 	tap_count++;
 	last_t = t;
-
-	return true;
 }
 
 bool

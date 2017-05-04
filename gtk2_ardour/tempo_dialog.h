@@ -58,8 +58,11 @@ private:
 	void pulse_change ();
 	void tempo_type_change ();
 	void lock_style_change ();
-	bool tap_tempo_button_press (GdkEventButton* );
+	bool tap_tempo_key_press (GdkEventKey*);
+	bool tap_tempo_button_press (GdkEventButton*);
 	bool tap_tempo_focus_out (GdkEventFocus* );
+
+	void tap_tempo ();
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
