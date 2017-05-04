@@ -97,13 +97,13 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	enum JogMode {
 		JOG,
+		NUDGE,
 		SCRUB,
 		SHUTTLE,
+		MARKER
 		SCROLL,
 		TRACK,
 		BANK,
-		NUDGE,
-		MARKER
 	};
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
