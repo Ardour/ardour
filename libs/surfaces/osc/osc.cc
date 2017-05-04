@@ -1806,7 +1806,7 @@ OSC::jog (float delta, lo_message msg)
 
 	OSCSurface *s = get_surface(get_address (msg));
 
-	string path = "/jog/mode";
+	string path = "/jog/mode/name";
 	switch(s->jogmode)
 	{
 		case JOG  :
@@ -1912,6 +1912,10 @@ OSC::jog_mode (float mode, lo_message msg)
 		default:
 			PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
 			break;
+	lo_message reply = lo_message_new ();
+	lo_message_add_int32 (reply, s->jogmode);
+	lo_send_message (get_address(msg), "/jog/mode", reply);
+	lo_message_free (reply);
 
 	}
 	jog (0, msg);
