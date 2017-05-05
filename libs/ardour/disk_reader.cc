@@ -132,7 +132,7 @@ XMLNode&
 DiskReader::state (bool full)
 {
 	XMLNode& node (DiskIOProcessor::state (full));
-	node.add_property(X_("type"), X_("diskreader"));
+	node.set_property(X_("type"), X_("diskreader"));
 	return node;
 }
 
