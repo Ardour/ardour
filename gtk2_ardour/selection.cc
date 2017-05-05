@@ -1640,37 +1640,21 @@ Selection::core_selection_changed (PropertyChange const & what_changed)
 
 	tracks.clear (); // clear stage for whatever tracks are now selected (maybe none)
 
-	TrackViewList const & tvl (editor->get_track_views ());
+	CoreSelection::StripableAutomationControls sac;
+	selection.get_stripables (sac);
 
-	for (TrackViewList::const_iterator x = tvl.begin(); x != tvl.end(); ++x) {
-
-		boost::shared_ptr<Stripable> s = (*x)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*x)->control ();
-
-		if (!s) {
-			continue;
+	for (CoreSelection::StripableAutomationControls::const_iterator i = sac.begin(); i != sac.end(); ++i) {
+		AxisView* av;
+		TimeAxisView* tav;
+		if ((*i).controllable) {
+			av = editor->axis_view_by_control ((*i).controllable);
+		} else {
+			av = editor->axis_view_by_stripable ((*i).stripable);
 		}
 
-		TimeAxisView* tav = editor->time_axis_view_from_stripable (s);
-
-		if (!tav) {
-			continue;
-		}
-
-		if ((c && selection.selected (c)) || selection.selected (s)) {
+		tav = dynamic_cast<TimeAxisView*>(av);
+		if (tav) {
 			tracks.push_back (tav);
 		}
-
-		TimeAxisView::Children kids = tav->get_child_list ();
-
-		for (TimeAxisView::Children::iterator j = kids.begin(); j != kids.end(); ++j) {
-			s = (*j)->stripable ();
-			c = (*j)->control ();
-
-			if ((c && selection.selected (c)) || selection.selected (s)) {
-				tracks.push_back ((*j).get());
-			}
-		}
-
 	}
 }
