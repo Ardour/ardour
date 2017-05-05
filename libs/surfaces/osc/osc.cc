@@ -4031,21 +4031,21 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	}
 	else if (!strncmp (path, "/cue/connect", 12)) {
 		// Connect to default Aux bus
-		if (argv[0]->i) {
+		if ((!argc) || argv[0]->i) {
 			cue_set (1, msg);
 		}
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/next_aux", 13)) {
 		// switch to next Aux bus
-		if (argv[0]->i) {
+		if ((!argc) || argv[0]->i) {
 			cue_next (msg);
 		}
 		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/previous_aux", 17)) {
 		// switch to previous Aux bus
-		if (argv[0]->i) {
+		if ((!argc) || argv[0]->i) {
 			cue_previous (msg);
 		}
 		ret = 0;
