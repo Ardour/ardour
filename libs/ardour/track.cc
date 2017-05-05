@@ -78,11 +78,11 @@ Track::init ()
 
         _disk_reader.reset (new DiskReader (_session, name(), dflags));
         _disk_reader->set_block_size (_session.get_block_size ());
-        _disk_reader->set_route (shared_from_this());
+        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 
         _disk_writer.reset (new DiskWriter (_session, name(), dflags));
         _disk_writer->set_block_size (_session.get_block_size ());
-        _disk_writer->set_route (shared_from_this());
+        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 
         use_new_playlist ();
 
@@ -122,11 +122,11 @@ Track::state (bool full)
 	XMLNode& root (Route::state (full));
 
 	if (_playlists[DataType::AUDIO]) {
-		root.add_property (X_("audio-playlist"), _playlists[DataType::AUDIO]->id().to_s());
+		root.set_property (X_("audio-playlist"), _playlists[DataType::AUDIO]->id().to_s());
 	}
 
 	if (_playlists[DataType::MIDI]) {
-		root.add_property (X_("midi-playlist"), _playlists[DataType::MIDI]->id().to_s());
+		root.set_property (X_("midi-playlist"), _playlists[DataType::MIDI]->id().to_s());
 	}
 
 	root.add_child_nocopy (_monitoring_control->get_state ());
@@ -154,12 +154,14 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property (X_("audio-playlist")))) {
-		find_and_use_playlist (DataType::AUDIO, PBD::ID (prop->value()));
+	std::string playlist_id;
+
+	if (node.get_property (X_("audio-playlist"), playlist_id)) {
+		find_and_use_playlist (DataType::AUDIO, PBD::ID (playlist_id));
 	}
 
-	if ((prop = node.property (X_("midi-playlist")))) {
-		find_and_use_playlist (DataType::MIDI, PBD::ID (prop->value()));
+	if (node.get_property (X_("midi-playlist"), playlist_id)) {
+		find_and_use_playlist (DataType::MIDI, PBD::ID (playlist_id));
 	}
 
 	XMLNodeList nlist = node.children();
