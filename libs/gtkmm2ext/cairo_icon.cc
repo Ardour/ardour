@@ -48,9 +48,8 @@ CairoIcon::set_fg (uint32_t color)
 void
 CairoIcon::render (cairo_t* cr , cairo_rectangle_t* area)
 {
-	const double scale = UI::instance()->ui_scale;
-	int width = get_width() * scale;
-	int height = get_height () * scale;
+	int width = get_width();
+	int height = get_height ();
 
 	ArdourIcon::render (cr, icon_type, width, height, Off, fg);
 }

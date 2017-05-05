@@ -166,7 +166,6 @@ public:
 	sigc::signal<void> theme_changed;
 
 	static bool just_hide_it (GdkEventAny *, Gtk::Window *);
-	static float ui_scale;
 
 	Gtkmm2ext::Bindings* global_bindings;
 
