@@ -294,6 +294,10 @@ FaderPort8::button_mute_clear ()
 		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
 			continue;
 		}
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
+		if (r && !r->active()) {
+			continue;
+		}
 		boost::shared_ptr<AutomationControl> ac = (*i)->mute_control();
 		if (ac && ac->get_value () > 0) {
 			cl->push_back (ac);

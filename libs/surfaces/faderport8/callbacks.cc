@@ -197,9 +197,14 @@ void
 FaderPort8::notify_mute_changed ()
 {
 	bool muted = false;
-	boost::shared_ptr<RouteList> rl = session->get_routes();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	StripableList all;
+	session->get_stripables (all);
+	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
+			continue;
+		}
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
+		if (r && !r->active()) {
 			continue;
 		}
 		boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
