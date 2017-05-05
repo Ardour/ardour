@@ -5254,6 +5254,14 @@ Editor::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 		if ((*j)->control() == c) {
 			return *j;
 		}
+
+		TimeAxisView::Children kids = (*j)->get_child_list ();
+
+		for (TimeAxisView::Children::iterator k = kids.begin(); k != kids.end(); ++k) {
+			if ((*k)->control() == c) {
+				return (*k).get();
+			}
+		}
 	}
 
 	return 0;
