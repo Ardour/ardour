@@ -94,6 +94,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, ipmidi_base_port_adjustment (_cp.ipmidi_base(), 0, 32767, 1, 1000)
 	, discover_button (_("Discover Mackie Devices"))
 	, _device_dependent_widget (0)
+	, _ignore_profile_changed (false)
 	, ignore_active_change (false)
 {
 	Gtk::Label* l;
@@ -805,6 +806,10 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Glib
 				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, i->second);
 			}
 
+			_ignore_profile_changed = true;
+			_profile_combo.set_active_text ( _cp.device_profile().name() );
+			_ignore_profile_changed = false;
+
 		} else {
 			std::cerr << "no such action\n";
 		}
@@ -834,11 +839,13 @@ MackieControlProtocolGUI::device_changed ()
 void
 MackieControlProtocolGUI::profile_combo_changed ()
 {
-	string profile = _profile_combo.get_active_text();
+	if (!_ignore_profile_changed) {
+		string profile = _profile_combo.get_active_text();
 
-	_cp.set_profile (profile);
+		_cp.set_profile (profile);
 
-	refresh_function_key_editor ();
+		refresh_function_key_editor ();
+	}
 }
 
 void
