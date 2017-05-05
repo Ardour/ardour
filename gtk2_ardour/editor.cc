@@ -491,7 +491,7 @@ Editor::Editor ()
 	location_loop_color = UIConfiguration::instance().color ("location loop");
 	location_punch_color = UIConfiguration::instance().color ("location punch");
 
-	timebar_height = std::max(12., ceil (15. * ARDOUR_UI::ui_scale));
+	timebar_height = std::max (12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
 
 	TimeAxisView::setup_sizes ();
 	ArdourMarker::setup_sizes (timebar_height);
