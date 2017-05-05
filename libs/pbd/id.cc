@@ -34,8 +34,9 @@ uint64_t ID::_counter = 0;
 void
 ID::init ()
 {
-	if (!counter_lock)
+	if (!counter_lock) {
 		counter_lock = new Glib::Threads::Mutex;
+	}
 }
 
 ID::ID ()
@@ -50,14 +51,21 @@ ID::ID (const ID& other)
 
 ID::ID (string str)
 {
+	/* danger, will robinson: could result in non-unique ID */
 	string_assign (str);
+}
+
+ID::ID (uint64_t n)
+{
+	/* danger, will robinson: could result in non-unique ID */
+	_id = n;
 }
 
 void
 ID::reset ()
 {
 	Glib::Threads::Mutex::Lock lm (*counter_lock);
-	_id = _counter++;
+	_id = ++_counter;
 }
 
 bool

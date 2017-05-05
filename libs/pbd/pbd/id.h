@@ -35,6 +35,7 @@ class LIBPBD_API ID {
 	ID ();
 	ID (std::string);
 	ID (const ID&);
+	ID (uint64_t);
 
 	void reset ();
 
@@ -47,6 +48,9 @@ class LIBPBD_API ID {
 	}
 
 	bool operator== (const std::string&) const;
+	bool operator== (uint64_t n) const {
+		return _id == n;
+	}
 
 	ID& operator= (std::string);
 	ID& operator= (const ID&);
