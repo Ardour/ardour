@@ -836,6 +836,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* session-wide solo/mute/rec-enable */
 
+	bool muted() const;
+	std::vector<boost::weak_ptr<AutomationControl> > cancel_all_mute ();
+
 	bool soloing() const { return _non_soloed_outs_muted; }
 	bool listening() const { return _listen_cnt > 0; }
 	bool solo_isolated() const { return _solo_isolated_cnt > 0; }

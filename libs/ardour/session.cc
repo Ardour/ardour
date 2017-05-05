@@ -4174,6 +4174,59 @@ Session::update_route_solo_state (boost::shared_ptr<RouteList> r)
 	set_dirty();
 }
 
+bool
+Session::muted () const
+{
+	// TODO consider caching the value on every MuteChanged signal,
+	// Note that API users may also subscribe to MuteChanged and hence
+	// this method needs to be called first.
+	bool muted = false;
+	StripableList all;
+	get_stripables (all);
+	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
+		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
+			continue;
+		}
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
+		if (r && !r->active()) {
+			continue;
+		}
+		boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
+		if (mc && mc->muted ()) {
+			muted = true;
+			break;
+		}
+	}
+	return muted;
+}
+
+std::vector<boost::weak_ptr<AutomationControl> >
+Session::cancel_all_mute ()
+{
+	StripableList all;
+	get_stripables (all);
+	std::vector<boost::weak_ptr<AutomationControl> > muted;
+	boost::shared_ptr<ControlList> cl (new ControlList);
+	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
+		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
+			continue;
+		}
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (*i);
+		if (r && !r->active()) {
+			continue;
+		}
+		boost::shared_ptr<AutomationControl> ac = (*i)->mute_control();
+		if (ac && ac->get_value () > 0) {
+			cl->push_back (ac);
+			muted.push_back (boost::weak_ptr<AutomationControl>(ac));
+		}
+	}
+	if (!cl->empty ()) {
+		set_controls (cl, 0.0, PBD::Controllable::UseGroup);
+	}
+	return muted;
+}
+
 void
 Session::get_stripables (StripableList& sl) const
 {
