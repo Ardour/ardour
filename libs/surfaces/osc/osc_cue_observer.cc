@@ -38,7 +38,6 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 	, _strip (s)
 	, tick_enable (false)
 {
-	std::cout << "entered observer\n";
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
@@ -48,12 +47,10 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 	send_change_message ("/cue/mute", 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
-	std::cout << "observer past gain timeout for aux\n";
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
 	send_gain_message (0, _strip->gain_control());
 
 	send_init ();
-	std::cout << "observer past send init\n";
 
 	tick_enable = true;
 	tick ();
