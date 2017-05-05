@@ -25,9 +25,11 @@
 #include <string>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/signals.h"
 
+#include "ardour/automatable.h"
 #include "ardour/presentation_info.h"
 #include "ardour/session_object.h"
 #include "ardour/libardour_visibility.h"
@@ -56,10 +58,13 @@ class RecordSafeControl;
  * and behaviour of the object.
  */
 
-class LIBARDOUR_API Stripable : public SessionObject {
-   public:
+class LIBARDOUR_API Stripable : public SessionObject,
+                                public Automatable,
+                                public boost::enable_shared_from_this<Stripable>
+{
+  public:
 	Stripable (Session& session, std::string const & name, PresentationInfo const &);
-	virtual ~Stripable () {}
+	virtual ~Stripable ();
 
 	/* XXX
 	   midi on/off
@@ -72,7 +77,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	int set_state (XMLNode const&, int);
 
 	bool is_hidden() const { return _presentation_info.flags() & PresentationInfo::Hidden; }
-	bool is_selected() const { return _presentation_info.flags() & PresentationInfo::Selected; }
+	bool is_selected() const;
 
 	PresentationInfo const & presentation_info () const { return _presentation_info; }
 	PresentationInfo& presentation_info () { return _presentation_info; }

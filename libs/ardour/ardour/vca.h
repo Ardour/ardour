@@ -28,7 +28,6 @@
 #include "pbd/controllable.h"
 #include "pbd/statefuldestructible.h"
 
-#include "ardour/automatable.h"
 #include "ardour/muteable.h"
 #include "ardour/monitorable.h"
 #include "ardour/recordable.h"
@@ -47,10 +46,9 @@ class MonitorControl;
 class LIBARDOUR_API VCA : public Stripable,
                           public Soloable,
                           public Muteable,
-                          public Automatable,
                           public Recordable,
-                          public Monitorable,
-                          public boost::enable_shared_from_this<VCA> {
+                          public Monitorable
+{
   public:
 	VCA (Session& session,  int32_t num, const std::string& name);
 	~VCA();

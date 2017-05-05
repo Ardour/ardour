@@ -335,7 +335,7 @@ MackieControlProtocol::get_sorted_stripables()
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
-			if (s->presentation_info().selected() && !s->presentation_info().hidden()) {
+			if (s->is_selected() && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -2038,7 +2038,7 @@ MackieControlProtocol::select_range (uint32_t pressed)
 		return;
 	}
 
-	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->presentation_info().selected()) {
+	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->is_selected()) {
 		/* cancel selection for one and only selected stripable */
 		ToggleStripableSelection (stripables.front());
 	} else {

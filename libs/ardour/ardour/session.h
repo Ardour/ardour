@@ -114,6 +114,7 @@ class Bundle;
 class Butler;
 class Click;
 class ControllableDescriptor;
+class CoreSelection;
 class Diskstream;
 class ExportHandler;
 class ExportStatus;
@@ -289,6 +290,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return routes.reader ();
 	}
 
+	CoreSelection& selection () { return *_selection; }
+
 	/* because the set of Stripables consists of objects managed
 	 * independently, in multiple containers within the Session (or objects
 	 * owned by the session), we fill out a list in-place rather than
@@ -323,6 +326,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool io_name_is_legal (const std::string&) const;
 	boost::shared_ptr<Route> route_by_name (std::string) const;
 	boost::shared_ptr<Route> route_by_id (PBD::ID) const;
+	boost::shared_ptr<Stripable> stripable_by_id (PBD::ID) const;
 	boost::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
 	boost::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
 	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
@@ -1060,6 +1064,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
 	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
+	boost::shared_ptr<AutomationControl> automation_control_by_id (const PBD::ID&);
 	boost::shared_ptr<PBD::Controllable> controllable_by_descriptor (const ARDOUR::ControllableDescriptor&);
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
@@ -2088,6 +2093,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
 	void rewire_midi_selection_ports ();
 	boost::weak_ptr<MidiTrack> current_midi_target;
+
+	CoreSelection* _selection;
 };
 
 

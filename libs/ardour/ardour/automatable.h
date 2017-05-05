@@ -54,6 +54,7 @@ public:
 
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
+	boost::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;
 	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
 		return automation_control (id, false);
 	}

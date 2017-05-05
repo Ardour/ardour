@@ -509,6 +509,21 @@ Automatable::control_factory(const Evoral::Parameter& param)
 }
 
 boost::shared_ptr<AutomationControl>
+Automatable::automation_control (PBD::ID const & id) const
+{
+	Controls::const_iterator li;
+
+	for (li = _controls.begin(); li != _controls.end(); ++li) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (li->second);
+		if (ac && (ac->id() == id)) {
+			return ac;
+		}
+	}
+
+	return boost::shared_ptr<AutomationControl>();
+}
+
+boost::shared_ptr<AutomationControl>
 Automatable::automation_control (const Evoral::Parameter& id, bool create)
 {
 	return boost::dynamic_pointer_cast<AutomationControl>(Evoral::ControlSet::control(id, create));

@@ -89,7 +89,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	: Stripable (sess, name, PresentationInfo (flag))
 	, GraphNode (sess._process_graph)
 	, Muteable (sess, name)
-	, Automatable (sess)
 	, _active (true)
 	, _signal_latency (0)
 	, _signal_latency_at_amp_position (0)
@@ -121,7 +120,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 
 boost::weak_ptr<Route>
 Route::weakroute () {
-	return boost::weak_ptr<Route> (shared_from_this ());
+	return boost::weak_ptr<Route> (boost::dynamic_pointer_cast<Route> (shared_from_this ()));
 }
 
 int
@@ -970,7 +969,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		flags &= mask;
 
 		if (flags != None) {
-			boost::optional<int> rv = PluginSetup (shared_from_this (), pi, flags);  /* EMIT SIGNAL */
+			boost::optional<int> rv = PluginSetup (boost::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
 			int mode = rv.get_value_or (0);
 			switch (mode & 3) {
 				case 1:
@@ -3283,13 +3282,13 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<Route> other, bool* 
 bool
 Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* via_send_only)
 {
-	return _session._current_route_graph.has (shared_from_this (), other, via_send_only);
+	return _session._current_route_graph.has (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other, via_send_only);
 }
 
 bool
 Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 {
-	return _session._current_route_graph.feeds (shared_from_this (), other);
+	return _session._current_route_graph.feeds (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other);
 }
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
@@ -3338,7 +3337,7 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 					continue;
 				}
 				bool sends_only;
-				bool does_feed = (*i)->direct_feeds_according_to_reality (shared_from_this(), &sends_only);
+				bool does_feed = (*i)->direct_feeds_according_to_reality (boost::dynamic_pointer_cast<Route> (shared_from_this()), &sends_only);
 				if (does_feed && !sends_only) {
 					if ((*i)->soloed()) {
 						++sbou;
@@ -3452,7 +3451,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 				_solo_control->mod_solo_by_others_downstream (delta);
 				// Session::route_solo_changed() does not propagate indirect solo-changes
 				// propagate upstream to tracks
-				boost::shared_ptr<Route> shared_this = shared_from_this();
+				boost::shared_ptr<Route> shared_this = boost::dynamic_pointer_cast<Route> (shared_from_this());
 				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 					if ((*i).get() == this || !can_solo()) {
 						continue;

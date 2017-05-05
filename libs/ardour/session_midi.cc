@@ -736,7 +736,7 @@ Session::midi_track_presentation_info_changed (PropertyChange const& what_change
 
 	boost::shared_ptr<MidiTrack> new_midi_target (mt.lock ());
 
-	if (new_midi_target->presentation_info().selected()) {
+	if (new_midi_target->is_selected()) {
 		rewire_selected_midi (new_midi_target);
 	}
 }

@@ -3998,17 +3998,13 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 						sorted.push_back (s);
 					}
 				}
-			} else
-			if (types[3] && (s->presentation_info().flags() & PresentationInfo::MidiBus)) {
+			} else if (types[3] && (s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 				sorted.push_back (s);
-			} else
-			if (types[4] && (s->presentation_info().flags() & PresentationInfo::VCA)) {
+			} else if (types[4] && (s->presentation_info().flags() & PresentationInfo::VCA)) {
 				sorted.push_back (s);
-			} else
-			if (types[8] && (s->presentation_info().flags() & PresentationInfo::Selected)) {
+			} else if (types[8] && (s->is_selected())) {
 				sorted.push_back (s);
-			} else
-			if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
+			} else if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 				sorted.push_back (s);
 			}
 		}

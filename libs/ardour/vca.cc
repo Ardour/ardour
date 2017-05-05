@@ -70,7 +70,6 @@ VCA::get_next_vca_number ()
 VCA::VCA (Session& s, int32_t num, const string& name)
 	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
-	, Automatable (s)
 	, _number (num)
 	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 {

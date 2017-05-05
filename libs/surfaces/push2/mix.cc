@@ -448,7 +448,7 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 	if (what_changed.contains (Properties::color)) {
 		lower_backgrounds[which]->set_fill_color (stripable[which]->presentation_info().color());
 
-		if (stripable[which]->presentation_info().selected()) {
+		if (stripable[which]->is_selected()) {
 			lower_text[which]->set_fill_color (contrasting_text_color (stripable[which]->presentation_info().color()));
 			/* might not be a MIDI track, in which case this will
 			   do nothing
@@ -467,7 +467,7 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 			return;
 		}
 
-		if (stripable[which]->presentation_info().selected()) {
+		if (stripable[which]->is_selected()) {
 			show_selection (which);
 		} else {
 			hide_selection (which);
@@ -581,7 +581,7 @@ MixLayout::switch_bank (uint32_t base)
 			stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
 
-			if (stripable[n]->presentation_info().selected()) {
+			if (stripable[n]->is_selected()) {
 				show_selection (n);
 			} else {
 				hide_selection (n);
@@ -671,7 +671,7 @@ MixLayout::button_select_release ()
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			if (stripable[n]->presentation_info().selected()) {
+			if (stripable[n]->is_selected()) {
 					selected = n;
 					break;
 			}

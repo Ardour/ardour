@@ -194,6 +194,7 @@ libardour_sources = [
         'rb_effect.cc',
         'scene_change.cc',
         'search_paths.cc',
+        'selection.cc',
         'send.cc',
         'session.cc',
         'session_butler.cc',

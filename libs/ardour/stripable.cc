@@ -21,12 +21,14 @@
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
+#include "pbd/i18n.h"
+
 
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/session.h"
+#include "ardour/selection.h"
 #include "ardour/stripable.h"
-
-#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -34,9 +36,15 @@ using std::string;
 
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
+	, Automatable (s)
 	, _presentation_info (pi)
 	, _active_color_picker (0)
 {
+}
+
+Stripable::~Stripable ()
+{
+	_session.selection().remove_stripable_by_id (id());
 }
 
 void
@@ -102,4 +110,16 @@ Stripable::set_state (XMLNode const& node, int version)
 	}
 
 	return 0;
+}
+
+bool
+Stripable::is_selected() const
+{
+	try {
+		boost::shared_ptr<const Stripable> s (shared_from_this());
+	} catch (...) {
+		std::cerr << "cannot shared-from-this for " << this << std::endl;
+		abort ();
+	}
+	return _session.selection().selected (shared_from_this());
 }

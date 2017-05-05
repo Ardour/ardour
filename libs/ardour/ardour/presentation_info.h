@@ -93,11 +93,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	 * change after construction (not strictly the constructor itself, but
 	 * a more generalized notion of construction, as in "ready to use").
 	 *
-	 * SELECTION
-	 *
-	 * When an object is selected, its _flags member will have the Selected
-	 * bit set.
-	 *
 	 * VISIBILITY
 	 *
 	 * When an object is hidden, its _flags member will have the Hidden
@@ -119,13 +114,12 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		/* These are for sharing Stripable states between the GUI and other
 		 * user interfaces/control surfaces
 		 */
-		Selected = 0x100,
-		Hidden = 0x200,
+		Hidden = 0x100,
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
 
 		/* special mask to delect out "state" bits */
-		StatusMask = (Selected|Hidden),
+		StatusMask = (Hidden),
 		/* special mask to delect select type bits */
 		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner)
 	};
@@ -152,7 +146,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	bool color_set() const;
 
 	void set_color (color_t);
-	void set_selected (bool yn);
 	void set_hidden (bool yn);
 	void set_flags (Flag f) { _flags = f; }
 
@@ -161,7 +154,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	int selection_cnt() const { return _selection_cnt; }
 
 	bool hidden() const { return _flags & Hidden; }
-	bool selected() const { return _flags & Selected; }
 	bool special() const { return _flags & (MasterOut|MonitorOut|Auditioner); }
 
 	bool flag_match (Flag f) const {
@@ -238,6 +230,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	 */
 
 	static PBD::Signal1<void,PBD::PropertyChange const &> Change;
+	static void send_static_change (const PBD::PropertyChange&);
 
 	static void make_property_quarks ();
 
@@ -270,7 +263,6 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	static PBD::PropertyChange _pending_static_changes;
 	static Glib::Threads::Mutex static_signal_lock;
 	static int _change_signal_suspended;
-	static void send_static_change (const PBD::PropertyChange&);
 
 	static int selection_counter;
 };

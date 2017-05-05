@@ -114,6 +114,7 @@
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_metadata.h"
@@ -1286,6 +1287,8 @@ Session::state (bool full_state)
 
 	if (full_state) {
 
+		node->add_child_nocopy (_selection->get_state());
+
 		if (_locations) {
 			node->add_child_nocopy (_locations->get_state());
 		}
@@ -1647,6 +1650,10 @@ Session::set_state (const XMLNode& node, int version)
 			}
 			g_free (buf);
 		}
+	}
+
+	if ((child = find_named_node (node, X_("Selection")))) {
+		_selection->set_state (*child, version);
 	}
 
 	update_route_record_state ();
@@ -3581,6 +3588,12 @@ Session::controllable_by_id (const PBD::ID& id)
 	}
 
 	return boost::shared_ptr<Controllable>();
+}
+
+boost::shared_ptr<AutomationControl>
+Session::automation_control_by_id (const PBD::ID& id)
+{
+	return boost::dynamic_pointer_cast<AutomationControl> (controllable_by_id (id));
 }
 
 boost::shared_ptr<Controllable>

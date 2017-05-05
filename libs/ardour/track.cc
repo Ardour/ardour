@@ -65,7 +65,7 @@ Track::init ()
                 return -1;
         }
 
-	boost::shared_ptr<Route> rp (shared_from_this());
+        boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
 	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this));

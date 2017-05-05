@@ -94,6 +94,7 @@
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
@@ -324,6 +325,7 @@ Session::Session (AudioEngine &eng,
 	, _midi_ports (0)
 	, _mmc (0)
 	, _vca_manager (new VCAManager (*this))
+	, _selection (new CoreSelection (*this))
 {
 	uint32_t sr = 0;
 
@@ -4388,6 +4390,22 @@ Session::route_by_id (PBD::ID id) const
 	return boost::shared_ptr<Route> ((Route*) 0);
 }
 
+
+boost::shared_ptr<Stripable>
+Session::stripable_by_id (PBD::ID id) const
+{
+	StripableList sl;
+	get_stripables (sl);
+
+	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
+		if ((*s)->id() == id) {
+			return *s;
+		}
+	}
+
+	return boost::shared_ptr<Stripable>();
+}
+
 boost::shared_ptr<Processor>
 Session::processor_by_id (PBD::ID id) const
 {
@@ -4487,7 +4505,7 @@ Session::route_by_selected_count (uint32_t id) const
 	RouteList::iterator i;
 
 	for (i = r.begin(); i != r.end(); ++i) {
-		if ((*i)->presentation_info().selected()) {
+		if ((*i)->is_selected()) {
 			if (id == 0) {
 				return *i;
 			}

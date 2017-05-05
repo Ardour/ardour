@@ -30,6 +30,7 @@
 #include "ardour/control_group.h"
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
+#include "ardour/selection.h"
 
 #include "pbd/i18n.h"
 
@@ -68,6 +69,7 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 AutomationControl::~AutomationControl ()
 {
+	_session.selection().remove_control_by_id (id());
 	DropReferences (); /* EMIT SIGNAL */
 }
 

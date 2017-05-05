@@ -722,7 +722,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (PresentationInfo, MasterOut);
 	REGISTER_CLASS_ENUM (PresentationInfo, MonitorOut);
 	REGISTER_CLASS_ENUM (PresentationInfo, Auditioner);
-	REGISTER_CLASS_ENUM (PresentationInfo, Selected);
 	REGISTER_CLASS_ENUM (PresentationInfo, Hidden);
 	REGISTER_CLASS_ENUM (PresentationInfo, OrderSet);
 	REGISTER_BITS (_PresentationInfo_Flag);
