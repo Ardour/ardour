@@ -20,6 +20,10 @@
 #ifndef ardour_surface_faderport8_h
 #define ardour_surface_faderport8_h
 
+// allow to undo "mute clear", "solo clear"
+// eventually this should use some libardour mixer history/undo
+#define FP8_MUTESOLO_UNDO
+
 #include <list>
 #include <map>
 #include <glibmm/threads.h>
@@ -243,6 +247,9 @@ private:
 	void button_loop ();
 	void button_metronom ();
 	void button_varispeed (bool);
+#ifdef FP8_MUTESOLO_UNDO
+	void button_solo_clear ();
+#endif
 	void button_mute_clear ();
 	void button_arm (bool);
 	void button_arm_all ();
@@ -254,6 +261,12 @@ private:
 	void button_parameter ();
 	void encoder_navigate (bool, int);
 	void encoder_parameter (bool, int);
+
+	/* mute undo history */
+#ifdef FP8_MUTESOLO_UNDO
+	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _mute_state;
+	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _solo_state;
+#endif
 
 	/* user bound actions */
 	void button_user (bool, FP8Controls::ButtonId);

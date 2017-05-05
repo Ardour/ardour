@@ -184,7 +184,13 @@ FaderPort8::notify_history_changed ()
 void
 FaderPort8::notify_solo_changed ()
 {
-	_ctrls.button (FP8Controls::BtnSoloClear).set_active (session->soloing() || session->listening());
+	bool soloing = session->soloing() || session->listening();
+	_ctrls.button (FP8Controls::BtnSoloClear).set_active (soloing);
+#ifdef FP8_MUTESOLO_UNDO
+	if (soloing) {
+		_solo_state.clear ();
+	}
+#endif
 }
 
 void
@@ -193,7 +199,7 @@ FaderPort8::notify_mute_changed ()
 	bool muted = false;
 	boost::shared_ptr<RouteList> rl = session->get_routes();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_master() || (*i)->is_monitor()) {
+		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
 			continue;
 		}
 		boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
@@ -202,5 +208,10 @@ FaderPort8::notify_mute_changed ()
 			break;
 		}
 	}
+#ifdef FP8_MUTESOLO_UNDO
+	if (muted) {
+		_mute_state.clear ();
+	}
+#endif
 	_ctrls.button (FP8Controls::BtnMuteClear).set_active (muted);
 }

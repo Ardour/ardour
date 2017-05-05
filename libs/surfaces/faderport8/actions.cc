@@ -67,7 +67,11 @@ FaderPort8::setup_actions ()
 	BindAction (BtnUndo, "Editor", "undo");
 	BindAction (BtnRedo, "Editor", "redo");
 
+#ifdef FP8_MUTESOLO_UNDO
+	BindMethod (BtnSoloClear, button_solo_clear);
+#else
 	BindAction (BtnSoloClear, "Main", "cancel-solo");
+#endif
 	BindMethod (BtnMuteClear, button_mute_clear);
 
 	BindMethod (FP8Controls::BtnArmAll, button_arm_all);
@@ -242,6 +246,44 @@ FaderPort8::button_varispeed (bool ffw)
 	session->request_transport_speed (speed, false);
 }
 
+#ifdef FP8_MUTESOLO_UNDO
+void
+FaderPort8::button_solo_clear ()
+{
+	bool soloing = session->soloing() || session->listening();
+	if (soloing) {
+		StripableList all;
+		session->get_stripables (all);
+		for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
+			if ((*i)->is_master() || (*i)->is_auditioner() || (*i)->is_monitor()) {
+				continue;
+			}
+			boost::shared_ptr<AutomationControl> ac = (*i)->solo_control();
+			if (ac && ac->get_value () > 0) {
+				_solo_state.push_back (boost::weak_ptr<AutomationControl>(ac));
+			}
+		}
+		AccessAction ("Main", "cancel-solo");
+	} else {
+		/* restore solo */
+		boost::shared_ptr<ControlList> cl (new ControlList);
+		for (std::vector <boost::weak_ptr<AutomationControl> >::const_iterator i = _solo_state.begin(); i != _solo_state.end(); ++i) {
+			boost::shared_ptr<AutomationControl> ac = (*i).lock();
+			if (!ac) {
+				continue;
+			}
+			if (ac->automation_state() == Touch && !ac->touching ()) {
+				ac->start_touch (ac->session().transport_frame());
+			}
+			cl->push_back (ac);
+		}
+		if (!cl->empty()) {
+			session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
+		}
+	}
+}
+#endif
+
 void
 FaderPort8::button_mute_clear ()
 {
@@ -249,18 +291,46 @@ FaderPort8::button_mute_clear ()
 	session->get_stripables (all);
 	boost::shared_ptr<ControlList> cl (new ControlList);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_master() || (*i)->is_monitor()) {
+		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
 			continue;
 		}
 		boost::shared_ptr<AutomationControl> ac = (*i)->mute_control();
 		if (ac && ac->get_value () > 0) {
-			if (ac->automation_state() == Touch && !ac->touching ()) {
-				ac->start_touch (ac->session().transport_frame());
-			}
 			cl->push_back (ac);
 		}
 	}
-	session->set_controls (cl, 0.0, PBD::Controllable::UseGroup);
+
+	bool mute = false;
+#ifdef FP8_MUTESOLO_UNDO
+	if (cl->empty ()) {
+		/* restore mute */
+		for (std::vector <boost::weak_ptr<AutomationControl> >::const_iterator i = _mute_state.begin(); i != _mute_state.end(); ++i) {
+			boost::shared_ptr<AutomationControl> ac = (*i).lock();
+			if (ac) {
+				cl->push_back (ac);
+			}
+		}
+		mute = true;
+	} else {
+		/* save muted control IDs */
+		_mute_state.clear ();
+		for (ControlList::const_iterator i = cl->begin (); i != cl->end (); ++i) {
+			_mute_state.push_back (boost::weak_ptr<AutomationControl>(*i));
+		}
+	}
+#endif
+
+	if (cl->empty ()) {
+		return;
+	}
+
+	for (ControlList::const_iterator i = cl->begin (); i != cl->end (); ++i) {
+		if ((*i)->automation_state() == Touch && !(*i)->touching ()) {
+			(*i)->start_touch ((*i)->session().transport_frame());
+		}
+	}
+
+	session->set_controls (cl, mute ? 1.0 : 0.0, mute ? PBD::Controllable::NoGroup : PBD::Controllable::UseGroup);
 }
 
 void
