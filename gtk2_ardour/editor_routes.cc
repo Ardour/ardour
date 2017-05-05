@@ -31,6 +31,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/route.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/utils.h"
@@ -319,7 +320,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_enable_search (false);
 
 	Route::PluginSetup.connect_same_thread (*this, boost::bind (&EditorRoutes::plugin_setup, this, _1, _2, _3));
-	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&EditorRoutes::presentation_info_changed, this, _1), gui_context());
 }
 
 bool
@@ -727,7 +727,10 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 		}
 	}
 
-	_display.set_model (Glib::RefPtr<ListStore>());
+	{
+		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
+		_display.set_model (Glib::RefPtr<ListStore>());
+	}
 
 	for (list<TimeAxisView*>::iterator x = tavs.begin(); x != tavs.end(); ++x) {
 
@@ -753,7 +756,6 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 			midi_trk= boost::dynamic_pointer_cast<MidiTrack> (stripable);
 
 			row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> (stripable) != 0);
-
 
 			if (midi_trk) {
 				row[_columns.is_input_active] = midi_trk->input_active ();
@@ -832,7 +834,11 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 	update_input_active_display ();
 	update_active_display ();
 
-	_display.set_model (_model);
+	{
+		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
+		cerr << "Should ignore model/selection change\n";
+		_display.set_model (_model);
+	}
 
 	/* now update route order keys from the treeview/track display order */
 
@@ -1083,19 +1089,6 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 }
 
 void
-EditorRoutes::presentation_info_changed (PropertyChange const & what_changed)
-{
-	PropertyChange soh;
-	soh.add (Properties::selected);
-	soh.add (Properties::order);
-	soh.add (Properties::hidden);
-
-	if (what_changed.contains (soh)) {
-		sync_treeview_from_presentation_info (what_changed);
-	}
-}
-
-void
 EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_changed)
 {
 	/* Some route order key(s) have been changed, make sure that
@@ -1169,13 +1162,18 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 
 	if (what_changed.contains (Properties::selected)) {
 
+		/* by the time this is invoked, the GUI Selection model has
+		 * already updated itself.
+		 */
+
 		TrackViewList tvl;
 		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
 
-		/* step one: set the treeview model selection state */
+		/* set the treeview model selection state */
+
 		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
-			if (stripable && stripable->presentation_info().selected()) {
+			if (stripable && stripable->is_selected()) {
 				TimeAxisView* tav = (*ri)[_columns.tv];
 				if (tav) {
 					tvl.push_back (tav);
@@ -1185,12 +1183,6 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 				_display.get_selection()->unselect (*ri);
 			}
 		}
-
-		/* step two: set the Selection (for stripables/routes) */
-		_editor->get_selection().set (tvl);
-
-		/* step three, tell the editor */
-		_editor->track_selection_changed ();
 	}
 
 	redisplay ();
@@ -1645,7 +1637,7 @@ EditorRoutes::move_selected_tracks (bool up)
 	/* build a list that includes time axis view information */
 
 	for (StripableList::const_iterator sli = sl.begin(); sli != sl.end(); ++sli) {
-		TimeAxisView* tv = _editor->axis_view_from_stripable (*sli);
+		TimeAxisView* tv = _editor->time_axis_view_from_stripable (*sli);
 		view_stripables.push_back (ViewStripable (tv, *sli));
 	}
 
@@ -1666,7 +1658,7 @@ EditorRoutes::move_selected_tracks (bool up)
 
 			while (vsi != view_stripables.end()) {
 
-				if (vsi->stripable->presentation_info().selected()) {
+				if (vsi->stripable->is_selected()) {
 
 					if (unselected_neighbour != view_stripables.end()) {
 
@@ -1701,7 +1693,7 @@ EditorRoutes::move_selected_tracks (bool up)
 
 				--vsi;
 
-				if (vsi->stripable->presentation_info().selected()) {
+				if (vsi->stripable->is_selected()) {
 
 					if (unselected_neighbour != view_stripables.end()) {
 
@@ -1852,6 +1844,7 @@ EditorRoutes::views () const
 void
 EditorRoutes::clear ()
 {
+	PBD::Unwinder<bool> uw (_ignore_selection_change, true);
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore> (0));
 	_model->clear ();
 	_display.set_model (_model);
@@ -1902,7 +1895,7 @@ EditorRoutes::show_tracks_with_regions_at_playhead ()
 
 	set<TimeAxisView*> show;
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		TimeAxisView* tav = _editor->axis_view_from_stripable (*i);
+		TimeAxisView* tav = _editor->time_axis_view_from_stripable (*i);
 		if (tav) {
 			show.insert (tav);
 		}

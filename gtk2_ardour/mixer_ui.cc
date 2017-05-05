@@ -48,6 +48,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route_group.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
@@ -110,6 +111,7 @@ Mixer_UI::Mixer_UI ()
 	, _maximised (false)
 	, _show_mixer_list (true)
 	, myactions (X_("mixer"))
+	, _selection (*this, *this)
 {
 	register_actions ();
 	load_bindings ();
@@ -683,6 +685,8 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
 {
+	_selection.presentation_info_changed (what_changed);
+
 	PropertyChange soh;
 	soh.add (Properties::selected);
 	soh.add (Properties::order);
@@ -850,7 +854,7 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 
 		for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 			boost::shared_ptr<Stripable> stripable = (*i)->stripable();
-			if (stripable && stripable->presentation_info().selected()) {
+			if (stripable && stripable->is_selected()) {
 				_selection.add (*i);
 			} else {
 				_selection.remove (*i);
@@ -891,10 +895,22 @@ Mixer_UI::strip_by_stripable (boost::shared_ptr<Stripable> s) const
 }
 
 AxisView*
-Mixer_UI::axis_by_stripable (boost::shared_ptr<Stripable> s) const
+Mixer_UI::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
 {
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->stripable() == s) {
+			return (*i);
+		}
+	}
+
+	return 0;
+}
+
+AxisView*
+Mixer_UI::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
+{
+	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if ((*i)->control() == c) {
 			return (*i);
 		}
 	}
@@ -1000,6 +1016,7 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	if (!_session) {
+		_selection.clear ();
 		return;
 	}
 
@@ -1029,6 +1046,13 @@ Mixer_UI::set_session (Session* sess)
 	if (_visible) {
 		show_window();
 	}
+
+	/* catch up on selection state, etc. */
+
+	PropertyChange sc;
+	sc.add (Properties::selected);
+	_selection.presentation_info_changed (sc);
+
 	start_updating ();
 }
 

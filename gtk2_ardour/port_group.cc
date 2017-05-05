@@ -378,7 +378,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup. */
 
 	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
-		TimeAxisView* tv = PublicEditor::instance().axis_view_from_stripable (i->route);
+		TimeAxisView* tv = PublicEditor::instance().time_axis_view_from_stripable (i->route);
 
 		/* Work out which group to put these IOs' bundles in */
 		boost::shared_ptr<PortGroup> g;

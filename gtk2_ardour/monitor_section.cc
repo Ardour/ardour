@@ -88,6 +88,7 @@ MonitorSection::MonitorSection (Session* s)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
 	, toggle_processorbox_button (ArdourButton::default_elements)
 	, _inhibit_solo_model_update (false)
+	, _rr_selection ()
 	, _ui_initialized (false)
 {
 

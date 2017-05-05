@@ -140,14 +140,13 @@ class TimeSelection;
 class RegionLayeringOrderEditor;
 class VerboseCursor;
 
-class Editor : public PublicEditor, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class Editor : public PublicEditor, public PBD::ScopedConnectionList
 {
 public:
 	Editor ();
 	~Editor ();
 
 	void             set_session (ARDOUR::Session *);
-	ARDOUR::Session* session() const { return _session; }
 
 	Gtk::Window* use_own_window (bool and_fill_it);
 
@@ -427,7 +426,7 @@ public:
 	void start_resize_line_ops ();
 	void end_resize_line_ops ();
 
-	TrackViewList const & get_track_views () {
+	TrackViewList const & get_track_views () const {
 		return track_views;
 	}
 
@@ -1158,7 +1157,13 @@ private:
 	/* track views */
 	TrackViewList track_views;
 	std::pair<TimeAxisView*, double> trackview_by_y_position (double, bool trackview_relative_offset = true) const;
-	TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+
+	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
+
+	TimeAxisView* time_axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable> s) const {
+		return dynamic_cast<TimeAxisView*> (axis_view_by_stripable (s));
+	}
 
 	TrackViewList get_tracks_for_range_action () const;
 
@@ -1857,7 +1862,7 @@ private:
 
 	void time_selection_changed ();
 	void update_time_selection_display ();
-	void track_selection_changed ();
+	void presentation_info_changed (PBD::PropertyChange const &);
 	void region_selection_changed ();
 	sigc::connection editor_regions_selection_changed_connection;
 	void sensitize_all_region_actions (bool);

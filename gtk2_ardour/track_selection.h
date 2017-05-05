@@ -35,8 +35,6 @@ public:
 
 	virtual ~TrackSelection ();
 
-	TrackViewList add (TrackViewList const &);
-
 	template <typename Function>
 	void foreach_time_axis (Function f) {
 		for (iterator i = begin(); i != end(); ++i) {

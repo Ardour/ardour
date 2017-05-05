@@ -62,7 +62,7 @@
 class MotionController;
 class PluginSelector;
 class PluginUIWindow;
-class RouteProcessorSelection;
+class ProcessorSelection;
 class MixerStrip;
 
 namespace ARDOUR {
@@ -414,7 +414,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	};
 
 	ProcessorBox (ARDOUR::Session*, boost::function<PluginSelector*()> get_plugin_selector,
-		      RouteProcessorSelection&, MixerStrip* parent, bool owner_is_mixer = false);
+		      ProcessorSelection&, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -490,7 +490,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	int _placement;
 	uint32_t                  _visible_prefader_processors;
 
-	RouteProcessorSelection& _rr_selection;
+	ProcessorSelection& _p_selection;
 	static Gtkmm2ext::ActionMap myactions;
 
 	static void load_bindings ();

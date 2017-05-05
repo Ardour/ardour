@@ -56,9 +56,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
-	: ArdourWindow (_("Tracks and Busses")),
-	  latency_apply_button (Stock::APPLY),
-	  track_menu(0)
+	: ArdourWindow (_("Tracks and Busses"))
+	, latency_apply_button (Stock::APPLY)
+	, track_menu(0)
 {
 	insert_box = 0;
 	_input_iosel = 0;
@@ -235,7 +235,7 @@ RouteParams_UI::setup_processor_boxes()
 		cleanup_processor_boxes();
 
 		// construct new redirect boxes
-		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _rr_selection, 0);
+		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _p_selection, 0);
 		insert_box->set_route (_route);
 
 		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);

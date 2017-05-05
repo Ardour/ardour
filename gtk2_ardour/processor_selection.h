@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2007 Paul Davis
+    Copyright (C) 2004 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,40 +20,64 @@
 #ifndef __ardour_gtk_processor_selection_h__
 #define __ardour_gtk_processor_selection_h__
 
+#include <vector>
+
+#include "pbd/signals.h"
 #include "pbd/xml++.h"
 
-class ProcessorSelection {
+class XMLProcessorSelection {
   public:
-    ProcessorSelection() : node (0) {}
-    ~ProcessorSelection() { if (node) { delete node; } }
+	XMLProcessorSelection() : node (0) {}
+	~XMLProcessorSelection() { if (node) { delete node; } }
 
-    void set (XMLNode* n) {
-	    if (node) {
-		    delete node;
-	    }
-	    node = n;
-    }
+	void set (XMLNode* n) {
+		if (node) {
+			delete node;
+		}
+		node = n;
+	}
 
-    void add (XMLNode* newchild) {
-	    if (!node) {
-		    node = new XMLNode ("add");
-	    }
-	    node->add_child_nocopy (*newchild);
-    }
+	void add (XMLNode* newchild) {
+		if (!node) {
+			node = new XMLNode ("add");
+		}
+		node->add_child_nocopy (*newchild);
+	}
 
-    void clear () {
-	    if (node) {
-		    delete node;
-		    node = 0;
-	    }
-    }
+	void clear () {
+		if (node) {
+			delete node;
+			node = 0;
+		}
+	}
 
-    bool empty () const { return node == 0 || node->children().empty(); }
+	bool empty () const { return node == 0 || node->children().empty(); }
 
-    const XMLNode& get_node() const { return *node; }
+	const XMLNode& get_node() const { return *node; }
 
   private:
-    XMLNode* node;
+	XMLNode* node;
 };
+
+class ProcessorSelection : public PBD::ScopedConnectionList, public sigc::trackable
+{
+  public:
+	ProcessorSelection () {}
+
+	XMLProcessorSelection processors;
+	sigc::signal<void> ProcessorsChanged;
+
+	ProcessorSelection& operator= (const ProcessorSelection& other);
+
+	void clear ();
+	bool empty();
+
+	void set (XMLNode* node);
+	void add (XMLNode* node);
+
+	void clear_processors ();
+};
+
+bool operator==(const ProcessorSelection& a, const ProcessorSelection& b);
 
 #endif /* __ardour_gtk_processor_selection_h__ */

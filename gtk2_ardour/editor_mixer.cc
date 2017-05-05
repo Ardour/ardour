@@ -146,7 +146,7 @@ Editor::show_editor_mixer (bool yn)
 
 		if (current_mixer_strip && current_mixer_strip->get_parent() == 0) {
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
- 			global_hpacker.reorder_child (*current_mixer_strip, 0);
+			global_hpacker.reorder_child (*current_mixer_strip, 0);
 			current_mixer_strip->show ();
 		}
 
@@ -285,4 +285,3 @@ Editor::mixer_strip_width_changed ()
 
 	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
 }
-

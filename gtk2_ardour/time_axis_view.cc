@@ -769,19 +769,9 @@ TimeAxisView::set_selected (bool yn)
 		time_axis_vbox.set_name (controls_base_unselected_name);
 
 		hide_selection ();
-
-		/* children will be set for the yn=true case. but when deselecting
-		   the editor only has a list of top-level trackviews, so we
-		   have to do this here.
-		*/
-
-		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-			(*i)->set_selected (false);
-		}
 	}
 
 	time_axis_frame.show();
-
 }
 
 void

@@ -19,21 +19,27 @@
 
 #include <algorithm>
 #include <sigc++/bind.h>
-#include "pbd/error.h"
 
+#include "pbd/error.h"
+#include "pbd/i18n.h"
+
+#include "ardour/selection.h"
+#include "ardour/session.h"
+#include "ardour/session_handle.h"
+
+#include "axis_provider.h"
 #include "gui_thread.h"
 #include "mixer_strip.h"
+#include "mixer_ui.h"
 #include "route_processor_selection.h"
 #include "route_ui.h"
-
-#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-
-RouteProcessorSelection::RouteProcessorSelection()
+RouteProcessorSelection::RouteProcessorSelection (SessionHandlePtr& s, AxisViewProvider& ap)
+	: shp (s), avp (ap)
 {
 }
 
@@ -41,7 +47,7 @@ RouteProcessorSelection&
 RouteProcessorSelection::operator= (const RouteProcessorSelection& other)
 {
 	if (&other != this) {
-		processors = other.processors;
+		(*((ProcessorSelection*) this)) = (*((ProcessorSelection const *) &other));
 		axes = other.axes;
 	}
 	return *this;
@@ -62,46 +68,57 @@ RouteProcessorSelection::clear ()
 }
 
 void
-RouteProcessorSelection::clear_processors ()
-{
-	processors.clear ();
-	ProcessorsChanged ();
-}
-
-void
 RouteProcessorSelection::clear_routes ()
 {
-	PresentationInfo::ChangeSuspender cs;
-
-	for (AxisViewSelection::iterator i = axes.begin(); i != axes.end(); ++i) {
-		(*i)->set_selected (false);
+	if (shp.session()) {
+		PresentationInfo::ChangeSuspender cs;
+		shp.session()->selection().clear_stripables ();
 	}
+}
+
+void
+RouteProcessorSelection::presentation_info_changed (PropertyChange const & what_changed)
+{
+	Session* s = shp.session();
+
+	if (!s) {
+		/* too early ... session handle provider doesn't know about the
+		   session yet.
+		*/
+		return;
+	}
+
+	PropertyChange pc;
+	pc.add (Properties::selected);
+
+	CoreSelection::StripableAutomationControls sc;
+	s->selection().get_stripables (sc);
+
+	for (AxisViewSelection::iterator a = axes.begin(); a != axes.end(); ++a) {
+		(*a)->set_selected (false);
+	}
+
 	axes.clear ();
-	drop_connections ();
-}
 
-void
-RouteProcessorSelection::add (XMLNode* node)
-{
-	// XXX check for duplicate
-	processors.add (node);
-	ProcessorsChanged();
-}
-
-void
-RouteProcessorSelection::set (XMLNode* node)
-{
-	clear_processors ();
-	processors.set (node);
-	ProcessorsChanged ();
+	for (CoreSelection::StripableAutomationControls::const_iterator i = sc.begin(); i != sc.end(); ++i) {
+		AxisView* av = avp.axis_view_by_stripable ((*i).stripable);
+		if (av) {
+			axes.insert (av);
+			av->set_selected (true);
+		}
+	}
 }
 
 void
 RouteProcessorSelection::add (AxisView* r)
 {
+	if (!shp.session()) {
+		return;
+	}
+
 	if (axes.insert (r).second) {
 
-		r->set_selected (true);
+		shp.session()->selection().add (r->stripable(), boost::shared_ptr<AutomationControl>());
 
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 
@@ -114,23 +131,20 @@ RouteProcessorSelection::add (AxisView* r)
 void
 RouteProcessorSelection::remove (AxisView* r)
 {
-	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
-	PresentationInfo::ChangeSuspender cs;
-
-	AxisViewSelection::iterator i;
-	if ((i = find (axes.begin(), axes.end(), r)) != axes.end()) {
-		AxisView* av = *i;
-		axes.erase (i);
-		av->set_selected (false);
+	if (!shp.session()) {
+		return;
 	}
+	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
+	shp.session()->selection().remove (r->stripable(), boost::shared_ptr<AutomationControl>());
 }
 
 void
 RouteProcessorSelection::set (AxisView* r)
 {
-	PresentationInfo::ChangeSuspender cs;
-	clear_routes ();
-	add (r);
+	if (!shp.session()) {
+		return;
+	}
+	shp.session()->selection().set (r->stripable(), boost::shared_ptr<AutomationControl>());
 }
 
 bool

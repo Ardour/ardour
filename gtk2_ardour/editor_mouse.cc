@@ -337,7 +337,6 @@ Editor::update_time_selection_display ()
 		break;
 	case MouseObject:
 		selection->clear_time ();
-		selection->clear_tracks ();
 		selection->clear_midi_notes ();
 		break;
 	case MouseDraw:

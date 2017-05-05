@@ -32,8 +32,8 @@
 #include "monitor_selector.h"
 
 #include "plugin_selector.h"
-#include "route_processor_selection.h"
 #include "processor_box.h"
+#include "processor_selection.h"
 
 namespace Gtkmm2ext {
 	class TearOff;
@@ -192,7 +192,7 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 
 	ProcessorBox* insert_box;
 	PluginSelector* _plugin_selector;
-	RouteProcessorSelection _rr_selection;
+	ProcessorSelection _rr_selection;
 	void help_count_processors (boost::weak_ptr<ARDOUR::Processor> p, uint32_t* cnt) const;
 	uint32_t count_processors ();
 

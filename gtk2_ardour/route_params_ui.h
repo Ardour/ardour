@@ -40,7 +40,7 @@
 
 #include "ardour_window.h"
 #include "processor_box.h"
-#include "route_processor_selection.h"
+#include "processor_selection.h"
 #include "latency_gui.h"
 
 namespace ARDOUR {
@@ -113,7 +113,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	IOSelector     * _output_iosel;
 
 	PluginSelector    *_plugin_selector;
-	RouteProcessorSelection  _rr_selection;
+	ProcessorSelection  _p_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnection _route_processors_connection;

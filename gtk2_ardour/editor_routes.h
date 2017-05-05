@@ -65,6 +65,7 @@ public:
 	void hide_all_tracks (bool);
 	void clear ();
 	void sync_presentation_info_from_treeview ();
+	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 
 private:
 	void initial_display ();
@@ -78,7 +79,6 @@ private:
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
 	void presentation_info_changed (PBD::PropertyChange const &);
-	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);

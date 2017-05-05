@@ -225,9 +225,13 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	std::list<std::pair<PBD::ID const, std::list<Evoral::event_id_t> > > pending_midi_note_selection;
 
+	void core_selection_changed (PBD::PropertyChange const & pc);
+
   private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;
+
+	TrackViewList add_grouped_tracks (TrackViewList const & t);
 };
 
 bool operator==(const Selection& a, const Selection& b);

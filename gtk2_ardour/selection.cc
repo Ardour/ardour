@@ -24,9 +24,10 @@
 #include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
 
+#include "ardour/evoral_types_convert.h"
 #include "ardour/playlist.h"
 #include "ardour/rc_configuration.h"
-#include "ardour/evoral_types_convert.h"
+#include "ardour/selection.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -64,9 +65,6 @@ Selection::Selection (const PublicEditor* e)
 	clear ();
 
 	/* we have disambiguate which remove() for the compiler */
-
-	void (Selection::*track_remove)(TimeAxisView*) = &Selection::remove;
-	TimeAxisView::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (track_remove, this, _1), gui_context());
 
 	void (Selection::*marker_remove)(ArdourMarker*) = &Selection::remove;
 	ArdourMarker::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (marker_remove, this, _1), gui_context());
@@ -128,20 +126,6 @@ Selection::clear_objects (bool with_signal)
 	clear_playlists (with_signal);
 	clear_midi_notes (with_signal);
 	clear_midi_regions (with_signal);
-}
-
-void
-Selection::clear_tracks (bool with_signal)
-{
-	if (!tracks.empty()) {
-		PresentationInfo::ChangeSuspender cs;
-
-		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
-			(*x)->set_selected (false);
-		}
-
-		tracks.clear ();
-	}
 }
 
 void
@@ -272,38 +256,6 @@ Selection::toggle (boost::shared_ptr<Playlist> pl)
 }
 
 void
-Selection::toggle (const TrackViewList& track_list)
-{
-	PresentationInfo::ChangeSuspender cs;
-
-	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
-		if (dynamic_cast<VCATimeAxisView*> (*i)) {
-			continue;
-		}
-		toggle ((*i));
-	}
-}
-
-void
-Selection::toggle (TimeAxisView* track)
-{
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
-	TrackSelection::iterator i;
-
-	if ((i = find (tracks.begin(), tracks.end(), track)) == tracks.end()) {
-		tracks.push_back (track);
-		track->set_selected (true);
-	} else {
-		tracks.erase (i);
-		track->set_selected (false);
-	}
-
-}
-
-void
 Selection::toggle (const MidiNoteSelection& midi_note_list)
 {
 	clear_time();  //enforce object/range exclusivity
@@ -405,10 +357,10 @@ Selection::toggle (framepos_t start, framepos_t end)
 void
 Selection::add (boost::shared_ptr<Playlist> pl)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
 
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 		pl->use ();
 		playlists.push_back(pl);
 		PlaylistsChanged ();
@@ -418,9 +370,6 @@ Selection::add (boost::shared_ptr<Playlist> pl)
 void
 Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-
 	bool changed = false;
 
 	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
@@ -432,51 +381,21 @@ Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
 	}
 
 	if (changed) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 		PlaylistsChanged ();
 	}
 }
 
 void
-Selection::add (TrackViewList const & track_list)
-{
-	clear_objects();  //enforce object/range exclusivity
-
-	PresentationInfo::ChangeSuspender cs;
-
-	TrackViewList added = tracks.add (track_list);
-
-	if (!added.empty()) {
-		for (TrackViewList::iterator x = added.begin(); x != added.end(); ++x) {
-			if (dynamic_cast<VCATimeAxisView*> (*x)) {
-				continue;
-			}
-			(*x)->set_selected (true);
-		}
-	}
-}
-
-void
-Selection::add (TimeAxisView* track)
-{
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
-	TrackViewList tr;
-	tr.push_back (track);
-	add (tr);
-}
-
-void
 Selection::add (const MidiNoteSelection& midi_list)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-
 	const MidiNoteSelection::const_iterator b = midi_list.begin();
 	const MidiNoteSelection::const_iterator e = midi_list.end();
 
 	if (!midi_list.empty()) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 		midi_notes.insert (midi_notes.end(), b, e);
 		MidiNotesChanged ();
 	}
@@ -496,9 +415,6 @@ Selection::add (MidiCutBuffer* midi)
 void
 Selection::add (vector<RegionView*>& v)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-
 	/* XXX This method or the add (const RegionSelection&) needs to go
 	 */
 
@@ -511,6 +427,8 @@ Selection::add (vector<RegionView*>& v)
 	}
 
 	if (changed) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 		RegionsChanged ();
 	}
 }
@@ -518,9 +436,6 @@ Selection::add (vector<RegionView*>& v)
 void
 Selection::add (const RegionSelection& rs)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-
 	/* XXX This method or the add (const vector<RegionView*>&) needs to go
 	 */
 
@@ -533,6 +448,8 @@ Selection::add (const RegionSelection& rs)
 	}
 
 	if (changed) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 		RegionsChanged ();
 	}
 }
@@ -540,12 +457,11 @@ Selection::add (const RegionSelection& rs)
 void
 Selection::add (RegionView* r)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
-
 	if (find (regions.begin(), regions.end(), r) == regions.end()) {
 		bool changed = regions.add (r);
 		if (changed) {
+			clear_time();  //enforce object/range exclusivity
+			clear_tracks();  //enforce object/track exclusivity
 			RegionsChanged ();
 		}
 	}
@@ -624,14 +540,16 @@ Selection::replace (uint32_t sid, framepos_t start, framepos_t end)
 void
 Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 {
-	clear_time();  //enforce object/range exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	boost::shared_ptr<ARDOUR::AutomationList> al = boost::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
 
-	boost::shared_ptr<ARDOUR::AutomationList> al
-		= boost::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
 	if (!al) {
 		warning << "Programming error: Selected list is not an ARDOUR::AutomationList" << endmsg;
 		return;
+	}
+
+	if (!cl->empty()) {
+		clear_time();  //enforce object/range exclusivity
+		clear_tracks();  //enforce object/track exclusivity
 	}
 
 	/* The original may change so we must store a copy (not a pointer) here.
@@ -641,38 +559,6 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 	 */
 	lines.push_back (boost::shared_ptr<ARDOUR::AutomationList> (new ARDOUR::AutomationList(*al)));
 	LinesChanged();
-}
-
-void
-Selection::remove (TimeAxisView* track)
-{
-	list<TimeAxisView*>::iterator i;
-	if ((i = find (tracks.begin(), tracks.end(), track)) != tracks.end()) {
-		/* erase first, because set_selected() will remove the track
-		   from the selection, invalidating the iterator.
-
-		   In fact, we don't really even need to do the erase, but this is
-		   a hangover of axis view selection being in the GUI.
-		*/
-		tracks.erase (i);
-		track->set_selected (false);
-	}
-}
-
-void
-Selection::remove (const TrackViewList& track_list)
-{
-	PresentationInfo::ChangeSuspender cs;
-
-	for (TrackViewList::const_iterator i = track_list.begin(); i != track_list.end(); ++i) {
-
-		TrackViewList::iterator x = find (tracks.begin(), tracks.end(), *i);
-
-		if (x != tracks.end()) {
-			tracks.erase (x);
-			(*i)->set_selected (false);
-		}
-	}
 }
 
 void
@@ -801,67 +687,12 @@ Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
 }
 
 void
-Selection::set (TimeAxisView* track)
-{
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-	clear_objects ();  //enforce object/range exclusivity
-
-	PresentationInfo::ChangeSuspender cs;
-
-	if (!tracks.empty()) {
-
-		if (tracks.size() == 1 && tracks.front() == track) {
-			/* already single selection: nothing to do */
-			return;
-		}
-
-		for (TrackViewList::iterator x = tracks.begin(); x != tracks.end(); ++x) {
-			(*x)->set_selected (false);
-		}
-
-		tracks.clear ();
-	}
-
-	add (track);
-}
-
-void
-Selection::set (const TrackViewList& track_list)
-{
-	clear_objects();  //enforce object/range exclusivity
-
-
-	TrackViewList to_be_added;
-	TrackViewList to_be_removed;
-
-	for (TrackViewList::const_iterator x = tracks.begin(); x != tracks.end(); ++x) {
-		if (find (track_list.begin(), track_list.end(), *x) == track_list.end()) {
-			to_be_removed.push_back (*x);
-		}
-	}
-
-	for (TrackViewList::const_iterator x = track_list.begin(); x != track_list.end(); ++x) {
-		if (dynamic_cast<VCATimeAxisView*> (*x)) {
-			continue;
-		}
-		if (find (tracks.begin(), tracks.end(), *x) == tracks.end()) {
-			to_be_added.push_back (*x);
-		}
-	}
-
-	PresentationInfo::ChangeSuspender cs;
-	remove (to_be_removed);
-	add (to_be_added);
-
-}
-
-void
 Selection::set (const MidiNoteSelection& midi_list)
 {
-	clear_time ();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (!midi_list.empty()) {
+		clear_time ();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
 	clear_objects ();
 	add (midi_list);
 }
@@ -869,8 +700,10 @@ Selection::set (const MidiNoteSelection& midi_list)
 void
 Selection::set (boost::shared_ptr<Playlist> playlist)
 {
-	clear_time ();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (playlist) {
+		clear_time ();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
 	clear_objects ();
 	add (playlist);
 }
@@ -878,7 +711,9 @@ Selection::set (boost::shared_ptr<Playlist> playlist)
 void
 Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
 {
-	clear_time();  //enforce region/object exclusivity
+	if (!pllist.empty()) {
+		clear_time();  //enforce region/object exclusivity
+	}
 	clear_objects ();
 	add (pllist);
 }
@@ -886,8 +721,10 @@ Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
 void
 Selection::set (const RegionSelection& rs)
 {
-	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (!rs.empty()) {
+		clear_time();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
 	clear_objects();
 	regions = rs;
 	RegionsChanged(); /* EMIT SIGNAL */
@@ -896,8 +733,10 @@ Selection::set (const RegionSelection& rs)
 void
 Selection::set (MidiRegionView* mrv)
 {
-	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (mrv) {
+		clear_time();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
 	clear_objects ();
 	add (mrv);
 }
@@ -905,8 +744,10 @@ Selection::set (MidiRegionView* mrv)
 void
 Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 {
-	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (r) {
+		clear_time();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
 	clear_objects ();
 	add (r);
 }
@@ -914,8 +755,11 @@ Selection::set (RegionView* r, bool /*also_clear_tracks*/)
 void
 Selection::set (vector<RegionView*>& v)
 {
-	clear_time();  //enforce region/object exclusivity
-	clear_tracks();  //enforce object/track exclusivity
+	if (!v.empty()) {
+		clear_time();  //enforce region/object exclusivity
+		clear_tracks();  //enforce object/track exclusivity
+	}
+
 	clear_objects();
 
 	add (v);
@@ -997,12 +841,6 @@ bool
 Selection::selected (ArdourMarker* m) const
 {
 	return find (markers.begin(), markers.end(), m) != markers.end();
-}
-
-bool
-Selection::selected (TimeAxisView* tv) const
-{
-	return tv->selected ();
 }
 
 bool
@@ -1384,26 +1222,19 @@ Selection::set_state (XMLNode const & node, int)
 	clear_midi_notes ();
 	clear_points ();
 	clear_time ();
-	clear_tracks ();
 	clear_markers ();
 
 	RegionSelection selected_regions;
 
+	/* NOTE: stripable/time-axis-view selection is saved/restored by
+	 * ARDOUR::CoreSelection, not this Selection object
+	 */
+
 	PBD::ID id;
 	XMLNodeList children = node.children ();
+
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
-		if ((*i)->name() == X_("RouteView")) {
-
-			if (!(*i)->get_property (X_("id"), id)) {
-				assert(false); // handle this more gracefully?
-			}
-
-			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
-			if (rtv) {
-				add (rtv);
-			}
-
-		} else if ((*i)->name() == X_("Region")) {
+		if ((*i)->name() == X_("Region")) {
 
 			if (!(*i)->get_property (X_("id"), id)) {
 				assert(false);
@@ -1592,5 +1423,254 @@ Selection::remove_regions (TimeAxisView* t)
 		}
 
 		i = tmp;
+	}
+}
+
+/* TIME AXIS VIEW ... proxy for Stripable/Controllable
+ *
+ * public methods just modify the CoreSelection; PresentationInfo::Changed will
+ * trigger Selection::core_selection_changed() and we will update our own data
+ * structures there.
+ */
+
+void
+Selection::toggle (const TrackViewList& track_list)
+{
+	TrackViewList t = add_grouped_tracks (track_list);
+
+	CoreSelection& selection (editor->session()->selection());
+	PresentationInfo::ChangeSuspender cs;
+
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		boost::shared_ptr<Stripable> s = (*i)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		selection.toggle (s, c);
+	}
+}
+
+void
+Selection::toggle (TimeAxisView* track)
+{
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
+
+	TrackViewList tr;
+	tr.push_back (track);
+	toggle (tr);
+}
+
+void
+Selection::add (TrackViewList const & track_list)
+{
+	TrackViewList t = add_grouped_tracks (track_list);
+
+	CoreSelection& selection (editor->session()->selection());
+	PresentationInfo::ChangeSuspender cs;
+
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		boost::shared_ptr<Stripable> s = (*i)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		selection.add (s, c);
+	}
+}
+
+void
+Selection::add (TimeAxisView* track)
+{
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
+
+	TrackViewList tr;
+	tr.push_back (track);
+	add (tr);
+}
+
+void
+Selection::remove (TimeAxisView* track)
+{
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
+
+	TrackViewList tvl;
+	tvl.push_back (track);
+	remove (tvl);
+}
+
+void
+Selection::remove (const TrackViewList& t)
+{
+	CoreSelection& selection (editor->session()->selection());
+	PresentationInfo::ChangeSuspender cs;
+
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		boost::shared_ptr<Stripable> s = (*i)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		selection.remove (s, c);
+	}
+}
+
+void
+Selection::set (TimeAxisView* track)
+{
+	if (dynamic_cast<VCATimeAxisView*> (track)) {
+		return;
+	}
+
+	TrackViewList tvl;
+	tvl.push_back (track);
+	set (tvl);
+}
+
+void
+Selection::set (const TrackViewList& track_list)
+{
+	TrackViewList t = add_grouped_tracks (track_list);
+
+	CoreSelection& selection (editor->session()->selection());
+	PresentationInfo::ChangeSuspender cs;
+
+	selection.clear_stripables ();
+
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		boost::shared_ptr<Stripable> s = (*i)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		selection.add (s, c);
+	}
+}
+
+void
+Selection::clear_tracks (bool)
+{
+	Session* s = editor->session();
+	if (s) {
+		CoreSelection& selection (s->selection());
+		selection.clear_stripables ();
+	}
+}
+
+bool
+Selection::selected (TimeAxisView* tv) const
+{
+	Session* session = editor->session();
+
+	if (!session) {
+		return false;
+	}
+
+	CoreSelection& selection (session->selection());
+	boost::shared_ptr<Stripable> s = tv->stripable ();
+	boost::shared_ptr<AutomationControl> c = tv->control ();
+
+	if (c) {
+		return selection.selected (c);
+	}
+
+	return selection.selected (s);
+}
+
+TrackViewList
+Selection::add_grouped_tracks (TrackViewList const & t)
+{
+	TrackViewList added;
+
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		if (dynamic_cast<VCATimeAxisView*> (*i)) {
+			continue;
+		}
+
+		/* select anything in the same select-enabled route group */
+		ARDOUR::RouteGroup* rg = (*i)->route_group ();
+
+		if (rg && rg->is_active() && rg->is_select ()) {
+
+			TrackViewList tr = editor->axis_views_from_routes (rg->route_list ());
+
+			for (TrackViewList::iterator j = tr.begin(); j != tr.end(); ++j) {
+
+				/* Do not add the trackview passed in as an
+				 * argument, because we want that to be on the
+				 * end of the list.
+				 */
+
+				if (*j != *i) {
+					if (!added.contains (*j)) {
+						added.push_back (*j);
+					}
+				}
+			}
+		}
+	}
+
+	/* now add the the trackview's passed in as actual arguments */
+	added.insert (added.end(), t.begin(), t.end());
+
+	return added;
+}
+
+#if 0
+static void dump_tracks (Selection const & s)
+{
+	cerr << "--TRACKS [" << s.tracks.size() << ']' << ":\n";
+	for (TrackViewList::const_iterator x = s.tracks.begin(); x != s.tracks.end(); ++x) {
+		cerr << (*x)->name() << ' ' << (*x)->stripable() << " C = " << (*x)->control() << endl;
+	}
+	cerr << "///\n";
+}
+#endif
+
+void
+Selection::core_selection_changed (PropertyChange const & what_changed)
+{
+	PropertyChange pc;
+
+	pc.add (Properties::selected);
+
+	if (!what_changed.contains (pc)) {
+		return;
+	}
+
+	CoreSelection& selection (editor->session()->selection());
+
+	if (selection.selected()) {
+		clear_objects();  // enforce object/range exclusivity
+	}
+
+	tracks.clear (); // clear stage for whatever tracks are now selected (maybe none)
+
+	TrackViewList const & tvl (editor->get_track_views ());
+
+	for (TrackViewList::const_iterator x = tvl.begin(); x != tvl.end(); ++x) {
+
+		boost::shared_ptr<Stripable> s = (*x)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*x)->control ();
+
+		if (!s) {
+			continue;
+		}
+
+		TimeAxisView* tav = editor->time_axis_view_from_stripable (s);
+
+		if (!tav) {
+			continue;
+		}
+
+		if ((c && selection.selected (c)) || selection.selected (s)) {
+			tracks.push_back (tav);
+		}
+
+		TimeAxisView::Children kids = tav->get_child_list ();
+
+		for (TimeAxisView::Children::iterator j = kids.begin(); j != kids.end(); ++j) {
+			s = (*j)->stripable ();
+			c = (*j)->control ();
+
+			if ((c && selection.selected (c)) || selection.selected (s)) {
+				tracks.push_back ((*j).get());
+			}
+		}
+
 	}
 }

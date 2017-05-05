@@ -642,6 +642,8 @@ Editor::Editor ()
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
 
+	PresentationInfo::Change.connect (*this, MISSING_INVALIDATOR, boost::bind (&Editor::presentation_info_changed, this, _1), gui_context());
+
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
 	_regions = new EditorRegions (this);
@@ -1038,7 +1040,7 @@ Editor::control_unselect ()
 void
 Editor::control_select (boost::shared_ptr<Stripable> s, Selection::Operation op)
 {
-	TimeAxisView* tav = axis_view_from_stripable (s);
+	TimeAxisView* tav = time_axis_view_from_stripable (s);
 
 	if (tav) {
 		switch (op) {
@@ -1371,6 +1373,12 @@ Editor::set_session (Session *t)
 	XMLNode* node = ARDOUR_UI::instance()->editor_settings();
 	set_state (*node, Stateful::loading_state_version);
 
+	/* catch up on selection state, etc. */
+
+	PropertyChange sc;
+	sc.add (Properties::selected);
+	presentation_info_changed (sc);
+
 	/* catch up with the playhead */
 
 	_session->request_locate (playhead_cursor->current_frame ());
@@ -1429,25 +1437,6 @@ Editor::set_session (Session *t)
 
 	default:
 		break;
-	}
-
-	/* catch up on selection of stripables (other selection state is lost
-	 * when a session is closed
-	 */
-
-	StripableList sl;
-	TrackViewList tl;
-	_session->get_stripables (sl);
-	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
-		if ((*s)->presentation_info().selected()) {
-			RouteTimeAxisView* rtav = get_route_view_by_route_id ((*s)->id());
-			if (rtav) {
-				tl.push_back (rtav);
-			}
-		}
-	}
-	if (!tl.empty()) {
-		selection->set (tl);
 	}
 
 	/* register for undo history */
@@ -5246,8 +5235,8 @@ Editor::region_view_removed ()
 	_summary->set_background_dirty ();
 }
 
-TimeAxisView*
-Editor::axis_view_from_stripable (boost::shared_ptr<Stripable> s) const
+AxisView*
+Editor::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
 {
 	for (TrackViewList::const_iterator j = track_views.begin (); j != track_views.end(); ++j) {
 		if ((*j)->stripable() == s) {
@@ -5258,6 +5247,17 @@ Editor::axis_view_from_stripable (boost::shared_ptr<Stripable> s) const
 	return 0;
 }
 
+AxisView*
+Editor::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
+{
+	for (TrackViewList::const_iterator j = track_views.begin (); j != track_views.end(); ++j) {
+		if ((*j)->control() == c) {
+			return *j;
+		}
+	}
+
+	return 0;
+}
 
 TrackViewList
 Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
@@ -5265,7 +5265,7 @@ Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
 	TrackViewList t;
 
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		TimeAxisView* tv = axis_view_from_stripable (*i);
+		TimeAxisView* tv = time_axis_view_from_stripable (*i);
 		if (tv) {
 			t.push_back (tv);
 		}

@@ -40,6 +40,8 @@
 
 #include "pbd/statefuldestructible.h"
 
+#include "ardour/session_handle.h"
+
 #include "canvas/fwd.h"
 
 #include "gtkmm2ext/actions.h"
@@ -47,6 +49,7 @@
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "axis_provider.h"
 #include "editing.h"
 #include "selection.h"
 
@@ -105,8 +108,8 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtkmm2ext::Tabbable {
-public:
+class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider {
+  public:
 	PublicEditor (Gtk::Widget& content);
 	virtual ~PublicEditor ();
 
@@ -122,9 +125,6 @@ public:
 	 * @param s Session to connect to.
 	 */
 	virtual void set_session (ARDOUR::Session* s) = 0;
-
-	/** @return The Session that we are editing, or 0 */
-	virtual ARDOUR::Session* session () const = 0;
 
 	/** Set the snap type.
 	 * @param t Snap type (defined in editing_syms.h)
@@ -353,6 +353,8 @@ public:
 
 	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
 
+	virtual TimeAxisView* time_axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable> s) const = 0;
+
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
 	virtual RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
 	virtual RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
@@ -422,15 +424,13 @@ public:
 
 	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
-	virtual TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
-
 	virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
 	virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (framepos_t) = 0;
 
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
-	virtual TrackViewList const & get_track_views () = 0;
+	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual DragManager* drags () const = 0;
 	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;

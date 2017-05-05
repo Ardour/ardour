@@ -1443,7 +1443,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
 			}
 			audio_tracks = _editor->session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
-			tav =_editor->axis_view_from_stripable (audio_tracks.front());
+			tav =_editor->time_axis_view_from_stripable (audio_tracks.front());
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
 			list<boost::shared_ptr<MidiTrack> > midi_tracks;
@@ -1452,7 +1452,7 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 			                                                  boost::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
 			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
-			tav = _editor->axis_view_from_stripable (midi_tracks.front());
+			tav = _editor->time_axis_view_from_stripable (midi_tracks.front());
 		}
 
 		if (tav) {

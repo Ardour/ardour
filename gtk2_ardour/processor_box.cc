@@ -76,9 +76,9 @@
 #include "plugin_ui.h"
 #include "port_insert_ui.h"
 #include "processor_box.h"
+#include "processor_selection.h"
 #include "public_editor.h"
 #include "return_ui.h"
-#include "route_processor_selection.h"
 #include "script_selector.h"
 #include "send_ui.h"
 #include "timers.h"
@@ -1807,14 +1807,14 @@ static std::list<Gtk::TargetEntry> drag_targets_noplugin()
 }
 
 ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelector*()> get_plugin_selector,
-			    RouteProcessorSelection& rsel, MixerStrip* parent, bool owner_is_mixer)
+			    ProcessorSelection& psel, MixerStrip* parent, bool owner_is_mixer)
 	: _parent_strip (parent)
 	, _owner_is_mixer (owner_is_mixer)
 	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
 	, _placement (-1)
 	, _visible_prefader_processors (0)
-	, _rr_selection(rsel)
+	, _p_selection(psel)
 	, processor_display (drop_targets())
 	, _redisplay_pending (false)
 {
@@ -2200,7 +2200,7 @@ ProcessorBox::show_processor_menu (int arg)
 
 	const bool sensitive = !processor_display.selection().empty() && ! stub_processor_selected ();
 
-	paste_action->set_sensitive (!_rr_selection.processors.empty());
+	paste_action->set_sensitive (!_p_selection.processors.empty());
 	cut_action->set_sensitive (sensitive && can_cut ());
 	copy_action->set_sensitive (sensitive);
 	delete_action->set_sensitive (sensitive || stub_processor_selected ());
@@ -3165,7 +3165,7 @@ ProcessorBox::cut_processors (const ProcSelection& to_be_removed)
 		return;
 	}
 
-	_rr_selection.set (node);
+	_p_selection.set (node);
 
 	no_processor_redisplay = false;
 	redisplay_processors ();
@@ -3189,7 +3189,7 @@ ProcessorBox::copy_processors (const ProcSelection& to_be_copied)
 		}
 	}
 
-	_rr_selection.set (node);
+	_p_selection.set (node);
 }
 
 void
@@ -3304,22 +3304,22 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 void
 ProcessorBox::paste_processors ()
 {
-	if (_rr_selection.processors.empty()) {
+	if (_p_selection.processors.empty()) {
 		return;
 	}
 
-	paste_processor_state (_rr_selection.processors.get_node().children(), boost::shared_ptr<Processor>());
+	paste_processor_state (_p_selection.processors.get_node().children(), boost::shared_ptr<Processor>());
 }
 
 void
 ProcessorBox::paste_processors (boost::shared_ptr<Processor> before)
 {
 
-	if (_rr_selection.processors.empty()) {
+	if (_p_selection.processors.empty()) {
 		return;
 	}
 
-	paste_processor_state (_rr_selection.processors.get_node().children(), before);
+	paste_processor_state (_p_selection.processors.get_node().children(), before);
 }
 
 void

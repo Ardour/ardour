@@ -47,6 +47,7 @@
 #include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "axis_provider.h"
 #include "enums.h"
 #include "route_processor_selection.h"
 
@@ -76,7 +77,7 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
   public:
 	static Mixer_UI* instance();
@@ -188,7 +189,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
 	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
-	AxisView* axis_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+
+	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void hide_all_strips (bool with_select);
 	void unselect_all_strips();

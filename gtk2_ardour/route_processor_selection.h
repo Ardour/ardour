@@ -26,34 +26,36 @@
 #include "processor_selection.h"
 #include "route_ui_selection.h"
 
-class RouteProcessorSelection : public PBD::ScopedConnectionList, public sigc::trackable
+namespace ARDOUR {
+	class SessionHandlePtr;
+}
+
+class AxisViewProvider;
+
+class RouteProcessorSelection : public ProcessorSelection
 {
   public:
-	ProcessorSelection processors;
 	AxisViewSelection  axes;
 
-	RouteProcessorSelection();
+	RouteProcessorSelection (ARDOUR::SessionHandlePtr&, AxisViewProvider&);
 
 	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
-
-	sigc::signal<void> ProcessorsChanged;
 
 	void clear ();
 	bool empty();
 
-	void set (XMLNode* node);
-	void add (XMLNode* node);
-
 	void set (AxisView*);
 	void add (AxisView*);
 	void remove (AxisView*);
-
-	void clear_processors ();
-	void clear_routes ();
-
 	bool selected (AxisView*);
 
+	void clear_routes ();
+
+	void presentation_info_changed (PBD::PropertyChange const & what_changed);
+
   private:
+	ARDOUR::SessionHandlePtr& shp;
+	AxisViewProvider& avp;
 	void removed (AxisView*);
 };
 
