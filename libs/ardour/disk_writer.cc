@@ -403,9 +403,9 @@ XMLNode&
 DiskWriter::state (bool full)
 {
 	XMLNode& node (DiskIOProcessor::state (full));
-	node.add_property(X_("type"), X_("diskwriter"));
-	node.add_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
-	node.add_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
+	node.set_property(X_("type"), X_("diskwriter"));
+	node.set_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
+	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
 	return node;
 }
 
@@ -418,15 +418,15 @@ DiskWriter::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 #if 0 // XXX DISK
-	if ((prop = node.property (X_("capture-alignment"))) != 0) {
+	if (!node.property (X_("capture-alignment"))) != 0) {
                 set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
                 set_align_choice (Automatic, true);
         }
 #endif
 
-	if ((prop = node.property ("record-safe")) != 0) {
-	    _record_safe = PBD::string_is_affirmative (prop->value()) ? 1 : 0;
+	if (!node.get_property (X_("record-safe"), _record_safe)) {
+		_record_safe = false;
 	}
 
 	return 0;
