@@ -287,54 +287,29 @@ FaderPort8::button_solo_clear ()
 void
 FaderPort8::button_mute_clear ()
 {
-	StripableList all;
-	session->get_stripables (all);
-	boost::shared_ptr<ControlList> cl (new ControlList);
-	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
-			continue;
-		}
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
-		if (r && !r->active()) {
-			continue;
-		}
-		boost::shared_ptr<AutomationControl> ac = (*i)->mute_control();
-		if (ac && ac->get_value () > 0) {
-			cl->push_back (ac);
-		}
-	}
-
-	bool mute = false;
 #ifdef FP8_MUTESOLO_UNDO
-	if (cl->empty ()) {
+	if (session->muted ()) {
+		_mute_state = session->cancel_all_mute ();
+	} else {
 		/* restore mute */
+		boost::shared_ptr<ControlList> cl (new ControlList);
 		for (std::vector <boost::weak_ptr<AutomationControl> >::const_iterator i = _mute_state.begin(); i != _mute_state.end(); ++i) {
 			boost::shared_ptr<AutomationControl> ac = (*i).lock();
-			if (ac) {
-				cl->push_back (ac);
+			if (!ac) {
+				continue;
+			}
+			cl->push_back (ac);
+			if (ac->automation_state() == Touch && !ac->touching ()) {
+				ac->start_touch (ac->session().transport_frame());
 			}
 		}
-		mute = true;
-	} else {
-		/* save muted control IDs */
-		_mute_state.clear ();
-		for (ControlList::const_iterator i = cl->begin (); i != cl->end (); ++i) {
-			_mute_state.push_back (boost::weak_ptr<AutomationControl>(*i));
+		if (!cl->empty()) {
+			session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
 		}
 	}
+#else
+	session->cancel_all_mute ();
 #endif
-
-	if (cl->empty ()) {
-		return;
-	}
-
-	for (ControlList::const_iterator i = cl->begin (); i != cl->end (); ++i) {
-		if ((*i)->automation_state() == Touch && !(*i)->touching ()) {
-			(*i)->start_touch ((*i)->session().transport_frame());
-		}
-	}
-
-	session->set_controls (cl, mute ? 1.0 : 0.0, mute ? PBD::Controllable::NoGroup : PBD::Controllable::UseGroup);
 }
 
 void

@@ -196,23 +196,7 @@ FaderPort8::notify_solo_changed ()
 void
 FaderPort8::notify_mute_changed ()
 {
-	bool muted = false;
-	StripableList all;
-	session->get_stripables (all);
-	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
-			continue;
-		}
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
-		if (r && !r->active()) {
-			continue;
-		}
-		boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
-		if (mc && mc->muted ()) {
-			muted = true;
-			break;
-		}
-	}
+	bool muted = session->muted ();
 #ifdef FP8_MUTESOLO_UNDO
 	if (muted) {
 		_mute_state.clear ();
