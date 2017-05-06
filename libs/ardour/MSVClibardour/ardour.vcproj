@@ -988,6 +988,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\selection.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\send.cc"
 				>
 			</File>
@@ -2279,6 +2283,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\search_paths.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\selection.h"
 				>
 			</File>
 			<File
