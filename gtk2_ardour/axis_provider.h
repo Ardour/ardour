@@ -30,7 +30,8 @@ class AxisView;
 
 class AxisViewProvider
 {
-  public:
+public:
+	virtual ~AxisViewProvider () {}
 	virtual AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
 	virtual AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const = 0;
 };
