@@ -38,7 +38,7 @@ class Session;
 class Stripable;
 class PresentationInfo;
 
-class CoreSelection : public PBD::Stateful {
+class LIBARDOUR_API CoreSelection : public PBD::Stateful {
   public:
 	CoreSelection (Session& s);
 	~CoreSelection ();
