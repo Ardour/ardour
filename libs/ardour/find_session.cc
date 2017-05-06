@@ -218,12 +218,9 @@ inflate_session (const std::string& zipfile, const std::string& target_dir, stri
 
 		size_t sep = bn.find_first_of ('/');
 
-		if (sep == string::npos) {
-			error << _("Archive does not contain a session folder") << endmsg;
-			return 3;
+		if (sep != string::npos) {
+			bn = bn.substr (0, sep);
 		}
-
-		bn = bn.substr (0, sep);
 
 		if (bn.empty ()) {
 			error << _("Archive does not contain a valid session structure") << endmsg;
