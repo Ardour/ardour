@@ -13,7 +13,7 @@
 
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+    Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 */
 
@@ -23,34 +23,34 @@
 #include "pbd/enumwriter.h"
 #include "pbd/string_convert.h"
 
-#define TO_STRING_FULL(Type)                                                                       \
-	template <>                                                                                      \
-	inline bool to_string (Type val, std::string& str)                                               \
-	{                                                                                                \
-		str = enum_2_string (val);                                                                     \
-		return true;                                                                                   \
-	}
+#define TO_STRING_FULL(Type)                                                  \
+  template <>                                                                 \
+  inline bool to_string (Type val, std::string& str)                          \
+  {                                                                           \
+    str = enum_2_string (val);                                                \
+    return true;                                                              \
+  }
 
-#define STRING_TO_FULL(Type)                                                                       \
-	template <>                                                                                      \
-	inline bool string_to (const std::string& str, Type& val)                                        \
-	{                                                                                                \
-		val = (Type)string_2_enum (str, val);                                                          \
-		return true;                                                                                   \
-	}
+#define STRING_TO_FULL(Type)                                                  \
+  template <>                                                                 \
+  inline bool string_to (const std::string& str, Type& val)                   \
+  {                                                                           \
+    val = (Type)string_2_enum (str, val);                                     \
+    return true;                                                              \
+  }
 
 #define TO_STRING(Type) \
-	template<> inline std::string to_string (Type val) \
-	{ return enum_2_string (val); }
+  template<> inline std::string to_string (Type val)                          \
+  { return enum_2_string (val); }
 
 #define STRING_TO(Type) \
-	template<> inline Type string_to (const std::string& str) \
-	{ Type val; return (Type) string_2_enum (str, val); }
+  template<> inline Type string_to (const std::string& str)                   \
+  { Type val; return (Type) string_2_enum (str, val); }
 
-#define DEFINE_ENUM_CONVERT(Type)                                                                  \
-	TO_STRING_FULL (Type)                                                                            \
-	STRING_TO_FULL (Type)                                                                            \
-	TO_STRING (Type)                                                                                 \
-	STRING_TO (Type)
+#define DEFINE_ENUM_CONVERT(Type)                                             \
+  TO_STRING_FULL (Type)                                                       \
+  STRING_TO_FULL (Type)                                                       \
+  TO_STRING (Type)                                                            \
+  STRING_TO (Type)
 
 #endif // PBD_ENUM_CONVERT_H
