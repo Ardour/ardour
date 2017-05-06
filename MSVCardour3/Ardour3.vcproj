@@ -1008,6 +1008,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\processor_selection.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\progress_reporter.cc"
 				>
 			</File>
@@ -1447,6 +1451,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\automation_time_axis.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\axis_provider.h"
 				>
 			</File>
 			<File
