@@ -236,7 +236,7 @@ CoreSelection::remove_control_by_id (PBD::ID const & id)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
+	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 		if ((*x).controllable == id) {
 			_stripables.erase (x);
 			return;
@@ -249,7 +249,7 @@ CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
+	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 		if ((*x).stripable == id) {
 			_stripables.erase (x);
 			return;
