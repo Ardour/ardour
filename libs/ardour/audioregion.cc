@@ -1470,7 +1470,7 @@ AudioRegion::rms (Progress* p) const
 			}
 		}
 	}
-	return sqrt (rms / (double)(total * n_chan));
+	return sqrt (2. * rms / (double)(total * n_chan));
 }
 
 /** Normalize using a given maximum amplitude and target, so that region
