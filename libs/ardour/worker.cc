@@ -22,6 +22,7 @@
 
 #include "ardour/worker.h"
 #include "pbd/error.h"
+#include "pbd/compose.h"
 
 #include <glibmm/timer.h>
 
@@ -32,7 +33,7 @@ Worker::Worker(Workee* workee, uint32_t ring_size, bool threaded)
 	, _requests(threaded ? new RingBuffer<uint8_t>(ring_size) : NULL)
 	, _responses(new RingBuffer<uint8_t>(ring_size))
 	, _response((uint8_t*)malloc(ring_size))
-	, _sem("worker_semaphore", 0)
+	, _sem(string_compose ("worker_semaphore%1", this).c_str(), 0)
 	, _thread(NULL)
 	, _exit(false)
 	, _synchronous(!threaded)
