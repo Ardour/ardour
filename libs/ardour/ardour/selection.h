@@ -75,6 +75,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
   protected:
 	friend class Stripable;
+	friend class Session;
 	void remove_stripable_by_id (PBD::ID const &);
 
   private:
