@@ -1549,10 +1549,12 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 			   occur either.
 			*/
 			if (bs == press) {
+				update_led (surface, button, on);
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
 				access_action (action);
+			} else {
+				update_led (surface, button, off);
 			}
-
 			return;
 
 		} else {
