@@ -249,10 +249,14 @@ CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
+	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ) {
 		if ((*x).stripable == id) {
-			_stripables.erase (x);
-			return;
+			x = _stripables.erase (x);
+			/* keep going because there may be more than 1 pair of
+			   stripable/automation-control in the selection.
+			*/
+		} else {
+			++x;
 		}
 	}
 }
