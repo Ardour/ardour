@@ -617,50 +617,51 @@ MackieControlProtocol::bank_release (Button& b, uint32_t basic_bank_num)
 	return on;
 }
 
+/*  F-KEYS are only used for actions that are bound from the control panel; no need to address them here
 LedState
 MackieControlProtocol::F1_press (Button &b)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F1_release (Button &b)
 {
-	return bank_release (b, 0);
+	return off;
 }
 LedState
 MackieControlProtocol::F2_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F2_release (Button &b)
 {
-	return bank_release (b, 1);
+	return off;
 }
 LedState
 MackieControlProtocol::F3_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F3_release (Button &b)
 {
-	return bank_release (b, 2);
+	return off;
 }
 LedState
 MackieControlProtocol::F4_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F4_release (Button &b)
 {
-	return bank_release (b, 3);
+	return off;
 }
 LedState
 MackieControlProtocol::F5_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F5_release (Button &)
@@ -670,7 +671,7 @@ MackieControlProtocol::F5_release (Button &)
 LedState
 MackieControlProtocol::F6_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F6_release (Button &)
@@ -680,7 +681,7 @@ MackieControlProtocol::F6_release (Button &)
 LedState
 MackieControlProtocol::F7_press (Button &)
 {
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F7_release (Button &)
@@ -690,14 +691,15 @@ MackieControlProtocol::F7_release (Button &)
 LedState
 MackieControlProtocol::F8_press (Button &)
 {
-	CloseDialog (); /* EMIT SIGNAL */
-	return off;
+	return on;
 }
 LedState
 MackieControlProtocol::F8_release (Button &)
 {
 	return off;
 }
+*/
+
 
 /* UNIMPLEMENTED */
 
