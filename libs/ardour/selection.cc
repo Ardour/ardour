@@ -251,7 +251,7 @@ CoreSelection::remove_stripable_by_id (PBD::ID const & id)
 
 	for (SelectedStripables::iterator x = _stripables.begin(); x != _stripables.end(); ) {
 		if ((*x).stripable == id) {
-			x = _stripables.erase (x);
+			_stripables.erase (x++);
 			/* keep going because there may be more than 1 pair of
 			   stripable/automation-control in the selection.
 			*/
