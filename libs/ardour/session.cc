@@ -3825,21 +3825,22 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 
 	routes.flush ();
 
-	/* try to cause everyone to drop their references
-	 * and unregister ports from the backend
+	/* remove these routes from the selection if appropriate, and signal
+	 * the change *before* we call DropReferences for them.
 	 */
 
 	if (send_selected && !deletion_in_progress()) {
 		for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 			_selection->remove_stripable_by_id ((*iter)->id());
 		}
-		PropertyChange so;
-		so.add (Properties::order);
-		if (send_selected) {
-			so.add (Properties::selected);
-		}
-		PresentationInfo::Change (so);
+		PropertyChange pc;
+		pc.add (Properties::selected);
+		PresentationInfo::Change (pc);
 	}
+
+	/* try to cause everyone to drop their references
+	 * and unregister ports from the backend
+	 */
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 		(*iter)->drop_references ();
@@ -3849,6 +3850,9 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		return;
 	}
 
+	PropertyChange pc;
+	pc.add (Properties::selected);
+	PresentationInfo::Change (pc);
 
 	/* save the new state of the world */
 
