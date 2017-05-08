@@ -227,6 +227,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
+	int set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_message msg);
+
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);

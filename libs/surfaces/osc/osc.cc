@@ -862,6 +862,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	len = strlen (path);
 
+	if (len >= 13 && !strcmp (&path[len-15], "/automation")) {
+		set_automation (path, len, argv, argc, msg);
+		ret = 0;
+
+	} else
 	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
@@ -2179,6 +2184,18 @@ OSC::route_get_receives(lo_message msg) {
 }
 
 // strip calls
+
+int
+OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+	//parse path first to find inlined parameter (or not)
+
+
+
+	return 0;
+}
+
 int
 OSC::route_mute (int ssid, int yn, lo_message msg)
 {
