@@ -862,7 +862,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	len = strlen (path);
 
-	if (len >= 13 && !strcmp (&path[len-15], "/automation")) {
+	if (strstr (path, "/automation")) {
 		set_automation (path, len, argv, argc, msg);
 		ret = 0;
 
@@ -2189,9 +2189,44 @@ int
 OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_message msg)
 {
 	if (!session) return -1;
-	//parse path first to find inlined parameter (or not)
 
 
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
+	uint32_t ctr = 0;
+	uint32_t aut = 0;
+
+	//parse path first to find stripable
+	if (!strncmp (path, "/strip/", 7)) {
+		// find ssid and stripable
+		if (argc > 1) {
+			strp = get_strip (argv[0]->i, get_address (msg));
+			aut = argv[1]->i;
+		} else {
+			uint32_t ssid = atoi (&(strrchr (path, '/' ))[1]);
+			strp = get_strip (ssid, get_address (msg));
+			aut = argv[0]->i;
+		}
+		ctr = 7;
+	} else if (!strncmp (path, "/select/", 8)) {
+		if (sur->expand_enable && sur->expand) {
+			strp = get_strip (sur->expand, get_address (msg));
+		} else {
+			strp = ControlProtocol::first_selected_stripable();
+		}
+		aut = argv[0]->i;
+		ctr = 8;
+	} else {
+		return -1;
+	}
+	if (strp) {
+		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
+			std::cout << "Automation " << strp->name() << "'s gain" << " in mode: " << aut << "\n";
+		} else {
+			return -1;
+		}
+
+	}
 
 	return 0;
 }
