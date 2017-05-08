@@ -3851,7 +3851,7 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	}
 
 	PropertyChange pc;
-	pc.add (Properties::selected);
+	pc.add (Properties::order);
 	PresentationInfo::Change (pc);
 
 	/* save the new state of the world */
