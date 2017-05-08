@@ -673,6 +673,8 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 		strips.erase (i);
 	}
 
+	PBD::Unwinder<bool> uwi (ignore_reorder, true);
+
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[stripable_columns.strip] == strip) {
                         PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
@@ -685,7 +687,11 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
 {
-	_selection.presentation_info_changed (what_changed);
+	cerr << ">>>> MUI::pic\n";
+
+	if (what_changed.contains (Properties::selected)) {
+		_selection.presentation_info_changed (what_changed);
+	}
 
 	PropertyChange soh;
 	soh.add (Properties::selected);
