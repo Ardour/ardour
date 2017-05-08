@@ -836,7 +836,6 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 
 	{
 		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
-		cerr << "Should ignore model/selection change\n";
 		_display.set_model (_model);
 	}
 

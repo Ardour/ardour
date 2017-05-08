@@ -3842,7 +3842,6 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	}
 
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
-		cerr << "Drop references to " << (*iter)->name() << endl;
 		(*iter)->drop_references ();
 	}
 

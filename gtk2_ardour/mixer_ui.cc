@@ -687,8 +687,6 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 void
 Mixer_UI::presentation_info_changed (PropertyChange const & what_changed)
 {
-	cerr << ">>>> MUI::pic\n";
-
 	if (what_changed.contains (Properties::selected)) {
 		_selection.presentation_info_changed (what_changed);
 	}
