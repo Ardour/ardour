@@ -77,6 +77,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 	, _edit_by_click_field (false)
 	, _negative_allowed (false)
 	, edit_is_negative (false)
+	, _limit_pos (INT64_MAX - 1)
 	, _with_info (with_info)
 	, editing_attr (0)
 	, foreground_attr (0)
@@ -819,6 +820,12 @@ AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 		when = when - offset;
 	}
 
+	if (when > _limit_pos) {
+		when = _limit_pos;
+	} else if (when < -_limit_pos) {
+		when = -_limit_pos;
+	}
+
 	if (when == last_when && !force) {
 #if 0 // XXX return if no change and no change forced. verify Aug/2014
 		if (_mode != Timecode && _mode != MinSec) {
@@ -944,6 +951,24 @@ AudioClock::set_slave_info ()
 }
 
 void
+AudioClock::set_out_of_bounds (bool negative)
+{
+	if (is_duration) {
+		if (negative) {
+			_layout->set_text (" >>> -- <<< ");
+		} else {
+			_layout->set_text (" >>> ++ <<< ");
+		}
+	} else {
+		if (negative) {
+			_layout->set_text (" <<<<<<<<<< ");
+		} else {
+			_layout->set_text (" >>>>>>>>>> ");
+		}
+	}
+}
+
+void
 AudioClock::set_frames (framepos_t when, bool /*force*/)
 {
 	char buf[32];
@@ -961,13 +986,15 @@ AudioClock::set_frames (framepos_t when, bool /*force*/)
 		negative = true;
 	}
 
-	if (negative) {
+	if (when >= _limit_pos) {
+		set_out_of_bounds (negative);
+	} else if (negative) {
 		snprintf (buf, sizeof (buf), "-%10" PRId64, when);
+		_layout->set_text (buf);
 	} else {
 		snprintf (buf, sizeof (buf), " %10" PRId64, when);
+		_layout->set_text (buf);
 	}
-
-	_layout->set_text (buf);
 
 	if (_with_info) {
 		framecnt_t rate = _session->frame_rate();
@@ -1038,9 +1065,13 @@ AudioClock::set_minsec (framepos_t when, bool /*force*/)
 		return;
 	}
 
-	print_minsec (when, buf, sizeof (buf), _session->frame_rate());
+	if (when >= _limit_pos || when <= -_limit_pos) {
+		set_out_of_bounds (when < 0);
+	} else {
+		print_minsec (when, buf, sizeof (buf), _session->frame_rate());
+		_layout->set_text (buf);
+	}
 
-	_layout->set_text (buf);
 	set_slave_info();
 }
 
@@ -1060,6 +1091,11 @@ AudioClock::set_timecode (framepos_t when, bool /*force*/)
 	if (when < 0) {
 		when = -when;
 		negative = true;
+	}
+	if (when >= _limit_pos) {
+		set_out_of_bounds (negative);
+		set_slave_info();
+		return;
 	}
 
 	if (is_duration) {
@@ -1082,7 +1118,7 @@ AudioClock::set_bbt (framepos_t when, framecnt_t offset, bool /*force*/)
 	Timecode::BBT_Time BBT;
 	bool negative = false;
 
-	if (_off) {
+	if (_off || when >= _limit_pos || when < -_limit_pos) {
 		_layout->set_text (" ---|--|----");
 		_left_btn.set_text ("", true);
 		_right_btn.set_text ("", true);
@@ -1186,6 +1222,11 @@ AudioClock::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
+		int64_t limit_sec = UIConfiguration::instance().get_clock_display_limit ();
+		if (limit_sec > 0) {
+			_limit_pos = (framecnt_t) floor (limit_sec * _session->frame_rate());
+		}
 
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
 		_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());

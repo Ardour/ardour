@@ -60,6 +60,7 @@ UI_CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
 UI_CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
 UI_CONFIG_VARIABLE (bool, primary_clock_delta_edit_cursor, "primary-clock-delta-edit-cursor", false)
 UI_CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta-edit-cursor", false)
+UI_CONFIG_VARIABLE (uint64_t, clock_display_limit, "clock-display-limit", 2592000) /* seconds; default 30days (720h), 0 = unlimited */
 UI_CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 UI_CONFIG_VARIABLE (bool, editor_stereo_only_meters, "editor-stereo-only-meters", false)
 UI_CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)

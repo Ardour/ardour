@@ -130,6 +130,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _negative_allowed;
 	bool             edit_is_negative;
 
+	framepos_t       _limit_pos;
+
 	Glib::RefPtr<Pango::Layout> _layout;
 
 	bool         _with_info;
@@ -207,6 +209,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_bbt (framepos_t, ARDOUR::framecnt_t, bool);
 	void set_minsec (framepos_t, bool);
 	void set_frames (framepos_t, bool);
+	void set_out_of_bounds (bool negative);
 
 	void set_clock_dimensions (Gtk::Requisition&);
 
