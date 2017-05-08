@@ -3719,6 +3719,7 @@ void
 Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 {
 	bool mute_changed = false;
+	bool send_selected = false;
 
 	{ // RCU Writer scope
 		PBD::Unwinder<bool> uw_flag (_route_deletion_in_progress, true);
@@ -3726,6 +3727,10 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 		boost::shared_ptr<RouteList> rs = writer.get_copy ();
 
 		for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+
+			if (_selection->selected (*iter)) {
+				send_selected = true;
+			}
 
 			if (*iter == _master_out) {
 				continue;
@@ -3824,19 +3829,27 @@ Session::remove_routes (boost::shared_ptr<RouteList> routes_to_remove)
 	 * and unregister ports from the backend
 	 */
 
+	if (send_selected && !deletion_in_progress()) {
+		for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
+			_selection->remove_stripable_by_id ((*iter)->id());
+		}
+		PropertyChange so;
+		so.add (Properties::order);
+		if (send_selected) {
+			so.add (Properties::selected);
+		}
+		PresentationInfo::Change (so);
+	}
+
 	for (RouteList::iterator iter = routes_to_remove->begin(); iter != routes_to_remove->end(); ++iter) {
 		cerr << "Drop references to " << (*iter)->name() << endl;
 		(*iter)->drop_references ();
 	}
 
-	if (_state_of_the_state & Deletion) {
+	if (deletion_in_progress()) {
 		return;
 	}
 
-	PropertyChange so;
-	so.add (Properties::selected);
-	so.add (Properties::order);
-	PresentationInfo::Change (PropertyChange (so));
 
 	/* save the new state of the world */
 
