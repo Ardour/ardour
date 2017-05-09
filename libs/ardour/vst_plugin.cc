@@ -379,7 +379,7 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 
 		/* old style */
 
-		char label[64];
+		char label[VestigeMaxLabelLen];
 		/* some VST plugins expect this buffer to be zero-filled */
 		memset (label, 0, sizeof (label));
 
@@ -593,7 +593,7 @@ VSTPlugin::do_remove_preset (string name)
 string
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
-	char name[64];
+	char name[VestigeMaxLabelLen];
 	if (param.id() == UINT32_MAX - 1) {
 		strcpy (name, _("Plugin Enable"));
 		return name;

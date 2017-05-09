@@ -682,8 +682,8 @@ vstfx_parse_vst_state (VSTState* vstfx)
 #endif
 
 	for (int i = 0; i < info->numParams; ++i) {
-		char name[64];
-		char label[64];
+		char name[VestigeMaxLabelLen];
+		char label[VestigeMaxLabelLen];
 
 		/* Not all plugins give parameters labels as well as names */
 

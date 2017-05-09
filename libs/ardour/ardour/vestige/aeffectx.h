@@ -204,7 +204,7 @@ struct _VstEvents
 enum Vestige2StringConstants
 {
 	VestigeMaxNameLen       = 64,
-	VestigeMaxLabelLen      = 64,
+	VestigeMaxLabelLen      = 128,
 	VestigeMaxShortLabelLen = 8,
 	VestigeMaxCategLabelLen = 24,
 	VestigeMaxFileNameLen   = 100
