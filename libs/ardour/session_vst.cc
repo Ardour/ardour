@@ -442,7 +442,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterGetProductString");
 		// fills <ptr> with a string with product name (max 64 char)
 		strcpy ((char*) ptr, PROGRAM_NAME);
-		return 0;
+		return 1;
 
 	case audioMasterGetVendorVersion:
 		SHOW_CALLBACK ("audioMasterGetVendorVersion");
