@@ -65,6 +65,7 @@ class OSCRouteObserver
 	void text_with_id (std::string path, uint32_t id, std::string name);
 	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void gain_automation (std::string path);
 	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	std::string set_path (std::string path);
 	void clear_strip (std::string path, float val);

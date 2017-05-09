@@ -75,12 +75,15 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 	}
 
 	if (feedback[1]) { // level controls
+		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
 		if (gainmode) {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/fader"), _strip->gain_control()), OSC::instance());
-			send_gain_message ("/strip/fader", _strip->gain_control());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::gain_automation, this, X_("/strip/fader")), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/fader"), gain_cont), OSC::instance());
+			gain_automation ("/strip/fader");
 		} else {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/gain"), _strip->gain_control()), OSC::instance());
-			send_gain_message ("/strip/gain", _strip->gain_control());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::gain_automation, this, X_("/strip/gain")), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/gain"), gain_cont), OSC::instance());
+			gain_automation ("/strip/gain");
 		}
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
@@ -357,6 +360,27 @@ OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
 }
+
+void
+OSCRouteObserver::gain_automation (string path)
+{
+	lo_message msg = lo_message_new ();
+	string apath = string_compose ("%1/automation", path);
+
+	if (feedback[2]) {
+		apath = set_path (apath);
+	} else {
+		lo_message_add_int32 (msg, ssid);
+	}
+
+	boost::shared_ptr<GainControl> control = _strip->gain_control();
+	lo_message_add_float (msg, control->alist()->automation_state());
+	send_gain_message (path, control);
+	lo_send_message (addr, apath.c_str(), msg);
+	lo_message_free (msg);
+}
+	
+
 
 string
 OSCRouteObserver::set_path (string path)
