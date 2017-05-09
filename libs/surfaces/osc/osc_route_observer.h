@@ -58,6 +58,8 @@ class OSCRouteObserver
 	float _last_meter;
 	uint32_t gain_timeout;
 	uint32_t trim_timeout;
+	float _last_gain;
+	ARDOUR::AutoState as;
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);

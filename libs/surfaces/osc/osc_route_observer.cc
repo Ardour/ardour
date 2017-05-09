@@ -39,10 +39,12 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 	: _strip (s)
 	,ssid (ss)
 	,sur (su)
+	,_last_gain (0.0)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
+	as = ARDOUR::AutoState::Off;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -220,6 +222,18 @@ OSCRouteObserver::tick ()
 			trim_timeout--;
 		}
 	}
+	if (feedback[1]) {
+		if (as != ARDOUR::AutoState::Off) {
+			if(_last_gain != _strip->gain_control()->get_value()) {
+				_last_gain = _strip->gain_control()->get_value();
+				if (gainmode) {
+					send_gain_message ("/strip/fader", _strip->gain_control());
+				} else {
+					send_gain_message ("/strip/fader", _strip->gain_control());
+				}
+			}
+		}
+	}
 
 }
 
@@ -374,13 +388,12 @@ OSCRouteObserver::gain_automation (string path)
 	}
 
 	boost::shared_ptr<GainControl> control = _strip->gain_control();
-	lo_message_add_float (msg, control->alist()->automation_state());
+	as = control->alist()->automation_state();
+	lo_message_add_float (msg, as);
 	send_gain_message (path, control);
 	lo_send_message (addr, apath.c_str(), msg);
 	lo_message_free (msg);
 }
-	
-
 
 string
 OSCRouteObserver::set_path (string path)
