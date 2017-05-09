@@ -2218,15 +2218,7 @@ OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_m
 						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Off);
 						ret = 0;
 						break;
-					case 'm':
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Off);
-						ret = 0;
-						break;
 					case 1:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Play);
-						ret = 0;
-						break;
-					case 'p':
 						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Play);
 						ret = 0;
 						break;
@@ -2234,15 +2226,7 @@ OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_m
 						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Write);
 						ret = 0;
 						break;
-					case 'w':
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Write);
-						ret = 0;
-						break;
 					case 3:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Touch);
-						ret = 0;
-						break;
-					case 't':
 						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Touch);
 						ret = 0;
 						break;
