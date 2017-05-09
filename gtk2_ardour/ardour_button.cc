@@ -978,6 +978,7 @@ ArdourButton::set_related_action (RefPtr<Action> act)
 	if (_action) {
 
 		action_tooltip_changed ();
+		action_sensitivity_changed ();
 
 		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (_action);
 		if (tact) {
