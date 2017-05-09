@@ -873,9 +873,8 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	} else
 	if (!strncmp (path, "/cue/", 5)) {
 
-		cue_parse (path, types, argv, argc, msg);
+		ret = cue_parse (path, types, argv, argc, msg);
 
-		ret = 0;
 	} else
 	if (!strncmp (path, "/access_action/", 15)) {
 		if (!(argc && !argv[0]->i)) {
@@ -933,99 +932,80 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	if (!strncmp (path, "/strip/gain/", 12) && strlen (path) > 12) {
 		// in dB
 		int ssid = atoi (&path[12]);
-		route_set_gain_dB (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = route_set_gain_dB (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/strip/fader/", 13) && strlen (path) > 13) {
 		// in fader position
 		int ssid = atoi (&path[13]);
-		route_set_gain_fader (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = route_set_gain_fader (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/strip/trimdB/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
-		route_set_trim_dB (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = route_set_trim_dB (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/strip/pan_stereo_position/", 27) && strlen (path) > 27) {
 		int ssid = atoi (&path[27]);
-		route_set_pan_stereo_position (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = route_set_pan_stereo_position (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/strip/mute/", 12) && strlen (path) > 12) {
 		int ssid = atoi (&path[12]);
-		route_mute (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_mute (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/solo/", 12) && strlen (path) > 12) {
 		int ssid = atoi (&path[12]);
-		route_solo (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_solo (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/monitor_input/", 21) && strlen (path) > 21) {
 		int ssid = atoi (&path[21]);
-		route_monitor_input (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_monitor_input (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/monitor_disk/", 20) && strlen (path) > 20) {
 		int ssid = atoi (&path[20]);
-		route_monitor_disk (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_monitor_disk (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/recenable/", 17) && strlen (path) > 17) {
 		int ssid = atoi (&path[17]);
-		route_recenable (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_recenable (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/record_safe/", 19) && strlen (path) > 19) {
 		int ssid = atoi (&path[19]);
-		route_recsafe (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = route_recsafe (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/expand/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
-		strip_expand (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = strip_expand (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
-		strip_gui_select (ssid, argv[0]->i, msg);
-		ret = 0;
+		ret = strip_gui_select (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/select/send_gain/", 18) && strlen (path) > 18) {
 		int ssid = atoi (&path[18]);
-		sel_sendgain (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_sendgain (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/select/send_fader/", 19) && strlen (path) > 19) {
 		int ssid = atoi (&path[19]);
-		sel_sendfader (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_sendfader (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/select/send_enable/", 20) && strlen (path) > 20) {
 		int ssid = atoi (&path[20]);
-		sel_sendenable (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_sendenable (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/select/eq_gain/", 16) && strlen (path) > 16) {
 		int ssid = atoi (&path[16]);
-		sel_eq_gain (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_eq_gain (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/select/eq_freq/", 16) && strlen (path) > 16) {
 		int ssid = atoi (&path[16]);
-		sel_eq_freq (ssid, argv[0]->f , msg);
-		ret = 0;
+		ret = sel_eq_freq (ssid, argv[0]->f , msg);
 	}
 	else if (!strncmp (path, "/select/eq_q/", 13) && strlen (path) > 13) {
 		int ssid = atoi (&path[13]);
-		sel_eq_q (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_eq_q (ssid, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/select/eq_shape/", 17) && strlen (path) > 17) {
 		int ssid = atoi (&path[17]);
-		sel_eq_shape (ssid, argv[0]->f, msg);
-		ret = 0;
+		ret = sel_eq_shape (ssid, argv[0]->f, msg);
 	}
 
 	if ((ret && _debugmode != Off)) {
@@ -4123,47 +4103,39 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 
 	if (!strncmp (path, "/cue/aux", 8)) {
 		// set our Aux bus
-		cue_set (argv[0]->i, msg);
-		ret = 0;
+		ret = cue_set (argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/cue/connect", 12)) {
 		// Connect to default Aux bus
 		if ((!argc) || argv[0]->i) {
-			cue_set (1, msg);
+			ret = cue_set (1, msg);
 		}
-		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/next_aux", 13)) {
 		// switch to next Aux bus
 		if ((!argc) || argv[0]->i) {
-			cue_next (msg);
+			ret = cue_next (msg);
 		}
-		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/previous_aux", 17)) {
 		// switch to previous Aux bus
 		if ((!argc) || argv[0]->i) {
-			cue_previous (msg);
+			ret = cue_previous (msg);
 		}
-		ret = 0;
 	}
 	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
 		int id = atoi (&path[16]);
-		cue_send_fader (id, argv[0]->f, msg);
-		ret = 0;
+		ret = cue_send_fader (id, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/cue/send/enable/", 17) && strlen (path) > 17) {
 		int id = atoi (&path[17]);
-		cue_send_enable (id, argv[0]->f, msg);
-		ret = 0;
+		ret = cue_send_enable (id, argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/cue/fader", 10)) {
-		cue_aux_fader (argv[0]->f, msg);
-		ret = 0;
+		ret = cue_aux_fader (argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/cue/mute", 9)) {
-		cue_aux_mute (argv[0]->f, msg);
-		ret = 0;
+		ret = cue_aux_mute (argv[0]->f, msg);
 	}
 
 	return ret;
@@ -4178,6 +4150,7 @@ OSC::cue_set (uint32_t aux, lo_message msg)
 int
 OSC::_cue_set (uint32_t aux, lo_address addr)
 {
+	int ret = 1;
 	OSCSurface *s = get_surface(addr);
 	s->bank_size = 0;
 	s->strip_types = 128;
@@ -4232,43 +4205,44 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 				// start cue observer
 				OSCCueObserver* co = new OSCCueObserver (stp, s->sends, addr);
 				cue_observers.push_back (co);
+				ret = 0;
 			}
 
 		}
 	}
 
-	return 0;
+	return ret;
 }
 
 int
 OSC::cue_next (lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
+	int ret = 1;
 
 	if (!s->cue) {
-		cue_set (1, msg);
-		return 0;
+		ret = cue_set (1, msg);
 	}
 	if (s->aux < s->nstrips) {
-		cue_set (s->aux + 1, msg);
+		ret = cue_set (s->aux + 1, msg);
 	} else {
-		cue_set (s->nstrips, msg);
+		ret = cue_set (s->nstrips, msg);
 	}
-	return 0;
+	return ret;
 }
 
 int
 OSC::cue_previous (lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
+	int ret = 1;
 	if (!s->cue) {
-		cue_set (1, msg);
-		return 0;
+		ret = cue_set (1, msg);
 	}
 	if (s->aux > 1) {
-		cue_set (s->aux - 1, msg);
+		ret = cue_set (s->aux - 1, msg);
 	}
-	return 0;
+	return ret;
 }
 
 boost::shared_ptr<Send>
@@ -4306,7 +4280,8 @@ OSC::cue_aux_fader (float position, lo_message msg)
 			}
 		}
 	}
-	return cue_float_message ("/cue/fader", 0, get_address (msg));
+	cue_float_message ("/cue/fader", 0, get_address (msg));
+	return -1;
 }
 
 int
@@ -4326,7 +4301,8 @@ OSC::cue_aux_mute (float state, lo_message msg)
 			}
 		}
 	}
-	return cue_float_message ("/cue/mute", 0, get_address (msg));
+	cue_float_message ("/cue/mute", 0, get_address (msg));
+	return -1;
 }
 
 int
@@ -4344,7 +4320,8 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return cue_float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
+	cue_float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
+	return -1;
 }
 
 int
@@ -4361,7 +4338,8 @@ OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 		}
 		return 0;
 	}
-	return cue_float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
+	cue_float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
+	return -1;
 }
 
 int
