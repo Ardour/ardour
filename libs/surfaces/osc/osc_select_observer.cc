@@ -49,8 +49,10 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	,gainmode (gm)
 	,feedback (fb)
 	,nsends (0)
+	,_last_gain (0.0)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	as = ARDOUR::AutoState::Off;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -99,12 +101,15 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	}
 
 	if (feedback[1]) { // level controls
+		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
 		if (gainmode) {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/fader"), _strip->gain_control()), OSC::instance());
-			gain_message ("/select/fader", _strip->gain_control());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::gain_automation, this, X_("/select/fader")), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/fader"), gain_cont), OSC::instance());
+			gain_automation ("/select/fader");
 		} else {
-			_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/gain"), _strip->gain_control()), OSC::instance());
-			gain_message ("/select/gain", _strip->gain_control());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCSelectObserver::gain_automation, this, X_("/select/gain")), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/gain"), _strip->gain_control()), OSC::instance());
+			gain_automation ("/strip/gain");
 		}
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
@@ -366,6 +371,18 @@ OSCSelectObserver::tick ()
 			}
 		}
 	}
+	if (feedback[1]) {
+		if (as != ARDOUR::AutoState::Off) {
+			if(_last_gain != _strip->gain_control()->get_value()) {
+				_last_gain = _strip->gain_control()->get_value();
+				if (gainmode) {
+					gain_message ("/select/fader", _strip->gain_control());
+				} else {
+					gain_message ("/select/fader", _strip->gain_control());
+				}
+			}
+		}
+	}
 
 }
 
@@ -507,6 +524,20 @@ OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> co
 	}
 
 	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::gain_automation (string path)
+{
+	lo_message msg = lo_message_new ();
+	string apath = string_compose ("%1/automation", path);
+
+	boost::shared_ptr<GainControl> control = _strip->gain_control();
+	as = control->alist()->automation_state();
+	lo_message_add_float (msg, as);
+	gain_message (path, control);
+	lo_send_message (addr, apath.c_str(), msg);
 	lo_message_free (msg);
 }
 
