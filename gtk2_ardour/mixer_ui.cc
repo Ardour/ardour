@@ -564,7 +564,11 @@ Mixer_UI::add_stripables (StripableList& slist)
 					_monitor_section->tearoff().Detach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_detached));
 					_monitor_section->tearoff().Attach.connect (sigc::mem_fun(*this, &Mixer_UI::monitor_section_attached));
 
-					monitor_section_attached ();
+					if (_monitor_section->tearoff().torn_off()) {
+						monitor_section_detached ();
+					} else {
+						monitor_section_attached ();
+					}
 
 					route->DropReferences.connect (*this, invalidator(*this), boost::bind (&Mixer_UI::monitor_section_going_away, this), gui_context());
 
@@ -2130,6 +2134,14 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		tact->set_active (yn);
 	}
 
+	if (node.get_property ("monitor-section-visible", yn)) {
+		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		/* do it twice to force the change */
+		tact->set_active (yn);
+		show_monitor_section (yn);
+	}
+
 
 	XMLNode* plugin_order;
 	if ((plugin_order = find_named_node (node, "PluginOrder")) != 0) {
@@ -2170,6 +2182,11 @@ Mixer_UI::get_state ()
 	node->set_property ("show-mixer", _visible);
 	node->set_property ("show-mixer-list", _show_mixer_list);
 	node->set_property ("maximised", _maximised);
+
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+	assert (tact);
+	node->set_property ("monitor-section-visible", tact->get_active ());
 
 	store_current_favorite_order ();
 	XMLNode* plugin_order = new XMLNode ("PluginOrder");
@@ -2279,10 +2296,6 @@ Mixer_UI::parameter_changed (string const & p)
 		bool const s = UIConfiguration::instance().get_default_narrow_ms ();
 		for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
 			(*i)->set_width_enum (s ? Narrow : Wide, this);
-		}
-	} else if (p == "use-monitor-bus") {
-		if (_session && !_session->monitor_out()) {
-			monitor_section_detached ();
 		}
 	}
 }
@@ -2432,6 +2445,22 @@ void
 Mixer_UI::monitor_section_going_away ()
 {
 	if (_monitor_section) {
+		XMLNode* ui_node = Config->extra_xml(X_("UI"));
+		/* immediate state save.
+		 *
+		 * Tearoff settings are otherwise only stored during
+		 * save_ardour_state(). The mon-section may or may not
+		 * exist at that point.
+		 * */
+		if (ui_node) {
+			XMLNode* tearoff_node = ui_node->child (X_("Tearoffs"));
+			if (tearoff_node) {
+				tearoff_node->remove_nodes_and_delete (X_("monitor-section"));
+				XMLNode* t = new XMLNode (X_("monitor-section"));
+				_monitor_section->tearoff().add_state (*t);
+				tearoff_node->add_child_nocopy (*t);
+			}
+		}
 		monitor_section_detached ();
 		out_packer.remove (_monitor_section->tearoff());
 		_monitor_section->set_session (0);
@@ -2496,7 +2525,7 @@ Mixer_UI::monitor_section_attached ()
 	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMonitorSection");
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	act->set_sensitive (true);
-	tact->set_active ();
+	show_monitor_section (tact->get_active ());
 }
 
 void
