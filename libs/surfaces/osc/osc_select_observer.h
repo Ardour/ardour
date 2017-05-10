@@ -83,8 +83,8 @@ class OSCSelectObserver
 	void eq_end (void);
 	void eq_restart (int);
 	std::string set_path (std::string path, uint32_t id);
-	void clear_strip (std::string path, float val);
-	void clear_strip_with_id (std::string path, uint32_t id, float val);
+	void send_float (std::string path, float val);
+	void send_float_with_id (std::string path, uint32_t id, float val);
 };
 
 #endif /* __osc_oscselectobserver_h__ */

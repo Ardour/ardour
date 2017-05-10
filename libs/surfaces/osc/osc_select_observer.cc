@@ -180,52 +180,52 @@ OSCSelectObserver::~OSCSelectObserver ()
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
 	if (feedback[0]) { // buttons are separate feedback
-		clear_strip ("/select/expand", 0);
+		send_float ("/select/expand", 0);
 		text_message ("/select/name", " ");
 		text_message ("/select/comment", " ");
-		clear_strip ("/select/mute", 0);
-		clear_strip ("/select/solo", 0);
-		clear_strip ("/select/recenable", 0);
-		clear_strip ("/select/record_safe", 0);
-		clear_strip ("/select/monitor_input", 0);
-		clear_strip ("/select/monitor_disk", 0);
-		clear_strip ("/select/polarity", 0);
-		clear_strip ("/select/n_inputs", 0);
-		clear_strip ("/select/n_outputs", 0);
+		send_float ("/select/mute", 0);
+		send_float ("/select/solo", 0);
+		send_float ("/select/recenable", 0);
+		send_float ("/select/record_safe", 0);
+		send_float ("/select/monitor_input", 0);
+		send_float ("/select/monitor_disk", 0);
+		send_float ("/select/polarity", 0);
+		send_float ("/select/n_inputs", 0);
+		send_float ("/select/n_outputs", 0);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {
-			clear_strip ("/select/fader", 0);
+			send_float ("/select/fader", 0);
 		} else {
-			clear_strip ("/select/gain", -193);
+			send_float ("/select/gain", -193);
 		}
-		clear_strip ("/select/trimdB", 0);
-		clear_strip ("/select/pan_stereo_position", 0.5);
-		clear_strip ("/select/pan_stereo_width", 1);
+		send_float ("/select/trimdB", 0);
+		send_float ("/select/pan_stereo_position", 0.5);
+		send_float ("/select/pan_stereo_width", 1);
 	}
 	if (feedback[9]) {
-		clear_strip ("/select/signal", 0);
+		send_float ("/select/signal", 0);
 	}
 	if (feedback[7]) {
 		if (gainmode) {
-			clear_strip ("/select/meter", 0);
+			send_float ("/select/meter", 0);
 		} else {
-			clear_strip ("/select/meter", -193);
+			send_float ("/select/meter", -193);
 		}
 	}else if (feedback[8]) {
-		clear_strip ("/select/meter", 0);
+		send_float ("/select/meter", 0);
 	}
 	if (feedback[13]) { // Well known controls
-		clear_strip ("/select/pan_elevation_position", 0);
-		clear_strip ("/select/pan_frontback_position", .5);
-		clear_strip ("/select/pan_lfe_control", 0);
-		clear_strip ("/select/comp_enable", 0);
-		clear_strip ("/select/comp_threshold", 0);
-		clear_strip ("/select/comp_speed", 0);
-		clear_strip ("/select/comp_mode", 0);
+		send_float ("/select/pan_elevation_position", 0);
+		send_float ("/select/pan_frontback_position", .5);
+		send_float ("/select/pan_lfe_control", 0);
+		send_float ("/select/comp_enable", 0);
+		send_float ("/select/comp_threshold", 0);
+		send_float ("/select/comp_speed", 0);
+		send_float ("/select/comp_mode", 0);
 		text_message ("/select/comp_mode_name", " ");
 		text_message ("/select/comp_speed_name", " ");
-		clear_strip ("/select/comp_makeup", 0);
+		send_float ("/select/comp_makeup", 0);
 	}
 	send_end();
 	eq_end();
@@ -255,13 +255,13 @@ OSCSelectObserver::send_init()
 			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
 			if (!r) {
 				// should never get here
-				clear_strip_with_id ("/select/send_enable", nsends + 1, 0);
+				send_float_with_id ("/select/send_enable", nsends + 1, 0);
 			}
 			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(nsends));
 			if (snd) {
 				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
 				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
-				clear_strip_with_id ("/select/send_enable", nsends + 1, proc->enabled());
+				send_float_with_id ("/select/send_enable", nsends + 1, proc->enabled());
 			}
 		}
 		// this should get signalled by the route the send goes to, (TODO)
@@ -281,12 +281,12 @@ OSCSelectObserver::send_end ()
 	send_connections.drop_connections ();
 	for (uint32_t i = 1; i <= nsends; i++) {
 		if (gainmode) {
-			clear_strip_with_id ("/select/send_fader", i, 0);
+			send_float_with_id ("/select/send_fader", i, 0);
 		} else {
-			clear_strip_with_id ("/select/send_gain", i, -193);
+			send_float_with_id ("/select/send_gain", i, -193);
 		}
 		// next enable
-		clear_strip_with_id ("/select/send_enable", i, 0);
+		send_float_with_id ("/select/send_enable", i, 0);
 		// next name
 		text_with_id ("/select/send_name", i, " ");
 	}
@@ -354,7 +354,7 @@ OSCSelectObserver::tick ()
 			gain_timeout--;
 		}
 
-		if (as == ARDOUR::AutoState::Play ||  as == ARDOUR::AutoState::Touch) {
+		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
 			if(_last_gain != _strip->gain_control()->get_value()) {
 				_last_gain = _strip->gain_control()->get_value();
 					gain_message ();
@@ -391,9 +391,9 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 		//spit out the comment at the same time
 		text_message ("/select/comment", route->comment());
 		// lets tell the surface how many inputs this strip has
-		clear_strip ("/select/n_inputs", (float) route->n_inputs().n_total());
+		send_float ("/select/n_inputs", (float) route->n_inputs().n_total());
 		// lets tell the surface how many outputs this strip has
-		clear_strip ("/select/n_outputs", (float) route->n_outputs().n_total());
+		send_float ("/select/n_outputs", (float) route->n_outputs().n_total());
 	}
 }
 
@@ -414,9 +414,9 @@ OSCSelectObserver::enable_message (string path, boost::shared_ptr<Controllable> 
 {
 	float val = controllable->get_value();
 	if (val) {
-		clear_strip (path, 1);
+		send_float (path, 1);
 	} else {
-		clear_strip (path, 0);
+		send_float (path, 0);
 	}
 
 }
@@ -443,9 +443,9 @@ OSCSelectObserver::enable_message_with_id (string path, uint32_t id, boost::shar
 {
 	float val = controllable->get_value();
 	if (val) {
-		clear_strip_with_id (path, id, 1);
+		send_float_with_id (path, id, 1);
 	} else {
-		clear_strip_with_id (path, id, 0);
+		send_float_with_id (path, id, 0);
 	}
 }
 
@@ -479,8 +479,8 @@ OSCSelectObserver::monitor_status (boost::shared_ptr<Controllable> controllable)
 			input = 0;
 	}
 
-	clear_strip ("/select/monitor_input", (float) input);
-	clear_strip ("/select/monitor_disk", (float) disk);
+	send_float ("/select/monitor_input", (float) input);
+	send_float ("/select/monitor_disk", (float) disk);
 }
 
 void
@@ -502,12 +502,12 @@ OSCSelectObserver::gain_message ()
 	if (gainmode) {
 		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)));
 		gain_timeout = 8;
-		clear_strip ("/select/fader", gain_to_slider_position (value));
+		send_float ("/select/fader", gain_to_slider_position (value));
 	} else {
 		if (value < 1e-15) {
-			clear_strip ("/select/gain", -200);
+			send_float ("/select/gain", -200);
 		} else {
-			clear_strip ("/select/gain", accurate_coefficient_to_dB (value));
+			send_float ("/select/gain", accurate_coefficient_to_dB (value));
 		}
 	}
 }
@@ -517,9 +517,9 @@ OSCSelectObserver::gain_automation ()
 {
 	as = _strip->gain_control()->alist()->automation_state();
 	if (gainmode) {
-		clear_strip ("/select/fader/automation", as);
+		send_float ("/select/fader/automation", as);
 	} else {
-		clear_strip ("/select/gain/automation", as);
+		send_float ("/select/gain/automation", as);
 	}
 
 	gain_message ();
@@ -575,7 +575,7 @@ OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Proc
 	// with no delay value is wrong
 	Glib::usleep(10);
 
-	clear_strip_with_id ("/select/send_enable", id, proc->enabled());
+	send_float_with_id ("/select/send_enable", id, proc->enabled());
 }
 
 void
@@ -649,18 +649,18 @@ OSCSelectObserver::eq_end ()
 	//need to check feedback for [13]
 	eq_connections.drop_connections ();
 	if (_strip->eq_hpf_controllable ()) {
-		clear_strip ("/select/eq_hpf", 0);
+		send_float ("/select/eq_hpf", 0);
 	}
 	if (_strip->eq_enable_controllable ()) {
-		clear_strip ("/select/eq_enable", 0);
+		send_float ("/select/eq_enable", 0);
 	}
 
 	for (uint32_t i = 1; i <= _strip->eq_band_cnt (); i++) {
 		text_with_id ("/select/eq_band_name", i, " ");
-		clear_strip_with_id ("/select/eq_gain", i, 0);
-		clear_strip_with_id ("/select/eq_freq", i, 0);
-		clear_strip_with_id ("/select/eq_q", i, 0);
-		clear_strip_with_id ("/select/eq_shape", i, 0);
+		send_float_with_id ("/select/eq_gain", i, 0);
+		send_float_with_id ("/select/eq_freq", i, 0);
+		send_float_with_id ("/select/eq_q", i, 0);
+		send_float_with_id ("/select/eq_shape", i, 0);
 
 
 	}
@@ -683,7 +683,7 @@ OSCSelectObserver::set_path (string path, uint32_t id)
 }
 
 void
-OSCSelectObserver::clear_strip (string path, float val)
+OSCSelectObserver::send_float (string path, float val)
 {
 	lo_message msg = lo_message_new ();
 	lo_message_add_float (msg, val);
@@ -694,7 +694,7 @@ OSCSelectObserver::clear_strip (string path, float val)
 }
 
 void
-OSCSelectObserver::clear_strip_with_id (string path, uint32_t id, float val)
+OSCSelectObserver::send_float_with_id (string path, uint32_t id, float val)
 {
 	lo_message msg = lo_message_new ();
 	if (feedback[2]) {
