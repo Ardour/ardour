@@ -44,7 +44,7 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
-	as = ARDOUR::AutoState::Off;
+	as = ARDOUR::Off;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -223,7 +223,7 @@ OSCRouteObserver::tick ()
 		}
 	}
 	if (feedback[1]) {
-		if (as != ARDOUR::AutoState::Off) {
+		if (as != ARDOUR::Off) {
 			if(_last_gain != _strip->gain_control()->get_value()) {
 				_last_gain = _strip->gain_control()->get_value();
 				if (gainmode) {

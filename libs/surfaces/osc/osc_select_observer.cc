@@ -52,7 +52,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	,_last_gain (0.0)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
-	as = ARDOUR::AutoState::Off;
+	as = ARDOUR::Off;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -372,7 +372,7 @@ OSCSelectObserver::tick ()
 		}
 	}
 	if (feedback[1]) {
-		if (as != ARDOUR::AutoState::Off) {
+		if (as != ARDOUR::Off) {
 			if(_last_gain != _strip->gain_control()->get_value()) {
 				_last_gain = _strip->gain_control()->get_value();
 				if (gainmode) {

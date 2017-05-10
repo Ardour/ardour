@@ -2215,19 +2215,19 @@ OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_m
 			if (strp->gain_control ()) {
 				switch (aut) {
 					case 0:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Off);
+						strp->gain_control()->set_automation_state (ARDOUR::Off);
 						ret = 0;
 						break;
 					case 1:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Play);
+						strp->gain_control()->set_automation_state (ARDOUR::Play);
 						ret = 0;
 						break;
 					case 2:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Write);
+						strp->gain_control()->set_automation_state (ARDOUR::Write);
 						ret = 0;
 						break;
 					case 3:
-						strp->gain_control()->set_automation_state (ARDOUR::AutoState::Touch);
+						strp->gain_control()->set_automation_state (ARDOUR::Touch);
 						ret = 0;
 						break;
 					default:
