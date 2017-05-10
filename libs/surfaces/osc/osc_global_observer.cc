@@ -55,21 +55,21 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		boost::shared_ptr<Stripable> strip = session->master_out();
 
 		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
-		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
+		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
 		send_change_message ("/master/mute", strip->mute_control());
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(strip->trim_control());
-		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
+		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
 		send_trim_message ("/master/trimdB", strip->trim_control());
 
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
 		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
+			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
 			send_change_message ("/master/pan_stereo_position", strip->pan_azimuth_control());
 		}
 
 		boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
+		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
 		send_gain_message ("/master/", strip->gain_control());
 
 		// monitor stuff next
@@ -78,19 +78,19 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 			text_message (X_("/monitor/name"), "Monitor");
 
 			boost::shared_ptr<Controllable> mon_mute_cont = strip->monitor_control()->cut_control();
-			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
+			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
 			send_change_message ("/monitor/mute", mon_mute_cont);
 
 			boost::shared_ptr<Controllable> mon_dim_cont = strip->monitor_control()->dim_control();
-			mon_dim_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/dim"), mon_dim_cont), OSC::instance());
+			mon_dim_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/dim"), mon_dim_cont), OSC::instance());
 			send_change_message ("/monitor/dim", mon_dim_cont);
 
 			boost::shared_ptr<Controllable> mon_mono_cont = strip->monitor_control()->mono_control();
-			mon_mono_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mono"), mon_mono_cont), OSC::instance());
+			mon_mono_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mono"), mon_mono_cont), OSC::instance());
 			send_change_message ("/monitor/mono", mon_mono_cont);
 
 			gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
+				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
 				send_gain_message ("/monitor/", strip->gain_control());
 		}
 

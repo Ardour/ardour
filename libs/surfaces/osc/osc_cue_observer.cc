@@ -43,11 +43,11 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
 	name_changed (ARDOUR::Properties::name, 0);
 
-	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
 	send_change_message ("/cue/mute", 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
-	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
 	send_gain_message (0, _strip->gain_control());
 
 	send_init ();
