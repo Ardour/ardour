@@ -79,11 +79,11 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 	if (feedback[1]) { // level controls
 		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
 		if (gainmode) {
-			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::gain_automation, this, X_("/strip/fader")), OSC::instance());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this, X_("/strip/fader")), OSC::instance());
 			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/fader"), gain_cont), OSC::instance());
 			gain_automation ("/strip/fader");
 		} else {
-			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::gain_automation, this, X_("/strip/gain")), OSC::instance());
+			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this, X_("/strip/gain")), OSC::instance());
 			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/gain"), gain_cont), OSC::instance());
 			gain_automation ("/strip/gain");
 		}
