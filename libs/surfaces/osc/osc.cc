@@ -1401,6 +1401,12 @@ OSC::get_surface (lo_address addr)
 {
 	string r_url;
 	char * rurl;
+	if (address_only) {
+		string host = lo_address_get_hostname (addr);
+		int protocol = lo_address_get_protocol (addr);
+		addr = lo_address_new_with_proto (protocol, host.c_str(), remote_port.c_str());
+	}
+
 	rurl = lo_address_get_url (addr);
 	r_url = rurl;
 	free (rurl);
