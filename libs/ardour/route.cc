@@ -5113,6 +5113,38 @@ Route::eq_hpf_controllable () const
 #endif
 }
 
+boost::shared_ptr<AutomationControl>
+Route::eq_lpf_controllable () const
+{
+#ifdef MIXBUS32C
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::filter_enable_controllable () const
+{
+#ifdef MIXBUS32C
+	boost::shared_ptr<PluginInsert> eq = ch_eq();
+
+	if (!eq) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
+#else
+	return boost::shared_ptr<AutomationControl>();
+#endif
+}
+
 string
 Route::eq_band_name (uint32_t band) const
 {

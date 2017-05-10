@@ -140,6 +140,10 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return boost::shared_ptr<MonitorProcessor>(); }
 	boost::shared_ptr<MonitorControl> monitoring_control() const { return boost::shared_ptr<MonitorControl>(); }
 
+	//additional filter params (currently 32C only )
+	boost::shared_ptr<AutomationControl> eq_lpf_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> filter_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+
   private:
 	int32_t _number;
 

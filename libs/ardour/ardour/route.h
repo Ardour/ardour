@@ -511,6 +511,11 @@ public:
 	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
 	boost::shared_ptr<AutomationControl> eq_hpf_controllable () const;
 
+	//additional filter params (currently 32C only )
+	boost::shared_ptr<AutomationControl> eq_lpf_controllable () const;
+	boost::shared_ptr<AutomationControl> filter_enable_controllable () const;
+
+
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
 	 */

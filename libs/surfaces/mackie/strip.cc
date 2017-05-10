@@ -525,12 +525,14 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 	case EQShape:
 		control = r->eq_shape_controllable (band);
 		break;
-	case EQHPF:
-		control = r->eq_hpf_controllable ();
-		break;
 	case EQEnable:
 		control = r->eq_enable_controllable ();
 		break;
+#ifndef MIXBUS32C
+	case EQHPF:
+		control = r->eq_hpf_controllable ();
+		break;
+#endif
 	default:
 		break;
 	}
@@ -578,6 +580,17 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 	case CompEnable:
 		control = r->comp_enable_controllable ();
 		break;
+#ifdef MIXBUS32C
+	case EQHPF:
+		control = r->eq_hpf_controllable ();
+		break;
+	case EQLPF:
+		control = r->eq_lpf_controllable ();
+		break;
+	case EQFilterEnable:
+		control = r->filter_enable_controllable ();
+		break;
+#endif
 	default:
 		break;
 	}
@@ -993,6 +1006,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 	case EQQ:
 	case EQShape:
 	case EQHPF:
+	case EQLPF:
 	case CompThreshold:
 	case CompSpeed:
 	case CompMakeup:
@@ -1001,6 +1015,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 		pending_display[1] = buf;
 		screen_hold = true;
 		break;
+	case EQFilterEnable:
 	case EQEnable:
 	case CompEnable:
 		if (val >= 0.5) {
@@ -1531,6 +1546,12 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	boost::shared_ptr<AutomationControl> kc = r->comp_makeup_controllable ();
 	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
 
+#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
+	boost::shared_ptr<AutomationControl> hpfc = r->eq_hpf_controllable ();
+	boost::shared_ptr<AutomationControl> lpfc = r->eq_lpf_controllable ();
+	boost::shared_ptr<AutomationControl> fec = r->filter_enable_controllable ();
+#endif
+
 	uint32_t pos = _surface->mcp().global_index (*this);
 
 	/* we will control the pos-th available parameter, from the list in the
@@ -1545,6 +1566,12 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	if (mc) { available.push_back (mc); params.push_back (CompMode); }
 	if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
 	if (ec) { available.push_back (ec); params.push_back (CompEnable); }
+
+#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
+	if (hpfc) { available.push_back (hpfc); params.push_back (EQHPF); }
+	if (lpfc) { available.push_back (lpfc); params.push_back (EQLPF); }
+	if (fec) { available.push_back (fec); params.push_back (EQFilterEnable); }
+#endif
 
 	if (pos >= available.size()) {
 		/* this knob is not needed to control the available parameters */
@@ -1585,9 +1612,24 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	case CompRedux:
 		pot_id = "Redux";
 		break;
+#ifdef MIXBUS32C
+	case CompEnable:
+		pot_id = "CompIn";
+		break;
+	case EQHPF:
+		pot_id = "HPF";
+		break;
+	case EQLPF:
+		pot_id = "LPF";
+		break;
+	case EQFilterEnable:
+		pot_id = "FiltIn";
+		break;
+#else
 	case CompEnable:
 		pot_id = "on/off";
 		break;
+#endif
 	default:
 		break;
 	}
@@ -1651,6 +1693,16 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		band_name = r->eq_band_name (eq_band);
 
 		switch (parameter) {
+#ifdef MIXBUS32C  //in 32C, we swap the order of freq/gain to match the GUI
+		case 0:
+			pc = r->eq_freq_controllable (eq_band);
+			param = EQFrequency;
+			break;
+		case 1:
+			pc = r->eq_gain_controllable (eq_band);
+			param = EQGain;
+			break;
+#else
 		case 0:
 			pc = r->eq_gain_controllable (eq_band);
 			param = EQGain;
@@ -1659,6 +1711,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 			pc = r->eq_freq_controllable (eq_band);
 			param = EQFrequency;
 			break;
+#endif
 		case 2:
 			pc = r->eq_q_controllable (eq_band);
 			param = EQQ;
@@ -1677,6 +1730,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		uint32_t parameter = global_pos - total_band_parameters;
 
 		switch (parameter) {
+#ifndef MIXBUS32C
 		case 0: /* first control after band parameters */
 			pc = r->eq_hpf_controllable();
 			param = EQHPF;
@@ -1685,6 +1739,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 			pc = r->eq_enable_controllable();
 			param = EQEnable;
 			break;
+#endif
 		default:
 			/* nothing to control */
 			_vpot->set_control (boost::shared_ptr<AutomationControl>());
@@ -1716,12 +1771,14 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		case EQShape:
 			pot_id = band_name + " Shp";
 			break;
-		case EQHPF:
-			pot_id = "HPFreq";
-			break;
 		case EQEnable:
 			pot_id = "on/off";
 			break;
+#ifndef MIXBUS32C
+		case EQHPF:
+			pot_id = "HPFreq";
+			break;
+#endif
 		default:
 			break;
 		}
