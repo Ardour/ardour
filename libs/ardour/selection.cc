@@ -217,9 +217,11 @@ CoreSelection::get_stripables (StripableAutomationControls& sc) const
 		boost::shared_ptr<AutomationControl> c;
 
 		if (!s) {
+			/* some global automation control, not owned by a Stripable */
 			c = session.automation_control_by_id ((*x).controllable);
 		} else {
-			c = s->automation_control ((*x).controllable);
+			/* automation control owned by a Stripable or one of its children */
+			c = s->automation_control_recurse ((*x).controllable);
 		}
 
 		if (s || c) {

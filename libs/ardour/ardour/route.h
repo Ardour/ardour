@@ -220,6 +220,8 @@ public:
 	RoutePinWindowProxy * pinmgr_proxy () const { return _pinmgr_proxy; }
 	void set_pingmgr_proxy (RoutePinWindowProxy* wp) { _pinmgr_proxy = wp ; }
 
+	boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
+
 	/* special processors */
 
 	boost::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }

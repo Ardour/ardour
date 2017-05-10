@@ -55,10 +55,27 @@ public:
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
 	boost::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;
+	/* derived classes need to provide some way to search their own child
+	   automatable's for a control. normally, we'd just make the method
+	   above virtual, and let them override it. But that wouldn't
+	   differentiate the "check children" and "just your own" cases.
+
+	   We could theoretically just overload the above method with an extra
+	   "bool recurse = default", but the rules of name hiding for C++ mean
+	   that making a method virtual will hide other overloaded versions of
+	   the same name. This means that virtual automation_control (PBD::ID
+	   const &) would hide automation_control (Evoral::Parameter const &
+	   id).
+
+	   So, skip around all that with a different name.
+	*/
+	virtual boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const {
+		return automation_control (id);
+	}
+
 	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
 		return automation_control (id, false);
 	}
-
 	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id, bool create_if_missing);
 	boost::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
 

@@ -5450,3 +5450,23 @@ Route::clear_all_solo_state ()
 {
 	_solo_control->clear_all_solo_state ();
 }
+
+boost::shared_ptr<AutomationControl>
+Route::automation_control_recurse (PBD::ID const & id) const
+{
+	boost::shared_ptr<AutomationControl> ac = Automatable::automation_control (id);
+
+	if (ac) {
+		return ac;
+	}
+
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((ac = (*i)->automation_control (id))) {
+			return ac;
+		}
+	}
+
+	return boost::shared_ptr<AutomationControl> ();
+}
