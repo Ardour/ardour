@@ -1225,7 +1225,7 @@ AudioClock::set_session (Session *s)
 
 		int64_t limit_sec = UIConfiguration::instance().get_clock_display_limit ();
 		if (limit_sec > 0) {
-			_limit_pos = (framecnt_t) floor (limit_sec * _session->frame_rate());
+			_limit_pos = (framecnt_t) floor ((double)(limit_sec * _session->frame_rate()));
 		}
 
 		Config->ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&AudioClock::session_configuration_changed, this, _1), gui_context());
