@@ -101,16 +101,9 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	}
 
 	if (feedback[1]) { // level controls
-		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
-		if (gainmode) {
-			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this, X_("/select/fader")), OSC::instance());
-			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/fader"), gain_cont), OSC::instance());
-			gain_automation ("/select/fader");
-		} else {
-			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this, X_("/select/gain")), OSC::instance());
-			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this, X_("/select/gain"), _strip->gain_control()), OSC::instance());
-			gain_automation ("/strip/gain");
-		}
+		_strip->gain_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this), OSC::instance());
+		_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this), OSC::instance());
+		gain_automation ();
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 		if (trim_controllable) {
@@ -360,6 +353,13 @@ OSCSelectObserver::tick ()
 			}
 			gain_timeout--;
 		}
+
+		if (as == ARDOUR::AutoState::Play ||  as == ARDOUR::AutoState::Touch) {
+			if(_last_gain != _strip->gain_control()->get_value()) {
+				_last_gain = _strip->gain_control()->get_value();
+					gain_message ();
+			}
+		}
 	}
 	if (feedback[13]) {
 		for (uint32_t i = 0; i < send_timeout.size(); i++) {
@@ -368,18 +368,6 @@ OSCSelectObserver::tick ()
 					text_with_id ("/select/send_name", i + 1, _strip->send_name(i));
 				}
 				send_timeout[i]--;
-			}
-		}
-	}
-	if (feedback[1]) {
-		if (as != ARDOUR::Off) {
-			if(_last_gain != _strip->gain_control()->get_value()) {
-				_last_gain = _strip->gain_control()->get_value();
-				if (gainmode) {
-					gain_message ("/select/fader", _strip->gain_control());
-				} else {
-					gain_message ("/select/fader", _strip->gain_control());
-				}
 			}
 		}
 	}
@@ -507,38 +495,34 @@ OSCSelectObserver::trim_message (string path, boost::shared_ptr<Controllable> co
 }
 
 void
-OSCSelectObserver::gain_message (string path, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::gain_message ()
 {
-	lo_message msg = lo_message_new ();
+	float value = _strip->gain_control()->get_value();
 
 	if (gainmode) {
-		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
-		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
+		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)));
 		gain_timeout = 8;
+		clear_strip ("/select/fader", gain_to_slider_position (value));
 	} else {
-		if (controllable->get_value() < 1e-15) {
-			lo_message_add_float (msg, -200);
+		if (value < 1e-15) {
+			clear_strip ("/select/gain", -200);
 		} else {
-			lo_message_add_float (msg, accurate_coefficient_to_dB (controllable->get_value()));
+			clear_strip ("/select/gain", accurate_coefficient_to_dB (value));
 		}
 	}
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
 }
 
 void
-OSCSelectObserver::gain_automation (string path)
+OSCSelectObserver::gain_automation ()
 {
-	lo_message msg = lo_message_new ();
-	string apath = string_compose ("%1/automation", path);
+	as = _strip->gain_control()->alist()->automation_state();
+	if (gainmode) {
+		clear_strip ("/select/fader/automation", as);
+	} else {
+		clear_strip ("/select/gain/automation", as);
+	}
 
-	boost::shared_ptr<GainControl> control = _strip->gain_control();
-	as = control->alist()->automation_state();
-	lo_message_add_float (msg, as);
-	gain_message (path, control);
-	lo_send_message (addr, apath.c_str(), msg);
-	lo_message_free (msg);
+	gain_message ();
 }
 
 void
