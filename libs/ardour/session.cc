@@ -4277,8 +4277,8 @@ Session::io_name_is_legal (const std::string& name) const
 	for (map<string,bool>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
 		if (name == reserved->first) {
 			if (!route_by_name (reserved->first)) {
-				/* first instance of a reserved name is allowed */
-				return true;
+				/* first instance of a reserved name is allowed for some */
+				return reserved->second;
 			}
 			/* all other instances of a reserved name are not allowed */
 			return false;
