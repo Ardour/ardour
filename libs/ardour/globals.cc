@@ -561,9 +561,16 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	reserved_io_names[_("Monitor")] = true;
 	reserved_io_names[_("Master")] = true;
+	reserved_io_names["auditioner"] = true; // auditioner.cc  Track (s, "auditioner",...)
+
+	/* pure I/O */
+	reserved_io_names[X_("Click")] = false; // session.cc ClickIO (*this, X_("Click")
 	reserved_io_names[_("Control")] = false;
-	reserved_io_names[_("Click")] = false;
 	reserved_io_names[_("Mackie")] = false;
+	reserved_io_names[_("FaderPort Recv")] = false;
+	reserved_io_names[_("FaderPort Send")] = false;
+	reserved_io_names[_("FaderPort8 Recv")] = false;
+	reserved_io_names[_("FaderPort8 Send")] = false;
 
 	libardour_initialized = true;
 
