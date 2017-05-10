@@ -515,11 +515,29 @@ OSCSelectObserver::gain_message ()
 void
 OSCSelectObserver::gain_automation ()
 {
+	float output;
 	as = _strip->gain_control()->alist()->automation_state();
+	switch (as) {
+		case ARDOUR::Off:
+			output = 0;
+			break;
+		case ARDOUR::Play:
+			output = 1;
+			break;
+		case ARDOUR::Write:
+			output = 2;
+			break;
+		case ARDOUR::Touch:
+			output = 3;
+			break;
+		default:
+			break;
+	}
+
 	if (gainmode) {
-		send_float ("/select/fader/automation", as);
+		send_float ("/select/fader/automation", output);
 	} else {
-		send_float ("/select/gain/automation", as);
+		send_float ("/select/gain/automation", output);
 	}
 
 	gain_message ();

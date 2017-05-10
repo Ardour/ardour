@@ -50,29 +50,29 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 		name_changed (ARDOUR::Properties::name);
 
-		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
+		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
 		send_change_message ("/strip/mute", _strip->mute_control());
 
-		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo"), _strip->solo_control()), OSC::instance());
+		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo"), _strip->solo_control()), OSC::instance());
 		send_change_message ("/strip/solo", _strip->solo_control());
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {
-			track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
+			track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_monitor_status, this, track->monitoring_control()), OSC::instance());
 			send_monitor_status (track->monitoring_control());
 		}
 
 		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
 		if (rec_controllable) {
-			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/recenable"), _strip->rec_enable_control()), OSC::instance());
+			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/recenable"), _strip->rec_enable_control()), OSC::instance());
 			send_change_message ("/strip/recenable", _strip->rec_enable_control());
 		}
 		boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
 		if (rec_controllable) {
-			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
+			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
 			send_change_message ("/strip/record_safe", _strip->rec_safe_control());
 		}
-		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_select_status, this, _1), OSC::instance());
+		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_select_status, this, _1), OSC::instance());
 		send_select_status (ARDOUR::Properties::selected);
 	}
 
@@ -80,23 +80,23 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a
 		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
 		if (gainmode) {
 			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this, X_("/strip/fader")), OSC::instance());
-			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/fader"), gain_cont), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/fader"), gain_cont), OSC::instance());
 			gain_automation ("/strip/fader");
 		} else {
 			gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this, X_("/strip/gain")), OSC::instance());
-			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/gain"), gain_cont), OSC::instance());
+			gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this, X_("/strip/gain"), gain_cont), OSC::instance());
 			gain_automation ("/strip/gain");
 		}
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 		if (trim_controllable) {
-			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_trim_message, this, X_("/strip/trimdB"), _strip->trim_control()), OSC::instance());
+			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_trim_message, this, X_("/strip/trimdB"), _strip->trim_control()), OSC::instance());
 			send_trim_message ("/strip/trimdB", _strip->trim_control());
 		}
 
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			send_change_message ("/strip/pan_stereo_position", _strip->pan_azimuth_control());
 		}
 	}
@@ -389,7 +389,25 @@ OSCRouteObserver::gain_automation (string path)
 
 	boost::shared_ptr<GainControl> control = _strip->gain_control();
 	as = control->alist()->automation_state();
-	lo_message_add_float (msg, as);
+	float output;
+	switch (as) {
+		case ARDOUR::Off:
+			output = 0;
+			break;
+		case ARDOUR::Play:
+			output = 1;
+			break;
+		case ARDOUR::Write:
+			output = 2;
+			break;
+		case ARDOUR::Touch:
+			output = 3;
+			break;
+		default:
+			break;
+	}
+
+	lo_message_add_float (msg, output);
 	send_gain_message (path, control);
 	lo_send_message (addr, apath.c_str(), msg);
 	lo_message_free (msg);
