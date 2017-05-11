@@ -17,6 +17,8 @@
 
 */
 
+#include <vector>
+
 #include "pbd/compose.h"
 #include "pbd/signals.h"
 
@@ -71,6 +73,13 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 
 		if (_stripables.insert (ss).second) {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("added %1/%2 to s/c selection\n", s->name(), c));
+			/* send per-object signal to notify interested parties
+			   the selection status has changed
+			*/
+			if (s) {
+				PropertyChange pc (Properties::selected);
+				s->PropertyChanged (pc);
+			}
 			send = true;
 		} else {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("%1/%2 already in s/c selection\n", s->name(), c));
@@ -96,6 +105,13 @@ CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automat
 		if (i != _stripables.end()) {
 			_stripables.erase (i);
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("removed %1/%2 from s/c selection\n", s, c));
+			/* send per-object signal to notify interested parties
+			   the selection status has changed
+			*/
+			if (s) {
+				PropertyChange pc (Properties::selected);
+				s->PropertyChanged (pc);
+			}
 			send = true;
 		}
 	}
@@ -120,6 +136,13 @@ CoreSelection::set (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 		_stripables.clear ();
 		_stripables.insert (ss);
 		DEBUG_TRACE (DEBUG::Selection, string_compose ("set s/c selection to %1/%2\n", s->name(), c));
+		/* send per-object signal to notify interested parties
+		   the selection status has changed
+		*/
+		if (s) {
+			PropertyChange pc (Properties::selected);
+			s->PropertyChanged (pc);
+		}
 	}
 
 	send_selection_change ();
@@ -129,20 +152,37 @@ void
 CoreSelection::clear_stripables ()
 {
 	bool send = false;
+	std::vector<boost::shared_ptr<Stripable> > s;
 
 	DEBUG_TRACE (DEBUG::Selection, "clearing s/c selection\n");
-
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
 		if (!_stripables.empty()) {
+
+			s.reserve (_stripables.size());
+
+			for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
+				boost::shared_ptr<Stripable> sp = session.stripable_by_id ((*x).stripable);
+				if (sp) {
+					s.push_back (sp);
+				}
+			}
+
 			_stripables.clear ();
+
 			send = true;
 			DEBUG_TRACE (DEBUG::Selection, "cleared s/c selection\n");
 		}
 	}
 
 	if (send) {
+		PropertyChange pc (Properties::selected);
+
+		for (std::vector<boost::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
+			(*ss)->PropertyChanged (pc);
+		}
+
 		send_selection_change ();
 	}
 }
@@ -327,4 +367,3 @@ CoreSelection::selected () const
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return _stripables.size();
 }
-
