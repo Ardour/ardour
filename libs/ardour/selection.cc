@@ -73,13 +73,6 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 
 		if (_stripables.insert (ss).second) {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("added %1/%2 to s/c selection\n", s->name(), c));
-			/* send per-object signal to notify interested parties
-			   the selection status has changed
-			*/
-			if (s) {
-				PropertyChange pc (Properties::selected);
-				s->PropertyChanged (pc);
-			}
 			send = true;
 		} else {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("%1/%2 already in s/c selection\n", s->name(), c));
@@ -88,6 +81,13 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 
 	if (send) {
 		send_selection_change ();
+		/* send per-object signal to notify interested parties
+		   the selection status has changed
+		*/
+		if (s) {
+			PropertyChange pc (Properties::selected);
+			s->PropertyChanged (pc);
+		}
 	}
 }
 
@@ -105,19 +105,19 @@ CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automat
 		if (i != _stripables.end()) {
 			_stripables.erase (i);
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("removed %1/%2 from s/c selection\n", s, c));
-			/* send per-object signal to notify interested parties
-			   the selection status has changed
-			*/
-			if (s) {
-				PropertyChange pc (Properties::selected);
-				s->PropertyChanged (pc);
-			}
 			send = true;
 		}
 	}
 
 	if (send) {
 		send_selection_change ();
+		/* send per-object signal to notify interested parties
+		   the selection status has changed
+		*/
+		if (s) {
+			PropertyChange pc (Properties::selected);
+			s->PropertyChanged (pc);
+		}
 	}
 }
 
@@ -136,16 +136,17 @@ CoreSelection::set (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 		_stripables.clear ();
 		_stripables.insert (ss);
 		DEBUG_TRACE (DEBUG::Selection, string_compose ("set s/c selection to %1/%2\n", s->name(), c));
-		/* send per-object signal to notify interested parties
-		   the selection status has changed
-		*/
-		if (s) {
-			PropertyChange pc (Properties::selected);
-			s->PropertyChanged (pc);
-		}
 	}
 
 	send_selection_change ();
+
+	/* send per-object signal to notify interested parties
+	   the selection status has changed
+	*/
+	if (s) {
+		PropertyChange pc (Properties::selected);
+		s->PropertyChanged (pc);
+	}
 }
 
 void
@@ -177,13 +178,14 @@ CoreSelection::clear_stripables ()
 	}
 
 	if (send) {
+		send_selection_change ();
+
 		PropertyChange pc (Properties::selected);
 
 		for (std::vector<boost::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
 			(*ss)->PropertyChanged (pc);
 		}
 
-		send_selection_change ();
 	}
 }
 
