@@ -1425,6 +1425,8 @@ OSC::get_surface (lo_address addr)
 	// No surface create one with default values
 	OSCSurface s;
 	s.remote_url = r_url;
+	s.no_clear = false;
+	s.jogmode = JOG;
 	s.bank = 1;
 	s.bank_size = default_banksize; // need to find out how many strips there are
 	s.strip_types = default_strip; // 159 is tracks, busses, and VCAs (no master/monitor)
@@ -1434,6 +1436,7 @@ OSC::get_surface (lo_address addr)
 	s.expand = 0;
 	s.expand_enable = false;
 	s.cue = false;
+	s.aux = 0;
 	s.strips = get_sorted_stripables(s.strip_types, s.cue);
 
 	s.nstrips = s.strips.size();
