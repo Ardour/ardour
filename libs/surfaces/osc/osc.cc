@@ -4007,6 +4007,10 @@ OSC::set_state (const XMLNode& node, int version)
 			s.expand_enable = false;
 			s.strips = get_sorted_stripables (s.strip_types, s.cue);
 			s.nstrips = s.strips.size ();
+			s.no_clear = false;
+			s.jogmode = JOG;
+			s.cue = false;
+			s.aux = 0;
 			_surface.push_back (s);
 		}
 	}
