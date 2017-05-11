@@ -1326,14 +1326,11 @@ Editor::marker_menu_loop_range ()
 	bool is_start;
 
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
-		Location* l2;
-		if ((l2 = transport_loop_location()) != 0) {
-			l2->set (l->start(), l->end());
-
-			// enable looping, reposition and start rolling
-			_session->request_locate (l2->start(), true);
-			_session->request_play_loop(true);
+		if (l != transport_loop_location()) {
+			set_loop_range (l->start(), l->end(), _("loop range from marker"));
 		}
+		_session->request_locate (l->start(), true);
+		_session->request_play_loop (true);
 	}
 }
 
