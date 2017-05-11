@@ -17,6 +17,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <boost/algorithm/string.hpp>
+
 #include "ardour/amp.h"
 #include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
@@ -228,8 +230,9 @@ ParameterDescriptor::NameNumMap
 ParameterDescriptor::build_midi_name2num()
 {
 	NameNumMap name2num;
-	for (uint8_t num = 0; num < 128; num++)
-		name2num[midi_note_name(num)] = num;
+	for (uint8_t num = 0; num < 128; num++) {
+		name2num[boost::to_lower_copy(midi_note_name(num))] = num;
+	}
 	return name2num;
 }
 
@@ -240,7 +243,7 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 
 	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
 
-	NameNumMap::const_iterator it = name2num.find(name);
+	NameNumMap::const_iterator it = name2num.find(boost::to_lower_copy(name));
 	if (it != name2num.end())
 		num = it->second;
 
