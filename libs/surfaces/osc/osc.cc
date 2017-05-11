@@ -1439,6 +1439,12 @@ OSC::get_surface (lo_address addr)
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
 
+	// set bank and strip feedback
+	_set_bank(s.bank, addr);
+
+	// Set global/master feedback
+	global_feedback (s.feedback, addr, s.gainmode);
+
 	return &_surface[_surface.size() - 1];
 }
 
