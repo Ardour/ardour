@@ -21,6 +21,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
@@ -99,6 +100,9 @@ Splash::Splash ()
 
 Splash::~Splash ()
 {
+	idle_connection.disconnect ();
+	expose_done = true;
+	hide ();
 	the_splash = 0;
 }
 
@@ -129,11 +133,19 @@ Splash::pop_back_for (Gtk::Window& win)
 void
 Splash::pop_front ()
 {
-#if defined  __APPLE__ || defined PLATFORM_WINDOWS
 	if (get_window()) {
+#if defined  __APPLE__ || defined PLATFORM_WINDOWS
 		show ();
-	}
+#else
+		gdk_window_restack(get_window()->gobj(), NULL, true);
 #endif
+	}
+}
+
+void
+Splash::hide ()
+{
+	Gtk::Window::hide();
 }
 
 void
@@ -182,8 +194,9 @@ Splash::expose (GdkEventExpose* ev)
 	 */
 
 	if (expose_is_the_one) {
-		Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
-					     GDK_PRIORITY_REDRAW+2);
+		idle_connection = Glib::signal_idle().connect (
+				sigc::mem_fun (this, &Splash::idle_after_expose),
+				GDK_PRIORITY_REDRAW+2);
 	}
 
 	return true;
@@ -216,7 +229,7 @@ Splash::display ()
 	present ();
 
 	if (!was_mapped) {
-		while (!expose_done) {
+		while (!expose_done && gtk_events_pending()) {
 			gtk_main_iteration ();
 		}
 		gdk_display_flush (gdk_display_get_default());
@@ -236,12 +249,13 @@ Splash::message (const string& msg)
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 
 	if (win) {
-		expose_done = false;
-
 		if (win->is_visible ()) {
 			win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
 		} else {
 			darea.queue_draw ();
+		}
+		if (expose_done) {
+			ARDOUR::GUIIdle ();
 		}
 	}
 }

@@ -1282,7 +1282,7 @@ ARDOUR_UI::starting ()
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 
-	if (splash && splash->is_visible()) {
+	if (splash) {
 		// in 1 second, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
@@ -1927,7 +1927,7 @@ ARDOUR_UI::open_recent_session ()
 
 		can_return = false;
 	}
-	if (splash && splash->is_visible()) {
+	if (splash) {
 		// in 1 second, hide the splash screen
 		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
