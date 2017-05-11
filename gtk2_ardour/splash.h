@@ -32,23 +32,23 @@ class ARDOUR_UI;
 
 class Splash : public Gtk::Window
 {
-  public:
+public:
 	Splash ();
 	~Splash ();
 
 	static Splash* instance() { return the_splash; }
 
-        void display ();
+	void display ();
 	void pop_back_for (Gtk::Window&);
 	void pop_front ();
 
 	bool expose (GdkEventExpose*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_realize ();
-        bool on_map_event (GdkEventAny*);
+	bool on_map_event (GdkEventAny*);
 	void message (const std::string& msg);
 
-  private:
+private:
 	static Splash* the_splash;
 
 	Glib::RefPtr<Gdk::Pixbuf> pixbuf;
@@ -58,9 +58,9 @@ class Splash : public Gtk::Window
 	void boot_message (std::string);
 	PBD::ScopedConnection msg_connection;
 
-        bool expose_done;
-        bool expose_is_the_one;
-        bool idle_after_expose ();
+	bool expose_done;
+	bool expose_is_the_one;
+	bool idle_after_expose ();
 };
 
 #endif /* __ardour_gtk_splash_h__ */
