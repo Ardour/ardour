@@ -19,6 +19,6 @@ def build(bld):
     obj = bld (features = 'cxx c cxxprogram')
     obj.source       = 'cfgtool.cc'
     obj.target       = 'cfgtool'
-    obj.use          = [ 'libpbd', 'libardour' ]
+    obj.use          = [ 'libpbd', 'libardour', 'libardour_cp' ]
     obj.uselib       = [ 'GLIBMM', 'XML' ]
     obj.install_path = None

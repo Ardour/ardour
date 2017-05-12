@@ -115,8 +115,6 @@ CC121::CC121 (Session& s)
 		);
 
 
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&CC121::gui_track_selection_changed, this, _1), this);
-
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&CC121::connection_handler, this, _1, _2, _3, _4, _5), this);
 	buttons.insert (std::make_pair (EButton, Button (*this, _("EButton"), EButton)));
@@ -1040,15 +1038,9 @@ CC121::Button::get_state () const
 }
 
 void
-CC121::gui_track_selection_changed (StripableNotificationListPtr stripables)
+CC121::stripable_selection_changed ()
 {
-	boost::shared_ptr<Stripable> r;
-
-	if (!stripables->empty()) {
-		r = stripables->front().lock();
-	}
-
-	set_current_stripable (r);
+	set_current_stripable (first_selected_stripable());
 }
 
 void

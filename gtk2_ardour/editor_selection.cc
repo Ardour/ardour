@@ -23,14 +23,13 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
+#include "ardour/control_protocol_manager.h"
 #include "ardour/midi_region.h"
 #include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
-
-#include "control_protocol/control_protocol.h"
 
 #include "editor.h"
 #include "editor_drag.h"
@@ -1090,7 +1089,7 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 
 		/* STEP 4: notify control protocols */
 
-		ControlProtocol::StripableSelectionChanged (stripables);
+		ControlProtocolManager::instance().stripable_selection_changed (stripables);
 
 		if (sfbrowser && _session && !_session->deletion_in_progress()) {
 			uint32_t audio_track_cnt = 0;

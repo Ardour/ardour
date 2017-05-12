@@ -56,14 +56,10 @@ PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::Toggle
 PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::RemoveStripableFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
 
-PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
-
 Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
 boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
 boost::weak_ptr<Stripable> ControlProtocol::_leftmost_mixer_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
-bool ControlProtocol::selection_connected = false;
-PBD::ScopedConnection ControlProtocol::selection_connection;
 
 const std::string ControlProtocol::state_node_name ("Protocol");
 
@@ -72,12 +68,6 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 	, _name (str)
 	, _active (false)
 {
-	if (!selection_connected) {
-		/* this is all static, connect it only once (and early), for all ControlProtocols */
-
-		StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::stripable_selection_changed, _1));
-		selection_connected = true;
-	}
 }
 
 ControlProtocol::~ControlProtocol ()
@@ -374,7 +364,7 @@ ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
 }
 
 void
-ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
+ControlProtocol::notify_stripable_selection_changed (StripableNotificationListPtr sp)
 {
 	bool had_selection = !_last_selected.empty();
 

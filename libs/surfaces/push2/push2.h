@@ -569,8 +569,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* pad mapping */
 
-	PBD::ScopedConnection selection_connection;
-	void stripable_selection_change (ARDOUR::StripableNotificationListPtr);
+	void stripable_selection_changed ();
 
 	MusicalMode::Type _mode;
 	int _scale_root;

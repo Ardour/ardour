@@ -77,6 +77,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	void stripable_selection_changed () {}
+
 	bool has_editor () const { return true; }
 	void* get_gui () const;
 	void  tear_down_gui ();

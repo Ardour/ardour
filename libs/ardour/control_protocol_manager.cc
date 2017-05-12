@@ -557,3 +557,26 @@ ControlProtocolManager::register_request_buffer_factories ()
 		}
 	}
 }
+
+void
+ControlProtocolManager::stripable_selection_changed (StripableNotificationListPtr sp)
+{
+	/* this sets up the (static) data structures owned by ControlProtocol
+	   that are "shared" across all control protocols.
+	*/
+
+	DEBUG_TRACE (DEBUG::Selection, string_compose ("Surface manager: selection changed, now %1 stripables\n", sp ? sp->size() : -1));
+	ControlProtocol::notify_stripable_selection_changed (sp);
+
+	/* now give each protocol the chance to respond to the selection change
+	 */
+
+	{
+		Glib::Threads::Mutex::Lock lm (protocols_lock);
+
+		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
+			DEBUG_TRACE (DEBUG::Selection, string_compose ("selection change notification for surface \"%1\"\n", (*p)->name()));
+			(*p)->stripable_selection_changed ();
+		}
+	}
+}

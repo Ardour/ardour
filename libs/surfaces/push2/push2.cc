@@ -107,8 +107,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
 
-	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
-
 	/* allocate graphics layouts, even though we're not using them yet */
 
 	_canvas = new Push2Canvas (*this, 960, 160);
@@ -138,7 +136,6 @@ Push2::~Push2 ()
 	DEBUG_TRACE (DEBUG::Push2, "push2 control surface object being destroyed\n");
 
 	/* do this before stopping the event loop, so that we don't get any notifications */
-	selection_connection.disconnect ();
 	port_reg_connection.disconnect ();
 	port_connection.disconnect ();
 
@@ -200,10 +197,7 @@ Push2::begin_using_device ()
 	splash ();
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
-	{
-		StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
-		stripable_selection_change (sp);
-	}
+	stripable_selection_changed ();
 
 	request_pressure_mode ();
 
@@ -1525,15 +1519,16 @@ Push2::current_layout () const
 }
 
 void
-Push2::stripable_selection_change (StripableNotificationListPtr selected)
+Push2::stripable_selection_changed ()
 {
 	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
 	boost::shared_ptr<MidiTrack> new_pad_target;
+	StripableNotificationList const & selected (last_selected());
 
 	/* See if there's a MIDI track selected */
 
-	for (StripableNotificationList::iterator si = selected->begin(); si != selected->end(); ++si) {
+	for (StripableNotificationList::const_iterator si = selected.begin(); si != selected.end(); ++si) {
 
 		new_pad_target = boost::dynamic_pointer_cast<MidiTrack> ((*si).lock());
 
@@ -1582,6 +1577,10 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	}
 
 	reset_pad_colors ();
+
+	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (mix_layout);
+	assert (tml);
+	tml->set_stripable (first_selected_stripable());
 }
 
 Push2::Button*

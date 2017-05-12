@@ -140,7 +140,6 @@ class MackieControlProtocol
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
-	void update_selected (boost::shared_ptr<ARDOUR::Stripable>, bool selected);
 
 	void check_fader_automation_state ();
 	void update_fader_automation_state ();
@@ -360,8 +359,7 @@ class MackieControlProtocol
 	void clear_surfaces ();
 	void force_special_stripable_to_strip (boost::shared_ptr<ARDOUR::Stripable> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
-	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr, bool save_list);
-	void _gui_track_selection_changed (ARDOUR::StripableNotificationList*, bool save_list, bool gui_did_change);
+	void stripable_selection_changed ();
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);

@@ -381,7 +381,6 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::selected)) {
 		if (_stripable) {
 			_surface->write (_select->set_state (_stripable->is_selected()));
-			_surface->mcp().update_selected (_stripable, _stripable->is_selected());
 		}
 	}
 }

@@ -298,7 +298,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void drop_current_stripable ();
 	void use_master ();
 	void use_monitor ();
-	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr);
+	void stripable_selection_changed ();
 	PBD::ScopedConnection selection_connection;
 	PBD::ScopedConnectionList stripable_connections;
 

@@ -55,6 +55,8 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_active (bool yn);
 	static bool probe() { return true; }
 
+	void stripable_selection_changed () {}
+
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
 
 	boost::shared_ptr<ARDOUR::Port> input_port () const;

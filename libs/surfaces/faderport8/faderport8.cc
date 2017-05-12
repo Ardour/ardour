@@ -128,8 +128,6 @@ FaderPort8::FaderPort8 (Session& s)
 	ARDOUR::AudioEngine::instance()->Stopped.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 	ARDOUR::Port::PortDrop.connect (port_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::engine_reset, this), this);
 
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_gui_track_selection_changed, this), this);
-
 	/* bind button events to call libardour actions */
 	setup_actions ();
 
@@ -1363,7 +1361,7 @@ FaderPort8::assign_strips (bool reset_bank)
 		case ModeTrack:
 		case ModePan:
 			assign_stripables ();
-			notify_gui_track_selection_changed (); // update selection, automation-state
+			stripable_selection_changed (); // update selection, automation-state
 			break;
 		case ModePlugins:
 			if (_proc_params.size() > 0) {
@@ -1427,7 +1425,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	}
 	if (s->is_selected () && s != first_selected_stripable ()) {
 		set_first_selected_stripable (s);
-		notify_gui_track_selection_changed ();
+		stripable_selection_changed ();
 	} else {
 		ToggleStripableSelection (s);
 	}
@@ -1538,7 +1536,7 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 }
 
 void
-FaderPort8::notify_gui_track_selection_changed (/*ARDOUR::StripableNotificationListPtr*/)
+FaderPort8::stripable_selection_changed ()
 {
 	if (!_device_active) {
 		/* this can be called anytime from the static

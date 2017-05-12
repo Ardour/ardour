@@ -27,6 +27,9 @@
 #include <glibmm/threads.h>
 
 #include "pbd/stateful.h"
+
+#include "control_protocol/types.h"
+
 #include "ardour/session_handle.h"
 
 namespace ARDOUR {
@@ -79,6 +82,8 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	XMLNode& get_state (void);
 
         PBD::Signal1<void,ControlProtocolInfo*> ProtocolStatusChange;
+
+        void stripable_selection_changed (ARDOUR::StripableNotificationListPtr);
 
   private:
 	ControlProtocolManager ();

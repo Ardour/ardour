@@ -2369,10 +2369,11 @@ MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 }
 
 void
-MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool became_selected)
+MackieControlProtocol::stripable_selection_changed ()
 {
-	if (became_selected) {
+	boost::shared_ptr<Stripable> s = first_selected_stripable ();
 
+	if (s) {
 		check_fader_automation_state ();
 
 		/* It is possible that first_selected_route() may return null if we
@@ -2382,7 +2383,7 @@ MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool bec
 		 * set_subview_mode() will fail, and we will reset to None.
 		 */
 
-		if (set_subview_mode (_subview_mode, first_selected_stripable())) {
+		if (set_subview_mode (_subview_mode, s)) {
 			set_subview_mode (None, boost::shared_ptr<Stripable>());
 		}
 

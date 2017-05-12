@@ -108,9 +108,6 @@ FaderPort::FaderPort (Session& s)
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
-
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
-
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
 
@@ -1105,7 +1102,7 @@ FaderPort::Button::get_state () const
 }
 
 void
-FaderPort::gui_track_selection_changed (StripableNotificationListPtr stripables)
+FaderPort::stripable_selection_changed ()
 {
 	set_current_stripable (ControlProtocol::first_selected_stripable());
 }

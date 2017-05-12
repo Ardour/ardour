@@ -160,24 +160,12 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
 	minsec_text->set_font_description (fd2);
 	minsec_text->set_color (p2.get_color (Push2::LightBackground));
 	minsec_text->set_position (Duple (10 + (4 * Push2Canvas::inter_button_spacing()), 90));
-
-	ControlProtocol::StripableSelectionChanged.connect (selection_connection, invalidator (*this), boost::bind (&TrackMixLayout::selection_changed, this), &p2);
 }
 
 TrackMixLayout::~TrackMixLayout ()
 {
 	for (int n = 0; n < 8; ++n) {
 		delete knobs[n];
-	}
-}
-
-void
-TrackMixLayout::selection_changed ()
-{
-	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
-
-	if (s) {
-		set_stripable (s);
 	}
 }
 

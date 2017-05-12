@@ -245,9 +245,6 @@ OSC::start ()
 	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &OSC::periodic));
 	periodic_timeout->attach (main_loop()->get_context());
 
-	// catch changes to selection for GUI_select mode
-	StripableSelectionChanged.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::gui_selection_changed, this), this);
-
 	// catch track reordering
 	// receive routes added
 	session->RouteAdded.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::notify_routes_added, this, _1), this);
