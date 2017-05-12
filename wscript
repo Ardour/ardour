@@ -239,7 +239,6 @@ children = [
         'libs/fst',
         'libs/vfork',
         'libs/ardouralsautil',
-        'cfgtool',
         'tools/luadevel',
 ]
 
