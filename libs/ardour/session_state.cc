@@ -5043,6 +5043,8 @@ Session::save_as (SaveAs& saveas)
 			session_dirs.push_back (sp);
 			refresh_disk_space ();
 
+			_writable = exists_and_writable (_path);
+
 			/* ensure that all existing tracks reset their current capture source paths
 			 */
 			reset_write_sources (true, true);
