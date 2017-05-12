@@ -874,6 +874,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	} else
 	if (!strncmp (path, "/access_action/", 15)) {
+		check_surface (msg);
 		if (!(argc && !argv[0]->i)) {
 			std::string action_path = path;
 
@@ -883,6 +884,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = 0;
 	} else
 	if (strcmp (path, "/strip/listen") == 0) {
+		check_surface (msg);
 
 		cerr << "set up listener\n";
 
@@ -914,6 +916,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	} else
 	if (strcmp (path, "/strip/ignore") == 0) {
+		check_surface (msg);
 
 		for (int n = 0; n < argc; ++n) {
 
@@ -1003,6 +1006,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (!strncmp (path, "/select/eq_shape/", 17) && strlen (path) > 17) {
 		int ssid = atoi (&path[17]);
 		ret = sel_eq_shape (ssid, argv[0]->f, msg);
+	}
+	if (ret) {
+		check_surface (msg);
 	}
 
 	if ((ret && _debugmode != Off)) {
@@ -1393,6 +1399,16 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 	return 0;
 }
 
+int
+OSC::check_surface (lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	get_surface(get_address (msg));
+	return 0;
+}
+
 OSC::OSCSurface *
 OSC::get_surface (lo_address addr)
 {
@@ -1707,6 +1723,7 @@ OSC::transport_frame (lo_message msg)
 	if (!session) {
 		return;
 	}
+	check_surface (msg);
 	framepos_t pos = session->transport_frame ();
 
 	lo_message reply = lo_message_new ();
@@ -1723,6 +1740,7 @@ OSC::transport_speed (lo_message msg)
 	if (!session) {
 		return;
 	}
+	check_surface (msg);
 	double ts = session->transport_speed ();
 
 	lo_message reply = lo_message_new ();
@@ -1739,6 +1757,7 @@ OSC::record_enabled (lo_message msg)
 	if (!session) {
 		return;
 	}
+	check_surface (msg);
 	int re = (int)session->get_record_enabled ();
 
 	lo_message reply = lo_message_new ();
@@ -1753,6 +1772,7 @@ int
 OSC::scrub (float delta, lo_message msg)
 {
 	if (!session) return -1;
+	check_surface (msg);
 
 	scrub_place = session->transport_frame ();
 
@@ -1963,6 +1983,7 @@ int
 OSC::master_set_pan_stereo_position (float position, lo_message msg)
 {
 	if (!session) return -1;
+	OSCSurface *sur = get_surface(get_address (msg));
 
 	float endposition = .5;
 	boost::shared_ptr<Stripable> s = session->master_out();
@@ -1973,7 +1994,6 @@ OSC::master_set_pan_stereo_position (float position, lo_message msg)
 			endposition = s->pan_azimuth_control()->internal_to_interface (s->pan_azimuth_control()->get_value ());
 		}
 	}
-	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (sur->feedback[4]) {
 		lo_message reply = lo_message_new ();

@@ -217,6 +217,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string get_unix_server_url ();
 	lo_address get_address (lo_message msg);
 	OSCSurface * get_surface (lo_address addr);
+	int check_surface (lo_message msg);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
 	void global_feedback (std::bitset<32> feedback, lo_address addr, uint32_t gainmode);
@@ -285,8 +286,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
 	} \
-	int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, void *) { \
+	int cb_ ## name (const char *path, const char *types, lo_arg ** argv, int argc, void *data) { \
 		OSC_DEBUG; \
+		check_surface (data); \
 		if (argc > 0 && !strcmp (types, "f") && argv[0]->f != 1.0) { return 0; } \
 		name (); \
 		return 0; \
@@ -352,8 +354,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
 	} \
-	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
 		OSC_DEBUG; \
+		check_surface (data); \
 		if (argc > 0) { \
 			name (optional argv[0]->type); \
 		} \
@@ -427,8 +430,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
 		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
 	} \
-	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *) { \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
 		OSC_DEBUG; \
+		check_surface (data); \
 		if (argc > 1) { \
 			name (argv[0]->arg1type, argv[1]->arg2type); \
 		} \
