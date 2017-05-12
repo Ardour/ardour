@@ -90,7 +90,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	ControlProtocolManager ();
 	static ControlProtocolManager* _instance;
 
-	Glib::Threads::Mutex protocols_lock;
+	Glib::Threads::RWLock protocols_lock;
 	std::list<ControlProtocol*>    control_protocols;
 
 	void session_going_away ();

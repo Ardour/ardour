@@ -65,7 +65,7 @@ ControlProtocolManager::ControlProtocolManager ()
 
 ControlProtocolManager::~ControlProtocolManager()
 {
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator i = control_protocols.begin(); i != control_protocols.end(); ++i) {
 		delete (*i);
@@ -87,7 +87,7 @@ ControlProtocolManager::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
-		Glib::Threads::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
@@ -158,7 +158,7 @@ ControlProtocolManager::drop_protocols ()
 	 * before the process cycle stops and ports vanish.
 	 */
 
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		delete *p;
@@ -245,7 +245,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
 	if (lock_required) {
-		Glib::Threads::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
 		if (p != control_protocols.end()) {
 			control_protocols.erase (p);
@@ -290,7 +290,7 @@ ControlProtocolManager::load_mandatory_protocols ()
 		return;
 	}
 
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 		if ((*i)->mandatory && ((*i)->protocol == 0)) {
@@ -443,7 +443,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
 
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 
 	clist = node.children();
 
@@ -495,7 +495,7 @@ XMLNode&
 ControlProtocolManager::get_state ()
 {
 	XMLNode* root = new XMLNode (state_node_name);
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
@@ -533,7 +533,7 @@ ControlProtocolManager::instance ()
 void
 ControlProtocolManager::midi_connectivity_established ()
 {
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		(*p)->midi_connectivity_established ();
@@ -543,7 +543,7 @@ ControlProtocolManager::midi_connectivity_established ()
 void
 ControlProtocolManager::register_request_buffer_factories ()
 {
-	Glib::Threads::Mutex::Lock lm (protocols_lock);
+	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 
@@ -572,7 +572,7 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 	 */
 
 	{
-		Glib::Threads::Mutex::Lock lm (protocols_lock);
+		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 		for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("selection change notification for surface \"%1\"\n", (*p)->name()));
