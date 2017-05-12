@@ -4968,7 +4968,7 @@ Route::eq_band_cnt () const
 		if (is_master() || mixbus()) {
 			return 3;
 		} else {
-			return 4;
+			return 6;
 		}
 #else
 		return 3;
@@ -5001,10 +5001,10 @@ Route::eq_gain_controllable (uint32_t band) const
 	} else {
 #ifdef MIXBUS32C
 		switch (band) {
-			case 0: port_number = 14; break;
-			case 1: port_number = 12; break;
-			case 2: port_number = 10; break;
-			case 3: port_number =  8; break;
+			case 2: port_number = 14; break;
+			case 3: port_number = 12; break;
+			case 4: port_number = 10; break;
+			case 5: port_number =  8; break;
 			default:
 				return boost::shared_ptr<AutomationControl>();
 		}
@@ -5042,10 +5042,12 @@ Route::eq_freq_controllable (uint32_t band) const
 	uint32_t port_number;
 #ifdef MIXBUS32C
 	switch (band) {
-		case 0: port_number = 13; break;
-		case 1: port_number = 11; break;
-		case 2: port_number = 9; break;
-		case 3: port_number = 7; break;
+		case 0: port_number = 5; break; // HPF
+		case 1: port_number = 6; break; // LPF
+		case 2: port_number = 13; break; // lo
+		case 3: port_number = 11; break; // lo mid
+		case 4: port_number = 9; break; // hi mid
+		case 5: port_number = 7; break; // hi
 		default:
 			return boost::shared_ptr<AutomationControl>();
 	}
@@ -5119,11 +5121,11 @@ Route::eq_lpf_controllable () const
 #ifdef MIXBUS32C
 	boost::shared_ptr<PluginInsert> eq = ch_eq();
 
-	if (!eq) {
+	if (is_master() || mixbus() || !eq) {
 		return boost::shared_ptr<AutomationControl>();
 	}
 
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6)));
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4)));
 #else
 	return boost::shared_ptr<AutomationControl>();
 #endif
@@ -5135,7 +5137,7 @@ Route::filter_enable_controllable () const
 #ifdef MIXBUS32C
 	boost::shared_ptr<PluginInsert> eq = ch_eq();
 
-	if (!eq) {
+	if (is_master() || mixbus() || !eq) {
 		return boost::shared_ptr<AutomationControl>();
 	}
 
@@ -5164,10 +5166,12 @@ Route::eq_band_name (uint32_t band) const
 #ifdef MIXBUS32C
 	} else {
 		switch (band) {
-			case 0: return _("lo");
-			case 1: return _("lo mid");
-			case 2: return _("hi mid");
-			case 3: return _("hi");
+			case 0: return _("HPF");
+			case 1: return _("LPF");
+			case 2: return _("lo");
+			case 3: return _("lo mid");
+			case 4: return _("hi mid");
+			case 5: return _("hi");
 			default: return string();
 		}
 	}
