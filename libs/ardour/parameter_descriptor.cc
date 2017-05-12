@@ -17,6 +17,8 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <boost/algorithm/string.hpp>
+
 #include "ardour/amp.h"
 #include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
@@ -190,13 +192,17 @@ ParameterDescriptor::update_steps()
 }
 
 std::string
-ParameterDescriptor::midi_note_name (const uint8_t b)
+ParameterDescriptor::midi_note_name (const uint8_t b, bool translate)
 {
 	char buf[16];
 	if (b > 127) {
 		snprintf(buf, sizeof(buf), "%d", b);
 		return buf;
 	}
+
+	static const char* en_notes[] = {
+		"C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"
+	};
 
 	static const char* notes[] = {
 		S_("Note|C"),
@@ -215,8 +221,40 @@ ParameterDescriptor::midi_note_name (const uint8_t b)
 
 	/* MIDI note 0 is in octave -1 (in scientific pitch notation) */
 	const int octave = b / 12 - 1;
-	snprintf (buf, sizeof (buf), "%s%d", notes[b % 12], octave);
+	const size_t p = b % 12;
+	snprintf (buf, sizeof (buf), "%s%d", translate ? notes[p] : en_notes[p], octave);
 	return buf;
+}
+
+std::string
+ParameterDescriptor::normalize_note_name(const std::string& name)
+{
+	// Remove whitespaces and convert to lower case for a more resilient parser
+	return boost::to_lower_copy(boost::erase_all_copy(name, " "));
+};
+
+ParameterDescriptor::NameNumMap
+ParameterDescriptor::build_midi_name2num()
+{
+	NameNumMap name2num;
+	for (uint8_t num = 0; num < 128; num++) {
+		name2num[normalize_note_name(midi_note_name(num))] = num;
+	}
+	return name2num;
+}
+
+uint8_t
+ParameterDescriptor::midi_note_num (const std::string& name)
+{
+	static NameNumMap name2num = build_midi_name2num();
+
+	uint8_t num = -1;			// -1 (or 255) is returned in case of failure
+
+	NameNumMap::const_iterator it = name2num.find(normalize_note_name(name));
+	if (it != name2num.end())
+		num = it->second;
+
+	return num;
 }
 
 } // namespace ARDOUR
