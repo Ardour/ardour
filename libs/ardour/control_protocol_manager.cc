@@ -42,7 +42,7 @@ using namespace PBD;
 
 ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
-
+PBD::Signal1<void,StripableNotificationListPtr> ControlProtocolManager::StripableSelectionChanged;
 
 ControlProtocolInfo::~ControlProtocolInfo ()
 {
@@ -566,7 +566,7 @@ ControlProtocolManager::stripable_selection_changed (StripableNotificationListPt
 	*/
 
 	DEBUG_TRACE (DEBUG::Selection, string_compose ("Surface manager: selection changed, now %1 stripables\n", sp ? sp->size() : -1));
-	ControlProtocol::notify_stripable_selection_changed (sp);
+	StripableSelectionChanged (sp); /* EMIT SIGNAL */
 
 	/* now give each protocol the chance to respond to the selection change
 	 */

@@ -21,6 +21,7 @@
 #include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "ardour/control_protocol_manager.h"
 #include "ardour/gain_control.h"
 #include "ardour/session.h"
 #include "ardour/record_enable_control.h"
@@ -60,6 +61,8 @@ Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
 boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
 boost::weak_ptr<Stripable> ControlProtocol::_leftmost_mixer_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
+PBD::ScopedConnection ControlProtocol::selection_connection;
+bool ControlProtocol::selection_connected = false;
 
 const std::string ControlProtocol::state_node_name ("Protocol");
 
@@ -68,6 +71,11 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 	, _name (str)
 	, _active (false)
 {
+	if (!selection_connected) {
+		/* this is all static, connect it only once (and early), for all ControlProtocols */
+		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
+		selection_connected = true;
+	}
 }
 
 ControlProtocol::~ControlProtocol ()

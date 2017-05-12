@@ -158,6 +158,8 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
         static boost::weak_ptr<ARDOUR::Stripable> _leftmost_mixer_stripable;
         static boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
         static StripableNotificationList _last_selected;
+        static PBD::ScopedConnection selection_connection;
+        static bool selection_connected;
 };
 
 extern "C" {
