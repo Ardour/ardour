@@ -2081,7 +2081,6 @@ MidiRegionView::change_patch_change (MidiModel::PatchChangePtr old_change, const
 void
 MidiRegionView::add_patch_change (framecnt_t t, Evoral::PatchChange<Evoral::Beats> const & patch)
 {
-	MidiTimeAxisView* const mtv = dynamic_cast<MidiTimeAxisView*>(&trackview);
 	string name = _("add patch change");
 
 	trackview.editor().begin_reversible_command (name);
