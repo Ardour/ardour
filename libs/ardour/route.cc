@@ -5105,7 +5105,7 @@ Route::eq_hpf_controllable () const
 		return boost::shared_ptr<AutomationControl>();
 	}
 #ifdef MIXBUS32C
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 3)));
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 5)));
 #else
 	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
 #endif
