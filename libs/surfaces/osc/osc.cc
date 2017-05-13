@@ -2243,28 +2243,38 @@ OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_m
 		return ret;
 	}
 	if (strp) {
+		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
 		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
 			if (strp->gain_control ()) {
-				switch (aut) {
-					case 0:
-						strp->gain_control()->set_automation_state (ARDOUR::Off);
-						ret = 0;
-						break;
-					case 1:
-						strp->gain_control()->set_automation_state (ARDOUR::Play);
-						ret = 0;
-						break;
-					case 2:
-						strp->gain_control()->set_automation_state (ARDOUR::Write);
-						ret = 0;
-						break;
-					case 3:
-						strp->gain_control()->set_automation_state (ARDOUR::Touch);
-						ret = 0;
-						break;
-					default:
-						break;
-				}
+				control = strp->gain_control ();
+			} else {
+				PBD::warning << "No fader for this strip" << endmsg;
+			}
+		} else {
+			PBD::warning << "Automation not available for " << path << endmsg;
+		}
+
+		if (control) {
+
+			switch (aut) {
+				case 0:
+					control->set_automation_state (ARDOUR::Off);
+					ret = 0;
+					break;
+				case 1:
+					control->set_automation_state (ARDOUR::Play);
+					ret = 0;
+					break;
+				case 2:
+					control->set_automation_state (ARDOUR::Write);
+					ret = 0;
+					break;
+				case 3:
+					control->set_automation_state (ARDOUR::Touch);
+					ret = 0;
+					break;
+				default:
+					break;
 			}
 		}
 	}
