@@ -242,9 +242,7 @@ MidiRegion::post_set (const PropertyChange& pc)
 void
 MidiRegion::set_start_beats_from_start_frames ()
 {
-	if (position_lock_style() == AudioTime) {
-		_start_beats = quarter_note() - _session.tempo_map().quarter_note_at_frame (_position - _start);
-	}
+	_start_beats = quarter_note() - _session.tempo_map().quarter_note_at_frame (_position - _start);
 }
 
 void
