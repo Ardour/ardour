@@ -1071,7 +1071,7 @@ FaderPort8::build_well_known_processor_ctrls (boost::shared_ptr<Stripable> s, bo
 #elif defined (MIXBUS)
 		PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
 		PUSH_BACK_NON_NULL ("HP Freq", s->eq_hpf_controllable ());  
-#end
+#endif
 
 		for (int band = 0; band < cnt; ++band) {
 			std::string bn = s->eq_band_name (band);
