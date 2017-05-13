@@ -3019,7 +3019,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> rhis will reduce the unpleasant increase in perceived volume "
+			_("<b>When enabled</b> this will reduce the unpleasant increase in perceived volume "
 				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
 	add_option (_("Transport"), bo);
 

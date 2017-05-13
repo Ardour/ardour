@@ -90,7 +90,7 @@ print_help (const char *execname)
 		<< _("  -S, --sync                  Draw the GUI synchronously\n")
 		<< _("  -T, --template <name>       Use given template for new session\n")
 		<< _("  -U, --uuid <uuid>           Set (jack) backend UUID\n")
-		<< _("  -v, --version               Print versoin and exit\n")
+		<< _("  -v, --version               Print version and exit\n")
 #ifdef WINDOWS_VST_SUPPORT
 		<< _("  -V, --novst                 Disable WindowsVST support\n")
 #endif
