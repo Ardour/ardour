@@ -3706,8 +3706,8 @@ OSC::sel_eq_hpf (float val, lo_message msg)
 		s = _select;
 	}
 	if (s) {
-		if (s->eq_hpf_controllable()) {
-			s->eq_hpf_controllable()->set_value (s->eq_hpf_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->filter_freq_controllable(true)) {
+			s->filter_freq_controllable(true)->set_value (s->filter_freq_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}

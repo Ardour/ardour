@@ -624,10 +624,11 @@ void
 OSCSelectObserver::eq_init()
 {
 	// HPF and enable are special case, rest are in bands
-	if (_strip->eq_hpf_controllable ()) {
-		_strip->eq_hpf_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf"), _strip->eq_hpf_controllable()), OSC::instance());
-		change_message ("/select/eq_hpf", _strip->eq_hpf_controllable());
+	if (_strip->filter_freq_controllable (true)) {
+		_strip->filter_freq_controllable (true)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf"), _strip->filter_freq_controllable (true)), OSC::instance());
+		change_message ("/select/eq_hpf", _strip->filter_freq_controllable(true));
 	}
+	// TODO LPF and LPF/HPF enable ctrls.
 	if (_strip->eq_enable_controllable ()) {
 		_strip->eq_enable_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/eq_enable"), _strip->eq_enable_controllable()), OSC::instance());
 		enable_message ("/select/eq_enable", _strip->eq_enable_controllable());
@@ -666,7 +667,7 @@ OSCSelectObserver::eq_end ()
 {
 	//need to check feedback for [13]
 	eq_connections.drop_connections ();
-	if (_strip->eq_hpf_controllable ()) {
+	if (_strip->filter_freq_controllable (true)) {
 		send_float ("/select/eq_hpf", 0);
 	}
 	if (_strip->eq_enable_controllable ()) {

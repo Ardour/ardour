@@ -529,7 +529,7 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 		break;
 #ifndef MIXBUS32C
 	case EQHPF:
-		control = r->eq_hpf_controllable ();
+		control = r->filter_freq_controllable (true);
 		break;
 #endif
 	default:
@@ -581,13 +581,13 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 		break;
 #ifdef MIXBUS32C
 	case EQHPF:
-		control = r->eq_hpf_controllable ();
+		control = r->filter_freq_controllable (true);
 		break;
 	case EQLPF:
-		control = r->eq_lpf_controllable ();
+		control = r->filter_freq_controllable (false);
 		break;
 	case EQFilterEnable:
-		control = r->filter_enable_controllable ();
+		control = r->filter_enable_controllable (true); // both HP/LP
 		break;
 #endif
 	default:
@@ -1546,9 +1546,9 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	boost::shared_ptr<AutomationControl> ec = r->comp_enable_controllable ();
 
 #ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	boost::shared_ptr<AutomationControl> hpfc = r->eq_hpf_controllable ();
-	boost::shared_ptr<AutomationControl> lpfc = r->eq_lpf_controllable ();
-	boost::shared_ptr<AutomationControl> fec = r->filter_enable_controllable ();
+	boost::shared_ptr<AutomationControl> hpfc = r->filter_freq_controllable (true);
+	boost::shared_ptr<AutomationControl> lpfc = r->filter_freq_controllable (false);
+	boost::shared_ptr<AutomationControl> fec = r->filter_enable_controllable (true); // shared HP/LP
 #endif
 
 	uint32_t pos = _surface->mcp().global_index (*this);
@@ -1731,7 +1731,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		switch (parameter) {
 #ifndef MIXBUS32C
 		case 0: /* first control after band parameters */
-			pc = r->eq_hpf_controllable();
+			pc = r->filter_freq_controllable(true);
 			param = EQHPF;
 			break;
 		case 1: /* second control after band parameters */

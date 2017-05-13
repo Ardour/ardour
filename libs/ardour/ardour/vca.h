@@ -119,12 +119,14 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<AutomationControl> pan_lfe_control() const { return boost::shared_ptr<AutomationControl>(); }
 	uint32_t eq_band_cnt () const { return 0; }
 	std::string eq_band_name (uint32_t) const { return std::string(); }
-	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
-	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> eq_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	boost::shared_ptr<AutomationControl> eq_hpf_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> filter_freq_controllable (bool) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> comp_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> comp_threshold_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> comp_speed_controllable () const { return boost::shared_ptr<AutomationControl>(); }

@@ -134,17 +134,16 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 * return of a null ptr (or an empty string for eq_band_name()).
 	 */
 	virtual uint32_t eq_band_cnt () const = 0;
+	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const = 0;
-	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
-	virtual boost::shared_ptr<AutomationControl> eq_hpf_controllable () const = 0;
 
-	//additional filter params (currently 32C only )
-	virtual boost::shared_ptr<AutomationControl> eq_lpf_controllable () const = 0;
-	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> filter_freq_controllable (bool hp /* false for LPF*/) const = 0;
+	virtual boost::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
+	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.

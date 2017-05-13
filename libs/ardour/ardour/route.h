@@ -504,16 +504,16 @@ public:
 	 */
 	uint32_t eq_band_cnt () const;
 	std::string eq_band_name (uint32_t) const;
+	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
 	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
 	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
 	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
 	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
-	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
-	boost::shared_ptr<AutomationControl> eq_hpf_controllable () const;
 
-	//additional filter params (currently 32C only )
-	boost::shared_ptr<AutomationControl> eq_lpf_controllable () const;
-	boost::shared_ptr<AutomationControl> filter_enable_controllable () const;
+	//additional HP/LP filters
+	boost::shared_ptr<AutomationControl> filter_freq_controllable (bool hpf) const;
+	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
+	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
 
 	/* "well-known" controls for a compressor in this route. Any or all may
