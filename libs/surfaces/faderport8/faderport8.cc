@@ -1063,7 +1063,13 @@ FaderPort8::build_well_known_processor_ctrls (boost::shared_ptr<Stripable> s, bo
 	if (eq) {
 		int cnt = s->eq_band_cnt();
 		PUSH_BACK_NON_NULL ("Enable", s->eq_enable_controllable ());
-		PUSH_BACK_NON_NULL ("HPF", s->eq_hpf_controllable ());
+		PUSH_BACK_NON_NULL ("HP/LP", s->filter_enable_controllable ());
+#ifdef MIXBUS32
+		PUSH_BACK_NON_NULL ("Lo-Bell", s->eq_lpf_controllable ());
+		PUSH_BACK_NON_NULL ("Hi-Bell", s->eq_hpf_controllable ());
+#else
+		PUSH_BACK_NON_NULL ("Freq HP", s->eq_hpf_controllable ());
+#endif
 		for (int band = 0; band < cnt; ++band) {
 			std::string bn = s->eq_band_name (band);
 			PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->eq_gain_controllable (band));
