@@ -373,7 +373,6 @@ AddRouteDialog::refill_track_modes ()
 #ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 	s.push_back (_("Non Layered"));
 #endif
-	s.push_back (_("Tape"));
 	if (!ARDOUR::Profile->get_mixbus ()) {
 		s.push_back (_("Tape"));
 	}
