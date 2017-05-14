@@ -71,7 +71,7 @@ MiniTimeline::MiniTimeline ()
 	Location::flags_changed.connect (marker_connection, invalidator (*this), boost::bind (&MiniTimeline::update_minitimeline, this), gui_context ());
 
 	ARDOUR_UI_UTILS::set_tooltip (*this,
-			string_compose (_("<b>Navigation Timeline</b>. Use left-click to locate to time position or marker; scroll-wheel to jump, hold %1 for fine gained and %2 + %3 for extra-fine grained control. Right-click to set display range. The display unit is defined by the primary clock."),
+			string_compose (_("<b>Navigation Timeline</b>. Use left-click to locate to time position or marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-fine grained control. Right-click to set display range. The display unit is defined by the primary clock."),
 				Gtkmm2ext::Keyboard::primary_modifier_name(),
 				Gtkmm2ext::Keyboard::primary_modifier_name (),
 				Gtkmm2ext::Keyboard::secondary_modifier_name ()));
