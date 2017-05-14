@@ -912,10 +912,15 @@ WaveView::desired_image_width () const
 	 * We want at least 1 canvas width's worth, but if that
 	 * represents less than 1/10th of a second, use 1/10th of
 	 * a second instead.
+	 *
+	 * ..unless at high-zoom level 100ms would be more than 2^15px
+	 * (cairo image limit), note that generate_image() uses twice this
+	 * width (left/right of the center of the request range.
 	 */
 
 	framecnt_t canvas_width_samples = _canvas->visible_area().width() * _samples_per_pixel;
-	const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
+	const framecnt_t one_tenth_of_second = std::min (_region->session().frame_rate() / 10,  (framecnt_t)floor (16383.0 / _samples_per_pixel));
+
 
 	if (canvas_width_samples > one_tenth_of_second) {
 		return  canvas_width_samples;
@@ -927,6 +932,7 @@ WaveView::desired_image_width () const
 void
 WaveView::queue_get_image (boost::shared_ptr<const ARDOUR::Region> region, framepos_t start, framepos_t end) const
 {
+	DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: queue image from %2 .. %3\n", name, start, end));
 	boost::shared_ptr<WaveViewThreadRequest> req (new WaveViewThreadRequest);
 
 	req->type = WaveViewThreadRequest::Draw;
@@ -983,12 +989,13 @@ WaveView::generate_image (boost::shared_ptr<WaveViewThreadRequest> req, bool in_
 		const framepos_t center = req->start + ((req->end - req->start) / 2);
 		const framecnt_t image_samples = req->width;
 
-		/* we can request data from anywhere in the Source, between 0 and its length
-		 */
+		/* we can request data from anywhere in the Source, between 0 and its length */
 
 		framepos_t sample_start = max (_region_start, (center - image_samples));
 		framepos_t sample_end = min (center + image_samples, region_end());
 		const int n_peaks = std::max (1LL, llrint (ceil ((sample_end - sample_start) / (req->samples_per_pixel))));
+
+		DEBUG_TRACE (DEBUG::WaveView, string_compose ("%1: request %2 .. %3 width: %4; render %5 .. %6 (%7)\n", name, req->start, req->end, req->width, sample_start, sample_end, n_peaks));
 
 		assert (n_peaks > 0 && n_peaks < 32767);
 
