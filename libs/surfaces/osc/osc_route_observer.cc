@@ -221,15 +221,13 @@ OSCRouteObserver::tick ()
 			}
 			trim_timeout--;
 		}
-	}
-	if (feedback[1]) {
-		if (as != ARDOUR::Off) {
+		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
 			if(_last_gain != _strip->gain_control()->get_value()) {
 				_last_gain = _strip->gain_control()->get_value();
 				if (gainmode) {
 					send_gain_message ("/strip/fader", _strip->gain_control());
 				} else {
-					send_gain_message ("/strip/fader", _strip->gain_control());
+					send_gain_message ("/strip/gain", _strip->gain_control());
 				}
 			}
 		}
