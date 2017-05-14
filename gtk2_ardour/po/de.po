@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-05-14 13:12+0200\n"
-"PO-Revision-Date: 2017-05-14 15:23+0100\n"
+"POT-Creation-Date: 2017-05-14 16:04+0200\n"
+"PO-Revision-Date: 2017-05-14 16:05+0100\n"
 "Last-Translator: Edgar Aichinger <edogawa@aon.at>\n"
 "Language-Team: German <>\n"
 "Language: de\n"
@@ -562,17 +562,17 @@ msgstr "MIDI Busse"
 msgid "VCA Masters"
 msgstr "VCA Masters"
 
-#: add_route_dialog.cc:85 add_route_dialog.cc:630 duplicate_routes_dialog.cc:58
+#: add_route_dialog.cc:85 add_route_dialog.cc:629 duplicate_routes_dialog.cc:58
 #: duplicate_routes_dialog.cc:209
 msgid "First"
 msgstr "Zuerst"
 
-#: add_route_dialog.cc:86 add_route_dialog.cc:634 duplicate_routes_dialog.cc:59
+#: add_route_dialog.cc:86 add_route_dialog.cc:633 duplicate_routes_dialog.cc:59
 #: duplicate_routes_dialog.cc:213
 msgid "Before Selection"
 msgstr "Vor Auswahl"
 
-#: add_route_dialog.cc:87 add_route_dialog.cc:632 duplicate_routes_dialog.cc:60
+#: add_route_dialog.cc:87 add_route_dialog.cc:631 duplicate_routes_dialog.cc:60
 #: duplicate_routes_dialog.cc:211
 msgid "After Selection"
 msgstr "Nach Auswahl"
@@ -663,62 +663,62 @@ msgstr ""
 "Falls Sie nicht vorhaben, so ein Plugin zu benutzen, verwenden Sie "
 "stattdessen eine normale Audio- oder MIDI-Spur"
 
-#: add_route_dialog.cc:372 add_route_dialog.cc:389 editor_actions.cc:446
+#: add_route_dialog.cc:372 add_route_dialog.cc:388 editor_actions.cc:446
 #: editor_rulers.cc:250 time_axis_view.cc:1289
 msgid "Normal"
 msgstr "Normal"
 
-#: add_route_dialog.cc:374 add_route_dialog.cc:391
+#: add_route_dialog.cc:374 add_route_dialog.cc:390
 msgid "Non Layered"
 msgstr "Non Layered"
 
-#: add_route_dialog.cc:376 add_route_dialog.cc:378 add_route_dialog.cc:393
+#: add_route_dialog.cc:377 add_route_dialog.cc:392
 msgid "Tape"
 msgstr "Band"
 
-#: add_route_dialog.cc:482 monitor_section.cc:277 plugin_pin_dialog.cc:509
+#: add_route_dialog.cc:481 monitor_section.cc:277 plugin_pin_dialog.cc:509
 #: plugin_setup_dialog.cc:213
 msgid "Mono"
 msgstr "Mono"
 
-#: add_route_dialog.cc:486 plugin_pin_dialog.cc:512 plugin_setup_dialog.cc:216
+#: add_route_dialog.cc:485 plugin_pin_dialog.cc:512 plugin_setup_dialog.cc:216
 msgid "Stereo"
 msgstr "Stereo"
 
-#: add_route_dialog.cc:509
+#: add_route_dialog.cc:508
 msgid "3 Channel"
 msgstr "3 Kanäle"
 
-#: add_route_dialog.cc:513
+#: add_route_dialog.cc:512
 msgid "4 Channel"
 msgstr "4 Kanäle"
 
-#: add_route_dialog.cc:517
+#: add_route_dialog.cc:516
 msgid "5 Channel"
 msgstr "5 Kanäle"
 
-#: add_route_dialog.cc:521
+#: add_route_dialog.cc:520
 msgid "6 Channel"
 msgstr "6 Kanäle"
 
-#: add_route_dialog.cc:525
+#: add_route_dialog.cc:524
 msgid "8 Channel"
 msgstr "8 Kanäle"
 
-#: add_route_dialog.cc:529
+#: add_route_dialog.cc:528
 msgid "12 Channel"
 msgstr "12 Kanäle"
 
-#: add_route_dialog.cc:533 gain_meter.cc:193 mixer_strip.cc:2053
+#: add_route_dialog.cc:532 gain_meter.cc:193 mixer_strip.cc:2053
 #: mixer_strip.cc:2499
 msgid "Custom"
 msgstr "Benutzerdefiniert"
 
-#: add_route_dialog.cc:575 add_route_dialog.cc:591 route_group_menu.cc:85
+#: add_route_dialog.cc:574 add_route_dialog.cc:590 route_group_menu.cc:85
 msgid "New Group..."
 msgstr "Neue Gruppe..."
 
-#: add_route_dialog.cc:579 mixer_strip.cc:1609 route_group_menu.cc:89
+#: add_route_dialog.cc:578 mixer_strip.cc:1609 route_group_menu.cc:89
 msgid "No Group"
 msgstr "Keine Gruppe"
 
@@ -2159,16 +2159,16 @@ msgid ""
 "Force all tracks to monitor Input, unless they are explicitly set to monitor "
 "Disk"
 msgstr ""
-"Zwinge alle Spuren, den Eingang an den Monitor zu schicken, sofern sie nicht"
-" explizit auf \"Festplatte\" eingestellt sind"
+"Zwinge alle Spuren, den Eingang an den Monitor zu schicken, sofern sie nicht "
+"explizit auf \"Festplatte\" eingestellt sind"
 
 #: ardour_ui2.cc:418
 msgid ""
 "Force all tracks to monitor Disk playback, unless they are explicitly set to "
 "Input"
 msgstr ""
-"Zwinge alle Spuren, die Festplatten-Wiedergabe an den Monitor zu schicken,"
-" sofern sie nicht explizit auf \"Eingang\" eingestellt sind"
+"Zwinge alle Spuren, die Festplatten-Wiedergabe an den Monitor zu schicken, "
+"sofern sie nicht explizit auf \"Eingang\" eingestellt sind"
 
 #: ardour_ui2.cc:844 rc_option_editor.cc:3508 rc_option_editor.cc:3521
 #: rc_option_editor.cc:3533 rc_option_editor.cc:3535 rc_option_editor.cc:3537
@@ -8365,8 +8365,8 @@ msgid ""
 "The key sequence is already bound to '%1'. Please remove the other binding "
 "first."
 msgstr ""
-"Diese Tastenkombination ist bereits mit '%1' verknüpft. Bitte entfernen Sie"
-" zuerst die andere Zuweisung."
+"Diese Tastenkombination ist bereits mit '%1' verknüpft. Bitte entfernen Sie "
+"zuerst die andere Zuweisung."
 
 #: keyeditor.cc:79
 msgid "Remove shortcut"
@@ -8531,9 +8531,9 @@ msgid ""
 "Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) "
 "for batch processing or customized tasks."
 msgstr ""
-"Aktionsskripte sind vom Benutzer ausgelöste Aktionen (Menüeinträge, Kürzel,"
-" Schaltflächen der Werkzeugleisten) für Stapelbearbeitung oder speziell"
-" angepasste Aufgaben."
+"Aktionsskripte sind vom Benutzer ausgelöste Aktionen (Menüeinträge, Kürzel, "
+"Schaltflächen der Werkzeugleisten) für Stapelbearbeitung oder speziell "
+"angepasste Aufgaben."
 
 #: lua_script_manager.cc:97
 msgid "Signal(s)"
@@ -8545,10 +8545,9 @@ msgid ""
 "Once a script is registered it is automatically triggered by events to "
 "perform some task."
 msgstr ""
-"Lua Aktions-Ankerpunkte sind durch Ereignisse ausgelöste Callbacks für das"
-" Editor/Mixer GUI. "
-"Sobald ein Skript registriert ist, wird es automatisch von Ereignissen"
-" ausgelöst, um eine bestimmte Aufgabe auszuführen."
+"Lua Aktions-Ankerpunkte sind durch Ereignisse ausgelöste Callbacks für das "
+"Editor/Mixer GUI. Sobald ein Skript registriert ist, wird es automatisch von "
+"Ereignissen ausgelöst, um eine bestimmte Aufgabe auszuführen."
 
 #: lua_script_manager.cc:149
 msgid ""
@@ -8556,11 +8555,10 @@ msgid ""
 "They are called periodically at the start of every audio cycle in the "
 "realtime process context before any processing takes place."
 msgstr ""
-"Lua Projektskripte werden in die Verarbeitungs-\"engine\" geladen und in"
-" Echtzeit abgearbeitet. "
-"Sie werden periodisch am Beginn jedes Audiozyklus im Kontext des"
-" Echtzeitprozesses gestartet, bevor jegliche weitere Verarbeitung"
-" durchgeführt wird."
+"Lua Projektskripte werden in die Verarbeitungs-\"engine\" geladen und in "
+"Echtzeit abgearbeitet. Sie werden periodisch am Beginn jedes Audiozyklus im "
+"Kontext des Echtzeitprozesses gestartet, bevor jegliche weitere Verarbeitung "
+"durchgeführt wird."
 
 #: lua_script_manager.cc:206
 msgid "Action %1"
@@ -9210,7 +9208,7 @@ msgstr "Neue Velocity"
 #: mini_timeline.cc:74
 msgid ""
 "<b>Navigation Timeline</b>. Use left-click to locate to time position or "
-"marker; scroll-wheel to jump, hold %1 for fine gained and %2 + %3 for extra-"
+"marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-"
 "fine grained control. Right-click to set display range. The display unit is "
 "defined by the primary clock."
 msgstr ""
@@ -10155,8 +10153,8 @@ msgid ""
 "Ardour is a multichannel hard disk recorder (HDR) and digital audio "
 "workstation (DAW)."
 msgstr ""
-"Ardour ist ein mehrkanaliges Festplatten-Aufnahmeprogramm (HDR) und eine"
-" Digitale Audio Workstation (DAW)."
+"Ardour ist ein mehrkanaliges Festplatten-Aufnahmeprogramm (HDR) und eine "
+"Digitale Audio Workstation (DAW)."
 
 #: opts.cc:69
 msgid "Options:\n"
@@ -11498,8 +11496,8 @@ msgstr "Aktivieren"
 #: rc_option_editor.cc:1338
 msgid "Edit the settings for selected protocol (it must be ENABLED first):"
 msgstr ""
-"Einstellungen für ausgewähltes Protokoll bearbeiten (es muss erst AKTIVIERT"
-" sein):"
+"Einstellungen für ausgewähltes Protokoll bearbeiten (es muss erst AKTIVIERT "
+"sein):"
 
 #: rc_option_editor.cc:1342
 msgid "Show Protocol Settings"
@@ -11733,10 +11731,10 @@ msgid ""
 "<b>When disabled</b> %1 will only allow tempo to be expressed in quarter "
 "notes per minute"
 msgstr ""
-"<b>Wenn aktiviert</b>, wird %1 Tempoangaben in \"divisions per minute\""
-" zulassen\n"
-"<b>Wenn deaktiviert</b>, wird %1 Tempoangaben nur in \"quarter notes per"
-" minute\" zulassen"
+"<b>Wenn aktiviert</b>, wird %1 Tempoangaben in \"divisions per minute\" "
+"zulassen\n"
+"<b>Wenn deaktiviert</b>, wird %1 Tempoangaben nur in \"quarter notes per "
+"minute\" zulassen"
 
 #: rc_option_editor.cc:2222
 msgid "GUI Lock"
@@ -12346,9 +12344,9 @@ msgid ""
 "volume that occurs when fast-forwarding or rewinding through some kinds of "
 "audio"
 msgstr ""
-"<b>Wenn aktiviert</b>, wird dies die unangenehme Steigerung der"
-" wahrgenommenen Lautstärke verringern, die bei manchem Material bei"
-" Vor/Rücklauf auftritt"
+"<b>Wenn aktiviert</b>, wird dies die unangenehme Steigerung der "
+"wahrgenommenen Lautstärke verringern, die bei manchem Material bei Vor/"
+"Rücklauf auftritt"
 
 #: rc_option_editor.cc:3028
 msgid "Preroll"
@@ -16639,5 +16637,3 @@ msgstr ""
 "Sehen Sie bitte im Handbuch unter %2/Video-Zeitleiste/Bearbeitung/#Export.\n"
 "\n"
 "Handbuch im Browser öffnen? "
-
-
