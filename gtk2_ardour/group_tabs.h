@@ -70,7 +70,7 @@ protected:
 	};
 
 private:
-	static void emit_gui_changed_for_members (ARDOUR::RouteGroup *);
+	static void emit_gui_changed_for_members (boost::shared_ptr<ARDOUR::RouteList>);
 
 	/** Compute all the tabs for this widget.
 	 *  @return Tabs.
