@@ -378,6 +378,7 @@ OSCRouteObserver::gain_automation (string path)
 {
 	lo_message msg = lo_message_new ();
 	string apath = string_compose ("%1/automation", path);
+	string npath = string_compose ("%1/automation_name", path);
 
 	if (feedback[2]) {
 		apath = set_path (apath);
@@ -387,28 +388,34 @@ OSCRouteObserver::gain_automation (string path)
 
 	boost::shared_ptr<GainControl> control = _strip->gain_control();
 	as = control->alist()->automation_state();
+	string auto_name;
 	float output;
 	switch (as) {
 		case ARDOUR::Off:
 			output = 0;
+			auto_name = "Manual";
 			break;
 		case ARDOUR::Play:
 			output = 1;
+			auto_name = "Play";
 			break;
 		case ARDOUR::Write:
 			output = 2;
+			auto_name = "Write";
 			break;
 		case ARDOUR::Touch:
 			output = 3;
+			auto_name = "Touch";
 			break;
 		default:
 			break;
 	}
 
-	lo_message_add_float (msg, output);
 	send_gain_message (path, control);
+	lo_message_add_float (msg, output);
 	lo_send_message (addr, apath.c_str(), msg);
 	lo_message_free (msg);
+	text_with_id (npath, ssid, auto_name);
 }
 
 string

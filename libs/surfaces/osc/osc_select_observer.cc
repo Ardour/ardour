@@ -517,18 +517,23 @@ OSCSelectObserver::gain_automation ()
 {
 	float output;
 	as = _strip->gain_control()->alist()->automation_state();
+	string auto_name;
 	switch (as) {
 		case ARDOUR::Off:
 			output = 0;
+			auto_name = "Manual";
 			break;
 		case ARDOUR::Play:
 			output = 1;
+			auto_name = "Play";
 			break;
 		case ARDOUR::Write:
 			output = 2;
+			auto_name = "Write";
 			break;
 		case ARDOUR::Touch:
 			output = 3;
+			auto_name = "Touch";
 			break;
 		default:
 			break;
@@ -536,8 +541,10 @@ OSCSelectObserver::gain_automation ()
 
 	if (gainmode) {
 		send_float ("/select/fader/automation", output);
+		text_message ("/select/fader/automation_name", auto_name);
 	} else {
 		send_float ("/select/gain/automation", output);
+		text_message ("/select/gain/automation_name", auto_name);
 	}
 
 	gain_message ();
@@ -629,6 +636,7 @@ OSCSelectObserver::eq_init()
 		change_message ("/select/eq_hpf", _strip->filter_freq_controllable(true));
 	}
 	// TODO LPF and LPF/HPF enable ctrls.
+
 	if (_strip->eq_enable_controllable ()) {
 		_strip->eq_enable_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/eq_enable"), _strip->eq_enable_controllable()), OSC::instance());
 		enable_message ("/select/eq_enable", _strip->eq_enable_controllable());

@@ -2244,6 +2244,7 @@ OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_m
 	}
 	if (strp) {
 		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
+		// other automatable controls can be added by repeating the next 6.5 lines
 		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
 			if (strp->gain_control ()) {
 				control = strp->gain_control ();
@@ -3713,6 +3714,7 @@ OSC::sel_eq_hpf (float val, lo_message msg)
 	}
 	return sel_fail ("eq_hpf", 0, get_address (msg));
 }
+// need to add two more filter controls
 
 int
 OSC::sel_eq_gain (int id, float val, lo_message msg)
