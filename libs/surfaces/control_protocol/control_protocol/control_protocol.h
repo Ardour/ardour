@@ -47,7 +47,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
 
-	std::string name() const { return _name; }
+	virtual std::string name() const { return _name; }
 
         virtual int set_active (bool yn);
         bool active() const { return _active; }
