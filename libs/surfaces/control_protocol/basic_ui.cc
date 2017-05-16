@@ -409,7 +409,9 @@ BasicUI::jump_by_bars (double bars)
 	Timecode::BBT_Time bbt (tmap.bbt_at_frame (session->transport_frame()));
 
 	bars += bbt.bars;
-	if (bars < 0) bars = 0;
+	if (bars < 0) {
+		bars = 0;
+	}
 
 	AnyTime any;
 	any.type = AnyTime::BBT;
