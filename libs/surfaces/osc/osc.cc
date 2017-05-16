@@ -860,7 +860,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	len = strlen (path);
 
 	if (strstr (path, "/automation")) {
-		ret = set_automation (path, len, argv, argc, msg);
+		ret = set_automation (path, argv, argc, msg);
 
 	} else
 	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
@@ -2197,7 +2197,7 @@ OSC::route_get_receives(lo_message msg) {
 // strip calls
 
 int
-OSC::set_automation (const char *path, size_t len, lo_arg **argv, int argc, lo_message msg)
+OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 {
 	if (!session) return -1;
 
