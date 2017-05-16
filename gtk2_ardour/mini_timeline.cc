@@ -419,7 +419,6 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 		dx = 2 * w2;
 		lx = x0 + dx;
 	} else {
-		with_label = false;
 		if (x1 - 2 * w2 - lw - 2 > x0) {
 			x0 = std::max (x0, x1 - 2 * w2 - lw - 2);
 			with_label = true;
