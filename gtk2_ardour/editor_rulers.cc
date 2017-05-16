@@ -1154,7 +1154,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
 				edit_last_mark_label (marks, buf);
-				helper_active = true;
 			} else {
 
 				if ((*i).is_bar()) {
