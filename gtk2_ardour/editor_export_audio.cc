@@ -161,7 +161,6 @@ Editor::export_region ()
 				finished = process_midi_export_dialog (dialog, midi_region);
 				break;
 			default:
-				finished = true;
 				return;
 			}
 		}
