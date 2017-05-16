@@ -394,7 +394,7 @@ BasicUI::jump_by_seconds (double secs)
 	double s = (double) current / (double) session->nominal_frame_rate();
 
 	s+= secs;
-	if (s < 0) current = 0;
+	if (s < 0) s = 0;
 	s = s * session->nominal_frame_rate();
 
 	session->request_locate ( floor(s) );
