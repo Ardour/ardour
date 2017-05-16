@@ -231,6 +231,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
 	int set_automation (const char *path, lo_arg **argv, int argc, lo_message msg);
+	int touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg);
 
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);

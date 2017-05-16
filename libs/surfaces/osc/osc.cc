@@ -863,6 +863,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = set_automation (path, argv, argc, msg);
 
 	} else
+	if (strstr (path, "/touch")) {
+		ret = touch_detect (path, argv, argc, msg);
+
+	} else
 	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
@@ -2207,24 +2211,22 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 	uint32_t ctr = 0;
 	uint32_t aut = 0;
 
+	if (argc) {
+		if (argv[argc - 1]->f) {
+			aut = (int)argv[argc - 1]->f;
+		} else {
+			aut = argv[argc - 1]->i;
+		}
+	}
+
 	//parse path first to find stripable
 	if (!strncmp (path, "/strip/", 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
 			strp = get_strip (argv[0]->i, get_address (msg));
-			if (argv[1]->f) {
-				aut = (int)argv[1]->f;
-			} else {
-				aut = argv[1]->i;
-			}
 		} else {
 			uint32_t ssid = atoi (&(strrchr (path, '/' ))[1]);
 			strp = get_strip (ssid, get_address (msg));
-			if (argv[0]->f) {
-				aut = (int)argv[0]->f;
-			} else {
-				aut = argv[0]->i;
-			}
 		}
 		ctr = 7;
 	} else if (!strncmp (path, "/select/", 8)) {
@@ -2232,11 +2234,6 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 			strp = get_strip (sur->expand, get_address (msg));
 		} else {
 			strp = ControlProtocol::first_selected_stripable();
-		}
-		if (argv[0]->f) {
-			aut = (int)argv[0]->f;
-		} else {
-			aut = argv[0]->i;
 		}
 		ctr = 8;
 	} else {
@@ -2277,6 +2274,75 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 				default:
 					break;
 			}
+		}
+	}
+
+	return ret;
+}
+
+int
+OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
+{
+	if (!session) return -1;
+
+	int ret = 1;
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
+	uint32_t ctr = 0;
+	uint32_t touch = 0;
+
+	if (argc) {
+		if (argv[argc - 1]->f) {
+			touch = (int)argv[argc - 1]->f;
+		} else {
+			touch = argv[argc - 1]->i;
+		}
+	}
+
+	//parse path first to find stripable
+	if (!strncmp (path, "/strip/", 7)) {
+		// find ssid and stripable
+		if (argc > 1) {
+			strp = get_strip (argv[0]->i, get_address (msg));
+		} else {
+			uint32_t ssid = atoi (&(strrchr (path, '/' ))[1]);
+			strp = get_strip (ssid, get_address (msg));
+		}
+		ctr = 7;
+	} else if (!strncmp (path, "/select/", 8)) {
+		if (sur->expand_enable && sur->expand) {
+			strp = get_strip (sur->expand, get_address (msg));
+		} else {
+			strp = ControlProtocol::first_selected_stripable();
+		}
+		ctr = 8;
+	} else {
+		return ret;
+	}
+	if (strp) {
+		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
+		// other automatable controls can be added by repeating the next 6.5 lines
+		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
+			if (strp->gain_control ()) {
+				control = strp->gain_control ();
+			} else {
+				PBD::warning << "No fader for this strip" << endmsg;
+			}
+		} else {
+			PBD::warning << "Automation not available for " << path << endmsg;
+		}
+
+		if (control) {
+			if (touch) {
+				//start touch
+				if (!control->touching ()) {
+					control->start_touch (control->session().transport_frame());
+				}
+			} else {
+				// end touch
+				control->stop_touch (true, control->session().transport_frame());
+			}
+
 		}
 	}
 
