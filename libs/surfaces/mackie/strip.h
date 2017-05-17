@@ -86,6 +86,8 @@ public:
 
 	void notify_metering_state_changed();
 
+	void update_selection_state ();
+
 	void block_screen_display_for (uint32_t msecs);
 	void block_vpot_mode_display_for (uint32_t msecs);
 

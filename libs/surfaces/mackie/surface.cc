@@ -939,6 +939,15 @@ Surface::write (const MidiByteArray& data)
 }
 
 void
+Surface::update_strip_selection ()
+{
+	Strips::iterator s = strips.begin();
+	for ( ; s != strips.end(); ++s) {
+		(*s)->update_selection_state();
+	}
+}
+
+void
 Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables)
 {
 	vector<boost::shared_ptr<Stripable> >::const_iterator r;

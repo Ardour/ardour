@@ -90,6 +90,8 @@ public:
 
 	void map_stripables (const std::vector<boost::shared_ptr<ARDOUR::Stripable> >&);
 
+	void update_strip_selection ();
+
 	const MidiByteArray& sysex_hdr() const;
 
 	void periodic (ARDOUR::microseconds_t now_usecs);

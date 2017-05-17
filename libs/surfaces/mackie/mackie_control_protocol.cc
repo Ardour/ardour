@@ -2371,8 +2371,12 @@ MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 void
 MackieControlProtocol::stripable_selection_changed ()
 {
-	boost::shared_ptr<Stripable> s = first_selected_stripable ();
+	//this function is called after the stripable selection is "stable", so this is the place to check surface selection state
+	for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+		(*si)->update_strip_selection ();
+	}
 
+	boost::shared_ptr<Stripable> s = first_selected_stripable ();
 	if (s) {
 		check_fader_automation_state ();
 

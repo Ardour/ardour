@@ -377,11 +377,13 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		show_stripable_name ();
 	}
+}
 
-	if (what_changed.contains (ARDOUR::Properties::selected)) {
-		if (_stripable) {
-			_surface->write (_select->set_state (_stripable->is_selected()));
-		}
+void
+Strip::update_selection_state ()
+{
+	if(_stripable) {
+		_surface->write (_select->set_state (_stripable->is_selected()));
 	}
 }
 
@@ -1729,6 +1731,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 			case 2:
 				eq_band = global_pos;
 				pc = r->eq_gain_controllable (eq_band);
+				band_name = r->eq_band_name (eq_band);
 				param = EQGain;
 				break;
 		}
