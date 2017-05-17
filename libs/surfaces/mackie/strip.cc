@@ -1645,112 +1645,97 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 void
 Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 {
-	uint32_t bands = r->eq_band_cnt ();
-
-	if (bands == 0) {
-		/* should never get here */
-		return;
-	}
-
-	/* figure out how many params per band are available */
-
 	boost::shared_ptr<AutomationControl> pc;
-	uint32_t params_per_band = 0;
 
-	if ((pc = r->eq_gain_controllable (0))) {
-		params_per_band += 1;
-	}
-	if ((pc = r->eq_freq_controllable (0))) {
-		params_per_band += 1;
-	}
-	if ((pc = r->eq_q_controllable (0))) {
-		params_per_band += 1;
-	}
-	if ((pc = r->eq_shape_controllable (0))) {
-		params_per_band += 1;
-	}
-
-	/* pick the one for this strip, based on its global position across
-	 * all surfaces
-	 */
-
-	pc.reset ();
-
-	const uint32_t total_band_parameters = bands * params_per_band;
 	const uint32_t global_pos = _surface->mcp().global_index (*this);
 	AutomationType param = NullAutomation;
+	int eq_band = -1;
 	string band_name;
 
-	eq_band = -1;
+#ifdef MIXBUS
+	if ( r->is_input_strip() ) {
 
-	if (global_pos < total_band_parameters) {
-
-		/* show a parameter for an EQ band */
-
-		const uint32_t parameter = global_pos % params_per_band;
-		eq_band = global_pos / params_per_band;
-		band_name = r->eq_band_name (eq_band);
-
-		switch (parameter) {
-#ifdef MIXBUS32C  //in 32C, we swap the order of freq/gain to match the GUI
-		case 0:
-			pc = r->eq_freq_controllable (eq_band);
-			param = EQFrequency;
-			break;
-		case 1:
-			pc = r->eq_gain_controllable (eq_band);
-			param = EQGain;
-			break;
-#else
-		case 0:
-			pc = r->eq_gain_controllable (eq_band);
-			param = EQGain;
-			break;
-		case 1:
-			pc = r->eq_freq_controllable (eq_band);
-			param = EQFrequency;
-			break;
-#endif
-		case 2:
-			pc = r->eq_q_controllable (eq_band);
-			param = EQQ;
-			break;
-		case 3:
-			pc = r->eq_shape_controllable (eq_band);
-			param = EQShape;
-			break;
+#ifdef MIXBUS32C
+		switch (global_pos) {
+			case 0:
+			case 2:
+			case 4:
+			case 6:
+				eq_band = global_pos / 2;
+				pc = r->eq_freq_controllable (eq_band);
+				band_name = r->eq_band_name (eq_band);
+				param = EQFrequency;
+				break;
+			case 1:
+			case 3:
+			case 5:
+			case 7:
+				eq_band = global_pos / 2;
+				pc = r->eq_gain_controllable (eq_band);
+				band_name = r->eq_band_name (eq_band);
+				param = EQGain;
+				break;
+			case 8: 
+				pc = r->eq_shape_controllable(0);  //low band "bell" button
+				band_name = "lo";
+				param = EQShape;
+				break;
+			case 9:
+				pc = r->eq_shape_controllable(3);  //high band "bell" button
+				band_name = "hi";
+				param = EQShape;
+				break;
+			case 10:
+				pc = r->eq_enable_controllable();
+				param = EQEnable;
+				break;
 		}
 
-	} else {
+#else  //regular Mixbus channel EQ
 
-		/* show a non-band parameter (HPF or enable)
-		 */
-
-		uint32_t parameter = global_pos - total_band_parameters;
-
-		switch (parameter) {
-#ifndef MIXBUS32C
-		case 0: /* first control after band parameters */
-			pc = r->filter_freq_controllable(true);
-			param = EQHPF;
-			break;
-		case 1: /* second control after band parameters */
-			pc = r->eq_enable_controllable();
-			param = EQEnable;
-			break;
-#endif
-		default:
-			/* nothing to control */
-			_vpot->set_control (boost::shared_ptr<AutomationControl>());
-			pending_display[0] = string();
-			pending_display[1] = string();
-			/* done */
-			return;
-			break;
+		switch (global_pos) {
+			case 0:
+			case 2:
+			case 4:
+				eq_band = global_pos / 2;
+				pc = r->eq_gain_controllable (eq_band);
+				band_name = r->eq_band_name (eq_band);
+				param = EQGain;
+				break;
+			case 1:
+			case 3:
+			case 5:
+				eq_band = global_pos / 2;
+				pc = r->eq_freq_controllable (eq_band);
+				band_name = r->eq_band_name (eq_band);
+				param = EQFrequency;
+				break;
+			case 6:
+				pc = r->eq_enable_controllable();
+				param = EQEnable;
+				break;
+			case 7:
+				pc = r->filter_freq_controllable(true);
+				param = EQHPF;
+				break;
 		}
 
+#endif
+
+	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
+		switch (global_pos) {
+			case 0:
+			case 1:
+			case 2:
+				eq_band = global_pos;
+				pc = r->eq_gain_controllable (eq_band);
+				param = EQGain;
+				break;
+		}
 	}
+#endif
 
+	//If a controllable was found, connect it up, and put the labels in the display.
 	if (pc) {
 		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, param, eq_band, false), ui_context());
 		_vpot->set_control (pc);
@@ -1771,13 +1756,11 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 			pot_id = band_name + " Shp";
 			break;
 		case EQEnable:
-			pot_id = "on/off";
+			pot_id = "EQ";
 			break;
-#ifndef MIXBUS32C
 		case EQHPF:
-			pot_id = "HPFreq";
+			pot_id = "HP Freq";
 			break;
-#endif
 		default:
 			break;
 		}
@@ -1787,9 +1770,14 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		} else {
 			pending_display[0] = string();
 		}
-
-		notify_eq_change (param, eq_band, true);
+		
+	} else {  //no controllable was found;  just clear this knob
+		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+		pending_display[0] = string();
+		pending_display[1] = string();
 	}
+	
+	notify_eq_change (param, eq_band, true);
 }
 
 void
