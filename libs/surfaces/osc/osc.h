@@ -110,6 +110,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types, bool cue);
+	typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, uint32_t> FakeTouchMap;
+	FakeTouchMap _touch_timeout;
 
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
@@ -232,6 +234,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int set_automation (const char *path, lo_arg **argv, int argc, lo_message msg);
 	int touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg);
+	int fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl);
 
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);

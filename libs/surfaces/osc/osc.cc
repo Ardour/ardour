@@ -2350,6 +2350,20 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 }
 
 int
+OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
+{
+	if (ctrl) {
+		//start touch
+		if (!ctrl->touching ()) {
+		ctrl->start_touch (ctrl->session().transport_frame());
+		}
+		_touch_timeout[ctrl] = 10;
+	}
+
+	return 0;
+}
+
+int
 OSC::route_mute (int ssid, int yn, lo_message msg)
 {
 	if (!session) return -1;
@@ -2834,6 +2848,7 @@ OSC::route_set_gain_abs (int ssid, float level, lo_message msg)
 
 	if (s) {
 		if (s->gain_control()) {
+			fake_touch (s->gain_control());
 			s->gain_control()->set_value (level, PBD::Controllable::NoGroup);
 		} else {
 			return 1;
@@ -2882,6 +2897,7 @@ OSC::sel_gain (float val, lo_message msg)
 			abs = dB_to_coefficient (val);
 		}
 		if (s->gain_control()) {
+			fake_touch (s->gain_control());
 			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
@@ -2918,6 +2934,7 @@ OSC::sel_fader (float val, lo_message msg)
 		float abs;
 		abs = slider_position_to_gain_with_max (val, 2.0);
 		if (s->gain_control()) {
+			fake_touch (s->gain_control());
 			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
@@ -3950,6 +3967,17 @@ OSC::periodic (void)
 
 		if ((co = dynamic_cast<OSCCueObserver*>(*x)) != 0) {
 			co->tick();
+		}
+	}
+	for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end();) {
+		_touch_timeout[(*x).first] = (*x).second - 1;
+		if (!(*x).second) {
+			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
+			// turn touch off
+			ctrl->stop_touch (true, ctrl->session().transport_frame());
+			x = _touch_timeout.erase (x);
+		} else {
+			++x;
 		}
 	}
 	return true;
