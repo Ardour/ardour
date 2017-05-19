@@ -2335,14 +2335,21 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 		if (control) {
 			if (touch) {
 				//start touch
-				if (!control->touching ()) {
+				if (control->automation_state() == Touch && !control->touching ()) {
 					control->start_touch (control->session().transport_frame());
 				}
 			} else {
 				// end touch
 				control->stop_touch (true, control->session().transport_frame());
 			}
-
+			// just in case some crazy surface starts sending control values before touch
+			for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end();) {
+				if ((*x).first == control) {
+					x = _touch_timeout.erase (x);
+				} else {
+					++x;
+				}
+			}
 		}
 	}
 
@@ -2354,10 +2361,10 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 {
 	if (ctrl) {
 		//start touch
-		if (!ctrl->touching ()) {
+		if (ctrl->automation_state() == Touch && !ctrl->touching ()) {
 		ctrl->start_touch (ctrl->session().transport_frame());
-		}
 		_touch_timeout[ctrl] = 10;
+		}
 	}
 
 	return 0;
