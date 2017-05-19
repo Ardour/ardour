@@ -793,6 +793,8 @@ def options(opt):
                     help='Turn on PT session import option')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
+    opt.add_option('--ws-osc', action='store_true', default=False, dest='ws_osc',
+                    help='Enable OSC-via-websocket')
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
@@ -1163,7 +1165,9 @@ int main () { return 0; }
     if opts.no_threaded_waveviews:
         conf.define('NO_THREADED_WAVEVIEWS', 1)
         conf.env['NO_THREADED_WAVEVIEWS'] = True
-
+    if opts.ws_osc:
+            autowaf.check_pkg(conf, 'libwebsockets', uselib_store='WEBSOCKETS', mandatory=True)
+            
     backends = opts.with_backends.split(',')
     if opts.build_tests and 'dummy' not in backends:
         backends += ['dummy']
@@ -1260,6 +1264,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Samplerate',            conf.is_defined('HAVE_SAMPLERATE'))
     write_config_text('PT format',             conf.is_defined('PTFORMAT'))
     write_config_text('PTW32 Semaphore',       conf.is_defined('USE_PTW32_SEMAPHORE'))
+    write_config_text('OSC-via-WebSockets',    conf.is_defined('HAVE_WEBSOCKETS'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Translation',           opts.nls)
 #    write_config_text('Tranzport',             opts.tranzport)
