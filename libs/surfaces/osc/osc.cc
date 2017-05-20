@@ -2343,11 +2343,10 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 				control->stop_touch (true, control->session().transport_frame());
 			}
 			// just in case some crazy surface starts sending control values before touch
-			for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end();) {
+			for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end(); x++) {
 				if ((*x).first == control) {
-					x = _touch_timeout.erase (x);
-				} else {
-					++x;
+					_touch_timeout.erase (x);
+					break;
 				}
 			}
 		}
@@ -3976,15 +3975,14 @@ OSC::periodic (void)
 			co->tick();
 		}
 	}
-	for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end();) {
+	for (FakeTouchMap::iterator x = _touch_timeout.begin(); x != _touch_timeout.end(); x++) {
 		_touch_timeout[(*x).first] = (*x).second - 1;
 		if (!(*x).second) {
 			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
 			// turn touch off
 			ctrl->stop_touch (true, ctrl->session().transport_frame());
-			x = _touch_timeout.erase (x);
-		} else {
-			++x;
+			_touch_timeout.erase (x);
+			break;
 		}
 	}
 	return true;
