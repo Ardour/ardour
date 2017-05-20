@@ -21,6 +21,8 @@
         http://github.com/signal11/hidapi .
 ********************************************************/
 
+#define _POSIX_C_SOURCE 200809L
+
 /* C */
 #include <stdio.h>
 #include <string.h>
