@@ -66,10 +66,12 @@ struct OSCUIRequest : public BaseUI::BaseRequestObject {
 	~OSCUIRequest() {}
 };
 
+class WSOSCServer;
+
 class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 {
   public:
-	OSC (ARDOUR::Session&, uint32_t port);
+	OSC (ARDOUR::Session&, uint32_t port, int32_t ws_port = -1);
 	virtual ~OSC();
 
 	static OSC* instance() { return _instance; }
@@ -174,21 +176,26 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::string get_remote_port () { return remote_port; }
 	void set_remote_port (std::string pt) { remote_port = pt; }
 
+	void attach (Glib::RefPtr<Glib::IOSource>);
+
   protected:
         void thread_init ();
 	void do_request (OSCUIRequest*);
 
 	GSource* local_server;
 	GSource* remote_server;
+	GSource* ws_server;
 
 	bool osc_input_handler (Glib::IOCondition, lo_server);
 
   private:
 	uint32_t _port;
+	int32_t _ws_port;
 	volatile bool _ok;
 	volatile bool _shutdown;
 	lo_server _osc_server;
 	lo_server _osc_unix_server;
+	WSOSCServer* _osc_ws_server;
 	std::string _osc_unix_socket_path;
 	std::string _osc_url_file;
 	OSCDebugMode _debugmode;

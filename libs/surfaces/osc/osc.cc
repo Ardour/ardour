@@ -32,6 +32,7 @@
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
 #include <pbd/failed_constructor.h>
+#include "pbd/i18n.h"
 
 #include "ardour/amp.h"
 #include "ardour/session.h"
@@ -58,7 +59,7 @@
 #include "osc_route_observer.h"
 #include "osc_global_observer.h"
 #include "osc_cue_observer.h"
-#include "pbd/i18n.h"
+#include "ws_osc.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -81,16 +82,19 @@ static void error_callback(int, const char *, const char *)
 }
 #endif
 
-OSC::OSC (Session& s, uint32_t port)
+OSC::OSC (Session& s, uint32_t port, int32_t ws_port)
 	: ControlProtocol (s, X_("Open Sound Control (OSC)"))
 	, AbstractUI<OSCUIRequest> (name())
 	, local_server (0)
 	, remote_server (0)
+	, ws_server (0)
 	, _port(port)
+	, _ws_port(ws_port)
 	, _ok (true)
 	, _shutdown (false)
 	, _osc_server (0)
 	, _osc_unix_server (0)
+	, _osc_ws_server (0)
 	, _debugmode (Off)
 	, address_only (false)
 	, remote_port ("8000")
@@ -220,6 +224,15 @@ OSC::start ()
 
 	PBD::info << "OSC @ " << get_server_url () << endmsg;
 
+	if (_ws_port > 0) {
+		try {
+			_osc_ws_server = new WSOSCServer (this, _ws_port, string(), string());
+			PBD::info << "OSC-WebSocket @ " << _ws_port << endmsg;
+		} catch (...) {
+			_osc_ws_server = 0;
+		}
+	}
+
 	std::string url_file;
 
 	if (find_file (ardour_config_search_path(), "osc_url", url_file)) {
@@ -256,6 +269,12 @@ OSC::start ()
 	_select = boost::shared_ptr<Stripable>();
 
 	return 0;
+}
+
+void
+OSC::attach (Glib::RefPtr<IOSource> src)
+{
+	src->attach (_main_loop->get_context());
 }
 
 void
@@ -580,7 +599,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/eq_q", "if", sel_eq_q);
 		REGISTER_CALLBACK (serv, "/select/eq_shape", "if", sel_eq_shape);
 
-		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */ 
+		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
 		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
 		REGISTER_CALLBACK (serv, "/strip/solo", "ii", route_solo);
 		REGISTER_CALLBACK (serv, "/strip/solo_iso", "ii", route_solo_iso);
@@ -607,7 +626,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
 		REGISTER_CALLBACK(serv, "/strip/name", "is", route_rename);
 		REGISTER_CALLBACK(serv, "/strip/sends", "i", route_get_sends);
-		REGISTER_CALLBACK(serv, "/strip/receives", "i", route_get_receives);                
+		REGISTER_CALLBACK(serv, "/strip/receives", "i", route_get_receives);
 		REGISTER_CALLBACK(serv, "/strip/plugin/list", "i", route_plugin_list);
 		REGISTER_CALLBACK(serv, "/strip/plugin/descriptor", "ii", route_plugin_descriptor);
 		REGISTER_CALLBACK(serv, "/strip/plugin/reset", "ii", route_plugin_reset);
@@ -4530,4 +4549,3 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 
 	return sorted;
 }
-
