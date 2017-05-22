@@ -4516,6 +4516,8 @@ TempoMap::fix_legacy_session ()
 			if (!t->active()) {
 				continue;
 			}
+			/* Ramp type never existed in the era of this tempo section */
+			t->set_end_note_types_per_minute (t->note_types_per_minute());
 
 			if (t->initial()) {
 				t->set_pulse (0.0);
