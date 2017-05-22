@@ -553,14 +553,14 @@ MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 {
 	LocaleGuard lg;
 	pair<double, BBT_Time> start;
+	start.first = 0.0;
 
-	BBT_Time bbt;
 	std::string bbt_str;
 	if (node.get_property ("start", bbt_str)) {
-		if (string_to_bbt_time (bbt_str, bbt)) {
+		if (string_to_bbt_time (bbt_str, start.second)) {
 			/* legacy session - start used to be in bbt*/
 			info << _("Legacy session detected - MeterSection XML node will be altered.") << endmsg;
-			set_pulse(-1.0);
+			set_pulse (-1.0);
 		} else {
 			error << _("MeterSection XML node has an illegal \"start\" value") << endmsg;
 		}
@@ -568,7 +568,6 @@ MeterSection::MeterSection (const XMLNode& node, const framecnt_t sample_rate)
 
 	MetricSection::set_state (node, Stateful::loading_state_version);
 
-	start.first = 0.0;
 	node.get_property ("beat", start.first);
 
 	if (node.get_property ("bbt", bbt_str)) {
