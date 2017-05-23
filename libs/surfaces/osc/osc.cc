@@ -409,6 +409,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/refresh", "", refresh_surface);
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
+		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
 		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
 		REGISTER_CALLBACK (serv, "/add_marker", "f", add_marker);
 		REGISTER_CALLBACK (serv, "/access_action", "s", access_action);
