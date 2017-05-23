@@ -1570,10 +1570,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\editor_enums.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\editor_group_tabs.h"
 				>
 			</File>
