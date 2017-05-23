@@ -4640,11 +4640,6 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 			}
 		}
 
-		if (niter == nlist.end()) {
-			MetricSectionSorter cmp;
-			_metrics.sort (cmp);
-		}
-
 		/* check for legacy sessions where bbt was the base musical unit for tempo */
 		for (Metrics::const_iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
 			TempoSection* t;
@@ -4661,6 +4656,11 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 
 				break;
 			}
+		}
+
+		if (niter == nlist.end()) {
+			MetricSectionSorter cmp;
+			_metrics.sort (cmp);
 		}
 
 		/* check for multiple tempo/meters at the same location, which
