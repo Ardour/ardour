@@ -31,6 +31,7 @@
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/processor.h"
+#include "ardour/readonly_control.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -362,6 +363,9 @@ OSCSelectObserver::tick ()
 		}
 	}
 	if (feedback[13]) {
+		if (_strip->comp_enable_controllable()->get_value()) {
+			send_float ("/select/comp_redux", (float) _strip->comp_redux_controllable()->get_parameter ());
+		}
 		for (uint32_t i = 0; i < send_timeout.size(); i++) {
 			if (send_timeout[i]) {
 				if (send_timeout[i] == 1) {
@@ -631,11 +635,35 @@ void
 OSCSelectObserver::eq_init()
 {
 	// HPF and enable are special case, rest are in bands
-	if (_strip->filter_freq_controllable (true)) {
-		_strip->filter_freq_controllable (true)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf"), _strip->filter_freq_controllable (true)), OSC::instance());
-		change_message ("/select/eq_hpf", _strip->filter_freq_controllable(true));
+	if (_strip->filter_enable_controllable (true)) {
+		_strip->filter_enable_controllable (true)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf/enable"), _strip->filter_enable_controllable (true)), OSC::instance());
+		change_message ("/select/eq_hpf/enable", _strip->filter_enable_controllable(true));
 	}
-	// TODO LPF and LPF/HPF enable ctrls.
+
+	if (_strip->filter_enable_controllable (false)) {
+		_strip->filter_enable_controllable (false)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_lpf/enable"), _strip->filter_enable_controllable (false)), OSC::instance());
+		change_message ("/select/eq_lpf/enable", _strip->filter_enable_controllable(false));
+	}
+
+	if (_strip->filter_freq_controllable (true)) {
+		_strip->filter_freq_controllable (true)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf/freq"), _strip->filter_freq_controllable (true)), OSC::instance());
+		change_message ("/select/eq_hpf/freq", _strip->filter_freq_controllable(true));
+	}
+
+	if (_strip->filter_freq_controllable (false)) {
+		_strip->filter_freq_controllable (false)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_lpf/freq"), _strip->filter_freq_controllable (false)), OSC::instance());
+		change_message ("/select/eq_lpf/freq", _strip->filter_freq_controllable(false));
+	}
+
+	if (_strip->filter_slope_controllable (true)) {
+		_strip->filter_slope_controllable (true)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_hpf/slope"), _strip->filter_slope_controllable (true)), OSC::instance());
+		change_message ("/select/eq_hpf/slope", _strip->filter_slope_controllable(true));
+	}
+
+	if (_strip->filter_slope_controllable (false)) {
+		_strip->filter_slope_controllable (false)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/eq_lpf/slope"), _strip->filter_slope_controllable (false)), OSC::instance());
+		change_message ("/select/eq_lpf/slope", _strip->filter_slope_controllable(false));
+	}
 
 	if (_strip->eq_enable_controllable ()) {
 		_strip->eq_enable_controllable ()->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/eq_enable"), _strip->eq_enable_controllable()), OSC::instance());
