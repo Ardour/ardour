@@ -2343,10 +2343,12 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 				//start touch
 				if (control->automation_state() == Touch && !control->touching ()) {
 					control->start_touch (control->session().transport_frame());
+					ret = 0;
 				}
 			} else {
 				// end touch
 				control->stop_touch (true, control->session().transport_frame());
+				ret = 0;
 			}
 			// just in case some crazy surface starts sending control values before touch
 			FakeTouchMap::iterator x = _touch_timeout.find(control);
