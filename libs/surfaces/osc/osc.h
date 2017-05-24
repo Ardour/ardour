@@ -427,7 +427,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_comp_mode,f);
 	PATH_CALLBACK1_MSG(sel_comp_makeup,f);
 	PATH_CALLBACK1_MSG(sel_eq_enable,f);
-	PATH_CALLBACK1_MSG(sel_eq_hpf,f);
+	PATH_CALLBACK1_MSG(sel_eq_hpf_freq,f);
+	PATH_CALLBACK1_MSG(sel_eq_hpf_enable,f);
+	PATH_CALLBACK1_MSG(sel_eq_hpf_slope,f);
+	PATH_CALLBACK1_MSG(sel_eq_lpf_freq,f);
+	PATH_CALLBACK1_MSG(sel_eq_lpf_enable,f);
+	PATH_CALLBACK1_MSG(sel_eq_lpf_slope,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type) \
@@ -613,7 +618,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_comp_mode (float val, lo_message msg);
 	int sel_comp_makeup (float val, lo_message msg);
 	int sel_eq_enable (float val, lo_message msg);
-	int sel_eq_hpf (float val, lo_message msg);
+	int sel_eq_hpf_freq (float val, lo_message msg);
+	int sel_eq_hpf_enable (float val, lo_message msg);
+	int sel_eq_hpf_slope (float val, lo_message msg);
+	int sel_eq_lpf_freq (float val, lo_message msg);
+	int sel_eq_lpf_enable (float val, lo_message msg);
+	int sel_eq_lpf_slope (float val, lo_message msg);
 	int sel_eq_gain (int id, float val, lo_message msg);
 	int sel_eq_freq (int id, float val, lo_message msg);
 	int sel_eq_q (int id, float val, lo_message msg);

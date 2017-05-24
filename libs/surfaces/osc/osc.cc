@@ -575,7 +575,12 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/comp_mode", "f", sel_comp_mode);
 		REGISTER_CALLBACK (serv, "/select/comp_makeup", "f", sel_comp_makeup);
 		REGISTER_CALLBACK (serv, "/select/eq_enable", "f", sel_eq_enable);
-		REGISTER_CALLBACK (serv, "/select/eq_hpf", "f", sel_eq_hpf);
+		REGISTER_CALLBACK (serv, "/select/eq_hpf/freq", "f", sel_eq_hpf_freq);
+		REGISTER_CALLBACK (serv, "/select/eq_hpf/enable", "f", sel_eq_hpf_enable);
+		REGISTER_CALLBACK (serv, "/select/eq_hpf/slope", "f", sel_eq_hpf_slope);
+		REGISTER_CALLBACK (serv, "/select/eq_lpf/freq", "f", sel_eq_lpf_freq);
+		REGISTER_CALLBACK (serv, "/select/eq_lpf/enable", "f", sel_eq_lpf_enable);
+		REGISTER_CALLBACK (serv, "/select/eq_lpf/slope", "f", sel_eq_lpf_slope);
 		REGISTER_CALLBACK (serv, "/select/eq_gain", "if", sel_eq_gain);
 		REGISTER_CALLBACK (serv, "/select/eq_freq", "if", sel_eq_freq);
 		REGISTER_CALLBACK (serv, "/select/eq_q", "if", sel_eq_q);
@@ -3785,7 +3790,7 @@ OSC::sel_eq_enable (float val, lo_message msg)
 }
 
 int
-OSC::sel_eq_hpf (float val, lo_message msg)
+OSC::sel_eq_hpf_freq (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
@@ -3800,9 +3805,103 @@ OSC::sel_eq_hpf (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_hpf", 0, get_address (msg));
+	return sel_fail ("eq_hpf/freq", 0, get_address (msg));
 }
-// need to add two more filter controls
+
+int
+OSC::sel_eq_lpf_freq (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->filter_freq_controllable(false)) {
+			s->filter_freq_controllable(false)->set_value (s->filter_freq_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_lpf/freq", 0, get_address (msg));
+}
+
+int
+OSC::sel_eq_hpf_enable (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->filter_enable_controllable(true)) {
+			s->filter_enable_controllable(true)->set_value (s->filter_enable_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_hpf/enable", 0, get_address (msg));
+}
+
+int
+OSC::sel_eq_lpf_enable (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->filter_enable_controllable(false)) {
+			s->filter_enable_controllable(false)->set_value (s->filter_enable_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_lpf/enable", 0, get_address (msg));
+}
+
+int
+OSC::sel_eq_hpf_slope (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->filter_slope_controllable(true)) {
+			s->filter_slope_controllable(true)->set_value (s->filter_slope_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_hpf/slope", 0, get_address (msg));
+}
+
+int
+OSC::sel_eq_lpf_slope (float val, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->filter_slope_controllable(false)) {
+			s->filter_slope_controllable(false)->set_value (s->filter_slope_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("eq_lpf/slope", 0, get_address (msg));
+}
 
 int
 OSC::sel_eq_gain (int id, float val, lo_message msg)
