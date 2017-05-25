@@ -47,9 +47,11 @@ def configure(conf):
 
     if conf.is_defined('HAVE_USB'):
         children += [ 'push2' ]
+        children += [ 'shuttlepro' ]
+
     else:
-        print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
-    
+        print ('You are missing the libusb-1.0 development package needed to compile Push2 and ShuttlePRO support')
+
     if conf.is_defined('HAVE_HIDAPI') and Options.options.maschine:
         children += [ 'maschine2' ]
         conf.define('BUILD_MASCHINE', 1)
@@ -92,6 +94,7 @@ def build(bld):
         bld.recurse('tranzport')
     if bld.is_defined('HAVE_USB'):
         bld.recurse('push2')
+        bld.recurse('shuttlepro')
     if bld.is_defined('BUILD_MASCHINE'):
         bld.recurse('maschine2')
 

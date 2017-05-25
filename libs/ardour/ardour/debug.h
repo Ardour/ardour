@@ -68,6 +68,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits OrderKeys;
 		LIBARDOUR_API extern DebugBits Automation;
 		LIBARDOUR_API extern DebugBits WiimoteControl;
+		LIBARDOUR_API extern DebugBits ShuttleproControl;
 		LIBARDOUR_API extern DebugBits Ports;
 		LIBARDOUR_API extern DebugBits AudioEngine;
 		LIBARDOUR_API extern DebugBits Soundcloud;
@@ -91,4 +92,3 @@ namespace PBD {
 }
 
 #endif /* __ardour_debug_h__ */
-
