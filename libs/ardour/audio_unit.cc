@@ -2016,9 +2016,16 @@ AUPlugin::describe_parameter (Evoral::Parameter param)
 }
 
 void
-AUPlugin::print_parameter (uint32_t /*param*/, char* /*buf*/, uint32_t /*len*/) const
+AUPlugin::print_parameter (uint32_t param, char* buf, uint32_t len) const
 {
 	// NameValue stuff here
+	if (buf && len) {
+		if (param < parameter_count()) {
+			snprintf (buf, len, "%.3f", get_parameter (param));
+		} else {
+			strcat (buf, "0");
+		}
+	}
 }
 
 bool
