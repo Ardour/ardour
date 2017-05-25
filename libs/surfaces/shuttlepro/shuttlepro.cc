@@ -116,15 +116,58 @@ ShuttleproControlProtocol::do_request (ShuttleproControlUIRequest* req)
 	}
 }
 
+
+int
+ShuttleproControlProtocol::discover_shuttlepro_fd () {
+        DIR* dir = opendir ("/dev/input");
+        if (!dir) {
+                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input");
+                return -1;
+        }
+
+        struct dirent* item = 0;
+
+        char fnbuf[64];
+
+        char dev_name[256];
+
+        while ((item = readdir (dir))) {
+                if (!item) {
+                        continue;
+                }
+
+                if (strncmp (item->d_name, "event", 5)) {
+                        continue;
+                }
+
+                strcpy (fnbuf, "/dev/input/");
+                strncat (fnbuf, item->d_name, 42);
+                int fd = open (fnbuf, O_RDONLY);
+                if (fd < 0) {
+                        continue;
+                }
+
+                memset (dev_name, 0, sizeof (dev_name));
+                ioctl (fd, EVIOCGNAME (sizeof (dev_name)), dev_name);
+
+		if (!strcmp (dev_name, "Contour Design ShuttlePRO v2")) {
+			DEBUG_TRACE (DEBUG::ShuttleproControl, "Shuttlepro found\n");
+			return fd;
+		}
+        }
+	return -1;
+}
+
+
 void
 ShuttleproControlProtocol::thread_init () {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init()");
 
 	BasicUI::register_thread (X_("Shuttlepro"));
 
-	_file_descriptor = open("/dev/input/by-id/usb-Contour_Design_ShuttlePRO_v2-event-if00", O_RDONLY);
+	_file_descriptor = discover_shuttlepro_fd ();
 	if (_file_descriptor < 0) {
-		cout << "Could not open Shuttlepro" << endl; // FIXME error handling and discovery missing
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttlePRO device found\n");
 		return;
 	}
 
