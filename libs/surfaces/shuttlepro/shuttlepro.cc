@@ -45,6 +45,7 @@ using namespace std;
 ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Shuttlepro"))
 	,  AbstractUI<ShuttleproControlUIRequest> ("shuttlepro")
+	, _io_source (0)
 	, _file_descriptor (-1)
 	, _jog_position (-1)
 {
