@@ -179,6 +179,8 @@ ShuttleproControlProtocol::stop ()
 
 void
 ShuttleproControlProtocol::handle_event (EV ev) {
+//	cout << "event " << ev.type << " " << ev.code << " " << ev.value << endl;;
+
 	if (ev.type == 0) { // check if shuttle is turned
 		if (_shuttle_event_recieved) {
 			if (_shuttle_position != _old_shuttle_position) {
@@ -207,10 +209,14 @@ ShuttleproControlProtocol::handle_event (EV ev) {
 			_jog_position = ev.value;
 			return;
 		}
-		if (ev.value - _jog_position < 0) {
+		cout << "jog event " << _jog_position << " " << ev.value << endl;
+		if (ev.value == 255 && _jog_position == 1) {
+			jog_event_backward ();
+		} else if (ev.value == 1 && _jog_position == 255) {
+			jog_event_forward();
+		} else if (ev.value < _jog_position) {
 			jog_event_backward();
-		}
-		if (ev.value - _jog_position > 0) {
+		} else {
 			jog_event_forward();
 		}
 		_jog_position = ev.value;
