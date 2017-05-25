@@ -526,10 +526,10 @@ Meterbridge::get_state (void)
 	}
 
 	XMLNode* geometry = new XMLNode ("geometry");
-	geometry->set_property(X_("x_size"), m_width);
-	geometry->set_property(X_("y_size"), m_height);
-	geometry->set_property(X_("x_pos"), m_root_x);
-	geometry->set_property(X_("y_pos"), m_root_y);
+	geometry->set_property(X_("x-size"), m_width);
+	geometry->set_property(X_("y-size"), m_height);
+	geometry->set_property(X_("x-pos"), m_root_x);
+	geometry->set_property(X_("y-pos"), m_root_y);
 	node->add_child_nocopy (*geometry);
 
 	node->set_property ("show-meterbridge", _visible);
