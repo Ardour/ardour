@@ -955,10 +955,10 @@ ARDOUR_UI::get_transport_controllable_state ()
 
 	node->set_property (X_("roll"), roll_controllable->id());
 	node->set_property (X_("stop"), stop_controllable->id());
-	node->set_property (X_("goto_start"), goto_start_controllable->id());
-	node->set_property (X_("goto_end"), goto_end_controllable->id());
-	node->set_property (X_("auto_loop"), auto_loop_controllable->id());
-	node->set_property (X_("play_selection"), play_selection_controllable->id());
+	node->set_property (X_("goto-start"), goto_start_controllable->id());
+	node->set_property (X_("goto-end"), goto_end_controllable->id());
+	node->set_property (X_("auto-loop"), auto_loop_controllable->id());
+	node->set_property (X_("play-selection"), play_selection_controllable->id());
 	node->set_property (X_("rec"), rec_controllable->id());
 	node->set_property (X_("shuttle"), shuttle_box.controllable()->id());
 
