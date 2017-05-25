@@ -253,8 +253,8 @@ MidiTrack::state(bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	root.set_property("playback_channel-mode", get_playback_channel_mode());
-	root.set_property("capture_channel-mode", get_capture_channel_mode());
+	root.set_property("playback-channel-mode", get_playback_channel_mode());
+	root.set_property("capture-channel-mode", get_capture_channel_mode());
 	snprintf (buf, sizeof(buf), "0x%x", get_playback_channel_mask());
 	root.set_property("playback-channel-mask", std::string(buf));
 	snprintf (buf, sizeof(buf), "0x%x", get_capture_channel_mask());
