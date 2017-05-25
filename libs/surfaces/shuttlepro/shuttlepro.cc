@@ -323,8 +323,6 @@ discover_shuttlepro_fd () {
 
         struct dirent* item = 0;
 
-        char fnbuf[64];
-
         char dev_name[256];
 
         while ((item = readdir (dir))) {
@@ -336,9 +334,7 @@ discover_shuttlepro_fd () {
                         continue;
                 }
 
-                strcpy (fnbuf, "/dev/input/");
-                strncat (fnbuf, item->d_name, 42);
-                int fd = open (fnbuf, O_RDONLY);
+                int fd = open (Glib::build_filename ("/dev/input", item->d_name).c_str (), O_RDONLY);
                 if (fd < 0) {
                         continue;
                 }

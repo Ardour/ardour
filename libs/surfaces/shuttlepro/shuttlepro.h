@@ -54,9 +54,6 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-//	void start_shuttlepro_discovery ();
-//	void stop_shuttlepro_discovery ();
-
 	void stripable_selection_changed () {}
 
 private:
