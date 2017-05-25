@@ -879,7 +879,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		control_ui->vbox = manage (new VBox);
 		control_ui->vbox->set_spacing(3);
 
-		if (desc.integer_step || desc.enumeration) {
+		if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
+			control_ui->vbox->pack_end (*control_ui->display, false, false);
+			control_ui->vbox->pack_end (control_ui->label, false, false);
+		} else if (desc.integer_step || desc.enumeration) {
 			control_ui->vbox->pack_end (*control_ui->display, false, false);
 			control_ui->vbox->pack_end (control_ui->label, false, false);
 		} else {
@@ -1086,7 +1089,10 @@ GenericPluginUI::output_update ()
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
-		snprintf (buf, sizeof(buf), "%.2f", val);
+		boost::shared_ptr<ReadOnlyControl> c = insert->control_output ((*i)->parameter().id());
+		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
+		size_t len = str.copy(buf, 31);
+		buf[len] = '\0';
 		(*i)->display_label->set_text (buf);
 
 		/* autoscaling for the meter */
