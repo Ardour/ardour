@@ -24,8 +24,9 @@
 
 using namespace ARDOUR;
 
-ReadOnlyControl::ReadOnlyControl (boost::shared_ptr<Plugin> p, uint32_t pnum)
+ReadOnlyControl::ReadOnlyControl (boost::shared_ptr<Plugin> p, const ParameterDescriptor& desc, uint32_t pnum)
 		: _plugin (boost::weak_ptr<Plugin> (p))
+		, _desc (desc)
 		, _parameter_num (pnum)
 { }
 

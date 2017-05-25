@@ -458,14 +458,15 @@ PluginInsert::create_automatable_parameters ()
 		if (!plugin->parameter_is_control (i)) {
 			continue;
 		}
-		if (!plugin->parameter_is_input (i)) {
-			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, i));
-			continue;
-		}
-		Evoral::Parameter param (PluginAutomation, 0, i);
 
 		ParameterDescriptor desc;
 		plugin->get_parameter_descriptor(i, desc);
+
+		if (!plugin->parameter_is_input (i)) {
+			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, desc, i));
+			continue;
+		}
+		Evoral::Parameter param (PluginAutomation, 0, i);
 
 		const bool automatable = a.find(param) != a.end();
 
