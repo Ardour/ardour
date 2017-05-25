@@ -243,8 +243,28 @@ ShuttleproControlProtocol::handle_key_press (unsigned short key)
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("Shuttlepro key number %1\n", key));
 	switch (key) {
+	case KEY01: midi_panic (); break;
+	case KEY02: access_action ("Editor/remove-last-capture"); break;
+
+// FIXME: calling undo () and redo () from here makes ardour crash (see #7371)
+//	case KEY03: undo (); break;
+//	case KEY04: redo (); break;
+
+	case KEY06: set_record_enable (!get_record_enabled ()); break;
+	case KEY07: transport_stop (); break;
+	case KEY08: transport_play (); break;
+
+	case KEY05: prev_marker (); break;
+	case KEY09: next_marker (); break;
+
 	case KEY14: goto_start (); break;
 	case KEY15: goto_end (); break;
+
+	case KEY10: jump_by_bars (-4.0); break;
+	case KEY11: jump_by_bars (+4.0); break;
+
+	case KEY13: add_marker (); break;
+
 	default: break;
 	}
 }
