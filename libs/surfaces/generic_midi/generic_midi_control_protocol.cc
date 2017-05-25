@@ -581,7 +581,7 @@ GenericMidiControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
 
-	node.set_property (X_("feedback_interval"), _feedback_interval);
+	node.set_property (X_("feedback-interval"), _feedback_interval);
 	node.set_property (X_("threshold"), _threshold);
 	node.set_property (X_("motorized"), _motorised);
 
@@ -619,7 +619,7 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if (!node.get_property ("feedback_interval", _feedback_interval)) {
+	if (!node.get_property ("feedback-interval", _feedback_interval)) {
 		_feedback_interval = 10000;
 	}
 
