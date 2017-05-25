@@ -494,19 +494,10 @@ Meterbridge::set_state (const XMLNode& node)
 	m_root_y = 1;
 
 	if ((geometry = find_named_node (node, "geometry")) != 0) {
-
-		if (!geometry->get_property ("x_size", m_width)) {
-			geometry->get_property ("x-size", m_width);
-		}
-		if (!geometry->get_property("y_size", m_height)) {
-			geometry->get_property ("y-size", m_height);
-		}
-		if (!geometry->get_property ("x_pos", m_root_x)) {
-			geometry->get_property ("x-pos", m_root_x);
-		}
-		if (!geometry->get_property ("y_pos", m_root_y)) {
-			geometry->get_property ("y-pos", m_root_y);
-		}
+		geometry->get_property ("x-size", m_width);
+		geometry->get_property ("y-size", m_height);
+		geometry->get_property ("x-pos", m_root_x);
+		geometry->get_property ("y-pos", m_root_y);
 	}
 
 	set_window_pos_and_size ();
