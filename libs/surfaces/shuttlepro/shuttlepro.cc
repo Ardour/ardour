@@ -117,48 +117,7 @@ ShuttleproControlProtocol::do_request (ShuttleproControlUIRequest* req)
 	}
 }
 
-
-int
-ShuttleproControlProtocol::discover_shuttlepro_fd () {
-        DIR* dir = opendir ("/dev/input");
-        if (!dir) {
-                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input");
-                return -1;
-        }
-
-        struct dirent* item = 0;
-
-        char fnbuf[64];
-
-        char dev_name[256];
-
-        while ((item = readdir (dir))) {
-                if (!item) {
-                        continue;
-                }
-
-                if (strncmp (item->d_name, "event", 5)) {
-                        continue;
-                }
-
-                strcpy (fnbuf, "/dev/input/");
-                strncat (fnbuf, item->d_name, 42);
-                int fd = open (fnbuf, O_RDONLY);
-                if (fd < 0) {
-                        continue;
-                }
-
-                memset (dev_name, 0, sizeof (dev_name));
-                ioctl (fd, EVIOCGNAME (sizeof (dev_name)), dev_name);
-
-		if (!strcmp (dev_name, "Contour Design ShuttlePRO v2")) {
-			DEBUG_TRACE (DEBUG::ShuttleproControl, "Shuttlepro found\n");
-			return fd;
-		}
-        }
-	return -1;
-}
-
+int discover_shuttlepro_fd ();
 
 void
 ShuttleproControlProtocol::thread_init () {
@@ -352,4 +311,45 @@ ShuttleproControlProtocol::input_event (IOCondition ioc, int fd)
 	handle_event (ev);
 
 	return true;
+}
+
+int
+discover_shuttlepro_fd () {
+        DIR* dir = opendir ("/dev/input");
+        if (!dir) {
+                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input");
+                return -1;
+        }
+
+        struct dirent* item = 0;
+
+        char fnbuf[64];
+
+        char dev_name[256];
+
+        while ((item = readdir (dir))) {
+                if (!item) {
+                        continue;
+                }
+
+                if (strncmp (item->d_name, "event", 5)) {
+                        continue;
+                }
+
+                strcpy (fnbuf, "/dev/input/");
+                strncat (fnbuf, item->d_name, 42);
+                int fd = open (fnbuf, O_RDONLY);
+                if (fd < 0) {
+                        continue;
+                }
+
+                memset (dev_name, 0, sizeof (dev_name));
+                ioctl (fd, EVIOCGNAME (sizeof (dev_name)), dev_name);
+
+		if (!strcmp (dev_name, "Contour Design ShuttlePRO v2")) {
+			DEBUG_TRACE (DEBUG::ShuttleproControl, "Shuttlepro found\n");
+			return fd;
+		}
+        }
+	return -1;
 }

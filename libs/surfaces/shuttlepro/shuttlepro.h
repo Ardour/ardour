@@ -66,8 +66,6 @@ private:
 
 	void thread_init ();
 
-	int discover_shuttlepro_fd ();
-
 	void handle_event (EV event);
 	void handle_key_press (unsigned short key);
 
