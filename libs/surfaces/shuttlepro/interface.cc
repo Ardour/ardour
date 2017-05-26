@@ -28,6 +28,7 @@
 
 using namespace ARDOUR;
 using namespace PBD;
+using namespace ArdourSurface;
 
 static ControlProtocol*
 new_shuttlepro_protocol (ControlProtocolDescriptor*, Session* s)

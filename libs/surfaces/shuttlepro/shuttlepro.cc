@@ -38,6 +38,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 using namespace std;
+using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
@@ -59,7 +60,6 @@ ShuttleproControlProtocol::~ShuttleproControlProtocol ()
 bool
 ShuttleproControlProtocol::probe ()
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "PROBE\n");
 	return true;
 }
 
@@ -68,25 +68,21 @@ ShuttleproControlProtocol::set_active (bool yn)
 {
 	int result;
 
-	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("ShuttleproControlProtocol::set_active init with yn: '%1'\n", yn));
-
-	/* do nothing if the active state is not changing */
+	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("set_active() init with yn: '%1'\n", yn));
 
 	if (yn == active()) {
 		return 0;
 	}
 
 	if (yn) {
-		/* activate Shuttlepro control surface */
 		result = start ();
 	} else {
-		/* deactivate Shuttlepro control surface */
 		result = stop ();
 	}
 
 	ControlProtocol::set_active (yn);
 
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "ShuttleproControlProtocol::set_active done\n");
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "set_active() fin\n");
 
 	return result;
 }
@@ -109,10 +105,10 @@ void
 ShuttleproControlProtocol::do_request (ShuttleproControlUIRequest* req)
 {
 	if (req->type == CallSlot) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "do_request type CallSlot");
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "do_request type CallSlot\n");
 		call_slot (MISSING_INVALIDATOR, req->the_slot);
 	} else if (req->type == Quit) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "do_request type Quit");
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "do_request type Quit\n");
 		stop ();
 	}
 }
@@ -121,7 +117,7 @@ int discover_shuttlepro_fd ();
 
 void
 ShuttleproControlProtocol::thread_init () {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init()");
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init()\n");
 
 	BasicUI::register_thread (X_("Shuttlepro"));
 
@@ -142,7 +138,7 @@ ShuttleproControlProtocol::thread_init () {
 	_io_source = source->gobj ();
 	g_source_ref (_io_source);
 
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin")
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin\n")
 }
 
 int
@@ -209,7 +205,6 @@ ShuttleproControlProtocol::handle_event (EV ev) {
 			_jog_position = ev.value;
 			return;
 		}
-		cout << "jog event " << _jog_position << " " << ev.value << endl;
 		if (ev.value == 255 && _jog_position == 1) {
 			jog_event_backward ();
 		} else if (ev.value == 1 && _jog_position == 255) {
@@ -323,7 +318,7 @@ int
 discover_shuttlepro_fd () {
         DIR* dir = opendir ("/dev/input");
         if (!dir) {
-                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input");
+                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input\n");
                 return -1;
         }
 

@@ -31,6 +31,8 @@ typedef struct input_event EV;
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
 
+namespace ArdourSurface {
+
 struct ShuttleproControlUIRequest : public BaseUI::BaseRequestObject {
 public:
 	ShuttleproControlUIRequest () {}
@@ -47,7 +49,6 @@ public:
 	virtual ~ShuttleproControlProtocol ();
 
 	static bool probe ();
-	static void* request_factory (uint32_t);
 
 	int set_active (bool yn);
 
@@ -79,5 +80,7 @@ private:
 	int _shuttle_position, _old_shuttle_position;
 	bool _shuttle_event_recieved;
 };
+
+} // namespace
 
 #endif  /* ardour_shuttlepro_control_protocol_h */
