@@ -424,11 +424,11 @@ void
 BasicUI::jump_by_beats (double beats)
 {
 	TempoMap& tmap (session->tempo_map ());
-	const framepos_t current_frame = session->transport_frame ();
-	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
-
-	const double qn_goal = tmap.quarter_note_at_frame (current_frame) + beats;
-
+	double qn_goal = tmap.quarter_note_at_frame (session->transport_frame ()) + beats;
+	std::cout << "qn_goal" << qn_goal << std::endl;
+	if (qn_goal < 0.0) {
+		qn_goal = 0.0;
+	}
 	session->request_locate (tmap.frame_at_quarter_note (qn_goal));
 }
 
