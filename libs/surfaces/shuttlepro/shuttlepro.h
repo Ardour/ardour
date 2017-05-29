@@ -67,10 +67,10 @@ private:
 	void handle_event (EV event);
 	void handle_key_press (unsigned short key);
 
-	void jog_event_backward();
-	void jog_event_forward();
+	void jog_event_backward ();
+	void jog_event_forward ();
 
-	void shuttle_event(int position);
+	void shuttle_event (int position);
 
 	bool input_event (Glib::IOCondition ioc, int fd);
 	GSource* _io_source;

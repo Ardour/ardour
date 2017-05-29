@@ -425,7 +425,6 @@ BasicUI::jump_by_beats (double beats)
 {
 	TempoMap& tmap (session->tempo_map ());
 	double qn_goal = tmap.quarter_note_at_frame (session->transport_frame ()) + beats;
-	std::cout << "qn_goal" << qn_goal << std::endl;
 	if (qn_goal < 0.0) {
 		qn_goal = 0.0;
 	}

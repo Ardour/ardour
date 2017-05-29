@@ -281,14 +281,14 @@ void
 ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
-	jump_by_beats (-0.5);
+	jump_by_beats (-1.0);
 }
 
 void
 ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
-	jump_by_beats (+0.5);
+	jump_by_beats (+1.0);
 }
 
 void
