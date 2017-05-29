@@ -185,6 +185,7 @@ static const char* authors[] = {
 	N_("Andreas Ruge"),
 	N_("Sampo Savolainen"),
 	N_("Rodrigo Severo"),
+	N_("Daniel Sheeler"),
 	N_("Per Sigmond"),
 	N_("Lincoln Spiteri"),
 	N_("Mike Start"),
