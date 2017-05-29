@@ -280,12 +280,9 @@ ShuttleproControlProtocol::handle_key_press (unsigned short key)
 void
 ShuttleproControlProtocol::jump_beat_backward ()
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "jump_beat_backward\n");
-	TempoMap& tmap (session->tempo_map());
+	TempoMap& tmap (session->tempo_map ());
 	const framepos_t current_frame = session->transport_frame ();
 	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
-
-	cout << bbt.bars << " " << bbt.beats << " " << bbt.ticks << " " << tmap.quarter_note_at_frame (session->transport_frame ()) << endl;
 
 	const double qn_goal = tmap.quarter_note_at_frame (current_frame) - 1.0;
 
@@ -295,12 +292,9 @@ ShuttleproControlProtocol::jump_beat_backward ()
 void
 ShuttleproControlProtocol::jump_beat_forward ()
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "jump_beat_forward\n");
-	TempoMap& tmap (session->tempo_map());
+	TempoMap& tmap (session->tempo_map ());
 	const framepos_t current_frame = session->transport_frame ();
 	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
-
-	cout << bbt.bars << " " << bbt.beats << " " << bbt.ticks << " " << tmap.quarter_note_at_frame (session->transport_frame ()) << endl;
 
 	const double qn_goal = tmap.quarter_note_at_frame (current_frame) + 1.0;
 
@@ -308,14 +302,14 @@ ShuttleproControlProtocol::jump_beat_forward ()
 }
 
 void
-ShuttleproControlProtocol::jog_event_backward()
+ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
 	jump_beat_backward ();
 }
 
 void
-ShuttleproControlProtocol::jog_event_forward()
+ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
 	jump_beat_forward ();
