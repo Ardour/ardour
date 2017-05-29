@@ -202,6 +202,9 @@ ShuttleproControlProtocol::handle_event (EV ev) {
 	}
 
 	if (ev.code == 7) { // jog wheel
+		if (_jog_position == ev.value) {
+			return;
+		}
 		if (_jog_position == -1) { // first jog event needed to get orientation
 			_jog_position = ev.value;
 			return;
