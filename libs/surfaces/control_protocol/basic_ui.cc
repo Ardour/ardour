@@ -421,6 +421,18 @@ BasicUI::jump_by_bars (double bars)
 }
 
 void
+BasicUI::jump_by_beats (double beats)
+{
+	TempoMap& tmap (session->tempo_map ());
+	const framepos_t current_frame = session->transport_frame ();
+	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
+
+	const double qn_goal = tmap.quarter_note_at_frame (current_frame) + beats;
+
+	session->request_locate (tmap.frame_at_quarter_note (qn_goal));
+}
+
+void
 BasicUI::toggle_monitor_mute ()
 {
 	if (session->monitor_out()) {

@@ -70,6 +70,7 @@ class LIBCONTROLCP_API BasicUI {
 
 	void jump_by_seconds( double sec );
 	void jump_by_bars(double bars);
+	void jump_by_beats (double beats);
 
 	ARDOUR::framepos_t transport_frame ();
 	void locate (ARDOUR::framepos_t frame, bool play = false);

@@ -67,9 +67,6 @@ private:
 	void handle_event (EV event);
 	void handle_key_press (unsigned short key);
 
-	void jump_beat_backward ();
-	void jump_beat_forward ();
-
 	void jog_event_backward();
 	void jog_event_forward();
 

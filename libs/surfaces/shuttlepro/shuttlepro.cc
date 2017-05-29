@@ -278,41 +278,17 @@ ShuttleproControlProtocol::handle_key_press (unsigned short key)
 }
 
 void
-ShuttleproControlProtocol::jump_beat_backward ()
-{
-	TempoMap& tmap (session->tempo_map ());
-	const framepos_t current_frame = session->transport_frame ();
-	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
-
-	const double qn_goal = tmap.quarter_note_at_frame (current_frame) - 1.0;
-
-	session->request_locate (tmap.frame_at_quarter_note (qn_goal));
-}
-
-void
-ShuttleproControlProtocol::jump_beat_forward ()
-{
-	TempoMap& tmap (session->tempo_map ());
-	const framepos_t current_frame = session->transport_frame ();
-	const Timecode::BBT_Time bbt (tmap.bbt_at_frame (current_frame));
-
-	const double qn_goal = tmap.quarter_note_at_frame (current_frame) + 1.0;
-
-	session->request_locate (tmap.frame_at_quarter_note (qn_goal));
-}
-
-void
 ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
-	jump_beat_backward ();
+	jump_by_beats (-0.5);
 }
 
 void
 ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
-	jump_beat_forward ();
+	jump_by_beats (+0.5);
 }
 
 void
