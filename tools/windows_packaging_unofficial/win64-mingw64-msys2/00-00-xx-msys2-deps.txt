@@ -1,0 +1,10 @@
+mingw-w64-liblo
+mingw-w64-serd
+mingw-w64-sord
+mingw-w64-lv2
+mingw-w64-sratom
+mingw-w64-lilv
+mingw-w64-aubio
+mingw-w64-jack
+mingw-w64-libltc
+mingw-w64-pangomm
