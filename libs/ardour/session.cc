@@ -3403,7 +3403,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 
 			/* new routes start off unsoloed to avoid issues related to
 			   upstream / downstream buses. */
-			node_copy.remove_node_and_delete(X_("Controllable"), X_("name"), X_("solo"));
+			node_copy.remove_node_and_delete (X_("Controllable"), X_("name"), X_("solo"));
 
 			boost::shared_ptr<Route> route (XMLRouteFactory (node_copy, 3000));
 

@@ -667,7 +667,7 @@ XMLNode::remove_node_and_delete(const string& n, const string& propname,
 			XMLProperty const * prop = (*i)->property (propname);
 			if (prop && prop->value() == val) {
 				delete *i;
-				_children.erase(i);
+				_children.erase (i);
 				break;
 			}
 		}

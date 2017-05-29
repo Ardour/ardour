@@ -179,13 +179,13 @@ public:
 	void remove_property_recursively(const std::string&);
 
 	/** Remove all nodes with the name passed to remove_nodes */
-	void remove_nodes(const std::string&);
+	void remove_nodes (const std::string&);
 	/** Remove and delete all nodes with the name passed to remove_nodes */
-	void remove_nodes_and_delete(const std::string&);
+	void remove_nodes_and_delete (const std::string&);
 	/** Remove and delete all nodes with property prop matching val */
-	void remove_nodes_and_delete(const std::string& propname, const std::string& val);
-  /** Remove and delete first node with given name and prop matching val */
-	void remove_node_and_delete(const std::string& n, const std::string& propname, const std::string& val);
+	void remove_nodes_and_delete (const std::string& propname, const std::string& val);
+	/** Remove and delete first node with given name and prop matching val */
+	void remove_node_and_delete (const std::string& n, const std::string& propname, const std::string& val);
 
 	void dump (std::ostream &, std::string p = "") const;
 
