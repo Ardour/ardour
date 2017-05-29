@@ -3354,7 +3354,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	/* if there is already a session, relabel the button
 	   on the SessionDialog so that we don't Quit directly
 	*/
-	cancel_not_quit = (_session != 0);
+	cancel_not_quit = (_session != 0) && !quit_on_cancel;
 
 	if (_session && _session->dirty()) {
 		if (unload_session (false)) {
