@@ -64,6 +64,8 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state();
 
+	bool find_next_event (double now, double end, Evoral::ControlEvent& next_event) const;
+
     protected:
 
 	class MasterRecord {

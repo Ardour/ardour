@@ -345,6 +345,54 @@ SlavableAutomationControl::clear_masters ()
 }
 
 bool
+SlavableAutomationControl::find_next_event (double now, double end, Evoral::ControlEvent& next_event) const
+{
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	if (_masters.empty()) {
+		return false;
+	}
+	bool rv = false;
+	/* iterate over all masters check their automation lists
+	 * for any event between "now" and "end" which is earlier than
+	 * next_event.when. If found, set next_event.when and return true.
+	 * (see also Automatable::find_next_event)
+	 */
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		boost::shared_ptr<AutomationControl> ac (mr->second.master());
+
+		boost::shared_ptr<SlavableAutomationControl> sc
+			= boost::dynamic_pointer_cast<SlavableAutomationControl>(ac);
+
+		if (sc && sc->find_next_event (now, end, next_event)) {
+			rv = true;
+		}
+
+		Evoral::ControlList::const_iterator i;
+		boost::shared_ptr<const Evoral::ControlList> alist (ac->list());
+		Evoral::ControlEvent cp (now, 0.0f);
+		if (!alist) {
+			continue;
+		}
+
+		for (i = lower_bound (alist->begin(), alist->end(), &cp, Evoral::ControlList::time_comparator);
+		     i != alist->end() && (*i)->when < end; ++i) {
+			if ((*i)->when > now) {
+				break;
+			}
+		}
+
+		if (i != alist->end() && (*i)->when < end) {
+			if ((*i)->when < next_event.when) {
+				next_event.when = (*i)->when;
+				rv = true;
+			}
+		}
+	}
+
+	return rv;
+}
+
+bool
 SlavableAutomationControl::slaved_to (boost::shared_ptr<AutomationControl> m) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);

@@ -563,6 +563,13 @@ Automatable::find_next_event (double now, double end, Evoral::ControlEvent& next
 			continue;
 		}
 
+		boost::shared_ptr<SlavableAutomationControl> sc
+			= boost::dynamic_pointer_cast<SlavableAutomationControl>(li->second);
+
+		if (sc) {
+			sc->find_next_event (now, end, next_event);
+		}
+
 		Evoral::ControlList::const_iterator i;
 		boost::shared_ptr<const Evoral::ControlList> alist (li->second->list());
 		Evoral::ControlEvent cp (now, 0.0f);
