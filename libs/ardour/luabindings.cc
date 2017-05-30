@@ -71,6 +71,8 @@
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/tempo.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -193,6 +195,8 @@ CLASSKEYS(ARDOUR::PresentationInfo);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(ARDOUR::Source);
+CLASSKEYS(ARDOUR::VCA);
+CLASSKEYS(ARDOUR::VCAManager);
 
 CLASSKEYS(PBD::ID);
 CLASSKEYS(PBD::Configuration);
@@ -222,6 +226,7 @@ CLASSKEYS(std::list<ARDOUR::AudioRange>);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
 CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Stripable> >);
 CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
@@ -244,7 +249,9 @@ CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Evoral::Beats> >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::Playlist>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Route>);
+CLASSKEYS(boost::shared_ptr<ARDOUR::VCA>);
 CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
+CLASSKEYS(boost::weak_ptr<ARDOUR::VCA>);
 
 CLASSKEYS(Vamp::RealTime);
 CLASSKEYS(Vamp::PluginBase);
@@ -943,6 +950,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Stripable, SessionObject> ("Stripable")
 		.addCast<Route> ("to_route")
+		.addCast<VCA> ("to_vca")
 		.addFunction ("is_auditioner", &Stripable::is_auditioner)
 		.addFunction ("is_master", &Stripable::is_master)
 		.addFunction ("is_monitor", &Stripable::is_monitor)
@@ -988,6 +996,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_presentation_order", &Stripable::set_presentation_order)
 		.addFunction ("presentation_info_ptr", &Stripable::presentation_info_ptr)
 
+		.endClass ()
+
+		.deriveWSPtrClass <VCA, Stripable> ("VCA")
+		.addFunction ("full_name", &VCA::full_name)
+		.addFunction ("number", &VCA::number)
+		.addFunction ("gain_control", &VCA::gain_control)
+		.addFunction ("solo_control", &VCA::solo_control)
+		.addFunction ("mute_control", &VCA::mute_control)
 		.endClass ()
 
 		.deriveWSPtrClass <Route, Stripable> ("Route")
@@ -1358,6 +1374,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <AutomationControl, PBD::Controllable> ("AutomationControl")
 		.addCast<Evoral::Control> ("to_ctrl")
+		.addCast<SlavableAutomationControl> ("to_slavable")
 		.addFunction ("automation_state", &AutomationControl::automation_state)
 		.addFunction ("automation_style", &AutomationControl::automation_style)
 		.addFunction ("set_automation_state", &AutomationControl::set_automation_state)
@@ -1469,6 +1486,14 @@ LuaBindings::common (lua_State* L)
 
 		// RouteList == std::list<boost::shared_ptr<Route> >
 		.beginConstStdList <boost::shared_ptr<Route> > ("RouteList")
+		.endClass ()
+
+		// StripableList == std::list<boost::shared_ptr<Stripable> >
+		.beginConstStdList <boost::shared_ptr<Stripable> > ("StripableList")
+		.endClass ()
+
+		// VCAList == std::list<boost::shared_ptr<VCA> >
+		.beginConstStdList <boost::shared_ptr<VCA> > ("VCAList")
 		.endClass ()
 
 		// boost::shared_ptr<RouteList>
@@ -1886,6 +1911,15 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_last_backend_error", &AudioEngine::get_last_backend_error)
 		.endClass()
 
+		.deriveClass <VCAManager, PBD::StatefulDestructible> ("VCAManager")
+#if 0 // needs non-const VCAManager reference
+		.addFunction ("create_vca", &VCAManager::create_vca)
+		.addFunction ("remove_vca", &VCAManager::remove_vca)
+#endif
+		.addFunction ("vca_by_number", &VCAManager::vca_by_number)
+		.addFunction ("vcas", &VCAManager::vcas)
+		.endClass()
+
 		.deriveClass <SessionConfiguration, PBD::Configuration> ("SessionConfiguration")
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
@@ -1983,6 +2017,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("end_is_free", &Session::end_is_free)
 		.addFunction ("set_end_is_free", &Session::set_end_is_free)
 		.addFunction ("remove_route_group", (void (Session::*)(RouteGroup*))&Session::remove_route_group)
+		.addFunction ("vca_manager", &Session::vca_manager)
 		.addExtCFunction ("timecode_to_sample_lua", ARDOUR::LuaAPI::timecode_to_sample_lua)
 		.addExtCFunction ("sample_to_timecode_lua", ARDOUR::LuaAPI::sample_to_timecode_lua)
 		.endClass ()
