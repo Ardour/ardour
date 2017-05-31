@@ -812,7 +812,7 @@ AudioClock::session_configuration_changed (std::string p)
 void
 AudioClock::set (framepos_t when, bool force, framecnt_t offset)
 {
- 	if ((!force && !is_visible()) || _session == 0) {
+	if ((!force && !is_visible()) || _session == 0) {
 		return;
 	}
 
@@ -1520,6 +1520,11 @@ AudioClock::index_to_field (int index) const
 bool
 AudioClock::on_button_press_event (GdkEventButton *ev)
 {
+	if (!_session || _session->actively_recording()) {
+		/* swallow event, do nothing */
+		return true;
+	}
+
 	switch (ev->button) {
 	case 1:
 		if (editable && !_off) {
@@ -1563,6 +1568,11 @@ AudioClock::on_button_press_event (GdkEventButton *ev)
 bool
 AudioClock::on_button_release_event (GdkEventButton *ev)
 {
+	if (!_session || _session->actively_recording()) {
+		/* swallow event, do nothing */
+		return true;
+	}
+
 	if (editable && !_off) {
 		if (dragging) {
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
@@ -1636,7 +1646,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 	int index;
 	int trailing;
 
-	if (editing || _session == 0 || !editable || _off) {
+	if (editing || _session == 0 || !editable || _off || _session->actively_recording())  {
 		return false;
 	}
 
@@ -1700,7 +1710,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 bool
 AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 {
-	if (editing || _session == 0 || !dragging) {
+	if (editing || _session == 0 || !dragging || _session->actively_recording()) {
 		return false;
 	}
 
@@ -1736,9 +1746,9 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 			set ((framepos_t) floor (pos - drag_accum * frames), false); // minus because up is negative in GTK
 		} else {
 			set (0 , false);
- 		}
+		}
 
-	       	drag_accum= 0;
+		drag_accum= 0;
 		ValueChanged();	 /* EMIT_SIGNAL */
 	}
 
