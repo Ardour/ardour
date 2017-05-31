@@ -363,8 +363,10 @@ OSCSelectObserver::tick ()
 		}
 	}
 	if (feedback[13]) {
-		if (_strip->comp_enable_controllable()->get_value()) {
-			send_float ("/select/comp_redux", (float) _strip->comp_redux_controllable()->get_parameter ());
+		if (_strip->comp_redux_controllable()) {
+			if (_strip->comp_redux_controllable()->get_parameter()) {
+				send_float ("/select/comp_redux", (float) _strip->comp_redux_controllable()->get_parameter ());
+			}
 		}
 		for (uint32_t i = 0; i < send_timeout.size(); i++) {
 			if (send_timeout[i]) {
