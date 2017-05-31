@@ -24,7 +24,7 @@ def build(bld):
     obj.includes     = ['.', '../libs']
     obj.name         = 'libardour_shuttlepro'
     obj.target       = 'ardour_shuttlepro'
-    obj.uselib       = 'GTKMM CWIID'
+    obj.uselib       = 'GTKMM USB'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 

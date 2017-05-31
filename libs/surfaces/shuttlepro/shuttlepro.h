@@ -31,6 +31,9 @@ typedef struct input_event EV;
 #include "ardour/types.h"
 #include "control_protocol/control_protocol.h"
 
+struct libusb_device_handle;
+struct libusb_transfer;
+
 namespace ArdourSurface {
 
 struct ShuttleproControlUIRequest : public BaseUI::BaseRequestObject {
@@ -57,28 +60,40 @@ public:
 
 	void stripable_selection_changed () {}
 
+	void handle_event ();
+
 private:
+	struct State {
+		int8_t shuttle;
+		uint8_t jog;
+		uint16_t buttons;
+	};
+
 	void do_request (ShuttleproControlUIRequest*);
 	int start ();
 	int stop ();
 
 	void thread_init ();
 
-	void handle_event (EV event);
-	void handle_key_press (unsigned short key);
+	int aquire_device ();
+	void release_device ();
+
+	void handle_button_press (unsigned short btn);
 
 	void jog_event_backward ();
 	void jog_event_forward ();
 
 	void shuttle_event (int position);
 
-	bool input_event (Glib::IOCondition ioc, int fd);
+	bool wait_for_event ();
 	GSource* _io_source;
-	int _file_descriptor;
+	libusb_device_handle* _dev_handle;
+	libusb_transfer* _usb_transfer;
+	bool _supposed_to_quit;
 
-	int _jog_position;
-	int _shuttle_position, _old_shuttle_position;
-	bool _shuttle_event_recieved;
+	unsigned char _buf[5];
+
+	State _state;
 };
 
 } // namespace

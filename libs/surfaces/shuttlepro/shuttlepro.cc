@@ -19,10 +19,8 @@
 */
 
 #include <iostream>
-#include <cstdio>
-#include <cstdlib>
-#include <fcntl.h>
-#include <unistd.h>
+
+#include <libusb.h>
 
 #include <glibmm.h>
 
@@ -43,19 +41,31 @@ using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
+static const uint16_t vendorID = 0x0b33;
+static const uint16_t productID = 0x0030;
+
+static void LIBUSB_CALL event_callback (struct libusb_transfer* transfer);
+
 
 ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Shuttlepro"))
 	,  AbstractUI<ShuttleproControlUIRequest> ("shuttlepro")
 	, _io_source (0)
-	, _file_descriptor (-1)
-	, _jog_position (-1)
+	, _dev_handle (0)
+	, _usb_transfer (0)
+	, _supposed_to_quit (false)
 {
+	libusb_init (0);
+	//libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
+
+	BaseUI::run();
 }
 
 ShuttleproControlProtocol::~ShuttleproControlProtocol ()
 {
 	stop ();
+	libusb_exit (0);
+	BaseUI::quit();
 }
 
 bool
@@ -114,32 +124,100 @@ ShuttleproControlProtocol::do_request (ShuttleproControlUIRequest* req)
 	}
 }
 
-int discover_shuttlepro_fd ();
-
 void
 ShuttleproControlProtocol::thread_init () {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init()\n");
 
-	BasicUI::register_thread (X_("Shuttlepro"));
+	pthread_set_name (X_("shuttlepro"));
+	PBD::notify_event_loops_about_thread_creation (pthread_self (), X_("shuttlepro"), 2048);
+	ARDOUR::SessionEvent::create_per_thread_pool (X_("shuttlepro"), 128);
 
-	_file_descriptor = discover_shuttlepro_fd ();
-	if (_file_descriptor < 0) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttlePRO device found\n");
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin\n")
+}
+
+bool
+ShuttleproControlProtocol::wait_for_event ()
+{
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "wait_for_event\n");
+	if (!_supposed_to_quit) {
+		libusb_handle_events (0);
+	}
+
+	return true;
+}
+
+
+int
+ShuttleproControlProtocol::aquire_device ()
+{
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "aquire_device()\n");
+
+	int err;
+
+	if (_dev_handle) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "already have a device handle\n");
+		return -1;
+	}
+
+	if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, vendorID, productID)) == 0) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to open USB handle\n");
+		return -1;
+	}
+
+	if (libusb_kernel_driver_active (_dev_handle, 0)) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "Detatching kernel driver\n");
+		err = libusb_detach_kernel_driver (_dev_handle, 0);
+		if (err < 0) {
+			DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("could not detatch kernel driver %d\n", err));
+			goto usb_close;
+		}
+	}
+
+	if ((err = libusb_claim_interface (_dev_handle, 0x00))) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to claim USB device\n");
+		goto usb_close;
+	}
+
+	_usb_transfer = libusb_alloc_transfer (0);
+	if (!_usb_transfer) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to alloc usb transfer\n");
+		err = -ENOMEM;
+		goto usb_close;
+	}
+
+	libusb_fill_interrupt_transfer(_usb_transfer, _dev_handle, 1 | LIBUSB_ENDPOINT_IN, _buf, sizeof(_buf),
+				       event_callback, this, 0);
+
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "callback installed\n");
+
+	if ((err = libusb_submit_transfer (_usb_transfer))) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("failed to submit tansfer: %1\n", err));
+		goto free_transfer;
+	}
+
+	return 0;
+
+ free_transfer:
+	libusb_free_transfer (_usb_transfer);
+
+ usb_close:
+	libusb_close (_dev_handle);
+	_dev_handle = 0;
+	return err;
+}
+
+void
+ShuttleproControlProtocol::release_device()
+{
+	if (!_dev_handle) {
 		return;
 	}
 
-	_shuttle_position = 0;
-	_old_shuttle_position = 0;
-	_shuttle_event_recieved = false;
-
-	Glib::RefPtr<Glib::IOSource> source = Glib::IOSource::create (_file_descriptor, IO_IN | IO_ERR);
-	source->connect (sigc::bind (sigc::mem_fun (*this, &ShuttleproControlProtocol::input_event), _file_descriptor));
-	source->attach (_main_loop->get_context ());
-
-	_io_source = source->gobj ();
-	g_source_ref (_io_source);
-
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin\n")
+	libusb_close(_dev_handle);
+	libusb_free_transfer(_usb_transfer);
+	libusb_release_interface(_dev_handle, 0);
+	_usb_transfer = 0;
+	_dev_handle = 0;
 }
 
 int
@@ -147,7 +225,27 @@ ShuttleproControlProtocol::start ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "start()\n");
 
-	BaseUI::run();
+	_supposed_to_quit = false;
+
+	int err = aquire_device();
+	if (err) {
+		return err;
+	}
+
+	if (!_dev_handle) {
+		return -1;
+	}
+
+	_state.shuttle = 0;
+	_state.jog = 0;
+	_state.buttons = 0;
+
+	Glib::RefPtr<Glib::IdleSource> source = Glib::IdleSource::create ();
+	source->connect (sigc::mem_fun (*this, &ShuttleproControlProtocol::wait_for_event));
+	source->attach (_main_loop->get_context ());
+
+	_io_source = source->gobj ();
+	g_source_ref (_io_source);
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "start() fin\n");
 	return 0;
@@ -159,119 +257,113 @@ ShuttleproControlProtocol::stop ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "stop()\n");
 
+	_supposed_to_quit = true;
+
 	if (_io_source) {
 		g_source_destroy (_io_source);
 		g_source_unref (_io_source);
 		_io_source = 0;
-
-		close(_file_descriptor);
-		_file_descriptor = -1;
 	}
 
-	BaseUI::quit();
+	if (_dev_handle) {
+		release_device ();
+	}
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "stop() fin\n");
 	return 0;
 }
 
 void
-ShuttleproControlProtocol::handle_event (EV ev) {
-//	cout << "event " << ev.type << " " << ev.code << " " << ev.value << endl;;
-
-	if (ev.type == 0) { // check if shuttle is turned
-		if (_shuttle_event_recieved) {
-			if (_shuttle_position != _old_shuttle_position) {
-				shuttle_event (_shuttle_position);
-				_old_shuttle_position = _shuttle_position;
-			}
-			_shuttle_event_recieved = false;
-		} else {
-			if (_shuttle_position != 0) {
-				shuttle_event (0);
-				_shuttle_position = 0;
-				_old_shuttle_position = 0;
-			}
-		}
+ShuttleproControlProtocol::handle_event () {
+	if (_usb_transfer->status == LIBUSB_TRANSFER_TIMED_OUT) {
+		goto resubmit;
 	}
-
-	if (ev.type == 1) { // key
-		if (ev.value == 1) {
-			handle_key_press (ev.code-255);
-		}
+	if (_usb_transfer->status != LIBUSB_TRANSFER_COMPLETED) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("libusb_transfer not completed: %1\n", _usb_transfer->status));
+		stop ();
 		return;
 	}
 
-	if (ev.code == 7) { // jog wheel
-		if (_jog_position == ev.value) {
-			return;
-		}
-		if (_jog_position == -1) { // first jog event needed to get orientation
-			_jog_position = ev.value;
-			return;
-		}
-		if (ev.value == 255 && _jog_position == 1) {
-			jog_event_backward ();
-		} else if (ev.value == 1 && _jog_position == 255) {
-			jog_event_forward();
-		} else if (ev.value < _jog_position) {
-			jog_event_backward();
-		} else {
-			jog_event_forward();
-		}
-		_jog_position = ev.value;
+	State new_state;
+	new_state.shuttle = _buf[0];
+	new_state.jog = _buf[1];
+	new_state.buttons = (_buf[4] << 8) + _buf[3];
 
-		return;
+//	cout << "event " << (int)new_state.shuttle << " " << (int)new_state.jog << " " << (int)new_state.buttons << endl;;
+
+	for (uint8_t btn=0; btn<16; btn++) {
+                if ( (new_state.buttons & (1<<btn)) && !(_state.buttons & (1<<btn)) ) {
+                        handle_button_press (btn);
+                } else if ( !(new_state.buttons & (1<<btn)) && (_state.buttons & (1<<btn)) ) {
+                        // we might handle button releases one day
+                }
+        }
+
+	if (new_state.jog == 255 && _state.jog == 0) {
+		jog_event_backward ();
+	} else if (new_state.jog == 0 && _state.jog == 255) {
+		jog_event_forward();
+	} else if (new_state.jog < _state.jog) {
+		jog_event_backward();
+	} else if (new_state.jog > _state.jog) {
+		jog_event_forward();
 	}
 
-	if (ev.code == 8) { // shuttle wheel
-		_shuttle_event_recieved = true;
-		_shuttle_position = ev.value;
-		return;
+	if (new_state.shuttle != _state.shuttle) {
+		shuttle_event(new_state.shuttle);
+	}
+
+	_state = new_state;
+
+ resubmit:
+	if (libusb_submit_transfer (_usb_transfer)) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to resubmit usb transfer after callback\n");
+		stop ();
 	}
 }
 
-/* The keys have the following layout
+/* The buttons have the following layout
  *
- *          1   2   3   4
- *        5   6   7   8   9
+ *          01  02  03  04
+ *        05  06  07  08  09
  *
- *        14    Jog     15
+ *          15   Jog   15
  *
- *           10     11
- *           12     13
+ *            10     11
+ *            12     13
  */
 
-enum Key {
-	KEY01 = 1, KEY02 = 2, KEY03 = 3, KEY04 = 4, KEY05 = 5, KEY06 = 6, KEY07 = 7,
-	KEY08 = 8, KEY09 = 9, KEY10 = 10, KEY11 = 11, KEY12 = 12, KEY13 = 13, KEY14 = 14, KEY15 = 15
+enum Buttons {
+	BTN01 =  0, BTN02 =  1, BTN03 =  2, BTN04 =  3, BTN05 =  4, BTN06 =  5, BTN07 =  6,
+	BTN08 =  7, BTN09 =  8, BTN10 =  9, BTN11 = 10, BTN12 = 11, BTN13 = 12, BTN14 = 13, BTN15 = 14
 };
 
 void
-ShuttleproControlProtocol::handle_key_press (unsigned short key)
+ShuttleproControlProtocol::handle_button_press (unsigned short btn)
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("Shuttlepro key number %1\n", key));
-	switch (key) {
-	case KEY01: midi_panic (); break;
-	case KEY02: access_action ("Editor/remove-last-capture"); break;
+	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("Shuttlepro button number %1\n", btn+1));
+	switch (btn) {
+	case BTN01: midi_panic (); break;
+	case BTN02: access_action ("Editor/remove-last-capture"); break;
 
 // FIXME: calling undo () and redo () from here makes ardour crash (see #7371)
-//	case KEY03: undo (); break;
-//	case KEY04: redo (); break;
+//	case BTN03: undo (); break;
+//	case BTN04: redo (); break;
 
-	case KEY06: set_record_enable (!get_record_enabled ()); break;
-	case KEY07: transport_stop (); break;
-	case KEY08: transport_play (); break;
+	case BTN06: set_record_enable (!get_record_enabled ()); break;
+	case BTN07: transport_stop (); break;
+	case BTN08: transport_play (); break;
 
-	case KEY05: prev_marker (); break;
-	case KEY09: next_marker (); break;
+	case BTN05: prev_marker (); break;
+	case BTN09: next_marker (); break;
 
-	case KEY14: goto_start (); break;
-	case KEY15: goto_end (); break;
+	case BTN14: goto_start (); break;
+	case BTN15: goto_end (); break;
 
-	case KEY10: jump_by_bars (-4.0); break;
-	case KEY11: jump_by_bars (+4.0); break;
+	case BTN10: jump_by_bars (-4.0); break;
+	case BTN11: jump_by_bars (+4.0); break;
 
-	case KEY13: add_marker (); break;
+	case BTN13: add_marker (); break;
 
 	default: break;
 	}
@@ -298,59 +390,8 @@ ShuttleproControlProtocol::shuttle_event(int position)
 	set_transport_speed(double(position));
 }
 
-bool
-ShuttleproControlProtocol::input_event (IOCondition ioc, int fd)
+static void LIBUSB_CALL event_callback (libusb_transfer* transfer)
 {
-	if (ioc & ~IO_IN) {
-		return false;
-	}
-
-	EV ev;
-	size_t r;
-
-	r = read (fd, &ev, sizeof (ev));
-	if (r < sizeof (ev)) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "Received too small event, strange.\n");
-		return false;
-	}
-	handle_event (ev);
-
-	return true;
-}
-
-int
-discover_shuttlepro_fd () {
-        DIR* dir = opendir ("/dev/input");
-        if (!dir) {
-                DEBUG_TRACE (DEBUG::ShuttleproControl, "Could not open /dev/input\n");
-                return -1;
-        }
-
-        struct dirent* item = 0;
-
-        char dev_name[256];
-
-        while ((item = readdir (dir))) {
-                if (!item) {
-                        continue;
-                }
-
-                if (strncmp (item->d_name, "event", 5)) {
-                        continue;
-                }
-
-                int fd = open (Glib::build_filename ("/dev/input", item->d_name).c_str (), O_RDONLY);
-                if (fd < 0) {
-                        continue;
-                }
-
-                memset (dev_name, 0, sizeof (dev_name));
-                ioctl (fd, EVIOCGNAME (sizeof (dev_name)), dev_name);
-
-		if (!strcmp (dev_name, "Contour Design ShuttlePRO v2")) {
-			DEBUG_TRACE (DEBUG::ShuttleproControl, "Shuttlepro found\n");
-			return fd;
-		}
-        }
-	return -1;
+	ShuttleproControlProtocol* spc = static_cast<ShuttleproControlProtocol*> (transfer->user_data);
+	spc->handle_event();
 }
