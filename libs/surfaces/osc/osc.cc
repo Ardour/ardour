@@ -866,11 +866,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	len = strlen (path);
 
 	if (strstr (path, "/automation")) {
-		ret = set_automation (path, argv, argc, msg);
+		ret = set_automation (path, types, argv, argc, msg);
 
 	} else
 	if (strstr (path, "/touch")) {
-		ret = touch_detect (path, argv, argc, msg);
+		ret = touch_detect (path, types, argv, argc, msg);
 
 	} else
 	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
@@ -2207,7 +2207,7 @@ OSC::route_get_receives(lo_message msg) {
 // strip calls
 
 int
-OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
+OSC::set_automation (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
 	if (!session) return -1;
 
@@ -2216,6 +2216,7 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
 	uint32_t ctr = 0;
 	uint32_t aut = 0;
+	uint32_t ssid;
 
 	if (argc) {
 		if (argv[argc - 1]->f) {
@@ -2229,9 +2230,14 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 	if (!strncmp (path, "/strip/", 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
-			strp = get_strip (argv[0]->i, get_address (msg));
+			if (types[1] == 'f') {
+				ssid = (uint32_t)argv[0]->f;
+			} else {
+				ssid = argv[0]->i;
+			}
+			strp = get_strip (ssid, get_address (msg));
 		} else {
-			uint32_t ssid = atoi (&(strrchr (path, '/' ))[1]);
+			ssid = atoi (&(strrchr (path, '/' ))[1]);
 			strp = get_strip (ssid, get_address (msg));
 		}
 		ctr = 7;
@@ -2287,7 +2293,7 @@ OSC::set_automation (const char *path, lo_arg **argv, int argc, lo_message msg)
 }
 
 int
-OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
+OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
 	if (!session) return -1;
 
@@ -2296,6 +2302,7 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
 	uint32_t ctr = 0;
 	uint32_t touch = 0;
+	uint32_t ssid;
 
 	if (argc) {
 		if (argv[argc - 1]->f) {
@@ -2309,9 +2316,14 @@ OSC::touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg)
 	if (!strncmp (path, "/strip/", 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
-			strp = get_strip (argv[0]->i, get_address (msg));
+			if (types[1] == 'f') {
+				ssid = (uint32_t)argv[0]->f;
+			} else {
+				ssid = argv[0]->i;
+			}
+			strp = get_strip (ssid, get_address (msg));
 		} else {
-			uint32_t ssid = atoi (&(strrchr (path, '/' ))[1]);
+			ssid = atoi (&(strrchr (path, '/' ))[1]);
 			strp = get_strip (ssid, get_address (msg));
 		}
 		ctr = 7;

@@ -121,6 +121,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		JogMode jogmode;			// current jogmode
 		uint32_t bank;				// current bank
 		uint32_t bank_size;			// size of banks for this surface
+		uint32_t plug_page;			// current plugin page
+		uint32_t plug_page_size;	// plugin page size (number of controls)
+		uint32_t send_page;			// current send page
+		uint32_t send_page_size;	// send page size in channels
 		std::bitset<32> strip_types;// what strip types are a part of this bank
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
@@ -232,8 +236,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data);
 	static int _catchall (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data);
 
-	int set_automation (const char *path, lo_arg **argv, int argc, lo_message msg);
-	int touch_detect (const char *path, lo_arg **argv, int argc, lo_message msg);
+	int set_automation (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl);
 
 	int route_get_sends (lo_message msg);
