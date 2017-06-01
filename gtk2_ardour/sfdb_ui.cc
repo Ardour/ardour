@@ -606,7 +606,6 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, _status (0)
 	, _done (false)
 	, import_button (_("Import"))
-	, close_button (Stock::CLOSE)
 	, gm (0)
 {
 
@@ -782,14 +781,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	Gtk::HButtonBox* button_box = manage (new HButtonBox);
 
 	button_box->set_layout (BUTTONBOX_END);
-	button_box->pack_start (close_button, false, false);
-	close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CLOSE));
 
 	button_box->pack_start (import_button, false, false);
 	import_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_OK));
 
 	Gtkmm2ext::UI::instance()->set_tip (import_button, _("Press to import selected files"));
-	Gtkmm2ext::UI::instance()->set_tip (close_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
 
