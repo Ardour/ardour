@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __libardour_process_thread__
@@ -42,8 +41,7 @@ public:
 	void get_buffers ();
 	void drop_buffers ();
 
-	/* these MUST be called by a process thread's thread, nothing else
-	 */
+	/* these MUST be called by a process thread's thread, nothing else */
 
 	static BufferSet& get_silent_buffers (ChanCount count = ChanCount::ZERO);
 	static BufferSet& get_scratch_buffers (ChanCount count = ChanCount::ZERO, bool silence = false);
@@ -59,7 +57,7 @@ protected:
 	void session_going_away ();
 
 private:
-    static Glib::Threads::Private<ThreadBuffers> _private_thread_buffers;
+	static Glib::Threads::Private<ThreadBuffers> _private_thread_buffers;
 };
 
 } // namespace
