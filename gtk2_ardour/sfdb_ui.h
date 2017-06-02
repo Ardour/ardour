@@ -252,8 +252,8 @@ class SoundFileBrowser : public ArdourWindow
 
 	virtual bool reset_options () { return true; }
 
-  protected:
 	void on_show();
+	bool on_key_press_event (GdkEventKey*);
 	virtual void do_something(int action);
 };
 

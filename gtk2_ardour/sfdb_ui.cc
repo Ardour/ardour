@@ -833,6 +833,16 @@ SoundFileBrowser::on_show ()
 	start_metering ();
 }
 
+bool
+SoundFileBrowser::on_key_press_event (GdkEventKey* ev)
+{
+	if (ev->keyval == GDK_Escape) {
+		do_something (RESPONSE_CLOSE);
+		return true;
+	}
+	return ArdourWindow::on_key_press_event (ev);
+}
+
 void
 SoundFileBrowser::clear_selection ()
 {
