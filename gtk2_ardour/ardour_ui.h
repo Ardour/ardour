@@ -268,7 +268,7 @@ public:
 	void synchronize_sync_source_and_video_pullup ();
 
 	void add_route ();
-	void add_route_dialog_finished (int);
+	void add_route_dialog_response (int);
 
 	void add_routes_part_two ();
 	void add_routes_thread ();

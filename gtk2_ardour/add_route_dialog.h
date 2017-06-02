@@ -51,6 +51,11 @@ class AddRouteDialog : public ArdourDialog
 	AddRouteDialog ();
 	~AddRouteDialog ();
 
+	enum ResponseId {
+		Add,
+		AddAndClose,
+	};
+
 	enum TypeWanted {
 		AudioTrack,
 		MidiTrack,
@@ -74,6 +79,10 @@ class AddRouteDialog : public ArdourDialog
 
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
+
+ 	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
 
   private:
 	Gtk::Entry name_template_entry;

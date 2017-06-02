@@ -194,10 +194,10 @@ AddRouteDialog::AddRouteDialog ()
 	   this dialog is shown, via ::on_show()
 	*/
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
-	add_button (Stock::ADD, RESPONSE_ACCEPT);
-	set_response_sensitive (RESPONSE_ACCEPT, true);
-	set_default_response (RESPONSE_ACCEPT);
+	add_button (_("Add"), Add);
+	add_button (_("Add and Close"), AddAndClose);
+	set_response_sensitive (AddAndClose, true);
+	set_default_response (AddAndClose);
 
 	track_type_chosen ();
 }

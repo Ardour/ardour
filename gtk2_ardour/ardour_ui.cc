@@ -4267,7 +4267,7 @@ void
 ARDOUR_UI::add_route ()
 {
 	if (!add_route_dialog.get (false)) {
-		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_finished));
+		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
 	}
 
 	if (!_session) {
@@ -4284,18 +4284,19 @@ ARDOUR_UI::add_route ()
 }
 
 void
-ARDOUR_UI::add_route_dialog_finished (int r)
+ARDOUR_UI::add_route_dialog_response (int r)
 {
 	int count;
 
-	add_route_dialog->hide();
-
 	switch (r) {
-		case RESPONSE_ACCEPT:
-			break;
-		default:
-			return;
-			break;
+	case AddRouteDialog::Add:
+		break;
+	case AddRouteDialog::AddAndClose:
+		add_route_dialog->ArdourDialog::on_response (r);
+		break;
+	default:
+		add_route_dialog->ArdourDialog::on_response (r);
+		return;
 	}
 
 	if ((count = add_route_dialog->count()) <= 0) {
