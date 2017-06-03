@@ -36,6 +36,7 @@ ThreadBuffers::ThreadBuffers ()
 	, gain_automation_buffer (0)
 	, trim_automation_buffer (0)
 	, send_gain_automation_buffer (0)
+	, scratch_automation_buffer (0)
 	, pan_automation_buffer (0)
 	, npan_buffers (0)
 {
@@ -86,6 +87,8 @@ ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 	trim_automation_buffer = new gain_t[audio_buffer_size];
 	delete [] send_gain_automation_buffer;
 	send_gain_automation_buffer = new gain_t[audio_buffer_size];
+	delete [] scratch_automation_buffer;
+	scratch_automation_buffer = new gain_t[audio_buffer_size];
 
 	allocate_pan_automation_buffers (audio_buffer_size, howmany.n_audio(), false);
 }

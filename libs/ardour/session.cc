@@ -6301,6 +6301,12 @@ Session::send_gain_automation_buffer() const
 	return ProcessThread::send_gain_automation_buffer ();
 }
 
+gain_t*
+Session::scratch_automation_buffer() const
+{
+	return ProcessThread::scratch_automation_buffer ();
+}
+
 pan_t**
 Session::pan_automation_buffer() const
 {

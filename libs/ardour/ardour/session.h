@@ -1034,6 +1034,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	gain_t* gain_automation_buffer () const;
 	gain_t* trim_automation_buffer () const;
 	gain_t* send_gain_automation_buffer () const;
+	gain_t* scratch_automation_buffer () const;
 	pan_t** pan_automation_buffer () const;
 
 	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);

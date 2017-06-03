@@ -51,6 +51,7 @@ public:
 	static gain_t* gain_automation_buffer ();
 	static gain_t* trim_automation_buffer ();
 	static gain_t* send_gain_automation_buffer ();
+	static gain_t* scratch_automation_buffer ();
 	static pan_t** pan_automation_buffer ();
 
 protected:
