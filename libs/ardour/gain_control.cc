@@ -21,6 +21,8 @@
 #include "pbd/convert.h"
 #include "pbd/strsplit.h"
 
+#include "evoral/Curve.hpp"
+
 #include "ardour/dB.h"
 #include "ardour/gain_control.h"
 #include "ardour/session.h"
@@ -100,3 +102,8 @@ GainControl::inc_gain (gain_t factor)
 	}
 }
 
+bool
+GainControl::get_masters_curve_locked (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
+{
+	return SlavableAutomationControl::masters_curve_multiply (start, end, vec, veclen);
+}
