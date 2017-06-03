@@ -345,9 +345,8 @@ SlavableAutomationControl::clear_masters ()
 }
 
 bool
-SlavableAutomationControl::find_next_event (double now, double end, Evoral::ControlEvent& next_event) const
+SlavableAutomationControl::find_next_event_locked (double now, double end, Evoral::ControlEvent& next_event) const
 {
-	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	if (_masters.empty()) {
 		return false;
 	}
@@ -363,7 +362,7 @@ SlavableAutomationControl::find_next_event (double now, double end, Evoral::Cont
 		boost::shared_ptr<SlavableAutomationControl> sc
 			= boost::dynamic_pointer_cast<SlavableAutomationControl>(ac);
 
-		if (sc && sc->find_next_event (now, end, next_event)) {
+		if (sc && sc->find_next_event_locked (now, end, next_event)) {
 			rv = true;
 		}
 
