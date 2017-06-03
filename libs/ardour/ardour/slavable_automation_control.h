@@ -50,6 +50,14 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 		return get_masters_value_locked ();
 	}
 
+	bool get_masters_curve (framepos_t s, framepos_t e, float* v, framecnt_t l) const {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return get_masters_curve_locked (s, e, v, l);
+	}
+	virtual bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
+
+	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
+
 	/* for toggled/boolean controls, returns a count of the number of
 	   masters currently enabled. For other controls, returns zero.
 	*/

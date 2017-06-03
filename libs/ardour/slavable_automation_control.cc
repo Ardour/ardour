@@ -24,6 +24,8 @@
 #include "pbd/types_convert.h"
 #include "pbd/i18n.h"
 
+#include "evoral/Curve.hpp"
+
 #include "ardour/audioengine.h"
 #include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
@@ -108,6 +110,59 @@ SlavableAutomationControl::get_value() const
 	} else {
 		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
 	}
+}
+
+bool
+SlavableAutomationControl::get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const
+{
+	/* Every AutomationControl needs to implement this as-needed.
+	 *
+	 * This class also provides some convenient methods which
+	 * could be used as defaults here (depending on  AutomationType)
+	 * e.g. masters_curve_multiply()
+	 */
+	return false;
+}
+
+bool
+SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
+{
+	bool rv = list()->curve().rt_safe_get_vector (start, end, vec, veclen);
+	if (_masters.empty()) {
+		return rv;
+	}
+	gain_t* scratch = _session.scratch_automation_buffer ();
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		boost::shared_ptr<AutomationControl> ac (mr->second.master());
+		bool got_curve;
+
+		boost::shared_ptr<SlavableAutomationControl> sc
+			= boost::dynamic_pointer_cast<SlavableAutomationControl>(ac);
+		if (sc) {
+			got_curve = sc->get_masters_curve_locked (start, end, scratch, veclen);
+		} else {
+			got_curve = ac->list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
+		}
+		if (got_curve) {
+			// TODO use SSE/AVX methods, e.g. ARDOUR::apply_gain_to_buffer, mix_buffers_no_gain
+			// which works as long as automation _types_ gain_t == ARDOUR::Sample type == float
+			if (!rv) {
+				// TODO optimize this, in case rv is false, direcly use "vec" above.
+				rv = true;
+				memcpy (vec, scratch, sizeof (float) * veclen);
+			} else {
+				for (framecnt_t i = 0; i < veclen; ++i) {
+					vec[i] *= scratch[i];
+				}
+			}
+		} else if (rv) {
+			const float v = get_masters_value ();
+			for (framecnt_t i = 0; i < veclen; ++i) {
+				vec[i] *= v;
+			}
+		}
+	}
+	return rv;
 }
 
 void
