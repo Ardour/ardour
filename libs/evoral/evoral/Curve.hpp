@@ -33,17 +33,17 @@ class LIBEVORAL_API Curve : public boost::noncopyable
 public:
 	Curve (const ControlList& cl);
 
-	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen);
-	void get_vector (double x0, double x1, float *arg, int32_t veclen);
+	bool rt_safe_get_vector (double x0, double x1, float *arg, int32_t veclen) const;
+	void get_vector (double x0, double x1, float *arg, int32_t veclen) const;
 
-	void solve ();
+	void solve () const;
 
 	void mark_dirty() const { _dirty = true; }
 
 private:
-	double multipoint_eval (double x);
+	double multipoint_eval (double x) const;
 
-	void _get_vector (double x0, double x1, float *arg, int32_t veclen);
+	void _get_vector (double x0, double x1, float *arg, int32_t veclen) const;
 
 	mutable bool       _dirty;
 	const ControlList& _list;

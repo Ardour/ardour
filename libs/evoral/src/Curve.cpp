@@ -42,7 +42,7 @@ Curve::Curve (const ControlList& cl)
 }
 
 void
-Curve::solve ()
+Curve::solve () const
 {
 	uint32_t npoints;
 
@@ -169,7 +169,7 @@ Curve::solve ()
 }
 
 bool
-Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock(), Glib::Threads::TRY_LOCK);
 
@@ -182,14 +182,14 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 void
-Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 
 void
-Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	double rx, lx, hx, max_x, min_x;
 	int32_t i;
@@ -329,7 +329,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 double
-Curve::multipoint_eval (double x)
+Curve::multipoint_eval (double x) const
 {
 	pair<ControlList::EventList::const_iterator,ControlList::EventList::const_iterator> range;
 
