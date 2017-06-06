@@ -429,6 +429,8 @@ DiskWriter::set_state (const XMLNode& node, int version)
 		_record_safe = false;
 	}
 
+	reset_write_sources (false, true);
+
 	return 0;
 }
 
