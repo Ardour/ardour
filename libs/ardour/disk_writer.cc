@@ -417,9 +417,10 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	if (DiskIOProcessor::set_state (node, version)) {
 		return -1;
 	}
+
 #if 0 // XXX DISK
-	if (!node.property (X_("capture-alignment"))) != 0) {
-                set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
+	if (!node.property (X_("capture-alignment")) != 0) {
+		set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
         } else {
                 set_align_choice (Automatic, true);
         }
