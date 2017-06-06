@@ -573,7 +573,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 		const size_t n_buffers = bufs.count().n_audio();
 
-		for (n = 0; chan != c->end(); ++chan, ++n) {
+		for (chan = c->begin(), n = 0; chan != c->end(); ++chan, ++n) {
 
 			ChannelInfo* chaninfo (*chan);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
