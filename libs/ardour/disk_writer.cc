@@ -538,7 +538,9 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				capture_start_frame = loop_start;
 			}
 
-			_midi_write_source->mark_write_starting_now (capture_start_frame, capture_captured, loop_length);
+			if (_midi_write_source) {
+				_midi_write_source->mark_write_starting_now (capture_start_frame, capture_captured, loop_length);
+			}
 
 			g_atomic_int_set(const_cast<gint*> (&_frames_pending_write), 0);
 			g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
