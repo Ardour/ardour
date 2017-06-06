@@ -45,15 +45,17 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t gm, std::bitset<32> fb)
+OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address a, ArdourSurface::OSC::OSCSurface* su)
 	: _strip (s)
-	,gainmode (gm)
-	,feedback (fb)
+	,sur (su)
 	,nsends (0)
 	,_last_gain (0.0)
 {
 	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	gainmode = sur->gainmode;
+	feedback = sur->feedback;
 	as = ARDOUR::Off;
+	send_size = 0;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -235,52 +237,85 @@ OSCSelectObserver::~OSCSelectObserver ()
 }
 
 void
+OSCSelectObserver::renew_sends () {
+	send_end();
+	send_init();
+}
+
+void
+OSCSelectObserver::renew_plugin () {
+	// to be written :)
+}
+
+void
 OSCSelectObserver::send_init()
 {
 	// we don't know how many there are, so find out.
 	bool sends;
+	nsends  = 0;
 	do {
 		sends = false;
 		if (_strip->send_level_controllable (nsends)) {
-			_strip->send_level_controllable(nsends)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, nsends, _strip->send_level_controllable(nsends)), OSC::instance());
-			send_timeout.push_back (0);
-			send_gain (nsends, _strip->send_level_controllable(nsends));
 			sends = true;
-		}
-
-		if (_strip->send_enable_controllable (nsends)) {
-			_strip->send_enable_controllable(nsends)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), nsends + 1, _strip->send_enable_controllable(nsends)), OSC::instance());
-			enable_message_with_id ("/select/send_enable", nsends + 1, _strip->send_enable_controllable(nsends));
-			sends = true;
-		} else if (sends) {
-			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
-			if (!r) {
-				// should never get here
-				send_float_with_id ("/select/send_enable", nsends + 1, 0);
-			}
-			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(nsends));
-			if (snd) {
-				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
-				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), nsends + 1, proc), OSC::instance());
-				send_float_with_id ("/select/send_enable", nsends + 1, proc->enabled());
-			}
-		}
-		// this should get signalled by the route the send goes to, (TODO)
-		if (!gainmode && sends) { // if the gain control is there, this is too
-			text_with_id ("/select/send_name", nsends + 1, _strip->send_name(nsends));
-		}
-		// Send numbers are 0 based, OSC is 1 based so this gets incremented at the end
-		if (sends) {
 			nsends++;
 		}
 	} while (sends);
+	if (!nsends) {
+		return;
+	}
+
+	send_size = nsends;
+	if (sur->send_page_size) {
+		send_size = sur->send_page_size;
+	}
+	// check limits
+	uint32_t max_page = (uint32_t)(nsends / send_size) + 1;
+	if (sur->send_page < 1) {
+		sur->send_page = 1;
+	} else if ((uint32_t)sur->send_page > max_page) {
+		sur->send_page = max_page;
+	}
+	uint32_t page_start = ((sur->send_page - 1) * send_size);
+	uint32_t last_send = sur->send_page * send_size;
+	uint32_t c = 1;
+
+	for (uint32_t s = page_start; s < last_send; ++s, ++c) {
+
+		bool send_valid = false;
+		if (_strip->send_level_controllable (s)) {
+			_strip->send_level_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, c, _strip->send_level_controllable(s)), OSC::instance());
+			send_timeout.push_back (0);
+			send_gain (c, _strip->send_level_controllable(s));
+			send_valid = true;
+		}
+
+		if (_strip->send_enable_controllable (s)) {
+			_strip->send_enable_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), c, _strip->send_enable_controllable(s)), OSC::instance());
+			enable_message_with_id ("/select/send_enable", c, _strip->send_enable_controllable(s));
+		} else if (send_valid) {
+			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
+			if (!r) {
+				// should never get here
+				send_float_with_id ("/select/send_enable", c, 0);
+			}
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(s));
+			if (snd) {
+				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
+				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), c, proc), OSC::instance());
+				send_float_with_id ("/select/send_enable", c, proc->enabled());
+			}
+		}
+		if (!gainmode && send_valid) {
+			text_with_id ("/select/send_name", c, _strip->send_name(s));
+		}
+	}
 }
 
 void
 OSCSelectObserver::send_end ()
 {
 	send_connections.drop_connections ();
-	for (uint32_t i = 1; i <= nsends; i++) {
+	for (uint32_t i = 1; i <= send_size; i++) {
 		if (gainmode) {
 			send_float_with_id ("/select/send_fader", i, 0);
 		} else {
@@ -291,6 +326,8 @@ OSCSelectObserver::send_end ()
 		// next name
 		text_with_id ("/select/send_name", i, " ");
 	}
+	// need to delete or clear send_timeout
+	send_timeout.clear();
 	nsends = 0;
 }
 
@@ -580,7 +617,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 #else
 		value = gain_to_slider_position (controllable->get_value());
 #endif
-	text_with_id ("/select/send_name" , id + 1, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db));
+	text_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db));
 	if (send_timeout.size() > id) {
 		send_timeout[id] = 8;
 	}
@@ -590,9 +627,9 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	}
 
 	if (feedback[2]) {
-		path = set_path (path, id + 1);
+		path = set_path (path, id);
 	} else {
-		lo_message_add_int32 (msg, id + 1);
+		lo_message_add_int32 (msg, id);
 	}
 
 	lo_message_add_float (msg, value);

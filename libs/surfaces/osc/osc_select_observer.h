@@ -31,16 +31,20 @@
 #include "ardour/types.h"
 #include "ardour/processor.h"
 
+#include "osc.h"
+
 class OSCSelectObserver
 {
 
   public:
-	OSCSelectObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t gainmode, std::bitset<32> feedback);
+	OSCSelectObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCSelectObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
+	void renew_sends (void);
+	void renew_plugin (void);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
@@ -54,12 +58,14 @@ class OSCSelectObserver
 	std::string path;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
+	ArdourSurface::OSC::OSCSurface* sur;
 	std::vector<int> send_timeout;
 	uint32_t gain_timeout;
 	float _last_meter;
 	uint32_t nsends;
 	float _last_gain;
 	ARDOUR::AutoState as;
+	uint32_t send_size;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

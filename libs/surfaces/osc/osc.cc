@@ -565,6 +565,11 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
+		REGISTER_CALLBACK (serv, "/select/send_page", "f", sel_send_page);
+		REGISTER_CALLBACK (serv, "/select/send_page_size", "f", sel_send_pagesize);
+		REGISTER_CALLBACK (serv, "/select/plug_page", "f", sel_plug_page);
+		REGISTER_CALLBACK (serv, "/select/plug_page_size", "f", sel_plug_pagesize);
+		REGISTER_CALLBACK (serv, "/select/plugin", "f", sel_plugin);
 		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
 		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
 		REGISTER_CALLBACK (serv, "/select/pan_frontback_position", "f", sel_pan_frontback);
@@ -1394,7 +1399,6 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	return 0;
 }
 
-
 int
 OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 {
@@ -1461,6 +1465,11 @@ OSC::get_surface (lo_address addr)
 	s.cue = false;
 	s.aux = 0;
 	s.strips = get_sorted_stripables(s.strip_types, s.cue);
+	s.send_page = 1;
+	s.send_page_size = 0;
+	s.plug_page = 1;
+	s.plug_page_size = 0;
+	s.plugin = 1;
 
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
@@ -1725,6 +1734,57 @@ OSC::get_strip (uint32_t ssid, lo_address addr)
 	}
 	// guess it is out of range
 	return boost::shared_ptr<ARDOUR::Stripable>();
+}
+
+// send and plugin paging commands
+int
+OSC::sel_send_pagesize (uint32_t size, lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	if  (size != s->send_page_size) {
+		s->send_page_size = size;
+		s->sel_obs->renew_sends();
+	}
+	return 0;
+}
+
+int
+OSC::sel_send_page (int page, lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	s->send_page = s->send_page + page;
+	s->sel_obs->renew_sends();
+	return 0;
+}
+
+int
+OSC::sel_plug_pagesize (uint32_t size, lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	if (size != s->plug_page_size) {
+		s->plug_page_size = size;
+		s->sel_obs->renew_plugin();
+	}
+	return 0;
+}
+
+int
+OSC::sel_plug_page (int page, lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	s->plug_page = s->plug_page + page;
+	s->sel_obs->renew_plugin();
+	return 0;
+}
+
+int
+OSC::sel_plugin (uint32_t id, lo_message msg)
+{
+	OSCSurface *s = get_surface(get_address (msg));
+	s->plugin = id;
+	s->plug_page = 1;
+	s->sel_obs->renew_plugin();
+	return 0;
 }
 
 void
@@ -2762,14 +2822,14 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	}
 	bool feedback_on = sur->feedback.to_ulong();
 	if (s && feedback_on) {
-		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur->gainmode, sur->feedback);
+		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur);
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
 	} else if (sur->expand_enable) {
 		sur->expand = 0;
 		sur->expand_enable = false;
 		if (_select && feedback_on) {
-			OSCSelectObserver* sel_fb = new OSCSelectObserver (_select, addr, sur->gainmode, sur->feedback);
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (_select, addr, sur);
 			_select->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 			sur->sel_obs = sel_fb;
 		}
@@ -3144,6 +3204,9 @@ int
 OSC::sel_sendgain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
+	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
+		return sel_send_fail ("send_gain", id, -193, get_address (msg));
+	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
 		s = get_strip (sur->expand, get_address (msg));
@@ -3151,9 +3214,10 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 		s = _select;
 	}
 	float abs;
+	int send_id;
 	if (s) {
 		if (id > 0) {
-			--id;
+			send_id = id - 1;
 		}
 #ifdef MIXBUS
 		abs = val;
@@ -3164,18 +3228,24 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 			abs = dB_to_coefficient (val);
 		}
 #endif
-		if (s->send_level_controllable (id)) {
-			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+		if (sur->send_page_size) {
+			send_id = send_id + ((sur->send_page - 1) * sur->send_page_size);
+		}
+		if (s->send_level_controllable (send_id)) {
+			s->send_level_controllable (send_id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_gain", id + 1, -193, get_address (msg));
+	return sel_send_fail ("send_gain", id, -193, get_address (msg));
 }
 
 int
 OSC::sel_sendfader (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
+	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
+		return sel_send_fail ("send_fader", id, 0, get_address (msg));
+	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
 		s = get_strip (sur->expand, get_address (msg));
@@ -3183,19 +3253,23 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 		s = _select;
 	}
 	float abs;
+	int send_id;
 	if (s) {
 
 		if (id > 0) {
-			--id;
+			send_id = id - 1;
+		}
+		if (sur->send_page_size) {
+			send_id = send_id + ((sur->send_page - 1) * sur->send_page_size);
 		}
 
-		if (s->send_level_controllable (id)) {
+		if (s->send_level_controllable (send_id)) {
 #ifdef MIXBUS
-			abs = s->send_level_controllable(id)->interface_to_internal (val);
+			abs = s->send_level_controllable(send_id)->interface_to_internal (val);
 #else
 			abs = slider_position_to_gain_with_max (val, 2.0);
 #endif
-			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
+			s->send_level_controllable (send_id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -3248,27 +3322,34 @@ int
 OSC::sel_sendenable (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
+	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
+		return sel_send_fail ("send_enable", id, 0, get_address (msg));
+	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
 		s = get_strip (sur->expand, get_address (msg));
 	} else {
 		s = _select;
 	}
+	int send_id;
 	if (s) {
 		if (id > 0) {
-			--id;
+			send_id = id - 1;
 		}
-		if (s->send_enable_controllable (id)) {
-			s->send_enable_controllable (id)->set_value (val, PBD::Controllable::NoGroup);
+		if (sur->send_page_size) {
+			send_id = send_id + ((sur->send_page - 1) * sur->send_page_size);
+		}
+		if (s->send_enable_controllable (send_id)) {
+			s->send_enable_controllable (send_id)->set_value (val, PBD::Controllable::NoGroup);
 			return 0;
 		}
-		if (s->send_level_controllable (id)) {
+		if (s->send_level_controllable (send_id)) {
 			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 			if (!r) {
 				// should never get here
-				return sel_send_fail ("send_enable", id + 1, 0, get_address (msg));
+				return sel_send_fail ("send_enable", id, 0, get_address (msg));
 			}
-			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(id));
+			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(send_id));
 			if (snd) {
 				if (val) {
 					snd->activate();
@@ -3279,7 +3360,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_enable", id + 1, 0, get_address (msg));
+	return sel_send_fail ("send_enable", id, 0, get_address (msg));
 }
 
 int

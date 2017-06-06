@@ -121,9 +121,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		JogMode jogmode;			// current jogmode
 		uint32_t bank;				// current bank
 		uint32_t bank_size;			// size of banks for this surface
-		uint32_t plug_page;			// current plugin page
+		int plug_page;				// current plugin page
 		uint32_t plug_page_size;	// plugin page size (number of controls)
-		uint32_t send_page;			// current send page
+		uint32_t plugin;			// id of current plugin
+		int send_page;				// current send page
 		uint32_t send_page_size;	// send page size in channels
 		std::bitset<32> strip_types;// what strip types are a part of this bank
 		uint32_t nstrips;			// how many strips are there for strip_types
@@ -425,6 +426,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_pan_elevation,f);
 	PATH_CALLBACK1_MSG(sel_pan_frontback,f);
 	PATH_CALLBACK1_MSG(sel_pan_lfe,f);
+	PATH_CALLBACK1_MSG(sel_send_page,f);
+	PATH_CALLBACK1_MSG(sel_send_pagesize,f);
+	PATH_CALLBACK1_MSG(sel_plug_page,f);
+	PATH_CALLBACK1_MSG(sel_plug_pagesize,f);
+	PATH_CALLBACK1_MSG(sel_plugin,f);
 	PATH_CALLBACK1_MSG(sel_comp_enable,f);
 	PATH_CALLBACK1_MSG(sel_comp_threshold,f);
 	PATH_CALLBACK1_MSG(sel_comp_speed,f);
@@ -581,6 +587,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 	int refresh_surface (lo_message msg);
+	int sel_send_pagesize (uint32_t size, lo_message msg);
+	int sel_send_page (int page, lo_message msg);
+	int sel_plug_pagesize (uint32_t size, lo_message msg);
+	int sel_plug_page (int page, lo_message msg);
+	int sel_plugin (uint32_t id, lo_message msg);
 
 	int scrub (float delta, lo_message msg);
 	int jog (float delta, lo_message msg);
