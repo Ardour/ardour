@@ -1810,7 +1810,9 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 
 	if (ds_prop) {
 
-		// XXX DISK .... how to load 2.x diskstreams ?
+		/* see comment in current ::set_state() regarding diskstream
+		 * state and DiskReader/DiskWRiter.
+		 */
 
 		error << _("Could not find diskstream for route") << endmsg;
 		return boost::shared_ptr<Route> ();
@@ -1830,8 +1832,6 @@ Session::XMLRouteFactory_2X (const XMLNode& node, int version)
 		if (track->set_state (node, version)) {
 			return ret;
 		}
-
-                // XXX DISK NEED TO SET UP DISKSTREAM ???
 
 		BOOST_MARK_TRACK (track);
 		ret = track;
