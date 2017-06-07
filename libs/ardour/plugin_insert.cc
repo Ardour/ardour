@@ -474,7 +474,7 @@ PluginInsert::create_automatable_parameters ()
 			can_automate (param);
 		}
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
-		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+		boost::shared_ptr<PluginControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable) {
 			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
 		}
@@ -814,6 +814,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 
 		for (Controls::iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
 
+			// TODO include ctrl-master value
 			boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 
@@ -2823,145 +2824,6 @@ PluginInsert::type ()
        return plugin()->get_info()->type;
 }
 
-PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
-                                            const Evoral::Parameter&          param,
-                                            const ParameterDescriptor&        desc,
-                                            boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p->session(), param, desc, list, p->describe_parameter(param))
-	, _plugin (p)
-{
-	if (alist()) {
-		if (desc.toggled) {
-			list->set_interpolation(Evoral::ControlList::Discrete);
-		}
-	}
-}
-
-/** @param val `user' value */
-
-void
-PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	/* FIXME: probably should be taking out some lock here.. */
-
-	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), user_val);
-	}
-
-	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
-	if (iasp) {
-		iasp->set_parameter (_list->parameter().id(), user_val);
-	}
-
-	AutomationControl::actually_set_value (user_val, group_override);
-}
-
-void
-PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
-{
-	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
-}
-
-XMLNode&
-PluginInsert::PluginControl::get_state ()
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property (X_("parameter"), parameter().id());
-#ifdef LV2_SUPPORT
-	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
-	if (lv2plugin) {
-		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
-	}
-#endif
-
-	return node;
-}
-
-/** @return `user' val */
-double
-PluginInsert::PluginControl::get_value () const
-{
-	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
-
-	if (!plugin) {
-		return 0.0;
-	}
-
-	return plugin->get_parameter (_list->parameter().id());
-}
-
-PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
-                                                            const Evoral::Parameter&          param,
-                                                            const ParameterDescriptor&        desc,
-                                                            boost::shared_ptr<AutomationList> list)
-	: AutomationControl (p->session(), param, desc, list)
-	, _plugin (p)
-{
-}
-
-void
-PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
-{
-	/* Old numeric set_value(), coerce to appropriate datatype if possible.
-	   This is lossy, but better than nothing until Ardour's automation system
-	   can handle various datatypes all the way down. */
-	const Variant value(_desc.datatype, user_val);
-	if (value.type() == Variant::NOTHING) {
-		error << "set_value(double) called for non-numeric property" << endmsg;
-		return;
-	}
-
-	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_property(_list->parameter().id(), value);
-	}
-
-	_value = value;
-
-	AutomationControl::actually_set_value (user_val, gcd);
-}
-
-XMLNode&
-PluginInsert::PluginPropertyControl::get_state ()
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property (X_("property"), parameter().id());
-	node.remove_property (X_("value"));
-
-	return node;
-}
-
-double
-PluginInsert::PluginPropertyControl::get_value () const
-{
-	return _value.to_double();
-}
-
-boost::shared_ptr<Plugin>
-PluginInsert::get_impulse_analysis_plugin()
-{
-	boost::shared_ptr<Plugin> ret;
-	if (_impulseAnalysisPlugin.expired()) {
-		// LV2 in particular uses various _session params
-		// during init() -- most notably block_size..
-		// not great.
-		ret = plugin_factory(_plugins[0]);
-		ChanCount out (internal_output_streams ());
-		if (ret->get_info ()->reconfigurable_io ()) {
-			// populate get_info ()->n_inputs and ->n_outputs
-			ChanCount useins;
-			ret->can_support_io_configuration (internal_input_streams (), out, &useins);
-			assert (out == internal_output_streams ());
-		}
-		ret->configure_io (internal_input_streams (), out);
-		ret->set_owner (_owner);
-		_impulseAnalysisPlugin = ret;
-	} else {
-		ret = _impulseAnalysisPlugin.lock();
-	}
-
-	return ret;
-}
-
 void
 PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
 {
@@ -3095,4 +2957,192 @@ std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
 	}
 	o << "\n";
 	return o;
+}
+
+/* ***************************************************************************/
+
+PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
+                                            const Evoral::Parameter&          param,
+                                            const ParameterDescriptor&        desc,
+                                            boost::shared_ptr<AutomationList> list)
+	: SlavableAutomationControl (p->session(), param, desc, list, p->describe_parameter(param))
+	, _plugin (p)
+{
+	if (alist()) {
+		if (desc.toggled) {
+			list->set_interpolation(Evoral::ControlList::Discrete);
+		}
+	}
+}
+
+/** @param val `user' value */
+
+void
+PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
+{
+	/* FIXME: probably should be taking out some lock here.. */
+	user_val = reduce_by_masters (user_val);
+
+	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
+		(*i)->set_parameter (_list->parameter().id(), user_val);
+	}
+
+	boost::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
+	if (iasp) {
+		iasp->set_parameter (_list->parameter().id(), user_val);
+	}
+
+	/* don't call SlavableAutomationControl::actually_set_value()
+	 * user_val is already reduced by masters */
+	AutomationControl::actually_set_value (user_val, group_override);
+}
+
+void
+PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
+{
+	user_val += get_masters_value ();
+	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
+}
+
+double
+PluginInsert::PluginControl::scale_automation_callback (double value, double v2) const
+{
+	// TODO: offset by v2. -- needs interface_to_internal somewhere :(
+	value = std::max (lower(), std::min(upper(), value));
+	return value;
+}
+
+double
+PluginInsert::PluginControl::reduce_by_masters_locked (double value, bool ignore_automation_state) const
+{
+	if (_desc.toggled) { return value; }
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	if (!_masters.empty() && (ignore_automation_state || !automation_write ())) {
+		const double masters_value = get_masters_value_locked();
+		value -= masters_value;
+		value = std::max (lower(), std::min(upper(), value));
+	}
+	return value;
+}
+
+double
+PluginInsert::PluginControl::get_masters_value_locked () const
+{
+	if (_desc.toggled) {
+		return SlavableAutomationControl::get_masters_value_locked ();
+	}
+
+	float v = 0;
+
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		v += mr->second.master()->get_value() - mr->second.val_master ();
+	}
+
+	return v;
+}
+
+bool
+PluginInsert::PluginControl::handle_master_change (boost::shared_ptr<AutomationControl> m)
+{
+	return true;
+}
+
+XMLNode&
+PluginInsert::PluginControl::get_state ()
+{
+	XMLNode& node (SlavableAutomationControl::get_state());
+	node.set_property (X_("parameter"), parameter().id());
+#ifdef LV2_SUPPORT
+	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
+	if (lv2plugin) {
+		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
+	}
+#endif
+
+	return node;
+}
+
+/** @return `user' val */
+double
+PluginInsert::PluginControl::get_value () const
+{
+	boost::shared_ptr<Plugin> plugin = _plugin->plugin (0);
+
+	if (!plugin) {
+		return 0.0;
+	}
+
+	return plugin->get_parameter (_list->parameter().id()) + get_masters_value ();
+}
+
+PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
+                                                            const Evoral::Parameter&          param,
+                                                            const ParameterDescriptor&        desc,
+                                                            boost::shared_ptr<AutomationList> list)
+	: SlavableAutomationControl (p->session(), param, desc, list)
+	, _plugin (p)
+{
+}
+
+void
+PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
+{
+	/* Old numeric set_value(), coerce to appropriate datatype if possible.
+	   This is lossy, but better than nothing until Ardour's automation system
+	   can handle various datatypes all the way down. */
+	const Variant value(_desc.datatype, user_val);
+	if (value.type() == Variant::NOTHING) {
+		error << "set_value(double) called for non-numeric property" << endmsg;
+		return;
+	}
+
+	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
+		(*i)->set_property(_list->parameter().id(), value);
+	}
+
+	_value = value;
+
+	AutomationControl::actually_set_value (user_val, gcd);
+}
+
+XMLNode&
+PluginInsert::PluginPropertyControl::get_state ()
+{
+	XMLNode& node (SlavableAutomationControl::get_state());
+	node.set_property (X_("property"), parameter().id());
+	node.remove_property (X_("value"));
+
+	return node;
+}
+
+double
+PluginInsert::PluginPropertyControl::get_value () const
+{
+	return _value.to_double();
+}
+
+boost::shared_ptr<Plugin>
+PluginInsert::get_impulse_analysis_plugin()
+{
+	boost::shared_ptr<Plugin> ret;
+	if (_impulseAnalysisPlugin.expired()) {
+		// LV2 in particular uses various _session params
+		// during init() -- most notably block_size..
+		// not great.
+		ret = plugin_factory(_plugins[0]);
+		ChanCount out (internal_output_streams ());
+		if (ret->get_info ()->reconfigurable_io ()) {
+			// populate get_info ()->n_inputs and ->n_outputs
+			ChanCount useins;
+			ret->can_support_io_configuration (internal_input_streams (), out, &useins);
+			assert (out == internal_output_streams ());
+		}
+		ret->configure_io (internal_input_streams (), out);
+		ret->set_owner (_owner);
+		_impulseAnalysisPlugin = ret;
+	} else {
+		ret = _impulseAnalysisPlugin.lock();
+	}
+
+	return ret;
 }
