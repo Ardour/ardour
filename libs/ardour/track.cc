@@ -161,7 +161,15 @@ Track::set_state (const XMLNode& node, int version)
 
 	if (version >= 3000 && version < 4000) {
 		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			/* XXX DISK ... setup reader/writer from XML */
+			/* XXX if we remember anything from stored DiskStream
+			   state (older Ardour versions) that is needed by a
+			   DiskReader or DiskWriter, we should cook up a new
+			   XMLNode here, populate it with that information
+			   (child nodes, properties, etc.) and then call
+			   ::set_state() on the writer/reader.
+
+			   But at present (June 2017), there's no such state. 
+			*/
 		}
 	}
 
