@@ -314,64 +314,9 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 
 	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
+		cerr << name() << " using align style " << enum_2_string (_alignment_style) << endl;
 		set_capture_offset ();
 		AlignmentStyleChanged ();
-	}
-}
-
-void
-DiskWriter::set_align_style_from_io ()
-{
-	bool have_physical = false;
-
-	if (_alignment_choice != Automatic) {
-		return;
-	}
-
-	if (!_route) {
-		return;
-	}
-
-	boost::shared_ptr<IO> input = _route->input ();
-
-	if (input) {
-		uint32_t n = 0;
-		vector<string> connections;
-		boost::shared_ptr<ChannelList> c = channels.reader();
-
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
-
-			if ((input->nth (n).get()) && (input->nth (n)->get_connections (connections) == 0)) {
-				if (AudioEngine::instance()->port_is_physical (connections[0])) {
-					have_physical = true;
-					break;
-				}
-			}
-
-			connections.clear ();
-		}
-	}
-
-#ifdef MIXBUS
-	// compensate for latency when bouncing from master or mixbus.
-	// we need to use "ExistingMaterial" to pick up the master bus' latency
-	// see also Route::direct_feeds_according_to_reality
-	IOVector ios;
-	ios.push_back (_io);
-	if (_session.master_out() && ios.fed_by (_session.master_out()->output())) {
-		have_physical = true;
-	}
-	for (uint32_t n = 0; n < NUM_MIXBUSES && !have_physical; ++n) {
-		if (_session.get_mixbus (n) && ios.fed_by (_session.get_mixbus(n)->output())) {
-			have_physical = true;
-		}
-	}
-#endif
-
-	if (have_physical) {
-		set_align_style (ExistingMaterial);
-	} else {
-		set_align_style (CaptureTime);
 	}
 }
 
@@ -386,15 +331,15 @@ DiskWriter::set_align_choice (AlignChoice a, bool force)
 		_alignment_choice = a;
 
 		switch (_alignment_choice) {
-			case Automatic:
-				set_align_style_from_io ();
-				break;
-			case UseExistingMaterial:
-				set_align_style (ExistingMaterial);
-				break;
-			case UseCaptureTime:
-				set_align_style (CaptureTime);
-				break;
+		case UseExistingMaterial:
+			set_align_style (ExistingMaterial);
+			break;
+		case UseCaptureTime:
+			set_align_style (CaptureTime);
+			break;
+		default:
+			error << string_compose (_("programming error: %1"), "DiskWriter: asked to use illegal alignment style") << endmsg;
+			break;
 		}
 	}
 }
@@ -403,7 +348,7 @@ XMLNode&
 DiskWriter::state (bool full)
 {
 	XMLNode& node (DiskIOProcessor::state (full));
-	node.set_property(X_("type"), X_("diskwriter"));
+	node.set_property (X_("type"), X_("diskwriter"));
 	node.set_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
 	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
 	return node;
@@ -412,19 +357,17 @@ DiskWriter::state (bool full)
 int
 DiskWriter::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	if (DiskIOProcessor::set_state (node, version)) {
 		return -1;
 	}
 
-#if 0 // XXX DISK
-	if (!node.property (X_("capture-alignment")) != 0) {
-		set_align_choice (AlignChoice (string_2_enum (prop->value(), _alignment_choice)), true);
+	AlignChoice ac;
+
+	if (node.get_property (X_("capture-alignment"), ac)) {
+		set_align_choice (ac, true);
         } else {
                 set_align_choice (Automatic, true);
         }
-#endif
 
 	if (!node.get_property (X_("record-safe"), _record_safe)) {
 		_record_safe = false;

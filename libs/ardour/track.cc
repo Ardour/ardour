@@ -51,6 +51,7 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
         , _mode (mode)
+	, _alignment_choice (Automatic)
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
@@ -107,7 +108,17 @@ Track::init ()
         _record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
         _record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
 
+        _input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
+
         return 0;
+}
+
+void
+Track::input_changed ()
+{
+	if (_disk_writer && _alignment_choice == Automatic) {
+		set_align_choice_from_io ();
+	}
 }
 
 XMLNode&
@@ -134,6 +145,7 @@ Track::state (bool full)
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
 	root.set_property (X_("saved-meter-point"), _saved_meter_point);
+	root.set_property (X_("alignment-choice"), _alignment_choice);
 
 	return root;
 }
@@ -146,7 +158,6 @@ Track::set_state (const XMLNode& node, int version)
 	}
 
 	XMLNode* child;
-	XMLProperty const * prop;
 
 	if (version >= 3000 && version < 4000) {
 		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
@@ -186,6 +197,12 @@ Track::set_state (const XMLNode& node, int version)
 
 	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
 		_saved_meter_point = _meter_point;
+	}
+
+	AlignChoice ac;
+
+	if (node.get_property (X_("alignment-choice"), ac)) {
+		set_align_choice (ac, true);
 	}
 
 	return 0;
@@ -877,15 +894,77 @@ Track::use_new_playlist ()
 }
 
 void
-Track::set_align_style (AlignStyle s, bool force)
+Track::set_align_choice (AlignChoice ac, bool force)
 {
-	// XXX DISK
+	switch (ac) {
+	case Automatic:
+		_alignment_choice = Automatic;
+		set_align_choice_from_io ();
+		return;
+	default:
+		break;
+	}
+
+	_disk_writer->set_align_choice (ac, force);
+	_alignment_choice = ac;
 }
 
 void
-Track::set_align_choice (AlignChoice s, bool force)
+Track::set_align_style (AlignStyle s, bool force)
 {
-	// XXX DISK
+	_disk_writer->set_align_style (s, force);
+}
+
+void
+Track::set_align_choice_from_io ()
+{
+	bool have_physical = false;
+
+	if (_input) {
+		uint32_t n = 0;
+		vector<string> connections;
+		boost::shared_ptr<Port> p;
+
+		while (true) {
+
+			p = _input->nth (n++);
+
+			if (!p) {
+				break;
+			}
+
+			if (p->get_connections (connections) != 0) {
+				if (AudioEngine::instance()->port_is_physical (connections[0])) {
+					have_physical = true;
+					break;
+				}
+			}
+
+			connections.clear ();
+		}
+	}
+
+#ifdef MIXBUS
+	// compensate for latency when bouncing from master or mixbus.
+	// we need to use "ExistingMaterial" to pick up the master bus' latency
+	// see also Route::direct_feeds_according_to_reality
+	IOVector ios;
+	ios.push_back (_input);
+	if (_session.master_out() && ios.fed_by (_session.master_out()->output())) {
+		have_physical = true;
+	}
+	for (uint32_t n = 0; n < NUM_MIXBUSES && !have_physical; ++n) {
+		if (_session.get_mixbus (n) && ios.fed_by (_session.get_mixbus(n)->output())) {
+			have_physical = true;
+		}
+	}
+#endif
+
+	if (have_physical) {
+		_disk_writer->set_align_style (ExistingMaterial);
+	} else {
+		_disk_writer->set_align_style (CaptureTime);
+	}
 }
 
 void

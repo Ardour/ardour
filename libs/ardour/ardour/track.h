@@ -246,6 +246,10 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
 	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
+	AlignChoice _alignment_choice;
+	void set_align_choice_from_io ();
+	void input_changed ();
+
 private:
 	void parameter_changed (std::string const & p);
 
