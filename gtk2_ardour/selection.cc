@@ -57,10 +57,11 @@ struct AudioRangeComparator {
 	}
 };
 
-Selection::Selection (const PublicEditor* e)
+Selection::Selection (const PublicEditor* e, bool mls)
 	: tracks (e)
 	, editor (e)
 	, next_time_id (0)
+	, manage_libardour_selection (mls)
 {
 	clear ();
 
@@ -1544,6 +1545,10 @@ Selection::set (const TrackViewList& track_list)
 void
 Selection::clear_tracks (bool)
 {
+	if (!manage_libardour_selection) {
+		return;
+	}
+
 	Session* s = editor->session();
 	if (s) {
 		CoreSelection& selection (s->selection());
