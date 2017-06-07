@@ -782,7 +782,7 @@ Track::set_slaved (bool s)
 ChanCount
 Track::n_channels ()
 {
-	return _disk_reader->output_streams(); // XXX DISK
+	return _disk_reader->output_streams();
 }
 
 framepos_t
