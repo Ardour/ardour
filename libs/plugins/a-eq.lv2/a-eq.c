@@ -270,12 +270,12 @@ activate(LV2_Handle instance)
 static void linear_svf_set_peq(struct linear_svf *self, float gdb, float sample_rate, float cutoff, float bandwidth)
 {
 	double f0 = (double)cutoff;
-	double q = (double)pow(2.0, 1.0 / bandwidth) / (pow(2.0, bandwidth) - 1.0);
+	double q = (double)pow(2.0, 0.5 * bandwidth) / (pow(2.0, bandwidth) - 1.0);
 	double sr = (double)sample_rate;
 	double A = pow(10.0, gdb/40.0);
 
 	self->g = tan(M_PI * (f0 / sr));
-	self->k = 1.0 / (q * A);
+	self->k = 1.0 / q;
 
 	self->a[0] = 1.0 / (1.0 + self->g * (self->g + self->k));
 	self->a[1] = self->g * self->a[0];
