@@ -330,7 +330,6 @@ TempoTest::qnDistanceTestRamp ()
 	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, AudioTime);
 	Meter meterB (3, 4);
 	map.add_meter (meterB, 4.0, BBT_Time (2, 1, 0), 288e3, AudioTime);
-	map.dump (std::cout);
 	map.recompute_map (map._metrics, 1);
 
 	list<MetricSection*>::iterator i = map._metrics.begin();
