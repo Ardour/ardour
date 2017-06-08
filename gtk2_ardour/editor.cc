@@ -5908,6 +5908,9 @@ Editor::session_going_away ()
 	hide_measures ();
 	clear_marker_display ();
 
+	delete tempo_lines;
+	tempo_lines = 0;
+
 	stop_step_editing ();
 
 	if (own_window()) {
