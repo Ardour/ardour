@@ -206,7 +206,7 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	}
 
 	TempoSection::Type old_type;
-	if (!node.get_property ("tempo-type", old_type)) {
+	if (node.get_property ("tempo-type", old_type)) {
 		/* sessions with a tempo-type node contain no end-beats-per-minute.
 		   if the legacy node indicates a constant tempo, simply fill this in with the
 		   start tempo. otherwise we need the next neighbour to know what it will be.
