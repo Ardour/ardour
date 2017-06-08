@@ -4162,11 +4162,11 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 	if (bar_mod == 0) {
 		while (pos >= 0 && pos < upper) {
 			pos = frame_at_minute (minute_at_beat_locked (_metrics, cnt));
-			const TempoSection tempo = tempo_section_at_minute_locked (_metrics, minute_at_frame (pos));
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_frame (pos));
 			const BBT_Time bbt = bbt_at_beat_locked (_metrics, cnt);
+			const double qn = pulse_at_beat_locked (_metrics, cnt) * 4.0;
 
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, tempo.c()));
+			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, qn));
 			++cnt;
 		}
 	} else {
@@ -4181,9 +4181,10 @@ TempoMap::get_grid (vector<TempoMap::BBTPoint>& points,
 
 		while (pos >= 0 && pos < upper) {
 			pos = frame_at_minute (minute_at_bbt_locked (_metrics, bbt));
-			const TempoSection tempo = tempo_section_at_minute_locked (_metrics, minute_at_frame (pos));
 			const MeterSection meter = meter_section_at_minute_locked (_metrics, minute_at_frame (pos));
-			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, tempo.c()));
+			const double qn = pulse_at_bbt_locked (_metrics, bbt) * 4.0;
+
+			points.push_back (BBTPoint (meter, tempo_at_minute_locked (_metrics, minute_at_frame (pos)), pos, bbt.bars, bbt.beats, qn));
 			bbt.bars += bar_mod;
 		}
 	}

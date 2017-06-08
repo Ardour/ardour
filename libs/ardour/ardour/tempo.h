@@ -343,16 +343,16 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	};
 
 	struct BBTPoint {
-		framepos_t          frame;
 		Meter               meter;
 		Tempo               tempo;
-		double              c;
+		framepos_t          frame;
 		uint32_t            bar;
 		uint32_t            beat;
+		double              qn;
 
 		BBTPoint (const MeterSection& m, const Tempo& t, framepos_t f,
-		          uint32_t b, uint32_t e, double func_c)
-		: frame (f), meter (m.divisions_per_bar(), m.note_divisor()), tempo (t.note_types_per_minute(), t.note_type(), t.end_note_types_per_minute()), c (func_c), bar (b), beat (e) {}
+		          uint32_t b, uint32_t e, double qnote)
+		: meter (m), tempo (t), frame (f), bar (b), beat (e), qn (qnote) {}
 
 		Timecode::BBT_Time bbt() const { return Timecode::BBT_Time (bar, beat, 0); }
 		operator Timecode::BBT_Time() const { return bbt(); }

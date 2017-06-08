@@ -19,13 +19,14 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
+#include "ardour/beats_frames_converter.h"
 #include "ardour/tempo.h"
 
 #include "canvas/line_set.h"
 
 class TempoLines {
 public:
-	TempoLines (ArdourCanvas::Container* group, double screen_height);
+	TempoLines (ArdourCanvas::Container* group, double screen_height, ARDOUR::BeatsFramesConverter* bfc);
 
 	void tempo_map_changed();
 
@@ -44,6 +45,7 @@ private:
 	                 ARDOUR::framecnt_t                                    frame_rate);
 
 	ArdourCanvas::LineSet lines;
+	ARDOUR::BeatsFramesConverter* _bfc;
 };
 
 #endif /* __ardour_tempo_lines_h__ */

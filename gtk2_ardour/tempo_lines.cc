@@ -29,8 +29,9 @@
 
 using namespace std;
 
-TempoLines::TempoLines (ArdourCanvas::Container* group, double)
+TempoLines::TempoLines (ArdourCanvas::Container* group, double, ARDOUR::BeatsFramesConverter* bfc)
 	: lines (group, ArdourCanvas::LineSet::Vertical)
+	, _bfc (bfc)
 {
 	lines.set_extent (ArdourCanvas::COORD_MAX);
 }
@@ -72,20 +73,8 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
-		framepos_t f = 0;
+		const framepos_t f = _bfc->to (Evoral::Beats (grid.begin()->qn + (l / (double) divisions)));
 
-		if (grid.begin()->c != 0.0) {
-			const double beat_divisions = (l / ((double) divisions)) * (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
-			const double time_at_division = log (((grid.begin()->c * (beat_divisions)) /
-							   grid.begin()->tempo.note_types_per_minute()) + 1) / grid.begin()->c;
-
-			f = grid.begin()->frame + (framecnt_t) floor ((time_at_division * 60.0 * frame_rate) + 0.5);
-		} else {
-			const double fpb  = grid.begin()->tempo.frames_per_note_type (frame_rate)
-				* (grid.begin()->tempo.note_type() / grid.begin()->meter.note_divisor());
-
-			f = grid.begin()->frame + (l * (fpb / (double) divisions));
-		}
 		if (f > leftmost_frame) {
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
