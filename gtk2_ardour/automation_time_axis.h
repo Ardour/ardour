@@ -39,7 +39,7 @@
 
 namespace ARDOUR {
 	class Session;
-	class Route;
+	class Stripable;
 	class AutomationControl;
 }
 
@@ -57,7 +57,7 @@ class ItemCounts;
 class AutomationTimeAxisView : public TimeAxisView {
   public:
 	AutomationTimeAxisView (ARDOUR::Session*,
-				boost::shared_ptr<ARDOUR::Route>,
+				boost::shared_ptr<ARDOUR::Stripable>,
 				boost::shared_ptr<ARDOUR::Automatable>,
 				boost::shared_ptr<ARDOUR::AutomationControl>,
 				Evoral::Parameter,
@@ -117,8 +117,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	bool has_automation () const;
 
-	boost::shared_ptr<ARDOUR::Route> parent_route () {
-		return _route;
+	boost::shared_ptr<ARDOUR::Stripable> parent_stripable () {
+		return _stripable;
 	}
 
 	bool show_regions () const {
@@ -132,11 +132,11 @@ class AutomationTimeAxisView : public TimeAxisView {
 	   may be set.  In this case, _automatable is likely _route so the
 	   controller will send immediate events out the route's MIDI port. */
 
-	/** parent route */
-	boost::shared_ptr<ARDOUR::Route> _route;
+	/** parent strip */
+	boost::shared_ptr<ARDOUR::Stripable> _stripable;
 	/** control */
 	boost::shared_ptr<ARDOUR::AutomationControl> _control;
-	/** control owner; may be _route, something else (e.g. a pan control), or NULL */
+	/** control owner; may be _stripable, something else (e.g. a pan control), or NULL */
 	boost::shared_ptr<ARDOUR::Automatable> _automatable;
 	/** controller owner */
 	boost::shared_ptr<AutomationController> _controller;
@@ -190,7 +190,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 	void interpolation_changed (ARDOUR::AutomationList::InterpolationStyle);
 
 	PBD::ScopedConnectionList _list_connections;
-	PBD::ScopedConnectionList _route_connections;
+	PBD::ScopedConnectionList _stripable_connections;
 
 	void entered ();
 	void exited ();

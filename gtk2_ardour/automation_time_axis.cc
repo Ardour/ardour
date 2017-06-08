@@ -75,7 +75,7 @@ bool AutomationTimeAxisView::have_name_font = false;
  */
 AutomationTimeAxisView::AutomationTimeAxisView (
 	Session* s,
-	boost::shared_ptr<Route> r,
+	boost::shared_ptr<Stripable> strip,
 	boost::shared_ptr<Automatable> a,
 	boost::shared_ptr<AutomationControl> c,
 	Evoral::Parameter p,
@@ -88,7 +88,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	)
 	: SessionHandlePtr (s)
 	, TimeAxisView (s, e, &parent, canvas)
-	, _route (r)
+	, _stripable (strip)
 	, _control (c)
 	, _automatable (a)
 	, _parameter (p)
@@ -113,9 +113,9 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	tipname += nom;
 	_name = tipname;
 
-	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, r->name()));
-	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, r->name()));
-	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, r->name()));
+	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for auto %2/%1", _name, strip->name()));
+	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for auto %2/%1", _name, strip->name()));
+	CANVAS_DEBUG_NAME (_ghost_group, string_compose ("ghosts for auto %2/%1", _name, strip->name()));
 
 	if (!have_name_font) {
 		name_font = get_font_for_style (X_("AutomationTrackName"));
@@ -297,8 +297,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	automation_state_changed ();
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &AutomationTimeAxisView::color_handler));
 
-	_route->DropReferences.connect (
-		_route_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
+	_stripable->DropReferences.connect (
+		_stripable_connections, invalidator (*this), boost::bind (&AutomationTimeAxisView::route_going_away, this), gui_context ()
 		);
 }
 
@@ -311,7 +311,7 @@ AutomationTimeAxisView::~AutomationTimeAxisView ()
 void
 AutomationTimeAxisView::route_going_away ()
 {
-	_route.reset ();
+	_stripable.reset ();
 }
 
 void
@@ -490,9 +490,9 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	}
 
 	if (changed) {
-		if (_canvas_display->visible() && _route) {
+		if (_canvas_display->visible() && _stripable) {
 			/* only emit the signal if the height really changed and we were visible */
-			_route->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
+			_stripable->gui_changed ("visible_tracks", (void *) 0); /* EMIT_SIGNAL */
 		}
 	}
 }
@@ -916,14 +916,14 @@ AutomationTimeAxisView::lines () const
 string
 AutomationTimeAxisView::state_id() const
 {
-	if (_automatable != _route && _control) {
+	if (_automatable != _stripable && _control) {
 		return string("automation ") + _control->id().to_s();
 	} else if (_parameter) {
 		const string parameter_str = PBD::to_string (_parameter.type()) + "/" +
 		                             PBD::to_string (_parameter.id()) + "/" +
 		                             PBD::to_string (_parameter.channel ());
 
-		return string("automation ") + PBD::to_string(_route->id()) + " " + parameter_str;
+		return string("automation ") + PBD::to_string(_stripable->id()) + " " + parameter_str;
 	} else {
 		error << "Automation time axis has no state ID" << endmsg;
 		return "";
@@ -1048,18 +1048,18 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 PresentationInfo const &
 AutomationTimeAxisView::presentation_info () const
 {
-	return _route->presentation_info();
+	return _stripable->presentation_info();
 }
 
 boost::shared_ptr<Stripable>
 AutomationTimeAxisView::stripable () const
 {
-	return _route;
+	return _stripable;
 }
 
 Gdk::Color
 AutomationTimeAxisView::color () const
 {
-	return gdk_color_from_rgb (_route->presentation_info().color());
+	return gdk_color_from_rgb (_stripable->presentation_info().color());
 }
 

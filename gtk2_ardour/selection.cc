@@ -1145,7 +1145,7 @@ Selection::get_state () const
 			t->set_property (X_("id"), rtv->route()->id ());
 		} else if (atv) {
 			XMLNode* t = node->add_child (X_("AutomationView"));
-			t->set_property (X_("id"), atv->parent_route()->id ());
+			t->set_property (X_("id"), atv->parent_stripable()->id ());
 			t->set_property (X_("parameter"), EventTypeMap::instance().to_symbol (atv->parameter ()));
 		}
 	}
@@ -1176,7 +1176,7 @@ Selection::get_state () const
 
 			XMLNode* r = node->add_child (X_("ControlPoint"));
 			r->set_property (X_("type"), "track");
-			r->set_property (X_("route-id"), atv->parent_route()->id ());
+			r->set_property (X_("route-id"), atv->parent_stripable()->id ());
 			r->set_property (X_("automation-list-id"), (*i)->line().the_list()->id ());
 			r->set_property (X_("parameter"), EventTypeMap::instance().to_symbol ((*i)->line().the_list()->parameter ()));
 			r->set_property (X_("view-index"), (*i)->view_index());
@@ -1305,7 +1305,7 @@ Selection::set_state (XMLNode const & node, int)
 					assert(false);
 				}
 
-				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (route_id);
+				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (route_id); // XXX may also be VCA
 				vector <ControlPoint *> cps;
 
 				if (rtv) {
