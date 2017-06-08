@@ -36,6 +36,12 @@ TempoLines::TempoLines (ArdourCanvas::Container* group, double, ARDOUR::BeatsFra
 	lines.set_extent (ArdourCanvas::COORD_MAX);
 }
 
+TempoLines::~TempoLines ()
+{
+	delete _bfc;
+	_bfc = 0;
+}
+
 void
 TempoLines::tempo_map_changed()
 {
