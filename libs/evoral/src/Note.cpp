@@ -57,8 +57,6 @@ Note<Time>::Note(const Note<Time>& copy)
 	: _on_event(copy._on_event, true)
 	, _off_event(copy._off_event, true)
 {
-	set_id (copy.id());
-
 	assert(_on_event.buffer());
 	assert(_off_event.buffer());
 	/*
