@@ -76,7 +76,11 @@ function factory () return function ()
 
 		{ type = "heading", title = "Heading" },
 
-		{ type = "number", key = "number", title = "Whatever",  min = 0, max = 10, step = 1, digits = 2 }
+		{ type = "number", key = "number", title = "Whatever",  min = 0, max = 10, step = 1, digits = 2 },
+
+		{ type = "file", key = "file", title = "Select a File",  path = ARDOUR.LuaAPI.build_filename (Session:path (), Session:name () .. ".ardour") },
+
+		{ type = "folder", key = "folder", title = "Select a Folder",  path = Session:path() }
 	}
 
 	local od = LuaDialog.Dialog ("title", dialog_options)
