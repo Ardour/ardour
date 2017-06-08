@@ -436,6 +436,47 @@ protected:
 	luabridge::LuaRef* _rv;
 };
 
+class LuaFileChooser : public LuaDialogWidget
+{
+public:
+	LuaFileChooser (std::string const& key, std::string const& title, Gtk::FileChooserAction a, const std::string& path)
+		: LuaDialogWidget (key, title)
+		, _fc (a)
+	{
+		if (!path.empty ()) {
+			switch (a) {
+				case Gtk::FILE_CHOOSER_ACTION_OPEN:
+				case Gtk::FILE_CHOOSER_ACTION_SAVE:
+					if (Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR|Glib::FILE_TEST_EXISTS)) {
+						_fc.set_filename (path);
+					}
+					break;
+				case Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER:
+					if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
+						_fc.set_filename (path);
+					}
+					break;
+				case Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER:
+					break;
+			}
+		}
+	}
+
+	Gtk::Widget* widget ()
+	{
+		return &_fc;
+	}
+
+	void assign (luabridge::LuaRef* rv) const
+	{
+		(*rv)[_key] = std::string (_fc.get_filename ());
+	}
+
+protected:
+	Gtk::FileChooserButton _fc;
+};
+
+
 
 /*******************************************************************************
  * Lua Parameter Dialog
@@ -546,6 +587,18 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				dflt = i.value ()["default"].cast<std::string> ();
 			}
 			_widgets.push_back (new LuaDialogDropDown (key, title, i.value ()["values"], dflt));
+		} else if (type == "file") {
+			std::string path;
+			if (i.value ()["path"].isString ()) {
+				path = i.value ()["path"].cast<std::string> ();
+			}
+			_widgets.push_back (new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_OPEN, path));
+		} else if (type == "folder") {
+			std::string path;
+			if (i.value ()["path"].isString ()) {
+				path = i.value ()["path"].cast<std::string> ();
+			}
+			_widgets.push_back (new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path));
 		}
 	}
 
