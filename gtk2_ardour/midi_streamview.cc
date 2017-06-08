@@ -449,7 +449,7 @@ MidiStreamView::setup_rec_box ()
 {
 	// cerr << _trackview.name() << " streamview SRB\n";
 
-	if (_trackview.session()->transport_rolling()) {
+	if (!_trackview.session()->transport_stopped()) {
 
 		if (!rec_active &&
 		    _trackview.session()->record_status() == Session::Recording &&
