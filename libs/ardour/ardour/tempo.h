@@ -249,7 +249,6 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	framepos_t frame_at_pulse (const double& pulse) const;
 
 	Timecode::BBT_Time legacy_bbt () { return _legacy_bbt; }
-	bool legacy_end () { return _legacy_end; }
 
   private:
 
@@ -283,7 +282,6 @@ class LIBARDOUR_API TempoSection : public MetricSection, public Tempo {
 	bool _locked_to_meter;
 	bool _clamped;
 	Timecode::BBT_Time _legacy_bbt;
-	bool _legacy_end;
 };
 
 typedef std::list<MetricSection*> Metrics;

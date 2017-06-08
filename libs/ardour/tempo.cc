@@ -158,7 +158,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	, _active (true)
 	, _locked_to_meter (false)
 	, _clamped (false)
-	, _legacy_end (false)
 {
 	LocaleGuard lg;
 
@@ -201,19 +200,22 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 
 	if (node.get_property ("end-beats-per-minute", _end_note_types_per_minute)) {
 		if (_end_note_types_per_minute < 0.0) {
-			info << _("TempoSection XML node has an illegal \"in-beats-per-minute\" value") << endmsg;
-			//throw failed_constructor();
-			_end_note_types_per_minute = _note_types_per_minute;
-			_legacy_end = true;
+			info << _("TempoSection XML node has an illegal \"end-beats-per-minute\" value") << endmsg;
+			throw failed_constructor();
 		}
-	} else {
-		_legacy_end = true;
 	}
 
 	TempoSection::Type old_type;
 	if (!node.get_property ("tempo-type", old_type)) {
+		/* sessions with a tempo-type node contain no end-beats-per-minute.
+		   if the legacy node indicates a constant tempo, simply fill this in with the
+		   start tempo. otherwise we need the next neighbour to know what it will be.
+		*/
+
 		if (old_type == TempoSection::Constant) {
 			_end_note_types_per_minute = _note_types_per_minute;
+		} else {
+			_end_note_types_per_minute = -1.0;
 		}
 	}
 
@@ -4649,7 +4651,7 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 					break;
 				}
 
-				if (t->legacy_end()) {
+				if (t->end_note_types_per_minute() < 0.0) {
 					fix_legacy_end_session();
 					break;
 				}
