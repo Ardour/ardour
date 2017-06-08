@@ -4312,8 +4312,8 @@ ProcessorWindowProxy::get (bool create)
 
 		if (_window) {
 			setup ();
+			_window->show_all ();
 		}
-		_window->show_all ();
 	}
 	return _window;
 }
