@@ -1367,7 +1367,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 	}
 
 	_last_roll_location = _last_roll_or_reversal_location =  _transport_frame;
-	Located (); /* EMIT SIGNAL */
+	if (!synced_to_engine () || _transport_frame == _engine.transport_frame ()) {
+		Located (); /* EMIT SIGNAL */
+	}
 }
 
 /** Set the transport speed.
