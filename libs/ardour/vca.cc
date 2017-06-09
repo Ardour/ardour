@@ -92,6 +92,12 @@ VCA::~VCA ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delete VCA %1\n", number()));
 	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+		}
+	}
+	{
 		Glib::Threads::Mutex::Lock lm (number_lock);
 		if (_number == next_number - 1) {
 			/* this was the "last" VCA added, so rewind the next number so

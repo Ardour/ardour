@@ -222,8 +222,10 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 			   avoiding holding a reference to the control in the binding
 			   itself.
 			*/
-
-			m->DropReferences.connect_same_thread (masters_connections, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
+			assert (masters_connections.find (boost::weak_ptr<AutomationControl>(m)) == masters_connections.end());
+			PBD::ScopedConnection con;
+			m->DropReferences.connect_same_thread (con, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
+			masters_connections[boost::weak_ptr<AutomationControl>(m)] = con;
 
 			/* Store the connection inside the MasterRecord, so
 			   that when we destroy it, the connection is destroyed
@@ -326,6 +328,7 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
+	masters_connections.erase (boost::weak_ptr<AutomationControl>(m));
 	pre_remove_master (m);
 
 	{

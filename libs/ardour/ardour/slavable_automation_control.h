@@ -36,7 +36,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	                          PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
-	~SlavableAutomationControl ();
+	virtual ~SlavableAutomationControl ();
 
 	double get_value () const;
 
@@ -110,7 +110,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	mutable Glib::Threads::RWLock master_lock;
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
-	PBD::ScopedConnectionList masters_connections;
+	std::map<boost::weak_ptr<AutomationControl>, PBD::ScopedConnection> masters_connections;
 
 	void   master_going_away (boost::weak_ptr<AutomationControl>);
 	double get_value_locked() const;

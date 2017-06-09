@@ -62,7 +62,7 @@ class LIBARDOUR_API AutomationControl
 	                  PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
-	~AutomationControl ();
+	virtual ~AutomationControl ();
 
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);
