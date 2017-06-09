@@ -201,7 +201,7 @@ void
 DiskReader::playlist_modified ()
 {
 	if (!i_am_the_modifier && !overwrite_queued) {
-		// !!!! _session.request_overwrite_buffer (this);
+		_session.request_overwrite_buffer (_route);
 		overwrite_queued = true;
 	}
 }
