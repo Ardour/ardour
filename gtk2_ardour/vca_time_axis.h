@@ -21,7 +21,7 @@
 #define __ardour_vca_time_axis_h__
 
 #include "ardour_button.h"
-#include "time_axis_view.h"
+#include "stripable_time_axis.h"
 #include "gain_meter.h"
 
 namespace ArdourCanvas {
@@ -33,7 +33,7 @@ namespace ARDOUR {
 	class VCA;
 }
 
-class VCATimeAxisView : public TimeAxisView
+class VCATimeAxisView : public StripableTimeAxisView
 {
   public:
 	VCATimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
@@ -59,11 +59,23 @@ class VCATimeAxisView : public TimeAxisView
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	ArdourButton  solo_button;
 	ArdourButton  mute_button;
-	ArdourButton  spill_button;
+	ArdourButton  automation_button;
 	ArdourButton  drop_button;
 	ArdourButton  number_label;
 	GainMeterBase gain_meter;
 	PBD::ScopedConnectionList vca_connections;
+
+	void create_gain_automation_child (const Evoral::Parameter &, bool);
+	void create_trim_automation_child (const Evoral::Parameter &, bool) {}
+	void create_mute_automation_child (const Evoral::Parameter &, bool);
+
+	virtual void show_all_automation (bool apply_to_selection = false);
+	virtual void show_existing_automation (bool apply_to_selection = false);
+	virtual void hide_all_automation (bool apply_to_selection = false);
+
+	void create_automation_child (const Evoral::Parameter& param, bool show);
+	virtual void build_automation_action_menu (bool);
+	Gtk::Menu* automation_action_menu;
 
 	void parameter_changed (std::string const& p);
 	void vca_property_changed (PBD::PropertyChange const&);
@@ -74,9 +86,9 @@ class VCATimeAxisView : public TimeAxisView
 	void update_track_number_visibility ();
 	bool solo_release (GdkEventButton*);
 	bool mute_release (GdkEventButton*);
-	bool spill_release (GdkEventButton*);
+	bool automation_click (GdkEventButton*);
 	bool drop_release (GdkEventButton*);
 	void self_delete ();
 };
 
-#endif /* __ardour_route_time_axis_h__ */
+#endif /* __ardour_vca_time_axis_h__ */

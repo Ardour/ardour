@@ -324,6 +324,9 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 	if (_automatable) {
 		_automatable->set_parameter_automation_state (_parameter, state);
 	}
+	else if (_control) {
+		_control->set_automation_state (state);
+	}
 
 	if (_view) {
 		_view->set_automation_state (state);
@@ -916,14 +919,14 @@ AutomationTimeAxisView::lines () const
 string
 AutomationTimeAxisView::state_id() const
 {
-	if (_automatable != _stripable && _control) {
-		return string("automation ") + _control->id().to_s();
-	} else if (_parameter) {
+	if (_parameter && _stripable && _automatable == _stripable) {
 		const string parameter_str = PBD::to_string (_parameter.type()) + "/" +
 		                             PBD::to_string (_parameter.id()) + "/" +
 		                             PBD::to_string (_parameter.channel ());
 
 		return string("automation ") + PBD::to_string(_stripable->id()) + " " + parameter_str;
+	} else if (_automatable != _stripable && _control) {
+		return string("automation ") + _control->id().to_s();
 	} else {
 		error << "Automation time axis has no state ID" << endmsg;
 		return "";

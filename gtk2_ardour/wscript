@@ -247,6 +247,7 @@ gtk2_ardour_sources = [
         'streamview.cc',
         'strip_silence_dialog.cc',
         'stripable_colorpicker.cc',
+        'stripable_time_axis.cc',
         'sys_ex.cc',
         'tape_region_view.cc',
         'tempo_curve.cc',

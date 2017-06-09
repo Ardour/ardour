@@ -17,6 +17,8 @@
 
 */
 
+#include <gtkmm/menu.h>
+
 #include "pbd/string_convert.h"
 
 #include "ardour/mute_control.h"
@@ -26,6 +28,7 @@
 #include "ardour/vca.h"
 
 #include "gtkmm2ext/doi.h"
+#include <gtkmm2ext/utils.h>
 
 #include "gui_thread.h"
 #include "public_editor.h"
@@ -37,50 +40,54 @@
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
 VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Canvas& canvas)
 	: SessionHandlePtr (s)
-	, TimeAxisView (s, ed, (TimeAxisView*) 0, canvas)
+	, StripableTimeAxisView (ed, s, canvas)
 	, gain_meter (s, true, 75, 14) // XXX stupid magic numbers, match sizes in RouteTimeAxisView
+	, automation_action_menu (0)
 {
 	solo_button.set_name ("solo button");
 	set_tooltip (solo_button, _("Solo slaves"));
 	solo_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::solo_release), false);
-	mute_button.unset_flags (Gtk::CAN_FOCUS);
-
-	mute_button.set_name ("mute button");
-	mute_button.set_text (_("M"));
-	set_tooltip (mute_button, _("Mute slaves"));
-	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::mute_release), false);
 	solo_button.unset_flags (Gtk::CAN_FOCUS);
 
+	mute_button.set_name ("mute button");
+	mute_button.set_text (S_("Mute|M"));
+	set_tooltip (mute_button, _("Mute slaves"));
+	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::mute_release), false);
+	mute_button.unset_flags (Gtk::CAN_FOCUS);
+
 	drop_button.set_name ("mute button");
-	drop_button.set_text (_("D"));
+	drop_button.set_text (S_("VCA|D"));
 	set_tooltip (drop_button, _("Unassign all slaves"));
 	drop_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::drop_release), false);
+	drop_button.unset_flags (Gtk::CAN_FOCUS);
 
-	spill_button.set_name ("mute button");
-	spill_button.set_text (_("V"));
-	set_tooltip (spill_button, _("Show only slaves"));
-	spill_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::spill_release), false);
+	automation_button.set_name ("route button");
+	automation_button.set_text (S_("RTAV|A"));
+	set_tooltip (automation_button, _("Automation"));
+	automation_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCATimeAxisView::automation_click), false);
+	automation_button.unset_flags (Gtk::CAN_FOCUS);
 
 	mute_button.set_tweaks(ArdourButton::TrackHeader);
 	solo_button.set_tweaks(ArdourButton::TrackHeader);
 	drop_button.set_tweaks(ArdourButton::TrackHeader);
-	spill_button.set_tweaks(ArdourButton::TrackHeader);
+	automation_button.set_tweaks(ArdourButton::TrackHeader);
 
 	controls_table.attach (mute_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (solo_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (drop_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (spill_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (automation_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	controls_table.attach (drop_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	controls_table.attach (gain_meter.get_gain_slider(), 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
 
 	mute_button.show ();
 	solo_button.show ();
 	drop_button.show ();
-	spill_button.show ();
+	automation_button.show ();
 	gain_meter.get_gain_slider().show ();
 
 	controls_ebox.set_name ("ControlMasterBaseUnselected");
@@ -136,6 +143,7 @@ VCATimeAxisView::mute_release (GdkEventButton*)
 void
 VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
 {
+	StripableTimeAxisView::set_stripable (v);
 	_vca = v;
 
 	gain_meter.set_controls (boost::shared_ptr<Route>(),
@@ -158,6 +166,13 @@ VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
 	number_label.set_text (PBD::to_string (_vca->number()));
 
 	set_height (preset_height (HeightNormal));
+
+	if (automation_child (GainAutomation) == 0) {
+		create_automation_child (GainAutomation, false);
+	}
+	if (automation_child (MuteAutomation) == 0) {
+		create_automation_child (MuteAutomation, false);
+	}
 
 	update_vca_name ();
 	set_button_names ();
@@ -269,8 +284,15 @@ VCATimeAxisView::update_track_number_visibility ()
 }
 
 bool
-VCATimeAxisView::spill_release (GdkEventButton*)
+VCATimeAxisView::automation_click (GdkEventButton* ev)
 {
+	if (ev->button != 1) {
+		return true;
+	}
+
+	conditionally_add_to_selection ();
+	build_automation_action_menu (false);
+	Gtkmm2ext::anchored_menu_popup (automation_action_menu, &automation_button, "", 1, ev->time);
 	return true;
 }
 
@@ -322,4 +344,141 @@ VCATimeAxisView::set_marked_for_display (bool yn)
 		return true; // things changed
 	}
 	return false;
+}
+
+void
+VCATimeAxisView::create_gain_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _vca->gain_control();
+	if (!c) {
+		error << "VCA has no gain automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	gain_track.reset (new AutomationTimeAxisView (_session,
+						      _vca, boost::shared_ptr<Automatable> (), c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      /*_route->amp()->describe_parameter(param)*/"Fader"));
+
+	add_automation_child (Evoral::Parameter(GainAutomation), gain_track, show);
+}
+
+void
+VCATimeAxisView::create_mute_automation_child (const Evoral::Parameter& param, bool show)
+{
+	boost::shared_ptr<AutomationControl> c = _vca->mute_control();
+	if (!c) {
+		error << "VCA has no mute automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	mute_track.reset (new AutomationTimeAxisView (_session,
+						      _vca, boost::shared_ptr<Automatable> (), c, param,
+						      _editor,
+						      *this,
+						      false,
+						      parent_canvas,
+						      /*_route->describe_parameter(param)*/ "Mute"));
+
+	add_automation_child (Evoral::Parameter(MuteAutomation), mute_track, show);
+}
+
+void
+VCATimeAxisView::create_automation_child (const Evoral::Parameter& param, bool show)
+{
+	switch (param.type()) {
+		case GainAutomation:
+			create_gain_automation_child (param, show);
+			break;
+		case MuteAutomation:
+			create_mute_automation_child (param, show);
+			break;
+		default:
+			break;
+	}
+}
+
+void
+VCATimeAxisView::build_automation_action_menu (bool for_selection)
+{
+	using namespace Menu_Helpers;
+	_main_automation_menu_map.clear ();
+	delete automation_action_menu;
+	automation_action_menu = new Menu;
+
+	MenuList& items = automation_action_menu->items();
+
+	automation_action_menu->set_name ("ArdourContextMenu");
+
+	items.push_back (MenuElem (_("Show All Automation"),
+	                           sigc::bind (sigc::mem_fun (*this, &VCATimeAxisView::show_all_automation), for_selection)));
+
+	items.push_back (MenuElem (_("Show Existing Automation"),
+	                           sigc::bind (sigc::mem_fun (*this, &VCATimeAxisView::show_existing_automation), for_selection)));
+
+	items.push_back (MenuElem (_("Hide All Automation"),
+	                           sigc::bind (sigc::mem_fun (*this, &VCATimeAxisView::hide_all_automation), for_selection)));
+
+	if (gain_track) {
+		items.push_back (CheckMenuElem (_("Fader"), sigc::mem_fun (*this, &VCATimeAxisView::update_gain_track_visibility)));
+		gain_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		gain_automation_item->set_active (string_to<bool>(gain_track->gui_property ("visible")));
+
+		_main_automation_menu_map[Evoral::Parameter(GainAutomation)] = gain_automation_item;
+	}
+
+	if (trim_track) {
+		items.push_back (CheckMenuElem (_("Trim"), sigc::mem_fun (*this, &VCATimeAxisView::update_trim_track_visibility)));
+		trim_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		trim_automation_item->set_active (string_to<bool>(trim_track->gui_property ("visible")));
+
+		_main_automation_menu_map[Evoral::Parameter(TrimAutomation)] = trim_automation_item;
+	}
+
+	if (mute_track) {
+		items.push_back (CheckMenuElem (_("Mute"), sigc::mem_fun (*this, &VCATimeAxisView::update_mute_track_visibility)));
+		mute_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
+		mute_automation_item->set_active (string_to<bool>(mute_track->gui_property ("visible")));
+
+		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
+	}
+}
+
+void
+VCATimeAxisView::show_all_automation (bool apply_to_selection)
+{
+	assert (!apply_to_selection); // VCAs can't yet be selected
+	no_redraw = true;
+
+	StripableTimeAxisView::show_all_automation ();
+
+	no_redraw = false;
+	request_redraw ();
+}
+
+void
+VCATimeAxisView::show_existing_automation (bool apply_to_selection)
+{
+	assert (!apply_to_selection); // VCAs can't yet be selected
+	no_redraw = true;
+
+	StripableTimeAxisView::show_existing_automation ();
+
+	no_redraw = false;
+	request_redraw ();
+}
+
+void
+VCATimeAxisView::hide_all_automation (bool apply_to_selection)
+{
+	assert (!apply_to_selection); // VCAs can't yet be selected
+	no_redraw = true;
+
+	StripableTimeAxisView::hide_all_automation ();
+
+	no_redraw = false;
+	request_redraw ();
 }

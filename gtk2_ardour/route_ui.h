@@ -104,8 +104,6 @@ class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandleP
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 
-	void request_redraw ();
-
 	virtual void set_color (uint32_t c);
 	Gdk::Color route_color () const;
 	void choose_color ();

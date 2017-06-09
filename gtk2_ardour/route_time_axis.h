@@ -42,7 +42,7 @@
 #include "ardour_dialog.h"
 #include "route_ui.h"
 #include "enums.h"
-#include "time_axis_view.h"
+#include "stripable_time_axis.h"
 #include "gain_meter.h"
 
 namespace ARDOUR {
@@ -72,7 +72,7 @@ class TimeSelection;
 class RouteGroupMenu;
 class ItemCounts;
 
-class RouteTimeAxisView : public RouteUI, public TimeAxisView
+class RouteTimeAxisView : public RouteUI, public StripableTimeAxisView
 {
 public:
 	RouteTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
@@ -129,12 +129,6 @@ public:
 
 	int set_state (const XMLNode&, int version);
 
-	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
-
-	typedef std::map<Evoral::Parameter, boost::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
-	const AutomationTracks& automation_tracks() const { return _automation_tracks; }
-
-	boost::shared_ptr<AutomationTimeAxisView> automation_child(Evoral::Parameter param);
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	StreamView*         view() const { return _view; }
@@ -195,7 +189,6 @@ protected:
 	void processor_automation_track_hidden (ProcessorAutomationNode*,
 	                                       boost::shared_ptr<ARDOUR::Processor>);
 
-	void automation_track_hidden (Evoral::Parameter param);
 
 	ProcessorAutomationNode*
 	find_processor_automation_node (boost::shared_ptr<ARDOUR::Processor> i, Evoral::Parameter);
@@ -206,7 +199,6 @@ protected:
 	void add_processor_automation_curve (boost::shared_ptr<ARDOUR::Processor> r, Evoral::Parameter);
 	void add_existing_processor_automation_curves (boost::weak_ptr<ARDOUR::Processor>);
 
-	void add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
 
 	void reset_processor_automation_curves ();
 
@@ -219,8 +211,6 @@ protected:
 	void blink_rec_display (bool onoff);
 
 	virtual void label_view ();
-
-	void reset_samples_per_pixel ();
 
 	virtual void build_automation_action_menu (bool);
 	virtual void append_extra_display_menu_items () {}
@@ -252,13 +242,7 @@ protected:
 	void route_color_changed ();
 	bool can_edit_name() const;
 
-	boost::shared_ptr<AutomationTimeAxisView> gain_track;
-	boost::shared_ptr<AutomationTimeAxisView> trim_track;
-	boost::shared_ptr<AutomationTimeAxisView> mute_track;
-
 	StreamView*           _view;
-	ArdourCanvas::Canvas& parent_canvas;
-	bool                  no_redraw;
 
 	Gtk::HBox   other_button_hbox;
 	Gtk::Table  button_table;
@@ -293,11 +277,6 @@ protected:
 
 	typedef std::vector<boost::shared_ptr<AutomationLine> > ProcessorAutomationCurves;
 	ProcessorAutomationCurves processor_automation_curves;
-
-	AutomationTracks _automation_tracks;
-	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
-	/** parameter -> menu item map for the main automation menu */
-	ParameterMenuMap _main_automation_menu_map;
 	/** parameter -> menu item map for the plugin automation menu */
 	ParameterMenuMap _subplugin_menu_map;
 
@@ -316,9 +295,6 @@ protected:
 	bool _ignore_set_layer_display;
 
 protected:
-	void update_gain_track_visibility ();
-	void update_trim_track_visibility ();
-	void update_mute_track_visibility ();
 	void update_pan_track_visibility ();
 
 	/** Ensure that we have the appropriate automation lanes for panners.
@@ -327,9 +303,6 @@ protected:
 	 */
 	void ensure_pan_views (bool show = true);
 
-	Gtk::CheckMenuItem* gain_automation_item;
-	Gtk::CheckMenuItem* trim_automation_item;
-	Gtk::CheckMenuItem* mute_automation_item;
 	std::list<boost::shared_ptr<AutomationTimeAxisView> > pan_tracks;
 	Gtk::CheckMenuItem* pan_automation_item;
 

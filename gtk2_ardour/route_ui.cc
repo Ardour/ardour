@@ -2181,14 +2181,6 @@ RouteUI::set_invert_sensitive (bool yn)
 	}
 }
 
-void
-RouteUI::request_redraw ()
-{
-	if (_route) {
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
-	}
-}
-
 /** The Route's gui_changed signal has been emitted */
 void
 RouteUI::route_gui_changed (PropertyChange const& what_changed)

@@ -97,10 +97,8 @@ using std::list;
 
 RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanvas::Canvas& canvas)
 	: RouteUI(sess)
-	, TimeAxisView(sess,ed,(TimeAxisView*) 0, canvas)
+	, StripableTimeAxisView(ed, sess, canvas)
 	, _view (0)
-	, parent_canvas (canvas)
-	, no_redraw (false)
 	, button_table (3, 3)
 	, route_group_button (S_("RTAV|G"))
 	, playlist_button (S_("RTAV|P"))
@@ -113,9 +111,6 @@ RouteTimeAxisView::RouteTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 	, color_mode_menu (0)
 	, gm (sess, true, 75, 14)
 	, _ignore_set_layer_display (false)
-	, gain_automation_item(NULL)
-	, trim_automation_item(NULL)
-	, mute_automation_item(NULL)
 	, pan_automation_item(NULL)
 {
 	number_label.set_name("tracknumber label");
@@ -141,6 +136,7 @@ void
 RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
+	StripableTimeAxisView::set_stripable (rt);
 
 	CANVAS_DEBUG_NAME (_canvas_display, string_compose ("main for %1", rt->name()));
 	CANVAS_DEBUG_NAME (selection_group, string_compose ("selections for %1", rt->name()));
@@ -320,7 +316,6 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	}
 
-	_editor.ZoomChanged.connect (sigc::mem_fun(*this, &RouteTimeAxisView::reset_samples_per_pixel));
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &RouteTimeAxisView::color_handler));
 
 	PropertyList* plist = new PropertyList();
@@ -1093,12 +1088,6 @@ RouteTimeAxisView::route_color_changed ()
 }
 
 void
-RouteTimeAxisView::reset_samples_per_pixel ()
-{
-	set_samples_per_pixel (_editor.get_current_zoom());
-}
-
-void
 RouteTimeAxisView::set_samples_per_pixel (double fpp)
 {
 	double speed = 1.0;
@@ -1111,7 +1100,7 @@ RouteTimeAxisView::set_samples_per_pixel (double fpp)
 		_view->set_samples_per_pixel (fpp * speed);
 	}
 
-	TimeAxisView::set_samples_per_pixel (fpp * speed);
+	StripableTimeAxisView::set_samples_per_pixel (fpp * speed);
 }
 
 void
@@ -1881,79 +1870,6 @@ RouteTimeAxisView::toggle_automation_track (const Evoral::Parameter& param)
 }
 
 void
-RouteTimeAxisView::automation_track_hidden (Evoral::Parameter param)
-{
-	boost::shared_ptr<AutomationTimeAxisView> track = automation_child (param);
-
-	if (!track) {
-		return;
-	}
-
-	Gtk::CheckMenuItem* menu = automation_child_menu_item (param);
-
-	if (menu && !_hidden) {
-		ignore_toggle = true;
-		menu->set_active (false);
-		ignore_toggle = false;
-	}
-
-	if (_route && !no_redraw) {
-		request_redraw ();
-	}
-}
-
-void
-RouteTimeAxisView::update_gain_track_visibility ()
-{
-	bool const showit = gain_automation_item->get_active();
-
-	bool visible;
-	if (gain_track->get_gui_property ("visible", visible) && visible != showit) {
-		gain_track->set_marked_for_display (showit);
-
-		/* now trigger a redisplay */
-
-		if (!no_redraw) {
-			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-		}
-	}
-}
-
-void
-RouteTimeAxisView::update_trim_track_visibility ()
-{
-	bool const showit = trim_automation_item->get_active();
-
-	bool visible;
-	if (trim_track->get_gui_property ("visible", visible) && visible != showit) {
-		trim_track->set_marked_for_display (showit);
-
-		/* now trigger a redisplay */
-
-		if (!no_redraw) {
-			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-		}
-	}
-}
-
-void
-RouteTimeAxisView::update_mute_track_visibility ()
-{
-	bool const showit = mute_automation_item->get_active();
-
-	bool visible;
-	if (mute_track->get_gui_property ("visible", visible) && visible != showit) {
-		mute_track->set_marked_for_display (showit);
-
-		/* now trigger a redisplay */
-
-		if (!no_redraw) {
-			 _route->gui_changed (X_("visible_tracks"), (void *) 0); /* EMIT_SIGNAL */
-		}
-	}
-}
-
-void
 RouteTimeAxisView::update_pan_track_visibility ()
 {
 	bool const showit = pan_automation_item->get_active();
@@ -2034,18 +1950,7 @@ RouteTimeAxisView::show_all_automation (bool apply_to_selection)
 	} else {
 		no_redraw = true;
 
-		/* Show our automation */
-
-		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_marked_for_display (true);
-
-			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-
-			if (menu) {
-				menu->set_active(true);
-			}
-		}
-
+		StripableTimeAxisView::show_all_automation ();
 
 		/* Show processor automation */
 
@@ -2075,21 +1980,9 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 	} else {
 		no_redraw = true;
 
-		/* Show our automation */
-
-		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			if (i->second->has_automation()) {
-				i->second->set_marked_for_display (true);
-
-				Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-				if (menu) {
-					menu->set_active(true);
-				}
-			}
-		}
+		StripableTimeAxisView::show_existing_automation ();
 
 		/* Show processor automation */
-
 		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 				if ((*i)->processor->control((*ii)->what)->list()->size() > 0) {
@@ -2099,7 +1992,6 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 		}
 
 		no_redraw = false;
-
 		request_redraw ();
 	}
 }
@@ -2111,21 +2003,9 @@ RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::hide_all_automation, _1, false));
 	} else {
 		no_redraw = true;
-
-		/* Hide our automation */
-
-		for (AutomationTracks::iterator i = _automation_tracks.begin(); i != _automation_tracks.end(); ++i) {
-			i->second->set_marked_for_display (false);
-
-			Gtk::CheckMenuItem* menu = automation_child_menu_item (i->first);
-
-			if (menu) {
-				menu->set_active (false);
-			}
-		}
+		StripableTimeAxisView::hide_all_automation ();
 
 		/* Hide processor automation */
-
 		for (list<ProcessorAutomationInfo*>::iterator i = processor_automation.begin(); i != processor_automation.end(); ++i) {
 			for (vector<ProcessorAutomationNode*>::iterator ii = (*i)->lines.begin(); ii != (*i)->lines.end(); ++ii) {
 				(*ii)->menu_item->set_active (false);
@@ -2136,7 +2016,6 @@ RouteTimeAxisView::hide_all_automation (bool apply_to_selection)
 		request_redraw ();
 	}
 }
-
 
 void
 RouteTimeAxisView::region_view_added (RegionView* rv)
@@ -2268,41 +2147,6 @@ RouteTimeAxisView::add_existing_processor_automation_curves (boost::weak_ptr<Pro
 		} else {
 			add_processor_automation_curve (processor, param);
 		}
-	}
-}
-
-void
-RouteTimeAxisView::add_automation_child (Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show)
-{
-	using namespace Menu_Helpers;
-
-	add_child (track);
-
-	track->Hiding.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::automation_track_hidden), param));
-
-	_automation_tracks[param] = track;
-
-	/* existing state overrides "show" argument */
-	bool visible;
-	if (track->get_gui_property ("visible", visible)) {
-		show = visible;
-	}
-
-	/* this might or might not change the visibility status, so don't rely on it */
-	track->set_marked_for_display (show);
-
-	if (show && !no_redraw) {
-		request_redraw ();
-	}
-
-	if (!ARDOUR::parameter_is_midi((AutomationType)param.type())) {
-		/* MIDI-related parameters are always in the menu, there's no
-		   reason to rebuild the menu just because we added a automation
-		   lane for one of them. But if we add a non-MIDI automation
-		   lane, then we need to invalidate the display menu.
-		*/
-		delete display_menu;
-		display_menu = 0;
 	}
 }
 
@@ -2543,19 +2387,6 @@ RouteTimeAxisView::layer_display () const
 	return Overlaid;
 }
 
-
-
-boost::shared_ptr<AutomationTimeAxisView>
-RouteTimeAxisView::automation_child(Evoral::Parameter param)
-{
-	AutomationTracks::iterator i = _automation_tracks.find(param);
-	if (i != _automation_tracks.end()) {
-		return i->second;
-	} else {
-		return boost::shared_ptr<AutomationTimeAxisView>();
-	}
-}
-
 void
 RouteTimeAxisView::fast_update ()
 {
@@ -2761,12 +2592,12 @@ RouteTimeAxisView::set_button_names ()
 Gtk::CheckMenuItem*
 RouteTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 {
-	ParameterMenuMap::iterator i = _main_automation_menu_map.find (param);
-	if (i != _main_automation_menu_map.end()) {
-		return i->second;
+	Gtk::CheckMenuItem* rv = StripableTimeAxisView::automation_child_menu_item (param);
+	if (rv) {
+		return rv;
 	}
 
-	i = _subplugin_menu_map.find (param);
+	ParameterMenuMap::iterator i = _subplugin_menu_map.find (param);
 	if (i != _subplugin_menu_map.end()) {
 		return i->second;
 	}
