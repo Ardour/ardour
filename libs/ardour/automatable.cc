@@ -542,12 +542,6 @@ Automatable::clear_controls ()
 	ControlSet::clear_controls ();
 }
 
-string
-Automatable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
-}
-
 bool
 Automatable::find_next_event (double now, double end, Evoral::ControlEvent& next_event, bool only_active) const
 {

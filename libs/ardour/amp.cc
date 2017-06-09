@@ -411,18 +411,6 @@ Amp::visible() const
 	return true;
 }
 
-std::string
-Amp::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	if (ac == _gain_control) {
-		char buffer[32];
-		snprintf (buffer, sizeof (buffer), _("%.2fdB"), ac->internal_to_user (ac->get_value ()));
-		return buffer;
-	}
-
-	return Automatable::value_as_string (ac);
-}
-
 /** Sets up the buffer that setup_gain_automation and ::run will use for
  *  gain automationc curves.  Must be called before setup_gain_automation,
  *  and must be called with process lock held.
