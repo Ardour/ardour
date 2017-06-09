@@ -28,6 +28,7 @@
 #include "ardour/panner.h"
 #include "ardour/pan_controllable.h"
 #include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"
 
@@ -282,5 +283,5 @@ Pannable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
 		return p->value_as_string (ac);
 	}
 
-	return Automatable::value_as_string (ac);
+	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
 }

@@ -116,6 +116,8 @@ class LIBARDOUR_API AutomationControl
 	double internal_to_interface (double i) const;
 	double interface_to_internal (double i) const;
 
+	virtual std::string get_user_string() const;
+
 	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }

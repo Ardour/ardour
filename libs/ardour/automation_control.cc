@@ -31,6 +31,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
 #include "ardour/selection.h"
+#include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"
 
@@ -336,6 +337,12 @@ AutomationControl::interface_to_internal (double val) const
 	if (val > upper()) val = upper();
 
 	return val;
+}
+
+std::string
+AutomationControl::get_user_string () const
+{
+	return ARDOUR::value_as_string (_desc, get_value());
 }
 
 void
