@@ -32,7 +32,8 @@
 #include "ardour/control_protocol_manager.h"
 
 #include "ardour/search_paths.h"
-
+#include "ardour/selection.h"
+#include "ardour/session.h"
 
 using namespace ARDOUR;
 using namespace std;
@@ -87,7 +88,24 @@ ControlProtocolManager::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+
+		/* get selection info and set it before instantiating any
+		 * control protocols.
+		 */
+
+		CoreSelection::StripableAutomationControls sac;
+		_session->selection().get_stripables (sac);
+
+		for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
+			if ((*i).stripable) {
+				cerr << "First selected being set to " << (*i).stripable->name() << endl;
+				ControlProtocol::set_first_selected_stripable ((*i).stripable);
+				break;
+			}
+		}
+
 		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
+
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
