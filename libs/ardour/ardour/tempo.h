@@ -525,6 +525,8 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	void fix_legacy_session();
 	void fix_legacy_end_session();
 
+	framepos_t music_origin ();
+
 private:
 	/* prevent copy construction */
 	TempoMap (TempoMap const&);

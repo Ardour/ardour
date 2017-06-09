@@ -1882,7 +1882,7 @@ TempoMap::quarter_note_at_tempo (const Tempo& tempo) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return pulse_at_tempo_locked (_metrics, tempo) * 4.0;;
+	return pulse_at_tempo_locked (_metrics, tempo) * 4.0;
 }
 
 /** Returns the whole-note pulse corresponding to the supplied  BBT (meter-based) beat.
@@ -3780,6 +3780,16 @@ TempoMap::gui_twist_tempi (TempoSection* ts, const Tempo& bpm, const framepos_t 
 
 	return can_solve;
 }
+
+/** Returns the frame position of the musical position zero */
+framepos_t
+TempoMap::music_origin ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (lock);
+
+	return first_tempo().frame();
+}
+
 /** Returns the exact bbt-based beat corresponding to the bar, beat or quarter note subdivision nearest to
  * the supplied frame, possibly returning a negative value.
  *
