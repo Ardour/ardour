@@ -183,19 +183,26 @@ int
 Session::backend_sync_callback (TransportState state, framepos_t pos)
 {
 	bool slave = synced_to_engine();
+	// cerr << "Session::backend_sync_callback() _transport_frame: " << _transport_frame << " pos: " << pos << " audible_frame: " << audible_frame() << endl;
+
+	if (slave) {
+		// cerr << "Session::backend_sync_callback() emitting Located()" << endl;
+		Located (); /* EMIT SIGNAL */
+	}
 
 	switch (state) {
 	case TransportStopped:
 		if (slave && _transport_frame != pos && post_transport_work() == 0) {
 			request_locate (pos, false);
-			// cerr << "SYNC: stopped, locate to " << pos->frame << " from " << _transport_frame << endl;
+			// cerr << "SYNC: stopped, locate to " << pos << " from " << _transport_frame << endl;
 			return false;
 		} else {
+			// cerr << "SYNC: stopped, nothing to do" << endl;
 			return true;
 		}
 
 	case TransportStarting:
-		// cerr << "SYNC: starting @ " << pos->frame << " a@ " << _transport_frame << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_frame == pos->frame) << endl;
+		// cerr << "SYNC: starting @ " << pos << " a@ " << _transport_frame << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_frame == pos) << endl;
 		if (slave) {
 			return _transport_frame == pos && post_transport_work() == 0;
 		} else {
