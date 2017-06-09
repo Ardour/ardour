@@ -275,7 +275,7 @@ static void linear_svf_set_peq(struct linear_svf *self, float gdb, float sample_
 	double A = pow(10.0, gdb/40.0);
 
 	self->g = tan(M_PI * (f0 / sr));
-	self->k = 1.0 / q;
+	self->k = 1.0 / (q * A);
 
 	self->a[0] = 1.0 / (1.0 + self->g * (self->g + self->k));
 	self->a[1] = self->g * self->a[0];
