@@ -32,8 +32,7 @@ class ArdourSpinner : public Gtk::Alignment
 	public:
 		ArdourSpinner (
 				boost::shared_ptr<ARDOUR::AutomationControl>,
-				Gtk::Adjustment* adj,
-				boost::shared_ptr<ARDOUR::Automatable>);
+				Gtk::Adjustment* adj);
 
 		virtual ~ArdourSpinner ();
 
@@ -65,7 +64,6 @@ class ArdourSpinner : public Gtk::Alignment
 		bool             _spin_ignore;
 
 		boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
-		boost::shared_ptr<ARDOUR::Automatable>       _printer;
 
 };
 

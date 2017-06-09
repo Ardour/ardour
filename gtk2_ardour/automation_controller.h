@@ -39,26 +39,22 @@ namespace ARDOUR {
 	class Session;
 	class AutomationList;
 	class AutomationControl;
-	class Automatable;
 }
 
 class AutomationBarController : public Gtkmm2ext::BarController {
 public:
-	AutomationBarController(boost::shared_ptr<ARDOUR::Automatable>       printer,
-	                        boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	AutomationBarController(boost::shared_ptr<ARDOUR::AutomationControl> ac,
 	                        Gtk::Adjustment*                             adj);
 	~AutomationBarController();
 private:
 	std::string get_label (double&);
-	boost::shared_ptr<ARDOUR::Automatable>       _printer;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 };
 
 /** A BarController which displays the value and allows control of an AutomationControl */
 class AutomationController : public Gtk::Alignment {
 public:
-	static boost::shared_ptr<AutomationController> create(
-		boost::shared_ptr<ARDOUR::Automatable>       parent,
+	static boost::shared_ptr<AutomationController> create (
 		const Evoral::Parameter&                     param,
 		const ARDOUR::ParameterDescriptor&           desc,
 		boost::shared_ptr<ARDOUR::AutomationControl> ac,
@@ -79,8 +75,7 @@ public:
 	void stop_updating ();
 
 private:
-	AutomationController (boost::shared_ptr<ARDOUR::Automatable>       printer,
-	                      boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac,
 	                      Gtk::Adjustment*                             adj,
 	                      bool                                         use_knob);
 
@@ -95,7 +90,6 @@ private:
 	bool on_button_release(GdkEventButton* ev);
 
 	Gtk::Widget*                                 _widget;
-	boost::shared_ptr<ARDOUR::Automatable>       _printer;
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;

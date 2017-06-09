@@ -485,12 +485,7 @@ ArdourKnob::controllable_changed (bool force_update)
 	_val = val;
 	if (!_tooltip_prefix.empty()) {
 		boost::shared_ptr<ARDOUR::AutomationControl> ac = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (c);
-		if (_printer && ac) {
-
-			_tooltip.set_tip (_tooltip_prefix + _printer->value_as_string (ac));
-		} else {
-			_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
-		}
+		_tooltip.set_tip (_tooltip_prefix + c->get_user_string());
 	}
 	set_dirty();
 }

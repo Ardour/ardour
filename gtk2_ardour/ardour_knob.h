@@ -86,8 +86,6 @@ public:
 	bool on_scroll_event (GdkEventScroll* ev);
 	bool on_motion_notify_event (GdkEventMotion *ev) ;
 
-	void set_printer (boost::shared_ptr<ARDOUR::Automatable> p) { _printer = p; controllable_changed (true); }
-
 	void color_handler ();
 
   protected:
@@ -108,7 +106,6 @@ public:
   private:
 	Element _elements;
 	BindingProxy binding_proxy;
-	boost::shared_ptr<ARDOUR::Automatable> _printer;
 
 	bool _hovering;
 	float _grabbed_x;

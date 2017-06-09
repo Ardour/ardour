@@ -740,7 +740,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 * destructor, and manage() reports object hierarchy
 			 * ambiguity.
 			 */
-			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
+			control_ui->controller = AutomationController::create(mcontrol->parameter(), desc, mcontrol, use_knob);
 
 			/* Control UI's don't need the rapid timer workaround */
 			control_ui->controller->stop_updating ();
@@ -773,7 +773,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			}
 
 			if (!desc.integer_step && !desc.toggled && use_knob) {
-				control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj, insert));
+				control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj));
 			}
 
 			adj->set_value (mcontrol->internal_to_interface(value));
@@ -797,7 +797,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else if (control_ui->spin_box) {
 				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
 				knob->set_tooltip_prefix (desc.label + ": ");
-				knob->set_printer (insert);
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
 				control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);

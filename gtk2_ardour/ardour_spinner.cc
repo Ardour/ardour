@@ -29,8 +29,7 @@ using namespace ARDOUR;
 
 ArdourSpinner::ArdourSpinner (
 		boost::shared_ptr<ARDOUR::AutomationControl> c,
-		Gtk::Adjustment* adj,
-		boost::shared_ptr<ARDOUR::Automatable> p)
+		Gtk::Adjustment* adj)
 	: _btn (ArdourButton::Text)
 	, _ctrl_adj (adj)
 	, _spin_adj (0, c->lower (), c->upper (), .1, .01)
@@ -40,7 +39,6 @@ ArdourSpinner::ArdourSpinner (
 	, _ctrl_ignore (false)
 	, _spin_ignore (false)
 	, _controllable (c)
-	, _printer (p)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	set (.5, .5, 1.0, 1.0);
@@ -204,10 +202,6 @@ ArdourSpinner::spin_adjusted ()
 void
 ArdourSpinner::controllable_changed ()
 {
-	if (_printer) {
-		_btn.set_text (_printer->value_as_string (_controllable));
-	} else {
-		_btn.set_text (_controllable->get_user_string());
-	}
+	_btn.set_text (_controllable->get_user_string());
 	_btn.set_dirty();
 }

@@ -122,8 +122,8 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 		have_name_font = true;
 	}
 
-	if (_automatable && _control) {
-		_controller = AutomationController::create (_automatable, _control->parameter(), _control->desc(), _control);
+	if (_control) {
+		_controller = AutomationController::create (_control->parameter(), _control->desc(), _control);
 	}
 
 	const std::string fill_color_name = (dynamic_cast<MidiTimeAxisView*>(&parent)

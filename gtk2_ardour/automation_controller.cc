@@ -44,11 +44,9 @@ using namespace Gtk;
 using PBD::Controllable;
 
 AutomationBarController::AutomationBarController (
-		boost::shared_ptr<Automatable>       printer,
 		boost::shared_ptr<AutomationControl> ac,
 		Adjustment*                          adj)
 	: Gtkmm2ext::BarController(*adj, ac)
-	, _printer(printer)
 	, _controllable(ac)
 {
 }
@@ -56,26 +54,22 @@ AutomationBarController::AutomationBarController (
 std::string
 AutomationBarController::get_label (double& xpos)
 {
-        xpos = 0.5;
-        return _printer->value_as_string (_controllable);
+	xpos = 0.5;
+	return _controllable->get_user_string();
 }
 
 AutomationBarController::~AutomationBarController()
 {
 }
 
-AutomationController::AutomationController(boost::shared_ptr<Automatable>       printer,
-                                           boost::shared_ptr<AutomationControl> ac,
+AutomationController::AutomationController(boost::shared_ptr<AutomationControl> ac,
                                            Adjustment*                          adj,
                                            bool                                 use_knob)
 	: _widget(NULL)
-	, _printer (printer)
 	, _controllable(ac)
 	, _adjustment(adj)
 	, _ignore_change(false)
 {
-	assert (_printer);
-
 	if (ac->toggled()) {
 		ArdourButton* but = manage(new ArdourButton());
 
@@ -104,7 +98,7 @@ AutomationController::AutomationController(boost::shared_ptr<Automatable>       
 		knob->set_name("processor control knob");
 		_widget = knob;
 	} else {
-		AutomationBarController* bar = manage(new AutomationBarController(_printer, ac, adj));
+		AutomationBarController* bar = manage(new AutomationBarController(ac, adj));
 
 		bar->set_name(X_("ProcessorControlSlider"));
 		bar->StartGesture.connect(
@@ -134,8 +128,7 @@ AutomationController::~AutomationController()
 }
 
 boost::shared_ptr<AutomationController>
-AutomationController::create(boost::shared_ptr<Automatable>       printer,
-                             const Evoral::Parameter&             param,
+AutomationController::create(const Evoral::Parameter&             param,
                              const ParameterDescriptor&           desc,
                              boost::shared_ptr<AutomationControl> ac,
                              bool use_knob)
@@ -151,7 +144,7 @@ AutomationController::create(boost::shared_ptr<Automatable>       printer,
 
 	assert (ac);
 	assert(ac->parameter() == param);
-	return boost::shared_ptr<AutomationController>(new AutomationController(printer, ac, adjustment, use_knob));
+	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment, use_knob));
 }
 
 void
