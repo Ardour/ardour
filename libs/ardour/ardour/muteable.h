@@ -29,7 +29,7 @@ class MuteMaster;
 class Session;
 
 class Muteable {
-    public:
+public:
 	Muteable (Session&, std::string const &name);
 	virtual ~Muteable() {}
 
@@ -43,7 +43,7 @@ class Muteable {
 
 	PBD::Signal0<void> mute_points_changed;
 
-    protected:
+protected:
 	boost::shared_ptr<MuteMaster> _mute_master;
 };
 

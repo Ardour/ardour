@@ -35,7 +35,7 @@ class Muteable;
 
 class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 {
-  public:
+public:
 	MuteControl (Session& session, std::string const& name, Muteable&);
 
 	double get_value () const;
@@ -70,14 +70,14 @@ class LIBARDOUR_API MuteControl : public SlavableAutomationControl
 
 	void automation_run (framepos_t start, pframes_t nframes);
 
-  protected:
+protected:
 	void master_changed (bool, PBD::Controllable::GroupControlDisposition, boost::shared_ptr<AutomationControl>);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
 	void pre_remove_master (boost::shared_ptr<AutomationControl>);
 	void post_add_master (boost::shared_ptr<AutomationControl>);
 
-  private:
+private:
 	Muteable& _muteable;
 };
 

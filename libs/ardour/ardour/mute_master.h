@@ -37,7 +37,7 @@ class Muteable;
 
 class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 {
-  public:
+public:
 	/** deliveries to mute when the channel is "muted" */
 	enum MutePoint {
 		PreFader  = 0x1, ///< mute all pre-fader sends
@@ -79,7 +79,7 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 	int set_state(const XMLNode&, int version);
 	static const std::string xml_node_name;
 
-  private:
+private:
 	Muteable* _muteable;
 	MutePoint _mute_point;
 	bool      _muted_by_self;

@@ -1,5 +1,4 @@
 /*
-
     Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -44,9 +43,9 @@ MuteMaster::MuteMaster (Session& s, Muteable& m, const std::string&)
 	: SessionHandleRef (s)
 	, _muteable (&m)
 	, _mute_point (MutePoint (0))
-        , _muted_by_self (false)
-        , _soloed_by_self (false)
-        , _soloed_by_others (false)
+	, _muted_by_self (false)
+	, _soloed_by_self (false)
+	, _soloed_by_others (false)
 	, _muted_by_masters (0)
 {
 
@@ -88,56 +87,56 @@ MuteMaster::unmute_at (MutePoint mp)
 gain_t
 MuteMaster::mute_gain_at (MutePoint mp) const
 {
-        gain_t gain;
+	gain_t gain;
 
-        if (Config->get_solo_mute_override()) {
-                if (_soloed_by_self) {
-                        gain = GAIN_COEFF_UNITY;
-                } else if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
-                        gain = GAIN_COEFF_ZERO;
-                } else {
-	                if (!_soloed_by_others && muted_by_others_soloing_at (mp)) {
-                                gain = Config->get_solo_mute_gain ();
-                        } else {
-                                gain = GAIN_COEFF_UNITY;
-                        }
-                }
-        } else {
-	        if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
-                        gain = GAIN_COEFF_ZERO;
-                } else if (_soloed_by_self || _soloed_by_others) {
-                        gain = GAIN_COEFF_UNITY;
-                } else {
-                        if (muted_by_others_soloing_at (mp)) {
-                                gain = Config->get_solo_mute_gain ();
-                        } else {
-                                gain = GAIN_COEFF_UNITY;
-                        }
-                }
-        }
+	if (Config->get_solo_mute_override()) {
+		if (_soloed_by_self) {
+			gain = GAIN_COEFF_UNITY;
+		} else if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
+			gain = GAIN_COEFF_ZERO;
+		} else {
+			if (!_soloed_by_others && muted_by_others_soloing_at (mp)) {
+				gain = Config->get_solo_mute_gain ();
+			} else {
+				gain = GAIN_COEFF_UNITY;
+			}
+		}
+	} else {
+		if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
+			gain = GAIN_COEFF_ZERO;
+		} else if (_soloed_by_self || _soloed_by_others) {
+			gain = GAIN_COEFF_UNITY;
+		} else {
+			if (muted_by_others_soloing_at (mp)) {
+				gain = Config->get_solo_mute_gain ();
+			} else {
+				gain = GAIN_COEFF_UNITY;
+			}
+		}
+	}
 
-        return gain;
+	return gain;
 }
 
 void
 MuteMaster::set_mute_points (const std::string& mute_point)
 {
-        MutePoint old = _mute_point;
+	MutePoint old = _mute_point;
 
 	_mute_point = (MutePoint) string_2_enum (mute_point, _mute_point);
 
-        if (old != _mute_point) {
-                MutePointChanged(); /* EMIT SIGNAL */
-        }
+	if (old != _mute_point) {
+		MutePointChanged(); /* EMIT SIGNAL */
+	}
 }
 
 void
 MuteMaster::set_mute_points (MutePoint mp)
 {
-        if (_mute_point != mp) {
-                _mute_point = mp;
-                MutePointChanged (); /* EMIT SIGNAL */
-        }
+	if (_mute_point != mp) {
+		_mute_point = mp;
+		MutePointChanged (); /* EMIT SIGNAL */
+	}
 }
 
 int

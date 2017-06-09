@@ -53,7 +53,7 @@ class LIBARDOUR_API AutomationControl
 	, public boost::enable_shared_from_this<AutomationControl>
 	, public ControlGroupMember
 {
-    public:
+public:
 	AutomationControl(ARDOUR::Session&,
 	                  const Evoral::Parameter&                  parameter,
 	                  const ParameterDescriptor&                desc,
@@ -123,7 +123,7 @@ class LIBARDOUR_API AutomationControl
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
-  protected:
+protected:
 	ARDOUR::Session& _session;
 	boost::shared_ptr<ControlGroup> _group;
 
@@ -147,7 +147,7 @@ class LIBARDOUR_API AutomationControl
 	/* this will be invoked in turn on behalf of the group or the control by itself */
 	virtual void do_pre_realtime_queue_stuff (double new_value) {}
 
-  private:
+private:
 	/* I am unclear on why we have to make ControlGroup a friend in order
 	   to get access to the ::set_group() method when it is already
 	   declared to be a friend in ControlGroupMember. Oh well.
