@@ -71,7 +71,7 @@ public:
 	void automation_run (framepos_t start, pframes_t nframes);
 
 protected:
-	void master_changed (bool, PBD::Controllable::GroupControlDisposition, boost::shared_ptr<AutomationControl>);
+	bool handle_master_change (boost::shared_ptr<AutomationControl>);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
 	void pre_remove_master (boost::shared_ptr<AutomationControl>);

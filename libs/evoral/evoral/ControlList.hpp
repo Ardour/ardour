@@ -225,7 +225,7 @@ public:
 	 * @param ok boolean reference if returned value is valid
 	 * @returns parameter value
 	 */
-	double rt_safe_eval (double where, bool& ok) {
+	double rt_safe_eval (double where, bool& ok) const {
 
 		Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 

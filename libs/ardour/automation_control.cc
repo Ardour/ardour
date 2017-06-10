@@ -207,6 +207,7 @@ AutomationControl::set_automation_state (AutoState as)
 
 		alist()->set_automation_state (as);
 		if (_desc.toggled) {
+			Changed (false, Controllable::NoGroup); // notify slaves, update boolean masters
 			return;  // No watch for boolean automation
 		}
 

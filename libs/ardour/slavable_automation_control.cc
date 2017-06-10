@@ -312,8 +312,16 @@ SlavableAutomationControl::update_boolean_masters_records (boost::shared_ptr<Aut
 void
 SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
 {
+	Glib::Threads::RWLock::ReaderLock lm (master_lock, Glib::Threads::TRY_LOCK);
+	if (!lm.locked ()) {
+		/* boolean_automation_run_locked () special case */
+		return;
+	}
+	bool send_signal = handle_master_change (m);
 	update_boolean_masters_records (m);
-	Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	if (send_signal) {
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	}
 }
 
 void
@@ -448,6 +456,66 @@ SlavableAutomationControl::find_next_event_locked (double now, double end, Evora
 	}
 
 	return rv;
+}
+
+bool
+SlavableAutomationControl::handle_master_change (boost::shared_ptr<AutomationControl>)
+{
+	return true; // emit Changed
+}
+
+bool
+SlavableAutomationControl::boolean_automation_run_locked (framepos_t start, pframes_t len)
+{
+	bool rv = false;
+	if (!_desc.toggled) {
+		return false;
+	}
+	for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+		boost::shared_ptr<AutomationControl> ac (mr->second.master());
+		if (!ac->automation_playback ()) {
+			continue;
+		}
+		if (!ac->toggled ()) {
+			continue;
+		}
+		boost::shared_ptr<SlavableAutomationControl> sc = boost::dynamic_pointer_cast<MuteControl>(ac);
+		if (sc) {
+			rv |= sc->boolean_automation_run (start, len);
+		}
+		boost::shared_ptr<const Evoral::ControlList> alist (ac->list());
+		bool valid = false;
+		const bool yn = alist->rt_safe_eval (start, valid) >= 0.5;
+		if (!valid) {
+			continue;
+		}
+		/* ideally we'd call just master_changed() which calls update_boolean_masters_records()
+		 * but that takes the master_lock, which is already locked */
+		if (mr->second.yn() != yn) {
+			rv |= handle_master_change (ac);
+			mr->second.set_yn (yn);
+			/* notify the GUI, without recursion:
+			 * master_changed() above will ignore the change if the lock is held.
+			 */
+			ac->set_value_unchecked (yn ? 1. : 0.);
+			ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		}
+	}
+	return rv;
+}
+
+bool
+SlavableAutomationControl::boolean_automation_run (framepos_t start, pframes_t len)
+{
+	bool change = false;
+	{
+		 Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		 change = boolean_automation_run_locked (start, len);
+	}
+	if (change) {
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	}
+	return change;
 }
 
 bool

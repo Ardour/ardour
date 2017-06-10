@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 {
-    public:
+public:
 	SlavableAutomationControl(ARDOUR::Session&,
 	                          const Evoral::Parameter&                  parameter,
 	                          const ParameterDescriptor&                desc,
@@ -80,10 +80,10 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 
 	bool find_next_event_locked (double now, double end, Evoral::ControlEvent& next_event) const;
 
-    protected:
+protected:
 
 	class MasterRecord {
-          public:
+	public:
 		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
 			: _master (gc)
 			, _yn (false)
@@ -101,7 +101,7 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 
 		PBD::ScopedConnection connection;
 
-         private:
+  private:
 		boost::shared_ptr<AutomationControl> _master;
 		/* holds most recently seen master value for boolean/toggle controls */
 		bool   _yn;
@@ -116,6 +116,10 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	double get_value_locked() const;
 	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
+
+	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
+	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);
+	bool boolean_automation_run (framepos_t start, pframes_t len);
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
 	virtual double get_masters_value_locked () const;

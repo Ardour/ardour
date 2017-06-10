@@ -52,7 +52,7 @@ MuteControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 
 		if (!muted_by_self() && !get_boolean_masters()) {
 			_muteable.mute_master()->set_muted_by_masters (true);
-			Changed (false, Controllable::NoGroup);
+			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -67,9 +67,10 @@ MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
 		return;
 	}
 
-	if (m->get_value()) {
-		if (!muted_by_self() && (get_boolean_masters() == 1)) {
-			Changed (false, Controllable::NoGroup);
+	if (m->get_value() && get_boolean_masters() == 1) {
+		_muteable.mute_master()->set_muted_by_masters (false);
+		if (!muted_by_self()) {
+			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -89,31 +90,33 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 	SlavableAutomationControl::actually_set_value (val, gcd);
 }
 
-void
-MuteControl::master_changed (bool self_change, Controllable::GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
+bool
+MuteControl::handle_master_change (boost::shared_ptr<AutomationControl> m)
 {
 	bool send_signal = false;
 	boost::shared_ptr<MuteControl> mc = boost::dynamic_pointer_cast<MuteControl> (m);
+	if (!mc) {
+		return false;
+	}
 
 	if (m->get_value()) {
 		/* this master is now enabled */
-		if (!muted_by_self() && get_boolean_masters() == 0) {
+		if (get_boolean_masters() == 0) {
 			_muteable.mute_master()->set_muted_by_masters (true);
-			send_signal = true;
+			if (!muted_by_self()) {
+				send_signal = true;
+			}
 		}
 	} else {
 		/* this master is disabled and there was only 1 enabled before */
-		if (!muted_by_self() && get_boolean_masters() == 1) {
+		if (get_boolean_masters() == 1) {
 			_muteable.mute_master()->set_muted_by_masters (false);
-			send_signal = true;
+			if (!muted_by_self()) {
+				send_signal = true;
+			}
 		}
 	}
-
-	update_boolean_masters_records (m);
-
-	if (send_signal) {
-		Changed (false, Controllable::NoGroup);
-	}
+	return send_signal;
 }
 
 double
@@ -177,19 +180,30 @@ MuteControl::muted_by_others_soloing () const
 }
 
 void
-MuteControl::automation_run (framepos_t start, pframes_t)
+MuteControl::automation_run (framepos_t start, pframes_t len)
 {
-	if (!list() || !automation_playback()) {
+	boolean_automation_run (start, len);
+
+	if (muted_by_masters ()) {
+		// already muted, no need to check further
 		return;
 	}
 
-	bool        valid = false;
-	const float mute  = list()->rt_safe_eval (start, valid);
+	bool valid = false;
+	bool mute  = false;
 
-	if (mute >= 0.5 && !muted()) {
+	if (list() && automation_playback()) {
+		mute = list()->rt_safe_eval (start, valid) >= 0.5;
+	}
+
+	if (!valid) {
+		return;
+	}
+
+	if (mute && !muted()) {
 		set_value_unchecked (1.0);  // mute
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
-	} else if (mute < 0.5 && muted ()) {
+	} else if (!mute && muted()) {
 		set_value_unchecked (0.0);  // unmute
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 	}
