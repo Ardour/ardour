@@ -105,5 +105,11 @@ GainControl::inc_gain (gain_t factor)
 bool
 GainControl::get_masters_curve_locked (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
 {
+	if (_masters.empty()) {
+		return list()->curve().rt_safe_get_vector (start, end, vec, veclen);
+	}
+	for (framecnt_t i = 0; i < veclen; ++i) {
+		vec[i] = 1.f;
+	}
 	return SlavableAutomationControl::masters_curve_multiply (start, end, vec, veclen);
 }

@@ -27,6 +27,7 @@
 #include "evoral/Curve.hpp"
 
 #include "ardour/audioengine.h"
+#include "ardour/runtime_functions.h"
 #include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
 
@@ -127,40 +128,24 @@ SlavableAutomationControl::get_masters_curve_locked (framepos_t, framepos_t, flo
 bool
 SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
 {
-	bool rv = list()->curve().rt_safe_get_vector (start, end, vec, veclen);
+	gain_t* scratch = _session.scratch_automation_buffer ();
+	bool rv = list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
+	if (rv) {
+		for (framecnt_t i = 0; i < veclen; ++i) {
+			vec[i] *= scratch[i];
+		}
+	} else {
+		apply_gain_to_buffer (vec, veclen, Control::get_double ());
+	}
 	if (_masters.empty()) {
 		return rv;
 	}
-	gain_t* scratch = _session.scratch_automation_buffer ();
-	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-		boost::shared_ptr<AutomationControl> ac (mr->second.master());
-		bool got_curve;
 
+	for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 		boost::shared_ptr<SlavableAutomationControl> sc
-			= boost::dynamic_pointer_cast<SlavableAutomationControl>(ac);
-		if (sc) {
-			got_curve = sc->get_masters_curve_locked (start, end, scratch, veclen);
-		} else {
-			got_curve = ac->list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
-		}
-		if (got_curve) {
-			// TODO use SSE/AVX methods, e.g. ARDOUR::apply_gain_to_buffer, mix_buffers_no_gain
-			// which works as long as automation _types_ gain_t == ARDOUR::Sample type == float
-			if (!rv) {
-				// TODO optimize this, in case rv is false, direcly use "vec" above.
-				rv = true;
-				memcpy (vec, scratch, sizeof (float) * veclen);
-			} else {
-				for (framecnt_t i = 0; i < veclen; ++i) {
-					vec[i] *= scratch[i];
-				}
-			}
-		} else if (rv) {
-			const float v = get_masters_value ();
-			for (framecnt_t i = 0; i < veclen; ++i) {
-				vec[i] *= v;
-			}
-		}
+			= boost::dynamic_pointer_cast<SlavableAutomationControl>(mr->second.master());
+		assert (sc);
+		rv |= sc->masters_curve_multiply (start, end, vec, veclen);
 	}
 	return rv;
 }
