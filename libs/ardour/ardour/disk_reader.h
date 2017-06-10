@@ -20,6 +20,8 @@
 #ifndef __ardour_disk_reader_h__
 #define __ardour_disk_reader_h__
 
+#include "pbd/i18n.h"
+
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
 
@@ -38,6 +40,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	~DiskReader ();
 
 	bool set_name (std::string const & str);
+	std::string display_name() const { return std::string (_("reader")); }
 
 	static framecnt_t chunk_frames() { return _chunk_frames; }
 	static framecnt_t default_chunk_frames ();
