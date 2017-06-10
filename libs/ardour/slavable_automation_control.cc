@@ -328,12 +328,12 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
-	masters_connections.erase (boost::weak_ptr<AutomationControl>(m));
 	pre_remove_master (m);
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
+		masters_connections.erase (boost::weak_ptr<AutomationControl>(m));
 		if (!_masters.erase (m->id())) {
 			return;
 		}
@@ -386,6 +386,7 @@ SlavableAutomationControl::clear_masters ()
 			had_masters = true;
 		}
 		_masters.clear ();
+		masters_connections.clear ();
 		new_value = get_value_locked ();
 	}
 
