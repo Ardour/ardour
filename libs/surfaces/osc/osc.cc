@@ -846,8 +846,13 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 			}
 		}
 	}
+	OSCSurface *sur = get_surface(get_address (msg));
 
-	lo_send_message (get_address (msg), "#reply", reply);
+	if (sur->feedback[14]) {
+		lo_send_message (get_address (msg), "/reply", reply);
+	} else {
+		lo_send_message (get_address (msg), "#reply", reply);
+	}
 	lo_message_free (reply);
 }
 
@@ -869,6 +874,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	/* 15 for /#current_value plus 2 for /<path> */
 
 	len = strlen (path);
+	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (strstr (path, "/automation")) {
 		ret = set_automation (path, types, argv, argc, msg);
@@ -924,7 +930,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 			}
 		}
 
-		lo_send_message (get_address (msg), "#reply", reply);
+		if (sur->feedback[14]) {
+			lo_send_message (get_address (msg), "/reply", reply);
+		} else {
+			lo_send_message (get_address (msg), "#reply", reply);
+		}
 		lo_message_free (reply);
 
 		ret = 0;
@@ -1239,7 +1249,11 @@ OSC::routes_list (lo_message msg)
 			//Automatically listen to stripables listed
 			listen_to_route(s, get_address (msg));
 
-			lo_send_message (get_address (msg), "#reply", reply);
+			if (sur->feedback[14]) {
+				lo_send_message (get_address (msg), "/reply", reply);
+			} else {
+				lo_send_message (get_address (msg), "#reply", reply);
+			}
 			lo_message_free (reply);
 		}
 	}
@@ -1257,7 +1271,11 @@ OSC::routes_list (lo_message msg)
 		lo_message_add_int32 (reply, 0);
 	}
 
-	lo_send_message (get_address (msg), "#reply", reply);
+	if (sur->feedback[14]) {
+		lo_send_message (get_address (msg), "/reply", reply);
+	} else {
+		lo_send_message (get_address (msg), "#reply", reply);
+	}
 
 	lo_message_free (reply);
 }

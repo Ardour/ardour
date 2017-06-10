@@ -363,6 +363,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (select_fb, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++fn;
 
+	label = manage (new Gtk::Label(_("Use /reply instead of #reply:")));
+	label->set_alignment(1, .5);
+	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (use_osc10, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++fn;
+
 	fbtable->show_all ();
 	append_page (*fbtable, _("Default Feedback"));
 	// set strips and feedback from loaded default values
@@ -392,6 +398,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	hp_min_sec.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	hp_gui.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	select_fb.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	use_osc10.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	preset_busy = false;
 
 }
@@ -599,6 +606,7 @@ OSC_GUI::reshow_values ()
 	hp_min_sec.set_active (def_feedback & 2048);
 	//hp_gui.set_active (false); // we don't have this yet (Mixbus wants)
 	select_fb.set_active(def_feedback & 8192);
+	use_osc10.set_active(def_feedback & 16384);
 
 	calculate_strip_types ();
 	calculate_feedback ();
@@ -649,6 +657,9 @@ OSC_GUI::calculate_feedback ()
 	}
 	if (select_fb.get_active()) {
 		fbvalue += 8192;
+	}
+	if (use_osc10.get_active()) {
+		fbvalue += 16384;
 	}
 
 	current_feedback.set_text(string_compose("%1", fbvalue));

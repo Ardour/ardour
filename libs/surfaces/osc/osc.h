@@ -154,6 +154,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [11] - Send Playhead position as minutes seconds
 		 * [12]	- Send Playhead position like primary/secondary GUI clocks
 		 * [13] - Send well known feedback (for /select/command
+		 * [14] - use OSC 1.0 only (#reply -> /reply)
 		 */
 
 
