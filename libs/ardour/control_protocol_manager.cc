@@ -96,16 +96,19 @@ ControlProtocolManager::set_session (Session* s)
 		CoreSelection::StripableAutomationControls sac;
 		_session->selection().get_stripables (sac);
 
-		for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
-			if ((*i).stripable) {
-				cerr << "First selected being set to " << (*i).stripable->name() << endl;
-				ControlProtocol::set_first_selected_stripable ((*i).stripable);
-				break;
+		if (!sac.empty()) {
+			StripableNotificationListPtr v (new StripableNotificationList);
+			for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
+				if ((*i).stripable) {
+					v->push_back (boost::weak_ptr<Stripable> ((*i).stripable));
+				}
+			}
+			if (!v->empty()) {
+				StripableSelectionChanged (v); /* EMIT SIGNAL */
 			}
 		}
 
 		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
-
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
