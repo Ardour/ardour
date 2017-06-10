@@ -1656,3 +1656,16 @@ DiskWriter::realtime_handle_transport_stopped ()
 {
 	realtime_speed_change ();
 }
+
+bool
+DiskWriter::set_name (string const & str)
+{
+	string my_name = X_("writer:");
+	my_name += str;
+
+	if (_name != my_name) {
+		SessionObject::set_name (my_name);
+	}
+
+	return true;
+}
