@@ -165,6 +165,8 @@ VCA::set_state (XMLNode const& node, int version)
 			}
 		} else if ((*i)->name() == Slavable::xml_node_name) {
 			Slavable::set_state (**i, version);
+		} else if ((*i)->name() == Automatable::xml_node_name) {
+			set_automation_xml_state (**i, Evoral::Parameter(NullAutomation));
 		}
 	}
 
