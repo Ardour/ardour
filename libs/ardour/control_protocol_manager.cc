@@ -87,33 +87,32 @@ ControlProtocolManager::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
 
-	if (_session) {
+	if (!_session) {
+		return;
+	}
 
-		/* get selection info and set it before instantiating any
-		 * control protocols.
-		 */
-
-		CoreSelection::StripableAutomationControls sac;
-		_session->selection().get_stripables (sac);
-
-		if (!sac.empty()) {
-			StripableNotificationListPtr v (new StripableNotificationList);
-			for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
-				if ((*i).stripable) {
-					v->push_back (boost::weak_ptr<Stripable> ((*i).stripable));
-				}
-			}
-			if (!v->empty()) {
-				StripableSelectionChanged (v); /* EMIT SIGNAL */
-			}
-		}
-
+	{
 		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
 			if ((*i)->requested || (*i)->mandatory) {
 				(void) activate (**i);
 			}
+		}
+	}
+
+	CoreSelection::StripableAutomationControls sac;
+	_session->selection().get_stripables (sac);
+
+	if (!sac.empty()) {
+		StripableNotificationListPtr v (new StripableNotificationList);
+		for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
+			if ((*i).stripable) {
+				v->push_back (boost::weak_ptr<Stripable> ((*i).stripable));
+			}
+		}
+		if (!v->empty()) {
+			StripableSelectionChanged (v); /* EMIT SIGNAL */
 		}
 	}
 }
