@@ -40,19 +40,7 @@ MonitorControl::MonitorControl (Session& session, std::string const & name, Moni
 void
 MonitorControl::actually_set_value (double val, Controllable::GroupControlDisposition gcd)
 {
-	int v = (int) val;
-	switch (v) {
-	case MonitorAuto:
-	case MonitorInput:
-	case MonitorDisk:
-	case MonitorCue:
-		break;
-	default:
-		/* illegal value */
-		return;
-	}
-
-	_monitoring = MonitorChoice (v);
+	_monitoring = MonitorChoice ((int) val);
 	AutomationControl::actually_set_value (val, gcd);
 }
 

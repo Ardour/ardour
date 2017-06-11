@@ -17,6 +17,7 @@
 
 */
 
+#include "pbd/enumwriter.h"
 #include "pbd/i18n.h"
 #include "pbd/memento_command.h"
 
@@ -51,7 +52,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
         , overwrite_offset (0)
         , _pending_overwrite (false)
         , overwrite_queued (false)
-	, _monitoring_choice (MonitorDisk)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 }
@@ -239,11 +239,23 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	const bool need_disk_signal = result_required || _monitoring_choice == MonitorDisk || _monitoring_choice == MonitorCue;
 	frameoffset_t playback_distance = nframes;
+	MonitorState ms = _route->monitoring_state ();
+
+	if (_active) {
+		if (!_pending_active) {
+			_active = false;
+			return;
+		}
+	} else {
+		if (_pending_active) {
+			_active = true;
+		} else {
+			return;
+		}
+	}
 
 	_need_butler = false;
-
 
 	if (speed != 1.0f && speed != -1.0f) {
 		interpolation.set_speed (speed);
@@ -255,91 +267,106 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		playback_distance = -playback_distance;
 	}
 
-	if (!need_disk_signal) {
+	if (!result_required || ((ms & MonitoringDisk) == 0)) {
+
+		/* no need for actual disk data, just advance read pointer and return */
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			(*chan)->buf->increment_read_ptr (playback_distance);
 		}
 
-		return;
-	}
-
-	/* we're doing playback */
-
-	size_t n_buffers = bufs.count().n_audio();
-	size_t n_chans = c->size();
-	gain_t scaling;
-
-	if (n_chans > n_buffers) {
-		scaling = ((float) n_buffers)/n_chans;
 	} else {
-		scaling = 1.0;
-	}
 
-	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
+		/* we need audio data from disk */
 
-		AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-		Sample* outgoing = buf.data ();
+		size_t n_buffers = bufs.count().n_audio();
+		size_t n_chans = c->size();
+		gain_t scaling;
+		BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 
-		ChannelInfo* chaninfo (*chan);
+		if (n_chans > n_buffers) {
+			scaling = ((float) n_buffers)/n_chans;
+		} else {
+			scaling = 1.0;
+		}
 
-		chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
+		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-		if (playback_distance <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+			ChannelInfo* chaninfo (*chan);
+			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+			Sample* outgoing = 0; /* assignment not really needed but it keeps the compiler quiet and helps track bugs */
 
-			if (fabsf (speed) != 1.0f) {
-				(void) interpolation.interpolate (
-					n, nframes,
-					chaninfo->rw_vector.buf[0],
-					outgoing);
+			if (ms & MonitoringInput) {
+				/* put disk stream in scratch buffer, blend at end */
+				outgoing = scratch_bufs.get_audio(n).data ();
 			} else {
-				memcpy (outgoing, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
+				/* no input stream needed, just overwrite buffers */
+				outgoing = buf.data ();
 			}
 
-		} else {
+			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
 
-			const framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
-
-			if (playback_distance <= total) {
-
-				/* We have enough samples, but not in one lump.
-				*/
+			if (playback_distance <= (framecnt_t) chaninfo->rw_vector.len[0]) {
 
 				if (fabsf (speed) != 1.0f) {
-					interpolation.interpolate (n, chaninfo->rw_vector.len[0],
-					                           chaninfo->rw_vector.buf[0],
-					                           outgoing);
-					outgoing += chaninfo->rw_vector.len[0];
-					interpolation.interpolate (n, playback_distance - chaninfo->rw_vector.len[0],
-					                           chaninfo->rw_vector.buf[1],
-					                           outgoing);
+					(void) interpolation.interpolate (
+						n, nframes,
+						chaninfo->rw_vector.buf[0],
+						outgoing);
 				} else {
-					memcpy (outgoing,
-					        chaninfo->rw_vector.buf[0],
-					        chaninfo->rw_vector.len[0] * sizeof (Sample));
-					outgoing += chaninfo->rw_vector.len[0];
-					memcpy (outgoing,
-					        chaninfo->rw_vector.buf[1],
-					        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
+					memcpy (outgoing, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
 				}
 
 			} else {
 
-				cerr << _name << " Need " << playback_distance << " total = " << total << endl;
-				cerr << "underrun for " << _name << endl;
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
-				                                            DEBUG_THREAD_SELF, name(), total));
-				Underrun ();
-				return;
+				const framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
+				if (playback_distance <= total) {
+
+					/* We have enough samples, but not in one lump.
+					 */
+
+					if (fabsf (speed) != 1.0f) {
+						interpolation.interpolate (n, chaninfo->rw_vector.len[0],
+						                           chaninfo->rw_vector.buf[0],
+						                           outgoing);
+						outgoing += chaninfo->rw_vector.len[0];
+						interpolation.interpolate (n, playback_distance - chaninfo->rw_vector.len[0],
+						                           chaninfo->rw_vector.buf[1],
+						                           outgoing);
+					} else {
+						memcpy (outgoing,
+						        chaninfo->rw_vector.buf[0],
+						        chaninfo->rw_vector.len[0] * sizeof (Sample));
+						outgoing += chaninfo->rw_vector.len[0];
+						memcpy (outgoing,
+						        chaninfo->rw_vector.buf[1],
+						        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
+					}
+
+				} else {
+
+					cerr << _name << " Need " << playback_distance << " total = " << total << endl;
+					cerr << "underrun for " << _name << endl;
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
+					                                            DEBUG_THREAD_SELF, name(), total));
+					Underrun ();
+					return;
+
+				}
+			}
+
+			if (scaling != 1.0f) {
+				apply_gain_to_buffer (outgoing, nframes, scaling);
+			}
+
+			chaninfo->buf->increment_read_ptr (playback_distance);
+
+			if (ms & MonitoringInput) {
+				/* mix the disk signal into the input signal (already in bufs) */
+				mix_buffers_no_gain (buf.data(), outgoing, speed == 0.0 ? nframes : playback_distance);
 			}
 		}
-
-		if (scaling != 1.0f) {
-			apply_gain_to_buffer (outgoing, nframes, scaling);
-		}
-
-		chaninfo->buf->increment_read_ptr (playback_distance);
 	}
 
 	/* MIDI data handling */
@@ -367,8 +394,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		playback_sample += playback_distance;
 	}
 
-	ChanCount cnt;
-
 	if (_playlists[DataType::AUDIO]) {
 		if (!c->empty()) {
 			if (_slaved) {
@@ -385,8 +410,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				}
 			}
 		}
-
-		cnt.set (DataType::AUDIO, bufs.count().n_audio());
 	}
 
 	if (_playlists[DataType::MIDI]) {
@@ -439,13 +462,9 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			_need_butler = true;
 		}
 
-		cnt.set (DataType::MIDI, 1);
-
 	}
 
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
-
-	bufs.set_count (cnt);
 }
 
 void
