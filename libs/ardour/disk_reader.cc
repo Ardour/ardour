@@ -333,7 +333,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				return;
 
 			}
-
 		}
 
 		if (scaling != 1.0f) {
@@ -368,6 +367,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		playback_sample += playback_distance;
 	}
 
+	ChanCount cnt;
+
 	if (_playlists[DataType::AUDIO]) {
 		if (!c->empty()) {
 			if (_slaved) {
@@ -384,6 +385,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				}
 			}
 		}
+
+		cnt.set (DataType::AUDIO, bufs.count().n_audio());
 	}
 
 	if (_playlists[DataType::MIDI]) {
@@ -435,14 +438,13 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		} else {
 			_need_butler = true;
 		}
+
+		cnt.set (DataType::MIDI, 1);
+
 	}
 
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
-	/* make sure bufs shows whatever data we had available */
 
-	ChanCount cnt;
-	cnt.set (DataType::MIDI, 1);
-	cnt.set (DataType::AUDIO, bufs.count().n_audio());
 	bufs.set_count (cnt);
 }
 
