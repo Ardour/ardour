@@ -434,6 +434,19 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	bool re = record_enabled ();
 	bool can_record = _session.actively_recording ();
 
+	if (_active) {
+		if (!_pending_active) {
+			_active = false;
+			return;
+		}
+	} else {
+		if (_pending_active) {
+			_active = true;
+		} else {
+			return;
+		}
+	}
+
 	_need_butler = false;
 
 	check_record_status (start_frame, can_record);
