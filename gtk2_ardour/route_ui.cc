@@ -904,17 +904,10 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	MonitorChoice mc;
 	boost::shared_ptr<RouteList> rl;
 
-	/* XXX for now, monitoring choices are orthogonal. cue monitoring
-	   will follow in 3.X but requires mixing the input and playback (disk)
-	   signal together, which requires yet more buffers.
-	*/
-
 	if (t->monitoring_control()->monitoring_choice() & monitor_choice) {
 		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() & ~monitor_choice);
 	} else {
-		/* this line will change when the options are non-orthogonal */
-		// mc = MonitorChoice (t->monitoring_choice() | monitor_choice);
-		mc = monitor_choice;
+		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() | monitor_choice);
 	}
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
@@ -2418,4 +2411,3 @@ RouteUI::stripable () const
 {
 	return _route;
 }
-
