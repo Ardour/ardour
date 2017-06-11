@@ -1165,22 +1165,22 @@ LV2Plugin::get_layout (uint32_t which, UILayoutHint& h) const
 
 		case  2: h.x0 = 1; h.x1 = 3; h.y0 = 2; h.y1 = 3; break; // Frequency 1
 		case  3: h.x0 = 1; h.x1 = 3; h.y0 = 0; h.y1 = 1; break; // Gain 1
-		case  4: h.x0 = 2; h.x1 = 4; h.y0 = 1; h.y1 = 2; break; // Bandwidth 1
+		case  4: h.x0 = 1; h.x1 = 3; h.y0 = 1; h.y1 = 2; break; // Bandwidth 1
 		case 18: h.x0 = 1; h.x1 = 4; h.y0 = 5; h.y1 = 6; break; // enable 1
 
 		case  5: h.x0 = 4; h.x1 = 6; h.y0 = 2; h.y1 = 3; break; // Frequency 2
 		case  6: h.x0 = 4; h.x1 = 6; h.y0 = 0; h.y1 = 1; break; // Gain 2
-		case  7: h.x0 = 5; h.x1 = 7; h.y0 = 1; h.y1 = 2; break; // Bandwidth 2
+		case  7: h.x0 = 4; h.x1 = 6; h.y0 = 1; h.y1 = 2; break; // Bandwidth 2
 		case 19: h.x0 = 4; h.x1 = 7; h.y0 = 5; h.y1 = 6; break; // enable 2
 
 		case  8: h.x0 = 7; h.x1 =  9; h.y0 = 2; h.y1 = 3; break; // Frequency 3
 		case  9: h.x0 = 7; h.x1 =  9; h.y0 = 0; h.y1 = 1; break; // Gain 3
-		case 10: h.x0 = 8; h.x1 = 10; h.y0 = 1; h.y1 = 2; break; // Bandwidth 3
+		case 10: h.x0 = 7; h.x1 =  9; h.y0 = 1; h.y1 = 2; break; // Bandwidth 3
 		case 20: h.x0 = 7; h.x1 = 10; h.y0 = 5; h.y1 = 6; break; // enable 3
 
 		case 11: h.x0 = 10; h.x1 = 12; h.y0 = 2; h.y1 = 3; break; // Frequency 4
 		case 12: h.x0 = 10; h.x1 = 12; h.y0 = 0; h.y1 = 1; break; // Gain 4
-		case 13: h.x0 = 11; h.x1 = 13; h.y0 = 1; h.y1 = 2; break; // Bandwidth 4
+		case 13: h.x0 = 10; h.x1 = 12; h.y0 = 1; h.y1 = 2; break; // Bandwidth 4
 		case 21: h.x0 = 10; h.x1 = 13; h.y0 = 5; h.y1 = 6; break; // enable 4
 
 		case 14: h.x0 = 13; h.x1 = 14; h.y0 = 2; h.y1 = 3; break; // Frequency H
