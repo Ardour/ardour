@@ -168,7 +168,7 @@ Track::set_state (const XMLNode& node, int version)
 			   (child nodes, properties, etc.) and then call
 			   ::set_state() on the writer/reader.
 
-			   But at present (June 2017), there's no such state. 
+			   But at present (June 2017), there's no such state.
 			*/
 		}
 	}
@@ -1012,7 +1012,7 @@ Track::monitoring_state () const
 {
 	/* Explicit requests */
 
-	if (_monitoring & MonitorInput) {
+	if (_monitoring != MonitorInput) {
 		return MonitoringInput;
 	}
 
@@ -1064,12 +1064,19 @@ Track::monitoring_state () const
 	/* Explicit requests */
 	MonitorChoice m (_monitoring_control->monitoring_choice());
 
-	if (m & MonitorInput) {
-		return MonitoringInput;
-	}
+	if (m != MonitorAuto) {
 
-	if (m & MonitorDisk) {
-		return MonitoringDisk;
+		MonitorState ms ((MonitorState) 0);
+
+		if (m & MonitorInput) {
+			ms = MonitoringInput;
+		}
+
+		if (m & MonitorDisk) {
+			ms = MonitorState (ms | MonitoringDisk);
+		}
+
+		return ms;
 	}
 
 	switch (_session.config.get_session_monitoring ()) {

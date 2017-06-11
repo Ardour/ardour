@@ -4845,7 +4845,6 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 		boost::shared_ptr<AudioPort> source_port = io->audio (i);
 		AudioBuffer& buf (bufs.get_audio (i%n_buffers));
 
-
 		if (i < n_buffers) {
 
 			/* first time through just copy a channel into
