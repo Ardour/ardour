@@ -115,6 +115,9 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public P
 	void audition_active(bool);
 	void audition_progress(ARDOUR::framecnt_t, ARDOUR::framecnt_t);
 
+	void update_autoplay ();
+	void autoplay_toggled ();
+
 	bool tags_entry_left (GdkEventFocus* event);
 	void tags_changed ();
 	void save_tags (const std::vector<std::string>&);

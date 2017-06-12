@@ -237,6 +237,9 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	play_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::stop_audition));
 
+	update_autoplay ();
+	autoplay_btn.signal_toggled().connect(sigc::mem_fun (*this, &SoundFileBox::autoplay_toggled));
+
 	stop_btn.set_sensitive (false);
 
 	channels_value.set_alignment (0.0f, 0.5f);
@@ -431,6 +434,22 @@ SoundFileBox::setup_labels (const string& filename)
 	}
 
 	return true;
+}
+
+void
+SoundFileBox::update_autoplay ()
+{
+	const bool config_autoplay = UIConfiguration::instance().get_autoplay_files();
+
+	if (autoplay_btn.get_active() != config_autoplay) {
+		autoplay_btn.set_active (config_autoplay);
+	}
+}
+
+void
+SoundFileBox::autoplay_toggled()
+{
+	UIConfiguration::instance().set_autoplay_files(autoplay_btn.get_active());
 }
 
 bool
