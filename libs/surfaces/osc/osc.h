@@ -38,6 +38,7 @@
 
 #include "ardour/types.h"
 #include "ardour/send.h"
+#include "ardour/plugin.h"
 #include "control_protocol/control_protocol.h"
 
 #include "pbd/i18n.h"
@@ -123,9 +124,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t bank_size;			// size of banks for this surface
 		int plug_page;				// current plugin page
 		uint32_t plug_page_size;	// plugin page size (number of controls)
-		uint32_t plugin;			// id of current plugin
+		int plugin_id;			// id of current plugin
+		std::vector<int> plug_params; // vector to store ports that are controls
 		int send_page;				// current send page
 		uint32_t send_page_size;	// send page size in channels
+		PBD::ScopedConnection proc_connection; // for processor signal monitoring
 		std::bitset<32> strip_types;// what strip types are a part of this bank
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
@@ -265,6 +268,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int text_message (std::string path, std::string val, lo_address addr);
 	boost::shared_ptr<ARDOUR::Send> cue_get_send (uint32_t id, lo_address addr);
 	// end cue
+
+	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \
@@ -592,7 +597,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_send_page (int page, lo_message msg);
 	int sel_plug_pagesize (uint32_t size, lo_message msg);
 	int sel_plug_page (int page, lo_message msg);
-	int sel_plugin (uint32_t id, lo_message msg);
+	int sel_plugin (int delta, lo_message msg);
+	int _sel_plugin (int id, lo_address addr);
+	void processor_changed (lo_address addr);
 
 	int scrub (float delta, lo_message msg);
 	int jog (float delta, lo_message msg);

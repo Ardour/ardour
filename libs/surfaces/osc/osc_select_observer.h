@@ -45,13 +45,15 @@ class OSCSelectObserver
 	void tick (void);
 	void renew_sends (void);
 	void renew_plugin (void);
+	void eq_restart (int);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
 
 	PBD::ScopedConnectionList strip_connections;
-	// sends and eq need their own
+	// sends, plugins and eq need their own
 	PBD::ScopedConnectionList send_connections;
+	PBD::ScopedConnectionList plugin_connections;
 	PBD::ScopedConnectionList eq_connections;
 
 	lo_address addr;
@@ -66,6 +68,8 @@ class OSCSelectObserver
 	float _last_gain;
 	ARDOUR::AutoState as;
 	uint32_t send_size;
+	uint32_t nplug_params;
+	uint32_t plug_size;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
@@ -82,12 +86,13 @@ class OSCSelectObserver
 	// sends stuff
 	void send_init (void);
 	void send_end (void);
-	void send_restart (int);
+	void plugin_init (void);
+	void plugin_end (void);
+	void plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_enable (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
 	void eq_init (void);
 	void eq_end (void);
-	void eq_restart (int);
 	std::string set_path (std::string path, uint32_t id);
 	void send_float (std::string path, float val);
 	void send_float_with_id (std::string path, uint32_t id, float val);

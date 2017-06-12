@@ -30,6 +30,8 @@
 #include "ardour/solo_safe_control.h"
 #include "ardour/route.h"
 #include "ardour/send.h"
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
 #include "ardour/readonly_control.h"
 
@@ -142,14 +144,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 			change_message ("/select/pan_lfe_control", _strip->pan_lfe_control());
 		}
 
-		// sends and eq
-		// detecting processor changes requires cast to route
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
-		if (r) {
-			r->processors_changed.connect  (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_restart, this, -1), OSC::instance());
-			send_init();
-			eq_init();
-		}
+		// sends, plugins and eq
+		// detecting processor changes is now in osc.cc
 
 		// Compressor
 		if (_strip->comp_enable_controllable ()) {
@@ -231,6 +227,7 @@ OSCSelectObserver::~OSCSelectObserver ()
 		send_float ("/select/comp_makeup", 0);
 	}
 	send_end();
+	plugin_end();
 	eq_end();
 
 	lo_address_free (addr);
@@ -244,7 +241,8 @@ OSCSelectObserver::renew_sends () {
 
 void
 OSCSelectObserver::renew_plugin () {
-	// to be written :)
+	plugin_end();
+	plugin_init();
 }
 
 void
@@ -264,6 +262,7 @@ OSCSelectObserver::send_init()
 		return;
 	}
 
+	// paging should be done in osc.cc in case there is no feedback
 	send_size = nsends;
 	if (sur->send_page_size) {
 		send_size = sur->send_page_size;
@@ -312,6 +311,79 @@ OSCSelectObserver::send_init()
 }
 
 void
+OSCSelectObserver::plugin_init()
+{
+	if (!sur->plugin_id) {
+		return;
+	}
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
+	if (!r) {
+		return;
+	}
+
+	// we have a plugin number now get the processor
+	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+	boost::shared_ptr<PluginInsert> pi;
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+		return;
+	}
+	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+
+	bool ok = false;
+	nplug_params = sur->plug_params.size ();
+
+	// default of 0 page size means show all
+	plug_size = nplug_params;
+	if (sur->plug_page_size) {
+		plug_size = sur->plug_page_size;
+	}
+	text_message ("/select/plugin/name", pip->name());
+	uint32_t page_end = nplug_params;
+	uint32_t max_page = 1;
+	if (plug_size) {
+		max_page = (uint32_t)((nplug_params - 1) / plug_size) + 1;
+	}
+
+	if (sur->plug_page < 1) {
+		sur->plug_page = 1;
+	}
+	if ((uint32_t)sur->plug_page > max_page) {
+		sur->plug_page = max_page;
+	}
+	uint32_t page_start = ((sur->plug_page - 1) * plug_size);
+	page_end = sur->plug_page * plug_size;
+
+	int pid = 1;
+	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++pid) {
+		if (ppi >= nplug_params) {
+			text_with_id ("/select/plugin/parameter/name", pid, " ");
+			send_float_with_id ("/select/plugin/parameter", pid, 0);
+			continue;
+		}
+
+		uint32_t controlid = pip->nth_parameter(sur->plug_params[ppi], ok);
+		if (!ok) {
+			continue;
+		}
+		ParameterDescriptor pd;
+		pip->get_parameter_descriptor(controlid, pd);
+		text_with_id ("/select/plugin/parameter/name", pid, pd.label);
+		if ( pip->parameter_is_input(controlid)) {
+			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+			if (c) {
+				bool swtch = false;
+				if (pd.integer_step && pd.upper == 1) {
+					swtch = true;
+				}
+				c->Changed.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plugin_parameter_changed, this, pid, swtch, c), OSC::instance());
+				plugin_parameter_changed (pid, swtch, c);
+			}
+		}
+	}
+}
+
+void
 OSCSelectObserver::send_end ()
 {
 	send_connections.drop_connections ();
@@ -332,10 +404,26 @@ OSCSelectObserver::send_end ()
 }
 
 void
-OSCSelectObserver::send_restart(int x)
+OSCSelectObserver::plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable)
 {
-	send_end();
-	send_init();
+	if (swtch) {
+		enable_message_with_id ("/select/plugin/parameter", pid, controllable);
+	} else {
+		change_message_with_id ("/select/plugin/parameter", pid, controllable);
+	}
+}
+
+void
+OSCSelectObserver::plugin_end ()
+{
+	plugin_connections.drop_connections ();
+	text_message ("/select/plugin/name", " ");
+	for (uint32_t i = 1; i <= plug_size; i++) {
+		send_float_with_id ("/select/plugin/parameter", i, 0);
+		// next name
+		text_with_id ("/select/plugin/parameter/name", i, " ");
+	}
+	nplug_params = 0;
 }
 
 void

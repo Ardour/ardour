@@ -894,6 +894,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = cue_parse (path, types, argv, argc, msg);
 
 	} else
+	if (!strncmp (path, "/select/plugin/parameter", 24)) {
+
+		ret = select_plugin_parameter (path, types, argv, argc, msg);
+
+	} else
 	if (!strncmp (path, "/access_action/", 15)) {
 		check_surface (msg);
 		if (!(argc && !argv[0]->i)) {
@@ -1461,11 +1466,6 @@ OSC::get_surface (lo_address addr)
 			return &_surface[it];
 		}
 	}
-	// if we do this when OSC is started we get the wrong stripable
-	// we don't need this until we actually have a surface to deal with
-	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
-		gui_selection_changed();
-	}
 
 	// No surface create one with default values
 	OSCSurface s;
@@ -1487,10 +1487,14 @@ OSC::get_surface (lo_address addr)
 	s.send_page_size = 0;
 	s.plug_page = 1;
 	s.plug_page_size = 0;
-	s.plugin = 1;
+	s.plugin_id = 1;
 
 	s.nstrips = s.strips.size();
 	_surface.push_back (s);
+	// moved this down here as selection may need s.<anything to do with select> set
+	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
+		gui_selection_changed();
+	}
 
 	// set bank and strip feedback
 	_set_bank(s.bank, addr);
@@ -1796,13 +1800,80 @@ OSC::sel_plug_page (int page, lo_message msg)
 }
 
 int
-OSC::sel_plugin (uint32_t id, lo_message msg)
+OSC::sel_plugin (int delta, lo_message msg)
 {
-	OSCSurface *s = get_surface(get_address (msg));
-	s->plugin = id;
-	s->plug_page = 1;
-	s->sel_obs->renew_plugin();
-	return 0;
+	OSCSurface *sur = get_surface(get_address (msg));
+	return _sel_plugin (sur->plugin_id + delta, get_address (msg));
+}
+
+int
+OSC::_sel_plugin (int id, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, addr);
+	} else {
+		s = _select;
+	}
+	if (s) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
+		if (!r) {
+			return 1;
+		}
+
+		// find out how many plugins we have
+		bool plugs;
+		int nplugs  = 0;
+		do {
+			plugs = false;
+			if (r->nth_plugin (nplugs)) {
+				plugs = true;
+				nplugs++;
+			}
+		} while (plugs);
+
+		// limit plugin_id to actual plugins
+		if (nplugs < id) {
+			sur->plugin_id = nplugs;
+		} else if (!nplugs) {
+			sur->plugin_id = 0;
+		} else  if (nplugs && !id) {
+			sur->plugin_id = 1;
+		} else {
+			sur->plugin_id = id;
+		}
+
+		// we have a plugin number now get the processor
+		boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+		boost::shared_ptr<PluginInsert> pi;
+		if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+			PBD::warning << "OSC: Plugin: " << sur->plugin_id << " does not seem to be a plugin" << endmsg;			
+			return 1;
+		}
+		boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+		bool ok = false;
+		// put only input controls into a vector
+		sur->plug_params.clear ();
+		uint32_t nplug_params  = pip->parameter_count();
+		for ( uint32_t ppi = 0;  ppi < nplug_params; ++ppi) {
+			uint32_t controlid = pip->nth_parameter(ppi, ok);
+			if (!ok) {
+				continue;
+			}
+			if (pip->parameter_is_input(controlid)) {
+				sur->plug_params.push_back (ppi);
+			}
+		}
+
+		sur->plug_page = 1;
+
+		if (sur->sel_obs) {
+			sur->sel_obs->renew_plugin();
+		}
+		return 0;
+	}
+	return 1;
 }
 
 void
@@ -2844,16 +2915,26 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 		sur->sel_obs = sel_fb;
 	} else if (sur->expand_enable) {
+		// expand doesn't point to a stripable, turn it off and use select
 		sur->expand = 0;
 		sur->expand_enable = false;
 		if (_select && feedback_on) {
-			OSCSelectObserver* sel_fb = new OSCSelectObserver (_select, addr, sur);
-			_select->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
+			s = _select;
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur);
+			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 			sur->sel_obs = sel_fb;
 		}
 	} else if (feedback_on) {
 		route_send_fail ("select", sur->expand, 0 , addr);
 	}
+	// need to set monitor for processor changed signal
+	// detecting processor changes requires cast to route
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
+	if (r) {
+		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, addr), this);
+		processor_changed (addr);
+	}
+
 	if (!feedback_on) {
 		return 0;
 	}
@@ -2902,6 +2983,18 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	}
 
 	return 0;
+}
+
+void
+OSC::processor_changed (lo_address addr)
+{
+	OSCSurface *sur = get_surface (addr);
+	sur->proc_connection.disconnect ();
+	_sel_plugin (sur->plugin_id, addr);
+	if (sur->sel_obs) {
+		sur->sel_obs->renew_sends ();
+		sur->sel_obs->eq_restart (-1);
+	}
 }
 
 int
@@ -3379,6 +3472,115 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 		}
 	}
 	return sel_send_fail ("send_enable", id, 0, get_address (msg));
+}
+
+int
+OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg) {
+	OSCSurface *sur = get_surface(get_address (msg));
+	int paid;
+	int piid = sur->plugin_id;
+	float value = 0;
+	if (argc > 1) {
+		// no inline args
+		if (argc == 2) {
+			// change parameter in already selected plugin
+			if (argv[0]->f) {
+				paid = (int) argv[0]->f;
+			} else {
+				paid = argv[0]->i;
+			}
+			value = argv[1]->f;
+		} else if (argc == 3) {
+			if (argv[0]->f) {
+				piid = (int) argv[0]->f;
+			} else {
+				piid = argv[0]->i;
+			}
+			_sel_plugin (piid, get_address (msg));
+			if (argv[1]->f) {
+				paid = (int) argv[1]->f;
+			} else {
+				paid = argv[1]->i;
+			}
+			value = argv[2]->f;
+		} else if (argc > 3) {
+			PBD::warning << "OSC: Too many parameters: " << argc << endmsg;
+			return -1;
+		}
+	} else if (argc) {
+		const char * par = strstr (&path[25], "/");
+		if (par) {
+			piid = atoi (&path[25]);
+			_sel_plugin (piid, msg);
+			paid = atoi (&par[1]);
+			value = argv[0]->f;
+			// we have plugin id too
+		} else {
+			// just parameter
+			paid = atoi (&path[25]);
+			value = argv[0]->f;
+		}
+	} else {
+		PBD::warning << "OSC: Must have parameters." << endmsg;
+		return -1;
+	}
+	if (piid != sur->plugin_id) {
+		// if the user is sending to a non-existant plugin, don't adjust one we do have
+		PBD::warning << "OSC: plugin: " << piid << " out of range" << endmsg;
+		return -1;
+	}
+	if (sur->plug_page_size && (paid > (int)sur->plug_page_size)) {
+		return sel_send_fail ("plugin/parameter", paid, 0, get_address (msg));
+	}
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
+	if (!r) {
+		return 1;
+	}
+
+	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+	boost::shared_ptr<PluginInsert> pi;
+	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+		return 1;
+	}
+	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	// paid is paged parameter convert to absolute
+	int parid = paid + (int)(sur->plug_page_size * (sur->plug_page - 1));
+	if (parid > (int) sur->plug_params.size ()) {
+		if (sur->feedback[13]) {
+			sel_send_fail ("plugin/parameter", paid, 0, get_address (msg));
+		}
+		return 0;
+	}
+
+	bool ok = false;
+	uint32_t controlid = pip->nth_parameter(sur->plug_params[parid - 1], ok);
+	if (!ok) {
+		return 1;
+	}
+	ParameterDescriptor pd;
+	pip->get_parameter_descriptor(controlid, pd);
+	if ( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
+		boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+		if (c) {
+			if (pd.integer_step && pd.upper == 1) {
+				if (c->get_value () && value < 1.0) {
+					c->set_value (0, PBD::Controllable::NoGroup);
+				} else if (!c->get_value () && value) {
+					c->set_value (1, PBD::Controllable::NoGroup);
+				}
+			} else {
+				c->set_value (c->interface_to_internal (value), PBD::Controllable::NoGroup);
+			}
+			return 0;
+		}
+	}
+	return 1;
 }
 
 int
