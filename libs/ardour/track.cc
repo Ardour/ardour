@@ -87,6 +87,8 @@ Track::init ()
 
         use_new_playlist ();
 
+        /* ordering here is important, and needs to be generally maintained */
+
         add_processor (_disk_writer, PreFader);
         add_processor (_disk_reader, PreFader);
 
