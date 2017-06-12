@@ -564,8 +564,8 @@ SlavableAutomationControl::get_state ()
 					mnode->set_property (X_("val-master"), mr->second.val_master());
 				}
 				masters_node->add_child_nocopy (*mnode);
-				node.add_child_nocopy (*masters_node);
 			}
+			node.add_child_nocopy (*masters_node);
 		}
 	}
 
