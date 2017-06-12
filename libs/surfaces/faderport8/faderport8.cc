@@ -918,6 +918,9 @@ FaderPort8::filter_stripables (StripableList& strips) const
 		case MixFX:
 			flt = &flt_auxbus;
 			break;
+		default:
+			assert (0);
+			// fall through
 		case MixAll:
 			allow_master = true;
 			flt = &flt_all;

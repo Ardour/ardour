@@ -155,7 +155,7 @@ namespace FP8Types {
 		MixMIDI,
 		MixOutputs,
 		MixFX,
-		MixUser,
+		MixUser
 	};
 
 };
