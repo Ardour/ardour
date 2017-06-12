@@ -110,6 +110,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, _gain_group (new GainControlGroup ())
 	, _monitoring_group (new ControlGroup (MonitoringAutomation))
 	, _rgba (0)
+	, _used_to_share_gain (false)
 {
 	_xml_node_name = X_("RouteGroup");
 
@@ -259,6 +260,7 @@ RouteGroup::get_state ()
 
 	node->set_property ("id", id());
 	node->set_property ("rgba", _rgba);
+	node->set_property ("used-to-share-gain", _used_to_share_gain);
 
 	add_properties (*node);
 
@@ -285,6 +287,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 	set_id (node);
 	set_values (node);
 	node.get_property ("rgba", _rgba);
+	node.get_property ("used-to-share-gain", _used_to_share_gain);
 
 	std::string routes;
 	if (node.get_property ("routes", routes)) {
@@ -348,9 +351,6 @@ void
 RouteGroup::set_gain (bool yn)
 {
 	if (is_gain() == yn) {
-		return;
-	}
-	if (has_control_master()) {
 		return;
 	}
 
@@ -648,19 +648,11 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 		(*r)->assign (master, false);
 	}
 
-	bool used_to_share_gain = false;
-
-	if (is_gain()) {
-		used_to_share_gain = true;
-	}
-
 	group_master = master;
 	_group_master_number = master->number();
-	_gain_group->set_active (false);
 
-	if (used_to_share_gain) {
-		send_change (PropertyChange (Properties::group_gain));
-	}
+	_used_to_share_gain = is_gain ();
+	set_gain (false);
 }
 
 void
@@ -683,17 +675,7 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 	group_master.reset ();
 	_group_master_number = -1;
 
-	/* this is slightly tricky: is_gain() will return whether or not
-	   the group is supposed to be sharing gain adjustment, and now that
-	   we've reset _group_master_number to -1, it will reflect the user's
-	   intentions correctly. Since there was a master before, and now there
-	   is not, we are going to reactivate gain sharing ... and then tell
-	   the world about it.
-	*/
-	if (is_gain()) {
-		_gain_group->set_active (true);
-		send_change (PropertyChange (Properties::group_gain));
-	}
+	set_gain (_used_to_share_gain);
 }
 
 bool

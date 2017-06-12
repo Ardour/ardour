@@ -76,7 +76,7 @@ public:
 	bool is_active () const { return _active.val(); }
 	bool is_relative () const { return _relative.val(); }
 	bool is_hidden () const { return _hidden.val(); }
-	bool is_gain () const { return _gain.val() && _group_master_number.val() <= 0; }
+	bool is_gain () const { return _gain.val(); }
 	bool is_mute () const { return _mute.val(); }
 	bool is_solo () const { return _solo.val(); }
 	bool is_recenable () const { return _recenable.val(); }
@@ -190,6 +190,7 @@ private:
 	void push_to_groups ();
 
 	uint32_t _rgba;
+	bool _used_to_share_gain;
 };
 
 } /* namespace */
