@@ -194,8 +194,8 @@ AddRouteDialog::AddRouteDialog ()
 	   this dialog is shown, via ::on_show()
 	*/
 
-	add_button (_("Add"), Add);
 	add_button (_("Add and Close"), AddAndClose);
+	add_button (_("Add"), Add);
 	set_response_sensitive (AddAndClose, true);
 	set_default_response (AddAndClose);
 
