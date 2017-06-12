@@ -77,7 +77,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	boost::shared_ptr<SMFSource> midi_write_source () { return _midi_write_source; }
 
-	virtual std::string steal_write_source_name () { return std::string(); }
+	virtual std::string steal_write_source_name ();
 	int use_new_write_source (DataType, uint32_t n = 0);
 	void reset_write_sources (bool, bool force = false);
 
@@ -90,6 +90,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	void set_input_latency (framecnt_t);
 	framecnt_t input_latency () const { return _input_latency; }
+
+	bool configure_io (ChanCount in, ChanCount out);
 
 	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
