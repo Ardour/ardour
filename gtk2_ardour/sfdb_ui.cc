@@ -819,6 +819,12 @@ SoundFileBrowser::set_action_sensitive (bool yn)
 	import_button.set_sensitive (yn);
 }
 
+bool
+SoundFileBrowser::get_action_sensitive () const
+{
+	return import_button.get_sensitive ();
+}
+
 void
 SoundFileBrowser::do_something (int action)
 {
@@ -840,6 +846,12 @@ SoundFileBrowser::on_key_press_event (GdkEventKey* ev)
 		do_something (RESPONSE_CLOSE);
 		return true;
 	}
+	if (ev->keyval == GDK_space && ev->type == GDK_KEY_PRESS) {
+		if (get_action_sensitive()) {
+			preview.audition();
+			return true;
+		}
+	}
 	return ArdourWindow::on_key_press_event (ev);
 }
 
@@ -853,7 +865,7 @@ SoundFileBrowser::clear_selection ()
 void
 SoundFileBrowser::chooser_file_activated ()
 {
-	preview.audition ();
+	do_something (RESPONSE_OK);
 }
 
 void

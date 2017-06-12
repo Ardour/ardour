@@ -249,6 +249,7 @@ class SoundFileBrowser : public ArdourWindow
 	bool on_audio_and_midi_filter (const Gtk::FileFilter::Info& filter_info);
 
 	void set_action_sensitive (bool);
+	bool get_action_sensitive () const;
 
 	virtual bool reset_options () { return true; }
 
