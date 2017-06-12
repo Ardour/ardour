@@ -916,21 +916,19 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+		/* Primary-Tertiary-click applies change to all routes */
 		rl = _session->get_routes ();
-
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
 	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		if (_route->route_group() && _route->route_group()->is_monitoring()) {
-			rl = _route->route_group()->route_list();
-		} else {
-			rl.reset (new RouteList);
-			rl->push_back (route());
-		}
+		/* Primary-click overrides group */
+		rl.reset (new RouteList);
+		rl->push_back (route());
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
 	} else {
 		rl.reset (new RouteList);
 		rl->push_back (route());
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 	}
-
-	_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 
 	return false;
 }
