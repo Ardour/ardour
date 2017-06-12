@@ -136,10 +136,8 @@ DiskIOProcessor::can_support_io_configuration (const ChanCount& in, ChanCount& o
 		return false;
 	}
 
-	if (in != out) {
-		/* currently no way to deliver different channels that we receive */
-		return false;
-	}
+	/* currently no way to deliver different channels that we receive */
+	out = in;
 
 	return true;
 }
@@ -332,6 +330,7 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
         DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: set to use playlist %2 (%3)\n", name(), playlist->name(), dt.to_string()));
 
         if (playlist == _playlists[dt]) {
+	        DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: already using that playlist\n", name()));
 	        return 0;
         }
 
@@ -349,7 +348,7 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
         playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
         playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now use playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now using playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
 
 	PlaylistChanged (dt); /* EMIT SIGNAL */
 	_session.set_dirty ();

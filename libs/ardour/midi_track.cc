@@ -79,10 +79,6 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	, _input_active (true)
 {
 	_session.SessionLoaded.connect_same_thread (*this, boost::bind (&MidiTrack::restore_controls, this));
-
-	_disk_writer->set_note_mode (_note_mode);
-	_disk_reader->reset_tracker ();
-
 }
 
 MidiTrack::~MidiTrack ()
@@ -97,6 +93,9 @@ MidiTrack::init ()
 	}
 
 	_input->changed.connect_same_thread (*this, boost::bind (&MidiTrack::track_input_active, this, _1, _2));
+
+	_disk_writer->set_note_mode (_note_mode);
+	_disk_reader->reset_tracker ();
 
 	return 0;
 }
