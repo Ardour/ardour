@@ -505,17 +505,9 @@ SlavableAutomationControl::slaved () const
 int
 SlavableAutomationControl::MasterRecord::set_state (XMLNode const& n, int)
 {
-	bool yn;
-	double v;
-	if (n.get_property (X_("yn"), yn)) {
-		_yn = yn;
-	}
-	if (n.get_property (X_("val-ctrl"), v)) {
-		_val_ctrl = v;
-	}
-	if (n.get_property (X_("val-master"), v)) {
-		_val_master = v;
-	}
+	n.get_property (X_("yn"), _yn);
+	n.get_property (X_("val-ctrl"), _val_ctrl);
+	n.get_property (X_("val-master"), _val_master);
 	return 0;
 }
 
