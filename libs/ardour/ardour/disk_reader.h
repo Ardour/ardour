@@ -149,7 +149,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	frameoffset_t calculate_playback_distance (pframes_t);
 
-	void get_playback (MidiBuffer& dst, framecnt_t nframes);
+	void get_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState, BufferSet&, double speed, framecnt_t distance);
 	void flush_playback (framepos_t start, framepos_t end);
 };
 
