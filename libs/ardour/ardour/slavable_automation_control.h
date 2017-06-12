@@ -84,12 +84,21 @@ protected:
 
 	class MasterRecord {
 	public:
-		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
+		MasterRecord (boost::weak_ptr<AutomationControl> gc, double vc, double vm)
 			: _master (gc)
 			, _yn (false)
+			, _val_ctrl (vc)
+			, _val_master (vm)
 		{}
 
-		boost::shared_ptr<AutomationControl> master() const { return _master; }
+		boost::shared_ptr<AutomationControl> master() const { assert(_master.lock()); return _master.lock(); }
+
+		double val_ctrl () const { return _val_ctrl; }
+		double val_master () const { return _val_master; }
+
+		double master_ratio () const { return _val_master == 0 ? master()->get_value() : master()->get_value() / _val_master; }
+
+		int set_state (XMLNode const&, int);
 
 		/* for boolean/toggled controls, we store a boolean value to
 		 * indicate if this master returned true/false (1.0/0.0) from
@@ -99,18 +108,22 @@ protected:
 		bool yn() const { return _yn; }
 		void set_yn (bool yn) { _yn = yn; }
 
-		PBD::ScopedConnection connection;
+		PBD::ScopedConnection changed_connection;
+		PBD::ScopedConnection dropped_connection;
 
   private:
-		boost::shared_ptr<AutomationControl> _master;
+		boost::weak_ptr<AutomationControl> _master;
 		/* holds most recently seen master value for boolean/toggle controls */
 		bool   _yn;
+
+		/* values at time of assignment */
+		double _val_ctrl;
+		double _val_master;
 	};
 
 	mutable Glib::Threads::RWLock master_lock;
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
-	std::map<boost::weak_ptr<AutomationControl>, PBD::ScopedConnection> masters_connections;
 
 	void   master_going_away (boost::weak_ptr<AutomationControl>);
 	double get_value_locked() const;
@@ -121,7 +134,7 @@ protected:
 	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);
 	bool boolean_automation_run (framepos_t start, pframes_t len);
 
-	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
+	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::weak_ptr<AutomationControl>);
 	virtual double get_masters_value_locked () const;
 	virtual void   pre_remove_master (boost::shared_ptr<AutomationControl>) {}
 	virtual void   post_add_master (boost::shared_ptr<AutomationControl>) {}

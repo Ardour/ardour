@@ -259,8 +259,10 @@ SoloControl::get_state ()
 }
 
 void
-SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost::shared_ptr<AutomationControl> m)
+SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost::weak_ptr<AutomationControl> wm)
 {
+	boost::shared_ptr<AutomationControl> m = wm.lock ();
+	assert (m);
 	bool send_signal = false;
 
 	_transition_into_solo = 0;

@@ -91,9 +91,10 @@ public:
 	void start_touch(double when);
 	void stop_touch(bool mark, double when);
 
-	/* inherited from PBD::Controllable.
-	 */
-	double get_value () const;
+	/* inherited from PBD::Controllable. */
+	virtual double get_value () const;
+	virtual double get_save_value () const;
+
 	/* inherited from PBD::Controllable.
 	 * Derived classes MUST call ::writable() to verify
 	 * that writing to the parameter is legal at that time.

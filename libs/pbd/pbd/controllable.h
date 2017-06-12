@@ -138,7 +138,7 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state ();
+	virtual XMLNode& get_state ();
 
 	std::string name()      const { return _name; }
 

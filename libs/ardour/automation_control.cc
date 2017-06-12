@@ -92,6 +92,13 @@ AutomationControl::get_value() const
 	return Control::get_double (from_list, _session.transport_frame());
 }
 
+double
+AutomationControl::get_save_value() const
+{
+	/* save user-value, not incl masters */
+	return Control::get_double ();
+}
+
 void
 AutomationControl::pre_realtime_queue_stuff (double val, PBD::Controllable::GroupControlDisposition gcd)
 {

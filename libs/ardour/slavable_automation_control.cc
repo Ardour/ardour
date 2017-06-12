@@ -57,7 +57,6 @@ SlavableAutomationControl::~SlavableAutomationControl ()
 double
 SlavableAutomationControl::get_masters_value_locked () const
 {
-
 	if (_desc.toggled) {
 		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
 			if (mr->second.master()->get_value()) {
@@ -70,7 +69,7 @@ SlavableAutomationControl::get_masters_value_locked () const
 		double v = 1.0; /* the masters function as a scaling factor */
 
 		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-			v *= mr->second.master()->get_value ();
+			v *= mr->second.master_ratio ();
 		}
 
 		return v;
@@ -146,6 +145,7 @@ SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t 
 			= boost::dynamic_pointer_cast<SlavableAutomationControl>(mr->second.master());
 		assert (sc);
 		rv |= sc->masters_curve_multiply (start, end, vec, veclen);
+		apply_gain_to_buffer (vec, veclen, mr->second.master_ratio ());
 	}
 	return rv;
 }
@@ -179,38 +179,19 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 	std::pair<Masters::iterator,bool> res;
 
 	{
+		const double master_value = m->get_value();
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
-		pair<PBD::ID,MasterRecord> newpair (m->id(), MasterRecord (m, 1.0));
+		pair<PBD::ID,MasterRecord> newpair (m->id(), MasterRecord (boost::weak_ptr<AutomationControl> (m), get_value_locked(), master_value));
 		res = _masters.insert (newpair);
 
 		if (res.second) {
-
-			if (!loading) {
-
-				if (!_desc.toggled) {
-					const double master_value = m->get_value();
-
-					if (master_value == 0.0) {
-						AutomationControl::set_double (0.0, Controllable::NoGroup);
-					} else {
-						/* scale control's own value by
-						   amount that the master will
-						   contribute.
-						*/
-						AutomationControl::set_double ((Control::get_double() / master_value), Controllable::NoGroup);
-					}
-				}
-			}
 
 			/* note that we bind @param m as a weak_ptr<AutomationControl>, thus
 			   avoiding holding a reference to the control in the binding
 			   itself.
 			*/
-			assert (masters_connections.find (boost::weak_ptr<AutomationControl>(m)) == masters_connections.end());
-			PBD::ScopedConnection con;
-			m->DropReferences.connect_same_thread (con, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
-			masters_connections[boost::weak_ptr<AutomationControl>(m)] = con;
+			m->DropReferences.connect_same_thread (res.first->second.dropped_connection, boost::bind (&SlavableAutomationControl::master_going_away, this, boost::weak_ptr<AutomationControl>(m)));
 
 			/* Store the connection inside the MasterRecord, so
 			   that when we destroy it, the connection is destroyed
@@ -228,7 +209,7 @@ SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, b
 			   because the change came from the master.
 			*/
 
-			m->Changed.connect_same_thread (res.first->second.connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2, m));
+			m->Changed.connect_same_thread (res.first->second.changed_connection, boost::bind (&SlavableAutomationControl::master_changed, this, _1, _2, boost::weak_ptr<AutomationControl>(m)));
 		}
 	}
 
@@ -295,14 +276,18 @@ SlavableAutomationControl::update_boolean_masters_records (boost::shared_ptr<Aut
 }
 
 void
-SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl> m)
+SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDisposition gcd, boost::weak_ptr<AutomationControl> wm)
 {
+	boost::shared_ptr<AutomationControl> m = wm.lock ();
+	assert (m);
 	Glib::Threads::RWLock::ReaderLock lm (master_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked ()) {
 		/* boolean_automation_run_locked () special case */
 		return;
 	}
 	bool send_signal = handle_master_change (m);
+	lm.release (); // update_boolean_masters_records() takes lock
+
 	update_boolean_masters_records (m);
 	if (send_signal) {
 		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
@@ -321,38 +306,32 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
+	if (_session.deletion_in_progress()) {
+		/* no reason to care about new values or sending signals */
+		return;
+	}
+
 	pre_remove_master (m);
+	double new_val = AutomationControl::get_double();
+	const double old_val = new_val;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
-		masters_connections.erase (boost::weak_ptr<AutomationControl>(m));
+		Masters::const_iterator mi = _masters.find (m->id ());
+
+		/* when un-assigning we apply the master-value permanently */
+		if (mi != _masters.end()) {
+			new_val *= mi->second.master_ratio ();
+		}
+
 		if (!_masters.erase (m->id())) {
 			return;
 		}
-
-		if (!_session.deletion_in_progress()) {
-
-			const double master_value = m->get_value ();
-
-			if (master_value == 0.0) {
-				/* slave would have been set to 0.0 as well,
-				   so just leave it there, and the user can
-				   bring it back up. this fits with the
-				   "removing a VCA does not change the level" rule.
-				*/
-			} else {
-				/* bump up the control's own value by the level
-				   of the master that is being removed.
-				*/
-				AutomationControl::set_double (AutomationControl::get_double() * master_value, Controllable::NoGroup);
-			}
-		}
 	}
 
-	if (_session.deletion_in_progress()) {
-		/* no reason to care about new values or sending signals */
-		return;
+	if (old_val != new_val) {
+		AutomationControl::set_double (new_val, Controllable::NoGroup);
 	}
 
 	MasterStatusChange (); /* EMIT SIGNAL */
@@ -365,31 +344,32 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 void
 SlavableAutomationControl::clear_masters ()
 {
-	double current_value;
-	double new_value;
-	bool had_masters = false;
+	if (_session.deletion_in_progress()) {
+		/* no reason to care about new values or sending signals */
+		return;
+	}
+
+	double new_val = AutomationControl::get_double();
+	const double old_val = new_val;
 
 	/* null ptr means "all masters */
 	pre_remove_master (boost::shared_ptr<AutomationControl>());
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		current_value = get_value_locked ();
-		if (!_masters.empty()) {
-			had_masters = true;
+		if (_masters.empty()) {
+			return;
 		}
+		/* permanently apply masters value */
+		new_val *= get_masters_value_locked ();
+
 		_masters.clear ();
-		masters_connections.clear ();
-		new_value = get_value_locked ();
 	}
 
-	if (had_masters) {
-		MasterStatusChange (); /* EMIT SIGNAL */
+	if (old_val != new_val) {
+		AutomationControl::set_double (new_val, Controllable::NoGroup);
 	}
-
-	if (new_value != current_value) {
-		actually_set_value (current_value, Controllable::UseGroup);
-	}
+	MasterStatusChange (); /* EMIT SIGNAL */
 
 	/* no need to update boolean masters records, since all MRs will have
 	 * been removed already.
@@ -446,6 +426,11 @@ SlavableAutomationControl::find_next_event_locked (double now, double end, Evora
 bool
 SlavableAutomationControl::handle_master_change (boost::shared_ptr<AutomationControl>)
 {
+	/* Derived classes can implement this for special cases (e.g. mute).
+	 * This method is called with a ReaderLock (master_lock) held.
+	 *
+	 * return true if the changed master value resulted
+	 * in a change of the control itself. */
 	return true; // emit Changed
 }
 
@@ -517,6 +502,23 @@ SlavableAutomationControl::slaved () const
 	return !_masters.empty();
 }
 
+int
+SlavableAutomationControl::MasterRecord::set_state (XMLNode const& n, int)
+{
+	bool yn;
+	double v;
+	if (n.get_property (X_("yn"), yn)) {
+		_yn = yn;
+	}
+	if (n.get_property (X_("val-ctrl"), v)) {
+		_val_ctrl = v;
+	}
+	if (n.get_property (X_("val-master"), v)) {
+		_val_master = v;
+	}
+	return 0;
+}
+
 void
 SlavableAutomationControl::use_saved_master_ratios ()
 {
@@ -526,28 +528,19 @@ SlavableAutomationControl::use_saved_master_ratios ()
 
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 
-	/* use stored state, do not recompute */
+	XMLNodeList nlist = _masters_node->children();
+	XMLNodeIterator niter;
 
-	if (_desc.toggled) {
-
-		XMLNodeList nlist = _masters_node->children();
-		XMLNodeIterator niter;
-
-		for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-			ID id_val;
-			bool yn;
-			if (!(*niter)->get_property (X_("id"), id_val) || !(*niter)->get_property (X_("yn"), yn)) {
-				continue;
-		  }
-
-			Masters::iterator mi = _masters.find (id_val);
-			if (mi != _masters.end()) {
-				mi->second.set_yn (yn);
-			}
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		ID id_val;
+		if (!(*niter)->get_property (X_("id"), id_val)) {
+			continue;
 		}
-
-	} else {
-
+		Masters::iterator mi = _masters.find (id_val);
+		if (mi == _masters.end()) {
+			continue;
+		}
+		mi->second.set_state (**niter, Stateful::loading_state_version);
 	}
 
 	delete _masters_node;
@@ -566,23 +559,21 @@ SlavableAutomationControl::get_state ()
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
-
 		if (!_masters.empty()) {
-
 			XMLNode* masters_node = new XMLNode (X_("masters"));
+			for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+				XMLNode* mnode = new XMLNode (X_("master"));
+				mnode->set_property (X_("id"), mr->second.master()->id());
 
-			if (_desc.toggled) {
-				for (Masters::iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
-					XMLNode* mnode = new XMLNode (X_("master"));
-					mnode->set_property (X_("id"), mr->second.master()->id());
+				if (_desc.toggled) {
 					mnode->set_property (X_("yn"), mr->second.yn());
-					masters_node->add_child_nocopy (*mnode);
+				} else {
+					mnode->set_property (X_("val-ctrl"), mr->second.val_ctrl());
+					mnode->set_property (X_("val-master"), mr->second.val_master());
 				}
-			} else {
-
+				masters_node->add_child_nocopy (*mnode);
+				node.add_child_nocopy (*masters_node);
 			}
-
-			node.add_child_nocopy (*masters_node);
 		}
 	}
 
