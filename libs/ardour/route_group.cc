@@ -261,6 +261,9 @@ RouteGroup::get_state ()
 	node->set_property ("id", id());
 	node->set_property ("rgba", _rgba);
 	node->set_property ("used-to-share-gain", _used_to_share_gain);
+	if (subgroup_bus) {
+		node->set_property ("subgroup-bus", subgroup_bus->id ());
+	}
 
 	add_properties (*node);
 
@@ -302,6 +305,14 @@ RouteGroup::set_state (const XMLNode& node, int version)
 			if (r) {
 				add (r);
 			}
+		}
+	}
+
+	PBD::ID subgroup_id (0);
+	if (node.get_property ("subgroup-bus", subgroup_id)) {
+		boost::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
+		if (r) {
+			subgroup_bus = r;
 		}
 	}
 
