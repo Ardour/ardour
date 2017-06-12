@@ -92,7 +92,7 @@ GainControl::inc_gain (gain_t factor)
 	 * ControlGroup::set_group_values().
 	 */
 
-	const float desired_gain = user_double();
+	const float desired_gain = get_value ();
 
 	if (fabsf (desired_gain) < GAIN_COEFF_SMALL) {
 		// really?! what's the idea here?
