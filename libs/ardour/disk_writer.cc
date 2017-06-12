@@ -1041,18 +1041,20 @@ DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 			Source::Lock lm(_midi_write_source->mutex());
 			_midi_write_source->mark_streaming_write_completed (lm);
 		}
+	}
 
+	if (_playlists[DataType::MIDI]) {
 		use_new_write_source (DataType::MIDI);
+	}
 
-		if (destructive() && !c->empty ()) {
+	if (destructive() && !c->empty ()) {
 
-			/* we now have all our write sources set up, so create the
-			   playlist's single region.
-			*/
+		/* we now have all our write sources set up, so create the
+		   playlist's single region.
+		*/
 
-			if (_playlists[DataType::MIDI]->empty()) {
-				setup_destructive_playlist ();
-			}
+		if (_playlists[DataType::MIDI]->empty()) {
+			setup_destructive_playlist ();
 		}
 	}
 }
@@ -1507,7 +1509,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen*/, 
 
 	}
 
-	use_new_write_source (0);
+	reset_write_sources ();
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 		delete *ci;
@@ -1679,6 +1681,47 @@ DiskWriter::set_name (string const & str)
 	if (_name != my_name) {
 		SessionObject::set_name (my_name);
 	}
+
+	return true;
+}
+
+std::string
+DiskWriter::steal_write_source_name ()
+{
+	if (_playlists[DataType::MIDI]) {
+		string our_old_name = _midi_write_source->name();
+
+		/* this will bump the name of the current write source to the next one
+		 * (e.g. "MIDI 1-1" gets renamed to "MIDI 1-2"), thus leaving the
+		 * current write source name (e.g. "MIDI 1-1" available). See the
+		 * comments in Session::create_midi_source_by_stealing_name() about why
+		 * we do this.
+		 */
+
+		try {
+			string new_path = _session.new_midi_source_path (name());
+
+			if (_midi_write_source->rename (new_path)) {
+				return string();
+			}
+		} catch (...) {
+			return string ();
+		}
+
+		return our_old_name;
+	}
+
+	return std::string();
+}
+
+bool
+DiskWriter::configure_io (ChanCount in, ChanCount out)
+{
+	if (!DiskIOProcessor::configure_io (in, out)) {
+		return false;
+	}
+
+	reset_write_sources (false, true);
 
 	return true;
 }
