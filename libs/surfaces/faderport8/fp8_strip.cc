@@ -449,10 +449,10 @@ FP8Strip::periodic_update_fader ()
 		return;
 	}
 
-	ARDOUR::AutoState state = ac->automation_state();
-	if (state == Touch || state == Play) {
-		notify_fader_changed ();
+	if (!ac->automation_playback ()) {
+		return;
 	}
+	notify_fader_changed ();
 }
 
 void
