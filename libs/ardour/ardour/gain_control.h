@@ -45,12 +45,13 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	double user_to_internal (double) const;
 	std::string get_user_string () const;
 
-	bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
-
 	double lower_db;
 	double range_db;
 
 	void inc_gain (gain_t);
+
+protected:
+	bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
 };
 
 } /* namespace */

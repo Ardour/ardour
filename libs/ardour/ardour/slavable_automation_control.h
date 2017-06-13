@@ -54,9 +54,6 @@ public:
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_masters_curve_locked (s, e, v, l);
 	}
-	virtual bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
-
-	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
 
 	/* for toggled/boolean controls, returns a count of the number of
 	   masters currently enabled. For other controls, returns zero.
@@ -129,6 +126,9 @@ protected:
 	double get_value_locked() const;
 	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
+
+	virtual bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
+	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
 
 	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
 	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);
