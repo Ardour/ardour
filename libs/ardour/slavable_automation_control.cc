@@ -106,6 +106,10 @@ SlavableAutomationControl::get_value() const
 
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	if (!from_list) {
+		if (!_masters.empty() && automation_write ()) {
+			/* writing automation takes the fader value as-is, factor out the master */
+			return Control::user_double ();
+		}
 		return get_value_locked ();
 	} else {
 		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
@@ -153,14 +157,12 @@ SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t 
 	return rv;
 }
 
-void
-SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+double
+SlavableAutomationControl::reduce_by_masters_locked (double value, bool ignore_automation_state) const
 {
 	if (!_desc.toggled) {
-
-		Glib::Threads::RWLock::WriterLock lm (master_lock);
-
-		if (!_masters.empty()) {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		if (!_masters.empty() && (ignore_automation_state || !automation_write ())) {
 			/* need to scale given value by current master's scaling */
 			const double masters_value = get_masters_value_locked();
 			if (masters_value == 0.0) {
@@ -171,7 +173,13 @@ SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::
 			}
 		}
 	}
+	return value;
+}
 
+void
+SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
+{
+	value = reduce_by_masters (value);
 	/* this will call Control::set_double() and emit Changed signals as appropriate */
 	AutomationControl::actually_set_value (value, gcd);
 }

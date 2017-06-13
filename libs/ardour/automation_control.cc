@@ -257,10 +257,14 @@ AutomationControl::start_touch(double when)
 	}
 
 	if (!touching()) {
-
 		if (alist()->automation_state() == Touch) {
-			/* subtle. aligns the user value with the playback */
-			set_value (get_value (), Controllable::NoGroup);
+			/* subtle. aligns the user value with the playback and
+			 * use take actual value (incl masters).
+			 *
+			 * Touch + hold writes inverse curve of master-automation
+			 * using AutomationWatch::timer ()
+			 */
+			AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
 			alist()->start_touch (when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().add_automation_watch (shared_from_this());

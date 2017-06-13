@@ -45,9 +45,16 @@ public:
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
+
 	double get_masters_value () const {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_masters_value_locked ();
+	}
+
+	/* factor out get_masters_value() */
+	double reduce_by_masters (double val, bool ignore_automation_state = false) const {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return reduce_by_masters_locked (val, ignore_automation_state);
 	}
 
 	bool get_masters_curve (framepos_t s, framepos_t e, float* v, framecnt_t l) const {
@@ -129,6 +136,8 @@ protected:
 
 	virtual bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
 	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
+
+	virtual double reduce_by_masters_locked (double val, bool) const;
 
 	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
 	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);

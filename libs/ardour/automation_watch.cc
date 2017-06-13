@@ -149,7 +149,12 @@ AutomationWatch::timer ()
 		if (time > _last_time) {  //we only write automation in the forward direction; this fixes automation-recording in a loop
 			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 				if ((*aw)->alist()->automation_write()) {
-					(*aw)->list()->add (time, (*aw)->user_double(), true);
+					double val = (*aw)->user_double();
+					boost::shared_ptr<SlavableAutomationControl> sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (*aw);
+					if (sc) {
+						val = sc->reduce_by_masters (val, true);
+					}
+					(*aw)->list()->add (time, val, true);
 				}
 			}
 		} else if (time != _last_time) {  //transport stopped or reversed.  stop the automation pass and start a new one (for bonus points, someday store the previous pass in an undo record)
