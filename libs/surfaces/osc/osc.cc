@@ -401,11 +401,6 @@ OSC::register_callbacks()
 		// Some controls have optional "f" for feedback or touchosc
 		// http://hexler.net/docs/touchosc-controls-reference
 
-		REGISTER_CALLBACK (serv, "/set_surface", "iiii", set_surface);
-		REGISTER_CALLBACK (serv, "/set_surface/feedback", "i", set_surface_feedback);
-		REGISTER_CALLBACK (serv, "/set_surface/bank_size", "i", set_surface_bank_size);
-		REGISTER_CALLBACK (serv, "/set_surface/gainmode", "i", set_surface_gainmode);
-		REGISTER_CALLBACK (serv, "/set_surface/strip_types", "i", set_surface_strip_types);
 		REGISTER_CALLBACK (serv, "/refresh", "", refresh_surface);
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
@@ -566,9 +561,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
 		REGISTER_CALLBACK (serv, "/select/send_page", "f", sel_send_page);
-		REGISTER_CALLBACK (serv, "/select/send_page_size", "f", sel_send_pagesize);
 		REGISTER_CALLBACK (serv, "/select/plug_page", "f", sel_plug_page);
-		REGISTER_CALLBACK (serv, "/select/plug_page_size", "f", sel_plug_pagesize);
 		REGISTER_CALLBACK (serv, "/select/plugin", "f", sel_plugin);
 		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
 		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
@@ -1037,6 +1030,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		int ssid = atoi (&path[17]);
 		ret = sel_eq_shape (ssid, argv[0]->f, msg);
 	}
+	else if (!strncmp (path, "/set_surface", 12)) {
+		ret = surface_parse (path, types, argv, argc, msg);
+	}
 	if (ret) {
 		check_surface (msg);
 	}
@@ -1315,7 +1311,8 @@ OSC::refresh_surface (lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg));
 	// restart all observers
-	set_surface (s->bank_size, (uint32_t) s->strip_types.to_ulong(), (uint32_t) s->feedback.to_ulong(), (uint32_t) s->gainmode, msg);
+	set_surface (s->bank_size, (uint32_t) s->strip_types.to_ulong(), (uint32_t) s->feedback.to_ulong(), \
+		(uint32_t) s->gainmode, (uint32_t) s->send_page_size, (uint32_t) s->plug_page_size, msg);
 	return 0;
 }
 
@@ -1371,17 +1368,195 @@ OSC::clear_devices ()
 }
 
 int
-OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, lo_message msg)
+OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	int ret = 1; /* unhandled */
+	OSCSurface *sur = get_surface(get_address (msg));
+	int pi_page = sur->plug_page_size;
+	int se_page = sur->send_page_size;
+	int fadermode = sur->gainmode;
+	int feedback = sur->feedback.to_ulong();
+	int strip_types = sur->strip_types.to_ulong();
+	int bank_size = sur->bank_size;
+
+
+	if (!strncmp (path, "/set_surface/feedback", 21)) {
+		if (argv[0]->f) {
+			ret = set_surface_feedback ((int)argv[0]->f, msg);
+		} else {
+			ret = set_surface_feedback (argv[0]->i, msg);
+		}
+	}
+	else if (!strncmp (path, "/set_surface/bank_size", 22)) {
+		if (argv[0]->f) {
+			ret = set_surface_bank_size ((int)argv[0]->f, msg);
+		} else {
+			ret = set_surface_bank_size (argv[0]->i, msg);
+		}
+	}
+	else if (!strncmp (path, "/set_surface/gainmode", 21)) {
+		if (argv[0]->f) {
+			ret = set_surface_gainmode ((int)argv[0]->f, msg);
+		} else {
+			ret = set_surface_gainmode (argv[0]->i, msg);
+		}
+	}
+	else if (!strncmp (path, "/set_surface/strip_types", 24)) {
+		if (argv[0]->f) {
+			ret = set_surface_strip_types ((int)argv[0]->f, msg);
+		} else {
+			ret = set_surface_strip_types (argv[0]->i, msg);
+		}
+	}
+	else if (!strncmp (path, "/set_surface/send_page_size", 27)) {
+		if (argv[0]->f) {
+			ret = sel_send_pagesize ((int)argv[0]->f, msg);
+		} else {
+			ret = sel_send_pagesize (argv[0]->i, msg);
+		}
+	}
+	else if (!strncmp (path, "/set_surface/plugin_page_size", 29)) {
+		if (argv[0]->f) {
+			ret = sel_plug_pagesize ((int)argv[0]->f, msg);
+		} else {
+			ret = sel_plug_pagesize (argv[0]->i, msg);
+		}
+	} else if (strlen(path) == 12) {
+		// command is in /set_surface iii form
+		switch (argc) {
+			case 6:
+				if (argv[5]->f) {
+					pi_page = (int) argv[5]->f;
+				} else {
+					pi_page = argv[5]->i;
+				}
+			case 5:
+				if (argv[4]->f) {
+					se_page = (int) argv[4]->f;
+				} else {
+					se_page = argv[4]->i;
+				}
+			case 4:
+				if (argv[3]->f) {
+					fadermode = (int) argv[3]->f;
+				} else {
+					fadermode = argv[3]->i;
+				}
+			case 3:
+				if (argv[2]->f) {
+					feedback = (int) argv[2]->f;
+				} else {
+					feedback = argv[2]->i;
+				}
+			case 2:
+				if (argv[1]->f) {
+					strip_types = (int) argv[1]->f;
+				} else {
+					strip_types = argv[1]->i;
+				}
+			case 1:
+				if (argv[0]->f) {
+					bank_size = (int) argv[0]->f;
+				} else {
+					bank_size = argv[0]->i;
+				}
+				ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
+				break;
+			case 0:
+				// send current setup
+				{
+					lo_message reply = lo_message_new ();
+					lo_message_add_int32 (reply, bank_size);
+					lo_message_add_int32 (reply, strip_types);
+					lo_message_add_int32 (reply, feedback);
+					lo_message_add_int32 (reply, fadermode);
+					lo_message_add_int32 (reply, se_page);
+					lo_message_add_int32 (reply, pi_page);
+					lo_send_message (get_address (msg), "/set_surface", reply);
+					lo_message_free (reply);
+					return 0;
+				}
+				break;
+
+			default:
+				PBD::warning << "OSC: Too many parameters." << endmsg;
+				return 1;
+				break;
+		}
+	} else if (isdigit(path[13])) {
+		// some of our parameters must be "in-lined"
+		bank_size = atoi (&path[13]);
+		const char * par = strstr (&path[13], "/");
+		if (par) {
+			strip_types = atoi (&par[1]);
+			const char * fb = strstr (&par[1], "/");
+			if (fb) {
+				feedback = atoi (&fb[1]);
+				const char * fm = strstr (&fb[1], "/");
+				if (fm) {
+					fadermode = atoi (&fm[1]);
+					const char * sp = strstr (&fm[1], "/");
+					if (sp) {
+						se_page = atoi (&sp[1]);
+						const char * pp = strstr (&sp[1], "/");
+						if (pp) {
+							pi_page = atoi (&pp[1]);
+						} else {
+							if (argv[0]->f) {
+								pi_page = (int) argv[0]->f;
+							} else if (argv[0]->i) {
+								pi_page = argv[0]->i;
+							}
+						}
+					} else {
+						if (argv[0]->f) {
+							se_page = (int) argv[0]->f;
+						} else if (argv[0]->i) {
+							se_page = argv[0]->i;
+						}
+					}
+				} else {
+					if (argv[0]->f) {
+						fadermode = (int) argv[0]->f;
+					} else if (argv[0]->i) {
+						fadermode = argv[0]->i;
+					}
+				}
+			} else {
+				if (argv[0]->f) {
+					feedback = (int) argv[0]->f;
+				} else if (argv[0]->i) {
+					feedback = argv[0]->i;
+				}
+			}
+		} else {
+			if (argv[0]->f) {
+				strip_types = (int) argv[0]->f;
+			} else if (argv[0]->i) {
+				strip_types = argv[0]->i;
+			}
+		}
+		ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
+	}
+	return ret;
+}
+
+int
+OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, uint32_t se_size, uint32_t pi_size, lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
 	s->bank_size = b_size;
 	s->strip_types = strips;
 	s->feedback = fb;
 	s->gainmode = gm;
+	s->send_page_size = se_size;
+	s->plug_page_size = pi_size;
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
 
 	global_feedback (s->feedback, get_address (msg), s->gainmode);
+	sel_send_pagesize (se_size, msg);
+	sel_plug_pagesize (pi_size, msg);
 	return 0;
 }
 

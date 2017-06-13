@@ -270,6 +270,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// end cue
 
 	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int surface_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \
@@ -411,10 +412,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(scrub,f);
 	PATH_CALLBACK1_MSG(jog,f);
 	PATH_CALLBACK1_MSG(jog_mode,f);
-	PATH_CALLBACK1_MSG(set_surface_bank_size,i);
-	PATH_CALLBACK1_MSG(set_surface_strip_types,i);
-	PATH_CALLBACK1_MSG(set_surface_feedback,i);
-	PATH_CALLBACK1_MSG(set_surface_gainmode,i);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -433,9 +430,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_pan_frontback,f);
 	PATH_CALLBACK1_MSG(sel_pan_lfe,f);
 	PATH_CALLBACK1_MSG(sel_send_page,f);
-	PATH_CALLBACK1_MSG(sel_send_pagesize,f);
 	PATH_CALLBACK1_MSG(sel_plug_page,f);
-	PATH_CALLBACK1_MSG(sel_plug_pagesize,f);
 	PATH_CALLBACK1_MSG(sel_plugin,f);
 	PATH_CALLBACK1_MSG(sel_comp_enable,f);
 	PATH_CALLBACK1_MSG(sel_comp_threshold,f);
@@ -520,7 +515,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(sel_eq_q,i,f);
 	PATH_CALLBACK2_MSG(sel_eq_shape,i,f);
 
-	PATH_CALLBACK4(set_surface,i,i,i,i);
 	PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(loop_location,i,i);
 	PATH_CALLBACK2_MSG_s(route_rename,i,s);
@@ -587,7 +581,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int _set_bank (uint32_t bank_start, lo_address addr);
 	int bank_up (lo_message msg);
 	int bank_down (lo_message msg);
-	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, lo_message msg);
+	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, uint32_t se_size, uint32_t pi_size, lo_message msg);
 	int set_surface_bank_size (uint32_t bs, lo_message msg);
 	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
