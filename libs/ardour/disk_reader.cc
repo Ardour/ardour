@@ -374,8 +374,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	if (!_session.declick_out_pending()) {
 		if (ms & MonitoringDisk) {
-			MidiBuffer& mbuf (bufs.get_midi (0));
-			get_playback (mbuf, playback_distance, ms, scratch_bufs, speed, playback_distance);
+			get_midi_playback (bufs.get_midi (0), playback_distance, ms, scratch_bufs, speed, playback_distance);
 		}
 	}
 
@@ -1188,18 +1187,11 @@ DiskReader::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t t
 	}
 }
 
-void
-DiskReader::flush_playback (framepos_t start, framepos_t end)
-{
-	_midi_buf->flush (start, end);
-	g_atomic_int_add (&_frames_read_from_ringbuffer, end - start);
-}
-
 /** Writes playback events from playback_sample for nframes to dst, translating time stamps
  *  so that an event at playback_sample has time = 0
  */
 void
-DiskReader::get_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, framecnt_t playback_distance)
+DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, framecnt_t playback_distance)
 {
 	MidiBuffer* target;
 
