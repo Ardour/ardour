@@ -138,6 +138,7 @@ protected:
 	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
 
 	virtual double reduce_by_masters_locked (double val, bool) const;
+	virtual double scale_automation_callback (double val, double ratio) const;
 
 	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
 	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);

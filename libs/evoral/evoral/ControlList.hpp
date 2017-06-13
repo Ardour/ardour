@@ -123,6 +123,8 @@ public:
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
 
+	void y_transform (boost::function<double(double)> callback);
+
 	/** add automation events
 	 * @param when absolute time in samples
 	 * @param value parameter value

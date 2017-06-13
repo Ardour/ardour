@@ -314,6 +314,15 @@ SlavableAutomationControl::master_going_away (boost::weak_ptr<AutomationControl>
 	}
 }
 
+double
+SlavableAutomationControl::scale_automation_callback (double value, double ratio) const
+{
+	/* derived classes can override this and e.g. add/subtract. */
+	value *= ratio;
+	value = std::max (lower(), std::min(upper(), value));
+	return value;
+}
+
 void
 SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m)
 {
@@ -323,17 +332,20 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 	}
 
 	pre_remove_master (m);
-	double new_val = AutomationControl::get_double();
-	const double old_val = new_val;
+
+	const double old_val = AutomationControl::get_double();
+
+	bool update_value = false;
+	double master_ratio = 0;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
 		Masters::const_iterator mi = _masters.find (m->id ());
 
-		/* when un-assigning we apply the master-value permanently */
 		if (mi != _masters.end()) {
-			new_val *= mi->second.master_ratio ();
+			master_ratio = mi->second.master_ratio ();
+			update_value = true;
 		}
 
 		if (!_masters.erase (m->id())) {
@@ -341,8 +353,19 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 		}
 	}
 
-	if (old_val != new_val) {
-		AutomationControl::set_double (new_val, Controllable::NoGroup);
+	if (update_value) {
+		/* when un-assigning we apply the master-value permanently */
+			double new_val = old_val * master_ratio;
+
+			if (old_val != new_val) {
+				AutomationControl::set_double (new_val, Controllable::NoGroup);
+			}
+
+			/* ..and update automation */
+			if (_list) {
+				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
+				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+			}
 	}
 
 	MasterStatusChange (); /* EMIT SIGNAL */
@@ -360,8 +383,10 @@ SlavableAutomationControl::clear_masters ()
 		return;
 	}
 
-	double new_val = AutomationControl::get_double();
-	const double old_val = new_val;
+	const double old_val = AutomationControl::get_double();
+
+	bool update_value = false;
+	double master_ratio = 0;
 
 	/* null ptr means "all masters */
 	pre_remove_master (boost::shared_ptr<AutomationControl>());
@@ -371,15 +396,26 @@ SlavableAutomationControl::clear_masters ()
 		if (_masters.empty()) {
 			return;
 		}
-		/* permanently apply masters value */
-		new_val *= get_masters_value_locked ();
-
+		master_ratio = get_masters_value_locked ();
+		update_value = true;
 		_masters.clear ();
 	}
 
-	if (old_val != new_val) {
-		AutomationControl::set_double (new_val, Controllable::NoGroup);
+	if (update_value) {
+		/* permanently apply masters value */
+			double new_val = old_val * master_ratio;
+
+			if (old_val != new_val) {
+				AutomationControl::set_double (new_val, Controllable::NoGroup);
+			}
+
+			/* ..and update automation */
+			if (_list) {
+				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
+				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+			}
 	}
+
 	MasterStatusChange (); /* EMIT SIGNAL */
 
 	/* no need to update boolean masters records, since all MRs will have

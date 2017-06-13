@@ -251,6 +251,19 @@ ControlList::extend_to (double when)
 }
 
 void
+ControlList::y_transform (boost::function<double(double)> callback)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			(*i)->value = callback ((*i)->value);
+		}
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
+void
 ControlList::_x_scale (double factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
