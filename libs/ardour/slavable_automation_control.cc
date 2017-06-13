@@ -128,7 +128,8 @@ bool
 SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
 {
 	gain_t* scratch = _session.scratch_automation_buffer ();
-	bool rv = list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
+	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
+	bool rv = from_list && list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
 	if (rv) {
 		for (framecnt_t i = 0; i < veclen; ++i) {
 			vec[i] *= scratch[i];
@@ -145,7 +146,9 @@ SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t 
 			= boost::dynamic_pointer_cast<SlavableAutomationControl>(mr->second.master());
 		assert (sc);
 		rv |= sc->masters_curve_multiply (start, end, vec, veclen);
-		apply_gain_to_buffer (vec, veclen, mr->second.master_ratio ());
+		if (mr->second.val_master () != 0) {
+			apply_gain_to_buffer (vec, veclen, 1.f / mr->second.val_master ());
+		}
 	}
 	return rv;
 }
