@@ -45,7 +45,10 @@ PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
-        , capture_start_frame (0)
+	, _input_latency (0)
+	, _record_enabled (0)
+	, _record_safe (0)
+	, capture_start_frame (0)
         , capture_captured (0)
         , was_recording (false)
         , adjust_capture_position (0)
