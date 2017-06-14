@@ -166,7 +166,7 @@ SlavableAutomationControl::reduce_by_masters_locked (double value, bool ignore_a
 			/* need to scale given value by current master's scaling */
 			const double masters_value = get_masters_value_locked();
 			if (masters_value == 0.0) {
-				value = 0.0;
+				value = 0.0; // XXX 1.0, see master_ratio(), val_master_inv()
 			} else {
 				value /= masters_value;
 				value = std::max (lower(), std::min(upper(), value));
@@ -337,6 +337,9 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	bool update_value = false;
 	double master_ratio = 0;
+	double list_ratio = 1;
+
+	boost::shared_ptr<AutomationControl> master;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
@@ -346,6 +349,8 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 		if (mi != _masters.end()) {
 			master_ratio = mi->second.master_ratio ();
 			update_value = true;
+			master = mi->second.master();
+			list_ratio *= mi->second.val_master_inv ();
 		}
 
 		if (!_masters.erase (m->id())) {
@@ -355,17 +360,22 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	if (update_value) {
 		/* when un-assigning we apply the master-value permanently */
-			double new_val = old_val * master_ratio;
+		double new_val = old_val * master_ratio;
 
-			if (old_val != new_val) {
-				AutomationControl::set_double (new_val, Controllable::NoGroup);
-			}
+		if (old_val != new_val) {
+			AutomationControl::set_double (new_val, Controllable::NoGroup);
+		}
 
-			/* ..and update automation */
-			if (_list) {
+		/* ..and update automation */
+		if (_list) {
+			if (master->automation_playback () && master->list()) {
+				_list->list_merge (*master->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
+				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
+			} else {
 				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
 				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
 			}
+		}
 	}
 
 	MasterStatusChange (); /* EMIT SIGNAL */
@@ -385,8 +395,10 @@ SlavableAutomationControl::clear_masters ()
 
 	const double old_val = AutomationControl::get_double();
 
+	ControlList masters;
 	bool update_value = false;
 	double master_ratio = 0;
+	double list_ratio = 1;
 
 	/* null ptr means "all masters */
 	pre_remove_master (boost::shared_ptr<AutomationControl>());
@@ -396,6 +408,17 @@ SlavableAutomationControl::clear_masters ()
 		if (_masters.empty()) {
 			return;
 		}
+
+		for (Masters::const_iterator mr = _masters.begin(); mr != _masters.end(); ++mr) {
+			boost::shared_ptr<AutomationControl> master = mr->second.master();
+			if (master->automation_playback () && master->list()) {
+				masters.push_back (mr->second.master());
+				list_ratio *= mr->second.val_master_inv ();
+			} else {
+				list_ratio *= mr->second.master_ratio ();
+			}
+		}
+
 		master_ratio = get_masters_value_locked ();
 		update_value = true;
 		_masters.clear ();
@@ -411,8 +434,14 @@ SlavableAutomationControl::clear_masters ()
 
 			/* ..and update automation */
 			if (_list) {
-				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
-				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+				if (!masters.empty()) {
+					for (ControlList::const_iterator m = masters.begin(); m != masters.end(); ++m) {
+						_list->list_merge (*(*m)->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
+					}
+					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
+				} else {
+					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+				}
 			}
 	}
 

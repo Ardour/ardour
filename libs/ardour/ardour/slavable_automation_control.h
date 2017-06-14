@@ -99,6 +99,7 @@ protected:
 
 		double val_ctrl () const { return _val_ctrl; }
 		double val_master () const { return _val_master; }
+		double val_master_inv () const { return _val_master == 0 ? 1.0 : 1.0 / _val_master; }
 
 		double master_ratio () const { return _val_master == 0 ? master()->get_value() : master()->get_value() / _val_master; }
 
