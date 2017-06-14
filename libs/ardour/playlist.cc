@@ -28,17 +28,19 @@
 #include "pbd/xml++.h"
 
 #include "ardour/debug.h"
+#include "ardour/midi_region.h"
 #include "ardour/playlist.h"
-#include "ardour/session.h"
+#include "ardour/playlist_factory.h"
+#include "ardour/playlist_source.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/region_sorters.h"
-#include "ardour/playlist_factory.h"
-#include "ardour/playlist_source.h"
-#include "ardour/transient_detector.h"
-#include "ardour/types_convert.h"
+#include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source_factory.h"
+#include "ardour/tempo.h"
+#include "ardour/transient_detector.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -888,6 +890,20 @@ Playlist::partition (framepos_t start, framepos_t end, bool cut)
 	}
 }
 
+/* If a MIDI region is locked to musical-time, Properties::start is ignored
+ * and _start is overwritten using Properties::start_beats in
+ * add_region_internal() -> Region::set_position() -> MidiRegion::set_position_internal()
+ */
+static void maybe_add_start_beats (TempoMap const& tm, PropertyList& plist, boost::shared_ptr<Region> r, framepos_t start, framepos_t end)
+{
+	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
+	if (!mr) {
+		return;
+	}
+	double delta_beats = tm.quarter_notes_between_frames (start, end);
+	plist.add (Properties::start_beats, mr->start_beats () + delta_beats);
+}
+
 /** Go through each region on the playlist and cut them at start and end, removing the section between
  *  start and end if cutting == true.  Regions that lie entirely within start and end are always
  *  removed.
@@ -980,6 +996,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
 					plist.add (Properties::right_of_split, true);
+					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
 					region = RegionFactory::create (current, plist);
 					add_region_internal (region, start);
@@ -999,6 +1016,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				plist.add (Properties::layering_index, current->layering_index ());
 				plist.add (Properties::automatic, true);
 				plist.add (Properties::right_of_split, true);
+				maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos3 - pos1));
 
 				region = RegionFactory::create (current, plist);
 
@@ -1039,6 +1057,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::layering_index, current->layering_index ());
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
+					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
 					region = RegionFactory::create (current, plist);
 
@@ -1084,6 +1103,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::layering_index, current->layering_index ());
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::right_of_split, true);
+					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start());
 
 					region = RegionFactory::create (current, plist);
 
