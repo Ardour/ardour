@@ -4670,6 +4670,11 @@ OSC::get_state ()
 			devnode->set_property (X_("strip-types"), (uint64_t)sur->strip_types.to_ulong());
 			devnode->set_property (X_("feedback"), (uint64_t)sur->feedback.to_ulong());
 			devnode->set_property (X_("gainmode"), sur->gainmode);
+			devnode->set_property (X_("send-page-size"), sur->send_page_size);
+			devnode->set_property (X_("plug-page-size"), sur->plug_page_size);
+			devnode->set_property (X_("no-clear"), sur->no_clear);
+			devnode->set_property (X_("cue"), sur->cue);
+			devnode->set_property (X_("aux"), sur->aux);
 			config->add_child_nocopy (*devnode);
 		}
 		node.add_child_nocopy (*config);
@@ -4718,16 +4723,18 @@ OSC::set_state (const XMLNode& node, int version)
 			}
 			(*d)->get_property (X_("gainmode"), s.gainmode);
 
+			(*d)->get_property (X_("send-page-size"), s.send_page_size);
+			(*d)->get_property (X_("plug-page-size"), s.plug_page_size);
+			(*d)->get_property (X_("no-clear"), s.no_clear);
+			(*d)->get_property (X_("cue"), s.cue);
+			(*d)->get_property (X_("aux"), s.aux);
 			s.bank = 1;
 			s.sel_obs = 0;
 			s.expand = 0;
 			s.expand_enable = false;
 			s.strips = get_sorted_stripables (s.strip_types, s.cue);
 			s.nstrips = s.strips.size ();
-			s.no_clear = false;
 			s.jogmode = JOG;
-			s.cue = false;
-			s.aux = 0;
 			_surface.push_back (s);
 		}
 	}
