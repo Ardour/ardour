@@ -98,6 +98,8 @@ OSC::OSC (Session& s, uint32_t port)
 	, default_strip (159)
 	, default_feedback (0)
 	, default_gainmode (0)
+	, default_send_size (0)
+	, default_plugin_size (0)
 	, tick (true)
 	, bank_dirty (false)
 	, scrub_speed (0)
@@ -1659,9 +1661,9 @@ OSC::get_surface (lo_address addr)
 	s.aux = 0;
 	s.strips = get_sorted_stripables(s.strip_types, s.cue);
 	s.send_page = 1;
-	s.send_page_size = 0;
+	s.send_page_size = default_send_size;
 	s.plug_page = 1;
-	s.plug_page_size = 0;
+	s.plug_page_size = default_plugin_size;
 	s.plugin_id = 1;
 
 	s.nstrips = s.strips.size();
@@ -4660,6 +4662,8 @@ OSC::get_state ()
 	node.set_property ("striptypes", default_strip);
 	node.set_property ("feedback", default_feedback);
 	node.set_property ("gainmode", default_gainmode);
+	node.set_property ("send-page-size", default_send_size);
+	node.set_property ("plug-page-size", default_plugin_size);
 	if (_surface.size()) {
 		XMLNode* config = new XMLNode (X_("Configurations"));
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
@@ -4699,6 +4703,8 @@ OSC::set_state (const XMLNode& node, int version)
 	node.get_property (X_("striptypes"), default_strip);
 	node.get_property (X_("feedback"), default_feedback);
 	node.get_property (X_("gainmode"), default_gainmode);
+	node.get_property (X_("send-page-size"), default_send_size);
+	node.get_property (X_("plugin-page-size"), default_plugin_size);
 
 	XMLNode* cnode = node.child (X_("Configurations"));
 

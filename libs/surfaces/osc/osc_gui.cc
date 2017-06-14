@@ -111,6 +111,28 @@ OSC_GUI::OSC_GUI (OSC& p)
 
 	++n;
 
+	// default send page setting
+	label = manage (new Gtk::Label(_("Send Page Size:")));
+	label->set_alignment(1, .5);
+	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (send_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	send_page_entry.set_range (0, 0xffff);
+	send_page_entry.set_increments (1, 8);
+	send_page_entry.set_value (cp.get_send_size());
+
+	++n;
+
+	// default plugin page setting
+	label = manage (new Gtk::Label(_("Plugin Page Size:")));
+	label->set_alignment(1, .5);
+	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (plugin_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	plugin_page_entry.set_range (0, 0xffff);
+	plugin_page_entry.set_increments (1, 8);
+	plugin_page_entry.set_value (cp.get_send_size());
+
+	++n;
+
 	// Gain Mode
 	label = manage (new Gtk::Label(_("Gain Mode:")));
 	label->set_alignment(1, .5);
@@ -173,6 +195,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	button->signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::clear_device));
 	port_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
 	bank_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
+	send_page_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::send_page_changed));
+	plugin_page_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::plugin_page_changed));
 
 	// Strip Types Calculate Page
 	int stn = 0; // table row
@@ -517,6 +541,24 @@ OSC_GUI::bank_changed ()
 }
 
 void
+OSC_GUI::send_page_changed ()
+{
+	uint32_t ssize = send_page_entry.get_value ();
+	cp.set_send_size (ssize);
+	save_user ();
+
+}
+
+void
+OSC_GUI::plugin_page_changed ()
+{
+	uint32_t psize = plugin_page_entry.get_value ();
+	cp.set_plugin_size (psize);
+	save_user ();
+
+}
+
+void
 OSC_GUI::gainmode_changed ()
 {
 	std::string str = gainmode_combo.get_active_text ();
@@ -556,6 +598,7 @@ OSC_GUI::preset_changed ()
 	else {
 		load_preset (str);
 	}
+	cp.clear_devices ();
 	preset_busy = false;
 }
 
@@ -564,6 +607,10 @@ OSC_GUI::factory_reset ()
 {
 	cp.set_banksize (0);
 	bank_entry.set_value (0);
+	cp.set_send_size (0);
+	send_page_entry.set_value (0);
+	cp.set_plugin_size (0);
+	plugin_page_entry.set_value (0);
 	cp.set_defaultstrip (159);
 	cp.set_defaultfeedback (0);
 	reshow_values ();
@@ -799,6 +846,14 @@ OSC_GUI::save_user ()
 	child->set_property ("value", cp.get_banksize());
 	node->add_child_nocopy (*child);
 
+	child = new XMLNode ("Send-Size");
+	child->set_property ("value", cp.get_send_size());
+	node->add_child_nocopy (*child);
+
+	child = new XMLNode ("Plugin-Size");
+	child->set_property ("value", cp.get_plugin_size());
+	node->add_child_nocopy (*child);
+
 	child = new XMLNode ("Strip-Types");
 	child->set_property ("value", cp.get_defaultstrip());
 	node->add_child_nocopy (*child);
@@ -873,6 +928,20 @@ OSC_GUI::load_preset (std::string preset)
 			cp.set_banksize (atoi (prop->value().c_str()));
 			bank_entry.set_value (atoi (prop->value().c_str()));
 		}
+		if ((child = root->child ("Send-Size")) == 0 || (prop = child->property ("value")) == 0) {
+			cp.set_send_size (sesn_send);
+			send_page_entry.set_value (sesn_send);
+		} else {
+			cp.set_send_size (atoi (prop->value().c_str()));
+			send_page_entry.set_value (atoi (prop->value().c_str()));
+		}
+		if ((child = root->child ("Plugin-Size")) == 0 || (prop = child->property ("value")) == 0) {
+			cp.set_plugin_size (sesn_plugin);
+			plugin_page_entry.set_value (sesn_plugin);
+		} else {
+			cp.set_plugin_size (atoi (prop->value().c_str()));
+			plugin_page_entry.set_value (atoi (prop->value().c_str()));
+		}
 		if ((child = root->child ("Strip-Types")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_defaultstrip (sesn_strips);
 		} else {
@@ -903,6 +972,8 @@ OSC_GUI::get_session ()
 	sesn_portmode = cp.get_portmode ();
 	sesn_port = cp.get_remote_port ();
 	sesn_bank = cp.get_banksize ();
+	sesn_send = cp.get_send_size ();
+	sesn_plugin = cp.get_plugin_size ();
 	sesn_strips = cp.get_defaultstrip ();
 	sesn_feedback = cp.get_defaultfeedback ();
 	sesn_gainmode = cp.get_gainmode ();
@@ -917,6 +988,10 @@ OSC_GUI::restore_sesn_values ()
 	port_entry.set_text (sesn_port);
 	cp.set_banksize (sesn_bank);
 	bank_entry.set_value (sesn_bank);
+	cp.set_send_size (sesn_send);
+	send_page_entry.set_value (sesn_send);
+	cp.set_plugin_size (sesn_plugin);
+	plugin_page_entry.set_value (sesn_plugin);
 	cp.set_defaultstrip (sesn_strips);
 	cp.set_defaultfeedback (sesn_feedback);
 	reshow_values ();

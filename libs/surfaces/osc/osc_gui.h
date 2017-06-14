@@ -45,6 +45,8 @@ private:
 	Gtk::ComboBoxText portmode_combo;
 	Gtk::SpinButton port_entry;
 	Gtk::SpinButton bank_entry;
+	Gtk::SpinButton send_page_entry;
+	Gtk::SpinButton plugin_page_entry;
 	Gtk::ComboBoxText gainmode_combo;
 	Gtk::ComboBoxText preset_combo;
 	std::vector<std::string> preset_options;
@@ -55,6 +57,8 @@ private:
 	uint32_t sesn_portmode;
 	std::string sesn_port;
 	uint32_t sesn_bank;
+	uint32_t sesn_send;
+	uint32_t sesn_plugin;
 	uint32_t sesn_strips;
 	uint32_t sesn_feedback;
 	uint32_t sesn_gainmode;
@@ -70,6 +74,8 @@ private:
 	void reshow_values ();
 	void port_changed ();
 	void bank_changed ();
+	void send_page_changed ();
+	void plugin_page_changed ();
 	void strips_changed ();
 	void feedback_changed ();
 	void preset_changed ();

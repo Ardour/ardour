@@ -178,6 +178,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void set_defaultstrip (int st) { default_strip = st; }
 	int get_defaultfeedback() { return default_feedback; }
 	void set_defaultfeedback (int fb) { default_feedback = fb; }
+	int get_send_size() { return default_send_size; }
+	void set_send_size (int ss) { default_send_size = ss; }
+	int get_plugin_size() { return default_plugin_size; }
+	void set_plugin_size (int ps) { default_plugin_size = ps; }
 	void clear_devices ();
 	void gui_changed ();
 	std::string get_remote_port () { return remote_port; }
@@ -207,6 +211,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	uint32_t default_strip;
 	uint32_t default_feedback;
 	uint32_t default_gainmode;
+	uint32_t default_send_size;
+	uint32_t default_plugin_size;
 	bool tick;
 	bool bank_dirty;
 	float scrub_speed;		// Current scrub speed
