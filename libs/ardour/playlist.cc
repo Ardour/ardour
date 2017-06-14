@@ -998,7 +998,10 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::right_of_split, true);
 					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
-					region = RegionFactory::create (current, plist);
+					/* see note in :_split_region()
+					 * for MusicFrame is needed to offset region-gain
+					 */
+					region = RegionFactory::create (current, MusicFrame (pos2 - pos1, 0), plist);
 					add_region_internal (region, start);
 					new_regions.push_back (region);
 				}
@@ -1018,7 +1021,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				plist.add (Properties::right_of_split, true);
 				maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos3 - pos1));
 
-				region = RegionFactory::create (current, plist);
+				region = RegionFactory::create (current, MusicFrame (pos3 - pos1, 0), plist);
 
 				add_region_internal (region, end);
 				new_regions.push_back (region);
@@ -1059,7 +1062,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::left_of_split, true);
 					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
-					region = RegionFactory::create (current, plist);
+					region = RegionFactory::create (current, MusicFrame(pos2 - pos1, 0), plist);
 
 					add_region_internal (region, start);
 					new_regions.push_back (region);
