@@ -124,6 +124,7 @@ public:
 	void shift (double before, double distance);
 
 	void y_transform (boost::function<double(double)> callback);
+	void list_merge (ControlList const& other, boost::function<double(double, double)> callback);
 
 	/** add automation events
 	 * @param when absolute time in samples
@@ -217,7 +218,7 @@ public:
 	 * @param where absolute time in samples
 	 * @returns parameter value
 	 */
-	double eval (double where) {
+	double eval (double where) const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return unlocked_eval (where);
 	}

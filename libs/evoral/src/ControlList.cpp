@@ -264,6 +264,52 @@ ControlList::y_transform (boost::function<double(double)> callback)
 }
 
 void
+ControlList::list_merge (ControlList const& other, boost::function<double(double, double)> callback)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		EventList nel;
+		/* First scale existing events, copy into a new list.
+		 * The original list is needed later to interpolate
+		 * for new events only present in the master list.
+		 */
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			float val = callback ((*i)->value, other.eval ((*i)->when));
+			nel.push_back (new ControlEvent ((*i)->when , val));
+		}
+		/* Now add events which are only present in the master-list. */
+		const EventList& evl (other.events());
+		for (const_iterator i = evl.begin(); i != evl.end(); ++i) {
+			bool found = false;
+			// TODO: optimize, remember last matching iterator (lists are sorted)
+			for (iterator j = _events.begin(); j != _events.end(); ++j) {
+				if ((*i)->when == (*j)->when) {
+					found = true;
+					break;
+				}
+			}
+			/* skip events that have already been merge in the first pass */
+			if (found) {
+				continue;
+			}
+			float val = callback (unlocked_eval ((*i)->when), (*i)->value);
+			nel.push_back (new ControlEvent ((*i)->when, val));
+		}
+		nel.sort (event_time_less_than);
+
+		for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
+			delete (*x);
+		}
+		_events.clear ();
+		_events = nel;
+
+		unlocked_invalidate_insert_iterator ();
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
+void
 ControlList::_x_scale (double factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
