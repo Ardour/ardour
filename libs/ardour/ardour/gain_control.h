@@ -51,6 +51,7 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	void inc_gain (gain_t);
 
 protected:
+	void post_add_master (boost::shared_ptr<AutomationControl>);
 	bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
 };
 

@@ -150,9 +150,7 @@ SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t 
 			= boost::dynamic_pointer_cast<SlavableAutomationControl>(mr->second.master());
 		assert (sc);
 		rv |= sc->masters_curve_multiply (start, end, vec, veclen);
-		if (mr->second.val_master () != 0) {
-			apply_gain_to_buffer (vec, veclen, 1.f / mr->second.val_master ());
-		}
+		apply_gain_to_buffer (vec, veclen, mr->second.val_master_inv ());
 	}
 	return rv;
 }
@@ -166,7 +164,7 @@ SlavableAutomationControl::reduce_by_masters_locked (double value, bool ignore_a
 			/* need to scale given value by current master's scaling */
 			const double masters_value = get_masters_value_locked();
 			if (masters_value == 0.0) {
-				value = 0.0; // XXX 1.0, see master_ratio(), val_master_inv()
+				value = 0.0;
 			} else {
 				value /= masters_value;
 				value = std::max (lower(), std::min(upper(), value));

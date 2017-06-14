@@ -102,6 +102,15 @@ GainControl::inc_gain (gain_t factor)
 	}
 }
 
+void
+GainControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+{
+	if (m->get_value() == 0) {
+		/* master is at -inf, which forces this ctrl to -inf on assignment */
+		Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+	}
+}
+
 bool
 GainControl::get_masters_curve_locked (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
 {
