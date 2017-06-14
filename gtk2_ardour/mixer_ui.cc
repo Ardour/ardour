@@ -1699,6 +1699,10 @@ Mixer_UI::stripable_property_changed (const PropertyChange& what_changed, boost:
 		}
 	}
 
+	if (s->is_master ()) {
+		return;
+	}
+
 	error << _("track display list item for renamed strip not found!") << endmsg;
 }
 
