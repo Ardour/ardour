@@ -4192,8 +4192,9 @@ Editor::cut_copy (CutCopyOp op)
 		}
 	}
 
-	if ( op != Delete )  //"Delete" doesn't change copy/paste buf
+	if ( op != Delete ) { //"Delete" doesn't change copy/paste buf
 		cut_buffer->clear ();
+	}
 
 	if (entered_marker) {
 
