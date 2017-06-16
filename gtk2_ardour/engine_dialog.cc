@@ -1049,9 +1049,14 @@ EngineControl::backend_changed ()
 		// set driver & devices
 		State state = get_matching_state (backend_combo.get_active_text());
 		if (state) {
+			DEBUG_ECONTROL ("backend-changed(): found prior state for backend");
 			PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 			set_current_state (state);
+		} else {
+			DEBUG_ECONTROL ("backend-changed(): no prior state for backend");
 		}
+	} else {
+		DEBUG_ECONTROL (string_compose ("backend-changed(): _have_control=%1 ignore_changes=%2", _have_control, ignore_changes));
 	}
 
 	if (!ignore_changes) {
@@ -2055,28 +2060,13 @@ EngineControl::set_state (const XMLNode& root)
 				state->lru = lru_val;
 			}
 
-#if 1
-			/* remove accumulated duplicates (due to bug in ealier version)
-			 * this can be removed again before release
-			 */
-			for (StateList::iterator i = states.begin(); i != states.end();) {
-				if ((*i)->backend == state->backend &&
-						(*i)->driver == state->driver &&
-						(*i)->device == state->device) {
-					i =  states.erase(i);
-				} else {
-					++i;
-				}
-			}
-#endif
-
 			states.push_back (state);
 		}
 	}
 
 	/* now see if there was an active state and switch the setup to it */
 
-	// purge states of backend that are not available in this built
+	/* purge states of backend that are not available in this built */
 	vector<const ARDOUR::AudioBackendInfo*> backends = ARDOUR::AudioEngine::instance()->available_backends();
 	vector<std::string> backend_names;
 
@@ -2092,6 +2082,28 @@ EngineControl::set_state (const XMLNode& root)
 	}
 
 	states.sort (state_sort_cmp);
+
+	/* purge old states referring to the same backend */
+	const time_t now = time (NULL);
+	for (vector<std::string>::const_iterator bi = backend_names.begin(); bi != backend_names.end(); ++bi) {
+		bool first = true;
+		for (StateList::iterator i = states.begin(); i != states.end();) {
+			if ((*i)->backend != *bi) {
+				++i; continue;
+			}
+			// keep at latest one for every audio-system
+			if (first) {
+				first = false;
+				++i; continue;
+			}
+			// also keep states used in the last 90 days.
+			if ((now - (*i)->lru) < 86400 * 90) {
+				++i; continue;
+			}
+			assert (!(*i)->active);
+			i = states.erase(i);
+		}
+	}
 
 	for (StateList::const_iterator i = states.begin(); i != states.end(); ++i) {
 
