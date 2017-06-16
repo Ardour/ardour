@@ -341,7 +341,7 @@ OSCSelectObserver::plugin_init()
 	text_message ("/select/plugin/name", pip->name());
 	uint32_t page_end = nplug_params;
 	uint32_t max_page = 1;
-	if (plug_size) {
+	if (plug_size && nplug_params) {
 		max_page = (uint32_t)((nplug_params - 1) / plug_size) + 1;
 	}
 
