@@ -834,50 +834,6 @@ static bool flt_instrument (boost::shared_ptr<Stripable> s) {
 	return 0 != r->the_instrument ();
 }
 
-struct FP8SortByNewDisplayOrder
-{
-	// return strict (a < b)
-	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
-	{
-		if (a->presentation_info().flags () == b->presentation_info().flags ()) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
-
-		int cmp_a = 0;
-		int cmp_b = 0;
-
-		// see also gtk2_ardour/route_sorter.h
-		if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
-			cmp_a = 2;
-		}
-#ifdef MIXBUS
-		else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
-			cmp_a = 3;
-		}
-		else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus || a->mixbus()) {
-			cmp_a = 1;
-		}
-#endif
-
-		if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
-			cmp_b = 2;
-		}
-#ifdef MIXBUS
-		else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
-			cmp_b = 3;
-		}
-		else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus || b->mixbus()) {
-			cmp_b = 1;
-		}
-#endif
-
-		if (cmp_a == cmp_b) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
-		return cmp_a < cmp_b;
-	}
-};
-
 void
 FaderPort8::filter_stripables (StripableList& strips) const
 {
@@ -941,7 +897,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			strips.push_back (*s);
 		}
 	}
-	strips.sort (FP8SortByNewDisplayOrder());
+	strips.sort (Stripable::Sorter());
 }
 
 /* Track/Pan mode: assign stripable to strips */

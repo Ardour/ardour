@@ -4469,7 +4469,7 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	PresentationInfo::order_t match_cnt = 0;
 
 	get_stripables (sl);
-	sl.sort (Stripable::PresentationOrderSorter());
+	sl.sort (Stripable::Sorter());
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
 
@@ -4501,26 +4501,11 @@ Session::get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo
 	return boost::shared_ptr<Stripable>();
 }
 
-struct PresentationOrderSorter {
-	bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-		if (a->presentation_info().special() && !b->presentation_info().special()) {
-			/* a is not ordered, b is; b comes before a */
-			return false;
-		} else if (!b->presentation_info().order_set() && a->presentation_info().order_set()) {
-			/* b is not ordered, a is; a comes before b */
-			return true;
-		} else {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
-	}
-};
-
 boost::shared_ptr<Route>
 Session::route_by_selected_count (uint32_t id) const
 {
 	RouteList r (*(routes.reader ()));
-	PresentationOrderSorter sorter;
-	r.sort (sorter);
+	r.sort (Stripable::Sorter());
 
 	RouteList::iterator i;
 
@@ -4542,8 +4527,7 @@ Session::reassign_track_numbers ()
 	int64_t tn = 0;
 	int64_t bn = 0;
 	RouteList r (*(routes.reader ()));
-	PresentationOrderSorter sorter;
-	r.sort (sorter);
+	r.sort (Stripable::Sorter());
 
 	StateProtector sp (this);
 
@@ -5631,18 +5615,6 @@ Session::cancel_audition ()
 		auditioner->cancel_audition ();
 		AuditionActive (false); /* EMIT SIGNAL */
 	}
-}
-
-bool
-Session::RoutePublicOrderSorter::operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
-{
-	if (a->is_monitor()) {
-		return true;
-	}
-	if (b->is_monitor()) {
-		return false;
-	}
-	return a->presentation_info().order() < b->presentation_info().order();
 }
 
 bool

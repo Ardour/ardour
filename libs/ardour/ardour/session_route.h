@@ -36,7 +36,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&), bool sort)
 	RouteList public_order (*r);
 
 	if (sort) {
-		public_order.sort (RoutePublicOrderSorter());
+		public_order.sort (Stripable::Sorter ());
 	}
 
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
@@ -51,7 +51,7 @@ Session::foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool 
 	RouteList public_order (*r);
 
 	if (sort) {
-		public_order.sort (RoutePublicOrderSorter());
+		public_order.sort (Stripable::Sorter ());
 	}
 
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {
@@ -66,7 +66,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 	RouteList public_order (*r);
 
 	if (sort) {
-		public_order.sort (RoutePublicOrderSorter());
+		public_order.sort (Stripable::Sorter ());
 	}
 
 	for (RouteList::iterator i = public_order.begin(); i != public_order.end(); i++) {

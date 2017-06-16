@@ -312,10 +312,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		return _bundles.reader ();
 	}
 
-	struct LIBARDOUR_API RoutePublicOrderSorter {
-		bool operator() (boost::shared_ptr<Route>, boost::shared_ptr<Route> b);
-	};
-
 	void notify_presentation_info_change ();
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
