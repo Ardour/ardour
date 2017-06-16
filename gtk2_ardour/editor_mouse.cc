@@ -1585,14 +1585,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 		case TempoBarItem:
 		case TempoCurveItem:
-			if (!_dragging_playhead) {
+			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				snap_to_with_modifier (where, event);
 				mouse_add_new_tempo_event (where.frame);
 			}
 			return true;
 
 		case MeterBarItem:
-			if (!_dragging_playhead) {
+			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				mouse_add_new_meter_event (pixel_to_sample (event->button.x));
 			}
 			return true;
