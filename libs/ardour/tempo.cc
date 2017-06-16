@@ -4683,9 +4683,9 @@ TempoMap::set_state (const XMLNode& node, int /*version*/)
 				TempoSection* ts;
 				TempoSection* prev_t;
 				if ((prev_m = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-					if (prev_m->pulse() == ms->pulse()) {
-						cerr << string_compose (_("Multiple meter definitions found at %1"), prev_m->pulse()) << endmsg;
-						error << string_compose (_("Multiple meter definitions found at %1"), prev_m->pulse()) << endmsg;
+					if (prev_m->beat() == ms->beat()) {
+						cerr << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
+						error << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
 						return -1;
 					}
 				} else if ((prev_t = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
