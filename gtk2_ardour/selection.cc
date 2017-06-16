@@ -1364,7 +1364,8 @@ Selection::set_state (XMLNode const & node, int)
 			if (!(*i)->get_property (X_("start"), start) || !(*i)->get_property (X_("end"), end)) {
 				assert(false);
 			}
-			set_preserving_all_ranges (start, end);
+
+			add (start, end);
 
 		} else if ((*i)->name() == X_("AutomationView")) {
 
