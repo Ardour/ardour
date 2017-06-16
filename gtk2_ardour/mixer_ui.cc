@@ -637,16 +637,6 @@ Mixer_UI::deselect_all_strip_processors ()
 }
 
 void
-Mixer_UI::select_strip (MixerStrip& ms, bool add)
-{
-	if (add) {
-		_selection.add (&ms);
-	} else {
-		_selection.set (&ms);
-	}
-}
-
-void
 Mixer_UI::select_none ()
 {
 	_selection.clear_routes();

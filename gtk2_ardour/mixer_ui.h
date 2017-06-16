@@ -109,7 +109,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void deselect_all_strip_processors();
 	void delete_processors();
-	void select_strip (MixerStrip&, bool add=false);
 	void select_none ();
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
@@ -192,17 +191,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
-
-	void hide_all_strips (bool with_select);
-	void unselect_all_strips();
-	void select_all_strips ();
-	void unselect_all_audiotrack_strips ();
-	void select_all_audiotrack_strips ();
-	void unselect_all_audiobus_strips ();
-	void select_all_audiobus_strips ();
-
-	void strip_select_op (bool audiotrack, bool select);
-	void select_strip_op (MixerStrip*, bool select);
 
 	gint start_updating ();
 	gint stop_updating ();
