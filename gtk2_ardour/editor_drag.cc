@@ -3701,6 +3701,11 @@ TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_before_state = &map.get_state();
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
 
+	if (_tempo->locked_to_meter()) {
+		_drag_valid = false;
+		return;
+	}
+
 	_next_tempo = map.next_tempo_section (_tempo);
 	if (_next_tempo) {
 		if (!map.next_tempo_section (_next_tempo)) {
@@ -3784,8 +3789,6 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	TempoMap& map (_editor->session()->tempo_map());
-
 	if (!movement_occurred || !_drag_valid) {
 		return;
 	}
@@ -3793,6 +3796,7 @@ TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->tempo_curve_selected (_tempo, false);
 	_editor->tempo_curve_selected (_next_tempo, false);
 
+	TempoMap& map (_editor->session()->tempo_map());
 	XMLNode &after = map.get_state();
 	_editor->session()->add_command(new MementoCommand<TempoMap>(map, _before_state, &after));
 	_editor->commit_reversible_command ();
@@ -3811,6 +3815,7 @@ TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
 	, _grab_qn (0.0)
 	, _tempo (0)
 	, _before_state (0)
+	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoEndDrag\n");
 	TempoMarker* marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
@@ -3827,6 +3832,10 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* get current state */
 	_before_state = &tmap.get_state();
 
+	if (_tempo->locked_to_meter()) {
+		_drag_valid = false;
+		return;
+	}
 
 	ostringstream sstr;
 
@@ -3856,13 +3865,15 @@ TempoEndDrag::setup_pointer_frame_offset ()
 void
 TempoEndDrag::motion (GdkEvent* event, bool first_move)
 {
+	if (!_drag_valid) {
+		return;
+	}
+
 	TempoMap& map (_editor->session()->tempo_map());
 
 	if (first_move) {
 		_editor->begin_reversible_command (_("stretch end tempo"));
 	}
-
-
 
 	framepos_t const pf = adjusted_current_frame (event, false);
 	map.gui_stretch_tempo_end (&map.tempo_section_at_frame (_tempo->frame() - 1), map.frame_at_quarter_note (_grab_qn), pf);
@@ -3880,7 +3891,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
+	if (!movement_occurred || !_drag_valid) {
 		return;
 	}
 
