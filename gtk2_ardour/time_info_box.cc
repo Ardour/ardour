@@ -28,11 +28,12 @@
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
-#include "time_info_box.h"
 #include "audio_clock.h"
-#include "editor.h"
-#include "control_point.h"
 #include "automation_line.h"
+#include "control_point.h"
+#include "editor.h"
+#include "region_view.h"
+#include "time_info_box.h"
 
 #include "pbd/i18n.h"
 
@@ -136,7 +137,6 @@ TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
-	Region::RegionPropertyChanged.connect (region_property_connections, invalidator (*this), boost::bind (&TimeInfoBox::region_property_change, this, _1, _2), gui_context());
 	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
@@ -154,30 +154,6 @@ void
 TimeInfoBox::track_mouse_mode ()
 {
 	selection_changed ();
-}
-
-void
-TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed)
-{
-	Selection& selection (Editor::instance().get_selection());
-
-	if (selection.regions.empty()) {
-		return;
-	}
-
-	PBD::PropertyChange our_interests;
-
-	our_interests.add (ARDOUR::Properties::position);
-	our_interests.add (ARDOUR::Properties::length);
-	our_interests.add (ARDOUR::Properties::start);
-
-	if (!what_changed.contains (our_interests)) {
-		return;
-	}
-
-	if (selection.regions.contains (r)) {
-		selection_changed ();
-	}
 }
 
 bool
@@ -255,10 +231,27 @@ TimeInfoBox::set_session (Session* s)
 }
 
 void
+TimeInfoBox::region_selection_changed ()
+{
+	framepos_t s, e;
+	Selection& selection (Editor::instance().get_selection());
+	s = selection.regions.start();
+	e = selection.regions.end_frame();
+	selection_start->set_off (false);
+	selection_end->set_off (false);
+	selection_length->set_off (false);
+	selection_start->set (s);
+	selection_end->set (e);
+	selection_length->set (e, false, s);
+}
+
+void
 TimeInfoBox::selection_changed ()
 {
 	framepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
+
+	region_property_connections.drop_connections();
 
 	switch (Editor::instance().current_mouse_mode()) {
 
@@ -304,14 +297,19 @@ TimeInfoBox::selection_changed ()
 				selection_length->set (e - s + 1);
 			}
 		} else {
-			s = selection.regions.start();
-			e = selection.regions.end_frame();
-			selection_start->set_off (false);
-			selection_end->set_off (false);
-			selection_length->set_off (false);
-			selection_start->set (s);
-			selection_end->set (e);
-			selection_length->set (e - s + 1);
+			/* this is more efficient than tracking changes per region in large selections */
+			std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+			for (RegionSelection::iterator s = selection.regions.begin(); s != selection.regions.end(); ++s) {
+				boost::shared_ptr<Playlist> pl = (*s)->region()->playlist();
+				if (pl) {
+					playlists.insert (pl);
+				}
+			}
+			for (std::set<boost::shared_ptr<ARDOUR::Playlist> >::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
+				(*ps)->ContentsChanged.connect (region_property_connections, invalidator (*this),
+								boost::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
+			}
+			region_selection_changed ();
 		}
 		break;
 
