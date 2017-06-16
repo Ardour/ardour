@@ -1093,6 +1093,7 @@ MidiRegionView::abort_command()
 {
 	delete _note_diff_command;
 	_note_diff_command = 0;
+	trackview.editor().abort_reversible_command();
 	clear_editor_note_selection();
 }
 
