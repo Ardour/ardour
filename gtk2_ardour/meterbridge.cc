@@ -408,22 +408,6 @@ Meterbridge::on_scroll()
 	metrics_right.set_metric_mode(mm_right, mt_right);
 }
 
-struct PresentationInfoRouteSorter
-{
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		if (a->is_master() || a->is_monitor()) {
-			/* "a" is a special route (master, monitor, etc), and comes
-			 * last in the mixer ordering
-			 */
-			return false;
-		} else if (b->is_master() || b->is_monitor()) {
-			/* everything comes before b */
-			return true;
-		}
-		return a->presentation_info().order() < b->presentation_info().order();
-	}
-};
-
 void
 Meterbridge::set_session (Session* s)
 {
@@ -449,7 +433,7 @@ Meterbridge::set_session (Session* s)
 	boost::shared_ptr<RouteList> routes = _session->get_routes();
 
 	RouteList copy (*routes);
-	copy.sort (PresentationInfoRouteSorter());
+	copy.sort (Stripable::Sorter (true));
 	add_strips (copy);
 
 	_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&Meterbridge::add_strips, this, _1), gui_context());

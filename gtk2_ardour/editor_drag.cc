@@ -546,9 +546,11 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 	return boost::shared_ptr<Region>();
 }
 
-struct PresentationInfoTimeAxisViewSorter {
-	bool operator() (TimeAxisView* a, TimeAxisView* b) {
-		return a->stripable()->presentation_info().order() < b->stripable()->presentation_info().order();
+struct TimeAxisViewStripableSorter {
+	bool operator() (TimeAxisView* tav_a, TimeAxisView* tav_b) {
+		boost::shared_ptr<ARDOUR::Stripable> const& a = tav_a->stripable ();
+		boost::shared_ptr<ARDOUR::Stripable> const& b = tav_b->stripable ();
+		return ARDOUR::Stripable::Sorter () (a, b);
 	}
 };
 
@@ -564,7 +566,7 @@ RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<Re
 	*/
 
 	TrackViewList track_views = _editor->track_views;
-	track_views.sort (PresentationInfoTimeAxisViewSorter ());
+	track_views.sort (TimeAxisViewStripableSorter ());
 
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		_time_axis_views.push_back (*i);

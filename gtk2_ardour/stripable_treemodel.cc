@@ -129,7 +129,7 @@ StripableTreeModel::iter_next_vfunc (const iterator& iter, iterator& iter_next) 
 	if (sl.empty()) {
 		return false;
 	}
-	sl.sort (Stripable::PresentationOrderSorter());
+	sl.sort (Stripable::Sorter());
 
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
 
@@ -199,7 +199,7 @@ StripableTreeModel::iter_nth_root_child_vfunc(int n, iterator& iter) const
 		return false;
 	}
 
-	sl.sort (Stripable::PresentationOrderSorter());
+	sl.sort (Stripable::Sorter());
 
 	StripableList::const_iterator s;
 

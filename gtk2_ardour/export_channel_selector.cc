@@ -121,7 +121,7 @@ PortExportChannelSelector::fill_route_list ()
 		channel_view.add_route (master);
 	}
 
-	routes.sort (Stripable::PresentationOrderSorter ());
+	routes.sort (Stripable::Sorter ());
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if ((*it)->is_master () || (*it)->is_monitor ()) {

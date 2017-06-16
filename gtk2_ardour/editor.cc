@@ -5332,7 +5332,7 @@ Editor::add_stripables (StripableList& sl)
 	TrackViewList new_selection;
 	bool from_scratch = (track_views.size() == 0);
 
-	sl.sort (StripablePresentationInfoSorter());
+	sl.sort (Stripable::Sorter());
 
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 

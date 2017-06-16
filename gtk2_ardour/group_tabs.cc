@@ -679,12 +679,12 @@ void
 GroupTabs::collect (RouteGroup* g)
 {
 	boost::shared_ptr<RouteList> group_routes = g->route_list ();
-	group_routes->sort (Stripable::PresentationOrderSorter());
+	group_routes->sort (Stripable::Sorter());
 	int const N = group_routes->size ();
 
 	RouteList::iterator i = group_routes->begin ();
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
-	routes->sort (Stripable::PresentationOrderSorter());
+	routes->sort (Stripable::Sorter());
 	RouteList::const_iterator j = routes->begin ();
 
 	int diff = 0;

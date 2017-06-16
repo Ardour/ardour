@@ -1006,82 +1006,37 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 	TreeModel::Children::iterator ri;
 	bool change = false;
 	PresentationInfo::order_t order = 0;
-	bool master_is_first = false;
-	uint32_t count = 0;
 
-	OrderingKeys sorted;
-	const size_t cmp_max = rows.size ();
+	TreeOrderKeys sorted;
 
 	PresentationInfo::ChangeSuspender cs;
 
-	// special case master if it's got PI order 0 lets keep it there
-	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
-		order++;
-		master_is_first = true;
-	}
-
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
-
 		boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 		bool visible = (*ri)[_columns.visible];
 
-		/* Monitor and Auditioner do not get their presentation
-		 * info reset here.
-		 */
-
+#ifndef NDEBUG // these should not exist in the treeview
 		if (stripable->is_monitor() || stripable->is_auditioner()) {
+			assert (0);
 			continue;
 		}
+#endif
 
 		stripable->presentation_info().set_hidden (!visible);
-
-		/* special case master if it's got PI order 0 lets keep it there
-		 * but still allow master to move if first non-master route has
-		 * presentation order 1
-		 */
-		if ((count == 0) && master_is_first && (stripable->presentation_info().order()  == 1)) {
-			master_is_first = false; // someone has moved master
-			order = 0;
-		}
-
-		if (stripable->is_master() && master_is_first) {
-			if (count) {
-				continue;
-			} else {
-				count++;
-				continue;
-			}
-		}
 
 		if (order != stripable->presentation_info().order()) {
 			stripable->set_presentation_order (order);
 			change = true;
 		}
 
-		sorted.push_back (OrderKeys (order, stripable, cmp_max));
-
+		sorted.push_back (TreeOrderKey (order, stripable));
 		++order;
-		++count;
 	}
 
-	if (!change) {
-		// VCA (and Mixbus) special cases according to SortByNewDisplayOrder
-		uint32_t n = 0;
-		SortByNewDisplayOrder cmp;
-		sort (sorted.begin(), sorted.end(), cmp);
-		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
-			if (sr->old_display_order != n) {
-				change = true;
-			}
-		}
-		if (change) {
-			n = 0;
-			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
-				if (sr->stripable->presentation_info().order() != n) {
-					sr->stripable->set_presentation_order (n);
-				}
-			}
-		}
+	change |= _session->ensure_stripable_sort_order ();
+
+	if (change) {
+		_session->set_dirty();
 	}
 }
 
@@ -1114,23 +1069,21 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 			return;
 		}
 
-		OrderingKeys sorted;
-		const size_t cmp_max = rows.size ();
-
+		TreeOrderKeys sorted;
 		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 			/* use global order */
-			sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
+			sorted.push_back (TreeOrderKey (old_order, stripable));
 		}
 
-		SortByNewDisplayOrder cmp;
+		TreeOrderKeySorter cmp;
 
 		sort (sorted.begin(), sorted.end(), cmp);
 		neworder.assign (sorted.size(), 0);
 
 		uint32_t n = 0;
 
-		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+		for (TreeOrderKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 
 			neworder[n] = sr->old_display_order;
 
@@ -1543,27 +1496,6 @@ EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const& model, TreeModel:
 	return true;
 }
 
-struct PresentationInfoRouteSorter
-{
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		if (a->is_master()) {
-			/* master before everything else */
-			return true;
-		} else if (b->is_master()) {
-			/* everything else before master */
-			return false;
-		}
-		return a->presentation_info().order () < b->presentation_info().order ();
-	}
-};
-
-struct PresentationInfoVCASorter
-{
-	bool operator() (boost::shared_ptr<VCA> a, boost::shared_ptr<VCA> b) {
-		return a->presentation_info().order () < b->presentation_info().order ();
-	}
-};
-
 void
 EditorRoutes::initial_display ()
 {
@@ -1627,7 +1559,7 @@ EditorRoutes::move_selected_tracks (bool up)
 		return;
 	}
 
-	sl.sort (Stripable::PresentationOrderSorter());
+	sl.sort (Stripable::Sorter());
 
 	std::list<ViewStripable> view_stripables;
 

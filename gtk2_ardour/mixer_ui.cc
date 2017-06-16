@@ -498,7 +498,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 	bool from_scratch = (track_model->children().size() == 0);
 	uint32_t nroutes = 0;
 
-	slist.sort (StripablePresentationInfoSorter());
+	slist.sort (Stripable::Sorter());
 
 	for (Gtk::TreeModel::Children::iterator it = track_model->children().begin(); it != track_model->children().end(); ++it) {
 		boost::shared_ptr<Stripable> s = (*it)[stripable_columns.stripable];
@@ -509,6 +509,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 		nroutes++;
 
+		// XXX what does this special case do?
 		if (s->presentation_info().order() == (slist.front()->presentation_info().order() + slist.size())) {
 			insert_iter = it;
 			break;
@@ -722,15 +723,12 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 
 	TreeModel::Children::iterator ri;
 	bool change = false;
-	uint32_t order = 0;
 
-	OrderingKeys sorted;
-	const size_t cmp_max = rows.size ();
+	PresentationInfo::order_t master_key = _session->master_order_key ();
+	PresentationInfo::order_t order = 0;
+	uint32_t count = 0;
 
-	// special case master if it's got PI order 0 lets keep it there
-	if (_session->master_out() && (_session->master_out()->presentation_info().order() == 0)) {
-		order++;
-	}
+	TreeOrderKeys sorted;
 
 	PresentationInfo::ChangeSuspender cs;
 
@@ -738,27 +736,26 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 		bool visible = (*ri)[stripable_columns.visible];
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
 
+#ifndef NDEBUG // these should not exist in the mixer's treeview
 		if (!stripable) {
+			assert (0);
 			continue;
 		}
-
-		/* Monitor and Auditioner do not get their presentation
-		 * info reset here.
-		 */
-
 		if (stripable->is_monitor() || stripable->is_auditioner()) {
+			assert (0);
 			continue;
 		}
-
-		/* Master also doesn't get set here but since the editor allows
-		 * it to be reordered, we need to preserve its ordering.
-		 */
+		if (stripable->is_master()) {
+			assert (0);
+			continue;
+		}
+#endif
 
 		stripable->presentation_info().set_hidden (!visible);
 
-		// master may not get set here, but if it is zero keep it there
-		if (stripable->is_master() && (stripable->presentation_info().order() == 0)) {
-			continue;
+		// leave master where it is.
+		if (order == master_key) {
+			++order;
 		}
 
 		if (order != stripable->presentation_info().order()) {
@@ -766,37 +763,12 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			change = true;
 		}
 
-		sorted.push_back (OrderKeys (order, stripable, cmp_max));
-
+		sorted.push_back (TreeOrderKey (count, stripable));
 		++order;
+		++count;
 	}
 
-	if (!change) {
-		// VCA (and Mixbus) special cases according to SortByNewDisplayOrder
-		uint32_t n = 0;
-		SortByNewDisplayOrder cmp;
-		sort (sorted.begin(), sorted.end(), cmp);
-		for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
-			if (_session->master_out() && (_session->master_out()->presentation_info().order() == n)) {
-				++n;
-			}
-			if (sr->old_display_order != n) {
-				change = true;
-				break;
-			}
-		}
-		if (change) {
-			n = 0;
-			for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
-				if (_session->master_out() && (_session->master_out()->presentation_info().order() == n)) {
-					++n;
-				}
-				if (sr->stripable->presentation_info().order() != n) {
-					sr->stripable->set_presentation_order (n);
-				}
-			}
-		}
-	}
+	change |= _session->ensure_stripable_sort_order ();
 
 	if (change) {
 		DEBUG_TRACE (DEBUG::OrderKeys, "... notify PI change from mixer GUI\n");
@@ -827,22 +799,20 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 		return;
 	}
 
-	OrderingKeys sorted;
-	const size_t cmp_max = rows.size ();
-
+	TreeOrderKeys sorted;
 	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri, ++old_order) {
 		boost::shared_ptr<Stripable> stripable = (*ri)[stripable_columns.stripable];
-		sorted.push_back (OrderKeys (old_order, stripable, cmp_max));
+		sorted.push_back (TreeOrderKey (old_order, stripable));
 	}
 
-	SortByNewDisplayOrder cmp;
+	TreeOrderKeySorter cmp;
 
 	sort (sorted.begin(), sorted.end(), cmp);
 	neworder.assign (sorted.size(), 0);
 
 	uint32_t n = 0;
 
-	for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
+	for (TreeOrderKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr, ++n) {
 
 		neworder[n] = sr->old_display_order;
 
@@ -926,6 +896,15 @@ Mixer_UI::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 	return 0;
 }
 
+struct MixerStripSorter {
+	bool operator() (const MixerStrip* ms_a, const MixerStrip* ms_b)
+	{
+		boost::shared_ptr<ARDOUR::Stripable> const& a = ms_a->stripable ();
+		boost::shared_ptr<ARDOUR::Stripable> const& b = ms_b->stripable ();
+		return ARDOUR::Stripable::Sorter(true)(a, b);
+	}
+};
+
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 {
@@ -949,16 +928,10 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 				bool accumulate = false;
 				bool found_another = false;
 
-				OrderingKeys sorted;
-				const size_t cmp_max = strips.size ();
-				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-					sorted.push_back (OrderKeys (-1, (*i)->stripable(), cmp_max));
-				}
-				SortByNewDisplayOrder cmp;
-				sort (sorted.begin(), sorted.end(), cmp);
+				strips.sort (MixerStripSorter());
 
-				for (OrderingKeys::iterator sr = sorted.begin(); sr != sorted.end(); ++sr) {
-					MixerStrip* ms = strip_by_stripable (sr->stripable);
+				for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+					MixerStrip* ms = *i;
 					assert (ms);
 
 					if (ms == strip) {
