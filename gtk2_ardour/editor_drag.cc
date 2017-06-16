@@ -3572,7 +3572,6 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	if (_tempo->clamped()) {
 		TempoSection* prev = map.previous_tempo_section (_tempo);
 		if (prev) {
-			_editor->tempo_curve_selected (prev, true);
 			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
 		}
 	}
