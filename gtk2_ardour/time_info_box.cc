@@ -275,7 +275,7 @@ TimeInfoBox::selection_changed ()
 					selection_length->set_off (false);
 					selection_start->set (selection.time.start());
 					selection_end->set (selection.time.end_frame());
-					selection_length->set (selection.time.length());
+					selection_length->set (selection.time.end_frame(), false, selection.time.start());
 				} else {
 					selection_start->set_off (true);
 					selection_end->set_off (true);
@@ -294,7 +294,7 @@ TimeInfoBox::selection_changed ()
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_length->set (e, false, s);
 			}
 		} else {
 			/* this is more efficient than tracking changes per region in large selections */
@@ -327,7 +327,7 @@ TimeInfoBox::selection_changed ()
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_length->set (e, false, s);
 			} else {
 				selection_start->set_off (true);
 				selection_end->set_off (true);
@@ -339,7 +339,7 @@ TimeInfoBox::selection_changed ()
 			selection_length->set_off (false);
 			selection_start->set (selection.time.start());
 			selection_end->set (selection.time.end_frame());
-			selection_length->set (selection.time.length());
+			selection_length->set (selection.time.end_frame(), false, selection.time.start());
 		}
 		break;
 
