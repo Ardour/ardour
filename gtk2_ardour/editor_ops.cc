@@ -7303,7 +7303,7 @@ Editor::playhead_forward_to_grid ()
 
 	if (pos.frame < max_framepos - 1) {
 		pos.frame += 2;
-		snap_to_internal (pos, RoundUpAlways, false);
+		snap_to_internal (pos, RoundUpAlways, false, true);
 		_session->request_locate (pos.frame);
 	}
 }
@@ -7320,7 +7320,7 @@ Editor::playhead_backward_to_grid ()
 
 	if (pos.frame > 2) {
 		pos.frame -= 2;
-		snap_to_internal (pos, RoundDownAlways, false);
+		snap_to_internal (pos, RoundDownAlways, false, true);
 		_session->request_locate (pos.frame);
 	}
 }
