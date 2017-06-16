@@ -822,6 +822,7 @@ private:
 	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
 	XMLNode* _before_state;
+	bool     _drag_valid;
 };
 
 /** tempo curve twist drag */

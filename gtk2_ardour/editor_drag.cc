@@ -3548,6 +3548,7 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 	, _grab_qn (0.0)
 	, _tempo (0)
 	, _before_state (0)
+	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
 
@@ -3559,6 +3560,12 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	TempoMap& map (_editor->session()->tempo_map());
 	_tempo = const_cast<TempoSection*> (&map.tempo_section_at_frame (raw_grab_frame()));
+
+	if (adjusted_current_frame (event, false) <= _tempo->frame()) {
+		_drag_valid = false;
+		return;
+	}
+
 	_editor->tempo_curve_selected (_tempo, true);
 
 	ostringstream sstr;
@@ -3604,12 +3611,15 @@ BBTRulerDrag::setup_pointer_frame_offset ()
 void
 BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 {
-	TempoMap& map (_editor->session()->tempo_map());
+	if (!_drag_valid) {
+		return;
+	}
 
 	if (first_move) {
 		_editor->begin_reversible_command (_("stretch tempo"));
 	}
 
+	TempoMap& map (_editor->session()->tempo_map());
 	framepos_t pf;
 
 	if (_editor->snap_musical()) {
@@ -3644,17 +3654,22 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	TempoMap& map (_editor->session()->tempo_map());
 
-	XMLNode &after = map.get_state();
-	_editor->session()->add_command(new MementoCommand<TempoMap>(map, _before_state, &after));
-	_editor->commit_reversible_command ();
 	_editor->tempo_curve_selected (_tempo, false);
-
 	if (_tempo->clamped()) {
 		TempoSection* prev_tempo = map.previous_tempo_section (_tempo);
 		if (prev_tempo) {
 			_editor->tempo_curve_selected (prev_tempo, false);
 		}
 	}
+
+	if (!movement_occurred || !_drag_valid) {
+		return;
+	}
+
+	XMLNode &after = map.get_state();
+	_editor->session()->add_command(new MementoCommand<TempoMap>(map, _before_state, &after));
+	_editor->commit_reversible_command ();
+
 }
 
 void
