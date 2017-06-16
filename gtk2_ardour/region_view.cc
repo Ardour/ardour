@@ -377,6 +377,9 @@ RegionView::region_changed (const PropertyChange& what_changed)
 	if (what_changed.contains (ARDOUR::Properties::name)) {
 		region_renamed ();
 	}
+	if (what_changed.contains (ARDOUR::Properties::position_lock_style)) {
+		region_renamed ();
+	}
 	if (what_changed.contains (ARDOUR::Properties::sync_position)) {
 		region_sync_changed ();
 	}
@@ -559,21 +562,22 @@ RegionView::make_name () const
 	std::string str;
 
 	// XXX nice to have some good icons for this
+	if (_region->position_lock_style() == MusicTime) {
+		str += "\u266B"; // BEAMED EIGHTH NOTES
+	}
 
 	if (_region->locked()) {
-		str += '>';
+		str += "\u2629"; // CROSS OF JERUSALEM
 		str += _region->name();
-		str += '<';
 	} else if (_region->position_locked()) {
-		str += '{';
+		str += "\u21B9"; // LEFTWARDS ARROW TO BAR OVER RIGHTWARDS ARROW TO BAR
 		str += _region->name();
-		str += '}';
 	} else if (_region->video_locked()) {
 		str += '[';
 		str += _region->name();
 		str += ']';
 	} else {
-		str = _region->name();
+		str += _region->name();
 	}
 
 	if (_region->muted()) {
