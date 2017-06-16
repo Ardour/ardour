@@ -1023,7 +1023,6 @@ Session::load_state (string snapshot_name)
 int
 Session::load_options (const XMLNode& node)
 {
-	LocaleGuard lg;
 	config.set_variables (node);
 	return 0;
 }
