@@ -2160,12 +2160,8 @@ Editor::edit_notes (MidiRegionView* mrv)
 void
 Editor::note_edit_done (int r, EditNoteDialog* d)
 {
-	begin_reversible_command (_("edit note(s)"));
-
 	d->done (r);
 	delete d;
-
-	commit_reversible_command();
 }
 
 void
