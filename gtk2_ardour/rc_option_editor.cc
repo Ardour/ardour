@@ -2394,6 +2394,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
+	bo = new BoolOption (
+		     "new-automation-points-on-lane",
+		     _("Ignore Y-axis click position when adding new automation-points"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_new_automation_points_on_lane),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_new_automation_points_on_lane)
+		     );
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> The new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
+
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
 			"default-fade-shape",
 			_("Default fade shape"),

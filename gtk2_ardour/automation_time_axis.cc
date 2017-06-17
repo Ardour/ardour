@@ -625,20 +625,23 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame,
 		return;
 	}
 
-	double x = 0;
-
-	_line->grab_item().canvas_to_item (x, y);
-
-	/* compute vertical fractional position */
-
-	y = 1.0 - (y / _line->height());
-
-	/* map using line */
-
-	_line->view_to_model_coord (x, y);
-
 	MusicFrame when (frame, 0);
 	_editor.snap_to_with_modifier (when, event);
+
+	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
+		if (_control->list()->size () == 0) {
+			y = _control->get_value ();
+		} else {
+			y = _control->list()->eval (when.frame);
+		}
+	} else {
+		double x = 0;
+		_line->grab_item().canvas_to_item (x, y);
+		/* compute vertical fractional position */
+		y = 1.0 - (y / _line->height());
+		/* map using line */
+		_line->view_to_model_coord (x, y);
+	}
 
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
