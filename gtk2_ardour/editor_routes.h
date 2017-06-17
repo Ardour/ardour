@@ -109,10 +109,6 @@ private:
 
 	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
-	void display_drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
-		);
-
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
@@ -157,7 +153,7 @@ private:
 	};
 
 	Gtk::ScrolledWindow _scroller;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display;
+	Gtk::TreeView _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	ModelColumns _columns;
 	int _name_column;

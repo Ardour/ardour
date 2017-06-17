@@ -261,7 +261,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	_display.set_name (X_("EditGroupList"));
 	_display.set_rules_hint (true);
 	_display.set_size_request (100, -1);
-	_display.add_object_drag (_columns.stripable.index(), "routes");
 
 	CellRendererText* name_cell = dynamic_cast<CellRendererText*> (_display.get_column_cell_renderer (_name_column));
 
@@ -1513,20 +1512,6 @@ EditorRoutes::initial_display ()
 	_editor->add_stripables (s);
 
 	sync_treeview_from_presentation_info (Properties::order);
-}
-
-void
-EditorRoutes::display_drag_data_received (const RefPtr<Gdk::DragContext>& context,
-					     int x, int y,
-					     const SelectionData& data,
-					     guint info, guint time)
-{
-	if (data.get_target() == "GTK_TREE_MODEL_ROW") {
-		_display.on_drag_data_received (context, x, y, data, info, time);
-		return;
-	}
-
-	context->drag_finish (true, false, time);
 }
 
 struct ViewStripable {
