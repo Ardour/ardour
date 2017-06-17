@@ -154,7 +154,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	int selection_cnt() const { return _selection_cnt; }
 
 	bool hidden() const { return _flags & Hidden; }
-	bool special() const { return _flags & (MasterOut|MonitorOut|Auditioner); }
+	bool special(bool with_master = true) const { return _flags & ((with_master ? MasterOut : 0)|MonitorOut|Auditioner); }
 
 	bool flag_match (Flag f) const {
 		/* no flags, match all */

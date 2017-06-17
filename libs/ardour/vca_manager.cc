@@ -69,6 +69,8 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 {
 	VCAList vcal;
 
+	uint32_t n_stripables = _session.nstripables ();
+
 	{
 		Mutex::Lock lm (lock);
 
@@ -86,6 +88,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			BOOST_MARK_VCA (vca);
 
 			vca->init ();
+			vca->set_presentation_order (n + n_stripables);
 
 			_vcas.push_back (vca);
 			vcal.push_back (vca);

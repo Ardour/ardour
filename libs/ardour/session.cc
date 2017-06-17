@@ -3064,6 +3064,8 @@ Session::ensure_stripable_sort_order ()
 void
 Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new_order, uint32_t how_many)
 {
+	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("ensure order gap starting at %1 for %2\n", first_new_order, how_many));
+
 	if (first_new_order == PresentationInfo::max_order) {
 		/* adding at end, no worries */
 		return;
@@ -3078,7 +3080,11 @@ Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new
 	for (StripableList::iterator si = sl.begin(); si != sl.end(); ++si) {
 		boost::shared_ptr<Stripable> s (*si);
 
-		if (s->is_monitor() || s->is_auditioner()) {
+		if (s->presentation_info().special (false)) {
+			continue;
+		}
+
+		if (!s->presentation_info().order_set()) {
 			continue;
 		}
 
@@ -3521,8 +3527,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	{
 		RCUWriter<RouteList> writer (routes);
 		boost::shared_ptr<RouteList> r = writer.get_copy ();
-		r->insert (r->end(), new_routes.begin(), new_routes.end());
 		n_routes = r->size();
+		r->insert (r->end(), new_routes.begin(), new_routes.end());
 
 		/* if there is no control out and we're not in the middle of loading,
 		 * resort the graph here. if there is a control out, we will resort
@@ -3545,11 +3551,9 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		--n_routes;
 	}
 
-	DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("ensure order gap starting at %1 for %2\n", order, new_routes.size()));
-	ensure_route_presentation_info_gap (order, new_routes.size());
-
 	{
 		PresentationInfo::ChangeSuspender cs;
+		ensure_route_presentation_info_gap (order, new_routes.size());
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
@@ -3586,25 +3590,13 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				}
 			}
 
-			if (!r->presentation_info().special()) {
+			if (!r->presentation_info().special (false)) {
 
 				DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("checking PI state for %1\n", r->name()));
 
 				/* presentation info order may already have been set from XML */
 
 				if (!r->presentation_info().order_set()) {
-					/* this is only useful for headless sessions,
-					 * Editor::add_routes() and Mixer_UI::add_routes() will
-					 * override it following the RouteAdded signal.
-					 *
-					 * Also routes should be sorted before VCAs (like the GUI does).
-					 * Session::ensure_route_presentation_info_gap() does not special case VCAs either.
-					 *
-					 * ... but not to worry, the GUI's
-					 * gtk2_ardour/route_sorter.h and various ::sync_presentation_info_from_treeview()
-					 * handle this :)
-					 */
-
 					if (order == PresentationInfo::max_order) {
 						/* just add to the end */
 						r->set_presentation_order (n_routes + added);
@@ -3638,6 +3630,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 			ARDOUR::GUIIdle ();
 		}
+		ensure_stripable_sort_order ();
 	}
 
 	if (_monitor_out && IO::connecting_legal) {
@@ -6368,6 +6361,27 @@ Session::nbusses () const
 	}
 
 	return n;
+}
+
+uint32_t
+Session::nstripables (bool with_auditioner_and_monitor) const
+{
+	uint32_t rv = routes.reader()->size ();
+	rv += _vca_manager->vcas ().size ();
+
+	if (with_auditioner_and_monitor) {
+		return rv;
+	}
+
+	if (auditioner) {
+		assert (rv > 0);
+		--rv;
+	}
+	if (_monitor_out) {
+		assert (rv > 0);
+		--rv;
+	}
+	return rv;
 }
 
 void
