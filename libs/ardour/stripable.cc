@@ -123,3 +123,62 @@ Stripable::is_selected() const
 	}
 	return _session.selection().selected (shared_from_this());
 }
+
+bool
+Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b)
+{
+	if (a->presentation_info().flags () == b->presentation_info().flags ()) {
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+
+	int cmp_a = 0;
+	int cmp_b = 0;
+
+	if (a->is_auditioner ()) { cmp_a = -2; }
+	if (b->is_auditioner ()) { cmp_b = -2; }
+	if (a->is_monitor ())    { cmp_a = -1; }
+	if (b->is_monitor ())    { cmp_b = -1; }
+
+	/* ARDOUR-Editor: [Track|Bus|Master] (0) < VCA (3)
+	 * ARDOUR-Mixer : [Track|Bus] (0) < VCA (3) < Master (4)
+	 *
+	 * Mixbus-Editor: [Track|Bus] (0) < Mixbus (1) < VCA (3) < Master (4)
+	 * Mixbus-Mixer : [Track|Bus] (0) < Mixbus (1) < Master (2) < VCA (3)
+	 */
+
+	if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+		cmp_a = 3;
+	}
+#ifdef MIXBUS
+	else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+		cmp_a = _mixer_order ? 2 : 4;
+	}
+	else if ((a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || a->mixbus()) {
+		cmp_a = 1;
+	}
+#endif
+	else if (_mixer_order && (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+		cmp_a = 4;
+	}
+
+
+	if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+		cmp_b = 3;
+	}
+#ifdef MIXBUS
+	else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+		cmp_b = _mixer_order ? 2 : 4;
+	}
+	else if ((b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || b->mixbus()) {
+		cmp_b = 1;
+	}
+#endif
+	else if (_mixer_order && (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+		cmp_b = 4;
+	}
+
+	if (cmp_a == cmp_b) {
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+	return cmp_a < cmp_b;
+}
