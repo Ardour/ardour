@@ -625,9 +625,9 @@ Editor::nudge_backward_capture_offset ()
 }
 
 struct RegionSelectionPositionSorter {
-        bool operator() (RegionView* a, RegionView* b) {
-                return a->region()->position() < b->region()->position();
-        }
+	bool operator() (RegionView* a, RegionView* b) {
+		return a->region()->position() < b->region()->position();
+	}
 };
 
 void
@@ -3170,8 +3170,8 @@ Editor::separate_regions_between (const TimeSelection& ts)
 }
 
 struct PlaylistState {
-    boost::shared_ptr<Playlist> playlist;
-    XMLNode*  before;
+	boost::shared_ptr<Playlist> playlist;
+	XMLNode*  before;
 };
 
 /** Take tracks from get_tracks_for_range_action and cut any regions
@@ -3569,9 +3569,9 @@ Editor::align_regions (RegionPoint what)
 }
 
 struct RegionSortByTime {
-    bool operator() (const RegionView* a, const RegionView* b) {
-	    return a->region()->position() < b->region()->position();
-    }
+	bool operator() (const RegionView* a, const RegionView* b) {
+		return a->region()->position() < b->region()->position();
+	}
 };
 
 void
@@ -4234,11 +4234,13 @@ struct AutomationRecord {
 	const AutomationLine* line; ///< line this came from
 	boost::shared_ptr<Evoral::ControlList> copy; ///< copied events for the cut buffer
 };
+
 struct PointsSelectionPositionSorter {
 	bool operator() (ControlPoint* a, ControlPoint* b) {
 		return (*(a->model()))->when < (*(b->model()))->when;
 	}
 };
+
 /** Cut, copy or clear selected automation points.
  *  @param op Operation (Cut, Copy or Clear)
  */
@@ -4388,16 +4390,16 @@ Editor::cut_copy_midi (CutCopyOp op)
 }
 
 struct lt_playlist {
-    bool operator () (const PlaylistState& a, const PlaylistState& b) {
-	    return a.playlist < b.playlist;
-    }
+	bool operator () (const PlaylistState& a, const PlaylistState& b) {
+		return a.playlist < b.playlist;
+	}
 };
 
 struct PlaylistMapping {
-    TimeAxisView* tv;
-    boost::shared_ptr<Playlist> pl;
+	TimeAxisView* tv;
+	boost::shared_ptr<Playlist> pl;
 
-    PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
+	PlaylistMapping (TimeAxisView* tvp) : tv (tvp) {}
 };
 
 /** Remove `clicked_regionview' */
@@ -4710,7 +4712,7 @@ Editor::cut_copy_ranges (CutCopyOp op)
 void
 Editor::paste (float times, bool from_context)
 {
-        DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
+	DEBUG_TRACE (DEBUG::CutNPaste, "paste to preferred edit pos\n");
 	MusicFrame where (get_preferred_edit_position (EDIT_IGNORE_NONE, from_context), 0);
 	paste_internal (where.frame, times, 0);
 }
@@ -4731,7 +4733,7 @@ Editor::mouse_paste ()
 void
 Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 {
-        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
+	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("apparent paste position is %1\n", position));
 
 	if (cut_buffer->empty(internal_editing())) {
 		return;
@@ -4739,7 +4741,7 @@ Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 
 	if (position == max_framepos) {
 		position = get_preferred_edit_position();
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
+		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
 
 	if (position == last_paste_pos) {
@@ -4756,8 +4758,8 @@ Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 	TrackViewList ts;
 	if (!selection->tracks.empty()) {
 		/* If there is a track selection, paste into exactly those tracks and
-		   only those tracks.  This allows the user to be explicit and override
-		   the below "do the reasonable thing" logic. */
+		 * only those tracks.  This allows the user to be explicit and override
+		 * the below "do the reasonable thing" logic. */
 		ts = selection->tracks.filter_to_unique_playlists ();
 		sort_track_selection (ts);
 	} else {
@@ -5539,7 +5541,7 @@ Editor::insert_patch_change (bool from_context)
 	MidiRegionView* first = dynamic_cast<MidiRegionView*> (rs.front ());
 
 	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
-        PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
+	PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
 
 	if (d.run() == RESPONSE_CANCEL) {
 		return;
@@ -7795,32 +7797,31 @@ Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
 void
 Editor::fit_selection ()
 {
-        if (!selection->tracks.empty()) {
-                fit_tracks (selection->tracks);
-        } else {
-                TrackViewList tvl;
+	if (!selection->tracks.empty()) {
+		fit_tracks (selection->tracks);
+	} else {
+		TrackViewList tvl;
 
-                /* no selected tracks - use tracks with selected regions */
+		/* no selected tracks - use tracks with selected regions */
 
-                if (!selection->regions.empty()) {
-                        for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
-                                tvl.push_back (&(*r)->get_time_axis_view ());
-                        }
+		if (!selection->regions.empty()) {
+			for (RegionSelection::iterator r = selection->regions.begin(); r != selection->regions.end(); ++r) {
+				tvl.push_back (&(*r)->get_time_axis_view ());
+			}
 
-                        if (!tvl.empty()) {
-                                fit_tracks (tvl);
-                        }
-                } else if (internal_editing()) {
-                        /* no selected tracks, or regions, but in internal edit mode, so follow the mouse and use
-                           the entered track
-                        */
-                        if (entered_track) {
-                                tvl.push_back (entered_track);
-                                fit_tracks (tvl);
-                        }
-                }
-        }
-
+			if (!tvl.empty()) {
+				fit_tracks (tvl);
+			}
+		} else if (internal_editing()) {
+			/* no selected tracks, or regions, but in internal edit mode, so follow the mouse and use
+			 * the entered track
+			 */
+			if (entered_track) {
+				tvl.push_back (entered_track);
+				fit_tracks (tvl);
+			}
+		}
+	}
 }
 
 void
@@ -7844,11 +7845,11 @@ Editor::fit_tracks (TrackViewList & tracks)
 	}
 
 	/* compute the per-track height from:
-
-	   total canvas visible height -
-                 height that will be taken by visible children of selected
-                 tracks - height of the ruler/hscroll area
-	*/
+	 *
+	 * total canvas visible height
+	 *  - height that will be taken by visible children of selected tracks
+	 *  - height of the ruler/hscroll area
+	 */
 	uint32_t h = (uint32_t) floor ((trackviews_height() - child_heights) / visible_tracks);
 	double first_y_pos = DBL_MAX;
 
@@ -7961,7 +7962,7 @@ Editor::start_visual_state_op (uint32_t n)
 void
 Editor::cancel_visual_state_op (uint32_t n)
 {
-        goto_visual_state (n);
+	goto_visual_state (n);
 }
 
 void
