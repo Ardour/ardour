@@ -87,7 +87,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	, _queue_tv_update (0)
 	, _menu (0)
 	, old_focus (0)
-	, selection_countdown (0)
 	, name_editable (0)
 {
 	static const int column_width = 22;
@@ -359,7 +358,6 @@ EditorRoutes::enter_notify (GdkEventCrossing*)
 	/* arm counter so that ::selection_filter() will deny selecting anything for the
 	 * next two attempts to change selection status.
 	 */
-	selection_countdown = 2;
 	_scroller.grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
 	return false;
@@ -368,8 +366,6 @@ EditorRoutes::enter_notify (GdkEventCrossing*)
 bool
 EditorRoutes::leave_notify (GdkEventCrossing*)
 {
-	selection_countdown = 0;
-
 	if (old_focus) {
 		old_focus->grab_focus ();
 		old_focus = 0;
@@ -1465,15 +1461,6 @@ EditorRoutes::selection_changed ()
 bool
 EditorRoutes::selection_filter (Glib::RefPtr<TreeModel> const& model, TreeModel::Path const& path, bool /*selected*/)
 {
-	if (selection_countdown) {
-		if (--selection_countdown == 0) {
-			return true;
-		} else {
-			/* no selection yet ... */
-			return false;
-		}
-	}
-
 	TreeModel::iterator iter = model->get_iter (path);
 	if (iter) {
 		boost::shared_ptr<Stripable> stripable = (*iter)[_columns.stripable];

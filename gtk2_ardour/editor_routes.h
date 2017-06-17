@@ -171,7 +171,6 @@ private:
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;
-	uint32_t selection_countdown;
 	Gtk::CellEditable* name_editable;
 
 	bool key_press (GdkEventKey* ev);
