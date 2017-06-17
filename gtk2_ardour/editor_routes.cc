@@ -944,8 +944,7 @@ EditorRoutes::update_visibility ()
 		(*i)[_columns.visible] = tv->marked_for_display ();
 	}
 
-	/* force route order keys catch up with visibility changes
-	 */
+	/* force route order keys catch up with visibility changes */
 
 	sync_presentation_info_from_treeview ();
 }
@@ -998,17 +997,17 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 
 	DEBUG_TRACE (DEBUG::OrderKeys, "editor sync presentation info from treeview\n");
 
-	TreeModel::Children::iterator ri;
 	bool change = false;
 	PresentationInfo::order_t order = 0;
 
 	PresentationInfo::ChangeSuspender cs;
 
-	for (ri = rows.begin(); ri != rows.end(); ++ri) {
+	for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 		boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 		bool visible = (*ri)[_columns.visible];
 
 #ifndef NDEBUG // these should not exist in the treeview
+		assert (stripable);
 		if (stripable->is_monitor() || stripable->is_auditioner()) {
 			assert (0);
 			continue;
