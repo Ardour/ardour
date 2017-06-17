@@ -4219,7 +4219,7 @@ PresentationInfo::order_t
 ARDOUR_UI::translate_order (RouteDialogs::InsertAt place)
 {
 	if (editor->get_selection().tracks.empty()) {
-		return PresentationInfo::max_order;
+		return place == RouteDialogs::First ? 0 : PresentationInfo::max_order;
 	}
 
 	PresentationInfo::order_t order_hint = PresentationInfo::max_order;
