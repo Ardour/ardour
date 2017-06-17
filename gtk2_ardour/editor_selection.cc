@@ -1005,9 +1005,11 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 	 * here, as a single handler.
 	 */
 
-	for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		(*i)->set_selected (false);
-		(*i)->hide_selection ();
+	if (what_changed.contains (Properties::selected)) {
+		for (TrackViewList::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
+			(*i)->set_selected (false);
+			(*i)->hide_selection ();
+		}
 	}
 
 	/* STEP 1: set the GUI selection state (in which TimeAxisViews for the
@@ -1048,6 +1050,7 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 			TimeAxisView* tav = dynamic_cast<TimeAxisView*> (av);
 
 			if (!tav) {
+				assert (0);
 				continue; /* impossible */
 			}
 
