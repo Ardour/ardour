@@ -4276,6 +4276,15 @@ Session::get_stripables (StripableList& sl) const
 	sl.insert (sl.end(), v.begin(), v.end());
 }
 
+StripableList
+Session::get_stripables () const
+{
+	StripableList rv;
+	Session::get_stripables (rv);
+	rv.sort (Stripable::Sorter ());
+	return rv;
+}
+
 boost::shared_ptr<RouteList>
 Session::get_routes_with_internal_returns() const
 {

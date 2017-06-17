@@ -300,6 +300,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 */
 
 	void get_stripables (StripableList&) const;
+	StripableList get_stripables () const;
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (framepos_t const) const;
