@@ -1531,6 +1531,43 @@ Selection::set (const TrackViewList& track_list)
 	TrackViewList t = add_grouped_tracks (track_list);
 
 	CoreSelection& selection (editor->session()->selection());
+
+#if 1 // crazy optmization hack
+	/* check is the selection actually changed, ignore NO-OPs
+	 *
+	 * There are excessive calls from EditorRoutes::selection_changed():
+	 * Every click calls selection_changed() even if it doesn't change.
+	 * Also re-ordering tracks calls into this due to gtk's odd DnD signal
+	 * messaging (row removed, re-added).
+	 *
+	 * Re-ordering a row results in at least 2 calls to selection_changed()
+	 * without actual change. Calling selection.clear_stripables()
+	 * and re-adding the same tracks every time in turn emits changed signals.
+	 */
+	bool changed = false;
+	CoreSelection::StripableAutomationControls sac;
+	selection.get_stripables (sac);
+	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
+		boost::shared_ptr<Stripable> s = (*i)->stripable ();
+		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		bool found = false;
+		for (CoreSelection::StripableAutomationControls::iterator j = sac.begin (); j != sac.end (); ++j) {
+			if (j->stripable == s && j->controllable == c) {
+				found = true;
+				sac.erase (j);
+				break;
+			}
+		}
+		if (!found) {
+			changed = true;
+			break;
+		}
+	}
+	if (!changed && sac.size() == 0) {
+		return;
+	}
+#endif
+
 	PresentationInfo::ChangeSuspender cs;
 
 	selection.clear_stripables ();
