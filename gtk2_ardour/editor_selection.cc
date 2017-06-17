@@ -1019,10 +1019,6 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 	/* STEP 2: update TimeAxisView's knowledge of their selected state
 	 */
 
-
-	PropertyChange pc;
-	pc.add (Properties::selected);
-
 	if (what_changed.contains (Properties::selected)) {
 
 		StripableNotificationListPtr stripables (new StripableNotificationList);

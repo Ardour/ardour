@@ -1007,8 +1007,6 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 	bool change = false;
 	PresentationInfo::order_t order = 0;
 
-	TreeOrderKeys sorted;
-
 	PresentationInfo::ChangeSuspender cs;
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
@@ -1028,8 +1026,6 @@ EditorRoutes::sync_presentation_info_from_treeview ()
 			stripable->set_presentation_order (order);
 			change = true;
 		}
-
-		sorted.push_back (TreeOrderKey (order, stripable));
 		++order;
 	}
 
@@ -1116,18 +1112,12 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 		 * already updated itself.
 		 */
 
-		TrackViewList tvl;
 		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
-
 		/* set the treeview model selection state */
 
 		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 			if (stripable && stripable->is_selected()) {
-				TimeAxisView* tav = (*ri)[_columns.tv];
-				if (tav) {
-					tvl.push_back (tav);
-				}
 				_display.get_selection()->select (*ri);
 			} else {
 				_display.get_selection()->unselect (*ri);

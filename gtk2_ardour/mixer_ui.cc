@@ -716,9 +716,6 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 
 	PresentationInfo::order_t master_key = _session->master_order_key ();
 	PresentationInfo::order_t order = 0;
-	uint32_t count = 0;
-
-	TreeOrderKeys sorted;
 
 	PresentationInfo::ChangeSuspender cs;
 
@@ -752,10 +749,7 @@ Mixer_UI::sync_presentation_info_from_treeview ()
 			stripable->set_presentation_order (order);
 			change = true;
 		}
-
-		sorted.push_back (TreeOrderKey (count, stripable));
 		++order;
-		++count;
 	}
 
 	change |= _session->ensure_stripable_sort_order ();
