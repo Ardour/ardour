@@ -3037,6 +3037,30 @@ Session::reconnect_mmc_ports(bool inputs)
 
 #endif
 
+bool
+Session::ensure_stripable_sort_order ()
+{
+	StripableList sl;
+	get_stripables (sl);
+	sl.sort (Stripable::Sorter ());
+
+	bool change = false;
+	PresentationInfo::order_t order = 0;
+
+	for (StripableList::iterator si = sl.begin(); si != sl.end(); ++si) {
+		boost::shared_ptr<Stripable> s (*si);
+		if (s->is_monitor () || s->is_auditioner ()) {
+			continue;
+		}
+		if (order != s->presentation_info().order()) {
+			s->set_presentation_order (order);
+			change = true;
+		}
+		++order;
+	}
+	return change;
+}
+
 void
 Session::ensure_route_presentation_info_gap (PresentationInfo::order_t first_new_order, uint32_t how_many)
 {

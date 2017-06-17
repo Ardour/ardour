@@ -873,6 +873,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	boost::shared_ptr<Route> master_out() const { return _master_out; }
 
+	PresentationInfo::order_t master_order_key () const { return _master_out ? _master_out->presentation_info ().order () : -1; }
+	bool ensure_stripable_sort_order ();
+
 	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
 	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
 	void globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest);
