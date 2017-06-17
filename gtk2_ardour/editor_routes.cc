@@ -1050,11 +1050,11 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 
 	TreeModel::Children rows = _model->children();
 
-	if (what_changed.contains (hidden_or_order)) {
+	bool changed = false;
 
+	if (what_changed.contains (hidden_or_order)) {
 		vector<int> neworder;
 		uint32_t old_order = 0;
-		bool changed = false;
 
 		if (rows.empty()) {
 			return;
@@ -1101,15 +1101,13 @@ EditorRoutes::sync_treeview_from_presentation_info (PropertyChange const & what_
 		}
 	}
 
-	if (what_changed.contains (Properties::selected)) {
-
+	if (changed || what_changed.contains (Properties::selected)) {
 		/* by the time this is invoked, the GUI Selection model has
 		 * already updated itself.
 		 */
-
 		PBD::Unwinder<bool> uw (_ignore_selection_change, true);
-		/* set the treeview model selection state */
 
+		/* set the treeview model selection state */
 		for (TreeModel::Children::iterator ri = rows.begin(); ri != rows.end(); ++ri) {
 			boost::shared_ptr<Stripable> stripable = (*ri)[_columns.stripable];
 			if (stripable && stripable->is_selected()) {
