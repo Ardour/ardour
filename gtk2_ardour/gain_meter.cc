@@ -310,7 +310,7 @@ GainMeterBase::setup_gain_adjustment ()
 		gain_adjustment.set_upper (GAIN_COEFF_UNITY);
 		gain_adjustment.set_step_increment (dB_coeff_step(Config->get_max_gain()) / 10.0);
 		gain_adjustment.set_page_increment (dB_coeff_step(Config->get_max_gain()));
-		gain_slider->set_default_value (gain_to_slider_position (GAIN_COEFF_UNITY));
+		gain_slider->set_default_value (gain_to_slider_position_with_max (GAIN_COEFF_UNITY, Config->get_max_gain()));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);

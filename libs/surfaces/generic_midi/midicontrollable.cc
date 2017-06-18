@@ -23,10 +23,10 @@
 #include <iostream>
 
 #include "pbd/error.h"
-#include "pbd/xml++.h"
+#include "pbd/compose.h"
 #include "pbd/stacktrace.h"
 #include "pbd/types_convert.h"
-#include "pbd/compose.h"
+#include "pbd/xml++.h"
 
 #include "midi++/types.h" // Added by JE - 06-01-2009. All instances of 'byte' changed to 'MIDI::byte' (for clarification)
 #include "midi++/port.h"
@@ -36,7 +36,6 @@
 #include "ardour/automation_control.h"
 #include "ardour/controllable_descriptor.h"
 #include "ardour/midi_ui.h"
-#include "ardour/utils.h"
 #include "ardour/debug.h"
 
 #include "midicontrollable.h"
@@ -175,7 +174,7 @@ int
 MIDIControllable::control_to_midi (float val)
 {
 	if (controllable->is_gain_like()) {
-		return gain_to_slider_position (val) * max_value_for_type ();
+		return controllable->internal_to_interface (val) * max_value_for_type ();
 	}
 
 	float control_min = controllable->lower ();

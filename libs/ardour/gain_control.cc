@@ -50,7 +50,7 @@ double
 GainControl::internal_to_interface (double v) const
 {
 	if (_desc.type == GainAutomation) {
-		return gain_to_slider_position (v);
+		return gain_to_slider_position_with_max (v, _desc.upper);
 	} else {
 		return (accurate_coefficient_to_dB (v) - lower_db) / range_db;
 	}
@@ -60,7 +60,7 @@ double
 GainControl::interface_to_internal (double v) const
 {
 	if (_desc.type == GainAutomation) {
-		return slider_position_to_gain (v);
+		return slider_position_to_gain_with_max (v, _desc.upper);
 	} else {
 		return dB_to_coefficient (lower_db + v * range_db);
 	}

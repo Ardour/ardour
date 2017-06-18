@@ -19,6 +19,8 @@
 
 #include "boost/lambda/lambda.hpp"
 
+#include "pbd/control_math.h"
+
 #include "ardour/track.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
@@ -221,7 +223,7 @@ OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable>
 		path = string_compose ("%1/%2", path, id);
 	}
 	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+	lo_message_add_float (msg, gain_to_position (controllable->get_value())); // XXX use internal_to_interface
 	gain_timeout[id] = 8;
 
 	lo_send_message (addr, path.c_str(), msg);

@@ -19,6 +19,8 @@
 
 #include "boost/lambda/lambda.hpp"
 
+#include "pbd/control_math.h"
+
 #include "ardour/session.h"
 #include "ardour/track.h"
 #include "ardour/monitor_control.h"
@@ -358,7 +360,7 @@ OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable
 	}
 
 	if (gainmode) {
-		lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
+		lo_message_add_float (msg, gain_to_position (controllable->get_value())); // XXX use internal_to_interface
 		text_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		gain_timeout = 8;
 	} else {

@@ -19,6 +19,8 @@
 
 #include <boost/algorithm/string.hpp>
 
+#include "pbd/control_math.h"
+
 #include "ardour/amp.h"
 #include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
@@ -157,8 +159,8 @@ ParameterDescriptor::update_steps()
 		/* dB_coeff_step gives a step normalized for [0, max_gain].  This is
 		   like "slider position", so we convert from "slider position" to gain
 		   to have the correct unit here. */
-		largestep = slider_position_to_gain(dB_coeff_step(upper));
-		step      = slider_position_to_gain(largestep / 10.0);
+		largestep = position_to_gain (dB_coeff_step(upper));
+		step      = position_to_gain (largestep / 10.0);
 		smallstep = step;
 	} else {
 		/* note that LV2Plugin::get_parameter_descriptor ()
