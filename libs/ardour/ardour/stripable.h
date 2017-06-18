@@ -87,7 +87,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 	void  set_presentation_order (PresentationInfo::order_t);
 
-	struct Sorter
+	struct LIBARDOUR_API Sorter
 	{
 		bool _mixer_order; // master is last
 		Sorter (bool mixer_order = false) : _mixer_order (mixer_order) {}
