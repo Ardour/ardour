@@ -423,7 +423,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 	float ratio = *acomp->ratio;
 	float thresdb = *acomp->thresdb;
-	float makeup_target = from_dB(*acomp->makeup);
+	float makeup = *acomp->makeup;
+	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
 	const const float tau = acomp->tau;
@@ -447,6 +448,11 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 	if (acomp->v_thresdb != thresdb) {
 		acomp->v_thresdb = thresdb;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_makeup != makeup) {
+		acomp->v_makeup = makeup;
 		acomp->need_expose = true;
 	}
 #endif
