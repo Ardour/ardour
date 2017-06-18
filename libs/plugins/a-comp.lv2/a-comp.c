@@ -588,6 +588,8 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	AComp* self = (AComp*)instance;
 	uint32_t h = MIN (w, max_h);
 
+	const float makeup_thres = self->v_thresdb + self->v_makeup;
+
 	if (!self->display || self->w != w || self->h != h) {
 		if (self->display) cairo_surface_destroy(self->display);
 		self->display = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
@@ -626,7 +628,7 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	}
 	if (self->v_thresdb < 0) {
 		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
-		const float y = -.5 + floorf (h * (self->v_thresdb / -60.f));
+		const float y = -.5 + floorf (h * (makeup_thres / -60.f));
 		cairo_set_dash(cr, dash1, 2, 2);
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
@@ -658,16 +660,16 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	// draw signal level & reduction/gradient
 	const float top = comp_curve (self, 0);
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, h);
-	if (top > self->v_thresdb) {
+	if (top > makeup_thres) {
 		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0.8, 0.1, 0.1, 0.5);
 		cairo_pattern_add_color_stop_rgba (pat, top / -60.f, 0.8, 0.1, 0.1, 0.5);
 	}
 	if (self->v_knee > 0) {
-		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - self->v_knee) / -60.f), 0.5, 0.5, 0.5, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, (makeup_thres / -60.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - self->v_knee) / -60.f), 0.5, 0.5, 0.5, 0.5);
 	} else {
-		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - .01) / -60.f), 0.5, 0.5, 0.5, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, (makeup_thres / -60.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - .01) / -60.f), 0.5, 0.5, 0.5, 0.5);
 	}
 	cairo_pattern_add_color_stop_rgba (pat, 1.0, 0.5, 0.5, 0.5, 0.5);
 
