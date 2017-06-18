@@ -99,6 +99,7 @@ typedef struct {
 	float v_knee;
 	float v_ratio;
 	float v_thresdb;
+	float v_makeup;
 	float v_lvl;
 	float v_lvl_in;
 	float v_lvl_out;
@@ -283,7 +284,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 	float ratio = *acomp->ratio;
 	float thresdb = *acomp->thresdb;
-	float makeup_target = from_dB(*acomp->makeup);
+	float makeup = *acomp->makeup;
+	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
 	const const float tau = acomp->tau;
@@ -291,6 +293,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
 		thresdb = 0.f;
+		makeup = 0.f;
 		makeup_target = 1.f;
 	}
 
@@ -307,6 +310,11 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 	if (acomp->v_thresdb != thresdb) {
 		acomp->v_thresdb = thresdb;
+		acomp->need_expose = true;
+	}
+
+	if (acomp->v_makeup != makeup) {
+		acomp->v_makeup = makeup;
 		acomp->need_expose = true;
 	}
 #endif
@@ -550,6 +558,7 @@ comp_curve (AComp* self, float xg) {
 	const float knee = self->v_knee;
 	const float ratio = self->v_ratio;
 	const float thresdb = self->v_thresdb;
+	const float makeup = self->v_makeup;
 
 	const float width = 6.f * knee + 0.01f;
 	float yg = 0.f;
@@ -561,6 +570,9 @@ comp_curve (AComp* self, float xg) {
 	} else {
 		yg = xg + (1.f / ratio - 1.f ) * (xg - thresdb + width / 2.f) * (xg - thresdb + width / 2.f) / (2.f * width);
 	}
+
+	yg += makeup;
+
 	return yg;
 }
 
@@ -655,8 +667,8 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	// maybe cut off at x-position?
 	const float x = w * (self->v_lvl_in + 60) / 60.f;
-	//const float y = h * (self->v_lvl_out + 60) / 60.f;
-	cairo_rectangle (cr, 0, h - x, x, h);
+	const float y = x + h*self->v_makeup;
+	cairo_rectangle (cr, 0, h - y, x, y);
 	if (self->v_ratio > 1.0) {
 		cairo_set_source (cr, pat);
 	} else {
