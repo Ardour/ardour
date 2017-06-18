@@ -1188,6 +1188,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\stripable_time_axis.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\sys_ex.cc"
 				>
 			</File>
@@ -2291,6 +2295,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\stripable_colorpicker.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\stripable_time_axis.h"
 				>
 			</File>
 			<File
