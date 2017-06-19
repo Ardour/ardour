@@ -55,6 +55,24 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 
 	ParameterDescriptor();
 
+	/** control-value to normalized [0..1] range
+	 *
+	 * Convert given AutomationType from lower/upper range to [0..1]
+	 * interface value, using settings from Evoral::ParameterDescriptor.
+	 *
+	 * default for AutomationControl::internal_to_interface ();
+	 */
+	float to_interface (float) const;
+
+	/** normalized [0..1] to control-value range
+	 *
+	 * Convert [0..1] to the control's range of this AutomationType
+	 * using settings from Evoral::ParameterDescriptor.
+	 *
+	 * default for AutomationControl::interface_to_internal ();
+	 */
+	float from_interface (float) const;
+
 	/** Set step, smallstep, and largestep, based on current description. */
 	void update_steps();
 

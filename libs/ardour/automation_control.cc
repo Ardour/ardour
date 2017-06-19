@@ -297,51 +297,25 @@ AutomationControl::commit_transaction (bool did_write)
 	}
 }
 
+/* take control-value and return UI range [0..1] */
 double
 AutomationControl::internal_to_interface (double val) const
 {
-	if (_desc.integer_step) {
-		// both upper and lower are inclusive.
-		val =  (val - lower()) / (1 + upper() - lower());
-	} else {
-		val =  (val - lower()) / (upper() - lower());
-	}
-
-	if (_desc.logarithmic) {
-		if (val > 0) {
-			val = pow (val, 1./2.0);
-		} else {
-			val = 0;
-		}
-	}
-
-	return val;
+	// XXX maybe optimize. _desc.from_interface() has
+	// a switch-statement depending on AutomationType.
+	return _desc.to_interface (val);
 }
 
+/* map GUI range [0..1] to control-value */
 double
 AutomationControl::interface_to_internal (double val) const
 {
 	if (!isfinite_local (val)) {
+		assert (0);
 		val = 0;
 	}
-	if (_desc.logarithmic) {
-		if (val <= 0) {
-			val = 0;
-		} else {
-			val = pow (val, 2.0);
-		}
-	}
-
-	if (_desc.integer_step) {
-		val =  lower() + val * (1 + upper() - lower());
-	} else {
-		val =  lower() + val * (upper() - lower());
-	}
-
-	if (val < lower()) val = lower();
-	if (val > upper()) val = upper();
-
-	return val;
+	// XXX maybe optimize. see above.
+	return _desc.from_interface (val);
 }
 
 std::string

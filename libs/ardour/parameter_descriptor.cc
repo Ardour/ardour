@@ -48,13 +48,12 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 {
 	ScalePoints sp;
 
+	/* Note: defaults in Evoral::ParameterDescriptor */
+
 	switch((AutomationType)parameter.type()) {
 	case GainAutomation:
-		upper  = Config->get_max_gain();
-		normal = 1.0f;
-		break;
 	case BusSendLevel:
-		upper = Config->get_max_gain ();
+		upper  = Config->get_max_gain();
 		normal = 1.0f;
 		break;
 	case BusSendEnable:
@@ -65,6 +64,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 10; // +20dB
 		lower  = .1; // -20dB
 		normal = 1.0f;
+		logarithmic = true;
 		break;
 	case PanAzimuthAutomation:
 		normal = 0.5f; // there really is no _normal but this works for stereo, sort of
@@ -81,7 +81,6 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 1.0;
 		toggled = true;
 		break;
-	case PluginAutomation:
 	case FadeInAutomation:
 	case FadeOutAutomation:
 	case EnvelopeAutomation:
@@ -117,8 +116,6 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
 		break;
 	case SoloIsolateAutomation:
-		toggled = true;
-		break;
 	case SoloSafeAutomation:
 		toggled = true;
 		break;
@@ -251,6 +248,110 @@ ParameterDescriptor::midi_note_num (const std::string& name)
 		num = it->second;
 
 	return num;
+}
+
+float
+ParameterDescriptor::to_interface (float val) const
+{
+	val = std::min (upper, std::max (lower, val));
+	switch(type) {
+		case GainAutomation:
+		case BusSendLevel:
+		case EnvelopeAutomation:
+			val = gain_to_slider_position_with_max (val, upper);
+			break;
+		case TrimAutomation:
+			{
+				const float lower_db = accurate_coefficient_to_dB (lower);
+				const float range_db = accurate_coefficient_to_dB (upper) - lower_db;
+				val = (accurate_coefficient_to_dB (val) - lower_db) / range_db;
+			}
+			break;
+		case PanAzimuthAutomation:
+		case PanElevationAutomation:
+			val = 1.f - val;
+			break;
+		case PanWidthAutomation:
+			val = .5f + val * .5f;
+			break;
+		default:
+			if (logarithmic) {
+				if (rangesteps > 1) {
+					val = logscale_to_position_with_steps (val, lower, upper, rangesteps);
+				} else {
+					val = logscale_to_position (val, lower, upper);
+				}
+			} else if (toggled) {
+				return (val - lower) / (upper - lower) >= 0.5f ? 1.f : 0.f;
+			} else if (integer_step) {
+				/* evenly-divide steps. lower,upper inclusive
+				 * e.g. 5 integers 0,1,2,3,4 are mapped to a fader
+				 * [0.0 ... 0.2 | 0.2 ... 0.4 | 0.4 ... 0.6 | 0.6 ... 0.8 | 0.8 ... 1.0]
+				 *       0             1             2             3             4
+				 *      0.1           0.3           0.5           0.7           0.9
+				 */
+				val = (val + .5f - lower) / (1.f + upper - lower);
+			} else {
+				val = (val - lower) / (upper - lower);
+			}
+			break;
+	}
+	val = std::max (0.f, std::min (1.f, val));
+	return val;
+}
+
+float
+ParameterDescriptor::from_interface (float val) const
+{
+	val = std::max (0.f, std::min (1.f, val));
+
+	switch(type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case BusSendLevel:
+			val = slider_position_to_gain_with_max (val, upper);
+			break;
+		case TrimAutomation:
+			{
+				const float lower_db = accurate_coefficient_to_dB (lower);
+				const float range_db = accurate_coefficient_to_dB (upper) - lower_db;
+				val = dB_to_coefficient (lower_db + val * range_db);
+			}
+			break;
+		case PanAzimuthAutomation:
+		case PanElevationAutomation:
+			 val = 1.f - val;
+			break;
+		case PanWidthAutomation:
+			val = 2.f * val - 1.f;
+			break;
+		default:
+			if (logarithmic) {
+				assert (!toggled && !integer_step); // update_steps() should prevent that.
+				if (rangesteps > 1) {
+					val = position_to_logscale_with_steps (val, lower, upper, rangesteps);
+				} else {
+					val = position_to_logscale (val, lower, upper);
+				}
+			} else if (toggled) {
+				val = val > 0 ? upper : lower;
+			} else if (integer_step) {
+				/* upper and lower are inclusive. use evenly-divided steps
+				 * e.g. 5 integers 0,1,2,3,4 are mapped to a fader
+				 * [0.0 .. 0.2 | 0.2 .. 0.4 | 0.4 .. 0.6 | 0.6 .. 0.8 | 0.8 .. 1.0]
+				 */
+				val =  round (lower + val * (1.f + upper - lower) - .5f);
+			} else if (rangesteps > 1) {
+				/* similar to above, but for float controls */
+				val = floor (val * (rangesteps - 1.f)) / (rangesteps - 1.f); // XXX
+				val = val * (upper - lower) + lower;
+			} else {
+				val = val * (upper - lower) + lower;
+			}
+			break;
+	}
+	val = std::min (upper, std::max (lower, val));
+	return val;
 }
 
 } // namespace ARDOUR
