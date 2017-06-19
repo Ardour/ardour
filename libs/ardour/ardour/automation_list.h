@@ -68,7 +68,7 @@ private:
  */
 class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::StatefulDestructible
 {
-  public:
+public:
 	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc);
 	AutomationList (const Evoral::Parameter& id);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
@@ -119,7 +119,10 @@ class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::Sta
 
 	XMLNode* before () { XMLNode* rv = _before; _before = 0; return rv; }
 	void clear_history ();
-  private:
+
+	ControlList::InterpolationStyle default_interpolation () const;
+
+private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
 
