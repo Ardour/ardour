@@ -88,10 +88,6 @@ class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::Sta
 	AutoState automation_state() const { return _state; }
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
-	void set_automation_style (AutoStyle m);
-	AutoStyle automation_style() const { return _style; }
-	PBD::Signal0<void> automation_style_changed;
-
 	bool automation_playback() const {
 		return (_state & Play) || ((_state & Touch) && !touching());
 	}
@@ -130,7 +126,6 @@ class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::Sta
 	void maybe_signal_changed ();
 
 	AutoState    _state;
-	AutoStyle    _style;
 	gint         _touching;
 
 	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }

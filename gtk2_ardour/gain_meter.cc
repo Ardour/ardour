@@ -90,7 +90,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	                   1.0,  // upper
 	                   dB_coeff_step(Config->get_max_gain()) / 10.0,  // step increment
 	                   dB_coeff_step(Config->get_max_gain()))  // page increment
-	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, meter_point_button (_("pre"))
 	, gain_astate_propagate (false)
@@ -147,24 +146,16 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_editable (false);
 
-	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
-	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_automation_state_button.set_size_request(15, 15);
-	gain_automation_style_button.set_size_request(15, 15);
-
-	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
-	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
 
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astate_menu.set_reserve_toggle_size(false);
-	gain_astyle_menu.set_name ("ArdourContextMenu");
 
 	meter_point_button.set_name ("mixer strip button");
 
@@ -268,12 +259,10 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Touch)));
 
-		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 		connections.push_back (ChangeGainAutomationState.connect (sigc::mem_fun(*this, &GainMeterBase::set_gain_astate)));
 
 		_control->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
-		_control->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
 
 		gain_automation_state_changed ();
 	}
@@ -763,22 +752,6 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 	return TRUE;
 }
 
-gint
-GainMeterBase::gain_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		gain_astyle_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
 
 string
 GainMeterBase::astate_string (AutoState state)
@@ -813,43 +786,6 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 	}
 
 	return sstr;
-}
-
-string
-GainMeterBase::astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, false);
-}
-
-string
-GainMeterBase::short_astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, true);
-}
-
-string
-GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
-{
-	if (style & Trim) {
-		return _("Trim");
-	} else {
-	        /* XXX it might different in different languages */
-
-		return (shrt ? _("Abs") : _("Abs"));
-	}
-}
-
-void
-GainMeterBase::gain_automation_style_changed ()
-{
-	switch (_width) {
-	case Wide:
-		gain_automation_style_button.set_text (astyle_string(_control->alist()->automation_style()));
-		break;
-	case Narrow:
-		gain_automation_style_button.set_text  (short_astyle_string(_control->alist()->automation_style()));
-		break;
-	}
 }
 
 void
@@ -963,17 +899,13 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	meter_metric_area.set_size_request(PX_SCALE(24, 24), -1);
 
-	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
-	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
-	gain_automation_style_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 
 	fader_vbox.set_spacing (0);
 	fader_vbox.pack_start (*gain_slider, true, true);

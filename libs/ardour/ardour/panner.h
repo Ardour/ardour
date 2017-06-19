@@ -105,8 +105,6 @@ public:
 
 	void      set_automation_state (AutoState);
 	AutoState automation_state() const;
-	void      set_automation_style (AutoStyle);
-	AutoStyle automation_style() const;
 
 	virtual std::set<Evoral::Parameter> what_can_be_automated() const;
 	virtual std::string describe_parameter (Evoral::Parameter);

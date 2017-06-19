@@ -91,9 +91,6 @@ public:
 	AutoState get_parameter_automation_state (Evoral::Parameter param);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
 
-	AutoStyle get_parameter_automation_style (Evoral::Parameter param);
-	void set_parameter_automation_style (Evoral::Parameter param, AutoStyle);
-
 	void protect_automation ();
 
 	const std::set<Evoral::Parameter>& what_can_be_automated() const { return _can_automate_list; }

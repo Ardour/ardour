@@ -108,10 +108,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	static std::string short_astate_string (ARDOUR::AutoState);
 	static std::string _astate_string (ARDOUR::AutoState, bool);
 
-	static std::string astyle_string (ARDOUR::AutoStyle);
-	static std::string short_astyle_string (ARDOUR::AutoStyle);
-	static std::string _astyle_string (ARDOUR::AutoStyle, bool);
-
   protected:
 
 	friend class MixerStrip;
@@ -139,11 +135,9 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	sigc::connection gain_watching;
 
-	ArdourButton gain_automation_style_button;
 	ArdourButton gain_automation_state_button;
 
 	Gtk::Menu gain_astate_menu;
-	Gtk::Menu gain_astyle_menu;
 
 	ArdourButton meter_point_button;
 
@@ -153,13 +147,10 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool gain_astate_propagate;
 	static sigc::signal<void, ARDOUR::AutoState> ChangeGainAutomationState;
 
-	gint gain_automation_style_button_event (GdkEventButton *);
 	gint gain_automation_state_button_event (GdkEventButton *);
-	gint pan_automation_style_button_event (GdkEventButton *);
 	gint pan_automation_state_button_event (GdkEventButton *);
 
 	void gain_automation_state_changed();
-	void gain_automation_style_changed();
 
 	void setup_gain_adjustment ();
 	Width _width;

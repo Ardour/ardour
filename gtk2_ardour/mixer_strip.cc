@@ -777,14 +777,10 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->set_text (_("Aux"));
 		}
 
-		gpm.gain_automation_style_button.set_text (
-				gpm.astyle_string(gain_automation->automation_style()));
 		gpm.gain_automation_state_button.set_text (
 				gpm.astate_string(gain_automation->automation_state()));
 
 		if (_route->panner()) {
-			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
-					panners.astyle_string(_route->panner()->automation_style()));
 			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
 					panners.astate_string(_route->panner()->automation_state()));
 		}
@@ -803,15 +799,11 @@ MixerStrip::set_width_enum (Width w, void* owner)
 			show_sends_button->set_text (_("Snd"));
 		}
 
-		gpm.gain_automation_style_button.set_text (
-				gpm.short_astyle_string(gain_automation->automation_style()));
 		gpm.gain_automation_state_button.set_text (
 				gpm.short_astate_string(gain_automation->automation_state()));
 		gain_meter().setup_meters (); // recalc meter width
 
 		if (_route->panner()) {
-			((Gtk::Label*)panners.pan_automation_style_button.get_child())->set_text (
-			panners.short_astyle_string(_route->panner()->automation_style()));
 			((Gtk::Label*)panners.pan_automation_state_button.get_child())->set_text (
 			panners.short_astate_string(_route->panner()->automation_state()));
 		}
@@ -1162,7 +1154,6 @@ MixerStrip::connect_to_pan ()
 	boost::shared_ptr<Pannable> p = _route->pannable ();
 
 	p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
-	p->automation_style_changed.connect (panstyle_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_style_changed, &panners), gui_context());
 
 	/* This call reduncant, PannerUI::set_panner() connects to _panshell->Changed itself
 	 * However, that only works a panner was previously set.

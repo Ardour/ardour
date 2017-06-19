@@ -57,10 +57,6 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
 	AutoState automation_state() const { return _auto_state; }
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
-	void set_automation_style (AutoStyle m);
-	AutoStyle automation_style() const { return _auto_style; }
-	PBD::Signal0<void> automation_style_changed;
-
 	bool automation_playback() const {
 		return (_auto_state & Play) || ((_auto_state & Touch) && !touching());
 	}
@@ -85,7 +81,6 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
   protected:
 	boost::weak_ptr<Panner> _panner;
 	AutoState _auto_state;
-	AutoStyle _auto_style;
 	gint      _touching;
 	bool      _has_state;
 	uint32_t  _responding_to_control_auto_state_change;

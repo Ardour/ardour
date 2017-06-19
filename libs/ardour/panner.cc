@@ -67,12 +67,6 @@ Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
 }
 
 void
-Panner::set_automation_style (AutoStyle style)
-{
-	_pannable->set_automation_style (style);
-}
-
-void
 Panner::set_automation_state (AutoState state)
 {
 	_pannable->set_automation_state (state);
@@ -82,12 +76,6 @@ AutoState
 Panner::automation_state () const
 {
 	return _pannable->automation_state();
-}
-
-AutoStyle
-Panner::automation_style () const
-{
-	return _pannable->automation_style ();
 }
 
 bool

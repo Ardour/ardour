@@ -96,7 +96,6 @@ setup_enum_writer ()
 	IOChange _IOChange;
 	AutomationType _AutomationType;
 	AutoState _AutoState;
-	AutoStyle _AutoStyle;
 	AutoConnectOption _AutoConnectOption;
 	TracksAutoNamingRule _TracksAutoNamingRule;
 	Session::StateOfTheState _Session_StateOfTheState;
@@ -191,10 +190,6 @@ setup_enum_writer ()
 	REGISTER_ENUM (Touch);
 	REGISTER_ENUM (Play);
 	REGISTER_BITS (_AutoState);
-
-	REGISTER_ENUM (Absolute);
-	REGISTER_ENUM (Trim);
-	REGISTER_BITS (_AutoStyle);
 
 	REGISTER_ENUM (CaptureTime);
 	REGISTER_ENUM (ExistingMaterial);

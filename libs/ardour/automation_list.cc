@@ -59,7 +59,6 @@ AutomationList::AutomationList (const Evoral::Parameter& id, const Evoral::Param
 	, _before (0)
 {
 	_state = Off;
-	_style = Absolute;
 	g_atomic_int_set (&_touching, 0);
 
 	create_curve_if_necessary();
@@ -73,7 +72,6 @@ AutomationList::AutomationList (const Evoral::Parameter& id)
 	, _before (0)
 {
 	_state = Off;
-	_style = Absolute;
 	g_atomic_int_set (&_touching, 0);
 
 	create_curve_if_necessary();
@@ -87,7 +85,6 @@ AutomationList::AutomationList (const AutomationList& other)
 	, StatefulDestructible()
 	, _before (0)
 {
-	_style = other._style;
 	_state = other._state;
 	g_atomic_int_set (&_touching, other.touching());
 
@@ -101,7 +98,6 @@ AutomationList::AutomationList (const AutomationList& other, double start, doubl
 	: ControlList(other, start, end)
 	, _before (0)
 {
-	_style = other._style;
 	_state = other._state;
 	g_atomic_int_set (&_touching, other.touching());
 
@@ -120,7 +116,6 @@ AutomationList::AutomationList (const XMLNode& node, Evoral::Parameter id)
 {
 	g_atomic_int_set (&_touching, 0);
 	_state = Off;
-	_style = Absolute;
 
 	set_state (node, Stateful::loading_state_version);
 
@@ -173,7 +168,6 @@ AutomationList::operator= (const AutomationList& other)
 
 		ControlList::operator= (other);
 		_state = other._state;
-		_style = other._style;
 		_touching = other._touching;
 
 		mark_dirty ();
@@ -205,15 +199,6 @@ AutomationList::set_automation_state (AutoState s)
 			_before = 0;
 		}
 		automation_state_changed (s); /* EMIT SIGNAL */
-	}
-}
-
-void
-AutomationList::set_automation_style (AutoStyle s)
-{
-	if (s != _style) {
-		_style = s;
-		automation_style_changed (); /* EMIT SIGNAL */
 	}
 }
 
@@ -358,8 +343,6 @@ AutomationList::state (bool full)
 		/* never save anything but Off for automation state to a template */
 		root->set_property ("state", Off);
 	}
-
-	root->set_property ("style", _style);
 
 	if (!_events.empty()) {
 		root->add_child_nocopy (serialize_events());
@@ -516,10 +499,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 		_default_value = 0.0;
 	}
 
-	if (!node.get_property (X_("style"), _style)) {
-		_style = Absolute;
-	}
-
 	if (node.get_property (X_("state"), _state)) {
 		if (_state == Write) {
 			_state = Off;
@@ -564,7 +543,6 @@ AutomationList::operator!= (AutomationList const & other) const
 	return (
 		static_cast<ControlList const &> (*this) != static_cast<ControlList const &> (other) ||
 		_state != other._state ||
-		_style != other._style ||
 		_touching != other._touching
 		);
 }

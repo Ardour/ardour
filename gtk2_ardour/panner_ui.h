@@ -121,7 +121,6 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	Gtk::Menu* pan_astate_menu;
 	Gtk::Menu* pan_astyle_menu;
 
-	Gtk::Button pan_automation_style_button;
 	Gtk::ToggleButton pan_automation_state_button;
 
 	void pan_value_changed (uint32_t which);
@@ -147,18 +146,12 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	void pan_set_custom_type (std::string type);
 
 	void pan_automation_state_changed();
-	void pan_automation_style_changed();
-	gint pan_automation_style_button_event (GdkEventButton *);
 	gint pan_automation_state_button_event (GdkEventButton *);
 	sigc::connection pan_watching;
 
 	std::string astate_string (ARDOUR::AutoState);
 	std::string short_astate_string (ARDOUR::AutoState);
 	std::string _astate_string (ARDOUR::AutoState, bool);
-
-	std::string astyle_string (ARDOUR::AutoStyle);
-	std::string short_astyle_string (ARDOUR::AutoStyle);
-	std::string _astyle_string (ARDOUR::AutoStyle, bool);
 
         void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
         void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);

@@ -50,7 +50,6 @@ PannerUI::PannerUI (Session* s)
 	, _current_nins (-1)
 	, _current_uri ("")
 	, _send_mode (false)
-	, pan_automation_style_button ("")
 	, pan_automation_state_button ("")
 	, _panner_list()
 {
@@ -66,19 +65,14 @@ PannerUI::PannerUI (Session* s)
         _ignore_width_change = false;
         _ignore_position_change = false;
 
-	pan_automation_style_button.set_name ("MixerAutomationModeButton");
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
 	set_tooltip (pan_automation_state_button, _("Pan automation mode"));
-	set_tooltip (pan_automation_style_button, _("Pan automation type"));
 
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
-	//set_size_request_to_display_given_text (pan_automation_style_button, X_("0"), 2, 2);
 
-	pan_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	pan_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
-	pan_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_automation_style_button_event), false);
 	pan_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &PannerUI::pan_automation_state_button_event), false);
 
 	pan_vbox.set_spacing (2);
@@ -515,41 +509,6 @@ PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
 	return TRUE;
 }
 
-gint
-PannerUI::pan_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		if (pan_astyle_menu == 0) {
-			build_astyle_menu ();
-		}
-		pan_astyle_menu->popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
-
-void
-PannerUI::pan_automation_style_changed ()
-{
-	ENSURE_GUI_THREAD (*this, &PannerUI::pan_automation_style_changed)
-
-	switch (_width) {
-	case Wide:
-	        pan_automation_style_button.set_label (astyle_string(_panner->automation_style()));
-		break;
-	case Narrow:
-	  	pan_automation_style_button.set_label (short_astyle_string(_panner->automation_style()));
-		break;
-	}
-}
-
 void
 PannerUI::pan_automation_state_changed ()
 {
@@ -616,30 +575,6 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 	}
 
 	return sstr;
-}
-
-string
-PannerUI::astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, false);
-}
-
-string
-PannerUI::short_astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, true);
-}
-
-string
-PannerUI::_astyle_string (AutoStyle style, bool shrt)
-{
-	if (style & Trim) {
-		return _("Trim");
-	} else {
-	        /* XXX it might different in different languages */
-
-		return (shrt ? _("Abs") : _("Abs"));
-	}
 }
 
 void

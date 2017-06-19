@@ -314,34 +314,6 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 }
 
 void
-Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
-{
-	Glib::Threads::Mutex::Lock lm (control_lock());
-
-	boost::shared_ptr<AutomationControl> c = automation_control(param, true);
-
-	if (c && (s != c->automation_style())) {
-		c->set_automation_style (s);
-		_a_session.set_dirty ();
-	}
-}
-
-AutoStyle
-Automatable::get_parameter_automation_style (Evoral::Parameter param)
-{
-	Glib::Threads::Mutex::Lock lm (control_lock());
-
-	boost::shared_ptr<Evoral::Control> c = control(param);
-	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
-
-	if (c) {
-		return l->automation_style();
-	} else {
-		return Absolute; // whatever
-	}
-}
-
-void
 Automatable::protect_automation ()
 {
 	typedef set<Evoral::Parameter> ParameterSet;

@@ -45,7 +45,6 @@ Pannable::Pannable (Session& s)
 	, pan_frontback_control (new PanControllable (s, "", this, PanFrontBackAutomation))
 	, pan_lfe_control (new PanControllable (s, "", this, PanLFEAutomation))
 	, _auto_state (Off)
-	, _auto_style (Absolute)
 	, _has_state (false)
 	, _responding_to_control_auto_state_change (0)
 {
@@ -133,26 +132,6 @@ Pannable::set_automation_state (AutoState state)
 
 		session().set_dirty ();
 		automation_state_changed (_auto_state);
-	}
-}
-
-void
-Pannable::set_automation_style (AutoStyle style)
-{
-	if (style != _auto_style) {
-		_auto_style = style;
-
-		const Controls& c (controls());
-
-		for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-			boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
-			if (ac) {
-				ac->alist()->set_automation_style (style);
-			}
-		}
-
-		session().set_dirty ();
-		automation_style_changed ();
 	}
 }
 

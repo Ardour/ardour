@@ -184,14 +184,6 @@ namespace ARDOUR {
 	std::string auto_state_to_string (AutoState);
 	AutoState string_to_auto_state (std::string);
 
-	enum AutoStyle {
-		Absolute = 0x1,
-		Trim = 0x2
-	};
-
-	std::string auto_style_to_string (AutoStyle);
-	AutoStyle string_to_auto_style (std::string);
-
 	enum AlignStyle {
 		CaptureTime,
 		ExistingMaterial

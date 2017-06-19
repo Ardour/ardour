@@ -82,12 +82,7 @@ public:
 		return alist() ? alist()->automation_state() : Off;
 	}
 
-	inline AutoStyle automation_style() const {
-		return alist() ? alist()->automation_style() : Absolute;
-	}
-
 	void set_automation_state(AutoState as);
-	void set_automation_style(AutoStyle as);
 	void start_touch(double when);
 	void stop_touch(bool mark, double when);
 

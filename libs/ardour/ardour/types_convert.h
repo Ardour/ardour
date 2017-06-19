@@ -89,20 +89,6 @@ inline bool string_to (const std::string& str, ARDOUR::AutoState& as)
 }
 
 template <>
-inline bool to_string (ARDOUR::AutoStyle val, std::string& str)
-{
-	str = ARDOUR::auto_style_to_string (val);
-	return true;
-}
-
-template <>
-inline bool string_to (const std::string& str, ARDOUR::AutoStyle& as)
-{
-	as = ARDOUR::string_to_auto_style (str);
-	return true;
-}
-
-template <>
 inline bool to_string (ARDOUR::DataType val, std::string& str)
 {
 	str = val.to_string();
