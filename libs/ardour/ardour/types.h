@@ -156,6 +156,11 @@ namespace ARDOUR {
 		TrimAutomation,
 		PhaseAutomation,
 		MonitoringAutomation,
+#if 1 // XXX remove me.
+		/* These really need to go away, they're "well known" PluginAutomation.
+		 * Abusing the AutomationType (range, steps, etc) to indentify controls is wrong.
+		 * Luckily it's only used by mackie/strip.cc in Mixbus.
+		 */
 		EQGain,
 		EQFrequency,
 		EQQ,
@@ -170,8 +175,9 @@ namespace ARDOUR {
 		CompMakeup,
 		CompRedux,
 		CompEnable,
-		BusSendLevel,
-		BusSendEnable,
+		BusSendLevel, //really GainAutomation
+#endif
+		BusSendEnable
 	};
 
 	enum AutoState {
