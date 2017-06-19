@@ -47,6 +47,7 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/cpus.h"
+#include "pbd/control_math.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
@@ -709,13 +710,13 @@ ARDOUR::how_many_dsp_threads ()
 double
 ARDOUR::gain_to_slider_position_with_max (double g, double max_gain)
 {
-        return gain_to_slider_position (g * 2.0/max_gain);
+	return gain_to_position (g * 2.0 / max_gain);
 }
 
 double
 ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 {
-	return slider_position_to_gain (g * max_gain/2.0);
+	return position_to_gain (g) * max_gain / 2.0;
 }
 
 extern "C" {
