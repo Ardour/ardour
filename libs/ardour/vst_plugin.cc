@@ -328,8 +328,6 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 	VstParameterProperties prop;
 
 	memset (&prop, 0, sizeof (VstParameterProperties));
-	desc.min_unbound = false;
-	desc.max_unbound = false;
 	prop.flags = 0;
 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {

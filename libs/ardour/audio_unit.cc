@@ -806,8 +806,6 @@ AUPlugin::discover_parameters ()
 				break;
 			}
 
-			d.min_unbound = 0; // lower is bound
-			d.max_unbound = 0; // upper is bound
 			d.update_steps();
 
 			descriptors.push_back (d);

@@ -3857,8 +3857,6 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 				flags |= pd.enumeration ? 1 : 0;
 				flags |= pd.integer_step ? 2 : 0;
 				flags |= pd.logarithmic ? 4 : 0;
-				flags |= pd.max_unbound ? 8 : 0;
-				flags |= pd.min_unbound ? 16 : 0;
 				flags |= pd.sr_dependent ? 32 : 0;
 				flags |= pd.toggled ? 64 : 0;
 				flags |= c != NULL ? 128 : 0; // bit 7 indicates in input control

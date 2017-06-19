@@ -469,20 +469,17 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 
 
 	if (LADSPA_IS_HINT_BOUNDED_BELOW(prh.HintDescriptor)) {
-		desc.min_unbound = false;
 		if (LADSPA_IS_HINT_SAMPLE_RATE(prh.HintDescriptor)) {
 			desc.lower = prh.LowerBound * _session.frame_rate();
 		} else {
 			desc.lower = prh.LowerBound;
 		}
 	} else {
-		desc.min_unbound = true;
 		desc.lower = 0;
 	}
 
 
 	if (LADSPA_IS_HINT_BOUNDED_ABOVE(prh.HintDescriptor)) {
-		desc.max_unbound = false;
 		if (LADSPA_IS_HINT_SAMPLE_RATE(prh.HintDescriptor)) {
 			desc.upper = prh.UpperBound * _session.frame_rate();
 		} else {
@@ -490,10 +487,8 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 		}
 	} else {
 		if (LADSPA_IS_HINT_TOGGLED (prh.HintDescriptor)) {
-			desc.max_unbound = false;
 			desc.upper = 1;
 		} else {
-			desc.max_unbound = true;
 			desc.upper = 4; /* completely arbitrary */
 		}
 	}

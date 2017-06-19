@@ -2122,9 +2122,6 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 		desc.upper *= _session.frame_rate ();
 	}
 
-	desc.min_unbound  = false; // TODO: LV2 extension required
-	desc.max_unbound  = false; // TODO: LV2 extension required
-
 	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
 	desc.scale_points = get_scale_points(which);
 

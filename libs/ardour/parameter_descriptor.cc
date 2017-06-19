@@ -44,8 +44,6 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	, integer_step(parameter.type() >= MidiCCAutomation &&
 	               parameter.type() <= MidiChannelPressureAutomation)
 	, sr_dependent(false)
-	, min_unbound(0)
-	, max_unbound(0)
 	, enumeration(false)
 {
 	ScalePoints sp;
@@ -142,8 +140,6 @@ ParameterDescriptor::ParameterDescriptor()
 	, largestep(0)
 	, integer_step(false)
 	, sr_dependent(false)
-	, min_unbound(0)
-	, max_unbound(0)
 	, enumeration(false)
 {}
 
