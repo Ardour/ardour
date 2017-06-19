@@ -69,7 +69,6 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	float                          smallstep;
 	float                          largestep;
 	bool                           integer_step;
-	bool                           logarithmic;
 	bool                           sr_dependent;
 	bool                           min_unbound;
 	bool                           max_unbound;
