@@ -106,8 +106,8 @@ public:
 
 	void hide ();
 	void set_height (guint32);
-	void set_uses_gain_mapping (bool yn);
-	bool get_uses_gain_mapping () const { return _uses_gain_mapping; }
+
+	bool get_uses_gain_mapping () const;
 
 	TimeAxisView& trackview;
 
@@ -172,7 +172,6 @@ protected:
 
 	VisibleAspects _visible;
 
-	bool    _uses_gain_mapping;
 	bool    terminal_points_can_slide;
 	bool    update_pending;
 	bool    have_timeout;

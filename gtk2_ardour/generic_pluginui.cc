@@ -1089,11 +1089,7 @@ GenericPluginUI::output_update ()
 		(*i)->display_label->set_text (buf);
 
 		if ((*i)->meterinfo && (*i)->meterinfo->packed) {
-			const float upper = c->desc().upper;
-			const float lower = c->desc().lower;
-			val = std::min (upper, std::max (lower, val));
-			float lval = (val - lower / (upper - lower));
-			(*i)->meterinfo->meter->set (lval);
+			(*i)->meterinfo->meter->set (c->desc().to_interface (val));
 		}
 	}
 }

@@ -99,7 +99,6 @@ AutomationLine::AutomationLine (const string&                              name,
 
 	update_pending = false;
 	have_timeout = false;
-	_uses_gain_mapping = false;
 	no_draw = false;
 	_is_boolean = false;
 	terminal_points_can_slide = true;
@@ -117,12 +116,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
-
-	if (alist->parameter().type() == GainAutomation ||
-	    alist->parameter().type() == TrimAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation) {
-		set_uses_gain_mapping (true);
-	}
 
 	interpolation_changed (alist->interpolation ());
 
@@ -194,7 +187,19 @@ AutomationLine::update_visibility ()
 			}
 		}
 	}
+}
 
+bool
+AutomationLine::get_uses_gain_mapping () const
+{
+	switch (_desc.type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case TrimAutomation:
+			return true;
+		default:
+			return false;
+	}
 }
 
 void
@@ -248,15 +253,6 @@ AutomationLine::set_line_color (uint32_t color)
 	ArdourCanvas::SVAModifier mod = UIConfiguration::instance().modifier ("automation line fill");
 
 	line->set_fill_color ((color & 0xffffff00) + mod.a()*255);
-}
-
-void
-AutomationLine::set_uses_gain_mapping (bool yn)
-{
-	if (yn != _uses_gain_mapping) {
-		_uses_gain_mapping = yn;
-		reset ();
-	}
 }
 
 ControlPoint*
@@ -342,36 +338,17 @@ AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp)
 string
 AutomationLine::get_verbose_cursor_string (double fraction) const
 {
-	std::string s = fraction_to_string (fraction);
-	if (_uses_gain_mapping) {
-		s += " dB";
-	}
-
-	return s;
+	return fraction_to_string (fraction);
 }
 
 string
 AutomationLine::get_verbose_cursor_relative_string (double original, double fraction) const
 {
 	std::string s = fraction_to_string (fraction);
-	if (_uses_gain_mapping) {
-		s += " dB";
-	}
-
 	std::string d = fraction_to_relative_string (original, fraction);
-
 	if (!d.empty()) {
-
-		s += " (\u0394";
-		s += d;
-
-		if (_uses_gain_mapping) {
-			s += " dB";
-		}
-
-		s += ')';
+		s += " (\u0394" + d + ")";
 	}
-
 	return s;
 }
 
@@ -382,26 +359,7 @@ AutomationLine::get_verbose_cursor_relative_string (double original, double frac
 string
 AutomationLine::fraction_to_string (double fraction) const
 {
-	if (_uses_gain_mapping) {
-		char buf[32];
-		if (_desc.type == GainAutomation || _desc.type == EnvelopeAutomation || _desc.lower == 0) {
-			if (fraction == 0.0) {
-				snprintf (buf, sizeof (buf), "-inf");
-			} else {
-				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, _desc.upper)));
-			}
-		} else {
-			const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-			const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-			snprintf (buf, sizeof (buf), "%.1f", lower_db + fraction * range_db);
-		}
-		return buf;
-	} else {
-		view_to_model_coord_y (fraction);
-		return ARDOUR::value_as_string (_desc, fraction);
-	}
-
-	return ""; /*NOTREACHED*/
+	return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction));
 }
 
 /**
@@ -412,32 +370,26 @@ AutomationLine::fraction_to_string (double fraction) const
 string
 AutomationLine::fraction_to_relative_string (double original, double fraction) const
 {
-	char buf[32];
-
 	if (original == fraction) {
-		return "0";
+		return ARDOUR::value_as_string (_desc, 0);
 	}
-
-	if (_uses_gain_mapping) {
-		if (original == 0.0) {
-			/* there is no sensible representation of a relative
-			   change from -inf dB, so return an empty string.
-			*/
-			return "";
-		} else if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-inf");
-		} else {
-			double old_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (original, Config->get_max_gain()));
-			double new_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain()));
-			snprintf (buf, sizeof (buf), "%.1f", new_db - old_db);
-		}
-	} else {
-		view_to_model_coord_y (original);
-		view_to_model_coord_y (fraction);
-		return ARDOUR::value_as_string (_desc, fraction - original);
+	switch (_desc.type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case TrimAutomation:
+			if (original == 0.0) {
+				/* there is no sensible representation of a relative
+				 * change from -inf dB, so return an empty string.
+				 */
+				return "";
+			} else if (fraction == 0.0) {
+				return "-inf dB";
+			}
+			return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction) / _desc.from_interface(original));
+		default:
+			break;
 	}
-
-	return buf;
+	return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction) - _desc.from_interface(original));
 }
 
 /**
@@ -447,21 +399,23 @@ AutomationLine::fraction_to_relative_string (double original, double fraction) c
 double
 AutomationLine::string_to_fraction (string const & s) const
 {
-	if (s == "-inf") {
-		return 0;
-	}
-
 	double v;
 	sscanf (s.c_str(), "%lf", &v);
 
-	if (_uses_gain_mapping) {
-		v = gain_to_slider_position_with_max (dB_to_coefficient (v), Config->get_max_gain());
-	} else {
-		double dummy = 0.0;
-		model_to_view_coord (dummy, v);
+	switch (_desc.type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case TrimAutomation:
+			if (s == "-inf") { /* translation */
+				v = 0;
+			} else {
+				v = dB_to_coefficient (v);
+			}
+			break;
+		default:
+			break;
 	}
-
-	return v;
+	return _desc.to_interface (v);
 }
 
 /** Start dragging a single point, possibly adding others if the supplied point is selected and there
@@ -1198,65 +1152,19 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
-	/* TODO: This should be more generic (use ParameterDescriptor)
-	 * or better yet:  Controllable -> set_interface();
-	 */
-
-	if (   alist->parameter().type() == GainAutomation
-	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
-		y = slider_position_to_gain_with_max (y, _desc.upper);
-		y = max ((double)_desc.lower, y);
-		y = min ((double)_desc.upper, y);
-	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
-		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-		y = max (0.0, y);
-		y = min (1.0, y);
-		y = dB_to_coefficient (lower_db + y * range_db);
-	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation) {
-		y = 1.0 - y;
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
-	} else if (alist->parameter().type() == PanWidthAutomation) {
-		y = 2.0 * y - 1.0;
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
-	} else {
-		y = y * (double)(_desc.upper - _desc.lower) + _desc.lower;
-		if (_desc.integer_step) {
-			y = round(y);
-		} else if (_desc.toggled) {
-			y = (y > 0.5) ? 1.0 : 0.0;
-		}
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
+	if (alist->default_interpolation () != alist->interpolation()) {
+		//TODO use non-standard scaling.
 	}
+	y = _desc.from_interface (y);
 }
 
 void
 AutomationLine::model_to_view_coord_y (double& y) const
 {
-	/* TODO: This should be more generic (use ParameterDescriptor) */
-	if (   alist->parameter().type() == GainAutomation
-	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
-		y = gain_to_slider_position_with_max (y, _desc.upper);
-	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
-		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-		y = (accurate_coefficient_to_dB (y) - lower_db) / range_db;
-	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation) {
-		y = 1.0 - y;
-	} else if (alist->parameter().type() == PanWidthAutomation) {
-		y = .5 + y * .5;
-	} else {
-		y = (y - _desc.lower) / (double)(_desc.upper - _desc.lower);
+	if (alist->default_interpolation () != alist->interpolation()) {
+		//TODO use non-standard scaling.
 	}
+	y = _desc.to_interface (y);
 }
 
 void

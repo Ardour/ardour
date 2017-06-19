@@ -51,7 +51,6 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 
 	group->raise_to_top ();
 	group->set_y_position (2);
-	set_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }
 
