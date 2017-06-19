@@ -172,8 +172,8 @@
     <ColorAlias name="ghost track zero line" alias="color 30"/>
     <ColorAlias name="gtk_arm" alias="color 13"/>
     <ColorAlias name="gtk_audio_bus" alias="color 29"/>
-    <ColorAlias name="gtk_audio_track" alias="color 25"/>
-    <ColorAlias name="gtk_automation_track_header" alias="color 48"/>
+    <ColorAlias name="gtk_audio_track" alias="color 87"/>
+    <ColorAlias name="gtk_automation_track_header" alias="color 25"/>
     <ColorAlias name="gtk_background" alias="color 87"/>
     <ColorAlias name="gtk_bases" alias="color 88"/>
     <ColorAlias name="gtk_bg_selected" alias="color 81"/>
@@ -331,9 +331,9 @@
     <ColorAlias name="nudge clock: cursor" alias="color 8"/>
     <ColorAlias name="nudge clock: edited text" alias="color 8"/>
     <ColorAlias name="nudge clock: text" alias="color 13"/>
-    <ColorAlias name="piano roll black" alias="color 76"/>
+    <ColorAlias name="piano roll black" alias="color 81"/>
     <ColorAlias name="piano roll black outline" alias="color 33"/>
-    <ColorAlias name="piano roll white" alias="color 45"/>
+    <ColorAlias name="piano roll white" alias="color 48"/>
     <ColorAlias name="play head" alias="color 13"/>
     <ColorAlias name="plugin bypass button: led active" alias="color 8"/>
     <ColorAlias name="pluginlist filter button: fill active" alias="color 10"/>
@@ -456,7 +456,7 @@
     <ColorAlias name="transport delta clock: edited text" alias="color 100"/>
     <ColorAlias name="transport delta clock: text" alias="color 92"/>
     <ColorAlias name="transport drag rect" alias="color 21"/>
-    <ColorAlias name="transport loop rect" alias="color 92"/>
+    <ColorAlias name="transport loop rect" alias="color 104"/>
     <ColorAlias name="transport marker bar" alias="color 25"/>
     <ColorAlias name="transport option button: fill active" alias="color 42"/>
     <ColorAlias name="transport option button: led active" alias="color 8"/>
