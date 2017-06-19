@@ -275,7 +275,9 @@ public:
 	enum InterpolationStyle {
 		Discrete,
 		Linear,
-		Curved
+		Curved, // spline, used for x-fades
+		Logarithmic,
+		Exponential // fader, gain
 	};
 
 	/** query interpolation style of the automation data
@@ -283,10 +285,18 @@ public:
 	 */
 	InterpolationStyle interpolation() const { return _interpolation; }
 
-	/** set the interpolation style of the automation data
+	/** query default interpolation for parameter-descriptor */
+	virtual InterpolationStyle default_interpolation() const;
+
+	/** set the interpolation style of the automation data.
+	 *
+	 * This will fail when asking for Logarithmic scale and min,max crosses 0
+	 * or Exponential scale with min != 0.
+	 *
 	 * @param is interpolation style
+	 * @returns true if style change was successful
 	 */
-	void set_interpolation (InterpolationStyle is);
+	bool set_interpolation (InterpolationStyle is);
 
 	virtual bool touching() const { return false; }
 	virtual bool writing() const { return false; }
@@ -339,14 +349,15 @@ protected:
 
 	Curve* _curve;
 
-  private:
-    iterator   most_recent_insert_iterator;
-    double     insert_position;
-    bool       new_write_pass;
-    bool       did_write_during_pass;
-    bool       _in_write_pass;
-    void unlocked_invalidate_insert_iterator ();
-    void add_guard_point (double when);
+private:
+	iterator   most_recent_insert_iterator;
+	double     insert_position;
+	bool       new_write_pass;
+	bool       did_write_during_pass;
+	bool       _in_write_pass;
+
+	void unlocked_invalidate_insert_iterator ();
+	void add_guard_point (double when);
 };
 
 } // namespace Evoral

@@ -38,6 +38,7 @@
 #include "evoral/TypeMap.hpp"
 #include "evoral/types.hpp"
 
+#include "pbd/control_math.h"
 #include "pbd/compose.h"
 #include "pbd/debug.h"
 
@@ -54,9 +55,9 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc)
 	: _parameter(id)
 	, _desc(desc)
+	, _interpolation (default_interpolation ())
 	, _curve(0)
 {
-	_interpolation = desc.toggled ? Discrete : Linear;
 	_frozen = 0;
 	_changed_when_thawed = false;
 	_lookup_cache.left = -1;
@@ -90,9 +91,8 @@ ControlList::ControlList (const ControlList& other)
 	insert_position = -1;
 	most_recent_insert_iterator = _events.end();
 
+	// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 	copy_events (other);
-
-	mark_dirty ();
 }
 
 ControlList::ControlList (const ControlList& other, double start, double end)
@@ -113,6 +113,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	boost::shared_ptr<ControlList> section = const_cast<ControlList*>(&other)->copy (start, end);
 
 	if (!section->empty()) {
+		// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 		copy_events (*(section.get()));
 	}
 
@@ -151,10 +152,21 @@ ControlList&
 ControlList::operator= (const ControlList& other)
 {
 	if (this != &other) {
+		_frozen = 0;
+		_changed_when_thawed = false;
+		_sort_pending = false;
 
+		insert_position = other.insert_position;
+		new_write_pass = true;
+		_in_write_pass = false;
+		did_write_during_pass = false;
+		insert_position = -1;
 
+		_parameter = other._parameter;
+		_desc = other._desc;
 		_interpolation = other._interpolation;
 
+		// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 		copy_events (other);
 	}
 
@@ -170,6 +182,7 @@ ControlList::copy_events (const ControlList& other)
 			delete (*x);
 		}
 		_events.clear ();
+		Glib::Threads::RWLock::ReaderLock olm (other._lock);
 		for (const_iterator i = other.begin(); i != other.end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
@@ -190,6 +203,17 @@ ControlList::destroy_curve()
 {
 	delete _curve;
 	_curve = NULL;
+}
+
+ControlList::InterpolationStyle
+ControlList::default_interpolation () const
+{
+	if (_desc.toggled) {
+		return Discrete;
+	} else if (_desc.logarithmic) {
+		return Logarithmic;
+	}
+	return Linear;
 }
 
 void
@@ -1252,13 +1276,21 @@ ControlList::unlocked_eval (double x) const
 		upos = _events.back()->when;
 		uval = _events.back()->value;
 
-		if (_interpolation == Discrete) {
-			return lval;
-		}
-
-		/* linear interpolation between the two points */
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
-		return lval + (fraction * (uval - lval));
+
+		switch (_interpolation) {
+			case Discrete:
+				return lval;
+			case Logarithmic:
+				return interpolate_logarithmic (lval, uval, fraction, _desc.lower, _desc.upper);
+			case Exponential:
+				return interpolate_gain (lval, uval, fraction, _desc.upper);
+			case Curved:
+				/* only used x-fade curves, never direct eval */
+				assert (0);
+			default: // Linear
+				return interpolate_linear (lval, uval, fraction);
+		}
 
 	default:
 		if (x >= _events.back()->when) {
@@ -1334,13 +1366,24 @@ ControlList::multipoint_eval (double x) const
 		upos = (*range.second)->when;
 		uval = (*range.second)->value;
 
-		/* linear interpolation betweeen the two points
-		   on either side of x
-		*/
-
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
-		return lval + (fraction * (uval - lval));
 
+		switch (_interpolation) {
+			case Logarithmic:
+				return interpolate_logarithmic (lval, uval, fraction, _desc.lower, _desc.upper);
+			case Exponential:
+				return interpolate_gain (lval, uval, fraction, _desc.upper);
+			case Discrete:
+				/* should not reach here */
+				assert (0);
+			case Curved:
+				/* only used x-fade curves, never direct eval */
+				assert (0);
+			default: // Linear
+				return interpolate_linear (lval, uval, fraction);
+				break;
+		}
+		assert (0);
 	}
 
 	/* x is a control point in the data */
@@ -1823,15 +1866,30 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	return true;
 }
 
-void
+bool
 ControlList::set_interpolation (InterpolationStyle s)
 {
 	if (_interpolation == s) {
-		return;
+		return true;
+	}
+
+	switch (s) {
+		case Logarithmic:
+			if (_desc.lower * _desc.upper <= 0 || _desc.upper <= _desc.lower) {
+				return false;
+			}
+			break;
+		case Exponential:
+			if (_desc.lower != 0 || _desc.upper <= _desc.lower) {
+				return false;
+			}
+		default:
+			break;
 	}
 
 	_interpolation = s;
 	InterpolationChanged (s); /* EMIT SIGNAL */
+	return true;
 }
 
 bool

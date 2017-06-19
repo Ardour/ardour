@@ -545,6 +545,8 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (AutomationList, Discrete);
 	REGISTER_CLASS_ENUM (AutomationList, Linear);
 	REGISTER_CLASS_ENUM (AutomationList, Curved);
+	REGISTER_CLASS_ENUM (AutomationList, Logarithmic);
+	REGISTER_CLASS_ENUM (AutomationList, Exponential);
 	REGISTER (_AutomationList_InterpolationStyle);
 
 	REGISTER_CLASS_ENUM (AnyTime, Timecode);
