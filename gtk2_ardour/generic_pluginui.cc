@@ -902,12 +902,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 					UIConfiguration::instance().color ("meter background top")
 					);
 
-			info->min_unbound = desc.min_unbound;
-			info->max_unbound = desc.max_unbound;
-
-			info->min = desc.lower;
-			info->max = desc.upper;
-
 			control_ui->label.set_angle(90);
 
 			HBox* center =  manage (new HBox);
@@ -1094,27 +1088,12 @@ GenericPluginUI::output_update ()
 		buf[len] = '\0';
 		(*i)->display_label->set_text (buf);
 
-		/* autoscaling for the meter */
 		if ((*i)->meterinfo && (*i)->meterinfo->packed) {
-
-			if (val < (*i)->meterinfo->min) {
-				if ((*i)->meterinfo->min_unbound)
-					(*i)->meterinfo->min = val;
-				else
-					val = (*i)->meterinfo->min;
-			}
-
-			if (val > (*i)->meterinfo->max) {
-				if ((*i)->meterinfo->max_unbound)
-					(*i)->meterinfo->max = val;
-				else
-					val = (*i)->meterinfo->max;
-			}
-
-			if ((*i)->meterinfo->max > (*i)->meterinfo->min ) {
-				float lval = (val - (*i)->meterinfo->min) / ((*i)->meterinfo->max - (*i)->meterinfo->min) ;
-				(*i)->meterinfo->meter->set (lval );
-			}
+			const float upper = c->desc().upper;
+			const float lower = c->desc().lower;
+			val = std::min (upper, std::max (lower, val));
+			float lval = (val - lower / (upper - lower));
+			(*i)->meterinfo->meter->set (lval);
 		}
 	}
 }

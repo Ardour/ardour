@@ -206,20 +206,11 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 	struct MeterInfo {
 		Gtkmm2ext::FastMeter *meter;
-
-		float           min;
-		float           max;
-		bool            min_unbound;
-		bool            max_unbound;
 		bool packed;
 
 		MeterInfo () {
 			meter = 0;
 			packed = false;
-			min = 1.0e10;
-			max = -1.0e10;
-			min_unbound = false;
-			max_unbound = false;
 		}
 	};
 

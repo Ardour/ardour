@@ -1225,7 +1225,7 @@ AutomationLine::view_to_model_coord_y (double& y) const
 		y = max ((double) _desc.lower, y);
 		y = min ((double) _desc.upper, y);
 	} else {
-		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
+		y = y * (double)(_desc.upper - _desc.lower) + _desc.lower;
 		if (_desc.integer_step) {
 			y = round(y);
 		} else if (_desc.toggled) {
@@ -1255,7 +1255,7 @@ AutomationLine::model_to_view_coord_y (double& y) const
 	} else if (alist->parameter().type() == PanWidthAutomation) {
 		y = .5 + y * .5;
 	} else {
-		y = (y - alist->get_min_y()) / (double)(alist->get_max_y() - alist->get_min_y());
+		y = (y - _desc.lower) / (double)(_desc.upper - _desc.lower);
 	}
 }
 
