@@ -142,8 +142,8 @@
     <ColorAlias name="comment button: fill" alias="color 20"/>
     <ColorAlias name="control point fill" alias="color 97"/>
     <ColorAlias name="control point outline" alias="meter color8"/>
-    <ColorAlias name="control point selected fill" alias="color 13"/>
-    <ColorAlias name="control point selected outline" alias="color 91"/>
+    <ColorAlias name="control point selected fill" alias="color 80"/>
+    <ColorAlias name="control point selected outline" alias="color 29"/>
     <ColorAlias name="covered region" alias="color 87"/>
     <ColorAlias name="crossfade editor base" alias="color 15"/>
     <ColorAlias name="crossfade editor line" alias="color 4"/>
