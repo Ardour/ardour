@@ -354,4 +354,43 @@ ParameterDescriptor::from_interface (float val) const
 	return val;
 }
 
+bool
+ParameterDescriptor::is_linear () const
+{
+	if (logarithmic) {
+		return false;
+	}
+	switch(type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case BusSendLevel:
+			return false;
+		default:
+			break;
+	}
+	return true;
+}
+
+float
+ParameterDescriptor::compute_delta (float from, float to) const
+{
+	if (is_linear ()) {
+		return to - from;
+	}
+	if (from == 0) {
+		return 0;
+	}
+	return to / from;
+}
+
+float
+ParameterDescriptor::apply_delta (float val, float delta) const
+{
+	if (is_linear ()) {
+		return val + delta;
+	} else {
+		return val * delta;
+	}
+}
+
 } // namespace ARDOUR

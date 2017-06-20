@@ -73,6 +73,10 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	 */
 	float from_interface (float) const;
 
+	bool  is_linear () const;
+	float compute_delta (float from, float to) const;
+	float apply_delta (float value, float delta) const;
+
 	/** Set step, smallstep, and largestep, based on current description. */
 	void update_steps();
 
