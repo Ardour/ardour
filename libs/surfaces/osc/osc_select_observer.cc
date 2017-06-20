@@ -58,6 +58,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	feedback = sur->feedback;
 	as = ARDOUR::Off;
 	send_size = 0;
+	plug_size = 0;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
