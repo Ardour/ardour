@@ -165,6 +165,8 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	Gtk::CheckMenuItem* mode_discrete_item;
 	Gtk::CheckMenuItem* mode_line_item;
+	Gtk::CheckMenuItem* mode_log_item;
+	Gtk::CheckMenuItem* mode_exp_item;
 
 	bool _show_regions;
 
@@ -183,6 +185,7 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	void set_automation_state (ARDOUR::AutoState);
 	bool ignore_state_request;
+	bool ignore_mode_request;
 
 	void automation_state_changed ();
 

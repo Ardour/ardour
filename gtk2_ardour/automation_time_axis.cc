@@ -27,6 +27,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/string_convert.h"
 #include "pbd/types_convert.h"
+#include "pbd/unwind.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/beats_frames_converter.h"
@@ -136,8 +137,11 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	auto_play_item = 0;
 	mode_discrete_item = 0;
 	mode_line_item = 0;
+	mode_log_item = 0;
+	mode_exp_item = 0;
 
 	ignore_state_request = false;
+	ignore_mode_request = false;
 	first_call_to_set_height = true;
 
 	CANVAS_DEBUG_NAME (_base_rect, string_compose ("base rect for %1", _name));
@@ -409,14 +413,33 @@ AutomationTimeAxisView::automation_state_changed ()
 void
 AutomationTimeAxisView::interpolation_changed (AutomationList::InterpolationStyle s)
 {
-	if (mode_line_item && mode_discrete_item) {
-		if (s == AutomationList::Discrete) {
-			mode_discrete_item->set_active(true);
-			mode_line_item->set_active(false);
-		} else {
-			mode_line_item->set_active(true);
-			mode_discrete_item->set_active(false);
-		}
+	if (ignore_mode_request) {
+		return;
+	}
+	PBD::Unwinder<bool> uw (ignore_mode_request, true);
+	switch (s) {
+		case AutomationList::Discrete:
+			if (mode_discrete_item) {
+				mode_discrete_item->set_active(true);
+			}
+			break;
+		case AutomationList::Linear:
+			if (mode_line_item) {
+				mode_line_item->set_active(true);
+			}
+			break;
+		case AutomationList::Logarithmic:
+			if (mode_log_item) {
+				mode_log_item->set_active(true);
+			}
+			break;
+		case AutomationList::Exponential:
+			if (mode_exp_item) {
+				mode_exp_item->set_active(true);
+			}
+			break;
+		default:
+			break;
 	}
 }
 
@@ -592,15 +615,55 @@ AutomationTimeAxisView::build_display_menu ()
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Discrete)));
 		mode_discrete_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
-		mode_discrete_item->set_active (s == AutomationList::Discrete);
 
 		am_items.push_back (RadioMenuElem (group, _("Linear"), sigc::bind (
 				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
 				AutomationList::Linear)));
 		mode_line_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
-		mode_line_item->set_active (s == AutomationList::Linear);
 
 		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
+
+	} else {
+
+		Menu* auto_mode_menu = manage (new Menu);
+		auto_mode_menu->set_name ("ArdourContextMenu");
+		MenuList& am_items = auto_mode_menu->items();
+		bool have_options = false;
+
+		RadioMenuItem::Group group;
+
+		am_items.push_back (RadioMenuElem (group, _("Linear"), sigc::bind (
+				sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+				AutomationList::Linear)));
+		mode_line_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
+
+		if (_control->desc().logarithmic) {
+			am_items.push_back (RadioMenuElem (group, _("Logarithmic"), sigc::bind (
+							sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+							AutomationList::Logarithmic)));
+			mode_log_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
+			have_options = true;
+		} else {
+			mode_log_item = 0;
+		}
+
+		if (_line->get_uses_gain_mapping () && !_control->desc().logarithmic) {
+			am_items.push_back (RadioMenuElem (group, _("Exponential"), sigc::bind (
+							sigc::mem_fun(*this, &AutomationTimeAxisView::set_interpolation),
+							AutomationList::Exponential)));
+			mode_exp_item = dynamic_cast<Gtk::CheckMenuItem*>(&am_items.back());
+			have_options = true;
+		} else {
+			mode_exp_item = 0;
+		}
+
+		if (have_options) {
+			items.push_back (MenuElem (_("Interpolation"), *auto_mode_menu));
+		} else {
+			mode_line_item = 0;
+			delete auto_mode_menu;
+			auto_mode_menu = 0;
+		}
 	}
 
 	/* make sure the automation menu state is correct */
