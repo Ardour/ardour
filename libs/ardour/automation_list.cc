@@ -211,6 +211,10 @@ AutomationList::default_interpolation () const
 		case GainAutomation:
 		case BusSendLevel:
 		case EnvelopeAutomation:
+#ifndef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
+			/* use old, wrong linear gain interpolation */
+			return ControlList::Linear;
+#endif
 			return ControlList::Exponential;
 			break;
 		case TrimAutomation:
@@ -342,7 +346,22 @@ AutomationList::state (bool full)
 
 	root->set_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 	root->set_property ("id", id());
+
+#ifndef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
+	/* force new enums to existing ones in session-file */
+	Evoral::ControlList::InterpolationStyle is = _interpolation;
+	switch (is) {
+		case ControlList::Exponential:
+		case ControlList::Logarithmic:
+			is = ControlList::Linear;
+			break;
+		default:
+			break;
+	}
+	root->set_property ("interpolation-style", is);
+#else
 	root->set_property ("interpolation-style", _interpolation);
+#endif
 
 	if (full) {
 		/* never serialize state with Write enabled - too dangerous
@@ -512,6 +531,12 @@ AutomationList::set_state (const XMLNode& node, int version)
 	if (!node.get_property (X_("interpolation-style"), _interpolation)) {
 		_interpolation = default_interpolation ();
 	}
+#ifndef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
+	/* internally force logarithmic and Trim params to use Log-scale */
+	if (_desc.logarithmic || _parameter.type() == TrimAutomation) {
+		_interpolation = ControlList::Logarithmic;
+	}
+#endif
 
 	if (node.get_property (X_("state"), _state)) {
 		if (_state == Write) {

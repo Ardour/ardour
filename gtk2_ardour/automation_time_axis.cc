@@ -624,7 +624,7 @@ AutomationTimeAxisView::build_display_menu ()
 		items.push_back (MenuElem (_("Mode"), *auto_mode_menu));
 
 	} else {
-
+#ifdef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
 		Menu* auto_mode_menu = manage (new Menu);
 		auto_mode_menu->set_name ("ArdourContextMenu");
 		MenuList& am_items = auto_mode_menu->items();
@@ -664,6 +664,7 @@ AutomationTimeAxisView::build_display_menu ()
 			delete auto_mode_menu;
 			auto_mode_menu = 0;
 		}
+#endif
 	}
 
 	/* make sure the automation menu state is correct */
