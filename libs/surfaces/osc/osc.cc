@@ -2006,16 +2006,18 @@ OSC::_sel_plugin (int id, lo_address addr)
 		do {
 			plugs = false;
 			if (r->nth_plugin (nplugs)) {
+				/// need to check for mixbus channel strips (and exclude them)
 				plugs = true;
 				nplugs++;
 			}
 		} while (plugs);
 
 		// limit plugin_id to actual plugins
-		if (nplugs < id) {
-			sur->plugin_id = nplugs;
-		} else if (!nplugs) {
+		if (!nplugs) {
 			sur->plugin_id = 0;
+			return 0;
+		} else if (nplugs < id) {
+			sur->plugin_id = nplugs;
 		} else  if (nplugs && !id) {
 			sur->plugin_id = 1;
 		} else {
@@ -2643,7 +2645,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 	if (!strncmp (path, "/strip/", 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
-			if (types[1] == 'f') {
+			if (types[0] == 'f') {
 				ssid = (uint32_t)argv[0]->f;
 			} else {
 				ssid = argv[0]->i;
@@ -2682,8 +2684,8 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 				//start touch
 				if (control->automation_state() == Touch && !control->touching ()) {
 					control->start_touch (control->session().transport_frame());
-					ret = 0;
 				}
+				ret = 0;
 			} else {
 				// end touch
 				control->stop_touch (true, control->session().transport_frame());
