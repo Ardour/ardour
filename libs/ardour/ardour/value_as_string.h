@@ -26,6 +26,8 @@
 #include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
 
+#include "pbd/i18n.h"
+
 namespace ARDOUR {
 
 inline std::string
@@ -43,6 +45,10 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 				return i->first;  // Found it, return scale point label
 			}
 		}
+	}
+
+	if (desc.toggled) {
+		return v >= 0 ? _("on") : _("off");
 	}
 
 	// Value is not a scale point, print it normally
