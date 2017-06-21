@@ -3243,25 +3243,24 @@ TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, con
 			Glib::Threads::RWLock::WriterLock lm (lock);
 			TempoSection* tempo_copy = copy_metrics_and_point (_metrics, future_map, ts);
 
-			if (solve_map_minute (future_map, tempo_copy, minute_at_frame (frame))) {
-				if (sub_num != 0) {
-					/* We're moving the object that defines the grid while snapping to it...
-					 * Placing the ts at the beat corresponding to the requested frame may shift the
-					 * grid in such a way that the mouse is left hovering over a completerly different division,
-					 * causing jittering when the mouse next moves (esp. large tempo deltas).
-					 *
-					 * This alters the snap behaviour slightly in that we snap to beat divisions
-					 * in the future map rather than the existing one.
-					 */
-					const double qn = exact_qn_at_frame_locked (future_map, frame, sub_num);
-					const framepos_t snapped_frame = frame_at_minute (minute_at_pulse_locked (future_map, qn / 4.0));
 
-					if (solve_map_minute (future_map, tempo_copy, minute_at_frame (snapped_frame))) {
-						solve_map_minute (_metrics, ts, minute_at_frame (snapped_frame));
-						ts->set_pulse (qn / 4.0);
-						recompute_meters (_metrics);
-					}
-				} else {
+			if (sub_num != 0) {
+				/* We're moving the object that defines the grid while snapping to it...
+				 * Placing the ts at the beat corresponding to the requested frame may shift the
+				 * grid in such a way that the mouse is left hovering over a completerly different division,
+				 * causing jittering when the mouse next moves (esp. large tempo deltas).
+				 * We fudge around this by doing this in the musical domain and then swapping back for the recompute.
+				 */
+				const double qn = exact_qn_at_frame_locked (_metrics, frame, sub_num);
+				tempo_copy->set_position_lock_style (MusicTime);
+				if (solve_map_pulse (future_map, tempo_copy, qn / 4.0)) {
+					ts->set_position_lock_style (MusicTime);
+					solve_map_pulse (_metrics, ts, qn / 4.0);
+					ts->set_position_lock_style (AudioTime);
+					recompute_meters (_metrics);
+				}
+			} else {
+				if (solve_map_minute (future_map, tempo_copy, minute_at_frame (frame))) {
 					solve_map_minute (_metrics, ts, minute_at_frame (frame));
 					recompute_meters (_metrics);
 				}
