@@ -60,6 +60,16 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 Track::~Track ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
+
+	if (_disk_reader) {
+		_disk_reader->set_route (boost::shared_ptr<Route>());
+		_disk_reader.reset ();
+	}
+
+	if (_disk_writer) {
+		_disk_writer->set_route (boost::shared_ptr<Route>());
+		_disk_writer.reset ();
+	}
 }
 
 int
