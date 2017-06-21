@@ -2767,30 +2767,6 @@ PluginInsert::set_parameter_state_2X (const XMLNode& node, int version)
 			if (c && c->alist()) {
 				if (!child->children().empty()) {
 					c->alist()->set_state (*child->children().front(), version);
-
-					/* In some cases 2.X saves lists with min_yval and max_yval
-					   being FLT_MIN and FLT_MAX respectively.  This causes problems
-					   in A3 because these min/max values are used to compute
-					   where GUI control points should be drawn.  If we see such
-					   values, `correct' them to the min/max of the appropriate
-					   parameter.
-					*/
-
-					float min_y = c->alist()->get_min_y ();
-					float max_y = c->alist()->get_max_y ();
-
-					ParameterDescriptor desc;
-					_plugins.front()->get_parameter_descriptor (port_id, desc);
-
-					if (min_y == FLT_MIN) {
-						min_y = desc.lower;
-					}
-
-					if (max_y == FLT_MAX) {
-						max_y = desc.upper;
-					}
-
-					c->alist()->set_yrange (min_y, max_y);
 				}
 			} else {
 				error << string_compose (_("PluginInsert: automatable control %1 not found - ignored"), port_id) << endmsg;
@@ -2855,7 +2831,6 @@ PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
 	, _plugin (p)
 {
 	if (alist()) {
-		alist()->reset_default (desc.normal);
 		if (desc.toggled) {
 			list->set_interpolation(Evoral::ControlList::Discrete);
 		}
@@ -2922,10 +2897,6 @@ PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*       
 	: AutomationControl (p->session(), param, desc, list)
 	, _plugin (p)
 {
-	if (alist()) {
-		alist()->set_yrange (desc.lower, desc.upper);
-		alist()->reset_default (desc.normal);
-	}
 }
 
 void

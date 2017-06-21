@@ -40,8 +40,6 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	                             param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol"),
 	                             Controllable::GainLike)
 {
-	alist()->reset_default (1.0);
-
 	lower_db = accurate_coefficient_to_dB (_desc.lower);
 	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
 }

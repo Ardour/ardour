@@ -59,9 +59,6 @@ ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc)
 	_interpolation = desc.toggled ? Discrete : Linear;
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = desc.lower;
-	_max_yval = desc.upper;
-	_default_value = desc.normal;
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
@@ -83,9 +80,6 @@ ControlList::ControlList (const ControlList& other)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = other._min_yval;
-	_max_yval = other._max_yval;
-	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
@@ -109,9 +103,6 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = other._min_yval;
-	_max_yval = other._max_yval;
-	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
@@ -161,12 +152,8 @@ ControlList::operator= (const ControlList& other)
 {
 	if (this != &other) {
 
-		_min_yval = other._min_yval;
-		_max_yval = other._max_yval;
-
 
 		_interpolation = other._interpolation;
-		_default_value = other._default_value;
 
 		copy_events (other);
 	}
@@ -553,8 +540,8 @@ ControlList::editor_add (double when, double value, bool with_guard)
 
 	/* clamp new value to allowed range */
 
-	value = max (_min_yval, value);
-	value = min (_max_yval, value);
+	value = max ((double)_desc.lower, value);
+	value = min ((double)_desc.upper, value);
 
 	iterator result;
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
@@ -663,7 +650,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 				} else {
 					_events.insert (_events.end(), new ControlEvent (0, value));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _desc.normal));
 				}
 			}
 		}
@@ -1085,8 +1072,8 @@ ControlList::truncate_end (double last_coordinate)
 			/* shortening end */
 
 			last_val = unlocked_eval (last_coordinate);
-			last_val = max ((double) _min_yval, last_val);
-			last_val = min ((double) _max_yval, last_val);
+			last_val = max ((double) _desc.lower, last_val);
+			last_val = min ((double) _desc.upper, last_val);
 
 			i = _events.rbegin();
 
@@ -1187,8 +1174,8 @@ ControlList::truncate_start (double overall_length)
 
 			first_legal_coordinate = _events.back()->when - overall_length;
 			first_legal_value = unlocked_eval (first_legal_coordinate);
-			first_legal_value = max (_min_yval, first_legal_value);
-			first_legal_value = min (_max_yval, first_legal_value);
+			first_legal_value = max ((double)_desc.lower, first_legal_value);
+			first_legal_value = min ((double)_desc.upper, first_legal_value);
 
 			/* remove all events earlier than the new "front" */
 
@@ -1248,7 +1235,7 @@ ControlList::unlocked_eval (double x) const
 
 	switch (npoints) {
 	case 0:
-		return _default_value;
+		return _desc.normal;
 
 	case 1:
 		return _events.front()->value;
@@ -1284,7 +1271,7 @@ ControlList::unlocked_eval (double x) const
 	}
 
 	abort(); /*NOTREACHED*/ /* stupid gcc */
-	return _default_value;
+	return _desc.normal;
 }
 
 double
@@ -1869,9 +1856,9 @@ ControlList::operator!= (ControlList const & other) const
 	return (
 		_parameter != other._parameter ||
 		_interpolation != other._interpolation ||
-		_min_yval != other._min_yval ||
-		_max_yval != other._max_yval ||
-		_default_value != other._default_value
+		_desc.lower != other._desc.lower ||
+		_desc.upper != other._desc.upper ||
+		_desc.normal != other._desc.normal
 		);
 }
 

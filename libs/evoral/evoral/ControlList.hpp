@@ -113,10 +113,6 @@ public:
 	}
 	bool empty() const { return _events.empty(); }
 
-	void reset_default (double val) {
-		_default_value = val;
-	}
-
 	void clear ();
 	void x_scale (double factor);
 	bool extend_to (double);
@@ -176,14 +172,6 @@ public:
 	void clear (double start, double end);
 
 	bool paste (const ControlList&, double position);
-
-	void set_yrange (double min, double max) {
-		_min_yval = min;
-		_max_yval = max;
-	}
-
-	double get_max_y() const { return _max_yval; }
-	double get_min_y() const { return _min_yval; }
 
 	/** truncate the event list after the given time
 	 * @param last_coordinate last event to include
@@ -258,7 +246,6 @@ public:
 	};
 
 	const EventList& events() const { return _events; }
-	double default_value() const { return _default_value; }
 
 	// FIXME: const violations for Curve
 	Glib::Threads::RWLock& lock()       const { return _lock; }
@@ -348,9 +335,6 @@ protected:
 	EventList             _events;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
-	double                _min_yval;
-	double                _max_yval;
-	double                _default_value;
 	bool                  _sort_pending;
 
 	Curve* _curve;

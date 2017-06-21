@@ -29,7 +29,7 @@ Control::Control(const Parameter&               parameter,
                  const ParameterDescriptor&     desc,
                  boost::shared_ptr<ControlList> list)
 	: _parameter(parameter)
-	, _user_value(list ? list->default_value() : desc.normal)
+	, _user_value(desc.normal)
 {
 	set_list (list);
 }

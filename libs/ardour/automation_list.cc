@@ -321,9 +321,6 @@ AutomationList::state (bool full)
 
 	root->set_property ("automation-id", EventTypeMap::instance().to_symbol(_parameter));
 	root->set_property ("id", id());
-	root->set_property ("default", _default_value);
-	root->set_property ("min-yval", _min_yval);
-	root->set_property ("max-yval", _max_yval);
 	root->set_property ("interpolation-style", _interpolation);
 
 	if (full) {
@@ -495,10 +492,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 		_interpolation = Linear;
 	}
 
-	if (!node.get_property (X_("default"), _default_value)) {
-		_default_value = 0.0;
-	}
-
 	if (node.get_property (X_("state"), _state)) {
 		if (_state == Write) {
 			_state = Off;
@@ -506,14 +499,6 @@ AutomationList::set_state (const XMLNode& node, int version)
 		automation_state_changed (_state);
 	} else {
 		_state = Off;
-	}
-
-	if (!node.get_property (X_("min-yval"), _min_yval)) {
-		_min_yval = FLT_MIN;
-	}
-
-	if (!node.get_property (X_("max-yval"), _max_yval)) {
-		_max_yval = FLT_MAX;
 	}
 
 	bool have_events = false;

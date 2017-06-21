@@ -203,7 +203,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 	if ((npoints = _list.events().size()) == 0) {
 		/* no events in list, so just fill the entire array with the default value */
 		for (int32_t i = 0; i < veclen; ++i) {
-			vec[i] = _list.default_value();
+			vec[i] = _list.descriptor().normal;
 		}
 		return;
 	}
