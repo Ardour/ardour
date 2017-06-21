@@ -3342,7 +3342,7 @@ Editor::separate_under_selected_regions ()
 			PlaylistState before;
 			before.playlist = playlist;
 			before.before = &playlist->get_state();
-
+			playlist->clear_changes ();
 			playlist->freeze ();
 			playlists.push_back(before);
 		}
