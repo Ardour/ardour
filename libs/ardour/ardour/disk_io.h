@@ -58,6 +58,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	DiskIOProcessor (Session&, const std::string& name, Flag f);
 
 	void set_route (boost::shared_ptr<Route>);
+	void drop_route ();
 
 	static void set_buffering_parameters (BufferingPreset bp);
 
