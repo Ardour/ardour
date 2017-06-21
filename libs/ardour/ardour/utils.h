@@ -144,9 +144,8 @@ slider_position_to_gain (double pos)
 
 	return g;
 #else
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
 	if (pos == 0.0) return 0;
-	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
+	return exp(((pow(pos,1.0/8.0)*198.0)-192.0)/6.0*log(2.0));
 #endif
 }
 #undef OLD_GAIN_MATH
