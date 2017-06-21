@@ -139,10 +139,12 @@ Route::init ()
 	/* add standard controls */
 
 	_gain_control.reset (new GainControl (_session, GainAutomation));
-	add_control (_gain_control);
-
 	_trim_control.reset (new GainControl (_session, TrimAutomation));
-	add_control (_trim_control);
+	/* While the route has-a gain-control for consistency with Stripable and VCA
+	 * ownership is handed over to the Amp Processor which manages the
+	 * state of the Control and AutomationList as part of its
+	 * Automatable API. -- Don't call add_control () here.
+	 */
 
 	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this));
 	add_control (_solo_control);
@@ -2539,9 +2541,7 @@ Route::set_state (const XMLNode& node, int version)
 				continue;
 			}
 
-			if (control_name == _gain_control->name()) {
-				_gain_control->set_state (*child, version);
-			} else if (control_name == _solo_control->name()) {
+			if (control_name == _solo_control->name()) {
 				_solo_control->set_state (*child, version);
 			} else if (control_name == _solo_safe_control->name()) {
 				_solo_safe_control->set_state (*child, version);
