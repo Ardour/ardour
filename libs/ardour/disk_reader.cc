@@ -257,6 +257,14 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	_need_butler = false;
 
+	if (speed == 0.0 && (ms == MonitoringDisk)) {
+		/* stopped. Don't accidentally pass any data from disk
+		 * into our outputs (e.g. via interpolation)
+		 */
+		bufs.silence (nframes, 0);
+		return;
+	}
+
 	if (speed != 1.0f && speed != -1.0f) {
 		interpolation.set_speed (speed);
 		midi_interpolation.set_speed (speed);
@@ -295,14 +303,14 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			ChannelInfo* chaninfo (*chan);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
-			Sample* outgoing = 0; /* assignment not really needed but it keeps the compiler quiet and helps track bugs */
+			Sample* disk_signal = 0; /* assignment not really needed but it keeps the compiler quiet and helps track bugs */
 
 			if (ms & MonitoringInput) {
 				/* put disk stream in scratch buffer, blend at end */
-				outgoing = scratch_bufs.get_audio(n).data ();
+				disk_signal = scratch_bufs.get_audio(n).data ();
 			} else {
 				/* no input stream needed, just overwrite buffers */
-				outgoing = buf.data ();
+				disk_signal = buf.data ();
 			}
 
 			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
@@ -313,9 +321,9 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 					(void) interpolation.interpolate (
 						n, nframes,
 						chaninfo->rw_vector.buf[0],
-						outgoing);
-				} else {
-					memcpy (outgoing, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
+						disk_signal);
+				} else if (speed != 0.0) {
+					memcpy (disk_signal, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
 				}
 
 			} else {
@@ -330,17 +338,17 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 					if (fabsf (speed) != 1.0f) {
 						interpolation.interpolate (n, chaninfo->rw_vector.len[0],
 						                           chaninfo->rw_vector.buf[0],
-						                           outgoing);
-						outgoing += chaninfo->rw_vector.len[0];
+						                           disk_signal);
+						disk_signal += chaninfo->rw_vector.len[0];
 						interpolation.interpolate (n, playback_distance - chaninfo->rw_vector.len[0],
 						                           chaninfo->rw_vector.buf[1],
-						                           outgoing);
-					} else {
-						memcpy (outgoing,
+						                           disk_signal);
+					} else if (speed != 0.0) {
+						memcpy (disk_signal,
 						        chaninfo->rw_vector.buf[0],
 						        chaninfo->rw_vector.len[0] * sizeof (Sample));
-						outgoing += chaninfo->rw_vector.len[0];
-						memcpy (outgoing,
+						disk_signal += chaninfo->rw_vector.len[0];
+						memcpy (disk_signal,
 						        chaninfo->rw_vector.buf[1],
 						        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
 					}
@@ -357,15 +365,15 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				}
 			}
 
-			if (scaling != 1.0f) {
-				apply_gain_to_buffer (outgoing, nframes, scaling);
+			if (scaling != 1.0f && speed != 0.0) {
+				apply_gain_to_buffer (disk_signal, nframes, scaling);
 			}
 
 			chaninfo->buf->increment_read_ptr (playback_distance);
 
-			if (ms & MonitoringInput) {
+			if ((speed != 0.0) && (ms & MonitoringInput)) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (buf.data(), outgoing, speed == 0.0 ? nframes : playback_distance);
+				mix_buffers_no_gain (buf.data(), disk_signal, speed == 0.0 ? nframes : playback_distance);
 			}
 		}
 	}
