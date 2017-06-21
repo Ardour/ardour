@@ -22,6 +22,7 @@
 
 #include <assert.h>
 #include <math.h>
+#include <stdint.h>
 
 /* map gain-coeff [0..2] to position [0..1] */
 static inline double
