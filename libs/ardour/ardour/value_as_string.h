@@ -23,6 +23,7 @@
 
 #include <stddef.h>
 
+#include "ardour/dB.h"
 #include "ardour/parameter_descriptor.h"
 
 namespace ARDOUR {
@@ -47,10 +48,16 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	// Value is not a scale point, print it normally
 	if (desc.unit == ARDOUR::ParameterDescriptor::MIDI_NOTE) {
 		snprintf(buf, sizeof(buf), "%s", ParameterDescriptor::midi_note_name (rint(v)).c_str());
+	} else if (desc.type == GainAutomation || desc.type == TrimAutomation || desc.type == EnvelopeAutomation) {
+		snprintf(buf, sizeof(buf), "%.1f dB", accurate_coefficient_to_dB (v));
 	} else if (!desc.print_fmt.empty()) {
 		snprintf(buf, sizeof(buf), desc.print_fmt.c_str(), v);
 	} else if (desc.integer_step) {
 		snprintf(buf, sizeof(buf), "%d", (int)v);
+	} else if (desc.upper - desc.lower >= 1000) {
+		snprintf(buf, sizeof(buf), "%.1f", v);
+	} else if (desc.upper - desc.lower >= 100) {
+		snprintf(buf, sizeof(buf), "%.2f", v);
 	} else {
 		snprintf(buf, sizeof(buf), "%.3f", v);
 	}
