@@ -542,6 +542,9 @@ ControlList::editor_add (double when, double value, bool with_guard)
 		return false;
 	}
 
+	/* clamp new value to allowed range */
+	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
+
 	if (_events.empty()) {
 
 		/* as long as the point we're adding is not at zero,
@@ -561,11 +564,6 @@ ControlList::editor_add (double when, double value, bool with_guard)
 		}
 		maybe_add_insert_guard (when);
 	}
-
-	/* clamp new value to allowed range */
-
-	value = max ((double)_desc.lower, value);
-	value = min ((double)_desc.upper, value);
 
 	iterator result;
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
@@ -646,12 +644,14 @@ ControlList::erase_from_iterator_to (iterator iter, double when)
 	return iter;
 }
 
+/* this is for making changes from some kind of user interface or
+ * control surface (GUI, MIDI, OSC etc)
+ */
 void
 ControlList::add (double when, double value, bool with_guards, bool with_initial)
 {
-	/* this is for making changes from some kind of user interface or
-	   control surface (GUI, MIDI, OSC etc)
-	*/
+	/* clamp new value to allowed range */
+	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
 
 	DEBUG_TRACE (DEBUG::ControlList,
 	             string_compose ("@%1 add %2 at %3 guards = %4 write pass = %5 (new? %6) at end? %7\n",
@@ -936,9 +936,12 @@ void
 ControlList::modify (iterator iter, double when, double val)
 {
 	/* note: we assume higher level logic is in place to avoid this
-	   reordering the time-order of control events in the list. ie. all
-	   points after *iter are later than when.
-	*/
+	 * reordering the time-order of control events in the list. ie. all
+	 * points after *iter are later than when.
+	 */
+
+	/* catch possible float/double rounding errors from higher levels */
+	val = std::min ((double)_desc.upper, std::max ((double)_desc.lower, val));
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1774,6 +1777,8 @@ ControlList::paste (const ControlList& alist, double pos)
 				if (_desc.toggled) {
 					value = (value < 0.5) ? 0.0 : 1.0;
 				}
+				/* catch possible rounding errors */
+				value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
 			}
 			_events.insert (where, new ControlEvent((*i)->when + pos, value));
 			end = (*i)->when + pos;
