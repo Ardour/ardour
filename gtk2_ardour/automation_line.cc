@@ -342,14 +342,11 @@ AutomationLine::get_verbose_cursor_string (double fraction) const
 }
 
 string
-AutomationLine::get_verbose_cursor_relative_string (double original, double fraction) const
+AutomationLine::get_verbose_cursor_relative_string (double fraction, double delta) const
 {
 	std::string s = fraction_to_string (fraction);
-	std::string d = fraction_to_relative_string (original, fraction);
-	if (!d.empty()) {
-		s += " (\u0394" + d + ")";
-	}
-	return s;
+	std::string d = delta_to_string (delta);
+	return s + " (" + d + ")";
 }
 
 /**
@@ -359,37 +356,18 @@ AutomationLine::get_verbose_cursor_relative_string (double original, double frac
 string
 AutomationLine::fraction_to_string (double fraction) const
 {
-	return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction));
+	view_to_model_coord_y (fraction);
+	return ARDOUR::value_as_string (_desc, fraction);
 }
 
-/**
- *  @param original an old y-axis fraction
- *  @param fraction the new y fraction
- *  @return string representation of the difference between original and fraction, using dB if appropriate.
- */
 string
-AutomationLine::fraction_to_relative_string (double original, double fraction) const
+AutomationLine::delta_to_string (double delta) const
 {
-	if (original == fraction) {
-		return ARDOUR::value_as_string (_desc, 0);
+	if (!get_uses_gain_mapping () && _desc.logarithmic) {
+		return "x " + ARDOUR::value_as_string (_desc, delta);
+	} else {
+		return "\u0394 " + ARDOUR::value_as_string (_desc, delta);
 	}
-	switch (_desc.type) {
-		case GainAutomation:
-		case EnvelopeAutomation:
-		case TrimAutomation:
-			if (original == 0.0) {
-				/* there is no sensible representation of a relative
-				 * change from -inf dB, so return an empty string.
-				 */
-				return "";
-			} else if (fraction == 0.0) {
-				return "-inf dB";
-			}
-			return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction) / _desc.from_interface(original));
-		default:
-			break;
-	}
-	return ARDOUR::value_as_string (_desc, _desc.from_interface (fraction) - _desc.from_interface(original));
 }
 
 /**
@@ -415,7 +393,8 @@ AutomationLine::string_to_fraction (string const & s) const
 		default:
 			break;
 	}
-	return _desc.to_interface (v);
+	model_to_view_coord_y (v);
+	return v;
 }
 
 /** Start dragging a single point, possibly adding others if the supplied point is selected and there
@@ -564,10 +543,17 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 }
 
 void
-AutomationLine::ContiguousControlPoints::move (double dx, double dy)
+AutomationLine::ContiguousControlPoints::move (double dx, double dvalue)
 {
 	for (std::list<ControlPoint*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - line.height() * dy, ControlPoint::Full);
+		// compute y-axis delta
+		double view_y = 1.0 - (*i)->get_y() / line.height();
+		line.view_to_model_coord_y (view_y);
+		line.apply_delta (view_y, dvalue);
+		line.model_to_view_coord_y (view_y);
+		view_y = (1.0 - view_y) * line.height();
+
+		(*i)->move_to ((*i)->get_x() + dx, view_y, ControlPoint::Full);
 		line.reset_line_coords (**i);
 	}
 }
@@ -596,11 +582,11 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @param fraction New y fraction.
  *  @return x position and y fraction that were actually used (once clamped).
  */
-pair<double, float>
+pair<float, float>
 AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
-		return pair<double,float> (x,fraction);
+		return pair<double,float> (fraction, _desc.is_linear () ? 0 : 1);
 	}
 
 	double dx = ignore_x ? 0 : (x - _drag_x);
@@ -657,24 +643,42 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 	}
 
+	/* compute deflection */
+	double delta_value;
+	{
+		double value0 = _last_drag_fraction;
+		double value1 = _last_drag_fraction + dy;
+		view_to_model_coord_y (value0);
+		view_to_model_coord_y (value1);
+		delta_value = compute_delta (value0, value1);
+	}
+
+	/* special case -inf */
+	if (delta_value == 0 && dy > 0 && !_desc.is_linear ()) {
+		assert (_desc.lower == 0);
+		delta_value = 1.0;
+	}
+
 	/* clamp y */
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
-		double const y = ((_height - (*i)->get_y()) / _height) + dy;
-		if (y < 0) {
-			dy -= y;
+		double vy = 1.0 - (*i)->get_y() / _height;
+		view_to_model_coord_y (vy);
+		const double orig = vy;
+		apply_delta (vy, delta_value);
+		if (vy < _desc.lower) {
+			delta_value = compute_delta (orig, _desc.lower);
 		}
-		if (y > 1) {
-			dy -= (y - 1);
+		if (vy > _desc.upper) {
+			delta_value = compute_delta (orig, _desc.upper);
 		}
 	}
 
 	if (dx || dy) {
-
 		/* and now move each section */
-
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->move (dx, dy);
+			(*ccp)->move (dx, delta_value);
 		}
+
 		if (with_push) {
 			final_index = contiguous_points.back()->back()->view_index () + 1;
 			ControlPoint* p;
@@ -686,20 +690,32 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			}
 		}
 
-		/* update actual line coordinates (will queue a redraw)
-		 */
+		/* update actual line coordinates (will queue a redraw) */
 
 		if (line_points.size() > 1) {
 			line->set_steps (line_points, is_stepped());
 		}
 	}
+
+	/* calculate effective delta */
+	ControlPoint* cp = _drag_points.front();
+	double vy = 1.0 - cp->get_y() / (double)_height;
+	view_to_model_coord_y (vy);
+	float val = (*(cp->model ()))->value;
+	float effective_delta = _desc.compute_delta (val, vy);
+	/* special case recovery from -inf */
+	if (val == 0 && effective_delta == 0 && vy > 0) {
+		assert (!_desc.is_linear ());
+		effective_delta = HUGE_VAL; // +Infinity
+	}
+
 	double const result_frac = _last_drag_fraction + dy;
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = result_frac;
 	did_push = with_push;
 
-	return pair<double, float> (_drag_x + dx, result_frac);
+	return pair<float, float> (result_frac, effective_delta);
 }
 
 /** Should be called to indicate the end of a drag */
@@ -750,7 +766,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	*/
 
 	double view_x = cp.get_x();
-	double view_y = 1.0 - (cp.get_y() / _height);
+	double view_y = 1.0 - cp.get_y() / (double)_height;
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
@@ -1153,16 +1169,48 @@ void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
 	if (alist->default_interpolation () != alist->interpolation()) {
-		//TODO use non-standard scaling.
+		switch (alist->interpolation()) {
+			case AutomationList::Linear:
+				y = y * (_desc.upper - _desc.lower) + _desc.lower;
+				return;
+			default:
+				assert (0);
+				break;
+		}
 	}
 	y = _desc.from_interface (y);
+}
+
+double
+AutomationLine::compute_delta (double from, double to) const
+{
+	return _desc.compute_delta (from, to);
+}
+
+void
+AutomationLine::apply_delta (double& val, double delta) const
+{
+	if (val == 0 && !_desc.is_linear () && delta >= 1.0) {
+		/* recover from -inf */
+		val = 1.0 / _height;
+		view_to_model_coord_y (val);
+		return;
+	}
+	val = _desc.apply_delta (val, delta);
 }
 
 void
 AutomationLine::model_to_view_coord_y (double& y) const
 {
 	if (alist->default_interpolation () != alist->interpolation()) {
-		//TODO use non-standard scaling.
+		switch (alist->interpolation()) {
+			case AutomationList::Linear:
+				y = (y - _desc.lower) / (_desc.upper - _desc.lower);
+				return;
+			default:
+				assert (0);
+				break;
+		}
 	}
 	y = _desc.to_interface (y);
 }
@@ -1179,6 +1227,7 @@ void
 AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
 	if (line_points.size() > 1) {
+		reset ();
 		line->set_steps(line_points, is_stepped());
 	}
 }

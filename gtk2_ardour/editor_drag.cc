@@ -4785,10 +4785,9 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		_editor->begin_reversible_command (_("automation event move"));
 		_point->line().start_drag_single (_point, _fixed_grab_x, initial_fraction);
 	}
-	pair<double, float> result;
+	pair<float, float> result;
 	result = _point->line().drag_motion (_editor->sample_to_pixel_unrounded (cx_mf.frame), fraction, false, _pushing, _final_index);
-
-	show_verbose_cursor_text (_point->line().get_verbose_cursor_string (result.second));
+	show_verbose_cursor_text (_point->line().get_verbose_cursor_relative_string (result.first, result.second));
 }
 
 void
@@ -4905,10 +4904,10 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	/* we are ignoring x position for this drag, so we can just pass in anything */
-	pair<double, float> result;
+	pair<float, float> result;
 
 	result = _line->drag_motion (0, fraction, true, false, ignored);
-	show_verbose_cursor_text (_line->get_verbose_cursor_string (result.second));
+	show_verbose_cursor_text (_line->get_verbose_cursor_relative_string (result.first, result.second));
 }
 
 void
@@ -6396,10 +6395,10 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 	for (list<Line>::iterator l = _lines.begin(); l != _lines.end(); ++l) {
 		float const f = y_fraction (l->line, current_pointer_y());
 		/* we are ignoring x position for this drag, so we can just pass in anything */
-		pair<double, float> result;
+		pair<float, float> result;
 		uint32_t ignored;
 		result = l->line->drag_motion (0, f, true, false, ignored);
-		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (l->original_fraction, result.second));
+		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (result.first, result.second));
 	}
 }
 
