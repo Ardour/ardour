@@ -3369,15 +3369,22 @@ Editor::crop_region_to_selection ()
 {
 	if (!selection->time.empty()) {
 
-		crop_region_to (selection->time.start(), selection->time.end_frame());
-
+		begin_reversible_command (_("Crop Regions to Time Selection"));
+		for (std::list<AudioRange>::iterator i = selection->time.begin(); i != selection->time.end(); ++i) {
+			crop_region_to ((*i).start, (*i).end);
+		}
+		commit_reversible_command();
 	} else {
 
 		framepos_t start;
 		framepos_t end;
 
 		if (get_edit_op_range (start, end)) {
+			begin_reversible_command (_("Crop Regions to Edit Range"));
+
 			crop_region_to (start, end);
+
+			commit_reversible_command();
 		}
 	}
 
@@ -3424,7 +3431,6 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 	framepos_t new_start;
 	framepos_t new_end;
 	framecnt_t new_length;
-	bool in_command = false;
 
 	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 
@@ -3454,18 +3460,10 @@ Editor::crop_region_to (framepos_t start, framepos_t end)
 			new_end = min (end, new_end);
 			new_length = new_end - new_start + 1;
 
-			if(!in_command) {
-				begin_reversible_command (_("trim to selection"));
-				in_command = true;
-			}
 			(*i)->clear_changes ();
 			(*i)->trim_to (new_start, new_length);
 			_session->add_command (new StatefulDiffCommand (*i));
 		}
-	}
-
-	if (in_command) {
-		commit_reversible_command ();
 	}
 }
 
