@@ -314,6 +314,7 @@ ControlList::list_merge (ControlList const& other, boost::function<double(double
 		_events.clear ();
 		_events = nel;
 
+		unlocked_remove_duplicates ();
 		unlocked_invalidate_insert_iterator ();
 		mark_dirty ();
 	}
@@ -424,6 +425,24 @@ void
 ControlList::unlocked_invalidate_insert_iterator ()
 {
 	most_recent_insert_iterator = _events.end();
+}
+
+void
+ControlList::unlocked_remove_duplicates ()
+{
+	if (_events.size() < 2) {
+		return;
+	}
+	iterator i = _events.begin();
+	iterator prev = i++;
+	while (i != _events.end()) {
+		if ((*prev)->when == (*i)->when && (*prev)->value == (*i)->value) {
+			i = _events.erase (i);
+		} else {
+			++prev;
+			++i;
+		}
+	}
 }
 
 void
@@ -954,6 +973,7 @@ ControlList::modify (iterator iter, double when, double val)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;
@@ -1018,6 +1038,7 @@ ControlList::thaw ()
 
 		if (_sort_pending) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 			_sort_pending = false;
 		}
@@ -1859,6 +1880,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;

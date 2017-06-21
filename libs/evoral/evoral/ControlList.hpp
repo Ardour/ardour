@@ -356,6 +356,7 @@ private:
 	bool       did_write_during_pass;
 	bool       _in_write_pass;
 
+	void unlocked_remove_duplicates ();
 	void unlocked_invalidate_insert_iterator ();
 	void add_guard_point (double when);
 };
