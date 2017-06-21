@@ -459,9 +459,9 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
 			boost::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();
 			if (trim) {
-				float val = trim->get_user();  //for gain elements, the "user" value is in dB
-				val += delta;
-				trim->set_user(val);
+				float val = accurate_coefficient_to_dB (trim->get_value());
+				val += delta * .5f; // use 1/2 dB Steps -20..+20
+				trim->set_value (dB_to_coefficient (val), Controllable::UseGroup);
 			}
 		} else if (width_modifier && ((button_state & width_modifier) == width_modifier)) {
 			ardour_pan_width (delta);

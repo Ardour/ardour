@@ -104,7 +104,13 @@ ArdourDisplay::handle_controllable_preset (float p)
 
 	if (!c) return;
 
-	c->set_user(p);
+	/* This should not use dB_to_coefficient(), but the Controllable's value.
+	 *
+	 * The only user of this API is currently monitor_section.cc which conveniently
+	 * binds dB values. Once there are other use-cases, for this, this (GUI only) API
+	 * needs fixing.
+	 */
+	c->set_value(dB_to_coefficient (p), Controllable::NoGroup);
 }
 
 

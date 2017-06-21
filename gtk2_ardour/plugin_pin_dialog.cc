@@ -36,6 +36,7 @@
 #include "ardour/profile.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
@@ -1914,10 +1915,8 @@ PluginPinWidget::Control::set_tooltip ()
 	if (!c) {
 		return;
 	}
-	char tmp[256];
-	snprintf (tmp, sizeof (tmp), "%s: %.2f", _name.c_str (), c->internal_to_user (c->get_value ()));
-
-	string sm = Gtkmm2ext::markup_escape_text (tmp);
+	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
+	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
 }
 

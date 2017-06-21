@@ -59,6 +59,7 @@
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
+#include "ardour/value_as_string.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -886,14 +887,8 @@ ProcessorEntry::Control::set_tooltip ()
 	if (!c) {
 		return;
 	}
-	char tmp[256];
-	if (c->toggled ()) {
-		snprintf (tmp, sizeof(tmp), "%s: %s", _name.c_str(), c->get_value() > 0.5 ? _("on") : _("off"));
-	} else {
-		snprintf (tmp, sizeof(tmp), "%s: %.2f", _name.c_str(), c->internal_to_user (c->get_value ()));
-	}
-
-	string sm = Gtkmm2ext::markup_escape_text (tmp);
+	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
+	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
 	ARDOUR_UI_UTILS::set_tooltip (_button, sm);
 }
