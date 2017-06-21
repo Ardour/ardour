@@ -66,9 +66,6 @@ public:
 		return (float) _value;
 	}
 
-	double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}
-	double user_to_internal (double u) const { return dB_to_coefficient(u) ;}
-
 	std::string get_user_string () const
 	{
 		char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));

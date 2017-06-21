@@ -39,15 +39,6 @@ class LIBARDOUR_API GainControl : public SlavableAutomationControl {
 	GainControl (Session& session, const Evoral::Parameter &param,
 	             boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>());
 
-	double internal_to_interface (double) const;
-	double interface_to_internal (double) const;
-	double internal_to_user (double) const;
-	double user_to_internal (double) const;
-	std::string get_user_string () const;
-
-	double lower_db;
-	double range_db;
-
 	void inc_gain (gain_t);
 
 protected:

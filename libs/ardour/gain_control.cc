@@ -40,47 +40,6 @@ GainControl::GainControl (Session& session, const Evoral::Parameter &param, boos
 	                             param.type() == GainAutomation ? X_("gaincontrol") : X_("trimcontrol"),
 	                             Controllable::GainLike)
 {
-	lower_db = accurate_coefficient_to_dB (_desc.lower);
-	range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-}
-
-double
-GainControl::internal_to_interface (double v) const
-{
-	if (_desc.type == GainAutomation) {
-		return gain_to_slider_position_with_max (v, _desc.upper);
-	} else {
-		return (accurate_coefficient_to_dB (v) - lower_db) / range_db;
-	}
-}
-
-double
-GainControl::interface_to_internal (double v) const
-{
-	if (_desc.type == GainAutomation) {
-		return slider_position_to_gain_with_max (v, _desc.upper);
-	} else {
-		return dB_to_coefficient (lower_db + v * range_db);
-	}
-}
-
-double
-GainControl::internal_to_user (double v) const
-{
-	return accurate_coefficient_to_dB (v);
-}
-
-double
-GainControl::user_to_internal (double u) const
-{
-	return dB_to_coefficient (u);
-}
-
-std::string
-GainControl::get_user_string () const
-{
-	char theBuf[32]; sprintf( theBuf, _("%3.1f dB"), accurate_coefficient_to_dB (get_value()));
-	return std::string(theBuf);
 }
 
 void
