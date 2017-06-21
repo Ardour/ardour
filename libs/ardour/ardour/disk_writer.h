@@ -39,6 +39,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 {
   public:
 	DiskWriter (Session&, std::string const & name, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
+	~DiskWriter ();
 
 	bool set_name (std::string const & str);
 	std::string display_name() const { return std::string (_("writer")); }
