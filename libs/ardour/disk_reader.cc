@@ -58,7 +58,7 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 
 DiskReader::~DiskReader ()
 {
-	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskReader %1 deleted\n", _name));
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskReader %1 @ %2 deleted\n", _name, this));
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
 		if (_playlists[n]) {
