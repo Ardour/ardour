@@ -735,6 +735,7 @@ Session::destroy ()
 
 	/* need to remove auditioner before monitoring section
 	 * otherwise it is re-connected */
+	auditioner->drop_references ();
 	auditioner.reset ();
 
 	/* drop references to routes held by the monitoring section
