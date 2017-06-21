@@ -52,7 +52,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	Processor(Session&, const std::string& name);
 	Processor (const Processor& other);
 
-	virtual ~Processor() { }
+	virtual ~Processor();
 
 	virtual std::string display_name() const { return SessionObject::name(); }
 

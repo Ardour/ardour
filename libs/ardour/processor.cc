@@ -28,6 +28,7 @@
 
 #include "ardour/automatable.h"
 #include "ardour/chan_count.h"
+#include "ardour/debug.h"
 #include "ardour/processor.h"
 #include "ardour/types.h"
 
@@ -86,6 +87,11 @@ Processor::Processor (const Processor& other)
 	, _pinmgr_proxy (0)
 	, _owner (0)
 {
+}
+
+Processor::~Processor ()
+{
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("processor %1 destructor\n", _name));
 }
 
 XMLNode&

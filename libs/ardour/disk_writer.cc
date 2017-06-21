@@ -65,6 +65,11 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	DiskIOProcessor::init ();
 }
 
+DiskWriter::~DiskWriter ()
+{
+	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskWriter %1 @ %2 deleted\n", _name, this));
+}
+
 framecnt_t
 DiskWriter::default_chunk_frames ()
 {
