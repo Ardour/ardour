@@ -388,9 +388,19 @@ DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 }
 
 void
+DiskIOProcessor::drop_route ()
+{
+	_route.reset ();
+}
+
+void
 DiskIOProcessor::set_route (boost::shared_ptr<Route> r)
 {
 	_route = r;
+
+	if (_route) {
+		_route->DropReferences.connect_same_thread (*this, boost::bind (&DiskIOProcessor::drop_route, this));
+	}
 }
 
 /** Get the start, end, and length of a location "atomically".
