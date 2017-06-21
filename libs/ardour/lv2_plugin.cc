@@ -2125,31 +2125,11 @@ LV2Plugin::get_parameter_descriptor(uint32_t which, ParameterDescriptor& desc) c
 	desc.enumeration = lilv_port_has_property(_impl->plugin, port, _world.lv2_enumeration);
 	desc.scale_points = get_scale_points(which);
 
-	desc.update_steps();
-
 	if (steps) {
-		//override auto-calculated steps in update_steps()
-		float s = lilv_node_as_float (steps);
-		const float delta = desc.upper - desc.lower;
-
-		desc.step = desc.smallstep = (delta / s);
-		desc.largestep = std::min ((delta / 5.0f), 10.f * desc.smallstep);
-
-		if (desc.logarithmic) {
-			// TODO marry AutomationControl::internal_to_interface () with
-			// http://lv2plug.in/ns/ext/port-props/#rangeSteps
-			desc.smallstep = desc.smallstep / logf(s);
-			desc.step      = desc.step      / logf(s);
-			desc.largestep = desc.largestep / logf(s);
-		} else if (desc.integer_step) {
-			desc.smallstep = 1.0;
-			desc.step      = std::max(1.f, rintf (desc.step));
-			desc.largestep = std::max(1.f, rintf (desc.largestep));
-		}
-		DEBUG_TRACE(DEBUG::LV2, string_compose("parameter %1 small: %2, step: %3 largestep: %4\n",
-					which, desc.smallstep, desc.step, desc.largestep));
+		desc.rangesteps = lilv_node_as_float (steps);
 	}
 
+	desc.update_steps();
 
 	lilv_node_free(def);
 	lilv_node_free(min);

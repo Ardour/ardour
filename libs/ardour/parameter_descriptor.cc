@@ -143,6 +143,17 @@ ParameterDescriptor::ParameterDescriptor()
 void
 ParameterDescriptor::update_steps()
 {
+	/* sanitize flags */
+	if (toggled || enumeration) {
+		logarithmic = false;
+	}
+	if (logarithmic && (upper <= lower || lower * upper <= 0)) {
+		logarithmic = false;
+	}
+	if (rangesteps < 2) {
+		rangesteps = 0;
+	}
+
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
 		largestep = 12;             // octave
@@ -153,10 +164,22 @@ ParameterDescriptor::update_steps()
 		largestep = position_to_gain (dB_coeff_step(upper));
 		step      = position_to_gain (largestep / 10.0);
 		smallstep = step;
+	} else if (rangesteps > 1) {
+		const float delta = upper - lower;
+
+		step = smallstep = (delta / (rangesteps - 1)); // XXX
+		largestep = std::min ((delta / 5.0f), 10.f * smallstep); // XXX
+
+		if (logarithmic) {
+			smallstep = smallstep / logf (rangesteps); // XXX
+			step      = step      / logf (rangesteps);
+			largestep = largestep / logf (rangesteps);
+		} else if (integer_step) {
+			smallstep = 1.0;
+			step      = std::max(1.f, rintf (rangesteps));
+			largestep = std::max(1.f, rintf (largestep));
+		}
 	} else {
-		/* note that LV2Plugin::get_parameter_descriptor ()
-		 * overrides this is lv2:rangeStep is set for a port.
-		 */
 		const float delta = upper - lower;
 
 		/* 30 happens to be the total number of steps for a fader with default
