@@ -166,13 +166,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 		framecnt_t& rec_nframes, framecnt_t& rec_offset
 		);
 
-	struct CaptureInfo {
-		framepos_t start;
-		framecnt_t frames;
-	};
-
-	std::vector<CaptureInfo*> capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
+	CaptureInfos capture_info;
 
   private:
 	framecnt_t   _input_latency;

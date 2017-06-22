@@ -706,6 +706,8 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	ci->start =  capture_start_frame;
 	ci->frames = capture_captured;
 
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
+
 	/* XXX theoretical race condition here. Need atomic exchange ?
 	   However, the circumstances when this is called right
 	   now (either on record-disable or transport_stopped)
@@ -714,8 +716,6 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	   to synchronize in the transport_stop and the capture info
 	   accessors, so that invalidation will not occur (both non-realtime).
 	*/
-
-	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
 
 	capture_info.push_back (ci);
 	capture_captured = 0;
@@ -992,6 +992,48 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	/* MIDI*/
 
+	if (_midi_write_source) {
+
+		const framecnt_t total = g_atomic_int_get(const_cast<gint*> (&_frames_pending_write));
+
+		if (total == 0 ||
+		    _midi_buf->read_space() == 0 ||
+		    (!force_flush && (total < _chunk_frames) && was_recording)) {
+			goto out;
+		}
+
+		/* if there are 2+ chunks of disk i/o possible for
+		   this track), let the caller know so that it can arrange
+		   for us to be called again, ASAP.
+
+		   if we are forcing a flush, then if there is* any* extra
+		   work, let the caller know.
+
+		   if we are no longer recording and there is any extra work,
+		   let the caller know too.
+		*/
+
+		if (total >= 2 * _chunk_frames || ((force_flush || !was_recording) && total > _chunk_frames)) {
+			ret = 1;
+		}
+
+		if (force_flush) {
+			/* push out everything we have, right now */
+			to_write = UINT32_MAX;
+		} else {
+			to_write = _chunk_frames;
+		}
+
+		if (record_enabled() && ((total > _chunk_frames) || force_flush)) {
+			Source::Lock lm(_midi_write_source->mutex());
+			if (_midi_write_source->midi_write (lm, *_midi_buf, get_capture_start_frame (0), to_write) != to_write) {
+				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
+				return -1;
+			}
+			g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), -to_write);
+		}
+	}
+
   out:
 	return ret;
 
@@ -1127,13 +1169,11 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 void
 DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abort_capture)
 {
-	uint32_t buffer_position;
 	bool more_work = true;
 	int err = 0;
-	boost::shared_ptr<AudioRegion> region;
 	framecnt_t total_capture;
-	SourceList srcs;
-	SourceList::iterator src;
+	SourceList audio_srcs;
+	SourceList midi_srcs;
 	ChannelList::iterator chan;
 	vector<CaptureInfo*>::iterator ci;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -1142,7 +1182,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	finish_capture (c);
 
-	boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> (_playlists[DataType::AUDIO]);
 
 	/* butler is already stopped, but there may be work to do
 	   to flush remaining data to disk.
@@ -1186,6 +1225,12 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			/* new source set up in "out" below */
 		}
 
+		if (_midi_write_source) {
+			_midi_write_source->mark_for_remove ();
+			_midi_write_source->drop_references ();
+			_midi_write_source.reset();
+		}
+
 		goto out;
 	}
 
@@ -1197,117 +1242,76 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-		boost::shared_ptr<AudioFileSource> s = (*chan)->write_source;
+		boost::shared_ptr<AudioFileSource> as = (*chan)->write_source;
 
-		if (s) {
-			srcs.push_back (s);
-			s->update_header (capture_info.front()->start, when, twhen);
-			s->set_captured_for (_name.val());
-			s->mark_immutable ();
+		if (as) {
+			audio_srcs.push_back (as);
+			as->update_header (capture_info.front()->start, when, twhen);
+			as->set_captured_for (_name.val());
+			as->mark_immutable ();
 
 			if (Config->get_auto_analyse_audio()) {
-				Analyser::queue_source_for_analysis (s, true);
+				Analyser::queue_source_for_analysis (as, true);
 			}
 
-			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("newly captured source %1 length %2\n", s->path(), s->length (0)));
+			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("newly captured source %1 length %2\n", as->path(), as->length (0)));
+		}
+
+		if (_midi_write_source) {
+			midi_srcs.push_back (_midi_write_source);
 		}
 	}
 
-	if (!pl) {
-		goto midi;
-	}
 
-	/* destructive tracks have a single, never changing region */
+	/* MIDI */
 
-	if (destructive()) {
+	if (_midi_write_source) {
 
-		/* send a signal that any UI can pick up to do the right thing. there is
-		   a small problem here in that a UI may need the peak data to be ready
-		   for the data that was recorded and this isn't interlocked with that
-		   process. this problem is deferred to the UI.
-		 */
+		if (_midi_write_source->length (capture_info.front()->start) == 0) {
+			/* No data was recorded, so this capture will
+			   effectively be aborted; do the same as we
+			   do for an explicit abort.
+			*/
+			if (_midi_write_source) {
+				_midi_write_source->mark_for_remove ();
+				_midi_write_source->drop_references ();
+				_midi_write_source.reset();
+			}
 
-		pl->LayeringChanged(); // XXX this may not get the UI to do the right thing
+			goto out;
+		}
 
-	} else {
+		/* phew, we have data */
 
-		string whole_file_region_name;
-		whole_file_region_name = region_name_from_path (c->front()->write_source->name(), true);
+		Source::Lock source_lock(_midi_write_source->mutex());
 
-		/* Register a new region with the Session that
-		   describes the entire source. Do this first
-		   so that any sub-regions will obviously be
-		   children of this one (later!)
+		/* figure out the name for this take */
+
+		midi_srcs.push_back (_midi_write_source);
+
+		_midi_write_source->set_timeline_position (capture_info.front()->start);
+		_midi_write_source->set_captured_for (_name);
+
+		/* set length in beats to entire capture length */
+
+		BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
+		const Evoral::Beats total_capture_beats = converter.from (total_capture);
+		_midi_write_source->set_length_beats (total_capture_beats);
+
+		/* flush to disk: this step differs from the audio path,
+		   where all the data is already on disk.
 		*/
 
-		try {
-			PropertyList plist;
+		_midi_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::Beats>::ResolveStuckNotes, total_capture_beats);
+	}
 
-			plist.add (Properties::start, c->front()->write_source->last_capture_start_frame());
-			plist.add (Properties::length, total_capture);
-			plist.add (Properties::name, whole_file_region_name);
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-			rx->set_automatic (true);
-			rx->set_whole_file (true);
-
-			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
-			region->special_set_position (capture_info.front()->start);
-		}
+	_last_capture_sources.insert (_last_capture_sources.end(), audio_srcs.begin(), audio_srcs.end());
+	_last_capture_sources.insert (_last_capture_sources.end(), midi_srcs.begin(), midi_srcs.end());
 
 
-		catch (failed_constructor& err) {
-			error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
-			/* XXX what now? */
-		}
-
-		_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
-
-		pl->clear_changes ();
-		pl->set_capture_insertion_in_progress (true);
-		pl->freeze ();
-
-		const framepos_t preroll_off = _session.preroll_record_trim_len ();
-		for (buffer_position = c->front()->write_source->last_capture_start_frame(), ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-
-			string region_name;
-
-			RegionFactory::region_name (region_name, whole_file_region_name, false);
-
-			DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture bufpos %5 start @ %2 length %3 add new region %4\n",
-			                                                      _name, (*ci)->start, (*ci)->frames, region_name, buffer_position));
-
-			try {
-
-				PropertyList plist;
-
-				plist.add (Properties::start, buffer_position);
-				plist.add (Properties::length, (*ci)->frames);
-				plist.add (Properties::name, region_name);
-
-				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-				region = boost::dynamic_pointer_cast<AudioRegion> (rx);
-				if (preroll_off > 0) {
-					region->trim_front (buffer_position + preroll_off);
-				}
-			}
-
-			catch (failed_constructor& err) {
-				error << _("AudioDiskstream: could not create region for captured audio!") << endmsg;
-				continue; /* XXX is this OK? */
-			}
-
-			i_am_the_modifier++;
-
-			pl->add_region (region, (*ci)->start + preroll_off, 1, non_layered());
-			pl->set_layer (region, DBL_MAX);
-			i_am_the_modifier--;
-
-			buffer_position += (*ci)->frames;
-		}
-
-		pl->thaw ();
-		pl->set_capture_insertion_in_progress (false);
-		_session.add_command (new StatefulDiffCommand (pl));
+	if (_route) {
+		_route->use_captured_sources (audio_srcs, capture_info);
+		_route->use_captured_sources (midi_srcs, capture_info);
 	}
 
 	mark_write_completed = true;
@@ -1323,214 +1327,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	capture_info.clear ();
 	capture_start_frame = 0;
-
-  midi:
-	return;
 }
-
-#if 0 // MIDI PART
-void
-DiskWriter::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen*/, bool abort_capture)
-{
-	bool more_work = true;
-	int err = 0;
-	boost::shared_ptr<MidiRegion> region;
-	MidiRegion::SourceList srcs;
-	MidiRegion::SourceList::iterator src;
-	vector<CaptureInfo*>::iterator ci;
-
-	finish_capture ();
-
-	/* butler is already stopped, but there may be work to do
-	   to flush remaining data to disk.
-	   */
-
-	while (more_work && !err) {
-		switch (do_flush (TransportContext, true)) {
-		case 0:
-			more_work = false;
-			break;
-		case 1:
-			break;
-		case -1:
-			error << string_compose(_("MidiDiskstream \"%1\": cannot flush captured data to disk!"), _name) << endmsg;
-			err++;
-		}
-	}
-
-	/* XXX is there anything we can do if err != 0 ? */
-	Glib::Threads::Mutex::Lock lm (capture_info_lock);
-
-	if (capture_info.empty()) {
-		goto no_capture_stuff_to_do;
-	}
-
-	if (abort_capture) {
-
-		if (_write_source) {
-			_write_source->mark_for_remove ();
-			_write_source->drop_references ();
-			_write_source.reset();
-		}
-
-		/* new source set up in "out" below */
-
-	} else {
-
-		framecnt_t total_capture = 0;
-		for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-			total_capture += (*ci)->frames;
-		}
-
-		if (_write_source->length (capture_info.front()->start) != 0) {
-
-			/* phew, we have data */
-
-			Source::Lock source_lock(_write_source->mutex());
-
-			/* figure out the name for this take */
-
-			srcs.push_back (_write_source);
-
-			_write_source->set_timeline_position (capture_info.front()->start);
-			_write_source->set_captured_for (_name);
-
-			/* set length in beats to entire capture length */
-
-			BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
-			const Evoral::Beats total_capture_beats = converter.from (total_capture);
-			_write_source->set_length_beats (total_capture_beats);
-
-			/* flush to disk: this step differs from the audio path,
-			   where all the data is already on disk.
-			*/
-
-			_write_source->mark_midi_streaming_write_completed (source_lock, Evoral::Sequence<Evoral::Beats>::ResolveStuckNotes, total_capture_beats);
-
-			/* we will want to be able to keep (over)writing the source
-			   but we don't want it to be removable. this also differs
-			   from the audio situation, where the source at this point
-			   must be considered immutable. luckily, we can rely on
-			   MidiSource::mark_streaming_write_completed() to have
-			   already done the necessary work for that.
-			*/
-
-			string whole_file_region_name;
-			whole_file_region_name = region_name_from_path (_write_source->name(), true);
-
-			/* Register a new region with the Session that
-			   describes the entire source. Do this first
-			   so that any sub-regions will obviously be
-			   children of this one (later!)
-			*/
-
-			try {
-				PropertyList plist;
-
-				plist.add (Properties::name, whole_file_region_name);
-				plist.add (Properties::whole_file, true);
-				plist.add (Properties::automatic, true);
-				plist.add (Properties::start, 0);
-				plist.add (Properties::length, total_capture);
-				plist.add (Properties::layer, 0);
-
-				boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-
-				region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-				region->special_set_position (capture_info.front()->start);
-			}
-
-
-			catch (failed_constructor& err) {
-				error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
-				/* XXX what now? */
-			}
-
-			_last_capture_sources.insert (_last_capture_sources.end(), srcs.begin(), srcs.end());
-
-			_playlist->clear_changes ();
-			_playlist->freeze ();
-
-			/* Session frame time of the initial capture in this pass, which is where the source starts */
-			framepos_t initial_capture = 0;
-			if (!capture_info.empty()) {
-				initial_capture = capture_info.front()->start;
-			}
-
-			const framepos_t preroll_off = _session.preroll_record_trim_len ();
-			for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-
-				string region_name;
-
-				RegionFactory::region_name (region_name, _write_source->name(), false);
-
-				DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
-							_name, (*ci)->start, (*ci)->frames, region_name));
-
-
-				// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
-
-				try {
-					PropertyList plist;
-
-					/* start of this region is the offset between the start of its capture and the start of the whole pass */
-					plist.add (Properties::start, (*ci)->start - initial_capture);
-					plist.add (Properties::length, (*ci)->frames);
-					plist.add (Properties::length_beats, converter.from((*ci)->frames).to_double());
-					plist.add (Properties::name, region_name);
-
-					boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-					region = boost::dynamic_pointer_cast<MidiRegion> (rx);
-					if (preroll_off > 0) {
-						region->trim_front ((*ci)->start - initial_capture + preroll_off);
-					}
-				}
-
-				catch (failed_constructor& err) {
-					error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
-					continue; /* XXX is this OK? */
-				}
-
-				// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
-
-				i_am_the_modifier++;
-				_playlist->add_region (region, (*ci)->start + preroll_off);
-				i_am_the_modifier--;
-			}
-
-			_playlist->thaw ();
-			_session.add_command (new StatefulDiffCommand(_playlist));
-
-		} else {
-
-			/* No data was recorded, so this capture will
-			   effectively be aborted; do the same as we
-			   do for an explicit abort.
-			*/
-
-			if (_write_source) {
-				_write_source->mark_for_remove ();
-				_write_source->drop_references ();
-				_write_source.reset();
-			}
-		}
-
-	}
-
-	reset_write_sources ();
-
-	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		delete *ci;
-	}
-
-	capture_info.clear ();
-	capture_start_frame = 0;
-
-  no_capture_stuff_to_do:
-
-	reset_tracker ();
-}
-#endif
 
 void
 DiskWriter::transport_looped (framepos_t transport_frame)
