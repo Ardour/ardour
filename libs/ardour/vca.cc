@@ -207,3 +207,13 @@ VCA::slaved_to (boost::shared_ptr<VCA> vca) const
 
 	return _gain_control->slaved_to (vca->gain_control());
 }
+
+SlavableControlList
+VCA::slavables () const
+{
+	SlavableControlList rv;
+	rv.push_back (_gain_control);
+	rv.push_back (_mute_control);
+	rv.push_back (_solo_control);
+	return rv;
+}

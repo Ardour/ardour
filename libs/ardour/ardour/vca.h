@@ -146,6 +146,9 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<AutomationControl> eq_lpf_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> filter_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 
+	protected:
+	SlavableControlList slavables () const;
+
   private:
 	int32_t _number;
 

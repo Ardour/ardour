@@ -5516,3 +5516,13 @@ Route::automation_control_recurse (PBD::ID const & id) const
 
 	return boost::shared_ptr<AutomationControl> ();
 }
+
+SlavableControlList
+Route::slavables () const
+{
+	SlavableControlList rv;
+	rv.push_back (_gain_control);
+	rv.push_back (_mute_control);
+	rv.push_back (_solo_control);
+	return rv;
+}

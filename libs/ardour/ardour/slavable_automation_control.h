@@ -40,7 +40,7 @@ public:
 
 	double get_value () const;
 
-	void add_master (boost::shared_ptr<AutomationControl>, bool loading);
+	void add_master (boost::shared_ptr<AutomationControl>);
 	void remove_master (boost::shared_ptr<AutomationControl>);
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;

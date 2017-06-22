@@ -183,7 +183,7 @@ SlavableAutomationControl::actually_set_value (double value, PBD::Controllable::
 }
 
 void
-SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m, bool loading)
+SlavableAutomationControl::add_master (boost::shared_ptr<AutomationControl> m)
 {
 	std::pair<Masters::iterator,bool> res;
 

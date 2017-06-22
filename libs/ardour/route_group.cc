@@ -187,7 +187,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	boost::shared_ptr<VCA> vca (group_master.lock());
 
 	if (vca) {
-		r->assign  (vca, false);
+		r->assign (vca);
 	}
 
 	_session.set_dirty ();
@@ -656,7 +656,7 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 	}
 
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-		(*r)->assign (master, false);
+		(*r)->assign (master);
 	}
 
 	group_master = master;

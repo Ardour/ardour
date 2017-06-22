@@ -686,6 +686,8 @@ protected:
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
+	SlavableControlList slavables () const;
+
 private:
 	int64_t _track_number;
 

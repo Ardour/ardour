@@ -55,6 +55,7 @@ namespace ARDOUR {
 	class Stripable;
 	class VCA;
 	class AutomationControl;
+	class SlavableAutomationControl;
 
 	typedef float    Sample;
 	typedef float    pan_t;
@@ -588,6 +589,7 @@ namespace ARDOUR {
 	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
 	typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
 	typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
+	typedef std::list<boost::shared_ptr<SlavableAutomationControl> > SlavableControlList;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAList;
 

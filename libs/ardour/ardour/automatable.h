@@ -117,6 +117,8 @@ public:
 
 	framepos_t _last_automation_snapshot;
 
+	SlavableControlList slavables () const { return SlavableControlList(); }
+
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
 };
