@@ -2300,7 +2300,7 @@ OSC::master_set_fader (float position)
 	if (!session) return -1;
 	boost::shared_ptr<Stripable> s = session->master_out();
 	if (s) {
-		s->gain_control()->set_value (slider_position_to_gain_with_max (position, 2.0), PBD::Controllable::NoGroup); // XXX use interface_to_internal, unhardcode 2.0
+		s->gain_control()->set_value (s->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
@@ -2381,7 +2381,7 @@ OSC::monitor_set_fader (float position)
 	if (!session) return -1;
 	boost::shared_ptr<Stripable> s = session->monitor_out();
 	if (s) {
-		s->gain_control()->set_value (slider_position_to_gain_with_max (position, 2.0), PBD::Controllable::NoGroup); // XXX use internal_to_interface, unhardcode 2.0
+		s->gain_control()->set_value (s->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 	}
 	return 0;
 }
@@ -2459,7 +2459,7 @@ OSC::route_get_sends(lo_message msg) {
 			lo_message_add_string(reply, isend->name().c_str());
 			lo_message_add_int32(reply, i);
 			boost::shared_ptr<Amp> a = isend->amp();
-			lo_message_add_float(reply, gain_to_position(a->gain_control()->get_value())); // XXX use internal_to_interface
+			lo_message_add_float(reply, a->gain_control()->internal_to_interface (a->gain_control()->get_value()));
 			lo_message_add_int32(reply, p->active() ? 1 : 0);
 		}
 	}
@@ -2519,7 +2519,7 @@ OSC::route_get_receives(lo_message msg) {
 					lo_message_add_int32(reply, get_sid(tr, get_address(msg)));
 					lo_message_add_string(reply, tr->name().c_str());
 					lo_message_add_int32(reply, j);
-					lo_message_add_float(reply, gain_to_position(a->gain_control()->get_value())); // XXX use internal_to_interface
+					lo_message_add_float(reply, a->gain_control()->internal_to_interface (a->gain_control()->get_value()));
 					lo_message_add_int32(reply, p->active() ? 1 : 0);
 				}
 			}
@@ -3284,12 +3284,18 @@ int
 OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 {
 	if (!session) {
-		route_send_fail ("fader", ssid, 0, get_address (msg));
 		return -1;
 	}
-	int ret;
-	ret = route_set_gain_abs (ssid, slider_position_to_gain_with_max (pos, 2.0), msg); // XXX use interface_to_internal, unhardcode 2.0
-	if (ret != 0) {
+	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
+
+	if (s) {
+		if (s->gain_control()) {
+			fake_touch (s->gain_control());
+			s->gain_control()->set_value (s->gain_control()->interface_to_internal (pos), PBD::Controllable::NoGroup);
+		} else {
+			return route_send_fail ("fader", ssid, 0, get_address (msg));
+		}
+	} else {
 		return route_send_fail ("fader", ssid, 0, get_address (msg));
 	}
 	return 0;
@@ -3306,11 +3312,9 @@ OSC::sel_fader (float val, lo_message msg)
 		s = _select;
 	}
 	if (s) {
-		float abs;
-		abs = slider_position_to_gain_with_max (val, 2.0); // XXX use interface_to_internal, unhardcode 2.0
 		if (s->gain_control()) {
 			fake_touch (s->gain_control());
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			s->gain_control()->set_value (s->gain_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -3479,11 +3483,7 @@ OSC::route_set_send_fader (int ssid, int id, float val, lo_message msg)
 		}
 
 		if (s->send_level_controllable (id)) {
-#ifdef MIXBUS
 			abs = s->send_level_controllable(id)->interface_to_internal (val);
-#else
-			abs = slider_position_to_gain_with_max (val, 2.0); // XXX use interface_to_internal, unhardcode 2.0
-#endif
 			s->send_level_controllable (id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
@@ -3555,11 +3555,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 		}
 
 		if (s->send_level_controllable (send_id)) {
-#ifdef MIXBUS
 			abs = s->send_level_controllable(send_id)->interface_to_internal (val);
-#else
-			abs = slider_position_to_gain_with_max (val, 2.0); // XXX interface_to_internal, unhardcode 2.0
-#endif
 			s->send_level_controllable (send_id)->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
 		}
@@ -5005,10 +5001,8 @@ OSC::cue_aux_fader (float position, lo_message msg)
 			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));
 
 			if (s) {
-				float abs;
-				abs = slider_position_to_gain_with_max (position, 2.0); // XXX use interface_to_internal, unhardcode 2.0
 				if (s->gain_control()) {
-					s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+					s->gain_control()->set_value (s->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
 					return 0;
 				}
 			}
@@ -5046,11 +5040,9 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 		return -1;
 	}
 	boost::shared_ptr<Send> s = cue_get_send (id, get_address (msg));
-	float abs;
 	if (s) {
 		if (s->gain_control()) {
-			abs = slider_position_to_gain_with_max (val, 2.0); // XXX use interface_to_internal, unhardcode 2.0
-			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			s->gain_control()->set_value (s->gain_control()->interface_to_internal(val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}

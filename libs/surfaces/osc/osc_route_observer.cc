@@ -360,7 +360,7 @@ OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable
 	}
 
 	if (gainmode) {
-		lo_message_add_float (msg, gain_to_position (controllable->get_value())); // XXX use internal_to_interface
+		lo_message_add_float (msg, controllable->internal_to_interface (controllable->get_value()));
 		text_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		gain_timeout = 8;
 	} else {

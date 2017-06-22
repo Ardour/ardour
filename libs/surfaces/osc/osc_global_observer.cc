@@ -261,7 +261,7 @@ void
 OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
 	if (gainmode) {
-		float_message (string_compose ("%1fader", path), gain_to_position (controllable->get_value())); // XXX use internal_to_interface
+		float_message (string_compose ("%1fader", path), controllable->internal_to_interface (controllable->get_value()));
 		text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		if (path.find("master") != std::string::npos) {
 			master_timeout = 8;

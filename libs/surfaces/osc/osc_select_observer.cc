@@ -636,7 +636,7 @@ OSCSelectObserver::gain_message ()
 	if (gainmode) {
 		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)));
 		gain_timeout = 8;
-		send_float ("/select/fader", gain_to_position (value)); // XXX use internal_to_interface
+		send_float ("/select/fader", _strip->gain_control()->internal_to_interface (value));
 	} else {
 		if (value < 1e-15) {
 			send_float ("/select/gain", -200);
@@ -703,11 +703,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 
 	if (gainmode) {
 		path = "/select/send_fader";
-#ifdef MIXBUS
 		value = controllable->internal_to_interface (controllable->get_value());
-#else
-		value = gain_to_position (controllable->get_value()); // XXX use internal_to_interface
-#endif
 	text_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db));
 	if (send_timeout.size() > id) {
 		send_timeout[id] = 8;
