@@ -142,6 +142,8 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 
+	void use_captured_sources (SourceList&, CaptureInfos const &);
+
 	void set_block_size (pframes_t);
 
 	boost::shared_ptr<Playlist> playlist ();
@@ -249,6 +251,9 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	AlignChoice _alignment_choice;
 	void set_align_choice_from_io ();
 	void input_changed ();
+
+	void use_captured_audio_sources (SourceList&, CaptureInfos const &);
+	void use_captured_midi_sources (SourceList&, CaptureInfos const &);
 
 private:
 	void parameter_changed (std::string const & p);
