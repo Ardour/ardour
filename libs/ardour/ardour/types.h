@@ -704,6 +704,13 @@ namespace ARDOUR {
 		SMFTempoUse,
 	};
 
+	struct CaptureInfo {
+		framepos_t start;
+		framecnt_t frames;
+	};
+
+	typedef std::vector<CaptureInfo*> CaptureInfos;
+
 } // namespace ARDOUR
 
 static inline ARDOUR::framepos_t

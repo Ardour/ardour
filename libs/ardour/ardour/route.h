@@ -579,8 +579,9 @@ public:
 	bool slaved_to (boost::shared_ptr<VCA>) const;
 	bool slaved () const;
 
-protected:
-	friend class Session;
+  protected:
+        friend class Session;
+	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
 
 	void catch_up_on_solo_mute_override ();
 	void set_listen (bool);
