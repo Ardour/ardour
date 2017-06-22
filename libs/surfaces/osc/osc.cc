@@ -966,6 +966,30 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		int ssid = atoi (&path[13]);
 		ret = route_set_gain_fader (ssid, argv[0]->f, msg);
 	}
+	else if (!strncmp (path, "/strip/db_delta", 15)) {
+		// in db delta
+		int ssid;
+		int ar_off = 0;
+		float delta;
+		if (strlen (path) > 15 && argc == 1) {
+			ssid = atoi (&path[16]);
+		} else if (argc == 2) {
+			if (types[0] == 'f') {
+				ssid = (int) argv[0]->f;
+			} else {
+				ssid = argv[0]->i;
+			}
+			ar_off = 1;
+		} else {
+			return -1;
+		}
+		if (types[ar_off] == 'f') {
+			delta = argv[ar_off]->f;
+		} else {
+			delta = (float) argv[ar_off]->i;
+		}
+		ret = strip_db_delta (ssid, delta, msg);
+	}
 	else if (!strncmp (path, "/strip/trimdB/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = route_set_trim_dB (ssid, argv[0]->f, msg);
@@ -3300,6 +3324,25 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 		return route_send_fail ("fader", ssid, 0, get_address (msg));
 	}
 	return 0;
+}
+
+int
+OSC::strip_db_delta (int ssid, float delta, lo_message msg)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
+	if (s) {
+		float db = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
+		float abs;
+		if (db < -192) {
+			abs = 0;
+		} else {
+			abs = dB_to_coefficient (db);
+		}
+		s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+		return 0;
+	}
+	return -1;
 }
 
 int

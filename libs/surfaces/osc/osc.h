@@ -567,6 +567,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);
 	int route_set_gain_fader (int rid, float pos, lo_message msg);
+	int strip_db_delta (int ssid, float delta, lo_message msg);
 	int route_set_trim_abs (int rid, float level, lo_message msg);
 	int route_set_trim_dB (int rid, float dB, lo_message msg);
 	int route_set_pan_stereo_position (int rid, float left_right_fraction, lo_message msg);
