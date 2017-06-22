@@ -653,6 +653,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\pbd\control_math.h"
+				>
+			</File>
+			<File
 				RelativePath="..\pbd\crossthread.h"
 				>
 			</File>
