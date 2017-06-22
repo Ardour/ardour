@@ -19,6 +19,8 @@
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
+#include "ardour/audiofilesource.h"
+#include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
 #include "ardour/disk_reader.h"
@@ -26,17 +28,20 @@
 #include "ardour/event_type_map.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
+#include "ardour/midi_region.h"
 #include "ardour/monitor_control.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
 #include "ardour/port.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
+#include "ardour/region_factory.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/record_safe_control.h"
 #include "ardour/route_group_specialized.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+#include "ardour/smf_source.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
@@ -1261,4 +1266,243 @@ Track::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 
 	error << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 	return false;
+}
+
+void
+Track::use_captured_sources (SourceList& srcs, CaptureInfos const & capture_info)
+{
+	if (srcs.empty()) {
+		return;
+	}
+
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (srcs.front());
+	boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (srcs.front());
+
+	if (afs) {
+		use_captured_audio_sources (srcs, capture_info);
+	}
+
+	if (mfs) {
+		use_captured_midi_sources (srcs, capture_info);
+	}
+}
+
+void
+Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture_info)
+{
+	if (srcs.empty() || data_type() != DataType::MIDI) {
+		return;
+	}
+
+	boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (srcs.front());
+	boost::shared_ptr<Playlist> pl = _playlists[DataType::MIDI];
+	boost::shared_ptr<MidiRegion> midi_region;
+	CaptureInfos::const_iterator ci;
+
+	if (!mfs || !pl) {
+		return;
+	}
+
+	framecnt_t total_capture = 0;
+
+	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+		total_capture += (*ci)->frames;
+	}
+
+	/* we will want to be able to keep (over)writing the source
+	   but we don't want it to be removable. this also differs
+	   from the audio situation, where the source at this point
+	   must be considered immutable. luckily, we can rely on
+	   MidiSource::mark_streaming_write_completed() to have
+	   already done the necessary work for that.
+	*/
+
+	string whole_file_region_name;
+	whole_file_region_name = region_name_from_path (mfs->name(), true);
+
+	/* Register a new region with the Session that
+	   describes the entire source. Do this first
+	   so that any sub-regions will obviously be
+	   children of this one (later!)
+	*/
+
+	try {
+		PropertyList plist;
+
+		plist.add (Properties::name, whole_file_region_name);
+		plist.add (Properties::whole_file, true);
+		plist.add (Properties::automatic, true);
+		plist.add (Properties::start, 0);
+		plist.add (Properties::length, total_capture);
+		plist.add (Properties::layer, 0);
+
+		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+
+		midi_region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+		midi_region->special_set_position (capture_info.front()->start);
+	}
+
+	catch (failed_constructor& err) {
+		error << string_compose(_("%1: could not create region for complete midi file"), _name) << endmsg;
+		/* XXX what now? */
+	}
+
+	pl->clear_changes ();
+	pl->freeze ();
+
+	/* Session frame time of the initial capture in this pass, which is where the source starts */
+	framepos_t initial_capture = 0;
+	if (!capture_info.empty()) {
+		initial_capture = capture_info.front()->start;
+	}
+
+	BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
+	const framepos_t preroll_off = _session.preroll_record_trim_len ();
+
+	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+
+		string region_name;
+
+		RegionFactory::region_name (region_name, mfs->name(), false);
+
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
+		                                                      _name, (*ci)->start, (*ci)->frames, region_name));
+
+
+		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+
+		try {
+			PropertyList plist;
+
+			/* start of this region is the offset between the start of its capture and the start of the whole pass */
+			plist.add (Properties::start, (*ci)->start - initial_capture);
+			plist.add (Properties::length, (*ci)->frames);
+			plist.add (Properties::length_beats, converter.from((*ci)->frames).to_double());
+			plist.add (Properties::name, region_name);
+
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			midi_region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+			if (preroll_off > 0) {
+				midi_region->trim_front ((*ci)->start - initial_capture + preroll_off);
+			}
+		}
+
+		catch (failed_constructor& err) {
+			error << _("MidiDiskstream: could not create region for captured midi!") << endmsg;
+			continue; /* XXX is this OK? */
+		}
+
+		// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+
+		pl->add_region (midi_region, (*ci)->start + preroll_off);
+	}
+
+	pl->thaw ();
+	_session.add_command (new StatefulDiffCommand (pl));
+}
+
+void
+Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & capture_info)
+{
+	if (srcs.empty() || data_type() != DataType::AUDIO) {
+		return;
+	}
+
+	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (srcs.front());
+	boost::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
+	boost::shared_ptr<AudioRegion> region;
+
+	if (!afs || !pl) {
+		return;
+	}
+
+	/* destructive tracks have a single, never changing region */
+
+	if (destructive()) {
+
+		/* send a signal that any UI can pick up to do the right thing. there is
+		   a small problem here in that a UI may need the peak data to be ready
+		   for the data that was recorded and this isn't interlocked with that
+		   process. this problem is deferred to the UI.
+		 */
+
+		pl->LayeringChanged(); // XXX this may not get the UI to do the right thing
+		return;
+	}
+
+	string whole_file_region_name;
+	whole_file_region_name = region_name_from_path (afs->name(), true);
+
+	/* Register a new region with the Session that
+	   describes the entire source. Do this first
+	   so that any sub-regions will obviously be
+	   children of this one (later!)
+	*/
+
+	try {
+		PropertyList plist;
+
+		plist.add (Properties::start, afs->last_capture_start_frame());
+		plist.add (Properties::length, afs->length(0));
+		plist.add (Properties::name, whole_file_region_name);
+		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+		rx->set_automatic (true);
+		rx->set_whole_file (true);
+
+		region = boost::dynamic_pointer_cast<AudioRegion> (rx);
+		region->special_set_position (afs->natural_position());
+	}
+
+
+	catch (failed_constructor& err) {
+		error << string_compose(_("%1: could not create region for complete audio file"), _name) << endmsg;
+		/* XXX what now? */
+	}
+
+	pl->clear_changes ();
+	pl->set_capture_insertion_in_progress (true);
+	pl->freeze ();
+
+	const framepos_t preroll_off = _session.preroll_record_trim_len ();
+	framecnt_t buffer_position = afs->last_capture_start_frame ();
+	CaptureInfos::const_iterator ci;
+
+	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+
+		string region_name;
+
+		RegionFactory::region_name (region_name, whole_file_region_name, false);
+
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture bufpos %5 start @ %2 length %3 add new region %4\n",
+		                                                      _name, (*ci)->start, (*ci)->frames, region_name, buffer_position));
+
+		try {
+
+			PropertyList plist;
+
+			plist.add (Properties::start, buffer_position);
+			plist.add (Properties::length, (*ci)->frames);
+			plist.add (Properties::name, region_name);
+
+			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
+			if (preroll_off > 0) {
+				region->trim_front (buffer_position + preroll_off);
+			}
+		}
+
+		catch (failed_constructor& err) {
+			error << _("AudioDiskstream: could not create region for captured audio!") << endmsg;
+			continue; /* XXX is this OK? */
+		}
+
+		pl->add_region (region, (*ci)->start + preroll_off, 1, _disk_writer->non_layered());
+		pl->set_layer (region, DBL_MAX);
+
+		buffer_position += (*ci)->frames;
+	}
+
+	pl->thaw ();
+	pl->set_capture_insertion_in_progress (false);
+	_session.add_command (new StatefulDiffCommand (pl));
 }
