@@ -46,6 +46,7 @@
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/presentation_info.h"
+#include "ardour/profile.h"
 #include "ardour/send.h"
 #include "ardour/internal_send.h"
 #include "ardour/phase_control.h"
@@ -4813,6 +4814,15 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 			} else if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 				sorted.push_back (s);
 			}
+#ifdef MIXBUS
+			else if (types[2]) {
+				if (Profile->get_mixbus()) {
+					if (s->mixbus()) {
+						sorted.push_back (s);
+					}
+				}
+			}
+#endif
 		}
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
