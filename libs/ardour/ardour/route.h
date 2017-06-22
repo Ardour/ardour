@@ -568,11 +568,11 @@ public:
 	void monitor_run (framepos_t start_frame, framepos_t end_frame,
 			pframes_t nframes, int declick);
 
-        bool slaved_to (boost::shared_ptr<VCA>) const;
-        bool slaved () const;
+	bool slaved_to (boost::shared_ptr<VCA>) const;
+	bool slaved () const;
 
-  protected:
-        friend class Session;
+protected:
+	friend class Session;
 
 	void catch_up_on_solo_mute_override ();
 	void set_listen (bool);
@@ -580,13 +580,11 @@ public:
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
-  protected:
-        virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
+	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
-	void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame,
-			pframes_t nframes, int declick);
+	void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
 					     framecnt_t /* nframes */) {}
@@ -661,7 +659,6 @@ public:
 
 	virtual ChanCount input_streams () const;
 
-protected:
 	virtual XMLNode& state(bool);
 
 	int configure_processors (ProcessorStreams*);
@@ -689,7 +686,7 @@ protected:
 
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
-  private:
+private:
 	int64_t _track_number;
 
 	int set_state_2X (const XMLNode&, int);
@@ -777,7 +774,7 @@ protected:
 
 	void reset_instrument_info ();
 
-        void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
+	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
 };
 
 } // namespace ARDOUR
