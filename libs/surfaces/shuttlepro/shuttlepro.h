@@ -78,6 +78,9 @@ private:
 	int aquire_device ();
 	void release_device ();
 
+	void prev_marker_keep_rolling ();
+	void next_marker_keep_rolling ();
+
 	void handle_button_press (unsigned short btn);
 
 	void jog_event_backward ();

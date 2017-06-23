@@ -357,18 +357,42 @@ ShuttleproControlProtocol::handle_button_press (unsigned short btn)
 	case BTN07: transport_stop (); break;
 	case BTN08: transport_play (); break;
 
-	case BTN05: prev_marker (); break;
-	case BTN09: next_marker (); break;
+	case BTN05: prev_marker_keep_rolling (); break;
+	case BTN09: next_marker_keep_rolling (); break;
 
 	case BTN14: goto_start (); break;
 	case BTN15: goto_end (); break;
 
-	case BTN10: jump_by_bars (-4.0); break;
-	case BTN11: jump_by_bars (+4.0); break;
+	case BTN10: jump_by_bars (-4.0, _keep_rolling && session->transport_rolling ()); break;
+	case BTN11: jump_by_bars (+4.0, _keep_rolling && session->transport_rolling ()); break;
 
 	case BTN13: add_marker (); break;
 
 	default: break;
+	}
+}
+
+void
+ShuttleproControlProtocol::prev_marker_keep_rolling ()
+{
+	framepos_t pos = session->locations()->first_mark_before (session->transport_frame());
+
+	if (pos >= 0) {
+		session->request_locate (pos, _keep_rolling && session->transport_rolling());
+	} else {
+		session->goto_start ();
+	}
+}
+
+void
+ShuttleproControlProtocol::next_marker_keep_rolling ()
+{
+	framepos_t pos = session->locations()->first_mark_after (session->transport_frame());
+
+	if (pos >= 0) {
+		session->request_locate (pos, _keep_rolling && session->transport_rolling());
+	} else {
+		session->goto_end();
 	}
 }
 
