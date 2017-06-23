@@ -5730,7 +5730,7 @@ Session::graph_reordered ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->set_capture_offset ();
+			tr->update_latency_information ();
 		}
 	}
 }
@@ -6929,7 +6929,7 @@ Session::post_capture_latency ()
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr) {
-			tr->set_capture_offset ();
+			tr->update_latency_information ();
 		}
 	}
 }
@@ -7038,7 +7038,7 @@ Session::update_latency_compensation (bool force_whole_graph)
 		if (!tr) {
 			continue;
 		}
-		tr->set_capture_offset ();
+		tr->update_latency_information ();
 	}
 }
 
@@ -7371,8 +7371,8 @@ Session::auto_connect_thread_run ()
 			/* this is only used for updating plugin latencies, the
 			 * graph does not change. so it's safe in general.
 			 * BUT..
-			 * .. update_latency_compensation () entails set_capture_offset()
-			 * which calls Diskstream::set_capture_offset () which
+			 * .. update_latency_compensation () entails Track::update_latency_information()
+			 * which calls DiskWriter::set_capture_offset () which
 			 * modifies the capture offset... which can be a proplem
 			 * in "prepare_to_stop"
 			 */

@@ -88,7 +88,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	bool can_record();
 
 	void set_latency_compensation (framecnt_t);
-
+	void update_latency_information ();
 	enum FreezeState {
 		NoFreeze,
 		Frozen,
@@ -151,7 +151,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	void ensure_input_monitoring (bool);
 	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
-	void set_capture_offset ();
 	std::string steal_write_source_name ();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;
