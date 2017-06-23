@@ -57,6 +57,7 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _shuttle_was_zero (true)
 	, _was_rolling_before_shuttle (false)
 	, _keep_rolling (true)
+	, _gui (0)
 {
 	libusb_init (0);
 	//libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
@@ -69,6 +70,7 @@ ShuttleproControlProtocol::~ShuttleproControlProtocol ()
 	stop ();
 	libusb_exit (0);
 	BaseUI::quit();
+	tear_down_gui ();
 }
 
 bool
@@ -105,13 +107,17 @@ XMLNode&
 ShuttleproControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	node.set_property (X_("feedback"), "0");
+	node.set_property (X_("keep-rolling"), _keep_rolling);
 	return node;
 }
 
 int
-ShuttleproControlProtocol::set_state (const XMLNode&, int)
+ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 {
+	if (ControlProtocol::set_state (node, version)) {
+		return -1;
+	}
+	node.get_property (X_("keep-rolling"), _keep_rolling);
 	return 0;
 }
 

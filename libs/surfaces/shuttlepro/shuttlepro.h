@@ -62,6 +62,9 @@ public:
 
 	void handle_event ();
 
+	void set_keep_rolling (bool yn) { _keep_rolling = yn; }
+	bool get_keep_rolling () { return _keep_rolling; }
+
 private:
 	struct State {
 		int8_t shuttle;
@@ -72,6 +75,10 @@ private:
 	void do_request (ShuttleproControlUIRequest*);
 	int start ();
 	int stop ();
+
+	bool has_editor () const { return true; }
+	void* get_gui () const;
+	void  tear_down_gui ();
 
 	void thread_init ();
 
@@ -101,6 +108,9 @@ private:
 	State _state;
 
 	bool _keep_rolling;
+
+	mutable void* _gui;
+	void build_gui ();
 };
 
 } // namespace
