@@ -109,6 +109,8 @@ private:
 
 	bool _keep_rolling;
 
+	std::vector<double> _shuttle_speeds;
+
 	mutable void* _gui;
 	void build_gui ();
 };

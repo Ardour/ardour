@@ -57,6 +57,7 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _shuttle_was_zero (true)
 	, _was_rolling_before_shuttle (false)
 	, _keep_rolling (true)
+	, _shuttle_speeds ( { 0.50, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0 } )
 	, _gui (0)
 {
 	libusb_init (0);
@@ -424,7 +425,8 @@ ShuttleproControlProtocol::shuttle_event(int position)
 		if (_shuttle_was_zero) {
 			_was_rolling_before_shuttle = session->transport_rolling ();
 		}
-		set_transport_speed (double(position));
+		double speed = position > 0 ? _shuttle_speeds[position-1] : -_shuttle_speeds[-position-1];
+		set_transport_speed (speed);
 		_shuttle_was_zero = false;
 	} else {
 		if (_keep_rolling && _was_rolling_before_shuttle) {
