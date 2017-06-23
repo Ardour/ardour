@@ -1486,6 +1486,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 
 #ifdef MIXBUS
 	int eq_band = -1;
+	std::string band_name;
 	if (r->is_input_strip ()) {
 
 #ifdef MIXBUS32C
