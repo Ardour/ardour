@@ -70,6 +70,9 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 
 	virtual framecnt_t signal_latency() const { return 0; }
 
+	virtual void set_input_latency (framecnt_t);
+	framecnt_t input_latency () const { return _input_latency; }
+
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
 	virtual bool requires_fixed_sized_buffers() const { return false; }
 
@@ -149,6 +152,7 @@ protected:
 	ProcessorWindowProxy *_window_proxy;
 	PluginPinWindowProxy *_pinmgr_proxy;
 	SessionObject* _owner;
+	framecnt_t _input_latency;
 };
 
 } // namespace ARDOUR

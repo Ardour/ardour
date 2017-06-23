@@ -1806,6 +1806,8 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 	// TODO check for a potential ReaderLock after ReaderLock ??
 	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
 
+	framecnt_t chain_latency = _input->latency ();
+
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 
@@ -1816,6 +1818,10 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 			lm->acquire ();
 			return -1;
 		}
+
+		(*p)->set_input_latency (chain_latency);
+		chain_latency += (*p)->signal_latency ();
+
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 
