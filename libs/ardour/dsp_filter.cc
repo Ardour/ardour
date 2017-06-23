@@ -354,6 +354,7 @@ FFTSpectrum::~FFTSpectrum ()
 void
 FFTSpectrum::init (uint32_t window_size, double rate)
 {
+	assert (window_size > 0);
 	Glib::Threads::Mutex::Lock lk (fft_planner_lock);
 
 	_fft_window_size = window_size;
