@@ -412,7 +412,7 @@ Strip::show_stripable_name ()
 }
 
 void
-Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool force_update)
+Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 {
 	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
@@ -433,7 +433,7 @@ Strip::notify_send_level_change (AutomationType type, uint32_t send_num, bool fo
 
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (type, val);
+		do_parameter_display (control->desc().type, val);
 
 		if (_vpot->control() == control) {
 			/* update pot/encoder */
@@ -497,7 +497,7 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 }
 
 void
-Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
+Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_update)
 {
 	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
@@ -511,43 +511,17 @@ Strip::notify_eq_change (AutomationType type, uint32_t band, bool force_update)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> control;
-
-	switch (type) {
-	case EQGain:
-		control = r->eq_gain_controllable (band);
-		break;
-	case EQFrequency:
-		control = r->eq_freq_controllable (band);
-		break;
-	case EQQ:
-		control = r->eq_q_controllable (band);
-		break;
-	case EQShape:
-		control = r->eq_shape_controllable (band);
-		break;
-	case EQEnable:
-		control = r->eq_enable_controllable ();
-		break;
-#ifndef MIXBUS32C
-	case EQHPF:
-		control = r->filter_freq_controllable (true);
-		break;
-#endif
-	default:
-		break;
-	}
-
+	boost::shared_ptr<AutomationControl> control = pc.lock ();
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (type, val);
+		do_parameter_display (control->desc().type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
 }
 
 void
-Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate_mode)
+Strip::notify_dyn_change (boost::weak_ptr<AutomationControl> pc, bool force_update, bool propagate_mode)
 {
 	boost::shared_ptr<Stripable> r = _surface->mcp().subview_stripable();
 
@@ -561,40 +535,8 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> control;
+	boost::shared_ptr<AutomationControl> control= pc.lock ();
 	bool reset_all = false;
-
-	switch (type) {
-	case CompThreshold:
-		control = r->comp_threshold_controllable ();
-		break;
-	case CompSpeed:
-		control = r->comp_speed_controllable ();
-		break;
-	case CompMode:
-		control = r->comp_mode_controllable ();
-		reset_all = true;
-		break;
-	case CompMakeup:
-		control = r->comp_makeup_controllable ();
-		break;
-	case CompEnable:
-		control = r->comp_enable_controllable ();
-		break;
-#ifdef MIXBUS32C
-	case EQHPF:
-		control = r->filter_freq_controllable (true);
-		break;
-	case EQLPF:
-		control = r->filter_freq_controllable (false);
-		break;
-	case EQFilterEnable:
-		control = r->filter_enable_controllable (true); // both HP/LP
-		break;
-#endif
-	default:
-		break;
-	}
 
 	if (propagate_mode && reset_all) {
 		_surface->subview_mode_changed ();
@@ -602,7 +544,7 @@ Strip::notify_dyn_change (AutomationType type, bool force_update, bool propagate
 
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (type, val);
+		do_parameter_display (control->desc().type, val);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -1559,19 +1501,19 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	 * order shown above.
 	 */
 
-	vector<boost::shared_ptr<AutomationControl> > available;
+	vector<std::pair<boost::shared_ptr<AutomationControl>, std::string > > available;
 	vector<AutomationType> params;
 
-	if (tc) { available.push_back (tc); params.push_back (CompThreshold); }
-	if (sc) { available.push_back (sc); params.push_back (CompSpeed); }
-	if (mc) { available.push_back (mc); params.push_back (CompMode); }
-	if (kc) { available.push_back (kc); params.push_back (CompMakeup); }
-	if (ec) { available.push_back (ec); params.push_back (CompEnable); }
+	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
+	if (sc) { available.push_back (std::make_pair (sc, mc ? r->comp_speed_name (mc->get_value()) : "Speed")); }
+	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
+	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
+	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
 
 #ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
-	if (hpfc) { available.push_back (hpfc); params.push_back (EQHPF); }
-	if (lpfc) { available.push_back (lpfc); params.push_back (EQLPF); }
-	if (fec) { available.push_back (fec); params.push_back (EQFilterEnable); }
+	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
+	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
+	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
 #endif
 
 	if (pos >= available.size()) {
@@ -1583,57 +1525,12 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 	}
 
 	boost::shared_ptr<AutomationControl> pc;
-	AutomationType param;
 
-	pc = available[pos];
-	param = params[pos];
+	pc = available[pos].first;
+	string pot_id = available[pos].second;
 
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, param, false, true), ui_context());
+	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_dyn_change, this, boost::weak_ptr<AutomationControl>(pc), false, true), ui_context());
 	_vpot->set_control (pc);
-
-	string pot_id;
-
-	switch (param) {
-	case CompThreshold:
-		pot_id = "Thresh";
-		break;
-	case CompSpeed:
-		if (mc) {
-			pot_id = r->comp_speed_name (mc->get_value());
-		} else {
-			pot_id = "Speed";
-		}
-		break;
-	case CompMode:
-		pot_id = "Mode";
-		break;
-	case CompMakeup:
-		pot_id = "Makeup";
-		break;
-	case CompRedux:
-		pot_id = "Redux";
-		break;
-#ifdef MIXBUS32C
-	case CompEnable:
-		pot_id = "CompIn";
-		break;
-	case EQHPF:
-		pot_id = "HPF";
-		break;
-	case EQLPF:
-		pot_id = "LPF";
-		break;
-	case EQFilterEnable:
-		pot_id = "FiltIn";
-		break;
-#else
-	case CompEnable:
-		pot_id = "on/off";
-		break;
-#endif
-	default:
-		break;
-	}
 
 	if (!pot_id.empty()) {
 		pending_display[0] = pot_id;
@@ -1641,7 +1538,7 @@ Strip::setup_dyn_vpot (boost::shared_ptr<Stripable> r)
 		pending_display[0] = string();
 	}
 
-	notify_dyn_change (param, true, false);
+	notify_dyn_change (boost::weak_ptr<AutomationControl>(pc), true, false);
 }
 
 void
@@ -1650,12 +1547,11 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 	boost::shared_ptr<AutomationControl> pc;
 
 	const uint32_t global_pos = _surface->mcp().global_index (*this);
-	AutomationType param = NullAutomation;
-	int eq_band = -1;
-	string band_name;
+	string pot_id;
 
 #ifdef MIXBUS
-	if ( r->is_input_strip() ) {
+	int eq_band = -1;
+	if (r->is_input_strip ()) {
 
 #ifdef MIXBUS32C
 		switch (global_pos) {
@@ -1666,7 +1562,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 				eq_band = global_pos / 2;
 				pc = r->eq_freq_controllable (eq_band);
 				band_name = r->eq_band_name (eq_band);
-				param = EQFrequency;
+				pot_id = band_name + "Freq";
 				break;
 			case 1:
 			case 3:
@@ -1675,21 +1571,21 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 				eq_band = global_pos / 2;
 				pc = r->eq_gain_controllable (eq_band);
 				band_name = r->eq_band_name (eq_band);
-				param = EQGain;
+				pot_id = band_name + "Gain";
 				break;
 			case 8: 
 				pc = r->eq_shape_controllable(0);  //low band "bell" button
 				band_name = "lo";
-				param = EQShape;
+				pot_id = band_name + " Shp";
 				break;
 			case 9:
 				pc = r->eq_shape_controllable(3);  //high band "bell" button
 				band_name = "hi";
-				param = EQShape;
+				pot_id = band_name + " Shp";
 				break;
 			case 10:
 				pc = r->eq_enable_controllable();
-				param = EQEnable;
+				pot_id = "EQ";
 				break;
 		}
 
@@ -1702,7 +1598,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 				eq_band = global_pos / 2;
 				pc = r->eq_gain_controllable (eq_band);
 				band_name = r->eq_band_name (eq_band);
-				param = EQGain;
+				pot_id = band_name + "Gain";
 				break;
 			case 1:
 			case 3:
@@ -1710,15 +1606,15 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 				eq_band = global_pos / 2;
 				pc = r->eq_freq_controllable (eq_band);
 				band_name = r->eq_band_name (eq_band);
-				param = EQFrequency;
+				pot_id = band_name + "Freq";
 				break;
 			case 6:
 				pc = r->eq_enable_controllable();
-				param = EQEnable;
+				pot_id = "EQ";
 				break;
 			case 7:
 				pc = r->filter_freq_controllable(true);
-				param = EQHPF;
+				pot_id = "HP Freq";
 				break;
 		}
 
@@ -1732,7 +1628,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 				eq_band = global_pos;
 				pc = r->eq_gain_controllable (eq_band);
 				band_name = r->eq_band_name (eq_band);
-				param = EQGain;
+				pot_id = band_name + "Gain";
 				break;
 		}
 	}
@@ -1740,33 +1636,8 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 
 	//If a controllable was found, connect it up, and put the labels in the display.
 	if (pc) {
-		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, param, eq_band, false), ui_context());
+		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_eq_change, this, boost::weak_ptr<AutomationControl>(pc), false), ui_context());
 		_vpot->set_control (pc);
-
-		string pot_id;
-
-		switch (param) {
-		case EQGain:
-			pot_id = band_name + "Gain";
-			break;
-		case EQFrequency:
-			pot_id = band_name + "Freq";
-			break;
-		case EQQ:
-			pot_id = band_name + " Q";
-			break;
-		case EQShape:
-			pot_id = band_name + " Shp";
-			break;
-		case EQEnable:
-			pot_id = "EQ";
-			break;
-		case EQHPF:
-			pot_id = "HP Freq";
-			break;
-		default:
-			break;
-		}
 
 		if (!pot_id.empty()) {
 			pending_display[0] = pot_id;
@@ -1780,7 +1651,7 @@ Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 		pending_display[1] = string();
 	}
 	
-	notify_eq_change (param, eq_band, true);
+	notify_eq_change (boost::weak_ptr<AutomationControl>(pc), true);
 }
 
 void
@@ -1802,12 +1673,12 @@ Strip::setup_sends_vpot (boost::shared_ptr<Stripable> r)
 		return;
 	}
 
-	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, BusSendLevel, global_pos, false), ui_context());
+	pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_send_level_change, this, global_pos, false), ui_context());
 	_vpot->set_control (pc);
 
 	pending_display[0] = PBD::short_version (r->send_name (global_pos), 6);
 
-	notify_send_level_change (BusSendLevel, global_pos, true);
+	notify_send_level_change (global_pos, true);
 }
 
 void
