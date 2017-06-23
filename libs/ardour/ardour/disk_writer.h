@@ -90,7 +90,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	PBD::Signal0<void> AlignmentStyleChanged;
 
 	void set_input_latency (framecnt_t);
-	framecnt_t input_latency () const { return _input_latency; }
 
 	bool configure_io (ChanCount in, ChanCount out);
 
@@ -170,7 +169,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	CaptureInfos capture_info;
 
   private:
-	framecnt_t   _input_latency;
 	gint         _record_enabled;
 	gint         _record_safe;
 	framepos_t    capture_start_frame;

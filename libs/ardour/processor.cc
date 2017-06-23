@@ -68,6 +68,7 @@ Processor::Processor(Session& session, const string& name)
 	, _window_proxy (0)
 	, _pinmgr_proxy (0)
 	, _owner (0)
+	, _input_latency (0)
 {
 }
 
@@ -86,6 +87,7 @@ Processor::Processor (const Processor& other)
 	, _window_proxy (0)
 	, _pinmgr_proxy (0)
 	, _owner (0)
+	, _input_latency (0)
 {
 }
 
@@ -288,3 +290,10 @@ Processor::owner() const
 {
 	return _owner;
 }
+
+void
+Processor::set_input_latency (framecnt_t cnt)
+{
+	_input_latency = cnt;
+}
+
