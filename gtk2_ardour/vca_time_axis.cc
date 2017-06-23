@@ -78,11 +78,26 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	drop_button.set_tweaks(ArdourButton::TrackHeader);
 	automation_button.set_tweaks(ArdourButton::TrackHeader);
 
-	controls_table.attach (mute_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (solo_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (automation_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (drop_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (gain_meter.get_gain_slider(), 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	if (ARDOUR::Profile->get_mixbus()) {
+		controls_button_size_group->add_widget(mute_button);
+
+		Gtk::Fixed *blank = manage(new Gtk::Fixed());
+		controls_button_size_group->add_widget(*blank);
+		controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		blank->show();
+
+		controls_table.attach (mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (drop_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gain_meter.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	} else {
+		controls_table.attach (mute_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (solo_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (automation_button, 2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (drop_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (gain_meter.get_gain_slider(), 0, 2, 1, 2, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+	}
 
 	mute_button.show ();
 	solo_button.show ();

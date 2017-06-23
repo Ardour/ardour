@@ -575,7 +575,7 @@ RouteTimeAxisView::build_automation_action_menu (bool for_selection)
 		_main_automation_menu_map[Evoral::Parameter(MuteAutomation)] = mute_automation_item;
 	}
 
-	if (!pan_tracks.empty()) {
+	if (!pan_tracks.empty() && !ARDOUR::Profile->get_mixbus()) {
 		items.push_back (CheckMenuElem (_("Pan"), sigc::mem_fun (*this, &RouteTimeAxisView::update_pan_track_visibility)));
 		pan_automation_item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		pan_automation_item->set_active (single_track_selected &&
