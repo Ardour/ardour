@@ -21,6 +21,7 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/memento_command.h"
 #include "pbd/types_convert.h"
 #include "pbd/i18n.h"
 
@@ -366,12 +367,18 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 		/* ..and update automation */
 		if (_list) {
+			XMLNode* before = &alist ()->get_state ();
 			if (master->automation_playback () && master->list()) {
 				_list->list_merge (*master->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
 				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 			} else {
 				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
 				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+			}
+			XMLNode* after = &alist ()->get_state ();
+			if (*before != *after) {
+				_session.begin_reversible_command (string_compose (_("Merge VCA automation into %1"), name ()));
+				_session.commit_reversible_command (alist()->memento_command (before, after));
 			}
 		}
 	}
@@ -432,6 +439,7 @@ SlavableAutomationControl::clear_masters ()
 
 			/* ..and update automation */
 			if (_list) {
+				XMLNode* before = &alist ()->get_state ();
 				if (!masters.empty()) {
 					for (ControlList::const_iterator m = masters.begin(); m != masters.end(); ++m) {
 						_list->list_merge (*(*m)->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
@@ -439,6 +447,11 @@ SlavableAutomationControl::clear_masters ()
 					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 				} else {
 					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, master_ratio));
+				}
+				XMLNode* after = &alist ()->get_state ();
+				if (*before != *after) {
+					_session.begin_reversible_command (string_compose (_("Merge VCA automation into %1"), name ()));
+					_session.commit_reversible_command (alist()->memento_command (before, after));
 				}
 			}
 	}
