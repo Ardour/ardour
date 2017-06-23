@@ -146,7 +146,7 @@ private:
 	void return_to_vpot_mode_display ();
 	void next_pot_mode ();
 
-	void do_parameter_display (ARDOUR::AutomationType, float val);
+	void do_parameter_display (ARDOUR::ParameterDescriptor const&, float val, bool screen_hold = false);
 	void select_event (Button&, ButtonState);
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);

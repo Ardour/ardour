@@ -53,6 +53,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/user_bundle.h"
 #include "ardour/profile.h"
+#include "ardour/value_as_string.h"
 
 #include "mackie_control_protocol.h"
 #include "surface_port.h"
@@ -361,7 +362,7 @@ Strip::notify_gain_changed (bool force_update)
 			}
 		}
 
-		do_parameter_display (GainAutomation, gain_coefficient);
+		do_parameter_display (ac->desc(), gain_coefficient); // GainAutomation
 		_last_gain_position_written = normalized_position;
 	}
 }
@@ -433,7 +434,7 @@ Strip::notify_send_level_change (uint32_t send_num, bool force_update)
 
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (control->desc().type, val);
+		do_parameter_display (control->desc (), val); // BusSendLevel
 
 		if (_vpot->control() == control) {
 			/* update pot/encoder */
@@ -459,10 +460,12 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 
 	boost::shared_ptr<AutomationControl> control;
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
+	bool screen_hold = false;
 
 	switch (type) {
 	case TrimAutomation:
 		control = r->trim_control();
+		screen_hold = true;
 		break;
 	case SoloIsolateAutomation:
 		control = r->solo_isolate_control ();
@@ -473,10 +476,12 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 	case MonitoringAutomation:
 		if (track) {
 			control = track->monitoring_control();
+			screen_hold = true;
 		}
 		break;
 	case PhaseAutomation:
 		control = r->phase_control ();
+		screen_hold = true;
 		break;
 	default:
 		break;
@@ -490,7 +495,7 @@ Strip::notify_trackview_change (AutomationType type, uint32_t send_num, bool for
 		 * into the normalized 0..1.0 ("interface") range.
 		 */
 
-		do_parameter_display (type, val);
+		do_parameter_display (control->desc(), val, screen_hold);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -514,7 +519,7 @@ Strip::notify_eq_change (boost::weak_ptr<AutomationControl> pc, bool force_updat
 	boost::shared_ptr<AutomationControl> control = pc.lock ();
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (control->desc().type, val);
+		do_parameter_display (control->desc(), val, true);
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -544,7 +549,11 @@ Strip::notify_dyn_change (boost::weak_ptr<AutomationControl> pc, bool force_upda
 
 	if (control) {
 		float val = control->get_value();
-		do_parameter_display (control->desc().type, val);
+		if (control == r->comp_mode_controllable ()) {
+			pending_display[1] = r->comp_mode_name (val);
+		} else {
+			do_parameter_display (control->desc(), val, true);
+		}
 		/* update pot/encoder */
 		_surface->write (_vpot->set (control->internal_to_interface (val), true, Pot::wrap));
 	}
@@ -579,7 +588,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 
 		_surface->write (_vpot->set (normalized_pos, true, Pot::dot));
 		/* show actual internal value to user */
-		do_parameter_display (PanAzimuthAutomation, internal_pos);
+		do_parameter_display (pan_control->desc(), internal_pos); // PanAzimuthAutomation
 
 		_last_pan_azi_position_written = normalized_pos;
 	}
@@ -612,7 +621,7 @@ Strip::notify_panner_width_changed (bool force_update)
 	if (force_update || pos != _last_pan_width_position_written) {
 
 		_surface->write (_vpot->set (pos, true, Pot::spread));
-		do_parameter_display (PanWidthAutomation, pos);
+		do_parameter_display (pan_control->desc(), pos); // PanWidthAutomation
 
 		_last_pan_width_position_written = pos;
 	}
@@ -718,7 +727,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 						/* we just turned it on, show the level
 						*/
 						control = _stripable->send_level_controllable (global_pos);
-						do_parameter_display (BusSendLevel, control->get_value());
+						do_parameter_display (control->desc(), control->get_value()); // BusSendLevel
 					}
 				}
 			}
@@ -784,7 +793,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 		_fader->start_touch (_surface->mcp().transport_frame());
 
 		if (ac) {
-			do_parameter_display ((AutomationType) ac->parameter().type(), ac->get_value());
+			do_parameter_display (ac->desc(), ac->get_value());
 		}
 
 	} else {
@@ -866,13 +875,14 @@ Strip::handle_button (Button& button, ButtonState bs)
 }
 
 void
-Strip::do_parameter_display (AutomationType type, float val)
+Strip::do_parameter_display (ARDOUR::ParameterDescriptor const& desc, float val, bool screen_hold)
 {
-	bool screen_hold = false;
 	char buf[16];
 
-	switch (type) {
+	switch (desc.type) {
 	case GainAutomation:
+	case TrimAutomation:
+		// we can't use value_as_string() that'll suffix "dB" and also use "-inf" w/o space :(
 		if (val == 0.0) {
 			pending_display[1] = " -inf ";
 		} else {
@@ -885,6 +895,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	case BusSendLevel:
 		if (Profile->get_mixbus()) {  //Mixbus sends are already stored in dB
+			// TODO remove after merge - PluginAutomation w/print_fmt
 			snprintf (buf, sizeof (buf), "%2.1f", val);
 			pending_display[1] = buf;
 			screen_hold = true;
@@ -902,6 +913,7 @@ Strip::do_parameter_display (AutomationType type, float val)
 
 	case PanAzimuthAutomation:
 		if (Profile->get_mixbus()) {
+			// XXX no _stripable check?
 			snprintf (buf, sizeof (buf), "%2.1f", val);
 			pending_display[1] = buf;
 			screen_hold = true;
@@ -915,88 +927,11 @@ Strip::do_parameter_display (AutomationType type, float val)
 			}
 		}
 		break;
-
-	case PanWidthAutomation:
-		if (_stripable) {
-			snprintf (buf, sizeof (buf), "%5ld%%", lrintf ((val * 200.0)-100));
-			pending_display[1] = buf;
-			screen_hold = true;
-		}
-		break;
-
-	case TrimAutomation:
-		if (_stripable) {
-			float dB = accurate_coefficient_to_dB (val);
-			snprintf (buf, sizeof (buf), "%6.1f", dB);
-			pending_display[1] = buf;
-			screen_hold = true;
-		}
-		break;
-
-	case PhaseAutomation:
-		if (_stripable) {
-			if (val < 0.5) {
-				pending_display[1] = "Normal";
-			} else {
-				pending_display[1] = "Invert";
-			}
-			screen_hold = true;
-		}
-		break;
-
-	case EQGain:
-	case EQFrequency:
-	case EQQ:
-	case EQShape:
-	case EQHPF:
-	case EQLPF:
-	case CompThreshold:
-	case CompSpeed:
-	case CompMakeup:
-	case CompRedux:
-		snprintf (buf, sizeof (buf), "%6.1f", val);
-		pending_display[1] = buf;
-		screen_hold = true;
-		break;
-	case EQFilterEnable:
-	case EQEnable:
-	case CompEnable:
-		if (val >= 0.5) {
-			pending_display[1] = "on";
-		} else {
-			pending_display[1] = "off";
-		}
-		break;
-	case CompMode:
-		if (_surface->mcp().subview_stripable()) {
-			pending_display[1] = _surface->mcp().subview_stripable()->comp_mode_name (val);
-		}
-		break;
-	case SoloSafeAutomation:
-	case SoloIsolateAutomation:
-		if (val >= 0.5) {
-			pending_display[1] = "on";
-		} else {
-			pending_display[1] = "off";
-		}
-		break;
-	case MonitoringAutomation:
-		switch (MonitorChoice ((int) val)) {
-		case MonitorAuto:
-			pending_display[1] = "auto";
-			break;
-		case MonitorInput:
-			pending_display[1] = "input";
-			break;
-		case MonitorDisk:
-			pending_display[1] = "disk";
-			break;
-		case MonitorCue: /* XXX not implemented as of jan 2016 */
-			pending_display[1] = "cue";
-			break;
-		}
-		break;
 	default:
+		pending_display[1] = ARDOUR::value_as_string (desc, val);
+		if (pending_display[1].size () < 6) { // left-padding, right-align
+			pending_display[1].insert (0, 6 - pending_display[1].size (), ' ');
+		}
 		break;
 	}
 
@@ -1329,9 +1264,9 @@ Strip::flip_mode_changed ()
 
 
 			if (_surface->mcp().flip_mode() == MackieControlProtocol::Normal) {
-				do_parameter_display (GainAutomation, fader_control->get_value());
+				do_parameter_display (fader_control->desc(), fader_control->get_value());
 			} else {
-				do_parameter_display (BusSendLevel, pot_control->get_value());
+				do_parameter_display (pot_control->desc(), pot_control->get_value()); // BusSendLevel
 			}
 
 		}
