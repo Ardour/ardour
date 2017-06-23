@@ -627,9 +627,15 @@ Track::last_capture_sources ()
 }
 
 void
-Track::set_capture_offset ()
+Track::update_latency_information ()
 {
-	_disk_writer->set_capture_offset ();
+	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
+	framecnt_t chain_latency = _input->latency ();
+
+	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+		(*p)->set_input_latency (chain_latency);
+		chain_latency += (*p)->signal_latency ();
+	}
 }
 
 std::string
