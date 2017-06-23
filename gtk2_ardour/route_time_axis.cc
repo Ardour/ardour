@@ -187,13 +187,13 @@ RouteTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			controls_table.attach (*rec_enable_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 		}
 
-                if (is_midi_track()) {
-                        set_tooltip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+		if (is_midi_track()) {
+			set_tooltip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
 			gm.set_fader_name ("MidiTrackFader");
-                } else {
-                        set_tooltip(*rec_enable_button, _("Record"));
+		} else {
+			set_tooltip(*rec_enable_button, _("Record"));
 			gm.set_fader_name ("AudioTrackFader");
-                }
+		}
 
 		/* set playlist button tip to the current playlist, and make it update when it changes */
 		update_playlist_tip ();
@@ -1106,12 +1106,12 @@ RouteTimeAxisView::set_samples_per_pixel (double fpp)
 void
 RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, bool apply_to_selection)
 {
-        if (!mitem->get_active()) {
-                /* this is one of the two calls made when these radio menu items change status. this one
-                   is for the item that became inactive, and we want to ignore it.
-                */
-                return;
-        }
+	if (!mitem->get_active()) {
+		/* this is one of the two calls made when these radio menu items change status. this one
+			 is for the item that became inactive, and we want to ignore it.
+			 */
+		return;
+	}
 
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_align_choice, _1, mitem, choice, false));
@@ -1497,8 +1497,8 @@ RouteTimeAxisView::fade_range (TimeSelection& selection)
 		}
 	}
 
-        playlist->clear_changes ();
-        playlist->clear_owned_changes ();
+	playlist->clear_changes ();
+	playlist->clear_owned_changes ();
 
 	playlist->fade_range (time);
 
@@ -1532,36 +1532,38 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 		}
 	}
 
-        playlist->clear_changes ();
-        playlist->clear_owned_changes ();
+	playlist->clear_changes ();
+	playlist->clear_owned_changes ();
 
 	switch (op) {
 	case Delete:
 		if (playlist->cut (time) != 0) {
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				playlist->ripple(time.start(), -time.length(), NULL);
-				// no need to exclude any regions from rippling here
+			}
+			// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
-                        _session->add_commands (cmds);
+			vector<Command*> cmds;
+			playlist->rdiff (cmds);
+			_session->add_commands (cmds);
 
-                        _session->add_command (new StatefulDiffCommand (playlist));
+			_session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
 
 	case Cut:
 		if ((what_we_got = playlist->cut (time)) != 0) {
 			_editor.get_cut_buffer().add (what_we_got);
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				playlist->ripple(time.start(), -time.length(), NULL);
-				// no need to exclude any regions from rippling here
+			}
+			// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
-                        _session->add_commands (cmds);
+			vector<Command*> cmds;
+			playlist->rdiff (cmds);
+			_session->add_commands (cmds);
 
-                        _session->add_command (new StatefulDiffCommand (playlist));
+			_session->add_command (new StatefulDiffCommand (playlist));
 		}
 		break;
 	case Copy:
@@ -1572,14 +1574,15 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 
 	case Clear:
 		if ((what_we_got = playlist->cut (time)) != 0) {
-			if (Config->get_edit_mode() == Ripple)
+			if (Config->get_edit_mode() == Ripple) {
 				playlist->ripple(time.start(), -time.length(), NULL);
-				// no need to exclude any regions from rippling here
+			}
+			// no need to exclude any regions from rippling here
 
-                        vector<Command*> cmds;
-                        playlist->rdiff (cmds);
+			vector<Command*> cmds;
+			playlist->rdiff (cmds);
 			_session->add_commands (cmds);
-                        _session->add_command (new StatefulDiffCommand (playlist));
+			_session->add_command (new StatefulDiffCommand (playlist));
 			what_we_got->release ();
 		}
 		break;
@@ -1602,11 +1605,11 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 	}
 	ctx.counts.increase_n_playlists(type);
 
-        DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
+	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
 
 	if (track()->speed() != 1.0f) {
 		pos = session_frame_to_track_frame (pos, track()->speed());
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
+		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("modified paste to %1\n", pos));
 	}
 
 	/* add multi-paste offset if applicable */
@@ -1634,9 +1637,9 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 
 
 struct PlaylistSorter {
-    bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
-            return a->sort_id() < b->sort_id();
-    }
+	bool operator() (boost::shared_ptr<Playlist> a, boost::shared_ptr<Playlist> b) const {
+		return a->sort_id() < b->sort_id();
+	}
 };
 
 void
@@ -1659,21 +1662,20 @@ RouteTimeAxisView::build_playlist_menu ()
 	RadioMenuItem::Group playlist_group;
 	boost::shared_ptr<Track> tr = track ();
 
-        vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists->playlists_for_track (tr);
+	vector<boost::shared_ptr<Playlist> > playlists_tr = _session->playlists->playlists_for_track (tr);
 
-        /* sort the playlists */
-        PlaylistSorter cmp;
-        sort (playlists_tr.begin(), playlists_tr.end(), cmp);
+	/* sort the playlists */
+	PlaylistSorter cmp;
+	sort (playlists_tr.begin(), playlists_tr.end(), cmp);
 
-        /* add the playlists to the menu */
-        for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
-                playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
-                RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
-                item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
+	/* add the playlists to the menu */
+	for (vector<boost::shared_ptr<Playlist> >::iterator i = playlists_tr.begin(); i != playlists_tr.end(); ++i) {
+		playlist_items.push_back (RadioMenuElem (playlist_group, (*i)->name()));
+		RadioMenuItem *item = static_cast<RadioMenuItem*>(&playlist_items.back());
+		item->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::use_playlist), item, boost::weak_ptr<Playlist> (*i)));
 
-                if (tr->playlist()->id() == (*i)->id()) {
-                        item->set_active();
-
+		if (tr->playlist()->id() == (*i)->id()) {
+			item->set_active();
 		}
 	}
 
@@ -1704,10 +1706,10 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 {
 	assert (is_track());
 
-        // exit if we were triggered by deactivating the old playlist
-        if (!item->get_active()) {
-                return;
-        }
+	// exit if we were triggered by deactivating the old playlist
+	if (!item->get_active()) {
+		return;
+	}
 
 	boost::shared_ptr<Playlist> pl (wpl.lock());
 
@@ -2081,10 +2083,10 @@ RouteTimeAxisView::add_processor_automation_curve (boost::shared_ptr<Processor> 
 	ProcessorAutomationNode* pan;
 
 	if ((pan = find_processor_automation_node (processor, what)) == 0) {
-                /* session state may never have been saved with new plugin */
-                error << _("programming error: ")
+		/* session state may never have been saved with new plugin */
+		error << _("programming error: ")
 		      << string_compose (X_("processor automation curve for %1:%2/%3/%4 not registered with track!"),
-                                         processor->name(), what.type(), (int) what.channel(), what.id() )
+		                         processor->name(), what.type(), (int) what.channel(), what.id() )
 		      << endmsg;
 		abort(); /*NOTREACHED*/
 		return;
