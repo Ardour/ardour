@@ -388,7 +388,7 @@ BasicUI::locate (framepos_t where, bool roll_after_locate)
 }
 
 void
-BasicUI::jump_by_seconds (double secs)
+BasicUI::jump_by_seconds (double secs, bool with_roll)
 {
 	framepos_t current = session->transport_frame();
 	double s = (double) current / (double) session->nominal_frame_rate();
@@ -399,11 +399,11 @@ BasicUI::jump_by_seconds (double secs)
 	}
 	s = s * session->nominal_frame_rate();
 
-	session->request_locate ( floor(s) );
+	session->request_locate (floor(s), with_roll);
 }
 
 void
-BasicUI::jump_by_bars (double bars)
+BasicUI::jump_by_bars (double bars, bool with_roll)
 {
 	TempoMap& tmap (session->tempo_map());
 	Timecode::BBT_Time bbt (tmap.bbt_at_frame (session->transport_frame()));
@@ -417,18 +417,18 @@ BasicUI::jump_by_bars (double bars)
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
 
-	session->request_locate ( session->convert_to_frames (any) );
+	session->request_locate (session->convert_to_frames (any), with_roll);
 }
 
 void
-BasicUI::jump_by_beats (double beats)
+BasicUI::jump_by_beats (double beats, bool with_roll)
 {
 	TempoMap& tmap (session->tempo_map ());
 	double qn_goal = tmap.quarter_note_at_frame (session->transport_frame ()) + beats;
 	if (qn_goal < 0.0) {
 		qn_goal = 0.0;
 	}
-	session->request_locate (tmap.frame_at_quarter_note (qn_goal));
+	session->request_locate (tmap.frame_at_quarter_note (qn_goal), with_roll);
 }
 
 void
