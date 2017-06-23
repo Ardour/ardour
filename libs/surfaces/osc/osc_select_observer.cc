@@ -494,9 +494,10 @@ OSCSelectObserver::tick ()
 	}
 	if (feedback[13]) {
 		if (_strip->comp_redux_controllable() && _strip->comp_enable_controllable() && _strip->comp_enable_controllable()->get_value()) {
-			if (_comp_redux != _strip->comp_redux_controllable()->get_parameter()) {
-				send_float ("/select/comp_redux", (float) _strip->comp_redux_controllable()->get_parameter ());
-				_comp_redux = _strip->comp_redux_controllable()->get_parameter();
+			float new_value = _strip->comp_redux_controllable()->get_parameter();
+			if (_comp_redux != new_value) {
+				send_float ("/select/comp_redux", new_value);
+				_comp_redux = new_value;
 			}
 		}
 		for (uint32_t i = 1; i <= send_timeout.size(); i++) {
