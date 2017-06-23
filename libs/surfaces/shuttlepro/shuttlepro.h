@@ -93,7 +93,11 @@ private:
 
 	unsigned char _buf[5];
 
+	bool _shuttle_was_zero, _was_rolling_before_shuttle;
+
 	State _state;
+
+	bool _keep_rolling;
 };
 
 } // namespace

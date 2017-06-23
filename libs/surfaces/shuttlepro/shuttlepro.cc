@@ -54,6 +54,9 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _dev_handle (0)
 	, _usb_transfer (0)
 	, _supposed_to_quit (false)
+	, _shuttle_was_zero (true)
+	, _was_rolling_before_shuttle (false)
+	, _keep_rolling (true)
 {
 	libusb_init (0);
 	//libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
@@ -373,21 +376,34 @@ void
 ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
-	jump_by_beats (-1.0);
+	jump_by_beats (-1.0, _keep_rolling && session->transport_rolling ());
 }
 
 void
 ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
-	jump_by_beats (+1.0);
+	jump_by_beats (+1.0, _keep_rolling && session->transport_rolling ());
 }
 
 void
 ShuttleproControlProtocol::shuttle_event(int position)
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("shuttle event %1\n", position));
-	set_transport_speed(double(position));
+	if (position != 0) {
+		if (_shuttle_was_zero) {
+			_was_rolling_before_shuttle = session->transport_rolling ();
+		}
+		set_transport_speed (double(position));
+		_shuttle_was_zero = false;
+	} else {
+		if (_keep_rolling && _was_rolling_before_shuttle) {
+			set_transport_speed (1.0);
+		} else {
+			transport_stop ();
+		}
+		_shuttle_was_zero = true;
+	}
 }
 
 static void LIBUSB_CALL event_callback (libusb_transfer* transfer)
