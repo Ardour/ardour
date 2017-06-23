@@ -1868,7 +1868,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 				}
 			}
 			// slow devices need time to clear buffers
-			usleep ((uint32_t) 10);
+			usleep ((uint32_t) 20);
 		}
 	}
 	// light bankup or bankdown buttons if it is possible to bank in that direction

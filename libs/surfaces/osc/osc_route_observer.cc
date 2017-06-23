@@ -389,6 +389,7 @@ OSCRouteObserver::gain_automation (string path)
 	}
 
 	boost::shared_ptr<GainControl> control = _strip->gain_control();
+	send_gain_message (path, control);
 	as = control->alist()->automation_state();
 	string auto_name;
 	float output;
@@ -413,7 +414,6 @@ OSCRouteObserver::gain_automation (string path)
 			break;
 	}
 
-	send_gain_message (path, control);
 	lo_message_add_float (msg, output);
 	lo_send_message (addr, apath.c_str(), msg);
 	lo_message_free (msg);
