@@ -326,7 +326,7 @@ OSCSelectObserver::plugin_init()
 	}
 
 	// we have a plugin number now get the processor
-	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[sur->plugin_id - 1]);
 	boost::shared_ptr<PluginInsert> pi;
 	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
 		return;

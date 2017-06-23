@@ -2028,29 +2028,44 @@ OSC::_sel_plugin (int id, lo_address addr)
 		// find out how many plugins we have
 		bool plugs;
 		int nplugs  = 0;
+		sur->plugins.clear();
 		do {
 			plugs = false;
 			if (r->nth_plugin (nplugs)) {
-				/// need to check for mixbus channel strips (and exclude them)
+				if (r->nth_plugin(nplugs)->display_to_user()) {
+#ifdef MIXBUS
+					// need to check for mixbus channel strips (and exclude them)
+					boost::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
+					boost::shared_ptr<PluginInsert> pi;
+					if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+
+						if (!pi->is_channelstrip()) {
+#endif
+							sur->plugins.push_back (nplugs);
+#ifdef MIXBUS
+						}
+					}
+#endif
+				}
 				plugs = true;
 				nplugs++;
 			}
 		} while (plugs);
 
 		// limit plugin_id to actual plugins
-		if (!nplugs) {
+		if (!sur->plugins.size()) {
 			sur->plugin_id = 0;
 			return 0;
-		} else if (nplugs < id) {
-			sur->plugin_id = nplugs;
-		} else  if (nplugs && !id) {
+		} else if (sur->plugins.size() < (uint32_t) id) {
+			sur->plugin_id = sur->plugins.size();
+		} else  if (sur->plugins.size() && !id) {
 			sur->plugin_id = 1;
 		} else {
 			sur->plugin_id = id;
 		}
 
 		// we have a plugin number now get the processor
-		boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+		boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[sur->plugin_id - 1]);
 		boost::shared_ptr<PluginInsert> pi;
 		if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
 			PBD::warning << "OSC: Plugin: " << sur->plugin_id << " does not seem to be a plugin" << endmsg;			
@@ -3763,7 +3778,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		return 1;
 	}
 
-	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugin_id - 1);
+	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[sur->plugin_id - 1]);
 	boost::shared_ptr<PluginInsert> pi;
 	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
 		return 1;

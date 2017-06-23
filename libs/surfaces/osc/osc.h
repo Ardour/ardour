@@ -126,6 +126,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t plug_page_size;	// plugin page size (number of controls)
 		int plugin_id;			// id of current plugin
 		std::vector<int> plug_params; // vector to store ports that are controls
+		std::vector<int> plugins;	// stores allowable plugins with index (work around MB strip PIs)
 		int send_page;				// current send page
 		uint32_t send_page_size;	// send page size in channels
 		PBD::ScopedConnection proc_connection; // for processor signal monitoring
