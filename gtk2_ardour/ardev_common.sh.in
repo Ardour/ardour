@@ -1,4 +1,4 @@
-[ -z $TOP ] && "ardev_common.sh: TOP var must be set" && exit 1
+[ -z $TOP ] && echo "ardev_common.sh: TOP var must be set" >&2 && exit 1
 
 #export G_DEBUG=fatal_criticals
 
