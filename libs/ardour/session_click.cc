@@ -80,6 +80,11 @@ Session::click (framepos_t start, framecnt_t nframes)
 	}
 
 	start -= _worst_track_latency;
+#ifdef MIXBUS
+	if (_master_out) {
+		start -= _master_out->signal_latency (); // delay signal by mixbus' internal latency
+	}
+#endif
 	/* start could be negative at this point */
 	const framepos_t end = start + nframes;
 	/* correct start, potentially */

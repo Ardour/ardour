@@ -266,6 +266,15 @@ Diskstream::set_capture_offset ()
 	switch (_alignment_style) {
 	case ExistingMaterial:
 		_capture_offset = _io->latency();
+#ifdef MIXBUS
+		/* add additional latency, delayline inside the channelstrip + master-bus
+		 * in MB the master-bus has no input-ports, so its latency does not propagate
+		 */
+		if (_session.master_out()) {
+			_capture_offset += _session.master_out()->signal_latency();
+		}
+#endif
+
 		break;
 
 	case CaptureTime:
