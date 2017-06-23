@@ -100,20 +100,29 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		lower  = 0.0;
 		normal = 0.0;
 		upper  = 127.0;
+		print_fmt = "%.0f";
 		break;
 	case MidiPitchBenderAutomation:
 		lower  = 0.0;
 		normal = 8192.0;
 		upper  = 16383.0;
+		print_fmt = "%.0f";
 		break;
 	case PhaseAutomation:
 		toggled = true;
+		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points->insert (std::make_pair (_("Normal"), 0));
+		scale_points->insert (std::make_pair (_("Invert"), 1));
 		break;
 	case MonitoringAutomation:
 		enumeration = true;
 		integer_step = true;
 		lower = MonitorAuto;
 		upper = MonitorDisk; /* XXX bump when we add MonitorCue */
+		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points->insert (std::make_pair (_("Auto"), MonitorAuto));
+		scale_points->insert (std::make_pair (_("Input"), MonitorInput));
+		scale_points->insert (std::make_pair (_("Disk"), MonitorDisk));
 		break;
 	case SoloIsolateAutomation:
 	case SoloSafeAutomation:
