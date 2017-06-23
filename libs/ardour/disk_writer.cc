@@ -45,7 +45,6 @@ PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
-	, _input_latency (0)
 	, _record_enabled (0)
 	, _record_safe (0)
 	, capture_start_frame (0)
@@ -292,7 +291,8 @@ DiskWriter::get_captured_frames (uint32_t n) const
 void
 DiskWriter::set_input_latency (framecnt_t l)
 {
-	_input_latency = l;
+	Processor::set_input_latency (l);
+	set_capture_offset ();
 }
 
 void
@@ -309,7 +309,7 @@ DiskWriter::set_capture_offset ()
 		break;
 	}
 
-        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using IO latency, capture offset set to %2 with style = %3\n", name(), _capture_offset, enum_2_string (_alignment_style)));
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using input latency %4, capture offset set to %2 with style = %3\n", name(), _capture_offset, enum_2_string (_alignment_style), _input_latency));
 }
 
 
@@ -322,7 +322,6 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 
 	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
-		cerr << name() << " using align style " << enum_2_string (_alignment_style) << endl;
 		set_capture_offset ();
 		AlignmentStyleChanged ();
 	}
