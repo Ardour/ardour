@@ -61,6 +61,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	as = ARDOUR::Off;
 	send_size = 0;
 	plug_size = 0;
+	_comp_redux = 1;
 
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
@@ -280,13 +281,14 @@ OSCSelectObserver::send_init()
 	uint32_t page_start = ((sur->send_page - 1) * send_size);
 	uint32_t last_send = sur->send_page * send_size;
 	uint32_t c = 1;
+	send_timeout.push_back (2);
 
 	for (uint32_t s = page_start; s < last_send; ++s, ++c) {
 
 		bool send_valid = false;
 		if (_strip->send_level_controllable (s)) {
 			_strip->send_level_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, c, _strip->send_level_controllable(s)), OSC::instance());
-			send_timeout.push_back (0);
+			send_timeout.push_back (2);
 			send_gain (c, _strip->send_level_controllable(s));
 			send_valid = true;
 		}
@@ -491,15 +493,16 @@ OSCSelectObserver::tick ()
 		}
 	}
 	if (feedback[13]) {
-		if (_strip->comp_redux_controllable()) {
-			if (_strip->comp_redux_controllable()->get_parameter()) {
+		if (_strip->comp_redux_controllable() && _strip->comp_enable_controllable() && _strip->comp_enable_controllable()->get_value()) {
+			if (_comp_redux != _strip->comp_redux_controllable()->get_parameter()) {
 				send_float ("/select/comp_redux", (float) _strip->comp_redux_controllable()->get_parameter ());
+				_comp_redux = _strip->comp_redux_controllable()->get_parameter();
 			}
 		}
-		for (uint32_t i = 0; i < send_timeout.size(); i++) {
+		for (uint32_t i = 1; i <= send_timeout.size(); i++) {
 			if (send_timeout[i]) {
 				if (send_timeout[i] == 1) {
-					text_with_id ("/select/send_name", i + 1, _strip->send_name(i));
+					text_with_id ("/select/send_name", i, _strip->send_name(i - 1));
 				}
 				send_timeout[i]--;
 			}
