@@ -422,6 +422,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
+	PATH_CALLBACK1_MSG(sel_master_send_enable,i);
 	PATH_CALLBACK1_MSG(sel_solo,i);
 	PATH_CALLBACK1_MSG(sel_solo_iso,i);
 	PATH_CALLBACK1_MSG(sel_solo_safe,i);
@@ -633,6 +634,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_sendgain (int id, float dB, lo_message msg);
 	int sel_sendfader (int id, float pos, lo_message msg);
 	int sel_sendenable (int id, float pos, lo_message msg);
+	int sel_master_send_enable (int state, lo_message msg);
 	int sel_expand (uint32_t state, lo_message msg);
 	int sel_pan_elevation (float val, lo_message msg);
 	int sel_pan_frontback (float val, lo_message msg);

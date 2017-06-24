@@ -564,6 +564,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
 		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
 		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
+		REGISTER_CALLBACK (serv, "/select/master_send_enable", "i", sel_master_send_enable);
 		REGISTER_CALLBACK (serv, "/select/send_page", "f", sel_send_page);
 		REGISTER_CALLBACK (serv, "/select/plug_page", "f", sel_plug_page);
 		REGISTER_CALLBACK (serv, "/select/plugin", "f", sel_plugin);
@@ -3707,6 +3708,25 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 		}
 	}
 	return sel_send_fail ("send_enable", id, 0, get_address (msg));
+}
+
+int
+OSC::sel_master_send_enable (int state, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->master_send_enable_controllable ()) {
+			s->master_send_enable_controllable()->set_value (state, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return cue_float_message ("/select/master_send_enable", 0, get_address(msg));
 }
 
 int

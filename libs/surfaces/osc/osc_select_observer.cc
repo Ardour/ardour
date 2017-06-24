@@ -150,6 +150,11 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 		// sends, plugins and eq
 		// detecting processor changes is now in osc.cc
+		// but... MB master send enable is different
+		if (_strip->master_send_enable_controllable ()) {
+			_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), _strip->master_send_enable_controllable()), OSC::instance());
+			enable_message ("/select/master_send_enable", _strip->master_send_enable_controllable());
+		}
 
 		// Compressor
 		if (_strip->comp_enable_controllable ()) {
