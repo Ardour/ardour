@@ -150,6 +150,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 
 		// sends, plugins and eq
 		// detecting processor changes is now in osc.cc
+
 		// but... MB master send enable is different
 		if (_strip->master_send_enable_controllable ()) {
 			_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), _strip->master_send_enable_controllable()), OSC::instance());
@@ -508,7 +509,8 @@ OSCSelectObserver::tick ()
 		for (uint32_t i = 1; i <= send_timeout.size(); i++) {
 			if (send_timeout[i]) {
 				if (send_timeout[i] == 1) {
-					text_with_id ("/select/send_name", i, _strip->send_name(i - 1));
+					uint32_t pg_offset = (sur->send_page - 1) * sur->send_page_size;
+					text_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1));
 				}
 				send_timeout[i]--;
 			}
