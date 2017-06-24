@@ -530,7 +530,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "f", scroll_dn_1_page);
 		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "", scroll_dn_1_page);
 		REGISTER_CALLBACK (serv, "/bank_up", "", bank_up);
-		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_up);
+		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_delta);
 		REGISTER_CALLBACK (serv, "/bank_down", "", bank_down);
 		REGISTER_CALLBACK (serv, "/bank_down", "f", bank_down);
 
@@ -1905,6 +1905,23 @@ OSC::bank_up (lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg));
 	set_bank (s->bank + s->bank_size, msg);
+	return 0;
+}
+
+int
+OSC::bank_delta (float delta, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *s = get_surface(get_address (msg));
+	uint32_t new_bank = s->bank + (s->bank_size * (int) delta);
+	if ((int)new_bank < 1) {
+		new_bank = 1;
+	}
+	if (new_bank != s->bank) {
+		set_bank (new_bank, msg);
+	}
 	return 0;
 }
 

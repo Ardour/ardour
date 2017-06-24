@@ -419,6 +419,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(scrub,f);
 	PATH_CALLBACK1_MSG(jog,f);
 	PATH_CALLBACK1_MSG(jog_mode,f);
+	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -589,6 +590,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_bank (uint32_t bank_start, lo_message msg);
 	int _set_bank (uint32_t bank_start, lo_address addr);
 	int bank_up (lo_message msg);
+	int bank_delta (float delta, lo_message msg);
 	int bank_down (lo_message msg);
 	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, uint32_t se_size, uint32_t pi_size, lo_message msg);
 	int set_surface_bank_size (uint32_t bs, lo_message msg);
