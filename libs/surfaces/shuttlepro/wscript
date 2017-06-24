@@ -17,6 +17,7 @@ def build(bld):
     obj.source = '''
             shuttlepro.cc
             shuttlepro_gui.cc
+            jump_distance_widget.cc
             interface.cc
     '''
     obj.export_includes = ['./shuttlepro']

@@ -67,13 +67,6 @@ public:
 
 	static const int num_shuttle_speeds = 7;
 
-private:
-	struct State {
-		int8_t shuttle;
-		uint8_t jog;
-		uint16_t buttons;
-	};
-
 	enum JumpUnit {
 		SECONDS = 0,
 		BEATS = 1,
@@ -83,6 +76,13 @@ private:
 	struct JumpDistance {
 		double value;
 		JumpUnit unit;
+	};
+
+private:
+	struct State {
+		int8_t shuttle;
+		uint8_t jog;
+		uint16_t buttons;
 	};
 
 	void do_request (ShuttleproControlUIRequest*);

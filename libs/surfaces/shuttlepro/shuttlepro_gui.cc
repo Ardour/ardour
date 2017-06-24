@@ -40,6 +40,7 @@
 #include "pbd/i18n.h"
 
 #include "shuttlepro.h"
+#include "jump_distance_widget.h"
 
 using namespace ArdourSurface;
 
@@ -58,10 +59,9 @@ private:
 	std::vector<boost::shared_ptr<Gtk::Adjustment> > _shuttle_speed_adjustments;
 	void set_shuttle_speed (int index);
 
-	Gtk::Adjustment _jog_distance;
-	Gtk::ComboBoxText _jog_unit;
+	JumpDistanceWidget _jog_distance;
 	void update_jog_distance ();
-	void update_jog_unit ();
+	PBD::ScopedConnection _jog_distance_connection;
 };
 
 
@@ -72,10 +72,11 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
 
+
 ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	: _scp (scp)
 	, _keep_rolling (_("Keep rolling after jumps"))
-	, _jog_distance (scp._jog_distance.value, 0, 100, 0.25)
+	, _jog_distance (scp._jog_distance)
 {
 	Table* table = manage (new Table);
 	table->set_row_spacings (6);
@@ -106,18 +107,8 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:")));
 	table->attach(*jog_label, 0, 2, n, n+1);
-
-	HBox* jog_box = manage (new HBox);
-	SpinButton* jog_sb = manage (new SpinButton (_jog_distance, 0.25, 2));
-	jog_sb->signal_value_changed().connect (boost::bind (&ShuttleproGUI::update_jog_distance, this));
-	jog_box->pack_start (*jog_sb);
-
-	const vector<string> jog_units_strings ({ _("seconds"), _("beats"), _("bars") });
-	set_popdown_strings (_jog_unit, jog_units_strings);
-	_jog_unit.set_active(_scp._jog_distance.unit);
-	_jog_unit.signal_changed().connect (boost::bind (&ShuttleproGUI::update_jog_unit, this));
-	jog_box->pack_start (_jog_unit);
-	table->attach(*jog_box, 3, 5, n, n+1);
+	_jog_distance.Changed.connect (_jog_distance_connection, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
+	table->attach(_jog_distance, 3, 5, n, n+1);
 	++n;
 
 	pack_end (*table, false, false);
@@ -139,14 +130,10 @@ ShuttleproGUI::set_shuttle_speed (int index)
 void
 ShuttleproGUI::update_jog_distance ()
 {
-	_scp._jog_distance.value = _jog_distance.get_value ();
+	_scp._jog_distance = _jog_distance.get_distance ();
 }
 
-void
-ShuttleproGUI::update_jog_unit ()
-{
-	_scp._jog_distance.unit = ShuttleproControlProtocol::JumpUnit (_jog_unit.get_active_row_number ());
-}
+
 
 void*
 ShuttleproControlProtocol::get_gui () const
