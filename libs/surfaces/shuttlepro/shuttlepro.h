@@ -34,6 +34,8 @@ typedef struct input_event EV;
 struct libusb_device_handle;
 struct libusb_transfer;
 
+class ShuttleproGUI;
+
 namespace ArdourSurface {
 
 struct ShuttleproControlUIRequest : public BaseUI::BaseRequestObject {
@@ -47,6 +49,7 @@ class ShuttleproControlProtocol
 	: public ARDOUR::ControlProtocol
 	, public AbstractUI<ShuttleproControlUIRequest>
 {
+	friend ShuttleproGUI;
 public:
 	ShuttleproControlProtocol (ARDOUR::Session &);
 	virtual ~ShuttleproControlProtocol ();
@@ -62,8 +65,7 @@ public:
 
 	void handle_event ();
 
-	void set_keep_rolling (bool yn) { _keep_rolling = yn; }
-	bool get_keep_rolling () { return _keep_rolling; }
+	static const int num_shuttle_speeds = 7;
 
 private:
 	struct State {

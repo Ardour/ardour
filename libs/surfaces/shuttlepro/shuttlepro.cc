@@ -109,6 +109,15 @@ ShuttleproControlProtocol::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
 	node.set_property (X_("keep-rolling"), _keep_rolling);
+
+	ostringstream os;
+	for (vector<double>::const_iterator it = _shuttle_speeds.begin (); it != _shuttle_speeds.end (); ++it) {
+		os << *it << ' ';
+	}
+	string s = os.str ();
+	s.pop_back ();
+	node.set_property (X_("shuttle-speeds"), s);
+
 	return node;
 }
 
@@ -119,6 +128,14 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 	node.get_property (X_("keep-rolling"), _keep_rolling);
+
+	string speeds;
+	node.get_property (X_("shuttle-speeds"), speeds);
+	istringstream is (speeds);
+	for (vector<double>::iterator it = _shuttle_speeds.begin (); it != _shuttle_speeds.end (); ++it) {
+		is >> *it;
+	}
+
 	return 0;
 }
 

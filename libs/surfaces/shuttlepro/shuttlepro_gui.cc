@@ -54,6 +54,9 @@ private:
 
 	Gtk::CheckButton _keep_rolling;
 	void toggle_keep_rolling ();
+	std::vector<boost::shared_ptr<Gtk::Adjustment> > _shuttle_speed_adjustments;
+	void set_shuttle_speed (int index);
+
 };
 
 
@@ -62,6 +65,7 @@ using namespace ARDOUR;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace Glib;
 
 ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	: _scp (scp)
@@ -74,20 +78,41 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	int n = 0;
 
-	_keep_rolling.signal_toggled().connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_keep_rolling));
-	_keep_rolling.set_active (_scp.get_keep_rolling());
+	_keep_rolling.signal_toggled().connect (boost::bind (&ShuttleproGUI::toggle_keep_rolling, this));
+	_keep_rolling.set_active (_scp._keep_rolling);
 	table->attach (_keep_rolling, 0, 2, n, n+1);
 	++n;
 
-	pack_start (*table, false, false);
+	Label* speed_label = manage (new Label (_("Transport speeds for the shuttle positions:")));
+	table->attach (*speed_label, 0, 2, n, n+1);
+
+	HBox* speed_box = manage (new HBox);
+	for (int i=0; i != ShuttleproControlProtocol::num_shuttle_speeds; ++i) {
+		double speed = scp._shuttle_speeds[i];
+		boost::shared_ptr<Gtk::Adjustment> adj (new Gtk::Adjustment (speed, 0.0, 100.0, 0.25));
+		_shuttle_speed_adjustments.push_back (adj);
+		SpinButton* sb = manage (new SpinButton (*adj, 0.25, 2));
+		speed_box->pack_start (*sb);
+		sb->signal_value_changed().connect (boost::bind (&ShuttleproGUI::set_shuttle_speed, this, i));
+	}
+	table->attach (*speed_box, 3, 5, n, n+1);
+	++n;
+
+	pack_end (*table, false, false);
 }
 
 void
 ShuttleproGUI::toggle_keep_rolling ()
 {
-	_scp.set_keep_rolling (_keep_rolling.get_active ());
+	_scp._keep_rolling = _keep_rolling.get_active();
 }
 
+void
+ShuttleproGUI::set_shuttle_speed (int index)
+{
+	double speed = _shuttle_speed_adjustments[index]->get_value ();
+	_scp._shuttle_speeds[index] = speed;
+}
 
 void*
 ShuttleproControlProtocol::get_gui () const
