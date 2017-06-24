@@ -4887,13 +4887,16 @@ Session::audio_source_by_path_and_channel (const string& path, uint16_t chn) con
 }
 
 boost::shared_ptr<MidiSource>
-Session::midi_source_by_path (const std::string& path) const
+Session::midi_source_by_path (const std::string& path, bool need_source_lock) const
 {
 	/* Restricted to MIDI files because audio sources require a channel
 	   for unique identification, in addition to a path.
 	*/
 
-	Glib::Threads::Mutex::Lock lm (source_lock);
+	Glib::Threads::Mutex::Lock lm (source_lock, Glib::Threads::NOT_LOCK);
+	if (need_source_lock) {
+		lm.acquire ();
+	}
 
 	for (SourceMap::const_iterator s = sources.begin(); s != sources.end(); ++s) {
 		boost::shared_ptr<MidiSource> ms
@@ -5194,7 +5197,7 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 
 /** Return a unique name based on `base` for a new internal MIDI source */
 string
-Session::new_midi_source_path (const string& base)
+Session::new_midi_source_path (const string& base, bool need_lock)
 {
 	uint32_t cnt;
 	char buf[PATH_MAX+1];
@@ -5235,7 +5238,7 @@ Session::new_midi_source_path (const string& base)
 				existing++;
 			}
 
-			if (midi_source_by_path (possible_path)) {
+			if (midi_source_by_path (possible_path, need_lock)) {
 				existing++;
 			}
 		}

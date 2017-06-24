@@ -249,7 +249,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	std::string format_audio_source_name (const std::string& legalized_base, uint32_t nchan, uint32_t chan, bool destructive, bool take_required, uint32_t cnt, bool related_exists);
 	std::string new_audio_source_path_for_embedded (const std::string& existing_path);
 	std::string new_audio_source_path (const std::string&, uint32_t nchans, uint32_t chan, bool destructive, bool take_required);
-	std::string new_midi_source_path (const std::string&);
+	std::string new_midi_source_path (const std::string&, bool need_source_lock = true);
 	/** create a new track or bus from a template (XML path)
 	 * @param how_many how many tracks or busses to create
 	 * @param template_path path to xml template file
@@ -801,7 +801,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
 	boost::shared_ptr<AudioFileSource> audio_source_by_path_and_channel (const std::string&, uint16_t) const;
-	boost::shared_ptr<MidiSource> midi_source_by_path (const std::string&) const;
+	boost::shared_ptr<MidiSource> midi_source_by_path (const std::string&, bool need_source_lock) const;
 	uint32_t count_sources_by_origin (const std::string&);
 
 	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
