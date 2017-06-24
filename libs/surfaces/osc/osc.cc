@@ -1333,11 +1333,6 @@ OSC::get_address (lo_message msg)
 int
 OSC::refresh_surface (lo_message msg)
 {
-	if (address_only) {
-		// get rid of all surfaces and observers.
-		// needs change to only clear those for this address on all ports
-		clear_devices();
-	}
 	OSCSurface *s = get_surface(get_address (msg));
 	// restart all observers
 	set_surface (s->bank_size, (uint32_t) s->strip_types.to_ulong(), (uint32_t) s->feedback.to_ulong(), \
@@ -4757,25 +4752,6 @@ OSC::get_state ()
 	node.set_property ("gainmode", default_gainmode);
 	node.set_property ("send-page-size", default_send_size);
 	node.set_property ("plug-page-size", default_plugin_size);
-	if (_surface.size()) {
-		XMLNode* config = new XMLNode (X_("Configurations"));
-		for (uint32_t it = 0; it < _surface.size(); ++it) {
-			OSCSurface* sur = &_surface[it];
-			XMLNode* devnode = new XMLNode (X_("Configuration"));
-			devnode->set_property (X_("url"), sur->remote_url);
-			devnode->set_property (X_("bank-size"), sur->bank_size);
-			devnode->set_property (X_("strip-types"), (uint64_t)sur->strip_types.to_ulong());
-			devnode->set_property (X_("feedback"), (uint64_t)sur->feedback.to_ulong());
-			devnode->set_property (X_("gainmode"), sur->gainmode);
-			devnode->set_property (X_("send-page-size"), sur->send_page_size);
-			devnode->set_property (X_("plug-page-size"), sur->plug_page_size);
-			devnode->set_property (X_("no-clear"), sur->no_clear);
-			devnode->set_property (X_("cue"), sur->cue);
-			devnode->set_property (X_("aux"), sur->aux);
-			config->add_child_nocopy (*devnode);
-		}
-		node.add_child_nocopy (*config);
-	}
 	return node;
 }
 
@@ -4799,44 +4775,6 @@ OSC::set_state (const XMLNode& node, int version)
 	node.get_property (X_("send-page-size"), default_send_size);
 	node.get_property (X_("plugin-page-size"), default_plugin_size);
 
-	XMLNode* cnode = node.child (X_("Configurations"));
-
-	if (cnode) {
-		XMLNodeList const& devices = cnode->children();
-		for (XMLNodeList::const_iterator d = devices.begin(); d != devices.end(); ++d) {
-			OSCSurface s;
-			if (!(*d)->get_property (X_("url"), s.remote_url)) {
-				continue;
-			}
-
-			bank_dirty = true;
-
-			(*d)->get_property (X_("bank-size"), s.bank_size);
-
-			uint64_t bits;
-			if ((*d)->get_property (X_ ("strip-types"), bits)) {
-				s.strip_types = bits;
-			}
-			if ((*d)->get_property (X_("feedback"), bits)) {
-				s.feedback = bits;
-			}
-			(*d)->get_property (X_("gainmode"), s.gainmode);
-
-			(*d)->get_property (X_("send-page-size"), s.send_page_size);
-			(*d)->get_property (X_("plug-page-size"), s.plug_page_size);
-			(*d)->get_property (X_("no-clear"), s.no_clear);
-			(*d)->get_property (X_("cue"), s.cue);
-			(*d)->get_property (X_("aux"), s.aux);
-			s.bank = 1;
-			s.sel_obs = 0;
-			s.expand = 0;
-			s.expand_enable = false;
-			s.strips = get_sorted_stripables (s.strip_types, s.cue);
-			s.nstrips = s.strips.size ();
-			s.jogmode = JOG;
-			_surface.push_back (s);
-		}
-	}
 	global_init = true;
 	tick = false;
 

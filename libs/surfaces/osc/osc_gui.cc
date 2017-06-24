@@ -59,7 +59,6 @@ OSC_GUI::OSC_GUI (OSC& p)
 	int n = 0; // table row
 	Table* table = manage (new Table);
 	Label* label;
-	Button* button;
 	table->set_row_spacings (10);
 	table->set_col_spacings (6);
 	table->set_border_width (12);
@@ -80,8 +79,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (portmode_combo, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	std::vector<std::string> portmode_options;
-	portmode_options.push_back (_("Auto"));
-	portmode_options.push_back (_("Manual"));
+	portmode_options.push_back (_("Auto - Reply to Originating Port"));
+	portmode_options.push_back (_("Manual - Specify Below"));
 
 	set_popdown_strings (portmode_combo, portmode_options);
 	portmode_combo.set_active ((int)cp.get_portmode());
@@ -182,17 +181,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	preset_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::preset_changed));
 	++n;
 
-	// refresh button
-	button = manage (new Gtk::Button(_("Clear OSC Devices")));
-	table->attach (*button, 0, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 10);
-
 	table->show_all ();
 	append_page (*table, _("OSC Setup"));
 
 	debug_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::debug_changed));
 	portmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::portmode_changed));
 	gainmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::gainmode_changed));
-	button->signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::clear_device));
 	port_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
 	bank_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
 	send_page_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::send_page_changed));
@@ -503,18 +497,12 @@ OSC_GUI::debug_changed ()
 void
 OSC_GUI::portmode_changed ()
 {
-	std::string str = portmode_combo.get_active_text ();
-	if (str == _("Auto")) {
-		cp.set_portmode (0);
-		port_entry.set_sensitive (false);
-	}
-	else if (str == _("Manual")) {
-		cp.set_portmode (1);
+	int pm = portmode_combo.get_active_row_number ();
+	cp.set_portmode (pm);
+	if (pm) {
 		port_entry.set_sensitive (true);
-	}
-	else {
-		std::cerr << "Invalid OSC Port Mode\n";
-		assert (0);
+	} else {
+		port_entry.set_sensitive (false);
 	}
 	save_user ();
 }
@@ -874,6 +862,7 @@ OSC_GUI::save_user ()
 	}
 	preset_combo.set_active (2);
 	cp.gui_changed();
+	clear_device ();
 
 }
 
