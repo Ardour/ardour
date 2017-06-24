@@ -70,10 +70,10 @@ public:
 	static bool valid_midi_file (const std::string& path);
 
 	void prevent_deletion ();
+	void set_path (const std::string& newpath);
 
   protected:
 	void close ();
-	void set_path (const std::string& newpath);
 	void flush_midi (const Lock& lock);
 
   private:

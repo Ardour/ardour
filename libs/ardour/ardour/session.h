@@ -1901,7 +1901,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	void  update_latency (bool playback);
 
-	XMLNode& state(bool);
+	enum snapshot_t {
+		NormalSave,
+		SnapshotKeep,
+		SwitchToSnapshot
+	};
+
+	XMLNode& state(bool, snapshot_t snapshot_type = NormalSave);
 
 	/* click track */
 	typedef std::list<Click*> Clicks;

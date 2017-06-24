@@ -122,6 +122,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/silentfilesource.h"
+#include "ardour/smf_source.h"
 #include "ardour/sndfilesource.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
@@ -806,6 +807,12 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
+	snapshot_t fork_state = NormalSave;
+	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && !template_only && !pending) {
+		/* snapshot, close midi */
+		fork_state = switch_to_snapshot ? SwitchToSnapshot : SnapshotKeep;
+	}
+
 #ifndef NDEBUG
 	const int64_t save_start_time = g_get_monotonic_time();
 #endif
@@ -832,7 +839,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		mark_as_clean = false;
 		tree.set_root (&get_template());
 	} else {
-		tree.set_root (&get_state());
+		tree.set_root (&state (true, fork_state));
 	}
 
 	if (snapshot_name.empty()) {
@@ -1139,7 +1146,7 @@ struct route_id_compare {
 } // anon namespace
 
 XMLNode&
-Session::state (bool full_state)
+Session::state (bool full_state, snapshot_t snapshot_type)
 {
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode("Session");
@@ -1238,19 +1245,80 @@ Session::state (bool full_state)
 			 * about non-destructive file sources that are empty
 			 * and unused by any regions.
 			 */
-
 			boost::shared_ptr<FileSource> fs;
 
-			if ((fs = boost::dynamic_pointer_cast<FileSource> (siter->second)) != 0) {
+			if ((fs = boost::dynamic_pointer_cast<FileSource> (siter->second)) == 0) {
+				continue;
+			}
 
-				if (!fs->destructive()) {
-					if (fs->empty() && !fs->used()) {
+			if (!fs->destructive()) {
+				if (fs->empty() && !fs->used()) {
+					continue;
+				}
+			}
+
+			if (snapshot_type != NormalSave && fs->within_session ()) {
+				/* copy MIDI sources to new file
+				 *
+				 * We cannot replace the midi-source and MidiRegion::clobber_sources,
+				 * because the GUI (midi_region) has a direct pointer to the midi-model
+				 * of the source, as does UndoTransaction.
+				 *
+				 * On the upside, .mid files are not kept open. The file is only open
+				 * when reading the model initially and when flushing the model to disk:
+				 * source->session_saved () or export.
+				 *
+				 * We can change the _path of the existing source under the hood, keeping
+				 * all IDs, references and pointers intact.
+				 * */
+				boost::shared_ptr<SMFSource> ms;
+				if ((ms = boost::dynamic_pointer_cast<SMFSource> (siter->second)) != 0) {
+					const std::string ancestor_name = ms->ancestor_name();
+					const std::string base          = PBD::basename_nosuffix(ancestor_name);
+					const string path               = new_midi_source_path (base, false);
+
+					/* use SMF-API to clone data (use the midi_model, not data on disk) */
+					boost::shared_ptr<SMFSource> newsrc (new SMFSource (*this, path, SndFileSource::default_writable_flags));
+					Source::Lock lm (ms->mutex());
+
+					// TODO special-case empty, removable() files: just create a new removable.
+					// (load + write flushes the model and creates the file)
+					if (!ms->model()) {
+						ms->load_model (lm);
+					}
+					if (ms->write_to (lm, newsrc, Evoral::MinBeats, Evoral::MaxBeats)) {
+						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
+					} else {
+						if (snapshot_type == SnapshotKeep) {
+							/* keep working on current session.
+							 *
+							 * Save snapshot-state with the original filename.
+							 * Switch to use new path for future saves of the main session.
+							 */
+							child->add_child_nocopy (ms->get_state());
+						}
+
+						/* swap file-paths.
+						 * ~SMFSource  unlinks removable() files.
+						 */
+						std::string npath (ms->path ());
+						ms->replace_file (newsrc->path ());
+						newsrc->replace_file (npath);
+
+						if (snapshot_type == SwitchToSnapshot) {
+							/* save and switch to snapshot.
+							 *
+							 * Leave the old file in place (as is).
+							 * Snapshot uses new source directly
+							 */
+							child->add_child_nocopy (ms->get_state());
+						}
 						continue;
 					}
 				}
-
-				child->add_child_nocopy (siter->second->get_state());
 			}
+
+			child->add_child_nocopy (siter->second->get_state());
 		}
 	}
 
