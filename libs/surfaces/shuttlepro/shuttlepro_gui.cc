@@ -75,7 +75,7 @@ using namespace Glib;
 ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	: _scp (scp)
 	, _keep_rolling (_("Keep rolling after jumps"))
-	, _jog_distance (scp._jog_distance, 0, 100, 0.25)
+	, _jog_distance (scp._jog_distance.value, 0, 100, 0.25)
 {
 	Table* table = manage (new Table);
 	table->set_row_spacings (6);
@@ -114,7 +114,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	const vector<string> jog_units_strings ({ _("seconds"), _("beats"), _("bars") });
 	set_popdown_strings (_jog_unit, jog_units_strings);
-	_jog_unit.set_active(_scp._jog_unit);
+	_jog_unit.set_active(_scp._jog_distance.unit);
 	_jog_unit.signal_changed().connect (boost::bind (&ShuttleproGUI::update_jog_unit, this));
 	jog_box->pack_start (_jog_unit);
 	table->attach(*jog_box, 3, 5, n, n+1);
@@ -139,13 +139,13 @@ ShuttleproGUI::set_shuttle_speed (int index)
 void
 ShuttleproGUI::update_jog_distance ()
 {
-	_scp._jog_distance = _jog_distance.get_value ();
+	_scp._jog_distance.value = _jog_distance.get_value ();
 }
 
 void
 ShuttleproGUI::update_jog_unit ()
 {
-	_scp._jog_unit = ShuttleproControlProtocol::JogUnit (_jog_unit.get_active_row_number ());
+	_scp._jog_distance.unit = ShuttleproControlProtocol::JumpUnit (_jog_unit.get_active_row_number ());
 }
 
 void*

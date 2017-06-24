@@ -74,10 +74,15 @@ private:
 		uint16_t buttons;
 	};
 
-	enum JogUnit {
+	enum JumpUnit {
 		SECONDS = 0,
 		BEATS = 1,
 		BARS = 2
+	};
+
+	struct JumpDistance {
+		double value;
+		JumpUnit unit;
 	};
 
 	void do_request (ShuttleproControlUIRequest*);
@@ -100,7 +105,8 @@ private:
 
 	void jog_event_backward ();
 	void jog_event_forward ();
-	void jog_jump (double dist);
+	void jump_forward (JumpDistance dist);
+	void jump_backward (JumpDistance dist);
 
 	void shuttle_event (int position);
 
@@ -120,9 +126,7 @@ private:
 
 	bool _keep_rolling;
 	std::vector<double> _shuttle_speeds;
-	JogUnit _jog_unit;
-	double _jog_distance;
-
+	JumpDistance _jog_distance;
 
 	mutable void* _gui;
 	void build_gui ();

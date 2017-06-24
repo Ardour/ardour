@@ -58,8 +58,7 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _was_rolling_before_shuttle (false)
 	, _keep_rolling (true)
 	, _shuttle_speeds ( { 0.50, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0 } )
-	, _jog_unit (BEATS)
-	, _jog_distance (1.0)
+	, _jog_distance ( { .value = 1.0, .unit = BEATS } )
 	, _gui (0)
 {
 	libusb_init (0);
@@ -120,8 +119,8 @@ ShuttleproControlProtocol::get_state ()
 	s.pop_back ();
 	node.set_property (X_("shuttle-speeds"), s);
 
-	node.set_property (X_("jog-distance"), _jog_distance);
-	switch (_jog_unit) {
+	node.set_property (X_("jog-distance"), _jog_distance.value);
+	switch (_jog_distance.unit) {
 	case SECONDS: s = "seconds"; break;
 	case BARS: s = "bars"; break;
 	case BEATS:
@@ -147,14 +146,14 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 		is >> *it;
 	}
 
-	node.get_property (X_("jog-distance"), _jog_distance);
+	node.get_property (X_("jog-distance"), _jog_distance.value);
 	node.get_property (X_("jog-unit"), s);
 	if (s == "seconds") {
-		_jog_unit = SECONDS;
+		_jog_distance.unit = SECONDS;
 	} else if (s == "bars") {
-		_jog_unit = BARS;
+		_jog_distance.unit = BARS;
 	} else {
-		_jog_unit = BEATS;
+		_jog_distance.unit = BEATS;
 	}
 
 	return 0;
@@ -445,26 +444,33 @@ void
 ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
-	jog_jump (-_jog_distance);
+	jump_backward (_jog_distance);
 }
 
 void
 ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
-	jog_jump (+_jog_distance);
+	jump_forward (_jog_distance);
 }
 
 void
-ShuttleproControlProtocol::jog_jump (double dist)
+ShuttleproControlProtocol::jump_forward (JumpDistance dist)
 {
 	bool kr = _keep_rolling && session->transport_rolling ();
-	switch (_jog_unit) {
-	case SECONDS: jump_by_seconds (dist, kr); break;
-	case BEATS: jump_by_beats (dist, kr); break;
-	case BARS: jump_by_bars (dist, kr); break;
+	switch (dist.unit) {
+	case SECONDS: jump_by_seconds (dist.value, kr); break;
+	case BEATS: jump_by_beats (dist.value, kr); break;
+	case BARS: jump_by_bars (dist.value, kr); break;
 	default: break;
 	}
+}
+
+void ShuttleproControlProtocol::jump_backward (JumpDistance dist)
+{
+	JumpDistance bw = dist;
+	bw.value = -bw.value;
+	jump_forward(bw);
 }
 
 void
