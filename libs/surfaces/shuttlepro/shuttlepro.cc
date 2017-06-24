@@ -58,6 +58,8 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _was_rolling_before_shuttle (false)
 	, _keep_rolling (true)
 	, _shuttle_speeds ( { 0.50, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0 } )
+	, _jog_unit (BEATS)
+	, _jog_distance (1.0)
 	, _gui (0)
 {
 	libusb_init (0);
@@ -118,6 +120,15 @@ ShuttleproControlProtocol::get_state ()
 	s.pop_back ();
 	node.set_property (X_("shuttle-speeds"), s);
 
+	node.set_property (X_("jog-distance"), _jog_distance);
+	switch (_jog_unit) {
+	case SECONDS: s = "seconds"; break;
+	case BARS: s = "bars"; break;
+	case BEATS:
+	default: s = "beats";
+	}
+	node.set_property (X_("jog-unit"), s);
+
 	return node;
 }
 
@@ -129,11 +140,21 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 	}
 	node.get_property (X_("keep-rolling"), _keep_rolling);
 
-	string speeds;
-	node.get_property (X_("shuttle-speeds"), speeds);
-	istringstream is (speeds);
+	string s;
+	node.get_property (X_("shuttle-speeds"), s);
+	istringstream is (s);
 	for (vector<double>::iterator it = _shuttle_speeds.begin (); it != _shuttle_speeds.end (); ++it) {
 		is >> *it;
+	}
+
+	node.get_property (X_("jog-distance"), _jog_distance);
+	node.get_property (X_("jog-unit"), s);
+	if (s == "seconds") {
+		_jog_unit = SECONDS;
+	} else if (s == "bars") {
+		_jog_unit = BARS;
+	} else {
+		_jog_unit = BEATS;
 	}
 
 	return 0;
@@ -424,14 +445,26 @@ void
 ShuttleproControlProtocol::jog_event_backward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event backward\n");
-	jump_by_beats (-1.0, _keep_rolling && session->transport_rolling ());
+	jog_jump (-_jog_distance);
 }
 
 void
 ShuttleproControlProtocol::jog_event_forward ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "jog event forward\n");
-	jump_by_beats (+1.0, _keep_rolling && session->transport_rolling ());
+	jog_jump (+_jog_distance);
+}
+
+void
+ShuttleproControlProtocol::jog_jump (double dist)
+{
+	bool kr = _keep_rolling && session->transport_rolling ();
+	switch (_jog_unit) {
+	case SECONDS: jump_by_seconds (dist, kr); break;
+	case BEATS: jump_by_beats (dist, kr); break;
+	case BARS: jump_by_bars (dist, kr); break;
+	default: break;
+	}
 }
 
 void

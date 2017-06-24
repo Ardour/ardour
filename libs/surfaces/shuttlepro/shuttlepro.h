@@ -74,6 +74,12 @@ private:
 		uint16_t buttons;
 	};
 
+	enum JogUnit {
+		SECONDS = 0,
+		BEATS = 1,
+		BARS = 2
+	};
+
 	void do_request (ShuttleproControlUIRequest*);
 	int start ();
 	int stop ();
@@ -94,6 +100,7 @@ private:
 
 	void jog_event_backward ();
 	void jog_event_forward ();
+	void jog_jump (double dist);
 
 	void shuttle_event (int position);
 
@@ -109,9 +116,13 @@ private:
 
 	State _state;
 
-	bool _keep_rolling;
+	// Config stuff
 
+	bool _keep_rolling;
 	std::vector<double> _shuttle_speeds;
+	JogUnit _jog_unit;
+	double _jog_distance;
+
 
 	mutable void* _gui;
 	void build_gui ();
