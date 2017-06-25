@@ -801,12 +801,6 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	}
 	_save_queued = false;
 
-	if (!_engine.connected ()) {
-		error << string_compose (_("the %1 audio engine is not connected and state saving would lose all I/O connections. Session not saved"), PROGRAM_NAME)
-		      << endmsg;
-		return 1;
-	}
-
 	snapshot_t fork_state = NormalSave;
 	if (!snapshot_name.empty() && snapshot_name != _current_snapshot_name && !template_only && !pending) {
 		/* snapshot, close midi */
