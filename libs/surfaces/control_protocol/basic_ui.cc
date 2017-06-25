@@ -334,7 +334,7 @@ BasicUI::undo ()
 void
 BasicUI::redo ()
 {
-	access_action ("Editor/redor");
+	access_action ("Editor/redo");
 }
 
 void
