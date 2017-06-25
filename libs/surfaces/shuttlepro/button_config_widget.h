@@ -23,6 +23,8 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/radiobutton.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/treestore.h>
 
 #include "pbd/signals.h"
 
@@ -37,14 +39,43 @@ public:
 	ButtonConfigWidget ();
 	~ButtonConfigWidget () {};
 
+	void set_current_config (boost::shared_ptr<ButtonBase> btn_cnf);
+	boost::shared_ptr<ButtonBase> get_current_config (ShuttleproControlProtocol& scp) const;
+
+	PBD::Signal0<void> Changed;
+
 private:
+	void set_current_action (std::string action_string);
+	void set_jump_distance (JumpDistance dist);
+
 	Gtk::RadioButton _choice_jump;
 	Gtk::RadioButton _choice_action;
 
 	void update_choice ();
+	void update_config ();
+
+	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const& action_path, Gtk::TreeModel::iterator* found);
 
 	JumpDistanceWidget _jump_distance;
+	Gtk::ComboBox _action_cb;
+
+	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
+		ActionColumns() {
+			add (name);
+			add (path);
+		}
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+	};
+
+	ActionColumns _action_columns;
+	Glib::RefPtr<Gtk::TreeStore> _available_action_model;
+	std::map<std::string,std::string> _action_map; // map from action names to paths
+	void setup_available_actions ();
+
+	PBD::ScopedConnection _jump_distance_connection;
 };
 }
 
 #endif /* ardour_shuttlepro_button_config_widget_h */
+;

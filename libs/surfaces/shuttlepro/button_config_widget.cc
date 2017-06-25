@@ -20,7 +20,13 @@
 
 #include <gtkmm/label.h>
 
+#include "gtkmm2ext/bindings.h"
+#include "gtkmm2ext/gui_thread.h"
+
 #include "pbd/i18n.h"
+#include "pbd/strsplit.h"
+#include "pbd/signals.h"
+
 #include "button_config_widget.h"
 
 using namespace std;
@@ -35,16 +41,194 @@ ButtonConfigWidget::ButtonConfigWidget ()
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
 	_choice_action.set_group (cbg);
-
 	_choice_jump.signal_toggled().connect (boost::bind (&ButtonConfigWidget::update_choice, this));
+
+	_jump_distance.Changed.connect (_jump_distance_connection, invalidator (*this), boost::bind(&ButtonConfigWidget::update_config, this), gui_context ());
+
+	setup_available_actions ();
+
+	_action_cb.set_model (_available_action_model);
+	_action_cb.signal_changed().connect (boost::bind (&ButtonConfigWidget::update_config, this));
+	_action_cb.pack_start (_action_columns.name);
 
 	pack_start (_choice_jump);
 	pack_start (_jump_distance);
 	pack_start (_choice_action);
+	pack_start (_action_cb);
+}
+
+bool
+ButtonConfigWidget::find_action_in_model (const TreeModel::iterator& iter, string const& action_path, TreeModel::iterator* found)
+{
+	TreeModel::Row row = *iter;
+
+	if (action_path == string(row[_action_columns.path])) {
+		*found = iter;
+		return true;
+	}
+
+	return false;
+}
+
+void
+ButtonConfigWidget::set_current_config (boost::shared_ptr<ButtonBase> btn_cnf)
+{
+	const ButtonAction* ba = dynamic_cast<const ButtonAction*> (btn_cnf.get());
+	if (ba) {
+		set_current_action (ba->get_path ());
+	} else {
+		const ButtonJump* bj = static_cast<const ButtonJump*> (btn_cnf.get());
+		set_jump_distance (bj->get_jump_distance());
+	}
+}
+
+boost::shared_ptr<ButtonBase>
+ButtonConfigWidget::get_current_config (ShuttleproControlProtocol& scp) const
+{
+	if (_choice_jump.get_active ()) {
+		return boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (_jump_distance.get_distance ()), scp));
+	}
+
+	TreeModel::const_iterator row = _action_cb.get_active ();
+	string action_path = (*row)[_action_columns.path];
+
+	return boost::shared_ptr<ButtonBase> (new ButtonAction (action_path, scp));
+}
+
+
+void
+ButtonConfigWidget::set_current_action (std::string action_string)
+{
+	_choice_action.set_active (true);
+	_choice_jump.set_active (false);
+	if (action_string.empty()) {
+		_action_cb.set_active (0);
+		return;
+	}
+
+	TreeModel::iterator iter = _available_action_model->children().end();
+
+	_available_action_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ButtonConfigWidget::find_action_in_model),  action_string, &iter));
+
+	if (iter != _available_action_model->children().end()) {
+		_action_cb.set_active (iter);
+	} else {
+		_action_cb.set_active (0);
+	}
+}
+
+void
+ButtonConfigWidget::set_jump_distance (JumpDistance dist)
+{
+	_choice_jump.set_active (true);
+	_choice_action.set_active (false);
+	_jump_distance.set_distance (dist);
+
+	Changed (); /* emit signal */
 }
 
 void
 ButtonConfigWidget::update_choice ()
 {
 	_jump_distance.set_sensitive (_choice_jump.get_active ());
+	_action_cb.set_sensitive (_choice_action.get_active ());
+
+	Changed (); /* emit signal */
+}
+
+void
+ButtonConfigWidget::setup_available_actions ()
+{
+	_available_action_model = TreeStore::create (_action_columns);
+	_available_action_model->clear ();
+
+	typedef std::map<string,TreeIter> NodeMap;
+	NodeMap nodes;
+	NodeMap::iterator r;
+
+	TreeIter rowp;
+	TreeModel::Row parent;
+
+
+	rowp = _available_action_model->append ();
+	parent = *(rowp);
+	parent[_action_columns.name] = _("Disabled");
+
+	vector<string> paths;
+	vector<string> labels;
+	vector<string> tooltips;
+	vector<string> keys;
+	vector<Glib::RefPtr<Gtk::Action> > actions;
+
+	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+
+	vector<string>::iterator k;
+	vector<string>::iterator p;
+	vector<string>::iterator t;
+	vector<string>::iterator l;
+
+	for (l = labels.begin(), k = keys.begin(), p = paths.begin(), t = tooltips.begin(); l != labels.end(); ++k, ++p, ++t, ++l) {
+
+		TreeModel::Row row;
+		vector<string> parts;
+		parts.clear ();
+		split (*p, parts, '/');
+
+		if (parts.empty()) {
+			continue;
+		}
+
+				//kinda kludgy way to avoid displaying menu items as mappable
+		if ( parts[1] == _("Main_menu") )
+			continue;
+		if ( parts[1] == _("JACK") )
+			continue;
+		if ( parts[1] == _("redirectmenu") )
+			continue;
+		if ( parts[1] == _("Editor_menus") )
+			continue;
+		if ( parts[1] == _("RegionList") )
+			continue;
+		if ( parts[1] == _("ProcessorMenu") )
+			continue;
+
+		if ((r = nodes.find (parts[1])) == nodes.end()) {
+			/* top level is missing */
+
+			TreeIter rowp;
+			TreeModel::Row parent;
+			rowp = _available_action_model->append();
+			nodes[parts[1]] = rowp;
+			parent = *(rowp);
+			parent[_action_columns.name] = parts[1];
+
+			row = *(_available_action_model->append (parent.children()));
+		} else {
+			row = *(_available_action_model->append ((*r->second)->children()));
+		}
+
+		/* add this action */
+
+		if (l->empty ()) {
+			row[_action_columns.name] = *t;
+			_action_map[*t] = *p;
+		} else {
+			row[_action_columns.name] = *l;
+			_action_map[*l] = *p;
+		}
+
+		string path = (*p);
+		/* ControlProtocol::access_action() is not interested in the
+		   legacy "<Actions>/" prefix part of a path.
+		*/
+		path = path.substr (strlen ("<Actions>/"));
+
+		row[_action_columns.path] = path;
+	}
+}
+
+void
+ButtonConfigWidget::update_config ()
+{
+	Changed (); /* emit signal */
 }

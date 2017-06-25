@@ -39,11 +39,11 @@ public:
 	~JumpDistanceWidget () {}
 
 	JumpDistance get_distance () const { return _distance; }
+	void set_distance (JumpDistance dist);
 
 	PBD::Signal0<void> Changed;
 
 private:
-
 	JumpDistance _distance;
 
 	void update_value ();

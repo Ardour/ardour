@@ -52,6 +52,7 @@ enum JumpUnit {
 
 struct JumpDistance {
 	JumpDistance (double v, JumpUnit u) : value (v), unit (u) {}
+	JumpDistance (const JumpDistance& o) : value (o.value), unit (o.unit) {}
 	double value;
 	JumpUnit unit;
 };
@@ -162,6 +163,7 @@ public:
 	~ButtonJump () {}
 
 	void execute ();
+	JumpDistance get_jump_distance () const { return _dist; };
 
 private:
 	JumpDistance _dist;
@@ -176,6 +178,7 @@ public:
 	~ButtonAction () {}
 
 	void execute ();
+	std::string get_path () const { return _action_string; }
 
 private:
 	const std::string _action_string;

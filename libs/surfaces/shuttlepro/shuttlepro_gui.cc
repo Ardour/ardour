@@ -30,6 +30,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/port.h"
 #include "ardour/midi_port.h"
 
@@ -45,7 +46,7 @@
 
 using namespace ArdourSurface;
 
-class ShuttleproGUI : public Gtk::VBox
+class ShuttleproGUI : public Gtk::VBox, public PBD::ScopedConnectionList
 {
 public:
 	ShuttleproGUI (ShuttleproControlProtocol& scp);
@@ -62,7 +63,8 @@ private:
 
 	JumpDistanceWidget _jog_distance;
 	void update_jog_distance ();
-	PBD::ScopedConnection _jog_distance_connection;
+
+	void update_action(unsigned int index, ButtonConfigWidget* sender);
 };
 
 
@@ -108,12 +110,25 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:")));
 	table->attach (*jog_label, 0, 2, n, n+1);
-	_jog_distance.Changed.connect (_jog_distance_connection, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
+
+	_jog_distance.Changed.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
 	table->attach (_jog_distance, 3, 5, n, n+1);
 	++n;
 
-	ButtonConfigWidget* test = manage (new ButtonConfigWidget);
-	table->attach (*test, 3, 5, n, n+1);
+	vector<boost::shared_ptr<ButtonBase> >::const_iterator it;
+	unsigned int btn_idx = 0;
+	for (it = _scp._button_actions.begin(); it != _scp._button_actions.end(); ++it) {
+		Label* lb = manage (new Label (string_compose (_("Setting for button %1"), btn_idx+1)));
+		table->attach (*lb, 0, 2, n, n+1);
+
+		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
+
+		bcw->set_current_config (*it);
+		bcw->Changed.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::update_action, this, btn_idx, bcw), gui_context ());
+		table->attach (*bcw, 3, 5, n, n+1);
+		++n;
+		++btn_idx;
+	}
 
 	pack_end (*table, false, false);
 }
@@ -137,6 +152,16 @@ ShuttleproGUI::update_jog_distance ()
 	_scp._jog_distance = _jog_distance.get_distance ();
 }
 
+void
+ShuttleproGUI::update_action (unsigned int index, ButtonConfigWidget* sender)
+{
+	if (index >= _scp._button_actions.size()) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("ShuttleproGUI::update_action() index out of bounds %1 / %2\n", index, _scp._button_actions.size()));
+		return;
+	}
+	_scp._button_actions[index] = sender->get_current_config (_scp);
+	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("update_action () %1\n", index));
+}
 
 
 void*

@@ -36,7 +36,7 @@ using namespace ArdourSurface;
 JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	: HBox ()
 	, _distance (dist)
-	, _value_adj (dist.value, 0, 100, 0.25)
+	, _value_adj (dist.value, -100, 100, 0.25)
 {
 	SpinButton* sb = manage (new SpinButton (_value_adj, 0.25, 2));
 	sb->signal_value_changed().connect (boost::bind (&JumpDistanceWidget::update_value, this));
@@ -47,6 +47,14 @@ JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	_unit_cb.set_active(_distance.unit);
 	_unit_cb.signal_changed().connect (boost::bind (&JumpDistanceWidget::update_unit, this));
 	pack_start (_unit_cb);
+}
+
+void
+JumpDistanceWidget::set_distance (JumpDistance dist)
+{
+	_distance = dist;
+	_value_adj.set_value (dist.value);
+	_unit_cb.set_active (dist.unit);
 }
 
 void
