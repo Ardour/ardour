@@ -328,13 +328,13 @@ BasicUI::get_transport_speed ()
 void
 BasicUI::undo ()
 {
-	session->undo (1);
+	access_action ("Editor/undo");
 }
 
 void
 BasicUI::redo ()
 {
-	session->redo (1);
+	access_action ("Editor/redo");
 }
 
 void
