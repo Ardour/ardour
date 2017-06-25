@@ -31,7 +31,7 @@ ButtonConfigWidget::ButtonConfigWidget ()
 	: HBox ()
 	, _choice_jump (_("Jump"))
 	, _choice_action (_("Other action"))
-	, _jump_distance (ShuttleproControlProtocol::JumpDistance ({ .value = 1, .unit = ShuttleproControlProtocol::BEATS }))
+	, _jump_distance (JumpDistance ({ .value = 1, .unit = BEATS }))
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
 	_choice_action.set_group (cbg);

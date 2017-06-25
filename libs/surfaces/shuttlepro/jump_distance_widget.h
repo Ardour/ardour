@@ -35,16 +35,16 @@ namespace ArdourSurface
 class JumpDistanceWidget : public Gtk::HBox
 {
 public:
-	JumpDistanceWidget (ShuttleproControlProtocol::JumpDistance dist);
+	JumpDistanceWidget (JumpDistance dist);
 	~JumpDistanceWidget () {}
 
-	ShuttleproControlProtocol::JumpDistance get_distance () const { return _distance; }
+	JumpDistance get_distance () const { return _distance; }
 
 	PBD::Signal0<void> Changed;
 
 private:
 
-	ShuttleproControlProtocol::JumpDistance _distance;
+	JumpDistance _distance;
 
 	void update_value ();
 	void update_unit ();

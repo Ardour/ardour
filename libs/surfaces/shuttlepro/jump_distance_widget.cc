@@ -33,7 +33,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ArdourSurface;
 
-JumpDistanceWidget::JumpDistanceWidget (ShuttleproControlProtocol::JumpDistance dist)
+JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	: HBox ()
 	, _distance (dist)
 	, _value_adj (dist.value, 0, 100, 0.25)
@@ -52,7 +52,7 @@ JumpDistanceWidget::JumpDistanceWidget (ShuttleproControlProtocol::JumpDistance 
 void
 JumpDistanceWidget::update_unit ()
 {
-	_distance.unit = ShuttleproControlProtocol::JumpUnit (_unit_cb.get_active_row_number ());
+	_distance.unit = JumpUnit (_unit_cb.get_active_row_number ());
 	Changed (); /* emit signal */
 }
 

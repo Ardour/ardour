@@ -44,6 +44,19 @@ public:
 	~ShuttleproControlUIRequest () {}
 };
 
+enum JumpUnit {
+	SECONDS = 0,
+	BEATS = 1,
+	BARS = 2
+};
+
+struct JumpDistance {
+	double value;
+	JumpUnit unit;
+};
+
+class ButtonBase;
+
 
 class ShuttleproControlProtocol
 	: public ARDOUR::ControlProtocol
@@ -67,16 +80,12 @@ public:
 
 	static const int num_shuttle_speeds = 7;
 
-	enum JumpUnit {
-		SECONDS = 0,
-		BEATS = 1,
-		BARS = 2
-	};
+	void prev_marker_keep_rolling ();
+	void next_marker_keep_rolling ();
 
-	struct JumpDistance {
-		double value;
-		JumpUnit unit;
-	};
+	void jump_forward (JumpDistance dist);
+	void jump_backward (JumpDistance dist);
+
 
 private:
 	struct State {
@@ -98,15 +107,10 @@ private:
 	int aquire_device ();
 	void release_device ();
 
-	void prev_marker_keep_rolling ();
-	void next_marker_keep_rolling ();
-
 	void handle_button_press (unsigned short btn);
 
 	void jog_event_backward ();
 	void jog_event_forward ();
-	void jump_forward (JumpDistance dist);
-	void jump_backward (JumpDistance dist);
 
 	void shuttle_event (int position);
 
