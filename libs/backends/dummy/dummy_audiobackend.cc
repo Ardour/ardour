@@ -638,7 +638,7 @@ DummyAudioBackend::my_name () const
 bool
 DummyAudioBackend::available () const
 {
-	return true;
+	return _running;
 }
 
 uint32_t
