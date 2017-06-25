@@ -432,6 +432,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
 		thresdb = 0.f;
+		makeup = 0.f;
 		makeup_target = 1.f;
 	}
 
