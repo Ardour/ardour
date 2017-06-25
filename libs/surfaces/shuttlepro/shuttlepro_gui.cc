@@ -41,6 +41,7 @@
 
 #include "shuttlepro.h"
 #include "jump_distance_widget.h"
+#include "button_config_widget.h"
 
 using namespace ArdourSurface;
 
@@ -106,10 +107,13 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	++n;
 
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:")));
-	table->attach(*jog_label, 0, 2, n, n+1);
+	table->attach (*jog_label, 0, 2, n, n+1);
 	_jog_distance.Changed.connect (_jog_distance_connection, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
-	table->attach(_jog_distance, 3, 5, n, n+1);
+	table->attach (_jog_distance, 3, 5, n, n+1);
 	++n;
+
+	ButtonConfigWidget* test = manage (new ButtonConfigWidget);
+	table->attach (*test, 3, 5, n, n+1);
 
 	pack_end (*table, false, false);
 }

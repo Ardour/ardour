@@ -18,41 +18,33 @@
 
 */
 
-#ifndef ardour_shuttlepro_jump_distance_widget_h
-#define ardour_shuttlepro_jump_distance_widget_h
+#ifndef ardour_shuttlepro_button_config_widget_h
+#define ardour_shuttlepro_button_config_widget_h
 
-#include <gtkmm/comboboxtext.h>
 #include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
+#include <gtkmm/radiobutton.h>
 
 #include "pbd/signals.h"
 
 #include "shuttlepro.h"
+#include "jump_distance_widget.h"
 
 namespace ArdourSurface
 {
-
-class JumpDistanceWidget : public Gtk::HBox
+class ButtonConfigWidget : public Gtk::HBox
 {
 public:
-	JumpDistanceWidget (ShuttleproControlProtocol::JumpDistance dist);
-	~JumpDistanceWidget () {}
-
-	ShuttleproControlProtocol::JumpDistance get_distance () const { return _distance; }
-
-	PBD::Signal0<void> Changed;
+	ButtonConfigWidget ();
+	~ButtonConfigWidget () {};
 
 private:
+	Gtk::RadioButton _choice_jump;
+	Gtk::RadioButton _choice_action;
 
-	ShuttleproControlProtocol::JumpDistance _distance;
+	void update_choice ();
 
-	void update_value ();
-	void update_unit ();
-
-	Gtk::Adjustment _value_adj;
-	Gtk::ComboBoxText _unit_cb;
+	JumpDistanceWidget _jump_distance;
 };
+}
 
-} /* namespace */
-
-#endif  /* ardour_shuttlepro_jump_distance_widget_h */
+#endif /* ardour_shuttlepro_button_config_widget_h */

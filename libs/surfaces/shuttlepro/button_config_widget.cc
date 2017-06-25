@@ -18,41 +18,33 @@
 
 */
 
-#ifndef ardour_shuttlepro_jump_distance_widget_h
-#define ardour_shuttlepro_jump_distance_widget_h
+#include <gtkmm/label.h>
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/box.h>
-#include <gtkmm/adjustment.h>
+#include "pbd/i18n.h"
+#include "button_config_widget.h"
 
-#include "pbd/signals.h"
+using namespace std;
+using namespace Gtk;
+using namespace ArdourSurface;
 
-#include "shuttlepro.h"
-
-namespace ArdourSurface
+ButtonConfigWidget::ButtonConfigWidget ()
+	: HBox ()
+	, _choice_jump (_("Jump"))
+	, _choice_action (_("Other action"))
+	, _jump_distance (ShuttleproControlProtocol::JumpDistance ({ .value = 1, .unit = ShuttleproControlProtocol::BEATS }))
 {
+	RadioButtonGroup cbg = _choice_jump.get_group ();
+	_choice_action.set_group (cbg);
 
-class JumpDistanceWidget : public Gtk::HBox
+	_choice_jump.signal_toggled().connect (boost::bind (&ButtonConfigWidget::update_choice, this));
+
+	pack_start (_choice_jump);
+	pack_start (_jump_distance);
+	pack_start (_choice_action);
+}
+
+void
+ButtonConfigWidget::update_choice ()
 {
-public:
-	JumpDistanceWidget (ShuttleproControlProtocol::JumpDistance dist);
-	~JumpDistanceWidget () {}
-
-	ShuttleproControlProtocol::JumpDistance get_distance () const { return _distance; }
-
-	PBD::Signal0<void> Changed;
-
-private:
-
-	ShuttleproControlProtocol::JumpDistance _distance;
-
-	void update_value ();
-	void update_unit ();
-
-	Gtk::Adjustment _value_adj;
-	Gtk::ComboBoxText _unit_cb;
-};
-
-} /* namespace */
-
-#endif  /* ardour_shuttlepro_jump_distance_widget_h */
+	_jump_distance.set_sensitive (_choice_jump.get_active ());
+}
