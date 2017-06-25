@@ -64,6 +64,7 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	libusb_init (0);
 	//libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
 
+	setup_default_button_actions ();
 	BaseUI::run();
 }
 
@@ -369,51 +370,55 @@ ShuttleproControlProtocol::handle_event () {
 	}
 }
 
+
+boost::shared_ptr<ButtonBase>
+ShuttleproControlProtocol::make_button_action (string action_string)
+{
+	return boost::shared_ptr<ButtonBase> (new ButtonAction (action_string, *this));
+}
+
 /* The buttons have the following layout
  *
- *          01  02  03  04
- *        05  06  07  08  09
+ *          00  01  02  03
+ *        04  05  06  07  08
  *
- *          15   Jog   15
+ *          13   Jog   14
  *
- *            10     11
- *            12     13
+ *            09     10
+ *            11     12
  */
 
-enum Buttons {
-	BTN01 =  0, BTN02 =  1, BTN03 =  2, BTN04 =  3, BTN05 =  4, BTN06 =  5, BTN07 =  6,
-	BTN08 =  7, BTN09 =  8, BTN10 =  9, BTN11 = 10, BTN12 = 11, BTN13 = 12, BTN14 = 13, BTN15 = 14
-};
+void
+ShuttleproControlProtocol::setup_default_button_actions ()
+{
+ 	_button_actions.push_back (make_button_action ("MIDI/panic"));
+	_button_actions.push_back (make_button_action ("Editor/remove-last-capture"));
+	_button_actions.push_back (make_button_action ("Editor/undo"));
+	_button_actions.push_back (make_button_action ("Editor/redo"));
+	_button_actions.push_back (make_button_action ("Common/jump-backward-to-mark"));
+	_button_actions.push_back (make_button_action ("Transport/Record"));
+	_button_actions.push_back (make_button_action ("Transport/Stop"));
+	_button_actions.push_back (make_button_action ("Transport/Roll"));
+	_button_actions.push_back (make_button_action ("Common/jump-forward-to-mark"));
+	_button_actions.push_back (boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (-4.0, BARS), *this)));
+	_button_actions.push_back (boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (+4.0, BARS), *this)));
+	_button_actions.push_back (make_button_action (""));
+	_button_actions.push_back (make_button_action ("Common/add-location-from-playhead"));
+	_button_actions.push_back (make_button_action ("Transport/GotoStart"));
+	_button_actions.push_back (make_button_action ("Transport/GotoEnd"));
+}
 
 void
 ShuttleproControlProtocol::handle_button_press (unsigned short btn)
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("Shuttlepro button number %1\n", btn+1));
-	switch (btn) {
-	case BTN01: midi_panic (); break;
-	case BTN02: access_action ("Editor/remove-last-capture"); break;
-
-// FIXME: calling undo () and redo () from here makes ardour crash (see #7371)
-//	case BTN03: undo (); break;
-//	case BTN04: redo (); break;
-
-	case BTN06: set_record_enable (!get_record_enabled ()); break;
-	case BTN07: transport_stop (); break;
-	case BTN08: transport_play (); break;
-
-	case BTN05: prev_marker_keep_rolling (); break;
-	case BTN09: next_marker_keep_rolling (); break;
-
-	case BTN14: goto_start (); break;
-	case BTN15: goto_end (); break;
-
-	case BTN10: jump_by_bars (-4.0, _keep_rolling && session->transport_rolling ()); break;
-	case BTN11: jump_by_bars (+4.0, _keep_rolling && session->transport_rolling ()); break;
-
-	case BTN13: add_marker (); break;
-
-	default: break;
+	if (btn >= _button_actions.size ()) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl,
+			     string_compose ("Shuttlepro button number out of bounds %1, max is %2\n",
+					     btn, _button_actions.size ()));
+		return;
 	}
+
+	_button_actions[btn]->execute ();
 }
 
 void
@@ -492,6 +497,18 @@ ShuttleproControlProtocol::shuttle_event(int position)
 		}
 		_shuttle_was_zero = true;
 	}
+}
+
+void
+ButtonJump::execute ()
+{
+	_spc.jump_forward (_dist);
+}
+
+void
+ButtonAction::execute ()
+{
+	_spc.access_action (_action_string);
 }
 
 static void LIBUSB_CALL event_callback (libusb_transfer* transfer)

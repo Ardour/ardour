@@ -21,6 +21,9 @@
 #ifndef ardour_shuttlepro_control_protocol_h
 #define ardour_shuttlepro_control_protocol_h
 
+#include <string>
+#include <vector>
+#include <boost/shared_ptr.hpp>
 #include <glibmm/main.h>
 
 #define ABSTRACT_UI_EXPORTS
@@ -48,6 +51,7 @@ enum JumpUnit {
 };
 
 struct JumpDistance {
+	JumpDistance (double v, JumpUnit u) : value (v), unit (u) {}
 	double value;
 	JumpUnit unit;
 };
@@ -83,6 +87,7 @@ public:
 	void jump_forward (JumpDistance dist);
 	void jump_backward (JumpDistance dist);
 
+	boost::shared_ptr<ButtonBase> make_button_action (std::string action_string);
 
 private:
 	struct State {
@@ -129,9 +134,54 @@ private:
 	std::vector<double> _shuttle_speeds;
 	JumpDistance _jog_distance;
 
+	std::vector<boost::shared_ptr<ButtonBase> > _button_actions;
+	void setup_default_button_actions ();
+
 	mutable void* _gui;
 	void build_gui ();
 };
+
+class ButtonBase
+{
+public:
+	ButtonBase (ShuttleproControlProtocol& spc) : _spc (spc) {}
+	virtual ~ButtonBase () {}
+	virtual void execute () = 0;
+
+protected:
+	ShuttleproControlProtocol& _spc;
+};
+
+
+class ButtonJump : public ButtonBase
+{
+public:
+	ButtonJump (JumpDistance dist, ShuttleproControlProtocol& scp)
+		: ButtonBase (scp)
+		, _dist (dist) {}
+	~ButtonJump () {}
+
+	void execute ();
+
+private:
+	JumpDistance _dist;
+};
+
+class ButtonAction : public ButtonBase
+{
+public:
+	ButtonAction (const std::string as, ShuttleproControlProtocol& scp)
+		: ButtonBase (scp)
+		, _action_string (as) {}
+	~ButtonAction () {}
+
+	void execute ();
+
+private:
+	const std::string _action_string;
+};
+
+
 
 } // namespace
 
