@@ -23,9 +23,6 @@
 
 #include <glibmm/main.h>
 
-#include <linux/input.h>
-typedef struct input_event EV;
-
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "ardour/types.h"
