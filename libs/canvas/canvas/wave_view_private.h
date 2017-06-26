@@ -280,7 +280,7 @@ private:
 	uint64_t _image_cache_threshold;
 
 private:
-	friend WaveViewCacheGroup;
+	friend class WaveViewCacheGroup;
 
 	void increase_size (uint64_t bytes);
 	void decrease_size (uint64_t bytes);
@@ -338,7 +338,7 @@ public:
 	static void enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>&);
 
 private:
-	friend WaveViewDrawingThread;
+	friend class WaveViewDrawingThread;
 
 	static void wake_up ();
 
