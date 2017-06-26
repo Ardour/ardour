@@ -42,6 +42,7 @@
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
 #include "ardour/srcfilesource.h"
+#include "ardour/utils.h"
 
 #include "audio_clock.h"
 #include "export_report.h"
@@ -318,9 +319,13 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 				// TODO get max width of labels per column, right-align labels,  x-align 1/3, 2/3 columns
 				const int lx0 = m_l;
-				const int lx1 = m_l + png_w / 2;
+				const int lx1 = m_l + png_w * 2 / 3; // right-col is short (channels, SR, duration)
+				std::string sha1sum = ARDOUR::compute_sha1_of_file (path);
+				if (!sha1sum.empty()) {
+					sha1sum = " (sha1: " + sha1sum + ")";
+				}
 
-				IMGLABEL (lx0, _("File:"), Glib::path_get_basename (path));
+				IMGLABEL (lx0, _("File:"), Glib::path_get_basename (path) + sha1sum);
 				IMGLABEL (lx1, _("Channels:"), string_compose ("%1", channels));
 				png_y0 += linesp;
 
