@@ -52,6 +52,7 @@
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/strsplit.h"
 #include "pbd/replace_all.h"
 
@@ -717,6 +718,29 @@ double
 ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 {
 	return position_to_gain (g) * max_gain / 2.0;
+}
+
+#include "sha1.c"
+
+std::string
+ARDOUR::compute_sha1_of_file (std::string path)
+{
+	PBD::ScopedFileDescriptor fd (g_open (path.c_str(), O_RDONLY, 0444));
+	if (fd < 0) {
+		return std::string ();
+	}
+	char buf[4096];
+	ssize_t n_read;
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+
+	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0) {
+		sha1_write (&s, (const uint8_t*) buf, n_read);
+	}
+
+	sha1_result_hash (&s, hash);
+	return std::string (hash);
 }
 
 extern "C" {
