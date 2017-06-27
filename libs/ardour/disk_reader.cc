@@ -239,7 +239,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	frameoffset_t playback_distance = nframes;
+	frameoffset_t playback_distance;
 	MonitorState ms = _route->monitoring_state ();
 
 	if (_active) {
@@ -269,20 +269,28 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		interpolation.set_speed (speed);
 		midi_interpolation.set_speed (speed);
 		playback_distance = midi_interpolation.distance (nframes);
-	}
-
-	if (speed < 0.0) {
-		playback_distance = -playback_distance;
+		if (speed < 0.0) {
+			playback_distance = -playback_distance;
+		}
+	} else {
+		playback_distance = nframes;
 	}
 
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
+	const bool still_locating = _session.locate_pending();
 
-	if (!result_required || ((ms & MonitoringDisk) == 0)) {
+	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating) {
 
 		/* no need for actual disk data, just advance read pointer and return */
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			(*chan)->buf->increment_read_ptr (playback_distance);
+		}
+
+		/* if monitoring disk but locating, put silence in the buffers */
+
+		if (still_locating && (ms == MonitoringDisk)) {
+			bufs.silence (playback_distance, 0);
 		}
 
 	} else {
@@ -302,7 +310,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
 			ChannelInfo* chaninfo (*chan);
-			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
+			AudioBuffer& output (bufs.get_audio (n%n_buffers));
 			Sample* disk_signal = 0; /* assignment not really needed but it keeps the compiler quiet and helps track bugs */
 
 			if (ms & MonitoringInput) {
@@ -310,7 +318,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				disk_signal = scratch_bufs.get_audio(n).data ();
 			} else {
 				/* no input stream needed, just overwrite buffers */
-				disk_signal = buf.data ();
+				disk_signal = output.data ();
 			}
 
 			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
@@ -373,7 +381,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			if ((speed != 0.0) && (ms & MonitoringInput)) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (buf.data(), disk_signal, speed == 0.0 ? nframes : playback_distance);
+				mix_buffers_no_gain (output.data(), disk_signal, speed == 0.0 ? nframes : playback_distance);
 			}
 		}
 	}
@@ -381,83 +389,86 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	/* MIDI data handling */
 
 	if (!_session.declick_out_pending()) {
-		if (ms & MonitoringDisk) {
+		if (ms & MonitoringDisk && !still_locating) {
 			get_midi_playback (bufs.get_midi (0), playback_distance, ms, scratch_bufs, speed, playback_distance);
 		}
 	}
 
-	if (speed < 0.0) {
-		playback_sample -= playback_distance;
-	} else {
-		playback_sample += playback_distance;
-	}
+	if (!still_locating) {
 
-	if (_playlists[DataType::AUDIO]) {
-		if (!c->empty()) {
-			if (_slaved) {
-				if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
-					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->buf->write_space(),
-					                                            c->front()->buf->bufsize()));
+		if (speed < 0.0) {
+			playback_sample -= playback_distance;
+		} else {
+			playback_sample += playback_distance;
+		}
+
+		if (_playlists[DataType::AUDIO]) {
+			if (!c->empty()) {
+				if (_slaved) {
+					if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->buf->write_space(),
+						                                            c->front()->buf->bufsize()));
+						_need_butler = true;
+					}
+				} else {
+					if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->buf->write_space(),
+						                                            _chunk_frames));
+						_need_butler = true;
+					}
+				}
+			}
+		}
+
+		if (_playlists[DataType::MIDI]) {
+			/* MIDI butler needed part */
+
+			uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
+			uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
+
+			/*
+			  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
+			  " = " << frames_written - frames_read
+			  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
+			*/
+
+			/* frames_read will generally be less than frames_written, but
+			 * immediately after an overwrite, we can end up having read some data
+			 * before we've written any. we don't need to trip an assert() on this,
+			 * but we do need to check so that the decision on whether or not we
+			 * need the butler is done correctly.
+			 */
+
+			/* furthermore..
+			 *
+			 * Doing heavy GUI operations[1] can stall also the butler.
+			 * The RT-thread meanwhile will happily continue and
+			 * ‘frames_read’ (from buffer to output) will become larger
+			 * than ‘frames_written’ (from disk to buffer).
+			 *
+			 * The disk-stream is now behind..
+			 *
+			 * In those cases the butler needs to be summed to refill the buffer (done now)
+			 * AND we need to skip (frames_read - frames_written). ie remove old events
+			 * before playback_sample from the rinbuffer.
+			 *
+			 * [1] one way to do so is described at #6170.
+			 * For me just popping up the context-menu on a MIDI-track header
+			 * of a track with a large (think beethoven :) midi-region also did the
+			 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
+			 *
+			 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
+			 * and can stall
+			 */
+			if (frames_read <= frames_written) {
+				if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 					_need_butler = true;
 				}
 			} else {
-				if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
-					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->buf->write_space(),
-					                                            _chunk_frames));
-					_need_butler = true;
-				}
-			}
-		}
-	}
-
-	if (_playlists[DataType::MIDI]) {
-		/* MIDI butler needed part */
-
-		uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
-		uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
-
-		/*
-		  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
-		  " = " << frames_written - frames_read
-		  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
-		*/
-
-		/* frames_read will generally be less than frames_written, but
-		 * immediately after an overwrite, we can end up having read some data
-		 * before we've written any. we don't need to trip an assert() on this,
-		 * but we do need to check so that the decision on whether or not we
-		 * need the butler is done correctly.
-		 */
-
-		/* furthermore..
-		 *
-		 * Doing heavy GUI operations[1] can stall also the butler.
-		 * The RT-thread meanwhile will happily continue and
-		 * ‘frames_read’ (from buffer to output) will become larger
-		 * than ‘frames_written’ (from disk to buffer).
-		 *
-		 * The disk-stream is now behind..
-		 *
-		 * In those cases the butler needs to be summed to refill the buffer (done now)
-		 * AND we need to skip (frames_read - frames_written). ie remove old events
-		 * before playback_sample from the rinbuffer.
-		 *
-		 * [1] one way to do so is described at #6170.
-		 * For me just popping up the context-menu on a MIDI-track header
-		 * of a track with a large (think beethoven :) midi-region also did the
-		 * trick. The playhead stalls for 2 or 3 sec, until the context-menu shows.
-		 *
-		 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
-		 * and can stall
-		 */
-		if (frames_read <= frames_written) {
-			if ((frames_written - frames_read) + playback_distance < midi_readahead) {
 				_need_butler = true;
 			}
-		} else {
-			_need_butler = true;
-		}
 
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
