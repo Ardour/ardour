@@ -412,9 +412,27 @@ Session::Session (AudioEngine &eng,
 		}
 	}
 
-	if (post_engine_init ()) {
+	int err = post_engine_init ();
+	if (err) {
 		destroy ();
-		throw SessionException (_("Cannot configure audio/midi engine with session parameters"));
+		switch (err) {
+			case -1:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Failed to create background threads.")));
+				break;
+			case -2:
+			case -3:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid TempoMap in session-file.")));
+				break;
+			case -4:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid or corrupt session state.")));
+				break;
+			case -5:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Port registration failed.")));
+				break;
+			default:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Unexpected exception during session setup, possibly invalid audio/midi engine parameters. Please see stdout/stderr for details")));
+				break;
+		}
 	}
 
 	store_recent_sessions (_name, _path);

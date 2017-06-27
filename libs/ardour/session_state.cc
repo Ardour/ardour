@@ -265,7 +265,15 @@ Session::post_engine_init ()
 		_tempo_map = new TempoMap (_current_frame_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
+	} catch (std::exception const & e) {
+		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
+		return -2;
+	} catch (...) {
+		error << _("Unknown exception during session setup") << endmsg;
+		return -3;
+	}
 
+	try {
 		/* MidiClock requires a tempo map */
 
 		delete midi_clock;
@@ -288,7 +296,7 @@ Session::post_engine_init ()
 		if (state_tree) {
 			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
 				error << _("Could not set session state from XML") << endmsg;
-				return -1;
+				return -4;
 			}
 		} else {
 			// set_state() will call setup_raid_path(), but if it's a new session we need
@@ -351,15 +359,14 @@ Session::post_engine_init ()
 		_locations->changed.connect_same_thread (*this, boost::bind (&Session::locations_changed, this));
 
 	} catch (AudioEngine::PortRegistrationFailure& err) {
-		/* handle this one in a different way than all others, so that its clear what happened */
 		error << err.what() << endmsg;
-		return -1;
+		return -5;
 	} catch (std::exception const & e) {
 		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
-		return -1;
+		return -6;
 	} catch (...) {
 		error << _("Unknown exception during session setup") << endmsg;
-		return -1;
+		return -7;
 	}
 
 	BootMessage (_("Reset Remote Controls"));
