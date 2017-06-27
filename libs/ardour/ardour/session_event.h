@@ -52,7 +52,6 @@ public:
 		Overwrite,
 		SetSyncSource,
 		Audition,
-		InputConfigurationChange,
 		SetPlayAudioRange,
 		CancelPlayAudioRange,
 		RealTimeOperation,
