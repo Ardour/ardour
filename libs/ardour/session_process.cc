@@ -1242,11 +1242,6 @@ Session::process_event (SessionEvent* ev)
 		ev->region.reset ();
 		break;
 
-	case SessionEvent::InputConfigurationChange:
-		add_post_transport_work (PostTransportInputChange);
-		_butler->schedule_transport_work ();
-		break;
-
 	case SessionEvent::SetPlayAudioRange:
 		set_play_range (ev->audio_range, (ev->speed == 1.0f));
 		break;

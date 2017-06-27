@@ -432,7 +432,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void request_overwrite_buffer (boost::shared_ptr<Route>);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
-	void request_input_change_handling ();
 
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
 	bool declick_out_pending() const { return static_cast<bool>(transport_sub_state&(PendingDeclickOut)); }

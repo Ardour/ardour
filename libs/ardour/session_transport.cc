@@ -77,15 +77,6 @@ Session::add_post_transport_work (PostTransportWork ptw)
 }
 
 void
-Session::request_input_change_handling ()
-{
-	if (!(_state_of_the_state & (InitialConnecting|Deletion))) {
-		SessionEvent* ev = new SessionEvent (SessionEvent::InputConfigurationChange, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-		queue_event (ev);
-	}
-}
-
-void
 Session::request_sync_source (Slave* new_slave)
 {
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetSyncSource, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);

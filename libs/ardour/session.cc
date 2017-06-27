@@ -5714,12 +5714,6 @@ Session::graph_reordered ()
 		return;
 	}
 
-	/* every track/bus asked for this to be handled but it was deferred because
-	   we were connecting. do it now.
-	*/
-
-	request_input_change_handling ();
-
 	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to
