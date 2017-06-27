@@ -20,7 +20,8 @@ echo $TMP
 trap "rm -rf $TMP" EXIT
 
 cd $TMP
-git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
+#git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
+git clone git://github.com/FluidSynth/fluidsynth.git fs-git
 
 FSR=fs-git/fluidsynth/
 

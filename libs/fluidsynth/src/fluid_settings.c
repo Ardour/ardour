@@ -443,7 +443,7 @@ fluid_settings_set(fluid_settings_t* settings, const char *name, void* value)
 /** returns 1 if the value has been registered correctly, 0
     otherwise */
 int
-fluid_settings_register_str(fluid_settings_t* settings, char* name, char* def, int hints,
+fluid_settings_register_str(fluid_settings_t* settings, const char* name, const char* def, int hints,
 			    fluid_str_update_t fun, void* data)
 {
   fluid_setting_node_t *node;
