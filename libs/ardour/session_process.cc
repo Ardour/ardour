@@ -897,7 +897,7 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	if (_transport_speed == 0) {
-		fail_roll (nframes);
+		no_roll (nframes);
 		return;
 	}
 
@@ -918,7 +918,7 @@ Session::process_without_events (pframes_t nframes)
 	framepos_t const stop_limit = compute_stop_limit ();
 
 	if (maybe_stop (stop_limit)) {
-		fail_roll (nframes);
+		no_roll (nframes);
 		return;
 	}
 
