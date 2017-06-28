@@ -87,6 +87,7 @@
 #include "new_plugin_preset_dialog.h"
 
 #include "pbd/i18n.h"
+#include "pbd/replace_all.h"
 
 #ifdef AUDIOUNIT_SUPPORT
 class AUPluginUI;
@@ -728,7 +729,9 @@ ProcessorEntry::build_controls_menu ()
 	}
 
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
-		items.push_back (CheckMenuElem ((*i)->name ()));
+		std::string lbl = (*i)->name ();
+		replace_all(lbl, "_", " ");
+		items.push_back (CheckMenuElem (lbl));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active ((*i)->visible ());
 		c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::toggle_control_visibility), *i));
@@ -2107,7 +2110,9 @@ ProcessorBox::build_possible_aux_menu ()
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (!_route->internal_send_for (*r) && *r != _route) {
-			items.push_back (MenuElem ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+			std::string lbl = (*r)->name ();
+			replace_all(lbl, "_", " ");
+			items.push_back (MenuElem (lbl, sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
 		}
 	}
 
