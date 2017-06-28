@@ -1130,7 +1130,8 @@ private:
 		enum Type {
 			TimeOrigin = 0x1,
 			ZoomLevel = 0x2,
-			YOrigin = 0x4
+			YOrigin = 0x4,
+			VideoTimeline = 0x8
 		};
 
 		Type       pending;

@@ -4557,13 +4557,7 @@ Editor::playhead_cursor_sample () const
 void
 Editor::queue_visual_videotimeline_update ()
 {
-	/* TODO:
-	 * pending_visual_change.add (VisualChange::VideoTimeline);
-	 * or maybe even more specific: which videotimeline-image
-	 * currently it calls update_video_timeline() to update
-	 * _all outdated_ images on the video-timeline.
-	 * see 'exposeimg()' in video_image_frame.cc
-	 */
+	pending_visual_change.add (VisualChange::VideoTimeline);
 	ensure_visual_change_idle_handler ();
 }
 
@@ -4679,9 +4673,12 @@ Editor::visual_changer (const VisualChange& vc)
 	if (vc.pending != VisualChange::YOrigin) {
 		update_fixed_rulers ();
 		redisplay_tempo (true);
-	}
 
-	update_video_timeline();
+		/* video frames & position need to be updated for zoom, horiz-scroll
+		 * and (explicitly) VisualChange::VideoTimeline.
+		 */
+		update_video_timeline();
+	}
 
 	_summary->set_overlays_dirty ();
 }
