@@ -27,13 +27,13 @@
 #include "pbd/replace_all.h"
 #include "pbd/stacktrace.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/bindable_button.h>
+#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/choice.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/slider_controller.h"
+#include "gtkmm2ext/bindable_button.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
