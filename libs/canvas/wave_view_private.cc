@@ -17,6 +17,9 @@
 
 */
 
+#include <cmath>
+#include "ardour/lmath.h"
+
 #include "canvas/wave_view_private.h"
 
 #include "pbd/cpus.h"
