@@ -4596,6 +4596,8 @@ Editor::pre_render ()
 int
 Editor::idle_visual_changer ()
 {
+	pending_visual_change.idle_handler_id = -1;
+
 	if (pending_visual_change.pending == 0) {
 		return 0;
 	}
@@ -4609,8 +4611,6 @@ Editor::idle_visual_changer ()
 	   super-rapid-screen-update can be dropped if we are still processing
 	   the last one.
 	*/
-
-	pending_visual_change.idle_handler_id = -1;
 
 	if (visual_change_queued) {
 		return 0;
