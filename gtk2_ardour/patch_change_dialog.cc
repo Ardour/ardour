@@ -34,6 +34,7 @@
 #include "gui_thread.h"
 
 #include "pbd/i18n.h"
+#include "pbd/replace_all.h"
 
 using namespace std;
 using namespace Gtk;
