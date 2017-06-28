@@ -35,6 +35,7 @@
 #include <gtkmm/messagedialog.h>
 
 #include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/menu_elems.h"
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/choice.h>
 #include <gtkmm2ext/utils.h>
@@ -728,7 +729,7 @@ ProcessorEntry::build_controls_menu ()
 	}
 
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
-		items.push_back (CheckMenuElem ((*i)->name ()));
+		items.push_back (CheckMenuElemNoMnemonic ((*i)->name ()));
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active ((*i)->visible ());
 		c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ProcessorEntry::toggle_control_visibility), *i));
@@ -2107,7 +2108,7 @@ ProcessorBox::build_possible_aux_menu ()
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (!_route->internal_send_for (*r) && *r != _route) {
-			items.push_back (MenuElem ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+			items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
 		}
 	}
 

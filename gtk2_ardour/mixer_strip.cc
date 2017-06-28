@@ -33,6 +33,7 @@
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/slider_controller.h>
 #include <gtkmm2ext/bindable_button.h>
+#include "gtkmm2ext/menu_elems.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
@@ -1094,11 +1095,7 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 	input_menu_bundles.push_back (b);
 
 	MenuList& citems = input_menu.items();
-
-	std::string n = b->name ();
-	replace_all (n, "_", " ");
-
-	citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
+	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_input_chosen), b)));
 }
 
 void
@@ -1122,11 +1119,7 @@ MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR
 	output_menu_bundles.push_back (b);
 
 	MenuList& citems = output_menu.items();
-
-	std::string n = b->name ();
-	replace_all (n, "_", " ");
-
-	citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
+	citems.push_back (MenuElemNoMnemonic (b->name (), sigc::bind (sigc::mem_fun(*this, &MixerStrip::bundle_output_chosen), b)));
 }
 
 void

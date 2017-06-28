@@ -24,6 +24,7 @@
 #include <glibmm/regex.h>
 
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 
 #include "midi++/midnam_patch.h"
@@ -137,14 +138,8 @@ PatchChange::initialize_popup_menus()
 		for (PatchNameList::const_iterator patch = patches.begin();
 		     patch != patches.end();
 		     ++patch) {
-			std::string name = (*patch)->name();
-			boost::replace_all (name, "_", " ");
-
-			patch_menus.push_back (
-				Gtk::Menu_Helpers::MenuElem (
-					name,
-					sigc::bind (sigc::mem_fun(*this, &PatchChange::on_patch_menu_selected),
-					            (*patch)->patch_primary_key())));
+			patch_menus.push_back (Gtkmm2ext::MenuElemNoMnemonic ((*patch)->name(),
+						sigc::bind (sigc::mem_fun(*this, &PatchChange::on_patch_menu_selected), (*patch)->patch_primary_key())));
 		}
 	}
 }

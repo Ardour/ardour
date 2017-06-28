@@ -27,6 +27,7 @@
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/menu_elems.h"
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -1822,7 +1823,7 @@ PluginPinWidget::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 	/* we're going to create the new send pre-fader, so check the route amp's data type.  */
 	const ChanCount& rc (r->amp ()->input_streams ());
 	if (!already_present && rc.get (dt) > 0) {
-		citems.push_back (MenuElem (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_send_from), wp, boost::weak_ptr<Route> (r))));
+		citems.push_back (MenuElemNoMnemonic (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_send_from), wp, boost::weak_ptr<Route> (r))));
 		++added;
 	}
 	return added;
