@@ -51,6 +51,7 @@ gtkmm2ext_sources = [
         'gtkapplication.c',
         'idle_adjustment.cc',
         'keyboard.cc',
+        'menu_elems.cc',
         'pane.cc',
         'paths_dialog.cc',
         'persistent_tooltip.cc',
