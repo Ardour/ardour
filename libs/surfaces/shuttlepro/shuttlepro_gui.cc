@@ -25,14 +25,13 @@
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
-#include <gtkmm/liststore.h>
+#include <gtkmm/image.h>
 
 #include "pbd/unwind.h"
+#include "pbd/file_utils.h"
 
-#include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/port.h"
-#include "ardour/midi_port.h"
+#include "ardour/filesystem_paths.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -46,7 +45,7 @@
 
 using namespace ArdourSurface;
 
-class ShuttleproGUI : public Gtk::VBox, public PBD::ScopedConnectionList
+class ShuttleproGUI : public Gtk::HBox, public PBD::ScopedConnectionList
 {
 public:
 	ShuttleproGUI (ShuttleproControlProtocol& scp);
@@ -81,6 +80,16 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	, _keep_rolling (_("Keep rolling after jumps"))
 	, _jog_distance (scp._jog_distance)
 {
+	std::string data_file_path;
+	string name = "shuttlepro.png";
+	Searchpath spath(ARDOUR::ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("icons");
+	find_file (spath, name, data_file_path);
+	if (!data_file_path.empty()) {
+		Image* image = manage (new Image (data_file_path));
+		pack_start (*image, false, false);
+	}
+
 	Table* table = manage (new Table);
 	table->set_row_spacings (6);
 	table->set_row_spacings (6);
