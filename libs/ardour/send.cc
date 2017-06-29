@@ -346,7 +346,7 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (_delayline && !_delayline->configure_io(in, out)) {
+	if (_delayline && !_delayline->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
 		cerr << "send delayline config failed\n";
 		return false;
 	}
