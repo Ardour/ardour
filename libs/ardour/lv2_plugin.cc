@@ -1804,7 +1804,16 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 		LilvNode* render = get_value(lworld, unit, _world.units_render);
 		if (render) {
 			desc.print_fmt = lilv_node_as_string(render);
-			replace_all (desc.print_fmt, "%f", "%.2f");
+			/* override lilv's default "%f" format */
+			if (desc.integer_step) {
+				replace_all (desc.print_fmt, "%f", "%d");
+			} else if (desc.upper - desc.lower >= 1000) {
+				replace_all (desc.print_fmt, "%f", "%.1f");
+			} else if (desc.upper - desc.lower >= 100) {
+				replace_all (desc.print_fmt, "%f", "%.2f");
+			} else {
+				replace_all (desc.print_fmt, "%f", "%.3f");
+			}
 			lilv_node_free(render);
 		}
 	}
