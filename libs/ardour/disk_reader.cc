@@ -355,8 +355,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 						memcpy (disk_signal,
 						        chaninfo->rw_vector.buf[0],
 						        chaninfo->rw_vector.len[0] * sizeof (Sample));
-						disk_signal += chaninfo->rw_vector.len[0];
-						memcpy (disk_signal,
+						memcpy (disk_signal + chaninfo->rw_vector.len[0],
 						        chaninfo->rw_vector.buf[1],
 						        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
 					}
