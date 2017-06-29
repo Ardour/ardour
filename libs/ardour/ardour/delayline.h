@@ -57,6 +57,8 @@ public:
 	XMLNode& state (bool full);
 
 private:
+	void allocate_pending_buffers (framecnt_t);
+
 	friend class IO;
 	framecnt_t _delay, _pending_delay;
 	framecnt_t _bsiz,  _pending_bsiz;

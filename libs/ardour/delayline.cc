@@ -33,7 +33,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 DelayLine::DelayLine (Session& s, const std::string& name)
-    : Processor (s, string_compose ("latency-compensation-%1", name))
+    : Processor (s, string_compose ("latency-compensation-%1-%2", name, this))
 		, _delay(0)
 		, _pending_delay(0)
 		, _bsiz(0)
@@ -80,7 +80,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			frameoffset_t wo = _pending_bsiz - wl;
 			for (pframes_t pos = 0; pos < FADE_LEN; ++pos) {
 				const gain_t gain = (gain_t)pos / (gain_t)FADE_LEN;
-				for (c = 0; c < _configured_input.n_audio(); ++c) {
+				for (c = 0; c < _configured_output.n_audio(); ++c) {
 					_pending_buf.get()[ wo * chn + c ] *= gain;
 					wo = (wo + 1) % (_pending_bsiz + 1);
 				}
@@ -96,15 +96,15 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			}
 			ro += delay_diff;
 			if (ro < 0) {
-				ro -= (_pending_bsiz +1) * floor(ro / (float)(_pending_bsiz +1));
+				ro -= (_pending_bsiz + 1) * floor(ro / (float)(_pending_bsiz + 1));
 			}
 			ro = ro % (_pending_bsiz + 1);
 			for (pframes_t pos = 0; pos < FADE_LEN; ++pos) {
-				for (c = 0; c < _configured_input.n_audio(); ++c) {
+				for (c = 0; c < _configured_output.n_audio(); ++c) {
 					_pending_buf.get()[ ro * chn + c ] = _buf.get()[ roold * chn + c ];
-					ro = (ro + 1) % (_pending_bsiz + 1);
-					roold = (roold + 1) % (_bsiz + 1);
 				}
+				ro = (ro + 1) % (_pending_bsiz + 1);
+				roold = (roold + 1) % (_bsiz + 1);
 			}
 		}
 
@@ -137,16 +137,20 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 
 			// fade out at old position
 			c = 0;
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++c) {
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 				Sample * const data = i->data();
+				frameoffset_t roff = _roff;
+				frameoffset_t woff = _woff;
 				for (pframes_t pos = 0; pos < fade_len; ++pos) {
 					const gain_t gain = (gain_t)(fade_len - pos) / (gain_t)fade_len;
-					buf[ _woff * chn + c ] = data[ pos ];
-					data[ pos ] = buf[ _roff * chn + c ] * gain;
-					_roff = (_roff + 1) % rbs;
-					_woff = (_woff + 1) % rbs;
+					buf[ woff * chn + c ] = data[ pos ];
+					data[ pos ] = buf[ roff * chn + c ] * gain;
+					roff = (roff + 1) % rbs;
+					woff = (woff + 1) % rbs;
 				}
 			}
+			_roff = (_roff + fade_len) % rbs;
+			_woff = (_woff + fade_len) % rbs;
 
 			if (pending_flush) {
 				DEBUG_TRACE (DEBUG::LatencyCompensation,
@@ -164,16 +168,20 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 
 			// fade in at new position
 			c = 0;
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++c) {
+			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 				Sample * const data = i->data();
+				frameoffset_t roff = _roff;
+				frameoffset_t woff = _woff;
 				for (pframes_t pos = fade_len; pos < 2 * fade_len; ++pos) {
 					const gain_t gain = (gain_t)(pos - fade_len) / (gain_t)fade_len;
-					buf[ _woff * chn + c ] = data[ pos ];
-					data[ pos ] = buf[ _roff * chn + c ] * gain;
-					_roff = (_roff + 1) % rbs;
-					_woff = (_woff + 1) % rbs;
+					buf[ woff * chn + c ] = data[ pos ];
+					data[ pos ] = buf[ roff * chn + c ] * gain;
+					roff = (roff + 1) % rbs;
+					woff = (woff + 1) % rbs;
 				}
 			}
+			_roff = (_roff + fade_len) % rbs;
+			_woff = (_woff + fade_len) % rbs;
 			p0  = 2 * fade_len;
 
 			_delay = pending_delay;
@@ -186,15 +194,19 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 		assert(_delay == ((_woff - _roff + rbs) % rbs));
 
 		c = 0;
-		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++c) {
+		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 			Sample * const data = i->data();
+			frameoffset_t roff = _roff;
+			frameoffset_t woff = _woff;
 			for (pframes_t pos = p0; pos < nsamples; ++pos) {
-				buf[ _woff * chn + c ] = data[ pos ];
-				data[ pos ] = buf[ _roff * chn + c ];
-				_roff = (_roff + 1) % rbs;
-				_woff = (_woff + 1) % rbs;
+				buf[ woff * chn + c ] = data[ pos ];
+				data[ pos ] = buf[ roff * chn + c ];
+				roff = (roff + 1) % rbs;
+				woff = (woff + 1) % rbs;
 			}
 		}
+		_roff = (_roff + nsamples) % rbs;
+		_woff = (_woff + nsamples) % rbs;
 	}
 
 	if (_midi_buf.get()) {
@@ -273,8 +285,6 @@ DelayLine::set_delay(framecnt_t signal_delay)
 		cerr << "WARNING: latency compensation is not possible.\n";
 	}
 
-	const framecnt_t rbs = signal_delay + 1;
-
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
 			string_compose ("%1 set_delay to %2 samples for %3 channels\n",
 				name(), signal_delay, _configured_output.n_audio()));
@@ -293,14 +303,7 @@ DelayLine::set_delay(framecnt_t signal_delay)
 		return;
 	}
 
-	if (_configured_output.n_audio() > 0 ) {
-		_pending_buf.reset(new Sample[_configured_output.n_audio() * rbs]);
-		memset(_pending_buf.get(), 0, _configured_output.n_audio() * rbs * sizeof (Sample));
-		_pending_bsiz = signal_delay;
-	} else {
-		_pending_buf.reset();
-		_pending_bsiz = 0;
-	}
+	allocate_pending_buffers (signal_delay);
 
 	_pending_delay = signal_delay;
 
@@ -316,6 +319,22 @@ DelayLine::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	return true;
 }
 
+void
+DelayLine::allocate_pending_buffers (framecnt_t signal_delay)
+{
+	assert (signal_delay >= 0);
+	const framecnt_t rbs = signal_delay + 1;
+
+	if (_configured_output.n_audio() > 0 ) {
+		_pending_buf.reset(new Sample[_configured_output.n_audio() * rbs]);
+		memset(_pending_buf.get(), 0, _configured_output.n_audio() * rbs * sizeof (Sample));
+		_pending_bsiz = signal_delay;
+	} else {
+		_pending_buf.reset();
+		_pending_bsiz = 0;
+	}
+}
+
 bool
 DelayLine::configure_io (ChanCount in, ChanCount out)
 {
@@ -323,13 +342,20 @@ DelayLine::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	// TODO realloc buffers if channel count changes..
-	// TODO support multiple midi buffers
+	if (_configured_output != out) {
+		// run() won't be called concurrently, so it's
+		// save for replace existing _pending_buf.
+		//
+		// configure_io is either called with process-lock held
+		// from route's configure_io() or by use_target() from the c'tor.
+		allocate_pending_buffers (_pending_delay);
+	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
 			string_compose ("configure IO: %1 Ain: %2 Aout: %3 Min: %4 Mout: %5\n",
 				name(), in.n_audio(), out.n_audio(), in.n_midi(), out.n_midi()));
 
+	// TODO support multiple midi buffers
 	if (in.n_midi() > 0 && !_midi_buf) {
 		_midi_buf.reset(new MidiBuffer(16384));
 	}
