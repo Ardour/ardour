@@ -5819,7 +5819,15 @@ Editor::super_rapid_screen_update ()
 	const int64_t now = g_get_monotonic_time ();
 	double err = 0;
 
+	if (_session->exporting ()) {
+		/* freewheel/export may be faster or slower than transport_speed() / SR.
+		 * Also exporting multiple ranges locates/jumps without a _pending_locate_request.
+		 */
+		_last_update_time = 0;
+	}
+
 	if (_last_update_time > 0) {
+		/* interpolate and smoothen playhead position */
 		const double ds =  (now - _last_update_time) * _session->transport_speed() * _session->nominal_frame_rate () * 1e-6;
 		framepos_t guess = playhead_cursor->current_frame () + rint (ds);
 		err = frame - guess;
@@ -5841,6 +5849,7 @@ Editor::super_rapid_screen_update ()
 	if (err > 8192 || latent_locate) {
 		// in case of x-runs or freewheeling
 		_last_update_time = 0;
+		frame = _session->audible_frame ();
 	} else {
 		_last_update_time = now;
 	}
