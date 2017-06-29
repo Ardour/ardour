@@ -35,7 +35,7 @@ MenuElemNoMnemonic::MenuElemNoMnemonic (const Glib::ustring& label, const CallSl
 
 CheckMenuElemNoMnemonic::CheckMenuElemNoMnemonic (const Glib::ustring& label, const CallSlot& slot)
 {
-	CheckMenuItem* item = manage (new CheckMenuItem (label, false));
+	Gtk::CheckMenuItem* item = manage (new Gtk::CheckMenuItem (label, false));
 	set_child (item);
 	if(slot) {
 		item->signal_toggled().connect(slot);
