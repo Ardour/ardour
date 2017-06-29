@@ -386,6 +386,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\menu_elems.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\pane.cc"
 				>
 			</File>
@@ -621,6 +625,10 @@
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\keyboard.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtkmm2ext\menu_elems.h"
 				>
 			</File>
 			<File
