@@ -35,8 +35,8 @@ using namespace ArdourSurface;
 
 ButtonConfigWidget::ButtonConfigWidget ()
 	: HBox ()
-	, _choice_jump (_("Jump"))
-	, _choice_action (_("Other action"))
+	, _choice_jump (_("Jump: "))
+	, _choice_action (_("Other action: "))
 	, _jump_distance (JumpDistance ({ .value = 1, .unit = BEATS }))
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
@@ -49,12 +49,19 @@ ButtonConfigWidget::ButtonConfigWidget ()
 
 	_action_cb.set_model (_available_action_model);
 	_action_cb.signal_changed().connect (boost::bind (&ButtonConfigWidget::update_config, this));
-	_action_cb.pack_start (_action_columns.name);
+	_action_cb.pack_start (_action_columns.name, true);
 
-	pack_start (_choice_jump);
-	pack_start (_jump_distance);
-	pack_start (_choice_action);
-	pack_start (_action_cb);
+	HBox* jump_box = manage (new HBox);
+	jump_box->pack_start (_choice_jump, false, true);
+	jump_box->pack_start (_jump_distance, false, true);
+
+	HBox* action_box = manage (new HBox);
+	action_box->pack_start (_choice_action, false, true);
+	action_box->pack_start (_action_cb, false, true);
+
+	set_spacing (25);
+	pack_start (*jump_box, false, true);
+	pack_start (*action_box, false, true);
 }
 
 bool
