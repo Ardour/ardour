@@ -91,12 +91,6 @@ public:
 	boost::shared_ptr<ButtonBase> make_button_action (std::string action_string);
 
 private:
-	struct State {
-		int8_t shuttle;
-		uint8_t jog;
-		uint16_t buttons;
-	};
-
 	void do_request (ShuttleproControlUIRequest*);
 	int start ();
 	int stop ();
@@ -127,6 +121,11 @@ private:
 
 	bool _shuttle_was_zero, _was_rolling_before_shuttle;
 
+	struct State {
+		int8_t shuttle;
+		uint8_t jog;
+		uint16_t buttons;
+	};
 	State _state;
 
 	// Config stuff
@@ -141,6 +140,8 @@ private:
 	mutable void* _gui;
 	void build_gui ();
 };
+
+
 
 class ButtonBase
 {

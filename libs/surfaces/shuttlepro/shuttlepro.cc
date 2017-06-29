@@ -211,7 +211,8 @@ ShuttleproControlProtocol::do_request (ShuttleproControlUIRequest* req)
 }
 
 void
-ShuttleproControlProtocol::thread_init () {
+ShuttleproControlProtocol::thread_init ()
+{
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init()\n");
 
 	pthread_set_name (X_("shuttlepro"));
@@ -254,7 +255,7 @@ ShuttleproControlProtocol::aquire_device ()
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "Detatching kernel driver\n");
 		err = libusb_detach_kernel_driver (_dev_handle, 0);
 		if (err < 0) {
-			DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("could not detatch kernel driver %d\n", err));
+			DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("could not detatch kernel driver %d\n", err));
 			goto usb_close;
 		}
 	}
@@ -271,13 +272,13 @@ ShuttleproControlProtocol::aquire_device ()
 		goto usb_close;
 	}
 
-	libusb_fill_interrupt_transfer(_usb_transfer, _dev_handle, 1 | LIBUSB_ENDPOINT_IN, _buf, sizeof(_buf),
+	libusb_fill_interrupt_transfer (_usb_transfer, _dev_handle, 1 | LIBUSB_ENDPOINT_IN, _buf, sizeof(_buf),
 				       event_callback, this, 0);
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "callback installed\n");
 
 	if ((err = libusb_submit_transfer (_usb_transfer))) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("failed to submit tansfer: %1\n", err));
+		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("failed to submit tansfer: %1\n", err));
 		goto free_transfer;
 	}
 
@@ -293,15 +294,15 @@ ShuttleproControlProtocol::aquire_device ()
 }
 
 void
-ShuttleproControlProtocol::release_device()
+ShuttleproControlProtocol::release_device ()
 {
 	if (!_dev_handle) {
 		return;
 	}
 
-	libusb_close(_dev_handle);
-	libusb_free_transfer(_usb_transfer);
-	libusb_release_interface(_dev_handle, 0);
+	libusb_close (_dev_handle);
+	libusb_free_transfer (_usb_transfer);
+	libusb_release_interface (_dev_handle, 0);
 	_usb_transfer = 0;
 	_dev_handle = 0;
 }

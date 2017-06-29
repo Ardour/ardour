@@ -44,7 +44,7 @@ JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 
 	const vector<string> jog_units_strings ({ _("seconds"), _("beats"), _("bars") });
 	set_popdown_strings (_unit_cb, jog_units_strings);
-	_unit_cb.set_active(_distance.unit);
+	_unit_cb.set_active (_distance.unit);
 	_unit_cb.signal_changed().connect (boost::bind (&JumpDistanceWidget::update_unit, this));
 	pack_start (_unit_cb);
 }

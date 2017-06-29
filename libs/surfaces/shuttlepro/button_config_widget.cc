@@ -185,7 +185,7 @@ ButtonConfigWidget::setup_available_actions ()
 			continue;
 		}
 
-				//kinda kludgy way to avoid displaying menu items as mappable
+		//kinda kludgy way to avoid displaying menu items as mappable
 		if ( parts[1] == _("Main_menu") )
 			continue;
 		if ( parts[1] == _("JACK") )
