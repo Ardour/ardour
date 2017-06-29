@@ -122,12 +122,17 @@ ShuttleproControlProtocol::get_state ()
 
 	node.set_property (X_("jog-distance"), _jog_distance.value);
 	switch (_jog_distance.unit) {
-	case SECONDS: s = "seconds"; break;
-	case BARS: s = "bars"; break;
+	case SECONDS: s = X_("seconds"); break;
+	case BARS: s = X_("bars"); break;
 	case BEATS:
-	default: s = "beats";
+	default: s = X_("beats");
 	}
 	node.set_property (X_("jog-unit"), s);
+
+	for (unsigned int i=0; i<_button_actions.size(); ++i) {
+		XMLNode* child = new XMLNode (string_compose (X_("button-%1"), i+1));
+		node.add_child_nocopy (_button_actions[i]->get_state (*child));
+	}
 
 	return node;
 }
@@ -155,6 +160,39 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 		_jog_distance.unit = BARS;
 	} else {
 		_jog_distance.unit = BEATS;
+	}
+
+	XMLNode* child;
+	for (unsigned int i=0; i<_button_actions.size(); ++i) {
+		if ((child = node.child (string_compose(X_("button-%1"), i+1).c_str())) == 0) {
+			cout << "Button " << i+1 << " not found" << endl;
+			continue;
+		}
+		string type;
+		child->get_property (X_("type"), type);
+		if (type == X_("action")) {
+			string path ("");
+			child->get_property (X_("path"), path);
+			cout << "Button " << i+1 << " " << path << endl;
+			boost::shared_ptr<ButtonBase> b (new ButtonAction (path, *this));
+			_button_actions[i] = b;
+		} else {
+			double value;
+			child->get_property(X_("value"), value);
+
+			string s;
+			child->get_property(X_("unit"), s);
+			JumpUnit unit;
+			if (s == X_("seconds")) {
+				unit = SECONDS;
+			} else if (s == X_("bars")) {
+				unit = BARS;
+			} else {
+				unit = BEATS;
+			}
+
+			boost::shared_ptr<ButtonBase> b (new ButtonJump (JumpDistance (value, unit), *this));
+		}
 	}
 
 	return 0;
@@ -505,10 +543,40 @@ ButtonJump::execute ()
 	_spc.jump_forward (_dist);
 }
 
+XMLNode&
+ButtonJump::get_state (XMLNode& node) const
+{
+	string ts (X_("jump"));
+	node.set_property (X_("type"), ts);
+	node.set_property (X_("distance"), _dist.value);
+
+	string s;
+	switch (_dist.unit) {
+	case SECONDS: s = X_("seconds"); break;
+	case BARS: s = X_("bars"); break;
+	case BEATS:
+	default: s = X_("beats");
+	}
+	node.set_property (X_("unit"), s);
+
+	return node;
+}
+
 void
 ButtonAction::execute ()
 {
 	_spc.access_action (_action_string);
+}
+
+
+XMLNode&
+ButtonAction::get_state (XMLNode& node) const
+{
+	string ts (X_("action"));
+	node.set_property (X_("type"), ts);
+	node.set_property (X_("path"), _action_string);
+
+	return node;
 }
 
 static void LIBUSB_CALL event_callback (libusb_transfer* transfer)

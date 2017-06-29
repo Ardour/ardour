@@ -149,6 +149,8 @@ public:
 	virtual ~ButtonBase () {}
 	virtual void execute () = 0;
 
+	virtual XMLNode& get_state (XMLNode& node) const = 0;
+
 protected:
 	ShuttleproControlProtocol& _spc;
 };
@@ -165,6 +167,8 @@ public:
 	void execute ();
 	JumpDistance get_jump_distance () const { return _dist; };
 
+	XMLNode& get_state (XMLNode& node) const;
+
 private:
 	JumpDistance _dist;
 };
@@ -179,6 +183,8 @@ public:
 
 	void execute ();
 	std::string get_path () const { return _action_string; }
+
+	XMLNode& get_state (XMLNode& node) const;
 
 private:
 	const std::string _action_string;
