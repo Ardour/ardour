@@ -20,6 +20,7 @@
  */
 
 #include "ardour/dB.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"
 #include "ardour/types.h"
@@ -94,7 +95,7 @@ FaderPort8::setup_actions ()
 	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_parameter, this));
 
 
-	BindAction (BtnBypass, "Mixer", "ab-plugins");
+	BindMethod (BtnBypass, button_bypass);
 	BindAction (BtnBypassAll, "Mixer", "ab-plugins"); // XXX
 
 	BindAction (BtnMacro, "Mixer", "show-editor");
@@ -154,6 +155,17 @@ void
 FaderPort8::button_metronom ()
 {
 	Config->set_clicking (!Config->get_clicking ());
+}
+
+void
+FaderPort8::button_bypass ()
+{
+	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	if (pi) {
+		pi->enable (! pi->enabled ());
+	} else {
+		AccessAction ("Mixer", "ab-plugins");
+	}
 }
 
 void

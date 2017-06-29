@@ -49,6 +49,7 @@ namespace ARDOUR {
 	class Bundle;
 	class Session;
 	class Processor;
+	class PluginInsert;
 }
 
 namespace ArdourSurface {
@@ -196,6 +197,7 @@ private:
 		boost::shared_ptr<ARDOUR::AutomationControl> ac;
 	};
 	std::list <ProcessorCtrl> _proc_params;
+	boost::weak_ptr<ARDOUR::PluginInsert> _plugin_insert;
 	int _showing_well_known;
 	/* **************************************************************************/
 
@@ -238,6 +240,7 @@ private:
 	void notify_solo_changed ();
 	void notify_mute_changed ();
 	void notify_automation_mode_changed ();
+	void notify_plugin_active_changed ();
 
 	/* actions */
 	PBD::ScopedConnectionList button_connections;
@@ -246,6 +249,7 @@ private:
 	void button_record ();
 	void button_loop ();
 	void button_metronom ();
+	void button_bypass ();
 	void button_varispeed (bool);
 #ifdef FP8_MUTESOLO_UNDO
 	void button_solo_clear ();

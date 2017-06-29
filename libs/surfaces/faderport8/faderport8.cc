@@ -986,17 +986,19 @@ FaderPort8::assign_processor_ctrls ()
 	uint8_t id = 0;
 	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
 		if (i >= toggle_params.size ()) {
-			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1);
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_TEXT2);
 		}
 		else if (i >= slider_params.size ()) {
 			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_SELECT & ~FP8Strip::CTRL_TEXT3);
 		} else {
-			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_SELECT & ~FP8Strip::CTRL_TEXT3);
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		}
 
 		if (i < slider_params.size ()) {
 			_ctrls.strip(id).set_fader_controllable (slider_params[i]->ac);
-			_ctrls.strip(id).set_text_line (0, slider_params[i]->name);
+			std::string param_name = slider_params[i]->name;
+			_ctrls.strip(id).set_text_line (0, param_name.substr (0, 9));
+			_ctrls.strip(id).set_text_line (1, param_name.length () > 9 ? param_name.substr (9) : "");
 		}
 		if (i < toggle_params.size ()) {
 			_ctrls.strip(id).set_select_controllable (toggle_params[i]->ac);
@@ -1051,13 +1053,25 @@ void
 FaderPort8::select_plugin (int num)
 {
 	// make sure drop_ctrl_connections() was called
-	assert (_proc_params.size() == 0 && _showing_well_known == 0);
+	assert (_proc_params.size() == 0 && _showing_well_known == 0 && _plugin_insert.expired());
 
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (first_selected_stripable());
 	if (!r) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
 	}
+
+	// Toggle Bypass
+	if (shift_mod ()) {
+		if (num >= 0) {
+			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (r->nth_plugin (num));
+			if (pi) {
+				pi->enable (! pi->enabled ());
+			}
+		}
+		return;
+	}
+
 	if (num < 0) {
 		build_well_known_processor_ctrls (r, num == -1);
 		assign_processor_ctrls ();
@@ -1071,6 +1085,21 @@ FaderPort8::select_plugin (int num)
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
 	}
+
+	// disconnect signals from spill_plugins: processors_changed and ActiveChanged
+	processor_connections.drop_connections ();
+	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	assert (pi); // nth_plugin() always returns a PI.
+#ifdef MIXBUS
+	if (!pi->is_channelstrip ())
+#endif
+	{
+		_plugin_insert = boost::weak_ptr<ARDOUR::PluginInsert> (pi);
+	}
+
+	pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
 	// which drops the references, disconnects the signal and re-spills tracks
@@ -1091,6 +1120,7 @@ FaderPort8::select_plugin (int num)
 
 	// display
 	assign_processor_ctrls ();
+	notify_plugin_active_changed ();
 }
 
 /* short 4 chars at most */
@@ -1198,13 +1228,15 @@ FaderPort8::spill_plugins ()
 
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_select_cb (cb);
-		_ctrls.strip(id).select_button ().set_color (0x00ff00ff);
-		_ctrls.strip(id).select_button ().set_active (true /*proc->enabled()*/);
+		_ctrls.strip(id).select_button ().set_color (proc->enabled () ? 0x00ff00ff : 0xff0000ff);
+		_ctrls.strip(id).select_button ().set_active (true);
 		_ctrls.strip(id).select_button ().set_blinking (false);
 		_ctrls.strip(id).set_text_line (0, proc->name());
 		_ctrls.strip(id).set_text_line (1, pi->plugin()->maker());
 		_ctrls.strip(id).set_text_line (2, plugintype (pi->type()));
 		_ctrls.strip(id).set_text_line (3, "");
+
+		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::spill_plugins, this), this);
 
 		if (++id == spillwidth) {
 			break;
@@ -1360,8 +1392,10 @@ void
 FaderPort8::drop_ctrl_connections ()
 {
 	_proc_params.clear();
+	_plugin_insert.reset ();
 	processor_connections.drop_connections ();
 	_showing_well_known = 0;
+	notify_plugin_active_changed ();
 }
 
 /* functor for FP8Strip's select button */

@@ -506,7 +506,7 @@ FP8Strip::periodic_update_meter ()
 	if (_displaymode == PluginParam) {
 		if (_fader_ctrl) {
 			set_bar_mode (2); // Fill
-			set_text_line (0x01, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
+			set_text_line (2, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
 			float barpos = _fader_ctrl->internal_to_interface (_fader_ctrl->get_value());
 			int val = std::min (127.f, std::max (0.f, barpos * 128.f));
 			if (val != _last_barpos) {
@@ -515,7 +515,7 @@ FP8Strip::periodic_update_meter ()
 			}
 		} else {
 			set_bar_mode (4); // Off
-			set_text_line (0x01, "");
+			set_text_line (0x02, "");
 		}
 	}
 	else if (_displaymode == SendDisplay) {
@@ -605,7 +605,7 @@ FP8Strip::periodic ()
 {
 	periodic_update_fader ();
 	periodic_update_meter ();
-	if (_displaymode != PluginSelect) {
+	if (_displaymode != PluginSelect && _displaymode != PluginParam) {
 		periodic_update_timecode ();
 	}
 }

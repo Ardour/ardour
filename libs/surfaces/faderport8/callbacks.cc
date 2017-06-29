@@ -19,6 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"
 
@@ -203,4 +204,17 @@ FaderPort8::notify_mute_changed ()
 	}
 #endif
 	_ctrls.button (FP8Controls::BtnMuteClear).set_active (muted);
+}
+
+void
+FaderPort8::notify_plugin_active_changed ()
+{
+	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	if (pi) {
+		_ctrls.button (FP8Controls::BtnBypass).set_active (true);
+		_ctrls.button (FP8Controls::BtnBypass).set_color (pi->enabled () ? 0x00ff00ff : 0xff0000ff);
+	} else {
+		_ctrls.button (FP8Controls::BtnBypass).set_active (false);
+		_ctrls.button (FP8Controls::BtnBypass).set_color (0x888888ff);
+	}
 }
