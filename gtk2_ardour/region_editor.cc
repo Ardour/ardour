@@ -46,30 +46,30 @@ using namespace ARDOUR_UI_UTILS;
 
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	: ArdourDialog (_("Region"))
-        , _table (9, 2)
-        , _table_row (0)
-        , _region (r)
-        , name_label (_("Name:"))
-        , audition_button (_("Audition"))
-        , _clock_group (new ClockGroup)
-        , position_clock (X_("regionposition"), true, "", true, false)
-        , end_clock (X_("regionend"), true, "", true, false)
-        , length_clock (X_("regionlength"), true, "", true, false, true)
-        , sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
-        , sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
-          /* XXX cannot file start yet */
-        , start_clock (X_("regionstart"), true, "", false, false)
-        , _sources (1)
+	, _table (9, 2)
+	, _table_row (0)
+	, _region (r)
+	, name_label (_("Name:"))
+	, audition_button (_("Audition"))
+	, _clock_group (new ClockGroup)
+	, position_clock (X_("regionposition"), true, "", true, false)
+	, end_clock (X_("regionend"), true, "", true, false)
+	, length_clock (X_("regionlength"), true, "", true, false, true)
+	, sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
+	, sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
+	  /* XXX cannot file start yet */
+	, start_clock (X_("regionstart"), true, "", false, false)
+	, _sources (1)
 {
 	set_session (s);
 
-        _clock_group->set_clock_mode (ARDOUR_UI::instance()->secondary_clock->mode());
-        _clock_group->add (position_clock);
-        _clock_group->add (end_clock);
-        _clock_group->add (length_clock);
-        _clock_group->add (sync_offset_relative_clock);
-        _clock_group->add (sync_offset_absolute_clock);
-        _clock_group->add (start_clock);
+	_clock_group->set_clock_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	_clock_group->add (position_clock);
+	_clock_group->add (end_clock);
+	_clock_group->add (length_clock);
+	_clock_group->add (sync_offset_relative_clock);
+	_clock_group->add (sync_offset_absolute_clock);
+	_clock_group->add (start_clock);
 
 	position_clock.set_session (_session);
 	end_clock.set_session (_session);
@@ -198,7 +198,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 RegionEditor::~RegionEditor ()
 {
-        delete _clock_group;
+	delete _clock_group;
 }
 
 void
@@ -299,7 +299,7 @@ RegionEditor::end_clock_changed ()
 		PublicEditor::instance().begin_reversible_command (_("change region end position"));
 		in_command = true;
 
-                _region->clear_changes ();
+		_region->clear_changes ();
 		_region->trim_end (end_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
@@ -415,7 +415,7 @@ RegionEditor::sync_offset_absolute_clock_changed ()
 {
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
-        _region->clear_changes ();
+	_region->clear_changes ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
 	_session->add_command (new StatefulDiffCommand (_region));
 
@@ -427,7 +427,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 {
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
-        _region->clear_changes ();
+	_region->clear_changes ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 
