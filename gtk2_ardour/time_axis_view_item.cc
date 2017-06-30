@@ -66,22 +66,22 @@ double TimeAxisViewItem::NAME_HIGHLIGHT_THRESH;
 void
 TimeAxisViewItem::set_constant_heights ()
 {
-        NAME_FONT = Pango::FontDescription (UIConfiguration::instance().get_SmallFont());
+	NAME_FONT = Pango::FontDescription (UIConfiguration::instance().get_SmallFont());
 
-        Gtk::Window win;
-        Gtk::Label foo;
-        win.add (foo);
+	Gtk::Window win;
+	Gtk::Label foo;
+	win.add (foo);
 
-        Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
-        int width = 0;
-        int height = 0;
+	Glib::RefPtr<Pango::Layout> layout = foo.create_pango_layout (X_("Hg")); /* ascender + descender */
+	int width = 0;
+	int height = 0;
 
-        layout->set_font_description (NAME_FONT);
-        get_pixel_size (layout, width, height);
+	layout->set_font_description (NAME_FONT);
+	get_pixel_size (layout, width, height);
 
-        layout = foo.create_pango_layout (X_("H")); /* just the ascender */
+	layout = foo.create_pango_layout (X_("H")); /* just the ascender */
 
-        NAME_HEIGHT = height;
+	NAME_HEIGHT = height;
 
 	/* Config->get_show_name_highlight) == true:
 	        Y_OFFSET is measured from bottom of the time axis view item.
@@ -96,7 +96,7 @@ TimeAxisViewItem::set_constant_heights ()
 		NAME_Y_OFFSET = 3;
 		NAME_HIGHLIGHT_SIZE = 0;
 	}
-        NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
+	NAME_HIGHLIGHT_THRESH = NAME_HIGHLIGHT_SIZE * 3;
 }
 
 /**
@@ -205,8 +205,8 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 		name_highlight = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (name_highlight, string_compose ("name highlight for %1", get_item_name()));
 		name_highlight->set_data ("timeaxisviewitem", this);
-                name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
-                name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255)); // this should use a theme color
+		name_highlight->set_outline_what (ArdourCanvas::Rectangle::TOP);
+		name_highlight->set_outline_color (RGBA_TO_UINT (0,0,0,255)); // this should use a theme color
 
 	} else {
 		name_highlight = 0;
@@ -543,7 +543,7 @@ TimeAxisViewItem::set_name_text(const string& new_name)
 void
 TimeAxisViewItem::set_height (double height)
 {
-        _height = height;
+	_height = height;
 
 	manage_name_highlight ();
 
@@ -637,7 +637,7 @@ TimeAxisViewItem::set_colors()
 	set_frame_color ();
 
 	if (name_highlight) {
-                name_highlight->set_fill_color (fill_color);
+		name_highlight->set_fill_color (fill_color);
 	}
 
 	set_name_text_color ();
