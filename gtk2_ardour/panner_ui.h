@@ -46,7 +46,7 @@ namespace ARDOUR {
 	class Panner;
 	class PannerShell;
 	class Delivery;
-        class AutomationControl;
+	class AutomationControl;
 }
 
 namespace Gtkmm2ext {
@@ -108,15 +108,15 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
         Gtk::VBox           poswidth_box;
 	Width              _width;
 
-        StereoPanner*  _stereo_panner;
+	StereoPanner*  _stereo_panner;
 	MonoPanner*    _mono_panner;
 
-        bool _ignore_width_change;
-        bool _ignore_position_change;
-        void width_adjusted ();
-        void show_width ();
-        void position_adjusted ();
-        void show_position ();
+	bool _ignore_width_change;
+	bool _ignore_position_change;
+	void width_adjusted ();
+	void show_width ();
+	void position_adjusted ();
+	void show_position ();
 
 	Gtk::Menu* pan_astate_menu;
 	Gtk::Menu* pan_astyle_menu;
@@ -153,8 +153,8 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	std::string short_astate_string (ARDOUR::AutoState);
 	std::string _astate_string (ARDOUR::AutoState, bool);
 
-        void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
-        void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
+	void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
+	void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
 
 	std::map<std::string,std::string> _panner_list;
 	bool _suspend_menu_callbacks;
