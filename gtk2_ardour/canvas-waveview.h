@@ -48,17 +48,17 @@ typedef struct _GnomeCanvasWaveViewCache       GnomeCanvasWaveViewCache;
 
 struct _GnomeCanvasWaveViewCacheEntry
 {
-    float  min;
-    float  max;
+	float  min;
+	float  max;
 };
 
 struct _GnomeCanvasWaveViewCache
 {
-    GnomeCanvasWaveViewCacheEntry* data;
-    guint32                       allocated;
-    guint64                       data_size;
-    gulong                        start;
-    gulong                        end;
+	GnomeCanvasWaveViewCacheEntry* data;
+	guint32                       allocated;
+	guint64                       data_size;
+	gulong                        start;
+	gulong                        end;
 };
 
 GnomeCanvasWaveViewCache* gnome_canvas_waveview_cache_new (void);
@@ -73,63 +73,63 @@ typedef  void (*waveview_peak_function_t)(void*,gulong,gulong,gulong,gpointer,gu
 
 struct _GnomeCanvasWaveView
 {
-    GnomeCanvasItem item;
+	GnomeCanvasItem item;
 
-    GnomeCanvasWaveViewCache *cache;
-    gboolean                cache_updater;
-    gint                    screen_width;
+	GnomeCanvasWaveViewCache *cache;
+	gboolean                cache_updater;
+	gint                    screen_width;
 
-    void *data_src;
-    guint32 channel;
-    waveview_peak_function_t peak_function;
-    waveview_length_function_t length_function;
-    waveview_sourcefile_length_function_t sourcefile_length_function;
-    waveview_gain_curve_function_t gain_curve_function;
-    void *gain_src;
+	void *data_src;
+	guint32 channel;
+	waveview_peak_function_t peak_function;
+	waveview_length_function_t length_function;
+	waveview_sourcefile_length_function_t sourcefile_length_function;
+	waveview_gain_curve_function_t gain_curve_function;
+	void *gain_src;
 
-    /** x-axis: samples per canvas unit. */
-    double samples_per_unit;
+	/** x-axis: samples per canvas unit. */
+	double samples_per_unit;
 
-    /** y-axis: amplitude_above_axis.
-     *
-     * the default is that an (scaled, normalized -1.0 ... +1.0) amplitude of 1.0
-     * corresponds to the top of the area assigned to the waveview.
-     *
-     * larger values will expand the vertical scale, cutting off the peaks/troughs.
-     * smaller values will decrease the vertical scale, moving peaks/troughs toward
-     * the middle of the area assigned to the waveview.
-     */
-    double amplitude_above_axis;
+	/** y-axis: amplitude_above_axis.
+	 *
+	 * the default is that an (scaled, normalized -1.0 ... +1.0) amplitude of 1.0
+	 * corresponds to the top of the area assigned to the waveview.
+	 *
+	 * larger values will expand the vertical scale, cutting off the peaks/troughs.
+	 * smaller values will decrease the vertical scale, moving peaks/troughs toward
+	 * the middle of the area assigned to the waveview.
+	 */
+	double amplitude_above_axis;
 
-    double x;
-    double y;
-    double height;
-    double half_height;
-    uint32_t wave_color;
-    uint32_t clip_color;
-    uint32_t zero_color;
-    uint32_t fill_color;
+	double x;
+	double y;
+	double height;
+	double half_height;
+	uint32_t wave_color;
+	uint32_t clip_color;
+	uint32_t zero_color;
+	uint32_t fill_color;
 
-    char filled;
-    char rectified;
-    char zero_line;
-    char logscaled;
+	char filled;
+	char rectified;
+	char zero_line;
+	char logscaled;
 
-    /* These are updated by the update() routine
-       to optimize the render() routine, which may
-       be called several times after a single update().
-    */
+	/* These are updated by the update() routine
+	   to optimize the render() routine, which may
+	   be called several times after a single update().
+	*/
 
-    int32_t bbox_ulx;
-    int32_t bbox_uly;
-    int32_t bbox_lrx;
-    int32_t bbox_lry;
-    unsigned char wave_r, wave_g, wave_b, wave_a;
-    unsigned char clip_r, clip_g, clip_b, clip_a;
-    unsigned char fill_r, fill_g, fill_b, fill_a;
-    uint32_t samples;
-    uint32_t region_start;
-    int32_t reload_cache_in_render;
+	int32_t bbox_ulx;
+	int32_t bbox_uly;
+	int32_t bbox_lrx;
+	int32_t bbox_lry;
+	unsigned char wave_r, wave_g, wave_b, wave_a;
+	unsigned char clip_r, clip_g, clip_b, clip_a;
+	unsigned char fill_r, fill_g, fill_b, fill_a;
+	uint32_t samples;
+	uint32_t region_start;
+	int32_t reload_cache_in_render;
 };
 
 struct _GnomeCanvasWaveViewClass {
