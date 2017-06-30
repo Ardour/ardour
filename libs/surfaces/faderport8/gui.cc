@@ -82,6 +82,7 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	: fp (p)
 	, table (2, 3)
 	, ignore_active_change (false)
+	, two_line_text (_("Two Line Trackname"))
 {
 	set_border_width (12);
 
@@ -106,8 +107,15 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	input_combo.pack_start (midi_port_columns.short_name);
 	output_combo.pack_start (midi_port_columns.short_name);
 
+	build_prefs_combos ();
+	update_prefs_combos ();
+
 	input_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FP8GUI::active_port_changed), &input_combo, true));
 	output_combo.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &FP8GUI::active_port_changed), &output_combo, false));
+
+	clock_combo.signal_changed().connect (sigc::mem_fun (*this, &FP8GUI::clock_mode_changed));
+	scribble_combo.signal_changed().connect (sigc::mem_fun (*this, &FP8GUI::scribble_mode_changed));
+	two_line_text.signal_toggled().connect(sigc::mem_fun (*this, &FP8GUI::twolinetext_toggled));
 
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Incoming MIDI on:")));
@@ -160,6 +168,28 @@ FP8GUI::FP8GUI (FaderPort8& p)
 		Gtk::VSeparator *vsep = manage(new Gtk::VSeparator);
 		table.attach (*vsep, 3 * c + 2, 3 * c + 3, row, row + 4, AttachOptions(0), AttachOptions(FILL), 6, 0);
 	}
+
+	row += 4;
+
+	hsep = manage(new Gtk::HSeparator);
+	table.attach (*hsep, 0, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 6);
+	row++;
+
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock:")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (clock_combo, 1, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+
+	table.attach (two_line_text, 5, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+	l = manage (new Gtk::Label);
+	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Display:")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table.attach (scribble_combo, 1, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
 
 	/* update the port connection combos */
 	update_port_combos ();
@@ -442,4 +472,94 @@ FP8GUI::action_changed (Gtk::ComboBox* cb, FP8Controls::ButtonId id)
 	TreeModel::const_iterator row = cb->get_active ();
 	string action_path = (*row)[action_columns.path];
 	fp.set_button_action (id, false, action_path);
+}
+
+
+void
+FP8GUI::build_prefs_combos ()
+{
+	vector<string> clock_strings;
+	vector<string> scribble_strings;
+
+	//clock_strings.push_back (_("Off"));
+	clock_strings.push_back (_("Timecode"));
+	clock_strings.push_back (_("BBT"));
+	clock_strings.push_back (_("Timecode + BBT"));
+
+	scribble_strings.push_back (_("Off"));
+	scribble_strings.push_back (_("Meter"));
+	scribble_strings.push_back (_("Pan"));
+	scribble_strings.push_back (_("Meter + Pan"));
+
+	set_popdown_strings (clock_combo, clock_strings);
+	set_popdown_strings (scribble_combo, scribble_strings);
+}
+
+void
+FP8GUI::update_prefs_combos ()
+{
+	switch (fp.clock_mode()) {
+		default:
+			clock_combo.set_active_text (_("Off"));
+			break;
+		case 1:
+			clock_combo.set_active_text (_("Timecode"));
+			break;
+		case 2:
+			clock_combo.set_active_text (_("BBT"));
+			break;
+		case 3:
+			clock_combo.set_active_text (_("Timecode + BBT"));
+			break;
+	}
+
+	switch (fp.scribble_mode()) {
+		default:
+			scribble_combo.set_active_text (_("Off"));
+			break;
+		case 1:
+			scribble_combo.set_active_text (_("Meter"));
+			break;
+		case 2:
+			scribble_combo.set_active_text (_("Pan"));
+			break;
+		case 3:
+			scribble_combo.set_active_text (_("Meter + Pan"));
+			break;
+	}
+	two_line_text.set_active (fp.twolinetext ());
+}
+
+void
+FP8GUI::clock_mode_changed ()
+{
+	string str = clock_combo.get_active_text();
+	if (str == _("BBT")) {
+		fp.set_clock_mode (2);
+	} else if (str == _("Timecode + BBT")) {
+		fp.set_clock_mode (3);
+	} else {
+		fp.set_clock_mode (1);
+	}
+}
+
+void
+FP8GUI::scribble_mode_changed ()
+{
+	string str = scribble_combo.get_active_text();
+	if (str == _("Off")) {
+		fp.set_scribble_mode (0);
+	} else if (str == _("Meter")) {
+		fp.set_scribble_mode (1);
+	} else if (str == _("Pan")) {
+		fp.set_scribble_mode (2);
+	} else {
+		fp.set_scribble_mode (3);
+	}
+}
+
+void
+FP8GUI::twolinetext_toggled ()
+{
+	fp.set_two_line_text (two_line_text.get_active ());
 }

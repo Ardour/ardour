@@ -25,6 +25,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/image.h>
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
@@ -72,6 +73,17 @@ private:
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
+
+	/* misc Prefs */
+	Gtk::ComboBoxText clock_combo;
+	Gtk::ComboBoxText scribble_combo;
+	Gtk::CheckButton  two_line_text;
+
+	void build_prefs_combos ();
+	void update_prefs_combos ();
+	void clock_mode_changed ();
+	void scribble_mode_changed ();
+	void twolinetext_toggled ();
 
 	/* user actions */
 	void build_available_action_menu ();

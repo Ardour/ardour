@@ -44,6 +44,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"
+#include "ardour/tempo.h"
 #include "ardour/vca.h"
 
 #include "faderport8.h"
@@ -99,6 +100,9 @@ FaderPort8::FaderPort8 (Session& s)
 	, _shift_lock (false)
 	, _shift_pressed (0)
 	, gui (0)
+	, _clock_mode (1)
+	, _scribble_mode (2)
+	, _two_line_text (false)
 {
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
@@ -217,15 +221,24 @@ FaderPort8::thread_init ()
 bool
 FaderPort8::periodic ()
 {
-	/* prepare TC display -- handled by stripable Periodic () */
-	if (_ctrls.display_timecode ()) {
-		// TODO allow BBT, HHMMSS
-		// used in FP8Strip::periodic_update_timecode
+	/* prepare TC display -- handled by stripable Periodic ()
+	 * in FP8Strip::periodic_update_timecode
+	 */
+	if (_ctrls.display_timecode () && clock_mode ()) {
 		Timecode::Time TC;
 		session->timecode_time (TC);
 		_timecode = Timecode::timecode_format_time(TC);
+
+		char buf[16];
+		Timecode::BBT_Time BBT = session->tempo_map ().bbt_at_frame (session->transport_frame ());
+		snprintf (buf, sizeof (buf),
+				" %02" PRIu32 "|%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32,
+				BBT.bars % 100, BBT.beats %100,
+				(BBT.ticks/ 100) %100, BBT.ticks %100);
+		_musical_time = std::string (buf);
 	} else {
 		_timecode.clear ();
+		_musical_time.clear ();
 	}
 
 	/* update stripables */
@@ -688,6 +701,9 @@ FaderPort8::get_state ()
 	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
 	node.add_child_nocopy (*child);
 
+	node.set_property (X_("clock-mode"), _clock_mode);
+	node.set_property (X_("scribble-mode"), _scribble_mode);
+
 	for (UserActionMap::const_iterator i = _user_action_map.begin (); i != _user_action_map.end (); ++i) {
 		if (i->second.empty()) {
 			continue;
@@ -737,6 +753,9 @@ FaderPort8::set_state (const XMLNode& node, int version)
 			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
 	}
+
+	node.get_property (X_("clock-mode"), _clock_mode);
+	node.get_property (X_("scribble-mode"), _scribble_mode);
 
 	_user_action_map.clear ();
 	// TODO: When re-loading state w/o surface re-init becomes possible,
@@ -903,7 +922,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 	strips.sort (Stripable::Sorter());
 }
 
-/* Track/Pan mode: assign stripable to strips */
+/* Track/Pan mode: assign stripable to strips, Send-mode: selection */
 void
 FaderPort8::assign_stripables (bool select_only)
 {
@@ -936,6 +955,7 @@ FaderPort8::assign_stripables (bool select_only)
 				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), _1), this);
 
 		if (select_only) {
+			/* used in send mode */
 			_ctrls.strip(id).set_text_line (3, (*s)->name (), true);
 			_ctrls.strip(id).select_button ().set_color ((*s)->presentation_info ().color());
 			/* update selection lights */
@@ -954,6 +974,7 @@ FaderPort8::assign_stripables (bool select_only)
 	}
 	for (; id < 8; ++id) {
 		_ctrls.strip(id).unset_controllables (select_only ? (FP8Strip::CTRL_SELECT | FP8Strip::CTRL_TEXT3) : FP8Strip::CTRL_ALL);
+		_ctrls.strip(id).set_periodic_display_mode (FP8Strip::Stripables);
 	}
 }
 

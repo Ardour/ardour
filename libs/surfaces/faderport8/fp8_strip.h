@@ -107,7 +107,7 @@ private:
 	PBD::ScopedConnection _base_connection; // periodic
 	PBD::ScopedConnectionList _button_connections;
 
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::string _stripable_name;
 
 	boost::shared_ptr<ARDOUR::AutomationControl> _fader_ctrl;
 	boost::shared_ptr<ARDOUR::AutomationControl> _mute_ctrl;
@@ -148,9 +148,10 @@ private:
 	void set_recarm ();
 
 	/* periodic poll, update view */
+	void set_strip_name ();
 	void periodic_update_fader ();
 	void periodic_update_meter ();
-	void periodic_update_timecode ();
+	void periodic_update_timecode (uint32_t);
 	void periodic ();
 
 	/* cache */
@@ -161,7 +162,7 @@ private:
 
 	/* display */
 	void set_strip_mode (uint8_t, bool clear = false);
-	void set_bar_mode (uint8_t);
+	void set_bar_mode (uint8_t, bool force = false);
 
 	uint8_t _strip_mode;
 	uint8_t _bar_mode;

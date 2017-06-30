@@ -178,6 +178,7 @@ FP8Strip::unset_controllables (int which)
 {
 	_peak_meter = boost::shared_ptr<ARDOUR::PeakMeter>();
 	_redux_ctrl = boost::shared_ptr<ARDOUR::ReadOnlyControl>();
+	_stripable_name.clear ();
 
 	if (which & CTRL_FADER) {
 		set_fader_controllable (boost::shared_ptr<AutomationControl>());
@@ -201,24 +202,43 @@ FP8Strip::unset_controllables (int which)
 		select_button ().set_blinking (false);
 	}
 	if (which & CTRL_TEXT0) {
-		set_text_line (0x00, "");
+		set_text_line (0, "");
 	}
 	if (which & CTRL_TEXT1) {
-		set_text_line (0x01, "");
+		set_text_line (1, "");
 	}
 	if (which & CTRL_TEXT2) {
-		set_text_line (0x02, "");
+		set_text_line (2, "");
 	}
 	if (which & CTRL_TEXT3) {
-		set_text_line (0x03, "");
+		set_text_line (3, "");
 	}
 	set_bar_mode (4); // Off
+}
+
+void
+FP8Strip::set_strip_name ()
+{
+	size_t lb = _base.show_meters () ? 6 : 9;
+	set_text_line (0, _stripable_name.substr (0, lb));
+	set_text_line (1, _stripable_name.length() > lb ? _stripable_name.substr (lb) : "");
 }
 
 void
 FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 {
 	assert (s);
+
+	if (_base.show_meters () && _base.show_panner ()) {
+		set_strip_mode (5, true);
+	} else if (_base.show_meters ()) {
+		set_strip_mode (4, true);
+	} else {
+		set_strip_mode (0, true);
+	}
+	if (!_base.show_panner ()) {
+		set_bar_mode (4, true); // Off
+	}
 
 	if (panmode) {
 		set_fader_controllable (s->pan_azimuth_control ());
@@ -251,11 +271,16 @@ FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 	select_button ().set_color (s->presentation_info ().color());
 	//select_button ().set_blinking (false);
 
-	set_strip_mode (0x05);
-	set_text_line (0x00, s->name ());
-	set_text_line (0x01, _pan_ctrl ? _pan_ctrl->get_user_string () : "");
-	set_text_line (0x02, "");
-	set_text_line (0x03, "");
+	_stripable_name = s->name ();
+
+	if (_base.twolinetext ()) {
+		set_text_line (0, s->name ());
+		set_text_line (1, _pan_ctrl ? _pan_ctrl->get_user_string () : "");
+	} else {
+		set_strip_name ();
+	}
+	set_text_line (2, "");
+	set_text_line (3, "");
 }
 
 /* *****************************************************************************
@@ -467,10 +492,11 @@ FP8Strip::set_periodic_display_mode (DisplayMode m) {
 void
 FP8Strip::periodic_update_meter ()
 {
+	bool show_meters = _base.show_meters ();
 	bool have_meter = false;
 	bool have_panner = false;
 
-	if (_peak_meter) {
+	if (_peak_meter && show_meters) {
 		have_meter = true;
 		float dB = _peak_meter->meter_level (0, MeterMCP);
 		// TODO: deflect meter
@@ -480,7 +506,7 @@ FP8Strip::periodic_update_meter ()
 			_last_meter = val;
 		}
 
-	} else {
+	} else if (show_meters) {
 		if (0 != _last_meter) {
 			_base.tx_midi2 (0xd0 + _id, 0);
 			_last_meter = 0;
@@ -488,7 +514,7 @@ FP8Strip::periodic_update_meter ()
 	}
 
 	// show redux only if there's a meter, too  (strip display mode 5)
-	if (_peak_meter && _redux_ctrl) {
+	if (_peak_meter && _redux_ctrl && show_meters) {
 		float rx = (1.f - _redux_ctrl->get_parameter ()) * 127.f;
 		// TODO: deflect redux
 		int val = std::min (127.f, std::max (0.f, rx));
@@ -496,7 +522,7 @@ FP8Strip::periodic_update_meter ()
 			_base.tx_midi2 (0xd8 + _id, val & 0x7f);
 			_last_redux = val;
 		}
-	} else {
+	} else if (show_meters) {
 		if (0 != _last_redux) {
 			_base.tx_midi2 (0xd8 + _id, 0);
 			_last_redux = 0;
@@ -515,28 +541,37 @@ FP8Strip::periodic_update_meter ()
 			}
 		} else {
 			set_bar_mode (4); // Off
-			set_text_line (0x02, "");
+			set_text_line (2, "");
 		}
 	}
 	else if (_displaymode == SendDisplay) {
 		set_bar_mode (4); // Off
 		if (_fader_ctrl) {
-			set_text_line (0x01, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
+			set_text_line (1, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
 		} else {
-			set_text_line (0x01, "");
+			set_text_line (1, "");
 		}
 	} else if (_pan_ctrl) {
-		have_panner = true;
+		have_panner = _base.show_panner ();
 		float panpos = _pan_ctrl->internal_to_interface (_pan_ctrl->get_value());
 		int val = std::min (127.f, std::max (0.f, panpos * 128.f));
-		set_bar_mode (1); // Bipolar
-		if (val != _last_barpos) {
+		set_bar_mode (have_panner ? 1 : 4); // Bipolar or Off
+		if (val != _last_barpos && have_panner) {
 			_base.tx_midi3 (0xb0, 0x30 + _id, val & 0x7f);
 			_last_barpos = val;
 		}
-		set_text_line (0x01, _pan_ctrl->get_user_string ());
+		if (_base.twolinetext ()) {
+			set_text_line (1, _pan_ctrl->get_user_string ());
+		} else {
+			set_strip_name ();
+		}
 	} else {
 		set_bar_mode (4); // Off
+		if (_base.twolinetext ()) {
+			set_text_line (1, "");
+		} else {
+			set_strip_name ();
+		}
 	}
 
 	if (_displaymode == SendDisplay || _displaymode == PluginParam) {
@@ -549,9 +584,9 @@ FP8Strip::periodic_update_meter ()
 		set_strip_mode (4); // big meters + 3 lines of text (3rd line is large)
 	}
 	else if (have_panner) {
-		set_strip_mode (0); // 3 lines of text (3rd line is large) + value-bar
+		set_strip_mode (0); // 3 lines of text (3rd line is large + long) + value-bar
 	} else {
-		set_strip_mode (0); // 3 lines of text (3rd line is large) + value-bar
+		set_strip_mode (0); // 3 lines of text (3rd line is large + long) + value-bar
 	}
 }
 
@@ -561,16 +596,32 @@ FP8Strip::set_strip_mode (uint8_t strip_mode, bool clear)
 	if (strip_mode == _strip_mode && !clear) {
 		return;
 	}
+
 	_strip_mode = strip_mode;
 	_base.tx_sysex (3, 0x13, _id, (_strip_mode & 0x07) | (clear ? 0x10 : 0));
+
+	if (clear) {
+		/* work-around, when swiching modes, the FP8 may not
+		 * properly redraw long lines. Only update lines 0, 1
+		 * (line 2 is timecode, line 3 may be inverted)
+		 */
+		_base.tx_text (_id, 0, 0x00, _last_line[0]);
+		_base.tx_text (_id, 1, 0x00, _last_line[1]);
+	}
 }
 
 void
-FP8Strip::set_bar_mode (uint8_t bar_mode)
+FP8Strip::set_bar_mode (uint8_t bar_mode, bool force)
 {
-	if (bar_mode == _bar_mode) {
+	if (bar_mode == _bar_mode && !force) {
 		return;
 	}
+
+	if (bar_mode == 4) {
+		_base.tx_midi3 (0xb0, 0x30 + _id, 0);
+		_last_barpos = 0xff;
+	}
+
 	_bar_mode = bar_mode;
 	_base.tx_midi3 (0xb0, 0x38 + _id, bar_mode);
 }
@@ -587,16 +638,29 @@ FP8Strip::set_text_line (uint8_t line, std::string const& txt, bool inv)
 }
 
 void
-FP8Strip::periodic_update_timecode ()
+FP8Strip::periodic_update_timecode (uint32_t m)
 {
-	if (_id >= 2 && _id < 6) {
-		std::string const& tc = _base.timecode();
-		//" HH:MM:SS:FF"
+	if (m == 0) {
+		return;
+	}
+	if (m == 3) {
+		bool mc = _id >= 4;
+		std::string const& tc = mc ? _base.musical_time () : _base.timecode();
+		std::string t;
+		if (tc.size () == 12) {
+			t = tc.substr (1 + (_id - (mc ? 4 : 0)) * 3, 2);
+		}
+		set_text_line (2, t);
+	} else if (_id >= 2 && _id < 6) {
+		std::string const& tc = (m == 2) ? _base.musical_time () : _base.timecode();
+		//" HH:MM:SS:FF" or " BR|BT|TI|CK"
 		std::string t;
 		if (tc.size () == 12) {
 			t = tc.substr (1 + (_id - 2) * 3, 2);
 		}
-		set_text_line (0x02, t);
+		set_text_line (2, t);
+	} else {
+		set_text_line (2, "");
 	}
 }
 
@@ -606,6 +670,6 @@ FP8Strip::periodic ()
 	periodic_update_fader ();
 	periodic_update_meter ();
 	if (_displaymode != PluginSelect && _displaymode != PluginParam) {
-		periodic_update_timecode ();
+		periodic_update_timecode (_base.clock_mode ());
 	}
 }

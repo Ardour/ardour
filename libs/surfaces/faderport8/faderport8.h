@@ -88,6 +88,14 @@ public:
 	std::string get_button_action (FP8Controls::ButtonId, bool);
 	FP8Controls const& control () const { return  _ctrls; }
 
+	void set_clock_mode (uint32_t m) { _clock_mode = m; }
+	void set_scribble_mode (uint32_t m) { _scribble_mode = m; }
+	void set_two_line_text (bool yn) { _two_line_text = yn; }
+
+	uint32_t clock_mode () const { return _clock_mode; }
+	uint32_t scribble_mode () const { return _scribble_mode; }
+	bool twolinetext () const { return _two_line_text; }
+
 	int stop ();
 	void do_request (FaderPort8Request*);
 	void thread_init ();
@@ -210,7 +218,12 @@ private:
 	sigc::connection _periodic_connection;
 	bool periodic ();
 	std::string _timecode;
+	std::string _musical_time;
 	std::string const& timecode () const { return _timecode; }
+	std::string const& musical_time () const { return _musical_time; }
+
+	bool show_meters () const { return _scribble_mode & 1; }
+	bool show_panner () const { return _scribble_mode & 2; }
 
 	/* sync button blink -- the FP's blink mode does not work */
 	sigc::connection _blink_connection;
@@ -276,6 +289,11 @@ private:
 	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _mute_state;
 	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _solo_state;
 #endif
+
+	/* user prefs */
+	uint32_t _clock_mode;
+	uint32_t _scribble_mode;
+	bool     _two_line_text;
 
 	/* user bound actions */
 	void button_user (bool, FP8Controls::ButtonId);
