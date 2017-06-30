@@ -81,6 +81,7 @@ public:
 		CTRL_TEXT2  = 0x400,
 		CTRL_TEXT3  = 0x800,
 
+		CTRL_TEXT01 = 0x300,
 		CTRL_TEXT   = 0xf00,
 		CTRL_ALL    = 0xfff,
 	};

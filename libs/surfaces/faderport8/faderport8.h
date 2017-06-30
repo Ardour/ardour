@@ -153,9 +153,13 @@ private:
 	void assign_sends ();
 	void spill_plugins ();
 	void assign_processor_ctrls ();
+	bool assign_plugin_presets (boost::shared_ptr<ARDOUR::PluginInsert>);
 	void build_well_known_processor_ctrls (boost::shared_ptr<ARDOUR::Stripable>, bool);
+	void preset_changed ();
 	void select_plugin (int num);
+	void select_plugin_preset (size_t num);
 
+	void toggle_preset_param_mode ();
 	void bank_param (bool down, bool page);
 	/* bank offsets */
 	int _channel_off;
@@ -198,6 +202,7 @@ private:
 	};
 	std::list <ProcessorCtrl> _proc_params;
 	boost::weak_ptr<ARDOUR::PluginInsert> _plugin_insert;
+	bool _show_presets;
 	int _showing_well_known;
 	/* **************************************************************************/
 

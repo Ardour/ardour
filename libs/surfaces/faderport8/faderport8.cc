@@ -37,6 +37,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
 #include "ardour/rc_configuration.h"
@@ -92,6 +93,8 @@ FaderPort8::FaderPort8 (Session& s)
 	, _channel_off (0)
 	, _plugin_off (0)
 	, _parameter_off (0)
+	, _show_presets (false)
+	, _showing_well_known (0)
 	, _blink_onoff (false)
 	, _shift_lock (false)
 	, _shift_pressed (0)
@@ -959,6 +962,25 @@ FaderPort8::assign_stripables (bool select_only)
  */
 
 void
+FaderPort8::toggle_preset_param_mode ()
+{
+	FaderMode fadermode = _ctrls.fader_mode ();
+	if (fadermode != ModePlugins || _proc_params.size() == 0) {
+		return;
+	}
+	_show_presets = ! _show_presets;
+	assign_processor_ctrls ();
+}
+
+void
+FaderPort8::preset_changed ()
+{
+	if (_show_presets) {
+		assign_processor_ctrls ();
+	}
+}
+
+void
 FaderPort8::assign_processor_ctrls ()
 {
 	if (_proc_params.size() == 0) {
@@ -966,6 +988,13 @@ FaderPort8::assign_processor_ctrls ()
 		return;
 	}
 	set_periodic_display_mode (FP8Strip::PluginParam);
+
+	if (_show_presets) {
+		if (assign_plugin_presets (_plugin_insert.lock ())) {
+			return;
+		}
+		_show_presets = false;
+	}
 
 	std::vector <ProcessorCtrl*> toggle_params;
 	std::vector <ProcessorCtrl*> slider_params;
@@ -986,7 +1015,7 @@ FaderPort8::assign_processor_ctrls ()
 	uint8_t id = 0;
 	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
 		if (i >= toggle_params.size ()) {
-			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_TEXT2);
+			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT01 & ~FP8Strip::CTRL_TEXT2);
 		}
 		else if (i >= slider_params.size ()) {
 			_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_SELECT & ~FP8Strip::CTRL_TEXT3);
@@ -1004,15 +1033,74 @@ FaderPort8::assign_processor_ctrls ()
 			_ctrls.strip(id).set_select_controllable (toggle_params[i]->ac);
 			_ctrls.strip(id).set_text_line (3, toggle_params[i]->name, true);
 		}
-		 if (++id == 8) {
-			 break;
-		 }
+		if (++id == 8) {
+			break;
+		}
 	}
 
 	// clear remaining
 	for (; id < 8; ++id) {
 		_ctrls.strip(id).unset_controllables ();
 	}
+}
+
+bool
+FaderPort8::assign_plugin_presets (boost::shared_ptr<PluginInsert> pi)
+{
+	if (!pi) {
+		return false;
+	}
+	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+
+	std::vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets ();
+	if (presets.size () == 0) {
+		return false;
+	}
+
+	int n_parameters = presets.size ();
+
+	_parameter_off = std::min (_parameter_off, n_parameters - 7);
+	_parameter_off = std::max (0, _parameter_off);
+	Plugin::PresetRecord active = plugin->last_preset ();
+
+	uint8_t id = 0;
+	for (size_t i = _parameter_off; i < (size_t)n_parameters; ++i) {
+		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT01 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
+		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, i));
+		_ctrls.strip(id).set_select_cb (cb);
+		_ctrls.strip(id).select_button ().set_active (true);
+		if (active != presets.at(i)) {
+			_ctrls.strip(id).select_button ().set_color (0x0000ffff);
+			_ctrls.strip(id).select_button ().set_blinking (false);
+		} else {
+			_ctrls.strip(id).select_button ().set_color (0x00ffffff);
+			_ctrls.strip(id).select_button ().set_blinking (plugin->parameter_changed_since_last_preset ());
+		}
+		std::string label = presets.at(i).label;
+		_ctrls.strip(id).set_text_line (0, label.substr (0, 9));
+		_ctrls.strip(id).set_text_line (1, label.length () > 9 ? label.substr (9) : "");
+		_ctrls.strip(id).set_text_line (3, "PRESET", true);
+		if (++id == 7) {
+			break;
+		}
+	}
+
+	// clear remaining
+	for (; id < 7; ++id) {
+		_ctrls.strip(id).unset_controllables ();
+	}
+
+	// pin clear-preset to the last slot
+	assert (id == 7);
+	_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
+	 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
+	_ctrls.strip(id).set_select_cb (cb);
+	_ctrls.strip(id).select_button ().set_blinking (false);
+	_ctrls.strip(id).select_button ().set_color (active.uri.empty() ? 0x00ffffff : 0x0000ffff);
+	_ctrls.strip(id).select_button ().set_active (true);
+	_ctrls.strip(id).set_text_line (0, _("(none)"));
+	_ctrls.strip(id).set_text_line (3, "PRESET", true);
+	return true;
 }
 
 void
@@ -1097,7 +1185,7 @@ FaderPort8::select_plugin (int num)
 
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
 	assert (pi); // nth_plugin() always returns a PI.
-	/* _plugin_insert is used for Bypass/Enable */
+	/* _plugin_insert is used for Bypass/Enable & presets */
 #ifdef MIXBUS
 	if (!pi->is_channelstrip () && pi->display_to_user ())
 #else
@@ -1106,6 +1194,12 @@ FaderPort8::select_plugin (int num)
 	{
 		_plugin_insert = boost::weak_ptr<ARDOUR::PluginInsert> (pi);
 		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
+		boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+
+		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 	}
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
@@ -1128,6 +1222,27 @@ FaderPort8::select_plugin (int num)
 	// display
 	assign_processor_ctrls ();
 	notify_plugin_active_changed ();
+}
+
+void
+FaderPort8::select_plugin_preset (size_t num)
+{
+	assert (_proc_params.size() > 0);
+	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	if (!pi) {
+		_ctrls.set_fader_mode (ModeTrack);
+		return;
+	}
+	if (num == SIZE_MAX) {
+		pi->plugin ()->clear_preset ();
+	} else {
+		std::vector<ARDOUR::Plugin::PresetRecord> presets = pi->plugin ()->get_presets ();
+		if (num < presets.size ()) {
+			pi->load_preset (presets.at (num));
+		}
+	}
+	_show_presets = false;
+	assign_processor_ctrls ();
 }
 
 /* short 4 chars at most */
@@ -1327,7 +1442,7 @@ FaderPort8::assign_sends ()
 			break;
 		}
 
-		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT1 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
+		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_FADER & ~FP8Strip::CTRL_TEXT01 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 		_ctrls.strip(id).set_fader_controllable (send);
 		_ctrls.strip(id).set_text_line (0, s->send_name (i));
 		_ctrls.strip(id).set_mute_controllable (s->send_enable_controllable (i));
@@ -1400,6 +1515,7 @@ FaderPort8::drop_ctrl_connections ()
 {
 	_proc_params.clear();
 	_plugin_insert.reset ();
+	_show_presets = false;
 	processor_connections.drop_connections ();
 	_showing_well_known = 0;
 	notify_plugin_active_changed ();

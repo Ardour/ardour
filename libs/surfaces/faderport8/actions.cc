@@ -548,6 +548,7 @@ FaderPort8::button_parameter ()
 			}
 			break;
 		case ModePlugins:
+			toggle_preset_param_mode ();
 			break;
 		case ModeSend:
 			break;
