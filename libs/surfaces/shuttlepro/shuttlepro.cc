@@ -41,8 +41,9 @@ using namespace ArdourSurface;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
-static const uint16_t vendorID = 0x0b33;
-static const uint16_t productID = 0x0030;
+static const uint16_t CounterDesign = 0x0b33;
+static const uint16_t ShuttlePRO = 0x0030;
+static const uint16_t ShuttleXpress = 0x0020;
 
 static void LIBUSB_CALL event_callback (struct libusb_transfer* transfer);
 
@@ -246,10 +247,14 @@ ShuttleproControlProtocol::aquire_device ()
 		return -1;
 	}
 
-	if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, vendorID, productID)) == 0) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to open USB handle\n");
-		return -1;
+	if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, CounterDesign, ShuttlePRO)) == 0) {
+		DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttlePRO found\n");
+		if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, CounterDesign, ShuttleXpress)) == 0) {
+			DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttleXpress found\n");
+			return -1;
+		}
 	}
+
 
 	if (libusb_kernel_driver_active (_dev_handle, 0)) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "Detatching kernel driver\n");
