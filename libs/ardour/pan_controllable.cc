@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #include "ardour/pannable.h"
@@ -28,31 +27,31 @@ PanControllable::actually_set_value (double v, Controllable::GroupControlDisposi
 {
 	boost::shared_ptr<Panner> p = owner->panner();
 
-        if (!p) {
-                /* no panner: just do it */
-	        AutomationControl::actually_set_value (v, group_override);
-                return;
-        }
+	if (!p) {
+		/* no panner: just do it */
+		AutomationControl::actually_set_value (v, group_override);
+		return;
+	}
 
-        bool can_set = false;
+	bool can_set = false;
 
-        switch (parameter().type()) {
-        case PanWidthAutomation:
-                can_set = p->clamp_width (v);
-                break;
-        case PanAzimuthAutomation:
-                can_set = p->clamp_position (v);
-                break;
-        case PanElevationAutomation:
-                can_set = p->clamp_elevation (v);
-                break;
-        default:
-                break;
-        }
+	switch (parameter().type()) {
+		case PanWidthAutomation:
+			can_set = p->clamp_width (v);
+			break;
+		case PanAzimuthAutomation:
+			can_set = p->clamp_position (v);
+			break;
+		case PanElevationAutomation:
+			can_set = p->clamp_elevation (v);
+			break;
+		default:
+			break;
+	}
 
-        if (can_set) {
-	        AutomationControl::actually_set_value (v, group_override);
-        }
+	if (can_set) {
+		AutomationControl::actually_set_value (v, group_override);
+	}
 }
 
 std::string
