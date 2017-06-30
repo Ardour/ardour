@@ -203,7 +203,7 @@ RegionView::~RegionView ()
 		delete *i;
 	}
 
-        drop_silent_frames ();
+	drop_silent_frames ();
 
 	delete editor;
 }
@@ -220,16 +220,16 @@ RegionView::canvas_group_event (GdkEvent* event)
 void
 RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*threshold*/)
 {
-        framecnt_t shortest = max_framecnt;
+	framecnt_t shortest = max_framecnt;
 
 	/* remove old silent frames */
-        drop_silent_frames ();
+	drop_silent_frames ();
 
-        if (silences.empty()) {
-                return;
-        }
+	if (silences.empty()) {
+		return;
+	}
 
-        uint32_t const color = UIConfiguration::instance().color_mod ("silence", "silence");
+	uint32_t const color = UIConfiguration::instance().color_mod ("silence", "silence");
 
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
 
@@ -250,7 +250,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 	}
 
 	/* Find shortest audible segment */
-        framecnt_t shortest_audible = max_framecnt;
+	framecnt_t shortest_audible = max_framecnt;
 
 	framecnt_t s = _region->start();
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
@@ -267,50 +267,50 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 		shortest_audible = min (shortest_audible, dur);
 	}
 
-        _silence_text = new ArdourCanvas::Text (group);
+	_silence_text = new ArdourCanvas::Text (group);
 	_silence_text->set_ignore_events (true);
-        _silence_text->set_font_description (get_font_for_style (N_("SilenceText")));
-        _silence_text->set_color (UIConfiguration::instance().color ("silence text"));
+	_silence_text->set_font_description (get_font_for_style (N_("SilenceText")));
+	_silence_text->set_color (UIConfiguration::instance().color ("silence text"));
 
-        /* both positions are relative to the region start offset in source */
+	/* both positions are relative to the region start offset in source */
 
-        _silence_text->set_x_position (trackview.editor().sample_to_pixel (silences.front().first - _region->start()) + 10.0);
-        _silence_text->set_y_position (20.0);
+	_silence_text->set_x_position (trackview.editor().sample_to_pixel (silences.front().first - _region->start()) + 10.0);
+	_silence_text->set_y_position (20.0);
 
-        double ms = (float) shortest/_region->session().frame_rate();
+	double ms = (float) shortest/_region->session().frame_rate();
 
-        /* ms are now in seconds */
+	/* ms are now in seconds */
 
-        char const * sunits;
+	char const * sunits;
 
-        if (ms >= 60.0) {
-                sunits = _("minutes");
-                ms /= 60.0;
-        } else if (ms < 1.0) {
-                sunits = _("msecs");
-                ms *= 1000.0;
-        } else {
-                sunits = _("secs");
-        }
+	if (ms >= 60.0) {
+		sunits = _("minutes");
+		ms /= 60.0;
+	} else if (ms < 1.0) {
+		sunits = _("msecs");
+		ms *= 1000.0;
+	} else {
+		sunits = _("secs");
+	}
 
 	string text = string_compose (ngettext ("%1 silent segment", "%1 silent segments", silences.size()), silences.size())
 		+ ", "
 		+ string_compose (_("shortest = %1 %2"), ms, sunits);
 
-        if (shortest_audible != max_framepos) {
-                /* ms are now in seconds */
-                double ma = (float) shortest_audible / _region->session().frame_rate();
-                char const * aunits;
+	if (shortest_audible != max_framepos) {
+		/* ms are now in seconds */
+		double ma = (float) shortest_audible / _region->session().frame_rate();
+		char const * aunits;
 
-                if (ma >= 60.0) {
-                        aunits = _("minutes");
-                        ma /= 60.0;
-                } else if (ma < 1.0) {
-                        aunits = _("msecs");
-                        ma *= 1000.0;
-                } else {
-                        aunits = _("secs");
-                }
+		if (ma >= 60.0) {
+			aunits = _("minutes");
+			ma /= 60.0;
+		} else if (ma < 1.0) {
+			aunits = _("msecs");
+			ma *= 1000.0;
+		} else {
+			aunits = _("secs");
+		}
 
 		text += string_compose (_("\n  (shortest audible segment = %1 %2)"), ma, aunits);
 	}
@@ -322,9 +322,9 @@ void
 RegionView::hide_silent_frames ()
 {
 	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
-                (*i)->hide ();
+		(*i)->hide ();
 	}
-        _silence_text->hide();
+	_silence_text->hide();
 }
 
 void
@@ -333,10 +333,10 @@ RegionView::drop_silent_frames ()
 	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
 		delete *i;
 	}
-        _silent_frames.clear ();
+	_silent_frames.clear ();
 
-        delete _silence_text;
-        _silence_text = 0;
+	delete _silence_text;
+	_silence_text = 0;
 }
 
 gint
