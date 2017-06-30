@@ -187,10 +187,10 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("OpenVideo"), _("Open Video..."),
-					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
+	                                      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
-					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
+	                                      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
 	act = global_actions.register_action (main_actions, X_("ExportVideo"), _("Export to Video File..."),
 	                                      hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::export_video), false)));
@@ -730,8 +730,8 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	Gtk::Widget* widget;
 	Application* app = Application::instance ();
 
-        /* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
-         */
+	/* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
+	*/
 
 	/* Quit will be taken care of separately */
 
@@ -747,11 +747,11 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-about"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-        }
+	}
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Edit/menu-show-preferences"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-        }
+	}
 
 	app->set_menu_bar (*menu_bar);
 }
