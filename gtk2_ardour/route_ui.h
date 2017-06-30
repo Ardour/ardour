@@ -308,16 +308,16 @@ class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandleP
 
   protected:
 	struct SoloMuteRelease {
-	    SoloMuteRelease (bool was_active)
-	    : active (was_active)
-	    , exclusive (false) {}
+		SoloMuteRelease (bool was_active)
+			: active (was_active)
+			, exclusive (false) {}
 
-	    boost::shared_ptr<ARDOUR::RouteList> routes;
-	    boost::shared_ptr<ARDOUR::RouteList> routes_on;
-	    boost::shared_ptr<ARDOUR::RouteList> routes_off;
-	    boost::shared_ptr<ARDOUR::Route> route;
-	    bool active;
-	    bool exclusive;
+		boost::shared_ptr<ARDOUR::RouteList> routes;
+		boost::shared_ptr<ARDOUR::RouteList> routes_on;
+		boost::shared_ptr<ARDOUR::RouteList> routes_off;
+		boost::shared_ptr<ARDOUR::Route> route;
+		bool active;
+		bool exclusive;
 	};
 
 	SoloMuteRelease* _solo_release;
