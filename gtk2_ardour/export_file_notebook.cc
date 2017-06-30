@@ -198,15 +198,15 @@ ExportFileNotebook::handle_page_change (GtkNotebookPage*, uint32_t page)
 ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager, ExportFileNotebook * parent, uint32_t number,
                                         ExportProfileManager::FormatStatePtr format_state,
                                         ExportProfileManager::FilenameStatePtr filename_state) :
-  format_state (format_state),
-  filename_state (filename_state),
-  profile_manager (profile_manager),
+	format_state (format_state),
+	filename_state (filename_state),
+	profile_manager (profile_manager),
 
-  format_label (_("Format"), Gtk::ALIGN_LEFT),
-  filename_label (_("Location"), Gtk::ALIGN_LEFT),
-  soundcloud_upload_button (_("Upload to Soundcloud")),
-  analysis_button (_("Analyze Exported Audio")),
-  tab_number (number)
+	format_label (_("Format"), Gtk::ALIGN_LEFT),
+	filename_label (_("Location"), Gtk::ALIGN_LEFT),
+	soundcloud_upload_button (_("Upload to Soundcloud")),
+	analysis_button (_("Analyze Exported Audio")),
+	tab_number (number)
 {
 	set_border_width (12);
 
