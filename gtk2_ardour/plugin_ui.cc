@@ -92,8 +92,8 @@ PluginUIWindow::PluginUIWindow (
 	, was_visible (false)
 	, _keyboard_focused (false)
 #ifdef AUDIOUNIT_SUPPORT
-        , pre_deactivate_x (-1)
-        , pre_deactivate_y (-1)
+	, pre_deactivate_x (-1)
+	, pre_deactivate_y (-1)
 #endif
 
 {
@@ -188,9 +188,9 @@ PluginUIWindow::on_show ()
 
 	if (_pluginui) {
 #if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
-                if (pre_deactivate_x >= 0) {
-                        move (pre_deactivate_x, pre_deactivate_y);
-                }
+		if (pre_deactivate_x >= 0) {
+			move (pre_deactivate_x, pre_deactivate_y);
+		}
 #endif
 
 		if (_pluginui->on_window_show (_title)) {
@@ -203,7 +203,7 @@ void
 PluginUIWindow::on_hide ()
 {
 #if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
-        get_position (pre_deactivate_x, pre_deactivate_y);
+	get_position (pre_deactivate_x, pre_deactivate_y);
 #endif
 
 	Window::on_hide ();
@@ -342,15 +342,15 @@ PluginUIWindow::app_activated (bool)
 		if (yn) {
 			if (was_visible) {
 				_pluginui->activate ();
-                                if (pre_deactivate_x >= 0) {
-                                        move (pre_deactivate_x, pre_deactivate_y);
-                                }
+				if (pre_deactivate_x >= 0) {
+					move (pre_deactivate_x, pre_deactivate_y);
+				}
 				present ();
 				was_visible = true;
 			}
 		} else {
 			was_visible = is_visible();
-                        get_position (pre_deactivate_x, pre_deactivate_y);
+			get_position (pre_deactivate_x, pre_deactivate_y);
 			hide ();
 			_pluginui->deactivate ();
 		}
