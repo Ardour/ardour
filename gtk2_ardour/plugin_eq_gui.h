@@ -36,7 +36,7 @@ namespace ARDOUR {
 }
 
 namespace GTKArdour {
-        class FFT;
+	class FFT;
 }
 
 class PluginEqGui : public Gtk::Table
@@ -113,9 +113,9 @@ private:
 	float _analysis_height;
 
 	// My objects
-        GTKArdour::FFT *_impulse_fft;
-        GTKArdour::FFT *_signal_input_fft;
-        GTKArdour::FFT *_signal_output_fft;
+	GTKArdour::FFT *_impulse_fft;
+	GTKArdour::FFT *_signal_input_fft;
+	GTKArdour::FFT *_signal_output_fft;
 	boost::shared_ptr<ARDOUR::Plugin> _plugin;
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
 
