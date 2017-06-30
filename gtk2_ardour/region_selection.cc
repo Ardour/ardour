@@ -106,12 +106,12 @@ bool
 RegionSelection::add (RegionView* rv)
 {
 	if (!rv->region()->playlist()) {
-                /* not attached to a playlist - selection not allowed.
-                   This happens if the user tries to select a region
-                   during a capture pass.
-                */
-                return false;
-        }
+		/* not attached to a playlist - selection not allowed.
+		   This happens if the user tries to select a region
+		   during a capture pass.
+		*/
+		return false;
+	}
 
 	if (contains (rv)) {
 		/* we already have it */
@@ -180,9 +180,9 @@ RegionSelection::add_to_layer (RegionView * rv)
 }
 
 struct RegionSortByTime {
-    bool operator() (const RegionView* a, const RegionView* b) const {
-	    return a->region()->position() < b->region()->position();
-    }
+	bool operator() (const RegionView* a, const RegionView* b) const {
+		return a->region()->position() < b->region()->position();
+	}
 };
 
 
@@ -205,16 +205,16 @@ RegionSelection::by_position (list<RegionView*>& foo) const
 }
 
 struct RegionSortByTrack {
-    bool operator() (const RegionView* a, const RegionView* b) const {
+	bool operator() (const RegionView* a, const RegionView* b) const {
 
-	    /* really, track and position */
+		/* really, track and position */
 
-	    if (a->get_time_axis_view().order() == b->get_time_axis_view().order()) {
-		    return a->region()->position() < b->region()->position();
-	    } else {
-		    return a->get_time_axis_view().order() < b->get_time_axis_view().order();
-	    }
-    }
+		if (a->get_time_axis_view().order() == b->get_time_axis_view().order()) {
+			return a->region()->position() < b->region()->position();
+		} else {
+			return a->get_time_axis_view().order() < b->get_time_axis_view().order();
+		}
+	}
 };
 
 
