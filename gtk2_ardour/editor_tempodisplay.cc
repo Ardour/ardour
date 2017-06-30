@@ -455,7 +455,7 @@ Editor::mouse_add_new_meter_event (framepos_t frame)
 	const double beat = map.beat_at_bbt (requested);
 	const double al_frame = map.frame_at_beat (beat);
 	begin_reversible_command (_("add meter mark"));
-        XMLNode &before = map.get_state();
+	XMLNode &before = map.get_state();
 
 	if (meter_dialog.get_lock_style() == MusicTime) {
 		map.add_meter (Meter (bpb, note_type), beat, requested, 0, MusicTime);
@@ -514,7 +514,7 @@ Editor::edit_meter_section (MeterSection* section)
 	const PositionLockStyle pls = (meter_dialog.get_lock_style() == AudioTime) ? AudioTime : MusicTime;
 
 	begin_reversible_command (_("replace meter mark"));
-        XMLNode &before = _session->tempo_map().get_state();
+	XMLNode &before = _session->tempo_map().get_state();
 
 	_session->tempo_map().replace_meter (*section, meter, when, frame, pls);
 
