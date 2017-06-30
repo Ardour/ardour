@@ -3103,7 +3103,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* SYNC */
 
-	add_option (_("Sync"), new OptionEditorHeading (_("External Syncronization")));
+	add_option (_("Sync"), new OptionEditorHeading (_("External Synchronization")));
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",

@@ -12377,7 +12377,7 @@ msgid "Create markers where xruns occur"
 msgstr "オーバー/アンダー・ランが発生した箇所にマーカーを作成"
 
 #: rc_option_editor.cc:3096
-msgid "External Syncronization"
+msgid "External Synchronization"
 msgstr "外部同期"
 
 #: rc_option_editor.cc:3100

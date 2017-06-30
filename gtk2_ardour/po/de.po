@@ -12466,7 +12466,7 @@ msgid "Create markers where xruns occur"
 msgstr "Bei xrun Marker erzeugen"
 
 #: rc_option_editor.cc:3096
-msgid "External Syncronization"
+msgid "External Synchronization"
 msgstr "Externe Synchronisation"
 
 #: rc_option_editor.cc:3100
