@@ -301,7 +301,7 @@ ParameterDescriptor::to_interface (float val) const
 			break;
 		case PanAzimuthAutomation:
 		case PanElevationAutomation:
-			val = 1.f - val;
+			val = val;
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
@@ -352,7 +352,7 @@ ParameterDescriptor::from_interface (float val) const
 			break;
 		case PanAzimuthAutomation:
 		case PanElevationAutomation:
-			 val = 1.f - val;
+			 val = val;
 			break;
 		case PanWidthAutomation:
 			val = 2.f * val - 1.f;
