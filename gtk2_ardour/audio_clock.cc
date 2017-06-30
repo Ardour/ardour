@@ -327,10 +327,10 @@ AudioClock::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 
 				cairo_set_source_rgba (cr, cursor_r, cursor_g, cursor_b, cursor_a);
 				cairo_rectangle (cr,
-						 min (get_width() - 2.0,
-						      (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
-						 (get_height() - layout_height)/2.0,
-						 2.0, cursor.get_height()/PANGO_SCALE);
+				                 min (get_width() - 2.0,
+				                 (double) xcenter + cursor.get_x()/PANGO_SCALE + em_width),
+				                 (get_height() - layout_height)/2.0,
+				                 2.0, cursor.get_height()/PANGO_SCALE);
 				cairo_fill (cr);
 			} else {
 				/* we've entered all possible digits, no cursor */
@@ -1722,8 +1722,7 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 
 
 	if (Keyboard::modifier_state_contains (ev->state,
-					       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
-
+	                                       Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) {
 		pixel_frame_scale_factor = 0.025f;
 	}
 
@@ -1881,7 +1880,7 @@ AudioClock::timecode_validate_edit (const string&)
 	char ignored[2];
 
 	if (sscanf (_layout->get_text().c_str(), "%[- _]%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
-		    ignored, &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
+	            ignored, &hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
 		return false;
 	}
 
@@ -1996,10 +1995,10 @@ AudioClock::frames_from_bbt_string (framepos_t pos, const string& str) const
 	if (is_duration) {
 		any.bbt.bars++;
 		any.bbt.beats++;
-                return _session->any_duration_to_frames (pos, any);
+		return _session->any_duration_to_frames (pos, any);
 	} else {
-                return _session->convert_to_frames (any);
-        }
+		return _session->convert_to_frames (any);
+	}
 }
 
 
