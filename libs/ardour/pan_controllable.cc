@@ -23,17 +23,6 @@
 
 using namespace ARDOUR;
 
-double
-PanControllable::lower () const
-{
-        switch (parameter().type()) {
-        case PanWidthAutomation:
-                return -1.0;
-        default:
-                return 0.0;
-        }
-}
-
 void
 PanControllable::actually_set_value (double v, Controllable::GroupControlDisposition group_override)
 {

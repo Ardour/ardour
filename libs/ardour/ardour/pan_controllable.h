@@ -46,7 +46,6 @@ class LIBARDOUR_API PanControllable : public AutomationControl
 		, owner (o)
 	{}
 
-	double lower () const;
 	std::string get_user_string () const;
 
   private:
