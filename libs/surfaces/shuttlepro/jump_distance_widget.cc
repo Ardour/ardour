@@ -42,7 +42,7 @@ JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	sb->signal_value_changed().connect (boost::bind (&JumpDistanceWidget::update_value, this));
 	pack_start (*sb);
 
-	const vector<string> jog_units_strings ({ _("seconds"), _("beats"), _("bars") });
+	const vector<string> jog_units_strings ({ X_("seconds"), X_("beats"), X_("bars") });
 	set_popdown_strings (_unit_cb, jog_units_strings);
 	_unit_cb.set_active (_distance.unit);
 	_unit_cb.signal_changed().connect (boost::bind (&JumpDistanceWidget::update_unit, this));
