@@ -1065,7 +1065,12 @@ FaderPort8::select_plugin (int num)
 	if (shift_mod ()) {
 		if (num >= 0) {
 			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (r->nth_plugin (num));
-			if (pi) {
+#ifdef MIXBUS
+			if (pi && !pi->is_channelstrip () && pi->display_to_user ())
+#else
+			if (pi && pi->display_to_user ())
+#endif
+			{
 				pi->enable (! pi->enabled ());
 			}
 		}
@@ -1092,14 +1097,16 @@ FaderPort8::select_plugin (int num)
 
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
 	assert (pi); // nth_plugin() always returns a PI.
+	/* _plugin_insert is used for Bypass/Enable */
 #ifdef MIXBUS
-	if (!pi->is_channelstrip ())
+	if (!pi->is_channelstrip () && pi->display_to_user ())
+#else
+	if (pi->display_to_user ())
 #endif
 	{
 		_plugin_insert = boost::weak_ptr<ARDOUR::PluginInsert> (pi);
+		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
 	}
-
-	pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
 	// which drops the references, disconnects the signal and re-spills tracks
