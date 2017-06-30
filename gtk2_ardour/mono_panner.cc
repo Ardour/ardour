@@ -487,12 +487,12 @@ MonoPanner::on_key_press_event (GdkEventKey* ev)
 void
 MonoPanner::set_colors ()
 {
-        colors.fill = UIConfiguration::instance().color_mod ("mono panner fill", "panner fill");
-        colors.outline = UIConfiguration::instance().color ("mono panner outline");
-        colors.text = UIConfiguration::instance().color ("mono panner text");
-        colors.background = UIConfiguration::instance().color ("mono panner bg");
-        colors.pos_outline = UIConfiguration::instance().color ("mono panner position outline");
-        colors.pos_fill = UIConfiguration::instance().color_mod ("mono panner position fill", "mono panner position fill");
+	colors.fill = UIConfiguration::instance().color_mod ("mono panner fill", "panner fill");
+	colors.outline = UIConfiguration::instance().color ("mono panner outline");
+	colors.text = UIConfiguration::instance().color ("mono panner text");
+	colors.background = UIConfiguration::instance().color ("mono panner bg");
+	colors.pos_outline = UIConfiguration::instance().color ("mono panner position outline");
+	colors.pos_fill = UIConfiguration::instance().color_mod ("mono panner position fill", "mono panner position fill");
 }
 
 void
