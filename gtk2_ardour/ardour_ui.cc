@@ -198,7 +198,7 @@ using namespace Editing;
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
 sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
-sigc::signal<void>      ARDOUR_UI::CloseAllDialogs;
+sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 
 static bool
 ask_about_configuration_copy (string const & old_dir, string const & new_dir, int version)
@@ -211,7 +211,7 @@ ask_about_configuration_copy (string const & old_dir, string const & new_dir, in
 	                   Gtk::MESSAGE_INFO,
 	                   Gtk::BUTTONS_YES_NO,
 	                   true /* modal, though it hardly matters since it is the only window */
-		);
+	);
 
 	msg.set_default_response (Gtk::RESPONSE_YES);
 	msg.show_all ();
@@ -221,8 +221,8 @@ ask_about_configuration_copy (string const & old_dir, string const & new_dir, in
 
 static void
 libxml_generic_error_func (void* /* parsing_context*/,
-                   const char* msg,
-                   ...)
+                           const char* msg,
+                           ...)
 {
 	va_list ap;
 	char buf[2048];
@@ -461,7 +461,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	TimeAxisViewItem::set_constant_heights ();
 
-        /* Set this up so that our window proxies can register actions */
+	/* Set this up so that our window proxies can register actions */
 
 	ActionManager::init ();
 
@@ -527,8 +527,8 @@ ARDOUR_UI::pre_release_dialog ()
 	ArdourDialog d (_("Pre-Release Warning"), true, false);
 	d.add_button (Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
-        Label* label = manage (new Label);
-        label->set_markup (string_compose (_("<b>Welcome to this pre-release build of %1 %2</b>\n\n\
+	Label* label = manage (new Label);
+	label->set_markup (string_compose (_("<b>Welcome to this pre-release build of %1 %2</b>\n\n\
 There are still several issues and bugs to be worked on,\n\
 as well as general workflow improvements, before this can be considered\n\
 release software. So, a few guidelines:\n\
@@ -548,11 +548,11 @@ Full information on all the above can be found on the support page at\n\
                 http://ardour.org/support\n\
 "), PROGRAM_NAME, VERSIONSTRING));
 
-        d.get_vbox()->set_border_width (12);
-        d.get_vbox()->pack_start (*label, false, false, 12);
-        d.get_vbox()->show_all ();
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (*label, false, false, 12);
+	d.get_vbox()->show_all ();
 
-        d.run ();
+	d.run ();
 }
 
 GlobalPortMatrixWindow*
@@ -1938,9 +1938,9 @@ ARDOUR_UI::check_audioengine (Gtk::Window& parent)
 {
 	if (!AudioEngine::instance()->connected()) {
 		MessageDialog msg (parent, string_compose (
-			                   _("%1 is not connected to any audio backend.\n"
-			                     "You cannot open or close sessions in this condition"),
-					   PROGRAM_NAME));
+		                           _("%1 is not connected to any audio backend.\n"
+		                           "You cannot open or close sessions in this condition"),
+		                           PROGRAM_NAME));
 		pop_back_splash (msg);
 		msg.run ();
 		return false;
@@ -2904,7 +2904,7 @@ ARDOUR_UI::process_snapshot_session_prompter (ArdourPrompter& prompter, bool swi
 		char illegal = Session::session_name_is_legal(snapname);
 		if (illegal) {
 			MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
-					     "snapshot names may not contain a '%1' character"), illegal));
+			                                     "snapshot names may not contain a '%1' character"), illegal));
 			msg.run ();
 			return false;
 		}
@@ -3004,7 +3004,7 @@ ARDOUR_UI::rename_session ()
 
 			if (illegal) {
 				MessageDialog msg (string_compose (_("To ensure compatibility with various systems\n"
-								     "session names may not contain a '%1' character"), illegal));
+				                                     "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				goto again;
 			}
@@ -3447,7 +3447,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		session_path = session_dialog.session_folder ();
 
 		if (nsm) {
-		        likely_new = true;
+			likely_new = true;
 		}
 
 		if (!likely_new) {
@@ -3484,12 +3484,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 		if (session_name[0] == G_DIR_SEPARATOR ||
 #ifdef PLATFORM_WINDOWS
-		    (session_name.length() > 3 && session_name[1] == ':' && session_name[2] == G_DIR_SEPARATOR)
+		   (session_name.length() > 3 && session_name[1] == ':' && session_name[2] == G_DIR_SEPARATOR)
 #else
-		    (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
-		    (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)
+		   (session_name.length() > 2 && session_name[0] == '.' && session_name[1] == G_DIR_SEPARATOR) ||
+		   (session_name.length() > 3 && session_name[0] == '.' && session_name[1] == '.' && session_name[2] == G_DIR_SEPARATOR)
 #endif
-			 )
+		)
 		{
 
 			/* absolute path or cwd-relative path specified for session name: infer session folder
@@ -3507,9 +3507,9 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			if (illegal) {
 				MessageDialog msg (session_dialog,
-						   string_compose (_("To ensure compatibility with various systems\n"
-								     "session names may not contain a '%1' character"),
-								   illegal));
+				                   string_compose (_("To ensure compatibility with various systems\n"
+				                                     "session names may not contain a '%1' character"),
+				                                   illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -3546,7 +3546,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			if (illegal) {
 				pop_back_splash (session_dialog);
 				MessageDialog msg (session_dialog, string_compose(_("To ensure compatibility with various systems\n"
-										    "session names may not contain a '%1' character"), illegal));
+				                                                    "session names may not contain a '%1' character"), illegal));
 				msg.run ();
 				ARDOUR_COMMAND_LINE::session_name = ""; // cancel that
 				continue;
@@ -3687,8 +3687,8 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	catch (...) {
 
 		MessageDialog msg (string_compose(
-			                   _("Session \"%1 (snapshot %2)\" did not load successfully"),
-			                   path, snap_name),
+		                           _("Session \"%1 (snapshot %2)\" did not load successfully"),
+		                           path, snap_name),
 		                   true,
 		                   Gtk::MESSAGE_INFO,
 		                   BUTTONS_OK);
@@ -3954,8 +3954,8 @@ ARDOUR_UI::show_splash ()
 void
 ARDOUR_UI::hide_splash ()
 {
-        delete splash;
-        splash = 0;
+	delete splash;
+	splash = 0;
 }
 
 void
@@ -3967,10 +3967,10 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 
 	if (removed == 0) {
 		MessageDialog msgd (_main_window,
-				    _("No files were ready for clean-up"),
-				    true,
-				    Gtk::MESSAGE_INFO,
-				    Gtk::BUTTONS_OK);
+		                    _("No files were ready for clean-up"),
+		                    true,
+		                    Gtk::MESSAGE_INFO,
+		                    Gtk::BUTTONS_OK);
 		msgd.set_title (_("Clean-up"));
 		msgd.set_secondary_text (_("If this seems suprising, \n\
 check for any existing snapshots.\n\
@@ -3984,12 +3984,12 @@ require some unused files to continue to exist."));
 	ArdourDialog results (_("Clean-up"), true, false);
 
 	struct CleanupResultsModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    CleanupResultsModelColumns() {
-		    add (visible_name);
-		    add (fullpath);
-	    }
-	    Gtk::TreeModelColumn<std::string> visible_name;
-	    Gtk::TreeModelColumn<std::string> fullpath;
+		CleanupResultsModelColumns() {
+			add (visible_name);
+			add (fullpath);
+		}
+		Gtk::TreeModelColumn<std::string> visible_name;
+		Gtk::TreeModelColumn<std::string> fullpath;
 	};
 
 
@@ -4833,8 +4833,8 @@ ARDOUR_UI::create_xrun_marker (framepos_t where)
 void
 ARDOUR_UI::halt_on_xrun_message ()
 {
-        cerr << "HALT on xrun\n";
-        MessageDialog msg (_main_window, _("Recording was stopped because your system could not keep up."));
+	cerr << "HALT on xrun\n";
+	MessageDialog msg (_main_window, _("Recording was stopped because your system could not keep up."));
 	msg.run ();
 }
 
@@ -5089,10 +5089,10 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 	case RESPONSE_ACCEPT:
 		return 0;
 	default:
-                break;
+		break;
 	}
 
-        return 1;
+	return 1;
 }
 
 void
@@ -5386,11 +5386,11 @@ ARDOUR_UI::session_format_mismatch (std::string xml_path, std::string backup_pat
 	const char* end_mono = "</tt>";
 
 	MessageDialog msg (string_compose (_("%4This is a session from an older version of %3%5\n\n"
-					     "%3 has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
-					     "From now on, use the backup copy with older versions of %3"),
-					   xml_path, backup_path, PROGRAM_NAME,
-					   start_big, end_big,
-					   start_mono, end_mono), true);
+	                                     "%3 has copied the old session file\n\n%6%1%7\n\nto\n\n%6%2%7\n\n"
+	                                     "From now on, use the backup copy with older versions of %3"),
+	                                   xml_path, backup_path, PROGRAM_NAME,
+	                                   start_big, end_big,
+	                                   start_mono, end_mono), true);
 
 	msg.run ();
 }
@@ -5618,7 +5618,7 @@ ARDOUR_UI::audioengine_became_silent ()
 void
 ARDOUR_UI::hide_application ()
 {
-    Application::instance ()-> hide ();
+	Application::instance ()-> hide ();
 }
 
 void
@@ -5744,7 +5744,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	bool special_handling_of_unmodified_accelerators = false;
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
 
-        if (focus) {
+	if (focus) {
 
 		/* some widget has keyboard focus */
 
@@ -5767,13 +5767,13 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 [title = %9] focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7 mods ? %8\n",
-                                                          win,
-                                                          ev->keyval,
-							  Gtkmm2ext::show_gdk_event_state (ev->state),
+	DEBUG_TRACE (DEBUG::Accelerators, string_compose ("Win = %1 [title = %9] focus = %7 (%8) Key event: code = %2  state = %3 special handling ? %4 magic widget focus ? %5 focus widget %6 named %7 mods ? %8\n",
+	                                                  win,
+	                                                  ev->keyval,
+	                                                  Gtkmm2ext::show_gdk_event_state (ev->state),
                                                           special_handling_of_unmodified_accelerators,
                                                           Keyboard::some_magic_widget_has_focus(),
-							  focus,
+	                                                  focus,
                                                           (focus ? gtk_widget_get_name (focus) : "no focus widget"),
                                                           ((ev->state & mask) ? "yes" : "no"),
                                                           window.get_title()));
@@ -5814,7 +5814,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 		/* no special handling or there are modifiers in effect: accelerate first */
 
-                DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
+		DEBUG_TRACE (DEBUG::Accelerators, "\tactivate, then propagate\n");
 		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tevent send-event:%1 time:%2 length:%3 name %7 string:%4 hardware_keycode:%5 group:%6\n",
 								  ev->send_event, ev->time, ev->length, ev->string, ev->hardware_keycode, ev->group, gdk_keyval_name (ev->keyval)));
 
@@ -5849,12 +5849,12 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			return true;
 		}
 
-                DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
+		DEBUG_TRACE (DEBUG::Accelerators, "\tnot accelerated, now propagate\n");
 
-                if (gtk_window_propagate_key_event (win, ev)) {
-	                DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate handled\n");
-	                return true;
-                }
+		if (gtk_window_propagate_key_event (win, ev)) {
+			DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate handled\n");
+			return true;
+		}
 
 	} else {
 
