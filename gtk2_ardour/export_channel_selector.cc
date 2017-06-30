@@ -238,7 +238,7 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 			for (Gtk::ListStore::Children::const_iterator p_it = port_list->children().begin(); p_it != port_list->children().end(); ++p_it) {
 				route_ports.insert ((*p_it)->get_value (route_cols.port_cols.port));
 				port_labels.insert (make_pair ((*p_it)->get_value (route_cols.port_cols.port),
-							       (*p_it)->get_value (route_cols.port_cols.label)));
+			                                       (*p_it)->get_value (route_cols.port_cols.label)));
 			}
 
 			std::set_intersection (pec->get_ports().begin(), pec->get_ports().end(),
@@ -455,15 +455,15 @@ RegionExportChannelSelector::RegionExportChannelSelector (ARDOUR::Session * _ses
                                                           ProfileManagerPtr manager,
                                                           ARDOUR::AudioRegion const & region,
                                                           ARDOUR::AudioTrack & track) :
-  ExportChannelSelector (_session, manager),
-  region (region),
-  track (track),
-  region_chans (region.n_channels()),
-  track_chans (track.n_outputs().n_audio()),
+	ExportChannelSelector (_session, manager),
+	region (region),
+	track (track),
+	region_chans (region.n_channels()),
+	track_chans (track.n_outputs().n_audio()),
 
-  raw_button (type_group),
-  fades_button (type_group),
-  processed_button (type_group)
+	raw_button (type_group),
+	fades_button (type_group),
+	processed_button (type_group)
 {
 	pack_start (vbox);
 
