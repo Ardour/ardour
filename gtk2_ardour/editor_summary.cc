@@ -124,7 +124,7 @@ EditorSummary::render_background_image ()
 
 	cairo_t* cr = cairo_create (_image);
 
-       /* background (really just the dividing lines between tracks */
+	/* background (really just the dividing lines between tracks */
 
 	cairo_set_source_rgb (cr, 0, 0, 0);
 	cairo_rectangle (cr, 0, 0, get_width(), get_height());
@@ -989,7 +989,7 @@ EditorSummary::set_editor_y (pair<double, double> const y)
 
 	_editor->_routes->resume_redisplay ();
 
-        set_editor_y (y.first);
+	set_editor_y (y.first);
 }
 
 void
