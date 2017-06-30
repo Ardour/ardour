@@ -629,12 +629,12 @@ TimeAxisView::begin_name_edit ()
 	 */
 
 	int x, y;
-        int wx, wy;
+	int wx, wy;
 
-        name_label.translate_coordinates (*toplevel, 0, 0, x, y);
-        toplevel->get_window()->get_origin (wx, wy);
+	name_label.translate_coordinates (*toplevel, 0, 0, x, y);
+	toplevel->get_window()->get_origin (wx, wy);
 
-        fte->move (wx + x, wy + y);
+	fte->move (wx + x, wy + y);
 	fte->present ();
 }
 
