@@ -3972,7 +3972,7 @@ ARDOUR_UI::display_cleanup_results (ARDOUR::CleanupReport& rep, const gchar* lis
 				    Gtk::MESSAGE_INFO,
 				    Gtk::BUTTONS_OK);
 		msgd.set_title (_("Clean-up"));
-		msgd.set_secondary_text (_("If this seems suprising, \n\
+		msgd.set_secondary_text (_("If this seems surprising, \n\
 check for any existing snapshots.\n\
 These may still include regions that\n\
 require some unused files to continue to exist."));
