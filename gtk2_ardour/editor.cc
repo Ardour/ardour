@@ -1888,7 +1888,6 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 
 	RegionSelection rs = get_regions_from_selection_and_entered ();
 
-	string::size_type pos = 0;
 	string menu_item_name = (rs.size() == 1) ? rs.front()->region()->name() : _("Selected Regions");
 
 	if (_popup_region_menu_item == 0) {
