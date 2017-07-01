@@ -272,12 +272,6 @@ Processor::set_pre_fader (bool p)
 }
 
 void
-Processor::set_ui (void* p)
-{
-	_ui_pointer = p;
-}
-
-void
 Processor::set_owner (SessionObject* o)
 {
 	_owner = o;

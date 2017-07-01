@@ -118,9 +118,6 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	PBD::Signal0<void>                     BypassableChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
-	void  set_ui (void*);
-	void* get_ui () const { return _ui_pointer; }
-
 	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
 	void set_window_proxy (ProcessorWindowProxy* wp) { _window_proxy = wp; }
 
