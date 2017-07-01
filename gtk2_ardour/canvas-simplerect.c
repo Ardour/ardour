@@ -87,7 +87,7 @@ gnome_canvas_simplerect_get_type (void)
 static void
 gnome_canvas_simplerect_class_init (GnomeCanvasSimpleRectClass *class)
 {
-        GObjectClass *gobject_class;
+	GObjectClass *gobject_class;
 	GtkObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
@@ -282,7 +282,7 @@ gnome_canvas_simplerect_reset_bounds (GnomeCanvasItem *item)
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simplerect->bbox_ulx, &simplerect->bbox_uly);
 	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simplerect->bbox_lrx, &simplerect->bbox_lry);
 
-        /* now queue redraws for changed areas */
+	/* now queue redraws for changed areas */
 
 	if (item->x1 == old_x1 && item->x2 == old_x2) {
 
@@ -376,44 +376,44 @@ gnome_canvas_simplerect_set_property (GObject      *object,
 
 	switch (prop_id) {
 	case PROP_X1:
-	        if (simplerect->x1 != g_value_get_double (value)) {
-		        simplerect->x1 = g_value_get_double (value);
+		if (simplerect->x1 != g_value_get_double (value)) {
+			simplerect->x1 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y1:
-	        if (simplerect->y1 != g_value_get_double (value)) {
-		        simplerect->y1 = g_value_get_double (value);
+		if (simplerect->y1 != g_value_get_double (value)) {
+			simplerect->y1 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_X2:
-	        if (simplerect->x2 != g_value_get_double (value)) {
-		        simplerect->x2 = g_value_get_double (value);
+		if (simplerect->x2 != g_value_get_double (value)) {
+			simplerect->x2 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y2:
-	        if (simplerect->y2 != g_value_get_double (value)) {
-		        simplerect->y2 = g_value_get_double (value);
+		if (simplerect->y2 != g_value_get_double (value)) {
+			simplerect->y2 = g_value_get_double (value);
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_DRAW:
-	        if (simplerect->draw != g_value_get_boolean (value)) {
-		        simplerect->draw = g_value_get_boolean (value);
+		if (simplerect->draw != g_value_get_boolean (value)) {
+			simplerect->draw = g_value_get_boolean (value);
 			update = TRUE;
 		}
 		break;
 
 
 	case PROP_FILL:
-	        if (simplerect->fill != g_value_get_boolean (value)) {
-		        simplerect->fill = g_value_get_boolean (value);
+		if (simplerect->fill != g_value_get_boolean (value)) {
+			simplerect->fill = g_value_get_boolean (value);
 			update = TRUE;
 		}
 		break;
@@ -537,10 +537,10 @@ gnome_canvas_simplerect_update (GnomeCanvasItem *item, double *affine, ArtSVP *c
 
 	if (simplerect->full_draw_on_update) {
 		gnome_canvas_request_redraw (item->canvas,
-                                             simplerect->bbox_ulx,
-                                             simplerect->bbox_uly,
-                                             simplerect->bbox_lrx+0.5,
-                                             simplerect->bbox_lry+0.5);
+		                             simplerect->bbox_ulx,
+        	                             simplerect->bbox_uly,
+        	                             simplerect->bbox_lrx+0.5,
+        	                             simplerect->bbox_lry+0.5);
 		simplerect->full_draw_on_update = FALSE;
 	}
 
@@ -622,30 +622,30 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 
 	}
 
-        if (simplerect->outline_a > 0) {
-                for (i = 0; i < simplerect->outline_pixels; ++i) {
+	if (simplerect->outline_a > 0) {
+		for (i = 0; i < simplerect->outline_pixels; ++i) {
 
-                        if (simplerect->outline_what & 0x1) {
-                                if (begin == simplerect->bbox_ulx) {
-                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
-                                }
-                        }
+			if (simplerect->outline_what & 0x1) {
+				if (begin == simplerect->bbox_ulx) {
+					PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
+				}
+			}
 
-                        if (simplerect->outline_what & 0x2) {
-                                if (end == (simplerect->bbox_lrx - 1)) {
-                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
-                                }
-                        }
+			if (simplerect->outline_what & 0x2) {
+				if (end == (simplerect->bbox_lrx - 1)) {
+					PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
+				}
+			}
 
-                        if (simplerect->outline_what & 0x4) {
-                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
-                        }
+			if (simplerect->outline_what & 0x4) {
+				PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
+			}
 
-                        if (simplerect->outline_what & 0x8) {
-                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
-                        }
-                }
-        }
+			if (simplerect->outline_what & 0x8) {
+				PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
+			}
+		}
+	}
 }
 
 #else /* SIMPLERECT_FAST_RENDERER */
@@ -701,30 +701,30 @@ gnome_canvas_simplerect_render (GnomeCanvasItem *item,
 #endif
 	}
 
-        if (simplerect->outline_a) {
-                for (i = 0; i < (int) simplerect->outline_pixels; ++i) {
+	if (simplerect->outline_a) {
+		for (i = 0; i < (int) simplerect->outline_pixels; ++i) {
 
-                        if (simplerect->outline_what & 0x1) {
-                                if (begin == simplerect->bbox_ulx) {
-                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
-                                }
-                        }
+			if (simplerect->outline_what & 0x1) {
+				if (begin == simplerect->bbox_ulx) {
+					PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin + i, sy, ey);
+				}
+			}
 
-                        if (simplerect->outline_what & 0x2) {
-                                if (end == (simplerect->bbox_lrx - 1)) {
-                                        PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
-                                }
-                        }
+			if (simplerect->outline_what & 0x2) {
+				if (end == (simplerect->bbox_lrx - 1)) {
+					PAINT_VERTA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, end - i, sy, ey + 1);
+				}
+			}
 
-                        if (simplerect->outline_what & 0x4) {
-                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
-                        }
+			if (simplerect->outline_what & 0x4) {
+				PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end, sy+i);
+			}
 
-                        if (simplerect->outline_what & 0x8) {
-                                PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
-                        }
-                }
-        }
+			if (simplerect->outline_what & 0x8) {
+				PAINT_HORIZA(buf, simplerect->outline_r, simplerect->outline_g, simplerect->outline_b, simplerect->outline_a, begin, end + 1, ey-i);
+			}
+		}
+	}
 }
 #endif /* SIMPLERECT_FAST_RENDERER */
 

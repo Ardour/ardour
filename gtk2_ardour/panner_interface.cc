@@ -36,13 +36,13 @@ PannerInterface::PannerInterface (boost::shared_ptr<Panner> p)
 	, _send_mode (false)
 	, _editor (0)
 {
-        set_flags (Gtk::CAN_FOCUS);
+	set_flags (Gtk::CAN_FOCUS);
 
-        add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
-                    Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|
-                    Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
-                    Gdk::SCROLL_MASK|
-                    Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK|
+	            Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK|
+	            Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|
+	            Gdk::SCROLL_MASK|
+	            Gdk::POINTER_MOTION_MASK);
 
 }
 

@@ -144,7 +144,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 	ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
 	ArdourButton automation_play_all_button;
-    /** a button which sets all controls' automation setting to Write */
+	/** a button which sets all controls' automation setting to Write */
 	ArdourButton automation_write_all_button;
 	/** a button which sets all controls' automation setting to Touch */
 	ArdourButton automation_touch_all_button;
@@ -328,8 +328,8 @@ class PluginUIWindow : public ArdourWindow
 	bool was_visible;
 	bool _keyboard_focused;
 #ifdef AUDIOUNIT_SUPPORT
-        int pre_deactivate_x;
-        int pre_deactivate_y;
+	int pre_deactivate_x;
+	int pre_deactivate_y;
 #endif
 
 	void keyboard_focused (bool yn);

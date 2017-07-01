@@ -770,7 +770,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		return false;
 
 	if (!_session->engine().connected()) {
-	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
+		MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
 		return false;
 	}

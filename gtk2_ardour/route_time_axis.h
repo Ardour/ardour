@@ -155,22 +155,22 @@ protected:
 		boost::shared_ptr<AutomationTimeAxisView> view;
 		RouteTimeAxisView&                        parent;
 
-	    ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
+		ProcessorAutomationNode (Evoral::Parameter w, Gtk::CheckMenuItem* mitem, RouteTimeAxisView& p)
 		    : what (w), menu_item (mitem), parent (p) {}
 
-	    ~ProcessorAutomationNode ();
+		~ProcessorAutomationNode ();
 	};
 
 	struct ProcessorAutomationInfo {
-	    boost::shared_ptr<ARDOUR::Processor> processor;
-	    bool                                 valid;
-	    Gtk::Menu*                           menu;
-	    std::vector<ProcessorAutomationNode*>     lines;
+		boost::shared_ptr<ARDOUR::Processor> processor;
+		bool                                 valid;
+		Gtk::Menu*                           menu;
+		std::vector<ProcessorAutomationNode*>     lines;
 
-	    ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
+		ProcessorAutomationInfo (boost::shared_ptr<ARDOUR::Processor> i)
 		    : processor (i), valid (true), menu (0) {}
 
-	    ~ProcessorAutomationInfo ();
+		~ProcessorAutomationInfo ();
 	};
 
 

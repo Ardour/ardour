@@ -583,13 +583,13 @@ private:
 	typedef std::pair<TimeAxisView*,XMLNode*> TAVState;
 
 	struct VisualState {
-	    VisualState (bool with_tracks);
-	    ~VisualState ();
-	    double              y_position;
-	    framecnt_t          samples_per_pixel;
-	    framepos_t          leftmost_frame;
-	    Editing::ZoomFocus  zoom_focus;
-	    GUIObjectState*     gui_state;
+		VisualState (bool with_tracks);
+		~VisualState ();
+		double              y_position;
+		framecnt_t          samples_per_pixel;
+		framepos_t          leftmost_frame;
+		Editing::ZoomFocus  zoom_focus;
+		GUIObjectState*     gui_state;
 	};
 
 	std::list<VisualState*> undo_visual_stack;

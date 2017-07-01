@@ -670,13 +670,13 @@ MeterDialog::entry_key_release (GdkEventKey*)
 void
 MeterDialog::note_type_change ()
 {
-        set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
 void
 MeterDialog::lock_style_change ()
 {
-        set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
+	set_response_sensitive (RESPONSE_ACCEPT, is_user_input_valid());
 }
 
 double

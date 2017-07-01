@@ -37,19 +37,19 @@ class PortInsertUI : public Gtk::VBox
 	void finished (IOSelector::Result);
 
   private:
-        boost::shared_ptr<ARDOUR::PortInsert> _pi;
+	boost::shared_ptr<ARDOUR::PortInsert> _pi;
 
-        Gtk::Notebook notebook;
+	Gtk::Notebook notebook;
 	Gtkmm2ext::StatefulToggleButton latency_button;
 	IOSelector input_selector;
 	IOSelector output_selector;
-        Gtk::Label latency_display;
-        Gtk::HBox  latency_hbox;
-        sigc::connection latency_timeout;
+	Gtk::Label latency_display;
+	Gtk::HBox  latency_hbox;
+	sigc::connection latency_timeout;
 
-        bool check_latency_measurement ();
-        void latency_button_toggled ();
-        void update_latency_display ();
+	bool check_latency_measurement ();
+	void latency_button_toggled ();
+	void update_latency_display ();
 };
 
 class PortInsertWindow : public ArdourDialog

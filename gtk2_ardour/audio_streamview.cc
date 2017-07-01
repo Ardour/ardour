@@ -111,7 +111,7 @@ AudioStreamView::create_region_view (boost::shared_ptr<Region> r, bool wait_for_
 		break;
 	case Destructive:
 		region_view = new TapeAudioRegionView (_canvas_group, _trackview, region,
-						       _samples_per_pixel, region_color);
+		                                       _samples_per_pixel, region_color);
 		break;
 	default:
 		fatal << string_compose (_("programming error: %1"), "illegal track mode in ::create_region_view()") << endmsg;
@@ -240,8 +240,8 @@ AudioStreamView::setup_rec_box ()
 			create_rec_box(frame_pos, width);
 
 		} else if (rec_active &&
-			   (_trackview.session()->record_status() != Session::Recording ||
-			    !_trackview.track()->rec_enable_control()->get_value())) {
+		           (_trackview.session()->record_status() != Session::Recording ||
+		            !_trackview.track()->rec_enable_control()->get_value())) {
 			screen_update_connection.disconnect();
 			rec_active = false;
 			rec_updating = false;

@@ -62,7 +62,7 @@ class AUPluginUI;
 @interface NotificationObject : NSObject {
 	@private
 		AUPluginUI* plugin_ui;
-	        NSWindow* cocoa_parent;
+		NSWindow* cocoa_parent;
 		NSWindow* top_level_parent;
 }
 @end
@@ -87,7 +87,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void activate ();
 	void deactivate ();
 
-        bool non_gtk_gui() const { return true; }
+	bool non_gtk_gui() const { return true; }
 
 	void lower_box_realized ();
 	bool lower_box_visibility_notify (GdkEventVisibility*);

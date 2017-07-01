@@ -124,8 +124,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void register_actions ();
 
-        void load_bindings ();
-        Gtkmm2ext::Bindings*  bindings;
+	void load_bindings ();
+	Gtkmm2ext::Bindings*  bindings;
 
   protected:
 	void set_axis_targets_for_operation ();

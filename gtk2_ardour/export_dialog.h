@@ -124,12 +124,12 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	Gtk::HBox           warn_hbox;
 	Gtk::Label          warn_label;
-	std::string       warn_string;
+	std::string         warn_string;
 
 	Gtk::HBox           list_files_hbox;
 	Gtk::Label          list_files_label;
 	Gtk::Button         list_files_button;
-	std::string       list_files_string;
+	std::string         list_files_string;
 
 	void add_error (std::string const & text);
 	void add_warning (std::string const & text);

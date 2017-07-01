@@ -351,11 +351,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 
-                /* we never show the monitor bus inputs */
+		/* we never show the monitor bus inputs */
 
-                if (inputs && (*i)->is_monitor()) {
-                        continue;
-                }
+		if (inputs && (*i)->is_monitor()) {
+			continue;
+		}
 
 		/* keep track of IOs that we have taken bundles from,
 		   so that we can avoid taking the same IO from both
@@ -500,10 +500,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	std::vector<std::string> extra_program[DataType::num_types];
 	std::vector<std::string> extra_other[DataType::num_types];
 
-        string lpn (PROGRAM_NAME);
-        boost::to_lower (lpn);
-        string lpnc = lpn;
-        lpnc += ':';
+	string lpn (PROGRAM_NAME);
+	boost::to_lower (lpn);
+	string lpnc = lpn;
+	lpnc += ':';
 
 	vector<string> ports;
 	if (type == DataType::NIL) {
@@ -529,31 +529,31 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			    !program->has_port(p) &&
 			    !other->has_port(p)) {
 
-                                /* special hack: ignore MIDI ports labelled Midi-Through. these
-                                   are basically useless and mess things up for default
-                                   connections.
-                                */
+				/* special hack: ignore MIDI ports labelled Midi-Through. these
+				   are basically useless and mess things up for default
+				   connections.
+				*/
 
 				if (p.find ("Midi-Through") != string::npos || p.find ("Midi Through") != string::npos) {
-                                        ++s;
-                                        continue;
-                                }
+					++s;
+					continue;
+				}
 
-                                /* special hack: ignore our monitor inputs (which show up here because
-                                   we excluded them earlier.
-                                */
+				/* special hack: ignore our monitor inputs (which show up here because
+				   we excluded them earlier.
+				*/
 
 				string lp = p;
 				string monitor = _("Monitor");
 
 				boost::to_lower (lp);
-                                boost::to_lower (monitor);
+				boost::to_lower (monitor);
 
-                                if ((lp.find (monitor) != string::npos) &&
-                                    (lp.find (lpn) != string::npos)) {
-                                        ++s;
-                                        continue;
-                                }
+				if ((lp.find (monitor) != string::npos) &&
+				    (lp.find (lpn) != string::npos)) {
+					++s;
+					continue;
+				}
 
 				/* can't use the audio engine for this as we
 				 * are looking at ports not owned by the

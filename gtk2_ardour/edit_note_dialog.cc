@@ -153,7 +153,7 @@ void
 EditNoteDialog::done (int r)
 {
 	if (r != RESPONSE_ACCEPT) {
-                return;
+		return;
 	}
 
 	/* These calls mean that if a value is entered using the keyboard

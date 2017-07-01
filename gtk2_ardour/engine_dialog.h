@@ -40,102 +40,102 @@
 
 class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
   public:
-    EngineControl ();
-    ~EngineControl ();
+	EngineControl ();
+	~EngineControl ();
 
-    static bool need_setup ();
+	static bool need_setup ();
 
-    XMLNode& get_state ();
-    bool set_state (const XMLNode&);
+	XMLNode& get_state ();
+	bool set_state (const XMLNode&);
 
-    void set_desired_sample_rate (uint32_t);
-    bool try_autostart ();
+	void set_desired_sample_rate (uint32_t);
+	bool try_autostart ();
 
   private:
-    Gtk::Notebook notebook;
+	Gtk::Notebook notebook;
 
-    Gtk::Label engine_status;
+	Gtk::Label engine_status;
 
-    /* core fields used by all backends */
+	/* core fields used by all backends */
 
-    Gtk::Table basic_packer;
-    Gtk::HBox basic_hbox;
-    Gtk::VBox basic_vbox;
+	Gtk::Table basic_packer;
+	Gtk::HBox basic_hbox;
+	Gtk::VBox basic_vbox;
 
-    Gtk::ComboBoxText backend_combo;
-    Gtk::ComboBoxText driver_combo;
-    Gtk::ComboBoxText device_combo;
-    Gtk::ComboBoxText input_device_combo;
-    Gtk::ComboBoxText output_device_combo;
-    Gtk::ComboBoxText sample_rate_combo;
-    Gtk::ComboBoxText midi_option_combo;
-    Gtk::ComboBoxText buffer_size_combo;
-    Gtk::Label        buffer_size_duration_label;
-    Gtk::ComboBoxText nperiods_combo;
-    Gtk::Adjustment input_latency_adjustment;
-    Gtk::SpinButton input_latency;
-    Gtk::Adjustment output_latency_adjustment;
-    Gtk::SpinButton output_latency;
-    Gtk::Adjustment input_channels_adjustment;
-    Gtk::SpinButton input_channels;
-    Gtk::Adjustment output_channels_adjustment;
-    Gtk::SpinButton output_channels;
-    Gtk::Adjustment ports_adjustment;
-    Gtk::SpinButton ports_spinner;
+	Gtk::ComboBoxText backend_combo;
+	Gtk::ComboBoxText driver_combo;
+	Gtk::ComboBoxText device_combo;
+	Gtk::ComboBoxText input_device_combo;
+	Gtk::ComboBoxText output_device_combo;
+	Gtk::ComboBoxText sample_rate_combo;
+	Gtk::ComboBoxText midi_option_combo;
+	Gtk::ComboBoxText buffer_size_combo;
+	Gtk::Label        buffer_size_duration_label;
+	Gtk::ComboBoxText nperiods_combo;
+	Gtk::Adjustment input_latency_adjustment;
+	Gtk::SpinButton input_latency;
+	Gtk::Adjustment output_latency_adjustment;
+	Gtk::SpinButton output_latency;
+	Gtk::Adjustment input_channels_adjustment;
+	Gtk::SpinButton input_channels;
+	Gtk::Adjustment output_channels_adjustment;
+	Gtk::SpinButton output_channels;
+	Gtk::Adjustment ports_adjustment;
+	Gtk::SpinButton ports_spinner;
 
-    Gtk::Label      have_control_text;
-    ArdourButton    control_app_button;
-    ArdourButton    midi_devices_button;
-    ArdourButton    start_stop_button;
-    ArdourButton    update_devices_button;
-    ArdourButton    use_buffered_io_button;
+	Gtk::Label      have_control_text;
+	ArdourButton    control_app_button;
+	ArdourButton    midi_devices_button;
+	ArdourButton    start_stop_button;
+	ArdourButton    update_devices_button;
+	ArdourButton    use_buffered_io_button;
 
-    Gtk::Button     connect_disconnect_button;
+	Gtk::Button     connect_disconnect_button;
 
-    /* latency measurement */
+	/* latency measurement */
 
-    Gtk::ComboBoxText lm_output_channel_combo;
-    Gtk::ComboBoxText lm_input_channel_combo;
-    Gtk::Label        lm_measure_label;
-    Gtk::Button       lm_measure_button;
-    Gtk::Button       lm_use_button;
-    Gtk::Button       lm_back_button;
-    ArdourButton      lm_button_audio;
-    Gtk::Label        lm_title;
-    Gtk::Label        lm_preamble;
-    Gtk::Label        lm_results;
-    Gtk::Table        lm_table;
-    Gtk::VBox         lm_vbox;
-    bool              have_lm_results;
-    bool              lm_running;
+	Gtk::ComboBoxText lm_output_channel_combo;
+	Gtk::ComboBoxText lm_input_channel_combo;
+	Gtk::Label        lm_measure_label;
+	Gtk::Button       lm_measure_button;
+	Gtk::Button       lm_use_button;
+	Gtk::Button       lm_back_button;
+	ArdourButton      lm_button_audio;
+	Gtk::Label        lm_title;
+	Gtk::Label        lm_preamble;
+	Gtk::Label        lm_results;
+	Gtk::Table        lm_table;
+	Gtk::VBox         lm_vbox;
+	bool              have_lm_results;
+	bool              lm_running;
 
-    /* MIDI Tab */
+	/* MIDI Tab */
 
-    Gtk::VBox midi_vbox;
-    Gtk::Button midi_back_button;
-    Gtk::Table midi_device_table;
+	Gtk::VBox midi_vbox;
+	Gtk::Button midi_back_button;
+	Gtk::Table midi_device_table;
 
-    /* MIDI ... JACK */
+	/* MIDI ... JACK */
 
-    Gtk::CheckButton aj_button;
+	Gtk::CheckButton aj_button;
 
-    uint32_t ignore_changes; // state save/load
-    uint32_t ignore_device_changes; // AudioEngine::DeviceListChanged
-    uint32_t _desired_sample_rate;
-    bool     started_at_least_once;
-    bool     queue_device_changed;
+	uint32_t ignore_changes; // state save/load
+	uint32_t ignore_device_changes; // AudioEngine::DeviceListChanged
+	uint32_t _desired_sample_rate;
+	bool     started_at_least_once;
+	bool     queue_device_changed;
 
-    void driver_changed ();
-    void backend_changed ();
-    void sample_rate_changed ();
-    void buffer_size_changed ();
-    void nperiods_changed ();
-    void parameter_changed ();
-    void midi_option_changed ();
+	void driver_changed ();
+	void backend_changed ();
+	void sample_rate_changed ();
+	void buffer_size_changed ();
+	void nperiods_changed ();
+	void parameter_changed ();
+	void midi_option_changed ();
 
-    void setup_midi_tab_for_backend ();
-    void setup_midi_tab_for_jack ();
-    void refresh_midi_display (std::string focus = "");
+	void setup_midi_tab_for_backend ();
+	void setup_midi_tab_for_jack ();
+	void refresh_midi_display (std::string focus = "");
 
 	void update_midi_options ();
 
@@ -148,67 +148,67 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::vector<float> get_sample_rates_for_all_devices ();
 	std::vector<uint32_t> get_buffer_sizes_for_all_devices ();
 
-    float get_rate() const;
-    uint32_t get_buffer_size() const;
-    uint32_t get_nperiods() const;
-    uint32_t get_input_channels() const;
-    uint32_t get_output_channels() const;
-    uint32_t get_input_latency() const;
-    uint32_t get_output_latency() const;
-    std::string get_device_name() const;
-    std::string get_input_device_name() const;
-    std::string get_output_device_name() const;
-    std::string get_driver() const;
-    std::string get_backend() const;
-    std::string get_midi_option () const;
-    bool get_use_buffered_io () const;
+	float get_rate() const;
+	uint32_t get_buffer_size() const;
+	uint32_t get_nperiods() const;
+	uint32_t get_input_channels() const;
+	uint32_t get_output_channels() const;
+	uint32_t get_input_latency() const;
+	uint32_t get_output_latency() const;
+	std::string get_device_name() const;
+	std::string get_input_device_name() const;
+	std::string get_output_device_name() const;
+	std::string get_driver() const;
+	std::string get_backend() const;
+	std::string get_midi_option () const;
+	bool get_use_buffered_io () const;
 
 	std::string get_default_device (const std::string&,
 	                                const std::vector<std::string>&);
 
-    void device_changed ();
-    void input_device_changed ();
-    void output_device_changed ();
-    bool set_driver_popdown_strings ();
-    bool set_device_popdown_strings ();
-    bool set_input_device_popdown_strings ();
-    bool set_output_device_popdown_strings ();
-    void set_samplerate_popdown_strings ();
-    void set_buffersize_popdown_strings ();
-    void set_nperiods_popdown_strings ();
-    void list_devices ();
-    void show_buffer_duration ();
+	void device_changed ();
+	void input_device_changed ();
+	void output_device_changed ();
+	bool set_driver_popdown_strings ();
+	bool set_device_popdown_strings ();
+	bool set_input_device_popdown_strings ();
+	bool set_output_device_popdown_strings ();
+	void set_samplerate_popdown_strings ();
+	void set_buffersize_popdown_strings ();
+	void set_nperiods_popdown_strings ();
+	void list_devices ();
+	void show_buffer_duration ();
 
-    void configure_midi_devices ();
+	void configure_midi_devices ();
 
-    struct MidiDeviceSetting {
+	struct MidiDeviceSetting {
 	std::string name;
 	bool enabled;
 	uint32_t input_latency;
 	uint32_t output_latency;
 
 	MidiDeviceSetting (std::string n, bool en = true, uint32_t inl = 0, uint32_t oul = 0)
-	    : name (n)
-	    , enabled (en)
-	    , input_latency (inl)
-	    , output_latency (oul)
+		: name (n)
+		, enabled (en)
+		, input_latency (inl)
+		, output_latency (oul)
 	{}
-    };
+	};
 
-    typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
-    bool _can_set_midi_latencies;
-    std::vector<MidiDeviceSettings> _midi_devices;
+	typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
+	bool _can_set_midi_latencies;
+	std::vector<MidiDeviceSettings> _midi_devices;
 
-    MidiDeviceSettings find_midi_device(std::string devicename) const {
+	MidiDeviceSettings find_midi_device(std::string devicename) const {
 	for (std::vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
-	    if ((*p)->name == devicename) {
+		if ((*p)->name == devicename) {
 		return *p;
-	    }
+		}
 	}
 	return MidiDeviceSettings();
-    }
+	}
 
-    struct StateStruct {
+	struct StateStruct {
 	std::string backend;
 	std::string driver;
 	std::string device;
@@ -238,38 +238,38 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 		, use_buffered_io (false)
 		, lru (0) {}
 
-    };
+	};
 
-    typedef boost::shared_ptr<StateStruct> State;
-    typedef std::list<State> StateList;
-    static bool state_sort_cmp (const State &a, const State &b);
+	typedef boost::shared_ptr<StateStruct> State;
+	typedef std::list<State> StateList;
+	static bool state_sort_cmp (const State &a, const State &b);
 
-    StateList states;
+	StateList states;
 
-    State get_matching_state (const std::string& backend);
-    State get_matching_state (const std::string& backend,
-			       const std::string& driver,
-			       const std::string& device);
-    State get_matching_state (const std::string& backend,
-			       const std::string& driver,
-			       const std::string& input_device,
-			       const std::string& output_device);
-    State get_saved_state_for_currently_displayed_backend_and_device ();
-    void maybe_display_saved_state ();
-    State save_state ();
-    void store_state (State);
-    bool equivalent_states (const State&, const State&);
+	State get_matching_state (const std::string& backend);
+	State get_matching_state (const std::string& backend,
+	                          const std::string& driver,
+	                          const std::string& device);
+	State get_matching_state (const std::string& backend,
+	                          const std::string& driver,
+	                          const std::string& input_device,
+	                          const std::string& output_device);
+	State get_saved_state_for_currently_displayed_backend_and_device ();
+	void maybe_display_saved_state ();
+	State save_state ();
+	void store_state (State);
+	bool equivalent_states (const State&, const State&);
 
 	bool set_current_state (const State& state);
 	void set_default_state ();
 
-    bool  _have_control;
+	bool  _have_control;
 
-    static bool print_channel_count (Gtk::SpinButton*);
+	static bool print_channel_count (Gtk::SpinButton*);
 
-    void build_notebook ();
-    void build_full_control_notebook ();
-    void build_no_control_notebook ();
+	void build_notebook ();
+	void build_full_control_notebook ();
+	void build_no_control_notebook ();
 
 	void connect_changed_signals ();
 	void block_changed_signals ();
@@ -303,50 +303,50 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	sigc::connection input_channels_connection;
 	sigc::connection output_channels_connection;
 
-    void on_show ();
-    void on_map ();
-    void control_app_button_clicked ();
-    void start_stop_button_clicked ();
-    void update_devices_button_clicked ();
-    void use_buffered_io_button_clicked ();
-    void use_latency_button_clicked ();
-    void manage_control_app_sensitivity ();
-    int push_state_to_backend (bool start);
-    void post_push ();
-    void update_sensitivity ();
+	void on_show ();
+	void on_map ();
+	void control_app_button_clicked ();
+	void start_stop_button_clicked ();
+	void update_devices_button_clicked ();
+	void use_buffered_io_button_clicked ();
+	void use_latency_button_clicked ();
+	void manage_control_app_sensitivity ();
+	int push_state_to_backend (bool start);
+	void post_push ();
+	void update_sensitivity ();
 	bool start_engine ();
 	bool stop_engine (bool for_latency = false);
 
-    /* latency measurement */
-    void latency_button_clicked ();
-    void latency_back_button_clicked ();
-    bool check_audio_latency_measurement ();
-    bool check_midi_latency_measurement ();
-    sigc::connection latency_timeout;
-    void enable_latency_tab ();
-    void disable_latency_tab ();
-    void start_latency_detection ();
-    void end_latency_detection ();
+	/* latency measurement */
+	void latency_button_clicked ();
+	void latency_back_button_clicked ();
+	bool check_audio_latency_measurement ();
+	bool check_midi_latency_measurement ();
+	sigc::connection latency_timeout;
+	void enable_latency_tab ();
+	void disable_latency_tab ();
+	void start_latency_detection ();
+	void end_latency_detection ();
 
-    void on_switch_page (GtkNotebookPage*, guint page_num);
-    bool on_delete_event (GdkEventAny*);
+	void on_switch_page (GtkNotebookPage*, guint page_num);
+	bool on_delete_event (GdkEventAny*);
 
-    void engine_running ();
-    void engine_stopped ();
-    void device_list_changed ();
+	void engine_running ();
+	void engine_stopped ();
+	void device_list_changed ();
 
-    PBD::ScopedConnection running_connection;
-    PBD::ScopedConnectionList stopped_connection;
-    PBD::ScopedConnection devicelist_connection;
+	PBD::ScopedConnection running_connection;
+	PBD::ScopedConnectionList stopped_connection;
+	PBD::ScopedConnection devicelist_connection;
 
-    void connect_disconnect_click ();
-    void calibrate_audio_latency ();
-    void calibrate_midi_latency (MidiDeviceSettings);
+	void connect_disconnect_click ();
+	void calibrate_audio_latency ();
+	void calibrate_midi_latency (MidiDeviceSettings);
 
-    MidiDeviceSettings _measure_midi;
-    void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
-    void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
-    sigc::connection lm_back_button_signal;
+	MidiDeviceSettings _measure_midi;
+	void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
+	void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
+	sigc::connection lm_back_button_signal;
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

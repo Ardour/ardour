@@ -88,7 +88,7 @@ public:
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
-        void mark_double_click ();
+	void mark_double_click ();
 
 	/** @return true if an end drag or abort is in progress */
 	bool ending () const {
@@ -128,7 +128,7 @@ private:
 class Drag
 {
 public:
-        Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
+	Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -147,8 +147,8 @@ public:
 	ARDOUR::MusicFrame adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
 	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
 
-        bool was_double_click() const { return _was_double_click; }
-        void set_double_click (bool yn) { _was_double_click = yn; }
+	bool was_double_click() const { return _was_double_click; }
+	void set_double_click (bool yn) { _was_double_click = yn; }
 
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
@@ -270,7 +270,7 @@ private:
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
 	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
-        bool _was_double_click; ///< true if drag initiated by a double click event
+	bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
@@ -904,7 +904,7 @@ public:
 private:
 	void fake_locate (framepos_t);
 
-        EditorCursor& _cursor;
+	EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
 };
@@ -949,7 +949,7 @@ public:
 class MarkerDrag : public Drag
 {
 public:
-        MarkerDrag (Editor *, ArdourCanvas::Item *);
+	MarkerDrag (Editor *, ArdourCanvas::Item *);
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -972,16 +972,16 @@ private:
 
 	ArdourMarker* _marker; ///< marker being dragged
 	bool _selection_changed;
-        struct CopiedLocationMarkerInfo {
-	    ARDOUR::Location* location;
-	    std::vector<ArdourMarker*> markers;
-	    bool    move_both;
-	    CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
+	struct CopiedLocationMarkerInfo {
+		ARDOUR::Location* location;
+		std::vector<ArdourMarker*> markers;
+		bool    move_both;
+		CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
 	};
 
-        typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
-        CopiedLocationInfo _copied_locations;
- 	ArdourCanvas::Points _points;
+	typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
+	CopiedLocationInfo _copied_locations;
+	ArdourCanvas::Points _points;
 };
 
 /** Control point drag */
@@ -1004,7 +1004,7 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
-        bool     _pushing;
+	bool     _pushing;
         uint32_t _final_index;
 	static double _zero_gain_fraction;
 };
@@ -1172,8 +1172,8 @@ private:
 	bool _add;
 	TrackSelection _track_selection_at_start;
 	bool _time_selection_at_start;
-        framepos_t start_at_start;
-        framepos_t end_at_start;
+	framepos_t start_at_start;
+	framepos_t end_at_start;
 };
 
 /** Range marker drag */
@@ -1261,7 +1261,7 @@ private:
 		std::list<ControlPoint*> points; ///< points to drag on the line
 		std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> range; ///< the range of all points on the line, in session frames
 		XMLNode* state; ///< the XML state node before the drag
-      	        double original_fraction; ///< initial y-fraction before the drag
+		double original_fraction; ///< initial y-fraction before the drag
 	};
 
 	std::list<Line> _lines;
