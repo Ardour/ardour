@@ -888,7 +888,7 @@ AudioRegionView::redraw_end_xfade ()
 
 void
 AudioRegionView::redraw_end_xfade_to (boost::shared_ptr<AudioRegion> ar, framecnt_t width, Points& points, double effective_height,
-				      double rect_edge, double rect_width)
+                                      double rect_edge, double rect_width)
 {
 	if (points.size() < 2) {
 		return;
@@ -1578,7 +1578,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		}
 	}
 
-        for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
+	for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
 		(*w)->set_fill_color (fill);
 		(*w)->set_outline_color (outline);
 		(*w)->set_clip_color (clip);
@@ -1720,11 +1720,11 @@ AudioRegionView::update_transient(float /*old_pos*/, float new_pos)
 		float* pos = (float*) (*l).second->get_data ("position");
 
 		if (rint(new_pos) == rint(*pos)) {
-				framepos_t position = _region->position();
-		    framepos_t old_frame = (*l).first;
-		    framepos_t new_frame = trackview.editor().pixel_to_sample (new_pos) + position;
-		    _region->update_transient (old_frame, new_frame);
-		    break;
+			framepos_t position = _region->position();
+			framepos_t old_frame = (*l).first;
+			framepos_t new_frame = trackview.editor().pixel_to_sample (new_pos) + position;
+			_region->update_transient (old_frame, new_frame);
+			break;
 		}
 	}
 }
@@ -1742,8 +1742,8 @@ AudioRegionView::remove_transient (float pos)
 	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
 		float *line_pos = (float*) (*l).second->get_data ("position");
 		if (rint(pos) == rint(*line_pos)) {
-		    _region->remove_transient ((*l).first);
-		    break;
+			_region->remove_transient ((*l).first);
+			break;
 		}
 	}
 }

@@ -321,6 +321,6 @@ NoteBase::mouse_near_ends () const
 bool
 NoteBase::big_enough_to_trim () const
 {
-        return (x1() - x0()) > 10;
+	return (x1() - x0()) > 10;
 }
 

@@ -89,9 +89,7 @@ EditorSnapshots::selection_changed ()
 			return;
 		}
 
-		_display.set_sensitive (false);
 		ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
-		_display.set_sensitive (true);
 	}
 }
 
@@ -191,7 +189,7 @@ EditorSnapshots::redisplay ()
 	vector<std::string> state_file_paths;
 
 	get_state_files_in_directory (_session->session_directory().root_path(),
-				      state_file_paths);
+	                              state_file_paths);
 
 	if (state_file_paths.empty()) {
 		return;

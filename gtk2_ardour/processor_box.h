@@ -435,16 +435,16 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	bool edit_aux_send(boost::shared_ptr<ARDOUR::Processor>);
 
-        /* Everything except a WindowProxy object should use this to get the window */
+	/* Everything except a WindowProxy object should use this to get the window */
 	Gtk::Window* get_processor_ui (boost::shared_ptr<ARDOUR::Processor>) const;
 
-        /* a WindowProxy object can use this */
-        Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>, bool);
-        Gtk::Window* get_generic_editor_window (boost::shared_ptr<ARDOUR::Processor>);
+	/* a WindowProxy object can use this */
+	Gtk::Window* get_editor_window (boost::shared_ptr<ARDOUR::Processor>, bool);
+	Gtk::Window* get_generic_editor_window (boost::shared_ptr<ARDOUR::Processor>);
 
-        void manage_pins (boost::shared_ptr<ARDOUR::Processor>);
-        void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
-        void generic_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+	void manage_pins (boost::shared_ptr<ARDOUR::Processor>);
+	void edit_processor (boost::shared_ptr<ARDOUR::Processor>);
+	void generic_edit_processor (boost::shared_ptr<ARDOUR::Processor>);
 
 	void update_gui_object_state (ProcessorEntry *);
 
@@ -497,7 +497,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	void route_going_away ();
 
-        bool is_editor_mixer_strip() const;
+	bool is_editor_mixer_strip() const;
 
 	Gtkmm2ext::DnDVBox<ProcessorEntry> processor_display;
 	Gtk::ScrolledWindow    processor_scroller;
@@ -511,7 +511,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void object_drop (Gtkmm2ext::DnDVBox<ProcessorEntry> *, ProcessorEntry *, Glib::RefPtr<Gdk::DragContext> const &);
 
 	Width _width;
-        bool  _redisplay_pending;
+	bool  _redisplay_pending;
 
 	Gtk::Menu *processor_menu;
 	gint processor_menu_map_handler (GdkEventAny *ev);
@@ -609,10 +609,10 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	void route_property_changed (const PBD::PropertyChange&);
 	std::string generate_processor_title (boost::shared_ptr<ARDOUR::PluginInsert> pi);
 
-        //typedef std::list<ProcessorWindowProxy*> ProcessorWindowProxies;
-        //ProcessorWindowProxies _processor_window_info;
+	//typedef std::list<ProcessorWindowProxy*> ProcessorWindowProxies;
+	//ProcessorWindowProxies _processor_window_info;
 
-        ProcessorWindowProxy* find_window_proxy (boost::shared_ptr<ARDOUR::Processor>) const;
+	ProcessorWindowProxy* find_window_proxy (boost::shared_ptr<ARDOUR::Processor>) const;
 
 	void set_processor_ui (boost::shared_ptr<ARDOUR::Processor>, Gtk::Window *);
 	void maybe_add_processor_to_ui_list (boost::weak_ptr<ARDOUR::Processor>);

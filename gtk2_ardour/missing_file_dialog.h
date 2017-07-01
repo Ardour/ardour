@@ -30,7 +30,7 @@
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
-        class Session;
+	class Session;
 }
 
 class MissingFileDialog : public ArdourDialog

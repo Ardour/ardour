@@ -66,7 +66,7 @@ class Manager : public ARDOUR::SessionHandlePtr
 	void set_transient_for (Gtk::Window*);
 	Gtk::Window* transient_parent() const { return current_transient_parent; }
 
-                                        private:
+  private:
 	typedef std::list<ProxyBase*> Windows;
 	Windows _windows;
 	Glib::RefPtr<Gtk::ActionGroup> window_actions;
@@ -155,7 +155,7 @@ class ProxyWithConstructor: public ProxyBase
 		}
 	}
 
-                                        private:
+  private:
 	boost::function<T*()>	creator;
 };
 

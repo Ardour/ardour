@@ -732,7 +732,7 @@ Editor::register_actions ()
 	myactions.register_toggle_action (editor_actions, X_("ToggleMeasureVisibility"), _("Show Measure Lines"), sigc::mem_fun (*this, &Editor::toggle_measure_visibility));
 
 	myactions.register_action (editor_actions, X_("toggle-midi-input-active"), _("Toggle MIDI Input Active for Editor-Selected Tracks/Busses"),
-				   sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
+	                           sigc::bind (sigc::mem_fun (*this, &Editor::toggle_midi_input_active), false));
 
 
 	/* MIDI stuff */
@@ -1694,7 +1694,7 @@ Editor::parameter_changed (std::string p)
 			_group_tabs->hide ();
 		}
 
-                reset_controls_layout_width ();
+		reset_controls_layout_width ();
 
 		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Editor"), X_("ToggleGroupTabs"));
 		if (act) {

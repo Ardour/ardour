@@ -168,8 +168,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (FadeOutHandleItem);
 	REGISTER_ENUM (NoteItem);
 	REGISTER_ENUM (FeatureLineItem);
-        REGISTER_ENUM (LeftFrameHandle);
-        REGISTER_ENUM (RightFrameHandle);
+	REGISTER_ENUM (LeftFrameHandle);
+	REGISTER_ENUM (RightFrameHandle);
 	REGISTER_ENUM (StartCrossFadeItem);
 	REGISTER_ENUM (EndCrossFadeItem);
 	REGISTER_ENUM (CrossfadeViewItem);

@@ -105,7 +105,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		stretch.run (*i);
 
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
-					  regions.front()->region()->position());
+		                          regions.front()->region()->position());
 		midi_playlists_affected.insert (playlist);
 	}
 
@@ -378,16 +378,16 @@ Editor::timefx_thread (void *arg)
 
 	tsd->editor.do_timefx ();
 
-        /* GACK! HACK! sleep for a bit so that our request buffer for the GUI
-           event loop doesn't die before any changes we made are processed
-           by the GUI ...
-        */
+	/* GACK! HACK! sleep for a bit so that our request buffer for the GUI
+	   event loop doesn't die before any changes we made are processed
+	   by the GUI ...
+	*/
 
 #ifdef PLATFORM_WINDOWS
 	Glib::usleep(2 * G_USEC_PER_SEC);
 #else
-        struct timespec t = { 2, 0 };
-        nanosleep (&t, 0);
+	struct timespec t = { 2, 0 };
+	nanosleep (&t, 0);
 #endif
 	return 0;
 }

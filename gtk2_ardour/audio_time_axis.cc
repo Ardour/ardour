@@ -116,7 +116,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
-                                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -207,8 +207,8 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		create_trim_automation_child (param, show);
 
 	} else if (param.type() == PanWidthAutomation ||
-                   param.type() == PanElevationAutomation ||
-                   param.type() == PanAzimuthAutomation) {
+	           param.type() == PanElevationAutomation ||
+	           param.type() == PanAzimuthAutomation) {
 
 		ensure_pan_views (show);
 

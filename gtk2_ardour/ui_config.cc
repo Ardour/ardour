@@ -218,7 +218,7 @@ UIConfiguration::post_gui_init ()
 int
 UIConfiguration::load_defaults ()
 {
-        std::string rcfile;
+	std::string rcfile;
 	int ret = -1;
 
 	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {

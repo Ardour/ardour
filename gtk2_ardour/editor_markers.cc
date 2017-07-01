@@ -741,7 +741,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 	Location* loc = find_location_from_marker (marker, is_start);
 
 	if (_session && loc) {
-	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
 }
 
@@ -1094,7 +1094,7 @@ Editor::marker_menu_select_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        set_selection_from_range (*l);
+		set_selection_from_range (*l);
 	}
 }
 
@@ -1112,7 +1112,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set, false);
+		select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set, false);
 	}
 
 }
@@ -1131,7 +1131,7 @@ Editor::marker_menu_separate_regions_using_location ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        separate_regions_using_location (*l);
+		separate_regions_using_location (*l);
 	}
 
 }
@@ -1604,11 +1604,13 @@ Editor::rename_marker(ArdourMarker *marker)
 
 	loc = find_location_from_marker (marker, is_start);
 
-	if (!loc)
-	       return;
-
-	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range())
+	if (!loc) {
 		return;
+	}
+
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range()) {
+		return;
+	}
 
 	ArdourPrompter dialog (true);
 	string txt;
@@ -1726,7 +1728,7 @@ Editor::update_punch_range_view ()
 
 	} else {
 
-	        transport_punch_range_rect->hide();
+		transport_punch_range_rect->hide();
 	}
 }
 
@@ -1747,9 +1749,9 @@ Editor::marker_selection_changed ()
 }
 
 struct SortLocationsByPosition {
-    bool operator() (Location* a, Location* b) {
-	    return a->start() < b->start();
-    }
+	bool operator() (Location* a, Location* b) {
+		return a->start() < b->start();
+	}
 };
 
 void

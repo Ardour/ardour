@@ -642,7 +642,7 @@ Dialog::run (lua_State *L)
 		case Gtk::RESPONSE_ACCEPT:
 			break;
 		default:
-      lua_pushnil (L);
+			lua_pushnil (L);
 			return 1;
 	}
 

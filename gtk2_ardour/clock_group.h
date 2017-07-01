@@ -27,21 +27,21 @@
 
 class ClockGroup : public sigc::trackable {
   public:
-        ClockGroup ();
-        ~ClockGroup ();
+	ClockGroup ();
+	~ClockGroup ();
 
-        void set_clock_mode (AudioClock::Mode);
-        AudioClock::Mode clock_mode() const { return _clock_mode; }
+	void set_clock_mode (AudioClock::Mode);
+	AudioClock::Mode clock_mode() const { return _clock_mode; }
 
-        void add (AudioClock&);
-        void remove (AudioClock&);
+	void add (AudioClock&);
+	void remove (AudioClock&);
 
   private:
-        std::set<AudioClock*> clocks;
-        bool ignore_changes;
-        AudioClock::Mode _clock_mode;
+	std::set<AudioClock*> clocks;
+	bool ignore_changes;
+	AudioClock::Mode _clock_mode;
 
-        void one_clock_changed (AudioClock*);
+	void one_clock_changed (AudioClock*);
 };
 
 #endif /* __gtk_ardour_clock_group_h__ */

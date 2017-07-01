@@ -87,19 +87,19 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	Width _width;
 
 	struct MeterInfo {
-	    Gtkmm2ext::FastMeter *meter;
-	    gint16                width;
+		Gtkmm2ext::FastMeter *meter;
+		gint16                width;
 		int                   length;
-	    bool                  packed;
-	    float                 max_peak;
+		bool                  packed;
+		float                 max_peak;
 
-	    MeterInfo() {
-		    meter = 0;
-		    width = 0;
-                    length = 0;
-		    packed = false;
-		    max_peak = -INFINITY;
-	    }
+		MeterInfo() {
+			meter = 0;
+			width = 0;
+			length = 0;
+			packed = false;
+			max_peak = -INFINITY;
+		}
 	};
 
 	guint16                regular_meter_width;

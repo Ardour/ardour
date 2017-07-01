@@ -92,7 +92,7 @@ gnome_canvas_simpleline_get_type (void)
 static void
 gnome_canvas_simpleline_class_init (GnomeCanvasSimpleLineClass *class)
 {
-        GObjectClass *gobject_class;
+	GObjectClass *gobject_class;
 	GtkObjectClass *object_class;
 	GnomeCanvasItemClass *item_class;
 
@@ -200,7 +200,7 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 	GnomeCanvasSimpleLine *simpleline;
 	int update = FALSE;
 	int bounds_changed = FALSE;
-        double d;
+	double d;
 
 	g_return_if_fail (object != NULL);
 	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
@@ -209,42 +209,42 @@ gnome_canvas_simpleline_set_property (GObject      *object,
 
 	switch (prop_id) {
 	case PROP_X1:
-                d = g_value_get_double (value);
-	        if (simpleline->x1 != d) {
-		        simpleline->x1 = d;
+		d = g_value_get_double (value);
+		if (simpleline->x1 != d) {
+			simpleline->x1 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y1:
-                d = g_value_get_double (value);
-	        if (simpleline->y1 != d) {
-		        simpleline->y1 = d;
+		d = g_value_get_double (value);
+		if (simpleline->y1 != d) {
+			simpleline->y1 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_X2:
-                d = g_value_get_double (value);
-	        if (simpleline->x2 != d) {
-		        simpleline->x2 = d;
+		d = g_value_get_double (value);
+		if (simpleline->x2 != d) {
+			simpleline->x2 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_Y2:
-                d = g_value_get_double (value);
-	        if (simpleline->y2 != d) {
-		        simpleline->y2 = d;
+		d = g_value_get_double (value);
+		if (simpleline->y2 != d) {
+			simpleline->y2 = d;
 			bounds_changed = TRUE;
 		}
 		break;
 
 	case PROP_COLOR_RGBA:
 		if (simpleline->color != g_value_get_uint(value)) {
-		        simpleline->color = g_value_get_uint(value);
+			simpleline->color = g_value_get_uint(value);
 			UINT_TO_RGBA (simpleline->color, &simpleline->r, &simpleline->g, &simpleline->b, &simpleline->a);
-		        update = TRUE;
+			update = TRUE;
 		}
 		break;
 	default:
@@ -262,8 +262,8 @@ gnome_canvas_simpleline_get_property (GObject      *object,
 				      GValue       *value,
 				      GParamSpec   *pspec)
 {
-        g_return_if_fail (object != NULL);
-        g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
+	g_return_if_fail (object != NULL);
+	g_return_if_fail (GNOME_IS_CANVAS_SIMPLELINE (object));
 
 	GnomeCanvasSimpleLine *line = GNOME_CANVAS_SIMPLELINE (object);
 
@@ -293,69 +293,69 @@ static void
 gnome_canvas_simpleline_update (GnomeCanvasItem *item, double *affine, ArtSVP *clip_path, int flags)
 {
 	GnomeCanvasSimpleLine *simpleline;
-        double x1, x2, y1, y2;
+	double x1, x2, y1, y2;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
 	if (parent_class->update)
 		(* parent_class->update) (item, affine, clip_path, flags);
 
-        /* redraw old location */
+	/* redraw old location */
 
-        gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
+	gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
 
-        /* get current bounding box in parent-relative world coordinates */
+	/* get current bounding box in parent-relative world coordinates */
 
-        gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
+	gnome_canvas_simpleline_bounds (item, &x1, &y1, &x2, &y2);
 
-        /* convert parent-relative item coordinates to world coordinates */
+	/* convert parent-relative item coordinates to world coordinates */
 
-        gnome_canvas_item_i2w (item, &x1, &y1);
-        gnome_canvas_item_i2w (item, &x2, &y2);
+	gnome_canvas_item_i2w (item, &x1, &y1);
+	gnome_canvas_item_i2w (item, &x2, &y2);
 
-        /* don't suffer from rounding errors */
+	/* don't suffer from rounding errors */
 
-        x1 = floor (x1);
-        y1 = floor (y1);
-        x2 = ceil (x2);
-        y2 = ceil (y2);
+	x1 = floor (x1);
+	y1 = floor (y1);
+	x2 = ceil (x2);
+	y2 = ceil (y2);
 
-        /* force non-zero dimensionality for both axes */
+	/* force non-zero dimensionality for both axes */
 
-        if (x1 == x2) {
-                x2 += 1.0;
-        }
+	if (x1 == x2) {
+		x2 += 1.0;
+	}
 
-        if (y1 == y2) {
-                y2 += 1.0;
-        }
+	if (y1 == y2) {
+		y2 += 1.0;
+	}
 
-        /* reset item bounding box (canvas coordinates, so integral. but stored in doubles) */
+	/* reset item bounding box (canvas coordinates, so integral. but stored in doubles) */
 
-        gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x1, y1, &item->x1, &item->y1);
-        gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x2, y2, &item->x2, &item->y2);
+	gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x1, y1, &item->x1, &item->y1);
+	gnome_canvas_w2c_d (GNOME_CANVAS(item->canvas), x2, y2, &item->x2, &item->y2);
 
-        /* redraw new location */
+	/* redraw new location */
 
-        gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
+	gnome_canvas_request_redraw (item->canvas, item->x1, item->y1, item->x2, item->y2);
 
-        /* store actual line coords as canvas coordinates for use in render() */
+	/* store actual line coords as canvas coordinates for use in render() */
 
-        x1 = simpleline->x1;
-        y1 = simpleline->y1;
-        x2 = simpleline->x2;
-        y2 = simpleline->y2;
-        /* convert to world */
-        gnome_canvas_item_i2w (item, &x1, &y1);
-        gnome_canvas_item_i2w (item, &x2, &y2);
-        /* avoid rounding errors */
-        x1 = (int) floor (item->x1);
-        y1 = (int) floor (item->y1);
-        x2 = (int) ceil (item->x2);
-        y2 = (int) ceil (item->y2);
-        /* convert to canvas coordinates, integral, stored in integers */
-        gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simpleline->cx1, &simpleline->cy1);
-        gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simpleline->cx2, &simpleline->cy2);
+	x1 = simpleline->x1;
+	y1 = simpleline->y1;
+	x2 = simpleline->x2;
+	y2 = simpleline->y2;
+	/* convert to world */
+	gnome_canvas_item_i2w (item, &x1, &y1);
+	gnome_canvas_item_i2w (item, &x2, &y2);
+	/* avoid rounding errors */
+	x1 = (int) floor (item->x1);
+	y1 = (int) floor (item->y1);
+	x2 = (int) ceil (item->x2);
+	y2 = (int) ceil (item->y2);
+	/* convert to canvas coordinates, integral, stored in integers */
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x1, y1, &simpleline->cx1, &simpleline->cy1);
+	gnome_canvas_w2c (GNOME_CANVAS(item->canvas), x2, y2, &simpleline->cx2, &simpleline->cy2);
 }
 
 static void
@@ -364,28 +364,28 @@ gnome_canvas_simpleline_render (GnomeCanvasItem *item,
 {
 	GnomeCanvasSimpleLine *simpleline;
 	int x1, x2;
-        int y1, y2;
+	int y1, y2;
 
 	simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
 	x1 = simpleline->cx1;
 	x2 = simpleline->cx2;
-        y1 = simpleline->cy1;
+	y1 = simpleline->cy1;
 
 	if (buf->is_bg) {
 		gnome_canvas_buf_ensure_buf (buf);
 		buf->is_bg = FALSE;
 	}
 
-        if (simpleline->x1 != simpleline->x2) {
-                PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
-                             x1, x2, y1);
-        } else {
-                y2 = simpleline->cy2;
-                PAINT_VERTA (buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
-                             x1, y1, y2);
+	if (simpleline->x1 != simpleline->x2) {
+		PAINT_HORIZA(buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
+		             x1, x2, y1);
+	} else {
+		y2 = simpleline->cy2;
+		PAINT_VERTA (buf, simpleline->r, simpleline->g, simpleline->b, simpleline->a,
+		             x1, y1, y2);
 
-        }
+	}
 }
 
 static void
@@ -402,10 +402,10 @@ gnome_canvas_simpleline_bounds (GnomeCanvasItem *item, double *x1, double *y1, d
 {
 	GnomeCanvasSimpleLine *simpleline = GNOME_CANVAS_SIMPLELINE (item);
 
-        *x1 = simpleline->x1;
-        *y1 = simpleline->y1;
-        *x2 = simpleline->x1;
-        *y2 = simpleline->y2;
+	*x1 = simpleline->x1;
+	*y1 = simpleline->y1;
+	*x2 = simpleline->x1;
+	*y2 = simpleline->y2;
 }
 
 static double

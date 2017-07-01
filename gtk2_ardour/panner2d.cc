@@ -296,8 +296,8 @@ Panner2d::handle_position_change ()
 	uint32_t n;
 	double w = panner_shell->pannable()->pan_width_control->get_value();
 
-        position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
-                        panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
+	position.position = AngularVector (panner_shell->pannable()->pan_azimuth_control->get_value() * 360.0,
+	                                   panner_shell->pannable()->pan_elevation_control->get_value() * 90.0);
 
 	for (uint32_t i = 0; i < signals.size(); ++i) {
 		signals[i]->position = panner_shell->panner()->signal_position (i);
@@ -341,10 +341,10 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 
 	/* start with the position itself */
 
-        PBD::AngularVector dp = position.position;
-        if (!have_elevation) dp.ele = 0;
-        dp.azi = 270 - dp.azi;
-        dp.cartesian (c);
+	PBD::AngularVector dp = position.position;
+	if (!have_elevation) dp.ele = 0;
+	dp.azi = 270 - dp.azi;
+	dp.cartesian (c);
 
 	cart_to_gtk (c);
 	best_distance = sqrt ((c.x - x) * (c.x - x) +
@@ -387,11 +387,11 @@ Panner2d::find_closest_object (gdouble x, gdouble y, bool& is_signal)
 	if (!closest) {
 		for (Targets::const_iterator i = speakers.begin(); i != speakers.end(); ++i) {
 			candidate = *i;
-                        PBD::AngularVector sp = candidate->position;
-                        sp.azi = 270 -sp.azi;
-                        CartesianVector c;
-                        sp.cartesian (c);
-                        cart_to_gtk (c);
+			PBD::AngularVector sp = candidate->position;
+			sp.azi = 270 -sp.azi;
+			CartesianVector c;
+			sp.cartesian (c);
+			cart_to_gtk (c);
 
 			distance = sqrt ((c.x - x) * (c.x - x) +
 					(c.y - y) * (c.y - y));
@@ -523,7 +523,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 	}
 
 	if (!panner_shell->bypassed()) {
-                /* convention top == front ^= azimuth == .5 (same as stereo/mono panners) */
+		/* convention top == front ^= azimuth == .5 (same as stereo/mono panners) */
 
 		if (signals.size() > 1) {
 			/* arc to show "diffusion" */
@@ -533,7 +533,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 			cairo_save (cr);
 			cairo_translate (cr, radius, radius);
-                        cairo_rotate (cr, M_PI / 2.0);
+			cairo_rotate (cr, M_PI / 2.0);
 			cairo_rotate (cr, position_angle - (width_angle/2.0));
 			cairo_move_to (cr, 0, 0);
 			cairo_arc_negative (cr, 0, 0, radius, width_angle, 0.0);
@@ -562,9 +562,9 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 		/* draw position */
 
-                PBD::AngularVector dp = position.position;
-                if (!have_elevation) dp.ele = 0;
-                dp.azi = 270 - dp.azi;
+		PBD::AngularVector dp = position.position;
+		if (!have_elevation) dp.ele = 0;
+		dp.azi = 270 - dp.azi;
 		dp.cartesian (c);
 		cart_to_gtk (c);
 
@@ -588,7 +588,7 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 					 */
 					PBD::AngularVector sp = signal->position;
 					if (!have_elevation) sp.ele = 0;
-                                        sp.azi += 270.0;
+					sp.azi += 270.0;
 					sp.cartesian (c);
 					cart_to_gtk (c);
 
@@ -626,8 +626,8 @@ Panner2d::on_expose_event (GdkEventExpose *event)
 
 			if (speaker->visible) {
 
-                                PBD::AngularVector sp = speaker->position;
-                                sp.azi += 270.0;
+				PBD::AngularVector sp = speaker->position;
+				sp.azi += 270.0;
 				CartesianVector c;
 				sp.cartesian (c);
 				cart_to_gtk (c);
@@ -683,29 +683,29 @@ bool
 Panner2d::on_button_press_event (GdkEventButton *ev)
 {
 	GdkModifierType state;
-        int x;
-        int y;
-        bool is_signal;
+	int x;
+	int y;
+	bool is_signal;
 
 	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
 		return false;
 	}
 
-        did_move = false;
+	did_move = false;
 
 	switch (ev->button) {
 	case 1:
 	case 2:
-                x = ev->x - hoffset;
-                y = ev->y - voffset;
+		x = ev->x - hoffset;
+		y = ev->y - voffset;
 
 		if ((drag_target = find_closest_object (x, y, is_signal)) != 0) {
-                        if (!is_signal) {
-                                panner_shell->panner()->set_position (drag_target->position.azi/360.0);
-                                drag_target = 0;
-                        } else {
-                                drag_target->set_selected (true);
-                        }
+			if (!is_signal) {
+				panner_shell->panner()->set_position (drag_target->position.azi/360.0);
+				drag_target = 0;
+			} else {
+				drag_target->set_selected (true);
+			}
 		}
 
 		state = (GdkModifierType) ev->state;
@@ -731,7 +731,7 @@ Panner2d::on_button_release_event (GdkEventButton *ev)
 		x = (int) floor (ev->x);
 		y = (int) floor (ev->y);
 		state = (GdkModifierType) ev->state;
-                ret = handle_motion (x, y, state);
+		ret = handle_motion (x, y, state);
 		drag_target = 0;
 		break;
 
@@ -791,7 +791,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 			if (!have_elevation) {
 				clamp_to_circle (cp.x, cp.y);
 				cp.angular (av);
-                                av.azi = fmod(270 - av.azi, 360);
+				av.azi = fmod(270 - av.azi, 360);
 				if (drag_target == &position) {
 					double degree_fract = av.azi / 360.0;
 					panner_shell->panner()->set_position (degree_fract);
@@ -803,7 +803,7 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 				double r2d = 180.0 / M_PI;
 				av.azi = r2d * atan2(cp.y, cp.x);
 				av.ele = r2d * asin(cp.z);
-                                av.azi = fmod(270 - av.azi, 360);
+				av.azi = fmod(270 - av.azi, 360);
 
 				if (drag_target == &position) {
 					double azi_fract = av.azi / 360.0;
@@ -821,18 +821,18 @@ Panner2d::handle_motion (gint evx, gint evy, GdkModifierType state)
 bool
 Panner2d::on_scroll_event (GdkEventScroll* ev)
 {
-        switch (ev->direction) {
-        case GDK_SCROLL_UP:
-        case GDK_SCROLL_RIGHT:
-                panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() - 1.0/360.0);
-                break;
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+	case GDK_SCROLL_RIGHT:
+		panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() - 1.0/360.0);
+		break;
 
-        case GDK_SCROLL_DOWN:
-        case GDK_SCROLL_LEFT:
-                panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() + 1.0/360.0);
-                break;
-        }
-        return true;
+	case GDK_SCROLL_DOWN:
+	case GDK_SCROLL_LEFT:
+		panner_shell->panner()->set_position (panner_shell->pannable()->pan_azimuth_control->get_value() + 1.0/360.0);
+		break;
+	}
+	return true;
 }
 
 void
@@ -840,28 +840,28 @@ Panner2d::cart_to_gtk (CartesianVector& c) const
 {
 	/* cartesian coordinate space:
    	      center = 0.0
-              dimension = 2.0 * 2.0
-              increasing y moves up
-              so max values along each axis are -1..+1
+	      dimension = 2.0 * 2.0
+	      increasing y moves up
+	      so max values along each axis are -1..+1
 
 	   GTK uses a coordinate space that is:
   	      top left = 0.0
-              dimension = (radius*2.0) * (radius*2.0)
-              increasing y moves down
+	      dimension = (radius*2.0) * (radius*2.0)
+	      increasing y moves down
 	*/
-        const double diameter = radius*2.0;
+	const double diameter = radius*2.0;
 
-        c.x = diameter * ((c.x + 1.0) / 2.0);
-        /* extra subtraction inverts the y-axis to match "increasing y moves down" */
-        c.y = diameter - (diameter * ((c.y + 1.0) / 2.0));
+	c.x = diameter * ((c.x + 1.0) / 2.0);
+	/* extra subtraction inverts the y-axis to match "increasing y moves down" */
+	c.y = diameter - (diameter * ((c.y + 1.0) / 2.0));
 }
 
 void
 Panner2d::gtk_to_cart (CartesianVector& c) const
 {
-        const double diameter = radius*2.0;
+	const double diameter = radius*2.0;
 	c.x = ((c.x / diameter) * 2.0) - 1.0;
-        c.y = (((diameter - c.y) / diameter) * 2.0) - 1.0;
+	c.y = (((diameter - c.y) / diameter) * 2.0) - 1.0;
 }
 
 void

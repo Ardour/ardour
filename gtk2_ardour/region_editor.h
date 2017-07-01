@@ -77,7 +77,7 @@ class RegionEditor : public ArdourDialog
 	Gtk::Label sync_absolute_label;
 	Gtk::Label start_label;
 
-        ClockGroup* _clock_group;
+	ClockGroup* _clock_group;
 
 	AudioClock position_clock;
 	AudioClock end_clock;

@@ -190,7 +190,7 @@ TempoCurve::show ()
 {
 	_shown = true;
 
-        group->show ();
+	group->show ();
 }
 
 void

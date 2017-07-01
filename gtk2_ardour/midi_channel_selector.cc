@@ -85,8 +85,8 @@ MidiChannelSelector::~MidiChannelSelector()
 bool
 MidiChannelSelector::was_clicked (GdkEventButton*)
 {
-        clicked ();
-        return false;
+	clicked ();
+	return false;
 }
 
 void
@@ -360,16 +360,16 @@ MidiChannelSelectorWindow::build ()
 	VBox* vpacker;
 	HBox* capture_controls;
 	HBox* playback_controls;
-        Button* b;
-        Label* l;
+	Button* b;
+	Label* l;
 
-        vpacker = manage (new VBox);
-        vpacker->set_spacing (6);
-        vpacker->set_border_width (12);
+	vpacker = manage (new VBox);
+	vpacker->set_spacing (6);
+	vpacker->set_border_width (12);
 
-    l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
+	l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Inbound"))));
 	l->set_use_markup (true);
-    vpacker->pack_start (*l, true, true);
+	vpacker->pack_start (*l, true, true);
 
 	vpacker->pack_start (capture_all_button);
 	capture_all_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), AllChannels));
@@ -380,35 +380,35 @@ MidiChannelSelectorWindow::build ()
 	vpacker->pack_start (capture_force_button);
 	capture_force_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::capture_mode_toggled), ForceChannel));
 
-        vpacker->pack_start (capture_mask_box);
+	vpacker->pack_start (capture_mask_box);
 
 	capture_controls = manage (new HBox);
 	capture_controls->set_spacing (6);
 
-        b = manage (new Button (_("All")));
+	b = manage (new Button (_("All")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable recording all channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_capture_mask));
-        b = manage (new Button (_("None")));
+	b = manage (new Button (_("None")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to disable recording all channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::zero_capture_mask));
-        b = manage (new Button (_("Invert")));
+	b = manage (new Button (_("Invert")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to invert currently selected recording channels"));
 	capture_controls->pack_start (*b);
 	capture_mask_controls.push_back (b);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::invert_capture_mask));
 
-        vpacker->pack_start (*capture_controls);
+	vpacker->pack_start (*capture_controls);
 
 	Gtk::HSeparator *hseparator2 = manage(new Gtk::HSeparator);
 	vpacker->pack_start (*hseparator2, false, false, 6);
 
-        l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Playback"))));
+	l = manage (new Label (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", _("Playback"))));
 	l->set_use_markup (true);
-        vpacker->pack_start (*l);
+	vpacker->pack_start (*l);
 
 	vpacker->pack_start (playback_all_button);
 	playback_all_button.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &MidiChannelSelectorWindow::playback_mode_toggled), AllChannels));
@@ -424,12 +424,12 @@ MidiChannelSelectorWindow::build ()
 	playback_controls = manage (new HBox);
 	playback_controls->set_spacing (6);
 
-        b = manage (new Button (_("All")));
+	b = manage (new Button (_("All")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to enable playback of all channels"));
 	playback_controls->pack_start (*b);
 	playback_mask_controls.push_back (b);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::fill_playback_mask));
-        b = manage (new Button (_("None")));
+	b = manage (new Button (_("None")));
 	Gtkmm2ext::UI::instance()->set_tip (*b, _("Click to disable playback of all channels"));
 	playback_controls->pack_start (*b);
 	playback_mask_controls.push_back (b);
@@ -440,9 +440,9 @@ MidiChannelSelectorWindow::build ()
 	playback_mask_controls.push_back (b);
 	b->signal_clicked().connect (sigc::mem_fun (*this, &MidiChannelSelectorWindow::invert_playback_mask));
 
-        vpacker->pack_start (*playback_controls);
+	vpacker->pack_start (*playback_controls);
 
-        add (*vpacker);
+	add (*vpacker);
 }
 
 void

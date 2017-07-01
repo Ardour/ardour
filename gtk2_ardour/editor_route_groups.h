@@ -38,9 +38,9 @@ public:
 
 private:
 
-        struct Columns : public Gtk::TreeModel::ColumnRecord {
+	struct Columns : public Gtk::TreeModel::ColumnRecord {
 
-                Columns () {
+		Columns () {
 			add (gdkcolor);
 			add (text);
 			add (is_visible);
@@ -54,11 +54,11 @@ private:
 			add (active_shared);
 			add (active_state);
 			add (routegroup);
-                }
+		}
 
-	        Gtk::TreeModelColumn<Gdk::Color> gdkcolor;
-	        Gtk::TreeModelColumn<std::string> text;
-	        Gtk::TreeModelColumn<bool> is_visible;
+		Gtk::TreeModelColumn<Gdk::Color> gdkcolor;
+		Gtk::TreeModelColumn<std::string> text;
+		Gtk::TreeModelColumn<bool> is_visible;
 		Gtk::TreeModelColumn<bool> gain;
 		Gtk::TreeModelColumn<bool> gain_relative;
 		Gtk::TreeModelColumn<bool> mute;
@@ -68,7 +68,7 @@ private:
 		Gtk::TreeModelColumn<bool> select;
 		Gtk::TreeModelColumn<bool> active_shared;
 		Gtk::TreeModelColumn<bool> active_state;
-	        Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
+		Gtk::TreeModelColumn<ARDOUR::RouteGroup*> routegroup;
 	};
 
 	Columns _columns;

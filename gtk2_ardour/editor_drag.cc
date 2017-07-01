@@ -4683,7 +4683,7 @@ MarkerDrag::aborted (bool movement_occurred)
 void
 MarkerDrag::update_item (Location*)
 {
-        /* noop */
+	/* noop */
 }
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
@@ -5846,7 +5846,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		case CreateSkipMarker:
 		case CreateRangeMarker:
 		case CreateCDMarker:
-		    {
+		{
 			XMLNode &before = _editor->session()->locations()->get_state();
 			if (_operation == CreateSkipMarker) {
 				_editor->begin_reversible_command (_("new skip marker"));
@@ -5873,7 +5873,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->session()->add_command(new MementoCommand<Locations>(*(_editor->session()->locations()), &before, &after));
 			_editor->commit_reversible_command ();
 			break;
-		    }
+		}
 
 		case CreateTransportMarker:
 			// popup menu to pick loop or punch

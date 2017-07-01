@@ -57,8 +57,8 @@ class MetadataField {
 	/// Get widget for editing value
 	virtual Gtk::Widget & edit_widget () = 0;
   protected:
-        std::string _name;
-        std::string _value;
+	std::string _name;
+	std::string _value;
 };
 
 /// MetadataField that contains text
@@ -106,7 +106,7 @@ class NumberMetadataField : public MetadataField {
 	Gtk::Widget & edit_widget ();
   private:
 	void update_value ();
-        std::string uint_to_str (uint32_t i) const;
+	std::string uint_to_str (uint32_t i) const;
 	uint32_t str_to_uint (std::string const & str) const;
 
 	Getter getter;
@@ -140,7 +140,7 @@ class EAN13MetadataField : public MetadataField {
 	void update_status ();
   private:
 	void update_value ();
-        std::string numeric_string (std::string const & str) const;
+	std::string numeric_string (std::string const & str) const;
 
 	Getter getter;
 	Setter setter;
@@ -171,7 +171,7 @@ class SessionMetadataSet : public ARDOUR::SessionHandlePtr {
   protected:
 	typedef std::list<MetadataPtr> DataList;
 	DataList list;
-        std::string name;
+	std::string name;
 };
 
 /// Contains MetadataFields for editing
