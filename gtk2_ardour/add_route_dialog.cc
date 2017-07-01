@@ -287,7 +287,7 @@ AddRouteDialog::track_type_chosen ()
 					   true, MESSAGE_INFO, BUTTONS_OK, true);
 			msg.set_position (WIN_POS_MOUSE);
 			msg.run ();
-	        }
+		}
 		channel_combo.set_sensitive (true);
 		mode_combo.set_sensitive (true);
 		instrument_combo.set_sensitive (true);

@@ -620,14 +620,14 @@ PluginSelector::run ()
 				PluginPtr p = load_plugin (pp);
 				if (p) {
 					plugins.push_back (p);
-                                } else {
-                                        MessageDialog msg (string_compose (_("The plugin \"%1\" could not be loaded\n\nSee the Log window for more details (maybe)"), pp->name));
-                                        msg.run ();
-                                }
+				} else {
+					MessageDialog msg (string_compose (_("The plugin \"%1\" could not be loaded\n\nSee the Log window for more details (maybe)"), pp->name));
+					msg.run ();
+				}
 			}
 			if (interested_object && !plugins.empty()) {
 				finish = !interested_object->use_plugins (plugins);
-                        }
+			}
 
 			break;
 
@@ -689,57 +689,57 @@ PluginSelector::on_show ()
 }
 
 struct PluginMenuCompareByCreator {
-    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-	    int cmp;
+	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+		int cmp;
 
-	    cmp = cmp_nocase_utf8 (a->creator, b->creator);
+		cmp = cmp_nocase_utf8 (a->creator, b->creator);
 
-	    if (cmp < 0) {
-		    return true;
-	    } else if (cmp == 0) {
-		    /* same creator ... compare names */
-		    if (cmp_nocase_utf8 (a->name, b->name) < 0) {
-			    return true;
-		    }
-	    }
-	    return false;
-    }
+		if (cmp < 0) {
+			return true;
+		} else if (cmp == 0) {
+			/* same creator ... compare names */
+			if (cmp_nocase_utf8 (a->name, b->name) < 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 struct PluginMenuCompareByName {
-    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-	    int cmp;
+	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+		int cmp;
 
-	    cmp = cmp_nocase_utf8 (a->name, b->name);
+		cmp = cmp_nocase_utf8 (a->name, b->name);
 
-	    if (cmp < 0) {
-		    return true;
-	    } else if (cmp == 0) {
-		    /* same name ... compare type */
-		    if (a->type < b->type) {
-			    return true;
-		    }
-	    }
-	    return false;
-    }
+		if (cmp < 0) {
+			return true;
+		} else if (cmp == 0) {
+			/* same name ... compare type */
+			if (a->type < b->type) {
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 struct PluginMenuCompareByCategory {
-    bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
-	    int cmp;
+	bool operator() (PluginInfoPtr a, PluginInfoPtr b) const {
+		int cmp;
 
-	    cmp = cmp_nocase_utf8 (a->category, b->category);
+		cmp = cmp_nocase_utf8 (a->category, b->category);
 
-	    if (cmp < 0) {
-		    return true;
-	    } else if (cmp == 0) {
-		    /* same category ... compare names */
-		    if (cmp_nocase_utf8 (a->name, b->name) < 0) {
-			    return true;
-		    }
-	    }
-	    return false;
-    }
+		if (cmp < 0) {
+			return true;
+		} else if (cmp == 0) {
+			/* same category ... compare names */
+			if (cmp_nocase_utf8 (a->name, b->name) < 0) {
+				return true;
+			}
+		}
+		return false;
+	}
 };
 
 /** @return Plugin menu. The caller should not delete it */

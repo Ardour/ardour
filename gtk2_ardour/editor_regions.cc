@@ -65,9 +65,9 @@ using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
 struct ColumnInfo {
-    int         index;
-    const char* label;
-    const char* tooltip;
+	int         index;
+	const char* label;
+	const char* tooltip;
 };
 
 EditorRegions::EditorRegions (Editor* e)
@@ -495,8 +495,8 @@ EditorRegions::remove_unused_regions ()
 		return;
 	}
 
-	prompt  = _("Do you really want to remove unused regions?"
-		    "\n(This is destructive and cannot be undone)");
+	prompt = _("Do you really want to remove unused regions?"
+	           "\n(This is destructive and cannot be undone)");
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove."));
@@ -1031,7 +1031,7 @@ EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::R
 void
 EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-        if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
+	if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
 		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (region->source()->name());
 	} else {
 		row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source()->name());
@@ -1056,10 +1056,10 @@ EditorRegions::set_full (bool f)
 {
 	if (f) {
 		_display.expand_all ();
-                expanded = true;
+		expanded = true;
 	} else {
 		_display.collapse_all ();
-                expanded = false;
+		expanded = false;
 	}
 }
 
@@ -1303,9 +1303,9 @@ EditorRegions::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl
 
 void
 EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
-				   int x, int y,
-				   const SelectionData& data,
-				   guint info, guint time)
+                                   int x, int y,
+                                   const SelectionData& data,
+                                   guint info, guint time)
 {
 	vector<string> paths;
 

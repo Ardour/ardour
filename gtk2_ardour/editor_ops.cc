@@ -3139,8 +3139,8 @@ Editor::separate_regions_between (const TimeSelection& ts)
 				if (!latest_regionviews.empty()) {
 
 					rtv->view()->foreach_regionview (sigc::bind (
-						                                 sigc::ptr_fun (add_if_covered),
-						                                 &(*t), &new_selection));
+					                                             sigc::ptr_fun (add_if_covered),
+					                                             &(*t), &new_selection));
 
 					if (!in_command) {
 						begin_reversible_command (_("separate"));
@@ -3274,10 +3274,10 @@ Editor::separate_under_selected_regions ()
 
 		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
 
-	        if (!playlist) {
+		if (!playlist) {
 			// is this check necessary?
 			continue;
-	        }
+		}
 
 		vector<PlaylistState>::iterator i;
 
@@ -3853,26 +3853,26 @@ Editor::trim_to_region(bool forward)
 
 		if (forward) {
 
-		    next_region = playlist->find_next_region (region->first_frame(), Start, 1);
+			next_region = playlist->find_next_region (region->first_frame(), Start, 1);
 
-		    if (!next_region) {
-			continue;
-		    }
+			if (!next_region) {
+				continue;
+			}
 
-		    region->trim_end((framepos_t) ( (next_region->first_frame() - 1) * speed));
-		    arv->region_changed (PropertyChange (ARDOUR::Properties::length));
+			region->trim_end((framepos_t) ( (next_region->first_frame() - 1) * speed));
+			arv->region_changed (PropertyChange (ARDOUR::Properties::length));
 		}
 		else {
 
-		    next_region = playlist->find_next_region (region->first_frame(), Start, 0);
+			next_region = playlist->find_next_region (region->first_frame(), Start, 0);
 
-		    if(!next_region){
-			continue;
-		    }
+			if(!next_region){
+				continue;
+			}
 
-		    region->trim_front((framepos_t) ((next_region->last_frame() + 1) * speed));
+			region->trim_front((framepos_t) ((next_region->last_frame() + 1) * speed));
 
-		    arv->region_changed (ARDOUR::bounds_change);
+			arv->region_changed (ARDOUR::bounds_change);
 		}
 
 		if (!in_command) {
@@ -3945,8 +3945,8 @@ Editor::freeze_route ()
 
 	if (clicked_routeview->track()->has_external_redirects()) {
 		MessageDialog d (string_compose (_("<b>%1</b>\n\nThis track has at least one send/insert/return as part of its signal flow.\n\n"
-						   "Freezing will only process the signal as far as the first send/insert/return."),
-						 clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
+		                                   "Freezing will only process the signal as far as the first send/insert/return."),
+		                                 clicked_routeview->track()->name()), true, MESSAGE_INFO, BUTTONS_NONE, true);
 
 		d.add_button (_("Freeze anyway"), Gtk::RESPONSE_OK);
 		d.add_button (_("Don't freeze"), Gtk::RESPONSE_CANCEL);
@@ -4463,10 +4463,10 @@ Editor::remove_selected_regions ()
 
 		boost::shared_ptr<Playlist> playlist = (*rl)->playlist();
 
-	        if (!playlist) {
+		if (!playlist) {
 			// is this check necessary?
 			continue;
-	        }
+		}
 
 		/* get_regions_from_selection_and_entered() guarantees that
 		   the playlists involved are unique, so there is no need
@@ -4823,8 +4823,8 @@ Editor::paste_internal (framepos_t position, float times, const int32_t sub_num)
 	    /* Only one line copied, and one automation track selected.  Do a
 	       "greedy" paste from one automation type to another. */
 
-	    PasteContext ctx(paste_count, times, ItemCounts(), true);
-	    ts.front()->paste (position, *cut_buffer, ctx, sub_num);
+		PasteContext ctx(paste_count, times, ItemCounts(), true);
+		ts.front()->paste (position, *cut_buffer, ctx, sub_num);
 
 	} else {
 
@@ -5041,7 +5041,7 @@ Editor::remove_last_capture ()
 
 	if (Config->get_verify_remove_last_capture()) {
 		prompt  = _("Do you really want to destroy the last capture?"
-			    "\n(This is destructive and cannot be undone)");
+		            "\n(This is destructive and cannot be undone)");
 
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, destroy it."));
@@ -5296,7 +5296,7 @@ Editor::strip_region_silence ()
 
 	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (*i);
-	        if (arv) {
+		if (arv) {
 			audio_only.push_back (arv);
 		}
 	}
@@ -7658,7 +7658,7 @@ Editor::do_remove_time ()
 
 void
 Editor::remove_time (framepos_t pos, framecnt_t frames, InsertTimeOption opt,
-		     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
+                     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
 {
 	if (Config->get_edit_mode() == Lock) {
 		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;

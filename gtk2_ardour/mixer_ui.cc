@@ -106,8 +106,8 @@ Mixer_UI::Mixer_UI ()
 	, _plugin_selector (0)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
 	, ignore_reorder (false)
-        , _in_group_rebuild_or_clear (false)
-        , _route_deletion_in_progress (false)
+	, _in_group_rebuild_or_clear (false)
+	, _route_deletion_in_progress (false)
 	, _maximised (false)
 	, _show_mixer_list (true)
 	, myactions (X_("mixer"))
@@ -442,7 +442,7 @@ Mixer_UI::remove_master (VCAMasterStrip* vms)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[stripable_columns.strip] == vms) {
-                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
+			PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
 		}
@@ -667,7 +667,7 @@ Mixer_UI::remove_strip (MixerStrip* strip)
 
 	for (ri = rows.begin(); ri != rows.end(); ++ri) {
 		if ((*ri)[stripable_columns.strip] == strip) {
-                        PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
+			PBD::Unwinder<bool> uw (_route_deletion_in_progress, true);
 			track_model->erase (ri);
 			break;
 		}
@@ -1132,15 +1132,15 @@ Mixer_UI::hide_strip (MixerStrip* ms)
 gint
 Mixer_UI::start_updating ()
 {
-    fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &Mixer_UI::fast_update_strips));
-    return 0;
+	fast_screen_update_connection = Timers::super_rapid_connect (sigc::mem_fun(*this, &Mixer_UI::fast_update_strips));
+	return 0;
 }
 
 gint
 Mixer_UI::stop_updating ()
 {
-    fast_screen_update_connection.disconnect();
-    return 0;
+	fast_screen_update_connection.disconnect();
+	return 0;
 }
 
 void
@@ -1302,9 +1302,9 @@ Mixer_UI::track_list_delete (const Gtk::TreeModel::Path&)
 	DEBUG_TRACE (DEBUG::OrderKeys, "mixer UI treeview row deleted\n");
 	sync_presentation_info_from_treeview ();
 
-        if (_route_deletion_in_progress) {
-                redisplay_track_list ();
-        }
+	if (_route_deletion_in_progress) {
+		redisplay_track_list ();
+	}
 }
 
 void

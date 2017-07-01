@@ -64,18 +64,18 @@ class CrossfadeEditor : public ArdourDialog
 	Gtk::Button* ok_button;
 
 	struct PresetPoint {
-	    double x;
-	    double y;
+		double x;
+		double y;
 
-	    PresetPoint (double a, double b)
-		    : x (a), y (b) {}
+		PresetPoint (double a, double b)
+			: x (a), y (b) {}
 	};
 
 	struct Preset : public std::list<PresetPoint> {
-	    const char* name;
-	    const char* image_name;
+		const char* name;
+		const char* image_name;
 
-	    Preset (const char* n, const char* x) : name (n), image_name (x) {}
+		Preset (const char* n, const char* x) : name (n), image_name (x) {}
 	};
 
 	typedef std::list<Preset*> Presets;
@@ -93,36 +93,36 @@ class CrossfadeEditor : public ArdourDialog
 	Gtk::VBox vpacker;
 
 	struct Point {
-	    ~Point();
+		~Point();
 
-	    ArdourCanvas::Rectangle* box;
-	    ArdourCanvas::PolyLine* curve;
-	    double x;
-	    double y;
+		ArdourCanvas::Rectangle* box;
+		ArdourCanvas::PolyLine* curve;
+		double x;
+		double y;
 
-	    static const int32_t size;
+		static const int32_t size;
 
-	    void move_to (double x, double y, double xfract, double yfract);
+		void move_to (double x, double y, double xfract, double yfract);
 	};
 
 	struct PointSorter {
-	    bool operator() (const CrossfadeEditor::Point* a, const CrossfadeEditor::Point *b) {
-		    return a->x < b->x;
-	    }
+		bool operator() (const CrossfadeEditor::Point* a, const CrossfadeEditor::Point *b) {
+			return a->x < b->x;
+		}
 	};
 
 	ArdourCanvas::Rectangle*   toplevel;
 	ArdourCanvas::GtkCanvas* canvas;
 
 	struct Half {
-	    ArdourCanvas::PolyLine* line;
-	    ArdourCanvas::Polygon*  shading;
-	    std::list<Point*>       points;
-	    ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
-	    ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
-	    std::vector<ArdourCanvas::WaveView*>  waves;
+		ArdourCanvas::PolyLine* line;
+		ArdourCanvas::Polygon*  shading;
+		std::list<Point*>       points;
+		ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
+		ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
+		std::vector<ArdourCanvas::WaveView*>  waves;
 
-	    Half();
+		Half();
 	};
 
 	enum WhichFade {

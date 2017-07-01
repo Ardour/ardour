@@ -165,8 +165,8 @@ public:
 protected:
 
 	std::string    _name;
-	guint32   _height;
-	uint32_t  _line_color;
+	guint32        _height;
+	uint32_t       _line_color;
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
 	Evoral::TimeConverter<double, ARDOUR::framepos_t>* _time_converter;
@@ -183,8 +183,8 @@ protected:
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
-	ArdourCanvas::Item&        _parent_group;
-	ArdourCanvas::Container*       group;
+	ArdourCanvas::Item&         _parent_group;
+	ArdourCanvas::Container*    group;
 	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */

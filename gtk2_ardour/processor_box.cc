@@ -2745,11 +2745,11 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		wp->set_state (*ui_xml, 0);
 	}
 
-        void* existing_ui = p->get_ui ();
+	void* existing_ui = p->get_ui ();
 
-        if (existing_ui) {
-                wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
-        }
+	if (existing_ui) {
+		wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
+	}
 
 	p->set_window_proxy (wp);
 	WM::Manager::instance().register_window (wp);
@@ -3270,26 +3270,26 @@ ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 		name_prompter.get_result (result);
 		if (result.length()) {
 
-                       int tries = 0;
-                       string test = result;
+			int tries = 0;
+			string test = result;
 
-                       while (tries < 100) {
-                               if (_session->io_name_is_legal (test)) {
-                                       result = test;
-                                       break;
-                               }
-                               tries++;
+			while (tries < 100) {
+				if (_session->io_name_is_legal (test)) {
+					result = test;
+					break;
+				}
+				tries++;
 
-                               test = string_compose ("%1-%2", result, tries);
-                       }
+				test = string_compose ("%1-%2", result, tries);
+			}
 
-                       if (tries < 100) {
-                               processor->set_name (result);
-                       } else {
-                               /* unlikely! */
-                               ARDOUR_UI::instance()->popup_error
-                                       (string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
-                       }
+			if (tries < 100) {
+				processor->set_name (result);
+			} else {
+				/* unlikely! */
+				ARDOUR_UI::instance()->popup_error
+				       (string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
+			}
 		}
 		break;
 	}
@@ -3362,10 +3362,10 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				IOProcessor::prepare_for_reset (n, s->name());
 
-                                if (s->set_state (n, Stateful::loading_state_version)) {
-                                        delete s;
-                                        return;
-                                }
+				if (s->set_state (n, Stateful::loading_state_version)) {
+					delete s;
+					return;
+				}
 
 				p.reset (s);
 
@@ -3378,24 +3378,24 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 
 				IOProcessor::prepare_for_reset (n, s->name());
 
-                                if (s->set_state (n, Stateful::loading_state_version)) {
-                                        delete s;
-                                        return;
-                                }
+				if (s->set_state (n, Stateful::loading_state_version)) {
+					delete s;
+					return;
+				}
 
 				p.reset (s);
 
 			} else if (type->value() == "return") {
 
 				XMLNode n (**niter);
-                                Return* r = new Return (*_session);
+				Return* r = new Return (*_session);
 
 				IOProcessor::prepare_for_reset (n, r->name());
 
-                                if (r->set_state (n, Stateful::loading_state_version)) {
-                                        delete r;
-                                        return;
-                                }
+				if (r->set_state (n, Stateful::loading_state_version)) {
+					delete r;
+					return;
+				}
 
 				p.reset (r);
 

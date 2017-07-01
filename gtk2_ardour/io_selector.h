@@ -34,7 +34,7 @@ class IOSelector : public PortMatrix
 	std::string disassociation_verb () const;
 	std::string channel_noun () const;
 
-        ARDOUR::Session* session() const { return _session; }
+	ARDOUR::Session* session() const { return _session; }
 
 	uint32_t n_io_ports () const;
 	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }

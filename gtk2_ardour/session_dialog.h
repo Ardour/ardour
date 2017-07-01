@@ -47,12 +47,12 @@ class EngineControl;
 
 class SessionDialog : public ArdourDialog {
   public:
-        SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path,
+	SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path,
 		       const std::string& template_name, bool cancel_not_quit);
-        SessionDialog ();
+	SessionDialog ();
 	~SessionDialog ();
 
-        void clear_given ();
+	void clear_given ();
 
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
@@ -83,20 +83,20 @@ class SessionDialog : public ArdourDialog {
 
   private:
 	bool new_only;
-        std::string _provided_session_name;
-        std::string _provided_session_path;
+	std::string _provided_session_name;
+	std::string _provided_session_path;
 
 	bool on_delete_event (GdkEventAny*);
 
-        Gtk::Button* cancel_button;
-        Gtk::Button* open_button;
-        Gtk::Button* back_button;
-        Gtk::Button* quit_button;
+	Gtk::Button* cancel_button;
+	Gtk::Button* open_button;
+	Gtk::Button* back_button;
+	Gtk::Button* quit_button;
 
-        bool back_button_pressed (GdkEventButton*);
-        bool open_button_pressed (GdkEventButton*);
+	bool back_button_pressed (GdkEventButton*);
+	bool open_button_pressed (GdkEventButton*);
 
-        Gtk::Frame info_frame;
+	Gtk::Frame info_frame;
 
 	/* initial choice page */
 
@@ -104,7 +104,7 @@ class SessionDialog : public ArdourDialog {
 	void setup_recent_sessions ();
 	Gtk::VBox ic_vbox;
 	Gtk::Button ic_new_session_button;
-        void new_session_button_clicked ();
+	void new_session_button_clicked ();
 
 	/* recent sessions */
 
@@ -176,7 +176,7 @@ class SessionDialog : public ArdourDialog {
 	Gtk::VBox session_existing_vbox;
 	Gtk::Expander more_new_session_options_button;
 	Gtk::CheckButton use_template_button;
-        std::string load_template_override;
+	std::string load_template_override;
 
 	void more_new_session_options_button_clicked();
 	void new_name_changed ();
@@ -251,10 +251,10 @@ class SessionDialog : public ArdourDialog {
 	bool _existing_session_chooser_used; ///< set to true when the existing session chooser has been used
 
 	Gtk::Label info_scroller_label;
-        std::string::size_type info_scroller_count;
-        bool info_scroller_update();
+	std::string::size_type info_scroller_count;
+	bool info_scroller_update();
 	sigc::connection info_scroller_connection;
-        void updates_button_clicked ();
+	void updates_button_clicked ();
 };
 
 #endif /* __gtk2_ardour_session_dialog_h__ */

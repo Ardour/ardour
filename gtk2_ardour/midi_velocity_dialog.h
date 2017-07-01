@@ -34,10 +34,10 @@ class MidiVelocityDialog : public ArdourDialog
 	uint8_t velocity() const;
 
   private:
-    Gtk::Adjustment adjustment;
-    Gtk::SpinButton spinner;
-    Gtk::Label      label;
-    Gtk::HBox       packer;
+	Gtk::Adjustment adjustment;
+	Gtk::SpinButton spinner;
+	Gtk::Label      label;
+	Gtk::HBox       packer;
 };
 
 #endif /* __gtk2_ardour_midi_velocity_dialog_h__ */

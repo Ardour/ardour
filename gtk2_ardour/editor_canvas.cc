@@ -127,7 +127,7 @@ Editor::initialize_canvas ()
 	 * uppermost (last) group with hv_scroll_group as a parent
 	 */
 	_drag_motion_group = new ArdourCanvas::Container (hv_scroll_group);
-        CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
+	CANVAS_DEBUG_NAME (_drag_motion_group, "Canvas Drag Motion");
 
 	/* TIME BAR CANVAS */
 
@@ -317,17 +317,17 @@ Editor::reset_controls_layout_width ()
 	edit_controls_vbox.size_request (req);
 	w = req.width;
 
-        if (_group_tabs->is_visible()) {
+	if (_group_tabs->is_visible()) {
 		_group_tabs->size_request (req);
-                w += req.width;
-        }
+		w += req.width;
+	}
 
-        /* the controls layout has no horizontal scrolling, its visible
-           width is always equal to the total width of its contents.
-        */
+	/* the controls layout has no horizontal scrolling, its visible
+	   width is always equal to the total width of its contents.
+	*/
 
-        controls_layout.property_width() = w;
-        controls_layout.property_width_request() = w;
+	controls_layout.property_width() = w;
+	controls_layout.property_width_request() = w;
 }
 
 void
@@ -345,11 +345,11 @@ Editor::reset_controls_layout_height (int32_t h)
 
 	h += _canvas_drop_zone->height ();
 
-        /* set the height of the scrollable area (i.e. the sum of all contained widgets)
+	/* set the height of the scrollable area (i.e. the sum of all contained widgets)
 	 * for the controls layout. The size request is set elsewhere.
-         */
+	 */
 
-        controls_layout.property_height() = h;
+	controls_layout.property_height() = h;
 
 }
 
@@ -432,11 +432,11 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 			selection->set (tv);
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-			           SrcBest, SMFTrackName, SMFTempoIgnore, frame);
+				   SrcBest, SMFTrackName, SMFTempoIgnore, frame);
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-				           SrcBest, SMFTrackName, SMFTempoIgnore, frame);
+					   SrcBest, SMFTrackName, SMFTempoIgnore, frame);
 			} else {
 				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
 			}
@@ -520,7 +520,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		controls_layout.get_parent()->translate_coordinates (*toplevel,
 		                                                     alloc.get_x(), alloc.get_y(),
-		                                                     wx, wy);
+		        		                             wx, wy);
 
 		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
 
@@ -559,7 +559,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 		_track_canvas_viewport->get_parent()->translate_coordinates (*toplevel,
 		                                                             alloc.get_x(), alloc.get_y(),
-		                                                             wx, wy);
+			                                                     wx, wy);
 
 		scrolling_boundary = ArdourCanvas::Rect (wx, wy, wx + alloc.get_width(), wy + alloc.get_height());
 	}

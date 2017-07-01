@@ -26,7 +26,7 @@
 class Editor;
 
 namespace ArdourCanvas {
-     class TrackingText;
+	class TrackingText;
 }
 
 class VerboseCursor

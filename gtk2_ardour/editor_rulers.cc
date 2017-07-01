@@ -149,7 +149,7 @@ Editor::initialize_rulers ()
 	minsec_nmarks = 0;
 
 	bbt_ruler = new ArdourCanvas::Ruler (_time_markers_group, *_bbt_metric,
-					     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	                                     ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
 	bbt_ruler->set_font_description (font);
 	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
 	timecode_nmarks = 0;
@@ -681,7 +681,7 @@ Editor::update_tempo_based_rulers ()
 void
 Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 {
-        using namespace std;
+	using namespace std;
 
 	framepos_t spacer;
 	framepos_t fr;
@@ -771,22 +771,22 @@ Editor::set_timecode_ruler_scale (framepos_t lower, framepos_t upper)
 		timecode_nmarks = 2 + 24;
 	} else {
 
-                const framecnt_t hours_in_range = range / (60 * 60 * fr);
-                const int text_width_rough_guess = 120; /* pixels, very very approximate guess at how wide the tick mark text is */
+		const framecnt_t hours_in_range = range / (60 * 60 * fr);
+		const int text_width_rough_guess = 120; /* pixels, very very approximate guess at how wide the tick mark text is */
 
-                /* Normally we do not need to know anything about the width of the canvas
-                   to set the ruler scale, because the caller has already determined
-                   the width and set lower + upper arguments to this function to match that.
+		/* Normally we do not need to know anything about the width of the canvas
+		   to set the ruler scale, because the caller has already determined
+		   the width and set lower + upper arguments to this function to match that.
 
-                   But in this case, where the range defined by lower and uppper can vary
-                   substantially (basically anything from 24hrs+ to several billion years)
-                   trying to decide which tick marks to show does require us to know
-                   about the available width.
-                */
+		   But in this case, where the range defined by lower and uppper can vary
+		   substantially (basically anything from 24hrs+ to several billion years)
+		   trying to decide which tick marks to show does require us to know
+		   about the available width.
+		*/
 
 		timecode_nmarks = _track_canvas->width() / text_width_rough_guess;
-                timecode_ruler_scale = timecode_show_many_hours;
-                timecode_mark_modulo = max ((framecnt_t) 1, 1 + (hours_in_range / timecode_nmarks));
+		timecode_ruler_scale = timecode_show_many_hours;
+		timecode_mark_modulo = max ((framecnt_t) 1, 1 + (hours_in_range / timecode_nmarks));
 	}
 }
 
@@ -946,10 +946,10 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdou
 			if ((timecode.hours % timecode_mark_modulo) == 0) {
 				mark.style = ArdourCanvas::Ruler::Mark::Major;
 				snprintf (buf, sizeof(buf), "%s%02u:%02u:%02u:%02u", timecode.negative ? "-" : "", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
-                                mark.label = buf;
-                                mark.position = pos;
-                                marks.push_back (mark);
-                                ++n;
+				mark.label = buf;
+				mark.position = pos;
+				marks.push_back (mark);
+				++n;
 			}
 			/* can't use Timecode::increment_hours() here because we may be traversing thousands of hours
 			 * and doing it 1 hour at a time is just stupid (and slow).
@@ -994,69 +994,69 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 		bbt_beat_subdivision = 2;
 		break;
 	case SnapToBeatDiv3:
-                bbt_beat_subdivision = 3;
+		bbt_beat_subdivision = 3;
 		break;
 	case SnapToBeatDiv4:
-                bbt_beat_subdivision = 4;
+		bbt_beat_subdivision = 4;
 		break;
 	case SnapToBeatDiv5:
-                bbt_beat_subdivision = 5;
+		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case SnapToBeatDiv6:
-                bbt_beat_subdivision = 6;
+		bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case SnapToBeatDiv7:
-                bbt_beat_subdivision = 7;
+		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case SnapToBeatDiv8:
-                bbt_beat_subdivision = 8;
+		bbt_beat_subdivision = 8;
 		bbt_accent_modulo = 2;
 		break;
 	case SnapToBeatDiv10:
-                bbt_beat_subdivision = 10;
+		bbt_beat_subdivision = 10;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case SnapToBeatDiv12:
-                bbt_beat_subdivision = 12;
+		bbt_beat_subdivision = 12;
 		bbt_accent_modulo = 3;
 		break;
 	case SnapToBeatDiv14:
-                bbt_beat_subdivision = 14;
+		bbt_beat_subdivision = 14;
 		bbt_accent_modulo = 3; // XXX YIKES!
 		break;
 	case SnapToBeatDiv16:
-                bbt_beat_subdivision = 16;
+		bbt_beat_subdivision = 16;
 		bbt_accent_modulo = 4;
 		break;
 	case SnapToBeatDiv20:
-                bbt_beat_subdivision = 20;
+		bbt_beat_subdivision = 20;
 		bbt_accent_modulo = 5;
 		break;
 	case SnapToBeatDiv24:
-                bbt_beat_subdivision = 24;
+		bbt_beat_subdivision = 24;
 		bbt_accent_modulo = 6;
 		break;
 	case SnapToBeatDiv28:
-                bbt_beat_subdivision = 28;
+		bbt_beat_subdivision = 28;
 		bbt_accent_modulo = 7;
 		break;
 	case SnapToBeatDiv32:
-                bbt_beat_subdivision = 32;
+		bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;
 	case SnapToBeatDiv64:
-                bbt_beat_subdivision = 64;
+		bbt_beat_subdivision = 64;
 		bbt_accent_modulo = 8;
 		break;
 	case SnapToBeatDiv128:
-                bbt_beat_subdivision = 128;
+		bbt_beat_subdivision = 128;
 		bbt_accent_modulo = 8;
 		break;
 	default:
-                bbt_beat_subdivision = 4;
+		bbt_beat_subdivision = 4;
 		break;
 	}
 
@@ -1072,7 +1072,7 @@ Editor::compute_bbt_ruler_scale (framepos_t lower, framepos_t upper)
 
 	/* Only show the bar helper if there aren't many bars on the screen */
 	if ((bbt_bars < 2) || (beats < 5)) {
-	        bbt_bar_helper_on = true;
+		bbt_bar_helper_on = true;
 	}
 
 	if (beat_density > 8192) {
@@ -1196,7 +1196,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 				helper_active = true;
 			} else {
 
-			        if ((*i).is_bar()) {
+				if ((*i).is_bar()) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 				} else {
@@ -1257,10 +1257,10 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1,   i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
-			        snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
+				snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
 				edit_last_mark_label (marks, buf);
 				helper_active = true;
 			} else {
@@ -1297,7 +1297,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 					i_am_accented = true;
 				}
 				if (i_am_accented && (pos > bbt_position_of_helper)){
-				        snprintf (buf, sizeof(buf), "%" PRIu32, tick);
+					snprintf (buf, sizeof(buf), "%" PRIu32, tick);
 				} else {
 					buf[0] = '\0';
 				}
@@ -1333,7 +1333,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
 		marks.push_back (mark);
 
-		for (n = 1,   i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
+		for (n = 1, i = grid.begin(); n < bbt_nmarks && i != grid.end(); ++i) {
 
 			if ((*i).frame < lower && (bbt_bar_helper_on)) {
 				  snprintf (buf, sizeof(buf), "<%" PRIu32 "|%" PRIu32, (*i).bar, (*i).beat);
@@ -1397,18 +1397,18 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	  break;
 
-        case bbt_show_many:
-                bbt_nmarks = 1;
-                snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars );
-                mark.style = ArdourCanvas::Ruler::Mark::Major;
-                mark.label = buf;
-                mark.position = lower;
-                marks.push_back (mark);
-                break;
+	case bbt_show_many:
+		bbt_nmarks = 1;
+		snprintf (buf, sizeof(buf), "cannot handle %" PRIu32 " bars", bbt_bars );
+		mark.style = ArdourCanvas::Ruler::Mark::Major;
+		mark.label = buf;
+		mark.position = lower;
+		marks.push_back (mark);
+		break;
 
 	case bbt_show_64:
-        		bbt_nmarks = (gint) (bbt_bars / 64) + 1;
-			for (n = 0,   i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
+			bbt_nmarks = (gint) (bbt_bars / 64) + 1;
+			for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
 				if ((*i).is_bar()) {
 					if ((*i).bar % 64 == 1) {
 						if ((*i).bar % 256 == 1) {
@@ -1432,19 +1432,19 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 			break;
 
 	case bbt_show_16:
-       		bbt_nmarks = (bbt_bars / 16) + 1;
+		bbt_nmarks = (bbt_bars / 16) + 1;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; i++) {
-		        if ((*i).is_bar()) {
+			if ((*i).is_bar()) {
 			  if ((*i).bar % 16 == 1) {
-			        if ((*i).bar % 64 == 1) {
-				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+				if ((*i).bar % 64 == 1) {
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
 					buf[0] = '\0';
 					if ((*i).bar % 64 == 33)  {
-					        mark.style = ArdourCanvas::Ruler::Mark::Minor;
+						mark.style = ArdourCanvas::Ruler::Mark::Minor;
 					} else {
-					        mark.style = ArdourCanvas::Ruler::Mark::Micro;
+						mark.style = ArdourCanvas::Ruler::Mark::Micro;
 					}
 				}
 				mark.label = buf;
@@ -1458,36 +1458,36 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	case bbt_show_4:
 		bbt_nmarks = (bbt_bars / 4) + 1;
-		for (n = 0,   i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-		        if ((*i).is_bar()) {
-			  if ((*i).bar % 4 == 1) {
-			        if ((*i).bar % 16 == 1) {
-				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
-					mark.style = ArdourCanvas::Ruler::Mark::Major;
-				} else {
-					buf[0] = '\0';
-					if ((*i).bar % 16 == 9)  {
-					        mark.style = ArdourCanvas::Ruler::Mark::Minor;
+		for (n = 0, i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
+			if ((*i).is_bar()) {
+				if ((*i).bar % 4 == 1) {
+					if ((*i).bar % 16 == 1) {
+						snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+						mark.style = ArdourCanvas::Ruler::Mark::Major;
 					} else {
-					        mark.style = ArdourCanvas::Ruler::Mark::Micro;
+						buf[0] = '\0';
+						if ((*i).bar % 16 == 9)  {
+							mark.style = ArdourCanvas::Ruler::Mark::Minor;
+						} else {
+							mark.style = ArdourCanvas::Ruler::Mark::Micro;
+						}
 					}
+					mark.label = buf;
+					mark.position = (*i).frame;
+					marks.push_back (mark);
+					++n;
 				}
-				mark.label = buf;
-				mark.position = (*i).frame;
-				marks.push_back (mark);
-				++n;
-			  }
 			}
 		}
 	  break;
 
 	case bbt_show_1:
 //	default:
-	        bbt_nmarks = bbt_bars + 2;
+		bbt_nmarks = bbt_bars + 2;
 		for (n = 0,  i = grid.begin(); i != grid.end() && n < bbt_nmarks; ++i) {
-		        if ((*i).is_bar()) {
+			if ((*i).is_bar()) {
 			  if ((*i).bar % 4 == 1) {
-				        snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
+					snprintf (buf, sizeof(buf), "%" PRIu32, (*i).bar);
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 			  } else {
 				  buf[0] = '\0';
@@ -1590,106 +1590,106 @@ Editor::set_minsec_ruler_scale (framepos_t lower, framepos_t upper)
 	upper += spacer;
 	framecnt_t const range = (upper - lower) * 1000;
 
-        if (range <= (fr / 10)) { /* 0-0.1 second */
+	if (range <= (fr / 10)) { /* 0-0.1 second */
 		minsec_mark_interval = fr / 1000; /* show 1/1000 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 10;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= (fr / 2)) { /* 0-0.5 second */
 		minsec_mark_interval = fr / 100;  /* show 1/100 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 100;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= fr) { /* 0-1 second */
 		minsec_mark_interval = fr / 10;  /* show 1/10 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 200;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 2 * fr) { /* 1-2 seconds */
 		minsec_mark_interval = fr / 10; /* show 1/10 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 500;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 8 * fr) { /* 2-5 seconds */
 		minsec_mark_interval =  fr / 5; /* show 2 seconds */
 		minsec_ruler_scale = minsec_show_msecs;
 		minsec_mark_modulo = 1000;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 16 * fr) { /* 8-16 seconds */
 		minsec_mark_interval =  fr; /* show 1 seconds */
 		minsec_ruler_scale = minsec_show_seconds;
 		minsec_mark_modulo = 2;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
 	} else if (range <= 30 * fr) { /* 10-30 seconds */
 		minsec_mark_interval =  fr; /* show 1 seconds */
 		minsec_ruler_scale = minsec_show_seconds;
-                minsec_mark_modulo = 5;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-	} else if (range <= 60 * fr) { /* 30-60 seconds */
-                minsec_mark_interval = fr; /* show 1 seconds */
-                minsec_ruler_scale = minsec_show_seconds;
-                minsec_mark_modulo = 5;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 2 * 60 * fr) { /* 1-2 minutes */
-                minsec_mark_interval = 5 * fr; /* show 5 seconds */
-                minsec_ruler_scale = minsec_show_seconds;
-                minsec_mark_modulo = 3;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 4 * 60 * fr) { /* 4 minutes */
-                minsec_mark_interval = 5 * fr; /* show 10 seconds */
-                minsec_ruler_scale = minsec_show_seconds;
-                minsec_mark_modulo = 30;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 10 * 60 * fr) { /* 10 minutes */
-                minsec_mark_interval = 30 * fr; /* show 30 seconds */
-                minsec_ruler_scale = minsec_show_seconds;
-                minsec_mark_modulo = 120;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 30 * 60 * fr) { /* 10-30 minutes */
-                minsec_mark_interval =  60 * fr; /* show 1 minute */
-                minsec_ruler_scale = minsec_show_minutes;
 		minsec_mark_modulo = 5;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 60 * 60 * fr) { /* 30 minutes - 1hr */
-                minsec_mark_interval = 2 * 60 * fr; /* show 2 minutes */
-                minsec_ruler_scale = minsec_show_minutes;
-                minsec_mark_modulo = 10;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 4 * 60 * 60 * fr) { /* 1 - 4 hrs*/
-                minsec_mark_interval = 5 * 60 * fr; /* show 10 minutes */
-                minsec_ruler_scale = minsec_show_minutes;
-                minsec_mark_modulo = 30;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 8 * 60 * 60 * fr) { /* 4 - 8 hrs*/
-                minsec_mark_interval = 20 * 60 * fr; /* show 20 minutes */
-                minsec_ruler_scale = minsec_show_minutes;
-                minsec_mark_modulo = 60;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else if (range <= 16 * 60 * 60 * fr) { /* 16-24 hrs*/
-                minsec_mark_interval =  60 * 60 * fr; /* show 60 minutes */
-                minsec_ruler_scale = minsec_show_hours;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 60 * fr) { /* 30-60 seconds */
+		minsec_mark_interval = fr; /* show 1 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 5;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 2 * 60 * fr) { /* 1-2 minutes */
+		minsec_mark_interval = 5 * fr; /* show 5 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 3;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 4 * 60 * fr) { /* 4 minutes */
+		minsec_mark_interval = 5 * fr; /* show 10 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 30;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 10 * 60 * fr) { /* 10 minutes */
+		minsec_mark_interval = 30 * fr; /* show 30 seconds */
+		minsec_ruler_scale = minsec_show_seconds;
+		minsec_mark_modulo = 120;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 30 * 60 * fr) { /* 10-30 minutes */
+		minsec_mark_interval =  60 * fr; /* show 1 minute */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 5;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 60 * 60 * fr) { /* 30 minutes - 1hr */
+		minsec_mark_interval = 2 * 60 * fr; /* show 2 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 10;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 4 * 60 * 60 * fr) { /* 1 - 4 hrs*/
+		minsec_mark_interval = 5 * 60 * fr; /* show 10 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 30;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 8 * 60 * 60 * fr) { /* 4 - 8 hrs*/
+		minsec_mark_interval = 20 * 60 * fr; /* show 20 minutes */
+		minsec_ruler_scale = minsec_show_minutes;
+		minsec_mark_modulo = 60;
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else if (range <= 16 * 60 * 60 * fr) { /* 16-24 hrs*/
+		minsec_mark_interval =  60 * 60 * fr; /* show 60 minutes */
+		minsec_ruler_scale = minsec_show_hours;
 		minsec_mark_modulo = 2;
-                minsec_nmarks = 2 + (range / minsec_mark_interval);
-        } else {
+		minsec_nmarks = 2 + (range / minsec_mark_interval);
+	} else {
 
-                const framecnt_t hours_in_range = range / (60 * 60 * fr);
-                const int text_width_rough_guess = 70; /* pixels, very very approximate guess at how wide the tick mark text is */
+		const framecnt_t hours_in_range = range / (60 * 60 * fr);
+		const int text_width_rough_guess = 70; /* pixels, very very approximate guess at how wide the tick mark text is */
 
-                /* Normally we do not need to know anything about the width of the canvas
-                   to set the ruler scale, because the caller has already determined
-                   the width and set lower + upper arguments to this function to match that.
+		/* Normally we do not need to know anything about the width of the canvas
+		   to set the ruler scale, because the caller has already determined
+		   the width and set lower + upper arguments to this function to match that.
 
-                   But in this case, where the range defined by lower and uppper can vary
-                   substantially (anything from 24hrs+ to several billion years)
-                   trying to decide which tick marks to show does require us to know
-                   about the available width.
-                */
+		   But in this case, where the range defined by lower and uppper can vary
+		   substantially (anything from 24hrs+ to several billion years)
+		   trying to decide which tick marks to show does require us to know
+		   about the available width.
+		*/
 
-                minsec_nmarks = _track_canvas->width() / text_width_rough_guess;
-                minsec_mark_modulo = max ((framecnt_t) 1, 1 + (hours_in_range / minsec_nmarks));
-                minsec_mark_interval = minsec_mark_modulo * (60 * 60 * fr);
-                minsec_ruler_scale = minsec_show_many_hours;
-        }
+		minsec_nmarks = _track_canvas->width() / text_width_rough_guess;
+		minsec_mark_modulo = max ((framecnt_t) 1, 1 + (hours_in_range / minsec_nmarks));
+		minsec_mark_interval = minsec_mark_modulo * (60 * 60 * fr);
+		minsec_ruler_scale = minsec_show_many_hours;
+	}
 }
 
 void
@@ -1735,77 +1735,77 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 			mark.position = pos/1000.0;
 			marks.push_back (mark);
 		}
-                break;
+		break;
 
 	case minsec_show_seconds:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                	sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
-              	  	if (secs % minsec_mark_modulo == 0) {
+			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+			if (secs % minsec_mark_modulo == 0) {
 				if (secs == 0) {
 					mark.style = ArdourCanvas::Ruler::Mark::Major;
 				} else {
 					mark.style = ArdourCanvas::Ruler::Mark::Minor;
 				}
 				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
-                	} else {
+			} else {
 				buf[0] = '\0';
-	                        mark.style = ArdourCanvas::Ruler::Mark::Micro;
-        	        }
-                	mark.label = buf;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
 			mark.position = pos/1000.0;
 			marks.push_back (mark);
 		}
-                break;
+		break;
 
 	case minsec_show_minutes:
 		for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
-                        if (mins % minsec_mark_modulo == 0) {
-                                if (mins == 0) {
-                                        mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                } else {
-                                        mark.style = ArdourCanvas::Ruler::Mark::Minor;
-                                }
-                                snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
-                        } else {
+			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+			if (mins % minsec_mark_modulo == 0) {
+				if (mins == 0) {
+					mark.style = ArdourCanvas::Ruler::Mark::Major;
+				} else {
+					mark.style = ArdourCanvas::Ruler::Mark::Minor;
+				}
+				snprintf (buf, sizeof(buf), "%02ld:%02ld:%02ld", hrs, mins, secs);
+			} else {
 				buf[0] = '\0';
-                                mark.style = ArdourCanvas::Ruler::Mark::Micro;
-                        }
-                        mark.label = buf;
-                        mark.position = pos/1000.0;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
 			marks.push_back (mark);
-                }
-                break;
+		}
+		break;
 
 	case minsec_show_hours:
 		 for (n = 0; n < minsec_nmarks; pos += minsec_mark_interval, ++n) {
-                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
-                        if (hrs % minsec_mark_modulo == 0) {
-                                mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:%02ld", hrs, mins);
-                        } else {
+			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+			if (hrs % minsec_mark_modulo == 0) {
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				snprintf (buf, sizeof(buf), "%02ld:%02ld", hrs, mins);
+			} else {
 				buf[0] = '\0';
-                                mark.style = ArdourCanvas::Ruler::Mark::Micro;
-                        }
-                        mark.label = buf;
-                        mark.position = pos/1000.0;
+				mark.style = ArdourCanvas::Ruler::Mark::Micro;
+			}
+			mark.label = buf;
+			mark.position = pos/1000.0;
 			marks.push_back (mark);
-                 }
-                 break;
+		 }
+		 break;
 
-        case minsec_show_many_hours:
-                for (n = 0; n < minsec_nmarks; ) {
-                        sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
-                        if (hrs % minsec_mark_modulo == 0) {
-                                mark.style = ArdourCanvas::Ruler::Mark::Major;
-                                snprintf (buf, sizeof(buf), "%02ld:00", hrs);
-                                mark.label = buf;
-                                mark.position = pos/1000.0;
-                                marks.push_back (mark);
-                                ++n;
-                        }
-                        pos += minsec_mark_interval;
-                }
-                break;
-        }
+	case minsec_show_many_hours:
+		for (n = 0; n < minsec_nmarks; ) {
+			sample_to_clock_parts (pos, _session->frame_rate(), &hrs, &mins, &secs, &millisecs);
+			if (hrs % minsec_mark_modulo == 0) {
+				mark.style = ArdourCanvas::Ruler::Mark::Major;
+				snprintf (buf, sizeof(buf), "%02ld:00", hrs);
+				mark.label = buf;
+				mark.position = pos/1000.0;
+				marks.push_back (mark);
+				++n;
+			}
+			pos += minsec_mark_interval;
+		}
+		break;
+	}
 }

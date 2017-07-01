@@ -20,8 +20,8 @@
 #include "clock_group.h"
 
 ClockGroup::ClockGroup ()
-        : ignore_changes (false)
-        , _clock_mode (AudioClock::Frames)
+	: ignore_changes (false)
+	, _clock_mode (AudioClock::Frames)
 {
 }
 
@@ -32,35 +32,35 @@ ClockGroup::~ClockGroup()
 void
 ClockGroup::add (AudioClock& clock)
 {
-        if (clocks.insert (&clock).second) {
-                clock.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &ClockGroup::one_clock_changed), &clock));
-                clock.set_mode (_clock_mode);
-        }
+	if (clocks.insert (&clock).second) {
+		clock.mode_changed.connect (sigc::bind (sigc::mem_fun (*this, &ClockGroup::one_clock_changed), &clock));
+		clock.set_mode (_clock_mode);
+	}
 }
 
 void
 ClockGroup::remove (AudioClock& clock)
 {
-        clocks.erase (&clock);
+	clocks.erase (&clock);
 }
 
 void
 ClockGroup::one_clock_changed (AudioClock* clock)
 {
-        if (!ignore_changes) {
-                set_clock_mode (clock->mode());
-        }
+	if (!ignore_changes) {
+		set_clock_mode (clock->mode());
+	}
 }
 
 void
 ClockGroup::set_clock_mode (AudioClock::Mode mode)
 {
-        _clock_mode = mode;
+	_clock_mode = mode;
 
-        ignore_changes = true;
-        for (std::set<AudioClock*>::iterator c = clocks.begin(); c != clocks.end(); ++c) {
-                (*c)->set_mode (mode);
-        }
-        ignore_changes = false;
+	ignore_changes = true;
+	for (std::set<AudioClock*>::iterator c = clocks.begin(); c != clocks.end(); ++c) {
+		(*c)->set_mode (mode);
+	}
+	ignore_changes = false;
 }
 

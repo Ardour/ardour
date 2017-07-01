@@ -401,8 +401,8 @@ EngineControl::unblock_changed_signals ()
 
 EngineControl::SignalBlocker::SignalBlocker (EngineControl& engine_control,
                                              const std::string& reason)
-    : ec (engine_control)
-    , m_reason (reason)
+	: ec (engine_control)
+	, m_reason (reason)
 {
 	DEBUG_ECONTROL (string_compose ("SignalBlocker: %1", m_reason));
 	ec.block_changed_signals ();

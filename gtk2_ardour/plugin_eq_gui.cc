@@ -758,7 +758,7 @@ PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 	// float width  = w->get_width();
 	float height = w->get_height();
 
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+	cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 	cairo_set_line_width (cr, 2.5);
 
 	for (uint32_t i = 0; i < _impulse_fft->bins()-1; i++) {

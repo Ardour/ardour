@@ -219,10 +219,10 @@ ARDOUR_UI::main_window_delete_event (GdkEventAny* ev)
 
 static GtkNotebook*
 tab_window_root_drop (GtkNotebook* src,
-		      GtkWidget* w,
-		      gint x,
-		      gint y,
-		      gpointer user_data)
+                      GtkWidget* w,
+                      gint x,
+                      gint y,
+                      gpointer user_data)
 {
 	return ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
 }
