@@ -4209,14 +4209,18 @@ ProcessorWindowProxy::ProcessorWindowProxy (string const & name, ProcessorBox* b
 	: WM::ProxyBase (name, string())
 	, _processor_box (box)
 	, _processor (processor)
-	, is_custom (false)
-	, want_custom (false)
+	, is_custom (true)
+	, want_custom (true)
 {
 	boost::shared_ptr<Processor> p = _processor.lock ();
 	if (!p) {
 		return;
 	}
 	p->DropReferences.connect (going_away_connection, MISSING_INVALIDATOR, boost::bind (&ProcessorWindowProxy::processor_going_away, this), gui_context());
+
+	p->ToggleUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, false), gui_context());
+	p->ShowUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::show_the_right_window, this, true), gui_context());
+	p->HideUI.connect (gui_connections, invalidator (*this), boost::bind (&ProcessorWindowProxy::hide, this), gui_context());
 }
 
 ProcessorWindowProxy::~ProcessorWindowProxy()
@@ -4231,6 +4235,7 @@ ProcessorWindowProxy::~ProcessorWindowProxy()
 void
 ProcessorWindowProxy::processor_going_away ()
 {
+	gui_connections.drop_connections ();
 	delete _window;
 	_window = 0;
 	WM::Manager::instance().remove (this);
@@ -4308,12 +4313,15 @@ ProcessorWindowProxy::get (bool create)
 }
 
 void
-ProcessorWindowProxy::show_the_right_window ()
+ProcessorWindowProxy::show_the_right_window (bool show_not_toggle)
 {
 	if (_window && (is_custom != want_custom)) {
 		/* drop existing window - wrong type */
 		set_state_mask (Gtkmm2ext::WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
 		drop_window ();
+	}
+	if (_window && fully_visible () && show_not_toggle) {
+		return;
 	}
 	toggle ();
 }

@@ -91,7 +91,7 @@ public:
 	}
 
 	ARDOUR::SessionHandlePtr* session_handle();
-	void show_the_right_window ();
+	void show_the_right_window (bool show_not_toggle = false);
 	void set_custom_ui_mode(bool use_custom) { want_custom = use_custom; }
 
 	int set_state (const XMLNode&, int);
@@ -105,6 +105,7 @@ private:
 
 	void processor_going_away ();
 	PBD::ScopedConnection going_away_connection;
+	PBD::ScopedConnectionList gui_connections;
 };
 
 
