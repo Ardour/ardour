@@ -118,6 +118,13 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	PBD::Signal0<void>                     BypassableChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
+	/* cross-thread signals.
+	 * This allows control-surfaces to show/hide a plugin GUI.
+	 */
+	PBD::Signal0<void> ToggleUI;
+	PBD::Signal0<void> ShowUI;
+	PBD::Signal0<void> HideUI;
+
 	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
 	void set_window_proxy (ProcessorWindowProxy* wp) { _window_proxy = wp; }
 
