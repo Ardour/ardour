@@ -3941,51 +3941,82 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 	lo_message reply = lo_message_new();
 	lo_message_add_int32 (reply, ssid);
 	lo_message_add_int32 (reply, piid);
-	lo_message_add_string (reply, pip->name());
+	lo_message_add_int32(reply, redi->enabled() ? 1 : 0);
+
 	for ( uint32_t ppi = 0; ppi < pip->parameter_count(); ppi++) {
 
 		uint32_t controlid = pip->nth_parameter(ppi, ok);
 		if (!ok) {
 			continue;
 		}
-		if ( pip->parameter_is_input(controlid) || pip->parameter_is_control(controlid) ) {
-			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+		boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 
-				lo_message_add_int32 (reply, ppi + 1);
-				ParameterDescriptor pd;
-				pi->plugin()->get_parameter_descriptor(controlid, pd);
-				lo_message_add_string (reply, pd.label.c_str());
+		lo_message_add_int32 (reply, ppi + 1);
+		ParameterDescriptor pd;
+		pi->plugin()->get_parameter_descriptor(controlid, pd);
+		lo_message_add_string (reply, pd.label.c_str());
 
-				// I've combined those binary descriptor parts in a bit-field to reduce lilo message elements
-				int flags = 0;
-				flags |= pd.enumeration ? 1 : 0;
-				flags |= pd.integer_step ? 2 : 0;
-				flags |= pd.logarithmic ? 4 : 0;
-				flags |= pd.sr_dependent ? 32 : 0;
-				flags |= pd.toggled ? 64 : 0;
-				flags |= c != NULL ? 128 : 0; // bit 7 indicates in input control
-				lo_message_add_int32 (reply, flags);
+		// I've combined those binary descriptor parts in a bit-field to reduce lilo message elements
+		int flags = 0;
+		flags |= pd.enumeration ? 1 : 0;
+		flags |= pd.integer_step ? 2 : 0;
+		flags |= pd.logarithmic ? 4 : 0;
+		flags |= pd.sr_dependent ? 32 : 0;
+		flags |= pd.toggled ? 64 : 0;
+		lo_message_add_int32 (reply, flags);
 
-				lo_message_add_int32 (reply, pd.datatype);
-				lo_message_add_float (reply, pd.lower);
-				lo_message_add_float (reply, pd.upper);
-				lo_message_add_string (reply, pd.print_fmt.c_str());
-				if ( pd.scale_points ) {
-					lo_message_add_int32 (reply, pd.scale_points->size());
-					for ( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
-						lo_message_add_int32 (reply, i->second);
-						lo_message_add_string (reply, ((std::string)i->first).c_str());
-					}
-				}
-				else {
-					lo_message_add_int32 (reply, 0);
-				}
-				if ( c ) {
-					lo_message_add_double (reply, c->get_value());
-				}
-				else {
-					lo_message_add_double (reply, 0);
+		switch(pd.datatype) {
+			case ARDOUR::Variant::BEATS:
+				lo_message_add_string(reply, _("BEATS"));
+				break;
+			case ARDOUR::Variant::BOOL:
+				lo_message_add_string(reply, _("BOOL"));
+				break;
+			case ARDOUR::Variant::DOUBLE:
+				lo_message_add_string(reply, _("DOUBLE"));
+				break;
+			case ARDOUR::Variant::FLOAT:
+				lo_message_add_string(reply, _("FLOAT"));
+				break;
+			case ARDOUR::Variant::INT:
+				lo_message_add_string(reply, _("INT"));
+				break;
+			case ARDOUR::Variant::LONG:
+				lo_message_add_string(reply, _("LONG"));
+				break;
+			case ARDOUR::Variant::NOTHING:
+				lo_message_add_string(reply, _("NOTHING"));
+				break;
+			case ARDOUR::Variant::PATH:
+				lo_message_add_string(reply, _("PATH"));
+				break;
+			case ARDOUR::Variant::STRING:
+				lo_message_add_string(reply, _("STRING"));
+				break;
+			case ARDOUR::Variant::URI:
+				lo_message_add_string(reply, _("URI"));
+				break;
+			default:
+				lo_message_add_string(reply, _("UNKNOWN"));
+				break;
+		}
+
+		lo_message_add_float (reply, pd.lower);
+		lo_message_add_float (reply, pd.upper);
+		lo_message_add_string (reply, pd.print_fmt.c_str());
+		if ( pd.scale_points ) {
+			lo_message_add_int32 (reply, pd.scale_points->size());
+			for ( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
+				lo_message_add_int32 (reply, i->second);
+				lo_message_add_string (reply, ((std::string)i->first).c_str());
 			}
+		} else {
+			lo_message_add_int32 (reply, 0);
+		}
+		if ( c ) {
+			lo_message_add_double (reply, c->get_value());
+		} else {
+			lo_message_add_double (reply, 0);
 		}
 	}
 
