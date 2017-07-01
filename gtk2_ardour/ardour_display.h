@@ -31,17 +31,15 @@
 
 class ArdourDisplay : public ArdourDropdown
 {
-  public:
+public:
 
 	ArdourDisplay (Element e = default_elements);
 	virtual ~ArdourDisplay ();
 
 	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
- 	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
 
-//	bool on_button_release_event (GdkEventButton*);
 	bool on_scroll_event (GdkEventScroll* ev);
-//	bool on_motion_notify_event (GdkEventMotion *ev) ;
 
 	void add_controllable_preset (const char*, float);
 	void handle_controllable_preset (float p);

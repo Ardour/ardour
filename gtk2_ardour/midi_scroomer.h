@@ -23,8 +23,9 @@
 #include <gtkmm2ext/scroomer.h>
 #include <gdkmm/pixbuf.h>
 
-class MidiScroomer : public Gtkmm2ext::Scroomer {
-  public:
+class MidiScroomer : public Gtkmm2ext::Scroomer
+{
+public:
 	MidiScroomer(Gtk::Adjustment&);
 	~MidiScroomer();
 

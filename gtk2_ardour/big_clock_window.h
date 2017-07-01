@@ -26,10 +26,10 @@ class AudioClock;
 
 class BigClockWindow : public ArdourWindow
 {
-    public:
+public:
 	BigClockWindow (AudioClock&);
 
-    private:
+private:
 	AudioClock& clock;
 	Gtk::Requisition default_size;
 

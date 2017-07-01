@@ -25,7 +25,7 @@
 
 class IOSelector : public PortMatrix
 {
-  public:
+public:
 	IOSelector (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
@@ -53,7 +53,7 @@ class IOSelector : public PortMatrix
 		return _other;
 	}
 
-  private:
+private:
 
 	void setup_type ();
 	void io_changed ();

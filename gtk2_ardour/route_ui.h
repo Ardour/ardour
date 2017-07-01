@@ -62,14 +62,14 @@ class ControlSlaveUI;
 
 class RoutePinWindowProxy : public WM::ProxyBase
 {
-  public:
+public:
 	RoutePinWindowProxy (std::string const &, boost::shared_ptr<ARDOUR::Route>);
 	~RoutePinWindowProxy();
 
 	Gtk::Window* get (bool create = false);
 	ARDOUR::SessionHandlePtr* session_handle();
 
-  private:
+private:
 	boost::weak_ptr<ARDOUR::Route> _route;
 
 	void route_going_away ();
@@ -78,7 +78,7 @@ class RoutePinWindowProxy : public WM::ProxyBase
 
 class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual sigc::trackable
 {
-  public:
+public:
 	RouteUI (ARDOUR::Session*);
 
 	virtual ~RouteUI();
@@ -268,7 +268,7 @@ class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandleP
 	void comment_edited ();
 	bool ignore_comment_edit;
 
-   protected:
+protected:
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
@@ -299,18 +299,19 @@ class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandleP
 
 	bool mark_hidden (bool yn);
 
-  private:
+private:
 	void parameter_changed (std::string const&);
 	void relabel_solo_button ();
 	void track_mode_changed ();
 
 	std::string route_state_id () const;
 
-  protected:
+protected:
 	struct SoloMuteRelease {
 		SoloMuteRelease (bool was_active)
 			: active (was_active)
-			, exclusive (false) {}
+			, exclusive (false)
+		{}
 
 		boost::shared_ptr<ARDOUR::RouteList> routes;
 		boost::shared_ptr<ARDOUR::RouteList> routes_on;

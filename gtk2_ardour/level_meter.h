@@ -51,7 +51,7 @@ namespace Gtk {
 
 class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
 {
-  public:
+public:
 	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,
 			Gtkmm2ext::FastMeter::Orientation o = Gtkmm2ext::FastMeter::Vertical);
 	virtual ~LevelMeterBase ();
@@ -75,11 +75,11 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
 	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
-	protected:
+protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;
 	virtual void mtr_remove(Gtk::Widget &w) = 0;
 
-  private:
+private:
 	PBD::EventLoop::InvalidationRecord* parent_invalidator;
 	ARDOUR::PeakMeter* _meter;
 	Gtkmm2ext::FastMeter::Orientation _meter_orientation;
@@ -131,22 +131,22 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 
 class LevelMeterHBox : public LevelMeterBase, public Gtk::HBox
 {
-  public:
+public:
 	LevelMeterHBox (ARDOUR::Session*);
 	~LevelMeterHBox();
 
-	protected:
+protected:
 	void mtr_pack(Gtk::Widget &w);
 	void mtr_remove(Gtk::Widget &w);
 };
 
 class LevelMeterVBox : public LevelMeterBase, public Gtk::VBox
 {
-  public:
+public:
 	LevelMeterVBox (ARDOUR::Session*);
 	~LevelMeterVBox();
 
-	protected:
+protected:
 	void mtr_pack(Gtk::Widget &w);
 	void mtr_remove(Gtk::Widget &w);
 };

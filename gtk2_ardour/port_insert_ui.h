@@ -30,13 +30,13 @@ namespace ARDOUR {
 
 class PortInsertUI : public Gtk::VBox
 {
-  public:
+public:
 	PortInsertUI (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>);
 
 	void redisplay ();
 	void finished (IOSelector::Result);
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::PortInsert> _pi;
 
 	Gtk::Notebook notebook;

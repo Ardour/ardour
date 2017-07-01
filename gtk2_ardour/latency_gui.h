@@ -46,7 +46,8 @@ class LatencyBarController : public Gtkmm2ext::BarController
 public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
 		: BarController (adj, boost::shared_ptr<PBD::IgnorableControllable> (new PBD::IgnorableControllable ())),
-		  _latency_gui (g) {}
+		                 _latency_gui (g)
+	{}
 
 private:
 	LatencyGUI* _latency_gui;
@@ -56,7 +57,7 @@ private:
 
 class LatencyGUI : public Gtk::VBox
 {
-  public:
+public:
 	LatencyGUI (ARDOUR::Latent&, framepos_t sample_rate, framepos_t period_size);
 	~LatencyGUI() { }
 
@@ -64,7 +65,7 @@ class LatencyGUI : public Gtk::VBox
 	void reset ();
 	void refresh ();
 
-  private:
+private:
 	ARDOUR::Latent& _latent;
 	framepos_t initial_value;
 	framepos_t sample_rate;

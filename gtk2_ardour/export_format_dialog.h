@@ -38,8 +38,9 @@
 
 #include <gtkmm.h>
 
-class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList {
-  private:
+class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
+{
+private:
 
 	typedef ARDOUR::WeakExportFormatCompatibilityPtr WeakCompatPtr;
 	typedef ARDOUR::WeakExportFormatPtr WeakFormatPtr;
@@ -51,14 +52,14 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
 
 
-  public:
+public:
 
 	explicit ExportFormatDialog (FormatPtr format, bool new_dialog = false);
 	~ExportFormatDialog ();
 
 	void set_session (ARDOUR::Session* s);
 
-  private:
+private:
 
 	FormatPtr                   format;
 	ARDOUR::ExportFormatManager manager;
@@ -197,7 +198,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct CompatibilityCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatCompatibilityPtr>  ptr;
 		Gtk::TreeModelColumn<bool>                                  selected;
 		Gtk::TreeModelColumn<std::string>                           label;
@@ -213,7 +214,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct QualityCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::QualityPtr>  ptr;
 		Gtk::TreeModelColumn<std::string>                            color;
 		Gtk::TreeModelColumn<std::string>                            label;
@@ -225,7 +226,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct FormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatPtr>  ptr;
 		Gtk::TreeModelColumn<std::string>              color;
 		Gtk::TreeModelColumn<std::string>              label;
@@ -237,7 +238,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct SampleRateCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatManager::SampleRatePtr>  ptr;
 		Gtk::TreeModelColumn<std::string>                               color;
 		Gtk::TreeModelColumn<std::string>                               label;
@@ -263,7 +264,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct SRCQualityCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::ExportFormatBase::SRCQuality>  id;
 		Gtk::TreeModelColumn<std::string>                         label;
 
@@ -293,7 +294,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct SampleFormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::HasSampleFormat::SampleFormatPtr>   ptr;
 		Gtk::TreeModelColumn<std::string>                              color;
 		Gtk::TreeModelColumn<std::string>                              label;
@@ -305,7 +306,7 @@ class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	struct DitherTypeCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::HasSampleFormat::DitherTypePtr>   ptr;
 		Gtk::TreeModelColumn<std::string>                            color;
 		Gtk::TreeModelColumn<std::string>                            label;

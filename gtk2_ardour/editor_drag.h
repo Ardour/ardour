@@ -501,7 +501,7 @@ private:
 /** "Drag" to cut a region (action only on button release) */
 class RegionCutDrag : public Drag
 {
-    public:
+public:
 	RegionCutDrag (Editor*, ArdourCanvas::Item*, framepos_t);
 	~RegionCutDrag ();
 
@@ -510,7 +510,7 @@ class RegionCutDrag : public Drag
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
 
-    private:
+private:
 	EditorCursor* line;
 };
 
@@ -551,7 +551,7 @@ private:
 /** Drags to move MIDI notes */
 class NoteDrag : public Drag
 {
-  public:
+public:
 	NoteDrag (Editor*, ArdourCanvas::Item*);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -560,7 +560,7 @@ class NoteDrag : public Drag
 	void aborted (bool);
 
 	void setup_pointer_frame_offset ();
-  private:
+private:
 
 	double total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
@@ -1274,7 +1274,7 @@ private:
  */
 class CrossfadeEdgeDrag : public Drag
 {
-  public:
+public:
 	CrossfadeEdgeDrag (Editor*, AudioRegionView*, ArdourCanvas::Item*, bool start);
 
 	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
@@ -1290,7 +1290,7 @@ class CrossfadeEdgeDrag : public Drag
 		return std::make_pair (4, 4);
 	}
 
-  private:
+private:
 	AudioRegionView* arv;
 	bool start;
 };

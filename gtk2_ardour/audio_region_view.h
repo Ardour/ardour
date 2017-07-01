@@ -50,20 +50,20 @@ class RouteTimeAxisView;
 
 class AudioRegionView : public RegionView
 {
-  public:
+public:
 	AudioRegionView (ArdourCanvas::Container *,
-			 RouteTimeAxisView&,
-			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double initial_samples_per_pixel,
-			 uint32_t base_color);
+	                 RouteTimeAxisView&,
+	                 boost::shared_ptr<ARDOUR::AudioRegion>,
+	                 double initial_samples_per_pixel,
+	                 uint32_t base_color);
 
 	AudioRegionView (ArdourCanvas::Container *,
-			 RouteTimeAxisView&,
-			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double samples_per_pixel,
-			 uint32_t base_color,
-			 bool recording,
-			 TimeAxisViewItem::Visibility);
+	                 RouteTimeAxisView&,
+	                 boost::shared_ptr<ARDOUR::AudioRegion>,
+	                 double samples_per_pixel,
+	                 uint32_t base_color,
+	                 bool recording,
+	                 TimeAxisViewItem::Visibility);
 
 	AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
@@ -138,12 +138,12 @@ class AudioRegionView : public RegionView
 		return _end_xfade_visible;
 	}
 
-  protected:
+protected:
 
 	/* this constructor allows derived types
-	   to specify their visibility requirements
-	   to the TimeAxisViewItem parent class
-	*/
+	 * to specify their visibility requirements
+	 * to the TimeAxisViewItem parent class
+	 */
 
 	enum Flags {
 		WaveformVisible = 0x4,

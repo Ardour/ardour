@@ -44,7 +44,7 @@ private:
 	UIConfiguration();
 	~UIConfiguration();
 
-    public:
+public:
 	static UIConfiguration& instance();
 
 	static std::string color_file_suffix;
@@ -106,8 +106,7 @@ private:
 	 */
 	int pre_gui_init ();
 
-	/** called after the GUI toolkit has been initialized.
-	 */
+	/** called after the GUI toolkit has been initialized. */
 	UIConfiguration* post_gui_init ();
 
 #undef UI_CONFIG_VARIABLE
@@ -122,7 +121,7 @@ private:
 #include "canvas_vars.h"
 #undef CANVAS_FONT_VARIABLE
 
-  private:
+private:
 	/* declare variables */
 
 #undef  UI_CONFIG_VARIABLE

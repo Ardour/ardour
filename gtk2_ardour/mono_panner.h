@@ -38,7 +38,7 @@ namespace PBD {
 
 class MonoPanner : public PannerInterface
 {
-  public:
+public:
 	MonoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~MonoPanner ();
 
@@ -47,7 +47,7 @@ class MonoPanner : public PannerInterface
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
 
-  protected:
+protected:
 	bool on_expose_event (GdkEventExpose*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
@@ -55,7 +55,7 @@ class MonoPanner : public PannerInterface
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_key_press_event (GdkEventKey*);
 
-  private:
+private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 

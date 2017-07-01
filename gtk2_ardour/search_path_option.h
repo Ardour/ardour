@@ -31,10 +31,10 @@
 
 class SearchPathOption : public Option
 {
-  public:
+public:
 	SearchPathOption (const std::string& pathname, const std::string& label,
-			  const std::string& default_path,
-                          sigc::slot<std::string>, sigc::slot<bool, std::string>);
+			const std::string& default_path,
+			sigc::slot<std::string>, sigc::slot<bool, std::string>);
 	~SearchPathOption ();
 
 	void set_state_from_config ();
@@ -43,11 +43,12 @@ class SearchPathOption : public Option
 
 	Gtk::Widget& tip_widget() { return add_chooser; }
 
-  protected:
+protected:
 	sigc::slot<std::string> _get; ///< slot to get the configuration variable's value
 	sigc::slot<bool, std::string> _set;  ///< slot to set the configuration variable's value
 
-	struct PathEntry {
+	struct PathEntry
+	{
 		PathEntry (const std::string& path, bool removable=true);
 
 		Gtk::Entry entry;

@@ -31,7 +31,7 @@
 
 class ArdourDropdown : public ArdourButton
 {
-  public:
+public:
 
 	ArdourDropdown (Element e = default_elements);
 	virtual ~ArdourDropdown ();
@@ -47,7 +47,7 @@ class ArdourDropdown : public ArdourButton
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
 
-  private:
+private:
 	Gtk::Menu      _menu;
 
 	bool _scrolling_disabled;

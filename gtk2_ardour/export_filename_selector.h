@@ -27,10 +27,9 @@
 #include "ardour/export_filename.h"
 #include "ardour/session_handle.h"
 
-///
 class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
 
 	ExportFilenameSelector ();
@@ -44,7 +43,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  private:
+private:
 
 	void load_state ();
 
@@ -94,7 +93,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct DateFormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<DateFormat>     format;
 		Gtk::TreeModelColumn<std::string>  label;
 
@@ -110,7 +109,7 @@ class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<TimeFormat>     format;
 		Gtk::TreeModelColumn<std::string>  label;
 

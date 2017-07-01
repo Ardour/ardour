@@ -60,7 +60,7 @@ namespace Gtk {
 
 class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	PannerUI (ARDOUR::Session*);
 	~PannerUI ();
 
@@ -84,7 +84,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	static void setup_slider_pix ();
 
-  private:
+private:
 	friend class MixerStrip;
 	friend class SendUI;
 
@@ -105,7 +105,7 @@ class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	Gtk::VBox           pan_bar_packer;
 	Gtk::VBox           pan_vbox;
-        Gtk::VBox           poswidth_box;
+	Gtk::VBox           poswidth_box;
 	Width              _width;
 
 	StereoPanner*  _stereo_panner;

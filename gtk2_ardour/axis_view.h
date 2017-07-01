@@ -52,7 +52,7 @@ namespace ARDOUR {
  */
 class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR::SessionHandlePtr, public virtual Selectable
 {
-  public:
+public:
 	virtual std::string name() const = 0;
 	virtual Gdk::Color color() const = 0;
 
@@ -63,21 +63,21 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 
 	virtual std::string state_id() const = 0;
 	/* for now, we always return properties in string form.
-	 */
+	*/
 	std::string gui_property (const std::string& property_name) const;
 
 	bool get_gui_property (const std::string& property_name, std::string& value) const;
 
 	template <typename T>
-	bool get_gui_property (const std::string& property_name, T& value) const
-	{
-		std::string str = gui_property (property_name);
+		bool get_gui_property (const std::string& property_name, T& value) const
+		{
+			std::string str = gui_property (property_name);
 
-		if (!str.empty ()) {
-			return PBD::string_to<T>(str, value);
+			if (!str.empty ()) {
+				return PBD::string_to<T>(str, value);
+			}
+			return false;
 		}
-		return false;
-	}
 
 	void set_gui_property (const std::string& property_name, const std::string& value);
 
@@ -112,7 +112,7 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 	 */
 	static Gdk::Color unique_random_color();
 
-  protected:
+protected:
 	AxisView ();
 	virtual ~AxisView();
 

@@ -37,15 +37,15 @@ class StripableSorter;
 
 class StripableTreeModel : public Gtk::TreeModel, public Glib::Object
 {
-  protected:
+protected:
 	StripableTreeModel (AxisViewProvider&);
 	virtual ~StripableTreeModel();
 
-  public:
+public:
 	static Glib::RefPtr<StripableTreeModel> create (AxisViewProvider&);
 	void set_session (ARDOUR::Session&);
 
-  protected:
+protected:
 	Gtk::TreeModelFlags get_flags_vfunc() const;
 	int   get_n_columns_vfunc() const;
 	GType get_column_type_vfunc(int index) const;
@@ -62,15 +62,15 @@ class StripableTreeModel : public Gtk::TreeModel, public Glib::Object
 	bool  get_iter_vfunc(const Path& path, iterator& iter) const;
 	bool  iter_is_valid(const iterator& iter) const;
 
-  public:
+public:
 	typedef Gtk::TreeModelColumn<std::string> StringColumn;
 	typedef Gtk::TreeModelColumn<bool>        BoolColumn;
 	typedef Gtk::TreeModelColumn<uint32_t>    UnsignedColumn;
 	typedef Gtk::TreeModelColumn<AxisView*> AVColumn;
 	typedef Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Stripable> > StripableColumn;
 
-	struct Columns : public Gtk::TreeModel::ColumnRecord {
-
+	struct Columns : public Gtk::TreeModel::ColumnRecord
+	{
 		Columns () {
 			add (text);
 			add (visible);
@@ -111,7 +111,7 @@ class StripableTreeModel : public Gtk::TreeModel, public Glib::Object
 
 	Columns columns;
 
-  private:
+private:
 	ARDOUR::Session* _session;
 	AxisViewProvider& axis_view_provider;
 
@@ -119,7 +119,8 @@ class StripableTreeModel : public Gtk::TreeModel, public Glib::Object
 
 	void text_value (boost::shared_ptr<ARDOUR::Stripable> stripable, Glib::ValueBase& value) const;
 
-	struct Glue {
+	struct Glue
+	{
 		Glue (boost::shared_ptr<ARDOUR::Stripable>);
 
 		boost::weak_ptr<ARDOUR::Stripable> stripable;

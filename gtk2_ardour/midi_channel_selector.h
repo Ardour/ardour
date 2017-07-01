@@ -41,7 +41,7 @@ namespace ARDOUR {
 
 class MidiChannelSelector : public Gtk::Table
 {
-  public:
+public:
 	MidiChannelSelector(int n_rows = 4, int n_columns = 4, int start_row = 0, int start_column = 0);
 	virtual ~MidiChannelSelector() = 0;
 
@@ -50,7 +50,7 @@ class MidiChannelSelector : public Gtk::Table
 	void set_channel_colors(const uint32_t new_channel_colors[16]);
 	void set_default_channel_color();
 
-  protected:
+protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
 	Gtk::Label                      _button_labels[4][4];
 	Gtkmm2ext::StatefulToggleButton _buttons[4][4];
@@ -61,14 +61,14 @@ class MidiChannelSelector : public Gtk::Table
 
 class SingleMidiChannelSelector : public MidiChannelSelector
 {
-  public:
+public:
 	SingleMidiChannelSelector(uint8_t active_channel = 0);
 
 	uint8_t get_active_channel() const { return _active_channel; }
 
 	sigc::signal<void, uint8_t> channel_selected;
 
-  protected:
+protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr);
 
 	Gtk::ToggleButton* _last_active_button;
@@ -77,9 +77,9 @@ class SingleMidiChannelSelector : public MidiChannelSelector
 
 class MidiMultipleChannelSelector : public MidiChannelSelector
 {
-  public:
+public:
 	MidiMultipleChannelSelector(ARDOUR::ChannelMode mode = ARDOUR::FilterChannels,
-				uint16_t initial_selection = 0xFFFF);
+			uint16_t initial_selection = 0xFFFF);
 
 	virtual ~MidiMultipleChannelSelector();
 
@@ -100,7 +100,7 @@ class MidiMultipleChannelSelector : public MidiChannelSelector
 	uint16_t get_selected_channels() const;
 	void     set_selected_channels(uint16_t selected_channels);
 
-  protected:
+protected:
 	ARDOUR::ChannelMode _channel_mode;
 	ARDOUR::NoteMode    _note_mode;
 
@@ -118,14 +118,14 @@ class MidiMultipleChannelSelector : public MidiChannelSelector
 
 class MidiChannelSelectorWindow : public ArdourWindow, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	MidiChannelSelectorWindow (boost::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiChannelSelectorWindow ();
 
 	void set_channel_colors (const uint32_t new_channel_colors[16]);
 	void set_default_channel_color();
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::MidiTrack> track;
 	std::vector<Gtk::ToggleButton*> playback_buttons;
 	std::vector<Gtk::ToggleButton*> capture_buttons;

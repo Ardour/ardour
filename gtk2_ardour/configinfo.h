@@ -24,10 +24,10 @@
 
 class ConfigInfoDialog : public ArdourDialog
 {
-  public:
+public:
 	ConfigInfoDialog();
 
-  private:
+private:
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
 };

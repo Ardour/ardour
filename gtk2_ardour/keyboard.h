@@ -32,7 +32,7 @@ class ARDOUR_UI;
 
 class ArdourKeyboard : public Gtkmm2ext::Keyboard
 {
-  public:
+public:
 	ArdourKeyboard(ARDOUR_UI&);
 
 	XMLNode& get_state (void);
@@ -67,38 +67,31 @@ class ArdourKeyboard : public Gtkmm2ext::Keyboard
 	static bool indicates_constraint (guint state);
 
 	static void set_constraint_modifier (guint);
-	/** @return Modifier mask to constrain drags in a particular direction;
-	 */
+	/** @return Modifier mask to constrain drags in a particular direction; */
 	static ModifierMask constraint_modifier () { return ModifierMask (constraint_mod); }
 
 	static void set_trim_contents_modifier (guint);
-	/** @return Modifier mask to move contents rather than region bounds during trim;
-	 */
+	/** @return Modifier mask to move contents rather than region bounds during trim; */
 	static ModifierMask trim_contents_modifier () { return ModifierMask (trim_contents_mod); }
 
 	static void set_trim_overlap_modifier (guint);
-	/** @return Modifier mask to remove region overlaps during trim;
-	 */
+	/** @return Modifier mask to remove region overlaps during trim; */
 	static ModifierMask trim_overlap_modifier () { return ModifierMask (trim_overlap_mod); }
 
 	static void set_trim_anchored_modifier (guint);
-	/** @return Modifier mask to use anchored trim;
-	 */
+	/** @return Modifier mask to use anchored trim; */
 	static ModifierMask trim_anchored_modifier () { return ModifierMask (trim_anchored_mod); }
 
 	static void set_fine_adjust_modifier (guint);
-	/** @return Modifier mask to fine adjust (control points only atm);
-	 */
+	/** @return Modifier mask to fine adjust (control points only atm); */
 	static ModifierMask fine_adjust_modifier () { return ModifierMask (fine_adjust_mod); }
 
 	static void set_push_points_modifier (guint);
-	/** @return Modifier mask to push proceeding points;
-	 */
+	/** @return Modifier mask to push proceeding points; */
 	static ModifierMask push_points_modifier () { return ModifierMask (push_points_mod); }
 
 	static void set_note_size_relative_modifier (guint);
-	/** @return Modifier mask to resize notes relatively;
-	 */
+	/** @return Modifier mask to resize notes relatively; */
 	static ModifierMask note_size_relative_modifier () { return ModifierMask (note_size_relative_mod); }
 private:
 	static guint     constraint_mod;

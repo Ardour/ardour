@@ -44,7 +44,7 @@ class Meterbridge :
 	public ARDOUR::SessionHandlePtr,
 	public Gtkmm2ext::VisibilityTracker
 {
-  public:
+public:
 	static Meterbridge* instance();
 	~Meterbridge();
 
@@ -56,7 +56,7 @@ class Meterbridge :
 	void show_window ();
 	bool hide_window (GdkEventAny *ev);
 
-  private:
+private:
 	Meterbridge ();
 	static Meterbridge* _instance;
 
@@ -94,7 +94,8 @@ class Meterbridge :
 		}
 	};
 
-	struct MeterOrderRouteSorter {
+	struct MeterOrderRouteSorter
+	{
 		bool operator() (struct MeterBridgeStrip ma, struct MeterBridgeStrip mb) {
 			boost::shared_ptr<ARDOUR::Route> a = ma.s->route();
 			boost::shared_ptr<ARDOUR::Route> b = mb.s->route();

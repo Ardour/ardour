@@ -30,11 +30,11 @@ class Editor;
 
 class RulerDialog : public ArdourDialog
 {
-  public:
+public:
 	RulerDialog ();
 	~RulerDialog ();
 
-  private:
+private:
 	Gtk::CheckButton samples_button;
 	Gtk::CheckButton timecode_button;
 	Gtk::CheckButton minsec_button;

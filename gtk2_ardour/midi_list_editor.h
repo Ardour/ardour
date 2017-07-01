@@ -43,15 +43,16 @@ namespace ARDOUR {
 
 class MidiListEditor : public ArdourWindow
 {
-  public:
+public:
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
-		       boost::shared_ptr<ARDOUR::MidiTrack>);
+	               boost::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiListEditor();
 
-  private:
-	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord {
+private:
+	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord
+	{
 		MidiListModelColumns() {
 			add (channel);
 			add (note);
@@ -70,7 +71,8 @@ class MidiListEditor : public ArdourWindow
 		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
 	};
 
-	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord {
+	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord
+	{
 		NoteLengthColumns() {
 			add (ticks);
 			add (name);

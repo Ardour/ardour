@@ -45,11 +45,11 @@ namespace ARDOUR {
 
 class MidiTracer : public ArdourWindow
 {
-  public:
+public:
 	MidiTracer ();
 	~MidiTracer();
 
-  private:
+private:
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment line_count_adjustment;

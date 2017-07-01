@@ -25,8 +25,9 @@
 
 typedef std::vector<ARDOUR::PluginPtr> SelectedPlugins;
 
-class PluginInterestedObject {
-  public:
+class PluginInterestedObject
+{
+public:
 	PluginInterestedObject() {}
 	virtual ~PluginInterestedObject() {}
 

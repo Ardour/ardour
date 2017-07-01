@@ -25,7 +25,7 @@
 
 class MonitorSelector : public PortMatrix
 {
-  public:
+public:
 	MonitorSelector (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
@@ -55,8 +55,7 @@ class MonitorSelector : public PortMatrix
 	bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const { return false; }
 	bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const { return false; }
 
-  private:
-
+private:
 	void io_changed ();
 	void io_changed_proxy ();
 
@@ -70,16 +69,16 @@ class MonitorSelector : public PortMatrix
 
 class MonitorSelectorWindow : public ArdourWindow
 {
-  public:
+public:
 	MonitorSelectorWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
 
 	MonitorSelector& selector() { return _selector; }
 
-  protected:
+protected:
 	void on_map ();
 	void on_show ();
 
-  private:
+private:
 	MonitorSelector _selector;
 
 	void io_name_changed (void *src);

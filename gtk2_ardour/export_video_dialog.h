@@ -40,7 +40,7 @@
  */
 class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
-  public:
+public:
 	ExportVideoDialog ();
 	~ExportVideoDialog ();
 
@@ -55,7 +55,7 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 		Gtk::Dialog::on_response (response_id);
 	}
 
-  private:
+private:
 	TimeSelection export_range;
 
 	void on_show ();

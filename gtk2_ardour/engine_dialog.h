@@ -38,8 +38,9 @@
 #include "ardour_dialog.h"
 #include "ardour_button.h"
 
-class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
-  public:
+class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList
+{
+public:
 	EngineControl ();
 	~EngineControl ();
 
@@ -51,7 +52,7 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	void set_desired_sample_rate (uint32_t);
 	bool try_autostart ();
 
-  private:
+private:
 	Gtk::Notebook notebook;
 
 	Gtk::Label engine_status;
@@ -182,17 +183,17 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	void configure_midi_devices ();
 
 	struct MidiDeviceSetting {
-	std::string name;
-	bool enabled;
-	uint32_t input_latency;
-	uint32_t output_latency;
+		std::string name;
+		bool enabled;
+		uint32_t input_latency;
+		uint32_t output_latency;
 
-	MidiDeviceSetting (std::string n, bool en = true, uint32_t inl = 0, uint32_t oul = 0)
-		: name (n)
-		, enabled (en)
-		, input_latency (inl)
-		, output_latency (oul)
-	{}
+		MidiDeviceSetting (std::string n, bool en = true, uint32_t inl = 0, uint32_t oul = 0)
+			: name (n)
+			, enabled (en)
+			, input_latency (inl)
+			, output_latency (oul)
+		{}
 	};
 
 	typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
@@ -200,44 +201,44 @@ class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList {
 	std::vector<MidiDeviceSettings> _midi_devices;
 
 	MidiDeviceSettings find_midi_device(std::string devicename) const {
-	for (std::vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
-		if ((*p)->name == devicename) {
-		return *p;
+		for (std::vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin(); p != _midi_devices.end(); ++p) {
+			if ((*p)->name == devicename) {
+				return *p;
+			}
 		}
-	}
-	return MidiDeviceSettings();
+		return MidiDeviceSettings();
 	}
 
 	struct StateStruct {
-	std::string backend;
-	std::string driver;
-	std::string device;
-	std::string input_device;
-	std::string output_device;
-	float sample_rate;
-	uint32_t buffer_size;
-	uint32_t n_periods;
-	uint32_t input_latency;
-	uint32_t output_latency;
-	uint32_t input_channels;
-	uint32_t output_channels;
-	bool active;
-	bool use_buffered_io;
-	std::string midi_option;
-	std::vector<MidiDeviceSettings> midi_devices;
-	time_t lru;
+		std::string backend;
+		std::string driver;
+		std::string device;
+		std::string input_device;
+		std::string output_device;
+		float sample_rate;
+		uint32_t buffer_size;
+		uint32_t n_periods;
+		uint32_t input_latency;
+		uint32_t output_latency;
+		uint32_t input_channels;
+		uint32_t output_channels;
+		bool active;
+		bool use_buffered_io;
+		std::string midi_option;
+		std::vector<MidiDeviceSettings> midi_devices;
+		time_t lru;
 
-	StateStruct()
-		: sample_rate (48000)
-		, buffer_size (1024)
-		, input_latency (0)
-		, output_latency (0)
-		, input_channels (0)
-		, output_channels (0)
-		, active (false)
-		, use_buffered_io (false)
-		, lru (0) {}
-
+		StateStruct()
+			: sample_rate (48000)
+			, buffer_size (1024)
+			, input_latency (0)
+			, output_latency (0)
+			, input_channels (0)
+			, output_channels (0)
+			, active (false)
+			, use_buffered_io (false)
+			, lru (0)
+		{}
 	};
 
 	typedef boost::shared_ptr<StateStruct> State;

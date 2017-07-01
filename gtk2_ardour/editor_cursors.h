@@ -29,8 +29,9 @@
 
 class Editor;
 
-class EditorCursor {
-  public:
+class EditorCursor
+{
+public:
 	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*));
 	EditorCursor (Editor&);
 	~EditorCursor ();
@@ -53,7 +54,7 @@ class EditorCursor {
 
 	PBD::Signal1<void, framepos_t> PositionChanged;
 
-  private:
+private:
 	Editor&               _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
 	framepos_t            _current_frame;

@@ -36,7 +36,7 @@ class TimeAxisView;
  */
 class RegionSelection : public std::list<RegionView*>
 {
-  public:
+public:
 	RegionSelection();
 	RegionSelection (const RegionSelection&);
 
@@ -69,7 +69,7 @@ class RegionSelection : public std::list<RegionView*>
 
 	ARDOUR::RegionList regionlist () const;
 
-  private:
+private:
 	void remove_it (RegionView*);
 
 	void add_to_layer (RegionView *);

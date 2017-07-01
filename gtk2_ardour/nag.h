@@ -28,13 +28,13 @@
 
 class NagScreen : public ArdourDialog
 {
-  public:
+public:
 	~NagScreen();
 
 	static NagScreen* maybe_nag (std::string context);
 	void nag ();
 
-  private:
+private:
 	NagScreen (std::string context, bool maybe_subscriber);
 
 	Gtk::Label message;

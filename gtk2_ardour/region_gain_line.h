@@ -34,7 +34,7 @@ class AudioRegionView;
 
 class AudioRegionGainLine : public AutomationLine
 {
-  public:
+public:
 	AudioRegionGainLine (const std::string & name, AudioRegionView&, ArdourCanvas::Container& parent, boost::shared_ptr<ARDOUR::AutomationList>);
 
 	void start_drag_single (ControlPoint*, double, float);
@@ -48,6 +48,5 @@ private:
 	void region_changed (const PBD::PropertyChange& what_changed);
 	AudioRegionView& rv;
 };
-
 
 #endif /* __ardour_gtk_region_gain_line_h__ */

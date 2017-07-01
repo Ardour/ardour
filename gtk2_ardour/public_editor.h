@@ -108,8 +108,9 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider {
-  public:
+class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+{
+public:
 	PublicEditor (Gtk::Widget& content);
 	virtual ~PublicEditor ();
 
@@ -151,7 +152,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePt
 	virtual void snap_to (ARDOUR::MusicFrame& first,
 	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                      bool                for_mark  = false,
-			      bool                ensure_snap = false) = 0;
+	                      bool                ensure_snap = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -181,8 +182,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePt
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
 
-	/** @return Whether the current mouse mode is an "internal" editing mode.
-	 */
+	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
 	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion

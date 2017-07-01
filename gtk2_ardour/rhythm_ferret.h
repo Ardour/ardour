@@ -40,11 +40,12 @@ namespace ARDOUR {
 class Editor;
 class RegionView;
 
-class RhythmFerret : public ArdourDialog {
-  public:
+class RhythmFerret : public ArdourDialog
+{
+public:
 	/* order of these enums must match the _analyse_mode_strings
-	   in rhythm_ferret.cc
-	*/
+	 * in rhythm_ferret.cc
+	 */
 	enum AnalysisMode {
 		PercussionOnset,
 		NoteOnset
@@ -61,10 +62,10 @@ class RhythmFerret : public ArdourDialog {
 	void set_session (ARDOUR::Session*);
 	void on_response (int);
 
-  protected:
+protected:
 	void on_hide ();
 
-  private:
+private:
 	Editor& editor;
 
 	Gtk::ComboBoxText operation_selector;

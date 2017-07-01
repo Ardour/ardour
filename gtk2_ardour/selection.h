@@ -65,7 +65,7 @@ namespace Evoral {
 
 class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	enum SelectionType {
 		Object = 0x1,
 		Range = 0x2
@@ -190,15 +190,15 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void replace (uint32_t time_index, framepos_t start, framepos_t end);
 
-/*
- * A note about items in an editing Selection:
- * At a high level, selections can include Tracks, Objects, or Time Ranges
- * Range and Object selections are mutually exclusive.
- * Selecting a Range will deselect all Objects, and vice versa.
- * This is done to avoid confusion over what will happen in an operation such as Delete
- * Tracks are somewhat orthogonal b/c editing operations don't apply to tracks.
- * The Track selection isn't affected when ranges or objects are added.
- */
+	/*
+	 * A note about items in an editing Selection:
+	 * At a high level, selections can include Tracks, Objects, or Time Ranges
+	 * Range and Object selections are mutually exclusive.
+	 * Selecting a Range will deselect all Objects, and vice versa.
+	 * This is done to avoid confusion over what will happen in an operation such as Delete
+	 * Tracks are somewhat orthogonal b/c editing operations don't apply to tracks.
+	 * The Track selection isn't affected when ranges or objects are added.
+	 */
 
 	void clear_all() { clear_time(); clear_tracks(); clear_objects(); }
 
@@ -227,7 +227,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void core_selection_changed (PBD::PropertyChange const & pc);
 
-  private:
+private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;
 	bool     manage_libardour_selection;

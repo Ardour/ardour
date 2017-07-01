@@ -79,7 +79,7 @@ protected:
 
 class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
-  public:
+public:
 	static Mixer_UI* instance();
 	~Mixer_UI();
 
@@ -127,10 +127,10 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void load_bindings ();
 	Gtkmm2ext::Bindings*  bindings;
 
-  protected:
+protected:
 	void set_axis_targets_for_operation ();
 
-  private:
+private:
 	Mixer_UI ();
 	static Mixer_UI*     _instance;
 	Gtk::VBox            _content;
@@ -343,8 +343,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	static const int32_t default_height = 765;
 
 	/** true if we are rebuilding the route group list, or clearing
-	    it during a session teardown.
-	*/
+	 * it during a session teardown.
+	 */
 	bool _in_group_rebuild_or_clear;
 	bool _route_deletion_in_progress;
 

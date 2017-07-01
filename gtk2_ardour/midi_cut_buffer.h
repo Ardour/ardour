@@ -29,7 +29,7 @@ namespace ARDOUR {
 
 class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::Beats>
 {
-  public:
+public:
 	typedef Evoral::Beats TimeType;
 
 	MidiCutBuffer (ARDOUR::Session*);
@@ -40,7 +40,7 @@ class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::Beats>
 
 	void set (const Evoral::Sequence<TimeType>::Notes&);
 
-  private:
+private:
 	TimeType _origin;
 };
 

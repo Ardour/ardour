@@ -44,8 +44,9 @@
 
 class EngineControl;
 
-class ArdourStartup : public Gtk::Assistant {
-  public:
+class ArdourStartup : public Gtk::Assistant
+{
+public:
 	ArdourStartup ();
 	~ArdourStartup ();
 
@@ -55,7 +56,7 @@ class ArdourStartup : public Gtk::Assistant {
 		return  _response;
 	}
 
-  private:
+private:
 	gint _response;
 	bool config_modified;
 	bool new_user;

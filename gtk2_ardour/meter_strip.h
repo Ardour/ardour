@@ -45,7 +45,7 @@ namespace Gtk {
 
 class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 {
-  public:
+public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 	MeterStrip (int, ARDOUR::MeterType);
 	~MeterStrip ();
@@ -79,7 +79,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 
 	bool selected() const { return false; }
 
-  protected:
+protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList meter_route_connections;
 	PBD::ScopedConnectionList level_meter_connection;
@@ -99,7 +99,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	std::string state_id() const;
 	void set_button_names ();
 
-  private:
+private:
 	Gtk::VBox mtr_vbox;
 	Gtk::VBox nfo_vbox;
 	Gtk::EventBox mtr_container;

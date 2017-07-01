@@ -44,7 +44,7 @@ class PublicEditor;
  */
 class ArdourMarker : public sigc::trackable
 {
-  public:
+public:
 	enum Type {
 		Mark,
 		Tempo,
@@ -61,7 +61,7 @@ class ArdourMarker : public sigc::trackable
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-		framepos_t frame = 0, bool handle_events = true);
+	              framepos_t frame = 0, bool handle_events = true);
 
 	virtual ~ArdourMarker ();
 
@@ -100,7 +100,7 @@ class ArdourMarker : public sigc::trackable
 
 	bool label_on_left () const;
 
-  protected:
+protected:
 	PublicEditor& editor;
 
 	Pango::FontDescription name_font;

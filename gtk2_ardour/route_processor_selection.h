@@ -34,7 +34,7 @@ class AxisViewProvider;
 
 class RouteProcessorSelection : public ProcessorSelection
 {
-  public:
+public:
 	AxisViewSelection  axes;
 
 	RouteProcessorSelection (ARDOUR::SessionHandlePtr&, AxisViewProvider&);
@@ -53,7 +53,7 @@ class RouteProcessorSelection : public ProcessorSelection
 
 	void presentation_info_changed (PBD::PropertyChange const & what_changed);
 
-  private:
+private:
 	ARDOUR::SessionHandlePtr& shp;
 	AxisViewProvider& avp;
 	void removed (AxisView*);

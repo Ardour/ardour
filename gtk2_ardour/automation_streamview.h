@@ -40,7 +40,7 @@ class AutomationRegionView;
 
 class AutomationStreamView : public StreamView
 {
-  public:
+public:
 	AutomationStreamView (AutomationTimeAxisView& tv);
 	~AutomationStreamView ();
 
@@ -70,7 +70,7 @@ class AutomationStreamView : public StreamView
 	            float                                     times,
 	            boost::shared_ptr<ARDOUR::AutomationList> list);
 
-  private:
+private:
 	void setup_rec_box ();
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);

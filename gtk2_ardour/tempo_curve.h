@@ -20,7 +20,7 @@ class PublicEditor;
 
 class TempoCurve : public sigc::trackable
 {
-  public:
+public:
 	TempoCurve (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, ARDOUR::TempoSection& temp, framepos_t frame, bool handle_events);
 	~TempoCurve ();
 

@@ -32,7 +32,7 @@ namespace ARDOUR {
 
 class LXVSTPluginUI : public VSTPluginUI
 {
-  public:
+public:
 	LXVSTPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>, boost::shared_ptr<ARDOUR::VSTPlugin>);
 	~LXVSTPluginUI ();
 

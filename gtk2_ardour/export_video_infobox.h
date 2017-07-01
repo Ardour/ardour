@@ -31,13 +31,13 @@
  */
 class ExportVideoInfobox : public ArdourDialog
 {
-  public:
+public:
 	ExportVideoInfobox (ARDOUR::Session*);
 	~ExportVideoInfobox ();
 
 	bool show_again () { return showagain_checkbox.get_active(); }
 
-  private:
+private:
 	Gtk::CheckButton showagain_checkbox;
 };
 

@@ -29,11 +29,11 @@
 
 class MidiVelocityDialog : public ArdourDialog
 {
-  public:
+public:
 	MidiVelocityDialog (uint8_t current_velocity = 0);
 	uint8_t velocity() const;
 
-  private:
+private:
 	Gtk::Adjustment adjustment;
 	Gtk::SpinButton spinner;
 	Gtk::Label      label;

@@ -36,7 +36,7 @@ namespace ARDOUR {
 
 class BundleEditorMatrix : public PortMatrix
 {
-  public:
+public:
 	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session *, boost::shared_ptr<ARDOUR::Bundle>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool s);
@@ -54,7 +54,7 @@ class BundleEditorMatrix : public PortMatrix
 
 	std::string disassociation_verb () const;
 
-  private:
+private:
 	enum {
 		OTHER = 0,
 		OURS = 1
@@ -66,13 +66,13 @@ class BundleEditorMatrix : public PortMatrix
 
 class BundleEditor : public ArdourDialog
 {
-  public:
+public:
 	BundleEditor (ARDOUR::Session *, boost::shared_ptr<ARDOUR::UserBundle>);
 
-  protected:
+protected:
 	void on_map ();
 
-  private:
+private:
 	void name_changed ();
 	void input_or_output_changed ();
 	void on_show ();
@@ -85,10 +85,10 @@ class BundleEditor : public ArdourDialog
 
 class BundleManager : public ArdourDialog
 {
-  public:
+public:
 	BundleManager (ARDOUR::Session *);
 
-  private:
+private:
 
 	void new_clicked ();
 	void edit_clicked ();

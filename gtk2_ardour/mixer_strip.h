@@ -78,7 +78,7 @@ class ArdourWindow;
 
 class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
-  public:
+public:
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>, bool in_mixer = true);
 	MixerStrip (Mixer_UI&, ARDOUR::Session*, bool in_mixer = true);
 	~MixerStrip ();
@@ -144,14 +144,14 @@ class MixerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 
 	static MixerStrip* entered_mixer_strip() { return _entered_mixer_strip; }
 
-  protected:
+protected:
 	friend class Mixer_UI;
 	void set_packed (bool yn);
 	bool packed () { return _packed; }
 
 	void set_stuff_from_route ();
 
-  private:
+private:
 	Mixer_UI& _mixer;
 
 	void init ();

@@ -83,7 +83,7 @@ class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	PlugUIBase (boost::shared_ptr<ARDOUR::PluginInsert>);
 	virtual ~PlugUIBase();
 
@@ -106,11 +106,11 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 
 	virtual void forward_key_event (GdkEventKey*) {}
 	virtual void grab_focus () {}
-  virtual bool non_gtk_gui() const { return false; }
+	virtual bool non_gtk_gui() const { return false; }
 
 	sigc::signal<void,bool> KeyboardFocused;
 
-  protected:
+protected:
 	boost::shared_ptr<ARDOUR::PluginInsert> insert;
 	boost::shared_ptr<ARDOUR::Plugin> plugin;
 
@@ -185,7 +185,7 @@ class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionL
 
 class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 {
-  public:
+public:
 	GenericPluginUI (boost::shared_ptr<ARDOUR::PluginInsert> plug, bool scrollable=false);
 	~GenericPluginUI ();
 
@@ -195,7 +195,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 
-  private:
+private:
 	Gtk::VBox main_contents;
 	Gtk::HBox settings_box;
 	Gtk::HBox hpacker;
@@ -301,7 +301,7 @@ class GenericPluginUI : public PlugUIBase, public Gtk::VBox
 
 class PluginUIWindow : public ArdourWindow
 {
-  public:
+public:
 	PluginUIWindow (boost::shared_ptr<ARDOUR::PluginInsert> insert,
 	                bool scrollable=false,
 	                bool editor=true);
@@ -319,7 +319,7 @@ class PluginUIWindow : public ArdourWindow
 	void on_show ();
 	void on_hide ();
 
-  private:
+private:
 	std::string _title;
 	PlugUIBase* _pluginui;
 	PBD::ScopedConnection death_connection;

@@ -81,14 +81,15 @@ public:
 
 class MidiGhostRegion : public GhostRegion {
 public:
-	class GhostEvent : public sigc::trackable {
-	  public:
-	    GhostEvent(::NoteBase *, ArdourCanvas::Container *);
-	    virtual ~GhostEvent ();
+	class GhostEvent : public sigc::trackable
+	{
+	public:
+		GhostEvent(::NoteBase *, ArdourCanvas::Container *);
+		virtual ~GhostEvent ();
 
-	    NoteBase* event;
-	    ArdourCanvas::Item* item;
-	    bool is_hit;
+		NoteBase* event;
+		ArdourCanvas::Item* item;
+		bool is_hit;
 	};
 
 	MidiGhostRegion(MidiRegionView& rv,

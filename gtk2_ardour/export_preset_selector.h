@@ -28,8 +28,7 @@
 
 class ExportPresetSelector : public Gtk::HBox
 {
-
-  public:
+public:
 
 	ExportPresetSelector ();
 
@@ -37,7 +36,7 @@ class ExportPresetSelector : public Gtk::HBox
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  private:
+private:
 
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef ARDOUR::ExportPresetPtr PresetPtr;
@@ -54,7 +53,7 @@ class ExportPresetSelector : public Gtk::HBox
 
 	struct PresetCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<PresetPtr>      preset;
 		Gtk::TreeModelColumn<std::string>  label;
 

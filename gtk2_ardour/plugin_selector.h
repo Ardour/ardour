@@ -40,7 +40,7 @@ namespace ARDOUR {
 
 class PluginSelector : public ArdourDialog
 {
-  public:
+public:
 	PluginSelector (ARDOUR::PluginManager&);
 	~PluginSelector ();
 
@@ -53,7 +53,7 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu* plugin_menu ();
 	void show_manager ();
 
-  private:
+private:
 	PluginInterestedObject* interested_object;
 
 	Gtk::ScrolledWindow scroller;   // Available plugins

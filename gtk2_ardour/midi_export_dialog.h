@@ -27,8 +27,9 @@
 #include "ardour_dialog.h"
 #include "public_editor.h"
 
-class MidiExportDialog : public ArdourDialog {
-  public:
+class MidiExportDialog : public ArdourDialog
+{
+public:
 	MidiExportDialog (PublicEditor& editor, boost::shared_ptr<ARDOUR::MidiRegion>);
 	~MidiExportDialog ();
 
@@ -36,7 +37,7 @@ class MidiExportDialog : public ArdourDialog {
 
 	std::string get_path() const;
 
-  private:
+private:
 	Gtk::FileChooserWidget file_chooser;
 };
 

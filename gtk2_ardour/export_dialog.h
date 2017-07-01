@@ -46,8 +46,7 @@ class ExportChannelSelector;
 
 class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 {
-
-  public:
+public:
 
 	ExportDialog (PublicEditor & editor, std::string title, ARDOUR::ExportProfileManager::ExportType type);
 	~ExportDialog ();
@@ -62,7 +61,7 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 		RESPONSE_CANCEL
 	};
 
-  protected:
+protected:
 
 	void on_response (int response_id) {
 		Gtk::Dialog::on_response (response_id);
@@ -94,7 +93,7 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	/*** GUI components ***/
 	Gtk::Notebook export_notebook;
 
-  private:
+private:
 
 	void init ();
 

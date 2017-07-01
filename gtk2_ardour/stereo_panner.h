@@ -38,7 +38,7 @@ namespace ARDOUR {
 
 class StereoPanner : public PannerInterface
 {
-  public:
+public:
 	StereoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~StereoPanner ();
 
@@ -50,7 +50,7 @@ class StereoPanner : public PannerInterface
 	sigc::signal<void> StartWidthGesture;
 	sigc::signal<void> StopWidthGesture;
 
-  protected:
+protected:
 	bool on_expose_event (GdkEventExpose*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
@@ -58,7 +58,7 @@ class StereoPanner : public PannerInterface
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_key_press_event (GdkEventKey*);
 
-  private:
+private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 

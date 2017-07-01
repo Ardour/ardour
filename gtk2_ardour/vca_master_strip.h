@@ -40,7 +40,7 @@ class FloatingTextEntry;
 
 class VCAMasterStrip : public AxisView, public Gtk::EventBox
 {
-      public:
+public:
 	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
 	~VCAMasterStrip ();
 
@@ -57,7 +57,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
-     private:
+private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	GainMeter    gain_meter;
 

@@ -14,7 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
 */
 
 #ifndef __gtk2_ardour_auplugin_ui_h__
@@ -75,7 +74,7 @@ class AUPluginUI;
 
 class AUPluginUI : public PlugUIBase, public Gtk::VBox
 {
-  public:
+public:
 	AUPluginUI (boost::shared_ptr<ARDOUR::PluginInsert>);
 	~AUPluginUI ();
 
@@ -110,7 +109,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	void start_live_resize ();
 	void end_live_resize ();
 
-  private:
+private:
 	WindowRef wr;
 	boost::shared_ptr<ARDOUR::AUPlugin> au;
 	int prefheight;
@@ -133,7 +132,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 
 	NSWindow*           cocoa_window;
 	NSView*             au_view;
-        NSRect              last_au_frame;
+	NSRect              last_au_frame;
 	bool                in_live_resize;
 	uint32_t            plugin_requested_resize;
 
@@ -175,7 +174,7 @@ class AUPluginUI : public PlugUIBase, public Gtk::VBox
 	static bool timer_callback ();
 	static sigc::connection timer_connection;
 
-  public:
+public:
 	static void start_cf_timer ();
 	static void stop_cf_timer ();
 };

@@ -47,7 +47,7 @@ class LuaWindow :
 	public ARDOUR::SessionHandlePtr,
 	public Gtkmm2ext::VisibilityTracker
 {
-  public:
+public:
 	static LuaWindow* instance();
 	~LuaWindow();
 
@@ -66,7 +66,8 @@ class LuaWindow :
 		Buffer_Scratch    = 0x10,
 	} BufferFlags;
 
-	class ScriptBuffer {
+	class ScriptBuffer
+	{
 	public:
 		ScriptBuffer (const std::string&);
 		ScriptBuffer (ARDOUR::LuaScriptInfoPtr);
@@ -82,7 +83,7 @@ class LuaWindow :
 		ARDOUR::LuaScriptInfo::ScriptType type;
 	};
 
-  private:
+private:
 	LuaWindow ();
 	static LuaWindow* _instance;
 

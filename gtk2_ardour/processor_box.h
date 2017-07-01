@@ -80,7 +80,7 @@ class ProcessorBox;
 
 class ProcessorWindowProxy : public WM::ProxyBase
 {
-  public:
+public:
 	ProcessorWindowProxy (std::string const &, ProcessorBox *, boost::weak_ptr<ARDOUR::Processor>);
 	~ProcessorWindowProxy();
 
@@ -97,7 +97,7 @@ class ProcessorWindowProxy : public WM::ProxyBase
 	int set_state (const XMLNode&, int);
 	XMLNode& get_state ();
 
-  private:
+private:
 	ProcessorBox* _processor_box;
 	boost::weak_ptr<ARDOUR::Processor> _processor;
 	bool is_custom;
@@ -401,7 +401,7 @@ private:
 
 class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	enum ProcessorOperation {
 		ProcessorsCut,
 		ProcessorsCopy,
@@ -414,7 +414,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	};
 
 	ProcessorBox (ARDOUR::Session*, boost::function<PluginSelector*()> get_plugin_selector,
-		      ProcessorSelection&, MixerStrip* parent, bool owner_is_mixer = false);
+	              ProcessorSelection&, MixerStrip* parent, bool owner_is_mixer = false);
 	~ProcessorBox ();
 
 	void set_route (boost::shared_ptr<ARDOUR::Route>);
@@ -457,7 +457,8 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Processor> > ProcSelection;
 
-	static ProcSelection current_processor_selection () {
+	static ProcSelection current_processor_selection ()
+	{
 		ProcSelection ps;
 		if (_current_processor_box) {
 			_current_processor_box->get_selected_processors (ps);
@@ -469,7 +470,7 @@ class ProcessorBox : public Gtk::HBox, public PluginInterestedObject, public ARD
 	static bool show_all_processors;
 #endif
 
-  private:
+private:
 	/* prevent copy construction */
 	ProcessorBox (ProcessorBox const &);
 

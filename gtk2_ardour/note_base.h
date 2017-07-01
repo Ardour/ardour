@@ -52,7 +52,7 @@ namespace ArdourCanvas {
  */
 class NoteBase : public sigc::trackable
 {
-  public:
+public:
 	typedef Evoral::Note<Evoral::Beats> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
@@ -106,11 +106,9 @@ class NoteBase : public sigc::trackable
 		if (selected) {
 			return _selected_mod_col;
 		} else if (vel < 64) {
-			return UINT_INTERPOLATE(_min_col, _mid_col,
-				(vel / (double)63.0));
+			return UINT_INTERPOLATE(_min_col, _mid_col, (vel / (double)63.0));
 		} else {
-			return UINT_INTERPOLATE(_mid_col, _max_col,
-				((vel-64) / (double)63.0));
+			return UINT_INTERPOLATE(_mid_col, _max_col, ((vel - 64) / (double)63.0));
 		}
 	}
 

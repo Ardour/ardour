@@ -48,13 +48,13 @@ namespace ArdourCanvas {
 
 class RegionView : public TimeAxisViewItem
 {
-  public:
+public:
 	RegionView (ArdourCanvas::Container* parent,
 	            TimeAxisView&        time_view,
 	            boost::shared_ptr<ARDOUR::Region> region,
 	            double               samples_per_pixel,
 	            uint32_t             base_color,
-		    bool 		 automation = false);
+	            bool 		 automation = false);
 
 	RegionView (const RegionView& other);
 	RegionView (const RegionView& other, boost::shared_ptr<ARDOUR::Region> other_region);
@@ -123,18 +123,18 @@ class RegionView : public TimeAxisViewItem
 
 	ARDOUR::MusicFrame snap_frame_to_frame (ARDOUR::frameoffset_t, bool ensure_snap = false) const;
 
-  protected:
+protected:
 
 	/** Allows derived types to specify their visibility requirements
 	 * to the TimeAxisViewItem parent class
 	 */
 	RegionView (ArdourCanvas::Container *,
-		    TimeAxisView&,
-		    boost::shared_ptr<ARDOUR::Region>,
-		    double samples_per_pixel,
-		    uint32_t basic_color,
-		    bool recording,
-		    TimeAxisViewItem::Visibility);
+	            TimeAxisView&,
+	            boost::shared_ptr<ARDOUR::Region>,
+	            double samples_per_pixel,
+	            uint32_t basic_color,
+	            bool recording,
+	            TimeAxisViewItem::Visibility);
 
 	bool canvas_group_event (GdkEvent*);
 
@@ -176,9 +176,9 @@ class RegionView : public TimeAxisViewItem
 	std::vector<GhostRegion*> ghosts;
 
 	/** a list of rectangles which are used in stacked display mode to colour
-	    different bits of regions according to whether or not they are the one
-	    that will be played at any given time.
-	*/
+	 * different bits of regions according to whether or not they are the one
+	 * that will be played at any given time.
+	 */
 	std::list<ArdourCanvas::Rectangle*> _coverage_frames;
 
 	/** a list of rectangles used to show silent segments
@@ -187,8 +187,7 @@ class RegionView : public TimeAxisViewItem
 	/** a list of rectangles used to show the current silence threshold
 	*/
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_frames;
-	/** a text item to display strip silence statistics
-	 */
+	/** a text item to display strip silence statistics */
 	ArdourCanvas::Text* _silence_text;
 };
 

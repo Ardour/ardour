@@ -45,10 +45,11 @@
 
 class EngineControl;
 
-class SessionDialog : public ArdourDialog {
-  public:
+class SessionDialog : public ArdourDialog
+{
+public:
 	SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path,
-		       const std::string& template_name, bool cancel_not_quit);
+	               const std::string& template_name, bool cancel_not_quit);
 	SessionDialog ();
 	~SessionDialog ();
 
@@ -81,7 +82,7 @@ class SessionDialog : public ArdourDialog {
 		_provided_session_path = session_path;
 	}
 
-  private:
+private:
 	bool new_only;
 	std::string _provided_session_name;
 	std::string _provided_session_path;
@@ -110,29 +111,31 @@ class SessionDialog : public ArdourDialog {
 
 	void setup_existing_session_page ();
 
-	struct RecentSessionsSorter {
-	    bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
-		    return ARDOUR::cmp_nocase(a.first, b.first) == -1;
-	    }
+	struct RecentSessionsSorter
+	{
+		bool operator() (std::pair<std::string,std::string> a, std::pair<std::string,std::string> b) const {
+			return ARDOUR::cmp_nocase(a.first, b.first) == -1;
+		}
 	};
 
 	struct RecentSessionModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    RecentSessionModelColumns() {
-		    add (visible_name);
-		    add (tip);
-		    add (fullpath);
-		    add (sample_rate);
-		    add (disk_format);
-		    add (time_modified);
-		    add (time_formatted);
-	    }
-	    Gtk::TreeModelColumn<std::string> visible_name;
-	    Gtk::TreeModelColumn<std::string> tip;
-	    Gtk::TreeModelColumn<std::string> fullpath;
-	    Gtk::TreeModelColumn<std::string> sample_rate;
-	    Gtk::TreeModelColumn<std::string> disk_format;
-	    Gtk::TreeModelColumn<int64_t>     time_modified;
-	    Gtk::TreeModelColumn<std::string> time_formatted;
+		RecentSessionModelColumns()
+		{
+			add (visible_name);
+			add (tip);
+			add (fullpath);
+			add (sample_rate);
+			add (disk_format);
+			add (time_modified);
+			add (time_formatted);
+		}
+		Gtk::TreeModelColumn<std::string> visible_name;
+		Gtk::TreeModelColumn<std::string> tip;
+		Gtk::TreeModelColumn<std::string> fullpath;
+		Gtk::TreeModelColumn<std::string> sample_rate;
+		Gtk::TreeModelColumn<std::string> disk_format;
+		Gtk::TreeModelColumn<int64_t>     time_modified;
+		Gtk::TreeModelColumn<std::string> time_formatted;
 	};
 
 	RecentSessionModelColumns    recent_session_columns;

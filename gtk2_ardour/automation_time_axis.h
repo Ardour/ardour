@@ -54,19 +54,20 @@ class AutomationStreamView;
 class AutomationController;
 class ItemCounts;
 
-class AutomationTimeAxisView : public TimeAxisView {
-  public:
+class AutomationTimeAxisView : public TimeAxisView
+{
+public:
 	AutomationTimeAxisView (ARDOUR::Session*,
-				boost::shared_ptr<ARDOUR::Stripable>,
-				boost::shared_ptr<ARDOUR::Automatable>,
-				boost::shared_ptr<ARDOUR::AutomationControl>,
-				Evoral::Parameter,
-				PublicEditor&,
-				TimeAxisView& parent,
-				bool show_regions,
-				ArdourCanvas::Canvas& canvas,
-				const std::string & name, /* translatable */
-				const std::string & plug_name = "");
+	                        boost::shared_ptr<ARDOUR::Stripable>,
+	                        boost::shared_ptr<ARDOUR::Automatable>,
+	                        boost::shared_ptr<ARDOUR::AutomationControl>,
+	                        Evoral::Parameter,
+	                        PublicEditor&,
+	                        TimeAxisView& parent,
+	                        bool show_regions,
+	                        ArdourCanvas::Canvas& canvas,
+	                        const std::string & name, /* translatable */
+	                        const std::string & plug_name = "");
 
 	~AutomationTimeAxisView();
 
@@ -127,10 +128,10 @@ class AutomationTimeAxisView : public TimeAxisView {
 
 	static void what_has_visible_automation (const boost::shared_ptr<ARDOUR::Automatable>& automatable, std::set<Evoral::Parameter>& visible);
 
-  protected:
+protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these
-	   may be set.  In this case, _automatable is likely _route so the
-	   controller will send immediate events out the route's MIDI port. */
+	 * may be set.  In this case, _automatable is likely _route so the
+	 * controller will send immediate events out the route's MIDI port. */
 
 	/** parent strip */
 	boost::shared_ptr<ARDOUR::Stripable> _stripable;

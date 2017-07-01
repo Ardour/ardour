@@ -41,12 +41,12 @@ namespace ARDOUR {
 
 class ControlSlaveUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-   public:
+public:
 	ControlSlaveUI (ARDOUR::Session*);
 	~ControlSlaveUI ();
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
-   private:
+private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList connections;
 	PBD::ScopedConnectionList master_connections;

@@ -25,8 +25,9 @@
 
 #include "audio_clock.h"
 
-class ClockGroup : public sigc::trackable {
-  public:
+class ClockGroup : public sigc::trackable
+{
+public:
 	ClockGroup ();
 	~ClockGroup ();
 
@@ -36,7 +37,7 @@ class ClockGroup : public sigc::trackable {
 	void add (AudioClock&);
 	void remove (AudioClock&);
 
-  private:
+private:
 	std::set<AudioClock*> clocks;
 	bool ignore_changes;
 	AudioClock::Mode _clock_mode;

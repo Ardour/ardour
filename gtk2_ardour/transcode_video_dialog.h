@@ -41,7 +41,7 @@ enum VtlTranscodeOption {
  */
 class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
-  public:
+public:
 	TranscodeVideoDialog (ARDOUR::Session*, std::string);
 	~TranscodeVideoDialog ();
 
@@ -54,7 +54,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 		Gtk::Dialog::on_response (response_id);
 	}
 
-  private:
+private:
 	void on_show ();
 	void open_browse_dialog ();
 	void abort_clicked ();
@@ -66,7 +66,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	void update_bitrate ();
 	void launch_audioonly ();
 	void launch_transcode ();
-  void launch_extract ();
+	void launch_extract ();
 	void dialog_progress_mode ();
 	bool aborted;
 	bool pending_audio_extract;

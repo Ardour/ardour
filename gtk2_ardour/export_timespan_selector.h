@@ -49,7 +49,7 @@ using ARDOUR::framecnt_t;
 /// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
-  protected:
+protected:
 	typedef std::list<ARDOUR::Location *> LocationList;
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
@@ -58,7 +58,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
 	typedef ARDOUR::ExportProfileManager::TimespanStatePtr TimespanStatePtr;
 
-  public:
+public:
 
 	ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager, bool multi);
 
@@ -69,7 +69,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  protected:
+protected:
 
 	ProfileManagerPtr manager;
 	TimespanStatePtr  state;
@@ -107,7 +107,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<TimeFormat>      format;
 		Gtk::TreeModelColumn<std::string>   label;
 
@@ -121,7 +121,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct RangeCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::Location *>  location;
 		Gtk::TreeModelColumn<std::string>       label;
 		Gtk::TreeModelColumn<bool>              selected;
@@ -142,12 +142,12 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 /// Allows selecting multiple timespans
 class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 {
-  public:
+public:
 	ExportTimespanSelectorMultiple (ARDOUR::Session * session, ProfileManagerPtr manager);
 
 	void allow_realtime_export (bool);
 
-  private:
+private:
 
 	virtual void fill_range_list ();
 
@@ -159,12 +159,12 @@ class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 /// Displays one timespan
 class ExportTimespanSelectorSingle : public ExportTimespanSelector
 {
-  public:
+public:
 	ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, std::string range_id);
 
 	void allow_realtime_export (bool);
 
-  private:
+private:
 
 	virtual void fill_range_list ();
 	void update_timespans ();

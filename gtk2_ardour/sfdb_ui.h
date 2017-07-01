@@ -61,7 +61,7 @@ class Mootcher;
 
 class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	SoundFileBox (bool persistent);
 	virtual ~SoundFileBox () {};
 
@@ -74,7 +74,7 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public P
 	void set_src_quality(ARDOUR::SrcQuality q) { _src_quality = q; }
 	void set_import_position(Editing::ImportPosition p) { _import_position = p; }
 
-  protected:
+protected:
 	std::string path;
 
 	ARDOUR::SoundFileInfo sf_info;
@@ -131,10 +131,10 @@ class SoundFileBox : public Gtk::VBox, public ARDOUR::SessionHandlePtr, public P
 
 class SoundFileBrowser : public ArdourWindow
 {
-  private:
+private:
 	class FoundTagColumns : public Gtk::TreeModel::ColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<std::string> pathname;
 
 		FoundTagColumns() { add(pathname); }
@@ -142,7 +142,7 @@ class SoundFileBrowser : public ArdourWindow
 
 	class FreesoundColumns : public Gtk::TreeModel::ColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<std::string> id;
 		Gtk::TreeModelColumn<std::string> uri;
 		Gtk::TreeModelColumn<std::string> filename;
@@ -174,7 +174,8 @@ class SoundFileBrowser : public ArdourWindow
 	Gtk::Button freesound_similar_btn;
 
 	void handle_freesound_results(std::string theString);
-  public:
+
+public:
 	SoundFileBrowser (std::string title, ARDOUR::Session* _s, bool persistent);
 	virtual ~SoundFileBrowser ();
 
@@ -204,7 +205,7 @@ class SoundFileBrowser : public ArdourWindow
 	void freesound_search();
 	void refresh_display(std::string ID, std::string file);
 
-  protected:
+protected:
 	bool resetting_ourselves;
 	int matches;
 	int _status;
@@ -263,24 +264,25 @@ class SoundFileBrowser : public ArdourWindow
 
 class SoundFileChooser : public SoundFileBrowser
 {
-  public:
+public:
 	SoundFileChooser (std::string title, ARDOUR::Session* _s = 0);
 	virtual ~SoundFileChooser () {};
 
 	std::string get_filename ();
 
-  protected:
+protected:
 	void on_hide();
 };
 
 class SoundFileOmega : public SoundFileBrowser
 {
-
-  public:
-	SoundFileOmega (std::string title, ARDOUR::Session* _s,
-			uint32_t selected_audio_tracks, uint32_t selected_midi_tracks,
-			bool persistent,
-			Editing::ImportMode mode_hint = Editing::ImportAsTrack);
+public:
+	SoundFileOmega (std::string title,
+	                ARDOUR::Session* _s,
+	                uint32_t selected_audio_tracks,
+	                uint32_t selected_midi_tracks,
+	                bool persistent,
+	                Editing::ImportMode mode_hint = Editing::ImportAsTrack);
 
 	void reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tracks);
 
@@ -302,10 +304,10 @@ class SoundFileOmega : public SoundFileBrowser
 	Editing::ImportDisposition get_channel_disposition() const;
 	ARDOUR::SrcQuality get_src_quality() const;
 
-  protected:
+protected:
 	void on_hide();
 
-  private:
+private:
 	uint32_t selected_audio_track_cnt;
 	uint32_t selected_midi_track_cnt;
 
@@ -318,7 +320,7 @@ class SoundFileOmega : public SoundFileBrowser
 	Gtk::VBox block_four;
 
 	bool check_info (const std::vector<std::string>& paths,
-			 bool& same_size, bool& src_needed, bool& multichannel);
+	                 bool& same_size, bool& src_needed, bool& multichannel);
 
 	static bool check_link_status (const ARDOUR::Session*, const std::vector<std::string>& paths);
 

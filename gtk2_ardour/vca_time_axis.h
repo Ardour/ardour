@@ -35,7 +35,7 @@ namespace ARDOUR {
 
 class VCATimeAxisView : public StripableTimeAxisView
 {
-  public:
+public:
 	VCATimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~VCATimeAxisView ();
 
@@ -55,7 +55,7 @@ class VCATimeAxisView : public StripableTimeAxisView
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
- protected:
+protected:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	ArdourButton  solo_button;
 	ArdourButton  mute_button;

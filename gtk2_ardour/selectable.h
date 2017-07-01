@@ -24,7 +24,7 @@
 
 class Selectable : public virtual sigc::trackable
 {
-  public:
+public:
 	Selectable() {
 		_selected = false;
 	}
@@ -41,7 +41,7 @@ class Selectable : public virtual sigc::trackable
 		return _selected;
 	}
 
-  protected:
+protected:
 	bool _selected;
 };
 

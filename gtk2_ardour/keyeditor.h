@@ -37,7 +37,7 @@ namespace Gtkmm2ext {
 
 class KeyEditor : public ArdourWindow
 {
-  public:
+public:
 	KeyEditor ();
 
 	void add_tab (std::string const &name, Gtkmm2ext::Bindings&);
@@ -49,10 +49,10 @@ class KeyEditor : public ArdourWindow
 		_refresh_connection.disconnect ();
 	}
 
-	private:
+private:
 	class Tab : public Gtk::VBox
 	{
-		public:
+	public:
 		Tab (KeyEditor&, std::string const &name, Gtkmm2ext::Bindings*);
 
 		uint32_t populate ();
@@ -80,8 +80,8 @@ class KeyEditor : public ArdourWindow
 
 		Gtk::VBox vpacker;
 		/* give KeyEditor full access to these. This is just a helper
-		   class with no special semantics
-		*/
+		 * class with no special semantics
+		 */
 
 		KeyEditor& owner;
 		std::string name;
@@ -94,7 +94,7 @@ class KeyEditor : public ArdourWindow
 		KeyEditorColumns columns;
 		guint last_keyval;
 
-		protected:
+	protected:
 		bool key_press_event (GdkEventKey*);
 		bool key_release_event (GdkEventKey*);
 		Gtk::TreeModel::iterator find_action_path (Gtk::TreeModel::const_iterator begin, Gtk::TreeModel::const_iterator end, const std::string& path) const;

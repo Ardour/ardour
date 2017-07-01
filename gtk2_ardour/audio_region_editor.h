@@ -51,13 +51,13 @@ class AudioRegionView;
 
 class AudioRegionEditor : public RegionEditor
 {
-  public:
+public:
 	AudioRegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::AudioRegion>);
 	~AudioRegionEditor ();
 
 	void peak_amplitude_thread ();
 
-  private:
+private:
 
 	void region_changed (PBD::PropertyChange const &);
 

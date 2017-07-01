@@ -39,19 +39,19 @@ namespace ARDOUR {
 
 class SessionImportDialog : public ArdourDialog
 {
-  private:
+private:
 	typedef boost::shared_ptr<ARDOUR::ElementImportHandler> HandlerPtr;
 	typedef std::list<HandlerPtr> HandlerList;
 
 	typedef boost::shared_ptr<ARDOUR::ElementImporter> ElementPtr;
 	typedef std::list<ElementPtr> ElementList;
 
-  public:
+public:
 	SessionImportDialog (ARDOUR::Session* target);
 
 	virtual Gtk::FileChooserAction browse_action() const { return Gtk::FILE_CHOOSER_ACTION_OPEN; }
 
-  private:
+private:
 
 	void load_session (const std::string& filename);
 	void fill_list ();
@@ -77,12 +77,12 @@ class SessionImportDialog : public ArdourDialog
 	struct SessionBrowserColumns : public Gtk::TreeModel::ColumnRecord
 	{
 	public:
-	  Gtk::TreeModelColumn<std::string>    name;
-	  Gtk::TreeModelColumn<bool>           queued;
-	  Gtk::TreeModelColumn<ElementPtr>     element;
-	  Gtk::TreeModelColumn<std::string>    info;
+		Gtk::TreeModelColumn<std::string>    name;
+		Gtk::TreeModelColumn<bool>           queued;
+		Gtk::TreeModelColumn<ElementPtr>     element;
+		Gtk::TreeModelColumn<std::string>    info;
 
-	  SessionBrowserColumns() { add (name); add (queued); add (element); add (info); }
+		SessionBrowserColumns() { add (name); add (queued); add (element); add (info); }
 	};
 
 	SessionBrowserColumns         sb_cols;

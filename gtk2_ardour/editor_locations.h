@@ -34,7 +34,7 @@ namespace Gtk {
 
 class EditorLocations : public EditorComponent, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	EditorLocations (Editor *);
 
 	void set_session (ARDOUR::Session *);
@@ -43,7 +43,7 @@ class EditorLocations : public EditorComponent, public ARDOUR::SessionHandlePtr
 	XMLNode & get_state () const;
 	int set_state (const XMLNode&);
 
-  private:
+private:
 	Gtk::ScrolledWindow _scroller;
 	LocationUI* _locations;
 };

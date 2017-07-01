@@ -58,7 +58,7 @@ class IOSelector;
 
 class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	RouteParams_UI ();
 	~RouteParams_UI();
 
@@ -66,7 +66,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	void session_going_away ();
 	PluginSelector* plugin_selector() { return _plugin_selector; }
 
-  private:
+private:
 	Gtk::VBox                list_vpacker;
 	Gtk::ScrolledWindow      route_select_scroller;
 

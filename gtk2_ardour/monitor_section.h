@@ -41,7 +41,7 @@ namespace Gtkmm2ext {
 
 class MonitorSection : public RouteUI, public Gtk::EventBox
 {
-  public:
+public:
 	MonitorSection (ARDOUR::Session*);
 	~MonitorSection ();
 
@@ -53,7 +53,7 @@ class MonitorSection : public RouteUI, public Gtk::EventBox
 
 	PluginSelector* plugin_selector() { return _plugin_selector; }
 
-	private:
+private:
 	Gtk::HBox hpacker;
 	Gtk::VBox vpacker;
 	Gtkmm2ext::TearOff* _tearoff;

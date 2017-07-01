@@ -38,7 +38,7 @@ class AudioClock;
 
 class TimeFXDialog : public ArdourDialog, public ProgressReporter
 {
-  public:
+public:
 	/* We need a position so that BBT mode in the clock can function */
 	TimeFXDialog (Editor& e, bool for_pitch, ARDOUR::framecnt_t old_length, ARDOUR::framecnt_t new_length, ARDOUR::framepos_t position);
 
@@ -78,7 +78,7 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 		Gtk::Dialog::on_response (response_id);
 	}
 
-  private:
+private:
 	ARDOUR::framecnt_t      original_length;
 	Gtk::Adjustment pitch_octave_adjustment;
 	Gtk::Adjustment pitch_semitone_adjustment;

@@ -72,12 +72,12 @@ enum MeterPointChangeTarget {
 
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
-  public:
-        GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
+public:
+	GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           boost::shared_ptr<ARDOUR::Amp> amp,
 	                           boost::shared_ptr<ARDOUR::GainControl> control);
 
@@ -108,7 +108,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	static std::string short_astate_string (ARDOUR::AutoState);
 	static std::string _astate_string (ARDOUR::AutoState, bool);
 
-  protected:
+protected:
 
 	friend class MixerStrip;
 	friend class MeterStrip;
@@ -127,7 +127,6 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	Gtk::Adjustment              gain_adjustment;
 	Gtkmm2ext::FocusEntry        gain_display;
 	Gtkmm2ext::FocusEntry        peak_display;
-//	Gtk::Button                  peak_display;
 	Gtk::DrawingArea             meter_metric_area;
 	Gtk::DrawingArea             meter_ticks1_area;
 	Gtk::DrawingArea             meter_ticks2_area;
@@ -213,9 +212,9 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	virtual ~GainMeter ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           boost::shared_ptr<ARDOUR::Amp> amp,
-				   boost::shared_ptr<ARDOUR::GainControl> control);
+	                           boost::shared_ptr<ARDOUR::GainControl> control);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

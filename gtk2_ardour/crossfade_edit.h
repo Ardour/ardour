@@ -49,7 +49,7 @@ namespace ArdourCanvas {
 
 class CrossfadeEditor : public ArdourDialog
 {
-  public:
+public:
 	CrossfadeEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Crossfade>, double miny, double maxy);
 	~CrossfadeEditor ();
 
@@ -57,8 +57,7 @@ class CrossfadeEditor : public ArdourDialog
 
 	static const double canvas_border;
 
-	/* these are public so that a caller/subclass can make them do the right thing.
-	 */
+	/* these are public so that a caller/subclass can make them do the right thing. */
 
 	Gtk::Button* cancel_button;
 	Gtk::Button* ok_button;
@@ -83,11 +82,11 @@ class CrossfadeEditor : public ArdourDialog
 	static Presets* fade_in_presets;
 	static Presets* fade_out_presets;
 
-  protected:
+protected:
 	bool on_key_press_event (GdkEventKey*);
 	bool on_key_release_event (GdkEventKey*);
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::Crossfade> xfade;
 
 	Gtk::VBox vpacker;

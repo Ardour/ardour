@@ -29,7 +29,7 @@ namespace ARDOUR {
 
 class MissingPluginDialog : public ArdourDialog
 {
-  public:
+public:
 	MissingPluginDialog (ARDOUR::Session *, std::list<std::string> const &);
 };
 

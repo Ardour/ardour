@@ -27,15 +27,16 @@
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
 
-class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
-  public:
+class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable
+{
+public:
 	ButtonJoiner (const std::string&, Gtk::Widget&, Gtk::Widget&, bool central_link = false);
 	~ButtonJoiner ();
 
 	void set_related_action (Glib::RefPtr<Gtk::Action>);
 	void set_active_state (Gtkmm2ext::ActiveState);
 
-  protected:
+protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_size_request (Gtk::Requisition*);
@@ -46,7 +47,7 @@ class ButtonJoiner : public CairoWidget, public Gtkmm2ext::Activatable {
 	void action_tooltip_changed ();
 	void action_toggled ();
 
-  private:
+private:
 	Gtk::Widget&   left;
 	Gtk::Widget&   right;
 	Gtk::HBox      packer;

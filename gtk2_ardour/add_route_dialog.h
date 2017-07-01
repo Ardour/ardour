@@ -47,7 +47,7 @@ class RouteGroupDialog;
 
 class AddRouteDialog : public ArdourDialog
 {
-  public:
+public:
 	AddRouteDialog ();
 	~AddRouteDialog ();
 
@@ -80,11 +80,11 @@ class AddRouteDialog : public ArdourDialog
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
 
- 	void on_response (int response_id) {
+	void on_response (int response_id) {
 		Gtk::Dialog::on_response (response_id);
 	}
 
-  private:
+private:
 	Gtk::Entry name_template_entry;
 	Gtk::ComboBoxText track_bus_combo;
 	Gtk::Adjustment routes_adjustment;
@@ -117,9 +117,9 @@ class AddRouteDialog : public ArdourDialog
 	void on_show ();
 
 	struct ChannelSetup {
-	    std::string name;
-	    std::string template_path;
-	    uint32_t    channels;
+		std::string name;
+		std::string template_path;
+		uint32_t    channels;
 	};
 
 	typedef std::vector<ChannelSetup> ChannelSetups;

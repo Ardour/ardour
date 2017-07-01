@@ -24,7 +24,7 @@
 
 class ArdourPrompter : public Gtkmm2ext::Prompter
 {
-  public:
+public:
 	ArdourPrompter (bool modal = false);
 };
 

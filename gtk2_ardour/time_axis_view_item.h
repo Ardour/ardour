@@ -46,7 +46,7 @@ using ARDOUR::framecnt_t;
 
 class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 {
-   public:
+public:
 	virtual ~TimeAxisViewItem();
 
 	virtual bool set_position(framepos_t, void*, double* delta = 0);
@@ -106,8 +106,8 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 	static const double GRAB_HANDLE_WIDTH;
 
 	/* these are not constant, but vary with the pixel size
-	   of the font used to display the item name.
-	*/
+	 * of the font used to display the item name.
+	 */
 	static int    NAME_HEIGHT;
 	static double NAME_Y_OFFSET;
 	static double NAME_HIGHLIGHT_SIZE;
@@ -152,9 +152,9 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 		FullWidthNameHighlight = 0x80
 	};
 
-  protected:
+protected:
 	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
-			  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+	                  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
