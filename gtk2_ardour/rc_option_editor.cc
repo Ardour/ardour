@@ -1536,7 +1536,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			t->attach (_video_advanced_setup_button, 1, 4, n, n + 1, FILL);
 			_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
 			Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
-					_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+					_("<b>When enabled</b> you can specify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
 			++n;
 
 			Label* l = manage (new Label (_("Video Server URL:")));
@@ -1552,7 +1552,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			t->attach (*l, 1, 2, n, n + 1, FILL);
 			t->attach (_video_server_docroot_entry, 2, 4, n, n + 1);
 			Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unavailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 			++n;
 
 			l = manage (new Label (""));
