@@ -274,10 +274,10 @@ FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 	_stripable_name = s->name ();
 
 	if (_base.twolinetext ()) {
+		set_strip_name ();
+	} else {
 		set_text_line (0, s->name ());
 		set_text_line (1, _pan_ctrl ? _pan_ctrl->get_user_string () : "");
-	} else {
-		set_strip_name ();
 	}
 	set_text_line (2, "");
 	set_text_line (3, "");
@@ -544,6 +544,9 @@ FP8Strip::periodic_update_meter ()
 			set_text_line (2, "");
 		}
 	}
+	else if (_displaymode == PluginSelect) {
+		set_bar_mode (4); // Off
+	}
 	else if (_displaymode == SendDisplay) {
 		set_bar_mode (4); // Off
 		if (_fader_ctrl) {
@@ -561,16 +564,16 @@ FP8Strip::periodic_update_meter ()
 			_last_barpos = val;
 		}
 		if (_base.twolinetext ()) {
-			set_text_line (1, _pan_ctrl->get_user_string ());
-		} else {
 			set_strip_name ();
+		} else {
+			set_text_line (1, _pan_ctrl->get_user_string ());
 		}
 	} else {
 		set_bar_mode (4); // Off
 		if (_base.twolinetext ()) {
-			set_text_line (1, "");
-		} else {
 			set_strip_name ();
+		} else {
+			set_text_line (1, "");
 		}
 	}
 
