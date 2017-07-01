@@ -922,7 +922,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			strips.push_back (*s);
 		}
 	}
-	strips.sort (Stripable::Sorter());
+	strips.sort (Stripable::Sorter(true));
 }
 
 /* Track/Pan mode: assign stripable to strips, Send-mode: selection */
