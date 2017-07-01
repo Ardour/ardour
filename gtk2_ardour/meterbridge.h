@@ -108,7 +108,7 @@ private:
 				/* everything comes before b */
 				return true;
 			}
-			return a->presentation_info().order() < b->presentation_info().order();
+			return ARDOUR::Stripable::Sorter (true) (a, b);
 		}
 	};
 
