@@ -1806,7 +1806,7 @@ load_parameter_descriptor_units(LilvWorld* lworld, ParameterDescriptor& desc, co
 			desc.print_fmt = lilv_node_as_string(render);
 			/* override lilv's default "%f" format */
 			if (desc.integer_step) {
-				replace_all (desc.print_fmt, "%f", "%d");
+				replace_all (desc.print_fmt, "%f", "%.0f");
 			} else if (desc.upper - desc.lower >= 1000) {
 				replace_all (desc.print_fmt, "%f", "%.1f");
 			} else if (desc.upper - desc.lower >= 100) {
