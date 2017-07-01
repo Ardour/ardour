@@ -1250,6 +1250,10 @@ OSC::routes_list (lo_message msg)
 				lo_message_add_string (reply, "MB");
 			} else if (s->presentation_info().flags() & PresentationInfo::VCA) {
 				lo_message_add_string (reply, "V");
+			} else if (s->is_master()) {
+				lo_message_add_string (reply, "MA");
+			} else if (s->is_monitor()) {
+				lo_message_add_string (reply, "MO");
 			}
 
 			lo_message_add_string (reply, s->name().c_str());
