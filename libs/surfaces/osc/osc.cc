@@ -332,6 +332,7 @@ OSC::stop ()
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
 	cueobserver_connections.drop_connections ();
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	// Delete any active route observers
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
 
@@ -1343,6 +1344,8 @@ OSC::refresh_surface (lo_message msg)
 void
 OSC::clear_devices ()
 {
+	tick = false;
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	for (RouteObservers::iterator x = route_observers.begin(); x != route_observers.end();) {
 
 		OSCRouteObserver* rc;
@@ -1389,6 +1392,7 @@ OSC::clear_devices ()
 
 	// clear out surfaces
 	_surface.clear();
+	tick = true;
 }
 
 int
@@ -1577,8 +1581,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->send_page_size = se_size;
 	s->plug_page_size = pi_size;
 	// set bank and strip feedback
-	// set_bank(s->bank, msg);
-	recalcbanks ();
+	set_bank(s->bank, msg);
 
 	global_feedback (s->feedback, get_address (msg), s->gainmode);
 	sel_send_pagesize (se_size, msg);
@@ -1661,10 +1664,13 @@ OSC::get_surface (lo_address addr)
 	rurl = lo_address_get_url (addr);
 	r_url = rurl;
 	free (rurl);
-	for (uint32_t it = 0; it < _surface.size(); ++it) {
-		//find setup for this server
-		if (!_surface[it].remote_url.find(r_url)){
-			return &_surface[it];
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		for (uint32_t it = 0; it < _surface.size(); ++it) {
+			//find setup for this server
+			if (!_surface[it].remote_url.find(r_url)){
+				return &_surface[it];
+			}
 		}
 	}
 
@@ -1691,15 +1697,17 @@ OSC::get_surface (lo_address addr)
 	s.plugin_id = 1;
 
 	s.nstrips = s.strips.size();
-	_surface.push_back (s);
+	{
+		Glib::Threads::Mutex::Lock lm (surfaces_lock);
+		_surface.push_back (s);
+	}
 	// moved this down here as selection may need s.<anything to do with select> set
 	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
 		gui_selection_changed();
 	}
 
 	// set bank and strip feedback
-	//_set_bank(s.bank, addr);
-	recalcbanks ();
+	_set_bank(s.bank, addr);
 
 	// Set global/master feedback
 	global_feedback (s.feedback, addr, s.gainmode);
@@ -3580,7 +3588,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 		s = _select;
 	}
 	float abs;
-	int send_id;
+	int send_id = 0;
 	if (s) {
 		if (id > 0) {
 			send_id = id - 1;
@@ -3619,7 +3627,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 		s = _select;
 	}
 	float abs;
-	int send_id;
+	int send_id = 0;
 	if (s) {
 
 		if (id > 0) {
@@ -3693,7 +3701,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 	} else {
 		s = _select;
 	}
-	int send_id;
+	int send_id = 0;
 	if (s) {
 		if (id > 0) {
 			send_id = id - 1;
@@ -4598,6 +4606,7 @@ OSC::periodic (void)
 	if (!tick) {
 		Glib::usleep(100); // let flurry of signals subside
 		if (global_init) {
+			Glib::Threads::Mutex::Lock lm (surfaces_lock);
 			for (uint32_t it = 0; it < _surface.size(); it++) {
 				OSCSurface* sur = &_surface[it];
 				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());

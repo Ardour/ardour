@@ -660,7 +660,7 @@ OSCSelectObserver::gain_message ()
 void
 OSCSelectObserver::gain_automation ()
 {
-	float output;
+	float output = 0;
 	as = _strip->gain_control()->alist()->automation_state();
 	string auto_name;
 	switch (as) {

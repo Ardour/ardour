@@ -392,7 +392,7 @@ OSCRouteObserver::gain_automation (string path)
 	send_gain_message (path, control);
 	as = control->alist()->automation_state();
 	string auto_name;
-	float output;
+	float output = 0;
 	switch (as) {
 		case ARDOUR::Off:
 			output = 0;

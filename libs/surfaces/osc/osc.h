@@ -163,6 +163,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 
 // storage for  each surface's settings
+	mutable Glib::Threads::Mutex surfaces_lock;
 	typedef std::vector<OSCSurface> Surface;
 	Surface _surface;
 
