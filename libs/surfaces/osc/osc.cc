@@ -3153,7 +3153,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		delete sur->sel_obs;
 		sur->sel_obs = 0;
 	}
-	bool feedback_on = sur->feedback.to_ulong();
+	bool feedback_on = sur->feedback[13];
 	if (s && feedback_on) {
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (s, addr, sur);
 		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);

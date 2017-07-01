@@ -63,123 +63,116 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	plug_size = 0;
 	_comp_redux = 1;
 
-	if (feedback[0]) { // buttons are separate feedback
-		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
-		name_changed (ARDOUR::Properties::name);
+	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
+	name_changed (ARDOUR::Properties::name);
 
-		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
-		change_message ("/select/mute", _strip->mute_control());
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
+	change_message ("/select/mute", _strip->mute_control());
 
-		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
-		change_message ("/select/solo", _strip->solo_control());
+	_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo"), _strip->solo_control()), OSC::instance());
+	change_message ("/select/solo", _strip->solo_control());
 
-		if (_strip->solo_isolate_control()) {
-			_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
-			change_message ("/select/solo_iso", _strip->solo_isolate_control());
-		}
-
-		if (_strip->solo_safe_control()) {
-			_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), OSC::instance());
-			change_message ("/select/solo_safe", _strip->solo_safe_control());
-		}
-
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
-		if (track) {
-			track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), OSC::instance());
-			monitor_status (track->monitoring_control());
-		}
-
-		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
-		if (rec_controllable) {
-			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
-			change_message ("/select/recenable", _strip->rec_enable_control());
-		}
-
-		boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
-		if (recsafe_controllable) {
-			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
-			change_message ("/select/record_safe", _strip->rec_safe_control());
-		}
-
-		boost::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
-		if (phase_controllable) {
-			phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/polarity"), _strip->phase_control()), OSC::instance());
-			change_message ("/select/polarity", _strip->phase_control());
-		}
-
+	if (_strip->solo_isolate_control()) {
+		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
+		change_message ("/select/solo_iso", _strip->solo_isolate_control());
 	}
 
-	if (feedback[1]) { // level controls
-		_strip->gain_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this), OSC::instance());
-		_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this), OSC::instance());
-		gain_automation ();
-
-		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
-		if (trim_controllable) {
-			trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
-			trim_message ("/select/trimdB", _strip->trim_control());
-		}
-
-		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
-		if (pan_controllable) {
-			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-			change_message ("/select/pan_stereo_position", _strip->pan_azimuth_control());
-		}
-
-		boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
-		if (width_controllable) {
-			width_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
-			change_message ("/select/pan_stereo_width", _strip->pan_width_control());
-		}
-
+	if (_strip->solo_safe_control()) {
+		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/solo_safe"), _strip->solo_safe_control()), OSC::instance());
+		change_message ("/select/solo_safe", _strip->solo_safe_control());
 	}
-	if (feedback[13]) { // Well known controls
-		// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
-		if (_strip->pan_elevation_control ()) {
-			_strip->pan_elevation_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
-			change_message ("/select/pan_elevation_position", _strip->pan_elevation_control());
-		}
-		if (_strip->pan_frontback_control ()) {
-			_strip->pan_frontback_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
-			change_message ("/select/pan_frontback_position", _strip->pan_frontback_control());
-		}
-		if (_strip->pan_lfe_control ()) {
-			_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
-			change_message ("/select/pan_lfe_control", _strip->pan_lfe_control());
-		}
 
-		// sends, plugins and eq
-		// detecting processor changes is now in osc.cc
-
-		// but... MB master send enable is different
-		if (_strip->master_send_enable_controllable ()) {
-			_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), _strip->master_send_enable_controllable()), OSC::instance());
-			enable_message ("/select/master_send_enable", _strip->master_send_enable_controllable());
-		}
-
-		// Compressor
-		if (_strip->comp_enable_controllable ()) {
-			_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
-			enable_message ("/select/comp_enable", _strip->comp_enable_controllable());
-		}
-		if (_strip->comp_threshold_controllable ()) {
-			_strip->comp_threshold_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), _strip->comp_threshold_controllable()), OSC::instance());
-			change_message ("/select/comp_threshold", _strip->comp_threshold_controllable());
-		}
-		if (_strip->comp_speed_controllable ()) {
-			_strip->comp_speed_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_speed"), _strip->comp_speed_controllable()), OSC::instance());
-			change_message ("/select/comp_speed", _strip->comp_speed_controllable());
-		}
-		if (_strip->comp_mode_controllable ()) {
-			_strip->comp_mode_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::comp_mode, this), OSC::instance());
-			comp_mode ();
-		}
-		if (_strip->comp_makeup_controllable ()) {
-			_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
-			change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
-		}
-
+	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
+	if (track) {
+		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), OSC::instance());
+		monitor_status (track->monitoring_control());
 	}
+
+	boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
+	if (rec_controllable) {
+		rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
+		change_message ("/select/recenable", _strip->rec_enable_control());
+	}
+
+	boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
+	if (recsafe_controllable) {
+		recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
+		change_message ("/select/record_safe", _strip->rec_safe_control());
+	}
+
+	boost::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
+	if (phase_controllable) {
+		phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/polarity"), _strip->phase_control()), OSC::instance());
+		change_message ("/select/polarity", _strip->phase_control());
+	}
+
+	_strip->gain_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this), OSC::instance());
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this), OSC::instance());
+	gain_automation ();
+
+	boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
+	if (trim_controllable) {
+		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
+		trim_message ("/select/trimdB", _strip->trim_control());
+	}
+
+	boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
+	if (pan_controllable) {
+		pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
+		change_message ("/select/pan_stereo_position", _strip->pan_azimuth_control());
+	}
+
+	boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
+	if (width_controllable) {
+		width_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
+		change_message ("/select/pan_stereo_width", _strip->pan_width_control());
+	}
+
+	// Rest of possible pan controls... Untested because I can't find a way to get them in the GUI :)
+	if (_strip->pan_elevation_control ()) {
+		_strip->pan_elevation_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_elevation_position"), _strip->pan_elevation_control()), OSC::instance());
+		change_message ("/select/pan_elevation_position", _strip->pan_elevation_control());
+	}
+	if (_strip->pan_frontback_control ()) {
+		_strip->pan_frontback_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_frontback_position"), _strip->pan_frontback_control()), OSC::instance());
+		change_message ("/select/pan_frontback_position", _strip->pan_frontback_control());
+	}
+	if (_strip->pan_lfe_control ()) {
+		_strip->pan_lfe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_lfe_control"), _strip->pan_lfe_control()), OSC::instance());
+		change_message ("/select/pan_lfe_control", _strip->pan_lfe_control());
+	}
+
+	// sends, plugins and eq
+	// detecting processor changes is now in osc.cc
+
+	// but... MB master send enable is different
+	if (_strip->master_send_enable_controllable ()) {
+		_strip->master_send_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/master_send_enable"), _strip->master_send_enable_controllable()), OSC::instance());
+		enable_message ("/select/master_send_enable", _strip->master_send_enable_controllable());
+	}
+
+	// Compressor
+	if (_strip->comp_enable_controllable ()) {
+		_strip->comp_enable_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message, this, X_("/select/comp_enable"), _strip->comp_enable_controllable()), OSC::instance());
+		enable_message ("/select/comp_enable", _strip->comp_enable_controllable());
+	}
+	if (_strip->comp_threshold_controllable ()) {
+		_strip->comp_threshold_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_threshold"), _strip->comp_threshold_controllable()), OSC::instance());
+		change_message ("/select/comp_threshold", _strip->comp_threshold_controllable());
+	}
+	if (_strip->comp_speed_controllable ()) {
+		_strip->comp_speed_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_speed"), _strip->comp_speed_controllable()), OSC::instance());
+		change_message ("/select/comp_speed", _strip->comp_speed_controllable());
+	}
+	if (_strip->comp_mode_controllable ()) {
+		_strip->comp_mode_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::comp_mode, this), OSC::instance());
+		comp_mode ();
+	}
+	if (_strip->comp_makeup_controllable ()) {
+		_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
+		change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
+	}
+
 
 	tick();
 }
@@ -188,30 +181,26 @@ OSCSelectObserver::~OSCSelectObserver ()
 {
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
-	if (feedback[0]) { // buttons are separate feedback
-		send_float ("/select/expand", 0);
-		text_message ("/select/name", " ");
-		text_message ("/select/comment", " ");
-		send_float ("/select/mute", 0);
-		send_float ("/select/solo", 0);
-		send_float ("/select/recenable", 0);
-		send_float ("/select/record_safe", 0);
-		send_float ("/select/monitor_input", 0);
-		send_float ("/select/monitor_disk", 0);
-		send_float ("/select/polarity", 0);
-		send_float ("/select/n_inputs", 0);
-		send_float ("/select/n_outputs", 0);
+	send_float ("/select/expand", 0);
+	text_message ("/select/name", " ");
+	text_message ("/select/comment", " ");
+	send_float ("/select/mute", 0);
+	send_float ("/select/solo", 0);
+	send_float ("/select/recenable", 0);
+	send_float ("/select/record_safe", 0);
+	send_float ("/select/monitor_input", 0);
+	send_float ("/select/monitor_disk", 0);
+	send_float ("/select/polarity", 0);
+	send_float ("/select/n_inputs", 0);
+	send_float ("/select/n_outputs", 0);
+	if (gainmode) {
+		send_float ("/select/fader", 0);
+	} else {
+		send_float ("/select/gain", -193);
 	}
-	if (feedback[1]) { // level controls
-		if (gainmode) {
-			send_float ("/select/fader", 0);
-		} else {
-			send_float ("/select/gain", -193);
-		}
-		send_float ("/select/trimdB", 0);
-		send_float ("/select/pan_stereo_position", 0.5);
-		send_float ("/select/pan_stereo_width", 1);
-	}
+	send_float ("/select/trimdB", 0);
+	send_float ("/select/pan_stereo_position", 0.5);
+	send_float ("/select/pan_stereo_width", 1);
 	if (feedback[9]) {
 		send_float ("/select/signal", 0);
 	}
@@ -224,18 +213,16 @@ OSCSelectObserver::~OSCSelectObserver ()
 	}else if (feedback[8]) {
 		send_float ("/select/meter", 0);
 	}
-	if (feedback[13]) { // Well known controls
-		send_float ("/select/pan_elevation_position", 0);
-		send_float ("/select/pan_frontback_position", .5);
-		send_float ("/select/pan_lfe_control", 0);
-		send_float ("/select/comp_enable", 0);
-		send_float ("/select/comp_threshold", 0);
-		send_float ("/select/comp_speed", 0);
-		send_float ("/select/comp_mode", 0);
-		text_message ("/select/comp_mode_name", " ");
-		text_message ("/select/comp_speed_name", " ");
-		send_float ("/select/comp_makeup", 0);
-	}
+	send_float ("/select/pan_elevation_position", 0);
+	send_float ("/select/pan_frontback_position", .5);
+	send_float ("/select/pan_lfe_control", 0);
+	send_float ("/select/comp_enable", 0);
+	send_float ("/select/comp_threshold", 0);
+	send_float ("/select/comp_speed", 0);
+	send_float ("/select/comp_mode", 0);
+	text_message ("/select/comp_mode_name", " ");
+	text_message ("/select/comp_speed_name", " ");
+	send_float ("/select/comp_makeup", 0);
 	send_end();
 	plugin_end();
 	eq_end();
@@ -483,40 +470,35 @@ OSCSelectObserver::tick ()
 		_last_meter = now_meter;
 
 	}
-	if (feedback[1]) {
-		if (gain_timeout) {
-			if (gain_timeout == 1) {
-				text_message ("/select/name", _strip->name());
-			}
-			gain_timeout--;
+	if (gain_timeout) {
+		if (gain_timeout == 1) {
+			text_message ("/select/name", _strip->name());
 		}
-
-		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
-			if(_last_gain != _strip->gain_control()->get_value()) {
-				_last_gain = _strip->gain_control()->get_value();
-					gain_message ();
-			}
-		}
-	}
-	if (feedback[13]) {
-		if (_strip->comp_redux_controllable() && _strip->comp_enable_controllable() && _strip->comp_enable_controllable()->get_value()) {
-			float new_value = _strip->comp_redux_controllable()->get_parameter();
-			if (_comp_redux != new_value) {
-				send_float ("/select/comp_redux", new_value);
-				_comp_redux = new_value;
-			}
-		}
-		for (uint32_t i = 1; i <= send_timeout.size(); i++) {
-			if (send_timeout[i]) {
-				if (send_timeout[i] == 1) {
-					uint32_t pg_offset = (sur->send_page - 1) * sur->send_page_size;
-					text_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1));
-				}
-				send_timeout[i]--;
-			}
-		}
+		gain_timeout--;
 	}
 
+	if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
+		if(_last_gain != _strip->gain_control()->get_value()) {
+			_last_gain = _strip->gain_control()->get_value();
+				gain_message ();
+		}
+	}
+	if (_strip->comp_redux_controllable() && _strip->comp_enable_controllable() && _strip->comp_enable_controllable()->get_value()) {
+		float new_value = _strip->comp_redux_controllable()->get_parameter();
+		if (_comp_redux != new_value) {
+			send_float ("/select/comp_redux", new_value);
+			_comp_redux = new_value;
+		}
+	}
+	for (uint32_t i = 1; i <= send_timeout.size(); i++) {
+		if (send_timeout[i]) {
+			if (send_timeout[i] == 1) {
+				uint32_t pg_offset = (sur->send_page - 1) * sur->send_page_size;
+				text_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1));
+			}
+			send_timeout[i]--;
+		}
+	}
 }
 
 void
@@ -838,7 +820,6 @@ OSCSelectObserver::eq_init()
 void
 OSCSelectObserver::eq_end ()
 {
-	//need to check feedback for [13]
 	eq_connections.drop_connections ();
 	if (_strip->filter_freq_controllable (true)) {
 		send_float ("/select/eq_hpf", 0);
