@@ -1891,17 +1891,8 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::sha
 	string::size_type pos = 0;
 	string menu_item_name = (rs.size() == 1) ? rs.front()->region()->name() : _("Selected Regions");
 
-	/* we have to hack up the region name because "_" has a special
-	   meaning for menu titles.
-	*/
-
-	while ((pos = menu_item_name.find ("_", pos)) != string::npos) {
-		menu_item_name.replace (pos, 1, "__");
-		pos += 2;
-	}
-
 	if (_popup_region_menu_item == 0) {
-		_popup_region_menu_item = new MenuItem (menu_item_name);
+		_popup_region_menu_item = new MenuItem (menu_item_name, false); //disable _ mnemonic parsing
 		_popup_region_menu_item->set_submenu (*dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu"))));
 		_popup_region_menu_item->show ();
 	} else {
