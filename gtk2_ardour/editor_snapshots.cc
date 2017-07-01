@@ -89,7 +89,9 @@ EditorSnapshots::selection_changed ()
 			return;
 		}
 
+		_display.set_sensitive (false);
 		ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
+		_display.set_sensitive (true);
 	}
 }
 

@@ -62,6 +62,7 @@
 #include "pbd/openuri.h"
 #include "pbd/stl_delete.h"
 #include "pbd/types_convert.h"
+#include "pbd/unwind.h"
 #include "pbd/file_utils.h"
 #include "pbd/localtime_r.h"
 #include "pbd/pthread_utils.h"
@@ -263,6 +264,7 @@ libxml_structured_error_func (void* /* parsing_context*/,
 ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	: Gtkmm2ext::UI (PROGRAM_NAME, X_("gui"), argcp, argvp)
 	, session_loaded (false)
+	, session_load_in_progress (false)
 	, gui_object_state (new GUIObjectState)
 	, primary_clock   (new MainClock (X_("primary"),   X_("transport"), true ))
 	, secondary_clock (new MainClock (X_("secondary"), X_("secondary"), false))
@@ -3614,6 +3616,18 @@ ARDOUR_UI::close_session()
 int
 ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, std::string mix_template)
 {
+	/* load_session calls flush_pending() which allows
+	 * GUI interaction and potentially loading another session
+	 * (that was easy via snapshot sidebar).
+	 * Recursing into load_session() from load_session() and recusive
+	 * event loops causes all kind of crashes.
+	 */
+	assert (!session_load_in_progress);
+	if (session_load_in_progress) {
+		return -1;
+	}
+	PBD::Unwinder<bool> lsu (session_load_in_progress, true);
+
 	Session *new_session;
 	int unload_status;
 	int retval = -1;
