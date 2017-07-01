@@ -2745,12 +2745,6 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		wp->set_state (*ui_xml, 0);
 	}
 
-	void* existing_ui = p->get_ui ();
-
-	if (existing_ui) {
-		wp->use_window (*(reinterpret_cast<Gtk::Window*>(existing_ui)));
-	}
-
 	p->set_window_proxy (wp);
 	WM::Manager::instance().register_window (wp);
 }
@@ -4134,7 +4128,6 @@ void
 ProcessorBox::set_processor_ui (boost::shared_ptr<Processor> p, Gtk::Window* w)
 {
 	assert (p->window_proxy());
-	p->set_ui (w);
 	p->window_proxy()->use_window (*w);
 }
 
