@@ -1405,81 +1405,82 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 
 
 	if (!strncmp (path, "/set_surface/feedback", 21)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = set_surface_feedback ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_feedback (argv[0]->i, msg);
 		}
 	}
 	else if (!strncmp (path, "/set_surface/bank_size", 22)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = set_surface_bank_size ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_bank_size (argv[0]->i, msg);
 		}
 	}
 	else if (!strncmp (path, "/set_surface/gainmode", 21)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = set_surface_gainmode ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_gainmode (argv[0]->i, msg);
 		}
 	}
 	else if (!strncmp (path, "/set_surface/strip_types", 24)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = set_surface_strip_types ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_strip_types (argv[0]->i, msg);
 		}
 	}
 	else if (!strncmp (path, "/set_surface/send_page_size", 27)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = sel_send_pagesize ((int)argv[0]->f, msg);
 		} else {
 			ret = sel_send_pagesize (argv[0]->i, msg);
 		}
 	}
 	else if (!strncmp (path, "/set_surface/plugin_page_size", 29)) {
-		if (argv[0]->f) {
+		if (types[0] == 'f') {
 			ret = sel_plug_pagesize ((int)argv[0]->f, msg);
 		} else {
 			ret = sel_plug_pagesize (argv[0]->i, msg);
 		}
 	} else if (strlen(path) == 12) {
+
 		// command is in /set_surface iii form
 		switch (argc) {
 			case 6:
-				if (argv[5]->f) {
+				if (types[5] == 'f') {
 					pi_page = (int) argv[5]->f;
 				} else {
 					pi_page = argv[5]->i;
 				}
 			case 5:
-				if (argv[4]->f) {
+				if (types[4] == 'f') {
 					se_page = (int) argv[4]->f;
 				} else {
 					se_page = argv[4]->i;
 				}
 			case 4:
-				if (argv[3]->f) {
+				if (types[3] == 'f') {
 					fadermode = (int) argv[3]->f;
 				} else {
 					fadermode = argv[3]->i;
 				}
 			case 3:
-				if (argv[2]->f) {
+				if (types[2] == 'f') {
 					feedback = (int) argv[2]->f;
 				} else {
 					feedback = argv[2]->i;
 				}
 			case 2:
-				if (argv[1]->f) {
+				if (types[1] == 'f') {
 					strip_types = (int) argv[1]->f;
 				} else {
 					strip_types = argv[1]->i;
 				}
 			case 1:
-				if (argv[0]->f) {
+				if (types[0] == 'f') {
 					bank_size = (int) argv[0]->f;
 				} else {
 					bank_size = argv[0]->i;
@@ -1526,37 +1527,37 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 						if (pp) {
 							pi_page = atoi (&pp[1]);
 						} else {
-							if (argv[0]->f) {
+							if (types[0] == 'f') {
 								pi_page = (int) argv[0]->f;
-							} else if (argv[0]->i) {
+							} else if (types[0] == 'i') {
 								pi_page = argv[0]->i;
 							}
 						}
 					} else {
-						if (argv[0]->f) {
+						if (types[0] == 'f') {
 							se_page = (int) argv[0]->f;
-						} else if (argv[0]->i) {
+						} else if (types[0] == 'i') {
 							se_page = argv[0]->i;
 						}
 					}
 				} else {
-					if (argv[0]->f) {
+					if (types[0] == 'f') {
 						fadermode = (int) argv[0]->f;
-					} else if (argv[0]->i) {
+					} else if (types[0] == 'i') {
 						fadermode = argv[0]->i;
 					}
 				}
 			} else {
-				if (argv[0]->f) {
+				if (types[0] == 'f') {
 					feedback = (int) argv[0]->f;
-				} else if (argv[0]->i) {
+				} else if (types[0] == 'i') {
 					feedback = argv[0]->i;
 				}
 			}
 		} else {
-			if (argv[0]->f) {
+			if (types[0] == 'f') {
 				strip_types = (int) argv[0]->f;
-			} else if (argv[0]->i) {
+			} else if (types[0] == 'i') {
 				strip_types = argv[0]->i;
 			}
 		}
@@ -1576,7 +1577,8 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->send_page_size = se_size;
 	s->plug_page_size = pi_size;
 	// set bank and strip feedback
-	set_bank(s->bank, msg);
+	// set_bank(s->bank, msg);
+	recalcbanks ();
 
 	global_feedback (s->feedback, get_address (msg), s->gainmode);
 	sel_send_pagesize (se_size, msg);
@@ -1696,7 +1698,8 @@ OSC::get_surface (lo_address addr)
 	}
 
 	// set bank and strip feedback
-	_set_bank(s.bank, addr);
+	//_set_bank(s.bank, addr);
+	recalcbanks ();
 
 	// Set global/master feedback
 	global_feedback (s.feedback, addr, s.gainmode);
@@ -2601,7 +2604,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 	uint32_t ssid;
 
 	if (argc) {
-		if (argv[argc - 1]->f) {
+		if (types[argc - 1] == 'f') {
 			aut = (int)argv[argc - 1]->f;
 		} else {
 			aut = argv[argc - 1]->i;
@@ -2687,7 +2690,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 	uint32_t ssid;
 
 	if (argc) {
-		if (argv[argc - 1]->f) {
+		if (types[argc - 1] == 'f') {
 			touch = (int)argv[argc - 1]->f;
 		} else {
 			touch = argv[argc - 1]->i;
@@ -3751,20 +3754,20 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		// no inline args
 		if (argc == 2) {
 			// change parameter in already selected plugin
-			if (argv[0]->f) {
+			if (types[0]  == 'f') {
 				paid = (int) argv[0]->f;
 			} else {
 				paid = argv[0]->i;
 			}
 			value = argv[1]->f;
 		} else if (argc == 3) {
-			if (argv[0]->f) {
+			if (types[0] == 'f') {
 				piid = (int) argv[0]->f;
 			} else {
 				piid = argv[0]->i;
 			}
 			_sel_plugin (piid, get_address (msg));
-			if (argv[1]->f) {
+			if (types[1] == 'f') {
 				paid = (int) argv[1]->f;
 			} else {
 				paid = argv[1]->i;
