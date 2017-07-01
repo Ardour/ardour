@@ -69,8 +69,8 @@ private:
 	TempoCurve (TempoCurve const &);
 	TempoCurve & operator= (TempoCurve const &);
 	ARDOUR::TempoSection& _tempo;
-        ArdourCanvas::Text *_start_text;
-        ArdourCanvas::Text *_end_text;
+	ArdourCanvas::Text *_start_text;
+	ArdourCanvas::Text *_end_text;
 
 };
 #endif /* __gtk_ardour_tempo_curve_h__ */

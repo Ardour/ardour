@@ -108,7 +108,7 @@ class ArdourMarker : public sigc::trackable
 	ArdourCanvas::Container* _parent;
 	ArdourCanvas::Container *group;
 	ArdourCanvas::Polygon *mark;
-        ArdourCanvas::Text *_name_item;
+	ArdourCanvas::Text *_name_item;
 	ArdourCanvas::Points *points;
 	ArdourCanvas::Line* _track_canvas_line;
 	ArdourCanvas::Rectangle* _name_background;
@@ -142,7 +142,7 @@ private:
 class TempoMarker : public ArdourMarker
 {
   public:
-        TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::TempoSection&);
 	~TempoMarker ();
 
 	ARDOUR::TempoSection& tempo() const { return _tempo; }
@@ -155,7 +155,7 @@ class TempoMarker : public ArdourMarker
 class MeterMarker : public ArdourMarker
 {
   public:
-        MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
+	MeterMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, ARDOUR::MeterSection&);
 	~MeterMarker ();
 
 	ARDOUR::MeterSection& meter() const { return _meter; }

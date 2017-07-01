@@ -58,9 +58,9 @@ using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
 struct ColumnInfo {
-    int         index;
-    const char* label;
-    const char* tooltip;
+	int         index;
+	const char* label;
+	const char* tooltip;
 };
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)

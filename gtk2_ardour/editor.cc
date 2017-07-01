@@ -845,16 +845,16 @@ Editor::Editor ()
 
 	_show_marker_lines = false;
 
-        /* Button bindings */
+	/* Button bindings */
 
 	button_bindings = new Bindings ("editor-mouse");
 
 	XMLNode* node = button_settings();
-        if (node) {
-                for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
-                        button_bindings->load_operation (**i);
-                }
-        }
+	if (node) {
+		for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
+			button_bindings->load_operation (**i);
+		}
+	}
 
 	constructed = true;
 
@@ -4716,7 +4716,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 	}
 
 	if (entered_marker) {
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use entered marker @ %1\n", entered_marker->position()));
+		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use entered marker @ %1\n", entered_marker->position()));
 		return entered_marker->position();
 	}
 
@@ -4737,7 +4737,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 		} else {
 			where = _session->audible_frame();
 		}
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
+		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use playhead @ %1\n", where));
 		break;
 
 	case EditAtSelectedMarker:
@@ -4750,7 +4750,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 				} else {
 					where = loc->end();
 				}
-                                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use selected marker @ %1\n", where));
+				DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use selected marker @ %1\n", where));
 				break;
 			}
 		}
@@ -4765,7 +4765,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 		snap_mf.frame = where;
 		snap_to (snap_mf);
 		where = snap_mf.frame;
-                DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use mouse @ %1\n", where));
+		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("GPEP: use mouse @ %1\n", where));
 		break;
 	}
 

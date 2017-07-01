@@ -55,25 +55,25 @@ extern void no_app_nap (); // cocoacarbon.mm
 static void
 setup_logging(void)
 {
-        /* The ASL API has evolved since it was introduced in 10.4. If ASL_LOG_DESCRIPTOR_WRITE is not available,
-           then we're not interested in doing any of this, since its only purpose is to get stderr/stdout to
-           appear in the Console.
-        */
+	/* The ASL API has evolved since it was introduced in 10.4. If ASL_LOG_DESCRIPTOR_WRITE is not available,
+	   then we're not interested in doing any of this, since its only purpose is to get stderr/stdout to
+	   appear in the Console.
+	*/
 #ifdef ASL_LOG_DESCRIPTOR_WRITE
-        aslmsg msg;
-        aslclient c = asl_open (PROGRAM_NAME, "com.apple.console", 0);
+	aslmsg msg;
+	aslclient c = asl_open (PROGRAM_NAME, "com.apple.console", 0);
 
-        msg = asl_new(ASL_TYPE_MSG);
-        asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
-        asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
-        asl_set(msg, ASL_KEY_READ_UID, "-1");
+	msg = asl_new(ASL_TYPE_MSG);
+	asl_set(msg, ASL_KEY_FACILITY, "com.apple.console");
+	asl_set(msg, ASL_KEY_LEVEL, ASL_STRING_NOTICE);
+	asl_set(msg, ASL_KEY_READ_UID, "-1");
 
-        int fd = dup(2);
-        //asl_set_filter(c, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
-        asl_add_log_file(c, fd);
-        asl_log(c, NULL, ASL_LEVEL_INFO, string_compose ("Hello world from %1", PROGRAM_NAME).c_str());
-        asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 1,  ASL_LOG_DESCRIPTOR_WRITE);
-        asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 2, ASL_LOG_DESCRIPTOR_WRITE);
+	int fd = dup(2);
+	//asl_set_filter(c, ASL_FILTER_MASK_UPTO(ASL_LEVEL_DEBUG));
+	asl_add_log_file(c, fd);
+	asl_log(c, NULL, ASL_LEVEL_INFO, string_compose ("Hello world from %1", PROGRAM_NAME).c_str());
+	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 1,  ASL_LOG_DESCRIPTOR_WRITE);
+	asl_log_descriptor(c, msg, ASL_LEVEL_INFO, 2, ASL_LOG_DESCRIPTOR_WRITE);
 #else
 #warning This build host has an older ASL API, so no console logging in this build.
 #endif
@@ -94,7 +94,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 	set_language_preference ();
 
-        setup_logging ();
+	setup_logging ();
 
 	char execpath[MAXPATHLEN+1];
 	uint32_t pathsz = sizeof (execpath);

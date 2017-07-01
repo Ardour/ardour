@@ -188,7 +188,6 @@ public:
 
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
 	bool session_loaded;
-	bool session_load_in_progress;
 	int build_session (const std::string& path, const std::string& snapshot, ARDOUR::BusProfile&);
 	bool session_is_new() const { return _session_is_new; }
 
@@ -462,7 +461,7 @@ private:
 
 	void about_signal_response(int response);
 
-	Gtk::VBox     top_packer;
+	Gtk::VBox    top_packer;
 
 	sigc::connection clock_signal_connection;
 	void         update_clocks ();
@@ -485,22 +484,22 @@ private:
 	void update_clock_visibility ();
 
 	struct TransportControllable : public PBD::Controllable {
-	    enum ToggleType {
-		    Roll = 0,
-		    Stop,
-		    RecordEnable,
-		    GotoStart,
-		    GotoEnd,
-		    AutoLoop,
-		    PlaySelection,
-	    };
+		enum ToggleType {
+			Roll = 0,
+			Stop,
+			RecordEnable,
+			GotoStart,
+			GotoEnd,
+			AutoLoop,
+			PlaySelection,
+	    	};
 
-	    TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
-	    void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-	    double get_value (void) const;
+		TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
+		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
+		double get_value (void) const;
 
-	    ARDOUR_UI& ui;
-	    ToggleType type;
+		ARDOUR_UI& ui;
+		ToggleType type;
 	};
 
 	boost::shared_ptr<TransportControllable> roll_controllable;

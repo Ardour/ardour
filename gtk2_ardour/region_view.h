@@ -108,12 +108,12 @@ class RegionView : public TimeAxisViewItem
 	virtual void trim_front_ending () {}
 
 	bool trim_end (framepos_t, bool, const int32_t sub_num);
-        void move_contents (ARDOUR::frameoffset_t);
+	void move_contents (ARDOUR::frameoffset_t);
 	virtual void thaw_after_trim ();
 
-        void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
-        void drop_silent_frames ();
-        void hide_silent_frames ();
+	void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
+	void drop_silent_frames ();
+	void hide_silent_frames ();
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
@@ -136,7 +136,7 @@ class RegionView : public TimeAxisViewItem
 		    bool recording,
 		    TimeAxisViewItem::Visibility);
 
-        bool canvas_group_event (GdkEvent*);
+	bool canvas_group_event (GdkEvent*);
 
 	virtual void region_resized (const PBD::PropertyChange&);
 	virtual void region_muted ();
@@ -187,9 +187,9 @@ class RegionView : public TimeAxisViewItem
 	/** a list of rectangles used to show the current silence threshold
 	*/
 	std::list<ArdourCanvas::Rectangle*> _silent_threshold_frames;
-        /** a text item to display strip silence statistics
-         */
-        ArdourCanvas::Text* _silence_text;
+	/** a text item to display strip silence statistics
+	 */
+	ArdourCanvas::Text* _silence_text;
 };
 
 #endif /* __gtk_ardour_region_view_h__ */

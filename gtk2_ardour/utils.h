@@ -33,14 +33,14 @@
 #include "canvas/types.h"
 
 namespace PBD {
-        class Controllable;
-        class ScopedConnectionList;
+	class Controllable;
+	class ScopedConnectionList;
 }
 
 namespace Gtk {
 	class Window;
 	class ComboBoxText;
-        class Adjustment;
+	class Adjustment;
 }
 
 namespace ArdourCanvas {

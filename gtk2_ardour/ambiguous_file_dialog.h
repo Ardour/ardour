@@ -33,7 +33,7 @@ public:
 private:
 	Gtk::RadioButtonGroup _group;
 	std::vector<Gtk::RadioButton*> _radio_buttons;
-        bool rb_button_press (GdkEventButton*);
+	bool rb_button_press (GdkEventButton*);
 };
 
 #endif // __gtk_ardour_ambiguous_file_dialog_h__

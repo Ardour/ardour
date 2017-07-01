@@ -45,12 +45,12 @@ AnalysisWindow::AnalysisWindow()
 	: source_selection_label       (_("Signal source"))
 	, source_selection_ranges_rb   (_("Selected ranges"))
 	, source_selection_regions_rb  (_("Selected regions"))
-	, show_minmax_button	 (_("Show frequency power range"))
-	, show_normalized_button (_("Fit dB range"))
-	, show_proportional_button (_("Proportional Spectrum, -18dB"))
-	, fft_graph (16384)
+	, show_minmax_button           (_("Show frequency power range"))
+	, show_normalized_button       (_("Fit dB range"))
+	, show_proportional_button     (_("Proportional Spectrum, -18dB"))
+	, fft_graph                    (16384)
 {
-	set_name(_("FFT analysis window"));
+	set_name  (_("FFT analysis window"));
 	set_title (_("Spectral Analysis"));
 
 	track_list_ready = false;

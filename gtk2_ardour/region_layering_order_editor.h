@@ -54,7 +54,7 @@ class RegionLayeringOrderEditor : public ArdourWindow
 	bool in_row_change;
 	uint32_t regions_at_position;
 
-        PBD::ScopedConnection playlist_modified_connection;
+	PBD::ScopedConnection playlist_modified_connection;
 
 	struct LayeringOrderColumns : public Gtk::TreeModel::ColumnRecord {
 		LayeringOrderColumns () {
@@ -75,7 +75,7 @@ class RegionLayeringOrderEditor : public ArdourWindow
 	PublicEditor& editor;
 	TimeAxisView* _time_axis_view;
 
-        void row_selected ();
+	void row_selected ();
 	void refill ();
 	void playlist_modified ();
 };

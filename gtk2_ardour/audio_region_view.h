@@ -86,7 +86,7 @@ class AudioRegionView : public RegionView
 
 	void update_envelope_visibility ();
 
-        void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
+	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
 	boost::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
@@ -118,8 +118,8 @@ class AudioRegionView : public RegionView
 	void drag_start ();
 	void drag_end ();
 
-        void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double);
-        void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double, double);
+	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double);
+	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double, double);
 	void redraw_start_xfade ();
 	void redraw_end_xfade ();
 
@@ -194,7 +194,7 @@ class AudioRegionView : public RegionView
 	void peaks_ready_handler (uint32_t);
 
 	void set_colors ();
-        void set_waveform_colors ();
+	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
 	void set_frame_color ();
 

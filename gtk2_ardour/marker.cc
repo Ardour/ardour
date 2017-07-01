@@ -479,7 +479,7 @@ ArdourMarker::show ()
 {
 	_shown = true;
 
-        group->show ();
+	group->show ();
 	setup_line ();
 }
 

@@ -85,18 +85,18 @@ bool
 Editor::mouse_frame (framepos_t& where, bool& in_track_canvas) const
 {
         /* gdk_window_get_pointer() has X11's XQueryPointer semantics in that it only
-           pays attentions to subwindows. this means that menu windows are ignored, and
-           if the pointer is in a menu, the return window from the call will be the
-           the regular subwindow *under* the menu.
+	   pays attentions to subwindows. this means that menu windows are ignored, and
+	   if the pointer is in a menu, the return window from the call will be the
+	   the regular subwindow *under* the menu.
 
-           this matters quite a lot if the pointer is moving around in a menu that overlaps
-           the track canvas because we will believe that we are within the track canvas
-           when we are not. therefore, we track enter/leave events for the track canvas
-           and allow that to override the result of gdk_window_get_pointer().
+	   this matters quite a lot if the pointer is moving around in a menu that overlaps
+	   the track canvas because we will believe that we are within the track canvas
+	   when we are not. therefore, we track enter/leave events for the track canvas
+	   and allow that to override the result of gdk_window_get_pointer().
         */
 
         if (!within_track_canvas) {
-                return false;
+		return false;
         }
 
 	int x, y;
@@ -1300,7 +1300,7 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 		break;
 
 	default:
-                return button_press_dispatch (&event->button);
+		return button_press_dispatch (&event->button);
 		break;
 
 	}
@@ -1342,24 +1342,24 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 	}
 
-        bool were_dragging = false;
+	bool were_dragging = false;
 
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
-                /* see if we're finishing a drag */
+		/* see if we're finishing a drag */
 
-                if (_drags->active ()) {
-                        bool const r = _drags->end_grab (event);
-                        if (r) {
-                                /* grab dragged, so do nothing else */
-                                return true;
-                        }
+		if (_drags->active ()) {
+			bool const r = _drags->end_grab (event);
+			if (r) {
+				/* grab dragged, so do nothing else */
+				return true;
+			}
 
-                        were_dragging = true;
-                }
+			were_dragging = true;
+		}
 
-                update_region_layering_order_editor ();
-        }
+		update_region_layering_order_editor ();
+	}
 
 	/* edit events get handled here */
 
@@ -1661,7 +1661,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		}
 
-                /* do any (de)selection operations that should occur on button release */
+		/* do any (de)selection operations that should occur on button release */
 		button_selection (item, event, item_type);
 
 		return true;
@@ -1722,7 +1722,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	MeterMarker* m_marker = 0;
 	TempoMarker* t_marker = 0;
 	double fraction;
-        bool ret = true;
+	bool ret = true;
 
 	/* by the time we reach here, entered_regionview and entered trackview
 	 * will have already been set as appropriate. Things are done this

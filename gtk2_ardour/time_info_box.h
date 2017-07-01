@@ -35,7 +35,7 @@
 
 namespace ARDOUR {
 	class Session;
-        class Location;
+	class Location;
 }
 
 class AudioClock;

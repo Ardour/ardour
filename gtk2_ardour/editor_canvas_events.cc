@@ -171,7 +171,7 @@ Editor::track_canvas_button_press_event (GdkEventButton *event)
 		begin_reversible_selection_op (X_("Clear Selection Click (track canvas)"));
 		selection->clear ();
 		commit_reversible_selection_op();
-        }
+	}
 	return false;
 }
 
@@ -179,10 +179,10 @@ bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
 	if (!Keyboard::is_context_menu_event (event)) {
-                if (_drags->active ()) {
-                        _drags->end_grab ((GdkEvent*) event);
-                }
-        }
+		if (_drags->active ()) {
+			_drags->end_grab ((GdkEvent*) event);
+		}
+	}
 	return false;
 }
 
@@ -641,9 +641,9 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 }
 
 struct DescendingRegionLayerSorter {
-    bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->layer() > b->layer();
-    }
+	bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->layer() > b->layer();
+	}
 };
 
 bool
@@ -1214,8 +1214,8 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 			if (tv.first == 0
 			    && (
-			        boost::dynamic_pointer_cast<AudioRegion> (region) != 0 ||
-			        boost::dynamic_pointer_cast<MidiRegion> (region) != 0
+				boost::dynamic_pointer_cast<AudioRegion> (region) != 0 ||
+				boost::dynamic_pointer_cast<MidiRegion> (region) != 0
 			       )
 			   )
 			{
@@ -1263,9 +1263,9 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 void
 Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
-		      int x, int y,
-		      const SelectionData& /*data*/,
-		      guint /*info*/, guint /*time*/)
+                      int x, int y,
+                      const SelectionData& /*data*/,
+                      guint /*info*/, guint /*time*/)
 {
 	GdkEvent event;
 	double px;
