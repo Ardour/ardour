@@ -70,9 +70,14 @@ ArdourDropdown::menu_size_request(Requisition *req) {
 bool
 ArdourDropdown::on_button_press_event (GdkEventButton* ev)
 {
-	if (ev->type == GDK_BUTTON_PRESS) {
+	if (binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
+
+	if (ev->type == GDK_BUTTON_PRESS && ev->button == 1) {
 		Gtkmm2ext::anchored_menu_popup(&_menu, this, get_text(), 1, ev->time);
 	}
+
 	return true;
 }
 

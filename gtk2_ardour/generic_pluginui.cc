@@ -730,6 +730,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 						           i->second)));
 			}
 
+			control_ui->combo->set_controllable (mcontrol);
+
 			update_control_display(control_ui);
 
 		} else {
@@ -759,6 +761,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 				} else {
 					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
 				}
+				control_ui->clickbox->set_controllable (mcontrol);
 			} else if (desc.toggled) {
 				ArdourButton* but = dynamic_cast<ArdourButton*> (control_ui->controller->widget());
 				assert(but);
