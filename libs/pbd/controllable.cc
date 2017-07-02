@@ -34,6 +34,7 @@ PBD::Signal1<bool,Controllable*> Controllable::StartLearning;
 PBD::Signal1<void,Controllable*> Controllable::StopLearning;
 PBD::Signal3<void,Controllable*,int,int> Controllable::CreateBinding;
 PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
+PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
 
 Glib::Threads::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;
