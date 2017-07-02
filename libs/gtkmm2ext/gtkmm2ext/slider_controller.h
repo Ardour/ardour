@@ -54,6 +54,8 @@ class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 
 	protected:
 	bool on_button_press_event (GdkEventButton *ev);
+	bool on_enter_notify_event (GdkEventCrossing* ev);
+	bool on_leave_notify_event (GdkEventCrossing* ev);
 	void ctrl_adjusted();
 	void spin_adjusted();
 

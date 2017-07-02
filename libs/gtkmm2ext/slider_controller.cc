@@ -65,6 +65,25 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 	return PixFader::on_button_press_event (ev);
 }
 
+bool
+SliderController::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	boost::shared_ptr<PBD::Controllable> c (_binding_proxy.get_controllable ());
+	if (c) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+	}
+	return PixFader::on_enter_notify_event (ev);
+}
+
+bool
+SliderController::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	if (_binding_proxy.get_controllable()) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+	}
+	return PixFader::on_leave_notify_event (ev);
+}
+
 void
 SliderController::ctrl_adjusted ()
 {
