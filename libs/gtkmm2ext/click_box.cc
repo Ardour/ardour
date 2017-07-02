@@ -24,6 +24,8 @@
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/click_box.h>
 
+#include "pbd/controllable.h"
+
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -57,6 +59,9 @@ ClickBox::~ClickBox ()
 bool
 ClickBox::button_press_handler (GdkEventButton* ev)
 {
+	if (_binding_proxy.button_press_handler (ev)) {
+		return true;
+	}
 	add_modal_grab();
 	AutoSpin::button_press (ev);
 	return true;
@@ -164,3 +169,21 @@ ClickBox::set_printer (sigc::slot<bool, char *, Gtk::Adjustment &> p)
 	set_label ();
 }
 
+bool
+ClickBox::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	boost::shared_ptr<PBD::Controllable> c (_binding_proxy.get_controllable ());
+	if (c) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+	}
+	return false;
+}
+
+bool
+ClickBox::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	if (_binding_proxy.get_controllable()) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+	}
+	return false;
+}

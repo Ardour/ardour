@@ -27,8 +27,13 @@
 #include <string>
 #include <gtkmm.h>
 
-#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/auto_spin.h"
+#include "gtkmm2ext/binding_proxy.h"
+#include "gtkmm2ext/visibility.h"
+
+namespace PBD {
+	class Controllable;
+}
 
 namespace Gtkmm2ext {
 
@@ -45,8 +50,16 @@ class LIBGTKMM2EXT_API ClickBox : public Gtk::DrawingArea, public AutoSpin
 	 */
 	void set_printer (sigc::slot<bool, char *, Gtk::Adjustment &>);
 
+	void set_controllable (boost::shared_ptr<PBD::Controllable> c) {
+		_binding_proxy.set_controllable (c);
+	}
+
   protected:
 	bool on_expose_event (GdkEventExpose*);
+	bool on_enter_notify_event (GdkEventCrossing* ev);
+	bool on_leave_notify_event (GdkEventCrossing* ev);
+
+	BindingProxy _binding_proxy;
 
   private:
 	Glib::RefPtr<Pango::Layout> layout;
