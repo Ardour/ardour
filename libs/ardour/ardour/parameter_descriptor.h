@@ -77,6 +77,17 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	float compute_delta (float from, float to) const;
 	float apply_delta (float value, float delta) const;
 
+	/* find the closest scale-point, return the internal value of
+	 * the prev/next scale-point (no wrap-around)
+	 *
+	 * If the given parameter is not en enum, the given val is returned.
+	 *
+	 * @param val internal (not interface) value
+	 * @param prev if true, step to prev scale-point, otherwise next
+	 * @return internal value, suitable for set_value()
+	 */
+	float step_enum (float val, bool prev) const;
+
 	/** Set step, smallstep, and largestep, based on current description. */
 	void update_steps();
 

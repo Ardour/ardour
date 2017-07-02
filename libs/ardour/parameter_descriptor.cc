@@ -17,6 +17,7 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <algorithm>
 #include <boost/algorithm/string.hpp>
 
 #include "pbd/control_math.h"
@@ -161,6 +162,16 @@ ParameterDescriptor::update_steps()
 	}
 	if (rangesteps < 2) {
 		rangesteps = 0;
+	}
+	if (enumeration) {
+		if (!scale_points || scale_points->empty ()) {
+			enumeration = false;
+		}
+	}
+	if (integer_step) {
+		if (lower >= upper) {
+			integer_step = false;
+		}
 	}
 
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
@@ -422,6 +433,43 @@ ParameterDescriptor::apply_delta (float val, float delta) const
 		return val + delta;
 	} else {
 		return val * delta;
+	}
+}
+
+float
+ParameterDescriptor::step_enum (float val, bool prev) const
+{
+	if (!enumeration) {
+		return val;
+	}
+	assert (scale_points && !scale_points->empty ());
+	float rv = scale_points->begin()->second;
+	float delta = fabsf (val - rv);
+	std::vector<float> avail;
+
+	for (ScalePoints::const_iterator i = scale_points->begin (); i != scale_points->end (); ++i) {
+		float s = i->second;
+		avail.push_back (s);
+		if (fabsf (val - s) < delta) {
+			rv = s;
+			delta = fabsf (val - s);
+		}
+	}
+	/* ScalePoints map is sorted by text string */
+	std::sort (avail.begin (), avail.end ());
+	std::vector<float>::const_iterator it = std::find (avail.begin (), avail.end (), rv);
+	assert (it != avail.end());
+
+	if (prev) {
+		if (it == avail.begin()) {
+			return rv;
+		}
+		return *(--it);
+	} else {
+		if (++it == avail.end()) {
+			return rv;
+		}
+		return *(it);
 	}
 }
 
