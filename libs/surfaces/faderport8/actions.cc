@@ -96,12 +96,12 @@ FaderPort8::setup_actions ()
 
 
 	BindMethod (BtnBypass, button_bypass);
-	BindAction (BtnBypassAll, "Mixer", "ab-plugins"); // XXX
+	BindAction (BtnBypassAll, "Mixer", "ab-plugins");
 
 	BindAction (BtnMacro, "Mixer", "show-editor");
 	BindAction (BtnLink, "Window", "show-mixer");
 
-	BindAction (BtnOpen, "Common", "addExistingAudioFiles");
+	BindMethod (BtnOpen, button_open);
 	BindAction (BtnLock, "Editor", "lock");
 
 	// user-specific
@@ -165,6 +165,17 @@ FaderPort8::button_bypass ()
 		pi->enable (! pi->enabled ());
 	} else {
 		AccessAction ("Mixer", "ab-plugins");
+	}
+}
+
+void
+FaderPort8::button_open ()
+{
+	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	if (pi) {
+		pi->ToggleUI (); /* EMIT SIGNAL */
+	} else {
+		AccessAction ("Common", "addExistingAudioFiles");
 	}
 }
 
@@ -585,7 +596,7 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 		case ModePlugins:
 		case ModeSend:
 			while (steps > 0) {
-				bank_param (neg, false);
+				bank_param (neg, shift_mod());
 				--steps;
 			}
 			break;

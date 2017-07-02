@@ -82,7 +82,8 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	: fp (p)
 	, table (2, 3)
 	, ignore_active_change (false)
-	, two_line_text (_("Two Line Trackname"))
+	, two_line_text_cb (_("Two Line Trackname"))
+	, auto_pluginui_cb (_("Auto Show/Hide Plugin GUIs"))
 {
 	set_border_width (12);
 
@@ -115,7 +116,8 @@ FP8GUI::FP8GUI (FaderPort8& p)
 
 	clock_combo.signal_changed().connect (sigc::mem_fun (*this, &FP8GUI::clock_mode_changed));
 	scribble_combo.signal_changed().connect (sigc::mem_fun (*this, &FP8GUI::scribble_mode_changed));
-	two_line_text.signal_toggled().connect(sigc::mem_fun (*this, &FP8GUI::twolinetext_toggled));
+	two_line_text_cb.signal_toggled().connect(sigc::mem_fun (*this, &FP8GUI::twolinetext_toggled));
+	auto_pluginui_cb.signal_toggled().connect(sigc::mem_fun (*this, &FP8GUI::auto_pluginui_toggled));
 
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Incoming MIDI on:")));
@@ -179,16 +181,18 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table.attach (clock_combo, 1, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	table.attach (clock_combo, 1, 4, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 
-	table.attach (two_line_text, 5, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	table.attach (two_line_text_cb, 4, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
 	l = manage (new Gtk::Label);
 	l->set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Display:")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
-	table.attach (scribble_combo, 1, 5, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	table.attach (scribble_combo, 1, 4, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+
+	table.attach (auto_pluginui_cb, 4, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
 
 	/* update the port connection combos */
@@ -527,7 +531,8 @@ FP8GUI::update_prefs_combos ()
 			scribble_combo.set_active_text (_("Meter + Pan"));
 			break;
 	}
-	two_line_text.set_active (fp.twolinetext ());
+	two_line_text_cb.set_active (fp.twolinetext ());
+	auto_pluginui_cb.set_active (fp.auto_pluginui ());
 }
 
 void
@@ -561,5 +566,12 @@ FP8GUI::scribble_mode_changed ()
 void
 FP8GUI::twolinetext_toggled ()
 {
-	fp.set_two_line_text (two_line_text.get_active ());
+	fp.set_two_line_text (two_line_text_cb.get_active ());
+}
+
+
+void
+FP8GUI::auto_pluginui_toggled ()
+{
+	fp.set_auto_pluginui (auto_pluginui_cb.get_active ());
 }

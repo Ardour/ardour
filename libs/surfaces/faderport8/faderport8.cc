@@ -103,6 +103,7 @@ FaderPort8::FaderPort8 (Session& s)
 	, _clock_mode (1)
 	, _scribble_mode (2)
 	, _two_line_text (false)
+	, _auto_pluginui (true)
 {
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
@@ -1224,6 +1225,10 @@ FaderPort8::select_plugin (int num)
 		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+
+		if (_auto_pluginui) {
+			pi->ShowUI (); /* EMIT SIGNAL */
+		}
 	}
 
 	// switching to "Mode Track" -> calls FaderPort8::notify_fader_mode_changed()
@@ -1538,6 +1543,12 @@ void
 FaderPort8::drop_ctrl_connections ()
 {
 	_proc_params.clear();
+	if (_auto_pluginui) {
+		boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock ();
+		if (pi) {
+			pi->HideUI (); /* EMIT SIGNAL */
+		}
+	}
 	_plugin_insert.reset ();
 	_show_presets = false;
 	processor_connections.drop_connections ();

@@ -77,13 +77,15 @@ private:
 	/* misc Prefs */
 	Gtk::ComboBoxText clock_combo;
 	Gtk::ComboBoxText scribble_combo;
-	Gtk::CheckButton  two_line_text;
+	Gtk::CheckButton  two_line_text_cb;
+	Gtk::CheckButton  auto_pluginui_cb;
 
 	void build_prefs_combos ();
 	void update_prefs_combos ();
 	void clock_mode_changed ();
 	void scribble_mode_changed ();
 	void twolinetext_toggled ();
+	void auto_pluginui_toggled ();
 
 	/* user actions */
 	void build_available_action_menu ();

@@ -91,10 +91,12 @@ public:
 	void set_clock_mode (uint32_t m) { _clock_mode = m; }
 	void set_scribble_mode (uint32_t m) { _scribble_mode = m; }
 	void set_two_line_text (bool yn) { _two_line_text = yn; }
+	void set_auto_pluginui (bool yn) { _auto_pluginui = yn; }
 
 	uint32_t clock_mode () const { return _clock_mode; }
 	uint32_t scribble_mode () const { return _scribble_mode; }
 	bool twolinetext () const { return _two_line_text; }
+	bool auto_pluginui () const { return _auto_pluginui; }
 
 	int stop ();
 	void do_request (FaderPort8Request*);
@@ -268,6 +270,7 @@ private:
 	void button_loop ();
 	void button_metronom ();
 	void button_bypass ();
+	void button_open ();
 	void button_varispeed (bool);
 #ifdef FP8_MUTESOLO_UNDO
 	void button_solo_clear ();
@@ -294,6 +297,7 @@ private:
 	uint32_t _clock_mode;
 	uint32_t _scribble_mode;
 	bool     _two_line_text;
+	bool     _auto_pluginui;
 
 	/* user bound actions */
 	void button_user (bool, FP8Controls::ButtonId);
