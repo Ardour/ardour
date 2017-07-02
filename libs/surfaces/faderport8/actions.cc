@@ -432,6 +432,11 @@ FaderPort8::handle_encoder_link (int steps)
 
 	if (ac->desc().toggled) {
 		v = v > 0 ? 0. : 1.;
+	} else if (ac->desc().integer_step) {
+		v += steps / (1.f + ac->desc().upper - ac->desc().lower);
+	} else if (ac->desc().enumeration) {
+		ac->set_value (ac->desc().step_enum (ac->get_value(), steps < 0), PBD::Controllable::UseGroup);
+		return;
 	} else {
 		v = std::max (0.0, std::min (1.0, v + steps * .01));
 	}
