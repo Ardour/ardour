@@ -43,10 +43,10 @@ private:
 	// settings page
 	Gtk::ComboBoxText debug_combo;
 	Gtk::ComboBoxText portmode_combo;
-	Gtk::SpinButton port_entry;
-	Gtk::SpinButton bank_entry;
-	Gtk::SpinButton send_page_entry;
-	Gtk::SpinButton plugin_page_entry;
+	Gtk::Entry port_entry;
+	Gtk::Entry bank_entry;
+	Gtk::Entry send_page_entry;
+	Gtk::Entry plugin_page_entry;
 	Gtk::ComboBoxText gainmode_combo;
 	Gtk::ComboBoxText preset_combo;
 	std::vector<std::string> preset_options;
@@ -73,6 +73,7 @@ private:
 	void factory_reset ();
 	void reshow_values ();
 	void port_changed ();
+	bool port_focus_out (GdkEventFocus*);
 	void bank_changed ();
 	void send_page_changed ();
 	void plugin_page_changed ();

@@ -33,7 +33,6 @@
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/button.h>
-#include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
 #include "gtkmm2ext/gtk_ui.h"
@@ -59,7 +58,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	int n = 0; // table row
 	Table* table = manage (new Table);
 	Label* label;
-	table->set_row_spacings (10);
+	table->set_row_spacings (16);
 	table->set_col_spacings (6);
 	table->set_border_width (12);
 	get_session ();
@@ -91,8 +90,6 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (port_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	port_entry.set_range(1024, 0xffff);
-	port_entry.set_increments (1, 100);
 	port_entry.set_text(cp.get_remote_port().c_str());
 	if (!cp.get_portmode()) {
 		port_entry.set_sensitive (false);
@@ -104,9 +101,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (bank_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	bank_entry.set_range (0, 0xffff);
-	bank_entry.set_increments (1, 8);
-	bank_entry.set_value (cp.get_banksize());
+	bank_entry.set_text (string_compose ("%1", cp.get_banksize()).c_str());
 
 	++n;
 
@@ -115,9 +110,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (send_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	send_page_entry.set_range (0, 0xffff);
-	send_page_entry.set_increments (1, 8);
-	send_page_entry.set_value (cp.get_send_size());
+	send_page_entry.set_text (string_compose ("%1", cp.get_send_size()).c_str());
 
 	++n;
 
@@ -126,9 +119,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (plugin_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	plugin_page_entry.set_range (0, 0xffff);
-	plugin_page_entry.set_increments (1, 8);
-	plugin_page_entry.set_value (cp.get_send_size());
+	plugin_page_entry.set_text (string_compose ("%1", cp.get_plugin_size()).c_str());
 
 	++n;
 
@@ -187,10 +178,11 @@ OSC_GUI::OSC_GUI (OSC& p)
 	debug_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::debug_changed));
 	portmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::portmode_changed));
 	gainmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::gainmode_changed));
-	port_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
-	bank_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
-	send_page_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::send_page_changed));
-	plugin_page_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::plugin_page_changed));
+	port_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
+	port_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &OSC_GUI::port_focus_out));
+	bank_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
+	send_page_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::send_page_changed));
+	plugin_page_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::plugin_page_changed));
 
 	// Strip Types Calculate Page
 	int stn = 0; // table row
@@ -511,18 +503,37 @@ void
 OSC_GUI::port_changed ()
 {
 	std::string str = port_entry.get_text ();
-	if (port_entry.get_value() == 3819) {
-		str = "8000";
-		port_entry.set_value (8000);
+	uint32_t prt = atoi (str.c_str());
+	if (str == "3819" || prt < 1024) {
+
+		port_entry.set_progress_fraction (1.0);
+		//str = "8000";
+	} else {
+
+		port_entry.set_progress_fraction (0.0);
+		cp.set_remote_port (str);
+		save_user ();
 	}
-	cp.set_remote_port (str);
-	save_user ();
+}
+
+bool
+OSC_GUI::port_focus_out (GdkEventFocus* )
+{
+	std::string str = port_entry.get_text ();
+	uint32_t prt = atoi (str.c_str());
+	if (str == "3819" || prt < 1024) {
+		port_entry.set_text(cp.get_remote_port().c_str());
+
+		port_entry.set_progress_fraction (0.0);
+	}
+	return false;
 }
 
 void
 OSC_GUI::bank_changed ()
 {
-	uint32_t bsize = bank_entry.get_value ();
+	uint32_t bsize = atoi(bank_entry.get_text ());
+	bank_entry.set_text (string_compose ("%1", bsize));
 	cp.set_banksize (bsize);
 	save_user ();
 
@@ -531,7 +542,8 @@ OSC_GUI::bank_changed ()
 void
 OSC_GUI::send_page_changed ()
 {
-	uint32_t ssize = send_page_entry.get_value ();
+	uint32_t ssize = atoi (send_page_entry.get_text ());
+	send_page_entry.set_text (string_compose ("%1", ssize));
 	cp.set_send_size (ssize);
 	save_user ();
 
@@ -540,7 +552,8 @@ OSC_GUI::send_page_changed ()
 void
 OSC_GUI::plugin_page_changed ()
 {
-	uint32_t psize = plugin_page_entry.get_value ();
+	uint32_t psize = atoi (plugin_page_entry.get_text ());
+	plugin_page_entry.set_text (string_compose ("%1", psize));
 	cp.set_plugin_size (psize);
 	save_user ();
 
@@ -594,11 +607,11 @@ void
 OSC_GUI::factory_reset ()
 {
 	cp.set_banksize (0);
-	bank_entry.set_value (0);
+	bank_entry.set_text ("0");
 	cp.set_send_size (0);
-	send_page_entry.set_value (0);
+	send_page_entry.set_text ("0");
 	cp.set_plugin_size (0);
-	plugin_page_entry.set_value (0);
+	plugin_page_entry.set_text ("0");
 	cp.set_defaultstrip (159);
 	cp.set_defaultfeedback (0);
 	reshow_values ();
@@ -607,7 +620,7 @@ OSC_GUI::factory_reset ()
 	cp.set_portmode (0);
 	portmode_combo.set_active (0);
 	cp.set_remote_port ("8000");
-	port_entry.set_value (8000);
+	port_entry.set_text ("8000");
 	cp.clear_devices ();
 	cp.gui_changed ();
 }
@@ -912,24 +925,24 @@ OSC_GUI::load_preset (std::string preset)
 		}
 		if ((child = root->child ("Bank-Size")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_banksize (sesn_bank);
-			bank_entry.set_value (sesn_bank);
+			bank_entry.set_text (string_compose("%1", sesn_bank));
 		} else {
 			cp.set_banksize (atoi (prop->value().c_str()));
-			bank_entry.set_value (atoi (prop->value().c_str()));
+			bank_entry.set_text (prop->value().c_str());
 		}
 		if ((child = root->child ("Send-Size")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_send_size (sesn_send);
-			send_page_entry.set_value (sesn_send);
+			send_page_entry.set_text (string_compose("%1", sesn_send));
 		} else {
 			cp.set_send_size (atoi (prop->value().c_str()));
-			send_page_entry.set_value (atoi (prop->value().c_str()));
+			send_page_entry.set_text (prop->value().c_str());
 		}
 		if ((child = root->child ("Plugin-Size")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_plugin_size (sesn_plugin);
-			plugin_page_entry.set_value (sesn_plugin);
+			plugin_page_entry.set_text (string_compose("%1", sesn_plugin));
 		} else {
 			cp.set_plugin_size (atoi (prop->value().c_str()));
-			plugin_page_entry.set_value (atoi (prop->value().c_str()));
+			plugin_page_entry.set_text (prop->value().c_str());
 		}
 		if ((child = root->child ("Strip-Types")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_defaultstrip (sesn_strips);
@@ -976,11 +989,11 @@ OSC_GUI::restore_sesn_values ()
 	cp.set_remote_port (sesn_port);
 	port_entry.set_text (sesn_port);
 	cp.set_banksize (sesn_bank);
-	bank_entry.set_value (sesn_bank);
+	bank_entry.set_text (string_compose ("%1", sesn_bank));
 	cp.set_send_size (sesn_send);
-	send_page_entry.set_value (sesn_send);
+	send_page_entry.set_text (string_compose ("%1", sesn_send));
 	cp.set_plugin_size (sesn_plugin);
-	plugin_page_entry.set_value (sesn_plugin);
+	plugin_page_entry.set_text (string_compose ("%1", sesn_plugin));
 	cp.set_defaultstrip (sesn_strips);
 	cp.set_defaultfeedback (sesn_feedback);
 	reshow_values ();
