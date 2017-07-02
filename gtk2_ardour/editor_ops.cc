@@ -3189,6 +3189,8 @@ Editor::separate_region_from_selection ()
 	if (!selection->time.empty()) {
 
 		separate_regions_between (selection->time);
+		select_all_selectables_using_time_selection();
+		selection->clear_time ();
 
 	} else {
 
