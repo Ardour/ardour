@@ -66,7 +66,8 @@ FaderPort8::send_session_state ()
 	notify_automation_mode_changed (); // XXX (stip specific, see below)
 }
 
-// TODO: AutomationState display of plugin & send automation ?!
+// TODO: AutomationState display of plugin & send automation
+// TODO: link/lock control AS.
 void
 FaderPort8::notify_automation_mode_changed ()
 {

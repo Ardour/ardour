@@ -98,7 +98,7 @@ FaderPort8::setup_actions ()
 	BindMethod (BtnBypass, button_bypass);
 	BindAction (BtnBypassAll, "Mixer", "ab-plugins");
 
-	BindAction (BtnMacro, "Mixer", "show-editor");
+	BindAction (BtnMacro, "Common", "toggle-editor-and-mixer");
 	BindMethod (BtnOpen, button_open);
 
 	BindMethod (BtnLink, button_link);
@@ -238,6 +238,8 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 		default:
 			break;
 	}
+
+	// TODO link/lock control automation?
 
 	// apply to all selected tracks
 	StripableList all;
