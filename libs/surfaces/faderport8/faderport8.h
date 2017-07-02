@@ -31,6 +31,7 @@
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 #include "pbd/properties.h"
+#include "pbd/controllable.h"
 
 #include "ardour/types.h"
 #include "ardour/async_midi_port.h"
@@ -271,6 +272,8 @@ private:
 	void button_metronom ();
 	void button_bypass ();
 	void button_open ();
+	void button_link ();
+	void button_lock ();
 	void button_varispeed (bool);
 #ifdef FP8_MUTESOLO_UNDO
 	void button_solo_clear ();
@@ -292,6 +295,22 @@ private:
 	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _mute_state;
 	std::vector <boost::weak_ptr<ARDOUR::AutomationControl> > _solo_state;
 #endif
+
+	/* Encoder handlers */
+	void handle_encoder_pan (int steps);
+	void handle_encoder_link (int steps);
+
+	/* Control Link */
+	void stop_link ();
+	void start_link ();
+	void lock_link ();
+	void unlock_link (bool drop = false);
+	void nofity_focus_control (boost::weak_ptr<PBD::Controllable>);
+	PBD::ScopedConnection link_connection;
+	PBD::ScopedConnection link_locked_connection;
+	boost::weak_ptr<PBD::Controllable> _link_control;
+	bool _link_enabled;
+	bool _link_locked; // can only be true if _link_enabled
 
 	/* user prefs */
 	uint32_t _clock_mode;

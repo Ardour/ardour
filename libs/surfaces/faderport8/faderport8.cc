@@ -100,6 +100,8 @@ FaderPort8::FaderPort8 (Session& s)
 	, _shift_lock (false)
 	, _shift_pressed (0)
 	, gui (0)
+	, _link_enabled (false)
+	, _link_locked (false)
 	, _clock_mode (1)
 	, _scribble_mode (2)
 	, _two_line_text (false)
@@ -983,6 +985,78 @@ FaderPort8::assign_stripables (bool select_only)
 }
 
 /* ****************************************************************************
+ * Control Link/Lock
+ */
+
+void
+FaderPort8::unlock_link (bool drop)
+{
+	link_locked_connection.disconnect ();
+
+	if (drop) {
+		stop_link (); // calls back here with drop = false
+		return;
+	}
+
+	_link_locked = false;
+
+	if (_link_enabled) {
+		assert (_ctrls.button (FP8Controls::BtnLink).is_active ());
+		_link_control.reset ();
+		start_link (); // re-connect & update LED colors
+	} else {
+		_ctrls.button (FP8Controls::BtnLink).set_active (false);
+		_ctrls.button (FP8Controls::BtnLink).set_color (0x888888ff);
+		_ctrls.button (FP8Controls::BtnLock).set_active (false);
+		_ctrls.button (FP8Controls::BtnLock).set_color (0x888888ff);
+	}
+}
+
+void
+FaderPort8::lock_link ()
+{
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (_link_control.lock ());
+	if (!ac) {
+		return;
+	}
+	ac->DropReferences.connect (link_locked_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::unlock_link, this, true), this);
+
+	// stop watching for focus events
+	link_connection.disconnect ();
+
+	_link_locked = true;
+
+	_ctrls.button (FP8Controls::BtnLock).set_color (0x00ff00ff);
+	_ctrls.button (FP8Controls::BtnLink).set_color (0x00ff00ff);
+}
+
+void
+FaderPort8::stop_link ()
+{
+	if (!_link_enabled) {
+		return;
+	}
+	link_connection.disconnect ();
+	_link_control.reset ();
+	_link_enabled = false;
+	unlock_link (); // also updates button colors
+}
+
+void
+FaderPort8::start_link ()
+{
+	assert (!_link_locked);
+
+	_link_enabled = true;
+	_ctrls.button (FP8Controls::BtnLink).set_active (true);
+	_ctrls.button (FP8Controls::BtnLock).set_active (true);
+	nofity_focus_control (_link_control); // update BtnLink, BtnLock colors
+
+	PBD::Controllable::GUIFocusChanged.connect (link_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort8::nofity_focus_control, this, _1), this);
+}
+
+
+/* ****************************************************************************
  * Plugin selection and parameters
  */
 
@@ -1617,6 +1691,7 @@ FaderPort8::notify_fader_mode_changed ()
 		case ModeSend:
 			_plugin_off = 0;
 			_parameter_off = 0;
+			stop_link ();
 			// force unset rec-arm button, see also FaderPort8::button_arm
 			_ctrls.button (FP8Controls::BtnArm).set_active (false);
 			ARMButtonChange (false);

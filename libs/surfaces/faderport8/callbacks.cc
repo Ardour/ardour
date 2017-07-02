@@ -218,3 +218,19 @@ FaderPort8::notify_plugin_active_changed ()
 		_ctrls.button (FP8Controls::BtnBypass).set_color (0x888888ff);
 	}
 }
+
+void
+FaderPort8::nofity_focus_control (boost::weak_ptr<PBD::Controllable> c)
+{
+	assert (_link_enabled && !_link_locked);
+	// TODO consider subscribing to c's DropReferences
+	// (in case the control goes away while it has focus, update the BtnColor)
+	_link_control = c;
+	if (c.expired ()) {
+		_ctrls.button (FP8Controls::BtnLink).set_color (0xff8800ff);
+		_ctrls.button (FP8Controls::BtnLock).set_color (0xff0000ff);
+	} else {
+		_ctrls.button (FP8Controls::BtnLink).set_color (0x88ff00ff);
+		_ctrls.button (FP8Controls::BtnLock).set_color (0x00ff88ff);
+	}
+}

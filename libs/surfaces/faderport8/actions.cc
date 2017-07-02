@@ -99,10 +99,10 @@ FaderPort8::setup_actions ()
 	BindAction (BtnBypassAll, "Mixer", "ab-plugins");
 
 	BindAction (BtnMacro, "Mixer", "show-editor");
-	BindAction (BtnLink, "Window", "show-mixer");
-
 	BindMethod (BtnOpen, button_open);
-	BindAction (BtnLock, "Editor", "lock");
+
+	BindMethod (BtnLink, button_link);
+	BindMethod (BtnLock, button_lock);
 
 	// user-specific
 	for (FP8Controls::UserButtonMap::const_iterator i = _ctrls.user_buttons ().begin ();
@@ -176,6 +176,37 @@ FaderPort8::button_open ()
 		pi->ToggleUI (); /* EMIT SIGNAL */
 	} else {
 		AccessAction ("Common", "addExistingAudioFiles");
+	}
+}
+void
+FaderPort8::button_lock ()
+{
+	if (!_link_enabled) {
+		AccessAction ("Editor", "lock");
+		return;
+	}
+	if (_link_locked) {
+		unlock_link ();
+	} else if (!_link_control.expired ()) {
+		lock_link ();
+	}
+}
+
+void
+FaderPort8::button_link ()
+{
+	switch (_ctrls.fader_mode()) {
+		case ModeTrack:
+		case ModePan:
+			if (_link_enabled) {
+				stop_link ();
+			} else {
+				start_link ();
+			}
+			break;
+		default:
+			//AccessAction ("Window", "show-mixer");
+			break;
 	}
 }
 
@@ -347,6 +378,66 @@ FaderPort8::button_action (const std::string& group, const std::string& item)
 {
 	AccessAction (group, item);
 }
+
+/* ****************************************************************************
+ * Control Interaction (encoder)
+ */
+
+void
+FaderPort8::handle_encoder_pan (int steps)
+{
+	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	if (s) {
+		boost::shared_ptr<AutomationControl> ac;
+		if (shift_mod () || _ctrls.fader_mode() == ModePan) {
+			ac = s->pan_width_control ();
+		} else {
+			ac = s->pan_azimuth_control ();
+		}
+		if (ac) {
+			if (ac->automation_state() == Touch && !ac->touching ()) {
+				ac->start_touch (ac->session().transport_frame());
+			}
+			if (steps == 0) {
+				ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
+			} else {
+				double v = ac->internal_to_interface (ac->get_value());
+				v = std::max (0.0, std::min (1.0, v + steps * .01));
+				ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+			}
+		}
+	}
+}
+
+void
+FaderPort8::handle_encoder_link (int steps)
+{
+	if (_link_control.expired ()) {
+		return;
+	}
+	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (_link_control.lock ());
+	if (!ac) {
+		return;
+	}
+
+	double v = ac->internal_to_interface (ac->get_value());
+	if (ac->automation_state() == Touch && !ac->touching ()) {
+		ac->start_touch (ac->session().transport_frame());
+	}
+
+	if (steps == 0) {
+		ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
+		return;
+	}
+
+	if (ac->desc().toggled) {
+		v = v > 0 ? 0. : 1.;
+	} else {
+		v = std::max (0.0, std::min (1.0, v + steps * .01));
+	}
+	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
+}
+
 
 /* ****************************************************************************
  * Mode specific and internal callbacks
@@ -540,22 +631,10 @@ FaderPort8::button_parameter ()
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
 		case ModePan:
-			{
-				boost::shared_ptr<Stripable> s = first_selected_stripable();
-				if (s) {
-					boost::shared_ptr<AutomationControl> ac;
-					if (shift_mod () || _ctrls.fader_mode() == ModePan) {
-						ac = s->pan_width_control ();
-					} else {
-						ac = s->pan_azimuth_control ();
-					}
-					if (ac) {
-						if (ac->automation_state() == Touch && !ac->touching ()) {
-							ac->start_touch (ac->session().transport_frame());
-						}
-						ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
-					}
-				}
+			if (_link_enabled || _link_locked) {
+				handle_encoder_link (0);
+			} else {
+				handle_encoder_pan (0);
 			}
 			break;
 		case ModePlugins:
@@ -573,23 +652,11 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
 		case ModePan:
-			{
-				boost::shared_ptr<Stripable> s = first_selected_stripable();
-				if (s) {
-					boost::shared_ptr<AutomationControl> ac;
-					if (shift_mod () || _ctrls.fader_mode() == ModePan) {
-						ac = s->pan_width_control ();
-					} else {
-						ac = s->pan_azimuth_control ();
-					}
-					if (ac) {
-						double v = ac->internal_to_interface (ac->get_value());
-						v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
-						if (ac->automation_state() == Touch && !ac->touching ()) {
-							ac->start_touch (ac->session().transport_frame());
-						}
-						ac->set_value (ac->interface_to_internal(v), PBD::Controllable::UseGroup);
-					}
+			if (steps != 0) {
+				if (_link_enabled || _link_locked) {
+					handle_encoder_link (neg ? -steps : steps);
+				} else {
+					handle_encoder_pan (neg ? -steps : steps);
 				}
 			}
 			break;
