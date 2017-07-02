@@ -20,6 +20,9 @@
 #include <gtkmm.h>
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/persistent_tooltip.h"
+
+#include "pbd/controllable.h"
+
 #include "panner_interface.h"
 #include "panner_editor.h"
 
@@ -56,6 +59,10 @@ PannerInterface::on_enter_notify_event (GdkEventCrossing *)
 {
 	grab_focus ();
 	Keyboard::magic_widget_grab_focus ();
+
+	if (!proxy_controllable ().expired ()) {
+		PBD::Controllable::GUIFocusChanged (proxy_controllable ());
+	}
 	return false;
 }
 
@@ -63,6 +70,9 @@ bool
 PannerInterface::on_leave_notify_event (GdkEventCrossing *)
 {
 	Keyboard::magic_widget_drop_focus ();
+	if (!proxy_controllable ().expired ()) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+	}
 	return false;
 }
 

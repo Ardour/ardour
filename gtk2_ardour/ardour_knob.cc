@@ -539,6 +539,11 @@ ArdourKnob::on_enter_notify_event (GdkEventCrossing* ev)
 
 	set_dirty ();
 
+	boost::shared_ptr<PBD::Controllable> c (binding_proxy.get_controllable ());
+	if (c) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+	}
+
 	return CairoWidget::on_enter_notify_event (ev);
 }
 
@@ -548,6 +553,10 @@ ArdourKnob::on_leave_notify_event (GdkEventCrossing* ev)
 	_hovering = false;
 
 	set_dirty ();
+
+	if (binding_proxy.get_controllable()) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+	}
 
 	return CairoWidget::on_leave_notify_event (ev);
 }

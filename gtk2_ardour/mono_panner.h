@@ -55,6 +55,11 @@ protected:
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_key_press_event (GdkEventKey*);
 
+	boost::weak_ptr<PBD::Controllable> proxy_controllable () const
+	{
+		return boost::weak_ptr<PBD::Controllable> (position_binder.get_controllable());
+	}
+
 private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;

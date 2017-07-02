@@ -1144,6 +1144,11 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 		CairoWidget::set_dirty ();
 	}
 
+	boost::shared_ptr<PBD::Controllable> c (binding_proxy.get_controllable ());
+	if (c) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+	}
+
 	return CairoWidget::on_enter_notify_event (ev);
 }
 
@@ -1154,6 +1159,10 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 
 	if (UIConfiguration::instance().get_widget_prelight()) {
 		CairoWidget::set_dirty ();
+	}
+
+	if (binding_proxy.get_controllable()) {
+		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
 	}
 
 	return CairoWidget::on_leave_notify_event (ev);

@@ -25,7 +25,6 @@
 #include <gtkmm/window.h>
 #include <pangomm/layout.h>
 
-#include "pbd/controllable.h"
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
