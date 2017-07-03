@@ -55,11 +55,13 @@ TemplateDialog::TemplateDialog ()
 	_session_template_treeview.signal_key_press_event().connect (sigc::mem_fun (*this, &TemplateDialog::key_event));
 
 	ScrolledWindow* sw = manage (new ScrolledWindow);
+	sw->property_hscrollbar_policy() = POLICY_AUTOMATIC;
 	sw->add (_session_template_treeview);
 	sw->set_size_request (300, 200);
 
 
 	VBox* vb = manage (new VBox);
+	vb->set_spacing (4);
 	vb->pack_start (_rename_button, false, false);
 	vb->pack_start (_remove_button, false, false);
 
@@ -69,6 +71,7 @@ TemplateDialog::TemplateDialog ()
 	_remove_button.signal_clicked().connect (sigc::mem_fun (*this, &TemplateDialog::delete_selected_template));
 
 	HBox* hb = manage (new HBox);
+	hb->set_spacing (6);
 	hb->pack_start (*sw);
 	hb->pack_start (*vb);
 
