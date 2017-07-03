@@ -227,7 +227,7 @@ FaderPort8::nofity_focus_control (boost::weak_ptr<PBD::Controllable> c)
 	// TODO consider subscribing to c's DropReferences
 	// (in case the control goes away while it has focus, update the BtnColor)
 	_link_control = c;
-	if (c.expired ()) {
+	if (c.expired () || 0 == boost::dynamic_pointer_cast<AutomationControl> (_link_control.lock ())) {
 		_ctrls.button (FP8Controls::BtnLink).set_color (0xff8800ff);
 		_ctrls.button (FP8Controls::BtnLock).set_color (0xff0000ff);
 	} else {
