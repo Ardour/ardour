@@ -250,6 +250,7 @@ gtk2_ardour_sources = [
         'stripable_time_axis.cc',
         'sys_ex.cc',
         'tape_region_view.cc',
+        'template_dialog.cc',
         'tempo_curve.cc',
         'tempo_dialog.cc',
         'tempo_lines.cc',
@@ -859,7 +860,7 @@ def build(bld):
 
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
-    # 
+    #
     a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
@@ -868,7 +869,7 @@ def build(bld):
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']
-        
+
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')

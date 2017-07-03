@@ -222,6 +222,9 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = global_actions.register_action (main_actions, X_("ManageTemplates"), _("Manage Templates..."), sigc::mem_fun(*this, &ARDOUR_UI::manage_templates));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	act = global_actions.register_action (main_actions, X_("Metadata"), _("Metadata"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
