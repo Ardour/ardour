@@ -87,6 +87,9 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	solo_mute_box.pack_start (mute_button, true, true);
 	solo_mute_box.pack_start (solo_button, true, true);
 
+	mute_button.set_controllable (_vca->mute_control());
+	solo_button.set_controllable (_vca->solo_control());
+
 	number_label.set_text (PBD::to_string (v->number()));
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_no_show_all ();
