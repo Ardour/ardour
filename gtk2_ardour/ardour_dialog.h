@@ -51,6 +51,7 @@ public:
 
 protected:
 	void pop_splash ();
+	void close_self ();
 
 private:
 	WM::ProxyTemporary* proxy;

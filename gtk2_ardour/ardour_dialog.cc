@@ -68,6 +68,17 @@ ArdourDialog::on_response (int response_id)
 }
 
 void
+ArdourDialog::close_self ()
+{
+	/* Don't call Idle, don't pop splash.
+	 * This is used at exit and session-close and invoked
+	 * via close_all_dialogs.
+	 */
+	hide ();
+	Gtk::Dialog::on_response (RESPONSE_CANCEL);
+}
+
+void
 ArdourDialog::pop_splash ()
 {
 	if (_splash_pushed) {
@@ -138,7 +149,7 @@ ArdourDialog::init ()
 		set_transient_for (*parent);
 	}
 
-	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourDialog::close_self)); /* send a RESPONSE_CANCEL to self */
 
 	proxy = new WM::ProxyTemporary (get_title(), this);
 	WM::Manager::instance().register_window (proxy);
