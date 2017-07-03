@@ -1284,11 +1284,6 @@ ARDOUR_UI::starting ()
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
 
-	if (splash) {
-		// in 1 second, hide the splash screen
-		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
-	}
-
 	/* all other dialogs are created conditionally */
 
 	return 0;
@@ -1928,10 +1923,6 @@ ARDOUR_UI::open_recent_session ()
 		}
 
 		can_return = false;
-	}
-	if (splash) {
-		// in 1 second, hide the splash screen
-		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 	}
 }
 
@@ -2848,7 +2839,6 @@ ARDOUR_UI::save_session_as ()
 	if (!sa.include_media && sa.switch_to) {
 		unload_session (false);
 		load_session (sa.final_session_folder_name, sa.new_name);
-		hide_splash ();
 	}
 }
 
@@ -3604,10 +3594,6 @@ ARDOUR_UI::close_session()
 	if (get_session_parameters (true, false)) {
 		exit (1);
 	}
-	if (splash && splash->is_visible()) {
-		// in 1 second, hide the splash screen
-		Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
-	}
 }
 
 /** @param snap_name Snapshot name (without .ardour suffix).
@@ -3775,6 +3761,14 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	retval = 0;
 
   out:
+	/* For successful session load the splash is hidden by ARDOUR_UI::first_idle,
+	 * which is queued by set_session().
+	 * If session-loading fails we hide it explicitly.
+	 * This covers both cases in a central place.
+	 */
+	if (retval) {
+		hide_splash ();
+	}
 	return retval;
 }
 
@@ -5201,6 +5195,15 @@ ARDOUR_UI::first_idle ()
 	if (editor) {
 		editor->first_idle();
 	}
+
+	/* in 1 second, hide the splash screen
+	 *
+	 * Consider hiding it *now*. If a user opens opens a dialog
+	 * during that one second while the splash is still visible,
+	 * the dialog will push-back the splash.
+	 * Closing the dialog later will pop it back.
+	 */
+	Glib::signal_timeout().connect (sigc::bind (sigc::ptr_fun (_hide_splash), this), 1000);
 
 	Keyboard::set_can_save_keybindings (true);
 	return false;
