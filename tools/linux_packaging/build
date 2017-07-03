@@ -192,6 +192,7 @@ MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
 MackieControl=$Shared/mcp
+OSC=$Shared/osc
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -226,6 +227,7 @@ mkdir -p $MidiMaps
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $MackieControl
+mkdir -p $OSC
 mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Backends
@@ -388,6 +390,12 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
+done
+
+# OSC data
+# got to be careful with names here
+for x in $BUILD_ROOT/../osc/*.preset ; do
+    cp "$x" $OSC
 done
 
 # Templates
