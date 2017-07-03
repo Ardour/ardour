@@ -28,14 +28,27 @@
 
 #include "ardour_dialog.h"
 
+namespace ARDOUR {
+	struct TemplateInfo;
+}
+
 class TemplateDialog : public ArdourDialog
 {
 public:
 	TemplateDialog ();
 	~TemplateDialog () {}
+};
 
-private:
-	void setup_session_templates ();
+class TemplateManager : public Gtk::HBox
+{
+public:
+	virtual ~TemplateManager () {}
+	virtual void init () = 0;
+
+protected:
+	TemplateManager ();
+
+	void setup_model (const std::vector<ARDOUR::TemplateInfo>& templates);
 
 	void row_selection_changed ();
 	void render_template_names (Gtk::CellRenderer* rnd, const Gtk::TreeModel::iterator& it);
@@ -44,8 +57,8 @@ private:
 
 	bool key_event (GdkEventKey* ev);
 
-	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
-	void delete_selected_template ();
+	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
+	virtual void delete_selected_template () = 0;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns () {
@@ -57,15 +70,43 @@ private:
 		Gtk::TreeModelColumn<std::string> path;
 	};
 
-	SessionTemplateColumns _session_template_columns;
-	Glib::RefPtr<Gtk::ListStore>  _session_template_model;
+	SessionTemplateColumns _template_columns;
+	Glib::RefPtr<Gtk::ListStore>  _template_model;
 
-	Gtk::TreeView _session_template_treeview;
+	Gtk::TreeView _template_treeview;
 	Gtk::CellRendererText _validating_cellrenderer;
 	Gtk::TreeView::Column _validated_column;
 
 	Gtk::Button _remove_button;
 	Gtk::Button _rename_button;
 };
+
+class SessionTemplateManager : public TemplateManager
+{
+public:
+	SessionTemplateManager () : TemplateManager () {}
+	~SessionTemplateManager () {}
+
+	void init ();
+
+private:
+	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
+	void delete_selected_template ();
+};
+
+
+class RouteTemplateManager : public TemplateManager
+{
+public:
+	RouteTemplateManager () : TemplateManager () {}
+	~RouteTemplateManager () {}
+
+	void init ();
+
+private:
+	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
+	void delete_selected_template ();
+};
+
 
 #endif /* __gtk2_ardour_template_dialog_h__ */
