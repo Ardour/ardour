@@ -65,7 +65,7 @@ static PanPluginDescriptor _descriptor = {
 	"http://ardour.org/plugin/panner_balance",
 	"http://ardour.org/plugin/panner_balance#ui",
 	2, 2,
-	2000,
+	10000,
 	Pannerbalance::factory
 };
 
