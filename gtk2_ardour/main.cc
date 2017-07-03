@@ -377,6 +377,11 @@ int main (int argc, char *argv[])
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str())) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+		Gtk::Main main (argc, argv);
+		Gtk::MessageDialog msg (string_compose (_("Could not initialize %1 (likely due to corrupt config files).\n"
+		                                          "Run %1 from a commandline for more information."), PROGRAM_NAME),
+		                        false, Gtk::MESSAGE_ERROR , Gtk::BUTTONS_OK, true);
+		msg.run ();
 		exit (1);
 	}
 
