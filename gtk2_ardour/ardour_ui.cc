@@ -177,6 +177,7 @@ typedef uint64_t microseconds_t;
 #include "speaker_dialog.h"
 #include "splash.h"
 #include "startup.h"
+#include "template_dialog.h"
 #include "time_axis_view_item.h"
 #include "time_info_box.h"
 #include "timers.h"
@@ -3170,6 +3171,12 @@ ARDOUR_UI::save_template ()
 			break;
 		}
 	}
+}
+
+void ARDOUR_UI::manage_templates ()
+{
+	TemplateDialog td;
+	td.run();
 }
 
 void

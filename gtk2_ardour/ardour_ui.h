@@ -656,6 +656,7 @@ private:
 	void open_recent_session ();
 	bool process_save_template_prompter (ArdourPrompter& prompter);
 	void save_template ();
+	void manage_templates ();
 
 	void edit_metadata ();
 	void import_metadata ();
