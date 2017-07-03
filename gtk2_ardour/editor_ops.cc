@@ -3190,6 +3190,10 @@ Editor::separate_region_from_selection ()
 
 		separate_regions_between (selection->time);
 		select_all_selectables_using_time_selection();
+		if(!Config->get_automation_follows_regions())
+		{
+			selection->clear_points ();
+		}
 		selection->clear_time ();
 
 	} else {
