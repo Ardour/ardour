@@ -22,7 +22,6 @@
 #include <list>
 #include <string>
 #include <vector>
-//#include <glibmm/miscutils.h>
 
 #include <errno.h>
 
@@ -33,6 +32,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/button.h>
+#include <gtkmm/spinbutton.h>
 #include <gtkmm/comboboxtext.h>
 
 #include "gtkmm2ext/gtk_ui.h"
@@ -90,6 +90,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (port_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	port_entry.set_range(1024, 0xffff);
+	port_entry.set_increments (1, 100);
 	port_entry.set_text(cp.get_remote_port().c_str());
 	if (!cp.get_portmode()) {
 		port_entry.set_sensitive (false);
@@ -101,7 +103,9 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (bank_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	bank_entry.set_text (string_compose ("%1", cp.get_banksize()).c_str());
+	bank_entry.set_range (0, 0xffff);
+	bank_entry.set_increments (1, 8);
+	bank_entry.set_value (cp.get_banksize());
 
 	++n;
 
@@ -110,7 +114,9 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (send_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	send_page_entry.set_text (string_compose ("%1", cp.get_send_size()).c_str());
+	send_page_entry.set_range (0, 0xffff);
+	send_page_entry.set_increments (1, 8);
+	send_page_entry.set_value (cp.get_send_size());
 
 	++n;
 
@@ -119,7 +125,9 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (plugin_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
-	plugin_page_entry.set_text (string_compose ("%1", cp.get_plugin_size()).c_str());
+	plugin_page_entry.set_range (0, 0xffff);
+	plugin_page_entry.set_increments (1, 8);
+	plugin_page_entry.set_value (cp.get_send_size());
 
 	++n;
 
@@ -503,15 +511,13 @@ void
 OSC_GUI::port_changed ()
 {
 	std::string str = port_entry.get_text ();
-	uint32_t prt = atoi (str.c_str());
-	if (str == "3819" || prt < 1024) {
-
+	int prt = atoi (str.c_str());
+	if (prt == 3819 || prt < 1024) {
+		// indicate non-valid text
 		port_entry.set_progress_fraction (1.0);
-		//str = "8000";
 	} else {
-
 		port_entry.set_progress_fraction (0.0);
-		cp.set_remote_port (str);
+		cp.set_remote_port (string_compose ("%1", prt));
 		save_user ();
 	}
 }
@@ -520,10 +526,9 @@ bool
 OSC_GUI::port_focus_out (GdkEventFocus* )
 {
 	std::string str = port_entry.get_text ();
-	uint32_t prt = atoi (str.c_str());
-	if (str == "3819" || prt < 1024) {
+	int prt = atoi (str.c_str());
+	if (prt == 3819 || prt < 1024) {
 		port_entry.set_text(cp.get_remote_port().c_str());
-
 		port_entry.set_progress_fraction (0.0);
 	}
 	return false;

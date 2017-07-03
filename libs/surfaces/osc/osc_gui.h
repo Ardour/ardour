@@ -43,10 +43,10 @@ private:
 	// settings page
 	Gtk::ComboBoxText debug_combo;
 	Gtk::ComboBoxText portmode_combo;
-	Gtk::Entry port_entry;
-	Gtk::Entry bank_entry;
-	Gtk::Entry send_page_entry;
-	Gtk::Entry plugin_page_entry;
+	Gtk::SpinButton port_entry;
+	Gtk::SpinButton bank_entry;
+	Gtk::SpinButton send_page_entry;
+	Gtk::SpinButton plugin_page_entry;
 	Gtk::ComboBoxText gainmode_combo;
 	Gtk::ComboBoxText preset_combo;
 	std::vector<std::string> preset_options;
@@ -129,7 +129,6 @@ OSC::get_gui () const
 	if (!gui) {
 		const_cast<OSC*>(this)->build_gui ();
 	}
-	//static_cast<Gtk::VBox*>(gui)->show_all();
 	static_cast<Gtk::Notebook*>(gui)->show_all();
 	return gui;
 }
