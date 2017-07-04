@@ -151,20 +151,26 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 	boost::shared_ptr<ChannelList> c = writer.get_copy();
 
 	uint32_t n_audio = in.n_audio();
+	bool changed = false;
 
 	if (n_audio > c->size()) {
 		add_channel_to (c, n_audio - c->size());
+		changed = true;
 	} else if (n_audio < c->size()) {
 		remove_channel_from (c, c->size() - n_audio);
+		changed = true;
 	}
 
 	if (in.n_midi() > 0 && !_midi_buf) {
 		const size_t size = _session.butler()->midi_diskstream_buffer_size();
 		_midi_buf = new MidiRingBuffer<framepos_t>(size);
 		midi_interpolation.add_channel_to (0,0);
+		changed = true;
 	}
 
-	seek (_session.transport_frame());
+	if (changed) {
+		seek (_session.transport_frame());
+	}
 
 	return Processor::configure_io (in, out);
 }
