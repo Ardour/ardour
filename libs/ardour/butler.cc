@@ -334,15 +334,15 @@ Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& 
 
 		int ret;
 
-		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1 capture load %2\n", tr->name(), tr->capture_buffer_load()));
+		// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler flushes track %1 capture load %2\n", tr->name(), tr->capture_buffer_load()));
 		ret = tr->do_flush (ButlerContext, false);
 		switch (ret) {
 		case 0:
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1\n", tr->name()));
+			//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush complete for %1\n", tr->name()));
 			break;
 
 		case 1:
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1\n", tr->name()));
+			//DEBUG_TRACE (DEBUG::Butler, string_compose ("\tflush not finished for %1\n", tr->name()));
 			disk_work_outstanding = true;
 			break;
 
