@@ -275,7 +275,7 @@ Butler::thread_work ()
 			goto restart;
 		}
 
-		disk_work_outstanding = flush_tracks_to_disk_normal (rl, err);
+		disk_work_outstanding = disk_work_outstanding || flush_tracks_to_disk_normal (rl, err);
 
 		if (err && _session.actively_recording()) {
 			/* stop the transport and try to catch as much possible
