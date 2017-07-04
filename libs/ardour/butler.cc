@@ -216,8 +216,7 @@ Butler::thread_work ()
 		}
 
 		frameoffset_t audition_seek;
-		if (should_run && _session.is_auditioning()
-				&& (audition_seek = _session.the_auditioner()->seek_frame()) >= 0) {
+		if (should_run && _session.is_auditioning() && (audition_seek = _session.the_auditioner()->seek_frame()) >= 0) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
 			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
 			tr->seek(audition_seek);
