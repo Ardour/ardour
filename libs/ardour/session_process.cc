@@ -1033,6 +1033,7 @@ Session::queue_event (SessionEvent* ev)
 	} else if (_state_of_the_state & Loading) {
 		merge_event (ev);
 	} else {
+		Glib::Threads::Mutex::Lock lm (rb_write_lock);
 		pending_events.write (&ev, 1);
 	}
 }

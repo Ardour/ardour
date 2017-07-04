@@ -167,6 +167,8 @@ protected:
 	Events           immediate_events;
 	Events::iterator next_event;
 
+	Glib::Threads::Mutex rb_write_lock;
+
 	/* there can only ever be one of each of these */
 
 	SessionEvent *auto_loop_event;
