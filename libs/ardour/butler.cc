@@ -212,7 +212,7 @@ Butler::thread_work ()
 		if (transport_work_requested()) {
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("do transport work @ %1\n", g_get_monotonic_time()));
 			_session.butler_transport_work ();
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1\n", g_get_monotonic_time()));
+			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time(), transport_work_requested()));
 		}
 
 		frameoffset_t audition_seek;
