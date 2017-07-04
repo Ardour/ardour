@@ -127,8 +127,19 @@ public:
 	}
 
 	/** @return Selected children */
-	std::list<T*> selection () const {
-		return _selection;
+	std::list<T*> selection (bool sorted = false) const {
+		if (!sorted) {
+			return _selection;
+		} else {
+			/* simple insertion-sort */
+			std::list<T*> rv;
+			for (typename std::list<T*>::const_iterator i = _children.begin(); i != _children.end(); ++i) {
+				if (selected (*i)) {
+					rv.push_back (*i);
+				}
+			}
+			return rv;
+		}
 	}
 
 	/** Set the `active' child; this is simply a child which is set to have the
@@ -406,8 +417,6 @@ private:
 		} else {
 
 			/* drag started in another DnDVBox; raise a signal to say what happened */
-
-			std::list<T*> dropped = _drag_source->selection ();
 			DropFromAnotherBox (_drag_source, drop.first, context);
 		}
 
