@@ -1809,7 +1809,6 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	, ab_direction (true)
 	, _get_plugin_selector (get_plugin_selector)
 	, _placement (-1)
-	, _visible_prefader_processors (0)
 	, _p_selection(psel)
 	, processor_display (drop_targets())
 	, _redisplay_pending (false)
@@ -2229,10 +2228,6 @@ ProcessorBox::show_processor_menu (int arg)
 	int x, y;
 	processor_display.get_pointer (x, y);
 	_placement = processor_display.add_placeholder (y);
-
-	if (_visible_prefader_processors == 0 && _placement > 0) {
-		--_placement;
-	}
 }
 
 bool
@@ -2687,19 +2682,12 @@ void
 ProcessorBox::redisplay_processors ()
 {
 	ENSURE_GUI_THREAD (*this, &ProcessorBox::redisplay_processors);
-	bool     fader_seen;
 
 	if (no_processor_redisplay) {
 		return;
 	}
 
 	processor_display.clear ();
-
-	_visible_prefader_processors = 0;
-	fader_seen = false;
-
-	_route->foreach_processor (sigc::bind (sigc::mem_fun (*this, &ProcessorBox::help_count_visible_prefader_processors),
-					       &_visible_prefader_processors, &fader_seen));
 
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::add_processor_to_display));
 	_route->foreach_processor (sigc::mem_fun (*this, &ProcessorBox::maybe_add_processor_to_ui_list));
@@ -2773,28 +2761,6 @@ ProcessorBox::maybe_add_processor_pin_mgr (boost::weak_ptr<Processor> w)
 
 	p->set_pingmgr_proxy (wp);
 	WM::Manager::instance().register_window (wp);
-}
-void
-ProcessorBox::help_count_visible_prefader_processors (boost::weak_ptr<Processor> p, uint32_t* cnt, bool* amp_seen)
-{
-	boost::shared_ptr<Processor> processor (p.lock ());
-
-	if (processor && ( processor->display_to_user()
-#ifndef NDEBUG
-	                    || show_all_processors
-#endif
-	                 )
-	   ) {
-
-		if (boost::dynamic_pointer_cast<Amp>(processor) &&
-		    boost::dynamic_pointer_cast<Amp>(processor)->gain_control()->parameter().type() == GainAutomation) {
-			*amp_seen = true;
-		} else {
-			if (!*amp_seen) {
-				(*cnt)++;
-			}
-		}
-	}
 }
 
 void
