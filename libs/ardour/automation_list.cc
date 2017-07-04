@@ -444,6 +444,7 @@ AutomationList::deserialize_events (const XMLNode& node)
 			ok = false;
 			break;
 		}
+		y = std::min ((double)_desc.upper, std::max ((double)_desc.lower, y));
 		fast_simple_add (x, y);
 	}
 
@@ -501,6 +502,7 @@ AutomationList::set_state (const XMLNode& node, int version)
 				continue;
 			}
 
+			y = std::min ((double)_desc.upper, std::max ((double)_desc.lower, y));
 			fast_simple_add (x, y);
 		}
 

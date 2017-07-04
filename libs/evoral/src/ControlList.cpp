@@ -412,6 +412,9 @@ ControlList::fast_simple_add (double when, double value)
 	_events.insert (_events.end(), new ControlEvent (when, value));
 
 	mark_dirty ();
+	if (_frozen) {
+		_sort_pending = true;
+	}
 }
 
 void
