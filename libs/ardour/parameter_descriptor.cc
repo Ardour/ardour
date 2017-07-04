@@ -157,6 +157,10 @@ ParameterDescriptor::update_steps()
 	if (toggled || enumeration) {
 		logarithmic = false;
 	}
+	if (logarithmic && sr_dependent && upper > lower && lower == 0) {
+		/* work-around for plugins with a log-scale control 0..SR; log (0) is not defined */
+		lower = upper / 1000.f;
+	}
 	if (logarithmic && (upper <= lower || lower * upper <= 0)) {
 		logarithmic = false;
 	}
