@@ -2040,7 +2040,7 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 
 	boost::shared_ptr<Processor> p = find_drop_position (position);
 
-	list<ProcessorEntry*> children = source->selection ();
+	list<ProcessorEntry*> children = source->selection (true);
 	list<boost::shared_ptr<Processor> > procs;
 	for (list<ProcessorEntry*>::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->processor ()) {
@@ -3455,7 +3455,7 @@ could not match the configuration of this track.");
 void
 ProcessorBox::get_selected_processors (ProcSelection& processors) const
 {
-	const list<ProcessorEntry*> selection = processor_display.selection ();
+	const list<ProcessorEntry*> selection = processor_display.selection (true);
 	for (list<ProcessorEntry*>::const_iterator i = selection.begin(); i != selection.end(); ++i) {
 		processors.push_back ((*i)->processor ());
 	}
