@@ -411,6 +411,7 @@ Butler::flush_tracks_to_disk_after_locate (boost::shared_ptr<RouteList> rl, uint
 void
 Butler::schedule_transport_work ()
 {
+	DEBUG_TRACE (DEBUG::Butler, "requesting more transport work\n");
 	g_atomic_int_inc (&should_do_transport_work);
 	summon ();
 }
