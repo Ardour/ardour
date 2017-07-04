@@ -470,7 +470,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
+	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
 }
 
 void
@@ -1077,7 +1077,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	}
 
 	// elapsed = g_get_monotonic_time () - before;
-	// cerr << "\tbandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
+	// cerr << '\t' << name() << ": bandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
 
 	file_frame = file_frame_tmp;
 	assert (file_frame >= 0);
