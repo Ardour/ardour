@@ -667,7 +667,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		_need_butler = true;
 	}
 
-	DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 writer run, needs butler = %2\n", name(), _need_butler));
+	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 writer run, needs butler = %2\n", name(), _need_butler));
 }
 
 void
