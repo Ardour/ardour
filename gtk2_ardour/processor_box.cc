@@ -2493,6 +2493,11 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 				}
 			}
 		}
+		/* add next processor below the currently added.
+		 * Note: placement < 0: add the bottom */
+		if (_placement >= 0) {
+			++_placement;
+		}
 	}
 
 	return false;
