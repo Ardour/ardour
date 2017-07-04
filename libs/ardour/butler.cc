@@ -243,13 +243,13 @@ Butler::thread_work ()
 
 			if (io && !io->active()) {
 				/* don't read inactive tracks */
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
+				// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
 				continue;
 			}
-			DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1, playback load = %2\n", tr->name(), tr->playback_buffer_load()));
+			// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1, playback load = %2\n", tr->name(), tr->playback_buffer_load()));
 			switch (tr->do_refill ()) {
 			case 0:
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
+				//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
 				break;
 
 			case 1:
