@@ -514,8 +514,7 @@ Session::butler_transport_work ()
 
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
-	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs\n"), g_get_monotonic_time() - before));
-	DEBUG_TRACE (DEBUG::Transport, X_(string_compose ("Frame %1\n", _transport_frame)));
+	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 trw = %3\n"), g_get_monotonic_time() - before, _transport_frame, _butler->transport_work_requested()));
 }
 
 void
