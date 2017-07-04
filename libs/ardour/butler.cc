@@ -229,6 +229,8 @@ Butler::thread_work ()
 		RouteList rl_with_auditioner = *rl;
 		rl_with_auditioner.push_back (_session.the_auditioner());
 
+		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested()));
+
 		for (i = rl_with_auditioner.begin(); !transport_work_requested() && should_run && i != rl_with_auditioner.end(); ++i) {
 
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
