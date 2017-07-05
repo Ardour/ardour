@@ -3189,6 +3189,12 @@ Editor::separate_region_from_selection ()
 	if (!selection->time.empty()) {
 
 		separate_regions_between (selection->time);
+		select_all_selectables_using_time_selection();
+		if(!Config->get_automation_follows_regions())
+		{
+			selection->clear_points ();
+		}
+		selection->clear_time ();
 
 	} else {
 
@@ -4063,6 +4069,16 @@ Editor::bounce_range_selection (bool replace, bool enable_processing)
 
 	if (in_command) {
 		commit_reversible_command ();
+
+		if(replace)
+		{
+			select_all_selectables_using_time_selection();
+			if(!Config->get_automation_follows_regions())
+			{
+				selection->clear_points ();
+			}
+		        selection->clear_time ();
+		}
 	}
 }
 
