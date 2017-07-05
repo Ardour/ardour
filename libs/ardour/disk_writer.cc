@@ -67,6 +67,12 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 DiskWriter::~DiskWriter ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskWriter %1 @ %2 deleted\n", _name, this));
+
+	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+		(*chan)->write_source.reset ();
+	}
 }
 
 framecnt_t
