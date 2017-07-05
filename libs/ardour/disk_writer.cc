@@ -1479,7 +1479,7 @@ DiskWriter::realtime_handle_transport_stopped ()
 bool
 DiskWriter::set_name (string const & str)
 {
-	string my_name = X_("writer:");
+	string my_name = X_("recorder:");
 	my_name += str;
 
 	if (_name != my_name) {
