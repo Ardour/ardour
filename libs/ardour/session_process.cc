@@ -428,12 +428,16 @@ Session::process_with_events (pframes_t nframes)
 		}
 	}
 
-	if (_transport_speed == 1.0) {
-		frames_moved = (framecnt_t) nframes;
+	if (locate_pending()) {
+		frames_moved = 0;
 	} else {
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
-		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		if (_transport_speed == 1.0) {
+			frames_moved = (framecnt_t) nframes;
+		} else {
+			interpolation.set_target_speed (_target_transport_speed);
+			interpolation.set_speed (_transport_speed);
+			frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		}
 	}
 
 	end_frame = _transport_frame + frames_moved;
@@ -482,7 +486,11 @@ Session::process_with_events (pframes_t nframes)
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
-			frames_moved = (framecnt_t) floor (_transport_speed * nframes); /* transport relative */
+			if (locate_pending()) {
+				frames_moved = 0;
+			} else {
+				frames_moved = (framecnt_t) floor (_transport_speed * nframes); /* transport relative */
+			}
 
 			/* running an event, position transport precisely to its time */
 			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
@@ -508,7 +516,7 @@ Session::process_with_events (pframes_t nframes)
 
 				if (frames_moved < 0) {
 					decrement_transport_position (-frames_moved);
-				} else {
+				} else if (frames_moved) {
 					increment_transport_position (frames_moved);
 				}
 
@@ -865,11 +873,17 @@ Session::follow_slave_silently (pframes_t nframes, float slave_speed)
 			_butler->summon ();
 		}
 
-		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
+		int32_t frames_moved;
+
+		if (locate_pending()) {
+			frames_moved = 0;
+		} else {
+			frames_moved = (int32_t) floor (_transport_speed * nframes);
+		}
 
 		if (frames_moved < 0) {
 			decrement_transport_position (-frames_moved);
-		} else {
+		} else if (frames_moved) {
 			increment_transport_position (frames_moved);
 		}
 
@@ -901,12 +915,16 @@ Session::process_without_events (pframes_t nframes)
 		return;
 	}
 
-	if (_transport_speed == 1.0) {
-		frames_moved = (framecnt_t) nframes;
+	if (locate_pending()) {
+		frames_moved = 0;
 	} else {
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
-		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		if (_transport_speed == 1.0) {
+			frames_moved = (framecnt_t) nframes;
+		} else {
+			interpolation.set_target_speed (_target_transport_speed);
+			interpolation.set_speed (_transport_speed);
+			frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		}
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {
@@ -937,7 +955,7 @@ Session::process_without_events (pframes_t nframes)
 
 	if (frames_moved < 0) {
 		decrement_transport_position (-frames_moved);
-	} else {
+	} else if (frames_moved) {
 		increment_transport_position (frames_moved);
 	}
 
