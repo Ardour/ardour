@@ -328,6 +328,7 @@ Session::Session (AudioEngine &eng,
 	, _mmc (0)
 	, _vca_manager (new VCAManager (*this))
 	, _selection (new CoreSelection (*this))
+	, _global_locate_pending (false)
 {
 	uint32_t sr = 0;
 
