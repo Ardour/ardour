@@ -192,6 +192,8 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 		(*i)->automation_run (start_frame, nframes);
 	}
 
+	_global_locate_pending = locate_pending ();
+
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
 		if (_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler) < 0) {
@@ -242,6 +244,8 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 		(*i)->automation_run (start_frame, nframes);
 	}
+
+	_global_locate_pending = locate_pending();
 
 	if (_process_graph) {
 		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);

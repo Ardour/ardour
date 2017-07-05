@@ -433,6 +433,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
 
+	bool global_locate_pending() const { return _global_locate_pending; }
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
 	bool declick_out_pending() const { return static_cast<bool>(transport_sub_state&(PendingDeclickOut)); }
 	bool transport_locked () const;
@@ -2095,6 +2096,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::weak_ptr<MidiTrack> current_midi_target;
 
 	CoreSelection* _selection;
+
+	bool _global_locate_pending;
 };
 
 
