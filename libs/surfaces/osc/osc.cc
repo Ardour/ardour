@@ -538,11 +538,13 @@ OSC::register_callbacks()
 		// controls for "special" strips
 		REGISTER_CALLBACK (serv, "/master/gain", "f", master_set_gain);
 		REGISTER_CALLBACK (serv, "/master/fader", "f", master_set_fader);
+		REGISTER_CALLBACK (serv, "/master/db_delta", "f", master_delta_gain);
 		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
 		REGISTER_CALLBACK (serv, "/master/trimdB", "f", master_set_trim);
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "f", monitor_set_fader);
+		REGISTER_CALLBACK (serv, "/monitor/db_delta", "f", monitor_delta_gain);
 		REGISTER_CALLBACK (serv, "/monitor/mute", "i", monitor_set_mute);
 		REGISTER_CALLBACK (serv, "/monitor/dim", "i", monitor_set_dim);
 		REGISTER_CALLBACK (serv, "/monitor/mono", "i", monitor_set_mono);
@@ -559,6 +561,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/polarity", "i", sel_phase);
 		REGISTER_CALLBACK (serv, "/select/gain", "f", sel_gain);
 		REGISTER_CALLBACK (serv, "/select/fader", "f", sel_fader);
+		REGISTER_CALLBACK (serv, "/select/db_delta", "f", sel_dB_delta);
 		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
@@ -2356,7 +2359,33 @@ OSC::master_set_gain (float dB)
 		if (dB < -192) {
 			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
 		} else {
-			s->gain_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
+			float abs = dB_to_coefficient (dB);
+			float top = s->gain_control()->upper();
+			if (abs > top) {
+				abs = top;
+			}
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+		}
+	}
+	return 0;
+}
+
+int
+OSC::master_delta_gain (float delta)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->master_out();
+	if (s) {
+		float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
+		if (dB < -192) {
+			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
+		} else {
+			float abs = dB_to_coefficient (dB);
+			float top = s->gain_control()->upper();
+			if (abs > top) {
+				abs = top;
+			}
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 		}
 	}
 	return 0;
@@ -2437,7 +2466,33 @@ OSC::monitor_set_gain (float dB)
 		if (dB < -192) {
 			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
 		} else {
-			s->gain_control()->set_value (dB_to_coefficient (dB), PBD::Controllable::NoGroup);
+			float abs = dB_to_coefficient (dB);
+			float top = s->gain_control()->upper();
+			if (abs > top) {
+				abs = top;
+			}
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+		}
+	}
+	return 0;
+}
+
+int
+OSC::monitor_delta_gain (float delta)
+{
+	if (!session) return -1;
+	boost::shared_ptr<Stripable> s = session->monitor_out();
+	if (s) {
+		float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
+		if (dB < -192) {
+			s->gain_control()->set_value (0.0, PBD::Controllable::NoGroup);
+		} else {
+			float abs = dB_to_coefficient (dB);
+			float top = s->gain_control()->upper();
+			if (abs > top) {
+				abs = top;
+			}
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 		}
 	}
 	return 0;
@@ -3334,12 +3389,47 @@ OSC::sel_gain (float val, lo_message msg)
 	}
 	if (s) {
 		float abs;
-		if (val < -192) {
-			abs = 0;
-		} else {
-			abs = dB_to_coefficient (val);
-		}
 		if (s->gain_control()) {
+			if (val < -192) {
+				abs = 0;
+			} else {
+				abs = dB_to_coefficient (val);
+				float top = s->gain_control()->upper();
+				if (abs > top) {
+					abs = top;
+				}
+			}
+			fake_touch (s->gain_control());
+			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
+			return 0;
+		}
+	}
+	return sel_fail ("gain", -193, get_address (msg));
+}
+
+int
+OSC::sel_dB_delta (float delta, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (s->gain_control()) {
+			float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
+			float abs;
+			if (dB < -192) {
+				abs = 0;
+			} else {
+				abs = dB_to_coefficient (dB);
+				float top = s->gain_control()->upper();
+				if (abs > top) {
+					abs = top;
+				}
+			}
 			fake_touch (s->gain_control());
 			s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 			return 0;
@@ -3381,6 +3471,10 @@ OSC::strip_db_delta (int ssid, float delta, lo_message msg)
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (db);
+			float top = s->gain_control()->upper();
+			if (abs > top) {
+				abs = top;
+			}
 		}
 		s->gain_control()->set_value (abs, PBD::Controllable::NoGroup);
 		return 0;

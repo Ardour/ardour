@@ -394,10 +394,12 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1(jump_by_seconds,f,);
 	PATH_CALLBACK1(master_set_gain,f,);
 	PATH_CALLBACK1(master_set_fader,f,);
+	PATH_CALLBACK1(master_delta_gain,f,);
 	PATH_CALLBACK1(master_set_trim,f,);
 	PATH_CALLBACK1(master_set_mute,i,);
 	PATH_CALLBACK1(monitor_set_gain,f,);
 	PATH_CALLBACK1(monitor_set_fader,f,);
+	PATH_CALLBACK1(monitor_delta_gain,f,);
 	PATH_CALLBACK1(monitor_set_mute,i,);
 	PATH_CALLBACK1(monitor_set_dim,i,);
 	PATH_CALLBACK1(monitor_set_mono,i,);
@@ -433,6 +435,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_phase,i);
 	PATH_CALLBACK1_MSG(sel_gain,f);
 	PATH_CALLBACK1_MSG(sel_fader,f);
+	PATH_CALLBACK1_MSG(sel_dB_delta,f);
 	PATH_CALLBACK1_MSG(sel_trim,f);
 	PATH_CALLBACK1_MSG(sel_pan_position,f);
 	PATH_CALLBACK1_MSG(sel_pan_width,f);
@@ -612,11 +615,13 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int jog_mode (float mode, lo_message msg);
 	int master_set_gain (float dB);
 	int master_set_fader (float position);
+	int master_delta_gain (float delta);
 	int master_set_trim (float dB);
 	int master_set_pan_stereo_position (float position, lo_message msg);
 	int master_set_mute (uint32_t state);
 	int monitor_set_gain (float dB);
 	int monitor_set_fader (float position);
+	int monitor_delta_gain (float delta);
 	int monitor_set_mute (uint32_t state);
 	int monitor_set_dim (uint32_t state);
 	int monitor_set_mono (uint32_t state);
@@ -631,6 +636,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_phase (uint32_t state, lo_message msg);
 	int sel_gain (float state, lo_message msg);
 	int sel_fader (float state, lo_message msg);
+	int sel_dB_delta (float delta, lo_message msg);
 	int sel_trim (float val, lo_message msg);
 	int sel_pan_position (float val, lo_message msg);
 	int sel_pan_width (float val, lo_message msg);
