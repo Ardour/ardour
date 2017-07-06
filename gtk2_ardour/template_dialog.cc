@@ -26,6 +26,7 @@
 
 #include "pbd/error.h"
 #include "pbd/i18n.h"
+#include "pbd/xml++.h"
 
 #include "ardour/template_utils.h"
 
@@ -186,6 +187,43 @@ TemplateManager::key_event (GdkEventKey* ev)
 	return false;
 }
 
+bool
+TemplateManager::adjust_plugin_paths (XMLNode* node, const string& name, const string& new_name) const
+{
+	bool adjusted = false;
+
+	const XMLNodeList& procs = node->children (X_("Processor"));
+	XMLNodeConstIterator pit;
+	for (pit = procs.begin(); pit != procs.end(); ++pit) {
+		XMLNode* lv2_node = (*pit)->child (X_("lv2"));
+		if (!lv2_node) {
+			continue;
+		}
+		string template_dir;
+
+		if (!lv2_node->get_property (X_("template-dir"), template_dir)) {
+			continue;
+		}
+
+		const int suffix_pos = template_dir.size() - name.size();
+		if (suffix_pos < 0) {
+			cerr << "Template name\"" << name << "\" longer than template-dir \"" << template_dir << "\", WTH?" << endl;
+			continue;
+		}
+
+		if (template_dir.compare (suffix_pos, template_dir.size(), name)) {
+			cerr << "Template name \"" << name << "\" no suffix of template-dir \"" << template_dir << "\"" << endl;
+			continue;
+		}
+
+		const string new_template_dir = template_dir.substr (0, suffix_pos) + new_name;
+		lv2_node->set_property (X_("template-dir"), new_template_dir);
+
+		adjusted = true;
+	}
+
+	return adjusted;
+}
 
 void SessionTemplateManager::init ()
 {
@@ -202,32 +240,59 @@ void RouteTemplateManager::init ()
 }
 
 void
-SessionTemplateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name)
+SessionTemplateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name_)
 {
-	const string path = item->get_value (_template_columns.path);
-	const string name = item->get_value (_template_columns.name);
+	const string old_path = item->get_value (_template_columns.path);
+	const string old_name = item->get_value (_template_columns.name);
+	const string new_name = string (new_name_);
 
-	const string old_filepath = Glib::build_filename (path, name+".template");
-	const string new_filepath = Glib::build_filename (path, new_name+".template");
+	const string old_file_old_path = Glib::build_filename (old_path, old_name+".template");
+
+	XMLTree tree;
+
+	if (!tree.read(old_file_old_path)) {
+		error << string_compose (_("Could not parse template file \"%1\"."), old_file_old_path) << endmsg;
+		return;
+	}
+	XMLNode* root = tree.root();
+
+	const XMLNode* const routes_node = root->child (X_("Routes"));
+	if (routes_node) {
+		const XMLNodeList& routes = routes_node->children (X_("Route"));
+		XMLNodeConstIterator rit;
+		for (rit = routes.begin(); rit != routes.end(); ++rit) {
+			adjust_plugin_paths (*rit, old_name, new_name);
+		}
+	}
+
+	const string new_file_old_path = Glib::build_filename (old_path, new_name+".template");
+
+	tree.set_filename (new_file_old_path);
+
+	if (!tree.write ()) {
+		error << string_compose(_("Could not write to new template file \"%1\"."), new_file_old_path);
+		return;
+	}
+
 	const string new_path = Glib::build_filename (user_template_directory (), new_name);
 
-	if (g_rename (old_filepath.c_str(), new_filepath.c_str()) != 0) {
-		error << string_compose (_("Renaming of the template file failed: %1"), strerror (errno)) << endmsg;
+	if (g_rename (old_path.c_str(), new_path.c_str()) != 0) {
+		error << string_compose (_("Could not rename template directory from \"%1\" to \"%2\": %3"),
+					 old_path, new_path, strerror (errno)) << endmsg;
+		g_unlink (new_file_old_path.c_str());
 		return;
 	}
 
-	if (g_rename (path.c_str(), new_path.c_str()) != 0) {
-		error << string_compose (_("Renaming of the template directory failed: %1"), strerror (errno)) << endmsg;
-		if (g_rename (new_filepath.c_str(), old_filepath.c_str()) != 0) {
-			error << string_compose (_("Couldn't even undo renaming of template file: %1. Please examine the situation using filemanager or terminal."),
-						 strerror (errno)) << endmsg;
-		}
-		return;
+	const string old_file_new_path = Glib::build_filename (new_path, old_name+".template");
+	if (g_unlink (old_file_new_path.c_str())) {
+		error << string_compose (X_("Could not delete old template file \"%1\": %2"),
+					 old_file_new_path, strerror (errno)) << endmsg;
 	}
 
-	item->set_value (_template_columns.name, string (new_name));
+	item->set_value (_template_columns.name, new_name);
 	item->set_value (_template_columns.path, new_path);
 }
+
 
 void
 SessionTemplateManager::delete_selected_template ()
@@ -262,12 +327,37 @@ SessionTemplateManager::delete_selected_template ()
 void
 RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name)
 {
+	const string name = item->get_value (_template_columns.name);
 	const string old_filepath = item->get_value (_template_columns.path);
 	const string new_filepath = Glib::build_filename (user_route_template_directory(), new_name+".template");
 
-	if (g_rename (old_filepath.c_str(), new_filepath.c_str()) != 0) {
-		error << string_compose (_("Renaming of the template file failed: %1"), strerror (errno)) << endmsg;
+	XMLTree tree;
+	if (!tree.read (old_filepath)) {
+		error << string_compose (_("Could not parse template file \"%1\"."), old_filepath) << endmsg;
 		return;
+	}
+	tree.root()->children().front()->set_property (X_("name"), new_name);
+
+	const bool adjusted = adjust_plugin_paths (tree.root(), name, string (new_name));
+
+	if (adjusted) {
+		const string old_state_dir = Glib::build_filename (user_route_template_directory(), name);
+		const string new_state_dir = Glib::build_filename (user_route_template_directory(), new_name);
+		if (g_rename (old_state_dir.c_str(), new_state_dir.c_str()) != 0) {
+			error << string_compose (_("Could not rename state dir \"%1\" to \"%22\": %3"), old_state_dir, new_state_dir, strerror (errno)) << endmsg;
+			return;
+		}
+	}
+
+	tree.set_filename (new_filepath);
+
+	if (!tree.write ()) {
+		error << string_compose(_("Could not write new template file \"%1\"."), new_filepath) << endmsg;
+		return;
+	}
+
+	if (g_unlink (old_filepath.c_str()) != 0) {
+		error << string_compose (_("Could not remove old template file \"%1\": %2"), old_filepath, strerror (errno)) << endmsg;
 	}
 
 	item->set_value (_template_columns.name, string (new_name));
