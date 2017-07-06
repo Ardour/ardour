@@ -162,12 +162,17 @@ ParameterDescriptor::update_steps()
 		lower = upper / 1000.f;
 	}
 	if (logarithmic && (upper <= lower || lower * upper <= 0)) {
+		/* log-scale params need upper > lower and both values need the same sign */
 		logarithmic = false;
 	}
 	if (rangesteps < 2) {
 		rangesteps = 0;
 	}
 	if (enumeration) {
+		/* enums need scale-points.
+		 * The GUI is more restrictive, a dropdown is displayed
+		 * IIF  scale_points.size() == (1 + upper - lower)
+		 */
 		if (!scale_points || scale_points->empty ()) {
 			enumeration = false;
 		}
@@ -177,6 +182,13 @@ ParameterDescriptor::update_steps()
 			integer_step = false;
 		}
 	}
+
+	/* upper == lower does not make any sense */
+	if (lower == upper) {
+		upper = lower + 0.01; // add some arbitrary value
+	}
+
+	/* set steps */
 
 	if (unit == ParameterDescriptor::MIDI_NOTE) {
 		step      = smallstep = 1;  // semitone
@@ -190,43 +202,28 @@ ParameterDescriptor::update_steps()
 		smallstep = step;
 	} else if (rangesteps > 1) {
 		const float delta = upper - lower;
-
-		step = smallstep = (delta / (rangesteps - 1)); // XXX
-		largestep = std::min ((delta / 5.0f), 10.f * smallstep); // XXX
-
 		if (logarithmic) {
-			smallstep = smallstep / logf (rangesteps); // XXX
-			step      = step      / logf (rangesteps);
-			largestep = largestep / logf (rangesteps);
+			smallstep = step = (powf (delta, 1.f  / (float)rangesteps) - 1.f) * lower;
+			largestep = (powf (delta, std::max (0.5f, 10.f / (float)rangesteps)) - 1.f) * lower;
 		} else if (integer_step) {
-			smallstep = 1.0;
-			step      = std::max(1.f, rintf (rangesteps));
-			largestep = std::max(1.f, rintf (largestep));
+			smallstep = step = 1.0;
+			largestep = std::max(1.f, rintf (delta / (rangesteps - 1)));
+		} else {
+			step = smallstep = delta / (rangesteps - 1);
+			largestep = std::min ((delta / 4.0f), 10.f * smallstep); // XXX
 		}
 	} else {
 		const float delta = upper - lower;
-
-		/* 30 happens to be the total number of steps for a fader with default
-		   max gain of 2.0 (6 dB), so we use 30 here too for consistency. */
-		step      = smallstep = (delta / 300.0f);
-		largestep = (delta / 30.0f);
-
+		/* 30 steps between min/max (300 for fine-grained) */
 		if (logarithmic) {
-			/* Steps are linear, but we map them with pow like values (in
-			   internal_to_interface).  Thus, they are applied exponentially,
-			   which means too few steps.  So, divide to get roughly the
-			   desired number of steps (30).  This is not mathematically
-			   precise but seems to be about right for the controls I tried.
-			   If you're reading this, you've probably found a case where that
-			   isn't true, and somebody needs to sit down with a piece of paper
-			   and actually do the math. */
-			smallstep = smallstep / logf(30.0f);
-			step      = step      / logf(30.0f);
-			largestep = largestep / logf(30.0f);
+			smallstep = step = (powf (delta, 1.f / 300.f) - 1.f) * lower;
+			largestep = (powf (delta, 1.f / 30.f) - 1.f) * lower;
 		} else if (integer_step) {
-			smallstep = 1.0;
-			step      = std::max(1.f, rintf (step));
-			largestep = std::max(1.f, rintf (largestep));
+			smallstep = step = 1.0;
+			largestep = std::max(1.f, rintf (delta / 30.f));
+		} else {
+			step      = smallstep = (delta / 300.0f);
+			largestep = (delta / 30.0f);
 		}
 	}
 }

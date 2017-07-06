@@ -342,27 +342,22 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 			desc.upper = 1.0;
 		}
 
-		if (prop.flags & kVstParameterUsesIntStep) {
+		const float range = desc.upper - desc.lower;
 
+		if (prop.flags & kVstParameterUsesIntStep && prop.stepInteger < range) {
 			desc.step = prop.stepInteger;
 			desc.smallstep = prop.stepInteger;
 			desc.largestep = prop.stepInteger;
 			desc.integer_step = true;
-
-		} else if (prop.flags & kVstParameterUsesFloatStep) {
-
+			desc.rangesteps = 1 + ceilf (range / desc.step);
+		} else if (prop.flags & kVstParameterUsesFloatStep && prop.stepFloat < range) {
 			desc.step = prop.stepFloat;
 			desc.smallstep = prop.smallStepFloat;
 			desc.largestep = prop.largeStepFloat;
-			// desc.rangesteps = (desc.upper - desc.lower) / prop.smallStepFloat; // XXX
-
+			desc.rangesteps = 1 + ceilf (range / desc.step);
 		} else {
-
-			float range = desc.upper - desc.lower;
-
-			desc.step = range / 100.0f;
-			desc.smallstep = desc.step / 2.0f;
-			desc.largestep = desc.step * 10.0f;
+			desc.smallstep = desc.step = range / 300.0f;
+			desc.largestep =  range / 30.0f;
 		}
 
 		if (strlen(prop.label) == 0) {
@@ -385,10 +380,15 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		desc.label = Glib::locale_to_utf8 (label);
 		desc.lower = 0.0f;
 		desc.upper = 1.0f;
-		desc.step = 0.01f;
-		desc.smallstep = 0.005f;
-		desc.largestep = 0.1f;
+		desc.smallstep = desc.step = 1.f / 300.f;
+		desc.largestep = 1.f / 30.f;
 	}
+
+	/* TODO we should really call
+	 *   desc.update_steps ()
+	 * instead of manually assigning steps. Yet, VST prop is (again)
+	 * the odd one out compared to other plugin formats.
+	 */
 
 	if (_parameter_defaults.find (which) == _parameter_defaults.end ()) {
 		_parameter_defaults[which] = get_parameter (which);
