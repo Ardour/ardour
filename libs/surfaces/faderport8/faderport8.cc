@@ -204,7 +204,6 @@ FaderPort8::stop ()
 	DEBUG_TRACE (DEBUG::FaderPort8, "BaseUI::quit ()\n");
 	BaseUI::quit ();
 	close (); // drop references, disconnect from session signals
-	return 0;
 }
 
 void
