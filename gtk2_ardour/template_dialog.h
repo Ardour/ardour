@@ -32,6 +32,8 @@ namespace ARDOUR {
 	struct TemplateInfo;
 }
 
+class XMLNode;
+
 class TemplateDialog : public ArdourDialog
 {
 public:
@@ -59,6 +61,8 @@ protected:
 
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
 	virtual void delete_selected_template () = 0;
+
+	bool adjust_plugin_paths (XMLNode* node, const std::string& name, const std::string& new_name) const;
 
 	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
 		SessionTemplateColumns () {
