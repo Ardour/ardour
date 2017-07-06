@@ -99,7 +99,7 @@ public:
 	bool twolinetext () const { return _two_line_text; }
 	bool auto_pluginui () const { return _auto_pluginui; }
 
-	int stop ();
+	void stop ();
 	void do_request (FaderPort8Request*);
 	void thread_init ();
 

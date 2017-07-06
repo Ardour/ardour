@@ -147,18 +147,20 @@ FaderPort8::FaderPort8 (Session& s)
 
 FaderPort8::~FaderPort8 ()
 {
-	cerr << "~FP8\n";
-	disconnected ();
-	close ();
+	/* this will be called from the main UI thread. during Session::destroy().
+	 * There can be concurrent activity from BaseUI::main_thread -> AsyncMIDIPort
+	 * -> MIDI::Parser::signal -> ... to any of the midi_connections
+	 *
+	 * stop event loop early and join thread */
+	stop ();
 
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
-		_input_port->disconnect_all ();
-		_input_port->drain (5000, 50000);
-		_input_port->clear ();
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
 	}
+
+	disconnected (); // zero faders, turn lights off, clear strips
 
 	if (_output_port) {
 		_output_port->drain (10000,  250000); /* check every 10 msecs, wait up to 1/4 second for the port to drain */
@@ -168,10 +170,6 @@ FaderPort8::~FaderPort8 ()
 	}
 
 	tear_down_gui ();
-
-	/* stop event loop */
-	DEBUG_TRACE (DEBUG::FaderPort8, "BaseUI::quit ()\n");
-	BaseUI::quit ();
 }
 
 /* ****************************************************************************
@@ -196,13 +194,16 @@ FaderPort8::do_request (FaderPort8Request* req)
 		call_slot (MISSING_INVALIDATOR, req->the_slot);
 	} else if (req->type == Quit) {
 		stop ();
+		disconnected ();
 	}
 }
 
-int
+void
 FaderPort8::stop ()
 {
+	DEBUG_TRACE (DEBUG::FaderPort8, "BaseUI::quit ()\n");
 	BaseUI::quit ();
+	close (); // drop references, disconnect from session signals
 	return 0;
 }
 
@@ -277,8 +278,7 @@ FaderPort8::set_active (bool yn)
 		BaseUI::run ();
 		connect_session_signals ();
 	} else {
-		BaseUI::quit ();
-		close ();
+		stop ();
 	}
 
 	ControlProtocol::set_active (yn);
