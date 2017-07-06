@@ -25,6 +25,7 @@
 #include <gtkmm/treeiter.h>
 
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
@@ -307,18 +308,7 @@ SessionTemplateManager::delete_selected_template ()
 		return;
 	}
 
-	const string path = it->get_value (_template_columns.path);
-	const string name = it->get_value (_template_columns.name);
-	const string file_path = Glib::build_filename (path, name+".template");
-
-	if (g_unlink (file_path.c_str()) != 0) {
-		error << string_compose(_("Could not delete template file \"%1\": %2"), file_path, strerror (errno)) << endmsg;
-		return;
-	}
-
-	if (g_rmdir (path.c_str()) != 0) {
-		error << string_compose(_("Could not delete template directory \"%1\": %2"), path, strerror (errno)) << endmsg;
-	}
+	PBD::remove_directory (it->get_value (_template_columns.path));
 
 	_template_model->erase (it);
 	row_selection_changed ();
@@ -383,6 +373,7 @@ RouteTemplateManager::delete_selected_template ()
 		error << string_compose(_("Could not delete template file \"%1\": %2"), file_path, strerror (errno)) << endmsg;
 		return;
 	}
+	PBD::remove_directory (Glib::build_filename (user_route_template_directory (), it->get_value (_template_columns.name)));
 
 	_template_model->erase (it);
 	row_selection_changed ();
