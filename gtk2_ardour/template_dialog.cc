@@ -317,7 +317,7 @@ SessionTemplateManager::delete_selected_template ()
 void
 RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name)
 {
-	const string name = item->get_value (_template_columns.name);
+	const string old_name = item->get_value (_template_columns.name);
 	const string old_filepath = item->get_value (_template_columns.path);
 	const string new_filepath = Glib::build_filename (user_route_template_directory(), new_name+".template");
 
@@ -328,11 +328,12 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 	}
 	tree.root()->children().front()->set_property (X_("name"), new_name);
 
-	const bool adjusted = adjust_plugin_paths (tree.root(), name, string (new_name));
+	const bool adjusted = adjust_plugin_paths (tree.root(), old_name, string (new_name));
+
+	const string old_state_dir = Glib::build_filename (user_route_template_directory(), old_name);
+	const string new_state_dir = Glib::build_filename (user_route_template_directory(), new_name);
 
 	if (adjusted) {
-		const string old_state_dir = Glib::build_filename (user_route_template_directory(), name);
-		const string new_state_dir = Glib::build_filename (user_route_template_directory(), new_name);
 		if (g_rename (old_state_dir.c_str(), new_state_dir.c_str()) != 0) {
 			error << string_compose (_("Could not rename state dir \"%1\" to \"%22\": %3"), old_state_dir, new_state_dir, strerror (errno)) << endmsg;
 			return;
@@ -343,6 +344,9 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 
 	if (!tree.write ()) {
 		error << string_compose(_("Could not write new template file \"%1\"."), new_filepath) << endmsg;
+		if (adjusted) {
+			g_rename (new_state_dir.c_str(), old_state_dir.c_str());
+		}
 		return;
 	}
 
