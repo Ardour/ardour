@@ -1865,23 +1865,11 @@ PluginPinWidget::Control::Control (boost::shared_ptr<AutomationControl> c, strin
 	_slider.show ();
 
 	const ARDOUR::ParameterDescriptor& desc = c->desc ();
-	double const lo = c->internal_to_interface (desc.lower);
-	double const up = c->internal_to_interface (desc.upper);
-	double const normal = c->internal_to_interface (desc.normal);
-	double smallstep = desc.smallstep;
-	double largestep = desc.largestep;
-
-	if (smallstep == 0.0) {
-		smallstep = up / 1000.;
-	} else {
-		smallstep = c->internal_to_interface (desc.lower + smallstep);
-	}
-
-	if (largestep == 0.0) {
-		largestep = up / 40.;
-	} else {
-		largestep = c->internal_to_interface (desc.lower + largestep);
-	}
+	double const lo        = c->internal_to_interface (desc.lower);
+	double const up        = c->internal_to_interface (desc.upper);
+	double const normal    = c->internal_to_interface (desc.normal);
+	double const smallstep = c->internal_to_interface (desc.lower + desc.smallstep);
+	double const largestep = c->internal_to_interface (desc.lower + desc.largestep);
 
 	_adjustment.set_lower (lo);
 	_adjustment.set_upper (up);
