@@ -217,33 +217,6 @@ TemplateManager::key_event (GdkEventKey* ev)
 	return false;
 }
 
-static string get_tmp_dir ()
-{
-	#ifdef PLATFORM_WINDOWS
-	char tmp[256] = "C:\\TEMP\\";
-	GetTempPath (sizeof (tmp), tmp);
-#else
-	char const* tmp = getenv("TMPDIR");
-	if (!tmp) {
-		tmp = "/tmp/";
-	}
-#endif
-	if ((strlen (tmp) + 21) > 1024) {
-		return string ();
-	}
-
-	char tmptpl[1024];
-	strcpy (tmptpl, tmp);
-	strcat (tmptpl, "ardour_template-XXXXXX");
-	char*  tmpdir = g_mkdtemp (tmptpl);
-
-	if (!tmpdir) {
-		return string ();
-	}
-
-	return string (tmpdir);
-}
-
 static
 bool accept_all_files (string const &, void *)
 {
@@ -259,6 +232,17 @@ static void _set_progress (Progress* p, size_t n, size_t t)
 void
 TemplateManager::export_all_templates ()
 {
+	GError* err = NULL;
+	char* td = g_dir_make_tmp ("ardour-templates-XXXXXX", &err);
+
+	if (!td) {
+		error << string_compose(_("Could not make tmpdir: %1"), err->message) << endmsg;
+		return;
+	}
+	const string tmpdir (td);
+	g_free (td);
+	g_clear_error (&err);
+
 	FileChooserDialog dialog(_("Save Exported Template Archive"), FILE_CHOOSER_ACTION_SAVE);
 	dialog.set_filename (X_("templates.tar.xz"));
 
@@ -275,8 +259,6 @@ TemplateManager::export_all_templates ()
 	if (result != RESPONSE_OK || !dialog.get_filename().length()) {
 		return;
 	}
-
-	const string tmpdir = get_tmp_dir();
 
 	PBD::copy_recurse (templates_dir (), tmpdir);
 
