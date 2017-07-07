@@ -24,14 +24,17 @@
 #include <vector>
 
 #include <gtkmm/liststore.h>
+#include <gtkmm/progressbar.h>
 #include <gtkmm/treeview.h>
 
 #include "ardour_dialog.h"
+#include "progress_reporter.h"
 
 namespace ARDOUR {
 	struct TemplateInfo;
 }
 
+class XMLTree;
 class XMLNode;
 
 class TemplateDialog : public ArdourDialog
@@ -41,7 +44,8 @@ public:
 	~TemplateDialog () {}
 };
 
-class TemplateManager : public Gtk::HBox
+class TemplateManager : public Gtk::HBox,
+			public ProgressReporter
 {
 public:
 	virtual ~TemplateManager () {}
@@ -61,6 +65,13 @@ protected:
 
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
 	virtual void delete_selected_template () = 0;
+
+	void export_all_templates ();
+	void import_template_set ();
+
+	virtual std::string templates_dir () const = 0;
+
+	virtual bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const = 0;
 
 	bool adjust_plugin_paths (XMLNode* node, const std::string& name, const std::string& new_name) const;
 
@@ -83,6 +94,14 @@ protected:
 
 	Gtk::Button _remove_button;
 	Gtk::Button _rename_button;
+
+	Gtk::Button _export_all_templates_button;
+	Gtk::Button _import_template_set_button;
+
+	Gtk::ProgressBar _progress_bar;
+	std::string _current_action;
+
+	void update_progress_gui (float p);
 };
 
 class SessionTemplateManager : public TemplateManager
@@ -96,6 +115,10 @@ public:
 private:
 	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
 	void delete_selected_template ();
+
+	std::string templates_dir () const;
+
+	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
 
 
@@ -110,6 +133,10 @@ public:
 private:
 	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
 	void delete_selected_template ();
+
+	std::string templates_dir () const;
+
+	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
 
 
