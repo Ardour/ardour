@@ -152,7 +152,8 @@ ControlList&
 ControlList::operator= (const ControlList& other)
 {
 	if (this != &other) {
-		_frozen = 0;
+		/* list should be frozen before assignment */
+		assert (_frozen > 0);
 		_changed_when_thawed = false;
 		_sort_pending = false;
 
@@ -166,7 +167,6 @@ ControlList::operator= (const ControlList& other)
 		_desc = other._desc;
 		_interpolation = other._interpolation;
 
-		// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 		copy_events (other);
 	}
 

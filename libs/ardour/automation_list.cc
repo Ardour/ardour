@@ -167,13 +167,14 @@ AutomationList&
 AutomationList::operator= (const AutomationList& other)
 {
 	if (this != &other) {
-
+		ControlList::freeze ();
+		/* ControlList::operator= calls copy_events() which calls
+		 * mark_dirty() and maybe_signal_changed()
+		 */
 		ControlList::operator= (other);
 		_state = other._state;
 		_touching = other._touching;
-
-		mark_dirty ();
-		maybe_signal_changed ();
+		ControlList::thaw ();
 	}
 
 	return *this;
