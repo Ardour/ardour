@@ -189,7 +189,7 @@ class TimeAxisView : public virtual AxisView
 			    const int32_t sub_num) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
-	virtual void set_selected_points (PointSelection&) {}
+	virtual void set_selected_points (PointSelection&);
 
 	virtual void fade_range (TimeSelection&) {}
 

@@ -1345,9 +1345,7 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 void
 RouteTimeAxisView::set_selected_points (PointSelection& points)
 {
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		(*i)->set_selected_points (points);
-	}
+	StripableTimeAxisView::set_selected_points (points);
 	AudioStreamView* asv = dynamic_cast<AudioStreamView*>(_view);
 	if (asv) {
 		asv->set_selected_points (points);
@@ -1382,12 +1380,7 @@ RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top
 	}
 
 	/* pick up visible automation tracks */
-
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		if (!(*i)->hidden()) {
-			(*i)->get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
-		}
-	}
+	StripableTimeAxisView::get_selectables (start_adjusted, end_adjusted, top, bot, results, within);
 }
 
 void
@@ -1396,14 +1389,7 @@ RouteTimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& 
 	if (_view) {
 		_view->get_inverted_selectables (sel, results);
 	}
-
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-		if (!(*i)->hidden()) {
-			(*i)->get_inverted_selectables (sel, results);
-		}
-	}
-
-	return;
+	StripableTimeAxisView::get_inverted_selectables (sel, results);
 }
 
 RouteGroup*

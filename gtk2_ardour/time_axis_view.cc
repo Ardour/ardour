@@ -1017,15 +1017,31 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
  *  @param result Filled in with selectable things.
  */
 void
-TimeAxisView::get_selectables (framepos_t /*start*/, framepos_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/, bool /*within*/)
+TimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
-	return;
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->get_selectables (start, end, top, bot, results, within);
+		}
+	}
 }
 
 void
-TimeAxisView::get_inverted_selectables (Selection& /*sel*/, list<Selectable*>& /*result*/)
+TimeAxisView::set_selected_points (PointSelection& points)
 {
-	return;
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->set_selected_points (points);
+	}
+}
+
+void
+TimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& results)
+{
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->get_inverted_selectables (sel, results);
+		}
+	}
 }
 
 void
