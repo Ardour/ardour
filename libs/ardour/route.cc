@@ -1236,6 +1236,7 @@ Route::clear_processors (Placement p)
 		_session.set_deletion_in_progress();
 	}
 
+	ProcessorList old_list = _processors;
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -1284,6 +1285,8 @@ Route::clear_processors (Placement p)
 		_processors = new_list;
 		configure_processors_unlocked (&err, &lm); // this can't fail
 	}
+	/* drop references w/o process-lock (I/O procs may re-take it in ~IO() */
+	old_list.clear ();
 
 	processor_max_streams.reset();
 	_have_internal_generator = false;
@@ -2910,6 +2913,7 @@ Route::set_processor_state (const XMLNode& node)
 		}
 	}
 
+	ProcessorList old_list = _processors; // keep a copy
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lm (_processor_lock);
@@ -2939,6 +2943,8 @@ Route::set_processor_state (const XMLNode& node)
 			}
 		}
 	}
+	/* drop references w/o process-lock (I/O procs may re-take it in ~IO() */
+	old_list.clear ();
 
 	reset_instrument_info ();
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
