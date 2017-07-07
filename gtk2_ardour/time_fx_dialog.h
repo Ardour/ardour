@@ -78,6 +78,11 @@ public:
 		Gtk::Dialog::on_response (response_id);
 	}
 
+	void hide () {
+		regions.clear ();
+		ArdourDialog::hide ();
+	}
+
 private:
 	ARDOUR::framecnt_t      original_length;
 	Gtk::Adjustment pitch_octave_adjustment;
