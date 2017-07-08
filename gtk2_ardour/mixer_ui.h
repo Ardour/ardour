@@ -129,6 +129,7 @@ public:
 
 protected:
 	void set_axis_targets_for_operation ();
+	ARDOUR::AutomationControlSet selected_gaincontrols ();
 
 private:
 	Mixer_UI ();

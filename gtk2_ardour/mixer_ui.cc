@@ -2983,29 +2983,44 @@ Mixer_UI::rec_enable_action ()
 	control_action (&Stripable::rec_enable_control);
 }
 
-void
-Mixer_UI::step_gain_up_action ()
+AutomationControlSet
+Mixer_UI::selected_gaincontrols ()
 {
 	set_axis_targets_for_operation ();
-
+	AutomationControlSet rv;
 	BOOST_FOREACH(AxisView* r, _axis_targets) {
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
-			ms->step_gain_up ();
+			boost::shared_ptr<GainControl> ac (ms->route()->gain_control());
+			ControlList cl (ac->grouped_controls());
+			for (ControlList::const_iterator c = cl.begin(); c != cl.end (); ++c) {
+				rv.insert (*c);
+			}
+			rv.insert (ac);
 		}
+	}
+	return rv;
+}
+
+void
+Mixer_UI::step_gain_up_action ()
+{
+	AutomationControlSet acs = selected_gaincontrols ();
+	for (AutomationControlSet::const_iterator i = acs.begin(); i != acs.end (); ++i) {
+		boost::shared_ptr<GainControl> ac = boost::dynamic_pointer_cast<GainControl> (*i);
+		assert (ac);
+		ac->set_value (dB_to_coefficient (accurate_coefficient_to_dB (ac->get_value()) + 0.1), Controllable::NoGroup);
 	}
 }
 
 void
 Mixer_UI::step_gain_down_action ()
 {
-	set_axis_targets_for_operation ();
-
-	BOOST_FOREACH(AxisView* r, _axis_targets) {
-		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
-		if (ms) {
-			ms->step_gain_down ();
-		}
+	AutomationControlSet acs = selected_gaincontrols ();
+	for (AutomationControlSet::const_iterator i = acs.begin(); i != acs.end (); ++i) {
+		boost::shared_ptr<GainControl> ac = boost::dynamic_pointer_cast<GainControl> (*i);
+		assert (ac);
+		ac->set_value (dB_to_coefficient (accurate_coefficient_to_dB (ac->get_value()) - 0.1), Controllable::NoGroup);
 	}
 }
 
