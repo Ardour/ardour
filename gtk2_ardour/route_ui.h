@@ -160,11 +160,6 @@ public:
 	void edit_input_configuration ();
 	void edit_output_configuration ();
 
-	void step_gain_up ();
-	void step_gain_down ();
-	void page_gain_up ();
-	void page_gain_down ();
-
 	void build_sends_menu ();
 	void set_sends_gain_from_track ();
 	void set_sends_gain_to_zero ();

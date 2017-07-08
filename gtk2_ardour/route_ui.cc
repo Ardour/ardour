@@ -2012,30 +2012,6 @@ RouteUI::parameter_changed (string const & p)
 }
 
 void
-RouteUI::step_gain_up ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), Controllable::UseGroup);
-}
-
-void
-RouteUI::page_gain_up ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), Controllable::UseGroup);
-}
-
-void
-RouteUI::step_gain_down ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), Controllable::UseGroup);
-}
-
-void
-RouteUI::page_gain_down ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), Controllable::UseGroup);
-}
-
-void
 RouteUI::setup_invert_buttons ()
 {
 	/* remove old invert buttons */
