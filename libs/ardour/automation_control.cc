@@ -136,6 +136,16 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 }
 
+ControlList
+AutomationControl::grouped_controls () const
+{
+	if (_group && _group->use_me (PBD::Controllable::UseGroup)) {
+		return _group->controls ();
+	} else {
+		return ControlList ();
+	}
+}
+
 /** Set the value and do the right thing based on automation state
  *  (e.g. record if necessary, etc.)
  *  @param value `user' value

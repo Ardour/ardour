@@ -119,6 +119,8 @@ public:
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
+	ControlList grouped_controls () const;
+
 protected:
 	ARDOUR::Session& _session;
 	boost::shared_ptr<ControlGroup> _group;

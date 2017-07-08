@@ -23,6 +23,7 @@
 #include <istream>
 #include <vector>
 #include <map>
+#include <set>
 #include <boost/shared_ptr.hpp>
 #include <sys/types.h>
 #include <stdint.h>
@@ -570,6 +571,7 @@ namespace ARDOUR {
 	typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
 	typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
 	typedef std::list<boost::shared_ptr<SlavableAutomationControl> > SlavableControlList;
+	typedef std::set <boost::shared_ptr<AutomationControl> > AutomationControlSet;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAList;
 
