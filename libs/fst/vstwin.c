@@ -569,7 +569,7 @@ fst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	}
 
 	fst->handle = fhandle;
-	fst->plugin->user = userptr;
+	fst->plugin->ptr1 = userptr;
 
 	if (fst->plugin->magic != kEffectMagic) {
 		fst_error ("fst_instantiate: %s is not a vst plugin\n", fhandle->name);

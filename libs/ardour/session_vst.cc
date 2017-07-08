@@ -69,8 +69,8 @@ intptr_t Session::vst_callback (
 	VstTimeInfo* timeinfo;
 	int32_t newflags = 0;
 
-	if (effect && effect->user) {
-		plug = (VSTPlugin *) (effect->user);
+	if (effect && effect->ptr1) {
+		plug = (VSTPlugin *) (effect->ptr1);
 		session = &plug->session();
 		timeinfo = plug->timeinfo ();
 		DEBUG_TRACE (PBD::DEBUG::VSTCallbacks, string_compose ("am callback 0x%1%2, opcode = %3%4, plugin = \"%5\"\n",

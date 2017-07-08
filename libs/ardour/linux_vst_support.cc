@@ -297,7 +297,7 @@ vstfx_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	}
 
 	vstfx->handle = fhandle;
-	vstfx->plugin->user = userptr;
+	vstfx->plugin->ptr1 = userptr;
 
 	if (vstfx->plugin->magic != kEffectMagic)
 	{

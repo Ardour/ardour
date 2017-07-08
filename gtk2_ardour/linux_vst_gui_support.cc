@@ -207,7 +207,7 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 				if (width != vstfx->width || height != vstfx->height) {
 					vstfx->width = width;
 					vstfx->height = height;
-					ARDOUR::VSTPlugin* plug = (ARDOUR::VSTPlugin *)(vstfx->plugin->user);
+					ARDOUR::VSTPlugin* plug = (ARDOUR::VSTPlugin *)(vstfx->plugin->ptr1);
 					plug->VSTSizeWindow (); /* EMIT SIGNAL */
 				}
 

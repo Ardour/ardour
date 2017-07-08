@@ -79,8 +79,8 @@ void
 VSTPlugin::open_plugin ()
 {
 	_plugin = _state->plugin;
-	assert (_plugin->user == this); // should have been set by {mac_vst|fst|lxvst}_instantiate
-	_plugin->user = this;
+	assert (_plugin->ptr1 == this); // should have been set by {mac_vst|fst|lxvst}_instantiate
+	_plugin->ptr1 = this;
 	_state->plugin->dispatcher (_plugin, effOpen, 0, 0, 0, 0);
 	_state->vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, 0, 0);
 }

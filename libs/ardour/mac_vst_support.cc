@@ -194,7 +194,7 @@ mac_vst_instantiate (VSTHandle* fhandle, audioMasterCallback amc, void* userptr)
 	}
 
 	mac_vst->handle = fhandle;
-	mac_vst->plugin->user = userptr;
+	mac_vst->plugin->ptr1 = userptr;
 
 	if (mac_vst->plugin->magic != kEffectMagic)
 	{

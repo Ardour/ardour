@@ -126,7 +126,7 @@ MacVSTPluginInfo::get_presets (bool user_only) const
 		Session::vst_current_loading_id = atoi (unique_id);
 		AEffect* plugin = handle->main_entry (Session::vst_callback);
 		Session::vst_current_loading_id = 0;
-		plugin->user = NULL;
+		plugin->ptr1 = NULL;
 
 		plugin->dispatcher (plugin, effOpen, 0, 0, 0, 0); // :(
 		int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0);
