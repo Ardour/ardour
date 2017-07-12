@@ -76,6 +76,26 @@ RouteProcessorSelection::clear_routes ()
 	}
 }
 
+std::list<AxisView*>
+RouteProcessorSelection::add_grouped_tracks (AxisView* r) const
+{
+	std::list<AxisView*> rv;
+
+	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route>(r->stripable());
+	if (route) {
+		ARDOUR::RouteGroup* rg = route->route_group ();
+		if (rg && rg->is_active() && rg->is_select ()) {
+
+			boost::shared_ptr<RouteList> rl = rg->route_list ();
+			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
+				AxisView* av = avp.axis_view_by_stripable (*i);
+				rv.push_back (av);
+			}
+		}
+	}
+	return rv;
+}
+
 void
 RouteProcessorSelection::presentation_info_changed (PropertyChange const & what_changed)
 {
@@ -110,32 +130,48 @@ RouteProcessorSelection::presentation_info_changed (PropertyChange const & what_
 }
 
 void
-RouteProcessorSelection::add (AxisView* r)
+RouteProcessorSelection::add (AxisView* r, bool with_groups)
 {
 	if (!shp.session()) {
 		return;
 	}
 
-	if (axes.insert (r).second) {
+	std::list<AxisView*> avl;
+	if (with_groups) {
+		avl= add_grouped_tracks (r);
+	}
+	avl.push_back (r);
 
-		shp.session()->selection().add (r->stripable(), boost::shared_ptr<AutomationControl>());
-
-		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
-
-		if (ms) {
-			ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1), gui_context());
+	PresentationInfo::ChangeSuspender cs;
+	for (std::list<AxisView*>::const_iterator i = avl.begin (); i != avl.end (); ++i) {
+		if (axes.insert (*i).second) {
+			shp.session()->selection().add ((*i)->stripable(), boost::shared_ptr<AutomationControl>());
+			MixerStrip* ms = dynamic_cast<MixerStrip*> (*i);
+			if (ms) {
+				ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1, false), gui_context());
+			}
 		}
 	}
 }
 
 void
-RouteProcessorSelection::remove (AxisView* r)
+RouteProcessorSelection::remove (AxisView* r, bool with_groups)
 {
 	if (!shp.session()) {
 		return;
 	}
 	ENSURE_GUI_THREAD (*this, &RouteProcessorSelection::remove, r);
-	shp.session()->selection().remove (r->stripable(), boost::shared_ptr<AutomationControl>());
+
+	std::list<AxisView*> avl;
+	if (with_groups) {
+		avl= add_grouped_tracks (r);
+	}
+	avl.push_back (r);
+
+	PresentationInfo::ChangeSuspender cs;
+	for (std::list<AxisView*>::const_iterator i = avl.begin (); i != avl.end (); ++i) {
+		shp.session()->selection().remove ((*i)->stripable(), boost::shared_ptr<AutomationControl>());
+	}
 }
 
 void
@@ -144,7 +180,8 @@ RouteProcessorSelection::set (AxisView* r)
 	if (!shp.session()) {
 		return;
 	}
-	shp.session()->selection().set (r->stripable(), boost::shared_ptr<AutomationControl>());
+	shp.session()->selection().clear_stripables ();
+	add (r, true);
 }
 
 bool

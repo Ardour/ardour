@@ -897,14 +897,14 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		if (_selection.selected (strip)) {
 			/* primary-click: toggle selection state of strip */
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				_selection.remove (strip);
+				_selection.remove (strip, true);
 			} else if (_selection.axes.size() > 1) {
 				/* de-select others */
 				_selection.set (strip);
 			}
 		} else {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				_selection.add (strip);
+				_selection.add (strip, true);
 			} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::RangeSelectModifier)) {
 
 				/* extend selection */
@@ -952,7 +952,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 				if (found_another) {
 					PresentationInfo::ChangeSuspender cs;
 					for (vector<MixerStrip*>::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-						_selection.add (*i);
+						_selection.add (*i, true);
 					}
 				} else {
 					_selection.set (strip);  //user wants to start a range selection, but there aren't any others selected yet
