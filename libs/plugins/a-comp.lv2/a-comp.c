@@ -286,7 +286,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(*acomp->makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const const float tau = acomp->tau;
+	const float tau = acomp->tau;
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
@@ -418,7 +418,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(*acomp->makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const const float tau = acomp->tau;
+	const float tau = acomp->tau;
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
