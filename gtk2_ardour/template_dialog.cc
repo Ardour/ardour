@@ -265,7 +265,30 @@ TemplateManager::export_all_templates ()
 	int result = dialog.run ();
 
 	if (result != RESPONSE_OK || !dialog.get_filename().length()) {
+		PBD::remove_directory (tmpdir);
 		return;
+	}
+
+	string filename = dialog.get_filename ();
+	if (filename.compare (filename.size () - 7, 7, ".tar.xz")) {
+		filename += ".tar.xz";
+	}
+
+	if (g_file_test (filename.c_str(), G_FILE_TEST_EXISTS)) {
+		ArdourDialog dlg (_("File exists"), true);
+		Label msg (string_compose (_("The file %1 already exists."), filename));
+		dlg.get_vbox()->pack_start (msg);
+		msg.show ();
+		dlg.add_button (_("Overwrite"), RESPONSE_ACCEPT);
+		dlg.add_button (_("Cancel"), RESPONSE_REJECT);
+		dlg.set_default_response (RESPONSE_REJECT);
+
+		result = dlg.run ();
+
+		if (result == RESPONSE_REJECT) {
+			PBD::remove_directory (tmpdir);
+			return;
+		}
 	}
 
 	PBD::copy_recurse (templates_dir (), Glib::build_filename (tmpdir, Glib::path_get_basename (templates_dir ())));
@@ -297,7 +320,7 @@ TemplateManager::export_all_templates ()
 
 	_current_action = _("Exporting templates");
 
-	PBD::FileArchive ar (dialog.get_filename());
+	PBD::FileArchive ar (filename);
 	PBD::ScopedConnectionList progress_connection;
 	ar.progress.connect_same_thread (progress_connection, boost::bind (&_set_progress, this, _1, _2));
 	ar.create (filemap);
