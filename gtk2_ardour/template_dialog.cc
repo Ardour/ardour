@@ -36,6 +36,9 @@
 #include "pbd/i18n.h"
 #include "pbd/xml++.h"
 
+#include "gtkmm2ext/gui_thread.h"
+
+#include "ardour/filesystem_paths.h"
 #include "ardour/template_utils.h"
 
 #include "template_dialog.h"
@@ -64,6 +67,9 @@ TemplateDialog::TemplateDialog ()
 
 	session_tm->init ();
 	route_tm->init ();
+
+	session_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&RouteTemplateManager::init, route_tm), gui_context ());
+	route_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&SessionTemplateManager::init, session_tm), gui_context ());
 }
 
 TemplateManager::TemplateManager ()
@@ -260,7 +266,7 @@ TemplateManager::export_all_templates ()
 		return;
 	}
 
-	PBD::copy_recurse (templates_dir (), tmpdir);
+	PBD::copy_recurse (templates_dir (), Glib::build_filename (tmpdir, Glib::path_get_basename (templates_dir ())));
 
 	vector<string> files;
 	PBD::find_files_matching_regex (files, tmpdir, string ("\\.template$"), /* recurse = */ true);
@@ -315,17 +321,12 @@ TemplateManager::import_template_set ()
 		return;
 	}
 
-	if (!g_file_test (templates_dir().c_str(), G_FILE_TEST_IS_DIR)) {
-		cout << "making " << templates_dir() << endl;
-		g_mkdir (templates_dir().c_str(), 0755);
-	}
-
 	_current_action = _("Importing templates");
 
 	FileArchive ar (dialog.get_filename ());
 	PBD::ScopedConnectionList progress_connection;
 	ar.progress.connect_same_thread (progress_connection, boost::bind (&_set_progress, this, _1, _2));
-	ar.inflate (templates_dir());
+	ar.inflate (user_config_directory ());
 
 	vector<string> files;
 	PBD::find_files_matching_regex (files, templates_dir (), string ("\\.template$"), /* recurse = */ true);
@@ -346,6 +347,7 @@ TemplateManager::import_template_set ()
 	}
 
 	init ();
+	TemplatesImported (); /* emit signal */
 }
 
 bool
