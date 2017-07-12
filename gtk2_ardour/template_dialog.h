@@ -37,7 +37,8 @@ namespace ARDOUR {
 class XMLTree;
 class XMLNode;
 
-class TemplateDialog : public ArdourDialog
+class TemplateDialog : public ArdourDialog,
+		       public PBD::ScopedConnectionList
 {
 public:
 	TemplateDialog ();
@@ -50,6 +51,8 @@ class TemplateManager : public Gtk::HBox,
 public:
 	virtual ~TemplateManager () {}
 	virtual void init () = 0;
+
+	PBD::Signal0<void> TemplatesImported;
 
 protected:
 	TemplateManager ();
