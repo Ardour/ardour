@@ -114,7 +114,7 @@ TemplateManager::TemplateManager ()
 	vb_btns->pack_start (_export_all_templates_button, false, false);
 	vb_btns->pack_start (_import_template_set_button, false, false);
 
-	_export_all_templates_button.set_sensitive (true);
+	_export_all_templates_button.set_sensitive (false);
 	_export_all_templates_button.signal_clicked().connect (sigc::mem_fun (*this, &TemplateManager::export_all_templates));
 
 	_import_template_set_button.set_sensitive (true);
@@ -145,6 +145,8 @@ TemplateManager::setup_model (const vector<TemplateInfo>& templates)
 		row[_template_columns.name] = it->name;
 		row[_template_columns.path] = it->path;
 	}
+
+	_export_all_templates_button.set_sensitive (!templates.empty ());
 }
 
 void
