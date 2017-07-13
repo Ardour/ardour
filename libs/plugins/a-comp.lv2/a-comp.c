@@ -615,9 +615,9 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_set_dash(cr, dash2, 2, 2);
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
 
-	for (uint32_t d = 1; d < 6; ++d) {
-		const float x = -.5 + floorf (w * (d * 10.f / 60.f));
-		const float y = -.5 + floorf (h * (d * 10.f / 60.f));
+	for (uint32_t d = 1; d < 7; ++d) {
+		const float x = -.5 + floorf (w * (d * 10.f / 70.f));
+		const float y = -.5 + floorf (h * (d * 10.f / 70.f));
 
 		cairo_move_to (cr, x, 0);
 		cairo_line_to (cr, x, h);
@@ -627,18 +627,31 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
 	}
+	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
+	cairo_set_dash(cr, dash1, 2, 2);
 	if (self->v_thresdb < 0) {
-		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
-		const float y = -.5 + floorf (h * (makeup_thres / -60.f));
-		cairo_set_dash(cr, dash1, 2, 2);
+		const float y = -.5 + floorf (h * ((makeup_thres - 10.f) / -70.f));
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
-		cairo_move_to (cr, 0, h);
-		cairo_line_to (cr, w, 0);
+	}
+	// diagonal unity
+	cairo_move_to (cr, 0, h);
+	cairo_line_to (cr, w, 0);
+	cairo_stroke (cr);
+	cairo_restore (cr);
+
+	{ // 0, 0
+		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+		const float x = -.5 + floorf (w * (60.f / 70.f));
+		const float y = -.5 + floorf (h * (10.f / 70.f));
+		cairo_move_to (cr, x, 0);
+		cairo_line_to (cr, x, h);
+		cairo_stroke (cr);
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
 	}
-	cairo_restore (cr);
 
 
 	// draw curve
@@ -646,10 +659,10 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_move_to (cr, 0, h);
 
 	for (uint32_t x = 0; x < w; ++x) {
-		// plot -60..0  dB
-		const float x_db = 60.f * (-1.f + x / (float)w);
-		const float y_db = comp_curve (self, x_db);
-		const float y = h * (y_db / -60.f);
+		// plot -60..+10  dB
+		const float x_db = 70.f * (-1.f + x / (float)w) + 10.f;
+		const float y_db = comp_curve (self, x_db) - 10.f;
+		const float y = h * (y_db / -70.f);
 		cairo_line_to (cr, x, y);
 	}
 	cairo_stroke_preserve (cr);
@@ -659,23 +672,23 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_clip (cr);
 
 	// draw signal level & reduction/gradient
-	const float top = comp_curve (self, 0);
+	const float top = comp_curve (self, 0) - 10.f;
 	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, h);
-	if (top > makeup_thres) {
+	if (top > makeup_thres - 10.f) {
 		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0.8, 0.1, 0.1, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, top / -60.f, 0.8, 0.1, 0.1, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, top / -70.f, 0.8, 0.1, 0.1, 0.5);
 	}
 	if (self->v_knee > 0) {
-		cairo_pattern_add_color_stop_rgba (pat, (makeup_thres / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - self->v_knee) / -60.f), 0.5, 0.5, 0.5, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres -10.f) / -70.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - self->v_knee - 10.f) / -70.f), 0.5, 0.5, 0.5, 0.5);
 	} else {
-		cairo_pattern_add_color_stop_rgba (pat, (makeup_thres / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - .01) / -60.f), 0.5, 0.5, 0.5, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - 10.f)/ -70.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - 10.01f) / -70.f), 0.5, 0.5, 0.5, 0.5);
 	}
 	cairo_pattern_add_color_stop_rgba (pat, 1.0, 0.5, 0.5, 0.5, 0.5);
 
 	// maybe cut off at x-position?
-	const float x = w * (self->v_lvl_in + 60) / 60.f;
+	const float x = w * (self->v_lvl_in + 60) / 70.f;
 	const float y = x + h*self->v_makeup;
 	cairo_rectangle (cr, 0, h - y, x, y);
 	if (self->v_ratio > 1.0) {
