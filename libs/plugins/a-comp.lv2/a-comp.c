@@ -102,6 +102,7 @@ typedef struct {
 	float v_gainr;
 	float v_makeup;
 	float v_lvl;
+	float v_lv1;
 	float v_lvl_in;
 	float v_lvl_out;
 #endif
@@ -377,7 +378,13 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
+	const float old_v_lv1 = acomp->v_lv1;
+	const float old_v_lvl = acomp->v_lvl;
+	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
+	const float tot_atk_c = exp(-1000.f/(*(acomp->attack) * srate) * n_samples);
+	acomp->v_lv1 = fmaxf (in_peak, tot_rel_c*old_v_lv1 + (1.f-tot_rel_c)*in_peak);
+	acomp->v_lvl = tot_atk_c*old_v_lvl + (1.f-tot_atk_c)*acomp->v_lv1;
+
 	if (!isfinite_local (acomp->v_lvl)) {
 		acomp->v_lvl = 0.f;
 	}
@@ -525,7 +532,12 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
+	const float old_v_lv1 = acomp->v_lv1;
+	const float old_v_lvl = acomp->v_lvl;
+	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
+	const float tot_atk_c = exp(-1000.f/(*(acomp->attack) * srate) * n_samples);
+	acomp->v_lv1 = fmaxf (in_peak, tot_rel_c*old_v_lv1 + (1.f-tot_rel_c)*in_peak);
+	acomp->v_lvl = tot_atk_c*old_v_lvl + (1.f-tot_atk_c)*acomp->v_lv1;
 	if (!isfinite_local (acomp->v_lvl)) {
 		acomp->v_lvl = 0.f;
 	}
