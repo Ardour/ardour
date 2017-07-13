@@ -33,7 +33,7 @@
         lv2:symbol "rel" ;
         lv2:default 80.000000 ;
         lv2:minimum 1.000000 ;
-        lv2:maximum 500.000000 ;
+        lv2:maximum 2000.000000 ;
         unit:unit unit:ms ;
     ] ,
     [
