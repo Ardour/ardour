@@ -99,6 +99,7 @@ typedef struct {
 	float v_knee;
 	float v_ratio;
 	float v_thresdb;
+	float v_gainr;
 	float v_makeup;
 	float v_lvl;
 	float v_lvl_in;
@@ -320,6 +321,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 #endif
 
 	float in_peak = 0;
+	acomp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
@@ -353,6 +355,9 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		Lgain = from_dB(cdb);
 
 		*(acomp->gainr) = Lyl;
+		if (Lyl > acomp->v_gainr) {
+			acomp->v_gainr = Lyl;
+		}
 
 		lgaininp = in0 * Lgain;
 
@@ -459,6 +464,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 #endif
 
 	float in_peak = 0;
+	acomp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input0[i];
@@ -494,6 +500,9 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		Lgain = from_dB(cdb);
 
 		*(acomp->gainr) = Lyl;
+		if (Lyl > acomp->v_gainr) {
+			acomp->v_gainr = Lyl;
+		}
 
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
@@ -653,6 +662,23 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 		cairo_stroke (cr);
 	}
 
+	{ // GR
+		const float x = -.5 + floorf (w * (62.5f / 70.f));
+		const float y = -.5 + floorf (h * (10.0f / 70.f));
+		const float wd = floorf (w * (5.f / 70.f));
+		const float ht = floorf (h * (55.f / 70.f));
+		cairo_rectangle (cr, x, y, wd, ht);
+		cairo_fill (cr);
+
+		const float h_gr = fminf (ht, floorf (h * self->v_gainr / 70.f));
+		cairo_set_source_rgba (cr, 0.95, 0.0, 0.0, 1.0);
+		cairo_rectangle (cr, x, y, wd, h_gr);
+		cairo_fill (cr);
+		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+		cairo_rectangle (cr, x, y, wd, ht);
+		cairo_set_source_rgba (cr, 0.75, 0.75, 0.75, 1.0);
+		cairo_stroke (cr);
+	}
 
 	// draw curve
 	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
