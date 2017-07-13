@@ -129,6 +129,7 @@ instantiate(const LV2_Descriptor* descriptor,
 	acomp->tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
+	acomp->v_lvl_out = -70.f;
 #endif
 
 	return (LV2_Handle)acomp;
@@ -394,7 +395,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		// >= 1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
+		const float relax_coef = exp(-(float)n_samples/srate);
+		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -547,7 +549,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		// >= 1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
+		const float relax_coef = exp(-2.0*n_samples/srate);
+		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -582,7 +585,7 @@ cleanup(LV2_Handle instance)
 
 #ifdef LV2_EXTENDED
 static float
-comp_curve (AComp* self, float xg) {
+comp_curve (const AComp* self, float xg) {
 	const float knee = self->v_knee;
 	const float ratio = self->v_ratio;
 	const float thresdb = self->v_thresdb;
@@ -604,22 +607,13 @@ comp_curve (AComp* self, float xg) {
 	return yg;
 }
 
-static LV2_Inline_Display_Image_Surface *
-render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
+static void
+render_inline_full (cairo_t* cr, const AComp* self)
 {
-	AComp* self = (AComp*)instance;
-	uint32_t h = MIN (w, max_h);
+	const float w = self->w;
+	const float h = self->h;
 
 	const float makeup_thres = self->v_thresdb + self->v_makeup;
-
-	if (!self->display || self->w != w || self->h != h) {
-		if (self->display) cairo_surface_destroy(self->display);
-		self->display = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
-		self->w = w;
-		self->h = h;
-	}
-
-	cairo_t* cr = cairo_create (self->display);
 
 	// clear background
 	cairo_rectangle (cr, 0, 0, w, h);
@@ -737,10 +731,114 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 	cairo_fill (cr);
 
 	cairo_pattern_destroy (pat); // TODO cache pattern
+}
 
+static void
+render_inline_only_bars (cairo_t* cr, const AComp* self)
+{
+	const float w = self->w;
+	const float h = self->h;
 
-	// create RGBA surface
+	cairo_rectangle (cr, 0, 0, w, h);
+	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
+	cairo_fill (cr);
+
+	cairo_set_line_width (cr, 1.0);
+
+	cairo_save (cr);
+
+	const float wd = 0.2f * w;
+
+	const float y1 = h*0.05;
+	const float ht = h - 2.0f*y1;
+
+	const float x1 = 0.3f*w - wd/2.0f;
+	const float x2 = w - x1 - wd;
+
+	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+
+	cairo_rectangle (cr, x1, y1, wd, ht);
+	cairo_fill (cr);
+
+	cairo_rectangle (cr, x2, y1, wd, ht);
+	cairo_fill (cr);
+
+	cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
+	const float h_gr = (self->v_gainr > 60.f) ? ht : ht * self->v_gainr * (1.f/60.f);
+	cairo_rectangle (cr, x2, y1, wd, h_gr);
+	cairo_fill (cr);
+
+	if (self->v_lvl_out > -60.f) {
+		if (self->v_lvl_out > 10.f) {
+			cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
+		} else if (self->v_lvl_out > 0.f) {
+			cairo_set_source_rgba (cr, 0.66, 0.66, 0.0, 1.0);
+		} else {
+			cairo_set_source_rgba (cr, 0.0, 0.66, 0.0, 1.0);
+		}
+		const float h_g = (self->v_lvl_out > 10.f) ? ht : ht * (60.f+self->v_lvl_out) / 70.f;
+		cairo_rectangle (cr, x1, y1+ht-h_g, wd, h_g);
+		cairo_fill (cr);
+	}
+
+	cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
+
+	const float tck = 0.25*wd;
+
+	for (uint32_t d = 1; d < 7; ++d) {
+		const float y = y1 + (d * ht * (10.f / 70.f));
+
+		cairo_move_to (cr, x1, y);
+		cairo_line_to (cr, x1+tck, y);
+
+		cairo_move_to (cr, x1+wd, y);
+		cairo_line_to (cr, x1+wd-tck, y);
+
+		cairo_move_to (cr, x2, y);
+		cairo_line_to (cr, x2+tck, y);
+
+		cairo_move_to (cr, x2+wd, y);
+		cairo_line_to (cr, x2+wd-tck, y);
+	}
+
+	const float y_0dB = y1 + ht*(10.f/70.f);
+
+	cairo_move_to (cr, x1, y_0dB);
+	cairo_line_to (cr, x1+wd, y_0dB);
+
+	cairo_rectangle (cr, x1, y1, wd, ht);
+
+	cairo_rectangle (cr, x2, y1, wd, ht);
+	cairo_stroke (cr);
+}
+
+static LV2_Inline_Display_Image_Surface *
+render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
+{
+	AComp* self = (AComp*)instance;
+
+	uint32_t h = MIN (w, max_h);
+	if (w < 100) {
+		h = max_h;
+	}
+
+	if (!self->display || self->w != w || self->h != h) {
+		if (self->display) cairo_surface_destroy(self->display);
+		self->display = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
+		self->w = w;
+		self->h = h;
+	}
+
+	cairo_t* cr = cairo_create (self->display);
+
+	if (w >= 100) {
+		render_inline_full (cr, self);
+	} else {
+		render_inline_only_bars (cr, self);
+	}
+
 	cairo_destroy (cr);
+
 	cairo_surface_flush (self->display);
 	self->surf.width = cairo_image_surface_get_width (self->display);
 	self->surf.height = cairo_image_surface_get_height (self->display);
