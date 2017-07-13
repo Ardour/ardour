@@ -125,7 +125,7 @@ Graph::reset_thread_list ()
 		throw failed_constructor ();
 	}
 
-	for (uint32_t i = 1; i < num_threads; ++i) {
+	for (uint32_t i = 2; i < num_threads; ++i) {
 		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this))) {
 			throw failed_constructor ();
 		}
