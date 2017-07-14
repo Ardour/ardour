@@ -807,9 +807,27 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_line_to (cr, x1+wd, y_0dB);
 
 	cairo_rectangle (cr, x1, y1, wd, ht);
-
 	cairo_rectangle (cr, x2, y1, wd, ht);
 	cairo_stroke (cr);
+
+	// visualize threshold
+	const float tr = y1 + ht * (1.f - (60.f+self->v_thresdb) / 70.f);
+	cairo_set_source_rgba (cr, 0.95, 0.95, 0.0, 1.0);
+	cairo_move_to (cr, x1, tr);
+	cairo_line_to (cr, x1-wd/2.f, tr-wd/4.f);
+	cairo_line_to (cr, x1-wd/2.f, tr+wd/4.f);
+	cairo_close_path (cr);
+	cairo_fill (cr);
+
+	// visualize ratio
+	const float reduced_0dB = self->v_thresdb * (1.f - 1.f/self->v_ratio);
+	const float rt = y1 + ht * (1.f - (60.f+reduced_0dB) / 70.f);
+	cairo_set_source_rgba (cr, 0.95, 0.0, 0.0, 1.0);
+	cairo_move_to (cr, x1, rt);
+	cairo_line_to (cr, x1-wd/2.f, rt-wd/4.f);
+	cairo_line_to (cr, x1-wd/2.f, rt+wd/4.f);
+	cairo_close_path (cr);
+	cairo_fill (cr);
 }
 
 static LV2_Inline_Display_Image_Surface *
