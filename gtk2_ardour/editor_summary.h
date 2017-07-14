@@ -49,17 +49,10 @@ private:
 
 	enum Position {
 		LEFT,
-		LEFT_TOP,
-		TOP,
-		RIGHT_TOP,
 		RIGHT,
-		RIGHT_BOTTOM,
 		BOTTOM,
-		LEFT_BOTTOM,
 		INSIDE,
-		BELOW_OR_ABOVE,
-		TO_LEFT_OR_RIGHT,
-		OTHERWISE_OUTSIDE
+		TO_LEFT_OR_RIGHT
 	};
 
 	void on_size_request (Gtk::Requisition *);
@@ -67,31 +60,27 @@ private:
 	bool on_button_release_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_scroll_event (GdkEventScroll *);
-        bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
-        bool on_enter_notify_event (GdkEventCrossing*);
-        bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void centre_on_click (GdkEventButton *);
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void render_region (RegionView*, cairo_t*, double) const;
-	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
-	void set_editor (double, double);
-	void set_editor (std::pair<double, double>, double);
-	void set_editor (std::pair<double, double>, std::pair<double, double>);
+	void get_editor (std::pair<double, double>* x, std::pair<double, double>* y = NULL) const;
+	void set_editor (double);
+	void set_editor (std::pair<double, double>);
 	void set_editor_x (double);
 	void set_editor_x (std::pair<double, double>);
-	void set_editor_y (double);
-	void set_editor_y (std::pair<double, double>);
 	void playhead_position_changed (framepos_t);
-	double summary_y_to_editor (double) const;
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;
 	void set_cursor (Position);
 	void route_gui_changed (PBD::PropertyChange const&);
 	bool suspending_editor_updates () const;
 	double playhead_frame_to_position (framepos_t) const;
-        framepos_t position_to_playhead_frame_to_position (double pos) const;
+	framepos_t position_to_playhead_frame_to_position (double pos) const;
 	void set_overlays_dirty (int, int, int, int);
 
 	framepos_t _start; ///< start frame of the overview
@@ -105,9 +94,7 @@ private:
 	double _last_playhead;
 
 	std::pair<double, double> _start_editor_x;
-	std::pair<double, double> _start_editor_y;
 	double _start_mouse_x;
-	double _start_mouse_y;
 
 	Position _start_position;
 
