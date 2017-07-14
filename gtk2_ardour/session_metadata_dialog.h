@@ -34,6 +34,7 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/table.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
@@ -75,7 +76,7 @@ protected:
 /// MetadataField that contains text
 class TextMetadataField : public MetadataField
 {
-private:
+protected:
 	typedef std::string (ARDOUR::SessionMetadata::*Getter) () const;
 	typedef void (ARDOUR::SessionMetadata::*Setter) (std::string const &);
 public:
@@ -88,7 +89,7 @@ public:
 	Gtk::Widget & name_widget ();
 	Gtk::Widget & value_widget ();
 	Gtk::Widget & edit_widget ();
-private:
+protected:
 	void update_value ();
 
 	Getter getter;
@@ -99,6 +100,20 @@ private:
 	Gtk::Entry* entry;
 
 	guint width;
+};
+
+/// MetadataField that contains longform text
+class LongTextMetadataField : public TextMetadataField
+{
+public:
+	LongTextMetadataField (Getter getter, Setter setter, std::string const & field_name, guint width = 50);
+	MetadataPtr copy ();
+
+	Gtk::Widget & edit_widget ();
+private:
+	void update_value ();
+
+	Gtk::TextView* tview;
 };
 
 /// MetadataField that accepts only numbers
@@ -286,6 +301,7 @@ protected:
 
 private:
 	void init_user_data ();
+	void init_description_data ();
 	void init_track_data ();
 	void init_album_data ();
 	void init_people_data ();

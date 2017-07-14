@@ -446,6 +446,7 @@ void RouteTemplateManager::init ()
 	_progress_bar.hide ();
 }
 
+#include <cerrno>
 
 void
 SessionTemplateManager::rename_template (TreeModel::iterator& item, const Glib::ustring& new_name_)

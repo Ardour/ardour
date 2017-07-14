@@ -88,7 +88,7 @@ Gtk::Widget &
 TextMetadataField::name_widget ()
 {
 	label = Gtk::manage (new Gtk::Label(_name + ':'));
-	label->set_alignment (1, 0.5);
+	label->set_alignment (1, 0);
 	return *label;
 }
 
@@ -115,6 +115,44 @@ void
 TextMetadataField::update_value ()
 {
 	_value = entry->get_text ();
+}
+
+/* LongTextMetadataField */
+
+LongTextMetadataField::LongTextMetadataField (Getter getter, Setter setter, string const & field_name, guint width ) :
+  TextMetadataField (getter, setter, field_name, width)
+{
+	tview = 0;
+	label = 0;
+	value_label = 0;
+}
+
+MetadataPtr
+LongTextMetadataField::copy ()
+{
+	return MetadataPtr (new TextMetadataField (getter, setter, _name, width));
+}
+
+Gtk::Widget &
+LongTextMetadataField::edit_widget ()
+{
+	tview = Gtk::manage (new Gtk::TextView());
+
+	tview->get_buffer()->set_text (_value);
+	tview->set_wrap_mode (Gtk::WRAP_WORD);
+	tview->set_size_request (-1, 400);
+	tview->set_editable (true);
+
+	Glib::RefPtr<Gtk::TextBuffer> tb (tview->get_buffer());
+	tb->signal_changed().connect (sigc::mem_fun(*this, &LongTextMetadataField::update_value));
+
+	return *tview;
+}
+
+void
+LongTextMetadataField::update_value ()
+{
+	_value = tview->get_buffer()->get_text ();
 }
 
 /* NumberMetadataField */
@@ -167,7 +205,7 @@ Gtk::Widget &
 NumberMetadataField::name_widget ()
 {
 	label = Gtk::manage (new Gtk::Label(_name + ':'));
-	label->set_alignment (1, 0.5);
+	label->set_alignment (1, 0);
 	return *label;
 }
 
@@ -307,7 +345,7 @@ Gtk::Widget &
 EAN13MetadataField::name_widget ()
 {
 	label = Gtk::manage (new Gtk::Label(_name + ':'));
-	label->set_alignment (1, 0.5);
+	label->set_alignment (1, 0);
 	return *label;
 }
 
@@ -569,6 +607,7 @@ SessionMetadataDialog<DataSet>::init_data ( bool skip_user )
 	init_album_data ();
 	init_people_data ();
 	init_school_data ();
+	init_description_data ();
 
 	for (DataSetList::iterator it = data_list.begin(); it != data_list.end(); ++it) {
 		(*it)->set_session (_session);
@@ -665,6 +704,20 @@ SessionMetadataDialog<DataSet>::init_user_data ()
 	data_set->add_data_field (ptr);
 
 }
+
+template <typename DataSet>
+void
+SessionMetadataDialog<DataSet>::init_description_data ()
+{
+	DataSetPtr data_set (new DataSet (_("Description")));
+	data_list.push_back (data_set);
+
+	MetadataPtr ptr;
+
+	ptr = MetadataPtr (new LongTextMetadataField (&ARDOUR::SessionMetadata::description, &ARDOUR::SessionMetadata::set_description, _("Description")));
+	data_set->add_data_field (ptr);
+}
+
 
 template <typename DataSet>
 void

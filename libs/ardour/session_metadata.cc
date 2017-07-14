@@ -31,6 +31,9 @@ SessionMetadata *SessionMetadata::_metadata = NULL;  //singleton instance
 SessionMetadata::SessionMetadata ()
 {
 	/*** General ***/
+	map.insert (Property ("description", ""));
+
+	/*** Track/Song Data ***/
 	map.insert (Property ("comment", ""));
 	map.insert (Property ("copyright", ""));
 	map.insert (Property ("isrc", ""));
@@ -222,6 +225,12 @@ SessionMetadata::get_user_state ()
 }
 
 /*** Accessing ***/
+string
+SessionMetadata::description () const
+{
+	return get_value("description");
+}
+
 string
 SessionMetadata::comment () const
 {
@@ -430,6 +439,12 @@ SessionMetadata::country () const
 
 
 /*** Editing ***/
+void
+SessionMetadata::set_description (const string & v)
+{
+	set_value ("description", v);
+}
+
 void
 SessionMetadata::set_comment (const string & v)
 {
