@@ -27,11 +27,12 @@ function dsp_run (_, _, n_samples)
 	for _,b in pairs (midiin) do
 		local t = b["time"] -- t = [ 1 .. n_samples ]
 		local d = b["data"] -- get midi-event
+		local event_type
+		if #d == 0 then event_type = -1 else event_type = d[1] >> 4 end
 
-		if (#d == 3 and bit32.band (d[1], 240) == 144) then -- note on
+		if (#d == 3 and event_type == 9) then -- note on
 			tx_midi (t, d)
-		end
-		if (#d == 3 and bit32.band (d[1], 240) == 128) then -- note off
+		elseif (#d == 3 and event_type = 8) then -- note off
 			tx_midi (t, d)
 		end
 	end
