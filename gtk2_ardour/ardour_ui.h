@@ -122,7 +122,6 @@ class IdleOMeter;
 class VideoTimeLine;
 class ArdourKeyboard;
 class AudioClock;
-class ButtonJoiner;
 class ConnectionEditor;
 class DuplicateRouteDialog;
 class MainClock;

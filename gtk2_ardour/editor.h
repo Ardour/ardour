@@ -103,7 +103,6 @@ class AutomationLine;
 class AutomationSelection;
 class AutomationTimeAxisView;
 class BundleManager;
-class ButtonJoiner;
 class ControlPoint;
 class CursorContext;
 class DragManager;

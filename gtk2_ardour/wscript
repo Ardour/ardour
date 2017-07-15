@@ -54,7 +54,6 @@ gtk2_ardour_sources = [
         'axis_view.cc',
         'big_clock_window.cc',
         'bundle_manager.cc',
-        'button_joiner.cc',
         'clock_group.cc',
         'color_theme_manager.cc',
         'configinfo.cc',
