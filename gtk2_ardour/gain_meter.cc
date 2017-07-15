@@ -617,7 +617,8 @@ GainMeterBase::effective_gain_display ()
 void
 GainMeterBase::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&GainMeterBase::effective_gain_display, this));
+	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed);
+	effective_gain_display ();
 }
 
 void
@@ -813,14 +814,6 @@ GainMeterBase::gain_automation_state_changed ()
 	update_gain_sensitive ();
 
 	gain_watching.disconnect();
-
-	if (automation_watch_required) {
-		/* start watching automation so that things move */
-		gain_watching = Timers::rapid_connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
-	} else {
-		/* update once to get the correct value shown as we re-enter off/manual mode */
-		effective_gain_display();
-	}
 }
 
 const ChanCount

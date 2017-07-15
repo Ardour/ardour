@@ -69,7 +69,8 @@ public:
 	Gtk::Adjustment* adjustment() { return _adjustment; }
 	Gtk::Widget*     widget()     { return _widget; }
 
-	void display_effective_value();
+	void display_effective_value ();
+	void automation_state_changed ();
 	void value_adjusted();
 
 	void stop_updating ();
@@ -93,7 +94,7 @@ private:
 	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;
-	PBD::ScopedConnection                        _changed_connection;
+	PBD::ScopedConnectionList                    _changed_connections;
 	bool                                         _ignore_change;
 };
 

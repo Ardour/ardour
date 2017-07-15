@@ -114,10 +114,13 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	_adjustment->signal_value_changed().connect(
 		sigc::mem_fun(*this, &AutomationController::value_adjusted));
 
-	_screen_update_connection = Timers::rapid_connect (
-			sigc::mem_fun (*this, &AutomationController::display_effective_value));
+	ac->Changed.connect (_changed_connections, invalidator (*this), boost::bind (&AutomationController::display_effective_value, this), gui_context());
+	display_effective_value ();
 
-	ac->Changed.connect (_changed_connection, invalidator (*this), boost::bind (&AutomationController::display_effective_value, this), gui_context());
+	if (ac->alist ()) {
+		ac->alist()->automation_state_changed.connect (_changed_connections, invalidator (*this), boost::bind (&AutomationController::automation_state_changed, this), gui_context());
+		automation_state_changed ();
+	}
 
 	add(*_widget);
 	show_all();
@@ -148,7 +151,14 @@ AutomationController::create(const Evoral::Parameter&             param,
 }
 
 void
-AutomationController::display_effective_value()
+AutomationController::automation_state_changed ()
+{
+	bool x = _controllable->alist()->automation_state() & Play;
+	_widget->set_sensitive (!x);
+}
+
+void
+AutomationController::display_effective_value ()
 {
 	double const interface_value = _controllable->internal_to_interface(_controllable->get_value());
 

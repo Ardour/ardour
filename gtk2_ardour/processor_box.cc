@@ -823,8 +823,11 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 
 		_button.signal_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked));
 		_button.signal_led_clicked.connect (sigc::mem_fun (*this, &Control::button_clicked_event));
-		// dup. currently timers are used :(
-		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		if (c->alist ()) {
+			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
+			control_automation_state_changed ();
+		}
 
 	} else {
 
@@ -848,13 +851,12 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_slider.set_default_value (normal);
 
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
-		// dup. currently timers are used :(
-		//c->Changed.connect (_connection, MISSING_INVALIDATOR, boost::bind (&Control::control_changed, this), gui_context ());
+		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
+		if (c->alist ()) {
+			c->alist()->automation_state_changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_automation_state_changed, this), gui_context());
+			control_automation_state_changed ();
+		}
 	}
-
-	// yuck, do we really need to do this?
-	// according to c404374 this is only needed for send automation
-	timer_connection = Timers::rapid_connect (sigc::mem_fun (*this, &Control::control_changed));
 
 	control_changed ();
 	set_tooltip ();
@@ -865,7 +867,6 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 
 ProcessorEntry::Control::~Control ()
 {
-	timer_connection.disconnect ();
 }
 
 void
@@ -924,6 +925,21 @@ ProcessorEntry::Control::button_clicked_event (GdkEventButton *ev)
 }
 
 void
+ProcessorEntry::Control::control_automation_state_changed ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+	bool x = c->alist()->automation_state() & Play;
+	if (c->toggled ()) {
+		_button.set_sensitive (!x);
+	} else {
+		_slider.set_sensitive (!x);
+	}
+}
+
+void
 ProcessorEntry::Control::control_changed ()
 {
 	boost::shared_ptr<AutomationControl> c = _control.lock ();
@@ -934,12 +950,9 @@ ProcessorEntry::Control::control_changed ()
 	_ignore_ui_adjustment = true;
 
 	if (c->toggled ()) {
-
 		_button.set_active (c->get_value() > 0.5);
-
 	} else {
-		// as long as rapid timers are used, only update the tooltip
-		// if the value has changed.
+		// Note: the _slider watches the controllable by itself
 		const double nval = c->internal_to_interface (c->get_value ());
 		if (_adjustment.get_value() != nval) {
 			_adjustment.set_value (nval);

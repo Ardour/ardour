@@ -219,6 +219,7 @@ private:
 		void button_clicked ();
 		void button_clicked_event (GdkEventButton *);
 		void control_changed ();
+		void control_automation_state_changed ();
 		std::string state_id () const;
 		void set_tooltip ();
 
@@ -230,10 +231,9 @@ private:
 		/* things for a button */
 		ArdourButton _button;
 		bool _ignore_ui_adjustment;
-		PBD::ScopedConnection _connection;
+		PBD::ScopedConnectionList _connections;
 		bool _visible;
 		std::string _name;
-		sigc::connection timer_connection;
 	};
 
 	std::list<Control*> _controls;
