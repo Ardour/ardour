@@ -49,9 +49,6 @@ public:
 
 	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
 
-	bool apply_gain () const  { return _apply_gain; }
-	void apply_gain (bool yn) { _apply_gain = yn; }
-
 	void set_gain_automation_buffer (gain_t *);
 
 	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
@@ -81,7 +78,6 @@ public:
 
 private:
 	bool   _denormal_protection;
-	bool   _apply_gain;
 	bool   _apply_gain_automation;
 	float  _current_gain;
 	framepos_t _current_automation_frame;
