@@ -46,6 +46,8 @@ public:
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
 
+	virtual void automation_run (framepos_t start, pframes_t nframes);
+
 	double get_masters_value () const {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_masters_value_locked ();

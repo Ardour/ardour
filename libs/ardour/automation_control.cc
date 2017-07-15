@@ -146,6 +146,27 @@ AutomationControl::grouped_controls () const
 	}
 }
 
+void
+AutomationControl::automation_run (framepos_t start, pframes_t nframes)
+{
+	if (!automation_playback ()) {
+		return;
+	}
+
+	assert (_list);
+	bool valid = false;
+	double val = _list->rt_safe_eval (start, valid);
+	if (!valid) {
+		return;
+	}
+	if (toggled ()) {
+		const double thresh = .5 * (_desc.upper - _desc.lower);
+		set_value_unchecked (val >= thresh ? _desc.upper : _desc.lower);
+	} else {
+		set_value_unchecked (val);
+	}
+}
+
 /** Set the value and do the right thing based on automation state
  *  (e.g. record if necessary, etc.)
  *  @param value `user' value
@@ -156,7 +177,6 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (_list);
 	const framepos_t pos = _session.transport_frame();
 	bool to_list;
-	double old_value;
 
 	/* We cannot use ::get_value() here since that is virtual, and intended
 	   to return a scalar value that in some way reflects the state of the
@@ -173,36 +193,28 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	   anything has changed) is the one derived from the automation event
 	   list.
 	*/
+	float old_value = Control::user_double();
 
-	if (!al) {
-		to_list = false;
-		old_value = Control::user_double();
+	if (al && al->automation_write ()) {
+		to_list = true;
 	} else {
-		if (al->automation_write ()) {
-			to_list = true;
-			old_value = Control::user_double ();
-		} else if (al->automation_playback()) {
-			to_list = false;
-			old_value = al->eval (pos);
-		} else {
-			to_list = false;
-			old_value = Control::user_double ();
-		}
+		to_list = false;
 	}
 
 	Control::set_double (value, pos, to_list);
 
-	if (old_value != value) {
-		//AutomationType at = (AutomationType) _parameter.type();
-		//std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
-		//<< " (was " << old_value << ") @ " << this << std::endl;
+	if (old_value != (float)value) {
+#if 0
+		AutomationType at = (AutomationType) _parameter.type();
+		std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
+		<< " (was " << old_value << ") @ " << this << std::endl;
+#endif
 
 		Changed (true, gcd);
 		if (!al || !al->automation_playback ()) {
 			_session.set_dirty ();
 		}
 	}
-
 }
 
 void

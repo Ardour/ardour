@@ -290,11 +290,7 @@ SlavableAutomationControl::master_changed (bool /*from_self*/, GroupControlDispo
 {
 	boost::shared_ptr<AutomationControl> m = wm.lock ();
 	assert (m);
-	Glib::Threads::RWLock::ReaderLock lm (master_lock, Glib::Threads::TRY_LOCK);
-	if (!lm.locked ()) {
-		/* boolean_automation_run_locked () special case */
-		return;
-	}
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	bool send_signal = handle_master_change (m);
 	lm.release (); // update_boolean_masters_records() takes lock
 
@@ -521,6 +517,28 @@ SlavableAutomationControl::handle_master_change (boost::shared_ptr<AutomationCon
 	return true; // emit Changed
 }
 
+void
+SlavableAutomationControl::automation_run (framepos_t start, pframes_t nframes)
+{
+	if (!automation_playback ()) {
+		return;
+	}
+
+	assert (_list);
+	bool valid = false;
+	double val = _list->rt_safe_eval (start, valid);
+	if (!valid) {
+		return;
+	}
+	if (toggled ()) {
+		const double thresh = .5 * (_desc.upper - _desc.lower);
+		bool on = (val >= thresh) || (get_masters_value () >= thresh);
+		set_value_unchecked (on ? _desc.upper : _desc.lower);
+	} else {
+		set_value_unchecked (val * get_masters_value ());
+	}
+}
+
 bool
 SlavableAutomationControl::boolean_automation_run_locked (framepos_t start, pframes_t len)
 {
@@ -551,11 +569,6 @@ SlavableAutomationControl::boolean_automation_run_locked (framepos_t start, pfra
 		if (mr->second.yn() != yn) {
 			rv |= handle_master_change (ac);
 			mr->second.set_yn (yn);
-			/* notify the GUI, without recursion:
-			 * master_changed() above will ignore the change if the lock is held.
-			 */
-			ac->set_value_unchecked (yn ? 1. : 0.);
-			ac->Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
 		}
 	}
 	return rv;

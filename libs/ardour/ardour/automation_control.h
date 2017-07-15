@@ -104,6 +104,8 @@ public:
 		actually_set_value (val, PBD::Controllable::NoGroup);
 	}
 
+	virtual void automation_run (framepos_t start, pframes_t nframes);
+
 	double lower()   const { return _desc.lower; }
 	double upper()   const { return _desc.upper; }
 	double normal()  const { return _desc.normal; }
