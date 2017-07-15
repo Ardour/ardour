@@ -33,11 +33,11 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
 
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/paths_dialog.h>
-#include <gtkmm2ext/window_title.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/slider_controller.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/paths_dialog.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -54,6 +54,7 @@
 #include "control_protocol/control_protocol.h"
 
 #include "canvas/wave_view.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
@@ -65,7 +66,6 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -75,6 +75,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 
 class ClickOptions : public OptionEditorMiniPage
 {

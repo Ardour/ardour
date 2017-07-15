@@ -25,14 +25,17 @@
 #include <gtkmm/action.h>
 
 #include "pbd/signals.h"
-#include "ardour/automatable.h"
 
 #include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/persistent_tooltip.h"
 
-class KnobPersistentTooltip : public Gtkmm2ext::PersistentTooltip
+#include "widgets/visibility.h"
+
+namespace ArdourWidgets {
+
+class LIBWIDGETS_API KnobPersistentTooltip : public Gtkmm2ext::PersistentTooltip
 {
 public:
 	KnobPersistentTooltip (Gtk::Widget* w);
@@ -46,7 +49,7 @@ private:
 };
 
 
-class ArdourKnob : public CairoWidget , public Gtkmm2ext::Activatable
+class LIBWIDGETS_API ArdourKnob : public CairoWidget , public Gtkmm2ext::Activatable
 {
 public:
 
@@ -124,5 +127,7 @@ public:
 	std::string _tooltip_prefix;
 	KnobPersistentTooltip _tooltip;
 };
+
+} /* namespace */
 
 #endif /* __gtk2_ardour_ardour_knob_h__ */

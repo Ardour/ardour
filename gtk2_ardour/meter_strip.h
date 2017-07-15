@@ -28,8 +28,10 @@
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"
+
+#include "widgets/ardour_button.h"
+
 #include "route_ui.h"
-#include "ardour_button.h"
 
 #include "level_meter.h"
 
@@ -108,8 +110,8 @@ private:
 	Gtk::HBox spacer;
 	Gtk::HBox namebx;
 	Gtk::VBox namenumberbx;
-	ArdourButton name_label;
-	ArdourButton number_label;
+	ArdourWidgets::ArdourButton name_label;
+	ArdourWidgets::ArdourButton number_label;
 	Gtk::DrawingArea meter_metric_area;
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;
@@ -124,7 +126,7 @@ private:
 	Gtk::Alignment peak_align;
 	Gtk::HBox peakbx;
 	Gtk::VBox btnbox;
-	ArdourButton peak_display;
+	ArdourWidgets::ArdourButton peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
 	ARDOUR::MeterType metric_type;

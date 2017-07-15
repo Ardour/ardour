@@ -110,6 +110,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace Editing;
 using Gtkmm2ext::Keyboard;
 

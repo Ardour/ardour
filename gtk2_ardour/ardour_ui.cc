@@ -193,6 +193,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
 using namespace Editing;
@@ -297,8 +298,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, solo_alert_button (_("Solo"))
 	, feedback_alert_button (_("Feedback"))
 	, error_alert_button ( ArdourButton::just_led_default_elements )
-	, editor_meter(0)
 	, editor_meter_peak_display()
+	, editor_meter(0)
 	, _suspend_editor_meter_callbacks (false)
 	, _numpad_locate_happening (false)
 	, _session_is_new (false)

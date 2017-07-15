@@ -24,6 +24,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace Gtk;
 
 PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<ARDOUR::PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)

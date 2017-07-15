@@ -21,9 +21,11 @@
 #include "ardour/session.h"
 #include "ardour/export_format_specification.h"
 
+#include "widgets/tooltips.h"
+
 #include "export_format_dialog.h"
 #include "gui_thread.h"
-#include "tooltips.h"
+
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -120,7 +122,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	normalize_hbox.pack_start (normalize_dbtp_spinbutton, false, false, 2);
 	normalize_hbox.pack_start (normalize_dbtp_label, false, false, 0);
 
-	ARDOUR_UI_UTILS::set_tooltip (normalize_loudness_rb,
+	ArdourWidgets::set_tooltip (normalize_loudness_rb,
 			_("Normalize to EBU-R128 LUFS target loudness without exceeding the given true-peak limit. EBU-R128 normalization is only available for mono and stereo targets, true-peak works for any channel layout."));
 
 	normalize_dbfs_spinbutton.configure (normalize_dbfs_adjustment, 0.1, 2);
@@ -147,7 +149,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog) :
 	get_vbox()->pack_start (command_label, false, false);
 	get_vbox()->pack_start (command_entry, false, false);
 
-	ARDOUR_UI_UTILS::set_tooltip (command_entry,
+	ArdourWidgets::set_tooltip (command_entry,
 			_(
 				"%a Artist name\n"
 				"%b File's base-name\n"

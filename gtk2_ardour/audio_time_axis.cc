@@ -36,12 +36,13 @@
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/ardour_button.h"
+
 #include "ardour/event_type_map.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
-#include "ardour_button.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
@@ -59,6 +60,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

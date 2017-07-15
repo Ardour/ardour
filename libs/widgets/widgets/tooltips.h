@@ -17,25 +17,25 @@
 
 */
 
-#include "tooltips.h"
+#ifndef _WIDGETS_TOOLTIPS_H_
+#define _WIDGETS_TOOLTIPS_H_
 
-#include "gtkmm2ext/gtk_ui.h"
+#include <string>
 
-namespace ARDOUR_UI_UTILS {
-
-void
-set_tooltip (Gtk::Widget& w, const std::string& text) {
-	Gtkmm2ext::UI::instance()->set_tip(w, text);
+namespace Gtk {
+	class Widget;
 }
 
-void
-set_tooltip (Gtk::Widget* w, const std::string& text) {
-	Gtkmm2ext::UI::instance()->set_tip(*w, text);
+#include "widgets/visibility.h"
+
+namespace ArdourWidgets {
+
+extern LIBWIDGETS_API void set_tooltip (Gtk::Widget& w, const std::string& text);
+
+extern LIBWIDGETS_API void set_tooltip (Gtk::Widget* w, const std::string& text);
+
+extern LIBWIDGETS_API void set_tooltip (Gtk::Widget* w, const std::string& text, const std::string& help_text);
+
 }
 
-void
-set_tooltip (Gtk::Widget* w, const std::string& text, const std::string& help_text) {
-	Gtkmm2ext::UI::instance()->set_tip(w, text.c_str(), help_text.c_str());
-}
-
-} // ARDOUR_UI_UTILS
+#endif

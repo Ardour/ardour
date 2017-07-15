@@ -38,6 +38,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/filesystem_paths.h"
 #include "ardour/luabindings.h"
 #include "LuaBridge/LuaBridge.h"
@@ -47,14 +49,12 @@
 #include "luainstance.h"
 #include "luawindow.h"
 #include "public_editor.h"
-#include "tooltips.h"
 #include "utils.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -164,7 +164,7 @@ LuaWindow::LuaWindow ()
 	vpane->show_all ();
 	add (*vpane);
 	set_size_request (640, 480); // XXX
-	ARDOUR_UI_UTILS::set_tooltip (script_select, _("Select Editor Buffer"));
+	ArdourWidgets::set_tooltip (script_select, _("Select Editor Buffer"));
 
 	setup_buffers ();
 	LuaScripting::instance().scripts_changed.connect (*this, invalidator (*this), boost::bind (&LuaWindow::refresh_scriptlist, this), gui_context());
@@ -190,7 +190,7 @@ LuaWindow::hide_window (GdkEventAny *ev)
 {
 	if (!_visible) return 0;
 	_visible = false;
-	return just_hide_it (ev, static_cast<Gtk::Window *>(this));
+	return ARDOUR_UI_UTILS::just_hide_it (ev, static_cast<Gtk::Window *>(this));
 }
 
 void LuaWindow::reinit_lua ()

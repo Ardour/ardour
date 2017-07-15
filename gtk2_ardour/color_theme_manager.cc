@@ -39,7 +39,6 @@
 #include "canvas/scroll_group.h"
 #include "canvas/wave_view.h"
 
-#include "ardour_button.h"
 #include "ardour_dialog.h"
 #include "color_theme_manager.h"
 #include "rgb_macros.h"

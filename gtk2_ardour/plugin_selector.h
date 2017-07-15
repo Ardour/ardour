@@ -28,9 +28,10 @@
 
 #include "ardour/plugin.h"
 #include "ardour/session_handle.h"
-#include "plugin_interest.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
+
+#include "plugin_interest.h"
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
@@ -63,10 +64,10 @@ private:
 	Gtk::Entry filter_entry;
 	Gtk::Button filter_button;
 
-	ArdourButton fil_hidden_button;
-	ArdourButton fil_instruments_button;
-	ArdourButton fil_analysis_button;
-	ArdourButton fil_utils_button;
+	ArdourWidgets::ArdourButton fil_hidden_button;
+	ArdourWidgets::ArdourButton fil_instruments_button;
+	ArdourWidgets::ArdourButton fil_analysis_button;
+	ArdourWidgets::ArdourButton fil_utils_button;
 
 	void filter_button_clicked ();
 	void filter_entry_changed ();

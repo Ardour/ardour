@@ -47,9 +47,11 @@
 
 #include "pbd/fastlog.h"
 
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_knob.h"
+
 #include "axis_view.h"
 #include "control_slave_ui.h"
-#include "ardour_knob.h"
 #include "route_ui.h"
 #include "gain_meter.h"
 #include "panner_ui.h"
@@ -162,11 +164,11 @@ private:
 	Width _width;
 	void*  _width_owner;
 
-	ArdourButton         hide_button;
-	ArdourButton         width_button;
-	ArdourButton         number_label;
-	Gtk::HBox           width_hide_box;
-	Gtk::EventBox		spacer;
+	ArdourWidgets::ArdourButton hide_button;
+	ArdourWidgets::ArdourButton width_button;
+	ArdourWidgets::ArdourButton number_label;
+	Gtk::HBox                   width_hide_box;
+	Gtk::EventBox               spacer;
 
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
@@ -191,17 +193,17 @@ private:
 	void meter_changed ();
 	void monitor_changed ();
 
-	ArdourButton input_button;
-	ArdourButton output_button;
+	ArdourWidgets::ArdourButton input_button;
+	ArdourWidgets::ArdourButton output_button;
 
-	ArdourButton* monitor_section_button;
+	ArdourWidgets::ArdourButton* monitor_section_button;
 
 	void input_button_resized (Gtk::Allocation&);
 	void output_button_resized (Gtk::Allocation&);
 	void comment_button_resized (Gtk::Allocation&);
 
-	ArdourButton* midi_input_enable_button;
-	Gtk::HBox   input_button_box;
+	ArdourWidgets::ArdourButton* midi_input_enable_button;
+	Gtk::HBox input_button_box;
 
 	std::string longest_label;
 
@@ -215,16 +217,14 @@ private:
 	gint    mark_update_safe ();
 	guint32 mode_switch_in_progress;
 
-	ArdourButton   name_button;
-
-	ArdourButton   _comment_button;
-
-	ArdourKnob     trim_control;
+	ArdourWidgets::ArdourButton name_button;
+	ArdourWidgets::ArdourButton _comment_button;
+	ArdourWidgets::ArdourKnob   trim_control;
 
 	void setup_comment_button ();
 
-	ArdourButton   group_button;
-	RouteGroupMenu *group_menu;
+	ArdourWidgets::ArdourButton group_button;
+	RouteGroupMenu*             group_menu;
 
 	gint input_press (GdkEventButton *);
 	gint input_release (GdkEventButton *);

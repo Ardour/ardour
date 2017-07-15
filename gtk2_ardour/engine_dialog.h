@@ -35,8 +35,9 @@
 
 #include "pbd/signals.h"
 
+#include "widgets/ardour_button.h"
+
 #include "ardour_dialog.h"
-#include "ardour_button.h"
 
 class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList
 {
@@ -84,31 +85,31 @@ private:
 	Gtk::Adjustment ports_adjustment;
 	Gtk::SpinButton ports_spinner;
 
-	Gtk::Label      have_control_text;
-	ArdourButton    control_app_button;
-	ArdourButton    midi_devices_button;
-	ArdourButton    start_stop_button;
-	ArdourButton    update_devices_button;
-	ArdourButton    use_buffered_io_button;
+	Gtk::Label                  have_control_text;
+	ArdourWidgets::ArdourButton control_app_button;
+	ArdourWidgets::ArdourButton midi_devices_button;
+	ArdourWidgets::ArdourButton start_stop_button;
+	ArdourWidgets::ArdourButton update_devices_button;
+	ArdourWidgets::ArdourButton use_buffered_io_button;
 
 	Gtk::Button     connect_disconnect_button;
 
 	/* latency measurement */
 
-	Gtk::ComboBoxText lm_output_channel_combo;
-	Gtk::ComboBoxText lm_input_channel_combo;
-	Gtk::Label        lm_measure_label;
-	Gtk::Button       lm_measure_button;
-	Gtk::Button       lm_use_button;
-	Gtk::Button       lm_back_button;
-	ArdourButton      lm_button_audio;
-	Gtk::Label        lm_title;
-	Gtk::Label        lm_preamble;
-	Gtk::Label        lm_results;
-	Gtk::Table        lm_table;
-	Gtk::VBox         lm_vbox;
-	bool              have_lm_results;
-	bool              lm_running;
+	Gtk::ComboBoxText           lm_output_channel_combo;
+	Gtk::ComboBoxText           lm_input_channel_combo;
+	Gtk::Label                  lm_measure_label;
+	Gtk::Button                 lm_measure_button;
+	Gtk::Button                 lm_use_button;
+	Gtk::Button                 lm_back_button;
+	ArdourWidgets::ArdourButton lm_button_audio;
+	Gtk::Label                  lm_title;
+	Gtk::Label                  lm_preamble;
+	Gtk::Label                  lm_results;
+	Gtk::Table                  lm_table;
+	Gtk::VBox                   lm_vbox;
+	bool                        have_lm_results;
+	bool                        lm_running;
 
 	/* MIDI Tab */
 
@@ -346,7 +347,7 @@ private:
 
 	MidiDeviceSettings _measure_midi;
 	void midi_latency_adjustment_changed(Gtk::Adjustment *, MidiDeviceSettings, bool);
-	void midi_device_enabled_toggled(ArdourButton *, MidiDeviceSettings);
+	void midi_device_enabled_toggled(ArdourWidgets::ArdourButton *, MidiDeviceSettings);
 	sigc::connection lm_back_button_signal;
 };
 

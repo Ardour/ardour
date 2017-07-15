@@ -38,7 +38,7 @@
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
 
 #include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/focus_entry.h"
@@ -134,11 +134,11 @@ protected:
 
 	sigc::connection gain_watching;
 
-	ArdourButton gain_automation_state_button;
+	ArdourWidgets::ArdourButton gain_automation_state_button;
 
 	Gtk::Menu gain_astate_menu;
 
-	ArdourButton meter_point_button;
+	ArdourWidgets::ArdourButton meter_point_button;
 
 	Gtk::Menu meter_point_menu;
 

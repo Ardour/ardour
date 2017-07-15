@@ -20,13 +20,15 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/bindable_button.h>
-#include <gtkmm2ext/barcontroller.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/choice.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/barcontroller.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
@@ -53,7 +55,7 @@
 #include "ardour/session.h"
 #include "ardour/template_utils.h"
 
-#include "ardour_button.h"
+
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
@@ -79,6 +81,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace std;
 

@@ -31,6 +31,8 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "widgets/tooltips.h"
+
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/monitor_processor.h"
@@ -46,13 +48,13 @@
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace Gtkmm2ext;

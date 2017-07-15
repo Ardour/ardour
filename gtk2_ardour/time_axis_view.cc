@@ -39,6 +39,8 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/profile.h"
 
 #include "ardour_dialog.h"
@@ -55,7 +57,6 @@
 #include "streamview.h"
 #include "editor_drag.h"
 #include "editor.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -64,10 +65,10 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
+using namespace ArdourWidgets;
 using Gtkmm2ext::Keyboard;
 
 #define TOP_LEVEL_WIDGET controls_ebox

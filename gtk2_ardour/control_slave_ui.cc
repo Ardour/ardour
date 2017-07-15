@@ -31,13 +31,13 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
-#include "ardour_button.h"
 #include "control_slave_ui.h"
 #include "gui_thread.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using std::string;
 

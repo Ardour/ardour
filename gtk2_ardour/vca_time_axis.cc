@@ -28,18 +28,18 @@
 #include "ardour/vca.h"
 
 #include "gtkmm2ext/doi.h"
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
+#include "widgets/tooltips.h"
 
 #include "gui_thread.h"
 #include "public_editor.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "vca_time_axis.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
@@ -334,7 +334,7 @@ VCATimeAxisView::stripable () const
 Gdk::Color
 VCATimeAxisView::color () const
 {
-	return gdk_color_from_rgb (_vca->presentation_info().color ());
+	return ARDOUR_UI_UTILS::gdk_color_from_rgb (_vca->presentation_info().color ());
 }
 
 void

@@ -27,11 +27,15 @@
 #include "ardour/utils.h"
 
 #include <pangomm.h>
-#include <gtkmm/style.h>
-#include <gdkmm/color.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/gtk_ui.h>
+
+#include "gtkmm/style.h"
+#include "gdkmm/color.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/fastmeter.h"
+#include "gtkmm2ext/gtk_ui.h"
+
+#include "widgets/tooltips.h"
+
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
@@ -42,7 +46,6 @@
 #include "utils.h"
 #include "meter_patterns.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "ardour/session.h"
@@ -55,7 +58,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -408,7 +411,7 @@ GainMeter::set_type (MeterType t)
 bool
 GainMeterBase::gain_key_press (GdkEventKey* ev)
 {
-	if (key_is_legal_for_numeric_entry (ev->keyval)) {
+	if (ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (ev->keyval)) {
 		/* drop through to normal handling */
 		return false;
 	}

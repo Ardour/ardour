@@ -27,11 +27,13 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "widgets/tooltips.h"
+
 #include "button_joiner.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 using namespace Gtk;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
 ButtonJoiner::ButtonJoiner (const std::string& str, Gtk::Widget& lw, Gtk::Widget& rw, bool central_joiner)

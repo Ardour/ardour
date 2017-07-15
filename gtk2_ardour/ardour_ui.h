@@ -70,10 +70,11 @@
 
 #include "video_timeline.h"
 
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_spacer.h"
+
 #include "add_route_dialog.h"
-#include "ardour_button.h"
 #include "ardour_dialog.h"
-#include "ardour_spacer.h"
 #include "ardour_window.h"
 #include "editing.h"
 #include "enums.h"
@@ -120,7 +121,6 @@ class IdleOMeter;
 
 class VideoTimeLine;
 class ArdourKeyboard;
-class ArdourVSpacer;
 class AudioClock;
 class ButtonJoiner;
 class ConnectionEditor;
@@ -480,7 +480,7 @@ private:
 	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
-	ArdourVSpacer *secondary_clock_spacer;
+	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
 	void repack_transport_hbox ();
 	void update_clock_visibility ();
 
@@ -516,23 +516,23 @@ private:
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
 
-	ArdourButton roll_button;
-	ArdourButton stop_button;
-	ArdourButton goto_start_button;
-	ArdourButton goto_end_button;
-	ArdourButton auto_loop_button;
-	ArdourButton play_selection_button;
-	ArdourButton rec_button;
-	ArdourButton punch_in_button;
-	ArdourButton punch_out_button;
-	ArdourButton layered_button;
+	ArdourWidgets::ArdourButton roll_button;
+	ArdourWidgets::ArdourButton stop_button;
+	ArdourWidgets::ArdourButton goto_start_button;
+	ArdourWidgets::ArdourButton goto_end_button;
+	ArdourWidgets::ArdourButton auto_loop_button;
+	ArdourWidgets::ArdourButton play_selection_button;
+	ArdourWidgets::ArdourButton rec_button;
+	ArdourWidgets::ArdourButton punch_in_button;
+	ArdourWidgets::ArdourButton punch_out_button;
+	ArdourWidgets::ArdourButton layered_button;
 
-	ArdourVSpacer recpunch_spacer;
-	ArdourVSpacer monitoring_spacer;
+	ArdourWidgets::ArdourVSpacer recpunch_spacer;
+	ArdourWidgets::ArdourVSpacer monitoring_spacer;
 
-	ArdourButton monitor_in_button;
-	ArdourButton monitor_disk_button;
-	ArdourButton auto_input_button;
+	ArdourWidgets::ArdourButton monitor_in_button;
+	ArdourWidgets::ArdourButton monitor_disk_button;
+	ArdourWidgets::ArdourButton auto_input_button;
 
 	Gtk::Label   punch_label;
 	Gtk::Label   layered_label;
@@ -548,25 +548,25 @@ private:
 	MiniTimeline   mini_timeline;
 	TimeInfoBox   *time_info_box;
 
-	ArdourButton auto_return_button;
-	ArdourButton follow_edits_button;
-	ArdourButton click_button;
-	ArdourButton sync_button;
+	ArdourWidgets::ArdourButton auto_return_button;
+	ArdourWidgets::ArdourButton follow_edits_button;
+	ArdourWidgets::ArdourButton click_button;
+	ArdourWidgets::ArdourButton sync_button;
 
-	ArdourButton auditioning_alert_button;
-	ArdourButton solo_alert_button;
-	ArdourButton feedback_alert_button;
-	ArdourButton error_alert_button;
+	ArdourWidgets::ArdourButton auditioning_alert_button;
+	ArdourWidgets::ArdourButton solo_alert_button;
+	ArdourWidgets::ArdourButton feedback_alert_button;
+	ArdourWidgets::ArdourButton error_alert_button;
 
-	ArdourButton action_script_call_btn[10];
+	ArdourWidgets::ArdourButton action_script_call_btn[10];
 	Gtk::Table action_script_table;
 
 	Gtk::VBox alert_box;
 	Gtk::VBox meter_box;
-	LevelMeterHBox * editor_meter;
-	float            editor_meter_max_peak;
-	ArdourButton     editor_meter_peak_display;
-	bool             editor_meter_peak_button_release (GdkEventButton*);
+	ArdourWidgets::ArdourButton editor_meter_peak_display;
+	LevelMeterHBox *            editor_meter;
+	float                       editor_meter_max_peak;
+	bool                        editor_meter_peak_button_release (GdkEventButton*);
 
 	bool editor_meter_button_press (GdkEventButton* ev);
 	void popup_editor_meter_menu (GdkEventButton* ev);
@@ -870,7 +870,7 @@ private:
 
 	void feedback_detected ();
 
-	ArdourButton             midi_panic_button;
+	ArdourWidgets::ArdourButton             midi_panic_button;
 	void                     midi_panic ();
 
 	void successful_graph_sort ();
@@ -902,9 +902,9 @@ private:
 	void tabs_switch (GtkNotebookPage*, guint page_number);
 	void tabs_page_added (Gtk::Widget*, guint);
 	void tabs_page_removed (Gtk::Widget*, guint);
-	ArdourButton editor_visibility_button;
-	ArdourButton mixer_visibility_button;
-	ArdourButton prefs_visibility_button;
+	ArdourWidgets::ArdourButton editor_visibility_button;
+	ArdourWidgets::ArdourButton mixer_visibility_button;
+	ArdourWidgets::ArdourButton prefs_visibility_button;
 
 	bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev, Gtkmm2ext::Bindings*);
 	bool try_gtk_accel_binding (GtkWindow* win, GdkEventKey* ev, bool translate, GdkModifierType modifier);

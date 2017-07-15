@@ -77,6 +77,7 @@ using namespace PBD;
 using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 void
 ARDOUR_UI::set_session (Session *s)

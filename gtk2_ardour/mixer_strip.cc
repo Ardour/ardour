@@ -35,6 +35,8 @@
 #include "gtkmm2ext/slider_controller.h"
 #include "gtkmm2ext/bindable_button.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
@@ -62,7 +64,6 @@
 #include "mixer_strip.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
-#include "ardour_button.h"
 #include "public_editor.h"
 #include "send_ui.h"
 #include "io_selector.h"
@@ -70,13 +71,12 @@
 #include "gui_thread.h"
 #include "route_group_menu.h"
 #include "meter_patterns.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -1621,6 +1621,7 @@ MixerStrip::route_group_changed ()
 void
 MixerStrip::route_color_changed ()
 {
+	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 	reset_strip_style ();

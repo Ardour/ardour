@@ -16,8 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __gtk2_ardour_ardour_button_h__
-#define __gtk2_ardour_ardour_button_h__
+#ifndef _WIDGETS_ARDOUR_BUTTON_H_
+#define _WIDGETS_ARDOUR_BUTTON_H_
 
 #include <list>
 #include <stdint.h>
@@ -30,7 +30,11 @@
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
 
-class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
+#include "widgets/visibility.h"
+
+namespace ArdourWidgets {
+
+class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 {
 	public:
 	enum Element {
@@ -212,4 +216,6 @@ class ArdourButton : public CairoWidget , public Gtkmm2ext::Activatable
 	void action_tooltip_changed ();
 };
 
-#endif /* __gtk2_ardour_ardour_button_h__ */
+} /* end namespace */
+
+#endif

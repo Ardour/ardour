@@ -33,9 +33,9 @@
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
 
-#include <gtkmm2ext/pane.h>
+#include "gtkmm2ext/pane.h"
+#include "widgets/ardour_button.h"
 
-#include "ardour_button.h"
 #include "ardour_window.h"
 #include "audio_clock.h"
 
@@ -82,13 +82,13 @@ protected:
 
 	Gtk::HBox     start_hbox;
 	AudioClock    start_clock;
-	ArdourButton  start_to_playhead_button;
-	ArdourButton  locate_to_start_button;
+	ArdourWidgets::ArdourButton start_to_playhead_button;
+	ArdourWidgets::ArdourButton locate_to_start_button;
 
 	Gtk::HBox     end_hbox;
 	AudioClock    end_clock;
-	ArdourButton  end_to_playhead_button;
-	ArdourButton  locate_to_end_button;
+	ArdourWidgets::ArdourButton end_to_playhead_button;
+	ArdourWidgets::ArdourButton locate_to_end_button;
 
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
@@ -96,7 +96,7 @@ protected:
 	Gtk::CheckButton lock_check_button;
 	Gtk::CheckButton glue_check_button;
 
-	ArdourButton   remove_button;
+	ArdourWidgets::ArdourButton remove_button;
 
 	Gtk::HBox     cd_track_details_hbox;
 	Gtk::Entry    isrc_entry;

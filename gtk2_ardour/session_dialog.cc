@@ -43,6 +43,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/recent_sessions.h"
@@ -56,7 +58,6 @@
 #include "opts.h"
 #include "engine_dialog.h"
 #include "pbd/i18n.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -66,6 +67,7 @@ using namespace Gdk;
 using namespace Glib;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
 SessionDialog::SessionDialog (bool require_new, const std::string& session_name, const std::string& session_path, const std::string& template_name, bool cancel_not_quit)

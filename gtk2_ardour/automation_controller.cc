@@ -29,8 +29,8 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
-#include "ardour_button.h"
-#include "ardour_knob.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_knob.h"
 #include "automation_controller.h"
 #include "gui_thread.h"
 #include "note_select_dialog.h"
@@ -40,6 +40,7 @@
 
 using namespace ARDOUR;
 using namespace Gtk;
+using namespace ArdourWidgets;
 
 using PBD::Controllable;
 

@@ -30,14 +30,15 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/keyboard.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/rgb_macros.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
+
+#include "widgets/tooltips.h"
 
 #include "gui_thread.h"
 #include "ardour_window.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -48,6 +49,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

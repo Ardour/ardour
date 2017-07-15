@@ -39,6 +39,8 @@
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/event_type_map.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/midi_playlist.h"
@@ -61,7 +63,6 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 
-#include "ardour_button.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "editor.h"
@@ -85,7 +86,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
-#include "tooltips.h"
 #include "utils.h"
 #include "note_base.h"
 
@@ -94,7 +94,6 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -154,7 +153,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	*/
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
+	_view->apply_color (ARDOUR_UI_UTILS::gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -261,8 +260,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	set_tooltip (_midnam_model_selector, _("External MIDI Device"));
-	set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
+	ArdourWidgets::set_tooltip (_midnam_model_selector, _("External MIDI Device"));
+	ArdourWidgets::set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.pack_start (_midnam_model_selector, false, false, 2);
 	_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);

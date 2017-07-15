@@ -24,13 +24,14 @@
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/keyboard.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/filesystem_paths.h"
 
 #include "midi_channel_selector.h"
 #include "midi_time_axis.h"
 #include "step_editor.h"
 #include "step_entry.h"
-#include "tooltips.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -42,6 +43,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 
 static void
 _note_off_event_handler (GtkWidget* /*widget*/, int note, gpointer arg)

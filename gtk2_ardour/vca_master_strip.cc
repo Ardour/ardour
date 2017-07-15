@@ -27,12 +27,12 @@
 
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/keyboard.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
 #include "floating_text_entry.h"
 #include "gui_thread.h"
 #include "mixer_ui.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "vca_master_strip.h"
@@ -40,7 +40,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace PBD;
@@ -59,7 +59,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	/* set color for the VCA, if not already done. */
 
 	if (!_vca->presentation_info().color_set()) {
-		_vca->presentation_info().set_color (gdk_color_to_rgba (unique_random_color()));
+		_vca->presentation_info().set_color (ARDOUR_UI_UTILS::gdk_color_to_rgba (unique_random_color()));
 	}
 
 	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (v));
@@ -521,7 +521,7 @@ VCAMasterStrip::drop_all_slaves ()
 Gdk::Color
 VCAMasterStrip::color () const
 {
-	return gdk_color_from_rgba (_vca->presentation_info().color ());
+	return ARDOUR_UI_UTILS::gdk_color_from_rgba (_vca->presentation_info().color ());
 }
 
 string

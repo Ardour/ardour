@@ -16,8 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __gtk2_ardour_ardour_dropdown_h__
-#define __gtk2_ardour_ardour_dropdown_h__
+#ifndef _WIDGETS_ARDOUR_DROPDOWN_H_
+#define _WIDGETS_ARDOUR_DROPDOWN_H_
 
 #include <list>
 #include <stdint.h>
@@ -26,10 +26,12 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "widgets/ardour_button.h"
+#include "widgets/visibility.h"
 
-#include "ardour_button.h"
+namespace ArdourWidgets {
 
-class ArdourDropdown : public ArdourButton
+class LIBWIDGETS_API ArdourDropdown : public ArdourButton
 {
 public:
 
@@ -53,4 +55,6 @@ private:
 	bool _scrolling_disabled;
 };
 
-#endif /* __gtk2_ardour_ardour_dropdown_h__ */
+} /* end namespace */
+
+#endif

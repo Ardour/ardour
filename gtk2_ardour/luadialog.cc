@@ -24,8 +24,9 @@
 #include "gtkmm2ext/slider_controller.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/ardour_dropdown.h"
+
 #include "ardour_dialog.h"
-#include "ardour_dropdown.h"
 #include "luadialog.h"
 #include "utils.h"
 
@@ -431,7 +432,7 @@ protected:
 		_rv = rv;
 	}
 
-	ArdourDropdown _dd;
+	ArdourWidgets::ArdourDropdown _dd;
 	std::vector<luabridge::LuaRef*> _refs;
 	luabridge::LuaRef* _rv;
 };

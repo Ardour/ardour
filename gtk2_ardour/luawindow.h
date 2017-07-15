@@ -38,8 +38,8 @@
 
 #include "lua/luastate.h"
 
-#include "ardour_button.h"
-#include "ardour_dropdown.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 
 class LuaWindow :
 	public Gtk::Window,
@@ -100,14 +100,14 @@ private:
 	Gtk::TextView outtext;
 	Gtk::ScrolledWindow scrollout;
 
-	ArdourButton _btn_run;
-	ArdourButton _btn_clear;
-	ArdourButton _btn_open;
-	ArdourButton _btn_save;
-	ArdourButton _btn_delete;
-	ArdourButton _btn_revert;
+	ArdourWidgets::ArdourButton _btn_run;
+	ArdourWidgets::ArdourButton _btn_clear;
+	ArdourWidgets::ArdourButton _btn_open;
+	ArdourWidgets::ArdourButton _btn_save;
+	ArdourWidgets::ArdourButton _btn_delete;
+	ArdourWidgets::ArdourButton _btn_revert;
 
-	ArdourDropdown script_select;
+	ArdourWidgets::ArdourDropdown script_select;
 
 	typedef boost::shared_ptr<ScriptBuffer> ScriptBufferPtr;
 	typedef std::vector<ScriptBufferPtr> ScriptBufferList;

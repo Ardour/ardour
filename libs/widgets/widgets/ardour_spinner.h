@@ -17,22 +17,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <boost/algorithm/string.hpp>
-#ifndef __gtk2_ardour_ardour_spinner_h__
-#define __gtk2_ardour_ardour_spinner_h__
+#ifndef _WIDGETS_ARDOUR_SPINNER_H_
+#define _WIDGETS_ARDOUR_SPINNER_H_
 
+#include <boost/algorithm/string.hpp>
 #include <gtkmm.h>
 
-#include "ardour/automatable.h"
-#include "ardour/automation_control.h"
-#include "ardour_button.h"
+#include "pbd/controllable.h"
 
-class ArdourSpinner : public Gtk::Alignment
+#include "widgets/ardour_button.h"
+#include "widgets/visibility.h"
+
+namespace ArdourWidgets {
+
+class LIBWIDGETS_API ArdourSpinner : public Gtk::Alignment
 {
 	public:
-		ArdourSpinner (
-				boost::shared_ptr<ARDOUR::AutomationControl>,
-				Gtk::Adjustment* adj);
+		ArdourSpinner (boost::shared_ptr<PBD::Controllable>, Gtk::Adjustment* adj);
 
 		virtual ~ArdourSpinner ();
 
@@ -54,7 +55,7 @@ class ArdourSpinner : public Gtk::Alignment
 		void ctrl_adjusted();
 		void spin_adjusted();
 
-		ArdourButton     _btn;
+		ArdourWidgets::ArdourButton _btn;
 		Gtk::Adjustment* _ctrl_adj;
 		Gtk::Adjustment  _spin_adj;
 		Gtk::SpinButton  _spinner;
@@ -63,8 +64,10 @@ class ArdourSpinner : public Gtk::Alignment
 		bool             _ctrl_ignore;
 		bool             _spin_ignore;
 
-		boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
+		boost::shared_ptr<PBD::Controllable> _controllable;
 
 };
 
-#endif /* __gtk2_ardour_ardour_menu_h__ */
+} /* end namespace */
+
+#endif

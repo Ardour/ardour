@@ -32,6 +32,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/plugin_manager.h"
 #include "ardour/profile.h"
 #include "ardour/template_utils.h"
@@ -42,7 +44,6 @@
 #include "utils.h"
 #include "add_route_dialog.h"
 #include "route_group_dialog.h"
-#include "tooltips.h"
 #include "pbd/i18n.h"
 
 using namespace Gtk;
@@ -173,7 +174,7 @@ AddRouteDialog::AddRouteDialog ()
 		table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 		table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
-		ARDOUR_UI_UTILS::set_tooltip (strict_io_combo,
+		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 		++n;
 	}

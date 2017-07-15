@@ -55,7 +55,10 @@ namespace Gtk {
 	class Widget;
 }
 
-class ArdourButton;
+namespace ArdourWidgets {
+	class ArdourButton;
+}
+
 class ArdourWindow;
 class IOSelectorWindow;
 class ControlSlaveUI;
@@ -114,17 +117,17 @@ public:
 	bool multiple_solo_change;
 
 	Gtk::HBox _invert_button_box;
-	ArdourButton* mute_button;
-	ArdourButton* solo_button;
-	ArdourButton* rec_enable_button; /* audio tracks */
-	ArdourButton* show_sends_button; /* busses */
-	ArdourButton* monitor_input_button;
-	ArdourButton* monitor_disk_button;
+	ArdourWidgets::ArdourButton* mute_button;
+	ArdourWidgets::ArdourButton* solo_button;
+	ArdourWidgets::ArdourButton* rec_enable_button; /* audio tracks */
+	ArdourWidgets::ArdourButton* show_sends_button; /* busses */
+	ArdourWidgets::ArdourButton* monitor_input_button;
+	ArdourWidgets::ArdourButton* monitor_disk_button;
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
-	ArdourButton* solo_safe_led;
-	ArdourButton* solo_isolated_led;
+	ArdourWidgets::ArdourButton* solo_safe_led;
+	ArdourWidgets::ArdourButton* solo_isolated_led;
 
 
 	Gtk::Label monitor_input_button_label;
@@ -329,7 +332,7 @@ private:
 	bool invert_release (GdkEventButton *, uint32_t i);
 
 	int _i_am_the_modifier;
-	std::vector<ArdourButton*> _invert_buttons;
+	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
 
 	StripableColorDialog _color_picker;

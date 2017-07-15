@@ -33,8 +33,9 @@
 #include "gtkmm2ext/persistent_tooltip.h"
 #include "gtkmm2ext/slider_controller.h"
 
-#include "ardour_button.h"
-#include "ardour_dropdown.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+
 #include "ardour_window.h"
 #include "io_selector.h"
 
@@ -94,22 +95,23 @@ private:
 
 
 	Gtk::DrawingArea darea;
-	ArdourButton _set_config;
-	ArdourButton _tgl_sidechain;
-	ArdourButton _add_plugin;
-	ArdourButton _del_plugin;
-	ArdourButton _add_input_audio;
-	ArdourButton _del_input_audio;
-	ArdourButton _add_input_midi;
-	ArdourButton _del_input_midi;
-	ArdourButton _add_output_audio;
-	ArdourButton _del_output_audio;
-	ArdourButton _add_output_midi;
-	ArdourButton _del_output_midi;
-	ArdourButton _add_sc_audio;
-	ArdourButton _add_sc_midi;
 
-	ArdourDropdown _out_presets;
+	ArdourWidgets::ArdourButton _set_config;
+	ArdourWidgets::ArdourButton _tgl_sidechain;
+	ArdourWidgets::ArdourButton _add_plugin;
+	ArdourWidgets::ArdourButton _del_plugin;
+	ArdourWidgets::ArdourButton _add_input_audio;
+	ArdourWidgets::ArdourButton _del_input_audio;
+	ArdourWidgets::ArdourButton _add_input_midi;
+	ArdourWidgets::ArdourButton _del_input_midi;
+	ArdourWidgets::ArdourButton _add_output_audio;
+	ArdourWidgets::ArdourButton _del_output_audio;
+	ArdourWidgets::ArdourButton _add_output_midi;
+	ArdourWidgets::ArdourButton _del_output_midi;
+	ArdourWidgets::ArdourButton _add_sc_audio;
+	ArdourWidgets::ArdourButton _add_sc_midi;
+
+	ArdourWidgets::ArdourDropdown _out_presets;
 
 	Gtk::Menu reset_menu;
 	Gtk::Menu input_menu;

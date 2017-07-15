@@ -72,6 +72,7 @@ UIConfiguration&
 UIConfiguration::instance ()
 {
 	static UIConfiguration s_instance;
+	_instance = &s_instance;
 	return s_instance;
 }
 

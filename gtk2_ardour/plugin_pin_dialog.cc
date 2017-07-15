@@ -29,6 +29,8 @@
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/menu_elems.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/pannable.h"
@@ -42,7 +44,6 @@
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -52,6 +53,7 @@ using namespace PBD;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: _set_config (_("Manual Config"), ArdourButton::led_default_elements)
@@ -191,7 +193,7 @@ PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	tl->pack_start (*manage (new Label ("")), true, true); // invisible separator
 	tl->pack_start (*manage (new HSeparator ()), false, false, 4);
 	_out_presets.disable_scrolling ();
-	ARDOUR_UI_UTILS::set_tooltip (_out_presets, _("Output Presets"));
+	ArdourWidgets::set_tooltip (_out_presets, _("Output Presets"));
 	tl->pack_start (_out_presets, false, false);
 
 	/* right side */
@@ -602,7 +604,7 @@ PluginPinWidget::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 	ArdourButton *pb = manage (new ArdourButton (lbl));
 	pb->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	pb->set_layout_ellipsize_width (108 * PANGO_SCALE);
-	ARDOUR_UI_UTILS::set_tooltip (*pb, tip);
+	ArdourWidgets::set_tooltip (*pb, tip);
 	_sidechain_tbl->attach (*pb, 0, 1, r, r +1 , EXPAND|FILL, SHRINK);
 
 	pb->signal_button_press_event ().connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::sc_input_press), boost::weak_ptr<Port> (p)), false);

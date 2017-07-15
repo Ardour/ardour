@@ -39,6 +39,8 @@
 
 #include "canvas/debug.h"
 
+#include "widgets/tooltips.h"
+
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
 #include "gui_thread.h"
@@ -47,7 +49,6 @@
 #include "paste_context.h"
 #include "public_editor.h"
 #include "selection.h"
-#include "tooltips.h"
 #include "rgb_macros.h"
 #include "point_selection.h"
 #include "control_point.h"
@@ -59,6 +60,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

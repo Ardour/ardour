@@ -33,9 +33,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
 
-#include "ardour/rc_configuration.h" // for widget prelight preference
-
-#include "ardour_display.h"
+#include "widgets/ardour_display.h"
 
 #include "pbd/i18n.h"
 
@@ -44,10 +42,10 @@ using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
+using namespace ArdourWidgets;
 using std::max;
 using std::min;
 using namespace std;
-
 
 ArdourDisplay::ArdourDisplay (Element e)
 {
@@ -96,6 +94,9 @@ ArdourDisplay::add_controllable_preset (const char *txt, float val)
 	AddMenuElem(MenuElem (txt, sigc::bind (sigc::mem_fun(*this, &ArdourDisplay::handle_controllable_preset), val)));
 }
 
+static inline float dB_to_coefficient (float dB) {
+	return dB > -318.8f ? pow (10.0f, dB * 0.05f) : 0.0f;
+}
 
 void
 ArdourDisplay::handle_controllable_preset (float p)

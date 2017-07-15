@@ -42,6 +42,8 @@
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "widgets/tooltips.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "audio_time_axis.h"
@@ -54,7 +56,6 @@
 #include "mixer_strip.h"
 #include "plugin_setup_dialog.h"
 #include "route_sorter.h"
-#include "tooltips.h"
 #include "vca_time_axis.h"
 #include "utils.h"
 
@@ -62,6 +63,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

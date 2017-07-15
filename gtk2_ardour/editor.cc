@@ -84,11 +84,13 @@
 #include "canvas/debug.h"
 #include "canvas/text.h"
 
+#include "widgets/ardour_spacer.h"
+#include "widgets/tooltips.h"
+
 #include "control_protocol/control_protocol.h"
 
 #include "actions.h"
 #include "analysis_window.h"
-#include "ardour_spacer.h"
 #include "audio_clock.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -137,7 +139,6 @@
 #include "time_axis_view.h"
 #include "time_info_box.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "vca_time_axis.h"
@@ -147,6 +148,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

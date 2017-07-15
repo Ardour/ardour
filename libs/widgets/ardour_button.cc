@@ -35,9 +35,9 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
-#include "ardour_button.h"
-#include "tooltips.h"
-#include "ui_config.h"
+#include "widgets/ardour_button.h"
+#include "widgets/tooltips.h"
+#include "widgets/ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -47,7 +47,7 @@
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using std::max;
 using std::min;
 using namespace std;
@@ -99,7 +99,7 @@ ArdourButton::ArdourButton (Element e)
 	, _update_colors (true)
 	, _pattern_height (0)
 {
-	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfigurationBase::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
 	/* This is not provided by gtkmm */
 	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
 }
@@ -146,8 +146,8 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, _pattern_height (0)
 {
 	set_text (str);
-	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
-	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
+	UIConfigurationBase::instance().ColorsChanged.connect (sigc::mem_fun (*this, &ArdourButton::color_handler));
+	UIConfigurationBase::instance().DPIReset.connect (sigc::mem_fun (*this, &ArdourButton::on_name_changed));
 	/* This is not provided by gtkmm */
 	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
 }
@@ -262,7 +262,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const float corner_radius = std::max(2.f, _corner_radius * UIConfiguration::instance().get_ui_scale());
+	const float corner_radius = std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
 
 	if (_update_colors) {
 		set_colors ();
@@ -515,12 +515,12 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 
 		//black ring
 		cairo_set_source_rgb (cr, 0, 0, 0);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * UIConfiguration::instance().get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 1 * UIConfigurationBase::instance().get_ui_scale(), 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		//led color
 		ArdourCanvas::set_source_rgba (cr, led_color);
-		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * UIConfiguration::instance().get_ui_scale(), 0, 2 * M_PI);
+		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * UIConfigurationBase::instance().get_ui_scale(), 0, 2 * M_PI);
 		cairo_fill(cr);
 
 		cairo_restore (cr);
@@ -529,13 +529,13 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	// a transparent overlay to indicate insensitivity
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
-		uint32_t ins_color = UIConfiguration::instance().color ("gtk_background");
+		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
 		ArdourCanvas::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
 	}
 
 	// if requested, show hovering
-	if (UIConfiguration::instance().get_widget_prelight()
+	if (UIConfigurationBase::instance().get_widget_prelight()
 			&& !((visual_state() & Gtkmm2ext::Insensitive))) {
 		if (_hovering) {
 			rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
@@ -604,7 +604,7 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 	CairoWidget::on_size_request (req);
 
 	if (_diameter == 0) {
-		const float newdia = rintf (11.f * UIConfiguration::instance().get_ui_scale());
+		const float newdia = rintf (11.f * UIConfigurationBase::instance().get_ui_scale());
 		if (_diameter != newdia) {
 			_pattern_height = 0;
 			_diameter = newdia;
@@ -722,25 +722,25 @@ ArdourButton::set_colors ()
 	bool failed = false;
 
 	if (!(_fixed_colors_set & 0x1)) {
-		fill_active_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
+		fill_active_color = UIConfigurationBase::instance().color (string_compose ("%1: fill active", name), &failed);
 		if (failed) {
-			fill_active_color = UIConfiguration::instance().color ("generic button: fill active");
+			fill_active_color = UIConfigurationBase::instance().color ("generic button: fill active");
 		}
 	}
 
 	if (!(_fixed_colors_set & 0x2)) {
-		fill_inactive_color = UIConfiguration::instance().color (string_compose ("%1: fill", name), &failed);
+		fill_inactive_color = UIConfigurationBase::instance().color (string_compose ("%1: fill", name), &failed);
 		if (failed) {
-			fill_inactive_color = UIConfiguration::instance().color ("generic button: fill");
+			fill_inactive_color = UIConfigurationBase::instance().color ("generic button: fill");
 		}
 	}
 
 	text_active_color = ArdourCanvas::contrasting_text_color (fill_active_color);
 	text_inactive_color = ArdourCanvas::contrasting_text_color (fill_inactive_color);
 
-	led_active_color = UIConfiguration::instance().color (string_compose ("%1: led active", name), &failed);
+	led_active_color = UIConfigurationBase::instance().color (string_compose ("%1: led active", name), &failed);
 	if (failed) {
-		led_active_color = UIConfiguration::instance().color ("generic button: led active");
+		led_active_color = UIConfigurationBase::instance().color ("generic button: led active");
 	}
 
 	/* The inactive color for the LED is just a fairly dark version of the
@@ -1140,7 +1140,7 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = (_elements & Inactive) ? false : true;
 
-	if (UIConfiguration::instance().get_widget_prelight()) {
+	if (UIConfigurationBase::instance().get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 
@@ -1157,7 +1157,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	_hovering = false;
 
-	if (UIConfiguration::instance().get_widget_prelight()) {
+	if (UIConfigurationBase::instance().get_widget_prelight()) {
 		CairoWidget::set_dirty ();
 	}
 

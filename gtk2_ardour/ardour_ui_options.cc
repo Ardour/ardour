@@ -45,6 +45,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace ArdourWidgets;
 
 void
 ARDOUR_UI::toggle_external_sync()

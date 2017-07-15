@@ -34,7 +34,7 @@
 #include "ardour/session_handle.h"
 
 #include "gtkmm2ext/cairo_widget.h"
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
 
 namespace ARDOUR {
 	class Session;
@@ -82,8 +82,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
 
-	ArdourButton* left_btn () { return &_left_btn; }
-	ArdourButton* right_btn () { return &_right_btn; }
+	ArdourWidgets::ArdourButton* left_btn () { return &_left_btn; }
+	ArdourWidgets::ArdourButton* right_btn () { return &_right_btn; }
 
 	/** Alter cairo scaling during rendering.
 	 *
@@ -112,8 +112,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_button_press_event (GdkEventButton *ev);
 	bool on_button_release_event(GdkEventButton *ev);
 
-	ArdourButton _left_btn;
-	ArdourButton _right_btn;
+	ArdourWidgets::ArdourButton _left_btn;
+	ArdourWidgets::ArdourButton _right_btn;
 
 	private:
 	Mode             _mode;

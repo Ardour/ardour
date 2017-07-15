@@ -17,25 +17,24 @@
 
 */
 
-#ifndef UI_TOOLTIPS_H
-#define UI_TOOLTIPS_H
+#include "gtkmm2ext/gtk_ui.h"
+#include "widgets/tooltips.h"
 
-#include <string>
+namespace ArdourWidgets {
 
-namespace Gtk {
-	class Widget;
+void
+set_tooltip (Gtk::Widget& w, const std::string& text) {
+	Gtkmm2ext::UI::instance()->set_tip(w, text);
 }
 
-// Reduce these down to just one function
-namespace ARDOUR_UI_UTILS {
-
-void set_tooltip (Gtk::Widget& w, const std::string& text);
-
-void set_tooltip (Gtk::Widget* w, const std::string& text);
-
-void set_tooltip (Gtk::Widget* w, const std::string& text, const std::string& help_text);
-
+void
+set_tooltip (Gtk::Widget* w, const std::string& text) {
+	Gtkmm2ext::UI::instance()->set_tip(*w, text);
 }
 
-#endif // UI_TOOLTIPS_H
+void
+set_tooltip (Gtk::Widget* w, const std::string& text, const std::string& help_text) {
+	Gtkmm2ext::UI::instance()->set_tip(w, text.c_str(), help_text.c_str());
+}
 
+}

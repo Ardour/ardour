@@ -31,7 +31,7 @@
 
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
 
 namespace ARDOUR {
 	class VCA;
@@ -48,9 +48,9 @@ public:
 
 private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
-	PBD::ScopedConnectionList connections;
-	PBD::ScopedConnectionList master_connections;
-	ArdourButton  initial_button;
+	PBD::ScopedConnectionList   connections;
+	PBD::ScopedConnectionList   master_connections;
+	ArdourWidgets::ArdourButton initial_button;
 
 	void master_property_changed (PBD::PropertyChange const &);
 	void update_vca_display ();

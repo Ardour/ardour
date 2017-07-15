@@ -31,8 +31,6 @@
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
-
 namespace ARDOUR {
 	class Session;
 	class Location;

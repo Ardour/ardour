@@ -32,12 +32,15 @@
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/barcontroller.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/slider_controller.h>
+#include "gtkmm2ext/click_box.h"
+#include "gtkmm2ext/fastmeter.h"
+#include "gtkmm2ext/barcontroller.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/slider_controller.h"
+
+#include "widgets/ardour_knob.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -48,10 +51,8 @@
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
-#include "ardour_knob.h"
 #include "gain_meter.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -60,6 +61,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 

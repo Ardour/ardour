@@ -24,6 +24,7 @@
 
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
 #include "clock_group.h"
@@ -35,14 +36,13 @@
 #include "prompter.h"
 #include "utils.h"
 #include "public_editor.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;

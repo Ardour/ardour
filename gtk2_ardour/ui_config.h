@@ -35,10 +35,11 @@
 #include "pbd/configuration_variable.h"
 
 #include "canvas/colors.h"
+#include "widgets/ui_config.h"
 
 #include "utils.h"
 
-class UIConfiguration : public PBD::Stateful
+class UIConfiguration : public ArdourWidgets::UIConfigurationBase
 {
 private:
 	UIConfiguration();
@@ -87,13 +88,8 @@ public:
 	static std::string color_to_hex_string (ArdourCanvas::Color c);
 	static std::string color_to_hex_string_no_alpha (ArdourCanvas::Color c);
 
-	sigc::signal<void>  ColorsChanged;
-
 	void reset_dpi ();
-
 	float get_ui_scale ();
-
-	sigc::signal<void>  DPIReset;
 
 	sigc::signal<void,std::string> ParameterChanged;
 	void map_parameters (boost::function<void (std::string)>&);

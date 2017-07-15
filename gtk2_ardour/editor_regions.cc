@@ -37,6 +37,8 @@
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/tooltips.h"
+
 #include "audio_clock.h"
 #include "editor.h"
 #include "editing.h"
@@ -50,13 +52,13 @@
 #include "editor_regions.h"
 #include "editor_drag.h"
 #include "main_clock.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;

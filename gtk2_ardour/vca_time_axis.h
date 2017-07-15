@@ -20,7 +20,8 @@
 #ifndef __ardour_vca_time_axis_h__
 #define __ardour_vca_time_axis_h__
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
+
 #include "stripable_time_axis.h"
 #include "gain_meter.h"
 
@@ -57,13 +58,13 @@ public:
 
 protected:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
-	ArdourButton  solo_button;
-	ArdourButton  mute_button;
-	ArdourButton  automation_button;
-	ArdourButton  drop_button;
-	ArdourButton  number_label;
-	GainMeterBase gain_meter;
-	PBD::ScopedConnectionList vca_connections;
+	ArdourWidgets::ArdourButton    solo_button;
+	ArdourWidgets::ArdourButton    mute_button;
+	ArdourWidgets::ArdourButton    automation_button;
+	ArdourWidgets::ArdourButton    drop_button;
+	ArdourWidgets::ArdourButton    number_label;
+	GainMeterBase                  gain_meter;
+	PBD::ScopedConnectionList      vca_connections;
 
 	void create_gain_automation_child (const Evoral::Parameter &, bool);
 	void create_trim_automation_child (const Evoral::Parameter &, bool) {}

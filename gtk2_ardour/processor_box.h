@@ -52,11 +52,12 @@
 
 #include "pbd/fastlog.h"
 
+#include "widgets/ardour_button.h"
+
 #include "plugin_interest.h"
 #include "io_selector.h"
 #include "send_ui.h"
 #include "enums.h"
-#include "ardour_button.h"
 #include "window_manager.h"
 
 class MotionController;
@@ -169,7 +170,7 @@ public:
 	Gtk::Menu* build_send_options_menu ();
 
 protected:
-	ArdourButton _button;
+	ArdourWidgets::ArdourButton _button;
 	Gtk::VBox _vbox;
 	Position _position;
 	uint32_t _position_num;
@@ -229,7 +230,7 @@ private:
 		Gtkmm2ext::HSliderController _slider;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 		/* things for a button */
-		ArdourButton _button;
+		ArdourWidgets::ArdourButton _button;
 		bool _ignore_ui_adjustment;
 		PBD::ScopedConnectionList _connections;
 		bool _visible;

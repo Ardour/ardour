@@ -36,17 +36,18 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
+#include "widgets/tooltips.h"
+
 #include "actions.h"
 #include "rgb_macros.h"
 #include "shuttle_control.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using std::min;
 using std::max;
 

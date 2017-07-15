@@ -48,9 +48,10 @@
 #include "ardour/plugin.h"
 #include "ardour/variant.h"
 
-#include "ardour_button.h"
-#include "ardour_dropdown.h"
-#include "ardour_spinner.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_spinner.h"
+
 #include "ardour_window.h"
 #include "automation_controller.h"
 
@@ -117,21 +118,21 @@ protected:
 	/* UI elements that can subclasses can add to their widgets */
 
 	/** a ComboBoxText which lists presets and manages their selection */
-	ArdourDropdown _preset_combo;
+	ArdourWidgets::ArdourDropdown _preset_combo;
 	/** a label which has a * in if the current settings are different from the preset being shown */
 	Gtk::Label _preset_modified;
 	/** a button to add a preset */
-	ArdourButton add_button;
+	ArdourWidgets::ArdourButton add_button;
 	/** a button to save the current settings as a new user preset */
-	ArdourButton save_button;
+	ArdourWidgets::ArdourButton save_button;
 	/** a button to delete the current preset (if it is a user one) */
-	ArdourButton delete_button;
+	ArdourWidgets::ArdourButton delete_button;
 	/** a button to delete the reset the plugin params */
-	ArdourButton reset_button;
+	ArdourWidgets::ArdourButton reset_button;
 	/** a button to bypass the plugin */
-	ArdourButton bypass_button;
+	ArdourWidgets::ArdourButton bypass_button;
 	/** and self-explaining button :) */
-	ArdourButton pin_management_button;
+	ArdourWidgets::ArdourButton pin_management_button;
 	/** a button to acquire keyboard focus */
 	Gtk::EventBox focus_button;
 	/** an expander containing the plugin description */
@@ -139,15 +140,15 @@ protected:
 	/** an expander containing the plugin analysis graph */
 	Gtk::Expander plugin_analysis_expander;
 	/** a button which, when clicked, opens the latency GUI */
-	ArdourButton latency_button;
+	ArdourWidgets::ArdourButton latency_button;
 	/** a button which sets all controls' automation setting to Manual */
-	ArdourButton automation_manual_all_button;
+	ArdourWidgets::ArdourButton automation_manual_all_button;
 	/** a button which sets all controls' automation setting to Play */
-	ArdourButton automation_play_all_button;
+	ArdourWidgets::ArdourButton automation_play_all_button;
 	/** a button which sets all controls' automation setting to Write */
-	ArdourButton automation_write_all_button;
+	ArdourWidgets::ArdourButton automation_write_all_button;
 	/** a button which sets all controls' automation setting to Touch */
-	ArdourButton automation_touch_all_button;
+	ArdourWidgets::ArdourButton automation_touch_all_button;
 
 	void set_latency_label ();
 
@@ -227,12 +228,12 @@ private:
 		boost::shared_ptr<ARDOUR::ScalePoints>  scale_points;
 		boost::shared_ptr<AutomationController> controller;
 
-		ArdourButton                            automate_button;
+		ArdourWidgets::ArdourButton             automate_button;
 		Gtk::Label                              label;
-		ArdourDropdown*                         combo;
+		ArdourWidgets::ArdourDropdown*          combo;
 		Gtkmm2ext::ClickBox*                    clickbox;
 		Gtk::FileChooserButton*                 file_button;
-		ArdourSpinner*                          spin_box;
+		ArdourWidgets::ArdourSpinner*           spin_box;
 
 		bool                                    button;
 		bool                                    update_pending;

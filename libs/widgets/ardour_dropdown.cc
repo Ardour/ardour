@@ -33,7 +33,7 @@
 
 #include "ardour/rc_configuration.h" // for widget prelight preference
 
-#include "ardour_dropdown.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "pbd/i18n.h"
 
@@ -43,6 +43,7 @@ using namespace Gdk;
 using namespace Gtk;
 using namespace Glib;
 using namespace PBD;
+using namespace ArdourWidgets;
 using namespace std;
 
 

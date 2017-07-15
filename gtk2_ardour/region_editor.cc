@@ -24,6 +24,8 @@
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/region.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
@@ -34,7 +36,6 @@
 #include "gui_thread.h"
 #include "region_editor.h"
 #include "public_editor.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
@@ -42,7 +43,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
-using namespace ARDOUR_UI_UTILS;
 
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	: ArdourDialog (_("Region"))
@@ -78,7 +78,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	sync_offset_absolute_clock.set_session (_session);
 	start_clock.set_session (_session);
 
-	set_tooltip (audition_button, _("audition this region"));
+	ArdourWidgets::set_tooltip (audition_button, _("audition this region"));
 
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
 

@@ -64,6 +64,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace Glib;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 
 #define DEBUG_ECONTROL(msg) DEBUG_TRACE (PBD::DEBUG::EngineControl, string_compose ("%1: %2\n", __LINE__, msg));

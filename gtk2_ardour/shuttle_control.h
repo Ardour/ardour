@@ -29,7 +29,7 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
 
 namespace Gtk {
 	class Menu;
@@ -60,7 +60,7 @@ public:
 	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
 	void set_colors ();
 
-	ArdourButton* info_button () { return &_info_button; }
+	ArdourWidgets::ArdourButton* info_button () { return &_info_button; }
 
 protected:
 	bool _hovering;
@@ -75,7 +75,7 @@ protected:
 	cairo_pattern_t* shine_pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
-	ArdourButton _info_button;
+	ArdourWidgets::ArdourButton _info_button;
 	Gtk::Menu*        shuttle_unit_menu;
 	Gtk::Menu*        shuttle_style_menu;
 	Gtk::Menu*        shuttle_context_menu;

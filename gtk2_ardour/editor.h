@@ -52,9 +52,10 @@
 #include "canvas/fwd.h"
 #include "canvas/ruler.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+
 #include "ardour_dialog.h"
-#include "ardour_dropdown.h"
 #include "public_editor.h"
 #include "editing.h"
 #include "enums.h"
@@ -1769,14 +1770,14 @@ private:
 	void editor_mixer_button_toggled ();
 	void editor_list_button_toggled ();
 
-	ArdourButton              zoom_in_button;
-	ArdourButton              zoom_out_button;
-	ArdourButton              zoom_out_full_button;
+	ArdourWidgets::ArdourButton   zoom_in_button;
+	ArdourWidgets::ArdourButton   zoom_out_button;
+	ArdourWidgets::ArdourButton   zoom_out_full_button;
 
-	ArdourButton              tav_expand_button;
-	ArdourButton              tav_shrink_button;
-	ArdourDropdown            visible_tracks_selector;
-	ArdourDropdown            zoom_preset_selector;
+	ArdourWidgets::ArdourButton   tav_expand_button;
+	ArdourWidgets::ArdourButton   tav_shrink_button;
+	ArdourWidgets::ArdourDropdown visible_tracks_selector;
+	ArdourWidgets::ArdourDropdown zoom_preset_selector;
 
 	int32_t                   _visible_track_count;
 	void build_track_count_menu ();
@@ -1789,15 +1790,15 @@ private:
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-	ArdourButton mouse_select_button;
-	ArdourButton mouse_draw_button;
-	ArdourButton mouse_move_button;
-	ArdourButton mouse_timefx_button;
-	ArdourButton mouse_content_button;
-	ArdourButton mouse_audition_button;
-	ArdourButton mouse_cut_button;
+	ArdourWidgets::ArdourButton mouse_select_button;
+	ArdourWidgets::ArdourButton mouse_draw_button;
+	ArdourWidgets::ArdourButton mouse_move_button;
+	ArdourWidgets::ArdourButton mouse_timefx_button;
+	ArdourWidgets::ArdourButton mouse_content_button;
+	ArdourWidgets::ArdourButton mouse_audition_button;
+	ArdourWidgets::ArdourButton mouse_cut_button;
 
-	ArdourButton smart_mode_button;
+	ArdourWidgets::ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
@@ -1810,20 +1811,20 @@ private:
 	Gtk::Button              automation_mode_button;
 
 	//edit mode menu stuff
-	ArdourDropdown	edit_mode_selector;
-	void edit_mode_selection_done ( ARDOUR::EditMode m );
+	ArdourWidgets::ArdourDropdown	edit_mode_selector;
+	void edit_mode_selection_done (ARDOUR::EditMode);
 	void build_edit_mode_menu ();
-	Gtk::VBox         edit_mode_box;
+	Gtk::VBox edit_mode_box;
 
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
 
-	ArdourDropdown snap_type_selector;
+	ArdourWidgets::ArdourDropdown snap_type_selector;
 	void build_snap_type_menu ();
 
-	ArdourDropdown snap_mode_selector;
+	ArdourWidgets::ArdourDropdown snap_mode_selector;
 	void build_snap_mode_menu ();
-	Gtk::HBox         snap_box;
+	Gtk::HBox snap_box;
 
 	std::vector<std::string> snap_type_strings;
 	std::vector<std::string> snap_mode_strings;
@@ -1837,8 +1838,8 @@ private:
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff
-	ArdourDropdown	zoom_focus_selector;
-	void zoom_focus_selection_done ( Editing::ZoomFocus f );
+	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
+	void zoom_focus_selection_done (Editing::ZoomFocus);
 	void build_zoom_focus_menu ();
 	std::vector<std::string> zoom_focus_strings;
 
@@ -1846,16 +1847,16 @@ private:
 
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
 
-	Gtk::HBox           _track_box;
+	Gtk::HBox _track_box;
 
-	Gtk::HBox           _zoom_box;
-	void                zoom_adjustment_changed();
+	Gtk::HBox _zoom_box;
+	void zoom_adjustment_changed();
 
 	void setup_toolbar ();
 
 	void setup_tooltips ();
 
-	Gtk::HBox                toolbar_hbox;
+	Gtk::HBox toolbar_hbox;
 
 	void setup_midi_toolbar ();
 
@@ -1893,35 +1894,35 @@ private:
 
 	/* transport range select process */
 
-	ArdourCanvas::Rectangle*  cd_marker_bar_drag_rect;
-	ArdourCanvas::Rectangle*  range_bar_drag_rect;
-	ArdourCanvas::Rectangle*  transport_bar_drag_rect;
-	ArdourCanvas::Rectangle     *transport_bar_range_rect;
-	ArdourCanvas::Rectangle     *transport_bar_preroll_rect;
-	ArdourCanvas::Rectangle     *transport_bar_postroll_rect;
-	ArdourCanvas::Rectangle     *transport_loop_range_rect;
-	ArdourCanvas::Rectangle     *transport_punch_range_rect;
-	ArdourCanvas::Line     *transport_punchin_line;
-	ArdourCanvas::Line     *transport_punchout_line;
-	ArdourCanvas::Rectangle     *transport_preroll_rect;
-	ArdourCanvas::Rectangle     *transport_postroll_rect;
+	ArdourCanvas::Rectangle* cd_marker_bar_drag_rect;
+	ArdourCanvas::Rectangle* range_bar_drag_rect;
+	ArdourCanvas::Rectangle* transport_bar_drag_rect;
+	ArdourCanvas::Rectangle* transport_bar_range_rect;
+	ArdourCanvas::Rectangle* transport_bar_preroll_rect;
+	ArdourCanvas::Rectangle* transport_bar_postroll_rect;
+	ArdourCanvas::Rectangle* transport_loop_range_rect;
+	ArdourCanvas::Rectangle* transport_punch_range_rect;
+	ArdourCanvas::Line*      transport_punchin_line;
+	ArdourCanvas::Line*      transport_punchout_line;
+	ArdourCanvas::Rectangle* transport_preroll_rect;
+	ArdourCanvas::Rectangle* transport_postroll_rect;
 
-	ARDOUR::Location*  transport_loop_location();
-	ARDOUR::Location*  transport_punch_location();
+	ARDOUR::Location* transport_loop_location();
+	ARDOUR::Location* transport_punch_location();
 
-	ARDOUR::Location   *temp_location;
+	ARDOUR::Location* temp_location;
 
 	/* object rubberband select process */
 
 	void select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
-	ArdourCanvas::Rectangle   *rubberband_rect;
+	ArdourCanvas::Rectangle* rubberband_rect;
 
 	EditorRouteGroups* _route_groups;
-	EditorRoutes* _routes;
-	EditorRegions* _regions;
-	EditorSnapshots* _snapshots;
-	EditorLocations* _locations;
+	EditorRoutes*      _routes;
+	EditorRegions*     _regions;
+	EditorSnapshots*   _snapshots;
+	EditorLocations*   _locations;
 
 	/* diskstream/route display management */
 	Glib::RefPtr<Gdk::Pixbuf> rec_enabled_icon;
@@ -1931,7 +1932,7 @@ private:
 
 	bool sync_track_view_list_and_routes ();
 
-	Gtk::VBox           list_vpacker;
+	Gtk::VBox list_vpacker;
 
 	/* autoscrolling */
 
@@ -2089,8 +2090,8 @@ private:
 
 	/* nudge */
 
-	ArdourButton      nudge_forward_button;
-	ArdourButton      nudge_backward_button;
+	ArdourWidgets::ArdourButton      nudge_forward_button;
+	ArdourWidgets::ArdourButton      nudge_backward_button;
 	Gtk::HBox        nudge_hbox;
 	Gtk::VBox        nudge_vbox;
 	AudioClock*       nudge_clock;
@@ -2152,7 +2153,7 @@ private:
 
 	Editing::EditPoint _edit_point;
 
-	ArdourDropdown edit_point_selector;
+	ArdourWidgets::ArdourDropdown edit_point_selector;
 	void build_edit_point_menu();
 
 	void set_edit_point_preference (Editing::EditPoint ep, bool force = false);

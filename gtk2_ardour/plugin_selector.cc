@@ -30,9 +30,9 @@
 #include <gtkmm/button.h>
 #include <gtkmm/notebook.h>
 
-#include <gtkmm2ext/utils.h>
-
+#include "gtkmm2ext/utils.h"
 #include "pbd/convert.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/plugin_manager.h"
 #include "ardour/plugin.h"
@@ -40,7 +40,6 @@
 
 #include "plugin_selector.h"
 #include "gui_thread.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
@@ -48,7 +47,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 
 static const char* _filter_mode_strings[] = {
 	N_("Name contains"),

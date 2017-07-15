@@ -27,12 +27,13 @@
 #include "ardour/panner_shell.h"
 #include "ardour/session.h"
 
+#include "widgets/tooltips.h"
+
 #include "panner_ui.h"
 #include "panner2d.h"
 #include "gui_thread.h"
 #include "stereo_panner.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "mono_panner.h"
 #include "ui_config.h"
 
@@ -43,7 +44,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
-using namespace ARDOUR_UI_UTILS;
 
 PannerUI::PannerUI (Session* s)
 	: _current_nouts (-1)
@@ -67,7 +67,7 @@ PannerUI::PannerUI (Session* s)
 
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
-	set_tooltip (pan_automation_state_button, _("Pan automation mode"));
+	ArdourWidgets::set_tooltip (pan_automation_state_button, _("Pan automation mode"));
 
 	//set_size_request_to_display_given_text (pan_automation_state_button, X_("O"), 2, 2);
 

@@ -34,13 +34,15 @@
 
 #include <gtkmm/messagedialog.h>
 
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/rgb_macros.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/choice.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/rgb_macros.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
@@ -84,7 +86,6 @@
 #include "script_selector.h"
 #include "send_ui.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "new_plugin_preset_dialog.h"
 
 #include "pbd/i18n.h"
@@ -103,6 +104,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 ProcessorBox*  ProcessorBox::_current_processor_box = 0;
 RefPtr<Action> ProcessorBox::paste_action;
@@ -516,10 +518,10 @@ ProcessorEntry::setup_tooltip ()
 			}
 
 			if (pi->plugin()->has_editor()) {
-				ARDOUR_UI_UTILS::set_tooltip (_button,
+				set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), name (Wide), Keyboard::secondary_modifier_name (), postfix));
 			} else {
-				ARDOUR_UI_UTILS::set_tooltip (_button,
+				set_tooltip (_button,
 						string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), name (Wide), postfix));
 			}
 			return;
@@ -533,14 +535,14 @@ ProcessorEntry::setup_tooltip ()
 		if ((send = boost::dynamic_pointer_cast<Send> (_processor)) != 0 &&
 				!boost::dynamic_pointer_cast<InternalSend>(_processor)) {
 			if (send->remove_on_disconnect ()) {
-				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.", _processor->name()));
+				set_tooltip (_button, string_compose ("<b>&gt; %1</b>\nThis (sidechain) send will be removed when disconnected.", _processor->name()));
 			} else {
-				ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
+				set_tooltip (_button, string_compose ("<b>&gt; %1</b>", _processor->name()));
 			}
 			return;
 		}
 	}
-	ARDOUR_UI_UTILS::set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
+	set_tooltip (_button, string_compose ("<b>%1</b>", name (Wide)));
 }
 
 string
@@ -880,7 +882,7 @@ ProcessorEntry::Control::set_tooltip ()
 	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
 	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
-	ARDOUR_UI_UTILS::set_tooltip (_button, sm);
+	ArdourWidgets::set_tooltip (_button, sm);
 }
 
 void
@@ -1556,10 +1558,10 @@ ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_p
 	std::string postfix = string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
 
 	if (_plug->has_editor()) {
-		ARDOUR_UI_UTILS::set_tooltip (*this,
+		set_tooltip (*this,
 				string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI.%3"), e.name (Wide), Keyboard::primary_modifier_name (), postfix));
 	} else {
-		ARDOUR_UI_UTILS::set_tooltip (*this,
+		set_tooltip (*this,
 				string_compose (_("<b>%1</b>\nDouble-click to show generic GUI.%2"), e.name (Wide), postfix));
 	}
 }
@@ -1856,7 +1858,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 			);
 	}
 
-	ARDOUR_UI_UTILS::set_tooltip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
+	set_tooltip (processor_display, _("Right-click to add/remove/edit\nplugins,inserts,sends and more"));
 }
 
 ProcessorBox::~ProcessorBox ()

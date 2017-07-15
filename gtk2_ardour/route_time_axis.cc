@@ -35,12 +35,15 @@
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm/menu.h>
-#include <gtkmm/menuitem.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/bindable_button.h>
-#include <gtkmm2ext/utils.h>
+#include "gtkmm/menu.h"
+#include "gtkmm/menuitem.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/selector.h"
+#include "gtkmm2ext/bindable_button.h"
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
@@ -58,7 +61,6 @@
 #include "canvas/debug.h"
 
 #include "ardour_ui.h"
-#include "ardour_button.h"
 #include "audio_streamview.h"
 #include "debug.h"
 #include "enums_convert.h"
@@ -77,7 +79,6 @@
 #include "rgb_macros.h"
 #include "selection.h"
 #include "streamview.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 #include "route_group_menu.h"
@@ -87,7 +88,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -1080,10 +1081,10 @@ RouteTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 void
 RouteTimeAxisView::route_color_changed ()
 {
+	using namespace ARDOUR_UI_UTILS;
 	if (_view) {
 		_view->apply_color (color(), StreamView::RegionColor);
 	}
-
 	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 }
 

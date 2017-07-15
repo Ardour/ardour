@@ -30,6 +30,8 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "widgets/tooltips.h"
+
 #include "ardour/profile.h"
 #include "ardour/lmath.h"
 #include "ardour/session.h"
@@ -42,7 +44,6 @@
 #include "enums_convert.h"
 #include "gui_thread.h"
 #include "keyboard.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -50,6 +51,7 @@
 
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using namespace std;

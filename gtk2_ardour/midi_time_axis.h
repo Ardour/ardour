@@ -34,8 +34,9 @@
 #include "ardour/types.h"
 #include "ardour/region.h"
 
+#include "widgets/ardour_dropdown.h"
+
 #include "ardour_dialog.h"
-#include "ardour_dropdown.h"
 #include "route_ui.h"
 #include "enums.h"
 #include "route_time_axis.h"
@@ -147,20 +148,20 @@ private:
 
 	void update_control_names ();
 
-	bool                         _ignore_signals;
-	MidiScroomer*                _range_scroomer;
-	PianoRollHeader*             _piano_roll_header;
-	ARDOUR::NoteMode             _note_mode;
-	Gtk::RadioMenuItem*          _note_mode_item;
-	Gtk::RadioMenuItem*          _percussion_mode_item;
-	ARDOUR::ColorMode            _color_mode;
-	Gtk::RadioMenuItem*          _meter_color_mode_item;
-	Gtk::RadioMenuItem*          _channel_color_mode_item;
-	Gtk::RadioMenuItem*          _track_color_mode_item;
-	Gtk::VBox                    _midi_controls_box;
-	MidiChannelSelectorWindow*   _channel_selector;
-	ArdourDropdown               _midnam_model_selector;
-	ArdourDropdown               _midnam_custom_device_mode_selector;
+	bool                          _ignore_signals;
+	MidiScroomer*                 _range_scroomer;
+	PianoRollHeader*              _piano_roll_header;
+	ARDOUR::NoteMode              _note_mode;
+	Gtk::RadioMenuItem*           _note_mode_item;
+	Gtk::RadioMenuItem*           _percussion_mode_item;
+	ARDOUR::ColorMode             _color_mode;
+	Gtk::RadioMenuItem*           _meter_color_mode_item;
+	Gtk::RadioMenuItem*           _channel_color_mode_item;
+	Gtk::RadioMenuItem*           _track_color_mode_item;
+	Gtk::VBox                     _midi_controls_box;
+	MidiChannelSelectorWindow*    _channel_selector;
+	ArdourWidgets::ArdourDropdown _midnam_model_selector;
+	ArdourWidgets::ArdourDropdown _midnam_custom_device_mode_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;

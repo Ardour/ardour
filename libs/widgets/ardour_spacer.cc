@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,32 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkardour_ardour_spacer_h__
-#define __gtkardour_ardour_spacer_h__
+#include "widgets/ardour_spacer.h"
 
-#include "gtkmm2ext/cairo_widget.h"
+using namespace ArdourWidgets;
 
-class ArdourVSpacer : public CairoWidget
+ArdourVSpacer::ArdourVSpacer (float r)
+	: CairoWidget ()
+	, ratio (r)
 {
-public:
-	ArdourVSpacer (float r = 0.75f) : CairoWidget (), ratio (r) {}
-
-protected:
-	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* r) {
-		float h = r->height * ratio;
-		float t = .5f * (r->height - h);
-		ctx->rectangle (0, t, 1, h);
-		ctx->set_source_rgb (0, 0, 0);
-		ctx->fill ();
-	}
-
-	void on_size_request (Gtk::Requisition* req) {
-		req->width = 1;
-		req->height = 0;
-		CairoWidget::on_size_request (req);
-	}
-
-	float ratio;
-};
-
-#endif
+}
