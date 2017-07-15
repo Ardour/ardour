@@ -50,7 +50,7 @@ public:
 	Automatable(Session&);
 	Automatable (const Automatable& other);
 
-        virtual ~Automatable();
+	virtual ~Automatable();
 
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
@@ -83,8 +83,10 @@ public:
 	virtual bool find_next_event (double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
-        virtual void transport_located (framepos_t now);
+	virtual void transport_located (framepos_t now);
 	virtual void transport_stopped (framepos_t now);
+
+	virtual void automation_run (framepos_t, pframes_t);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
 
@@ -103,7 +105,7 @@ public:
 
 	PBD::Signal0<void> AutomationStateChanged;
 
-  protected:
+protected:
 	Session& _a_session;
 
 	void can_automate(Evoral::Parameter);

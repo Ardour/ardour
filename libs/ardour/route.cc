@@ -322,7 +322,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		return;
 	}
 
-	_mute_control->automation_run (start_frame, nframes);
+	automation_run (start_frame, nframes);
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
@@ -2980,11 +2980,16 @@ Route::silence_unlocked (framecnt_t nframes)
 
 		_output->silence (nframes);
 
+		// update owned automated controllables
+		automation_run (now, nframes);
+
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			boost::shared_ptr<PluginInsert> pi;
 
 			if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
-				// skip plugins, they don't need anything when we're not active
+				/* evaluate automated automation controls */
+				pi->automation_run (now, nframes);
+				/* skip plugins, they don't need anything when we're not active */
 				continue;
 			}
 

@@ -40,6 +40,8 @@
 #include "ardour/slave.h"
 #include "ardour/ticker.h"
 #include "ardour/types.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "midi++/mmc.h"
 
@@ -142,6 +144,11 @@ Session::no_roll (pframes_t nframes)
 
 	ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
 
+	VCAList v = _vca_manager->vcas ();
+	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+		(*i)->automation_run (_transport_frame, nframes);
+	}
+
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
@@ -179,6 +186,11 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
+
+	VCAList v = _vca_manager->vcas ();
+	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+		(*i)->automation_run (start_frame, nframes);
+	}
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
@@ -224,6 +236,11 @@ Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 
 	const framepos_t start_frame = _transport_frame;
 	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
+
+	VCAList v = _vca_manager->vcas ();
+	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+		(*i)->automation_run (start_frame, nframes);
+	}
 
 	if (_process_graph) {
 		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);

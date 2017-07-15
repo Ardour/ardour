@@ -1170,6 +1170,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	} else {
 		bypass (bufs, nframes);
+		automation_run (start_frame, nframes);
 		_delaybuffers.flush ();
 	}
 

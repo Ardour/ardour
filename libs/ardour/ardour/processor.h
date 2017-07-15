@@ -77,7 +77,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */
 	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
-	virtual void silence (framecnt_t /*nframes*/, framepos_t /*start_frame*/) {}
+	virtual void silence (framecnt_t nframes, framepos_t start_frame) { automation_run (start_frame, nframes); }
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }

@@ -345,7 +345,7 @@ Automatable::transport_located (framepos_t now)
 		boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 		if (c) {
-                        boost::shared_ptr<AutomationList> l
+			boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 
 			if (l) {
@@ -392,6 +392,19 @@ Automatable::transport_stopped (framepos_t now)
 		if (l->automation_playback ()) {
 			c->set_value_unchecked (c->list ()->eval (now));
 		}
+	}
+}
+
+void
+Automatable::automation_run (framepos_t start, pframes_t nframes)
+{
+	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
+		boost::shared_ptr<AutomationControl> c =
+			boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		if (!c) {
+			continue;
+		}
+		c->automation_run (start, nframes);
 	}
 }
 

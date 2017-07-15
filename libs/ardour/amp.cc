@@ -90,6 +90,9 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			gain_t* gab = _gain_automation_buffer;
 			assert (gab);
 
+			/* see note in PluginInsert::connect_and_run -- emit Changed signal */
+			_gain_control->set_value_unchecked (gab[0]);
+
 			if (_midi_amp) {
 				for (BufferSet::midi_iterator i = bufs.midi_begin(); i != bufs.midi_end(); ++i) {
 					MidiBuffer& mb (*i);
@@ -129,6 +132,12 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			if (_current_gain != dg) {
 
 				_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, dg, _midi_amp);
+
+				/* see note in PluginInsert::connect_and_run ()
+				 * set_value_unchecked() won't emit a signal since the value is effectively unchanged
+				 */
+
+				_gain_control->Changed (false, PBD::Controllable::NoGroup);
 
 			} else if (_current_gain != GAIN_COEFF_UNITY) {
 

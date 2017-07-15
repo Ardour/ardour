@@ -260,6 +260,7 @@ AutomationControl::set_automation_state (AutoState as)
 			}
 		} else {
 			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			Changed (false, Controllable::NoGroup);
 		}
 	}
 }
