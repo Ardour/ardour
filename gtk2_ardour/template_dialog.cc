@@ -19,6 +19,7 @@
 */
 
 #include <map>
+#include <cerrno>
 
 #include <glib/gstdio.h>
 
