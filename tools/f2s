@@ -1,0 +1,182 @@
+#!/bin/sh
+
+# This script edits the Ardour source code to change all references to "audio frames" into "audio samples". We skip 3rd party and special libraries,
+# and after the global edit do a bunch of per-file fixups for things that the global edit can't take care of.
+#
+# This was written so that it can be run after merging various PRs and development branches in the near term (July 2017) future.
+#
+# It also reveals just how confusing this naming "scheme" was.
+
+grep_blacklist="qm-dsp/ build/ appleutility/ fluidsynth/ hidapi/ fst/ lua/ vamp-plugins/ ltc/ vfork/ ltc_file_reader.cc ltc_file_reader.h"
+
+files=`find . -name \*.cc -o -name \*.h -o -name \*.c`
+
+for f in $files
+do
+    skip=0;
+
+    for b in $grep_blacklist ; do
+	if echo $f | grep -sq $b ; then
+	    skip=1
+	fi
+    done
+    
+    if [ $skip -eq 1 ] ; then
+	echo skip $f
+	continue
+    fi
+
+    echo Processing $f ...
+
+    # Three sets of transformations: 
+    #    The first changes all instances of "frames" etc. that need to remain in place. They get temporarily converted to FROOME.
+    #    Then we do the global frame->sample substitution.
+    #    Then we change FROOME back to frame etc.
+
+    sed -i -E \
+	-e 's/gtkmm\/frame\.h/gtkmm\/FROOME.h/g' \
+	-e 's/video_image_frame/video_image_FROOME/g' \
+	-e 's/subframes_per_frame/subframes_per_FROOME/g' \
+	-e 's/per_timecode_frame/per_timecode_FROOME/g' \
+	-e 's/frames_per_hour/FROOMES_per_hour/g' \
+	-e 's/frames_per_second/FROOMES_per_second/g' \
+	-e 's/drop_frames/drop_FROOMES/g' \
+	-e 's/sync_frame_rate/sync_FROOME_rate/g' \
+	-e 's/frame-rate/FROOME-rate/g' \
+	-e 's/frame rate/FROOME rate/g' \
+	-e 's/video frame/video FROOME/g' \
+	-e 's/video_frame/video_FROOME/g' \
+	-e 's/video-frame/video-FROOME/g' \
+	-e 's/timecode frame/timecode FROOME/g' \
+	-e 's/timecode_frame/timecode_FROOME/g' \
+	-e 's/timecode\.frame/timecode.FROOME/g' \
+	-e 's/time\.frames/time.FROOMES/g' \
+	-e 's/info\.frames/info.FROOMES/g' \
+	-e 's/per_ltc_frame/per_ltc_FROOME/g' \
+	-e 's/frame"/FROOME"/g' \
+	-e 's/quarter_frame/quarter_FROOME/g' \
+	-e 's/quarter frame/quarter FROOME/g' \
+	-e 's/quarter-frame/quarter-FROOME/g' \
+	-e 's/put_frames/put_FROOMES/g' \
+	-e 's/bound_frame/bound_FROOME/g' \
+	-e 's/mtc_frame/mtc_FROOME/g' \
+	-e 's/self->frame/self->FROOME/g' \
+	-e 's/_time\.frames/_time.FROOMES/g' \
+	-e 's/(jack[a-z_][a-z_]*)frame/\1FROOME/g' \
+	-e 's/tc([a-z_][a-z_]*)\.frame/tc\1.FROOME/g' \
+	-e 's/([tT][cC])\.frame/\1.FROOME/g' \
+	-e 's/framepos_sec/FROOMEpos_sec/g' \
+	-e 's/Timecode_Frames/Timecode_FROOMES/g' \
+	-e 's/frames_floor/FROOMES_floot/g' \
+	\
+	-e 's/AudioFrames/Samples/g' \
+	-e 's/Frames/Samples/g' \
+	-e 's/MusicFrame/MusicSample/g' \
+	-e 's/([^a-zA-Z]|^)frame$/\1sample/g' \
+	-e 's/([^a-zA-Z]|^)frames$/\1samples/g' \
+	-e 's/([^a-zA-Z]|^)frames([^a-zA-Z])/\1samples\2/g' \
+	-e 's/([^a-zA-Z]|^)frame([^a-zA-Z])/\1sample\2/g' \
+	-e 's/([^a-zA-Z]|^)framepos([^a-zA-Z])/\1samplepos\2/g' \
+	-e 's/([^a-zA-Z]|^)Framepos([^a-zA-Z])/\1Samplepos\2/g' \
+	-e 's/([^a-zA-Z]|^)framecnt([^a-zA-Z])/\1samplecnt\2/g' \
+	-e 's/([^a-zA-Z]|^)frameoffset([^a-zA-Z])/\1sampleoffset\2/g' \
+	\
+	-e 's/FFROOMES/Frames/g' \
+	-e 's/FROOMES/frames/g' \
+	-e 's/FROOME/frame/g' \
+	$f
+done
+
+# Special fix ups
+sed -i -E -e 's/([^_])samples/\1frames/g' -e 's/samples;/frames;/' libs/timecode/timecode/time.h
+sed -i -E -e 's/>sample([^a-z])/>frame\1/' -e 's/\.sample([^a-z])/.frame\1/' -e 's/engine\.frame/engine.sample/g' libs/backends/jack/jack_audiobackend.cc    
+sed -i -E -e 's/\.samples/.frames/g' libs/timecode/src/time.cc
+sed -i -E -e 's/"samples"/"frames"/g' -e 's/Time::samples\)/Time::frames)/g' -e 's/sample2/frame2/g' libs/ardour/luabindings.cc
+sed -i -E -e 's/framecnt_t/samplecnt_t/' libs/ardour/ardour/ltc_file_reader.h
+sed -i -E -e 's/sample_units/frame_units/g' \
+          -e 's/sample_tens/frame_tens/g' \
+	  -e 's/ltc_sample/ltc_frame/g' \
+	  -e 's/equal_ltc_frame_time/equal_ltc_sample_time/g' \
+	  -e 's/stime\.sample/stime.frame/g' \
+	  -e 's/([^a-z_])ltc_sample([^a-z_])/\1ltc_frame\2/g' \
+	  -e 's/last_ltc_frame/last_ltc_sample/g' \
+	  -e 's/ltc_sample_alignment/ltc_frame_alignment/g' \
+	  libs/ardour/ltc_slave.cc
+sed -i -E -e 's/equal_ltc_frame_time/equal_ltc_sample_time/g' libs/ardour/ardour/slave.h
+sed -i -E -e 's/ltc_sample_alignment/ltc_frame_alignment/g' -e 's/ltc_encoder_([sg])et_sample/ltc_encoder_\1et_frame/g' libs/ardour/session_ltc.cc
+sed -i -E -e 's/>samples/>frames/g' libs/ardour/lv2_evbuf.c
+sed -i -E -e 's/t.samples/t.frames/g' libs/ardour/session_vst.cc
+sed -i -E -e 's/>frame/>sample/g' -e 's/forge_sample_time/forge_frame_time/g' libs/plugins/a-fluidsynth.lv2/a-fluidsynth.cc
+sed -i -E -e 's/Samples,$/S_Samples,/g' gtk2_ardour/audio_clock.h
+sed -i -E -e 's/adj_sample\.frame/adj_sample.sample/g' gtk2_ardour/editor_drag.cc
+sed -i -E -e 's/frame, track_speed/sample, track_speed/' gtk2_ardour/editor_ops.cc
+sed -i -E -e 's/timediff\.samples/timediff.frames/' gtk2_ardour/editor_drag.cc
+sed -i -E -e 's/time\.frames/time.samples/' gtk2_ardour/export_format_dialog.cc
+sed -i -E -e 's/sample\.frame/sample.sample/g' gtk2_ardour/region_view.cc
+
+git mv libs/ardour/beats_frames_converter.cc libs/ardour/beats_samples_converter.cc
+git mv libs/ardour/ardour/beats_frames_converter.h libs/ardour/ardour/beats_samples_converter.h
+sed -i -E -e 's/beats_frames_/beats_samples_/' libs/ardour/wscript
+
+# editor hacking for leftmost
+
+sed -i -E -e 's/leftmost_sample;/_leftmost_sample;/' gtk2_ardour/editor.h
+sed -i -E -e 's/, leftmost_sample \(/, _leftmost_sample (/' gtk2_ardour/editor.cc
+for f in gtk2_ardour/editor*.cc ; do
+    sed -i -E -e 's/leftmost_sample( ?\()/leftmost_CALL\1/g' -e 's/leftmost_sample/_leftmost_sample/g' -e 's/leftmost_CALL/leftmost_sample/g' $f
+done
+
+# audio clock hack (context dependent edit, so sed can't do it)
+
+patch -R -p0 <<EOF
+--- gtk2_ardour/audio_clock.cc~	2017-07-15 10:40:44.394569157 -0400
++++ gtk2_ardour/audio_clock.cc	2017-07-15 11:36:41.997873534 -0400
+@@ -476,7 +476,7 @@
+ 	case Ticks:
+ 		return edit_string.substr (8, 4);
+ 		break;
+-	case S_Samples:
++	case Samples:
+ 		return edit_string;
+ 		break;
+ 	}
+@@ -1510,7 +1510,7 @@
+ 		}
+ 		break;
+ 	case Samples:
+-		return S_Samples;
++		return Samples;
+ 		break;
+ 	}
+ 
+@@ -1774,7 +1774,7 @@
+ 		f = (samplecnt_t) floor (_session->sample_rate() / _session->timecode_frames_per_second());
+ 		break;
+ 
+-	case S_Samples:
++	case Samples:
+ 		f = 1;
+ 		break;
+
+EOF
+
+# add a hack to the enums table
+
+patch -p0 <<EOF
+--- libs/ardour/enums.cc~	2017-07-15 12:16:09.507761761 -0400
++++ libs/ardour/enums.cc	2017-07-15 12:16:20.471847339 -0400
+@@ -143,6 +143,12 @@
+ #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
+ #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
+ 
++	/* in mid-2017 the entire code base was changed to use "samples"
++	   instead of frames, which included several enums. This hack table
++	   entry will catch all of them.
++	*/
++	enum_writer.add_to_hack_table ("Frames", "Samples");
++
+ 	REGISTER_ENUM (NullAutomation);
+ 	REGISTER_ENUM (GainAutomation);
+ 	REGISTER_ENUM (PanAzimuthAutomation);
+
+EOF
