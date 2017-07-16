@@ -29,9 +29,6 @@
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/button.h>
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/slider_controller.h>
-
 #include "ardour/session_handle.h"
 
 #include "enums.h"
@@ -47,10 +44,6 @@ namespace ARDOUR {
 	class PannerShell;
 	class Delivery;
 	class AutomationControl;
-}
-
-namespace Gtkmm2ext {
-	class FastMeter;
 }
 
 namespace Gtk {

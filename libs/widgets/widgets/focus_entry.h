@@ -17,27 +17,27 @@
 
 */
 
-#ifndef __gtkmm2ext_focus_entry_h__
-#define __gtkmm2ext_focus_entry_h__
+#ifndef _WIDGETS_FOCUS_ENTRY_H_
+#define _WIDGETS_FOCUS_ENTRY_H_
 
 #include <gtkmm/entry.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API FocusEntry : public Gtk::Entry
+class LIBWIDGETS_API FocusEntry : public Gtk::Entry
 {
-  public:
+public:
 	FocusEntry ();
 
-  protected:
+protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
-  private:
+private:
 	bool next_release_selects;
 };
 
-}
+} /* end namespace */
 
-#endif /* __gtkmm2ext_focus_entry_h__ */
+#endif

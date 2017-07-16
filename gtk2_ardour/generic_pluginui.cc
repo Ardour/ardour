@@ -32,14 +32,13 @@
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
-#include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/fastmeter.h"
-#include "gtkmm2ext/barcontroller.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
-#include "gtkmm2ext/slider_controller.h"
 
 #include "widgets/ardour_knob.h"
+#include "widgets/click_box.h"
+#include "widgets/fastmeter.h"
+#include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/plugin.h"
@@ -756,7 +755,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			Adjustment* adj = control_ui->controller->adjustment();
 
 			if (desc.integer_step && !desc.toggled) {
-				control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
+				control_ui->clickbox = new ArdourWidgets::ClickBox (adj, "PluginUIClickBox", true);
 				Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 				if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
 					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));

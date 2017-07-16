@@ -34,10 +34,9 @@
 #include "ardour/chan_count.h"
 #include "ardour/session_handle.h"
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/focus_entry.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/fastmeter.h>
+#include "widgets/fastmeter.h"
+#include "widgets/focus_entry.h"
+#include "widgets/slider_controller.h"
 
 #include "enums.h"
 
@@ -53,7 +52,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 {
 public:
 	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,
-			Gtkmm2ext::FastMeter::Orientation o = Gtkmm2ext::FastMeter::Vertical);
+			ArdourWidgets::FastMeter::Orientation o = ArdourWidgets::FastMeter::Vertical);
 	virtual ~LevelMeterBase ();
 
 	virtual void set_meter (ARDOUR::PeakMeter* meter);
@@ -82,16 +81,16 @@ protected:
 private:
 	PBD::EventLoop::InvalidationRecord* parent_invalidator;
 	ARDOUR::PeakMeter* _meter;
-	Gtkmm2ext::FastMeter::Orientation _meter_orientation;
+	ArdourWidgets::FastMeter::Orientation _meter_orientation;
 
 	Width _width;
 
 	struct MeterInfo {
-		Gtkmm2ext::FastMeter *meter;
-		gint16                width;
-		int                   length;
-		bool                  packed;
-		float                 max_peak;
+		ArdourWidgets::FastMeter* meter;
+		gint16                    width;
+		int                       length;
+		bool                      packed;
+		float                     max_peak;
 
 		MeterInfo() {
 			meter = 0;

@@ -16,29 +16,29 @@
 
 */
 
-#ifndef __gtkmm2ext_bar_controller_h__
-#define __gtkmm2ext_bar_controller_h__
+#ifndef _WIDGETS_BAR_CONTROLLER_H_
+#define _WIDGETS_BAR_CONTROLLER_H_
 
 #include <gtkmm/alignment.h>
 #include <cairo.h>
 
-#include "gtkmm2ext/visibility.h"
 #include "gtkmm2ext/binding_proxy.h"
-#include "gtkmm2ext/slider_controller.h"
+#include "widgets/slider_controller.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
+class LIBWIDGETS_API BarController : public Gtk::Alignment
 {
-  public:
+public:
 	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
 
 	virtual ~BarController ();
 
 	void set_sensitive (bool yn);
 
-	PixFader::Tweaks tweaks() const { return _slider.tweaks (); }
-	void set_tweaks (PixFader::Tweaks t) { _slider.set_tweaks (t);}
+	ArdourFader::Tweaks tweaks() const { return _slider.tweaks (); }
+	void set_tweaks (ArdourFader::Tweaks t) { _slider.set_tweaks (t);}
 
 	sigc::signal<void> StartGesture;
 	sigc::signal<void> StopGesture;
@@ -51,7 +51,7 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 	 */
 	sigc::signal<void, bool> SpinnerActive;
 
-  protected:
+protected:
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
@@ -60,7 +60,7 @@ class LIBGTKMM2EXT_API BarController : public Gtk::Alignment
 		return "";
 	}
 
-	private:
+private:
 	HSliderController _slider;
 	bool entry_focus_out (GdkEventFocus*);
 	void entry_activated ();

@@ -28,10 +28,9 @@
 #include <gtkmm/button.h>
 #include <gtkmm/adjustment.h>
 
-#include <gtkmm2ext/barcontroller.h>
 #include "pbd/controllable.h"
-
 #include "ardour/types.h"
+#include "widgets/barcontroller.h"
 
 #include "ardour_dialog.h"
 
@@ -41,7 +40,7 @@ namespace ARDOUR {
 
 class LatencyGUI;
 
-class LatencyBarController : public Gtkmm2ext::BarController
+class LatencyBarController : public ArdourWidgets::BarController
 {
 public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)

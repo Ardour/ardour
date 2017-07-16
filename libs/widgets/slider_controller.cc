@@ -19,18 +19,19 @@
 
 #include <string>
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/pixfader.h>
-#include <gtkmm2ext/slider_controller.h>
+#include "gtkmm2ext/gtk_ui.h"
 #include "pbd/controllable.h"
+
+#include "widgets/ardour_fader.h"
+#include "widgets/slider_controller.h"
 
 #include "pbd/i18n.h"
 
-using namespace Gtkmm2ext;
 using namespace PBD;
+using namespace ArdourWidgets;
 
 SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int fader_length, int fader_girth)
-	: PixFader (*adj, orientation, fader_length, fader_girth)
+	: ArdourFader (*adj, orientation, fader_length, fader_girth)
 	, _ctrl (mc)
 	, _ctrl_adj (adj)
 	, _spin_adj (0, 0, 1.0, .1, .01)
@@ -62,7 +63,7 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 		return true;
 	}
 
-	return PixFader::on_button_press_event (ev);
+	return ArdourFader::on_button_press_event (ev);
 }
 
 bool
@@ -72,7 +73,7 @@ SliderController::on_enter_notify_event (GdkEventCrossing* ev)
 	if (c) {
 		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
 	}
-	return PixFader::on_enter_notify_event (ev);
+	return ArdourFader::on_enter_notify_event (ev);
 }
 
 bool
@@ -81,7 +82,7 @@ SliderController::on_leave_notify_event (GdkEventCrossing* ev)
 	if (_binding_proxy.get_controllable()) {
 		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
 	}
-	return PixFader::on_leave_notify_event (ev);
+	return ArdourFader::on_leave_notify_event (ev);
 }
 
 void

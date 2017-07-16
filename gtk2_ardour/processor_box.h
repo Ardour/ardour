@@ -30,12 +30,9 @@
 #include <gtkmm/menu.h>
 #include <gtkmm/scrolledwindow.h>
 
-#include "gtkmm2ext/auto_spin.h"
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/dndvbox.h"
-#include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/persistent_tooltip.h"
 
 #include "pbd/stateful.h"
@@ -53,6 +50,8 @@
 #include "pbd/fastlog.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_fader.h"
+#include "widgets/slider_controller.h"
 
 #include "plugin_interest.h"
 #include "io_selector.h"
@@ -227,7 +226,7 @@ private:
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
 		/* things for a slider */
 		Gtk::Adjustment _adjustment;
-		Gtkmm2ext::HSliderController _slider;
+		ArdourWidgets::HSliderController _slider;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 		/* things for a button */
 		ArdourWidgets::ArdourButton _button;

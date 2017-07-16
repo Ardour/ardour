@@ -19,10 +19,11 @@
 */
 
 #include <cmath>
-#include "gtkmm2ext/auto_spin.h"
 #include "gtkmm2ext/keyboard.h"
+#include "widgets/auto_spin.h"
 
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace std;
 
 #define upper          adjustment.get_upper()

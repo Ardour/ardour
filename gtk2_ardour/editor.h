@@ -35,7 +35,6 @@
 #include <gtkmm/layout.h>
 
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/pane.h"
 #include "gtkmm2ext/selector.h"

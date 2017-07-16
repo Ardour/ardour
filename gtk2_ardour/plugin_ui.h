@@ -69,12 +69,9 @@ namespace PBD {
 	class Controllable;
 }
 
-namespace Gtkmm2ext {
-	class HSliderController;
-	class BarController;
+namespace ArdourWidgets {
 	class ClickBox;
 	class FastMeter;
-	class PixmapButton;
 }
 
 class LatencyGUI;
@@ -206,7 +203,7 @@ private:
 	bool is_scrollable;
 
 	struct MeterInfo {
-		Gtkmm2ext::FastMeter *meter;
+		ArdourWidgets::FastMeter* meter;
 		bool packed;
 
 		MeterInfo () {
@@ -231,7 +228,7 @@ private:
 		ArdourWidgets::ArdourButton             automate_button;
 		Gtk::Label                              label;
 		ArdourWidgets::ArdourDropdown*          combo;
-		Gtkmm2ext::ClickBox*                    clickbox;
+		ArdourWidgets::ClickBox*                clickbox;
 		Gtk::FileChooserButton*                 file_button;
 		ArdourWidgets::ArdourSpinner*           spin_box;
 

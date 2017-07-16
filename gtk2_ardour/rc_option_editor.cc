@@ -34,7 +34,6 @@
 #include <gtkmm/scale.h>
 
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/slider_controller.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/paths_dialog.h"
 #include "gtkmm2ext/window_title.h"

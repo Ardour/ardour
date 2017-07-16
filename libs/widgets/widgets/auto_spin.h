@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtkmm2ext_auto_spin_h__
-#define __gtkmm2ext_auto_spin_h__
+#ifndef _WIDGETS_AUTO_SPIN_H_
+#define _WIDGETS_AUTO_SPIN_H_
 
 #ifdef interface
 #undef interface
@@ -26,14 +26,13 @@
 
 #include <gtkmm.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API AutoSpin
-
+class LIBWIDGETS_API AutoSpin
 {
-  public:
+public:
 	AutoSpin (Gtk::Adjustment &adj, gfloat cr = 0, bool round_to_steps_yn = false);
 
 	Gtk::Adjustment &get_adjustment() { return adjustment; }
@@ -41,15 +40,14 @@ class LIBGTKMM2EXT_API AutoSpin
 	void use_left_as_decrement (bool yn) { left_is_decrement = yn; }
 	void set_wrap (bool yn) { wrap = yn; }
 	void set_climb_rate (gfloat cr) { climb_rate = cr; }
-	void set_bounds (gfloat initial, gfloat low, gfloat high,
-			 bool with_reset = true);
+	void set_bounds (gfloat initial, gfloat low, gfloat high, bool with_reset = true);
 
 	gint button_press (GdkEventButton *);
 	gint stop_spinning (GdkEventButton *ignored_but_here_for_clicked);
 	void start_spinning (bool decrementing, bool use_page);
 	gint scroll_event (GdkEventScroll *);
 
-  private:
+private:
 	Gtk::Adjustment &adjustment;
 	gfloat climb_rate;
 	gfloat timer_increment;
@@ -75,4 +73,4 @@ class LIBGTKMM2EXT_API AutoSpin
 
 } /* namespace */
 
-#endif /* __gtkmm2ext_auto_spin_h__ */
+#endif

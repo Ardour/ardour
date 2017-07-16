@@ -24,7 +24,6 @@
 #include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/bindable_button.h"
-#include "gtkmm2ext/barcontroller.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 

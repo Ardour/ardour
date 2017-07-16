@@ -32,15 +32,13 @@
 
 #include "gtkmm/widget.h"
 #include "gtkmm/box.h"
-#include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/fastmeter.h"
-#include "gtkmm2ext/barcontroller.h"
+
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
-#include "gtkmm2ext/slider_controller.h"
 #include "gtkmm2ext/application.h"
 
 #include "widgets/tooltips.h"
+#include "widgets/fastmeter.h"
 
 #include "ardour/session.h"
 #include "ardour/plugin.h"

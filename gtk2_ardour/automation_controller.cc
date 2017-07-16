@@ -47,8 +47,8 @@ using PBD::Controllable;
 AutomationBarController::AutomationBarController (
 		boost::shared_ptr<AutomationControl> ac,
 		Adjustment*                          adj)
-	: Gtkmm2ext::BarController(*adj, ac)
-	, _controllable(ac)
+	: ArdourWidgets::BarController (*adj, ac)
+	, _controllable (ac)
 {
 }
 
@@ -344,7 +344,6 @@ AutomationController::disable_vertical_scroll ()
 	AutomationBarController* bar = dynamic_cast<AutomationBarController*>(_widget);
 	if (bar) {
 		bar->set_tweaks (
-			Gtkmm2ext::PixFader::Tweaks(bar->tweaks() |
-			                            Gtkmm2ext::PixFader::NoVerticalScroll));
+			ArdourWidgets::ArdourFader::Tweaks(bar->tweaks() | ArdourWidgets::ArdourFader::NoVerticalScroll));
 	}
 }

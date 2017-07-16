@@ -21,14 +21,13 @@
 #include <iostream>
 #include <cstdio> /* for sprintf, sigh ... */
 
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/click_box.h>
-
 #include "pbd/controllable.h"
+#include "gtkmm2ext/utils.h"
+#include "widgets/click_box.h"
 
 using namespace std;
 using namespace Gtk;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace sigc;
 
 ClickBox::ClickBox (Gtk::Adjustment *adjp, const string &name, bool round_to_steps)

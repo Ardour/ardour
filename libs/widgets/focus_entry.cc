@@ -17,9 +17,9 @@
 
 */
 
-#include <gtkmm2ext/focus_entry.h>
+#include "widgets/focus_entry.h"
 
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 FocusEntry::FocusEntry ()
 	: next_release_selects (false)
@@ -47,4 +47,3 @@ FocusEntry::on_button_release_event (GdkEventButton* ev)
 
 	return Entry::on_button_release_event (ev);
 }
-

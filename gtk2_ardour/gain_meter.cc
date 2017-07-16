@@ -31,7 +31,6 @@
 #include "gtkmm/style.h"
 #include "gdkmm/color.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/fastmeter.h"
 #include "gtkmm2ext/gtk_ui.h"
 
 #include "widgets/tooltips.h"
@@ -122,7 +121,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
-	gain_slider->set_tweaks (PixFader::Tweaks(PixFader::NoButtonForward | PixFader::NoVerticalScroll));
+	gain_slider->set_tweaks (ArdourFader::Tweaks(ArdourFader::NoButtonForward | ArdourFader::NoVerticalScroll));
 	gain_slider->StartGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_start_touch));
 	gain_slider->StopGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_stop_touch));
 	gain_slider->set_name ("GainFader");
@@ -645,7 +644,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_control->alist()->automation_state() & Play);
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
+	static_cast<ArdourWidgets::SliderController*>(gain_slider)->set_sensitive (x);
 }
 
 gint

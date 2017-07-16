@@ -17,25 +17,25 @@
 
 */
 
-#ifndef __gtkmm2ext_pixfader_h__
-#define __gtkmm2ext_pixfader_h__
+#ifndef _WIDGETS_ARDOUR_FADER_H_
+#define _WIDGETS_ARDOUR_FADER_H_
 
 #include <cmath>
 #include <stdint.h>
 
-#include "gtkmm2ext/cairo_widget.h"
-#include <gtkmm/adjustment.h>
 #include <gdkmm.h>
+#include <gtkmm/adjustment.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/cairo_widget.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API PixFader : public CairoWidget
+class LIBWIDGETS_API ArdourFader : public CairoWidget
 {
-	public:
-	PixFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
-	virtual ~PixFader ();
+public:
+	ArdourFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
+	virtual ~ArdourFader ();
 	static void flush_pattern_cache();
 
 	sigc::signal<void> StartGesture;
@@ -54,7 +54,7 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 	Tweaks tweaks() const { return _tweaks; }
 	void set_tweaks (Tweaks);
 
-	protected:
+protected:
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation& alloc);
 
@@ -75,8 +75,7 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 		HORIZ,
 	};
 
-	private:
-
+private:
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string                 _text;
 	Tweaks                      _tweaks;
@@ -153,7 +152,6 @@ class LIBGTKMM2EXT_API PixFader : public CairoWidget
 			int w, int h);
 
 };
-
 
 } /* namespace */
 

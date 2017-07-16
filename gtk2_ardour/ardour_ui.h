@@ -55,7 +55,6 @@
 #include <gtkmm/adjustment.h>
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/bindings.h"

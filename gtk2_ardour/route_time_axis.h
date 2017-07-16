@@ -33,7 +33,6 @@
 #include <gtkmm/adjustment.h>
 
 #include <gtkmm2ext/selector.h>
-#include <gtkmm2ext/slider_controller.h>
 
 #include "widgets/ardour_button.h"
 

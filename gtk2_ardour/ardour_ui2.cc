@@ -37,7 +37,6 @@
 
 #include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/window_title.h"
 
 #include "ardour/profile.h"

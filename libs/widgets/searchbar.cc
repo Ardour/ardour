@@ -1,8 +1,9 @@
-#include "gtkmm2ext/searchbar.h"
-#include "gtkmm2ext/keyboard.h"
 #include <iostream>
 
-namespace Gtkmm2ext {
+#include "gtkmm2ext/keyboard.h"
+#include "widgets/searchbar.h"
+
+using namespace ArdourWidgets;
 
 SearchBar::SearchBar (const std::string& label, bool icon_resets)
 	: placeholder_text (label)
@@ -88,6 +89,4 @@ SearchBar::reset ()
 {
 	set_text (placeholder_text);
 	search_string_changed ();
-}
-
 }

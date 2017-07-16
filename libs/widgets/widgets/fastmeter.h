@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtkmm2ext_fastmeter_h__
-#define __gtkmm2ext_fastmeter_h__
+#ifndef _WIDGETS_FAST_METER_H_
+#define _WIDGETS_FAST_METER_H_
 
 #include <map>
 #include <boost/tuple/tuple.hpp>
@@ -26,12 +26,12 @@
 #include <cairomm/pattern.h>
 #include "gtkmm2ext/cairo_widget.h"
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
-  public:
+class LIBWIDGETS_API FastMeter : public CairoWidget {
+public:
 	enum Orientation {
 		Horizontal,
 		Vertical
@@ -70,8 +70,8 @@ class LIBGTKMM2EXT_API FastMeter : public CairoWidget {
 protected:
 	void on_size_request (GtkRequisition*);
 	void on_size_allocate (Gtk::Allocation&);
-private:
 
+private:
 	Cairo::RefPtr<Cairo::Pattern> fgpattern;
 	Cairo::RefPtr<Cairo::Pattern> bgpattern;
 	gint pixheight;
@@ -174,4 +174,4 @@ private:
 
 } /* namespace */
 
- #endif /* __gtkmm2ext_fastmeter_h__ */
+#endif

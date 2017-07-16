@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtkmm2ext_click_box_h__
-#define __gtkmm2ext_click_box_h__
+#ifndef _WIDGETS_CLICK_BOX_H_
+#define _WIDGETS_CLICK_BOX_H_
 
 #ifdef interface
 #undef interface
@@ -27,17 +27,18 @@
 #include <string>
 #include <gtkmm.h>
 
-#include "gtkmm2ext/auto_spin.h"
 #include "gtkmm2ext/binding_proxy.h"
-#include "gtkmm2ext/visibility.h"
+
+#include "widgets/auto_spin.h"
+#include "widgets/visibility.h"
 
 namespace PBD {
 	class Controllable;
 }
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API ClickBox : public Gtk::DrawingArea, public AutoSpin
+class LIBWIDGETS_API ClickBox : public Gtk::DrawingArea, public AutoSpin
 {
   public:
 	ClickBox (Gtk::Adjustment *adj, const std::string &name, bool round_to_steps = false);
@@ -77,4 +78,4 @@ class LIBGTKMM2EXT_API ClickBox : public Gtk::DrawingArea, public AutoSpin
 
 } /* namespace */
 
-#endif  /* __gtkmm2ext_click_box_h__ */
+#endif

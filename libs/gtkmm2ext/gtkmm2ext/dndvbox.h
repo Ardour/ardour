@@ -17,6 +17,7 @@
 
 */
 
+#include <gtkmm/window.h>
 #include <gtkmm/box.h>
 
 #include "gtkmm2ext/visibility.h"

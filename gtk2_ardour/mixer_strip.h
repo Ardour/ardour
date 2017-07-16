@@ -34,8 +34,6 @@
 #include <gtkmm/textview.h>
 #include <gtkmm/adjustment.h>
 
-#include "gtkmm2ext/auto_spin.h"
-#include "gtkmm2ext/click_box.h"
 #include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/stateful_button.h"
 

@@ -27,14 +27,16 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/keyboard.h"
-#include "gtkmm2ext/barcontroller.h"
 #include "gtkmm2ext/cairo_widget.h"
+
+#include "widgets/barcontroller.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 BarController::BarController (Gtk::Adjustment& adj,
 		boost::shared_ptr<PBD::Controllable> mc)
@@ -46,7 +48,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	add_events (Gdk::BUTTON_PRESS_MASK | Gdk::BUTTON_RELEASE_MASK);
 	set (.5, .5, 1.0, 1.0);
 	set_border_width (0);
-	_slider.set_tweaks (PixFader::NoShowUnityLine);
+	_slider.set_tweaks (ArdourFader::NoShowUnityLine);
 
 	_slider.StartGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_start));
 	_slider.StopGesture.connect (sigc::mem_fun(*this, &BarController::passtrhu_gesture_stop));

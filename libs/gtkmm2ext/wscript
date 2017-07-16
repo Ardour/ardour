@@ -26,8 +26,6 @@ gtkmm2ext_sources = [
         'actions.cc',
         'application.cc',
         'ardour_icon.cc',
-        'auto_spin.cc',
-        'barcontroller.cc',
         'binding_proxy.cc',
         'bindable_button.cc',
         'bindings.cc',
@@ -39,13 +37,11 @@ gtkmm2ext_sources = [
         'cell_renderer_pixbuf_multi.cc',
         'cell_renderer_pixbuf_toggle.cc',
         'choice.cc',
-        'click_box.cc',
         'cursors.cc',
         'debug.cc',
         'dndtreeview.cc',
         'emscale.cc',
         'eventboxext.cc',
-        'focus_entry.cc',
         'grouped_buttons.cc',
         'gtk_ui.cc',
         'gtkapplication.c',
@@ -55,14 +51,11 @@ gtkmm2ext_sources = [
         'pane.cc',
         'paths_dialog.cc',
         'persistent_tooltip.cc',
-        'pixfader.cc',
         'pixscroller.cc',
         'popup.cc',
         'prompter.cc',
         'scroomer.cc',
-        'searchbar.cc',
         'selector.cc',
-        'slider_controller.cc',
         'stateful_button.cc',
         'tabbable.cc',
         'tearoff.cc',
@@ -95,8 +88,6 @@ def build(bld):
     sources = list(gtkmm2ext_sources)
     if bld.is_tracks_build():
         sources += [ 'waves_fastmeter.cc', 'fader.cc' ]
-    else:
-        sources += [ 'fastmeter.cc' ]
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)

@@ -18,7 +18,6 @@
 */
 
 #include <utility>
-#include <gtkmm2ext/barcontroller.h>
 #include <gtkmm2ext/utils.h>
 #include <boost/algorithm/string.hpp>
 

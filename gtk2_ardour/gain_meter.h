@@ -39,10 +39,8 @@
 #include "ardour/session_handle.h"
 
 #include "widgets/ardour_button.h"
-
-#include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/focus_entry.h"
-#include "gtkmm2ext/slider_controller.h"
+#include "widgets/focus_entry.h"
+#include "widgets/slider_controller.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -57,9 +55,7 @@ namespace ARDOUR {
 	class Amp;
 	class Automatable;
 }
-namespace Gtkmm2ext {
-	class FastMeter;
-}
+
 namespace Gtk {
 	class Menu;
 }
@@ -97,7 +93,7 @@ public:
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
+	ArdourWidgets::SliderController& get_gain_slider() const { return *gain_slider; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
@@ -123,14 +119,14 @@ protected:
 	bool ignore_toggle;
 	bool next_release_selects;
 
-	Gtkmm2ext::SliderController *gain_slider;
-	Gtk::Adjustment              gain_adjustment;
-	Gtkmm2ext::FocusEntry        gain_display;
-	Gtkmm2ext::FocusEntry        peak_display;
-	Gtk::DrawingArea             meter_metric_area;
-	Gtk::DrawingArea             meter_ticks1_area;
-	Gtk::DrawingArea             meter_ticks2_area;
-	LevelMeterHBox              *level_meter;
+	ArdourWidgets::SliderController* gain_slider;
+	Gtk::Adjustment                  gain_adjustment;
+	ArdourWidgets::FocusEntry        gain_display;
+	ArdourWidgets::FocusEntry        peak_display;
+	Gtk::DrawingArea                 meter_metric_area;
+	Gtk::DrawingArea                 meter_ticks1_area;
+	Gtk::DrawingArea                 meter_ticks2_area;
+	LevelMeterHBox*                  level_meter;
 
 	sigc::connection gain_watching;
 

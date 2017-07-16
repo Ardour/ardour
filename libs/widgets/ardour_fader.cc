@@ -26,21 +26,23 @@
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/keyboard.h"
-#include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/utils.h"
 
-using namespace Gtkmm2ext;
+#include "widgets/ardour_fader.h"
+
 using namespace Gtk;
 using namespace std;
+using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 #define CORNER_RADIUS 2.5
 #define CORNER_SIZE   2
 #define CORNER_OFFSET 1
 #define FADER_RESERVE 6
 
-std::list<PixFader::FaderImage*> PixFader::_patterns;
+std::list<ArdourFader::FaderImage*> ArdourFader::_patterns;
 
-PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int fader_girth)
+ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_length, int fader_girth)
 	: _layout (0)
 	, _tweaks (Tweaks(0))
 	, _adjustment (adj)
@@ -69,9 +71,9 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 			| Gdk::LEAVE_NOTIFY_MASK
 			);
 
-	_adjustment.signal_value_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
-	_adjustment.signal_changed().connect (mem_fun (*this, &PixFader::adjustment_changed));
-	signal_grab_broken_event ().connect (mem_fun (*this, &PixFader::on_grab_broken_event));
+	_adjustment.signal_value_changed().connect (mem_fun (*this, &ArdourFader::adjustment_changed));
+	_adjustment.signal_changed().connect (mem_fun (*this, &ArdourFader::adjustment_changed));
+	signal_grab_broken_event ().connect (mem_fun (*this, &ArdourFader::on_grab_broken_event));
 	if (_orien == VERT) {
 		CairoWidget::set_size_request(_girth, _span);
 	} else {
@@ -79,14 +81,14 @@ PixFader::PixFader (Gtk::Adjustment& adj, int orientation, int fader_length, int
 	}
 }
 
-PixFader::~PixFader ()
+ArdourFader::~ArdourFader ()
 {
 	if (_parent_style_change) _parent_style_change.disconnect();
 	if (_layout) _layout.clear (); // drop reference to existing layout
 }
 
 void
-PixFader::flush_pattern_cache () {
+ArdourFader::flush_pattern_cache () {
 	for (list<FaderImage*>::iterator f = _patterns.begin(); f != _patterns.end(); ++f) {
 		cairo_pattern_destroy ((*f)->pattern);
 	}
@@ -95,7 +97,7 @@ PixFader::flush_pattern_cache () {
 
 
 cairo_pattern_t*
-PixFader::find_pattern (double afr, double afg, double afb,
+ArdourFader::find_pattern (double afr, double afg, double afb,
 			double abr, double abg, double abb,
 			int w, int h)
 {
@@ -108,7 +110,7 @@ PixFader::find_pattern (double afr, double afg, double afb,
 }
 
 void
-PixFader::create_patterns ()
+ArdourFader::create_patterns ()
 {
 	Gdk::Color c = get_style()->get_fg (get_state());
 	float fr, fg, fb;
@@ -205,7 +207,7 @@ PixFader::create_patterns ()
 }
 
 void
-PixFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* area)
+ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* area)
 {
 	cairo_t* cr = ctx->cobj();
 
@@ -344,7 +346,7 @@ PixFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* a
 }
 
 void
-PixFader::on_size_request (GtkRequisition* req)
+ArdourFader::on_size_request (GtkRequisition* req)
 {
 	if (_orien == VERT) {
 		req->width = (_min_girth ? _min_girth : -1);
@@ -356,7 +358,7 @@ PixFader::on_size_request (GtkRequisition* req)
 }
 
 void
-PixFader::on_size_allocate (Gtk::Allocation& alloc)
+ArdourFader::on_size_allocate (Gtk::Allocation& alloc)
 {
 	int old_girth = _girth;
 	int old_span = _span;
@@ -380,7 +382,7 @@ PixFader::on_size_allocate (Gtk::Allocation& alloc)
 }
 
 bool
-PixFader::on_grab_broken_event (GdkEventGrabBroken* ev)
+ArdourFader::on_grab_broken_event (GdkEventGrabBroken* ev)
 {
 	if (_dragging) {
 		remove_modal_grab();
@@ -392,7 +394,7 @@ PixFader::on_grab_broken_event (GdkEventGrabBroken* ev)
 }
 
 bool
-PixFader::on_button_press_event (GdkEventButton* ev)
+ArdourFader::on_button_press_event (GdkEventButton* ev)
 {
 	if (ev->type != GDK_BUTTON_PRESS) {
 		if (_dragging) {
@@ -426,7 +428,7 @@ PixFader::on_button_press_event (GdkEventButton* ev)
 }
 
 bool
-PixFader::on_button_release_event (GdkEventButton* ev)
+ArdourFader::on_button_release_event (GdkEventButton* ev)
 {
 	double ev_pos = (_orien == VERT) ? ev->y : ev->x;
 
@@ -486,7 +488,7 @@ PixFader::on_button_release_event (GdkEventButton* ev)
 }
 
 bool
-PixFader::on_scroll_event (GdkEventScroll* ev)
+ArdourFader::on_scroll_event (GdkEventScroll* ev)
 {
 	double scale;
 	bool ret = false;
@@ -539,7 +541,7 @@ PixFader::on_scroll_event (GdkEventScroll* ev)
 }
 
 bool
-PixFader::on_motion_notify_event (GdkEventMotion* ev)
+ArdourFader::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (_dragging) {
 		double scale = 1.0;
@@ -582,14 +584,14 @@ PixFader::on_motion_notify_event (GdkEventMotion* ev)
 }
 
 void
-PixFader::adjustment_changed ()
+ArdourFader::adjustment_changed ()
 {
 	queue_draw ();
 }
 
 /** @return pixel offset of the current value from the right or bottom of the fader */
 int
-PixFader::display_span ()
+ArdourFader::display_span ()
 {
 	float fract = (_adjustment.get_value () - _adjustment.get_lower()) / ((_adjustment.get_upper() - _adjustment.get_lower()));
 	int ds;
@@ -607,7 +609,7 @@ PixFader::display_span ()
 }
 
 void
-PixFader::update_unity_position ()
+ArdourFader::update_unity_position ()
 {
 	if (_orien == VERT) {
 		const double span = _span - FADER_RESERVE - CORNER_OFFSET;
@@ -621,7 +623,7 @@ PixFader::update_unity_position ()
 }
 
 bool
-PixFader::on_enter_notify_event (GdkEventCrossing*)
+ArdourFader::on_enter_notify_event (GdkEventCrossing*)
 {
 	_hovering = true;
 	if (!(_tweaks & NoVerticalScroll)) {
@@ -632,7 +634,7 @@ PixFader::on_enter_notify_event (GdkEventCrossing*)
 }
 
 bool
-PixFader::on_leave_notify_event (GdkEventCrossing*)
+ArdourFader::on_leave_notify_event (GdkEventCrossing*)
 {
 	if (!_dragging) {
 		_hovering = false;
@@ -645,7 +647,7 @@ PixFader::on_leave_notify_event (GdkEventCrossing*)
 }
 
 void
-PixFader::set_adjustment_from_event (GdkEventButton* ev)
+ArdourFader::set_adjustment_from_event (GdkEventButton* ev)
 {
 	const double off  = FADER_RESERVE + ((_orien == VERT) ? CORNER_OFFSET : 0);
 	const double span = _span - off;
@@ -658,14 +660,14 @@ PixFader::set_adjustment_from_event (GdkEventButton* ev)
 }
 
 void
-PixFader::set_default_value (float d)
+ArdourFader::set_default_value (float d)
 {
 	_default_value = d;
 	update_unity_position ();
 }
 
 void
-PixFader::set_tweaks (Tweaks t)
+ArdourFader::set_tweaks (Tweaks t)
 {
 	bool need_redraw = false;
 	if ((_tweaks & NoShowUnityLine) ^ (t & NoShowUnityLine)) {
@@ -678,7 +680,7 @@ PixFader::set_tweaks (Tweaks t)
 }
 
 void
-PixFader::set_text (const std::string& str, bool centered, bool expose)
+ArdourFader::set_text (const std::string& str, bool centered, bool expose)
 {
 	if (_layout && _text == str) {
 		return;
@@ -698,7 +700,7 @@ PixFader::set_text (const std::string& str, bool centered, bool expose)
 }
 
 void
-PixFader::on_state_changed (Gtk::StateType old_state)
+ArdourFader::on_state_changed (Gtk::StateType old_state)
 {
 	Widget::on_state_changed (old_state);
 	create_patterns ();
@@ -706,7 +708,7 @@ PixFader::on_state_changed (Gtk::StateType old_state)
 }
 
 void
-PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
+ArdourFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 {
 	if (_layout) {
 		std::string txt = _layout->get_text();
@@ -721,7 +723,7 @@ PixFader::on_style_changed (const Glib::RefPtr<Gtk::Style>&)
 }
 
 Gdk::Color
-PixFader::get_parent_bg ()
+ArdourFader::get_parent_bg ()
 {
 	Widget* parent = get_parent ();
 
@@ -736,7 +738,7 @@ PixFader::get_parent_bg ()
 		if (_current_parent != parent) {
 			if (_parent_style_change) _parent_style_change.disconnect();
 			_current_parent = parent;
-			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &PixFader::on_style_changed));
+			_parent_style_change = parent->signal_style_changed().connect (mem_fun (*this, &ArdourFader::on_style_changed));
 		}
 		return parent->get_style ()->get_bg (parent->get_state());
 	}

@@ -149,7 +149,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
 	{
-		std::auto_ptr<Gtk::Entry> an_entry (new Gtkmm2ext::FocusEntry);
+		std::auto_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
 		Gtk::Requisition req;
 		an_entry->size_request (req);

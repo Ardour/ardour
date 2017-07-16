@@ -14,8 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
 #include <iostream>
@@ -27,9 +25,9 @@
 
 #include <glibmm.h>
 #include <gdkmm.h>
-#include <gdkmm/rectangle.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/utils.h>
+
+#include "gtkmm2ext/utils.h"
+#include "widgets/fastmeter.h"
 
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
 #define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
@@ -37,6 +35,7 @@
 using namespace Gtk;
 using namespace Glib;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace std;
 
 int FastMeter::min_pattern_metric_size = 16;

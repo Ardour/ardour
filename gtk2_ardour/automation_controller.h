@@ -31,9 +31,9 @@
 #include <boost/shared_ptr.hpp>
 #include <gtkmm.h>
 
-#include "gtkmm2ext/barcontroller.h"
 #include "pbd/signals.h"
 #include "evoral/Parameter.hpp"
+#include "widgets/barcontroller.h"
 
 namespace ARDOUR {
 	class Session;
@@ -41,7 +41,7 @@ namespace ARDOUR {
 	class AutomationControl;
 }
 
-class AutomationBarController : public Gtkmm2ext::BarController {
+class AutomationBarController : public ArdourWidgets::BarController {
 public:
 	AutomationBarController(boost::shared_ptr<ARDOUR::AutomationControl> ac,
 	                        Gtk::Adjustment*                             adj);

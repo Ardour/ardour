@@ -74,10 +74,10 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/fastmeter.h"
 #include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/window_title.h"
+
+#include "widgets/fastmeter.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
@@ -867,7 +867,7 @@ ARDOUR_UI::~ARDOUR_UI ()
 		delete gui_object_state; gui_object_state = 0;
 		delete main_window_visibility;
 		FastMeter::flush_pattern_cache ();
-		PixFader::flush_pattern_cache ();
+		ArdourFader::flush_pattern_cache ();
 	}
 
 #ifndef NDEBUG

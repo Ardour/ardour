@@ -33,18 +33,18 @@
 #include <gtkmm/label.h>
 #include <gtkmm/sizegroup.h>
 
-#include <gtkmm2ext/focus_entry.h>
-
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
+
+#include "evoral/Parameter.hpp"
 
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 #include "ardour/region.h"
 
-#include "evoral/Parameter.hpp"
-
 #include "canvas/line.h"
+
+#include "widgets/focus_entry.h"
 
 #include "prompter.h"
 #include "axis_view.h"

@@ -37,7 +37,7 @@
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace std;
 

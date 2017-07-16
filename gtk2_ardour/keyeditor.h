@@ -27,7 +27,8 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
-#include "gtkmm2ext/searchbar.h"
+
+#include "widgets/searchbar.h"
 
 #include "ardour_window.h"
 
@@ -109,7 +110,7 @@ private:
 	Gtk::HBox reset_box;
 	Gtk::Button reset_button;
 	Gtk::Label reset_label;
-	Gtkmm2ext::SearchBar filter_entry;
+	ArdourWidgets::SearchBar filter_entry;
 	std::string filter_string;
 	Gtk::Button print_button;
 	Gtk::Label print_label;

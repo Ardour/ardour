@@ -16,35 +16,31 @@
 
 */
 
-#ifndef __gtkmm2ext_slider_controller_h__
-#define __gtkmm2ext_slider_controller_h__
+#ifndef _WIDGETS_SLIDER_CONTROLLER_H_
+#define _WIDGETS_SLIDER_CONTROLLER_H_
 
 #ifdef interface
 #undef interface
 #endif
 
 #include <gtkmm.h>
-#include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/pixfader.h>
-#include <gtkmm2ext/binding_proxy.h>
-
 #include <boost/shared_ptr.hpp>
 
-#include "gtkmm2ext/visibility.h"
+#include "gtkmm2ext/popup.h"
+#include "gtkmm2ext/binding_proxy.h"
 
-namespace Gtkmm2ext {
-	class Pix;
-}
+#include "widgets/ardour_fader.h"
+#include "widgets/visibility.h"
 
 namespace PBD {
 	class Controllable;
 }
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
+class LIBWIDGETS_API SliderController : public ArdourWidgets::ArdourFader
 {
-	public:
+public:
 	SliderController (Gtk::Adjustment* adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int, int);
 
 	virtual ~SliderController () {}
@@ -52,7 +48,7 @@ class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 	Gtk::SpinButton& get_spin_button () { assert(_ctrl); return _spin; }
 	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { _binding_proxy.set_controllable (c); }
 
-	protected:
+protected:
 	bool on_button_press_event (GdkEventButton *ev);
 	bool on_enter_notify_event (GdkEventCrossing* ev);
 	bool on_leave_notify_event (GdkEventCrossing* ev);
@@ -68,19 +64,18 @@ class LIBGTKMM2EXT_API SliderController : public Gtkmm2ext::PixFader
 	bool _spin_ignore;
 };
 
-class LIBGTKMM2EXT_API VSliderController : public SliderController
+class LIBWIDGETS_API VSliderController : public SliderController
 {
-	public:
+public:
 	VSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
-class LIBGTKMM2EXT_API HSliderController : public SliderController
+class LIBWIDGETS_API HSliderController : public SliderController
 {
-	public:
+public:
 	HSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
-
 }; /* namespace */
 
-#endif // __gtkmm2ext_slider_controller_h__
+#endif

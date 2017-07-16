@@ -29,12 +29,12 @@
 
 #include <gtkmm/box.h>
 
-#include "gtkmm2ext/pixfader.h"
 #include "gtkmm2ext/persistent_tooltip.h"
-#include "gtkmm2ext/slider_controller.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_fader.h"
+#include "widgets/slider_controller.h"
 
 #include "ardour_window.h"
 #include "io_selector.h"
@@ -210,7 +210,7 @@ private:
 
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
 		Gtk::Adjustment _adjustment;
-		Gtkmm2ext::HSliderController _slider;
+		ArdourWidgets::HSliderController _slider;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
 
 		bool _ignore_ui_adjustment;
