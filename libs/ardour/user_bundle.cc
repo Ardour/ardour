@@ -60,7 +60,7 @@ ARDOUR::UserBundle::set_state (XMLNode const & node, int /*version*/)
 			return -1;
 		}
 
-		if ((*i)->get_property ("name", str)) {
+		if (!(*i)->get_property ("name", str)) {
 			PBD::error << _("Node for Channel has no \"name\" property") << endmsg;
 			return -1;
 		}
