@@ -48,7 +48,7 @@ value_as_string(const ARDOUR::ParameterDescriptor& desc,
 	}
 
 	if (desc.toggled) {
-		return v >= 0 ? _("on") : _("off");
+		return v > 0 ? _("on") : _("off");
 	}
 
 	// Value is not a scale point, print it normally
