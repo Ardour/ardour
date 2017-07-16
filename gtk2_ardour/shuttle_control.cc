@@ -29,7 +29,6 @@
 
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/gui_thread.h"
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 

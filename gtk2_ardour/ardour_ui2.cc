@@ -35,7 +35,6 @@
 #include "pbd/basename.h"
 #include "pbd/fastlog.h"
 
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 

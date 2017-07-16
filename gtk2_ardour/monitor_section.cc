@@ -23,7 +23,6 @@
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
 
-#include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"

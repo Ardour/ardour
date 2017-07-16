@@ -26,10 +26,10 @@
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 
-#include "gtkmm2ext/cairo_packer.h"
-
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
+
+#include "gtkmm2ext/cairo_packer.h"
 
 namespace ARDOUR {
 	class Session;

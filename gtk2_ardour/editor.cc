@@ -58,9 +58,8 @@
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/eventboxext.h"
-#include "gtkmm2ext/grouped_buttons.h"
 #include "gtkmm2ext/gtk_ui.h"
-#include <gtkmm2ext/keyboard.h>
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/choice.h"

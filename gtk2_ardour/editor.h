@@ -37,8 +37,6 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
 #include "gtkmm2ext/pane.h"
-#include "gtkmm2ext/selector.h"
-#include "gtkmm2ext/stateful_button.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -114,7 +112,6 @@ class EditorRoutes;
 class EditorRouteGroups;
 class EditorSnapshots;
 class EditorSummary;
-class GroupedButtons;
 class GUIObjectState;
 class ArdourMarker;
 class MidiRegionView;

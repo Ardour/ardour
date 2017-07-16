@@ -27,7 +27,6 @@
 #include <gtkmm/label.h>
 #include <gtkmm/notebook.h>
 
-#include "gtkmm2ext/cairo_icon.h"
 #include "gtkmm2ext/window_proxy.h"
 #include "gtkmm2ext/visibility.h"
 

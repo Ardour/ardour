@@ -26,7 +26,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/button.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm2ext/selector.h>
+#include <gtkmm/treestore.h>
 
 #include "ardour_dialog.h"
 #include "ardour/session_handle.h"

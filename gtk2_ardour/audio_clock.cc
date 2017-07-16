@@ -26,7 +26,6 @@
 #include <gtkmm/style.h>
 #include <sigc++/bind.h>
 
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 

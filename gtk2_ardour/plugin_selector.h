@@ -24,7 +24,6 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
 #include "gtkmm2ext/dndtreeview.h"
-#include <gtkmm2ext/selector.h>
 
 #include "ardour/plugin.h"
 #include "ardour/session_handle.h"

@@ -34,9 +34,6 @@
 #include <gtkmm/textview.h>
 #include <gtkmm/adjustment.h>
 
-#include "gtkmm2ext/bindable_button.h"
-#include "gtkmm2ext/stateful_button.h"
-
 #include "pbd/stateful.h"
 
 #include "ardour/types.h"

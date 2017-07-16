@@ -23,7 +23,6 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/doi.h"
-#include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
@@ -1431,10 +1430,6 @@ RouteUI::build_solo_menu (void)
 	items.push_back (CheckMenuElem(*check));
 	solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
-
 }
 
 void
@@ -1470,9 +1465,6 @@ RouteUI::build_mute_menu(void)
 	main_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
 	items.push_back (CheckMenuElem(*main_mute_check));
 	main_mute_check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
 	_route->mute_points_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::muting_change, this), gui_context());
 }

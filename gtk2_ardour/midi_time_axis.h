@@ -29,8 +29,6 @@
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/checkmenuitem.h>
 
-#include "gtkmm2ext/selector.h"
-
 #include "ardour/types.h"
 #include "ardour/region.h"
 

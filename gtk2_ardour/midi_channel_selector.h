@@ -29,6 +29,7 @@
 #include "gtkmm/button.h"
 #include "gtkmm/radiobutton.h"
 #include "gtkmm/label.h"
+
 #include "gtkmm2ext/stateful_button.h"
 
 #include "ardour/types.h"

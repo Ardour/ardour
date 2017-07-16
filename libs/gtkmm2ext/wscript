@@ -27,10 +27,7 @@ gtkmm2ext_sources = [
         'application.cc',
         'ardour_icon.cc',
         'binding_proxy.cc',
-        'bindable_button.cc',
         'bindings.cc',
-        'cairocell.cc',
-        'cairo_icon.cc',
         'cairo_packer.cc',
         'cairo_widget.cc',
         'cell_renderer_color_selector.cc',
@@ -42,20 +39,16 @@ gtkmm2ext_sources = [
         'dndtreeview.cc',
         'emscale.cc',
         'eventboxext.cc',
-        'grouped_buttons.cc',
         'gtk_ui.cc',
         'gtkapplication.c',
-        'idle_adjustment.cc',
         'keyboard.cc',
         'menu_elems.cc',
         'pane.cc',
         'paths_dialog.cc',
         'persistent_tooltip.cc',
-        'pixscroller.cc',
         'popup.cc',
         'prompter.cc',
         'scroomer.cc',
-        'selector.cc',
         'stateful_button.cc',
         'tabbable.cc',
         'tearoff.cc',
@@ -86,8 +79,6 @@ def configure(conf):
 def build(bld):
     # operate on copy to avoid adding sources twice
     sources = list(gtkmm2ext_sources)
-    if bld.is_tracks_build():
-        sources += [ 'waves_fastmeter.cc', 'fader.cc' ]
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)

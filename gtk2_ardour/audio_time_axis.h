@@ -28,7 +28,6 @@
 #include <gtkmm/radiomenuitem.h>
 #include <gtkmm/checkmenuitem.h>
 
-#include <gtkmm2ext/selector.h>
 #include <list>
 
 #include "ardour/types.h"

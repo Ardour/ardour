@@ -20,10 +20,8 @@
 #include <algorithm>
 #include "pbd/compose.h"
 
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"

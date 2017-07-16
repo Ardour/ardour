@@ -30,7 +30,6 @@
 #include "pbd/i18n.h"
 
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/selector.h>
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/selection.h"

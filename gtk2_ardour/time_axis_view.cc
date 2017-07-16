@@ -31,7 +31,6 @@
 
 #include <gtkmm2ext/doi.h>
 #include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/selector.h>
 
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"

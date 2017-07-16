@@ -21,7 +21,6 @@
 #include <gtkmm/table.h>
 #include <gtkmm/eventbox.h>
 
-#include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/bindings.h"
 
 #include "widgets/ardour_button.h"
