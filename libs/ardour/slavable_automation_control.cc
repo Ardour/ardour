@@ -313,7 +313,14 @@ double
 SlavableAutomationControl::scale_automation_callback (double value, double ratio) const
 {
 	/* derived classes can override this and e.g. add/subtract. */
-	value *= ratio;
+	if (toggled ()) {
+		// XXX we should use the master's upper/lower as threshold
+		if (ratio >= 0.5 * (upper () - lower ())) {
+			value = upper ();
+		}
+	} else {
+		value *= ratio;
+	}
 	value = std::max (lower(), std::min(upper(), value));
 	return value;
 }
@@ -332,7 +339,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 
 	bool update_value = false;
 	double master_ratio = 0;
-	double list_ratio = 1;
+	double list_ratio = toggled () ? 0 : 1;
 
 	boost::shared_ptr<AutomationControl> master;
 
@@ -366,6 +373,7 @@ SlavableAutomationControl::remove_master (boost::shared_ptr<AutomationControl> m
 			XMLNode* before = &alist ()->get_state ();
 			if (master->automation_playback () && master->list()) {
 				_list->list_merge (*master->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
+				printf ("y-t %s  %f\n", name().c_str(), list_ratio);
 				_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));
 			} else {
 				// do we need to freeze/thaw the list? probably no: iterators & positions don't change
@@ -399,7 +407,7 @@ SlavableAutomationControl::clear_masters ()
 	ControlList masters;
 	bool update_value = false;
 	double master_ratio = 0;
-	double list_ratio = 1;
+	double list_ratio = toggled () ? 0 : 1;
 
 	/* null ptr means "all masters */
 	pre_remove_master (boost::shared_ptr<AutomationControl>());

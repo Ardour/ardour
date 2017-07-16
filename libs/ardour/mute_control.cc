@@ -123,7 +123,7 @@ double
 MuteControl::get_value () const
 {
 	if (slaved ()) {
-		return muted_by_self() || get_masters_value ();
+		return muted_by_self() || muted_by_masters ();
 	}
 
 	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
@@ -158,7 +158,7 @@ MuteControl::muted () const
 	   Control, or the Muteable that we sort-of proxy for. Since this
 	   method is called by ::get_value(), use the latter to avoid recursion.
 	*/
-	return _muteable.mute_master()->muted_by_self() || get_masters_value ();
+	return _muteable.mute_master()->muted_by_self() || muted_by_masters ();
 }
 
 bool
@@ -170,7 +170,7 @@ MuteControl::muted_by_self () const
 bool
 MuteControl::muted_by_masters () const
 {
-	return get_masters_value ();
+	return _muteable.mute_master()->muted_by_masters ();
 }
 
 bool
@@ -184,11 +184,6 @@ MuteControl::automation_run (framepos_t start, pframes_t len)
 {
 	boolean_automation_run (start, len);
 
-	if (muted_by_masters ()) {
-		// already muted, no need to check further
-		return;
-	}
-
 	bool valid = false;
 	bool mute  = false;
 
@@ -197,6 +192,17 @@ MuteControl::automation_run (framepos_t start, pframes_t len)
 	}
 
 	if (!valid) {
+		return;
+	}
+
+	if (muted_by_masters ()) {
+		/* already muted, no need to check further,
+		 * except we need to up update implicit/explict mute
+		 */
+		if (muted_by_self () != mute) {
+			set_value_unchecked (mute ? 1. : 0.);
+			Changed (false, Controllable::NoGroup); /* EMIT SIGNAL */
+		}
 		return;
 	}
 
