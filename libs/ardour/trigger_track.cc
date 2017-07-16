@@ -253,7 +253,6 @@ TriggerTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 {
 	Track::set_diskstream (ds);
 	_diskstream->set_track (this);
-	_diskstream->set_destructive (false);
 	_diskstream->set_record_enabled (false);
 	_diskstream->request_input_monitoring (false);
 
@@ -280,10 +279,7 @@ TriggerTrack::set_mode (TrackMode m)
 	case NonLayered:
 	case Normal:
 		if (m != _mode) {
-			_diskstream->set_non_layered (m == NonLayered);
 			_mode = m;
-
-			TrackModeChanged (); /* EMIT SIGNAL */
 		}
 		break;
 
