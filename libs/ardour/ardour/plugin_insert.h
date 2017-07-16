@@ -355,7 +355,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 	PinMappings _out_map;
 	ChanMapping _thru_map; // out-idx <=  in-idx
 
-	void automation_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes);
+	void automate_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes);
 	void connect_and_run (BufferSet& bufs, framepos_t start, framecnt_t end, double speed, pframes_t nframes, framecnt_t offset, bool with_auto);
 	void bypass (BufferSet& bufs, pframes_t nframes);
 	void inplace_silence_unconnected (BufferSet&, const PinMappings&, framecnt_t nframes, framecnt_t offset) const;

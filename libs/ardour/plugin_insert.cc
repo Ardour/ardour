@@ -1162,7 +1162,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		/* run as normal if we are active or moving from inactive to active */
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
-			automation_run (bufs, start_frame, end_frame, speed, nframes);
+			automate_and_run (bufs, start_frame, end_frame, speed, nframes);
 		} else {
 			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, lm.locked());
@@ -1181,7 +1181,7 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 }
 
 void
-PluginInsert::automation_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes)
+PluginInsert::automate_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
 	framecnt_t offset = 0;
