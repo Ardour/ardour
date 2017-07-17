@@ -17,14 +17,16 @@
 
 */
 
+#include "evoral/Note.hpp"
+
 #include "ardour/parameter_descriptor.h"
 
-#include "evoral/Note.hpp"
 #include "canvas/container.h"
 #include "canvas/polygon.h"
 #include "canvas/rectangle.h"
-#include "canvas/wave_view.h"
 #include "canvas/debug.h"
+
+#include "waveview/wave_view.h"
 
 #include "automation_time_axis.h"
 #include "ghostregion.h"
@@ -126,7 +128,7 @@ AudioGhostRegion::AudioGhostRegion(RegionView& rv,
 void
 AudioGhostRegion::set_samples_per_pixel (double fpp)
 {
-	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
+	for (vector<ArdourWaveView::WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
 		(*i)->set_samples_per_pixel (fpp);
 	}
 }
@@ -134,7 +136,7 @@ AudioGhostRegion::set_samples_per_pixel (double fpp)
 void
 AudioGhostRegion::set_height ()
 {
-	vector<WaveView*>::iterator i;
+	vector<ArdourWaveView::WaveView*>::iterator i;
 	uint32_t n;
 
 	GhostRegion::set_height();

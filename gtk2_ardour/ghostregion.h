@@ -24,7 +24,7 @@
 #include <boost/unordered_map.hpp>
 #include "pbd/signals.h"
 
-namespace ArdourCanvas {
+namespace ArdourWaveView {
 	class WaveView;
 }
 
@@ -76,7 +76,7 @@ public:
 	void set_height();
 	void set_colors();
 
-	std::vector<ArdourCanvas::WaveView*> waves;
+	std::vector<ArdourWaveView::WaveView*> waves;
 };
 
 class MidiGhostRegion : public GhostRegion {

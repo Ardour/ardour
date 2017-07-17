@@ -48,6 +48,8 @@
 #include "canvas/xfade_curve.h"
 #include "canvas/debug.h"
 
+#include "waveview/debug.h"
+
 #include "streamview.h"
 #include "audio_region_view.h"
 #include "audio_time_axis.h"
@@ -427,7 +429,7 @@ AudioRegionView::region_resized (const PropertyChange& what_changed)
 		for (vector<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 			if ((agr = dynamic_cast<AudioGhostRegion*>(*i)) != 0) {
 
-				for (vector<WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
+				for (vector<ArdourWaveView::WaveView*>::iterator w = agr->waves.begin(); w != agr->waves.end(); ++w) {
 					(*w)->region_resized ();
 				}
 			}
@@ -1139,7 +1141,7 @@ AudioRegionView::delete_waves ()
 	}
 	_data_ready_connections.clear ();
 
-	for (vector<WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
+	for (vector<ArdourWaveView::WaveView*>::iterator w = waves.begin(); w != waves.end(); ++w) {
 		group->remove(*w);
 	}
 	waves.clear();
@@ -1237,7 +1239,7 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	gdouble yoff = which * ht;
 
-	WaveView *wave = new WaveView (group, audio_region ());
+	ArdourWaveView::WaveView *wave = new ArdourWaveView::WaveView (group, audio_region ());
 	CANVAS_DEBUG_NAME (wave, string_compose ("wave view for chn %1 of %2", which, get_item_name()));
 
 	wave->set_channel (which);
@@ -1252,15 +1254,15 @@ AudioRegionView::create_one_wave (uint32_t which, bool /*direct*/)
 
 	switch (UIConfiguration::instance().get_waveform_shape()) {
 	case Rectified:
-		wave->set_shape (WaveView::Rectified);
+		wave->set_shape (ArdourWaveView::WaveView::Rectified);
 		break;
 	default:
-		wave->set_shape (WaveView::Normal);
+		wave->set_shape (ArdourWaveView::WaveView::Normal);
 	}
 
 	wave->set_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 
-	vector<ArdourCanvas::WaveView*> v;
+	vector<ArdourWaveView::WaveView*> v;
 	v.push_back (wave);
 	set_some_waveform_colors (v);
 
@@ -1426,7 +1428,7 @@ AudioRegionView::add_ghost (TimeAxisView& tv)
 			break;
 		}
 
-		WaveView *wave = new WaveView (ghost->group, audio_region());
+		ArdourWaveView::WaveView *wave = new ArdourWaveView::WaveView (ghost->group, audio_region());
 		CANVAS_DEBUG_NAME (wave, string_compose ("ghost wave for %1", get_item_name()));
 
 		wave->set_channel (n);
@@ -1546,7 +1548,7 @@ AudioRegionView::set_waveform_colors ()
 }
 
 void
-AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& waves_to_color)
+AudioRegionView::set_some_waveform_colors (vector<ArdourWaveView::WaveView*>& waves_to_color)
 {
 	Gtkmm2ext::Color fill;
 	Gtkmm2ext::Color outline;
@@ -1578,7 +1580,7 @@ AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& wave
 		}
 	}
 
-	for (vector<ArdourCanvas::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
+	for (vector<ArdourWaveView::WaveView*>::iterator w = waves_to_color.begin(); w != waves_to_color.end(); ++w) {
 		(*w)->set_fill_color (fill);
 		(*w)->set_outline_color (outline);
 		(*w)->set_clip_color (clip);

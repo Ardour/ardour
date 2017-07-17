@@ -25,12 +25,11 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
-#include <gtkmm2ext/utils.h>
-
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
-#include "canvas/wave_view.h"
+#include "gtkmm2ext/utils.h"
+#include "waveview/wave_view.h"
 
 #include "audio_clock.h"
 #include "ardour_ui.h"
@@ -476,7 +475,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 			Gtkmm2ext::disable_tooltips ();
 		}
 	} else if (p == "waveform-gradient-depth") {
-		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-mini-timeline") {
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-recpunch") {
@@ -490,17 +489,17 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-secondary-clock") {
 		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
-		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
+		ArdourWaveView::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
 		CairoWidget::set_widget_prelight (UIConfiguration::instance().get_widget_prelight());
 	} else if (p == "waveform-shape") {
-		ArdourCanvas::WaveView::set_global_shape (UIConfiguration::instance().get_waveform_shape() == Rectified
-				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
+		ArdourWaveView::WaveView::set_global_shape (UIConfiguration::instance().get_waveform_shape() == Rectified
+				? ArdourWaveView::WaveView::Rectified : ArdourWaveView::WaveView::Normal);
 	} else if (p == "show-waveform-clipping") {
-		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
+		ArdourWaveView::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
 	} else if (p == "waveform-cache-size") {
 		/* GUI option has units of megabytes; image cache uses units of bytes */
-		ArdourCanvas::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
+		ArdourWaveView::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
 	} else if (p == "use-wm-visibility") {
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
 	} else if (p == "action-table-columns") {
@@ -516,9 +515,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());
 	} else if (p == "show-waveform-clipping") {
-		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
+		ArdourWaveView::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
 	} else if (p == "waveform-gradient-depth") {
-		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {

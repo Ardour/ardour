@@ -17,18 +17,18 @@
 
 */
 
-#ifndef __CANVAS_WAVE_VIEW_PRIVATE_H__
-#define __CANVAS_WAVE_VIEW_PRIVATE_H__
+#ifndef _WAVEVIEW_WAVE_VIEW_PRIVATE_H_
+#define _WAVEVIEW_WAVE_VIEW_PRIVATE_H_
 
 #include <deque>
 
-#include "canvas/wave_view.h"
+#include "waveview/wave_view.h"
 
 namespace ARDOUR {
 	class AudioRegion;
 }
 
-namespace ArdourCanvas {
+namespace ArdourWaveView {
 
 struct WaveViewProperties
 {
@@ -360,6 +360,6 @@ private:
 };
 
 
-} // namespace ArdourCanvas
+} /* namespace */
 
-#endif // __CANVAS_WAVE_VIEW_PRIVATE_H__
+#endif

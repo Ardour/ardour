@@ -60,8 +60,6 @@ canvas_sources = [
         'tracking_text.cc',
         'types.cc',
         'utils.cc',
-        'wave_view.cc',
-        'wave_view_private.cc',
         'widget.cc',
         'xfade_curve.cc',
 ]
@@ -88,7 +86,7 @@ def build(bld):
     obj.export_includes = ['.']
     obj.includes     = ['.']
     obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML'
-    obj.use          = [ 'libpbd', 'libevoral', 'libardour', 'libgtkmm2ext', 'libevoral' ]
+    obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
     obj.vnum         = CANVAS_LIB_VERSION
@@ -113,7 +111,7 @@ def build(bld):
 
             unit_testobj.includes     = obj.includes + ['test', '../pbd']
             unit_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
-            unit_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+            unit_testobj.uselib_local = 'libcanvas libgtkmm2ext'
             unit_testobj.name         = 'libcanvas-unit-tests'
             unit_testobj.target       = 'run-tests'
             unit_testobj.install_path = ''
@@ -138,7 +136,7 @@ def build(bld):
                     manual_testobj.source = t
                     manual_testobj.includes = obj.includes + ['test', '../pbd']
                     manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
-                    manual_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+                    manual_testobj.uselib_local = 'libcanvas libgtkmm2ext'
                     manual_testobj.name         = 'libcanvas-manual-test-%s' % name
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''
@@ -157,7 +155,7 @@ def build(bld):
                     manual_testobj.source = [ t, 'benchmark/benchmark.cc' ]
                     manual_testobj.includes = obj.includes + ['test', '../pbd']
                     manual_testobj.uselib       = 'CPPUNIT SIGCPP CAIROMM GTKMM'
-                    manual_testobj.uselib_local = 'libcanvas libevoral libardour libgtkmm2ext'
+                    manual_testobj.uselib_local = 'libcanvas libgtkmm2ext'
                     manual_testobj.name         = 'libcanvas-benchmark-%s' % name
                     manual_testobj.target       = target
                     manual_testobj.install_path = ''

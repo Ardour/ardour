@@ -26,9 +26,7 @@
 #include <cairomm/cairomm.h>
 
 #include <glibmm/threads.h>
-
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/gui_thread.h"
+#include <gdkmm/general.h>
 
 #include "pbd/base_ui.h"
 #include "pbd/compose.h"
@@ -43,21 +41,22 @@
 #include "ardour/audiosource.h"
 #include "ardour/session.h"
 
-#include "canvas/canvas.h"
 #include "gtkmm2ext/colors.h"
-#include "canvas/debug.h"
-#include "canvas/wave_view.h"
-#include "canvas/wave_view_private.h"
-
-#include <gdkmm/general.h>
-
 #include "gtkmm2ext/gui_thread.h"
+#include "gtkmm2ext/utils.h"
+
+#include "canvas/canvas.h"
+#include "canvas/debug.h"
+
+#include "waveview/wave_view.h"
+#include "waveview/wave_view_private.h"
 
 using namespace std;
-using namespace ARDOUR;
 using namespace PBD;
-using namespace ArdourCanvas;
+using namespace ARDOUR;
 using namespace Gtkmm2ext;
+using namespace ArdourCanvas;
+using namespace ArdourWaveView;
 
 double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;

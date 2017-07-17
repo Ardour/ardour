@@ -19,8 +19,6 @@
 
 #include <cairomm/cairomm.h>
 
-#include "ardour/utils.h"
-
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 

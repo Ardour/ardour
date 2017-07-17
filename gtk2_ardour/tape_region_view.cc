@@ -91,10 +91,10 @@ TapeAudioRegionView::update (uint32_t /*n*/)
 
 #if 0
 	/* deadlock:
-#1  0x00007f9570ebd77c in g_mutex_lock_slowpath (mutex=0x7f9575157760 <ArdourCanvas::WaveView::current_image_lock>) at ././glib/gthread-posix.c:1313
+#1  0x00007f9570ebd77c in g_mutex_lock_slowpath (mutex=0x7f9575157760 <ArdourWaveView::WaveView::current_image_lock>) at ././glib/gthread-posix.c:1313
 #2  0x000055f6f8d1aac0 in Glib::Threads::Mutex::Lock::Lock(Glib::Threads::Mutex&) (this=0x7ffc4d905aa0, mutex=...) at /usr/include/glibmm-2.4/glibmm/threads.h:688
-#3  0x00007f9574f05054 in ArdourCanvas::WaveView::invalidate_image_cache() (this=0x55f6fdf341a0) at ../libs/canvas/wave_view.cc:275
-#4  0x00007f9574f0b1b0 in ArdourCanvas::WaveView::gain_changed() (this=0x55f6fdf341a0) at ../libs/canvas/wave_view.cc:1329
+#3  0x00007f9574f05054 in ArdourWaveView::WaveView::invalidate_image_cache() (this=0x55f6fdf341a0) at ../libs/canvas/wave_view.cc:275
+#4  0x00007f9574f0b1b0 in ArdourWaveView::WaveView::gain_changed() (this=0x55f6fdf341a0) at ../libs/canvas/wave_view.cc:1329
 #5  0x000055f6f96eb1b8 in TapeAudioRegionView::update(unsigned int) (this=0x55f6fdf32640) at ../gtk2_ardour/tape_region_view.cc:102
 #6  0x000055f6f96eba9f in boost::_mfi::mf1<void, TapeAudioRegionView, unsigned int>::operator()(TapeAudioRegionView*, unsigned int) const (this=0x55f6fa74ce10, p=0x55f6fdf32640, a1=0)
     at /usr/include/boost/bind/mem_fn_template.hpp:165
@@ -125,12 +125,12 @@ TapeAudioRegionView::update (uint32_t /*n*/)
 #25 0x00007f957394eb15 in ARDOUR::AudioSource::read_peaks(ARDOUR::PeakData*, long, long, long, double) const (this=0x55f6fd359140, peaks=0x55f700da6b80, npeaks=1356, start=113190, cnt=447480, samples_per_visual_peak=330) at ../libs/ardour/audiosource.cc:337
 #26 0x00007f957393a905 in ARDOUR::AudioRegion::read_peaks(ARDOUR::PeakData*, long, long, long, unsigned int, double) const (this=
     0x55f6fd84c3b0, buf=0x55f700da6b80, npeaks=1356, offset=113190, cnt=447480, chan_n=0, frames_per_pixel=330) at ../libs/ardour/audioregion.cc:431
-#27 0x00007f9574f09caa in ArdourCanvas::WaveView::generate_image(boost::shared_ptr<ArdourCanvas::WaveViewThreadRequest>, bool) const (this=0x55f6fdf341a0, req=..., in_render_thread=false)
+#27 0x00007f9574f09caa in ArdourWaveView::WaveView::generate_image(boost::shared_ptr<ArdourWaveView::WaveViewThreadRequest>, bool) const (this=0x55f6fdf341a0, req=..., in_render_thread=false)
     at ../libs/canvas/wave_view.cc:1005
-#28 0x00007f9574f08e99 in ArdourCanvas::WaveView::get_image(long, long, bool&) const (this=0x55f6fdf341a0, start=225060, end=448800, full_image=@0x7ffc4d9070c7: false)
+#28 0x00007f9574f08e99 in ArdourWaveView::WaveView::get_image(long, long, bool&) const (this=0x55f6fdf341a0, start=225060, end=448800, full_image=@0x7ffc4d9070c7: false)
 ---Type <return> to continue, or q <return> to quit---
     at ../libs/canvas/wave_view.cc:870
-#29 0x00007f9574f0a6e8 in ArdourCanvas::WaveView::render(ArdourCanvas::Rect const&, Cairo::RefPtr<Cairo::Context>) const (this=0x55f6fdf341a0, area=..., context=...)
+#29 0x00007f9574f0a6e8 in ArdourWaveView::WaveView::render(ArdourCanvas::Rect const&, Cairo::RefPtr<Cairo::Context>) const (this=0x55f6fdf341a0, area=..., context=...)
     at ../libs/canvas/wave_view.cc:1180
 */
 
@@ -145,7 +145,7 @@ TapeAudioRegionView::update (uint32_t /*n*/)
 	/* this is a quick hack to draw something (abuse gain_changed to force
 	 * an image-cache invalidation.
 	 *
-	 * TODO: ArdourCanvas::WaveView needs an API to look up the specific channel "n"
+	 * TODO: ArdourWaveView::WaveView needs an API to look up the specific channel "n"
 	 * and a special case to not only invalidate the cache but re-expose the
 	 * waveform. e.g.
 	 *

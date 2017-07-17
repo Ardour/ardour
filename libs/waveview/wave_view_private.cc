@@ -20,14 +20,14 @@
 #include <cmath>
 #include "ardour/lmath.h"
 
-#include "canvas/wave_view_private.h"
-
 #include "pbd/cpus.h"
 
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 
-namespace ArdourCanvas {
+#include "waveview/wave_view_private.h"
+
+namespace ArdourWaveView {
 
 WaveViewProperties::WaveViewProperties (boost::shared_ptr<ARDOUR::AudioRegion> region)
     : region_start (region->start ())
@@ -455,4 +455,4 @@ WaveViewDrawingThread::run ()
 	}
 }
 
-} // namespace ArdourCanvas
+}

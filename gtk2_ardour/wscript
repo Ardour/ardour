@@ -481,6 +481,7 @@ def build(bld):
                 'libmidipp',
                 'libgtkmm2ext',
                 'libcanvas',
+                'libwaveview',
                 'libwidgets',
                 'libptformat',
                 ]
@@ -553,6 +554,7 @@ def build(bld):
                              'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libcanvas',
+                             'libwaveview',
                              'libwidgets',
                              'libptformat',
                              ]
@@ -599,6 +601,7 @@ def build(bld):
                      'libmidipp',
                      'libgtkmm2ext',
                      'libcanvas',
+                     'libwaveview',
                      'libwidgets',
                      'libptformat',
                      ]

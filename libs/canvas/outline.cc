@@ -22,8 +22,6 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
-#include "ardour/utils.h"
-
 #include "canvas/item.h"
 #include "canvas/outline.h"
 #include "canvas/debug.h"

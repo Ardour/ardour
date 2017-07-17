@@ -44,6 +44,9 @@ namespace ArdourCanvas {
 	class Rectangle;
 	class Line;
 	class Polygon;
+}
+
+namespace ArdourWaveview {
 	class WaveView;
 }
 
@@ -119,7 +122,7 @@ private:
 		std::list<Point*>       points;
 		ARDOUR::AutomationList  normative_curve; /* 0 - 1.0, linear */
 		ARDOUR::AutomationList  gain_curve;      /* 0 - 2.0, gain mapping */
-		std::vector<ArdourCanvas::WaveView*>  waves;
+		std::vector<ArdourWaveView::WaveView*>  waves;
 
 		Half();
 	};

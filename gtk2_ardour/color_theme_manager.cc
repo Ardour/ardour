@@ -26,9 +26,6 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include "gtkmm2ext/cell_renderer_color_selector.h"
-#include "gtkmm2ext/utils.h"
-
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
 #include "pbd/replace_all.h"
@@ -36,10 +33,14 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 
+#include "gtkmm2ext/cell_renderer_color_selector.h"
+#include "gtkmm2ext/utils.h"
+
 #include "canvas/container.h"
 #include "canvas/rectangle.h"
 #include "canvas/scroll_group.h"
-#include "canvas/wave_view.h"
+
+#include "waveview/wave_view.h"
 
 #include "ardour_dialog.h"
 #include "color_theme_manager.h"

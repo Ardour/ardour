@@ -221,6 +221,7 @@ children = [
         'libs/audiographer',
         'libs/canvas',
         'libs/widgets',
+        'libs/waveview',
         'libs/plugins/reasonablesynth.lv2',
         'libs/plugins/a-comp.lv2',
         'libs/plugins/a-delay.lv2',

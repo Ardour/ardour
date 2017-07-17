@@ -29,8 +29,9 @@
 #include "ardour/audioregion.h"
 
 #include "canvas/fwd.h"
-#include "canvas/wave_view.h"
 #include "canvas/xfade_curve.h"
+
+#include "waveview/wave_view.h"
 
 #include "region_view.h"
 #include "time_axis_view_item.h"
@@ -151,8 +152,8 @@ protected:
 		WaveformLogScaled = 0x10,
 	};
 
-	std::vector<ArdourCanvas::WaveView *> waves;
-	std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+	std::vector<ArdourWaveView::WaveView *> waves;
+	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see ::create_waves()
 
 	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
 
@@ -209,7 +210,7 @@ private:
 
 	void parameter_changed (std::string const &);
 	void setup_waveform_visibility ();
-	void set_some_waveform_colors (std::vector<ArdourCanvas::WaveView*>& waves_to_color);
+	void set_some_waveform_colors (std::vector<ArdourWaveView::WaveView*>& waves_to_color);
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.

@@ -1,6 +1,5 @@
 /*
     Copyright (C) 2011 Paul Davis
-    Author: Carl Hetherington <cth@carlh.net>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,21 +17,7 @@
 
 */
 
-#ifndef __canvas_canvas_fwd_h__
-#define __canvas_canvas_fwd_h__
+#include "pbd/debug.h"
+#include "waveview/debug.h"
 
-namespace ArdourCanvas {
-	class Line;
-	class LineSet;
-	class Rectangle;
-	class Ruler;
-	class Polygon;
-	class PolyLine;
-	class GtkCanvas;
-	class GtkCanvasViewport;
-	class Text;
-	class Curve;
-	class ScrollGroup;
-}
-
-#endif /* __canvas_canvas_fwd_h__ */
+PBD::DebugBits PBD::DEBUG::WaveView = PBD::new_debug_bit ("waveview");

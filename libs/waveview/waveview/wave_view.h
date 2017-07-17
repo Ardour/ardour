@@ -19,18 +19,17 @@
 
 */
 
-#ifndef __CANVAS_WAVE_VIEW_H__
-#define __CANVAS_WAVE_VIEW_H__
+#ifndef _WAVEVIEW_WAVE_VIEW_H_
+#define _WAVEVIEW_WAVE_VIEW_H_
 
 #include <boost/shared_ptr.hpp>
 #include <boost/scoped_ptr.hpp>
 
-#include "ardour/types.h"
-
 #include <glibmm/refptr.h>
 
-#include "canvas/visibility.h"
+#include "ardour/types.h"
 #include "canvas/item.h"
+#include "waveview/visibility.h"
 
 namespace ARDOUR {
 	class AudioRegion;
@@ -40,9 +39,7 @@ namespace Gdk {
 	class Pixbuf;
 }
 
-class WaveViewTest;
-
-namespace ArdourCanvas {
+namespace ArdourWaveView {
 
 class WaveViewCacheGroup;
 class WaveViewDrawRequest;
@@ -51,7 +48,7 @@ class WaveViewImage;
 class WaveViewProperties;
 class WaveViewDrawingThread;
 
-class LIBCANVAS_API WaveView : public Item, public sigc::trackable
+class LIBWAVEVIEW_API WaveView : public ArdourCanvas::Item, public sigc::trackable
 {
 public:
 	enum Shape { Normal, Rectified };
@@ -76,18 +73,18 @@ public:
 	   other view parameters).
 	*/
 
-	WaveView (Canvas*, boost::shared_ptr<ARDOUR::AudioRegion>);
+	WaveView (ArdourCanvas::Canvas*, boost::shared_ptr<ARDOUR::AudioRegion>);
 	WaveView (Item*, boost::shared_ptr<ARDOUR::AudioRegion>);
 	~WaveView ();
 
-	virtual void prepare_for_render (Rect const& window_area) const;
+	virtual void prepare_for_render (ArdourCanvas::Rect const& window_area) const;
 
-	virtual void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
+	virtual void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
 	void compute_bounding_box () const;
 
 	void set_samples_per_pixel (double);
-	void set_height (Distance);
+	void set_height (ArdourCanvas::Distance);
 	void set_channel (int);
 	void set_region_start (ARDOUR::frameoffset_t);
 
@@ -161,7 +158,6 @@ private:
 #endif
 
 private:
-	friend class ::WaveViewTest;
 	friend class WaveViewThreadClient;
 	friend class WaveViewDrawingThread;
 
@@ -247,8 +243,9 @@ private:
 	void set_image (boost::shared_ptr<WaveViewImage> img) const;
 
 	// @return true if item area intersects with draw area
-	bool get_item_and_draw_rect_in_window_coords (Rect const& canvas_rect, Rect& item_area,
-	                                              Rect& draw_rect) const;
+	bool get_item_and_draw_rect_in_window_coords (ArdourCanvas::Rect const& canvas_rect,
+	                                              ArdourCanvas::Rect& item_area,
+	                                              ArdourCanvas::Rect& draw_rect) const;
 
 	boost::shared_ptr<WaveViewDrawRequest> create_draw_request (WaveViewProperties const&) const;
 
@@ -266,6 +263,6 @@ private:
 	void reset_cache_group ();
 };
 
-} // namespace ArdourCanvas
+} /* namespace */
 
-#endif // __CANVAS_WAVE_VIEW_H__
+#endif

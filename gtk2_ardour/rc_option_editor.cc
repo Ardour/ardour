@@ -51,7 +51,7 @@
 #include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
-#include "canvas/wave_view.h"
+#include "waveview/wave_view.h"
 
 #include "widgets/paths_dialog.h"
 #include "widgets/tooltips.h"
@@ -1198,7 +1198,7 @@ private:
 	{
 		UIConfiguration::instance().set_waveform_clip_level (_clip_level_adjustment.get_value());
 		/* XXX: should be triggered from the parameter changed signal */
-		ArdourCanvas::WaveView::set_clip_level (_clip_level_adjustment.get_value());
+		ArdourWaveView::WaveView::set_clip_level (_clip_level_adjustment.get_value());
 	}
 
 	Adjustment _clip_level_adjustment;

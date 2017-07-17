@@ -17,40 +17,19 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __CANVAS_DEBUG_H__
-#define __CANVAS_DEBUG_H__
+#ifndef _WAVEVIEW_DEBUG_H_
+#define _WAVEVIEW_DEBUG_H_
 
 #include <sys/time.h>
 #include <map>
 #include "pbd/debug.h"
 
-#include "canvas/visibility.h"
+#include "waveview/visibility.h"
 
 namespace PBD {
 	namespace DEBUG {
-		LIBCANVAS_API extern DebugBits CanvasItems;
-		LIBCANVAS_API extern DebugBits CanvasItemsDirtied;
-		LIBCANVAS_API extern DebugBits CanvasEvents;
-		LIBCANVAS_API extern DebugBits CanvasRender;
-		LIBCANVAS_API extern DebugBits CanvasEnterLeave;
+		LIBWAVEVIEW_API extern DebugBits WaveView;
 	}
-}
-
-#ifdef CANVAS_DEBUG
-#define CANVAS_DEBUG_NAME(i, n) i->name = n;
-#else
-#define CANVAS_DEBUG_NAME(i, n) /* empty */
-#endif
-
-namespace ArdourCanvas {
-	LIBCANVAS_API extern struct timeval epoch;
-	LIBCANVAS_API extern std::map<std::string, struct timeval> last_time;
-	LIBCANVAS_API extern void checkpoint (std::string, std::string);
-	LIBCANVAS_API extern void set_epoch ();
-	LIBCANVAS_API extern const char* event_type_string (int event_type);
-	LIBCANVAS_API extern int render_count;
-	LIBCANVAS_API extern int render_depth;
-	LIBCANVAS_API extern int dump_depth;
 }
 
 #endif

@@ -21,8 +21,6 @@
 #include "pbd/demangle.h"
 #include "pbd/convert.h"
 
-#include "ardour/utils.h"
-
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 #include "canvas/item.h"
