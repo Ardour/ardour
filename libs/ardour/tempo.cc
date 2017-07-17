@@ -1028,27 +1028,10 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 	}
 
 	TempoSection* ts = 0;
-	TempoSection* prev_tempo = 0;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), pls, true);
-		for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		ts = add_tempo_locked (tempo, pulse, minute_at_frame (frame), pls, true, false);
 
-			if ((*i)->is_tempo()) {
-				TempoSection* const this_t = static_cast<TempoSection*> (*i);
-
-				bool const ipm = ts->position_lock_style() == MusicTime;
-				bool const lm = ts->locked_to_meter();
-				if ((ipm && this_t->pulse() == ts->pulse()) || (!ipm && this_t->frame() == ts->frame())
-				    || (lm && this_t->pulse() == ts->pulse())) {
-					if (prev_tempo && prev_tempo->type() == TempoSection::Ramp) {
-						prev_tempo->set_end_note_types_per_minute (ts->note_types_per_minute());
-					}
-					break;
-				}
-				prev_tempo = this_t;
-			}
-		}
 		recompute_map (_metrics);
 	}
 
@@ -1086,22 +1069,6 @@ TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pul
 
 				if (new_ts && new_ts->type() == TempoSection::Constant) {
 					new_ts->set_end_note_types_per_minute (new_ts->note_types_per_minute());
-				} else {
-					for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
-
-						if ((*i)->is_tempo()) {
-							TempoSection* const this_t = static_cast<TempoSection*> (*i);
-
-							bool const ipm = new_ts->position_lock_style() == MusicTime;
-							bool const lm = new_ts->locked_to_meter();
-							if ((ipm && this_t->pulse() > new_ts->pulse()) || (!ipm && this_t->frame() > new_ts->frame())
-							    || (lm && this_t->pulse() > new_ts->pulse())) {
-								new_ts->set_end_note_types_per_minute (tempo.end_note_types_per_minute());
-
-								break;
-							}
-						}
-					}
 				}
 			}
 
@@ -1130,6 +1097,24 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, double minute
 	t->set_locked_to_meter (locked_to_meter);
 
 	do_insert (t);
+
+	TempoSection* prev_tempo = 0;
+	for (Metrics::iterator i = _metrics.begin(); i != _metrics.end(); ++i) {
+		TempoSection* const this_t = dynamic_cast<TempoSection*>(*i);
+		if (this_t) {
+			bool const ipm = t->position_lock_style() == MusicTime;
+			bool const lm = t->locked_to_meter();
+
+			if ((ipm && this_t->pulse() == t->pulse()) || (!ipm && this_t->frame() == t->frame())
+			    || (lm && this_t->pulse() == t->pulse())) {
+				if (prev_tempo && prev_tempo->type() == TempoSection::Ramp) {
+					prev_tempo->set_end_note_types_per_minute (t->note_types_per_minute());
+				}
+				break;
+			}
+			prev_tempo = this_t;
+		}
+	}
 
 	if (recompute) {
 		if (pls == AudioTime) {
