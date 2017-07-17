@@ -211,6 +211,11 @@ SessionEventManager::merge_event (SessionEvent* ev)
 
 	/* try to handle immediate events right here */
 
+	if (ev->type == SessionEvent::Locate || ev->type == SessionEvent::LocateRoll) {
+		/* remove any existing Locates that are waiting to execute */
+		_clear_event_type (ev->type);
+	}
+
 	if (ev->action_frame == SessionEvent::Immediate) {
 		process_event (ev);
 		return;
@@ -222,7 +227,6 @@ SessionEventManager::merge_event (SessionEvent* ev)
 	case SessionEvent::StopOnce:
 		_clear_event_type (ev->type);
 		break;
-
 	default:
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
 			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
@@ -336,4 +340,3 @@ SessionEventManager::_clear_event_type (SessionEvent::Type type)
 
 	set_next_event ();
 }
-
