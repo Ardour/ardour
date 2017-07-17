@@ -25,7 +25,6 @@
 #include "canvas/circle.h"
 #include "canvas/types.h"
 #include "canvas/debug.h"
-#include "canvas/utils.h"
 #include "canvas/canvas.h"
 
 using namespace std;

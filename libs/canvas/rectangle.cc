@@ -25,7 +25,6 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
-#include "canvas/utils.h"
 
 using namespace std;
 using namespace ArdourCanvas;

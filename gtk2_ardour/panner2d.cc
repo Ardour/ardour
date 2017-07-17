@@ -33,7 +33,7 @@
 #include "ardour/pannable.h"
 #include "ardour/speakers.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "panner2d.h"
 #include "keyboard.h"

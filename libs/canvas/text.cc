@@ -27,8 +27,7 @@
 
 #include "canvas/text.h"
 #include "canvas/canvas.h"
-#include "canvas/utils.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -169,14 +168,14 @@ Text::_redraw () const
 	/* and draw, in the appropriate color of course */
 
 	if (_outline) {
-		set_source_rgba (img_context, _outline_color);
+		Gtkmm2ext::set_source_rgba (img_context, _outline_color);
 		layout->update_from_cairo_context (img_context);
 		pango_cairo_layout_path (img_context->cobj(), layout->gobj());
 		img_context->stroke_preserve ();
-		set_source_rgba (img_context, _color);
+		Gtkmm2ext::set_source_rgba (img_context, _color);
 		img_context->fill ();
 	} else {
-		set_source_rgba (img_context, _color);
+		Gtkmm2ext::set_source_rgba (img_context, _color);
 		layout->show_in_cairo_context (img_context);
 	}
 
@@ -286,7 +285,7 @@ Text::set_font_description (Pango::FontDescription font_description)
 }
 
 void
-Text::set_color (Color color)
+Text::set_color (Gtkmm2ext::Color color)
 {
 	if (color == _color) {
 		return;
@@ -296,7 +295,7 @@ Text::set_color (Color color)
 
 	_color = color;
 	if (_outline) {
-		set_outline_color (contrasting_text_color (_color));
+		set_outline_color (Gtkmm2ext::contrasting_text_color (_color));
 	}
 	_need_redraw = true;
 

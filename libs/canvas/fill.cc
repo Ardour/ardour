@@ -27,8 +27,6 @@
 #include "canvas/fill.h"
 #include "canvas/item.h"
 #include "canvas/types.h"
-#include "canvas/utils.h"
-#include "canvas/colors.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -42,14 +40,14 @@ Fill::Fill (Item& self)
 }
 
 void
-Fill::set_fill_color (Color color)
+Fill::set_fill_color (Gtkmm2ext::Color color)
 {
 	if (_fill_color != color) {
 		_self.begin_visual_change ();
 		_fill_color = color;
 
 		double r, g, b, a;
-		color_to_rgba (color, r, g, b, a);
+		Gtkmm2ext::color_to_rgba (color, r, g, b, a);
 		if (a == 0.0) {
 			_transparent = true;
 		} else {
@@ -76,7 +74,7 @@ Fill::setup_fill_context (Cairo::RefPtr<Cairo::Context> context) const
         if (_pattern) {
                 context->set_source (_pattern);
         } else {
-                set_source_rgba (context, _fill_color);
+					Gtkmm2ext::set_source_rgba (context, _fill_color);
         }
 }
 
@@ -93,7 +91,7 @@ Fill::setup_gradient_context (Cairo::RefPtr<Cairo::Context> context, Rect const 
 
 	for (StopList::const_iterator s = _stops.begin(); s != _stops.end(); ++s) {
 		double r, g, b, a;
-		color_to_rgba (s->second, r, g, b, a);
+		Gtkmm2ext::color_to_rgba (s->second, r, g, b, a);
 		_gradient->add_color_stop_rgba (s->first, r, g, b, a);
 	}
 

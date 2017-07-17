@@ -34,7 +34,7 @@
 #include "pbd/xml++.h"
 #include "pbd/configuration_variable.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "widgets/ui_config.h"
 
 #include "utils.h"
@@ -64,29 +64,29 @@ public:
 
 	std::string  color_file_name (bool use_my, bool with_version) const;
 
-	typedef std::map<std::string,ArdourCanvas::Color> Colors;
+	typedef std::map<std::string,Gtkmm2ext::Color> Colors;
 	typedef std::map<std::string,std::string> ColorAliases;
-	typedef std::map<std::string,ArdourCanvas::SVAModifier> Modifiers;
+	typedef std::map<std::string,Gtkmm2ext::SVAModifier> Modifiers;
 
 	Colors         colors;
 	ColorAliases   color_aliases;
 	Modifiers      modifiers;
 
 	void set_alias (std::string const & name, std::string const & alias);
-	void set_color (const std::string& name, ArdourCanvas::Color);
-	void set_modifier (std::string const &, ArdourCanvas::SVAModifier svam);
+	void set_color (const std::string& name, Gtkmm2ext::Color);
+	void set_modifier (std::string const &, Gtkmm2ext::SVAModifier svam);
 
-	std::string color_as_alias (ArdourCanvas::Color c);
-	ArdourCanvas::Color quantized (ArdourCanvas::Color) const;
+	std::string color_as_alias (Gtkmm2ext::Color c);
+	Gtkmm2ext::Color quantized (Gtkmm2ext::Color) const;
 
-	ArdourCanvas::Color color (const std::string&, bool* failed = 0) const;
-	ArdourCanvas::Color color_mod (std::string const & color, std::string const & modifier) const;
-	ArdourCanvas::Color color_mod (const ArdourCanvas::Color& color, std::string const & modifier) const;
-	ArdourCanvas::HSV  color_hsv (const std::string&) const;
-	ArdourCanvas::SVAModifier modifier (const std::string&) const;
+	Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const;
+	Gtkmm2ext::Color color_mod (std::string const & color, std::string const & modifier) const;
+	Gtkmm2ext::Color color_mod (const Gtkmm2ext::Color& color, std::string const & modifier) const;
+	Gtkmm2ext::HSV  color_hsv (const std::string&) const;
+	Gtkmm2ext::SVAModifier modifier (const std::string&) const;
 
-	static std::string color_to_hex_string (ArdourCanvas::Color c);
-	static std::string color_to_hex_string_no_alpha (ArdourCanvas::Color c);
+	static std::string color_to_hex_string (Gtkmm2ext::Color c);
+	static std::string color_to_hex_string_no_alpha (Gtkmm2ext::Color c);
 
 	void reset_dpi ();
 	float get_ui_scale ();

@@ -20,11 +20,9 @@
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
-
-#include "canvas/colors.h"
-#include "canvas/utils.h"
 
 #include "widgets/tooltips.h"
 
@@ -306,14 +304,14 @@ MiniTimeline::format_time (framepos_t when)
 }
 
 void
-MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y, ArdourCanvas::Color color)
+MiniTimeline::draw_dots (cairo_t* cr, int left, int right, int y, Gtkmm2ext::Color color)
 {
 	if (left + 1 >= right) {
 		return;
 	}
 	cairo_move_to (cr, left + .5, y + .5);
 	cairo_line_to (cr, right - .5, y + .5);
-	ArdourCanvas::set_source_rgb_a(cr, color, 0.3);
+	Gtkmm2ext::set_source_rgb_a(cr, color, 0.3);
 	const double dashes[] = { 0, 1 };
 	cairo_set_dash (cr, dashes, 2, 1);
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
@@ -358,7 +356,7 @@ MiniTimeline::draw_mark (cairo_t* cr, int x0, int x1, const std::string& label, 
 			prelight ? "entered marker" : "location marker");
 
 	double r, g, b, a;
-	ArdourCanvas::color_to_rgba (color, r, g, b, a);
+	Gtkmm2ext::color_to_rgba (color, r, g, b, a);
 
 	if (rw < x0) {
 		rw = x1;
@@ -445,7 +443,7 @@ MiniTimeline::draw_edge (cairo_t* cr, int x0, int x1, bool left, const std::stri
 			prelight ? "entered marker" : "location marker");
 
 	double r, g, b, a;
-	ArdourCanvas::color_to_rgba (color, r, g, b, a);
+	Gtkmm2ext::color_to_rgba (color, r, g, b, a);
 
 	if (with_label) {
 		const int y = PADDING;
@@ -494,8 +492,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 {
 	cairo_t* cr = ctx->cobj();
 	// TODO cache, set_colors()
-	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
-	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");
+	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
+	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
 
 	if (_n_labels == 0) {
 		return;
@@ -505,7 +503,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	const int height = get_height ();
 
 	Gtkmm2ext::rounded_rectangle (cr, 0, 0, width, height, 4);
-	ArdourCanvas::set_source_rgba(cr, base);
+	Gtkmm2ext::set_source_rgba(cr, base);
 	cairo_fill (cr);
 
 	Gtkmm2ext::rounded_rectangle (cr, PADDING, PADDING, width - PADDING - PADDING, height - PADDING - PADDING, 4);
@@ -537,7 +535,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		draw_dots (cr, dot_left, x0, y0 + _time_height * .5, text);
 
 		cairo_move_to (cr, x0, y0);
-		ArdourCanvas::set_source_rgba(cr, text);
+		Gtkmm2ext::set_source_rgba(cr, text);
 		pango_cairo_show_layout (cr, _layout->gobj());
 		dot_left = x0 + lw;
 	}

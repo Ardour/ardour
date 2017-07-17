@@ -25,8 +25,6 @@
 
 #include <gtkmm.h>
 
-#include <gtkmm2ext/gtk_ui.h>
-
 #include "ardour/playlist.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
@@ -38,6 +36,10 @@
 
 #include "evoral/Curve.hpp"
 
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/colors.h"
+
 #include "canvas/rectangle.h"
 #include "canvas/polygon.h"
 #include "canvas/poly_line.h"
@@ -45,8 +47,6 @@
 #include "canvas/text.h"
 #include "canvas/xfade_curve.h"
 #include "canvas/debug.h"
-#include "canvas/utils.h"
-#include "canvas/colors.h"
 
 #include "streamview.h"
 #include "audio_region_view.h"
@@ -184,7 +184,7 @@ AudioRegionView::init (bool wfd)
 	// needs to be created first, RegionView::init() calls set_height()
 	pending_peak_data = new ArdourCanvas::Rectangle (group);
 	CANVAS_DEBUG_NAME (pending_peak_data, string_compose ("pending peak rectangle for %1", region()->name()));
-	pending_peak_data->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 0.0));
+	pending_peak_data->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 0.0));
 	pending_peak_data->set_pattern (pending_peak_pattern);
 	pending_peak_data->set_data ("regionview", this);
 	pending_peak_data->hide ();
@@ -198,28 +198,28 @@ AudioRegionView::init (bool wfd)
 	if (!_recregion) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
-		fade_in_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+		fade_in_handle->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 		fade_in_handle->set_fill_color (UIConfiguration::instance().color ("inactive fade handle"));
 		fade_in_handle->set_data ("regionview", this);
 		fade_in_handle->hide ();
 
 		fade_out_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out handle for %1", region()->name()));
-		fade_out_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+		fade_out_handle->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 		fade_out_handle->set_fill_color (UIConfiguration::instance().color ("inactive fade handle"));
 		fade_out_handle->set_data ("regionview", this);
 		fade_out_handle->hide ();
 
 		fade_in_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in trim handle for %1", region()->name()));
-		fade_in_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+		fade_in_trim_handle->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 		fade_in_trim_handle->set_fill_color (UIConfiguration::instance().color ("inactive fade handle"));
 		fade_in_trim_handle->set_data ("regionview", this);
 		fade_in_trim_handle->hide ();
 
 		fade_out_trim_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_out_handle, string_compose ("fade out trim handle for %1", region()->name()));
-		fade_out_trim_handle->set_outline_color (ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+		fade_out_trim_handle->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 		fade_out_trim_handle->set_fill_color (UIConfiguration::instance().color ("inactive fade handle"));
 		fade_out_trim_handle->set_data ("regionview", this);
 		fade_out_trim_handle->hide ();
@@ -1548,10 +1548,10 @@ AudioRegionView::set_waveform_colors ()
 void
 AudioRegionView::set_some_waveform_colors (vector<ArdourCanvas::WaveView*>& waves_to_color)
 {
-	ArdourCanvas::Color fill;
-	ArdourCanvas::Color outline;
-	ArdourCanvas::Color clip = UIConfiguration::instance().color ("clipped waveform");
-	ArdourCanvas::Color zero = UIConfiguration::instance().color ("zero line");
+	Gtkmm2ext::Color fill;
+	Gtkmm2ext::Color outline;
+	Gtkmm2ext::Color clip = UIConfiguration::instance().color ("clipped waveform");
+	Gtkmm2ext::Color zero = UIConfiguration::instance().color ("zero line");
 
 	if (_selected) {
 		if (_region->muted()) {

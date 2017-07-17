@@ -21,7 +21,7 @@
 
 #include "ardour/route_group.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "editor.h"
 #include "editor_group_tabs.h"
@@ -93,9 +93,9 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 	double r, g, b, a;
 
 	if (tab.group && tab.group->is_active()) {
-		ArdourCanvas::color_to_rgba (tab.color, r, g, b, a);
+		Gtkmm2ext::color_to_rgba (tab.color, r, g, b, a);
 	} else {
-		ArdourCanvas::color_to_rgba (UIConfiguration::instance().color ("inactive group tab"), r, g, b, a);
+		Gtkmm2ext::color_to_rgba (UIConfiguration::instance().color ("inactive group tab"), r, g, b, a);
 	}
 
 	a = 1.0;
@@ -121,8 +121,8 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 
 		cairo_move_to (cr, (get_width() - text_height) * .5, (text_width + tab.to + tab.from) * .5);
 
-		ArdourCanvas::Color c = ArdourCanvas::contrasting_text_color (ArdourCanvas::rgba_to_color (r, g, b, a));
-		ArdourCanvas::color_to_rgba (c, r, g, b, a);
+		Gtkmm2ext::Color c = Gtkmm2ext::contrasting_text_color (Gtkmm2ext::rgba_to_color (r, g, b, a));
+		Gtkmm2ext::color_to_rgba (c, r, g, b, a);
 		cairo_set_source_rgb (cr, r, g, b);
 
 		cairo_save (cr);

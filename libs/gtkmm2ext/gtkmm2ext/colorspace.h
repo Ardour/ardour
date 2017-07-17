@@ -3,13 +3,16 @@
  * @author Pascal Getreuer 2005-2010 <getreuer@gmail.com>
  */
 
-#ifndef _ARDOURCANVAS_COLORSPACE_H_
-#define _ARDOURCANVAS_COLORSPACE_H_
+#ifndef _GTKMM2EXT_COLORSPACE_H_
+#define _GTKMM2EXT_COLORSPACE_H_
 
 /** @brief XYZ color of the D65 white point */
 #define WHITEPOINT_X	0.950456
 #define WHITEPOINT_Y	1.0
 #define WHITEPOINT_Z	1.088754
+
+namespace Gtkmm2ext
+{
 
 void Rgb2Yuv(double *Y, double *U, double *V, double R, double G, double B);
 void Yuv2Rgb(double *R, double *G, double *B, double Y, double U, double V);
@@ -51,4 +54,6 @@ void Lch2Rgb(double *R, double *G, double *B, double L, double C, double H);
 void Rgb2Cat02lms(double *L, double *M, double *S, double R, double G, double B);
 void Cat02lms2Rgb(double *R, double *G, double *B, double L, double M, double S);
 
-#endif  /* _ARDOURCANVAS_COLORSPACE_H_ */
+} /* namespace */
+
+#endif

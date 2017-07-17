@@ -33,43 +33,43 @@ class LIBCANVAS_API Text : public Item
 public:
 	Text (Canvas*);
 	Text (Item*);
-       ~Text();
+	~Text();
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
-        ArdourCanvas::Color color () const { return _color; }
-	void set_color (ArdourCanvas::Color);
+	Gtkmm2ext::Color color () const { return _color; }
+	void set_color (Gtkmm2ext::Color);
 
 	void set (std::string const &);
 	void set_font_description (Pango::FontDescription);
 	void set_alignment (Pango::Alignment);
 
-        void clamp_width (double);
+	void clamp_width (double);
 
-        double width() const;
-        double height() const;
+	double width() const;
+	double height() const;
 
-        void set_size_chars (int nchars);
-        void dump (std::ostream&) const;
+	void set_size_chars (int nchars);
+	void dump (std::ostream&) const;
 
 	std::string text() const { return _text; }
 	double text_width() const;
 
 private:
 	std::string             _text;
-        ArdourCanvas::Color     _color;
+	Gtkmm2ext::Color        _color;
 	Pango::FontDescription* _font_description;
 	Pango::Alignment        _alignment;
-        mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
-        mutable Duple          _origin;
-        mutable double         _width;
-        mutable double         _height;
-        mutable bool           _need_redraw;
-        mutable double         _width_correction;
-        double                 _clamped_width;
+	mutable Cairo::RefPtr<Cairo::ImageSurface> _image;
+	mutable Duple           _origin;
+	mutable double          _width;
+	mutable double          _height;
+	mutable bool            _need_redraw;
+	mutable double          _width_correction;
+	double                  _clamped_width;
 
-        void _redraw () const;
+	void _redraw () const;
 };
 
 }

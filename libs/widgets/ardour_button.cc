@@ -29,12 +29,10 @@
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
-
-#include "canvas/utils.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/tooltips.h"
@@ -314,15 +312,15 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if ((_elements & Body)==Body) {
 		rounded_function (cr, 1, 1, get_width() - 2, get_height() - 2, corner_radius);
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
-			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
+			Gtkmm2ext::set_source_rgba (cr, fill_inactive_color);
 			cairo_fill (cr);
 		} else if ( (active_state() == Gtkmm2ext::ExplicitActive) && !((_elements & Indicator)==Indicator) ) {
 			//background color
-			ArdourCanvas::set_source_rgba (cr, fill_active_color);
+			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_fill (cr);
 		} else {  //inactive, or it has an indicator
 			//background color
-			ArdourCanvas::set_source_rgba (cr, fill_inactive_color);
+			Gtkmm2ext::set_source_rgba (cr, fill_inactive_color);
 		}
 		cairo_fill (cr);
 	}
@@ -332,7 +330,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		if (active_state() == Gtkmm2ext::ImplicitActive && !((_elements & Indicator)==Indicator)) {
 			cairo_set_line_width (cr, 2.0);
 			rounded_function (cr, 2, 2, get_width() - 4, get_height() - 4, corner_radius-0.5);
-			ArdourCanvas::set_source_rgba (cr, fill_active_color);
+			Gtkmm2ext::set_source_rgba (cr, fill_active_color);
 			cairo_stroke (cr);
 		}
 	}
@@ -418,7 +416,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_clip(cr);
 
 		cairo_new_path (cr);
-		ArdourCanvas::set_source_rgba (cr, text_color);
+		Gtkmm2ext::set_source_rgba (cr, text_color);
 		const double text_ypos = (get_height() - _text_height) * .5;
 
 		if (_elements & Menu) {
@@ -520,7 +518,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 		cairo_fill(cr);
 
 		//led color
-		ArdourCanvas::set_source_rgba (cr, led_color);
+		Gtkmm2ext::set_source_rgba (cr, led_color);
 		cairo_arc (cr, 0, 0, _diameter * .5 - 3 * UIConfigurationBase::instance().get_ui_scale(), 0, 2 * M_PI);
 		cairo_fill(cr);
 
@@ -531,7 +529,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	if ((visual_state() & Gtkmm2ext::Insensitive)) {
 		rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius);
 		uint32_t ins_color = UIConfigurationBase::instance().color ("gtk_background");
-		ArdourCanvas::set_source_rgb_a (cr, ins_color, 0.6);
+		Gtkmm2ext::set_source_rgb_a (cr, ins_color, 0.6);
 		cairo_fill (cr);
 	}
 
@@ -736,8 +734,8 @@ ArdourButton::set_colors ()
 		}
 	}
 
-	text_active_color = ArdourCanvas::contrasting_text_color (fill_active_color);
-	text_inactive_color = ArdourCanvas::contrasting_text_color (fill_inactive_color);
+	text_active_color = Gtkmm2ext::contrasting_text_color (fill_active_color);
+	text_inactive_color = Gtkmm2ext::contrasting_text_color (fill_inactive_color);
 
 	led_active_color = UIConfigurationBase::instance().color (string_compose ("%1: led active", name), &failed);
 	if (failed) {
@@ -748,7 +746,7 @@ ArdourButton::set_colors ()
 	 * active color.
 	 */
 
-	ArdourCanvas::HSV inactive (led_active_color);
+	Gtkmm2ext::HSV inactive (led_active_color);
 	inactive.v = 0.35;
 
 	led_inactive_color = inactive.color ();

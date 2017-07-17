@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <algorithm> // std:min
 
+#include "gtkmm2ext/colors.h"
 #include "widgets/ardour_icon.h"
 
 using namespace ArdourWidgets::ArdourIcon;
@@ -37,35 +38,22 @@ using namespace ArdourWidgets::ArdourIcon;
 
 #define OUTLINEWIDTH 1.5 // px
 
-#define VECTORICONSTROKEFILL(fillalpha)                    \
-	cairo_set_line_width (cr, OUTLINEWIDTH);           \
-	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);          \
-	cairo_stroke_preserve (cr);                        \
-	cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha));  \
-	cairo_fill (cr);
+#define VECTORICONSTROKEFILL(fillalpha)              \
+  cairo_set_line_width (cr, OUTLINEWIDTH);           \
+  cairo_set_source_rgba (cr, 0, 0, 0, 1.0);          \
+  cairo_stroke_preserve (cr);                        \
+  cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha));  \
+  cairo_fill (cr);
 
-#define VECTORICONSTROKEOUTLINE(LW, color)                 \
-	cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);     \
-	cairo_set_line_width (cr, (LW) + OUTLINEWIDTH);    \
-	ardour_icon_set_source_inv_rgba (cr, color);       \
-	cairo_stroke_preserve (cr);                        \
-	ardour_icon_set_source_rgba (cr, color);           \
-	cairo_set_line_width (cr, (LW));                   \
-	cairo_stroke (cr);
+#define VECTORICONSTROKEOUTLINE(LW, color)           \
+  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);     \
+  cairo_set_line_width (cr, (LW) + OUTLINEWIDTH);    \
+  ardour_icon_set_source_inv_rgba (cr, color);       \
+  cairo_stroke_preserve (cr);                        \
+  Gtkmm2ext::set_source_rgba (cr, color);            \
+  cairo_set_line_width (cr, (LW));                   \
+  cairo_stroke (cr);
 
-
-/** convert 32bit 'RRGGBBAA' to cairo doubles
- * from libs/canvas/utils.cc and  canvas/types.h: typedef uint32_t Color;
- */
-static void ardour_icon_set_source_rgba (cairo_t *cr, uint32_t color)
-{
-	cairo_set_source_rgba (cr,
-			((color >> 24) & 0xff) / 255.0,
-			((color >> 16) & 0xff) / 255.0,
-			((color >>  8) & 0xff) / 255.0,
-			((color >>  0) & 0xff) / 255.0
-			);
-}
 
 /** inverse color */
 static void ardour_icon_set_source_inv_rgba (cairo_t *cr, uint32_t color)
@@ -127,7 +115,7 @@ static void icon_tool_content (cairo_t *cr, const int width, const int height) {
 		cairo_move_to (cr, EM_POINT( 5.0, -5.0));
 		cairo_close_path (cr);
 
-		ardour_icon_set_source_rgba (cr, 0xffffffff);
+		Gtkmm2ext::set_source_rgba (cr, 0xffffffff);
 		cairo_set_line_width (cr, 3 * em);
 		cairo_stroke (cr);
 #undef EM_POINT
@@ -800,7 +788,7 @@ static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon i
 #undef LINE45DEG
 
 	// lens
-	ardour_icon_set_source_rgba (cr, fg_color);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_arc (cr, x, y, r, 0, 2 * M_PI);
 	cairo_fill_preserve (cr);
 
@@ -899,7 +887,7 @@ static void icon_close_cross (cairo_t *cr, const int width, const int height, co
 	const double x = width * .5;
 	const double y = height * .5;
 	const double o = .5 + std::min (x, y) * .4;
-	ardour_icon_set_source_rgba (cr, fg_color);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_set_line_width (cr, 1.0);
 	cairo_move_to (cr, x-o, y-o);
 	cairo_line_to (cr, x+o, y+o);
@@ -959,7 +947,7 @@ static void icon_strip_width (cairo_t *cr, const int width, const int height, co
 	const double ya0= height * .35;
 	const double ya1= height * .65;
 
-	ardour_icon_set_source_rgba (cr, fg_color);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_set_line_width (cr, 1);
 
 	// left + right
@@ -992,7 +980,7 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
 	const double x = width * .5;
 	const double y = height * .5;
 	const double r = std::min (x, y) * .75;
-	ardour_icon_set_source_rgba (cr, fg_color);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
 	cairo_set_line_width (cr, 1);
 	cairo_arc (cr, x, y, r, .57 * M_PI, 2.43 * M_PI);
 	cairo_stroke (cr);

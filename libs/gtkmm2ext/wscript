@@ -31,6 +31,8 @@ gtkmm2ext_sources = [
         'cell_renderer_color_selector.cc',
         'cell_renderer_pixbuf_multi.cc',
         'cell_renderer_pixbuf_toggle.cc',
+        'colors.cc',
+        'colorspace.cc',
         'cursors.cc',
         'debug.cc',
         'dndtreeview.cc',

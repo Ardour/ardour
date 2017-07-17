@@ -32,7 +32,7 @@
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/text.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "ardour/profile.h"
 
@@ -666,10 +666,10 @@ TimeAxisViewItem::set_name_text_color ()
 		f = get_fill_color ();
 	}
 
-	name_text->set_color (ArdourCanvas::contrasting_text_color (f));
+	name_text->set_color (contrasting_text_color (f));
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 TimeAxisViewItem::get_fill_color () const
 {
 	const std::string mod_name = (_dragging ? "dragging region" : fill_color_name);
@@ -714,20 +714,20 @@ TimeAxisViewItem::set_frame_gradient ()
 	ArdourCanvas::Fill::StopList stops;
 	double r, g, b, a;
 	double h, s, v;
-	ArdourCanvas::Color f (get_fill_color());
+	Color f (get_fill_color());
 
 	/* need to get alpha value */
-	ArdourCanvas::color_to_rgba (f, r, g, b, a);
+	color_to_rgba (f, r, g, b, a);
 
 	stops.push_back (std::make_pair (0.0, f));
 
 	/* now a darker version */
 
-	ArdourCanvas::color_to_hsv (f, h, s, v);
+	color_to_hsv (f, h, s, v);
 
 	v = min (1.0, v * (1.0 - UIConfiguration::instance().get_timeline_item_gradient_depth()));
 
-	ArdourCanvas::Color darker = ArdourCanvas::hsva_to_color (h, s, v, a);
+	Color darker = hsva_to_color (h, s, v, a);
 	stops.push_back (std::make_pair (1.0, darker));
 
 	frame->set_gradient (stops, true);

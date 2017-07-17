@@ -28,13 +28,13 @@
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
+#include "gtkmm2ext/colors.h"
+
 #include "canvas/polygon.h"
 #include "canvas/debug.h"
 #include "canvas/pixbuf.h"
 #include "canvas/text.h"
 #include "canvas/line.h"
-#include "canvas/utils.h"
-#include "canvas/colors.h"
 
 #include "streamview.h"
 #include "region_view.h"
@@ -512,7 +512,7 @@ void
 RegionView::set_sync_mark_color ()
 {
 	if (sync_mark) {
-		ArdourCanvas::Color c = UIConfiguration::instance().color ("sync mark");
+		Gtkmm2ext::Color c = UIConfiguration::instance().color ("sync mark");
 		sync_mark->set_fill_color (c);
 		sync_mark->set_outline_color (c);
 		sync_line->set_outline_color (c);
@@ -522,7 +522,7 @@ RegionView::set_sync_mark_color ()
 uint32_t
 RegionView::get_fill_color () const
 {
-	ArdourCanvas::Color f = TimeAxisViewItem::get_fill_color();
+	Gtkmm2ext::Color f = TimeAxisViewItem::get_fill_color();
 	char const *modname;
 
 	if (_region->opaque() && (!ARDOUR::Profile->get_mixbus() || (!_dragging && !_region->muted ()))) {
@@ -531,7 +531,7 @@ RegionView::get_fill_color () const
 		modname = "transparent region base";
 	}
 
-	return HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
+	return Gtkmm2ext::HSV(f).mod (UIConfiguration::instance().modifier (modname)).color ();
 }
 
 void

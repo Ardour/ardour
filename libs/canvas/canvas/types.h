@@ -28,6 +28,8 @@
 
 #include <cairomm/refptr.h>
 
+#include "gtkmm2ext/colors.h"
+
 #include "canvas/visibility.h"
 
 namespace Cairo {
@@ -39,7 +41,6 @@ namespace ArdourCanvas
 
 typedef double Coord;
 typedef double Distance;
-typedef uint32_t Color;
 
 extern LIBCANVAS_API Coord const COORD_MAX;
 

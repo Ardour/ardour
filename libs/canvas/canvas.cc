@@ -38,11 +38,10 @@
 #include "pbd/stacktrace.h"
 
 #include "canvas/canvas.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/debug.h"
 #include "canvas/line.h"
 #include "canvas/scroll_group.h"
-#include "canvas/utils.h"
 
 #ifdef __APPLE__
 #include <gdk/gdk.h>
@@ -57,7 +56,7 @@ uint32_t Canvas::tooltip_timeout_msecs = 750;
 /** Construct a new Canvas */
 Canvas::Canvas ()
 	: _root (this)
-	, _bg_color (rgba_to_color (0, 1.0, 0.0, 1.0))
+	, _bg_color (Gtkmm2ext::rgba_to_color (0, 1.0, 0.0, 1.0))
 	, _last_render_start_timestamp(0)
 {
 	set_epoch ();
@@ -407,7 +406,7 @@ Canvas::set_tooltip_timeout (uint32_t msecs)
 }
 
 void
-Canvas::set_background_color (Color c)
+Canvas::set_background_color (Gtkmm2ext::Color c)
 {
 	_bg_color = c;
 
@@ -926,7 +925,7 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 
 	/* draw background color */
 	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	set_source_rgba (draw_context, _bg_color);
+	Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
 	draw_context->fill ();
 
 	/* render canvas */

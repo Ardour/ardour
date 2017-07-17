@@ -531,7 +531,7 @@ TrackMixLayout::color_changed ()
 		return;
 	}
 
-	Color rgba = stripable->presentation_info().color();
+	Gtkmm2ext::Color rgba = stripable->presentation_info().color();
 	selection_color = p2.get_color_index (rgba);
 
 	name_text->set_color (rgba);

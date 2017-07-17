@@ -100,8 +100,8 @@ public:
 	 */
 	void set_start_shift (double pixels);
 
-	void set_fill_color (Color);
-	void set_outline_color (Color);
+	void set_fill_color (Gtkmm2ext::Color);
+	void set_outline_color (Gtkmm2ext::Color);
 
 	void region_resized ();
 	void gain_changed ();
@@ -109,8 +109,8 @@ public:
 	void set_show_zero_line (bool);
 	bool show_zero_line () const;
 
-	void set_zero_color (Color);
-	void set_clip_color (Color);
+	void set_zero_color (Gtkmm2ext::Color);
+	void set_clip_color (Gtkmm2ext::Color);
 	void set_logscaled (bool);
 
 	void set_gradient_depth (double);

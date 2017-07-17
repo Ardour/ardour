@@ -69,8 +69,6 @@ uint32_t gdk_color_to_rgba (Gdk::Color const&);
 void set_color_from_rgb (Gdk::Color&, uint32_t);
 void set_color_from_rgba (Gdk::Color&, uint32_t);
 
-uint32_t contrasting_text_color (uint32_t c);
-
 bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey* ev);
 bool emulate_key_event (unsigned int);

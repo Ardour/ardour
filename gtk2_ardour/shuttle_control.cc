@@ -27,13 +27,11 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
-
-#include "canvas/utils.h"
-#include "canvas/colors.h"
 
 #include "widgets/tooltips.h"
 
@@ -611,7 +609,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
 	if (_flat_buttons) {
 		uint32_t col = UIConfiguration::instance().color ("shuttle");
-		ArdourCanvas::set_source_rgba (cr, col);
+		Gtkmm2ext::set_source_rgba (cr, col);
 	} else {
 		cairo_set_source (cr, pattern);
 	}

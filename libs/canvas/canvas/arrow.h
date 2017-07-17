@@ -58,7 +58,7 @@ public:
 	void set_head_height (int, Distance);
 	void set_head_width (int, Distance);
 	void set_outline_width (Distance);
-	void set_color (Color);
+	void set_color (Gtkmm2ext::Color);
 
 	Coord x () const;
 	Coord y1 () const;
@@ -67,7 +67,7 @@ public:
 	void set_y0 (Coord);
 	void set_y1 (Coord);
 
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
 private:
 	void setup_polygon (int);

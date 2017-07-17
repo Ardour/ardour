@@ -32,14 +32,14 @@
 
 #include "ardour/profile.h"
 
+#include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
+
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
-#include "canvas/colors.h"
-
-#include "gtkmm2ext/doi.h"
-#include "gtkmm2ext/utils.h"
 
 #include "widgets/tooltips.h"
 
@@ -129,7 +129,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_canvas_separator = new ArdourCanvas::Line(_canvas_display);
 	CANVAS_DEBUG_NAME (_canvas_separator, "separator for TAV");
 	_canvas_separator->set (ArdourCanvas::Duple(0.0, 0.0), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, 0.0));
-	_canvas_separator->set_outline_color(ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+	_canvas_separator->set_outline_color(Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 	_canvas_separator->set_outline_width(1.0);
 	_canvas_separator->hide();
 

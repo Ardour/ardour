@@ -135,7 +135,9 @@
 #include <string.h>
 #include <ctype.h>
 
-#include "canvas/colorspace.h"
+#include "gtkmm2ext/colorspace.h"
+
+namespace Gtkmm2ext {
 
 /** @brief Min of A and B */
 #define MIN(A,B)	(((A) <= (B)) ? (A) : (B))
@@ -938,3 +940,5 @@ void Cat02lms2Rgb(double *R, double *G, double *B, double L, double M, double S)
 	Cat02lms2Xyz(&X, &Y, &Z, L, M, S);
 	Xyz2Rgb(R, G, B, X, Y, Z);
 }
+
+} /* namespace */

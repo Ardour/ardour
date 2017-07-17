@@ -28,19 +28,14 @@
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
-
-#include "pbd/controllable.h"
+#include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_knob.h"
 #include "widgets/ui_config.h"
-//#include "timers.h"
-
-#include "canvas/colors.h"
-#include "canvas/utils.h"
 
 #include "pbd/i18n.h"
 
@@ -109,7 +104,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 	cairo_translate (cr, xc, yc);  //after this, everything is based on the center of the knob
 
 	//get the knob color from the theme
-	ArdourCanvas::Color knob_color = UIConfigurationBase::instance().color (string_compose ("%1", get_name()));
+	Gtkmm2ext::Color knob_color = UIConfigurationBase::instance().color (string_compose ("%1", get_name()));
 
 	float center_radius = 0.48*scale;
 	float border_width = 0.8;
@@ -134,11 +129,11 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 
 		//look up the arc colors from the config
 		double red_start, green_start, blue_start, unused;
-		ArdourCanvas::Color arc_start_color = UIConfigurationBase::instance().color ( string_compose ("%1: arc start", get_name()));
-		ArdourCanvas::color_to_rgba( arc_start_color, red_start, green_start, blue_start, unused );
+		Gtkmm2ext::Color arc_start_color = UIConfigurationBase::instance().color ( string_compose ("%1: arc start", get_name()));
+		Gtkmm2ext::color_to_rgba( arc_start_color, red_start, green_start, blue_start, unused );
 		double red_end, green_end, blue_end;
-		ArdourCanvas::Color arc_end_color = UIConfigurationBase::instance().color ( string_compose ("%1: arc end", get_name()) );
-		ArdourCanvas::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
+		Gtkmm2ext::Color arc_end_color = UIConfigurationBase::instance().color ( string_compose ("%1: arc end", get_name()) );
+		Gtkmm2ext::color_to_rgba( arc_end_color, red_end, green_end, blue_end, unused );
 
 		//vary the arc color over the travel of the knob
 		float intensity = fabsf (_val - zero) / std::max(zero, (1.f - zero));
@@ -198,7 +193,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 		cairo_restore(cr);
 
 		//inner circle
-		ArdourCanvas::set_source_rgba(cr, knob_color);
+		Gtkmm2ext::set_source_rgba(cr, knob_color);
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
 
@@ -216,7 +211,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 			cairo_pattern_destroy (shade_pattern);
 
 			//flat top over beveled edge
-			ArdourCanvas::set_source_rgb_a (cr, knob_color, 0.5 );
+			Gtkmm2ext::set_source_rgb_a (cr, knob_color, 0.5 );
 			cairo_arc (cr, 0, 0, center_radius-pointer_thickness, 0, 2.0*G_PI);
 			cairo_fill (cr);
 		} else {
@@ -232,7 +227,7 @@ ArdourKnob::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*
 
 	} else {
 		//inner circle
-		ArdourCanvas::set_source_rgba(cr, knob_color);
+		Gtkmm2ext::set_source_rgba(cr, knob_color);
 		cairo_arc (cr, 0, 0, center_radius, 0, 2.0*G_PI);
 		cairo_fill (cr);
 	}

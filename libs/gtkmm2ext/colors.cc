@@ -25,30 +25,30 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/string_convert.h"
 
-#include "canvas/colors.h"
-#include "canvas/colorspace.h"
+#include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/colorspace.h"
 
 using namespace std;
-using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 
 using std::max;
 using std::min;
 
-ArdourCanvas::Color
-ArdourCanvas::change_alpha (Color c, double a)
+Gtkmm2ext::Color
+Gtkmm2ext::change_alpha (Color c, double a)
 {
 	return ((c & ~0xff) | (lrintf (a*255.0) & 0xff));
 }
 
 void
-ArdourCanvas::color_to_hsv (Color color, double& h, double& s, double& v)
+Gtkmm2ext::color_to_hsv (Color color, double& h, double& s, double& v)
 {
 	double a;
 	color_to_hsva (color, h, s, v, a);
 }
 
 void
-ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, double& a)
+Gtkmm2ext::color_to_hsva (Color color, double& h, double& s, double& v, double& a)
 {
 	double r, g, b;
 	double cmax;
@@ -106,8 +106,8 @@ ArdourCanvas::color_to_hsva (Color color, double& h, double& s, double& v, doubl
 	}
 }
 
-ArdourCanvas::Color
-ArdourCanvas::hsva_to_color (double h, double s, double v, double a)
+Gtkmm2ext::Color
+Gtkmm2ext::hsva_to_color (double h, double s, double v, double a)
 {
 	s = min (1.0, max (0.0, s));
 	v = min (1.0, max (0.0, v));
@@ -139,7 +139,7 @@ ArdourCanvas::hsva_to_color (double h, double s, double v, double a)
 }
 
 void
-ArdourCanvas::color_to_rgba (Color color, double& r, double& g, double& b, double& a)
+Gtkmm2ext::color_to_rgba (Color color, double& r, double& g, double& b, double& a)
 {
 	r = ((color >> 24) & 0xff) / 255.0;
 	g = ((color >> 16) & 0xff) / 255.0;
@@ -147,8 +147,8 @@ ArdourCanvas::color_to_rgba (Color color, double& r, double& g, double& b, doubl
 	a = ((color >>  0) & 0xff) / 255.0;
 }
 
-ArdourCanvas::Color
-ArdourCanvas::rgba_to_color (double r, double g, double b, double a)
+Gtkmm2ext::Color
+Gtkmm2ext::rgba_to_color (double r, double g, double b, double a)
 {
 	/* clamp to [0 .. 1] range */
 
@@ -203,18 +203,18 @@ luminance (uint32_t c)
 
         double r, g, b, a;
 
-        ArdourCanvas::color_to_rgba (c, r, g, b, a);
+        Gtkmm2ext::color_to_rgba (c, r, g, b, a);
 
         return (gam_sRGB (rY*inv_gam_sRGB(r) + gY*inv_gam_sRGB(g) + bY*inv_gam_sRGB(b))) / 255.0;
 }
 
 uint32_t
-ArdourCanvas::contrasting_text_color (uint32_t c)
+Gtkmm2ext::contrasting_text_color (uint32_t c)
 {
 	/* use a slightly off-white... XXX should really look this up */
 
-        static const uint32_t white = ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1.0);
-        static const uint32_t black = ArdourCanvas::rgba_to_color (0.0, 0.0, 0.0, 1.0);
+        static const uint32_t white = Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1.0);
+        static const uint32_t black = Gtkmm2ext::rgba_to_color (0.0, 0.0, 0.0, 1.0);
 
 	return (luminance (c) < 0.50) ? white : black;
 }
@@ -515,7 +515,7 @@ HSV::print (std::ostream& o) const
 }
 
 
-std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv) { hsv.print (o); return o; }
+std::ostream& operator<<(std::ostream& o, const Gtkmm2ext::HSV& hsv) { hsv.print (o); return o; }
 
 HSV
 HSV::mod (SVAModifier const & svam)
@@ -647,10 +647,54 @@ SVAModifier::operator () (HSV& hsv)  const
 	return r;
 }
 
-ArdourCanvas::Color
-ArdourCanvas::color_at_alpha (ArdourCanvas::Color c, double a)
+Color
+Gtkmm2ext::color_at_alpha (Gtkmm2ext::Color c, double a)
 {
 	double r, g, b, unused;
 	color_to_rgba (c, r, g, b, unused);
 	return rgba_to_color( r,g,b, a );
+}
+
+void
+Gtkmm2ext::set_source_rgba (Cairo::RefPtr<Cairo::Context> context, Color color)
+{
+	context->set_source_rgba (
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		((color >>  0) & 0xff) / 255.0
+		);
+}
+
+void
+Gtkmm2ext::set_source_rgb_a (Cairo::RefPtr<Cairo::Context> context, Color color, float alpha)
+{
+	context->set_source_rgba (
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		alpha
+		);
+}
+
+void
+Gtkmm2ext::set_source_rgba (cairo_t *cr, Color color)
+{
+	cairo_set_source_rgba ( cr,
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		((color >>  0) & 0xff) / 255.0
+		);
+}
+
+void
+Gtkmm2ext::set_source_rgb_a (cairo_t *cr, Color color, float alpha)
+{
+	cairo_set_source_rgba ( cr,
+		((color >> 24) & 0xff) / 255.0,
+		((color >> 16) & 0xff) / 255.0,
+		((color >>  8) & 0xff) / 255.0,
+		alpha
+		);
 }

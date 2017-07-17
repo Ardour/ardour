@@ -101,7 +101,7 @@ EditorCursor::hide ()
 }
 
 void
-EditorCursor::set_color (ArdourCanvas::Color color)
+EditorCursor::set_color (Gtkmm2ext::Color color)
 {
 	_track_canvas_item->set_color (color);
 }

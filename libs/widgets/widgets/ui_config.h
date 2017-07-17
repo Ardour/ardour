@@ -4,7 +4,7 @@
 #include <cassert>
 
 #include "pbd/stateful.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "widgets/visibility.h"
 
@@ -24,7 +24,7 @@ public:
 
 	virtual float get_ui_scale () = 0;
 	virtual bool get_widget_prelight () const = 0;
-	virtual ArdourCanvas::Color color (const std::string&, bool* failed = 0) const = 0;
+	virtual Gtkmm2ext::Color color (const std::string&, bool* failed = 0) const = 0;
 };
 
 }

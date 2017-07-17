@@ -56,9 +56,9 @@ public:
 	void set_controllable (boost::shared_ptr<ARDOUR::AutomationControl> c);
 	boost::shared_ptr<ARDOUR::AutomationControl> controllable() const { return _controllable; }
 
-	void set_text_color (ArdourCanvas::Color);
-	void set_arc_start_color (ArdourCanvas::Color);
-	void set_arc_end_color (ArdourCanvas::Color);
+	void set_text_color (Gtkmm2ext::Color);
+	void set_arc_start_color (Gtkmm2ext::Color);
+	void set_arc_end_color (Gtkmm2ext::Color);
 	void set_radius (double r);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
@@ -77,9 +77,9 @@ public:
 	float   _val; // current value [0..1]
 	float   _normal; // default value, arc
 
-	ArdourCanvas::Color text_color;
-	ArdourCanvas::Color arc_start_color;
-	ArdourCanvas::Color arc_end_color;
+	Gtkmm2ext::Color text_color;
+	Gtkmm2ext::Color arc_start_color;
+	Gtkmm2ext::Color arc_end_color;
 	ArdourCanvas::Text* text;
 
 	void set_pan_azimuth_text (double);

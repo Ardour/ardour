@@ -9,7 +9,6 @@
 #include "pbd/xml++.h"
 
 #include "canvas/stateful_image.h"
-#include "canvas/utils.h"
 
 #include "pbd/i18n.h"
 
@@ -68,7 +67,7 @@ StatefulImage::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 		}
 
 		// layout->set_alignment (_alignment);
-		set_source_rgba (context, _text_color);
+		Gtkmm2ext::set_source_rgba (context, _text_color);
 		context->move_to (_text_x, _text_y);
 		layout->show_in_cairo_context (context);
 	}

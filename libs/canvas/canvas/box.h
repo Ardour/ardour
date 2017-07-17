@@ -56,7 +56,7 @@ public:
 
 	/* aliases so that CSS box model terms work */
 	void set_border_width (double w) { set_outline_width (w); }
-	void set_border_color (Color c)  { set_outline_color (c); }
+	void set_border_color (Gtkmm2ext::Color c)  { set_outline_color (c); }
 
 	void add (Item*);
 	void pack_start (Item*, double extra_padding = 0);

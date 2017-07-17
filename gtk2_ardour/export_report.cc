@@ -25,10 +25,9 @@
 
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
+
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/utils.h"
-#include "canvas/utils.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "audiographer/general/analyser.h"
 
@@ -530,8 +529,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 							rint ((g + 59.0) * 10.0 - h * .5), 5,
 							h + 2, w + 2, 4);
 					const float pk = (g + 59.0) / 54.0;
-					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4, .6);
-					ArdourCanvas::set_source_rgba (cr, c);
+					Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color (252 - 260 * pk, .9, .3 + pk * .4, .6);
+					Gtkmm2ext::set_source_rgba (cr, c);
 					cr->fill ();
 
 					cr->save ();
@@ -731,8 +730,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 			for (size_t x = 0 ; x < width; ++x) {
 				for (size_t y = 0 ; y < height; ++y) {
 					const float pk = p->spectrum[x][y];
-					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
-					ArdourCanvas::set_source_rgba (cr, c);
+					Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
+					Gtkmm2ext::set_source_rgba (cr, c);
 					cr->rectangle (m_l + x - .5, y - .5, 1, 1);
 					cr->fill ();
 				}
@@ -792,8 +791,8 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			for (size_t y = 0 ; y < innerheight - 2; ++y) {
 					const float pk = 1.0 - (float) y / innerheight;
-					ArdourCanvas::Color c = ArdourCanvas::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
-					ArdourCanvas::set_source_rgba (cr, c);
+					Gtkmm2ext::Color c = Gtkmm2ext::hsva_to_color (252 - 260 * pk, .9, sqrt(pk));
+					Gtkmm2ext::set_source_rgba (cr, c);
 					cr->rectangle (2, innertop + y + .5, m_r - 4 - anw, 1);
 					cr->fill ();
 			}

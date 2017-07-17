@@ -46,10 +46,10 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/search_paths.h"
 
-#include "canvas/item.h"
-#include "canvas/utils.h"
-
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/utils.h"
+
+#include "canvas/item.h"
 
 #include "debug.h"
 #include "public_editor.h"

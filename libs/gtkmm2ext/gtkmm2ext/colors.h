@@ -17,36 +17,45 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#ifndef __ardour_canvas_colors_h__
-#define __ardour_canvas_colors_h__
+#ifndef _GTKMM2EXT_COLORS_H_
+#define _GTKMM2EXT_COLORS_H_
 
 #include <cairomm/context.h>
 
-#include "canvas/visibility.h"
-#include "canvas/types.h"
+#include "gtkmm2ext/visibility.h"
 
-namespace ArdourCanvas
+namespace Gtkmm2ext
 {
 
-struct LIBCANVAS_API HSV;
-struct LIBCANVAS_API HSVA;
+typedef uint32_t Color;
 
-extern LIBCANVAS_API Color change_alpha (Color, double alpha);
+/* conventient way to use Gtkmm2ext::Color with libcairo */
+extern LIBGTKMM2EXT_API void set_source_rgba (Cairo::RefPtr<Cairo::Context>, Gtkmm2ext::Color);
+extern LIBGTKMM2EXT_API void set_source_rgb_a (Cairo::RefPtr<Cairo::Context>, Gtkmm2ext::Color, float alpha);  //override the color's alpha
 
-extern LIBCANVAS_API Color hsva_to_color (double h, double s, double v, double a = 1.0);
-extern LIBCANVAS_API void  color_to_hsva (Color color, double& h, double& s, double& v, double& a);
-extern LIBCANVAS_API Color color_at_alpha (Color, double a);
-extern LIBCANVAS_API void  color_to_hsv (Color color, double& h, double& s, double& v);
-extern LIBCANVAS_API void  color_to_rgba (Color, double& r, double& g, double& b, double& a);
-extern LIBCANVAS_API Color rgba_to_color (double r, double g, double b, double a);
+extern LIBGTKMM2EXT_API void set_source_rgba (cairo_t*, Gtkmm2ext::Color);
+extern LIBGTKMM2EXT_API void set_source_rgb_a (cairo_t*, Gtkmm2ext::Color, float alpha);  //override the color's alpha
 
-uint32_t LIBCANVAS_API contrasting_text_color (uint32_t c);
 
-struct LIBCANVAS_API HSV;
+struct LIBGTKMM2EXT_API HSV;
+struct LIBGTKMM2EXT_API HSVA;
 
-class LIBCANVAS_API SVAModifier
+extern LIBGTKMM2EXT_API Color change_alpha (Color, double alpha);
+
+extern LIBGTKMM2EXT_API Color hsva_to_color (double h, double s, double v, double a = 1.0);
+extern LIBGTKMM2EXT_API void  color_to_hsva (Color color, double& h, double& s, double& v, double& a);
+extern LIBGTKMM2EXT_API Color color_at_alpha (Color, double a);
+extern LIBGTKMM2EXT_API void  color_to_hsv (Color color, double& h, double& s, double& v);
+extern LIBGTKMM2EXT_API void  color_to_rgba (Color, double& r, double& g, double& b, double& a);
+extern LIBGTKMM2EXT_API Color rgba_to_color (double r, double g, double b, double a);
+
+uint32_t LIBGTKMM2EXT_API contrasting_text_color (uint32_t c);
+
+struct LIBGTKMM2EXT_API HSV;
+
+class LIBGTKMM2EXT_API SVAModifier
 {
-  public:
+public:
 	enum Type {
 		Add,
 		Multiply,
@@ -65,14 +74,14 @@ class LIBCANVAS_API SVAModifier
 	std::string to_string () const;
 	void from_string (std::string const &);
 
-  private:
+private:
 	Type type;
 	double _s;
 	double _v;
 	double _a;
 };
 
-struct LIBCANVAS_API HSV
+struct LIBGTKMM2EXT_API HSV
 {
 	HSV ();
 	HSV (double h, double s, double v, double a = 1.0);
@@ -118,13 +127,12 @@ struct LIBCANVAS_API HSV
 
 	void print (std::ostream&) const;
 
-  protected:
+protected:
 	void clamp ();
 };
 
+} /* namespace */
 
-}
+std::ostream& operator<<(std::ostream& o, const Gtkmm2ext::HSV& hsv);
 
-std::ostream& operator<<(std::ostream& o, const ArdourCanvas::HSV& hsv);
-
-#endif /* __ardour_canvas_colors_h__ */
+#endif

@@ -60,7 +60,7 @@
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
-using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 
 static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
@@ -143,7 +143,7 @@ UIConfiguration::reset_gtk_theme ()
 
 		if (g->first.find ("gtk_") == 0) {
 			const string gtk_name = g->first.substr (4);
-			ArdourCanvas::Color a_color = color (g->second);
+			Gtkmm2ext::Color a_color = color (g->second);
 
 			color_scheme_string += gtk_name + ":#" + color_to_hex_string_no_alpha (a_color) + ';';
 		}
@@ -617,7 +617,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 		color = child->property (X_("value"));
 
 		if (name && color) {
-			ArdourCanvas::Color c;
+			Gtkmm2ext::Color c;
 			c = strtoul (color->value().c_str(), 0, 16);
 			/* insert or replace color name definition */
 			colors[name->value()] =  c;
@@ -661,7 +661,7 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  CANVAS_FONT_VARIABLE
 }
 
-ArdourCanvas::SVAModifier
+Gtkmm2ext::SVAModifier
 UIConfiguration::modifier (string const & name) const
 {
 	Modifiers::const_iterator m = modifiers.find (name);
@@ -671,19 +671,19 @@ UIConfiguration::modifier (string const & name) const
 	return SVAModifier ();
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 UIConfiguration::color_mod (std::string const & colorname, std::string const & modifiername) const
 {
 	return HSV (color (colorname)).mod (modifier (modifiername)).color ();
 }
 
-ArdourCanvas::Color
-UIConfiguration::color_mod (const ArdourCanvas::Color& color, std::string const & modifiername) const
+Gtkmm2ext::Color
+UIConfiguration::color_mod (const Gtkmm2ext::Color& color, std::string const & modifiername) const
 {
 	return HSV (color).mod (modifier (modifiername)).color ();
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 UIConfiguration::color (const std::string& name, bool* failed) const
 {
 	ColorAliases::const_iterator e = color_aliases.find (name);
@@ -731,7 +731,7 @@ UIConfiguration::quantized (Color c) const
 }
 
 void
-UIConfiguration::set_color (string const& name, ArdourCanvas::Color color)
+UIConfiguration::set_color (string const& name, Gtkmm2ext::Color color)
 {
 	Colors::iterator i = colors.find (name);
 	if (i == colors.end()) {
@@ -791,7 +791,7 @@ UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 }
 
 std::string
-UIConfiguration::color_to_hex_string (ArdourCanvas::Color c)
+UIConfiguration::color_to_hex_string (Gtkmm2ext::Color c)
 {
 	char buf[16];
 	int retval = g_snprintf (buf, sizeof(buf), "%08x", c);
@@ -803,7 +803,7 @@ UIConfiguration::color_to_hex_string (ArdourCanvas::Color c)
 }
 
 std::string
-UIConfiguration::color_to_hex_string_no_alpha (ArdourCanvas::Color c)
+UIConfiguration::color_to_hex_string_no_alpha (Gtkmm2ext::Color c)
 {
 	c >>= 8; // shift/remove alpha
 	char buf[16];

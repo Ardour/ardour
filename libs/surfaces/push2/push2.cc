@@ -45,7 +45,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "canvas.h"
 #include "gui.h"
@@ -68,6 +68,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
@@ -1296,7 +1297,7 @@ Push2::update_selection_color ()
 	}
 
 	selection_color = get_color_index (current_midi_track->presentation_info().color());
-	contrast_color = get_color_index (ArdourCanvas::HSV (current_midi_track->presentation_info().color()).opposite().color());
+	contrast_color = get_color_index (Gtkmm2ext::HSV (current_midi_track->presentation_info().color()).opposite().color());
 
 	reset_pad_colors ();
 }
@@ -1569,7 +1570,7 @@ Push2::stripable_selection_changed ()
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 		current_pad_target = new_pad_target;
 		selection_color = get_color_index (new_pad_target->presentation_info().color());
-		contrast_color = get_color_index (ArdourCanvas::HSV (new_pad_target->presentation_info().color()).opposite().color());
+		contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
 	} else {
 		current_pad_target.reset ();
 		selection_color = LED::Green;
@@ -1590,7 +1591,7 @@ Push2::button_by_id (ButtonID bid)
 }
 
 uint8_t
-Push2::get_color_index (ArdourCanvas::Color rgba)
+Push2::get_color_index (Color rgba)
 {
 	ColorMap::iterator i = color_map.find (rgba);
 
@@ -1600,7 +1601,7 @@ Push2::get_color_index (ArdourCanvas::Color rgba)
 
 	double dr, dg, db, da;
 	int r, g, b;
-	ArdourCanvas::color_to_rgba (rgba, dr, dg, db, da);
+	color_to_rgba (rgba, dr, dg, db, da);
 	int w = 126; /* not sure where/when we should get this value */
 
 
@@ -1675,26 +1676,26 @@ Push2::build_color_map ()
 void
 Push2::fill_color_table ()
 {
-	colors.insert (make_pair (DarkBackground, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
-	colors.insert (make_pair (LightBackground, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	colors.insert (make_pair (DarkBackground, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
+	colors.insert (make_pair (LightBackground, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (ParameterName, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	colors.insert (make_pair (ParameterName, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (KnobArcBackground, ArdourCanvas::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
-	colors.insert (make_pair (KnobArcStart, ArdourCanvas::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
-	colors.insert (make_pair (KnobArcEnd, ArdourCanvas::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
+	colors.insert (make_pair (KnobArcBackground, Gtkmm2ext::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
+	colors.insert (make_pair (KnobArcStart, Gtkmm2ext::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
+	colors.insert (make_pair (KnobArcEnd, Gtkmm2ext::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
 
-	colors.insert (make_pair (KnobLineShadow, ArdourCanvas::rgba_to_color  (0, 0, 0, 0.3)));
-	colors.insert (make_pair (KnobLine, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+	colors.insert (make_pair (KnobLineShadow, Gtkmm2ext::rgba_to_color  (0, 0, 0, 0.3)));
+	colors.insert (make_pair (KnobLine, Gtkmm2ext::rgba_to_color (1, 1, 1, 1)));
 
-	colors.insert (make_pair (KnobForeground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobBackground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobShadow, ArdourCanvas::rgba_to_color (0, 0, 0, 0.1)));
-	colors.insert (make_pair (KnobBorder, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
+	colors.insert (make_pair (KnobForeground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	colors.insert (make_pair (KnobBackground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	colors.insert (make_pair (KnobShadow, Gtkmm2ext::rgba_to_color (0, 0, 0, 0.1)));
+	colors.insert (make_pair (KnobBorder, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
 
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 Push2::get_color (ColorName name)
 {
 	Colors::iterator c = colors.find (name);

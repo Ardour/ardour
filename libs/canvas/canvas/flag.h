@@ -35,23 +35,23 @@ class Rectangle;
 class LIBCANVAS_API Flag : public Container
 {
 public:
-	Flag (Canvas *, Distance, Color, Color, Duple, bool invert=false);
-	Flag (Item*, Distance, Color, Color, Duple, bool invert=false);
+	Flag (Canvas *, Distance, Gtkmm2ext::Color, Gtkmm2ext::Color, Duple, bool invert=false);
+	Flag (Item*, Distance, Gtkmm2ext::Color, Gtkmm2ext::Color, Duple, bool invert=false);
 
 	void set_text (std::string const &);
 	void set_height (Distance);
 
 	void set_font_description (Pango::FontDescription);
 
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
 	double width() const;
 
 private:
 	void setup (Distance height, Duple position);
 
-	Color _outline_color;
-	Color _fill_color;
+	Gtkmm2ext::Color _outline_color;
+	Gtkmm2ext::Color _fill_color;
 	Text* _text;
 	Line* _line;
 	Rectangle* _rectangle;

@@ -26,7 +26,7 @@
 #include "canvas/text.h"
 #include "canvas/types.h"
 #include "canvas/rectangle.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "canvas.h"
 #include "gui.h"
@@ -262,7 +262,7 @@ Push2Menu::set_active (uint32_t index)
 }
 
 void
-Push2Menu::set_text_color (Color c)
+Push2Menu::set_text_color (Gtkmm2ext::Color c)
 {
 	text_color = c;
 
@@ -273,10 +273,10 @@ Push2Menu::set_text_color (Color c)
 }
 
 void
-Push2Menu::set_active_color (Color c)
+Push2Menu::set_active_color (Gtkmm2ext::Color c)
 {
 	active_color = c;
-	contrast_color = contrasting_text_color (active_color);
+	contrast_color = Gtkmm2ext::contrasting_text_color (active_color);
 	if (active_bg) {
 		active_bg->set_fill_color (c);
 	}

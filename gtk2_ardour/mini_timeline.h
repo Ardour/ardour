@@ -64,7 +64,7 @@ private:
 	void calculate_time_width ();
 	void calculate_time_spacing ();
 	void update_minitimeline ();
-	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
+	void draw_dots (cairo_t*, int left, int right, int y, Gtkmm2ext::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, const std::string&, bool& prelight);
 	int  draw_edge (cairo_t*, int x0, int x1, bool left, const std::string&, bool& prelight);
 

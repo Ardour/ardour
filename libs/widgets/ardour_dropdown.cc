@@ -31,8 +31,6 @@
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gui_thread.h"
 
-#include "ardour/rc_configuration.h" // for widget prelight preference
-
 #include "widgets/ardour_dropdown.h"
 
 #include "pbd/i18n.h"

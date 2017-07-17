@@ -521,8 +521,8 @@ private:
 
 	bool _mouse_changed_selection;
 
-	ArdourCanvas::Color _patch_change_outline;
-	ArdourCanvas::Color _patch_change_fill;
+	Gtkmm2ext::Color _patch_change_outline;
+	Gtkmm2ext::Color _patch_change_fill;
 
 	Evoral::Beats snap_frame_to_grid_underneath (framepos_t p, int32_t divisions, bool shift_snap) const;
 

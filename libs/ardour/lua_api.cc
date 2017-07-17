@@ -486,7 +486,7 @@ ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
 		a = luabridge::Stack<double>::get (L, 4);
 	}
 
-	// we can't use ArdourCanvas::hsva_to_color here
+	// we can't use Gtkmm2ext::hsva_to_color here
 	// besides we want HSL not HSV and without intermediate
 	// color_to_rgba (rgba_to_color ())
 	double r, g, b;
@@ -515,7 +515,7 @@ ARDOUR::LuaAPI::color_to_rgba (lua_State *L)
 
 	/* libardour is no user of libcanvas, otherwise
 	 * we could just call
-	 * ArdourCanvas::color_to_rgba (color, r, g, b, a);
+	 * Gtkmm2ext::color_to_rgba (color, r, g, b, a);
 	 */
 	r = ((color >> 24) & 0xff) / 255.0;
 	g = ((color >> 16) & 0xff) / 255.0;

@@ -53,6 +53,7 @@ using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
 ColorThemeManager::ColorThemeManager ()
@@ -273,8 +274,8 @@ ColorThemeManager::palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanva
 
 struct NamedColor {
 	string name;
-	ArdourCanvas::HSV    color;
-	NamedColor (string s, ArdourCanvas::HSV c) : name (s), color (c) {}
+	Gtkmm2ext::HSV    color;
+	NamedColor (string s, Gtkmm2ext::HSV c) : name (s), color (c) {}
 };
 
 struct SortByHue {
@@ -378,7 +379,7 @@ ColorThemeManager::edit_palette_color (std::string name)
 	using namespace ArdourCanvas;
 	double r,g, b, a;
 	UIConfiguration* uic (&UIConfiguration::instance());
-	ArdourCanvas::Color c = uic->color (name);
+	Gtkmm2ext::Color c = uic->color (name);
 	Gdk::Color gdkcolor;
 
 	color_to_rgba (c, r, g, b, a);

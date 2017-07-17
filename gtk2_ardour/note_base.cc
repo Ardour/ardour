@@ -142,7 +142,7 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		const ArdourCanvas::Color inactive_ch = UIConfiguration::instance().color ("midi note inactive channel");
+		const Gtkmm2ext::Color inactive_ch = UIConfiguration::instance().color ("midi note inactive channel");
 		set_fill_color(inactive_ch);
 		set_outline_color(calculate_outline(inactive_ch, _selected));
 	} else {

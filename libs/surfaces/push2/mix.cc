@@ -43,7 +43,7 @@
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/line.h"
 #include "canvas/rectangle.h"
 #include "canvas/text.h"
@@ -68,6 +68,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 using namespace ArdourCanvas;
 
 MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
@@ -481,7 +482,7 @@ MixLayout::show_selection (uint32_t n)
 {
 	lower_backgrounds[n]->show ();
 	lower_backgrounds[n]->set_fill_color (stripable[n]->presentation_info().color());
-	lower_text[n]->set_color (ArdourCanvas::contrasting_text_color (lower_backgrounds[n]->fill_color()));
+	lower_text[n]->set_color (contrasting_text_color (lower_backgrounds[n]->fill_color()));
 }
 
 void

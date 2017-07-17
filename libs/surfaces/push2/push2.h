@@ -38,7 +38,7 @@
 #include "control_protocol/control_protocol.h"
 #include "control_protocol/types.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "midi_byte_array.h"
 
@@ -359,8 +359,8 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	void write (const MidiByteArray&);
 
-	uint8_t get_color_index (ArdourCanvas::Color rgba);
-	ArdourCanvas::Color get_color (ColorName);
+	uint8_t get_color_index (Gtkmm2ext::Color rgba);
+	Gtkmm2ext::Color get_color (ColorName);
 
 	PressureMode pressure_mode () const { return _pressure_mode; }
 	void set_pressure_mode (PressureMode);
@@ -583,7 +583,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* color map (device side) */
 
-	typedef std::map<ArdourCanvas::Color,uint8_t> ColorMap;
+	typedef std::map<Gtkmm2ext::Color,uint8_t> ColorMap;
 	typedef std::stack<uint8_t> ColorMapFreeList;
 	ColorMap color_map;
 	ColorMapFreeList color_map_free_list;
@@ -591,7 +591,7 @@ class Push2 : public ARDOUR::ControlProtocol
 
 	/* our own colors */
 
-	typedef std::map<ColorName,ArdourCanvas::Color> Colors;
+	typedef std::map<ColorName,Gtkmm2ext::Color> Colors;
 	Colors colors;
 	void fill_color_table ();
 	void reset_pad_colors ();

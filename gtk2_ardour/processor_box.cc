@@ -27,13 +27,12 @@
 
 #include <sigc++/bind.h>
 
-#include "canvas/utils.h"
-
 #include <glibmm/miscutils.h>
 #include <glibmm/fileutils.h>
 
 #include <gtkmm/messagedialog.h>
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
@@ -1730,12 +1729,12 @@ ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
 
 	bool failed = false;
 	std::string name = get_name();
-	ArdourCanvas::Color fill_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
+	Gtkmm2ext::Color fill_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
 
 	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
 	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 	cairo_set_line_width(cr, 1.0);
-	ArdourCanvas::set_source_rgb_a (cr, fill_color, 1.0);
+	Gtkmm2ext::set_source_rgb_a (cr, fill_color, 1.0);
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);

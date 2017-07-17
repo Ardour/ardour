@@ -122,7 +122,7 @@ public:
 
 private:
 	ArdourCanvas::Container* _note_group;
-	ArdourCanvas::Color _outline;
+	Gtkmm2ext::Color _outline;
 	ArdourCanvas::Rectangle* _tmp_rect;
 	ArdourCanvas::Polygon* _tmp_poly;
 

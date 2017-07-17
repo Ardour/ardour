@@ -41,7 +41,7 @@ public:
 
 	void show ();
 	void hide ();
-	void set_color (ArdourCanvas::Color);
+	void set_color (Gtkmm2ext::Color);
 	void set_sensitive (bool);
 
 	framepos_t current_frame () const {

@@ -41,8 +41,8 @@ public:
 	            double                            y,
 	            ARDOUR::InstrumentInfo&           info,
 	            ARDOUR::MidiModel::PatchChangePtr patch,
-		    ArdourCanvas::Color               outline_color,
-		    ArdourCanvas::Color               fill_color);
+		    Gtkmm2ext::Color               outline_color,
+		    Gtkmm2ext::Color               fill_color);
 
 	~PatchChange();
 

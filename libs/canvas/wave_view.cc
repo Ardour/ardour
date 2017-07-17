@@ -44,13 +44,10 @@
 #include "ardour/session.h"
 
 #include "canvas/canvas.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/debug.h"
-#include "canvas/utils.h"
 #include "canvas/wave_view.h"
 #include "canvas/wave_view_private.h"
-
-#include "evoral/Range.hpp"
 
 #include <gdkmm/general.h>
 
@@ -60,6 +57,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 
 double WaveView::_global_gradient_depth = 0.6;
 bool WaveView::_global_logscaled = false;

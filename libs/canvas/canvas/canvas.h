@@ -98,8 +98,8 @@ public:
 		return &_root;
 	}
 
-	void set_background_color (ArdourCanvas::Color);
-	ArdourCanvas::Color background_color() const { return _bg_color; }
+	void set_background_color (Gtkmm2ext::Color);
+	Gtkmm2ext::Color background_color() const { return _bg_color; }
 
 	/** Called when an item is being destroyed */
 	virtual void item_going_away (Item *, Rect) {}
@@ -170,8 +170,8 @@ public:
 	virtual Glib::RefPtr<Pango::Context> get_pango_context() = 0;
 
 protected:
-	Root  _root;
-	Color _bg_color;
+	Root             _root;
+	Gtkmm2ext::Color _bg_color;
 
 	mutable gint64 _last_render_start_timestamp;
 

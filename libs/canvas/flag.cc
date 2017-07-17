@@ -25,7 +25,7 @@
 using namespace std;
 using namespace ArdourCanvas;
 
-Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_color, Duple position, bool invert)
+Flag::Flag (Canvas* canvas, Distance height, Gtkmm2ext::Color outline_color, Gtkmm2ext::Color fill_color, Duple position, bool invert)
 	: Container (canvas)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)
@@ -34,7 +34,7 @@ Flag::Flag (Canvas* canvas, Distance height, Color outline_color, Color fill_col
 	setup (height, position);
 }
 
-Flag::Flag (Item* parent, Distance height, Color outline_color, Color fill_color, Duple position, bool invert)
+Flag::Flag (Item* parent, Distance height, Gtkmm2ext::Color outline_color, Gtkmm2ext::Color fill_color, Duple position, bool invert)
 	: Container (parent)
 	, _outline_color (outline_color)
 	, _fill_color (fill_color)

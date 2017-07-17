@@ -918,8 +918,8 @@ Editor::set_horizontal_position (double p)
 void
 Editor::color_handler()
 {
-	ArdourCanvas::Color base = UIConfiguration::instance().color ("ruler base");
-	ArdourCanvas::Color text = UIConfiguration::instance().color ("ruler text");
+	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
+	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
 	timecode_ruler->set_fill_color (base);
 	timecode_ruler->set_outline_color (text);
 	minsec_ruler->set_fill_color (base);

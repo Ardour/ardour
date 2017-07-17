@@ -48,10 +48,10 @@ public: // member variables
 	double                samples_per_pixel;
 	double                amplitude;
 	double                amplitude_above_axis;
-	Color                 fill_color;
-	Color                 outline_color;
-	Color                 zero_color;
-	Color                 clip_color;
+	Gtkmm2ext::Color      fill_color;
+	Gtkmm2ext::Color      outline_color;
+	Gtkmm2ext::Color      zero_color;
+	Gtkmm2ext::Color      clip_color;
 	bool                  show_zero;
 	bool                  logscaled;
 	WaveView::Shape       shape;
