@@ -213,7 +213,10 @@ void
 AddRouteDialog::on_response (int r)
 {
 	name_edited_by_user = false;
-	ArdourDialog::on_response (r);
+	/* Don't call ArdourDialog::on_response() because that will
+	   automatically hide the dialog.
+	*/
+	Gtk::Dialog::on_response (r);
 }
 
 void
