@@ -708,6 +708,7 @@ FaderPort8::get_state ()
 
 	node.set_property (X_("clock-mode"), _clock_mode);
 	node.set_property (X_("scribble-mode"), _scribble_mode);
+	node.set_property (X_("two-line-text"), _two_line_text);
 
 	for (UserActionMap::const_iterator i = _user_action_map.begin (); i != _user_action_map.end (); ++i) {
 		if (i->second.empty()) {
@@ -761,6 +762,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("clock-mode"), _clock_mode);
 	node.get_property (X_("scribble-mode"), _scribble_mode);
+	node.get_property (X_("two-line-text"), _two_line_text);
 
 	_user_action_map.clear ();
 	// TODO: When re-loading state w/o surface re-init becomes possible,
