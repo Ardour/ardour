@@ -32,7 +32,7 @@ function dsp_run (_, _, n_samples)
 
 		if (#d == 3 and event_type == 9) then -- note on
 			tx_midi (t, d)
-		elseif (#d == 3 and event_type = 8) then -- note off
+		elseif (#d == 3 and event_type == 8) then -- note off
 			tx_midi (t, d)
 		end
 	end
