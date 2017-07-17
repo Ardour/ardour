@@ -20,6 +20,8 @@
 #ifndef _GTKMM2EXT_COLORS_H_
 #define _GTKMM2EXT_COLORS_H_
 
+#include<stdint.h>
+
 #include <cairomm/context.h>
 
 #include "gtkmm2ext/visibility.h"
