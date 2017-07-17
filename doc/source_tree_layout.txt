@@ -1,0 +1,174 @@
+Ardour Source-Tree layout (July 2017)
+
+===== LIBRARIES =====
+ A collection of libraries and utility functions. While most are shared
+ libraries, they're pretty much exclusive to Ardour.
+
+libs/
+
+ **** Independent libs ****
+
+ - fluidsynth
+   Stripped down (library only) and slightly customized version of fluidsynth
+   use  tools/update_fluidsynth.sh to update from upstream
+
+ - appleutility
+   Utility Classes, abstraction for CoreAudio and AudioUnits (OSX, macOS)
+
+ - ardouralsautil
+   Utility Class for device-listing (used by the jack and  ALSA backends).
+   Device-reservation comandline tool (linked against libdbus), which is
+   also available from https://github.com/x42/alsa_request_device
+
+ - hidapi
+   Unmodified https://github.com/signal11/hidapi for interaction with some
+   control surfaces (Push2, NI Maschine)
+
+ - libltc
+   Unmodified https://github.com/x42/libltc/ for Linear Timecode en/decoding
+
+ - ptformat
+   Unmodified https://github.com/zamaudio/ptformat for loading ProTools sessions
+
+ - vfork
+   A exec-wrapper which redirects file-descriptors to be used with vfork(2)
+
+ - qm-dsp
+   Stripped down version of https://github.com/c4dm/qm-dsp
+   The Queen Mary DSP library is used by VAMP Plugins
+
+ - vamp-plugins
+   VAMP plugins for audio analysis and offline processing (uses qm-dsp)
+
+ - timecode
+   Timecode (FPS) and musical time conversions
+
+ - lua
+   Lua Script interpreter and C++ class abstraction
+   - libs/lua/lua-5.3.3 is unmodified upstream Lua-5.3.3
+   - libs/lua/LuaBridge is a highly customized version of
+     https://github.com/vinniefalco/LuaBridge (C++ bindings)
+
+ - plugins
+   LV2 Plugins included with Ardour. These are currently mostly
+   independent (a-fluidsynth uses libfluidsynth)
+
+ - clearlooks-newer
+   GTK theme engine (used by gtk2_ardour)
+
+
+ **** PBD dependent libs ****
+
+ - pbd
+   Paul B-D's utility classes. This is the basis for all Ardour specifics.
+   It provides basic concepts and OS abstractions.
+
+ - evoral
+   (uses libpbd)
+   Control events, control lists, automation evaluation,
+   parameter descriptions, incl MIDI event abstraction
+
+ - midi++2
+   (uses libpdb, libevoral)
+   Standard MIDI Files I/O
+
+ - backends
+   (uses libpdb, ardouralsautil | appleutility, implements libardour interface)
+   Interaction with Operating System's Audio/MIDI API:
+   ALSA, CoreAudio, JACK, PortAudio/ASIO
+
+ - surfaces
+   (uses libpbd, libevoral, libtimecode, libardour ;; libgtkmm2ext, libcanvas)
+   Control Surfaces, dynamically loaded by libardour on runtime.
+
+ - panners
+   (uses libpdb, implements libardour interface)
+   Pan plugins (stereo-balance, VBAP, etc) are dynamically loaded at runtime.
+
+ - audiographer
+   (uses libpdb)
+   Mini Ardour inside Ardour to export audio-files from sessions.
+
+ - fst
+   (uses libpbd, implements external methods for libardour and gtk2ardour)
+   VST scanner tool and abstraction for Windows-VSTs to be used with
+   wine or actual windows.
+
+ - ardour
+   (uses pretty much all the libs above)
+   This is it. libardour runs Ardour sessions.
+
+ **** UI related libs ****
+
+ - gtkmm2ext
+   (uses libpbd)
+   Utility Library to extend GDK, GTK, and basic abstraction for UIs
+   and event-loops. This library is not limited to the GUI, but also
+   used for other graphical interfaces (e.g. Push2, NI Maschine)
+
+ - canvas
+   (uses libpbd, libgtkmm2ext)
+   Cairo Canvas, provides a slate for scalable drawing and basic layout/packing
+
+ - widgets
+   (uses libpbd, libgtkmm2ext ;; libcanvas utils/colors)
+   Custom GUI widgets
+
+ - waveview
+   (uses libpbd, libgtkmm2ext, canvas,  libardour)
+  Threaded waveform rendering
+
+
+===== RESOURCE FILES =====
+These are bundled as-is.
+
+export/
+ Export Presets
+
+mcp/
+ Mackie control surface device files
+
+midi_maps/
+ Generic MIDI control surface presets
+
+osc/
+ Configuration presets for the OSC control surface
+
+patchfiles/
+ MIDNAM files, MIDI synth descriptions (note-names, CC, PGM names)
+
+scripts/
+ Lua scripts (files with a leading underscore are not bundled)
+
+templates/
+ Session templates (currently none)
+
+
+===== MISC =====
+doc/
+ Misc developer oriented documentation files and Doxygen
+
+patches/
+ Some .diff files for the build-stack.
+
+tools/
+ Various developer tools, most notably packaging scripts
+
+
+===== Front Ends =====
+
+gtk2_ardour/
+ The main Ardour GUI
+
+headless/
+ hardour -- headless Ardour, mostly demo-code how to use
+ Ardour without a GUI.
+
+session_utils/
+ command-line tools using libardour (e.g. export)
+
+tools/luadevel/
+ arlua -- commandline interface to libardour
+
+vst
+ wine application top-level (WindowsVST on Linux)
