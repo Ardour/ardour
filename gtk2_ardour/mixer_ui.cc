@@ -27,7 +27,10 @@
 
 #include <boost/foreach.hpp>
 
+#include <glibmm/threads.h>
+
 #include <gtkmm/accelmap.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"

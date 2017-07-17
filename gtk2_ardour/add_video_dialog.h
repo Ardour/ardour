@@ -26,7 +26,18 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/cellrendererpixbuf.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/filechooserwidget.h>
+#include <gtkmm/image.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"

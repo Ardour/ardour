@@ -27,10 +27,17 @@
 #include <string>
 #include <vector>
 
+#include <gtkmm/separator.h>
+
 #include "pbd/stl_delete.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
+
+#include "ardour/plugin.h"
+#include "ardour/plugin_insert.h"
+#include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
@@ -40,11 +47,6 @@
 #include "widgets/fastmeter.h"
 #include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
-
-#include "ardour/plugin.h"
-#include "ardour/plugin_insert.h"
-#include "ardour/session.h"
-#include "ardour/value_as_string.h"
 
 #include "prompter.h"
 #include "plugin_ui.h"

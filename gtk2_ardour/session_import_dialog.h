@@ -26,7 +26,16 @@
 #include <utility>
 
 #include <boost/shared_ptr.hpp>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
 #include "pbd/xml++.h"
 

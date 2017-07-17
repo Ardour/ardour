@@ -26,6 +26,8 @@
 
 #include "fix_carbon.h"
 
+#include <gtkmm/stock.h>
+
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
 

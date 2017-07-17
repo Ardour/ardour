@@ -18,8 +18,10 @@
 */
 
 #include <utility>
-#include <gtkmm2ext/utils.h>
+
 #include <boost/algorithm/string.hpp>
+
+#include <gtkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
@@ -35,6 +37,8 @@
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+
+#include "gtkmm2ext/utils.h"
 
 #include "canvas/debug.h"
 

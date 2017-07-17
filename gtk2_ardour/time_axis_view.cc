@@ -23,14 +23,14 @@
 #include <string>
 #include <list>
 
+#include <gtkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/utils.h>
+#include "ardour/profile.h"
 
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
@@ -38,9 +38,10 @@
 #include "canvas/utils.h"
 #include "canvas/colors.h"
 
-#include "widgets/tooltips.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
 
-#include "ardour/profile.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
 #include "floating_text_entry.h"

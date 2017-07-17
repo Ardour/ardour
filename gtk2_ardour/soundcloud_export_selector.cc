@@ -20,6 +20,8 @@
 
 
 *************************************************************************************/
+#include <gtkmm/frame.h>
+
 #include "ardour/debug.h"
 #include "ardour/soundcloud_upload.h"
 #include "soundcloud_export_selector.h"

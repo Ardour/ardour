@@ -36,7 +36,17 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/radiobutton.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/table.h>
+#include <gtkmm/treeview.h>
 
 class ExportFormatDialog : public ArdourDialog, public PBD::ScopedConnectionList
 {

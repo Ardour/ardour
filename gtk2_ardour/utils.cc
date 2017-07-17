@@ -28,25 +28,28 @@
 #include <cmath>
 #include <list>
 #include <sys/stat.h>
-#include <gtkmm/rc.h>
-#include <gtkmm/window.h>
+
+#include <boost/algorithm/string.hpp>
+
+#include <gtk/gtkpaned.h>
 #include <gtkmm/combo.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
-#include <gtk/gtkpaned.h>
-#include <boost/algorithm/string.hpp>
+#include <gtkmm/rc.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/window.h>
 
 #include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/stacktrace.h"
-
-#include <gtkmm2ext/utils.h>
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/search_paths.h"
 
 #include "canvas/item.h"
 #include "canvas/utils.h"
+
+#include "gtkmm2ext/utils.h"
 
 #include "debug.h"
 #include "public_editor.h"

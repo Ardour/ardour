@@ -21,7 +21,17 @@
 #ifndef __export_filename_selector_h__
 #define __export_filename_selector_h__
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/sizegroup.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/treemodel.h>
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/export_filename.h"

@@ -21,8 +21,14 @@
 #ifndef __export_dialog_h__
 #define __export_dialog_h__
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
+#include <boost/scoped_ptr.hpp>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/progressbar.h>
 
 #include "ardour/export_profile_manager.h"
 
@@ -33,8 +39,6 @@
 #include "export_preset_selector.h"
 #include "ardour_dialog.h"
 #include "soundcloud_export_selector.h"
-
-#include <gtkmm.h>
 
 namespace ARDOUR {
 	class ExportStatus;

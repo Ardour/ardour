@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <gtkmm/frame.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
+
 #include "gtkmm2ext/utils.h"
 
 #include "script_selector.h"

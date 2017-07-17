@@ -18,7 +18,9 @@
 
 */
 
+#include <gtkmm/filechooserdialog.h>
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/openuri.h"
 #include "export_filename_selector.h"

@@ -19,6 +19,12 @@
 
 #include <limits.h>
 
+#include <pangomm.h>
+
+#include <gtkmm/alignment.h>
+#include <gdkmm/color.h>
+#include <gtkmm/style.h>
+
 #include "ardour/amp.h"
 #include "ardour/logmeter.h"
 #include "ardour/route_group.h"
@@ -26,10 +32,6 @@
 #include "ardour/dB.h"
 #include "ardour/utils.h"
 
-#include <pangomm.h>
-
-#include "gtkmm/style.h"
-#include "gdkmm/color.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 

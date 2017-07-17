@@ -30,19 +30,20 @@
 
 #include <sigc++/signal.h>
 
-#include <gtkmm/button.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
-#include <gtkmm/table.h>
+#include <gtkmm/button.h>
 #include <gtkmm/eventbox.h>
-#include <gtkmm/viewport.h>
-#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/expander.h>
+#include <gtkmm/filechooserbutton.h>
+#include <gtkmm/image.h>
 #include <gtkmm/label.h>
 #include <gtkmm/menu.h>
-#include <gtkmm/image.h>
-#include <gtkmm/adjustment.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/socket.h>
+#include <gtkmm/table.h>
 #include <gtkmm/togglebutton.h>
-#include <gtkmm/socket.h>
-#include <gtkmm/socket.h>
+#include <gtkmm/viewport.h>
 
 #include "ardour/types.h"
 #include "ardour/plugin.h"

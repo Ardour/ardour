@@ -17,10 +17,17 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#include "ardour/session.h"
 #ifdef interface
 #undef interface
 #endif
+
+#include <gtkmm/box.h>
+#include <gtkmm/label.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/stock.h>
+
+#include "ardour/session.h"
+
 #include "export_video_infobox.h"
 #include "pbd/i18n.h"
 

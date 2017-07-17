@@ -19,7 +19,12 @@
 #ifndef _gtk2_ardour_lua_script_manager_h_
 #define _gtk2_ardour_lua_script_manager_h_
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
+
 #include "ardour/luascripting.h"
 
 #include "ardour_window.h"

@@ -19,9 +19,11 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/table.h>
+#include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/table.h>
 
 #include "pbd/replace_all.h"
 

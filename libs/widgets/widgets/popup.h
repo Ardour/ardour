@@ -25,7 +25,9 @@
 #endif
 
 #include <string>
-#include <gtkmm.h>
+
+#include <gtkmm/label.h>
+#include <gtkmm/window.h>
 
 #include <pbd/touchable.h>
 

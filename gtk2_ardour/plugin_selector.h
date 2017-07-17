@@ -20,11 +20,14 @@
 #ifndef __ardour_plugin_selector_h__
 #define __ardour_plugin_selector_h__
 
-#include <gtkmm/dialog.h>
-#include <gtkmm/notebook.h>
-#include <gtkmm/treeview.h>
-#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
 
 #include "gtkmm2ext/dndtreeview.h"
 

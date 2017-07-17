@@ -18,6 +18,11 @@
 */
 #include <cstdio>
 
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/treestore.h>
+
 #include "pbd/i18n.h"
 #include "pbd/pathexpand.h"
 #include "widgets/paths_dialog.h"

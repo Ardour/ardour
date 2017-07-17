@@ -21,9 +21,10 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "gtkmm/box.h"
-#include "gtkmm/menuitem.h"
-#include "gtkmm/colorselection.h"
+#include <gtkmm/box.h>
+#include <gtkmm/colorselection.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/messagedialog.h>
 
 #include "widgets/ardour_button.h"
 

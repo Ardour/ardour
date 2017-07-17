@@ -16,6 +16,8 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
+#include <gtkmm/stock.h>
+
 #include "pbd/strsplit.h"
 #include "pbd/compose.h"
 #include "pbd/shortpath.h"

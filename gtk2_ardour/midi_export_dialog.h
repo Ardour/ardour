@@ -22,7 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include <gtkmm/filechooser.h>
+#include <gtkmm/filechooserwidget.h>
 
 #include "ardour_dialog.h"
 #include "public_editor.h"

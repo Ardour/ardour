@@ -1,9 +1,10 @@
 #ifndef _ardour_gtk_simpple_progress_dialog_h_
 #define _ardour_gtk_simpple_progress_dialog_h_
 
-#include <gtkmm/messagedialog.h>
 #include <gtkmm/button.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/types.h"
 

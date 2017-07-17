@@ -18,6 +18,8 @@
 
 */
 
+#include <gtkmm/stock.h>
+
 #include "ardour/session.h"
 #include "ardour/export_format_specification.h"
 

@@ -24,7 +24,7 @@
 #include <boost/weak_ptr.hpp>
 #include <stdint.h>
 
-#include <gtkmm.h>
+#include <gtkmm/treemodel.h>
 
 namespace ARDOUR {
 	class Session;

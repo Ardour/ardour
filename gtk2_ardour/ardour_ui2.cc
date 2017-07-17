@@ -29,6 +29,8 @@
 #include <cmath>
 
 #include <sigc++/bind.h>
+#include <gtkmm/settings.h>
+
 #include "canvas/canvas.h"
 
 #include "pbd/error.h"

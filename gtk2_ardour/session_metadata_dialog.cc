@@ -17,11 +17,10 @@
     675 Mass Ave, Cambridge, MA 02139, USA.
 */
 
-#include "session_metadata_dialog.h"
-
 #include <sstream>
-
-#include <gtkmm2ext/utils.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/xml++.h"
 #include "pbd/error.h"
@@ -29,6 +28,10 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_utils.h"
+
+#include "gtkmm2ext/utils.h"
+
+#include "session_metadata_dialog.h"
 
 #include "pbd/i18n.h"
 

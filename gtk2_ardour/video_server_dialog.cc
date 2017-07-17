@@ -22,6 +22,11 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/box.h>
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
+
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "ardour/session_directory.h"

@@ -22,17 +22,12 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/messagedialog.h>
+
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/replace_all.h"
 #include "pbd/stacktrace.h"
-
-#include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/menu_elems.h"
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/doi.h"
-
-#include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
@@ -55,6 +50,13 @@
 #include "ardour/user_bundle.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/menu_elems.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour_window.h"
 #include "enums_convert.h"

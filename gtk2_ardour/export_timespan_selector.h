@@ -29,9 +29,17 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 
+#include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"

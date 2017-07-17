@@ -17,15 +17,17 @@
 
 */
 
-#include <gtkmm/messagedialog.h>
 #include <glibmm/objectbase.h>
 
-#include <gtkmm2ext/doi.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/mtdm.h"
 #include "ardour/port_insert.h"
 #include "ardour/session.h"
+
+#include "gtkmm2ext/doi.h"
 
 #include "port_insert_ui.h"
 #include "gui_thread.h"

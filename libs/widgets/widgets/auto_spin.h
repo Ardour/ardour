@@ -24,7 +24,7 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
+#include <gtkmm/adjustment.h>
 
 #include "widgets/visibility.h"
 

@@ -27,7 +27,11 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
+#include <gtkmm/alignment.h>
 #include <gtkmm/box.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/sizegroup.h>
 
 #include "gtkmm2ext/persistent_tooltip.h"
 

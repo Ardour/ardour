@@ -23,10 +23,10 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/dialog.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/adjustment.h>
+#include <gtkmm/comboboxtext.h>
 
 #include "pbd/controllable.h"
 #include "ardour/types.h"

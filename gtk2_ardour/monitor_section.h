@@ -18,8 +18,10 @@
 */
 
 #include <gtkmm/box.h>
-#include <gtkmm/table.h>
 #include <gtkmm/eventbox.h>
+#include <gtkmm/sizegroup.h>
+#include <gtkmm/table.h>
+#include <gtkmm/viewport.h>
 
 #include "gtkmm2ext/bindings.h"
 

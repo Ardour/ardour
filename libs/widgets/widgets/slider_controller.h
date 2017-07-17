@@ -23,8 +23,10 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
+
+#include <gtkmm/adjustment.h>
+#include <gtkmm/spinbutton.h>
 
 #include "widgets/ardour_fader.h"
 #include "widgets/binding_proxy.h"

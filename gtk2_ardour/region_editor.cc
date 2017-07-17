@@ -20,6 +20,7 @@
 #include <cmath>
 
 #include <gtkmm/listviewtext.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"

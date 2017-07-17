@@ -18,7 +18,11 @@
 
 */
 
-#include "export_timespan_selector.h"
+#include <sstream>
+#include <iomanip>
+
+#include "pbd/enumwriter.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/location.h"
 #include "ardour/types.h"
@@ -26,11 +30,7 @@
 #include "ardour/export_handler.h"
 #include "ardour/export_timespan.h"
 
-#include "pbd/enumwriter.h"
-#include "pbd/string_convert.h"
-
-#include <sstream>
-#include <iomanip>
+#include "export_timespan_selector.h"
 
 #include "pbd/i18n.h"
 

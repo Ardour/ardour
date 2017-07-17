@@ -22,7 +22,13 @@
 #define __export_file_notebook_h__
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"

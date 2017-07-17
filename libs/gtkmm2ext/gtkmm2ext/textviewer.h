@@ -20,7 +20,12 @@
 #define __pbd_gtkmm_textviewer_h__
 
 #include <string>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/textview.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/window.h>
 
 #include "pbd/transmitter.h"
 

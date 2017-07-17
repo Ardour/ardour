@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <gtkmm/box.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/messagedialog.h>
+
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 

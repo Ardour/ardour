@@ -21,8 +21,9 @@
 #include <iostream>
 #include <cstdlib>
 #include <cmath>
-
 #include <string>
+
+#include <gtkmm/stock.h>
 
 #include "pbd/error.h"
 #include "pbd/pthread_utils.h"
@@ -30,7 +31,7 @@
 #include "pbd/unwind.h"
 #include "pbd/stacktrace.h"
 
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
 
 #include "audio_clock.h"
 #include "editor.h"

@@ -25,8 +25,9 @@
 #include <gtkmm/buttonbox.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/scrolledwindow.h>
-#include <gtkmm/treeview.h>
+#include <gtkmm/treemodelfilter.h>
 #include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
 #include "widgets/searchbar.h"
 

@@ -25,7 +25,6 @@
 #define __gtk_ardour_video_utils_h__
 
 #include <string>
-#include <gtkmm.h>
 
 #include "ardour/rc_configuration.h"
 #include "ardour/types.h"

@@ -20,7 +20,7 @@
 #ifndef __gtk_ardour_export_video_infobox_h__
 #define __gtk_ardour_export_video_infobox_h__
 
-#include <gtkmm.h>
+#include <gtkmm/checkbutton.h>
 #include "ardour_dialog.h"
 
 /** @class ExportVideoInfobox

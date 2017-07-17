@@ -21,8 +21,7 @@
 #include <inttypes.h>
 
 #include <glibmm/threads.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
@@ -34,6 +33,9 @@
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/internal_send.h"
+
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"

@@ -20,6 +20,11 @@
 #ifndef __gtk_ardour_editor_route_groups_h__
 #define __gtk_ardour_editor_route_groups_h__
 
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
+
 #include "editor_component.h"
 
 class EditorRouteGroups : public EditorComponent, public ARDOUR::SessionHandlePtr

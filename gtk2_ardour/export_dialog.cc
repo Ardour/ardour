@@ -22,6 +22,7 @@
 #include <sigc++/signal.h>
 
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"

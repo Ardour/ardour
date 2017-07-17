@@ -28,6 +28,10 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/error.h"
 #include "pbd/stl_delete.h"
 #include "pbd/whitespace.h"
@@ -35,13 +39,7 @@
 #include "pbd/enumwriter.h"
 #include "pbd/stateful_diff_command.h"
 
-#include "gtkmm/menu.h"
-#include "gtkmm/menuitem.h"
-#include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/utils.h"
-
-#include "widgets/ardour_button.h"
-#include "widgets/tooltips.h"
+#include "evoral/Parameter.hpp"
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
@@ -53,10 +51,15 @@
 #include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
-
-#include "evoral/Parameter.hpp"
+#include "ardour/track.h"
 
 #include "canvas/debug.h"
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
 #include "audio_streamview.h"
@@ -80,8 +83,6 @@
 #include "ui_config.h"
 #include "utils.h"
 #include "route_group_menu.h"
-
-#include "ardour/track.h"
 
 #include "pbd/i18n.h"
 

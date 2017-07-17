@@ -18,7 +18,8 @@
 
 */
 
-#include "session_import_dialog.h"
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/failed_constructor.h"
 
@@ -29,10 +30,12 @@
 #include "ardour/location_importer.h"
 #include "ardour/tempo_map_importer.h"
 
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
 
 #include "gui_thread.h"
 #include "prompter.h"
+#include "session_import_dialog.h"
+
 #include "pbd/i18n.h"
 
 using namespace std;

@@ -20,8 +20,6 @@
 #include <cmath>
 #include <algorithm>
 
-#include <gtkmm.h>
-
 #include <gtkmm2ext/gtk_ui.h>
 
 #include "ardour/audioregion.h"

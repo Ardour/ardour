@@ -31,6 +31,7 @@
 #include <limits.h>
 
 #include <gtkmm/box.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"

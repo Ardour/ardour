@@ -19,11 +19,16 @@
 #ifndef __gtk_ardour_option_editor_h__
 #define __gtk_ardour_option_editor_h__
 
-#include <gtkmm/notebook.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/filechooserbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scale.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
 #include "widgets/slider_controller.h"

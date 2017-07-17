@@ -20,6 +20,8 @@
 #include <cmath>
 #include <errno.h>
 
+#include <gtkmm/stock.h>
+
 #include "fix_carbon.h"
 
 #include "pbd/gstdio_compat.h"

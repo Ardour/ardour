@@ -23,14 +23,16 @@
 #include <vector>
 #include <map>
 
-#include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
-#include <gdkmm/colormap.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/table.h>
+
+//#include <gdkmm/colormap.h>
 
 #include "pbd/signals.h"
 

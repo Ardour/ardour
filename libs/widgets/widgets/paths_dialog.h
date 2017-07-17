@@ -21,7 +21,10 @@
 
 #include <string>
 #include <vector>
-#include <gtkmm.h>
+
+#include <gtkmm/button.h>
+#include <gtkmm/dialog.h>
+#include <gtkmm/listviewtext.h>
 
 #include "widgets/visibility.h"
 

@@ -25,7 +25,9 @@
 #endif
 
 #include <string>
-#include <gtkmm.h>
+
+#include <gtkmm/adjustment.h>
+#include <gtkmm/drawingarea.h>
 
 #include "widgets/auto_spin.h"
 #include "widgets/binding_proxy.h"

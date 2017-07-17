@@ -21,8 +21,13 @@
 #define __ardour_meter_strip__
 
 #include <vector>
-
 #include <cmath>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/separator.h>
 
 #include "pbd/stateful.h"
 
@@ -31,18 +36,13 @@
 
 #include "widgets/ardour_button.h"
 
-#include "route_ui.h"
-
 #include "level_meter.h"
+#include "route_ui.h"
 
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 	class Session;
-}
-namespace Gtk {
-	class Window;
-	class Style;
 }
 
 class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI

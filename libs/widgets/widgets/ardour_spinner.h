@@ -21,7 +21,10 @@
 #define _WIDGETS_ARDOUR_SPINNER_H_
 
 #include <boost/algorithm/string.hpp>
-#include <gtkmm.h>
+
+#include <gtkmm/adjustment.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/spinbutton.h>
 
 #include "pbd/controllable.h"
 

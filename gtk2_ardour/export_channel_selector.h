@@ -29,9 +29,19 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/cellrenderercombo.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
 
 namespace ARDOUR {
 	class Session;

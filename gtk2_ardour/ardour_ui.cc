@@ -47,9 +47,10 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#include <gtkmm/messagedialog.h>
 #include <gtkmm/accelmap.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/uimanager.h>
 
 #include "pbd/error.h"
 #include "pbd/basename.h"

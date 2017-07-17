@@ -19,8 +19,14 @@
 #ifndef __gtk_ardour_editor_regions_h__
 #define __gtk_ardour_editor_regions_h__
 
-#include "editor_component.h"
 #include <boost/unordered_map.hpp>
+
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treerowreference.h>
+#include <gtkmm/treestore.h>
+
+#include "editor_component.h"
 
 class EditorRegions : public EditorComponent, public ARDOUR::SessionHandlePtr
 {

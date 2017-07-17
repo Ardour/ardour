@@ -29,7 +29,8 @@
 #endif
 
 #include <boost/shared_ptr.hpp>
-#include <gtkmm.h>
+
+#include <gtkmm/alignment.h>
 
 #include "pbd/signals.h"
 #include "evoral/Parameter.hpp"
@@ -39,6 +40,11 @@ namespace ARDOUR {
 	class Session;
 	class AutomationList;
 	class AutomationControl;
+}
+
+namespace Gtk {
+	class Adjustment;
+	class Widget;
 }
 
 class AutomationBarController : public ArdourWidgets::BarController {

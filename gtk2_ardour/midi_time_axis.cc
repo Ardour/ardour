@@ -25,6 +25,9 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/separator.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/error.h"
 #include "pbd/ffs.h"
 #include "pbd/stl_delete.h"

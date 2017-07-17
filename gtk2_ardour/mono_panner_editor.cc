@@ -17,7 +17,8 @@
 
 */
 
-#include <gtkmm.h>
+#include <gtkmm/table.h>
+
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"

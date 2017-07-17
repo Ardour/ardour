@@ -29,6 +29,10 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
+
 #include "pbd/gstdio_compat.h"
 
 #include "pbd/error.h"

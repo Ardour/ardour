@@ -23,16 +23,16 @@
 
 #include <cmath>
 
-#include <gtkmm/eventbox.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/button.h>
 #include <gtkmm/box.h>
+#include <gtkmm/eventbox.h>
 #include <gtkmm/frame.h>
-#include <gtkmm/button.h>
 #include <gtkmm/label.h>
-#include <gtkmm/togglebutton.h>
 #include <gtkmm/menu.h>
+#include <gtkmm/sizegroup.h>
 #include <gtkmm/textview.h>
-#include <gtkmm/adjustment.h>
+#include <gtkmm/togglebutton.h>
 
 #include "pbd/stateful.h"
 

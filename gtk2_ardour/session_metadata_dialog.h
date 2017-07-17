@@ -26,7 +26,17 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/table.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
+
 #include <boost/shared_ptr.hpp>
 
 #include <string>

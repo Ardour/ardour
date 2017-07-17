@@ -20,6 +20,11 @@
 #ifndef __ardour_gtk_editor_route_h__
 #define __ardour_gtk_editor_route_h__
 
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+
 #include "pbd/signals.h"
 #include "gtkmm2ext/widget_state.h"
 

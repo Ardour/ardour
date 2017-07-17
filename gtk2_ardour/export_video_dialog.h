@@ -22,7 +22,13 @@
 
 #include <string>
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/progressbar.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"

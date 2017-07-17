@@ -22,7 +22,13 @@
 #define __export_preset_selector_h__
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxentry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
 
 #include "ardour/export_profile_manager.h"
 

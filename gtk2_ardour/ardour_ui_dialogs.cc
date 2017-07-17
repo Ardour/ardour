@@ -25,6 +25,8 @@
 
 #include <vector>
 
+#include <gtkmm/treemodelfilter.h>
+
 #include "pbd/convert.h"
 
 #include "ardour/audioengine.h"
