@@ -391,7 +391,6 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 
 	/** add a meter section locked to pls.. ignored values will be set in recompute_meters()
 	 * @param meter the Meter to be added
-	 * @param beat beat position of new section
 	 * @param where bbt position of new section
 	 * @param frame frame position of new section. ignored if pls == MusicTime
 	 * note that @frame may also be ignored if it would create an un-solvable map
@@ -402,7 +401,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	 * adding an audio-locked meter will add a meter-locked tempo section at the meter position.
 	 * the meter-locked tempo tempo will be the Tempo at @beat
 	 */
-	MeterSection* add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
+	MeterSection* add_meter (const Meter& meter, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls);
 
 	void remove_tempo (const TempoSection&, bool send_signal);
 	void remove_meter (const MeterSection&, bool send_signal);
@@ -610,7 +609,7 @@ private:
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
 			       , PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
 
-	MeterSection* add_meter_locked (const Meter&, double beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute);
+	MeterSection* add_meter_locked (const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute);
 
 	bool remove_tempo_locked (const TempoSection&);
 	bool remove_meter_locked (const MeterSection&);

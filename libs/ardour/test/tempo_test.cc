@@ -40,7 +40,7 @@ TempoTest::recomputeMapTest48 ()
 	Tempo tempoB (240.0, 4.0);
 	map.add_tempo (tempoB, 3.0, 0, MusicTime);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
+	map.add_meter (meterB, BBT_Time (4, 1, 0), 0, MusicTime);
 	//map.dump (map._metrics, std::cout);
 	list<MetricSection*>::iterator i = map._metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
@@ -138,7 +138,7 @@ TempoTest::recomputeMapTest44 ()
 	Tempo tempoB (240.0, 4.0);
 	map.add_tempo (tempoB, 3.0, 0, MusicTime);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 288e3, MusicTime);
+	map.add_meter (meterB, BBT_Time (4, 1, 0), 288e3, MusicTime);
 
 	list<MetricSection*>::iterator i = map._metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
@@ -251,7 +251,7 @@ TempoTest::qnDistanceTestConstant ()
 	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, AudioTime);
 
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 288e3, MusicTime);
+	map.add_meter (meterB, BBT_Time (4, 1, 0), 288e3, MusicTime);
 
 	list<MetricSection*>::iterator i = map._metrics.begin();
 	CPPUNIT_ASSERT_EQUAL (framepos_t (0), (*i)->frame ());
@@ -329,7 +329,7 @@ TempoTest::qnDistanceTestRamp ()
 	Tempo tempoG (111.8, 4.0);
 	map.add_tempo (tempoG, 0.0, (framepos_t) 2 * 60 * sampling_rate, AudioTime);
 	Meter meterB (3, 4);
-	map.add_meter (meterB, 4.0, BBT_Time (2, 1, 0), 288e3, AudioTime);
+	map.add_meter (meterB, BBT_Time (2, 1, 0), 288e3, AudioTime);
 	map.recompute_map (map._metrics, 1);
 
 	list<MetricSection*>::iterator i = map._metrics.begin();

@@ -293,7 +293,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, MusicTime);
 			if (!(meter == last_meter)) {
 				bbt = new_map.bbt_at_quarter_note ((t->time_pulses/smf.ppqn()));
-				new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
+				new_map.add_meter (meter, bbt, 0, MusicTime);
 			}
 
 		} else {

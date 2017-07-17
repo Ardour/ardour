@@ -1144,12 +1144,12 @@ TempoMap::add_tempo_locked (const Tempo& tempo, double pulse, double minute
 }
 
 MeterSection*
-TempoMap::add_meter (const Meter& meter, const double& beat, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls)
+TempoMap::add_meter (const Meter& meter, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls)
 {
 	MeterSection* m = 0;
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		m = add_meter_locked (meter, beat, where, frame, pls, true);
+		m = add_meter_locked (meter, where, frame, pls, true);
 	}
 
 
@@ -1168,11 +1168,10 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		const double beat = beat_at_bbt_locked (_metrics, where);
 
 		if (!ms.initial()) {
 			remove_meter_locked (ms);
-			add_meter_locked (meter, beat, where, frame, pls, true);
+			add_meter_locked (meter, where, frame, pls, true);
 		} else {
 			MeterSection& first (first_meter());
 			TempoSection& first_t (first_tempo());
@@ -1195,24 +1194,25 @@ TempoMap::replace_meter (const MeterSection& ms, const Meter& meter, const BBT_T
 }
 
 MeterSection*
-TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute)
+TempoMap::add_meter_locked (const Meter& meter, const BBT_Time& bbt, framepos_t frame, PositionLockStyle pls, bool recompute)
 {
-	const MeterSection& prev_m = meter_section_at_minute_locked  (_metrics, minute_at_beat_locked (_metrics, beat) - minute_at_frame (1));
-	const double pulse = ((where.bars - prev_m.bbt().bars) * (prev_m.divisions_per_bar() / prev_m.note_divisor())) + prev_m.pulse();
-	const double time_minutes = minute_at_pulse_locked (_metrics, pulse);
-	TempoSection* mlt = 0;
+	double const minute_at_bbt = minute_at_bbt_locked (_metrics, bbt);
+	const MeterSection& prev_m = meter_section_at_minute_locked  (_metrics, minute_at_bbt - minute_at_frame (1));
+	double const pulse = ((bbt.bars - prev_m.bbt().bars) * (prev_m.divisions_per_bar() / prev_m.note_divisor())) + prev_m.pulse();
+	/* the natural time of the BBT position */
+	double const time_minutes = minute_at_pulse_locked (_metrics, pulse);
 
 	if (pls == AudioTime) {
-		/* add meter-locked tempo */
-		mlt = add_tempo_locked (tempo_at_minute_locked (_metrics, time_minutes), pulse, minute_at_frame (frame), AudioTime, true, true);
+		/* add meter-locked tempo at the natural time in the current map (frame may differ). */
+		Tempo const tempo_at_time = tempo_at_minute_locked (_metrics, time_minutes);
+		TempoSection* mlt = add_tempo_locked (tempo_at_time, pulse, time_minutes, AudioTime, true, true);
 
 		if (!mlt) {
 			return 0;
 		}
-
 	}
-
-	MeterSection* new_meter = new MeterSection (pulse, minute_at_frame (frame), beat, where, meter.divisions_per_bar(), meter.note_divisor(), pls, _frame_rate);
+	/* still using natural time for the position, ignoring lock style. */
+	MeterSection* new_meter = new MeterSection (pulse, time_minutes, beat_at_bbt_locked (_metrics, bbt), bbt, meter.divisions_per_bar(), meter.note_divisor(), pls, _frame_rate);
 
 	bool solved = false;
 
@@ -1221,6 +1221,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 	if (recompute) {
 
 		if (pls == AudioTime) {
+			/* now set the audio locked meter's position to frame */
 			solved = solve_map_minute (_metrics, new_meter, minute_at_frame (frame));
 			/* we failed, most likely due to some impossible frame requirement wrt audio-locked tempi.
 			   fudge frame so that the meter ends up at its BBT position instead.
@@ -1229,7 +1230,7 @@ TempoMap::add_meter_locked (const Meter& meter, double beat, const BBT_Time& whe
 				solved = solve_map_minute (_metrics, new_meter, minute_at_frame (prev_m.frame() + 1));
 			}
 		} else {
-			solved = solve_map_bbt (_metrics, new_meter, where);
+			solved = solve_map_bbt (_metrics, new_meter, bbt);
 			/* required due to resetting the pulse of meter-locked tempi above.
 			   Arguably  solve_map_bbt() should use solve_map_pulse (_metrics, TempoSection) instead,
 			   but afaict this cannot cause the map to be left unsolved (these tempi are all audio locked).

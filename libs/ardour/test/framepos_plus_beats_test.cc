@@ -120,7 +120,7 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 12.0 / tempoA.note_type(), 0, MusicTime);
 	Meter meterB (3, 8);
-	map.add_meter (meterB, 12.0, BBT_Time (4, 1, 0), 0, MusicTime);
+	map.add_meter (meterB, BBT_Time (4, 1, 0), 0, MusicTime);
 
 	/* Now some tests */
 
@@ -177,7 +177,7 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 12.0 / 4.0, 0, MusicTime);
 	Meter meterB (5, 8);
-	map.add_meter (meterB, 9.0, BBT_Time (4, 1, 0), 0, MusicTime);
+	map.add_meter (meterB, BBT_Time (4, 1, 0), 0, MusicTime);
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */

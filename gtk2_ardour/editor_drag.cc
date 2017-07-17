@@ -3308,10 +3308,9 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 			} else {
 				--bbt.bars;
 			}
-			const double beat = map.beat_at_bbt (bbt);
-			const framepos_t frame = map.frame_at_beat (beat);
+			const framepos_t frame = map.frame_at_bbt (bbt);
 			_real_section = map.add_meter (Meter (_marker->meter().divisions_per_bar(), _marker->meter().note_divisor())
-						       , beat, bbt, frame, _real_section->position_lock_style());
+						       , bbt, frame, _real_section->position_lock_style());
 			if (!_real_section) {
 				aborted (true);
 				return;
