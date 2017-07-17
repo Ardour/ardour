@@ -2684,16 +2684,6 @@ TempoMap::solve_map_minute (Metrics& imaginary, TempoSection* section, const dou
 		}
 	}
 
-#if (0)
-	recompute_tempi (imaginary);
-
-	if (check_solved (imaginary)) {
-		return true;
-	} else {
-		dunp (imaginary, std::cout);
-	}
-#endif
-
 	MetricSectionFrameSorter fcmp;
 	imaginary.sort (fcmp);
 
@@ -2750,16 +2740,6 @@ TempoMap::solve_map_pulse (Metrics& imaginary, TempoSection* section, const doub
 		section_prev->set_c (section_prev->compute_c_pulse (section_prev->end_note_types_per_minute(), pulse));
 		section->set_minute (section_prev->minute_at_ntpm (section_prev->end_note_types_per_minute(), pulse));
 	}
-
-#if (0)
-	recompute_tempi (imaginary);
-
-	if (check_solved (imaginary)) {
-		return true;
-	} else {
-		dunp (imaginary, std::cout);
-	}
-#endif
 
 	MetricSectionSorter cmp;
 	imaginary.sort (cmp);
