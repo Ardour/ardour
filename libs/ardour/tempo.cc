@@ -3351,7 +3351,7 @@ TempoMap::gui_change_tempo (TempoSection* ts, const Tempo& bpm)
 }
 
 void
-TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const framepos_t end_frame)
+TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const framepos_t end_frame, const double start_qnote, const double end_qnote)
 {
 	/*
 	  Ts (future prev_t)   Tnext
@@ -3388,14 +3388,14 @@ TempoMap::gui_stretch_tempo (TempoSection* ts, const framepos_t frame, const fra
 			*/
 			double contribution = 0.0;
 			if (next_t && prev_to_prev_t && prev_to_prev_t->type() == TempoSection::Ramp) {
-				contribution = (prev_t->frame() - prev_to_prev_t->frame()) / (double) (next_t->frame() - prev_to_prev_t->frame());
+				contribution = (prev_t->pulse() - prev_to_prev_t->pulse()) / (double) (next_t->pulse() - prev_to_prev_t->pulse());
 			}
-			framepos_t const fr_off = (end_frame - frame);
-			const frameoffset_t prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
+			framepos_t const fr_off = end_frame - frame;
+			frameoffset_t const prev_t_frame_contribution = fr_off - (contribution * (double) fr_off);
 
 			if (frame > prev_to_prev_t->frame() + min_dframe && (frame + prev_t_frame_contribution) > prev_to_prev_t->frame() + min_dframe) {
-				new_bpm = prev_t->note_types_per_minute() * ((frame - prev_to_prev_t->frame())
-										     / (double) ((frame + prev_t_frame_contribution) - prev_to_prev_t->frame()));
+				new_bpm = prev_t->note_types_per_minute() * ((start_qnote - (prev_to_prev_t->pulse() * 4.0))
+									     / (end_qnote - (prev_to_prev_t->pulse() * 4.0)));
 			} else {
 				new_bpm = prev_t->note_types_per_minute();
 			}

@@ -3628,7 +3628,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::indicates_constraint (event->button.state)) {
 		/* adjust previous tempo to match pointer frame */
-		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf);
+		_editor->session()->tempo_map().gui_stretch_tempo (_tempo, map.frame_at_quarter_note (_grab_qn), pf, _grab_qn, map.quarter_note_at_frame (pf));
 	}
 
 	ostringstream sstr;
