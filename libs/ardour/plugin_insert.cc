@@ -1128,10 +1128,7 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 void
 PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
 {
-	// XXX This method is never called, Route::silence skips PIs
-	// we should probably use it during bypass ()
-	// and call automation_run()
-	assert (0);
+	automation_run (start_frame, nframes); // evaluate automation only
 
 	if (!active ()) {
 		// XXX delaybuffers need to be offset by nframes
