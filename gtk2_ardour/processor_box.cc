@@ -41,6 +41,7 @@
 #include "gtkmm2ext/rgb_macros.h"
 
 #include "widgets/choice.h"
+#include "widgets/prompter.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
@@ -3222,7 +3223,7 @@ ProcessorBox::idle_delete_processor (boost::weak_ptr<Processor> weak_processor)
 void
 ProcessorBox::rename_processor (boost::shared_ptr<Processor> processor)
 {
-	ArdourPrompter name_prompter (true);
+	Prompter name_prompter (true);
 	string result;
 	name_prompter.set_title (_("Rename Processor"));
 	name_prompter.set_prompt (_("New name:"));

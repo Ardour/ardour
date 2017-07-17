@@ -63,7 +63,6 @@
 #include "ardour_ui.h"
 #include "editing.h"
 #include "gui_thread.h"
-#include "prompter.h"
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "gain_meter.h"

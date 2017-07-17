@@ -32,7 +32,6 @@
 #include "ardour/session_handle.h"
 
 #include "gui_object.h"
-#include "prompter.h"
 #include "selectable.h"
 
 namespace PBD {

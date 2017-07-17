@@ -54,6 +54,7 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/binding_proxy.h"
+#include "widgets/prompter.h"
 
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
@@ -66,7 +67,6 @@
 #include "latency_gui.h"
 #include "mixer_strip.h"
 #include "plugin_pin_dialog.h"
-#include "prompter.h"
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
@@ -1670,7 +1670,7 @@ RouteUI::verify_new_route_name (const std::string& name)
 void
 RouteUI::route_rename ()
 {
-	ArdourPrompter name_prompter (true);
+	ArdourWidgets::Prompter name_prompter (true);
 	string result;
 	bool done = false;
 
@@ -1896,7 +1896,7 @@ RouteUI::adjust_latency ()
 }
 
 bool
-RouteUI::process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir)
+RouteUI::process_save_template_prompter (Prompter& prompter, const std::string& dir)
 {
 	std::string path;
 	std::string safe_name;
@@ -1936,7 +1936,7 @@ RouteUI::save_as_template ()
 		return;
 	}
 
-	ArdourPrompter prompter (true); // modal
+	Prompter prompter (true); // modal
 
 	prompter.set_title (_("Save As Template"));
 	prompter.set_prompt (_("Template name:"));

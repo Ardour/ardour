@@ -31,13 +31,14 @@
 #include "canvas/item.h"
 #include "canvas/rectangle.h"
 
+#include "widgets/prompter.h"
+
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
 #include "gui_thread.h"
 #include "actions.h"
-#include "prompter.h"
 #include "editor_drag.h"
 
 #include "pbd/i18n.h"
@@ -1612,7 +1613,7 @@ Editor::rename_marker(ArdourMarker *marker)
 		return;
 	}
 
-	ArdourPrompter dialog (true);
+	ArdourWidgets::Prompter dialog (true);
 	string txt;
 
 	dialog.set_prompt (_("New Name:"));

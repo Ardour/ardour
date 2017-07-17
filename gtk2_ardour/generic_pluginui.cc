@@ -48,7 +48,6 @@
 #include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
 
-#include "prompter.h"
 #include "plugin_ui.h"
 #include "gui_thread.h"
 #include "automation_controller.h"

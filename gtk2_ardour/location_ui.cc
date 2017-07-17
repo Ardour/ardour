@@ -33,7 +33,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
-#include "prompter.h"
 #include "utils.h"
 #include "public_editor.h"
 #include "ui_config.h"

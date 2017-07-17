@@ -125,7 +125,6 @@ class ConnectionEditor;
 class DuplicateRouteDialog;
 class MainClock;
 class Mixer_UI;
-class ArdourPrompter;
 class PublicEditor;
 class SaveAsDialog;
 class SessionDialog;
@@ -154,6 +153,7 @@ namespace Gtk {
 }
 
 namespace ArdourWidgets {
+	class Prompter;
 	class Tabbable;
 }
 
@@ -652,7 +652,7 @@ private:
 
 	void open_session ();
 	void open_recent_session ();
-	bool process_save_template_prompter (ArdourPrompter& prompter);
+	bool process_save_template_prompter (ArdourWidgets::Prompter& prompter);
 	void save_template ();
 	void manage_templates ();
 
@@ -697,7 +697,7 @@ private:
 
 	guint32  last_key_press_time;
 
-	bool process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it);
+	bool process_snapshot_session_prompter (ArdourWidgets::Prompter& prompter, bool switch_to_it);
 	void snapshot_session (bool switch_to_it);
 
 	void quick_snapshot_session (bool switch_to_it);  //does not promtp for name, just makes a timestamped file

@@ -59,6 +59,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/prompter.h"
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
@@ -74,7 +75,6 @@
 #include "paste_context.h"
 #include "playlist_selector.h"
 #include "point_selection.h"
-#include "prompter.h"
 #include "public_editor.h"
 #include "region_view.h"
 #include "rgb_macros.h"
@@ -1125,7 +1125,7 @@ RouteTimeAxisView::set_align_choice (RadioMenuItem* mitem, AlignChoice choice, b
 void
 RouteTimeAxisView::rename_current_playlist ()
 {
-	ArdourPrompter prompter (true);
+	Prompter prompter (true);
 	string name;
 
 	boost::shared_ptr<Track> tr = track();
@@ -1226,7 +1226,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		// TODO: The prompter "new" button should be de-activated if the user
 		// specifies a playlist name which already exists in the session.
 
-		ArdourPrompter prompter (true);
+		Prompter prompter (true);
 
 		if (copy) {
 			prompter.set_title (_("New Copy Playlist"));

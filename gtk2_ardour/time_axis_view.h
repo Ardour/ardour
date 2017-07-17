@@ -46,7 +46,6 @@
 
 #include "widgets/focus_entry.h"
 
-#include "prompter.h"
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"

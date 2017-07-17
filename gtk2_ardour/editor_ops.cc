@@ -42,6 +42,7 @@
 
 #include "widgets/choice.h"
 #include "widgets/popup.h"
+#include "widgets/prompter.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
@@ -2121,7 +2122,7 @@ Editor::choose_new_marker_name(string &name) {
 		return true;
 	}
 
-	ArdourPrompter dialog (true);
+	Prompter dialog (true);
 
 	dialog.set_prompt (_("New Name:"));
 

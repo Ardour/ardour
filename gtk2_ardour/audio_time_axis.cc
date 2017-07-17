@@ -48,7 +48,6 @@
 #include "automation_time_axis.h"
 #include "keyboard.h"
 #include "playlist_selector.h"
-#include "prompter.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"

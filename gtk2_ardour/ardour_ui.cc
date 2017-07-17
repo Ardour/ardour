@@ -78,6 +78,7 @@
 #include "gtkmm2ext/window_title.h"
 
 #include "widgets/fastmeter.h"
+#include "widgets/prompter.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
@@ -163,7 +164,6 @@ typedef uint64_t microseconds_t;
 #include "opts.h"
 #include "pingback.h"
 #include "processor_box.h"
-#include "prompter.h"
 #include "public_editor.h"
 #include "rc_option_editor.h"
 #include "route_time_axis.h"
@@ -2886,7 +2886,7 @@ ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
 
 
 bool
-ARDOUR_UI::process_snapshot_session_prompter (ArdourPrompter& prompter, bool switch_to_it)
+ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to_it)
 {
 	string snapname;
 
@@ -2932,7 +2932,7 @@ ARDOUR_UI::process_snapshot_session_prompter (ArdourPrompter& prompter, bool swi
 void
 ARDOUR_UI::snapshot_session (bool switch_to_it)
 {
-	ArdourPrompter prompter (true);
+	Prompter prompter (true);
 
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
@@ -2977,7 +2977,7 @@ ARDOUR_UI::rename_session ()
 		return;
 	}
 
-	ArdourPrompter prompter (true);
+	Prompter prompter (true);
 	string name;
 
 	prompter.set_name ("Prompter");
@@ -3119,7 +3119,7 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 }
 
 bool
-ARDOUR_UI::process_save_template_prompter (ArdourPrompter& prompter)
+ARDOUR_UI::process_save_template_prompter (Prompter& prompter)
 {
 	string name;
 
@@ -3148,7 +3148,7 @@ ARDOUR_UI::process_save_template_prompter (ArdourPrompter& prompter)
 void
 ARDOUR_UI::save_template ()
 {
-	ArdourPrompter prompter (true);
+	Prompter prompter (true);
 
 	if (!check_audioengine (_main_window)) {
 		return;

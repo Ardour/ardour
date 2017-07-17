@@ -32,12 +32,12 @@
 #include "ardour/session_directory.h"
 
 #include "widgets/choice.h"
+#include "widgets/prompter.h"
 
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
 #include "pbd/i18n.h"
 #include "utils.h"
-#include "prompter.h"
 
 using namespace std;
 using namespace PBD;
@@ -143,7 +143,7 @@ EditorSnapshots::popup_context_menu (int button, int32_t time, std::string snaps
 void
 EditorSnapshots::rename (std::string old_name)
 {
-	ArdourPrompter prompter(true);
+	ArdourWidgets::Prompter prompter(true);
 
 	string new_name;
 

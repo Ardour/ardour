@@ -31,9 +31,9 @@
 #include "ardour/tempo_map_importer.h"
 
 #include "gtkmm2ext/utils.h"
+#include "widgets/prompter.h"
 
 #include "gui_thread.h"
-#include "prompter.h"
 #include "session_import_dialog.h"
 
 #include "pbd/i18n.h"
@@ -285,7 +285,7 @@ SessionImportDialog::end_dialog ()
 std::pair<bool, string>
 SessionImportDialog::open_rename_dialog (string text, string name)
 {
-	ArdourPrompter prompter(true);
+	ArdourWidgets::Prompter prompter(true);
 	string new_name;
 
 	prompter.set_name ("Prompter");

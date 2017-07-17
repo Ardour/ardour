@@ -45,7 +45,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "marker.h"
-#include "prompter.h"
 #include "route_group_dialog.h"
 #include "route_time_axis.h"
 #include "time_axis_view.h"

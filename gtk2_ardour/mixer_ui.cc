@@ -63,7 +63,6 @@
 #include "public_editor.h"
 #include "mouse_cursors.h"
 #include "ardour_ui.h"
-#include "prompter.h"
 #include "utils.h"
 #include "route_sorter.h"
 #include "actions.h"

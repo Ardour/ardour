@@ -57,6 +57,7 @@ namespace Gtk {
 
 namespace ArdourWidgets {
 	class ArdourButton;
+	class Prompter;
 }
 
 class ArdourWindow;
@@ -242,7 +243,7 @@ public:
 	virtual void map_frozen ();
 
 	void adjust_latency ();
-	bool process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir);
+	bool process_save_template_prompter (ArdourWidgets::Prompter& prompter, const std::string& dir);
 	void save_as_template ();
 
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);

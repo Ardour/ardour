@@ -46,6 +46,8 @@
 #include "ardour/session.h"
 #include "ardour/types.h"
 
+#include "widgets/prompter.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "editor.h"
@@ -58,7 +60,6 @@
 #include "region_gain_line.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
-#include "prompter.h"
 #include "selection.h"
 #include "keyboard.h"
 #include "editing.h"
@@ -2352,7 +2353,7 @@ Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 {
 	using namespace Gtkmm2ext;
 
-	ArdourPrompter prompter (false);
+	ArdourWidgets::Prompter prompter (false);
 
 	prompter.set_prompt (_("Name for region:"));
 	prompter.set_initial_text (clicked_regionview->region()->name());
