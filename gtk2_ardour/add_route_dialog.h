@@ -80,10 +80,6 @@ public:
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
 
-	void on_response (int response_id) {
-		Gtk::Dialog::on_response (response_id);
-	}
-
 private:
 	Gtk::Entry name_template_entry;
 	Gtk::ComboBoxText track_bus_combo;
@@ -115,6 +111,7 @@ private:
 	void reset_template_option_visibility ();
 	void new_group_dialog_finished (int, RouteGroupDialog*);
 	void on_show ();
+	void on_response (int);
 
 	struct ChannelSetup {
 		std::string name;
@@ -127,6 +124,10 @@ private:
 
 	static std::vector<std::string> channel_combo_strings;
 	static std::vector<std::string> bus_mode_strings;
+
+	bool name_edited_by_user;
+	void name_template_entry_insertion (Glib::ustring const &,int*);
+	void name_template_entry_deletion (int, int);
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

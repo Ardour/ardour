@@ -61,6 +61,7 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
+	, name_edited_by_user (false)
 {
 	set_name ("AddRouteDialog");
 	set_skip_taskbar_hint (true);
@@ -182,6 +183,8 @@ AddRouteDialog::AddRouteDialog ()
 
 	get_vbox()->pack_start (*vbox, false, false);
 
+	name_template_entry.signal_insert_text ().connect (sigc::mem_fun (*this, &AddRouteDialog::name_template_entry_insertion));
+	name_template_entry.signal_delete_text ().connect (sigc::mem_fun (*this, &AddRouteDialog::name_template_entry_deletion));
 	track_bus_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::track_type_chosen));
 	channel_combo.signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::channel_combo_changed));
 	channel_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::channel_separator));
@@ -204,6 +207,25 @@ AddRouteDialog::AddRouteDialog ()
 
 AddRouteDialog::~AddRouteDialog ()
 {
+}
+
+void
+AddRouteDialog::on_response (int r)
+{
+	name_edited_by_user = false;
+	ArdourDialog::on_response (r);
+}
+
+void
+AddRouteDialog::name_template_entry_insertion (Glib::ustring const &,int*)
+{
+	name_edited_by_user = true;
+}
+
+void
+AddRouteDialog::name_template_entry_deletion (int, int)
+{
+	name_edited_by_user = true;
 }
 
 void
@@ -234,6 +256,10 @@ AddRouteDialog::type_wanted() const
 void
 AddRouteDialog::maybe_update_name_template_entry ()
 {
+	if (name_edited_by_user) {
+		return;
+	}
+
 	switch (type_wanted()) {
 	case AudioTrack:
 		name_template_entry.set_text (_("Audio"));
@@ -459,6 +485,7 @@ void
 AddRouteDialog::on_show ()
 {
 	routes_spinner.grab_focus ();
+	name_edited_by_user = false;
 
 	refill_channel_setups ();
 	refill_route_groups ();
