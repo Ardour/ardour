@@ -24,7 +24,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-#include "gtkmm2ext/binding_proxy.h"
+#include "widgets/binding_proxy.h"
 
 #include "panner_interface.h"
 
@@ -72,7 +72,7 @@ private:
 	double accumulated_delta;
 	bool detented;
 
-	BindingProxy position_binder;
+	ArdourWidgets::BindingProxy position_binder;
 
 	void set_tooltip ();
 

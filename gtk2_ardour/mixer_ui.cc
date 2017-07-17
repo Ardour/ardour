@@ -33,15 +33,6 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
-#include <glibmm/threads.h>
-
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/keyboard.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/tearoff.h>
-#include <gtkmm2ext/window_title.h>
-#include <gtkmm2ext/doi.h>
-
 #include "ardour/amp.h"
 #include "ardour/debug.h"
 #include "ardour/audio_track.h"
@@ -52,6 +43,14 @@
 #include "ardour/session.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+#include "gtkmm2ext/doi.h"
+
+#include "widgets/tearoff.h"
 
 #include "keyboard.h"
 #include "mixer_ui.h"

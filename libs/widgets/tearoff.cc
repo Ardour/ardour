@@ -15,7 +15,6 @@
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
-    $Id$
 */
 
 #include <cmath>
@@ -23,32 +22,33 @@
 
 #include "pbd/xml++.h"
 
-#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/tearoff.h"
 
 #include "pbd/i18n.h"
 
-using namespace Gtkmm2ext;
-using namespace Gtk;
-using namespace Gdk;
-using namespace Glib;
 using namespace std;
+using namespace Glib;
+using namespace Gdk;
+using namespace Gtk;
+using namespace ArdourWidgets;
 
 TearOff::TearOff (Widget& c, bool allow_resize)
 	: contents (c)
-        , own_window (Gtk::WINDOW_TOPLEVEL)
-        , tearoff_arrow (ARROW_DOWN, SHADOW_OUT)
-        , close_arrow (ARROW_UP, SHADOW_OUT)
-        , dragging (false)
-        , _visible (true)
-        , _torn (false)
-        , _can_be_torn_off (true)
+	, own_window (Gtk::WINDOW_TOPLEVEL)
+	, tearoff_arrow (ARROW_DOWN, SHADOW_OUT)
+	, close_arrow (ARROW_UP, SHADOW_OUT)
+	, dragging (false)
+	, _visible (true)
+	, _torn (false)
+	, _can_be_torn_off (true)
 
 {
-        own_window_width = 0;
-        own_window_height = 0;
-        own_window_xpos = 0;
-        own_window_ypos = 0;
+	own_window_width = 0;
+	own_window_height = 0;
+	own_window_xpos = 0;
+	own_window_ypos = 0;
 
 	tearoff_event_box.add (tearoff_arrow);
 	tearoff_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
@@ -60,7 +60,7 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	close_event_box.set_events (BUTTON_PRESS_MASK|BUTTON_RELEASE_MASK);
 	close_event_box.signal_button_release_event().connect (mem_fun (*this, &TearOff::close_click));
 
-        close_event_box.set_tooltip_text (_("Click to put this back in the main window"));
+	close_event_box.set_tooltip_text (_("Click to put this back in the main window"));
 
 	VBox* box1;
 	box1 = manage (new VBox);
@@ -78,8 +78,8 @@ TearOff::TearOff (Widget& c, bool allow_resize)
 	own_window.signal_button_release_event().connect (mem_fun (*this, &TearOff::window_button_release));
 	own_window.signal_motion_notify_event().connect (mem_fun (*this, &TearOff::window_motion));
 	own_window.signal_delete_event().connect (mem_fun (*this, &TearOff::window_delete_event));
-        own_window.signal_realize().connect (sigc::mem_fun (*this, &TearOff::own_window_realized));
-        own_window.signal_configure_event().connect (sigc::mem_fun (*this, &TearOff::own_window_configured), false);
+	own_window.signal_realize().connect (sigc::mem_fun (*this, &TearOff::own_window_realized));
+	own_window.signal_configure_event().connect (sigc::mem_fun (*this, &TearOff::own_window_configured), false);
 
 	tearoff_arrow.set_name ("TearOffArrow");
 	close_arrow.set_name ("TearOffArrow");
@@ -135,7 +135,7 @@ TearOff::set_visible (bool yn, bool force)
 gint
 TearOff::tearoff_click (GdkEventButton* /*ev*/)
 {
-        tear_it_off ();
+	tear_it_off ();
 	return true;
 }
 
@@ -143,42 +143,42 @@ void
 TearOff::tear_it_off ()
 {
 	if (!_can_be_torn_off) {
-                return;
-        }
+		return;
+	}
 
-        if (torn_off()) {
-                return;
-        }
+	if (torn_off()) {
+		return;
+	}
 
-        remove (contents);
-        window_box.pack_start (contents);
-        own_window.set_name (get_name());
-        close_event_box.set_name (get_name());
-        if (own_window_width == 0) {
-                own_window.set_position (WIN_POS_MOUSE);
-        }
-        own_window.show_all ();
-        own_window.present ();
-        hide ();
+	remove (contents);
+	window_box.pack_start (contents);
+	own_window.set_name (get_name());
+	close_event_box.set_name (get_name());
+	if (own_window_width == 0) {
+		own_window.set_position (WIN_POS_MOUSE);
+	}
+	own_window.show_all ();
+	own_window.present ();
+	hide ();
 
-        _torn = true;
+	_torn = true;
 
-        Detach ();
+	Detach ();
 }
 
 gint
 TearOff::close_click (GdkEventButton* /*ev*/)
 {
-        put_it_back ();
+	put_it_back ();
 	return true;
 }
 
 void
 TearOff::put_it_back ()
 {
-        if (!torn_off()) {
-                return;
-        }
+	if (!torn_off()) {
+		return;
+	}
 
 	window_box.remove (contents);
 	pack_start (contents);
@@ -186,7 +186,7 @@ TearOff::put_it_back ()
 	own_window.hide ();
 	show_all ();
 
-        _torn = false;
+	_torn = false;
 
 	Attach ();
 }
@@ -309,35 +309,33 @@ TearOff::own_window_realized ()
 {
 	own_window.get_window()->set_decorations (WMDecoration (DECOR_BORDER|DECOR_RESIZEH));
 
-        if (own_window_width > 0) {
-                own_window.set_default_size (own_window_width, own_window_height);
-                own_window.move (own_window_xpos, own_window_ypos);
-        }
+	if (own_window_width > 0) {
+		own_window.set_default_size (own_window_width, own_window_height);
+		own_window.move (own_window_xpos, own_window_ypos);
+	}
 }
 
 bool
 TearOff::own_window_configured (GdkEventConfigure*)
 {
-        Glib::RefPtr<const Gdk::Window> win;
+	Glib::RefPtr<const Gdk::Window> win;
 
-        win = own_window.get_window ();
+	win = own_window.get_window ();
 
-        if (win) {
-                win->get_size (own_window_width, own_window_height);
-                win->get_position (own_window_xpos, own_window_ypos);
-        }
+	if (win) {
+		win->get_size (own_window_width, own_window_height);
+		win->get_position (own_window_xpos, own_window_ypos);
+	}
 
-        return false;
+	return false;
 }
 
 void
 TearOff::hide_visible ()
 {
-        if (torn_off()) {
-                own_window.hide ();
-        }
+	if (torn_off()) {
+		own_window.hide ();
+	}
 
-        hide ();
+	hide ();
 }
-
-

@@ -26,10 +26,8 @@
 #include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 
-#include "gtkmm2ext/popup.h"
-#include "gtkmm2ext/binding_proxy.h"
-
 #include "widgets/ardour_fader.h"
+#include "widgets/binding_proxy.h"
 #include "widgets/visibility.h"
 
 namespace PBD {

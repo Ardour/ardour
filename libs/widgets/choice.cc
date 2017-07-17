@@ -19,12 +19,12 @@
 */
 
 #include <gtkmm/label.h>
-#include <gtkmm2ext/choice.h>
+#include <widgets/choice.h>
 
 using namespace std;
-using namespace Gtkmm2ext;
 using namespace sigc;
 using namespace Gtk;
+using namespace ArdourWidgets;
 
 Choice::Choice (string title, string prompt, vector<string> choices, bool center)
 	: Dialog (title)

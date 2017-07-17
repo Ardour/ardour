@@ -26,12 +26,12 @@
 
 #include <gtkmm/liststore.h>
 
-#include "gtkmm2ext/choice.h"
-
 #include "ardour/filename_extensions.h"
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
+
+#include "widgets/choice.h"
 
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
@@ -173,7 +173,7 @@ EditorSnapshots::remove (std::string name)
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove it."));
 
-	Gtkmm2ext::Choice prompter (_("Remove snapshot"), prompt, choices);
+	ArdourWidgets::Choice prompter (_("Remove snapshot"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_session->remove_state (name);

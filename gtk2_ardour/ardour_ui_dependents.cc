@@ -153,7 +153,7 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 	using namespace std;
 	Gtk::Notebook* nb = 0;
 	Gtk::Window* win = 0;
-	Gtkmm2ext::Tabbable* tabbable = 0;
+	ArdourWidgets::Tabbable* tabbable = 0;
 
 
 	if (w == GTK_WIDGET(editor->contents().gobj())) {

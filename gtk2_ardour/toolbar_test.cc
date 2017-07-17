@@ -100,7 +100,7 @@ LogReceiver::receive (Transmitter::Channel chn, const char * str)
 /* ***************************************************************************/
 
 void
-setup_action_button (ArdourButton& button, std::string const & action, Gtkmm2ext::ArdourIcon::Icon icon, std::string const & button_theme_name)
+setup_action_button (ArdourButton& button, std::string const & action, ArdourWidgets::ArdourIcon::Icon icon, std::string const & button_theme_name)
 {
 	button.set_name (button_theme_name + string (" button"));
 	Glib::RefPtr<Gtk::Action> act;
@@ -110,7 +110,7 @@ setup_action_button (ArdourButton& button, std::string const & action, Gtkmm2ext
 }
 
 ArdourButton*
-make_action_button (std::string const & action, Gtkmm2ext::ArdourIcon::Icon icon, std::string const & button_theme_name)
+make_action_button (std::string const & action, ArdourWidgets::ArdourIcon::Icon icon, std::string const & button_theme_name)
 {
 	ArdourButton* button = new ArdourButton;
 	setup_action_button (*button, action, icon, button_theme_name);
@@ -227,7 +227,7 @@ CANVAS_UI::build_toolbar (ArdourCanvas::Item* parent, std::string const & spec_p
 			break;
 		}
 
-		Gtkmm2ext::ArdourIcon::Icon i = (ArdourIcon::Icon) string_2_enum (string ("ArdourIcon::") + icon, i);
+		ArdourWidgets::ArdourIcon::Icon i = (ArdourWidgets::ArdourIcon::Icon) string_2_enum (string ("ArdourIcon::") + icon, i);
 
 		ArdourCanvas::Widget* w = new ArdourCanvas::Widget (canvas, *make_action_button (action, i, theme_name));
 		grid->place (w, col, row);

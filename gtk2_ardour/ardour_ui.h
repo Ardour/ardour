@@ -47,6 +47,8 @@
 #include <gtkmm/eventbox.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/notebook.h>
 #include <gtkmm/button.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/treeview.h>
@@ -151,7 +153,7 @@ namespace Gtk {
 	class ProgressBar;
 }
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 	class Tabbable;
 }
 
@@ -414,15 +416,15 @@ private:
 	bool          _initial_verbose_plugin_scan;
 	bool           first_time_engine_run;
 
-	void show_tabbable (Gtkmm2ext::Tabbable*);
-	void hide_tabbable (Gtkmm2ext::Tabbable*);
-	void detach_tabbable (Gtkmm2ext::Tabbable*);
-	void attach_tabbable (Gtkmm2ext::Tabbable*);
-	void button_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
-	void key_change_tabbable_visibility (Gtkmm2ext::Tabbable*);
+	void show_tabbable (ArdourWidgets::Tabbable*);
+	void hide_tabbable (ArdourWidgets::Tabbable*);
+	void detach_tabbable (ArdourWidgets::Tabbable*);
+	void attach_tabbable (ArdourWidgets::Tabbable*);
+	void button_change_tabbable_visibility (ArdourWidgets::Tabbable*);
+	void key_change_tabbable_visibility (ArdourWidgets::Tabbable*);
 	void toggle_editor_and_mixer ();
 
-	void tabbable_state_change (Gtkmm2ext::Tabbable&);
+	void tabbable_state_change (ArdourWidgets::Tabbable&);
 
 	void toggle_meterbridge ();
 	void toggle_luawindow ();

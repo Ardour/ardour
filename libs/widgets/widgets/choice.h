@@ -17,30 +17,31 @@
 
 */
 
-#ifndef __pbd_gtkmm_choice_h__
-#define __pbd_gtkmm_choice_h__
+#ifndef _WIDGETS_CHOICE_H_
+#define _WIDGETS_CHOICE_H_
+
+#include <string>
+#include <vector>
 
 #include <gtkmm/dialog.h>
 #include <gtkmm/image.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/box.h>
-#include <string>
-#include <vector>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API Choice : public Gtk::Dialog
+class LIBWIDGETS_API Choice : public Gtk::Dialog
 {
-  public:
+public:
 	Choice (std::string title, std::string prompt, std::vector<std::string> choices, bool center = true);
 	virtual ~Choice ();
 
-  protected:
+protected:
 	void on_realize ();
 };
 
 } /* namespace */
 
-#endif  // __pbd_gtkmm_choice_h__
+#endif

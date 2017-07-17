@@ -16,16 +16,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkmm2ext_eventbox_ext_h__
-#define __gtkmm2ext_eventbox_ext_h__
+#ifndef _WIDGETS_EVENTBOX_EXT_H_
+#define _WIDGETS_EVENTBOX_EXT_H_
 
 #include <gtkmm/eventbox.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API EventBoxExt : public Gtk::EventBox
+class LIBWIDGETS_API EventBoxExt : public Gtk::EventBox
 {
 public:
 	EventBoxExt ();

@@ -23,6 +23,9 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/liststore.h>
+
 #include "gtkmm2ext/dndtreeview.h"
 
 #include "ardour/plugin.h"

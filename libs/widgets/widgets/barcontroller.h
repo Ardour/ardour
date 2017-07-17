@@ -22,7 +22,7 @@
 #include <gtkmm/alignment.h>
 #include <cairo.h>
 
-#include "gtkmm2ext/binding_proxy.h"
+#include "widgets/binding_proxy.h"
 #include "widgets/slider_controller.h"
 #include "widgets/visibility.h"
 

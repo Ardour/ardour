@@ -25,10 +25,13 @@
 
 #include <algorithm>
 
-#include <gtkmm/table.h>
-#include <gtkmm/stock.h>
 #include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
 
 #include "gtkmm2ext/utils.h"
 #include "pbd/convert.h"

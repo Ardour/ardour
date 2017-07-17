@@ -22,14 +22,13 @@
 #include "midi_scroomer.h"
 #include "ui_config.h"
 
-using namespace Gtkmm2ext;
 using namespace Gtk;
 using namespace std;
 
 //std::map<int, Glib::RefPtr<Gdk::Pixmap> > MidiScroomer::piano_pixmaps;
 
 MidiScroomer::MidiScroomer(Adjustment& adj)
-	: Gtkmm2ext::Scroomer(adj)
+	: ArdourWidgets::Scroomer(adj)
 {
 
 	adj.set_lower(0);

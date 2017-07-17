@@ -19,6 +19,8 @@
 
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
 
 #include "plugin_setup_dialog.h"
 #include "pbd/i18n.h"

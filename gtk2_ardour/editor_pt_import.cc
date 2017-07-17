@@ -29,8 +29,6 @@
 #include "pbd/shortpath.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm2ext/choice.h>
-
 #include "ardour/audio_track.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/audioregion.h"

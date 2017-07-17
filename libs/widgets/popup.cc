@@ -20,13 +20,14 @@
 
 #include <iostream>
 
-#include <gtkmm2ext/popup.h>
-#include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
+#include <gtkmm2ext/utils.h>
+
+#include <widgets/popup.h>
 
 using namespace std;
 using namespace Gtk;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 PopUp::PopUp (Gtk::WindowPosition pos, unsigned int showfor_msecs, bool doh)
 	: Window (WINDOW_POPUP)
@@ -98,7 +99,7 @@ PopUp::touch ()
 	if (is_visible ()) {
 		remove ();
 	} else {
-		set_size_request_to_display_given_text (label, my_text.c_str(), 25, 10);
+		Gtkmm2ext::set_size_request_to_display_given_text (label, my_text.c_str(), 25, 10);
 		label.set_text (my_text);
 		show_all ();
 

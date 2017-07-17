@@ -38,7 +38,6 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/textviewer.h"
-#include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/actions.h"
@@ -549,8 +548,6 @@ UI::receive (Transmitter::Channel chn, const char *str)
 	}
 }
 
-#define OLD_STYLE_ERRORS 1
-
 void
 UI::process_error_message (Transmitter::Channel chn, const char *str)
 {
@@ -560,9 +557,6 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	const char *prefix;
 	size_t prefix_len;
 	bool fatal_received = false;
-#ifndef OLD_STYLE_ERRORS
-	PopUp* popup = new PopUp (WIN_POS_CENTER, 0, true);
-#endif
 
 	switch (chn) {
 	case Transmitter::Fatal:
@@ -573,44 +567,22 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		fatal_received = true;
 		break;
 	case Transmitter::Error:
-#if OLD_STYLE_ERRORS
 		prefix = "[ERROR]: ";
 		ptag = error_ptag;
 		mtag = error_mtag;
 		prefix_len = 9;
-#else
-		popup->set_name ("ErrorMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
 		break;
 	case Transmitter::Info:
-#if OLD_STYLE_ERRORS
 		prefix = "[INFO]: ";
 		ptag = info_ptag;
 		mtag = info_mtag;
 		prefix_len = 8;
-#else
-		popup->set_name ("InfoMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
-
 		break;
 	case Transmitter::Warning:
-#if OLD_STYLE_ERRORS
 		prefix = "[WARNING]: ";
 		ptag = warning_ptag;
 		mtag = warning_mtag;
 		prefix_len = 11;
-#else
-		popup->set_name ("WarningMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
 		break;
 	default:
 		/* no choice but to use text/console output here */

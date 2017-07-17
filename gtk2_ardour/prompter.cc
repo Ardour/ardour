@@ -20,7 +20,7 @@
 #include "prompter.h"
 
 ArdourPrompter::ArdourPrompter (bool modal)
-	: Gtkmm2ext::Prompter (modal)
+	: ArdourWidgets::Prompter (modal)
 {
 }
 

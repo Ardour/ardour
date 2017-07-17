@@ -22,18 +22,20 @@
 #include <gtkmm/window.h>
 #include <gtkmm/stock.h>
 
-#include "gtkmm2ext/tabbable.h"
+#include "pbd/stacktrace.h"
+
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
-#include "pbd/stacktrace.h"
+#include "widgets/tabbable.h"
 
 #include "pbd/i18n.h"
 
-using namespace Gtkmm2ext;
-using namespace Gtk;
 using std::string;
+using namespace Gtk;
+using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 Tabbable::Tabbable (Widget& w, const string& name, bool tabbed_by_default)
 	: WindowProxy (name)

@@ -30,6 +30,7 @@
 #include <gtkmm/frame.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/liststore.h>
 
 #include "pbd/stateful.h"
@@ -43,9 +44,10 @@
 
 #include <gtkmm2ext/bindings.h>
 #include "gtkmm2ext/dndtreeview.h"
-#include <gtkmm2ext/pane.h>
-#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/treeutils.h"
+
+#include "widgets/pane.h"
+#include "widgets/tabbable.h"
 
 #include "axis_provider.h"
 #include "enums.h"
@@ -77,7 +79,7 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class Mixer_UI : public ArdourWidgets::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
 public:
 	static Mixer_UI* instance();
@@ -152,9 +154,9 @@ private:
 	Gtk::Frame            track_display_frame;
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
-	Gtkmm2ext::VPane      rhs_pane1;
-	Gtkmm2ext::VPane      rhs_pane2;
-	Gtkmm2ext::HPane      inner_pane;
+	ArdourWidgets::VPane  rhs_pane1;
+	ArdourWidgets::VPane  rhs_pane2;
+	ArdourWidgets::HPane  inner_pane;
 	Gtk::HBox             strip_packer;
 	Gtk::ScrolledWindow   vca_scroller;
 	Gtk::HBox             vca_hpacker;
@@ -163,7 +165,7 @@ private:
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	Gtkmm2ext::HPane      list_hpane;
+	ArdourWidgets::HPane  list_hpane;
 
 	MixerGroupTabs* _group_tabs;
 

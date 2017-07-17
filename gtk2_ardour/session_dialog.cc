@@ -30,6 +30,7 @@
 #include <glibmm/datetime.h>
 
 #include <gtkmm/filechooser.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/basename.h"
 #include "pbd/failed_constructor.h"

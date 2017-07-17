@@ -27,9 +27,8 @@
 #include <string>
 #include <gtkmm.h>
 
-#include "gtkmm2ext/binding_proxy.h"
-
 #include "widgets/auto_spin.h"
+#include "widgets/binding_proxy.h"
 #include "widgets/visibility.h"
 
 namespace PBD {

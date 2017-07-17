@@ -35,7 +35,7 @@
 #include "processor_box.h"
 #include "processor_selection.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 	class TearOff;
 }
 
@@ -47,7 +47,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
-	Gtkmm2ext::TearOff& tearoff() const { return *_tearoff; }
+	ArdourWidgets::TearOff& tearoff() const { return *_tearoff; }
 
 	std::string state_id() const;
 
@@ -56,7 +56,7 @@ public:
 private:
 	Gtk::HBox hpacker;
 	Gtk::VBox vpacker;
-	Gtkmm2ext::TearOff* _tearoff;
+	ArdourWidgets::TearOff* _tearoff;
 
 	Gtk::HBox  channel_table_packer;
 	Gtk::HBox  table_hpacker;

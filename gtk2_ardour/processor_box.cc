@@ -37,11 +37,10 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/choice.h"
-#include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "widgets/choice.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
@@ -3470,7 +3469,7 @@ ProcessorBox::clear_processors ()
 	choices.push_back (_("Cancel"));
 	choices.push_back (_("Yes, remove them all"));
 
-	Gtkmm2ext::Choice prompter (_("Remove processors"), prompt, choices);
+	ArdourWidgets::Choice prompter (_("Remove processors"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_route->clear_processors (PreFader);
@@ -3495,7 +3494,7 @@ ProcessorBox::clear_processors (Placement p)
 	choices.push_back (_("Cancel"));
 	choices.push_back (_("Yes, remove them all"));
 
-	Gtkmm2ext::Choice prompter (_("Remove processors"), prompt, choices);
+	ArdourWidgets::Choice prompter (_("Remove processors"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_route->clear_processors (p);

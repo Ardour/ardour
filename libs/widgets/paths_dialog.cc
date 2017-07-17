@@ -20,11 +20,11 @@
 
 #include "pbd/i18n.h"
 #include "pbd/pathexpand.h"
-#include "gtkmm2ext/paths_dialog.h"
+#include "widgets/paths_dialog.h"
 
 using namespace Gtk;
 using namespace std;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 PathsDialog::PathsDialog (Gtk::Window& parent, std::string title, std::string current_paths, std::string default_paths)
 	: Dialog (title, parent, true)

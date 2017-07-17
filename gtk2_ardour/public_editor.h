@@ -46,8 +46,9 @@
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
+
+#include "widgets/tabbable.h"
 
 #include "axis_provider.h"
 #include "editing.h"
@@ -108,7 +109,7 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtkmm2ext::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
 public:
 	PublicEditor (Gtk::Widget& content);

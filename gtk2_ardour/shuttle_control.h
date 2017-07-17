@@ -21,15 +21,15 @@
 
 #include <gtkmm/drawingarea.h>
 
-#include "gtkmm2ext/binding_proxy.h"
-#include "gtkmm2ext/cairo_widget.h"
-
 #include "pbd/controllable.h"
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#include "gtkmm2ext/cairo_widget.h"
+
 #include "widgets/ardour_button.h"
+#include "widgets/binding_proxy.h"
 
 namespace Gtk {
 	class Menu;
@@ -76,10 +76,10 @@ protected:
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
 	ArdourWidgets::ArdourButton _info_button;
-	Gtk::Menu*        shuttle_unit_menu;
-	Gtk::Menu*        shuttle_style_menu;
-	Gtk::Menu*        shuttle_context_menu;
-	BindingProxy      binding_proxy;
+	Gtk::Menu*                  shuttle_unit_menu;
+	Gtk::Menu*                  shuttle_style_menu;
+	Gtk::Menu*                  shuttle_context_menu;
+	ArdourWidgets::BindingProxy binding_proxy;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
 	void shuttle_style_changed();

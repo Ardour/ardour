@@ -36,7 +36,6 @@
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/dndtreeview.h"
-#include "gtkmm2ext/pane.h"
 
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
@@ -51,6 +50,7 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+#include "widgets/pane.h"
 
 #include "ardour_dialog.h"
 #include "public_editor.h"
@@ -635,8 +635,8 @@ private:
 	void add_notebook_page (std::string const &, Gtk::Widget &);
 	bool notebook_tab_clicked (GdkEventButton *, Gtk::Widget *);
 
-	Gtkmm2ext::HPane   edit_pane;
-	Gtkmm2ext::VPane   editor_summary_pane;
+	ArdourWidgets::HPane edit_pane;
+	ArdourWidgets::VPane editor_summary_pane;
 
 	Gtk::EventBox meter_base;
 	Gtk::HBox     meter_box;

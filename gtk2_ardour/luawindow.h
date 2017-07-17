@@ -24,6 +24,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/window.h>
 
 #include "pbd/signals.h"

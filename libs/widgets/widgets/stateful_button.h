@@ -17,20 +17,20 @@
 
 */
 
-#ifndef __pbd_gtkmm_abutton_h__
-#define __pbd_gtkmm_abutton_h__
+#ifndef _WIDGETS_STATEFUL_BUTTON_H_
+#define _WIDGETS_STATEFUL_BUTTON_H_
 
 #include <vector>
 
 #include <gtkmm/togglebutton.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API StateButton
+class LIBWIDGETS_API StateButton
 {
-   public:
+public:
 	StateButton();
 	virtual ~StateButton() {}
 
@@ -39,57 +39,57 @@ class LIBGTKMM2EXT_API StateButton
 	void set_self_managed (bool yn) { _self_managed = yn; }
 	virtual void set_widget_name (const std::string& name) = 0;
 
-  protected:
+protected:
 	int  visual_state;
 	bool _self_managed;
 	bool _is_realized;
-        bool style_changing;
-        Gtk::StateType state_before_prelight;
-        bool is_toggle;
+	bool style_changing;
+	Gtk::StateType state_before_prelight;
+	bool is_toggle;
 
 	virtual std::string  get_widget_name() const = 0;
-        virtual Gtk::Widget* get_child_widget () = 0;
+	virtual Gtk::Widget* get_child_widget () = 0;
 
-        void avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& style, GtkWidget* widget);
-        void avoid_prelight_on_state_changed (Gtk::StateType old_state, GtkWidget* widget);
+	void avoid_prelight_on_style_changed (const Glib::RefPtr<Gtk::Style>& style, GtkWidget* widget);
+	void avoid_prelight_on_state_changed (Gtk::StateType old_state, GtkWidget* widget);
 };
 
 
-class LIBGTKMM2EXT_API StatefulToggleButton : public StateButton, public Gtk::ToggleButton
+class LIBWIDGETS_API StatefulToggleButton : public StateButton, public Gtk::ToggleButton
 {
-   public:
+public:
 	StatefulToggleButton();
 	explicit StatefulToggleButton(const std::string &label);
 	~StatefulToggleButton() {}
 	void set_widget_name (const std::string& name);
 
-  protected:
+protected:
 	void on_realize ();
 	void on_toggled ();
-        void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
-        void on_state_changed (Gtk::StateType old_state);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
+	void on_state_changed (Gtk::StateType old_state);
 
-        Gtk::Widget* get_child_widget ();
+	Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
 };
 
-class LIBGTKMM2EXT_API StatefulButton : public StateButton, public Gtk::Button
+class LIBWIDGETS_API StatefulButton : public StateButton, public Gtk::Button
 {
-   public:
+public:
 	StatefulButton();
 	explicit StatefulButton(const std::string &label);
 	virtual ~StatefulButton() {}
 	void set_widget_name (const std::string& name);
 
-  protected:
+protected:
 	void on_realize ();
-        void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
-        void on_state_changed (Gtk::StateType old_state);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>& style);
+	void on_state_changed (Gtk::StateType old_state);
 
-        Gtk::Widget* get_child_widget ();
+	Gtk::Widget* get_child_widget ();
 	std::string get_widget_name() const { return get_name(); }
 };
 
-};
+} /* end namespace */
 
 #endif

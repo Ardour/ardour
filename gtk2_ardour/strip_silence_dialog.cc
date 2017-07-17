@@ -21,6 +21,7 @@
 
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
+#include <gtkmm/progressbar.h>
 #include <gtkmm/stock.h>
 
 #include "ardour/audioregion.h"

@@ -16,9 +16,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include "gtkmm2ext/eventboxext.h"
+#include "widgets/eventboxext.h"
 
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 EventBoxExt::EventBoxExt ()
 {

@@ -20,10 +20,9 @@
 #ifndef __ardour_midi_scroomer_h__
 #define __ardour_midi_scroomer_h__
 
-#include <gtkmm2ext/scroomer.h>
-#include <gdkmm/pixbuf.h>
+#include "widgets/scroomer.h"
 
-class MidiScroomer : public Gtkmm2ext::Scroomer
+class MidiScroomer : public ArdourWidgets::Scroomer
 {
 public:
 	MidiScroomer(Gtk::Adjustment&);

@@ -57,12 +57,10 @@
 #include <gtkmm/menuitem.h>
 
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/eventboxext.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
-#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/cell_renderer_pixbuf_toggle.h"
 
 #include "ardour/analysis_graph.h"
@@ -84,6 +82,7 @@
 #include "canvas/text.h"
 
 #include "widgets/ardour_spacer.h"
+#include "widgets/eventboxext.h"
 #include "widgets/tooltips.h"
 
 #include "control_protocol/control_protocol.h"
@@ -761,11 +760,11 @@ Editor::Editor ()
 	ebox->set_name("EditorWindow");
 	ebox->add (toolbar_hbox);
 
-	Gtk::EventBox* epane_box = manage (new Gtkmm2ext::EventBoxExt);  //a themeable box
+	Gtk::EventBox* epane_box = manage (new EventBoxExt);  //a themeable box
 	epane_box->set_name("EditorWindow");
 	epane_box->add (edit_pane);
 
-	Gtk::EventBox* epane_box2 = manage (new Gtkmm2ext::EventBoxExt);  //a themeable box
+	Gtk::EventBox* epane_box2 = manage (new EventBoxExt);  //a themeable box
 	epane_box2->set_name("EditorWindow");
 	epane_box2->add (global_vpacker);
 

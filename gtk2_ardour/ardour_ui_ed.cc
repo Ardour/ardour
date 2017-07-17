@@ -33,14 +33,15 @@
 #include <gtkmm/accelmap.h>
 #include <gtk/gtk.h>
 
-#include "gtkmm2ext/cairo_packer.h"
-#include "gtkmm2ext/tearoff.h"
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/window_title.h"
-
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/convert.h"
+
+#include "gtkmm2ext/cairo_packer.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+
+#include "widgets/tearoff.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"

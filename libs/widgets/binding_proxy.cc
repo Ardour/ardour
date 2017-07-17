@@ -13,24 +13,23 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
 #include <string>
 #include <climits>
 #include <iostream>
 
-#include <pbd/controllable.h>
-
-#include <gtkmm2ext/binding_proxy.h>
-#include <gtkmm2ext/keyboard.h>
+#include "pbd/controllable.h"
+#include "gtkmm2ext/keyboard.h"
+#include "widgets/binding_proxy.h"
+#include "widgets/popup.h"
 
 #include "pbd/i18n.h"
 
-using namespace Gtkmm2ext;
 using namespace std;
 using namespace PBD;
+using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 guint BindingProxy::bind_button = 2;
 guint BindingProxy::bind_statemask = Gdk::CONTROL_MASK;
@@ -73,7 +72,6 @@ BindingProxy::is_bind_action (GdkEventButton *ev)
 	return (Keyboard::modifier_state_equals (ev->state, bind_statemask) && ev->button == bind_button );
 }
 
-
 bool
 BindingProxy::button_press_handler (GdkEventButton *ev)
 {
@@ -103,7 +101,6 @@ BindingProxy::learning_finished ()
 	}
 }
 
-
 bool
 BindingProxy::prompter_hiding (GdkEventAny* /*ev*/)
 {
@@ -113,4 +110,3 @@ BindingProxy::prompter_hiding (GdkEventAny* /*ev*/)
 	}
 	return false;
 }
-

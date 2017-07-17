@@ -33,10 +33,10 @@
 #include "ardour/session.h"
 #include "ardour/profile.h"
 
-#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/choice.h"
 #include "widgets/tooltips.h"
 
 #include "audio_clock.h"
@@ -503,7 +503,7 @@ EditorRegions::remove_unused_regions ()
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove."));
 
-	Gtkmm2ext::Choice prompter (_("Remove unused regions"), prompt, choices);
+	ArdourWidgets::Choice prompter (_("Remove unused regions"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_no_redisplay = true;

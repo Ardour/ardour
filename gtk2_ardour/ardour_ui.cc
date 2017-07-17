@@ -74,7 +74,6 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/window_title.h"
 
 #include "widgets/fastmeter.h"

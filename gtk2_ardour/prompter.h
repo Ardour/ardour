@@ -20,9 +20,9 @@
 #ifndef __ardour_gtk_prompter_h__
 #define __ardour_gtk_prompter_h__
 
-#include <gtkmm2ext/prompter.h>
+#include "widgets/prompter.h"
 
-class ArdourPrompter : public Gtkmm2ext::Prompter
+class ArdourPrompter : public ArdourWidgets::Prompter
 {
 public:
 	ArdourPrompter (bool modal = false);

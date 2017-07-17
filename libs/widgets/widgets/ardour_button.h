@@ -25,11 +25,11 @@
 #include <gtkmm/action.h>
 
 #include "pbd/signals.h"
-#include "gtkmm2ext/ardour_icon.h"
-#include "gtkmm2ext/binding_proxy.h"
 #include "gtkmm2ext/activatable.h"
 #include "gtkmm2ext/cairo_widget.h"
 
+#include "widgets/ardour_icon.h"
+#include "widgets/binding_proxy.h"
 #include "widgets/visibility.h"
 
 namespace ArdourWidgets {
@@ -80,8 +80,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void set_elements (Element);
 	void add_elements (Element);
 
-	Gtkmm2ext::ArdourIcon::Icon icon() const { return _icon; }
-	void set_icon (Gtkmm2ext::ArdourIcon::Icon);
+	ArdourIcon::Icon icon() const { return _icon; }
+	void set_icon (ArdourIcon::Icon);
 	void set_icon (rendercallback_t, void*);
 
 	void set_corner_radius (float);
@@ -155,7 +155,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	std::string                 _sizing_text;
 	bool                        _markup;
 	Element                     _elements;
-	Gtkmm2ext::ArdourIcon::Icon _icon;
+	ArdourIcon::Icon            _icon;
 	rendercallback_t            _icon_render_cb;
 	void*                       _icon_render_cb_data;
 	Tweaks                      _tweaks;

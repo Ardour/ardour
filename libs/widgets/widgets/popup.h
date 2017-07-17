@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __qui_popup_h__
-#define __qui_popup_h__
+#ifndef _WIDGETS_POPUP_H_
+#define _WIDGETS_POPUP_H_
 
 #ifdef interface
 #undef interface
@@ -29,13 +29,13 @@
 
 #include <pbd/touchable.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API PopUp : public Gtk::Window, public Touchable
+class LIBWIDGETS_API PopUp : public Gtk::Window, public Touchable
 {
-  public:
+public:
 	PopUp (Gtk::WindowPosition pos, unsigned int show_for_msecs = 0,
 	       bool delete_on_hide = false);
 	virtual ~PopUp ();
@@ -47,19 +47,18 @@ class LIBGTKMM2EXT_API PopUp : public Gtk::Window, public Touchable
 
 	bool on_delete_event (GdkEventAny* );
 
-  protected:
+protected:
 	void on_realize ();
 
-  private:
+private:
 	Gtk::Label label;
 	std::string my_text;
 	gint timeout;
 	static gint remove_prompt_timeout (void *);
 	bool delete_on_hide;
 	unsigned int popdown_time;
-
 };
 
 } /* namespace */
 
-#endif  // __qui_popup_h__
+#endif

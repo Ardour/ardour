@@ -21,12 +21,12 @@
 #include <boost/algorithm/string.hpp>
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/doi.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/binding_proxy.h"
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
@@ -416,7 +416,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	multiple_mute_change = false;
@@ -591,7 +591,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	multiple_solo_change = false;
@@ -767,7 +767,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	if (!_session->engine().connected()) {

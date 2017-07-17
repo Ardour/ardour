@@ -21,9 +21,10 @@
 #include <math.h> // M_PI
 #include <assert.h>
 #include <algorithm> // std:min
-#include "gtkmm2ext/ardour_icon.h"
 
-using namespace Gtkmm2ext::ArdourIcon;
+#include "widgets/ardour_icon.h"
+
+using namespace ArdourWidgets::ArdourIcon;
 
 /* general style info:
  *
@@ -654,7 +655,7 @@ static void icon_transport_panic (cairo_t *cr, const int width, const int height
 
 /** various combinations of lines and triangles "|>|", ">|" "|>" */
 static void icon_transport_ck (cairo_t *cr,
-		const enum Gtkmm2ext::ArdourIcon::Icon icon,
+		const enum ArdourWidgets::ArdourIcon::Icon icon,
 		const int width, const int height)
 {
 	// small play triangle
@@ -780,7 +781,7 @@ static void icon_transport_metronom (cairo_t *cr, const int width, const int hei
 /*****************************************************************************
  * Zoom: In "+", Out "-" and Full "[]"
  */
-static void icon_zoom (cairo_t *cr, const enum Gtkmm2ext::ArdourIcon::Icon icon, const int width, const int height, const uint32_t fg_color)
+static void icon_zoom (cairo_t *cr, const enum ArdourWidgets::ArdourIcon::Icon icon, const int width, const int height, const uint32_t fg_color)
 {
 	const double x = width * .5;
 	const double y = height * .5;
@@ -1018,11 +1019,11 @@ static void icon_din_midi (cairo_t *cr, const int width, const int height, const
 /*****************************************************************************/
 
 bool
-Gtkmm2ext::ArdourIcon::render (cairo_t *cr,
-                               const enum Gtkmm2ext::ArdourIcon::Icon icon,
-                               const int width, const int height,
-                               const Gtkmm2ext::ActiveState state,
-                               const uint32_t fg_color)
+ArdourWidgets::ArdourIcon::render (cairo_t *cr,
+                                   const enum ArdourWidgets::ArdourIcon::Icon icon,
+                                   const int width, const int height,
+                                   const Gtkmm2ext::ActiveState state,
+                                   const uint32_t fg_color)
 {
 	bool rv = true;
 	cairo_save (cr);

@@ -22,6 +22,7 @@
 #include <algorithm>
 
 #include <pangomm/layout.h>
+#include <gtkmm/toggleaction.h>
 
 #include "pbd/compose.h"
 #include "pbd/controllable.h"
@@ -60,7 +61,7 @@ ArdourButton::ArdourButton (Element e)
 	: _sizing_text("")
 	, _markup (false)
 	, _elements (e)
-	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
+	, _icon (ArdourIcon::NoIcon)
 	, _icon_render_cb (0)
 	, _icon_render_cb_data (0)
 	, _tweaks (Tweaks (0))
@@ -108,7 +109,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	: _sizing_text("")
 	, _markup (false)
 	, _elements (e)
-	, _icon (Gtkmm2ext::ArdourIcon::NoIcon)
+	, _icon (ArdourIcon::NoIcon)
 	, _tweaks (Tweaks (0))
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
@@ -379,7 +380,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			vw -= _diameter + 4;
 		}
 		if (_elements & VectorIcon) {
-			Gtkmm2ext::ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
+			ArdourIcon::render (cr, _icon, vw, vh, active_state(), text_color);
 		} else {
 			cairo_save (cr);
 			rounded_function (cr, 0, 0, get_width(), get_height(), corner_radius + 1.5);
@@ -1303,7 +1304,7 @@ ArdourButton::add_elements (Element e)
 }
 
 void
-ArdourButton::set_icon (Gtkmm2ext::ArdourIcon::Icon i)
+ArdourButton::set_icon (ArdourIcon::Icon i)
 {
 	_icon = i;
 	_icon_render_cb = 0;

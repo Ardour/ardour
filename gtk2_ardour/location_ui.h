@@ -33,8 +33,8 @@
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
 
-#include "gtkmm2ext/pane.h"
 #include "widgets/ardour_button.h"
+#include "widgets/pane.h"
 
 #include "ardour_window.h"
 #include "audio_clock.h"
@@ -180,7 +180,7 @@ private:
 	LocationEditRow      punch_edit_row;
 	Gtk::VBox loop_punch_box;
 
-	Gtkmm2ext::VPane loc_range_panes;
+	ArdourWidgets::VPane loc_range_panes;
 
 	Gtk::VBox  loc_frame_box;
 	Gtk::Button add_location_button;

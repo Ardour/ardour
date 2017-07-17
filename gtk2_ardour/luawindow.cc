@@ -34,10 +34,10 @@
 #include "pbd/md5.h"
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/pane.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 
+#include "widgets/pane.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/filesystem_paths.h"
@@ -156,7 +156,7 @@ LuaWindow::LuaWindow ()
 	vbox->pack_start (*scrollin, true, true, 0);
 	vbox->pack_start (*hbox, false, false, 2);
 
-	Gtkmm2ext::VPane *vpane = manage (new Gtkmm2ext::VPane ());
+	ArdourWidgets::VPane *vpane = manage (new ArdourWidgets::VPane ());
 	vpane->add (*vbox);
 	vpane->add (scrollout);
 	vpane->set_divider (0, 0.75);

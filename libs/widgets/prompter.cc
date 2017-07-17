@@ -19,16 +19,15 @@
 */
 
 #include <string>
-
-#include <pbd/whitespace.h>
-
 #include <gtkmm/stock.h>
-#include <gtkmm2ext/prompter.h>
+
+#include "pbd/whitespace.h"
+#include "widgets/prompter.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 Prompter::Prompter (Gtk::Window& parent, bool modal)
 	: Gtk::Dialog ("", parent, modal)

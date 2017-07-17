@@ -27,8 +27,6 @@
 
 #include "pbd/gstdio_compat.h"
 
-#include "gtkmm2ext/choice.h"
-
 #include "pbd/pthread_utils.h"
 
 #include "ardour/audio_track.h"

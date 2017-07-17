@@ -14,28 +14,31 @@
     You should have received a copy of the GNU General Public License
     along with this program; if not, write to the Free Software
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
-
-    $Id$
 */
 
-#ifndef __binding_proxy__
-#define __binding_proxy__
+#ifndef _WIDGETS_BINDING_PROXY_
+#define _WIDGETS_BINDING_PROXY_
 
 #include <string>
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 
-#include "gtkmm2ext/visibility.h"
-#include "gtkmm2ext/popup.h"
+#include "widgets/visibility.h"
 
 namespace PBD {
 	class Controllable;
 }
 
-class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
+namespace ArdourWidgets {
+	class PopUp;
+}
+
+namespace ArdourWidgets {
+
+class LIBWIDGETS_API BindingProxy : public sigc::trackable
 {
-   public:
+public:
 	BindingProxy (boost::shared_ptr<PBD::Controllable>);
 	BindingProxy ();
 	virtual ~BindingProxy();
@@ -48,8 +51,8 @@ class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
 	boost::shared_ptr<PBD::Controllable> get_controllable() const { return controllable; }
  	void set_controllable (boost::shared_ptr<PBD::Controllable>);
 
-  protected:
-	Gtkmm2ext::PopUp*  prompter;
+protected:
+	ArdourWidgets::PopUp* prompter;
 	boost::shared_ptr<PBD::Controllable> controllable;
 
 	static guint bind_button;
@@ -59,5 +62,7 @@ class LIBGTKMM2EXT_API BindingProxy : public sigc::trackable
 	void learning_finished ();
 	bool prompter_hiding (GdkEventAny *);
 };
+
+}
 
 #endif

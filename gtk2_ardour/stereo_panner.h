@@ -21,7 +21,7 @@
 #define __gtk_ardour_stereo_panner_h__
 
 #include "pbd/signals.h"
-#include "gtkmm2ext/binding_proxy.h"
+#include "widgets/binding_proxy.h"
 #include "panner_interface.h"
 
 namespace ARDOUR {
@@ -79,8 +79,8 @@ private:
 	double accumulated_delta;
 	bool detented;
 
-	BindingProxy position_binder;
-	BindingProxy width_binder;
+	ArdourWidgets::BindingProxy position_binder;
+	ArdourWidgets::BindingProxy width_binder;
 
 	void set_tooltip ();
 

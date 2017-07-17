@@ -19,7 +19,7 @@
 
 #include "pbd/enumwriter.h"
 
-#include "gtkmm2ext/ardour_icon.h"
+#include "widgets/ardour_icon.h"
 
 #include "audio_clock.h"
 #include "editing.h"
@@ -30,7 +30,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace Editing;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 void
 setup_gtk_ardour_enums ()

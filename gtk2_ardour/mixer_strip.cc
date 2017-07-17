@@ -30,7 +30,6 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/doi.h"
 
 #include "widgets/tooltips.h"

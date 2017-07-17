@@ -17,23 +17,23 @@
 
 */
 
-#ifndef __gtkmm2ext_tearoff_h__
-#define __gtkmm2ext_tearoff_h__
+#ifndef _WIDGETS_TEAROFF_H_
+#define _WIDGETS_TEAROFF_H_
 
-#include <gtkmm/window.h>
 #include <gtkmm/arrow.h>
 #include <gtkmm/box.h>
 #include <gtkmm/eventbox.h>
+#include <gtkmm/window.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
 class XMLNode;
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API TearOff : public Gtk::HBox
+class LIBWIDGETS_API TearOff : public Gtk::HBox
 {
-  public:
+public:
 	TearOff (Gtk::Widget& contents, bool allow_resize = false);
 	virtual ~TearOff ();
 
@@ -49,14 +49,14 @@ class LIBGTKMM2EXT_API TearOff : public Gtk::HBox
 
 	Gtk::Window& tearoff_window() { return own_window; }
 	bool torn_off() const;
-        void tear_it_off ();
-        void put_it_back ();
-        void hide_visible ();
+	void tear_it_off ();
+	void put_it_back ();
+	void hide_visible ();
 
-        void set_state (const XMLNode&);
-        void add_state (XMLNode&) const;
+	void set_state (const XMLNode&);
+	void add_state (XMLNode&) const;
 
-  private:
+private:
 	Gtk::Widget&   contents;
 	Gtk::Window    own_window;
 	Gtk::Arrow     tearoff_arrow;
@@ -70,10 +70,10 @@ class LIBGTKMM2EXT_API TearOff : public Gtk::HBox
 	bool          _visible;
 	bool          _torn;
 	bool          _can_be_torn_off;
-        int            own_window_width;
-        int            own_window_height;
-        int            own_window_xpos;
-        int            own_window_ypos;
+	int            own_window_width;
+	int            own_window_height;
+	int            own_window_xpos;
+	int            own_window_ypos;
 
 	gint tearoff_click (GdkEventButton*);
 	gint close_click (GdkEventButton*);
@@ -83,10 +83,10 @@ class LIBGTKMM2EXT_API TearOff : public Gtk::HBox
 	gint window_button_release (GdkEventButton*);
 	gint window_delete_event (GdkEventAny*);
 
-        void own_window_realized ();
-        bool own_window_configured (GdkEventConfigure*);
+	void own_window_realized ();
+	bool own_window_configured (GdkEventConfigure*);
 };
 
 } /* namespace */
 
-#endif  // __gtkmm2ext_tearoff_h__
+#endif

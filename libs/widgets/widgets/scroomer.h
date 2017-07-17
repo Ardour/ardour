@@ -17,18 +17,18 @@
 
 */
 
-#ifndef __gtkmm2ext_scroomer_h__
-#define __gtkmm2ext_scroomer_h__
+#ifndef _WIDGETS_SCROOMER_H_
+#define _WIDGETS_SCROOMER_H_
 
+#include <gdkmm.h>
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/adjustment.h>
-#include <gdkmm.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API Scroomer : public Gtk::DrawingArea
+class LIBWIDGETS_API Scroomer : public Gtk::DrawingArea
 {
 public:
 	enum Component {
@@ -88,6 +88,6 @@ private:
 	bool pinch;
 };
 
-} // namespace
+} /* end namespace */
 
-#endif /* __gtkmm2ext_scroomer_h__ */
+#endif

@@ -48,8 +48,9 @@
 #include "ardour/filesystem_paths.h"
 
 #include <gtkmm/main.h>
+#include <gtkmm/stock.h>
+
 #include <gtkmm2ext/application.h>
-#include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"

@@ -16,26 +16,26 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#ifndef __gtkmmext_paths_dialog_h__
-#define __gtkmmext_paths_dialog_h__
+#ifndef _WIDGETS_PATHS_DIALOG_H_
+#define _WIDGETS_PATHS_DIALOG_H_
 
 #include <string>
 #include <vector>
 #include <gtkmm.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API PathsDialog : public Gtk::Dialog
+class LIBWIDGETS_API PathsDialog : public Gtk::Dialog
 {
-  public:
+public:
 	PathsDialog (Gtk::Window& parent, std::string, std::string current_paths = "", std::string default_paths = "");
 	~PathsDialog ();
 
 	std::string get_serialized_paths ();
 
-  private:
+private:
 	void on_show ();
 
 	Gtk::ListViewText  paths_list_view;
@@ -54,4 +54,4 @@ class LIBGTKMM2EXT_API PathsDialog : public Gtk::Dialog
 
 } /* namespace */
 
-#endif /* __gtkmmext_paths_dialog_h__ */
+#endif

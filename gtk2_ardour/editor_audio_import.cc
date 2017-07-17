@@ -31,7 +31,7 @@
 #include "pbd/shortpath.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm2ext/choice.h>
+#include "widgets/choice.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audiofilesource.h"
@@ -651,7 +651,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Don't embed it"));
 				choices.push_back (_("Embed all without questions"));
 
-				Gtkmm2ext::Choice rate_choice (
+				ArdourWidgets::Choice rate_choice (
 					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"),
 							short_path (path, 40)),
@@ -677,7 +677,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Cancel"));
 				choices.push_back (_("Embed it anyway"));
 
-				Gtkmm2ext::Choice rate_choice (
+				ArdourWidgets::Choice rate_choice (
 					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 					choices, false

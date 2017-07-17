@@ -23,13 +23,13 @@
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
 
-#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
 
+#include "widgets/tearoff.h"
 #include "widgets/tooltips.h"
 
 #include "ardour/amp.h"

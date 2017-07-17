@@ -23,11 +23,11 @@
 
 #include <gtkmm/main.h>
 
-#include <gtkmm2ext/stateful_button.h>
+#include "widgets/stateful_button.h"
 
 using namespace Gtk;
 using namespace Glib;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace std;
 
 StateButton::StateButton ()

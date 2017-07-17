@@ -19,14 +19,15 @@
 
 #include <assert.h>
 #include <gdkmm/cursor.h>
-#include "gtkmm2ext/pane.h"
+
+#include "widgets/pane.h"
 
 #include "pbd/i18n.h"
 
-using namespace PBD;
-using namespace Gtk;
-using namespace Gtkmm2ext;
 using namespace std;
+using namespace Gtk;
+using namespace PBD;
+using namespace ArdourWidgets;
 
 Pane::Pane (bool h)
 	: horizontal (h)

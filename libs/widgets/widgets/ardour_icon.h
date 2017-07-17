@@ -1,11 +1,13 @@
-#ifndef _gtkmm2ext_ardour_icon_h_
-#define _gtkmm2ext_ardour_icon_h_
+#ifndef _WIDGETS_ARDOUR_ICON_H_
+#define _WIDGETS_ARDOUR_ICON_H_
 
 #include <stdint.h>
 #include <cairo.h>
-#include "gtkmm2ext/widget_state.h"
 
-namespace Gtkmm2ext { namespace ArdourIcon {
+#include "gtkmm2ext/widget_state.h"
+#include "widgets/visibility.h"
+
+namespace ArdourWidgets { namespace ArdourIcon {
 	enum Icon {
 		NoIcon,
 		RecButton,
@@ -38,11 +40,11 @@ namespace Gtkmm2ext { namespace ArdourIcon {
 		ToolContent,
 	};
 
-	LIBGTKMM2EXT_API bool render (cairo_t *cr,
-	                              const enum Icon icon,
-	                              const int width, const int height,
-	                              const Gtkmm2ext::ActiveState state,
-	                              const uint32_t fg_color);
-}; };
+	LIBWIDGETS_API bool render (cairo_t *cr,
+	                            const enum Icon icon,
+	                            const int width, const int height,
+	                            const Gtkmm2ext::ActiveState state,
+	                            const uint32_t fg_color);
+}; } /* end namespace */
 
 #endif

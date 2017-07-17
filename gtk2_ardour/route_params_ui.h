@@ -36,7 +36,7 @@
 
 #include "ardour/ardour.h"
 
-#include <gtkmm2ext/pane.h>
+#include <widgets/pane.h>
 
 #include "ardour_window.h"
 #include "processor_box.h"
@@ -71,22 +71,22 @@ private:
 	Gtk::ScrolledWindow      route_select_scroller;
 
 	Gtk::Notebook            notebook;
-	Gtk::Frame		 input_frame;
-	Gtk::Frame		 output_frame;
-	Gtkmm2ext::HPane	 redir_hpane;
+	Gtk::Frame               input_frame;
+	Gtk::Frame               output_frame;
+	ArdourWidgets::HPane     redir_hpane;
 
-	Gtk::Frame		 route_select_frame;
+	Gtk::Frame               route_select_frame;
 
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
 
 	ProcessorBox*            insert_box;
 
-	Gtkmm2ext::HPane	 list_hpane;
+	ArdourWidgets::HPane     list_hpane;
 
-	Gtkmm2ext::HPane	 right_hpane;
+	ArdourWidgets::HPane     right_hpane;
 
-	Gtk::Frame		 route_param_frame;
+	Gtk::Frame               route_param_frame;
 
 	Gtk::VBox                choice_vpacker;
 

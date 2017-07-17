@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __libgtkmm2ext_pane_h__
-#define __libgtkmm2ext_pane_h__
+#ifndef _WIDGETS_PANE_H_
+#define _WIDGETS_PANE_H_
 
 #include <vector>
 #include <algorithm>
@@ -30,21 +30,20 @@
 #include <gtkmm/container.h>
 #include <gtkmm/eventbox.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
 namespace Gtk {
 	class Widget;
 }
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API Pane : public Gtk::Container
+class LIBWIDGETS_API Pane : public Gtk::Container
 {
-  private:
+private:
 	class Divider;
 
-
-  public:
+public:
 	struct Child
 	{
 		Pane* pane;
@@ -70,7 +69,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	void set_check_divider_position (bool);
 
-  protected:
+protected:
 	bool horizontal;
 
 	void on_add (Gtk::Widget*);
@@ -87,7 +86,7 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 
 	void forall_vfunc (gboolean include_internals, GtkCallback callback, gpointer callback_data);
 
-  private:
+private:
 	Gdk::Cursor drag_cursor;
 	bool did_move;
 
@@ -117,13 +116,13 @@ class LIBGTKMM2EXT_API Pane : public Gtk::Container
 	void* child_destroyed (Gtk::Widget*);
 };
 
-class LIBGTKMM2EXT_API HPane : public Pane
+class LIBWIDGETS_API HPane : public Pane
 {
   public:
 	HPane () : Pane (true) {}
 };
 
-class LIBGTKMM2EXT_API VPane : public Pane
+class LIBWIDGETS_API VPane : public Pane
 {
   public:
 	VPane () : Pane (false) {}
@@ -131,4 +130,4 @@ class LIBGTKMM2EXT_API VPane : public Pane
 
 } /* namespace */
 
-#endif /* __libgtkmm2ext_pane_h__ */
+#endif

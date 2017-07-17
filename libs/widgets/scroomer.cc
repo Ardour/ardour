@@ -19,13 +19,13 @@
 
 #include <iostream>
 
-#include "gtkmm2ext/scroomer.h"
 #include "gtkmm2ext/keyboard.h"
+#include "widgets/scroomer.h"
 
-using namespace Gtkmm2ext;
-using namespace Gtk;
-using namespace Gdk;
 using namespace std;
+using namespace Gdk;
+using namespace Gtk;
+using namespace ArdourWidgets;
 
 Scroomer::Scroomer(Gtk::Adjustment& adjustment)
 	: adj(adjustment)
@@ -80,8 +80,8 @@ Scroomer::on_motion_notify_event (GdkEventMotion* ev)
 
 	grab_y = ev->y;
 
-	if (ev->state & Keyboard::PrimaryModifier) {
-		if (ev->state & Keyboard::SecondaryModifier) {
+	if (ev->state & Gtkmm2ext::Keyboard::PrimaryModifier) {
+		if (ev->state & Gtkmm2ext::Keyboard::SecondaryModifier) {
 			scale = 0.05;
 		} else {
 			scale = 0.1;
@@ -245,8 +245,8 @@ Scroomer::on_button_press_event (GdkEventButton* ev)
 		if (ev->button == 3){
 			pinch = true;
 		} else {
-                        pinch = false;
-                }
+			pinch = false;
+		}
 
 		DragStarting (); /* EMIT SIGNAL */
 	}

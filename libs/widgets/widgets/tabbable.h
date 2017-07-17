@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtkmm2ext_tabbable_h__
-#define __gtkmm2ext_tabbable_h__
+#ifndef _WIDGETS_TABBABLE_H_
+#define _WIDGETS_TABBABLE_H_
 
 #include <gtkmm/bin.h>
 #include <gtkmm/box.h>
@@ -28,7 +28,7 @@
 #include <gtkmm/notebook.h>
 
 #include "gtkmm2ext/window_proxy.h"
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
 namespace Gtk {
 	class Window;
@@ -36,11 +36,14 @@ namespace Gtk {
 }
 
 namespace Gtkmm2ext {
+	class VisibilityTracker;
+}
 
-class VisibilityTracker;
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
-  public:
+class LIBWIDGETS_API Tabbable : public Gtkmm2ext::WindowProxy
+{
+public:
 	Tabbable (Gtk::Widget&, const std::string&, bool tabbed_by_default = true);
 	~Tabbable ();
 
@@ -76,10 +79,10 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 
 	sigc::signal1<void,Tabbable&> StateChange;
 
-  protected:
+protected:
 	bool delete_event_handler (GdkEventAny *ev);
 
-  private:
+private:
 	Gtk::Widget&   _contents;
 	Gtk::Notebook  _own_notebook;
 	Gtk::Notebook* _parent_notebook;
@@ -94,7 +97,6 @@ class LIBGTKMM2EXT_API Tabbable : public WindowProxy {
 	void window_unmapped ();
 };
 
-
-}
+} /* end namespace */
 
 #endif

@@ -30,7 +30,7 @@
 #include "gtkmm/radiobutton.h"
 #include "gtkmm/label.h"
 
-#include "gtkmm2ext/stateful_button.h"
+#include "widgets/stateful_button.h"
 
 #include "ardour/types.h"
 
@@ -53,11 +53,11 @@ public:
 
 protected:
 	virtual void button_toggled(Gtk::ToggleButton* button, uint8_t button_nr) = 0;
-	Gtk::Label                      _button_labels[4][4];
-	Gtkmm2ext::StatefulToggleButton _buttons[4][4];
-	int                             _recursion_counter;
+	Gtk::Label                          _button_labels[4][4];
+	ArdourWidgets::StatefulToggleButton _buttons[4][4];
+	int                                 _recursion_counter;
 
-	bool              was_clicked (GdkEventButton*);
+	bool was_clicked (GdkEventButton*);
 };
 
 class SingleMidiChannelSelector : public MidiChannelSelector

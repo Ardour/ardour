@@ -24,14 +24,15 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/checkbutton.h>
-#include <gtkmm/spinbutton.h>
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/table.h>
-#include <gtkmm/expander.h>
 #include <gtkmm/box.h>
-#include <gtkmm/buttonbox.h>
 #include <gtkmm/button.h>
+#include <gtkmm/buttonbox.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/expander.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/table.h>
 
 #include "pbd/signals.h"
 

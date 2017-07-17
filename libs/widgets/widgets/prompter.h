@@ -17,8 +17,8 @@
 
 */
 
-#ifndef __gtkmm2ext_prompter_h__
-#define __gtkmm2ext_prompter_h__
+#ifndef _WIDGETS_PROMPTER_H_
+#define _WIDGETS_PROMPTER_H_
 
 #include <string>
 #include <gtkmm/box.h>
@@ -27,18 +27,17 @@
 #include <gtkmm/dialog.h>
 #include <sigc++/sigc++.h>
 
-#include "gtkmm2ext/visibility.h"
+#include "widgets/visibility.h"
 
 namespace Gtk {
 	class Window;
 }
 
-namespace Gtkmm2ext {
+namespace ArdourWidgets {
 
-class LIBGTKMM2EXT_API Prompter : public Gtk::Dialog
-
+class LIBWIDGETS_API Prompter : public Gtk::Dialog
 {
-  public:
+public:
 	Prompter (bool modal = false);
 	Prompter (Gtk::Window& parent, bool modal = false);
 	~Prompter () {};
@@ -56,13 +55,13 @@ class LIBGTKMM2EXT_API Prompter : public Gtk::Dialog
 
 	void get_result (std::string &str, bool strip=true);
 
-  protected:
+protected:
 	Gtk::Entry& the_entry() { return entry; }
 
 	void on_entry_changed ();
 	void on_show ();
 
-  private:
+private:
 	Gtk::Entry entry;
 	Gtk::HBox entryBox;
 	Gtk::Label entryLabel;
@@ -75,4 +74,4 @@ class LIBGTKMM2EXT_API Prompter : public Gtk::Dialog
 
 } /* namespace */
 
-#endif  /* __gtkmm2ext_prompter_h__ */
+#endif

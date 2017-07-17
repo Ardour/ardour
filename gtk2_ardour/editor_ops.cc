@@ -36,9 +36,10 @@
 #include "pbd/whitespace.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/popup.h>
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/choice.h"
+#include "widgets/popup.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioregion.h"
@@ -5047,7 +5048,7 @@ Editor::remove_last_capture ()
 		choices.push_back (_("No, do nothing."));
 		choices.push_back (_("Yes, destroy it."));
 
-		Gtkmm2ext::Choice prompter (_("Destroy last capture"), prompt, choices);
+		Choice prompter (_("Destroy last capture"), prompt, choices);
 
 		if (prompter.run () == 1) {
 			_session->remove_last_capture ();
