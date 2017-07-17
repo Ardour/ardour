@@ -582,6 +582,8 @@ Session::non_realtime_locate ()
 	}
 
 
+	microseconds_t begin = get_microseconds ();
+
 	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
@@ -603,12 +605,16 @@ Session::non_realtime_locate ()
 
 		cerr << "\n\n <<< DONE Non-RT locate on routes\n\n";
 	}
+
 	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (_transport_frame);
 		}
 	}
+
+	microseconds_t end = get_microseconds ();
+	cerr << "Locate took " << setprecision (3) << ((end - begin) /1000000.0) << " secs\n";
 
 	_scene_changer->locate (_transport_frame);
 
