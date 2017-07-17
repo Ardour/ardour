@@ -283,8 +283,10 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 		/* no need for actual disk data, just advance read pointer and return */
 
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			(*chan)->buf->increment_read_ptr (playback_distance);
+		if (!still_locating) {
+			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+				(*chan)->buf->increment_read_ptr (playback_distance);
+			}
 		}
 
 		/* if monitoring disk but locating, put silence in the buffers */
