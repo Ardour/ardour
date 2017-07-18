@@ -91,6 +91,7 @@ FP8Strip::initialize ()
 	 * ie from FaderPort8::connected()
 	 */
 	_solo.set_active (false);
+	_solo.set_blinking (false);
 	_mute.set_active (false);
 
 	/* reset momentary button state */
@@ -414,8 +415,16 @@ void
 FP8Strip::notify_solo_changed ()
 {
 	if (_solo_ctrl) {
-		_solo.set_active (_solo_ctrl->get_value () > 0);
+		boost::shared_ptr<SoloControl> sc = boost::dynamic_pointer_cast<SoloControl> (_solo_ctrl);
+		if (sc) {
+			_solo.set_blinking (sc->soloed_by_others () && !sc->self_soloed ());
+			_solo.set_active (sc->self_soloed ());
+		} else {
+			_solo.set_blinking (false);
+			_solo.set_active (_solo_ctrl->get_value () > 0);
+		}
 	} else {
+		_solo.set_blinking (false);
 		_solo.set_active (false);
 	}
 }

@@ -307,6 +307,9 @@ void
 FaderPort8::button_solo_clear ()
 {
 	bool soloing = session->soloing() || session->listening();
+#ifdef MIXBUS
+	soloing |= session->mixbus_soloed();
+#endif
 	if (soloing) {
 		StripableList all;
 		session->get_stripables (all);
@@ -314,9 +317,9 @@ FaderPort8::button_solo_clear ()
 			if ((*i)->is_master() || (*i)->is_auditioner() || (*i)->is_monitor()) {
 				continue;
 			}
-			boost::shared_ptr<AutomationControl> ac = (*i)->solo_control();
-			if (ac && ac->get_value () > 0) {
-				_solo_state.push_back (boost::weak_ptr<AutomationControl>(ac));
+			boost::shared_ptr<SoloControl> sc = (*i)->solo_control();
+			if (sc && sc->self_soloed ()) {
+				_solo_state.push_back (boost::weak_ptr<AutomationControl>(sc));
 			}
 		}
 		AccessAction ("Main", "cancel-solo");

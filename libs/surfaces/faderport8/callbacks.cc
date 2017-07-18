@@ -187,6 +187,9 @@ void
 FaderPort8::notify_solo_changed ()
 {
 	bool soloing = session->soloing() || session->listening();
+#ifdef MIXBUS
+	soloing |= session->mixbus_soloed();
+#endif
 	_ctrls.button (FP8Controls::BtnSoloClear).set_active (soloing);
 #ifdef FP8_MUTESOLO_UNDO
 	if (soloing) {

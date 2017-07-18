@@ -106,11 +106,13 @@ public:
 		return true;
 	}
 
-	void ignore_release () {
+	virtual void ignore_release () {
 		if (_pressed) {
 			_ignore_release = true;
 		}
 	}
+
+	bool blinking () const { return _blinking; }
 
 	void set_blinking (bool yes) {
 		if (yes && !_blinking) {
@@ -118,8 +120,8 @@ public:
 			_base.BlinkIt.connect_same_thread (_blink_connection, boost::bind (&FP8ButtonBase::blink, this, _1));
 		} else if (!yes && _blinking) {
 			_blink_connection.disconnect ();
-			blink (true);
 			_blinking = false;
+			blink (true);
 		}
 	}
 
@@ -360,14 +362,12 @@ private:
 // short press: activate in press, deactivate on release,
 // long press + hold, activate on press, de-activate directly on release
 // e.g. mute/solo  press + hold => changed()
-class FP8MomentaryButton : public FP8ButtonInterface
+class FP8MomentaryButton : public FP8ButtonBase
 {
 public:
 	FP8MomentaryButton (FP8Base& b, uint8_t id)
-		: _base (b)
+		: FP8ButtonBase (b)
 		, _midi_id (id)
-		, _pressed (false)
-		, _active (false)
 	{}
 
 	~FP8MomentaryButton () {
@@ -390,6 +390,8 @@ public:
 		_was_active_on_press = false;
 		_hold_connection.disconnect ();
 	}
+
+	void ignore_release () { }
 
 	bool midi_event (bool a)
 	{
@@ -423,12 +425,18 @@ public:
 	}
 
 protected:
-	FP8Base& _base;
+	void blink (bool onoff)
+	{
+		if (!blinking ()) {
+			_base.tx_midi3 (0x90, _midi_id, _active ? 0x7f : 0x00);
+			return;
+		}
+		_base.tx_midi3 (0x90, _midi_id, onoff ? 0x7f : 0x00);
+	}
+
 	uint8_t  _midi_id; // MIDI-note
-	bool     _pressed;
 	bool     _momentaty;
 	bool     _was_active_on_press;
-	bool     _active;
 
 private:
 	bool hold_timeout ()
