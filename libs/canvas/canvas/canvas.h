@@ -214,6 +214,9 @@ public:
 	void start_tooltip_timeout (Item*);
 	void stop_tooltip_timeout ();
 
+	void queue_draw ();
+	void queue_draw_area (int x, int y, int width, int height);
+
 	Glib::RefPtr<Pango::Context> get_pango_context();
 
 	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)

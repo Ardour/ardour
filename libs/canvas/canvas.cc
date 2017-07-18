@@ -873,7 +873,6 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 	}
 #ifdef __APPLE__
 	if (_nsglview) {
-		Gtkmm2ext::nsglview_queue_draw (_nsglview, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 		return true;
 	}
 #endif
@@ -1199,6 +1198,30 @@ GtkCanvas::on_unmap ()
 		Gtkmm2ext::nsglview_set_visible (_nsglview, false);
 	}
 #endif
+}
+
+void
+GtkCanvas::queue_draw()
+{
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_queue_draw (_nsglview, 0, 0, get_width (), get_height ());
+		return;
+	}
+#endif
+	Gtk::Widget::queue_draw ();
+}
+
+void
+GtkCanvas::queue_draw_area (int x, int y, int width, int height)
+{
+#ifdef __APPLE__
+	if (_nsglview) {
+		Gtkmm2ext::nsglview_queue_draw (_nsglview, x, y, width, height);
+		return;
+	}
+#endif
+	Gtk::Widget::queue_draw_area (x, y, width, height);
 }
 
 /** Called to request a redraw of our canvas.
