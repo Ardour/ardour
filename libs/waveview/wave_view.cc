@@ -51,6 +51,10 @@
 #include "waveview/wave_view.h"
 #include "waveview/wave_view_private.h"
 
+#ifdef __APPLE__
+#define Rect ArdourCanvas::Rect
+#endif
+
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
