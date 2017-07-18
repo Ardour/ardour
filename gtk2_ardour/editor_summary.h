@@ -95,8 +95,11 @@ private:
 
 	std::pair<double, double> _start_editor_x;
 	double _start_mouse_x;
+	double _start_mouse_y;
 
 	Position _start_position;
+
+	bool _begin_dragging;
 
 	bool _move_dragging;
 	bool _moved;
@@ -107,8 +110,11 @@ private:
 	std::pair<double, double> _pending_editor_y;
 	bool _pending_editor_changed;
 
+	bool _zoom_trim_dragging;
+	Position _zoom_trim_position;
+
 	bool _zoom_dragging;
-	Position _zoom_position;
+	double _zoom_last_y;
 
 	bool _old_follow_playhead;
 	cairo_surface_t* _image;

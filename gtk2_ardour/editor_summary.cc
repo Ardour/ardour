@@ -50,10 +50,12 @@ EditorSummary::EditorSummary (Editor* e)
 	  _x_scale (1),
 	  _track_height (16),
 	  _last_playhead (-1),
+	  _begin_dragging (false),
 	  _move_dragging (false),
 	  _moved (false),
 	  _view_rectangle_x (0, 0),
 	  _view_rectangle_y (0, 0),
+	  _zoom_trim_dragging (false),
 	  _zoom_dragging (false),
 	  _old_follow_playhead (false),
 	  _image (0),
@@ -242,8 +244,9 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	}
 
 	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
+	std::min(8, width);
 	int32_t height = _view_rectangle_y.second - _view_rectangle_y.first;
-	cairo_rectangle (cr, _view_rectangle_x.first, _view_rectangle_y.first, width, height);
+	cairo_rectangle (cr, _view_rectangle_x.first, 0, width, get_height ());
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
 	cairo_fill (cr);
 
@@ -327,9 +330,9 @@ EditorSummary::set_overlays_dirty (int x, int y, int w, int h)
 void
 EditorSummary::on_size_request (Gtk::Requisition *req)
 {
-	/* Use a dummy, small width and the actual height that we want */
-	req->width = 64;
-	req->height = 32;
+	/* The left/right buttons will determine our height */
+	req->width = -1;
+	req->height = -1;
 }
 
 
@@ -416,14 +419,15 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 	_start_editor_x = xr;
 	_start_mouse_x = ev->x;
+	_start_mouse_y = ev->y;
 	_start_position = get_position (ev->x, ev->y);
 
 	if (_start_position != INSIDE && _start_position != TO_LEFT_OR_RIGHT) {
 
-		/* start a zoom drag */
+		/* start a zoom_trim drag */
 
-		_zoom_position = get_position (ev->x, ev->y);
-		_zoom_dragging = true;
+		_zoom_trim_position = get_position (ev->x, ev->y);
+		_zoom_trim_dragging = true;
 		_editor->_dragging_playhead = true;
 		_editor->set_follow_playhead (false);
 
@@ -445,16 +449,9 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 
 	} else {
 
-		/* start a move drag */
-
-		/* get the editor's state in case we are suspending updates */
-		get_editor (&_pending_editor_x, &_pending_editor_y);
-		_pending_editor_changed = false;
-
-		_move_dragging = true;
-		_moved = false;
-		_editor->_dragging_playhead = true;
-		_editor->set_follow_playhead (false);
+		/* start a move or zoom drag */
+		/* won't know which one until the mouse moves */
+		_begin_dragging = true;
 	}
 
 	return true;
@@ -466,7 +463,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 bool
 EditorSummary::suspending_editor_updates () const
 {
-	return (!UIConfiguration::instance().get_update_editor_during_summary_drag () && (_zoom_dragging || _move_dragging));
+	return (!UIConfiguration::instance().get_update_editor_during_summary_drag () && (_zoom_dragging || _zoom_trim_dragging || _move_dragging));
 }
 
 /** Fill in x and y with the editor's current viewable area in summary coordinates */
@@ -568,11 +565,29 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 	} else if (_zoom_dragging) {
 
+		//ToDo: refactor into summary_zoom_in/out(
+		//ToDo:  protect the case where the editor position is small, and results in offsetting the position
+
+		double const dy = ev->y - _zoom_last_y;
+		
+		pair<double, double> xn;
+		get_editor (&xn);
+
+		xn.first -= dy;
+		xn.second += dy;
+	
+		set_overlays_dirty ();
+		set_editor_x (xn);
+	
+		_zoom_last_y = ev->y;
+			
+	} else if (_zoom_trim_dragging) {
+
 		double const dx = ev->x - _start_mouse_x;
 
-		if (_zoom_position == LEFT) {
+		if (_zoom_trim_position == LEFT) {
 			xr.first += dx;
-		} else if (_zoom_position == RIGHT) {
+		} else if (_zoom_trim_position == RIGHT) {
 			xr.second += dx;
 		} else {
 			assert (0);
@@ -580,11 +595,52 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		}
 
 		set_overlays_dirty ();
-		set_cursor (_zoom_position);
+		set_cursor (_zoom_trim_position);
 		set_editor (xr);
 
+	} else if (_begin_dragging) {
+
+		double const dx = ev->x - _start_mouse_x;
+		double const dy = ev->y - _start_mouse_y;
+
+		if ( fabs(dx) > fabs(dy) ) {
+			
+			/* initiate a move drag */
+
+			/* get the editor's state in case we are suspending updates */
+			get_editor (&_pending_editor_x, &_pending_editor_y);
+			_pending_editor_changed = false;
+
+			_move_dragging = true;
+			_moved = false;
+			_editor->_dragging_playhead = true;
+			_editor->set_follow_playhead (false);
+
+			get_window()->set_cursor (*_editor->_cursors->expand_left_right);
+
+			_begin_dragging = false;
+		
+		} else if ( fabs(dy) > fabs(dx) ) {
+		
+			/* initiate a zoom drag */
+
+			/* get the editor's state in case we are suspending updates */
+			get_editor (&_pending_editor_x, &_pending_editor_y);
+			_pending_editor_changed = false;
+
+			//_zoom_position = get_position (ev->x, ev->y);
+			_zoom_dragging = true;
+			_zoom_last_y = ev->y;
+			_editor->_dragging_playhead = true;
+			_editor->set_follow_playhead (false);
+
+			get_window()->set_cursor (*_editor->_cursors->expand_up_down);
+
+			_begin_dragging = false;
+		}
+		
 	} else {
-		set_cursor (get_position (ev->x, ev->y));
+		set_cursor ( INSIDE );
 	}
 
 	return true;
@@ -596,6 +652,7 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 	bool const was_suspended = suspending_editor_updates ();
 
 	_move_dragging = false;
+	_zoom_trim_dragging = false;
 	_zoom_dragging = false;
 	_editor->_dragging_playhead = false;
 	_editor->set_follow_playhead (_old_follow_playhead, false);
@@ -616,7 +673,34 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	double x = xr.first;
 
 	switch (ev->direction) {
-		case GDK_SCROLL_UP:
+		case GDK_SCROLL_UP: {
+			//ToDo:  use function summary_zoom_in/out
+			
+			pair<double, double> xn;
+			get_editor (&xn);
+
+			xn.first -= 2;
+			xn.second += 2;
+		
+			set_overlays_dirty ();
+			set_editor_x (xn);
+		
+			return true;
+		} break;
+		
+		case GDK_SCROLL_DOWN: {
+			pair<double, double> xn;
+			get_editor (&xn);
+
+			xn.first += 2;
+			xn.second -= 2;
+		
+			set_overlays_dirty ();
+			set_editor_x (xn);
+		
+			return true;
+		} break;
+		
 		case GDK_SCROLL_LEFT:
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (false);
@@ -629,7 +713,6 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 				return true;
 			}
 			break;
-		case GDK_SCROLL_DOWN:
 		case GDK_SCROLL_RIGHT:
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (true);
