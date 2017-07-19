@@ -1272,11 +1272,11 @@ TimeAxisView::preset_height (Height h)
 
 /** @return Child time axis views that are not hidden */
 TimeAxisView::Children
-TimeAxisView::get_child_list ()
+TimeAxisView::get_child_list () const
 {
 	Children c;
 
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
 			c.push_back(*i);
 		}

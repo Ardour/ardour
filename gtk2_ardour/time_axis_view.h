@@ -216,7 +216,7 @@ class TimeAxisView : public virtual AxisView
 	virtual StreamView* view () const { return 0; }
 
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
-	Children get_child_list ();
+	Children get_child_list () const;
 
 	static uint32_t preset_height (Height);
 
