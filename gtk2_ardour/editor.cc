@@ -3812,10 +3812,20 @@ Editor::set_visible_track_count (int32_t n)
 		str = s.str();
 	} else if (_visible_track_count == 0) {
 		uint32_t n = 0;
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
+		for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((*i)->marked_for_display()) {
 				++n;
+				TimeAxisView::Children cl ((*i)->get_child_list ());
+				for (TimeAxisView::Children::const_iterator j = cl.begin(); j != cl.end(); ++j) {
+					if ((*j)->marked_for_display()) {
+						++n;
+					}
+				}
 			}
+		}
+		if (n == 0) {
+			visible_tracks_selector.set_text (X_("*"));
+			return;
 		}
 		h = trackviews_height() / n;
 		str = _("All");
