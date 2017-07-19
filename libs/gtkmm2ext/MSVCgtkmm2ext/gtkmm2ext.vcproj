@@ -270,31 +270,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour_icon.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\auto_spin.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\barcontroller.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\bindable_button.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\binding_proxy.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\bindings.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\cairo_icon.cc"
 				>
 			</File>
 			<File
@@ -303,10 +279,6 @@
 			</File>
 			<File
 				RelativePath="..\cairo_widget.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\cairocell.cc"
 				>
 			</File>
 			<File
@@ -322,11 +294,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\choice.cc"
+				RelativePath="..\colors.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\click_box.cc"
+				RelativePath="..\colorspace.cc"
 				>
 			</File>
 			<File
@@ -346,26 +318,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\eventboxext.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\fader.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\fastmeter.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\focus_entry.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\grouped_buttons.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk_ui.cc"
 				>
 			</File>
@@ -378,10 +330,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\idle_adjustment.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\keyboard.cc"
 				>
 			</File>
@@ -390,59 +338,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\pane.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\paths_dialog.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\persistent_tooltip.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\pixfader.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\pixscroller.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\popup.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\prompter.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\scroomer.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\searchbar.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\selector.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\slider_controller.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\stateful_button.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\tabbable.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\tearoff.cc"
 				>
 			</File>
 			<File
@@ -492,26 +388,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\ardour_icon.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\auto_spin.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\barcontroller.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\bindable_button.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\binding_proxy.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\bindings.h"
 				>
 			</File>
@@ -520,19 +396,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\cairo_icon.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\cairo_packer.h"
 				>
 			</File>
 			<File
 				RelativePath="..\gtkmm2ext\cairo_widget.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\cairocell.h"
 				>
 			</File>
 			<File
@@ -548,11 +416,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\choice.h"
+				RelativePath="..\gtkmm2ext\colors.h"
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\click_box.h"
+				RelativePath="..\gtkmm2ext\colorspace.h"
 				>
 			</File>
 			<File
@@ -580,26 +448,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\eventboxext.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\fader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\fastmeter.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\focus_entry.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\grouped_buttons.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\gtk_ui.h"
 				>
 			</File>
@@ -620,10 +468,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\idle_adjustment.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\keyboard.h"
 				>
 			</File>
@@ -632,27 +476,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\pane.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\persistent_tooltip.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\pixfader.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\pixscroller.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\popup.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\prompter.h"
 				>
 			</File>
 			<File
@@ -660,35 +484,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtkmm2ext\scroomer.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\searchbar.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\selector.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\slider_controller.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\stateful_button.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtkmm2ext\sync-menu.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\tabbable.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtkmm2ext\tearoff.h"
 				>
 			</File>
 			<File
