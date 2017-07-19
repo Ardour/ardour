@@ -5342,7 +5342,7 @@ Route::send_level_controllable (uint32_t n) const
 # undef MIXBUS_PORTS_H
 # include "../../gtk2_ardour/mixbus_ports.h"
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	if (plug) {
+	if (plug && !mixbus()) {
 		uint32_t port_id = 0;
 		switch (n) {
 			case  0: port_id = port_channel_post_aux1_level; break;
