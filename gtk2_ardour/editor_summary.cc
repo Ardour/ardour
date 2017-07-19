@@ -535,7 +535,7 @@ EditorSummary::set_cursor (Position p)
 		get_window()->set_cursor (*_editor->_cursors->move);
 		break;
 	case TO_LEFT_OR_RIGHT:
-		get_window()->set_cursor (*_editor->_cursors->expand_left_right);
+		get_window()->set_cursor (*_editor->_cursors->move);
 		break;
 	default:
 		assert (0);
@@ -652,7 +652,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		}
 		
 	} else {
-		set_cursor ( INSIDE );
+		set_cursor ( get_position(ev->x, ev->y) );
 	}
 
 	return true;
