@@ -764,6 +764,8 @@ LuaInstance::register_classes (lua_State* L)
 #endif
 		.addFunction ("hide_track_in_display", &PublicEditor::hide_track_in_display)
 		.addFunction ("show_track_in_display", &PublicEditor::show_track_in_display)
+		.addFunction ("set_visible_track_count", &PublicEditor::set_visible_track_count)
+		.addFunction ("fit_selection", &PublicEditor::fit_selection)
 
 		.addFunction ("regionview_from_region", &PublicEditor::regionview_from_region)
 		.addFunction ("set_stationary_playhead", &PublicEditor::set_stationary_playhead)

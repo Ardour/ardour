@@ -323,6 +323,8 @@ public:
 	virtual void reset_x_origin (framepos_t frame) = 0;
 	virtual double get_y_origin () const = 0;
 	virtual void reset_y_origin (double pos) = 0;
+	virtual void set_visible_track_count (int32_t) = 0;
+	virtual void fit_selection () = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
