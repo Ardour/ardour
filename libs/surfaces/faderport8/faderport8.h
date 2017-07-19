@@ -156,7 +156,7 @@ private:
 	void assign_stripables (bool select_only = false);
 	void set_periodic_display_mode (FP8Strip::DisplayMode);
 
-	void assign_strips (bool reset_bank);
+	void assign_strips ();
 	void bank (bool down, bool page);
 	void move_selected_into_view ();
 	void select_prev_next (bool next);
@@ -173,7 +173,10 @@ private:
 	void toggle_preset_param_mode ();
 	void bank_param (bool down, bool page);
 	/* bank offsets */
-	int _channel_off;
+	int  get_channel_off (FP8Types::MixMode m) const { return _channel_off [m]; }
+	void set_channel_off (FP8Types::MixMode m, int off) {_channel_off [m] = off ; }
+
+	int _channel_off[FP8Types::MixModeMax + 1];
 	int _plugin_off;
 	int _parameter_off;
 

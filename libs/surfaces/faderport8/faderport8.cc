@@ -91,7 +91,6 @@ FaderPort8::FaderPort8 (Session& s)
 	, _connection_state (ConnectionState (0))
 	, _device_active (false)
 	, _ctrls (*this)
-	, _channel_off (0)
 	, _plugin_off (0)
 	, _parameter_off (0)
 	, _show_presets (false)
@@ -142,7 +141,7 @@ FaderPort8::FaderPort8 (Session& s)
 	setup_actions ();
 
 	_ctrls.FaderModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::notify_fader_mode_changed, this));
-	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::assign_strips, this, true));
+	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::assign_strips, this));
 }
 
 FaderPort8::~FaderPort8 ()
@@ -323,7 +322,8 @@ FaderPort8::connected ()
 	// ideally check firmware version >= 1.01 (USB bcdDevice 0x0101) (vendor 0x194f prod 0x0202)
 	// but we don't have a handle to the underlying USB device here.
 
-	_channel_off = _plugin_off = _parameter_off = 0;
+	memset (_channel_off, 0, sizeof (_channel_off));
+	_plugin_off = _parameter_off = 0;
 	_blink_onoff = false;
 	_shift_lock = false;
 	_shift_pressed = 0;
@@ -341,7 +341,7 @@ FaderPort8::connected ()
 	tx_midi3 (0x90, 0x46, 0x00);
 
 	send_session_state ();
-	assign_strips (true);
+	assign_strips ();
 
 	Glib::RefPtr<Glib::TimeoutSource> blink_timer =
 		Glib::TimeoutSource::create (200);
@@ -941,11 +941,13 @@ FaderPort8::assign_stripables (bool select_only)
 	}
 
 	int n_strips = strips.size();
-	_channel_off = std::min (_channel_off, n_strips - 8);
-	_channel_off = std::max (0, _channel_off);
+	int channel_off = get_channel_off (_ctrls.mix_mode ());
+	channel_off = std::min (channel_off, n_strips - 8);
+	channel_off = std::max (0, channel_off);
+	set_channel_off (_ctrls.mix_mode (), channel_off);
 
 	uint8_t id = 0;
-	int skip = _channel_off;
+	int skip = channel_off;
 	for (StripableList::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if (skip > 0) {
 			--skip;
@@ -1573,12 +1575,8 @@ FaderPort8::assign_sends ()
  */
 
 void
-FaderPort8::assign_strips (bool reset_bank)
+FaderPort8::assign_strips ()
 {
-	if (reset_bank) {
-		_channel_off = 0;
-	}
-
 	assigned_stripable_connections.drop_connections ();
 	_assigned_strips.clear ();
 
@@ -1698,7 +1696,7 @@ FaderPort8::notify_fader_mode_changed ()
 			ARMButtonChange (false);
 			break;
 	}
-	assign_strips (false);
+	assign_strips ();
 	notify_automation_mode_changed ();
 }
 
@@ -1712,7 +1710,7 @@ FaderPort8::notify_stripable_added_or_removed ()
 	 *    - Properties::hidden
 	 *    - Properties::order
 	 */
-	assign_strips (false);
+	assign_strips ();
 }
 
 /* called from static PresentationInfo::Change */
@@ -1848,16 +1846,18 @@ FaderPort8::move_selected_into_view ()
 	}
 	int off = std::distance (strips.begin(), it);
 
-	if (_channel_off <= off && off < _channel_off + 8) {
+	int channel_off = get_channel_off (_ctrls.mix_mode ());
+	if (channel_off <= off && off < channel_off + 8) {
 		return;
 	}
 
-	if (_channel_off > off) {
-		_channel_off = off;
+	if (channel_off > off) {
+		channel_off = off;
 	} else {
-		_channel_off = off - 7;
+		channel_off = off - 7;
 	}
-	assign_strips (false);
+	set_channel_off (_ctrls.mix_mode (), channel_off);
+	assign_strips ();
 }
 
 void
@@ -1910,8 +1910,8 @@ FaderPort8::bank (bool down, bool page)
 	if (down) {
 		dt *= -1;
 	}
-	_channel_off += dt;
-	assign_strips (false);
+	set_channel_off (_ctrls.mix_mode (), get_channel_off (_ctrls.mix_mode ()) + dt);
+	assign_strips ();
 }
 
 void

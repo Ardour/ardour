@@ -160,7 +160,8 @@ namespace FP8Types {
 		MixMIDI,
 		MixOutputs,
 		MixFX,
-		MixUser
+		MixUser,
+		MixModeMax = MixUser
 	};
 
 };
