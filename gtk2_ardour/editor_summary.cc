@@ -570,7 +570,7 @@ EditorSummary::set_cursor (Position p)
 }
 
 void
-EditorSummary::summary_zoom_step ( int steps /* negative steps to zoom "out" , positive steps to zoom "in" */  )
+EditorSummary::summary_zoom_step ( int steps /* positive steps to zoom "out" , negative steps to zoom "in" */  )
 {
 	pair<double, double> xn;
 
@@ -580,8 +580,8 @@ EditorSummary::summary_zoom_step ( int steps /* negative steps to zoom "out" , p
 //		xn.second = xn.first + _editor->current_page_samples() * _x_scale;
 //	}
 
-	xn.first += steps;
-	xn.second -= steps;
+	xn.first -= steps;
+	xn.second += steps;
 
 	set_overlays_dirty ();
 	set_editor_x (xn);
@@ -713,14 +713,14 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 	switch (ev->direction) {
 		case GDK_SCROLL_UP: {
 			
-			summary_zoom_step( -2 );
+			summary_zoom_step( -4 );
 		
 			return true;
 		} break;
 		
 		case GDK_SCROLL_DOWN: {
 			
-			summary_zoom_step( 2 );
+			summary_zoom_step( 4 );
 		
 			return true;
 		} break;
