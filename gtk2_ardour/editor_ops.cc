@@ -1771,7 +1771,51 @@ Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
 			nspp /= 2.0;
 		}
 	}
-
+	
+	// ToDo:   encapsulate all of this into something like editor::get_session_extents() or editor::leftmost(), rightmost()
+	{
+		//ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like)
+		
+		//calculate the extents of all regions in every playlist
+		framecnt_t session_extent_start = 0;
+		framecnt_t session_extent_end = 0;
+		{
+			boost::shared_ptr<RouteList> rl = _session->get_routes();
+			for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+				boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
+				if (tr) {
+					boost::shared_ptr<Playlist> pl = tr->playlist();
+					if (pl) {
+						pair<framepos_t, framepos_t> e;
+						e = pl->get_extent();
+						if (e.first < session_extent_start) {
+							session_extent_start = e.first;
+						}
+						if (e.second > session_extent_end) {
+							session_extent_end = e.second;
+						}
+					}
+				}
+			}
+		}
+		framecnt_t session_extents = session_extent_end - session_extent_start;
+		
+		//in a session with no regions, use the start/end markers to set max zoom
+		framecnt_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
+		if ( session_length > session_extents )
+			session_extents = session_length;
+			
+		//in a session with no regions or start/end markers, use 2 minutes to set max zoom
+		framecnt_t const min_length = _session->nominal_frame_rate()*60*2;
+		if ( min_length > session_extents )
+			session_extents = min_length;
+			
+		//convert to samples-per-pixel and limit our zoom to this value
+		framecnt_t session_extents_pp = session_extents / _visible_canvas_width;
+		if (nspp > session_extents_pp)
+			nspp = session_extents_pp;
+	}
+	
 	temporal_zoom (nspp);
 }
 
