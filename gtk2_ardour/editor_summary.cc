@@ -651,6 +651,7 @@ EditorSummary::on_button_release_event (GdkEventButton*)
 {
 	bool const was_suspended = suspending_editor_updates ();
 
+	_begin_dragging = false;
 	_move_dragging = false;
 	_zoom_trim_dragging = false;
 	_zoom_dragging = false;
@@ -679,8 +680,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			pair<double, double> xn;
 			get_editor (&xn);
 
-			xn.first -= 2;
-			xn.second += 2;
+			xn.first += 2;
+			xn.second -= 2;
 		
 			set_overlays_dirty ();
 			set_editor_x (xn);
@@ -692,8 +693,8 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 			pair<double, double> xn;
 			get_editor (&xn);
 
-			xn.first += 2;
-			xn.second -= 2;
+			xn.first -= 2;
+			xn.second += 2;
 		
 			set_overlays_dirty ();
 			set_editor_x (xn);
