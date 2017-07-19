@@ -243,14 +243,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\colors.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\colorspace.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\container.cc"
 				>
 			</File>
@@ -359,14 +351,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\wave_view.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\wave_view_private.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\widget.cc"
 				>
 			</File>
@@ -398,14 +382,6 @@
 			</File>
 			<File
 				RelativePath="..\canvas\circle.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\colors.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\colorspace.h"
 				>
 			</File>
 			<File
@@ -522,14 +498,6 @@
 			</File>
 			<File
 				RelativePath="..\canvas\utils.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\wave_view.h"
-				>
-			</File>
-			<File
-				RelativePath="..\canvas\wave_view_private.h"
 				>
 			</File>
 			<File
