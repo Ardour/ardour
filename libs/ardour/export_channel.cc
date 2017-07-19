@@ -63,7 +63,9 @@ PortExportChannel::read (Sample const *& data, framecnt_t frames) const
 
 	if (ports.size() == 1) {
 		boost::shared_ptr<AudioPort> p = ports.begin()->lock ();
-		data = p->get_audio_buffer(frames).data();
+		AudioBuffer& ab (p->get_audio_buffer(frames)); // unsets AudioBuffer::_written
+		data = ab.data();
+		ab.set_written (true);
 		return;
 	}
 
@@ -72,7 +74,9 @@ PortExportChannel::read (Sample const *& data, framecnt_t frames) const
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		boost::shared_ptr<AudioPort> p = it->lock ();
 		if (p) {
-			Sample* port_buffer = p->get_audio_buffer(frames).data();
+			AudioBuffer& ab (p->get_audio_buffer(frames)); // unsets AudioBuffer::_written
+			Sample* port_buffer = ab.data();
+			ab.set_written (true);
 
 			for (uint32_t i = 0; i < frames; ++i) {
 				buffer[i] += (float) port_buffer[i];
