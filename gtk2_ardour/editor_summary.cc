@@ -544,6 +544,25 @@ EditorSummary::set_cursor (Position p)
 	}
 }
 
+void
+EditorSummary::summary_zoom_step ( int steps /* negative steps to zoom "out" , positive steps to zoom "in" */  )
+{
+	pair<double, double> xn;
+
+	get_editor (&xn);
+//	{
+//		xn.first = (_editor->leftmost_sample () - _start) * _x_scale;
+//		xn.second = xn.first + _editor->current_page_samples() * _x_scale;
+//	}
+
+	xn.first += steps;
+	xn.second -= steps;
+
+	set_overlays_dirty ();
+	set_editor_x (xn);
+}
+
+
 bool
 EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
@@ -570,15 +589,8 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 		double const dy = ev->y - _zoom_last_y;
 		
-		pair<double, double> xn;
-		get_editor (&xn);
+		summary_zoom_step( dy );
 
-		xn.first -= dy;
-		xn.second += dy;
-	
-		set_overlays_dirty ();
-		set_editor_x (xn);
-	
 		_zoom_last_y = ev->y;
 			
 	} else if (_zoom_trim_dragging) {
@@ -675,29 +687,15 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 
 	switch (ev->direction) {
 		case GDK_SCROLL_UP: {
-			//ToDo:  use function summary_zoom_in/out
 			
-			pair<double, double> xn;
-			get_editor (&xn);
-
-			xn.first += 2;
-			xn.second -= 2;
-		
-			set_overlays_dirty ();
-			set_editor_x (xn);
+			summary_zoom_step( -2 );
 		
 			return true;
 		} break;
 		
 		case GDK_SCROLL_DOWN: {
-			pair<double, double> xn;
-			get_editor (&xn);
-
-			xn.first -= 2;
-			xn.second += 2;
-		
-			set_overlays_dirty ();
-			set_editor_x (xn);
+			
+			summary_zoom_step( 2 );
 		
 			return true;
 		} break;

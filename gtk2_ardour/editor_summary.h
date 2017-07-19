@@ -83,6 +83,8 @@ private:
 	framepos_t position_to_playhead_frame_to_position (double pos) const;
 	void set_overlays_dirty (int, int, int, int);
 
+	void summary_zoom_step (  int steps );
+
 	framepos_t _start; ///< start frame of the overview
 	framepos_t _end; ///< end frame of the overview
 
