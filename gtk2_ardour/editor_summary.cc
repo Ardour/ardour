@@ -117,7 +117,7 @@ EditorSummary::set_session (Session* s)
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	
 		_leftmost = _session->current_start_frame();
-		_rightmost = min (_session->nominal_frame_rate()*60*2, _session->current_start_frame() );  //always show at least 2 minutes
+		_rightmost = min (_session->nominal_frame_rate()*60*2, _session->current_end_frame() );  //always show at least 2 minutes
 	}
 }
 
