@@ -183,12 +183,14 @@ EditorSummary::render_background_image ()
 
 		/* paint a non-bg colored strip to represent the track itself */
 
-		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
-		cairo_set_line_width (cr, _track_height - 1);
-		cairo_move_to (cr, 0, y + _track_height / 2);
-		cairo_line_to (cr, get_width(), y + _track_height / 2);
-		cairo_stroke (cr);
-
+		if ( _track_height > 4 ) {
+			cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
+			cairo_set_line_width (cr, _track_height - 1);
+			cairo_move_to (cr, 0, y + _track_height / 2);
+			cairo_line_to (cr, get_width(), y + _track_height / 2);
+			cairo_stroke (cr);
+		}
+		
 		StreamView* s = (*i)->view ();
 
 		if (s) {
@@ -575,13 +577,15 @@ EditorSummary::summary_zoom_step ( int steps /* positive steps to zoom "out" , n
 	pair<double, double> xn;
 
 	get_editor (&xn);
-//	{
-//		xn.first = (_editor->leftmost_sample () - _start) * _x_scale;
-//		xn.second = xn.first + _editor->current_page_samples() * _x_scale;
-//	}
 
 	xn.first -= steps;
 	xn.second += steps;
+
+	//for now, disallow really close zooming-in from the scroomer. ( currently it causes the start-offset to 'walk' because of integer limitations.  to fix this, probably need to maintain float throught the get/set_editor() path )
+	if (steps<0) {
+      if ( (xn.second-xn.first) < 2)
+		return;
+	}
 
 	set_overlays_dirty ();
 	set_editor_x (xn);
