@@ -46,7 +46,7 @@ EditorSummary::EditorSummary (Editor* e)
 	: EditorComponent (e),
 	  _start (0),
 	  _end (1),
-	  _overhang_fraction (0.1),
+	  _overhang_fraction (0.02),
 	  _x_scale (1),
 	  _track_height (16),
 	  _last_playhead (-1),
@@ -116,6 +116,9 @@ EditorSummary::set_session (Session* s)
 		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
+	
+	_leftmost = _session->current_start_frame();
+	_rightmost = min (_session->nominal_frame_rate()*60*2, _session->current_start_frame() );  //always show at least 2 minutes
 }
 
 void
@@ -135,9 +138,25 @@ EditorSummary::render_background_image ()
 	/* compute start and end points for the summary */
 
 	framecnt_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
-	double const theoretical_start = _session->current_start_frame() - session_length * _overhang_fraction;
+	double theoretical_start = _session->current_start_frame() - session_length * _overhang_fraction;
+	double theoretical_end = _session->current_end_frame();
+
+	/* the summary should encompass the full extent of everywhere we've visited since the session was opened */
+	if ( _leftmost < theoretical_start)
+		theoretical_start = _leftmost;
+	if ( _rightmost > theoretical_end )
+		theoretical_end = _rightmost;
+
+	/* range-check */
 	_start = theoretical_start > 0 ? theoretical_start : 0;
-	_end = _session->current_end_frame() + session_length * _overhang_fraction;
+	_end = theoretical_end + session_length * _overhang_fraction;
+
+	/* calculate x scale */
+	if (_end != _start) {
+		_x_scale = static_cast<double> (get_width()) / (_end - _start);
+ 	} else {
+		_x_scale = 1;
+	}
 
 	/* compute track height */
 	int N = 0;
@@ -151,13 +170,6 @@ EditorSummary::render_background_image ()
 		_track_height = 16;
 	} else {
 		_track_height = (double) get_height() / N;
-	}
-
-	/* calculate x scale */
-	if (_end != _start) {
-		_x_scale = static_cast<double> (get_width()) / (_end - _start);
- 	} else {
-		_x_scale = 1;
 	}
 
 	/* render tracks and regions */
@@ -221,6 +233,19 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 		return;
 	}
 
+	/* maintain the leftmost and rightmost locations that we've ever reached */
+	framecnt_t const leftmost = _editor->leftmost_sample ();
+	if ( leftmost < _leftmost) {
+		_leftmost = leftmost;
+		_background_dirty = true;
+	}
+	framecnt_t const rightmost = leftmost + _editor->current_page_samples();
+	if ( rightmost > _rightmost) {
+		_rightmost = rightmost;
+		_background_dirty = true;
+	}
+
+	//draw the background (regions, markers, etc ) if they've changed
 	if (!_image || _background_dirty) {
 		render_background_image ();
 		_background_dirty = false;

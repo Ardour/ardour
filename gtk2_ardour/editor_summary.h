@@ -88,6 +88,9 @@ private:
 	framepos_t _start; ///< start frame of the overview
 	framepos_t _end; ///< end frame of the overview
 
+	framepos_t _leftmost; ///< the earliest frame we ever viewed
+	framepos_t _rightmost; ///< the latest frame we ever viewed
+
 	/** fraction of the session length by which the overview size should extend past the start and end markers */
 	double _overhang_fraction;
 
