@@ -184,7 +184,7 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_processor);
 		if (pi && pi->plugin() && pi->plugin()->has_inline_display()) {
 			if (pi->plugin()->get_info()->type != ARDOUR::Lua) {
-				_plugin_display = new PluginDisplay (*this, pi->plugin(),
+				_plugin_display = new PluginInlineDisplay (*this, pi->plugin(),
 						std::max (60.f, rintf(112.f * UIConfiguration::instance().get_ui_scale())));
 			} else {
 				assert (boost::dynamic_pointer_cast<LuaProc>(pi->plugin()));
@@ -1563,20 +1563,11 @@ ProcessorEntry::RoutingIcon::expose_output_map (cairo_t* cr, const double width,
 	}
 }
 
-ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
-	: _entry (e)
-	, _plug (p)
-	, _surf (0)
-	, _max_height (max_height)
-	, _cur_height (1)
+ProcessorEntry::PluginInlineDisplay::PluginInlineDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
+	: PluginDisplay (p, max_height)
+	, _entry (e)
 	, _scroll (false)
 {
-	set_name ("processor prefader");
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	_plug->DropReferences.connect (_death_connection, invalidator (*this), boost::bind (&PluginDisplay::plugin_going_away, this), gui_context());
-	_plug->QueueDraw.connect (_qdraw_connection, invalidator (*this),
-			boost::bind (&Gtk::Widget::queue_draw, this), gui_context ());
-
 	std::string postfix = string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
 
 	if (_plug->has_editor()) {
@@ -1588,15 +1579,9 @@ ProcessorEntry::PluginDisplay::PluginDisplay (ProcessorEntry& e, boost::shared_p
 	}
 }
 
-ProcessorEntry::PluginDisplay::~PluginDisplay ()
-{
-	if (_surf) {
-		cairo_surface_destroy (_surf);
-	}
-}
 
 bool
-ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
+ProcessorEntry::PluginInlineDisplay::on_button_press_event (GdkEventButton *ev)
 {
 	assert (_entry.processor ());
 
@@ -1623,14 +1608,8 @@ ProcessorEntry::PluginDisplay::on_button_press_event (GdkEventButton *ev)
 	return false;
 }
 
-bool
-ProcessorEntry::PluginDisplay::on_button_release_event (GdkEventButton *ev)
-{
-	return false;
-}
-
 void
-ProcessorEntry::PluginDisplay::on_size_request (Requisition* req)
+ProcessorEntry::PluginInlineDisplay::on_size_request (Requisition* req)
 {
 	req->width = 56;
 	req->height = _cur_height;
@@ -1638,7 +1617,7 @@ ProcessorEntry::PluginDisplay::on_size_request (Requisition* req)
 
 
 void
-ProcessorEntry::PluginDisplay::update_height_alloc (uint32_t inline_height)
+ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height)
 {
 	/* work-around scroll-bar + aspect ratio
 	 * show inline-view -> height changes -> scrollbar gets added
@@ -1667,105 +1646,8 @@ ProcessorEntry::PluginDisplay::update_height_alloc (uint32_t inline_height)
 	_scroll = sc;
 }
 
-uint32_t
-ProcessorEntry::PluginDisplay::render_inline (cairo_t* cr, uint32_t width)
-{
-	Plugin::Display_Image_Surface* dis = _plug->render_inline_display (width, _max_height);
-	if (!dis) {
-		return 0;
-	}
-
-	/* allocate a local image-surface,
-	 * We cannot re-use the data via cairo_image_surface_create_for_data(),
-	 * since pixman keeps a reference to it.
-	 * we'd need to hand over the data and ha cairo_surface_destroy to free it.
-	 * it might be possible to work around via cairo_surface_set_user_data().
-	 */
-	if (!_surf
-			|| dis->width !=  cairo_image_surface_get_width (_surf)
-			|| dis->height !=  cairo_image_surface_get_height (_surf)
-		 ) {
-		if (_surf) {
-			cairo_surface_destroy (_surf);
-		}
-		_surf = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, dis->width, dis->height);
-	}
-
-	if (cairo_image_surface_get_stride (_surf) == dis->stride) {
-		memcpy (cairo_image_surface_get_data (_surf), dis->data, dis->stride * dis->height);
-	} else {
-		unsigned char *src = dis->data;
-		unsigned char *dst = cairo_image_surface_get_data (_surf);
-		const int dst_stride =  cairo_image_surface_get_stride (_surf);
-		for (int y = 0; y < dis->height; ++y) {
-			memcpy (dst, src, dis->width * 4 /*ARGB32*/);
-			src += dis->stride;
-			dst += dst_stride;
-		}
-	}
-
-	cairo_surface_flush(_surf);
-	cairo_surface_mark_dirty(_surf);
-	const double xc = floor ((width - dis->width) * .5);
-	cairo_set_source_surface(cr, _surf, xc, 0);
-	cairo_paint (cr);
-
-	return dis->height;
-}
-
-bool
-ProcessorEntry::PluginDisplay::on_expose_event (GdkEventExpose* ev)
-{
-	Gtk::Allocation a = get_allocation();
-	double const width = a.get_width();
-	double const height = a.get_height();
-
-	cairo_t* cr = gdk_cairo_create (get_window()->gobj());
-	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	cairo_clip (cr);
-
-	Gdk::Color const bg = get_style()->get_bg (STATE_NORMAL);
-	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
-	cairo_rectangle (cr, 0, 0, width, height);
-	cairo_fill (cr);
-
-	cairo_save (cr);
-	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
-	cairo_clip (cr);
-	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-
-	uint32_t ht = render_inline (cr, width);
-	cairo_restore (cr);
-
-	if (ht == 0) {
-		hide ();
-		if (_cur_height != 1) {
-			_cur_height = 1;
-			queue_resize ();
-		}
-		cairo_destroy (cr);
-		return true;
-	} else {
-		update_height_alloc (ht);
-	}
-
-	bool failed = false;
-	std::string name = get_name();
-	Gtkmm2ext::Color fill_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
-
-	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
-	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
-	cairo_set_line_width(cr, 1.0);
-	Gtkmm2ext::set_source_rgb_a (cr, fill_color, 1.0);
-	cairo_stroke (cr);
-
-	cairo_destroy(cr);
-	return true;
-}
-
 ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
-	: PluginDisplay (e, p, max_height)
+	: PluginInlineDisplay (e, p, max_height)
 	, _luaproc (p)
 	, _lua_render_inline (0)
 {
