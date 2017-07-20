@@ -104,10 +104,15 @@ private:
 
 	Position _start_position;
 
-	bool _begin_dragging;
-
 	bool _move_dragging;
-	bool _moved;
+
+	//used for zooming
+	int _last_mx;
+	int _last_my;
+	int _last_dx;
+	int _last_dy;
+	int _last_y_delta;
+
 	std::pair<double, double> _view_rectangle_x;
 	std::pair<double, double> _view_rectangle_y;
 
@@ -117,9 +122,6 @@ private:
 
 	bool _zoom_trim_dragging;
 	Position _zoom_trim_position;
-
-	bool _zoom_dragging;
-	double _zoom_last_y;
 
 	bool _old_follow_playhead;
 	cairo_surface_t* _image;

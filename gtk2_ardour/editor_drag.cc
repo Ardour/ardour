@@ -4007,13 +4007,13 @@ CursorDrag::motion (GdkEvent* event, bool)
 		double dy = fabs(my - _last_my);
 
 		{
-			//do zooming in windowed "steps" so it feels more reversible
-			const int stepsize = 4;
+			//do zooming in windowed "steps" so it feels more reversible ?
+			const int stepsize = 2;  //stepsize ==1  means "trigger on every pixel of movement"
 			int y_delta = grab_y() - current_pointer_y();
 			y_delta = y_delta / stepsize;
 
 			//if all requirements are met, do the actual zoom
-			const double scale = 1.4;
+			const double scale = 1.2;
 			if ( (dy>dx) && (_last_dx ==0) && (y_delta != _last_y_delta) ) {
 				if ( _last_y_delta > y_delta ) {
 					_editor->temporal_zoom_step_mouse_focus_scale (true, scale);
