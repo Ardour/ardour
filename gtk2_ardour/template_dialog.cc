@@ -568,9 +568,11 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 	const string new_state_dir = Glib::build_filename (user_route_template_directory(), new_name);
 
 	if (adjusted) {
-		if (g_rename (old_state_dir.c_str(), new_state_dir.c_str()) != 0) {
-			error << string_compose (_("Could not rename state dir \"%1\" to \"%22\": %3"), old_state_dir, new_state_dir, strerror (errno)) << endmsg;
-			return;
+		if (g_file_test (old_state_dir.c_str(), G_FILE_TEST_EXISTS)) {
+			if (g_rename (old_state_dir.c_str(), new_state_dir.c_str()) != 0) {
+				error << string_compose (_("Could not rename state dir \"%1\" to \"%22\": %3"), old_state_dir, new_state_dir, strerror (errno)) << endmsg;
+				return;
+			}
 		}
 	}
 
