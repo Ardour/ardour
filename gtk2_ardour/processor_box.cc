@@ -1623,6 +1623,12 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 	_scroll = sc;
 }
 
+void
+ProcessorEntry::PluginInlineDisplay::display_frame (cairo_t* cr, double w, double h)
+{
+	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, w - 1, h + 1, 7);
+}
+
 ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, boost::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
 	: PluginInlineDisplay (e, p, max_height)
 	, _luaproc (p)
