@@ -2315,7 +2315,6 @@ private:
 	friend class ControlPointDrag;
 	friend class LineDrag;
 	friend class RubberbandSelectDrag;
-	friend class RulerZoomDrag;
 	friend class EditorRubberbandSelectDrag;
 	friend class TimeFXDrag;
 	friend class ScrubDrag;

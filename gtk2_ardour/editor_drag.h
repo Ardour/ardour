@@ -907,6 +907,12 @@ private:
 	EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
 	double _grab_zoom; ///< editor frames per unit when our grab started
+
+	//used for zooming
+	int _last_mx;
+	int _last_my;
+	int _last_dx;
+	int _last_y_delta;
 };
 
 /** Region fade-in drag */
@@ -1293,22 +1299,6 @@ public:
 private:
 	AudioRegionView* arv;
 	bool start;
-};
-
-class RulerZoomDrag : public Drag
-{
-public:
-	RulerZoomDrag (Editor*, ArdourCanvas::Item*);
-
-	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent*, bool);
-	void aborted (bool);
-
-	virtual bool allow_vertical_autoscroll () const {
-		return false;
-	}
-
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

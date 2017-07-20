@@ -1080,18 +1080,6 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 		return handled;
 	}
 
-	switch (event->type) {
-	case GDK_BUTTON_PRESS:
-		if (UIConfiguration::instance ().get_use_time_rulers_to_zoom_with_vertical_drag () &&
-		    Keyboard::no_modifier_keys_pressed (&event->button) && event->button.button == 1) {
-			_drags->set(new RulerZoomDrag(this, item), event);
-			return true;
-		}
-		break;
-	default:
-		break;
-	}
-
 	return typed_event (item, event, type);
 }
 

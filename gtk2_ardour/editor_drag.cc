@@ -3981,6 +3981,8 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	}
 
 	fake_locate (where.frame - snap_delta (event->button.state));
+	
+	_last_y_delta = 0;
 }
 
 void
@@ -3992,6 +3994,39 @@ CursorDrag::motion (GdkEvent* event, bool)
 
 	if (where.frame != last_pointer_frame()) {
 		fake_locate (where.frame - snap_delta (event->button.state));
+	}
+	
+	//maybe do zooming, too, if the option is enabled
+	if (UIConfiguration::instance ().get_use_time_rulers_to_zoom_with_vertical_drag () ) {
+	
+		//To avoid accidental zooming, the mouse must move exactly vertical, not diagonal, to trigger a zoom step
+		//we use screen coordinates for this, not canvas-based grab_x
+		double mx = event->button.x;
+		double dx = fabs(mx - _last_mx);
+		double my = event->button.y;
+		double dy = fabs(my - _last_my);
+
+		{
+			//do zooming in windowed "steps" so it feels more reversible
+			const int stepsize = 4;
+			int y_delta = grab_y() - current_pointer_y();
+			y_delta = y_delta / stepsize;
+
+			//if all requirements are met, do the actual zoom
+			const double scale = 1.4;
+			if ( (dy>dx) && (_last_dx ==0) && (y_delta != _last_y_delta) ) {
+				if ( _last_y_delta > y_delta ) {
+					_editor->temporal_zoom_step_mouse_focus_scale (true, scale);
+				} else {
+					_editor->temporal_zoom_step_mouse_focus_scale (false, scale);
+				}
+				_last_y_delta = y_delta;
+			}
+		}
+
+		_last_my = my;
+		_last_mx = mx;
+		_last_dx = dx;
 	}
 }
 
@@ -6963,58 +6998,5 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 
 void
 RegionCutDrag::aborted (bool)
-{
-}
-
-RulerZoomDrag::RulerZoomDrag (Editor* e, ArdourCanvas::Item* item)
-	: Drag (e, item, true)
-{
-}
-
-void
-RulerZoomDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
-{
-	Drag::start_grab (event, c);
-
-	framepos_t where = _editor->canvas_event_sample(event);
-
-	_editor->_dragging_playhead = true;
-
-	_editor->playhead_cursor->set_position (where);
-}
-
-void
-RulerZoomDrag::motion (GdkEvent* event, bool)
-{
-	framepos_t where = _editor->canvas_event_sample(event);
-
-	_editor->playhead_cursor->set_position (where);
-
-	const double movement_limit = 20.0;
-	const double scale = 1.12;
-	const double y_delta = last_pointer_y() - current_pointer_y();
-
-	if (y_delta > 0 && y_delta < movement_limit) {
-		_editor->temporal_zoom_step_mouse_focus_scale (true, scale);
-	} else if (y_delta < 0 && y_delta > -movement_limit) {
-		_editor->temporal_zoom_step_mouse_focus_scale (false, scale);
-	}
-}
-
-void
-RulerZoomDrag::finished (GdkEvent*, bool)
-{
-	_editor->_dragging_playhead = false;
-
-	Session* s = _editor->session ();
-	if (s) {
-		s->request_locate (_editor->playhead_cursor->current_frame (), _was_rolling);
-		_editor->_pending_locate_request = true;
-	}
-
-}
-
-void
-RulerZoomDrag::aborted (bool)
 {
 }
