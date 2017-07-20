@@ -1340,6 +1340,8 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	}
 
 	_editor.commit_reversible_selection_op ();
+
+	_editor.set_selected_mixer_strip (*this);
 }
 
 void
