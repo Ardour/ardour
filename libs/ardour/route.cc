@@ -4022,6 +4022,7 @@ Route::save_as_template (const string& path, const string& name)
 	PBD::Unwinder<std::string> uw (_session._template_state_dir, state_dir);
 
 	XMLNode& node (state (false));
+	node.set_property (X_("name"), name);
 
 	XMLTree tree;
 
