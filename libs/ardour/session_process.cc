@@ -32,6 +32,7 @@
 #include "ardour/butler.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/graph.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
@@ -235,43 +236,10 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 int
 Session::silent_process_routes (pframes_t nframes, bool& need_butler)
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	const framepos_t start_frame = _transport_frame;
-	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
-
-	VCAList v = _vca_manager->vcas ();
-	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-		(*i)->automation_run (start_frame, nframes);
-	}
-
-	_global_locate_pending = locate_pending();
-
-	if (_process_graph) {
-		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
-	} else {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-			int ret;
-
-			if ((*i)->is_auditioner()) {
-				continue;
-			}
-
-			bool b = false;
-
-			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, b)) < 0) {
-				stop_transport ();
-				return -1;
-			}
-
-			if (b) {
-				need_butler = true;
-			}
-		}
-	}
-
-	return 0;
+	DiskReader::set_no_disk_output (true);
+	int ret = process_routes (nframes, need_butler);
+	DiskReader::set_no_disk_output (false);
+	return ret;
 }
 
 void
