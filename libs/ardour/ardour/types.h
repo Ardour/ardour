@@ -194,7 +194,7 @@ namespace ARDOUR {
 	enum DiskIOPoint {
 		DiskIOPreFader,  /* after the trim control, but before other processors */
 		DiskIOPostFader, /* before the main outs, after other processors */
-		DiskIOCaustom,   /* up to the user. Caveat Emptor! */
+		DiskIOCustom,   /* up to the user. Caveat Emptor! */
 	};
 
 	enum MeterType {

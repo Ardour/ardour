@@ -190,6 +190,8 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
+	void set_disk_io_position (DiskIOPoint);
+
 	PBD::Signal0<void> FreezeChange;
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> SpeedChanged;
@@ -203,6 +205,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
 
 	MeterPoint    _saved_meter_point;
+	DiskIOPoint   _disk_io_point;
 	TrackMode     _mode;
 	bool          _needs_butler;
 	boost::shared_ptr<MonitorControl> _monitoring_control;
@@ -232,9 +235,9 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	virtual void set_state_part_two () = 0;
 
-	FreezeRecord          _freeze_record;
-	XMLNode*              pending_state;
-	bool                  _destructive;
+	FreezeRecord _freeze_record;
+	XMLNode*      pending_state;
+	bool         _destructive;
 
 	void maybe_declick (BufferSet&, framecnt_t, int);
 
@@ -256,6 +259,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 private:
 	void parameter_changed (std::string const & p);
+	void setup_invisible_processors_oh_children_of_mine (ProcessorList&);
 
 	std::string _diskstream_name;
 };
