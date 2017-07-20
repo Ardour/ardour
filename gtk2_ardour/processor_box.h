@@ -54,6 +54,7 @@
 #include "widgets/slider_controller.h"
 
 #include "plugin_interest.h"
+#include "plugin_display.h"
 #include "io_selector.h"
 #include "send_ui.h"
 #include "enums.h"
@@ -242,34 +243,20 @@ private:
 	void toggle_panner_link ();
 	void toggle_allow_feedback ();
 
-	class PluginDisplay : public Gtk::DrawingArea {
+	class PluginInlineDisplay : public PluginDisplay {
 	public:
-		PluginDisplay(ProcessorEntry&, boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
-		virtual ~PluginDisplay();
+		PluginInlineDisplay(ProcessorEntry&, boost::shared_ptr<ARDOUR::Plugin>, uint32_t max_height = 80);
+		~PluginInlineDisplay() {}
 	protected:
-		bool on_expose_event (GdkEventExpose *);
 		void on_size_request (Gtk::Requisition* req);
 		bool on_button_press_event (GdkEventButton *ev);
-		bool on_button_release_event (GdkEventButton *ev);
-
-		void plugin_going_away () {
-			_qdraw_connection.disconnect ();
-		}
-
 		void update_height_alloc (uint32_t inline_height);
-		virtual uint32_t render_inline (cairo_t *, uint32_t width);
 
 		ProcessorEntry& _entry;
-		boost::shared_ptr<ARDOUR::Plugin> _plug;
-		PBD::ScopedConnection _qdraw_connection;
-		PBD::ScopedConnection _death_connection;
-		cairo_surface_t* _surf;
-		uint32_t _max_height;
-		uint32_t _cur_height;
 		bool _scroll;
 	};
 
-	class LuaPluginDisplay : public PluginDisplay {
+	class LuaPluginDisplay : public PluginInlineDisplay {
 	public:
 		LuaPluginDisplay(ProcessorEntry&, boost::shared_ptr<ARDOUR::LuaProc>, uint32_t max_height = 80);
 		~LuaPluginDisplay();
