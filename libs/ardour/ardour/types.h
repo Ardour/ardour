@@ -191,6 +191,12 @@ namespace ARDOUR {
 		MeterCustom
 	};
 
+	enum DiskIOPoint {
+		DiskIOPreFader,  /* after the trim control, but before other processors */
+		DiskIOPostFader, /* before the main outs, after other processors */
+		DiskIOCaustom,   /* up to the user. Caveat Emptor! */
+	};
+
 	enum MeterType {
 		MeterMaxSignal = 0x0001,
 		MeterMaxPeak   = 0x0002,
