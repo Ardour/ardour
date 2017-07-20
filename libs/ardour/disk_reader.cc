@@ -44,6 +44,7 @@ PBD::Signal0<void> DiskReader::Underrun;
 Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
 framecnt_t DiskReader::midi_readahead = 4096;
+bool DiskReader::no_disk_output = false;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -289,7 +290,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			}
 		}
 
-		/* if monitoring disk but locating, put silence in the buffers */
+		/* if monitoring disk but locating put silence in the buffers */
 
 		if (still_locating && (ms == MonitoringDisk)) {
 			bufs.silence (playback_distance, 0);
@@ -380,7 +381,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			chaninfo->buf->increment_read_ptr (playback_distance);
 
-			if ((speed != 0.0) && (ms & MonitoringInput)) {
+			if (!no_disk_output && (speed != 0.0) && (ms & MonitoringInput)) {
 				/* mix the disk signal into the input signal (already in bufs) */
 				mix_buffers_no_gain (output.data(), disk_signal, speed == 0.0 ? nframes : playback_distance);
 			}
@@ -1464,4 +1465,17 @@ DiskReader::refill_midi ()
 	}
 
 	return ret;
+}
+
+void
+DiskReader::set_no_disk_output (bool yn)
+{
+	/* this MUST be called as part of the process call tree, before any
+	   disk readers are invoked. We use it when the session needs the
+	   transport (and thus effective read position for DiskReaders) to keep
+	   advancing as part of syncing up with a transport master, but we
+	   don't want any actual disk output yet because we are still not
+	   synced.
+	*/
+	no_disk_output = yn;
 }
