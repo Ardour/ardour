@@ -560,6 +560,7 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 		error << string_compose (_("Could not parse template file \"%1\"."), old_filepath) << endmsg;
 		return;
 	}
+	tree.root()->set_property (X_("name"), new_name);
 	tree.root()->children().front()->set_property (X_("name"), new_name);
 
 	const bool adjusted = adjust_plugin_paths (tree.root(), old_name, string (new_name));
