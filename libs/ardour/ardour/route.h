@@ -736,6 +736,8 @@ private:
 	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
+	virtual void setup_invisible_processors_oh_children_of_mine (ProcessorList&) {}
+
 	void unpan ();
 
 	void set_plugin_state_dir (boost::weak_ptr<Processor>, const std::string&);
