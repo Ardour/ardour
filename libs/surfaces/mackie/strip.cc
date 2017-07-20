@@ -1480,11 +1480,10 @@ void
 Strip::setup_eq_vpot (boost::shared_ptr<Stripable> r)
 {
 	boost::shared_ptr<AutomationControl> pc;
-
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
 	string pot_id;
 
 #ifdef MIXBUS
+	const uint32_t global_pos = _surface->mcp().global_index (*this);
 	int eq_band = -1;
 	std::string band_name;
 	if (r->is_input_strip ()) {
