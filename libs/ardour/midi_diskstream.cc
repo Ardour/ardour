@@ -1073,7 +1073,7 @@ MidiDiskstream::transport_stopped_wallclock (struct tm& /*when*/, time_t /*twhen
 				// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
 				i_am_the_modifier++;
-				_playlist->add_region (region, (*ci)->start + preroll_off);
+				_playlist->add_region (region, (*ci)->start + preroll_off, 1, non_layered());
 				i_am_the_modifier--;
 			}
 
