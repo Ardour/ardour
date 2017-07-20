@@ -4649,6 +4649,8 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_capturing_processor);
 	}
 
+	setup_invisible_processors_oh_children_of_mine (new_processors);
+
 	_processors = new_processors;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {

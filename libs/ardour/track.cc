@@ -55,6 +55,7 @@ using namespace PBD;
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
+	, _disk_io_point (DiskIOPreFader)
         , _mode (mode)
 	, _alignment_choice (Automatic)
 {
@@ -102,10 +103,9 @@ Track::init ()
 
         use_new_playlist ();
 
-        /* ordering here is important, and needs to be generally maintained */
-
-        add_processor (_disk_writer, PreFader);
-        add_processor (_disk_reader, PreFader);
+        /* disk writer and reader processors will be added when Route calls
+         * setup_invisible_processors_oh_children_of_mine ().
+         */
 
         boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
@@ -162,6 +162,7 @@ Track::state (bool full)
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
 	root.set_property (X_("saved-meter-point"), _saved_meter_point);
+	root.set_property (X_("disk-io-point"), _disk_io_point);
 	root.set_property (X_("alignment-choice"), _alignment_choice);
 
 	return root;
@@ -222,6 +223,10 @@ Track::set_state (const XMLNode& node, int version)
 
 	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
 		_saved_meter_point = _meter_point;
+	}
+
+	if (!node.get_property (X_("saved-meter-point"), _disk_io_point)) {
+		_disk_io_point = DiskIOPreFader;
 	}
 
 	AlignChoice ac;
@@ -1511,4 +1516,31 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->thaw ();
 	pl->set_capture_insertion_in_progress (false);
 	_session.add_command (new StatefulDiffCommand (pl));
+}
+
+#ifdef __clang__
+__attribute__((annotate("realtime")))
+#endif
+void
+Track::setup_invisible_processors_oh_children_of_mine (ProcessorList& new_processors)
+{
+	ProcessorList::iterator insert_pos;
+
+	switch (_disk_io_point) {
+	case DiskIOPreFader:
+		insert_pos = find (new_processors.begin(), new_processors.end(), _trim);
+		if (insert_pos != new_processors.end()) {
+			insert_pos = new_processors.insert (insert_pos, _disk_writer);
+			new_processors.insert (insert_pos, _disk_reader);
+		}
+		break;
+	case DiskIOPostFader:
+		insert_pos = find (new_processors.begin(), new_processors.end(), _main_outs);
+		if (insert_pos != new_processors.end()) {
+			insert_pos = new_processors.insert (insert_pos, _disk_writer);
+			new_processors.insert (insert_pos, _disk_reader);
+		}
+	case DiskIOCustom:
+		break;
+	}
 }
