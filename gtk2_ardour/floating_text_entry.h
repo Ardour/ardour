@@ -50,6 +50,7 @@ private:
 	void changed ();
 	void populate_popup (Gtk::Menu*);
 	void idle_delete_self ();
+	void disconect_signals ();
 
 	std::list<sigc::connection> _connections;
 

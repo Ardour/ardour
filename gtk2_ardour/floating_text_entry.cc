@@ -87,7 +87,8 @@ FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
 
 	entry.remove_modal_grab ();
 	if (entry_changed) {
-		use_text (entry.get_text (), 0);
+		disconect_signals ();
+		use_text (entry.get_text (), 0); /* EMIT SIGNAL */
 	}
 
 	idle_delete_self ();
@@ -108,7 +109,8 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 	Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::ptr_fun (gtk_main_do_event), gdk_event_copy ((GdkEvent*) ev)), false));
 
 	if (entry_changed) {
-		use_text (entry.get_text (), 0);
+		disconect_signals ();
+		use_text (entry.get_text (), 0); /* EMIT SIGNAL */
 	}
 
 	idle_delete_self ();
@@ -119,6 +121,7 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 void
 FloatingTextEntry::activated ()
 {
+	disconect_signals ();
 	use_text (entry.get_text(), 0); // EMIT SIGNAL
 	idle_delete_self ();
 }
@@ -151,11 +154,13 @@ FloatingTextEntry::key_release (GdkEventKey* ev)
 		 * generates a different ev->keyval, rather than setting
 		 * ev->state.
 		 */
+		disconect_signals ();
 		use_text (entry.get_text(), -1); // EMIT SIGNAL, move to prev
 		idle_delete_self ();
 		return true;
 
 	case GDK_Tab:
+		disconect_signals ();
 		use_text (entry.get_text(), 1); // EMIT SIGNAL, move to next
 		idle_delete_self ();
 		return true;
@@ -173,19 +178,40 @@ FloatingTextEntry::on_hide ()
 	entry.remove_modal_grab ();
 
 	/* No hide button is shown (no decoration on the window),
-	   so being hidden is equivalent to the Escape key or any other
-	   method of cancelling the edit.
-	*/
-
-	idle_delete_self ();
+	 * so being hidden is equivalent to the Escape key or any other
+	 * method of cancelling the edit.
+	 *
+	 * This is also used during disconect_signals() before calling
+	 * use_text (). see note below.
+	 *
+	 * If signals are already disconnected, idle-delete must be
+	 * in progress already.
+	 */
+	if (!_connections.empty ()) {
+		idle_delete_self ();
+	}
 	Gtk::Window::on_hide ();
+}
+
+void
+FloatingTextEntry::disconect_signals ()
+{
+	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
+		i->disconnect ();
+	}
+	/* the entry is floating on-top, emitting use_text()
+	 * may result in another dialog being shown (cannot rename track)
+	 * which would
+	 *  - be stacked below the floating text entry
+	 *  - return focus to the entry when closedA
+	 * so we hide the entry here.
+	 */
+	hide ();
 }
 
 void
 FloatingTextEntry::idle_delete_self ()
 {
-	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
-		i->disconnect ();
-	}
+	disconect_signals ();
 	delete_when_idle (this);
 }
