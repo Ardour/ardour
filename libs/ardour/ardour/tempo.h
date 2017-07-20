@@ -607,7 +607,7 @@ private:
 	void do_insert (MetricSection* section);
 
 	TempoSection* add_tempo_locked (const Tempo&, double pulse, double minute
-			       , PositionLockStyle pls, bool recompute, bool locked_to_meter = false);
+					, PositionLockStyle pls, bool recompute, bool locked_to_meter = false, bool clamped = false);
 
 	MeterSection* add_meter_locked (const Meter&, const Timecode::BBT_Time& where, framepos_t frame, PositionLockStyle pls, bool recompute);
 

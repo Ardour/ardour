@@ -1000,15 +1000,14 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 
 	if (!loc->tempo().initial()) {
 		if (loc->tempo().clamped()) {
-			items.push_back (MenuElem (_("Unlock Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+			items.push_back (MenuElem (_("Don't Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
 		} else {
-			items.push_back (MenuElem (_("Lock Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
 		}
+	}
 
-		TempoSection* prev_ts = _session->tempo_map().previous_tempo_section (&loc->tempo());
-		if (prev_ts && prev_ts->end_note_types_per_minute() != loc->tempo().note_types_per_minute()) {
-			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::continue_previous_tempo)));
-		}
+	if (loc->tempo().type() == TempoSection::Ramp) {
+		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
 	}
 
 	TempoSection* next_ts = _session->tempo_map().next_tempo_section (&loc->tempo());
@@ -1016,15 +1015,15 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
 
-	if (loc->tempo().type() == TempoSection::Ramp) {
-		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
-	}
-
 	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	} else if (can_remove) {
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	}
+
+	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
@@ -1502,35 +1501,6 @@ Editor::toggle_tempo_clamped ()
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
-	}
-}
-
-void
-Editor::continue_previous_tempo ()
-{
-	TempoMarker* tm;
-	MeterMarker* mm;
-	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
-
-	if (tm) {
-		TempoMap& tmap (_session->tempo_map());
-		TempoSection* tsp = &tm->tempo();
-		TempoSection* prev_ts = tmap.previous_tempo_section (&tm->tempo());
-		if (prev_ts) {
-			const Tempo tempo (prev_ts->end_note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
-			const double pulse = tsp->pulse();
-			const framepos_t frame = tsp->frame();
-			const PositionLockStyle pls = tsp->position_lock_style();
-
-			begin_reversible_command (_("continue previous tempo"));
-			XMLNode &before = _session->tempo_map().get_state();
-
-			tmap.replace_tempo (*tsp, tempo, pulse, frame, pls);
-
-			XMLNode &after = _session->tempo_map().get_state();
-			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
-			commit_reversible_command ();
-		}
 	}
 }
 
