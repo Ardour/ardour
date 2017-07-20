@@ -153,7 +153,7 @@ PluginDisplay::on_expose_event (GdkEventExpose* ev)
 
 	cairo_save (cr);
 	cairo_set_operator (cr, CAIRO_OPERATOR_SOURCE);
-	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
+	display_frame(cr, width, height);
 	cairo_clip (cr);
 	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 
@@ -176,12 +176,22 @@ PluginDisplay::on_expose_event (GdkEventExpose* ev)
 	std::string name = get_name();
 	Gtkmm2ext::Color fill_color = UIConfiguration::instance().color (string_compose ("%1: fill active", name), &failed);
 
-	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, width - 1, height + 1, 7);
+	display_frame(cr, width, height);
 	cairo_set_operator (cr, CAIRO_OPERATOR_OVER);
 	cairo_set_line_width(cr, 1.0);
-	Gtkmm2ext::set_source_rgb_a (cr, fill_color, 1.0);
+	if (failed) {
+		cairo_set_source_rgba (cr, .75, .75, .75, 1.0);
+	} else {
+		Gtkmm2ext::set_source_rgb_a (cr, fill_color, 1.0);
+	}
 	cairo_stroke (cr);
 
 	cairo_destroy(cr);
 	return true;
+}
+
+void
+PluginDisplay::display_frame (cairo_t* cr, double w, double h)
+{
+	cairo_rectangle (cr, 0.0, 0.0, w, h);
 }
