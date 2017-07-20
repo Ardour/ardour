@@ -49,6 +49,7 @@
 #include "widgets/tooltips.h"
 
 #include "plugin_ui.h"
+#include "plugin_display.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
 #include "gain_meter.h"
@@ -526,6 +527,12 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		output_table->show_all ();
 	} else {
 		delete output_table;
+	}
+
+	if (plugin->has_inline_display ()) {
+		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
+		pd->set_name("inside gui");
+		hpacker.pack_end (*pd, true, true);
 	}
 	show_all();
 

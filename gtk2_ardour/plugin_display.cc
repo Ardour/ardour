@@ -65,7 +65,7 @@ PluginDisplay::on_button_release_event (GdkEventButton *ev)
 void
 PluginDisplay::on_size_request (Gtk::Requisition* req)
 {
-	req->width = 56;
+	req->width = 300;
 	req->height = _cur_height;
 }
 
