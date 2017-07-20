@@ -903,6 +903,11 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 				/* de-select others */
 				_selection.set (strip);
 			}
+			PublicEditor& pe = PublicEditor::instance();
+			TimeAxisView* tav = pe.time_axis_view_from_stripable (strip->stripable());
+			if (tav) {
+				pe.set_selected_mixer_strip (*tav);
+			}
 		} else {
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				_selection.add (strip, true);
