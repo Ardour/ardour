@@ -70,7 +70,9 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 
 	assert (_name.find_first_of (':') == std::string::npos);
 
-	if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
+	if (!port_engine.available ()) {
+		_port_handle = 0; // created during ::reestablish() later
+	} else if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}

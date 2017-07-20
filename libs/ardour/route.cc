@@ -926,10 +926,6 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		loc = _processors.end ();
 	}
 
-	if (!AudioEngine::instance()->connected()) {
-		return 1;
-	}
-
 	if (others.empty()) {
 		return 0;
 	}

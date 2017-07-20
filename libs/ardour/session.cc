@@ -6826,6 +6826,9 @@ Session::update_latency (bool playback)
 	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _route_deletion_in_progress) {
 		return;
 	}
+	if (!_engine.running()) {
+		return;
+	}
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	framecnt_t max_latency = 0;
