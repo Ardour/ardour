@@ -58,6 +58,7 @@ setup_enum_writer ()
 	AlignStyle _AlignStyle;
 	AlignChoice _AlignChoice;
 	MeterPoint _MeterPoint;
+	DiskIOPoint _DiskIOPoint;
 	MeterType _MeterType;
 	TrackMode _TrackMode;
 	NoteMode _NoteMode;
@@ -131,12 +132,12 @@ setup_enum_writer ()
 	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
-    BufferingPreset _BufferingPreset;
+	BufferingPreset _BufferingPreset;
 	AutoReturnTarget _AutoReturnTarget;
 	PresentationInfo::Flag _PresentationInfo_Flag;
 	MusicalMode::Type mode;
 	MidiPortFlags _MidiPortFlags;
-
+		
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -194,6 +195,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (MeterOutput);
 	REGISTER_ENUM (MeterCustom);
 	REGISTER (_MeterPoint);
+
+	REGISTER_ENUM (DiskIOPreFader);
+	REGISTER_ENUM (DiskIOPostFader);
+	REGISTER_ENUM (DiskIOCustom);
+	REGISTER (_DiskIOPoint);
 
 	REGISTER_ENUM (MeterMaxSignal);
 	REGISTER_ENUM (MeterMaxPeak);
