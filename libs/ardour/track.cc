@@ -1575,4 +1575,6 @@ Track::set_disk_io_position (DiskIOPoint diop)
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		configure_processors (0);
 	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
