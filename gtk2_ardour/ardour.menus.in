@@ -14,12 +14,7 @@
       <menuitem action='SnapshotSwitch'/>
 #endif
       <menuitem action='SaveTemplate'/>
-      <menuitem action='ManageTemplates'/>
       <menuitem action='Archive'/>
-      <menu name='Metadata' action='Metadata'>
-        <menuitem action='EditMetadata'/>
-        <menuitem action='ImportMetadata'/>
-      </menu>
       <separator/>
       <menuitem action='AddTrackBus'/>
       <separator/>
@@ -37,14 +32,18 @@
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>
+      <separator/>
+      <menuitem action='toggle-session-options-editor'/>
+      <menu name='Metadata' action='Metadata'>
+        <menuitem action='EditMetadata'/>
+        <menuitem action='ImportMetadata'/>
+      </menu>
       <menu name='Cleanup' action='Cleanup'>
         <menuitem action='bring-into-session'/>
         <menuitem action='CleanupPeakFiles'/>
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
-      <separator/>
-      <menuitem action='toggle-session-options-editor'/>
 #ifdef __APPLE__
       <menuitem action='toggle-about'/>
 #endif
@@ -560,13 +559,11 @@
         <menuitem action='detach-preferences'/>
       </menu>
       <menuitem action='toggle-meterbridge'/>
-      <menuitem action='toggle-luawindow'/>
       <separator/>
 #ifndef MIXBUS
       <menuitem action='toggle-inspector'/>
 #endif
       <menuitem action='toggle-locations'/>
-      <menuitem action='toggle-key-editor'/>
 #ifndef MIXBUS
       <menuitem action='toggle-bundle-manager'/>
 #endif
@@ -579,18 +576,21 @@
 #endif
 
       <separator/>
-#ifdef MIXBUS
-      <menuitem action='license-manager'/>
-
-      <separator/>
-#endif
-
       <menuitem action='ToggleJadeo'/>
       <separator/>
 
-      <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-audio-connection-manager'/>
       <menuitem action='toggle-midi-connection-manager'/>
+      <separator/>
+      <menuitem action='toggle-luawindow'/>
+      <menuitem action='ManageTemplates'/>
+      <menuitem action='toggle-key-editor'/>
+      <separator/>
+#ifdef MIXBUS
+      <menuitem action='license-manager'/>
+      <separator/>
+#endif
+      <menuitem action='NewMIDITracer'/>
       <menuitem action='toggle-log-window'/>
       <separator/>
     </menu>
