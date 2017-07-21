@@ -271,6 +271,8 @@ public:
 	void comment_edited ();
 	bool ignore_comment_edit;
 
+	void set_disk_io_point (ARDOUR::DiskIOPoint);
+
 protected:
 
 	ArdourWindow*  comment_window;

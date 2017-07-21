@@ -552,6 +552,8 @@ private:
 	void for_selected_processors (void (ProcessorBox::*pmf)(boost::shared_ptr<ARDOUR::Processor>));
 	void get_selected_processors (ProcSelection&) const;
 
+	void set_disk_io_position (ARDOUR::DiskIOPoint);
+
 	bool can_cut() const;
 	bool stub_processor_selected() const;
 
@@ -562,6 +564,7 @@ private:
 	static Glib::RefPtr<Gtk::Action> delete_action;
 	static Glib::RefPtr<Gtk::Action> backspace_action;
 	static Glib::RefPtr<Gtk::Action> manage_pins_action;
+	static Glib::RefPtr<Gtk::Action> disk_io_action;
 	static Glib::RefPtr<Gtk::Action> edit_action;
 	static Glib::RefPtr<Gtk::Action> edit_generic_action;
 	void paste_processor_state (const XMLNodeList&, boost::shared_ptr<ARDOUR::Processor>);
@@ -595,6 +598,7 @@ private:
 	static void rb_deactivate_all ();
 	static void rb_ab_plugins ();
 	static void rb_manage_pins ();
+	static void rb_set_disk_io_position (ARDOUR::DiskIOPoint);
 	static void rb_edit ();
 	static void rb_edit_generic ();
 
