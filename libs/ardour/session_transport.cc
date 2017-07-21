@@ -48,6 +48,8 @@
 #include "ardour/slave.h"
 #include "ardour/tempo.h"
 #include "ardour/operations.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "pbd/i18n.h"
 
@@ -792,9 +794,15 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 
 	if (_engine.running()) {
 		PostTransportWork ptw = post_transport_work ();
+
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->nonrealtime_handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
 		}
+		VCAList v = _vca_manager->vcas ();
+		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+			(*i)->transport_stopped (_transport_frame);
+		}
+
 		update_latency_compensation ();
 	}
 
