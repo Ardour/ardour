@@ -113,6 +113,7 @@ RefPtr<Action> ProcessorBox::rename_action;
 RefPtr<Action> ProcessorBox::delete_action;
 RefPtr<Action> ProcessorBox::backspace_action;
 RefPtr<Action> ProcessorBox::manage_pins_action;
+RefPtr<Action> ProcessorBox::disk_io_action;
 RefPtr<Action> ProcessorBox::edit_action;
 RefPtr<Action> ProcessorBox::edit_generic_action;
 RefPtr<ActionGroup> ProcessorBox::processor_box_actions;
@@ -2105,7 +2106,6 @@ ProcessorBox::show_processor_menu (int arg)
 
 	/* Sensitise actions as approprioate */
 
-
 	const bool sensitive = !processor_display.selection().empty() && ! stub_processor_selected ();
 
 	paste_action->set_sensitive (!_p_selection.processors.empty());
@@ -2123,6 +2123,11 @@ ProcessorBox::show_processor_menu (int arg)
 	}
 
 	manage_pins_action->set_sensitive (pi != 0);
+	if (boost::dynamic_pointer_cast<Track>(_route)) {
+		disk_io_action->set_sensitive (true);
+	} else {
+		disk_io_action->set_sensitive (false);
+	}
 
 	/* allow editing with an Ardour-generated UI for plugin inserts with editors */
 	edit_action->set_sensitive (pi && pi->plugin()->has_editor ());
@@ -3367,6 +3372,14 @@ ProcessorBox::ab_plugins ()
 	ab_direction = !ab_direction;
 }
 
+void
+ProcessorBox::set_disk_io_position (DiskIOPoint diop)
+{
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_route);
+	if (t) {
+		t->set_disk_io_position (diop);
+	}
+}
 
 void
 ProcessorBox::clear_processors ()
@@ -3647,6 +3660,12 @@ ProcessorBox::register_actions ()
 		processor_box_actions, X_("manage-pins"), _("Pin Connections..."),
 		sigc::ptr_fun (ProcessorBox::rb_manage_pins));
 
+	/* Disk IO stuff */
+	disk_io_action = myactions.register_action (processor_box_actions, X_("disk-io-menu"), _("Disk I/O ..."));
+	myactions.register_action (processor_box_actions, X_("disk-io-prefader"), _("Pre-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPreFader));
+	myactions.register_action (processor_box_actions, X_("disk-io-postfader"), _("Post-Fader."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOPostFader));
+	myactions.register_action (processor_box_actions, X_("disk-io-custom"), _("Custom."), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_set_disk_io_position), DiskIOCustom));
+
 	/* show editors */
 	edit_action = myactions.register_action (
 		processor_box_actions, X_("edit"), _("Edit..."),
@@ -3677,6 +3696,16 @@ ProcessorBox::rb_ab_plugins ()
 	}
 
 	_current_processor_box->ab_plugins ();
+}
+
+void
+ProcessorBox::rb_set_disk_io_position (DiskIOPoint diop)
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->set_disk_io_position (diop);
 }
 
 void
