@@ -238,6 +238,10 @@ Route::init ()
 		_monitor_control->activate ();
 	}
 
+	/* give derived classes a chance to add processors before we configure */
+
+	add_processors_oh_children_of_mine ();
+
 	/* now that we have _meter, its safe to connect to this */
 
 	{
