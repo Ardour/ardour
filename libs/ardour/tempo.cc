@@ -4531,13 +4531,17 @@ TempoMap::fix_legacy_end_session ()
 			}
 
 			if (prev_t) {
-				if (prev_t->type() != TempoSection::Constant) {
+				if (prev_t->end_note_types_per_minute() < 0.0) {
 					prev_t->set_end_note_types_per_minute (t->note_types_per_minute());
 				}
 			}
 
 			prev_t = t;
 		}
+	}
+
+	if (prev_t) {
+		prev_t->set_end_note_types_per_minute (prev_t->note_types_per_minute());
 	}
 }
 
