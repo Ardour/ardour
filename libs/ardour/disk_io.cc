@@ -65,6 +65,7 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _frames_read_from_ringbuffer (0)
 {
 	midi_interpolation.add_channel_to (0,0);
+	set_display_to_user (false);
 }
 
 void
@@ -428,3 +429,4 @@ DiskIOProcessor::get_location_times(const Location* location,
 		*length = *end - *start;
 	}
 }
+
