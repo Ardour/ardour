@@ -454,7 +454,10 @@ Session::butler_transport_work ()
 			}
 			(*i)->non_realtime_locate (_transport_frame);
 		}
-
+		VCAList v = _vca_manager->vcas ();
+		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+			(*i)->transport_located (_transport_frame);
+		}
 	}
 
 	if (ptw & PostTransportAdjustCaptureBuffering) {
@@ -502,6 +505,10 @@ Session::butler_transport_work ()
 					g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 					goto restart;
 				}
+			}
+			VCAList v = _vca_manager->vcas ();
+			for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+				(*i)->transport_located (_transport_frame);
 			}
 		}
 	}
@@ -606,6 +613,12 @@ Session::non_realtime_locate ()
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (_transport_frame);
+		}
+	}
+	{
+		VCAList v = _vca_manager->vcas ();
+		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+			(*i)->transport_located (_transport_frame);
 		}
 	}
 
@@ -885,6 +898,13 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 				/* we will be back */
 				return;
 			}
+		}
+	}
+
+	{
+		VCAList v = _vca_manager->vcas ();
+		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+			(*i)->transport_located (_transport_frame);
 		}
 	}
 
