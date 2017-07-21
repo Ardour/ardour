@@ -90,8 +90,7 @@ typedef struct {
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
 	bool                     need_expose;
-	cairo_surface_t** display;
-	cairo_surface_t* cached_displays[DISP_CACHE_NUM];
+	cairo_surface_t* display[DISP_CACHE_NUM];
 	LV2_Inline_Display*      queue_draw;
 	uint32_t                 w, h;
 
@@ -133,10 +132,9 @@ instantiate(const LV2_Descriptor* descriptor,
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
 	acomp->v_lvl_out = -70.f;
-	for (cairo_surface_t** d = acomp->cached_displays; d < acomp->cached_displays + DISP_CACHE_NUM; d++) {
+	for (cairo_surface_t** d = acomp->display; d < acomp->display + DISP_CACHE_NUM; d++) {
 		*d = NULL;
 	}
-	acomp->display = acomp->cached_displays;
 #endif
 
 	return (LV2_Handle)acomp;
@@ -577,7 +575,7 @@ cleanup(LV2_Handle instance)
 {
 #ifdef LV2_EXTENDED
 	AComp* acomp = (AComp*)instance;
-	for (cairo_surface_t** d = acomp->cached_displays; d < acomp->cached_displays + DISP_CACHE_NUM; d++) {
+	for (cairo_surface_t** d = acomp->display; d < acomp->display + DISP_CACHE_NUM; d++) {
 		if (*d) {
 			cairo_surface_destroy (*d);
 		}
@@ -849,15 +847,13 @@ aquire_display(AComp* self, uint32_t w, uint32_t h)
 		const uint32_t w_ = cairo_image_surface_get_width (*current);
 		const uint32_t h_ = cairo_image_surface_get_height (*current);
 		if (w == w_ && h == h_) {
-			self->w = w_;
-			self->h = h_;
 			break;
 		}
-		++current;
-		if (*current && current == self->cached_displays + DISP_CACHE_NUM) {
+		if (*current && current == self->display + DISP_CACHE_NUM) {
 			cairo_surface_destroy (*current);
-			*current = 0;
+			*current = NULL;
 		}
+		++current;
 	}
 
 	if (!*current) {
