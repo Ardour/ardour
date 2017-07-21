@@ -1479,3 +1479,4 @@ DiskReader::set_no_disk_output (bool yn)
 	*/
 	no_disk_output = yn;
 }
+
