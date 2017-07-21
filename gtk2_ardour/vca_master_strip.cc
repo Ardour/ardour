@@ -112,16 +112,17 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	set_tooltip (vertical_button, _("Click to show slaves only")); /* tooltip updated dynamically */
 
 	global_vpacker.set_border_width (0);
-	global_vpacker.set_spacing (2);
+	global_vpacker.set_spacing (0);
 	gain_meter.set_spacing(4);
 
-	global_vpacker.pack_start (number_label, false, false);
-	global_vpacker.pack_start (hide_button, false, false);
-	global_vpacker.pack_start (vertical_button, true, true);
-	global_vpacker.pack_start (solo_mute_box, false, false);
-	global_vpacker.pack_start (gain_meter, false, false);
-	global_vpacker.pack_start (control_slave_ui, false, false);
-	global_vpacker.pack_start (bottom_padding, false, false);
+	global_vpacker.pack_start (number_label, false, false, 1);
+	global_vpacker.pack_start (hide_button, false, false, 1);
+	global_vpacker.pack_start (vertical_button, true, true, 1);
+	global_vpacker.pack_start (solo_mute_box, false, false, 1);
+	global_vpacker.pack_start (gain_meter, false, false, 1);
+	global_vpacker.pack_start (control_slave_ui, false, false, 1);
+	global_vpacker.pack_start (gain_meter.gain_automation_state_button, false, false, 1);
+	global_vpacker.pack_start (bottom_padding, false, false, 0);
 
 	global_frame.add (global_vpacker);
 	global_frame.set_shadow_type (Gtk::SHADOW_IN);
@@ -132,13 +133,13 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.show ();
 	global_frame.show ();
 	top_padding.show ();
-	bottom_padding.show ();
 	vertical_button.show ();
 	hide_button.show ();
 	number_label.show ();
 	gain_meter.show ();
 	solo_mute_box.show_all ();
 	control_slave_ui.show ();
+	gain_meter.gain_automation_state_button.show ();
 
 	/* force setting of visible selected status */
 
@@ -225,11 +226,9 @@ VCAMasterStrip::update_bottom_padding ()
 {
 	std::string viz = UIConfiguration::instance().get_mixer_strip_visibility ();
 
-	ArdourButton meter_point_button (_("pre"));
 	ArdourButton output_button (_("Output"));
 	ArdourButton comment_button (_("Comments"));
 
-	meter_point_button.set_name ("mixer strip button");
 	output_button.set_name ("mixer strip button");
 	comment_button.set_name ("generic button");
 
@@ -239,13 +238,7 @@ VCAMasterStrip::update_bottom_padding ()
 		control_slave_ui.show ();
 	}
 
-	int h = 1;
-	if (1) {
-		Gtk::Window window (WINDOW_TOPLEVEL);
-		window.add (meter_point_button);
-		Gtk::Requisition requisition(meter_point_button.size_request ());
-		h += requisition.height;
-	}
+	int h = 0;
 	if (viz.find ("Output") != std::string::npos) {
 		Gtk::Window window (WINDOW_TOPLEVEL);
 		window.add (output_button);
@@ -258,7 +251,13 @@ VCAMasterStrip::update_bottom_padding ()
 		Gtk::Requisition requisition(comment_button.size_request ());
 		h += requisition.height + 2;
 	}
-	bottom_padding.set_size_request (-1, h);
+	if (h <= 0) {
+		bottom_padding.set_size_request (-1, 1);
+		bottom_padding.hide ();
+	} else {
+		bottom_padding.set_size_request (-1, h);
+		bottom_padding.show ();
+	}
 }
 
 string
