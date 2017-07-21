@@ -737,6 +737,7 @@ private:
 
 	void setup_invisible_processors ();
 	virtual void setup_invisible_processors_oh_children_of_mine (ProcessorList&) {}
+	virtual void add_processors_oh_children_of_mine () {}
 
 	void unpan ();
 

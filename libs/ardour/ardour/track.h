@@ -261,6 +261,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 private:
 	void parameter_changed (std::string const & p);
 	void setup_invisible_processors_oh_children_of_mine (ProcessorList&);
+	void add_processors_oh_children_of_mine ();
 
 	std::string _diskstream_name;
 };
