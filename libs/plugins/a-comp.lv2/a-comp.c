@@ -38,6 +38,8 @@
 #define isfinite_local isfinite
 #endif
 
+#define DISP_CACHE_NUM 3
+
 typedef enum {
 	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
@@ -88,7 +90,8 @@ typedef struct {
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
 	bool                     need_expose;
-	cairo_surface_t*         display;
+	cairo_surface_t** display;
+	cairo_surface_t* cached_displays[DISP_CACHE_NUM];
 	LV2_Inline_Display*      queue_draw;
 	uint32_t                 w, h;
 
@@ -130,6 +133,10 @@ instantiate(const LV2_Descriptor* descriptor,
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
 	acomp->v_lvl_out = -70.f;
+	for (cairo_surface_t** d = acomp->cached_displays; d < acomp->cached_displays + DISP_CACHE_NUM; d++) {
+		*d = NULL;
+	}
+	acomp->display = acomp->cached_displays;
 #endif
 
 	return (LV2_Handle)acomp;
@@ -570,8 +577,10 @@ cleanup(LV2_Handle instance)
 {
 #ifdef LV2_EXTENDED
 	AComp* acomp = (AComp*)instance;
-	if (acomp->display) {
-		cairo_surface_destroy (acomp->display);
+	for (cairo_surface_t** d = acomp->cached_displays; d < acomp->cached_displays + DISP_CACHE_NUM; d++) {
+		if (*d) {
+			cairo_surface_destroy (*d);
+		}
 	}
 #endif
 
@@ -828,6 +837,42 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_stroke (cr);
 }
 
+static void
+aquire_display(AComp* self, uint32_t w, uint32_t h)
+{
+	cairo_surface_t** current = self->display;
+	while (1) {
+		if (!*current) {
+			break;
+		}
+
+		const uint32_t w_ = cairo_image_surface_get_width (*current);
+		const uint32_t h_ = cairo_image_surface_get_height (*current);
+		if (w == w_ && h == h_) {
+			self->w = w_;
+			self->h = h_;
+			break;
+		}
+		++current;
+		if (*current && current == self->cached_displays + DISP_CACHE_NUM) {
+			cairo_surface_destroy (*current);
+			*current = 0;
+		}
+	}
+
+	if (!*current) {
+		*current = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
+	}
+	cairo_surface_t* tmp = *current;
+	while (current != self->display) {
+		*current = *(current-1);
+		--current;
+	}
+	*self->display = tmp;
+	self->w = w;
+	self->h = h;
+}
+
 static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
@@ -838,14 +883,9 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 		h = 40;
 	}
 
-	if (!self->display || self->w != w || self->h != h) {
-		if (self->display) cairo_surface_destroy(self->display);
-		self->display = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, w, h);
-		self->w = w;
-		self->h = h;
-	}
+	aquire_display (self, w, h);
 
-	cairo_t* cr = cairo_create (self->display);
+	cairo_t* cr = cairo_create (*self->display);
 
 	if (w >= 200) {
 		render_inline_full (cr, self);
@@ -855,11 +895,11 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	cairo_destroy (cr);
 
-	cairo_surface_flush (self->display);
-	self->surf.width = cairo_image_surface_get_width (self->display);
-	self->surf.height = cairo_image_surface_get_height (self->display);
-	self->surf.stride = cairo_image_surface_get_stride (self->display);
-	self->surf.data = cairo_image_surface_get_data  (self->display);
+	cairo_surface_flush (*self->display);
+	self->surf.width = cairo_image_surface_get_width (*self->display);
+	self->surf.height = cairo_image_surface_get_height (*self->display);
+	self->surf.stride = cairo_image_surface_get_stride (*self->display);
+	self->surf.data = cairo_image_surface_get_data  (*self->display);
 
 	return &self->surf;
 }
