@@ -1522,25 +1522,51 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 __attribute__((annotate("realtime")))
 #endif
 void
-Track::setup_invisible_processors_oh_children_of_mine (ProcessorList& new_processors)
+Track::setup_invisible_processors_oh_children_of_mine (ProcessorList& processors)
 {
 	ProcessorList::iterator insert_pos;
 
 	switch (_disk_io_point) {
 	case DiskIOPreFader:
-		insert_pos = find (new_processors.begin(), new_processors.end(), _trim);
-		if (insert_pos != new_processors.end()) {
-			insert_pos = new_processors.insert (insert_pos, _disk_writer);
-			new_processors.insert (insert_pos, _disk_reader);
+		insert_pos = find (processors.begin(), processors.end(), _trim);
+		if (insert_pos != processors.end()) {
+			insert_pos = processors.insert (insert_pos, _disk_writer);
+			processors.insert (insert_pos, _disk_reader);
 		}
 		break;
 	case DiskIOPostFader:
-		insert_pos = find (new_processors.begin(), new_processors.end(), _main_outs);
-		if (insert_pos != new_processors.end()) {
-			insert_pos = new_processors.insert (insert_pos, _disk_writer);
-			new_processors.insert (insert_pos, _disk_reader);
+		insert_pos = find (processors.begin(), processors.end(), _main_outs);
+		if (insert_pos != processors.end()) {
+			insert_pos = processors.insert (insert_pos, _disk_writer);
+			processors.insert (insert_pos, _disk_reader);
 		}
 	case DiskIOCustom:
 		break;
+	}
+}
+
+void
+Track::set_disk_io_position (DiskIOPoint diop)
+{
+	bool display = false;
+
+	switch (diop) {
+	case DiskIOCustom:
+		display = true;
+		break;
+	default:
+		display = false;
+	}
+
+	_disk_writer->set_display_to_user (display);
+	_disk_reader->set_display_to_user (display);
+
+	const bool changed = (diop != _disk_io_point);
+
+	_disk_io_point = diop;
+
+	if (changed) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		configure_processors (0);
 	}
 }
