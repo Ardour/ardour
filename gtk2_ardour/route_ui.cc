@@ -2411,3 +2411,11 @@ RouteUI::stripable () const
 {
 	return _route;
 }
+
+void
+RouteUI::set_disk_io_point (DiskIOPoint diop)
+{
+	if (_route && is_track()) {
+		track()->set_disk_io_position (diop);
+	}
+}

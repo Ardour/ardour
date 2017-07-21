@@ -1719,6 +1719,18 @@ MixerStrip::build_route_ops_menu ()
 		i->signal_activate().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*_route, &Route::set_strict_io), !_route->strict_io())));
 	}
 
+	if (is_track()) {
+		items.push_back (SeparatorElem());
+
+		Gtk::Menu* dio_menu = new Menu;
+		MenuList& dio_items = dio_menu->items();
+		dio_items.push_back (MenuElem (_("Record Pre-Fader"), sigc::bind (sigc::mem_fun (*this, &RouteUI::set_disk_io_point), DiskIOPreFader)));
+		dio_items.push_back (MenuElem (_("Record Post-Fader"), sigc::bind (sigc::mem_fun (*this, &RouteUI::set_disk_io_point), DiskIOPostFader)));
+		dio_items.push_back (MenuElem (_("Custom Record+Playback Positions"), sigc::bind (sigc::mem_fun (*this, &RouteUI::set_disk_io_point), DiskIOCustom)));
+
+		items.push_back (MenuElem (_("Disk I/O..."), *dio_menu));
+	}
+
 	_plugin_insert_cnt = 0;
 	_route->foreach_processor (sigc::mem_fun (*this, &MixerStrip::help_count_plugins));
 	if (_plugin_insert_cnt > 0) {
