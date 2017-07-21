@@ -529,9 +529,8 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 		delete output_table;
 	}
 
-	if (plugin->has_inline_display ()) {
+	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
 		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
-		pd->set_name("inside gui");
 		hpacker.pack_end (*pd, true, true);
 	}
 	show_all();
@@ -551,6 +550,11 @@ GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
 		layout->attach (*cui, cui->x0, cui->x1, cui->y0, cui->y1, FILL, SHRINK, 2, 2);
 	}
 	hpacker.pack_start (*layout, true, true);
+
+	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
+		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
+		hpacker.pack_end (*pd, true, true);
+	}
 }
 
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
