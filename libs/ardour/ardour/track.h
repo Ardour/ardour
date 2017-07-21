@@ -191,6 +191,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	void adjust_capture_buffering ();
 
 	void set_disk_io_position (DiskIOPoint);
+	DiskIOPoint disk_io_point() const { return _disk_io_point; }
 
 	PBD::Signal0<void> FreezeChange;
 	PBD::Signal0<void> PlaylistChanged;
