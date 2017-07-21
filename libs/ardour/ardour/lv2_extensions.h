@@ -32,6 +32,7 @@
 #define LV2_INLINEDISPLAY_PREFIX LV2_INLINEDISPLAY_URI "#"
 #define LV2_INLINEDISPLAY__interface LV2_INLINEDISPLAY_PREFIX "interface"
 #define LV2_INLINEDISPLAY__queue_draw LV2_INLINEDISPLAY_PREFIX "queue_draw"
+#define LV2_INLINEDISPLAY__in_gui LV2_INLINEDISPLAY_PREFIX "in_gui"
 
 /** Opaque handle for LV2_Inline_Display::queue_draw() */
 typedef void* LV2_Inline_Display_Handle;

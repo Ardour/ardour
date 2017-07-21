@@ -171,6 +171,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	} Display_Image_Surface;
 
 	virtual bool has_inline_display () { return false; }
+	virtual bool inline_display_in_gui () { return false; }
 	virtual Display_Image_Surface* render_inline_display (uint32_t, uint32_t) { return NULL; }
 	PBD::Signal0<void> QueueDraw;
 

@@ -547,6 +547,8 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_display_interface = (const LV2_Inline_Display_Interface*)
 		extension_data (LV2_INLINEDISPLAY__interface);
 
+	_show_display_in_generic_gui = (bool) extension_data (LV2_INLINEDISPLAY__in_gui);
+
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
@@ -960,6 +962,11 @@ LV2Plugin::ui_is_resizable () const
 bool
 LV2Plugin::has_inline_display () {
 	return _display_interface ? true : false;
+}
+
+bool
+LV2Plugin::inline_display_in_gui () {
+	return _show_display_in_generic_gui;
 }
 
 Plugin::Display_Image_Surface*
