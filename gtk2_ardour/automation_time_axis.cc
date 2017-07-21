@@ -889,6 +889,19 @@ AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
 	line->add_visibility (AutomationLine::Line);
 }
 
+bool
+AutomationTimeAxisView::propagate_time_selection () const
+{
+	/* MIDI automation is part of the MIDI region. It is always
+	 * implicily selected with the parent, regardless of TAV selection
+	 */
+	if (_parameter.type() >= MidiCCAutomation &&
+	    _parameter.type() <= MidiChannelPressureAutomation) {
+		return true;
+	}
+	return false;
+}
+
 void
 AutomationTimeAxisView::entered()
 {

@@ -189,6 +189,8 @@ protected:
 	bool ignore_state_request;
 	bool ignore_mode_request;
 
+	bool propagate_time_selection () const;
+
 	void automation_state_changed ();
 
 	void set_interpolation (ARDOUR::AutomationList::InterpolationStyle);

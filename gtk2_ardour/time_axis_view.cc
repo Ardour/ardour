@@ -822,6 +822,9 @@ TimeAxisView::show_selection (TimeSelection& ts)
 
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->selected () && !(*i)->propagate_time_selection ()) {
+			continue;
+		}
 		(*i)->show_selection (ts);
 	}
 
@@ -879,6 +882,9 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 	show_selection (ts);
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->selected () && !(*i)->propagate_time_selection ()) {
+			continue;
+		}
 		(*i)->show_selection (ts);
 	}
 }

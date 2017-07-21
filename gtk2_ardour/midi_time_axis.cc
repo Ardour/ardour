@@ -1324,6 +1324,10 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		}
 
 		add_automation_child (param, track, show);
+		if (selected ()) {
+			reshow_selection (_editor.get_selection().time);
+		}
+
 		break;
 
 	case PanWidthAutomation:
