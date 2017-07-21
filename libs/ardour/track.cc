@@ -85,26 +85,10 @@ Track::init ()
                 return -1;
         }
 
-        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
-
-        if (_mode == Destructive && !Profile->get_trx()) {
-	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
-        } else if (_mode == NonLayered){
-	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
-        }
-
-        _disk_reader.reset (new DiskReader (_session, name(), dflags));
-        _disk_reader->set_block_size (_session.get_block_size ());
-        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
-
-        _disk_writer.reset (new DiskWriter (_session, name(), dflags));
-        _disk_writer->set_block_size (_session.get_block_size ());
-        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
-
         use_new_playlist ();
 
         /* disk writer and reader processors will be added when Route calls
-         * setup_invisible_processors_oh_children_of_mine ().
+         * add_processors_oh_children_of_mine ().
          */
 
         boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
@@ -128,6 +112,28 @@ Track::init ()
         _input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
 
         return 0;
+}
+
+void
+Track::add_processors_oh_children_of_mine ()
+{
+        cerr << name() << " ::apocom(), create DW + DR\n";
+
+        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
+
+        if (_mode == Destructive && !Profile->get_trx()) {
+	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
+        } else if (_mode == NonLayered){
+	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
+        }
+
+        _disk_reader.reset (new DiskReader (_session, name(), dflags));
+        _disk_reader->set_block_size (_session.get_block_size ());
+        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+
+        _disk_writer.reset (new DiskWriter (_session, name(), dflags));
+        _disk_writer->set_block_size (_session.get_block_size ());
+        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 }
 
 void
