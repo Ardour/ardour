@@ -199,6 +199,7 @@ FloatingTextEntry::disconect_signals ()
 	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
 		i->disconnect ();
 	}
+	 _connections.clear ();
 	/* the entry is floating on-top, emitting use_text()
 	 * may result in another dialog being shown (cannot rename track)
 	 * which would
