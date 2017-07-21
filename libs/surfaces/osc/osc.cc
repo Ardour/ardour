@@ -3006,7 +3006,7 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 
 	if (s) {
 		if (s->rec_enable_control()) {
-			s->rec_enable_control()->set_value (yn, PBD::Controllable::UseGroup);
+			s->rec_enable_control()->set_value (yn, PBD::Controllable::NoGroup);
 			if (s->rec_enable_control()->get_value()) {
 				return 0;
 			}
@@ -3058,7 +3058,7 @@ OSC::route_recsafe (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
 		if (s->rec_safe_control()) {
-			s->rec_safe_control()->set_value (yn, PBD::Controllable::UseGroup);
+			s->rec_safe_control()->set_value (yn, PBD::Controllable::NoGroup);
 			if (s->rec_safe_control()->get_value()) {
 				return 0;
 			}
