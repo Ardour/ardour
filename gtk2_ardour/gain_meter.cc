@@ -292,7 +292,12 @@ GainMeterBase::set_gain_astate (AutoState as)
 		ChangeGainAutomationState (as);
 		return;
 	}
-	_amp->set_parameter_automation_state (Evoral::Parameter (GainAutomation), as);
+	if (_amp) {
+		_amp->set_parameter_automation_state (Evoral::Parameter (GainAutomation), as);
+	} else if (_control) {
+		_control->set_automation_state (as);
+		_session->set_dirty ();
+	}
 }
 
 void
