@@ -341,6 +341,16 @@ void
 VCATimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 {
 	TimeAxisView::set_height (h, m);
+	if (height >= preset_height (HeightNormal)) {
+		drop_button.show ();
+		automation_button.show ();
+		gain_meter.get_gain_slider().show ();
+	} else {
+		drop_button.hide ();
+		automation_button.hide ();
+		gain_meter.get_gain_slider().hide ();
+	}
+
 	set_gui_property ("height", h);
 	_vca->gui_changed ("track_height", (void*) 0); /* EMIT SIGNAL */
 }
