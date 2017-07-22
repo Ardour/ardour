@@ -33,7 +33,7 @@ namespace ARDOUR {
 
 class AutomationControl;
 
-class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList {
+class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::SessionHandlePtr {
   public:
     static AutomationWatch& instance();
 
@@ -46,6 +46,7 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
 
   private:
     typedef std::set<boost::shared_ptr<ARDOUR::AutomationControl> > AutomationWatches;
+    typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, PBD::ScopedConnection> AutomationConnection;
 
     AutomationWatch ();
     ~AutomationWatch();
@@ -55,6 +56,7 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
     framepos_t              _last_time;
     bool                    _run_thread;
     AutomationWatches        automation_watches;
+    AutomationConnection     automation_connections;
     Glib::Threads::Mutex     automation_watch_lock;
     PBD::ScopedConnection    transport_connection;
 

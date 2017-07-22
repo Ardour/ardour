@@ -60,6 +60,7 @@ AutomationWatch::~AutomationWatch ()
 
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	automation_watches.clear ();
+	automation_connections.clear ();
 }
 
 void
@@ -67,7 +68,11 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation, astate = %2\n", ac->name(), enum_2_string (ac->automation_state())));
-	automation_watches.insert (ac);
+	std::pair<AutomationWatches::iterator, bool> r = automation_watches.insert (ac);
+
+	if (!r.second) {
+		return;
+	}
 
 	/* if an automation control is added here while the transport is
 	 * rolling, make sure that it knows that there is a write pass going
@@ -87,7 +92,7 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 	 */
 
 	boost::weak_ptr<AutomationControl> wac (ac);
-	ac->DropReferences.connect_same_thread (*this, boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
+	ac->DropReferences.connect_same_thread (automation_connections[ac], boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
 }
 
 void
@@ -108,6 +113,7 @@ AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> a
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
 	automation_watches.erase (ac);
+	automation_connections.erase (ac);
 	ac->list()->set_in_write_pass (false);
 }
 
@@ -128,6 +134,7 @@ AutomationWatch::transport_stop_automation_watches (framepos_t when)
 		*/
 
 		automation_watches.clear ();
+		automation_connections.clear ();
 	}
 
 	for (AutomationWatches::iterator i = tmp.begin(); i != tmp.end(); ++i) {
