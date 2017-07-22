@@ -84,7 +84,7 @@ public:
 	void clear_controls ();
 
 	virtual void non_realtime_locate (framepos_t now);
-	virtual void transport_stopped (framepos_t now);
+	virtual void non_realtime_transport_stop (framepos_t now, bool flush);
 
 	virtual void automation_run (framepos_t, pframes_t);
 

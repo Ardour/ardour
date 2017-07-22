@@ -809,11 +809,11 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		PostTransportWork ptw = post_transport_work ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->nonrealtime_handle_transport_stopped (abort, (ptw & PostTransportLocate), (!(ptw & PostTransportLocate) || pending_locate_flush));
+			(*i)->non_realtime_transport_stop (_transport_frame, !(ptw & PostTransportLocate) || pending_locate_flush);
 		}
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-			(*i)->transport_stopped (_transport_frame);
+			(*i)->non_realtime_transport_stop (_transport_frame, !(ptw & PostTransportLocate) || pending_locate_flush);
 		}
 
 		update_latency_compensation ();

@@ -77,7 +77,7 @@ public:
 
 	void flush_buffers (framecnt_t nframes);
 	void no_outs_cuz_we_no_monitor(bool);
-	void transport_stopped (framepos_t frame);
+	void non_realtime_transport_stop (framepos_t now, bool flush);
 	void realtime_locate ();
 
 	BufferSet& output_buffers() { return *_output_buffers; }

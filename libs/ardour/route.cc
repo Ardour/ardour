@@ -3300,22 +3300,20 @@ Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
 void
-Route::nonrealtime_handle_transport_stopped (bool /*abort_ignored*/, bool /*did_locate*/, bool can_flush_processors)
+Route::non_realtime_transport_stop (framepos_t now, bool flush)
 {
-	framepos_t now = _session.transport_frame();
-
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-		Automatable::transport_stopped (now);
+		Automatable::non_realtime_transport_stop (now, flush);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-			if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && can_flush_processors)) {
+			if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && flush)) {
 				(*i)->flush ();
 			}
 
-			(*i)->transport_stopped (now);
+			(*i)->non_realtime_transport_stop (now, flush);
 		}
 	}
 

@@ -134,7 +134,7 @@ public:
 
 	virtual bool can_record() { return false; }
 
-	virtual void nonrealtime_handle_transport_stopped (bool abort, bool did_locate, bool flush_processors);
+	virtual void non_realtime_transport_stop (framepos_t now, bool flush);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
 	virtual void non_realtime_locate (framepos_t);

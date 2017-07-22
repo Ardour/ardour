@@ -356,7 +356,7 @@ Automatable::non_realtime_locate (framepos_t now)
 }
 
 void
-Automatable::transport_stopped (framepos_t now)
+Automatable::non_realtime_transport_stop (framepos_t now, bool /*flush_processors*/)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationControl> c =

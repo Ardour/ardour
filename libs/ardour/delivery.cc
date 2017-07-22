@@ -498,12 +498,12 @@ Delivery::flush_buffers (framecnt_t nframes)
 }
 
 void
-Delivery::transport_stopped (framepos_t now)
+Delivery::non_realtime_transport_stop (framepos_t now, bool flush)
 {
-        Processor::transport_stopped (now);
+	Processor::non_realtime_transport_stop (now, flush);
 
 	if (_panshell) {
-		_panshell->pannable()->transport_stopped (now);
+		_panshell->pannable()->non_realtime_transport_stop (now, flush);
 	}
 
         if (_output) {
