@@ -174,7 +174,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	   as the longest automation label (see ::automation_state_changed()
 	   below). be sure to include a descender.
 	*/
-	auto_dropdown.set_sizing_text(_("Mgnual"));
+	auto_dropdown.set_sizing_text(_("Manual"));
 
 	hide_button.set_icon (ArdourIcon::CloseCross);
 	hide_button.set_tweaks(ArdourButton::TrackHeader);
