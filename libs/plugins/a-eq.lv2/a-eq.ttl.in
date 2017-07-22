@@ -21,6 +21,13 @@ unit:hz0
 	unit:render "%.0f Hz" ;
 	unit:symbol "Hz" .
 
+unit:db1
+	a unit:Unit ;
+	rdfs:label "decibels" ;
+	rdfs:label "dB" ;
+	unit:render "%4.1f dB" ;
+	unit:symbol "dB" .
+
 <urn:ardour:a-eq>
     a lv2:Plugin, doap:Project, lv2:FilterPlugin ;
 
@@ -49,7 +56,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -70,7 +77,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -101,7 +108,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -132,7 +139,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -163,7 +170,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
@@ -194,7 +201,7 @@ unit:hz0
         lv2:default 0.000000 ;
         lv2:minimum -20.000000 ;
         lv2:maximum 20.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db1 ;
     ],
     [
         a lv2:InputPort, lv2:ControlPort ;
