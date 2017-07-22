@@ -4771,6 +4771,8 @@ Route::the_instrument_unlocked () const
 void
 Route::non_realtime_locate (framepos_t pos)
 {
+	Automatable::non_realtime_locate (pos);
+
 	if (_pannable) {
 		_pannable->non_realtime_locate (pos);
 	}
