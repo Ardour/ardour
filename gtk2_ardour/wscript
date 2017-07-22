@@ -181,6 +181,7 @@ gtk2_ardour_sources = [
         'piano_roll_header.cc',
         'pingback.cc',
         'playlist_selector.cc',
+        'plugin_display.cc',
         'plugin_eq_gui.cc',
         'plugin_pin_dialog.cc',
         'plugin_setup_dialog.cc',
