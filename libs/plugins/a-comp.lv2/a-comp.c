@@ -750,16 +750,15 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
 	cairo_fill (cr);
 
-	cairo_set_line_width (cr, 1.0);
 
 	cairo_save (cr);
 
-	const float ht = 0.333f * h;
+	const float ht = 0.25f * h;
 
 	const float x1 = w*0.05;
 	const float wd = w - 2.0f*x1;
 
-	const float y1 = 0.1*h;
+	const float y1 = 0.17*h;
 	const float y2 = h - y1 - ht;
 
 	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
@@ -790,7 +789,9 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 
 	cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
 
-	const float tck = 0.25*ht;
+	const float tck = 0.33*ht;
+
+	cairo_set_line_width (cr, .5);
 
 	for (uint32_t d = 1; d < 7; ++d) {
 		const float x = x1 + (d * wd * (10.f / 70.f));
@@ -808,7 +809,7 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 		cairo_line_to (cr, x, y2+ht-tck);
 	}
 
-	cairo_set_line_width (cr, 2.0);
+	cairo_stroke (cr);
 
 	const float x_0dB = x1 + wd*(60.f/70.f);
 
@@ -818,6 +819,8 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_rectangle (cr, x1, y1, wd, ht);
 	cairo_rectangle (cr, x1, y2, wd, ht);
 	cairo_stroke (cr);
+
+	cairo_set_line_width (cr, 2.0);
 
 	// visualize threshold
 	const float tr = x1 + wd * (60.f+self->v_thresdb) / 70.f;
