@@ -506,25 +506,25 @@ Delivery::non_realtime_transport_stop (framepos_t now, bool flush)
 		_panshell->pannable()->non_realtime_transport_stop (now, flush);
 	}
 
-        if (_output) {
-                PortSet& ports (_output->ports());
+	if (_output) {
+		PortSet& ports (_output->ports());
 
-                for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        i->transport_stopped ();
-                }
-        }
+		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+			i->transport_stopped ();
+		}
+	}
 }
 
 void
 Delivery::realtime_locate ()
 {
 	if (_output) {
-                PortSet& ports (_output->ports());
+		PortSet& ports (_output->ports());
 
-                for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        i->realtime_locate ();
-                }
-        }
+		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+			i->realtime_locate ();
+		}
+	}
 }
 
 gain_t
@@ -544,38 +544,37 @@ Delivery::target_gain ()
 		return GAIN_COEFF_ZERO;
 	}
 
-        MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
+	MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
 
-        switch (_role) {
-        case Main:
-                mp = MuteMaster::Main;
-                break;
-        case Listen:
-                mp = MuteMaster::Listen;
-                break;
-        case Send:
-        case Insert:
-        case Aux:
-		if (_pre_fader) {
-			mp = MuteMaster::PreFader;
-		} else {
-			mp = MuteMaster::PostFader;
-		}
-                break;
-        }
+	switch (_role) {
+		case Main:
+			mp = MuteMaster::Main;
+			break;
+		case Listen:
+			mp = MuteMaster::Listen;
+			break;
+		case Send:
+		case Insert:
+		case Aux:
+			if (_pre_fader) {
+				mp = MuteMaster::PreFader;
+			} else {
+				mp = MuteMaster::PostFader;
+			}
+			break;
+	}
 
-        gain_t desired_gain = _mute_master->mute_gain_at (mp);
+	gain_t desired_gain = _mute_master->mute_gain_at (mp);
 
-        if (_role == Listen && _session.monitor_out() && !_session.listening()) {
+	if (_role == Listen && _session.monitor_out() && !_session.listening()) {
 
-                /* nobody is soloed, and this delivery is a listen-send to the
-                   control/monitor/listen bus, we should be silent since
-                   it gets its signal from the master out.
-                */
+		/* nobody is soloed, and this delivery is a listen-send to the
+		 * control/monitor/listen bus, we should be silent since
+		 * it gets its signal from the master out.
+		 */
 
-                desired_gain = GAIN_COEFF_ZERO;
-
-        }
+		desired_gain = GAIN_COEFF_ZERO;
+	}
 
 	return desired_gain;
 }
