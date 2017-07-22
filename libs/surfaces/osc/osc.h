@@ -134,6 +134,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
+		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
 		uint32_t expand;			// Used by /select/select
 		bool expand_enable;			// use expand instead of select
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
@@ -423,6 +424,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(jog,f);
 	PATH_CALLBACK1_MSG(jog_mode,f);
 	PATH_CALLBACK1_MSG(bank_delta,f);
+	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -595,6 +597,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int _set_bank (uint32_t bank_start, lo_address addr);
 	int bank_up (lo_message msg);
 	int bank_delta (float delta, lo_message msg);
+	int use_group (float value, lo_message msg);
 	int bank_down (lo_message msg);
 	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, uint32_t se_size, uint32_t pi_size, lo_message msg);
 	int set_surface_bank_size (uint32_t bs, lo_message msg);
