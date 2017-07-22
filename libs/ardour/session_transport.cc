@@ -456,7 +456,7 @@ Session::butler_transport_work ()
 		}
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-			(*i)->transport_located (_transport_frame);
+			(*i)->non_realtime_locate (_transport_frame);
 		}
 	}
 
@@ -508,7 +508,7 @@ Session::butler_transport_work ()
 			}
 			VCAList v = _vca_manager->vcas ();
 			for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-				(*i)->transport_located (_transport_frame);
+				(*i)->non_realtime_locate (_transport_frame);
 			}
 		}
 	}
@@ -618,7 +618,7 @@ Session::non_realtime_locate ()
 	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-			(*i)->transport_located (_transport_frame);
+			(*i)->non_realtime_locate (_transport_frame);
 		}
 	}
 
@@ -904,7 +904,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-			(*i)->transport_located (_transport_frame);
+			(*i)->non_realtime_locate (_transport_frame);
 		}
 	}
 

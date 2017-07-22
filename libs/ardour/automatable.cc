@@ -338,7 +338,7 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::transport_located (framepos_t now)
+Automatable::non_realtime_locate (framepos_t now)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 

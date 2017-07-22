@@ -4774,7 +4774,7 @@ void
 Route::non_realtime_locate (framepos_t pos)
 {
 	if (_pannable) {
-		_pannable->transport_located (pos);
+		_pannable->non_realtime_locate (pos);
 	}
 
 	if (_delayline.get()) {
@@ -4786,7 +4786,7 @@ Route::non_realtime_locate (framepos_t pos)
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			(*i)->transport_located (pos);
+			(*i)->non_realtime_locate (pos);
 		}
 	}
 	_roll_delay = _initial_delay;
