@@ -1056,14 +1056,21 @@ AutomationLine::reset ()
 		return;
 	}
 
+	/* TODO: abort any drags in progress, e.g. draging points while writing automation
+	 * (the control-point model, used by AutomationLine::drag_motion, will be invalid).
+	 *
+	 * Note: reset() may also be called from an aborted drag (LineDrag::aborted)
+	 * maybe abort in list_changed(), interpolation_changed() and ... ?
+	 * XXX
+	 */
+
 	alist->apply_to_points (*this, &AutomationLine::reset_callback);
 }
 
 void
 AutomationLine::queue_reset ()
 {
-	/* this must be called from the GUI thread
-	 */
+	/* this must be called from the GUI thread */
 
 	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
 		/* automation write pass ... defer to a timeout */
