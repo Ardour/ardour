@@ -27,6 +27,8 @@
 #define isnan_local std::isnan
 #endif
 
+#define GUARD_POINT_DELTA 64
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -488,13 +490,37 @@ ControlList::set_in_write_pass (bool yn, bool add_point, double when)
 	_in_write_pass = yn;
 
 	if (yn && add_point) {
-		add_guard_point (when);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		add_guard_point (when, 0);
 	}
 }
 
 void
-ControlList::add_guard_point (double when)
+ControlList::add_guard_point (double when, double offset)
 {
+	// caller needs to hold writer-lock
+	if (offset < 0 && when < offset) {
+		return;
+	}
+	assert (offset <= 0);
+
+	if (offset != 0) {
+		/* check if there are points between when + offset .. when */
+		ControlEvent cp (when + offset, 0.0);
+		iterator s;
+		iterator e;
+		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
+			cp.when = when;
+			e = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			if (s != e) {
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add_guard_point, none added, found event between %2 and %3\n", this, when - offset, when));
+				return;
+			}
+		}
+	}
+
+	when += offset;
+
 	ControlEvent cp (when, 0.0);
 	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
@@ -524,8 +550,7 @@ ControlList::add_guard_point (double when)
 		++most_recent_insert_iterator;
 	} else {
 
-		/* insert a new control event at the right spot
-		 */
+		/* insert a new control event at the right spot */
 
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n",
 								 this, eval_value, (*most_recent_insert_iterator)->when));
@@ -540,9 +565,12 @@ ControlList::add_guard_point (double when)
 		++most_recent_insert_iterator;
 	}
 
-	/* don't do this again till the next write pass */
-
-	new_write_pass = false;
+	/* don't do this again till the next write pass,
+	 * unless we're not in a write-pass (transport stopped)
+	 */
+	if (_in_write_pass) {
+		new_write_pass = false;
+	}
 }
 
 bool
@@ -554,48 +582,49 @@ ControlList::in_write_pass () const
 bool
 ControlList::editor_add (double when, double value, bool with_guard)
 {
-	/* this is for making changes from a graphical line editor
-	*/
+	/* this is for making changes from a graphical line editor */
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	ControlEvent cp (when, 0.0f);
-	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+		ControlEvent cp (when, 0.0f);
+		iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-	if (i != _events.end () && (*i)->when == when) {
-		return false;
-	}
-
-	/* clamp new value to allowed range */
-	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
-
-	if (_events.empty()) {
-
-		/* as long as the point we're adding is not at zero,
-		 * add an "anchor" point there.
-		 */
-
-		if (when >= 1) {
-			_events.insert (_events.end(), new ControlEvent (0, value));
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
+		if (i != _events.end () && (*i)->when == when) {
+			return false;
 		}
-	}
 
-	insert_position = when;
-	if (with_guard) {
-		if (when > 64) {
-			add_guard_point (when - 64);
+		/* clamp new value to allowed range */
+		value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
+
+		if (_events.empty()) {
+
+			/* as long as the point we're adding is not at zero,
+			 * add an "anchor" point there.
+			 */
+
+			if (when >= 1) {
+				_events.insert (_events.end(), new ControlEvent (0, value));
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
+			}
 		}
-		maybe_add_insert_guard (when);
+
+		insert_position = when;
+		if (with_guard) {
+			add_guard_point (when, -GUARD_POINT_DELTA);
+			maybe_add_insert_guard (when);
+			i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+		}
+
+		iterator result;
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
+		result = _events.insert (i, new ControlEvent (when, value));
+
+		if (i == result) {
+			return false;
+		}
+
+		mark_dirty ();
 	}
-
-	iterator result;
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
-	result = _events.insert (i, new ControlEvent (when, value));
-
-	if (i == result) {
-		return false;
-	}
-
-	mark_dirty ();
 	maybe_signal_changed ();
 
 	return true;
@@ -604,17 +633,18 @@ ControlList::editor_add (double when, double value, bool with_guard)
 void
 ControlList::maybe_add_insert_guard (double when)
 {
+	// caller needs to hold writer-lock
 	if (most_recent_insert_iterator != _events.end()) {
-		if ((*most_recent_insert_iterator)->when - when > 64) {
+		if ((*most_recent_insert_iterator)->when - when > GUARD_POINT_DELTA) {
 			/* Next control point is some distance from where our new point is
 			   going to go, so add a new point to avoid changing the shape of
 			   the line too much.  The insert iterator needs to point to the
 			   new control point so that our insert will happen correctly. */
-			most_recent_insert_iterator = _events.insert (
-				most_recent_insert_iterator,
-				new ControlEvent (when + 64, (*most_recent_insert_iterator)->value));
+			most_recent_insert_iterator = _events.insert ( most_recent_insert_iterator,
+					new ControlEvent (when + GUARD_POINT_DELTA, (*most_recent_insert_iterator)->value));
+
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert guard point @ %2 = %3\n",
-			                                                 this, when + 64,
+			                                                 this, when + GUARD_POINT_DELTA,
 			                                                 (*most_recent_insert_iterator)->value));
 		}
 	}
@@ -624,6 +654,7 @@ ControlList::maybe_add_insert_guard (double when)
 bool
 ControlList::maybe_insert_straight_line (double when, double value)
 {
+	// caller needs to hold writer-lock
 	if (_events.empty()) {
 		return false;
 	}
@@ -652,6 +683,7 @@ ControlList::maybe_insert_straight_line (double when, double value)
 ControlList::iterator
 ControlList::erase_from_iterator_to (iterator iter, double when)
 {
+	// caller needs to hold writer-lock
 	while (iter != _events.end()) {
 		if ((*iter)->when < when) {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*iter)->when));
@@ -706,7 +738,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 			/* first write in a write pass: add guard point if requested */
 
 			if (with_guards) {
-				add_guard_point (insert_position);
+				add_guard_point (insert_position, 0);
 				did_write_during_pass = true;
 			} else {
 				/* not adding a guard, but we need to set iterator appropriately */
@@ -725,9 +757,11 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				++most_recent_insert_iterator;
 			}
 
-			most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
 			if (with_guards) {
+				most_recent_insert_iterator = erase_from_iterator_to (most_recent_insert_iterator, when + GUARD_POINT_DELTA);
 				maybe_add_insert_guard (when);
+			} else {
+				most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
 			}
 
 		} else if (!_in_write_pass) {
@@ -793,20 +827,19 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				}
 
 				if (have_point1 && have_point2) {
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 no change: move existing at %3 to %2\n", this, when, (*most_recent_insert_iterator)->when));
 					(*most_recent_insert_iterator)->when = when;
 					done = true;
 				} else {
 					++most_recent_insert_iterator;
 				}
 			}
-			//done = maybe_insert_straight_line (when, value) || done;
-			/* if the transport is stopped, add guard points (?) */
-			if (!done && !_in_write_pass && when > 64) {
-				add_guard_point (when - 64);
-				maybe_add_insert_guard (when);
-			}
 
-			if (with_guards) {
+			/* if the transport is stopped, add guard points */
+			if (!done && !_in_write_pass) {
+				add_guard_point (when, -GUARD_POINT_DELTA);
+				maybe_add_insert_guard (when);
+			} else if (with_guards) {
 				maybe_add_insert_guard (when);
 			}
 

@@ -358,7 +358,7 @@ private:
 
 	void unlocked_remove_duplicates ();
 	void unlocked_invalidate_insert_iterator ();
-	void add_guard_point (double when);
+	void add_guard_point (double when, double offset);
 };
 
 } // namespace Evoral
