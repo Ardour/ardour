@@ -2066,7 +2066,7 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 		switch (dir) {
 		case 1: /* forwards */
 
-			if (pos > frame) {
+			if (pos > frame || (pos == 0 && frame == 0)) {
 				if ((distance = pos - frame) < closest) {
 					closest = distance;
 					ret = r;
