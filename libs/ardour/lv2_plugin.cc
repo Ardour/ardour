@@ -190,6 +190,7 @@ public:
 	LilvNode* auto_automation_control; // atom:supports
 	LilvNode* auto_automation_controlled; // lv2:portProperty
 	LilvNode* auto_automation_controller; // lv2:portProperty
+	LilvNode* inline_display_in_gui; // lv2:optionalFeature
 #endif
 
 private:
@@ -390,6 +391,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_was_activated          = false;
 	_has_state_interface    = false;
 	_can_write_automation   = false;
+	_inline_display_in_gui  = false;
 	_max_latency            = 0;
 	_current_latency        = 0;
 	_impl->block_length     = _session.get_block_size();
@@ -547,8 +549,6 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_display_interface = (const LV2_Inline_Display_Interface*)
 		extension_data (LV2_INLINEDISPLAY__interface);
 
-	_show_display_in_generic_gui = (bool) extension_data (LV2_INLINEDISPLAY__in_gui);
-
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
@@ -594,6 +594,9 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	}
 	if (lilv_nodes_contains (optional_features, _world.auto_can_write_automatation)) {
 		_can_write_automation = true;
+	}
+	if (lilv_nodes_contains (optional_features, _world.inline_display_in_gui)) {
+		_inline_display_in_gui = true;
 	}
 	lilv_nodes_free(optional_features);
 #endif
@@ -966,7 +969,7 @@ LV2Plugin::has_inline_display () {
 
 bool
 LV2Plugin::inline_display_in_gui () {
-	return _show_display_in_generic_gui;
+	return _inline_display_in_gui;
 }
 
 Plugin::Display_Image_Surface*
@@ -3163,6 +3166,7 @@ LV2World::LV2World()
 	auto_automation_control     = lilv_new_uri(world, LV2_AUTOMATE_URI__control);
 	auto_automation_controlled  = lilv_new_uri(world, LV2_AUTOMATE_URI__controlled);
 	auto_automation_controller  = lilv_new_uri(world, LV2_AUTOMATE_URI__controller);
+	inline_display_in_gui       = lilv_new_uri(world, LV2_INLINEDISPLAY__in_gui);
 #endif
 #ifdef HAVE_LV2_1_2_0
 	bufz_powerOf2BlockLength = lilv_new_uri(world, LV2_BUF_SIZE__powerOf2BlockLength);
