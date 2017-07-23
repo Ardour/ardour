@@ -98,6 +98,8 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 		knob->set_controllable (ac);
 		knob->set_name("processor control knob");
 		_widget = knob;
+		knob->StartGesture.connect(sigc::mem_fun(*this, &AutomationController::start_touch));
+		knob->StopGesture.connect(sigc::mem_fun(*this, &AutomationController::end_touch));
 	} else {
 		AutomationBarController* bar = manage(new AutomationBarController(ac, adj));
 

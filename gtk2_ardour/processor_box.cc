@@ -851,6 +851,9 @@ ProcessorEntry::Control::Control (boost::shared_ptr<AutomationControl> c, string
 		_adjustment.set_page_increment (largestep);
 		_slider.set_default_value (normal);
 
+		_slider.StartGesture.connect(sigc::mem_fun(*this, &Control::start_touch));
+		_slider.StopGesture.connect(sigc::mem_fun(*this, &Control::end_touch));
+
 		_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &Control::slider_adjusted));
 		c->Changed.connect (_connections, invalidator (*this), boost::bind (&Control::control_changed, this), gui_context ());
 		if (c->alist ()) {
@@ -899,6 +902,26 @@ ProcessorEntry::Control::slider_adjusted ()
 
 	c->set_value ( c->interface_to_internal(_adjustment.get_value ()) , Controllable::NoGroup);
 	set_tooltip ();
+}
+
+void
+ProcessorEntry::Control::start_touch ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+	c->start_touch (c->session().transport_frame());
+}
+
+void
+ProcessorEntry::Control::end_touch ()
+{
+	boost::shared_ptr<AutomationControl> c = _control.lock ();
+	if (!c) {
+		return;
+	}
+	c->stop_touch (true, c->session().transport_frame());
 }
 
 void

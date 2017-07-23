@@ -223,6 +223,9 @@ private:
 		std::string state_id () const;
 		void set_tooltip ();
 
+		void start_touch ();
+		void end_touch ();
+
 		boost::weak_ptr<ARDOUR::AutomationControl> _control;
 		/* things for a slider */
 		Gtk::Adjustment _adjustment;
