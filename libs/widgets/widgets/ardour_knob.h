@@ -91,6 +91,9 @@ public:
 
 	void color_handler ();
 
+	sigc::signal<void> StartGesture;
+	sigc::signal<void> StopGesture;
+
   protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);

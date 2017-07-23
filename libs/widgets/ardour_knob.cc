@@ -393,6 +393,8 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 	if (ev->type != GDK_BUTTON_PRESS) {
 		if (_grabbed) {
 			remove_modal_grab();
+			_grabbed = false;
+			StopGesture ();
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		}
 		return true;
@@ -410,6 +412,7 @@ ArdourKnob::on_button_press_event (GdkEventButton *ev)
 	_tooltip.start_drag();
 	add_modal_grab();
 	_grabbed = true;
+	StartGesture ();
 	gdk_pointer_grab(ev->window,false,
 			GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
 			NULL,NULL,ev->time);
@@ -421,6 +424,7 @@ ArdourKnob::on_button_release_event (GdkEventButton *ev)
 {
 	_tooltip.stop_drag();
 	_grabbed = false;
+	StopGesture ();
 	remove_modal_grab();
 	gdk_pointer_ungrab (GDK_CURRENT_TIME);
 
