@@ -14,7 +14,8 @@
     a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
     lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
-		lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#in_gui> ;
 
     lv2:port [
         a lv2:InputPort, lv2:ControlPort ;

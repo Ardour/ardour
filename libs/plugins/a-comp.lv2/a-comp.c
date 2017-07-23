@@ -876,9 +876,6 @@ extension_data(const char* uri)
 	if (!strcmp(uri, LV2_INLINEDISPLAY__interface)) {
 		return &display;
 	}
-	if (!strcmp(uri, LV2_INLINEDISPLAY__in_gui)) {
-		return &display;
-	}
 #endif
 	return NULL;
 }

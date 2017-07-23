@@ -278,7 +278,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 #ifdef LV2_EXTENDED
 	const LV2_Inline_Display_Interface* _display_interface;
-	bool _show_display_in_generic_gui;
+	bool _inline_display_in_gui;
 	const LV2_Midnam_Interface* _midname_interface;
 #endif
 

@@ -32,7 +32,8 @@ unit:db1
     a lv2:Plugin, doap:Project, lv2:FilterPlugin ;
 
     lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
-		lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#in_gui> ;
 
     lv2:requiredFeature <http://lv2plug.in/ns/ext/options#options> ,
                         <http://lv2plug.in/ns/ext/urid#map> ;
