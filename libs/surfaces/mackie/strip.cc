@@ -799,7 +799,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 	} else {
 
 		_fader->set_in_use (false);
-		_fader->stop_touch (_surface->mcp().transport_frame(), true);
+		_fader->stop_touch (_surface->mcp().transport_frame());
 
 	}
 }
@@ -949,7 +949,7 @@ Strip::handle_fader_touch (Fader& fader, bool touch_on)
 	if (touch_on) {
 		fader.start_touch (_surface->mcp().transport_frame());
 	} else {
-		fader.stop_touch (_surface->mcp().transport_frame(), false);
+		fader.stop_touch (_surface->mcp().transport_frame());
 	}
 }
 

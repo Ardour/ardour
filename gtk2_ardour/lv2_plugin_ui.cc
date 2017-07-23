@@ -105,7 +105,7 @@ LV2PluginUI::touch(void*    controller,
 	if (grabbed) {
 		control->start_touch(control->session().transport_frame());
 	} else {
-		control->stop_touch(false, control->session().transport_frame());
+		control->stop_touch(control->session().transport_frame());
 	}
 }
 

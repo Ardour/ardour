@@ -301,7 +301,7 @@ FP8Strip::midi_touch (bool t)
 			ac->start_touch (ac->session().transport_frame());
 		}
 	} else {
-		ac->stop_touch (true, ac->session().transport_frame());
+		ac->stop_touch (ac->session().transport_frame());
 	}
 	return true;
 }

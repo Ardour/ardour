@@ -364,7 +364,7 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	    boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 	    if (gain) {
 	      framepos_t now = session->engine().sample_time();
-	      gain->stop_touch (true, now);
+	      gain->stop_touch (now);
 	    }
 	  }
 	  break;

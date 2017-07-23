@@ -3078,7 +3078,7 @@ PluginInsert::end_touch (uint32_t param_id)
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
 	if (ac) {
 		// ToDo subtract _plugin_signal_latency  from audible_frame() when rolling, assert > 0
-		ac->stop_touch (true, session().audible_frame());
+		ac->stop_touch (session().audible_frame());
 	}
 }
 

@@ -852,7 +852,7 @@ MackieControlProtocol::master_fader_touch_release (Mackie::Button &)
 	Fader* master_fader = _master_surface->master_fader();
 
 	master_fader->set_in_use (false);
-	master_fader->stop_touch (transport_frame(), true);
+	master_fader->stop_touch (transport_frame());
 
 	return none;
 }

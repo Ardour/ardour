@@ -352,7 +352,7 @@ PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
 	if (!ac) {
 		return;
 	}
-	ac->stop_touch (false, ac->session().transport_frame());
+	ac->stop_touch (ac->session().transport_frame());
 }
 
 bool

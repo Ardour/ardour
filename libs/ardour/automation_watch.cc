@@ -138,7 +138,7 @@ AutomationWatch::transport_stop_automation_watches (framepos_t when)
 	}
 
 	for (AutomationWatches::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-		(*i)->stop_touch (true, when);
+		(*i)->stop_touch (when);
 	}
 }
 

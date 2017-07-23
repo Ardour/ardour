@@ -737,7 +737,7 @@ GainMeterBase::amp_start_touch ()
 void
 GainMeterBase::amp_stop_touch ()
 {
-	_control->stop_touch (false, _control->session().transport_frame());
+	_control->stop_touch (_control->session().transport_frame());
 	effective_gain_display ();
 }
 

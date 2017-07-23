@@ -150,14 +150,14 @@ Pannable::start_touch (double when)
 }
 
 void
-Pannable::stop_touch (bool mark, double when)
+Pannable::stop_touch (double when)
 {
 	const Controls& c (controls());
 
 	for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
 		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
 		if (ac) {
-			ac->alist()->stop_touch (mark, when);
+			ac->alist()->stop_touch (when);
 		}
 	}
 	g_atomic_int_set (&_touching, 0);

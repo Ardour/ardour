@@ -74,7 +74,7 @@ public:
 	void set_value (float val, PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup);
 
 	virtual void start_touch (double when);
-	virtual void stop_touch (bool mark, double when);
+	virtual void stop_touch (double when);
 
   protected:
 	boost::shared_ptr<ARDOUR::AutomationControl> normal_ac;

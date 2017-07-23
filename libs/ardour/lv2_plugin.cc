@@ -2811,7 +2811,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 								AutomationCtrlPtr c = get_automation_control (p);
 								DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("End Touch p: %1\n", p));
 								if (c) {
-									c->ac->stop_touch (true, std::max ((framepos_t)0, start - _current_latency));
+									c->ac->stop_touch (std::max ((framepos_t)0, start - _current_latency));
 								}
 							}
 						}

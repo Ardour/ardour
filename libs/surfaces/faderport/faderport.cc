@@ -379,7 +379,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 				if (tb->value) {
 					gain->start_touch (now);
 				} else {
-					gain->stop_touch (true, now);
+					gain->stop_touch (now);
 				}
 			}
 		}

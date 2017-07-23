@@ -2838,7 +2838,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 				ret = 0;
 			} else {
 				// end touch
-				control->stop_touch (true, control->session().transport_frame());
+				control->stop_touch (control->session().transport_frame());
 				ret = 0;
 			}
 			// just in case some crazy surface starts sending control values before touch
@@ -4844,7 +4844,7 @@ OSC::periodic (void)
 		if (!(*x).second) {
 			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
 			// turn touch off
-			ctrl->stop_touch (true, ctrl->session().transport_frame());
+			ctrl->stop_touch (ctrl->session().transport_frame());
 			_touch_timeout.erase (x++);
 		} else {
 			x++;

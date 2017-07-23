@@ -921,7 +921,7 @@ ProcessorEntry::Control::end_touch ()
 	if (!c) {
 		return;
 	}
-	c->stop_touch (true, c->session().transport_frame());
+	c->stop_touch (c->session().transport_frame());
 }
 
 void

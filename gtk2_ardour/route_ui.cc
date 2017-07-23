@@ -531,7 +531,7 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 		_mute_release = 0;
 	}
 
-	_route->mute_control()->stop_touch (false, _session->audible_frame ());
+	_route->mute_control()->stop_touch (_session->audible_frame ());
 
 	return false;
 }

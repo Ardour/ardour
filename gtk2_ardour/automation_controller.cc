@@ -200,20 +200,7 @@ AutomationController::start_touch()
 void
 AutomationController::end_touch ()
 {
-	if (_controllable->automation_state() == Touch) {
-
-		bool mark = false;
-		double when = 0;
-
-		if (_controllable->session().transport_rolling()) {
-			mark = true;
-			when = _controllable->session().transport_frame();
-		}
-
-		_controllable->stop_touch (mark, when);
-	} else {
-		_controllable->stop_touch (false, _controllable->session().transport_frame());
-	}
+	_controllable->stop_touch (_controllable->session().transport_frame());
 }
 
 bool

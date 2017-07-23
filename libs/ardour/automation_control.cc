@@ -291,17 +291,16 @@ AutomationControl::start_touch(double when)
 }
 
 void
-AutomationControl::stop_touch(bool mark, double when)
+AutomationControl::stop_touch(double when)
 {
 	if (!_list) return;
 	if (touching()) {
 		set_touching (false);
 
 		if (alist()->automation_state() == Touch) {
-			alist()->stop_touch (mark, when);
+			alist()->stop_touch (when);
 			if (!_desc.toggled) {
 				AutomationWatch::instance().remove_automation_watch (shared_from_this());
-
 			}
 		}
 	}

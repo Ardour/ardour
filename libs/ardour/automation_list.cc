@@ -257,7 +257,7 @@ AutomationList::start_touch (double when)
 }
 
 void
-AutomationList::stop_touch (bool mark, double)
+AutomationList::stop_touch (double)
 {
 	if (g_atomic_int_get (&_touching) == 0) {
 		/* this touch has already been stopped (probably by Automatable::transport_stopped),
@@ -267,16 +267,6 @@ AutomationList::stop_touch (bool mark, double)
 	}
 
 	g_atomic_int_set (&_touching, 0);
-
-        if (_state == Touch) {
-
-                if (mark) {
-
-			/* XXX need to mark the last added point with the
-			 * current time
-			 */
-                }
-        }
 }
 
 /* _before may be owned by the undo stack,

@@ -572,7 +572,7 @@ TrackMixLayout::strip_vpot_touch (int n, bool touching)
 		if (touching) {
 			ac->start_touch (session.audible_frame());
 		} else {
-			ac->stop_touch (true, session.audible_frame());
+			ac->stop_touch (session.audible_frame());
 		}
 	}
 }
