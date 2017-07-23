@@ -35,8 +35,7 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-// used for low-pass filter denormal protection
-#define GAIN_COEFF_TINY (1e-10) // -200dB
+#define GAIN_COEFF_DELTA (1e-5)
 
 Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<GainControl> gc, bool control_midi_also)
 	: Processor(s, "Amp")
@@ -103,9 +102,8 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			}
 		}
 
-
-		const double a = 156.825 / _session.nominal_frame_rate(); // 25 Hz LPF; see Amp::apply_gain for details
-		double lpf = _current_gain;
+		const gain_t a = 156.825f / (gain_t)_session.nominal_frame_rate(); // 25 Hz LPF; see Amp::apply_gain for details
+		gain_t lpf = _current_gain;
 
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 			Sample* const sp = i->data();
@@ -116,7 +114,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			}
 		}
 
-		if (fabs (lpf) < GAIN_COEFF_TINY) {
+		if (fabsf (lpf) < GAIN_COEFF_SMALL) {
 			_current_gain = GAIN_COEFF_ZERO;
 		} else {
 			_current_gain = lpf;
@@ -124,20 +122,20 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 
 	} else { /* manual (scalar) gain */
 
-		gain_t const dg = _gain_control->get_value();
+		gain_t const target_gain = _gain_control->get_value();
 
-		if (_current_gain != dg) {
+		if (fabsf (_current_gain - target_gain) >= GAIN_COEFF_DELTA) {
 
-			_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, dg, _midi_amp);
+			_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, target_gain, _midi_amp);
 
 			/* see note in PluginInsert::connect_and_run ()
 			 * set_value_unchecked() won't emit a signal since the value is effectively unchanged
 			 */
 			_gain_control->Changed (false, PBD::Controllable::NoGroup);
 
-		} else if (_current_gain != GAIN_COEFF_UNITY) {
+		} else if (target_gain != GAIN_COEFF_UNITY) {
 
-			/* gain has not changed, but its non-unity */
+			_current_gain = target_gain;
 
 			if (_midi_amp) {
 				/* don't Trim midi velocity -- only relevant for Midi on Audio tracks */
@@ -157,6 +155,9 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 				apply_gain_to_buffer (i->data(), nframes, _current_gain);
 			}
+		} else {
+			/* unity target gain */
+			_current_gain = target_gain;
 		}
 	}
 
@@ -166,7 +167,7 @@ Amp::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/,
 gain_t
 Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target, bool midi_amp)
 {
-        /** Apply a (potentially) declicked gain to the buffers of @a bufs */
+	/** Apply a (potentially) declicked gain to the buffers of @a bufs */
 	gain_t rv = target;
 
 	if (nframes == 0 || bufs.count().n_total() == 0) {
@@ -211,7 +212,7 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 	/* Low pass filter coefficient: 1.0 - e^(-2.0 * π * f / 48000) f in Hz.
 	 * for f << SR,  approx a ~= 6.2 * f / SR;
 	 */
-	const double a = 156.825 / sample_rate; // 25 Hz LPF
+	const gain_t a = 156.825f / (gain_t)sample_rate; // 25 Hz LPF
 
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
 		Sample* const buffer = i->data();
@@ -225,8 +226,7 @@ Amp::apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, ga
 			rv = lpf;
 		}
 	}
-	if (fabsf (rv - target) < GAIN_COEFF_TINY) return target;
-	if (fabsf (rv) < GAIN_COEFF_TINY) return GAIN_COEFF_ZERO;
+	if (fabsf (rv - target) < GAIN_COEFF_DELTA) return target;
 	return rv;
 }
 
@@ -244,11 +244,11 @@ Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 	if (dir < 0) {
 		/* fade out: remove more and more of delta from initial */
 		delta = -1.0;
-                initial = GAIN_COEFF_UNITY;
+		initial = GAIN_COEFF_UNITY;
 	} else {
 		/* fade in: add more and more of delta from initial */
 		delta = 1.0;
-                initial = GAIN_COEFF_ZERO;
+		initial = GAIN_COEFF_ZERO;
 	}
 
 	/* Audio Gain */
@@ -265,7 +265,7 @@ Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 		/* now ensure the rest of the buffer has the target value applied, if necessary. */
 		if (declick != nframes) {
 			if (dir < 0) {
-                                memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
+				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
 			}
 		}
 	}
@@ -275,7 +275,7 @@ Amp::declick (BufferSet& bufs, framecnt_t nframes, int dir)
 gain_t
 Amp::apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target)
 {
-        /* Apply a (potentially) declicked gain to the contents of @a buf
+	/* Apply a (potentially) declicked gain to the contents of @a buf
 	 * -- used by MonitorProcessor::run()
 	 */
 
@@ -289,17 +289,16 @@ Amp::apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, g
 		return target;
 	}
 
-        Sample* const buffer = buf.data();
-	const double a = 156.825 / sample_rate; // 25 Hz LPF, see [other] Amp::apply_gain() above for details
+	Sample* const buffer = buf.data();
+	const gain_t a = 156.825f / (gain_t)sample_rate; // 25 Hz LPF, see [other] Amp::apply_gain() above for details
 
-	double lpf = initial;
-        for (pframes_t nx = 0; nx < nframes; ++nx) {
-                buffer[nx] *= lpf;
+	gain_t lpf = initial;
+	for (pframes_t nx = 0; nx < nframes; ++nx) {
+		buffer[nx] *= lpf;
 		lpf += a * (target - lpf);
-        }
+	}
 
-	if (fabs (lpf - target) < GAIN_COEFF_TINY) return target;
-	if (fabs (lpf) < GAIN_COEFF_TINY) return GAIN_COEFF_ZERO;
+	if (fabsf (lpf - target) < GAIN_COEFF_DELTA) return target;
 	return lpf;
 }
 
@@ -352,9 +351,9 @@ void
 Amp::apply_simple_gain (AudioBuffer& buf, framecnt_t nframes, gain_t target)
 {
 	if (fabsf (target) < GAIN_COEFF_SMALL) {
-                memset (buf.data(), 0, sizeof (Sample) * nframes);
+		memset (buf.data(), 0, sizeof (Sample) * nframes);
 	} else if (target != GAIN_COEFF_UNITY) {
-                apply_gain_to_buffer (buf.data(), nframes, target);
+		apply_gain_to_buffer (buf.data(), nframes, target);
 	}
 }
 
@@ -419,7 +418,6 @@ Amp::visible() const
  *  gain automationc curves.  Must be called before setup_gain_automation,
  *  and must be called with process lock held.
  */
-
 void
 Amp::set_gain_automation_buffer (gain_t* g)
 {
