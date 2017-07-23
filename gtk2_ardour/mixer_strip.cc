@@ -268,6 +268,8 @@ MixerStrip::init ()
 	trim_control.set_tooltip_prefix (_("Trim: "));
 	trim_control.set_name ("trim knob");
 	trim_control.set_no_show_all (true);
+	trim_control.StartGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_start_touch));
+	trim_control.StopGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_end_touch));
 	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_border_width (1);
@@ -494,6 +496,24 @@ MixerStrip::update_trim_control ()
 		trim_control.hide ();
 		boost::shared_ptr<Controllable> none;
 		trim_control.set_controllable (none);
+	}
+}
+
+void
+MixerStrip::trim_start_touch ()
+{
+	assert (_route && _session);
+	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
+		route()->trim()->gain_control ()->start_touch (_session->transport_frame());
+	}
+}
+
+void
+MixerStrip::trim_end_touch ()
+{
+	assert (_route && _session);
+	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
+		route()->trim()->gain_control ()->stop_touch (_session->transport_frame());
 	}
 }
 

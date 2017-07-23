@@ -216,6 +216,9 @@ private:
 	ArdourWidgets::ArdourButton _comment_button;
 	ArdourWidgets::ArdourKnob   trim_control;
 
+	void trim_start_touch ();
+	void trim_end_touch ();
+
 	void setup_comment_button ();
 
 	ArdourWidgets::ArdourButton group_button;
