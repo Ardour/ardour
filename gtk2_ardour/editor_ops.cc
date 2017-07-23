@@ -721,9 +721,12 @@ Editor::build_region_boundary_cache ()
 		return;
 	}
 
+	bool maybe_first_frame = false;
+
 	switch (_snap_type) {
 	case SnapToRegionStart:
 		interesting_points.push_back (Start);
+		maybe_first_frame = true;
 		break;
 	case SnapToRegionEnd:
 		interesting_points.push_back (End);
@@ -734,6 +737,7 @@ Editor::build_region_boundary_cache ()
 	case SnapToRegionBoundary:
 		interesting_points.push_back (Start);
 		interesting_points.push_back (End);
+		maybe_first_frame = true;
 		break;
 	default:
 		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
@@ -748,6 +752,17 @@ Editor::build_region_boundary_cache ()
 		tlist = selection->tracks.filter_to_unique_playlists ();
 	} else {
 		tlist = track_views.filter_to_unique_playlists ();
+	}
+
+	if (maybe_first_frame) {
+		TrackViewList::const_iterator i;
+		for (i = tlist.begin(); i != tlist.end(); ++i) {
+			boost::shared_ptr<Playlist> pl = (*i)->playlist();
+			if (pl && pl->count_regions_at (0)) {
+				region_boundary_cache.push_back (0);
+				break;
+			}
+		}
 	}
 
 	while (pos < _session->current_end_frame() && !at_end) {
@@ -1771,11 +1786,11 @@ Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
 			nspp /= 2.0;
 		}
 	}
-	
+
 	// ToDo:   encapsulate all of this into something like editor::get_session_extents() or editor::leftmost(), rightmost()
 	{
 		//ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like)
-		
+
 		//calculate the extents of all regions in every playlist
 		framecnt_t session_extent_start = 0;
 		framecnt_t session_extent_end = 0;
@@ -1799,23 +1814,23 @@ Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
 			}
 		}
 		framecnt_t session_extents = session_extent_end - session_extent_start;
-		
+
 		//in a session with no regions, use the start/end markers to set max zoom
 		framecnt_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
 		if ( session_length > session_extents )
 			session_extents = session_length;
-			
+
 		//in a session with no regions or start/end markers, use 2 minutes to set max zoom
 		framecnt_t const min_length = _session->nominal_frame_rate()*60*2;
 		if ( min_length > session_extents )
 			session_extents = min_length;
-			
+
 		//convert to samples-per-pixel and limit our zoom to this value
 		framecnt_t session_extents_pp = session_extents / _visible_canvas_width;
 		if (nspp > session_extents_pp)
 			nspp = session_extents_pp;
 	}
-	
+
 	temporal_zoom (nspp);
 }
 
