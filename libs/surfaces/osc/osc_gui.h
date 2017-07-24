@@ -94,6 +94,7 @@ private:
 	Gtk::CheckButton monitor_type;
 	Gtk::CheckButton selected_tracks;
 	Gtk::CheckButton hidden_tracks;
+	Gtk::CheckButton usegroups;
 	int stvalue;
 	// feedback calculator
 	uint32_t def_feedback;

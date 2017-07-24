@@ -272,6 +272,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (hidden_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
+	label = manage (new Gtk::Label(_("Use Groups:")));
+	label->set_alignment(1, .5);
+	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	sttable->attach (usegroups, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++stn;
+
 
 	sttable->show_all ();
 	append_page (*sttable, _("Default Strip Types"));
@@ -402,6 +408,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	monitor_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	selected_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	hidden_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	usegroups.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	strip_buttons_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	strip_control_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	ssid_as_path.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
@@ -644,6 +651,7 @@ OSC_GUI::reshow_values ()
 	audio_auxes.set_active(def_strip & 128);
 	selected_tracks.set_active(def_strip & 256);
 	hidden_tracks.set_active(def_strip & 512);
+	usegroups.set_active(def_strip & 1024);
 	def_feedback = cp.get_defaultfeedback();
 	strip_buttons_button.set_active(def_feedback & 1);
 	strip_control_button.set_active(def_feedback & 2);
@@ -751,6 +759,9 @@ OSC_GUI::calculate_strip_types ()
 	}
 	if (hidden_tracks.get_active()) {
 		stvalue += 512;
+	}
+	if (usegroups.get_active()) {
+		stvalue += 1024;
 	}
 
 	current_strip_types.set_text(string_compose("%1", stvalue));
