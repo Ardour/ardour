@@ -38,13 +38,13 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, lo_address a, uint32_t ss, ArdourSurface::OSC::OSCSurface* su)
+OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss, ArdourSurface::OSC::OSCSurface* su)
 	: _strip (s)
 	,ssid (ss)
 	,sur (su)
 	,_last_gain (0.0)
 {
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	as = ARDOUR::Off;

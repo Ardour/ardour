@@ -717,7 +717,7 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 
 	OSCSurface *s = get_surface(addr);
 	uint32_t ssid = get_sid (strip, addr);
-	OSCRouteObserver* o = new OSCRouteObserver (strip, addr, ssid, s);
+	OSCRouteObserver* o = new OSCRouteObserver (strip, ssid, s);
 	route_observers.push_back (o);
 
 	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::route_lost, this, boost::weak_ptr<Stripable> (strip)), this);

@@ -36,7 +36,7 @@ class OSCRouteObserver
 {
 
   public:
-	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
+	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCRouteObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
