@@ -36,12 +36,15 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std::bitset<32> fb)
-	: gainmode (gm)
-	,feedback (fb)
+OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface* su)
+	: sur (su)
+	,_init (true)
 {
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	//addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	session = &s;
+	gainmode = sur->gainmode;
+	feedback = sur->feedback;
 	_last_frame = -1;
 	if (feedback[4]) {
 
@@ -117,10 +120,12 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, lo_address a, uint32_t gm, std
 		* 	Maybe (many) more
 		*/
 	}
+	_init = false;
 }
 
 OSCGlobalObserver::~OSCGlobalObserver ()
 {
+	_init = true;
 
 	// need to add general zero everything messages
 	strip_connections.drop_connections ();
@@ -132,6 +137,9 @@ OSCGlobalObserver::~OSCGlobalObserver ()
 void
 OSCGlobalObserver::tick ()
 {
+	if (_init) {
+		return;
+	}
 	framepos_t now_frame = session->transport_frame();
 	if (now_frame != _last_frame) {
 		if (feedback[6]) { // timecode enabled

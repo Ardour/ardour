@@ -60,6 +60,7 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 
 OSCCueObserver::~OSCCueObserver ()
 {
+	tick_enable = false;
 
 	strip_connections.drop_connections ();
 	send_end ();

@@ -240,7 +240,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int check_surface (lo_message msg);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
-	void global_feedback (std::bitset<32> feedback, lo_address addr, uint32_t gainmode);
+	void global_feedback (OSCSurface sur, lo_address addr);
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
 	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);

@@ -54,8 +54,9 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	,sur (su)
 	,nsends (0)
 	,_last_gain (0.0)
+	,_init (true)
 {
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	as = ARDOUR::Off;
@@ -173,12 +174,14 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 		change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
 	}
 
+	_init = false;
 
 	tick();
 }
 
 OSCSelectObserver::~OSCSelectObserver ()
 {
+	_init = true;
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
 	send_float ("/select/expand", 0);
@@ -427,6 +430,9 @@ OSCSelectObserver::plugin_end ()
 void
 OSCSelectObserver::tick ()
 {
+	if (_init) {
+		return;
+	}
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		float now_meter;
 		if (_strip->peak_meter()) {

@@ -1596,7 +1596,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	// set bank and strip feedback
 	set_bank(s->bank, msg);
 
-	global_feedback (s->feedback, get_address (msg), s->gainmode);
+	global_feedback (*s, get_address (msg));
 	sel_send_pagesize (se_size, msg);
 	sel_plug_pagesize (pi_size, msg);
 	return 0;
@@ -1640,7 +1640,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	set_bank(s->bank, msg);
 
 	// Set global/master feedback
-	global_feedback (s->feedback, get_address (msg), s->gainmode);
+	global_feedback (*s, get_address (msg));
 	return 0;
 }
 
@@ -1654,7 +1654,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 	set_bank(s->bank, msg);
 
 	// Set global/master feedback
-	global_feedback (s->feedback, get_address (msg), s->gainmode);
+	global_feedback (*s, get_address (msg));
 	return 0;
 }
 
@@ -1729,24 +1729,24 @@ OSC::get_surface (lo_address addr)
 	_set_bank(s.bank, addr);
 
 	// Set global/master feedback
-	global_feedback (s.feedback, addr, s.gainmode);
+	global_feedback (s, addr);
 
 	return &_surface[_surface.size() - 1];
 }
 
 // setup global feedback for a surface
 void
-OSC::global_feedback (bitset<32> feedback, lo_address addr, uint32_t gainmode)
+OSC::global_feedback (OSCSurface sur, lo_address addr)
 {
 	// first destroy global observer for this surface
 	GlobalObservers::iterator x;
 	for (x = global_observers.begin(); x != global_observers.end();) {
 
-		OSCGlobalObserver* ro;
+		OSCGlobalObserver* go;
 
-		if ((ro = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
+		if ((go = dynamic_cast<OSCGlobalObserver*>(*x)) != 0) {
 
-			int res = strcmp(lo_address_get_url(ro->address()), lo_address_get_url(addr));
+			int res = strcmp(lo_address_get_url(go->address()), lo_address_get_url(addr));
 
 			if (res == 0) {
 				delete *x;
@@ -1758,9 +1758,10 @@ OSC::global_feedback (bitset<32> feedback, lo_address addr, uint32_t gainmode)
 			++x;
 		}
 	}
+	std::bitset<32> feedback = sur.feedback;
 	if (feedback[4] || feedback[3] || feedback[5] || feedback[6]) {
 		// create a new Global Observer for this surface
-		OSCGlobalObserver* o = new OSCGlobalObserver (*session, addr, gainmode, /*s->*/feedback);
+		OSCGlobalObserver* o = new OSCGlobalObserver (*session, &sur);
 		global_observers.push_back (o);
 	}
 }
@@ -4784,7 +4785,7 @@ OSC::periodic (void)
 			for (uint32_t it = 0; it < _surface.size(); it++) {
 				OSCSurface* sur = &_surface[it];
 				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-				global_feedback (sur->feedback, addr, sur->gainmode);
+				global_feedback (*sur, addr);
 			}
 			global_init = false;
 			tick = true;

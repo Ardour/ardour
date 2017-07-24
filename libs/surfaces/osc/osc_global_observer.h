@@ -33,7 +33,7 @@ class OSCGlobalObserver
 {
 
   public:
-	OSCGlobalObserver (ARDOUR::Session& s, lo_address addr, uint32_t gainmode, std::bitset<32> feedback);
+	OSCGlobalObserver (ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* su);
 	~OSCGlobalObserver ();
 
 	lo_address address() const { return addr; };
@@ -49,7 +49,8 @@ class OSCGlobalObserver
 		Monitor,
 	};
 
-
+	ArdourSurface::OSC::OSCSurface* sur;
+	bool _init;
 	lo_address addr;
 	std::string path;
 	uint32_t gainmode;

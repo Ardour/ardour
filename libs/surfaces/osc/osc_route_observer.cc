@@ -43,6 +43,7 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss,
 	,ssid (ss)
 	,sur (su)
 	,_last_gain (0.0)
+	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
@@ -109,11 +110,13 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss,
 			send_change_message ("/strip/pan_stereo_position", _strip->pan_azimuth_control());
 		}
 	}
+	_init = false;
 	tick();
 }
 
 OSCRouteObserver::~OSCRouteObserver ()
 {
+	_init = true;
 
 	strip_connections.drop_connections ();
 	if (sur->no_clear) {
@@ -163,6 +166,9 @@ OSCRouteObserver::~OSCRouteObserver ()
 void
 OSCRouteObserver::tick ()
 {
+	if (_init) {
+		return;
+	}
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
 		float now_meter;
