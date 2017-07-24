@@ -40,6 +40,11 @@ function dsp_params ()
 	}
 end
 
+-- symbolic names for shmem offsets
+local SHMEM_RATE = 0
+local SHMEM_WRITEPTR = 1
+local SHMEM_AUDIO = 2
+
 -- a C memory area.
 -- It needs to be in global scope.
 -- When the variable is set to nil, the allocated memory is free()ed.
@@ -53,36 +58,34 @@ function dsp_init (rate)
 	dpy_hz = rate / 25
 	dpy_wr = 0
 
-	-- create a ringbuffer to hold (float) audio-data
-	-- http://manual.ardour.org/lua-scripting/class_reference/#PBD:RingBufferF
-	rb = PBD.RingBufferF (2 * rate)
+	-- create a shared memory area to hold the sample rate, the write_pointer,
+	-- and (float) audio-data. Make it big enough to store 2s of audio which
+	-- should be enough. If not, the DSP will overwrite the oldest data anyway.
+	self:shmem ():allocate(2 + 2 * rate)
+	self:shmem ():clear()
+	self:shmem ():atomic_set_int (SHMEM_RATE, rate)
+	self:shmem ():atomic_set_int (SHMEM_WRITEPTR, 0)
 
 	-- allocate memory, local mix buffer
 	cmem = ARDOUR.DSP.DspShm (8192)
-
-	-- create a table of objects to share with the GUI
-	local tbl = {}
-	tbl['rb'] = rb;
-	tbl['samplerate'] = rate
-
-	-- "self" is a special DSP variable referring
-	-- to the plugin instance itself.
-	--
-	-- "table()" is-a http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR.LuaTableRef
-	-- which allows to store/retrieve lua-tables to share them other interpreters
-	self:table ():set (tbl);
 end
 
 -- "dsp_runmap" uses Ardour's internal processor API, eqivalent to
 -- 'connect_and_run()". There is no overhead (mapping, translating buffers).
 -- The lua implementation is responsible to map all the buffers directly.
 function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
-	-- here we sum all audio input channels channels and then copy the data to a ringbuffer
-	-- for the GUI to process later
+	-- here we sum all audio input channels and then copy the data to a
+	-- custom-made circular table for the GUIs to process later
 
 	local audio_ins = in_map:count (): n_audio () -- number of audio input buffers
 	local ccnt = 0 -- processed channel count
 	local mem = cmem:to_float(0) -- a "FloatArray", float* for direct C API usage from the previously allocated buffer
+	local rate = self:shmem ():atomic_get_int (SHMEM_RATE)
+	local write_ptr  = self:shmem ():atomic_get_int (SHMEM_WRITEPTR)
+
+	local ringsize = 2 * rate
+	local ptr_wrap = math.floor(2^50 / ringsize) * ringsize
+
 	for c = 1,audio_ins do
 		-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:ChanMapping
 		-- Note: lua starts counting at 1, ardour's ChanMapping::get() at 0
@@ -131,9 +134,15 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 		ARDOUR.DSP.memset (mem, 0, n_samples)
 	end
 
-	-- write data to the ringbuffer
-	-- http://manual.ardour.org/lua-scripting/class_reference/#PBD:RingBufferF
-	rb:write (mem, n_samples)
+	-- write data to the circular table
+	if (write_ptr % ringsize + n_samples < ringsize) then
+		ARDOUR.DSP.copy_vector (self:shmem ():to_float (SHMEM_AUDIO + write_ptr % ringsize), mem, n_samples)
+	else
+		local chunk = ringsize - write_ptr % ringsize
+		ARDOUR.DSP.copy_vector (self:shmem ():to_float (SHMEM_AUDIO + write_ptr % ringsize), mem, chunk)
+		ARDOUR.DSP.copy_vector (self:shmem ():to_float (SHMEM_AUDIO), cmem:to_float (chunk), n_samples - chunk)
+	end
+	self:shmem ():atomic_set_int (SHMEM_WRITEPTR, (write_ptr + n_samples) % ptr_wrap)
 
 	-- emit QueueDraw every FPS
 	-- TODO: call every FFT window-size worth of samples, at most every FPS
@@ -154,10 +163,10 @@ local img = nil
 local fft_size = 0
 local last_log = false
 
+
 function render_inline (ctx, w, max_h)
 	local ctrl = CtrlPorts:array () -- get control port array (read/write)
-	local tbl = self:table ():get () -- get shared memory table
-	local rate = tbl['samplerate']
+	local rate = self:shmem ():atomic_get_int (SHMEM_RATE)
 	if not cmem then
 		cmem = ARDOUR.DSP.DspShm (0)
 	end
@@ -231,12 +240,36 @@ function render_inline (ctx, w, max_h)
 	local f_b = w / math.log (fft_size / 2) -- inverse log-scale base
 	local f_l = math.log (fft_size / rate) * f_b -- inverse logscale lower-bound
 
-	local rb = tbl['rb'];
 	local mem = cmem:to_float (0)
 
-	while (rb:read_space() >= fft_size) do
-		-- process one line / buffer
-		rb:read (mem, fft_size)
+	local ringsize = 2 * rate
+	local ptr_wrap = math.floor(2^50 / ringsize) * ringsize
+
+	local write_ptr
+	function read_space()
+		write_ptr   = self:shmem ():atomic_get_int (SHMEM_WRITEPTR)
+		local space = (write_ptr - read_ptr + ptr_wrap) % ptr_wrap
+		if space > ringsize then
+			-- the GUI lagged too much and unread data was overwritten
+			-- jump to the oldest audio still present in the ringtable
+			read_ptr = write_ptr - ringsize
+			space = ringsize
+		end
+		return space
+	end
+
+	while (read_space() >= fft_size) do
+		-- read one window from the circular table
+		if (read_ptr % ringsize + fft_size < ringsize) then
+			ARDOUR.DSP.copy_vector (mem, self:shmem ():to_float (SHMEM_AUDIO + read_ptr % ringsize), fft_size)
+		else
+			local chunk = ringsize - read_ptr % ringsize
+			ARDOUR.DSP.copy_vector (mem, self:shmem ():to_float (SHMEM_AUDIO + read_ptr % ringsize), chunk)
+			ARDOUR.DSP.copy_vector (cmem:to_float(chunk), self:shmem ():to_float (SHMEM_AUDIO), fft_size - chunk)
+		end
+		read_ptr = (read_ptr + fft_size) % ptr_wrap
+
+		-- process one line
 		fft:set_data_hann (mem, fft_size, 0)
 		fft:execute ()
 
