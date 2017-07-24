@@ -5444,8 +5444,8 @@ Route::send_name (uint32_t n) const
 		}
 		n -= 8;
 # endif
-#endif
 	}
+#endif
 	boost::shared_ptr<Processor> p = nth_send (n);
 	if (p) {
 		return p->name();
