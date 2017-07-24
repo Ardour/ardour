@@ -119,7 +119,7 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 		copy_events (*(section.get()));
 	}
 
-	new_write_pass = false;
+	new_write_pass = true;
 	_in_write_pass = false;
 	did_write_during_pass = false;
 	insert_position = -1;
@@ -346,6 +346,8 @@ ControlList::thin (double thinning_factor)
 		return;
 	}
 
+	assert (is_sorted ());
+
 	bool changed = false;
 
 	{
@@ -457,8 +459,6 @@ ControlList::start_write_pass (double when)
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
 
-	new_write_pass = true;
-	did_write_during_pass = false;
 	insert_position = when;
 
 	/* leave the insert iterator invalid, so that we will do the lookup
@@ -519,12 +519,20 @@ ControlList::add_guard_point (double when, double offset)
 		}
 	}
 
+	/* don't do this again till the next write pass,
+	 * unless we're not in a write-pass (transport stopped)
+	 */
+	if (_in_write_pass && new_write_pass) {
+		WritePassStarted (); /* EMIT SIGNAL w/WriteLock */
+		new_write_pass = false;
+	}
+
 	when += offset;
 
 	ControlEvent cp (when, 0.0);
 	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-	double eval_value = unlocked_eval (insert_position);
+	double eval_value = unlocked_eval (when);
 
 	if (most_recent_insert_iterator == _events.end()) {
 
@@ -563,13 +571,6 @@ ControlList::add_guard_point (double when, double offset)
 		 */
 
 		++most_recent_insert_iterator;
-	}
-
-	/* don't do this again till the next write pass,
-	 * unless we're not in a write-pass (transport stopped)
-	 */
-	if (_in_write_pass) {
-		new_write_pass = false;
 	}
 }
 
@@ -745,6 +746,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				const ControlEvent cp (when, 0.0);
 				most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			}
+			WritePassStarted (); /* EMIT SIGNAL w/WriteLock */
 			new_write_pass = false;
 
 		} else if (_in_write_pass &&
@@ -1981,6 +1983,24 @@ ControlList::operator!= (ControlList const & other) const
 		_desc.upper != other._desc.upper ||
 		_desc.normal != other._desc.normal
 		);
+}
+
+bool
+ControlList::is_sorted () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	if (_events.size () == 0) {
+		return true;
+	}
+	const_iterator i = _events.begin();
+	const_iterator n = i;
+	while (++n != _events.end ()) {
+		if (event_time_less_than(*n,*i)) {
+			return false;
+		}
+		++i;
+	}
+	return true;
 }
 
 void

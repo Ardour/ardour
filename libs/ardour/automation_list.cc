@@ -161,6 +161,8 @@ AutomationList::create_curve_if_necessary()
 	default:
 		break;
 	}
+
+	WritePassStarted.connect_same_thread (_writepass_connection, boost::bind (&AutomationList::snapshot_history, this, false));
 }
 
 AutomationList&
@@ -193,16 +195,14 @@ AutomationList::maybe_signal_changed ()
 void
 AutomationList::set_automation_state (AutoState s)
 {
-	if (s != _state) {
-		_state = s;
-		delete _before;
-		if (s == Write && _desc.toggled) {
-			_before = &get_state ();
-		} else {
-			_before = 0;
-		}
-		automation_state_changed (s); /* EMIT SIGNAL */
+	if (s == _state) {
+		return;
 	}
+	_state = s;
+	if (s == Write && _desc.toggled) {
+		snapshot_history (true);
+	}
+	automation_state_changed (s); /* EMIT SIGNAL */
 }
 
 Evoral::ControlList::InterpolationStyle
@@ -231,12 +231,7 @@ AutomationList::default_interpolation () const
 void
 AutomationList::start_write_pass (double when)
 {
-	delete _before;
-	if (in_new_write_pass ()) {
-		_before = &get_state ();
-	} else {
-		_before = 0;
-	}
+	snapshot_history (true);
 	ControlList::start_write_pass (when);
 }
 
@@ -249,9 +244,9 @@ AutomationList::write_pass_finished (double when, double thinning_factor)
 void
 AutomationList::start_touch (double when)
 {
-        if (_state == Touch) {
+	if (_state == Touch) {
 		start_write_pass (when);
-        }
+	}
 
 	g_atomic_int_set (&_touching, 1);
 }
@@ -280,6 +275,17 @@ AutomationList::clear_history ()
 	delete _before;
 	_before = 0;
 }
+
+void
+AutomationList::snapshot_history (bool need_lock)
+{
+	if (!in_new_write_pass ()) {
+		return;
+	}
+	delete _before;
+	_before = &state (true, need_lock);
+}
+
 
 void
 AutomationList::thaw ()
@@ -326,11 +332,11 @@ AutomationList::memento_command (XMLNode* before, XMLNode* after)
 XMLNode&
 AutomationList::get_state ()
 {
-	return state (true);
+	return state (true, true);
 }
 
 XMLNode&
-AutomationList::state (bool full)
+AutomationList::state (bool full, bool need_lock)
 {
 	XMLNode* root = new XMLNode (X_("AutomationList"));
 
@@ -372,18 +378,22 @@ AutomationList::state (bool full)
 	}
 
 	if (!_events.empty()) {
-		root->add_child_nocopy (serialize_events());
+		root->add_child_nocopy (serialize_events (need_lock));
 	}
 
 	return *root;
 }
 
 XMLNode&
-AutomationList::serialize_events ()
+AutomationList::serialize_events (bool need_lock)
 {
 	XMLNode* node = new XMLNode (X_("events"));
 	stringstream str;
 
+	Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock, Glib::Threads::NOT_LOCK);
+	if (need_lock) {
+		lm.acquire ();
+	}
 	for (iterator xx = _events.begin(); xx != _events.end(); ++xx) {
 		str << PBD::to_string ((*xx)->when);
 		str << ' ';

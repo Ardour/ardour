@@ -110,8 +110,6 @@ public:
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode &, int version);
-	XMLNode& state (bool full);
-	XMLNode& serialize_events ();
 
 	Command* memento_command (XMLNode* before, XMLNode* after);
 
@@ -119,6 +117,7 @@ public:
 
 	XMLNode* before () { XMLNode* rv = _before; _before = 0; return rv; }
 	void clear_history ();
+	void snapshot_history (bool need_lock);
 
 	ControlList::InterpolationStyle default_interpolation () const;
 
@@ -126,10 +125,15 @@ private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
 
+	XMLNode& state (bool full, bool need_lock);
+	XMLNode& serialize_events (bool need_lock);
+
 	void maybe_signal_changed ();
 
 	AutoState    _state;
 	gint         _touching;
+
+	PBD::ScopedConnection _writepass_connection;
 
 	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }
 	XMLNode* _before; //used for undo of touch start/stop pairs.

@@ -307,6 +307,7 @@ public:
 	bool in_write_pass () const;
 	bool in_new_write_pass () { return new_write_pass; }
 
+	PBD::Signal0<void> WritePassStarted;
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
 	/** Emitted when our interpolation style changes */
@@ -359,6 +360,8 @@ private:
 	void unlocked_remove_duplicates ();
 	void unlocked_invalidate_insert_iterator ();
 	void add_guard_point (double when, double offset);
+
+	bool is_sorted () const;
 };
 
 } // namespace Evoral
