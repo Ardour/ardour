@@ -5386,7 +5386,7 @@ Route::send_enable_controllable (uint32_t n) const
 # undef MIXBUS_PORTS_H
 # include "../../gtk2_ardour/mixbus_ports.h"
 	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
-	if (plug) {
+	if (plug && !mixbus()) {
 		uint32_t port_id = 0;
 		switch (n) {
 			case  0: port_id = port_channel_post_aux1_asgn; break;
@@ -5431,18 +5431,21 @@ string
 Route::send_name (uint32_t n) const
 {
 #ifdef MIXBUS
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	if (plug && !mixbus()) {
 # ifdef MIXBUS32C
-	if (n < 12) {
-		return _session.get_mixbus (n)->name();
-	}
-	n -= 12;
+		if (n < 12) {
+			return _session.get_mixbus (n)->name();
+		}
+		n -= 12;
 #else
-	if (n < 8) {
-		return _session.get_mixbus (n)->name();
-	}
-	n -= 8;
+		if (n < 8) {
+			return _session.get_mixbus (n)->name();
+		}
+		n -= 8;
 # endif
 #endif
+	}
 	boost::shared_ptr<Processor> p = nth_send (n);
 	if (p) {
 		return p->name();
