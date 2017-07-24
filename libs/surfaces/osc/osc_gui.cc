@@ -622,8 +622,8 @@ OSC_GUI::factory_reset ()
 	reshow_values ();
 	cp.set_gainmode (0);
 	gainmode_combo.set_active (0);
-	cp.set_portmode (0);
-	portmode_combo.set_active (0);
+	cp.set_portmode (1);
+	portmode_combo.set_active (1);
 	cp.set_remote_port ("8000");
 	port_entry.set_text ("8000");
 	cp.clear_devices ();
