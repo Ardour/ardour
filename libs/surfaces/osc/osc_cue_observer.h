@@ -54,6 +54,7 @@ class OSCCueObserver
 	float _last_meter;
 	std::vector<uint32_t> gain_timeout;
 	bool tick_enable;
+	std::vector<float> _last_gain;
 
 	void name_changed (const PBD::PropertyChange& what_changed, uint32_t id);
 	void send_change_message (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);

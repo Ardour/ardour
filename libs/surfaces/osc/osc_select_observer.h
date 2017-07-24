@@ -66,6 +66,8 @@ class OSCSelectObserver
 	float _last_meter;
 	uint32_t nsends;
 	float _last_gain;
+	float _last_trim;
+	std::vector<float> _last_send;
 	bool _init;
 	float _comp_redux;
 	ARDOUR::AutoState as;

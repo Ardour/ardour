@@ -39,6 +39,9 @@ using namespace ArdourSurface;
 OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface* su)
 	: sur (su)
 	,_init (true)
+	,_last_master_gain (0.0)
+	,_last_master_trim (0.0)
+	,_last_monitor_gain (0.0)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	//addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
@@ -268,10 +271,25 @@ OSCGlobalObserver::send_change_message (string path, boost::shared_ptr<Controlla
 void
 OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	bool ismaster = false;
+	if (path.find("master") != std::string::npos) {
+		ismaster = true;
+		if (_last_master_gain != controllable->get_value()) {
+			_last_master_gain = controllable->get_value();
+		} else {
+			return;
+		}
+	} else {
+		if (_last_monitor_gain != controllable->get_value()) {
+			_last_monitor_gain = controllable->get_value();
+		} else {
+			return;
+		}
+	}
 	if (gainmode) {
 		float_message (string_compose ("%1fader", path), controllable->internal_to_interface (controllable->get_value()));
 		text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
-		if (path.find("master") != std::string::npos) {
+		if (ismaster) {
 			master_timeout = 8;
 		} else {
 			monitor_timeout = 8;
@@ -289,6 +307,11 @@ OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 void
 OSCGlobalObserver::send_trim_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	if (_last_master_trim != controllable->get_value()) {
+		_last_master_trim = controllable->get_value();
+	} else {
+		return;
+	}
 	float_message (X_("/master/trimdB"), (float) accurate_coefficient_to_dB (controllable->get_value()));
 }
 

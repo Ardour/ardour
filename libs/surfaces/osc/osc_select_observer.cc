@@ -54,6 +54,7 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	,sur (su)
 	,nsends (0)
 	,_last_gain (0.0)
+	,_last_trim (0.0)
 	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
@@ -278,6 +279,8 @@ OSCSelectObserver::send_init()
 	uint32_t last_send = sur->send_page * send_size;
 	uint32_t c = 1;
 	send_timeout.push_back (2);
+	_last_send.clear();
+	_last_send.push_back (0.0);
 
 	for (uint32_t s = page_start; s < last_send; ++s, ++c) {
 
@@ -285,6 +288,7 @@ OSCSelectObserver::send_init()
 		if (_strip->send_level_controllable (s)) {
 			_strip->send_level_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, c, _strip->send_level_controllable(s)), OSC::instance());
 			send_timeout.push_back (2);
+			_last_send.push_back (0.0);
 			send_gain (c, _strip->send_level_controllable(s));
 			send_valid = true;
 		}
@@ -619,6 +623,11 @@ OSCSelectObserver::monitor_status (boost::shared_ptr<Controllable> controllable)
 void
 OSCSelectObserver::trim_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	if (_last_trim != controllable->get_value()) {
+		_last_trim = controllable->get_value();
+	} else {
+		return;
+	}
 	lo_message msg = lo_message_new ();
 
 	lo_message_add_float (msg, (float) accurate_coefficient_to_dB (controllable->get_value()));
@@ -631,6 +640,11 @@ void
 OSCSelectObserver::gain_message ()
 {
 	float value = _strip->gain_control()->get_value();
+	if (_last_gain != value) {
+		_last_gain = value;
+	} else {
+		return;
+	}
 
 	if (gainmode) {
 		text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)));
@@ -686,6 +700,11 @@ OSCSelectObserver::gain_automation ()
 void
 OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable)
 {
+	if (_last_send[id] != controllable->get_value()) {
+		_last_send[id] = controllable->get_value();
+	} else {
+		return;
+	}
 	lo_message msg = lo_message_new ();
 	string path;
 	float value;

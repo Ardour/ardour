@@ -59,6 +59,7 @@ class OSCRouteObserver
 	uint32_t gain_timeout;
 	uint32_t trim_timeout;
 	float _last_gain;
+	float _last_trim;
 	bool _init;
 	ARDOUR::AutoState as;
 

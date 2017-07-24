@@ -43,6 +43,7 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss,
 	,ssid (ss)
 	,sur (su)
 	,_last_gain (0.0)
+	,_last_trim (0.0)
 	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
@@ -342,6 +343,11 @@ OSCRouteObserver::send_monitor_status (boost::shared_ptr<Controllable> controlla
 void
 OSCRouteObserver::send_trim_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	if (_last_trim != controllable->get_value()) {
+		_last_trim = controllable->get_value();
+	} else {
+		return;
+	}
 	if (gainmode) {
 		text_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
 		trim_timeout = 8;
@@ -364,6 +370,11 @@ OSCRouteObserver::send_trim_message (string path, boost::shared_ptr<Controllable
 void
 OSCRouteObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
+	if (_last_gain != controllable->get_value()) {
+		_last_gain = controllable->get_value();
+	} else {
+		return;
+	}
 	lo_message msg = lo_message_new ();
 
 	if (feedback[2]) {

@@ -49,6 +49,7 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 	send_change_message ("/cue/mute", 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
+	_last_gain.push_back (0.0);
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
 	send_gain_message (0, _strip->gain_control());
 
@@ -132,6 +133,7 @@ OSCCueObserver::send_init()
 
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
+				_last_gain.push_back (0.0);
 				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control()), OSC::instance());
 				send_gain_message (i + 1, send->gain_control());
 			}
@@ -213,6 +215,11 @@ OSCCueObserver::text_with_id (string path, uint32_t id, string val)
 void
 OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable)
 {
+	if (_last_gain[id] != controllable->get_value()) {
+		_last_gain[id] = controllable->get_value();
+	} else {
+		return;
+	}
 	string path = "/cue";
 	if (id) {
 		path = "/cue/send";

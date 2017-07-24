@@ -51,6 +51,9 @@ class OSCGlobalObserver
 
 	ArdourSurface::OSC::OSCSurface* sur;
 	bool _init;
+	float _last_master_gain;
+	float _last_master_trim;
+	float _last_monitor_gain;
 	lo_address addr;
 	std::string path;
 	uint32_t gainmode;
