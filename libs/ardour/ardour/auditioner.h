@@ -50,8 +50,6 @@ class LIBARDOUR_API Auditioner : public Track
 	void seek_to_frame (frameoffset_t pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = pos; }}
 	void seek_to_percent (float const pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = floorf(length * pos / 100.0); }}
 
-	ARDOUR::AudioPlaylist& prepare_playlist ();
-
 	int play_audition (framecnt_t nframes);
 
 	MonitorState monitoring_state () const;
