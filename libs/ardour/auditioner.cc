@@ -255,26 +255,6 @@ Auditioner::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	return 0;
 }
 
-AudioPlaylist&
-Auditioner::prepare_playlist ()
-{
-	// used by CrossfadeEditor::audition()
-
-	_midi_audition = false;
-
-	if (_synth_added) {
-		remove_processor(asynth);
-		_synth_added = false;
-	}
-
-	// FIXME auditioner is still audio-only
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(playlist());
-	assert(apl);
-
-	apl->clear ();
-	return *apl;
-}
-
 void
 Auditioner::audition_region (boost::shared_ptr<Region> region)
 {
