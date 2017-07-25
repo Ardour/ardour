@@ -869,7 +869,6 @@ DiskWriter::seek (framepos_t frame, bool complete_refill)
 	}
 
 	playback_sample = frame;
-	file_frame = frame;
 
 	return 0;
 }
