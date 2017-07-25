@@ -1432,7 +1432,7 @@ DiskReader::refill_midi ()
 		return 0;
 	}
 
-	size_t  write_space = _midi_buf->write_space();
+	const size_t  write_space = _midi_buf->write_space();
 	const bool reversed    = _session.transport_speed() < 0.0f;
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame[DataType::MIDI]));
