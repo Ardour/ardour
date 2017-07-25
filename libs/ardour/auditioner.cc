@@ -503,8 +503,12 @@ Auditioner::input_streams () const
 	   depends solely on the region we are auditioning.
 	*/
 
-	if (_disk_reader) {
-		return _disk_reader->input_streams ();
+	if (_midi_audition) {
+		return ChanCount (DataType::MIDI, 1);
+	} else {
+		if (the_region) {
+			return ChanCount (DataType::AUDIO, the_region->n_channels ());
+		}
 	}
 
 	return ChanCount (DataType::AUDIO, 1);
