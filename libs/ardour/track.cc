@@ -700,12 +700,6 @@ Track::seek (framepos_t p, bool complete_refill)
 	return _disk_writer->seek (p, complete_refill);
 }
 
-bool
-Track::hidden () const
-{
-	return _disk_writer->hidden () || _disk_reader->hidden();
-}
-
 int
 Track::can_internal_playback_seek (framecnt_t p)
 {
@@ -723,9 +717,9 @@ Track::non_realtime_locate (framepos_t p)
 {
 	Route::non_realtime_locate (p);
 
-	if (!hidden()) {
+	if (!is_private_route()) {
 		/* don't waste i/o cycles and butler calls
-		   for hidden (secret) tracks
+		   for private tracks (e.g.auditioner)
 		*/
 		_disk_reader->non_realtime_locate (p);
 		_disk_writer->non_realtime_locate (p);

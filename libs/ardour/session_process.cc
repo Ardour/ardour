@@ -253,7 +253,7 @@ Session::get_track_statistics ()
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 
-		if (!tr || tr->hidden()) {
+		if (!tr || tr->is_private_route()) {
 			continue;
 		}
 

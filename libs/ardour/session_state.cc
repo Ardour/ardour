@@ -403,7 +403,7 @@ Session::post_engine_init ()
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
-		if (trk && !trk->hidden()) {
+		if (trk && !trk->is_private_route()) {
 			trk->seek (_transport_frame, true);
 		}
 	}

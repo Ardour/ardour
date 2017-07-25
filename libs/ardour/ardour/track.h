@@ -159,7 +159,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	int do_flush (RunContext, bool force = false);
 	void set_pending_overwrite (bool);
 	int seek (framepos_t, bool complete_refill = false);
-	bool hidden () const;
 	int can_internal_playback_seek (framecnt_t);
 	int internal_playback_seek (framecnt_t);
 	void non_realtime_locate (framepos_t);
