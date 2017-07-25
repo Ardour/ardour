@@ -259,8 +259,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		}
 	}
 
-	_need_butler = false;
-
 	if (speed == 0.0 && (ms == MonitoringDisk)) {
 		/* stopped. Don't accidentally pass any data from disk
 		 * into our outputs (e.g. via interpolation)
@@ -401,6 +399,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	if (!still_locating) {
 
+		bool butler_required = false;
+
 		if (speed < 0.0) {
 			playback_sample -= playback_distance;
 		} else {
@@ -413,13 +413,13 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 					if (c->front()->buf->write_space() >= c->front()->buf->bufsize() / 2) {
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: slaved, write space = %2 of %3\n", name(), c->front()->buf->write_space(),
 						                                            c->front()->buf->bufsize()));
-						_need_butler = true;
+						butler_required = true;
 					}
 				} else {
 					if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->buf->write_space(),
 						                                            _chunk_frames));
-						_need_butler = true;
+						butler_required = true;
 					}
 				}
 			}
@@ -467,13 +467,15 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			 */
 			if (frames_read <= frames_written) {
 				if ((frames_written - frames_read) + playback_distance < midi_readahead) {
-					_need_butler = true;
+					butler_required = true;
 				}
 			} else {
-				_need_butler = true;
+				butler_required = true;
 			}
 
 		}
+
+		_need_butler = butler_required;
 	}
 
 	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 reader run, needs butler = %2\n", name(), _need_butler));
