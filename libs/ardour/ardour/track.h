@@ -185,7 +185,10 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
 	int find_and_use_playlist (DataType, PBD::ID const &);
 	int use_copy_playlist ();
-	int use_new_playlist ();
+	int use_new_playlist (DataType);
+	int use_default_new_playlist () {
+		return use_new_playlist (data_type());
+	}
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
