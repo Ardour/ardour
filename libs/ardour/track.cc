@@ -55,12 +55,12 @@ using namespace PBD;
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
         , _saved_meter_point (_meter_point)
-	, _disk_io_point (DiskIOPreFader)
         , _mode (mode)
 	, _alignment_choice (Automatic)
 {
 	_freeze_record.state = NoFreeze;
         _declickable = true;
+
 }
 
 Track::~Track ()
@@ -85,11 +85,23 @@ Track::init ()
                 return -1;
         }
 
-        use_new_playlist (data_type());
+        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-        /* disk writer and reader processors will be added when Route calls
-         * add_processors_oh_children_of_mine ().
-         */
+        if (_mode == Destructive && !Profile->get_trx()) {
+	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
+        } else if (_mode == NonLayered){
+	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
+        }
+
+        _disk_reader.reset (new DiskReader (_session, name(), dflags));
+        _disk_reader->set_block_size (_session.get_block_size ());
+        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+
+        _disk_writer.reset (new DiskWriter (_session, name(), dflags));
+        _disk_writer->set_block_size (_session.get_block_size ());
+        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+
+        use_new_playlist (data_type());
 
         boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
@@ -112,31 +124,6 @@ Track::init ()
         _input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
 
         return 0;
-}
-
-void
-Track::add_processors_oh_children_of_mine ()
-{
-        cerr << name() << " ::apocom(), create DW + DR\n";
-
-        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
-
-        if (_mode == Destructive && !Profile->get_trx()) {
-	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
-        } else if (_mode == NonLayered){
-	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
-        }
-        if (!_disk_reader) {
-	        _disk_reader.reset (new DiskReader (_session, name(), dflags));
-	        _disk_reader->set_block_size (_session.get_block_size ());
-	        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
-        }
-
-        if (!_disk_writer) {
-	        _disk_writer.reset (new DiskWriter (_session, name(), dflags));
-	        _disk_writer->set_block_size (_session.get_block_size ());
-	        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
-        }
 }
 
 void
@@ -171,7 +158,6 @@ Track::state (bool full)
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
 	root.set_property (X_("saved-meter-point"), _saved_meter_point);
-	root.set_property (X_("disk-io-point"), _disk_io_point);
 	root.set_property (X_("alignment-choice"), _alignment_choice);
 
 	return root;
@@ -234,9 +220,6 @@ Track::set_state (const XMLNode& node, int version)
 		_saved_meter_point = _meter_point;
 	}
 
-	if (!node.get_property (X_("saved-meter-point"), _disk_io_point)) {
-		_disk_io_point = DiskIOPreFader;
-	}
 
 	AlignChoice ac;
 
@@ -1264,6 +1247,8 @@ Track::set_processor_state (XMLNode const & node, XMLProperty const* prop, Proce
 		return true;
 	}
 
+	cerr << name() << " looking for state for track procs, DR = " << _disk_reader << endl;
+
 	if (prop->value() == "diskreader") {
 		if (_disk_reader) {
 			_disk_reader->set_state (node, Stateful::current_state_version);
@@ -1521,57 +1506,4 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	_session.add_command (new StatefulDiffCommand (pl));
 }
 
-#ifdef __clang__
-__attribute__((annotate("realtime")))
-#endif
-void
-Track::setup_invisible_processors_oh_children_of_mine (ProcessorList& processors)
-{
-	ProcessorList::iterator insert_pos;
 
-	switch (_disk_io_point) {
-	case DiskIOPreFader:
-		insert_pos = find (processors.begin(), processors.end(), _trim);
-		if (insert_pos != processors.end()) {
-			insert_pos = processors.insert (insert_pos, _disk_writer);
-			processors.insert (insert_pos, _disk_reader);
-		}
-		break;
-	case DiskIOPostFader:
-		insert_pos = find (processors.begin(), processors.end(), _main_outs);
-		if (insert_pos != processors.end()) {
-			insert_pos = processors.insert (insert_pos, _disk_writer);
-			processors.insert (insert_pos, _disk_reader);
-		}
-	case DiskIOCustom:
-		break;
-	}
-}
-
-void
-Track::set_disk_io_position (DiskIOPoint diop)
-{
-	bool display = false;
-
-	switch (diop) {
-	case DiskIOCustom:
-		display = true;
-		break;
-	default:
-		display = false;
-	}
-
-	_disk_writer->set_display_to_user (display);
-	_disk_reader->set_display_to_user (display);
-
-	const bool changed = (diop != _disk_io_point);
-
-	_disk_io_point = diop;
-
-	if (changed) {
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		configure_processors (0);
-	}
-
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-}
