@@ -138,6 +138,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	auto_off_item = 0;
 	auto_touch_item = 0;
+	auto_latch_item = 0;
 	auto_write_item = 0;
 	auto_play_item = 0;
 	mode_discrete_item = 0;
@@ -170,6 +171,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	      _parameter.type() <= MidiChannelPressureAutomation)) {
 		auto_dropdown.AddMenuElem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
 		auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+		auto_dropdown.AddMenuElem (MenuElem (_("Latch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Latch)));
 	}
 
 	/* XXX translators: use a string here that will be at least as long
@@ -369,7 +371,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		state = ARDOUR::Off;
 	}
 
-	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
+	switch (state & (ARDOUR::Off|Play|Touch|Write|Latch)) {
 	case ARDOUR::Off:
 		auto_dropdown.set_text (automation_state_off_string());
 		ignore_state_request = true;
@@ -379,6 +381,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		if (auto_touch_item) {
 			auto_touch_item->set_active (false);
+			auto_latch_item->set_active (false);
 			auto_write_item->set_active (false);
 		}
 		ignore_state_request = false;
@@ -392,6 +395,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		if (auto_touch_item) {
 			auto_touch_item->set_active (false);
+			auto_latch_item->set_active (false);
 			auto_write_item->set_active (false);
 		}
 		ignore_state_request = false;
@@ -406,6 +410,7 @@ AutomationTimeAxisView::automation_state_changed ()
 		if (auto_touch_item) {
 			auto_write_item->set_active (true);
 			auto_touch_item->set_active (false);
+			auto_latch_item->set_active (false);
 		}
 		ignore_state_request = false;
 		break;
@@ -418,6 +423,21 @@ AutomationTimeAxisView::automation_state_changed ()
 		}
 		if (auto_touch_item) {
 			auto_touch_item->set_active (true);
+			auto_write_item->set_active (false);
+			auto_latch_item->set_active (false);
+		}
+		ignore_state_request = false;
+		break;
+	case Latch:
+		auto_dropdown.set_text (_("Latch"));
+		ignore_state_request = true;
+		if (auto_off_item) {
+			auto_off_item->set_active (false);
+			auto_play_item->set_active (false);
+		}
+		if (auto_touch_item) {
+			auto_latch_item->set_active (true);
+			auto_touch_item->set_active (false);
 			auto_write_item->set_active (false);
 		}
 		ignore_state_request = false;
@@ -622,6 +642,11 @@ AutomationTimeAxisView::build_display_menu ()
 			                                   sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) Touch)));
 		auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
+
+		as_items.push_back (CheckMenuElem (_("Latch"), sigc::bind (
+						sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+						(AutoState) Latch)));
+		auto_latch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 	}
 
 	items.push_back (MenuElem (_("State"), *auto_state_menu));
