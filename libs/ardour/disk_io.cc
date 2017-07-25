@@ -147,18 +147,23 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 {
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("Configuring %1 for in:%2 out:%3\n", name(), in, out));
 
-	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
-
-	uint32_t n_audio = in.n_audio();
 	bool changed = false;
 
-	if (n_audio > c->size()) {
-		add_channel_to (c, n_audio - c->size());
-		changed = true;
-	} else if (n_audio < c->size()) {
-		remove_channel_from (c, c->size() - n_audio);
-		changed = true;
+	{
+		RCUWriter<ChannelList> writer (channels);
+		boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+		uint32_t n_audio = in.n_audio();
+
+		if (n_audio > c->size()) {
+			add_channel_to (c, n_audio - c->size());
+			changed = true;
+		} else if (n_audio < c->size()) {
+			remove_channel_from (c, c->size() - n_audio);
+			changed = true;
+		}
+
+		/* writer leaves scope, actual channel list is updated */
 	}
 
 	if (in.n_midi() > 0 && !_midi_buf) {
