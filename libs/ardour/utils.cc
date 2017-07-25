@@ -561,6 +561,8 @@ ARDOUR::string_to_auto_state (std::string str)
 		return Write;
 	} else if (str == X_("Touch")) {
 		return Touch;
+	} else if (str == X_("Latch")) {
+		return Latch;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
@@ -585,6 +587,10 @@ ARDOUR::auto_state_to_string (AutoState as)
 		break;
 	case Touch:
 		return X_("Touch");
+		break;
+	case Latch:
+		return X_("Latch");
+		break;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState type: ", as) << endmsg;

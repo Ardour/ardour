@@ -329,6 +329,8 @@ Automatable::protect_automation ()
 		case Write:
 			l->set_automation_state (Off);
 			break;
+		case Latch:
+			// no break
 		case Touch:
 			l->set_automation_state (Play);
 			break;
@@ -408,6 +410,7 @@ Automatable::non_realtime_transport_stop (framepos_t now, bool /*flush_processor
 		*/
 		const bool list_did_write = !l->in_new_write_pass ();
 
+		c->stop_touch (now);
 		l->stop_touch (now);
 
 		c->commit_transaction (list_did_write);

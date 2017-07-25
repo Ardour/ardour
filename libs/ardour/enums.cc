@@ -177,6 +177,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (Write);
 	REGISTER_ENUM (Touch);
 	REGISTER_ENUM (Play);
+	REGISTER_ENUM (Latch);
 	REGISTER_BITS (_AutoState);
 
 	REGISTER_ENUM (CaptureTime);
