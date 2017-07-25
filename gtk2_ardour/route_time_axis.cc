@@ -1255,7 +1255,7 @@ RouteTimeAxisView::use_new_playlist (bool prompt, vector<boost::shared_ptr<Playl
 		if (copy) {
 			tr->use_copy_playlist ();
 		} else {
-			tr->use_new_playlist ();
+			tr->use_default_new_playlist ();
 		}
 		tr->playlist()->set_name (name);
 	}
@@ -1718,7 +1718,7 @@ RouteTimeAxisView::use_playlist (RadioMenuItem *item, boost::weak_ptr<Playlist> 
 			boost::shared_ptr<Playlist> ipl = session()->playlists->by_name(playlist_name);
 			if (!ipl) {
 				// No playlist for this track for this take yet, make it
-				track->use_new_playlist();
+				track->use_default_new_playlist();
 				track->playlist()->set_name(playlist_name);
 			} else {
 				track->use_playlist(track->data_type(), ipl);
