@@ -2328,22 +2328,22 @@ Route::state(bool full_state)
 	XMLNode *node = new XMLNode("Route");
 	ProcessorList::iterator i;
 
-	node->set_property ("id", id ());
-	node->set_property ("name", name());
-	node->set_property ("default-type", _default_type);
-	node->set_property ("strict-io", _strict_io);
+	node->set_property (X_("id"), id ());
+	node->set_property (X_("name"), name());
+	node->set_property (X_("default-type"), _default_type);
+	node->set_property (X_("strict-io"), _strict_io);
 
 	node->add_child_nocopy (_presentation_info.get_state());
 
-	node->set_property ("active", _active);
-	node->set_property ("denormal-protection", _denormal_protection);
-	node->set_property ("meter-point", _meter_point);
-	node->set_property ("disk-io-point", _disk_io_point);
+	node->set_property (X_("active"), _active);
+	node->set_property (X_("denormal-protection"), _denormal_protection);
+	node->set_property (X_("meter-point"), _meter_point);
+	node->set_property (X_("disk-io-point"), _disk_io_point);
 
-	node->set_property ("meter-type", _meter_type);
+	node->set_property (X_("meter-type"), _meter_type);
 
 	if (_route_group) {
-		node->set_property ("route-group", _route_group->name());
+		node->set_property (X_("route-group"), _route_group->name());
 	}
 
 	node->add_child_nocopy (_solo_control->get_state ());
