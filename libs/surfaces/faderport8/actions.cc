@@ -90,6 +90,7 @@ FaderPort8::setup_actions ()
 	BindFunction (BtnATouch, released, button_automation, ARDOUR::Touch);
 	BindFunction (BtnARead, released, button_automation, ARDOUR::Play);
 	BindFunction (BtnAWrite, released, button_automation, ARDOUR::Write);
+	BindFunction (BtnALatch, released, button_automation, ARDOUR::Latch);
 
 	_ctrls.button (FP8Controls::BtnEncoder).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_encoder, this));
 	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_parameter, this));
