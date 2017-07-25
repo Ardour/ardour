@@ -1035,7 +1035,7 @@ Session::set_track_loop (bool yn)
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->hidden()) {
+		if (tr && !tr->is_private_route()) {
 			tr->set_loop (yn ? loc : 0);
 		}
 	}
@@ -1863,7 +1863,7 @@ Session::use_sync_source (Slave* new_slave)
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->hidden()) {
+		if (tr && !tr->is_private_route()) {
 			if (tr->realtime_speed_change()) {
 				non_rt_required = true;
 			}

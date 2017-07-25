@@ -1832,7 +1832,7 @@ Session::set_auto_loop_location (Location* location)
 		boost::shared_ptr<RouteList> rl = routes.reader ();
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && !tr->hidden()) {
+			if (tr && !tr->is_private_route()) {
 				tr->set_loop (location);
 			}
 		}
