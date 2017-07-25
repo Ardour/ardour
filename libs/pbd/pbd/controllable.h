@@ -50,7 +50,7 @@ namespace PBD {
  *
  */
 class LIBPBD_API Controllable : public PBD::StatefulDestructible {
-  public:
+public:
 	enum Flag {
 		Toggle = 0x1,
 		GainLike = 0x2,
@@ -140,7 +140,6 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	std::string name()      const { return _name; }
 
 	bool touching () const { return _touching; }
-	void set_touching (bool yn) { _touching = yn; }
 
 	bool is_toggle() const { return _flags & Toggle; }
 	bool is_gain_like() const { return _flags & GainLike; }
@@ -156,7 +155,11 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	static Controllable* by_name (const std::string&);
         static const std::string xml_node_name;
 
-  private:
+protected:
+	void set_touching (bool yn) { _touching = yn; }
+
+private:
+
 	std::string _name;
 	std::string _units;
 	Flag        _flags;

@@ -266,42 +266,41 @@ AutomationControl::set_automation_state (AutoState as)
 }
 
 void
-AutomationControl::start_touch(double when)
+AutomationControl::start_touch (double when)
 {
-	if (!_list) {
+	if (!_list || touching ()) {
 		return;
 	}
 
-	if (!touching()) {
-		if (alist()->automation_state() == Touch) {
-			/* subtle. aligns the user value with the playback and
-			 * use take actual value (incl masters).
-			 *
-			 * Touch + hold writes inverse curve of master-automation
-			 * using AutomationWatch::timer ()
-			 */
-			AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
-			alist()->start_touch (when);
-			if (!_desc.toggled) {
-				AutomationWatch::instance().add_automation_watch (shared_from_this());
-			}
+	if (alist()->automation_state() == Touch) {
+		/* subtle. aligns the user value with the playback and
+		 * use take actual value (incl masters).
+		 *
+		 * Touch + hold writes inverse curve of master-automation
+		 * using AutomationWatch::timer ()
+		 */
+		AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
+		alist()->start_touch (when);
+		if (!_desc.toggled) {
+			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		}
 		set_touching (true);
 	}
 }
 
 void
-AutomationControl::stop_touch(double when)
+AutomationControl::stop_touch (double when)
 {
-	if (!_list) return;
-	if (touching()) {
-		set_touching (false);
+	if (!_list || !touching ()) {
+		return;
+	}
 
-		if (alist()->automation_state() == Touch) {
-			alist()->stop_touch (when);
-			if (!_desc.toggled) {
-				AutomationWatch::instance().remove_automation_watch (shared_from_this());
-			}
+	set_touching (false);
+
+	if (alist()->automation_state() == Touch) {
+		alist()->stop_touch (when);
+		if (!_desc.toggled) {
+			AutomationWatch::instance().remove_automation_watch (shared_from_this());
 		}
 	}
 }
