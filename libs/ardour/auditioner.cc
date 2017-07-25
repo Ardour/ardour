@@ -246,6 +246,14 @@ Auditioner::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 
 	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, !_session.transport_stopped());
 
+	/* note: auditioner never writes to disk, so we don't care about the
+	 * disk writer status (it's buffers will always have no data in them).
+	 */
+
+	if (_disk_reader->need_butler()) {
+		need_butler = true;
+	}
+
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
