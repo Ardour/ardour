@@ -233,12 +233,11 @@ FP8Controls::initialize ()
 	button (BtnARead).set_color (0x00ff00ff);
 	button (BtnAWrite).set_color (0xff0000ff);
 	button (BtnATouch).set_color (0xff8800ff);
+	button (BtnALatch).set_color (0xffff00ff);
 
 	button (BtnUser1).set_color (0x0000ffff);
 	button (BtnUser2).set_color (0x0000ffff);
 	button (BtnUser3).set_color (0x0000ffff);
-
-	button (BtnALatch).set_color (0x0000ffff);
 
 	button (BtnBypass).set_color (0x888888ff);
 	button (BtnBypassAll).set_color (0xffffffff);
