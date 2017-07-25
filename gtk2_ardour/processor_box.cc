@@ -3377,7 +3377,7 @@ ProcessorBox::set_disk_io_position (DiskIOPoint diop)
 {
 	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_route);
 	if (t) {
-		t->set_disk_io_position (diop);
+		t->set_disk_io_point (diop);
 	}
 }
 
