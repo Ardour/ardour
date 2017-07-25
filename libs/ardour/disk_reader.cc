@@ -55,6 +55,8 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
         , overwrite_queued (false)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
+	file_frame[DataType::AUDIO] = 0;
+	file_frame[DataType::MIDI] = 0;
 }
 
 DiskReader::~DiskReader ()
@@ -583,8 +585,7 @@ DiskReader::overwrite_existing_buffers ()
 		midi_playlist()->resolve_note_trackers (*_midi_buf, overwrite_frame);
 
 		midi_read (overwrite_frame, _chunk_frames, false);
-
-		file_frame = overwrite_frame; // it was adjusted by ::midi_read()
+		file_frame[DataType::MIDI] = overwrite_frame; // overwrite_frame was adjusted by ::midi_read() to the new position
 	}
 
 	_pending_overwrite = false;
@@ -617,7 +618,8 @@ DiskReader::seek (framepos_t frame, bool complete_refill)
 	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
 
 	playback_sample = frame;
-	file_frame = frame;
+	file_frame[DataType::AUDIO] = frame;
+	file_frame[DataType::MIDI] = frame;
 
 	if (complete_refill) {
 		/* call _do_refill() to refill the entire buffer, using
@@ -912,9 +914,11 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 		return 0;
 	}
 
+	framepos_t ffa = file_frame[DataType::AUDIO];
+
 	if (reversed) {
 
-		if (file_frame == 0) {
+		if (ffa == 0) {
 
 			/* at start: nothing to do but fill with silence */
 
@@ -931,14 +935,14 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 			return 0;
 		}
 
-		if (file_frame < total_space) {
+		if (ffa < total_space) {
 
 			/* too close to the start: read what we can,
 			   and then zero fill the rest
 			*/
 
-			zero_fill = total_space - file_frame;
-			total_space = file_frame;
+			zero_fill = total_space - ffa;
+			total_space = ffa;
 
 		} else {
 
@@ -947,7 +951,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 
 	} else {
 
-		if (file_frame == max_framepos) {
+		if (ffa == max_framepos) {
 
 			/* at end: nothing to do but fill with silence */
 
@@ -964,12 +968,12 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 			return 0;
 		}
 
-		if (file_frame > max_framepos - total_space) {
+		if (ffa > max_framepos - total_space) {
 
 			/* to close to the end: read what we can, and zero fill the rest */
 
-			zero_fill = total_space - (max_framepos - file_frame);
-			total_space = max_framepos - file_frame;
+			zero_fill = total_space - (max_framepos - ffa);
+			total_space = max_framepos - ffa;
 
 		} else {
 			zero_fill = 0;
@@ -1033,7 +1037,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 		}
 
 		ts = total_space;
-		file_frame_tmp = file_frame;
+		file_frame_tmp = ffa;
 
 		buf1 = vector.buf[0];
 		len1 = vector.len[0];
@@ -1051,7 +1055,6 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 				ret = -1;
 				goto out;
 			}
-
 			chan->buf->increment_write_ptr (to_read);
 			ts -= to_read;
 		}
@@ -1082,8 +1085,8 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	// elapsed = g_get_monotonic_time () - before;
 	// cerr << '\t' << name() << ": bandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
 
-	file_frame = file_frame_tmp;
-	assert (file_frame >= 0);
+	file_frame[DataType::AUDIO] = file_frame_tmp;
+	assert (file_frame[DataType::AUDIO] >= 0);
 
 	ret = ((total_space - samples_to_read) > _chunk_frames);
 
@@ -1430,7 +1433,7 @@ DiskReader::refill_midi ()
 	size_t  write_space = _midi_buf->write_space();
 	const bool reversed    = _session.transport_speed() < 0.0f;
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame[DataType::MIDI]));
 
 	/* no space to write */
 	if (write_space == 0) {
@@ -1443,7 +1446,9 @@ DiskReader::refill_midi ()
 
 	/* at end: nothing to do */
 
-	if (file_frame == max_framepos) {
+	framepos_t ffm = file_frame[DataType::MIDI];
+
+	if (ffm == max_framepos) {
 		return 0;
 	}
 
@@ -1457,12 +1462,14 @@ DiskReader::refill_midi ()
 
 	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
 
-	to_read = min (to_read, (framecnt_t) (max_framepos - file_frame));
+	to_read = min (to_read, (framecnt_t) (max_framepos - ffm));
 	to_read = min (to_read, (framecnt_t) write_space);
 
-	if (midi_read (file_frame, to_read, reversed)) {
+	if (midi_read (ffm, to_read, reversed)) {
 		ret = -1;
 	}
+
+	file_frame[DataType::MIDI] = ffm;
 
 	return ret;
 }
