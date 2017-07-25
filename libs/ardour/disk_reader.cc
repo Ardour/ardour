@@ -1420,7 +1420,6 @@ DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
 		}
 
 		dur -= this_read;
-		//offset += this_read;
 	}
 
 	return 0;
