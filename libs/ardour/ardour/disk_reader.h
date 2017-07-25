@@ -40,7 +40,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	~DiskReader ();
 
 	bool set_name (std::string const & str);
-	std::string display_name() const { return std::string (_("reader")); }
+	std::string display_name() const { return std::string (_("player")); }
 
 	static framecnt_t chunk_frames() { return _chunk_frames; }
 	static framecnt_t default_chunk_frames ();
