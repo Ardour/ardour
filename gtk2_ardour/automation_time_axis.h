@@ -164,6 +164,7 @@ protected:
 	Gtk::CheckMenuItem*     auto_play_item;
 	Gtk::CheckMenuItem*     auto_touch_item;
 	Gtk::CheckMenuItem*     auto_write_item;
+	Gtk::CheckMenuItem*     auto_latch_item;
 
 	Gtk::CheckMenuItem* mode_discrete_item;
 	Gtk::CheckMenuItem* mode_line_item;

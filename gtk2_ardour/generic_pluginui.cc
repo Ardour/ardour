@@ -107,6 +107,8 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_write_all_button.set_name (X_("generic button"));
 	automation_touch_all_button.set_text(_("Touch"));
 	automation_touch_all_button.set_name (X_("generic button"));
+	automation_latch_all_button.set_text(_("Touch"));
+	automation_latch_all_button.set_name (X_("generic button"));
 
 	Label* l = manage (new Label (_("All Automation")));
 	l->set_alignment (1.0, 0.5);
@@ -115,6 +117,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_hbox->pack_start (automation_play_all_button, false, false);
 	automation_hbox->pack_start (automation_write_all_button, false, false);
 	automation_hbox->pack_start (automation_touch_all_button, false, false);
+	automation_hbox->pack_start (automation_latch_all_button, false, false);
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->set_homogeneous (false);
@@ -319,6 +322,7 @@ GenericPluginUI::build ()
 	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
 	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
 	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
+	automation_latch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Latch));
 
 	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
@@ -613,7 +617,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 		return;
 	}
 
-	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
+	switch (state & (ARDOUR::Off|Play|Touch|Write|Latch)) {
 	case ARDOUR::Off:
 		cui->automate_button.set_text (S_("Automation|Manual"));
 		break;
@@ -625,6 +629,9 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 		break;
 	case Touch:
 		cui->automate_button.set_text (_("Touch"));
+		break;
+	case Latch:
+		cui->automate_button.set_text (_("Latch"));
 		break;
 	default:
 		cui->automate_button.set_text (_("???"));
@@ -986,6 +993,8 @@ GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
+	items.push_back (MenuElem (_("Latch"),
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Latch, cui)));
 
 	anchored_menu_popup(automation_menu, &cui->automate_button, cui->automate_button.get_text(),
 	                    1, ev->time);

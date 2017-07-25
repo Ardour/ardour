@@ -154,6 +154,9 @@ PannerUI::build_astate_menu ()
 	pan_astate_menu->items().push_back (MenuElem (_("Touch"), sigc::bind (
 			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
 			(AutoState) Touch)));
+	pan_astate_menu->items().push_back (MenuElem (_("Latch"), sigc::bind (
+			sigc::mem_fun (_panner.get(), &Panner::set_automation_state),
+			(AutoState) Latch)));
 
 }
 
@@ -568,6 +571,9 @@ PannerUI::_astate_string (AutoState state, bool shrt)
 		break;
 	case Touch:
 		sstr = (shrt ? "T" : S_("Touch|T"));
+		break;
+	case Latch:
+		sstr = (shrt ? "L" : S_("Latch|L"));
 		break;
 	case Write:
 		sstr = (shrt ? "W" : S_("Write|W"));
