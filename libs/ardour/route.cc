@@ -424,7 +424,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool const meter_already_run = metering_state() == MeteringInput;
 
 	framecnt_t latency = 0;
-	const double speed = _session.transport_speed ();
+	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
