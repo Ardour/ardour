@@ -116,7 +116,7 @@ DiskReader::default_chunk_frames()
 bool
 DiskReader::set_name (string const & str)
 {
-	string my_name = X_("playback:");
+	string my_name = X_("player:");
 	my_name += str;
 
 	if (_name != my_name) {
