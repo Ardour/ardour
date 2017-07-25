@@ -382,7 +382,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 
 	// If we shouldn't play automation defer to distribute_no_automation
 
-	if (!(as & Play || ((as & Touch) && !_panner->touching()))) {
+	if (!((as & Play) || ((as & (Touch | Latch)) && !_panner->touching()))) {
 
 		distribute_no_automation (inbufs, outbufs, nframes, 1.0);
 

@@ -58,19 +58,19 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
 	bool automation_playback() const {
-		return (_auto_state & Play) || ((_auto_state & Touch) && !touching());
+		return (_auto_state & Play) || ((_auto_state & (Touch | Latch)) && !touching());
 	}
 	bool automation_write () const {
-		return ((_auto_state & Write) || ((_auto_state & Touch) && touching()));
+		return ((_auto_state & Write) || ((_auto_state & (Touch | Latch)) && touching()));
 	}
 
 	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	void start_touch (double when);
 	void stop_touch (double when);
-        bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
+	bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
 	bool writing() const { return _auto_state == Write; }
-	bool touch_enabled() const { return _auto_state == Touch; }
+	bool touch_enabled() const { return _auto_state & (Touch | Latch); }
 
 	XMLNode& get_state ();
 	XMLNode& state (bool full_state);
