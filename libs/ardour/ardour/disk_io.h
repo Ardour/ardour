@@ -129,7 +129,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool         _slaved;
 	Location*     loop_location;
 	bool          in_set_state;
-	framepos_t     file_frame;
 	framepos_t     playback_sample;
 	framecnt_t    wrap_buffer_size;
 	framecnt_t    speed_buffer_size;
