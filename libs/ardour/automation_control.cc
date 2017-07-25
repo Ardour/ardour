@@ -253,7 +253,7 @@ AutomationControl::set_automation_state (AutoState as)
 
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
-		} else if (as == Touch) {
+		} else if (as & (Touch | Latch)) {
 			if (alist()->empty()) {
 				Control::set_double (val, _session.current_start_frame (), true);
 				Control::set_double (val, _session.current_end_frame (), true);
@@ -283,7 +283,7 @@ AutomationControl::start_touch (double when)
 		return;
 	}
 
-	if (alist()->automation_state() == Touch) {
+	if (alist()->automation_state() & (Touch | Latch)) {
 		/* subtle. aligns the user value with the playback and
 		 * use take actual value (incl masters).
 		 *
@@ -306,9 +306,13 @@ AutomationControl::stop_touch (double when)
 		return;
 	}
 
+	if (alist()->automation_state() == Latch && _session.transport_rolling ()) {
+		return;
+	}
+
 	set_touching (false);
 
-	if (alist()->automation_state() == Touch) {
+	if (alist()->automation_state() & (Touch | Latch)) {
 		alist()->stop_touch (when);
 		if (!_desc.toggled) {
 			AutomationWatch::instance().remove_automation_watch (shared_from_this());

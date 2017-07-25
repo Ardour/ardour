@@ -1704,6 +1704,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Write", ARDOUR::AutoState(Write))
 		.addConst ("Touch", ARDOUR::AutoState(Touch))
 		.addConst ("Play", ARDOUR::AutoState(Play))
+		.addConst ("Latch", ARDOUR::AutoState(Latch))
 		.endNamespace ()
 
 		.beginNamespace ("AutomationType")

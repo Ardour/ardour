@@ -163,10 +163,11 @@ namespace ARDOUR {
 	};
 
 	enum AutoState {
-		Off = 0x0,
-		Write = 0x1,
-		Touch = 0x2,
-		Play = 0x4
+		Off   = 0x00,
+		Write = 0x01,
+		Touch = 0x02,
+		Play  = 0x04,
+		Latch = 0x08
 	};
 
 	std::string auto_state_to_string (AutoState);

@@ -89,10 +89,10 @@ public:
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
 	bool automation_playback() const {
-		return (_state & Play) || ((_state & Touch) && !touching());
+		return (_state & Play) || ((_state & (Touch | Latch)) && !touching());
 	}
 	bool automation_write () const {
-		return ((_state & Write) || ((_state & Touch) && touching()));
+		return ((_state & Write) || ((_state & (Touch | Latch)) && touching()));
 	}
 
 	PBD::Signal0<void> StateChanged;
@@ -106,7 +106,7 @@ public:
 	void stop_touch (double when);
 	bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
 	bool writing() const { return _state == Write; }
-	bool touch_enabled() const { return _state == Touch; }
+	bool touch_enabled() const { return _state & (Touch | Latch); }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode &, int version);
