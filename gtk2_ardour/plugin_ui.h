@@ -147,6 +147,8 @@ protected:
 	ArdourWidgets::ArdourButton automation_write_all_button;
 	/** a button which sets all controls' automation setting to Touch */
 	ArdourWidgets::ArdourButton automation_touch_all_button;
+	/** a button which sets all controls' automation setting to Latch */
+	ArdourWidgets::ArdourButton automation_latch_all_button;
 
 	void set_latency_label ();
 
