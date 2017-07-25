@@ -85,7 +85,7 @@ Track::init ()
                 return -1;
         }
 
-        use_new_playlist ();
+        use_new_playlist (data_type());
 
         /* disk writer and reader processors will be added when Route calls
          * add_processors_oh_children_of_mine ().
@@ -909,10 +909,10 @@ Track::use_copy_playlist ()
 }
 
 int
-Track::use_new_playlist ()
+Track::use_new_playlist (DataType dt)
 {
 	string newname;
-	boost::shared_ptr<Playlist> playlist = _playlists[data_type()];
+	boost::shared_ptr<Playlist> playlist = _playlists[dt];
 
 	if (playlist) {
 		newname = Playlist::bump_name (playlist->name(), _session);
@@ -920,13 +920,13 @@ Track::use_new_playlist ()
 		newname = Playlist::bump_name (_name, _session);
 	}
 
-	playlist = PlaylistFactory::create (data_type(), _session, newname, hidden());
+	playlist = PlaylistFactory::create (dt, _session, newname, is_private_route());
 
 	if (!playlist) {
 		return -1;
 	}
 
-	return use_playlist (data_type(), playlist);
+	return use_playlist (dt, playlist);
 }
 
 void
