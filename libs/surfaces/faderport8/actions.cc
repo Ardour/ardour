@@ -331,9 +331,7 @@ FaderPort8::button_solo_clear ()
 			if (!ac) {
 				continue;
 			}
-			if (ac->automation_state() == Touch && !ac->touching ()) {
-				ac->start_touch (ac->session().transport_frame());
-			}
+			ac->start_touch (ac->session().transport_frame());
 			cl->push_back (ac);
 		}
 		if (!cl->empty()) {
@@ -358,9 +356,7 @@ FaderPort8::button_mute_clear ()
 				continue;
 			}
 			cl->push_back (ac);
-			if (ac->automation_state() == Touch && !ac->touching ()) {
-				ac->start_touch (ac->session().transport_frame());
-			}
+			ac->start_touch (ac->session().transport_frame());
 		}
 		if (!cl->empty()) {
 			session->set_controls (cl, 1.0, PBD::Controllable::NoGroup);
@@ -400,9 +396,7 @@ FaderPort8::handle_encoder_pan (int steps)
 			ac = s->pan_azimuth_control ();
 		}
 		if (ac) {
-			if (ac->automation_state() == Touch && !ac->touching ()) {
-				ac->start_touch (ac->session().transport_frame());
-			}
+			ac->start_touch (ac->session().transport_frame());
 			if (steps == 0) {
 				ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
 			} else {
@@ -426,9 +420,7 @@ FaderPort8::handle_encoder_link (int steps)
 	}
 
 	double v = ac->internal_to_interface (ac->get_value());
-	if (ac->automation_state() == Touch && !ac->touching ()) {
-		ac->start_touch (ac->session().transport_frame());
-	}
+	ac->start_touch (ac->session().transport_frame());
 
 	if (steps == 0) {
 		ac->set_value (ac->normal(), PBD::Controllable::UseGroup);
@@ -535,9 +527,7 @@ FaderPort8::button_encoder ()
 					ac = session->master_out()->gain_control ();
 				}
 				if (ac) {
-					if (ac->automation_state() == Touch && !ac->touching ()) {
-						ac->start_touch (ac->session().transport_frame());
-					}
+					ac->start_touch (ac->session().transport_frame());
 					ac->set_value (ac->normal(), PBD::Controllable::NoGroup);
 				}
 			}
@@ -617,9 +607,7 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 				if (ac) {
 					double v = ac->internal_to_interface (ac->get_value());
 					v = std::max (0.0, std::min (1.0, v + steps * (neg ? -.01 : .01)));
-					if (ac->automation_state() == Touch && !ac->touching ()) {
-						ac->start_touch (ac->session().transport_frame());
-					}
+					ac->start_touch (ac->session().transport_frame());
 					ac->set_value (ac->interface_to_internal(v), PBD::Controllable::NoGroup);
 				}
 			}

@@ -2833,9 +2833,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		if (control) {
 			if (touch) {
 				//start touch
-				if (control->automation_state() == Touch && !control->touching ()) {
-					control->start_touch (control->session().transport_frame());
-				}
+				control->start_touch (control->session().transport_frame());
 				ret = 0;
 			} else {
 				// end touch
