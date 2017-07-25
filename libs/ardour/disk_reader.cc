@@ -29,6 +29,7 @@
 #include "ardour/disk_reader.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_playlist.h"
+#include "ardour/midi_track.h"
 #include "ardour/pannable.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_factory.h"
@@ -1340,10 +1341,10 @@ DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
 	framepos_t effective_start = start;
 	Evoral::Range<framepos_t>*  loop_range (0);
 
-//	MidiTrack*         mt     = dynamic_cast<MidiTrack*>(_track);
-//	MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
-	MidiChannelFilter* filter = 0;
+	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
 
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
+	MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
 	frameoffset_t loop_offset = 0;
 
 	if (!reversed && loc) {
