@@ -65,6 +65,8 @@ namespace ARDOUR {
 class Amp;
 class DelayLine;
 class Delivery;
+class DiskReader;
+class DiskWriter;
 class IOProcessor;
 class Panner;
 class PannerShell;
@@ -184,6 +186,9 @@ public:
 
 	void         set_meter_type (MeterType t) { _meter_type = t; }
 	MeterType    meter_type() const { return _meter_type; }
+
+	void set_disk_io_point (DiskIOPoint);
+	DiskIOPoint disk_io_point() const { return _disk_io_point; }
 
 	/* Processors */
 
@@ -631,6 +636,10 @@ public:
 	boost::shared_ptr<InternalReturn> _intreturn;
 	boost::shared_ptr<MonitorProcessor> _monitor_control;
 	boost::shared_ptr<Pannable> _pannable;
+	boost::shared_ptr<DiskReader> _disk_reader;
+	boost::shared_ptr<DiskWriter> _disk_writer;
+
+	DiskIOPoint    _disk_io_point;
 
 	enum {
 		EmitNone = 0x00,
@@ -736,8 +745,6 @@ private:
 	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
 
 	void setup_invisible_processors ();
-	virtual void setup_invisible_processors_oh_children_of_mine (ProcessorList&) {}
-	virtual void add_processors_oh_children_of_mine () {}
 
 	void unpan ();
 

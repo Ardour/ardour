@@ -47,6 +47,8 @@
 #include "ardour/capturing_processor.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/event_type_map.h"
 #include "ardour/gain_control.h"
 #include "ardour/internal_return.h"
@@ -96,6 +98,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _signal_latency_at_trim_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
+	, _disk_io_point (DiskIOPreFader)
 	, _pending_process_reorder (0)
 	, _pending_signals (0)
 	, _pending_declick (true)
@@ -237,10 +240,6 @@ Route::init ()
 		_monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
 	}
-
-	/* give derived classes a chance to add processors before we configure */
-
-	add_processors_oh_children_of_mine ();
 
 	/* now that we have _meter, its safe to connect to this */
 
@@ -2339,6 +2338,7 @@ Route::state(bool full_state)
 	node->set_property ("active", _active);
 	node->set_property ("denormal-protection", _denormal_protection);
 	node->set_property ("meter-point", _meter_point);
+	node->set_property ("disk-io-point", _disk_io_point);
 
 	node->set_property ("meter-type", _meter_type);
 
@@ -2493,6 +2493,17 @@ Route::set_state (const XMLNode& node, int version)
 		if (_meter) {
 			_meter->set_display_to_user (_meter_point == MeterCustom);
 		}
+	}
+
+	DiskIOPoint diop;
+	if (node.get_property (X_("disk-io-point"), diop)) {
+		if (_disk_writer) {
+			_disk_writer->set_display_to_user (diop == DiskIOCustom);
+		}
+		if (_disk_reader) {
+			_disk_reader->set_display_to_user (diop == DiskIOCustom);
+		}
+		set_disk_io_point (diop);
 	}
 
 	node.get_property (X_("meter-type"), _meter_type);
@@ -2834,6 +2845,12 @@ Route::set_processor_state (const XMLNode& node)
 		} else if (prop->value() == "capture") {
 			/* CapturingProcessor should never be restored, it's always
 			   added explicitly when needed */
+		} else if (prop->value() == "diskreader" && _disk_reader) {
+			_disk_reader->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_disk_reader);
+		} else if (prop->value() == "diskwriter" && _disk_writer) {
+			_disk_writer->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_disk_writer);
 		} else {
 			set_processor_state (**niter, prop, new_order, must_configure);
 		}
@@ -4501,6 +4518,8 @@ Route::setup_invisible_processors ()
 	 */
 
 	ProcessorList new_processors;
+	ProcessorList::iterator dr;
+	ProcessorList::iterator dw;
 
 	/* find visible processors */
 
@@ -4620,9 +4639,12 @@ Route::setup_invisible_processors ()
 
 	/* TRIM CONTROL */
 
+	ProcessorList::iterator trim = new_processors.end();
+
 	if (_trim && _trim->active()) {
 		assert (!_trim->display_to_user ());
 		new_processors.push_front (_trim);
+		trim = new_processors.begin();
 	}
 
 	/* INTERNAL RETURN */
@@ -4643,7 +4665,46 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_capturing_processor);
 	}
 
-	setup_invisible_processors_oh_children_of_mine (new_processors);
+	/* DISK READER & WRITER (for Track objects) */
+
+	if (_disk_reader || _disk_writer) {
+		switch (_disk_io_point) {
+		case DiskIOPreFader:
+			if (trim != new_processors.end()) {
+				/* insert AFTER TRIM */
+				ProcessorList::iterator insert_pos = trim;
+				++insert_pos;
+				if (_disk_writer) {
+					new_processors.insert (insert_pos, _disk_writer);
+				}
+				if (_disk_reader) {
+					new_processors.insert (insert_pos, _disk_reader);
+				}
+			} else {
+				if (_disk_writer) {
+					new_processors.push_front (_disk_writer);
+				}
+				if (_disk_reader) {
+					new_processors.push_front (_disk_reader);
+				}
+			}
+			break;
+		case DiskIOPostFader:
+			/* insert BEFORE main outs */
+			if (_disk_writer) {
+				new_processors.insert (main, _disk_writer);
+			}
+			if (_disk_reader) {
+				new_processors.insert (main, _disk_reader);
+			}
+			break;
+		case DiskIOCustom:
+			/* reader and writer are visible under this condition, so they
+			 * are not invisible and thus not handled here.
+			 */
+			break;
+		}
+	}
 
 	_processors = new_processors;
 
@@ -5554,4 +5615,39 @@ Route::slavables () const
 	rv.push_back (_mute_control);
 	rv.push_back (_solo_control);
 	return rv;
+}
+
+void
+Route::set_disk_io_point (DiskIOPoint diop)
+{
+	bool display = false;
+
+	cerr << "set disk io to " << enum_2_string (diop) << endl;
+
+	switch (diop) {
+	case DiskIOCustom:
+		display = true;
+		break;
+	default:
+		display = false;
+	}
+
+	if (_disk_writer) {
+		_disk_writer->set_display_to_user (display);
+	}
+
+	if (_disk_reader) {
+		_disk_reader->set_display_to_user (display);
+	}
+
+	const bool changed = (diop != _disk_io_point);
+
+	_disk_io_point = diop;
+
+	if (changed) {
+		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+		configure_processors (0);
+	}
+
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
