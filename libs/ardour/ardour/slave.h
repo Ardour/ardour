@@ -364,7 +364,7 @@ public:
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
 	bool equal_ltc_frame_time(LTCFrame *a, LTCFrame *b);
-	void reset();
+	void reset (bool with_ts = true);
 	void resync_xrun();
 	void resync_latency();
 	void parse_timecode_offset();

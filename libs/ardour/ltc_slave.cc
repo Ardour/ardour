@@ -143,11 +143,13 @@ LTC_Slave::resync_latency()
 }
 
 void
-LTC_Slave::reset()
+LTC_Slave::reset (bool with_ts)
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC reset()\n");
-	last_timestamp = 0;
-	current_delta = 0;
+	if (with_ts) {
+		last_timestamp = 0;
+		current_delta = 0;
+	}
 	transport_direction = 0;
 	ltc_speed = 0;
 	engine_dll_initstate = 0;
@@ -466,7 +468,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 			DEBUG_TRACE (DEBUG::LTC, string_compose("engine skipped %1 frames. Feeding silence to LTC parser.\n", skip));
 			if (skip >= 8192) skip = 8192;
 			unsigned char sound[8192];
-			memset(sound, 0, sizeof(char) * skip);
+			memset(sound, 0x80, sizeof(char) * skip);
 			ltc_decoder_write(decoder, sound, nframes, now);
 		} else if (skip != 0) {
 			/* this should never happen. it may if monotonic_cnt, now overflow on 64bit */
@@ -548,9 +550,8 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (((pos < 0) || (labs(current_delta) > 2 * session.frame_rate()))) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC large drift: %1\n", current_delta));
-		reset();
+		reset(false);
 		speed = 0;
-		pos = session.transport_frame();
 		return true;
 	}
 
