@@ -340,6 +340,8 @@ Automatable::protect_automation ()
 void
 Automatable::non_realtime_locate (framepos_t now)
 {
+	bool rolling = _a_session.transport_rolling ();
+
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 
 		boost::shared_ptr<AutomationControl> c
@@ -348,8 +350,34 @@ Automatable::non_realtime_locate (framepos_t now)
 			boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-			if (l) {
-				l->start_write_pass (now);
+			if (!l) {
+				continue;
+			}
+
+			bool am_touching = c->touching ();
+			if (rolling && am_touching) {
+			/* when locating while rolling, and writing automation,
+			 * start a new write pass.
+			 * compare to compare to non_realtime_transport_stop()
+			 */
+				const bool list_did_write = !l->in_new_write_pass ();
+				c->stop_touch (-1); // time is irrelevant
+				l->stop_touch (-1);
+				c->commit_transaction (list_did_write);
+				l->write_pass_finished (now, Config->get_automation_thinning_factor ());
+
+				if (l->automation_state () == Write) {
+					l->set_automation_state (Touch);
+				}
+				if (l->automation_playback ()) {
+					c->set_value_unchecked (c->list ()->eval (now));
+				}
+			}
+
+			l->start_write_pass (now);
+
+			if (rolling && am_touching) {
+				c->start_touch (now);
 			}
 		}
 	}
