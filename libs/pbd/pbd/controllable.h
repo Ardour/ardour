@@ -95,13 +95,13 @@ public:
 	/** Get and Set `internal' value
 	 *
 	 * All derived classes must implement this.
-         *
-         * Basic derived classes will ignore @param group_override,
-         * but more sophisticated children, notably those that
-         * proxy the value setting logic via an object that is aware of group
-         * relationships between this control and others, will find it useful.
-         */
-        virtual void set_value (double, GroupControlDisposition group_override) = 0;
+	 *
+	 * Basic derived classes will ignore @param group_override,
+	 * but more sophisticated children, notably those that
+	 * proxy the value setting logic via an object that is aware of group
+	 * relationships between this control and others, will find it useful.
+	 */
+	virtual void set_value (double, GroupControlDisposition group_override) = 0;
 	virtual double get_value (void) const = 0;
 
 	/** This is used when saving state. By default it just calls
@@ -140,23 +140,28 @@ public:
 	std::string name()      const { return _name; }
 
 	bool touching () const { return _touching; }
+	PBD::Signal0<void> TouchChanged;
 
 	bool is_toggle() const { return _flags & Toggle; }
 	bool is_gain_like() const { return _flags & GainLike; }
 
-        virtual double lower() const { return 0.0; }
-        virtual double upper() const { return 1.0; }
-        virtual double normal() const { return 0.0; }  //the default value
+	virtual double lower() const { return 0.0; }
+	virtual double upper() const { return 1.0; }
+	virtual double normal() const { return 0.0; }  //the default value
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
-        static const std::string xml_node_name;
+	static const std::string xml_node_name;
 
 protected:
-	void set_touching (bool yn) { _touching = yn; }
+	void set_touching (bool yn) {
+		if (_touching == yn) { return; }
+		_touching = yn;
+		TouchChanged (); /* EMIT SIGNAL */
+	}
 
 private:
 
@@ -169,17 +174,16 @@ private:
 	static void remove (Controllable*);
 
 	typedef std::set<PBD::Controllable*> Controllables;
-        static Glib::Threads::RWLock registry_lock;
+	static Glib::Threads::RWLock registry_lock;
 	static Controllables registry;
 };
 
 /* a utility class for the occasions when you need but do not have
-   a Controllable
-*/
-
+ * a Controllable
+ */
 class LIBPBD_API IgnorableControllable : public Controllable
 {
-  public:
+public:
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
 
