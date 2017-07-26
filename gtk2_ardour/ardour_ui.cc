@@ -2766,6 +2766,33 @@ ARDOUR_UI::save_session_as ()
 		return;
 	}
 
+	if (_session->dirty()) {
+		vector<string> actions;
+		actions.push_back (_("Abort save-as"));
+		actions.push_back (_("Don't save now, just save-as"));
+		actions.push_back (_("Save it first"));
+		switch (ask_about_saving_session(actions)) {
+			case -1:
+				return;
+				break;
+			case 1:
+				if (save_state_canfail ("")) {
+					MessageDialog msg (_main_window,
+							string_compose (_("\
+%1 was unable to save your session.\n\n\
+If you still wish to proceeed, please use the\n\n\
+\"Don't save now\" option."), PROGRAM_NAME));
+					pop_back_splash(msg);
+					msg.run ();
+					return;
+				}
+				// no break
+			case 0:
+				_session->remove_pending_capture_state ();
+				break;
+		}
+	}
+
 	if (!save_as_dialog) {
 		save_as_dialog = new SaveAsDialog;
 	}
@@ -2880,6 +2907,9 @@ ARDOUR_UI::quick_snapshot_session (bool switch_to_it)
 		time (&n);
 		localtime_r (&n, &local_time);
 		strftime (timebuf, sizeof(timebuf), "%FT%H.%M.%S", &local_time);
+		if (switch_to_it && _session->dirty ()) {
+			save_state_canfail ("");
+		}
 
 		save_state (timebuf, switch_to_it);
 }
@@ -2932,8 +2962,34 @@ ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to
 void
 ARDOUR_UI::snapshot_session (bool switch_to_it)
 {
-	Prompter prompter (true);
+	if (switch_to_it && _session->dirty()) {
+		vector<string> actions;
+		actions.push_back (_("Abort saving snapshot"));
+		actions.push_back (_("Don't save now, just snapshot"));
+		actions.push_back (_("Save it first"));
+		switch (ask_about_saving_session(actions)) {
+			case -1:
+				return;
+				break;
+			case 1:
+				if (save_state_canfail ("")) {
+					MessageDialog msg (_main_window,
+							string_compose (_("\
+%1 was unable to save your session.\n\n\
+If you still wish to proceeed, please use the\n\n\
+\"Don't save now\" option."), PROGRAM_NAME));
+					pop_back_splash(msg);
+					msg.run ();
+					return;
+				}
+				// no break
+			case 0:
+				_session->remove_pending_capture_state ();
+				break;
+		}
+	}
 
+	Prompter prompter (true);
 	prompter.set_name ("Prompter");
 	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
 	if (switch_to_it) {
