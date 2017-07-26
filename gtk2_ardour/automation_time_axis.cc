@@ -548,9 +548,9 @@ AutomationTimeAxisView::hide_clicked ()
 {
 	hide_button.set_sensitive(false);
 	set_marked_for_display (false);
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(parent);
-	if (rtv) {
-		rtv->request_redraw ();
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*>(parent);
+	if (stv) {
+		stv->request_redraw ();
 	}
 	hide_button.set_sensitive(true);
 }
