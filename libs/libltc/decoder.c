@@ -2,7 +2,7 @@
    libltc - en+decode linear timecode
 
    Copyright (C) 2005 Maarten de Boer <mdeboer@iua.upf.es>
-   Copyright (C) 2006-2012 Robin Gareus <robin@gareus.org>
+   Copyright (C) 2006-2016 Robin Gareus <robin@gareus.org>
    Copyright (C) 2008-2009 Jan <jan@geheimwerk.de>
 
    Binary constant generator macro for endianess conversion
@@ -107,7 +107,7 @@ static double calc_volume_db(LTCDecoder *d) {
 	return (20.0 * log10((d->snd_to_biphase_max - d->snd_to_biphase_min) / 255.0));
 }
 
-static void parse_ltc(LTCDecoder *d, unsigned char bit, int offset, ltc_off_t posinfo) {
+static void parse_ltc(LTCDecoder *d, unsigned char bit, ltc_off_t offset, ltc_off_t posinfo) {
 	int bit_num, bit_set, byte_num;
 
 	if (d->bit_cnt == 0) {
@@ -248,7 +248,7 @@ static void parse_ltc(LTCDecoder *d, unsigned char bit, int offset, ltc_off_t po
 	}
 }
 
-static inline void biphase_decode2(LTCDecoder *d, int offset, ltc_off_t pos) {
+static inline void biphase_decode2(LTCDecoder *d, ltc_off_t offset, ltc_off_t pos) {
 
 	d->biphase_tics[d->biphase_tic] = d->snd_to_biphase_period;
 	d->biphase_tic = (d->biphase_tic + 1) % LTC_FRAME_BIT_COUNT;

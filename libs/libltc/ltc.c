@@ -1,7 +1,7 @@
 /*
    libltc - en+decode linear timecode
 
-   Copyright (C) 2006-2012 Robin Gareus <robin@gareus.org>
+   Copyright (C) 2006-2015 Robin Gareus <robin@gareus.org>
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU Lesser General Public License as
@@ -191,7 +191,7 @@ int ltc_encoder_reinit(LTCEncoder *e, double sample_rate, double fps, enum LTC_T
 		ltc_frame_set_parity(&e->f, standard);
 	}
 
-	if (rint(fps*100) == 2997)
+	if ((int)rint(fps * 100.0) == 2997)
 		e->f.dfbit = 1;
 	else
 		e->f.dfbit = 0;
