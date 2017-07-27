@@ -598,7 +598,7 @@ Session::follow_slave (pframes_t nframes)
 		*/
 
 		if (_slave_state == Running) {
-			calculate_moving_average_of_slave_delta(dir, this_delta);
+			calculate_moving_average_of_slave_delta(dir, abs(this_delta));
 		}
 	}
 
@@ -651,8 +651,8 @@ Session::follow_slave (pframes_t nframes)
 									   slave_speed));
 			}
 
-			if (!actively_recording() && (framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => silent motion\n", abs(average_slave_delta), _slave->resolution()));
+			if (!actively_recording() && (framecnt_t) average_slave_delta > _slave->resolution()) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => silent motion\n", average_slave_delta, _slave->resolution()));
 				/* run routes as normal, but no disk output */
 				cerr << "sync too far apart " << average_slave_delta << ", NO disk audio for now\n";
 				DiskReader::set_no_disk_output (true);
@@ -709,7 +709,7 @@ Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta
 		average_slave_delta /= (int32_t) delta_accumulator_size;
 		if (average_slave_delta < 0L) {
 			average_dir = -1;
-			average_slave_delta = abs(average_slave_delta);
+			average_slave_delta = average_slave_delta;
 		} else {
 			average_dir = 1;
 		}
