@@ -467,6 +467,20 @@ ControlList::start_write_pass (double when)
 	*/
 
 	unlocked_invalidate_insert_iterator ();
+
+	/* except if we're already in an active write-pass.
+	 *
+	 * invalid iterator == end() the iterator is set to the correct
+	 * position in ControlList::add IFF (_in_write_pass && new_write_pass)
+	 */
+	if (_in_write_pass && !new_write_pass) {
+#if 1
+		add_guard_point (when, 0); // also sets most_recent_insert_iterator
+#else
+		const ControlEvent cp (when, 0.0);
+		most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+#endif
+	}
 }
 
 void
