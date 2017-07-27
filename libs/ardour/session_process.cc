@@ -230,18 +230,6 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 	return 0;
 }
 
-/** @param need_butler to be set to true by this method if it needs the butler,
- *  otherwise it must be left alone.
- */
-int
-Session::silent_process_routes (pframes_t nframes, bool& need_butler)
-{
-	DiskReader::set_no_disk_output (true);
-	int ret = process_routes (nframes, need_butler);
-	DiskReader::set_no_disk_output (false);
-	return ret;
-}
-
 void
 Session::get_track_statistics ()
 {
@@ -620,9 +608,9 @@ Session::follow_slave (pframes_t nframes)
 						   _slave_state, slave_transport_frame, slave_speed, this_delta, average_slave_delta));
 
 
-	if (_slave_state == Running && !_slave->is_always_synced() &&
-			!(Config->get_timecode_source_is_synced() && (dynamic_cast<TimecodeSlave*>(_slave)) != 0)
-			) {
+	if (_slave_state == Running && !_slave->is_always_synced() && !(Config->get_timecode_source_is_synced() && (dynamic_cast<TimecodeSlave*>(_slave)) != 0)) {
+
+		/* may need to varispeed to sync with slave */
 
 		if (_transport_speed != 0.0f) {
 
@@ -663,24 +651,36 @@ Session::follow_slave (pframes_t nframes)
 									   slave_speed));
 			}
 
-#if 1
 			if (!actively_recording() && (framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
-				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
-				goto silent_motion;
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => silent motion\n", abs(average_slave_delta), _slave->resolution()));
+				/* run routes as normal, but no disk output */
+				cerr << "sync too far apart " << average_slave_delta << ", NO disk audio for now\n";
+				DiskReader::set_no_disk_output (true);
+				return true;
 			}
-#endif
+
+			if (!have_first_delta_accumulator) {
+				DEBUG_TRACE (DEBUG::Slave, "waiting for first slave delta accumulator to be ready\n");
+				/* run routes as normal, but no disk output */
+				cerr << "can't measure sync yet, NO disk audio for now\n";
+				DiskReader::set_no_disk_output (true);
+				return true;
+			}
 		}
 	}
 
 
-	if (_slave_state == Running && 0 == (post_transport_work () & ~PostTransportSpeed)) {
-		/* speed is set, we're locked, and good to go */
-		return true;
+	if (!have_first_delta_accumulator) {
+		DiskReader::set_no_disk_output (true);
+	} else {
+		DiskReader::set_no_disk_output (false);
 	}
 
-  silent_motion:
-	DEBUG_TRACE (DEBUG::Slave, "silent motion\n")
-	follow_slave_silently (nframes, slave_speed);
+	if ((_slave_state == Running) && (0 == (post_transport_work () & ~PostTransportSpeed))) {
+		/* speed is set, we're locked, and good to go */
+		cerr << "slave is locked, play disk audio ? " << !DiskReader::no_disk_output() << " delta = " << average_slave_delta << endl;
+		return true;
+	}
 
   noroll:
 	/* don't move at all */
@@ -822,45 +822,6 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 		}
 
 		reset_slave_state();
-	}
-}
-
-void
-Session::follow_slave_silently (pframes_t nframes, float slave_speed)
-{
-	if (slave_speed && _transport_speed) {
-
-		/* something isn't right, but we should move with the master
-		   for now.
-		*/
-
-		bool need_butler = false;
-
-		silent_process_routes (nframes, need_butler);
-
-		get_track_statistics ();
-
-		if (need_butler) {
-			DEBUG_TRACE (DEBUG::Butler, "f-slave-silently: session needs butler, call it\n");
-			_butler->summon ();
-		}
-
-		int32_t frames_moved;
-
-		if (locate_pending()) {
-			frames_moved = 0;
-		} else {
-			frames_moved = (int32_t) floor (_transport_speed * nframes);
-		}
-
-		if (frames_moved < 0) {
-			decrement_transport_position (-frames_moved);
-		} else if (frames_moved) {
-			increment_transport_position (frames_moved);
-		}
-
-		framepos_t const stop_limit = compute_stop_limit ();
-		maybe_stop (stop_limit);
 	}
 }
 

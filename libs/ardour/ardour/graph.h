@@ -65,9 +65,6 @@ public:
 
 	void helper_thread();
 
-	int silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                           bool& need_butler);
-
 	int process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
 	                    bool& need_butler);
 
@@ -130,7 +127,6 @@ private:
 	bool	   _process_non_rt_pending;
 	int        _process_declick;
 
-	bool _process_silent;
 	bool _process_noroll;
 	int  _process_retval;
 	bool _process_need_butler;

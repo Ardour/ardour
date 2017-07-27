@@ -1324,7 +1324,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool follow_slave (pframes_t);
 	void calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta);
 	void track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t this_delta);
-	void follow_slave_silently (pframes_t nframes, float slave_speed);
 
 	void switch_to_sync_source (SyncSource); /* !RT context */
 	void drop_sync_source ();  /* !RT context */
