@@ -41,6 +41,7 @@
 #include "ardour/butler.h"
 #include "ardour/click.h"
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
@@ -1830,6 +1831,12 @@ Session::use_sync_source (Slave* new_slave)
 
 	delete _slave;
 	_slave = new_slave;
+
+
+	/* slave change, reset any DiskIO block on disk output because it is no
+	   longer valid with a new slave.
+	*/
+	DiskReader::set_no_disk_output (false);
 
 	MTC_Slave* mtc_slave = dynamic_cast<MTC_Slave*>(_slave);
 	if (mtc_slave) {
