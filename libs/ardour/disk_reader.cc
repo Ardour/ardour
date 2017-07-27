@@ -45,7 +45,7 @@ PBD::Signal0<void> DiskReader::Underrun;
 Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
 framecnt_t DiskReader::midi_readahead = 4096;
-bool DiskReader::no_disk_output = false;
+bool DiskReader::_no_disk_output = false;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
@@ -243,7 +243,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	frameoffset_t playback_distance;
+	frameoffset_t disk_samples_to_consume;
 	MonitorState ms = _route->monitoring_state ();
 
 	if (_active) {
@@ -270,31 +270,33 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	if (speed != 1.0f && speed != -1.0f) {
 		interpolation.set_speed (speed);
 		midi_interpolation.set_speed (speed);
-		playback_distance = midi_interpolation.distance (nframes);
+		disk_samples_to_consume = midi_interpolation.distance (nframes);
 		if (speed < 0.0) {
-			playback_distance = -playback_distance;
+			disk_samples_to_consume = -disk_samples_to_consume;
 		}
 	} else {
-		playback_distance = nframes;
+		disk_samples_to_consume = nframes;
 	}
 
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 	const bool still_locating = _session.global_locate_pending();
 
-	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating) {
+	cerr << name() << " use disk output ? " << !_no_disk_output << endl;
+
+	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
 		/* no need for actual disk data, just advance read pointer and return */
 
-		if (!still_locating) {
+		if (!still_locating || _no_disk_output) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-				(*chan)->buf->increment_read_ptr (playback_distance);
+				(*chan)->buf->increment_read_ptr (disk_samples_to_consume);
 			}
 		}
 
 		/* if monitoring disk but locating put silence in the buffers */
 
-		if (still_locating && (ms == MonitoringDisk)) {
-			bufs.silence (playback_distance, 0);
+		if (_no_disk_output || (still_locating && (ms == MonitoringDisk))) {
+			bufs.silence (nframes, 0);
 		}
 
 	} else {
@@ -327,7 +329,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
 
-			if (playback_distance <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+			if (disk_samples_to_consume <= (framecnt_t) chaninfo->rw_vector.len[0]) {
 
 				if (fabsf (speed) != 1.0f) {
 					(void) interpolation.interpolate (
@@ -335,14 +337,14 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 						chaninfo->rw_vector.buf[0],
 						disk_signal);
 				} else if (speed != 0.0) {
-					memcpy (disk_signal, chaninfo->rw_vector.buf[0], sizeof (Sample) * playback_distance);
+					memcpy (disk_signal, chaninfo->rw_vector.buf[0], sizeof (Sample) * disk_samples_to_consume);
 				}
 
 			} else {
 
 				const framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
-				if (playback_distance <= total) {
+				if (disk_samples_to_consume <= total) {
 
 					/* We have enough samples, but not in one lump.
 					 */
@@ -352,7 +354,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 						                           chaninfo->rw_vector.buf[0],
 						                           disk_signal);
 						disk_signal += chaninfo->rw_vector.len[0];
-						interpolation.interpolate (n, playback_distance - chaninfo->rw_vector.len[0],
+						interpolation.interpolate (n, disk_samples_to_consume - chaninfo->rw_vector.len[0],
 						                           chaninfo->rw_vector.buf[1],
 						                           disk_signal);
 					} else if (speed != 0.0) {
@@ -361,12 +363,12 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 						        chaninfo->rw_vector.len[0] * sizeof (Sample));
 						memcpy (disk_signal + chaninfo->rw_vector.len[0],
 						        chaninfo->rw_vector.buf[1],
-						        (playback_distance - chaninfo->rw_vector.len[0]) * sizeof (Sample));
+						        (disk_samples_to_consume - chaninfo->rw_vector.len[0]) * sizeof (Sample));
 					}
 
 				} else {
 
-					cerr << _name << " Need " << playback_distance << " total = " << total << endl;
+					cerr << _name << " Need " << disk_samples_to_consume << " total = " << total << endl;
 					cerr << "underrun for " << _name << endl;
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3\n",
 					                                            DEBUG_THREAD_SELF, name(), total));
@@ -380,11 +382,11 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				apply_gain_to_buffer (disk_signal, nframes, scaling);
 			}
 
-			chaninfo->buf->increment_read_ptr (playback_distance);
+			chaninfo->buf->increment_read_ptr (disk_samples_to_consume);
 
-			if (!no_disk_output && (speed != 0.0) && (ms & MonitoringInput)) {
+			if ((speed != 0.0) && (ms & MonitoringInput)) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (output.data(), disk_signal, speed == 0.0 ? nframes : playback_distance);
+				mix_buffers_no_gain (output.data(), disk_signal, speed == 0.0 ? nframes : disk_samples_to_consume);
 			}
 		}
 	}
@@ -392,8 +394,16 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	/* MIDI data handling */
 
 	if (!_session.declick_out_pending()) {
+		MidiBuffer* dst;
+
+		if (_no_disk_output) {
+			dst = &scratch_bufs.get_midi(0);
+		} else {
+			dst = &bufs.get_midi (0);
+		}
+
 		if (ms & MonitoringDisk && !still_locating) {
-			get_midi_playback (bufs.get_midi (0), playback_distance, ms, scratch_bufs, speed, playback_distance);
+			get_midi_playback (*dst, disk_samples_to_consume, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
 
@@ -402,9 +412,9 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		bool butler_required = false;
 
 		if (speed < 0.0) {
-			playback_sample -= playback_distance;
+			playback_sample -= disk_samples_to_consume;
 		} else {
-			playback_sample += playback_distance;
+			playback_sample += disk_samples_to_consume;
 		}
 
 		if (_playlists[DataType::AUDIO]) {
@@ -434,7 +444,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			/*
 			  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
 			  " = " << frames_written - frames_read
-			  << " + " << playback_distance << " < " << midi_readahead << " = " << need_butler << ")" << endl;
+			  << " + " << disk_samples_to_consume << " < " << midi_readahead << " = " << need_butler << ")" << endl;
 			*/
 
 			/* frames_read will generally be less than frames_written, but
@@ -466,7 +476,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			 * and can stall
 			 */
 			if (frames_read <= frames_written) {
-				if ((frames_written - frames_read) + playback_distance < midi_readahead) {
+				if ((frames_written - frames_read) + disk_samples_to_consume < midi_readahead) {
 					butler_required = true;
 				}
 			} else {
@@ -1218,7 +1228,7 @@ DiskReader::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t t
  *  so that an event at playback_sample has time = 0
  */
 void
-DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, framecnt_t playback_distance)
+DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, framecnt_t disk_samples_to_consume)
 {
 	MidiBuffer* target;
 
@@ -1318,7 +1328,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState
 	if (speed != 0.0 && fabsf (speed) != 1.0f) {
 		for (MidiBuffer::iterator i = target->begin(); i != target->end(); ++i) {
 			MidiBuffer::TimeType *tme = i.timeptr();
-			*tme = (*tme) * nframes / playback_distance;
+			*tme = (*tme) * nframes / disk_samples_to_consume;
 		}
 	}
 
@@ -1486,6 +1496,5 @@ DiskReader::set_no_disk_output (bool yn)
 	   don't want any actual disk output yet because we are still not
 	   synced.
 	*/
-	no_disk_output = yn;
+	_no_disk_output = yn;
 }
-
