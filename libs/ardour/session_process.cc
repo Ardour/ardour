@@ -653,14 +653,14 @@ Session::follow_slave (pframes_t nframes)
 			}
 
 			if (!actively_recording() && (framecnt_t) average_slave_delta > _slave->resolution()) {
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => silent motion\n", average_slave_delta, _slave->resolution()));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => no disk output\n", average_slave_delta, _slave->resolution()));
 				/* run routes as normal, but no disk output */
 				DiskReader::set_no_disk_output (true);
 				return true;
 			}
 
 			if (!have_first_delta_accumulator) {
-				DEBUG_TRACE (DEBUG::Slave, "waiting for first slave delta accumulator to be ready\n");
+				DEBUG_TRACE (DEBUG::Slave, "waiting for first slave delta accumulator to be ready, no disk output\n");
 				/* run routes as normal, but no disk output */
 				DiskReader::set_no_disk_output (true);
 				return true;
@@ -670,6 +670,7 @@ Session::follow_slave (pframes_t nframes)
 
 
 	if (!have_first_delta_accumulator) {
+		DEBUG_TRACE (DEBUG::Slave, "still waiting to compute slave delta, no disk output\n");
 		DiskReader::set_no_disk_output (true);
 	} else {
 		DiskReader::set_no_disk_output (false);
