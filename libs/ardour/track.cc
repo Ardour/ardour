@@ -1360,7 +1360,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 		// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
 
-		pl->add_region (midi_region, (*ci)->start + preroll_off);
+		pl->add_region (midi_region, (*ci)->start + preroll_off, _disk_writer->non_layered());
 	}
 
 	pl->thaw ();
