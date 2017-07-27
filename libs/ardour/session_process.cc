@@ -529,6 +529,7 @@ Session::reset_slave_state ()
 	delta_accumulator_cnt = 0;
 	have_first_delta_accumulator = false;
 	_slave_state = Stopped;
+	DiskReader::set_no_disk_output (false);
 }
 
 bool
