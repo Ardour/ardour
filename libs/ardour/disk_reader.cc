@@ -281,8 +281,6 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 	const bool still_locating = _session.global_locate_pending();
 
-	cerr << name() << " use disk output ? " << !_no_disk_output << endl;
-
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
 		/* no need for actual disk data, just advance read pointer and return */
