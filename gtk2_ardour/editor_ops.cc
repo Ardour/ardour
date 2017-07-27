@@ -4279,7 +4279,7 @@ Editor::cut_copy (CutCopyOp op)
 	if (did_edit) {
 		/* reset repeated paste state */
 		paste_count    = 0;
-		last_paste_pos = 0;
+		last_paste_pos = -1;
 		commit_reversible_command ();
 	}
 
