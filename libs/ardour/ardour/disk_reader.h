@@ -100,6 +100,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	static void set_midi_readahead_frames (framecnt_t frames_ahead) { midi_readahead = frames_ahead; }
 
 	static void set_no_disk_output (bool yn);
+	static bool no_disk_output() { return _no_disk_output; }
 
   protected:
 	friend class Track;
@@ -128,7 +129,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 
 	static framecnt_t _chunk_frames;
 	static framecnt_t midi_readahead;
-	static bool       no_disk_output;
+	static bool       _no_disk_output;
 
 	/* The MIDI stuff */
 
