@@ -654,7 +654,6 @@ Session::follow_slave (pframes_t nframes)
 			if (!actively_recording() && (framecnt_t) average_slave_delta > _slave->resolution()) {
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => silent motion\n", average_slave_delta, _slave->resolution()));
 				/* run routes as normal, but no disk output */
-				cerr << "sync too far apart " << average_slave_delta << ", NO disk audio for now\n";
 				DiskReader::set_no_disk_output (true);
 				return true;
 			}
@@ -662,7 +661,6 @@ Session::follow_slave (pframes_t nframes)
 			if (!have_first_delta_accumulator) {
 				DEBUG_TRACE (DEBUG::Slave, "waiting for first slave delta accumulator to be ready\n");
 				/* run routes as normal, but no disk output */
-				cerr << "can't measure sync yet, NO disk audio for now\n";
 				DiskReader::set_no_disk_output (true);
 				return true;
 			}
@@ -678,7 +676,6 @@ Session::follow_slave (pframes_t nframes)
 
 	if ((_slave_state == Running) && (0 == (post_transport_work () & ~PostTransportSpeed))) {
 		/* speed is set, we're locked, and good to go */
-		cerr << "slave is locked, play disk audio ? " << !DiskReader::no_disk_output() << " delta = " << average_slave_delta << endl;
 		return true;
 	}
 
