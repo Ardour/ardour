@@ -77,9 +77,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                     bool state_changing);
 
-	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                 bool& need_butler);
-
 	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	                  int declick, bool& need_butler) = 0;
 

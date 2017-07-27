@@ -556,39 +556,6 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	return 0;
 }
 
-int
-Track::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& need_butler)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-	if (!lm.locked()) {
-		// XXX DISK reader needs to seek ahead the correct distance ?? OR DOES IT ?
-		//framecnt_t playback_distance = _disk_reader->calculate_playback_distance(nframes);
-		//if (can_internal_playback_seek(playback_distance)) {
-		// internal_playback_seek(playback_distance);
-		//}
-		return 0;
-	}
-
-	if (n_outputs().n_total() == 0 && _processors.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		return 0;
-	}
-
-	_silent = true;
-	_amp->apply_gain_automation(false);
-
-	silence (nframes);
-	flush_processor_buffers_locked (nframes);
-
-	//BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
-	// XXXX DISKWRITER/READER ADVANCE, SET need_butler
-	return 0;
-}
-
 boost::shared_ptr<Playlist>
 Track::playlist ()
 {
