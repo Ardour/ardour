@@ -413,11 +413,13 @@ Session::process_with_events (pframes_t nframes)
 
 		if (!_exporting && _slave) {
 			if (!follow_slave (nframes)) {
+				cerr << "P-w-E: FS fail\n";
 				return;
 			}
 		}
 
 		if (_transport_speed == 0) {
+			cerr << "P-w-E: ts = 0\n";
 			no_roll (nframes);
 			return;
 		}
@@ -431,6 +433,7 @@ Session::process_with_events (pframes_t nframes)
 		framepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
+			cerr << "P-w-E: mebbe stop\n";
 			no_roll (nframes);
 			return;
 		}
@@ -466,6 +469,7 @@ Session::process_with_events (pframes_t nframes)
 				click (_transport_frame, this_nframes);
 
 				if (process_routes (this_nframes, session_needs_butler)) {
+					cerr << "P-w-E: PR fail\n";
 					fail_roll (nframes);
 					return;
 				}
@@ -479,6 +483,8 @@ Session::process_with_events (pframes_t nframes)
 				} else if (frames_moved) {
 					increment_transport_position (frames_moved);
 				}
+
+				cerr << "P-w-E: ts now = " << _transport_frame << endl;
 
 				maybe_stop (stop_limit);
 				check_declick_out ();
@@ -504,6 +510,7 @@ Session::process_with_events (pframes_t nframes)
 			/* if an event left our state changing, do the right thing */
 
 			if (nframes && non_realtime_work_pending()) {
+				cerr << "P-w-E: nrtwp no roll\n";
 				no_roll (nframes);
 				break;
 			}
@@ -515,6 +522,8 @@ Session::process_with_events (pframes_t nframes)
 		set_next_event ();
 
 	} /* implicit release of route lock */
+
+	cerr << "P-w-E: final ts = " << _transport_frame << endl;
 
 	if (session_needs_butler) {
 		DEBUG_TRACE (DEBUG::Butler, "p-with-events: session needs butler, call it\n");
@@ -838,11 +847,13 @@ Session::process_without_events (pframes_t nframes)
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
 			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
+			cerr << "p-WO-E: FS fail\n";
 			return;
 		}
 	}
 
 	if (_transport_speed == 0) {
+		cerr << "p-WO-E: ts = 0\n";
 		no_roll (nframes);
 		return;
 	}
@@ -868,17 +879,20 @@ Session::process_without_events (pframes_t nframes)
 	framepos_t const stop_limit = compute_stop_limit ();
 
 	if (maybe_stop (stop_limit)) {
+		cerr << "p-WO-E: mebbe stop\n";
 		no_roll (nframes);
 		return;
 	}
 
 	if (maybe_sync_start (nframes)) {
+		cerr << "p-WO-E: sync start said no\n";
 		return;
 	}
 
 	click (_transport_frame, nframes);
 
 	if (process_routes (nframes, session_needs_butler)) {
+		cerr << "p-WO-E: pr failed\n";
 		fail_roll (nframes);
 		return;
 	}
@@ -890,6 +904,8 @@ Session::process_without_events (pframes_t nframes)
 	} else if (frames_moved) {
 		increment_transport_position (frames_moved);
 	}
+
+	cerr << "p-WO-E: ts now " << _transport_frame << endl;
 
 	maybe_stop (stop_limit);
 	check_declick_out ();
