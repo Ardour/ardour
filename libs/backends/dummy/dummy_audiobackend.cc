@@ -33,6 +33,7 @@
 #include "dummy_midi_seq.h"
 
 #include "pbd/error.h"
+#include "pbd/compose.h"
 #include "ardour/port_manager.h"
 #include "pbd/i18n.h"
 
@@ -127,6 +128,7 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("Sine Sweep Swell"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep Swell"), true));
+		_device_status.push_back (DeviceStatus (_("LTC"), true));
 		_device_status.push_back (DeviceStatus (_("Loopback"), true));
 	}
 	return _device_status;
@@ -849,6 +851,8 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SquareSweep;
 	} else if (_device == _("Square Sweep Swell")) {
 		gt = DummyAudioPort::SquareSweepSwell;
+	} else if (_device == _("LTC")) {
+		gt = DummyAudioPort::LTC;
 	} else if (_device == _("Loopback")) {
 		gt = DummyAudioPort::Loopback;
 	} else if (_device == _("Demolition")) {
@@ -1655,13 +1659,19 @@ DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, P
 	, _gen_count2 (0)
 	, _pass (false)
 	, _rn1 (0)
+	, _ltc (0)
+	, _ltcbuf (0)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 }
 
 DummyAudioPort::~DummyAudioPort () {
 	free(_wavetable);
+	ltc_encoder_free (_ltc);
+	delete _ltcbuf;
 	_wavetable = 0;
+	_ltc = 0;
+	_ltcbuf = 0;
 }
 
 static std::string format_hz (float freq) {
@@ -1792,6 +1802,44 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 					}
 				}
 			}
+			break;
+		case LTC:
+			switch (c % 4) {
+				case 0:
+					_ltc = ltc_encoder_create (samplerate, 25, LTC_TV_625_50, 0);
+					name = "LTC25";
+					break;
+				case 1:
+					_ltc = ltc_encoder_create (samplerate, 30, LTC_TV_1125_60, 0);
+					name = "LTC30";
+					break;
+				case 2:
+					_ltc = ltc_encoder_create (samplerate, 30001.f / 1001.f, LTC_TV_525_60, 0);
+					name = "LTC29df";
+					break;
+				case 3:
+					_ltc = ltc_encoder_create (samplerate, 24, LTC_TV_FILM_24, 0);
+					name = "LTC30";
+					break;
+			}
+			_ltc_spd = 1.0;
+			_ltc_rand = floor(c / 4) * .001f;
+			if (c < 4) {
+					name += " (locked)";
+			} else {
+					name += " (varspd)";
+			}
+			SMPTETimecode tc;
+			tc.years = 0;
+			tc.months = 0;
+			tc.days = 0;
+			tc.hours = (3 * (c / 4)) % 24; // XXX
+			tc.mins = 0;
+			tc.secs = 0;
+			tc.frame = 0;
+			ltc_encoder_set_timecode (_ltc, &tc);
+					name += string_compose ("@%1h", (int)tc.hours);
+			_ltcbuf = new RingBuffer<Sample> (std::max (DummyAudioBackend::max_buffer_size() * 2.f, samplerate));
 			break;
 		case Loopback:
 			_wavetable = (Sample*) malloc (DummyAudioBackend::max_buffer_size() * sizeof(Sample));
@@ -1995,6 +2043,28 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				_b2 = 0.57000f * _b2 + white * 1.0526913f;
 				_buffer[i] = _b0 + _b1 + _b2 + white * 0.1848f;
 			}
+			break;
+		case LTC:
+			while (_ltcbuf->read_space () < n_samples) {
+				// we should pre-allocate (or add a zero-copy libltc API), whatever.
+				ltcsnd_sample_t* enc_buf = (ltcsnd_sample_t*) malloc (ltc_encoder_get_buffersize (_ltc) * sizeof (ltcsnd_sample_t));
+				for (int byteCnt = 0; byteCnt < 10; byteCnt++) {
+					if (_ltc_rand != 0.f) {
+						_ltc_spd += randf () * _ltc_rand;
+						_ltc_spd = std::min (1.5f, std::max (0.5f, _ltc_spd));
+					}
+					ltc_encoder_encode_byte (_ltc, byteCnt, _ltc_spd);
+					const int len = ltc_encoder_get_buffer (_ltc, enc_buf);
+					for (int i = 0; i < len; ++i) {
+						const float v1 = enc_buf[i] - 128;
+						Sample v = v1 * 0.002;
+						_ltcbuf->write (&v, 1);
+					}
+				}
+				ltc_encoder_inc_timecode (_ltc);
+				free (enc_buf);
+			}
+			_ltcbuf->read (_buffer, n_samples);
 			break;
 	}
 	_gen_cycle = true;

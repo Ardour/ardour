@@ -28,9 +28,12 @@
 #include <stdint.h>
 #include <pthread.h>
 
+#include <ltc.h>
+
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
+#include "pbd/ringbuffer.h"
 #include "ardour/types.h"
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"
@@ -167,6 +170,7 @@ class DummyAudioPort : public DummyPort {
 			SineSweepSwell,
 			SquareSweep,
 			SquareSweepSwell,
+			LTC,
 			Loopback,
 		};
 		std::string setup_generator (GeneratorType const, float const, int, int);
@@ -194,6 +198,12 @@ class DummyAudioPort : public DummyPort {
 		float grandf ();
 		bool _pass;
 		float _rn1;
+		// LTC generator
+		LTCEncoder* _ltc;
+		RingBuffer<Sample>* _ltcbuf;
+		float _ltc_spd;
+		float _ltc_rand;
+
 
 }; // class DummyAudioPort
 
