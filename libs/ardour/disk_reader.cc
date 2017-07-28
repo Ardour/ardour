@@ -293,7 +293,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 		/* if monitoring disk but locating put silence in the buffers */
 
-		if (_no_disk_output || (still_locating && (ms == MonitoringDisk))) {
+		if ((_no_disk_output || still_locating) && (ms == MonitoringDisk)) {
 			bufs.silence (nframes, 0);
 		}
 
