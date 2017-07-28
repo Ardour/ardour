@@ -836,6 +836,10 @@ Session::destroy ()
 		AudioEngine::instance()->clear_pending_port_deletions ();
 	}
 
+	DEBUG_TRACE (DEBUG::Destruction, "delete selection\n");
+	delete _selection;
+	_selection = 0;
+
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
 	BOOST_SHOW_POINTERS ();

@@ -44,7 +44,9 @@ Stripable::Stripable (Session& s, string const & name, PresentationInfo const & 
 
 Stripable::~Stripable ()
 {
-	_session.selection().remove_stripable_by_id (id());
+	if (!_session.deletion_in_progress ()) {
+		_session.selection().remove_stripable_by_id (id());
+	}
 }
 
 void

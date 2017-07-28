@@ -70,7 +70,9 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 AutomationControl::~AutomationControl ()
 {
-	_session.selection().remove_control_by_id (id());
+	if (!_session.deletion_in_progress ()) {
+		_session.selection().remove_control_by_id (id());
+	}
 	DropReferences (); /* EMIT SIGNAL */
 }
 
