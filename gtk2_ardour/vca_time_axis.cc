@@ -210,6 +210,13 @@ VCATimeAxisView::update_vca_name ()
 	name_label.set_text (_vca->full_name());
 }
 
+bool
+VCATimeAxisView::name_entry_changed (std::string const& str)
+{
+	_vca->set_name (str);
+	return true;
+}
+
 void
 VCATimeAxisView::update_mute_display ()
 {

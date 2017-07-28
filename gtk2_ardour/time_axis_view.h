@@ -257,6 +257,7 @@ class TimeAxisView : public virtual AxisView
 
 	void begin_name_edit ();
 	void end_name_edit (std::string, int);
+	virtual std::string name () const { return name_label.get_text (); }
 
 	/* derived classes can override these */
 

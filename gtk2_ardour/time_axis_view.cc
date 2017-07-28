@@ -619,7 +619,7 @@ TimeAxisView::begin_name_edit ()
 	}
 
 	Gtk::Window* toplevel = (Gtk::Window*) control_parent->get_toplevel();
-	FloatingTextEntry* fte = new FloatingTextEntry (toplevel, name_label.get_text ());
+	FloatingTextEntry* fte = new FloatingTextEntry (toplevel, name ());
 
 	fte->set_name ("TrackNameEditor");
 	fte->use_text.connect (sigc::mem_fun (*this, &TimeAxisView::end_name_edit));

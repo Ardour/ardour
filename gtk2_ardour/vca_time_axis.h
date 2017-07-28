@@ -78,6 +78,8 @@ protected:
 	virtual void build_automation_action_menu (bool);
 	Gtk::Menu* automation_action_menu;
 
+	bool name_entry_changed (std::string const&);
+
 	void parameter_changed (std::string const& p);
 	void vca_property_changed (PBD::PropertyChange const&);
 	void update_vca_name ();
