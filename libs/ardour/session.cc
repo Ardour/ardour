@@ -100,6 +100,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/slave.h"
 #include "ardour/smf_source.h"
+#include "ardour/slave.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
@@ -679,6 +680,12 @@ Session::destroy ()
 #ifdef USE_TRACKS_CODE_FEATURES
 	EngineStateController::instance()->remove_session();
 #endif
+
+	/* drop slave, if any. We don't use use_sync_source (0) because
+	 * there's no reason to do all the other stuff that may happen
+	 * when calling that method.
+	 */
+	delete _slave;
 
 	/* deregister all ports - there will be no process or any other
 	 * callbacks from the engine any more.
