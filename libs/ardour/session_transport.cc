@@ -585,23 +585,16 @@ Session::non_realtime_locate ()
 
 	microseconds_t begin = get_microseconds ();
 
+	const framepos_t tf = _transport_frame;
+
 	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
-	  restart:
-		const framepos_t tf = _transport_frame;
 
 		cerr << "\n\n >>> START Non-RT locate on routes to " << tf << "\n\n";
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			(*i)->non_realtime_locate (_transport_frame);
-			if (tf != _transport_frame) {
-				/* new locate request arrived while processing
-				   this one. start over.
-				*/
-				cerr << "\n\n\n\n RESTART LOCATE @ " << _transport_frame << endl;
-				goto restart;
-			}
+			(*i)->non_realtime_locate (tf);
 		}
 
 		cerr << "\n\n <<< DONE Non-RT locate on routes\n\n";
@@ -610,7 +603,7 @@ Session::non_realtime_locate ()
 	{
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
-			(*i)->non_realtime_locate (_transport_frame);
+			(*i)->non_realtime_locate (tf);
 		}
 	}
 
