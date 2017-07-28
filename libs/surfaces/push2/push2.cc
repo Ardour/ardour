@@ -294,8 +294,11 @@ Push2::ports_release ()
 	asp = dynamic_cast<AsyncMIDIPort*> (_output_port);
 	asp->drain (10000, 500000);
 
-	AudioEngine::instance()->unregister_port (_async_in);
-	AudioEngine::instance()->unregister_port (_async_out);
+	{
+		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		AudioEngine::instance()->unregister_port (_async_in);
+		AudioEngine::instance()->unregister_port (_async_out);
+	}
 
 	_async_in.reset ((ARDOUR::Port*) 0);
 	_async_out.reset ((ARDOUR::Port*) 0);

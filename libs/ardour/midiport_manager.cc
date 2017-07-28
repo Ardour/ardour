@@ -37,6 +37,7 @@ MidiPortManager::MidiPortManager ()
 
 MidiPortManager::~MidiPortManager ()
 {
+	Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
 	if (_midi_in) {
 		AudioEngine::instance()->unregister_port (_midi_in);
 	}
