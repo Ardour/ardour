@@ -550,7 +550,7 @@ LTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (((pos < 0) || (labs(current_delta) > 2 * session.frame_rate()))) {
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC large drift: %1\n", current_delta));
-		reset(false);
+		reset();
 		speed = 0;
 		return true;
 	}
