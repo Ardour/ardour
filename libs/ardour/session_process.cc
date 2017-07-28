@@ -859,6 +859,7 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	if (locate_pending()) {
+		cerr << "p-WO-E: locate still pending\n";
 		frames_moved = 0;
 	} else {
 		if (_transport_speed == 1.0) {
@@ -867,8 +868,11 @@ Session::process_without_events (pframes_t nframes)
 			interpolation.set_target_speed (_target_transport_speed);
 			interpolation.set_speed (_transport_speed);
 			frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+			cerr << "p-WO-E: current speed : " << _transport_speed << " interpolate says " << frames_moved << endl;
 		}
 	}
+
+	cerr << "p-WO-E: will move " << frames_moved << endl;
 
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
