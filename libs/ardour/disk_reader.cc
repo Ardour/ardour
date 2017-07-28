@@ -391,7 +391,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	/* MIDI data handling */
 
-	if (!_session.declick_out_pending()) {
+	if (!_session.declick_out_pending() && bufs.count().n_midi()) {
 		MidiBuffer* dst;
 
 		if (_no_disk_output) {
@@ -400,7 +400,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			dst = &bufs.get_midi (0);
 		}
 
-		if (ms & MonitoringDisk && !still_locating) {
+		if ((ms & MonitoringDisk) && !still_locating) {
 			get_midi_playback (*dst, disk_samples_to_consume, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
