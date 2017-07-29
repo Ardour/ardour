@@ -60,7 +60,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib boost-regex32D.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gmodule32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)timecode32D.lib $(DllPrefix)ardour32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)D.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)D.lib boost-regex32D.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)D.lib $(DllPrefix)gobject32$(GlibDllSuffix)D.lib $(DllPrefix)gmodule32$(GlibDllSuffix)D.lib $(DllPrefix)glib32$(GlibDllSuffix)D.lib $(DllPrefix)gio32$(GlibDllSuffix)D.lib $(DllPrefix)sigc++32-2.0D.lib $(DllPrefix)ltcD.lib $(DllPrefix)timecode32D.lib $(DllPrefix)ardour32D.lib $(DllPrefix)pbd32D.lib intlD.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;msvcrt.lib;dsound.lib"
@@ -142,7 +142,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix).lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib boost-regex32.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gmodule32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)timecode32.lib $(DllPrefix)ardour32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix).lib $(DllPrefix)giomm32$(GlibmmDllSuffix).lib boost-regex32.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix).lib $(DllPrefix)gobject32$(GlibDllSuffix).lib $(DllPrefix)gmodule32$(GlibDllSuffix).lib $(DllPrefix)glib32$(GlibDllSuffix).lib $(DllPrefix)gio32$(GlibDllSuffix).lib $(DllPrefix)sigc++32-2.0.lib $(DllPrefix)ltc.lib $(DllPrefix)timecode32.lib $(DllPrefix)ardour32.lib $(DllPrefix)pbd32.lib intl.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
 				OutputFile="$(OutDir)\$(ProjectName).dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
@@ -225,7 +225,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib boost-regex32RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gmodule32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)ardour32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
+				AdditionalDependencies="$(DllPrefix)glibmm32$(GlibmmDllSuffix)RDC.lib $(DllPrefix)giomm32$(GlibmmDllSuffix)RDC.lib boost-regex32RDC.lib pthreadVCE2.lib $(DllPrefix)gthread32$(GlibDllSuffix)RDC.lib $(DllPrefix)gobject32$(GlibDllSuffix)RDC.lib $(DllPrefix)gmodule32$(GlibDllSuffix)RDC.lib $(DllPrefix)glib32$(GlibDllSuffix)RDC.lib $(DllPrefix)gio32$(GlibDllSuffix)RDC.lib $(DllPrefix)sigc++32-2.0RDC.lib $(DllPrefix)ltcRDC.lib $(DllPrefix)timecode32RDC.lib $(DllPrefix)ardour32RDC.lib $(DllPrefix)pbd32RDC.lib intlRDC.lib ws2_32.lib psapi.lib wininet.lib kernel32.lib shell32.lib"
 				OutputFile="$(OutDir)\$(ProjectName)RDC.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
