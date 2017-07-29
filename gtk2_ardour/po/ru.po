@@ -2238,13 +2238,15 @@ msgstr "Редактор"
 
 #: ardour_ui_dependents.cc:436 editor_actions.cc:469
 msgid "Unset #%1"
-msgstr ""
+msgstr "Сбросить #%1"
 
 #: ardour_ui_dependents.cc:437
 msgid ""
 "No action bound\n"
 "Right-click to assign"
 msgstr ""
+"Действие не назначено\n"
+"Щелкните правой кнопкой мыши, чтобы назначить"
 
 #: ardour_ui_dependents.cc:441
 msgid ""
@@ -2980,7 +2982,7 @@ msgstr "--в ожидании--"
 
 #: audio_clock.cc:948
 msgid "INT"
-msgstr ""
+msgstr "ВНУТР"
 
 #: audio_clock.cc:1008
 msgid "SR"
@@ -3018,7 +3020,7 @@ msgstr "Ошибка в программе: %1 %2"
 
 #: audio_clock.cc:2048 editor.cc:325 export_timespan_selector.cc:105
 msgid "Bars:Beats"
-msgstr "Такты : Доли"
+msgstr "Такты:Доли"
 
 #: audio_clock.cc:2049 export_timespan_selector.cc:100
 msgid "Minutes:Seconds"
@@ -3057,7 +3059,7 @@ msgstr "Пиковая амплитуда:"
 
 #: audio_region_editor.cc:87
 msgid "Calculating..."
-msgstr "Производится вычисление..."
+msgstr "Вычисляю..."
 
 #: audio_region_view.cc:1385
 msgid "add gain control point"
@@ -3129,8 +3131,8 @@ msgid "Touch"
 msgstr "Касание"
 
 #: automation_time_axis.cc:168 generic_pluginui.cc:568
-msgid "Mgnual"
-msgstr "Mgnual"
+msgid "Manual"
+msgstr "Вручную"
 
 #: automation_time_axis.cc:181
 msgid "automation state"
@@ -3183,7 +3185,7 @@ msgstr "Направление:"
 
 #: bundle_manager.cc:206 bundle_manager.cc:212
 msgid "Destination"
-msgstr ""
+msgstr "Назначение"
 
 #: bundle_manager.cc:207 bundle_manager.cc:210 bundle_manager.cc:245
 #: export_dialog.cc:514
@@ -3271,7 +3273,7 @@ msgstr "Значение"
 
 #: control_slave_ui.cc:51
 msgid "VCA Assign"
-msgstr ""
+msgstr "Назначение VCA"
 
 #: control_slave_ui.cc:55
 msgid "-VCAs-"
@@ -3605,7 +3607,7 @@ msgstr "Видеолинейка"
 
 #: editor.cc:392
 msgid "mode"
-msgstr "Режим"
+msgstr "режим"
 
 #: editor.cc:540 editor_actions.cc:136 editor_actions.cc:595
 msgid "Markers"
@@ -5224,11 +5226,11 @@ msgstr "Молча"
 
 #: editor_actions.cc:1786
 msgid "Normalize..."
-msgstr "Нормировать сигнал..."
+msgstr "Нормализация..."
 
 #: editor_actions.cc:1789
 msgid "Reverse"
-msgstr "Развернуть"
+msgstr "Реверс"
 
 #: editor_actions.cc:1792
 msgid "Make Mono Regions"
@@ -5700,11 +5702,11 @@ msgstr ""
 
 #: editor_drag.cc:6703
 msgid "Create Note"
-msgstr ""
+msgstr "Создать ноту"
 
 #: editor_drag.cc:6758
 msgid "Create Hit"
-msgstr ""
+msgstr "Создать удар"
 
 #: editor_route_groups.cc:97
 msgid "Col"
@@ -5724,7 +5726,7 @@ msgstr "В"
 
 #: editor_route_groups.cc:99
 msgid "Group is visible?"
-msgstr "Группа видима"
+msgstr "Группа видима?"
 
 #: editor_route_groups.cc:100
 msgid "On"
@@ -5732,7 +5734,7 @@ msgstr "Вкл"
 
 #: editor_route_groups.cc:100
 msgid "Group is enabled?"
-msgstr "Группа включена"
+msgstr "Группа включена?"
 
 #: editor_route_groups.cc:101
 msgid "Group|G"
@@ -5834,12 +5836,12 @@ msgstr "Конец"
 
 #: editor_markers.cc:645
 msgid "mark"
-msgstr ""
+msgstr "пометка"
 
 #: editor_markers.cc:650 editor_ops.cc:2167 editor_ops.cc:2189
 #: editor_ops.cc:2324 editor_ops.cc:2361 location_ui.cc:1057
 msgid "add marker"
-msgstr "Добавка маркера"
+msgstr "Добавить пометку"
 
 #: editor_markers.cc:682 editor_markers.cc:1665
 msgid "set loop range"
@@ -5855,11 +5857,11 @@ msgstr "диапазон"
 
 #: editor_markers.cc:718
 msgid "new range marker"
-msgstr "Новый маркер диапазона"
+msgstr "Новая пометка диапазона"
 
 #: editor_markers.cc:751 editor_ops.cc:2285 location_ui.cc:893
 msgid "remove marker"
-msgstr "Удаление маркера"
+msgstr "Удаление пометки"
 
 #: editor_markers.cc:899
 msgid "Locate to Here"
@@ -5871,11 +5873,11 @@ msgstr "Воспроизвести отсюда"
 
 #: editor_markers.cc:901
 msgid "Move Mark to Playhead"
-msgstr "Маркер к указателю воспроизведения"
+msgstr "Пометку к указателю воспроизведения"
 
 #: editor_markers.cc:905
 msgid "Create Range to Next Marker"
-msgstr "Создать выделение до след. маркера"
+msgstr "Создать выделение до след. пометки"
 
 #: editor_markers.cc:946
 msgid "Locate to Marker"
@@ -5887,7 +5889,7 @@ msgstr "Воспроизвести от маркера"
 
 #: editor_markers.cc:950
 msgid "Set Marker from Playhead"
-msgstr "Установить маркер по указателю"
+msgstr "Установить пометку по указателю"
 
 #: editor_markers.cc:951
 msgid "Set Range from Selection"
@@ -5959,7 +5961,7 @@ msgstr ""
 
 #: editor_markers.cc:1462
 msgid "set tempo to constant"
-msgstr ""
+msgstr "установить темп в постоянный"
 
 #: editor_markers.cc:1481
 msgid "Clamp Tempo"
@@ -8118,11 +8120,11 @@ msgstr "Удалить группу"
 
 #: group_tabs.cc:359
 msgid "Drop Group from VCA..."
-msgstr ""
+msgstr "Убрать группу из VCA"
 
 #: group_tabs.cc:368
 msgid "Assign Group to VCA..."
-msgstr ""
+msgstr "Назначить группу на VCA"
 
 #: group_tabs.cc:374
 msgid "Remove Subgroup Bus"
@@ -8142,15 +8144,15 @@ msgstr "Добавить новую внешнюю шину (после фейд
 
 #: group_tabs.cc:404
 msgid "Assign Selection to VCA..."
-msgstr ""
+msgstr "Назначить выделение на VCA..."
 
 #: group_tabs.cc:415
 msgid "Assign Record Enabled to VCA..."
-msgstr ""
+msgstr "Назначить отметку на запись на VCA..."
 
 #: group_tabs.cc:426
 msgid "Assign Soloed to VCA..."
-msgstr ""
+msgstr "Назначить отметку соло на VCA..."
 
 #: group_tabs.cc:429
 msgid "Enable All Groups"
