@@ -1823,7 +1823,7 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 					break;
 			}
 			_ltc_spd = 1.0;
-			_ltc_rand = floor(c / 4) * .001f;
+			_ltc_rand = floor((float)c / 4) * .001f;
 			if (c < 4) {
 					name += " (locked)";
 			} else {
