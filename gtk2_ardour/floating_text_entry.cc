@@ -28,13 +28,14 @@
 #include "pbd/i18n.h"
 
 FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents)
-	: Gtk::Window (Gtk::WINDOW_POPUP)
-        , entry_changed (false)
-	, by_popup_menu (false)
+	: Gtk::Window ()
+	, entry_changed (false)
 {
 	//set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_border_width (0);
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
+	set_resizable (false);
 
 	if (!initial_contents.empty()) {
 		entry.set_text (initial_contents);
@@ -46,21 +47,14 @@ FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& in
 	_connections.push_back (entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press), false));
 	_connections.push_back (entry.signal_key_release_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_release), false));
 	_connections.push_back (entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press)));
-	_connections.push_back (entry.signal_populate_popup().connect (sigc::mem_fun (*this, &FloatingTextEntry::populate_popup)));
 
 	entry.select_region (0, -1);
 
 	if (parent) {
-		_connections.push_back (parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out)));
+		set_transient_for (*parent);
 	}
 
 	add (entry);
-}
-
-void
-FloatingTextEntry::populate_popup (Gtk::Menu *)
-{
-	by_popup_menu = true;
 }
 
 void
@@ -74,17 +68,13 @@ FloatingTextEntry::on_realize ()
 {
 	Gtk::Window::on_realize ();
 	get_window()->set_decorations (Gdk::WMDecoration (0));
+	set_keep_above (true);
 	entry.add_modal_grab ();
 }
 
 bool
 FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
 {
-	if (by_popup_menu) {
-		by_popup_menu = false;
-		return false;
-	}
-
 	entry.remove_modal_grab ();
 	if (entry_changed) {
 		disconect_signals ();

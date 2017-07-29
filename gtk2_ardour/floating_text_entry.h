@@ -39,7 +39,6 @@ public:
 private:
 	Gtk::Entry entry;
 	bool entry_changed;
-	bool by_popup_menu;
 
 	/* handlers for Entry events */
 	bool entry_focus_out (GdkEventFocus*);
@@ -48,7 +47,6 @@ private:
 	void activated ();
 	bool button_press (GdkEventButton*);
 	void changed ();
-	void populate_popup (Gtk::Menu*);
 	void idle_delete_self ();
 	void disconect_signals ();
 
