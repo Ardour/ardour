@@ -191,10 +191,10 @@ class LIBPBD_API ScopedConnectionList  : public boost::noncopyable
 	       one from another.
 	 */
 
-	Glib::Threads::Mutex _lock;
+	Glib::Threads::Mutex _scoped_connection_lock;
 
 	typedef std::list<ScopedConnection*> ConnectionList;
-	ConnectionList _list;
+	ConnectionList _scoped_connection_list;
 };
 
 #include "pbd/signals_generated.h"
