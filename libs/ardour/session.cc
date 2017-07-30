@@ -98,6 +98,7 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
+#include "ardour/slave.h"
 #include "ardour/smf_source.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
@@ -186,6 +187,7 @@ Session::Session (AudioEngine &eng,
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
 	, _last_transport_speed (0)
+	, _signalled_varispeed (0)
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
 	, _last_slave_transport_frame (0)
@@ -635,6 +637,13 @@ Session::destroy ()
 
 	_state_of_the_state = StateOfTheState (CannotSave|Deletion);
 
+	{
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		ltc_tx_cleanup();
+		delete _slave;
+		_slave = 0;
+	}
+
 	/* disconnect from any and all signals that we are connected to */
 
 	Port::PortSignalDrop (); /* EMIT SIGNAL */
@@ -663,8 +672,6 @@ Session::destroy ()
 
 	Port::PortDrop (); /* EMIT SIGNAL */
 
-	ltc_tx_cleanup();
-
 	/* clear history so that no references to objects are held any more */
 
 	_history.clear ();
@@ -674,17 +681,20 @@ Session::destroy ()
 	delete state_tree;
 	state_tree = 0;
 
-	// unregister all lua functions, drop held references (if any)
-	(*_lua_cleanup)();
-	lua.do_command ("Session = nil");
-	delete _lua_run;
-	delete _lua_add;
-	delete _lua_del;
-	delete _lua_list;
-	delete _lua_save;
-	delete _lua_load;
-	delete _lua_cleanup;
-	lua.collect_garbage ();
+	{
+		/* unregister all lua functions, drop held references (if any) */
+		Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
+		(*_lua_cleanup)();
+		lua.do_command ("Session = nil");
+		delete _lua_run;
+		delete _lua_add;
+		delete _lua_del;
+		delete _lua_list;
+		delete _lua_save;
+		delete _lua_load;
+		delete _lua_cleanup;
+		lua.collect_garbage ();
+	}
 
 	/* reset dynamic state version back to default */
 	Stateful::loading_state_version = 0;
