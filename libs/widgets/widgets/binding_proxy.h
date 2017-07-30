@@ -59,6 +59,7 @@ protected:
 	static guint bind_statemask;
 
 	PBD::ScopedConnection learning_connection;
+	PBD::ScopedConnection _controllable_going_away_connection;
 	void learning_finished ();
 	bool prompter_hiding (GdkEventAny *);
 };

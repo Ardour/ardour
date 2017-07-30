@@ -20,6 +20,7 @@
 #include <iostream>
 
 #include "pbd/controllable.h"
+#include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/keyboard.h"
 #include "widgets/binding_proxy.h"
 #include "widgets/popup.h"
@@ -38,6 +39,12 @@ BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
 	: prompter (0),
 	  controllable (c)
 {
+	if (c) {
+		c->DropReferences.connect (
+				_controllable_going_away_connection, invalidator (*this),
+				boost::bind (&BindingProxy::set_controllable, this, boost::shared_ptr<Controllable> ()),
+				gui_context());
+	}
 }
 
 BindingProxy::BindingProxy ()
@@ -57,6 +64,14 @@ BindingProxy::set_controllable (boost::shared_ptr<Controllable> c)
 {
 	learning_finished ();
 	controllable = c;
+
+	_controllable_going_away_connection.disconnect ();
+	if (c) {
+		c->DropReferences.connect (
+				_controllable_going_away_connection, invalidator (*this),
+				boost::bind (&BindingProxy::set_controllable, this, boost::shared_ptr<Controllable> ()),
+				gui_context());
+	}
 }
 
 void
