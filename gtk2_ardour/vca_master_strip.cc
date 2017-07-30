@@ -188,6 +188,10 @@ VCAMasterStrip::self_delete ()
 	}
 	/* Drop reference immediately, delete self when idle */
 	_vca.reset ();
+	gain_meter.set_controls (boost::shared_ptr<Route>(),
+	                         boost::shared_ptr<PeakMeter>(),
+	                         boost::shared_ptr<Amp>(),
+	                         boost::shared_ptr<GainControl>());
 	delete_when_idle (this);
 }
 
