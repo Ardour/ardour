@@ -269,7 +269,6 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 
 	int32_t width = _view_rectangle_x.second - _view_rectangle_x.first;
 	std::min(8, width);
-	int32_t height = _view_rectangle_y.second - _view_rectangle_y.first;
 	cairo_rectangle (cr, _view_rectangle_x.first, 0, width, get_height ());
 	cairo_set_source_rgba (cr, 1, 1, 1, 0.15);
 	cairo_fill (cr);
