@@ -56,8 +56,9 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name, flags)
 	, Evoral::Control(parameter, desc, list)
-	, _session(session)
+	, SessionHandleRef (session)
 	, _desc(desc)
+	, _no_session(false)
 {
 	if (_desc.toggled) {
 		set_flags (Controllable::Toggle);
@@ -70,10 +71,18 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 AutomationControl::~AutomationControl ()
 {
-	if (!_session.deletion_in_progress ()) {
+	if (!_no_session && !_session.deletion_in_progress ()) {
 		_session.selection().remove_control_by_id (id());
+		DropReferences (); /* EMIT SIGNAL */
 	}
+}
+
+void
+AutomationControl::session_going_away ()
+{
+	SessionHandleRef::session_going_away ();
 	DropReferences (); /* EMIT SIGNAL */
+	_no_session = true;
 }
 
 bool
@@ -90,7 +99,7 @@ AutomationControl::writable() const
 double
 AutomationControl::get_value() const
 {
-	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
+	bool from_list = alist() && alist()->automation_playback();
 	return Control::get_double (from_list, _session.transport_frame());
 }
 
@@ -176,7 +185,7 @@ AutomationControl::automation_run (framepos_t start, pframes_t nframes)
 void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (_list);
+	boost::shared_ptr<AutomationList> al = alist ();
 	const framepos_t pos = _session.transport_frame();
 	bool to_list;
 
@@ -232,7 +241,7 @@ AutomationControl::set_automation_state (AutoState as)
 	if (flags() & NotAutomatable) {
 		return;
 	}
-	if (_list && as != alist()->automation_state()) {
+	if (alist() && as != alist()->automation_state()) {
 
 		const double val = get_value ();
 

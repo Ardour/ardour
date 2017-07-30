@@ -36,6 +36,7 @@
 #include "ardour/automation_list.h"
 #include "ardour/control_group_member.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/session_handle.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -52,6 +53,7 @@ class LIBARDOUR_API AutomationControl
 	, public Evoral::Control
 	, public boost::enable_shared_from_this<AutomationControl>
 	, public ControlGroupMember
+	, public SessionHandleRef
 {
 public:
 	AutomationControl(ARDOUR::Session&,
@@ -124,7 +126,6 @@ public:
 	ControlList grouped_controls () const;
 
 protected:
-	ARDOUR::Session& _session;
 	boost::shared_ptr<ControlGroup> _group;
 
 	const ParameterDescriptor _desc;
@@ -147,6 +148,8 @@ protected:
 	/* this will be invoked in turn on behalf of the group or the control by itself */
 	virtual void do_pre_realtime_queue_stuff (double new_value) {}
 
+	void session_going_away ();
+
 private:
 	/* I am unclear on why we have to make ControlGroup a friend in order
 	   to get access to the ::set_group() method when it is already
@@ -155,6 +158,7 @@ private:
 	friend class ControlGroup;
 	void set_group (boost::shared_ptr<ControlGroup>);
 	PBD::ScopedConnection _state_changed_connection;
+	bool _no_session;
 };
 
 
