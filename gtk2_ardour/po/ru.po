@@ -409,7 +409,7 @@ msgstr ""
 "\tИгорь Блинов <pitstop@nm.ru>\n"
 "\tАлександр Прокудин <alexandre.prokoudine@gmail.com>\n"
 "\tАлександр Кольцов <ag1455@mail.ru>\n"
-"\tПетр Семилетов <tea@list.ru>"
+"\tПетр Семилетов <tea@list.ru>\n"
 
 #: about.cc:221
 msgid ""
@@ -559,11 +559,11 @@ msgstr "MIDI-дорожки"
 
 #: add_route_dialog.cc:81 add_route_dialog.cc:251
 msgid "Audio+MIDI Tracks"
-msgstr "Смешанные дорожки (Звук+MIDI)"
+msgstr "Звуковые +MIDI дорожки"
 
 #: add_route_dialog.cc:82 add_route_dialog.cc:245
 msgid "Audio Busses"
-msgstr "Аудиошины"
+msgstr "Звуковые шины"
 
 #: add_route_dialog.cc:83 add_route_dialog.cc:247
 msgid "MIDI Busses"
@@ -571,7 +571,7 @@ msgstr "MIDI-шины"
 
 #: add_route_dialog.cc:84
 msgid "VCA Masters"
-msgstr "VCA-мастер"
+msgstr "VCA-мастера"
 
 #: add_route_dialog.cc:87 add_route_dialog.cc:660 duplicate_routes_dialog.cc:58
 #: duplicate_routes_dialog.cc:209
@@ -694,7 +694,7 @@ msgstr "Бесслойный"
 
 #: add_route_dialog.cc:407 add_route_dialog.cc:422
 msgid "Tape"
-msgstr "Плёночный"
+msgstr "Лента"
 
 #: add_route_dialog.cc:512 monitor_section.cc:278 plugin_pin_dialog.cc:515
 #: plugin_setup_dialog.cc:216
@@ -727,7 +727,7 @@ msgstr "8 каналов"
 
 #: add_route_dialog.cc:559
 msgid "12 Channel"
-msgstr "3 канала"
+msgstr "12 каналов"
 
 #: add_route_dialog.cc:563 gain_meter.cc:188 mixer_strip.cc:2057
 #: mixer_strip.cc:2503
@@ -778,7 +778,7 @@ msgstr "Выбранные выделения"
 
 #: analysis_window.cc:47
 msgid "Selected regions"
-msgstr "Выделенные области"
+msgstr "Выделенные регионы"
 
 #: analysis_window.cc:48
 msgid "Show frequency power range"
@@ -815,11 +815,11 @@ msgstr "Повторно проанализировать данные"
 
 #: ardour_http.cc:183 ardour_http.cc:197
 msgid "HTTP request failed: (%1) %2"
-msgstr ""
+msgstr "HTTP-запрос провалился: (%1) %2"
 
 #: ardour_http.cc:187 ardour_http.cc:200
 msgid "HTTP request status: %1"
-msgstr ""
+msgstr "Состояние HTTP-запроса: %1"
 
 #: ardour_ui.cc:209
 msgid ""
@@ -838,7 +838,7 @@ msgstr ""
 #: ardour_ui.cc:297 editor_actions.cc:673 rc_option_editor.cc:2779
 #: region_editor.cc:54
 msgid "Audition"
-msgstr "Контроль"
+msgstr "Прослушивание"
 
 #: ardour_ui.cc:298 editor_actions.cc:158 mixer_strip.cc:2253
 #: monitor_section.cc:331 rc_option_editor.cc:2472 route_time_axis.cc:264
@@ -852,7 +852,7 @@ msgstr "Отклик"
 
 #: ardour_ui.cc:311 speaker_dialog.cc:36
 msgid "Speaker Configuration"
-msgstr "Конфигурация громкоговорителей"
+msgstr "Конфигурация динамиков"
 
 #: ardour_ui.cc:312
 msgid "Add Tracks/Busses"
@@ -912,7 +912,7 @@ msgstr "Соединения MIDI"
 
 #: ardour_ui.cc:326 keyeditor.cc:80
 msgid "Keyboard Shortcuts"
-msgstr "Клавиатурные комбинации"
+msgstr "Сочетания клавиш"
 
 #: ardour_ui.cc:337 editor.cc:1299
 msgid "Window|Editor"
@@ -1107,7 +1107,7 @@ msgstr "Выйти"
 
 #: ardour_ui.cc:1256
 msgid "Continue using %1"
-msgstr "Продолжить работу"
+msgstr "Продолжить использование %1"
 
 #: ardour_ui.cc:1287 startup.cc:337
 msgid "%1 is ready for use"
@@ -1287,12 +1287,12 @@ msgstr "X: <span foreground=\"%s\">?</span>"
 
 #: ardour_ui.cc:1715
 msgid "Audio dropouts. Shift+click to reset"
-msgstr ""
+msgstr "Выпадения звука. Shift+клик для сброса."
 
 #: ardour_ui.cc:1728
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
-msgstr "ЦП: <span foreground=\"%s\">%5.1f%%</span>"
+msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
 #: ardour_ui.cc:1738
 #, c-format
@@ -1347,7 +1347,7 @@ msgstr "Открыть сессию"
 #: ardour_ui.cc:1978 session_dialog.cc:416 session_import_dialog.cc:173
 #: session_metadata_dialog.cc:864
 msgid "%1 sessions"
-msgstr "Cеансы %1"
+msgstr "%1 сессий"
 
 #: ardour_ui.cc:1983 session_dialog.cc:421
 msgid "Session Archives"
@@ -1548,7 +1548,7 @@ msgstr ""
 
 #: ardour_ui.cc:3269
 msgid "Open Existing Session"
-msgstr "Открыть существующую сессю"
+msgstr "Открыть существующую сессию"
 
 #: ardour_ui.cc:3594
 msgid "There is no existing session at \"%1\""
@@ -1816,11 +1816,11 @@ msgstr "Не выбран видеофайл"
 
 #: ardour_ui.cc:4718
 msgid "No LTC detected, video will not be aligned."
-msgstr ""
+msgstr "LTC не обнаружено, видео не будет выровнено"
 
 #: ardour_ui.cc:4724
 msgid "Align video-start to %1 [samples]"
-msgstr ""
+msgstr "Выровнять начало видео к %1 [сэмплов]"
 
 #: ardour_ui.cc:4900
 msgid "xrun"
@@ -2030,7 +2030,7 @@ msgstr "В конец сессии"
 
 #: ardour_ui2.cc:83
 msgid "Play loop range"
-msgstr "Воспроизвести выделение в петле"
+msgstr "Играть петлю"
 
 #: ardour_ui2.cc:84
 msgid ""
