@@ -246,6 +246,7 @@ OSCRouteObserver::tick ()
 				_last_gain = _strip->gain_control()->get_value();
 				if (gainmode) {
 					send_gain_message ("/strip/fader", _strip->gain_control());
+					gain_timeout = 8;
 				} else {
 					send_gain_message ("/strip/gain", _strip->gain_control());
 				}
