@@ -4,7 +4,7 @@
 #
 # Igor Blinov pitstop@nm.ru, 2004.
 # Александр Кольцов <ag1455@mail.ru>, 2014-2016
-# Петр Семилетов <tea@list.ru>? 2016
+# Петр Семилетов <tea@list.ru> 2016-2017
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006-2017, 2017.
 #
 #: audio_clock.cc:892 audio_clock.cc:893
@@ -559,7 +559,7 @@ msgstr "MIDI-дорожки"
 
 #: add_route_dialog.cc:81 add_route_dialog.cc:251
 msgid "Audio+MIDI Tracks"
-msgstr "Звуковые +MIDI дорожки"
+msgstr "Звуковые + MIDI дорожки"
 
 #: add_route_dialog.cc:82 add_route_dialog.cc:245
 msgid "Audio Busses"
@@ -3088,7 +3088,7 @@ msgstr "Дб"
 
 #: audio_region_editor.cc:63
 msgid "Region gain:"
-msgstr "Усиление области:"
+msgstr "Усиление региона:"
 
 #: audio_region_editor.cc:73 export_format_dialog.cc:53 export_report.cc:776
 #: export_report.cc:1189 fft_graph.cc:497 normalize_dialog.cc:61
@@ -3102,11 +3102,11 @@ msgstr "Пиковая амплитуда:"
 
 #: audio_region_editor.cc:87
 msgid "Calculating..."
-msgstr "Выполняется вычисление…"
+msgstr "Вычисляю…"
 
 #: audio_region_view.cc:1387
 msgid "add gain control point"
-msgstr "Добавление точки контроля усиления"
+msgstr "Добавление точки управления gain"
 
 #: automation_controller.cc:290 automation_controller.cc:306
 msgid "Select Note..."
@@ -3133,11 +3133,11 @@ msgstr "Смещение события автоматизации"
 
 #: automation_line.cc:861 region_gain_line.cc:74
 msgid "remove control point"
-msgstr "Удаление контрольной точки"
+msgstr "Удалить точку управления"
 
 #: automation_line.cc:986
 msgid "Ignoring illegal points on AutomationLine \"%1\""
-msgstr "Игнорирование некорреткных точек на линии автоматизации \"%1\""
+msgstr "Игнорирование неправильных точек на линии автоматизации \"%1\""
 
 #: automation_region_view.cc:196 automation_time_axis.cc:721
 msgid "add automation event"
@@ -3529,19 +3529,19 @@ msgstr "Маркеры"
 
 #: editor.cc:190
 msgid "Region starts"
-msgstr "Начала областей"
+msgstr "Начала регионов"
 
 #: editor.cc:191
 msgid "Region ends"
-msgstr "Концы областей"
+msgstr "Концы регионов"
 
 #: editor.cc:192
 msgid "Region syncs"
-msgstr "Синхр. областей"
+msgstr "Синхр. регионов"
 
 #: editor.cc:193
 msgid "Region bounds"
-msgstr "Границы областей"
+msgstr "Границы регионов"
 
 #: editor.cc:198 editor_actions.cc:541
 msgid "No Grid"
@@ -3671,7 +3671,7 @@ msgstr "Маркеры"
 
 #: editor.cc:663 rc_option_editor.cc:2736
 msgid "Regions"
-msgstr "Области"
+msgstr "Регионы"
 
 #: editor.cc:664
 msgid "Tracks & Busses"
@@ -3735,7 +3735,7 @@ msgstr "Разморозить"
 
 #: editor.cc:1747
 msgid "Region Loudness Analysis"
-msgstr "Анализ громкости области"
+msgstr "Анализ громкости региона"
 
 #: editor.cc:1766 editor.cc:1815
 msgid "Audio Report/Analysis"
@@ -3747,7 +3747,7 @@ msgstr "Анализ громкости выделения"
 
 #: editor.cc:1881
 msgid "Selected Regions"
-msgstr "Выделенные области"
+msgstr "Выделенные регионы"
 
 #: editor.cc:1916 editor_markers.cc:952
 msgid "Play Range"
@@ -3767,19 +3767,19 @@ msgstr "Анализ громкости"
 
 #: editor.cc:1930 editor_actions.cc:391
 msgid "Move Range Start to Previous Region Boundary"
-msgstr "Переместить начало выделения к границе предыдущей области"
+msgstr "Переместить начало выделения к границе предыдущего региона"
 
 #: editor.cc:1937 editor_actions.cc:398
 msgid "Move Range Start to Next Region Boundary"
-msgstr "Переместить начало выделения к границе следующей области"
+msgstr "Переместить начало выделения к границе следующего выделения"
 
 #: editor.cc:1944 editor_actions.cc:405
 msgid "Move Range End to Previous Region Boundary"
-msgstr "Переместить конец выделения к границе предыдущей области"
+msgstr "Переместить конец выделения к границе предыдущего выделения"
 
 #: editor.cc:1951 editor_actions.cc:412
 msgid "Move Range End to Next Region Boundary"
-msgstr "Переместить конец выделения к границе следующей области"
+msgstr "Переместить конец выделения к границе следующего выделения"
 
 #: editor.cc:1957 editor_actions.cc:155 editor_actions.cc:353
 msgid "Separate"
@@ -3787,7 +3787,7 @@ msgstr "Разделить"
 
 #: editor.cc:1958
 msgid "Convert to Region in Region List"
-msgstr "Преобразовать в область в списке областей"
+msgstr "Преобразовать в регион в списке регионов"
 
 #: editor.cc:1961 editor_markers.cc:987
 msgid "Select All in Range"
@@ -3811,7 +3811,7 @@ msgstr "Добавить маркеры областей"
 
 #: editor.cc:1972
 msgid "Crop Region to Range"
-msgstr "Обрезать область по выделению"
+msgstr "Обрезать регион по выделению"
 
 #: editor.cc:1973
 msgid "Duplicate Range"
@@ -3827,19 +3827,19 @@ msgstr "0бъединить диапазон с постобработкой"
 
 #: editor.cc:1978
 msgid "Bounce Range to Region List"
-msgstr "Свести диапазон в список областей"
+msgstr "Свести диапазон в список регионов"
 
 #: editor.cc:1979
 msgid "Bounce Range to Region List with Processing"
-msgstr ""
+msgstr "Свести диапазон в список регионов, с обработкой "
 
 #: editor.cc:1980 editor_markers.cc:970
 msgid "Export Range..."
-msgstr "Экспортировать выделение…"
+msgstr "Экспортировать диапазон…"
 
 #: editor.cc:1982
 msgid "Export Video Range..."
-msgstr "Экспортировать фрагмент видео..."
+msgstr "Экспортировать отрезок видео..."
 
 #: editor.cc:1998 editor.cc:2080 editor_actions.cc:326
 msgid "Play from Edit Point"
@@ -3851,11 +3851,11 @@ msgstr "Воспроизвести от начала"
 
 #: editor.cc:2000
 msgid "Play Region"
-msgstr "Воспроизвести область"
+msgstr "Воспроизвести регион"
 
 #: editor.cc:2002
 msgid "Loop Region"
-msgstr "Создать петлю из области"
+msgstr "Создать петлю из региона"
 
 #: editor.cc:2012 editor.cc:2090
 msgid "Select All in Track"
@@ -3867,11 +3867,11 @@ msgstr "Выделить все объекты"
 
 #: editor.cc:2014 editor.cc:2092
 msgid "Invert Selection in Track"
-msgstr "Обратить выделение на дорожке"
+msgstr "Перевернуть выделение на дорожке"
 
 #: editor.cc:2015 editor.cc:2093 editor_actions.cc:218
 msgid "Invert Selection"
-msgstr "Обратить выделение"
+msgstr "Перевернуть выделение"
 
 #: editor.cc:2017 editor_actions.cc:220
 msgid "Set Range to Loop Range"
@@ -3883,7 +3883,7 @@ msgstr "Установить диапазон по диапазону врезк
 
 #: editor.cc:2019 editor_actions.cc:222
 msgid "Set Range to Selected Regions"
-msgstr "Установить диапазон по выбранным областям"
+msgstr "Установить диапазон по выбранным регионам"
 
 #: editor.cc:2021 editor.cc:2095 editor_actions.cc:227 editor_actions.cc:228
 msgid "Select All After Edit Point"
@@ -3939,7 +3939,7 @@ msgstr "Выровнять относительно"
 
 #: editor.cc:2051
 msgid "Insert Selected Region"
-msgstr "Вставить выделенную область"
+msgstr "Вставить выделенный регион"
 
 #: editor.cc:2052
 msgid "Insert Existing Media"
@@ -3987,7 +3987,7 @@ msgstr "Захват (выделение и перемещение объект�
 
 #: editor.cc:3250
 msgid "Cut Mode (split regions)"
-msgstr "Нарезка (разделение областей)"
+msgstr "Нарезка (разделение регионов)"
 
 #: editor.cc:3251
 msgid "Range Mode (select time ranges)"
@@ -4003,11 +4003,11 @@ msgstr "Растягивание (аудио и MIDI во времени с со
 
 #: editor.cc:3254
 msgid "Audition Mode (listen to regions)"
-msgstr "Прослушивание (областей)"
+msgstr "Прослушивание (регионов)"
 
 #: editor.cc:3255
 msgid "Internal Edit Mode (edit notes and automation points)"
-msgstr "Правка содержимого областей (правка нот и точек автоматизации)"
+msgstr "Правка содержимого (правка нот и точек автоматизации)"
 
 #: editor.cc:3256
 msgid ""
@@ -4019,11 +4019,11 @@ msgstr ""
 
 #: editor.cc:3257
 msgid "Nudge Region/Selection Later"
-msgstr "Толкнуть область или выделение вперёд"
+msgstr "Толкнуть регион или выделение вперёд"
 
 #: editor.cc:3258
 msgid "Nudge Region/Selection Earlier"
-msgstr "Толкнуть область или выделение назад"
+msgstr "Толкнуть регион или выделение назад"
 
 #: editor.cc:3259 editor_actions.cc:271
 msgid "Zoom In"
@@ -4079,7 +4079,7 @@ msgid ""
 "(controls distance used to nudge regions and selections)"
 msgstr ""
 "Сдвиг часов\n"
-"(расстояние, на которое подтолкнуть области и выделения)"
+"(расстояние, на которое подтолкнуть регионы и выделения)"
 
 #: editor.cc:3548 editor_actions.cc:341
 msgid "Command|Undo"
@@ -4189,7 +4189,7 @@ msgstr "Отмасштабировать до 24 час"
 
 #: editor.cc:3775
 msgid "Zoom to Range/Region Selection"
-msgstr "Отмасштабировать до выбранного диапазона/области"
+msgstr "Отмасштабировать до выбранного диапазона/региона"
 
 #: editor.cc:3855
 msgid "*"
@@ -4290,7 +4290,7 @@ msgstr "Выбор диапазона циклов"
 
 #: editor_actions.cc:119
 msgid "Select Regions"
-msgstr "Выбор областей"
+msgstr "Выбор регионов"
 
 #: editor_actions.cc:121
 msgid "Fade"
@@ -4302,7 +4302,7 @@ msgstr "Запирание"
 
 #: editor_actions.cc:123 editor_regions.cc:159 region_editor.cc:49
 msgid "Region"
-msgstr "Область"
+msgstr "Регион"
 
 #: editor_actions.cc:124
 msgid "Layering"
@@ -4376,7 +4376,7 @@ msgstr "Вверх/вниз"
 
 #: editor_actions.cc:147
 msgid "Region operations"
-msgstr "Действия с областями"
+msgstr "Действия с регионами"
 
 #: editor_actions.cc:149 ruler_dialog.cc:28
 msgid "Rulers"
@@ -4436,83 +4436,83 @@ msgstr "Показывать список редактирования"
 
 #: editor_actions.cc:183
 msgid "Playhead to Next Region Boundary"
-msgstr "К следующей границе области"
+msgstr "К следующей границе региона"
 
 #: editor_actions.cc:184
 msgid "Playhead to Next Region Boundary (No Track Selection)"
-msgstr "К следующей границе области (без выделения дорожки)"
+msgstr "К следующей границе региона (без выделения дорожки)"
 
 #: editor_actions.cc:185
 msgid "Playhead to Previous Region Boundary"
-msgstr "К предыдущей границе области"
+msgstr "К предыдущей границе региона"
 
 #: editor_actions.cc:186
 msgid "Playhead to Previous Region Boundary (No Track Selection)"
-msgstr "К предыдущей границе области (без выделения дорожки)"
+msgstr "К предыдущей границе региона (без выделения дорожки)"
 
 #: editor_actions.cc:188
 msgid "Playhead to Next Region Start"
-msgstr "К началу следующей области"
+msgstr "К началу следующей региона"
 
 #: editor_actions.cc:189
 msgid "Playhead to Next Region End"
-msgstr "К концу следующей области"
+msgstr "К концу следующей региона"
 
 #: editor_actions.cc:190
 msgid "Playhead to Next Region Sync"
-msgstr "К следующему синхронизатору областей"
+msgstr "К следующему синхронизатору регионов"
 
 #: editor_actions.cc:192
 msgid "Playhead to Previous Region Start"
-msgstr "К началу предыдущей области"
+msgstr "К началу предыдущего региона"
 
 #: editor_actions.cc:193
 msgid "Playhead to Previous Region End"
-msgstr "К концу предыдущей области"
+msgstr "К концу предыдущего региона"
 
 #: editor_actions.cc:194
 msgid "Playhead to Previous Region Sync"
-msgstr "К предыдущему синхронизатору областей"
+msgstr "К предыдущему синхронизатору регионов"
 
 #: editor_actions.cc:196
 msgid "To Next Region Boundary"
-msgstr "К следующей границе области"
+msgstr "К следующей границе региона"
 
 #: editor_actions.cc:197
 msgid "To Next Region Boundary (No Track Selection)"
-msgstr "К следующей границе области (без выделения дорожки)"
+msgstr "К следующей границе региона (без выделения дорожки)"
 
 #: editor_actions.cc:198
 msgid "To Previous Region Boundary"
-msgstr "К предыдущей границе области"
+msgstr "К предыдущей границе региона"
 
 #: editor_actions.cc:199
 msgid "To Previous Region Boundary (No Track Selection)"
-msgstr "К предыдущей границе области (без выделения дорожки)"
+msgstr "К предыдущей границе региона (без выделения дорожки)"
 
 #: editor_actions.cc:201
 msgid "To Next Region Start"
-msgstr "К началу следующей области"
+msgstr "К началу следующей региона"
 
 #: editor_actions.cc:202
 msgid "To Next Region End"
-msgstr "К концу следующей области"
+msgstr "К концу следующего региона"
 
 #: editor_actions.cc:203
 msgid "To Next Region Sync"
-msgstr "К следующему синхронизатору области"
+msgstr "К следующему синхронизатору региона"
 
 #: editor_actions.cc:205
 msgid "To Previous Region Start"
-msgstr "К началу предыдущей области"
+msgstr "К началу предыдущего региона"
 
 #: editor_actions.cc:206
 msgid "To Previous Region End"
-msgstr "К концу предыдущей области"
+msgstr "К концу предыдущего региона"
 
 #: editor_actions.cc:207
 msgid "To Previous Region Sync"
-msgstr "К предыдущему синхронизатору области"
+msgstr "К предыдущему синхронизатору региона"
 
 #: editor_actions.cc:209
 msgid "To Range Start"
@@ -4720,7 +4720,7 @@ msgstr "Исп. пропуск диапазонов"
 
 #: editor_actions.cc:325
 msgid "Play Selected Regions"
-msgstr "Воспроизвести выбранные области"
+msgstr "Воспроизвести выбранные регионы"
 
 #: editor_actions.cc:327
 msgid "Play from Edit Point and Return"
@@ -5076,19 +5076,19 @@ msgstr "К маркерам"
 
 #: editor_actions.cc:582
 msgid "Snap to Region Start"
-msgstr "К началам областей"
+msgstr "К началам регионов"
 
 #: editor_actions.cc:583
 msgid "Snap to Region End"
-msgstr "К концам областей"
+msgstr "К концам регионов"
 
 #: editor_actions.cc:584
 msgid "Snap to Region Sync"
-msgstr "К синхронизаторам областей"
+msgstr "К синхронизаторам регионов"
 
 #: editor_actions.cc:585
 msgid "Snap to Region Boundary"
-msgstr "К границам областей"
+msgstr "К границам регионов"
 
 #: editor_actions.cc:587
 msgid "Show Marker Lines"
@@ -5145,7 +5145,7 @@ msgstr "Показать всё"
 
 #: editor_actions.cc:683
 msgid "Show Automatic Regions"
-msgstr "Показать автомат. области"
+msgstr "Показать автомат. регионы"
 
 #: editor_actions.cc:685
 msgid "Ascending"
@@ -5157,27 +5157,27 @@ msgstr "По убыванию"
 
 #: editor_actions.cc:690
 msgid "By Region Name"
-msgstr "По имени области"
+msgstr "По имени региона"
 
 #: editor_actions.cc:692
 msgid "By Region Length"
-msgstr "По длительности области"
+msgstr "По длительности региона"
 
 #: editor_actions.cc:694
 msgid "By Region Position"
-msgstr "По расположению области"
+msgstr "По расположению региона"
 
 #: editor_actions.cc:696
 msgid "By Region Timestamp"
-msgstr "По времени создания области"
+msgstr "По времени создания региона"
 
 #: editor_actions.cc:698
 msgid "By Region Start in File"
-msgstr "По началу области в файле"
+msgstr "По началу региона в файле"
 
 #: editor_actions.cc:700
 msgid "By Region End in File"
-msgstr "По концу области в файле"
+msgstr "По концу региона в файле"
 
 #: editor_actions.cc:702
 msgid "By Source File Name"
@@ -5205,7 +5205,7 @@ msgstr "Импортировать сессию PT"
 
 #: editor_actions.cc:718
 msgid "Import to Region List..."
-msgstr "Импортировать в список областей…"
+msgstr "Импортировать в список регионов…"
 
 #: editor_actions.cc:721 session_import_dialog.cc:47
 #: session_import_dialog.cc:68
@@ -5292,15 +5292,15 @@ msgstr "Реверс"
 
 #: editor_actions.cc:1792
 msgid "Make Mono Regions"
-msgstr "Создать моно-области"
+msgstr "Создать моно-регионы"
 
 #: editor_actions.cc:1795
 msgid "Boost Gain"
-msgstr "Повысить громкость области"
+msgstr "Повысить gain региона"
 
 #: editor_actions.cc:1798
 msgid "Cut Gain"
-msgstr "Понизить громкость области"
+msgstr "Понизить gain региона"
 
 #: editor_actions.cc:1801 editor_actions.cc:1886
 msgid "Reset Gain"
@@ -5372,7 +5372,7 @@ msgstr "Установить длительность затухания"
 
 #: editor_actions.cc:1865
 msgid "Set Tempo from Region = Bar"
-msgstr "Установить темп, считая что область = такт"
+msgstr "Установить темп, считая что регион = такт"
 
 #: editor_actions.cc:1867
 msgid "Split at Percussion Onsets"
@@ -5388,7 +5388,7 @@ msgstr "Свойства..."
 
 #: editor_actions.cc:1875
 msgid "Play selected Regions"
-msgstr "Воспроизвести выбранные области"
+msgstr "Воспроизвести выбранные регионы"
 
 #: editor_actions.cc:1877
 msgid "Bounce (with processing)"
@@ -5448,7 +5448,7 @@ msgstr "Толкнуть назад"
 
 #: editor_actions.cc:1905
 msgid "Sequence Regions"
-msgstr "Выстроить области встык"
+msgstr "Выстроить регионы встык"
 
 #: editor_actions.cc:1907
 msgid "Nudge Later by Capture Offset"
@@ -5468,19 +5468,19 @@ msgstr "Во врезку"
 
 #: editor_actions.cc:1914
 msgid "Trim to Previous"
-msgstr "До предыдущей области"
+msgstr "До предыдущего региона"
 
 #: editor_actions.cc:1915
 msgid "Trim to Next"
-msgstr "До следующей области"
+msgstr "До следующего региона"
 
 #: editor_actions.cc:1919
 msgid "Insert Region from Region List"
-msgstr "Вставить область из списка областей"
+msgstr "Вставить регион из списка регионов"
 
 #: editor_actions.cc:1923
 msgid "Set Sync Position"
-msgstr "Установить синхронизатор области"
+msgstr "Установить синхронизатор региона"
 
 #: editor_actions.cc:1924
 msgid "Place Transient"
@@ -5496,11 +5496,11 @@ msgstr "Конец по курсору редактора"
 
 #: editor_actions.cc:1927
 msgid "Align Start"
-msgstr "Выровнять начала областей"
+msgstr "Выровнять начала регионов"
 
 #: editor_actions.cc:1928
 msgid "Align Start Relative"
-msgstr "Выровнять относительно начал областей"
+msgstr "Выровнять относительно начал регионов"
 
 #: editor_actions.cc:1929
 msgid "Align End"
@@ -14568,11 +14568,11 @@ msgstr "в выделенные дорожки"
 
 #: sfdb_ui.cc:111 sfdb_ui.cc:131
 msgid "to region list"
-msgstr "в список областей"
+msgstr "в список регионов"
 
 #: sfdb_ui.cc:113 sfdb_ui.cc:133
 msgid "as new tape tracks"
-msgstr "как новые плёночные дорожки"
+msgstr "как новые ленточные дорожки"
 
 #: sfdb_ui.cc:117
 msgid "programming error: unknown import mode string %1"
@@ -14620,7 +14620,7 @@ msgstr ""
 
 #: sfdb_ui.cc:599
 msgid "SoundFileBox: Could not tokenize string: "
-msgstr "SoundFileBox: Не удалось разметить строку: "
+msgstr "SoundFileBox: Не удалось разобрать строку: "
 
 #: sfdb_ui.cc:619 sfdb_ui.cc:621
 msgid "Search"
@@ -14696,7 +14696,7 @@ msgstr "Ещё"
 
 #: sfdb_ui.cc:756
 msgid "Similar"
-msgstr "Дубликат"
+msgstr "Подобное"
 
 #: sfdb_ui.cc:768
 msgid "ID"
@@ -14732,7 +14732,7 @@ msgstr "Нажмите для импорта выбранных файлов"
 
 #: sfdb_ui.cc:1024
 msgid "SoundFileBrowser: Could not tokenize string: "
-msgstr "SoundFileBrowser: Не удалось разметить строку:"
+msgstr "SoundFileBrowser: Не удалось разобрать строку:"
 
 #: sfdb_ui.cc:1224
 msgid "%1 more page of 100 results available"
@@ -14937,11 +14937,11 @@ msgstr "Загружается %1..."
 
 #: speaker_dialog.cc:40
 msgid "Add Speaker"
-msgstr "Добавить громкоговоритель"
+msgstr "Добавить динамик"
 
 #: speaker_dialog.cc:41
 msgid "Remove Speaker"
-msgstr "Удалить громкоговоритель"
+msgstr "Удалить динамик"
 
 #: speaker_dialog.cc:63
 msgid "Azimuth:"
@@ -15495,7 +15495,7 @@ msgstr "Длина фейда"
 
 #: strip_silence_dialog.cc:112 strip_silence_dialog.cc:299
 msgid "Analyzing"
-msgstr "Выполняется анализ"
+msgstr "Анализируется"
 
 #: stripable_colorpicker.cc:108
 msgid "Color Selection: %1"
@@ -15511,7 +15511,7 @@ msgstr "Шаблоны дорожек"
 
 #: template_dialog.cc:81
 msgid "Export all"
-msgstr ""
+msgstr "Экспортировать все"
 
 #: template_dialog.cc:87
 msgid "Template Name"
@@ -15535,7 +15535,7 @@ msgstr ""
 
 #: template_dialog.cc:279
 msgid "File exists"
-msgstr ""
+msgstr "Файл существует"
 
 #: template_dialog.cc:280
 msgid "The file %1 already exists."
@@ -15599,7 +15599,7 @@ msgstr "в доле:"
 
 #: tempo_dialog.cc:48 tempo_dialog.cc:68
 msgid "Pulse:"
-msgstr ""
+msgstr "Пульс:"
 
 #: tempo_dialog.cc:49 tempo_dialog.cc:69
 msgid "Tap tempo"
@@ -15792,55 +15792,55 @@ msgstr "Ошибка в программе: запрос в несуществу
 
 #: transform_dialog.cc:39
 msgid "this note's"
-msgstr ""
+msgstr "этой ноты"
 
 #: transform_dialog.cc:40
 msgid "the previous note's"
-msgstr ""
+msgstr "предыдущей ноты"
 
 #: transform_dialog.cc:41
 msgid "this note's index"
-msgstr ""
+msgstr "индекс этой ноты"
 
 #: transform_dialog.cc:42
 msgid "the number of notes"
-msgstr ""
+msgstr "количество нот"
 
 #: transform_dialog.cc:43
 msgid "exactly"
-msgstr ""
+msgstr "точно"
 
 #: transform_dialog.cc:44
 msgid "a random number from"
-msgstr ""
+msgstr "случайное число из"
 
 #: transform_dialog.cc:55
 msgid "equal steps from"
-msgstr ""
+msgstr "равные шаги от"
 
 #: transform_dialog.cc:58
 msgid "note number"
-msgstr ""
+msgstr "номер ноты"
 
 #: transform_dialog.cc:59
 msgid "velocity"
-msgstr ""
+msgstr "скорость"
 
 #: transform_dialog.cc:60
 msgid "start time"
-msgstr ""
+msgstr "начальное время"
 
 #: transform_dialog.cc:61
 msgid "length"
-msgstr ""
+msgstr "длина"
 
 #: transform_dialog.cc:82 transform_dialog.cc:113
 msgid "Transform"
-msgstr ""
+msgstr "Преобразовать"
 
 #: transform_dialog.cc:91
 msgid "Set "
-msgstr ""
+msgstr "Установить"
 
 #: transpose_dialog.cc:30
 msgid "Transpose MIDI"
@@ -15919,7 +15919,7 @@ msgstr ""
 
 #: ui_config.cc:788
 msgid "Loading ui configuration file %1"
-msgstr ""
+msgstr "Загрузка файла пользовательского интерфейса %1"
 
 #: utils.cc:121 utils.cc:164
 msgid "bad XPM header %1"
@@ -15972,11 +15972,11 @@ msgstr "C"
 
 #: vca_master_strip.cc:458
 msgid "Assign Selected Channels"
-msgstr ""
+msgstr "Назначить выбранные каналы"
 
 #: vca_master_strip.cc:459
 msgid "Drop Selected Channels"
-msgstr ""
+msgstr "Отсоединить выбранные каналы"
 
 #: vca_master_strip.cc:461
 msgid "Drop All Slaves"
@@ -16128,7 +16128,7 @@ msgstr "Импортировать/перекодировать видеофай
 
 #: transcode_video_dialog.cc:61
 msgid "Output File:"
-msgstr "Файл вывода:"
+msgstr "Выходной файл:"
 
 #: transcode_video_dialog.cc:64 export_video_dialog.cc:85
 msgid "Abort"
@@ -16144,7 +16144,7 @@ msgstr "Извлечь LTC из звуковой дорожки и выровн�
 
 #: transcode_video_dialog.cc:70
 msgid "Manual Override"
-msgstr "Ручное управление"
+msgstr "Переопределить вручную"
 
 #: transcode_video_dialog.cc:74 export_video_dialog.cc:103
 msgid "Debug Mode: Print ffmpeg command and output to stdout."
@@ -16159,18 +16159,20 @@ msgid ""
 "ffmpeg installation was not found. Video Import is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg не найден. Видео импортирование работать не будет. Подробности "
+"см. в окне лога."
 
 #: transcode_video_dialog.cc:123
 msgid ""
 "File-info can not be read. Most likely '%1' is not a valid video-file or an "
 "unsupported video codec or format."
 msgstr ""
-"ИнфоФайл не может быть прочитан. Скорее всего '%1' не является допустимым "
+"Сведения о файле не могут быть прочитаны. Скорее всего '%1' не является допустимым "
 "видеофайлом, "
 
 #: transcode_video_dialog.cc:140
 msgid "FPS:"
-msgstr "ф/с:"
+msgstr "к/с:"
 
 #: transcode_video_dialog.cc:144
 msgid "Codec:"
@@ -16242,7 +16244,7 @@ msgstr "Перекодирование видео..."
 
 #: transcode_video_dialog.cc:441
 msgid "Transcoding Failed."
-msgstr "Не удалось выполнить перекодирование."
+msgstr "Перекодировать не удалось."
 
 #: transcode_video_dialog.cc:545
 msgid "Save Transcoded Video File"
@@ -16355,7 +16357,7 @@ msgstr "Указать соотношение сторон:"
 
 #: export_video_dialog.cc:94
 msgid "Normalize Audio"
-msgstr "Нормировать звук"
+msgstr "Нормализация звука"
 
 #: export_video_dialog.cc:95
 msgid "2 Pass Encoding"
@@ -16375,7 +16377,7 @@ msgstr "Использовать [2] B-кадры (только MPEG 2 или 4)
 
 #: export_video_dialog.cc:100
 msgid "Override FPS (Default is to retain FPS from the input video file):"
-msgstr "Принудительно указать свою частоту кадров:"
+msgstr "Переопределить частоту кадров (по умолчанию взять как во входном файле):"
 
 #: export_video_dialog.cc:101
 msgid "Include Session Metadata"
@@ -16386,6 +16388,8 @@ msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
+"ffmpeg не найден, экспорт видео невозможен, см. "
+"подробности в окне лога."
 
 #: export_video_dialog.cc:130
 msgid "<b>Output:</b> (file extension defines format)"
@@ -16438,7 +16442,7 @@ msgstr "Частота сэмплирования звука:"
 #: export_video_dialog.cc:219 export_video_dialog.cc:227
 #: export_video_dialog.cc:836 export_video_dialog.cc:839
 msgid "(default for format)"
-msgstr "(по умолчанию для контейнера)"
+msgstr "(по умолчанию для формата)"
 
 #: export_video_dialog.cc:237 export_video_dialog.cc:248
 #: export_video_dialog.cc:843 export_video_dialog.cc:852
@@ -16463,7 +16467,7 @@ msgstr "Выбранный диапазон"
 
 #: export_video_dialog.cc:583
 msgid "Normalizing audio"
-msgstr "Выполняется нормировка звука"
+msgstr "Нормализируем звук"
 
 #: export_video_dialog.cc:588 export_video_dialog.cc:593
 msgid "Exporting audio"
@@ -16496,19 +16500,19 @@ msgstr "Кодируется видео..."
 
 #: export_video_dialog.cc:816
 msgid "Export Video: Video input file cannot be read."
-msgstr "Экспорт видео: не удалось прочитать используемый видеофайл"
+msgstr "Экспорт видео: не удалось прочитать входной видеофайл"
 
 #: export_video_dialog.cc:922
 msgid "Encoding Video.. Pass 1/2"
-msgstr "Выполняется кодирование видео. Проход 1/2."
+msgstr "Кодируется видео. Проход 1/2."
 
 #: export_video_dialog.cc:934
 msgid "Encoding Video.. Pass 2/2"
-msgstr "Выполняется кодирование видео. Проход 2/2."
+msgstr "Кодируется видео. Проход 2/2."
 
 #: export_video_dialog.cc:1037
 msgid "Transcoding failed."
-msgstr "Не удалось выполнить перекодировку."
+msgstr "Перекодировать не удалось."
 
 #: export_video_dialog.cc:1273 export_video_dialog.cc:1293
 msgid "Save Exported Video File"
@@ -16516,7 +16520,7 @@ msgstr "Сохранить экспортированный видеофайл"
 
 #: export_video_infobox.cc:40
 msgid "Video Export Info"
-msgstr "Информация об экспорте видео"
+msgstr "Сведения об экспорте видео"
 
 #: export_video_infobox.cc:41
 msgid "Do Not Show This Dialog Again (Reset in Edit > Preferences > Video)."
