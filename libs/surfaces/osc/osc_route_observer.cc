@@ -61,11 +61,15 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss,
 		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo"), _strip->solo_control()), OSC::instance());
 		send_change_message ("/strip/solo", _strip->solo_control());
 
-		_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
-		send_change_message ("/strip/solo_iso", _strip->solo_isolate_control());
+		if (_strip->solo_isolate_control()) {
+			_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
+			send_change_message ("/strip/solo_iso", _strip->solo_isolate_control());
+		}
 
-		_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_safe"), _strip->solo_safe_control()), OSC::instance());
-		send_change_message ("/strip/solo_safe", _strip->solo_safe_control());
+		if (_strip->solo_safe_control()) {
+			_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_safe"), _strip->solo_safe_control()), OSC::instance());
+			send_change_message ("/strip/solo_safe", _strip->solo_safe_control());
+		}
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
 		if (track) {
