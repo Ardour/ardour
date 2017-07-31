@@ -1819,7 +1819,7 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 					break;
 				case 3:
 					_ltc = ltc_encoder_create (samplerate, 24, LTC_TV_FILM_24, 0);
-					name = "LTC30";
+					name = "LTC24";
 					break;
 			}
 			_ltc_spd = 1.0;
