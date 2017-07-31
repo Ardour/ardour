@@ -13,7 +13,7 @@ msgstr ""
 "Project-Id-Version: Ardour 5\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2017-07-30 00:21+0300\n"
-"PO-Revision-Date: 2017-07-30 17:33+0300\n"
+"PO-Revision-Date: 2017-08-01 00:16+0300\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: русский <>\n"
 "Language: ru\n"
@@ -559,7 +559,7 @@ msgstr "MIDI-дорожки"
 
 #: add_route_dialog.cc:81 add_route_dialog.cc:251
 msgid "Audio+MIDI Tracks"
-msgstr "Звуковые +MIDI дорожки"
+msgstr "Звуковые + MIDI-дорожки"
 
 #: add_route_dialog.cc:82 add_route_dialog.cc:245
 msgid "Audio Busses"
@@ -694,7 +694,7 @@ msgstr "Бесслойный"
 
 #: add_route_dialog.cc:407 add_route_dialog.cc:422
 msgid "Tape"
-msgstr "Лента"
+msgstr "Ленточный"
 
 #: add_route_dialog.cc:512 monitor_section.cc:278 plugin_pin_dialog.cc:515
 #: plugin_setup_dialog.cc:216
@@ -774,11 +774,11 @@ msgstr "Источник сигнала"
 
 #: analysis_window.cc:46
 msgid "Selected ranges"
-msgstr "Выбранные выделения"
+msgstr "Выбранные диапазоны"
 
 #: analysis_window.cc:47
 msgid "Selected regions"
-msgstr "Выделенные регионы"
+msgstr "Выделенные области"
 
 #: analysis_window.cc:48
 msgid "Show frequency power range"
@@ -912,7 +912,7 @@ msgstr "Соединения MIDI"
 
 #: ardour_ui.cc:326 keyeditor.cc:80
 msgid "Keyboard Shortcuts"
-msgstr "Сочетания клавиш"
+msgstr "Клавиатурные комбинации"
 
 #: ardour_ui.cc:337 editor.cc:1299
 msgid "Window|Editor"
@@ -1107,7 +1107,7 @@ msgstr "Выйти"
 
 #: ardour_ui.cc:1256
 msgid "Continue using %1"
-msgstr "Продолжить использование %1"
+msgstr "Продолжить работу с %1"
 
 #: ardour_ui.cc:1287 startup.cc:337
 msgid "%1 is ready for use"
@@ -1347,7 +1347,7 @@ msgstr "Открыть сессию"
 #: ardour_ui.cc:1978 session_dialog.cc:416 session_import_dialog.cc:173
 #: session_metadata_dialog.cc:864
 msgid "%1 sessions"
-msgstr "%1 сессий"
+msgstr "Сессии %1"
 
 #: ardour_ui.cc:1983 session_dialog.cc:421
 msgid "Session Archives"
@@ -6720,7 +6720,7 @@ msgstr "Перемещение встроенных файлов в папке �
 
 #: editor_regions.cc:159
 msgid "Region name, with number of channels in []'s"
-msgstr "Название региона с числом каналов в []'с"
+msgstr "Название области с числом каналов в []'с"
 
 #: editor_regions.cc:160
 msgid "Position of start of region"
@@ -6740,7 +6740,7 @@ msgstr "Длительность области"
 
 #: editor_regions.cc:163
 msgid "Position of region sync point, relative to start of the region"
-msgstr "Положение точки области синхронизации относительно начала региона"
+msgstr "Положение точки области синхронизации относительно начала области"
 
 #: editor_regions.cc:164
 msgid "Length of region fade-in (units: secondary clock), () if disabled"
@@ -6764,7 +6764,7 @@ msgstr "У"
 
 #: editor_regions.cc:167
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Приклеить позицию региона к времени Бар|Бит?"
+msgstr "Приклеить позицию области к времени Такт|Доля?"
 
 #: editor_regions.cc:168
 msgid "Region muted?"
@@ -6776,7 +6776,7 @@ msgstr "Н"
 
 #: editor_regions.cc:169
 msgid "Region opaque (blocks regions below it from being heard)?"
-msgstr "Непрозрачность региона (блоки регионов под ним слышимы)?"
+msgstr "Непрозрачность области (отключает слышимость нижних областей)?"
 
 #: editor_regions.cc:360 editor_regions.cc:365 editor_regions.cc:367
 msgid "Hidden"
@@ -11360,7 +11360,7 @@ msgstr ""
 
 #: rc_option_editor.cc:1133
 msgid "Scan Time Out"
-msgstr ""
+msgstr "Таймаут сканирования"
 
 #: rc_option_editor.cc:1141
 msgid "∞"
@@ -11393,11 +11393,11 @@ msgstr "Профиль:"
 
 #: rc_option_editor.cc:1215
 msgid "Playback (seconds of buffering)"
-msgstr ""
+msgstr "Воспроизведение (секунд буферизации)"
 
 #: rc_option_editor.cc:1219
 msgid "Recording (seconds of buffering)"
-msgstr ""
+msgstr "Запись (секунд буферизации)"
 
 #: rc_option_editor.cc:1228
 msgid "Small sessions (4-16 tracks)"
@@ -11429,7 +11429,7 @@ msgstr "Включить"
 
 #: rc_option_editor.cc:1339
 msgid "Edit the settings for selected protocol (it must be ENABLED first):"
-msgstr ""
+msgstr "Изменить параметры выбранного протокола (сначала надо его включить):"
 
 #: rc_option_editor.cc:1343
 msgid "Show Protocol Settings"
@@ -11721,11 +11721,11 @@ msgstr ""
 
 #: rc_option_editor.cc:2312
 msgid "Snap rubberband to grid"
-msgstr ""
+msgstr "Привязывать рамку выделения по сетке"
 
 #: rc_option_editor.cc:2319
 msgid "Prompt for new marker names"
-msgstr ""
+msgstr "Запрашивать текст новых пометок"
 
 #: rc_option_editor.cc:2324
 msgid ""
@@ -11746,7 +11746,7 @@ msgstr "Разрешить перетаскивание указателя во�
 
 #: rc_option_editor.cc:2340
 msgid "Zoom to mouse position when zooming with scroll wheel"
-msgstr ""
+msgstr "Масштабировать вокруг указателя мыши при прокручивании колеса"
 
 #: rc_option_editor.cc:2349
 msgid "Zoom with vertical drag in rulers"
@@ -11754,7 +11754,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2357
 msgid "Double click zooms to selection"
-msgstr ""
+msgstr "Двойной щелчок масштабирует в выделение"
 
 #: rc_option_editor.cc:2365
 msgid "Update editor window during drags of the summary"
@@ -11788,6 +11788,7 @@ msgstr "Перемещать автоматизацию вместе с обла
 #: rc_option_editor.cc:2400
 msgid "Ignore Y-axis click position when adding new automation-points"
 msgstr ""
+"Игнорировать позицию по оси Y при щелчке для добавления точки автоматизации"
 
 #: rc_option_editor.cc:2406
 msgid ""
@@ -11801,7 +11802,7 @@ msgstr "Форма фейда по умолчанию"
 
 #: rc_option_editor.cc:2428
 msgid "Regions in edit groups are edited together"
-msgstr ""
+msgstr "Области в группах редактирования меняются вместе"
 
 #: rc_option_editor.cc:2429
 msgid "whenever they overlap in time"
@@ -11809,7 +11810,7 @@ msgstr "Когда пересекаются по времени"
 
 #: rc_option_editor.cc:2430
 msgid "only if they have identical length and position"
-msgstr ""
+msgstr "Только если у них одинаковая длительность и позиция"
 
 #: rc_option_editor.cc:2439
 msgid "Layering model"
@@ -11905,7 +11906,7 @@ msgstr "За послефейдерными обработчиками и до �
 
 #: rc_option_editor.cc:2551
 msgid "Default Track / Bus Muting Options"
-msgstr ""
+msgstr "Параметры приглушения дорожек/шин по умолчанию"
 
 #: rc_option_editor.cc:2556
 msgid "Mute affects pre-fader sends"
@@ -12049,7 +12050,7 @@ msgstr "Воспроизводить выбираемые в редакторе 
 
 #: rc_option_editor.cc:2791
 msgid "MIDI Audition Synth (LV2)"
-msgstr ""
+msgstr "Синтезатор для прослушивания MIDI (LV2)"
 
 #: rc_option_editor.cc:2824
 msgid "Enable metronome only while recording"
@@ -12119,7 +12120,7 @@ msgstr "Очень быстрое [32 Дб/с]"
 
 #: rc_option_editor.cc:2872
 msgid "Meter line-up level; 0dBu"
-msgstr "Точка выравнивания индикатора; 0dBu"
+msgstr "Точка выравнивания; 0dBu"
 
 #: rc_option_editor.cc:2877 rc_option_editor.cc:2893
 msgid "-24dBFS (SMPTE US: 4dBu = -20dBFS)"
@@ -12147,7 +12148,7 @@ msgstr ""
 
 #: rc_option_editor.cc:2888
 msgid "IEC1/DIN Meter line-up level; 0dBu"
-msgstr "Точка выравнивания индикатора IEC1/DIN; 0dBu"
+msgstr "Точка выравнивания IEC1/DIN; 0dBu"
 
 #: rc_option_editor.cc:2898
 msgid "Reference level for IEC1/DIN meter."
@@ -12175,7 +12176,7 @@ msgstr "0VU = +8dBu"
 
 #: rc_option_editor.cc:2917
 msgid "Peak indicator threshold [dBFS]"
-msgstr ""
+msgstr "Порог индикатора пика [dBFS]"
 
 #: rc_option_editor.cc:2925
 msgid ""
@@ -12187,25 +12188,27 @@ msgstr ""
 
 #: rc_option_editor.cc:2929
 msgid "Default Meter Types"
-msgstr ""
+msgstr "Индикаторы по умолчанию"
 
 #: rc_option_editor.cc:2930
 msgid ""
 "These settings apply to newly created tracks and busses. For the Master bus, "
 "this will be when a new session is created."
 msgstr ""
+"Эти параметры влияют на вновь созданные дорожки и шины. Изменение для мастер-"
+"шины вступит в силу после создания новой сессии."
 
 #: rc_option_editor.cc:2936
 msgid "Default Meter Type for Master Bus"
-msgstr "Тип индикатора по умолчанию для мастер-шины"
+msgstr "Индикатор для мастер-шины"
 
 #: rc_option_editor.cc:2954
 msgid "Default meter type for busses"
-msgstr ""
+msgstr "Индикатор для шин"
 
 #: rc_option_editor.cc:2971
 msgid "Default meter type for tracks"
-msgstr ""
+msgstr "Индикатор для дорожек"
 
 #: rc_option_editor.cc:2980
 msgid "Post Export Analysis"
@@ -12361,7 +12364,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3084
 msgid "Dropout (xrun) Handling"
-msgstr ""
+msgstr "Обработка рассинхронизации (xrun)"
 
 #: rc_option_editor.cc:3087
 msgid "Stop recording when an xrun occurs"
@@ -12377,11 +12380,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3098
 msgid "Create markers where xruns occur"
-msgstr "Создавать пометки в точках рассинхронизации"
+msgstr "Помечать точки рассинхронизации"
 
 #: rc_option_editor.cc:3107
 msgid "External Synchronization"
-msgstr ""
+msgstr "Внешняя синхронизация"
 
 #: rc_option_editor.cc:3111
 msgid "External timecode source"
@@ -12520,7 +12523,7 @@ msgstr "Синхронизация/MIDI"
 
 #: rc_option_editor.cc:3226
 msgid "MIDI Beat Clock (Mclk) Generator"
-msgstr ""
+msgstr "Генератор MIDI Beat Clock (Mclk)"
 
 #: rc_option_editor.cc:3231
 msgid "Enable Mclk generator"
@@ -12573,7 +12576,7 @@ msgstr ""
 
 #: rc_option_editor.cc:3314
 msgid "Scan/Discover"
-msgstr ""
+msgstr "Сканирование и обнаружение"
 
 #: rc_option_editor.cc:3316 rc_option_editor.cc:3359 rc_option_editor.cc:3441
 #: startup.cc:340
@@ -12807,11 +12810,11 @@ msgstr ""
 
 #: rc_option_editor.cc:3579
 msgid "Blink Rec-Arm buttons"
-msgstr "Мигать кнопками готовности к записи"
+msgstr "Мерцать кнопками готовности к записи"
 
 #: rc_option_editor.cc:3587
 msgid "Blink Alert Indicators"
-msgstr ""
+msgstr "Мерцать индикаторами предупреждения"
 
 #: rc_option_editor.cc:3597 rc_option_editor.cc:3598 rc_option_editor.cc:3606
 #: rc_option_editor.cc:3614 rc_option_editor.cc:3617 rc_option_editor.cc:3626
@@ -12904,7 +12907,7 @@ msgstr "Полоса микшера"
 
 #: rc_option_editor.cc:3729
 msgid "Use narrow strips in the mixer for new strips by default"
-msgstr ""
+msgstr "Использовать узкие полоски микшера по умолчанию"
 
 #: rc_option_editor.cc:3736 rc_option_editor.cc:3738 rc_option_editor.cc:3746
 #: rc_option_editor.cc:3754 rc_option_editor.cc:3763 rc_option_editor.cc:3772
@@ -12914,35 +12917,35 @@ msgstr "Внешний вид/Панель управления"
 
 #: rc_option_editor.cc:3736
 msgid "Main Transport Toolbar Items"
-msgstr ""
+msgstr "Основные элементы панели транспорта"
 
 #: rc_option_editor.cc:3741
 msgid "Display Record/Punch Options"
-msgstr ""
+msgstr "Показывать параметры записи и врезки"
 
 #: rc_option_editor.cc:3749
 msgid "Display Monitor Options"
-msgstr ""
+msgstr "Показывать параметры мониторинга"
 
 #: rc_option_editor.cc:3757
 msgid "Display Selection Clock"
-msgstr ""
+msgstr "Показывать время выделения"
 
 #: rc_option_editor.cc:3766
 msgid "Display Secondary Clock"
-msgstr ""
+msgstr "Показывать вспомогательный счётчик"
 
 #: rc_option_editor.cc:3775
 msgid "Display Navigation Timeline"
-msgstr ""
+msgstr "Показывать шкалу навигации"
 
 #: rc_option_editor.cc:3783
 msgid "Display Master Level Meter"
-msgstr ""
+msgstr "Показывать индикатор уровня в мастер-шине"
 
 #: rc_option_editor.cc:3790
 msgid "Lua Action Script Button Visibility"
-msgstr ""
+msgstr "Видимость кнопок для вызова скриптов на Lua"
 
 #: rc_option_editor.cc:3800 rc_option_editor.cc:3802 rc_option_editor.cc:3809
 #: rc_option_editor.cc:3825 rc_option_editor.cc:3835 rc_option_editor.cc:3847
@@ -13216,7 +13219,7 @@ msgstr "Разделить область"
 
 #: rhythm_ferret.cc:70
 msgid "Snap regions"
-msgstr "Приклеить области к сетке"
+msgstr "Привязывать области к сетке"
 
 #: rhythm_ferret.cc:71
 msgid "Conform regions"
