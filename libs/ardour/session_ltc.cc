@@ -84,8 +84,8 @@ Session::ltc_tx_initialize()
 	ltc_prev_cycle = -1;
 	ltc_tx_reset();
 	ltc_tx_resync_latency();
-	Xrun.connect_same_thread (*this, boost::bind (&Session::ltc_tx_reset, this));
-	engine().GraphReordered.connect_same_thread (*this, boost::bind (&Session::ltc_tx_resync_latency, this));
+	Xrun.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_reset, this));
+	engine().GraphReordered.connect_same_thread (ltc_tx_connections, boost::bind (&Session::ltc_tx_resync_latency, this));
 	restarting = false;
 }
 
@@ -97,6 +97,7 @@ Session::ltc_tx_cleanup()
 	ltc_enc_buf = NULL;
 	ltc_encoder_free(ltc_encoder);
 	ltc_encoder = NULL;
+	ltc_tx_connections.drop_connections ();
 }
 
 void
@@ -115,6 +116,7 @@ void
 Session::ltc_tx_reset()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC TX reset\n");
+	assert (ltc_encoder);
 	ltc_enc_pos = -9999; // force re-start
 	ltc_buf_len = 0;
 	ltc_buf_off = 0;

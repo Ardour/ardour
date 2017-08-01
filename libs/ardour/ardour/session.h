@@ -1677,6 +1677,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void ltc_tx_recalculate_position();
 	void ltc_tx_parse_offset();
 	void ltc_tx_send_time_code_for_cycle (framepos_t, framepos_t, double, double, pframes_t nframes);
+	PBD::ScopedConnectionList ltc_tx_connections;
+
 
 	void reset_record_status ();
 
