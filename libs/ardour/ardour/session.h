@@ -1241,6 +1241,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int                      transport_sub_state;
 	mutable gint            _record_status;
 	framepos_t              _transport_frame;
+	gint                    _seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_end_is_free;
 	Slave*                  _slave;
