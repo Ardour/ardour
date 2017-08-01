@@ -694,7 +694,7 @@ then
 	JACK_VERSION_OK="f"
 	JACK_VER_STRING=$(jackd --version | grep -e "jackd.*protocol")
 	JACK_NAME=$(echo $JACK_VER_STRING | awk '{print $1}')
-	JACK_VERSION=$(echo $JACK_VER_STRING | awk '{print $3}')
+	JACK_VERSION=$(echo $JACK_VER_STRING | awk '{print $3}') | sed 's/-.*$//'
 	JACK_VERSION_MAJOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $1}')
 	JACK_VERSION_MIDDLE=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $2}')
 	JACK_VERSION_MINOR=$(echo $JACK_VERSION | awk 'BEGIN{FS="."}{print $3}')
