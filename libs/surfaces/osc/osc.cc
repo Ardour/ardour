@@ -4077,11 +4077,6 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	bool ok = false;
 
-	lo_message reply = lo_message_new();
-	lo_message_add_int32 (reply, ssid);
-	lo_message_add_int32 (reply, piid);
-	lo_message_add_int32(reply, redi->enabled() ? 1 : 0);
-
 	for ( uint32_t ppi = 0; ppi < pip->parameter_count(); ppi++) {
 
 		uint32_t controlid = pip->nth_parameter(ppi, ok);
@@ -4089,6 +4084,10 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 			continue;
 		}
 		boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+
+		lo_message reply = lo_message_new();
+		lo_message_add_int32 (reply, ssid);
+		lo_message_add_int32 (reply, piid);
 
 		lo_message_add_int32 (reply, ppi + 1);
 		ParameterDescriptor pd;
@@ -4102,6 +4101,10 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 		flags |= pd.logarithmic ? 4 : 0;
 		flags |= pd.sr_dependent ? 32 : 0;
 		flags |= pd.toggled ? 64 : 0;
+		flags |= pip->parameter_is_input(controlid) ? 0x80 : 0;
+
+		std::string param_desc = pi->plugin()->describe_parameter(Evoral::Parameter(PluginAutomation, 0, controlid));
+		flags |= (param_desc == X_("hidden")) ? 0x100 : 0;
 		lo_message_add_int32 (reply, flags);
 
 		switch(pd.datatype) {
@@ -4139,27 +4142,34 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 				lo_message_add_string(reply, _("UNKNOWN"));
 				break;
 		}
-
 		lo_message_add_float (reply, pd.lower);
 		lo_message_add_float (reply, pd.upper);
 		lo_message_add_string (reply, pd.print_fmt.c_str());
 		if ( pd.scale_points ) {
 			lo_message_add_int32 (reply, pd.scale_points->size());
 			for ( ARDOUR::ScalePoints::const_iterator i = pd.scale_points->begin(); i != pd.scale_points->end(); ++i) {
-				lo_message_add_int32 (reply, i->second);
+				lo_message_add_float (reply, i->second);
 				lo_message_add_string (reply, ((std::string)i->first).c_str());
 			}
-		} else {
+		}
+		else {
 			lo_message_add_int32 (reply, 0);
 		}
 		if ( c ) {
 			lo_message_add_double (reply, c->get_value());
-		} else {
+		}
+		else {
 			lo_message_add_double (reply, 0);
 		}
+
+		lo_send_message (get_address (msg), "/strip/plugin/descriptor", reply);
+		lo_message_free (reply);
 	}
 
-	lo_send_message (get_address (msg), "/strip/plugin/descriptor", reply);
+	lo_message reply = lo_message_new ();
+	lo_message_add_int32 (reply, ssid);
+	lo_message_add_int32 (reply, piid);
+	lo_send_message (get_address (msg), "/strip/plugin/descriptor_end", reply);
 	lo_message_free (reply);
 
 	return 0;
