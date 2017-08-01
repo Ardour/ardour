@@ -4037,6 +4037,7 @@ OSC::route_plugin_list (int ssid, lo_message msg) {
 
 		boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 		lo_message_add_string (reply, pip->name());
+		lo_message_add_int32(reply, redi->enabled() ? 1 : 0);
 
 		piid++;
 	}
