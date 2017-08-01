@@ -170,6 +170,12 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 	pframes_t txf = 0;
 	boost::shared_ptr<Port> ltcport = ltc_output_port();
 
+	if (!ltcport) {
+		assert (deletion_in_progress ());
+		return;
+	}
+
+	/* marks buffer as not written */
 	Buffer& buf (ltcport->get_buffer (nframes));
 
 	if (!ltc_encoder || !ltc_enc_buf) {

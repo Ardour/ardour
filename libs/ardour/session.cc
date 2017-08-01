@@ -644,6 +644,11 @@ Session::destroy ()
 		_slave = 0;
 	}
 
+	/* remove I/O objects before unsetting the engine session */
+	_click_io.reset ();
+	_ltc_input.reset ();
+	_ltc_output.reset ();
+
 	/* disconnect from any and all signals that we are connected to */
 
 	Port::PortSignalDrop (); /* EMIT SIGNAL */
@@ -7071,13 +7076,14 @@ Session::operation_in_progress (GQuark op) const
 boost::shared_ptr<Port>
 Session::ltc_input_port () const
 {
+	assert (_ltc_input);
 	return _ltc_input->nth (0);
 }
 
 boost::shared_ptr<Port>
 Session::ltc_output_port () const
 {
-	return _ltc_output->nth (0);
+	return _ltc_output ? _ltc_output->nth (0) : boost::shared_ptr<Port> ();
 }
 
 void
