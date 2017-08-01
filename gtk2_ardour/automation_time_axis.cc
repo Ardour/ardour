@@ -313,13 +313,16 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 AutomationTimeAxisView::~AutomationTimeAxisView ()
 {
-	cleanup_gui_properties ();
+	if (_stripable) {
+		cleanup_gui_properties ();
+	}
 	delete _view;
 }
 
 void
 AutomationTimeAxisView::route_going_away ()
 {
+	cleanup_gui_properties ();
 	_stripable.reset ();
 }
 
