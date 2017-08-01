@@ -584,23 +584,34 @@ Session::non_realtime_locate ()
 
 
 	microseconds_t begin = get_microseconds ();
-
-	const framepos_t tf = _transport_frame;
+	framepos_t tf;
 
 	{
 		boost::shared_ptr<RouteList> rl = routes.reader();
 
+	  restart:
+		gint sc = g_atomic_int_get (&_seek_counter);
+		tf = _transport_frame;
 
 		cerr << "\n\n >>> START Non-RT locate on routes to " << tf << "\n\n";
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (tf);
+			if (sc != g_atomic_int_get (&_seek_counter)) {
+				cerr << "\n\n RESTART locate, new seek delivered\n";
+				goto restart;
+			}
 		}
 
 		cerr << "\n\n <<< DONE Non-RT locate on routes\n\n";
 	}
 
 	{
+		/* VCAs are quick to locate because they have no data (except
+		   automation) associated with them. Don't bother with a
+		   restart mechanism here, but do use the same transport frame
+		   that the Routes used.
+		*/
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (tf);
@@ -1241,6 +1252,9 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 
 	// Update Timecode time
 	_transport_frame = target_frame;
+	// Bump seek counter so that any in-process locate in the butler
+	// thread(s?) can restart.
+	g_atomic_int_inc (&_seek_counter);
 	_last_roll_or_reversal_location = target_frame;
 	timecode_time(_transport_frame, transmitting_timecode_time);
 

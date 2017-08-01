@@ -181,6 +181,7 @@ Session::Session (AudioEngine &eng,
 	, transport_sub_state (0)
 	, _record_status (Disabled)
 	, _transport_frame (0)
+	, _seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_end_is_free (true)
 	, _slave (0)
