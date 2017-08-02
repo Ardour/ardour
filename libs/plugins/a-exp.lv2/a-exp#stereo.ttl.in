@@ -1,0 +1,168 @@
+@prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:  <http://lv2plug.in/ns/lv2core#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rsz:  <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix unit: <http://lv2plug.in/ns/extensions/units#> .
+
+<http://ardour.org/credits.html>
+	a foaf:Person ;
+	foaf:name "Ardour Team" ;
+	foaf:homepage <http://ardour.org/> .
+
+<urn:ardour:a-exp#stereo>
+    a lv2:Plugin, doap:Project, lv2:ExpanderPlugin ;
+
+    lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#in_gui> ;
+
+    lv2:port [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 0 ;
+        lv2:name "Attack" ;
+        lv2:symbol "att" ;
+        lv2:default 10.000000 ;
+        lv2:minimum 0.100000 ;
+        lv2:maximum 100.000000 ;
+        unit:unit unit:ms ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 1 ;
+        lv2:name "Release" ;
+        lv2:symbol "rel" ;
+        lv2:default 80.000000 ;
+        lv2:minimum 1.000000 ;
+        lv2:maximum 2000.000000 ;
+        unit:unit unit:ms ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 2 ;
+        lv2:name "Knee" ;
+        lv2:symbol "kn" ;
+        lv2:default 0.000000 ;
+        lv2:minimum 0.000000 ;
+        lv2:maximum 8.000000 ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 3 ;
+        lv2:name "Ratio" ;
+        lv2:symbol "rat" ;
+        lv2:default 4.000000 ;
+        lv2:minimum 1.000000 ;
+        lv2:maximum 20.000000 ;
+        unit:unit [
+            rdfs:label  " " ;
+            unit:symbol " " ;
+            unit:render "%f  " ;
+        ] ;
+        lv2:portProperty <http://lv2plug.in/ns/ext/port-props#logarithmic> ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 4 ;
+        lv2:name "Threshold" ;
+        lv2:symbol "thr" ;
+        lv2:default 0.000000 ;
+        lv2:minimum -60.000000 ;
+        lv2:maximum 0.000000 ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 5 ;
+        lv2:name "Makeup" ;
+        lv2:symbol "mak" ;
+        lv2:default 0.000000 ;
+        lv2:minimum 0.000000 ;
+        lv2:maximum 30.000000 ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:OutputPort, lv2:ControlPort ;
+        lv2:index 6 ;
+        lv2:name "Gain Reduction" ;
+        lv2:symbol "gr" ;
+        lv2:default 0.000000 ;
+        lv2:minimum 0.000000 ;
+        lv2:maximum 45.000000 ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:OutputPort, lv2:ControlPort ;
+        lv2:index 7 ;
+        lv2:name "Output Level" ;
+        lv2:symbol "outlevel" ;
+        lv2:default -45.000000 ;
+        lv2:minimum -45.000000 ;
+        lv2:maximum 0.000000 ;
+        unit:unit unit:db ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 8 ;
+        lv2:name "Sidechain" ;
+        lv2:symbol "sidech" ;
+        lv2:default 0.000000 ;
+        lv2:minimum 0.000000 ;
+        lv2:maximum 1.000000 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 9 ;
+        lv2:name "Enable" ;
+        lv2:symbol "enable" ;
+        lv2:default 1 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
+        lv2:designation lv2:enabled;
+    ];
+
+    lv2:port [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 10 ;
+        lv2:symbol "lv2_audio_in_1" ;
+        lv2:name "Audio Input 1" ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 11 ;
+        lv2:symbol "lv2_audio_in_2" ;
+        lv2:name "Audio Input 2" ;
+    ] ,
+    [
+        a lv2:InputPort, lv2:AudioPort ;
+        lv2:index 12 ;
+        lv2:symbol "lv2_sidechain_in" ;
+        lv2:name "Sidechain Input" ;
+        lv2:portProperty lv2:isSideChain ;
+    ],
+    [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 13 ;
+        lv2:symbol "lv2_audio_out_1" ;
+        lv2:name "Audio Output 1" ;
+    ],
+    [
+        a lv2:OutputPort, lv2:AudioPort ;
+        lv2:index 14 ;
+        lv2:symbol "lv2_audio_out_2" ;
+        lv2:name "Audio Output 2" ;
+    ] ;
+
+    rdfs:comment """
+A powerful stereo expander
+""" ;
+
+    doap:name "a-Expander stereo" ;
+		doap:license <http://usefulinc.com/doap/licenses/gpl> ;
+    doap:maintainer <http://ardour.org/credits.html> ;
+
+    lv2:microVersion 1 ;
+    lv2:minorVersion 1 .

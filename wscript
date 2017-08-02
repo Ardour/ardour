@@ -242,6 +242,7 @@ children = [
         'libs/waveview',
         'libs/plugins/reasonablesynth.lv2',
         'libs/plugins/a-comp.lv2',
+        'libs/plugins/a-exp.lv2',
         'libs/plugins/a-delay.lv2',
         'libs/plugins/a-eq.lv2',
         'libs/plugins/a-reverb.lv2',
