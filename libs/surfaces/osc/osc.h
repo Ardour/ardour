@@ -306,6 +306,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(refresh_surface);
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);
+	PATH_CALLBACK_MSG(master_select);
 
 #define PATH_CALLBACK(name) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -622,6 +623,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int master_set_trim (float dB);
 	int master_set_pan_stereo_position (float position, lo_message msg);
 	int master_set_mute (uint32_t state);
+	int master_select (lo_message msg);
 	int monitor_set_gain (float dB);
 	int monitor_set_fader (float position);
 	int monitor_delta_gain (float delta);

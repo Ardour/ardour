@@ -543,6 +543,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
 		REGISTER_CALLBACK (serv, "/master/trimdB", "f", master_set_trim);
 		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, "/master/select", "f", master_select);
 		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
 		REGISTER_CALLBACK (serv, "/monitor/fader", "f", monitor_set_fader);
 		REGISTER_CALLBACK (serv, "/monitor/db_delta", "f", monitor_delta_gain);
@@ -2479,6 +2480,22 @@ OSC::master_set_mute (uint32_t state)
 
 	if (s) {
 		s->mute_control()->set_value (state, PBD::Controllable::NoGroup);
+	}
+
+	return 0;
+}
+
+int
+OSC::master_select (lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *sur = get_surface(get_address (msg));
+	sur->expand_enable = false;
+	boost::shared_ptr<Stripable> s = session->master_out();
+	if (s) {
+		SetStripableSelection (s);
 	}
 
 	return 0;
