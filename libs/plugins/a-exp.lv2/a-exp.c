@@ -253,7 +253,7 @@ activate(LV2_Handle instance)
 {
 	AExp* aexp = (AExp*)instance;
 
-	*(aexp->gainr) = -160.0f;
+	*(aexp->gainr) = 160.0f;
 	*(aexp->outlevel) = -45.0f;
 	aexp->old_in_peak_db = -160.0f;
 }
@@ -322,7 +322,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0;
+	float in_peak = 0.f;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
@@ -479,7 +479,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0;
+	float in_peak = 0.f;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
