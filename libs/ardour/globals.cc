@@ -597,13 +597,13 @@ ARDOUR::cleanup ()
 		return;
 	}
 
+	delete &ControlProtocolManager::instance();
 	ARDOUR::AudioEngine::destroy ();
 
 	delete Library;
 #ifdef HAVE_LRDF
 	lrdf_cleanup ();
 #endif
-	delete &ControlProtocolManager::instance();
 #ifdef WINDOWS_VST_SUPPORT
 	fst_exit ();
 #endif

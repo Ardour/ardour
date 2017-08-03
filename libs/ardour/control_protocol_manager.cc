@@ -76,6 +76,7 @@ ControlProtocolManager::~ControlProtocolManager()
 
 
 	for (list<ControlProtocolInfo*>::iterator p = control_protocol_info.begin(); p != control_protocol_info.end(); ++p) {
+		(*p)->protocol = 0; // protocol was already destroyed above.
 		delete (*p);
 	}
 
