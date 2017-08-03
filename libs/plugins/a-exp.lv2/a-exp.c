@@ -85,6 +85,8 @@ typedef struct {
 	float makeup_gain;
 	float tau;
 
+	bool was_disabled;
+
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
 	bool                     need_expose;
@@ -274,7 +276,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float Lgain = 1.f;
 	float Lxg, Lyg;
 	float current_gainr;
-	float old_gainr = *aexp->gainr;
+	float old_gainr;
 
 	int usesidechain = (*(aexp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
@@ -295,6 +297,15 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		thresdb = 0.f;
 		makeup = 0.f;
 		makeup_target = 1.f;
+		if (!aexp->was_disabled) {
+			*aexp->gainr = 0.f;
+			aexp->was_disabled = true;
+		}
+	} else {
+		if (aexp->was_disabled) {
+			*aexp->gainr = 160.f;
+			aexp->was_disabled = false;
+		}
 	}
 
 #ifdef LV2_EXTENDED
@@ -319,6 +330,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
+	old_gainr = *aexp->gainr;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
@@ -434,6 +446,15 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		thresdb = 0.f;
 		makeup = 0.f;
 		makeup_target = 1.f;
+		if (!aexp->was_disabled) {
+			*aexp->gainr = 0.f;
+			aexp->was_disabled = true;
+		}
+	} else {
+		if (aexp->was_disabled) {
+			*aexp->gainr = 160.f;
+			aexp->was_disabled = false;
+		}
 	}
 
 #ifdef LV2_EXTENDED
@@ -458,6 +479,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
+	old_gainr = *aexp->gainr;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
