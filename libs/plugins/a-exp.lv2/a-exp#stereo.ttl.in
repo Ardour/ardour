@@ -54,7 +54,7 @@
         lv2:symbol "rat" ;
         lv2:default 4.000000 ;
         lv2:minimum 1.000000 ;
-        lv2:maximum 20.000000 ;
+        lv2:maximum 100.000000 ;
         unit:unit [
             rdfs:label  " " ;
             unit:symbol " " ;
