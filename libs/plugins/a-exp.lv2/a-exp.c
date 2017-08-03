@@ -81,9 +81,8 @@ typedef struct {
 	float* output1;
 
 	float srate;
-	float old_yl;
-	float old_y1;
-	float old_yg;
+
+	float old_in_peak_db;
 
 	float makeup_gain;
 	float tau;
@@ -104,8 +103,6 @@ typedef struct {
 	float v_thresdb;
 	float v_gainr;
 	float v_makeup;
-	float v_lvl;
-	float v_lv1;
 	float v_lvl_in;
 	float v_lvl_out;
 #endif
@@ -128,7 +125,6 @@ instantiate(const LV2_Descriptor* descriptor,
 	}
 
 	aexp->srate = rate;
-	aexp->old_yl=aexp->old_y1=aexp->old_yg=0.f;
 	aexp->tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
 #ifdef LV2_EXTENDED
 	aexp->need_expose = true;
@@ -257,9 +253,9 @@ activate(LV2_Handle instance)
 {
 	AExp* aexp = (AExp*)instance;
 
-	*(aexp->gainr) = 0.0f;
+	*(aexp->gainr) = -160.0f;
 	*(aexp->outlevel) = -45.0f;
-	aexp->old_yl=aexp->old_y1=aexp->old_yg=0.f;
+	aexp->old_in_peak_db = -160.0f;
 }
 
 static void
@@ -273,14 +269,16 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 	float srate = aexp->srate;
 	float width = (6.f * *(aexp->knee)) + 0.01;
-	float cdb=0.f;
 	float attack_coeff = exp(-1000.f/(*(aexp->attack) * srate));
 	float release_coeff = exp(-1000.f/(*(aexp->release) * srate));
 
 	float max = 0.f;
 	float lgaininp = 0.f;
 	float Lgain = 1.f;
-	float Lxg, Lxl, Lyg, Lyl, Ly1;
+	float Lxg, Lyg;
+	float current_gainr;
+	float old_gainr = *aexp->gainr;
+
 	int usesidechain = (*(aexp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
@@ -345,21 +343,22 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 			Lyg = Lxg + (1.f-ratio)*(Lxg-thresdb-width/2.f)*(Lxg-thresdb-width/2.f)/(2.f*width);
 		}
 
-		Lxl = Lxg - Lyg;
+		current_gainr = Lxg - Lyg;
 
-		aexp->old_y1 = sanitize_denormal(aexp->old_y1);
-		aexp->old_yl = sanitize_denormal(aexp->old_yl);
-		Ly1 = fminf(Lxl, release_coeff * aexp->old_y1+(1.f-release_coeff)*Lxl);
-		Lyl = attack_coeff * aexp->old_yl+(1.f-attack_coeff)*Ly1;
-		Ly1 = sanitize_denormal(Ly1);
-		Lyl = sanitize_denormal(Lyl);
+		if (current_gainr > old_gainr) {
+			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
+		} else if (current_gainr < old_gainr) {
+			current_gainr = attack_coeff*old_gainr + (1.f-attack_coeff)*current_gainr;
+		}
 
-		cdb = -Lyl;
-		Lgain = from_dB(cdb);
+		current_gainr = sanitize_denormal(current_gainr);
 
-		*(aexp->gainr) = Lyl;
-		if (Lyl > aexp->v_gainr) {
-			aexp->v_gainr = Lyl;
+		Lgain = from_dB(-current_gainr);
+
+		old_gainr = current_gainr;
+
+		if (current_gainr > aexp->v_gainr) {
+			aexp->v_gainr = current_gainr;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -368,29 +367,33 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		output[i] = lgaininp * makeup_gain;
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
-
-		// TODO re-use local variables on stack
-		// store values back to aexp at the end of the inner-loop
-		aexp->old_yl = Lyl;
-		aexp->old_y1 = Ly1;
-		aexp->old_yg = Lyg;
 	}
 
+	*(aexp->gainr) = current_gainr;
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	const float old_v_lv1 = aexp->v_lv1;
-	const float old_v_lvl = aexp->v_lvl;
+	float in_peak_db = to_dB(in_peak);
+
+	if (!isfinite_local (in_peak_db)) {
+		in_peak_db = -160.0f;
+	}
+
 	const float tot_rel_c = exp(-1000.f/(*(aexp->release) * srate) * n_samples);
 	const float tot_atk_c = exp(-1000.f/(*(aexp->attack) * srate) * n_samples);
-	aexp->v_lv1 = fmaxf (in_peak, tot_rel_c*old_v_lv1 + (1.f-tot_rel_c)*in_peak);
-	aexp->v_lvl = tot_atk_c*old_v_lvl + (1.f-tot_atk_c)*aexp->v_lv1;
 
-	if (!isfinite_local (aexp->v_lvl)) {
-		aexp->v_lvl = 0.f;
+	const float old_in_peak_db = aexp->old_in_peak_db;
+
+	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
+		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
+	} else if (in_peak_db > aexp->old_in_peak_db && in_peak_db > thresdb) {
+		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
 	}
-	const float v_lvl_in = (aexp->v_lvl < 0.001f) ? -60.f : to_dB(aexp->v_lvl);
+
+	aexp->old_in_peak_db = in_peak_db;
+
+	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
@@ -420,7 +423,6 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 	float srate = aexp->srate;
 	float width = (6.f * *(aexp->knee)) + 0.01;
-	float cdb=0.f;
 	float attack_coeff = exp(-1000.f/(*(aexp->attack) * srate));
 	float release_coeff = exp(-1000.f/(*(aexp->release) * srate));
 
@@ -428,7 +430,10 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float lgaininp = 0.f;
 	float rgaininp = 0.f;
 	float Lgain = 1.f;
-	float Lxg, Lxl, Lyg, Lyl, Ly1;
+	float Lxg, Lyg;
+	float current_gainr;
+	float old_gainr = *aexp->gainr;
+
 	int usesidechain = (*(aexp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
@@ -497,21 +502,22 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 			Lyg = Lxg + (1.f-ratio)*(Lxg-thresdb-width/2.f)*(Lxg-thresdb-width/2.f)/(2.f*width);
 		}
 
-		Lxl = Lxg - Lyg;
+		current_gainr = Lxg - Lyg;
 
-		aexp->old_y1 = sanitize_denormal(aexp->old_y1);
-		aexp->old_yl = sanitize_denormal(aexp->old_yl);
-		Ly1 = fminf(Lxl, release_coeff * aexp->old_y1+(1.f-release_coeff)*Lxl);
-		Lyl = attack_coeff * aexp->old_yl+(1.f-attack_coeff)*Ly1;
-		Ly1 = sanitize_denormal(Ly1);
-		Lyl = sanitize_denormal(Lyl);
+		if (current_gainr > old_gainr) {
+			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
+		} else if (current_gainr < old_gainr) {
+			current_gainr = attack_coeff*old_gainr + (1.f-attack_coeff)*current_gainr;
+		}
 
-		cdb = -Lyl;
-		Lgain = from_dB(cdb);
+		current_gainr = sanitize_denormal(current_gainr);
 
-		*(aexp->gainr) = Lyl;
-		if (Lyl > aexp->v_gainr) {
-			aexp->v_gainr = Lyl;
+		Lgain = from_dB(-current_gainr);
+
+		old_gainr = current_gainr;
+
+		if (current_gainr > aexp->v_gainr) {
+			aexp->v_gainr = current_gainr;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -523,28 +529,33 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		output1[i] = rgaininp * makeup_gain;
 
 		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
-
-		// TODO re-use local variables on stack
-		// store values back to aexp at the end of the inner-loop
-		aexp->old_yl = Lyl;
-		aexp->old_y1 = Ly1;
-		aexp->old_yg = Lyg;
 	}
 
+	*(aexp->gainr) = current_gainr;
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	const float old_v_lv1 = aexp->v_lv1;
-	const float old_v_lvl = aexp->v_lvl;
+	float in_peak_db = to_dB(in_peak);
+
+	if (!isfinite_local (in_peak_db)) {
+		in_peak_db = -160.0f;
+	}
+
 	const float tot_rel_c = exp(-1000.f/(*(aexp->release) * srate) * n_samples);
 	const float tot_atk_c = exp(-1000.f/(*(aexp->attack) * srate) * n_samples);
-	aexp->v_lv1 = fmaxf (in_peak, tot_rel_c*old_v_lv1 + (1.f-tot_rel_c)*in_peak);
-	aexp->v_lvl = tot_atk_c*old_v_lvl + (1.f-tot_atk_c)*aexp->v_lv1;
-	if (!isfinite_local (aexp->v_lvl)) {
-		aexp->v_lvl = 0.f;
+
+	const float old_in_peak_db = aexp->old_in_peak_db;
+
+	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
+		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
+	} else if (in_peak_db > aexp->old_in_peak_db && in_peak_db > thresdb) {
+		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
 	}
-	const float v_lvl_in = (aexp->v_lvl < 0.001f) ? -60.f : to_dB(aexp->v_lvl);
+
+	aexp->old_in_peak_db = in_peak_db;
+
+	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
