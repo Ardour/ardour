@@ -644,19 +644,19 @@ Session::destroy ()
 		_slave = 0;
 	}
 
-	/* remove I/O objects before unsetting the engine session */
-	_click_io.reset ();
-	_ltc_input.reset ();
-	_ltc_output.reset ();
-
 	/* disconnect from any and all signals that we are connected to */
 
 	Port::PortSignalDrop (); /* EMIT SIGNAL */
 	drop_connections ();
 
 	/* shutdown control surface protocols while we still have ports
-	   and the engine to move data to any devices.
-	*/
+	 * and the engine to move data to any devices.
+	 */
+
+	/* remove I/O objects before unsetting the engine session */
+	_click_io.reset ();
+	_ltc_input.reset ();
+	_ltc_output.reset ();
 
 	ControlProtocolManager::instance().drop_protocols ();
 
