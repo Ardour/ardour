@@ -148,7 +148,9 @@ IO::silence (framecnt_t nframes)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		i->get_buffer(nframes).silence (nframes);
+		if (i->port_handle ()) {
+			i->get_buffer(nframes).silence (nframes);
+		}
 	}
 }
 
