@@ -82,8 +82,6 @@ typedef struct {
 
 	float srate;
 
-	float old_in_peak_db;
-
 	float makeup_gain;
 	float tau;
 
@@ -255,7 +253,6 @@ activate(LV2_Handle instance)
 
 	*(aexp->gainr) = 160.0f;
 	*(aexp->outlevel) = -45.0f;
-	aexp->old_in_peak_db = -160.0f;
 }
 
 static void
@@ -322,14 +319,12 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0.f;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
 		sc0 = sc[i];
 		ingain = usesidechain ? fabs(sc0) : fabs(in0);
-		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -374,27 +369,11 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	float in_peak_db = to_dB(in_peak);
-
-	if (!isfinite_local (in_peak_db)) {
-		in_peak_db = -160.0f;
-	}
-
-	const float tot_rel_c = exp(-1000.f/(*(aexp->release) * srate) * n_samples);
-	const float tot_atk_c = exp(-1000.f/(*(aexp->attack) * srate) * n_samples);
-
-	const float old_in_peak_db = aexp->old_in_peak_db;
-
-	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
-		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
-	} else if (in_peak_db > aexp->old_in_peak_db && in_peak_db > thresdb) {
-		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
-	}
-
-	aexp->old_in_peak_db = in_peak_db;
-
-	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
+	const float v_lvl_in = v_lvl_out > thresdb ?
+		v_lvl_out :
+		(aexp->v_lvl_out - thresdb * (1.f-ratio))/ratio;
+
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
 		aexp->need_expose = true;
@@ -479,7 +458,6 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0.f;
 	aexp->v_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
@@ -488,7 +466,6 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		sc0 = sc[i];
 		maxabslr = fmaxf(fabs(in0), fabs(in1));
 		ingain = usesidechain ? fabs(sc0) : maxabslr;
-		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -536,27 +513,11 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	float in_peak_db = to_dB(in_peak);
-
-	if (!isfinite_local (in_peak_db)) {
-		in_peak_db = -160.0f;
-	}
-
-	const float tot_rel_c = exp(-1000.f/(*(aexp->release) * srate) * n_samples);
-	const float tot_atk_c = exp(-1000.f/(*(aexp->attack) * srate) * n_samples);
-
-	const float old_in_peak_db = aexp->old_in_peak_db;
-
-	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
-		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
-	} else if (in_peak_db > aexp->old_in_peak_db && in_peak_db > thresdb) {
-		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
-	}
-
-	aexp->old_in_peak_db = in_peak_db;
-
-	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
+	const float v_lvl_in = v_lvl_out > thresdb ?
+		v_lvl_out :
+		(aexp->v_lvl_out - thresdb * (1.f-ratio))/ratio;
+
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
 		aexp->need_expose = true;
