@@ -46,6 +46,7 @@
 #include "ardour/profile.h"
 #include "ardour/playlist.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
 
@@ -476,8 +477,12 @@ Diskstream::set_name (const string& str)
 {
 	if (_name != str) {
 		assert(playlist());
-		playlist()->set_name (str);
-		SessionObject::set_name(str);
+		std::string name (str);
+		while (_session.playlists->by_name (name)) {
+			name = Playlist::bump_name (name, _session);
+		}
+		playlist()->set_name (name);
+		SessionObject::set_name(name);
 	}
 	return true;
 }
