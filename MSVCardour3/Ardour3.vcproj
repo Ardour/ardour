@@ -924,6 +924,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\plugin_display.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\plugin_eq_gui.cc"
 				>
 			</File>
@@ -1955,6 +1959,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\playlist_selector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\plugin_display.h"
 				>
 			</File>
 			<File
