@@ -58,12 +58,12 @@ AudioPort::cycle_start (pframes_t nframes)
 void
 AudioPort::cycle_end (pframes_t nframes)
 {
-        if (sends_output() && !_buffer->written()) {
-	        if (!_buffer->data (0)) {
-		        get_audio_buffer (nframes);
-	        }
-	        if (_buffer->capacity() >= nframes) {
-		        _buffer->silence (nframes);
+	if (sends_output() && !_buffer->written() && _port_handle) {
+		if (!_buffer->data (0)) {
+			get_audio_buffer (nframes);
+		}
+		if (_buffer->capacity() >= nframes) {
+			_buffer->silence (nframes);
 		}
 	}
 }

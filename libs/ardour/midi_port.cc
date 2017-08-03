@@ -65,7 +65,7 @@ MidiPort::cycle_start (pframes_t nframes)
 
 	_buffer->clear ();
 
-	if (sends_output ()) {
+	if (sends_output () && _port_handle) {
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
 	}
 
