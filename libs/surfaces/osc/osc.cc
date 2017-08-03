@@ -39,6 +39,7 @@
 #include "ardour/route.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
+#include "ardour/vca.h"
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
 #include "ardour/filesystem_paths.h"
@@ -1238,27 +1239,29 @@ OSC::routes_list (lo_message msg)
 
 			lo_message reply = lo_message_new ();
 
-			if (s->presentation_info().flags() & PresentationInfo::AudioTrack) {
+			if (boost::dynamic_pointer_cast<AudioTrack>(s)) {
 				lo_message_add_string (reply, "AT");
-			} else if (s->presentation_info().flags() & PresentationInfo::MidiTrack) {
+			} else if (boost::dynamic_pointer_cast<MidiTrack>(s)) {
 				lo_message_add_string (reply, "MT");
-			} else if (s->presentation_info().flags() & PresentationInfo::AudioBus) {
-				// r->feeds (session->master_out()) may make more sense
-				if (r->direct_feeds_according_to_reality (session->master_out())) {
-					// this is a bus
-					lo_message_add_string (reply, "B");
-				} else {
-					// this is an Aux out
-					lo_message_add_string (reply, "AX");
-				}
-			} else if (s->presentation_info().flags() & PresentationInfo::MidiBus) {
-				lo_message_add_string (reply, "MB");
-			} else if (s->presentation_info().flags() & PresentationInfo::VCA) {
+			} else if (boost::dynamic_pointer_cast<VCA>(s)) {
 				lo_message_add_string (reply, "V");
 			} else if (s->is_master()) {
 				lo_message_add_string (reply, "MA");
 			} else if (s->is_monitor()) {
 				lo_message_add_string (reply, "MO");
+			} else if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
+					// r->feeds (session->master_out()) may make more sense
+					if (r->direct_feeds_according_to_reality (session->master_out())) {
+						// this is a bus
+						lo_message_add_string (reply, "B");
+					} else {
+						// this is an Aux out
+						lo_message_add_string (reply, "AX");
+					}
+				} else {
+					lo_message_add_string (reply, "MB");
+				}
 			}
 
 			lo_message_add_string (reply, s->name().c_str());
@@ -5017,10 +5020,9 @@ OSC::Sorted
 OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 {
 	Sorted sorted;
-
-	// fetch all stripables
 	StripableList stripables;
 
+	// fetch all stripables
 	session->get_stripables (stripables);
 
 	// Look for stripables that match bit in sur->strip_types
@@ -5029,46 +5031,44 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 		boost::shared_ptr<Stripable> s = *it;
 		if ((!cue) && (!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 			// do nothing... skip it
+		} else if (types[8] && (s->is_selected())) {
+			sorted.push_back (s);
+		} else if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
+			sorted.push_back (s);
+		} else if (s->is_master() || s->is_monitor() || s->is_auditioner()) {
+			// do nothing for these either (we add them later)
 		} else {
-
-			if (types[0] && (s->presentation_info().flags() & PresentationInfo::AudioTrack)) {
+			if (types[0] && boost::dynamic_pointer_cast<AudioTrack>(s)) {
+				sorted.push_back (s);
+			} else if (types[1] && boost::dynamic_pointer_cast<MidiTrack>(s)) {
+				sorted.push_back (s);
+			} else if (types[4] && boost::dynamic_pointer_cast<VCA>(s)) {
 				sorted.push_back (s);
 			} else
-			if (types[1] && (s->presentation_info().flags() & PresentationInfo::MidiTrack)) {
-				sorted.push_back (s);
-			} else
-			if ((s->presentation_info().flags() & PresentationInfo::AudioBus)) {
-				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
-				// r->feeds (session->master_out()) may make more sense
-				if (r->direct_feeds_according_to_reality (session->master_out())) {
-					// this is a bus
-					if (types[2]) {
-						sorted.push_back (s);
-					}
-				} else {
-					// this is an Aux out
-					if (types[7]) {
-						sorted.push_back (s);
-					}
-				}
-			} else if (types[3] && (s->presentation_info().flags() & PresentationInfo::MidiBus)) {
-				sorted.push_back (s);
-			} else if (types[4] && (s->presentation_info().flags() & PresentationInfo::VCA)) {
-				sorted.push_back (s);
-			} else if (types[8] && (s->is_selected())) {
-				sorted.push_back (s);
-			} else if (types[9] && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
-				sorted.push_back (s);
-			}
 #ifdef MIXBUS
-			else if (types[2]) {
-				if (Profile->get_mixbus()) {
-					if (s->mixbus()) {
-						sorted.push_back (s);
+			if (types[2] && Profile->get_mixbus() && s->mixbus()) {
+				sorted.push_back (s);
+			} else
+#endif
+			if ((types[2] || types[3] || types[7]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
+				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
+					// note some older sessions will show midibuses as busses
+					if (r->direct_feeds_according_to_reality (session->master_out())) {
+						// this is a bus
+						if (types[2]) {
+							sorted.push_back (s);
+						}
+					} else {
+						// this is an Aux out
+						if (types[7]) {
+							sorted.push_back (s);
+						}
 					}
+				} else if (types[3]) {
+						sorted.push_back (s);
 				}
 			}
-#endif
 		}
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
@@ -5077,7 +5077,9 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 		sorted.push_back (session->master_out());
 	}
 	if (types[6]) {
-		sorted.push_back (session->monitor_out());
+		if (session->monitor_out()) {
+			sorted.push_back (session->monitor_out());
+		}
 	}
 	return sorted;
 }
