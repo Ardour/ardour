@@ -729,7 +729,7 @@ LuaAPI::Vamp::Vamp (const std::string& key, float sample_rate)
 
 	if (bs > 0 && ss > 0 && bs <= 8192 && ss <= 8192) {
 		_bufsize = bs;
-		_stepsize = bs;
+		_stepsize = ss;
 	}
 }
 
