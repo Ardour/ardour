@@ -64,6 +64,7 @@ using namespace Timecode;
 void
 Session::ltc_tx_initialize()
 {
+	assert (!ltc_encoder && !ltc_enc_buf);
 	ltc_enc_tcformat = config.get_timecode_format();
 
 	ltc_tx_parse_offset();
@@ -93,11 +94,11 @@ void
 Session::ltc_tx_cleanup()
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC TX cleanup\n");
+	ltc_tx_connections.drop_connections ();
 	free(ltc_enc_buf);
 	ltc_enc_buf = NULL;
 	ltc_encoder_free(ltc_encoder);
 	ltc_encoder = NULL;
-	ltc_tx_connections.drop_connections ();
 }
 
 void

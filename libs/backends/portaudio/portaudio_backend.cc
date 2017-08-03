@@ -1816,7 +1816,9 @@ PortAudioBackend::n_physical_inputs () const
 void*
 PortAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	if (!port || !valid_port (port)) return NULL;
+	assert (port);
+	assert (valid_port (port));
+	if (!port || !valid_port (port)) return NULL; // XXX remove me
 	return static_cast<PamPort*>(port)->get_buffer (nframes);
 }
 

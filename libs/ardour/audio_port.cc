@@ -77,6 +77,7 @@ AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
+	assert (_port_handle);
 	_buffer->set_data ((Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes) +
 			   _global_port_buffer_offset + _port_buffer_offset, nframes);
 	return *_buffer;
@@ -86,6 +87,7 @@ Sample*
 AudioPort::engine_get_whole_audio_buffer ()
 {
 	/* caller must hold process lock */
+	assert (_port_handle);
 	return (Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes);
 }
 
