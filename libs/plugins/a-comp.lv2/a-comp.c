@@ -249,7 +249,7 @@ activate(LV2_Handle instance)
 	AComp* acomp = (AComp*)instance;
 
 	*(acomp->gainr) = 0.0f;
-	*(acomp->outlevel) = -45.0f;
+	*(acomp->outlevel) = -70.0f;
 }
 
 static void
@@ -372,7 +372,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
-	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
@@ -396,8 +396,9 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
 		// >= 0.1dB difference
 		acomp->need_expose = true;
-		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out;
+		const float relax_coef = exp(-5.f*n_samples/srate);
+		acomp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*acomp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
+		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
@@ -535,7 +536,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
-	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
@@ -559,8 +560,9 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
 		// >= 0.1dB difference
 		acomp->need_expose = true;
-		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out;
+		const float relax_coef = exp(-5.f*n_samples/srate);
+		acomp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*acomp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
+		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
