@@ -194,7 +194,6 @@ BeatBox::start ()
 	*/
 
 	whole_note_superclocks = (superclock_ticks_per_second * 60) / (_tempo / _meter_beat_type);
-	cerr << "there are " << _tempo / _meter_beat_type << " whole notes per minute, which is " << superclock_ticks_per_second * 60 << " sct, so wns = " << whole_note_superclocks << endl;
 	beat_superclocks = whole_note_superclocks / _meter_beat_type;
 	measure_superclocks = beat_superclocks * _meter_beats;
 
@@ -339,7 +338,6 @@ BeatBox::process (int nsamples)
 		process_start = 0;
 		process_end = superclocks;
 		two_pass_required = false;
-		cerr << "2nd Pass for " << superclocks << " offset = " << offset << endl;
 		goto second_pass;
 	}
 
