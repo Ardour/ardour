@@ -1,6 +1,6 @@
 all: bb
 
-CXXFLAGS=-I$(AD)/5.0/libs/evoral `pkg-config --cflags jack` `pkg-config --cflags gtkmm-2.4`
+CXXFLAGS=-I../../libs/evoral `pkg-config --cflags jack` `pkg-config --cflags gtkmm-2.4`
 LDFLAGS=`pkg-config --libs jack` `pkg-config --libs gtkmm-2.4`
 
 bb: bb.o gui.o
