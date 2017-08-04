@@ -329,7 +329,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		aexp->need_expose = true;
 	}
 #endif
-
+	float in_peak_db = -160.f;
 	old_gainr = *aexp->gainr;
 	aexp->v_gainr = 0.0;
 
@@ -340,6 +340,10 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+
+		if (Lxg > in_peak_db) {
+			in_peak_db = Lxg;
+		}
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = thresdb + (Lxg-thresdb) * ratio;
@@ -381,16 +385,14 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	const float v_lvl_in = v_lvl_out > thresdb ?
-		v_lvl_out :
-		(aexp->v_lvl_out - thresdb * (1.f-ratio))/ratio;
+	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
+	const float v_lvl_in = in_peak_db;
 
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
 		aexp->need_expose = true;
-		aexp->v_lvl_in = v_lvl_in;
-		const float relax_coef = exp(-(float)n_samples/srate);
+		const float relax_coef = exp(-5.f*n_samples/srate);
+		aexp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*aexp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
 		aexp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*aexp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 	}
 	if (aexp->need_expose && aexp->queue_draw) {
@@ -479,6 +481,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
+	float in_peak_db = -160.f;
 	old_gainr = *aexp->gainr;
 	aexp->v_gainr = 0.0;
 
@@ -491,6 +494,10 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+
+		if (Lxg > in_peak_db) {
+			in_peak_db = Lxg;
+		}
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = thresdb + (Lxg-thresdb) * ratio;
@@ -535,16 +542,14 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	const float v_lvl_in = v_lvl_out > thresdb ?
-		v_lvl_out :
-		(aexp->v_lvl_out - thresdb * (1.f-ratio))/ratio;
+	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
+	const float v_lvl_in = in_peak_db;
 
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
 		// >= 1dB difference
 		aexp->need_expose = true;
-		aexp->v_lvl_in = v_lvl_in;
-		const float relax_coef = exp(-2.0*n_samples/srate);
+		const float relax_coef = exp(-5.f*n_samples/srate);
+		aexp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*aexp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
 		aexp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*aexp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
 	}
 	if (aexp->need_expose && aexp->queue_draw) {
@@ -764,7 +769,7 @@ render_inline_only_bars (cairo_t* cr, const AExp* self)
 	cairo_rectangle (cr, x1+wd-w_gr, y2, w_gr, ht);
 	cairo_fill (cr);
 
-	if (self->v_lvl_out > -60.f) {
+	if (self->v_lvl_in > -60.f) {
 		if (self->v_lvl_out > 10.f) {
 			cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
 		} else if (self->v_lvl_out > 0.f) {
@@ -772,7 +777,7 @@ render_inline_only_bars (cairo_t* cr, const AExp* self)
 		} else {
 			cairo_set_source_rgba (cr, 0.0, 0.66, 0.0, 1.0);
 		}
-		const float w_g = (self->v_lvl_out > 10.f) ? wd : wd * (60.f+self->v_lvl_out) / 70.f;
+		const float w_g = (self->v_lvl_in > 10.f) ? wd : wd * (60.f+self->v_lvl_in) / 70.f;
 		cairo_rectangle (cr, x1, y1, w_g, ht);
 		cairo_fill (cr);
 	}
