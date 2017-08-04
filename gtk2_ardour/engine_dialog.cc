@@ -803,22 +803,10 @@ EngineControl::update_sensitivity ()
 	if (get_popdown_string_count (buffer_size_combo) > 0) {
 		if (!engine_running) {
 			buffer_size_combo.set_sensitive (valid);
-		} else if (backend->can_change_sample_rate_when_running()) {
+		} else if (backend->can_change_buffer_size_when_running ()) {
 			buffer_size_combo.set_sensitive (valid || !_have_control);
 		} else {
-#if 1
-			/* TODO
-			 * Currently there is no way to manually stop the
-			 * engine in order to re-configure it.
-			 * This needs to remain sensitive for now.
-			 *
-			 * (it's also handy to implicily
-			 * re-start the engine)
-			 */
-			buffer_size_combo.set_sensitive (true);
-#else
 			buffer_size_combo.set_sensitive (false);
-#endif
 		}
 	} else {
 		buffer_size_combo.set_sensitive (false);
@@ -1443,7 +1431,7 @@ EngineControl::set_buffersize_popdown_strings ()
 		s.push_back (bufsize_as_string (*x));
 	}
 
-	uint32_t previous_size = 0;
+	uint32_t previous_size = backend->buffer_size ();
 	if (!buffer_size_combo.get_active_text().empty()) {
 		previous_size = get_buffer_size ();
 	}
@@ -1634,6 +1622,12 @@ void
 EngineControl::buffer_size_changed ()
 {
 	DEBUG_ECONTROL ("buffer_size_changed");
+	if (ARDOUR::AudioEngine::instance()->running()) {
+		boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
+		if (backend && backend->can_change_buffer_size_when_running ()) {
+			backend->set_buffer_size (get_buffer_size());
+		}
+	}
 	show_buffer_duration ();
 }
 
@@ -1869,7 +1863,7 @@ EngineControl::store_state (State state)
 void
 EngineControl::maybe_display_saved_state ()
 {
-	if (!_have_control) {
+	if (!_have_control || ARDOUR::AudioEngine::instance()->running ()) {
 		return;
 	}
 
