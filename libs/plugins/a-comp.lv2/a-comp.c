@@ -48,6 +48,7 @@ typedef enum {
 
 	ACOMP_GAINR,
 	ACOMP_OUTLEVEL,
+	ACOMP_INLEVEL,
 	ACOMP_SIDECHAIN,
 	ACOMP_ENABLE,
 
@@ -68,6 +69,7 @@ typedef struct {
 
 	float* gainr;
 	float* outlevel;
+	float* inlevel;
 	float* sidechain;
 	float* enable;
 
@@ -161,6 +163,9 @@ connect_port(LV2_Handle instance,
 		case ACOMP_OUTLEVEL:
 			acomp->outlevel = (float*)data;
 			break;
+		case ACOMP_INLEVEL:
+			acomp->inlevel = (float*)data;
+			break;
 		case ACOMP_SIDECHAIN:
 			acomp->sidechain = (float*)data;
 			break;
@@ -250,6 +255,7 @@ activate(LV2_Handle instance)
 
 	*(acomp->gainr) = 0.0f;
 	*(acomp->outlevel) = -70.0f;
+	*(acomp->inlevel) = -160.f;
 }
 
 static void
@@ -373,6 +379,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
+	*(acomp->inlevel) = in_peak_db;
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
@@ -537,6 +544,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
+	*(acomp->inlevel) = in_peak_db;
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
