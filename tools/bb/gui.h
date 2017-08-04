@@ -31,13 +31,18 @@ class BBGUI {
 	Gtk::ToggleButton play_button;
 	Gtk::Button clear_button;
 
+	Gtk::Adjustment tempo_adjustment;
+	Gtk::SpinButton tempo_spinner;
+
 	Gtk::VBox global_vbox;
 	Gtk::VBox quantize_button_box;
 	Gtk::HBox misc_button_box;
 
+
 	void set_quantize (int divisor);
 	void toggle_play ();
 	void clear ();
+	void tempo_changed ();
 };
 
 #endif /* __bb_gui_h__ */

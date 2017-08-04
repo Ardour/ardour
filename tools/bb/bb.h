@@ -44,6 +44,7 @@ class BeatBox {
 	bool _running;
 	int   _measures;
 	float _tempo;
+	float _tempo_request;
 	int   _meter_beats;
 	int   _meter_beat_type;
 	jack_port_t* _input;
@@ -60,6 +61,7 @@ class BeatBox {
 
 	struct Event {
 		superclock_t time;
+		superclock_t whole_note_superclocks;
 		size_t       size;
 		unsigned char  buf[24];
 
@@ -77,6 +79,8 @@ class BeatBox {
 
 	typedef std::vector<Event*> EventPool;
 	EventPool  event_pool;
+
+	void compute_tempo_clocks ();
 };
 
 

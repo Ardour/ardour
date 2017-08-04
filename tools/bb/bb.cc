@@ -144,6 +144,7 @@ BeatBox::BeatBox (int sr)
 	, _running (false)
 	, _measures (2)
 	, _tempo (120)
+	, _tempo_request (0)
 	, _meter_beats (4)
 	, _meter_beat_type (4)
 	, _input (0)
@@ -183,19 +184,19 @@ BeatBox::register_ports (jack_client_t* jack)
 }
 
 void
+BeatBox::compute_tempo_clocks ()
+{
+	whole_note_superclocks = (superclock_ticks_per_second * 60) / (_tempo / _meter_beat_type);
+	beat_superclocks = whole_note_superclocks / _meter_beat_type;
+	measure_superclocks = beat_superclocks * _meter_beats;
+}
+
+void
 BeatBox::start ()
 {
 	/* compute tempo, beat steps etc. */
 
-	/*
-	   superclocks_per_minute = superclock_ticks_per_second * 60;
-	   beats_per_minute = _tempo;
-	   whole_notes_per_minute = beats_per_minute / _meter_beat_type;
-	*/
-
-	whole_note_superclocks = (superclock_ticks_per_second * 60) / (_tempo / _meter_beat_type);
-	beat_superclocks = whole_note_superclocks / _meter_beat_type;
-	measure_superclocks = beat_superclocks * _meter_beats;
+	compute_tempo_clocks ();
 
 	/* we can start */
 
@@ -206,6 +207,12 @@ void
 BeatBox::stop ()
 {
 	_start_requested = false;
+}
+
+void
+BeatBox::set_tempo (float bpm)
+{
+	_tempo_request = bpm;
 }
 
 int
@@ -228,6 +235,18 @@ BeatBox::process (int nsamples)
 	if (!_running) {
 		superclock_cnt += superclocks;
 		return 0;
+	}
+
+	if (_tempo_request) {
+		double ratio = _tempo / _tempo_request;
+		_tempo = _tempo_request;
+		_tempo_request = 0;
+
+		compute_tempo_clocks ();
+
+		for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
+			(*ee)->time = llrintf ((*ee)->time * ratio);
+		}
 	}
 
 	superclock_t process_start = superclock_cnt - last_start;
@@ -324,6 +343,7 @@ BeatBox::process (int nsamples)
 		event_pool.pop_back ();
 
 		e->time = quantized_time;
+		e->whole_note_superclocks = whole_note_superclocks;
 		e->size = in_event.size;
 		memcpy (e->buf, in_event.buffer, in_event.size);
 

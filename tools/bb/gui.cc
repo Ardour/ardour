@@ -14,6 +14,8 @@ BBGUI::BBGUI (int* argc, char** argv[], jack_client_t* j, BeatBox* bb)
 	, quantize_whole (quantize_group, "Whole")
 	, play_button ("Run")
 	, clear_button ("Clear")
+	, tempo_adjustment (bb->tempo(), 1, 300, 1, 10)
+	, tempo_spinner (tempo_adjustment)
 {
 	quantize_off.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 0));
 	quantize_32nd.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 32));
@@ -37,6 +39,10 @@ BBGUI::BBGUI (int* argc, char** argv[], jack_client_t* j, BeatBox* bb)
 	misc_button_box.pack_start (play_button);
 	misc_button_box.pack_start (clear_button);
 
+	tempo_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BBGUI::tempo_changed));
+
+	misc_button_box.pack_start (tempo_spinner);
+
 	global_vbox.pack_start (misc_button_box);
 	global_vbox.pack_start (quantize_button_box, true, true);
 	window.add (global_vbox);
@@ -52,6 +58,13 @@ BBGUI::run ()
 {
 	window.show ();
 	main.run ();
+}
+
+void
+BBGUI::tempo_changed ()
+{
+	float t = tempo_adjustment.get_value();
+	bbox->set_tempo (t);
 }
 
 void
