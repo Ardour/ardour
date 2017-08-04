@@ -28,6 +28,9 @@
 #include <cerrno>
 #include <cstring>
 
+#include <pthread.h>
+#include <sched.h>
+
 #include "pbd/base_ui.h"
 #include "pbd/debug.h"
 #include "pbd/pthread_utils.h"
@@ -74,6 +77,35 @@ BaseUI::new_request_type ()
 	rt_bit <<= 1;
 
 	return rt;
+}
+
+int
+BaseUI::set_thread_priority (const int policy, int priority) const
+{
+	struct sched_param param;
+	memset (&param, 0, sizeof (param));
+
+	/* POSIX requires a spread of at least 32 steps between min..max */
+	const int p_min = sched_get_priority_min (policy); // Linux: 1
+	const int p_max = sched_get_priority_max (policy); // Linux: 99
+
+	if (priority == 0) {
+		/* use default. XXX this should be relative to audio (JACK) thread,
+		 * internal backends use -20 (Audio), -21 (MIDI), -22 (compuation)
+		 */
+		priority = 7;
+	}
+
+	if (priority > 0) {
+		priority += p_min;
+	} else {
+		priority += p_max;
+	}
+	if (priority > p_max) priority = p_max;
+	if (priority < p_min) priority = p_min;
+	param.sched_priority = priority;
+
+	return pthread_setschedparam (pthread_self(), SCHED_FIFO, &param);
 }
 
 void

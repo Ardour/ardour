@@ -91,6 +91,8 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
+	int set_thread_priority (const int policy = SCHED_FIFO, int priority = 0) const;
+
 	/** Called when there input ready on the request_channel
 	 */
 	bool request_handler (Glib::IOCondition);
