@@ -857,7 +857,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
-	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
+	if (_realtime_pthread_create (SCHED_FIFO, -22, stacksize,
 	                              &thread_id, coreaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);
