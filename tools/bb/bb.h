@@ -35,6 +35,10 @@ class BeatBox {
 
 	void set_quantize (int divisor);
 
+	float tempo() const { return _tempo; }
+	int meter_beats() const { return _meter_beats; }
+	int meter_beat_type() const { return _meter_beat_type; }
+
   private:
 	bool _start_requested;
 	bool _running;
