@@ -19,6 +19,7 @@
 #ifndef ARDOUR_DSP_LOAD_CALCULATOR_H
 #define ARDOUR_DSP_LOAD_CALCULATOR_H
 
+#include <stdlib.h>
 #include <stdint.h>
 #include <cassert>
 #include <algorithm>
@@ -68,8 +69,14 @@ public:
 			return;
 		}
 
+#ifndef NDEBUG
+		const bool calc_avg_load = NULL != getenv("AVGLOAD");
+#else
+		const bool calc_avg_load = false;
+#endif
+
 		const float load = (float) elapsed_time_us() / (float)m_max_time_us;
-		if (load > m_dsp_load || load > 1.0) {
+		if ((calc_avg_load && load > .95f) || (!calc_avg_load && (load > m_dsp_load || load > 1.f))) {
 			m_dsp_load = load;
 		} else {
 			const float alpha = 0.2f * (m_max_time_us * 1e-6f);

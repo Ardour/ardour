@@ -22,6 +22,8 @@
 #include "libpbd-config.h"
 #endif
 
+#include <stdlib.h>
+
 #ifdef __linux__
 #include <unistd.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__)
@@ -41,6 +43,12 @@
 uint32_t
 hardware_concurrency()
 {
+	if (getenv("CONCURRENCY")) {
+		int c = atoi (getenv("CONCURRENCY"));
+		if (c > 0) {
+			return c;
+		}
+	}
 #if defined(PTW32_VERSION) || defined(__hpux)
         return pthread_num_processors_np();
 #elif defined(__APPLE__)
