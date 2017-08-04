@@ -797,15 +797,15 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_rectangle (cr, x1+wd-w_gr, y2, w_gr, ht);
 	cairo_fill (cr);
 
-	if (self->v_lvl_out > -60.f) {
-		if (self->v_lvl_out > 10.f) {
+	if (self->v_lvl_in > -60.f) {
+		if (self->v_lvl_out > 6.f) {
 			cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
 		} else if (self->v_lvl_out > 0.f) {
 			cairo_set_source_rgba (cr, 0.66, 0.66, 0.0, 1.0);
 		} else {
 			cairo_set_source_rgba (cr, 0.0, 0.66, 0.0, 1.0);
 		}
-		const float w_g = (self->v_lvl_out > 10.f) ? wd : wd * (60.f+self->v_lvl_out) / 70.f;
+		const float w_g = (self->v_lvl_in > 10.f) ? wd : wd * (60.f+self->v_lvl_in) / 70.f;
 		cairo_rectangle (cr, x1, y1, w_g, ht);
 		cairo_fill (cr);
 	}
