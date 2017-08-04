@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
 "PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
-"Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
+"Last-Translator: Kristoffer Grundström <hamnisdude@gmail.com>\n"
 "Language-Team: Svenska <sv@li.org>\n"
 "Language: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -19,283 +19,287 @@ msgstr ""
 
 #: about.cc:127
 msgid "Fons Adriaensen"
-msgstr ""
+msgstr "Fons Adriaensen"
 
 #: about.cc:128
 msgid "Brian Ahr"
-msgstr ""
+msgstr "Brian Ahr"
 
 #: about.cc:129
 msgid "John Anderson"
-msgstr ""
+msgstr "John Anderson"
 
 #: about.cc:130
 msgid "Marcus Andersson"
-msgstr ""
+msgstr "Marcus Andersson"
 
 #: about.cc:131
 msgid "Nedko Arnaudov"
-msgstr ""
+msgstr "Nedko Arnaudov"
 
 #: about.cc:132
 msgid "Hans Baier"
-msgstr ""
+msgstr "Hans Baier"
 
 #: about.cc:133
 msgid "Ben Bell"
-msgstr ""
+msgstr "Ben Bell"
 
 #: about.cc:134
 msgid "Sakari Bergen"
-msgstr ""
+msgstr "Sakari Bergen"
 
 #: about.cc:135
 msgid "Christian Borss"
-msgstr ""
+msgstr "Christian Borss"
 
 #: about.cc:136
 msgid "Chris Cannam"
-msgstr ""
+msgstr "Chris Cannam"
 
 #: about.cc:137
 msgid "Jeremy Carter"
-msgstr ""
+msgstr "Jeremy Carter"
 
 #: about.cc:138
 msgid "Jesse Chappell"
-msgstr ""
+msgstr "Jesse Chappell"
 
 #: about.cc:139
 msgid "Thomas Charbonnel"
-msgstr ""
+msgstr "Thomas Charbonel"
 
 #: about.cc:140
 msgid "Sam Chessman"
-msgstr ""
+msgstr "Sam Chessman"
 
 #: about.cc:141
 msgid "André Colomb"
-msgstr ""
+msgstr "André Colomb"
 
 #: about.cc:142
 msgid "Paul Davis"
-msgstr ""
+msgstr "Paul Davis"
 
 #: about.cc:143
 msgid "Gerard van Dongen"
-msgstr ""
+msgstr "Gerard van Dongen"
 
 #: about.cc:144
 msgid "John Emmas"
-msgstr ""
+msgstr "John Emmas"
 
 #: about.cc:145
 msgid "Colin Fletcher"
-msgstr ""
+msgstr "Colin Fletcher"
 
 #: about.cc:146
 msgid "Dave Flick"
-msgstr ""
+msgstr "Dave Flick"
 
 #: about.cc:147
 msgid "Hans Fugal"
-msgstr ""
+msgstr "Hans Fugal"
 
 #: about.cc:148
 msgid "Robin Gareus"
-msgstr ""
+msgstr "Robin Gareus"
 
 #: about.cc:149
 msgid "Nil Geisweiller"
-msgstr ""
+msgstr "Nil Geisweiller"
 
 #: about.cc:150
 msgid "Christopher George"
-msgstr ""
+msgstr "Christopher George"
 
 #: about.cc:151
 msgid "Chris Goddard"
-msgstr ""
+msgstr "Chris Goddard"
 
 #: about.cc:152
 msgid "J. Abelardo Gutierrez"
-msgstr ""
+msgstr "J. Abelardo Gutierrez"
 
 #: about.cc:153
 msgid "Jeremy Hall"
-msgstr ""
+msgstr "Jeremy Hall"
 
 #: about.cc:154
 msgid "Audun Halland"
-msgstr ""
+msgstr "Audun Halland"
 
 #: about.cc:155
 msgid "David Halter"
-msgstr ""
+msgstr "David Halter"
 
 #: about.cc:156
 msgid "Steve Harris"
-msgstr ""
+msgstr "Steve Harris"
 
 #: about.cc:157
 msgid "Melvin Ray Herr"
-msgstr ""
+msgstr "Melvin Ray Herr"
 
 #: about.cc:158
 msgid "Carl Hetherington"
-msgstr ""
+msgstr "Carl Hetherington"
 
 #: about.cc:159
 msgid "Rob Holland"
-msgstr ""
+msgstr "Rob Holland"
 
 #: about.cc:160
 msgid "Robert Jordens"
-msgstr ""
+msgstr "Robert Jordens"
 
 #: about.cc:161
 msgid "Stefan Kersten"
-msgstr ""
+msgstr "Stefan Kersten"
 
 #: about.cc:162
 msgid "Armand Klenk"
-msgstr ""
+msgstr "Armand Klenk"
 
 #: about.cc:163
 msgid "Julien de Kozak"
-msgstr ""
+msgstr "Julien de Kozak"
 
 #: about.cc:164
 msgid "Matt Krai"
-msgstr ""
+msgstr "Matt Krai"
 
 #: about.cc:165
 msgid "Georg Krause"
-msgstr ""
+msgstr "Georg Krause"
 
 #: about.cc:166
 msgid "Nick Lanham"
-msgstr ""
+msgstr "Nick Lanham"
 
 #: about.cc:167
 msgid "Colin Law"
-msgstr ""
+msgstr "Colin Law"
 
 #: about.cc:168
 msgid "Joshua Leach"
-msgstr ""
+msgstr "Joshua Leach"
 
 #: about.cc:169
 msgid "Ben Loftis"
-msgstr ""
+msgstr "Ben Loftis"
 
 #: about.cc:170
 msgid "Nick Mainsbridge"
-msgstr ""
+msgstr "Nick Mainsbridge"
 
 #: about.cc:171
 msgid "Tim Mayberry"
-msgstr ""
+msgstr "Tim Mayberry"
 
 #: about.cc:172
 msgid "Doug Mclain"
-msgstr ""
+msgstr "Doug Mclain"
 
 #: about.cc:173
 msgid "Todd Naugle"
-msgstr ""
+msgstr "Todd Naugle"
 
 #: about.cc:174
 msgid "André Nusser"
-msgstr ""
+msgstr "André Nusser"
 
 #: about.cc:175
 msgid "Bent Bisballe Nyeng"
-msgstr ""
+msgstr "Bent Bisballe Nyeng"
 
 #: about.cc:176
 msgid "Jack O'Quin"
-msgstr ""
+msgstr "Jack O'Quin"
 
 #: about.cc:177
 msgid "Pavel Potocek"
-msgstr ""
+msgstr "Pavel Potocek"
 
 #: about.cc:178
 msgid "Nimal Ratnayake"
-msgstr ""
+msgstr "Nimal Ratnayake"
 
 #: about.cc:179
 msgid "Julien Rivaud"
-msgstr ""
+msgstr "Julien Rivaud"
 
 #: about.cc:180
 msgid "David Robillard"
-msgstr ""
+msgstr "David Robillard"
 
 #: about.cc:181
 msgid "Julien Roger"
-msgstr ""
+msgstr "Julien Roger"
 
 #: about.cc:182
 msgid "Taybin Rutkin"
-msgstr ""
+msgstr "Taybin Rutkin"
 
 #: about.cc:183
 msgid "Andreas Ruge"
-msgstr ""
+msgstr "Andreas Ruge"
 
 #: about.cc:184
 msgid "Sampo Savolainen"
-msgstr ""
+msgstr "Sampo Savolainen"
 
 #: about.cc:185
 msgid "Rodrigo Severo"
-msgstr ""
+msgstr "Rodrigo Severo"
 
 #: about.cc:186
 msgid "Per Sigmond"
-msgstr ""
+msgstr "Per Sigmond"
 
 #: about.cc:187
 msgid "Lincoln Spiteri"
-msgstr ""
+msgstr "Lincoln Spiteri"
 
 #: about.cc:188
 msgid "Mike Start"
-msgstr ""
+msgstr "Mike Start"
 
 #: about.cc:189
 msgid "Mark Stewart"
-msgstr ""
+msgstr "Mark Stewart"
 
 #: about.cc:190
 msgid "Roland Stigge"
-msgstr ""
+msgstr "Roland Stigge"
 
 #: about.cc:191
 msgid "Petter Sundlöf"
-msgstr ""
+msgstr "Petter Sundlöf"
 
 #: about.cc:192
 msgid "Mike Täht"
-msgstr ""
+msgstr "Mike Täht"
 
 #: about.cc:193
 msgid "Roy Vegard"
-msgstr ""
+msgstr "Roy Vegard"
 
 #: about.cc:194
 msgid "Thorsten Wilms"
-msgstr ""
+msgstr "Thorsten Wilms"
 
 #: about.cc:195
 msgid "Damien Zammit"
-msgstr ""
+msgstr "Damien Zammit"
 
 #: about.cc:196
 msgid "Grygorii Zharun"
-msgstr ""
+msgstr "Grygorii Zharun"
+
+#: about.cc:197
+msgid "Kristoffer Grundström"
+msgstr "Kristoffer Grundström"
 
 #: about.cc:201
 msgid ""
@@ -362,6 +366,7 @@ msgstr ""
 msgid ""
 "Swedish:\n"
 "\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
+"\t Kristoffer Grundström <hamnisdude@gmail.com>\n"
 msgstr ""
 
 #: about.cc:218
@@ -390,39 +395,39 @@ msgstr ""
 
 #: about.cc:601
 msgid "Intel 64-bit"
-msgstr ""
+msgstr "64-bit Intel"
 
 #: about.cc:603
 msgid "Intel 32-bit"
-msgstr ""
+msgstr "32-bit Intel"
 
 #: about.cc:605
 msgid "PowerPC 64-bit"
-msgstr ""
+msgstr "64-bit PowerPC"
 
 #: about.cc:607
 msgid "PowerPC 32-bit"
-msgstr ""
+msgstr "32-bit PowerPC"
 
 #: about.cc:609
 msgid "64-bit"
-msgstr ""
+msgstr "64-bit"
 
 #: about.cc:611
 msgid "32-bit"
-msgstr ""
+msgstr "32-bit"
 
 #: about.cc:619
 msgid " - debug"
-msgstr ""
+msgstr " - avlusa"
 
 #: about.cc:625
 msgid "Copyright (C) 1999-2015 Paul Davis\n"
-msgstr ""
+msgstr "Kopieringsrätt (C) 1999-2015 Paul Davis\n"
 
 #: about.cc:629
 msgid "http://ardour.org/"
-msgstr ""
+msgstr "http://ardour.org/"
 
 #: about.cc:630
 msgid ""
@@ -430,14 +435,17 @@ msgid ""
 "(rev %3)\n"
 "%4%5"
 msgstr ""
+"%1%2\n"
+"(rev %3)\n"
+"%4%5"
 
 #: about.cc:635
 msgid "Config"
-msgstr ""
+msgstr "Konfigurera"
 
 #: actions.cc:83
 msgid "Loading menus from %1"
-msgstr ""
+msgstr "Laddar menyer från %1"
 
 #: actions.cc:86 actions.cc:87
 msgid "badly formatted menu definition file: %1"
@@ -453,7 +461,7 @@ msgstr ""
 
 #: add_route_dialog.cc:58
 msgid "Add Track/Bus/VCA"
-msgstr ""
+msgstr "Lägg till Spår/Buss/VCA"
 
 #: add_route_dialog.cc:61
 msgid "Configuration:"
@@ -461,11 +469,11 @@ msgstr "Konfiguration:"
 
 #: add_route_dialog.cc:62
 msgid "Record Mode:"
-msgstr ""
+msgstr "Inspelningsläge:"
 
 #: add_route_dialog.cc:63
 msgid "Instrument:"
-msgstr ""
+msgstr "Instrument:"
 
 #: add_route_dialog.cc:77 add_route_dialog.cc:228
 msgid "Audio Tracks"
@@ -473,19 +481,19 @@ msgstr "Ljudspår"
 
 #: add_route_dialog.cc:78 add_route_dialog.cc:224
 msgid "MIDI Tracks"
-msgstr ""
+msgstr "MIDI-spår"
 
 #: add_route_dialog.cc:79 add_route_dialog.cc:226
 msgid "Audio+MIDI Tracks"
-msgstr ""
+msgstr "Ljud+MIDI-spår"
 
 #: add_route_dialog.cc:80 add_route_dialog.cc:220
 msgid "Audio Busses"
-msgstr ""
+msgstr "Ljudbussar"
 
 #: add_route_dialog.cc:81 add_route_dialog.cc:222
 msgid "MIDI Busses"
-msgstr ""
+msgstr "MIDI-bussar"
 
 #: add_route_dialog.cc:82
 msgid "VCA Masters"
@@ -493,31 +501,31 @@ msgstr ""
 
 #: add_route_dialog.cc:85 add_route_dialog.cc:622
 msgid "First"
-msgstr ""
+msgstr "Första"
 
 #: add_route_dialog.cc:86 add_route_dialog.cc:626
 msgid "Before Selection"
-msgstr ""
+msgstr "Innan valet"
 
 #: add_route_dialog.cc:87 add_route_dialog.cc:624
 msgid "After Selection"
-msgstr ""
+msgstr "Efter valet"
 
 #: add_route_dialog.cc:88
 msgid "Last"
-msgstr ""
+msgstr "Sista"
 
 #: add_route_dialog.cc:91
 msgid "Flexible-I/O"
-msgstr ""
+msgstr "Flexibel-I/O"
 
 #: add_route_dialog.cc:92
 msgid "Strict-I/O"
-msgstr ""
+msgstr "Strikt-I/O"
 
 #: add_route_dialog.cc:108
 msgid "Add:"
-msgstr "Lägg till"
+msgstr "Lägg till:"
 
 #: add_route_dialog.cc:121 time_fx_dialog.cc:101 add_video_dialog.cc:135
 #: video_server_dialog.cc:118
@@ -535,11 +543,11 @@ msgstr "Grupp:"
 
 #: add_route_dialog.cc:161
 msgid "Insert:"
-msgstr ""
+msgstr "Infoga:"
 
 #: add_route_dialog.cc:171
 msgid "Output Ports:"
-msgstr ""
+msgstr "Portar för utsignal:"
 
 #: add_route_dialog.cc:176 rc_option_editor.cc:2474
 msgid ""
@@ -556,7 +564,7 @@ msgstr ""
 #: rc_option_editor.cc:2478 rc_option_editor.cc:2480 rc_option_editor.cc:2525
 #: rc_option_editor.cc:2527 rc_option_editor.cc:2529 rc_option_editor.cc:2537
 msgid "Audio"
-msgstr "Ljudspår"
+msgstr "Ljud"
 
 #: add_route_dialog.cc:243 add_route_dialog.cc:352 editor_actions.cc:112
 #: engine_dialog.cc:246 missing_file_dialog.cc:60 mixer_ui.cc:1895
@@ -565,15 +573,15 @@ msgstr "Ljudspår"
 #: rc_option_editor.cc:2709 rc_option_editor.cc:2717 rc_option_editor.cc:2790
 #: rc_option_editor.cc:2813
 msgid "MIDI"
-msgstr ""
+msgstr "MIDI"
 
 #: add_route_dialog.cc:246 add_route_dialog.cc:353
 msgid "Audio+MIDI"
-msgstr ""
+msgstr "Ljud+MIDI"
 
 #: add_route_dialog.cc:250 add_route_dialog.cc:354
 msgid "Bus"
-msgstr ""
+msgstr "Buss"
 
 #: add_route_dialog.cc:286
 msgid ""
@@ -587,11 +595,11 @@ msgstr ""
 #: add_route_dialog.cc:373 add_route_dialog.cc:385 editor_actions.cc:456
 #: editor_rulers.cc:250 time_axis_view.cc:1290
 msgid "Normal"
-msgstr ""
+msgstr "Normal"
 
 #: add_route_dialog.cc:374 add_route_dialog.cc:387
 msgid "Non Layered"
-msgstr "Ej lagerläge"
+msgstr "Utan lager"
 
 #: add_route_dialog.cc:375 add_route_dialog.cc:389
 msgid "Tape"
@@ -600,11 +608,11 @@ msgstr "Band"
 #: add_route_dialog.cc:476 monitor_section.cc:273 plugin_pin_dialog.cc:509
 #: plugin_setup_dialog.cc:202
 msgid "Mono"
-msgstr ""
+msgstr "Mono"
 
 #: add_route_dialog.cc:480 plugin_pin_dialog.cc:512 plugin_setup_dialog.cc:205
 msgid "Stereo"
-msgstr ""
+msgstr "Stereo"
 
 #: add_route_dialog.cc:503
 msgid "3 Channel"
@@ -636,21 +644,24 @@ msgstr "Manuellt"
 
 #: add_route_dialog.cc:569 add_route_dialog.cc:585 route_group_menu.cc:85
 msgid "New Group..."
-msgstr ""
+msgstr "Ny grupp..."
 
 #: add_route_dialog.cc:573 route_group_menu.cc:89
 msgid "No Group"
-msgstr ""
+msgstr "Ingen grupp"
 
 #: ambiguous_file_dialog.cc:30
 msgid "Ambiguous File"
-msgstr ""
+msgstr "Diffus fil"
 
 #: ambiguous_file_dialog.cc:37
 msgid ""
 "%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
+"%1 har hittat filen <i>%2</i> på följande platser:\n"
+"\n"
+
 
 #: ambiguous_file_dialog.cc:46
 msgid ""
@@ -661,7 +672,7 @@ msgstr ""
 
 #: ambiguous_file_dialog.cc:48 missing_file_dialog.cc:50
 msgid "Done"
-msgstr ""
+msgstr "Färdig"
 
 #: analysis_window.cc:45
 msgid "Signal source"
@@ -677,7 +688,7 @@ msgstr "Valda regioner"
 
 #: analysis_window.cc:48
 msgid "Show frequency power range"
-msgstr "Visa frekvenskraftsomfång"
+msgstr "Visa omfånget för frekvensens kraft"
 
 #: analysis_window.cc:49
 msgid "Fit dB range"
@@ -685,7 +696,7 @@ msgstr ""
 
 #: analysis_window.cc:50
 msgid "Proportional Spectrum, -18dB"
-msgstr ""
+msgstr "Propetionellt spektrum, -18dB"
 
 #: analysis_window.cc:53
 msgid "FFT analysis window"
@@ -693,7 +704,7 @@ msgstr "FFT-analysfönster"
 
 #: analysis_window.cc:54 editor.cc:1953
 msgid "Spectral Analysis"
-msgstr "Spektralanalys"
+msgstr "Spektrumanalys"
 
 #: analysis_window.cc:61 editor_actions.cc:145 session_metadata_dialog.cc:670
 msgid "Track"
@@ -714,7 +725,7 @@ msgstr ""
 
 #: ardour_button.cc:1144
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-msgstr ""
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_ui.cc:198
 msgid ""
@@ -733,7 +744,7 @@ msgstr "Avlyssna"
 #: monitor_section.cc:329 rc_option_editor.cc:2547 route_time_axis.cc:263
 #: route_time_axis.cc:2740 vca_master_strip.cc:212 vca_time_axis.cc:237
 msgid "Solo"
-msgstr ""
+msgstr "Ensam"
 
 #: ardour_ui.cc:285 rc_option_editor.cc:1357
 msgid "Feedback"
@@ -741,11 +752,11 @@ msgstr "Gensvar"
 
 #: ardour_ui.cc:296 speaker_dialog.cc:36
 msgid "Speaker Configuration"
-msgstr ""
+msgstr "Högtalarkonfiguration"
 
 #: ardour_ui.cc:297
 msgid "Add Tracks/Busses"
-msgstr ""
+msgstr "Lägg till Spår/Bussar"
 
 #: ardour_ui.cc:298
 msgid "About"
@@ -753,15 +764,15 @@ msgstr "Om"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr ""
+msgstr "Omfång|Platser"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
-msgstr "Spår och bussar"
+msgstr "Spår och Bussar"
 
 #: ardour_ui.cc:301 engine_dialog.cc:73
 msgid "Audio/MIDI Setup"
-msgstr ""
+msgstr "Ljud/MIDI-installation"
 
 #: ardour_ui.cc:302
 msgid "Video Export Dialog"
@@ -769,7 +780,7 @@ msgstr ""
 
 #: ardour_ui.cc:303 lua_script_manager.cc:30
 msgid "Script Manager"
-msgstr ""
+msgstr "Skripthanterare"
 
 #: ardour_ui.cc:304
 msgid "Properties"
@@ -777,11 +788,11 @@ msgstr "Egenskaper"
 
 #: ardour_ui.cc:305
 msgid "Add Video"
-msgstr ""
+msgstr "Lägg till video"
 
 #: ardour_ui.cc:306 bundle_manager.cc:264
 msgid "Bundle Manager"
-msgstr "Buntar"
+msgstr "Bunthanterare"
 
 #: ardour_ui.cc:307 big_clock_window.cc:37
 msgid "Big Clock"
@@ -789,11 +800,11 @@ msgstr "Stor klocka"
 
 #: ardour_ui.cc:308
 msgid "Audio Connections"
-msgstr ""
+msgstr "Ljudanslutningar"
 
 #: ardour_ui.cc:309
 msgid "MIDI Connections"
-msgstr ""
+msgstr "MIDI-anslutning"
 
 #: ardour_ui.cc:310
 msgid "Bindings Editor"
@@ -801,19 +812,19 @@ msgstr ""
 
 #: ardour_ui.cc:321 editor.cc:1288
 msgid "Window|Editor"
-msgstr ""
+msgstr "Fönster|Redigerare"
 
 #: ardour_ui.cc:322 mixer_ui.cc:2210 mixer_ui.cc:2216
 msgid "Window|Mixer"
-msgstr ""
+msgstr "Fönster|Mixer"
 
 #: ardour_ui.cc:323
 msgid "Window|Preferences"
-msgstr ""
+msgstr "Fönster|Egenskaper"
 
 #: ardour_ui.cc:330
 msgid "Your configuration files were copied. You can now restart %1."
-msgstr ""
+msgstr "Dina konfigurationsfiler kopierades. Du kan nu starta om %1."
 
 #: ardour_ui.cc:509
 msgid "Pre-Release Warning"
@@ -853,6 +864,9 @@ msgid ""
 "\n"
 "%1"
 msgstr ""
+"Ljudets bakände stängdes ner för att:\n"
+"\n"
+"%1"
 
 #: ardour_ui.cc:615
 msgid ""
@@ -882,15 +896,15 @@ msgstr ""
 
 #: ardour_ui.cc:1028
 msgid "NSM: no session created"
-msgstr ""
+msgstr "NSM: ingen session skapad"
 
 #: ardour_ui.cc:1051
 msgid "NSM: initialization failed"
-msgstr ""
+msgstr "NSM: initialiseringen misslyckades"
 
 #: ardour_ui.cc:1083
 msgid "Free/Demo Version Warning"
-msgstr ""
+msgstr "Gratis/Demo-versionsvarning"
 
 #: ardour_ui.cc:1085
 msgid "Subscribe and support development of %1"
@@ -898,7 +912,7 @@ msgstr ""
 
 #: ardour_ui.cc:1086
 msgid "Don't warn me about this again"
-msgstr ""
+msgstr "Varna mig inte om det här igen"
 
 #: ardour_ui.cc:1088
 msgid ""
@@ -910,14 +924,21 @@ msgid ""
 "\n"
 "%4"
 msgstr ""
+"<span weight=\"bold\" size=\"large\">%1</span>\n"
+"\n"
+"<b>%2</b>\n"
+"\n"
+"<i>%3</i>\n"
+"\n"
+"%4"
 
 #: ardour_ui.cc:1089
 msgid "This is a free/demo version of %1"
-msgstr ""
+msgstr "Det här är en gratis/demo-version av %1"
 
 #: ardour_ui.cc:1090
 msgid "It will not restore OR save any plugin settings"
-msgstr ""
+msgstr "Det kommer inte att återställa ELLER spara några inställningar för insticksmoduler"
 
 #: ardour_ui.cc:1091
 msgid ""
@@ -933,7 +954,7 @@ msgstr ""
 
 #: ardour_ui.cc:1103
 msgid "Quit now"
-msgstr ""
+msgstr "Avsluta nu"
 
 #: ardour_ui.cc:1104
 msgid "Continue using %1"
@@ -941,7 +962,7 @@ msgstr ""
 
 #: ardour_ui.cc:1135 startup.cc:349
 msgid "%1 is ready for use"
-msgstr ""
+msgstr "%1 används redan"
 
 #: ardour_ui.cc:1185
 msgid ""
@@ -954,11 +975,11 @@ msgstr ""
 
 #: ardour_ui.cc:1202
 msgid "Do not show this window again"
-msgstr ""
+msgstr "Visa inte det här fönstret igen"
 
 #: ardour_ui.cc:1245
 msgid "Don't quit"
-msgstr ""
+msgstr "Avsluta inte"
 
 #: ardour_ui.cc:1246
 msgid "Just quit"
@@ -966,7 +987,7 @@ msgstr ""
 
 #: ardour_ui.cc:1247 ardour_ui.cc:5362
 msgid "Save and quit"
-msgstr ""
+msgstr "Spara och avsluta"
 
 #: ardour_ui.cc:1257
 msgid ""
@@ -979,7 +1000,7 @@ msgstr ""
 
 #: ardour_ui.cc:1307
 msgid "Unsaved Session"
-msgstr ""
+msgstr "Ej sparad session"
 
 #: ardour_ui.cc:1328
 msgid ""
@@ -991,6 +1012,13 @@ msgid ""
 "\n"
 "What do you want to do?"
 msgstr ""
+"Sessionen \"%1\"\n"
+"har inte sparats.\n"
+"\n"
+"Alla ändringar som har gjorts den här gången\n"
+"kommer att gå förlorades om du nu inte sparar den.\n"
+"\n"
+"Vad vill du göra?"
 
 #: ardour_ui.cc:1331
 msgid ""
@@ -1008,86 +1036,86 @@ msgid "Prompter"
 msgstr "Fråga"
 
 #: ardour_ui.cc:1459 ardour_ui.cc:1467
-msgid "Audio: <span foreground=\"red\">none</span>"
-msgstr ""
+msgid "Audio: <span foreground=\"red\">ingen</span>"
+msgstr "Ljud: <span foreground=\"red\">ingen</span>"
 
 #: ardour_ui.cc:1471
 #, c-format
 msgid "Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
-msgstr ""
+msgstr "Ljud: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 
 #: ardour_ui.cc:1475
 #, c-format
 msgid "Audio: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
-msgstr ""
+msgstr "Ljud: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 
 #: ardour_ui.cc:1493 export_report.cc:108 export_report.cc:323
 #: export_video_dialog.cc:76
 msgid "File:"
-msgstr ""
+msgstr "Arkiv:"
 
 #: ardour_ui.cc:1497
 msgid "BWF"
-msgstr ""
+msgstr "BWF"
 
 #: ardour_ui.cc:1500
 msgid "WAV"
-msgstr ""
+msgstr "WAV"
 
 #: ardour_ui.cc:1503
 msgid "WAV64"
-msgstr ""
+msgstr "WAV64"
 
 #: ardour_ui.cc:1506 session_option_editor.cc:202
 msgid "CAF"
-msgstr ""
+msgstr "CAF"
 
 #: ardour_ui.cc:1509
 msgid "AIFF"
-msgstr ""
+msgstr "AIFF"
 
 #: ardour_ui.cc:1512
 msgid "iXML"
-msgstr ""
+msgstr "iXML"
 
 #: ardour_ui.cc:1515 session_option_editor.cc:203
 msgid "RF64"
-msgstr ""
+msgstr "RF64"
 
 #: ardour_ui.cc:1518
 msgid "RF64/WAV"
-msgstr ""
+msgstr "RF64/WAV"
 
 #: ardour_ui.cc:1521
 msgid "MBWF"
-msgstr ""
+msgstr "MBWF"
 
 #: ardour_ui.cc:1529
 msgid "32-float"
-msgstr ""
+msgstr "32-float"
 
 #: ardour_ui.cc:1532
 msgid "24-int"
-msgstr ""
+msgstr "24-int"
 
 #: ardour_ui.cc:1535
 msgid "16-int"
-msgstr ""
+msgstr "16-int"
 
 #: ardour_ui.cc:1556
 #, c-format
 msgid "X: <span foreground=\"%s\">&gt;10K</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">&gt;10K</span>"
 
 #: ardour_ui.cc:1558
 #, c-format
 msgid "X: <span foreground=\"%s\">%u</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">%u</span>"
 
 #: ardour_ui.cc:1561
 #, c-format
 msgid "X: <span foreground=\"%s\">?</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">?</span>"
 
 #: ardour_ui.cc:1564
 msgid "Audio dropouts. Shift+click to reset"
@@ -1096,12 +1124,12 @@ msgstr ""
 #: ardour_ui.cc:1577
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
-msgstr ""
+msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
 #: ardour_ui.cc:1587
 #, c-format
 msgid "PkBld: <span foreground=\"%s\">%d</span>"
-msgstr ""
+msgstr "PkBld: <span foreground=\"%s\">%d</span>"
 
 #: ardour_ui.cc:1609
 #, c-format
@@ -1113,25 +1141,25 @@ msgstr ""
 
 #: ardour_ui.cc:1650
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">Okänd</span>"
 
 #: ardour_ui.cc:1652
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">24 timmar+</span>"
 
 #: ardour_ui.cc:1670
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">&gt;24 timmar</span>"
 
 #: ardour_ui.cc:1681
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
 #: ardour_ui.cc:1707
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-msgstr ""
+msgstr "Tidskod|TC: <span foreground=\"%s\">%s</span>"
 
 #: ardour_ui.cc:1789
 msgid ""
@@ -1146,7 +1174,7 @@ msgstr "Öppna session"
 #: ardour_ui.cc:1831 session_dialog.cc:410 session_import_dialog.cc:170
 #: session_metadata_dialog.cc:861
 msgid "%1 sessions"
-msgstr ""
+msgstr "%1 sessioner"
 
 #: ardour_ui.cc:1879 ardour_ui.cc:1916
 msgid "You cannot add a track without a session already loaded."
@@ -1166,7 +1194,7 @@ msgstr[1] ""
 
 #: ardour_ui.cc:1977
 msgid "You cannot add a track or bus without a session already loaded."
-msgstr ""
+msgstr "Du kan inte lägga till ett spår eller en buss utan att ha en session redan laddad."
 
 #: ardour_ui.cc:1986
 msgid "could not create %1 new audio track"
@@ -1201,11 +1229,11 @@ msgstr ""
 
 #: ardour_ui.cc:2619 save_as_dialog.cc:33
 msgid "Save As"
-msgstr ""
+msgstr "Spara som"
 
 #: ardour_ui.cc:2647
 msgid "Save As failed: %1"
-msgstr ""
+msgstr "Spara som misslyckades: %1"
 
 #: ardour_ui.cc:2684
 msgid ""
@@ -1215,11 +1243,11 @@ msgstr ""
 
 #: ardour_ui.cc:2698
 msgid "Confirm Snapshot Overwrite"
-msgstr ""
+msgstr "Bekräfta överskrivning av ögonblicksbild"
 
 #: ardour_ui.cc:2699
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
-msgstr ""
+msgstr "Det finns redan en ögonblicksbild med det där namnet. Vill du skriva över den?"
 
 #: ardour_ui.cc:2724
 msgid "Snapshot and switch"
@@ -1239,7 +1267,7 @@ msgstr "Namnge ny ögonblickskopia"
 
 #: ardour_ui.cc:2775
 msgid "Rename Session"
-msgstr ""
+msgstr "Döp om session"
 
 #: ardour_ui.cc:2790 ardour_ui.cc:3267 ardour_ui.cc:3305
 msgid ""
@@ -1268,11 +1296,11 @@ msgstr ""
 
 #: ardour_ui.cc:2948
 msgid "Save Template"
-msgstr ""
+msgstr "Spara mall"
 
 #: ardour_ui.cc:2949
 msgid "Name for template:"
-msgstr ""
+msgstr "Namn för mall:"
 
 #: ardour_ui.cc:2950
 msgid "-template"
@@ -1287,11 +1315,11 @@ msgstr ""
 
 #: ardour_ui.cc:2997
 msgid "Open Existing Session"
-msgstr ""
+msgstr "Öppna befintlig session"
 
 #: ardour_ui.cc:3295
 msgid "There is no existing session at \"%1\""
-msgstr ""
+msgstr "Det finns ingen befintlig session vid \"%1\""
 
 #: ardour_ui.cc:3391
 msgid "Please wait while %1 loads your session"
