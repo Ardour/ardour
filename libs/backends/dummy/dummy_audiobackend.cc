@@ -184,7 +184,7 @@ DummyAudioBackend::available_output_channel_count (const std::string&) const
 bool
 DummyAudioBackend::can_change_sample_rate_when_running () const
 {
-	return true;
+	return false;
 }
 
 bool
@@ -456,8 +456,6 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 
 	engine.sample_rate_change (_samplerate);
 	engine.buffer_size_change (_samples_per_period);
-
-	_dsp_load_calc.set_max_time (_samplerate, _samples_per_period);
 
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
@@ -1307,6 +1305,7 @@ DummyAudioBackend::main_process_thread ()
 	int64_t clock1;
 	clock1 = -1;
 	while (_running) {
+		const size_t samples_per_period = _samples_per_period;
 
 		if (_freewheeling != _freewheel) {
 			_freewheel = _freewheeling;
@@ -1321,17 +1320,17 @@ DummyAudioBackend::main_process_thread ()
 			(*it)->next_period();
 		}
 
-		if (engine.process_callback (_samples_per_period)) {
+		if (engine.process_callback (samples_per_period)) {
 			return 0;
 		}
-		_processed_samples += _samples_per_period;
+		_processed_samples += samples_per_period;
 
 		if (_device == _("Loopback") && _midi_mode != MidiToAudio) {
 			int opn = 0;
 			int opc = _system_outputs.size();
 			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
 				DummyAudioPort* op = _system_outputs[(opn % opc)];
-				(*it)->fill_wavetable ((const float*)op->get_buffer (_samples_per_period), _samples_per_period);
+				(*it)->fill_wavetable ((const float*)op->get_buffer (samples_per_period), samples_per_period);
 			}
 		}
 
@@ -1350,11 +1349,12 @@ DummyAudioBackend::main_process_thread ()
 			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
 				DummyMidiPort* op = _system_midi_out[(opn % opc)];
 				op->get_buffer(0); // mix-down
-				(*it)->midi_to_wavetable (op->const_buffer(), _samples_per_period);
+				(*it)->midi_to_wavetable (op->const_buffer(), samples_per_period);
 			}
 		}
 
 		if (!_freewheel) {
+			_dsp_load_calc.set_max_time (_samplerate, samples_per_period);
 			_dsp_load_calc.set_start_timestamp_us (clock1);
 			_dsp_load_calc.set_stop_timestamp_us (_x_get_monotonic_usec());
 			_dsp_load = _dsp_load_calc.get_dsp_load_unbound ();
@@ -1987,7 +1987,8 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			}
 			break;
 		case Loopback:
-			_gen_period = n_samples; // XXX DummyBackend::_samples_per_period;
+			memcpy((void*)_buffer, (void*)_wavetable, n_samples * sizeof(Sample));
+			break;
 		case SineWave:
 		case SineWaveOctaves:
 		case SineSweep:
