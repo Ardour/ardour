@@ -43,16 +43,12 @@ TranzportControlProtocol::~TranzportControlProtocol ()
 
 int TranzportControlProtocol::rtpriority_set(int priority)
 {
-	struct sched_param rtparam;
-	int err;
 	char *a = (char*) alloca(4096*2); a[0] = 'a'; a[4096] = 'b';
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = priority; /* XXX should be relative to audio (JACK) thread */
 	// Note - try SCHED_RR with a low limit
 	// - we don't care if we can't write everything this ms
 	// and it will help if we lose the device
-	if ((err = pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam)) != 0) {
-		PBD::info << string_compose (_("%1: thread not running with realtime scheduling (%2)"), name(), strerror (errno)) << endmsg;
+	if (set_thread_priority (SCHED_FIFO, priority)) {
+		PBD::info << string_compose (_("%1: thread not running with realtime scheduling."), name(), strerror (errno)) << endmsg;
 		return 1;
 	}
 	return 0;

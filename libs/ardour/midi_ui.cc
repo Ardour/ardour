@@ -144,19 +144,12 @@ MidiControlUI::reset_ports ()
 void
 MidiControlUI::thread_init ()
 {
-	struct sched_param rtparam;
-
 	pthread_set_name (X_("midiUI"));
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), X_("midiUI"), 2048);
 	SessionEvent::create_per_thread_pool (X_("midiUI"), 128);
 
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
-		// do we care? not particularly.
-	}
+	set_thread_priority ();
 
 	reset_ports ();
 }
