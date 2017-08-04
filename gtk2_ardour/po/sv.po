@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-07-14 06:20-0400\n"
 "PO-Revision-Date: 2006-06-26 23:57+GMT+1\n"
-"Last-Translator: Petter Sundlöf <petter.sundlof@findus.dhs.org>\n"
+"Last-Translator: Kristoffer Grundström <hamnisdude@gmail.com>\n"
 "Language-Team: Svenska <sv@li.org>\n"
 "Language: Swedish\n"
 "MIME-Version: 1.0\n"
@@ -395,39 +395,39 @@ msgstr ""
 
 #: about.cc:601
 msgid "Intel 64-bit"
-msgstr ""
+msgstr "64-bit Intel"
 
 #: about.cc:603
 msgid "Intel 32-bit"
-msgstr ""
+msgstr "32-bit Intel"
 
 #: about.cc:605
 msgid "PowerPC 64-bit"
-msgstr ""
+msgstr "64-bit PowerPC"
 
 #: about.cc:607
 msgid "PowerPC 32-bit"
-msgstr ""
+msgstr "32-bit PowerPC"
 
 #: about.cc:609
 msgid "64-bit"
-msgstr ""
+msgstr "64-bit"
 
 #: about.cc:611
 msgid "32-bit"
-msgstr ""
+msgstr "32-bit"
 
 #: about.cc:619
 msgid " - debug"
-msgstr ""
+msgstr " - avlusa"
 
 #: about.cc:625
 msgid "Copyright (C) 1999-2015 Paul Davis\n"
-msgstr ""
+msgstr "Kopieringsrätt (C) 1999-2015 Paul Davis\n"
 
 #: about.cc:629
 msgid "http://ardour.org/"
-msgstr ""
+msgstr "http://ardour.org/"
 
 #: about.cc:630
 msgid ""
@@ -435,10 +435,13 @@ msgid ""
 "(rev %3)\n"
 "%4%5"
 msgstr ""
+"%1%2\n"
+"(rev %3)\n"
+"%4%5"
 
 #: about.cc:635
 msgid "Config"
-msgstr "Ställ in"
+msgstr "Konfigurera"
 
 #: actions.cc:83
 msgid "Loading menus from %1"
@@ -502,11 +505,11 @@ msgstr "Första"
 
 #: add_route_dialog.cc:86 add_route_dialog.cc:626
 msgid "Before Selection"
-msgstr ""
+msgstr "Innan valet"
 
 #: add_route_dialog.cc:87 add_route_dialog.cc:624
 msgid "After Selection"
-msgstr ""
+msgstr "Efter valet"
 
 #: add_route_dialog.cc:88
 msgid "Last"
@@ -540,11 +543,11 @@ msgstr "Grupp:"
 
 #: add_route_dialog.cc:161
 msgid "Insert:"
-msgstr "Klistra in:"
+msgstr "Infoga:"
 
 #: add_route_dialog.cc:171
 msgid "Output Ports:"
-msgstr "Portar för utmatning:"
+msgstr "Portar för utsignal:"
 
 #: add_route_dialog.cc:176 rc_option_editor.cc:2474
 msgid ""
@@ -649,13 +652,16 @@ msgstr "Ingen grupp"
 
 #: ambiguous_file_dialog.cc:30
 msgid "Ambiguous File"
-msgstr "Ambigiös fil"
+msgstr "Diffus fil"
 
 #: ambiguous_file_dialog.cc:37
 msgid ""
 "%1 has found the file <i>%2</i> in the following places:\n"
 "\n"
 msgstr ""
+"%1 har hittat filen <i>%2</i> på följande platser:\n"
+"\n"
+
 
 #: ambiguous_file_dialog.cc:46
 msgid ""
@@ -674,7 +680,7 @@ msgstr "Signalkälla"
 
 #: analysis_window.cc:46
 msgid "Selected ranges"
-msgstr "Valda räckvidder"
+msgstr "Valda omfång"
 
 #: analysis_window.cc:47
 msgid "Selected regions"
@@ -682,7 +688,7 @@ msgstr "Valda regioner"
 
 #: analysis_window.cc:48
 msgid "Show frequency power range"
-msgstr "Visa räckvidden för frekvensens kraft"
+msgstr "Visa omfånget för frekvensens kraft"
 
 #: analysis_window.cc:49
 msgid "Fit dB range"
@@ -690,7 +696,7 @@ msgstr ""
 
 #: analysis_window.cc:50
 msgid "Proportional Spectrum, -18dB"
-msgstr ""
+msgstr "Propetionellt spektrum, -18dB"
 
 #: analysis_window.cc:53
 msgid "FFT analysis window"
@@ -698,7 +704,7 @@ msgstr "FFT-analysfönster"
 
 #: analysis_window.cc:54 editor.cc:1953
 msgid "Spectral Analysis"
-msgstr "Spektralanalys"
+msgstr "Spektrumanalys"
 
 #: analysis_window.cc:61 editor_actions.cc:145 session_metadata_dialog.cc:670
 msgid "Track"
@@ -719,7 +725,7 @@ msgstr ""
 
 #: ardour_button.cc:1144
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-msgstr ""
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
 #: ardour_ui.cc:198
 msgid ""
@@ -746,7 +752,7 @@ msgstr "Gensvar"
 
 #: ardour_ui.cc:296 speaker_dialog.cc:36
 msgid "Speaker Configuration"
-msgstr ""
+msgstr "Högtalarkonfiguration"
 
 #: ardour_ui.cc:297
 msgid "Add Tracks/Busses"
@@ -758,7 +764,7 @@ msgstr "Om"
 
 #: ardour_ui.cc:299 location_ui.cc:1167
 msgid "Ranges|Locations"
-msgstr "Räckvidder|Platser"
+msgstr "Omfång|Platser"
 
 #: ardour_ui.cc:300 route_params_ui.cc:59 route_params_ui.cc:620
 msgid "Tracks and Busses"
@@ -766,7 +772,7 @@ msgstr "Spår och Bussar"
 
 #: ardour_ui.cc:301 engine_dialog.cc:73
 msgid "Audio/MIDI Setup"
-msgstr ""
+msgstr "Ljud/MIDI-installation"
 
 #: ardour_ui.cc:302
 msgid "Video Export Dialog"
@@ -806,19 +812,19 @@ msgstr ""
 
 #: ardour_ui.cc:321 editor.cc:1288
 msgid "Window|Editor"
-msgstr ""
+msgstr "Fönster|Redigerare"
 
 #: ardour_ui.cc:322 mixer_ui.cc:2210 mixer_ui.cc:2216
 msgid "Window|Mixer"
-msgstr ""
+msgstr "Fönster|Mixer"
 
 #: ardour_ui.cc:323
 msgid "Window|Preferences"
-msgstr ""
+msgstr "Fönster|Egenskaper"
 
 #: ardour_ui.cc:330
 msgid "Your configuration files were copied. You can now restart %1."
-msgstr ""
+msgstr "Dina konfigurationsfiler kopierades. Du kan nu starta om %1."
 
 #: ardour_ui.cc:509
 msgid "Pre-Release Warning"
@@ -858,6 +864,9 @@ msgid ""
 "\n"
 "%1"
 msgstr ""
+"Ljudets bakände stängdes ner för att:\n"
+"\n"
+"%1"
 
 #: ardour_ui.cc:615
 msgid ""
@@ -887,15 +896,15 @@ msgstr ""
 
 #: ardour_ui.cc:1028
 msgid "NSM: no session created"
-msgstr ""
+msgstr "NSM: ingen session skapad"
 
 #: ardour_ui.cc:1051
 msgid "NSM: initialization failed"
-msgstr ""
+msgstr "NSM: initialiseringen misslyckades"
 
 #: ardour_ui.cc:1083
 msgid "Free/Demo Version Warning"
-msgstr ""
+msgstr "Gratis/Demo-versionsvarning"
 
 #: ardour_ui.cc:1085
 msgid "Subscribe and support development of %1"
@@ -903,7 +912,7 @@ msgstr ""
 
 #: ardour_ui.cc:1086
 msgid "Don't warn me about this again"
-msgstr ""
+msgstr "Varna mig inte om det här igen"
 
 #: ardour_ui.cc:1088
 msgid ""
@@ -915,14 +924,21 @@ msgid ""
 "\n"
 "%4"
 msgstr ""
+"<span weight=\"bold\" size=\"large\">%1</span>\n"
+"\n"
+"<b>%2</b>\n"
+"\n"
+"<i>%3</i>\n"
+"\n"
+"%4"
 
 #: ardour_ui.cc:1089
 msgid "This is a free/demo version of %1"
-msgstr ""
+msgstr "Det här är en gratis/demo-version av %1"
 
 #: ardour_ui.cc:1090
 msgid "It will not restore OR save any plugin settings"
-msgstr ""
+msgstr "Det kommer inte att återställa ELLER spara några inställningar för insticksmoduler"
 
 #: ardour_ui.cc:1091
 msgid ""
@@ -938,7 +954,7 @@ msgstr ""
 
 #: ardour_ui.cc:1103
 msgid "Quit now"
-msgstr ""
+msgstr "Avsluta nu"
 
 #: ardour_ui.cc:1104
 msgid "Continue using %1"
@@ -946,7 +962,7 @@ msgstr ""
 
 #: ardour_ui.cc:1135 startup.cc:349
 msgid "%1 is ready for use"
-msgstr ""
+msgstr "%1 används redan"
 
 #: ardour_ui.cc:1185
 msgid ""
@@ -959,11 +975,11 @@ msgstr ""
 
 #: ardour_ui.cc:1202
 msgid "Do not show this window again"
-msgstr ""
+msgstr "Visa inte det här fönstret igen"
 
 #: ardour_ui.cc:1245
 msgid "Don't quit"
-msgstr ""
+msgstr "Avsluta inte"
 
 #: ardour_ui.cc:1246
 msgid "Just quit"
@@ -971,7 +987,7 @@ msgstr ""
 
 #: ardour_ui.cc:1247 ardour_ui.cc:5362
 msgid "Save and quit"
-msgstr ""
+msgstr "Spara och avsluta"
 
 #: ardour_ui.cc:1257
 msgid ""
@@ -984,7 +1000,7 @@ msgstr ""
 
 #: ardour_ui.cc:1307
 msgid "Unsaved Session"
-msgstr ""
+msgstr "Ej sparad session"
 
 #: ardour_ui.cc:1328
 msgid ""
@@ -996,6 +1012,13 @@ msgid ""
 "\n"
 "What do you want to do?"
 msgstr ""
+"Sessionen \"%1\"\n"
+"har inte sparats.\n"
+"\n"
+"Alla ändringar som har gjorts den här gången\n"
+"kommer att gå förlorades om du nu inte sparar den.\n"
+"\n"
+"Vad vill du göra?"
 
 #: ardour_ui.cc:1331
 msgid ""
@@ -1013,86 +1036,86 @@ msgid "Prompter"
 msgstr "Fråga"
 
 #: ardour_ui.cc:1459 ardour_ui.cc:1467
-msgid "Audio: <span foreground=\"red\">none</span>"
-msgstr ""
+msgid "Audio: <span foreground=\"red\">ingen</span>"
+msgstr "Ljud: <span foreground=\"red\">ingen</span>"
 
 #: ardour_ui.cc:1471
 #, c-format
 msgid "Audio: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
-msgstr ""
+msgstr "Ljud: <span foreground=\"green\">%.1f kHz / %4.1f ms</span>"
 
 #: ardour_ui.cc:1475
 #, c-format
 msgid "Audio: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
-msgstr ""
+msgstr "Ljud: <span foreground=\"green\">%<PRId64> kHz / %4.1f ms</span>"
 
 #: ardour_ui.cc:1493 export_report.cc:108 export_report.cc:323
 #: export_video_dialog.cc:76
 msgid "File:"
-msgstr ""
+msgstr "Arkiv:"
 
 #: ardour_ui.cc:1497
 msgid "BWF"
-msgstr ""
+msgstr "BWF"
 
 #: ardour_ui.cc:1500
 msgid "WAV"
-msgstr ""
+msgstr "WAV"
 
 #: ardour_ui.cc:1503
 msgid "WAV64"
-msgstr ""
+msgstr "WAV64"
 
 #: ardour_ui.cc:1506 session_option_editor.cc:202
 msgid "CAF"
-msgstr ""
+msgstr "CAF"
 
 #: ardour_ui.cc:1509
 msgid "AIFF"
-msgstr ""
+msgstr "AIFF"
 
 #: ardour_ui.cc:1512
 msgid "iXML"
-msgstr ""
+msgstr "iXML"
 
 #: ardour_ui.cc:1515 session_option_editor.cc:203
 msgid "RF64"
-msgstr ""
+msgstr "RF64"
 
 #: ardour_ui.cc:1518
 msgid "RF64/WAV"
-msgstr ""
+msgstr "RF64/WAV"
 
 #: ardour_ui.cc:1521
 msgid "MBWF"
-msgstr ""
+msgstr "MBWF"
 
 #: ardour_ui.cc:1529
 msgid "32-float"
-msgstr ""
+msgstr "32-float"
 
 #: ardour_ui.cc:1532
 msgid "24-int"
-msgstr ""
+msgstr "24-int"
 
 #: ardour_ui.cc:1535
 msgid "16-int"
-msgstr ""
+msgstr "16-int"
 
 #: ardour_ui.cc:1556
 #, c-format
 msgid "X: <span foreground=\"%s\">&gt;10K</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">&gt;10K</span>"
 
 #: ardour_ui.cc:1558
 #, c-format
 msgid "X: <span foreground=\"%s\">%u</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">%u</span>"
 
 #: ardour_ui.cc:1561
 #, c-format
 msgid "X: <span foreground=\"%s\">?</span>"
-msgstr ""
+msgstr "X: <span foreground=\"%s\">?</span>"
 
 #: ardour_ui.cc:1564
 msgid "Audio dropouts. Shift+click to reset"
@@ -1101,12 +1124,12 @@ msgstr ""
 #: ardour_ui.cc:1577
 #, c-format
 msgid "DSP: <span foreground=\"%s\">%5.1f%%</span>"
-msgstr ""
+msgstr "DSP: <span foreground=\"%s\">%5.1f%%</span>"
 
 #: ardour_ui.cc:1587
 #, c-format
 msgid "PkBld: <span foreground=\"%s\">%d</span>"
-msgstr ""
+msgstr "PkBld: <span foreground=\"%s\">%d</span>"
 
 #: ardour_ui.cc:1609
 #, c-format
@@ -1118,25 +1141,25 @@ msgstr ""
 
 #: ardour_ui.cc:1650
 msgid "Disk: <span foreground=\"green\">Unknown</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">Okänd</span>"
 
 #: ardour_ui.cc:1652
 msgid "Disk: <span foreground=\"green\">24hrs+</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">24 timmar+</span>"
 
 #: ardour_ui.cc:1670
 msgid "Disk: <span foreground=\"green\">&gt;24 hrs</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"green\">&gt;24 timmar</span>"
 
 #: ardour_ui.cc:1681
 #, c-format
 msgid "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
-msgstr ""
+msgstr "Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 
 #: ardour_ui.cc:1707
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-msgstr ""
+msgstr "Tidskod|TC: <span foreground=\"%s\">%s</span>"
 
 #: ardour_ui.cc:1789
 msgid ""
@@ -1151,7 +1174,7 @@ msgstr "Öppna session"
 #: ardour_ui.cc:1831 session_dialog.cc:410 session_import_dialog.cc:170
 #: session_metadata_dialog.cc:861
 msgid "%1 sessions"
-msgstr ""
+msgstr "%1 sessioner"
 
 #: ardour_ui.cc:1879 ardour_ui.cc:1916
 msgid "You cannot add a track without a session already loaded."
@@ -1171,7 +1194,7 @@ msgstr[1] ""
 
 #: ardour_ui.cc:1977
 msgid "You cannot add a track or bus without a session already loaded."
-msgstr ""
+msgstr "Du kan inte lägga till ett spår eller en buss utan att ha en session redan laddad."
 
 #: ardour_ui.cc:1986
 msgid "could not create %1 new audio track"
@@ -1206,11 +1229,11 @@ msgstr ""
 
 #: ardour_ui.cc:2619 save_as_dialog.cc:33
 msgid "Save As"
-msgstr ""
+msgstr "Spara som"
 
 #: ardour_ui.cc:2647
 msgid "Save As failed: %1"
-msgstr ""
+msgstr "Spara som misslyckades: %1"
 
 #: ardour_ui.cc:2684
 msgid ""
@@ -1220,11 +1243,11 @@ msgstr ""
 
 #: ardour_ui.cc:2698
 msgid "Confirm Snapshot Overwrite"
-msgstr ""
+msgstr "Bekräfta överskrivning av ögonblicksbild"
 
 #: ardour_ui.cc:2699
 msgid "A snapshot already exists with that name. Do you want to overwrite it?"
-msgstr ""
+msgstr "Det finns redan en ögonblicksbild med det där namnet. Vill du skriva över den?"
 
 #: ardour_ui.cc:2724
 msgid "Snapshot and switch"
@@ -1244,7 +1267,7 @@ msgstr "Namnge ny ögonblickskopia"
 
 #: ardour_ui.cc:2775
 msgid "Rename Session"
-msgstr ""
+msgstr "Döp om session"
 
 #: ardour_ui.cc:2790 ardour_ui.cc:3267 ardour_ui.cc:3305
 msgid ""
@@ -1273,11 +1296,11 @@ msgstr ""
 
 #: ardour_ui.cc:2948
 msgid "Save Template"
-msgstr ""
+msgstr "Spara mall"
 
 #: ardour_ui.cc:2949
 msgid "Name for template:"
-msgstr ""
+msgstr "Namn för mall:"
 
 #: ardour_ui.cc:2950
 msgid "-template"
@@ -1292,11 +1315,11 @@ msgstr ""
 
 #: ardour_ui.cc:2997
 msgid "Open Existing Session"
-msgstr ""
+msgstr "Öppna befintlig session"
 
 #: ardour_ui.cc:3295
 msgid "There is no existing session at \"%1\""
-msgstr ""
+msgstr "Det finns ingen befintlig session vid \"%1\""
 
 #: ardour_ui.cc:3391
 msgid "Please wait while %1 loads your session"
