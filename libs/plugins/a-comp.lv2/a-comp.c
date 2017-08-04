@@ -79,8 +79,6 @@ typedef struct {
 
 	float srate;
 
-	float old_in_peak_db;
-
 	float makeup_gain;
 
 #ifdef LV2_EXTENDED
@@ -101,6 +99,7 @@ typedef struct {
 	float v_makeup;
 	float v_lvl_in;
 	float v_lvl_out;
+	float v_state_x;
 #endif
 } AComp;
 
@@ -251,7 +250,6 @@ activate(LV2_Handle instance)
 
 	*(acomp->gainr) = 0.0f;
 	*(acomp->outlevel) = -45.0f;
-	acomp->old_in_peak_db = -160.0f;
 }
 
 static void
@@ -318,17 +316,20 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0.f;
+	float in_peak_db = -160.f;
 	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
 		sc0 = sc[i];
 		ingain = usesidechain ? fabs(sc0) : fabs(in0);
-		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+
+		if (Lxg > in_peak_db) {
+			in_peak_db = Lxg;
+		}
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = Lxg;
@@ -377,32 +378,27 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 #ifdef LV2_EXTENDED
 	acomp->v_gainr = max_gainr;
 
-	float in_peak_db = to_dB(in_peak);
-
-	if (!isfinite_local (in_peak_db)) {
-		in_peak_db = -160.0f;
-	}
-	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
-	const float tot_atk_c = exp(-1000.f/(*(acomp->attack) * srate) * n_samples);
-
-	const float old_in_peak_db = acomp->old_in_peak_db;
-
-	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
-		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
-	} else if (in_peak_db > acomp->old_in_peak_db && in_peak_db > thresdb) {
-		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
-	}
-
-	acomp->old_in_peak_db = in_peak_db;
-
 	const float v_lvl_in = in_peak_db;
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
+	const float v_lvl_out = *acomp->outlevel;
+
+	float state_x;
+
+	const float knee_lim_gr = (1.f - 1.f/ratio) * width/2.f;
+
+	if (acomp->v_gainr > knee_lim_gr) {
+		state_x = acomp->v_gainr / (1.f - 1.f/ratio) + thresdb;
+	} else {
+		state_x = sqrt ( (2.f*width*acomp->v_gainr) / (1.f-1.f/ratio) ) + thresdb - width/2.f;
+	}
+
+	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= .1f ||
+	    fabsf (acomp->v_lvl_in - v_lvl_in) >= .1f ||
+	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
+		// >= 0.1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		const float relax_coef = exp(-(float)n_samples/srate);
-		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		acomp->v_lvl_out = v_lvl_out;
+		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -480,7 +476,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0.f;
+	float in_peak_db = -160.f;
 	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
@@ -489,10 +485,12 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		sc0 = sc[i];
 		maxabslr = fmaxf(fabs(in0), fabs(in1));
 		ingain = usesidechain ? fabs(sc0) : maxabslr;
-		in_peak = fmaxf (in_peak, ingain);
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
+		if (Lxg > in_peak_db) {
+			in_peak_db = Lxg;
+		}
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = Lxg;
@@ -543,33 +541,27 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 #ifdef LV2_EXTENDED
 	acomp->v_gainr = max_gainr;
 
-	float in_peak_db = to_dB(in_peak);
-
-	if (!isfinite_local (in_peak_db)) {
-		in_peak_db = -160.0f;
-	}
-
-	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
-	const float tot_atk_c = exp(-1000.f/(*(acomp->attack) * srate) * n_samples);
-
-	const float old_in_peak_db = acomp->old_in_peak_db;
-
-	if (in_peak_db < old_in_peak_db && in_peak_db < thresdb) {
-		in_peak_db = tot_rel_c*old_in_peak_db + (1.f-tot_rel_c)*in_peak_db;
-	} else if (in_peak_db > acomp->old_in_peak_db && in_peak_db > thresdb) {
-		in_peak_db = tot_atk_c*old_in_peak_db+ (1.f*tot_atk_c)*in_peak_db;
-	}
-
-	acomp->old_in_peak_db = in_peak_db;
-
 	const float v_lvl_in = in_peak_db;
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
+	const float v_lvl_out = *acomp->outlevel;
+
+	float state_x;
+
+	const float knee_lim_gr = (1.f - 1.f/ratio) * width/2.f;
+
+	if (acomp->v_gainr > knee_lim_gr) {
+		state_x = acomp->v_gainr / (1.f - 1.f/ratio) + thresdb;
+	} else {
+		state_x = sqrt ( (2.f*width*acomp->v_gainr) / (1.f-1.f/ratio) ) + thresdb - width/2.f;
+	}
+
+	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= .1f ||
+	    fabsf (acomp->v_lvl_in - v_lvl_in) >= .1f ||
+	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
+		// >= 0.1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		const float relax_coef = exp(-2.0*n_samples/srate);
-		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		acomp->v_lvl_out = v_lvl_out;
+		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -704,6 +696,15 @@ render_inline_full (cairo_t* cr, const AComp* self)
 		cairo_set_source_rgba (cr, 0.75, 0.75, 0.75, 1.0);
 		cairo_stroke (cr);
 	}
+
+	// draw state
+	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
+
+	const float state_x = w * (1.f - (10.f-self->v_state_x)/70.f);
+	const float state_y = h * (comp_curve (self, self->v_state_x) - 10.f) / -70.f;
+
+	cairo_arc (cr, state_x, state_y, 3.f, 0.f, 2.f*M_PI);
+	cairo_fill (cr);
 
 	// draw curve
 	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
