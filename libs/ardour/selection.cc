@@ -86,7 +86,7 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 		*/
 		if (s) {
 			PropertyChange pc (Properties::selected);
-			s->PropertyChanged (pc);
+			s->presentation_info().PropertyChanged (pc);
 		}
 	}
 }
@@ -116,7 +116,7 @@ CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automat
 		*/
 		if (s) {
 			PropertyChange pc (Properties::selected);
-			s->PropertyChanged (pc);
+			s->presentation_info().PropertyChanged (pc);
 		}
 	}
 }
@@ -145,7 +145,7 @@ CoreSelection::set (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 	*/
 	if (s) {
 		PropertyChange pc (Properties::selected);
-		s->PropertyChanged (pc);
+		s->presentation_info().PropertyChanged (pc);
 	}
 }
 
@@ -183,7 +183,7 @@ CoreSelection::clear_stripables ()
 		PropertyChange pc (Properties::selected);
 
 		for (std::vector<boost::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
-			(*ss)->PropertyChanged (pc);
+			(*ss)->presentation_info().PropertyChanged (pc);
 		}
 
 	}
