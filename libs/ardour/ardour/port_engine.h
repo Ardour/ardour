@@ -245,7 +245,7 @@ class LIBARDOUR_API PortEngine {
     * of the current process cycle, in samples) will be stored in @param
     * timestamp
     */
-    virtual int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index) = 0;
+    virtual int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index) = 0;
 
     /** Place a MIDI event consisting of @param size bytes copied from the data
      * at @param buf into the port buffer referred to by @param

@@ -488,7 +488,7 @@ JACKAudioBackend::disconnect_all (PortHandle port)
 }
 
 int
-JACKAudioBackend::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index)
+JACKAudioBackend::midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index)
 {
 	jack_midi_event_t ev;
 	int ret;

@@ -360,7 +360,7 @@ class DummyAudioBackend : public AudioBackend {
 		int  get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
 
 		/* MIDI */
-		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
+		int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
 		int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
 		uint32_t get_midi_event_count (void* port_buffer);
 		void     midi_clear (void* port_buffer);

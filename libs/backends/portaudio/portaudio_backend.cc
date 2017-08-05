@@ -1610,7 +1610,7 @@ PortAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 int
 PortAudioBackend::midi_event_get (
 		pframes_t& timestamp,
-		size_t& size, uint8_t** buf, void* port_buffer,
+		size_t& size, uint8_t const** buf, void* port_buffer,
 		uint32_t event_index)
 {
 	if (!buf || !port_buffer) return -1;

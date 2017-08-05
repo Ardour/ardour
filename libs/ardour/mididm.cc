@@ -37,7 +37,7 @@ MIDIDM::MIDIDM (framecnt_t sample_rate)
 }
 
 int64_t
-MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
+MIDIDM::parse_mclk (uint8_t const * const buf, pframes_t timestamp) const
 {
 	/* calculate time difference */
 #define MODCLK (16384)  // 1<<(2*7)
@@ -52,7 +52,7 @@ MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
 }
 
 int64_t
-MIDIDM::parse_mtc (uint8_t* buf, pframes_t timestamp) const
+MIDIDM::parse_mtc (uint8_t const * const buf, pframes_t timestamp) const
 {
 #define MODTC (2097152)  // 1<<(3*7)
 	const int64_t tc = (_monotonic_cnt + timestamp) & 0x001FFFFF;
@@ -101,7 +101,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	for (pframes_t n = 0; n < nevents; ++n) {
 		pframes_t timestamp;
 		size_t size;
-		uint8_t* buf;
+		uint8_t const* buf;
 		int64_t tdiff;
 		pe.midi_event_get (timestamp, size, &buf, midi_in, n);
 

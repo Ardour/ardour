@@ -129,28 +129,33 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 				pframes_t timestamp;
 				size_t size;
-				uint8_t* buf;
+				uint8_t const* buf;
 
 				port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
 
 				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
-				} else if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
-					/* normalize note on with velocity 0 to proper note off */
-					buf[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
-					buf[2] = 0x40;  /* default velocity */
 				}
 
 				/* check that the event is in the acceptable time range */
-
-				if ((timestamp >= (_global_port_buffer_offset + _port_buffer_offset)) &&
-				    (timestamp < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
-					_buffer->push_back (timestamp, size, buf);
-				} else {
+				if ((timestamp <  (_global_port_buffer_offset + _port_buffer_offset)) ||
+				    (timestamp >= (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
-					     << _global_port_buffer_offset << " limit="
-					     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+						<< _global_port_buffer_offset << " limit="
+						<< (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+					continue;
+				}
+
+				if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
+					/* normalize note on with velocity 0 to proper note off */
+					uint8_t ev[3];
+					ev[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
+					ev[1] = buf[1];
+					ev[2] = 0x40;  /* default velocity */
+					_buffer->push_back (timestamp, size, ev);
+				} else {
+					_buffer->push_back (timestamp, size, buf);
 				}
 			}
 

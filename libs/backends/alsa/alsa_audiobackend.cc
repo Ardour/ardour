@@ -1685,7 +1685,7 @@ AlsaAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 int
 AlsaAudioBackend::midi_event_get (
 		pframes_t& timestamp,
-		size_t& size, uint8_t** buf, void* port_buffer,
+		size_t& size, uint8_t const** buf, void* port_buffer,
 		uint32_t event_index)
 {
 	assert (buf && port_buffer);
