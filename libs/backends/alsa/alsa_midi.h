@@ -26,6 +26,10 @@
 #include "pbd/ringbuffer.h"
 #include "ardour/types.h"
 
+/* max bytes per individual midi-event
+ * events larger than this are ignored */
+#define MaxAlsaMidiEventSize (64)
+
 namespace ARDOUR {
 
 class AlsaMidiIO {

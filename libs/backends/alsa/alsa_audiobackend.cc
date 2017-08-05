@@ -77,6 +77,8 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	pthread_mutex_init (&_port_callback_mutex, 0);
 	_input_audio_device_info.valid = false;
 	_output_audio_device_info.valid = false;
+
+	_port_connection_queue.reserve (128);
 }
 
 AlsaAudioBackend::~AlsaAudioBackend ()
@@ -1693,11 +1695,11 @@ AlsaAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	AlsaMidiEvent * const event = source[event_index].get ();
+	AlsaMidiEvent const& event = source[event_index];
 
-	timestamp = event->timestamp ();
-	size = event->size ();
-	*buf = event->data ();
+	timestamp = event.timestamp ();
+	size = event.size ();
+	*buf = event.data ();
 	return 0;
 }
 
@@ -1708,15 +1710,18 @@ AlsaAudioBackend::midi_event_put (
 		const uint8_t* buffer, size_t size)
 {
 	assert (buffer && port_buffer);
+	if (size >= MaxAlsaMidiEventSize) {
+		return -1;
+	}
 	AlsaMidiBuffer& dst = * static_cast<AlsaMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
 #ifndef NDEBUG
+	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "AlsaMidiBuffer: it's too late for this event. %d > %d\n",
-				(pframes_t)dst.back ()->timestamp (), timestamp);
-#endif
+				(pframes_t)dst.back ().timestamp (), timestamp);
 	}
-	dst.push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (timestamp, buffer, size)));
+#endif
+	dst.push_back (AlsaMidiEvent (timestamp, buffer, size));
 	return 0;
 }
 
@@ -1949,7 +1954,7 @@ AlsaAudioBackend::main_process_thread ()
 					AlsaMidiIn *rm = _rmidi_in.at(i);
 					void *bptr = (*it)->get_buffer(0);
 					pframes_t time;
-					uint8_t data[64]; // match MaxAlsaEventSize in alsa_rawmidi.cc
+					uint8_t data[MaxAlsaMidiEventSize];
 					size_t size = sizeof(data);
 					midi_clear(bptr);
 					while (rm->recv_event (time, data, size)) {
@@ -1983,7 +1988,7 @@ AlsaAudioBackend::main_process_thread ()
 					AlsaMidiOut *rm = _rmidi_out.at(i);
 					rm->sync_time (clock1);
 					for (AlsaMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-						rm->send_event ((*mit)->timestamp(), (*mit)->data(), (*mit)->size());
+						rm->send_event (mit->timestamp (), mit->data (), mit->size ());
 					}
 				}
 
@@ -2321,13 +2326,18 @@ AlsaMidiPort::AlsaMidiPort (AlsaAudioBackend &b, const std::string& name, PortFl
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
+	_buffer[2].clear ();
+
+	_buffer[0].reserve(256);
+	_buffer[1].reserve(256);
+	_buffer[2].reserve(256);
 }
 
 AlsaMidiPort::~AlsaMidiPort () { }
 
 struct MidiEventSorter {
-	bool operator() (const boost::shared_ptr<AlsaMidiEvent>& a, const boost::shared_ptr<AlsaMidiEvent>& b) {
-		return *a < *b;
+	bool operator() (AlsaMidiEvent const& a, AlsaMidiEvent const& b) {
+		return a < b;
 	}
 };
 
@@ -2341,7 +2351,7 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 				++i) {
 			const AlsaMidiBuffer * src = static_cast<const AlsaMidiPort*>(*i)->const_buffer ();
 			for (AlsaMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
-				(_buffer[_bufperiod]).push_back (boost::shared_ptr<AlsaMidiEvent>(new AlsaMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
 		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
@@ -2352,10 +2362,8 @@ void* AlsaMidiPort::get_buffer (pframes_t /* nframes */)
 AlsaMidiEvent::AlsaMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
 	, _timestamp (timestamp)
-	, _data (0)
 {
-	if (size > 0) {
-		_data = (uint8_t*) malloc (size);
+	if (size > 0 && size < MaxAlsaMidiEventSize) {
 		memcpy (_data, data, size);
 	}
 }
@@ -2363,14 +2371,9 @@ AlsaMidiEvent::AlsaMidiEvent (const pframes_t timestamp, const uint8_t* data, si
 AlsaMidiEvent::AlsaMidiEvent (const AlsaMidiEvent& other)
 	: _size (other.size ())
 	, _timestamp (other.timestamp ())
-	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
-		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+	if (other._size > 0) {
+		assert (other._size < MaxAlsaMidiEventSize);
+		memcpy (_data, other._data, other._size);
 	}
-};
-
-AlsaMidiEvent::~AlsaMidiEvent () {
-	free (_data);
 };

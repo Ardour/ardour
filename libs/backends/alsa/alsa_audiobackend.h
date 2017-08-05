@@ -50,19 +50,17 @@ class AlsaMidiEvent {
 	public:
 		AlsaMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
 		AlsaMidiEvent (const AlsaMidiEvent& other);
-		~AlsaMidiEvent ();
 		size_t size () const { return _size; };
 		pframes_t timestamp () const { return _timestamp; };
-		const unsigned char* const_data () const { return _data; };
-		unsigned char* data () { return _data; };
+		const uint8_t* data () const { return _data; };
 		bool operator< (const AlsaMidiEvent &other) const { return timestamp () < other.timestamp (); };
 	private:
 		size_t _size;
 		pframes_t _timestamp;
-		uint8_t *_data;
+		uint8_t _data[MaxAlsaMidiEventSize];
 };
 
-typedef std::vector<boost::shared_ptr<AlsaMidiEvent> > AlsaMidiBuffer;
+typedef std::vector<AlsaMidiEvent> AlsaMidiBuffer;
 
 class AlsaPort {
 	protected:

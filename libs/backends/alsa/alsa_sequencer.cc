@@ -27,10 +27,6 @@
 
 using namespace ARDOUR;
 
-/* max bytes per individual midi-event
- * events larger than this are ignored */
-#define MaxAlsaSeqEventSize (64)
-
 #ifndef NDEBUG
 #define _DEBUGPRINT(STR) fprintf(stderr, STR);
 #else
@@ -130,12 +126,12 @@ AlsaSeqMidiOut::main_process_thread ()
 	_running = true;
 	bool need_drain = false;
 	snd_midi_event_t *alsa_codec = NULL;
-	snd_midi_event_new (MaxAlsaSeqEventSize, &alsa_codec);
+	snd_midi_event_new (MaxAlsaMidiEventSize, &alsa_codec);
 	pthread_mutex_lock (&_notify_mutex);
 	while (_running) {
 		bool have_data = false;
 		struct MidiEventHeader h(0,0);
-		uint8_t data[MaxAlsaSeqEventSize];
+		uint8_t data[MaxAlsaMidiEventSize];
 
 		const uint32_t read_space = _rb->read_space();
 
@@ -145,7 +141,7 @@ AlsaSeqMidiOut::main_process_thread ()
 				break;
 			}
 			assert (read_space >= h.size);
-			if (h.size > MaxAlsaSeqEventSize) {
+			if (h.size > MaxAlsaMidiEventSize) {
 				_rb->increment_read_idx (h.size);
 				_DEBUGPRINT("AlsaSeqMidiOut: MIDI event too large!\n");
 				continue;
@@ -240,7 +236,7 @@ AlsaSeqMidiIn::main_process_thread ()
 	_running = true;
 	bool do_poll = true;
 	snd_midi_event_t *alsa_codec = NULL;
-	snd_midi_event_new (MaxAlsaSeqEventSize, &alsa_codec);
+	snd_midi_event_new (MaxAlsaMidiEventSize, &alsa_codec);
 
 	while (_running) {
 
@@ -275,7 +271,7 @@ AlsaSeqMidiIn::main_process_thread ()
 			break;
 		}
 
-		uint8_t data[MaxAlsaSeqEventSize];
+		uint8_t data[MaxAlsaMidiEventSize];
 		snd_midi_event_reset_decode (alsa_codec);
 		ssize_t size = snd_midi_event_decode (alsa_codec, data, sizeof(data), event);
 

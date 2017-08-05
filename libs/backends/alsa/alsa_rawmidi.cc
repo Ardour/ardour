@@ -28,10 +28,6 @@
 
 using namespace ARDOUR;
 
-/* max bytes per individual midi-event
- * events larger than this are ignored */
-#define MaxAlsaRawEventSize (64)
-
 #ifndef NDEBUG
 #define _DEBUGPRINT(STR) fprintf(stderr, STR);
 #else
@@ -123,7 +119,7 @@ AlsaRawMidiOut::main_process_thread ()
 	while (_running) {
 		bool have_data = false;
 		struct MidiEventHeader h(0,0);
-		uint8_t data[MaxAlsaRawEventSize];
+		uint8_t data[MaxAlsaMidiEventSize];
 
 		const uint32_t read_space = _rb->read_space();
 
@@ -133,7 +129,7 @@ AlsaRawMidiOut::main_process_thread ()
 				break;
 			}
 			assert (read_space >= h.size);
-			if (h.size > MaxAlsaRawEventSize) {
+			if (h.size > MaxAlsaMidiEventSize) {
 				_rb->increment_read_idx (h.size);
 				_DEBUGPRINT("AlsaRawMidiOut: MIDI event too large!\n");
 				continue;
@@ -280,7 +276,7 @@ AlsaRawMidiIn::main_process_thread ()
 			continue;
 		}
 
-		uint8_t data[MaxAlsaRawEventSize];
+		uint8_t data[MaxAlsaMidiEventSize];
 		uint64_t time = g_get_monotonic_time();
 		ssize_t err = snd_rawmidi_read (_device, data, sizeof(data));
 
