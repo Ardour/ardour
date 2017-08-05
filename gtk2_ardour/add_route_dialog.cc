@@ -282,6 +282,7 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (VCA::default_name_template());
 		break;
 	}
+	name_edited_by_user = false;
 }
 
 void
