@@ -733,7 +733,7 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-        if conf.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
+        if bld.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and bld.env['build_target'] == 'snowleopard'):
             # CTFontManagerRegisterFontsForURL for ArdourMono is 10.6 or newer
             # "Lucida Grande" is not mono-spaced, but works for most cases, except big-clock-window
             font_names = {
