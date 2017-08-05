@@ -114,6 +114,8 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init  (&_freewheel_signal, 0);
 
+	_port_connection_queue.reserve (128);
+
 	_pcmio = new CoreAudioPCM ();
 	_midiio = new CoreMidiIo ();
 
@@ -1415,11 +1417,11 @@ CoreAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	CoreMidiEvent * const event = source[event_index].get ();
+	CoreMidiEvent const& event = source[event_index].get ();
 
-	timestamp = event->timestamp ();
-	size = event->size ();
-	*buf = event->data ();
+	timestamp = event.timestamp ();
+	size = event.size ();
+	*buf = event.data ();
 	return 0;
 }
 
@@ -1430,15 +1432,18 @@ CoreAudioBackend::_midi_event_put (
 	const uint8_t* buffer, size_t size)
 {
 	if (!buffer || !port_buffer) return -1;
+	if (size >= MaxCoreMidiEventSize) {
+		return -1;
+	}
 	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
 #ifndef NDEBUG
+	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
-		         (pframes_t)dst.back ()->timestamp (), timestamp);
-#endif
+		         (pframes_t)dst.back ().timestamp (), timestamp);
 	}
-	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
+#endif
+	dst.push_back (CoreMidiEvent (timestamp, buffer, size));
 	return 0;
 }
 
@@ -1802,7 +1807,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 			continue;
 		}
 		uint64_t time_ns;
-		uint8_t data[128]; // matches CoreMidi's MIDIPacket
+		uint8_t data[MaxCoreMidiEventSize];
 		size_t size = sizeof(data);
 
 		port->clear_events ();
@@ -1845,15 +1850,10 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* queue outgoing midi */
 	i = 0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-#if 0 // something's still b0rked with CoreMidiIo::send_events()
-		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
-		_midiio->send_events (i, nominal_time, (void*)src);
-#else // works..
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-			_midiio->send_event (i, (*mit)->timestamp() / nominal_time, (*mit)->data(), (*mit)->size());
+			_midiio->send_event (i,tamp (), mit->data (), mit->size ());
 		}
-#endif
 	}
 
 	/* write back audio */
@@ -2159,13 +2159,16 @@ CoreMidiPort::CoreMidiPort (CoreAudioBackend &b, const std::string& name, PortFl
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
+
+	_buffer[0].reserve (256);
+	_buffer[1].reserve (256);
 }
 
 CoreMidiPort::~CoreMidiPort () { }
 
 struct MidiEventSorter {
-	bool operator() (const boost::shared_ptr<CoreMidiEvent>& a, const boost::shared_ptr<CoreMidiEvent>& b) {
-		return *a < *b;
+	bool operator() (CoreMidiEvent const& a, CoreMidiEvent const& b) {
+		return a < b;
 	}
 };
 
@@ -2179,7 +2182,7 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
-				(_buffer[_bufperiod]).push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
 		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
@@ -2348,10 +2351,8 @@ CoreMidiPort::process_byte(const uint64_t time, const uint8_t byte)
 CoreMidiEvent::CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
 	, _timestamp (timestamp)
-	, _data (0)
 {
-	if (size > 0) {
-		_data = (uint8_t*) malloc (size);
+	if (size > 0 && size < MaxCoreMidiEventSize) {
 		memcpy (_data, data, size);
 	}
 }
@@ -2359,14 +2360,9 @@ CoreMidiEvent::CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, si
 CoreMidiEvent::CoreMidiEvent (const CoreMidiEvent& other)
 	: _size (other.size ())
 	, _timestamp (other.timestamp ())
-	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
-		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+	if (other._size > 0) {
+		assert (other._size < MaxCoreMidiEventSize);
+		memcpy (_data, other._data, other._size);
 	}
-};
-
-CoreMidiEvent::~CoreMidiEvent () {
-	free (_data);
 };

@@ -38,6 +38,8 @@
 #include "coreaudio_pcmio.h"
 #include "coremidi_io.h"
 
+#define MaxCoreMidiEventSize 128 // matches CoreMidi's MIDIPacket
+
 namespace ARDOUR {
 
 class CoreAudioBackend;
@@ -46,19 +48,17 @@ class CoreMidiEvent {
   public:
 	CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
 	CoreMidiEvent (const CoreMidiEvent& other);
-	~CoreMidiEvent ();
 	size_t size () const { return _size; };
 	pframes_t timestamp () const { return _timestamp; };
-	const unsigned char* const_data () const { return _data; };
-	unsigned char* data () { return _data; };
+	const uint8_t* () const { return _data; };
 	bool operator< (const CoreMidiEvent &other) const { return timestamp () < other.timestamp (); };
   private:
 	size_t _size;
 	pframes_t _timestamp;
-	uint8_t *_data;
+	uint8_t _data[MaxCoreMidiEventSize];
 };
 
-typedef std::vector<boost::shared_ptr<CoreMidiEvent> > CoreMidiBuffer;
+typedef std::vector<CoreMidiEvent> CoreMidiBuffer;
 
 class CoreBackendPort {
   protected:
