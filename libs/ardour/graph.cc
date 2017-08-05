@@ -125,7 +125,7 @@ Graph::reset_thread_list ()
 		throw failed_constructor ();
 	}
 
-	for (uint32_t i = 2; i < num_threads; ++i) {
+	for (uint32_t i = 1; i < num_threads; ++i) {
 		if (AudioEngine::instance()->create_process_thread (boost::bind (&Graph::helper_thread, this))) {
 			throw failed_constructor ();
 		}
@@ -272,6 +272,7 @@ void
 Graph::restart_cycle()
 {
 	// we are through. wakeup our caller.
+	DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 cycle done.\n", pthread_name()));
 
 again:
 	_callback_done_sem.signal ();
@@ -283,6 +284,7 @@ again:
 		return;
 	}
 
+	DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("%1 prepare new cycle.\n", pthread_name()));
 	prep ();
 
 	if (_graph_empty && _threads_active) {
@@ -473,7 +475,7 @@ again:
 
 	/* This loop will run forever */
 	while (1) {
-		DEBUG_TRACE(DEBUG::ProcessThreads, "main thread runs one graph node\n");
+		DEBUG_TRACE(DEBUG::ProcessThreads, string_compose ("main thread (%1) runs one graph node\n", pthread_name ()));
 		if (run_one()) {
 			break;
 		}
@@ -528,6 +530,7 @@ Graph::silent_process_routes (pframes_t nframes, framepos_t start_frame, framepo
 		DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for silent process\n");
 		_callback_start_sem.signal ();
 		_callback_done_sem.wait ();
+		DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
 	}
 
 	need_butler = _process_need_butler;
@@ -555,7 +558,6 @@ Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end
 	DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for non-silent process\n");
 	_callback_start_sem.signal ();
 	_callback_done_sem.wait ();
-
 	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
 
 	need_butler = _process_need_butler;
@@ -585,6 +587,7 @@ Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end
 	DEBUG_TRACE(DEBUG::ProcessThreads, "wake graph for no-roll process\n");
 	_callback_start_sem.signal ();
 	_callback_done_sem.wait ();
+	DEBUG_TRACE (DEBUG::ProcessThreads, "graph execution complete\n");
 
 	return _process_retval;
 }
