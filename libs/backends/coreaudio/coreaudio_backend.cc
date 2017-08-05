@@ -1417,7 +1417,7 @@ CoreAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	CoreMidiEvent const& event = source[event_index].get ();
+	CoreMidiEvent const& event = source[event_index];
 
 	timestamp = event.timestamp ();
 	size = event.size ();
@@ -1852,7 +1852,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-			_midiio->send_event (i,tamp (), mit->data (), mit->size ());
+			_midiio->send_event (i, mit->timestamp (), mit->data (), mit->size ());
 		}
 	}
 

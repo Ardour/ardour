@@ -321,10 +321,10 @@ CoreMidiIo::send_events (uint32_t port, double timescale, const void *b)
 	MIDIPacket *cur = MIDIPacketListInit(mpl);
 
 	for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-		assert((*mit)->size() < 256);
+		assert(mit->size() < 256);
 		cur = MIDIPacketListAdd(mpl, sizeof(bytes), cur,
-				AudioConvertNanosToHostTime(ts + (*mit)->timestamp() / timescale),
-				(*mit)->size(), (*mit)->data());
+				AudioConvertNanosToHostTime(ts + mit->timestamp() / timescale),
+				mit->size(), mit->data());
 		if (!cur) {
 #ifndef DEBUG
 			printf("CoreMidi: Packet list overflow, dropped events\n");

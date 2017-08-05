@@ -50,7 +50,7 @@ class CoreMidiEvent {
 	CoreMidiEvent (const CoreMidiEvent& other);
 	size_t size () const { return _size; };
 	pframes_t timestamp () const { return _timestamp; };
-	const uint8_t* () const { return _data; };
+	const uint8_t* data () const { return _data; };
 	bool operator< (const CoreMidiEvent &other) const { return timestamp () < other.timestamp (); };
   private:
 	size_t _size;
