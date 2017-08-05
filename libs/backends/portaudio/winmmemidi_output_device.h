@@ -31,6 +31,8 @@
 
 #include <pbd/ringbuffer.h>
 
+#define MaxWinMidiEventSize 256
+
 namespace ARDOUR {
 
 class WinMMEMidiOutputDevice {

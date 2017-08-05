@@ -50,7 +50,7 @@ struct WinMMEMIDIPacket {
 
 	// MIDITimeStamp timeStamp;
 	uint16_t length;
-	uint8_t data[256];
+	uint8_t data[MaxWinMidiEventSize];
 };
 
 typedef std::vector<boost::shared_ptr<WinMMEMIDIPacket> > WinMMEMIDIQueue;

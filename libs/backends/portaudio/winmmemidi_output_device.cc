@@ -32,7 +32,6 @@
 
 // remove dup with input_device
 static const uint32_t MIDI_BUFFER_SIZE = 32768;
-static const uint32_t MAX_MIDI_MSG_SIZE = 256; // fix this for sysex
 static const uint32_t MAX_QUEUE_SIZE = 4096;
 
 namespace ARDOUR {
@@ -361,7 +360,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		DEBUG_MIDI ("WinMMEMidiOut: output thread woken by semaphore\n");
 
 		MidiEventHeader h (0, 0);
-		uint8_t data[MAX_MIDI_MSG_SIZE];
+		uint8_t data[MaxWinMidiEventSize];
 
 		const uint32_t read_space = m_midi_buffer->read_space ();
 
@@ -375,7 +374,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			}
 			assert (read_space >= h.size);
 
-			if (h.size > MAX_MIDI_MSG_SIZE) {
+			if (h.size > MaxWinMidiEventSize) {
 				m_midi_buffer->increment_read_idx (h.size);
 				DEBUG_MIDI ("WinMMEMidiOut: MIDI event too large!\n");
 				continue;

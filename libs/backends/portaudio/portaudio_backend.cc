@@ -93,6 +93,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init (&_freewheel_signal, 0);
 
+	_port_connection_queue.reserve (128);
+
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
 }
@@ -1618,11 +1620,11 @@ PortAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	PortMidiEvent * const event = source[event_index].get ();
+	PortMidiEvent const& event = source[event_index].get ();
 
-	timestamp = event->timestamp ();
-	size = event->size ();
-	*buf = event->data ();
+	timestamp = event.timestamp ();
+	size = event.size ();
+	*buf = event.data ();
 	return 0;
 }
 
@@ -1634,13 +1636,15 @@ PortAudioBackend::midi_event_put (
 {
 	if (!buffer || !port_buffer) return -1;
 	PortMidiBuffer& dst = * static_cast<PortMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+#ifndef NDEBUG
+	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		DEBUG_MIDI (string_compose ("PortMidiBuffer: unordered event: %1 > %2\n",
-		                            (pframes_t)dst.back ()->timestamp (),
+		                            (pframes_t)dst.back ().timestamp (),
 		                            timestamp));
 	}
-	dst.push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (timestamp, buffer, size)));
+#endif
+	dst.push_back (PortMidiEvent (timestamp, buffer, size));
 	return 0;
 }
 
@@ -2038,7 +2042,7 @@ PortAudioBackend::process_incoming_midi ()
 		mbuf->clear();
 		uint64_t timestamp;
 		pframes_t sample_offset;
-		uint8_t data[256];
+		uint8_t data[MaxWinMidiEventSize];
 		size_t size = sizeof(data);
 		while (_midiio->dequeue_input_event(i,
 		                                    _cycle_timer.get_start(),
@@ -2079,14 +2083,14 @@ PortAudioBackend::process_outgoing_midi ()
 		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
 		     ++mit) {
 			uint64_t timestamp =
-			    _cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
+			    _cycle_timer.timestamp_from_sample_offset(mit->timestamp());
 			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
 			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
 			                          _midiio->get_outputs()[i]->name(),
-			                          (*mit)->timestamp(),
+			                          mit->timestamp(),
 			                          timestamp,
-			                          (*mit)->size()));
-			_midiio->enqueue_output_event(i, timestamp, (*mit)->data(), (*mit)->size());
+			                          mit->size()));
+			_midiio->enqueue_output_event(i, timestamp, mit->data(), mit->size());
 		}
 	}
 }
@@ -2354,13 +2358,16 @@ PortMidiPort::PortMidiPort (PortAudioBackend &b, const std::string& name, PortFl
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
+
+	_buffer[0].reserve (256);
+	_buffer[1].reserve (256);
 }
 
 PortMidiPort::~PortMidiPort () { }
 
 struct MidiEventSorter {
-	bool operator() (const boost::shared_ptr<PortMidiEvent>& a, const boost::shared_ptr<PortMidiEvent>& b) {
-		return *a < *b;
+	bool operator() (PortMidiEvent const& a, PortMidiEvent const& b) {
+		return a < b;
 	}
 };
 
@@ -2373,7 +2380,7 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 				++i) {
 			const PortMidiBuffer * src = static_cast<const PortMidiPort*>(*i)->const_buffer ();
 			for (PortMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
-				(_buffer[_bufperiod]).push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
 		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
@@ -2384,10 +2391,8 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 PortMidiEvent::PortMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
 	, _timestamp (timestamp)
-	, _data (0)
 {
-	if (size > 0) {
-		_data = (uint8_t*) malloc (size);
+	if (size > 0 && size < MaxWinMidiEventSize) {
 		memcpy (_data, data, size);
 	}
 }
@@ -2395,14 +2400,9 @@ PortMidiEvent::PortMidiEvent (const pframes_t timestamp, const uint8_t* data, si
 PortMidiEvent::PortMidiEvent (const PortMidiEvent& other)
 	: _size (other.size ())
 	, _timestamp (other.timestamp ())
-	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
-		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+	if (other._size > 0) {
+		assert (other._size < MaxWinMidiEventSize);
+		memcpy (_data, other._data, other._size);
 	}
-};
-
-PortMidiEvent::~PortMidiEvent () {
-	free (_data);
 };
