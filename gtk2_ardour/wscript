@@ -733,21 +733,19 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-
-        # There is no acceptable monospace font available on older versions of OS X
-        # and no API on those versions to load TTF files that will work with
-        # GTK/fontconfig/pango.
-        #
-        # In addition, the ArdourMono font gets clipped for some reason on OS X
-        #
-        # Moreover, Lucida Grande just seems to work even though it is not monospace
-        # so just use it.
-        #
-        font_names = {
-            'MONOSPACE' : 'Monaco',
-            'CLOCKFONT' : 'Lucida Grande',
-        }
-    else: # Linux/X11 fonts
+        if conf.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and conf.env['build_target'] == 'snowleopard'):
+            # CTFontManagerRegisterFontsForURL for ArdourMono is 10.6 or newer
+            # "Lucida Grande" is not mono-spaced, but works for most cases, except big-clock-window
+            font_names = {
+                    'MONOSPACE' : 'Monaco',
+                    'CLOCKFONT' : 'Lucida Grande',
+                    }
+        else:
+            font_names = {
+                    'MONOSPACE' : 'Monaco',
+                    'CLOCKFONT' : 'ArdourMono',
+                    }
+    else: # Linux/X11 & Windows fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
                 'SMALLER' : '6',
