@@ -1620,7 +1620,7 @@ PortAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	PortMidiEvent const& event = source[event_index].get ();
+	PortMidiEvent const& event = source[event_index];
 
 	timestamp = event.timestamp ();
 	size = event.size ();
