@@ -10,6 +10,8 @@
 
 #include <jack/jack.h>
 
+#include "ardour/midi_state_tracker.h"
+
 typedef uint64_t superclock_t;
 
 static const superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
@@ -58,6 +60,8 @@ class BeatBox {
 	superclock_t measure_superclocks;
 	int _quantize_divisor;
 	bool clear_pending;
+	ARDOUR::MidiStateTracker inbound_tracker;
+	ARDOUR::MidiStateTracker outbound_tracker;
 
 	struct Event {
 		superclock_t time;

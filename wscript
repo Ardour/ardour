@@ -730,6 +730,8 @@ def options(opt):
                     help='Compile Tool to dump LuaBindings (needs C++11)')
     opt.add_option('--canvasui', action='store_true', default=False, dest='canvasui',
                     help='Compile libcanvas test GUI')
+    opt.add_option('--beatbox', action='store_true', default=False, dest='beatbox',
+                    help='Compile beatbox test app')
     opt.add_option('--lv2', action='store_true', default=True, dest='lv2',
                     help='Compile with support for LV2 (if Lilv+Suil is available)')
     opt.add_option('--no-lv2', action='store_false', dest='lv2',
@@ -958,6 +960,10 @@ def configure(conf):
     if Options.options.canvasui:
         conf.env['CANVASTESTUI'] = True
         conf.define ('CANVASTESTUI', 1)
+
+    if Options.options.beatbox:
+        conf.env['BEATBOX'] = True
+        conf.define ('BEATBOX', 1)
 
     if Options.options.luadoc:
         conf.env['LUABINDINGDOC'] = True
@@ -1239,6 +1245,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('AudioUnits',            conf.is_defined('AUDIOUNIT_SUPPORT'))
     write_config_text('Build target',          conf.env['build_target'])
     write_config_text('Canvas Test UI',        conf.is_defined('CANVASTESTUI'))
+    write_config_text('Beatbox test app',      conf.is_defined('BEATBOX'))
     write_config_text('CoreAudio',             conf.is_defined('HAVE_COREAUDIO'))
     write_config_text('CoreAudio 10.5 compat', conf.is_defined('COREAUDIO105'))
     write_config_text('Debug RT allocations',  conf.is_defined('DEBUG_RT_ALLOC'))
@@ -1339,6 +1346,9 @@ def build(bld):
     for i in children:
         bld.recurse(i)
 
+    if bld.is_defined ('BEATBOX'):
+        bld.recurse('tools/bb')
+            
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
     if bld.env['RUN_TESTS']:

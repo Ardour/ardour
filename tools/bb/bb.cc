@@ -11,6 +11,8 @@
 
 #include "evoral/midi_events.h"
 
+#include "ardour/midi_buffer.h"
+
 #include "bb.h"
 #include "gui.h"
 
@@ -18,126 +20,6 @@ using std::cerr;
 using std::endl;
 
 
-static bool
-second_simultaneous_midi_byte_is_first (uint8_t a, uint8_t b)
-{
-	bool b_first = false;
-
-	/* two events at identical times. we need to determine
-	   the order in which they should occur.
-
-	   the rule is:
-
-	   Controller messages
-	   Program Change
-	   Note Off
-	   Note On
-	   Note Pressure
-	   Channel Pressure
-	   Pitch Bend
-	*/
-
-	if ((a) >= 0xf0 || (b) >= 0xf0 || ((a & 0xf) != (b & 0xf))) {
-
-		/* if either message is not a channel message, or if the channels are
-		 * different, we don't care about the type.
-		 */
-
-		b_first = true;
-
-	} else {
-
-		switch (b & 0xf0) {
-		case MIDI_CMD_CONTROL:
-			b_first = true;
-			break;
-
-		case MIDI_CMD_PGM_CHANGE:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-				break;
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_PRESSURE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-
-		case MIDI_CMD_NOTE_OFF:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_PGM_CHANGE:
-				break;
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_PRESSURE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-
-		case MIDI_CMD_NOTE_ON:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_NOTE_OFF:
-				break;
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_PRESSURE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-		case MIDI_CMD_NOTE_PRESSURE:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_NOTE_ON:
-				break;
-			case MIDI_CMD_NOTE_PRESSURE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-
-		case MIDI_CMD_CHANNEL_PRESSURE:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_PRESSURE:
-				break;
-			case MIDI_CMD_CHANNEL_PRESSURE:
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-		case MIDI_CMD_BENDER:
-			switch (a & 0xf0) {
-			case MIDI_CMD_CONTROL:
-			case MIDI_CMD_PGM_CHANGE:
-			case MIDI_CMD_NOTE_OFF:
-			case MIDI_CMD_NOTE_ON:
-			case MIDI_CMD_NOTE_PRESSURE:
-			case MIDI_CMD_CHANNEL_PRESSURE:
-				break;
-			case MIDI_CMD_BENDER:
-				b_first = true;
-			}
-			break;
-		}
-	}
-
-	return b_first;
-}
 
 BeatBox::BeatBox (int sr)
 	: _start_requested (false)
@@ -232,11 +114,6 @@ BeatBox::process (int nsamples)
 
 	superclock_t superclocks = samples_to_superclock (nsamples, _sample_rate);
 
-	if (!_running) {
-		superclock_cnt += superclocks;
-		return 0;
-	}
-
 	if (_tempo_request) {
 		double ratio = _tempo / _tempo_request;
 		_tempo = _tempo_request;
@@ -244,9 +121,18 @@ BeatBox::process (int nsamples)
 
 		compute_tempo_clocks ();
 
+		/* recompute all the event times based on the ratio between the
+		 * new and old tempo.
+		 */
+
 		for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
 			(*ee)->time = llrintf ((*ee)->time * ratio);
 		}
+	}
+
+	if (!_running) {
+		superclock_cnt += superclocks;
+		return 0;
 	}
 
 	superclock_t process_start = superclock_cnt - last_start;
@@ -273,7 +159,6 @@ BeatBox::process (int nsamples)
 	void* in_buf;
 	jack_midi_event_t in_event;
 	jack_nframes_t event_index;
-	jack_nframes_t event_count;
 
 	/* do this on the first pass only */
 	out_buf = jack_port_get_buffer (_output, nsamples);
@@ -298,6 +183,7 @@ BeatBox::process (int nsamples)
 		if (e->size && (e->time >= process_start && e->time < process_end)) {
 			if ((buffer = jack_midi_event_reserve (out_buf, superclock_to_samples (offset + e->time - process_start, _sample_rate), e->size)) != 0) {
 				memcpy (buffer, e->buf, e->size);
+				outbound_tracker.track (e->buf);
 			} else {
 				cerr << "Could not reserve space for output event @ " << e << " of size " << e->size << " @ " << offset + e->time - process_start
 				     << " (samples: " << superclock_to_samples (offset + e->time - process_start, _sample_rate) << ") offset is " << offset
@@ -323,8 +209,37 @@ BeatBox::process (int nsamples)
 		superclock_t quantized_time;
 
 		if (_quantize_divisor != 0) {
-			const superclock_t time_per_beat = whole_note_superclocks / _quantize_divisor;
-			quantized_time = (in_loop_time / time_per_beat) * time_per_beat;
+			const superclock_t time_per_grid_unit = whole_note_superclocks / _quantize_divisor;
+
+			if (in_event.buffer[0] == MIDI_CMD_NOTE_OFF) {
+
+				/* note off is special - it must be quantized
+				 * to at least 1 quantization "spacing" after
+				 * the corresponding note on.
+				 */
+
+				/* compute nominal time */
+
+				quantized_time = (in_loop_time / time_per_grid_unit) * time_per_grid_unit;
+
+				/* look for the note on */
+
+				for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
+					/* is it a note-on? same note? same  channel? */
+					if ((*ee)->time > quantized_time) {
+						cerr << "Note off seen without corresponding note on!\n";
+						/* leave quantized_time alone ... should probably dump the whole event */
+						break;
+					}
+
+					if (((*ee)->buf[0] == MIDI_CMD_NOTE_ON) && ((*ee)->buf[1] == in_event.buffer[1]) && ((*ee)->buf[0] & 0xf) == (in_event.buffer[0] & 0xf)) {
+						quantized_time = (*ee)->time + time_per_grid_unit;
+					}
+				}
+			} else {
+				quantized_time = (in_loop_time / time_per_grid_unit) * time_per_grid_unit;
+			}
+
 		} else {
 			quantized_time = elapsed_time;
 		}
@@ -346,6 +261,8 @@ BeatBox::process (int nsamples)
 		e->whole_note_superclocks = whole_note_superclocks;
 		e->size = in_event.size;
 		memcpy (e->buf, in_event.buffer, in_event.size);
+
+		inbound_tracker.track (e->buf);
 
 		_current_events.insert (e);
 	}
@@ -383,7 +300,7 @@ BeatBox::EventComparator::operator() (Event const * a, Event const *b) const
 		if (a->buf[0] == b->buf[0]) {
 			return a < b;
 		}
-		return !second_simultaneous_midi_byte_is_first (a->buf[0], b->buf[0]);
+		return !ARDOUR::MidiBuffer::second_simultaneous_midi_byte_is_first (a->buf[0], b->buf[0]);
 	}
 	return a->time < b->time;
 }
