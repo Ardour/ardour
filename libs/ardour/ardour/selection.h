@@ -36,6 +36,7 @@ namespace ARDOUR {
 class AutomationControl;
 class Session;
 class Stripable;
+class VCAManager;
 class PresentationInfo;
 
 class LIBARDOUR_API CoreSelection : public PBD::Stateful {
@@ -76,6 +77,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
   protected:
 	friend class Stripable;
 	friend class Session;
+	friend class VCAManager;
 	void remove_stripable_by_id (PBD::ID const &);
 
   private:

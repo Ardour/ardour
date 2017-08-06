@@ -22,6 +22,7 @@
 #include "pbd/string_convert.h"
 
 #include "ardour/boost_debug.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/slavable.h"
 #include "ardour/vca.h"
@@ -50,11 +51,24 @@ VCAManager::~VCAManager ()
 void
 VCAManager::clear ()
 {
-	Mutex::Lock lm (lock);
-	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
-		(*i)->DropReferences ();
+	bool send = false;
+	{
+		Mutex::Lock lm (lock);
+		for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+			if ((*i)->is_selected ()) {
+				_session.selection().remove_stripable_by_id ((*i)->id());
+				send = true;
+			}
+			(*i)->DropReferences ();
+		}
+		_vcas.clear ();
 	}
-	_vcas.clear ();
+
+	if (send && !_session.deletion_in_progress ()) {
+		PropertyChange pc;
+		pc.add (Properties::selected);
+		PresentationInfo::Change (pc);
+	}
 }
 
 VCAList
@@ -115,6 +129,12 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 
 	vca->DropReferences ();
 
+	if (vca->is_selected () && !_session.deletion_in_progress ()) {
+		_session.selection().remove_stripable_by_id (vca->id());
+		PropertyChange pc;
+		pc.add (Properties::selected);
+		PresentationInfo::Change (pc);
+	}
 	_session.set_dirty ();
 }
 
