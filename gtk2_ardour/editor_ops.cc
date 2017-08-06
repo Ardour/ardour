@@ -63,6 +63,7 @@
 #include "ardour/strip_silence.h"
 #include "ardour/transient_detector.h"
 #include "ardour/transpose.h"
+#include "ardour/vca_manager.h"
 
 #include "canvas/canvas.h"
 
@@ -106,6 +107,7 @@
 #include "transpose_dialog.h"
 #include "transform_dialog.h"
 #include "ui_config.h"
+#include "vca_time_axis.h"
 
 #include "pbd/i18n.h"
 
@@ -7414,20 +7416,29 @@ Editor::_remove_tracks ()
 	string prompt;
 	int ntracks = 0;
 	int nbusses = 0;
+	int nvcas = 0;
 	const char* trackstr;
 	const char* busstr;
+	const char* vcastr;
 	vector<boost::shared_ptr<Route> > routes;
+	vector<boost::shared_ptr<VCA> > vcas;
 	bool special_bus = false;
 
 	for (TrackSelection::iterator x = ts.begin(); x != ts.end(); ++x) {
+		VCATimeAxisView* vtv = dynamic_cast<VCATimeAxisView*> (*x);
+		if (vtv) {
+			vcas.push_back (vtv->vca());
+			++nvcas;
+			continue;
+		}
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*x);
 		if (!rtv) {
 			continue;
 		}
 		if (rtv->is_track()) {
-			ntracks++;
+			++ntracks;
 		} else {
-			nbusses++;
+			++nbusses;
 		}
 		routes.push_back (rtv->_route);
 
@@ -7454,43 +7465,66 @@ edit your ardour.rc file to set the\n\
 		return;
 	}
 
-	if (ntracks + nbusses == 0) {
+	if (ntracks + nbusses + nvcas == 0) {
 		return;
 	}
 
+	string title;
+
 	trackstr = P_("track", "tracks", ntracks);
 	busstr = P_("bus", "busses", nbusses);
+	vcastr = P_("VCA", "VCAs", nvcas);
 
-	if (ntracks) {
-		if (nbusses) {
-			prompt  = string_compose (_("Do you really want to remove %1 %2 and %3 %4?\n"
-						    "(You may also lose the playlists associated with the %2)\n\n"
-						    "This action cannot be undone, and the session file will be overwritten!"),
-						  ntracks, trackstr, nbusses, busstr);
-		} else {
-			prompt  = string_compose (_("Do you really want to remove %1 %2?\n"
-						    "(You may also lose the playlists associated with the %2)\n\n"
-						    "This action cannot be undone, and the session file will be overwritten!"),
-						  ntracks, trackstr);
-		}
-	} else if (nbusses) {
-		prompt  = string_compose (_("Do you really want to remove %1 %2?\n\n"
-		                            "This action cannot be undone, and the session file will be overwritten"),
-					  nbusses, busstr);
+	if (ntracks > 0 && nbusses > 0 && nvcas > 0) {
+		title = _("Remove various strips");
+		prompt = string_compose (_("Do you really want to remove %1 %2, %3 %4 and %5 %6?"),
+						  ntracks, trackstr, nbusses, busstr, nvcas, vcastr);
+	}
+	else if (ntracks > 0 && nbusses > 0) {
+		title = string_compose (_("Remove %1 and %2"), trackstr, busstr);
+		prompt = string_compose (_("Do you really want to remove %1 %2 and %3 %4?"),
+				ntracks, trackstr, nbusses, busstr);
+	}
+	else if (ntracks > 0 && nvcas > 0) {
+		title = string_compose (_("Remove %1 and %2"), trackstr, vcastr);
+		prompt = string_compose (_("Do you really want to remove %1 %2 and %3 %4?"),
+				ntracks, trackstr, nvcas, vcastr);
+	}
+	else if (nbusses > 0 && nvcas > 0) {
+		title = string_compose (_("Remove %1 and %2"), busstr, vcastr);
+		prompt = string_compose (_("Do you really want to remove %1 %2 and %3 %4?"),
+				nbusses, busstr, nvcas, vcastr);
+	}
+	else if (ntracks > 0) {
+		title = string_compose (_("Remove %1"), trackstr);
+		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+				ntracks, trackstr);
+	}
+	else if (nbusses > 0) {
+		title = string_compose (_("Remove %1"), busstr);
+		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+				nbusses, busstr);
+	}
+	else if (nvcas > 0) {
+		title = string_compose (_("Remove %1"), vcastr);
+		prompt  = string_compose (_("Do you really want to remove %1 %2?"),
+				nvcas, vcastr);
+	}
+	else {
+		assert (0);
 	}
 
+	if (ntracks > 0) {
+			prompt += "\n" + string_compose ("(You may also lose the playlists associated with the %1)", trackstr) + "\n";
+	}
+
+	prompt += "\n" + string(_("This action cannot be undone, and the session file will be overwritten!"));
+
 	choices.push_back (_("No, do nothing."));
-	if (ntracks + nbusses > 1) {
+	if (ntracks + nbusses + nvcas > 1) {
 		choices.push_back (_("Yes, remove them."));
 	} else {
 		choices.push_back (_("Yes, remove it."));
-	}
-
-	string title;
-	if (ntracks) {
-		title = string_compose (_("Remove %1"), trackstr);
-	} else {
-		title = string_compose (_("Remove %1"), busstr);
 	}
 
 	Choice prompter (title, prompt, choices);
@@ -7526,6 +7560,11 @@ edit your ardour.rc file to set the\n\
 			rl->push_back (*x);
 		}
 		_session->remove_routes (rl);
+
+		for (vector<boost::shared_ptr<VCA> >::iterator x = vcas.begin(); x != vcas.end(); ++x) {
+			_session->vca_manager().remove_vca (*x);
+		}
+
 	}
 	/* TrackSelection and RouteList leave scope,
 	 * destructors are called,
