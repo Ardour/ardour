@@ -813,7 +813,7 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("drags", &PublicEditor::drags)
 #endif
 
-		.addFunction ("get_route_view_by_route_id", &PublicEditor::get_route_view_by_route_id)
+		.addFunction ("get_stripable_time_axis_by_id", &PublicEditor::get_stripable_time_axis_by_id)
 		.addFunction ("get_track_views", &PublicEditor::get_track_views)
 		.addFunction ("rtav_from_route", &PublicEditor::rtav_from_route)
 		.addFunction ("axis_views_from_routes", &PublicEditor::axis_views_from_routes)

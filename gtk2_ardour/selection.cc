@@ -1138,11 +1138,11 @@ Selection::get_state () const
 	XMLNode* node = new XMLNode (X_("Selection"));
 
 	for (TrackSelection::const_iterator i = tracks.begin(); i != tracks.end(); ++i) {
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (*i);
+		StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (*i);
 		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (*i);
-		if (rtv) {
-			XMLNode* t = node->add_child (X_("RouteView"));
-			t->set_property (X_("id"), rtv->route()->id ());
+		if (stv) {
+			XMLNode* t = node->add_child (X_("StripableView"));
+			t->set_property (X_("id"), stv->stripable()->id ());
 		} else if (atv) {
 			XMLNode* t = node->add_child (X_("AutomationView"));
 			t->set_property (X_("id"), atv->parent_stripable()->id ());
@@ -1317,11 +1317,11 @@ Selection::set_state (XMLNode const & node, int)
 					assert(false);
 				}
 
-				RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (route_id); // XXX may also be VCA
+				StripableTimeAxisView* stv = editor->get_stripable_time_axis_by_id (route_id);
 				vector <ControlPoint *> cps;
 
-				if (rtv) {
-					boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().from_symbol (param));
+				if (stv) {
+					boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param));
 					if (atv) {
 						list<boost::shared_ptr<AutomationLine> > lines = atv->lines();
 						for (list<boost::shared_ptr<AutomationLine> > ::iterator li = lines.begin(); li != lines.end(); ++li) {
@@ -1387,10 +1387,10 @@ Selection::set_state (XMLNode const & node, int)
 				assert (false);
 			}
 
-			RouteTimeAxisView* rtv = editor->get_route_view_by_route_id (id);
+			StripableTimeAxisView* stv = editor->get_stripable_time_axis_by_id (id);
 
-			if (rtv) {
-				boost::shared_ptr<AutomationTimeAxisView> atv = rtv->automation_child (EventTypeMap::instance().from_symbol (param));
+			if (stv) {
+				boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param));
 
 				/* the automation could be for an entity that was never saved
 				   in the session file. Don't freak out if we can't find

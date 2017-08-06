@@ -84,6 +84,7 @@ class PluginUIWindow;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
+class StripableTimeAxisView;
 class TempoCurve;
 class TempoMarker;
 class TimeAxisView;
@@ -354,7 +355,7 @@ public:
 
 	virtual bool track_selection_change_without_scroll () const = 0;
 
-	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
+	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
 
 	virtual TimeAxisView* time_axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable> s) const = 0;
 

@@ -5552,15 +5552,15 @@ Editor::foreach_time_axis_view (sigc::slot<void,TimeAxisView&> theslot)
 	}
 }
 
-/** Find a RouteTimeAxisView by the ID of its route */
-RouteTimeAxisView*
-Editor::get_route_view_by_route_id (const PBD::ID& id) const
+/** Find a StripableTimeAxisView by the ID of its stripable */
+StripableTimeAxisView*
+Editor::get_stripable_time_axis_by_id (const PBD::ID& id) const
 {
-	RouteTimeAxisView* v;
+	StripableTimeAxisView* v;
 
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
-		if((v = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
-			if(v->route()->id() == id) {
+		if((v = dynamic_cast<StripableTimeAxisView*>(*i)) != 0) {
+			if(v->stripable()->id() == id) {
 				return v;
 			}
 		}

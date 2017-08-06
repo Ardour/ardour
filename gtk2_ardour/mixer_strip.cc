@@ -1750,11 +1750,11 @@ MixerStrip::build_route_ops_menu ()
 		   sane thing for users anyway.
 		*/
 
-		RouteTimeAxisView* rtav = PublicEditor::instance().get_route_view_by_route_id (_route->id());
-		if (rtav) {
+		StripableTimeAxisView* stav = PublicEditor::instance().get_stripable_time_axis_by_id (_route->id());
+		if (stav) {
 			Selection& selection (PublicEditor::instance().get_selection());
-			if (!selection.selected (rtav)) {
-				selection.set (rtav);
+			if (!selection.selected (stav)) {
+				selection.set (stav);
 			}
 
 			if (!_route->is_master()) {

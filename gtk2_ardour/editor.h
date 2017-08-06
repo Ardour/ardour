@@ -192,7 +192,7 @@ public:
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
 
-	RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const;
+	StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const;
 
 	void consider_auditioning (boost::shared_ptr<ARDOUR::Region>);
 	void hide_a_region (boost::shared_ptr<ARDOUR::Region>);
