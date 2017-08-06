@@ -41,7 +41,7 @@ static const double encoder_divider = 24.0;
 void
 FaderPort::left ()
 {
-	access_action ("Editor/select-prev-route");
+	access_action ("Editor/select-prev-stripable");
 
 	//ToDo:  bank by 8?
 	//if ( (button_state & ShiftDown) == ShiftDown )
@@ -51,7 +51,7 @@ FaderPort::left ()
 void
 FaderPort::right ()
 {
-	access_action ("Editor/select-next-route");
+	access_action ("Editor/select-next-stripable");
 
 	//ToDo:  bank by 8?
 	//if ( (button_state & ShiftDown) == ShiftDown )
