@@ -328,6 +328,7 @@ private:
 	void group_display_selection_changed ();
 
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
+	bool vca_button_release_event (GdkEventButton*, VCAMasterStrip*);
 
 	Width _strip_width;
 

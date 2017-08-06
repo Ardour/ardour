@@ -6375,7 +6375,7 @@ Editor::split_region ()
 }
 
 void
-Editor::select_next_route()
+Editor::select_next_stripable (bool routes_only)
 {
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
@@ -6384,7 +6384,7 @@ Editor::select_next_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	RouteUI *rui;
+	bool valid;
 	do {
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -6400,9 +6400,14 @@ Editor::select_next_route()
 			}
 		}
 
-		rui = dynamic_cast<RouteUI *>(current);
+		if (routes_only) {
+			RouteUI* rui = dynamic_cast<RouteUI *>(current);
+			valid = rui && rui->route()->active();
+		} else {
+			valid = 0 != current->stripable ().get();
+		}
 
-	} while (current->hidden() || (rui == NULL) || !rui->route()->active());
+	} while (current->hidden() || !valid);
 
 	selection->set (current);
 
@@ -6410,7 +6415,7 @@ Editor::select_next_route()
 }
 
 void
-Editor::select_prev_route()
+Editor::select_prev_stripable (bool routes_only)
 {
 	if (selection->tracks.empty()) {
 		selection->set (track_views.front());
@@ -6419,7 +6424,7 @@ Editor::select_prev_route()
 
 	TimeAxisView* current = selection->tracks.front();
 
-	RouteUI *rui;
+	bool valid;
 	do {
 		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
 
@@ -6433,9 +6438,14 @@ Editor::select_prev_route()
 				break;
 			}
 		}
-		rui = dynamic_cast<RouteUI *>(current);
+		if (routes_only) {
+			RouteUI* rui = dynamic_cast<RouteUI *>(current);
+			valid = rui && rui->route()->active();
+		} else {
+			valid = 0 != current->stripable ().get();
+		}
 
-	} while (current->hidden() || (rui == NULL) || !rui->route()->active());
+	} while (current->hidden() || !valid);
 
 	selection->set (current);
 

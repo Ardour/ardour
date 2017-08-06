@@ -1462,10 +1462,6 @@ Selection::toggle (const TrackViewList& track_list)
 void
 Selection::toggle (TimeAxisView* track)
 {
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
 	TrackViewList tr;
 	tr.push_back (track);
 	toggle (tr);
@@ -1489,10 +1485,6 @@ Selection::add (TrackViewList const & track_list)
 void
 Selection::add (TimeAxisView* track)
 {
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
 	TrackViewList tr;
 	tr.push_back (track);
 	add (tr);
@@ -1501,10 +1493,6 @@ Selection::add (TimeAxisView* track)
 void
 Selection::remove (TimeAxisView* track)
 {
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
 	TrackViewList tvl;
 	tvl.push_back (track);
 	remove (tvl);
@@ -1526,10 +1514,6 @@ Selection::remove (const TrackViewList& t)
 void
 Selection::set (TimeAxisView* track)
 {
-	if (dynamic_cast<VCATimeAxisView*> (track)) {
-		return;
-	}
-
 	TrackViewList tvl;
 	tvl.push_back (track);
 	set (tvl);

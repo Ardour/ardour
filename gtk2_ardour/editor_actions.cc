@@ -237,8 +237,11 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "select-all-in-punch-range", _("Select All in Punch Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_punch));
 	reg_sens (editor_actions, "select-all-in-loop-range", _("Select All in Loop Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_loop));
 
-	reg_sens (editor_actions, "select-next-route", _("Select Next Track or Bus"), sigc::mem_fun(*this, &Editor::select_next_route));
-	reg_sens (editor_actions, "select-prev-route", _("Select Previous Track or Bus"), sigc::mem_fun(*this, &Editor::select_prev_route));
+	reg_sens (editor_actions, "select-next-route", _("Select Next Track or Bus"), sigc::bind (sigc::mem_fun(*this, &Editor::select_next_stripable), true));
+	reg_sens (editor_actions, "select-prev-route", _("Select Previous Track or Bus"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_stripable), true));
+
+	reg_sens (editor_actions, "select-next-stripable", _("Select Next Strip"), sigc::bind (sigc::mem_fun(*this, &Editor::select_next_stripable), false));
+	reg_sens (editor_actions, "select-prev-stripable", _("Select Previous Strip"), sigc::bind (sigc::mem_fun(*this, &Editor::select_prev_stripable), false));
 
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);

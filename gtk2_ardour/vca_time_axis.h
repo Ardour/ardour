@@ -52,7 +52,6 @@ public:
 
 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 
-	bool selectable() const { return false; }
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 

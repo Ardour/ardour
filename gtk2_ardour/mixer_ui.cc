@@ -349,6 +349,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.show();
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
+	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
 
 	/* handle escape */
 
@@ -535,7 +536,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 				row[stripable_columns.strip] = vms;
 				row[stripable_columns.stripable] = vca;
 
-				vms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
+				vms->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &Mixer_UI::vca_button_release_event), vms));
 
 			} else if ((route = boost::dynamic_pointer_cast<Route> (*s))) {
 
@@ -828,6 +829,20 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 		if (!_selection.axes.empty() && !PublicEditor::instance().track_selection_change_without_scroll ()) {
 			move_stripable_into_view ((*_selection.axes.begin())->stripable());
 		}
+
+		TreeModel::Children rows = track_model->children();
+		for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+			AxisView* av = (*i)[stripable_columns.strip];
+			VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+			if (!vms) {
+				continue;
+			}
+			if (vms->vca() && vms->vca()->is_selected()) {
+				_selection.add (vms);
+			} else {
+				_selection.remove (vms);
+			}
+		}
 	}
 
 	redisplay_track_list ();
@@ -864,6 +879,15 @@ Mixer_UI::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
 	for (list<MixerStrip *>::const_iterator i = strips.begin(); i != strips.end(); ++i) {
 		if ((*i)->stripable() == s) {
 			return (*i);
+		}
+	}
+
+	TreeModel::Children rows = track_model->children();
+	for (TreeModel::Children::const_iterator i = rows.begin(); i != rows.end(); ++i) {
+		AxisView* av = (*i)[stripable_columns.strip];
+		VCAMasterStrip* vms = dynamic_cast<VCAMasterStrip*> (av);
+		if (vms && vms->stripable () == s) {
+			return av;
 		}
 	}
 
@@ -969,6 +993,13 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		}
 	}
 
+	return true;
+}
+
+bool
+Mixer_UI::vca_button_release_event (GdkEventButton *ev, VCAMasterStrip *strip)
+{
+	_selection.set (strip);
 	return true;
 }
 

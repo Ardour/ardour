@@ -2175,8 +2175,8 @@ private:
 	void stop_updating_meters ();
 	bool meters_running;
 
-	void select_next_route ();
-	void select_prev_route ();
+	void select_next_stripable (bool routes_only = true);
+	void select_prev_stripable (bool routes_only = true);
 
 	void snap_to_internal (ARDOUR::MusicFrame& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
