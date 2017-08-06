@@ -170,8 +170,6 @@ ArdourKeyboard::setup_keybindings ()
 		keybindings_path = default_bindings;
 	}
 
-	cerr << "KP is " << keybindings_path << endl;
-
 	while (true) {
 
 		if (!Glib::path_is_absolute (keybindings_path)) {
