@@ -203,36 +203,26 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	// if this is an automation track, then we shold the mixer strip should
 	// show the parent
 
-	boost::shared_ptr<ARDOUR::Route> route;
+	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	AutomationTimeAxisView* atv;
 
 	if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
-
 		AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>(view.get_parent());
-
 		if (parent) {
-			route = parent->route ();
+			stripable = parent->stripable ();
 		}
-
 	} else {
-
-		AudioTimeAxisView* at = dynamic_cast<AudioTimeAxisView*> (&view);
-
-		if (at) {
-			route = at->route();
-		} else {
-			MidiTimeAxisView* mt = dynamic_cast<MidiTimeAxisView*> (&view);
-			if (mt) {
-				route = mt->route();
-			}
+		StripableTimeAxisView* stav = dynamic_cast<StripableTimeAxisView*> (&view);
+		if (stav) {
+			stripable = stav->stripable();
 		}
 	}
 
 	/* Typically this is set by changing the TAV selection but if for any
-	   reason we decide to show a different strip for some reason, make
-	   sure that control surfaces can find it.
-	*/
-	ARDOUR::ControlProtocol::set_first_selected_stripable (route);
+	 * reason we decide to show a different strip for some reason, make
+	 * sure that control surfaces can find it.
+	 */
+	ARDOUR::ControlProtocol::set_first_selected_stripable (stripable);
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 
@@ -248,6 +238,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		create_editor_mixer ();
 	}
 
+	boost::shared_ptr<ARDOUR::Route> route = boost::dynamic_pointer_cast<ARDOUR::Route> (stripable);
 	if (current_mixer_strip->route() == route) {
 		return;
 	}
