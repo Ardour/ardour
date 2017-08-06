@@ -127,6 +127,7 @@ private:
 			add (mute_state);
 			add (solo_state);
 			add (solo_visible);
+			add (solo_lock_iso_visible);
 			add (solo_isolate_state);
 			add (solo_safe_state);
 			add (is_track);
@@ -135,6 +136,7 @@ private:
 			add (name_editable);
 			add (is_input_active);
 			add (is_midi);
+			add (is_vca);
 			add (active);
 		}
 
@@ -146,6 +148,7 @@ private:
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		/** true if the solo buttons are visible for this route, otherwise false */
 		Gtk::TreeModelColumn<bool>           solo_visible;
+		Gtk::TreeModelColumn<bool>           solo_lock_iso_visible;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;
 		Gtk::TreeModelColumn<bool>           is_track;
@@ -154,6 +157,7 @@ private:
 		Gtk::TreeModelColumn<bool>           name_editable;
 		Gtk::TreeModelColumn<bool>           is_input_active;
 		Gtk::TreeModelColumn<bool>           is_midi;
+		Gtk::TreeModelColumn<bool>           is_vca;
 		Gtk::TreeModelColumn<bool>           active;
 	};
 

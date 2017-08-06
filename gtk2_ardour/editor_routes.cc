@@ -195,7 +195,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	TreeViewColumn* solo_isolate_state_column = manage (new TreeViewColumn("SI", *solo_iso_renderer));
 
 	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_state(), _columns.solo_isolate_state);
-	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_visible(), _columns.solo_visible);
+	solo_isolate_state_column->add_attribute(solo_iso_renderer->property_visible(), _columns.solo_lock_iso_visible);
 	solo_isolate_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_isolate_state_column->set_alignment(ALIGN_CENTER);
 	solo_isolate_state_column->set_expand(false);
@@ -210,11 +210,13 @@ EditorRoutes::EditorRoutes (Editor* e)
 
 	TreeViewColumn* solo_safe_state_column = manage (new TreeViewColumn(_("SS"), *solo_safe_renderer));
 	solo_safe_state_column->add_attribute(solo_safe_renderer->property_state(), _columns.solo_safe_state);
-	solo_safe_state_column->add_attribute(solo_safe_renderer->property_visible(), _columns.solo_visible);
+	solo_safe_state_column->add_attribute(solo_safe_renderer->property_visible(), _columns.solo_lock_iso_visible);
 	solo_safe_state_column->set_sizing(TREE_VIEW_COLUMN_FIXED);
 	solo_safe_state_column->set_alignment(ALIGN_CENTER);
 	solo_safe_state_column->set_expand(false);
 	solo_safe_state_column->set_fixed_width(column_width);
+
+	// TODO hide _columns.active for is_vca  with some  property_visible() trick..
 
 	_name_column = _display.append_column ("", _columns.text) - 1;
 	_visible_column = _display.append_column ("", _columns.visible) - 1;
@@ -422,13 +424,13 @@ EditorRoutes::on_tv_rec_enable_changed (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView* tv = row[_columns.tv];
-	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = rtv->route()->rec_enable_control();
+	boost::shared_ptr<AutomationControl> ac = stv->stripable()->rec_enable_control();
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -440,13 +442,13 @@ EditorRoutes::on_tv_rec_safe_toggled (std::string const & path_string)
 {
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 	TimeAxisView* tv = row[_columns.tv];
-	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac (rtv->route()->rec_safe_control());
+	boost::shared_ptr<AutomationControl> ac (stv->stripable()->rec_safe_control());
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -460,13 +462,13 @@ EditorRoutes::on_tv_mute_enable_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	RouteTimeAxisView *rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac (rtv->route()->mute_control());
+	boost::shared_ptr<AutomationControl> ac (stv->stripable()->mute_control());
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -480,13 +482,13 @@ EditorRoutes::on_tv_solo_enable_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_control());
+	boost::shared_ptr<AutomationControl> ac (stv->stripable()->solo_control());
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -500,13 +502,13 @@ EditorRoutes::on_tv_solo_isolate_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_isolate_control());
+	boost::shared_ptr<AutomationControl> ac (stv->stripable()->solo_isolate_control());
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -520,13 +522,13 @@ EditorRoutes::on_tv_solo_safe_toggled (std::string const & path_string)
 	Gtk::TreeModel::Row row = *_model->get_iter (Gtk::TreeModel::Path (path_string));
 
 	TimeAxisView *tv = row[_columns.tv];
-	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
+	StripableTimeAxisView* stv = dynamic_cast<StripableTimeAxisView*> (tv);
 
-	if (!rtv) {
+	if (!stv || !stv->stripable()) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac (rtv->route()->solo_safe_control());
+	boost::shared_ptr<AutomationControl> ac (stv->stripable()->solo_safe_control());
 
 	if (ac) {
 		ac->set_value (!ac->get_value(), Controllable::UseGroup);
@@ -746,6 +748,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 			row[_columns.is_track] = false;
 			row[_columns.is_input_active] = false;
 			row[_columns.is_midi] = false;
+			row[_columns.is_vca] = true;
 
 		} else if (rtav) {
 
@@ -753,6 +756,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 			midi_trk= boost::dynamic_pointer_cast<MidiTrack> (stripable);
 
 			row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> (stripable) != 0);
+			row[_columns.is_vca] = false;
 
 			if (midi_trk) {
 				row[_columns.is_input_active] = midi_trk->input_active ();
@@ -774,7 +778,8 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 		row[_columns.stripable] = stripable;
 		row[_columns.mute_state] = RouteUI::mute_active_state (_session, stripable);
 		row[_columns.solo_state] = RouteUI::solo_active_state (stripable);
-		row[_columns.solo_visible] = true;
+		row[_columns.solo_visible] = !stripable->is_master ();
+		row[_columns.solo_lock_iso_visible] =  row[_columns.solo_visible] && !row[_columns.is_vca];
 		row[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (stripable);
 		row[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (stripable);
 		row[_columns.name_editable] = true;
