@@ -22,6 +22,7 @@
 
 #include "widgets/ardour_button.h"
 
+#include "stripable_colorpicker.h"
 #include "stripable_time_axis.h"
 #include "gain_meter.h"
 
@@ -75,6 +76,7 @@ protected:
 
 	void create_automation_child (const Evoral::Parameter& param, bool show);
 	virtual void build_automation_action_menu (bool);
+	void         build_display_menu ();
 	Gtk::Menu* automation_action_menu;
 
 	bool name_entry_changed (std::string const&);
@@ -91,6 +93,12 @@ protected:
 	bool automation_click (GdkEventButton*);
 	bool drop_release (GdkEventButton*);
 	void self_delete ();
+
+	void drop_all_slaves ();
+	void choose_color ();
+
+private:
+	StripableColorDialog _color_picker;
 };
 
 #endif /* __ardour_vca_time_axis_h__ */

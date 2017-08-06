@@ -33,6 +33,7 @@
 
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "mixer_ui.h"
 #include "ui_config.h"
 #include "vca_time_axis.h"
 
@@ -438,6 +439,32 @@ VCATimeAxisView::create_automation_child (const Evoral::Parameter& param, bool s
 }
 
 void
+VCATimeAxisView::build_display_menu ()
+{
+	using namespace Menu_Helpers;
+	/* prepare it */
+	TimeAxisView::build_display_menu ();
+
+	MenuList& items = display_menu->items();
+	items.push_back (MenuElem (_("Color..."), sigc::mem_fun (*this, &VCATimeAxisView::choose_color)));
+	if (_size_menu) {
+		detach_menu (*_size_menu);
+	}
+	build_size_menu ();
+	items.push_back (MenuElem (_("Height"), *_size_menu));
+	items.push_back (SeparatorElem());
+
+	build_automation_action_menu (true);
+	items.push_back (MenuElem (_("Automation"), *automation_action_menu));
+
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Drop All Slaves"), sigc::mem_fun (*this, &VCATimeAxisView::drop_all_slaves)));
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
+}
+
+
+void
 VCATimeAxisView::build_automation_action_menu (bool for_selection)
 {
 	using namespace Menu_Helpers;
@@ -517,4 +544,19 @@ VCATimeAxisView::hide_all_automation (bool apply_to_selection)
 
 	no_redraw = false;
 	request_redraw ();
+}
+
+void
+VCATimeAxisView::drop_all_slaves ()
+{
+	_vca->Drop (); /* EMIT SIGNAL */
+
+	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
+		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+	}
+}
+
+void
+VCATimeAxisView::choose_color () {
+	_color_picker.popup (_vca);
 }
