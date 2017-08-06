@@ -157,8 +157,11 @@ static void usage (int status) {
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
-The session is exported as 16bit wav.\n\
-If the no output file is given, the session's export dir is used.\n\
+This tool exports the session-range of a given ardour-session to a 16bit wav,\n\
+using the master-bus outputs.\n\
+If the no output-file is given, the session's export dir is used.\n\
+\n\
+Note: the tool expects a session-name without .ardour file-name extension.\n\
 \n");
 
 	printf ("Report bugs to <http://tracker.ardour.org/>\n"
@@ -228,7 +231,7 @@ int main (int argc, char* argv[])
 		usage (EXIT_FAILURE);
 	}
 
-	SessionUtils::init();
+	SessionUtils::init(false);
 	Session* s = 0;
 
 	s = SessionUtils::load_session (argv[optind], argv[optind+1]);

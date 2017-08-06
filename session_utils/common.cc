@@ -123,6 +123,12 @@ static Session * _load_session (string dir, string state)
 	std::string v;
 
 	std::string s = Glib::build_filename (dir, state + statefile_suffix);
+
+	if (!Glib::file_test (s, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		std::cerr << "Cannot read session '"<< s << "'\n";
+		return 0;
+	}
+
 	if (Session::get_info_from_path (s, sr, sf, v) == 0) {
 		if (engine->set_sample_rate (sr)) {
 			std::cerr << "Cannot set session's samplerate.\n";
