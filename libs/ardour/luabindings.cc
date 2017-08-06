@@ -1526,6 +1526,10 @@ LuaBindings::common (lua_State* L)
 		.addVoidPtrConstructor<std::list<boost::shared_ptr <Region> > > ()
 		.endClass ()
 
+		// RegionFactory::RegionMap
+		.beginStdMap <PBD::ID,boost::shared_ptr<Region>> ("RegionMap")
+		.endClass ()
+
 		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
 		.beginStdList <boost::shared_ptr<Processor> > ("ProcessorList")
 		.endClass ()
@@ -2020,6 +2024,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <RegionFactory> ("RegionFactory")
 		.addStaticFunction ("region_by_id", &RegionFactory::region_by_id)
+		.addStaticFunction ("regions", &RegionFactory::regions)
 		.endClass ()
 
 		/* session enums (rt-safe, common) */
