@@ -172,13 +172,13 @@ int main (int argc, char* argv[])
 	std::string outfile;
 	bool normalize = false;
 
-	const char *optstring = "hno:r:V";
+	const char *optstring = "hno:s:V";
 
 	const struct option longopts[] = {
 		{ "help",       0, 0, 'h' },
 		{ "normalize",  0, 0, 'n' },
 		{ "output",     1, 0, 'o' },
-		{ "samplerate", 1, 0, 'r' },
+		{ "samplerate", 1, 0, 's' },
 		{ "version",    0, 0, 'V' },
 	};
 
