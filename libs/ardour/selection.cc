@@ -358,8 +358,6 @@ CoreSelection::set_state (const XMLNode& node, int /* version */)
 		_stripables.insert (ss);
 	}
 
-	std::cerr << "set state: " << _stripables.size() << std::endl;
-
 	return 0;
 }
 

@@ -857,10 +857,12 @@ Diskstream::set_buffering_parameters (BufferingPreset bp)
 	Config->set_audio_capture_buffer_seconds (write_buffer_size);
 	Config->set_audio_playback_buffer_seconds (read_buffer_size);
 
+#ifndef NDEBUG
 	cerr << "Set buffering params to " << disk_read_chunk_frames << '|' << disk_write_chunk_frames << '|'
 	     << Config->get_audio_playback_buffer_seconds() << '|'
 	     << Config->get_audio_capture_buffer_seconds ()
 	     << endl;
+#endif
 }
 
 bool

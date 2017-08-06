@@ -483,7 +483,9 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 			ControlProtocolInfo* cpi = cpi_by_name (name);
 
 			if (cpi) {
+#ifndef NDEBUG
 				std::cerr << "protocol " << name << " active ? " << active << std::endl;
+#endif
 
 				if (active) {
 					delete cpi->state;
