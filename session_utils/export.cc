@@ -6,7 +6,9 @@
 #include "common.h"
 
 #include "pbd/basename.h"
+#include "pbd/enumwriter.h"
 
+#include "ardour/broadcast_info.h"
 #include "ardour/export_handler.h"
 #include "ardour/export_status.h"
 #include "ardour/export_timespan.h"
@@ -21,33 +23,69 @@ using namespace std;
 using namespace ARDOUR;
 using namespace SessionUtils;
 
+struct ExportSettings
+{
+	ExportSettings ()
+		: _samplerate (0)
+		, _sample_format (ExportFormatBase::SF_16)
+		, _normalize (false)
+		, _bwf (false)
+	{}
+
+	std::string samplerate () const
+	{
+		stringstream ss;
+		ss << _samplerate;
+		return ss.str();
+	}
+
+	std::string sample_format () const
+	{
+		return enum_2_string (_sample_format);
+	}
+
+	std::string normalize () const
+	{
+		return _normalize ? "true" : "false";
+	}
+
+	std::string bwf () const
+	{
+		return _bwf ? "true" : "false";
+	}
+
+	int _samplerate;
+	ExportFormatBase::SampleFormat _sample_format;
+	bool _normalize;
+	bool _bwf;
+};
+
 static int export_session (Session *session,
 		std::string outfile,
-		std::string samplerate,
-		bool normalize)
+		ExportSettings const& settings)
 {
 	ExportTimespanPtr tsp = session->get_export_handler()->add_timespan();
 	boost::shared_ptr<ExportChannelConfiguration> ccp = session->get_export_handler()->add_channel_config();
 	boost::shared_ptr<ARDOUR::ExportFilename> fnp = session->get_export_handler()->add_filename();
-	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
+	boost::shared_ptr<ARDOUR::BroadcastInfo> b;
 
 	XMLTree tree;
 
 	tree.read_buffer(std::string(
 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-"<ExportFormatSpecification name=\"UTIL-WAV-16\" id=\"14792644-44ab-4209-a4f9-7ce6c2910cac\">"
+"<ExportFormatSpecification name=\"UTIL-WAV-EXPORT\" id=\"b1280899-0459-4aef-9dc9-7e2277fa6d24\">"
 "  <Encoding id=\"F_WAV\" type=\"T_Sndfile\" extension=\"wav\" name=\"WAV\" has-sample-format=\"true\" channel-limit=\"256\"/>"
-"  <SampleRate rate=\""+ samplerate +"\"/>"
+"  <SampleRate rate=\""+ settings.samplerate () +"\"/>"
 "  <SRCQuality quality=\"SRC_SincBest\"/>"
 "  <EncodingOptions>"
-"    <Option name=\"sample-format\" value=\"SF_16\"/>"
+"    <Option name=\"sample-format\" value=\"" + settings.sample_format () + "\"/>"
 "    <Option name=\"dithering\" value=\"D_None\"/>"
 "    <Option name=\"tag-metadata\" value=\"true\"/>"
 "    <Option name=\"tag-support\" value=\"false\"/>"
-"    <Option name=\"broadcast-info\" value=\"false\"/>"
+"    <Option name=\"broadcast-info\" value=\"" + settings.bwf () +"\"/>"
 "  </EncodingOptions>"
 "  <Processing>"
-"    <Normalize enabled=\""+ (normalize ? "true" : "false") +"\" target=\"0\"/>"
+"    <Normalize enabled=\""+ settings.normalize () +"\" target=\"0\"/>"
 "    <Silence>"
 "      <Start>"
 "        <Trim enabled=\"false\"/>"
@@ -104,6 +142,12 @@ static int export_session (Session *session,
 		tsp->set_name (basename);
 	}
 
+	/* set broadcast info */
+	if (settings._bwf) {
+		b.reset (new BroadcastInfo);
+		b->set_from_session (*session, tsp->get_start ());
+	}
+
 	cout << "* Writing " << Glib::build_filename (fnp->get_folder(), tsp->name() + ".wav") << endl;
 
 
@@ -150,15 +194,18 @@ static void usage (int status) {
 	printf (UTILNAME " - export an ardour session from the commandline.\n\n");
 	printf ("Usage: " UTILNAME " [ OPTIONS ] <session-dir> <session/snapshot-name>\n\n");
 	printf ("Options:\n\
+  -b, --bitdepth <depth>     set export-format (16, 24, 32, float)\n\
+  -B, --broadcast            include broadcast wave header\n\
   -h, --help                 display this help and exit\n\
   -n, --normalize            normalize signal level (to 0dBFS)\n\
   -o, --output  <file>       export output file name\n\
-  -s, --samplerate <rate>    samplerate to use (default: 48000)\n\
+  -s, --samplerate <rate>    samplerate to use\n\
   -V, --version              print version information and exit\n\
 \n");
 	printf ("\n\
-This tool exports the session-range of a given ardour-session to a 16bit wav,\n\
+This tool exports the session-range of a given ardour-session to a wave file,\n\
 using the master-bus outputs.\n\
+By default a 16bit signed .wav file at session-rate is exported.\n\
 If the no output-file is given, the session's export dir is used.\n\
 \n\
 Note: the tool expects a session-name without .ardour file-name extension.\n\
@@ -171,13 +218,14 @@ Note: the tool expects a session-name without .ardour file-name extension.\n\
 
 int main (int argc, char* argv[])
 {
-	std::string rate = "48000";
+	ExportSettings settings;
 	std::string outfile;
-	bool normalize = false;
 
-	const char *optstring = "hno:s:V";
+	const char *optstring = "b:Bhno:s:V";
 
 	const struct option longopts[] = {
+		{ "bitdepth",   1, 0, 'b' },
+		{ "broadcast",  0, 0, 'B' },
 		{ "help",       0, 0, 'h' },
 		{ "normalize",  0, 0, 'n' },
 		{ "output",     1, 0, 'o' },
@@ -190,8 +238,35 @@ int main (int argc, char* argv[])
 					optstring, longopts, (int *) 0))) {
 		switch (c) {
 
+			case 'b':
+				switch (atoi (optarg)) {
+					case 16:
+						settings._sample_format = ExportFormatBase::SF_16;
+						break;
+					case 24:
+						settings._sample_format = ExportFormatBase::SF_24;
+						break;
+					case 32:
+						settings._sample_format = ExportFormatBase::SF_32;
+						break;
+					case 0:
+						if (0 == strcmp (optarg, "float")) {
+							settings._sample_format = ExportFormatBase::SF_Float;
+							break;
+						}
+						// no break
+					default:
+						fprintf(stderr, "Invalid Bit Depth\n");
+						break;
+				}
+				break;
+
+			case 'B':
+				settings._bwf = true;
+				break;
+
 			case 'n':
-				normalize = true;
+				settings._normalize = true;
 				break;
 
 			case 'o':
@@ -202,9 +277,7 @@ int main (int argc, char* argv[])
 				{
 					const int sr = atoi (optarg);
 					if (sr >= 8000 && sr <= 192000) {
-						stringstream ss;
-						ss << sr;
-						rate = ss.str();
+						settings._samplerate = sr;
 					} else {
 						fprintf(stderr, "Invalid Samplerate\n");
 					}
@@ -213,7 +286,7 @@ int main (int argc, char* argv[])
 
 			case 'V':
 				printf ("ardour-utils version %s\n\n", VERSIONSTRING);
-				printf ("Copyright (C) GPL 2015 Robin Gareus <robin@gareus.org>\n");
+				printf ("Copyright (C) GPL 2015,2017 Robin Gareus <robin@gareus.org>\n");
 				exit (0);
 				break;
 
@@ -236,7 +309,11 @@ int main (int argc, char* argv[])
 
 	s = SessionUtils::load_session (argv[optind], argv[optind+1]);
 
-	export_session (s, outfile, rate, normalize);
+	if (settings._samplerate == 0) {
+		settings._samplerate = s->nominal_frame_rate ();
+	}
+
+	export_session (s, outfile, settings);
 
 	SessionUtils::unload_session(s);
 	SessionUtils::cleanup();
