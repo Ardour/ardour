@@ -220,6 +220,8 @@ ShuttleproControlProtocol::thread_init ()
 	PBD::notify_event_loops_about_thread_creation (pthread_self (), X_("shuttlepro"), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (X_("shuttlepro"), 128);
 
+	set_thread_priority ();
+
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin\n")
 }
 
