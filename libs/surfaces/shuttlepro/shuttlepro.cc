@@ -166,7 +166,6 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 	XMLNode* child;
 	for (unsigned int i=0; i<_button_actions.size(); ++i) {
 		if ((child = node.child (string_compose(X_("button-%1"), i+1).c_str())) == 0) {
-			cout << "Button " << i+1 << " not found" << endl;
 			continue;
 		}
 		string type;
@@ -174,7 +173,6 @@ ShuttleproControlProtocol::set_state (const XMLNode& node, int version)
 		if (type == X_("action")) {
 			string path ("");
 			child->get_property (X_("path"), path);
-			cout << "Button " << i+1 << " " << path << endl;
 			boost::shared_ptr<ButtonBase> b (new ButtonAction (path, *this));
 			_button_actions[i] = b;
 		} else {
