@@ -5956,7 +5956,7 @@ Editor::toggle_mute ()
 {
 	bool new_state = false;
 	bool first = true;
-	StripableList sl;
+	boost::shared_ptr<ControlList> cl (new ControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
@@ -5970,10 +5970,10 @@ Editor::toggle_mute ()
 			first = false;
 		}
 
-		sl.push_back (stav->stripable());
+		cl->push_back (stav->stripable()->mute_control());
 	}
 
-	_session->set_controls (stripable_list_to_control_list (sl, &Stripable::mute_control), new_state, Controllable::UseGroup);
+	_session->set_controls (cl, new_state, Controllable::UseGroup);
 }
 
 void
