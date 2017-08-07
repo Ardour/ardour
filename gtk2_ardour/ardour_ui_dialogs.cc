@@ -150,6 +150,10 @@ ARDOUR_UI::set_session (Session *s)
 
 	ActionManager::set_sensitive (ActionManager::time_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::route_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::bus_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::vca_selection_sensitive_actions, false);
+	ActionManager::set_sensitive (ActionManager::stripable_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::line_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);

@@ -160,7 +160,10 @@ Editor::register_actions ()
 	myactions.register_action (editor_menu_actions, X_("SyncMenu"), _("Sync"));
 	myactions.register_action (editor_menu_actions, X_("TempoMenu"), _("Tempo"));
 	myactions.register_action (editor_menu_actions, X_("Timecode"), _("Timecode fps"));
-	myactions.register_action (editor_menu_actions, X_("TrackHeightMenu"), _("Height"));
+
+	act = myactions.register_action (editor_menu_actions, X_("TrackHeightMenu"), _("Height"));
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
+
 	myactions.register_action (editor_menu_actions, X_("TrackMenu"), _("Track"));
 	myactions.register_action (editor_menu_actions, X_("Tools"), _("Tools"));
 	myactions.register_action (editor_menu_actions, X_("View"), _("View"));
@@ -246,11 +249,11 @@ Editor::register_actions ()
 	act = reg_sens (editor_actions, "track-record-enable-toggle", _("Toggle Record Enable"), sigc::mem_fun(*this, &Editor::toggle_record_enable));
 	ActionManager::track_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-solo-toggle", _("Toggle Solo"), sigc::mem_fun(*this, &Editor::toggle_solo));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-mute-toggle", _("Toggle Mute"), sigc::mem_fun(*this, &Editor::toggle_mute));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-solo-isolate-toggle", _("Toggle Solo Isolate"), sigc::mem_fun(*this, &Editor::toggle_solo_isolate));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	for (int i = 1; i <= 12; ++i) {
 		string const a = string_compose (X_("save-visual-state-%1"), i);
@@ -297,9 +300,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "zoom_10_min", _("Zoom to 10 min"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 10 * 60 * 1000));
 
 	act = reg_sens (editor_actions, "move-selected-tracks-up", _("Move Selected Tracks Up"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), true));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "move-selected-tracks-down", _("Move Selected Tracks Down"), sigc::bind (sigc::mem_fun(*_routes, &EditorRoutes::move_selected_tracks), false));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "scroll-tracks-up", _("Scroll Tracks Up"), sigc::mem_fun(*this, &Editor::scroll_tracks_up));
 	act = reg_sens (editor_actions, "scroll-tracks-down", _("Scroll Tracks Down"), sigc::mem_fun(*this, &Editor::scroll_tracks_down));
@@ -429,29 +432,28 @@ Editor::register_actions ()
 
 
 	act = reg_sens (editor_actions, "toggle-track-active", _("Toggle Active"), (sigc::mem_fun(*this, &Editor::toggle_tracks_active)));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "remove-track", _("Remove"), (sigc::mem_fun(*this, &Editor::remove_tracks)));
-	/* not selection sensitive? */
-
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "fit-selection", _("Fit Selection (Vertical)"), sigc::mem_fun(*this, &Editor::fit_selection));
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	act = reg_sens (editor_actions, "track-height-largest", _("Largest"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLargest));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-height-larger", _("Larger"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLarger));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-height-large", _("Large"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightLarge));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-height-normal", _("Normal"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightNormal));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 	act = reg_sens (editor_actions, "track-height-small", _("Small"), sigc::bind (
 				sigc::mem_fun(*this, &Editor::set_track_height), HeightSmall));
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::stripable_selection_sensitive_actions.push_back (act);
 
 	toggle_reg_sens (editor_actions, "sound-midi-notes", _("Sound Selected MIDI Notes"), sigc::mem_fun (*this, &Editor::toggle_sound_midi_notes));
 

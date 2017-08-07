@@ -30,6 +30,7 @@
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
+#include "ardour/vca.h"
 
 #include "editor.h"
 #include "editor_drag.h"
@@ -1000,6 +1001,12 @@ struct SelectionOrderSorter {
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
+	uint32_t n_tracks = 0;
+	uint32_t n_busses = 0;
+	uint32_t n_vcas = 0;
+	uint32_t n_routes = 0;
+	uint32_t n_stripables = 0;
+
 	/* We cannot ensure ordering of the handlers for
 	 * PresentationInfo::Changed, so we have to do everything in order
 	 * here, as a single handler.
@@ -1047,6 +1054,18 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 				continue;
 			}
 
+			n_stripables++;
+
+			if (boost::dynamic_pointer_cast<Track> ((*i).stripable)) {
+				n_tracks++;
+				n_routes++;
+			} else if (boost::dynamic_pointer_cast<Route> ((*i).stripable)) {
+				n_busses++;
+				n_routes++;
+			} else if (boost::dynamic_pointer_cast<VCA> ((*i).stripable)) {
+				n_vcas++;
+			}
+
 			TimeAxisView* tav = dynamic_cast<TimeAxisView*> (av);
 
 			if (!tav) {
@@ -1082,7 +1101,11 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 			stripables->push_back ((*i).stripable);
 		}
 
-		ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, !selection->tracks.empty());
+		ActionManager::set_sensitive (ActionManager::stripable_selection_sensitive_actions, (n_stripables > 0));
+		ActionManager::set_sensitive (ActionManager::track_selection_sensitive_actions, (n_tracks > 0));
+		ActionManager::set_sensitive (ActionManager::bus_selection_sensitive_actions, (n_busses > 0));
+		ActionManager::set_sensitive (ActionManager::route_selection_sensitive_actions, (n_routes > 0));
+		ActionManager::set_sensitive (ActionManager::vca_selection_sensitive_actions, (n_vcas > 0));
 
 		sensitize_the_right_region_actions (false);
 
