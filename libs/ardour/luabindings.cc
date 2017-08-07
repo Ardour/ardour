@@ -1527,7 +1527,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		// RegionFactory::RegionMap
-		.beginStdMap <PBD::ID,boost::shared_ptr<Region>> ("RegionMap")
+		.beginStdMap <PBD::ID,boost::shared_ptr<Region> > ("RegionMap")
 		.endClass ()
 
 		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
