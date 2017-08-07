@@ -27,6 +27,8 @@
 #define ACOMP_URI		"urn:ardour:a-comp"
 #define ACOMP_STEREO_URI	"urn:ardour:a-comp#stereo"
 
+#define RESET_PEAK_AFTER_SECONDS 3
+
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
 #endif
@@ -102,6 +104,9 @@ typedef struct {
 	float v_lvl_in;
 	float v_lvl_out;
 	float v_state_x;
+
+	float v_peakdb;
+	uint32_t peakdb_samples;
 #endif
 } AComp;
 
@@ -256,6 +261,11 @@ activate(LV2_Handle instance)
 	*(acomp->gainr) = 0.0f;
 	*(acomp->outlevel) = -70.0f;
 	*(acomp->inlevel) = -160.f;
+
+#ifdef LV2_EXTENDED
+	acomp->v_peakdb = -160.f;
+	acomp->peakdb_samples = 0;
+#endif
 }
 
 static void
@@ -385,6 +395,18 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 #ifdef LV2_EXTENDED
 	acomp->v_gainr = max_gainr;
 
+	if (in_peak_db > acomp->v_peakdb) {
+		acomp->v_peakdb = in_peak_db;
+		acomp->peakdb_samples = 0;
+	} else {
+		acomp->peakdb_samples += n_samples;
+		if ((float)acomp->peakdb_samples/acomp->srate > RESET_PEAK_AFTER_SECONDS) {
+			acomp->v_peakdb = in_peak_db;
+			acomp->peakdb_samples = 0;
+			acomp->need_expose = true;
+		}
+	}
+
 	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = *acomp->outlevel;
 
@@ -403,9 +425,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
 		// >= 0.1dB difference
 		acomp->need_expose = true;
-		const float relax_coef = exp(-5.f*n_samples/srate);
-		acomp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*acomp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
-		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		acomp->v_lvl_in = v_lvl_in;
+		acomp->v_lvl_out = v_lvl_out;
 		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
@@ -550,6 +571,18 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 #ifdef LV2_EXTENDED
 	acomp->v_gainr = max_gainr;
 
+	if (in_peak_db > acomp->v_peakdb) {
+		acomp->v_peakdb = in_peak_db;
+		acomp->peakdb_samples = 0;
+	} else {
+		acomp->peakdb_samples += n_samples;
+		if ((float)acomp->peakdb_samples/acomp->srate > RESET_PEAK_AFTER_SECONDS) {
+			acomp->v_peakdb = in_peak_db;
+			acomp->peakdb_samples = 0;
+			acomp->need_expose = true;
+		}
+	}
+
 	const float v_lvl_in = in_peak_db;
 	const float v_lvl_out = *acomp->outlevel;
 
@@ -568,9 +601,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
 		// >= 0.1dB difference
 		acomp->need_expose = true;
-		const float relax_coef = exp(-5.f*n_samples/srate);
-		acomp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*acomp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
-		acomp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*acomp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		acomp->v_lvl_in = v_lvl_in;
+		acomp->v_lvl_out = v_lvl_out;
 		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
@@ -844,6 +876,15 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_stroke (cr);
 
 	cairo_set_line_width (cr, 2.0);
+
+	// visualize in peak
+	if (self->v_peakdb > -60.f) {
+		cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
+		const float pk = (self->v_peakdb > 10.f) ? x1+wd : wd * (60.f+self->v_peakdb) / 70.f;
+		cairo_move_to (cr, pk, y1);
+		cairo_line_to (cr, pk, y1+ht);
+		cairo_stroke (cr);
+	}
 
 	// visualize threshold
 	const float tr = x1 + wd * (60.f+self->v_thresdb) / 70.f;
