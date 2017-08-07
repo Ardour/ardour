@@ -489,19 +489,21 @@ GroupTabs::unassign_group_to_master (uint32_t which, RouteGroup* group) const
 }
 
 void
-GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
+GroupTabs::assign_some_to_master (uint32_t which, RouteList rl, std::string vcaname)
 {
 	if (!_session) {
 		return;
 	}
 
 	boost::shared_ptr<VCA> master;
+	bool set_name = false;
 
 	if (which == 0) {
 		if (_session->vca_manager().create_vca (1)) {
 			/* error */
 			return;
 		}
+		set_name = true;
 
 		/* Get most recently created VCA... */
 		which = _session->vca_manager().vcas().back()->number();
@@ -524,6 +526,9 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
 
 	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
 		(*r)->assign (master);
+	}
+	if (set_name && !vcaname.empty()) {
+		master->set_name (vcaname);
 	}
 }
 
@@ -568,7 +573,7 @@ GroupTabs::get_soloed ()
 void
 GroupTabs::assign_selection_to_master (uint32_t which)
 {
-	assign_some_to_master (which, selected_routes ());
+	assign_some_to_master (which, selected_routes (), _("Selection"));
 }
 
 void

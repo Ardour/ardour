@@ -132,7 +132,7 @@ private:
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);
-	void assign_some_to_master (uint32_t which, ARDOUR::RouteList);
+	void assign_some_to_master (uint32_t which, ARDOUR::RouteList, std::string vcaname = "");
 
 	ARDOUR::RouteList get_soloed ();
 	ARDOUR::RouteList get_rec_enabled ();
