@@ -628,6 +628,9 @@ LuaInstance::register_classes (lua_State* L)
 		.deriveClass <TimeAxisView, AxisView> ("TimeAxisView")
 		.endClass ()
 
+		.deriveClass <StripableTimeAxisView, TimeAxisView> ("StripableTimeAxisView")
+		.endClass ()
+
 		.beginClass <Selectable> ("Selectable")
 		.endClass ()
 
@@ -641,7 +644,8 @@ LuaInstance::register_classes (lua_State* L)
 		.endClass ()
 
 		.deriveClass <RouteTimeAxisView, RouteUI> ("RouteTimeAxisView")
-		.addCast<TimeAxisView> ("to_timeaxisview")
+		.addCast<StripableTimeAxisView> ("to_stripabletimeaxisview")
+		.addCast<TimeAxisView> ("to_timeaxisview") // deprecated
 		.endClass ()
 
 		// std::list<Selectable*>

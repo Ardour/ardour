@@ -147,6 +147,7 @@ CLASSINFO(MarkerSelection);
 CLASSINFO(PublicEditor);
 CLASSINFO(RegionSelection);
 CLASSINFO(RegionView);
+CLASSINFO(StripableTimeAxisView);
 CLASSINFO(RouteTimeAxisView);
 CLASSINFO(RouteUI);
 CLASSINFO(Selectable);
