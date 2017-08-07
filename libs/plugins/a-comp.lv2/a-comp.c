@@ -321,8 +321,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0;
-	acomp->v_gainr = 0.0;
+	float in_peak = 0.f;
+	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
@@ -356,8 +356,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		Lgain = from_dB(cdb);
 
 		*(acomp->gainr) = Lyl;
-		if (Lyl > acomp->v_gainr) {
-			acomp->v_gainr = Lyl;
+		if (Lyl > max_gainr) {
+			max_gainr = Lyl;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -383,6 +383,8 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
+	acomp->v_gainr = max_gainr;
+
 	const float old_v_lv1 = acomp->v_lv1;
 	const float old_v_lvl = acomp->v_lvl;
 	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
@@ -476,8 +478,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 #endif
 
-	float in_peak = 0;
-	acomp->v_gainr = 0.0;
+	float in_peak = 0.f;
+	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input0[i];
@@ -513,8 +515,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		Lgain = from_dB(cdb);
 
 		*(acomp->gainr) = Lyl;
-		if (Lyl > acomp->v_gainr) {
-			acomp->v_gainr = Lyl;
+		if (Lyl > max_gainr) {
+			max_gainr = Lyl;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -542,6 +544,8 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
+	acomp->v_gainr = max_gainr;
+
 	const float old_v_lv1 = acomp->v_lv1;
 	const float old_v_lvl = acomp->v_lvl;
 	const float tot_rel_c = exp(-1000.f/(*(acomp->release) * srate) * n_samples);
