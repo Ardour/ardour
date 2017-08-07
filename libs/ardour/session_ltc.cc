@@ -176,21 +176,6 @@ Session::ltc_tx_send_time_code_for_cycle (framepos_t start_frame, framepos_t end
 		return;
 	}
 
-#if 1
-	/* Work around a race-condition on Windows/ PortAudio.
-	 * It may happen that we do have a valid ltcport (created
-	 * with the session), but no valid port-handle yet:
-	 *
-	 * Session > New implicitly closes old session and creates
-	 * a new session directly after.
-	 * re-registers ports fail? delayed? first proc callback only?
-	 * reason is still unknown
-	 */
-	if (!ltcport->port_handle ()) {
-		return;
-	}
-#endif
-
 	/* marks buffer as not written */
 	Buffer& buf (ltcport->get_buffer (nframes));
 
