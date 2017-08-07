@@ -372,6 +372,10 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		current_gainr = Lxg - Lyg;
 
+		if (current_gainr > 160.f) {
+			current_gainr = 160.f;
+		}
+
 		if (current_gainr > old_gainr) {
 			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
 		} else if (current_gainr < old_gainr) {
@@ -540,6 +544,10 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		}
 
 		current_gainr = Lxg - Lyg;
+
+		if (current_gainr > 160.f) {
+			current_gainr = 160.f;
+		}
 
 		if (current_gainr > old_gainr) {
 			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
