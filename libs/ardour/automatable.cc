@@ -57,6 +57,7 @@ Automatable::Automatable(Session& session)
 
 Automatable::Automatable (const Automatable& other)
         : ControlSet (other)
+        , Slavable ()
         , _a_session (other._a_session)
 {
         Glib::Threads::Mutex::Lock lm (other._control_lock);

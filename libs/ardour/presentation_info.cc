@@ -145,7 +145,8 @@ PresentationInfo::PresentationInfo (order_t o, Flag f)
 	/* OrderSet is set */
 }
 PresentationInfo::PresentationInfo (PresentationInfo const& other)
-	: _order (other.order())
+	: PBD::Stateful ()
+	, _order (other.order())
 	, _flags (other.flags())
 	, _color (other.color())
 {
