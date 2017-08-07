@@ -5934,18 +5934,18 @@ Editor::toggle_solo ()
 	boost::shared_ptr<ControlList> cl (new ControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
 
-		if (!rtav) {
+		if (!stav || !stav->stripable()->solo_control()) {
 			continue;
 		}
 
 		if (first) {
-			new_state = !rtav->route()->soloed ();
+			new_state = !stav->stripable()->solo_control()->soloed ();
 			first = false;
 		}
 
-		cl->push_back (rtav->route()->solo_control());
+		cl->push_back (stav->stripable()->solo_control());
 	}
 
 	_session->set_controls (cl, new_state ? 1.0 : 0.0, Controllable::UseGroup);
@@ -5956,24 +5956,24 @@ Editor::toggle_mute ()
 {
 	bool new_state = false;
 	bool first = true;
-	boost::shared_ptr<RouteList> rl (new RouteList);
+	StripableList sl;
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
-		RouteTimeAxisView *rtav = dynamic_cast<RouteTimeAxisView *>(*i);
+		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
 
-		if (!rtav) {
+		if (!stav || !stav->stripable()->mute_control()) {
 			continue;
 		}
 
 		if (first) {
-			new_state = !rtav->route()->muted();
+			new_state = !stav->stripable()->mute_control()->muted();
 			first = false;
 		}
 
-		rl->push_back (rtav->route());
+		sl.push_back (stav->stripable());
 	}
 
-	_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), new_state, Controllable::UseGroup);
+	_session->set_controls (stripable_list_to_control_list (sl, &Stripable::mute_control), new_state, Controllable::UseGroup);
 }
 
 void
