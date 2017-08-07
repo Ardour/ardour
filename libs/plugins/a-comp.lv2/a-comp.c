@@ -877,15 +877,6 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 
 	cairo_set_line_width (cr, 2.0);
 
-	// visualize in peak
-	if (self->v_peakdb > -60.f) {
-		cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
-		const float pk = (self->v_peakdb > 10.f) ? x1+wd : wd * (60.f+self->v_peakdb) / 70.f;
-		cairo_move_to (cr, pk, y1);
-		cairo_line_to (cr, pk, y1+ht);
-		cairo_stroke (cr);
-	}
-
 	// visualize threshold
 	const float tr = x1 + wd * (60.f+self->v_thresdb) / 70.f;
 	cairo_set_source_rgba (cr, 0.95, 0.95, 0.0, 1.0);
@@ -900,6 +891,15 @@ render_inline_only_bars (cairo_t* cr, const AComp* self)
 	cairo_move_to (cr, rt, y1);
 	cairo_line_to (cr, rt, y1+ht);
 	cairo_stroke (cr);
+
+	// visualize in peak
+	if (self->v_peakdb > -60.f) {
+		cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
+		const float pk = (self->v_peakdb > 10.f) ? x1+wd : wd * (60.f+self->v_peakdb) / 70.f;
+		cairo_move_to (cr, pk, y1);
+		cairo_line_to (cr, pk, y1+ht);
+		cairo_stroke (cr);
+	}
 }
 
 static LV2_Inline_Display_Image_Surface *
