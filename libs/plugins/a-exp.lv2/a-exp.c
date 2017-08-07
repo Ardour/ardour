@@ -787,7 +787,7 @@ render_inline_full (cairo_t* cr, const AExp* self)
 	cairo_fill (cr);
 
 	// draw peak input
-	cairo_set_source_rgba (cr, .9f, .9f, .9f, 1.0);
+	cairo_set_source_rgba (cr, .0f, 1.f, 0.f, 1.0);
 	cairo_set_line_width(cr, 1.0);
 
 	const float peak_x = w * (1.f - (10.f-self->v_peakdb)/70.f);
