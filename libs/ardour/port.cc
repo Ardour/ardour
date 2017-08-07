@@ -71,11 +71,13 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	assert (_name.find_first_of (':') == std::string::npos);
 
 	if (!port_engine.available ()) {
+		DEBUG_TRACE (DEBUG::Ports, string_compose ("port-engine n/a postpone registering %1\n", name()));
 		_port_handle = 0; // created during ::reestablish() later
 	} else if ((_port_handle = port_engine.register_port (_name, t, _flags)) == 0) {
 		cerr << "Failed to register port \"" << _name << "\", reason is unknown from here\n";
 		throw failed_constructor ();
 	}
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("registed port %1 handle %2\n", name(), _port_handle));
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
 	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
@@ -506,6 +508,8 @@ Port::reestablish ()
 		PBD::error << string_compose (_("could not reregister %1"), _name) << endmsg;
 		return -1;
 	}
+
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reestablish %1 handle %2\n", name(), _port_handle));
 
 	reset ();
 
