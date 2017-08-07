@@ -581,6 +581,8 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	/* reset internal state */
+	assert (_run == false);
+	_run = false;
 	_dsp_load = 0;
 	_freewheeling = false;
 	_freewheel = false;
@@ -658,7 +660,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (register_system_midi_ports () != 0) {
 		DEBUG_PORTS("Failed to register system midi ports.\n")
-		_run = false;
 		return PortRegistrationError;
 	}
 
@@ -666,7 +667,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (register_system_audio_ports()) {
 		DEBUG_PORTS("Failed to register system audio ports.\n");
-		_run = false;
 		return PortRegistrationError;
 	}
 
@@ -675,7 +675,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (engine.reestablish_ports ()) {
 		DEBUG_PORTS("Could not re-establish ports.\n");
-		_run = false;
 		return PortReconnectError;
 	}
 
@@ -697,6 +696,16 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		if (!start_freewheel_process_thread()) {
 			DEBUG_AUDIO("Unable to start freewheel thread\n");
 			stop();
+			return ProcessThreadStartError;
+		}
+
+		/* wait for backend to become active */
+		int timeout = 5000;
+		while (!_active && --timeout > 0) { Glib::usleep (1000); }
+
+		if (timeout == 0 || !_active) {
+			PBD::error << _("PortAudio:: failed to start device.") << endmsg;
+			stop ();
 			return ProcessThreadStartError;
 		}
 	}
