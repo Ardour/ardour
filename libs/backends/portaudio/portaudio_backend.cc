@@ -641,7 +641,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	_measure_latency = for_latency_measurement;
 
-	_run = true;
 	_port_change_flag = false;
 
 	if (_midi_driver_option == winmme_driver_name) {
@@ -680,8 +679,9 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		return PortReconnectError;
 	}
 
-	engine.reconnect_ports ();
 	_run = true;
+
+	engine.reconnect_ports ();
 	_port_change_flag = false;
 
 	if (_use_blocking_api) {
