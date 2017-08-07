@@ -27,6 +27,8 @@
 
 #include "lv2/lv2plug.in/ns/lv2core/lv2.h"
 
+#define RESET_PEAK_AFTER_SECONDS 3
+
 #define AEXP_URI "urn:ardour:a-exp"
 #define AEXP_STEREO_URI "urn:ardour:a-exp#stereo"
 
@@ -107,6 +109,9 @@ typedef struct {
 	float v_makeup;
 	float v_lvl_in;
 	float v_lvl_out;
+
+	float v_peakdb;
+	uint32_t peakdb_samples;
 #endif
 } AExp;
 
@@ -261,6 +266,11 @@ activate(LV2_Handle instance)
 	*(aexp->gainr) = 160.0f;
 	*(aexp->outlevel) = -45.0f;
 	*(aexp->inlevel) = -45.0f;
+
+#ifdef LV2_EXTENDED
+	aexp->v_peakdb = -160.f;
+	aexp->peakdb_samples = 0;
+#endif
 }
 
 static void
@@ -337,7 +347,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 #endif
 	float in_peak_db = -160.f;
 	old_gainr = *aexp->gainr;
-	aexp->v_gainr = 0.0;
+	float max_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input[i];
@@ -374,8 +384,9 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		old_gainr = current_gainr;
 
-		if (current_gainr > aexp->v_gainr) {
-			aexp->v_gainr = current_gainr;
+		*(aexp->gainr) = current_gainr;
+		if (current_gainr > max_gainr) {
+			max_gainr = current_gainr;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -386,21 +397,34 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
 	}
 
-	*(aexp->gainr) = current_gainr;
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 	*(aexp->inlevel) = in_peak_db;
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
+	if (in_peak_db > aexp->v_peakdb) {
+		aexp->v_peakdb = in_peak_db;
+		aexp->peakdb_samples = 0;
+	} else {
+		aexp->peakdb_samples += n_samples;
+		if ((float)aexp->peakdb_samples/aexp->srate > RESET_PEAK_AFTER_SECONDS) {
+			aexp->v_peakdb = in_peak_db;
+			aexp->peakdb_samples = 0;
+			aexp->need_expose = true;
+		}
+	}
+
 	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
 	const float v_lvl_in = in_peak_db;
 
-	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
+	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= .1 ||
+	    fabsf (aexp->v_lvl_in - v_lvl_in) >= .1 ||
+	    fabsf (aexp->v_gainr - max_gainr) >= .1) {
+		// >= 0.1dB difference
 		aexp->need_expose = true;
-		const float relax_coef = exp(-5.f*n_samples/srate);
-		aexp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*aexp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
-		aexp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*aexp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		aexp->v_lvl_in = v_lvl_in;
+		aexp->v_lvl_out = v_lvl_out;
+		aexp->v_gainr = max_gainr;
 	}
 	if (aexp->need_expose && aexp->queue_draw) {
 		aexp->need_expose = false;
@@ -490,7 +514,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 	float in_peak_db = -160.f;
 	old_gainr = *aexp->gainr;
-	aexp->v_gainr = 0.0;
+	float max_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
 		in0 = input0[i];
@@ -529,8 +553,9 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 
 		old_gainr = current_gainr;
 
-		if (current_gainr > aexp->v_gainr) {
-			aexp->v_gainr = current_gainr;
+		*(aexp->gainr) = current_gainr;
+		if (current_gainr > max_gainr) {
+			max_gainr = current_gainr;
 		}
 
 		lgaininp = in0 * Lgain;
@@ -544,21 +569,34 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
 	}
 
-	*(aexp->gainr) = current_gainr;
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
 	*(aexp->inlevel) = in_peak_db;
 	aexp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
+	if (in_peak_db > aexp->v_peakdb) {
+		aexp->v_peakdb = in_peak_db;
+		aexp->peakdb_samples = 0;
+	} else {
+		aexp->peakdb_samples += n_samples;
+		if ((float)aexp->peakdb_samples/aexp->srate > RESET_PEAK_AFTER_SECONDS) {
+			aexp->v_peakdb = in_peak_db;
+			aexp->peakdb_samples = 0;
+			aexp->need_expose = true;
+		}
+	}
+
 	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
 	const float v_lvl_in = in_peak_db;
 
-	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= 1 || fabsf (aexp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
+	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= .1 ||
+	    fabsf (aexp->v_lvl_in - v_lvl_in) >= .1 ||
+	    fabsf (aexp->v_gainr - max_gainr) >= .1) {
+		// >= 0.1dB difference
 		aexp->need_expose = true;
-		const float relax_coef = exp(-5.f*n_samples/srate);
-		aexp->v_lvl_in = fmaxf (v_lvl_in, relax_coef*aexp->v_lvl_in + (1.f-relax_coef)*v_lvl_in);
-		aexp->v_lvl_out = fmaxf (v_lvl_out, relax_coef*aexp->v_lvl_out + (1.f-relax_coef)*v_lvl_out);
+		aexp->v_lvl_in = v_lvl_in;
+		aexp->v_lvl_out = v_lvl_out;
+		aexp->v_gainr = max_gainr;
 	}
 	if (aexp->need_expose && aexp->queue_draw) {
 		aexp->need_expose = false;
@@ -740,6 +778,17 @@ render_inline_full (cairo_t* cr, const AExp* self)
 	}
 	cairo_fill (cr);
 
+	// draw peak input
+	cairo_set_source_rgba (cr, .9f, .9f, .9f, 1.0);
+	cairo_set_line_width(cr, 1.0);
+
+	const float peak_x = w * (1.f - (10.f-self->v_peakdb)/70.f);
+	const float peak_y = h * (exp_curve (self, self->v_peakdb) - 10.f) / -70.f;
+
+	cairo_move_to(cr, peak_x, h);
+	cairo_line_to(cr, peak_x, peak_y);
+	cairo_stroke (cr);
+
 	cairo_pattern_destroy (pat); // TODO cache pattern
 }
 
@@ -839,7 +888,17 @@ render_inline_only_bars (cairo_t* cr, const AExp* self)
 	cairo_move_to (cr, rt, y1);
 	cairo_line_to (cr, rt, y1+ht);
 	cairo_stroke (cr);
+
+	// visualize in peak
+	if (self->v_peakdb > -60.f) {
+		cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
+		const float pk = (self->v_peakdb > 10.f) ? x1+wd : wd * (60.f+self->v_peakdb) / 70.f;
+		cairo_move_to (cr, pk, y1);
+		cairo_line_to (cr, pk, y1+ht);
+		cairo_stroke (cr);
+	}
 }
+
 
 static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
