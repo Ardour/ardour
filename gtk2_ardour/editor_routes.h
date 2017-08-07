@@ -136,7 +136,7 @@ private:
 			add (name_editable);
 			add (is_input_active);
 			add (is_midi);
-			add (is_vca);
+			add (no_vca);
 			add (active);
 		}
 
@@ -157,7 +157,7 @@ private:
 		Gtk::TreeModelColumn<bool>           name_editable;
 		Gtk::TreeModelColumn<bool>           is_input_active;
 		Gtk::TreeModelColumn<bool>           is_midi;
-		Gtk::TreeModelColumn<bool>           is_vca;
+		Gtk::TreeModelColumn<bool>           no_vca; // activatable
 		Gtk::TreeModelColumn<bool>           active;
 	};
 

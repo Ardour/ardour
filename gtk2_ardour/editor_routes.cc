@@ -216,8 +216,6 @@ EditorRoutes::EditorRoutes (Editor* e)
 	solo_safe_state_column->set_expand(false);
 	solo_safe_state_column->set_fixed_width(column_width);
 
-	// TODO hide _columns.active for is_vca  with some  property_visible() trick..
-
 	_name_column = _display.append_column ("", _columns.text) - 1;
 	_visible_column = _display.append_column ("", _columns.visible) - 1;
 	_active_column = _display.append_column ("", _columns.active) - 1;
@@ -306,6 +304,7 @@ EditorRoutes::EditorRoutes (Editor* e)
 	active_col->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	active_col->set_fixed_width (30);
 	active_col->set_alignment (ALIGN_CENTER);
+	active_col->add_attribute (active_cell->property_visible(), _columns.no_vca);
 
 	_model->signal_row_deleted().connect (sigc::mem_fun (*this, &EditorRoutes::row_deleted));
 	_model->signal_rows_reordered().connect (sigc::mem_fun (*this, &EditorRoutes::reordered));
@@ -748,7 +747,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 			row[_columns.is_track] = false;
 			row[_columns.is_input_active] = false;
 			row[_columns.is_midi] = false;
-			row[_columns.is_vca] = true;
+			row[_columns.no_vca] = false;
 
 		} else if (rtav) {
 
@@ -756,7 +755,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 			midi_trk= boost::dynamic_pointer_cast<MidiTrack> (stripable);
 
 			row[_columns.is_track] = (boost::dynamic_pointer_cast<Track> (stripable) != 0);
-			row[_columns.is_vca] = false;
+			row[_columns.no_vca] = true;
 
 			if (midi_trk) {
 				row[_columns.is_input_active] = midi_trk->input_active ();
@@ -779,7 +778,7 @@ EditorRoutes::time_axis_views_added (list<TimeAxisView*> tavs)
 		row[_columns.mute_state] = RouteUI::mute_active_state (_session, stripable);
 		row[_columns.solo_state] = RouteUI::solo_active_state (stripable);
 		row[_columns.solo_visible] = !stripable->is_master ();
-		row[_columns.solo_lock_iso_visible] =  row[_columns.solo_visible] && !row[_columns.is_vca];
+		row[_columns.solo_lock_iso_visible] = row[_columns.solo_visible] && row[_columns.no_vca];
 		row[_columns.solo_isolate_state] = RouteUI::solo_isolate_active_state (stripable);
 		row[_columns.solo_safe_state] = RouteUI::solo_safe_active_state (stripable);
 		row[_columns.name_editable] = true;
