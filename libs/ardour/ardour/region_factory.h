@@ -60,6 +60,9 @@ public:
 
 	/** create a "pure copy" of Region @param other */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce = false, bool fork = false);
+	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, bool announce, bool fork) {
+		return create (boost::shared_ptr<const Region>(other), announce, fork);
+	}
 
 	/** create a region from a single Source */
 	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>,

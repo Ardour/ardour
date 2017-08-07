@@ -2025,6 +2025,7 @@ LuaBindings::common (lua_State* L)
 		.beginClass <RegionFactory> ("RegionFactory")
 		.addStaticFunction ("region_by_id", &RegionFactory::region_by_id)
 		.addStaticFunction ("regions", &RegionFactory::regions)
+		.addStaticFunction ("clone_region", static_cast<boost::shared_ptr<Region> (*)(boost::shared_ptr<Region>, bool, bool)>(&RegionFactory::create))
 		.endClass ()
 
 		/* session enums (rt-safe, common) */
