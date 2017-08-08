@@ -839,13 +839,11 @@ Session::process_without_events (pframes_t nframes)
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
 			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
-			cerr << "p-WO-E: FS fail\n";
 			return;
 		}
 	}
 
 	if (_transport_speed == 0) {
-		cerr << "p-WO-E: ts = 0\n";
 		no_roll (nframes);
 		return;
 	}
@@ -856,10 +854,7 @@ Session::process_without_events (pframes_t nframes)
 		interpolation.set_target_speed (_target_transport_speed);
 		interpolation.set_speed (_transport_speed);
 		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
-		cerr << "p-WO-E: current speed : " << _transport_speed << " interpolate says " << frames_moved << endl;
 	}
-
-	cerr << "p-WO-E: will move " << frames_moved << endl;
 
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
@@ -870,20 +865,17 @@ Session::process_without_events (pframes_t nframes)
 	framepos_t const stop_limit = compute_stop_limit ();
 
 	if (maybe_stop (stop_limit)) {
-		cerr << "p-WO-E: mebbe stop\n";
 		no_roll (nframes);
 		return;
 	}
 
 	if (maybe_sync_start (nframes)) {
-		cerr << "p-WO-E: sync start said no\n";
 		return;
 	}
 
 	click (_transport_frame, nframes);
 
 	if (process_routes (nframes, session_needs_butler)) {
-		cerr << "p-WO-E: pr failed\n";
 		fail_roll (nframes);
 		return;
 	}
@@ -895,8 +887,6 @@ Session::process_without_events (pframes_t nframes)
 	} else if (frames_moved) {
 		increment_transport_position (frames_moved);
 	}
-
-	cerr << "p-WO-E: ts now " << _transport_frame << endl;
 
 	maybe_stop (stop_limit);
 	check_declick_out ();
@@ -1093,7 +1083,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Locate:
-		if (ev->yes_or_no) {
+		if (ev->yes_or_no) { /* force locate */
 			/* args: do not roll after locate, do flush, not with loop */
 			locate (ev->target_frame, false, true, false);
 		} else {
