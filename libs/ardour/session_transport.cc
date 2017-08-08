@@ -593,10 +593,12 @@ Session::non_realtime_locate ()
 		gint sc = g_atomic_int_get (&_seek_counter);
 		tf = _transport_frame;
 
-		cerr << "\n\n >>> START Non-RT locate on routes to " << tf << "\n\n";
+		cerr << "\n\n >>> START Non-RT locate on routes to " << tf << " counter = " << sc << "\n\n";
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (tf);
+			//::usleep (250000);
+			cerr << "\t\tcounter after track: " << g_atomic_int_get (&_seek_counter) << endl;
 			if (sc != g_atomic_int_get (&_seek_counter)) {
 				cerr << "\n\n RESTART locate, new seek delivered\n";
 				goto restart;
@@ -1246,9 +1248,12 @@ Session::locate (framepos_t target_frame, bool with_roll, bool with_flush, bool 
 			pending_locate_frame = target_frame;
 			pending_locate_roll = with_roll;
 			pending_locate_flush = with_flush;
+			cerr << "Declick scheduled ... back soon\n";
 			return;
 		}
 	}
+
+	cerr << "... now doing the actual locate\n";
 
 	// Update Timecode time
 	_transport_frame = target_frame;
