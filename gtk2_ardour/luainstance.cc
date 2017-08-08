@@ -27,6 +27,7 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/system_exec.h"
 
 #include "LuaBridge/LuaBridge.h"
 
@@ -870,7 +871,14 @@ LuaInstance::register_classes (lua_State* L)
 		.addConst ("Add", Selection::Operation(Selection::Add))
 		.endNamespace ()
 
-		.endNamespace (); // end ArdourUI
+		.endNamespace () // end ArdourUI
+
+		.beginNamespace ("ARDOUR")
+		.beginClass <ARDOUR::SystemExec> ("SystemExec")
+		.addConstructor <void (*) (std::string, std::string)> ()
+		.addFunction ("start", &ARDOUR::SystemExec::start)
+		.endClass ()
+		.endNamespace (); // end ARDOUR
 
 	// Editing Symbols
 
