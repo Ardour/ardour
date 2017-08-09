@@ -160,7 +160,7 @@ CLASSINFO(TrackSelection);
 CLASSINFO(TrackViewList);
 
 
-CLASSKEYS(std::bitset<47ul>); // LuaSignal::LAST_SIGNAL
+CLASSKEYS(std::bitset<48ul>); // LuaSignal::LAST_SIGNAL
 
 CLASSKEYS(void);
 CLASSKEYS(float);

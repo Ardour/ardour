@@ -377,6 +377,7 @@ namespace LuaMixer {
 using namespace ARDOUR;
 
 PBD::Signal0<void> LuaInstance::LuaTimerDS;
+PBD::Signal0<void> LuaInstance::SetSession;
 
 void
 LuaInstance::register_hooks (lua_State* L)
@@ -398,6 +399,10 @@ LuaInstance::register_hooks (lua_State* L)
 		.beginStdBitSet <LuaSignal::LAST_SIGNAL> ("Set")
 		.endClass()
 		.endNamespace ();
+
+#if 0 // Dump size -> libs/ardour/luabindings.cc
+	printf ("LuaInstance: registered %d signals\n", LuaSignal::LAST_SIGNAL);
+#endif
 }
 
 void
@@ -605,7 +610,6 @@ LuaInstance::register_classes (lua_State* L)
 
 	bind_cairo (L);
 	bind_dialog (L);
-	register_hooks (L);
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ArdourUI")
@@ -1110,6 +1114,7 @@ LuaInstance::init ()
 	}
 
 	register_classes (L);
+	register_hooks (L);
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
@@ -1129,6 +1134,7 @@ void LuaInstance::set_session (Session* s)
 		i->second->set_session (s);
 	}
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_point_one_seconds));
+	SetSession (); /* EMIT SIGNAL */
 }
 
 void
@@ -1806,6 +1812,7 @@ LuaCallback::init (void)
 	}
 
 	LuaInstance::register_classes (L);
+	LuaInstance::register_hooks (L);
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");

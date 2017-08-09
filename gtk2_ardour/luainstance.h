@@ -121,6 +121,7 @@ public:
 	sigc::signal<void,PBD::ID,std::string,ActionHook> SlotChanged;
 
 	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
+	static PBD::Signal0<void> SetSession; // emitted when a session is loaded
 
 private:
 	LuaInstance();
