@@ -69,6 +69,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/stripable.h"
+#include "ardour/system_exec.h"
 #include "ardour/track.h"
 #include "ardour/tempo.h"
 #include "ardour/vca.h"
