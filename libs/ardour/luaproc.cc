@@ -163,7 +163,7 @@ LuaProc::init ()
 	lua_setglobal (L, "self");
 
 	// sandbox
-	lua.do_command ("io = nil os = nil loadfile = nil require = nil dofile = nil package = nil debug = nil");
+	lua.sandbox (true);
 #if 0
 	lua.do_command ("for n in pairs(_G) do print(n) end print ('----')"); // print global env
 #endif

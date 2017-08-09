@@ -36,6 +36,7 @@ public:
 	void collect_garbage ();
 	void collect_garbage_step ();
 	void tweak_rt_gc ();
+	void sandbox (bool rt_safe = false);
 
 	sigc::signal<void,std::string> Print;
 

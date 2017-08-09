@@ -179,8 +179,7 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 
 	lua_State* L = lua.getState();
 	lua.Print.connect (&LuaScripting::lua_print);
-
-	lua.do_command ("io = nil;");
+	lua.sandbox (true);
 
 	lua.do_command (
 			"ardourluainfo = {}"
@@ -339,7 +338,7 @@ LuaScriptParams::script_params (const std::string& s, const std::string &pname, 
 
 	LuaState lua;
 	lua_State* L = lua.getState();
-	lua.do_command ("io = nil;");
+	lua.sandbox (true);
 	lua.do_command ("function ardour () end");
 
 	try {
@@ -416,6 +415,7 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 	}
 	LuaState l;
 	l.Print.connect (&LuaScripting::lua_print);
+	l.sandbox (true);
 	lua_State* L = l.getState();
 
 	l.do_command (""
@@ -425,7 +425,7 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 			"  assert(type(f) == 'string', 'Assigned ByteCode must be string')"
 			"  local factory = load(f)"
 			"  assert(type(factory) == 'function', 'Factory is a not a function')"
-			"  local env = _ENV;  env.f = nil env.debug = nil os.exit = nil"
+			"  local env = _ENV; env.f = nil env.os = nil env.io = nil"
 			"  load (string.dump(factory, true), nil, nil, env)(a)"
 			" end"
 			);
@@ -454,6 +454,7 @@ LuaScripting::get_factory_bytecode (const std::string& script, const std::string
 {
 	LuaState l;
 	l.Print.connect (&LuaScripting::lua_print);
+	l.sandbox (true);
 	lua_State* L = l.getState();
 
 	l.do_command (
