@@ -847,6 +847,7 @@ LuaInstance::register_classes (lua_State* L)
 #endif
 
 		.addFunction ("access_action", &PublicEditor::access_action)
+		.addFunction ("set_toggleaction", &PublicEditor::set_toggleaction)
 		.endClass ()
 
 		/* ArdourUI enums */

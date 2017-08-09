@@ -448,7 +448,8 @@ public:
 	virtual void abort_reversible_command () = 0;
 	virtual void commit_reversible_command () = 0;
 
-	virtual void access_action (std::string,std::string) = 0;
+	virtual void access_action (const std::string&, const std::string&) = 0;
+	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;

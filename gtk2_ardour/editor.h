@@ -1114,7 +1114,8 @@ private:
 	void control_scroll (float);
 	void control_select (boost::shared_ptr<ARDOUR::Stripable>, Selection::Operation);
 	void control_unselect ();
-	void access_action (std::string,std::string);
+	void access_action (const std::string&, const std::string&);
+	void set_toggleaction (const std::string&, const std::string&, bool);
 	bool deferred_control_scroll (framepos_t);
 	sigc::connection control_scroll_connection;
 

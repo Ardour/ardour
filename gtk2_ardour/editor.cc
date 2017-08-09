@@ -1132,7 +1132,7 @@ Editor::deferred_control_scroll (framepos_t /*target*/)
 }
 
 void
-Editor::access_action (std::string action_group, std::string action_item)
+Editor::access_action (const std::string& action_group, const std::string& action_item)
 {
 	if (!_session) {
 		return;
@@ -1146,6 +1146,12 @@ Editor::access_action (std::string action_group, std::string action_item)
 	if (act) {
 		act->activate();
 	}
+}
+
+void
+Editor::set_toggleaction (const std::string& action_group, const std::string& action_item, bool s)
+{
+	ActionManager::set_toggleaction_state (action_group.c_str(), action_item.c_str(), s);
 }
 
 void
