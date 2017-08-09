@@ -28,6 +28,7 @@
 
 #include "ardour_dialog.h"
 #include "luadialog.h"
+#include "splash.h"
 #include "utils.h"
 
 using namespace LuaDialog;
@@ -44,8 +45,24 @@ Message::Message (std::string const& title, std::string const& msg, Message::Mes
 int
 Message::run ()
 {
+
+	bool _splash_pushed;
+	Splash* spl = Splash::instance();
+	if (spl && spl->is_visible()) {
+		spl->pop_back_for (_message_dialog);
+		_splash_pushed = true;
+	}
+
 	int rv = _message_dialog.run ();
 	_message_dialog.hide ();
+
+	if (_splash_pushed) {
+		spl = Splash::instance();
+		if (spl) {
+			spl->pop_front();
+		}
+	}
+
 	switch (rv) {
 		case Gtk::RESPONSE_OK:
 			return 0;
