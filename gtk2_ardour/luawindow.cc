@@ -199,6 +199,7 @@ void LuaWindow::reinit_lua ()
 	delete lua;
 	lua = new LuaState();
 	lua->Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
+	lua->sandbox (false);
 
 	lua_State* L = lua->getState();
 	LuaInstance::register_classes (L);

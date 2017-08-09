@@ -967,6 +967,7 @@ LuaInstance::~LuaInstance ()
 void
 LuaInstance::init ()
 {
+	lua.sandbox (false);
 	lua.do_command (
 			"function ScriptManager ()"
 			"  local self = { scripts = {}, instances = {}, icons = {} }"
@@ -984,7 +985,7 @@ LuaInstance::init ()
 			"   assert(type(f) == 'function', 'Factory is a not a function')"
 			"   assert(type(a) == 'table' or type(a) == 'nil', 'Given argument is invalid')"
 			"   self.scripts[i] = { ['n'] = n, ['s'] = s, ['f'] = f, ['a'] = a, ['c'] = c }"
-			"   local env = _ENV;  env.f = nil env.debug = nil os.exit = nil require = nil dofile = nil loadfile = nil package = nil"
+			"   local env = _ENV; env.f = nil env.io = nil"
 			"   self.instances[i] = load (string.dump(f, true), nil, nil, env)(a)"
 			"   if type(c) == 'function' then"
 			"     self.icons[i] = load (string.dump(c, true), nil, nil, env)(a)"
@@ -1085,7 +1086,6 @@ LuaInstance::init ()
 			" manager = ScriptManager ()"
 			" ScriptManager = nil"
 			);
-
 	lua_State* L = lua.getState();
 
 	try {
@@ -1482,6 +1482,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	try {
 		LuaState l;
 		l.Print.connect (&_lua_print);
+		l.sandbox (true);
 		lua_State* L = l.getState();
 		register_hooks (L);
 		l.do_command ("function ardour () end");
@@ -1688,6 +1689,7 @@ void
 LuaCallback::init (void)
 {
 	lua.Print.connect (&_lua_print);
+	lua.sandbox (false);
 
 	lua.do_command (
 			"function ScriptManager ()"
@@ -1699,7 +1701,7 @@ LuaCallback::init (void)
 			"   assert(type(f) == 'function', 'Factory is a not a function')"
 			"   assert(type(a) == 'table' or type(a) == 'nil', 'Given argument is invalid')"
 			"   self.script = { ['n'] = n, ['s'] = s, ['f'] = f, ['a'] = a }"
-			"   local env = _ENV;  env.f = nil env.debug = nil os.exit = nil require = nil dofile = nil loadfile = nil package = nil"
+			"   local env = _ENV; env.f = nil env.io = nil"
 			"   self.instance = load (string.dump(f, true), nil, nil, env)(a)"
 			"  end"
 			""
