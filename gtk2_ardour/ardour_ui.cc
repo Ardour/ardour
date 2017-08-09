@@ -3825,6 +3825,29 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 #endif
 	retval = 0;
 
+	if (!mix_template.empty ()) {
+		/* if mix_template is given, assume this is a new session */
+		string metascript = Glib::build_filename (mix_template, "template.lua");
+		if (Glib::file_test (metascript, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+			LuaState lua;
+			lua_State* L = lua.getState();
+			lua.Print.connect (&LuaInstance::_lua_print);
+			LuaInstance::register_classes (L);
+			LuaBindings::set_session (L, _session);
+			luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+			lua_setglobal (L, "Editor");
+			lua.sandbox (true);
+			lua.do_file (metascript);
+			try {
+				luabridge::LuaRef fn = luabridge::getGlobal (L, "template_load");
+				if (fn.isFunction()) {
+					fn ();
+				}
+			} catch (luabridge::LuaException const& e) { }
+		}
+	}
+
+
   out:
 	/* For successful session load the splash is hidden by ARDOUR_UI::first_idle,
 	 * which is queued by set_session().
