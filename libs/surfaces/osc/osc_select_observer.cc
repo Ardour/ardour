@@ -53,8 +53,8 @@ OSCSelectObserver::OSCSelectObserver (boost::shared_ptr<Stripable> s, lo_address
 	: _strip (s)
 	,sur (su)
 	,nsends (0)
-	,_last_gain (0.0)
-	,_last_trim (0.0)
+	,_last_gain (-1.0)
+	,_last_trim (-1.0)
 	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());

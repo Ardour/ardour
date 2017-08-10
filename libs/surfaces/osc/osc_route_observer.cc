@@ -42,8 +42,8 @@ OSCRouteObserver::OSCRouteObserver (boost::shared_ptr<Stripable> s, uint32_t ss,
 	: _strip (s)
 	,ssid (ss)
 	,sur (su)
-	,_last_gain (0.0)
-	,_last_trim (0.0)
+	,_last_gain (-1.0)
+	,_last_trim (-1.0)
 	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
