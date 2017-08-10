@@ -510,8 +510,16 @@ Session::Session (AudioEngine &eng,
 
 	ensure_subdirs (); // archived or zipped sessions may lack peaks/ analysis/ etc
 
-	_is_new = false;
+	if (!mix_template.empty ()) {
+		/* ::create() unsets _is_new after creating the session.
+		 * But for templated sessions, the sample-rate is initially unset
+		 * (not read from template), so we need to save it (again).
+		 */
+		_is_new = true;
+	}
+
 	session_loaded ();
+	_is_new = false;
 
 	BootMessage (_("Session loading complete"));
 }
