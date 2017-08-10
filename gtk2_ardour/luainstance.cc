@@ -368,6 +368,60 @@ namespace LuaMixer {
 	}
 
 };
+////////////////////////////////////////////////////////////////////////////////
+
+static PBD::ScopedConnectionList _luaexecs;
+
+static void reaper (ARDOUR::SystemExec* x)
+{
+	delete x;
+}
+
+static int
+lua_forkexec (lua_State *L)
+{
+	int argc = lua_gettop (L);
+	if (argc == 0) {
+		return luaL_argerror (L, 1, "invalid number of arguments, forkexec (command, ...)");
+	}
+	// args are free()ed in ~SystemExec
+	char** args = (char**) malloc ((argc + 1) * sizeof(char*));
+	for (int i = 0; i < argc; ++i) {
+		args[i] = strdup (luaL_checkstring (L, i + 1));
+	}
+	args[argc] = 0;
+
+	ARDOUR::SystemExec* x = new ARDOUR::SystemExec (args[0], args);
+	x->Terminated.connect (_luaexecs, MISSING_INVALIDATOR, boost::bind (&reaper, x), gui_context());
+
+	if (x->start()) {
+		reaper (x);
+		luabridge::Stack<bool>::push (L, false);
+		return -1;
+	} else {
+		luabridge::Stack<bool>::push (L, false);
+	}
+	return 1;
+}
+
+#ifndef PLATFORM_WINDOWS
+static int
+lua_exec (std::string cmd)
+{
+	// args are free()ed in ~SystemExec
+	char** args = (char**) malloc (4 * sizeof(char*));
+	args[0] = strdup ("/bin/sh");
+	args[1] = strdup ("-c");
+	args[2] = strdup (cmd.c_str());
+	args[3] = 0;
+	ARDOUR::SystemExec x ("/bin/sh", args);
+	if (x.start()) {
+		return -1;
+	}
+	x.wait ();
+	return 0;
+}
+#endif
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -878,12 +932,12 @@ LuaInstance::register_classes (lua_State* L)
 
 		.endNamespace () // end ArdourUI
 
-		.beginNamespace ("ARDOUR")
-		.beginClass <ARDOUR::SystemExec> ("SystemExec")
-		.addConstructor <void (*) (std::string, std::string)> ()
-		.addFunction ("start", &ARDOUR::SystemExec::start)
-		.endClass ()
-		.endNamespace (); // end ARDOUR
+		.beginNamespace ("os")
+#ifndef PLATFORM_WINDOWS
+		.addFunction ("execute", &lua_exec)
+#endif
+		.addCFunction ("forkexec", &lua_forkexec)
+		.endNamespace ();
 
 	// Editing Symbols
 
