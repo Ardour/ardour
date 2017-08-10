@@ -1032,6 +1032,7 @@ EngineControl::backend_changed ()
 
 	if (!_have_control) {
 		// set settings from backend that we do have control over
+		set_buffersize_popdown_strings ();
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (backend->buffer_size()));
 	}
 
