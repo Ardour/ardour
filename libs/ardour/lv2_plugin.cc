@@ -40,6 +40,11 @@
 #include "pbd/replace_all.h"
 #include "pbd/xml++.h"
 
+#ifdef PLATFORM_WINDOWS
+#include <shlobj.h> // CSIDL_*
+#include "pbd/windows_special_dirs.h"
+#endif
+
 #include "libardour-config.h"
 
 #include "ardour/audio_buffer.h"
