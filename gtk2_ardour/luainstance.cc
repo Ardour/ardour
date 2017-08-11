@@ -974,9 +974,7 @@ using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace std;
 
-void
-LuaInstance::_lua_print (std::string s)
-{
+static void _lua_print (std::string s) {
 #ifndef NDEBUG
 	std::cout << "LuaInstance: " << s << "\n";
 #endif
@@ -1750,7 +1748,7 @@ LuaCallback::get_state (void)
 void
 LuaCallback::init (void)
 {
-	lua.Print.connect (&LuaInstance::_lua_print);
+	lua.Print.connect (&_lua_print);
 	lua.sandbox (false);
 
 	lua.do_command (

@@ -91,8 +91,6 @@ public:
 
 	static void render_action_icon (cairo_t* cr, int w, int h, uint32_t c, void* i);
 
-	static void _lua_print (std::string s);
-
 	void set_session (ARDOUR::Session* s);
 
 	int set_state (const XMLNode&);
