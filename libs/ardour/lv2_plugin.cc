@@ -1516,8 +1516,7 @@ LV2Plugin::do_save_preset(string name)
 		return "";
 	}
 	const string bundle = Glib::build_filename (
-			appdata, "LV2",
-			Glib::build_filename(prefix + "_" + base_name + ".lv2"));
+			appdata, "LV2", prefix + "_" + base_name + ".lv2");
 #else
 	/* while macOS/OSX user-specific path is
 	 *
