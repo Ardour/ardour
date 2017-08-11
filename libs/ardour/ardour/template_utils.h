@@ -37,6 +37,7 @@ namespace ARDOUR {
 	struct LIBARDOUR_API TemplateInfo {
 		std::string name;
 		std::string path;
+		std::string description;
 	};
 
 	LIBARDOUR_API void find_route_templates (std::vector<TemplateInfo>& template_names);

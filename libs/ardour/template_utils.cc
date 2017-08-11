@@ -94,17 +94,18 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
 
+		TemplateInfo rti;
+		rti.name = Glib::path_get_basename (*i);
+		rti.path = *i;
+
 		if (read_xml) {
 			XMLTree tree;
 			if (!tree.read (file.c_str())) {
 				continue;
 			}
+			// TODO extract description,
+			// compare to Session::get_info_from_path
 		}
-
-		TemplateInfo rti;
-
-		rti.name = Glib::path_get_basename (*i);
-		rti.path = *i;
 
 		template_names.push_back (rti);
 	}
