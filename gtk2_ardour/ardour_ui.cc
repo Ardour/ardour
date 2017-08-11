@@ -3479,15 +3479,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				break;
 			default:
 				if (quit_on_cancel) {
-					// JE - Currently (July 2014) this section can only get reached if the
-					// user quits from the main 'Session Setup' dialog (i.e. reaching this
-					// point does NOT indicate an abnormal termination). Therefore, let's
-					// behave gracefully (i.e. let's do some cleanup) before we call exit()
-					assert (!_session);
+					ARDOUR_UI::finish ();
+					Gtkmm2ext::Application::instance()->cleanup();
 					ARDOUR::cleanup ();
 					pthread_cancel_all ();
-
-					exit (1);
+					return -1; // caller is responsible to call exit()
 				} else {
 					return ret;
 				}
