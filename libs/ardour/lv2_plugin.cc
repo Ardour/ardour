@@ -1503,9 +1503,29 @@ LV2Plugin::do_save_preset(string name)
 	const string prefix    = legalize_for_uri(lilv_node_as_string(plug_name));
 	const string base_name = legalize_for_uri(name);
 	const string file_name = base_name + ".ttl";
+#ifdef PLATFORM_WINDOWS
+	/* http://lv2plug.in/pages/filesystem-hierarchy-standard.html */
+	std::string appdata = PBD::get_win_special_folder_path (CSIDL_APPDATA);
+	if (appdata.empty ()) {
+		// TODO consider a fallback location
+		return "";
+	}
+	const string bundle = Glib::build_filename (
+			appdata, "LV2",
+			Glib::build_filename(prefix + "_" + base_name + ".lv2"));
+#else
+	/* while macOS/OSX user-specific path is
+	 *
+	 *   $HOME/Library/Audio/Plug-Ins/LV2/
+	 *
+	 * liblilv's LV2 search path on all unices does include ~/.lv2/
+	 * Ardour has been saving lv2 presets to ~/.lv2 for along time,
+	 * so just keep them there.
+	 */
 	const string bundle    = Glib::build_filename(
 		Glib::get_home_dir(),
 		Glib::build_filename(".lv2", prefix + "_" + base_name + ".lv2"));
+#endif
 
 #ifdef HAVE_LILV_0_21_3
 	/* delete reference to old preset (if any) */
