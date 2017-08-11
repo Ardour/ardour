@@ -165,10 +165,12 @@ private:
 		SessionTemplateColumns () {
 			add (name);
 			add (path);
+			add (desc);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<std::string> desc;
 	};
 
 	SessionTemplateColumns session_template_columns;

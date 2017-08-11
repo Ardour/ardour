@@ -48,6 +48,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/luascripting.h"
 #include "ardour/recent_sessions.h"
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
@@ -516,6 +517,16 @@ SessionDialog::populate_session_templates ()
 
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
+		row[session_template_columns.desc] = (*x).description;
+	}
+
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
+	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		TreeModel::Row row;
+		row = *(template_model->append ());
+		row[session_template_columns.name] = "Meta: " + (*s)->name;
+		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
+		row[session_template_columns.desc] = "urn:ardour:" + (*s)->description;
 	}
 
 	if (!templates.empty()) {

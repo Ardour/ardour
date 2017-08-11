@@ -3612,7 +3612,12 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			_session_is_new = true;
 		}
 
-		if (likely_new && template_name.empty()) {
+		if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
+
+			ret = build_session_from_dialog (session_dialog, session_path, session_name);
+			meta_session_setup (template_name.substr (11));
+
+		} else if (likely_new && template_name.empty()) {
 
 			ret = build_session_from_dialog (session_dialog, session_path, session_name);
 
@@ -3828,23 +3833,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	if (!mix_template.empty ()) {
 		/* if mix_template is given, assume this is a new session */
 		string metascript = Glib::build_filename (mix_template, "template.lua");
-		if (Glib::file_test (metascript, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
-			LuaState lua;
-			lua_State* L = lua.getState();
-			lua.Print.connect (&LuaInstance::_lua_print);
-			LuaInstance::register_classes (L);
-			LuaBindings::set_session (L, _session);
-			luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
-			lua_setglobal (L, "Editor");
-			lua.sandbox (true);
-			lua.do_file (metascript);
-			try {
-				luabridge::LuaRef fn = luabridge::getGlobal (L, "template_load");
-				if (fn.isFunction()) {
-					fn ();
-				}
-			} catch (luabridge::LuaException const& e) { }
-		}
+		meta_session_setup (metascript);
 	}
 
 
@@ -3936,6 +3925,34 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	new_session->save_state(new_session->name());
 
 	return 0;
+}
+
+void
+ARDOUR_UI::meta_session_setup (const std::string& script_path)
+{
+	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		return;
+	}
+
+	LuaState lua;
+	lua.Print.connect (&LuaInstance::_lua_print);
+	lua.sandbox (true);
+
+	lua_State* L = lua.getState();
+	LuaInstance::register_classes (L);
+	LuaBindings::set_session (L, _session);
+	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+	lua_setglobal (L, "Editor");
+
+	lua.do_command ("function ardour () end");
+	lua.do_file (script_path);
+
+	try {
+		luabridge::LuaRef fn = luabridge::getGlobal (L, "session_setup");
+		if (fn.isFunction()) {
+			fn ();
+		}
+	} catch (luabridge::LuaException const& e) { }
 }
 
 void

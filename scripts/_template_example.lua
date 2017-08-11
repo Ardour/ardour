@@ -1,14 +1,27 @@
---
--- Session Template setup-hook
+ardour {
+	["type"]    = "SessionSetup",
+	name        = "Recording Session",
+	description = [[Add as many mono tracks to the new session as there are physical audio inputs and optionally record-arm them.]]
+}
+
+---- For use with templates: Session Template setup-hook
 --
 -- If a script named 'template.lua' exists in a session-template folder
--- the `template_load` function of the script is called after
+-- the `session_setup` function of the script is called after
 -- creating the session from the template.
 --
--- (e.g. ~/.config/ardour5/templates/Template-Name/template.lua
+-- (e.g. ~/.config/ardour5/templates/Template-Name/template.lua)
+--
+--
+---- For use as meta-session
+--
+-- Every Lua script in the script-folder of type "SessionSetup"
+-- is listed as implicit template in the new-session dialog.
+-- The scripts 'session_setup' function  is called once after
+-- creating a new, empty session.
 --
 
-function template_load ()
+function session_setup ()
 	local e = Session:engine()
 	-- from the engine's POV readable/capture ports are "outputs"
 	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())
@@ -17,7 +30,7 @@ function template_load ()
 
 	local dialog_options = {
 		{ type = "heading", title = "Customize Session: " .. Session:name () },
-		{ type = "number", key = "tracks", title = "Create Tracks",  min = 0, max = 128, step = 1, digits = 0, default = tracks },
+		{ type = "number", key = "tracks", title = "Create Tracks",  min = 1, max = 128, step = 1, digits = 0, default = tracks },
 		{ type = "checkbox", key = "recarm", default = false, title = "Record Arm Tracks" },
 	}
 

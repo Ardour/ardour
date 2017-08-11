@@ -656,6 +656,8 @@ private:
 	void save_template ();
 	void manage_templates ();
 
+	void meta_session_setup (const std::string& script_path);
+
 	void edit_metadata ();
 	void import_metadata ();
 
