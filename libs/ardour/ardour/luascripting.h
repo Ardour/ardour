@@ -38,6 +38,7 @@ class LIBARDOUR_API LuaScriptInfo {
 		EditorHook,
 		EditorAction,
 		Snippet,
+		SessionSetup,
 	};
 
 	static std::string type2str (const ScriptType t);
@@ -123,6 +124,7 @@ private:
 	LuaScriptList *_sl_hook;
 	LuaScriptList *_sl_action;
 	LuaScriptList *_sl_snippet;
+	LuaScriptList *_sl_setup;
 	LuaScriptList  _empty_script_info;
 
 	Glib::Threads::Mutex _lock;
