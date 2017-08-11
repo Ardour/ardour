@@ -181,6 +181,8 @@ private:
 	Gtk::CheckButton use_template_button;
 	std::string load_template_override;
 
+	void template_checkbox_toggled ();
+
 	void more_new_session_options_button_clicked();
 	void new_name_changed ();
 	void new_name_activated ();

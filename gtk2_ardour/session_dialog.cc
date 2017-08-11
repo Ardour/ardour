@@ -611,6 +611,7 @@ SessionDialog::setup_new_session_page ()
 
 	HBox* hbox4a = manage (new HBox);
 	use_template_button.set_label (_("Use this template"));
+	use_template_button.signal_toggled().connect(sigc::mem_fun (*this, &SessionDialog::template_checkbox_toggled));
 
 	TreeModel::Row row = *template_model->prepend ();
 	row[session_template_columns.name] = (_("no template"));
@@ -649,6 +650,14 @@ SessionDialog::setup_new_session_page ()
 
 	session_new_vbox.pack_start (*vbox2, false, false);
 	session_new_vbox.show_all ();
+
+	template_checkbox_toggled ();
+}
+
+void
+SessionDialog::template_checkbox_toggled ()
+{
+	template_chooser.set_sensitive (use_template_button.get_active());
 }
 
 void
