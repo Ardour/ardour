@@ -480,7 +480,9 @@ AutomationTimeAxisView::clear_clicked ()
 	} else if (_view) {
 		_view->clear ();
 	}
-	set_automation_state ((AutoState) ARDOUR::Off);
+	if (!EventTypeMap::instance().type_is_midi (_control->parameter().type())) {
+		set_automation_state ((AutoState) ARDOUR::Off);
+	}
 	_editor.commit_reversible_command ();
 	_session->set_dirty ();
 }
