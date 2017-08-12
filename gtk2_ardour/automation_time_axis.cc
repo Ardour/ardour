@@ -161,14 +161,16 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 	using namespace Menu_Helpers;
 
-	auto_dropdown.AddMenuElem (MenuElem (S_("Automation|Manual"), sigc::bind (sigc::mem_fun(*this,
+	auto_dropdown.AddMenuElem (MenuElem (automation_state_off_string(), sigc::bind (sigc::mem_fun(*this,
 						&AutomationTimeAxisView::set_automation_state), (AutoState) ARDOUR::Off)));
 	auto_dropdown.AddMenuElem (MenuElem (_("Play"), sigc::bind (sigc::mem_fun(*this,
 						&AutomationTimeAxisView::set_automation_state), (AutoState) Play)));
-	auto_dropdown.AddMenuElem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this,
-						&AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
-	auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this,
-						&AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+
+	if (!(_parameter.type() >= MidiCCAutomation &&
+	      _parameter.type() <= MidiChannelPressureAutomation)) {
+		auto_dropdown.AddMenuElem (MenuElem (_("Write"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Write)));
+		auto_dropdown.AddMenuElem (MenuElem (_("Touch"), sigc::bind (sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state), (AutoState) Touch)));
+	}
 
 	/* XXX translators: use a string here that will be at least as long
 	   as the longest automation label (see ::automation_state_changed()
@@ -369,48 +371,56 @@ AutomationTimeAxisView::automation_state_changed ()
 
 	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
 	case ARDOUR::Off:
-		auto_dropdown.set_text (S_("Automation|Manual"));
+		auto_dropdown.set_text (automation_state_off_string());
+		ignore_state_request = true;
 		if (auto_off_item) {
-			ignore_state_request = true;
 			auto_off_item->set_active (true);
 			auto_play_item->set_active (false);
+		}
+		if (auto_touch_item) {
 			auto_touch_item->set_active (false);
 			auto_write_item->set_active (false);
-			ignore_state_request = false;
 		}
+		ignore_state_request = false;
 		break;
 	case Play:
 		auto_dropdown.set_text (_("Play"));
-		if (auto_play_item) {
-			ignore_state_request = true;
+		ignore_state_request = true;
+		if (auto_off_item) {
 			auto_play_item->set_active (true);
 			auto_off_item->set_active (false);
+		}
+		if (auto_touch_item) {
 			auto_touch_item->set_active (false);
 			auto_write_item->set_active (false);
-			ignore_state_request = false;
 		}
+		ignore_state_request = false;
 		break;
 	case Write:
 		auto_dropdown.set_text (_("Write"));
-		if (auto_write_item) {
-			ignore_state_request = true;
-			auto_write_item->set_active (true);
+		ignore_state_request = true;
+		if (auto_off_item) {
 			auto_off_item->set_active (false);
 			auto_play_item->set_active (false);
-			auto_touch_item->set_active (false);
-			ignore_state_request = false;
 		}
+		if (auto_touch_item) {
+			auto_write_item->set_active (true);
+			auto_touch_item->set_active (false);
+		}
+		ignore_state_request = false;
 		break;
 	case Touch:
 		auto_dropdown.set_text (_("Touch"));
-		if (auto_touch_item) {
-			ignore_state_request = true;
-			auto_touch_item->set_active (true);
+		ignore_state_request = true;
+		if (auto_off_item) {
 			auto_off_item->set_active (false);
 			auto_play_item->set_active (false);
-			auto_write_item->set_active (false);
-			ignore_state_request = false;
 		}
+		if (auto_touch_item) {
+			auto_touch_item->set_active (true);
+			auto_write_item->set_active (false);
+		}
+		ignore_state_request = false;
 		break;
 	default:
 		auto_dropdown.set_text (_("???"));
@@ -512,10 +522,7 @@ AutomationTimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 		first_call_to_set_height = false;
 
 		if (h >= preset_height (HeightNormal)) {
-			if (!(_parameter.type() >= MidiCCAutomation &&
-			      _parameter.type() <= MidiChannelPressureAutomation)) {
-				auto_dropdown.show();
-			}
+			auto_dropdown.show();
 			name_label.show();
 			hide_button.show();
 
@@ -560,6 +567,16 @@ AutomationTimeAxisView::hide_clicked ()
 	hide_button.set_sensitive(true);
 }
 
+string
+AutomationTimeAxisView::automation_state_off_string () const
+{
+	if (_parameter.type() >= MidiCCAutomation && _parameter.type() <= MidiChannelPressureAutomation) {
+		return S_("Automation|Off");
+	}
+
+	return S_("Automation|Manual");
+}
+
 void
 AutomationTimeAxisView::build_display_menu ()
 {
@@ -584,7 +601,7 @@ AutomationTimeAxisView::build_display_menu ()
 	auto_state_menu->set_name ("ArdourContextMenu");
 	MenuList& as_items = auto_state_menu->items();
 
-	as_items.push_back (CheckMenuElem (S_("Automation|Manual"), sigc::bind (
+	as_items.push_back (CheckMenuElem (automation_state_off_string(), sigc::bind (
 			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
 			(AutoState) ARDOUR::Off)));
 	auto_off_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
@@ -594,20 +611,20 @@ AutomationTimeAxisView::build_display_menu ()
 			(AutoState) Play)));
 	auto_play_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 
-	as_items.push_back (CheckMenuElem (_("Write"), sigc::bind (
-			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
-			(AutoState) Write)));
-	auto_write_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
-
-	as_items.push_back (CheckMenuElem (_("Touch"), sigc::bind (
-			sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
-			(AutoState) Touch)));
-	auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
-
 	if (!(_parameter.type() >= MidiCCAutomation &&
 	      _parameter.type() <= MidiChannelPressureAutomation)) {
-		items.push_back (MenuElem (_("State"), *auto_state_menu));
+		as_items.push_back (CheckMenuElem (_("Write"), sigc::bind (
+			                                   sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			                                   (AutoState) Write)));
+		auto_write_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
+
+		as_items.push_back (CheckMenuElem (_("Touch"), sigc::bind (
+			                                   sigc::mem_fun(*this, &AutomationTimeAxisView::set_automation_state),
+			(AutoState) Touch)));
+		auto_touch_item = dynamic_cast<Gtk::CheckMenuItem*>(&as_items.back());
 	}
+
+	items.push_back (MenuElem (_("State"), *auto_state_menu));
 
 	/* mode menu */
 
@@ -1156,4 +1173,3 @@ AutomationTimeAxisView::color () const
 {
 	return gdk_color_from_rgb (_stripable->presentation_info().color());
 }
-

@@ -208,6 +208,8 @@ protected:
 	static Pango::FontDescription name_font;
 	static bool have_name_font;
 
+	std::string automation_state_off_string () const;
+
 private:
 	int set_state_2X (const XMLNode &, int);
 };
