@@ -192,16 +192,28 @@ AutomationList::maybe_signal_changed ()
 	}
 }
 
+AutoState
+AutomationList::automation_state() const
+{
+	Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
+	return _state;
+}
+
 void
 AutomationList::set_automation_state (AutoState s)
 {
-	if (s == _state) {
-		return;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (Evoral::ControlList::_lock);
+
+		if (s == _state) {
+			return;
+		}
+		_state = s;
+		if (s == Write && _desc.toggled) {
+			snapshot_history (true);
+		}
 	}
-	_state = s;
-	if (s == Write && _desc.toggled) {
-		snapshot_history (true);
-	}
+
 	automation_state_changed (s); /* EMIT SIGNAL */
 }
 
@@ -588,4 +600,3 @@ AutomationListProperty::clone () const
 		boost::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
 		);
 }
-

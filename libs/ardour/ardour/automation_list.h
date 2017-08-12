@@ -85,7 +85,7 @@ public:
 	bool paste (const ControlList&, double, DoubleBeatsFramesConverter const&);
 
 	void set_automation_state (AutoState);
-	AutoState automation_state() const { return _state; }
+	AutoState automation_state() const;
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
 	bool automation_playback() const {
