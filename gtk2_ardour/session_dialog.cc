@@ -503,11 +503,7 @@ SessionDialog::populate_session_templates ()
 
 	template_model->clear ();
 
-//  ToDo:  maybe add an explicit 'no template' item?
-//	TreeModel::Row row = *template_model->prepend ();
-//	row[session_template_columns.name] = (_("no template"));
-//	row[session_template_columns.path] = string();
-
+    //Add any Lua scripts (factory templates) found in the scripts folder
 	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
 	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
 		TreeModel::Row row;
@@ -518,6 +514,8 @@ SessionDialog::populate_session_templates ()
         row[session_template_columns.created_with] = _("{Factory Template}");
 	}
 
+
+    //Add any "template sessions" found in the user's preferences folder
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
 		TreeModel::Row row;
 
@@ -528,7 +526,19 @@ SessionDialog::populate_session_templates ()
         row[session_template_columns.description] = (*x).description;
         row[session_template_columns.created_with] = (*x).created_with;
 	}
+    
+    //Add an explicit 'Empty Template' item
+	TreeModel::Row row = *template_model->prepend ();
+	row[session_template_columns.name] = (_("Empty Template"));
+	row[session_template_columns.path] = string();
+    row[session_template_columns.description] = _("An empty session with factory default settings.");
+    row[session_template_columns.created_with] = _("{Factory Template}");
 
+    //auto-select the first item in the list
+    Gtk::TreeModel::Row first = template_model->children()[0];
+    if(first) {
+        template_chooser.get_selection()->select(first);
+    }
 }
 
 void
@@ -612,18 +622,18 @@ SessionDialog::setup_new_session_page ()
 
 	HBox* hbox4a = manage (new HBox);
 
-	hbox4a->set_spacing (6);
-	hbox4a->pack_start (template_chooser, false, false);
-	hbox4a->pack_start (template_desc, true, true);
-
+    //if the "template override" is provided, don't give the user any template selections   (?)
+	if ( load_template_override.empty() ) {
+        hbox4a->set_spacing (6);
+        hbox4a->pack_start (template_chooser, false, false);
+        hbox4a->pack_start (template_desc, true, true);
+    }
+    
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	template_desc.set_size_request(300,400);
 	template_desc.set_left_margin(6);
 	template_desc.set_right_margin(6);
-
-	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
-	text_renderer->property_editable() = false;
 
 	template_chooser.set_model (template_model);
 	template_chooser.set_size_request(300,400);
