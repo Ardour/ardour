@@ -551,32 +551,29 @@ SessionDialog::setup_new_session_page ()
 	name_label->set_text (_("Session name:"));
 
 	HBox* name_hbox = manage (new HBox);
-    name_hbox->set_spacing (6);
-
-	name_hbox->pack_start (*name_label, false, false);
+    name_hbox->set_spacing (8);
+	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (new_name_entry, true, true);
 
+    //check to see if a session name was provided on command line
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
-		/* name provided - they can move right along */
 		open_button->set_sensitive (true);
 	}
 
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::new_name_changed));
 	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &SessionDialog::new_name_activated));
 
-	/* --- */
-
+	//Folder location for the new session
+	Label* new_folder_label = manage (new Label);
+	new_folder_label->set_text (_("Create session folder in:"));
 	HBox* folder_box = manage (new HBox);
-	Label* label2 = manage (new Label);
-
-	folder_box->set_spacing (6);
-	folder_box->pack_start (*label2, false, false);
+	folder_box->set_spacing (8);
+	folder_box->pack_start (*new_folder_label, false, false);
 	folder_box->pack_start (new_folder_chooser, true, true);
 
-	label2->set_text (_("Create session folder in:"));
-
-	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+	//determine the text in the new folder selector
+    if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
 	} else if (ARDOUR_UI::instance()->session_loaded) {
 		// point the new session file chooser at the parent directory of the current session
@@ -596,28 +593,27 @@ SessionDialog::setup_new_session_page ()
 	}
 	new_folder_chooser.show ();
 	new_folder_chooser.set_title (_("Select folder for session"));
-
 	Gtkmm2ext::add_volume_shortcuts (new_folder_chooser);
 
-	/* --- */
-
-	template_model = TreeStore::create (session_template_columns);
-
+	//Template & Template Description area
 	HBox* template_hbox = manage (new HBox);
 
     //if the "template override" is provided, don't give the user any template selections   (?)
 	if ( load_template_override.empty() ) {
-        template_hbox->set_spacing (6);
-        template_hbox->pack_start (template_chooser, false, false);
+        template_hbox->set_spacing (8);
+        template_hbox->pack_start (template_chooser, true, true);
         template_hbox->pack_start (template_desc, true, true);
     }
     
+    //template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	template_desc.set_size_request(300,400);
 	template_desc.set_left_margin(6);
 	template_desc.set_right_margin(6);
 
+    //template_chooser is the treeview showing available templates
+	template_model = TreeStore::create (session_template_columns);
 	template_chooser.set_model (template_model);
 	template_chooser.set_size_request(300,400);
 	template_chooser.append_column (_("Template"), session_template_columns.name);
@@ -634,10 +630,10 @@ SessionDialog::setup_new_session_page ()
 
 	/* --- */
 
-	session_new_vbox.pack_start (*name_hbox, true, true);
-	session_new_vbox.pack_start (*folder_box, true, true);
-	session_new_vbox.pack_start (*template_hbox, false, false);
-	session_new_vbox.pack_start (more_new_session_options_button, false, false);
+	session_new_vbox.pack_start (*template_hbox, false, true);
+	session_new_vbox.pack_start (*folder_box, false, true);
+	session_new_vbox.pack_start (*name_hbox, false, true);
+	session_new_vbox.pack_start (more_new_session_options_button, false, true);
 	session_new_vbox.show_all ();
 }
 
