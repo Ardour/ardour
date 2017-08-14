@@ -95,8 +95,8 @@
     [
         a lv2:OutputPort, lv2:ControlPort ;
         lv2:index 7 ;
-        lv2:name "Output Level" ;
-        lv2:symbol "outlevel" ;
+        lv2:name "Input Level" ;
+        lv2:symbol "inlevel" ;
         lv2:default -45.000000 ;
         lv2:minimum -45.000000 ;
         lv2:maximum 0.000000 ;
@@ -105,8 +105,8 @@
     [
         a lv2:OutputPort, lv2:ControlPort ;
         lv2:index 8 ;
-        lv2:name "Input Level" ;
-        lv2:symbol "inlevel" ;
+        lv2:name "Output Level" ;
+        lv2:symbol "outlevel" ;
         lv2:default -45.000000 ;
         lv2:minimum -45.000000 ;
         lv2:maximum 0.000000 ;
