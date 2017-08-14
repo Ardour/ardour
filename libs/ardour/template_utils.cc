@@ -33,6 +33,8 @@
 #include "ardour/search_paths.h"
 #include "ardour/io.h"
 
+#include "pbd/i18n.h"
+
 using namespace std;
 using namespace PBD;
 
@@ -103,8 +105,25 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 			if (!tree.read (file.c_str())) {
 				continue;
 			}
-			// TODO extract description,
-			// compare to Session::get_info_from_path
+
+			string created_with = "(unknown)";
+			XMLNode *pv = tree.root()->child("ProgramVersion");
+			if (pv != 0) {
+				pv->get_property (X_("created-with"), created_with);
+			}
+			
+			string description = "No Description";
+			XMLNode *md = tree.root()->child("Metadata");
+			if (md != 0) {
+				XMLNode *desc = md->child("description");
+				if (desc != 0) {
+					description = desc->attribute_value();
+				}
+			}
+			
+			rti.created_with = created_with;
+			rti.description = description;
+			
 		}
 
 		template_names.push_back (rti);

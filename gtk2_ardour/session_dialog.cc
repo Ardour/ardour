@@ -116,7 +116,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	}
 
 	if (!template_name.empty()) {
-		use_template_button.set_active (false);
 		load_template_override = template_name;
 	}
 
@@ -125,14 +124,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	/* fill data models and show/hide accordingly */
 
 	populate_session_templates ();
-
-	if (!template_model->children().empty()) {
-		use_template_button.show();
-		template_chooser.show ();
-	} else {
-		use_template_button.hide();
-		template_chooser.hide ();
-	}
 
 	if (recent_session_model) {
 		int cnt = redisplay_recent_sessions ();
@@ -218,7 +209,7 @@ SessionDialog::use_session_template ()
 		return true;
 	}
 
-	if (use_template_button.get_active()) {
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
 		return true;
 	}
 
@@ -233,11 +224,13 @@ SessionDialog::session_template_name ()
 		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
 	}
 
-	if (use_template_button.get_active()) {
-		TreeModel::iterator iter = template_chooser.get_active ();
-		TreeModel::Row row = (*iter);
-		string s = row[session_template_columns.path];
-		return s;
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
+		TreeIter iter = template_chooser.get_selection()->get_selected();
+
+		if (iter) {
+			string s = (*iter)[session_template_columns.path];
+			return s;
+		}
 	}
 
 	return string();
@@ -506,9 +499,24 @@ SessionDialog::populate_session_templates ()
 {
 	vector<TemplateInfo> templates;
 
-	find_session_templates (templates);
+	find_session_templates (templates, true);
 
 	template_model->clear ();
+
+//  ToDo:  maybe add an explicit 'no template' item?
+//	TreeModel::Row row = *template_model->prepend ();
+//	row[session_template_columns.name] = (_("no template"));
+//	row[session_template_columns.path] = string();
+
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
+	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		TreeModel::Row row;
+		row = *(template_model->append ());
+		row[session_template_columns.name] = "Meta: " + (*s)->name;
+		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
+		row[session_template_columns.description] = (*s)->description;
+        row[session_template_columns.created_with] = _("{Factory Template}");
+	}
 
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
 		TreeModel::Row row;
@@ -517,22 +525,10 @@ SessionDialog::populate_session_templates ()
 
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
-		row[session_template_columns.desc] = (*x).description;
+        row[session_template_columns.description] = (*x).description;
+        row[session_template_columns.created_with] = (*x).created_with;
 	}
 
-	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
-	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
-		TreeModel::Row row;
-		row = *(template_model->append ());
-		row[session_template_columns.name] = "Meta: " + (*s)->name;
-		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
-		row[session_template_columns.desc] = "urn:ardour:" + (*s)->description;
-	}
-
-	if (!templates.empty()) {
-		/* select first row */
-		template_chooser.set_active (0);
-	}
 }
 
 void
@@ -606,7 +602,7 @@ SessionDialog::setup_new_session_page ()
 
 	VBox *vbox2 = manage (new VBox);
 	HBox* hbox3 = manage (new HBox);
-	template_model = ListStore::create (session_template_columns);
+	template_model = TreeStore::create (session_template_columns);
 
 	vbox2->set_spacing (6);
 
@@ -614,32 +610,29 @@ SessionDialog::setup_new_session_page ()
 
 	vbox3->set_spacing (6);
 
-	/* we may want to hide this and show it at various
-	   times depending on the existence of templates.
-	*/
-	template_chooser.set_no_show_all (true);
-	use_template_button.set_no_show_all (true);
-
 	HBox* hbox4a = manage (new HBox);
-	use_template_button.set_label (_("Use this template"));
-	use_template_button.signal_toggled().connect(sigc::mem_fun (*this, &SessionDialog::template_checkbox_toggled));
-
-	TreeModel::Row row = *template_model->prepend ();
-	row[session_template_columns.name] = (_("no template"));
-	row[session_template_columns.path] = string();
 
 	hbox4a->set_spacing (6);
-	hbox4a->pack_start (use_template_button, false, false);
-	hbox4a->pack_start (template_chooser, true, true);
+	hbox4a->pack_start (template_chooser, false, false);
+	hbox4a->pack_start (template_desc, true, true);
 
-	template_chooser.set_model (template_model);
+	template_desc.set_editable (false);
+	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
+	template_desc.set_size_request(300,400);
+	template_desc.set_left_margin(6);
+	template_desc.set_right_margin(6);
 
 	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
 	text_renderer->property_editable() = false;
 
-	template_chooser.pack_start (*text_renderer);
-	template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
-	template_chooser.set_active (0);
+	template_chooser.set_model (template_model);
+	template_chooser.set_size_request(300,400);
+	template_chooser.append_column (_("Template"), session_template_columns.name);
+	template_chooser.append_column (_("Created With"), session_template_columns.created_with);
+	template_chooser.set_headers_visible (true);
+	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
+	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
+	template_chooser.set_sensitive (true);
 
 	vbox3->pack_start (*hbox4a, false, false);
 
@@ -654,21 +647,16 @@ SessionDialog::setup_new_session_page ()
 	more_new_session_options_button.add (more_options_vbox);
 
 	vbox3->pack_start (*hbox5, false, false);
-	hbox3->pack_start (*vbox3, true, true, 8);
+
+	/* --- */
+
+	hbox3->pack_start (*vbox3, true, true);
 	vbox2->pack_start (*hbox3, false, false);
 
 	/* --- */
 
 	session_new_vbox.pack_start (*vbox2, false, false);
 	session_new_vbox.show_all ();
-
-	template_checkbox_toggled ();
-}
-
-void
-SessionDialog::template_checkbox_toggled ()
-{
-	template_chooser.set_sensitive (use_template_button.get_active());
 }
 
 void
@@ -925,6 +913,19 @@ SessionDialog::recent_session_row_selected ()
 		session_selected ();
 	} else {
 		open_button->set_sensitive (false);
+	}
+}
+
+void
+SessionDialog::template_row_selected ()
+{
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
+		TreeIter iter = template_chooser.get_selection()->get_selected();
+
+		if (iter) {
+			string s = (*iter)[session_template_columns.description];
+			template_desc.get_buffer()->set_text (s);
+		}
 	}
 }
 

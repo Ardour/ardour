@@ -30,6 +30,7 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/filechooserbutton.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/treeview.h>
 #include <gtkmm/treestore.h>
 #include <gtkmm/checkbutton.h>
@@ -165,25 +166,30 @@ private:
 		SessionTemplateColumns () {
 			add (name);
 			add (path);
-			add (desc);
+			add (description);
+			add (created_with);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
-		Gtk::TreeModelColumn<std::string> desc;
+		Gtk::TreeModelColumn<std::string> description;
+		Gtk::TreeModelColumn<std::string> created_with;
 	};
 
 	SessionTemplateColumns session_template_columns;
-	Glib::RefPtr<Gtk::ListStore>  template_model;
-	Gtk::ComboBox template_chooser;
+
+    Glib::RefPtr<Gtk::TreeStore>  template_model;
+    Gtk::TreeView                 template_chooser;
+	Gtk::ScrolledWindow           template_scroller;
+
+	void template_row_selected ();
+
+	Gtk::TextView template_desc;
 
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;
 	Gtk::Expander more_new_session_options_button;
-	Gtk::CheckButton use_template_button;
 	std::string load_template_override;
-
-	void template_checkbox_toggled ();
 
 	void more_new_session_options_button_clicked();
 	void new_name_changed ();
