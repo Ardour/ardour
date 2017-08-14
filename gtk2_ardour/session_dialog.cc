@@ -544,20 +544,17 @@ SessionDialog::populate_session_templates ()
 void
 SessionDialog::setup_new_session_page ()
 {
-	session_new_vbox.set_border_width (12);
-	session_new_vbox.set_spacing (18);
+	session_new_vbox.set_border_width (8);
+	session_new_vbox.set_spacing (8);
 
-	VBox *vbox1 = manage (new VBox);
-	HBox* hbox1 = manage (new HBox);
-	Label* label1 = manage (new Label);
+    Label* name_label = manage (new Label);
+	name_label->set_text (_("Session name:"));
 
-	vbox1->set_spacing (6);
+	HBox* name_hbox = manage (new HBox);
+    name_hbox->set_spacing (6);
 
-	hbox1->set_spacing (6);
-	hbox1->pack_start (*label1, false, false);
-	hbox1->pack_start (new_name_entry, true, true);
-
-	label1->set_text (_("Session name:"));
+	name_hbox->pack_start (*name_label, false, false);
+	name_hbox->pack_start (new_name_entry, true, true);
 
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
@@ -568,16 +565,14 @@ SessionDialog::setup_new_session_page ()
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::new_name_changed));
 	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &SessionDialog::new_name_activated));
 
-	vbox1->pack_start (*hbox1, true, true);
-
 	/* --- */
 
-	HBox* hbox2 = manage (new HBox);
+	HBox* folder_box = manage (new HBox);
 	Label* label2 = manage (new Label);
 
-	hbox2->set_spacing (6);
-	hbox2->pack_start (*label2, false, false);
-	hbox2->pack_start (new_folder_chooser, true, true);
+	folder_box->set_spacing (6);
+	folder_box->pack_start (*label2, false, false);
+	folder_box->pack_start (new_folder_chooser, true, true);
 
 	label2->set_text (_("Create session folder in:"));
 
@@ -604,29 +599,17 @@ SessionDialog::setup_new_session_page ()
 
 	Gtkmm2ext::add_volume_shortcuts (new_folder_chooser);
 
-	vbox1->pack_start (*hbox2, false, false);
-
-	session_new_vbox.pack_start (*vbox1, false, false);
-
 	/* --- */
 
-	VBox *vbox2 = manage (new VBox);
-	HBox* hbox3 = manage (new HBox);
 	template_model = TreeStore::create (session_template_columns);
 
-	vbox2->set_spacing (6);
-
-	VBox *vbox3 = manage (new VBox);
-
-	vbox3->set_spacing (6);
-
-	HBox* hbox4a = manage (new HBox);
+	HBox* template_hbox = manage (new HBox);
 
     //if the "template override" is provided, don't give the user any template selections   (?)
 	if ( load_template_override.empty() ) {
-        hbox4a->set_spacing (6);
-        hbox4a->pack_start (template_chooser, false, false);
-        hbox4a->pack_start (template_desc, true, true);
+        template_hbox->set_spacing (6);
+        template_hbox->pack_start (template_chooser, false, false);
+        template_hbox->pack_start (template_desc, true, true);
     }
     
 	template_desc.set_editable (false);
@@ -644,28 +627,17 @@ SessionDialog::setup_new_session_page ()
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
 	template_chooser.set_sensitive (true);
 
-	vbox3->pack_start (*hbox4a, false, false);
-
 	/* --- */
-
-	HBox* hbox5 = manage (new HBox);
-
-	hbox5->set_spacing (6);
-	hbox5->pack_start (more_new_session_options_button, false, false);
 
 	setup_more_options_box ();
 	more_new_session_options_button.add (more_options_vbox);
 
-	vbox3->pack_start (*hbox5, false, false);
-
 	/* --- */
 
-	hbox3->pack_start (*vbox3, true, true);
-	vbox2->pack_start (*hbox3, false, false);
-
-	/* --- */
-
-	session_new_vbox.pack_start (*vbox2, false, false);
+	session_new_vbox.pack_start (*name_hbox, true, true);
+	session_new_vbox.pack_start (*folder_box, true, true);
+	session_new_vbox.pack_start (*template_hbox, false, false);
+	session_new_vbox.pack_start (more_new_session_options_button, false, false);
 	session_new_vbox.show_all ();
 }
 
