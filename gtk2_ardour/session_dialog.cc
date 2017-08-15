@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2013 Paul Davis
+  Copyright (C) 2013 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -148,7 +148,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	   pass then require it for a second pass (e.g. when there
 	   is an error with session loading and we have to ask the user
 	   what to do next).
-	 */
+	*/
 
 	if (!session_name.empty() && !require_new) {
 		response (RESPONSE_OK);
@@ -161,7 +161,7 @@ SessionDialog::SessionDialog ()
 	, new_only (false)
 	, _provided_session_name ("")
 	, _provided_session_path ("")
-	// the following are unused , but have no default ctor
+	  // the following are unused , but have no default ctor
 	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
 	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
@@ -503,7 +503,7 @@ SessionDialog::populate_session_templates ()
 
 	template_model->clear ();
 
-    //Add any Lua scripts (factory templates) found in the scripts folder
+	//Add any Lua scripts (factory templates) found in the scripts folder
 	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
 	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
 		TreeModel::Row row;
@@ -511,11 +511,11 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.name] = "Meta: " + (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[session_template_columns.description] = (*s)->description;
-        row[session_template_columns.created_with] = _("{Factory Template}");
+		row[session_template_columns.created_with] = _("{Factory Template}");
 	}
 
 
-    //Add any "template sessions" found in the user's preferences folder
+	//Add any "template sessions" found in the user's preferences folder
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
 		TreeModel::Row row;
 
@@ -523,22 +523,22 @@ SessionDialog::populate_session_templates ()
 
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
-        row[session_template_columns.description] = (*x).description;
-        row[session_template_columns.created_with] = (*x).created_with;
+		row[session_template_columns.description] = (*x).description;
+		row[session_template_columns.created_with] = (*x).created_with;
 	}
-    
-    //Add an explicit 'Empty Template' item
+
+	//Add an explicit 'Empty Template' item
 	TreeModel::Row row = *template_model->prepend ();
 	row[session_template_columns.name] = (_("Empty Template"));
 	row[session_template_columns.path] = string();
-    row[session_template_columns.description] = _("An empty session with factory default settings.");
-    row[session_template_columns.created_with] = _("{Factory Template}");
+	row[session_template_columns.description] = _("An empty session with factory default settings.");
+	row[session_template_columns.created_with] = _("{Factory Template}");
 
-    //auto-select the first item in the list
-    Gtk::TreeModel::Row first = template_model->children()[0];
-    if(first) {
-        template_chooser.get_selection()->select(first);
-    }
+	//auto-select the first item in the list
+	Gtk::TreeModel::Row first = template_model->children()[0];
+	if(first) {
+		template_chooser.get_selection()->select(first);
+	}
 }
 
 void
@@ -547,15 +547,15 @@ SessionDialog::setup_new_session_page ()
 	session_new_vbox.set_border_width (8);
 	session_new_vbox.set_spacing (8);
 
-    Label* name_label = manage (new Label);
+	Label* name_label = manage (new Label);
 	name_label->set_text (_("Session name:"));
 
 	HBox* name_hbox = manage (new HBox);
-    name_hbox->set_spacing (8);
+	name_hbox->set_spacing (8);
 	name_hbox->pack_start (*name_label, false, true);
 	name_hbox->pack_start (new_name_entry, true, true);
 
-    //check to see if a session name was provided on command line
+	//check to see if a session name was provided on command line
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
 		open_button->set_sensitive (true);
@@ -573,7 +573,7 @@ SessionDialog::setup_new_session_page ()
 	folder_box->pack_start (new_folder_chooser, true, true);
 
 	//determine the text in the new folder selector
-    if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
+	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
 	} else if (ARDOUR_UI::instance()->session_loaded) {
 		// point the new session file chooser at the parent directory of the current session
@@ -598,14 +598,14 @@ SessionDialog::setup_new_session_page ()
 	//Template & Template Description area
 	HBox* template_hbox = manage (new HBox);
 
-    //if the "template override" is provided, don't give the user any template selections   (?)
+	//if the "template override" is provided, don't give the user any template selections   (?)
 	if ( load_template_override.empty() ) {
-        template_hbox->set_spacing (8);
-        template_hbox->pack_start (template_chooser, true, true);
-        template_hbox->pack_start (template_desc_frame, true, true);
-    }
-    
-    //template_desc is the textview that displays the currently selected template's description
+		template_hbox->set_spacing (8);
+		template_hbox->pack_start (template_chooser, true, true);
+		template_hbox->pack_start (template_desc_frame, true, true);
+	}
+
+	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	template_desc.set_size_request(300,400);
@@ -615,7 +615,7 @@ SessionDialog::setup_new_session_page ()
 	template_desc_frame.set_name (X_("HighlightFrame"));
 	template_desc_frame.add (template_desc);
 
-    //template_chooser is the treeview showing available templates
+	//template_chooser is the treeview showing available templates
 	template_model = TreeStore::create (session_template_columns);
 	template_chooser.set_model (template_model);
 	template_chooser.set_size_request(300,400);
@@ -810,15 +810,15 @@ SessionDialog::redisplay_recent_sessions ()
 #if 0
 						child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 						switch (sf) {
-							case FormatFloat:
-								child_row[recent_session_columns.disk_format] = _("32-bit float");
-								break;
-							case FormatInt24:
-								child_row[recent_session_columns.disk_format] = _("24-bit");
-								break;
-							case FormatInt16:
-								child_row[recent_session_columns.disk_format] = _("16-bit");
-								break;
+						case FormatFloat:
+							child_row[recent_session_columns.disk_format] = _("32-bit float");
+							break;
+						case FormatInt24:
+							child_row[recent_session_columns.disk_format] = _("24-bit");
+							break;
+						case FormatInt16:
+							child_row[recent_session_columns.disk_format] = _("16-bit");
+							break;
 						}
 #else
 						child_row[recent_session_columns.sample_rate] = "";
@@ -1324,4 +1324,3 @@ SessionDialog::on_delete_event (GdkEventAny* ev)
 	response (RESPONSE_CANCEL);
 	return ArdourDialog::on_delete_event (ev);
 }
-
