@@ -612,7 +612,7 @@ SessionDialog::setup_new_session_page ()
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
 
-	template_desc_frame.set_name (X_("HighlightFrame"));
+	template_desc_frame.set_name (X_("TextHighlightFrame"));
 	template_desc_frame.add (template_desc);
 
 	//template_chooser is the treeview showing available templates

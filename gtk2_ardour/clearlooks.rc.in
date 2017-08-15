@@ -413,10 +413,10 @@ style "base_frame"
 	bg[NORMAL] = @background
 }
 
-style "highlight_frame"
+style "text_highlight_frame"
 {
-	fg[NORMAL] = @foreground
-	bg[NORMAL] = @foreground
+	fg[NORMAL] = @texts
+	bg[NORMAL] = @texts
 }
 
 style "transport_frame"
@@ -1107,7 +1107,7 @@ widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
 
 widget "*BaseFrame" style:highest "base_frame"
-widget "*HighlightFrame" style:highest "highlight_frame"
+widget "*TextHighlightFrame" style:highest "text_highlight_frame"
 widget "*TransportFrame" style:highest "transport_frame"
 widget "*TransportFrame*" style:highest  "transport_frame"
 widget "*EditorWindow*" style:highest  "editor_window"
