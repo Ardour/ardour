@@ -1568,6 +1568,7 @@ ProcessorEntry::PluginInlineDisplay::PluginInlineDisplay (ProcessorEntry& e, boo
 	: PluginDisplay (p, max_height)
 	, _entry (e)
 	, _scroll (false)
+	, _given_max_height (max_height)
 {
 	std::string postfix = string_compose(_("\n%1+double-click to toggle inline-display"), Keyboard::tertiary_modifier_name ());
 
@@ -1639,11 +1640,15 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 	}
 
 	if (shm != _cur_height) {
-		if (_scroll == sc || _cur_height < shm) {
-			queue_resize ();
+		queue_resize ();
+		if (!_scroll && sc) {
+			_max_height = shm;
+		} else {
+			_max_height = _given_max_height;
 		}
 		_cur_height = shm;
 	}
+
 	_scroll = sc;
 }
 
