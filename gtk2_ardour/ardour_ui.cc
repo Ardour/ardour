@@ -3923,6 +3923,14 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	return 0;
 }
 
+
+static void _lua_print (std::string s) {
+#ifndef NDEBUG
+	std::cout << "LuaInstance: " << s << "\n";
+#endif
+	PBD::info << "LuaInstance: " << s << endmsg;
+}
+
 void
 ARDOUR_UI::meta_session_setup (const std::string& script_path)
 {
@@ -3931,6 +3939,7 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 	}
 
 	LuaState lua;
+	lua.Print.connect (&_lua_print);
 	lua.sandbox (true);
 
 	lua_State* L = lua.getState();
@@ -3947,7 +3956,9 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 		if (fn.isFunction()) {
 			fn ();
 		}
-	} catch (luabridge::LuaException const& e) { }
+	} catch (luabridge::LuaException const& e) {
+		cerr << "LuaException:" << e.what () << endl;
+	}
 }
 
 void
