@@ -137,6 +137,7 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	if (trackview.editor().internal_editing() &&
 	    ev->type == GDK_BUTTON_RELEASE &&
+	    ev->button.button == 1 &&
 	    e.current_mouse_mode() == Editing::MouseDraw &&
 	    !e.drags()->active()) {
 
