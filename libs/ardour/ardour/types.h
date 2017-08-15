@@ -625,11 +625,7 @@ namespace ARDOUR {
 	};
 
 	struct BusProfile {
-		AutoConnectOption input_ac;      /* override the RC config for input auto-connection */
-		AutoConnectOption output_ac;     /* override the RC config for output auto-connection */
-		uint32_t master_out_channels;    /* how many channels for the master bus */
-		uint32_t requested_physical_in;  /* now many of the available physical inputs to consider usable */
-		uint32_t requested_physical_out; /* now many of the available physical inputs to consider usable */
+		uint32_t master_out_channels; /* how many channels for the master bus, 0: no master bus */
 	};
 
 	enum FadeShape {

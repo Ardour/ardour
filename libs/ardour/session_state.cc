@@ -657,7 +657,6 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	/* set up Master Out and Monitor Out if necessary */
 
 	if (bus_profile) {
-
 		RouteList rl;
 		ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
 
@@ -678,28 +677,10 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 
 			rl.push_back (r);
 
-		} else {
-			/* prohibit auto-connect to master, because there isn't one */
-			bus_profile->output_ac = AutoConnectOption (bus_profile->output_ac & ~AutoConnectMaster);
 		}
 
 		if (!rl.empty()) {
 			add_routes (rl, false, false, false, PresentationInfo::max_order);
-		}
-
-		// Waves Tracks: Skip this. Always use autoconnection for Tracks
-		if (!ARDOUR::Profile->get_trx()) {
-
-			/* this allows the user to override settings with an environment variable.
-			*/
-
-			if (no_auto_connect()) {
-				bus_profile->input_ac = AutoConnectOption (0);
-				bus_profile->output_ac = AutoConnectOption (0);
-			}
-
-			Config->set_input_auto_connect (bus_profile->input_ac);
-			Config->set_output_auto_connect (bus_profile->output_ac);
 		}
 	}
 
