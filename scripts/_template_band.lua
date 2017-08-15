@@ -3,21 +3,21 @@ ardour {
 	name        = "Live Band Recording Session",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
-    
+
 You will be prompted to assemble your session from a list of track types.
 
 Each track comes with its pre-assigned grouping, routing, EQ and plugins.
-    ]]
+]]
 }
 
 function session_setup ()
 
-    --prompt the user for the tracks they'd like to instantiate
+	--prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
 		{ type = "heading", title = "Select the tracks you'd like\n to add to your session: " },
-        
+
 		{ type = "checkbox", key = "LeadVox", default = false, title = "Lead Vocal" },
-        
+
 		{ type = "checkbox", key = "Bass", default = false, title = "Bass" },
 
 		{ type = "checkbox", key = "Piano", default = false, title = "Piano" },
@@ -31,7 +31,7 @@ function session_setup ()
 		{ type = "checkbox", key = "basicDrums", default = false, title = "Basic Drum Mics (Kick + Snare)" },
 		{ type = "checkbox", key = "fullDrums", default = false, title = "Full Drum Mics (Kick, Snare, HiHat, 3 Toms)" },
 		{ type = "checkbox", key = "overDrums", default = false, title = "Overkill Drum Mics (Kick (2x), Snare(2x), HiHat, 3 Toms)" },
-        
+
 		{ type = "checkbox", key = "Drum O-Heads (2 mono)", default = false, title = "Drum O-Heads (2 mono)" },
 		{ type = "checkbox", key = "Drum O-Heads (Stereo)", default = false, title = "Drum O-Heads (Stereo)" },
 
@@ -45,37 +45,51 @@ function session_setup ()
 	if (not rv) then
 		return
 	end
-    
-    local track_count = 0;
+
+	local track_list = {}
+	local channel_count = 0
+
+	function add_track (io, name)
+		local tl = Session:new_audio_track (io, io, nil, 1, name,  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+		for track in tl:iter() do
+			table.insert (track_list, track)
+			channel_count = channel_count + io
+		end
+	end
 
 	-- for each selected item, create track(s), add plugins, etc
 	if rv['Bass'] then
-    	local tl = Session:new_audio_track (1, 1, nil, 1, "Bass",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
-		for track in tl:iter() do
---			track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
-		end
-        
-        track_count = track_count+1
+		add_track (1, "Bass")
 	end
 
 	if rv['Room (Stereo)'] then
-    	local tl = Session:new_audio_track (2, 2, nil, 1, "Room (Stereo)",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
-		for track in tl:iter() do
---			track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
-		end
-
-        track_count = track_count+2
+		add_track (2, "Room (Stereo)")
 	end
 
-    --determine the number of tracks we can record
+	-- TODO add others
+
+
+	-- determine the number of physical inputs
 	local e = Session:engine()
-	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())  -- from the engine's POV readable/capture ports are "outputs"
-	local num_inputs = t[4]:size();  -- table 't' holds argument references. t[4] is the C.StringVector (return value)
+	-- from the engine's POV readable/capture ports are "outputs"
+	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())
+	-- table 't' holds argument references. t[4] is the C.StringVector (return value)
+	local num_inputs = t[4]:size()
 
-    --ToDo:  if track_count > num_inputs, we should warn the user to check their routing.        
+	if num_inputs < channel_count then
+		-- warn the user if there are less physical inputs than created tracks
+		LuaDialog.Message ("Session Creation", "Check your routing :)", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
 
-    --fit all tracks on the screen
-    Editor:access_action("Editor","fit_all_tracks")
+	else
+
+		-- otherwise record arm all created tracks
+		for _, t in ipairs (track_list) do
+			t:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
+		end
+	end
+
+	--fit all tracks on the screen
+	Editor:access_action("Editor","fit_all_tracks")
 
 	Session:save_state("");
 end
