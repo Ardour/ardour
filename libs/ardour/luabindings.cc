@@ -193,6 +193,7 @@ CLASSKEYS(ARDOUR::Plugin::PresetRecord);
 CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
 CLASSKEYS(ARDOUR::PresentationInfo);
+CLASSKEYS(ARDOUR::RCConfiguration);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
 CLASSKEYS(ARDOUR::Source);
@@ -309,6 +310,11 @@ CLASSKEYS(LuaDialog::Dialog);
  */
 
 using namespace ARDOUR;
+
+/** Access libardour global configuration */
+static RCConfiguration* _libardour_config () {
+	return ARDOUR::Config;
+}
 
 void
 LuaBindings::stddef (lua_State* L)
@@ -1920,6 +1926,25 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("vcas", &VCAManager::vcas)
 		.endClass()
 
+		.deriveClass <RCConfiguration, PBD::Configuration> ("RCConfiguration")
+#undef  CONFIG_VARIABLE
+#undef  CONFIG_VARIABLE_SPECIAL
+#define CONFIG_VARIABLE(Type,var,name,value) \
+		.addFunction ("get_" # var, &RCConfiguration::get_##var) \
+		.addFunction ("set_" # var, &RCConfiguration::set_##var) \
+		.addProperty (#var, &RCConfiguration::get_##var, &RCConfiguration::set_##var)
+
+#define CONFIG_VARIABLE_SPECIAL(Type,var,name,value,mutator) \
+		.addFunction ("get_" # var, &RCConfiguration::get_##var) \
+		.addFunction ("set_" # var, &RCConfiguration::set_##var) \
+		.addProperty (#var, &RCConfiguration::get_##var, &RCConfiguration::set_##var)
+
+#include "ardour/rc_configuration_vars.h"
+
+#undef CONFIG_VARIABLE
+#undef CONFIG_VARIABLE_SPECIAL
+		.endClass()
+
 		.deriveClass <SessionConfiguration, PBD::Configuration> ("SessionConfiguration")
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
@@ -1938,6 +1963,10 @@ LuaBindings::common (lua_State* L)
 #undef CONFIG_VARIABLE
 #undef CONFIG_VARIABLE_SPECIAL
 		.endClass()
+
+		// we could use addProperty ()
+		.addFunction ("config", &_libardour_config)
+
 		.endNamespace ();
 
 	// basic representation of Session
