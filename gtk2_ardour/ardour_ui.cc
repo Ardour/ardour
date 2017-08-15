@@ -3285,13 +3285,7 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 	BusProfile bus_profile;
 
 	if (nsm) {
-
 		bus_profile.master_out_channels = 2;
-		bus_profile.input_ac = AutoConnectPhysical;
-		bus_profile.output_ac = AutoConnectMaster;
-		bus_profile.requested_physical_in = 0; // use all available
-		bus_profile.requested_physical_out = 0; // use all available
-
 	} else {
 
 		/* get settings from advanced section of NSD */
@@ -3302,27 +3296,9 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 			bus_profile.master_out_channels = 0;
 		}
 
-		if (sd.connect_inputs()) {
-			bus_profile.input_ac = AutoConnectPhysical;
-		} else {
-			bus_profile.input_ac = AutoConnectOption (0);
-		}
-
-		bus_profile.output_ac = AutoConnectOption (0);
-
-		if (sd.connect_outputs ()) {
-			if (sd.connect_outs_to_master()) {
-				bus_profile.output_ac = AutoConnectMaster;
-			} else if (sd.connect_outs_to_physical()) {
-				bus_profile.output_ac = AutoConnectPhysical;
-			}
-		}
-
-		bus_profile.requested_physical_in = (uint32_t) sd.input_limit_count();
-		bus_profile.requested_physical_out = (uint32_t) sd.output_limit_count();
 	}
 
-	if (build_session (session_path, session_name, bus_profile)) {
+	if (build_session (session_path, session_name, &bus_profile)) {
 		return -1;
 	}
 
@@ -3846,7 +3822,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 }
 
 int
-ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile& bus_profile)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, BusProfile* bus_profile)
 {
 	Session *new_session;
 	int x;
@@ -3863,7 +3839,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	_session_is_new = true;
 
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, &bus_profile);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile);
 	}
 
 	catch (SessionException e) {
