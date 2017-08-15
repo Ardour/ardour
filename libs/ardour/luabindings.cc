@@ -1970,6 +1970,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_audio_route", &Session::new_audio_route)
 		.addFunction ("new_midi_track", &Session::new_midi_track)
 		.addFunction ("new_midi_route", &Session::new_midi_route)
+
+		.addFunction ("add_master_bus", &Session::add_master_bus)
+		.addFunction ("add_monitor_section", &Session::add_monitor_section)
+		.addFunction ("remove_monitor_section", &Session::remove_monitor_section)
+
 		.addFunction ("get_routes", &Session::get_routes)
 		.addFunction ("get_tracks", &Session::get_tracks)
 		.addFunction ("get_stripables", (StripableList (Session::*)() const)&Session::get_stripables)

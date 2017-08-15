@@ -1495,6 +1495,33 @@ Session::reset_monitor_section ()
 	}
 }
 
+int
+Session::add_master_bus (ChanCount const& count)
+{
+	if (master_out ()) {
+		return -1;
+	}
+
+	RouteList rl;
+
+	boost::shared_ptr<Route> r (new Route (*this, _("Master"), PresentationInfo::MasterOut, DataType::AUDIO));
+	if (r->init ()) {
+		return -1;
+	}
+
+	BOOST_MARK_ROUTE(r);
+
+	{
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		r->input()->ensure_io (count, false, this);
+		r->output()->ensure_io (count, false, this);
+	}
+
+	rl.push_back (r);
+	add_routes (rl, false, false, false, PresentationInfo::max_order);
+	return 0;
+}
+
 void
 Session::hookup_io ()
 {

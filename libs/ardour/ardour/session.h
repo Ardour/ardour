@@ -866,6 +866,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::Signal0<void> session_routes_reconnected;
 
 	/* monitor/master out */
+	int add_master_bus (ChanCount const&);
 
 	void add_monitor_section ();
 	void reset_monitor_section ();

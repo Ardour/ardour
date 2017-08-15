@@ -659,33 +659,16 @@ Session::create (const string& session_template, BusProfile* bus_profile)
 	if (bus_profile) {
 		RouteList rl;
 		ChanCount count(DataType::AUDIO, bus_profile->master_out_channels);
+		if (bus_profile->master_out_channels) {
+			int rv = add_master_bus (count);
 
-		// Waves Tracks: always create master bus for Tracks
-		if (ARDOUR::Profile->get_trx() || bus_profile->master_out_channels) {
-			boost::shared_ptr<Route> r (new Route (*this, _("Master"), PresentationInfo::MasterOut, DataType::AUDIO));
-			if (r->init ()) {
-				return -1;
+			if (rv) {
+				return rv;
 			}
 
-			BOOST_MARK_ROUTE(r);
-
-			{
-				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-				r->input()->ensure_io (count, false, this);
-				r->output()->ensure_io (count, false, this);
-			}
-
-			rl.push_back (r);
-
+			if (Config->get_use_monitor_bus())
+				add_monitor_section ();
 		}
-
-		if (!rl.empty()) {
-			add_routes (rl, false, false, false, PresentationInfo::max_order);
-		}
-	}
-
-	if (Config->get_use_monitor_bus() && bus_profile) {
-		add_monitor_section ();
 	}
 
 	return 0;
