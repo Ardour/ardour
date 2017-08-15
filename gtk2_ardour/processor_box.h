@@ -258,6 +258,7 @@ private:
 
 		ProcessorEntry& _entry;
 		bool _scroll;
+		const uint32_t _given_max_height;
 	};
 
 	class LuaPluginDisplay : public PluginInlineDisplay {
