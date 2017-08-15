@@ -3287,12 +3287,18 @@ ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& sess
 	if (nsm) {
 		bus_profile.master_out_channels = 2;
 	} else {
+
 		/* get settings from advanced section of NSD */
-		bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
+
+		if (sd.create_master_bus()) {
+			bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
+		} else {
+			bus_profile.master_out_channels = 0;
+		}
+
 	}
 
-	// NULL profile: no master, no monitor
-	if (build_session (session_path, session_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL)) {
+	if (build_session (session_path, session_name, &bus_profile)) {
 		return -1;
 	}
 
