@@ -2553,11 +2553,13 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->is_auditioner()) {
-			in  += tr->n_inputs();
-			out += tr->n_outputs();
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (!tr) {
+			continue;
 		}
+		assert (!tr->is_auditioner()); // XXX remove me
+		in  += tr->n_inputs();
+		out += tr->n_outputs();
 	}
 }
 
@@ -3120,7 +3122,8 @@ Session::ensure_stripable_sort_order ()
 
 	for (StripableList::iterator si = sl.begin(); si != sl.end(); ++si) {
 		boost::shared_ptr<Stripable> s (*si);
-		if (s->is_monitor () || s->is_auditioner ()) {
+		assert (!s->is_auditioner ()); // XXX remove me
+		if (s->is_monitor ()) {
 			continue;
 		}
 		if (order != s->presentation_info().order()) {
@@ -3612,11 +3615,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		}
 	}
 
-	/* auditioner and monitor routes are not part of the order */
-	if (auditioner) {
-		assert (n_routes > 0);
-		--n_routes;
-	}
+	/* monitor is not part of the order */
 	if (_monitor_out) {
 		assert (n_routes > 0);
 		--n_routes;
@@ -4294,7 +4293,8 @@ Session::muted () const
 	StripableList all;
 	get_stripables (all);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
+		assert (!(*i)->is_auditioner()); // XXX remove me
+		if ((*i)->is_monitor()) {
 			continue;
 		}
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*i);
@@ -4318,7 +4318,8 @@ Session::cancel_all_mute ()
 	std::vector<boost::weak_ptr<AutomationControl> > muted;
 	boost::shared_ptr<ControlList> cl (new ControlList);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_auditioner() || (*i)->is_monitor()) {
+		assert (!(*i)->is_auditioner());
+		if ((*i)->is_monitor()) {
 			continue;
 		}
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (*i);
@@ -4629,10 +4630,11 @@ Session::reassign_track_numbers ()
 	StateProtector sp (this);
 
 	for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
+		assert (!(*i)->is_auditioner());
 		if (boost::dynamic_pointer_cast<Track> (*i)) {
 			(*i)->set_track_number(++tn);
 		}
-		else if (!(*i)->is_master() && !(*i)->is_monitor() && !(*i)->is_auditioner()) {
+		else if (!(*i)->is_master() && !(*i)->is_monitor()) {
 			(*i)->set_track_number(--bn);
 		}
 	}
@@ -6447,19 +6449,15 @@ Session::nbusses () const
 }
 
 uint32_t
-Session::nstripables (bool with_auditioner_and_monitor) const
+Session::nstripables (bool with_monitor) const
 {
 	uint32_t rv = routes.reader()->size ();
 	rv += _vca_manager->vcas ().size ();
 
-	if (with_auditioner_and_monitor) {
+	if (with_monitor) {
 		return rv;
 	}
 
-	if (auditioner) {
-		assert (rv > 0);
-		--rv;
-	}
 	if (_monitor_out) {
 		assert (rv > 0);
 		--rv;
@@ -6590,9 +6588,8 @@ Session::get_tracks () const
 
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 		if (boost::dynamic_pointer_cast<Track> (*r)) {
-			if (!(*r)->is_auditioner()) {
-				tl->push_back (*r);
-			}
+			assert (!(*r)->is_auditioner()); // XXX remove me
+			tl->push_back (*r);
 		}
 	}
 	return tl;
@@ -6936,7 +6933,8 @@ Session::post_playback_latency ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_auditioner() && ((*i)->active())) {
+		assert (!(*i)->is_auditioner()); // XXX remove me
+		if ((*i)->active()) {
 			_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
 		}
 	}
@@ -7042,7 +7040,8 @@ Session::update_latency_compensation (bool force_whole_graph)
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->is_auditioner() && ((*i)->active())) {
+		assert (!(*i)->is_auditioner()); // XXX remove me
+		if ((*i)->active()) {
 			framecnt_t tl;
 			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency ())) {
 				some_track_latency_changed = true;
