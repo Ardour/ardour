@@ -75,17 +75,9 @@ PluginDisplay::update_height_alloc (uint32_t height)
 {
 	uint32_t shm = std::min (_max_height, height);
 
-	Gtk::Container* pr = get_parent();
-	for (uint32_t i = 0; i < 4 && pr; ++i) {
-		// VBox, EventBox, ViewPort, ScrolledWindow
-		pr = pr->get_parent();
-	}
-
 	if (shm != _cur_height) {
-		if (_cur_height < shm) {
-			queue_resize ();
-		}
 		_cur_height = shm;
+		queue_resize ();
 	}
 }
 
