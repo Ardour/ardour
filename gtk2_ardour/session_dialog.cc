@@ -55,6 +55,8 @@
 #include "ardour/template_utils.h"
 #include "ardour/filename_extensions.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "ardour_ui.h"
 #include "session_dialog.h"
 #include "opts.h"
@@ -78,10 +80,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _provided_session_name (session_name)
 	, _provided_session_path (session_path)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
-	, more_new_session_options_button (_("Advanced options ..."))
-	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false)
 {
 	set_position (WIN_POS_CENTER);
@@ -161,10 +159,6 @@ SessionDialog::SessionDialog ()
 	, new_only (false)
 	, _provided_session_name ("")
 	, _provided_session_path ("")
-	  // the following are unused , but have no default ctor
-	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false) // caller must check should_be_new
 {
 	get_vbox()->set_spacing (6);
@@ -202,8 +196,71 @@ SessionDialog::clear_given ()
 	_provided_session_name = "";
 }
 
+uint32_t
+SessionDialog::meta_master_bus_profile (std::string script_path) const
+{
+	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		return UINT32_MAX;
+	}
+
+	LuaState lua;
+	lua.sandbox (true);
+	lua_State* L = lua.getState();
+
+	lua.do_command (
+			"ardourluainfo = {}"
+			"function ardour (entry)"
+			"  ardourluainfo['type'] = assert(entry['type'])"
+			"  ardourluainfo['master_bus'] = entry['master_bus'] or 2"
+			" end"
+			);
+
+	int err = -1;
+
+	try {
+		err = lua.do_file (script_path);
+	} catch (luabridge::LuaException const& e) {
+		err = -1;
+	}
+
+	if (err) {
+		return UINT32_MAX;
+	}
+
+	luabridge::LuaRef nfo = luabridge::getGlobal (L, "ardourluainfo");
+	if (nfo.type() != LUA_TTABLE) {
+		return UINT32_MAX;
+	}
+
+	if (nfo["master_bus"].type() != LUA_TNUMBER || nfo["type"].type() != LUA_TSTRING) {
+		return UINT32_MAX;
+	}
+
+	LuaScriptInfo::ScriptType type = LuaScriptInfo::str2type (nfo["type"].cast<std::string>());
+	if (type != LuaScriptInfo::SessionSetup) {
+		return UINT32_MAX;
+	}
+
+	return nfo["master_bus"].cast<uint32_t>();
+}
+
+uint32_t
+SessionDialog::master_channel_count ()
+{
+	if (use_session_template ()) {
+		std::string tn = session_template_name();
+		if (tn.substr (0, 11) == "urn:ardour:") {
+			uint32_t mc = meta_master_bus_profile (tn.substr (11));
+			if (mc != UINT32_MAX) {
+				return mc;
+			}
+		}
+	}
+	return 2;
+}
+
 bool
-SessionDialog::use_session_template ()
+SessionDialog::use_session_template () const
 {
 	if (!load_template_override.empty()) {
 		return true;
@@ -225,7 +282,8 @@ SessionDialog::session_template_name ()
 	}
 
 	if (template_chooser.get_selection()->count_selected_rows() > 0) {
-		TreeIter iter = template_chooser.get_selection()->get_selected();
+
+		TreeIter const iter = template_chooser.get_selection()->get_selected();
 
 		if (iter) {
 			string s = (*iter)[session_template_columns.path];
@@ -628,15 +686,9 @@ SessionDialog::setup_new_session_page ()
 
 	/* --- */
 
-	setup_more_options_box ();
-	more_new_session_options_button.add (more_options_vbox);
-
-	/* --- */
-
 	session_new_vbox.pack_start (*template_hbox, false, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
-	session_new_vbox.pack_start (more_new_session_options_button, false, true);
 	session_new_vbox.show_all ();
 }
 
@@ -908,301 +960,6 @@ SessionDialog::template_row_selected ()
 			template_desc.get_buffer()->set_text (s);
 		}
 	}
-}
-
-void
-SessionDialog::setup_more_options_box ()
-{
-	more_options_vbox.set_border_width (24);
-
-	_output_limit_count.set_adjustment (_output_limit_count_adj);
-	_input_limit_count.set_adjustment (_input_limit_count_adj);
-	_master_bus_channel_count.set_adjustment (_master_bus_channel_count_adj);
-
-	chan_count_label_1.set_text (_("channels"));
-	chan_count_label_3.set_text (_("channels"));
-	chan_count_label_4.set_text (_("channels"));
-
-	chan_count_label_1.set_alignment(0,0.5);
-	chan_count_label_1.set_padding(0,0);
-	chan_count_label_1.set_line_wrap(false);
-
-	chan_count_label_3.set_alignment(0,0.5);
-	chan_count_label_3.set_padding(0,0);
-	chan_count_label_3.set_line_wrap(false);
-
-	chan_count_label_4.set_alignment(0,0.5);
-	chan_count_label_4.set_padding(0,0);
-	chan_count_label_4.set_line_wrap(false);
-
-	bus_label.set_markup (_("<b>Busses</b>"));
-	input_label.set_markup (_("<b>Inputs</b>"));
-	output_label.set_markup (_("<b>Outputs</b>"));
-
-	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
-	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_master_bus_channel_count.set_numeric(true);
-	_master_bus_channel_count.set_digits(0);
-	_master_bus_channel_count.set_wrap(false);
-
-	_create_master_bus.set_label (_("Create master bus"));
-	_create_master_bus.set_flags(Gtk::CAN_FOCUS);
-	_create_master_bus.set_relief(Gtk::RELIEF_NORMAL);
-	_create_master_bus.set_mode(true);
-	_create_master_bus.set_active(true);
-	_create_master_bus.set_border_width(0);
-
-	advanced_table.set_row_spacings(0);
-	advanced_table.set_col_spacings(0);
-
-	_connect_inputs.set_label (_("Automatically connect to physical inputs"));
-	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
-	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_inputs.set_mode(true);
-	_connect_inputs.set_active(Config->get_input_auto_connect() != ManualConnect);
-	_connect_inputs.set_border_width(0);
-
-	_limit_input_ports.set_label (_("Use only"));
-	_limit_input_ports.set_flags(Gtk::CAN_FOCUS);
-	_limit_input_ports.set_relief(Gtk::RELIEF_NORMAL);
-	_limit_input_ports.set_mode(true);
-	_limit_input_ports.set_sensitive(true);
-	_limit_input_ports.set_border_width(0);
-
-	_input_limit_count.set_flags(Gtk::CAN_FOCUS);
-	_input_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_input_limit_count.set_numeric(true);
-	_input_limit_count.set_digits(0);
-	_input_limit_count.set_wrap(false);
-	_input_limit_count.set_sensitive(false);
-
-	bus_hbox.pack_start (bus_table, Gtk::PACK_SHRINK, 18);
-
-	bus_label.set_alignment(0, 0.5);
-	bus_label.set_padding(0,0);
-	bus_label.set_line_wrap(false);
-	bus_label.set_selectable(false);
-	bus_label.set_use_markup(true);
-	bus_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	bus_frame.set_label_align(0,0.5);
-	bus_frame.add(bus_hbox);
-	bus_frame.set_label_widget(bus_label);
-
-	bus_table.set_row_spacings (0);
-	bus_table.set_col_spacings (0);
-	bus_table.attach (_create_master_bus, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (_master_bus_channel_count, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (chan_count_label_1, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
-
-	input_port_limit_hbox.pack_start(_limit_input_ports, Gtk::PACK_SHRINK, 6);
-	input_port_limit_hbox.pack_start(_input_limit_count, Gtk::PACK_SHRINK, 0);
-	input_port_limit_hbox.pack_start(chan_count_label_3, Gtk::PACK_SHRINK, 6);
-	input_port_vbox.pack_start(_connect_inputs, Gtk::PACK_SHRINK, 0);
-	input_port_vbox.pack_start(input_port_limit_hbox, Gtk::PACK_EXPAND_PADDING, 0);
-	input_table.set_row_spacings(0);
-	input_table.set_col_spacings(0);
-	input_table.attach(input_port_vbox, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 6);
-
-	input_hbox.pack_start (input_table, Gtk::PACK_SHRINK, 18);
-
-	input_label.set_alignment(0, 0.5);
-	input_label.set_padding(0,0);
-	input_label.set_line_wrap(false);
-	input_label.set_selectable(false);
-	input_label.set_use_markup(true);
-	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	input_frame.set_label_align(0,0.5);
-	input_frame.add(input_hbox);
-	input_frame.set_label_widget(input_label);
-
-	_connect_outputs.set_label (_("Automatically connect outputs"));
-	_connect_outputs.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs.set_mode(true);
-	_connect_outputs.set_active(Config->get_output_auto_connect() != ManualConnect);
-	_connect_outputs.set_border_width(0);
-	_limit_output_ports.set_label (_("Use only"));
-	_limit_output_ports.set_flags(Gtk::CAN_FOCUS);
-	_limit_output_ports.set_relief(Gtk::RELIEF_NORMAL);
-	_limit_output_ports.set_mode(true);
-	_limit_output_ports.set_sensitive(true);
-	_limit_output_ports.set_border_width(0);
-	_output_limit_count.set_flags(Gtk::CAN_FOCUS);
-	_output_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_output_limit_count.set_numeric(false);
-	_output_limit_count.set_digits(0);
-	_output_limit_count.set_wrap(false);
-	_output_limit_count.set_sensitive(false);
-	output_port_limit_hbox.pack_start(_limit_output_ports, Gtk::PACK_SHRINK, 6);
-	output_port_limit_hbox.pack_start(_output_limit_count, Gtk::PACK_SHRINK, 0);
-	output_port_limit_hbox.pack_start(chan_count_label_4, Gtk::PACK_SHRINK, 6);
-
-	_connect_outputs_to_master.set_label (_("... to master bus"));
-	_connect_outputs_to_master.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs_to_master.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs_to_master.set_mode(true);
-	_connect_outputs_to_master.set_active(Config->get_output_auto_connect() == AutoConnectMaster);
-	_connect_outputs_to_master.set_border_width(0);
-
-	_connect_outputs_to_master.set_group (connect_outputs_group);
-	_connect_outputs_to_physical.set_group (connect_outputs_group);
-
-	_connect_outputs_to_physical.set_label (_("... to physical outputs"));
-	_connect_outputs_to_physical.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs_to_physical.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs_to_physical.set_mode(true);
-	_connect_outputs_to_physical.set_active(Config->get_output_auto_connect() == AutoConnectPhysical);
-	_connect_outputs_to_physical.set_border_width(0);
-
-	output_conn_vbox.pack_start(_connect_outputs, Gtk::PACK_SHRINK, 0);
-	output_conn_vbox.pack_start(_connect_outputs_to_master, Gtk::PACK_SHRINK, 0);
-	output_conn_vbox.pack_start(_connect_outputs_to_physical, Gtk::PACK_SHRINK, 0);
-	output_vbox.set_border_width(6);
-
-	output_port_vbox.pack_start(output_port_limit_hbox, Gtk::PACK_SHRINK, 0);
-
-	output_vbox.pack_start(output_conn_vbox);
-	output_vbox.pack_start(output_port_vbox);
-
-	output_label.set_alignment(0, 0.5);
-	output_label.set_padding(0,0);
-	output_label.set_line_wrap(false);
-	output_label.set_selectable(false);
-	output_label.set_use_markup(true);
-	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	output_frame.set_label_align(0,0.5);
-
-	output_hbox.pack_start (output_vbox, Gtk::PACK_SHRINK, 18);
-
-	output_frame.add(output_hbox);
-	output_frame.set_label_widget(output_label);
-
-	more_options_vbox.pack_start(advanced_table, Gtk::PACK_SHRINK, 0);
-	more_options_vbox.pack_start(bus_frame, Gtk::PACK_SHRINK, 6);
-	more_options_vbox.pack_start(input_frame, Gtk::PACK_SHRINK, 6);
-	more_options_vbox.pack_start(output_frame, Gtk::PACK_SHRINK, 0);
-
-	/* signals */
-
-	_connect_inputs.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::connect_inputs_clicked));
-	_connect_outputs.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::connect_outputs_clicked));
-	_limit_input_ports.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::limit_inputs_clicked));
-	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::limit_outputs_clicked));
-	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::master_bus_button_clicked));
-
-	/* note that more_options_vbox is "visible" by default even
-	 * though it may not be displayed to the user, this is so the dialog
-	 * doesn't resize.
-	 */
-	more_options_vbox.show_all ();
-}
-
-bool
-SessionDialog::create_master_bus() const
-{
-	return _create_master_bus.get_active();
-}
-
-int
-SessionDialog::master_channel_count() const
-{
-	return _master_bus_channel_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_inputs() const
-{
-	return _connect_inputs.get_active();
-}
-
-bool
-SessionDialog::limit_inputs_used_for_connection() const
-{
-	return _limit_input_ports.get_active();
-}
-
-int
-SessionDialog::input_limit_count() const
-{
-	return _input_limit_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_outputs() const
-{
-	return _connect_outputs.get_active();
-}
-
-bool
-SessionDialog::limit_outputs_used_for_connection() const
-{
-	return _limit_output_ports.get_active();
-}
-
-int
-SessionDialog::output_limit_count() const
-{
-	return _output_limit_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_outs_to_master() const
-{
-	return _connect_outputs_to_master.get_active();
-}
-
-bool
-SessionDialog::connect_outs_to_physical() const
-{
-	return _connect_outputs_to_physical.get_active();
-}
-
-void
-SessionDialog::connect_inputs_clicked ()
-{
-	_limit_input_ports.set_sensitive(_connect_inputs.get_active());
-
-	if (_connect_inputs.get_active() && _limit_input_ports.get_active()) {
-		_input_limit_count.set_sensitive(true);
-	} else {
-		_input_limit_count.set_sensitive(false);
-	}
-}
-
-void
-SessionDialog::connect_outputs_clicked ()
-{
-	bool const co = _connect_outputs.get_active ();
-	_limit_output_ports.set_sensitive(co);
-	_connect_outputs_to_master.set_sensitive(co);
-	_connect_outputs_to_physical.set_sensitive(co);
-
-	if (co && _limit_output_ports.get_active()) {
-		_output_limit_count.set_sensitive(true);
-	} else {
-		_output_limit_count.set_sensitive(false);
-	}
-}
-
-void
-SessionDialog::limit_inputs_clicked ()
-{
-	_input_limit_count.set_sensitive(_limit_input_ports.get_active());
-}
-
-void
-SessionDialog::limit_outputs_clicked ()
-{
-	_output_limit_count.set_sensitive(_limit_output_ports.get_active());
-}
-
-void
-SessionDialog::master_bus_button_clicked ()
-{
-	bool const yn = _create_master_bus.get_active();
-
-	_master_bus_channel_count.set_sensitive(yn);
-	_connect_outputs_to_master.set_sensitive(yn);
 }
 
 void

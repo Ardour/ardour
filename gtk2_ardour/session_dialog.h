@@ -59,24 +59,10 @@ public:
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
 
-	bool use_session_template();
+	bool use_session_template() const;
 	std::string session_template_name();
 
-	// advanced session options
-
-	bool create_master_bus() const;
-	int master_channel_count() const;
-
-	bool connect_inputs() const;
-	bool limit_inputs_used_for_connection() const;
-	int input_limit_count() const;
-
-	bool connect_outputs() const;
-	bool limit_outputs_used_for_connection() const;
-	int output_limit_count() const;
-
-	bool connect_outs_to_master() const;
-	bool connect_outs_to_physical() const;
+	uint32_t master_channel_count();
 
 	void set_provided_session(const std::string& session_name, const std::string& session_path) {
 		_provided_session_name = session_name;
@@ -189,74 +175,18 @@ private:
 
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;
-	Gtk::Expander more_new_session_options_button;
 	std::string load_template_override;
 
-	void more_new_session_options_button_clicked();
 	void new_name_changed ();
 	void new_name_activated ();
 	void populate_session_templates ();
 
-	/* more options for new sessions */
-
-	Gtk::VBox more_options_vbox;
-
-	Gtk::Label chan_count_label_1;
-	Gtk::Label chan_count_label_3;
-	Gtk::Label chan_count_label_4;
-	Gtk::Table advanced_table;
-	Gtk::HBox input_port_limit_hbox;
-	Gtk::VBox input_port_vbox;
-	Gtk::Table input_table;
-	Gtk::HBox input_hbox;
-
-	Gtk::Label bus_label;
-	Gtk::Frame bus_frame;
-	Gtk::Table bus_table;
-	Gtk::HBox bus_hbox;
-
-	Gtk::Label input_label;
-	Gtk::Frame input_frame;
-	Gtk::HBox output_port_limit_hbox;
-	Gtk::VBox output_port_vbox;
-	Gtk::VBox output_conn_vbox;
-	Gtk::VBox output_vbox;
-	Gtk::HBox output_hbox;
-
-	Gtk::Label output_label;
-	Gtk::Frame output_frame;
-	Gtk::VBox advanced_vbox;
-	Gtk::Label advanced_label;
-
-	Gtk::CheckButton _create_master_bus;
-	Gtk::SpinButton _master_bus_channel_count;
-
-	Gtk::CheckButton _connect_inputs;
-	Gtk::CheckButton _limit_input_ports;
-	Gtk::SpinButton _input_limit_count;
-
-	Gtk::CheckButton _connect_outputs;
-	Gtk::CheckButton _limit_output_ports;
-	Gtk::SpinButton _output_limit_count;
-
-	Gtk::RadioButtonGroup connect_outputs_group;
-	Gtk::RadioButton _connect_outputs_to_master;
-	Gtk::RadioButton _connect_outputs_to_physical;
-
-	Gtk::Adjustment _output_limit_count_adj;
-	Gtk::Adjustment _input_limit_count_adj;
-	Gtk::Adjustment _master_bus_channel_count_adj;
-
-	void connect_inputs_clicked ();
-	void connect_outputs_clicked ();
-	void limit_inputs_clicked ();
-	void limit_outputs_clicked ();
-	void master_bus_button_clicked ();
-	void setup_more_options_box ();
-
 	/* --disable plugins UI */
 	Gtk::CheckButton _disable_plugins;
 	void disable_plugins_clicked ();
+
+	/* meta-template */
+	uint32_t meta_master_bus_profile (std::string script) const;
 
 	/* always there */
 
