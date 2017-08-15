@@ -602,15 +602,18 @@ SessionDialog::setup_new_session_page ()
 	if ( load_template_override.empty() ) {
         template_hbox->set_spacing (8);
         template_hbox->pack_start (template_chooser, true, true);
-        template_hbox->pack_start (template_desc, true, true);
+        template_hbox->pack_start (template_desc_frame, true, true);
     }
     
     //template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	template_desc.set_size_request(300,400);
-	template_desc.set_left_margin(6);
-	template_desc.set_right_margin(6);
+	template_desc.set_name (X_("TextOnBackground"));
+	template_desc.set_border_width (6);
+
+	template_desc_frame.set_name (X_("HighlightFrame"));
+	template_desc_frame.add (template_desc);
 
     //template_chooser is the treeview showing available templates
 	template_model = TreeStore::create (session_template_columns);

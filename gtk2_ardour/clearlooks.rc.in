@@ -375,6 +375,11 @@ style "marker_text" = "small text"
 {
 }
 
+style "text_on_bg" = "medium_text"
+{
+	base[NORMAL] = @background
+}
+
 style "midi_tracer_textview" = "medium_monospace_text"
 {
 
@@ -406,6 +411,12 @@ style "base_frame"
 {
 	fg[NORMAL] = @background
 	bg[NORMAL] = @background
+}
+
+style "highlight_frame"
+{
+	fg[NORMAL] = @foreground
+	bg[NORMAL] = @foreground
 }
 
 style "transport_frame"
@@ -1096,6 +1107,7 @@ widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
 
 widget "*BaseFrame" style:highest "base_frame"
+widget "*HighlightFrame" style:highest "highlight_frame"
 widget "*TransportFrame" style:highest "transport_frame"
 widget "*TransportFrame*" style:highest  "transport_frame"
 widget "*EditorWindow*" style:highest  "editor_window"
@@ -1228,4 +1240,4 @@ widget "*ooltip*" style:highest "tooltip"
 widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
-
+widget "*TextOnBackground" style:highest "text_on_bg"

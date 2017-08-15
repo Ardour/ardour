@@ -185,6 +185,7 @@ private:
 	void template_row_selected ();
 
 	Gtk::TextView template_desc;
+	Gtk::Frame    template_desc_frame;
 
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;
