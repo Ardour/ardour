@@ -57,6 +57,7 @@ LuaScripting::LuaScripting ()
 	, _sl_action (0)
 	, _sl_snippet (0)
 	, _sl_setup (0)
+	, _sl_tracks (0)
 {
 	;
 }
@@ -71,6 +72,7 @@ LuaScripting::~LuaScripting ()
 		delete _sl_action;
 		delete _sl_snippet;
 		delete _sl_setup;
+		delete _sl_tracks;
 	}
 }
 
@@ -86,6 +88,7 @@ LuaScripting::refresh (bool run_scan)
 	delete _sl_action;
 	delete _sl_snippet;
 	delete _sl_setup;
+	delete _sl_tracks;
 
 	_sl_dsp = 0;
 	_sl_session = 0;
@@ -93,6 +96,7 @@ LuaScripting::refresh (bool run_scan)
 	_sl_action = 0;
 	_sl_snippet = 0;
 	_sl_setup = 0;
+	_sl_tracks = 0;
 
 	if (run_scan) {
 		lm.release ();
@@ -125,6 +129,7 @@ LuaScripting::scan ()
 	CLEAR_OR_NEW (_sl_action)
 	CLEAR_OR_NEW (_sl_snippet)
 	CLEAR_OR_NEW (_sl_setup)
+	CLEAR_OR_NEW (_sl_tracks)
 
 #undef CLEAR_OR_NEW
 
@@ -156,6 +161,9 @@ LuaScripting::scan ()
 			case LuaScriptInfo::SessionSetup:
 				_sl_setup->push_back(lsi);
 				break;
+			case LuaScriptInfo::TrackSetup:
+				_sl_tracks->push_back(lsi);
+				break;
 			default:
 				break;
 		}
@@ -167,6 +175,7 @@ LuaScripting::scan ()
 	std::sort (_sl_action->begin(), _sl_action->end(), ScriptSorter());
 	std::sort (_sl_snippet->begin(), _sl_snippet->end(), ScriptSorter());
 	std::sort (_sl_setup->begin(), _sl_setup->end(), ScriptSorter());
+	std::sort (_sl_tracks->begin(), _sl_tracks->end(), ScriptSorter());
 
 	scripts_changed (); /* EMIT SIGNAL */
 }
@@ -283,7 +292,7 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 LuaScriptList &
 LuaScripting::scripts (LuaScriptInfo::ScriptType type) {
 
-	if (!_sl_dsp || !_sl_session || !_sl_hook || !_sl_action || !_sl_snippet || ! _sl_setup) {
+	if (!_sl_dsp || !_sl_session || !_sl_hook || !_sl_action || !_sl_snippet || ! _sl_setup || ! _sl_tracks) {
 		scan ();
 	}
 
@@ -306,6 +315,9 @@ LuaScripting::scripts (LuaScriptInfo::ScriptType type) {
 		case LuaScriptInfo::SessionSetup:
 			return *_sl_setup;
 			break;
+		case LuaScriptInfo::TrackSetup:
+			return *_sl_tracks;
+			break;
 		default:
 			break;
 	}
@@ -322,6 +334,7 @@ LuaScriptInfo::type2str (const ScriptType t) {
 		case LuaScriptInfo::EditorAction: return "EditorAction";
 		case LuaScriptInfo::Snippet: return "Snippet";
 		case LuaScriptInfo::SessionSetup: return "SessionSetup";
+		case LuaScriptInfo::TrackSetup: return "TrackSetup";
 		default: return "Invalid";
 	}
 }
@@ -335,6 +348,7 @@ LuaScriptInfo::str2type (const std::string& str) {
 	if (!strcasecmp (type, "EditorAction")) {return LuaScriptInfo::EditorAction;}
 	if (!strcasecmp (type, "Snippet")) {return LuaScriptInfo::Snippet;}
 	if (!strcasecmp (type, "SessionSetup")) {return LuaScriptInfo::SessionSetup;}
+	if (!strcasecmp (type, "TrackSetup")) {return LuaScriptInfo::TrackSetup;}
 	return LuaScriptInfo::Invalid;
 }
 
