@@ -1175,7 +1175,6 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
-#ifdef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
 	if (alist->default_interpolation () != alist->interpolation()) {
 		switch (alist->interpolation()) {
 			case AutomationList::Linear:
@@ -1186,7 +1185,6 @@ AutomationLine::view_to_model_coord_y (double& y) const
 				break;
 		}
 	}
-#endif
 	y = _desc.from_interface (y);
 }
 
@@ -1211,7 +1209,6 @@ AutomationLine::apply_delta (double& val, double delta) const
 void
 AutomationLine::model_to_view_coord_y (double& y) const
 {
-#ifdef XXX_NEW_INTERPOLATON__BREAK_SESSION_FORMAT_XXX
 	if (alist->default_interpolation () != alist->interpolation()) {
 		switch (alist->interpolation()) {
 			case AutomationList::Linear:
@@ -1222,7 +1219,6 @@ AutomationLine::model_to_view_coord_y (double& y) const
 				break;
 		}
 	}
-#endif
 	y = _desc.to_interface (y);
 }
 
