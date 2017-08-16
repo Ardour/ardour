@@ -662,24 +662,32 @@ SessionDialog::setup_new_session_page ()
 	//if the "template override" is provided, don't give the user any template selections   (?)
 	if ( load_template_override.empty() ) {
 		template_hbox->set_spacing (8);
-		template_hbox->pack_start (template_chooser, true, true);
+
+		Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
+		template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		template_scroller->add (template_chooser);
+       
+		Gtk::ScrolledWindow *desc_scroller = manage (new Gtk::ScrolledWindow());
+		desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		desc_scroller->add (template_desc);
+
+        template_hbox->pack_start (*template_scroller, true, true);
+
+        template_desc_frame.set_name (X_("TextHighlightFrame"));
+        template_desc_frame.add (*desc_scroller);
 		template_hbox->pack_start (template_desc_frame, true, true);
 	}
 
 	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-	template_desc.set_size_request(300,400);
+	template_desc.set_size_request(300,50);
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
-
-	template_desc_frame.set_name (X_("TextHighlightFrame"));
-	template_desc_frame.add (template_desc);
 
 	//template_chooser is the treeview showing available templates
 	template_model = TreeStore::create (session_template_columns);
 	template_chooser.set_model (template_model);
-	template_chooser.set_size_request(300,400);
 	template_chooser.append_column (_("Template"), session_template_columns.name);
 #ifdef MIXBUS
 	template_chooser.append_column (_("Created With"), session_template_columns.created_with_short);
@@ -692,7 +700,12 @@ SessionDialog::setup_new_session_page ()
 
 	/* --- */
 
-	session_new_vbox.pack_start (*template_hbox, false, true);
+	setup_more_options_box ();
+	more_new_session_options_button.add (more_options_vbox);
+
+	/* --- */
+
+	session_new_vbox.pack_start (*template_hbox, true, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();
