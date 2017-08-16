@@ -1,19 +1,19 @@
 /*
-    Copyright (C) 2013 Paul Davis
+  Copyright (C) 2013 Paul Davis
 
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 2 of the License, or
-    (at your option) any later version.
+  This program is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with this program; if not, write to the Free Software
-    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+  You should have received a copy of the GNU General Public License
+  along with this program; if not, write to the Free Software
+  Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
 
@@ -55,6 +55,8 @@
 #include "ardour/template_utils.h"
 #include "ardour/filename_extensions.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "ardour_ui.h"
 #include "session_dialog.h"
 #include "opts.h"
@@ -78,10 +80,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	, _provided_session_name (session_name)
 	, _provided_session_path (session_path)
 	, new_folder_chooser (FILE_CHOOSER_ACTION_SELECT_FOLDER)
-	, more_new_session_options_button (_("Advanced options ..."))
-	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false)
 {
 	set_position (WIN_POS_CENTER);
@@ -116,7 +114,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	}
 
 	if (!template_name.empty()) {
-		use_template_button.set_active (false);
 		load_template_override = template_name;
 	}
 
@@ -125,14 +122,6 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	/* fill data models and show/hide accordingly */
 
 	populate_session_templates ();
-
-	if (!template_model->children().empty()) {
-		use_template_button.show();
-		template_chooser.show ();
-	} else {
-		use_template_button.hide();
-		template_chooser.hide ();
-	}
 
 	if (recent_session_model) {
 		int cnt = redisplay_recent_sessions ();
@@ -157,7 +146,7 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	   pass then require it for a second pass (e.g. when there
 	   is an error with session loading and we have to ask the user
 	   what to do next).
-	 */
+	*/
 
 	if (!session_name.empty() && !require_new) {
 		response (RESPONSE_OK);
@@ -170,10 +159,6 @@ SessionDialog::SessionDialog ()
 	, new_only (false)
 	, _provided_session_name ("")
 	, _provided_session_path ("")
-	// the following are unused , but have no default ctor
-	, _output_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _input_limit_count_adj (1, 0, 100, 1, 10, 0)
-	, _master_bus_channel_count_adj (2, 0, 100, 1, 10, 0)
 	, _existing_session_chooser_used (false) // caller must check should_be_new
 {
 	get_vbox()->set_spacing (6);
@@ -211,14 +196,77 @@ SessionDialog::clear_given ()
 	_provided_session_name = "";
 }
 
+uint32_t
+SessionDialog::meta_master_bus_profile (std::string script_path) const
+{
+	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		return UINT32_MAX;
+	}
+
+	LuaState lua;
+	lua.sandbox (true);
+	lua_State* L = lua.getState();
+
+	lua.do_command (
+			"ardourluainfo = {}"
+			"function ardour (entry)"
+			"  ardourluainfo['type'] = assert(entry['type'])"
+			"  ardourluainfo['master_bus'] = entry['master_bus'] or 2"
+			" end"
+			);
+
+	int err = -1;
+
+	try {
+		err = lua.do_file (script_path);
+	} catch (luabridge::LuaException const& e) {
+		err = -1;
+	}
+
+	if (err) {
+		return UINT32_MAX;
+	}
+
+	luabridge::LuaRef nfo = luabridge::getGlobal (L, "ardourluainfo");
+	if (nfo.type() != LUA_TTABLE) {
+		return UINT32_MAX;
+	}
+
+	if (nfo["master_bus"].type() != LUA_TNUMBER || nfo["type"].type() != LUA_TSTRING) {
+		return UINT32_MAX;
+	}
+
+	LuaScriptInfo::ScriptType type = LuaScriptInfo::str2type (nfo["type"].cast<std::string>());
+	if (type != LuaScriptInfo::SessionSetup) {
+		return UINT32_MAX;
+	}
+
+	return nfo["master_bus"].cast<uint32_t>();
+}
+
+uint32_t
+SessionDialog::master_channel_count ()
+{
+	if (use_session_template ()) {
+		std::string tn = session_template_name();
+		if (tn.substr (0, 11) == "urn:ardour:") {
+			uint32_t mc = meta_master_bus_profile (tn.substr (11));
+			if (mc != UINT32_MAX) {
+				return mc;
+			}
+		}
+	}
+	return 2;
+}
+
 bool
-SessionDialog::use_session_template ()
+SessionDialog::use_session_template () const
 {
 	if (!load_template_override.empty()) {
 		return true;
 	}
 
-	if (use_template_button.get_active()) {
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
 		return true;
 	}
 
@@ -233,11 +281,14 @@ SessionDialog::session_template_name ()
 		return Glib::build_filename (the_path, load_template_override + ARDOUR::template_suffix);
 	}
 
-	if (use_template_button.get_active()) {
-		TreeModel::iterator iter = template_chooser.get_active ();
-		TreeModel::Row row = (*iter);
-		string s = row[session_template_columns.path];
-		return s;
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
+
+		TreeIter const iter = template_chooser.get_selection()->get_selected();
+
+		if (iter) {
+			string s = (*iter)[session_template_columns.path];
+			return s;
+		}
 	}
 
 	return string();
@@ -506,10 +557,23 @@ SessionDialog::populate_session_templates ()
 {
 	vector<TemplateInfo> templates;
 
-	find_session_templates (templates);
+	find_session_templates (templates, true);
 
 	template_model->clear ();
 
+	//Add any Lua scripts (factory templates) found in the scripts folder
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
+	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		TreeModel::Row row;
+		row = *(template_model->append ());
+		row[session_template_columns.name] = "Meta: " + (*s)->name;
+		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
+		row[session_template_columns.description] = (*s)->description;
+		row[session_template_columns.created_with] = _("{Factory Template}");
+	}
+
+
+	//Add any "template sessions" found in the user's preferences folder
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
 		TreeModel::Row row;
 
@@ -517,64 +581,56 @@ SessionDialog::populate_session_templates ()
 
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
-		row[session_template_columns.desc] = (*x).description;
+		row[session_template_columns.description] = (*x).description;
+		row[session_template_columns.created_with] = (*x).created_with;
 	}
 
-	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionSetup));
-	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
-		TreeModel::Row row;
-		row = *(template_model->append ());
-		row[session_template_columns.name] = "Meta: " + (*s)->name;
-		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
-		row[session_template_columns.desc] = "urn:ardour:" + (*s)->description;
-	}
+	//Add an explicit 'Empty Template' item
+	TreeModel::Row row = *template_model->prepend ();
+	row[session_template_columns.name] = (_("Empty Template"));
+	row[session_template_columns.path] = string();
+	row[session_template_columns.description] = _("An empty session with factory default settings.");
+	row[session_template_columns.created_with] = _("{Factory Template}");
 
-	if (!templates.empty()) {
-		/* select first row */
-		template_chooser.set_active (0);
+	//auto-select the first item in the list
+	Gtk::TreeModel::Row first = template_model->children()[0];
+	if(first) {
+		template_chooser.get_selection()->select(first);
 	}
 }
 
 void
 SessionDialog::setup_new_session_page ()
 {
-	session_new_vbox.set_border_width (12);
-	session_new_vbox.set_spacing (18);
+	session_new_vbox.set_border_width (8);
+	session_new_vbox.set_spacing (8);
 
-	VBox *vbox1 = manage (new VBox);
-	HBox* hbox1 = manage (new HBox);
-	Label* label1 = manage (new Label);
+	Label* name_label = manage (new Label);
+	name_label->set_text (_("Session name:"));
 
-	vbox1->set_spacing (6);
+	HBox* name_hbox = manage (new HBox);
+	name_hbox->set_spacing (8);
+	name_hbox->pack_start (*name_label, false, true);
+	name_hbox->pack_start (new_name_entry, true, true);
 
-	hbox1->set_spacing (6);
-	hbox1->pack_start (*label1, false, false);
-	hbox1->pack_start (new_name_entry, true, true);
-
-	label1->set_text (_("Session name:"));
-
+	//check to see if a session name was provided on command line
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_name_entry.set_text  (Glib::path_get_basename (ARDOUR_COMMAND_LINE::session_name));
-		/* name provided - they can move right along */
 		open_button->set_sensitive (true);
 	}
 
 	new_name_entry.signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::new_name_changed));
 	new_name_entry.signal_activate().connect (sigc::mem_fun (*this, &SessionDialog::new_name_activated));
 
-	vbox1->pack_start (*hbox1, true, true);
+	//Folder location for the new session
+	Label* new_folder_label = manage (new Label);
+	new_folder_label->set_text (_("Create session folder in:"));
+	HBox* folder_box = manage (new HBox);
+	folder_box->set_spacing (8);
+	folder_box->pack_start (*new_folder_label, false, false);
+	folder_box->pack_start (new_folder_chooser, true, true);
 
-	/* --- */
-
-	HBox* hbox2 = manage (new HBox);
-	Label* label2 = manage (new Label);
-
-	hbox2->set_spacing (6);
-	hbox2->pack_start (*label2, false, false);
-	hbox2->pack_start (new_folder_chooser, true, true);
-
-	label2->set_text (_("Create session folder in:"));
-
+	//determine the text in the new folder selector
 	if (!ARDOUR_COMMAND_LINE::session_name.empty()) {
 		new_folder_chooser.set_current_folder (poor_mans_glob (Glib::path_get_dirname (ARDOUR_COMMAND_LINE::session_name)));
 	} else if (ARDOUR_UI::instance()->session_loaded) {
@@ -595,80 +651,45 @@ SessionDialog::setup_new_session_page ()
 	}
 	new_folder_chooser.show ();
 	new_folder_chooser.set_title (_("Select folder for session"));
-
 	Gtkmm2ext::add_volume_shortcuts (new_folder_chooser);
 
-	vbox1->pack_start (*hbox2, false, false);
+	//Template & Template Description area
+	HBox* template_hbox = manage (new HBox);
 
-	session_new_vbox.pack_start (*vbox1, false, false);
+	//if the "template override" is provided, don't give the user any template selections   (?)
+	if ( load_template_override.empty() ) {
+		template_hbox->set_spacing (8);
+		template_hbox->pack_start (template_chooser, true, true);
+		template_hbox->pack_start (template_desc_frame, true, true);
+	}
 
-	/* --- */
+	//template_desc is the textview that displays the currently selected template's description
+	template_desc.set_editable (false);
+	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
+	template_desc.set_size_request(300,400);
+	template_desc.set_name (X_("TextOnBackground"));
+	template_desc.set_border_width (6);
 
-	VBox *vbox2 = manage (new VBox);
-	HBox* hbox3 = manage (new HBox);
-	template_model = ListStore::create (session_template_columns);
+	template_desc_frame.set_name (X_("TextHighlightFrame"));
+	template_desc_frame.add (template_desc);
 
-	vbox2->set_spacing (6);
-
-	VBox *vbox3 = manage (new VBox);
-
-	vbox3->set_spacing (6);
-
-	/* we may want to hide this and show it at various
-	   times depending on the existence of templates.
-	*/
-	template_chooser.set_no_show_all (true);
-	use_template_button.set_no_show_all (true);
-
-	HBox* hbox4a = manage (new HBox);
-	use_template_button.set_label (_("Use this template"));
-	use_template_button.signal_toggled().connect(sigc::mem_fun (*this, &SessionDialog::template_checkbox_toggled));
-
-	TreeModel::Row row = *template_model->prepend ();
-	row[session_template_columns.name] = (_("no template"));
-	row[session_template_columns.path] = string();
-
-	hbox4a->set_spacing (6);
-	hbox4a->pack_start (use_template_button, false, false);
-	hbox4a->pack_start (template_chooser, true, true);
-
+	//template_chooser is the treeview showing available templates
+	template_model = TreeStore::create (session_template_columns);
 	template_chooser.set_model (template_model);
-
-	Gtk::CellRendererText* text_renderer = Gtk::manage (new Gtk::CellRendererText);
-	text_renderer->property_editable() = false;
-
-	template_chooser.pack_start (*text_renderer);
-	template_chooser.add_attribute (text_renderer->property_text(), session_template_columns.name);
-	template_chooser.set_active (0);
-
-	vbox3->pack_start (*hbox4a, false, false);
+	template_chooser.set_size_request(300,400);
+	template_chooser.append_column (_("Template"), session_template_columns.name);
+	template_chooser.append_column (_("Created With"), session_template_columns.created_with);
+	template_chooser.set_headers_visible (true);
+	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
+	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
+	template_chooser.set_sensitive (true);
 
 	/* --- */
 
-	HBox* hbox5 = manage (new HBox);
-
-	hbox5->set_spacing (6);
-	hbox5->pack_start (more_new_session_options_button, false, false);
-
-	setup_more_options_box ();
-	more_new_session_options_button.add (more_options_vbox);
-
-	vbox3->pack_start (*hbox5, false, false);
-	hbox3->pack_start (*vbox3, true, true, 8);
-	vbox2->pack_start (*hbox3, false, false);
-
-	/* --- */
-
-	session_new_vbox.pack_start (*vbox2, false, false);
+	session_new_vbox.pack_start (*template_hbox, false, true);
+	session_new_vbox.pack_start (*folder_box, false, true);
+	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();
-
-	template_checkbox_toggled ();
-}
-
-void
-SessionDialog::template_checkbox_toggled ()
-{
-	template_chooser.set_sensitive (use_template_button.get_active());
 }
 
 void
@@ -841,15 +862,15 @@ SessionDialog::redisplay_recent_sessions ()
 #if 0
 						child_row[recent_session_columns.sample_rate] = rate_as_string (sr);
 						switch (sf) {
-							case FormatFloat:
-								child_row[recent_session_columns.disk_format] = _("32-bit float");
-								break;
-							case FormatInt24:
-								child_row[recent_session_columns.disk_format] = _("24-bit");
-								break;
-							case FormatInt16:
-								child_row[recent_session_columns.disk_format] = _("16-bit");
-								break;
+						case FormatFloat:
+							child_row[recent_session_columns.disk_format] = _("32-bit float");
+							break;
+						case FormatInt24:
+							child_row[recent_session_columns.disk_format] = _("24-bit");
+							break;
+						case FormatInt16:
+							child_row[recent_session_columns.disk_format] = _("16-bit");
+							break;
 						}
 #else
 						child_row[recent_session_columns.sample_rate] = "";
@@ -929,298 +950,16 @@ SessionDialog::recent_session_row_selected ()
 }
 
 void
-SessionDialog::setup_more_options_box ()
+SessionDialog::template_row_selected ()
 {
-	more_options_vbox.set_border_width (24);
+	if (template_chooser.get_selection()->count_selected_rows() > 0) {
+		TreeIter iter = template_chooser.get_selection()->get_selected();
 
-	_output_limit_count.set_adjustment (_output_limit_count_adj);
-	_input_limit_count.set_adjustment (_input_limit_count_adj);
-	_master_bus_channel_count.set_adjustment (_master_bus_channel_count_adj);
-
-	chan_count_label_1.set_text (_("channels"));
-	chan_count_label_3.set_text (_("channels"));
-	chan_count_label_4.set_text (_("channels"));
-
-	chan_count_label_1.set_alignment(0,0.5);
-	chan_count_label_1.set_padding(0,0);
-	chan_count_label_1.set_line_wrap(false);
-
-	chan_count_label_3.set_alignment(0,0.5);
-	chan_count_label_3.set_padding(0,0);
-	chan_count_label_3.set_line_wrap(false);
-
-	chan_count_label_4.set_alignment(0,0.5);
-	chan_count_label_4.set_padding(0,0);
-	chan_count_label_4.set_line_wrap(false);
-
-	bus_label.set_markup (_("<b>Busses</b>"));
-	input_label.set_markup (_("<b>Inputs</b>"));
-	output_label.set_markup (_("<b>Outputs</b>"));
-
-	_master_bus_channel_count.set_flags(Gtk::CAN_FOCUS);
-	_master_bus_channel_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_master_bus_channel_count.set_numeric(true);
-	_master_bus_channel_count.set_digits(0);
-	_master_bus_channel_count.set_wrap(false);
-
-	_create_master_bus.set_label (_("Create master bus"));
-	_create_master_bus.set_flags(Gtk::CAN_FOCUS);
-	_create_master_bus.set_relief(Gtk::RELIEF_NORMAL);
-	_create_master_bus.set_mode(true);
-	_create_master_bus.set_active(true);
-	_create_master_bus.set_border_width(0);
-
-	advanced_table.set_row_spacings(0);
-	advanced_table.set_col_spacings(0);
-
-	_connect_inputs.set_label (_("Automatically connect to physical inputs"));
-	_connect_inputs.set_flags(Gtk::CAN_FOCUS);
-	_connect_inputs.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_inputs.set_mode(true);
-	_connect_inputs.set_active(Config->get_input_auto_connect() != ManualConnect);
-	_connect_inputs.set_border_width(0);
-
-	_limit_input_ports.set_label (_("Use only"));
-	_limit_input_ports.set_flags(Gtk::CAN_FOCUS);
-	_limit_input_ports.set_relief(Gtk::RELIEF_NORMAL);
-	_limit_input_ports.set_mode(true);
-	_limit_input_ports.set_sensitive(true);
-	_limit_input_ports.set_border_width(0);
-
-	_input_limit_count.set_flags(Gtk::CAN_FOCUS);
-	_input_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_input_limit_count.set_numeric(true);
-	_input_limit_count.set_digits(0);
-	_input_limit_count.set_wrap(false);
-	_input_limit_count.set_sensitive(false);
-
-	bus_hbox.pack_start (bus_table, Gtk::PACK_SHRINK, 18);
-
-	bus_label.set_alignment(0, 0.5);
-	bus_label.set_padding(0,0);
-	bus_label.set_line_wrap(false);
-	bus_label.set_selectable(false);
-	bus_label.set_use_markup(true);
-	bus_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	bus_frame.set_label_align(0,0.5);
-	bus_frame.add(bus_hbox);
-	bus_frame.set_label_widget(bus_label);
-
-	bus_table.set_row_spacings (0);
-	bus_table.set_col_spacings (0);
-	bus_table.attach (_create_master_bus, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (_master_bus_channel_count, 1, 2, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 0, 0);
-	bus_table.attach (chan_count_label_1, 2, 3, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 0);
-
-	input_port_limit_hbox.pack_start(_limit_input_ports, Gtk::PACK_SHRINK, 6);
-	input_port_limit_hbox.pack_start(_input_limit_count, Gtk::PACK_SHRINK, 0);
-	input_port_limit_hbox.pack_start(chan_count_label_3, Gtk::PACK_SHRINK, 6);
-	input_port_vbox.pack_start(_connect_inputs, Gtk::PACK_SHRINK, 0);
-	input_port_vbox.pack_start(input_port_limit_hbox, Gtk::PACK_EXPAND_PADDING, 0);
-	input_table.set_row_spacings(0);
-	input_table.set_col_spacings(0);
-	input_table.attach(input_port_vbox, 0, 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL, 6, 6);
-
-	input_hbox.pack_start (input_table, Gtk::PACK_SHRINK, 18);
-
-	input_label.set_alignment(0, 0.5);
-	input_label.set_padding(0,0);
-	input_label.set_line_wrap(false);
-	input_label.set_selectable(false);
-	input_label.set_use_markup(true);
-	input_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	input_frame.set_label_align(0,0.5);
-	input_frame.add(input_hbox);
-	input_frame.set_label_widget(input_label);
-
-	_connect_outputs.set_label (_("Automatically connect outputs"));
-	_connect_outputs.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs.set_mode(true);
-	_connect_outputs.set_active(Config->get_output_auto_connect() != ManualConnect);
-	_connect_outputs.set_border_width(0);
-	_limit_output_ports.set_label (_("Use only"));
-	_limit_output_ports.set_flags(Gtk::CAN_FOCUS);
-	_limit_output_ports.set_relief(Gtk::RELIEF_NORMAL);
-	_limit_output_ports.set_mode(true);
-	_limit_output_ports.set_sensitive(true);
-	_limit_output_ports.set_border_width(0);
-	_output_limit_count.set_flags(Gtk::CAN_FOCUS);
-	_output_limit_count.set_update_policy(Gtk::UPDATE_ALWAYS);
-	_output_limit_count.set_numeric(false);
-	_output_limit_count.set_digits(0);
-	_output_limit_count.set_wrap(false);
-	_output_limit_count.set_sensitive(false);
-	output_port_limit_hbox.pack_start(_limit_output_ports, Gtk::PACK_SHRINK, 6);
-	output_port_limit_hbox.pack_start(_output_limit_count, Gtk::PACK_SHRINK, 0);
-	output_port_limit_hbox.pack_start(chan_count_label_4, Gtk::PACK_SHRINK, 6);
-
-	_connect_outputs_to_master.set_label (_("... to master bus"));
-	_connect_outputs_to_master.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs_to_master.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs_to_master.set_mode(true);
-	_connect_outputs_to_master.set_active(Config->get_output_auto_connect() == AutoConnectMaster);
-	_connect_outputs_to_master.set_border_width(0);
-
-	_connect_outputs_to_master.set_group (connect_outputs_group);
-	_connect_outputs_to_physical.set_group (connect_outputs_group);
-
-	_connect_outputs_to_physical.set_label (_("... to physical outputs"));
-	_connect_outputs_to_physical.set_flags(Gtk::CAN_FOCUS);
-	_connect_outputs_to_physical.set_relief(Gtk::RELIEF_NORMAL);
-	_connect_outputs_to_physical.set_mode(true);
-	_connect_outputs_to_physical.set_active(Config->get_output_auto_connect() == AutoConnectPhysical);
-	_connect_outputs_to_physical.set_border_width(0);
-
-	output_conn_vbox.pack_start(_connect_outputs, Gtk::PACK_SHRINK, 0);
-	output_conn_vbox.pack_start(_connect_outputs_to_master, Gtk::PACK_SHRINK, 0);
-	output_conn_vbox.pack_start(_connect_outputs_to_physical, Gtk::PACK_SHRINK, 0);
-	output_vbox.set_border_width(6);
-
-	output_port_vbox.pack_start(output_port_limit_hbox, Gtk::PACK_SHRINK, 0);
-
-	output_vbox.pack_start(output_conn_vbox);
-	output_vbox.pack_start(output_port_vbox);
-
-	output_label.set_alignment(0, 0.5);
-	output_label.set_padding(0,0);
-	output_label.set_line_wrap(false);
-	output_label.set_selectable(false);
-	output_label.set_use_markup(true);
-	output_frame.set_shadow_type(Gtk::SHADOW_NONE);
-	output_frame.set_label_align(0,0.5);
-
-	output_hbox.pack_start (output_vbox, Gtk::PACK_SHRINK, 18);
-
-	output_frame.add(output_hbox);
-	output_frame.set_label_widget(output_label);
-
-	more_options_vbox.pack_start(advanced_table, Gtk::PACK_SHRINK, 0);
-	more_options_vbox.pack_start(bus_frame, Gtk::PACK_SHRINK, 6);
-	more_options_vbox.pack_start(input_frame, Gtk::PACK_SHRINK, 6);
-	more_options_vbox.pack_start(output_frame, Gtk::PACK_SHRINK, 0);
-
-	/* signals */
-
-	_connect_inputs.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::connect_inputs_clicked));
-	_connect_outputs.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::connect_outputs_clicked));
-	_limit_input_ports.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::limit_inputs_clicked));
-	_limit_output_ports.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::limit_outputs_clicked));
-	_create_master_bus.signal_clicked().connect (sigc::mem_fun (*this, &SessionDialog::master_bus_button_clicked));
-
-	/* note that more_options_vbox is "visible" by default even
-	 * though it may not be displayed to the user, this is so the dialog
-	 * doesn't resize.
-	 */
-	more_options_vbox.show_all ();
-}
-
-bool
-SessionDialog::create_master_bus() const
-{
-	return _create_master_bus.get_active();
-}
-
-int
-SessionDialog::master_channel_count() const
-{
-	return _master_bus_channel_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_inputs() const
-{
-	return _connect_inputs.get_active();
-}
-
-bool
-SessionDialog::limit_inputs_used_for_connection() const
-{
-	return _limit_input_ports.get_active();
-}
-
-int
-SessionDialog::input_limit_count() const
-{
-	return _input_limit_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_outputs() const
-{
-	return _connect_outputs.get_active();
-}
-
-bool
-SessionDialog::limit_outputs_used_for_connection() const
-{
-	return _limit_output_ports.get_active();
-}
-
-int
-SessionDialog::output_limit_count() const
-{
-	return _output_limit_count.get_value_as_int();
-}
-
-bool
-SessionDialog::connect_outs_to_master() const
-{
-	return _connect_outputs_to_master.get_active();
-}
-
-bool
-SessionDialog::connect_outs_to_physical() const
-{
-	return _connect_outputs_to_physical.get_active();
-}
-
-void
-SessionDialog::connect_inputs_clicked ()
-{
-	_limit_input_ports.set_sensitive(_connect_inputs.get_active());
-
-	if (_connect_inputs.get_active() && _limit_input_ports.get_active()) {
-		_input_limit_count.set_sensitive(true);
-	} else {
-		_input_limit_count.set_sensitive(false);
+		if (iter) {
+			string s = (*iter)[session_template_columns.description];
+			template_desc.get_buffer()->set_text (s);
+		}
 	}
-}
-
-void
-SessionDialog::connect_outputs_clicked ()
-{
-	bool const co = _connect_outputs.get_active ();
-	_limit_output_ports.set_sensitive(co);
-	_connect_outputs_to_master.set_sensitive(co);
-	_connect_outputs_to_physical.set_sensitive(co);
-
-	if (co && _limit_output_ports.get_active()) {
-		_output_limit_count.set_sensitive(true);
-	} else {
-		_output_limit_count.set_sensitive(false);
-	}
-}
-
-void
-SessionDialog::limit_inputs_clicked ()
-{
-	_input_limit_count.set_sensitive(_limit_input_ports.get_active());
-}
-
-void
-SessionDialog::limit_outputs_clicked ()
-{
-	_output_limit_count.set_sensitive(_limit_output_ports.get_active());
-}
-
-void
-SessionDialog::master_bus_button_clicked ()
-{
-	bool const yn = _create_master_bus.get_active();
-
-	_master_bus_channel_count.set_sensitive(yn);
-	_connect_outputs_to_master.set_sensitive(yn);
 }
 
 void
@@ -1342,4 +1081,3 @@ SessionDialog::on_delete_event (GdkEventAny* ev)
 	response (RESPONSE_CANCEL);
 	return ArdourDialog::on_delete_event (ev);
 }
-
