@@ -583,7 +583,6 @@ Session::non_realtime_locate ()
 	}
 
 
-	microseconds_t begin = get_microseconds ();
 	framepos_t tf;
 
 	{
@@ -593,19 +592,12 @@ Session::non_realtime_locate ()
 		gint sc = g_atomic_int_get (&_seek_counter);
 		tf = _transport_frame;
 
-		cerr << "\n\n >>> START Non-RT locate on routes to " << tf << " counter = " << sc << "\n\n";
-
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 			(*i)->non_realtime_locate (tf);
-			//::usleep (250000);
-			cerr << "\t\tcounter after track: " << g_atomic_int_get (&_seek_counter) << endl;
 			if (sc != g_atomic_int_get (&_seek_counter)) {
-				cerr << "\n\n RESTART locate, new seek delivered\n";
 				goto restart;
 			}
 		}
-
-		cerr << "\n\n <<< DONE Non-RT locate on routes\n\n";
 	}
 
 	{
@@ -619,9 +611,6 @@ Session::non_realtime_locate ()
 			(*i)->non_realtime_locate (tf);
 		}
 	}
-
-	microseconds_t end = get_microseconds ();
-	cerr << "Locate took " << setprecision (3) << ((end - begin) /1000000.0) << " secs\n";
 
 	_scene_changer->locate (_transport_frame);
 
