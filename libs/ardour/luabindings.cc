@@ -2025,12 +2025,11 @@ LuaBindings::common (lua_State* L)
 		.endClass()
 
 		.deriveClass <VCAManager, PBD::StatefulDestructible> ("VCAManager")
-#if 0 // needs non-const VCAManager reference
 		.addFunction ("create_vca", &VCAManager::create_vca)
 		.addFunction ("remove_vca", &VCAManager::remove_vca)
-#endif
 		.addFunction ("vca_by_number", &VCAManager::vca_by_number)
 		.addFunction ("vcas", &VCAManager::vcas)
+		.addFunction ("n_vcas", &VCAManager::n_vcas)
 		.endClass()
 
 		.deriveClass <RCConfiguration, PBD::Configuration> ("RCConfiguration")
@@ -2159,7 +2158,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("end_is_free", &Session::end_is_free)
 		.addFunction ("set_end_is_free", &Session::set_end_is_free)
 		.addFunction ("remove_route_group", (void (Session::*)(RouteGroup*))&Session::remove_route_group)
-		.addFunction ("vca_manager", &Session::vca_manager)
+		.addFunction ("vca_manager", &Session::vca_manager_ptr)
 		.addExtCFunction ("timecode_to_sample_lua", ARDOUR::LuaAPI::timecode_to_sample_lua)
 		.addExtCFunction ("sample_to_timecode_lua", ARDOUR::LuaAPI::sample_to_timecode_lua)
 		.endClass ()

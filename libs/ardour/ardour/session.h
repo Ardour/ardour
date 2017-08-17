@@ -1203,6 +1203,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reconnect_ltc_output ();
 
 	VCAManager& vca_manager() { return *_vca_manager; }
+	VCAManager* vca_manager_ptr() { return _vca_manager; }
 
 	void auto_connect_thread_wakeup ();
 
