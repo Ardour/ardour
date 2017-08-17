@@ -25,6 +25,7 @@
 
 #include <gtkmm/liststore.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/treeview.h>
 
 #include "ardour_dialog.h"
@@ -64,15 +65,20 @@ protected:
 	void validate_edit (const Glib::ustring& path_string, const Glib::ustring& new_name);
 	void start_edit ();
 
+	void set_desc_dirty ();
+
 	bool key_event (GdkEventKey* ev);
 
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
 	virtual void delete_selected_template () = 0;
 
+	virtual void save_template_desc ();
+
 	void export_all_templates ();
 	void import_template_set ();
 
 	virtual std::string templates_dir () const = 0;
+	virtual std::string template_file (const Gtk::TreeModel::const_iterator& item) const = 0;
 
 	virtual bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const = 0;
 
@@ -82,10 +88,12 @@ protected:
 		SessionTemplateColumns () {
 			add (name);
 			add (path);
+			add (description);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<std::string> description;
 	};
 
 	SessionTemplateColumns _template_columns;
@@ -94,6 +102,10 @@ protected:
 	Gtk::TreeView _template_treeview;
 	Gtk::CellRendererText _validating_cellrenderer;
 	Gtk::TreeView::Column _validated_column;
+
+	Gtk::TextView _description_editor;
+	Gtk::Button _save_desc;
+	bool _desc_dirty;
 
 	Gtk::Button _remove_button;
 	Gtk::Button _rename_button;
@@ -120,6 +132,7 @@ private:
 	void delete_selected_template ();
 
 	std::string templates_dir () const;
+	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
@@ -138,6 +151,7 @@ private:
 	void delete_selected_template ();
 
 	std::string templates_dir () const;
+	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
 
 	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
 };
