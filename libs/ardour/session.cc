@@ -380,8 +380,12 @@ Session::Session (AudioEngine &eng,
 		 */
 
 		if (!mix_template.empty()) {
-			if (load_state (_current_snapshot_name)) {
-				throw SessionException (_("Failed to load template/snapshot state"));
+			try {
+				if (load_state (_current_snapshot_name)) {
+					throw SessionException (_("Failed to load template/snapshot state"));
+				}
+			} catch (PBD::unknown_enumeration& e) {
+				throw SessionException (_("Failed to parse template/snapshot state"));
 			}
 			store_recent_templates (mix_template);
 		}

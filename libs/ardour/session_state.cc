@@ -294,8 +294,13 @@ Session::post_engine_init ()
 		 */
 
 		if (state_tree) {
-			if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
-				error << _("Could not set session state from XML") << endmsg;
+			try {
+				if (set_state (*state_tree->root(), Stateful::loading_state_version)) {
+					error << _("Could not set session state from XML") << endmsg;
+					return -4;
+				}
+			} catch (PBD::unknown_enumeration& e) {
+				error << _("Session state: ") << e.what() << endmsg;
 				return -4;
 			}
 		} else {
@@ -889,8 +894,14 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 int
 Session::restore_state (string snapshot_name)
 {
-	if (load_state (snapshot_name) == 0) {
-		set_state (*state_tree->root(), Stateful::loading_state_version);
+	try {
+		if (load_state (snapshot_name) == 0) {
+			set_state (*state_tree->root(), Stateful::loading_state_version);
+		}
+	} catch (...) {
+		// SessionException
+		// unknown_enumeration
+		return -1;
 	}
 
 	return 0;
@@ -4547,7 +4558,6 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 		return -1;
 	}
 
-
 	node = node->children;
 	while (node != NULL) {
 		 if (!strcmp((const char*) node->name, "ProgramVersion")) {
@@ -4571,9 +4581,11 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 				 xmlFree (pv);
 				 xmlChar* val = xmlGetProp (node, (const xmlChar*)"value");
 				 if (val) {
-					 SampleFormat fmt = (SampleFormat) string_2_enum (string ((const char*)val), fmt);
-					 data_format = fmt;
-					 found_data_format = true;
+					 try {
+						 SampleFormat fmt = (SampleFormat) string_2_enum (string ((const char*)val), fmt);
+						 data_format = fmt;
+						 found_data_format = true;
+					 } catch (PBD::unknown_enumeration& e) {}
 				 }
 				 xmlFree (val);
 				 break;
