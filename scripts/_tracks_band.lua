@@ -6,7 +6,11 @@ This template helps create the tracks for a typical pop/rock band.
 
 You will be prompted to assemble your session from a list of track types.
 
-Each track comes with its pre-assigned grouping, routing, EQ and plugins.
+Each track will be pre-assigned with a color.
+
+Optionally, tracks may be assigned to sensible Groups ( vocals, guitars, drums )
+
+Optionally, tracks may be assigned Gates and other plugins.
     ]]
 }
 
@@ -21,22 +25,22 @@ function session_setup ()
 		{ type = "checkbox", key = "bass", default = false, title = "Bass" },
 
 		{ type = "checkbox", key = "piano", default = false, title = "Piano" },
-		{ type = "checkbox", key = "electric-piano", default = false, title = "E. Piano" },
+		{ type = "checkbox", key = "electric-piano", default = false, title = "Electric Piano" },
 		{ type = "checkbox", key = "organ", default = false, title = "Organ" },
 
 		{ type = "checkbox", key = "electric-guitar", default = false, title = "Electric Guitar" },
-		{ type = "checkbox", key = "solo-guitar", default = false, title = "Guitar Solo" },
+		{ type = "checkbox", key = "solo-guitar", default = false, title = "Lead Guitar" },
 		{ type = "checkbox", key = "accoustic-guitar", default = false, title = "Acoustic Guitar" },
 
 		{ type = "checkbox", key = "basic-kit", default = false, title = "Basic Drum Mics (Kick + Snare)" },
 		{ type = "checkbox", key = "full-kit", default = false, title = "Full Drum Mics (Kick, Snare, HiHat, 3 Toms)" },
 		{ type = "checkbox", key = "overkill-kit", default = false, title = "Overkill Drum Mics (Kick (2x), Snare(2x), HiHat, 3 Toms)" },
 
-		{ type = "checkbox", key = "overhead-mono", default = false, title = "Drum O-Heads (2 mono)" },
-		{ type = "checkbox", key = "overhead-stereo", default = false, title = "Drum O-Head (Stereo)" },
+		{ type = "checkbox", key = "overhead-mono", default = false, title = "Drum OH (2 mono)" },
+		{ type = "checkbox", key = "overhead-stereo", default = false, title = "Drum OH (Stereo)" },
 
-		{ type = "checkbox", key = "room-mono", default = false, title = "Room (Mono)" },
-		{ type = "checkbox", key = "room-stereo", default = false, title = "Room (Stereo)" },
+		{ type = "checkbox", key = "room-mono", default = false, title = "Drum Room (Mono)" },
+		{ type = "checkbox", key = "room-stereo", default = false, title = "Drum Room (Stereo)" },
 
 		{ type = "checkbox", key = "bgvox", default = false, title = "Background Vocals (3x)" },
 
@@ -125,7 +129,7 @@ function session_setup ()
 	end
 
 	if rv['overkill-kit'] then
-		local names = {"Kick In", "Kick Out", "Snare Top", "Snare Bottom", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
+		local names = {"Kick In", "Kick Out", "Snare Top", "Snare Btm", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -147,7 +151,7 @@ function session_setup ()
 	end
 
 	if rv['overhead-mono'] then
-		local names = {"Overhead Left", "Overhead Right"}
+		local names = {"Drum OHL", "Drum OHR"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -160,7 +164,7 @@ function session_setup ()
 	end
 
 	if rv['overhead-stereo'] then
-		local names = {"Stereo Overhead"}
+		local names = {"Drum OH (st)"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (2, 2, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -173,7 +177,7 @@ function session_setup ()
 	end
 
 	if rv['room-mono'] then
-		local names = {"Room"}
+		local names = {"Drum Room"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -186,7 +190,7 @@ function session_setup ()
 	end
 
 	if rv['room-stereo'] then
-		local names = {"Stereo Room"}
+		local names = {"Drum Room (st)"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (2, 2, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -214,7 +218,7 @@ function session_setup ()
 	end
 
 	if rv['electric-guitar'] then
-		local names = {"Electric Guitar"}
+		local names = {"El Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -227,7 +231,7 @@ function session_setup ()
 	end
 
 	if rv['solo-guitar'] then
-		local names = {"Solo Guitar"}
+		local names = {"Ld Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -240,7 +244,7 @@ function session_setup ()
 	end
 
 	if rv['accoustic-guitar'] then
-		local names = {"Accoustic Guitar"}
+		local names = {"Ac Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -266,7 +270,7 @@ function session_setup ()
 	end
 
 	if rv['electric-piano'] then
-		local names = {"Electric Piano"}
+		local names = {"E Piano"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
