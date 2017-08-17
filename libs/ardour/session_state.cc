@@ -1708,8 +1708,11 @@ Session::load_routes (const XMLNode& node, int version)
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
 		boost::shared_ptr<Route> route;
+
 		if (version < 3000) {
 			route = XMLRouteFactory_2X (**niter, version);
+		} else if (version < 5000) {
+			route = XMLRouteFactory_3X (**niter, version);
 		} else {
 			route = XMLRouteFactory (**niter, version);
 		}
@@ -1756,6 +1759,57 @@ Session::XMLRouteFactory (const XMLNode& node, int version)
 	if (pl_prop) {
 
 		/* has at least 1 playlist, therefore a track ... */
+
+		boost::shared_ptr<Track> track;
+
+		if (type == DataType::AUDIO) {
+			track.reset (new AudioTrack (*this, X_("toBeResetFroXML")));
+		} else {
+			track.reset (new MidiTrack (*this, X_("toBeResetFroXML")));
+		}
+
+		if (track->init()) {
+			return ret;
+		}
+
+		if (track->set_state (node, version)) {
+			return ret;
+		}
+
+		BOOST_MARK_TRACK (track);
+		ret = track;
+
+	} else {
+		PresentationInfo::Flag flags = PresentationInfo::get_flags (node);
+		boost::shared_ptr<Route> r (new Route (*this, X_("toBeResetFroXML"), flags));
+
+
+		if (r->init () == 0 && r->set_state (node, version) == 0) {
+			BOOST_MARK_ROUTE (r);
+			ret = r;
+		}
+	}
+
+	return ret;
+}
+
+boost::shared_ptr<Route>
+Session::XMLRouteFactory_3X (const XMLNode& node, int version)
+{
+	boost::shared_ptr<Route> ret;
+
+	if (node.name() != "Route") {
+		return ret;
+	}
+
+	XMLNode* ds_child = find_named_node (node, X_("Diskstream"));
+
+	DataType type = DataType::AUDIO;
+	node.get_property("default-type", type);
+
+	assert (type != DataType::NIL);
+
+	if (ds_child) {
 
 		boost::shared_ptr<Track> track;
 
