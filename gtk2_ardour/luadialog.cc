@@ -46,7 +46,7 @@ int
 Message::run ()
 {
 
-	bool splash_pushed = false
+	bool splash_pushed = false;
 	Splash* spl = Splash::instance();
 	if (spl && spl->is_visible()) {
 		spl->pop_back_for (_message_dialog);
