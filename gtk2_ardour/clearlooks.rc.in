@@ -415,8 +415,8 @@ style "base_frame"
 
 style "text_highlight_frame"
 {
-	fg[NORMAL] = @texts
-	bg[NORMAL] = @texts
+	fg[NORMAL] = shade (0.4, @texts)
+	bg[NORMAL] = shade (0.4, @texts)
 }
 
 style "transport_frame"
