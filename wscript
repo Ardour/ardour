@@ -766,6 +766,8 @@ def options(opt):
                     help="Build a single executable for each unit test")
     #opt.add_option('--tranzport', action='store_true', default=False, dest='tranzport',
     # help='Compile with support for Frontier Designs Tranzport (if libusb is available)')
+    opt.add_option('--maschine', action='store_true', default=False, dest='maschine',
+                    help='Compile with support for NI-Maschine')
     opt.add_option('--generic', action='store_true', default=False, dest='generic',
                     help='Compile with -arch i386 (OS X ONLY)')
     opt.add_option('--ppc', action='store_true', default=False, dest='ppc',
@@ -1262,6 +1264,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('LV2 extensions',        conf.is_defined('LV2_EXTENDED'))
     write_config_text('LXVST support',         conf.is_defined('LXVST_SUPPORT'))
     write_config_text('Mac VST support',       conf.is_defined('MACVST_SUPPORT'))
+    write_config_text('NI-Maschine',           opts.maschine)
     write_config_text('OGG',                   conf.is_defined('HAVE_OGG'))
     write_config_text('Phone home',            conf.is_defined('PHONE_HOME'))
     write_config_text('Process thread timing', conf.is_defined('PT_TIMING'))
