@@ -130,7 +130,9 @@ AddRouteDialog::AddRouteDialog ()
         trk_template_model = TreeStore::create (track_template_columns);
         trk_template_chooser.set_model (trk_template_model);
         trk_template_chooser.append_column (_("Template"), track_template_columns.name);
+#ifdef MIXBUS
         trk_template_chooser.append_column (_("Created With"), track_template_columns.created_with);
+#endif
         trk_template_chooser.set_headers_visible (true);
         trk_template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
         trk_template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::trk_template_row_selected));
