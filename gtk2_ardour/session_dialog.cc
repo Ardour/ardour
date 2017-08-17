@@ -780,8 +780,6 @@ SessionDialog::redisplay_recent_sessions ()
 			continue;
 		}
 
-		Gtk::TreeModel::Row row = *(recent_session_model->append());
-
 		float sr;
 		SampleFormat sf;
 		std::string program_version;
@@ -802,13 +800,21 @@ SessionDialog::redisplay_recent_sessions ()
 
 		std::string s = Glib::build_filename (dirname, state_file_basename + statefile_suffix);
 
+		int err = Session::get_info_from_path (s, sr, sf, program_version);
+		if (err < 0) {
+			// XML cannot be parsed, or unsuppored version
+			continue;
+		}
+
 		GStatBuf gsb;
 		g_stat (s.c_str(), &gsb);
 
+		Gtk::TreeModel::Row row = *(recent_session_model->append());
 		row[recent_session_columns.fullpath] = s;
 		row[recent_session_columns.time_modified] = gsb.st_mtime;
 
-		if (Session::get_info_from_path (s, sr, sf, program_version) == 0) {
+
+		if (err == 0) {
 			row[recent_session_columns.sample_rate] = rate_as_string (sr);
 			switch (sf) {
 			case FormatFloat:

@@ -3702,7 +3702,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	}
 	catch (SessionException e) {
 		MessageDialog msg (string_compose(
-			                   _("Session \"%1 (snapshot %2)\" did not load successfully: %3"),
+			                   _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
 			                   path, snap_name, e.what()),
 		                   true,
 		                   Gtk::MESSAGE_INFO,
@@ -3723,7 +3723,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 	catch (...) {
 
 		MessageDialog msg (string_compose(
-		                           _("Session \"%1 (snapshot %2)\" did not load successfully"),
+		                           _("Session \"%1 (snapshot %2)\" did not load successfully."),
 		                           path, snap_name),
 		                   true,
 		                   Gtk::MESSAGE_INFO,
