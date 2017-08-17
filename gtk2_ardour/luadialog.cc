@@ -46,17 +46,17 @@ int
 Message::run ()
 {
 
-	bool _splash_pushed;
+	bool splash_pushed = false
 	Splash* spl = Splash::instance();
 	if (spl && spl->is_visible()) {
 		spl->pop_back_for (_message_dialog);
-		_splash_pushed = true;
+		splash_pushed = true;
 	}
 
 	int rv = _message_dialog.run ();
 	_message_dialog.hide ();
 
-	if (_splash_pushed) {
+	if (splash_pushed) {
 		spl = Splash::instance();
 		if (spl) {
 			spl->pop_front();
