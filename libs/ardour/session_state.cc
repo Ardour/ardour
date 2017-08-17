@@ -954,20 +954,12 @@ Session::load_state (string snapshot_name)
 	}
 
 	std::string version;
-	if (root.get_property ("version", version)) {
-		if (version.find ('.') != string::npos) {
-			/* old school version format */
-			if (version[0] == '2') {
-				Stateful::loading_state_version = 2000;
-			} else {
-				Stateful::loading_state_version = 3000;
-			}
-		} else {
-			Stateful::loading_state_version = string_to<int32_t>(version);
-		}
-	} else {
-		/* no version implies very old version of Ardour */
-		Stateful::loading_state_version = 1000;
+	root.get_property ("version", version);
+	Stateful::loading_state_version = parse_stateful_loading_version (version);
+
+	if ((Stateful::loading_state_version / 1000L) > (CURRENT_SESSION_FILE_VERSION / 1000L)) {
+		cerr << "Session-version: " << Stateful::loading_state_version << " is not supported. Current: " << CURRENT_SESSION_FILE_VERSION << "\n";
+		throw SessionException (string_compose (_("Incomatible Session Version. That session was created with a newer version of %1"), PROGRAM_NAME));
 	}
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable) {
@@ -4488,10 +4480,31 @@ Session::rename (const std::string& new_name)
 }
 
 int
+Session::parse_stateful_loading_version (const std::string& version)
+{
+	if (version.empty ()) {
+		/* no version implies very old version of Ardour */
+		return 1000;
+	}
+
+	if (version.find ('.') != string::npos) {
+		/* old school version format */
+		if (version[0] == '2') {
+			return 2000;
+		} else {
+			return 3000;
+		}
+	} else {
+		return string_to<int32_t>(version);
+	}
+}
+
+int
 Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFormat& data_format, std::string& program_version)
 {
 	bool found_sr = false;
 	bool found_data_format = false;
+	std::string version;
 	program_version = "";
 
 	if (!Glib::file_test (xmlpath, Glib::FILE_TEST_EXISTS)) {
@@ -4517,15 +4530,23 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 		return -1;
 	}
 
-	/* sample rate */
+	/* sample rate & version*/
 
 	xmlAttrPtr attr;
 	for (attr = node->properties; attr; attr = attr->next) {
+		if (!strcmp ((const char*)attr->name, "version") && attr->children) {
+			version = std::string ((char*)attr->children->content);
+		}
 		if (!strcmp ((const char*)attr->name, "sample-rate") && attr->children) {
 			sample_rate = atoi ((char*)attr->children->content);
 			found_sr = true;
 		}
 	}
+
+	if ((parse_stateful_loading_version(version) / 1000L) > (CURRENT_SESSION_FILE_VERSION / 1000L)) {
+		return -1;
+	}
+
 
 	node = node->children;
 	while (node != NULL) {
@@ -4565,7 +4586,7 @@ Session::get_info_from_path (const string& xmlpath, float& sample_rate, SampleFo
 	xmlFreeParserCtxt(ctxt);
 	xmlFreeDoc (doc);
 
-	return !(found_sr && found_data_format); // zero if they are both found
+	return (found_sr && found_data_format) ? 0 : 1;
 }
 
 std::string

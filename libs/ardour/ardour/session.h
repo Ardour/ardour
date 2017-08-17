@@ -1421,8 +1421,9 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	Glib::Threads::Mutex save_state_lock;
 	Glib::Threads::Mutex peak_cleanup_lock;
 
-	int      load_options (const XMLNode&);
-	int      load_state (std::string snapshot_name);
+	int        load_options (const XMLNode&);
+	int        load_state (std::string snapshot_name);
+	static int parse_stateful_loading_version (const std::string&);
 
 	framepos_t _last_roll_location;
 	/** the session frame time at which we last rolled, located, or changed transport direction */
