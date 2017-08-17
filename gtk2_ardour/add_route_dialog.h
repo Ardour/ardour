@@ -31,8 +31,12 @@
 #include <gtkmm/button.h>
 #include <gtkmm/combobox.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
 
 #include "ardour/plugin.h"
 #include "ardour/types.h"
@@ -80,6 +84,8 @@ public:
 	RouteDialogs::InsertAt insert_at();
 	bool use_strict_io();
 
+	std::string get_template_path();
+
 private:
 	Gtk::Entry name_template_entry;
 	Gtk::ComboBoxText track_bus_combo;
@@ -87,6 +93,13 @@ private:
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
 	Gtk::Label configuration_label;
+	Gtk::Label manual_label;
+	Gtk::Label add_label;
+	Gtk::Label type_label;
+	Gtk::Label name_label;
+	Gtk::Label group_label;
+	Gtk::Label insert_label;
+	Gtk::Label strict_io_label;
 	Gtk::Label mode_label;
 	Gtk::Label instrument_label;
 	Gtk::ComboBoxText mode_combo;
@@ -107,6 +120,30 @@ private:
 	bool channel_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 	bool route_separator (const Glib::RefPtr<Gtk::TreeModel> &m, const Gtk::TreeModel::iterator &i);
 	void maybe_update_name_template_entry ();
+
+	struct TrackTemplateColumns : public Gtk::TreeModel::ColumnRecord {
+		TrackTemplateColumns () {
+			add (name);
+			add (path);
+			add (description);
+			add (created_with);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<std::string> description;
+		Gtk::TreeModelColumn<std::string> created_with;
+	};
+
+	TrackTemplateColumns track_template_columns;
+
+    Glib::RefPtr<Gtk::TreeStore>  trk_template_model;
+    Gtk::TreeView                 trk_template_chooser;
+
+	void trk_template_row_selected ();
+
+	Gtk::TextView trk_template_desc;
+	Gtk::Frame    trk_template_desc_frame;
 
 	void reset_template_option_visibility ();
 	void new_group_dialog_finished (int, RouteGroupDialog*);

@@ -60,6 +60,13 @@ AddRouteDialog::AddRouteDialog ()
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, configuration_label (_("Configuration:"))
+	, manual_label (_("Manual Configuration:"))
+	, add_label (_("Add:"))
+	, type_label (_("Type:"))
+	, name_label (_("Name:"))
+	, group_label (_("Group:"))
+	, insert_label (_("Insert At:"))
+	, strict_io_label (_("Pin Mode:"))
 	, mode_label (_("Record Mode:"))
 	, instrument_label (_("Instrument:"))
 	, name_edited_by_user (false)
@@ -95,92 +102,149 @@ AddRouteDialog::AddRouteDialog ()
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
 	VBox* vbox = manage (new VBox);
-	Gtk::Label* l;
 
 	get_vbox()->set_spacing (4);
 
 	vbox->set_spacing (18);
 	vbox->set_border_width (5);
 
-	HBox *type_hbox = manage (new HBox);
-	type_hbox->set_spacing (6);
+	{ //Template & Template Description area
+        HBox* template_hbox = manage (new HBox);
+        template_hbox->set_spacing (8);
 
-	/* track/bus choice */
+        Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
+        template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+        template_scroller->add (trk_template_chooser);
+       
+        Gtk::ScrolledWindow *desc_scroller = manage (new Gtk::ScrolledWindow());
+        desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+        desc_scroller->add (trk_template_desc);
 
-	type_hbox->pack_start (*manage (new Label (_("Add:"))));
-	type_hbox->pack_start (routes_spinner);
-	type_hbox->pack_start (track_bus_combo);
+        template_hbox->pack_start (*template_scroller, true, true);
 
-	vbox->pack_start (*type_hbox, false, true);
+        trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
+        trk_template_desc_frame.add (*desc_scroller);
+        template_hbox->pack_start (trk_template_desc_frame, true, true);
 
-	VBox* options_box = manage (new VBox);
-	Table *table2 = manage (new Table (3, 3, false));
+        //template_chooser is the treeview showing available templates
+        trk_template_model = TreeStore::create (track_template_columns);
+        trk_template_chooser.set_model (trk_template_model);
+        trk_template_chooser.append_column (_("Template"), track_template_columns.name);
+        trk_template_chooser.append_column (_("Created With"), track_template_columns.created_with);
+        trk_template_chooser.set_headers_visible (true);
+        trk_template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
+        trk_template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::trk_template_row_selected));
+        trk_template_chooser.set_sensitive (true);
+        
+        //template_desc is the textview that displays the currently selected template's description
+        trk_template_desc.set_editable (false);
+        trk_template_desc.set_wrap_mode (Gtk::WRAP_WORD);
+        trk_template_desc.set_size_request(400,200);
+        trk_template_desc.set_name (X_("TextOnBackground"));
+        trk_template_desc.set_border_width (6);
 
-	options_box->set_spacing (6);
-	table2->set_row_spacings (6);
-	table2->set_col_spacing	(1, 6);
+    	vbox->pack_start (*template_hbox, true, true);
+    }
+    
+//	{
+//       HBox *trk_go_hbox = manage (new HBox);
+//        trk_go_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
+//        trk_go_hbox->pack_start (*(manage (new Gtk::Button(_("Add template")))), false, false);
+//        trk_go_hbox->set_spacing (6);
+//    	vbox->pack_start (*trk_go_hbox, true, true);
+//    }
+    
+	{
+        HBox *separator_hbox = manage (new HBox);
+        separator_hbox->pack_start (manual_label, false, false);
+        separator_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
+        separator_hbox->set_spacing (6);
+    	vbox->pack_start (*separator_hbox, true, true);
+    }
+    
+    /* track/bus choice */
 
-	l = manage (new Label (_("<b>Options</b>"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	options_box->pack_start (*l, false, true);
 
-	l = manage (new Label ("", Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	l->set_padding (8, 0);
-	table2->attach (*l, 0, 1, 0, 3, Gtk::FILL, Gtk::FILL, 0, 0);
+	Table *add_table = manage (new Table (8, 8, false));
+	add_table->set_row_spacings (8);
+	add_table->set_col_spacings	(3);
+	add_table->set_col_spacing	(1, 12);
+	add_table->set_col_spacing	(3, 12);
+	add_table->set_col_spacing	(5, 12);
+	add_table->set_border_width	(0);
 
 	int n = 0;
 
-	l = manage (new Label (_("Name:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (name_template_entry, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	// Number
+	add_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (routes_spinner, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+
+	// Type
+	type_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (type_label, 2,3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (track_bus_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+
+	// Name
+	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (name_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (name_template_entry, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
 	++n;
 
-	/* Route configuration */
+	// Route configuration
+	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (configuration_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (channel_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
-	configuration_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-	table2->attach (configuration_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (channel_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	// Group choice
+	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (route_group_combo, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
 	++n;
 
-	mode_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-	table2->attach (mode_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (mode_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	// instrument choice (for MIDI)
+	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (instrument_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (instrument_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
 	++n;
 
-	instrument_label.set_alignment (Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER);
-	table2->attach (instrument_label, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (instrument_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-	++n;
-
-	/* Group choice */
-
-	l = manage (new Label (_("Group:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (route_group_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-	++n;
-
-	/* New route will be inserted at.. */
-	l = manage (new Label (_("Insert:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-	table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	table2->attach (insert_at_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-	++n;
-
-	/* New Route's Routing is.. */
-
+	// New Route's I/O is.. {strict/flexible}
 	if (Profile->get_mixbus ()) {
 		strict_io_combo.set_active (1);
 	} else {
-		l = manage (new Label (_("Output Ports:"), Gtk::ALIGN_LEFT, Gtk::ALIGN_CENTER, false));
-		table2->attach (*l, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		table2->attach (strict_io_combo, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+		strict_io_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		add_table->attach (strict_io_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		add_table->attach (strict_io_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
 		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
+
+		// recording mode
+		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+		add_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+		add_table->attach (mode_combo, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
 		++n;
 	}
 
-	options_box->pack_start (*table2, false, true);
-	vbox->pack_start (*options_box, false, true);
+	// Separator
+	++n;
+	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+
+	++n;
+	++n;
+	// New route will be inserted at..
+	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (insert_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (insert_at_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
+	add_table->attach (*(manage (new Gtk::Button(_("Add selected items (and leave dialog open)"), Add))), 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+
+
+	vbox->pack_start (*add_table, false, true);
 
 	get_vbox()->pack_start (*vbox, false, false);
 
@@ -199,7 +263,7 @@ AddRouteDialog::AddRouteDialog ()
 	*/
 
 	add_button (_("Add and Close"), AddAndClose);
-	add_button (_("Add"), Add);
+//	add_button (_("Add"), Add);
 	set_response_sensitive (AddAndClose, true);
 	set_default_response (AddAndClose);
 
@@ -221,6 +285,63 @@ AddRouteDialog::on_response (int r)
 }
 
 void
+AddRouteDialog::trk_template_row_selected ()
+{
+	if (trk_template_chooser.get_selection()->count_selected_rows() > 0) {
+		TreeIter iter = trk_template_chooser.get_selection()->get_selected();
+
+		if (iter) {
+			string d = (*iter)[track_template_columns.description];
+			trk_template_desc.get_buffer()->set_text (d);
+
+			string n = (*iter)[track_template_columns.name];
+			if ( n != _("Manual Configuration") ) {
+
+				trk_template_desc.set_sensitive(true);
+
+				manual_label.set_sensitive(false);
+				add_label.set_sensitive(false);
+				type_label.set_sensitive(false);
+				name_label.set_sensitive(false);
+				group_label.set_sensitive(false);
+				strict_io_label.set_sensitive(false);
+				configuration_label.set_sensitive(false);
+				mode_label.set_sensitive(false);
+
+				routes_spinner.set_sensitive(false);
+				track_bus_combo.set_sensitive(false);
+				name_template_entry.set_sensitive(false);
+				channel_combo.set_sensitive(false);
+				mode_combo.set_sensitive(false);
+				instrument_combo.set_sensitive(false);
+				strict_io_combo.set_sensitive(false);
+				route_group_combo.set_sensitive(false);
+			} else {
+
+				trk_template_desc.set_sensitive(false);
+
+				manual_label.set_sensitive(true);
+				add_label.set_sensitive(true);
+				type_label.set_sensitive(true);
+				name_label.set_sensitive(true);
+				group_label.set_sensitive(true);
+				strict_io_label.set_sensitive(true);
+
+				track_bus_combo.set_sensitive(true);
+				routes_spinner.set_sensitive(true);
+				name_template_entry.set_sensitive(true);
+				track_type_chosen();
+			}
+		}
+
+
+	}
+
+
+}
+
+
+void
 AddRouteDialog::name_template_entry_insertion (Glib::ustring const &,int*)
 {
 	name_edited_by_user = true;
@@ -237,6 +358,26 @@ AddRouteDialog::channel_combo_changed ()
 {
 	refill_track_modes ();
 }
+
+std::string
+AddRouteDialog::get_template_path ()
+{
+	string p;
+	
+	if (trk_template_chooser.get_selection()->count_selected_rows() > 0) {
+		TreeIter iter = trk_template_chooser.get_selection()->get_selected();
+
+		if (iter) {
+			string n = (*iter)[track_template_columns.name];
+			if ( n != _("Manual Configuration") ) {
+				p = (*iter)[track_template_columns.path];
+			}
+		}
+	}
+
+	return p;
+}
+
 
 AddRouteDialog::TypeWanted
 AddRouteDialog::type_wanted() const
@@ -364,6 +505,7 @@ AddRouteDialog::track_type_chosen ()
 	}
 
 	maybe_update_name_template_entry ();
+
 }
 
 
@@ -532,6 +674,34 @@ AddRouteDialog::refill_channel_setups ()
 			channel_setups.push_back (chn);
 		}
 	}
+
+	trk_template_model->clear();
+
+	//Add any Lua scripts (factory templates) found in the scripts folder
+    LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::TrackSetup));
+	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		TreeModel::Row row;
+		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
+			row = *(trk_template_model->prepend ());
+		} else {
+			row = *(trk_template_model->append ());
+		}
+		row[track_template_columns.name] = (*s)->name;
+		row[track_template_columns.path] = "urn:ardour:" + (*s)->path;
+		row[track_template_columns.description] = (*s)->description;
+		row[track_template_columns.created_with] = _("{Factory Template}");
+
+		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
+			trk_template_chooser.get_selection()->select(row);
+		}
+	}
+
+	//Add a special item for "Manual Configuration)
+	TreeModel::Row row = *(trk_template_model->prepend ());
+	row[track_template_columns.name] = _("Manual Configuration");
+	row[track_template_columns.path] = "urn:ardour:manual";
+	row[track_template_columns.description] = _("Use the controls, below, to add tracks.");
+	row[track_template_columns.created_with] = "";
 
 	/* clear template path for the rest */
 

@@ -4388,6 +4388,22 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		return;
 	}
 
+	std::string template_name = add_route_dialog->get_template_path();
+	if ( !template_name.empty() ) {
+
+		if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
+
+			//ret = build_session_from_dialog (session_dialog, session_path, session_name);
+			meta_session_setup (template_name.substr (11));
+			
+		} else {
+		
+			//could be a user's track template (from file).  ToDo
+		}
+		
+		return;
+	}
+
 	if ((count = add_route_dialog->count()) <= 0) {
 		return;
 	}
