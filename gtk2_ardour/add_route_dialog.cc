@@ -230,8 +230,10 @@ AddRouteDialog::AddRouteDialog ()
 	add_table->attach (insert_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
 	add_table->attach (insert_at_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
-	add_table->attach (*(manage (new Gtk::Button(_("Add selected items (and leave dialog open)"), Add))), 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-
+	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
+	addnoclose_button->set_can_default ();
+	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
+	add_table->attach (*addnoclose_button, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
 
 	vbox->pack_start (*add_table, false, true);
 
@@ -252,7 +254,6 @@ AddRouteDialog::AddRouteDialog ()
 	 */
 
 	add_button (_("Add and Close"), AddAndClose);
-	//add_button (_("Add"), Add);
 	set_response_sensitive (AddAndClose, true);
 	set_default_response (AddAndClose);
 
@@ -277,53 +278,56 @@ void
 AddRouteDialog::trk_template_row_selected ()
 {
 	if (trk_template_chooser.get_selection()->count_selected_rows() > 0) {
-		TreeIter iter = trk_template_chooser.get_selection()->get_selected();
+		TreeIter iter = trk_template_chooser.get_selection ()->get_selected ();
 
 		if (!iter) {
 			return;
 		}
 
 		string d = (*iter)[track_template_columns.description];
-		trk_template_desc.get_buffer()->set_text (d);
+		trk_template_desc.get_buffer ()->set_text (d);
 
-		string n = (*iter)[track_template_columns.name];
+		const string n = (*iter)[track_template_columns.name];
 		if ( n != _("Manual Configuration") ) {
+			/* template or meta-template */
+			const string p = (*iter)[track_template_columns.path];
+			bool meta_template = p.substr (0, 11) == "urn:ardour:";
 
-			trk_template_desc.set_sensitive(true);
+			trk_template_desc.set_sensitive (true);
 
-			manual_label.set_sensitive(false);
-			add_label.set_sensitive(false);
-			type_label.set_sensitive(false);
-			name_label.set_sensitive(false);
-			group_label.set_sensitive(false);
-			strict_io_label.set_sensitive(false);
-			configuration_label.set_sensitive(false);
-			mode_label.set_sensitive(false);
+			manual_label.set_sensitive (false);
+			add_label.set_sensitive (false);
+			type_label.set_sensitive (false);
+			name_label.set_sensitive (!meta_template);
+			group_label.set_sensitive (false);
+			strict_io_label.set_sensitive (false);
+			configuration_label.set_sensitive (false);
+			mode_label.set_sensitive (false);
 
-			routes_spinner.set_sensitive(false);
-			track_bus_combo.set_sensitive(false);
-			name_template_entry.set_sensitive(false);
-			channel_combo.set_sensitive(false);
-			mode_combo.set_sensitive(false);
-			instrument_combo.set_sensitive(false);
-			strict_io_combo.set_sensitive(false);
-			route_group_combo.set_sensitive(false);
+			routes_spinner.set_sensitive (!meta_template);
+			track_bus_combo.set_sensitive (false);
+			name_template_entry.set_sensitive (!meta_template);
+			channel_combo.set_sensitive (false);
+			mode_combo.set_sensitive (false);
+			instrument_combo.set_sensitive (false);
+			strict_io_combo.set_sensitive (false);
+			route_group_combo.set_sensitive (false);
 
 		} else {
 
-			trk_template_desc.set_sensitive(false);
+			trk_template_desc.set_sensitive (false);
 
-			manual_label.set_sensitive(true);
-			add_label.set_sensitive(true);
-			type_label.set_sensitive(true);
-			name_label.set_sensitive(true);
-			group_label.set_sensitive(true);
-			strict_io_label.set_sensitive(true);
+			manual_label.set_sensitive (true);
+			add_label.set_sensitive (true);
+			type_label.set_sensitive (true);
+			name_label.set_sensitive (true);
+			group_label.set_sensitive (true);
+			strict_io_label.set_sensitive (true);
 
-			track_bus_combo.set_sensitive(true);
-			routes_spinner.set_sensitive(true);
-			name_template_entry.set_sensitive(true);
-			track_type_chosen();
+			track_bus_combo.set_sensitive (true);
+			routes_spinner.set_sensitive (true);
+			name_template_entry.set_sensitive (true);
+			track_type_chosen ();
 		}
 	}
 }
@@ -496,7 +500,6 @@ AddRouteDialog::track_type_chosen ()
 
 }
 
-
 string
 AddRouteDialog::name_template () const
 {
@@ -504,7 +507,7 @@ AddRouteDialog::name_template () const
 }
 
 bool
-AddRouteDialog::name_template_is_default() const
+AddRouteDialog::name_template_is_default () const
 {
 	string n = name_template();
 
@@ -602,20 +605,6 @@ AddRouteDialog::channels ()
 	return ret;
 }
 
-string
-AddRouteDialog::track_template ()
-{
-	string str = channel_combo.get_active_text();
-
-	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
-		if (str == (*i).name) {
-			return (*i).template_path;
-		}
-	}
-
-	return string();
-}
-
 void
 AddRouteDialog::on_show ()
 {
@@ -633,8 +622,6 @@ AddRouteDialog::refill_channel_setups ()
 {
 	ChannelSetup chn;
 
-	route_templates.clear ();
-
 	string channel_current_choice = channel_combo.get_active_text();
 
 	channel_combo_strings.clear ();
@@ -648,25 +635,48 @@ AddRouteDialog::refill_channel_setups ()
 	chn.channels = 2;
 	channel_setups.push_back (chn);
 
-	chn.name = "separator";
-	channel_setups.push_back (chn);
+	if (!ARDOUR::Profile->get_mixbus()) {
 
-	ARDOUR::find_route_templates (route_templates);
+		chn.name = "separator";
+		channel_setups.push_back (chn);
 
-	if (!route_templates.empty()) {
-		vector<string> v;
-		for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
-			chn.name = x->name;
-			chn.channels = 0;
-			chn.template_path = x->path;
-			channel_setups.push_back (chn);
-		}
+		chn.name = _("3 Channel");
+		chn.channels = 3;
+		channel_setups.push_back (chn);
+
+		chn.name = _("4 Channel");
+		chn.channels = 4;
+		channel_setups.push_back (chn);
+
+		chn.name = _("5 Channel");
+		chn.channels = 5;
+		channel_setups.push_back (chn);
+
+		chn.name = _("6 Channel");
+		chn.channels = 6;
+		channel_setups.push_back (chn);
+
+		chn.name = _("8 Channel");
+		chn.channels = 8;
+		channel_setups.push_back (chn);
+
+		chn.name = _("12 Channel");
+		chn.channels = 12;
+		channel_setups.push_back (chn);
+
+		chn.name = _("Custom");
+		chn.channels = 0;
+		channel_setups.push_back (chn);
+	}
+
+	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+		channel_combo_strings.push_back ((*i).name);
 	}
 
 	trk_template_model->clear();
 
-	//Add any Lua scripts (factory templates) found in the scripts folder
-    LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::TrackSetup));
+	/* Add any Lua scripts (factory templates) found in the scripts folder */
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::TrackSetup));
 	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
 		TreeModel::Row row;
 		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
@@ -684,48 +694,24 @@ AddRouteDialog::refill_channel_setups ()
 		}
 	}
 
-	//Add a special item for "Manual Configuration)
+	std::vector<ARDOUR::TemplateInfo> route_templates;
+	ARDOUR::find_route_templates (route_templates);
+
+	for (vector<TemplateInfo>::iterator x = route_templates.begin(); x != route_templates.end(); ++x) {
+		TreeModel::Row row = *(trk_template_model->append ());
+
+		row[track_template_columns.name] = x->name;
+		row[track_template_columns.path] = x->path;
+		row[track_template_columns.description] = x->description;
+		row[track_template_columns.created_with] = x->created_with;
+	}
+
+	/* Add a special item for "Manual Configuration" */
 	TreeModel::Row row = *(trk_template_model->prepend ());
 	row[track_template_columns.name] = _("Manual Configuration");
 	row[track_template_columns.path] = "urn:ardour:manual";
 	row[track_template_columns.description] = _("Use the controls, below, to add tracks.");
 	row[track_template_columns.created_with] = "";
-
-	/* clear template path for the rest */
-
-	chn.template_path = "";
-
-	chn.name = _("3 Channel");
-	chn.channels = 3;
-	channel_setups.push_back (chn);
-
-	chn.name = _("4 Channel");
-	chn.channels = 4;
-	channel_setups.push_back (chn);
-
-	chn.name = _("5 Channel");
-	chn.channels = 5;
-	channel_setups.push_back (chn);
-
-	chn.name = _("6 Channel");
-	chn.channels = 6;
-	channel_setups.push_back (chn);
-
-	chn.name = _("8 Channel");
-	chn.channels = 8;
-	channel_setups.push_back (chn);
-
-	chn.name = _("12 Channel");
-	chn.channels = 12;
-	channel_setups.push_back (chn);
-
-	chn.name = _("Custom");
-	chn.channels = 0;
-	channel_setups.push_back (chn);
-
-	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
-		channel_combo_strings.push_back ((*i).name);
-	}
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
 

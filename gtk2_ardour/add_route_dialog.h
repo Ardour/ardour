@@ -75,7 +75,6 @@ public:
 
 	std::string name_template () const;
 	bool name_template_is_default () const;
-	std::string track_template ();
 	ARDOUR::PluginInfoPtr requested_instrument ();
 
 	ARDOUR::TrackMode mode();
@@ -107,8 +106,6 @@ private:
 	InstrumentSelector instrument_combo;
 	Gtk::ComboBoxText insert_at_combo;
 	Gtk::ComboBoxText strict_io_combo;
-
-	std::vector<ARDOUR::TemplateInfo> route_templates;
 
 	void track_type_chosen ();
 	void refill_channel_setups ();
@@ -152,7 +149,6 @@ private:
 
 	struct ChannelSetup {
 		std::string name;
-		std::string template_path;
 		uint32_t    channels;
 	};
 

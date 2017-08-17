@@ -4377,9 +4377,9 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		return;
 	}
 
-	std::string template_name = add_route_dialog->get_template_path();
-	if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
-		meta_session_setup (template_name.substr (11));
+	std::string template_path = add_route_dialog->get_template_path();
+	if (!template_path.empty() && template_path.substr (0, 11) == "urn:ardour:") {
+		meta_session_setup (template_path.substr (11));
 		return;
 	}
 
@@ -4388,21 +4388,20 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	}
 
 	PresentationInfo::order_t order = translate_order (add_route_dialog->insert_at());
-	string template_path = add_route_dialog->track_template();
+	const string name_template = add_route_dialog->name_template ();
 	DisplaySuspender ds;
 
-	if (!template_path.empty()) {
-		if (add_route_dialog->name_template_is_default())  {
-			_session->new_route_from_template (count, order, template_path, string());
+	if (!template_path.empty ()) {
+		if (add_route_dialog->name_template_is_default ()) {
+			_session->new_route_from_template (count, order, template_path, string ());
 		} else {
-			_session->new_route_from_template (count, order, template_path, add_route_dialog->name_template());
+			_session->new_route_from_template (count, order, template_path, name_template);
 		}
 		return;
 	}
 
 	ChanCount input_chan= add_route_dialog->channels ();
 	ChanCount output_chan;
-	string name_template = add_route_dialog->name_template ();
 	PluginInfoPtr instrument = add_route_dialog->requested_instrument ();
 	RouteGroup* route_group = add_route_dialog->route_group ();
 	AutoConnectOption oac = Config->get_output_auto_connect();
