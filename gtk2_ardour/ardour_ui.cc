@@ -2017,16 +2017,6 @@ ARDOUR_UI::open_session ()
 }
 
 void
-ARDOUR_UI::session_add_vca (const string& name_template, uint32_t n)
-{
-	if (!_session) {
-		return;
-	}
-
-	_session->vca_manager().create_vca (n, name_template);
-}
-
-void
 ARDOUR_UI::session_add_mixed_track (
 		const ChanCount& input,
 		const ChanCount& output,
@@ -2038,10 +2028,7 @@ ARDOUR_UI::session_add_mixed_track (
 		Plugin::PresetRecord* pset,
 		ARDOUR::PresentationInfo::order_t order)
 {
-	if (_session == 0) {
-		warning << _("You cannot add a track without a session already loaded.") << endmsg;
-		return;
-	}
+	assert (_session);
 
 	if (Profile->get_mixbus ()) {
 		strict_io = true;
@@ -2131,10 +2118,7 @@ ARDOUR_UI::session_add_audio_route (
 	list<boost::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
 
-	if (_session == 0) {
-		warning << _("You cannot add a track or bus without a session already loaded.") << endmsg;
-		return;
-	}
+	assert (_session);
 
 	try {
 		if (track) {
@@ -4375,6 +4359,11 @@ ARDOUR_UI::add_route ()
 void
 ARDOUR_UI::add_route_dialog_response (int r)
 {
+	if (!_session) {
+		warning << _("You cannot add tracks or busses without a session already loaded.") << endmsg;
+		return;
+	}
+
 	int count;
 
 	switch (r) {
@@ -4389,18 +4378,8 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	}
 
 	std::string template_name = add_route_dialog->get_template_path();
-	if ( !template_name.empty() ) {
-
-		if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
-
-			//ret = build_session_from_dialog (session_dialog, session_path, session_name);
-			meta_session_setup (template_name.substr (11));
-			
-		} else {
-		
-			//could be a user's track template (from file).  ToDo
-		}
-		
+	if (!template_name.empty() && template_name.substr (0, 11) == "urn:ardour:") {
+		meta_session_setup (template_name.substr (11));
 		return;
 	}
 
@@ -4442,22 +4421,22 @@ ARDOUR_UI::add_route_dialog_response (int r)
 
 	switch (add_route_dialog->type_wanted()) {
 	case AddRouteDialog::AudioTrack:
-		session_add_audio_track (input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
+		session_add_audio_route (true, input_chan.n_audio(), output_chan.n_audio(), add_route_dialog->mode(), route_group, count, name_template, strict_io, order);
 		break;
 	case AddRouteDialog::MidiTrack:
-		session_add_midi_track (route_group, count, name_template, strict_io, instrument, 0, order);
+		session_add_midi_route (true, route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::MixedTrack:
 		session_add_mixed_track (input_chan, output_chan, route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::AudioBus:
-		session_add_audio_bus (input_chan.n_audio(), output_chan.n_audio(), route_group, count, name_template, strict_io, order);
+		session_add_audio_route (false, input_chan.n_audio(), output_chan.n_audio(), ARDOUR::Normal, route_group, count, name_template, strict_io, order);
 		break;
 	case AddRouteDialog::MidiBus:
 		session_add_midi_bus (route_group, count, name_template, strict_io, instrument, 0, order);
 		break;
 	case AddRouteDialog::VCAMaster:
-		session_add_vca (name_template, count);
+		_session->vca_manager().create_vca (count, name_template);
 		break;
 	}
 }
