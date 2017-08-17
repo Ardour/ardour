@@ -40,7 +40,7 @@ class VCA;
 
 class LIBARDOUR_API VCAManager : public SessionHandleRef, public PBD::StatefulDestructible
 {
-     public:
+public:
 	VCAManager (ARDOUR::Session&);
 	~VCAManager ();
 
@@ -62,7 +62,7 @@ class LIBARDOUR_API VCAManager : public SessionHandleRef, public PBD::StatefulDe
 
 	static std::string xml_node_name;
 
-     private:
+private:
 	mutable Glib::Threads::Mutex lock;
 	VCAList _vcas;
 	bool _vcas_loaded;
