@@ -24,6 +24,7 @@
 #include <glib/gstdio.h>
 
 #include <gtkmm/filechooserdialog.h>
+#include <gtkmm/frame.h>
 #include <gtkmm/notebook.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/scrolledwindow.h>
@@ -76,6 +77,8 @@ TemplateDialog::TemplateDialog ()
 TemplateManager::TemplateManager ()
 	: HBox ()
 	, ProgressReporter ()
+	, _save_desc (_("Save Description"))
+	, _desc_dirty (false)
 	, _remove_button (_("Remove"))
 	, _rename_button (_("Rename"))
 	, _export_all_templates_button (_("Export all"))
@@ -99,11 +102,11 @@ TemplateManager::TemplateManager ()
 	sw->add (_template_treeview);
 	sw->set_size_request (300, 200);
 
-
 	VBox* vb_btns = manage (new VBox);
 	vb_btns->set_spacing (4);
 	vb_btns->pack_start (_rename_button, false, false);
 	vb_btns->pack_start (_remove_button, false, false);
+	vb_btns->pack_start (_save_desc, false, false);
 
 	_rename_button.set_sensitive (false);
 	_rename_button.signal_clicked().connect (sigc::mem_fun (*this, &TemplateManager::start_edit));
@@ -127,7 +130,21 @@ TemplateManager::TemplateManager ()
 	vb->pack_start (*sw);
 	vb->pack_start (_progress_bar);
 
+	Frame* desc_frame = manage (new Frame (_("Description")));
+
+	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);
+	_description_editor.set_size_request (300,400);
+	_description_editor.set_border_width (6);
+
+	_save_desc.set_sensitive (false);
+	_save_desc.signal_clicked().connect (sigc::mem_fun (*this, &TemplateManager::save_template_desc));
+
+	_description_editor.get_buffer()->signal_changed().connect (sigc::mem_fun (*this, &TemplateManager::set_desc_dirty));
+
+	desc_frame->add (_description_editor);
+
 	pack_start (*vb);
+	pack_start (*desc_frame);
 	pack_start (*vb_btns);
 
 	show_all_children ();
@@ -145,6 +162,7 @@ TemplateManager::setup_model (const vector<TemplateInfo>& templates)
 
 		row[_template_columns.name] = it->name;
 		row[_template_columns.path] = it->path;
+		row[_template_columns.description] = it->description;
 	}
 
 	_export_all_templates_button.set_sensitive (!templates.empty ());
@@ -158,6 +176,10 @@ TemplateManager::row_selection_changed ()
 		Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected ();
 		if (it) {
 			has_selection = true;
+			const string desc = it->get_value (_template_columns.description);
+			_description_editor.get_buffer()->set_text (desc);
+			_desc_dirty = false;
+			_save_desc.set_sensitive (false);
 		}
 	}
 
@@ -209,6 +231,51 @@ TemplateManager::start_edit ()
 	TreeViewColumn* col;
 	_template_treeview.get_cursor (path, col);
 	_template_treeview.set_cursor (path, *col, /*set_editing =*/ true);
+}
+
+void
+TemplateManager::set_desc_dirty ()
+{
+	_desc_dirty = true;
+	_save_desc.set_sensitive (true);
+}
+
+void
+TemplateManager::save_template_desc ()
+{
+	const Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected ();
+	const string file_path = template_file (it);
+
+	const string desc_txt = _description_editor.get_buffer()->get_text ();
+	it->set_value (_template_columns.description, desc_txt);
+
+	XMLTree tree;
+
+	if (!tree.read(file_path)) {
+		error << string_compose (_("Could not parse template file \"%1\"."), file_path) << endmsg;
+		return;
+	}
+
+	XMLNode* md = tree.root()->child (X_("Metadata"));
+	if (!md) {
+		md = new XMLNode (X_("Metadata"));
+		tree.root()->add_child_nocopy (*md);
+	}
+	XMLNode* desc = md->child (X_("description"));
+	if (!desc) {
+		desc = new XMLNode (X_("description"));
+		md->add_child_nocopy (*desc);
+	}
+	XMLNode* dn = new XMLNode (X_("content"), desc_txt);
+	desc->add_child_nocopy (*dn);
+
+	if (!tree.write ()) {
+		error << string_compose(X_("Could not write to template file \"%1\"."), file_path) << endmsg;
+		return;
+	}
+
+	_save_desc.set_sensitive (false);
+	_desc_dirty = false;
 }
 
 bool
@@ -431,7 +498,7 @@ TemplateManager::update_progress_gui (float p)
 void SessionTemplateManager::init ()
 {
 	vector<TemplateInfo> templates;
-	find_session_templates (templates);
+	find_session_templates (templates, /* read_xml = */ true);
 	setup_model (templates);
 
 	_progress_bar.hide ();
@@ -521,11 +588,19 @@ SessionTemplateManager::delete_selected_template ()
 	row_selection_changed ();
 }
 
-
 string
 SessionTemplateManager::templates_dir () const
 {
 	return user_template_directory ();
+}
+
+
+string
+SessionTemplateManager::template_file (const TreeModel::const_iterator& item) const
+{
+	const string path = item->get_value (_template_columns.path);
+	const string name = item->get_value (_template_columns.name);
+	return Glib::build_filename (path, name+".template");
 }
 
 bool
@@ -625,6 +700,13 @@ string
 RouteTemplateManager::templates_dir () const
 {
 	return user_route_template_directory ();
+}
+
+
+string
+RouteTemplateManager::template_file (const TreeModel::const_iterator& item) const
+{
+	return item->get_value (_template_columns.path);
 }
 
 bool
