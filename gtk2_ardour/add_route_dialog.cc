@@ -108,64 +108,51 @@ AddRouteDialog::AddRouteDialog ()
 	vbox->set_spacing (18);
 	vbox->set_border_width (5);
 
-	{ //Template & Template Description area
-        HBox* template_hbox = manage (new HBox);
-        template_hbox->set_spacing (8);
+	HBox* template_hbox = manage (new HBox);
+	template_hbox->set_spacing (8);
 
-        Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
-        template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-        template_scroller->add (trk_template_chooser);
-       
-        Gtk::ScrolledWindow *desc_scroller = manage (new Gtk::ScrolledWindow());
-        desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-        desc_scroller->add (trk_template_desc);
+	Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
+	template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	template_scroller->add (trk_template_chooser);
 
-        template_hbox->pack_start (*template_scroller, true, true);
+	Gtk::ScrolledWindow *desc_scroller = manage (new Gtk::ScrolledWindow());
+	desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	desc_scroller->add (trk_template_desc);
 
-        trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
-        trk_template_desc_frame.add (*desc_scroller);
-        template_hbox->pack_start (trk_template_desc_frame, true, true);
+	template_hbox->pack_start (*template_scroller, true, true);
 
-        //template_chooser is the treeview showing available templates
-        trk_template_model = TreeStore::create (track_template_columns);
-        trk_template_chooser.set_model (trk_template_model);
-        trk_template_chooser.append_column (_("Template"), track_template_columns.name);
+	trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
+	trk_template_desc_frame.add (*desc_scroller);
+	template_hbox->pack_start (trk_template_desc_frame, true, true);
+
+	/* template_chooser is the treeview showing available templates */
+	trk_template_model = TreeStore::create (track_template_columns);
+	trk_template_chooser.set_model (trk_template_model);
+	trk_template_chooser.append_column (_("Template"), track_template_columns.name);
 #ifdef MIXBUS
-        trk_template_chooser.append_column (_("Created With"), track_template_columns.created_with);
+	trk_template_chooser.append_column (_("Created With"), track_template_columns.created_with);
 #endif
-        trk_template_chooser.set_headers_visible (true);
-        trk_template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
-        trk_template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::trk_template_row_selected));
-        trk_template_chooser.set_sensitive (true);
-        
-        //template_desc is the textview that displays the currently selected template's description
-        trk_template_desc.set_editable (false);
-        trk_template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-        trk_template_desc.set_size_request(400,200);
-        trk_template_desc.set_name (X_("TextOnBackground"));
-        trk_template_desc.set_border_width (6);
+	trk_template_chooser.set_headers_visible (true);
+	trk_template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
+	trk_template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &AddRouteDialog::trk_template_row_selected));
+	trk_template_chooser.set_sensitive (true);
 
-    	vbox->pack_start (*template_hbox, true, true);
-    }
-    
-//	{
-//       HBox *trk_go_hbox = manage (new HBox);
-//        trk_go_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
-//        trk_go_hbox->pack_start (*(manage (new Gtk::Button(_("Add template")))), false, false);
-//        trk_go_hbox->set_spacing (6);
-//    	vbox->pack_start (*trk_go_hbox, true, true);
-//    }
-    
-	{
-        HBox *separator_hbox = manage (new HBox);
-        separator_hbox->pack_start (manual_label, false, false);
-        separator_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
-        separator_hbox->set_spacing (6);
-    	vbox->pack_start (*separator_hbox, true, true);
-    }
-    
-    /* track/bus choice */
+	/* template_desc is the textview that displays the currently selected template's description */
+	trk_template_desc.set_editable (false);
+	trk_template_desc.set_wrap_mode (Gtk::WRAP_WORD);
+	trk_template_desc.set_size_request(400,200);
+	trk_template_desc.set_name (X_("TextOnBackground"));
+	trk_template_desc.set_border_width (6);
 
+	vbox->pack_start (*template_hbox, true, true);
+
+	HBox *separator_hbox = manage (new HBox);
+	separator_hbox->pack_start (manual_label, false, false);
+	separator_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
+	separator_hbox->set_spacing (6);
+	vbox->pack_start (*separator_hbox, true, true);
+
+	/* track/bus choice */
 
 	Table *add_table = manage (new Table (8, 8, false));
 	add_table->set_row_spacings (8);
@@ -261,11 +248,11 @@ AddRouteDialog::AddRouteDialog ()
 	show_all_children ();
 
 	/* track template info will be managed whenever
-	   this dialog is shown, via ::on_show()
-	*/
+	 * this dialog is shown, via ::on_show()
+	 */
 
 	add_button (_("Add and Close"), AddAndClose);
-//	add_button (_("Add"), Add);
+	//add_button (_("Add"), Add);
 	set_response_sensitive (AddAndClose, true);
 	set_default_response (AddAndClose);
 
