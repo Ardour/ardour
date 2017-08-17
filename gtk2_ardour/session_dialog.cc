@@ -666,22 +666,22 @@ SessionDialog::setup_new_session_page ()
 		Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
 		template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		template_scroller->add (template_chooser);
-       
+
 		Gtk::ScrolledWindow *desc_scroller = manage (new Gtk::ScrolledWindow());
 		desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 		desc_scroller->add (template_desc);
 
-        template_hbox->pack_start (*template_scroller, true, true);
+		template_hbox->pack_start (*template_scroller, true, true);
 
-        template_desc_frame.set_name (X_("TextHighlightFrame"));
-        template_desc_frame.add (*desc_scroller);
+		template_desc_frame.set_name (X_("TextHighlightFrame"));
+		template_desc_frame.add (*desc_scroller);
 		template_hbox->pack_start (template_desc_frame, true, true);
 	}
 
 	//template_desc is the textview that displays the currently selected template's description
 	template_desc.set_editable (false);
 	template_desc.set_wrap_mode (Gtk::WRAP_WORD);
-	template_desc.set_size_request(300,400);
+	template_desc.set_size_request (300,400);
 	template_desc.set_name (X_("TextOnBackground"));
 	template_desc.set_border_width (6);
 

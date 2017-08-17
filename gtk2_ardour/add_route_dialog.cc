@@ -290,54 +290,53 @@ AddRouteDialog::trk_template_row_selected ()
 	if (trk_template_chooser.get_selection()->count_selected_rows() > 0) {
 		TreeIter iter = trk_template_chooser.get_selection()->get_selected();
 
-		if (iter) {
-			string d = (*iter)[track_template_columns.description];
-			trk_template_desc.get_buffer()->set_text (d);
-
-			string n = (*iter)[track_template_columns.name];
-			if ( n != _("Manual Configuration") ) {
-
-				trk_template_desc.set_sensitive(true);
-
-				manual_label.set_sensitive(false);
-				add_label.set_sensitive(false);
-				type_label.set_sensitive(false);
-				name_label.set_sensitive(false);
-				group_label.set_sensitive(false);
-				strict_io_label.set_sensitive(false);
-				configuration_label.set_sensitive(false);
-				mode_label.set_sensitive(false);
-
-				routes_spinner.set_sensitive(false);
-				track_bus_combo.set_sensitive(false);
-				name_template_entry.set_sensitive(false);
-				channel_combo.set_sensitive(false);
-				mode_combo.set_sensitive(false);
-				instrument_combo.set_sensitive(false);
-				strict_io_combo.set_sensitive(false);
-				route_group_combo.set_sensitive(false);
-			} else {
-
-				trk_template_desc.set_sensitive(false);
-
-				manual_label.set_sensitive(true);
-				add_label.set_sensitive(true);
-				type_label.set_sensitive(true);
-				name_label.set_sensitive(true);
-				group_label.set_sensitive(true);
-				strict_io_label.set_sensitive(true);
-
-				track_bus_combo.set_sensitive(true);
-				routes_spinner.set_sensitive(true);
-				name_template_entry.set_sensitive(true);
-				track_type_chosen();
-			}
+		if (!iter) {
+			return;
 		}
 
+		string d = (*iter)[track_template_columns.description];
+		trk_template_desc.get_buffer()->set_text (d);
 
+		string n = (*iter)[track_template_columns.name];
+		if ( n != _("Manual Configuration") ) {
+
+			trk_template_desc.set_sensitive(true);
+
+			manual_label.set_sensitive(false);
+			add_label.set_sensitive(false);
+			type_label.set_sensitive(false);
+			name_label.set_sensitive(false);
+			group_label.set_sensitive(false);
+			strict_io_label.set_sensitive(false);
+			configuration_label.set_sensitive(false);
+			mode_label.set_sensitive(false);
+
+			routes_spinner.set_sensitive(false);
+			track_bus_combo.set_sensitive(false);
+			name_template_entry.set_sensitive(false);
+			channel_combo.set_sensitive(false);
+			mode_combo.set_sensitive(false);
+			instrument_combo.set_sensitive(false);
+			strict_io_combo.set_sensitive(false);
+			route_group_combo.set_sensitive(false);
+
+		} else {
+
+			trk_template_desc.set_sensitive(false);
+
+			manual_label.set_sensitive(true);
+			add_label.set_sensitive(true);
+			type_label.set_sensitive(true);
+			name_label.set_sensitive(true);
+			group_label.set_sensitive(true);
+			strict_io_label.set_sensitive(true);
+
+			track_bus_combo.set_sensitive(true);
+			routes_spinner.set_sensitive(true);
+			name_template_entry.set_sensitive(true);
+			track_type_chosen();
+		}
 	}
-
-
 }
 
 
