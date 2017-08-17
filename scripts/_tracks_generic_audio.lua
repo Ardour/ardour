@@ -12,7 +12,7 @@ You will be prompted for:
 ]]
 }
 
-function track_setup ()
+function session_setup ()
 	local e = Session:engine()
 	-- from the engine's POV readable/capture ports are "outputs"
 	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())

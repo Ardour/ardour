@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "TrackSetup",
-	name        = "Live Recording Session",
+	name        = "Route Test",
 	description = [[ FOR TESTING AND PROTOTYING ONLY ]]
 }
 
