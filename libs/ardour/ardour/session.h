@@ -1747,6 +1747,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
 	boost::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
+	boost::shared_ptr<Route> XMLRouteFactory_3X (const XMLNode&, int);
 
 	void route_processors_changed (RouteProcessorChange);
 
