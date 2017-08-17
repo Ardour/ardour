@@ -698,13 +698,6 @@ SessionDialog::setup_new_session_page ()
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
 	template_chooser.set_sensitive (true);
 
-	/* --- */
-
-	setup_more_options_box ();
-	more_new_session_options_button.add (more_options_vbox);
-
-	/* --- */
-
 	session_new_vbox.pack_start (*template_hbox, true, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
