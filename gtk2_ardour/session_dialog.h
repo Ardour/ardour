@@ -153,13 +153,15 @@ private:
 			add (name);
 			add (path);
 			add (description);
-			add (created_with);
+			add (created_with_short);
+			add (created_with_long);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> description;
-		Gtk::TreeModelColumn<std::string> created_with;
+		Gtk::TreeModelColumn<std::string> created_with_short;
+		Gtk::TreeModelColumn<std::string> created_with_long;
 	};
 
 	SessionTemplateColumns session_template_columns;

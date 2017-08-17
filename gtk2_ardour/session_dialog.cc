@@ -569,7 +569,8 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.name] = "Meta: " + (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[session_template_columns.description] = (*s)->description;
-		row[session_template_columns.created_with] = _("{Factory Template}");
+		row[session_template_columns.created_with_short] = _("{Factory Template}");
+		row[session_template_columns.created_with_long] = _("{Factory Template}");
 	}
 
 
@@ -582,7 +583,8 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.name] = (*x).name;
 		row[session_template_columns.path] = (*x).path;
 		row[session_template_columns.description] = (*x).description;
-		row[session_template_columns.created_with] = (*x).created_with;
+		row[session_template_columns.created_with_long] = (*x).created_with;
+		row[session_template_columns.created_with_short] = (*x).created_with.substr(0, (*x).created_with.find(" "));
 	}
 
 	//Add an explicit 'Empty Template' item
@@ -590,7 +592,8 @@ SessionDialog::populate_session_templates ()
 	row[session_template_columns.name] = (_("Empty Template"));
 	row[session_template_columns.path] = string();
 	row[session_template_columns.description] = _("An empty session with factory default settings.");
-	row[session_template_columns.created_with] = _("{Factory Template}");
+	row[session_template_columns.created_with_short] = _("{Factory Template}");
+	row[session_template_columns.created_with_long] = _("{Factory Template}");
 
 	//auto-select the first item in the list
 	Gtk::TreeModel::Row first = template_model->children()[0];
@@ -678,7 +681,10 @@ SessionDialog::setup_new_session_page ()
 	template_chooser.set_model (template_model);
 	template_chooser.set_size_request(300,400);
 	template_chooser.append_column (_("Template"), session_template_columns.name);
-	template_chooser.append_column (_("Created With"), session_template_columns.created_with);
+#ifdef MIXBUS
+	template_chooser.append_column (_("Created With"), session_template_columns.created_with_short);
+#endif
+	template_chooser.set_tooltip_column(4); // created_with_long
 	template_chooser.set_headers_visible (true);
 	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
