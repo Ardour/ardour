@@ -138,7 +138,7 @@ QuantizeDialog::start_grid_size () const
 double
 QuantizeDialog::end_grid_size () const
 {
-	return grid_size_to_musical_time (start_grid_combo.get_active_text ());
+	return grid_size_to_musical_time (end_grid_combo.get_active_text ());
 }
 
 double
