@@ -1162,6 +1162,11 @@ LuaInstance::init ()
 
 	} catch (luabridge::LuaException const& e) {
 		fatal << string_compose (_("programming error: %1"),
+				std::string ("Failed to setup Lua action interpreter") + e.what ())
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	} catch (...) {
+		fatal << string_compose (_("programming error: %1"),
 				X_("Failed to setup Lua action interpreter"))
 			<< endmsg;
 		abort(); /*NOTREACHED*/
@@ -1229,7 +1234,7 @@ LuaInstance::set_state (const XMLNode& node)
 				(*_lua_load)(std::string ((const char*)buf, size));
 			} catch (luabridge::LuaException const& e) {
 				cerr << "LuaException:" << e.what () << endl;
-			}
+			} catch (...) { }
 			for (int i = 0; i < 9; ++i) {
 				std::string name;
 				if (lua_action_name (i, name)) {
@@ -1249,7 +1254,7 @@ LuaInstance::set_state (const XMLNode& node)
 				SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
 			} catch (luabridge::LuaException const& e) {
 				cerr << "LuaException:" << e.what () << endl;
-			}
+			} catch (...) { }
 		}
 	}
 
@@ -1340,6 +1345,10 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 				string msg = string_compose (_("Loading Session script '%1' failed: %2"), spd.name(), e.what ());
 				Gtk::MessageDialog am (msg);
 				am.run ();
+			} catch (...) {
+				string msg = string_compose (_("Loading Session script '%1' failed: %2"), spd.name(), "Unknown Exception");
+				Gtk::MessageDialog am (msg);
+				am.run ();
 			}
 		default:
 			break;
@@ -1386,7 +1395,7 @@ LuaInstance::call_action (const int id)
 		lua.collect_garbage_step ();
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-	}
+	} catch (...) { }
 }
 
 void
@@ -1403,7 +1412,7 @@ LuaInstance::render_icon (int i, cairo_t* cr, int w, int h, uint32_t clr)
 		 (*_lua_render_icon)(i + 1, (Cairo::Context *)&ctx, w, h, clr);
 	 } catch (luabridge::LuaException const& e) {
 		 cerr << "LuaException:" << e.what () << endl;
-	 }
+	 } catch (...) { }
 }
 
 bool
@@ -1429,6 +1438,8 @@ LuaInstance::set_lua_action (
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
 		return false;
+	} catch (...) {
+		return false;
 	}
 	_session->set_dirty ();
 	return true;
@@ -1441,6 +1452,8 @@ LuaInstance::remove_lua_action (const int id)
 		(*_lua_del_action)(id + 1);
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
+		return false;
+	} catch (...) {
 		return false;
 	}
 	ActionChanged (id, ""); /* EMIT SIGNAL */
@@ -1463,8 +1476,7 @@ LuaInstance::lua_action_name (const int id, std::string& rv)
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-		return false;
-	}
+	} catch (...) { }
 	return false;
 }
 
@@ -1494,7 +1506,7 @@ LuaInstance::lua_action_has_icon (const int id)
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-	}
+	} catch (...) { }
 	return false;
 }
 
@@ -1529,8 +1541,7 @@ LuaInstance::lua_action (const int id, std::string& name, std::string& script, L
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-		return false;
-	}
+	} catch (...) { }
 	return false;
 }
 
@@ -1553,7 +1564,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-	}
+	} catch (...) { }
 
 	if (ah.none ()) {
 		cerr << "Script registered no hooks." << endl;
@@ -1570,7 +1581,7 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-	}
+	} catch (...) { }
 	_session->set_dirty ();
 	return false;
 }
@@ -1656,10 +1667,12 @@ LuaCallback::LuaCallback (Session *s,
 	}
 
 	try {
-	const std::string& bytecode = LuaScripting::get_factory_bytecode (script);
-	(*_lua_add)(name, script, bytecode, tbl_arg);
+		const std::string& bytecode = LuaScripting::get_factory_bytecode (script);
+		(*_lua_add)(name, script, bytecode, tbl_arg);
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
+		throw failed_constructor ();
+	} catch (...) {
 		throw failed_constructor ();
 	}
 
@@ -1699,7 +1712,7 @@ LuaCallback::LuaCallback (Session *s, XMLNode & node)
 		(*_lua_load)(std::string ((const char*)buf, size));
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-	}
+	} catch (...) { }
 	g_free (buf);
 
 	set_session (s);
@@ -1860,6 +1873,11 @@ LuaCallback::init (void)
 
 	} catch (luabridge::LuaException const& e) {
 		fatal << string_compose (_("programming error: %1"),
+				std::string ("Failed to setup Lua callback interpreter: ") + e.what ())
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	} catch (...) {
+		fatal << string_compose (_("programming error: %1"),
 				X_("Failed to setup Lua callback interpreter"))
 			<< endmsg;
 		abort(); /*NOTREACHED*/
@@ -1907,7 +1925,7 @@ LuaCallback::lua_slot (std::string& name, std::string& script, ActionHook& ah, A
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
 		return false;
-	}
+	} catch (...) { }
 	return false;
 }
 

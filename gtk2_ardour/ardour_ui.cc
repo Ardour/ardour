@@ -3927,8 +3927,7 @@ ARDOUR_UI::route_setup_info (const std::string& script_path)
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
-		return rv;
-	}
+	} catch (...) { }
 	return rv;
 }
 
@@ -3976,6 +3975,8 @@ ARDOUR_UI::meta_route_setup (const std::string& script_path)
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
+	} catch (...) {
+		display_insufficient_ports_message ();
 	}
 }
 
@@ -4006,6 +4007,8 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
+	} catch (...) {
+		display_insufficient_ports_message ();
 	}
 }
 

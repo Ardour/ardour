@@ -221,7 +221,10 @@ SessionDialog::meta_master_bus_profile (std::string script_path) const
 		err = lua.do_file (script_path);
 	} catch (luabridge::LuaException const& e) {
 		err = -1;
+	}  catch (...) {
+		err = -1;
 	}
+
 
 	if (err) {
 		return UINT32_MAX;

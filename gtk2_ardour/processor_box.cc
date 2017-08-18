@@ -1686,7 +1686,7 @@ ProcessorEntry::LuaPluginDisplay::render_inline (cairo_t *cr, uint32_t width)
 #ifndef NDEBUG
 		cerr << "LuaException:" << e.what () << endl;
 #endif
-	}
+	} catch (...) { }
 	return 0;
 }
 

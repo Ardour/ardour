@@ -286,6 +286,12 @@ LuaWindow::run_script ()
 			}
 		} catch (luabridge::LuaException const& e) {
 			append_text (string_compose (_("LuaException: %1"), e.what()));
+		} catch (Glib::Exception const& e) {
+			append_text (string_compose (_("Glib Exception: %1"), e.what()));
+		} catch (std::exception const& e) {
+			append_text (string_compose (_("C++ Exception: %1"), e.what()));
+		} catch (...) {
+			append_text (string_compose (_("C++ Exception: %1"), "..."));
 		}
 	} else {
 		// script with factory method
@@ -304,6 +310,12 @@ LuaWindow::run_script ()
 			lua->do_command ("factory = nil;");
 		} catch (luabridge::LuaException const& e) {
 			append_text (string_compose (_("LuaException: %1"), e.what()));
+		} catch (Glib::Exception const& e) {
+			append_text (string_compose (_("Glib Exception: %1"), e.what()));
+		} catch (std::exception const& e) {
+			append_text (string_compose (_("C++ Exception: %1"), e.what()));
+		} catch (...) {
+			append_text (string_compose (_("C++ Exception: %1"), "..."));
 		}
 	}
 }
