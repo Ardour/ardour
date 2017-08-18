@@ -34,6 +34,7 @@
 #include "evoral/midi_util.h"
 
 #include "ardour/amp.h"
+#include "ardour/beatbox.h"
 #include "ardour/beats_frames_converter.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
@@ -96,6 +97,8 @@ MidiTrack::init ()
 
 	_disk_writer->set_note_mode (_note_mode);
 	_disk_reader->reset_tracker ();
+
+	_beatbox.reset (new BeatBox (_session));
 
 	return 0;
 }

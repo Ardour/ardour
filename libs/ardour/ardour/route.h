@@ -63,6 +63,7 @@ class RoutePinWindowProxy;
 namespace ARDOUR {
 
 class Amp;
+class BeatBox;
 class DelayLine;
 class Delivery;
 class DiskReader;
@@ -638,6 +639,7 @@ public:
 	boost::shared_ptr<Pannable> _pannable;
 	boost::shared_ptr<DiskReader> _disk_reader;
 	boost::shared_ptr<DiskWriter> _disk_writer;
+	boost::shared_ptr<BeatBox> _beatbox;
 
 	DiskIOPoint    _disk_io_point;
 
