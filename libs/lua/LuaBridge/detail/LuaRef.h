@@ -850,6 +850,7 @@ public:
   //inline bool isNone () const { return m_ref == LUA_NOREF; }
 
   inline bool isNil () const { return type () == LUA_TNIL; }
+  inline bool isBoolean () const { return type () == LUA_TBOOLEAN; }
   inline bool isNumber () const { return type () == LUA_TNUMBER; }
   inline bool isString () const { return type () == LUA_TSTRING; }
   inline bool isTable () const { return type () == LUA_TTABLE; }
