@@ -169,6 +169,7 @@ typedef uint64_t microseconds_t;
 #include "route_time_axis.h"
 #include "route_params_ui.h"
 #include "save_as_dialog.h"
+#include "save_template_dialog.h"
 #include "script_selector.h"
 #include "session_archive_dialog.h"
 #include "session_dialog.h"
@@ -3158,60 +3159,43 @@ ARDOUR_UI::transport_rec_enable_blink (bool onoff)
 	}
 }
 
-bool
-ARDOUR_UI::process_save_template_prompter (Prompter& prompter)
+void
+ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 {
-	string name;
+	if (response == RESPONSE_ACCEPT) {
+		const string name = d->get_template_name ();
+		const string desc = d->get_description ();
 
-	prompter.get_result (name);
-
-	if (name.length()) {
-		int failed = _session->save_template (name);
+		int failed = _session->save_template (name, desc);
 
 		if (failed == -2) { /* file already exists. */
-			bool overwrite = overwrite_file_dialog (prompter,
+			bool overwrite = overwrite_file_dialog (*d,
 								_("Confirm Template Overwrite"),
 								_("A template already exists with that name. Do you want to overwrite it?"));
 
 			if (overwrite) {
-				_session->save_template (name, true);
+				_session->save_template (name, desc, true);
 			}
 			else {
-				return false;
+				d->show ();
+				return;
 			}
 		}
 	}
-
-	return true;
+	delete d;
 }
 
 void
 ARDOUR_UI::save_template ()
 {
-	Prompter prompter (true);
-
 	if (!check_audioengine (_main_window)) {
 		return;
 	}
 
-	prompter.set_name (X_("Prompter"));
-	prompter.set_title (_("Save Template"));
-	prompter.set_prompt (_("Name for template:"));
-	prompter.set_initial_text(_session->name() + _("-template"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
+	SaveTemplateDialog* d = new SaveTemplateDialog (*_session);
 
-	bool finished = false;
-	while (!finished) {
-		switch (prompter.run()) {
-		case RESPONSE_ACCEPT:
-			finished = process_save_template_prompter (prompter);
-			break;
-
-		default:
-			finished = true;
-			break;
-		}
-	}
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::save_template_dialog_response), d));
+	d->show ();
 }
 
 void ARDOUR_UI::manage_templates ()

@@ -259,7 +259,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	 */
 	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, const std::string& template_path, const std::string& name, PlaylistDisposition pd = NewPlaylist);
 	RouteList new_route_from_template (uint32_t how_many, PresentationInfo::order_t insert_at, XMLNode&, const std::string& name, PlaylistDisposition pd = NewPlaylist);
-	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path, 
+	std::vector<std::string> get_paths_for_new_sources (bool allow_replacing, const std::string& import_file_path,
 	                                                    uint32_t channels, std::vector<std::string> const & smf_track_names);
 
 	int bring_all_sources_into_session (boost::function<void(uint32_t,uint32_t,std::string)> callback);
@@ -531,7 +531,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, bool only_used_sources = false, Progress* p = 0);
 
 	int restore_state (std::string snapshot_name);
-	int save_template (std::string template_name, bool replace_existing = false);
+	int save_template (const std::string& template_name, const std::string& description = "", bool replace_existing = false);
 	int save_history (std::string snapshot_name = "");
 	int restore_history (std::string snapshot_name);
 	void remove_state (std::string snapshot_name);
