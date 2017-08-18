@@ -1,5 +1,5 @@
 ardour {
-	["type"]    = "TrackSetup",
+	["type"]    = "EditorAction",
 	name        = "Track Wizard",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
@@ -14,7 +14,17 @@ Optionally, tracks may be assigned Gates and other plugins.
     ]]
 }
 
-function session_setup ()
+function route_setup ()
+	return
+	{
+		['Insert_at'] = ARDOUR.PresentationInfo.max_order;
+	}
+end
+
+function factory () return function ()
+
+	local p         = params or route_setup ()
+	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
 
     --prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
@@ -27,56 +37,56 @@ function session_setup ()
 		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-bass", default = false, title = "Bass" },
-		{ type = "entry",    key = "name-ldvox",   default = "Bass", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-bass",   default = "Bass", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-bass", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-piano", default = false, title = "Piano" },
-		{ type = "entry",    key = "name-ldvox",   default = "Piano", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-piano",   default = "Piano", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-piano", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-electric-piano", default = false, title = "Electric Piano" },
-		{ type = "entry",    key = "name-ldvox",   default = "E Piano", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-electric-piano",   default = "E Piano", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-electric-piano", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-organ", default = false, title = "Organ" },
-		{ type = "entry",    key = "name-ldvox",   default = "Organ", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-organ",   default = "Organ", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-organ", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-electric-guitar", default = false, title = "Electric Guitar" },
-		{ type = "entry",    key = "name-ldvox",   default = "E Guitar", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-electric-guitar",   default = "E Guitar", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-electric-guitar", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-solo-guitar", default = false, title = "Lead Guitar" },
-		{ type = "entry",    key = "name-ldvox",   default = "Ld Gtr", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-solo-guitar",   default = "Ld Gtr", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-solo-guitar", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-accoustic-guitar", default = false, title = "Acoustic Guitar" },
-		{ type = "entry",    key = "name-ldvox",   default = "Ac Gtr", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "entry",    key = "name-accoustic-guitar",   default = "Ac Gtr", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-accoustic-guitar", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics" },
-		{ type = "heading",  title = " (Kick + Snare)", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "heading",  title = "(Kick + Snare)", col=1 },
+--		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics" },
 		{ type = "heading",  title = "(Kick, Snare, HiHat, 3 Toms)", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+--		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "overkill-kit", default = false, title = "Overkill Drum Mics" },
+		{ type = "checkbox", key = "check-overkill-kit", default = false, title = "Overkill Drum Mics" },
 		{ type = "heading",  title = "(Kick (2x), Snare(2x), HiHat, 3 Toms)", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+--		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-overhead-mono", default = false, title = "Drum OH (2 mono)" },
+		{ type = "checkbox", key = "check-overhead", default = false, title = "Drum Overheads" },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "checkbox", key = "stereo-overhead", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-room-mono", default = false, title = "Drum Room (Mono)" },
+		{ type = "checkbox", key = "check-room", default = false, title = "Drum Room" },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "checkbox", key = "stereo-room", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals (3x)" },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+		{ type = "checkbox", key = "stereo-bgvox", default = false,        title = "", col=2 },
 
 		{ type = "heading", title = "-------------------" },
 
@@ -128,7 +138,7 @@ function session_setup ()
 	if rv['check-basic-kit'] then
 		local names = {"Kick", "Snare"}
 		for i = 1, #names do
-	    	local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+	    	local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				local gate = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
@@ -143,7 +153,7 @@ function session_setup ()
 	if rv['check-full-kit'] then
 		local names = {"Kick", "Snare", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				local eg = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
 				local tg = ARDOUR.LuaAPI.new_plugin(Session, "XT-TG Tom Gate (Mono)",      ARDOUR.PluginType.LV2, "")
@@ -165,7 +175,7 @@ function session_setup ()
 	if rv['check-overkill-kit'] then
 		local names = {"Kick In", "Kick Out", "Snare Top", "Snare Btm", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				local eg = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
 				local tg = ARDOUR.LuaAPI.new_plugin(Session, "XT-TG Tom Gate (Mono)",      ARDOUR.PluginType.LV2, "")
@@ -184,62 +194,43 @@ function session_setup ()
 		track_count = track_count+8
 	end
 
-	if rv['check-overhead-mono'] then
-		local names = {"Drum OHL", "Drum OHR"}
+	if rv['check-overhead'] then
+		local names = { "OH" }
+		local ch = 1
+		if rv["stereo-bass"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then drum_group:add(track) end
 			end
 		end
 
-		track_count = track_count+2
+		track_count = track_count+ch
 	end
 
-	if rv['overhead-stereo'] then
-		local names = {"Drum OH (st)"}
+
+	if rv['check-room'] then
+		local names = { "Drum Room" }
+		local ch = 1
+		if rv["stereo-bass"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (2, 2, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then drum_group:add(track) end
 			end
 		end
 
-		track_count = track_count+2
-	end
-
-	if rv['check-room-mono'] then
-		local names = {"Drum Room"}
-		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
-			for track in tl:iter() do
-				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
-				if rv['group'] then drum_group:add(track) end
-			end
-		end
-
-		track_count = track_count+1
-	end
-
-	if rv['check-room-stereo'] then
-		local names = {"Drum Room (st)"}
-		for i = 1, #names do
-			local tl = Session:new_audio_track (2, 2, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
-			for track in tl:iter() do
-				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
-				if rv['group'] then drum_group:add(track) end
-			end
-		end
-
-		track_count = track_count+2
+		track_count = track_count+ch
 	end
 
 	if rv['check-bass'] then
-		local names = {"Bass"}
+		local names = { rv["name-bass"] }
+		local ch = 1
+		if rv["stereo-bass"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				local bc = ARDOUR.LuaAPI.new_plugin(Session, "XT-BC Bass Character (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
@@ -248,91 +239,105 @@ function session_setup ()
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-electric-guitar'] then
-		local names = {"El Guitar"}
+		local names = { rv["name-electric-guitar"] }
+		local ch = 1
+		if rv["stereo-electric-guitar"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then guitar_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-solo-guitar'] then
-		local names = {"Ld Guitar"}
+		local names = { rv["name-solo-guitar"] }
+		local ch = 1
+		if rv["stereo-solo-guitar"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then guitar_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-acoustic-guitar'] then
-		local names = {"Ac Guitar"}
+		local names = { rv["name-acoustic-guitar"] }
+		local ch = 1
+		if rv["stereo-acoustic-guitar"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then guitar_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-piano'] then
-		local names = {"Piano"}
+		local names = { rv["name-piano"] }
+		local ch = 1
+		if rv["stereo-piano"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then key_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-electric-piano'] then
-		local names = {"E Piano"}
+		local names = { rv["name-electric-piano"] }
+		local ch = 1
+		if rv["stereo-electric-piano"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then key_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-organ'] then
-		local names = {"Organ"}
+		local names = { rv["name-organ"] }
+		local ch = 1
+		if rv["stereo-organ"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then key_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-ldvox'] then
-		local names = {"Vox"}
+		local names = { rv["name-ldvox"] }
+		local ch = 1
+		if rv["stereo-ldvox"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track ( ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				local vc = ARDOUR.LuaAPI.new_plugin(Session, "XT-VC Vocal Character (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
@@ -341,20 +346,22 @@ function session_setup ()
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
 	if rv['check-bgvox'] then
-		local names = {"Bg. Vox 1", "Bg. Vox 2", "Bg. Vox 3"}
+		local names = { rv["name-bgvox"] }
+		local ch = 1
+		if rv["stereo-bgvox"] then ch = 2 end --stereo
 		for i = 1, #names do
-			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then vox_group:add(track) end
 			end
 		end
 
-		track_count = track_count+1
+		track_count = track_count+ch
 	end
 
     --determine the number of tracks we can record
@@ -368,4 +375,4 @@ function session_setup ()
     Editor:access_action("Editor","fit_all_tracks")
 
 	Session:save_state("");
-end
+end end
