@@ -564,14 +564,24 @@ SessionDialog::populate_session_templates ()
 
 	template_model->clear ();
 
-	//Add any Lua scripts (factory templates) found in the scripts folder
+	/* Add Lua Scripts dedicated to session-setup */
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
+	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		TreeModel::Row row = *(template_model->append ());
+		row[session_template_columns.name] = "Meta: " + (*s)->name;
+		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
+		row[session_template_columns.description] = (*s)->description;
+		row[session_template_columns.created_with_short] = _("{Factory Template}");
+		row[session_template_columns.created_with_long] = _("{Factory Template}");
+	}
+
+	/* Add Lua Action Scripts which can also be used for session-setup */
 	LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
 	for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
 		if (!((*s)->subtype & LuaScriptInfo::SessionSetup)) {
 			continue;
 		}
-		TreeModel::Row row;
-		row = *(template_model->append ());
+		TreeModel::Row row = *(template_model->append ());
 		row[session_template_columns.name] = (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[session_template_columns.description] = (*s)->description;
