@@ -385,7 +385,7 @@ LuaScriptParams::script_params (const std::string& s, const std::string &pname, 
 		} else {
 			lua.do_command (s);
 		}
-	} catch (luabridge::LuaException const& e) {
+	} catch (...) {
 		return rv;
 	}
 
@@ -482,7 +482,7 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 		cerr << e.what() << "\n";
 #endif
 		lua_print (e.what());
-	}
+	} catch (...) { }
 
 	return false;
 }
@@ -513,7 +513,7 @@ LuaScripting::get_factory_bytecode (const std::string& script, const std::string
 		if (lua_factory.isFunction()) {
 			return (lua_dump(lua_factory)).cast<std::string> ();
 		}
-	} catch (luabridge::LuaException const& e) { }
+	} catch (...) { }
 	return "";
 }
 

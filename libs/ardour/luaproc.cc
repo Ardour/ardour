@@ -238,8 +238,7 @@ LuaProc::load_script ()
 		try {
 			lua_dsp_init (_session.nominal_frame_rate ());
 		} catch (luabridge::LuaException const& e) {
-			;
-		}
+		} catch (...) { }
 	}
 
 	_ctrl_params.clear ();
@@ -353,6 +352,8 @@ LuaProc::can_support_io_configuration (const ChanCount& in, ChanCount& out, Chan
 				_iotable = new luabridge::LuaRef (iotable);
 			}
 		} catch (luabridge::LuaException const& e) {
+			_iotable = NULL;
+		} catch (...) {
 			_iotable = NULL;
 		}
 	}
@@ -584,6 +585,8 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 				std::cerr << "LuaException: " << e.what () << "\n";
 #endif
 				return false;
+			} catch (...) {
+				return false;
 			}
 		}
 	}
@@ -733,6 +736,8 @@ LuaProc::connect_and_run (BufferSet& bufs,
 #ifndef NDEBUG
 		std::cerr << "LuaException: " << e.what () << "\n";
 #endif
+		return -1;
+	} catch (...) {
 		return -1;
 	}
 #ifdef WITH_LUAPROC_STATS

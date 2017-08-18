@@ -5513,7 +5513,7 @@ Session::registered_lua_functions ()
 			if (!i.key ().isString ()) { assert(0); continue; }
 			rv.push_back (i.key ().cast<std::string> ());
 		}
-	} catch (luabridge::LuaException const& e) { }
+	} catch (...) { }
 	return rv;
 }
 
@@ -5529,7 +5529,7 @@ Session::try_run_lua (pframes_t nframes)
 	if (_n_lua_scripts == 0) return;
 	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
 	if (tm.locked ()) {
-		try { (*_lua_run)(nframes); } catch (luabridge::LuaException const& e) { }
+		try { (*_lua_run)(nframes); } catch (...) { }
 		lua.collect_garbage_step ();
 	}
 }
@@ -5661,7 +5661,12 @@ Session::setup_lua ()
 		_lua_cleanup = new luabridge::LuaRef(lua_sess["cleanup"]);
 	} catch (luabridge::LuaException const& e) {
 		fatal << string_compose (_("programming error: %1"),
-				X_("Failed to setup Lua interpreter"))
+				std::string ("Failed to setup session Lua interpreter") + e.what ())
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	} catch (...) {
+		fatal << string_compose (_("programming error: %1"),
+				X_("Failed to setup session Lua interpreter"))
 			<< endmsg;
 		abort(); /*NOTREACHED*/
 	}
@@ -5687,6 +5692,11 @@ Session::scripts_changed ()
 		}
 		_n_lua_scripts = cnt;
 	} catch (luabridge::LuaException const& e) {
+		fatal << string_compose (_("programming error: %1"),
+				std::string ("Indexing Lua Session Scripts failed.") + e.what ())
+			<< endmsg;
+		abort(); /*NOTREACHED*/
+	} catch (...) {
 		fatal << string_compose (_("programming error: %1"),
 				X_("Indexing Lua Session Scripts failed."))
 			<< endmsg;

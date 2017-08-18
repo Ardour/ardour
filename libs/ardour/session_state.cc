@@ -1683,7 +1683,7 @@ Session::set_state (const XMLNode& node, int version)
 				(*_lua_load)(std::string ((const char*)buf, size));
 			} catch (luabridge::LuaException const& e) {
 				cerr << "LuaException:" << e.what () << endl;
-			}
+			} catch (...) { }
 			g_free (buf);
 		}
 	}
