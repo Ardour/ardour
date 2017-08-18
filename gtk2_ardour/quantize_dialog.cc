@@ -55,6 +55,13 @@ static const gchar *_grid_strings[] = {
 	0
 };
 
+static const int _grid_beats[] = {
+	0,
+	128, 64, 32, 28, 24, 20, 16, 14,
+	12, 10, 8, 7, 6, 5, 4, 3, 2, 1,
+	0
+};
+
 std::vector<std::string> QuantizeDialog::grid_strings;
 
 QuantizeDialog::QuantizeDialog (PublicEditor& e)
@@ -137,7 +144,7 @@ QuantizeDialog::end_grid_size () const
 double
 QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 {
-	if (txt == "main grid") {
+	if (txt == _("main grid")) {
 		bool success;
 
 		Evoral::Beats b = editor.get_grid_type_as_beats (success, 0);
@@ -147,18 +154,17 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 		return b.to_double();
 	}
 
-	string::size_type slash;
 
-	if ((slash = txt.find ('/')) != string::npos) {
-		if (slash < txt.length() - 1) {
-			double divisor = PBD::atof (txt.substr (slash+1));
-			if (divisor != 0.0) {
-				return 1.0/divisor;
-			}
+	double divisor = 1.0;
+	for (int i = 1; i < grid_strings.size(); ++i) {
+		if (txt == grid_strings[i]) {
+			assert (_grid_beats[i] != 0);
+			divisor = 1.0 / _grid_beats[i];
+			break;
 		}
 	}
 
-	return 1.0;
+	return divisor;
 }
 
 float
