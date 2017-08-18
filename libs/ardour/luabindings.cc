@@ -196,6 +196,7 @@ CLASSKEYS(ARDOUR::PresentationInfo);
 CLASSKEYS(ARDOUR::RCConfiguration);
 CLASSKEYS(ARDOUR::Session);
 CLASSKEYS(ARDOUR::SessionConfiguration);
+CLASSKEYS(ARDOUR::Slavable);
 CLASSKEYS(ARDOUR::Source);
 CLASSKEYS(ARDOUR::VCA);
 CLASSKEYS(ARDOUR::VCAManager);
@@ -958,6 +959,11 @@ LuaBindings::common (lua_State* L)
 		.addConst ("max_order", ARDOUR::PresentationInfo::max_order)
 		.endClass ()
 
+		.beginWSPtrClass <Slavable> ("Slavable")
+		.addFunction ("assign", &Slavable::assign)
+		.addFunction ("unassign", &Slavable::unassign)
+		.endClass ()
+
 		.deriveWSPtrClass <Stripable, SessionObject> ("Stripable")
 		.addCast<Route> ("to_route")
 		.addCast<VCA> ("to_vca")
@@ -1019,6 +1025,7 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <Route, Stripable> ("Route")
 		.addCast<Track> ("to_track")
 		.addCast<Automatable> ("to_automatable")
+		.addCast<Slavable> ("to_slavable")
 		.addFunction ("set_name", &Route::set_name)
 		.addFunction ("comment", &Route::comment)
 		.addFunction ("active", &Route::active)
@@ -1250,6 +1257,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
+		.addCast<Slavable> ("to_slavable")
 		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
 		//.addFunction ("what_can_be_automated", &Automatable::what_can_be_automated)
 		.endClass ()
@@ -2028,6 +2036,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("create_vca", &VCAManager::create_vca)
 		.addFunction ("remove_vca", &VCAManager::remove_vca)
 		.addFunction ("vca_by_number", &VCAManager::vca_by_number)
+		.addFunction ("vca_by_name", &VCAManager::vca_by_name)
 		.addFunction ("vcas", &VCAManager::vcas)
 		.addFunction ("n_vcas", &VCAManager::n_vcas)
 		.endClass()

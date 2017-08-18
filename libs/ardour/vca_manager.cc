@@ -152,6 +152,20 @@ VCAManager::vca_by_number (int32_t n) const
 	return boost::shared_ptr<VCA>();
 }
 
+boost::shared_ptr<VCA>
+VCAManager::vca_by_name (std::string const& name) const
+{
+	Mutex::Lock lm (lock);
+
+	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		if ((*i)->name() == name || (*i)->full_name() == name) {
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<VCA>();
+}
+
 XMLNode&
 VCAManager::get_state ()
 {

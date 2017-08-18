@@ -48,6 +48,7 @@ public:
 	void remove_vca (boost::shared_ptr<VCA>);
 
 	boost::shared_ptr<VCA> vca_by_number(int32_t) const;
+	boost::shared_ptr<VCA> vca_by_name (std::string const&) const;
 
 	VCAList vcas() const;
 	VCAList::size_type n_vcas() const { return _vcas.size(); }
