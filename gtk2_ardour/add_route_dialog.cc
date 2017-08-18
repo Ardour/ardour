@@ -337,11 +337,15 @@ AddRouteDialog::trk_template_row_selected ()
 					case ARDOUR::Normal:
 						mode_combo.set_active_text (_("Normal"));
 						break;
+#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
 					case ARDOUR::NonLayered:
 						mode_combo.set_active_text (_("Nn Layered"));
 						break;
+#endif
 					case ARDOUR::Destructive:
-						mode_combo.set_active_text (_("Tape"));
+						if (!ARDOUR::Profile->get_mixbus ()) {
+							mode_combo.set_active_text (_("Tape"));
+						}
 						break;
 				}
 			}

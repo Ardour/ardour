@@ -21,10 +21,8 @@ function route_setup ()
 		-- these keys just need to be set (to something other than nil)
 		['insert_at'] = ARDOUR.PresentationInfo.max_order,
 		['group'] = false,
-		--[[
 		['track_mode'] = ARDOUR.TrackMode.Normal,
 		['strict_io'] = true,
-		--]]
 	}
 end
 
@@ -46,7 +44,15 @@ function factory (params) return function ()
 	local channels  = p["channels"] or 1
 	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
 	local group     = p["group"] or nil
+	local mode      = p["track_mode"] or ARDOUR.TrackMode.Normal
+	local strict_io = p["strict_io"] or false
 
-	Session:new_audio_track (channels, channels, group, how_many, name, insert_at, ARDOUR.TrackMode.Normal)
+	local tl = Session:new_audio_track (channels, channels, group, how_many, name, insert_at, mode)
+
+	if strict_io then
+		for t in tl:iter() do
+			t:set_strict_io (true)
+		end
+	end
 
 end end
