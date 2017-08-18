@@ -519,7 +519,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 		if (i.value ()["key"].isString ()) {
 			key = i.value ()["key"].cast<std::string> ();
 		}
-                    
+
 		LuaDialogWidget *widge;
 
 		if (type == "heading") {
@@ -619,14 +619,14 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			}
 			widge = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path);
 		}
-        
+
 		if (widge) {
 			_widgets.push_back(widge);
 
 			if (i.value ()["col"].isNumber ()) {
 				widge->set_col ( i.value ()["col"].cast<int> () );
 			}
-        }
+		}
 	}
 
 	_ad.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
@@ -640,15 +640,15 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 
 	for (DialogWidgets::const_iterator i = _widgets.begin (); i != _widgets.end (); ++i) {
 		int col = (*i)->col();
-        if (col <= 0)
-		    ++row;
-        
-        std::string const& label = (*i)->label ();
+		if (col <= 0)
+			++row;
+
+		std::string const& label = (*i)->label ();
 		if (!label.empty ()) {
 			Gtk::HBox* hb = Gtk::manage (new Gtk::HBox());
-            Gtk::Label* lbl = Gtk::manage (new Gtk::Label (label + ":", Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
+			Gtk::Label* lbl = Gtk::manage (new Gtk::Label (label + ":", Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
 			hb->set_spacing(4);
-            hb->pack_start( *lbl, true, false);
+			hb->pack_start( *lbl, true, false);
 			hb->pack_start( (*((*i)->widget ())), true, false);
 			table->attach (*hb, col+0, col+1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 		} else if ((*i)->key ().empty ()) {
