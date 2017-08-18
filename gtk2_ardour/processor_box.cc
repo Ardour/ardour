@@ -69,6 +69,7 @@
 #include "actions.h"
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
+#include "beatbox_gui.h"
 #include "gui_thread.h"
 #include "io_selector.h"
 #include "keyboard.h"
@@ -1665,7 +1666,7 @@ ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, boost::sh
 	LuaInstance::bind_cairo (LG);
 	luabridge::LuaRef lua_render = luabridge::getGlobal (LG, "render_inline");
 	assert (lua_render.isFunction ());
-	_lua_render_inline = new luabridge::LuaRef (lua_render); 
+	_lua_render_inline = new luabridge::LuaRef (lua_render);
 }
 
 ProcessorEntry::LuaPluginDisplay::~LuaPluginDisplay ()
@@ -3580,9 +3581,19 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 
 		gidget = io_selector;
 
-	} else if ((beatbox == boost::dynamic_pointer_cast<BeatBox> (processor)) != 0) {
-		cerr << "Beatbox editor goes here\n";
-		return 0;
+	} else if ((beatbox = boost::dynamic_pointer_cast<BeatBox> (processor)) != 0) {
+
+		Window* w = get_processor_ui (beatbox);
+		BBGUI* bbg = 0;
+
+		if (!w) {
+			bbg = new BBGUI (beatbox);
+			set_processor_ui (beatbox, bbg);
+		} else {
+			bbg = dynamic_cast<BBGUI*> (w);
+		}
+
+		gidget = bbg;
 	}
 
 	return gidget;
