@@ -338,7 +338,7 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
 		coreaudio_set_realtime_policy (*i);
 	}
-	engine.buffer_size_change (bs);
+	//engine.buffer_size_change (bs);
 	return 0;
 }
 

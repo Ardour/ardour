@@ -1,5 +1,5 @@
 ardour {
-	["type"]    = "SessionSetup",
+	["type"]    = "SessionInit",
 	name        = "Recording Session",
 	description = [[Add as many mono tracks to the new session as there are physical audio inputs and optionally record-arm them.]]
 }
@@ -7,21 +7,28 @@ ardour {
 ---- For use with templates: Session Template setup-hook
 --
 -- If a script named 'template.lua' exists in a session-template folder
--- the `session_setup` function of the script is called after
--- creating the session from the template.
+-- the function produced by the 'factory' function of the script is called
+-- once after creating the session from the template.
 --
 -- (e.g. ~/.config/ardour5/templates/Template-Name/template.lua)
 --
 --
----- For use as meta-session
+---- For use as meta-session (specic session-setup scripts)
 --
--- Every Lua script in the script-folder of type "SessionSetup"
+-- Every Lua script in the script-folder of type "SessionInit"
 -- is listed as implicit template in the new-session dialog.
--- The scripts 'session_setup' function  is called once after
--- creating a new, empty session.
+-- The function produced by the scripts `factory` function is called
+-- once after creating a new, empty session.
 --
+---- For use as meta-session (general purpose Actions)
+--
+-- In some cases normal action scripts can also serve as session-setup
+-- To include those ActionScripts in the template-list the script needs
+-- to implement an additional function
+--      function session_setup () return true end;
+-- The script's factory will be called without any parameters
 
-function session_setup ()
+function factory () return function ()
 	local e = Session:engine()
 	-- from the engine's POV readable/capture ports are "outputs"
 	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())
@@ -50,4 +57,4 @@ function session_setup ()
 	end
 
 	Session:save_state("");
-end
+end end

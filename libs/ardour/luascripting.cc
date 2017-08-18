@@ -158,11 +158,8 @@ LuaScripting::scan ()
 			case LuaScriptInfo::Snippet:
 				_sl_snippet->push_back(lsi);
 				break;
-			case LuaScriptInfo::SessionSetup:
+			case LuaScriptInfo::SessionInit:
 				_sl_setup->push_back(lsi);
-				break;
-			case LuaScriptInfo::TrackSetup:
-				_sl_tracks->push_back(lsi);
 				break;
 			default:
 				break;
@@ -286,6 +283,24 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 		if (key == "description") { lsi->description = val; }
 		if (key == "category") { lsi->category = val; }
 	}
+
+
+	if (type == LuaScriptInfo::EditorAction) {
+
+		luabridge::LuaRef lua_rs = luabridge::getGlobal (L, "route_setup");
+		if (lua_rs.isFunction ()) {
+			lsi->subtype |= LuaScriptInfo::RouteSetup;
+		}
+
+		luabridge::LuaRef lua_ss = luabridge::getGlobal (L, "session_setup");
+		if (lua_ss.isFunction ()) {
+			if (lua_ss () == true) {
+				lsi->subtype |= LuaScriptInfo::SessionSetup;
+			}
+		}
+
+	}
+
 	return lsi;
 }
 
@@ -312,11 +327,8 @@ LuaScripting::scripts (LuaScriptInfo::ScriptType type) {
 		case LuaScriptInfo::Snippet:
 			return *_sl_snippet;
 			break;
-		case LuaScriptInfo::SessionSetup:
+		case LuaScriptInfo::SessionInit:
 			return *_sl_setup;
-			break;
-		case LuaScriptInfo::TrackSetup:
-			return *_sl_tracks;
 			break;
 		default:
 			break;
@@ -333,8 +345,7 @@ LuaScriptInfo::type2str (const ScriptType t) {
 		case LuaScriptInfo::EditorHook: return "EditorHook";
 		case LuaScriptInfo::EditorAction: return "EditorAction";
 		case LuaScriptInfo::Snippet: return "Snippet";
-		case LuaScriptInfo::SessionSetup: return "SessionSetup";
-		case LuaScriptInfo::TrackSetup: return "TrackSetup";
+		case LuaScriptInfo::SessionInit: return "SessionInit";
 		default: return "Invalid";
 	}
 }
@@ -347,8 +358,7 @@ LuaScriptInfo::str2type (const std::string& str) {
 	if (!strcasecmp (type, "EditorHook")) {return LuaScriptInfo::EditorHook;}
 	if (!strcasecmp (type, "EditorAction")) {return LuaScriptInfo::EditorAction;}
 	if (!strcasecmp (type, "Snippet")) {return LuaScriptInfo::Snippet;}
-	if (!strcasecmp (type, "SessionSetup")) {return LuaScriptInfo::SessionSetup;}
-	if (!strcasecmp (type, "TrackSetup")) {return LuaScriptInfo::TrackSetup;}
+	if (!strcasecmp (type, "SessionInit")) {return LuaScriptInfo::SessionInit;}
 	return LuaScriptInfo::Invalid;
 }
 

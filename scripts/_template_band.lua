@@ -1,5 +1,5 @@
 ardour {
-	["type"]    = "SessionSetup",
+	["type"]    = "SessionInit",
 	name        = "Live Band Recording Session",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
@@ -10,7 +10,7 @@ Each track comes with its pre-assigned grouping, routing, EQ and plugins.
 ]]
 }
 
-function session_setup ()
+function factory () return function ()
 
 	--prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
@@ -92,4 +92,4 @@ function session_setup ()
 	Editor:access_action("Editor","fit_all_tracks")
 
 	Session:save_state("");
-end
+end end

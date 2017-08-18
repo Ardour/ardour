@@ -71,6 +71,7 @@ public:
 	TypeWanted type_wanted() const;
 
 	ARDOUR::ChanCount channels ();
+	uint32_t channel_count ();
 	int count ();
 
 	std::string name_template () const;

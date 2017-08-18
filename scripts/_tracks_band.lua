@@ -1,5 +1,5 @@
 ardour {
-	["type"]    = "TrackSetup",
+	["type"]    = "EditorAction",
 	name        = "Live Band Recording Session",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
@@ -11,10 +11,12 @@ Each track will be pre-assigned with a color.
 Optionally, tracks may be assigned to sensible Groups ( vocals, guitars, drums )
 
 Optionally, tracks may be assigned Gates and other plugins.
-    ]]
+]]
 }
 
-function session_setup ()
+function route_setup () return {} end
+
+function factory () return function ()
 
     --prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
@@ -334,4 +336,4 @@ function session_setup ()
     Editor:access_action("Editor","fit_all_tracks")
 
 	Session:save_state("");
-end
+end end

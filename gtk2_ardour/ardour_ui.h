@@ -67,6 +67,8 @@
 #include "ardour/session_handle.h"
 #include "ardour/system_exec.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "video_timeline.h"
 
 #include "widgets/ardour_button.h"
@@ -347,6 +349,8 @@ public:
 
 	ARDOUR::PresentationInfo::order_t translate_order (RouteDialogs::InsertAt);
 
+	std::map<std::string, std::string> route_setup_info (const std::string& script_path);
+
 protected:
 	friend class PublicEditor;
 
@@ -624,6 +628,7 @@ private:
 	void manage_templates ();
 
 	void meta_session_setup (const std::string& script_path);
+	void meta_route_setup (const std::string& script_path);
 
 	void edit_metadata ();
 	void import_metadata ();

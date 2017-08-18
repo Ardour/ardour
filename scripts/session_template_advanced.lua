@@ -1,11 +1,11 @@
 ardour {
-	["type"]    = "SessionSetup",
+	["type"]    = "SessionInit",
 	name        = "Advanced Session",
 	description = [[Allows to configure master-bus and autoconnect]],
 	master_bus  = 0
 }
 
-function session_setup ()
+function factory () return function ()
 
 	local auto_connect_in = {
 		[0] = "Manually",
@@ -56,4 +56,4 @@ function session_setup ()
 	ARDOUR.config():set_output_auto_connect (rv['ac_output'])
 
 	Session:save_state("");
-end
+end end

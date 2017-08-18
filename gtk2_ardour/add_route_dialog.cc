@@ -41,9 +41,13 @@
 #include "ardour/session.h"
 #include "ardour/vca.h"
 
-#include "utils.h"
+#include "LuaBridge/LuaBridge.h"
+
 #include "add_route_dialog.h"
+#include "ardour_ui.h"
 #include "route_group_dialog.h"
+#include "utils.h"
+
 #include "pbd/i18n.h"
 
 using namespace Gtk;
@@ -139,6 +143,7 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* template_desc is the textview that displays the currently selected template's description */
 	trk_template_desc.set_editable (false);
+	trk_template_desc.set_can_focus (false);
 	trk_template_desc.set_wrap_mode (Gtk::WRAP_WORD);
 	trk_template_desc.set_size_request(400,200);
 	trk_template_desc.set_name (X_("TextOnBackground"));
@@ -288,25 +293,94 @@ AddRouteDialog::trk_template_row_selected ()
 		trk_template_desc.get_buffer ()->set_text (d);
 
 		const string n = (*iter)[track_template_columns.name];
-		if ( n != _("Manual Configuration") ) {
-			/* template or meta-template */
-			const string p = (*iter)[track_template_columns.path];
-			bool meta_template = p.substr (0, 11) == "urn:ardour:";
+		const string p = (*iter)[track_template_columns.path];
+
+		if ( n != _("Manual Configuration") && p.substr (0, 11) == "urn:ardour:") {
+			/* lua script - meta-template */
+			const std::map<std::string, std::string> rs (ARDOUR_UI::instance()->route_setup_info (p.substr (11)));
 
 			trk_template_desc.set_sensitive (true);
 
 			manual_label.set_sensitive (false);
 			add_label.set_sensitive (false);
 			type_label.set_sensitive (false);
-			name_label.set_sensitive (!meta_template);
+
+			name_label.set_sensitive (rs.find ("name") != rs.end());
+			group_label.set_sensitive (rs.find ("group") != rs.end());
+			strict_io_label.set_sensitive (rs.find ("strict_io") != rs.end());
+			configuration_label.set_sensitive (rs.find ("channels") != rs.end ());
+			mode_label.set_sensitive (rs.find ("track_mode") != rs.end ());
+			instrument_label.set_sensitive (rs.find ("instrument") != rs.end ());
+			strict_io_label.set_sensitive (rs.find ("strict_io") != rs.end());
+
+			track_bus_combo.set_sensitive (false);
+			routes_spinner.set_sensitive (rs.find ("how_many") != rs.end ());
+			name_template_entry.set_sensitive (rs.find ("name") != rs.end ());
+			route_group_combo.set_sensitive (rs.find ("group") != rs.end());
+			channel_combo.set_sensitive (rs.find ("channels") != rs.end ());
+			mode_combo.set_sensitive (rs.find ("track_mode") != rs.end ());
+			instrument_combo.set_sensitive (rs.find ("instrument") != rs.end ());
+			strict_io_combo.set_sensitive (rs.find ("strict_io") != rs.end());
+
+			std::map<string,string>::const_iterator it;
+
+			if ((it = rs.find ("name")) != rs.end()) {
+				name_template_entry.set_text (it->second);
+			}
+
+			if ((it = rs.find ("how_many")) != rs.end()) {
+				routes_adjustment.set_value (atoi (it->second.c_str()));
+			}
+
+			if ((it = rs.find ("track_mode")) != rs.end()) {
+				switch ((ARDOUR::TrackMode) atoi (it->second.c_str())) {
+					case ARDOUR::Normal:
+						mode_combo.set_active_text (_("Normal"));
+						break;
+					case ARDOUR::NonLayered:
+						mode_combo.set_active_text (_("Nn Layered"));
+						break;
+					case ARDOUR::Destructive:
+						mode_combo.set_active_text (_("Tape"));
+						break;
+				}
+			}
+
+			if ((it = rs.find ("strict_io")) != rs.end()) {
+				if (it->second == X_("true")) {
+					strict_io_combo.set_active (1);
+				} else if (it->second == X_("false")) {
+					strict_io_combo.set_active (0);
+				}
+			}
+
+			if ((it = rs.find ("channels")) != rs.end()) {
+				uint32_t channels = atoi (it->second.c_str());
+				for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+					if ((*i).channels == channels) {
+						channel_combo.set_active_text ((*i).name);
+						break;
+					}
+				}
+			}
+
+		} else if ( n != _("Manual Configuration")) {
+			/* user-template */
+			trk_template_desc.set_sensitive (true);
+
+			manual_label.set_sensitive (false);
+			add_label.set_sensitive (false);
+			type_label.set_sensitive (false);
+			name_label.set_sensitive (true);
 			group_label.set_sensitive (false);
 			strict_io_label.set_sensitive (false);
 			configuration_label.set_sensitive (false);
 			mode_label.set_sensitive (false);
+			instrument_label.set_sensitive (false);
 
-			routes_spinner.set_sensitive (!meta_template);
+			routes_spinner.set_sensitive (true);
 			track_bus_combo.set_sensitive (false);
-			name_template_entry.set_sensitive (!meta_template);
+			name_template_entry.set_sensitive (true);
 			channel_combo.set_sensitive (false);
 			mode_combo.set_sensitive (false);
 			instrument_combo.set_sensitive (false);
@@ -314,7 +388,7 @@ AddRouteDialog::trk_template_row_selected ()
 			route_group_combo.set_sensitive (false);
 
 		} else {
-
+			/* all manual mode */
 			trk_template_desc.set_sensitive (false);
 
 			manual_label.set_sensitive (true);
@@ -564,21 +638,26 @@ AddRouteDialog::mode ()
 	return ARDOUR::Normal;
 }
 
+uint32_t
+AddRouteDialog::channel_count ()
+{
+	string str = channel_combo.get_active_text();
+	for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
+		if (str == (*i).name) {
+			return (*i).channels;
+		}
+	}
+	return 0;
+}
+
 ChanCount
 AddRouteDialog::channels ()
 {
 	ChanCount ret;
-	string str;
 	switch (type_wanted()) {
 	case AudioTrack:
 	case AudioBus:
-		str = channel_combo.get_active_text();
-		for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
-			if (str == (*i).name) {
-				ret.set (DataType::AUDIO, (*i).channels);
-				break;
-			}
-		}
+		ret.set (DataType::MIDI, channel_count ());
 		ret.set (DataType::MIDI, 0);
 		break;
 
@@ -589,13 +668,7 @@ AddRouteDialog::channels ()
 		break;
 
 	case MixedTrack:
-		str = channel_combo.get_active_text();
-		for (ChannelSetups::iterator i = channel_setups.begin(); i != channel_setups.end(); ++i) {
-			if (str == (*i).name) {
-				ret.set (DataType::AUDIO, (*i).channels);
-				break;
-			}
-		}
+		ret.set (DataType::MIDI, channel_count ());
 		ret.set (DataType::MIDI, 1);
 		break;
 	default:
@@ -676,8 +749,11 @@ AddRouteDialog::refill_channel_setups ()
 	trk_template_model->clear();
 
 	/* Add any Lua scripts (factory templates) found in the scripts folder */
-	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::TrackSetup));
+	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
 	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
+		if (!((*s)->subtype & LuaScriptInfo::RouteSetup)) {
+			continue;
+		}
 		TreeModel::Row row;
 		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
 			row = *(trk_template_model->prepend ());

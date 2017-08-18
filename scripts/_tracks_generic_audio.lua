@@ -1,5 +1,5 @@
 ardour {
-	["type"]    = "TrackSetup",
+	["type"]    = "EditorAction",
 	name        = "Add tracks",
 	description = [[
 This template creates audio tracks.
@@ -12,7 +12,17 @@ You will be prompted for:
 ]]
 }
 
-function session_setup ()
+function route_setup ()
+	return
+	{
+		['Insert_at'] = ARDOUR.PresentationInfo.max_order;
+	}
+end
+
+function factory (params) return function ()
+	local p         = params or route_setup ()
+	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
+
 	local e = Session:engine()
 	-- from the engine's POV readable/capture ports are "outputs"
 	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())
@@ -31,11 +41,11 @@ function session_setup ()
 	end
 
 	-- create tracks
-	local tl = Session:new_audio_track (1, 1, nil, rv['tracks'], "",  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
+	local tl = Session:new_audio_track (1, 1, nil, rv['tracks'], "", insert_at, ARDOUR.TrackMode.Normal)
 	-- and optionally record-arm them
 	if rv['recarm'] then
 		for track in tl:iter() do
 			track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 		end
 	end
-end
+end end

@@ -3885,6 +3885,100 @@ static void _lua_print (std::string s) {
 	PBD::info << "LuaInstance: " << s << endmsg;
 }
 
+std::map<std::string, std::string>
+ARDOUR_UI::route_setup_info (const std::string& script_path)
+{
+	std::map<std::string, std::string> rv;
+
+	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		return rv;
+	}
+
+	LuaState lua;
+	lua.Print.connect (&_lua_print);
+	lua.sandbox (true);
+
+	lua_State* L = lua.getState();
+	LuaInstance::register_classes (L);
+	LuaBindings::set_session (L, _session);
+	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+	lua_setglobal (L, "Editor");
+
+	lua.do_command ("function ardour () end");
+	lua.do_file (script_path);
+
+	try {
+		luabridge::LuaRef fn = luabridge::getGlobal (L, "route_setup");
+		if (!fn.isFunction ()) {
+			return rv;
+		}
+		luabridge::LuaRef rs = fn ();
+		if (!rs.isTable ()) {
+			return rv;
+		}
+		for (luabridge::Iterator i(rs); !i.isNil (); ++i) {
+			if (!i.key().isString()) {
+				continue;
+			}
+			std::string key = i.key().tostring();
+			if (i.value().isString() || i.value().isNumber() || i.value().isBoolean()) {
+				rv[key] = i.value().tostring();
+			}
+		}
+	} catch (luabridge::LuaException const& e) {
+		cerr << "LuaException:" << e.what () << endl;
+		return rv;
+	}
+	return rv;
+}
+
+void
+ARDOUR_UI::meta_route_setup (const std::string& script_path)
+{
+	if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		return;
+	}
+	assert (add_route_dialog);
+
+	int count;
+	if ((count = add_route_dialog->count()) <= 0) {
+		return;
+	}
+
+	LuaState lua;
+	lua.Print.connect (&_lua_print);
+	lua.sandbox (true);
+
+	lua_State* L = lua.getState();
+	LuaInstance::register_classes (L);
+	LuaBindings::set_session (L, _session);
+	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+	lua_setglobal (L, "Editor");
+
+	lua.do_command ("function ardour () end");
+	lua.do_file (script_path);
+
+	luabridge::LuaRef args (luabridge::newTable (L));
+
+	args["name"]       = add_route_dialog->name_template ();
+	args["insert_at"]  = translate_order (add_route_dialog->insert_at());
+	args["group"]      = add_route_dialog->route_group ();
+	args["strict_io"]  = add_route_dialog->use_strict_io ();
+	args["instrument"] = add_route_dialog->requested_instrument ();
+	args["track_mode"] = add_route_dialog->mode ();
+	args["channels"]   = add_route_dialog->channel_count ();
+	args["how_many"]   = count;
+
+	try {
+		luabridge::LuaRef fn = luabridge::getGlobal (L, "factory");
+		if (fn.isFunction()) {
+			fn (args)();
+		}
+	} catch (luabridge::LuaException const& e) {
+		cerr << "LuaException:" << e.what () << endl;
+	}
+}
+
 void
 ARDOUR_UI::meta_session_setup (const std::string& script_path)
 {
@@ -3906,9 +4000,9 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 	lua.do_file (script_path);
 
 	try {
-		luabridge::LuaRef fn = luabridge::getGlobal (L, "session_setup");
+		luabridge::LuaRef fn = luabridge::getGlobal (L, "factory");
 		if (fn.isFunction()) {
-			fn ();
+			fn ()();
 		}
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
@@ -4379,7 +4473,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 
 	std::string template_path = add_route_dialog->get_template_path();
 	if (!template_path.empty() && template_path.substr (0, 11) == "urn:ardour:") {
-		meta_session_setup (template_path.substr (11));
+		meta_route_setup (template_path.substr (11));
 		return;
 	}
 
