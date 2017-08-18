@@ -41,8 +41,7 @@ public:
 	ControlSet (const ControlSet&);
         virtual ~ControlSet() {}
 
-	virtual boost::shared_ptr<Evoral::Control>
-	control_factory(const Evoral::Parameter& id) = 0;
+	virtual boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id) = 0;
 
 	boost::shared_ptr<Control>
 	control (const Parameter& id, bool create_if_missing=false);
