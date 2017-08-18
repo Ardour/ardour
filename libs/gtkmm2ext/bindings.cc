@@ -825,17 +825,21 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 
 		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
 
+			string print_path = *p;
+			/* strip <Actions>/ from the start */
+			print_path = print_path.substr (10);
+
 			if ((*k).empty()) {
-				ostr << *p  << " ( " << *l << " ) "  << "</br>" << endl;
+				ostr << print_path  << " ( " << *l << " ) "  << "</br>" << endl;
 			} else {
-				ostr << *p << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
+				ostr << print_path << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
 			}
 		}
 	}
 	ostr << "</td>\n\n";
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
-	
+
 	ostr << "</body>\n";
 	ostr << "</html>\n";
 }
