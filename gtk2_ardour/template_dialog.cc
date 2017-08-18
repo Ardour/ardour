@@ -256,15 +256,10 @@ TemplateManager::save_template_desc ()
 		return;
 	}
 
-	XMLNode* md = tree.root()->child (X_("Metadata"));
-	if (!md) {
-		md = new XMLNode (X_("Metadata"));
-		tree.root()->add_child_nocopy (*md);
-	}
-	XMLNode* desc = md->child (X_("description"));
+	XMLNode* desc = tree.root()->child (X_("description"));
 	if (!desc) {
 		desc = new XMLNode (X_("description"));
-		md->add_child_nocopy (*desc);
+		tree.root()->add_child_nocopy (*desc);
 	}
 	XMLNode* dn = new XMLNode (X_("content"), desc_txt);
 	desc->add_child_nocopy (*dn);
