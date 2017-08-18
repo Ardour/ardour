@@ -262,7 +262,9 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 
 		if (e->size && (e->time >= process_start && e->time < process_end)) {
 			const framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _session.frame_rate());
-			buf.push_back (sample_offset_in_buffer, e->size, e->buf);
+			/* e->buf is guaranteed to live through this process * * cycle, so do not alloc for a copy*/
+			const Evoral::Event<MidiBuffer::TimeType> eev (Evoral::MIDI_EVENT, sample_offset_in_buffer, e->size, e->buf, false);
+			buf.insert_event (eev);
 		}
 
 		if (e->time >= process_end) {
