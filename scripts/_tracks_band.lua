@@ -1,6 +1,6 @@
 ardour {
-	["type"]    = "EditorAction",
-	name        = "Live Band Recording Session",
+	["type"]    = "TrackSetup",
+	name        = "Track Wizard",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
 
@@ -11,40 +11,72 @@ Each track will be pre-assigned with a color.
 Optionally, tracks may be assigned to sensible Groups ( vocals, guitars, drums )
 
 Optionally, tracks may be assigned Gates and other plugins.
-]]
+    ]]
 }
 
-function route_setup () return {} end
-
-function factory () return function ()
+function session_setup ()
 
     --prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
 		{ type = "heading", title = "Select the tracks you'd like\n to add to your session: " },
+		{ type = "heading", title = "Name", col=1 },
+		{ type = "heading", title = "Stereo?", col=2 },
 
-		{ type = "checkbox", key = "ldvox", default = false, title = "Lead Vocal" },
+		{ type = "checkbox", key = "check-ldvox",  default = false,        title = "Lead Vocal" },
+		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "bass", default = false, title = "Bass" },
+		{ type = "checkbox", key = "check-bass", default = false, title = "Bass" },
+		{ type = "entry",    key = "name-ldvox",   default = "Bass", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "piano", default = false, title = "Piano" },
-		{ type = "checkbox", key = "electric-piano", default = false, title = "Electric Piano" },
-		{ type = "checkbox", key = "organ", default = false, title = "Organ" },
+		{ type = "checkbox", key = "check-piano", default = false, title = "Piano" },
+		{ type = "entry",    key = "name-ldvox",   default = "Piano", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "electric-guitar", default = false, title = "Electric Guitar" },
-		{ type = "checkbox", key = "solo-guitar", default = false, title = "Lead Guitar" },
-		{ type = "checkbox", key = "accoustic-guitar", default = false, title = "Acoustic Guitar" },
+		{ type = "checkbox", key = "check-electric-piano", default = false, title = "Electric Piano" },
+		{ type = "entry",    key = "name-ldvox",   default = "E Piano", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "basic-kit", default = false, title = "Basic Drum Mics (Kick + Snare)" },
-		{ type = "checkbox", key = "full-kit", default = false, title = "Full Drum Mics (Kick, Snare, HiHat, 3 Toms)" },
-		{ type = "checkbox", key = "overkill-kit", default = false, title = "Overkill Drum Mics (Kick (2x), Snare(2x), HiHat, 3 Toms)" },
+		{ type = "checkbox", key = "check-organ", default = false, title = "Organ" },
+		{ type = "entry",    key = "name-ldvox",   default = "Organ", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "overhead-mono", default = false, title = "Drum OH (2 mono)" },
-		{ type = "checkbox", key = "overhead-stereo", default = false, title = "Drum OH (Stereo)" },
+		{ type = "checkbox", key = "check-electric-guitar", default = false, title = "Electric Guitar" },
+		{ type = "entry",    key = "name-ldvox",   default = "E Guitar", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "room-mono", default = false, title = "Drum Room (Mono)" },
-		{ type = "checkbox", key = "room-stereo", default = false, title = "Drum Room (Stereo)" },
+		{ type = "checkbox", key = "check-solo-guitar", default = false, title = "Lead Guitar" },
+		{ type = "entry",    key = "name-ldvox",   default = "Ld Gtr", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "bgvox", default = false, title = "Background Vocals (3x)" },
+		{ type = "checkbox", key = "check-accoustic-guitar", default = false, title = "Acoustic Guitar" },
+		{ type = "entry",    key = "name-ldvox",   default = "Ac Gtr", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics" },
+		{ type = "heading",  title = " (Kick + Snare)", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics" },
+		{ type = "heading",  title = "(Kick, Snare, HiHat, 3 Toms)", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "overkill-kit", default = false, title = "Overkill Drum Mics" },
+		{ type = "heading",  title = "(Kick (2x), Snare(2x), HiHat, 3 Toms)", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "check-overhead-mono", default = false, title = "Drum OH (2 mono)" },
+--		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "check-room-mono", default = false, title = "Drum Room (Mono)" },
+--		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
+
+		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals (3x)" },
+--		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
 		{ type = "heading", title = "-------------------" },
 
@@ -93,7 +125,7 @@ function factory () return function ()
 	end
 
 	local track_count = 0;
-	if rv['basic-kit'] then
+	if rv['check-basic-kit'] then
 		local names = {"Kick", "Snare"}
 		for i = 1, #names do
 	    	local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -108,7 +140,7 @@ function factory () return function ()
 		track_count = track_count+2
 	end
 
-	if rv['full-kit'] then
+	if rv['check-full-kit'] then
 		local names = {"Kick", "Snare", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -130,7 +162,7 @@ function factory () return function ()
 		track_count = track_count+6
 	end
 
-	if rv['overkill-kit'] then
+	if rv['check-overkill-kit'] then
 		local names = {"Kick In", "Kick Out", "Snare Top", "Snare Btm", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -152,7 +184,7 @@ function factory () return function ()
 		track_count = track_count+8
 	end
 
-	if rv['overhead-mono'] then
+	if rv['check-overhead-mono'] then
 		local names = {"Drum OHL", "Drum OHR"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -178,7 +210,7 @@ function factory () return function ()
 		track_count = track_count+2
 	end
 
-	if rv['room-mono'] then
+	if rv['check-room-mono'] then
 		local names = {"Drum Room"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -191,7 +223,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['room-stereo'] then
+	if rv['check-room-stereo'] then
 		local names = {"Drum Room (st)"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (2, 2, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -204,7 +236,7 @@ function factory () return function ()
 		track_count = track_count+2
 	end
 
-	if rv['bass'] then
+	if rv['check-bass'] then
 		local names = {"Bass"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -219,7 +251,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['electric-guitar'] then
+	if rv['check-electric-guitar'] then
 		local names = {"El Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -232,7 +264,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['solo-guitar'] then
+	if rv['check-solo-guitar'] then
 		local names = {"Ld Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -245,7 +277,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['accoustic-guitar'] then
+	if rv['check-acoustic-guitar'] then
 		local names = {"Ac Guitar"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -258,7 +290,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['piano'] then
+	if rv['check-piano'] then
 		local names = {"Piano"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -271,7 +303,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['electric-piano'] then
+	if rv['check-electric-piano'] then
 		local names = {"E Piano"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -284,7 +316,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['organ'] then
+	if rv['check-organ'] then
 		local names = {"Organ"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -297,7 +329,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['ldvox'] then
+	if rv['check-ldvox'] then
 		local names = {"Vox"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -312,7 +344,7 @@ function factory () return function ()
 		track_count = track_count+1
 	end
 
-	if rv['bgvox'] then
+	if rv['check-bgvox'] then
 		local names = {"Bg. Vox 1", "Bg. Vox 2", "Bg. Vox 3"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  ARDOUR.PresentationInfo.max_order, ARDOUR.TrackMode.Normal)
@@ -336,4 +368,4 @@ function factory () return function ()
     Editor:access_action("Editor","fit_all_tracks")
 
 	Session:save_state("");
-end end
+end
