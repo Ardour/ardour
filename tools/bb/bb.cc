@@ -225,10 +225,6 @@ BeatBox::process (int nsamples)
 				 * the corresponding note on.
 				 */
 
-				/* compute nominal time */
-
-				quantized_time = (in_loop_time / time_per_grid_unit) * time_per_grid_unit;
-
 				/* look for the note on */
 
 				IncompleteNotes::iterator ee;
