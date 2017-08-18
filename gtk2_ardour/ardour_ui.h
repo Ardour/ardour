@@ -127,6 +127,7 @@ class MainClock;
 class Mixer_UI;
 class PublicEditor;
 class SaveAsDialog;
+class SaveTemplateDialog;
 class SessionDialog;
 class SessionOptionEditorWindow;
 class Splash;
@@ -621,7 +622,7 @@ private:
 
 	void open_session ();
 	void open_recent_session ();
-	bool process_save_template_prompter (ArdourWidgets::Prompter& prompter);
+	void save_template_dialog_response (int response, SaveTemplateDialog* d);
 	void save_template ();
 	void manage_templates ();
 

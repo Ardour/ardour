@@ -2356,7 +2356,7 @@ Session::XMLSourceFactory (const XMLNode& node)
 }
 
 int
-Session::save_template (string template_name, bool replace_existing)
+Session::save_template (const string& template_name, const string& description, bool replace_existing)
 {
 	if ((_state_of_the_state & CannotSave) || template_name.empty ()) {
 		return -1;
@@ -2411,11 +2411,21 @@ Session::save_template (string template_name, bool replace_existing)
 	SessionSaveUnderway (); /* EMIT SIGNAL */
 
 	XMLTree tree;
-
+	XMLNode* root;
 	{
 		PBD::Unwinder<std::string> uw (_template_state_dir, template_dir_path);
-		tree.set_root (&get_template());
+		root = &get_template();
 	}
+
+	if (!description.empty()) {
+		XMLNode* desc = new XMLNode(X_("description"));
+		XMLNode* desc_cont = new XMLNode(X_("content"), description);
+		desc->add_child_nocopy (*desc_cont);
+
+		root->add_child_nocopy (*desc);
+	}
+
+	tree.set_root (root);
 
 	if (!tree.write (template_file_path)) {
 		error << _("template not saved") << endmsg;
