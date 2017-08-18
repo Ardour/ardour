@@ -337,11 +337,6 @@ AddRouteDialog::trk_template_row_selected ()
 					case ARDOUR::Normal:
 						mode_combo.set_active_text (_("Normal"));
 						break;
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-					case ARDOUR::NonLayered:
-						mode_combo.set_active_text (_("Nn Layered"));
-						break;
-#endif
 					case ARDOUR::Destructive:
 						if (!ARDOUR::Profile->get_mixbus ()) {
 							mode_combo.set_active_text (_("Tape"));
@@ -612,9 +607,6 @@ AddRouteDialog::refill_track_modes ()
 	vector<string> s;
 
 	s.push_back (_("Normal"));
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	s.push_back (_("Non Layered"));
-#endif
 	if (!ARDOUR::Profile->get_mixbus ()) {
 		s.push_back (_("Tape"));
 	}

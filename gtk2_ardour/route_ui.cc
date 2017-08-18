@@ -328,9 +328,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-		track()->TrackModeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::track_mode_changed, this), gui_context());
-#endif
 		track_mode_changed();
 	}
 

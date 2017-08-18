@@ -788,57 +788,6 @@ RouteTimeAxisView::build_display_menu ()
 			/* show nothing */
 		}
 
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-		Menu* mode_menu = manage (new Menu);
-		MenuList& mode_items = mode_menu->items ();
-		mode_menu->set_name ("ArdourContextMenu");
-
-		RadioMenuItem::Group mode_group;
-
-		int normal = 0;
-		int tape = 0;
-		int non_layered = 0;
-
-		for (TrackSelection::const_iterator t = s.begin(); t != s.end(); ++t) {
-			RouteTimeAxisView* r = dynamic_cast<RouteTimeAxisView*> (*t);
-			if (!r || !r->is_track ()) {
-				continue;
-			}
-
-			switch (r->track()->mode()) {
-			case Normal:
-				++normal;
-				break;
-			case Destructive:
-				++tape;
-				break;
-			case NonLayered:
-				++non_layered;
-				break;
-			}
-		}
-
-		mode_items.push_back (RadioMenuElem (mode_group, _("Normal Mode")));
-		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Normal, true));
-		i->set_active (normal != 0 && tape == 0 && non_layered == 0);
-		i->set_inconsistent (normal != 0 && (tape != 0 || non_layered != 0));
-
-		mode_items.push_back (RadioMenuElem (mode_group, _("Tape Mode")));
-		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::Destructive, true));
-		i->set_active (normal == 0 && tape != 0 && non_layered == 0);
-		i->set_inconsistent (tape != 0 && (normal != 0 || non_layered != 0));
-
-		mode_items.push_back (RadioMenuElem (mode_group, _("Non-Layered Mode")));
-		i = dynamic_cast<RadioMenuItem*> (&mode_items.back ());
-		i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::set_track_mode), ARDOUR::NonLayered, true));
-		i->set_active (normal == 0 && tape == 0 && non_layered != 0);
-		i->set_inconsistent (non_layered != 0 && (normal != 0 || tape != 0));
-
-		items.push_back (MenuElem (_("Record Mode"), *mode_menu));
-#endif
-
 		items.push_back (SeparatorElem());
 
 		build_playlist_menu ();
@@ -907,32 +856,6 @@ RouteTimeAxisView::build_display_menu ()
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-void
-RouteTimeAxisView::set_track_mode (TrackMode mode, bool apply_to_selection)
-{
-	if (apply_to_selection) {
-		_editor.get_selection().tracks.foreach_route_time_axis (boost::bind (&RouteTimeAxisView::set_track_mode, _1, mode, false));
-	} else {
-
-		bool needs_bounce = false;
-
-		if (!track()->can_use_mode (mode, needs_bounce)) {
-
-			if (!needs_bounce) {
-				/* cannot be done */
-				return;
-			} else {
-				cerr << "would bounce this one\n";
-				return;
-			}
-		}
-
-		track()->set_mode (mode);
-	}
-}
-#endif
 
 void
 RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
