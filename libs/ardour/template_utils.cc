@@ -111,19 +111,16 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 			if (pv != 0) {
 				pv->get_property (X_("created-with"), created_with);
 			}
-			
+
 			string description = "No Description";
-			XMLNode *md = tree.root()->child("Metadata");
-			if (md != 0) {
-				XMLNode *desc = md->child("description");
-				if (desc != 0) {
-					description = desc->attribute_value();
-				}
+			XMLNode *desc = tree.root()->child("description");
+			if (desc != 0) {
+				description = desc->attribute_value();
 			}
-			
+
 			rti.created_with = created_with;
 			rti.description = description;
-			
+
 		}
 
 		template_names.push_back (rti);
