@@ -786,7 +786,7 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
-	
+
 	/* first column: separate by group */
 	ostr << "<td>\n\n";
 	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
@@ -861,7 +861,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 		GroupMap group_map;
 
 		for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-			
+
 			if (k->first.name().empty()) {
 				continue;
 			}
@@ -883,13 +883,13 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 			}
 		}
 
-		
+
 		for (GroupMap::const_iterator gm = group_map.begin(); gm != group_map.end(); ++gm) {
 
 			if (categorize) {
 				ostr << "<h3>" << gm->first << "</h3>\n";
 			}
-			
+
 			for (vector<KeybindingMap::const_iterator>::const_iterator k = gm->second.begin(); k != gm->second.end(); ++k) {
 
 				if ((*k)->first.name().empty()) {
@@ -938,7 +938,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 						key_name.replace (pos, strlen (targets[n]), replacements[n]);
 					}
 				}
-				
+
 				key_name.append(" ");
 
 				while (key_name.length()<28)
@@ -950,7 +950,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 			ostr << "\n\n";
 
 		}
-		
+
 		ostr << "\n";
 	}
 }
