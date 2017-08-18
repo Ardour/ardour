@@ -19,7 +19,7 @@
 using std::cerr;
 using std::endl;
 
-
+using namespace ARDOUR;
 
 BeatBox::BeatBox (int sr)
 	: _start_requested (false)
@@ -174,16 +174,21 @@ BeatBox::process (int nsamples)
 			event_pool.push_back (*ee);
 		}
 		_current_events.clear ();
+		_incomplete_notes.clear ();
 		clear_pending = false;
 	}
+
+	framepos_t last_output_time = 0;
 
 	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
 		Event* e = (*ee);
 
 		if (e->size && (e->time >= process_start && e->time < process_end)) {
-			if ((buffer = jack_midi_event_reserve (out_buf, superclock_to_samples (offset + e->time - process_start, _sample_rate), e->size)) != 0) {
+			framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _sample_rate);
+			if ((buffer = jack_midi_event_reserve (out_buf, sample_offset_in_buffer, e->size)) != 0) {
 				memcpy (buffer, e->buf, e->size);
 				outbound_tracker.track (e->buf);
+				last_output_time = sample_offset_in_buffer;
 			} else {
 				cerr << "Could not reserve space for output event @ " << e << " of size " << e->size << " @ " << offset + e->time - process_start
 				     << " (samples: " << superclock_to_samples (offset + e->time - process_start, _sample_rate) << ") offset is " << offset
@@ -201,6 +206,8 @@ BeatBox::process (int nsamples)
 	in_buf = jack_port_get_buffer (_input, nsamples);
 	event_index = 0;
 
+	Events::iterator loop_iterator;
+
 	while (jack_midi_event_get (&in_event, in_buf, event_index++) == 0) {
 
 		superclock_t event_time = superclock_cnt + samples_to_superclock (in_event.time, _sample_rate);
@@ -211,7 +218,7 @@ BeatBox::process (int nsamples)
 		if (_quantize_divisor != 0) {
 			const superclock_t time_per_grid_unit = whole_note_superclocks / _quantize_divisor;
 
-			if (in_event.buffer[0] == MIDI_CMD_NOTE_OFF) {
+			if ((in_event.buffer[0] & 0xf) == MIDI_CMD_NOTE_OFF) {
 
 				/* note off is special - it must be quantized
 				 * to at least 1 quantization "spacing" after
@@ -224,18 +231,22 @@ BeatBox::process (int nsamples)
 
 				/* look for the note on */
 
-				for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
-					/* is it a note-on? same note? same  channel? */
-					if ((*ee)->time > quantized_time) {
-						cerr << "Note off seen without corresponding note on!\n";
-						/* leave quantized_time alone ... should probably dump the whole event */
+				IncompleteNotes::iterator ee;
+
+				for (ee = _incomplete_notes.begin(); ee != _incomplete_notes.end(); ++ee) {
+					/* check for same note and channel */
+					if (((*ee)->buf[1] == in_event.buffer[1]) && ((*ee)->buf[0] & 0xf) == (in_event.buffer[0] & 0xf)) {
+						quantized_time = (*ee)->time + time_per_grid_unit;
+						_incomplete_notes.erase (ee);
 						break;
 					}
-
-					if (((*ee)->buf[0] == MIDI_CMD_NOTE_ON) && ((*ee)->buf[1] == in_event.buffer[1]) && ((*ee)->buf[0] & 0xf) == (in_event.buffer[0] & 0xf)) {
-						quantized_time = (*ee)->time + time_per_grid_unit;
-					}
 				}
+
+				if (ee == _incomplete_notes.end()) {
+					cerr << "Note off for " << (int) (*ee)->buf[1] << " seen without corresponding note on among " << _incomplete_notes.size() << endl;
+					continue;
+				}
+
 			} else {
 				quantized_time = (in_loop_time / time_per_grid_unit) * time_per_grid_unit;
 			}
@@ -265,6 +276,17 @@ BeatBox::process (int nsamples)
 		inbound_tracker.track (e->buf);
 
 		_current_events.insert (e);
+
+		if ((e->buf[0] & 0xf) == MIDI_CMD_NOTE_ON) {
+			_incomplete_notes.push_back (e);
+		}
+
+		/* play it to out outputs so that we can hear it immediately */
+		/* XXX this smooshes together all inbound notes ... tricky */
+		if ((buffer = jack_midi_event_reserve (out_buf, last_output_time++, e->size)) != 0) {
+			memcpy (buffer, e->buf, e->size);
+			outbound_tracker.track (e->buf);
+		}
 	}
 
 	superclock_cnt += superclocks;

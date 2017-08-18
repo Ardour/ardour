@@ -18,6 +18,10 @@ static const superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4
 inline superclock_t superclock_to_samples (superclock_t s, int sr) { return (s * sr) / superclock_ticks_per_second; }
 inline superclock_t samples_to_superclock (int samples, int sr) { return (samples * superclock_ticks_per_second) / sr; }
 
+namespace ARDOUR {
+class Session;
+}
+
 class BeatBox {
   public:
 	BeatBox (int sample_rate);
@@ -77,6 +81,9 @@ class BeatBox {
 	struct EventComparator {
 		bool operator () (Event const * a, Event const * b) const;
 	};
+
+	typedef std::vector<Event*> IncompleteNotes;
+	IncompleteNotes _incomplete_notes;
 
 	typedef std::set<Event*,EventComparator> Events;
 	Events _current_events;
