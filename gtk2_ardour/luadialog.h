@@ -53,20 +53,24 @@ private:
 
 class LuaDialogWidget {
 public:
-	LuaDialogWidget (std::string const& key, std::string const& label)
-		: _key (key), _label (label)
+	LuaDialogWidget (std::string const& key, std::string const& label, int col = 0)
+		: _key (key), _label (label), _col (col)
 	{}
 
 	virtual ~LuaDialogWidget () {}
 
 	virtual Gtk::Widget* widget () = 0;
 	virtual void assign (luabridge::LuaRef* rv) const = 0;
-	std::string const& label () const { return _label; }
-	std::string const& key () const { return _key; }
+	std::string const&  label () const { return _label; }
+	std::string const&  key () const { return _key; }
+	int const&          col () const { return _col; }
+
+	void set_col (int col) { _col = col; }
 
 protected:
 	std::string _key;
 	std::string _label;
+	int _col;
 };
 
 
