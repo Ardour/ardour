@@ -151,10 +151,6 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 	/* do this on the first pass only */
 	MidiBuffer& buf = bufs.get_midi (0);
 
-  second_pass:
-
-	/* Output */
-
 	if (clear_pending) {
 
 		for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
@@ -165,19 +161,7 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 		clear_pending = false;
 	}
 
-	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
-		Event* e = (*ee);
-
-		if (e->size && (e->time >= process_start && e->time < process_end)) {
-			framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _session.frame_rate());
-
-			buf.push_back (sample_offset_in_buffer, e->size, e->buf);
-		}
-
-		if (e->time >= process_end) {
-			break;
-		}
-	}
+  second_pass:
 
 	/* input */
 
@@ -249,6 +233,21 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 
 		if ((new_event->buf[0] & 0xf) == MIDI_CMD_NOTE_ON) {
 			_incomplete_notes.push_back (new_event);
+		}
+	}
+
+	/* Output */
+
+	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
+		Event* e = (*ee);
+
+		if (e->size && (e->time >= process_start && e->time < process_end)) {
+			const framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _session.frame_rate());
+			buf.push_back (sample_offset_in_buffer, e->size, e->buf);
+		}
+
+		if (e->time >= process_end) {
+			break;
 		}
 	}
 
