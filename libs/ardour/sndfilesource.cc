@@ -837,27 +837,6 @@ SndFileSource::natural_position() const
 	return _timeline_position;
 }
 
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-bool
-SndFileSource::set_destructive (bool yn)
-{
-	if (yn) {
-		_flags = Flag (_flags | Writable | Destructive);
-		if (!xfade_buf) {
-			xfade_buf = new Sample[xfade_frames];
-		}
-		clear_capture_marks ();
-		_timeline_position = header_position_offset;
-	} else {
-		_flags = Flag (_flags & ~Destructive);
-		_timeline_position = 0;
-		/* leave xfade buf alone in case we need it again later */
-	}
-
-	return true;
-}
-#endif
-
 void
 SndFileSource::clear_capture_marks ()
 {

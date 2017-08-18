@@ -74,11 +74,6 @@ class LIBARDOUR_API AudioDiskstream : public Diskstream
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	int set_destructive (bool yn);
-	int set_non_layered (bool yn);
-	bool can_become_destructive (bool& requires_bounce) const;
-#endif
 
 	boost::shared_ptr<AudioPlaylist> audio_playlist () { return boost::dynamic_pointer_cast<AudioPlaylist>(_playlist); }
 

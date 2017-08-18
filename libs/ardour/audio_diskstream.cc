@@ -394,12 +394,8 @@ AudioDiskstream::use_destructive_playlist ()
 
 		/* this might be false if we switched modes, so force it */
 
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-		(*chan)->write_source->set_destructive (true);
-#else
 		// should be set when creating the source or loading the state
 		assert ((*chan)->write_source->destructive());
-#endif
 	}
 
 	/* the source list will never be reset for a destructive track */
@@ -2386,122 +2382,6 @@ AudioDiskstream::use_pending_capture_data (XMLNode& node)
 
 	return 0;
 }
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-int
-AudioDiskstream::set_non_layered (bool yn)
-{
-	if (yn != non_layered()) {
-
-		if (yn) {
-			_flags = Flag (_flags | NonLayered);
-		} else {
-			_flags = Flag (_flags & ~NonLayered);
-		}
-	}
-
-	return 0;
-}
-
-int
-AudioDiskstream::set_destructive (bool yn)
-{
-	if (yn != destructive()) {
-
-		if (yn) {
-			bool bounce_ignored;
-			/* requestor should already have checked this and
-			   bounced if necessary and desired
-			*/
-			if (!can_become_destructive (bounce_ignored)) {
-				return -1;
-			}
-			_flags = Flag (_flags | Destructive);
-			use_destructive_playlist ();
-		} else {
-			_flags = Flag (_flags & ~Destructive);
-			reset_write_sources (true, true);
-		}
-	}
-
-	return 0;
-}
-
-bool
-AudioDiskstream::can_become_destructive (bool& requires_bounce) const
-{
-	if (Profile->get_trx()) {
-		return false;
-	}
-
-	if (!_playlist) {
-		requires_bounce = false;
-		return false;
-	}
-
-	/* if no regions are present: easy */
-
-	if (_playlist->n_regions() == 0) {
-		requires_bounce = false;
-		return true;
-	}
-
-	/* is there only one region ? */
-
-	if (_playlist->n_regions() != 1) {
-		requires_bounce = true;
-		return false;
-	}
-
-	boost::shared_ptr<Region> first;
-	{
-		const RegionList& rl (_playlist->region_list_property().rlist());
-		assert((rl.size() == 1));
-		first = rl.front();
-
-	}
-
-	if (!first) {
-		requires_bounce = false;
-		return true;
-	}
-
-	/* do the source(s) for the region cover the session start position ? */
-
-	if (first->position() != _session.current_start_frame()) {
-		// what is the idea here?  why start() ??
-		if (first->start() > _session.current_start_frame()) {
-			requires_bounce = true;
-			return false;
-		}
-	}
-
-	/* currently RouteTimeAxisView::set_track_mode does not
-	 * implement bounce. Existing regions cannot be converted.
-	 *
-	 * so let's make sure this region is already set up
-	 * as tape-track (spanning the complete range)
-	 */
-	if (first->length() != max_framepos - first->position()) {
-		requires_bounce = true;
-		return false;
-	}
-
-	/* is the source used by only 1 playlist ? */
-
-	boost::shared_ptr<AudioRegion> afirst = boost::dynamic_pointer_cast<AudioRegion> (first);
-
-	assert (afirst);
-
-	if (_session.playlists->source_use_count (afirst->source()) > 1) {
-		requires_bounce = true;
-		return false;
-	}
-
-	requires_bounce = false;
-	return true;
-}
-#endif
 
 void
 AudioDiskstream::adjust_playback_buffering ()

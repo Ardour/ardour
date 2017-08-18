@@ -91,10 +91,6 @@ class LIBARDOUR_API MidiDiskstream : public Diskstream
 
 	boost::shared_ptr<SMFSource> write_source ()    { return _write_source; }
 
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	int set_destructive (bool yn); // doom!
-#endif
-
 	void set_note_mode (NoteMode m);
 
 	/** Emitted when some MIDI data has been received for recording.

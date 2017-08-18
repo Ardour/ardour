@@ -140,13 +140,6 @@ MidiTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
 	mds->reset_tracker ();
 
 	_diskstream->set_track (this);
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	if (Profile->get_trx()) {
-		_diskstream->set_destructive (false);
-	} else {
-		_diskstream->set_destructive (_mode == Destructive);
-	}
-#endif
 	_diskstream->set_record_enabled (false);
 
 	_diskstream_data_recorded_connection.disconnect ();
