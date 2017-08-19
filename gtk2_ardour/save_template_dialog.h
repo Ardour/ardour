@@ -21,20 +21,18 @@
 #ifndef __ardour_gtk_save_template_dialog_h__
 #define __ardour_gtk_save_template_dialog_h__
 
+#include <string>
+
 #include <gtkmm/entry.h>
 #include <gtkmm/textview.h>
 
 #include "ardour_dialog.h"
 
-namespace ARDOUR
-{
-class Session;
-}
 
 class SaveTemplateDialog : public ArdourDialog
 {
 public:
-	SaveTemplateDialog (const ARDOUR::Session& s);
+	SaveTemplateDialog (const std::string& name, const std::string& description = "");
 
 	std::string get_template_name () const;
 	std::string get_description () const;

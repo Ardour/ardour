@@ -4014,13 +4014,21 @@ Route::set_plugin_state_dir (boost::weak_ptr<Processor> p, const std::string& d)
 }
 
 int
-Route::save_as_template (const string& path, const string& name)
+Route::save_as_template (const string& path, const string& name, const string& description)
 {
 	std::string state_dir = path.substr (0, path.find_last_of ('.')); // strip template_suffix
 	PBD::Unwinder<std::string> uw (_session._template_state_dir, state_dir);
 
 	XMLNode& node (state (false));
 	node.set_property (X_("name"), name);
+
+	if (!description.empty()) {
+		XMLNode* desc = new XMLNode(X_("description"));
+		XMLNode* desc_cont = new XMLNode(X_("content"), description);
+		desc->add_child_nocopy (*desc_cont);
+
+		node.add_child_nocopy (*desc);
+	}
 
 	XMLTree tree;
 

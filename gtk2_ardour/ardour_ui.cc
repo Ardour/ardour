@@ -3192,9 +3192,10 @@ ARDOUR_UI::save_template ()
 		return;
 	}
 
-	SaveTemplateDialog* d = new SaveTemplateDialog (*_session);
+	SaveTemplateDialog* d = new SaveTemplateDialog (_session->name());
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::save_template_dialog_response), d));
+
 	d->show ();
 }
 

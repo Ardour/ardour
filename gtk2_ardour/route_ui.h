@@ -63,6 +63,7 @@ namespace ArdourWidgets {
 class ArdourWindow;
 class IOSelectorWindow;
 class ControlSlaveUI;
+class SaveTemplateDialog;
 
 class RoutePinWindowProxy : public WM::ProxyBase
 {
@@ -243,7 +244,7 @@ public:
 	virtual void map_frozen ();
 
 	void adjust_latency ();
-	bool process_save_template_prompter (ArdourWidgets::Prompter& prompter, const std::string& dir);
+	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
 	void save_as_template ();
 
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);

@@ -381,7 +381,7 @@ public:
 
 	boost::weak_ptr<Route> weakroute ();
 
-	int save_as_template (const std::string& path, const std::string& name);
+	int save_as_template (const std::string& path, const std::string& name, const std::string& description );
 
 	PBD::Signal1<void,void*> SelectedChanged;
 
