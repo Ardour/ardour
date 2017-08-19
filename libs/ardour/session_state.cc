@@ -2414,12 +2414,13 @@ Session::save_template (const string& template_name, const string& description, 
 	XMLNode* root;
 	{
 		PBD::Unwinder<std::string> uw (_template_state_dir, template_dir_path);
-		root = &get_template();
+		root = &get_template ();
 	}
 
+	root->remove_nodes (X_("description"));
 	if (!description.empty()) {
-		XMLNode* desc = new XMLNode(X_("description"));
-		XMLNode* desc_cont = new XMLNode(X_("content"), description);
+		XMLNode* desc = new XMLNode (X_("description"));
+		XMLNode* desc_cont = new XMLNode (X_("content"), description);
 		desc->add_child_nocopy (*desc_cont);
 
 		root->add_child_nocopy (*desc);
