@@ -14,6 +14,10 @@ Optionally, tracks may be assigned Gates and other plugins.
     ]]
 }
 
+function session_setup ()
+	return true;
+end
+
 function route_setup ()
 	return
 	{
