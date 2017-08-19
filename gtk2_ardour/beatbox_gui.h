@@ -20,6 +20,7 @@
 #ifndef __gtk2_ardour_beatbox_gui_h__
 #define __gtk2_ardour_beatbox_gui_h__
 
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 #include <gtkmm/radiobutton.h>
@@ -27,7 +28,15 @@
 #include <gtkmm/button.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/box.h>
+#include <gtkmm/notebook.h>
 
+#include "gtkmm2ext/colors.h"
+
+#include "canvas/canvas.h"
+#include "canvas/rectangle.h"
+#include "canvas/text.h"
+
+#include "widgets/ardour_button.h"
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
@@ -39,8 +48,50 @@ class BBGUI : public ArdourDialog {
 	BBGUI (boost::shared_ptr<ARDOUR::BeatBox> bb);
 	~BBGUI ();
 
+  protected:
+	void on_map ();
+	void on_unmap ();
+
   private:
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
+
+	ArdourCanvas::GtkCanvas step_sequencer_canvas;
+	ArdourCanvas::GtkCanvas pad_canvas;
+	ArdourCanvas::GtkCanvas roll_canvas;
+
+	ArdourWidgets::ArdourButton step_sequencer_tab_button;
+	ArdourWidgets::ArdourButton pad_tab_button;
+	ArdourWidgets::ArdourButton roll_tab_button;
+
+	sigc::connection timer_connection;
+
+	struct Pad {
+		Pad (ArdourCanvas::Canvas* canvas, int x, int y, int note, std::string const & txt);
+		void set_color (Gtkmm2ext::Color);
+
+		ArdourCanvas::Rectangle* rect;
+		ArdourCanvas::Text* text;
+
+		static int pad_width;
+		static int pad_height;
+		static int pad_spacing;
+
+		int row() const  { return _row; }
+		int col() const  { return _col; }
+		int note() const { return _note; }
+           private:
+		int _row;
+		int _col;
+		int _note;
+		std::string _label;
+	};
+
+	typedef std::vector<Pad*> Pads;
+	Pads pads;
+	int pad_rows;
+	int pad_cols;
+
+	Gtk::Notebook tabs;
 
 	Gtk::RadioButtonGroup quantize_group;
 	Gtk::RadioButton quantize_off;
@@ -65,6 +116,22 @@ class BBGUI : public ArdourDialog {
 	void toggle_play ();
 	void clear ();
 	void tempo_changed ();
+
+	void setup_step_sequencer_canvas ();
+	void setup_pad_canvas ();
+	void setup_roll_canvas ();
+
+	void size_pads (int cols, int rows);
+
+	void switch_tabs (Gtk::Widget*);
+	void pads_off ();
+	void update ();
+	void update_pads ();
+	void update_steps ();
+	void update_roll ();
+
+	bool pad_event (GdkEvent*, int col, int row);
+	PBD::ScopedConnectionList pad_connections;
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */
