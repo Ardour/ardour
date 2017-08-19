@@ -28,71 +28,71 @@ function factory () return function ()
 
     --prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
-		{ type = "heading", title = "Select the tracks you'd like\n to add to your session: " },
-		{ type = "heading", title = "Name", col=1 },
-		{ type = "heading", title = "Stereo?", col=2 },
+		{ type = "heading", title = "Select the tracks you'd like\nto add to your session: ", col=0, align = "left", colspan = 1},
+		{ type = "heading", title = "Name", col=1, colspan = 1 },
+		{ type = "heading", title = "Stereo?", col=2, colspan = 1 },
 
-		{ type = "checkbox", key = "check-ldvox",  default = false,        title = "Lead Vocal" },
+		{ type = "checkbox", key = "check-ldvox",  default = false,        title = "Lead Vocal", col=0 },
 		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-bass", default = false, title = "Bass" },
+		{ type = "checkbox", key = "check-bass", default = false, title = "Bass", col=0 },
 		{ type = "entry",    key = "name-bass",   default = "Bass", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-bass", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-piano", default = false, title = "Piano" },
+		{ type = "checkbox", key = "check-piano", default = false, title = "Piano", col=0 },
 		{ type = "entry",    key = "name-piano",   default = "Piano", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-piano", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-electric-piano", default = false, title = "Electric Piano" },
+		{ type = "checkbox", key = "check-electric-piano", default = false, title = "Electric Piano", col=0 },
 		{ type = "entry",    key = "name-electric-piano",   default = "E Piano", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-electric-piano", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-organ", default = false, title = "Organ" },
+		{ type = "checkbox", key = "check-organ", default = false, title = "Organ", col=0 },
 		{ type = "entry",    key = "name-organ",   default = "Organ", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-organ", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-electric-guitar", default = false, title = "Electric Guitar" },
+		{ type = "checkbox", key = "check-electric-guitar", default = false, title = "Electric Guitar", col=0 },
 		{ type = "entry",    key = "name-electric-guitar",   default = "E Guitar", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-electric-guitar", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-solo-guitar", default = false, title = "Lead Guitar" },
+		{ type = "checkbox", key = "check-solo-guitar", default = false, title = "Lead Guitar", col=0 },
 		{ type = "entry",    key = "name-solo-guitar",   default = "Ld Gtr", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-solo-guitar", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-accoustic-guitar", default = false, title = "Acoustic Guitar" },
+		{ type = "checkbox", key = "check-accoustic-guitar", default = false, title = "Acoustic Guitar", col=0 },
 		{ type = "entry",    key = "name-accoustic-guitar",   default = "Ac Gtr", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-accoustic-guitar", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics" },
-		{ type = "heading",  title = "(Kick + Snare)", col=1 },
+		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics", col=0 },
+		{ type = "label",  title = "(Kick + Snare)", col=1, colspan = 1, align = "left"},
 --		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics" },
-		{ type = "heading",  title = "(Kick, Snare, HiHat, 3 Toms)", col=1 },
+		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics", col=0 },
+		{ type = "label",  title = "(Kick, Snare, HiHat, 3 Toms)", col=1, colspan = 1, align = "left"},
 --		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-overkill-kit", default = false, title = "Overkill Drum Mics" },
-		{ type = "heading",  title = "(Kick (2x), Snare(2x), HiHat, 3 Toms)", col=1 },
+		{ type = "checkbox", key = "check-overkill-kit", default = false, title = "Overkill Drum Mics", col=0 },
+		{ type = "label",  title = "(Kick (2x), Snare(2x), HiHat, 3 Toms)", col=1, colspan = 1, align = "left"},
 --		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-overhead", default = false, title = "Drum Overheads" },
+		{ type = "checkbox", key = "check-overhead", default = false, title = "Drum Overheads", col=0 },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-overhead", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-room", default = false, title = "Drum Room" },
+		{ type = "checkbox", key = "check-room", default = false, title = "Drum Room", col=0 },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-room", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals (3x)" },
+		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals (3x)", col=0 },
 --		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-bgvox", default = false,        title = "", col=2 },
 
-		{ type = "heading", title = "-------------------" },
+		{ type = "hseparator", title="", col=0, colspan = 3},
 
-		{ type = "checkbox", key = "group", default = false, title = "Group Track(s)?" },
-		{ type = "checkbox", key = "gates", default = false, title = "Add Gate(s)?" },
-		{ type = "checkbox", key = "char", default = false, title = "Add Character Plugin(s)?" },
+		{ type = "checkbox", key = "group", default = false, title = "Group Track(s)?", col=0 },
+		{ type = "checkbox", key = "gates", default = false, title = "Add Gate(s)?", col=0 },
+		{ type = "checkbox", key = "char", default = false, title = "Add Character Plugin(s)?", col=0 },
 	}
 
 	local dlg = LuaDialog.Dialog ("Template Setup", dialog_options)

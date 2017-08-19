@@ -125,11 +125,9 @@ class LuaDialogLabel : public LuaDialogWidget
 {
 public:
 	LuaDialogLabel (std::string const& title, Gtk::AlignmentEnum xalign)
-		: LuaDialogWidget ("", "")
-		, _lbl ("<b>" + title + "</b>", xalign, Gtk::ALIGN_CENTER, false)
-	{
-		_lbl.set_use_markup ();
-	}
+		: LuaDialogWidget ("", "", 0, 2)
+		, _lbl (title, xalign, Gtk::ALIGN_CENTER, false)
+	{ }
 
 	Gtk::Widget* widget ()
 	{
@@ -141,13 +139,43 @@ protected:
 	Gtk::Label _lbl;
 };
 
+
+class LuaDialogHeading : public LuaDialogLabel
+{
+public:
+	LuaDialogHeading (std::string const& title, Gtk::AlignmentEnum xalign)
+	: LuaDialogLabel ("<b>" + title + "</b>", xalign)
+	{
+		_lbl.set_use_markup ();
+	}
+};
+
+class LuaHSeparator : public LuaDialogWidget
+{
+public:
+	LuaHSeparator ()
+		: LuaDialogWidget ("", "", 0, 2)
+	{}
+
+	Gtk::Widget* widget ()
+	{
+		return &_sep;
+	}
+
+	void assign (luabridge::LuaRef* rv) const { }
+protected:
+	Gtk::HSeparator _sep;
+};
+
 class LuaDialogCheckbox : public LuaDialogWidget
 {
 public:
 	LuaDialogCheckbox (std::string const& key, std::string const& title, bool on)
-		: LuaDialogWidget (key, "")
-		, _cb (title)
+		: LuaDialogWidget (key, "", 1, 1)
 	{
+		if (!title.empty ()) {
+			_cb.add_label (title, false, 0);
+		}
 		_cb.set_active (on);
 	}
 
@@ -514,13 +542,13 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 
 		std::string title = i.value ()["title"].cast<std::string> ();
 		std::string type = i.value ()["type"].cast<std::string> ();
-
 		std::string key;
+
 		if (i.value ()["key"].isString ()) {
 			key = i.value ()["key"].cast<std::string> ();
 		}
 
-		LuaDialogWidget *widge;
+		LuaDialogWidget* w = NULL;
 
 		if (type == "heading") {
 			Gtk::AlignmentEnum xalign = Gtk::ALIGN_CENTER;
@@ -532,19 +560,37 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 					xalign = Gtk::ALIGN_RIGHT;
 				}
 			}
-			widge = new LuaDialogLabel (title, xalign);
-		} else if (type == "checkbox") {
+			w = new LuaDialogHeading (title, xalign);
+		} else if (type == "label") {
+			Gtk::AlignmentEnum xalign = Gtk::ALIGN_CENTER;
+			if (i.value ()["align"].isString ()) {
+				std::string align = i.value ()["align"].cast <std::string> ();
+				if (align == "left") {
+					xalign = Gtk::ALIGN_LEFT;
+				} else if (align == "right") {
+					xalign = Gtk::ALIGN_RIGHT;
+				}
+			}
+			w = new LuaDialogLabel (title, xalign);
+		} else if (type == "hseparator") {
+			w = new LuaHSeparator ();
+		}
+		/* the following widgets do require a key */
+		else if (key.empty ()) {
+			continue;
+		}
+		else if (type == "checkbox") {
 			bool dflt = false;
 			if (i.value ()["default"].isBoolean ()) {
 				dflt = i.value ()["default"].cast<bool> ();
 			}
-			widge = new LuaDialogCheckbox (key, title, dflt);
+			w = new LuaDialogCheckbox (key, title, dflt);
 		} else if (type == "entry") {
 			std::string dflt;
 			if (i.value ()["default"].isString ()) {
 				dflt = i.value ()["default"].cast<std::string> ();
 			}
-			widge = new LuaDialogEntry (key, title, dflt);
+			w = new LuaDialogEntry (key, title, dflt);
 		} else if (type == "radio") {
 			std::string dflt;
 			if (!i.value ()["values"].isTable ()) {
@@ -553,13 +599,13 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["default"].isString ()) {
 				dflt = i.value ()["default"].cast<std::string> ();
 			}
-			widge = new LuaDialogRadio (key, title, i.value ()["values"], dflt);
+			w = new LuaDialogRadio (key, title, i.value ()["values"], dflt);
 		} else if (type == "fader") {
 			double dflt = 0;
 			if (i.value ()["default"].isNumber ()) {
 				dflt = i.value ()["default"].cast<double> ();
 			}
-			widge = new LuaDialogFader (key, title, dflt);
+			w = new LuaDialogFader (key, title, dflt);
 		} else if (type == "slider") {
 			double lower, upper, dflt;
 			int digits = 0;
@@ -575,7 +621,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["digits"].isNumber ()) {
 				digits = i.value ()["digits"].cast<int> ();
 			}
-			widge = new LuaDialogSlider (key, title, lower, upper, dflt, digits, i.value ()["scalepoints"]);
+			w = new LuaDialogSlider (key, title, lower, upper, dflt, digits, i.value ()["scalepoints"]);
 		} else if (type == "number") {
 			double lower, upper, dflt, step;
 			int digits = 0;
@@ -596,7 +642,7 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["digits"].isNumber ()) {
 				digits = i.value ()["digits"].cast<int> ();
 			}
-			widge = new LuaDialogSpinBox (key, title, lower, upper, dflt, step, digits);
+			w = new LuaDialogSpinBox (key, title, lower, upper, dflt, step, digits);
 		} else if (type == "dropdown") {
 			std::string dflt;
 			if (!i.value ()["values"].isTable ()) {
@@ -605,27 +651,29 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 			if (i.value ()["default"].isString ()) {
 				dflt = i.value ()["default"].cast<std::string> ();
 			}
-			widge = new LuaDialogDropDown (key, title, i.value ()["values"], dflt);
+			w = new LuaDialogDropDown (key, title, i.value ()["values"], dflt);
 		} else if (type == "file") {
 			std::string path;
 			if (i.value ()["path"].isString ()) {
 				path = i.value ()["path"].cast<std::string> ();
 			}
-			widge = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_OPEN, path);
+			w = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_OPEN, path);
 		} else if (type == "folder") {
 			std::string path;
 			if (i.value ()["path"].isString ()) {
 				path = i.value ()["path"].cast<std::string> ();
 			}
-			widge = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path);
+			w = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path);
 		}
 
-		if (widge) {
-			_widgets.push_back(widge);
-
+		if (w) {
 			if (i.value ()["col"].isNumber ()) {
-				widge->set_col (i.value ()["col"].cast<int> ());
+				w->set_col (i.value ()["col"].cast<int> ());
 			}
+			if (i.value ()["colspan"].isNumber ()) {
+				w->set_span (i.value ()["colspan"].cast<int> ());
+			}
+			_widgets.push_back(w);
 		}
 	}
 
@@ -636,26 +684,35 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	table->set_col_spacings (20);
 	table->set_row_spacings (8);
 	_ad.get_vbox ()->pack_start (*table);
+
 	int row = 0;
+	int last_end = -1;
 
 	for (DialogWidgets::const_iterator i = _widgets.begin (); i != _widgets.end (); ++i) {
 		int col = (*i)->col();
-		if (col <= 0) {
+		int cend = col + (*i)->span();
+
+		if (col < last_end) {
 			++row;
 		}
+		last_end = cend;
 
 		std::string const& label = (*i)->label ();
 		if (!label.empty ()) {
-			Gtk::HBox* hb = Gtk::manage (new Gtk::HBox());
+			/* items with implicit label (title) */
 			Gtk::Label* lbl = Gtk::manage (new Gtk::Label (label + ":", Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-			hb->set_spacing(4);
-			hb->pack_start (*lbl, true, false);
-			hb->pack_start (*(*i)->widget (), true, false);
-			table->attach (*hb, col+0, col+1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
-		} else if ((*i)->key ().empty ()) {
-			table->attach (*((*i)->widget ()), col+0, col+1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			if (cend - col > 1) {
+				table->attach (*lbl, col, col + 1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+				table->attach (*((*i)->widget ()), col + 1, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			} else {
+				Gtk::HBox* hb = Gtk::manage (new Gtk::HBox());
+				hb->set_spacing(4);
+				hb->pack_start (*lbl, true, false);
+				hb->pack_start (*(*i)->widget (), true, false);
+				table->attach (*hb, col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			}
 		} else {
-			table->attach (*((*i)->widget ()), col+0, col+1, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
+			table->attach (*((*i)->widget ()), col, cend, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 		}
 	}
 }
