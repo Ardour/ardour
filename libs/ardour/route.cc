@@ -4022,6 +4022,7 @@ Route::save_as_template (const string& path, const string& name, const string& d
 	XMLNode& node (state (false));
 	node.set_property (X_("name"), name);
 
+	node.remove_nodes (X_("description"));
 	if (!description.empty()) {
 		XMLNode* desc = new XMLNode(X_("description"));
 		XMLNode* desc_cont = new XMLNode(X_("content"), description);

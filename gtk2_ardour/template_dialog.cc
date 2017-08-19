@@ -256,13 +256,13 @@ TemplateManager::save_template_desc ()
 		return;
 	}
 
-	XMLNode* desc = tree.root()->child (X_("description"));
-	if (!desc) {
-		desc = new XMLNode (X_("description"));
-		tree.root()->add_child_nocopy (*desc);
-	}
+	tree.root()->remove_nodes (X_("description"));
+	XMLNode* desc = new XMLNode (X_("description"));
+
 	XMLNode* dn = new XMLNode (X_("content"), desc_txt);
 	desc->add_child_nocopy (*dn);
+
+	tree.root()->add_child_nocopy (*desc);
 
 	if (!tree.write ()) {
 		error << string_compose(X_("Could not write to template file \"%1\"."), file_path) << endmsg;
