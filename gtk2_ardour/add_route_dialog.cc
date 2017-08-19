@@ -653,7 +653,7 @@ AddRouteDialog::channels ()
 	switch (type_wanted()) {
 	case AudioTrack:
 	case AudioBus:
-		ret.set (DataType::MIDI, channel_count ());
+		ret.set (DataType::AUDIO, channel_count ());
 		ret.set (DataType::MIDI, 0);
 		break;
 
@@ -664,7 +664,7 @@ AddRouteDialog::channels ()
 		break;
 
 	case MixedTrack:
-		ret.set (DataType::MIDI, channel_count ());
+		ret.set (DataType::AUDIO, channel_count ());
 		ret.set (DataType::MIDI, 1);
 		break;
 	default:
