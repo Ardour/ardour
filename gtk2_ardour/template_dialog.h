@@ -49,6 +49,7 @@ public:
 class TemplateManager : public Gtk::HBox,
 			public ProgressReporter
 {
+	friend class TemplateDialog;
 public:
 	virtual ~TemplateManager () {}
 	virtual void init () = 0;
@@ -72,6 +73,7 @@ protected:
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
 	virtual void delete_selected_template () = 0;
 
+	void handle_dirty_description ();
 	virtual void save_template_desc ();
 
 	void export_all_templates ();
@@ -98,6 +100,8 @@ protected:
 
 	SessionTemplateColumns _template_columns;
 	Glib::RefPtr<Gtk::ListStore>  _template_model;
+
+	Gtk::TreeModel::const_iterator _current_selection;
 
 	Gtk::TreeView _template_treeview;
 	Gtk::CellRendererText _validating_cellrenderer;

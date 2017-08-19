@@ -72,6 +72,11 @@ TemplateDialog::TemplateDialog ()
 
 	session_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&RouteTemplateManager::init, route_tm), gui_context ());
 	route_tm->TemplatesImported.connect (*this, invalidator (*this), boost::bind (&SessionTemplateManager::init, session_tm), gui_context ());
+
+	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
+	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));
+	nb->signal_switch_page().connect (boost::bind (&TemplateManager::handle_dirty_description, session_tm));
+	nb->signal_switch_page().connect (boost::bind (&TemplateManager::handle_dirty_description, route_tm));
 }
 
 TemplateManager::TemplateManager ()
@@ -169,22 +174,46 @@ TemplateManager::setup_model (const vector<TemplateInfo>& templates)
 }
 
 void
+TemplateManager::handle_dirty_description ()
+{
+	if (_desc_dirty && _current_selection) {
+		ArdourDialog dlg (_("Description not saved"), true);
+		const string name = _current_selection->get_value (_template_columns.name);
+		Label msg (string_compose (_("The discription of template \"%1\" has been modfied but has not been saved yet.\n"
+					     "Do you want to save it?"), name));
+		dlg.get_vbox()->pack_start (msg);
+		msg.show ();
+		dlg.add_button (_("Save"), RESPONSE_ACCEPT);
+		dlg.add_button (_("Discard"), RESPONSE_REJECT);
+		dlg.set_default_response (RESPONSE_REJECT);
+
+		int response = dlg.run ();
+
+		if (response == RESPONSE_ACCEPT) {
+			save_template_desc ();
+		} else {
+			_description_editor.get_buffer()->set_text (_current_selection->get_value (_template_columns.description));
+		}
+
+		_desc_dirty = false;
+	}
+}
+
+void
 TemplateManager::row_selection_changed ()
 {
-	bool has_selection = false;
-	if (_template_treeview.get_selection()->count_selected_rows () != 0) {
-		Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected ();
-		if (it) {
-			has_selection = true;
-			const string desc = it->get_value (_template_columns.description);
-			_description_editor.get_buffer()->set_text (desc);
-			_desc_dirty = false;
-			_save_desc.set_sensitive (false);
-		}
+	handle_dirty_description ();
+
+	_current_selection = _template_treeview.get_selection()->get_selected ();
+	if (_current_selection) {
+		const string desc = _current_selection->get_value (_template_columns.description);
+		_description_editor.get_buffer()->set_text (desc);
+		_desc_dirty = false;
+		_save_desc.set_sensitive (false);
 	}
 
-	_rename_button.set_sensitive (has_selection);
-	_remove_button.set_sensitive (has_selection);
+	_rename_button.set_sensitive (_current_selection);
+	_remove_button.set_sensitive (_current_selection);
 }
 
 void
@@ -243,11 +272,10 @@ TemplateManager::set_desc_dirty ()
 void
 TemplateManager::save_template_desc ()
 {
-	const Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected ();
-	const string file_path = template_file (it);
+	const string file_path = template_file (_current_selection);
 
 	const string desc_txt = _description_editor.get_buffer()->get_text ();
-	it->set_value (_template_columns.description, desc_txt);
+	_current_selection->set_value (_template_columns.description, desc_txt);
 
 	XMLTree tree;
 
@@ -567,19 +595,13 @@ SessionTemplateManager::rename_template (TreeModel::iterator& item, const Glib::
 void
 SessionTemplateManager::delete_selected_template ()
 {
-	if (_template_treeview.get_selection()->count_selected_rows() == 0) {
+	if (!_current_selection) {
 		return;
 	}
 
-	Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected();
+	PBD::remove_directory (_current_selection->get_value (_template_columns.path));
 
-	if (!it) {
-		return;
-	}
-
-	PBD::remove_directory (it->get_value (_template_columns.path));
-
-	_template_model->erase (it);
+	_template_model->erase (_current_selection);
 	row_selection_changed ();
 }
 
@@ -669,25 +691,20 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 void
 RouteTemplateManager::delete_selected_template ()
 {
-	if (_template_treeview.get_selection()->count_selected_rows() == 0) {
+	if (!_current_selection) {
 		return;
 	}
 
-	Gtk::TreeModel::const_iterator it = _template_treeview.get_selection()->get_selected();
-
-	if (!it) {
-		return;
-	}
-
-	const string file_path = it->get_value (_template_columns.path);
+	const string file_path = _current_selection->get_value (_template_columns.path);
 
 	if (g_unlink (file_path.c_str()) != 0) {
 		error << string_compose(_("Could not delete template file \"%1\": %2"), file_path, strerror (errno)) << endmsg;
 		return;
 	}
-	PBD::remove_directory (Glib::build_filename (user_route_template_directory (), it->get_value (_template_columns.name)));
+	PBD::remove_directory (Glib::build_filename (user_route_template_directory (),
+						     _current_selection->get_value (_template_columns.name)));
 
-	_template_model->erase (it);
+	_template_model->erase (_current_selection);
 	row_selection_changed ();
 }
 
