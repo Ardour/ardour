@@ -34,7 +34,7 @@ using namespace ARDOUR;
 SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::string& desc)
 	: ArdourDialog (_("Save as template"))
 {
-	_name_editor.get_buffer()->set_text (name + _("-template"));
+	_name_entry.get_buffer()->set_text (name + _("-template"));
 	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);
 	_description_editor.set_size_request(400, 300);
 
@@ -42,7 +42,7 @@ SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::stri
 	hb->set_spacing (8);
 	Label* lb = manage (new Label(_("Template name:")));
 	hb->pack_start (*lb, false, true);
-	hb->pack_start (_name_editor, true, true);
+	hb->pack_start (_name_entry, true, true);
 
 	Frame* fd = manage (new Frame(_("Description:")));
 	fd->add (_description_editor);
@@ -61,7 +61,7 @@ SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::stri
 std::string
 SaveTemplateDialog::get_template_name () const
 {
-	return _name_editor.get_buffer()->get_text();
+	return _name_entry.get_buffer()->get_text();
 }
 
 std::string

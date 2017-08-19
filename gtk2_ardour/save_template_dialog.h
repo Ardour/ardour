@@ -38,7 +38,7 @@ public:
 	std::string get_description () const;
 
 private:
-	Gtk::Entry _name_editor;
+	Gtk::Entry _name_entry;
 	Gtk::TextView _description_editor;
 };
 
