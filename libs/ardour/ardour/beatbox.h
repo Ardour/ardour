@@ -27,6 +27,11 @@
 
 #include <stdint.h>
 
+#include "pbd/pool.h"
+#include "pbd/ringbuffer.h"
+
+#include "timecode/bbt_time.h"
+
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
 
@@ -52,6 +57,11 @@ class BeatBox : public ARDOUR::Processor {
 	void stop ();
 	void clear ();
 
+	Timecode::BBT_Time get_last_time () const;
+
+	void inject_note (int number, int velocity);
+	void inject_note (int number, int velocity, Timecode::BBT_Time at);
+
 	void set_measure_count (int measures);
 	void set_meter (int beats, int beat_type);
 	void set_tempo (float bpm);
@@ -75,6 +85,7 @@ class BeatBox : public ARDOUR::Processor {
 	int   _meter_beat_type;
 	superclock_t  superclock_cnt;
 	superclock_t  last_start;
+	Timecode::BBT_Time last_time;
 
 	int _sample_rate;
 	superclock_t whole_note_superclocks;
@@ -94,6 +105,16 @@ class BeatBox : public ARDOUR::Processor {
 		Event () : time (0), size (0) {}
 		Event (superclock_t t, size_t sz, unsigned char* b) : time (t), size (sz) { memcpy (buf, b, std::min (sizeof (buf), sz)); }
 		Event (Event const & other) : time (other.time), size (other.size) { memcpy (buf, other.buf, other.size); }
+
+		static MultiAllocSingleReleasePool pool;
+
+		void *operator new (size_t) {
+			return pool.alloc ();
+		}
+
+		void operator delete (void* ptr, size_t /* size */) {
+			pool.release (ptr);
+		}
 	};
 
 	struct EventComparator {
@@ -106,10 +127,10 @@ class BeatBox : public ARDOUR::Processor {
 	typedef std::set<Event*,EventComparator> Events;
 	Events _current_events;
 
-	typedef std::vector<Event*> EventPool;
-	EventPool  event_pool;
-
 	void compute_tempo_clocks ();
+
+	RingBuffer<Event*> injection_queue;
+	void queue_event (Event*);
 };
 
 } /* namespace */

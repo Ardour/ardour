@@ -38,6 +38,8 @@ using std::endl;
 
 using namespace ARDOUR;
 
+MultiAllocSingleReleasePool BeatBox::Event::pool (X_("beatbox events"), sizeof (Event*), 2048);
+
 BeatBox::BeatBox (Session& s)
 	: Processor (s, _("BeatBox"))
 	, _start_requested (false)
@@ -54,12 +56,9 @@ BeatBox::BeatBox (Session& s)
 	, measure_superclocks (0)
 	, _quantize_divisor (4)
 	, clear_pending (false)
+	, injection_queue (256)
 {
 	_display_to_user = true;
-
-	for (uint32_t n = 0; n < 1024; ++n) {
-		event_pool.push_back (new Event());
-	}
 }
 
 BeatBox::~BeatBox ()
@@ -146,6 +145,12 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 		return;
 	}
 
+	Event* injected_event;
+
+	while (injection_queue.read (&injected_event, 1)) {
+		_current_events.insert (injected_event);
+	}
+
 	superclock_t process_start = superclock_cnt - last_start;
 	superclock_t process_end = process_start + superclocks;
 	const superclock_t loop_length = _measures * measure_superclocks;
@@ -153,6 +158,14 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 
 	process_start %= loop_length;
 	process_end   %= loop_length;
+
+	last_time.bars = (process_end / measure_superclocks);
+	last_time.beats = ((process_end - (last_time.bars * measure_superclocks)) / beat_superclocks);
+	last_time.ticks = 0; /* XXX fix me */
+
+	/* change to 1-base */
+	last_time.bars++;
+	last_time.beats++;
 
 	bool two_pass_required;
 	superclock_t offset = 0;
@@ -173,7 +186,7 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 	if (clear_pending) {
 
 		for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
-			event_pool.push_back (*ee);
+			delete *ee;
 		}
 		_current_events.clear ();
 		_incomplete_notes.clear ();
@@ -233,13 +246,12 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 			continue;
 		}
 
-		if (event_pool.empty()) {
+		Event* new_event = new Event; // pool alloc, thread safe
+
+		if (!new_event) {
 			cerr << "No more events, grow pool\n";
 			continue;
 		}
-
-		Event* new_event = event_pool.back();
-		event_pool.pop_back ();
 
 		new_event->time = quantized_time;
 		new_event->whole_note_superclocks = whole_note_superclocks;
@@ -329,4 +341,40 @@ BeatBox::state(bool full)
 	node.set_property ("type", "beatbox");
 
 	return node;
+}
+
+Timecode::BBT_Time
+BeatBox::get_last_time() const
+{
+	/* need mutex */
+	return last_time;
+}
+
+void
+BeatBox::inject_note (int note, int velocity)
+{
+
+}
+
+void
+BeatBox::inject_note (int note, int velocity, Timecode::BBT_Time at)
+{
+	Event* e = new Event; // pool allocated, thread safe
+
+	if (!e) {
+		cerr << "No more events for injection, grow pool\n";
+ 		return;
+	}
+
+	at.bars %= _measures;
+	at.beats %= _meter_beats;
+
+	e->time = (measure_superclocks * (at.bars - 1)) + (beat_superclocks * (at.beats - 1));
+	queue_event (e);
+}
+
+void
+BeatBox::queue_event (Event* e)
+{
+	injection_queue.write (&e, 1);
 }
