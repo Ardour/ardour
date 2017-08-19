@@ -369,7 +369,7 @@ Canvas::canvas_to_window (Duple const & d, bool rounded) const
 void
 Canvas::item_moved (Item* item, Rect pre_change_parent_bounding_box)
 {
-	if (pre_change_parent_bounding_box) {
+	if (item->parent() && pre_change_parent_bounding_box) {
 		/* request a redraw of where the item used to be. The box has
 		 * to be in parent coordinate space since the bounding box of
 		 * an item does not change when moved. If we use
