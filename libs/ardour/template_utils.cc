@@ -106,13 +106,13 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 				continue;
 			}
 
-			string created_with = "(unknown)";
+			string created_with = _("(unknown)");
 			XMLNode *pv = tree.root()->child("ProgramVersion");
 			if (pv != 0) {
 				pv->get_property (X_("created-with"), created_with);
 			}
 
-			string description = "No Description";
+			string description = _("No Description");
 			XMLNode *desc = tree.root()->child("description");
 			if (desc != 0) {
 				description = desc->attribute_value();
@@ -149,7 +149,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		XMLNode* root = tree.root();
 
-		string description = "No Description";
+		string description = _("No Description");
 		XMLNode* desc = tree.root()->child ("description");
 		if (desc) {
 			description = desc->attribute_value ();
