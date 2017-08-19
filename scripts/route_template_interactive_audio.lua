@@ -1,6 +1,6 @@
 ardour {
 	["type"]    = "EditorAction",
-	name        = "Create Audio Tracks interactively",
+	name        = "Create Audio Tracks Interactively",
 	description = [[
 This template creates audio tracks.
 

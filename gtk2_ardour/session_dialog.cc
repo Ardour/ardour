@@ -568,7 +568,7 @@ SessionDialog::populate_session_templates ()
 	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
 	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
 		TreeModel::Row row = *(template_model->append ());
-		row[session_template_columns.name] = "Meta: " + (*s)->name;
+		row[session_template_columns.name] = (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[session_template_columns.description] = (*s)->description;
 		row[session_template_columns.created_with_short] = _("{Factory Template}");

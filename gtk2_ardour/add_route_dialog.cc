@@ -302,7 +302,7 @@ AddRouteDialog::trk_template_row_selected ()
 			trk_template_desc.set_sensitive (true);
 
 			manual_label.set_sensitive (false);
-			add_label.set_sensitive (false);
+			add_label.set_sensitive (rs.find ("how_many") != rs.end ());
 			type_label.set_sensitive (false);
 
 			name_label.set_sensitive (rs.find ("name") != rs.end());
@@ -329,7 +329,9 @@ AddRouteDialog::trk_template_row_selected ()
 			}
 
 			if ((it = rs.find ("how_many")) != rs.end()) {
-				routes_adjustment.set_value (atoi (it->second.c_str()));
+				if (atoi (it->second.c_str()) > 0) {
+					routes_adjustment.set_value (atoi (it->second.c_str()));
+				}
 			}
 
 			if ((it = rs.find ("track_mode")) != rs.end()) {
@@ -341,6 +343,8 @@ AddRouteDialog::trk_template_row_selected ()
 						if (!ARDOUR::Profile->get_mixbus ()) {
 							mode_combo.set_active_text (_("Tape"));
 						}
+						break;
+					default: // "NonLayered" enum is still present for session-format compat
 						break;
 				}
 			}
@@ -368,7 +372,7 @@ AddRouteDialog::trk_template_row_selected ()
 			trk_template_desc.set_sensitive (true);
 
 			manual_label.set_sensitive (false);
-			add_label.set_sensitive (false);
+			add_label.set_sensitive (true);
 			type_label.set_sensitive (false);
 			name_label.set_sensitive (true);
 			group_label.set_sensitive (false);
@@ -743,6 +747,7 @@ AddRouteDialog::refill_channel_setups ()
 	}
 
 	trk_template_model->clear();
+	bool selected_default = false;
 
 	/* Add any Lua scripts (factory templates) found in the scripts folder */
 	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
@@ -751,7 +756,8 @@ AddRouteDialog::refill_channel_setups ()
 			continue;
 		}
 		TreeModel::Row row;
-		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
+		if ( (*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
+			// somewhat-special, Ben says: "most-used template"
 			row = *(trk_template_model->prepend ());
 		} else {
 			row = *(trk_template_model->append ());
@@ -761,8 +767,9 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.description] = (*s)->description;
 		row[track_template_columns.created_with] = _("{Factory Template}");
 
-		if ( (*s)->name == "Add tracks") {  //somewhat-special, most-used template
+		if ((*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
 			trk_template_chooser.get_selection()->select(row);
+			selected_default = true;
 		}
 	}
 
@@ -784,6 +791,10 @@ AddRouteDialog::refill_channel_setups ()
 	row[track_template_columns.path] = "urn:ardour:manual";
 	row[track_template_columns.description] = _("Use the controls, below, to add tracks.");
 	row[track_template_columns.created_with] = "";
+
+	if (!selected_default) {
+		trk_template_chooser.get_selection()->select(row);
+	}
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
 
