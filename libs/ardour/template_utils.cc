@@ -149,10 +149,17 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		XMLNode* root = tree.root();
 
+		string description = "No Description";
+		XMLNode* desc = tree.root()->child ("description");
+		if (desc) {
+			description = desc->attribute_value ();
+		}
+
 		TemplateInfo rti;
 
 		rti.name = IO::name_from_state (*root->children().front());
 		rti.path = fullpath;
+		rti.description = description;
 
 		template_names.push_back (rti);
 	}
