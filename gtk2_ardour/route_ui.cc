@@ -70,6 +70,7 @@
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
+#include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -1892,33 +1893,29 @@ RouteUI::adjust_latency ()
 	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
 }
 
-bool
-RouteUI::process_save_template_prompter (Prompter& prompter, const std::string& dir)
+
+void
+RouteUI::save_as_template_dialog_response (int response, SaveTemplateDialog* d)
 {
-	std::string path;
-	std::string safe_name;
-	std::string name;
+	if (response == RESPONSE_ACCEPT) {
+		const string name = d->get_template_name ();
+		const string desc = d->get_description ();
+		const string path = Glib::build_filename(ARDOUR::user_route_template_directory (), name);
 
-	prompter.get_result (name, true);
+		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) { /* file already exists. */
+			bool overwrite = overwrite_file_dialog (*d,
+								_("Confirm Template Overwrite"),
+								_("A template already exists with that name. Do you want to overwrite it?"));
 
-	safe_name = legalize_for_path (name);
-	safe_name += template_suffix;
-
-	path = Glib::build_filename (dir, safe_name);
-
-	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		bool overwrite = overwrite_file_dialog (prompter,
-		                                        _("Confirm Template Overwrite"),
-							_("A template already exists with that name. Do you want to overwrite it?"));
-
-		if (!overwrite) {
-			return false;
+			if (!overwrite) {
+				d->show ();
+				return;
+			}
 		}
+		_route->save_as_template (path, name, desc);
 	}
 
-	_route->save_as_template (path, name);
-
-	return true;
+	delete d;
 }
 
 void
@@ -1933,23 +1930,10 @@ RouteUI::save_as_template ()
 		return;
 	}
 
-	Prompter prompter (true); // modal
+	SaveTemplateDialog* d = new SaveTemplateDialog (_route->name());
 
-	prompter.set_title (_("Save As Template"));
-	prompter.set_prompt (_("Template name:"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-
-	bool finished = false;
-	while (!finished) {
-		switch (prompter.run()) {
-		case RESPONSE_ACCEPT:
-			finished = process_save_template_prompter (prompter, dir);
-			break;
-		default:
-			finished = true;
-			break;
-		}
-	}
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::save_as_template_dialog_response), d));
+	d->show ();
 }
 
 void
@@ -2415,4 +2399,3 @@ RouteUI::stripable () const
 {
 	return _route;
 }
-
