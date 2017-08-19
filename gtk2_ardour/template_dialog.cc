@@ -63,7 +63,7 @@ class TemplateManager : public Gtk::HBox,
 public:
 	virtual ~TemplateManager () {}
 
-	virtual void init () = 0;
+	void init ();
 	void handle_dirty_description ();
 
 	PBD::Signal0<void> TemplatesImported;
@@ -107,6 +107,8 @@ private:
 
 	bool key_event (GdkEventKey* ev);
 
+	virtual void get_templates (vector<TemplateInfo>& templates) const = 0;
+
 	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
 
 	virtual void save_template_desc ();
@@ -142,7 +144,7 @@ public:
 	SessionTemplateManager () : TemplateManager () {}
 	~SessionTemplateManager () {}
 
-	void init ();
+	void get_templates (vector<TemplateInfo>& templates) const;
 
 private:
 	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
@@ -161,7 +163,7 @@ public:
 	RouteTemplateManager () : TemplateManager () {}
 	~RouteTemplateManager () {}
 
-	void init ();
+	void get_templates (vector<TemplateInfo>& templates) const;
 
 private:
 	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
@@ -281,6 +283,18 @@ TemplateManager::TemplateManager ()
 }
 
 void
+TemplateManager::init ()
+{
+	vector<TemplateInfo> templates;
+	get_templates (templates);
+	setup_model (templates);
+
+	_progress_bar.hide ();
+	_description_editor.set_sensitive (false);
+	_save_desc.set_sensitive (false);
+}
+
+void
 TemplateManager::setup_model (const vector<TemplateInfo>& templates)
 {
 	_template_model->clear ();
@@ -326,7 +340,12 @@ TemplateManager::handle_dirty_description ()
 void
 TemplateManager::row_selection_changed ()
 {
-	handle_dirty_description ();
+	if (_current_selection) {
+		handle_dirty_description ();
+	} else {
+		_description_editor.get_buffer()->set_text ("");
+		_desc_dirty = false;
+	}
 
 	_current_selection = _template_treeview.get_selection()->get_selected ();
 	if (_current_selection) {
@@ -336,6 +355,7 @@ TemplateManager::row_selection_changed ()
 		_save_desc.set_sensitive (false);
 	}
 
+	_description_editor.set_sensitive (_current_selection);
 	_rename_button.set_sensitive (_current_selection);
 	_remove_button.set_sensitive (_current_selection);
 }
@@ -641,23 +661,15 @@ TemplateManager::update_progress_gui (float p)
 	_progress_bar.set_fraction (p);
 }
 
-
-void SessionTemplateManager::init ()
+void
+SessionTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
-	vector<TemplateInfo> templates;
 	find_session_templates (templates, /* read_xml = */ true);
-	setup_model (templates);
-
-	_progress_bar.hide ();
 }
 
-void RouteTemplateManager::init ()
+void RouteTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
-	vector<TemplateInfo> templates;
 	find_route_templates (templates);
-	setup_model (templates);
-
-	_progress_bar.hide ();
 }
 
 #include <cerrno>
@@ -726,6 +738,7 @@ SessionTemplateManager::delete_selected_template ()
 	PBD::remove_directory (_current_selection->get_value (_template_columns.path));
 
 	_template_model->erase (_current_selection);
+	_current_selection = TreeIter ();
 	row_selection_changed ();
 }
 
