@@ -67,8 +67,6 @@
 #include "ardour/session_handle.h"
 #include "ardour/system_exec.h"
 
-#include "LuaBridge/LuaBridge.h"
-
 #include "video_timeline.h"
 
 #include "widgets/ardour_button.h"
