@@ -363,13 +363,22 @@ BeatBox::inject_note (int note, int velocity, Timecode::BBT_Time at)
 
 	if (!e) {
 		cerr << "No more events for injection, grow pool\n";
- 		return;
+		return;
 	}
+	/* convert to zero-base */
+	at.bars--;
+	at.beats--;
 
+	/* clamp to current loop configuration */
 	at.bars %= _measures;
 	at.beats %= _meter_beats;
 
-	e->time = (measure_superclocks * (at.bars - 1)) + (beat_superclocks * (at.beats - 1));
+	e->time = (measure_superclocks * at.bars) + (beat_superclocks * at.beats);
+	e->size = 3;
+	e->buf[0] = MIDI_CMD_NOTE_ON | (0 & 0xf);
+	e->buf[1] = note;
+	e->buf[2] = velocity;
+
 	queue_event (e);
 }
 
