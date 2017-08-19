@@ -19,17 +19,22 @@
 */
 
 #include <map>
+#include <vector>
 #include <cerrno>
 
 #include <glib/gstdio.h>
 
 #include <gtkmm/filechooserdialog.h>
 #include <gtkmm/frame.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/progressbar.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/stock.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/treeiter.h>
+#include <gtkmm/treeview.h>
 
 #include "pbd/basename.h"
 #include "pbd/error.h"
@@ -43,12 +48,131 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/template_utils.h"
 
+#include "progress_reporter.h"
+
 #include "template_dialog.h"
 
 using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+
+class TemplateManager : public Gtk::HBox,
+			public ProgressReporter
+{
+public:
+	virtual ~TemplateManager () {}
+
+	virtual void init () = 0;
+	void handle_dirty_description ();
+
+	PBD::Signal0<void> TemplatesImported;
+
+protected:
+	TemplateManager ();
+
+	void setup_model (const std::vector<ARDOUR::TemplateInfo>& templates);
+
+	void row_selection_changed ();
+
+	virtual void delete_selected_template () = 0;
+	bool adjust_plugin_paths (XMLNode* node, const std::string& name, const std::string& new_name) const;
+
+	struct SessionTemplateColumns : public Gtk::TreeModel::ColumnRecord {
+		SessionTemplateColumns () {
+			add (name);
+			add (path);
+			add (description);
+		}
+
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<std::string> path;
+		Gtk::TreeModelColumn<std::string> description;
+	};
+
+	Glib::RefPtr<Gtk::ListStore>  _template_model;
+	SessionTemplateColumns _template_columns;
+
+	Gtk::TreeModel::const_iterator _current_selection;
+
+	Gtk::ProgressBar _progress_bar;
+	std::string _current_action;
+
+private:
+	void render_template_names (Gtk::CellRenderer* rnd, const Gtk::TreeModel::iterator& it);
+	void validate_edit (const Glib::ustring& path_string, const Glib::ustring& new_name);
+	void start_edit ();
+
+	void set_desc_dirty ();
+
+	bool key_event (GdkEventKey* ev);
+
+	virtual void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name) = 0;
+
+	virtual void save_template_desc ();
+
+	void export_all_templates ();
+	void import_template_set ();
+
+	virtual std::string templates_dir () const = 0;
+	virtual std::string template_file (const Gtk::TreeModel::const_iterator& item) const = 0;
+
+	virtual bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const = 0;
+
+	Gtk::TreeView _template_treeview;
+	Gtk::CellRendererText _validating_cellrenderer;
+	Gtk::TreeView::Column _validated_column;
+
+	Gtk::TextView _description_editor;
+	Gtk::Button _save_desc;
+	bool _desc_dirty;
+
+	Gtk::Button _remove_button;
+	Gtk::Button _rename_button;
+
+	Gtk::Button _export_all_templates_button;
+	Gtk::Button _import_template_set_button;
+
+	void update_progress_gui (float p);
+};
+
+class SessionTemplateManager : public TemplateManager
+{
+public:
+	SessionTemplateManager () : TemplateManager () {}
+	~SessionTemplateManager () {}
+
+	void init ();
+
+private:
+	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
+	void delete_selected_template ();
+
+	std::string templates_dir () const;
+	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
+
+	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
+};
+
+
+class RouteTemplateManager : public TemplateManager
+{
+public:
+	RouteTemplateManager () : TemplateManager () {}
+	~RouteTemplateManager () {}
+
+	void init ();
+
+private:
+	void rename_template (Gtk::TreeModel::iterator& item, const Glib::ustring& new_name);
+	void delete_selected_template ();
+
+	std::string templates_dir () const;
+	std::string template_file (const Gtk::TreeModel::const_iterator& item) const;
+
+	bool adjust_xml_tree (XMLTree& tree, const std::string& old_name, const std::string& new_name) const;
+};
+
 
 
 TemplateDialog::TemplateDialog ()
