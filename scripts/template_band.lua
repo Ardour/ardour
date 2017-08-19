@@ -11,26 +11,26 @@ Each track will be pre-assigned with a color.
 Optionally, tracks may be assigned to sensible Groups ( vocals, guitars, drums )
 
 Optionally, tracks may be assigned Gates and other plugins.
-    ]]
+]]
 }
 
 function session_setup ()
-	return true;
+	return true
 end
 
 function route_setup ()
 	return
 	{
-		['Insert_at'] = ARDOUR.PresentationInfo.max_order;
+		['Insert_at'] = ARDOUR.PresentationInfo.max_order
 	}
 end
 
-function factory () return function ()
+function factory (params) return function ()
 
 	local p         = params or route_setup ()
-	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order;
+	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order
 
-    --prompt the user for the tracks they'd like to instantiate
+	--prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
 		{ type = "heading", title = "Select the tracks you'd like\nto add to your session: ", col=0, align = "left", colspan = 1},
 		{ type = "heading", title = "Name", col=1, colspan = 1 },
@@ -95,9 +95,28 @@ function factory () return function ()
 		{ type = "hseparator", title="", col=0, colspan = 3},
 
 		{ type = "checkbox", key = "group", default = false, title = "Group Track(s)?", col=0 },
-		{ type = "checkbox", key = "gates", default = false, title = "Add Gate(s)?", col=0 },
-		{ type = "checkbox", key = "char", default = false, title = "Add Character Plugin(s)?", col=0 },
 	}
+
+	--- check for available plugins
+	-- gates
+	local xt_eg = not ARDOUR.LuaAPI.new_plugin_info ("XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2):isnil ()
+	local xt_tg = not ARDOUR.LuaAPI.new_plugin_info ("XT-TG Tom Gate (Mono", ARDOUR.PluginType.LV2):isnil ()
+	-- char
+	local xt_tg = not ARDOUR.LuaAPI.new_plugin_info ("XT-BC Bass Character (Mono)", ARDOUR.PluginType.LV2):isnil ()
+	local xt_vc = not ARDOUR.LuaAPI.new_plugin_info ("XT-VC Vocal Character (Mono)", ARDOUR.PluginType.LV2):isnil ()
+
+	if (xt_eg and xt_tg) then
+		table.insert (dialog_options,
+		{ type = "checkbox", key = "gates", default = false, title = "Add Gate(s)?", col=0 }
+		)
+	end
+	if (xt_tg and xt_vc) then
+		table.insert (dialog_options,
+		{ type = "checkbox", key = "char", default = false, title = "Add Character Plugin(s)?", col=0 }
+		)
+	end
+
+
 
 	local dlg = LuaDialog.Dialog ("Template Setup", dialog_options)
 	local rv = dlg:run()
@@ -125,6 +144,16 @@ function factory () return function ()
 		return true
 	end
 
+	function add_lv2_plugin (track, pluginname, position)
+		local p = ARDOUR.LuaAPI.new_plugin(Session, pluginname, ARDOUR.PluginType.LV2, "")
+		if not p:isnil () then
+			track:add_processor_by_index(p, position, nil, true)
+		end
+	end
+
+
+	local drum_group, bass_group, guitar_group, key_group, vox_group
+
 	if rv['group'] then
 		drum_group = Session:new_route_group("Drums")
 		drum_group:set_rgba(0x425CADff)
@@ -138,20 +167,21 @@ function factory () return function ()
 		vox_group:set_rgba(0xC54249ff)
 	end
 
-	local track_count = 0;
+	local channel_count = 0
+
 	if rv['check-basic-kit'] then
 		local names = {"Kick", "Snare"}
 		for i = 1, #names do
 	    	local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
-				local gate = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then drum_group:add(track) end
-				if rv['gates'] then track:add_processor_by_index(eg, 0, nil, true) end
+				if rv['gates'] then
+					add_lv2_plugin (track, "XT-EG Expander Gate (Mono)", 0)
+				end
 			end
 		end
-
-		track_count = track_count+2
+		channel_count = channel_count + #names
 	end
 
 	if rv['check-full-kit'] then
@@ -159,21 +189,18 @@ function factory () return function ()
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
-				local eg = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
-				local tg = ARDOUR.LuaAPI.new_plugin(Session, "XT-TG Tom Gate (Mono)",      ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then drum_group:add(track) end
 				if rv['gates'] then
 					if string.find(track:name(), '-tom') then
-						track:add_processor_by_index(tg, 0, nil, true)
+						add_lv2_plugin (track, "XT-TG Tom Gate (Mono)", 0)
 					else
-						track:add_processor_by_index(eg, 0, nil, true)
+						add_lv2_plugin (track, "XT-EG Expander Gate (Mono)", 0)
 					end
 				end
 			end
 		end
-
-		track_count = track_count+6
+		channel_count = channel_count + #names
 	end
 
 	if rv['check-overkill-kit'] then
@@ -181,27 +208,24 @@ function factory () return function ()
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
-				local eg = ARDOUR.LuaAPI.new_plugin(Session, "XT-EG Expander Gate (Mono)", ARDOUR.PluginType.LV2, "")
-				local tg = ARDOUR.LuaAPI.new_plugin(Session, "XT-TG Tom Gate (Mono)",      ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then drum_group:add(track) end
 				if rv['gates'] then
 					if string.find(track:name(), '-tom') then
-						track:add_processor_by_index(tg, 0, nil, true)
+						add_lv2_plugin (track, "XT-TG Tom Gate (Mono)", 0)
 					else
-						track:add_processor_by_index(eg, 0, nil, true)
+						add_lv2_plugin (track, "XT-EG Expander Gate (Mono)", 0)
 					end
 				end
 			end
 		end
-
-		track_count = track_count+8
+		channel_count = channel_count + #names
 	end
 
 	if rv['check-overhead'] then
 		local names = { "OH" }
 		local ch = 1
-		if rv["stereo-bass"] then ch = 2 end --stereo
+		if rv["stereo-overhead"] then ch = 2 end --stereo
 		for i = 1, #names do
 			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -209,15 +233,14 @@ function factory () return function ()
 				if rv['group'] then drum_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 
 	if rv['check-room'] then
 		local names = { "Drum Room" }
 		local ch = 1
-		if rv["stereo-bass"] then ch = 2 end --stereo
+		if rv["stereo-room"] then ch = 2 end --stereo
 		for i = 1, #names do
 			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -225,8 +248,7 @@ function factory () return function ()
 				if rv['group'] then drum_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-bass'] then
@@ -236,14 +258,14 @@ function factory () return function ()
 		for i = 1, #names do
 			local tl = Session:new_audio_track (ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
-				local bc = ARDOUR.LuaAPI.new_plugin(Session, "XT-BC Bass Character (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then bass_group:add(track) end
-				if rv['char'] then track:add_processor_by_index(bc, 0, nil, true) end
+				if rv['char'] then
+					add_lv2_plugin (track, "XT-BC Bass Character (Mono)", 0)
+				end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-electric-guitar'] then
@@ -257,8 +279,7 @@ function factory () return function ()
 				if rv['group'] then guitar_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-solo-guitar'] then
@@ -273,7 +294,7 @@ function factory () return function ()
 			end
 		end
 
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-acoustic-guitar'] then
@@ -288,7 +309,7 @@ function factory () return function ()
 			end
 		end
 
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-piano'] then
@@ -303,7 +324,7 @@ function factory () return function ()
 			end
 		end
 
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-electric-piano'] then
@@ -317,8 +338,7 @@ function factory () return function ()
 				if rv['group'] then key_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-organ'] then
@@ -332,8 +352,7 @@ function factory () return function ()
 				if rv['group'] then key_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-ldvox'] then
@@ -343,14 +362,14 @@ function factory () return function ()
 		for i = 1, #names do
 			local tl = Session:new_audio_track ( ch, ch, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
-				local vc = ARDOUR.LuaAPI.new_plugin(Session, "XT-VC Vocal Character (Mono)", ARDOUR.PluginType.LV2, "")
 				--track:rec_enable_control ():set_value (1, PBD.GroupControlDisposition.NoGroup)
 				if rv['group'] then vox_group:add(track) end
-				if rv['char']  then track:add_processor_by_index(vc, 0, nil, true) end
+				if rv['char']  then
+					add_lv2_plugin (track, "XT-VC Vocal Character (Mono)", 0)
+				end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
 	if rv['check-bgvox'] then
@@ -364,19 +383,24 @@ function factory () return function ()
 				if rv['group'] then vox_group:add(track) end
 			end
 		end
-
-		track_count = track_count+ch
+		channel_count = channel_count + ch
 	end
 
-    --determine the number of tracks we can record
+	--fit all tracks on the screen
+	Editor:access_action("Editor","fit_all_tracks")
+
+	Session:save_state("")
+
+	-- determine the number of channels we can record
 	local e = Session:engine()
 	local _, t = e:get_backend_ports ("", ARDOUR.DataType("audio"), ARDOUR.PortFlags.IsOutput | ARDOUR.PortFlags.IsPhysical, C.StringVector())  -- from the engine's POV readable/capture ports are "outputs"
-	local num_inputs = t[4]:size();  -- table 't' holds argument references. t[4] is the C.StringVector (return value)
+	local num_inputs = t[4]:size() -- table 't' holds argument references. t[4] is the C.StringVector (return value)
 
-    --ToDo:  if track_count > num_inputs, we should warn the user to check their routing.
+	if num_inputs < channel_count then
+		-- warn the user if there are less physical inputs than created tracks
+		LuaDialog.Message ("Session Creation",
+			"Created more tracks than there are physical inputs on the soundcard",
+			LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
+	end
 
-    --fit all tracks on the screen
-    Editor:access_action("Editor","fit_all_tracks")
-
-	Session:save_state("");
 end end
