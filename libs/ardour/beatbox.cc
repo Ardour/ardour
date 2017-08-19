@@ -38,7 +38,7 @@ using std::endl;
 
 using namespace ARDOUR;
 
-MultiAllocSingleReleasePool BeatBox::Event::pool (X_("beatbox events"), sizeof (Event*), 2048);
+MultiAllocSingleReleasePool BeatBox::Event::pool (X_("beatbox events"), sizeof (Event), 2048);
 
 BeatBox::BeatBox (Session& s)
 	: Processor (s, _("BeatBox"))
