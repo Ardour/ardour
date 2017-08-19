@@ -35,6 +35,7 @@ SaveTemplateDialog::SaveTemplateDialog (const std::string& name, const std::stri
 	: ArdourDialog (_("Save as template"))
 {
 	_name_entry.get_buffer()->set_text (name + _("-template"));
+	_description_editor.get_buffer()->set_text (desc);
 	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);
 	_description_editor.set_size_request(400, 300);
 
