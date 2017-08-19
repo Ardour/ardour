@@ -1928,8 +1928,7 @@ RouteUI::save_as_template ()
 		return;
 	}
 
-	SaveTemplateDialog* d = new SaveTemplateDialog (_route->name());
-
+	SaveTemplateDialog* d = new SaveTemplateDialog (_route->name(), _route->comment());
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::save_as_template_dialog_response), d));
 	d->show ();
 }
