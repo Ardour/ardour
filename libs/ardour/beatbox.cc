@@ -56,7 +56,8 @@ BeatBox::BeatBox (Session& s)
 	, measure_superclocks (0)
 	, _quantize_divisor (4)
 	, clear_pending (false)
-	, injection_queue (256)
+	, add_queue (64)
+	, remove_queue (64)
 {
 	_display_to_user = true;
 }
@@ -119,6 +120,7 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 	} else {
 		if (!_start_requested) {
 			_running = false;
+			outbound_tracker.resolve_notes (bufs.get_midi (0), 0);
 		}
 	}
 
@@ -143,12 +145,6 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 	if (!_running) {
 		superclock_cnt += superclocks;
 		return;
-	}
-
-	Event* injected_event;
-
-	while (injection_queue.read (&injected_event, 1)) {
-		_current_events.insert (injected_event);
 	}
 
 	superclock_t process_start = superclock_cnt - last_start;
@@ -208,7 +204,7 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 		if (_quantize_divisor != 0) {
 			const superclock_t time_per_grid_unit = whole_note_superclocks / _quantize_divisor;
 
-			if ((in_event.buffer()[0] & 0xf) == MIDI_CMD_NOTE_OFF) {
+			if ((in_event.buffer()[0] & 0xf0) == MIDI_CMD_NOTE_OFF) {
 
 				/* note off is special - it must be quantized
 				 * to at least 1 quantization "spacing" after
@@ -218,18 +214,20 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 				/* look for the note on */
 
 				IncompleteNotes::iterator ee;
+				bool found = false;
 
 				for (ee = _incomplete_notes.begin(); ee != _incomplete_notes.end(); ++ee) {
 					/* check for same note and channel */
 					if (((*ee)->buf[1] == in_event.buffer()[1]) && ((*ee)->buf[0] & 0xf) == (in_event.buffer()[0] & 0xf)) {
 						quantized_time = (*ee)->time + time_per_grid_unit;
 						_incomplete_notes.erase (ee);
+						found = true;
 						break;
 					}
 				}
 
-				if (ee == _incomplete_notes.end()) {
-					cerr << "Note off for " << (int) (*ee)->buf[1] << " seen without corresponding note on among " << _incomplete_notes.size() << endl;
+				if (!found) {
+					cerr << "Note off for " << (int) in_event.buffer()[1] << " seen without corresponding note on among " << _incomplete_notes.size() << endl;
 					continue;
 				}
 
@@ -240,6 +238,12 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 		} else {
 			quantized_time = elapsed_time;
 		}
+
+		/* if computed quantized time is past the end of the loop, wrap
+		   it back around.
+		*/
+
+		quantized_time %= loop_length;
 
 		if (in_event.size() > 24) {
 			cerr << "Ignored large MIDI event\n";
@@ -262,24 +266,85 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 
 		_current_events.insert (new_event);
 
-		if ((new_event->buf[0] & 0xf) == MIDI_CMD_NOTE_ON) {
+		if ((new_event->buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
 			_incomplete_notes.push_back (new_event);
+		}
+	}
+
+	/* Notes added from other threads */
+
+	Event* added_event;
+
+	if (offset == 0) {
+		/* during first pass only */
+
+		while (add_queue.read (&added_event, 1)) {
+			_current_events.insert (added_event);
+
+			if (((added_event->buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) &&
+			    (added_event->time >= process_end || added_event->time < process_start)) {
+
+				/* won't hear it this time, so do immediate play. Off will follow in time */
+
+				/* e->buf is guaranteed to live through this process cycle, so do not alloc for a copy*/
+				const Evoral::Event<MidiBuffer::TimeType> eev (Evoral::MIDI_EVENT, 0, added_event->size, added_event->buf, false);
+
+				if (buf.insert_event (eev)) {
+					outbound_tracker.track (added_event->buf);
+				}
+
+				/* insert a 1-time only note off to turn off this immediate note on */
+
+				Event* matching_note_off = new Event;
+				matching_note_off->once = 1;
+				matching_note_off->size = 3;
+
+				if (_quantize_divisor) {
+					matching_note_off->time = process_start + (beat_superclocks / _quantize_divisor);
+				} else {
+					matching_note_off->time = process_start + beat_superclocks;
+				}
+				matching_note_off->time %= loop_length;
+
+				matching_note_off->buf[0] = MIDI_CMD_NOTE_OFF | (added_event->buf[0] & 0xf);
+				matching_note_off->buf[1] = added_event->buf[1];
+				matching_note_off->buf[2] = 0;
+
+				_current_events.insert (matching_note_off);
+			}
 		}
 	}
 
 	/* Output */
 
-	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
+	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ) {
 		Event* e = (*ee);
-		if (e->size && (e->time >= process_start && e->time < process_end)) {
+		if ((e->once <= 1) && e->size && (e->time >= process_start && e->time < process_end)) {
 			const framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _session.frame_rate());
-			/* e->buf is guaranteed to live through this process * * cycle, so do not alloc for a copy*/
+			/* e->buf is guaranteed to live through this process cycle, so do not alloc for a copy*/
 			const Evoral::Event<MidiBuffer::TimeType> eev (Evoral::MIDI_EVENT, sample_offset_in_buffer, e->size, e->buf, false);
-			buf.insert_event (eev);
+			if (buf.insert_event (eev)) {
+				outbound_tracker.track (e->buf);
+			}
 		}
 
 		if (e->time >= process_end) {
 			break;
+		}
+
+		switch (e->once) {
+		case 0:
+			/* normal event, do nothing */
+			++ee;
+			break;
+		case 1:
+			/* delete it next process cycle */
+			e->once++;
+			++ee;
+			break;
+		default:
+			delete e;
+			ee = _current_events.erase (ee);
 		}
 	}
 
@@ -350,17 +415,17 @@ BeatBox::get_last_time() const
 }
 
 void
-BeatBox::inject_note (int note, int velocity)
+BeatBox::remove_note (int note, Timecode::BBT_Time at)
 {
 
 }
 
 void
-BeatBox::inject_note (int note, int velocity, Timecode::BBT_Time at)
+BeatBox::add_note (int note, int velocity, Timecode::BBT_Time at)
 {
-	Event* e = new Event; // pool allocated, thread safe
+	Event* on = new Event; // pool allocated, thread safe
 
-	if (!e) {
+	if (!on) {
 		cerr << "No more events for injection, grow pool\n";
 		return;
 	}
@@ -372,17 +437,30 @@ BeatBox::inject_note (int note, int velocity, Timecode::BBT_Time at)
 	at.bars %= _measures;
 	at.beats %= _meter_beats;
 
-	e->time = (measure_superclocks * at.bars) + (beat_superclocks * at.beats);
-	e->size = 3;
-	e->buf[0] = MIDI_CMD_NOTE_ON | (0 & 0xf);
-	e->buf[1] = note;
-	e->buf[2] = velocity;
+	on->time = (measure_superclocks * at.bars) + (beat_superclocks * at.beats);
+	on->size = 3;
+	on->buf[0] = MIDI_CMD_NOTE_ON | (0 & 0xf);
+	on->buf[1] = note;
+	on->buf[2] = velocity;
 
-	queue_event (e);
-}
+	Event* off = new Event; // pool allocated, thread safe
 
-void
-BeatBox::queue_event (Event* e)
-{
-	injection_queue.write (&e, 1);
+	if (!off) {
+		cerr << "No more events for injection, grow pool\n";
+		return;
+	}
+
+	if (_quantize_divisor != 0) {
+		off->time = on->time + (beat_superclocks / _quantize_divisor);
+	} else {
+		/* 1/4 second note .. totally arbitrary */
+		off->time = on->time + (_session.frame_rate() / 4);
+	}
+	off->size = 3;
+	off->buf[0] = MIDI_CMD_NOTE_OFF | (0 & 0xf);
+	off->buf[1] = note;
+	off->buf[2] = 0;
+
+	add_queue.write (&on, 1);
+	add_queue.write (&off, 1);
 }

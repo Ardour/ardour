@@ -59,8 +59,8 @@ class BeatBox : public ARDOUR::Processor {
 
 	Timecode::BBT_Time get_last_time () const;
 
-	void inject_note (int number, int velocity);
-	void inject_note (int number, int velocity, Timecode::BBT_Time at);
+	void add_note (int number, int velocity, Timecode::BBT_Time at);
+	void remove_note (int number, Timecode::BBT_Time at);
 
 	void set_measure_count (int measures);
 	void set_meter (int beats, int beat_type);
@@ -97,14 +97,15 @@ class BeatBox : public ARDOUR::Processor {
 	ARDOUR::MidiStateTracker outbound_tracker;
 
 	struct Event {
-		superclock_t time;
-		superclock_t whole_note_superclocks;
-		size_t       size;
-		unsigned char  buf[24];
+		superclock_t  time;
+		superclock_t  whole_note_superclocks;
+		size_t        size;
+		unsigned char buf[24];
+		int           once;
 
-		Event () : time (0), size (0) {}
-		Event (superclock_t t, size_t sz, unsigned char* b) : time (t), size (sz) { memcpy (buf, b, std::min (sizeof (buf), sz)); }
-		Event (Event const & other) : time (other.time), size (other.size) { memcpy (buf, other.buf, other.size); }
+		Event () : time (0), size (0), once (0) {}
+		Event (superclock_t t, size_t sz, unsigned char* b) : time (t), size (sz), once (0) { memcpy (buf, b, std::min (sizeof (buf), sz)); }
+		Event (Event const & other) : time (other.time), size (other.size), once (0) { memcpy (buf, other.buf, other.size); }
 
 		static MultiAllocSingleReleasePool pool;
 
@@ -129,8 +130,8 @@ class BeatBox : public ARDOUR::Processor {
 
 	void compute_tempo_clocks ();
 
-	RingBuffer<Event*> injection_queue;
-	void queue_event (Event*);
+	RingBuffer<Event*> add_queue;
+	RingBuffer<Event*> remove_queue;
 };
 
 } /* namespace */
