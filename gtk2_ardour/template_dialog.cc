@@ -420,7 +420,12 @@ TemplateManager::save_template_desc ()
 {
 	const string file_path = template_file (_current_selection);
 
-	const string desc_txt = _description_editor.get_buffer()->get_text ();
+	string desc_txt = _description_editor.get_buffer()->get_text ();
+	string::reverse_iterator wss = desc_txt.rbegin();
+	while (wss != desc_txt.rend() && isspace (*wss)) {
+		desc_txt.erase (--(wss++).base());
+	}
+
 	_current_selection->set_value (_template_columns.description, desc_txt);
 
 	XMLTree tree;
