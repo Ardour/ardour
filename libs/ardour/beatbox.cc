@@ -344,7 +344,13 @@ BeatBox::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fram
 			break;
 		default:
 			delete e;
-			ee = _current_events.erase (ee);
+			/* old versions of libstc++ don't return an iterator
+			from set<T>::erase (iterator)
+			*/
+			Events::iterator n = ee;
+			++n;
+			_current_events.erase (ee);
+			ee = n;
 		}
 	}
 
