@@ -68,5 +68,11 @@ SaveTemplateDialog::get_template_name () const
 std::string
 SaveTemplateDialog::get_description () const
 {
-	return _description_editor.get_buffer()->get_text();
+	std::string desc_txt = _description_editor.get_buffer()->get_text ();
+	std::string::reverse_iterator wss = desc_txt.rbegin();
+	while (wss != desc_txt.rend() && isspace (*wss)) {
+		desc_txt.erase (--(wss++).base());
+	}
+
+	return desc_txt;
 }
