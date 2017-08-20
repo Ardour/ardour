@@ -50,10 +50,10 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, tempo_spinner (tempo_adjustment)
 {
 	setup_pad_canvas ();
-	setup_step_sequencer_canvas ();
+	setup_switch_canvas ();
 	setup_roll_canvas ();
 
-	tabs.append_page (step_sequencer_canvas);
+	tabs.append_page (switch_canvas);
 	tabs.append_page (pad_canvas);
 	tabs.append_page (roll_canvas);
 	tabs.set_show_tabs (false);
@@ -83,7 +83,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	misc_button_box.pack_start (pad_tab_button);
 	misc_button_box.pack_start (roll_tab_button);
 
-	step_sequencer_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &step_sequencer_canvas));
+	step_sequencer_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &switch_canvas));
 	pad_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &pad_canvas));
 	roll_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &roll_canvas));
 
@@ -123,6 +123,25 @@ BBGUI::update ()
 void
 BBGUI::update_steps ()
 {
+	Timecode::BBT_Time bbt;
+
+	if (!bbox->running()) {
+		switches_off ();
+		return;
+	}
+
+	bbt = bbox->get_last_time ();
+
+	int current_switch_column = (bbt.bars - 1) * bbox->meter_beats ();
+	current_switch_column += bbt.beats - 1;
+
+	for (Switches::iterator p = switches.begin(); p != switches.end(); ++p) {
+		if ((*p)->col() == current_switch_column) {
+			(*p)->flash_on ();
+		} else {
+			(*p)->flash_off ();
+		}
+	}
 }
 
 void
@@ -159,6 +178,14 @@ BBGUI::pads_off ()
 {
 	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
 		(*p)->off ();
+	}
+}
+
+void
+BBGUI::switches_off ()
+{
+	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
+		(*s)->off ();
 	}
 }
 
@@ -272,7 +299,6 @@ BBGUI::size_pads (int cols, int rows)
 	}
 
 	pads.clear ();
-	pad_connections.drop_connections ();
 
 	pad_rows = rows;
 	pad_cols = cols;
@@ -322,8 +348,140 @@ BBGUI::pad_event (GdkEvent* ev, int col, int row)
 }
 
 void
-BBGUI::setup_step_sequencer_canvas ()
+BBGUI::setup_switch_canvas ()
 {
+	switch_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.1, 0.09, 0.12, 1.0));
+	size_switches (8, 8);
+}
+
+int BBGUI::Switch::switch_width = 20;
+int BBGUI::Switch::switch_height = 40;
+int BBGUI::Switch::switch_spacing = 6;
+
+BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note, std::string const& txt)
+	: rect (new ArdourCanvas::Rectangle (canvas, ArdourCanvas::Rect (((col+1) * switch_spacing) + (col * (switch_width - switch_spacing)), ((row+1) * switch_spacing) + (row * (switch_height - switch_spacing)),
+	                                                                 ((col+1) * switch_spacing) + ((col + 1) * (switch_width - switch_spacing)), ((row+1) * switch_spacing) + ((row + 1) * (switch_height - switch_spacing)))))
+	, _row (row)
+	, _col (col)
+	, _note (note)
+	, _label (txt)
+	, _on (false)
+	, _flashed (false)
+{
+	canvas->root()->add (rect);
+}
+
+//static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
+
+void
+BBGUI::Switch::on ()
+{
+	_on = true;
+	rect->set_fill_color (hsv.lighter(0.2).color());
+}
+
+void
+BBGUI::Switch::off ()
+{
+	_on = false;
+	_flashed = false;
+
+	rect->set_fill_color (hsv.color());
+}
+
+void
+BBGUI::Switch::flash_on ()
+{
+	_flashed = true;
+	rect->set_fill_color (hsv.lighter(0.05).color());
+}
+
+void
+BBGUI::Switch::flash_off ()
+{
+	_flashed = false;
+
+	if (_on) {
+		on ();
+	} else {
+		off ();
+	}
+}
+
+void
+BBGUI::Switch::set_color (Gtkmm2ext::Color c)
+{
+	hsv = c;
+
+	if (_flashed) {
+		if (_on) {
+			flash_on ();
+		} else {
+			flash_off ();
+		}
+	} else {
+		if (_on) {
+			on ();
+		} else {
+			off ();
+		}
+	}
+}
+
+void
+BBGUI::size_switches (int cols, int rows)
+{
+	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
+		delete *s;
+	}
+
+	switches.clear ();
+
+	switch_rows = rows;
+	switch_cols = cols;
+
+	Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0, 0, 1.0);
+
+	for (int row = 0; row < switch_rows; ++row) {
+
+		int note = random() % 128;
+
+		for (int col = 0; col < switch_cols; ++col) {
+			Switch* s = new Switch (&switch_canvas, row, col, note, string_compose ("%1", note));
+			/* This is the "off" color */
+			s->set_color (c);
+			s->rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_event), col, row));
+			switches.push_back (s);
+		}
+	}
+}
+
+bool
+BBGUI::switch_event (GdkEvent* ev, int col, int row)
+{
+	Switch* s = switches[row*switch_cols + col];
+	Timecode::BBT_Time at;
+
+	at.bars = col / bbox->meter_beats();
+	at.beats = col % bbox->meter_beats();
+	at.ticks = 0;
+
+	at.bars++;
+	at.beats++;
+
+	if (ev->type == GDK_BUTTON_PRESS) {
+		/* XXX on/off should be done by model changes */
+		if (s->is_on()) {
+			bbox->remove_note (switches[row * switch_cols + col]->note(), at);
+			s->off ();
+		} else {
+			bbox->add_note (switches[row * switch_cols + col]->note(), 127, at);
+			s->on ();
+			return true;
+		}
+	}
+
+	return false;
 }
 
 void

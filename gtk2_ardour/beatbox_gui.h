@@ -55,7 +55,7 @@ class BBGUI : public ArdourDialog {
   private:
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
 
-	ArdourCanvas::GtkCanvas step_sequencer_canvas;
+	ArdourCanvas::GtkCanvas switch_canvas;
 	ArdourCanvas::GtkCanvas pad_canvas;
 	ArdourCanvas::GtkCanvas roll_canvas;
 
@@ -102,6 +102,46 @@ class BBGUI : public ArdourDialog {
 	int pad_rows;
 	int pad_cols;
 
+
+	struct Switch {
+		Switch (ArdourCanvas::Canvas* canvas, int x, int y, int note, std::string const & txt);
+		void set_color (Gtkmm2ext::Color);
+
+		bool is_on () const { return _on; }
+		bool is_off () const { return !_on; }
+		bool is_flashed() const { return _flashed; }
+
+		void on ();
+		void off ();
+		void flash_on ();
+		void flash_off ();
+
+		ArdourCanvas::Rectangle* rect;
+
+		static int switch_width;
+		static int switch_height;
+		static int switch_spacing;
+
+		int row() const  { return _row; }
+		int col() const  { return _col; }
+		int note() const { return _note; }
+           private:
+		int _row;
+		int _col;
+		int _note;
+		std::string _label;
+		Gtkmm2ext::HSV hsv;
+		bool _on;
+		bool _flashed;
+	};
+
+	typedef std::vector<Switch*> Switches;
+	Switches switches;
+	int switch_rows;
+	int switch_cols;
+
+	void size_switches (int cols, int rows);
+
 	Gtk::Notebook tabs;
 
 	Gtk::RadioButtonGroup quantize_group;
@@ -128,7 +168,7 @@ class BBGUI : public ArdourDialog {
 	void clear ();
 	void tempo_changed ();
 
-	void setup_step_sequencer_canvas ();
+	void setup_switch_canvas ();
 	void setup_pad_canvas ();
 	void setup_roll_canvas ();
 
@@ -136,13 +176,15 @@ class BBGUI : public ArdourDialog {
 
 	void switch_tabs (Gtk::Widget*);
 	void pads_off ();
+	void switches_off ();
 	void update ();
 	void update_pads ();
 	void update_steps ();
 	void update_roll ();
 
 	bool pad_event (GdkEvent*, int col, int row);
-	PBD::ScopedConnectionList pad_connections;
+	bool switch_event (GdkEvent*, int col, int row);
+
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */
