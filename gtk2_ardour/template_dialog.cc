@@ -435,7 +435,7 @@ TemplateManager::save_template_desc ()
 		return;
 	}
 
-	tree.root()->remove_nodes (X_("description"));
+	tree.root()->remove_nodes_and_delete (X_("description"));
 	XMLNode* desc = new XMLNode (X_("description"));
 
 	XMLNode* dn = new XMLNode (X_("content"), desc_txt);

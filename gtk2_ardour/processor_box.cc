@@ -1944,7 +1944,7 @@ ProcessorBox::object_drop (DnDVBox<ProcessorEntry>* source, ProcessorEntry* posi
 		 * otherwise we'll end up with duplicate ports-names.
 		 * (this needs a better solution which retains connections)
 		 */
-		state.remove_nodes ("Processor");
+		state.remove_nodes_and_delete ("Processor");
 		proc->set_state (state, Stateful::loading_state_version);
 		boost::dynamic_pointer_cast<PluginInsert>(proc)->update_id (id);
 		return;
@@ -3307,7 +3307,7 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				 * We really would want Stateful::ForceIDRegeneration here :(
 				 */
 				XMLNode state (**niter);
-				state.remove_nodes ("Processor");
+				state.remove_nodes_and_delete ("Processor");
 
 				p->set_state (state, Stateful::current_state_version);
 				boost::dynamic_pointer_cast<PluginInsert>(p)->update_id (id);
