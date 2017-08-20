@@ -191,7 +191,7 @@ TemplateDialog::TemplateDialog ()
 	nb->append_page (*route_tm, _("Track Templates"));
 
 	get_vbox()->pack_start (*nb);
-	add_button (_("Ok"), Gtk::RESPONSE_OK);
+	add_button (_("Done"), Gtk::RESPONSE_OK);
 
 	get_vbox()->show_all();
 
