@@ -135,6 +135,8 @@ private:
 	Gtk::Button _export_all_templates_button;
 	Gtk::Button _import_template_set_button;
 
+	sigc::connection _cursor_changed_connection;
+
 	void update_progress_gui (float p);
 };
 
@@ -225,7 +227,7 @@ TemplateManager::TemplateManager ()
 
 	_validated_column.set_cell_data_func (_validating_cellrenderer, sigc::mem_fun (*this, &TemplateManager::render_template_names));
 	_validating_cellrenderer.signal_edited().connect (sigc::mem_fun (*this, &TemplateManager::validate_edit));
-	_template_treeview.signal_cursor_changed().connect (sigc::mem_fun (*this, &TemplateManager::row_selection_changed));
+	_cursor_changed_connection = _template_treeview.signal_cursor_changed().connect (sigc::mem_fun (*this, &TemplateManager::row_selection_changed));
 	_template_treeview.signal_key_press_event().connect (sigc::mem_fun (*this, &TemplateManager::key_event));
 
 	ScrolledWindow* sw = manage (new ScrolledWindow);
@@ -332,8 +334,6 @@ TemplateManager::handle_dirty_description ()
 		} else {
 			_description_editor.get_buffer()->set_text (_current_selection->get_value (_template_columns.description));
 		}
-
-		_desc_dirty = false;
 	}
 }
 
@@ -344,16 +344,16 @@ TemplateManager::row_selection_changed ()
 		handle_dirty_description ();
 	} else {
 		_description_editor.get_buffer()->set_text ("");
-		_desc_dirty = false;
 	}
 
 	_current_selection = _template_treeview.get_selection()->get_selected ();
 	if (_current_selection) {
 		const string desc = _current_selection->get_value (_template_columns.description);
 		_description_editor.get_buffer()->set_text (desc);
-		_desc_dirty = false;
-		_save_desc.set_sensitive (false);
 	}
+
+	_desc_dirty = false;
+	_save_desc.set_sensitive (false);
 
 	_description_editor.set_sensitive (_current_selection);
 	_rename_button.set_sensitive (_current_selection);
@@ -403,7 +403,9 @@ TemplateManager::start_edit ()
 	TreeModel::Path path;
 	TreeViewColumn* col;
 	_template_treeview.get_cursor (path, col);
+	_cursor_changed_connection.block ();
 	_template_treeview.set_cursor (path, *col, /*set_editing =*/ true);
+	_cursor_changed_connection.unblock ();
 }
 
 void
