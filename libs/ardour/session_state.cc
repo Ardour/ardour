@@ -2417,7 +2417,8 @@ Session::save_template (const string& template_name, const string& description, 
 		root = &get_template ();
 	}
 
-	root->remove_nodes (X_("description"));
+	root->remove_nodes_and_delete (X_("description"));
+
 	if (!description.empty()) {
 		XMLNode* desc = new XMLNode (X_("description"));
 		XMLNode* desc_cont = new XMLNode (X_("content"), description);
