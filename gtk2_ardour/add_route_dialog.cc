@@ -64,7 +64,7 @@ AddRouteDialog::AddRouteDialog ()
 	, routes_adjustment (1, 1, 128, 1, 4)
 	, routes_spinner (routes_adjustment)
 	, configuration_label (_("Configuration:"))
-	, manual_label (_("Manual Configuration:"))
+	, manual_label (_("Configuration:"))
 	, add_label (_("Add:"))
 	, type_label (_("Type:"))
 	, name_label (_("Name:"))
@@ -159,49 +159,49 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* track/bus choice */
 
-	Table *add_table = manage (new Table (8, 8, false));
+	Table *add_table = manage (new Table (8, 5, false));
 	add_table->set_row_spacings (8);
-	add_table->set_col_spacings	(3);
-	add_table->set_col_spacing	(1, 12);
-	add_table->set_col_spacing	(3, 12);
-	add_table->set_col_spacing	(5, 12);
+	add_table->set_col_spacings	(4);
+	add_table->set_col_spacing	(2, 20);
 	add_table->set_border_width	(0);
 
 	int n = 0;
 
 	// Number
 	add_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (routes_spinner, 1, 2, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+	add_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	Gtk::Alignment *align = manage (new Alignment (0, .5, 0, 0));
+	align->add (routes_spinner);
+	add_table->attach (*align, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Type
 	type_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (type_label, 2,3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (track_bus_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-
-	// Name
-	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (name_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (name_template_entry, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	add_table->attach (type_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (track_bus_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
+	// Name
+	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (name_template_entry, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+
 	// Route configuration
 	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (configuration_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (channel_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
-
-	// Group choice
-	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (route_group_combo, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	add_table->attach (configuration_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (channel_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// instrument choice (for MIDI)
 	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (instrument_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (instrument_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	add_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (instrument_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+
+	// Group choice
+	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
+	add_table->attach (group_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (route_group_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
@@ -210,35 +210,34 @@ AddRouteDialog::AddRouteDialog ()
 		strict_io_combo.set_active (1);
 	} else {
 		strict_io_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		add_table->attach (strict_io_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		add_table->attach (strict_io_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+		add_table->attach (strict_io_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		add_table->attach (strict_io_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
 		// recording mode
 		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		add_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-		add_table->attach (mode_combo, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+		add_table->attach (mode_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		add_table->attach (mode_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		++n;
 	}
 
-	// Separator
-	++n;
-	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
+
+	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
-	++n;
+
 	// New route will be inserted at..
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (insert_label, 2, 3, n, n + 1, Gtk::FILL, Gtk::EXPAND, 0, 0);
-	add_table->attach (insert_at_combo, 3, 4, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	add_table->attach (insert_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (insert_at_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
 	addnoclose_button->set_can_default ();
 	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
-	add_table->attach (*addnoclose_button, 5, 8, n, n + 1, Gtk::FILL, Gtk::EXPAND | Gtk::FILL, 0, 0);
+	add_table->attach (*addnoclose_button, 3, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	vbox->pack_start (*add_table, false, true);
 
@@ -301,19 +300,17 @@ AddRouteDialog::trk_template_row_selected ()
 
 			trk_template_desc.set_sensitive (true);
 
-			manual_label.set_sensitive (false);
-			add_label.set_sensitive (rs.find ("how_many") != rs.end ());
 			type_label.set_sensitive (false);
+			track_bus_combo.set_sensitive (false);
 
+			add_label.set_sensitive (rs.find ("how_many") != rs.end ());
 			name_label.set_sensitive (rs.find ("name") != rs.end());
 			group_label.set_sensitive (rs.find ("group") != rs.end());
-			strict_io_label.set_sensitive (rs.find ("strict_io") != rs.end());
 			configuration_label.set_sensitive (rs.find ("channels") != rs.end ());
 			mode_label.set_sensitive (rs.find ("track_mode") != rs.end ());
 			instrument_label.set_sensitive (rs.find ("instrument") != rs.end ());
 			strict_io_label.set_sensitive (rs.find ("strict_io") != rs.end());
 
-			track_bus_combo.set_sensitive (false);
 			routes_spinner.set_sensitive (rs.find ("how_many") != rs.end ());
 			name_template_entry.set_sensitive (rs.find ("name") != rs.end ());
 			route_group_combo.set_sensitive (rs.find ("group") != rs.end());
@@ -321,6 +318,16 @@ AddRouteDialog::trk_template_row_selected ()
 			mode_combo.set_sensitive (rs.find ("track_mode") != rs.end ());
 			instrument_combo.set_sensitive (rs.find ("instrument") != rs.end ());
 			strict_io_combo.set_sensitive (rs.find ("strict_io") != rs.end());
+
+			bool any_enabled = rs.find ("how_many") != rs.end ()
+				|| rs.find ("name") != rs.end ()
+				|| rs.find ("group") != rs.end()
+				|| rs.find ("channels") != rs.end ()
+				|| rs.find ("track_mode") != rs.end ()
+				|| rs.find ("instrument") != rs.end ()
+				|| rs.find ("strict_io") != rs.end();
+
+			manual_label.set_sensitive (any_enabled);
 
 			std::map<string,string>::const_iterator it;
 
@@ -371,7 +378,7 @@ AddRouteDialog::trk_template_row_selected ()
 			/* user-template */
 			trk_template_desc.set_sensitive (true);
 
-			manual_label.set_sensitive (false);
+			manual_label.set_sensitive (true);
 			add_label.set_sensitive (true);
 			type_label.set_sensitive (false);
 			name_label.set_sensitive (true);
