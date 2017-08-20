@@ -17,6 +17,7 @@
 
 */
 
+#include "pbd/compose.h"
 #include "pbd/i18n.h"
 
 #include "ardour/beatbox.h"
@@ -146,9 +147,9 @@ BBGUI::update_pads ()
 
 	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
 		if ((*p)->col() == current_pad_column) {
-			(*p)->rect->set_outline_color (rgba_to_color (1.0, 0.0, 0.0, 1.0));
+			(*p)->flash_on ();
 		} else {
-			(*p)->rect->set_outline_color (rgba_to_color (0.0, 0.0, 0.0, 1.0));
+			(*p)->flash_off ();
 		}
 	}
 }
@@ -156,6 +157,9 @@ BBGUI::update_pads ()
 void
 BBGUI::pads_off ()
 {
+	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
+		(*p)->off ();
+	}
 }
 
 void
@@ -182,35 +186,79 @@ int BBGUI::Pad::pad_height = 80;
 int BBGUI::Pad::pad_spacing = 6;
 
 BBGUI::Pad::Pad (ArdourCanvas::Canvas* canvas, int row, int col, int note, std::string const& txt)
-	: rect (new ArdourCanvas::Rectangle (canvas, ArdourCanvas::Rect ((col * pad_spacing) + (col * (pad_width - pad_spacing)), (row * pad_spacing) + (row * (pad_height - pad_spacing)),
-	                                                                 (col * pad_spacing) + ((col + 1) * (pad_width - pad_spacing)) , (row * pad_spacing) + ((row +1) * (pad_height - pad_spacing)))))
-	, text (new ArdourCanvas::Text (canvas))
+	: rect (new ArdourCanvas::Rectangle (canvas, ArdourCanvas::Rect (((col+1) * pad_spacing) + (col * (pad_width - pad_spacing)), ((row+1) * pad_spacing) + (row * (pad_height - pad_spacing)),
+	                                                                 ((col+1) * pad_spacing) + ((col + 1) * (pad_width - pad_spacing)), ((row+1) * pad_spacing) + ((row + 1) * (pad_height - pad_spacing)))))
 	, _row (row)
 	, _col (col)
 	, _note (note)
 	, _label (txt)
+	, _on (false)
+	, _flashed (false)
 {
 	canvas->root()->add (rect);
-	canvas->root()->add (text);
+}
 
-	text->set (_label);
+//static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
 
-	const ArdourCanvas::Rect r (rect->get());
-	text->set_position (ArdourCanvas::Duple (r.x0 + 10, r.y0 + 10));
+void
+BBGUI::Pad::on ()
+{
+	_on = true;
+	rect->set_fill_color (hsv.lighter(0.2).color());
+}
+
+void
+BBGUI::Pad::off ()
+{
+	_on = false;
+	_flashed = false;
+
+	rect->set_fill_color (hsv.color());
+}
+
+void
+BBGUI::Pad::flash_on ()
+{
+	_flashed = true;
+	rect->set_fill_color (hsv.lighter(0.05).color());
+}
+
+void
+BBGUI::Pad::flash_off ()
+{
+	_flashed = false;
+
+	if (_on) {
+		on ();
+	} else {
+		off ();
+	}
 }
 
 void
 BBGUI::Pad::set_color (Gtkmm2ext::Color c)
 {
-	rect->set_fill_color (c);
-	text->set_color (contrasting_text_color (c));
+	hsv = c;
+
+	if (_flashed) {
+		if (_on) {
+			flash_on ();
+		} else {
+			flash_off ();
+		}
+	} else {
+		if (_on) {
+			on ();
+		} else {
+			off ();
+		}
+	}
 }
 
 void
 BBGUI::setup_pad_canvas ()
 {
 	pad_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.32, 0.47, 0.89, 1.0));
-
 	size_pads (8, 8);
 }
 
@@ -229,17 +277,16 @@ BBGUI::size_pads (int cols, int rows)
 	pad_rows = rows;
 	pad_cols = cols;
 
+	Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0, 0, 1.0);
+
 	for (int row = 0; row < pad_rows; ++row) {
 
 		int note = random() % 128;
 
 		for (int col = 0; col < pad_cols; ++col) {
 			Pad* p = new Pad (&pad_canvas, row, col, note, string_compose ("%1", note));
-			p->set_color (Gtkmm2ext::rgba_to_color ((random() % 255) / 255.0,
-			                                        (random() % 255) / 255.0,
-			                                        (random() % 255) / 255.0,
-			                                        (random() % 255) / 255.0));
-
+			/* This is the "off" color */
+			p->set_color (c);
 			p->rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::pad_event), col, row));
 			pads.push_back (p);
 		}
@@ -249,18 +296,26 @@ BBGUI::size_pads (int cols, int rows)
 bool
 BBGUI::pad_event (GdkEvent* ev, int col, int row)
 {
+	Pad* p = pads[row*pad_cols + col];
+	Timecode::BBT_Time at;
+
+	at.bars = col / bbox->meter_beats();
+	at.beats = col % bbox->meter_beats();
+	at.ticks = 0;
+
+	at.bars++;
+	at.beats++;
+
 	if (ev->type == GDK_BUTTON_PRESS) {
-		Timecode::BBT_Time at;
-
-		at.bars = col / bbox->meter_beats();
-		at.beats = col % bbox->meter_beats();
-		at.ticks = 0;
-
-		at.bars++;
-		at.beats++;
-
-		bbox->inject_note (pads[row * pad_cols + col]->note(), 127, at);
-		return true;
+		/* XXX on/off should be done by model changes */
+		if (p->is_on()) {
+			bbox->remove_note (pads[row * pad_cols + col]->note(), at);
+			p->off ();
+		} else {
+			bbox->add_note (pads[row * pad_cols + col]->note(), 127, at);
+			p->on ();
+			return true;
+		}
 	}
 
 	return false;
