@@ -91,15 +91,15 @@ public:
 	 */
 	uint32_t n_total() const {
 		uint32_t ret = 0;
-		for (uint32_t i=0; i < DataType::num_types; ++i)
-			ret += _counts[i];
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t)
+			ret += _counts[*t];
 
 		return ret;
 	}
 
 	bool operator==(const ChanCount& other) const {
-		for (uint32_t i=0; i < DataType::num_types; ++i)
-			if (_counts[i] != other._counts[i])
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t)
+			if (_counts[*t] != other._counts[*t])
 				return false;
 
 		return true;
