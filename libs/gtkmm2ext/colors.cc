@@ -135,7 +135,7 @@ Gtkmm2ext::hsva_to_color (double h, double s, double v, double a)
         } else if (h >= 300.0 && h < 360.0) {
 		return rgba_to_color (c + m, m, x + m, a);
         }
-	return rgba_to_color (m, m, m, a);
+        return rgba_to_color (m, m, m, a);
 }
 
 void
@@ -271,9 +271,9 @@ HSV::clamp ()
 		/* normalize negative hue values into positive range */
 		h = 360.0 + h;
 	}
-	s = min (1.0, s);
-	v = min (1.0, v);
-	a = min (1.0, a);
+	s = max (0.0, min (1.0, s));
+	v = max (0.0, min (1.0, v));
+	a = max (0.0, min (1.0, a));
 }
 
 HSV
@@ -343,15 +343,21 @@ HSV::shade (double factor) const
 	*/
 
 	if (factor > 1.0) {
-		if (s < 88) {
-			hsv.v += (hsv.v * (factor * 10.0));
-		}
+		/* darker */
+		/* increase saturation (factor is > 1.0, so s grows) */
 		hsv.s *= factor;
+		if (hsv.s >= 0.88) {
+			/* above saturation threshold, so decrease v a bit */
+			hsv.v -= (hsv.v * 0.05);
+		}
 	} else {
-		if (s < 88) {
-			hsv.v -= (hsv.v * (factor * 10.0));
-		}
+		/* lighter */
+		/* reduce saturation, (factor is < 1.0, so s shrinks) */
 		hsv.s *= factor;
+		if (hsv.s > 0.88) {
+			/* still above 88% saturation, so increase v a bit */
+			hsv.v += (hsv.v * 0.05);
+		}
 	}
 
 	hsv.clamp();
