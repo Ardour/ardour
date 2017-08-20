@@ -55,7 +55,7 @@ MetricSection::frame_at_minute (const double& time) const
 }
 
 double
-MetricSection::minute_at_frame (const framepos_t& frame) const
+MetricSection::minute_at_frame (const framepos_t frame) const
 {
 	return (frame / (double) _sample_rate) / 60.0;
 }
@@ -360,7 +360,7 @@ TempoSection::minute_at_pulse (const double& p) const
  *  for use with musical units whose granularity is coarser than frames (e.g. ticks)
 */
 double
-TempoSection::pulse_at_frame (const framepos_t& f) const
+TempoSection::pulse_at_frame (const framepos_t f) const
 {
 	const bool constant = type() == Constant || _c == 0.0 || (initial() && f < frame());
 	if (constant) {
@@ -1020,7 +1020,7 @@ TempoMap::do_insert (MetricSection* section)
 }
 /* user supplies the exact pulse if pls == MusicTime */
 TempoSection*
-TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& frame, PositionLockStyle pls)
+TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t frame, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
 		warning << "Cannot add tempo. note types per minute must be greater than zero." << endmsg;
@@ -1042,7 +1042,7 @@ TempoMap::add_tempo (const Tempo& tempo, const double& pulse, const framepos_t& 
 }
 
 void
-TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t& frame, PositionLockStyle pls)
+TempoMap::replace_tempo (TempoSection& ts, const Tempo& tempo, const double& pulse, const framepos_t frame, PositionLockStyle pls)
 {
 	if (tempo.note_types_per_minute() <= 0.0) {
 		warning << "Cannot replace tempo. note types per minute must be greater than zero." << endmsg;
@@ -1598,7 +1598,7 @@ TempoMap::metric_at (BBT_Time bbt) const
  * This function uses both tempo and meter.
  */
 double
-TempoMap::beat_at_frame (const framecnt_t& frame) const
+TempoMap::beat_at_frame (const framecnt_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -1695,7 +1695,7 @@ TempoMap::minute_at_beat_locked (const Metrics& metrics, const double& beat) con
  *
  */
 Tempo
-TempoMap::tempo_at_frame (const framepos_t& frame) const
+TempoMap::tempo_at_frame (const framepos_t frame) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -2589,7 +2589,7 @@ TempoMap::check_solved (const Metrics& metrics) const
 }
 
 bool
-TempoMap::set_active_tempi (const Metrics& metrics, const framepos_t& frame)
+TempoMap::set_active_tempi (const Metrics& metrics, const framepos_t frame)
 {
 	for (Metrics::const_iterator i = metrics.begin(); i != metrics.end(); ++i) {
 		TempoSection* t;
@@ -3179,7 +3179,7 @@ TempoMap::predict_tempo_position (TempoSection* section, const BBT_Time& bbt)
  * if sub_num is zero, the musical position will be taken from the supplied frame.
  */
 void
-TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, const int& sub_num)
+TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t frame, const int& sub_num)
 {
 	Metrics future_map;
 
@@ -3251,7 +3251,7 @@ TempoMap::gui_set_tempo_position (TempoSection* ts, const framepos_t& frame, con
  * leaving the meter position unchanged.
  */
 void
-TempoMap::gui_set_meter_position (MeterSection* ms, const framepos_t& frame)
+TempoMap::gui_set_meter_position (MeterSection* ms, const framepos_t frame)
 {
 	Metrics future_map;
 
@@ -3763,7 +3763,7 @@ TempoMap::music_origin ()
  * This function is sensitive to tempo and meter.
  */
 double
-TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num) const
+TempoMap::exact_beat_at_frame (const framepos_t frame, const int32_t sub_num) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -3771,7 +3771,7 @@ TempoMap::exact_beat_at_frame (const framepos_t& frame, const int32_t sub_num) c
 }
 
 double
-TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t divisions) const
+TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t frame, const int32_t divisions) const
 {
 	return beat_at_pulse_locked (_metrics, exact_qn_at_frame_locked (metrics, frame, divisions) / 4.0);
 }
@@ -3799,7 +3799,7 @@ TempoMap::exact_beat_at_frame_locked (const Metrics& metrics, const framepos_t& 
  * This function is tempo-sensitive.
  */
 double
-TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num) const
+TempoMap::exact_qn_at_frame (const framepos_t frame, const int32_t sub_num) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
@@ -3807,7 +3807,7 @@ TempoMap::exact_qn_at_frame (const framepos_t& frame, const int32_t sub_num) con
 }
 
 double
-TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t& frame, const int32_t sub_num) const
+TempoMap::exact_qn_at_frame_locked (const Metrics& metrics, const framepos_t frame, const int32_t sub_num) const
 {
 	double qn = pulse_at_minute_locked (metrics, minute_at_frame (frame)) * 4.0;
 
@@ -4340,7 +4340,7 @@ TempoMap::next_tempo_section_locked (const Metrics& metrics, TempoSection* ts) c
    do that stuff based on the beat_at_frame and frame_at_beat api
 */
 double
-TempoMap::frames_per_quarter_note_at (const framepos_t& frame, const framecnt_t& sr) const
+TempoMap::frames_per_quarter_note_at (const framepos_t frame, const framecnt_t sr) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
