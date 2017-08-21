@@ -477,6 +477,10 @@ BeatBox::export_to_path (std::string const & path)
 {
 	Evoral::SMF smf;
 
+	double smf_delta = 0;
+	superclock_t last_time = 0;
+	Evoral::event_id_t note_id = 0;
+
 	try {
 		if (smf.create (path)) {
 			return false;
@@ -485,14 +489,12 @@ BeatBox::export_to_path (std::string const & path)
 		return false;
 	}
 
-	double smf_delta = 0;
-	superclock_t last_time = 0;
-	Evoral::event_id_t note_id = 0;
+	smf.begin_write ();
 
 	for (Events::const_iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
 		smf_delta = (*e)->time - last_time;
 		/* convert to quarter notes */
-		smf_delta /= beat_superclocks * (_meter_beat_type / 4.0);
+		smf_delta /= beat_superclocks * (4.0 / _meter_beat_type);
 		/* convert to pulses/ticks */
 		smf_delta *= Timecode::BBT_Time::ticks_per_beat;
 		smf.append_event_delta (llrint (smf_delta), (*e)->size, (*e)->buf, note_id++);
@@ -500,7 +502,7 @@ BeatBox::export_to_path (std::string const & path)
 	}
 
 	try {
-		smf.close ();
+		smf.end_write (path);
 	} catch (...) {
 		return false;
 	}
