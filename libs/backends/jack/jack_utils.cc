@@ -273,7 +273,7 @@ void
 ARDOUR::get_jack_alsa_device_names (device_map_t& devices)
 {
 #ifdef HAVE_ALSA
-	get_alsa_audio_device_names(devices);
+	get_alsa_audio_device_names(devices, HalfDuplexOut);
 #else
 	/* silence a compiler unused variable warning */
 	(void) devices;
