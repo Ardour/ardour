@@ -66,7 +66,6 @@ AddRouteDialog::AddRouteDialog ()
 	, configuration_label (_("Configuration:"))
 	, manual_label (_("Configuration:"))
 	, add_label (_("Add:"))
-	, type_label (_("Type:"))
 	, name_label (_("Name:"))
 	, group_label (_("Group:"))
 	, insert_label (_("Insert At:"))
@@ -94,6 +93,10 @@ AddRouteDialog::AddRouteDialog ()
 	track_bus_combo.append_text (_("MIDI Busses"));
 	track_bus_combo.append_text (_("VCA Masters"));
 	track_bus_combo.set_active (0);
+
+	template_type_placeholder.append_text (_("Template"));
+	template_type_placeholder.set_active (0);
+	template_type_placeholder.set_sensitive (false);
 
 	insert_at_combo.append_text (_("First"));
 	insert_at_combo.append_text (_("Before Selection"));
@@ -159,10 +162,10 @@ AddRouteDialog::AddRouteDialog ()
 
 	/* track/bus choice */
 
-	Table *add_table = manage (new Table (8, 5, false));
+	Table *add_table = manage (new Table (8, 6, false));
 	add_table->set_row_spacings (8);
 	add_table->set_col_spacings	(4);
-	add_table->set_col_spacing	(2, 20);
+	add_table->set_col_spacing	(3, 20);
 	add_table->set_border_width	(0);
 
 	int n = 0;
@@ -175,33 +178,37 @@ AddRouteDialog::AddRouteDialog ()
 	add_table->attach (*align, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Type
-	type_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (type_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (track_bus_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	VBox* tvbox = manage (new VBox);
+	tvbox->pack_start (track_bus_combo, true, true);
+	tvbox->pack_start (template_type_placeholder, true, true);
+	track_bus_combo.set_no_show_all(true);
+	template_type_placeholder.set_no_show_all(true);
+	track_bus_combo.show ();
+	add_table->attach (*tvbox, 2, 3, n, n + 1, Gtk::EXPAND | Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// Name
 	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	add_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (name_template_entry, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (name_template_entry, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Route configuration
 	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (configuration_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (channel_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (configuration_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (channel_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// instrument choice (for MIDI)
 	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	add_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (instrument_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (instrument_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Group choice
 	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (group_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (route_group_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (route_group_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
@@ -211,33 +218,33 @@ AddRouteDialog::AddRouteDialog ()
 	} else {
 		strict_io_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 		add_table->attach (strict_io_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-		add_table->attach (strict_io_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		add_table->attach (strict_io_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
 		// recording mode
 		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		add_table->attach (mode_label, 3, 4, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-		add_table->attach (mode_combo, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		add_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		add_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		++n;
 	}
 
 
-	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// New route will be inserted at..
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	add_table->attach (insert_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (insert_at_combo, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (insert_at_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
 	addnoclose_button->set_can_default ();
 	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
-	add_table->attach (*addnoclose_button, 3, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	add_table->attach (*addnoclose_button, 4, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	vbox->pack_start (*add_table, false, true);
 
@@ -300,7 +307,6 @@ AddRouteDialog::trk_template_row_selected ()
 
 			trk_template_desc.set_sensitive (true);
 
-			type_label.set_sensitive (false);
 			track_bus_combo.set_sensitive (false);
 
 			add_label.set_sensitive (rs.find ("how_many") != rs.end ());
@@ -328,6 +334,8 @@ AddRouteDialog::trk_template_row_selected ()
 				|| rs.find ("strict_io") != rs.end();
 
 			manual_label.set_sensitive (any_enabled);
+			track_bus_combo.hide ();
+			template_type_placeholder.show ();
 
 			std::map<string,string>::const_iterator it;
 
@@ -378,9 +386,11 @@ AddRouteDialog::trk_template_row_selected ()
 			/* user-template */
 			trk_template_desc.set_sensitive (true);
 
+			track_bus_combo.hide ();
+			template_type_placeholder.show ();
+
 			manual_label.set_sensitive (true);
 			add_label.set_sensitive (true);
-			type_label.set_sensitive (false);
 			name_label.set_sensitive (true);
 			group_label.set_sensitive (false);
 			strict_io_label.set_sensitive (false);
@@ -399,11 +409,13 @@ AddRouteDialog::trk_template_row_selected ()
 
 		} else {
 			/* all manual mode */
+			template_type_placeholder.hide ();
+			track_bus_combo.show ();
+
 			trk_template_desc.set_sensitive (false);
 
 			manual_label.set_sensitive (true);
 			add_label.set_sensitive (true);
-			type_label.set_sensitive (true);
 			name_label.set_sensitive (true);
 			group_label.set_sensitive (true);
 			strict_io_label.set_sensitive (true);

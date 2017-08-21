@@ -95,13 +95,13 @@ private:
 	Gtk::Label configuration_label;
 	Gtk::Label manual_label;
 	Gtk::Label add_label;
-	Gtk::Label type_label;
 	Gtk::Label name_label;
 	Gtk::Label group_label;
 	Gtk::Label insert_label;
 	Gtk::Label strict_io_label;
 	Gtk::Label mode_label;
 	Gtk::Label instrument_label;
+	Gtk::ComboBoxText template_type_placeholder;
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
 	InstrumentSelector instrument_combo;
