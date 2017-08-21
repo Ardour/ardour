@@ -28,6 +28,7 @@
 #include "pbd/i18n.h"
 
 #include "evoral/midi_events.h"
+#include "evoral/SMF.hpp"
 
 #include "ardour/beatbox.h"
 #include "ardour/midi_buffer.h"
@@ -469,4 +470,40 @@ BeatBox::add_note (int note, int velocity, Timecode::BBT_Time at)
 
 	add_queue.write (&on, 1);
 	add_queue.write (&off, 1);
+}
+
+bool
+BeatBox::export_to_path (std::string const & path)
+{
+	Evoral::SMF smf;
+
+	try {
+		if (smf.create (path)) {
+			return false;
+		}
+	} catch (...) {
+		return false;
+	}
+
+	double smf_delta = 0;
+	superclock_t last_time = 0;
+	Evoral::event_id_t note_id = 0;
+
+	for (Events::const_iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
+		smf_delta = (*e)->time - last_time;
+		/* convert to quarter notes */
+		smf_delta /= beat_superclocks * (_meter_beat_type / 4.0);
+		/* convert to pulses/ticks */
+		smf_delta *= Timecode::BBT_Time::ticks_per_beat;
+		smf.append_event_delta (llrint (smf_delta), (*e)->size, (*e)->buf, note_id++);
+		last_time = (*e)->time;
+	}
+
+	try {
+		smf.close ();
+	} catch (...) {
+		return false;
+	}
+
+	return true;
 }

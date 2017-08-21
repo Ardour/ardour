@@ -75,6 +75,8 @@ class BeatBox : public ARDOUR::Processor {
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 
+	bool export_to_path (std::string const & path);
+
   private:
 	bool _start_requested;
 	bool _running;
