@@ -1284,10 +1284,6 @@ MixerStrip::guess_main_type(bool for_input, bool favor_connected) const
 void
 MixerStrip::update_io_button (bool for_input)
 {
-	uint32_t io_count;
-	uint32_t io_index;
-	boost::shared_ptr<IO> io;
-	boost::shared_ptr<Port> port;
 	vector<string> port_connections;
 
 	uint32_t total_connection_count = 0;
@@ -1313,14 +1309,6 @@ MixerStrip::update_io_button (bool for_input)
 
 	DataType dt = guess_main_type(for_input);
 
-	if (for_input) {
-		io = _route->input();
-	} else {
-		io = _route->output();
-	}
-
-	io_count = io->n_ports().n_total();
-
 	if ( dt == DataType::MIDI ) {
 		tooltip << _("MIDI ");
 	}
@@ -1331,9 +1319,8 @@ MixerStrip::update_io_button (bool for_input)
 		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (_route->name()));
 	}
 
-	for (io_index = 0; io_index < io_count; ++io_index) {
-		port = io->nth (io_index);
-
+	boost::shared_ptr<IO> io = for_input ? _route->input() : _route->output();
+	for (PortSet::iterator port = io->ports().begin(); port != io->ports().end(); ++port) {
 		port_connections.clear ();
 		port->get_connections(port_connections);
 
