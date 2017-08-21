@@ -99,6 +99,7 @@ MidiTrack::init ()
 	_disk_reader->reset_tracker ();
 
 	_beatbox.reset (new BeatBox (_session));
+	add_processor (_beatbox, PostFader);
 
 	return 0;
 }
