@@ -139,7 +139,7 @@ OSCCueObserver::send_init()
 			}
 			
 			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
-				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send_enable"), i + 1, proc->enabled()), OSC::instance());
+				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc->enabled()), OSC::instance());
 				send_enabled_message (X_("/cue/send/enable"), i + 1, proc->enabled());
 		}
 	}
