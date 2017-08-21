@@ -1195,6 +1195,53 @@ MixerStrip::update_panner_choices ()
 	panners.set_available_panners(PannerManager::instance().PannerManager::get_available_panners(in, out));
 }
 
+DataType
+MixerStrip::guess_main_type(bool for_input, bool favor_connected) const
+{
+	/* The heuristic follows these principles:
+	 *  A) If all ports that the user connected are of the same type, then he
+	 *     very probably intends to use the IO with that type. A common subcase
+	 *     is when the IO has only ports of the same type (connected or not).
+	 *  B) If several types of ports are connected, then we should guess based
+	 *     on the likeliness of the user wanting to use a given type.
+	 *     We assume that the DataTypes are ordered from the most likely to the
+	 *     least likely when iterating or comparing them with "<".
+	 *  C) If no port is connected, the same logic can be applied with all ports
+	 *     instead of connected ones. TODO: Try other ideas, for instance look at
+	 *     the last plugin output when |for_input| is false (note: when StrictIO
+	 *     the outs of the last plugin should be the same as the outs of the route
+	 *     modulo the panner which forwards non-audio anyway).
+	 * All of these constraints are respected by the following algorithm that
+	 * just returns the most likely datatype found in connected ports if any, or
+	 * available ports if any (since if all ports are of the same type, the most
+	 * likely found will be that one obviously). */
+
+	boost::shared_ptr<IO> io = for_input ? _route->input() : _route->output();
+
+	/* Find most likely type among connected ports */
+	if (favor_connected) {
+		DataType type = DataType::NIL; /* NIL is always last so least likely */
+		for (PortSet::iterator p = io->ports().begin(); p != io->ports().end(); ++p) {
+			if (p->connected() && p->type() < type)
+				type = p->type();
+		}
+		if (type != DataType::NIL) {
+			/* There has been a connected port (necessarily non-NIL) */
+			return type;
+		}
+	}
+
+	/* Find most likely type among available ports.
+	 * The iterator stops before NIL. */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		if (io->n_ports().n(*t) > 0)
+			return *t;
+	}
+
+	/* No port at all, return the most likely datatype by default */
+	return DataType::front();
+}
+
 /*
  * Output port labelling
  * =====================
@@ -1264,22 +1311,7 @@ MixerStrip::update_io_button (bool for_input)
 	ostringstream tooltip;
 	char * tooltip_cstr;
 
-	/* To avoid confusion, the button caption only shows connections that match the expected datatype
-	 *
-	 * First of all, if the user made only connections to a given type, we should use that one since
-	 * it is very probably what the user expects. If there are several connections types, then show
-	 * audio ones as primary, which matches expectations for both audio tracks with midi control and
-	 * synthesisers. This first heuristic can be expressed with these two rules:
-	 * A) If there are connected audio ports, consider audio as primary type.
-	 * B) Else, if there are connected midi ports, consider midi as primary type.
-	 *
-	 * If there are no connected ports, then we choose the primary type based on the type of existing
-	 * but unconnected ports. Again:
-	 * C) If there are audio ports, consider audio as primary type.
-	 * D) Else, if there are midi ports, consider midi as primary type. */
-
-	DataType dt = DataType::AUDIO;
-	bool match = false;
+	DataType dt = guess_main_type(for_input);
 
 	if (for_input) {
 		io = _route->input();
@@ -1288,33 +1320,6 @@ MixerStrip::update_io_button (bool for_input)
 	}
 
 	io_count = io->n_ports().n_total();
-	for (io_index = 0; io_index < io_count; ++io_index) {
-		port = io->nth (io_index);
-		if (port->connected()) {
-			match = true;
-			if (port->type() == DataType::AUDIO) {
-				/* Rule A) applies no matter the remaining ports */
-				dt = DataType::AUDIO;
-				break;
-			}
-			if (port->type() == DataType::MIDI) {
-				/* Rule B) is a good candidate... */
-				dt = DataType::MIDI;
-				/* ...but continue the loop to check remaining ports for rule A) */
-			}
-		}
-	}
-
-	if (!match) {
-		/* Neither rule A) nor rule B) matched */
-		if ( io->n_ports().n_audio() > 0 ) {
-			/* Rule C */
-			dt = DataType::AUDIO;
-		} else if ( io->n_ports().n_midi() > 0 ) {
-			/* Rule D */
-			dt = DataType::MIDI;
-		}
-	}
 
 	if ( dt == DataType::MIDI ) {
 		tooltip << _("MIDI ");

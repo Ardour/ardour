@@ -297,6 +297,8 @@ private:
 
 	void reset_strip_style ();
 
+	ARDOUR::DataType guess_main_type(bool for_input, bool favor_connected = true) const;
+
 	void update_io_button (bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
