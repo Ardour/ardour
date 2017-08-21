@@ -294,9 +294,11 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 
 		luabridge::LuaRef lua_ss = luabridge::getGlobal (L, "session_setup");
 		if (lua_ss.isFunction ()) {
-			if (lua_ss () == true) {
-				lsi->subtype |= LuaScriptInfo::SessionSetup;
-			}
+			try {
+				if (lua_ss () == true) {
+					lsi->subtype |= LuaScriptInfo::SessionSetup;
+				}
+			} catch (...) { }
 		}
 
 	}
