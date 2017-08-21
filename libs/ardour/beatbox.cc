@@ -28,11 +28,11 @@
 #include "pbd/i18n.h"
 
 #include "evoral/midi_events.h"
-#include "evoral/SMF.hpp"
 
 #include "ardour/beatbox.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/session.h"
+#include "ardour/smf_source.h"
 
 using std::cerr;
 using std::endl;
@@ -473,39 +473,48 @@ BeatBox::add_note (int note, int velocity, Timecode::BBT_Time at)
 }
 
 bool
-BeatBox::export_to_path (std::string const & path)
+BeatBox::fill_source (boost::shared_ptr<Source> src)
 {
-	Evoral::SMF smf;
+	boost::shared_ptr<SMFSource> msrc = boost::dynamic_pointer_cast<SMFSource> (src);
 
-	double smf_delta = 0;
-	superclock_t last_time = 0;
-	Evoral::event_id_t note_id = 0;
+	if (msrc) {
+		return fill_midi_source (msrc);
+	}
+
+	return false;
+}
+
+bool
+BeatBox::fill_midi_source (boost::shared_ptr<SMFSource> src)
+{
+	Evoral::Beats smf_beats;
+
+	if (_current_events.empty()) {
+		return false;
+	}
+
+	Source::Lock lck (src->mutex());
 
 	try {
-		if (smf.create (path)) {
-			return false;
+		src->mark_streaming_midi_write_started (lck, Sustained);
+		src->begin_write ();
+
+		for (Events::const_iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
+			/* convert to quarter notes */
+			smf_beats = Evoral::Beats ((*e)->time / (beat_superclocks * (4.0 / _meter_beat_type)));
+			Evoral::Event<Evoral::Beats> ee (Evoral::MIDI_EVENT, smf_beats, (*e)->size, (*e)->buf, false);
+			src->append_event_beats (lck, ee);
+			last_time = (*e)->time;
 		}
+
+		src->end_write (src->path());
+		src->mark_nonremovable ();
+		src->mark_streaming_write_completed (lck);
+		return true;
+
 	} catch (...) {
-		return false;
+		cerr << "Exception during beatbox write to SMF... " << endl;
 	}
 
-	smf.begin_write ();
-
-	for (Events::const_iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
-		smf_delta = (*e)->time - last_time;
-		/* convert to quarter notes */
-		smf_delta /= beat_superclocks * (4.0 / _meter_beat_type);
-		/* convert to pulses/ticks */
-		smf_delta *= Timecode::BBT_Time::ticks_per_beat;
-		smf.append_event_delta (llrint (smf_delta), (*e)->size, (*e)->buf, note_id++);
-		last_time = (*e)->time;
-	}
-
-	try {
-		smf.end_write (path);
-	} catch (...) {
-		return false;
-	}
-
-	return true;
+	return false;
 }

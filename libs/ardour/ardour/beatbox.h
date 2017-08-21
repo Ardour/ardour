@@ -37,6 +37,9 @@
 
 namespace ARDOUR {
 
+class Source;
+class SMFSource;
+
 typedef uint64_t superclock_t;
 
 static const superclock_t superclock_ticks_per_second = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
@@ -75,7 +78,7 @@ class BeatBox : public ARDOUR::Processor {
 	XMLNode& state(bool full);
 	XMLNode& get_state(void);
 
-	bool export_to_path (std::string const & path);
+	bool fill_source (boost::shared_ptr<Source>);
 
   private:
 	bool _start_requested;
@@ -134,6 +137,9 @@ class BeatBox : public ARDOUR::Processor {
 
 	RingBuffer<Event*> add_queue;
 	RingBuffer<Event*> remove_queue;
+
+	bool fill_midi_source (boost::shared_ptr<SMFSource>);
+
 };
 
 } /* namespace */
