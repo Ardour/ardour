@@ -297,7 +297,7 @@ private:
 
 	void reset_strip_style ();
 
-	void update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool input_button);
+	void update_io_button (bool input_button);
 	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
 
 	bool mixer_strip_enter_event ( GdkEventCrossing * );

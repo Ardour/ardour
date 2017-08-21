@@ -1235,7 +1235,7 @@ MixerStrip::update_panner_choices ()
  */
 
 void
-MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width width, bool for_input)
+MixerStrip::update_io_button (bool for_input)
 {
 	uint32_t io_count;
 	uint32_t io_index;
@@ -1282,9 +1282,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	bool match = false;
 
 	if (for_input) {
-		io = route->input();
+		io = _route->input();
 	} else {
-		io = route->output();
+		io = _route->output();
 	}
 
 	io_count = io->n_ports().n_total();
@@ -1321,9 +1321,9 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 	}
 
 	if (for_input) {
-		tooltip << string_compose (_("<b>INPUT</b> to %1"), Gtkmm2ext::markup_escape_text (route->name()));
+		tooltip << string_compose (_("<b>INPUT</b> to %1"), Gtkmm2ext::markup_escape_text (_route->name()));
 	} else {
-		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (route->name()));
+		tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (_route->name()));
 	}
 
 	for (io_index = 0; io_index < io_count; ++io_index) {
@@ -1497,7 +1497,7 @@ MixerStrip::update_io_button (boost::shared_ptr<ARDOUR::Route> route, Width widt
 void
 MixerStrip::update_input_display ()
 {
-	update_io_button (_route, _width, true);
+	update_io_button (true);
 	panners.setup_pan ();
 
 	if (has_audio_outputs ()) {
@@ -1511,7 +1511,7 @@ MixerStrip::update_input_display ()
 void
 MixerStrip::update_output_display ()
 {
-	update_io_button (_route, _width, false);
+	update_io_button (false);
 	gpm.setup_meters ();
 	panners.setup_pan ();
 
