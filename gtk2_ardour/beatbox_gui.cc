@@ -21,6 +21,12 @@
 #include "pbd/i18n.h"
 
 #include "ardour/beatbox.h"
+#include "ardour/session.h"
+#include "ardour/smf_source.h"
+#include "ardour/source_factory.h"
+#include "ardour/region.h"
+#include "ardour/region_factory.h"
+#include "ardour/utils.h"
 
 #include "beatbox_gui.h"
 #include "timers.h"
@@ -526,13 +532,44 @@ BBGUI::toggle_play ()
 void
 BBGUI::export_as_region ()
 {
-	std::string path;
+	std::string path = bbox->session().new_midi_source_path (bbox->owner()->name());
 
-	path = "/tmp/foo.smf";
-	if (!bbox->export_to_path (path)) {
-		cerr << "export failed\n";
-	} else {
-		cerr << "export in " << path << endl;
+	boost::shared_ptr<SMFSource> src;
+
+	/* caller must check for pre-existing file */
+
+	assert (!path.empty());
+	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
+
+	src = boost::dynamic_pointer_cast<SMFSource>(SourceFactory::createWritable (DataType::MIDI, bbox->session(), path, false, bbox->session().frame_rate()));
+
+	try {
+		if (src->create (path)) {
+			return;
+		}
+	} catch (...) {
+		return;
 	}
-}
 
+	if (!bbox->fill_source (src)) {
+		cerr << "export failed\n";
+		return;
+	}
+
+	cerr << "written to " << path << " source has length " << src->length (0) << endl;
+
+	std::string region_name = region_name_from_path (src->name(), true);
+
+	PBD::PropertyList plist;
+
+	plist.add (ARDOUR::Properties::start, 0);
+	plist.add (ARDOUR::Properties::length, src->length (0));
+	plist.add (ARDOUR::Properties::name, region_name);
+	plist.add (ARDOUR::Properties::layer, 0);
+	plist.add (ARDOUR::Properties::whole_file, true);
+	plist.add (ARDOUR::Properties::external, false);
+
+	boost::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
+
+	cerr << "new region = " << region->name() << endl;
+}
