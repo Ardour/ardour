@@ -5049,6 +5049,11 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 			if (types[2] && Profile->get_mixbus() && s->mixbus()) {
 				sorted.push_back (s);
 			} else
+			if (types[7] && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+				if (Profile->get_mixbus() && !s->mixbus()) {
+					sorted.push_back (s);
+				}
+			} else
 #endif
 			if ((types[2] || types[3] || types[7]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
