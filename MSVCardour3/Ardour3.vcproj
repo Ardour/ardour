@@ -1068,6 +1068,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\save_template_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\script_selector.cc"
 				>
 			</File>
@@ -2131,6 +2135,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\save_as_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\save_template_dialog.h"
 				>
 			</File>
 			<File
