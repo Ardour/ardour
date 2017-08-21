@@ -5096,23 +5096,23 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 
 	if (!strncmp (path, "/cue/aux", 8)) {
 		// set our Aux bus
-		ret = cue_set (argv[0]->i, msg);
+		ret = cue_set (argv[0]->f, msg);
 	}
 	else if (!strncmp (path, "/cue/connect", 12)) {
 		// Connect to default Aux bus
-		if ((!argc) || argv[0]->i) {
+		if ((!argc) || argv[0]->f) {
 			ret = cue_set (1, msg);
 		}
 	}
 	else if (!strncmp (path, "/cue/next_aux", 13)) {
 		// switch to next Aux bus
-		if ((!argc) || argv[0]->i) {
+		if ((!argc) || argv[0]->f) {
 			ret = cue_next (msg);
 		}
 	}
 	else if (!strncmp (path, "/cue/previous_aux", 17)) {
 		// switch to previous Aux bus
-		if ((!argc) || argv[0]->i) {
+		if ((!argc) || argv[0]->f) {
 			ret = cue_previous (msg);
 		}
 	}

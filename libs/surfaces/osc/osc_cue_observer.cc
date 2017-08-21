@@ -139,8 +139,8 @@ OSCCueObserver::send_init()
 			}
 			
 			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
-				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc->enabled()), OSC::instance());
-				send_enabled_message (X_("/cue/send/enable"), i + 1, proc->enabled());
+				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc), OSC::instance());
+				send_enabled_message (X_("/cue/send/enable"), i + 1, proc);
 		}
 	}
 
@@ -239,14 +239,14 @@ OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable>
 }
 
 void
-OSCCueObserver::send_enabled_message (std::string path, uint32_t id, bool enabled)
+OSCCueObserver::send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc)
 {
 	lo_message msg = lo_message_new ();
 
 	if (id) {
 		path = string_compose("%1/%2", path, id);
 	}
-	lo_message_add_float (msg, (float) enabled);
+	lo_message_add_float (msg, (float) proc->enabled());
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);

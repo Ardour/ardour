@@ -60,7 +60,7 @@ class OSCCueObserver
 	void send_change_message (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void text_with_id (std::string path, uint32_t id, std::string val);
 	void send_gain_message (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_enabled_message (std::string path, uint32_t id, bool enabled);
+	void send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
 	void clear_strip (std::string path, float val);
 	void send_init (void);
 	void send_end (void);
