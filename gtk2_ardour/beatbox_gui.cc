@@ -37,6 +37,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, step_sequencer_tab_button (_("Steps"))
 	, pad_tab_button (_("Pads"))
 	, roll_tab_button (_("Roll"))
+	, export_as_region_button (_(">Region"))
 	, quantize_off (quantize_group, "None")
 	, quantize_32nd (quantize_group, "ThirtySecond")
 	, quantize_16th (quantize_group, "Sixteenth")
@@ -94,6 +95,10 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	get_vbox()->pack_start (misc_button_box, false, false);
 	get_vbox()->pack_start (tabs, true, true);
 	get_vbox()->pack_start (quantize_button_box, true, true);
+
+
+	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
+	get_action_area()->pack_end (export_as_region_button);
 
 	show_all ();
 }
@@ -517,3 +522,17 @@ BBGUI::toggle_play ()
 		bbox->start ();
 	}
 }
+
+void
+BBGUI::export_as_region ()
+{
+	std::string path;
+
+	path = "/tmp/foo.smf";
+	if (!bbox->export_to_path (path)) {
+		cerr << "export failed\n";
+	} else {
+		cerr << "export in " << path << endl;
+	}
+}
+

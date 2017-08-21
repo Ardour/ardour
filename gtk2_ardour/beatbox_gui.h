@@ -144,6 +144,9 @@ class BBGUI : public ArdourDialog {
 
 	Gtk::Notebook tabs;
 
+	ArdourWidgets::ArdourButton export_as_region_button;
+	void export_as_region ();
+
 	Gtk::RadioButtonGroup quantize_group;
 	Gtk::RadioButton quantize_off;
 	Gtk::RadioButton quantize_32nd;
