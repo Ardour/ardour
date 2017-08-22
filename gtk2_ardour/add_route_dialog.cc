@@ -106,16 +106,17 @@ AddRouteDialog::AddRouteDialog ()
 	strict_io_combo.append_text (_("Strict-I/O"));
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
+	//top-level VBox
 	VBox* vbox = manage (new VBox);
-
 	get_vbox()->set_spacing (4);
-
 	vbox->set_spacing (18);
 	vbox->set_border_width (5);
 
+	//this box contains the template chooser, and the template details
 	HBox* template_hbox = manage (new HBox);
 	template_hbox->set_spacing (8);
 
+	//scrollbars for the template chooser and template descriptions....
 	Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
 	template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	template_scroller->add (trk_template_chooser);
@@ -124,11 +125,12 @@ AddRouteDialog::AddRouteDialog ()
 	desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	desc_scroller->add (trk_template_desc);
 
-	template_hbox->pack_start (*template_scroller, true, true);
+	//this is the outer frame that surrounds the description and the settings-table
+	trk_template_outer_frame.set_name (X_("TextHighlightFrame"));
 
+	//this is the "inner frame" that surrounds the description text
 	trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
 	trk_template_desc_frame.add (*desc_scroller);
-	template_hbox->pack_start (trk_template_desc_frame, true, true);
 
 	/* template_chooser is the treeview showing available templates */
 	trk_template_model = TreeStore::create (track_template_columns);
@@ -150,54 +152,67 @@ AddRouteDialog::AddRouteDialog ()
 	trk_template_desc.set_name (X_("TextOnBackground"));
 	trk_template_desc.set_border_width (6);
 
+	Table *settings_table = manage (new Table (2, 6, false));
+	settings_table->set_row_spacings (8);
+	settings_table->set_col_spacings	(4);
+	settings_table->set_col_spacing	(3, 20);
+	settings_table->set_border_width	(12);
+
+	VBox* settings_vbox = manage (new VBox);
+	settings_vbox->pack_start(trk_template_desc_frame , true, true);
+	settings_vbox->pack_start(*settings_table , true, true);
+	settings_vbox->set_border_width	(4);
+
+	trk_template_outer_frame.add (*settings_vbox);
+
+	template_hbox->pack_start (*template_scroller, true, true);
+	template_hbox->pack_start (trk_template_outer_frame, true, true);
+
 	vbox->pack_start (*template_hbox, true, true);
+
+
+	//Now pack the "settings table" with manual controls (these controls are sensitized by the left-side selection) 
+
+	int n = 0;
 
 	HBox *separator_hbox = manage (new HBox);
 	separator_hbox->pack_start (manual_label, false, false);
 	separator_hbox->pack_start (*(manage (new Gtk::HSeparator)), true, true);
 	separator_hbox->set_spacing (6);
-	vbox->pack_start (*separator_hbox, true, true);
+	settings_table->attach (*separator_hbox, 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
-	/* track/bus choice */
-
-	Table *add_table = manage (new Table (8, 6, false));
-	add_table->set_row_spacings (8);
-	add_table->set_col_spacings	(4);
-	add_table->set_col_spacing	(3, 20);
-	add_table->set_border_width	(0);
-
-	int n = 0;
+	++n;
 
 	// Number
 	add_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	Gtk::Alignment *align = manage (new Alignment (0, .5, 0, 0));
 	align->add (routes_spinner);
-	add_table->attach (*align, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (*align, 1, 2, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// Name
 	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (name_template_entry, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (name_template_entry, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Route configuration
 	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (configuration_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (channel_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (configuration_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (channel_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// instrument choice (for MIDI)
 	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (instrument_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (instrument_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	// Group choice
 	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (route_group_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	settings_table->attach (route_group_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
@@ -206,36 +221,46 @@ AddRouteDialog::AddRouteDialog ()
 		strict_io_combo.set_active (1);
 	} else {
 		strict_io_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		add_table->attach (strict_io_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-		add_table->attach (strict_io_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		settings_table->attach (strict_io_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		settings_table->attach (strict_io_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
 		// recording mode
 		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-		add_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-		add_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		settings_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+		settings_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 		++n;
 	}
 
+	//now pack the "global" table at the bottom:  these controls are always sensitized for adding the selected item(s)
 
-	add_table->attach (*(manage (new Gtk::HSeparator)), 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	Table *global_table = manage (new Table (2, 6, false));
+	global_table->set_row_spacings (8);
+	global_table->set_col_spacings	(4);
+	global_table->set_border_width	(0);
+	n = 0;
+
+	global_table->attach (*(manage (new Gtk::HSeparator)), 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
 	// New route will be inserted at..
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	add_table->attach (insert_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	add_table->attach (insert_at_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	global_table->attach (insert_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	global_table->attach (insert_at_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::FILL|Gtk::SHRINK, 0, 0);
 
+//	++n;
+
+	//quick-add button  (add item but don't close dialog)
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
 	addnoclose_button->set_can_default ();
 	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
-	add_table->attach (*addnoclose_button, 4, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
+	global_table->attach (*addnoclose_button, 4, 6, n, n + 1, Gtk::FILL, Gtk::FILL|Gtk::SHRINK, 0, 0);
 
-	vbox->pack_start (*add_table, false, true);
+	vbox->pack_start (*global_table, true, true);
 
 	get_vbox()->pack_start (*vbox, false, false);
 

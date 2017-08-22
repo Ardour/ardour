@@ -139,6 +139,7 @@ private:
 	void trk_template_row_selected ();
 
 	Gtk::TextView trk_template_desc;
+	Gtk::Frame    trk_template_outer_frame;
 	Gtk::Frame    trk_template_desc_frame;
 
 	void reset_template_option_visibility ();
