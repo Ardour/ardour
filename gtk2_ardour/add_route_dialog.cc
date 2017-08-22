@@ -343,7 +343,10 @@ AddRouteDialog::trk_template_row_selected ()
 
 		if ((it = rs.find ("name")) != rs.end()) {
 			name_template_entry.set_text (it->second);
+		} else {
+			name_template_entry.set_text ("");
 		}
+	
 
 		if ((it = rs.find ("how_many")) != rs.end()) {
 			if (atoi (it->second.c_str()) > 0) {
@@ -530,26 +533,46 @@ AddRouteDialog::track_type_chosen ()
 {
 	switch (type_wanted()) {
 	case AudioTrack:
-		mode_combo.set_sensitive (true);
-		channel_combo.set_sensitive (true);
-		instrument_combo.set_sensitive (false);
+
 		configuration_label.set_sensitive (true);
+		channel_combo.set_sensitive (true);
+
 		mode_label.set_sensitive (true);
+		mode_combo.set_sensitive (true);
+
 		instrument_label.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+
+		group_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+
+		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
-		insert_at_combo.set_sensitive (true);
+
+		insert_label.set_sensitive (false);
+		insert_at_combo.set_sensitive (false);
+		
 		break;
 	case MidiTrack:
-		channel_combo.set_sensitive (false);
-		mode_combo.set_sensitive (false);
-		instrument_combo.set_sensitive (true);
+
 		configuration_label.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+
 		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
 		instrument_label.set_sensitive (true);
+		instrument_combo.set_sensitive (true);
+
+		group_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+
+		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+
+		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
+		
 		break;
 	case MixedTrack:
 		{
@@ -559,47 +582,88 @@ AddRouteDialog::track_type_chosen ()
 			msg.set_position (WIN_POS_MOUSE);
 			msg.run ();
 		}
-		channel_combo.set_sensitive (true);
-		mode_combo.set_sensitive (true);
-		instrument_combo.set_sensitive (true);
+
 		configuration_label.set_sensitive (true);
+		channel_combo.set_sensitive (true);
+
 		mode_label.set_sensitive (true);
+		mode_combo.set_sensitive (true);
+
 		instrument_label.set_sensitive (true);
+		instrument_combo.set_sensitive (true);
+
+		group_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+
+		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+
+		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
+
 		break;
 	case AudioBus:
-		mode_combo.set_sensitive (false);
-		channel_combo.set_sensitive (true);
-		instrument_combo.set_sensitive (false);
+
 		configuration_label.set_sensitive (true);
-		mode_label.set_sensitive (true);
+		channel_combo.set_sensitive (true);
+
+		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
 		instrument_label.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+
+		group_label.set_sensitive (true);
 		route_group_combo.set_sensitive (true);
+
+		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+
+		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
+
 		break;
 	case VCAMaster:
-		mode_combo.set_sensitive (false);
-		channel_combo.set_sensitive (false);
-		instrument_combo.set_sensitive (false);
+
 		configuration_label.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+
 		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
 		instrument_label.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+
+		group_label.set_sensitive (false);
 		route_group_combo.set_sensitive (false);
+
+		strict_io_label.set_sensitive (false);
 		strict_io_combo.set_sensitive (false);
+
+		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
+		
 		break;
 	case MidiBus:
-		mode_combo.set_sensitive (false);
-		channel_combo.set_sensitive (false);
-		instrument_combo.set_sensitive (true);
+
 		configuration_label.set_sensitive (false);
-		mode_label.set_sensitive (true);
+		channel_combo.set_sensitive (false);
+
+		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
 		instrument_label.set_sensitive (true);
+		instrument_combo.set_sensitive (true);
+
+		group_label.set_sensitive (true);
+		route_group_combo.set_sensitive (true);
+
+		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
+
+		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
+
 		break;
 	}
 
