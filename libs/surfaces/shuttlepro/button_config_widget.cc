@@ -108,9 +108,13 @@ ButtonConfigWidget::set_current_config (boost::shared_ptr<ButtonBase> btn_cnf)
 	const ButtonAction* ba = dynamic_cast<const ButtonAction*> (btn_cnf.get());
 	if (ba) {
 		set_current_action (ba->get_path ());
+		_action_cb.set_sensitive (true);
+		_jump_distance.set_sensitive (false);
 	} else {
 		const ButtonJump* bj = static_cast<const ButtonJump*> (btn_cnf.get());
 		set_jump_distance (bj->get_jump_distance());
+		_action_cb.set_sensitive (false);
+		_jump_distance.set_sensitive (true);
 	}
 }
 
