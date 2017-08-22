@@ -68,7 +68,7 @@ public:
 		MidiBus,
 		VCAMaster,
 	};
-	TypeWanted type_wanted() const;
+	TypeWanted type_wanted();
 
 	ARDOUR::ChanCount channels ();
 	uint32_t channel_count ();
@@ -88,7 +88,6 @@ public:
 
 private:
 	Gtk::Entry name_template_entry;
-	Gtk::ComboBoxText track_bus_combo;
 	Gtk::Adjustment routes_adjustment;
 	Gtk::SpinButton routes_spinner;
 	Gtk::ComboBoxText channel_combo;
@@ -101,7 +100,6 @@ private:
 	Gtk::Label strict_io_label;
 	Gtk::Label mode_label;
 	Gtk::Label instrument_label;
-	Gtk::ComboBoxText template_type_placeholder;
 	Gtk::ComboBoxText mode_combo;
 	Gtk::ComboBoxText route_group_combo;
 	InstrumentSelector instrument_combo;
@@ -156,6 +154,7 @@ private:
 	typedef std::vector<ChannelSetup> ChannelSetups;
 	ChannelSetups channel_setups;
 
+	static std::vector<std::string> builtin_types;
 	static std::vector<std::string> channel_combo_strings;
 	static std::vector<std::string> bus_mode_strings;
 
