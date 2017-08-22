@@ -103,6 +103,9 @@ private:
 		void set_target_property(Property prop);
 		void source_changed();
 
+		double get_value () const;
+		double get_max () const;
+
 		const Model&    model;            ///< Models for combo boxes
 		Property        target_property;  ///< Property on source
 		Gtk::ComboBox   source_combo;     ///< Value source chooser
