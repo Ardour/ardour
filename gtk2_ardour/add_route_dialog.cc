@@ -280,7 +280,7 @@ AddRouteDialog::~AddRouteDialog ()
 void
 AddRouteDialog::on_response (int r)
 {
-	name_edited_by_user = false;
+	reset_name_edited ();
 	/* Don't call ArdourDialog::on_response() because that will
 	   automatically hide the dialog.
 	*/
@@ -421,13 +421,21 @@ AddRouteDialog::trk_template_row_selected ()
 void
 AddRouteDialog::name_template_entry_insertion (Glib::ustring const &,int*)
 {
-	name_edited_by_user = true;
+	if (name_template ().empty ()) {
+		name_edited_by_user = false;
+	} else {
+		name_edited_by_user = true;
+	}
 }
 
 void
 AddRouteDialog::name_template_entry_deletion (int, int)
 {
-	name_edited_by_user = true;
+	if (name_template ().empty ()) {
+		name_edited_by_user = false;
+	} else {
+		name_edited_by_user = true;
+	}
 }
 
 void
@@ -509,7 +517,8 @@ AddRouteDialog::maybe_update_name_template_entry ()
 		name_template_entry.set_text (VCA::default_name_template());
 		break;
 	}
-	name_edited_by_user = false;
+	/* ignore programatic change, restore false */
+	reset_name_edited ();
 }
 
 void
@@ -698,7 +707,7 @@ void
 AddRouteDialog::on_show ()
 {
 	routes_spinner.grab_focus ();
-	name_edited_by_user = false;
+	reset_name_edited ();
 
 	refill_route_groups ();
 

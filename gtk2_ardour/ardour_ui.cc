@@ -4449,6 +4449,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 
 	switch (r) {
 	case AddRouteDialog::Add:
+		add_route_dialog->reset_name_edited ();
 		break;
 	case AddRouteDialog::AddAndClose:
 		add_route_dialog->ArdourDialog::on_response (r);

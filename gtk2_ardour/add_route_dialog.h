@@ -86,6 +86,8 @@ public:
 
 	std::string get_template_path();
 
+	void reset_name_edited () { name_edited_by_user = false; }
+
 private:
 	Gtk::Entry name_template_entry;
 	Gtk::Adjustment routes_adjustment;
