@@ -2033,7 +2033,6 @@ Mixer_UI::strip_scroller_button_release (GdkEventButton* ev)
 void
 Mixer_UI::scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>& context, int x, int y, const Gtk::SelectionData& data, guint info, guint time)
 {
-	printf ("Mixer_UI::scroller_drag_data_received\n");
 	if (data.get_target() != "PluginFavoritePtr") {
 		context->drag_finish (false, false, time);
 		return;
