@@ -58,7 +58,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
 std::vector<std::string> AddRouteDialog::channel_combo_strings;
-std::vector<std::string> AddRouteDialog::builtin_types;
+std::vector<std::pair<std::string,std::string> > AddRouteDialog::builtin_types;
 
 AddRouteDialog::AddRouteDialog ()
 	: ArdourDialog (_("Add Track/Bus/VCA"))
@@ -88,12 +88,88 @@ AddRouteDialog::AddRouteDialog ()
 	refill_track_modes ();
 
 	if (builtin_types.empty()) {
-		builtin_types.push_back (_("Audio Tracks"));
-		builtin_types.push_back (_("MIDI Tracks"));
-		builtin_types.push_back (_("Audio+MIDI Tracks"));
-		builtin_types.push_back (_("Audio Busses"));
-		builtin_types.push_back (_("MIDI Busses"));
-		builtin_types.push_back (_("VCA Masters"));
+		builtin_types.push_back (
+			std::pair<string,string>(_("Audio Tracks"),  _( " \
+Use the settings, below, to create 1 or more new Audio tracks.\n \
+\n\n \
+You may select:\n \
+* The number of tracks to add.\n \
+* A Name for the new track(s).\n \
+* Mono, Stereo, or Multichannel operation for the new track(s).\n \
+* A Group which the track will be assigned to.\n \
+* The Pin Connections mode. (see tooltip for details).\n \
+* Normal (non-destructive) or Tape (destructive) recording mode.\n \
+\n \
+The track will be added in the location specified by \"Position\".\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("MIDI Tracks"),  _(" \
+Use the settings, below, to create 1 or more new MIDI tracks.\n \
+\n\n \
+You may select:\n \
+* The number of tracks to add.\n \
+* A Name for the track(s).\n \
+* An Instrument plugin (or select \"None\" to drive an external device)\n \
+* A Group which the track will be assigned to.\n \
+* The Pin Connections mode. (see tooltip for details)\n \
+\n \
+The track will be added in the location specified by \"Position\".\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("Audio+MIDI Tracks"),   _(" \
+Use the settings, below, to create 1 or more new Audio+MIDI tracks.\n \
+\n\n \
+You may select:\n \
+* The number of tracks to add.\n \
+* A Name for the track(s).\n \
+* An Instrument plugin (or select \"None\" to drive an external device)\n \
+* A Group which will be assigned to the track(s).\n \
+* Pin Connections mode. (see tooltip for details).\n \
+* Normal (non-destructive) or Tape (destructive) recording mode.\n \
+\n \
+The track will be added in the location specified by \"Position\".\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("Audio Busses"),  _(" \
+Use the settings, below, to create new Audio Tracks.\n \
+\n\n \
+You may select:\n \
+* The number of buses to add.\n \
+* A Name for the track(s).\n \
+* An Instrument plugin (or select \"None\" to drive an external device)\n \
+* A Group which will be assigned to the track(s).\n \
+* Pin Connections mode. (see tooltip for details).\n \
+* Normal (non-destructive) or Tape (destructive) recording mode.\n \
+\n \
+The track will be added in the location specified by \"Position\".\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("MIDI Busses"),  _(" \
+Use the settings, below, to create new Audio Tracks.\n \
+\n\n \
+You may select:\n \
+* The number of buses to add.\n \
+* A Name for the track(s).\n \
+* An Instrument plugin (or select \"None\" to drive an external device)\n \
+* A Group which will be assigned to the track(s).\n \
+* Pin Connections mode. (see tooltip for details).\n \
+\n \
+The track will be added in the location specified by \"Position\".\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("VCA Masters"),   _(" \
+Use the settings, below, to create 1 or more VCA Master(s).\n \
+\n\n \
+You may select:\n \
+* The number of buses to add.\n \
+* A name for the new VCAs.  \"%n\" will be replaced by an index number for each VCA.\n \
+")
+		));
 	}
 
 	insert_at_combo.append_text (_("First"));
@@ -549,8 +625,8 @@ AddRouteDialog::track_type_chosen ()
 		strict_io_label.set_sensitive (true);
 		strict_io_combo.set_sensitive (true);
 
-		insert_label.set_sensitive (false);
-		insert_at_combo.set_sensitive (false);
+		insert_label.set_sensitive (true);
+		insert_at_combo.set_sensitive (true);
 		
 		break;
 	case MidiTrack:
@@ -841,11 +917,11 @@ AddRouteDialog::refill_channel_setups ()
 	trk_template_model->clear();
 	bool selected_default = false;
 
-	for (std::vector<std::string>::const_iterator i = builtin_types.begin(); i != builtin_types.end(); ++i) {
+	for (std::vector<std::pair<std::string,std::string> >::const_iterator i = builtin_types.begin(); i != builtin_types.end(); ++i) {
 		TreeModel::Row row = *(trk_template_model->append ());
-		row[track_template_columns.name] = (*i);
+		row[track_template_columns.name] = (*i).first;
 		row[track_template_columns.path] = "";
-		row[track_template_columns.description] = _("Use the controls below");
+		row[track_template_columns.description] = (*i).second;
 		row[track_template_columns.created_with] = "";
 
 		if (!selected_default && !Profile->get_mixbus ()) {

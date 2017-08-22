@@ -157,7 +157,7 @@ private:
 	typedef std::vector<ChannelSetup> ChannelSetups;
 	ChannelSetups channel_setups;
 
-	static std::vector<std::string> builtin_types;
+	static std::vector<std::pair<std::string, std::string> > builtin_types;
 	static std::vector<std::string> channel_combo_strings;
 	static std::vector<std::string> bus_mode_strings;
 
