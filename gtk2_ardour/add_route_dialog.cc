@@ -235,32 +235,21 @@ AddRouteDialog::AddRouteDialog ()
 		++n;
 	}
 
-	//now pack the "global" table at the bottom:  these controls are always sensitized for adding the selected item(s)
-
-	Table *global_table = manage (new Table (2, 6, false));
-	global_table->set_row_spacings (8);
-	global_table->set_col_spacings	(4);
-	global_table->set_border_width	(0);
-	n = 0;
-
-	global_table->attach (*(manage (new Gtk::HSeparator)), 0, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-
-	++n;
+	HBox* outer_box = manage (new HBox);
+	outer_box->set_spacing (4);
 
 	// New route will be inserted at..
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
-	global_table->attach (insert_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
-	global_table->attach (insert_at_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::FILL|Gtk::SHRINK, 0, 0);
-
-//	++n;
+	outer_box->pack_start (insert_label, false, false);
+	outer_box->pack_start (insert_at_combo, false, false);
 
 	//quick-add button  (add item but don't close dialog)
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
 	addnoclose_button->set_can_default ();
 	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
-	global_table->attach (*addnoclose_button, 4, 6, n, n + 1, Gtk::FILL, Gtk::FILL|Gtk::SHRINK, 0, 0);
+	outer_box->pack_end (*addnoclose_button, false, false);
 
-	vbox->pack_start (*global_table, true, true);
+	vbox->pack_start (*outer_box, true, true);
 
 	get_vbox()->pack_start (*vbox, false, false);
 
