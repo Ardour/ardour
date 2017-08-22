@@ -260,6 +260,10 @@ AddRouteDialog::AddRouteDialog ()
 	route_group_combo.set_row_separator_func (sigc::mem_fun (*this, &AddRouteDialog::route_separator));
 	route_group_combo.signal_changed ().connect (sigc::mem_fun (*this, &AddRouteDialog::group_changed));
 
+	routes_spinner.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), AddAndClose));
+	name_template_entry.signal_activate ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), AddAndClose));
+	trk_template_chooser.signal_row_activated ().connect (sigc::hide (sigc::hide (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), AddAndClose))));
+
 	show_all_children ();
 
 	/* track template info will be managed whenever
