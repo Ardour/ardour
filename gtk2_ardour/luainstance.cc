@@ -368,6 +368,7 @@ namespace LuaMixer {
 	}
 
 };
+
 ////////////////////////////////////////////////////////////////////////////////
 
 static PBD::ScopedConnectionList _luaexecs;
@@ -422,6 +423,14 @@ lua_exec (std::string cmd)
 	return 0;
 }
 #endif
+////////////////////////////////////////////////////////////////////////////////
+
+// ARDOUR_UI and instance() are not exposed.
+ARDOUR::PresentationInfo::order_t
+lua_translate_order (RouteDialogs::InsertAt place)
+{
+	return ARDOUR_UI::instance()->translate_order (place);
+}
 
 ////////////////////////////////////////////////////////////////////////////////
 
@@ -908,7 +917,16 @@ LuaInstance::register_classes (lua_State* L)
 		.addFunction ("set_toggleaction", &PublicEditor::set_toggleaction)
 		.endClass ()
 
+		.addFunction ("translate_order", &lua_translate_order)
+
 		/* ArdourUI enums */
+		.beginNamespace ("InsertAt")
+		.addConst ("BeforeSelection", RouteDialogs::InsertAt(RouteDialogs::BeforeSelection))
+		.addConst ("AfterSelection", RouteDialogs::InsertAt(RouteDialogs::AfterSelection))
+		.addConst ("First", RouteDialogs::InsertAt(RouteDialogs::First))
+		.addConst ("Last", RouteDialogs::InsertAt(RouteDialogs::Last))
+		.endNamespace ()
+
 		.beginNamespace ("MarkerType")
 		.addConst ("Mark", ArdourMarker::Type(ArdourMarker::Mark))
 		.addConst ("Tempo", ArdourMarker::Type(ArdourMarker::Tempo))
