@@ -5428,6 +5428,7 @@ Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
 
 	if (in_command) {
 		commit_reversible_command ();
+		_session->set_dirty ();
 	}
 }
 
