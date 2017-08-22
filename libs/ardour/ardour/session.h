@@ -1942,8 +1942,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void   add_click (framepos_t pos, bool emphasis);
 	framecnt_t _count_in_samples;
 
-	std::vector<Route*> master_outs;
-
 	/* range playback */
 
 	std::list<AudioRange> current_audio_range;
