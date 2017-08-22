@@ -1118,23 +1118,41 @@ MixerStrip::maybe_add_bundle_to_input_menu (boost::shared_ptr<Bundle> b, ARDOUR:
 }
 
 void
-MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
+MixerStrip::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/,
+                                             DataType type)
 {
 	using namespace Menu_Helpers;
 
-	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs() || *b == *_route->input()->bundle()) {
+	/* The bundle should be an input one, but not ours */
+	if (b->ports_are_inputs() == false || *b == *_route->input()->bundle()) {
 		return;
 	}
 
+	/* Don't add the monitor input unless we are Master */
+	boost::shared_ptr<Route> monitor = _session->monitor_out();
+	if ((!_route->is_master()) && monitor && b->has_same_ports (monitor->input()->bundle()))
+		return;
+
+	/* It should either match exactly our outputs (if |type| is DataType::NIL)
+	 * or have the same number of |type| channels than our outputs. */
+	if (type == DataType::NIL) {
+		if(b->nchannels() != _route->n_outputs())
+			return;
+	} else {
+		if (b->nchannels().n(type) != _route->n_outputs().n(type))
+			return;
+	}
+
+	/* Avoid adding duplicates */
 	list<boost::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
 	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
 		++i;
 	}
-
 	if (i != output_menu_bundles.end()) {
 		return;
 	}
 
+	/* Now add the bundle to the menu */
 	output_menu_bundles.push_back (b);
 
 	MenuList& citems = output_menu.items();

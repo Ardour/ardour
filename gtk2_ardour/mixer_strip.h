@@ -236,7 +236,8 @@ private:
 
 	Gtk::Menu output_menu;
 	std::list<boost::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
-	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
+	void maybe_add_bundle_to_output_menu (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &,
+	                                      ARDOUR::DataType type = ARDOUR::DataType::NIL);
 
 	void bundle_input_chosen (boost::shared_ptr<ARDOUR::Bundle>);
 	void bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle>);
