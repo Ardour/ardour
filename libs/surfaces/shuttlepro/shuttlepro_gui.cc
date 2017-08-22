@@ -92,7 +92,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	Table* table = manage (new Table);
 	table->set_row_spacings (6);
-	table->set_row_spacings (6);
+	table->set_col_spacings (6);
 	table->show ();
 
 	int n = 0;
@@ -102,7 +102,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	table->attach (_keep_rolling, 0, 2, n, n+1);
 	++n;
 
-	Label* speed_label = manage (new Label (_("Transport speeds for the shuttle positions:")));
+	Label* speed_label = manage (new Label (_("Transport speeds for the shuttle positions:"), ALIGN_START));
 	table->attach (*speed_label, 0, 2, n, n+1);
 
 	HBox* speed_box = manage (new HBox);
@@ -117,7 +117,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	table->attach (*speed_box, 3, 5, n, n+1);
 	++n;
 
-	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:")));
+	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:"), ALIGN_START));
 	table->attach (*jog_label, 0, 2, n, n+1);
 
 	_jog_distance.Changed.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
@@ -127,7 +127,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	vector<boost::shared_ptr<ButtonBase> >::const_iterator it;
 	unsigned int btn_idx = 0;
 	for (it = _scp._button_actions.begin(); it != _scp._button_actions.end(); ++it) {
-		Label* lb = manage (new Label (string_compose (_("Setting for button %1"), btn_idx+1)));
+		Label* lb = manage (new Label (string_compose (_("Setting for button %1"), btn_idx+1), ALIGN_START));
 		table->attach (*lb, 0, 2, n, n+1);
 
 		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
@@ -139,6 +139,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 		++btn_idx;
 	}
 
+	set_spacing (6);
 	pack_end (*table, false, false);
 }
 
