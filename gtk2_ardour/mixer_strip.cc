@@ -904,25 +904,35 @@ MixerStrip::output_press (GdkEventButton *ev)
 
 		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
-		/* give user bundles first chance at being in the menu */
+		/* guess the user-intended main type of the route output */
+		DataType intended_type = guess_main_type(false);
 
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
-				maybe_add_bundle_to_output_menu (*i, current);
-			}
+		/* try adding the master bus first */
+		boost::shared_ptr<Route> master = _session->master_out();
+		if (master) {
+			maybe_add_bundle_to_output_menu (master->input()->bundle(), current, intended_type);
 		}
 
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-				maybe_add_bundle_to_output_menu (*i, current);
-			}
-		}
-
+		/* then other routes inputs */
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current);
+			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current, intended_type);
+		}
+
+		/* then try adding user bundles, often labeled/grouped physical inputs */
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+				maybe_add_bundle_to_output_menu (*i, current, intended_type);
+			}
+		}
+
+		/* then all other bundles, including physical outs or other sofware */
+		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
+			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+				maybe_add_bundle_to_output_menu (*i, current, intended_type);
+			}
 		}
 
 		if (citems.size() == n_with_separator) {
