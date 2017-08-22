@@ -31,6 +31,8 @@
 #include "shuttlepro.h"
 #include "jump_distance_widget.h"
 
+class ActionModel;
+
 namespace ArdourSurface
 {
 class ButtonConfigWidget : public Gtk::HBox
@@ -59,23 +61,10 @@ private:
 	JumpDistanceWidget _jump_distance;
 	Gtk::ComboBox _action_cb;
 
-	struct ActionColumns : public Gtk::TreeModel::ColumnRecord {
-		ActionColumns() {
-			add (name);
-			add (path);
-		}
-		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<std::string> path;
-	};
-
-	ActionColumns _action_columns;
-	Glib::RefPtr<Gtk::TreeStore> _available_action_model;
-	std::map<std::string,std::string> _action_map; // map from action names to paths
-	void setup_available_actions ();
-
 	PBD::ScopedConnection _jump_distance_connection;
+
+	const ActionModel& _action_model;
 };
 }
 
 #endif /* ardour_shuttlepro_button_config_widget_h */
-;

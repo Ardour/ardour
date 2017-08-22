@@ -33,11 +33,38 @@ using namespace std;
 using namespace Gtk;
 using namespace ArdourSurface;
 
+class ActionModel
+{
+public:
+	static const ActionModel& instance ();
+
+	const Glib::RefPtr<TreeStore> model () const { return _available_action_model; }
+
+	const TreeModelColumn<string>& name () const { return _action_columns.name; }
+	const TreeModelColumn<string>& path () const { return _action_columns.path; }
+
+private:
+	ActionModel ();
+	struct ActionColumns : public TreeModel::ColumnRecord {
+		ActionColumns() {
+			add (name);
+			add (path);
+		}
+		TreeModelColumn<string> name;
+		TreeModelColumn<string> path;
+	};
+
+	const ActionColumns _action_columns;
+	Glib::RefPtr<TreeStore> _available_action_model;
+};
+
+
 ButtonConfigWidget::ButtonConfigWidget ()
 	: HBox ()
 	, _choice_jump (_("Jump: "))
 	, _choice_action (_("Other action: "))
 	, _jump_distance (JumpDistance ({ .value = 1, .unit = BEATS }))
+	, _action_model (ActionModel::instance ())
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
 	_choice_action.set_group (cbg);
@@ -45,11 +72,9 @@ ButtonConfigWidget::ButtonConfigWidget ()
 
 	_jump_distance.Changed.connect (_jump_distance_connection, invalidator (*this), boost::bind(&ButtonConfigWidget::update_config, this), gui_context ());
 
-	setup_available_actions ();
-
-	_action_cb.set_model (_available_action_model);
+	_action_cb.set_model (_action_model.model());
 	_action_cb.signal_changed().connect (boost::bind (&ButtonConfigWidget::update_config, this));
-	_action_cb.pack_start (_action_columns.name, true);
+	_action_cb.pack_start (_action_model.name (), true);
 
 	HBox* jump_box = manage (new HBox);
 	jump_box->pack_start (_choice_jump, false, true);
@@ -69,7 +94,7 @@ ButtonConfigWidget::find_action_in_model (const TreeModel::iterator& iter, strin
 {
 	TreeModel::Row row = *iter;
 
-	if (action_path == string(row[_action_columns.path])) {
+	if (action_path == string(row[_action_model.path ()])) {
 		*found = iter;
 		return true;
 	}
@@ -97,7 +122,7 @@ ButtonConfigWidget::get_current_config (ShuttleproControlProtocol& scp) const
 	}
 
 	TreeModel::const_iterator row = _action_cb.get_active ();
-	string action_path = (*row)[_action_columns.path];
+	string action_path = (*row)[_action_model.path ()];
 
 	return boost::shared_ptr<ButtonBase> (new ButtonAction (action_path, scp));
 }
@@ -113,11 +138,11 @@ ButtonConfigWidget::set_current_action (std::string action_string)
 		return;
 	}
 
-	TreeModel::iterator iter = _available_action_model->children().end();
+	TreeModel::iterator iter = _action_model.model()->children().end();
 
-	_available_action_model->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ButtonConfigWidget::find_action_in_model),  action_string, &iter));
+	_action_model.model()->foreach_iter (sigc::bind (sigc::mem_fun (*this, &ButtonConfigWidget::find_action_in_model),  action_string, &iter));
 
-	if (iter != _available_action_model->children().end()) {
+	if (iter != _action_model.model()->children().end()) {
 		_action_cb.set_active (iter);
 	} else {
 		_action_cb.set_active (0);
@@ -143,8 +168,23 @@ ButtonConfigWidget::update_choice ()
 	Changed (); /* emit signal */
 }
 
+
 void
-ButtonConfigWidget::setup_available_actions ()
+ButtonConfigWidget::update_config ()
+{
+	Changed (); /* emit signal */
+}
+
+
+
+const ActionModel&
+ActionModel::instance ()
+{
+	static ActionModel am;
+	return am;
+}
+
+ActionModel::ActionModel ()
 {
 	_available_action_model = TreeStore::create (_action_columns);
 	_available_action_model->clear ();
@@ -218,10 +258,8 @@ ButtonConfigWidget::setup_available_actions ()
 
 		if (l->empty ()) {
 			row[_action_columns.name] = *t;
-			_action_map[*t] = *p;
 		} else {
 			row[_action_columns.name] = *l;
-			_action_map[*l] = *p;
 		}
 
 		string path = (*p);
@@ -232,10 +270,4 @@ ButtonConfigWidget::setup_available_actions ()
 
 		row[_action_columns.path] = path;
 	}
-}
-
-void
-ButtonConfigWidget::update_config ()
-{
-	Changed (); /* emit signal */
 }
