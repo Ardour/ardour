@@ -256,7 +256,7 @@ AddRouteDialog::AddRouteDialog ()
 	set_response_sensitive (AddAndClose, true);
 	set_default_response (AddAndClose);
 
-	track_type_chosen ();
+	refill_channel_setups ();
 }
 
 AddRouteDialog::~AddRouteDialog ()
@@ -686,7 +686,6 @@ AddRouteDialog::on_show ()
 	routes_spinner.grab_focus ();
 	name_edited_by_user = false;
 
-	refill_channel_setups ();
 	refill_route_groups ();
 
 	Dialog::on_show ();
@@ -799,7 +798,6 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.description] = x->description;
 		row[track_template_columns.created_with] = x->created_with;
 	}
-
 
 	set_popdown_strings (channel_combo, channel_combo_strings);
 
