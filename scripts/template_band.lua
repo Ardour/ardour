@@ -1,16 +1,20 @@
 ardour {
 	["type"]    = "EditorAction",
-	name        = "Track Wizard",
+	name        = "Live Band",
 	description = [[
 This template helps create the tracks for a typical pop/rock band.
 
-You will be prompted to assemble your session from a list of track types.
+You will be prompted to assemble your session from a list of suggested tracks.
 
-Each track will be pre-assigned with a color.
+You may rename each track, and you may choose whether it is mono (default) or stereo.
 
 Optionally, tracks may be assigned to sensible Groups ( vocals, guitars, drums )
 
+Each track will be pre-assigned a color corresponding to its group.
+
 Optionally, tracks may be assigned Gates and other plugins.
+
+This script is developed in Lua, and can be duplicated and/or modified to meet your needs.
 ]]
 }
 
@@ -32,12 +36,12 @@ function factory (params) return function ()
 
 	--prompt the user for the tracks they'd like to instantiate
 	local dialog_options = {
-		{ type = "heading", title = "Select the tracks you'd like\nto add to your session: ", col=0, align = "left", colspan = 1},
-		{ type = "heading", title = "Name", col=1, colspan = 1 },
-		{ type = "heading", title = "Stereo?", col=2, colspan = 1 },
+		{ type = "heading", title = "Track Type: ", col=0, align = "left", colspan = 1},
+		{ type = "heading", title = "Track Name:", align = "left", col=1, colspan = 1 },
+		{ type = "heading", title = "Stereo?", align = "left", col=2, colspan = 1 },
 
 		{ type = "checkbox", key = "check-ldvox",  default = false,        title = "Lead Vocal", col=0 },
-		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "entry",    key = "name-ldvox",   default = "Ld Vox", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-ldvox", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-bass", default = false, title = "Bass", col=0 },
@@ -57,7 +61,7 @@ function factory (params) return function ()
 		{ type = "checkbox", key = "stereo-organ", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-electric-guitar", default = false, title = "Electric Guitar", col=0 },
-		{ type = "entry",    key = "name-electric-guitar",   default = "E Guitar", title = "", col=1 },
+		{ type = "entry",    key = "name-electric-guitar",   default = "E Gtr", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-electric-guitar", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-solo-guitar", default = false, title = "Lead Guitar", col=0 },
@@ -68,29 +72,26 @@ function factory (params) return function ()
 		{ type = "entry",    key = "name-accoustic-guitar",   default = "Ac Gtr", title = "", col=1 },
 		{ type = "checkbox", key = "stereo-accoustic-guitar", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics", col=0 },
-		{ type = "label",  title = "(Kick + Snare)", col=1, colspan = 1, align = "left"},
---		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
-
-		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics", col=0 },
-		{ type = "label",  title = "(Kick, Snare, HiHat, 3 Toms)", col=1, colspan = 1, align = "left"},
---		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
-
-		{ type = "checkbox", key = "check-overkill-kit", default = false, title = "Overkill Drum Mics", col=0 },
-		{ type = "label",  title = "(Kick (2x), Snare(2x), HiHat, 3 Toms)", col=1, colspan = 1, align = "left"},
---		{ type = "checkbox", key = "stereo-overhead-mono", default = false,        title = "", col=2 },
+		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals", col=0 },
+		{ type = "label",  title = "BGV1, BGV2, BGV3", col=1, colspan = 1, align = "left"},
+		{ type = "checkbox", key = "stereo-bgvox", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-overhead", default = false, title = "Drum Overheads", col=0 },
---		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "label",  title = "OH {OH L, OH R}", col=1, colspan = 1, align = "left"},
 		{ type = "checkbox", key = "stereo-overhead", default = false,        title = "", col=2 },
 
 		{ type = "checkbox", key = "check-room", default = false, title = "Drum Room", col=0 },
---		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
+		{ type = "label",  title = "Room {Rm L, Rm R}", col=1, colspan = 1, align = "left"},
 		{ type = "checkbox", key = "stereo-room", default = false,        title = "", col=2 },
 
-		{ type = "checkbox", key = "check-bgvox", default = false, title = "Background Vocals (3x)", col=0 },
---		{ type = "entry",    key = "name-ldvox",   default = "Lead Vocal", title = "", col=1 },
-		{ type = "checkbox", key = "stereo-bgvox", default = false,        title = "", col=2 },
+		{ type = "checkbox", key = "check-basic-kit", default = false, title = "Basic Drum Mics", col=0 },
+		{ type = "label",  title = "Kick, Snare", col=1, colspan = 1, align = "left"},
+
+		{ type = "checkbox", key = "check-full-kit", default = false, title = "Full Drum Mics", col=0 },
+		{ type = "label",  title = "Hi-Hat, Hi-tom, Mid-Tom, Fl-Tom", col=1, colspan = 1, align = "left"},
+
+		{ type = "checkbox", key = "check-overkill-kit", default = false, title = "Overkill Drum Mics", col=0 },
+		{ type = "label",  title = "Kick Beater, Snare Btm", col=1, colspan = 1, align = "left"},
 
 		{ type = "hseparator", title="", col=0, colspan = 3},
 
@@ -185,7 +186,7 @@ function factory (params) return function ()
 	end
 
 	if rv['check-full-kit'] then
-		local names = {"Kick", "Snare", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
+		local names = {"Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
@@ -204,7 +205,7 @@ function factory (params) return function ()
 	end
 
 	if rv['check-overkill-kit'] then
-		local names = {"Kick In", "Kick Out", "Snare Top", "Snare Btm", "Hi-Hat", "Hi-tom", "Mid-tom", "Fl-tom"}
+		local names = {"Kick Beater", "Snare Btm"}
 		for i = 1, #names do
 			local tl = Session:new_audio_track (1, 1, nil, 1, names[i],  insert_at, ARDOUR.TrackMode.Normal)
 			for track in tl:iter() do
