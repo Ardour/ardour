@@ -1351,6 +1351,8 @@ def build(bld):
             
     bld.install_files (bld.env['CONFDIR'], 'system_config')
 
+    bld.install_files (os.path.join (bld.env['DATADIR'], 'templates'), bld.path.ant_glob ('templates/**'))
+
     if bld.env['RUN_TESTS']:
         bld.add_post_fun(test)
 

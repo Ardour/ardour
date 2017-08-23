@@ -180,7 +180,6 @@ mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
-mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
@@ -349,12 +348,8 @@ for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do
     cp "$f" $ExportFormats ; 
 done
 
-# Session and Route templates
-#for f in $BUILD_ROOT/../templates/* ; do 
-#    if [ -d "$f" ] ; then
-#        cp -r "$f" $Templates ; 
-#    fi
-#done
+#Session templates
+cp -av $BUILD_ROOT/../templates $Templates
 
 # MidiMaps
 # got to be careful with names here
