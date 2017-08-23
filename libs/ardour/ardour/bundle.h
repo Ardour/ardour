@@ -73,6 +73,7 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 
 	/** @return Number of channels that this Bundle has */
 	ChanCount nchannels () const;
+	uint32_t n_total () const; /* shortcut for nchannels().n_total() */
 
 	/** @param Channel index.
 	 *  @return Ports associated with this channel.

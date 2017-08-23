@@ -77,10 +77,17 @@ Bundle::nchannels () const
 	return c;
 }
 
+uint32_t
+Bundle::n_total () const
+{
+    /* Simpler and far more efficient than nchannels.n_total() */
+    return _channel.size();
+}
+
 Bundle::PortList const &
 Bundle::channel_ports (uint32_t c) const
 {
-	assert (c < nchannels().n_total());
+	assert (c < n_total());
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].ports;
@@ -93,7 +100,7 @@ Bundle::channel_ports (uint32_t c) const
 void
 Bundle::add_port_to_channel (uint32_t ch, string portname)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 	assert (portname.find_first_of (':') != string::npos);
 
 	{
@@ -111,7 +118,7 @@ Bundle::add_port_to_channel (uint32_t ch, string portname)
 void
 Bundle::remove_port_from_channel (uint32_t ch, string portname)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	bool changed = false;
 
@@ -138,7 +145,7 @@ Bundle::remove_port_from_channel (uint32_t ch, string portname)
 void
 Bundle::set_port (uint32_t ch, string portname)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 	assert (portname.find_first_of (':') != string::npos);
 
 	{
@@ -189,7 +196,7 @@ Bundle::add_channel (std::string const & n, DataType t, std::string const & p)
 bool
 Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	return (std::find (_channel[ch].ports.begin (), _channel[ch].ports.end (), portname) != _channel[ch].ports.end ());
@@ -201,7 +208,7 @@ Bundle::port_attached_to_channel (uint32_t ch, std::string portname)
 void
 Bundle::remove_channel (uint32_t ch)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	_channel.erase (_channel.begin () + ch);
@@ -265,7 +272,7 @@ Bundle::offers_port_alone (std::string p) const
 std::string
 Bundle::channel_name (uint32_t ch) const
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	return _channel[ch].name;
@@ -278,7 +285,7 @@ Bundle::channel_name (uint32_t ch) const
 void
 Bundle::set_channel_name (uint32_t ch, std::string const & n)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	{
 		Glib::Threads::Mutex::Lock lm (_channel_mutex);
@@ -295,9 +302,9 @@ Bundle::set_channel_name (uint32_t ch, std::string const & n)
 void
 Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
 {
-	uint32_t const ch = nchannels().n_total();
+	uint32_t const ch = n_total();
 
-	for (uint32_t i = 0; i < other->nchannels().n_total(); ++i) {
+	for (uint32_t i = 0; i < other->n_total(); ++i) {
 
 		std::stringstream s;
 		s << other->name() << " " << other->channel_name(i);
@@ -319,8 +326,8 @@ Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
 void
 Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 {
-	uint32_t const N = nchannels().n_total();
-	assert (N == other->nchannels().n_total());
+	uint32_t const N = n_total();
+	assert (N == other->n_total());
 
 	for (uint32_t i = 0; i < N; ++i) {
 		Bundle::PortList const & our_ports = channel_ports (i);
@@ -337,8 +344,8 @@ Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 void
 Bundle::disconnect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 {
-	uint32_t const N = nchannels().n_total();
-	assert (N == other->nchannels().n_total());
+	uint32_t const N = n_total();
+	assert (N == other->n_total());
 
 	for (uint32_t i = 0; i < N; ++i) {
 		Bundle::PortList const & our_ports = channel_ports (i);
@@ -358,7 +365,7 @@ Bundle::remove_ports_from_channels ()
 {
 	{
 		Glib::Threads::Mutex::Lock lm (_channel_mutex);
-		for (uint32_t c = 0; c < _channel.size(); ++c) {
+		for (uint32_t c = 0; c < n_total(); ++c) {
 			_channel[c].ports.clear ();
 		}
 
@@ -373,7 +380,7 @@ Bundle::remove_ports_from_channels ()
 void
 Bundle::remove_ports_from_channel (uint32_t ch)
 {
-	assert (ch < nchannels().n_total());
+	assert (ch < n_total());
 
 	{
 		Glib::Threads::Mutex::Lock lm (_channel_mutex);
@@ -417,7 +424,7 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 		return false;
 	}
 
-	for (uint32_t i = 0; i < nchannels().n_total(); ++i) {
+	for (uint32_t i = 0; i < n_total(); ++i) {
 		Bundle::PortList const & A = channel_ports (i);
 		Bundle::PortList const & B = other->channel_ports (i);
 
@@ -452,7 +459,7 @@ Bundle::connected_to_anything (AudioEngine& engine)
 {
 	PortManager& pm (engine);
 
-	for (uint32_t i = 0; i < nchannels().n_total(); ++i) {
+	for (uint32_t i = 0; i < n_total(); ++i) {
 		Bundle::PortList const & ports = channel_ports (i);
 
 		for (uint32_t j = 0; j < ports.size(); ++j) {
@@ -500,9 +507,9 @@ Bundle::set_name (string const & n)
 bool
 Bundle::has_same_ports (boost::shared_ptr<Bundle> b) const
 {
-	uint32_t const N = nchannels().n_total();
+	uint32_t const N = n_total();
 
-	if (b->nchannels().n_total() != N) {
+	if (b->n_total() != N) {
 		return false;
 	}
 
@@ -520,7 +527,7 @@ Bundle::has_same_ports (boost::shared_ptr<Bundle> b) const
 DataType
 Bundle::channel_type (uint32_t c) const
 {
-	assert (c < nchannels().n_total());
+	assert (c < n_total());
 
 	Glib::Threads::Mutex::Lock lm (_channel_mutex);
 	return _channel[c].type;
@@ -530,7 +537,7 @@ ostream &
 operator<< (ostream& os, Bundle const & b)
 {
 	os << "BUNDLE " << b.nchannels() << " channels: ";
-	for (uint32_t i = 0; i < b.nchannels().n_total(); ++i) {
+	for (uint32_t i = 0; i < b.n_total(); ++i) {
 		os << "( ";
 		Bundle::PortList const & pl = b.channel_ports (i);
 		for (Bundle::PortList::const_iterator j = pl.begin(); j != pl.end(); ++j) {
