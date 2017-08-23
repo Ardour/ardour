@@ -97,7 +97,7 @@ class LIBARDOUR_API MidiRegion : public Region
 	XMLNode& state ();
 	int      set_state (const XMLNode&, int version);
 
-	int separate_by_channel (ARDOUR::Session&, std::vector< boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (std::vector< boost::shared_ptr<Region> >&) const;
 
 	/* automation */
 

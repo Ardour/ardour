@@ -1210,6 +1210,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("scale_amplitude", &AudioRegion::scale_amplitude)
 		.addFunction ("maximum_amplitude", &AudioRegion::maximum_amplitude)
 		.addFunction ("rms", &AudioRegion::rms)
+		.addRefFunction ("separate_by_channel", &AudioRegion::separate_by_channel)
 		.endClass ()
 
 		.deriveWSPtrClass <Source, SessionObject> ("Source")
@@ -1536,6 +1537,10 @@ LuaBindings::common (lua_State* L)
 
 		// std::list< boost::weak_ptr <AudioSource> >
 		.beginConstStdList <boost::weak_ptr<AudioSource> > ("WeakAudioSourceList")
+		.endClass ()
+
+		// typedef std::vector<boost::shared_ptr<Region> > RegionVector
+		.beginStdVector <boost::shared_ptr<Region> > ("RegionVector")
 		.endClass ()
 
 		// typedef std::list<boost::shared_ptr<Region> > RegionList

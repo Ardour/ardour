@@ -510,7 +510,7 @@ MidiRegion::recompute_at_start ()
 }
 
 int
-MidiRegion::separate_by_channel (ARDOUR::Session&, vector< boost::shared_ptr<Region> >&) const
+MidiRegion::separate_by_channel (vector< boost::shared_ptr<Region> >&) const
 {
 	// TODO
 	return -1;

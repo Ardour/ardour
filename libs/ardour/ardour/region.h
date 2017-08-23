@@ -336,9 +336,8 @@ class LIBARDOUR_API Region
 
 	bool has_transients () const;
 
-	virtual int separate_by_channel (ARDOUR::Session&,
-			std::vector< boost::shared_ptr<Region> >&) const {
-		return 0;
+	virtual int separate_by_channel (std::vector< boost::shared_ptr<Region> >&) const {
+		return -1;
 	}
 
 	void maybe_invalidate_transients ();

@@ -153,7 +153,7 @@ class LIBARDOUR_API AudioRegion : public Region
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
-	int separate_by_channel (ARDOUR::Session&, std::vector<boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (std::vector<boost::shared_ptr<Region> >&) const;
 
 	/* automation */
 

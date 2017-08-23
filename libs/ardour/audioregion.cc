@@ -1321,7 +1321,7 @@ AudioRegion::recompute_at_start ()
 }
 
 int
-AudioRegion::separate_by_channel (Session& /*session*/, vector<boost::shared_ptr<Region> >& v) const
+AudioRegion::separate_by_channel (vector<boost::shared_ptr<Region> >& v) const
 {
 	SourceList srcs;
 	string new_name;
