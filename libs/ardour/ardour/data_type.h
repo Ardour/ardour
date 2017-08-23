@@ -44,6 +44,9 @@ public:
 	 * types are added, so this number is NOT suitable for serialization,
 	 * network, or binary anything.
 	 *
+	 * Some heuristics in Ardour's UI assume that the DataTypes are ordered
+	 * from most to least likely to be the main intended type of a route.
+	 *
 	 * WARNING: The number of non-NIL entries here must match num_types.
 	 */
 	enum Symbol {
@@ -60,6 +63,8 @@ public:
 	DataType(const Symbol& symbol)
 	: _symbol(symbol)
 	{}
+
+	static DataType front() { return DataType((Symbol) 0); }
 
 	/** Construct from a string (Used for loading from XML and Ports)
 	 * The string can be as in an XML file (eg "audio" or "midi"), or a
