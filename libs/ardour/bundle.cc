@@ -322,20 +322,37 @@ Bundle::add_channels_from_bundle (boost::shared_ptr<Bundle> other)
  *  with another bundle's channels.
  *  @param other Other bundle.
  *  @param engine AudioEngine to use to make the connections.
+ *  @param allow_partial whether to allow leaving unconnected channels types,
+ *              or require that the ChanCounts match exactly (default false).
  */
 void
-Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
+Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine,
+                 bool allow_partial)
 {
-	uint32_t const N = n_total();
-	assert (N == other->n_total());
+	ChanCount our_count = nchannels();
+	ChanCount other_count = other->nchannels();
 
-	for (uint32_t i = 0; i < N; ++i) {
-		Bundle::PortList const & our_ports = channel_ports (i);
-		Bundle::PortList const & other_ports = other->channel_ports (i);
+	if (!allow_partial && our_count != other_count) {
+		assert (our_count == other_count);
+		return;
+	}
 
-		for (Bundle::PortList::const_iterator j = our_ports.begin(); j != our_ports.end(); ++j) {
-			for (Bundle::PortList::const_iterator k = other_ports.begin(); k != other_ports.end(); ++k) {
-				engine.connect (*j, *k);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t N = our_count.n(*t);
+		if (N != other_count.n(*t))
+			continue;
+		for (uint32_t i = 0; i < N; ++i) {
+			Bundle::PortList const & our_ports =
+				channel_ports (type_channel_to_overall(*t, i));
+			Bundle::PortList const & other_ports =
+				other->channel_ports (other->type_channel_to_overall(*t, i));
+
+			for (Bundle::PortList::const_iterator j = our_ports.begin();
+						j != our_ports.end(); ++j) {
+				for (Bundle::PortList::const_iterator k = other_ports.begin();
+							k != other_ports.end(); ++k) {
+					engine.connect (*j, *k);
+				}
 			}
 		}
 	}

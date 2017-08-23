@@ -97,7 +97,8 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 	void remove_channel (uint32_t);
 	void remove_channels ();
 	void add_channels_from_bundle (boost::shared_ptr<Bundle>);
-	void connect (boost::shared_ptr<Bundle>, AudioEngine &);
+	void connect (boost::shared_ptr<Bundle>, AudioEngine &,
+	              bool allow_partial = false);
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
 	bool connected_to_anything (AudioEngine &);
