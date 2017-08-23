@@ -3093,7 +3093,7 @@ Editor::split_multichannel_region ()
 	vector< boost::shared_ptr<Region> > v;
 
 	for (list<RegionView*>::iterator x = rs.begin(); x != rs.end(); ++x) {
-		(*x)->region()->separate_by_channel (*_session, v);
+		(*x)->region()->separate_by_channel (v);
 	}
 }
 
