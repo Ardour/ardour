@@ -1299,7 +1299,13 @@ IO::latency () const
 }
 
 int
-IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src)
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src) {
+	return connect_ports_to_bundle(c, exclusive, false, src);
+}
+
+int
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive,
+                             bool allow_partial, void* src)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -1312,7 +1318,7 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* 
 			}
 		}
 
-		c->connect (_bundle, _session.engine());
+		c->connect (_bundle, _session.engine(), allow_partial);
 
 		/* If this is a UserBundle, make a note of what we've done */
 
