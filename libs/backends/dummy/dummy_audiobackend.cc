@@ -1909,7 +1909,7 @@ static const float _demolition[] = {
 	-4.3f,           /* arbitrary negative number > 0dBFS */
 	 4294967395.0f,  /* 2^16 + 100 */
 	-4294967395.0f,
-	 HUGE,           /* Big, non-inf number */
+	 3.40282347e+38F,/* HUGE, HUGEVALF, non-inf number */
 	 INFINITY,       /* +inf */
 	-INFINITY,       /* -inf */
 	-NAN,            /* -nan */
