@@ -1097,7 +1097,7 @@ MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 	ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
 	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->output()->connect_ports_to_bundle (c, true, this);
+		_route->output()->connect_ports_to_bundle (c, true, true, this);
 	} else {
 		_route->output()->disconnect_ports_from_bundle (c, this);
 	}
