@@ -1350,92 +1350,90 @@ MixerStrip::update_io_button (bool for_input)
 
 		io_connection_count = 0;
 
-		if (!port_connections.empty()) {
-			for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
-				string pn = "";
-				string& connection_name (*i);
+		for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
+			string pn = "";
+			string& connection_name (*i);
 
-				if (connection_name.find("system:") == 0) {
-					pn = AudioEngine::instance()->get_pretty_name_by_name (connection_name);
-				}
-
-				if (io_connection_count == 0) {
-					tooltip << endl << Gtkmm2ext::markup_escape_text (port->name().substr(port->name().find("/") + 1))
-						<< " -> "
-						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
-				} else {
-					tooltip << ", "
-						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
-				}
-
-				if (connection_name.find(RouteUI::program_port_prefix) == 0) {
-					if (ardour_track_name.empty()) {
-						// "ardour:Master/in 1" -> "ardour:Master/"
-						string::size_type slash = connection_name.find("/");
-						if (slash != string::npos) {
-							ardour_track_name = connection_name.substr(0, slash + 1);
-						}
-					}
-
-					if (connection_name.find(ardour_track_name) == 0) {
-						++ardour_connection_count;
-					}
-				} else if (!pn.empty()) {
-					if (system_ports.empty()) {
-						system_ports += pn;
-					} else {
-						system_ports += "/" + pn;
-					}
-					if (connection_name.find("system:") == 0) {
-						++system_connection_count;
-					}
-				} else if (connection_name.find("system:midi_") == 0) {
-					if (for_input) {
-						// "system:midi_capture_123" -> "123"
-						system_port = "M " + connection_name.substr(20);
-					} else {
-						// "system:midi_playback_123" -> "123"
-						system_port = "M " + connection_name.substr(21);
-					}
-
-					if (system_ports.empty()) {
-						system_ports += system_port;
-					} else {
-						system_ports += "/" + system_port;
-					}
-
-					++system_connection_count;
-
-				} else if (connection_name.find("system:") == 0) {
-					if (for_input) {
-						// "system:capture_123" -> "123"
-						system_port = connection_name.substr(15);
-					} else {
-						// "system:playback_123" -> "123"
-						system_port = connection_name.substr(16);
-					}
-
-					if (system_ports.empty()) {
-						system_ports += system_port;
-					} else {
-						system_ports += "/" + system_port;
-					}
-
-					++system_connection_count;
-				} else {
-					if (other_connection_type.empty()) {
-						// "jamin:in 1" -> "jamin:"
-						other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
-					}
-
-					if (connection_name.find(other_connection_type) == 0) {
-						++other_connection_count;
-					}
-				}
-
-				++total_connection_count;
-				++io_connection_count;
+			if (connection_name.find("system:") == 0) {
+				pn = AudioEngine::instance()->get_pretty_name_by_name (connection_name);
 			}
+
+			if (io_connection_count == 0) {
+				tooltip << endl << Gtkmm2ext::markup_escape_text (port->name().substr(port->name().find("/") + 1))
+					<< " -> "
+					<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
+			} else {
+				tooltip << ", "
+					<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
+			}
+
+			if (connection_name.find(RouteUI::program_port_prefix) == 0) {
+				if (ardour_track_name.empty()) {
+					// "ardour:Master/in 1" -> "ardour:Master/"
+					string::size_type slash = connection_name.find("/");
+					if (slash != string::npos) {
+						ardour_track_name = connection_name.substr(0, slash + 1);
+					}
+				}
+
+				if (connection_name.find(ardour_track_name) == 0) {
+					++ardour_connection_count;
+				}
+			} else if (!pn.empty()) {
+				if (system_ports.empty()) {
+					system_ports += pn;
+				} else {
+					system_ports += "/" + pn;
+				}
+				if (connection_name.find("system:") == 0) {
+					++system_connection_count;
+				}
+			} else if (connection_name.find("system:midi_") == 0) {
+				if (for_input) {
+					// "system:midi_capture_123" -> "123"
+					system_port = "M " + connection_name.substr(20);
+				} else {
+					// "system:midi_playback_123" -> "123"
+					system_port = "M " + connection_name.substr(21);
+				}
+
+				if (system_ports.empty()) {
+					system_ports += system_port;
+				} else {
+					system_ports += "/" + system_port;
+				}
+
+				++system_connection_count;
+
+			} else if (connection_name.find("system:") == 0) {
+				if (for_input) {
+					// "system:capture_123" -> "123"
+					system_port = connection_name.substr(15);
+				} else {
+					// "system:playback_123" -> "123"
+					system_port = connection_name.substr(16);
+				}
+
+				if (system_ports.empty()) {
+					system_ports += system_port;
+				} else {
+					system_ports += "/" + system_port;
+				}
+
+				++system_connection_count;
+			} else {
+				if (other_connection_type.empty()) {
+					// "jamin:in 1" -> "jamin:"
+					other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
+				}
+
+				if (connection_name.find(other_connection_type) == 0) {
+					++other_connection_count;
+				}
+			}
+
+			++total_connection_count;
+			++io_connection_count;
 		}
 
 		if (io_connection_count != 1) {
