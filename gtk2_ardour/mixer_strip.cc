@@ -1088,7 +1088,7 @@ MixerStrip::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
 		return;
 	}
 
-	route->output()->connect_ports_to_bundle (c, true, true, this);
+	_route->output()->connect_ports_to_bundle (c, true, true, this);
 }
 
 void
