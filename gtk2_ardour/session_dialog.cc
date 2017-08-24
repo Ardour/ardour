@@ -265,6 +265,11 @@ SessionDialog::master_channel_count ()
 bool
 SessionDialog::use_session_template () const
 {
+	if (!back_button->sensitive () && !new_only) {
+		/* open session -- not create a new one */
+		return false;
+	}
+
 	if (!load_template_override.empty()) {
 		return true;
 	}
