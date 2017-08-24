@@ -46,8 +46,9 @@ PatchChangeDialog::PatchChangeDialog (
 	Evoral::PatchChange<Evoral::Beats> const & patch,
 	ARDOUR::InstrumentInfo&                    info,
 	const Gtk::BuiltinStockID&                 ok,
-	bool                                       allow_delete)
-	: ArdourDialog (_("Patch Change"), true)
+	bool                                       allow_delete,
+	bool                                       modal)
+	: ArdourDialog (_("Patch Change"), modal)
 	, _time_converter (tc)
 	, _info (info)
 	, _time (X_("patchchangetime"), true, "", true, false)
@@ -56,6 +57,7 @@ PatchChangeDialog::PatchChangeDialog (
 	, _bank_msb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _bank_lsb (*manage (new Adjustment (0, 0, 127, 1, 16)))
 	, _ignore_signals (false)
+	, _keep_open (!modal)
 {
 	Table* t = manage (new Table (4, 2));
 	Label* l;
@@ -122,7 +124,9 @@ PatchChangeDialog::PatchChangeDialog (
 
 	get_vbox()->add (*t);
 
-	add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	if (modal) {
+		add_button (Stock::CANCEL, RESPONSE_CANCEL);
+	}
 	add_button (ok, RESPONSE_ACCEPT);
 	if (allow_delete) {
 		add_button (Gtk::StockID(GTK_STOCK_DELETE), RESPONSE_REJECT);
@@ -137,6 +141,16 @@ PatchChangeDialog::PatchChangeDialog (
 			       boost::bind (&PatchChangeDialog::instrument_info_changed, this), gui_context());
 
 	show_all ();
+}
+
+void
+PatchChangeDialog::on_response (int response_id)
+{
+	if (_keep_open) {
+		Gtk::Dialog::on_response (response_id);
+	} else {
+		ArdourDialog::on_response (response_id);
+	}
 }
 
 int

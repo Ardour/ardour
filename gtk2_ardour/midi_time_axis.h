@@ -67,6 +67,7 @@ class PianoRollHeader;
 class StepEntry;
 class StepEditor;
 class MidiChannelSelectorWindow;
+class PatchChangeDialog;
 
 #define NO_MIDI_NOTE 0xff
 
@@ -196,6 +197,10 @@ private:
 	ParameterMenuMap _controller_menu_map;
 
 	StepEditor* _step_editor;
+
+	void immediate_patch_chnage_response (int response);
+	PatchChangeDialog* _patch_change_dialog;
+
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

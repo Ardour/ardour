@@ -122,6 +122,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, controller_menu (0)
 	, poly_pressure_menu (0)
 	, _step_editor (0)
+	, _patch_change_dialog (0)
 {
 	_midnam_model_selector.disable_scrolling();
 	_midnam_custom_device_mode_selector.disable_scrolling();
@@ -345,6 +346,9 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 
 	delete controller_menu;
 	delete _step_editor;
+
+	delete  _patch_change_dialog;
+	_patch_change_dialog = 0;
 }
 
 void
@@ -1078,19 +1082,14 @@ MidiTimeAxisView::build_color_mode_menu()
 }
 
 void
-MidiTimeAxisView::send_patch_change ()
+MidiTimeAxisView::immediate_patch_chnage_response (int response)
 {
-	if (!_route) {
+	if (response != RESPONSE_ACCEPT || !_route) {
+		delete  _patch_change_dialog;
+		_patch_change_dialog = 0;
 		return;
 	}
-
-	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
-	PatchChangeDialog d (0, 0, empty, _route->instrument_info(), Gtk::Stock::OK);
-
-	if (d.run() == RESPONSE_CANCEL) {
-		return;
-	}
-	Evoral::PatchChange<Evoral::Beats> p (d.patch ());
+	Evoral::PatchChange<Evoral::Beats> p (_patch_change_dialog->patch ());
 
 	uint8_t chn = p.channel();
 
@@ -1099,12 +1098,32 @@ MidiTimeAxisView::send_patch_change ()
 	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
 
 	if (!bank_msb || ! bank_lsb || !program) {
+		_patch_change_dialog->show ();
 		return;
 	}
 
 	bank_msb->set_value (p.bank_msb (), Controllable::NoGroup);
 	bank_lsb->set_value (p.bank_lsb (), Controllable::NoGroup);
 	program->set_value  (p.program () , Controllable::NoGroup);
+	_patch_change_dialog->show ();
+}
+
+void
+MidiTimeAxisView::send_patch_change ()
+{
+	if (!_route) {
+		return;
+	}
+	if (_patch_change_dialog) {
+		_patch_change_dialog->present ();
+		return;
+	}
+
+	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
+	PatchChangeDialog* d = new PatchChangeDialog (0, 0, empty, _route->instrument_info(), Gtk::Stock::APPLY, false, false);
+	d->signal_response().connect (sigc::mem_fun (*this, &MidiTimeAxisView::immediate_patch_chnage_response));
+	_patch_change_dialog = d;
+	_patch_change_dialog->present ();
 }
 
 void

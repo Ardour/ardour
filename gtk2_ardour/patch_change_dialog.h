@@ -46,10 +46,14 @@ public:
 		Evoral::PatchChange<Evoral::Beats> const &,
 		ARDOUR::InstrumentInfo&,
 		const Gtk::BuiltinStockID &,
-		bool allow_delete = false
+		bool allow_delete = false,
+		bool modal = true
 		);
 
 	Evoral::PatchChange<Evoral::Beats> patch () const;
+
+protected:
+	void on_response (int);
 
 private:
 	void fill_bank_combo ();
@@ -76,6 +80,7 @@ private:
 
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
 	bool _ignore_signals;
+	bool _keep_open;
 
 	void instrument_info_changed ();
 	PBD::ScopedConnection _info_changed_connection;
