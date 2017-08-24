@@ -203,8 +203,8 @@ TemplateDialog::TemplateDialog ()
 
 	signal_hide().connect (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description));
 	signal_hide().connect (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description));
-	nb->signal_switch_page().connect (boost::bind (&TemplateManager::handle_dirty_description, session_tm));
-	nb->signal_switch_page().connect (boost::bind (&TemplateManager::handle_dirty_description, route_tm));
+	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (session_tm, &TemplateManager::handle_dirty_description))));
+	nb->signal_switch_page().connect (sigc::hide (sigc::hide (sigc::mem_fun (route_tm, &TemplateManager::handle_dirty_description))));
 }
 
 TemplateManager::TemplateManager ()
