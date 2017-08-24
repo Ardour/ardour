@@ -225,14 +225,10 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 		PBD::ScopedConnection changed;
 	};
 
-	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports
-
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 
 	int ensure_ports (ChanCount, bool clear, void *src);
-
-	void check_bundles_connected ();
 
 	void bundle_changed (Bundle::Change);
 

@@ -154,50 +154,6 @@ IO::silence (framecnt_t nframes)
 	}
 }
 
-/** Set _bundles_connected to those bundles that are connected such that every
- *  port on every bundle channel x is connected to port x in _ports.
- */
-void
-IO::check_bundles_connected ()
-{
-	std::vector<UserBundleInfo*> new_list;
-
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-
-		uint32_t const N = (*i)->bundle->nchannels().n_total();
-
-		if (_ports.num_ports() < N) {
-			continue;
-		}
-
-		bool ok = true;
-
-		for (uint32_t j = 0; j < N; ++j) {
-			/* Every port on bundle channel j must be connected to our input j */
-			Bundle::PortList const pl = (*i)->bundle->channel_ports (j);
-			for (uint32_t k = 0; k < pl.size(); ++k) {
-				if (_ports.port(j)->connected_to (pl[k]) == false) {
-					ok = false;
-					break;
-				}
-			}
-
-			if (ok == false) {
-				break;
-			}
-		}
-
-		if (ok) {
-			new_list.push_back (*i);
-		} else {
-			delete *i;
-		}
-	}
-
-	_bundles_connected = new_list;
-}
-
-
 int
 IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 {
@@ -220,8 +176,6 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
                         error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
                         return -1;
                 }
-
-                check_bundles_connected ();
         }
 
         changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -288,7 +242,6 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 				}
 
 				_session.engine().unregister_port (port);
-				check_bundles_connected ();
 			}
 		}
 
@@ -395,8 +348,6 @@ IO::disconnect (void* src)
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
 		}
-
-		check_bundles_connected ();
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -482,7 +433,6 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	}
 
 	if (changed) {
-		check_bundles_connected ();
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
@@ -565,12 +515,6 @@ IO::state (bool /*full_state*/)
 
 	if (!_pretty_name_prefix.empty ()) {
 		node->set_property("pretty-name", _pretty_name_prefix);
-	}
-
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		XMLNode* n = new XMLNode ("Bundle");
-		n->set_property ("name", (*i)->bundle->name ());
-		node->add_child_nocopy (*n);
 	}
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
@@ -1320,22 +1264,6 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive,
 
 		c->connect (_bundle, _session.engine(), allow_partial);
 
-		/* If this is a UserBundle, make a note of what we've done */
-
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			/* See if we already know about this one */
-			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
-				++i;
-			}
-
-			if (i == _bundles_connected.end()) {
-				/* We don't, so make a note */
-				_bundles_connected.push_back (new UserBundleInfo (this, ub));
-			}
-		}
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -1354,19 +1282,6 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 
 		/* If this is a UserBundle, make a note of what we've done */
 
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
-				++i;
-			}
-
-			if (i != _bundles_connected.end()) {
-				delete *i;
-				_bundles_connected.erase (i);
-			}
-		}
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -1544,11 +1459,6 @@ BundleList
 IO::bundles_connected ()
 {
 	BundleList bundles;
-
-	/* User bundles */
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		bundles.push_back ((*i)->bundle);
-	}
 
 	/* Session bundles */
 	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
