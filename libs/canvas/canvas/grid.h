@@ -34,11 +34,12 @@ class LIBCANVAS_API Grid : public Item
 {
 public:
 	Grid (Canvas *);
-	Grid (Item *);
-	Grid (Item *, Duple const & position);
 
 	void set_row_spacing (double s);
 	void set_col_spacing (double s);
+
+	void set_fill_color (Gtkmm2ext::Color c);
+	void set_outline_color (Gtkmm2ext::Color c);
 
 	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 	void set_margin (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
@@ -55,6 +56,8 @@ public:
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
 
+	Rectangle* background() const { return bg; }
+
   protected:
 	double row_spacing;
 	double col_spacing;
@@ -62,6 +65,8 @@ public:
 	double top_margin, right_margin, bottom_margin, left_margin;
 
 	void child_changed ();
+	void parented ();
+
   private:
 	struct ChildInfo {
 		Item* item;
@@ -77,8 +82,8 @@ public:
 	Rectangle *bg;
 	bool collapse_on_hide;
 	bool homogenous;
+	bool repositioning;
 
-	void reset_bg ();
 	void reposition_children ();
 };
 

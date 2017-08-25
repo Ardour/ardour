@@ -19,6 +19,8 @@
 #include <algorithm>
 #include <vector>
 
+#include "pbd/unwind.h"
+
 #include "canvas/grid.h"
 #include "canvas/rectangle.h"
 
@@ -35,39 +37,10 @@ Grid::Grid (Canvas* canvas)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
 	, homogenous (false)
+	, repositioning (false)
 {
 	bg = new Rectangle (this);
-	bg->set_outline (false);
-	bg->set_fill (false);
-	bg->hide ();
-}
-
-Grid::Grid (Item* parent)
-	: Item (parent)
-	, row_spacing (0)
-	, col_spacing (0)
-	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
-	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
-{
-	bg = new Rectangle (this);
-	bg->set_outline (false);
-	bg->set_fill (false);
-	bg->hide ();
-}
-
-Grid::Grid (Item* parent, Duple const & p)
-	: Item (parent, p)
-	, row_spacing (0)
-	, col_spacing (0)
-	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
-	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (true)
-{
-	bg = new Rectangle (this);
-	bg->set_outline (false);
-	bg->set_fill (false);
-	bg->hide ();
+	bg->name = "bg rect for grid";
 }
 
 void
@@ -159,29 +132,17 @@ Grid::set_margin (double t, double r, double b, double l)
 }
 
 void
-Grid::reset_bg ()
+Grid::reposition_children ()
 {
-	if (_bounding_box_dirty) {
-		compute_bounding_box ();
-	}
-
-	if (!_bounding_box) {
-		bg->hide ();
+	if (!_parent || _items.empty()) {
+		_bounding_box_dirty = true;
 		return;
 	}
 
-	Rect r (_bounding_box);
-
-	/* XXX need to shrink by margin */
-
-	bg->set (r);
-}
-
-void
-Grid::reposition_children ()
-{
 	uint32_t max_row = 0;
 	uint32_t max_col = 0;
+
+	PBD::Unwinder<bool> uw (repositioning, true);
 
 	/* since we encourage dynamic and essentially random placement of
 	 * children, begin by determining the maximum row and column extents given
@@ -331,8 +292,22 @@ Grid::reposition_children ()
 		(*i)->set_position (Duple (col_dimens[c->second.x], row_dimens[c->second.y]));
 	}
 
-	_bounding_box_dirty = true;
-	reset_bg ();
+	if (_bounding_box_dirty) {
+		compute_bounding_box ();
+	}
+
+	if (!_bounding_box) {
+		bg->hide ();
+		return;
+	} else {
+
+		Rect r (_bounding_box);
+
+		/* XXX need to shrink by margin */
+
+		bg->set (r);
+		bg->show ();
+	}
 }
 
 void
@@ -355,6 +330,11 @@ Grid::place (Item* i, double x, double y, double col_span, double row_span)
 void
 Grid::child_changed ()
 {
+	if (repositioning) {
+		_bounding_box_dirty = true;
+		return;
+	}
+
 	/* catch visibility and size changes */
 
 	Item::child_changed ();
@@ -368,4 +348,24 @@ Grid::set_collapse_on_hide (bool yn)
 		collapse_on_hide = yn;
 		reposition_children ();
 	}
+}
+
+void
+Grid::parented ()
+{
+	if (_parent) {
+		reposition_children ();
+	}
+}
+
+void
+Grid::set_fill_color (Gtkmm2ext::Color c)
+{
+	bg->set_fill_color (c);
+}
+
+void
+Grid::set_outline_color (Gtkmm2ext::Color c)
+{
+	bg->set_outline_color (c);
 }

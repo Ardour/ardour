@@ -47,8 +47,6 @@ public:
 	};
 
 	Box (Canvas *, Orientation);
-	Box (Item *, Orientation);
-	Box (Item *, Duple const & position, Orientation);
 
 	void set_spacing (double s);
 	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
@@ -75,12 +73,14 @@ public:
 	double top_margin, right_margin, bottom_margin, left_margin;
 
 	void child_changed ();
+	void parented ();
+
   private:
-	Rectangle *self;
+	Rectangle *bg;
 	bool collapse_on_hide;
 	bool homogenous;
+	bool repositioning;
 
-	void reset_self ();
 	void reposition_children ();
 };
 
@@ -88,16 +88,12 @@ class LIBCANVAS_API VBox : public Box
 {
   public:
 	VBox (Canvas *);
-	VBox (Item *);
-	VBox (Item *, Duple const & position);
 };
 
 class LIBCANVAS_API HBox : public Box
 {
   public:
 	HBox (Canvas *);
-	HBox (Item *);
-	HBox (Item *, Duple const & position);
 };
 
 }

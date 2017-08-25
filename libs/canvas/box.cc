@@ -19,6 +19,8 @@
 
 #include <algorithm>
 
+#include "pbd/unwind.h"
+
 #include "canvas/box.h"
 #include "canvas/rectangle.h"
 
@@ -31,37 +33,12 @@ Box::Box (Canvas* canvas, Orientation o)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
 	, homogenous (false)
+	, repositioning (false)
 {
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
-}
-
-Box::Box (Item* parent, Orientation o)
-	: Item (parent)
-	, orientation (o)
-	, spacing (0)
-	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
-	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
-{
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
-}
-
-
-Box::Box (Item* parent, Duple const & p, Orientation o)
-	: Item (parent, p)
-	, orientation (o)
-	, spacing (0)
-	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
-	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
-	, homogenous (false)
-{
-	self = new Rectangle (this);
-	self->set_outline (false);
-	self->set_fill (false);
+	bg = new Rectangle (this);
+	bg->name = "bg rect for box";
+	bg->set_outline (false);
+	bg->set_fill (false);
 }
 
 void
@@ -141,31 +118,19 @@ Box::set_margin (double t, double r, double b, double l)
 }
 
 void
-Box::reset_self ()
+Box::reposition_children ()
 {
-	if (_bounding_box_dirty) {
-		compute_bounding_box ();
-	}
-
-	if (!_bounding_box) {
-		self->hide ();
+	if (!_parent || _items.empty()) {
+		_bounding_box_dirty = true;
 		return;
 	}
 
-	Rect r (_bounding_box);
-
-	/* XXX need to shrink by margin */
-
-	self->set (r);
-}
-
-void
-Box::reposition_children ()
-{
 	Duple previous_edge (0, 0);
 	Distance largest_width = 0;
 	Distance largest_height = 0;
 	Rect uniform_size;
+
+	PBD::Unwinder<bool> uw (repositioning, true);
 
 	if (homogenous) {
 
@@ -180,7 +145,8 @@ Box::reposition_children ()
 		uniform_size = Rect (0, 0, largest_width, largest_height);
 	}
 
-	for (std::list<Item*>::iterator i = _items.begin(); ++i != _items.end(); ++i) {
+
+	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
 		(*i)->set_position (previous_edge);
 
@@ -231,8 +197,21 @@ Box::reposition_children ()
 		}
 	}
 
-	_bounding_box_dirty = true;
-	reset_self ();
+	/* resize our background rect to match our bounding box */
+
+	if (_bounding_box_dirty) {
+		compute_bounding_box ();
+	}
+
+	if (!_bounding_box) {
+		bg->hide ();
+		return;
+	}
+
+	Rect r (_bounding_box);
+
+	/* XXX need to shrink by margin */
+	bg->set (r);
 }
 
 void
@@ -246,6 +225,7 @@ Box::pack_end (Item* i, double extra_padding)
 	Item::add_front (i);
 	reposition_children ();
 }
+
 void
 Box::pack_start (Item* i, double extra_padding)
 {
@@ -267,6 +247,10 @@ Box::add (Item* i)
 void
 Box::child_changed ()
 {
+	if (repositioning) {
+		return;
+	}
+
 	/* catch visibility and size changes */
 
 	Item::child_changed ();
@@ -282,30 +266,21 @@ Box::set_collapse_on_hide (bool yn)
 	}
 }
 
+void
+Box::parented ()
+{
+	if (_parent) {
+		reposition_children ();
+	}
+}
+
 /*----*/
 
 VBox::VBox (Canvas* c)
 	: Box (c, Vertical)
 {
 }
-VBox::VBox (Item* i)
-	: Box (i, Vertical)
-{
-}
-VBox::VBox (Item* i, Duple const & position)
-	: Box (i, position, Vertical)
-{
-}
-
 HBox::HBox (Canvas* c)
 	: Box (c, Horizontal)
-{
-}
-HBox::HBox (Item* i)
-	: Box (i, Horizontal)
-{
-}
-HBox::HBox (Item* i, Duple const & position)
-	: Box (i, position, Horizontal)
 {
 }
