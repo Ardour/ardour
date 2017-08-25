@@ -149,7 +149,10 @@ The track will be added in the location specified by \"Position\".\n \
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("MIDI Busses"),  _(" \
-Use the settings, below, to create new Audio Tracks.\n \
+Use the settings, below, to create new MIDI Busses.\n \
+\n \
+MIDI Busses can combine the output of multiple tracks. \n \
+MIDI Buses are sometimes used to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.  \
 \n\n \
 You may select:\n \
 * The number of buses to add.\n \
