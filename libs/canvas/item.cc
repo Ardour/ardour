@@ -413,23 +413,9 @@ Item::reparent (Item* new_parent, bool already_added)
 	if (new_parent == _parent) {
 		return;
 	}
-
 	assert (_canvas == new_parent->canvas());
 
-	if (_parent) {
-		_parent->remove (this);
-	}
-
-	assert (new_parent);
-
-	_parent = new_parent;
-	_canvas = _parent->canvas ();
-
-	find_scroll_parent ();
-
-	if (!already_added) {
-		_parent->add (this);
-	}
+	_parent->add (this);
 }
 
 void
@@ -890,6 +876,7 @@ Item::add_child_bounding_boxes (bool include_hidden) const
 		}
 
 		Rect group_bbox = (*i)->item_to_parent (item_bbox);
+
 		if (have_one) {
 			bbox = bbox.extend (group_bbox);
 		} else {
@@ -910,8 +897,18 @@ Item::add (Item* i)
 {
 	/* XXX should really notify canvas about this */
 
+	if (i->parent() && (i)->parent() != this) {
+		i->parent()->remove (i);
+	}
+
 	_items.push_back (i);
-	i->reparent (this, true);
+
+	i->_parent = this;
+	i->_canvas = _canvas;
+
+	i->find_scroll_parent ();
+	i->parented ();
+
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 }
@@ -921,8 +918,18 @@ Item::add_front (Item* i)
 {
 	/* XXX should really notify canvas about this */
 
+	if (i->parent() && (i)->parent() != this) {
+		i->parent()->remove (i);
+	}
+
 	_items.push_front (i);
-	i->reparent (this, true);
+
+	i->_parent = this;
+	i->_canvas = _canvas;
+
+	i->find_scroll_parent ();
+	i->parented ();
+
 	invalidate_lut ();
 	_bounding_box_dirty = true;
 }
@@ -956,7 +963,7 @@ Item::remove (Item* i)
 }
 
 void
-Item::clear (bool with_delete)
+Item::clear_children (bool with_delete)
 {
 	begin_change ();
 
@@ -1182,4 +1189,3 @@ ArdourCanvas::operator<< (ostream& o, const Item& i)
 	i.dump (o);
 	return o;
 }
-
