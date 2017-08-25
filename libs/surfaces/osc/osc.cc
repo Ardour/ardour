@@ -1041,6 +1041,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = strip_gui_select (ssid, argv[0]->i, msg);
+	} else
+	if (strstr (path, "/select") && (argc != 1)) {
+		// All of the select commands below require 1 parameter
+		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 	}
 	else if (!strncmp (path, "/select/send_gain/", 18) && strlen (path) > 18) {
 		int ssid = atoi (&path[18]);
