@@ -33,15 +33,17 @@ function factory (params) return function ()
 
    --at session load, params will be empty.  in this case we can do things that we -only- want to do if this is a new session
 	if (not params) then
-	   Editor:set_toggleaction ("Rulers", "toggle-tempo-ruler", 1)
-	   Editor:set_toggleaction ("Rulers", "toggle-meter-ruler", 1)
+	   Editor:set_toggleaction ("Rulers", "toggle-tempo-ruler", true)
+	   Editor:set_toggleaction ("Rulers", "toggle-meter-ruler", true)
 
-	   Editor:set_toggleaction ("Transport", "primary-clock-bbt", 1)
-	   Editor:set_toggleaction ("Transport", "secondary-clock-off", 1)
+	   Editor:access_action ("Transport", "primary-clock-bbt")
+	   Editor:access_action ("Transport", "secondary-clock-off")
 
-	   Editor:set_toggleaction ("Rulers", "toggle-minsec-ruler", 0)
-	   Editor:set_toggleaction ("Rulers", "toggle-samples-ruler", 0)
-	   Editor:set_toggleaction ("Rulers", "toggle-bbt-ruler", 1)
+	   Editor:set_toggleaction ("Rulers", "toggle-minsec-ruler", false)
+	   Editor:set_toggleaction ("Rulers", "toggle-timecode-ruler", false)
+	   Editor:set_toggleaction ("Rulers", "toggle-samples-ruler", false)
+	   
+	   Editor:set_toggleaction ("Rulers", "toggle-bbt-ruler", true)
 	end
 
 
