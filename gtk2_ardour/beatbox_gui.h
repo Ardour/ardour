@@ -35,6 +35,7 @@
 #include "canvas/canvas.h"
 
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 #include "ardour_dialog.h"
 
 namespace ArdourCanvas {
@@ -153,13 +154,14 @@ class BBGUI : public ArdourDialog {
 		ArdourCanvas::Grid* switch_grid;
 		Switches switches;
 		ArdourWidgets::ArdourButton* clear_row_button;
-		ArdourWidgets::ArdourButton* row_note_button;
+		ArdourWidgets::ArdourDropdown* row_note_button;
 		ArdourCanvas::Widget* clear_row_item;
 		ArdourCanvas::Widget* row_note_item;
 
 		SwitchRow (BBGUI&, ArdourCanvas::Item*, int row, int cols);
 		~SwitchRow ();
 
+		void set_note (int note_number);
 		void update (int current_row);
 
             private:

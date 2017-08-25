@@ -39,6 +39,8 @@
 #include "canvas/text.h"
 #include "canvas/widget.h"
 
+#include "gtkmm2ext/utils.h"
+
 #include "beatbox_gui.h"
 #include "timers.h"
 
@@ -113,7 +115,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (misc_button_box, false, false);
-	get_vbox()->pack_start (tabs, true, true);
+	get_vbox()->pack_start (tabs, false, false);
 	get_vbox()->pack_start (quantize_button_box, true, true);
 
 
@@ -406,12 +408,21 @@ BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note,
 BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int cols)
 	: owner (bbg)
 	, row (r)
-	, note (64)
-	, clear_row_button (new ArdourWidgets::ArdourButton (string_compose ("C %1", r)))
-	, row_note_button (new ArdourWidgets::ArdourButton (string_compose ("%1", note)))
+	, note (r + 64)
+	, clear_row_button (new ArdourWidgets::ArdourButton ("C"))
+	, row_note_button (new ArdourWidgets::ArdourDropdown)
 	, clear_row_item (new ArdourCanvas::Widget (parent->canvas(), *clear_row_button))
 	, row_note_item (new ArdourCanvas::Widget (parent->canvas(), *row_note_button))
 {
+	/* populate note dropdown */
+	for (int n = 0; n < 127; ++n) {
+		row_note_button->AddMenuElem (Gtk::Menu_Helpers::MenuElem (string_compose ("%1", n+1), sigc::bind (sigc::mem_fun (*this, &BBGUI::SwitchRow::set_note), n)));
+	}
+
+#define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
+	set_size_request_to_display_given_text (*row_note_button, "127", COMBO_TRIANGLE_WIDTH, 2);
+	row_note_button->set_text (string_compose ("%1", note));
+
 	switch_grid = new ArdourCanvas::Grid (parent->canvas());
 	switch_grid->name = string_compose ("Grid for row %1", r);
 	switch_grid->background()->set_fill (false);
@@ -500,20 +511,63 @@ BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 {
 	Timecode::BBT_Time at;
 
-	at.bars = col / owner.bbox->meter_beats();
-	at.beats = col % owner.bbox->meter_beats();
+	const int beats_per_bar = owner.bbox->meter_beats();
+
+	at.bars = col / beats_per_bar;
+	at.beats = col % beats_per_bar;
 	at.ticks = 0;
 
 	at.bars++;
 	at.beats++;
 
+	Switch* s = switches[col];
+
 	if (ev->type == GDK_BUTTON_PRESS) {
-		cerr << "Add note " << note << endl;
-		owner.bbox->add_note (note, 127, at);
+		/* XXX changes hould be driven by model */
+		if (s->button->value()) {
+			owner.bbox->remove_note (note, at);
+			s->button->set_value (0);
+		} else {
+			s->button->set_value (64);
+			owner.bbox->add_note (note, rint (s->button->value()), at);
+		}
+		return true;
+	} else if (ev->type == GDK_SCROLL) {
+		switch (ev->scroll.direction) {
+		case GDK_SCROLL_UP:
+		case GDK_SCROLL_RIGHT:
+			s->button->set_value (s->button->value() + 1);
+			break;
+		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_LEFT:
+			s->button->set_value (s->button->value() - 1);
+			break;
+		}
 		return true;
 	}
 
 	return false;
+}
+
+void
+BBGUI::SwitchRow::set_note (int n)
+{
+	if (n < 0) {
+		n = 0;
+	} else if (n > 127) {
+		n = 127;
+	}
+
+	if (note == n) {
+		return;
+	}
+
+	int old_note = note;
+
+	note = n;
+
+	owner.bbox->edit_note_number (old_note, note);
+	row_note_button->set_text (string_compose ("%1", note));
 }
 
 void
