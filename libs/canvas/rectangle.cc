@@ -58,13 +58,7 @@ Rectangle::Rectangle (Item* parent, Rect const & rect)
 Rect
 Rectangle::get_self_for_render () const
 {
-	/* In general, a Rectangle will have a _position of (0,0) within its
-	   parent, and its extent is actually defined by _rect. But in the
-	   unusual case that _position is set to something other than (0,0),
-	   we should take that into account when rendering.
-	*/
-
-	return item_to_window (_rect.translate (_position), false);
+	return item_to_window (_rect, false);
 }
 
 void
