@@ -328,6 +328,24 @@ HSV::operator== (const HSV& other)
 }
 
 HSV
+HSV::darker (double factor) const
+{
+	HSV hsv (*this);
+	/* factor == 1.0: reduce all the way to zero */
+	hsv.v -= max (0.0, min (1.0, factor)) * hsv.v;
+	return hsv;
+}
+
+HSV
+HSV::lighter (double factor) const
+{
+	HSV hsv (*this);
+	/* factor == 1.0: increase all the way to 1.0 */
+	hsv.v += max (0.0, min (1.0, factor)) * (1.0 - hsv.v);
+	return hsv;
+}
+
+HSV
 HSV::shade (double factor) const
 {
 	HSV hsv (*this);
