@@ -33,11 +33,19 @@
 #include "gtkmm2ext/colors.h"
 
 #include "canvas/canvas.h"
-#include "canvas/rectangle.h"
-#include "canvas/text.h"
 
 #include "widgets/ardour_button.h"
 #include "ardour_dialog.h"
+
+namespace ArdourCanvas {
+class Grid;
+class Item;
+class Rectangle;
+class StepButton;
+class Text;
+class VBox;
+class Widget;
+}
 
 namespace ARDOUR {
 class BeatBox;
@@ -53,6 +61,7 @@ class BBGUI : public ArdourDialog {
 	void on_unmap ();
 
   private:
+	friend class SwitchRow;
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
 
 	ArdourCanvas::GtkCanvas switch_canvas;
@@ -104,7 +113,7 @@ class BBGUI : public ArdourDialog {
 
 
 	struct Switch {
-		Switch (ArdourCanvas::Canvas* canvas, int x, int y, int note, std::string const & txt);
+		Switch (ArdourCanvas::Canvas*, int x, int y, int note, Gtkmm2ext::Color, std::string const & txt);
 		void set_color (Gtkmm2ext::Color);
 
 		bool is_on () const { return _on; }
@@ -116,7 +125,7 @@ class BBGUI : public ArdourDialog {
 		void flash_on ();
 		void flash_off ();
 
-		ArdourCanvas::Rectangle* rect;
+		ArdourCanvas::StepButton* button;
 
 		static int switch_width;
 		static int switch_height;
@@ -136,9 +145,37 @@ class BBGUI : public ArdourDialog {
 	};
 
 	typedef std::vector<Switch*> Switches;
-	Switches switches;
-	int switch_rows;
+
+	struct SwitchRow {
+		BBGUI& owner;
+		int row;
+		int note;
+		ArdourCanvas::Grid* switch_grid;
+		Switches switches;
+		ArdourWidgets::ArdourButton* clear_row_button;
+		ArdourWidgets::ArdourButton* row_note_button;
+		ArdourCanvas::Widget* clear_row_item;
+		ArdourCanvas::Widget* row_note_item;
+
+		SwitchRow (BBGUI&, ArdourCanvas::Item*, int row, int cols);
+		~SwitchRow ();
+
+		void update (int current_row);
+
+            private:
+		void resize (int cols);
+		void drop_switches ();
+		bool switch_event (GdkEvent*, int col);
+	};
+
+	typedef std::vector<SwitchRow*> SwitchRows;
+
+	ArdourCanvas::VBox* switch_vbox;
+
+	SwitchRows switch_rows;
 	int switch_cols;
+
+	ArdourCanvas::Item* add_row_button;
 
 	void size_switches (int cols, int rows);
 
@@ -186,7 +223,6 @@ class BBGUI : public ArdourDialog {
 	void update_roll ();
 
 	bool pad_event (GdkEvent*, int col, int row);
-	bool switch_event (GdkEvent*, int col, int row);
 
 };
 

@@ -17,6 +17,9 @@
 
 */
 
+#include <cstdlib>
+#include <ctime>
+
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 
@@ -27,6 +30,14 @@
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/utils.h"
+
+#include "canvas/canvas.h"
+#include "canvas/grid.h"
+#include "canvas/box.h"
+#include "canvas/rectangle.h"
+#include "canvas/step_button.h"
+#include "canvas/text.h"
+#include "canvas/widget.h"
 
 #include "beatbox_gui.h"
 #include "timers.h"
@@ -56,6 +67,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, tempo_adjustment (bb->tempo(), 1, 300, 1, 10)
 	, tempo_spinner (tempo_adjustment)
 {
+	srandom (time(0));
 	setup_pad_canvas ();
 	setup_switch_canvas ();
 	setup_roll_canvas ();
@@ -64,6 +76,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	tabs.append_page (pad_canvas);
 	tabs.append_page (roll_canvas);
 	tabs.set_show_tabs (false);
+	tabs.set_show_border (false);
 
 	quantize_off.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 0));
 	quantize_32nd.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 32));
@@ -98,6 +111,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 	misc_button_box.pack_start (tempo_spinner);
 
+	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (misc_button_box, false, false);
 	get_vbox()->pack_start (tabs, true, true);
 	get_vbox()->pack_start (quantize_button_box, true, true);
@@ -111,6 +125,11 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 BBGUI::~BBGUI ()
 {
+	for (SwitchRows::iterator s = switch_rows.begin(); s != switch_rows.end(); ++s) {
+		delete *s;
+	}
+
+	switch_rows.clear ();
 }
 
 void
@@ -146,12 +165,8 @@ BBGUI::update_steps ()
 	int current_switch_column = (bbt.bars - 1) * bbox->meter_beats ();
 	current_switch_column += bbt.beats - 1;
 
-	for (Switches::iterator p = switches.begin(); p != switches.end(); ++p) {
-		if ((*p)->col() == current_switch_column) {
-			(*p)->flash_on ();
-		} else {
-			(*p)->flash_off ();
-		}
+	for (SwitchRows::iterator sr = switch_rows.begin(); sr != switch_rows.end(); ++sr) {
+		(*sr)->update (current_switch_column);
 	}
 }
 
@@ -195,9 +210,11 @@ BBGUI::pads_off ()
 void
 BBGUI::switches_off ()
 {
+#if 0
 	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
 		(*s)->off ();
 	}
+#endif
 }
 
 void
@@ -362,16 +379,19 @@ void
 BBGUI::setup_switch_canvas ()
 {
 	switch_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.1, 0.09, 0.12, 1.0));
+	switch_vbox = new ArdourCanvas::VBox (&switch_canvas);
+	switch_vbox->name = "swvbox";
+
 	size_switches (8, 8);
+
+	switch_canvas.root()->add (switch_vbox);
 }
 
-int BBGUI::Switch::switch_width = 20;
-int BBGUI::Switch::switch_height = 40;
-int BBGUI::Switch::switch_spacing = 6;
+int BBGUI::Switch::switch_width = 50;
+int BBGUI::Switch::switch_height = 50;
 
-BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note, std::string const& txt)
-	: rect (new ArdourCanvas::Rectangle (canvas, ArdourCanvas::Rect (((col+1) * switch_spacing) + (col * (switch_width - switch_spacing)), ((row+1) * switch_spacing) + (row * (switch_height - switch_spacing)),
-	                                                                 ((col+1) * switch_spacing) + ((col + 1) * (switch_width - switch_spacing)), ((row+1) * switch_spacing) + ((row + 1) * (switch_height - switch_spacing)))))
+BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note, Gtkmm2ext::Color c, std::string const& txt)
+	: button (new ArdourCanvas::StepButton (canvas, switch_width, switch_height, c))
 	, _row (row)
 	, _col (col)
 	, _note (note)
@@ -379,62 +399,87 @@ BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note,
 	, _on (false)
 	, _flashed (false)
 {
-	canvas->root()->add (rect);
 }
 
 //static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
 
-void
-BBGUI::Switch::on ()
+BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int cols)
+	: owner (bbg)
+	, row (r)
+	, note (64)
+	, clear_row_button (new ArdourWidgets::ArdourButton (string_compose ("C %1", r)))
+	, row_note_button (new ArdourWidgets::ArdourButton (string_compose ("%1", note)))
+	, clear_row_item (new ArdourCanvas::Widget (parent->canvas(), *clear_row_button))
+	, row_note_item (new ArdourCanvas::Widget (parent->canvas(), *row_note_button))
 {
-	_on = true;
-	rect->set_fill_color (hsv.lighter(0.2).color());
+	switch_grid = new ArdourCanvas::Grid (parent->canvas());
+	switch_grid->name = string_compose ("Grid for row %1", r);
+	switch_grid->background()->set_fill (false);
+	switch_grid->background()->set_outline (false);
+	switch_grid->set_border_width (0);
+	switch_grid->set_col_spacing (0);
+
+	row_note_item->name = string_compose ("row note for %1", r);
+	switch_grid->place (row_note_item, 0, r, 2, 1);
+
+	resize (cols);
+
+	parent->add (switch_grid);
 }
 
 void
-BBGUI::Switch::off ()
+BBGUI::SwitchRow::resize (int cols)
 {
-	_on = false;
-	_flashed = false;
+	const Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0.1, 0.0, 1.0);
 
-	rect->set_fill_color (hsv.color());
-}
+	switch_grid->remove (clear_row_item);
 
-void
-BBGUI::Switch::flash_on ()
-{
-	_flashed = true;
-	rect->set_fill_color (hsv.lighter(0.05).color());
-}
+	Switches::size_type n = switches.size();
 
-void
-BBGUI::Switch::flash_off ()
-{
-	_flashed = false;
-
-	if (_on) {
-		on ();
-	} else {
-		off ();
+	while (n > (Switches::size_type) cols) {
+		Switch* s = switches.back ();
+		switch_grid->remove (s->button);
+		delete s;
+		switches.pop_back ();
+		--n;
 	}
+
+	while (n < (Switches::size_type) cols) {
+		Switch* s = new Switch (switch_grid->canvas(), row, n, note, c, string_compose ("%1", note));
+		s->button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SwitchRow::switch_event), n));
+		s->button->name = string_compose ("switch %1,%2", n, row);
+		switch_grid->place (s->button, 2 + n, row, 1, 1);
+		switches.push_back (s);
+		++n;
+	}
+
+	clear_row_item->name = string_compose ("clear for %1", row);
+	switch_grid->place (clear_row_item, 2 + cols, row, 1, 1);
+}
+
+BBGUI::SwitchRow::~SwitchRow()
+{
+	drop_switches ();
 }
 
 void
-BBGUI::Switch::set_color (Gtkmm2ext::Color c)
+BBGUI::SwitchRow::drop_switches ()
 {
-	hsv = c;
+	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
+		delete *s;
+	}
 
-	if (_flashed) {
-		if (_on) {
-			flash_on ();
+	switches.clear ();
+}
+
+void
+BBGUI::SwitchRow::update (int current_col)
+{
+	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
+		if ((*s)->col() == current_col) {
+			(*s)->button->set_highlight (true);
 		} else {
-			flash_off ();
-		}
-	} else {
-		if (_on) {
-			on ();
-		} else {
-			off ();
+			(*s)->button->set_highlight (false);
 		}
 	}
 }
@@ -442,54 +487,30 @@ BBGUI::Switch::set_color (Gtkmm2ext::Color c)
 void
 BBGUI::size_switches (int cols, int rows)
 {
-	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
-		delete *s;
-	}
-
-	switches.clear ();
-
-	switch_rows = rows;
 	switch_cols = cols;
 
-	Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0, 0, 1.0);
-
-	for (int row = 0; row < switch_rows; ++row) {
-
-		int note = random() % 128;
-
-		for (int col = 0; col < switch_cols; ++col) {
-			Switch* s = new Switch (&switch_canvas, row, col, note, string_compose ("%1", note));
-			/* This is the "off" color */
-			s->set_color (c);
-			s->rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_event), col, row));
-			switches.push_back (s);
-		}
+	for (int row = 0; row < rows; ++row) {
+		SwitchRow*sr = new SwitchRow (*this, switch_vbox, row, cols);
+		switch_rows.push_back (sr);
 	}
 }
 
 bool
-BBGUI::switch_event (GdkEvent* ev, int col, int row)
+BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 {
-	Switch* s = switches[row*switch_cols + col];
 	Timecode::BBT_Time at;
 
-	at.bars = col / bbox->meter_beats();
-	at.beats = col % bbox->meter_beats();
+	at.bars = col / owner.bbox->meter_beats();
+	at.beats = col % owner.bbox->meter_beats();
 	at.ticks = 0;
 
 	at.bars++;
 	at.beats++;
 
 	if (ev->type == GDK_BUTTON_PRESS) {
-		/* XXX on/off should be done by model changes */
-		if (s->is_on()) {
-			bbox->remove_note (switches[row * switch_cols + col]->note(), at);
-			s->off ();
-		} else {
-			bbox->add_note (switches[row * switch_cols + col]->note(), 127, at);
-			s->on ();
-			return true;
-		}
+		cerr << "Add note " << note << endl;
+		owner.bbox->add_note (note, 127, at);
+		return true;
 	}
 
 	return false;
@@ -552,11 +573,9 @@ BBGUI::export_as_region ()
 	}
 
 	if (!bbox->fill_source (src)) {
-		cerr << "export failed\n";
+
 		return;
 	}
-
-	cerr << "written to " << path << " source has length " << src->length (0) << endl;
 
 	std::string region_name = region_name_from_path (src->name(), true);
 
@@ -570,6 +589,4 @@ BBGUI::export_as_region ()
 	plist.add (ARDOUR::Properties::external, false);
 
 	boost::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
-
-	cerr << "new region = " << region->name() << endl;
 }
