@@ -75,7 +75,7 @@ class Meter : public Item {
 	static void flush_pattern_cache();
 
 	void set (float level, float peak = -1);
-	void clear ();
+	void clear_display ();
 
 	float get_level() { return current_level; }
 	float get_user_level() { return current_user_level; }

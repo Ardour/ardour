@@ -930,7 +930,7 @@ Meter::set_highlight (bool onoff)
 }
 
 void
-Meter::clear ()
+Meter::clear_display ()
 {
 	current_level = 0;
 	current_peak = 0;

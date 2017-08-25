@@ -130,7 +130,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
-LineSet::add (Coord y, Distance width, Gtkmm2ext::Color color)
+LineSet::add_line (Coord y, Distance width, Gtkmm2ext::Color color)
 {
 	begin_change ();
 
@@ -142,7 +142,7 @@ LineSet::add (Coord y, Distance width, Gtkmm2ext::Color color)
 }
 
 void
-LineSet::clear ()
+LineSet::clear_lines ()
 {
 	begin_change ();
 	_lines.clear ();
