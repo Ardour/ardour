@@ -44,8 +44,10 @@ public:
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void compute_bounding_box () const;
 
-	void set_size (double w, double h);
 	void set_value (double val);
+	double value() const { return current_value; }
+
+	void set_size (double w, double h);
 	void set_highlight (bool);
 	void set_color (Gtkmm2ext::Color);
 

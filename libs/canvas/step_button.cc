@@ -80,15 +80,15 @@ StepButton::create_patterns ()
 	double r, g, b, a;
 
 	inactive_pattern = LinearGradient::create (0.0, 0.0, width, height);
-	color_to_rgba (color.darker (0.80).color(), r, g, b, a);
+	color_to_rgba (color.darker (0.95).color(), r, g, b, a);
 	inactive_pattern->add_color_stop_rgb (0.00, r, g, b);
-	color_to_rgba (color.darker (0.60).color(), r, g, b, a);
+	color_to_rgba (color.darker (0.85).color(), r, g, b, a);
 	inactive_pattern->add_color_stop_rgb (1.00, r, g, b);
 
 	enabled_pattern = LinearGradient::create (0.0, 0.0, width, height);
-	color_to_rgba (color.darker (1.95).color(), r, g, b, a);
+	color_to_rgba (color.lighter (0.95).color(), r, g, b, a);
 	enabled_pattern->add_color_stop_rgb (0.00, r, g, b);
-	color_to_rgba (color.darker (1.85).color(), r, g, b, a);
+	color_to_rgba (color.lighter (0.85).color(), r, g, b, a);
 	enabled_pattern->add_color_stop_rgb (1.00, r, g, b);
 }
 
@@ -124,7 +124,13 @@ StepButton::set_value (double val)
 		return;
 	}
 	current_value = val;
-	label->set (string_compose ("%1", current_value));
+	label->set (string_compose ("%1", (int) current_value));
+
+	/* move to recenter */
+	Rect r = label->bounding_box ();
+	label->set_position (Duple ((width - r.width())/2.0, (height - r.height())/2.0));
+
+	redraw ();
 }
 
 void
@@ -140,11 +146,12 @@ StepButton::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	double cr, g, b, a;
 
 	context->save ();
+	context->set_operator (OPERATOR_OVER);
 
 	/* basic (rounded) rectangle, with pattern to fill */
 	rounded_rectangle (context, self.x0 + 2.5, self.y0 + 2.5, width - 4, height - 4, CORNER_RADIUS);
 	if (current_value > 0) {
-		color_to_rgba (color.darker (1.95).color(), cr, g, b, a);
+		color_to_rgba (color.lighter (0.95).color(), cr, g, b, a);
 		context->set_source_rgb (cr, g, b);
 		context->set_source (enabled_pattern);
 		context->fill_preserve ();
@@ -170,7 +177,7 @@ StepButton::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 		context->set_line_width (r);
 
 		const float alpha = 0.1 - 0.1 * r / (2 * CORNER_RADIUS + 1.f);
-		color_to_rgba (color.darker (3.0).color(), cr, g, b, a);
+		color_to_rgba (color.darker (0.95).color(), cr, g, b, a);
 		context->set_source_rgba (cr, g, b, alpha);
 
 		/* draw a line along the top side */
