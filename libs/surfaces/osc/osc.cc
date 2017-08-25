@@ -964,6 +964,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else
+	if (strstr (path, "/strip") && (argc != 1)) {
+		// All of the strip commands below require 1 parameter
+		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
+	} else
 	if (!strncmp (path, "/strip/gain/", 12) && strlen (path) > 12) {
 		// in dB
 		int ssid = atoi (&path[12]);
