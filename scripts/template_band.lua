@@ -37,7 +37,7 @@ function factory (params) return function ()
 	   Editor:set_toggleaction ("Rulers", "toggle-meter-ruler", true)
 
 	   Editor:access_action ("Transport", "primary-clock-bbt")
-	   Editor:access_action ("Transport", "secondary-clock-off")
+	   Editor:access_action ("Transport", "secondary-clock-minsec")
 
 	   Editor:set_toggleaction ("Rulers", "toggle-minsec-ruler", false)
 	   Editor:set_toggleaction ("Rulers", "toggle-timecode-ruler", false)
