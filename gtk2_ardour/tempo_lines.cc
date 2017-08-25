@@ -45,7 +45,7 @@ TempoLines::~TempoLines ()
 void
 TempoLines::tempo_map_changed (framepos_t new_origin)
 {
-	lines.clear ();
+	lines.clear_lines ();
 	_bfc->set_origin_b (new_origin);
 }
 
@@ -83,7 +83,7 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		const framepos_t f = _bfc->to (Evoral::Beats (grid.begin()->qn + (l / (double) divisions))) + _bfc->origin_b();
 
 		if (f > leftmost_frame) {
-			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
+			lines.add_line (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
 	}
 }
@@ -138,7 +138,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 
 	if (beat_density > 2.0f) {
 		/* if the lines are too close together, they become useless */
-		lines.clear ();
+		lines.clear_lines ();
 		return;
 	}
 
@@ -147,7 +147,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		divisions /= 2;
 	}
 
-	lines.clear ();
+	lines.clear_lines ();
 	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->frame > 0 && !all_bars) {
 		/* draw subdivisions of the beat before the first visible beat line XX this shouldn't happen now */
 		std::vector<ARDOUR::TempoMap::BBTPoint> vec;
@@ -173,7 +173,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 
 		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
 
-		lines.add (xpos, 1.0, color);
+		lines.add_line (xpos, 1.0, color);
 
 		if (beat_density <= 0.12 && !all_bars) {
 			/* draw subdivisions of this beat */

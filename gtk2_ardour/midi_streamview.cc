@@ -316,7 +316,7 @@ MidiStreamView::draw_note_lines()
 	double prev_y = .5;
 	uint32_t color;
 
-	_note_lines->clear();
+	_note_lines->clear_lines();
 
 	if (child_height() < 140 || note_height() < 3) {
 		/* track is too small for note lines, or there are too many */
@@ -336,7 +336,7 @@ MidiStreamView::draw_note_lines()
 		 */
 
 		if (i <= highest_note()) {
-			_note_lines->add (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
+			_note_lines->add_line (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
 		}
 
 		/* now add a thicker line/bar which covers the entire vertical
@@ -360,7 +360,7 @@ MidiStreamView::draw_note_lines()
 		double mid = y + (h/2.0);
 
 		if (mid >= 0 && h > 1.0) {
-			_note_lines->add (mid, h, color);
+			_note_lines->add_line (mid, h, color);
 		}
 
 		prev_y = y;

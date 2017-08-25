@@ -60,9 +60,11 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &p2);
 
 	if (_meter_orientation == Meter::Vertical) {
-		meter_packer = new HBox (this);
+		meter_packer = new HBox (_canvas);
+		add (meter_packer);
 	} else {
-		meter_packer = new VBox (this);
+		meter_packer = new VBox (_canvas);
+		add (meter_packer);
 	}
 
 	meter_packer->set_collapse_on_hide (true);
@@ -492,7 +494,7 @@ LevelMeter::set_type(MeterType t)
 void LevelMeter::clear_meters (bool reset_highlight)
 {
 	for (vector<MeterInfo>::iterator i = meters.begin(); i < meters.end(); i++) {
-		(*i).meter->clear();
+		(*i).meter->clear_display();
 		(*i).max_peak = minus_infinity();
 		if (reset_highlight)
 			(*i).meter->set_highlight(false);

@@ -170,8 +170,8 @@ ColorThemeManager::ColorThemeManager ()
 
 ColorThemeManager::~ColorThemeManager ()
 {
-	if (palette_group) { 
-		palette_group->clear (true);  
+	if (palette_group) {
+		palette_group->clear_children (true);
 		delete palette_group;
 	}
 }
@@ -318,7 +318,7 @@ ColorThemeManager::build_palette_canvas (ArdourCanvas::Canvas& canvas, ArdourCan
 
 	/* clear existing rects and delete them */
 
-	group.clear (true);
+	group.clear_children (true);
 
 	for (uint32_t y = 0; y < height - box_size && color_num < color_limit; y += box_size) {
 		for (uint32_t x = 0; x < width - box_size && color_num < color_limit; x += box_size) {

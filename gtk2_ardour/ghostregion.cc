@@ -369,7 +369,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 void
 MidiGhostRegion::clear_events()
 {
-	_note_group->clear (true);
+	_note_group->clear_children (true);
 	events.clear ();
 	_optimization_iterator = events.end();
 }

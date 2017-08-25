@@ -977,7 +977,7 @@ MidiRegionView::clear_events ()
 	}
 
 
-	_note_group->clear (true);
+	_note_group->clear_children (true);
 	_events.clear();
 	_patch_changes.clear();
 	_sys_exes.clear();
