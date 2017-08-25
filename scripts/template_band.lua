@@ -31,6 +31,20 @@ end
 
 function factory (params) return function ()
 
+   --at session load, params will be empty.  in this case we can do things that we -only- want to do if this is a new session
+	if (not params) then
+	   Editor:set_toggleaction ("Rulers", "toggle-tempo-ruler", 1)
+	   Editor:set_toggleaction ("Rulers", "toggle-meter-ruler", 1)
+
+	   Editor:set_toggleaction ("Transport", "primary-clock-bbt", 1)
+	   Editor:set_toggleaction ("Transport", "secondary-clock-off", 1)
+
+	   Editor:set_toggleaction ("Rulers", "toggle-minsec-ruler", 0)
+	   Editor:set_toggleaction ("Rulers", "toggle-samples-ruler", 0)
+	   Editor:set_toggleaction ("Rulers", "toggle-bbt-ruler", 1)
+	end
+
+
 	local p         = params or route_setup ()
 	local insert_at = p["insert_at"] or ARDOUR.PresentationInfo.max_order
 
