@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include "pbd/unwind.h"
+#include "pbd/stacktrace.h"
 
 #include "canvas/box.h"
 #include "canvas/rectangle.h"
@@ -39,11 +40,13 @@ Box::Box (Canvas* canvas, Orientation o)
 	bg->name = "bg rect for box";
 	bg->set_outline (false);
 	bg->set_fill (false);
+	bg->hide ();
 }
 
 void
 Box::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	bg->render (area, context);
 	Item::render_children (area, context);
 }
 
@@ -148,6 +151,11 @@ Box::reposition_children ()
 
 	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
+		if ((*i) == bg || !(*i)->visible()) {
+			/* background rect takes up no space */
+			continue;
+		}
+
 		(*i)->set_position (previous_edge);
 
 		if (homogenous) {
@@ -204,12 +212,10 @@ Box::reposition_children ()
 	}
 
 	if (!_bounding_box) {
-		bg->hide ();
 		return;
 	}
 
 	Rect r (_bounding_box);
-
 	/* XXX need to shrink by margin */
 	bg->set (r);
 }

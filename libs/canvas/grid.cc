@@ -41,6 +41,7 @@ Grid::Grid (Canvas* canvas)
 {
 	bg = new Rectangle (this);
 	bg->name = "bg rect for grid";
+	bg->hide ();
 }
 
 void
@@ -52,6 +53,7 @@ Grid::set_homogenous (bool yn)
 void
 Grid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	bg->render (area, context);
 	Item::render_children (area, context);
 }
 
@@ -297,7 +299,6 @@ Grid::reposition_children ()
 	}
 
 	if (!_bounding_box) {
-		bg->hide ();
 		return;
 	} else {
 
@@ -306,7 +307,6 @@ Grid::reposition_children ()
 		/* XXX need to shrink by margin */
 
 		bg->set (r);
-		bg->show ();
 	}
 }
 

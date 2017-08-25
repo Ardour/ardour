@@ -76,7 +76,7 @@ public:
 	void parented ();
 
   private:
-	Rectangle *bg;
+	Rectangle* bg;
 	bool collapse_on_hide;
 	bool homogenous;
 	bool repositioning;
