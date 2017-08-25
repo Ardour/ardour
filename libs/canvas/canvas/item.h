@@ -209,10 +209,10 @@ public:
 	void* get_data (std::string const &) const;
 
 	/* nested item ("grouping") API */
-	void add (Item *);
-	void add_front (Item *);
-	void remove (Item *);
-        void clear (bool with_delete = false);
+	virtual void add (Item *);
+	virtual void add_front (Item *);
+	virtual void remove (Item *);
+	virtual void clear_children (bool with_delete = false);
 	std::list<Item*> const & items () const {
 		return _items;
 	}
@@ -320,6 +320,11 @@ protected:
 
 	Duple scroll_offset() const;
 	Duple position_offset() const;
+
+	/* called when _parent is set to a non-null value. Containers can use
+	   this to do size calculations less frequently.
+	*/
+	virtual void parented() {}
 
 private:
 	void init ();
