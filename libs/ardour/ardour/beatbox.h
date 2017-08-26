@@ -64,6 +64,7 @@ class BeatBox : public ARDOUR::Processor {
 
 	void add_note (int number, int velocity, Timecode::BBT_Time at);
 	void remove_note (int number, Timecode::BBT_Time at);
+	void edit_note_number (int old_number, int new_number);
 
 	void set_measure_count (int measures);
 	void set_meter (int beats, int beat_type);

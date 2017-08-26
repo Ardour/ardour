@@ -422,9 +422,20 @@ BeatBox::get_last_time() const
 }
 
 void
+BeatBox::edit_note_number (int old_number, int new_number)
+{
+	for (Events::iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
+		if (((*e)->buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF || ((*e)->buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
+			if ((*e)->buf[1] == old_number) {
+				(*e)->buf[1] = new_number;
+			}
+		}
+	}
+}
+
+void
 BeatBox::remove_note (int note, Timecode::BBT_Time at)
 {
-
 }
 
 void
