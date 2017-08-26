@@ -55,15 +55,10 @@ Rectangle::Rectangle (Item* parent, Rect const & rect)
 {
 }
 
-Rect
-Rectangle::get_self_for_render () const
-{
-	return item_to_window (_rect, false);
-}
-
 void
-Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
+Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
+	Rect self = item_to_window (_rect, false);
 	Rect r = self.intersection (area);
 
 	if (!r) {
@@ -134,12 +129,6 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 		context->stroke ();
 	}
-}
-
-void
-Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	render_self (area, context, get_self_for_render ());
 }
 
 void
