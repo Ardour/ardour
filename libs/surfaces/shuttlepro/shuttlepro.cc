@@ -57,6 +57,7 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _supposed_to_quit (false)
 	, _shuttle_was_zero (true)
 	, _was_rolling_before_shuttle (false)
+	, _test_mode (false)
 	, _keep_rolling (true)
 	, _shuttle_speeds ( { 0.50, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0 } )
 	, _jog_distance ( { .value = 1.0, .unit = BEATS } )
@@ -387,7 +388,7 @@ ShuttleproControlProtocol::handle_event () {
                 if ( (new_state.buttons & (1<<btn)) && !(_state.buttons & (1<<btn)) ) {
                         handle_button_press (btn);
                 } else if ( !(new_state.buttons & (1<<btn)) && (_state.buttons & (1<<btn)) ) {
-                        // we might handle button releases one day
+                        handle_button_release (btn);
                 }
         }
 
@@ -455,6 +456,10 @@ ShuttleproControlProtocol::setup_default_button_actions ()
 void
 ShuttleproControlProtocol::handle_button_press (unsigned short btn)
 {
+	if (_test_mode) {
+		ButtonPress (btn); /* emit signal */
+		return;
+	}
 	if (btn >= _button_actions.size ()) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl,
 			     string_compose ("Shuttlepro button number out of bounds %1, max is %2\n",
@@ -464,6 +469,15 @@ ShuttleproControlProtocol::handle_button_press (unsigned short btn)
 
 	_button_actions[btn]->execute ();
 }
+
+void
+ShuttleproControlProtocol::handle_button_release (unsigned short btn)
+{
+	if (_test_mode) {
+		ButtonRelease (btn); /* emit signal */
+	}
+}
+
 
 void
 ShuttleproControlProtocol::prev_marker_keep_rolling ()

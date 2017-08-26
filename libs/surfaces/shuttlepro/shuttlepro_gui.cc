@@ -37,6 +37,8 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
+#include "widgets/ardour_button.h"
+
 #include "pbd/i18n.h"
 
 #include "shuttlepro.h"
@@ -54,6 +56,8 @@ public:
 private:
 	ShuttleproControlProtocol& _scp;
 
+	ArdourWidgets::ArdourButton _test_button;
+
 	Gtk::CheckButton _keep_rolling;
 	void toggle_keep_rolling ();
 
@@ -64,6 +68,16 @@ private:
 	void update_jog_distance ();
 
 	void update_action(unsigned int index, ButtonConfigWidget* sender);
+
+	void toggle_test_mode ();
+
+	void test_button_press (unsigned short btn);
+	void test_button_release (unsigned short btn);
+
+	std::vector<boost::shared_ptr<ArdourWidgets::ArdourButton> > _btn_leds;
+
+	void init_on_show ();
+	bool reset_test_state (GdkEventAny* = 0);
 };
 
 
@@ -73,22 +87,17 @@ using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace Glib;
+using namespace ArdourWidgets;
 
 
 ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	: _scp (scp)
+	, _test_button (_("Button Test"), ArdourButton::led_default_elements)
 	, _keep_rolling (_("Keep rolling after jumps"))
 	, _jog_distance (scp._jog_distance)
 {
-	std::string data_file_path;
-	string name = "shuttlepro.png";
-	Searchpath spath(ARDOUR::ardour_data_search_path());
-	spath.add_subdirectory_to_paths ("icons");
-	find_file (spath, name, data_file_path);
-	if (!data_file_path.empty()) {
-		Image* image = manage (new Image (data_file_path));
-		pack_start (*image, false, false);
-	}
+	_test_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_test_mode));
+	pack_start(_test_button, false, false);
 
 	Table* table = manage (new Table);
 	table->set_row_spacings (6);
@@ -127,8 +136,10 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	vector<boost::shared_ptr<ButtonBase> >::const_iterator it;
 	unsigned int btn_idx = 0;
 	for (it = _scp._button_actions.begin(); it != _scp._button_actions.end(); ++it) {
-		Label* lb = manage (new Label (string_compose (_("Setting for button %1"), btn_idx+1), ALIGN_START));
-		table->attach (*lb, 0, 2, n, n+1);
+		boost::shared_ptr<ArdourButton> b (new ArdourButton (string_compose (_("Setting for button %1"), btn_idx+1),
+								     ArdourButton::Element(ArdourButton::Indicator|ArdourButton::Text|ArdourButton::Inactive)));
+		table->attach (*b, 0, 2, n, n+1);
+		_btn_leds.push_back (b);
 
 		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
 
@@ -140,7 +151,12 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	}
 
 	set_spacing (6);
-	pack_end (*table, false, false);
+	pack_start (*table, false, false);
+
+	_scp.ButtonPress.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_press, this, _1), gui_context ());
+	_scp.ButtonRelease.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_release, this, _1), gui_context ());
+
+	signal_map().connect (sigc::mem_fun (*this, &ShuttleproGUI::init_on_show));
 }
 
 void
@@ -173,6 +189,50 @@ ShuttleproGUI::update_action (unsigned int index, ButtonConfigWidget* sender)
 	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("update_action () %1\n", index));
 }
 
+void
+ShuttleproGUI::toggle_test_mode ()
+{
+	_scp._test_mode = !_scp._test_mode;
+	if (_scp._test_mode) {
+		_test_button.set_active_state (ActiveState::ExplicitActive);
+	} else {
+		reset_test_state ();
+	}
+}
+
+void
+ShuttleproGUI::init_on_show ()
+{
+	Gtk::Widget* p = get_parent();
+	if (p) {
+		p->signal_delete_event().connect (sigc::mem_fun (*this, &ShuttleproGUI::reset_test_state));
+	}
+}
+
+bool
+ShuttleproGUI::reset_test_state (GdkEventAny*)
+{
+	_scp._test_mode = false;
+	_test_button.set_active (ActiveState::Off);
+	vector<boost::shared_ptr<ArdourButton> >::const_iterator it;
+	for (it = _btn_leds.begin(); it != _btn_leds.end(); ++it) {
+		(*it)->set_active_state (ActiveState::Off);
+	}
+
+	return false;
+}
+
+void
+ShuttleproGUI::test_button_press (unsigned short btn)
+{
+	_btn_leds[btn]->set_active_state (ActiveState::ExplicitActive);
+}
+
+void
+ShuttleproGUI::test_button_release (unsigned short btn)
+{
+	_btn_leds[btn]->set_active_state (ActiveState::Off);
+}
 
 void*
 ShuttleproControlProtocol::get_gui () const
@@ -180,7 +240,8 @@ ShuttleproControlProtocol::get_gui () const
 	if (!_gui) {
 		const_cast<ShuttleproControlProtocol*>(this)->build_gui ();
 	}
-	static_cast<Gtk::VBox*>(_gui)->show_all();
+
+	static_cast<Gtk::HBox*>(_gui)->show_all();
 	return _gui;
 }
 
@@ -188,7 +249,7 @@ void
 ShuttleproControlProtocol::tear_down_gui ()
 {
 	if (_gui) {
-		Gtk::Widget *w = static_cast<Gtk::VBox*>(_gui)->get_parent();
+		Gtk::Widget *w = static_cast<Gtk::HBox*>(_gui)->get_parent();
 		if (w) {
 			w->hide();
 			delete w;

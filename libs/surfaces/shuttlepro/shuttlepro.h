@@ -105,6 +105,7 @@ private:
 	void release_device ();
 
 	void handle_button_press (unsigned short btn);
+	void handle_button_release (unsigned short btn);
 
 	void jog_event_backward ();
 	void jog_event_forward ();
@@ -127,6 +128,10 @@ private:
 		uint16_t buttons;
 	};
 	State _state;
+
+	bool _test_mode;
+	PBD::Signal1<void, unsigned short> ButtonPress;
+	PBD::Signal1<void, unsigned short> ButtonRelease;
 
 	// Config stuff
 

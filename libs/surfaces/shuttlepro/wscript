@@ -24,7 +24,7 @@ def build(bld):
     obj.export_includes = ['./shuttlepro']
     obj.defines      = [ 'PACKAGE="ardour_shuttlepro"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.includes     = ['.', '../libs']
+    obj.includes     = ['.', '../libs', '../../widgets']
     obj.name         = 'libardour_shuttlepro'
     obj.target       = 'ardour_shuttlepro'
     obj.uselib       = 'GTKMM USB'
