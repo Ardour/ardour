@@ -26,8 +26,6 @@
 #include <gtkmm/combobox.h>
 #include <gtkmm/treestore.h>
 
-#include "pbd/signals.h"
-
 #include "shuttlepro.h"
 #include "jump_distance_widget.h"
 
@@ -44,7 +42,7 @@ public:
 	void set_current_config (boost::shared_ptr<ButtonBase> btn_cnf);
 	boost::shared_ptr<ButtonBase> get_current_config (ShuttleproControlProtocol& scp) const;
 
-	PBD::Signal0<void> Changed;
+	sigc::signal<void> Changed;
 
 private:
 	void set_current_action (std::string action_string);
@@ -60,8 +58,6 @@ private:
 
 	JumpDistanceWidget _jump_distance;
 	Gtk::ComboBox _action_cb;
-
-	PBD::ScopedConnection _jump_distance_connection;
 
 	const ActionModel& _action_model;
 };

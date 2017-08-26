@@ -106,7 +106,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 
 	int n = 0;
 
-	_keep_rolling.signal_toggled().connect (boost::bind (&ShuttleproGUI::toggle_keep_rolling, this));
+	_keep_rolling.signal_toggled().connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_keep_rolling));
 	_keep_rolling.set_active (_scp._keep_rolling);
 	table->attach (_keep_rolling, 0, 2, n, n+1);
 	++n;
@@ -121,7 +121,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 		_shuttle_speed_adjustments.push_back (adj);
 		SpinButton* sb = manage (new SpinButton (*adj, 0.25, 2));
 		speed_box->pack_start (*sb);
-		sb->signal_value_changed().connect (boost::bind (&ShuttleproGUI::set_shuttle_speed, this, i));
+		sb->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &ShuttleproGUI::set_shuttle_speed), i));
 	}
 	table->attach (*speed_box, 3, 5, n, n+1);
 	++n;
@@ -129,7 +129,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:"), ALIGN_START));
 	table->attach (*jog_label, 0, 2, n, n+1);
 
-	_jog_distance.Changed.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::update_jog_distance, this), gui_context ());
+	_jog_distance.Changed.connect (sigc::mem_fun (*this, &ShuttleproGUI::update_jog_distance));
 	table->attach (_jog_distance, 3, 5, n, n+1);
 	++n;
 
@@ -144,7 +144,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
 
 		bcw->set_current_config (*it);
-		bcw->Changed.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::update_action, this, btn_idx, bcw), gui_context ());
+		bcw->Changed.connect (sigc::bind (sigc::mem_fun (*this, &ShuttleproGUI::update_action), btn_idx, bcw));
 		table->attach (*bcw, 3, 5, n, n+1);
 		++n;
 		++btn_idx;

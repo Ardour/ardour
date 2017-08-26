@@ -39,13 +39,13 @@ JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	, _value_adj (dist.value, -100, 100, 0.25)
 {
 	SpinButton* sb = manage (new SpinButton (_value_adj, 0.25, 2));
-	sb->signal_value_changed().connect (boost::bind (&JumpDistanceWidget::update_value, this));
+	sb->signal_value_changed().connect (sigc::mem_fun (*this, &JumpDistanceWidget::update_value));
 	pack_start (*sb);
 
 	const vector<string> jog_units_strings ({ X_("seconds"), X_("beats"), X_("bars") });
 	set_popdown_strings (_unit_cb, jog_units_strings);
 	_unit_cb.set_active (_distance.unit);
-	_unit_cb.signal_changed().connect (boost::bind (&JumpDistanceWidget::update_unit, this));
+	_unit_cb.signal_changed().connect (sigc::mem_fun (*this, &JumpDistanceWidget::update_unit));
 	pack_start (_unit_cb);
 }
 

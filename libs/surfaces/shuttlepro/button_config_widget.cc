@@ -68,12 +68,11 @@ ButtonConfigWidget::ButtonConfigWidget ()
 {
 	RadioButtonGroup cbg = _choice_jump.get_group ();
 	_choice_action.set_group (cbg);
-	_choice_jump.signal_toggled().connect (boost::bind (&ButtonConfigWidget::update_choice, this));
+	_choice_jump.signal_toggled().connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_choice));
 
-	_jump_distance.Changed.connect (_jump_distance_connection, invalidator (*this), boost::bind(&ButtonConfigWidget::update_config, this), gui_context ());
-
+	_jump_distance.Changed.connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_config));
 	_action_cb.set_model (_action_model.model());
-	_action_cb.signal_changed().connect (boost::bind (&ButtonConfigWidget::update_config, this));
+	_action_cb.signal_changed().connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_config));
 	_action_cb.pack_start (_action_model.name (), true);
 
 	HBox* jump_box = manage (new HBox);
