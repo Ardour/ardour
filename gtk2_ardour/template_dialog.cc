@@ -63,13 +63,16 @@ class TemplateManager : public Gtk::HBox,
 public:
 	virtual ~TemplateManager () {}
 
-	void init ();
+	virtual void init () = 0;
 	void handle_dirty_description ();
 
 	PBD::Signal0<void> TemplatesImported;
 
 protected:
 	TemplateManager ();
+
+	Gtk::TextView _description_editor;
+	Gtk::Button _save_desc;
 
 	void setup_model (const std::vector<ARDOUR::TemplateInfo>& templates);
 
@@ -125,8 +128,6 @@ private:
 	Gtk::CellRendererText _validating_cellrenderer;
 	Gtk::TreeView::Column _validated_column;
 
-	Gtk::TextView _description_editor;
-	Gtk::Button _save_desc;
 	bool _desc_dirty;
 
 	Gtk::Button _remove_button;
@@ -146,6 +147,8 @@ public:
 	SessionTemplateManager () : TemplateManager () {}
 	~SessionTemplateManager () {}
 
+	void init ();
+
 	void get_templates (vector<TemplateInfo>& templates) const;
 
 private:
@@ -164,6 +167,8 @@ class RouteTemplateManager : public TemplateManager
 public:
 	RouteTemplateManager () : TemplateManager () {}
 	~RouteTemplateManager () {}
+
+	void init ();
 
 	void get_templates (vector<TemplateInfo>& templates) const;
 
@@ -282,18 +287,6 @@ TemplateManager::TemplateManager ()
 
 	show_all_children ();
 	_progress_bar.hide ();
-}
-
-void
-TemplateManager::init ()
-{
-	vector<TemplateInfo> templates;
-	get_templates (templates);
-	setup_model (templates);
-
-	_progress_bar.hide ();
-	_description_editor.set_sensitive (false);
-	_save_desc.set_sensitive (false);
 }
 
 void
@@ -467,13 +460,14 @@ TemplateManager::key_event (GdkEventKey* ev)
 	return false;
 }
 
-static
-bool accept_all_files (string const &, void *)
+static bool
+accept_all_files (string const &, void *)
 {
 	return true;
 }
 
-static void _set_progress (Progress* p, size_t n, size_t t)
+static void
+_set_progress (Progress* p, size_t n, size_t t)
 {
 	p->set_progress (float (n) / float(t));
 }
@@ -669,12 +663,37 @@ TemplateManager::update_progress_gui (float p)
 }
 
 void
+SessionTemplateManager::init ()
+{
+	vector<TemplateInfo> templates;
+	get_templates (templates);
+	setup_model (templates);
+
+	_progress_bar.hide ();
+	_description_editor.set_sensitive (false);
+	_save_desc.set_sensitive (false);
+}
+
+void
+RouteTemplateManager::init ()
+{
+	vector<TemplateInfo> templates;
+	get_templates (templates);
+	setup_model (templates);
+
+	_progress_bar.hide ();
+	_description_editor.set_sensitive (false);
+	_save_desc.set_sensitive (false);
+}
+
+void
 SessionTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
 	find_session_templates (templates, /* read_xml = */ true);
 }
 
-void RouteTemplateManager::get_templates (vector<TemplateInfo>& templates) const
+void
+RouteTemplateManager::get_templates (vector<TemplateInfo>& templates) const
 {
 	find_route_templates (templates);
 }
