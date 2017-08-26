@@ -31,17 +31,17 @@ using std::cerr;
 using std::endl;
 
 Grid::Grid (Canvas* canvas)
-	: Item (canvas)
+	: Rectangle (canvas)
 	, row_spacing (0)
 	, col_spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
+	, collapse_on_hide (true)
 	, homogenous (false)
 	, repositioning (false)
 {
-	bg = new Rectangle (this);
-	bg->name = "bg rect for grid";
-	bg->hide ();
+	set_fill (false);
+	set_outline (false);
 }
 
 void
@@ -53,7 +53,7 @@ Grid::set_homogenous (bool yn)
 void
 Grid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bg->render (area, context);
+	Rectangle::render (area, context);
 	Item::render_children (area, context);
 }
 
@@ -175,7 +175,7 @@ Grid::reposition_children ()
 	if (homogenous) {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
+			if (collapse_on_hide && !(*i)->visible()) {
 				continue;
 			}
 
@@ -201,8 +201,7 @@ Grid::reposition_children ()
 
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
-				/* bg rect is not a normal child */
+			if (collapse_on_hide && !(*i)->visible()) {
 				continue;
 			}
 
@@ -218,8 +217,7 @@ Grid::reposition_children ()
 	} else {
 		for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-			if (*i == bg || (collapse_on_hide && !(*i)->visible())) {
-				/* bg rect is not a normal child */
+			if (collapse_on_hide && !(*i)->visible()) {
 				continue;
 			}
 
@@ -250,7 +248,7 @@ Grid::reposition_children ()
 	 *
 	 * col_dimens: transformed into the x coordinate of the left edge of each column.
 	 *
-	 * row_dimens: transformed into the y coordinate of the upper left of each row,
+	 * row_dimens: transformed into the y coordinate of the upper edge of each row,
 	 *
 	 */
 
@@ -306,7 +304,7 @@ Grid::reposition_children ()
 
 		/* XXX need to shrink by margin */
 
-		bg->set (r);
+		set (r);
 	}
 }
 
@@ -358,14 +356,3 @@ Grid::parented ()
 	}
 }
 
-void
-Grid::set_fill_color (Gtkmm2ext::Color c)
-{
-	bg->set_fill_color (c);
-}
-
-void
-Grid::set_outline_color (Gtkmm2ext::Color c)
-{
-	bg->set_outline_color (c);
-}

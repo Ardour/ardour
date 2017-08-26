@@ -20,12 +20,10 @@
 #ifndef __CANVAS_BOX_H__
 #define __CANVAS_BOX_H__
 
-#include "canvas/item.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas
 {
-
-class Rectangle;
 
 /** a Container is an item which has no content of its own
  * but renders its children in some geometrical arrangement.
@@ -38,7 +36,7 @@ class Rectangle;
  *
  *   Other?
  */
-class LIBCANVAS_API Box : public Item
+class LIBCANVAS_API Box : public Rectangle
 {
 public:
 	enum Orientation {
@@ -76,7 +74,6 @@ public:
 	void parented ();
 
   private:
-	Rectangle* bg;
 	bool collapse_on_hide;
 	bool homogenous;
 	bool repositioning;

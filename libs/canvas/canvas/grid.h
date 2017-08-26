@@ -21,25 +21,20 @@
 
 #include <map>
 
-#include "canvas/item.h"
+#include "canvas/rectangle.h"
 
 namespace ArdourCanvas
 {
 
-class Rectangle;
-
 /** Canvas container that renders its children in a grid layout
  */
-class LIBCANVAS_API Grid : public Item
+class LIBCANVAS_API Grid : public Rectangle
 {
 public:
 	Grid (Canvas *);
 
 	void set_row_spacing (double s);
 	void set_col_spacing (double s);
-
-	void set_fill_color (Gtkmm2ext::Color c);
-	void set_outline_color (Gtkmm2ext::Color c);
 
 	void set_padding (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
 	void set_margin (double top, double right = -1.0, double bottom = -1.0, double left = -1.0);
@@ -55,8 +50,6 @@ public:
 
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const;
-
-	Rectangle* background() const { return bg; }
 
   protected:
 	double row_spacing;
@@ -79,7 +72,6 @@ public:
 	typedef std::map<Item*,ChildInfo> CoordsByItem;
 	CoordsByItem coords_by_item;
 
-	Rectangle *bg;
 	bool collapse_on_hide;
 	bool homogenous;
 	bool repositioning;

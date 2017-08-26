@@ -28,25 +28,23 @@
 using namespace ArdourCanvas;
 
 Box::Box (Canvas* canvas, Orientation o)
-	: Item (canvas)
+	: Rectangle (canvas)
 	, orientation (o)
 	, spacing (0)
 	, top_padding (0), right_padding (0), bottom_padding (0), left_padding (0)
 	, top_margin (0), right_margin (0), bottom_margin (0), left_margin (0)
+	, collapse_on_hide (false)
 	, homogenous (false)
 	, repositioning (false)
 {
-	bg = new Rectangle (this);
-	bg->name = "bg rect for box";
-	bg->set_outline (false);
-	bg->set_fill (false);
-	bg->hide ();
+	set_outline (false);
+	set_fill (false);
 }
 
 void
 Box::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	bg->render (area, context);
+	Rectangle::render (area, context);
 	Item::render_children (area, context);
 }
 
@@ -148,15 +146,11 @@ Box::reposition_children ()
 		uniform_size = Rect (0, 0, largest_width, largest_height);
 	}
 
-
 	for (std::list<Item*>::iterator i = _items.begin(); i != _items.end(); ++i) {
 
-		if ((*i) == bg || !(*i)->visible()) {
-			/* background rect takes up no space */
-			continue;
+		if (!collapse_on_hide || (*i)->visible()) {
+			(*i)->set_position (previous_edge);
 		}
-
-		(*i)->set_position (previous_edge);
 
 		if (homogenous) {
 			(*i)->size_allocate (uniform_size);
@@ -168,18 +162,8 @@ Box::reposition_children ()
 
 			Rect bb = (*i)->bounding_box();
 
-			if (!(*i)->visible()) {
-				/* invisible child */
-				if (!collapse_on_hide) {
-					/* still add in its size */
-					if (bb) {
-						shift += bb.height();
-						}
-				}
-			} else {
-				if (bb) {
-					shift += bb.height();
-				}
+			if (bb && ((*i)->visible() || !collapse_on_hide)) {
+				shift += bb.height();
 			}
 
 			previous_edge = previous_edge.translate (Duple (0, spacing + shift));
@@ -189,16 +173,8 @@ Box::reposition_children ()
 			Distance shift = 0;
 			Rect bb = (*i)->bounding_box();
 
-			if (!(*i)->visible()) {
-				if (!collapse_on_hide) {
-					if (bb) {
-						shift += bb.width();
-					}
-				}
-			} else {
-				if (bb) {
-					shift += bb.width();
-				}
+			if (bb && ((*i)->visible() || !collapse_on_hide)) {
+				shift += bb.width();
 			}
 
 			previous_edge = previous_edge.translate (Duple (spacing + shift, 0));
@@ -217,7 +193,7 @@ Box::reposition_children ()
 
 	Rect r (_bounding_box);
 	/* XXX need to shrink by margin */
-	bg->set (r);
+	set (r);
 }
 
 void
