@@ -421,14 +421,12 @@ BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int 
 
 #define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
 	set_size_request_to_display_given_text (*row_note_button, "127", COMBO_TRIANGLE_WIDTH, 2);
-	row_note_button->set_text (string_compose ("%1", note));
+	row_note_button->set_text (string_compose ("%1", note+1));
 
 	switch_grid = new ArdourCanvas::Grid (parent->canvas());
 	switch_grid->name = string_compose ("Grid for row %1", r);
-	switch_grid->background()->set_fill (false);
-	switch_grid->background()->set_outline (false);
-	switch_grid->set_border_width (0);
-	switch_grid->set_col_spacing (0);
+	//switch_grid->set_border_width (0);
+	//switch_grid->set_col_spacing (0);
 
 	row_note_item->name = string_compose ("row note for %1", r);
 	switch_grid->place (row_note_item, 0, r, 2, 1);
@@ -567,7 +565,7 @@ BBGUI::SwitchRow::set_note (int n)
 	note = n;
 
 	owner.bbox->edit_note_number (old_note, note);
-	row_note_button->set_text (string_compose ("%1", note));
+	row_note_button->set_text (string_compose ("%1", note+1));
 }
 
 void
