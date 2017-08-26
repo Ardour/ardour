@@ -19,22 +19,22 @@ have to wait for the export.
 
 function factory (unused_params) return function ()
 
-	fr = Session:frame_rate()
-	chaps = {}
+	local fr = Session:frame_rate()
+	local chaps = {}
 
 	for l in Session:locations():list():iter() do
-		name = l:name()
+		local name = l:name()
 		if not l:is_mark() or string.find(name, "^xrun%d*$") then
 			goto next end
 
-		t = l:start()
-		h = math.floor(t / (3600*fr))
-		r = t - (h*3600*fr)
-		m = math.floor(r / (60*fr))
+		local t = l:start()
+		local h = math.floor(t / (3600*fr))
+		local r = t - (h*3600*fr)
+		local m = math.floor(r / (60*fr))
 		r = r - m*60*fr
-		s = math.floor(r / fr)
+		local s = math.floor(r / fr)
 		r = r - s*fr
-		ms = math.floor(r*1000/fr)
+		local ms = math.floor(r*1000/fr)
 		table.insert(chaps, string.format("%02d:%02d:%02d.%03d %s\n", h, m, s, ms, name))
 		::next::
 	end
