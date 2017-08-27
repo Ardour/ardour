@@ -1575,7 +1575,7 @@ Push2::stripable_selection_changed ()
 
 	reset_pad_colors ();
 
-	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (mix_layout);
+	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (track_mix_layout);
 	assert (tml);
 	tml->set_stripable (first_selected_stripable());
 }
