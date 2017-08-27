@@ -364,6 +364,9 @@ public:
 	void set_group_tabs ();
 	void toggle_measure_visibility ();
 
+	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
+	std::pair <framepos_t,framepos_t> session_gui_extents() const; 
+
 	/* fades */
 
 	void toggle_region_fades (int dir);

@@ -581,6 +581,45 @@ Editor::autoscroll_active () const
 	return autoscroll_connection.connected ();
 }
 
+std::pair <framepos_t,framepos_t>
+Editor::session_gui_extents () const
+{
+	framecnt_t session_extent_start = _session->current_start_frame();
+	framecnt_t session_extent_end = _session->current_end_frame();
+
+	//calculate the extents of all regions in every playlist
+	//NOTE:  we should listen to playlists, and cache these values so we don't calculate them every time.
+	{
+		boost::shared_ptr<RouteList> rl = _session->get_routes();
+		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
+			if (tr) {
+				boost::shared_ptr<Playlist> pl = tr->playlist();
+				if ( pl && !pl->all_regions_empty() ) {
+					pair<framepos_t, framepos_t> e;
+					e = pl->get_extent();
+					if (e.first < session_extent_start) {
+						session_extent_start = e.first;
+					}
+					if (e.second > session_extent_end) {
+						session_extent_end = e.second;
+					}
+				}
+			}
+		}
+	}
+
+	//ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like)
+
+	//if all else fails, give us 2 minutes
+	framecnt_t const min_length = _session->nominal_frame_rate()*60*2;
+	if ( session_extent_end < min_length )
+		session_extent_end = min_length;
+	
+	std::pair <framepos_t,framepos_t> ret (session_extent_start, session_extent_end);
+	return ret;
+}
+
 bool
 Editor::autoscroll_canvas ()
 {
@@ -612,6 +651,8 @@ Editor::autoscroll_canvas ()
 			dx += 10 + (2 * (autoscroll_cnt/2));
 
 			dx = pixel_to_sample (dx);
+			
+			dx /= 10;  //ToDo:  make a config variable for scroll speed  zoom-behavior-tweaks
 
 			if (leftmost_frame < max_framepos - dx) {
 				new_frame = leftmost_frame + dx;
@@ -627,6 +668,8 @@ Editor::autoscroll_canvas ()
 			dx += 10 + (2 * (autoscroll_cnt/2));
 
 			dx = pixel_to_sample (dx);
+
+			dx /= 10;  //ToDo:  make a config variable for scroll speed  zoom-behavior-tweaks
 
 			if (leftmost_frame >= dx) {
 				new_frame = leftmost_frame - dx;
