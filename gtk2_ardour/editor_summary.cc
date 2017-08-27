@@ -46,7 +46,6 @@ EditorSummary::EditorSummary (Editor* e)
 	: EditorComponent (e),
 	  _start (0),
 	  _end (1),
-	  _overhang_fraction (0.02),
 	  _x_scale (1),
 	  _track_height (16),
 	  _last_playhead (-1),
@@ -112,10 +111,10 @@ EditorSummary::set_session (Session* s)
 		_session->StartTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_session->EndTimeChanged.connect (_session_connections, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context());
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
-	
-		_leftmost = _session->current_start_frame();
-		_rightmost = min (_session->nominal_frame_rate()*60*2, _session->current_end_frame() );  //always show at least 2 minutes
 	}
+
+	_leftmost = max_framepos;
+	_rightmost = 0;
 }
 
 void
@@ -134,9 +133,9 @@ EditorSummary::render_background_image ()
 
 	/* compute start and end points for the summary */
 
-	framecnt_t const session_length = _session->current_end_frame() - _session->current_start_frame ();
-	double theoretical_start = _session->current_start_frame() - session_length * _overhang_fraction;
-	double theoretical_end = _session->current_end_frame();
+	std::pair<framepos_t, framepos_t> ext = _editor->session_gui_extents();
+	double theoretical_start = ext.first;
+	double theoretical_end = ext.second;
 
 	/* the summary should encompass the full extent of everywhere we've visited since the session was opened */
 	if ( _leftmost < theoretical_start)
@@ -146,7 +145,7 @@ EditorSummary::render_background_image ()
 
 	/* range-check */
 	_start = theoretical_start > 0 ? theoretical_start : 0;
-	_end = theoretical_end + session_length * _overhang_fraction;
+	_end = theoretical_end < max_framepos ? theoretical_end : max_framepos;
 
 	/* calculate x scale */
 	if (_end != _start) {
@@ -340,9 +339,9 @@ EditorSummary::set_overlays_dirty ()
 
 /** Set the summary so that just the overlays (viewbox, playhead etc.) in a given area will be re-rendered */
 void
-EditorSummary::set_overlays_dirty (int x, int y, int w, int h)
+EditorSummary::set_overlays_dirty_rect (int x, int y, int w, int h)
 {
-	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty);
+	ENSURE_GUI_THREAD (*this, &EditorSummary::set_overlays_dirty_rect);
 	queue_draw_area (x, y, w, h);
 }
 
@@ -638,10 +637,19 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 
 			double x = _start_editor_x.first;
 			x += ev->x - _start_mouse_x;
+			
 			if (x < 0) {
 				x = 0;
 			}
-			set_editor (x);
+
+			//zoom-behavior-tweaks
+			//protect the right edge from expanding beyond the end
+			pair<double, double> xr;
+			get_editor (&xr);
+			double w = xr.second - xr.first;
+			if ( x + w < get_width() ) {
+				set_editor (x);
+			}
 		}
 
 		_last_my = my;
@@ -658,7 +666,13 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		if (_zoom_trim_position == LEFT) {
 			xr.first += dx;
 		} else if (_zoom_trim_position == RIGHT) {
-			xr.second += dx;
+
+			//zoom-behavior-tweaks
+			//protect the right edge from expanding beyond the edge
+			if ( (xr.second + dx) < get_width() ) {
+				xr.second += dx;
+			}
+
 		} else {
 			assert (0);
 			xr.first = -1; /* do not change */
@@ -854,7 +868,7 @@ EditorSummary::playhead_position_changed (framepos_t p)
 	if (_session && o != n) {
 		int a = max(2, min (o, n));
 		int b = max (o, n);
-		set_overlays_dirty (a - 2, 0, b + 2, get_height ());
+		set_overlays_dirty_rect (a - 2, 0, b + 2, get_height ());
 	}
 }
 

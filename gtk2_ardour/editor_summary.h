@@ -81,7 +81,7 @@ private:
 	bool suspending_editor_updates () const;
 	double playhead_frame_to_position (framepos_t) const;
 	framepos_t position_to_playhead_frame_to_position (double pos) const;
-	void set_overlays_dirty (int, int, int, int);
+	void set_overlays_dirty_rect (int, int, int, int);
 
 	void summary_zoom_step (  int steps );
 
