@@ -69,6 +69,8 @@ class BBGUI : public ArdourDialog {
 	ArdourCanvas::GtkCanvas pad_canvas;
 	ArdourCanvas::GtkCanvas roll_canvas;
 
+	ArdourCanvas::Grid* pad_grid;
+
 	ArdourWidgets::ArdourButton step_sequencer_tab_button;
 	ArdourWidgets::ArdourButton pad_tab_button;
 	ArdourWidgets::ArdourButton roll_tab_button;
@@ -79,16 +81,7 @@ class BBGUI : public ArdourDialog {
 		Pad (ArdourCanvas::Canvas* canvas, int x, int y, int note, std::string const & txt);
 		void set_color (Gtkmm2ext::Color);
 
-		bool is_on () const { return _on; }
-		bool is_off () const { return !_on; }
-		bool is_flashed() const { return _flashed; }
-
-		void on ();
-		void off ();
-		void flash_on ();
-		void flash_off ();
-
-		ArdourCanvas::Rectangle* rect;
+		ArdourCanvas::StepButton* button;
 
 		static int pad_width;
 		static int pad_height;
@@ -97,14 +90,13 @@ class BBGUI : public ArdourDialog {
 		int row() const  { return _row; }
 		int col() const  { return _col; }
 		int note() const { return _note; }
+		int velocity() const;
+
            private:
 		int _row;
 		int _col;
 		int _note;
 		std::string _label;
-		Gtkmm2ext::HSV hsv;
-		bool _on;
-		bool _flashed;
 	};
 
 	typedef std::vector<Pad*> Pads;
@@ -168,6 +160,7 @@ class BBGUI : public ArdourDialog {
 		void resize (int cols);
 		void drop_switches ();
 		bool switch_event (GdkEvent*, int col);
+		std::string print_midi_note (int note);
 	};
 
 	typedef std::vector<SwitchRow*> SwitchRows;

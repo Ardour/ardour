@@ -194,9 +194,9 @@ BBGUI::update_pads ()
 
 	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
 		if ((*p)->col() == current_pad_column) {
-			(*p)->flash_on ();
+			(*p)->button->set_highlight (true);
 		} else {
-			(*p)->flash_off ();
+			(*p)->button->set_highlight (false);
 		}
 	}
 }
@@ -205,7 +205,7 @@ void
 BBGUI::pads_off ()
 {
 	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
-		(*p)->off ();
+		(*p)->button->set_highlight (false);
 	}
 }
 
@@ -243,79 +243,29 @@ int BBGUI::Pad::pad_height = 80;
 int BBGUI::Pad::pad_spacing = 6;
 
 BBGUI::Pad::Pad (ArdourCanvas::Canvas* canvas, int row, int col, int note, std::string const& txt)
-	: rect (new ArdourCanvas::Rectangle (canvas, ArdourCanvas::Rect (((col+1) * pad_spacing) + (col * (pad_width - pad_spacing)), ((row+1) * pad_spacing) + (row * (pad_height - pad_spacing)),
-	                                                                 ((col+1) * pad_spacing) + ((col + 1) * (pad_width - pad_spacing)), ((row+1) * pad_spacing) + ((row + 1) * (pad_height - pad_spacing)))))
+	: button (new ArdourCanvas::StepButton (canvas, pad_width, pad_height, 0))
 	, _row (row)
 	, _col (col)
 	, _note (note)
 	, _label (txt)
-	, _on (false)
-	, _flashed (false)
 {
-	canvas->root()->add (rect);
+}
+
+int
+BBGUI::Pad::velocity () const
+{
+	return button->value();
 }
 
 //static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
 
 void
-BBGUI::Pad::on ()
-{
-	_on = true;
-	rect->set_fill_color (hsv.lighter(0.2).color());
-}
-
-void
-BBGUI::Pad::off ()
-{
-	_on = false;
-	_flashed = false;
-
-	rect->set_fill_color (hsv.color());
-}
-
-void
-BBGUI::Pad::flash_on ()
-{
-	_flashed = true;
-	rect->set_fill_color (hsv.lighter(0.05).color());
-}
-
-void
-BBGUI::Pad::flash_off ()
-{
-	_flashed = false;
-
-	if (_on) {
-		on ();
-	} else {
-		off ();
-	}
-}
-
-void
-BBGUI::Pad::set_color (Gtkmm2ext::Color c)
-{
-	hsv = c;
-
-	if (_flashed) {
-		if (_on) {
-			flash_on ();
-		} else {
-			flash_off ();
-		}
-	} else {
-		if (_on) {
-			on ();
-		} else {
-			off ();
-		}
-	}
-}
-
-void
 BBGUI::setup_pad_canvas ()
 {
 	pad_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.32, 0.47, 0.89, 1.0));
+	pad_grid = new ArdourCanvas::Grid (&pad_canvas);
+	pad_canvas.root()->add (pad_grid);
+
 	size_pads (8, 8);
 }
 
@@ -342,8 +292,9 @@ BBGUI::size_pads (int cols, int rows)
 		for (int col = 0; col < pad_cols; ++col) {
 			Pad* p = new Pad (&pad_canvas, row, col, note, string_compose ("%1", note));
 			/* This is the "off" color */
-			p->set_color (c);
-			p->rect->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::pad_event), col, row));
+			pad_grid->place (p->button, col, row, 1, 1);
+			p->button->set_color (c);
+			p->button->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::pad_event), col, row));
 			pads.push_back (p);
 		}
 	}
@@ -364,12 +315,12 @@ BBGUI::pad_event (GdkEvent* ev, int col, int row)
 
 	if (ev->type == GDK_BUTTON_PRESS) {
 		/* XXX on/off should be done by model changes */
-		if (p->is_on()) {
+		if (p->button->value()) {
 			bbox->remove_note (pads[row * pad_cols + col]->note(), at);
-			p->off ();
+			p->button->set_value (0);
 		} else {
 			bbox->add_note (pads[row * pad_cols + col]->note(), 127, at);
-			p->on ();
+			p->button->set_value (64);
 			return true;
 		}
 	}
@@ -408,7 +359,6 @@ BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note,
 BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int cols)
 	: owner (bbg)
 	, row (r)
-	, note (r + 64)
 	, clear_row_button (new ArdourWidgets::ArdourButton ("C"))
 	, row_note_button (new ArdourWidgets::ArdourDropdown)
 	, clear_row_item (new ArdourCanvas::Widget (parent->canvas(), *clear_row_button))
@@ -416,12 +366,13 @@ BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int 
 {
 	/* populate note dropdown */
 	for (int n = 0; n < 127; ++n) {
-		row_note_button->AddMenuElem (Gtk::Menu_Helpers::MenuElem (string_compose ("%1", n+1), sigc::bind (sigc::mem_fun (*this, &BBGUI::SwitchRow::set_note), n)));
+		row_note_button->AddMenuElem (Gtk::Menu_Helpers::MenuElem (print_midi_note (n), sigc::bind (sigc::mem_fun (*this, &BBGUI::SwitchRow::set_note), n)));
 	}
 
 #define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
-	set_size_request_to_display_given_text (*row_note_button, "127", COMBO_TRIANGLE_WIDTH, 2);
-	row_note_button->set_text (string_compose ("%1", note+1));
+	set_size_request_to_display_given_text (*row_note_button, "G#-1\n127", COMBO_TRIANGLE_WIDTH, 2);
+	note = 130; /* invalid value to force change in set_note() */
+	set_note (r + 64);
 
 	switch_grid = new ArdourCanvas::Grid (parent->canvas());
 	switch_grid->name = string_compose ("Grid for row %1", r);
@@ -434,6 +385,12 @@ BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int 
 	resize (cols);
 
 	parent->add (switch_grid);
+}
+
+std::string
+BBGUI::SwitchRow::print_midi_note (int n)
+{
+	return string_compose ("%1\n%2", ParameterDescriptor::midi_note_name (n), n+1);
 }
 
 void
@@ -565,7 +522,7 @@ BBGUI::SwitchRow::set_note (int n)
 	note = n;
 
 	owner.bbox->edit_note_number (old_note, note);
-	row_note_button->set_text (string_compose ("%1", note+1));
+	row_note_button->set_text (print_midi_note (note));
 }
 
 void
