@@ -2250,7 +2250,7 @@ OSC::scrub (float delta, lo_message msg)
 		if (speed == 1) {
 			session->request_transport_speed (.5);
 		} else {
-			session->request_transport_speed (1);
+			session->request_transport_speed (9.9);
 		}
 	} else if (speed < 0) {
 		if (speed == -1) {
@@ -2289,7 +2289,7 @@ OSC::jog (float delta, lo_message msg)
 			text_message (path, "Shuttle", get_address (msg));
 			if (delta) {
 				double speed = get_transport_speed ();
-				set_transport_speed (speed + (delta / 8));
+				set_transport_speed (speed + (delta / 8.1));
 			} else {
 				set_transport_speed (0);
 			}
@@ -2348,31 +2348,42 @@ OSC::jog_mode (float mode, lo_message msg)
 	if (!session) return -1;
 
 	OSCSurface *s = get_surface(get_address (msg));
+	if (get_transport_speed () != 1.0) {
+		set_transport_speed (0);
+	}
 
 	switch((uint32_t)mode)
 	{
 		case JOG  :
+			text_message ("/jog/mode/name", "Jog", get_address (msg));
 			s->jogmode = JOG;
 			break;
 		case SCRUB:
+			text_message ("/jog/mode/name", "Scrub", get_address (msg));
 			s->jogmode = SCRUB;
 			break;
 		case SHUTTLE:
+			text_message ("/jog/mode/name", "Shuttle", get_address (msg));
 			s->jogmode = SHUTTLE;
 			break;
 		case SCROLL:
+			text_message ("/jog/mode/name", "Scroll", get_address (msg));
 			s->jogmode = SCROLL;
 			break;
 		case TRACK:
+			text_message ("/jog/mode/name", "Track", get_address (msg));
 			s->jogmode = TRACK;
 			break;
 		case BANK:
+			text_message ("/jog/mode/name", "Bank", get_address (msg));
 			s->jogmode = BANK;
 			break;
 		case NUDGE:
+			text_message ("/jog/mode/name", "Nudge", get_address (msg));
 			s->jogmode = NUDGE;
 			break;
 		case MARKER:
+			text_message ("/jog/mode/name", "Marker", get_address (msg));
 			s->jogmode = MARKER;
 			break;
 		default:
@@ -2384,7 +2395,6 @@ OSC::jog_mode (float mode, lo_message msg)
 	lo_message_free (reply);
 
 	}
-	jog (0, msg);
 	return 0;
 
 }
