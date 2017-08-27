@@ -265,8 +265,8 @@ public:
 
 	bool write_section_to(boost::shared_ptr<MidiSource>     source,
 	                      const Glib::Threads::Mutex::Lock& source_lock,
-	                      Evoral::Beats                     begin = Evoral::MinBeats,
-	                      Evoral::Beats                     end   = Evoral::MaxBeats,
+	                      Evoral::Beats                     begin = Evoral::Beats(),
+	                      Evoral::Beats                     end   = std::numeric_limits<Evoral::Beats>::max(),
 	                      bool                              offset_events = false);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code

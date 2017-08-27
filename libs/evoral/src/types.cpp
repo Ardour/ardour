@@ -16,15 +16,11 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#include <limits.h>
-
 #include "evoral/Beats.hpp"
 #include "evoral/types.hpp"
 
 namespace Evoral {
 
-const double Beats::PPQN = 1920.0;
-const Beats  MaxBeats    = Evoral::Beats(DBL_MAX);
-const Beats  MinBeats    = Evoral::Beats(DBL_MIN);
+const int32_t Beats::PPQN = 1920;
 
 }
