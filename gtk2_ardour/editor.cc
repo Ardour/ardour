@@ -1319,6 +1319,10 @@ Editor::set_session (Session *t)
 		return;
 	}
 
+	//initialize leftmost_frame to the extents of the session
+	//this prevents a bogus setting of leftmost = "0" if the summary view asks for the leftmost frame before the visible state has been loaded from instant.xml
+	leftmost_frame = session_gui_extents().first;
+	
 	_playlist_selector->set_session (_session);
 	nudge_clock->set_session (_session);
 	_summary->set_session (_session);
