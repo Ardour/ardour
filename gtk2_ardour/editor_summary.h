@@ -65,6 +65,8 @@ private:
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
 
+	void reset_to_extents ();
+
 	void centre_on_click (GdkEventButton *);
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void render_region (RegionView*, cairo_t*, double) const;

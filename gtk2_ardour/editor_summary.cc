@@ -21,6 +21,9 @@
 
 #include "canvas/debug.h"
 
+#include <gtkmm/menu.h>
+#include <gtkmm/menuitem.h>
+
 #include "time_axis_view.h"
 #include "streamview.h"
 #include "editor_summary.h"
@@ -34,6 +37,8 @@
 #include "mouse_cursors.h"
 #include "route_time_axis.h"
 #include "ui_config.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -424,6 +429,8 @@ EditorSummary::on_key_release_event (GdkEventKey* key)
 	return false;
 }
 
+#include "gtkmm2ext/utils.h"
+
 /** Handle a button press.
  *  @param ev GTK event.
  */
@@ -431,6 +438,16 @@ bool
 EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	_old_follow_playhead = _editor->follow_playhead ();
+
+	if (ev->button == 3) {  //right-click:  show the reset menu action
+		using namespace Gtk::Menu_Helpers;
+		Gtk::Menu* m = manage (new Gtk::Menu);
+		MenuList& items = m->items ();
+		items.push_back(MenuElem(_("Reset Summary to Extents"),
+			sigc::mem_fun(*this, &EditorSummary::reset_to_extents)));
+		m->popup (ev->button, ev->time);
+		return true;
+	}
 
 	if (ev->button != 1) {
 		return true;
@@ -555,6 +572,18 @@ EditorSummary::get_position (double x, double y) const
 		return TO_LEFT_OR_RIGHT;
 	}
 }
+
+void
+EditorSummary::reset_to_extents()
+{
+	//reset as if the user never went anywhere outside the extents
+	_leftmost = max_framepos;
+	_rightmost = 0;
+
+	_editor->temporal_zoom_extents ();
+	set_background_dirty ();
+}
+
 
 void
 EditorSummary::set_cursor (Position p)
