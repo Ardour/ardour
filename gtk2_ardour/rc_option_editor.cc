@@ -2355,6 +2355,8 @@ RCOptionEditor::RCOptionEditor ()
 	eet->add (2, _("2 minutes"));
 	eet->add (20, _("20 minutes"));
 	eet->add (60, _("1 hour"));
+	eet->add (60*2, _("2 hours"));
+	eet->add (60*24, _("24 hours"));
 	add_option (_("Editor"), eet);
 
 	if (!Profile->get_mixbus()) {
