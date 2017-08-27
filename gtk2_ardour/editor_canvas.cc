@@ -582,7 +582,7 @@ Editor::autoscroll_active () const
 }
 
 std::pair <framepos_t,framepos_t>
-Editor::session_gui_extents () const
+Editor::session_gui_extents ( bool use_extra ) const
 {
 	if (!_session) {
 		return std::pair <framepos_t,framepos_t>(max_framepos,0);
@@ -616,10 +616,12 @@ Editor::session_gui_extents () const
 	//ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like)
 
 	//add additional time to the ui extents ( user-defined in config )
-	framecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_frame_rate();
-	session_extent_end += extra;
-	session_extent_start -= extra;
-		
+	if (use_extra) {
+		framecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_frame_rate();
+		session_extent_end += extra;
+		session_extent_start -= extra;
+	}
+			
 	//range-check
 	if (session_extent_end > max_framepos) {
 		session_extent_end = max_framepos;

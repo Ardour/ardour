@@ -365,7 +365,7 @@ public:
 	void toggle_measure_visibility ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
-	std::pair <framepos_t,framepos_t> session_gui_extents() const; 
+	std::pair <framepos_t,framepos_t> session_gui_extents( bool use_extra = true ) const; 
 
 	/* fades */
 
@@ -1342,6 +1342,7 @@ private:
 	void calc_extra_zoom_edges(framepos_t &start, framepos_t &end);
 	void temporal_zoom_selection (Editing::ZoomAxis);
 	void temporal_zoom_session ();
+	void temporal_zoom_extents ();
 	void temporal_zoom (framecnt_t samples_per_pixel);
 	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
 	void temporal_zoom_to_frame (bool coarser, framepos_t frame);

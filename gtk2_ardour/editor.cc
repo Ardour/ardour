@@ -3782,6 +3782,7 @@ Editor::build_track_count_menu ()
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 8 hours"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 8 * 60 * 60 * 1000)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to 24 hours"), sigc::bind (sigc::mem_fun(*this, &Editor::set_zoom_preset), 24 * 60 * 60 * 1000)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Session"), sigc::mem_fun(*this, &Editor::temporal_zoom_session)));
+		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Extents"), sigc::mem_fun(*this, &Editor::temporal_zoom_extents)));
 		zoom_preset_selector.AddMenuElem (MenuElem (_("Zoom to Range/Region Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), Horizontal)));
 	}
 }

@@ -2059,6 +2059,39 @@ Editor::temporal_zoom_session ()
 }
 
 void
+Editor::temporal_zoom_extents ()
+{
+	ENSURE_GUI_THREAD (*this, &Editor::temporal_zoom_extents)
+
+	if (_session) {
+		std::pair<framepos_t, framepos_t> ext = session_gui_extents( false );  //in this case we want to zoom to the extents explicitly; ignore the users prefs for extra padding
+
+		framecnt_t start = ext.first;
+		framecnt_t end = ext.second;
+
+		if (_session->actively_recording () ) {
+			framepos_t cur = playhead_cursor->current_frame ();
+			if (cur > end) {
+				/* recording beyond the end marker; zoom out
+				 * by 5 seconds more so that if 'follow
+				 * playhead' is active we don't immediately
+				 * scroll.
+				 */
+				end = cur + _session->frame_rate() * 5;
+			}
+		}
+
+		if ((start == 0 && end == 0) || end < start) {
+			return;
+		}
+
+		calc_extra_zoom_edges(start, end);
+
+		temporal_zoom_by_frame (start, end);
+	}
+}
+
+void
 Editor::temporal_zoom_by_frame (framepos_t start, framepos_t end)
 {
 	if (!_session) return;
