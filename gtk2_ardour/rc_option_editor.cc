@@ -2345,6 +2345,18 @@ RCOptionEditor::RCOptionEditor ()
 	dps->add (1.0, _("100%"));
 	add_option (_("Editor"), dps);
 
+	ComboOption<float>* eet = new ComboOption<float> (
+		     "extra-ui-extents-time",
+		     _("Limit zooming & summary view to X minutes beyond session extents"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_extra_ui_extents_time),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_extra_ui_extents_time)
+		     );
+	eet->add (1, _("1 minute"));
+	eet->add (2, _("2 minutes"));
+	eet->add (20, _("20 minutes"));
+	eet->add (60, _("1 hour"));
+	add_option (_("Editor"), eet);
+
 	if (!Profile->get_mixbus()) {
 
 		add_option (_("Editor"),

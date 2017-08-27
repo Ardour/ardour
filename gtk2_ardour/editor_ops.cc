@@ -1790,11 +1790,11 @@ Editor::temporal_zoom_step_scale (bool zoom_out, double scale)
 	}
 
 	//zoom-behavior-tweaks
-	//limit our maximum zoom to the session gui extents value (+10%)
+	//limit our maximum zoom to the session gui extents value
 	std::pair<framepos_t, framepos_t> ext = session_gui_extents();
 	framecnt_t session_extents_pp = ( ext.second - ext.first )  / _visible_canvas_width;
-	if (nspp > session_extents_pp * 1.1)
-		nspp = session_extents_pp * 1.1;
+	if (nspp > session_extents_pp)
+		nspp = session_extents_pp;
 
 	temporal_zoom (nspp);
 }
