@@ -652,7 +652,7 @@ Editor::autoscroll_canvas ()
 
 			dx = pixel_to_sample (dx);
 			
-			dx /= 10;  //ToDo:  make a config variable for scroll speed  zoom-behavior-tweaks
+			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
 
 			if (leftmost_frame < max_framepos - dx) {
 				new_frame = leftmost_frame + dx;
@@ -669,7 +669,7 @@ Editor::autoscroll_canvas ()
 
 			dx = pixel_to_sample (dx);
 
-			dx /= 10;  //ToDo:  make a config variable for scroll speed  zoom-behavior-tweaks
+			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
 
 			if (leftmost_frame >= dx) {
 				new_frame = leftmost_frame - dx;
