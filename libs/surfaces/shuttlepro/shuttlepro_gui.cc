@@ -19,19 +19,21 @@
 */
 
 
-#include <gtkmm/comboboxtext.h>
-#include <gtkmm/label.h>
-#include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
-#include <gtkmm/image.h>
 
 #include "pbd/unwind.h"
-#include "pbd/file_utils.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/filesystem_paths.h"
+#include "ardour/port.h"
+#include "ardour/midi_port.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -47,7 +49,7 @@
 
 using namespace ArdourSurface;
 
-class ShuttleproGUI : public Gtk::HBox, public PBD::ScopedConnectionList
+class ShuttleproGUI : public Gtk::VBox, public PBD::ScopedConnectionList
 {
 public:
 	ShuttleproGUI (ShuttleproControlProtocol& scp);
@@ -96,23 +98,14 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	, _keep_rolling (_("Keep rolling after jumps"))
 	, _jog_distance (scp._jog_distance)
 {
-	_test_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_test_mode));
-	pack_start(_test_button, false, false);
-
-	Table* table = manage (new Table);
-	table->set_row_spacings (6);
-	table->set_col_spacings (6);
-	table->show ();
-
-	int n = 0;
-
-	_keep_rolling.signal_toggled().connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_keep_rolling));
-	_keep_rolling.set_active (_scp._keep_rolling);
-	table->attach (_keep_rolling, 0, 2, n, n+1);
-	++n;
+	Frame* sj_frame = manage (new Frame (_("Shuttle speeds and jog jump distances")));
+	Table* sj_table = manage (new Table);
+	sj_frame->set_border_width (6);
+	sj_table->set_border_width (12);
+	sj_frame->add (*sj_table);
 
 	Label* speed_label = manage (new Label (_("Transport speeds for the shuttle positions:"), ALIGN_START));
-	table->attach (*speed_label, 0, 2, n, n+1);
+	sj_table->attach (*speed_label, 0,1, 0,1);
 
 	HBox* speed_box = manage (new HBox);
 	for (int i=0; i != ShuttleproControlProtocol::num_shuttle_speeds; ++i) {
@@ -123,35 +116,61 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 		speed_box->pack_start (*sb);
 		sb->signal_value_changed().connect (sigc::bind (sigc::mem_fun(*this, &ShuttleproGUI::set_shuttle_speed), i));
 	}
-	table->attach (*speed_box, 3, 5, n, n+1);
-	++n;
+	sj_table->attach (*speed_box, 1,2, 0,1);
 
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:"), ALIGN_START));
-	table->attach (*jog_label, 0, 2, n, n+1);
-
 	_jog_distance.Changed.connect (sigc::mem_fun (*this, &ShuttleproGUI::update_jog_distance));
-	table->attach (_jog_distance, 3, 5, n, n+1);
-	++n;
+
+	sj_table->attach (*jog_label, 0,1, 1,2);
+	sj_table->attach (_jog_distance, 1,2, 1,2);
+
+	_keep_rolling.set_tooltip_text (_("If checked Ardour keeps rolling after jog or shuttle events. If unchecked it stops."));
+	_keep_rolling.signal_toggled().connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_keep_rolling));
+	_keep_rolling.set_active (_scp._keep_rolling);
+
+	sj_table->attach (_keep_rolling, 0,1, 2,3);
+
+
+	Frame* btn_action_frame = manage (new Frame (_("Actions or jumps for buttons")));
+	HBox* btn_action_box = manage (new HBox);
+	btn_action_frame->set_border_width (6);
+	btn_action_box->set_border_width (12);
+	btn_action_frame->add (*btn_action_box);
+
+	VBox* tbb = manage (new VBox);
+	_test_button.set_tooltip_text (_("If the button is active, all the button presses are not handled, "
+					 "but in the corresponding line in the button table the LED will light up."));
+	_test_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::toggle_test_mode));
+	_test_button.set_size_request (-1, 64);
+	tbb->pack_start(_test_button, true, false);
+	btn_action_box->pack_start (*tbb, true, false, 12);
+
+
+	Table* table = manage (new Table);
+	table->set_row_spacings (6);
+	table->set_col_spacings (6);;
 
 	vector<boost::shared_ptr<ButtonBase> >::const_iterator it;
 	unsigned int btn_idx = 0;
 	for (it = _scp._button_actions.begin(); it != _scp._button_actions.end(); ++it) {
 		boost::shared_ptr<ArdourButton> b (new ArdourButton (string_compose (_("Setting for button %1"), btn_idx+1),
 								     ArdourButton::Element(ArdourButton::Indicator|ArdourButton::Text|ArdourButton::Inactive)));
-		table->attach (*b, 0, 2, n, n+1);
+		table->attach (*b, 0, 2, btn_idx, btn_idx+1);
 		_btn_leds.push_back (b);
 
 		ButtonConfigWidget* bcw = manage (new ButtonConfigWidget);
 
 		bcw->set_current_config (*it);
 		bcw->Changed.connect (sigc::bind (sigc::mem_fun (*this, &ShuttleproGUI::update_action), btn_idx, bcw));
-		table->attach (*bcw, 3, 5, n, n+1);
-		++n;
+		table->attach (*bcw, 3, 5, btn_idx, btn_idx+1);
 		++btn_idx;
 	}
 
 	set_spacing (6);
-	pack_start (*table, false, false);
+	btn_action_box->pack_start (*table, false, false);
+
+	pack_start (*sj_frame);
+	pack_start (*btn_action_frame);
 
 	_scp.ButtonPress.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_press, this, _1), gui_context ());
 	_scp.ButtonRelease.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_release, this, _1), gui_context ());
@@ -240,8 +259,7 @@ ShuttleproControlProtocol::get_gui () const
 	if (!_gui) {
 		const_cast<ShuttleproControlProtocol*>(this)->build_gui ();
 	}
-
-	static_cast<Gtk::HBox*>(_gui)->show_all();
+	static_cast<Gtk::VBox*>(_gui)->show_all();
 	return _gui;
 }
 
@@ -249,7 +267,7 @@ void
 ShuttleproControlProtocol::tear_down_gui ()
 {
 	if (_gui) {
-		Gtk::Widget *w = static_cast<Gtk::HBox*>(_gui)->get_parent();
+		Gtk::Widget *w = static_cast<Gtk::VBox*>(_gui)->get_parent();
 		if (w) {
 			w->hide();
 			delete w;
