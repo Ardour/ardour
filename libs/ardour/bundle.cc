@@ -434,8 +434,12 @@ Bundle::emit_changed (Change c)
 	}
 }
 
-/* @return true if a Bundle is connected to another.
- * @param type: if not NIL, restrict the check to channels of that type. */
+/** This must not be called in code executed as a response to a backend event,
+ *  as it may query the backend in the same thread where it's waiting for us.
+ * @return true if a Bundle is connected to another.
+ * @param type: if not NIL, restrict the check to channels of that type.
+ * @param exclusive: if true, additionally check if the bundle is connected
+ *                   only to |other|, and return false if not. */
 bool
 Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
                       DataType type, bool exclusive)
@@ -446,7 +450,7 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
 	if (type == DataType::NIL) {
 		for (DataType::iterator t = DataType::begin();
 		                        t != DataType::end(); ++t) {
-			if (!connected_to(other, engine, *t))
+			if (!connected_to(other, engine, *t, exclusive))
 				return false;
 		}
 		return true;
@@ -455,6 +459,8 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
 	uint32_t N = nchannels().n(type);
 	if (other->nchannels().n(type) != N)
 		return false;
+
+	vector<string> port_connections;
 
 	for (uint32_t i = 0; i < N; ++i) {
 		Bundle::PortList const & our_ports =
@@ -479,6 +485,13 @@ Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
 				} else if (q && !q->connected_to (*j)) {
 					return false;
 				}
+			}
+
+			if (exclusive && p) {
+				port_connections.clear();
+				p->get_connections(port_connections);
+				if (port_connections.size() != other_ports.size())
+					return false;
 			}
 		}
 	}
