@@ -434,30 +434,49 @@ Bundle::emit_changed (Change c)
 	}
 }
 
+/* @return true if a Bundle is connected to another.
+ * @param type: if not NIL, restrict the check to channels of that type. */
 bool
-Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine)
+Bundle::connected_to (boost::shared_ptr<Bundle> other, AudioEngine & engine,
+                      DataType type, bool exclusive)
 {
-	if (_ports_are_inputs == other->_ports_are_inputs || nchannels() != other->nchannels()) {
+	if (_ports_are_inputs == other->_ports_are_inputs)
 		return false;
+
+	if (type == DataType::NIL) {
+		for (DataType::iterator t = DataType::begin();
+		                        t != DataType::end(); ++t) {
+			if (!connected_to(other, engine, *t))
+				return false;
+		}
+		return true;
 	}
 
-	for (uint32_t i = 0; i < n_total(); ++i) {
-		Bundle::PortList const & A = channel_ports (i);
-		Bundle::PortList const & B = other->channel_ports (i);
+	uint32_t N = nchannels().n(type);
+	if (other->nchannels().n(type) != N)
+		return false;
 
-		for (uint32_t j = 0; j < A.size(); ++j) {
-			for (uint32_t k = 0; k < B.size(); ++k) {
+	for (uint32_t i = 0; i < N; ++i) {
+		Bundle::PortList const & our_ports =
+			channel_ports (type_channel_to_overall(type, i));
+		Bundle::PortList const & other_ports =
+			other->channel_ports (other->type_channel_to_overall(type, i));
 
-				boost::shared_ptr<Port> p = engine.get_port_by_name (A[j]);
-				boost::shared_ptr<Port> q = engine.get_port_by_name (B[k]);
+		for (Bundle::PortList::const_iterator j = our_ports.begin();
+		                                      j != our_ports.end(); ++j) {
+			boost::shared_ptr<Port> p = engine.get_port_by_name(*j);
+
+			for (Bundle::PortList::const_iterator k = other_ports.begin();
+			                                   k != other_ports.end(); ++k) {
+				boost::shared_ptr<Port> q = engine.get_port_by_name(*k);
 
 				if (!p && !q) {
 					return false;
 				}
 
-				if (p && !p->connected_to (B[k])) {
+				if (p && !p->connected_to (*k)) {
 					return false;
-				} else if (q && !q->connected_to (A[j])) {
+				} else if (q && !q->connected_to (*j)) {
 					return false;
 				}
 			}
