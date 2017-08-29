@@ -54,6 +54,14 @@ LIBPBD_API void pthread_kill_all (int signum);
 LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
 
+LIBPBD_API int pbd_realtime_pthread_create (
+		const int policy, int priority, const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg);
+
+LIBPBD_API int pbd_set_thread_priority (pthread_t, const int policy, int priority);
+
 namespace PBD {
 	LIBPBD_API extern void notify_event_loops_about_thread_creation (pthread_t, const std::string&, int requests = 256);
 	LIBPBD_API extern PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
