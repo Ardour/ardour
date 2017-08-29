@@ -22,6 +22,7 @@
 #include <glibmm/timer.h>
 
 #include "pbd/compose.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/automation_watch.h"
@@ -185,6 +186,7 @@ AutomationWatch::timer ()
 void
 AutomationWatch::thread ()
 {
+	pbd_set_thread_priority (pthread_self(), SCHED_FIFO, -25);
 	while (_run_thread) {
 		Glib::usleep ((gulong) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
