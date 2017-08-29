@@ -563,17 +563,22 @@ Bundle::set_name (string const & n)
 bool
 Bundle::has_same_ports (boost::shared_ptr<Bundle> b) const
 {
-	uint32_t const N = n_total();
+	ChanCount our_count = nchannels();
+	ChanCount other_count = b->nchannels();
 
-	if (b->n_total() != N) {
+	if (our_count != other_count)
 		return false;
-	}
 
-	/* XXX: probably should sort channel port lists before comparing them */
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t N = our_count.n(*t);
+		for (uint32_t i = 0; i < N; ++i) {
+			Bundle::PortList const & our_ports =
+				channel_ports (type_channel_to_overall(*t, i));
+			Bundle::PortList const & other_ports =
+				b->channel_ports (b->type_channel_to_overall(*t, i));
 
-	for (uint32_t i = 0; i < N; ++i) {
-		if (channel_ports (i) != b->channel_ports (i)) {
-			return false;
+			if (our_ports != other_ports)
+				return false;
 		}
 	}
 
