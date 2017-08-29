@@ -237,6 +237,7 @@ private:
 		bool                                    update_pending;
 		bool                                    ignore_change;
 
+
 		/* output */
 
 		Gtk::EventBox* display;
@@ -252,7 +253,11 @@ private:
 		/* layout */
 		Gtk::Table* knobtable;
 		int x0, x1, y0, y1;
+
+		bool short_autostate; // modify with set_short_autostate below
 	};
+
+	void set_short_autostate(ControlUI* cui, bool value);
 
 	std::vector<ControlUI*>   input_controls; // workaround for preset load
 	std::vector<ControlUI*>   input_controls_with_automation;

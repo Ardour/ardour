@@ -573,13 +573,6 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	automate_button.set_name ("plugin automation state button");
 	set_tooltip (automate_button, _("Automation control"));
 
-	/* XXX translators: use a string here that will be at least as long
-	   as the longest automation label (see ::automation_state_changed()
-	   below). be sure to include a descender.
-	*/
-
-	automate_button.set_sizing_text(_("Mgnual"));
-
 	ignore_change = false;
 	update_pending = false;
 	button = false;
@@ -596,6 +589,21 @@ GenericPluginUI::ControlUI::~ControlUI()
 }
 
 void
+GenericPluginUI::set_short_autostate (ControlUI* cui, bool value)
+{
+	cui->short_autostate = value;
+	if (value) {
+		cui->automate_button.set_sizing_text("M");
+	} else {
+		/* XXX translators: use a string here that will be at least as long
+		   as the longest automation label (see ::automation_state_changed()
+		   below). be sure to include a descender. */
+		cui->automate_button.set_sizing_text(_("Mgnual"));
+	}
+	automation_state_changed(cui);
+}
+
+void
 GenericPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
@@ -607,7 +615,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 
 	cui->automate_button.set_active((state != ARDOUR::Off));
 
-	if (cui->knobtable) {
+	if (cui->short_autostate) {
 		cui->automate_button.set_text (
 				GainMeterBase::astate_string (state));
 		return;
@@ -678,6 +686,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
 	control_ui->set_spacing (5);
+	set_short_autostate(control_ui, false);
 
 	if (is_input) {
 
@@ -797,7 +806,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		if (use_knob) {
-			control_ui->automate_button.set_sizing_text("M");
+			set_short_autostate(control_ui, true);
 
 			control_ui->label.set_alignment (0.5, 0.5);
 			control_ui->knobtable = manage (new Table());
