@@ -31,11 +31,11 @@
 #include <glibmm.h>
 
 #include "portaudio_backend.h"
-#include "rt_thread.h"
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/windows_timer_utils.h"
 #include "pbd/windows_mmcss.h"
 
@@ -787,7 +787,7 @@ PortAudioBackend::process_callback(const float* input,
 bool
 PortAudioBackend::start_blocking_process_thread ()
 {
-	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
+	if (pbd_realtime_pthread_create (SCHED_FIFO, -20, 100000,
 				&_main_blocking_thread, blocking_thread_func, this))
 	{
 		if (pthread_create (&_main_blocking_thread, NULL, blocking_thread_func, this))
@@ -1115,7 +1115,7 @@ PortAudioBackend::create_process_thread (boost::function<void()> func)
 
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
-	if (_realtime_pthread_create (SCHED_FIFO, -22, stacksize,
+	if (pbd_realtime_pthread_create (SCHED_FIFO, -22, stacksize,
 				&thread_id, portaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);

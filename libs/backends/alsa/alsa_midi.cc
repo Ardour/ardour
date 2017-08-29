@@ -21,9 +21,9 @@
 #include <glibmm.h>
 
 #include "alsa_midi.h"
-#include "rt_thread.h"
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -72,7 +72,7 @@ static void * pthread_process (void *arg)
 int
 AlsaMidiIO::start ()
 {
-	if (_realtime_pthread_create (SCHED_FIFO, -21, 100000,
+	if (pbd_realtime_pthread_create (SCHED_FIFO, -21, 100000,
 				&_main_thread, pthread_process, this))
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
