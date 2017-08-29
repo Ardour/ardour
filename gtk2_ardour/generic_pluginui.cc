@@ -220,6 +220,7 @@ std::size_t s1pos, s2pos, n = 0;
 
 static const guint32 min_controls_per_column = 17, max_controls_per_column = 24;
 static const float default_similarity_threshold = 0.3;
+static const guint32 max_columns_for_big_autostate = 2;
 
 void
 GenericPluginUI::build ()
@@ -474,6 +475,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	// starting a new column when necessary.
 
 	i = 0;
+	size_t columns = 1;
 	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
 
 		ControlUI* cui = *cuip;
@@ -493,6 +495,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 				frame->add (*box);
 				hpacker.pack_start(*frame, true, true);
 				x = 0;
+				++columns;
 			} else {
 				HSeparator *split = new HSeparator();
 				split->set_size_request(-1, 5);
@@ -501,6 +504,14 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 		}
 		box->pack_start (*cui, false, false);
+	}
+
+	if (columns > max_columns_for_big_autostate) {
+		for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin();
+		                                  cuip != cui_controls_list.end();
+		                                  ++cuip) {
+			set_short_autostate(*cuip, true);
+		}
 	}
 
 	if (is_scrollable) {
