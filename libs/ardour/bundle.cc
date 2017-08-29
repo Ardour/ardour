@@ -361,16 +361,23 @@ Bundle::connect (boost::shared_ptr<Bundle> other, AudioEngine & engine,
 void
 Bundle::disconnect (boost::shared_ptr<Bundle> other, AudioEngine & engine)
 {
-	uint32_t const N = n_total();
-	assert (N == other->n_total());
+	ChanCount our_count = nchannels();
+	ChanCount other_count = other->nchannels();
 
-	for (uint32_t i = 0; i < N; ++i) {
-		Bundle::PortList const & our_ports = channel_ports (i);
-		Bundle::PortList const & other_ports = other->channel_ports (i);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t N = min(our_count.n(*t), other_count.n(*t));
+		for (uint32_t i = 0; i < N; ++i) {
+			Bundle::PortList const & our_ports =
+				channel_ports (type_channel_to_overall(*t, i));
+			Bundle::PortList const & other_ports =
+				other->channel_ports (other->type_channel_to_overall(*t, i));
 
-		for (Bundle::PortList::const_iterator j = our_ports.begin(); j != our_ports.end(); ++j) {
-			for (Bundle::PortList::const_iterator k = other_ports.begin(); k != other_ports.end(); ++k) {
-				engine.disconnect (*j, *k);
+			for (Bundle::PortList::const_iterator j = our_ports.begin();
+						j != our_ports.end(); ++j) {
+				for (Bundle::PortList::const_iterator k = other_ports.begin();
+							k != other_ports.end(); ++k) {
+					engine.disconnect (*j, *k);
+				}
 			}
 		}
 	}
