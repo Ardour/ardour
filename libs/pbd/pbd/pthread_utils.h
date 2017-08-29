@@ -67,4 +67,17 @@ namespace PBD {
 	LIBPBD_API extern PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
+/* pthread-w32 does not support realtime scheduling
+ * (well, windows, doesn't..) and only supports SetThreadPriority()
+ *
+ * pthread_setschedparam() returns ENOTSUP if the policy is not SCHED_OTHER.
+ *
+ * however, pthread_create() with attributes, ignores the policy and
+ * only sets the priority (when PTHREAD_EXPLICIT_SCHED is used).
+ */
+#ifdef PLATFORM_WINDOWS
+#define PBD_SCHED_FIFO SCHED_OTHER
+#else
+#define PBD_SCHED_FIFO SCHED_FIFO
+#endif
 #endif /* __pbd_pthread_utils__ */

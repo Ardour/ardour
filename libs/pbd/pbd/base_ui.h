@@ -32,6 +32,7 @@
 #include "pbd/libpbd_visibility.h"
 #include "pbd/crossthread.h"
 #include "pbd/event_loop.h"
+#include "pbd/pthread_utils.h"
 
 /** A BaseUI is an abstraction designed to be used with any "user
  * interface" (not necessarily graphical) that needs to wait on
@@ -91,7 +92,7 @@ class LIBPBD_API BaseUI : public sigc::trackable, public PBD::EventLoop
 
 	virtual void thread_init () {};
 
-	int set_thread_priority (const int policy = SCHED_FIFO, int priority = 0) const;
+	int set_thread_priority (const int policy = PBD_SCHED_FIFO, int priority = 0) const;
 
 	/** Called when there input ready on the request_channel
 	 */

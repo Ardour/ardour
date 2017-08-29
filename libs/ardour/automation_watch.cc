@@ -186,7 +186,7 @@ AutomationWatch::timer ()
 void
 AutomationWatch::thread ()
 {
-	pbd_set_thread_priority (pthread_self(), SCHED_FIFO, -25);
+	pbd_set_thread_priority (pthread_self(), PBD_SCHED_FIFO, -25);
 	while (_run_thread) {
 		Glib::usleep ((gulong) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
