@@ -221,13 +221,7 @@ ArdourButton::set_sizing_text (const std::string& str)
 		return;
 	}
 	_sizing_text = str;
-	if (!is_realized()) {
-		return;
-	}
-	ensure_layout ();
-	if (_layout) {
-		queue_resize ();
-	}
+	queue_resize ();
 }
 
 void
