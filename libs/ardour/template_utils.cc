@@ -118,7 +118,7 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 					pv->get_property (X_("created-with"), created_with);
 				}
 				rti.created_with = created_with;
-			} catch ( LIBPBD_API::XMLException &e) {}
+			} catch (XMLException &e) {}
 
 			rti.description = _("No Description");
 			try {
@@ -126,7 +126,7 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 				if (desc != 0) {
 					rti.description = desc->attribute_value();
 				}
-			} catch ( LIBPBD_API::XMLException &e) {}
+			} catch (XMLException &e) {}
 		}
 
 		template_names.push_back (rti);
@@ -166,7 +166,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 				pv->get_property (X_("created-with"), created_with);
 			}
 			rti.created_with = created_with;
-		} catch ( LIBPBD_API::XMLException &e) {}
+		} catch (XMLException &e) {}
 
 		rti.description = _("No Description");
 		try {
@@ -174,7 +174,7 @@ find_route_templates (vector<TemplateInfo>& template_names)
 			if (desc != 0) {
 				rti.description = desc->attribute_value();
 			}
-		} catch ( LIBPBD_API::XMLException &e) {}
+		} catch (XMLException &e) {}
 
 		rti.name = IO::name_from_state (*root->children().front());
 		rti.path = fullpath;
