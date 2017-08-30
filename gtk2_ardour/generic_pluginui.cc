@@ -199,8 +199,8 @@ GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 	GtkRequisition request = hpacker.size_request();
 
 	if (request.width > maximum_width) {
-		for (vector<ControlUI*>::const_iterator cuip = input_controls.cbegin();
-		                                        cuip != input_controls.cend();
+		for (vector<ControlUI*>::const_iterator cuip = input_controls.begin();
+		                                        cuip != input_controls.end();
 		                                        ++cuip) {
 			if (!(*cuip)->short_autostate)
 				set_short_autostate(*cuip, true);
