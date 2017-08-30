@@ -301,6 +301,8 @@ private:
 	                        Gtk::FileChooserButton*            widget);
 	void path_property_changed (uint32_t key, const ARDOUR::Variant& value);
 
+	void scroller_size_request (Gtk::Requisition*);
+	Gtk::ScrolledWindow scroller;
 };
 
 class PluginUIWindow : public ArdourWindow

@@ -138,22 +138,28 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (*constraint_hbox, false, false);
 
-	if (is_scrollable) {
-		Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow());
-		scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-		scroller->set_name ("PluginEditor");
-		scroller->add (hpacker);
-		main_contents.pack_start (*scroller, true, true);
-	} else {
-		main_contents.pack_start (hpacker, false, false);
-	}
-
 	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
 
 	bypass_button.set_active (!pi->enabled());
 
+	/* ScrolledWindow will wrap hpacker in a Viewport */
+	scroller.add (hpacker);
+	Viewport* view = static_cast<Viewport*>(scroller.get_child());
+	view->set_shadow_type(Gtk::SHADOW_NONE);
+
+	main_contents.pack_start (scroller, true, true);
+
 	prefheight = 0;
 	build ();
+
+	if (is_scrollable) {
+		scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		scroller.set_name ("PluginEditor");
+	} else {
+		scroller.signal_size_request().connect (sigc::mem_fun(*this, &GenericPluginUI::scroller_size_request));
+		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+	}
+
 
 	/* Listen for property changes that are not notified normally because
 	 * AutomationControl has only support for numeric values currently.
@@ -170,6 +176,39 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+}
+
+void
+GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
+{
+	Glib::RefPtr<Gdk::Screen> screen = get_screen();
+	if (!screen)
+		screen = Gdk::Screen::get_default();
+
+	int maximum_width;
+	{
+		Gdk::Rectangle monitor;
+		const int monitor_num = screen->get_monitor_at_window (get_window ());
+		screen->get_monitor_geometry (
+				(monitor_num < 0) ? 0 : monitor_num,
+				monitor);
+
+		maximum_width = monitor.get_width() * 0.9;
+	}
+
+	GtkRequisition request = hpacker.size_request();
+
+	if (request.width > maximum_width) {
+		for (vector<ControlUI*>::const_iterator cuip = input_controls.cbegin();
+		                                        cuip != input_controls.cend();
+		                                        ++cuip) {
+			if (!(*cuip)->short_autostate)
+				set_short_autostate(*cuip, true);
+		}
+		request = hpacker.size_request();
+	}
+
+	a->width = min(request.width, maximum_width);
 }
 
 // Some functions for calculating the 'similarity' of two plugin
@@ -220,7 +259,6 @@ std::size_t s1pos, s2pos, n = 0;
 
 static const guint32 min_controls_per_column = 17, max_controls_per_column = 24;
 static const float default_similarity_threshold = 0.3;
-static const guint32 max_columns_for_big_autostate = 2;
 
 void
 GenericPluginUI::build ()
@@ -475,7 +513,6 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	// starting a new column when necessary.
 
 	i = 0;
-	size_t columns = 1;
 	for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin(); cuip != cui_controls_list.end(); ++cuip, ++i) {
 
 		ControlUI* cui = *cuip;
@@ -495,7 +532,6 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 				frame->add (*box);
 				hpacker.pack_start(*frame, true, true);
 				x = 0;
-				++columns;
 			} else {
 				HSeparator *split = new HSeparator();
 				split->set_size_request(-1, 5);
@@ -504,14 +540,6 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 		}
 		box->pack_start (*cui, false, false);
-	}
-
-	if (columns > max_columns_for_big_autostate) {
-		for (vector<ControlUI*>::const_iterator cuip = control_uis.cbegin();
-		                                        cuip != control_uis.cend();
-		                                        ++cuip) {
-			set_short_autostate(*cuip, true);
-		}
 	}
 
 	if (is_scrollable) {
