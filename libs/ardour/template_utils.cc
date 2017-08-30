@@ -101,26 +101,32 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 		rti.path = *i;
 
 		if (read_xml) {
+
 			XMLTree tree;
 			if (!tree.read (file.c_str())) {
+				cerr << "Failed to parse Route-template XML file: " << file;
 				continue;
 			}
 
-			string created_with = _("(unknown)");
-			XMLNode *pv = tree.root()->child("ProgramVersion");
-			if (pv != 0) {
-				pv->get_property (X_("created-with"), created_with);
-			}
+			XMLNode* root = tree.root();
+			
+			rti.created_with = _("(unknown)");
+			try {
+				XMLNode *pv = root->child("ProgramVersion");
+				string created_with;
+				if (pv != 0) {
+					pv->get_property (X_("created-with"), created_with);
+				}
+				rti.created_with = created_with;
+			} catch ( LIBPBD_API::XMLException &e) {}
 
-			string description = _("No Description");
-			XMLNode *desc = tree.root()->child("description");
-			if (desc != 0) {
-				description = desc->attribute_value();
-			}
-
-			rti.created_with = created_with;
-			rti.description = description;
-
+			rti.description = _("No Description");
+			try {
+				XMLNode *desc = root->child("description");
+				if (desc != 0) {
+					rti.description = desc->attribute_value();
+				}
+			} catch ( LIBPBD_API::XMLException &e) {}
 		}
 
 		template_names.push_back (rti);
@@ -144,22 +150,34 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
+			cerr << "Failed to parse Route-template XML file: " << fullpath;
 			continue;
 		}
 
 		XMLNode* root = tree.root();
 
-		string description = _("No Description");
-		XMLNode* desc = tree.root()->child ("description");
-		if (desc) {
-			description = desc->attribute_value ();
-		}
-
 		TemplateInfo rti;
+
+		rti.created_with = _("(unknown)");
+		try {
+			XMLNode *pv = root->child("ProgramVersion");
+			string created_with;
+			if (pv != 0) {
+				pv->get_property (X_("created-with"), created_with);
+			}
+			rti.created_with = created_with;
+		} catch ( LIBPBD_API::XMLException &e) {}
+
+		rti.description = _("No Description");
+		try {
+			XMLNode *desc = root->child("description");
+			if (desc != 0) {
+				rti.description = desc->attribute_value();
+			}
+		} catch ( LIBPBD_API::XMLException &e) {}
 
 		rti.name = IO::name_from_state (*root->children().front());
 		rti.path = fullpath;
-		rti.description = description;
 
 		template_names.push_back (rti);
 	}
