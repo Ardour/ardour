@@ -131,7 +131,7 @@ public:
 	XMLNode* add_child_copy(const XMLNode&);
 	void     add_child_nocopy(XMLNode&);
 
-	std::string attribute_value();
+	std::string attribute_value();  //throws XMLException if attribute doesn't exist
 
 	const XMLPropertyList& properties() const { return _proplist; }
 	XMLProperty const *    property(const char*) const;
