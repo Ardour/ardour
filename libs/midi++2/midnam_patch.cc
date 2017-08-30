@@ -567,8 +567,12 @@ ChannelNameSet::set_state (const XMLTree& tree, const XMLNode& node)
 			for (XMLSharedNodeList::const_iterator i = channels->begin();
 			    i != channels->end();
 			    ++i) {
-				_available_for_channels.insert(
-					string_to_int(tree, (*i)->attribute_value()));
+				try {
+					_available_for_channels.insert(
+							string_to_int(tree, (*i)->attribute_value()));
+				} catch (XMLException &e) {
+					cerr << "ChannelNameSet::set_state: " << e.what () << endl;
+				}
 			}
 		} else if (node->name() == "PatchBank") {
 			boost::shared_ptr<PatchBank> bank (new PatchBank ());
