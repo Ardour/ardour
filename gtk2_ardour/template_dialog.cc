@@ -429,10 +429,12 @@ TemplateManager::save_template_desc ()
 	}
 
 	tree.root()->remove_nodes_and_delete (X_("description"));
-	XMLNode* desc = new XMLNode (X_("description"));
 
-	XMLNode* dn = new XMLNode (X_("content"), desc_txt);
-	desc->add_child_nocopy (*dn);
+	if (!desc_txt.empty ()) {
+		XMLNode* desc = new XMLNode (X_("description"));
+		XMLNode* dn = new XMLNode (X_("content"), desc_txt);
+		desc->add_child_nocopy (*dn);
+	}
 
 	tree.root()->add_child_nocopy (*desc);
 
