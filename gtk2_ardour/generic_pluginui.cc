@@ -507,9 +507,9 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	}
 
 	if (columns > max_columns_for_big_autostate) {
-		for (vector<ControlUI*>::iterator cuip = cui_controls_list.begin();
-		                                  cuip != cui_controls_list.end();
-		                                  ++cuip) {
+		for (vector<ControlUI*>::const_iterator cuip = control_uis.cbegin();
+		                                        cuip != control_uis.cend();
+		                                        ++cuip) {
 			set_short_autostate(*cuip, true);
 		}
 	}
