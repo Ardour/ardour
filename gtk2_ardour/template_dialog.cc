@@ -434,9 +434,8 @@ TemplateManager::save_template_desc ()
 		XMLNode* desc = new XMLNode (X_("description"));
 		XMLNode* dn = new XMLNode (X_("content"), desc_txt);
 		desc->add_child_nocopy (*dn);
+		tree.root()->add_child_nocopy (*desc);
 	}
-
-	tree.root()->add_child_nocopy (*desc);
 
 	if (!tree.write ()) {
 		error << string_compose(X_("Could not write to template file \"%1\"."), file_path) << endmsg;
