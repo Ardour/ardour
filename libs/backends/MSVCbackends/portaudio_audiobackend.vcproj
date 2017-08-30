@@ -327,10 +327,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\portaudio\rt_thread.h"
-				>
-			</File>
-			<File
 				RelativePath="..\portaudio\winmmemidi_input_device.h"
 				>
 			</File>
