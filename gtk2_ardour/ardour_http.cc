@@ -15,6 +15,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
+#define ARDOURCURLDEBUG
 
 #include <assert.h>
 #include <stdlib.h>
@@ -35,6 +36,12 @@
 
 #ifndef ARDOUR_CURL_TIMEOUT
 #define ARDOUR_CURL_TIMEOUT (60)
+#endif
+
+#ifdef ARDOURCURLDEBUG
+#define CCERR(msg) do { if (cc != CURLE_OK) { std::cerr << string_compose ("curl_easy_setopt(%1) failed: %2", msg, cc) << std::endl; } } while (0)
+#else
+#define CCERR(msg)
 #endif
 
 using namespace ArdourCurl;
@@ -106,6 +113,9 @@ WriteMemoryCallback (void *ptr, size_t size, size_t nmemb, void *data) {
 static size_t headerCallback (char* ptr, size_t size, size_t nmemb, void* data)
 {
 	size_t realsize = size * nmemb;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << string_compose ("ArdourCurl HTTP-header recv %1 bytes", realsize) << std::endl;
+#endif
 	struct HttpGet::HeaderInfo *nfo = (struct HttpGet::HeaderInfo*)data;
 	std::string header (static_cast<const char*>(ptr), realsize);
 	std::string::size_type index = header.find (':', 0);
@@ -115,6 +125,9 @@ static size_t headerCallback (char* ptr, size_t size, size_t nmemb, void* data)
 		k.erase(k.find_last_not_of (" \n\r\t")+1);
 		v.erase(v.find_last_not_of (" \n\r\t")+1);
 		nfo->h[k] = v;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << string_compose ("ArdourCurl HTTP-header  '%1' = '%2'", k, v) << std::endl;
+#endif
 	}
 
 	return realsize;
@@ -128,14 +141,22 @@ HttpGet::HttpGet (bool p, bool ssl)
 	memset (error_buffer, 0, sizeof (*error_buffer));
 	_curl = curl_easy_init ();
 
-	curl_easy_setopt (_curl, CURLOPT_WRITEDATA, (void *)&mem);
-	curl_easy_setopt (_curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback);
-	curl_easy_setopt (_curl, CURLOPT_HEADERDATA, (void *)&nfo);
-	curl_easy_setopt (_curl, CURLOPT_HEADERFUNCTION, headerCallback);
-	curl_easy_setopt (_curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING);
-	curl_easy_setopt (_curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT);
-	curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1);
-	curl_easy_setopt (_curl, CURLOPT_ERRORBUFFER, error_buffer);
+	if (!_curl) {
+		std::cerr << "HttpGet::HttpGet curl_easy_init() failed." << std::endl;
+		return;
+	}
+
+	CURLcode cc;
+
+	cc = curl_easy_setopt (_curl, CURLOPT_WRITEDATA, (void *)&mem); CCERR ("CURLOPT_WRITEDATA");
+	cc = curl_easy_setopt (_curl, CURLOPT_WRITEFUNCTION, WriteMemoryCallback); CCERR ("CURLOPT_WRITEFUNCTION");
+	cc = curl_easy_setopt (_curl, CURLOPT_HEADERDATA, (void *)&nfo); CCERR ("CURLOPT_HEADERDATA");
+	cc = curl_easy_setopt (_curl, CURLOPT_HEADERFUNCTION, headerCallback); CCERR ("CURLOPT_HEADERFUNCTION");
+	cc = curl_easy_setopt (_curl, CURLOPT_USERAGENT, PROGRAM_NAME VERSIONSTRING); CCERR ("CURLOPT_USERAGENT");
+	cc = curl_easy_setopt (_curl, CURLOPT_TIMEOUT, ARDOUR_CURL_TIMEOUT); CCERR ("CURLOPT_TIMEOUT");
+	cc = curl_easy_setopt (_curl, CURLOPT_NOSIGNAL, 1); CCERR ("CURLOPT_NOSIGNAL");
+	cc = curl_easy_setopt (_curl, CURLOPT_ERRORBUFFER, error_buffer); CCERR ("CURLOPT_ERRORBUFFER");
+	// cc= curl_easy_setopt (_curl, CURLOPT_FOLLOWLOCATION, 1); CCERR ("CURLOPT_FOLLOWLOCATION");
 
 	// by default use curl's default.
 	if (ssl && ca_info) {
@@ -148,7 +169,9 @@ HttpGet::HttpGet (bool p, bool ssl)
 
 HttpGet::~HttpGet ()
 {
-	curl_easy_cleanup (_curl);
+	if (_curl) {
+		curl_easy_cleanup (_curl);
+	}
 	if (!persist) {
 		free (mem.data);
 	}
@@ -157,12 +180,23 @@ HttpGet::~HttpGet ()
 char*
 HttpGet::get (const char* url)
 {
+#ifdef ARDOURCURLDEBUG
+		std::cerr << "HttpGet::get() ---- new request ---"<< std::endl;
+#endif
 	_status = _result = -1;
 	if (!_curl || !url) {
+		PBD::error << "HttpGet::get() not initialized (or NULL url)"<< endmsg;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << "HttpGet::get() not initialized (or NULL url)"<< std::endl;
+#endif
 		return NULL;
 	}
 
 	if (strncmp ("http://", url, 7) && strncmp ("https://", url, 8)) {
+		PBD::error << "HttpGet::get() not a http[s] URL"<< endmsg;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << "HttpGet::get() not a http[s] URL"<< std::endl;
+#endif
 		return NULL;
 	}
 
@@ -174,16 +208,26 @@ HttpGet::get (const char* url)
 	mem.data = NULL;
 	mem.size = 0;
 
-	curl_easy_setopt (_curl, CURLOPT_URL, url);
+	CURLcode cc;
+
+	cc = curl_easy_setopt (_curl, CURLOPT_URL, url);
+	CCERR ("CURLOPT_URL");
 	_result = curl_easy_perform (_curl);
-	curl_easy_getinfo (_curl, CURLINFO_RESPONSE_CODE, &_status);
+	cc = curl_easy_getinfo (_curl, CURLINFO_RESPONSE_CODE, &_status);
+	CCERR ("CURLINFO_RESPONSE_CODE,");
 
 	if (_result) {
 		PBD::error << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer) << endmsg;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer) << std::endl;
+#endif
 		return NULL;
 	}
 	if (_status != 200) {
 		PBD::error << string_compose (_("HTTP request status: %1"), _status) << endmsg;
+#ifdef ARDOURCURLDEBUG
+		std::cerr << string_compose (_("HTTP request status: %1"), _status) << std::endl;
+#endif
 		return NULL;
 	}
 
