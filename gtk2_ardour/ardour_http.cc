@@ -127,7 +127,7 @@ HttpGet::HttpGet (bool p, bool ssl)
 	, _status (-1)
 	, _result (-1)
 {
-	error_buffer[0] = '\0';
+	memset (error_buffer, 0, sizeof (*error_buffer));
 	_curl = curl_easy_init ();
 
 	curl_easy_setopt (_curl, CURLOPT_WRITEDATA, (void *)&mem);
@@ -172,6 +172,7 @@ HttpGet::get (const char* url)
 		free (mem.data);
 	} // otherwise caller is expected to have free()d or re-used it.
 
+	memset (error_buffer, 0, sizeof (*error_buffer));
 	mem.data = NULL;
 	mem.size = 0;
 
@@ -180,11 +181,11 @@ HttpGet::get (const char* url)
 	curl_easy_getinfo (_curl, CURLINFO_RESPONSE_CODE, &_status);
 
 	if (_result) {
-		PBD::error << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer);
+		PBD::error << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer) << endmsg;
 		return NULL;
 	}
 	if (_status != 200) {
-		PBD::error << string_compose (_("HTTP request status: %1"), _status);
+		PBD::error << string_compose (_("HTTP request status: %1"), _status) << endmsg;
 		return NULL;
 	}
 
