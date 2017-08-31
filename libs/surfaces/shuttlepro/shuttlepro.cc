@@ -295,19 +295,7 @@ ShuttleproControlProtocol::acquire_device ()
 		return err;
 	}
 
-
-	if (libusb_kernel_driver_active (_dev_handle, 0)) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "Detatching kernel driver\n");
-		err = libusb_detach_kernel_driver (_dev_handle, 0);
-		if (err == LIBUSB_ERROR_NOT_SUPPORTED) {
-			err = 0;
-		}
-		if (err < 0) {
-			DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("could not detatch kernel driver %d\n", err));
-			goto usb_close;
-		}
-		_needs_reattach = true;
-	}
+	libusb_set_auto_detach_kernel_driver (_dev_handle, true);
 
 	if ((err = libusb_claim_interface (_dev_handle, 0x00))) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to claim USB device\n");
@@ -352,10 +340,6 @@ ShuttleproControlProtocol::release_device ()
 	libusb_close (_dev_handle);
 	libusb_free_transfer (_usb_transfer);
 	libusb_release_interface (_dev_handle, 0);
-	if (_needs_reattach) {
-		libusb_attach_kernel_driver (_dev_handle, 0);
-		_needs_reattach = false;
-	}
 	_usb_transfer = 0;
 	_dev_handle = 0;
 }
