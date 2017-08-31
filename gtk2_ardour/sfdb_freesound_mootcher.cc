@@ -142,8 +142,6 @@ std::string Mootcher::sortMethodString(enum sortMethod sort)
 //------------------------------------------------------------------------
 void Mootcher::setcUrlOptions()
 {
-	// basic init for curl
-	curl_global_init(CURL_GLOBAL_ALL);
 	// some servers don't like requests that are made without a user-agent field, so we provide one
 	curl_easy_setopt(curl, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	// setup curl error buffer

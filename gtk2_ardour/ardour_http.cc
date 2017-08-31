@@ -59,8 +59,6 @@ HttpGet::setup_certificate_paths ()
 	 */
 	assert (!ca_path && !ca_info); // call once
 
-	curl_global_init (CURL_GLOBAL_DEFAULT);
-
 	if (Glib::file_test ("/etc/pki/tls/certs/ca-bundle.crt", Glib::FILE_TEST_EXISTS|Glib::FILE_TEST_IS_REGULAR)) {
 		// Fedora / RHEL, Arch
 		ca_info = "/etc/pki/tls/certs/ca-bundle.crt";

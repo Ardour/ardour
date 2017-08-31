@@ -31,6 +31,8 @@
 #include <fftw3.h>
 #endif
 
+#include <curl/curl.h>
+
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
@@ -287,6 +289,11 @@ int main (int argc, char *argv[])
 #endif
 {
 	ARDOUR::check_for_old_configuration_files();
+
+	/* global init is not thread safe.*/
+	if (curl_global_init (CURL_GLOBAL_DEFAULT)) {
+		cerr << "curl_global_init() failed. The web is gone. We're all doomed." << endl;
+	}
 
 	fixup_bundle_environment (argc, argv, localedir);
 
