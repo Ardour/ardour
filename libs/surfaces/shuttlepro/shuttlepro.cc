@@ -403,7 +403,7 @@ ShuttleproControlProtocol::handle_event () {
 	}
 	if (_usb_transfer->status != LIBUSB_TRANSFER_COMPLETED) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose("libusb_transfer not completed: %1\n", _usb_transfer->status));
-		stop ();
+		_error = LIBUSB_ERROR_NO_DEVICE;
 		return;
 	}
 
