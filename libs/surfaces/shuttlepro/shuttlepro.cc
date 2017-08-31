@@ -87,8 +87,6 @@ ShuttleproControlProtocol::probe ()
 int
 ShuttleproControlProtocol::set_active (bool yn)
 {
-	int result;
-
 	DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("set_active() init with yn: '%1'\n", yn));
 
 	if (yn == active()) {
@@ -96,16 +94,16 @@ ShuttleproControlProtocol::set_active (bool yn)
 	}
 
 	if (yn) {
-		result = start ();
+		_error = start ();
 	} else {
-		result = stop ();
+		_error = stop ();
 	}
 
 	ControlProtocol::set_active (yn);
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "set_active() fin\n");
 
-	return result;
+	return _error;
 }
 
 XMLNode&
@@ -235,35 +233,80 @@ ShuttleproControlProtocol::wait_for_event ()
 	return true;
 }
 
+int
+get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
+{
+	struct libusb_device **devs;
+	struct libusb_device *dev;
+	size_t i = 0;
+	int r;
+
+	*device = 0;
+
+	if (libusb_get_device_list (0, &devs) < 0) {
+		return LIBUSB_ERROR_NO_DEVICE;
+	}
+
+	while ((dev = devs[i++])) {
+		struct libusb_device_descriptor desc;
+		r = libusb_get_device_descriptor (dev, &desc);
+		if (r < 0) {
+			cout << "Descriptor " << libusb_strerror ((libusb_error)r) << endl;
+			goto out;
+		}
+		if (desc.idVendor == vendor_id && desc.idProduct == product_id) {
+			*device = dev;
+			break;
+		}
+	}
+
+out:
+	libusb_free_device_list(devs, 1);
+	if (!dev && !r) {
+		return LIBUSB_ERROR_NO_DEVICE;
+	}
+	return r;
+}
 
 int
-ShuttleproControlProtocol::aquire_device ()
+ShuttleproControlProtocol::acquire_device ()
 {
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "aquire_device()\n");
+	DEBUG_TRACE (DEBUG::ShuttleproControl, "acquire_device()\n");
 
 	int err;
 
 	if (_dev_handle) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "already have a device handle\n");
-		return -1;
+		return LIBUSB_SUCCESS;
 	}
 
-	if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, CounterDesign, ShuttlePRO)) == 0) {
-		DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttlePRO found\n");
-		if ((_dev_handle = libusb_open_device_with_vid_pid (NULL, CounterDesign, ShuttleXpress)) == 0) {
-			DEBUG_TRACE (DEBUG::ShuttleproControl, "No ShuttleXpress found\n");
-			return -1;
+	libusb_device* dev;
+
+	if ((err = get_usb_device (CounterDesign, ShuttlePRO, &dev)) != 0) {
+		if ((err = get_usb_device (CounterDesign, ShuttleXpress, &dev)) != 0) {
+			cout << "Returning " << libusb_strerror ((libusb_error) err) << endl;
+			return err;
 		}
+	}
+
+	err = libusb_open (dev, &_dev_handle);
+	if (err < 0) {
+		cout << "Open: " << libusb_strerror ((libusb_error)err) << endl;
+		return err;
 	}
 
 
 	if (libusb_kernel_driver_active (_dev_handle, 0)) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "Detatching kernel driver\n");
 		err = libusb_detach_kernel_driver (_dev_handle, 0);
+		if (err == LIBUSB_ERROR_NOT_SUPPORTED) {
+			err = 0;
+		}
 		if (err < 0) {
 			DEBUG_TRACE (DEBUG::ShuttleproControl, string_compose ("could not detatch kernel driver %d\n", err));
 			goto usb_close;
 		}
+		_needs_reattach = true;
 	}
 
 	if ((err = libusb_claim_interface (_dev_handle, 0x00))) {
@@ -274,7 +317,7 @@ ShuttleproControlProtocol::aquire_device ()
 	_usb_transfer = libusb_alloc_transfer (0);
 	if (!_usb_transfer) {
 		DEBUG_TRACE (DEBUG::ShuttleproControl, "failed to alloc usb transfer\n");
-		err = -ENOMEM;
+		err = LIBUSB_ERROR_NO_MEM;
 		goto usb_close;
 	}
 
@@ -288,7 +331,7 @@ ShuttleproControlProtocol::aquire_device ()
 		goto free_transfer;
 	}
 
-	return 0;
+	return LIBUSB_SUCCESS;
 
  free_transfer:
 	libusb_free_transfer (_usb_transfer);
@@ -309,6 +352,10 @@ ShuttleproControlProtocol::release_device ()
 	libusb_close (_dev_handle);
 	libusb_free_transfer (_usb_transfer);
 	libusb_release_interface (_dev_handle, 0);
+	if (_needs_reattach) {
+		libusb_attach_kernel_driver (_dev_handle, 0);
+		_needs_reattach = false;
+	}
 	_usb_transfer = 0;
 	_dev_handle = 0;
 }
@@ -320,12 +367,12 @@ ShuttleproControlProtocol::start ()
 
 	_supposed_to_quit = false;
 
-	int err = aquire_device();
+	int err = acquire_device();
 	if (err) {
 		return err;
 	}
 
-	if (!_dev_handle) {
+	if (!_dev_handle) { // can this actually happen?
 		return -1;
 	}
 

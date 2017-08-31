@@ -18,6 +18,7 @@
 
 */
 
+#include <libusb.h>
 
 #include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
@@ -30,10 +31,7 @@
 
 #include "pbd/unwind.h"
 
-#include "ardour/audioengine.h"
 #include "ardour/debug.h"
-#include "ardour/port.h"
-#include "ardour/midi_port.h"
 
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -80,6 +78,9 @@ private:
 
 	void init_on_show ();
 	bool reset_test_state (GdkEventAny* = 0);
+
+	Gtk::Label _device_state_lbl;
+	void update_device_state ();
 };
 
 
@@ -97,7 +98,16 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	, _test_button (_("Button Test"), ArdourButton::led_default_elements)
 	, _keep_rolling (_("Keep rolling after jumps"))
 	, _jog_distance (scp._jog_distance)
+	, _device_state_lbl ()
 {
+	Frame* dg_frame = manage (new Frame (_("Device")));
+	Table* dg_table = manage (new Table);
+	dg_frame->add (*dg_table);
+	dg_table->attach (_device_state_lbl, 0,1, 0,2);
+
+	_device_state_lbl.set_line_wrap (true);
+	update_device_state ();
+
 	Frame* sj_frame = manage (new Frame (_("Shuttle speeds and jog jump distances")));
 	Table* sj_table = manage (new Table);
 	sj_frame->set_border_width (6);
@@ -169,7 +179,10 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	set_spacing (6);
 	btn_action_box->pack_start (*table, false, false);
 
-	pack_start (*sj_frame);
+	HBox* top_box = manage (new HBox);
+	top_box->pack_start (*dg_frame);
+	top_box->pack_start (*sj_frame);
+	pack_start (*top_box);
 	pack_start (*btn_action_frame);
 
 	_scp.ButtonPress.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_press, this, _1), gui_context ());
@@ -251,6 +264,17 @@ void
 ShuttleproGUI::test_button_release (unsigned short btn)
 {
 	_btn_leds[btn]->set_active_state (ActiveState::Off);
+}
+
+void
+ShuttleproGUI::update_device_state ()
+{
+	if (_scp._error) {
+		_device_state_lbl.set_markup (string_compose ("<span weight=\"bold\" foreground=\"red\">Device not working:</span> %1",
+							      libusb_strerror ((libusb_error)_scp._error)));
+	} else {
+		_device_state_lbl.set_markup ("<span weight=\"bold\" foreground=\"green\">Device working</span>");
+	}
 }
 
 void*

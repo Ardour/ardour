@@ -101,7 +101,7 @@ private:
 
 	void thread_init ();
 
-	int aquire_device ();
+	int acquire_device ();
 	void release_device ();
 
 	void handle_button_press (unsigned short btn);
@@ -144,6 +144,9 @@ private:
 
 	mutable void* _gui;
 	void build_gui ();
+
+	int _error;
+	bool _needs_reattach;
 };
 
 
