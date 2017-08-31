@@ -80,7 +80,9 @@ private:
 	bool reset_test_state (GdkEventAny* = 0);
 
 	Gtk::Label _device_state_lbl;
+	ArdourWidgets::ArdourButton _retry_button;
 	void update_device_state ();
+	void retry_get_device ();
 };
 
 
@@ -99,11 +101,16 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	, _keep_rolling (_("Keep rolling after jumps"))
 	, _jog_distance (scp._jog_distance)
 	, _device_state_lbl ()
+	, _retry_button (_("Retry"))
 {
 	Frame* dg_frame = manage (new Frame (_("Device")));
-	Table* dg_table = manage (new Table);
-	dg_frame->add (*dg_table);
-	dg_table->attach (_device_state_lbl, 0,1, 0,2);
+	VBox* dg_box = manage (new VBox);
+	dg_frame->add (*dg_box);
+	dg_box->pack_start (_device_state_lbl);
+
+	dg_box->pack_start (_retry_button);
+
+	_retry_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::retry_get_device));
 
 	_device_state_lbl.set_line_wrap (true);
 	update_device_state ();
@@ -275,6 +282,13 @@ ShuttleproGUI::update_device_state ()
 	} else {
 		_device_state_lbl.set_markup ("<span weight=\"bold\" foreground=\"green\">Device working</span>");
 	}
+}
+
+void
+ShuttleproGUI::retry_get_device ()
+{
+	_scp.start ();
+	update_device_state ();
 }
 
 void*

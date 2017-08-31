@@ -94,9 +94,9 @@ ShuttleproControlProtocol::set_active (bool yn)
 	}
 
 	if (yn) {
-		_error = start ();
+		start ();
 	} else {
-		_error = stop ();
+		stop ();
 	}
 
 	ControlProtocol::set_active (yn);
@@ -360,20 +360,21 @@ ShuttleproControlProtocol::release_device ()
 	_dev_handle = 0;
 }
 
-int
+void
 ShuttleproControlProtocol::start ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "start()\n");
 
 	_supposed_to_quit = false;
 
-	int err = acquire_device();
-	if (err) {
-		return err;
+	_error = acquire_device();
+	if (_error) {
+		return;
 	}
 
 	if (!_dev_handle) { // can this actually happen?
-		return -1;
+		_error = -1;
+		return;
 	}
 
 	_state.shuttle = 0;
@@ -388,11 +389,10 @@ ShuttleproControlProtocol::start ()
 	g_source_ref (_io_source);
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "start() fin\n");
-	return 0;
 }
 
 
-int
+void
 ShuttleproControlProtocol::stop ()
 {
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "stop()\n");
@@ -410,7 +410,6 @@ ShuttleproControlProtocol::stop ()
 	}
 
 	DEBUG_TRACE (DEBUG::ShuttleproControl, "stop() fin\n");
-	return 0;
 }
 
 void

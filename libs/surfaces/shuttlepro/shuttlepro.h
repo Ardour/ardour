@@ -92,8 +92,8 @@ public:
 
 private:
 	void do_request (ShuttleproControlUIRequest*);
-	int start ();
-	int stop ();
+	void start ();
+	void stop ();
 
 	bool has_editor () const { return true; }
 	void* get_gui () const;
