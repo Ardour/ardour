@@ -78,10 +78,10 @@ private:
 
 	void init_on_show ();
 	bool reset_test_state (GdkEventAny* = 0);
+	bool update_device_state ();
 
 	Gtk::Label _device_state_lbl;
 	ArdourWidgets::ArdourButton _retry_button;
-	void update_device_state ();
 	void retry_get_device ();
 };
 
@@ -113,7 +113,6 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	_retry_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::retry_get_device));
 
 	_device_state_lbl.set_line_wrap (true);
-	update_device_state ();
 
 	Frame* sj_frame = manage (new Frame (_("Shuttle speeds and jog jump distances")));
 	Table* sj_table = manage (new Table);
@@ -196,6 +195,8 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	_scp.ButtonRelease.connect (*this, invalidator (*this), boost::bind (&ShuttleproGUI::test_button_release, this, _1), gui_context ());
 
 	signal_map().connect (sigc::mem_fun (*this, &ShuttleproGUI::init_on_show));
+	signal_focus_in_event().connect (sigc::hide (sigc::mem_fun (*this, &ShuttleproGUI::update_device_state)));
+	update_device_state ();
 }
 
 void
@@ -273,7 +274,7 @@ ShuttleproGUI::test_button_release (unsigned short btn)
 	_btn_leds[btn]->set_active_state (ActiveState::Off);
 }
 
-void
+bool
 ShuttleproGUI::update_device_state ()
 {
 	if (_scp._error) {
@@ -282,6 +283,8 @@ ShuttleproGUI::update_device_state ()
 	} else {
 		_device_state_lbl.set_markup ("<span weight=\"bold\" foreground=\"green\">Device working</span>");
 	}
+
+	return false;
 }
 
 void
