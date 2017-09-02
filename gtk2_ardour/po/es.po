@@ -1,3 +1,7 @@
+# Spanish translation of gtk-ardour.
+# This file is distributed under the same license as the gtk-ardour package.
+#
+# Pablo Fernández <pablo.fbus@gmail.com>, 2016
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk2_ardour\n"

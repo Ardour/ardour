@@ -1,7 +1,6 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR "Paul Davis"
-# This file is distributed under the same license as the PACKAGE package.
-# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+# Chinese translation of gtk-ardour.
+# Copyright (C) 2008 Paul Davis
+# This file is distributed under the same license as the gtk-ardour package.
 # 一善鱼 <YQ-YSY@163.com> 翻译于 2016-07-29
 msgid ""
 msgstr ""

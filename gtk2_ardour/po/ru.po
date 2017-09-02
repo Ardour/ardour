@@ -2,7 +2,7 @@
 # Copyright (C) 2004 Paul Davis
 # This file is distributed under the same license as the gtk-ardour package.
 #
-# Igor Blinov pitstop@nm.ru, 2004.
+# Igor Blinov <pitstop@nm.ru>, 2004.
 # Александр Кольцов <ag1455@mail.ru>, 2014-2016
 # Петр Семилетов <tea@list.ru>? 2016
 # Alexandre Prokoudine <alexandre.prokoudine@gmail.com>, 2006-2017, 2017.
