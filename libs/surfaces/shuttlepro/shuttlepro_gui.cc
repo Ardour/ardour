@@ -104,11 +104,14 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	, _retry_button (_("Retry"))
 {
 	Frame* dg_frame = manage (new Frame (_("Device")));
+	dg_frame->set_size_request (300, -1);
 	VBox* dg_box = manage (new VBox);
 	dg_frame->add (*dg_box);
+	dg_box->set_border_width (6);
 	dg_box->pack_start (_device_state_lbl);
 
 	dg_box->pack_start (_retry_button);
+	_retry_button.set_size_request (64, -1);
 
 	_retry_button.signal_clicked.connect (sigc::mem_fun (*this, &ShuttleproGUI::retry_get_device));
 
@@ -121,7 +124,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	sj_frame->add (*sj_table);
 
 	Label* speed_label = manage (new Label (_("Transport speeds for the shuttle positions:"), ALIGN_START));
-	sj_table->attach (*speed_label, 0,1, 0,1);
+	sj_table->attach (*speed_label, 0,1, 0,1, FILL|EXPAND, FILL|EXPAND, /* xpadding = */ 12);
 
 	HBox* speed_box = manage (new HBox);
 	for (int i=0; i != ShuttleproControlProtocol::num_shuttle_speeds; ++i) {
@@ -137,7 +140,7 @@ ShuttleproGUI::ShuttleproGUI (ShuttleproControlProtocol& scp)
 	Label* jog_label = manage (new Label (_("Jump distance for jog wheel:"), ALIGN_START));
 	_jog_distance.Changed.connect (sigc::mem_fun (*this, &ShuttleproGUI::update_jog_distance));
 
-	sj_table->attach (*jog_label, 0,1, 1,2);
+	sj_table->attach (*jog_label, 0,1, 1,2, FILL|EXPAND, FILL|EXPAND, /* xpadding = */ 12);
 	sj_table->attach (_jog_distance, 1,2, 1,2);
 
 	_keep_rolling.set_tooltip_text (_("If checked Ardour keeps rolling after jog or shuttle events. If unchecked it stops."));
