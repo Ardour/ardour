@@ -157,7 +157,7 @@ def fetch_tarball_revision ():
     if not os.path.exists ('libs/ardour/revision.cc'):
         print ('This tarball was not created correctly - it is missing libs/ardour/revision.cc')
         sys.exit (1)
-    with open('libs/ardour/revision.cc') as f:
+    with open('libs/ardour/revision.cc', 'rb') as f:
         content = f.readlines()
         remove_punctuation_map = dict((ord(char), None) for char in '";')
         return content[1].decode('utf-8').strip().split(' ')[7].translate (remove_punctuation_map)
@@ -182,12 +182,29 @@ else:
     MICRO = '0'
 
 V = MAJOR + '.' + MINOR + '.' + MICRO
-# Ensure that these are not unicode, which
-# can cause odd problems elsewhere. Note that
-# in python3, encode and decode do not return
-# strings, so we have to force the type.
-VERSION = V.encode ('ascii', 'ignore').decode ("utf-8")
-PROGRAM_VERSION = MAJOR.encode ('ascii', 'ignore').decode ("utf-8")
+
+def sanitize(s):
+    # round-trip to remove anything in the string that is not encodable in
+    # ASCII, yet still keep a real (utf8-encoded internally) string.
+    s = s.encode ('ascii', 'ignore').decode ("utf-8")
+    # In Python3, bytes is the class of binary content and encode() returns
+    # bytes to transform a string according to a text encoding; str is the
+    # class of normal strings (utf8-encoded internally) and decode() returns
+    # that type.
+    # Python 2 did not initially cater for encoding problems and can use str
+    # for both binary content and for (decoded) strings. The Unicode type was
+    # added to correspond to Python 3 str, and the Python 2 str type should
+    # only correspond to bytes. Alas, almost everything in the Python 2
+    # ecosystem has been written with str in mind and doesn't handle Unicode
+    # objects correctly. If Python 2 is in use, s will be a Unicode object and
+    # to avoid strange problems later we convert back to str, but in utf-8
+    # nonetheless.
+    if not isinstance(s, str):
+        s = s.encode("utf-8")
+    return s
+VERSION = sanitize(V)
+PROGRAM_VERSION = sanitize(MAJOR)
+del sanitize
 
 if len (sys.argv) > 1 and sys.argv[1] == 'dist':
         if not 'APPNAME' in os.environ:
