@@ -421,6 +421,12 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
+# dynamically loaded NSS/SSL libs
+nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
+for nsslib in $nsslibs; do
+	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ || true
+done
+
 # TODO check if this is still needed, even when building on 10.5
 if file $BUILD_ROOT/gtk2_ardour/ardour-$release_version | grep -q ppc; then
 STDCPP='|libstdc\+\+'
