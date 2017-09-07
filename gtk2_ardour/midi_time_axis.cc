@@ -77,6 +77,7 @@
 #include "midi_region_view.h"
 #include "midi_time_axis.h"
 #include "patch_change_dialog.h"
+#include "patch_change_widget.h"
 #include "piano_roll_header.h"
 #include "playlist_selector.h"
 #include "plugin_selector.h"
@@ -1082,33 +1083,6 @@ MidiTimeAxisView::build_color_mode_menu()
 }
 
 void
-MidiTimeAxisView::immediate_patch_chnage_response (int response)
-{
-	if (response != RESPONSE_ACCEPT || !_route) {
-		delete  _patch_change_dialog;
-		_patch_change_dialog = 0;
-		return;
-	}
-	Evoral::PatchChange<Evoral::Beats> p (_patch_change_dialog->patch ());
-
-	uint8_t chn = p.channel();
-
-	boost::shared_ptr<AutomationControl> bank_msb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
-	boost::shared_ptr<AutomationControl> bank_lsb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
-	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
-
-	if (!bank_msb || ! bank_lsb || !program) {
-		_patch_change_dialog->show ();
-		return;
-	}
-
-	bank_msb->set_value (p.bank_msb (), Controllable::NoGroup);
-	bank_lsb->set_value (p.bank_lsb (), Controllable::NoGroup);
-	program->set_value  (p.program () , Controllable::NoGroup);
-	_patch_change_dialog->show ();
-}
-
-void
 MidiTimeAxisView::send_patch_change ()
 {
 	if (!_route) {
@@ -1119,11 +1093,9 @@ MidiTimeAxisView::send_patch_change ()
 		return;
 	}
 
-	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
-	PatchChangeDialog* d = new PatchChangeDialog (0, 0, empty, _route->instrument_info(), Gtk::Stock::APPLY, false, false);
-	d->signal_response().connect (sigc::mem_fun (*this, &MidiTimeAxisView::immediate_patch_chnage_response));
+	PatchChangeGridDialog* d = new PatchChangeGridDialog (string_compose (_("Select Patch for '%1'"), _route->name ()), _route);
 	_patch_change_dialog = d;
-	_patch_change_dialog->present ();
+	d->present ();
 }
 
 void

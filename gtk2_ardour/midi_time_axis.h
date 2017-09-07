@@ -67,7 +67,7 @@ class PianoRollHeader;
 class StepEntry;
 class StepEditor;
 class MidiChannelSelectorWindow;
-class PatchChangeDialog;
+class PatchChangeGridDialog;
 
 #define NO_MIDI_NOTE 0xff
 
@@ -199,7 +199,7 @@ private:
 	StepEditor* _step_editor;
 
 	void immediate_patch_chnage_response (int response);
-	PatchChangeDialog* _patch_change_dialog;
+	PatchChangeGridDialog* _patch_change_dialog;
 
 };
 

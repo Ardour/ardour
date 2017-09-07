@@ -1,0 +1,93 @@
+/*
+ * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
+#ifndef __gtkardour_patch_change_widget_h__
+#define __gtkardour_patch_change_widget_h__
+
+#include <gtkmm/box.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/table.h>
+
+#include "pbd/signals.h"
+
+#include "ardour/route.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+
+#include "ardour_dialog.h"
+
+class PatchChangeWidget : public Gtk::VBox
+{
+public:
+	PatchChangeWidget (boost::shared_ptr<ARDOUR::Route>);
+	~PatchChangeWidget ();
+
+protected:
+	int bank (uint8_t) const;
+	uint8_t program (uint8_t) const;
+
+	void on_show ();
+	void on_hide ();
+
+private:
+	boost::shared_ptr<ARDOUR::Route> _route;
+
+	ArdourWidgets::ArdourDropdown _channel_select;
+	ArdourWidgets::ArdourDropdown _bank_select;
+	Gtk::SpinButton               _bank_msb_spin;
+	Gtk::SpinButton               _bank_lsb_spin;
+	ArdourWidgets::ArdourButton   _program_btn[128];
+	Gtk::Table                    _program_table;
+
+	uint8_t _channel;
+	bool    _ignore_spin_btn_signals;
+
+	void select_channel (uint8_t);
+	void select_bank (uint32_t);
+	void select_bank_spin ();
+	void select_program (uint8_t);
+
+	void bank_changed ();
+	void program_changed ();
+
+	void refill_banks ();
+	void refill_program_list ();
+
+	void instrument_info_changed ();
+
+	PBD::ScopedConnection _info_changed_connection;
+	PBD::ScopedConnection _route_connection;
+	PBD::ScopedConnectionList _ac_connections;
+
+	ARDOUR::InstrumentInfo& _info;
+	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+};
+
+class PatchChangeGridDialog : public ArdourDialog
+{
+public:
+	PatchChangeGridDialog (std::string const&, boost::shared_ptr<ARDOUR::Route>);
+	void on_hide () { w.hide (); ArdourDialog::on_hide (); }
+	void on_show () { w.show (); ArdourDialog::on_show (); }
+
+private:
+	PatchChangeWidget w;
+};
+
+#endif

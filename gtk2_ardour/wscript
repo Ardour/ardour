@@ -178,6 +178,7 @@ gtk2_ardour_sources = [
         'panner_interface.cc',
         'panner_ui.cc',
         'patch_change.cc',
+        'patch_change_widget.cc',
         'piano_roll_header.cc',
         'pingback.cc',
         'playlist_selector.cc',
