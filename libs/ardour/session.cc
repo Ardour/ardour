@@ -5277,15 +5277,10 @@ Session::new_audio_source_path (const string& base, uint32_t nchan, uint32_t cha
 string
 Session::new_midi_source_path (const string& base, bool need_lock)
 {
-	uint32_t cnt;
-	char buf[PATH_MAX+1];
-	const uint32_t limit = 10000;
-	string legalized;
 	string possible_path;
 	string possible_name;
 
-	buf[0] = '\0';
-	legalized = legalize_for_path (base);
+	possible_name = legalize_for_path (base);
 
 	// Find a "version" of the file name that doesn't exist in any of the possible directories.
 	std::vector<string> sdirs = source_search_path(DataType::MIDI);
@@ -5300,17 +5295,15 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 	 */
 	std::reverse(sdirs.begin(), sdirs.end());
 
-	for (cnt = 1; cnt <= limit; ++cnt) {
+	while (true) {
+		possible_name = bump_name_once (possible_name, '-');
 
 		vector<space_and_path>::iterator i;
 		uint32_t existing = 0;
 
 		for (vector<string>::const_iterator i = sdirs.begin(); i != sdirs.end(); ++i) {
 
-			snprintf (buf, sizeof(buf), "%s-%u.mid", legalized.c_str(), cnt);
-			possible_name = buf;
-
-			possible_path = Glib::build_filename (*i, possible_name);
+			possible_path = Glib::build_filename (*i, possible_name + ".mid");
 
 			if (Glib::file_test (possible_path, Glib::FILE_TEST_EXISTS)) {
 				existing++;
@@ -5321,16 +5314,16 @@ Session::new_midi_source_path (const string& base, bool need_lock)
 			}
 		}
 
-		if (existing == 0) {
-			break;
-		}
-
-		if (cnt > limit) {
+		if (possible_path.size () >= PATH_MAX) {
 			error << string_compose(
-					_("There are already %1 recordings for %2, which I consider too many."),
-					limit, base) << endmsg;
+					_("There are already many recordings for %1, resulting in a too long file-path %2."),
+					base, possible_path) << endmsg;
 			destroy ();
 			return 0;
+		}
+
+		if (existing == 0) {
+			break;
 		}
 	}
 
