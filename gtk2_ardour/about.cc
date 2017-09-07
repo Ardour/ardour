@@ -289,7 +289,7 @@ patent must be licensed for everyone's free use or not licensed at all.\n\
 \n\
   The precise terms and conditions for copying, distribution and\n\
 modification follow.\n\
-\n\
+\n\
 ""		    GNU GENERAL PUBLIC LICENSE\n\
    TERMS AND CONDITIONS FOR COPYING, DISTRIBUTION AND MODIFICATION\n\
 \n\
@@ -344,7 +344,7 @@ above, provided that you also meet all of these conditions:\n\
     License.  (Exception: if the Program itself is interactive but\n\
     does not normally print such an announcement, your work based on\n\
     the Program is not required to print an announcement.)\n\
-\n\
+\n\
 These requirements apply to the modified work as a whole.  If\n\
 identifiable sections of that work are not derived from the Program,\n\
 and can be reasonably considered independent and separate works in\n\
@@ -402,7 +402,7 @@ access to copy from a designated place, then offering equivalent\n\
 access to copy the source code from the same place counts as\n\
 distribution of the source code, even though third parties are not\n\
 compelled to copy the source along with the object code.\n\
-\n\
+\n\
   4. You may not copy, modify, sublicense, or distribute the Program\n\
 except as expressly provided under this License.  Any attempt\n\
 otherwise to copy, modify, sublicense or distribute the Program is\n\
@@ -459,7 +459,7 @@ impose that choice.\n\
 \n\
 This section is intended to make thoroughly clear what is believed to\n\
 be a consequence of the rest of this License.\n\
-\n\
+\n\
   8. If the distribution and/or use of the Program is restricted in\n\
 certain countries either by patents or by copyrighted interfaces, the\n\
 original copyright holder who places the Program under this License\n\
@@ -512,66 +512,6 @@ PROGRAMS), EVEN IF SUCH HOLDER OR OTHER PARTY HAS BEEN ADVISED OF THE\n\
 POSSIBILITY OF SUCH DAMAGES.\n\
 \n\
 		     END OF TERMS AND CONDITIONS\n\
-\n\
-	    How to Apply These Terms to Your New Programs\n\
-\n\
-  If you develop a new program, and you want it to be of the greatest\n\
-possible use to the public, the best way to achieve this is to make it\n\
-free software which everyone can redistribute and change under these terms.\n\
-\n\
-  To do so, attach the following notices to the program.  It is safest\n\
-to attach them to the start of each source file to most effectively\n\
-convey the exclusion of warranty; and each file should have at least\n\
-the \"copyright\" line and a pointer to where the full notice is found.\n\
-\n\
-    <one line to give the program's name and a brief idea of what it does.>\n\
-    Copyright (C) <year>  <name of author>\n\
-\n\
-    This program is free software; you can redistribute it and/or modify\n\
-    it under the terms of the GNU General Public License as published by\n\
-    the Free Software Foundation; either version 2 of the License, or\n\
-    (at your option) any later version.\n\
-\n\
-    This program is distributed in the hope that it will be useful,\n\
-    but WITHOUT ANY WARRANTY; without even the implied warranty of\n\
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n\
-    GNU General Public License for more details.\n\
-\n\
-    You should have received a copy of the GNU General Public License\n\
-    along with this program; if not, write to the Free Software\n\
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA\n\
-\n\
-\n\
-Also add information on how to contact you by electronic and paper mail.\n\
-\n\
-If the program is interactive, make it output a short notice like this\n\
-when it starts in an interactive mode:\n\
-\n\
-    Gnomovision version 69, Copyright (C) year  name of author\n\
-    Gnomovision comes with ABSOLUTELY NO WARRANTY; for details type `show w'.\n\
-    This is free software, and you are welcome to redistribute it\n\
-    under certain conditions; type `show c' for details.\n\
-\n\
-The hypothetical commands `show w' and `show c' should show the appropriate\n\
-parts of the General Public License.  Of course, the commands you use may\n\
-be called something other than `show w' and `show c'; they could even be\n\
-mouse-clicks or menu items--whatever suits your program.\n\
-\n\
-You should also get your employer (if you work as a programmer) or your\n\
-school, if any, to sign a \"copyright disclaimer\" for the program, if\n\
-necessary.  Here is a sample; alter the names:\n\
-\n\
-  Yoyodyne, Inc., hereby disclaims all copyright interest in the program\n\
-  `Gnomovision' (which makes passes at compilers) written by James Hacker.\n\
-\n\
-  <signature of Ty Coon>, 1 April 1989\n\
-  Ty Coon, President of Vice\n\
-\n\
-This General Public License does not permit incorporating your program into\n\
-proprietary programs.  If your program is a subroutine library, you may\n\
-consider it more useful to permit linking proprietary applications with the\n\
-library.  If this is what you want to do, use the GNU Library General\n\
-Public License instead of this License.\n\
 "); /* Note that at the start of (approximately) line 265, the above license
        text has been split into two concatenated tokens (to satisfy compilation
        under MSVC). Hopefully this won't affect gcc */
