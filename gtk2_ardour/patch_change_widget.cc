@@ -21,8 +21,12 @@
 #include <boost/algorithm/string.hpp>
 
 #include "pbd/unwind.h"
+
+#include "evoral/midi_events.h"
 #include "evoral/PatchChange.hpp"
+
 #include "midi++/midnam_patch.h"
+
 #include "ardour/instrument_info.h"
 #include "ardour/midi_track.h"
 
@@ -45,6 +49,10 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	, _channel (-1)
 	, _ignore_spin_btn_signals (false)
 	, _info (r->instrument_info ())
+	, _audition_enable (_("Audition on Change"), ArdourWidgets::ArdourButton::led_default_elements)
+	, _audition_start_spin (*manage (new Adjustment (48, 0, 127, 1, 16)))
+	, _audition_end_spin (*manage (new Adjustment (60, 0, 127, 1, 16)))
+	, _audition_note_on (false)
 {
 	assert (boost::dynamic_pointer_cast<MidiTrack> (r));
 
@@ -66,6 +74,19 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	_program_table.set_spacings (1);
 	pack_start (_program_table, true, true);
 
+	box = manage (new HBox ());
+	box->set_spacing (4);
+	box->pack_start (_audition_enable, false, false);
+	box->pack_start (*manage (new Label (_("Start Note:"))), false, false);
+	box->pack_start (_audition_start_spin, false, false);
+	box->pack_start (*manage (new Label (_("End Note:"))), false, false);
+	box->pack_start (_audition_end_spin, false, false);
+
+	Box* box2 = manage (new HBox ());
+	box2->pack_start (*box, true, false);
+	box2->set_border_width (2);
+	pack_start (*box2, false, false);
+
 	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
 		_program_btn[pgm].set_text_ellipsize (Pango::ELLIPSIZE_END);
 		_program_btn[pgm].set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
@@ -82,6 +103,12 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 		_channel_select.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
 	}
 
+	_audition_start_spin.set_sensitive (false);
+	_audition_end_spin.set_sensitive (false);
+
+	_audition_enable.signal_clicked.connect (sigc::mem_fun (*this, &PatchChangeWidget::audition_toggle));
+	_audition_start_spin.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), false));
+	_audition_end_spin.signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::check_note_range), true));
 	_bank_msb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeWidget::select_bank_spin));
 	_bank_lsb_spin.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeWidget::select_bank_spin));
 
@@ -94,12 +121,14 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 
 PatchChangeWidget::~PatchChangeWidget ()
 {
+	cancel_audition ();
 }
 
 void
 PatchChangeWidget::on_show ()
 {
 	Gtk::VBox::on_show ();
+	cancel_audition ();
 	_channel = -1;
 	select_channel (0);
 }
@@ -109,17 +138,20 @@ PatchChangeWidget::on_hide ()
 {
 	Gtk::VBox::on_hide ();
 	_ac_connections.drop_connections ();
+	cancel_audition ();
 }
-
 
 void
 PatchChangeWidget::select_channel (uint8_t chn)
 {
 	assert (_route);
+	assert (chn < 16);
 
 	if (_channel == chn) {
 		return;
 	}
+
+	cancel_audition ();
 
 	_channel_select.set_text (string_compose ("%1", (int)(chn + 1)));
 	_channel = chn;
@@ -143,6 +175,7 @@ PatchChangeWidget::select_channel (uint8_t chn)
 void
 PatchChangeWidget::refill_banks ()
 {
+	cancel_audition ();
 	using namespace Menu_Helpers;
 
 	_current_patch_bank.reset ();
@@ -222,6 +255,8 @@ PatchChangeWidget::select_bank_spin ()
 void
 PatchChangeWidget::select_bank (uint32_t bank)
 {
+	cancel_audition ();
+
 	boost::shared_ptr<AutomationControl> bank_msb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, _channel, MIDI_CTL_MSB_BANK), true);
 	boost::shared_ptr<AutomationControl> bank_lsb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, _channel, MIDI_CTL_LSB_BANK), true);
 
@@ -232,8 +267,12 @@ PatchChangeWidget::select_bank (uint32_t bank)
 void
 PatchChangeWidget::select_program (uint8_t pgm)
 {
+	cancel_audition ();
+
 	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, _channel), true);
 	program->set_value (pgm, PBD::Controllable::NoGroup);
+
+	audition ();
 }
 
 /* ***** callbacks, external changes *****/
@@ -260,6 +299,100 @@ PatchChangeWidget::instrument_info_changed ()
 	refill_banks ();
 }
 
+/* ***** play notes *****/
+
+void
+PatchChangeWidget::audition_toggle ()
+{
+	_audition_enable.set_active (!_audition_enable.get_active ());
+	if (_audition_enable.get_active()) {
+		_audition_start_spin.set_sensitive (true);
+		_audition_end_spin.set_sensitive (true);
+	} else {
+		cancel_audition ();
+		_audition_start_spin.set_sensitive (false);
+		_audition_end_spin.set_sensitive (false);
+	}
+}
+
+void
+PatchChangeWidget::check_note_range (bool upper)
+{
+	int s = _audition_start_spin.get_value_as_int ();
+	int e = _audition_end_spin.get_value_as_int ();
+	if (s <= e) {
+		return;
+	}
+	if (upper) {
+		_audition_start_spin.set_value (e);
+	} else {
+		_audition_end_spin.set_value (s);
+	}
+}
+
+void
+PatchChangeWidget::cancel_audition ()
+{
+	_note_queue_connection.disconnect();
+
+	if (_audition_note_on) {
+		boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route);
+		uint8_t event[3];
+
+		event[0] = (MIDI_CMD_NOTE_OFF | _channel);
+		event[1] = _audition_note_num;
+		event[2] = 0;
+		mt->write_immediate_event(3, event);
+	}
+	_audition_note_on = false;
+}
+
+void
+PatchChangeWidget::audition ()
+{
+	if (!boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		return;
+	}
+	if (_channel > 16) {
+		return;
+	}
+
+	if (_note_queue_connection.connected ()) {
+		cancel_audition ();
+	}
+
+	if (!_audition_enable.get_active ()) {
+		return;
+	}
+
+	assert (!_audition_note_on);
+	_audition_note_num = _audition_start_spin.get_value_as_int ();
+
+	_note_queue_connection = Glib::signal_timeout().connect (sigc::bind (sigc::mem_fun (&PatchChangeWidget::audition_next), this), 250);
+}
+
+bool
+PatchChangeWidget::audition_next ()
+{
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route);
+	uint8_t event[3];
+
+	if (_audition_note_on) {
+		event[0] = (MIDI_CMD_NOTE_OFF | _channel);
+		event[1] = _audition_note_num;
+		event[2] = 100;
+		mt->write_immediate_event(3, event);
+		_audition_note_on = false;
+		return ++_audition_note_num <= _audition_end_spin.get_value_as_int() && _audition_enable.get_active ();
+	} else {
+		event[0] = (MIDI_CMD_NOTE_ON | _channel);
+		event[1] = _audition_note_num;
+		event[2] = 100;
+		mt->write_immediate_event(3, event);
+		_audition_note_on = true;
+		return true;
+	}
+}
 
 /* ***** query info *****/
 

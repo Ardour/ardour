@@ -77,6 +77,19 @@ private:
 
 	ARDOUR::InstrumentInfo& _info;
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+
+	void audition_toggle ();
+	void check_note_range (bool);
+	void audition ();
+	void cancel_audition ();
+	bool audition_next ();
+	sigc::connection _note_queue_connection;
+
+	ArdourWidgets::ArdourButton _audition_enable;
+	Gtk::SpinButton             _audition_start_spin; // Consider a click-box w/note-names
+	Gtk::SpinButton             _audition_end_spin;
+	uint8_t                     _audition_note_num;
+	bool                        _audition_note_on;
 };
 
 class PatchChangeGridDialog : public ArdourDialog
