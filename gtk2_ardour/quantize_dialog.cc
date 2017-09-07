@@ -156,7 +156,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 
 
 	double divisor = 1.0;
-	for (int i = 1; i < grid_strings.size(); ++i) {
+	for (size_t i = 1; i < grid_strings.size(); ++i) {
 		if (txt == grid_strings[i]) {
 			assert (_grid_beats[i] != 0);
 			divisor = 1.0 / _grid_beats[i];
