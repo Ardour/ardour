@@ -349,9 +349,10 @@ MidiTrack::update_controls(const BufferSet& bufs)
 	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
 		const Evoral::Event<framepos_t>&         ev      = *e;
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
-		const boost::shared_ptr<Evoral::Control> control = this->control(param);
+		const boost::shared_ptr<AutomationControl> control = automation_control (param);
 		if (control) {
 			control->set_double(ev.value(), _session.transport_frame(), false);
+			control->Changed (false, Controllable::NoGroup);
 		}
 	}
 }
