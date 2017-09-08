@@ -561,10 +561,10 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
-	items.push_back (MenuElem (_("Channel Selector"),
+	items.push_back (MenuElem (_("Channel Selector..."),
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
-	items.push_back (MenuElem (_("Select Patch..."),
+	items.push_back (MenuElem (_("Patch Selector..."),
 				sigc::mem_fun(*this, &MidiTimeAxisView::send_patch_change)));
 
 	color_mode_menu = build_color_mode_menu();
