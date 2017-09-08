@@ -180,6 +180,10 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual std::string midnam_model () { return ""; }
 	PBD::Signal0<void> UpdateMidnam;
 
+	virtual bool knows_bank_patch () { return false; }
+	virtual uint32_t bank_patch (uint8_t chn) { return UINT32_MAX; }
+	PBD::Signal1<void, uint8_t> BankPatchChange;
+
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
 	    PresetRecord (const std::string& u, const std::string& l, bool s = true) : uri (u), label (l), user (s), valid (true)  {}

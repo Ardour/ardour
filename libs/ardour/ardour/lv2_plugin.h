@@ -277,9 +277,23 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	Glib::Threads::Mutex _work_mutex;
 
 #ifdef LV2_EXTENDED
+	static void queue_draw (LV2_Inline_Display_Handle);
+	static void midnam_update (LV2_Midnam_Handle);
+	static void bankpatch_notify (LV2_BankPatch_Handle, uint8_t, uint32_t, uint8_t);
+
 	const LV2_Inline_Display_Interface* _display_interface;
 	bool _inline_display_in_gui;
-	const LV2_Midnam_Interface* _midname_interface;
+	const LV2_Midnam_Interface*    _midname_interface;
+
+	uint32_t _bankpatch[16];
+	bool seen_bankpatch;
+	bool knows_bank_patch () { return seen_bankpatch; }
+	uint32_t bank_patch (uint8_t chn) {
+		assert (chn < 16);
+		if (chn > 15) return UINT32_MAX;
+		return _bankpatch[chn];
+	}
+
 #endif
 
 	typedef struct {
@@ -297,6 +311,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 #ifdef LV2_EXTENDED
 	LV2_Feature    _queue_draw_feature;
 	LV2_Feature    _midnam_feature;
+	LV2_Feature    _bankpatch_feature;
 #endif
 
 	// Options passed to plugin

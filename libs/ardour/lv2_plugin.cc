@@ -230,18 +230,34 @@ work_respond(LV2_Worker_Respond_Handle handle,
 
 #ifdef LV2_EXTENDED
 /* inline display extension */
-static void
-queue_draw (LV2_Inline_Display_Handle handle)
+void
+LV2Plugin::queue_draw (LV2_Inline_Display_Handle handle)
 {
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	plugin->QueueDraw(); /* EMIT SIGNAL */
 }
 
-static void
-midnam_update (LV2_Midnam_Handle handle)
+void
+LV2Plugin::midnam_update (LV2_Midnam_Handle handle)
 {
 	LV2Plugin* plugin = (LV2Plugin*)handle;
 	plugin->UpdateMidnam (); /* EMIT SIGNAL */
+}
+
+void
+LV2Plugin::bankpatch_notify (LV2_BankPatch_Handle handle, uint8_t chn, uint32_t bank, uint8_t pgm)
+{
+	LV2Plugin* plugin = (LV2Plugin*)handle;
+	if (chn > 15) {
+		return;
+	}
+	plugin->seen_bankpatch = true;
+	if (pgm > 127 || bank > 16383) {
+		plugin->_bankpatch[chn] = UINT32_MAX;
+	} else {
+		plugin->_bankpatch[chn] = (bank << 7) | pgm;
+	}
+	plugin->BankPatchChange (chn); /* EMIT SIGNAL */
 }
 #endif
 
@@ -329,6 +345,7 @@ struct LV2Plugin::Impl {
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display*          queue_draw;
 	LV2_Midnam*                  midnam;
+	LV2_BankPatch*               bankpatch;
 #endif
 };
 
@@ -422,7 +439,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	lilv_node_free(state_uri);
 	lilv_node_free(state_iface_uri);
 
-	_features    = (LV2_Feature**)calloc(13, sizeof(LV2_Feature*));
+	_features    = (LV2_Feature**)calloc(14, sizeof(LV2_Feature*));
 	_features[0] = &_instance_access_feature;
 	_features[1] = &_data_access_feature;
 	_features[2] = &_make_path_feature;
@@ -457,6 +474,15 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_midnam_feature.URI  = LV2_MIDNAM__update;
 	_midnam_feature.data = _impl->midnam;
 	_features[n_features++]  = &_midnam_feature;
+
+	_impl->bankpatch = (LV2_BankPatch*)
+		malloc (sizeof(LV2_BankPatch));
+	_impl->bankpatch->handle = this;
+	_impl->bankpatch->notify = bankpatch_notify;
+
+	_bankpatch_feature.URI  = LV2_BANKPATCH__notify;
+	_bankpatch_feature.data = _impl->bankpatch;
+	_features[n_features++]  = &_bankpatch_feature;
 #endif
 
 #ifdef HAVE_LV2_1_2_0
@@ -488,6 +514,13 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_options_feature.URI    = LV2_OPTIONS__options;
 	_options_feature.data   = _impl->options;
 	_features[n_features++] = &_options_feature;
+#endif
+
+#ifdef LV2_EXTENDED
+	seen_bankpatch = false;
+	for (uint32_t chn = 0; chn < 16; ++chn) {
+		_bankpatch[chn] = UINT32_MAX;
+	}
 #endif
 
 	LV2_State_Make_Path* make_path = (LV2_State_Make_Path*)malloc(
@@ -900,6 +933,7 @@ LV2Plugin::~LV2Plugin ()
 #ifdef LV2_EXTENDED
 	free(_impl->queue_draw);
 	free(_impl->midnam);
+	free(_impl->bankpatch);
 #endif
 
 	free(_features);
