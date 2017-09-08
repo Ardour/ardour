@@ -425,7 +425,7 @@ MidiTimeAxisView::update_patch_selector ()
 					boost::bind (&MidiTimeAxisView::drop_instrument_ref, this),
 					gui_context());
 			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
-					boost::bind (&Plugin::read_midnam, pi->plugin ()),
+					boost::bind (&MidiTimeAxisView::reread_midnam, this),
 					gui_context());
 
 			pluginprovided = true;
@@ -445,6 +445,17 @@ MidiTimeAxisView::update_patch_selector ()
 	}
 }
 
+void
+MidiTimeAxisView::reread_midnam ()
+{
+	boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
+	pi->plugin ()->read_midnam();
+
+	if (_patch_change_dialog) {
+		_patch_change_dialog->refresh ();
+	}
+}
 void
 MidiTimeAxisView::model_changed(const std::string& model)
 {
@@ -486,6 +497,10 @@ MidiTimeAxisView::model_changed(const std::string& model)
 	delete controller_menu;
 	controller_menu = 0;
 	build_automation_action_menu(false);
+
+	if (_patch_change_dialog) {
+		_patch_change_dialog->refresh ();
+	}
 }
 
 void
@@ -1093,7 +1108,7 @@ MidiTimeAxisView::send_patch_change ()
 		return;
 	}
 
-	PatchChangeGridDialog* d = new PatchChangeGridDialog (string_compose (_("Select Patch for '%1'"), _route->name ()), _route);
+	PatchChangeGridDialog* d = new PatchChangeGridDialog (_route);
 	_patch_change_dialog = d;
 	d->present ();
 }

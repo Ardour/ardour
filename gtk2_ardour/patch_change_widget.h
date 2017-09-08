@@ -39,6 +39,8 @@ public:
 	PatchChangeWidget (boost::shared_ptr<ARDOUR::Route>);
 	~PatchChangeWidget ();
 
+	void refresh ();
+
 protected:
 	int bank (uint8_t) const;
 	uint8_t program (uint8_t) const;
@@ -105,11 +107,14 @@ private:
 class PatchChangeGridDialog : public ArdourDialog
 {
 public:
-	PatchChangeGridDialog (std::string const&, boost::shared_ptr<ARDOUR::Route>);
+	PatchChangeGridDialog (boost::shared_ptr<ARDOUR::Route>);
 	void on_hide () { w.hide (); ArdourDialog::on_hide (); }
 	void on_show () { w.show (); ArdourDialog::on_show (); }
+	void refresh () { w.refresh (); }
 
 private:
+	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route>);
+	PBD::ScopedConnection _route_connection;
 	PatchChangeWidget w;
 };
 

@@ -19,7 +19,6 @@
 
 #include <bitset>
 #include <gtkmm/frame.h>
-#include <boost/algorithm/string.hpp>
 
 #include "pbd/unwind.h"
 
@@ -142,6 +141,14 @@ PatchChangeWidget::~PatchChangeWidget ()
 }
 
 void
+PatchChangeWidget::refresh ()
+{
+	if (is_visible ()) {
+		on_show ();
+	}
+}
+
+void
 PatchChangeWidget::on_show ()
 {
 	Gtk::VBox::on_show ();
@@ -237,7 +244,7 @@ PatchChangeWidget::refill_program_list ()
 	if (_current_patch_bank) {
 		const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 		for (MIDI::Name::PatchNameList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
-			std::string n = (*i)->name ();
+			const std::string n = (*i)->name ();
 			MIDI::Name::PatchPrimaryKey const& key = (*i)->patch_primary_key ();
 
 			const uint8_t pgm = key.program();
@@ -477,10 +484,20 @@ PatchChangeWidget::program (uint8_t chn) const
 
 /* ***************************************************************************/
 
-PatchChangeGridDialog::PatchChangeGridDialog (std::string const& title, boost::shared_ptr<ARDOUR::Route> r)
-	: ArdourDialog (title, false, false)
+PatchChangeGridDialog::PatchChangeGridDialog (boost::shared_ptr<ARDOUR::Route> r)
+	: ArdourDialog (string_compose (_("Select Patch for '%1"), r->name()), false, false)
 	, w (r)
 {
+	r->PropertyChanged.connect (_route_connection, invalidator (*this), boost::bind (&PatchChangeGridDialog::route_property_changed, this, _1, boost::weak_ptr<Route>(r)), gui_context());
 	get_vbox()->add (w);
 	w.show ();
+}
+
+void
+PatchChangeGridDialog::route_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<Route> wr)
+{
+	boost::shared_ptr<ARDOUR::Route> r = wr.lock ();
+	if (r && what_changed.contains (ARDOUR::Properties::name)) {
+		set_title (string_compose (_("Select Patch for '%1"), r->name()));
+	}
 }

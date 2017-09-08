@@ -122,6 +122,7 @@ private:
 	void setup_midnam_patches ();
 	void update_patch_selector ();
 	void drop_instrument_ref ();
+	void reread_midnam ();
 	PBD::ScopedConnectionList midnam_connection;
 
 	void start_scroomer_update ();
