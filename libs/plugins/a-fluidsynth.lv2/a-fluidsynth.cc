@@ -125,6 +125,7 @@ typedef struct {
 	LV2_URID patch_Set;
 	LV2_URID patch_property;
 	LV2_URID patch_value;
+	LV2_URID state_Changed;
 	LV2_URID afs_sf2file;
 
 	/* lv2 extensions */
@@ -384,6 +385,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->patch_Set          = map->map (map->handle, LV2_PATCH__Set);
 	self->patch_property     = map->map (map->handle, LV2_PATCH__property);
 	self->patch_value        = map->map (map->handle, LV2_PATCH__value);
+	self->state_Changed      = map->map (map->handle, "http://lv2plug.in/ns/ext/state#StateChanged");
 	self->afs_sf2file        = map->map (map->handle, AFS_URN ":sf2file");
 
 	return (LV2_Handle)self;
@@ -555,7 +557,6 @@ run (LV2_Handle instance, uint32_t n_samples)
 				}
 #endif
 			}
-
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
 		}
 	}
@@ -569,7 +570,16 @@ run (LV2_Handle instance, uint32_t n_samples)
 	/* inform the GUI */
 	if (self->inform_ui) {
 		self->inform_ui = false;
+
+		/* emit stateChanged */
+		LV2_Atom_Forge_Frame frame;
+		lv2_atom_forge_frame_time(&self->forge, 0);
+		x_forge_object(&self->forge, &frame, 1, self->state_Changed);
+		lv2_atom_forge_pop(&self->forge, &frame);
+
+		/* send .sf2 filename */
 		inform_ui (self);
+
 #ifdef LV2_EXTENDED
 		self->midnam->update (self->midnam->handle);
 #endif
