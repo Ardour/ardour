@@ -31,6 +31,7 @@
 #include "widgets/ardour_dropdown.h"
 
 #include "ardour_dialog.h"
+#include "gtk_pianokeyboard.h"
 
 class PatchChangeWidget : public Gtk::VBox
 {
@@ -88,8 +89,17 @@ private:
 	ArdourWidgets::ArdourButton _audition_enable;
 	Gtk::SpinButton             _audition_start_spin; // Consider a click-box w/note-names
 	Gtk::SpinButton             _audition_end_spin;
+	Gtk::SpinButton             _audition_velocity;
 	uint8_t                     _audition_note_num;
 	bool                        _audition_note_on;
+
+	PianoKeyboard* _piano;
+	Gtk::Widget*   _pianomm;
+
+	static void _note_on_event_handler (GtkWidget*, int, gpointer);
+	static void _note_off_event_handler (GtkWidget*, int, gpointer);
+	void note_on_event_handler (int);
+	void note_off_event_handler (int);
 };
 
 class PatchChangeGridDialog : public ArdourDialog

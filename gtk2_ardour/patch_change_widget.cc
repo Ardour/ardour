@@ -52,10 +52,11 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	, _audition_enable (_("Audition on Change"), ArdourWidgets::ArdourButton::led_default_elements)
 	, _audition_start_spin (*manage (new Adjustment (48, 0, 127, 1, 16)))
 	, _audition_end_spin (*manage (new Adjustment (60, 0, 127, 1, 16)))
+	, _audition_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
 	, _audition_note_on (false)
+	, _piano ((PianoKeyboard*)piano_keyboard_new())
+	, _pianomm (Glib::wrap((GtkWidget*)_piano))
 {
-	assert (boost::dynamic_pointer_cast<MidiTrack> (r));
-
 	Box* box;
 	box = manage (new HBox ());
 	box->set_border_width (2);
@@ -74,18 +75,22 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 	_program_table.set_spacings (1);
 	pack_start (_program_table, true, true);
 
-	box = manage (new HBox ());
-	box->set_spacing (4);
-	box->pack_start (_audition_enable, false, false);
-	box->pack_start (*manage (new Label (_("Start Note:"))), false, false);
-	box->pack_start (_audition_start_spin, false, false);
-	box->pack_start (*manage (new Label (_("End Note:"))), false, false);
-	box->pack_start (_audition_end_spin, false, false);
+	if (boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		box = manage (new HBox ());
+		box->set_spacing (4);
+		box->pack_start (_audition_enable, false, false);
+		box->pack_start (*manage (new Label (_("Start Note:"))), false, false);
+		box->pack_start (_audition_start_spin, false, false);
+		box->pack_start (*manage (new Label (_("End Note:"))), false, false);
+		box->pack_start (_audition_end_spin, false, false);
+		box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+		box->pack_start (_audition_velocity, false, false);
 
-	Box* box2 = manage (new HBox ());
-	box2->pack_start (*box, true, false);
-	box2->set_border_width (2);
-	pack_start (*box2, false, false);
+		Box* box2 = manage (new HBox ());
+		box2->pack_start (*box, true, false);
+		box2->set_border_width (2);
+		pack_start (*box2, false, false);
+	}
 
 	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
 		_program_btn[pgm].set_text_ellipsize (Pango::ELLIPSIZE_END);
@@ -101,6 +106,14 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 		char buf[8];
 		snprintf (buf, sizeof(buf), "%d", chn + 1);
 		_channel_select.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
+	}
+
+	if (boost::dynamic_pointer_cast<MidiTrack> (_route)) {
+		piano_keyboard_set_monophonic (_piano, TRUE);
+		g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (PatchChangeWidget::_note_on_event_handler), this);
+		g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (PatchChangeWidget::_note_off_event_handler), this);
+		_pianomm->set_flags(Gtk::CAN_FOCUS);
+		pack_start (*_pianomm, false, false);
 	}
 
 	_audition_start_spin.set_sensitive (false);
@@ -122,6 +135,7 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 PatchChangeWidget::~PatchChangeWidget ()
 {
 	cancel_audition ();
+	delete _pianomm;
 }
 
 void
@@ -160,7 +174,7 @@ PatchChangeWidget::select_channel (uint8_t chn)
 
 	boost::shared_ptr<AutomationControl> bank_msb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 	boost::shared_ptr<AutomationControl> bank_lsb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
-	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true); 
+	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
 
 	bank_msb->Changed.connect (_ac_connections, invalidator (*this),
 			boost::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
@@ -227,9 +241,6 @@ PatchChangeWidget::refill_program_list ()
 			std::string n = (*i)->name ();
 			boost::replace_all (n, "_", " ");
 			MIDI::Name::PatchPrimaryKey const& key = (*i)->patch_primary_key ();
-
-			assert (key.program () < 128);
-			assert (key.bank () == bank (_channel));
 
 			const uint8_t pgm = key.program();
 			_program_btn[pgm].set_text (n);
@@ -342,7 +353,8 @@ PatchChangeWidget::cancel_audition ()
 		event[0] = (MIDI_CMD_NOTE_OFF | _channel);
 		event[1] = _audition_note_num;
 		event[2] = 0;
-		mt->write_immediate_event(3, event);
+		mt->write_immediate_event (3, event);
+		piano_keyboard_set_note_off (_piano, _audition_note_num);
 	}
 	_audition_note_on = false;
 }
@@ -380,18 +392,59 @@ PatchChangeWidget::audition_next ()
 	if (_audition_note_on) {
 		event[0] = (MIDI_CMD_NOTE_OFF | _channel);
 		event[1] = _audition_note_num;
-		event[2] = 100;
-		mt->write_immediate_event(3, event);
+		event[2] = 0;
+		mt->write_immediate_event (3, event);
 		_audition_note_on = false;
+		piano_keyboard_set_note_off (_piano, _audition_note_num);
 		return ++_audition_note_num <= _audition_end_spin.get_value_as_int() && _audition_enable.get_active ();
 	} else {
 		event[0] = (MIDI_CMD_NOTE_ON | _channel);
 		event[1] = _audition_note_num;
-		event[2] = 100;
-		mt->write_immediate_event(3, event);
+		event[2] = _audition_velocity.get_value_as_int ();
+		mt->write_immediate_event (3, event);
 		_audition_note_on = true;
+		piano_keyboard_set_note_on (_piano, _audition_note_num);
 		return true;
 	}
+}
+
+void
+PatchChangeWidget::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((PatchChangeWidget*)arg)->note_on_event_handler(note);
+}
+
+void
+PatchChangeWidget::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((PatchChangeWidget*)arg)->note_off_event_handler(note);
+}
+
+void
+PatchChangeWidget::note_on_event_handler (int note)
+{
+	cancel_audition ();
+	_pianomm->grab_focus ();
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route);
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_ON | _channel);
+	event[1] = note;
+	event[2] = _audition_velocity.get_value_as_int ();
+	mt->write_immediate_event (3, event);
+	_audition_note_on = true;
+	_audition_note_num = note;
+}
+
+void
+PatchChangeWidget::note_off_event_handler (int note)
+{
+	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack> (_route);
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_OFF | _channel);
+	event[1] = note;
+	event[2] = 0;
+	mt->write_immediate_event (3, event);
+	_audition_note_on = false;
 }
 
 /* ***** query info *****/
@@ -405,10 +458,10 @@ PatchChangeWidget::bank (uint8_t chn) const
 	return ((int)bank_msb->get_value () << 7) + (int)bank_lsb->get_value();
 }
 
-uint8_t 
+uint8_t
 PatchChangeWidget::program (uint8_t chn) const
 {
-	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true); 
+	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
 	return program->get_value();
 }
 
