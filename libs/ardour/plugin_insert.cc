@@ -492,7 +492,11 @@ PluginInsert::create_automatable_parameters ()
 			if (Variant::type_is_numeric(desc.datatype)) {
 				list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc));
 			}
-			add_control (boost::shared_ptr<AutomationControl> (new PluginPropertyControl(this, param, desc, list)));
+			boost::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
+			if (!Variant::type_is_numeric(desc.datatype)) {
+				c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
+			}
+			add_control (c);
 		}
 	}
 
