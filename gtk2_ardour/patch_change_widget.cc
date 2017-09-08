@@ -249,10 +249,12 @@ PatchChangeWidget::refill_program_list ()
 
 	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
 		if (!unset_notes.test (pgm)) {
+			_program_btn[pgm].set_name (X_("patch change button"));
 			continue;
 		}
 		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
 		_program_btn[pgm].set_text (n);
+		_program_btn[pgm].set_name (X_("patch change dim button"));
 		set_tooltip (_program_btn[pgm], n);
 	}
 

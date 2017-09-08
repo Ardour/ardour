@@ -335,6 +335,11 @@
     <ColorAlias name="nudge clock: text" alias="color 49"/>
     <ColorAlias name="page switch button: fill active" alias="color 92"/>
     <ColorAlias name="page switch button: fill" alias="color 94"/>
+    <ColorAlias name="patch change button: fill active" alias="color 74"/>
+    <ColorAlias name="patch change button: fill" alias="color 25"/>
+    <ColorAlias name="patch change dim button: fill active" alias="color 74"/>
+    <ColorAlias name="patch change dim button: fill" alias="color 46"/>
+    <ColorAlias name="patch change dim button: text" alias="color 92"/>
     <ColorAlias name="piano roll black" alias="color 76"/>
     <ColorAlias name="piano roll black outline" alias="color 33"/>
     <ColorAlias name="piano roll white" alias="color 45"/>
