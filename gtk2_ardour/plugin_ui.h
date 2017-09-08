@@ -303,6 +303,14 @@ private:
 
 	void scroller_size_request (Gtk::Requisition*);
 	Gtk::ScrolledWindow scroller;
+
+	void build_midi_table ();
+	void midi_refill_patches ();
+	void midi_bank_patch_change (uint8_t chn);
+	void midi_bank_patch_select (uint8_t chn, uint32_t bankpgm);
+	std::vector<ArdourWidgets::ArdourDropdown*> midi_pgmsel;
+	PBD::ScopedConnectionList midi_connections;
+	std::map<uint32_t, std::string> pgm_names;
 };
 
 class PluginUIWindow : public ArdourWindow

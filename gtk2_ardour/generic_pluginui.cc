@@ -34,11 +34,19 @@
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
+#include "evoral/midi_events.h"
+#include "evoral/PatchChange.hpp"
+
+#include "midi++/midnam_patch.h"
+
+#include "ardour/midi_patch_manager.h"
+#include "ardour/midi_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/value_as_string.h"
 
+#include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
 
@@ -151,6 +159,13 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	prefheight = 0;
 	build ();
+
+	if (insert->plugin()->has_midnam() && insert->plugin()->knows_bank_patch()) {
+		/* right now PC are sent via MIDI Track controls only */
+		if (dynamic_cast<MidiTrack*> (insert->owner())) {
+			build_midi_table ();
+		}
+	}
 
 	if (is_scrollable) {
 		scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
@@ -400,10 +415,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	button_table->set_homogeneous (false);
 	button_table->set_row_spacings (2);
 	button_table->set_col_spacings (2);
+	button_table->set_border_width (5);
+
 	output_table->set_homogeneous (true);
 	output_table->set_row_spacings (2);
 	output_table->set_col_spacings (2);
-	button_table->set_border_width (5);
 	output_table->set_border_width (5);
 
 
@@ -593,6 +609,143 @@ GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
 	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
 		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
 		hpacker.pack_end (*pd, true, true);
+	}
+}
+
+void
+GenericPluginUI::build_midi_table ()
+{
+	Gtk::Table* pgm_table = manage (new Gtk::Table (8, 2));
+
+	pgm_table->set_homogeneous (true);
+	pgm_table->set_row_spacings (2);
+	pgm_table->set_col_spacings (2);
+	pgm_table->set_border_width (5);
+
+	Frame* frame = manage (new Frame);
+	frame->set_name ("BaseFrame");
+	frame->set_label (_("MIDI Progams (sent to track)"));
+	//frame->set_label (_("MIDI Progams (volatile)"));
+	frame->add (*pgm_table);
+	hpacker.pack_start (*frame, true, true);
+
+	for (uint8_t chn = 0; chn < 16; ++chn) {
+		int col = chn / 8;
+		int row = chn % 8;
+		ArdourDropdown* cui = manage (new ArdourWidgets::ArdourDropdown ());
+		// TODO set size_request
+		cui->set_text_ellipsize (Pango::ELLIPSIZE_END);
+		cui->set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
+		midi_pgmsel.push_back (cui);
+		pgm_table->attach (*cui, col, col + 1, row, row+1, FILL|EXPAND, FILL);
+	}
+
+	midi_refill_patches ();
+
+	insert->plugin()->BankPatchChange.connect (
+			midi_connections, invalidator (*this),
+			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
+			gui_context());
+
+	/* Note: possible race with MidiTimeAxisView::update_patch_selector()
+	 * which uses this signal to update/re-register the midnam (also in gui context).
+	 * MTAV does register before us, so the midnam should already be updated when
+	 * we're notified.
+	 */
+	insert->plugin()->UpdateMidnam.connect (
+			midi_connections, invalidator (*this),
+			boost::bind (&GenericPluginUI::midi_refill_patches, this),
+			gui_context());
+}
+
+void
+GenericPluginUI::midi_refill_patches ()
+{
+	assert (midi_pgmsel.size() == 16);
+
+	pgm_names.clear ();
+
+	const std::string model = insert->plugin ()->midnam_model ();
+	std::string mode;
+	const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (model);
+	if (device_modes.size() > 0) {
+		mode = device_modes.front();
+	}
+
+	for (uint8_t chn = 0; chn < 16; ++chn) {
+		midi_pgmsel[chn]->clear_items ();
+		boost::shared_ptr<MIDI::Name::ChannelNameSet> cns =
+			MIDI::Name::MidiPatchManager::instance().find_channel_name_set (model, mode, chn);
+
+		if (cns) {
+			using namespace Menu_Helpers;
+			using namespace Gtkmm2ext;
+
+			for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
+				const MIDI::Name::PatchNameList& patches = (*i)->patch_name_list ();
+				for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
+					const std::string pgm = (*j)->name ();
+					MIDI::Name::PatchPrimaryKey const& key = (*j)->patch_primary_key ();
+					assert ((*i)->number () == key.bank());
+					const uint32_t bp = (key.bank() << 7) | key.program();
+					midi_pgmsel[chn]->AddMenuElem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
+					pgm_names[bp] = pgm;
+				}
+			}
+		}
+
+		midi_bank_patch_change (chn);
+	}
+}
+
+void
+GenericPluginUI::midi_bank_patch_change (uint8_t chn)
+{
+	assert (chn < 16 && midi_pgmsel.size() == 16);
+	uint32_t bankpgm = insert->plugin()->bank_patch (chn);
+	if (bankpgm == UINT32_MAX) {
+		midi_pgmsel[chn]->set_text (_("--Unset--"));
+	} else {
+		int bank = bankpgm >> 7;
+		int pgm = bankpgm & 127;
+		if (pgm_names.find (bankpgm) != pgm_names.end ()) {
+			midi_pgmsel[chn]->set_text (pgm_names[bankpgm]);
+		} else {
+			midi_pgmsel[chn]->set_text (string_compose ("Bank %1,%2 Pgm %3",
+						(bank >> 7) + 1, (bank & 127) + 1, pgm +1));
+		}
+	}
+}
+
+void
+GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
+{
+	int bank = bankpgm >> 7;
+	int pgm = bankpgm & 127;
+	if (1) {
+		/* send to track */
+		MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+		if (!mt) {
+			return;
+		}
+
+		boost::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
+		boost::shared_ptr<AutomationControl> bank_lsb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
+		boost::shared_ptr<AutomationControl> program = mt->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
+
+		bank_msb->set_value (bank >> 7, PBD::Controllable::NoGroup);
+		bank_lsb->set_value (bank & 127, PBD::Controllable::NoGroup);
+		program->set_value (pgm, PBD::Controllable::NoGroup);
+
+	} else {
+#if 0 // TODO inject directly to plugin..
+		const int cnt = insert->get_count();
+		for (int i=0; i < cnt; i++ ) {
+			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin(i));
+			//lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
+
+		}
+#endif
 	}
 }
 
