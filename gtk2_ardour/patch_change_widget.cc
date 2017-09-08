@@ -17,6 +17,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <bitset>
 #include <gtkmm/frame.h>
 #include <boost/algorithm/string.hpp>
 
@@ -30,6 +31,7 @@
 #include "ardour/instrument_info.h"
 #include "ardour/midi_track.h"
 
+#include "gtkmm2ext/menu_elems.h"
 #include "widgets/tooltips.h"
 
 #include "gui_thread.h"
@@ -101,11 +103,12 @@ PatchChangeWidget::PatchChangeWidget (boost::shared_ptr<ARDOUR::Route> r)
 		_program_btn[pgm].signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_program), pgm));
 	}
 
-	using namespace Menu_Helpers;
 	for (uint32_t chn = 0; chn < 16; ++chn) {
+		using namespace Menu_Helpers;
+		using namespace Gtkmm2ext;
 		char buf[8];
 		snprintf (buf, sizeof(buf), "%d", chn + 1);
-		_channel_select.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
+		_channel_select.AddMenuElem (MenuElemNoMnemonic (buf, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_channel), chn)));
 	}
 
 	if (boost::dynamic_pointer_cast<MidiTrack> (_route)) {
@@ -191,6 +194,7 @@ PatchChangeWidget::refill_banks ()
 {
 	cancel_audition ();
 	using namespace Menu_Helpers;
+	using namespace Gtkmm2ext;
 
 	_current_patch_bank.reset ();
 	_bank_select.clear_items ();
@@ -207,8 +211,7 @@ PatchChangeWidget::refill_banks ()
 	if (cns) {
 		for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 			std::string n = (*i)->name ();
-			boost::replace_all (n, "_", " ");
-			_bank_select.AddMenuElem (MenuElem (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*i)->number ())));
+			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*i)->number ())));
 			if ((*i)->number () == b) {
 				_current_patch_bank = *i;
 				_bank_select.set_text (n);
@@ -218,7 +221,7 @@ PatchChangeWidget::refill_banks ()
 
 	if (!_current_patch_bank) {
 		std::string n = string_compose (_("Bank %1"), b);
-		_bank_select.AddMenuElem (MenuElem (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), b)));
+		_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), b)));
 		_bank_select.set_text (n);
 	}
 
@@ -228,24 +231,29 @@ PatchChangeWidget::refill_banks ()
 void
 PatchChangeWidget::refill_program_list ()
 {
-	// TODO if _current_patch_bank!=0, only clear/reset unused patches
-	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
-		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
-		_program_btn[pgm].set_text (n);
-		set_tooltip (_program_btn[pgm], n);
-	}
+	std::bitset<128> unset_notes;
+	unset_notes.set ();
 
 	if (_current_patch_bank) {
 		const MIDI::Name::PatchNameList& patches = _current_patch_bank->patch_name_list ();
 		for (MIDI::Name::PatchNameList::const_iterator i = patches.begin(); i != patches.end(); ++i) {
 			std::string n = (*i)->name ();
-			boost::replace_all (n, "_", " ");
 			MIDI::Name::PatchPrimaryKey const& key = (*i)->patch_primary_key ();
 
 			const uint8_t pgm = key.program();
 			_program_btn[pgm].set_text (n);
 			set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"), n, (int)(pgm +1)));
-			}
+			unset_notes.reset (pgm);
+		}
+	}
+
+	for (uint8_t pgm = 0; pgm < 128; ++pgm) {
+		if (!unset_notes.test (pgm)) {
+			continue;
+		}
+		std::string n = string_compose (_("Pgm-%1"), (int)(pgm +1));
+		_program_btn[pgm].set_text (n);
+		set_tooltip (_program_btn[pgm], n);
 	}
 
 	program_changed ();
@@ -273,6 +281,7 @@ PatchChangeWidget::select_bank (uint32_t bank)
 
 	bank_msb->set_value (bank >> 7, PBD::Controllable::NoGroup);
 	bank_lsb->set_value (bank & 127, PBD::Controllable::NoGroup);
+	select_program (program (_channel));
 }
 
 void
@@ -291,7 +300,6 @@ PatchChangeWidget::select_program (uint8_t pgm)
 void
 PatchChangeWidget::bank_changed ()
 {
-	// TODO optimize, just find the bank, set the text and refill_program_list()
 	refill_banks ();
 }
 
