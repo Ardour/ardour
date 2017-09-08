@@ -88,9 +88,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
-	HBox* automation_hbox = manage (new HBox);
 	smaller_hbox->set_spacing (4);
-	automation_hbox->set_spacing (6);
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
@@ -104,7 +102,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
-	smaller_hbox->pack_start (reset_button, false, false, 4);
+	if (pi->controls().size() > 0) {
+		smaller_hbox->pack_start (reset_button, false, false, 4);
+	}
 	smaller_hbox->pack_start (bypass_button, false, true, 4);
 
 	automation_manual_all_button.set_text(_("Manual"));
@@ -115,14 +115,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_write_all_button.set_name (X_("generic button"));
 	automation_touch_all_button.set_text(_("Touch"));
 	automation_touch_all_button.set_name (X_("generic button"));
-
-	Label* l = manage (new Label (_("All Automation")));
-	l->set_alignment (1.0, 0.5);
-	automation_hbox->pack_start (*l, true, true);
-	automation_hbox->pack_start (automation_manual_all_button, false, false);
-	automation_hbox->pack_start (automation_play_all_button, false, false);
-	automation_hbox->pack_start (automation_write_all_button, false, false);
-	automation_hbox->pack_start (automation_touch_all_button, false, false);
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->set_homogeneous (false);
@@ -136,7 +128,18 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	v1_box->set_spacing (6);
 	v1_box->pack_start (*smaller_hbox, false, true);
-	v1_box->pack_start (*automation_hbox, false, true);
+	if (pi->controls().size() > 0) {
+		HBox* automation_hbox = manage (new HBox);
+		automation_hbox->set_spacing (6);
+		Label* l = manage (new Label (_("All Automation")));
+		l->set_alignment (1.0, 0.5);
+		automation_hbox->pack_start (*l, true, true);
+		automation_hbox->pack_start (automation_manual_all_button, false, false);
+		automation_hbox->pack_start (automation_play_all_button, false, false);
+		automation_hbox->pack_start (automation_write_all_button, false, false);
+		automation_hbox->pack_start (automation_touch_all_button, false, false);
+		v1_box->pack_start (*automation_hbox, false, true);
+	}
 	v2_box->pack_start (focus_button, false, true);
 
 	main_contents.pack_start (settings_box, false, false);

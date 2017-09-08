@@ -235,7 +235,9 @@ LV2PluginUI::LV2PluginUI(boost::shared_ptr<PluginInsert> pi,
 	_ardour_buttons_box.set_border_width (6);
 	_ardour_buttons_box.pack_end (focus_button, false, false);
 	_ardour_buttons_box.pack_end (bypass_button, false, false, 4);
-	_ardour_buttons_box.pack_end (reset_button, false, false, 4);
+	if (pi->controls().size() > 0) {
+		_ardour_buttons_box.pack_end (reset_button, false, false, 4);
+	}
 	_ardour_buttons_box.pack_end (delete_button, false, false);
 	_ardour_buttons_box.pack_end (save_button, false, false);
 	_ardour_buttons_box.pack_end (add_button, false, false);

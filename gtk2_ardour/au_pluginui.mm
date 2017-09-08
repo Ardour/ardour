@@ -420,7 +420,9 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PluginInsert> insert)
 	smaller_hbox->pack_start (automation_mode_label, false, false);
 	smaller_hbox->pack_start (automation_mode_selector, false, false);
 #endif
-	smaller_hbox->pack_start (reset_button, false, false);
+	if (insert->controls().size() > 0) {
+		smaller_hbox->pack_start (reset_button, false, false);
+	}
 	smaller_hbox->pack_start (bypass_button, false, true);
 
 	VBox* v1_box = manage (new VBox);
