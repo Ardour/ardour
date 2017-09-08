@@ -136,6 +136,7 @@ typedef struct {
 
 #ifdef LV2_EXTENDED
 	LV2_Midnam*          midnam;
+	LV2_BankPatch*       bankpatch;
 	BPMap                presets;
 #endif
 	pthread_mutex_t      bp_lock;
@@ -144,6 +145,7 @@ typedef struct {
 	bool panic;
 	bool initialized;
 	bool inform_ui;
+	bool send_bankpgm;
 
 	char current_sf2_file_path[1024];
 	char queue_sf2_file_path[1024];
@@ -297,6 +299,8 @@ instantiate (const LV2_Descriptor*     descriptor,
 #ifdef LV2_EXTENDED
 		} else if (!strcmp (features[i]->URI, LV2_MIDNAM__update)) {
 			self->midnam = (LV2_Midnam*)features[i]->data;
+		} else if (!strcmp (features[i]->URI, LV2_BANKPATCH__notify)) {
+			self->bankpatch = (LV2_BankPatch*)features[i]->data;
 #endif
 		}
 	}
@@ -360,6 +364,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 #endif
 	self->panic = false;
 	self->inform_ui = false;
+	self->send_bankpgm = true;
 	self->initialized = false;
 	self->reinit_in_progress = false;
 	self->queue_reinit = false;
@@ -542,6 +547,13 @@ run (LV2_Handle instance, uint32_t n_samples)
 				assert (chn >= 0 && chn < 16);
 				self->program_state[chn].bank = (self->last_bank_msb << 7) | self->last_bank_lsb;
 				self->program_state[chn].program = data[1];
+#ifdef LV2_EXTENDED
+				if (self->bankpatch) {
+					self->bankpatch->notify (self->bankpatch->handle, chn,
+							self->program_state[chn].bank,
+							self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+				}
+#endif
 			}
 
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
@@ -559,9 +571,20 @@ run (LV2_Handle instance, uint32_t n_samples)
 		self->inform_ui = false;
 		inform_ui (self);
 #ifdef LV2_EXTENDED
-    self->midnam->update (self->midnam->handle);
+		self->midnam->update (self->midnam->handle);
 #endif
 	}
+
+#ifdef LV2_EXTENDED
+	if (self->send_bankpgm && self->bankpatch) {
+		self->send_bankpgm = false;
+		for (uint8_t chn = 0; chn < 16; ++chn) {
+			self->bankpatch->notify (self->bankpatch->handle, chn,
+					self->program_state[chn].bank,
+					self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+		}
+	}
+#endif
 
 	if (n_samples > offset && self->initialized && !self->reinit_in_progress) {
 		fluid_synth_write_float (
@@ -635,6 +658,7 @@ work_response (LV2_Handle  instance,
 
 	self->reinit_in_progress = false;
 	self->inform_ui = true;
+	self->send_bankpgm = true;
 	self->queue_reinit = false;
 	return LV2_WORKER_SUCCESS;
 }
