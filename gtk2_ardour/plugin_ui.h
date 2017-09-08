@@ -55,6 +55,7 @@
 
 #include "ardour_window.h"
 #include "automation_controller.h"
+#include "gtk_pianokeyboard.h"
 
 namespace ARDOUR {
 	class PluginInsert;
@@ -304,6 +305,19 @@ private:
 	void scroller_size_request (Gtk::Requisition*);
 	Gtk::ScrolledWindow scroller;
 
+	Gtk::Expander   _plugin_pianokeyboard_expander;
+	PianoKeyboard*  _piano;
+	Gtk::Widget*    _pianomm;
+	Gtk::VBox       _pianobox;
+	Gtk::SpinButton _piano_velocity;
+	Gtk::SpinButton _piano_channel;
+
+	static void _note_on_event_handler (GtkWidget*, int, gpointer);
+	static void _note_off_event_handler (GtkWidget*, int, gpointer);
+	void note_on_event_handler (int);
+	void note_off_event_handler (int);
+
+	void toggle_pianokeyboard ();
 	void build_midi_table ();
 	void midi_refill_patches ();
 	void midi_bank_patch_change (uint8_t chn);

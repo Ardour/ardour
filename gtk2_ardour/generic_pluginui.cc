@@ -78,6 +78,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	: PlugUIBase (pi)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
+	, _plugin_pianokeyboard_expander (_("MIDI Keyboard"))
+	, _piano (0)
+	, _pianomm (0)
+	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
+	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
 	set_name ("PluginEditor");
 	set_border_width (10);
@@ -121,7 +126,37 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
-	pack_end (plugin_analysis_expander, false, false);
+	if (pi->is_instrument ()) {
+		if (dynamic_cast<MidiTrack*> (pi->owner())) {
+			_piano = (PianoKeyboard*)piano_keyboard_new();
+			_pianomm = Glib::wrap((GtkWidget*)_piano);
+			_pianomm->set_flags(Gtk::CAN_FOCUS);
+			_pianomm->add_events(Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+
+			g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (GenericPluginUI::_note_on_event_handler), this);
+			g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (GenericPluginUI::_note_off_event_handler), this);
+
+			HBox* box = manage (new HBox);
+			box->pack_start (*manage (new Label (_("Channel:"))), false, false);
+			box->pack_start (_piano_channel, false, false);
+			box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+			box->pack_start (_piano_velocity, false, false);
+
+			Box* box2 = manage (new HBox ());
+			box2->pack_start (*box, true, false);
+
+			_pianobox.set_spacing (4);
+			_pianobox.pack_start (*box2, true, true);
+			_pianobox.pack_start (*_pianomm, true, true);
+
+			_plugin_pianokeyboard_expander.set_expanded(false);
+			_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
+
+			pack_end (_plugin_pianokeyboard_expander, false, false);
+		}
+	} else {
+		pack_end (plugin_analysis_expander, false, false);
+	}
 	if (!plugin->get_docs().empty()) {
 		pack_end (description_expander, false, false);
 	}
@@ -194,6 +229,7 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+	delete _pianomm;
 }
 
 void
@@ -1330,4 +1366,65 @@ GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 	} else {
 		std::cerr << "warning: property change for property with no control" << std::endl;
 	}
+}
+
+void
+GenericPluginUI::toggle_pianokeyboard ()
+{
+	if (_plugin_pianokeyboard_expander.get_expanded()) {
+		_plugin_pianokeyboard_expander.add (_pianobox);
+		_pianobox.show_all ();
+	} else {
+		const int child_height = _plugin_pianokeyboard_expander.get_child ()->get_height ();
+		_plugin_pianokeyboard_expander.get_child ()->hide ();
+		_plugin_pianokeyboard_expander.remove ();
+
+		Gtk::Window *toplevel = (Gtk::Window*) _plugin_pianokeyboard_expander.get_ancestor (GTK_TYPE_WINDOW);
+		if (toplevel) {
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
+		}
+	}
+}
+
+void
+GenericPluginUI::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((GenericPluginUI*)arg)->note_on_event_handler(note);
+}
+
+void
+GenericPluginUI::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((GenericPluginUI*)arg)->note_off_event_handler(note);
+}
+
+void
+GenericPluginUI::note_on_event_handler (int note)
+{
+	// TODO add option to send to synth directly (bypass track)
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	if (!mt) { return; }
+	_pianomm->grab_focus ();
+	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_ON | channel);
+	event[1] = note;
+	event[2] = _piano_velocity.get_value_as_int ();
+	mt->write_immediate_event (3, event);
+}
+
+void
+GenericPluginUI::note_off_event_handler (int note)
+{
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	if (!mt) { return; }
+	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_OFF | channel);
+	event[1] = note;
+	event[2] = 0;
+	mt->write_immediate_event (3, event);
 }
