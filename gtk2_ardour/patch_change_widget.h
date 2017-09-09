@@ -24,6 +24,7 @@
 #include <gtkmm/table.h>
 
 #include "pbd/signals.h"
+#include "midi++/midnam_patch.h"
 
 #include "ardour/route.h"
 
@@ -60,6 +61,7 @@ private:
 
 	uint8_t _channel;
 	bool    _ignore_spin_btn_signals;
+	bool    _no_notifications;
 
 	void select_channel (uint8_t);
 	void select_bank (uint32_t);
@@ -68,11 +70,13 @@ private:
 
 	void bank_changed ();
 	void program_changed ();
+	void bankpatch_changed (uint8_t);
 
 	void refill_banks ();
 	void refill_program_list ();
 
 	void instrument_info_changed ();
+	void processors_changed ();
 
 	PBD::ScopedConnection _info_changed_connection;
 	PBD::ScopedConnection _route_connection;
