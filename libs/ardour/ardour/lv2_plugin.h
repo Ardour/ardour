@@ -344,6 +344,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool has_midnam ();
 	bool read_midnam ();
 	std::string midnam_model ();
+	bool _midnam_dirty;
 #endif
 
 	void latency_compute_run ();

@@ -241,6 +241,7 @@ void
 LV2Plugin::midnam_update (LV2_Midnam_Handle handle)
 {
 	LV2Plugin* plugin = (LV2Plugin*)handle;
+	plugin->_midnam_dirty = true;
 	plugin->UpdateMidnam (); /* EMIT SIGNAL */
 }
 
@@ -590,6 +591,7 @@ LV2Plugin::init(const void* c_plugin, framecnt_t rate)
 	_midname_interface = (const LV2_Midnam_Interface*)
 		extension_data (LV2_MIDNAM__interface);
 	if (_midname_interface) {
+		_midnam_dirty = true;
 		read_midnam ();
 	}
 #endif
@@ -1029,7 +1031,7 @@ LV2Plugin::has_midnam () {
 bool
 LV2Plugin::read_midnam () {
 	bool rv = false;
-	if (!_midname_interface) {
+	if (!_midname_interface || !_midnam_dirty) {
 		return rv;
 	}
 	char* midnam = _midname_interface->midnam ((void*)_impl->instance->lv2_handle);
@@ -1047,6 +1049,10 @@ LV2Plugin::read_midnam () {
 	}
 #endif
 	_midname_interface->free (midnam);
+	if (rv) {
+		UpdatedMidnam ();
+		_midnam_dirty = false;
+	}
 	return rv;
 }
 

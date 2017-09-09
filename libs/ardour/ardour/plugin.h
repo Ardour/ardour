@@ -182,6 +182,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool read_midnam () { return false; }
 	virtual std::string midnam_model () { return ""; }
 	PBD::Signal0<void> UpdateMidnam;
+	PBD::Signal0<void> UpdatedMidnam;
 
 	virtual bool knows_bank_patch () { return false; }
 	virtual uint32_t bank_patch (uint8_t chn) { return UINT32_MAX; }
