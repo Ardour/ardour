@@ -1,0 +1,7 @@
+# This is a sample udev file to set "CounterDesign ShuttlePROv2 and
+# shuttleXpress" device permissions on GNU/Linux systems.
+#
+# copy this file to /etc/udev/rules.d/
+
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0b33", ATTRS{idProduct}=="0030", MODE="660", GROUP="audio"
+SUBSYSTEM=="usb", ATTRS{idVendor}=="0b33", ATTRS{idProduct}=="0020", MODE="660", GROUP="audio"
