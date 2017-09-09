@@ -59,12 +59,20 @@ ShuttleproControlProtocol::ShuttleproControlProtocol (Session& session)
 	, _was_rolling_before_shuttle (false)
 	, _test_mode (false)
 	, _keep_rolling (true)
-	, _shuttle_speeds ( { 0.50, 0.75, 1.0, 1.5, 2.0, 5.0, 10.0 } )
-	, _jog_distance ( { .value = 1.0, .unit = BEATS } )
+	, _shuttle_speeds ()
+	, _jog_distance ()
 	, _gui (0)
 {
 	libusb_init (0);
 	//libusb_set_debug(0, LIBUSB_LOG_LEVEL_WARNING);
+
+	_shuttle_speeds.push_back (0.50);
+	_shuttle_speeds.push_back (0.75);
+	_shuttle_speeds.push_back (1.0);
+	_shuttle_speeds.push_back (1.5);
+	_shuttle_speeds.push_back (2.0);
+	_shuttle_speeds.push_back (5.0);
+	_shuttle_speeds.push_back (10.0);
 
 	setup_default_button_actions ();
 	BaseUI::run();
@@ -113,11 +121,12 @@ ShuttleproControlProtocol::get_state ()
 	node.set_property (X_("keep-rolling"), _keep_rolling);
 
 	ostringstream os;
-	for (vector<double>::const_iterator it = _shuttle_speeds.begin (); it != _shuttle_speeds.end (); ++it) {
-		os << *it << ' ';
+	vector<double>::const_iterator it = _shuttle_speeds.begin ();
+	os << *(it++);
+	for (; it != _shuttle_speeds.end (); ++it) {
+		os << ' ' << *it;
 	}
 	string s = os.str ();
-	s.pop_back ();
 	node.set_property (X_("shuttle-speeds"), s);
 
 	node.set_property (X_("jog-distance"), _jog_distance.value);

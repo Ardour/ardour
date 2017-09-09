@@ -42,7 +42,11 @@ JumpDistanceWidget::JumpDistanceWidget (JumpDistance dist)
 	sb->signal_value_changed().connect (sigc::mem_fun (*this, &JumpDistanceWidget::update_value));
 	pack_start (*sb);
 
-	const vector<string> jog_units_strings ({ X_("seconds"), X_("beats"), X_("bars") });
+	vector<string> jog_units_strings;
+	jog_units_strings.push_back (_("seconds"));
+	jog_units_strings.push_back (_("beats"));
+	jog_units_strings.push_back (_("bars"));
+
 	set_popdown_strings (_unit_cb, jog_units_strings);
 	_unit_cb.set_active (_distance.unit);
 	_unit_cb.signal_changed().connect (sigc::mem_fun (*this, &JumpDistanceWidget::update_unit));

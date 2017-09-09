@@ -303,26 +303,26 @@ ShuttleproControlProtocol::get_gui () const
 	if (!_gui) {
 		const_cast<ShuttleproControlProtocol*>(this)->build_gui ();
 	}
-	static_cast<Gtk::VBox*>(_gui)->show_all();
-	return _gui;
+	_gui->show_all();
+	return (void*) _gui;
+}
+
+void
+ShuttleproControlProtocol::build_gui ()
+{
+	_gui = new ShuttleproGUI (*this);
 }
 
 void
 ShuttleproControlProtocol::tear_down_gui ()
 {
 	if (_gui) {
-		Gtk::Widget *w = static_cast<Gtk::VBox*>(_gui)->get_parent();
+		Gtk::Widget *w = _gui->get_parent();
 		if (w) {
 			w->hide();
 			delete w;
 		}
 	}
-	delete (ShuttleproGUI*) _gui;
+	delete _gui;
 	_gui = 0;
-}
-
-void
-ShuttleproControlProtocol::build_gui ()
-{
-	_gui = (void*) new ShuttleproGUI (*this);
 }

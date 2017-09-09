@@ -51,6 +51,7 @@ enum JumpUnit {
 };
 
 struct JumpDistance {
+	JumpDistance () : value (1.0), unit (BEATS) {}
 	JumpDistance (double v, JumpUnit u) : value (v), unit (u) {}
 	JumpDistance (const JumpDistance& o) : value (o.value), unit (o.unit) {}
 	double value;
@@ -142,7 +143,7 @@ private:
 	std::vector<boost::shared_ptr<ButtonBase> > _button_actions;
 	void setup_default_button_actions ();
 
-	mutable void* _gui;
+	mutable ShuttleproGUI* _gui;
 	void build_gui ();
 
 	int _error;
