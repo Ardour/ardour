@@ -63,6 +63,7 @@ namespace ArdourWidgets {
 class ArdourWindow;
 class IOSelectorWindow;
 class ControlSlaveUI;
+class PatchChangeGridDialog;
 class SaveTemplateDialog;
 
 class RoutePinWindowProxy : public WM::ProxyBase
@@ -112,6 +113,8 @@ public:
 	virtual void set_color (uint32_t c);
 	Gdk::Color route_color () const;
 	void choose_color ();
+
+	void select_midi_patch ();
 
 	bool ignore_toggle;
 	bool wait_for_release;
@@ -299,10 +302,13 @@ protected:
 
 	bool mark_hidden (bool yn);
 
+	PatchChangeGridDialog* patch_change_dialog () const;
+
 private:
 	void parameter_changed (std::string const&);
 	void relabel_solo_button ();
 	void track_mode_changed ();
+	void delete_patch_change_dialog ();
 
 	std::string route_state_id () const;
 

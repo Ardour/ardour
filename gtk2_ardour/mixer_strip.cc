@@ -1738,6 +1738,11 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
+	if (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ()) {
+		items.push_back (MenuElem (_("Patch Selector..."),
+					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
+	}
+
 	if (_route->the_instrument () && _route->the_instrument ()->output_streams().n_audio() > 2) {
 		// TODO ..->n_audio() > 1 && separate_output_groups) hard to check here every time.
 		items.push_back (MenuElem (_("Fan out to Busses"), sigc::bind (sigc::mem_fun (*this, &RouteUI::fan_out), true, true)));

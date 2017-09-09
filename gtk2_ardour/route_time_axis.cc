@@ -46,6 +46,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
@@ -73,6 +74,7 @@
 #include "item_counts.h"
 #include "keyboard.h"
 #include "paste_context.h"
+#include "patch_change_widget.h"
 #include "playlist_selector.h"
 #include "point_selection.h"
 #include "public_editor.h"
@@ -793,6 +795,13 @@ RouteTimeAxisView::build_display_menu ()
 		build_playlist_menu ();
 		items.push_back (MenuElem (_("Playlist"), *playlist_action_menu));
 		items.back().set_sensitive (_editor.get_selection().tracks.size() <= 1);
+	}
+
+	if (!is_midi_track () && _route->the_instrument ()) {
+		/* MIDI Bus */
+		items.push_back (MenuElem (_("Patch Selector..."),
+					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
+		items.push_back (SeparatorElem());
 	}
 
 	route_group_menu->detach ();
@@ -2190,8 +2199,42 @@ RouteTimeAxisView::processor_menu_item_toggled (RouteTimeAxisView::ProcessorAuto
 }
 
 void
+RouteTimeAxisView::reread_midnam ()
+{
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+	assert (pi);
+	bool rv = pi->plugin ()->read_midnam();
+
+	if (rv && patch_change_dialog ()) {
+		patch_change_dialog ()->refresh ();
+	}
+}
+
+void
+RouteTimeAxisView::drop_instrument_ref ()
+{
+	midnam_connection.drop_connections ();
+}
+
+void
 RouteTimeAxisView::processors_changed (RouteProcessorChange c)
 {
+	if (_route) {
+		boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (the_instrument);
+		if (pi && pi->plugin ()->has_midnam ()) {
+			midnam_connection.drop_connections ();
+			the_instrument->DropReferences.connect (midnam_connection, invalidator (*this),
+					boost::bind (&RouteTimeAxisView::drop_instrument_ref, this),
+					gui_context());
+			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
+					boost::bind (&RouteTimeAxisView::reread_midnam, this),
+					gui_context());
+
+			reread_midnam ();
+		}
+	}
+
 	if (c.type == RouteProcessorChange::MeterPointChange) {
 		/* nothing to do if only the meter point has changed */
 		return;

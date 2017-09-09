@@ -176,7 +176,7 @@ protected:
 
 	bool route_group_click  (GdkEventButton *);
 
-	void processors_changed (ARDOUR::RouteProcessorChange);
+	virtual void processors_changed (ARDOUR::RouteProcessorChange);
 
 	virtual void add_processor_to_subplugin_menu (boost::weak_ptr<ARDOUR::Processor>);
 	void remove_processor_automation_node (ProcessorAutomationNode* pan);
@@ -306,6 +306,10 @@ private:
 	void update_playlist_tip ();
 	void parameter_changed (std::string const & p);
 	void update_track_number_visibility();
+
+	void drop_instrument_ref ();
+	void reread_midnam ();
+	PBD::ScopedConnectionList midnam_connection;
 };
 
 #endif /* __ardour_route_time_axis_h__ */

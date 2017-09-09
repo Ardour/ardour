@@ -66,6 +66,7 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "mixer_strip.h"
+#include "patch_change_widget.h"
 #include "plugin_pin_dialog.h"
 #include "rgb_macros.h"
 #include "route_time_axis.h"
@@ -120,6 +121,8 @@ RouteUI::~RouteUI()
 	if (_route) {
 		ARDOUR_UI::instance()->gui_object_state->remove_node (route_state_id());
 	}
+
+	delete_patch_change_dialog ();
 
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
@@ -246,6 +249,7 @@ RouteUI::reset ()
 	delete mute_menu;
 	mute_menu = 0;
 
+	delete_patch_change_dialog ();
 	_color_picker.reset ();
 
 	denormal_menu_item = 0;
@@ -1611,6 +1615,39 @@ void
 RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 {
 	_route->solo_safe_control()->set_value (check->get_active() ? 1.0 : 0.0, Controllable::UseGroup);
+}
+
+void
+RouteUI::delete_patch_change_dialog ()
+{
+	if (!_route) {
+		return;
+	}
+	delete _route->patch_selector_dialog ();
+	_route->set_patch_selector_dialog (0);
+}
+
+PatchChangeGridDialog*
+RouteUI::patch_change_dialog () const
+{
+	return _route->patch_selector_dialog ();
+}
+
+void
+RouteUI::select_midi_patch ()
+{
+	if (patch_change_dialog ()) {
+		patch_change_dialog()->present ();
+		return;
+	}
+
+	/* note: RouteTimeAxisView is resoponsible to updating
+	 * the Dialog (PatchChangeGridDialog::refresh())
+	 * when the midnam model changes.
+	 */
+	PatchChangeGridDialog* d = new PatchChangeGridDialog (_route);
+	_route->set_patch_selector_dialog (d);
+	d->present ();
 }
 
 /** Ask the user to choose a colour, and then apply that color to my route */

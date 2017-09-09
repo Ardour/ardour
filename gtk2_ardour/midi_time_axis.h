@@ -67,7 +67,6 @@ class PianoRollHeader;
 class StepEntry;
 class StepEditor;
 class MidiChannelSelectorWindow;
-class PatchChangeGridDialog;
 
 #define NO_MIDI_NOTE 0xff
 
@@ -121,9 +120,6 @@ private:
 
 	void setup_midnam_patches ();
 	void update_patch_selector ();
-	void drop_instrument_ref ();
-	void reread_midnam ();
-	PBD::ScopedConnectionList midnam_connection;
 
 	void start_scroomer_update ();
 	void stop_scroomer_update ();
@@ -140,8 +136,6 @@ private:
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
-	void send_patch_change ();
-
 	void route_active_changed ();
 	void note_range_changed ();
 	void contents_height_changed ();
@@ -200,8 +194,6 @@ private:
 	StepEditor* _step_editor;
 
 	void immediate_patch_chnage_response (int response);
-	PatchChangeGridDialog* _patch_change_dialog;
-
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

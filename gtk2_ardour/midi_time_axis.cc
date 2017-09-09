@@ -123,7 +123,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, controller_menu (0)
 	, poly_pressure_menu (0)
 	, _step_editor (0)
-	, _patch_change_dialog (0)
 {
 	_midnam_model_selector.disable_scrolling();
 	_midnam_custom_device_mode_selector.disable_scrolling();
@@ -192,10 +191,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ensure_pan_views (false);
 	update_control_names();
 	processors_changed (RouteProcessorChange ());
-
-	_route->processors_changed.connect (*this, invalidator (*this),
-	                                    boost::bind (&MidiTimeAxisView::processors_changed, this, _1),
-	                                    gui_context());
 
 	if (is_track()) {
 		_piano_roll_header->SetNoteSelection.connect (
@@ -347,9 +342,6 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 
 	delete controller_menu;
 	delete _step_editor;
-
-	delete  _patch_change_dialog;
-	_patch_change_dialog = 0;
 }
 
 void
@@ -392,11 +384,6 @@ MidiTimeAxisView::setup_midnam_patches ()
 }
 
 void
-MidiTimeAxisView::drop_instrument_ref ()
-{
-	midnam_connection.drop_connections ();
-}
-void
 MidiTimeAxisView::start_scroomer_update ()
 {
 	_note_range_changed_connection.disconnect();
@@ -417,18 +404,8 @@ MidiTimeAxisView::update_patch_selector ()
 
 	bool pluginprovided = false;
 	if (_route) {
-		boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 		if (pi && pi->plugin ()->has_midnam ()) {
-			midnam_connection.drop_connections ();
-			the_instrument->DropReferences.connect (midnam_connection, invalidator (*this),
-					boost::bind (&MidiTimeAxisView::drop_instrument_ref, this),
-					gui_context());
-			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
-					boost::bind (&MidiTimeAxisView::reread_midnam, this),
-					gui_context());
-			reread_midnam ();
-
 			pluginprovided = true;
 			std::string model_name = pi->plugin ()->midnam_model ();
 			if (gui_property (X_("midnam-model-name")) != model_name) {
@@ -446,17 +423,7 @@ MidiTimeAxisView::update_patch_selector ()
 	}
 }
 
-void
-MidiTimeAxisView::reread_midnam ()
-{
-	boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
-	bool rv = pi->plugin ()->read_midnam();
 
-	if (rv && _patch_change_dialog) {
-		_patch_change_dialog->refresh ();
-	}
-}
 void
 MidiTimeAxisView::model_changed(const std::string& model)
 {
@@ -499,8 +466,8 @@ MidiTimeAxisView::model_changed(const std::string& model)
 	controller_menu = 0;
 	build_automation_action_menu(false);
 
-	if (_patch_change_dialog) {
-		_patch_change_dialog->refresh ();
+	if (patch_change_dialog ()) {
+		patch_change_dialog ()->refresh ();
 	}
 }
 
@@ -581,7 +548,7 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
 	items.push_back (MenuElem (_("Patch Selector..."),
-				sigc::mem_fun(*this, &MidiTimeAxisView::send_patch_change)));
+				sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 
 	color_mode_menu = build_color_mode_menu();
 	if (color_mode_menu) {
@@ -1096,22 +1063,6 @@ MidiTimeAxisView::build_color_mode_menu()
 	_channel_color_mode_item->set_active(_color_mode == TrackColor);
 
 	return mode_menu;
-}
-
-void
-MidiTimeAxisView::send_patch_change ()
-{
-	if (!_route) {
-		return;
-	}
-	if (_patch_change_dialog) {
-		_patch_change_dialog->present ();
-		return;
-	}
-
-	PatchChangeGridDialog* d = new PatchChangeGridDialog (_route);
-	_patch_change_dialog = d;
-	d->present ();
 }
 
 void
