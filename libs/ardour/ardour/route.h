@@ -59,6 +59,7 @@
 #include "ardour/slavable.h"
 
 class RoutePinWindowProxy;
+class PatchChangeGridDialog;
 
 namespace ARDOUR {
 
@@ -219,6 +220,9 @@ public:
 
 	RoutePinWindowProxy * pinmgr_proxy () const { return _pinmgr_proxy; }
 	void set_pingmgr_proxy (RoutePinWindowProxy* wp) { _pinmgr_proxy = wp ; }
+
+	PatchChangeGridDialog* patch_selector_dialog () const { return _patch_selector_dialog; }
+	void set_patch_selector_dialog  (PatchChangeGridDialog* d) { _patch_selector_dialog = d; }
 
 	boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
 
@@ -773,6 +777,7 @@ private:
 	*/
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
 	RoutePinWindowProxy *_pinmgr_proxy;
+	PatchChangeGridDialog* _patch_selector_dialog;
 
 	void reset_instrument_info ();
 
