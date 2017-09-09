@@ -1287,10 +1287,10 @@ Route::clear_processors (Placement p)
 
 	processor_max_streams.reset();
 	_have_internal_generator = false;
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	reset_instrument_info ();
 	set_processor_positions ();
 
-	reset_instrument_info ();
+	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 
 	if (!already_deleting) {
 		_session.clear_deletion_in_progress();
