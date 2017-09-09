@@ -649,12 +649,13 @@ GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
 void
 GenericPluginUI::build_midi_table ()
 {
-	Gtk::Table* pgm_table = manage (new Gtk::Table (8, 2));
+	Gtk::Table* pgm_table = manage (new Gtk::Table (8, 5));
 
-	pgm_table->set_homogeneous (true);
+	pgm_table->set_homogeneous (false);
 	pgm_table->set_row_spacings (2);
 	pgm_table->set_col_spacings (2);
 	pgm_table->set_border_width (5);
+	pgm_table->set_col_spacing (2, 10);
 
 	Frame* frame = manage (new Frame);
 	frame->set_name ("BaseFrame");
@@ -664,17 +665,18 @@ GenericPluginUI::build_midi_table ()
 		frame->set_label (_("MIDI Progams (volatile)"));
 	}
 	frame->add (*pgm_table);
-	hpacker.pack_start (*frame, true, true);
+	hpacker.pack_start (*frame, false, false);
 
 	for (uint8_t chn = 0; chn < 16; ++chn) {
-		int col = chn / 8;
+		int col = 3 * (chn / 8);
 		int row = chn % 8;
 		ArdourDropdown* cui = manage (new ArdourWidgets::ArdourDropdown ());
-		// TODO set size_request
+		cui->set_sizing_text ("Stereo Grand Piano");
 		cui->set_text_ellipsize (Pango::ELLIPSIZE_END);
 		cui->set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
 		midi_pgmsel.push_back (cui);
-		pgm_table->attach (*cui, col, col + 1, row, row+1, FILL|EXPAND, FILL);
+		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_RIGHT)), col, col + 1, row, row+1, FILL, SHRINK);
+		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
 	}
 
 	insert->plugin ()->read_midnam();
