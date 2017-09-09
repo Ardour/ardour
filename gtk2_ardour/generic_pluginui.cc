@@ -127,33 +127,31 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
 	if (pi->is_instrument ()) {
-		if (dynamic_cast<MidiTrack*> (pi->owner())) {
-			_piano = (PianoKeyboard*)piano_keyboard_new();
-			_pianomm = Glib::wrap((GtkWidget*)_piano);
-			_pianomm->set_flags(Gtk::CAN_FOCUS);
-			_pianomm->add_events(Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+		_piano = (PianoKeyboard*)piano_keyboard_new();
+		_pianomm = Glib::wrap((GtkWidget*)_piano);
+		_pianomm->set_flags(Gtk::CAN_FOCUS);
+		_pianomm->add_events(Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
 
-			g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (GenericPluginUI::_note_on_event_handler), this);
-			g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (GenericPluginUI::_note_off_event_handler), this);
+		g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (GenericPluginUI::_note_on_event_handler), this);
+		g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (GenericPluginUI::_note_off_event_handler), this);
 
-			HBox* box = manage (new HBox);
-			box->pack_start (*manage (new Label (_("Channel:"))), false, false);
-			box->pack_start (_piano_channel, false, false);
-			box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
-			box->pack_start (_piano_velocity, false, false);
+		HBox* box = manage (new HBox);
+		box->pack_start (*manage (new Label (_("Channel:"))), false, false);
+		box->pack_start (_piano_channel, false, false);
+		box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+		box->pack_start (_piano_velocity, false, false);
 
-			Box* box2 = manage (new HBox ());
-			box2->pack_start (*box, true, false);
+		Box* box2 = manage (new HBox ());
+		box2->pack_start (*box, true, false);
 
-			_pianobox.set_spacing (4);
-			_pianobox.pack_start (*box2, true, true);
-			_pianobox.pack_start (*_pianomm, true, true);
+		_pianobox.set_spacing (4);
+		_pianobox.pack_start (*box2, true, true);
+		_pianobox.pack_start (*_pianomm, true, true);
 
-			_plugin_pianokeyboard_expander.set_expanded(false);
-			_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
+		_plugin_pianokeyboard_expander.set_expanded(false);
+		_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
 
-			pack_end (_plugin_pianokeyboard_expander, false, false);
-		}
+		pack_end (_plugin_pianokeyboard_expander, false, false);
 	} else {
 		pack_end (plugin_analysis_expander, false, false);
 	}
@@ -199,10 +197,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	build ();
 
 	if (insert->plugin()->has_midnam() && insert->plugin()->knows_bank_patch()) {
-		/* right now PC are sent via MIDI Track controls only */
-		if (dynamic_cast<MidiTrack*> (insert->owner())) {
-			build_midi_table ();
-		}
+		build_midi_table ();
 	}
 
 	if (is_scrollable) {
@@ -663,8 +658,11 @@ GenericPluginUI::build_midi_table ()
 
 	Frame* frame = manage (new Frame);
 	frame->set_name ("BaseFrame");
-	frame->set_label (_("MIDI Progams (sent to track)"));
-	//frame->set_label (_("MIDI Progams (volatile)"));
+	if (dynamic_cast<MidiTrack*> (insert->owner())) {
+		frame->set_label (_("MIDI Progams (sent to track)"));
+	} else {
+		frame->set_label (_("MIDI Progams (volatile)"));
+	}
 	frame->add (*pgm_table);
 	hpacker.pack_start (*frame, true, true);
 
@@ -761,13 +759,9 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 {
 	int bank = bankpgm >> 7;
 	int pgm = bankpgm & 127;
-	if (1) {
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	if (mt) {
 		/* send to track */
-		MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
-		if (!mt) {
-			return;
-		}
-
 		boost::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 		boost::shared_ptr<AutomationControl> bank_lsb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 		boost::shared_ptr<AutomationControl> program = mt->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
@@ -775,16 +769,20 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 		bank_msb->set_value (bank >> 7, PBD::Controllable::NoGroup);
 		bank_lsb->set_value (bank & 127, PBD::Controllable::NoGroup);
 		program->set_value (pgm, PBD::Controllable::NoGroup);
-
 	} else {
-#if 0 // TODO inject directly to plugin..
-		const int cnt = insert->get_count();
-		for (int i=0; i < cnt; i++ ) {
-			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (insert->plugin(i));
-			//lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
+		uint8_t event[3];
+		event[0] = (MIDI_CMD_CONTROL | chn);
+		event[1] = 0x00;
+		event[2] = bank >> 7;
+		insert->write_immediate_event (3, event);
 
-		}
-#endif
+		event[1] = 0x20;
+		event[2] = bank & 127;
+		insert->write_immediate_event (3, event);
+
+		event[0] = (MIDI_CMD_PGM_CHANGE | chn);
+		event[1] = pgm;
+		insert->write_immediate_event (2, event);
 	}
 }
 
@@ -1404,27 +1402,32 @@ GenericPluginUI::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
 void
 GenericPluginUI::note_on_event_handler (int note)
 {
-	// TODO add option to send to synth directly (bypass track)
 	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
-	if (!mt) { return; }
 	_pianomm->grab_focus ();
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_ON | channel);
 	event[1] = note;
 	event[2] = _piano_velocity.get_value_as_int ();
-	mt->write_immediate_event (3, event);
+	if (mt) {
+		mt->write_immediate_event (3, event);
+	} else {
+		insert->write_immediate_event (3, event);
+	}
 }
 
 void
 GenericPluginUI::note_off_event_handler (int note)
 {
 	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
-	if (!mt) { return; }
 	uint8_t channel = _piano_channel.get_value_as_int () - 1;
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_OFF | channel);
 	event[1] = note;
 	event[2] = 0;
-	mt->write_immediate_event (3, event);
+	if (mt) {
+		mt->write_immediate_event (3, event);
+	} else {
+		insert->write_immediate_event (3, event);
+	}
 }
