@@ -208,14 +208,6 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	}
 
-
-	/* Listen for property changes that are not notified normally because
-	 * AutomationControl has only support for numeric values currently.
-	 * The only case is Variant::PATH for now */
-	plugin->PropertyChanged.connect(*this, invalidator(*this),
-	                                boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
-	                                gui_context());
-
 	main_contents.show ();
 }
 
@@ -392,6 +384,14 @@ GenericPluginUI::build ()
 		control_uis.push_back(cui);
 	}
 	if (!descs.empty()) {
+		/* Listen for property changes that are not notified normally because
+		 * AutomationControl has only support for numeric values currently.
+		 * The only case is Variant::PATH for now */
+		plugin->PropertyChanged.connect(*this, invalidator(*this),
+				boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+				gui_context());
+
+		/* and query current property value */
 		plugin->announce_property_values();
 	}
 
