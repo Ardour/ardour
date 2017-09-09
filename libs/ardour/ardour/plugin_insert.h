@@ -77,6 +77,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	bool reset_parameters_to_default ();
 	bool can_reset_all_parameters ();
 
+	bool write_immediate_event (size_t size, const uint8_t* buf);
+
 	int set_block_size (pframes_t nframes);
 
 	ChanMapping input_map (uint32_t num) const {

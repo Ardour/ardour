@@ -101,6 +101,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _have_presets (false)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
+	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
@@ -116,6 +117,7 @@ Plugin::Plugin (const Plugin& other)
 	, _have_presets (false)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
+	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
@@ -345,16 +347,28 @@ Plugin::preset_by_uri (const string& uri)
 	}
 }
 
+bool
+Plugin::write_immediate_event (size_t size, const uint8_t* buf)
+{
+	if (!Evoral::midi_event_is_valid (buf, size)) {
+		return false;
+	}
+	return (_immediate_events.write (0, Evoral::MIDI_EVENT, size, buf) == size);
+}
+
 int
 Plugin::connect_and_run (BufferSet& bufs,
 		framepos_t /*start*/, framepos_t /*end*/, double /*speed*/,
 		ChanMapping /*in_map*/, ChanMapping /*out_map*/,
-		pframes_t /* nframes */, framecnt_t /*offset*/)
+		pframes_t nframes, framecnt_t /*offset*/)
 {
 	if (bufs.count().n_midi() > 0) {
 
-		/* Track notes that we are sending to the plugin */
+		if (_immediate_events.read_space() && nframes > 0) {
+			_immediate_events.read (bufs.get_midi (0), 0, 1, nframes - 1, true);
+		}
 
+		/* Track notes that we are sending to the plugin */
 		const MidiBuffer& b = bufs.get_midi (0);
 
 		_tracker.track (b.begin(), b.end());

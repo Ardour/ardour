@@ -705,6 +705,18 @@ PluginInsert::bypassable_changed ()
 	BypassableChanged ();
 }
 
+bool
+PluginInsert::write_immediate_event (size_t size, const uint8_t* buf)
+{
+	bool rv = true;
+	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
+		if (!(*i)->write_immediate_event (size, buf)) {
+			rv = false;
+		}
+	}
+	return rv;
+}
+
 void
 PluginInsert::preset_load_set_value (uint32_t p, float v)
 {

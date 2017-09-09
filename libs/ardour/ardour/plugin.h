@@ -33,6 +33,7 @@
 #include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/types.h"
@@ -158,6 +159,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual boost::shared_ptr<ScalePoints> get_scale_points(uint32_t /*port_index*/) const {
 		return boost::shared_ptr<ScalePoints>();
 	}
+
+	bool write_immediate_event (size_t size, const uint8_t* buf);
 
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
@@ -378,6 +381,8 @@ private:
 	bool _parameter_changed_since_last_preset;
 
 	PBD::ScopedConnection _preset_connection;
+
+	MidiRingBuffer<framepos_t> _immediate_events;
 
 	void resolve_midi ();
 };
