@@ -677,6 +677,8 @@ GenericPluginUI::build_midi_table ()
 		pgm_table->attach (*cui, col, col + 1, row, row+1, FILL|EXPAND, FILL);
 	}
 
+	insert->plugin ()->read_midnam();
+
 	midi_refill_patches ();
 
 	insert->plugin()->BankPatchChange.connect (
@@ -684,12 +686,7 @@ GenericPluginUI::build_midi_table ()
 			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
 			gui_context());
 
-	/* Note: possible race with MidiTimeAxisView::update_patch_selector()
-	 * which uses this signal to update/re-register the midnam (also in gui context).
-	 * MTAV does register before us, so the midnam should already be updated when
-	 * we're notified.
-	 */
-	insert->plugin()->UpdateMidnam.connect (
+	insert->plugin()->UpdatedMidnam.connect (
 			midi_connections, invalidator (*this),
 			boost::bind (&GenericPluginUI::midi_refill_patches, this),
 			gui_context());

@@ -427,6 +427,7 @@ MidiTimeAxisView::update_patch_selector ()
 			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
 					boost::bind (&MidiTimeAxisView::reread_midnam, this),
 					gui_context());
+			reread_midnam ();
 
 			pluginprovided = true;
 			std::string model_name = pi->plugin ()->midnam_model ();
@@ -450,9 +451,9 @@ MidiTimeAxisView::reread_midnam ()
 {
 	boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
 	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
-	pi->plugin ()->read_midnam();
+	bool rv = pi->plugin ()->read_midnam();
 
-	if (_patch_change_dialog) {
+	if (rv && _patch_change_dialog) {
 		_patch_change_dialog->refresh ();
 	}
 }
