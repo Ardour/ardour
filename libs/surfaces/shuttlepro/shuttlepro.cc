@@ -109,8 +109,6 @@ ShuttleproControlProtocol::set_active (bool yn)
 
 	ControlProtocol::set_active (yn);
 
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "set_active() fin\n");
-
 	return _error;
 }
 
@@ -227,8 +225,6 @@ ShuttleproControlProtocol::thread_init ()
 	ARDOUR::SessionEvent::create_per_thread_pool (X_("shuttlepro"), 128);
 
 	set_thread_priority ();
-
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "thread_init() fin\n")
 }
 
 bool
@@ -260,7 +256,6 @@ get_usb_device (uint16_t vendor_id, uint16_t product_id, libusb_device** device)
 		struct libusb_device_descriptor desc;
 		r = libusb_get_device_descriptor (dev, &desc);
 		if (r < 0) {
-			cout << "Descriptor " << libusb_strerror ((libusb_error)r) << endl;
 			goto out;
 		}
 		if (desc.idVendor == vendor_id && desc.idProduct == product_id) {
@@ -293,14 +288,12 @@ ShuttleproControlProtocol::acquire_device ()
 
 	if ((err = get_usb_device (CounterDesign, ShuttlePRO, &dev)) != 0) {
 		if ((err = get_usb_device (CounterDesign, ShuttleXpress, &dev)) != 0) {
-			cout << "Returning " << libusb_strerror ((libusb_error) err) << endl;
 			return err;
 		}
 	}
 
 	err = libusb_open (dev, &_dev_handle);
 	if (err < 0) {
-		cout << "Open: " << libusb_strerror ((libusb_error)err) << endl;
 		return err;
 	}
 
@@ -380,8 +373,6 @@ ShuttleproControlProtocol::start ()
 
 	_io_source = source->gobj ();
 	g_source_ref (_io_source);
-
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "start() fin\n");
 }
 
 
@@ -401,8 +392,6 @@ ShuttleproControlProtocol::stop ()
 	if (_dev_handle) {
 		release_device ();
 	}
-
-	DEBUG_TRACE (DEBUG::ShuttleproControl, "stop() fin\n");
 }
 
 void
