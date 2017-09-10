@@ -19,6 +19,7 @@
 */
 
 #include <gtkmm/label.h>
+#include <gtkmm/treemodelsort.h>
 
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
@@ -38,7 +39,7 @@ class ActionModel
 public:
 	static const ActionModel& instance ();
 
-	const Glib::RefPtr<TreeStore> model () const { return _available_action_model; }
+	const Glib::RefPtr<TreeModelSort> model () const { return _sorted_model; }
 
 	const TreeModelColumn<string>& name () const { return _action_columns.name; }
 	const TreeModelColumn<string>& path () const { return _action_columns.path; }
@@ -56,6 +57,7 @@ private:
 
 	const ActionColumns _action_columns;
 	Glib::RefPtr<TreeStore> _available_action_model;
+	Glib::RefPtr<TreeModelSort> _sorted_model;
 };
 
 
@@ -71,6 +73,7 @@ ButtonConfigWidget::ButtonConfigWidget ()
 	_choice_jump.signal_toggled().connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_choice));
 
 	_jump_distance.Changed.connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_config));
+
 	_action_cb.set_model (_action_model.model());
 	_action_cb.signal_changed().connect (sigc::mem_fun (*this, &ButtonConfigWidget::update_config));
 	_action_cb.pack_start (_action_model.name (), true);
@@ -199,7 +202,6 @@ ActionModel::ActionModel ()
 	TreeIter rowp;
 	TreeModel::Row parent;
 
-
 	rowp = _available_action_model->append ();
 	parent = *(rowp);
 	parent[_action_columns.name] = _("Disabled");
@@ -273,4 +275,6 @@ ActionModel::ActionModel ()
 
 		row[_action_columns.path] = path;
 	}
+	_sorted_model = TreeModelSort::create (_available_action_model);
+	_available_action_model->set_sort_column (_action_columns.name, Gtk::SORT_ASCENDING);
 }
