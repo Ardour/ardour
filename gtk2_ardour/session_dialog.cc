@@ -374,7 +374,11 @@ SessionDialog::setup_recent_sessions ()
 	recent_session_display.set_model (recent_session_model);
 	recent_session_display.append_column (_("Session Name"), recent_session_columns.visible_name);
 	recent_session_display.append_column (_("Sample Rate"), recent_session_columns.sample_rate);
+#ifdef MIXBUS
+	recent_session_display.append_column (_("Created With"), recent_session_columns.created_with);
+#else
 	recent_session_display.append_column (_("File Resolution"), recent_session_columns.disk_format);
+#endif
 	recent_session_display.append_column (_("Last Modified"), recent_session_columns.time_formatted);
 	recent_session_display.set_headers_visible (true);
 	recent_session_display.get_selection()->set_mode (SELECTION_SINGLE);
@@ -863,6 +867,7 @@ SessionDialog::redisplay_recent_sessions ()
 			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname);
 		} else {
 			row[recent_session_columns.tip] = Gtkmm2ext::markup_escape_text (dirname + "\n" + string_compose (_("Last modified with: %1"), program_version));
+			row[recent_session_columns.created_with] = program_version;
 		}
 
 		++session_snapshot_count;

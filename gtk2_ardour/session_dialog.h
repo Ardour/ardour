@@ -113,6 +113,7 @@ private:
 			add (fullpath);
 			add (sample_rate);
 			add (disk_format);
+			add (created_with);
 			add (time_modified);
 			add (time_formatted);
 		}
@@ -121,6 +122,7 @@ private:
 		Gtk::TreeModelColumn<std::string> fullpath;
 		Gtk::TreeModelColumn<std::string> sample_rate;
 		Gtk::TreeModelColumn<std::string> disk_format;
+		Gtk::TreeModelColumn<std::string> created_with;
 		Gtk::TreeModelColumn<int64_t>     time_modified;
 		Gtk::TreeModelColumn<std::string> time_formatted;
 	};
