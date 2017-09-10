@@ -218,6 +218,16 @@ load_sf2 (AFluidSynth* self, const char* fn)
 				self->program_state[chn].bank, self->program_state[chn].program);
 	}
 
+	for (chn = 0; chn < 16; ++chn) {
+		unsigned int sfid = 0;
+		unsigned int bank = 0;
+		unsigned int program = -1;
+		if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
+			self->program_state[chn].bank = bank;
+			self->program_state[chn].program = program;
+		}
+	}
+
 	return true;
 }
 
