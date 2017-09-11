@@ -5510,6 +5510,10 @@ Editor::hide_track_in_display (TimeAxisView* tv, bool apply_to_selection)
 	if (!tv) {
 		return;
 	}
+
+	DisplaySuspender ds;
+	PresentationInfo::ChangeSuspender cs;
+
 	if (apply_to_selection) {
 		for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ) {
 
