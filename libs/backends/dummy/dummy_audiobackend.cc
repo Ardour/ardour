@@ -1902,19 +1902,19 @@ float DummyAudioPort::grandf ()
 
 /* inspired by jack-demolition by Steve Harris */
 static const float _demolition[] = {
-	 0.0f,           /* special case - 0dbFS white noise */
-	 0.0f,           /* zero, may cause denomrals following a signal */
-	 0.73 / 1e45,    /* very small - should be denormal when floated */
-	 3.7f,           /* arbitrary number > 0dBFS */
-	-4.3f,           /* arbitrary negative number > 0dBFS */
-	 4294967395.0f,  /* 2^16 + 100 */
+	 0.0f,             /* special case - 0dbFS white noise */
+	 0.0f,             /* zero, may cause denomrals following a signal */
+	 0.73 / 1e45,      /* very small - should be denormal when floated */
+	 3.7f,             /* arbitrary number > 0dBFS */
+	-4.3f,             /* arbitrary negative number > 0dBFS */
+	 4294967395.0f,    /* 2^16 + 100 */
 	-4294967395.0f,
-	 3.40282347e+38F,/* HUGE, HUGEVALF, non-inf number */
-	 INFINITY,       /* +inf */
-	-INFINITY,       /* -inf */
-	-NAN,            /* -nan */
-	 NAN,            /*  nan */
-	 0.0f,           /* some silence to check for recovery */
+	 3.402823466e+38F, /* HUGE, HUGEVALF, non-inf number */
+	 INFINITY,         /* +inf */
+	-INFINITY,         /* -inf */
+	-NAN,              /* -nan */
+	 NAN,              /*  nan */
+	 0.0f,             /* some silence to check for recovery */
 };
 
 void DummyAudioPort::generate (const pframes_t n_samples)
