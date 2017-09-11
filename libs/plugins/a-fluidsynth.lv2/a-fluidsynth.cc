@@ -153,8 +153,6 @@ typedef struct {
 	bool reinit_in_progress; // set in run, cleared in work_response
 	bool queue_reinit; // set in restore, cleared in work_response
 
-	uint8_t last_bank_lsb;
-	uint8_t last_bank_msb;
 	BankProgram program_state[16];
 
 	fluid_midi_event_t* fmidi_event;
@@ -208,24 +206,6 @@ load_sf2 (AFluidSynth* self, const char* fn)
 
 	if (chn == 0) {
 		return false;
-	}
-
-	for (chn = 0; chn < 16; ++chn) {
-		if (self->program_state[chn].program < 0) {
-			continue;
-		}
-		fluid_synth_program_select (self->synth, chn, synth_id,
-				self->program_state[chn].bank, self->program_state[chn].program);
-	}
-
-	for (chn = 0; chn < 16; ++chn) {
-		unsigned int sfid = 0;
-		unsigned int bank = 0;
-		unsigned int program = -1;
-		if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
-			self->program_state[chn].bank = bank;
-			self->program_state[chn].program = program;
-		}
 	}
 
 	return true;
@@ -550,14 +530,21 @@ run (LV2_Handle instance, uint32_t n_samples)
 					fluid_midi_event_set_value (self->fmidi_event, data[2]);
 				}
 				if (0xb0 /* CC */ == fluid_midi_event_get_type (self->fmidi_event)) {
-					if (data[1] == 0x00) { self->last_bank_msb = data[2]; }
-					if (data[1] == 0x20) { self->last_bank_lsb = data[2]; }
+					int chn = fluid_midi_event_get_channel (self->fmidi_event);
+					assert (chn >= 0 && chn < 16);
+					if (data[1] == 0x00) {
+						self->program_state[chn].bank &= 0x7f;
+						self->program_state[chn].bank |= (data[2] &0x7f) << 7;
+					}
+					if (data[1] == 0x20) {
+						self->program_state[chn].bank &= 0x3F80;
+						self->program_state[chn].bank |= data[2] & 0x7f;
+					}
 				}
 			}
 			if (ev->body.size == 2 && 0xc0 /* Pgm */ == fluid_midi_event_get_type (self->fmidi_event)) {
 				int chn = fluid_midi_event_get_channel (self->fmidi_event);
 				assert (chn >= 0 && chn < 16);
-				self->program_state[chn].bank = (self->last_bank_msb << 7) | self->last_bank_lsb;
 				self->program_state[chn].program = data[1];
 #ifdef LV2_EXTENDED
 				if (self->bankpatch) {
@@ -567,6 +554,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 				}
 #endif
 			}
+
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
 		}
 	}
@@ -672,6 +660,36 @@ work_response (LV2_Handle  instance,
 
 	if (self->initialized) {
 		strcpy (self->current_sf2_file_path, self->queue_sf2_file_path);
+
+		for (int chn = 0; chn < 16; ++chn) {
+			if (self->program_state[chn].program < 0) {
+				continue;
+			}
+			/* cannot direcly call fluid_channel_set_bank_msb/fluid_channel_set_bank_lsb, use CCs */
+			fluid_midi_event_set_type (self->fmidi_event, 0xb0 /* CC */);
+			fluid_midi_event_set_channel (self->fmidi_event, chn);
+
+			fluid_midi_event_set_control (self->fmidi_event, 0x00); // BANK_SELECT_MSB
+			fluid_midi_event_set_value (self->fmidi_event, (self->program_state[chn].bank >> 7) & 0x7f);
+			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
+
+			fluid_midi_event_set_control (self->fmidi_event, 0x20); // BANK_SELECT_LSB
+			fluid_midi_event_set_value (self->fmidi_event, self->program_state[chn].bank & 0x7f);
+			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
+
+			fluid_synth_program_change (self->synth, chn, self->program_state[chn].program);
+		}
+
+		for (int chn = 0; chn < 16; ++chn) {
+			unsigned int sfid = 0;
+			unsigned int bank = 0;
+			unsigned int program = -1;
+			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
+				self->program_state[chn].bank = bank;
+				self->program_state[chn].program = program;
+			}
+		}
+
 	} else {
 		self->current_sf2_file_path[0] = 0;
 	}
