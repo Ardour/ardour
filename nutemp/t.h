@@ -391,6 +391,7 @@ class LIBARDOUR_API TempoMap
 	void move_explicit_to (TempoMapPoints::iterator, superclock_t destination);
 
 	void rebuild_locked (superclock_t limit);
+	void dump_locked (std::ostream&);
 };
 
 }

@@ -480,7 +480,7 @@ TempoMap::rebuild_locked (superclock_t limit)
 	 */
 
 	cerr << "POST-SORT\n";
-	dump (cerr);
+	dump_locked (cerr);
 
 	prev = _points.end();
 
@@ -1033,10 +1033,17 @@ TempoMap::set_sample_rate (framecnt_t new_sr)
 		i->map_reset_set_sclock_for_sr_change (llrint (ratio * i->sclock()));
 	}
 }
-																																      void
+
+void
 TempoMap::dump (std::ostream& ostr)
 {
-	//Glib::Threads::RWLock::ReaderLock lm (_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	dump_locked (ostr);
+}
+
+void
+TempoMap::dump (std::ostream& ostr)
+{
 	ostr << "\n\n------------\n";
 	for (TempoMapPoints::iterator i = _points.begin(); i != _points.end(); ++i) {
 		ostr << *i << std::endl;
