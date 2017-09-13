@@ -62,8 +62,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int write_to (const Lock&                   lock,
 	              boost::shared_ptr<MidiSource> newsrc,
-	              Evoral::Beats                 begin = Evoral::MinBeats,
-	              Evoral::Beats                 end   = Evoral::MaxBeats);
+	              Evoral::Beats                 begin = Evoral::Beats(),
+	              Evoral::Beats                 end   = std::numeric_limits<Evoral::Beats>::max());
 
 	/** Export the midi data in the given time range to another MidiSource
 	 * \param newsrc MidiSource to which data will be written. Should be a

@@ -408,7 +408,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 	newsrc->copy_automation_state_from (this);
 
 	if (_model) {
-		if (begin == Evoral::MinBeats && end == Evoral::MaxBeats) {
+		if (begin == Evoral::Beats() && end == std::numeric_limits<Evoral::Beats>::max()) {
 			_model->write_to (newsrc, newsrc_lock);
 		} else {
 			_model->write_section_to (newsrc, newsrc_lock, begin, end);
@@ -422,7 +422,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 
 	/* force a reload of the model if the range is partial */
 
-	if (begin != Evoral::MinBeats || end != Evoral::MaxBeats) {
+	if (begin != Evoral::Beats() || end != std::numeric_limits<Evoral::Beats>::max()) {
 		newsrc->load_model (newsrc_lock, true);
 	} else {
 		newsrc->set_model (newsrc_lock, _model);
