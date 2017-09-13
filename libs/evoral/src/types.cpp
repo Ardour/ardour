@@ -23,7 +23,6 @@
 
 namespace Evoral {
 
-const double Beats::PPQN = 1920.0;
 const Beats  MaxBeats    = Evoral::Beats(DBL_MAX);
 const Beats  MinBeats    = Evoral::Beats(DBL_MIN);
 

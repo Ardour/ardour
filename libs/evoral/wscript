@@ -96,7 +96,6 @@ def build(bld):
             src/Sequence.cpp
             src/TimeConverter.cpp
             src/debug.cpp
-            src/types.cpp
     '''
 
     # Library

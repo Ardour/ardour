@@ -34,7 +34,7 @@ namespace Evoral {
 /** Musical time in beats. */
 class /*LIBEVORAL_API*/ Beats {
 public:
-	LIBEVORAL_API static const int32_t PPQN;
+	LIBEVORAL_API static const int32_t PPQN = 1920;
 
 	Beats() : _beats(0), _ticks(0) {}
 
@@ -105,6 +105,7 @@ public:
 
 		_beats = whole;
 		_ticks = frac * PPQN;
+		return *this;
 	}
 
 	Beats& operator=(const Beats& other) {
