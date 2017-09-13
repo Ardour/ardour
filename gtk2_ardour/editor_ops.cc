@@ -4301,7 +4301,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 
 		/* Snap start time backwards, so copy/paste is snap aligned. */
 		if (midi) {
-			if (earliest == Evoral::Beats::max()) {
+			if (earliest == std::numeric_limits<Evoral::Beats>::max()) {
 				earliest = Evoral::Beats();  // Weird... don't offset
 			}
 			earliest.round_down_to_beat();
@@ -4369,7 +4369,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 void
 Editor::cut_copy_midi (CutCopyOp op)
 {
-	Evoral::Beats earliest = Evoral::Beats::max();
+	Evoral::Beats earliest = std::numeric_limits<Evoral::Beats>::max();
 	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
