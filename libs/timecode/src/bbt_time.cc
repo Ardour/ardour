@@ -29,15 +29,17 @@ using namespace Timecode;
    1/Nth divisions are integer numbers of ticks.
 
    1920 has many factors, though going up to 3840 gets a couple more.
+
+   This needs to match Evoral::Beats::PPQN
 */
 
 const double BBT_Time::ticks_per_beat = 1920.0;
 
-BBT_Time::BBT_Time (double dbeats)
+BBT_Offset::BBT_Offset (double dbeats)
 {
 	/* NOTE: this does not construct a BBT time in a canonical form,
 	   in that beats may be a very large number, and bars will
-	   always be zero.
+	   always be zero. Hence ... it's a BBT_Offset
 	*/
 
 	assert (dbeats >= 0);
