@@ -32,6 +32,7 @@
 #include "ardour/plugin_insert.h"
 
 #include "gtkmm2ext/menu_elems.h"
+#include "gtkmm2ext/utils.h"
 #include "widgets/tooltips.h"
 
 #include "gui_thread.h"
@@ -268,7 +269,8 @@ PatchChangeWidget::refill_program_list ()
 
 			const uint8_t pgm = key.program();
 			_program_btn[pgm].set_text (n);
-			set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"), n, (int)(pgm +1)));
+			set_tooltip (_program_btn[pgm], string_compose (_("%1 (Pgm-%2)"),
+						Gtkmm2ext::markup_escape_text (n), (int)(pgm +1)));
 			unset_notes.reset (pgm);
 		}
 	}

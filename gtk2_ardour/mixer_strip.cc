@@ -1860,7 +1860,7 @@ MixerStrip::name_changed ()
 			break;
 	}
 
-	set_tooltip (name_button, _route->name());
+	set_tooltip (name_button, Gtkmm2ext::markup_escape_text(_route->name()));
 
 	if (_session->config.get_track_name_number()) {
 		const int64_t track_number = _route->track_number ();

@@ -884,7 +884,7 @@ ProcessorEntry::Control::set_tooltip ()
 	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
 	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
-	ArdourWidgets::set_tooltip (_button, sm);
+	ArdourWidgets::set_tooltip (_button, Gtkmm2ext::markup_escape_text (sm));
 }
 
 void

@@ -570,7 +570,7 @@ uint32_t
 PluginPinWidget::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
 {
 	std::string lbl;
-	std::string tip = p->name ();
+	std::string tip = Gtkmm2ext::markup_escape_text (p->name ());
 	std::vector<std::string> cns;
 	bool single_source = true;
 	p->get_connections (cns);
