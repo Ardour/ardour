@@ -104,7 +104,7 @@ private:
 
 	static void _note_on_event_handler (GtkWidget*, int, gpointer);
 	static void _note_off_event_handler (GtkWidget*, int, gpointer);
-	void note_on_event_handler (int);
+	void note_on_event_handler (int, bool for_audition);
 	void note_off_event_handler (int);
 };
 

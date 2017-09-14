@@ -466,7 +466,7 @@ PatchChangeWidget::audition_next ()
 		piano_keyboard_set_note_off (_piano, _audition_note_num);
 		return ++_audition_note_num <= _audition_end_spin.get_value_as_int() && _audition_enable.get_active ();
 	} else {
-		note_on_event_handler (_audition_note_num);
+		note_on_event_handler (_audition_note_num, true);
 		piano_keyboard_set_note_on (_piano, _audition_note_num);
 		return true;
 	}
@@ -475,7 +475,7 @@ PatchChangeWidget::audition_next ()
 void
 PatchChangeWidget::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
 {
-	((PatchChangeWidget*)arg)->note_on_event_handler(note);
+	((PatchChangeWidget*)arg)->note_on_event_handler(note, false);
 }
 
 void
@@ -485,10 +485,12 @@ PatchChangeWidget::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
 }
 
 void
-PatchChangeWidget::note_on_event_handler (int note)
+PatchChangeWidget::note_on_event_handler (int note, bool for_audition)
 {
-	cancel_audition ();
-	_pianomm->grab_focus ();
+	if (!for_audition) {
+		cancel_audition ();
+		_pianomm->grab_focus ();
+	}
 	uint8_t event[3];
 	event[0] = (MIDI_CMD_NOTE_ON | _channel);
 	event[1] = note;
