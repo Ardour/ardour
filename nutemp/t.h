@@ -217,9 +217,10 @@ class LIBARDOUR_API TempoMapPoint
 	Timecode::BBT_Time  const & bbt() const { return _bbt; }
 	bool                ramped() const      { return metric().ramped(); }
 	TempoMetric const & metric() const      { return is_explicit() ? _explicit.metric : _reference->metric(); }
-	/* Implicit points are not allowed to return non-const references to their reference metric */
-	TempoMetric & metric()                  { if (is_explicit()) { return _explicit.metric; } throw BadTempoMetricLookup(); }
 	PositionLockStyle   lock_style() const  { return is_explicit() ? _explicit.lock_style : _reference->lock_style(); }
+
+	void compute_c_superclock (framecnt_t sr, superclock_t end_superclocks_per_note_type, superclock_t duration) { if (is_explicit()) { _explicit.metric.compute_c_superclock (sr, end_superclocks_per_note_type, duration); } }
+	void compute_c_quarters (framecnt_t sr, superclock_t end_superclocks_per_note_type, Evoral::Beats const & duration) { if (is_explicit()) { _explicit.metric.compute_c_quarters (sr, end_superclocks_per_note_type, duration); } }
 
 	/* None of these properties can be set for an Implicit point, because
 	 * they are determined by the TempoMapPoint pointed to by _reference.
@@ -301,14 +302,12 @@ class LIBARDOUR_API TempoMap
 
 	void remove_explicit_point (superclock_t);
 
-	void move_implicit (superclock_t current, superclock_t destination);
-	void move_explicit (superclock_t current, superclock_t destination);
+	bool move_to (superclock_t current, superclock_t destination, bool push = false);
 
-	//bool set_tempo_at (Tempo const &, Evoral::Beats const &, PositionLockStyle psl, bool ramp = false);
+	bool set_tempo_and_meter (Tempo const &, Meter const &, superclock_t, bool ramp, bool flexible);
+
 	bool set_tempo (Tempo const &, Timecode::BBT_Time const &, bool ramp = false);
 	bool set_tempo (Tempo const &, superclock_t, bool ramp = false);
-
-	//bool set_meter_at (Meter const &, Evoral::Beats const &);
 
 	bool set_meter (Meter const &, Timecode::BBT_Time const &);
 	bool set_meter (Meter const &, superclock_t);
@@ -326,6 +325,16 @@ class LIBARDOUR_API TempoMap
 	Evoral::Beats quarter_note_at (Timecode::BBT_Time const &) const;
 	superclock_t superclock_at (Evoral::Beats const &) const;
 	superclock_t superclock_at (Timecode::BBT_Time const &) const;
+
+	TempoMapPoint const & const_point_at (superclock_t sc) const { return *const_iterator_at (sc); }
+	TempoMapPoint const & const_point_at (Evoral::Beats const & b) const { return *const_iterator_at (b); }
+	TempoMapPoint const & const_point_at (Timecode::BBT_Time const & bbt) const { return *const_iterator_at (bbt); }
+
+	TempoMapPoint const & const_point_after (superclock_t sc) const;
+	TempoMapPoint const & const_point_after (Evoral::Beats const & b) const;
+	TempoMapPoint const & const_point_after (Timecode::BBT_Time const & bbt) const;
+
+	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end);
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
@@ -371,10 +380,6 @@ class LIBARDOUR_API TempoMap
 	TempoMapPoint & point_at (Evoral::Beats const & b) { return *iterator_at (b); }
 	TempoMapPoint & point_at (Timecode::BBT_Time const & bbt) { return *iterator_at (bbt); }
 
-	TempoMapPoint const & const_point_at (superclock_t sc) const { return *const_iterator_at (sc); }
-	TempoMapPoint const & const_point_at (Evoral::Beats const & b) const { return *const_iterator_at (b); }
-	TempoMapPoint const & const_point_at (Timecode::BBT_Time const & bbt) const { return *const_iterator_at (bbt); }
-
 	Meter const & meter_at_locked (superclock_t sc) const { return const_point_at (sc).metric(); }
 	Meter const & meter_at_locked (Evoral::Beats const & b) const { return const_point_at (b).metric(); }
 	Meter const & meter_at_locked (Timecode::BBT_Time const & bbt) const { return const_point_at (bbt).metric(); }
@@ -387,8 +392,6 @@ class LIBARDOUR_API TempoMap
 	Evoral::Beats quarter_note_at_locked (Timecode::BBT_Time const &) const;
 	superclock_t superclock_at_locked (Evoral::Beats const &) const;
 	superclock_t superclock_at_locked (Timecode::BBT_Time const &) const;
-
-	void move_explicit_to (TempoMapPoints::iterator, superclock_t destination);
 
 	void rebuild_locked (superclock_t limit);
 	void dump_locked (std::ostream&);

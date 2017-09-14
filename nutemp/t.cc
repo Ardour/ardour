@@ -431,7 +431,7 @@ TempoMap::rebuild_locked (superclock_t limit)
 		++nxt;
 
 		if (tmp->ramped() && (nxt != _points.end())) {
-			tmp->metric().compute_c_quarters (_sample_rate, nxt->metric().superclocks_per_quarter_note (), nxt->quarters() - tmp->quarters());
+			tmp->compute_c_quarters (_sample_rate, nxt->metric().superclocks_per_quarter_note (), nxt->quarters() - tmp->quarters());
 		}
 
 		tmp = nxt;
@@ -559,6 +559,98 @@ TempoMap::rebuild_locked (superclock_t limit)
 }
 
 bool
+TempoMap::set_tempo_and_meter (Tempo const & tempo, Meter const & meter, superclock_t sc, bool ramp, bool flexible)
+{
+	/* CALLER MUST HOLD LOCK */
+
+	assert (!_points.empty());
+
+	/* special case: first map entry is later than the new point */
+
+	if (_points.front().sclock() > sc) {
+		/* first point is later than sc. There's no iterator to reference a point at or before sc */
+
+		/* determine beats and BBT time for this new tempo point. Note that tempo changes (points) must be deemed to be on beat,
+		   even if the user moves them later. Even after moving, the TempoMapPoint that was beat N is still beat N, and is not
+		   fractional.
+		*/
+
+		Evoral::Beats b = _points.front().quarters_at (sc).round_to_beat();
+		Timecode::BBT_Time bbt = _points.front().bbt_at (b).round_to_beat ();
+
+		_points.insert (_points.begin(), TempoMapPoint (TempoMapPoint::ExplicitTempo, tempo, meter, sc, b, bbt, AudioTime, ramp));
+		return true;
+	}
+
+	/* special case #3: only one map entry, at the same time as the new point.
+	   This is the common case when editing tempo/meter in a session with a single tempo/meter
+	*/
+
+	if (_points.size() == 1 && _points.front().sclock() == sc) {
+		/* change metrics */
+		*((Tempo*) &_points.front().metric()) = tempo;
+		*((Meter*) &_points.front().metric()) = meter;
+		_points.front().make_explicit (TempoMapPoint::Flag (TempoMapPoint::ExplicitTempo|TempoMapPoint::ExplicitMeter));
+		return true;
+	}
+
+	/* Remember: iterator_at() returns an iterator that references the TempoMapPoint at or BEFORE sc */
+
+	TempoMapPoints::iterator i = iterator_at (sc);
+	TempoMapPoints::iterator nxt = i;
+	++nxt;
+
+	if (i->sclock() == sc) {
+		/* change  metrics */
+		*((Tempo*) &i->metric()) = tempo;
+		*((Meter*) &i->metric()) = meter;
+		i->make_explicit (TempoMapPoint::Flag (TempoMapPoint::ExplicitTempo|TempoMapPoint::ExplicitMeter));
+		/* done */
+		return true;
+	}
+
+	if (!flexible && (sc - i->sclock() < i->metric().superclocks_per_note_type())) {
+		cerr << "new tempo too close to previous ...\n";
+		return false;
+	}
+
+	TempoMapPoints::iterator e (i);
+	while (!e->is_explicit() && e != _points.begin()) {
+		--e;
+	}
+
+	if (e->metric().ramped()) {
+		/* need to adjust ramp constants for preceding explict point, since the new point will be positioned right after it
+		   and thus defines the new ramp distance.
+		*/
+		e->compute_c_superclock (_sample_rate, tempo.superclocks_per_quarter_note (), sc);
+	}
+
+	/* determine beats and BBT time for this new tempo point. Note that tempo changes (points) must be deemed to be on beat,
+	   even if the user moves them later. Even after moving, the TempoMapPoint that was beat N is still beat N, and is not
+	   fractional.
+	 */
+
+	Evoral::Beats qn = i->quarters_at (sc).round_to_beat();
+
+	/* rule: all Tempo changes must be on-beat. So determine the nearest later beat to "sc"
+	 */
+
+	Timecode::BBT_Time bbt = i->bbt_at (qn).round_up_to_beat ();
+
+	/* Modify the iterator to reference the point AFTER this new one, because STL insert is always "insert-before"
+	 */
+
+	if (i != _points.end()) {
+		++i;
+	}
+
+	cerr << "Insert at " << i->sclock() / superclock_ticks_per_second << endl;
+	_points.insert (i, TempoMapPoint (TempoMapPoint::ExplicitTempo, tempo, meter, sc, qn, bbt, AudioTime, ramp));
+	return true;
+}
+
+bool
 TempoMap::set_tempo (Tempo const & t, superclock_t sc, bool ramp)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -614,11 +706,16 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc, bool ramp)
 
 	Meter const & meter (i->metric());
 
-	if (i->metric().ramped()) {
+	TempoMapPoints::iterator e (i);
+	while (!e->is_explicit() && e != _points.begin()) {
+		--e;
+	}
+
+	if (e->metric().ramped()) {
 		/* need to adjust ramp constants for preceding explict point, since the new point will be positioned right after it
 		   and thus defines the new ramp distance.
 		*/
-		i->metric().compute_c_superclock (_sample_rate, t.superclocks_per_quarter_note (), sc);
+		e->compute_c_superclock (_sample_rate, t.superclocks_per_quarter_note (), sc);
 	}
 
 	/* determine beats and BBT time for this new tempo point. Note that tempo changes (points) must be deemed to be on beat,
@@ -1042,7 +1139,7 @@ TempoMap::dump (std::ostream& ostr)
 }
 
 void
-TempoMap::dump (std::ostream& ostr)
+TempoMap::dump_locked (std::ostream& ostr)
 {
 	ostr << "\n\n------------\n";
 	for (TempoMapPoints::iterator i = _points.begin(); i != _points.end(); ++i) {
@@ -1053,7 +1150,7 @@ TempoMap::dump (std::ostream& ostr)
 void
 TempoMap::remove_explicit_point (superclock_t sc)
 {
-	//Glib::Threads::RWLock::WriterLock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	TempoMapPoints::iterator p = iterator_at (sc);
 
 	if (p->sclock() == sc) {
@@ -1061,64 +1158,74 @@ TempoMap::remove_explicit_point (superclock_t sc)
 	}
 }
 
-void
-TempoMap::move_explicit (superclock_t current, superclock_t destination)
+bool
+TempoMap::move_to (superclock_t current, superclock_t destination, bool push)
 {
-	//Glib::Threads::RWLock::WriterLock lm (_lock);
+	Glib::Threads::RWLock::WriterLock lm (_lock);
 	TempoMapPoints::iterator p = iterator_at (current);
 
 	if (p->sclock() != current) {
-		return;
+		cerr << "No point @ " << current << endl;
+		return false;
 	}
 
-	move_explicit_to (p, destination);
-}
-
-void
-TempoMap::move_explicit_to (TempoMapPoints::iterator p, superclock_t destination)
-{
-	/* CALLER MUST HOLD LOCK */
-
-	TempoMapPoint point (*p);
-	point.set_sclock (destination);
-
-	TempoMapPoints::iterator prev;
-
-	prev = p;
-	if (p != _points.begin()) {
-		--prev;
-	}
-
-	/* remove existing */
+	const Meter meter (p->metric());
+	const Tempo tempo (p->metric());
+	const bool ramp = p->ramped();
 
 	_points.erase (p);
-	prev->set_dirty (true);
 
-	/* find insertion point */
-
-	p = iterator_at (destination);
-
-	/* STL insert semantics are always "insert-before", whereas ::iterator_at() returns iterator-at-or-before */
-	++p;
-
-	_points.insert (p, point);
+	return set_tempo_and_meter (tempo, meter, destination, ramp, true);
 }
 
 void
-TempoMap::move_implicit (superclock_t current, superclock_t destination)
+TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end)
 {
-	//Glib::Threads::RWLock::WriterLock lm (_lock);
-	TempoMapPoints::iterator p = iterator_at (current);
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	TempoMapPoints::iterator p = iterator_at (start);
 
-	if (p->sclock() != current) {
-		return;
+	while (p != _points.end() && p->sclock() < start) {
+		++p;
 	}
 
-	if (p->is_implicit()) {
-		p->make_explicit (TempoMapPoint::Flag (TempoMapPoint::ExplicitMeter|TempoMapPoint::ExplicitTempo));
+	while (p != _points.end() && p->sclock() < end) {
+		ret.push_back (*p);
+		++p;
+	}
+}
+
+std::ostream&
+operator<<(std::ostream& str, Meter const & m)
+{
+	return str << m.divisions_per_bar() << '/' << m.note_value();
+}
+
+std::ostream&
+operator<<(std::ostream& str, Tempo const & t)
+{
+	return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+}
+
+std::ostream&
+operator<<(std::ostream& str, TempoMapPoint const & tmp)
+{
+	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second
+	    << (tmp.is_explicit() ? " EXP" : " imp")
+	    << " qn " << tmp.quarters ()
+	    << " bbt " << tmp.bbt()
+	    << " lock to " << tmp.lock_style()
+		;
+
+	if (tmp.is_explicit()) {
+		str << " tempo " << *((Tempo*) &tmp.metric())
+		    << " meter " << *((Meter*) &tmp.metric())
+			;
 	}
 
-	move_explicit_to (p, destination);
+	if (tmp.is_explicit() && tmp.ramped()) {
+		str << " ramp c/sc = " << tmp.metric().c_per_superclock() << " c/qn " << tmp.metric().c_per_quarter();
+	}
+	return str;
 }
 
 /*******/
@@ -1212,39 +1319,17 @@ main ()
 	tmap.rebuild (SECONDS_TO_SUPERCLOCK (120));
 	tmap.dump (std::cout);
 
+	if (tmap.move_to (SECONDS_TO_SUPERCLOCK(23), SECONDS_TO_SUPERCLOCK (72))) {
+		tmap.rebuild (SECONDS_TO_SUPERCLOCK (120));
+		tmap.dump (std::cout);
+	}
+
+	TempoMapPoints grid;
+	tmap.get_grid (grid, SECONDS_TO_SUPERCLOCK (12), SECONDS_TO_SUPERCLOCK (44));
+	cout << "grid contains " << grid.size() << endl;
+	for (TempoMapPoints::iterator p = grid.begin(); p != grid.end(); ++p) {
+		cout << *p << endl;
+	}
+
 	return 0;
-}
-
-std::ostream&
-operator<<(std::ostream& str, Meter const & m)
-{
-	return str << m.divisions_per_bar() << '/' << m.note_value();
-}
-
-std::ostream&
-operator<<(std::ostream& str, Tempo const & t)
-{
-	return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
-}
-
-std::ostream&
-operator<<(std::ostream& str, TempoMapPoint const & tmp)
-{
-	str << '@' << std::setw (12) << tmp.sclock() << ' ' << tmp.sclock() / (double) superclock_ticks_per_second
-	    << (tmp.is_explicit() ? " EXP" : " imp")
-	    << " qn " << tmp.quarters ()
-	    << " bbt " << tmp.bbt()
-	    << " lock to " << tmp.lock_style()
-		;
-
-	if (tmp.is_explicit()) {
-		str << " tempo " << *((Tempo*) &tmp.metric())
-		    << " meter " << *((Meter*) &tmp.metric())
-			;
-	}
-
-	if (tmp.is_explicit() && tmp.ramped()) {
-		str << " ramp c/sc = " << tmp.metric().c_per_superclock() << " c/qn " << tmp.metric().c_per_quarter();
-	}
-	return str;
 }
