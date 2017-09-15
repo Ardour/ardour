@@ -196,6 +196,7 @@ class LIBARDOUR_API TempoMapPoint
 		: _flags (Flag (0)), _reference (&tmp), _sclock (sc), _quarters (q), _bbt (bbt), _dirty (true) {}
 	~TempoMapPoint () {}
 
+	Flag flags() const       { return _flags; }
 	bool is_explicit() const { return _flags != Flag (0); }
 	bool is_implicit() const { return _flags == Flag (0); }
 
@@ -334,7 +335,19 @@ class LIBARDOUR_API TempoMap
 	TempoMapPoint const & const_point_after (Evoral::Beats const & b) const;
 	TempoMapPoint const & const_point_after (Timecode::BBT_Time const & bbt) const;
 
-	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end);
+	/* If resolution == Evoral::Beats() (i.e. zero), then the grid that is
+	   returned will contain a mixture of implicit and explicit points,
+	   and will only be valid as long as this map remains unchanged
+	   (because the implicit points may reference explicit points in the
+	   map.
+
+	   If resolution != Evoral::Beats() (i.e. non-zero), then the in-out @param
+	   grid will contain only explicit points that do not reference this
+	   map in anyway.
+	*/
+	void get_grid (TempoMapPoints& points, superclock_t start, superclock_t end, Evoral::Beats const & resolution);
+
+	void get_bar_grid (TempoMapPoints& points, superclock_t start, superclock_t end, int32_t bar_gap);
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
