@@ -498,6 +498,7 @@ TempoMap::rebuild (superclock_t limit)
 	 */
 
 	bool hit_dirty = false;
+	superclock_t first_dirty = 0;
 
 	for (tmp = _points.begin(); tmp != _points.end(); ) {
 
@@ -507,6 +508,7 @@ TempoMap::rebuild (superclock_t limit)
 				continue;
 			}
 			hit_dirty = true;
+			first_dirty = tmp->sclock();
 		}
 
 		TempoMapPoints::iterator next = tmp;
@@ -567,6 +569,9 @@ TempoMap::rebuild (superclock_t limit)
 		prev = tmp;
 		tmp = next;
 	}
+
+	Changed (first_dirty, _points.back().sclock()); /* EMIT SIGNAL */
+	cerr << "Rebuilt " << first_dirty << " .. " << _points.back().sclock() << endl;
 }
 
 bool

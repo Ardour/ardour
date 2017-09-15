@@ -9,6 +9,8 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/signals.h"
+
 #include "evoral/Beats.hpp"
 
 #include "ardour/ardour.h"
@@ -360,6 +362,8 @@ class LIBARDOUR_API TempoMap
 
 	void dump (std::ostream&);
 	void rebuild (superclock_t limit);
+
+	PBD::Signal2<void,superclock_t,superclock_t> Changed;
 
    private:
 	TempoMapPoints _points;
