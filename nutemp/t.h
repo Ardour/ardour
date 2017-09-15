@@ -191,10 +191,12 @@ class LIBARDOUR_API TempoMapPoint
 	};
 
 	TempoMapPoint (Flag f, Tempo const& t, Meter const& m, superclock_t sc, Evoral::Beats const & q, Timecode::BBT_Time const & bbt, PositionLockStyle psl, bool ramp = false)
-		: _flags (f), _explicit (t, m, psl, ramp), _sclock (sc), _quarters (q), _bbt (bbt), _dirty (true) {}
+		: _flags (f), _explicit (t, m, psl, ramp), _sclock (sc), _quarters (q), _bbt (bbt), _dirty (true), _map (0) {}
 	TempoMapPoint (TempoMapPoint const & tmp, superclock_t sc, Evoral::Beats const & q, Timecode::BBT_Time const & bbt)
-		: _flags (Flag (0)), _reference (&tmp), _sclock (sc), _quarters (q), _bbt (bbt), _dirty (true) {}
+		: _flags (Flag (0)), _reference (&tmp), _sclock (sc), _quarters (q), _bbt (bbt), _dirty (true), _map (0) {}
 	~TempoMapPoint () {}
+
+	void set_map (TempoMap* m);
 
 	Flag flags() const       { return _flags; }
 	bool is_explicit() const { return _flags != Flag (0); }
@@ -230,7 +232,7 @@ class LIBARDOUR_API TempoMapPoint
 	void set_sclock (superclock_t  sc) { if (is_explicit()) { _sclock = sc; _dirty = true; } }
 	void set_quarters (Evoral::Beats const & q) { if (is_explicit()) { _quarters = q; _dirty = true;  } }
 	void set_bbt (Timecode::BBT_Time const & bbt) {  if (is_explicit()) { _bbt = bbt; _dirty = true;  } }
-	void set_dirty (bool yn) { if (is_explicit()) { _dirty = yn; } }
+	void set_dirty (bool yn);
 	void set_lock_style (PositionLockStyle psl) {  if (is_explicit()) { _explicit.lock_style = psl; _dirty = true; } }
 
 	void make_explicit (Flag f) {
@@ -289,6 +291,7 @@ class LIBARDOUR_API TempoMapPoint
 	Evoral::Beats         _quarters;
 	Timecode::BBT_Time    _bbt;
 	bool                  _dirty;
+	TempoMap*             _map;
 };
 
 typedef std::list<TempoMapPoint> TempoMapPoints;
@@ -297,6 +300,8 @@ class LIBARDOUR_API TempoMap
 {
    public:
 	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, framecnt_t sr);
+
+	void set_dirty (bool yn);
 
 	void set_sample_rate (framecnt_t sr);
 	framecnt_t sample_rate() const { return _sample_rate; }
@@ -360,6 +365,7 @@ class LIBARDOUR_API TempoMap
 	TempoMapPoints _points;
 	framecnt_t     _sample_rate;
 	mutable Glib::Threads::RWLock _lock;
+	bool _dirty;
 
 	/* these return an iterator that refers to the TempoMapPoint at or most immediately preceding the given position.
 	 *

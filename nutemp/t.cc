@@ -306,6 +306,23 @@ TempoMetric::superclock_at_qn (Evoral::Beats const & qn) const
 	return llrint (superclocks_per_quarter_note() * (log1p (_c_per_quarter * qn.to_double()) / _c_per_quarter));
 }
 
+void
+TempoMapPoint::set_map (TempoMap* m)
+{
+	_map = m;
+}
+
+void
+TempoMapPoint::set_dirty (bool yn)
+{
+	if (yn != _dirty) {
+		_dirty = yn;
+		if (yn && _map) {
+			_map->set_dirty (true);
+		}
+	}
+}
+
 Evoral::Beats
 TempoMapPoint::quarters_at (superclock_t sc) const
 {
@@ -339,9 +356,16 @@ TempoMapPoint::bbt_at (Evoral::Beats const & qn) const
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, framecnt_t sr)
 	: _sample_rate (sr)
+	, _dirty (false)
 {
 	TempoMapPoint tmp (TempoMapPoint::Flag (TempoMapPoint::ExplicitMeter|TempoMapPoint::ExplicitTempo), initial_tempo, initial_meter, 0, Evoral::Beats(), Timecode::BBT_Time(), AudioTime);
 	_points.push_back (tmp);
+}
+
+void
+TempoMap::set_dirty (bool yn)
+{
+	_dirty = yn;
 }
 
 Meter const &
