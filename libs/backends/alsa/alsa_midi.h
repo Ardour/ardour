@@ -72,7 +72,7 @@ protected:
 			, size(s) {}
 	};
 
-	RingBuffer<uint8_t>* _rb;
+	PBD::RingBuffer<uint8_t>* _rb;
 
 	std::string _name;
 

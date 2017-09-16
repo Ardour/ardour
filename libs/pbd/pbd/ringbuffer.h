@@ -25,6 +25,8 @@
 
 #include "pbd/libpbd_visibility.h"
 
+namespace PBD {
+
 template<class T>
 class /*LIBPBD_API*/ RingBuffer
 {
@@ -279,5 +281,6 @@ RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 	}
 }
 
+} /* end namespace */
 
 #endif /* __ringbuffer_h__ */

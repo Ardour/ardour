@@ -50,7 +50,7 @@ AlsaMidiIO::AlsaMidiIO ()
 	// worst case here is  8192 SPP and 8KSPS for which we'd need
 	// 4000 bytes sans MidiEventHeader.
 	// since we're not always in sync, let's use 4096.
-	_rb = new RingBuffer<uint8_t>(4096 + 4096 * sizeof(MidiEventHeader));
+	_rb = new PBD::RingBuffer<uint8_t>(4096 + 4096 * sizeof(MidiEventHeader));
 }
 
 AlsaMidiIO::~AlsaMidiIO ()
@@ -178,7 +178,7 @@ AlsaMidiIn::recv_event (pframes_t &time, uint8_t *data, size_t &size)
 		return 0;
 	}
 
-	RingBuffer<uint8_t>::rw_vector vector;
+	PBD::RingBuffer<uint8_t>::rw_vector vector;
 	_rb->get_read_vector(&vector);
 	if (vector.len[0] >= sizeof(MidiEventHeader)) {
 		memcpy((uint8_t*)&h, vector.buf[0], sizeof(MidiEventHeader));

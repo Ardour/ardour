@@ -45,7 +45,7 @@ WinMMEMidiOutputDevice::WinMMEMidiOutputDevice (int index)
 	, m_enabled(false)
 	, m_thread_running(false)
 	, m_thread_quit(false)
-	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
+	, m_midi_buffer(new PBD::RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 {
 	DEBUG_MIDI (string_compose ("Creating midi output device index: %1\n", index));
 

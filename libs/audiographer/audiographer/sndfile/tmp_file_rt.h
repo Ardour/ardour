@@ -124,7 +124,7 @@ class TmpFileRt
 
 	bool _capture;
 	framecnt_t _chunksize;
-	RingBuffer<T> _rb;
+	PBD::RingBuffer<T> _rb;
 
 	pthread_mutex_t _disk_thread_lock;
 	pthread_cond_t  _data_ready;

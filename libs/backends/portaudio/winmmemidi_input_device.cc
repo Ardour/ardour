@@ -37,7 +37,7 @@ namespace ARDOUR {
 WinMMEMidiInputDevice::WinMMEMidiInputDevice (int index)
 	: m_handle(0)
 	, m_started(false)
-	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
+	, m_midi_buffer(new PBD::RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 	, m_sysex_buffer(new uint8_t[SYSEX_BUFFER_SIZE])
 {
 	DEBUG_MIDI (string_compose ("Creating midi input device index: %1\n", index));
@@ -315,7 +315,7 @@ WinMMEMidiInputDevice::dequeue_midi_event (uint64_t timestamp_start,
 		return false;
 	}
 
-	RingBuffer<uint8_t>::rw_vector vector;
+	PBD::RingBuffer<uint8_t>::rw_vector vector;
 	m_midi_buffer->get_read_vector (&vector);
 	if (vector.len[0] >= sizeof(MidiEventHeader)) {
 		memcpy ((uint8_t*)&h, vector.buf[0], sizeof(MidiEventHeader));

@@ -1839,7 +1839,7 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 			tc.frame = 0;
 			ltc_encoder_set_timecode (_ltc, &tc);
 					name += string_compose ("@%1h", (int)tc.hours);
-			_ltcbuf = new RingBuffer<Sample> (std::max (DummyAudioBackend::max_buffer_size() * 2.f, samplerate));
+			_ltcbuf = new PBD::RingBuffer<Sample> (std::max (DummyAudioBackend::max_buffer_size() * 2.f, samplerate));
 			break;
 		case Loopback:
 			_wavetable = (Sample*) malloc (DummyAudioBackend::max_buffer_size() * sizeof(Sample));

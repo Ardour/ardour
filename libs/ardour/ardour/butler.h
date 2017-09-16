@@ -85,7 +85,7 @@ class LIBARDOUR_API Butler : public SessionHandleRef
 	framecnt_t   audio_dstream_capture_buffer_size;
 	framecnt_t   audio_dstream_playback_buffer_size;
 	uint32_t     midi_dstream_buffer_size;
-	RingBuffer<CrossThreadPool*> pool_trash;
+	PBD::RingBuffer<CrossThreadPool*> pool_trash;
 
 private:
 	void empty_pool_trash ();

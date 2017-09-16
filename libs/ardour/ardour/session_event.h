@@ -161,7 +161,7 @@ public:
 	void clear_events (SessionEvent::Type type, boost::function<void (void)> after);
 
 protected:
-	RingBuffer<SessionEvent*> pending_events;
+	PBD::RingBuffer<SessionEvent*> pending_events;
 	typedef std::list<SessionEvent *> Events;
 	Events           events;
 	Events           immediate_events;

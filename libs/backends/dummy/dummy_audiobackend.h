@@ -200,7 +200,7 @@ class DummyAudioPort : public DummyPort {
 		float _rn1;
 		// LTC generator
 		LTCEncoder* _ltc;
-		RingBuffer<Sample>* _ltcbuf;
+		PBD::RingBuffer<Sample>* _ltcbuf;
 		float _ltc_spd;
 		float _ltc_rand;
 

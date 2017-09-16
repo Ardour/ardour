@@ -95,7 +95,7 @@ private: // data
 	std::string m_name;
 
 	// can't use unique_ptr yet
-	boost::scoped_ptr<RingBuffer<uint8_t> > m_midi_buffer;
+	boost::scoped_ptr<PBD::RingBuffer<uint8_t> > m_midi_buffer;
 	boost::scoped_array<uint8_t> m_sysex_buffer;
 };
 

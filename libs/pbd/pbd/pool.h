@@ -46,7 +46,7 @@ class LIBPBD_API Pool
 	guint total() const { return free_list.bufsize(); }
 
   protected:
-	RingBuffer<void*> free_list; ///< a list of pointers to free items within block
+	PBD::RingBuffer<void*> free_list; ///< a list of pointers to free items within block
 	std::string _name;
 
   private:
@@ -116,7 +116,7 @@ class LIBPBD_API CrossThreadPool : public Pool
 	void flush_pending_with_ev (void*);
 
   private:
-	RingBuffer<void*> pending;
+	PBD::RingBuffer<void*> pending;
 	PerThreadPool* _parent;
 };
 
@@ -125,24 +125,24 @@ class LIBPBD_API CrossThreadPool : public Pool
  */
 class LIBPBD_API PerThreadPool
 {
-  public:
+public:
 	PerThreadPool ();
 
-        const Glib::Threads::Private<CrossThreadPool>& key() const { return _key; }
+	const Glib::Threads::Private<CrossThreadPool>& key() const { return _key; }
 
 	void  create_per_thread_pool (std::string name, unsigned long item_size, unsigned long nitems);
 	CrossThreadPool* per_thread_pool (bool must_exist = true);
 	bool has_per_thread_pool ();
-	void set_trash (RingBuffer<CrossThreadPool*>* t);
+	void set_trash (PBD::RingBuffer<CrossThreadPool*>* t);
 	void add_to_trash (CrossThreadPool *);
 
-  private:
-        Glib::Threads::Private<CrossThreadPool> _key;
+private:
+	Glib::Threads::Private<CrossThreadPool> _key;
 	std::string _name;
 
 	/** mutex to protect either changes to the _trash variable, or writes to the RingBuffer */
-        Glib::Threads::Mutex _trash_mutex;
-	RingBuffer<CrossThreadPool*>* _trash;
+	Glib::Threads::Mutex _trash_mutex;
+	PBD::RingBuffer<CrossThreadPool*>* _trash;
 };
 
 #endif // __qm_pool_h__

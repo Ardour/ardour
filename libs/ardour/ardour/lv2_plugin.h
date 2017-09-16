@@ -264,15 +264,15 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	                 uint32_t       size,
 	                 const uint8_t* body);
 
-	bool write_to(RingBuffer<uint8_t>* dest,
-	              uint32_t             index,
-	              uint32_t             protocol,
-	              uint32_t             size,
-	              const uint8_t*       body);
+	bool write_to(PBD::RingBuffer<uint8_t>* dest,
+	              uint32_t                  index,
+	              uint32_t                  protocol,
+	              uint32_t                  size,
+	              const uint8_t*            body);
 
 	// Created on demand so the space is only consumed if necessary
-	RingBuffer<uint8_t>* _to_ui;
-	RingBuffer<uint8_t>* _from_ui;
+	PBD::RingBuffer<uint8_t>* _to_ui;
+	PBD::RingBuffer<uint8_t>* _from_ui;
 
 	Glib::Threads::Mutex _work_mutex;
 
