@@ -4681,14 +4681,12 @@ Route::setup_invisible_processors ()
 		switch (_disk_io_point) {
 		case DiskIOPreFader:
 			if (trim != new_processors.end()) {
-				/* insert AFTER TRIM */
-				ProcessorList::iterator insert_pos = trim;
-				++insert_pos;
+				/* insert BEFORE TRIM */
 				if (_disk_writer) {
-					new_processors.insert (insert_pos, _disk_writer);
+					new_processors.insert (trim, _disk_writer);
 				}
 				if (_disk_reader) {
-					new_processors.insert (insert_pos, _disk_reader);
+					new_processors.insert (trim, _disk_reader);
 				}
 			} else {
 				if (_disk_writer) {
