@@ -56,7 +56,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	: _port_buffer_offset (0)
 	, _name (n)
 	, _flags (f)
-        , _last_monitor (false)
+	, _last_monitor (false)
 {
 	_private_playback_latency.min = 0;
 	_private_playback_latency.max = 0;

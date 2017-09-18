@@ -135,11 +135,11 @@ IO::increment_port_buffer_offset (pframes_t offset)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
-        if (_direction == Output) {
-                for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-                        i->increment_port_buffer_offset (offset);
-                }
-        }
+	if (_direction == Output) {
+		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
+			i->increment_port_buffer_offset (offset);
+		}
+	}
 }
 
 void
@@ -161,24 +161,24 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 		return 0;
 	}
 
-        {
-                Glib::Threads::Mutex::Lock lm (io_lock);
+	{
+		Glib::Threads::Mutex::Lock lm (io_lock);
 
-                /* check that our_port is really one of ours */
+		/* check that our_port is really one of ours */
 
-                if ( ! _ports.contains(our_port)) {
-                        return -1;
-                }
+		if ( ! _ports.contains(our_port)) {
+			return -1;
+		}
 
-                /* disconnect it from the source */
+		/* disconnect it from the source */
 
-                if (our_port->disconnect (other_port)) {
-                        error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
-                        return -1;
-                }
-        }
+		if (our_port->disconnect (other_port)) {
+			error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
+			return -1;
+		}
+	}
 
-        changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	_session.set_dirty ();
 
@@ -674,10 +674,10 @@ IO::connecting_became_legal ()
 
 	connection_legal_c.disconnect ();
 
-    // it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
-    if (!Profile->get_trx() ) {
-        ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
-    }
+	// it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
+	if (!Profile->get_trx() ) {
+		ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
+	}
 
 	delete pending_state_node;
 	pending_state_node = 0;
@@ -926,7 +926,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 					}
 
 					if (prop) {
-                                                connect (p, prop->value(), this);
+						connect (p, prop->value(), this);
 					}
 				}
 			}
@@ -1228,17 +1228,17 @@ IO::latency () const
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
-                        DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
-                                                                     name(),
-                                                                     ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
-                                                                     latency));
+			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                             name(),
+			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                             latency));
 			max_latency = latency;
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
-                                                     name(), _ports.num_ports(), max_latency,
-                                                     ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
+	                                             name(), _ports.num_ports(), max_latency,
+	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
 	return max_latency;
 }
 
@@ -1418,11 +1418,10 @@ IO::midi(uint32_t n) const
 /**
  *  Setup a bundle that describe our inputs or outputs. Also creates the bundle if necessary.
  */
-
 void
 IO::setup_bundle ()
 {
-        char buf[32];
+	char buf[32];
 
 	if (!_bundle) {
 		_bundle.reset (new Bundle (_direction == Input));
@@ -1437,7 +1436,7 @@ IO::setup_bundle ()
 	} else {
 		snprintf(buf, sizeof (buf), _("%s out"), _name.val().c_str());
 	}
-        _bundle->set_name (buf);
+	_bundle->set_name (buf);
 
 	int c = 0;
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
@@ -1552,22 +1551,22 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 bool
 IO::connected () const
 {
-        /* do we have any connections at all? */
+	/* do we have any connections at all? */
 
-        for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
-                if (p->connected()) {
-                        return true;
-                }
-        }
+	for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		if (p->connected()) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool
 IO::connected_to (boost::shared_ptr<const IO> other) const
 {
 	if (!other) {
-                return connected ();
+		return connected ();
 	}
 
 	assert (_direction != other->direction());
@@ -1695,12 +1694,12 @@ bool
 IO::physically_connected () const
 {
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
-                if (i->physically_connected()) {
-                        return true;
-                }
-        }
+		if (i->physically_connected()) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool

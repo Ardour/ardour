@@ -143,7 +143,7 @@ public:
 	virtual XMLNode& get_state (void) const;
 	virtual int set_state (const XMLNode&, int version);
 
-        static std::string state_node_name;
+	static std::string state_node_name;
 
 protected:
 
@@ -162,7 +162,7 @@ protected:
 
 private:
 	std::string _name;  ///< port short name
-	PortFlags       _flags; ///< flags
+	PortFlags   _flags; ///< flags
 	bool        _last_monitor;
 
 	/** ports that we are connected to, kept so that we can
