@@ -334,10 +334,26 @@ def enoify (major, minor):
             return "\\n\\\"More Music for Films\\\"" # 1983
         elif minor == 12:
             return "\\n\\\"Working Backwards\\\"" # 1984 Compilation
-        elif minor == 13:
+    elif major == 6:
+        if minor == 0:
             return "\\n\\\"The Pearl\\\"" # 1984 Collaborative
-        elif minor == 14:
+        elif minor == 1:
             return "\\n\\\"Begegnungen\\\"" # 1984 Compilation
+        ### From now on, no more compilations, names are not suitable
+        elif minor == 2:
+            return "\\n\\\"Thursday Afternoon\\\"" # 1985
+        elif minor == 3:
+            return "\\n\\\"Music for Films III\\\"" # 1988 Collaborative
+        elif minor == 4:
+            return "\\n\\\"Wrong Way Up\\\"" # 1990 Collaborative
+        elif minor == 5:
+            return "\\n\\\"Nerve Net\\\"" # 1992
+        elif minor == 6:
+            return "\\n\\\"The Shutov Assembly\\\"" # 1992
+        elif minor == 7:
+            return "\\n\\\"Neroli\\\"" # 1993
+        elif minor == 8:
+            return "\\n\\\"Headcandy\\\"" # 1994
     return "\\\"\\\""
 
 def options(opt):
