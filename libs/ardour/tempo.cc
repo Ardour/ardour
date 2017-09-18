@@ -159,8 +159,6 @@ TempoSection::TempoSection (const XMLNode& node, framecnt_t sample_rate)
 	, _locked_to_meter (false)
 	, _clamped (false)
 {
-	_legacy_bbt = BBT_Time (0, 0, 0);
-
 	BBT_Time bbt;
 	std::string start_bbt;
 	if (node.get_property ("start", start_bbt)) {
