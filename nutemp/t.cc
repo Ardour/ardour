@@ -565,13 +565,12 @@ TempoMap::rebuild (superclock_t limit)
 			_points.insert (next, TempoMapPoint (*tmp, sc, qn, bbt));
 		}
 
-		(*tmp).set_dirty (false);
+		tmp->set_dirty (false);
 		prev = tmp;
 		tmp = next;
 	}
 
 	Changed (first_dirty, _points.back().sclock()); /* EMIT SIGNAL */
-	cerr << "Rebuilt " << first_dirty << " .. " << _points.back().sclock() << endl;
 }
 
 bool
