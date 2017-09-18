@@ -50,7 +50,7 @@ CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming",
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)
-CONFIG_VARIABLE (bool, send_mmc, "send-mmc", true)
+CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
 CONFIG_VARIABLE (bool, send_midi_clock, "send-midi-clock", false)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
@@ -142,7 +142,7 @@ CONFIG_VARIABLE (std::string, monitor_bus_preferred_bundle, "monitor-bus-preferr
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 
 CONFIG_VARIABLE (bool, link_send_and_route_panner, "link-send-and-route-panner", true)
-CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "https://community.ardour.org/node/7596")
+CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "")
 
 /* click */
 

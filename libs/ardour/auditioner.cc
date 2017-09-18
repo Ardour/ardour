@@ -97,7 +97,7 @@ Auditioner::lookup_synth ()
 {
 	string plugin_id = Config->get_midi_audition_synth_uri();
 	asynth.reset ();
-	if (!plugin_id.empty()) {
+	if (!plugin_id.empty() || plugin_id == X_("@default@")) {
 		boost::shared_ptr<Plugin> p;
 		p = find_plugin (_session, plugin_id, ARDOUR::LV2);
 		if (!p) {
@@ -113,6 +113,9 @@ Auditioner::lookup_synth ()
 			}
 		}
 		if (p) {
+			if (plugin_id == X_("@default@")) {
+				Config->set_midi_audition_synth_uri (p->get_info()->unique_id);
+			}
 			asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, p));
 		}
 	}
