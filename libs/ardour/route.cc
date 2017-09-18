@@ -293,7 +293,7 @@ Route::set_trim (gain_t val, Controllable::GroupControlDisposition /* group over
 }
 
 void
-Route::maybe_declick (BufferSet&, framecnt_t, int)
+Route::maybe_declick (BufferSet&, samplecnt_t, int)
 {
 	/* this is the "bus" implementation and they never declick.
 	 */
@@ -303,16 +303,16 @@ Route::maybe_declick (BufferSet&, framecnt_t, int)
 /** Process this route for one (sub) cycle (process thread)
  *
  * @param bufs Scratch buffers to use for the signal path
- * @param start_frame Initial transport frame
- * @param end_frame Final transport frame
- * @param nframes Number of frames to output (to ports)
+ * @param start_sample Initial transport sample
+ * @param end_sample Final transport sample
+ * @param nframes Number of samples to output (to ports)
  *
- * Note that (end_frame - start_frame) may not be equal to nframes when the
+ * Note that (end_sample - start_sample) may not be equal to nframes when the
  * transport speed isn't 1.0 (eg varispeed).
  */
 void
 Route::process_output_buffers (BufferSet& bufs,
-			       framepos_t start_frame, framepos_t end_frame, pframes_t nframes,
+			       samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes,
 			       int declick, bool gain_automation_ok)
 {
 	/* Caller must hold process lock */
@@ -326,20 +326,20 @@ Route::process_output_buffers (BufferSet& bufs,
 		return;
 	}
 
-	automation_run (start_frame, nframes);
+	automation_run (start_sample, nframes);
 
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (
-				start_frame + _signal_latency_at_amp_position,
-				end_frame + _signal_latency_at_amp_position,
+				start_sample + _signal_latency_at_amp_position,
+				end_sample + _signal_latency_at_amp_position,
 				nframes);
 
 		_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
 		_trim->setup_gain_automation (
-				start_frame + _signal_latency_at_trim_position,
-				end_frame + _signal_latency_at_trim_position,
+				start_sample + _signal_latency_at_trim_position,
+				end_sample + _signal_latency_at_trim_position,
 				nframes);
 	} else {
 		_amp->apply_gain_automation (false);
@@ -423,7 +423,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	/* set this to be true if the meter will already have been ::run() earlier */
 	bool const meter_already_run = metering_state() == MeteringInput;
 
-	framecnt_t latency = 0;
+	samplecnt_t latency = 0;
 	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -455,13 +455,13 @@ Route::process_output_buffers (BufferSet& bufs,
 			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
 		}
 		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
-			const framecnt_t longest_session_latency = _initial_delay + _signal_latency;
+			const samplecnt_t longest_session_latency = _initial_delay + _signal_latency;
 			boost::dynamic_pointer_cast<PluginInsert>(*i)->set_sidechain_latency (
 					_initial_delay + latency, longest_session_latency - latency);
 		}
 
 		//cerr << name() << " run " << (*i)->name() << endl;
-		(*i)->run (bufs, start_frame - latency, end_frame - latency, speed, nframes, *i != _processors.back());
+		(*i)->run (bufs, start_sample - latency, end_sample - latency, speed, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 
 		if ((*i)->active ()) {
@@ -471,7 +471,7 @@ Route::process_output_buffers (BufferSet& bufs,
 }
 
 void
-Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
 		boost::shared_ptr<Processor> endpoint,
 		bool include_endpoint, bool for_export, bool for_freeze)
 {
@@ -480,7 +480,7 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 		return;
 	}
 
-	framecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
+	samplecnt_t latency = bounce_get_latency(_amp, false, for_export, for_freeze);
 	_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 	_amp->setup_gain_automation (start - latency, start - latency + nframes, nframes);
 
@@ -531,11 +531,11 @@ Route::bounce_process (BufferSet& buffers, framepos_t start, framecnt_t nframes,
 	}
 }
 
-framecnt_t
+samplecnt_t
 Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 		bool include_endpoint, bool for_export, bool for_freeze) const
 {
-	framecnt_t latency = 0;
+	samplecnt_t latency = 0;
 	if (!endpoint && !include_endpoint) {
 		return latency;
 	}
@@ -595,16 +595,16 @@ Route::n_process_buffers ()
 }
 
 void
-Route::monitor_run (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
+Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
 {
 	assert (is_monitor());
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 	fill_buffers_with_input (bufs, _input, nframes);
-	passthru (bufs, start_frame, end_frame, nframes, declick);
+	passthru (bufs, start_sample, end_sample, nframes, declick);
 }
 
 void
-Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
+Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
 {
 	_silent = false;
 
@@ -618,18 +618,18 @@ Route::passthru (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 		bufs.silence (nframes, 0);
 	}
 
-	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, true);
+	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, true);
 }
 
 void
-Route::passthru_silence (framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick)
+Route::passthru_silence (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
 {
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
 
 	bufs.set_count (_input->n_ports());
-	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, false);
+	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, false);
 }
 
 void
@@ -1809,7 +1809,7 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 	// TODO check for a potential ReaderLock after ReaderLock ??
 	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
 
-	framecnt_t chain_latency = _input->latency ();
+	samplecnt_t chain_latency = _input->latency ();
 
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
@@ -2990,7 +2990,7 @@ Route::curve_reallocate ()
 }
 
 void
-Route::silence (framecnt_t nframes)
+Route::silence (samplecnt_t nframes)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
@@ -3001,11 +3001,11 @@ Route::silence (framecnt_t nframes)
 }
 
 void
-Route::silence_unlocked (framecnt_t nframes)
+Route::silence_unlocked (samplecnt_t nframes)
 {
 	/* Must be called with the processor lock held */
 
-	const framepos_t now = _session.transport_frame ();
+	const samplepos_t now = _session.transport_sample ();
 
 	if (!_silent) {
 
@@ -3335,7 +3335,7 @@ Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 
 /** Called from the (non-realtime) butler thread when the transport is stopped */
 void
-Route::non_realtime_transport_stop (framepos_t now, bool flush)
+Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 {
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -3529,7 +3529,7 @@ Route::pans_required () const
 }
 
 void
-Route::flush_processor_buffers_locked (framecnt_t nframes)
+Route::flush_processor_buffers_locked (samplecnt_t nframes)
 {
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
@@ -3545,7 +3545,7 @@ Route::flush_processor_buffers_locked (framecnt_t nframes)
 }
 
 int
-Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
+Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -3578,12 +3578,12 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_frame, end_frame, 0.0, nframes, true);
+		_meter->run (bufs, start_sample, end_sample, 0.0, nframes, true);
 	}
 
 	_amp->apply_gain_automation (false);
 	_trim->apply_gain_automation (false);
-	passthru (bufs, start_frame, end_frame, nframes, 0);
+	passthru (bufs, start_sample, end_sample, nframes, 0);
 
 	flush_processor_buffers_locked (nframes);
 
@@ -3591,7 +3591,7 @@ Route::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 }
 
 int
-Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& /* need_butler */)
+Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& /* need_butler */)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
@@ -3603,7 +3603,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 		return 0;
 	}
 
-	framepos_t unused = 0;
+	samplepos_t unused = 0;
 
 	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
 		return 0;
@@ -3616,10 +3616,10 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_frame, end_frame, 1.0, nframes, true);
+		_meter->run (bufs, start_sample, end_sample, 1.0, nframes, true);
 	}
 
-	passthru (bufs, start_frame, end_frame, nframes, declick);
+	passthru (bufs, start_sample, end_sample, nframes, declick);
 
 	flush_processor_buffers_locked (nframes);
 
@@ -3627,7 +3627,7 @@ Route::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, in
 }
 
 int
-Route::silent_roll (pframes_t nframes, framepos_t /*start_frame*/, framepos_t /*end_frame*/, bool& /* need_butler */)
+Route::silent_roll (pframes_t nframes, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, bool& /* need_butler */)
 {
 	silence (nframes);
 	flush_processor_buffers_locked (nframes);
@@ -3862,13 +3862,13 @@ Route::add_export_point()
 	return _capturing_processor;
 }
 
-framecnt_t
+samplecnt_t
 Route::update_signal_latency ()
 {
-	framecnt_t l = _output->user_latency();
-	framecnt_t lamp = 0;
+	samplecnt_t l = _output->user_latency();
+	samplecnt_t lamp = 0;
 	bool before_amp = true;
-	framecnt_t ltrim = 0;
+	samplecnt_t ltrim = 0;
 	bool before_trim = true;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -3904,16 +3904,16 @@ Route::update_signal_latency ()
 }
 
 void
-Route::set_user_latency (framecnt_t nframes)
+Route::set_user_latency (samplecnt_t nframes)
 {
 	_output->set_user_latency (nframes);
 	_session.update_latency_compensation ();
 }
 
 void
-Route::set_latency_compensation (framecnt_t longest_session_latency)
+Route::set_latency_compensation (samplecnt_t longest_session_latency)
 {
-	framecnt_t old = _initial_delay;
+	samplecnt_t old = _initial_delay;
 
 	if (_signal_latency < longest_session_latency) {
 		_initial_delay = longest_session_latency - _signal_latency;
@@ -3972,18 +3972,18 @@ Route::set_pending_declick (int declick)
  *  Adds undo commands for any shifts that are performed.
  *
  * @param pos Position to start shifting from.
- * @param frames Amount to shift forwards by.
+ * @param samples Amount to shift forwards by.
  */
 
 void
-Route::shift (framepos_t pos, framecnt_t frames)
+Route::shift (samplepos_t pos, samplecnt_t samples)
 {
 	/* gain automation */
 	{
 		boost::shared_ptr<AutomationControl> gc = _amp->gain_control();
 
 		XMLNode &before = gc->alist()->get_state ();
-		gc->alist()->shift (pos, frames);
+		gc->alist()->shift (pos, samples);
 		XMLNode &after = gc->alist()->get_state ();
 		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
 	}
@@ -3993,7 +3993,7 @@ Route::shift (framepos_t pos, framecnt_t frames)
 		boost::shared_ptr<AutomationControl> gc = _trim->gain_control();
 
 		XMLNode &before = gc->alist()->get_state ();
-		gc->alist()->shift (pos, frames);
+		gc->alist()->shift (pos, samples);
 		XMLNode &after = gc->alist()->get_state ();
 		_session.add_command (new MementoCommand<AutomationList> (*gc->alist().get(), &before, &after));
 	}
@@ -4009,7 +4009,7 @@ Route::shift (framepos_t pos, framecnt_t frames)
 			if (pc) {
 				boost::shared_ptr<AutomationList> al = pc->alist();
 				XMLNode& before = al->get_state ();
-				al->shift (pos, frames);
+				al->shift (pos, samples);
 				XMLNode& after = al->get_state ();
 				_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
 			}
@@ -4028,7 +4028,7 @@ Route::shift (framepos_t pos, framecnt_t frames)
 				if (ac) {
 					boost::shared_ptr<AutomationList> al = ac->alist();
 					XMLNode &before = al->get_state ();
-					al->shift (pos, frames);
+					al->shift (pos, samples);
 					XMLNode &after = al->get_state ();
 					_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));
 				}
@@ -4396,8 +4396,8 @@ Route::unknown_processors () const
 }
 
 
-framecnt_t
-Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecnt_t our_latency) const
+samplecnt_t
+Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplecnt_t our_latency) const
 {
 	/* we assume that all our input ports feed all our output ports. its not
 	   universally true, but the alternative is way too corner-case to worry about.
@@ -4445,10 +4445,10 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, framecn
 	return all_connections.max;
 }
 
-framecnt_t
+samplecnt_t
 Route::set_private_port_latencies (bool playback) const
 {
-	framecnt_t own_latency = 0;
+	samplecnt_t own_latency = 0;
 
 	/* Processor list not protected by lock: MUST BE CALLED FROM PROCESS THREAD
 	   OR LATENCY CALLBACK.
@@ -4477,7 +4477,7 @@ Route::set_private_port_latencies (bool playback) const
 }
 
 void
-Route::set_public_port_latencies (framecnt_t value, bool playback) const
+Route::set_public_port_latencies (samplecnt_t value, bool playback) const
 {
 	/* this is called to set the JACK-visible port latencies, which take
 	   latency compensation into account.
@@ -4859,7 +4859,7 @@ Route::the_instrument_unlocked () const
 
 
 void
-Route::non_realtime_locate (framepos_t pos)
+Route::non_realtime_locate (samplepos_t pos)
 {
 	Automatable::non_realtime_locate (pos);
 

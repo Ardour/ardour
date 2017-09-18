@@ -124,7 +124,7 @@ TapeAudioRegionView::update (uint32_t /*n*/)
 #24 0x00007f957394ee6b in ARDOUR::AudioSource::read_peaks_with_fpp(ARDOUR::PeakData*, long, long, long, double, long) const (this=0x55f6fd359140, peaks=0x55f700da6b80, npeaks=1356, start=113190, cnt=447480, samples_per_visual_peak=330, samples_per_file_peak=256) at ../libs/ardour/audiosource.cc:391
 #25 0x00007f957394eb15 in ARDOUR::AudioSource::read_peaks(ARDOUR::PeakData*, long, long, long, double) const (this=0x55f6fd359140, peaks=0x55f700da6b80, npeaks=1356, start=113190, cnt=447480, samples_per_visual_peak=330) at ../libs/ardour/audiosource.cc:337
 #26 0x00007f957393a905 in ARDOUR::AudioRegion::read_peaks(ARDOUR::PeakData*, long, long, long, unsigned int, double) const (this=
-    0x55f6fd84c3b0, buf=0x55f700da6b80, npeaks=1356, offset=113190, cnt=447480, chan_n=0, frames_per_pixel=330) at ../libs/ardour/audioregion.cc:431
+    0x55f6fd84c3b0, buf=0x55f700da6b80, npeaks=1356, offset=113190, cnt=447480, chan_n=0, samples_per_pixel=330) at ../libs/ardour/audioregion.cc:431
 #27 0x00007f9574f09caa in ArdourWaveView::WaveView::generate_image(boost::shared_ptr<ArdourWaveView::WaveViewThreadRequest>, bool) const (this=0x55f6fdf341a0, req=..., in_render_thread=false)
     at ../libs/canvas/wave_view.cc:1005
 #28 0x00007f9574f08e99 in ArdourWaveView::WaveView::get_image(long, long, bool&) const (this=0x55f6fdf341a0, start=225060, end=448800, full_image=@0x7ffc4d9070c7: false)

@@ -25,46 +25,46 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
-#ifndef __ardour_beats_frames_converter_h__
-#define __ardour_beats_frames_converter_h__
+#ifndef __ardour_beats_samples_converter_h__
+#define __ardour_beats_samples_converter_h__
 
 namespace ARDOUR {
 
 class TempoMap;
 
-/** Converter between quarter-note beats and frames.  Takes distances in quarter-note beats or frames
- *  from some origin (supplied to the constructor in frames), and converts
+/** Converter between quarter-note beats and samples.  Takes distances in quarter-note beats or samples
+ *  from some origin (supplied to the constructor in samples), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
-class LIBARDOUR_API BeatsFramesConverter
-	: public Evoral::TimeConverter<Evoral::Beats,framepos_t> {
+class LIBARDOUR_API BeatsSamplesConverter
+	: public Evoral::TimeConverter<Evoral::Beats,samplepos_t> {
 public:
-	BeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
-		: Evoral::TimeConverter<Evoral::Beats, framepos_t> (origin)
+	BeatsSamplesConverter (const TempoMap& tempo_map, samplepos_t origin)
+		: Evoral::TimeConverter<Evoral::Beats, samplepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
 
-	framepos_t    to (Evoral::Beats beats) const;
-	Evoral::Beats from (framepos_t frames) const;
+	samplepos_t    to (Evoral::Beats beats) const;
+	Evoral::Beats from (samplepos_t samples) const;
 
 private:
 	const TempoMap& _tempo_map;
 };
 
-/** Converter between quarter-note beats and frames.  Takes distances in quarter-note beats or frames
- *  from some origin (supplied to the constructor in frames), and converts
+/** Converter between quarter-note beats and samples.  Takes distances in quarter-note beats or samples
+ *  from some origin (supplied to the constructor in samples), and converts
  *  them to the opposite unit, taking tempo changes into account.
  */
-class LIBARDOUR_API DoubleBeatsFramesConverter
-	: public Evoral::TimeConverter<double,framepos_t> {
+class LIBARDOUR_API DoubleBeatsSamplesConverter
+	: public Evoral::TimeConverter<double,samplepos_t> {
 public:
-	DoubleBeatsFramesConverter (const TempoMap& tempo_map, framepos_t origin)
-		: Evoral::TimeConverter<double, framepos_t> (origin)
+	DoubleBeatsSamplesConverter (const TempoMap& tempo_map, samplepos_t origin)
+		: Evoral::TimeConverter<double, samplepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
 
-	framepos_t          to (double beats) const;
-	double from (framepos_t frames) const;
+	samplepos_t          to (double beats) const;
+	double from (samplepos_t samples) const;
 
 private:
 	const TempoMap& _tempo_map;
@@ -72,4 +72,4 @@ private:
 
 } /* namespace ARDOUR */
 
-#endif /* __ardour_beats_frames_converter_h__ */
+#endif /* __ardour_beats_samples_converter_h__ */

@@ -118,7 +118,7 @@ EditorSummary::set_session (Session* s)
 		_editor->selection->RegionsChanged.connect (sigc::mem_fun(*this, &EditorSummary::set_background_dirty));
 	}
 
-	_leftmost = max_framepos;
+	_leftmost = max_samplepos;
 	_rightmost = 0;
 }
 
@@ -138,7 +138,7 @@ EditorSummary::render_background_image ()
 
 	/* compute start and end points for the summary */
 
-	std::pair<framepos_t, framepos_t> ext = _editor->session_gui_extents();
+	std::pair<samplepos_t, samplepos_t> ext = _editor->session_gui_extents();
 	double theoretical_start = ext.first;
 	double theoretical_end = ext.second;
 
@@ -150,7 +150,7 @@ EditorSummary::render_background_image ()
 
 	/* range-check */
 	_start = theoretical_start > 0 ? theoretical_start : 0;
-	_end = theoretical_end < max_framepos ? theoretical_end : max_framepos;
+	_end = theoretical_end < max_samplepos ? theoretical_end : max_samplepos;
 
 	/* calculate x scale */
 	if (_end != _start) {
@@ -212,11 +212,11 @@ EditorSummary::render_background_image ()
 	cairo_set_line_width (cr, 1);
 	cairo_set_source_rgb (cr, 1, 1, 0);
 
-	const double p = (_session->current_start_frame() - _start) * _x_scale;
+	const double p = (_session->current_start_sample() - _start) * _x_scale;
 	cairo_move_to (cr, p, 0);
 	cairo_line_to (cr, p, get_height());
 
-	double const q = (_session->current_end_frame() - _start) * _x_scale;
+	double const q = (_session->current_end_sample() - _start) * _x_scale;
 	cairo_move_to (cr, q, 0);
 	cairo_line_to (cr, q, get_height());
 	cairo_stroke (cr);
@@ -237,12 +237,12 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	}
 
 	/* maintain the leftmost and rightmost locations that we've ever reached */
-	framecnt_t const leftmost = _editor->leftmost_sample ();
+	samplecnt_t const leftmost = _editor->leftmost_sample ();
 	if ( leftmost < _leftmost) {
 		_leftmost = leftmost;
 		_background_dirty = true;
 	}
-	framecnt_t const rightmost = leftmost + _editor->current_page_samples();
+	samplecnt_t const rightmost = leftmost + _editor->current_page_samples();
 	if ( rightmost > _rightmost) {
 		_rightmost = rightmost;
 		_background_dirty = true;
@@ -289,7 +289,7 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 	/* XXX: colour should be set from configuration file */
 	cairo_set_source_rgba (cr, 1, 0, 0, 1);
 
-	const double ph= playhead_frame_to_position (_editor->playhead_cursor->current_frame());
+	const double ph= playhead_sample_to_position (_editor->playhead_cursor->current_sample());
 	cairo_move_to (cr, ph, 0);
 	cairo_line_to (cr, ph, get_height());
 	cairo_stroke (cr);
@@ -407,7 +407,7 @@ EditorSummary::on_key_press_event (GdkEventKey* key)
 		if (key->keyval == set_playhead_accel.accel_key && (int) key->state == set_playhead_accel.accel_mods) {
 			if (_session) {
 				get_pointer (x, y);
-				_session->request_locate (_start + (framepos_t) x / _x_scale, _session->transport_rolling());
+				_session->request_locate (_start + (samplepos_t) x / _x_scale, _session->transport_rolling());
 				return true;
 			}
 		}
@@ -577,7 +577,7 @@ void
 EditorSummary::reset_to_extents()
 {
 	//reset as if the user never went anywhere outside the extents
-	_leftmost = max_framepos;
+	_leftmost = max_samplepos;
 	_rightmost = 0;
 
 	_editor->temporal_zoom_extents ();
@@ -890,10 +890,10 @@ EditorSummary::set_editor_x (pair<double, double> x)
 }
 
 void
-EditorSummary::playhead_position_changed (framepos_t p)
+EditorSummary::playhead_position_changed (samplepos_t p)
 {
 	int const o = int (_last_playhead);
-	int const n = int (playhead_frame_to_position (p));
+	int const n = int (playhead_sample_to_position (p));
 	if (_session && o != n) {
 		int a = max(2, min (o, n));
 		int b = max (o, n);
@@ -948,13 +948,13 @@ EditorSummary::route_gui_changed (PBD::PropertyChange const& what_changed)
 }
 
 double
-EditorSummary::playhead_frame_to_position (framepos_t t) const
+EditorSummary::playhead_sample_to_position (samplepos_t t) const
 {
 	return (t - _start) * _x_scale;
 }
 
-framepos_t
-EditorSummary::position_to_playhead_frame_to_position (double pos) const
+samplepos_t
+EditorSummary::position_to_playhead_sample_to_position (double pos) const
 {
 	return _start  + (pos * _x_scale);
 }

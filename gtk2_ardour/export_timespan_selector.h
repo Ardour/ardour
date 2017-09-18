@@ -52,7 +52,7 @@ namespace ARDOUR {
 }
 
 using ARDOUR::CDMarkerFormat;
-using ARDOUR::framecnt_t;
+using ARDOUR::samplecnt_t;
 
 /// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
@@ -94,9 +94,9 @@ protected:
 
 	std::string construct_label (ARDOUR::Location const * location) const;
 	std::string construct_length (ARDOUR::Location const * location) const;
-	std::string bbt_str (framepos_t frames) const;
-	std::string timecode_str (framecnt_t frames) const;
-	std::string ms_str (framecnt_t frames) const;
+	std::string bbt_str (samplepos_t samples) const;
+	std::string timecode_str (samplecnt_t samples) const;
+	std::string ms_str (samplecnt_t samples) const;
 
 	void update_range_name (std::string const & path, std::string const & new_text);
 

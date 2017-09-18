@@ -71,13 +71,13 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	/* supplemental method used with MIDI */
 
-	void flush_buffers (framecnt_t nframes);
+	void flush_buffers (samplecnt_t nframes);
 	void no_outs_cuz_we_no_monitor(bool);
-	void non_realtime_transport_stop (framepos_t now, bool flush);
+	void non_realtime_transport_stop (samplepos_t now, bool flush);
 	void realtime_locate ();
 
 	BufferSet& output_buffers() { return *_output_buffers; }

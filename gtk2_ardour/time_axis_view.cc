@@ -199,9 +199,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
-	time_axis_frame.add(top_hbox);
-	time_axis_frame.show();
+	time_axis_sample.set_shadow_type (Gtk::SHADOW_NONE);
+	time_axis_sample.add(top_hbox);
+	time_axis_sample.show();
 
 	HSeparator* separator = manage (new HSeparator());
 	separator->set_name("TrackSeparator");
@@ -213,7 +213,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	midi_scroomer_size_group->add_widget (scroomer_placeholder);
 
 	time_axis_vbox.pack_start (*separator, false, false);
-	time_axis_vbox.pack_start (time_axis_frame, true, true);
+	time_axis_vbox.pack_start (time_axis_sample, true, true);
 	time_axis_vbox.show();
 	time_axis_hbox.pack_start (time_axis_vbox, true, true);
 	time_axis_hbox.show();
@@ -757,14 +757,14 @@ TimeAxisView::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (_selected) {
-		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);
-		time_axis_frame.set_name ("MixerStripSelectedFrame");
+		time_axis_sample.set_shadow_type (Gtk::SHADOW_IN);
+		time_axis_sample.set_name ("MixerStripSelectedFrame");
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
 		time_axis_vbox.set_name (controls_base_selected_name);
 	} else {
-		time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
-		time_axis_frame.set_name (controls_base_unselected_name);
+		time_axis_sample.set_shadow_type (Gtk::SHADOW_NONE);
+		time_axis_sample.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
 		time_axis_vbox.set_name (controls_base_unselected_name);
@@ -772,7 +772,7 @@ TimeAxisView::set_selected (bool yn)
 		hide_selection ();
 	}
 
-	time_axis_frame.show();
+	time_axis_sample.show();
 }
 
 void
@@ -797,7 +797,7 @@ TimeAxisView::set_samples_per_pixel (double fpp)
 }
 
 void
-TimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
+TimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end, layers, layer);
@@ -818,7 +818,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x1;
 	double x2;
 	double y2;
-	SelectionRect *rect;	time_axis_frame.show();
+	SelectionRect *rect;	time_axis_sample.show();
 
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
@@ -843,8 +843,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->raise_to_top();
 
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
-		framepos_t start, end;
-		framecnt_t cnt;
+		samplepos_t start, end;
+		samplecnt_t cnt;
 
 		start = (*i).start;
 		end = (*i).end;
@@ -1017,14 +1017,14 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
 }
 
 /** Get selectable things within a given range.
- *  @param start Start time in session frames.
- *  @param end End time in session frames.
+ *  @param start Start time in session samples.
+ *  @param end End time in session samples.
  *  @param top Top y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param bot Bottom y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param result Filled in with selectable things.
  */
 void
-TimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
+TimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
@@ -1120,8 +1120,8 @@ TimeAxisView::compute_heights ()
 	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-	const int frame_height = 2;
-	extra_height = (2 * border_width) + frame_height;
+	const int sample_height = 2;
+	extra_height = (2 * border_width) + sample_height;
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");

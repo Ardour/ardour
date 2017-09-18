@@ -1330,10 +1330,10 @@ MidiTimeAxisView::update_control_names ()
 
 	if (selected()) {
 		controls_ebox.set_name (controls_base_selected_name);
-		time_axis_frame.set_name (controls_base_selected_name);
+		time_axis_sample.set_name (controls_base_selected_name);
 	} else {
 		controls_ebox.set_name (controls_base_unselected_name);
-		time_axis_frame.set_name (controls_base_unselected_name);
+		time_axis_sample.set_name (controls_base_unselected_name);
 	}
 }
 
@@ -1535,10 +1535,10 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t f, framecnt_t length, bool commit)
+MidiTimeAxisView::add_region (samplepos_t f, samplecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
-	MusicFrame pos (f, 0);
+	MusicSample pos (f, 0);
 
 	if (commit) {
 		real_editor->begin_reversible_command (Operations::create_region);
@@ -1556,8 +1556,8 @@ MidiTimeAxisView::add_region (framepos_t f, framecnt_t length, bool commit)
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 	/* sets beat position */
-	region->set_position (pos.frame, pos.division);
-	playlist()->add_region (region, pos.frame, 1.0, false, pos.division);
+	region->set_position (pos.sample, pos.division);
+	playlist()->add_region (region, pos.sample, 1.0, false, pos.division);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 
 	if (commit) {
@@ -1632,7 +1632,7 @@ MidiTimeAxisView::contents_height_changed ()
 }
 
 bool
-MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+MidiTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	if (!_editor.internal_editing()) {
 		// Non-internal paste, paste regions like any other route

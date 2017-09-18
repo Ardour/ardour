@@ -50,7 +50,7 @@ public:
 	uint32_t   npan_buffers;
 
 private:
-	void allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force);
+	void allocate_pan_automation_buffers (samplecnt_t nframes, uint32_t howmany, bool force);
 };
 
 } // namespace

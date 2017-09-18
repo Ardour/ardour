@@ -64,7 +64,7 @@ SrcFileSource::SrcFileSource (Session& s, boost::shared_ptr<AudioFileSource> src
 	}
 
 
-	_ratio = s.nominal_frame_rate() / _source->sample_rate();
+	_ratio = s.nominal_sample_rate() / _source->sample_rate();
 	_src_data.src_ratio = _ratio;
 
 	src_buffer_size = ceil((double)max_blocksize / _ratio) + 2;
@@ -93,8 +93,8 @@ SrcFileSource::close ()
 	}
 }
 
-framecnt_t
-SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
+samplecnt_t
+SrcFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const
 {
 	int err;
 	const double srccnt = cnt / _ratio;
@@ -107,7 +107,7 @@ SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 		_target_position = start;
 	}
 
-	const framecnt_t scnt = ceilf(srccnt - _fract_position);
+	const samplecnt_t scnt = ceilf(srccnt - _fract_position);
 	_fract_position += (scnt - srccnt);
 
 #ifndef NDEBUG
@@ -120,7 +120,7 @@ SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	_src_data.input_frames = _source->read (_src_buffer, _source_position, scnt);
 
-	if ((framecnt_t) _src_data.input_frames * _ratio <= cnt
+	if ((samplecnt_t) _src_data.input_frames * _ratio <= cnt
 			&& _source_position + scnt >= _source->length(0)) {
 		_src_data.end_of_input = true;
 		DEBUG_TRACE (DEBUG::AudioPlayback, "SRC: END OF INPUT\n");
@@ -128,7 +128,7 @@ SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 		_src_data.end_of_input = false;
 	}
 
-	if ((framecnt_t) _src_data.input_frames < scnt) {
+	if ((samplecnt_t) _src_data.input_frames < scnt) {
 		_target_position += _src_data.input_frames * _ratio;
 	} else {
 		_target_position += cnt;
@@ -149,12 +149,12 @@ SrcFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 
 	_source_position += _src_data.input_frames_used;
 
-	framepos_t saved_target = _target_position;
-	framecnt_t generated = _src_data.output_frames_gen;
+	samplepos_t saved_target = _target_position;
+	samplecnt_t generated = _src_data.output_frames_gen;
 
 	while (generated < cnt) {
 		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("SRC: recurse for %1 samples\n",  cnt - generated));
-		framecnt_t g = read_unlocked(dst + generated, _target_position, cnt - generated);
+		samplecnt_t g = read_unlocked(dst + generated, _target_position, cnt - generated);
 		generated += g;
 		if (g == 0) break;
 	}

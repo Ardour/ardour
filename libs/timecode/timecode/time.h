@@ -55,7 +55,7 @@ struct LIBTIMECODE_API Time {
 	uint32_t      hours;
 	uint32_t      minutes;
 	uint32_t      seconds;
-	uint32_t      frames;        ///< Timecode frames (not audio samples)
+	uint32_t      frames;        ///< Timecode frames (not audio frames)
 	uint32_t      subframes;     ///< Typically unused
 	double        rate;          ///< Frame rate of this Time
 	static double default_rate;  ///< Rate to use for default constructor
@@ -98,7 +98,7 @@ Wrap LIBTIMECODE_API decrement_subframes (Time& timecode, uint32_t);
 Wrap LIBTIMECODE_API increment_seconds (Time& timecode, uint32_t);
 Wrap LIBTIMECODE_API increment_minutes (Time& timecode, uint32_t);
 Wrap LIBTIMECODE_API increment_hours (Time& timecode, uint32_t);
-void LIBTIMECODE_API frames_floor (Time& timecode);
+void LIBTIMECODE_API frames_floot (Time& timecode);
 void LIBTIMECODE_API seconds_floor (Time& timecode);
 void LIBTIMECODE_API minutes_floor (Time& timecode);
 void LIBTIMECODE_API hours_floor (Time& timecode);
@@ -112,7 +112,7 @@ std::string LIBTIMECODE_API timecode_format_time (Timecode::Time const timecode)
 
 std::string LIBTIMECODE_API timecode_format_sampletime (
 		int64_t sample,
-		double sample_frame_rate,
+		double sample_sample_rate,
 		double timecode_frames_per_second, bool timecode_drop_frames
 		);
 
@@ -122,7 +122,7 @@ void LIBTIMECODE_API timecode_to_sample(
 		Timecode::Time& timecode, int64_t& sample,
 		bool use_offset, bool use_subframes,
     /* Note - framerate info is taken from Timecode::Time& */
-		double sample_frame_rate /**< may include pull up/down */,
+		double sample_sample_rate /**< may include pull up/down */,
 		uint32_t subframes_per_frame /**< must not be 0 if use_subframes==true */,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples
@@ -134,7 +134,7 @@ void LIBTIMECODE_API sample_to_timecode (
     /* framerate info */
 		double timecode_frames_per_second,
 		bool   timecode_drop_frames,
-		double sample_frame_rate/**< can include pull up/down */,
+		double sample_sample_rate/**< can include pull up/down */,
 		uint32_t subframes_per_frame,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples

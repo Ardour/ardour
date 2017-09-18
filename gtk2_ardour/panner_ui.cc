@@ -308,7 +308,7 @@ PannerUI::setup_pan ()
 		twod_panner->set_size_request (-1, rintf(61.f * scale));
 		twod_panner->set_send_drawing_mode (_send_mode);
 
-		/* and finally, add it to the panner frame */
+		/* and finally, add it to the panner sample */
 
 		pan_vbox.pack_start (*twod_panner, false, false);
 	}
@@ -345,7 +345,7 @@ PannerUI::start_touch (boost::weak_ptr<AutomationControl> wac)
 	if (!ac) {
 		return;
 	}
-	ac->start_touch (ac->session().transport_frame());
+	ac->start_touch (ac->session().transport_sample());
 }
 
 void
@@ -355,7 +355,7 @@ PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
 	if (!ac) {
 		return;
 	}
-	ac->stop_touch (ac->session().transport_frame());
+	ac->stop_touch (ac->session().transport_sample());
 }
 
 bool

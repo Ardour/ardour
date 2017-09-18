@@ -70,7 +70,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-/** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
+/** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by AutomationLine.
  */
 AutomationLine::AutomationLine (const string&                              name,
@@ -78,14 +78,14 @@ AutomationLine::AutomationLine (const string&                              name,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
                                 const ParameterDescriptor&                 desc,
-                                Evoral::TimeConverter<double, framepos_t>* converter)
+                                Evoral::TimeConverter<double, samplepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
-	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, framepos_t>)
+	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, samplepos_t>)
 	, _parent_group (parent)
 	, _offset (0)
-	, _maximum_time (max_framepos)
+	, _maximum_time (max_samplepos)
 	, _fill (false)
 	, _desc (desc)
 {
@@ -488,9 +488,9 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 
-			const framepos_t pos = e.pixel_to_sample(before_x);
-			const Meter& meter = map.meter_at_frame (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
+			const samplepos_t pos = e.pixel_to_sample(before_x);
+			const Meter& meter = map.meter_at_sample (pos);
+			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()) );
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -504,9 +504,9 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		if (back()->view_index() < (line.npoints() - 1)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 
-			const framepos_t pos = e.pixel_to_sample(after_x);
-			const Meter& meter = map.meter_at_frame (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
+			const samplepos_t pos = e.pixel_to_sample(after_x);
+			const Meter& meter = map.meter_at_sample (pos);
+			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -872,14 +872,14 @@ AutomationLine::remove_point (ControlPoint& cp)
 }
 
 /** Get selectable points within an area.
- *  @param start Start position in session frames.
- *  @param end End position in session frames.
+ *  @param start Start position in session samples.
+ *  @param end End position in session samples.
  *  @param bot Bottom y range, as a fraction of line height, where 0 is the bottom of the line.
  *  @param top Top y range, as a fraction of line height, where 0 is the bottom of the line.
  *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
-AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
+AutomationLine::get_selectables (samplepos_t start, samplepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
@@ -889,12 +889,12 @@ AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfra
 		double const model_when = (*(*i)->model())->when;
 
 		/* model_when is relative to the start of the source, so we just need to add on the origin_b here
-		   (as it is the session frame position of the start of the source)
+		   (as it is the session sample position of the start of the source)
 		*/
 
-		framepos_t const session_frames_when = _time_converter->to (model_when) + _time_converter->origin_b ();
+		samplepos_t const session_samples_when = _time_converter->to (model_when) + _time_converter->origin_b ();
 
-		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
+		if (session_samples_when >= start && session_samples_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
 		}
 	}
@@ -988,7 +988,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
-		if (tx >= max_framepos || tx < 0 || tx >= _maximum_time) {
+		if (tx >= max_samplepos || tx < 0 || tx >= _maximum_time) {
 			continue;
 		}
 
@@ -1307,7 +1307,7 @@ AutomationLine::memento_command_binder ()
  *  to the start of the track or region that it is on.
  */
 void
-AutomationLine::set_maximum_time (framecnt_t t)
+AutomationLine::set_maximum_time (samplecnt_t t)
 {
 	if (_maximum_time == t) {
 		return;
@@ -1318,11 +1318,11 @@ AutomationLine::set_maximum_time (framecnt_t t)
 }
 
 
-/** @return min and max x positions of points that are in the list, in session frames */
-pair<framepos_t, framepos_t>
+/** @return min and max x positions of points that are in the list, in session samples */
+pair<samplepos_t, samplepos_t>
 AutomationLine::get_point_x_range () const
 {
-	pair<framepos_t, framepos_t> r (max_framepos, 0);
+	pair<samplepos_t, samplepos_t> r (max_samplepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
 		r.first = min (r.first, session_position (i));
@@ -1332,14 +1332,14 @@ AutomationLine::get_point_x_range () const
 	return r;
 }
 
-framepos_t
+samplepos_t
 AutomationLine::session_position (AutomationList::const_iterator p) const
 {
 	return _time_converter->to ((*p)->when) + _offset + _time_converter->origin_b ();
 }
 
 void
-AutomationLine::set_offset (framepos_t off)
+AutomationLine::set_offset (samplepos_t off)
 {
 	if (_offset == off) {
 		return;

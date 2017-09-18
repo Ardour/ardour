@@ -156,18 +156,18 @@ RegionView::init (bool wfd)
 		name_highlight->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_region_view_name_highlight_event), name_highlight, this));
 	}
 
-	if (frame_handle_start) {
-		frame_handle_start->set_data ("regionview", this);
-		frame_handle_start->set_data ("isleft", (void*) 1);
-		frame_handle_start->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_start, this));
-		frame_handle_start->raise_to_top();
+	if (sample_handle_start) {
+		sample_handle_start->set_data ("regionview", this);
+		sample_handle_start->set_data ("isleft", (void*) 1);
+		sample_handle_start->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_sample_handle_event), sample_handle_start, this));
+		sample_handle_start->raise_to_top();
 	}
 
-	if (frame_handle_end) {
-		frame_handle_end->set_data ("regionview", this);
-		frame_handle_end->set_data ("isleft", (void*) 0);
-		frame_handle_end->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_frame_handle_event), frame_handle_end, this));
-		frame_handle_end->raise_to_top();
+	if (sample_handle_end) {
+		sample_handle_end->set_data ("regionview", this);
+		sample_handle_end->set_data ("isleft", (void*) 0);
+		sample_handle_end->Event.connect (sigc::bind (sigc::mem_fun (PublicEditor::instance(), &PublicEditor::canvas_sample_handle_event), sample_handle_end, this));
+		sample_handle_end->raise_to_top();
 	}
 
 	if (name_text) {
@@ -199,11 +199,11 @@ RegionView::~RegionView ()
 		delete *g;
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin (); i != _coverage_samples.end (); ++i) {
 		delete *i;
 	}
 
-	drop_silent_frames ();
+	drop_silent_samples ();
 
 	delete editor;
 }
@@ -218,12 +218,12 @@ RegionView::canvas_group_event (GdkEvent* event)
 }
 
 void
-RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*threshold*/)
+RegionView::set_silent_samples (const AudioIntervalResult& silences, double /*threshold*/)
 {
-	framecnt_t shortest = max_framecnt;
+	samplecnt_t shortest = max_samplecnt;
 
-	/* remove old silent frames */
-	drop_silent_frames ();
+	/* remove old silent samples */
+	drop_silent_samples ();
 
 	if (silences.empty()) {
 		return;
@@ -235,7 +235,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 
 		ArdourCanvas::Rectangle* cr = new ArdourCanvas::Rectangle (group);
 		cr->set_ignore_events (true);
-		_silent_frames.push_back (cr);
+		_silent_samples.push_back (cr);
 
 		/* coordinates for the rect are relative to the regionview origin */
 
@@ -250,11 +250,11 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 	}
 
 	/* Find shortest audible segment */
-	framecnt_t shortest_audible = max_framecnt;
+	samplecnt_t shortest_audible = max_samplecnt;
 
-	framecnt_t s = _region->start();
+	samplecnt_t s = _region->start();
 	for (AudioIntervalResult::const_iterator i = silences.begin(); i != silences.end(); ++i) {
-		framecnt_t const dur = i->first - s;
+		samplecnt_t const dur = i->first - s;
 		if (dur > 0) {
 			shortest_audible = min (shortest_audible, dur);
 		}
@@ -262,7 +262,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 		s = i->second;
 	}
 
-	framecnt_t const dur = _region->start() + _region->length() - 1 - s;
+	samplecnt_t const dur = _region->start() + _region->length() - 1 - s;
 	if (dur > 0) {
 		shortest_audible = min (shortest_audible, dur);
 	}
@@ -277,7 +277,7 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 	_silence_text->set_x_position (trackview.editor().sample_to_pixel (silences.front().first - _region->start()) + 10.0);
 	_silence_text->set_y_position (20.0);
 
-	double ms = (float) shortest/_region->session().frame_rate();
+	double ms = (float) shortest/_region->session().sample_rate();
 
 	/* ms are now in seconds */
 
@@ -297,9 +297,9 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 		+ ", "
 		+ string_compose (_("shortest = %1 %2"), ms, sunits);
 
-	if (shortest_audible != max_framepos) {
+	if (shortest_audible != max_samplepos) {
 		/* ms are now in seconds */
-		double ma = (float) shortest_audible / _region->session().frame_rate();
+		double ma = (float) shortest_audible / _region->session().sample_rate();
 		char const * aunits;
 
 		if (ma >= 60.0) {
@@ -319,21 +319,21 @@ RegionView::set_silent_frames (const AudioIntervalResult& silences, double /*thr
 }
 
 void
-RegionView::hide_silent_frames ()
+RegionView::hide_silent_samples ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin (); i != _silent_samples.end (); ++i) {
 		(*i)->hide ();
 	}
 	_silence_text->hide();
 }
 
 void
-RegionView::drop_silent_frames ()
+RegionView::drop_silent_samples ()
 {
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin (); i != _silent_frames.end (); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin (); i != _silent_samples.end (); ++i) {
 		delete *i;
 	}
-	_silent_frames.clear ();
+	_silent_samples.clear ();
 
 	delete _silence_text;
 	_silence_text = 0;
@@ -432,14 +432,14 @@ RegionView::reset_width_dependent_items (double pixel_width)
 void
 RegionView::region_muted ()
 {
-	set_frame_color ();
+	set_sample_color ();
 	region_renamed ();
 }
 
 void
 RegionView::region_opacity ()
 {
-	set_frame_color ();
+	set_sample_color ();
 }
 
 void
@@ -455,7 +455,7 @@ RegionView::lower_to_bottom ()
 }
 
 bool
-RegionView::set_position (framepos_t pos, void* /*src*/, double* ignored)
+RegionView::set_position (samplepos_t pos, void* /*src*/, double* ignored)
 {
 	double delta;
 	bool ret;
@@ -491,9 +491,9 @@ RegionView::set_samples_per_pixel (double fpp)
 }
 
 bool
-RegionView::set_duration (framecnt_t frames, void *src)
+RegionView::set_duration (samplecnt_t samples, void *src)
 {
-	if (!TimeAxisViewItem::set_duration (frames, src)) {
+	if (!TimeAxisViewItem::set_duration (samples, src)) {
 		return false;
 	}
 
@@ -600,7 +600,7 @@ void
 RegionView::region_sync_changed ()
 {
 	int sync_dir;
-	framecnt_t sync_offset;
+	samplecnt_t sync_offset;
 
 	sync_offset = _region->sync_offset (sync_dir);
 
@@ -728,7 +728,7 @@ RegionView::set_height (double h)
 	if (sync_line) {
 		Points points;
 		int sync_dir;
-		framecnt_t sync_offset;
+		samplecnt_t sync_offset;
 		sync_offset = _region->sync_offset (sync_dir);
 		double offset = sync_offset / samples_per_pixel;
 
@@ -738,30 +738,30 @@ RegionView::set_height (double h)
 			);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frames.begin(); i != _coverage_frames.end(); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin(); i != _coverage_samples.end(); ++i) {
 		(*i)->set_y1 (h + 1);
 	}
 
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_frames.begin(); i != _silent_frames.end(); ++i) {
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _silent_samples.begin(); i != _silent_samples.end(); ++i) {
 		(*i)->set_y1 (h + 1);
 	}
 
 }
 
-/** Remove old coverage frames and make new ones, if we're in a LayerDisplay mode
+/** Remove old coverage samples and make new ones, if we're in a LayerDisplay mode
  *  which uses them. */
 void
-RegionView::update_coverage_frames (LayerDisplay d)
+RegionView::update_coverage_samples (LayerDisplay d)
 {
-	/* remove old coverage frames */
-	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_frames.begin (); i != _coverage_frames.end (); ++i) {
+	/* remove old coverage samples */
+	for (list<ArdourCanvas::Rectangle*>::iterator i = _coverage_samples.begin (); i != _coverage_samples.end (); ++i) {
 		delete *i;
 	}
 
-	_coverage_frames.clear ();
+	_coverage_samples.clear ();
 
 	if (d != Stacked) {
-		/* don't do coverage frames unless we're in stacked mode */
+		/* don't do coverage samples unless we're in stacked mode */
 		return;
 	}
 
@@ -770,9 +770,9 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		return;
 	}
 
-	framepos_t const position = _region->first_frame ();
-	framepos_t t = position;
-	framepos_t const end = _region->last_frame ();
+	samplepos_t const position = _region->first_sample ();
+	samplepos_t t = position;
+	samplepos_t const end = _region->last_sample ();
 
 	ArdourCanvas::Rectangle* cr = 0;
 	bool me = false;
@@ -795,7 +795,7 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		/* start off any new rect, if required */
 		if (cr == 0 || me != new_me) {
 			cr = new ArdourCanvas::Rectangle (group);
-			_coverage_frames.push_back (cr);
+			_coverage_samples.push_back (cr);
 			cr->set_x0 (trackview.editor().sample_to_pixel (t - position));
 			cr->set_y0 (1);
 			cr->set_y1 (_height + 1);
@@ -821,12 +821,12 @@ RegionView::update_coverage_frames (LayerDisplay d)
 		cr->set_x1 (trackview.editor().sample_to_pixel (end - position));
 	}
 
-	if (frame_handle_start) {
-		frame_handle_start->raise_to_top ();
+	if (sample_handle_start) {
+		sample_handle_start->raise_to_top ();
 	}
 
-	if (frame_handle_end) {
-		frame_handle_end->raise_to_top ();
+	if (sample_handle_end) {
+		sample_handle_end->raise_to_top ();
 	}
 
 	if (name_highlight) {
@@ -839,13 +839,13 @@ RegionView::update_coverage_frames (LayerDisplay d)
 }
 
 bool
-RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t sub_num)
+RegionView::trim_front (samplepos_t new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;
 	}
 
-	framepos_t const pre_trim_first_frame = _region->first_frame();
+	samplepos_t const pre_trim_first_sample = _region->first_sample();
 
 	if (_region->position() == new_bound) {
 		return false;
@@ -856,50 +856,50 @@ RegionView::trim_front (framepos_t new_bound, bool no_overlap, const int32_t sub
 	if (no_overlap) {
 		// Get the next region on the left of this region and shrink/expand it.
 		boost::shared_ptr<Playlist> playlist (_region->playlist());
-		boost::shared_ptr<Region> region_left = playlist->find_next_region (pre_trim_first_frame, End, 0);
+		boost::shared_ptr<Region> region_left = playlist->find_next_region (pre_trim_first_sample, End, 0);
 
 		bool regions_touching = false;
 
-		if (region_left != 0 && (pre_trim_first_frame == region_left->last_frame() + 1)) {
+		if (region_left != 0 && (pre_trim_first_sample == region_left->last_sample() + 1)) {
 			regions_touching = true;
 		}
 
-		// Only trim region on the left if the first frame has gone beyond the left region's last frame.
-		if (region_left != 0 &&	(region_left->last_frame() > _region->first_frame() || regions_touching)) {
-			region_left->trim_end (_region->first_frame() - 1);
+		// Only trim region on the left if the first sample has gone beyond the left region's last sample.
+		if (region_left != 0 &&	(region_left->last_sample() > _region->first_sample() || regions_touching)) {
+			region_left->trim_end (_region->first_sample() - 1);
 		}
 	}
 
 	region_changed (ARDOUR::bounds_change);
 
-	return (pre_trim_first_frame != _region->first_frame());  //return true if we actually changed something
+	return (pre_trim_first_sample != _region->first_sample());  //return true if we actually changed something
 }
 
 bool
-RegionView::trim_end (framepos_t new_bound, bool no_overlap, const int32_t sub_num)
+RegionView::trim_end (samplepos_t new_bound, bool no_overlap, const int32_t sub_num)
 {
 	if (_region->locked()) {
 		return false;
 	}
 
-	framepos_t const pre_trim_last_frame = _region->last_frame();
+	samplepos_t const pre_trim_last_sample = _region->last_sample();
 
 	_region->trim_end (new_bound, sub_num);
 
 	if (no_overlap) {
 		// Get the next region on the right of this region and shrink/expand it.
 		boost::shared_ptr<Playlist> playlist (_region->playlist());
-		boost::shared_ptr<Region> region_right = playlist->find_next_region (pre_trim_last_frame, Start, 1);
+		boost::shared_ptr<Region> region_right = playlist->find_next_region (pre_trim_last_sample, Start, 1);
 
 		bool regions_touching = false;
 
-		if (region_right != 0 && (pre_trim_last_frame == region_right->first_frame() - 1)) {
+		if (region_right != 0 && (pre_trim_last_sample == region_right->first_sample() - 1)) {
 			regions_touching = true;
 		}
 
-		// Only trim region on the right if the last frame has gone beyond the right region's first frame.
-		if (region_right != 0 && (region_right->first_frame() < _region->last_frame() || regions_touching)) {
-			region_right->trim_front (_region->last_frame() + 1, sub_num);
+		// Only trim region on the right if the last sample has gone beyond the right region's first sample.
+		if (region_right != 0 && (region_right->first_sample() < _region->last_sample() || regions_touching)) {
+			region_right->trim_front (_region->last_sample() + 1, sub_num);
 		}
 
 		region_changed (ARDOUR::bounds_change);
@@ -908,7 +908,7 @@ RegionView::trim_end (framepos_t new_bound, bool no_overlap, const int32_t sub_n
 		region_changed (PropertyChange (ARDOUR::Properties::length));
 	}
 
-	return (pre_trim_last_frame != _region->last_frame());  //return true if we actually changed something
+	return (pre_trim_last_sample != _region->last_sample());  //return true if we actually changed something
 }
 
 
@@ -924,7 +924,7 @@ RegionView::thaw_after_trim ()
 
 
 void
-RegionView::move_contents (frameoffset_t distance)
+RegionView::move_contents (sampleoffset_t distance)
 {
 	if (_region->locked()) {
 		return;
@@ -933,29 +933,29 @@ RegionView::move_contents (frameoffset_t distance)
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
-/** Snap a frame offset within our region using the current snap settings.
+/** Snap a sample offset within our region using the current snap settings.
  *  @param x Frame offset from this region's position.
  *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
  *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
- *  @return Snapped frame offset from this region's position.
+ *  @return Snapped sample offset from this region's position.
  */
-MusicFrame
-RegionView::snap_frame_to_frame (frameoffset_t x, bool ensure_snap) const
+MusicSample
+RegionView::snap_sample_to_sample (sampleoffset_t x, bool ensure_snap) const
 {
 	PublicEditor& editor = trackview.editor();
-	/* x is region relative, convert it to global absolute frames */
-	framepos_t const session_frame = x + _region->position();
+	/* x is region relative, convert it to global absolute samples */
+	samplepos_t const session_sample = x + _region->position();
 
 	/* try a snap in either direction */
-	MusicFrame frame (session_frame, 0);
-	editor.snap_to (frame, RoundNearest, false, ensure_snap);
+	MusicSample sample (session_sample, 0);
+	editor.snap_to (sample, RoundNearest, false, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
-	if (frame.frame < _region->position ()) {
-		frame.frame = session_frame;
-		editor.snap_to (frame, RoundUpAlways, false, ensure_snap);
+	if (sample.sample < _region->position ()) {
+		sample.sample = session_sample;
+		editor.snap_to (sample, RoundUpAlways, false, ensure_snap);
 	}
 
 	/* back to region relative, keeping the relevant divisor */
-	return MusicFrame (frame.frame - _region->position(), frame.division);
+	return MusicSample (sample.sample - _region->position(), sample.division);
 }

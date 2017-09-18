@@ -264,7 +264,7 @@ PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, Au
 			= boost::dynamic_pointer_cast<AutomationControl>(control (which));
 
 	if (c && s != Off) {
-		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_frame()));
+		_plugins[0]->set_parameter (which.id(), c->list()->eval (_session.transport_sample()));
 	}
 }
 
@@ -395,7 +395,7 @@ PluginInsert::has_no_audio_inputs() const
 	return _plugins[0]->get_info()->n_inputs.n_audio() == 0;
 }
 
-framecnt_t
+samplecnt_t
 PluginInsert::plugin_latency () const {
 	return _plugins.front()->signal_latency ();
 }
@@ -735,7 +735,7 @@ PluginInsert::preset_load_set_value (uint32_t p, float v)
 }
 
 void
-PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& out_map, framecnt_t nframes, framecnt_t offset) const
+PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& out_map, samplecnt_t nframes, samplecnt_t offset) const
 {
 	// TODO optimize: store "unconnected" in a fixed set.
 	// it only changes on reconfiguration.
@@ -768,7 +768,7 @@ PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& o
 }
 
 void
-PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes, framecnt_t offset, bool with_auto)
+PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes, samplecnt_t offset, bool with_auto)
 {
 	// TODO: atomically copy maps & _no_inplace
 	PinMappings in_map (_in_map);
@@ -855,10 +855,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 		}
 	}
 
-	/* Calculate if, and how many frames we need to collect for analysis */
-	framecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
+	/* Calculate if, and how many samples we need to collect for analysis */
+	samplecnt_t collect_signal_nframes = (_signal_analysis_collect_nframes_max -
 					     _signal_analysis_collected_nframes);
-	if (nframes < collect_signal_nframes) { // we might not get all frames now
+	if (nframes < collect_signal_nframes) { // we might not get all samples now
 		collect_signal_nframes = nframes;
 	}
 
@@ -866,7 +866,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, framepos_t start, framepos_t end
 		// collect input
 		//std::cerr << "collect input, bufs " << bufs.count().n_audio() << " count,  " << bufs.available().n_audio() << " available" << std::endl;
 		//std::cerr << "               streams " << internal_input_streams().n_audio() << std::endl;
-		//std::cerr << "filling buffer with " << collect_signal_nframes << " frames at " << _signal_analysis_collected_nframes << std::endl;
+		//std::cerr << "filling buffer with " << collect_signal_nframes << " samples at " << _signal_analysis_collected_nframes << std::endl;
 
 		_signal_analysis_inputs.set_count(input_streams());
 
@@ -1142,9 +1142,9 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 }
 
 void
-PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
+PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 {
-	automation_run (start_frame, nframes); // evaluate automation only
+	automation_run (start_sample, nframes); // evaluate automation only
 
 	if (!active ()) {
 		// XXX delaybuffers need to be offset by nframes
@@ -1159,39 +1159,39 @@ PluginInsert::silence (framecnt_t nframes, framepos_t start_frame)
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
-			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0, in_map, out_map, nframes, 0);
+			_plugins.front()->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_sample, start_sample + nframes, 1.0, in_map, out_map, nframes, 0);
 		}
 	} else
 #endif
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
-		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_frame, start_frame + nframes, 1.0, in_map, out_map, nframes, 0);
+		(*i)->connect_and_run (_session.get_scratch_buffers (maxbuf, true), start_sample, start_sample + nframes, 1.0, in_map, out_map, nframes, 0);
 	}
 }
 
 void
-PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (_sidechain) {
 		// collect sidechain input for complete cycle (!)
 		// TODO we need delaylines here for latency compensation
-		_sidechain->run (bufs, start_frame, end_frame, speed, nframes, true);
+		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
 	if (_pending_active) {
 		/* run as normal if we are active or moving from inactive to active */
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
-			automate_and_run (bufs, start_frame, end_frame, speed, nframes);
+			automate_and_run (bufs, start_sample, end_sample, speed, nframes);
 		} else {
 			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
-			connect_and_run (bufs, start_frame, end_frame, speed, nframes, 0, lm.locked());
+			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
 
 	} else {
 		// XXX should call ::silence() to run plugin(s) for consistent load.
 		// We'll need to change this anyway when bypass can be automated
 		bypass (bufs, nframes);
-		automation_run (start_frame, nframes); // evaluate automation only
+		automation_run (start_sample, nframes); // evaluate automation only
 		_delaybuffers.flush ();
 	}
 
@@ -1203,10 +1203,10 @@ PluginInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 }
 
 void
-PluginInsert::automate_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes)
+PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes)
 {
 	Evoral::ControlEvent next_event (0, 0.0f);
-	framecnt_t offset = 0;
+	samplecnt_t offset = 0;
 
 	Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 
@@ -1225,7 +1225,7 @@ PluginInsert::automate_and_run (BufferSet& bufs, framepos_t start, framepos_t en
 
 	while (nframes) {
 
-		framecnt_t cnt = min (((framecnt_t) ceil (next_event.when) - start), (framecnt_t) nframes);
+		samplecnt_t cnt = min (((samplecnt_t) ceil (next_event.when) - start), (samplecnt_t) nframes);
 
 		connect_and_run (bufs, start, start + cnt, speed, cnt, offset, true); // XXX (start + cnt) * speed
 
@@ -2826,7 +2826,7 @@ PluginInsert::describe_parameter (Evoral::Parameter param)
 	return Automatable::describe_parameter(param);
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 PluginInsert::signal_latency() const
 {
 	if (!_pending_active) {
@@ -2985,7 +2985,7 @@ PluginInsert::get_impulse_analysis_plugin()
 }
 
 void
-PluginInsert::collect_signal_for_analysis (framecnt_t nframes)
+PluginInsert::collect_signal_for_analysis (samplecnt_t nframes)
 {
 	// called from outside the audio thread, so this should be safe
 	// only do audio as analysis is (currently) only for audio plugins
@@ -3083,8 +3083,8 @@ PluginInsert::start_touch (uint32_t param_id)
 {
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
 	if (ac) {
-		// ToDo subtract _plugin_signal_latency  from audible_frame() when rolling, assert > 0
-		ac->start_touch (session().audible_frame());
+		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
+		ac->start_touch (session().audible_sample());
 	}
 }
 
@@ -3093,8 +3093,8 @@ PluginInsert::end_touch (uint32_t param_id)
 {
 	boost::shared_ptr<AutomationControl> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, param_id));
 	if (ac) {
-		// ToDo subtract _plugin_signal_latency  from audible_frame() when rolling, assert > 0
-		ac->stop_touch (session().audible_frame());
+		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
+		ac->stop_touch (session().audible_sample());
 	}
 }
 

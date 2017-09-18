@@ -549,8 +549,8 @@ PlugUIBase::plugin_going_away ()
 void
 PlugUIBase::set_latency_label ()
 {
-	framecnt_t const l = insert->effective_latency ();
-	framecnt_t const sr = insert->session().frame_rate ();
+	samplecnt_t const l = insert->effective_latency ();
+	samplecnt_t const sr = insert->session().sample_rate ();
 
 	string t;
 
@@ -567,7 +567,7 @@ void
 PlugUIBase::latency_button_clicked ()
 {
 	if (!latency_gui) {
-		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
+		latency_gui = new LatencyGUI (*(insert.get()), insert->session().sample_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.

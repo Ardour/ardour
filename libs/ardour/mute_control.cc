@@ -180,7 +180,7 @@ MuteControl::muted_by_others_soloing () const
 }
 
 void
-MuteControl::automation_run (framepos_t start, pframes_t len)
+MuteControl::automation_run (samplepos_t start, pframes_t len)
 {
 	boolean_automation_run (start, len);
 

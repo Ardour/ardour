@@ -115,11 +115,11 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
-		const Meter& m = _mtv.session()->tempo_map().meter_at_frame (step_edit_insert_position);
-		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position));
+		const Meter& m = _mtv.session()->tempo_map().meter_at_sample (step_edit_insert_position);
+		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_sample (step_edit_insert_position));
 		double next_bar_in_beats =  baf + m.divisions_per_bar();
-		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
-		framecnt_t len = next_bar_pos - step_edit_insert_position;
+		samplecnt_t next_bar_pos = _mtv.session()->tempo_map().sample_at_beat (next_bar_in_beats);
+		samplecnt_t len = next_bar_pos - step_edit_insert_position;
 
 		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
 
@@ -135,16 +135,16 @@ StepEditor::reset_step_edit_beat_pos ()
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+	samplecnt_t samples_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
 
-	if (frames_from_start < 0) {
+	if (samples_from_start < 0) {
 		/* this can happen with snap enabled, and the edit point == Playhead. we snap the
 		   position of the new region, and it can end up after the edit point.
 		*/
-		frames_from_start = 0;
+		samples_from_start = 0;
 	}
 
-	step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (frames_from_start);
+	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (samples_from_start);
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -179,14 +179,14 @@ StepEditor::stop_step_editing ()
 void
 StepEditor::check_step_edit ()
 {
-	MidiRingBuffer<framepos_t>& incoming (_track->step_edit_ring_buffer());
+	MidiRingBuffer<samplepos_t>& incoming (_track->step_edit_ring_buffer());
 	uint8_t* buf;
 	uint32_t bufsize = 32;
 
 	buf = new uint8_t[bufsize];
 
 	while (incoming.read_space()) {
-		framepos_t time;
+		samplepos_t time;
 		Evoral::EventType type;
 		uint32_t size;
 
@@ -234,7 +234,7 @@ StepEditor::move_step_edit_beat_pos (Evoral::Beats beats)
 	}
 	if (beats > 0.0) {
 		step_edit_beat_pos = min (step_edit_beat_pos + beats,
-		                          step_edit_region_view->region_frames_to_region_beats (step_edit_region->length()));
+		                          step_edit_region_view->region_samples_to_region_beats (step_edit_region->length()));
 	} else if (beats < 0.0) {
 		if (-beats < step_edit_beat_pos) {
 			step_edit_beat_pos += beats; // its negative, remember
@@ -283,7 +283,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
 	/* make sure its visible on the horizontal axis */
 
-	framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos + beat_duration);
+	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos + beat_duration);
 
 	if (fpos >= (_editor.leftmost_sample() + _editor.current_page_samples())) {
 		_editor.reset_x_origin (fpos - (_editor.current_page_samples()/4));
@@ -409,9 +409,9 @@ StepEditor::step_edit_bar_sync ()
 		return;
 	}
 
-	framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
-	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).frame;
-	step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
+	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos);
+	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).sample;
+	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 

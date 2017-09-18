@@ -226,7 +226,7 @@ AudioTrack::set_state_part_two ()
  *  or set to false.
  */
 int
-AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
+AudioTrack::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -254,10 +254,10 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 	fill_buffers_with_input (bufs, _input, nframes);
 
 	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
-		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
+		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
 	}
 
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!_disk_writer->record_enabled() && _session.transport_rolling()));
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer->record_enabled() && _session.transport_rolling()));
 
 	if (_disk_reader->need_butler() || _disk_writer->need_butler()) {
 		need_butler = true;
@@ -269,7 +269,7 @@ AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 }
 
 int
-AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
@@ -281,7 +281,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 
 	assert(apl);
 	assert(buffers.count().n_audio() >= 1);
-	assert ((framecnt_t) buffers.get_audio(0).capacity() >= nframes);
+	assert ((samplecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
 	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;
@@ -368,11 +368,11 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 boost::shared_ptr<Region>
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	return bounce_range (_session.current_start_frame(), _session.current_end_frame(), itt, main_outs(), false);
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false);
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
+AudioTrack::bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
 {
 	vector<boost::shared_ptr<Source> > srcs;
@@ -418,7 +418,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> res;
 
-	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(),
+	if ((res = _session.write_one_track (*this, _session.current_start_sample(), _session.current_end_sample(),
 					true, srcs, itt, main_outs(), false, false, true)) == 0) {
 		return;
 	}
@@ -469,7 +469,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
 	new_playlist->set_orig_track_id (id());
-	new_playlist->add_region (region, _session.current_start_frame());
+	new_playlist->add_region (region, _session.current_start_sample());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 

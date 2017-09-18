@@ -300,7 +300,7 @@ ExportFormatDialog::set_session (ARDOUR::Session* s)
 	if (sample_rate_view.get_selection()->count_selected_rows() == 0) {
 		Gtk::ListStore::Children::iterator it;
 		for (it = sample_rate_list->children().begin(); it != sample_rate_list->children().end(); ++it) {
-			if ((framecnt_t) (*it)->get_value (sample_rate_cols.ptr)->rate == _session->nominal_frame_rate()) {
+			if ((samplecnt_t) (*it)->get_value (sample_rate_cols.ptr)->rate == _session->nominal_sample_rate()) {
 				sample_rate_view.get_selection()->select (it);
 				break;
 			}
@@ -691,7 +691,7 @@ ExportFormatDialog::change_sample_rate_selection (bool select, WeakSampleRatePtr
 	if (select) {
 		ExportFormatManager::SampleRatePtr ptr = rate.lock();
 		if (ptr && _session) {
-			src_quality_combo.set_sensitive ((uint32_t) ptr->rate != _session->frame_rate());
+			src_quality_combo.set_sensitive ((uint32_t) ptr->rate != _session->sample_rate());
 		}
 	}
 }
@@ -877,7 +877,7 @@ void
 ExportFormatDialog::update_clock (AudioClock & clock, ARDOUR::AnyTime const & time)
 {
 	// TODO position
-	clock.set (_session->convert_to_frames (time), true);
+	clock.set (_session->convert_to_samples (time), true);
 
 	AudioClock::Mode mode(AudioClock::Timecode);
 
@@ -888,8 +888,8 @@ ExportFormatDialog::update_clock (AudioClock & clock, ARDOUR::AnyTime const & ti
 	  case AnyTime::BBT:
 		mode = AudioClock::BBT;
 		break;
-	  case AnyTime::Frames:
-		mode = AudioClock::Frames;
+	  case AnyTime::Samples:
+		mode = AudioClock::Samples;
 		break;
 	  case AnyTime::Seconds:
 		mode = AudioClock::MinSec;
@@ -906,24 +906,24 @@ ExportFormatDialog::update_time (AnyTime & time, AudioClock const & clock)
 		return;
 	}
 
-	framecnt_t frames = clock.current_duration();
+	samplecnt_t samples = clock.current_duration();
 
 	switch (clock.mode()) {
 	  case AudioClock::Timecode:
 		time.type = AnyTime::Timecode;
-		_session->timecode_time (frames, time.timecode);
+		_session->timecode_time (samples, time.timecode);
 		break;
 	  case AudioClock::BBT:
 		time.type = AnyTime::BBT;
-		_session->bbt_time (frames, time.bbt);
+		_session->bbt_time (samples, time.bbt);
 		break;
 	  case AudioClock::MinSec:
 		time.type = AnyTime::Seconds;
-		time.seconds = (double) frames / _session->frame_rate();
+		time.seconds = (double) samples / _session->sample_rate();
 		break;
-	  case AudioClock::Frames:
-		time.type = AnyTime::Frames;
-		time.frames = frames;
+	  case AudioClock::Samples:
+		time.type = AnyTime::Samples;
+		time.samples = samples;
 		break;
 	}
 }

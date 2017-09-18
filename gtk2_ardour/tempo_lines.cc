@@ -29,7 +29,7 @@
 
 using namespace std;
 
-TempoLines::TempoLines (ArdourCanvas::Container* group, double, ARDOUR::BeatsFramesConverter* bfc)
+TempoLines::TempoLines (ArdourCanvas::Container* group, double, ARDOUR::BeatsSamplesConverter* bfc)
 	: lines (group, ArdourCanvas::LineSet::Vertical)
 	, _bfc (bfc)
 {
@@ -43,7 +43,7 @@ TempoLines::~TempoLines ()
 }
 
 void
-TempoLines::tempo_map_changed (framepos_t new_origin)
+TempoLines::tempo_map_changed (samplepos_t new_origin)
 {
 	lines.clear ();
 	_bfc->set_origin_b (new_origin);
@@ -64,8 +64,8 @@ TempoLines::hide ()
 void
 TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 			unsigned                                              divisions,
-                        framecnt_t                                            leftmost_frame,
-                        framecnt_t                                            frame_rate)
+                        samplecnt_t                                            leftmost_sample,
+                        samplecnt_t                                            sample_rate)
 {
 	const uint32_t base = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
 
@@ -80,9 +80,9 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
-		const framepos_t f = _bfc->to (Evoral::Beats (grid.begin()->qn + (l / (double) divisions))) + _bfc->origin_b();
+		const samplepos_t f = _bfc->to (Evoral::Beats (grid.begin()->qn + (l / (double) divisions))) + _bfc->origin_b();
 
-		if (f > leftmost_frame) {
+		if (f > leftmost_sample) {
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);
 		}
 	}
@@ -91,8 +91,8 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 void
 TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		  unsigned                                              divisions,
-                  framecnt_t                                            leftmost_frame,
-                  framecnt_t                                            frame_rate)
+                  samplecnt_t                                            leftmost_sample,
+                  samplecnt_t                                            sample_rate)
 {
 	std::vector<ARDOUR::TempoMap::BBTPoint>::const_iterator i;
 	double  beat_density;
@@ -129,9 +129,9 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 	}
 
 	double canvas_width_used = 1.0;
-	if (leftmost_frame < grid.front().frame) {
-		const framecnt_t frame_distance = max ((framecnt_t) 1, grid.back().frame - grid.front().frame);
-		canvas_width_used = 1.0 - ((grid.front().frame - leftmost_frame) / (double) (frame_distance + grid.front().frame));
+	if (leftmost_sample < grid.front().sample) {
+		const samplecnt_t sample_distance = max ((samplecnt_t) 1, grid.back().sample - grid.front().sample);
+		canvas_width_used = 1.0 - ((grid.front().sample - leftmost_sample) / (double) (sample_distance + grid.front().sample));
 	}
 
 	beat_density = (beats * 10.0f) / (lines.canvas()->width() * canvas_width_used);
@@ -148,11 +148,11 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 	}
 
 	lines.clear ();
-	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->frame > 0 && !all_bars) {
+	if (beat_density <= 0.12 && grid.begin() != grid.end() && grid.begin()->sample > 0 && !all_bars) {
 		/* draw subdivisions of the beat before the first visible beat line XX this shouldn't happen now */
 		std::vector<ARDOUR::TempoMap::BBTPoint> vec;
 		vec.push_back (*i);
-		draw_ticks (vec, divisions, leftmost_frame, frame_rate);
+		draw_ticks (vec, divisions, leftmost_sample, sample_rate);
 	}
 
 	for (i = grid.begin(); i != grid.end(); ++i) {
@@ -171,7 +171,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 			color = beat_color;
 		}
 
-		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).frame);
+		ArdourCanvas::Coord xpos = PublicEditor::instance().sample_to_pixel_unrounded ((*i).sample);
 
 		lines.add (xpos, 1.0, color);
 
@@ -179,7 +179,7 @@ TempoLines::draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 			/* draw subdivisions of this beat */
 			std::vector<ARDOUR::TempoMap::BBTPoint> vec;
 			vec.push_back (*i);
-			draw_ticks (vec, divisions, leftmost_frame, frame_rate);
+			draw_ticks (vec, divisions, leftmost_sample, sample_rate);
 		}
 	}
 }

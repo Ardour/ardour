@@ -340,7 +340,7 @@ PannerShell::distribute_no_automation (BufferSet& inbufs, BufferSet& outbufs, pf
 }
 
 void
-PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame, framepos_t end_frame, pframes_t nframes)
+PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes)
 {
 	if (inbufs.count().n_audio() == 0) {
 		/* Input has no audio buffers (e.g. Aux Send in a MIDI track at a
@@ -395,7 +395,7 @@ PannerShell::run (BufferSet& inbufs, BufferSet& outbufs, framepos_t start_frame,
 			i->silence(nframes);
 		}
 
-		_panner->distribute_automated (inbufs, outbufs, start_frame, end_frame, nframes, _session.pan_automation_buffer());
+		_panner->distribute_automated (inbufs, outbufs, start_sample, end_sample, nframes, _session.pan_automation_buffer());
 	}
 }
 

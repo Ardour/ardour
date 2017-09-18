@@ -133,7 +133,7 @@ typedef struct {
 	LV2_Log_Logger       logger;
   LV2_Worker_Schedule* schedule;
 	LV2_Atom_Forge       forge;
-	LV2_Atom_Forge_Frame frame;
+	LV2_Atom_Forge_Frame sample;
 
 #ifdef LV2_EXTENDED
 	LV2_Midnam*          midnam;
@@ -243,15 +243,15 @@ inform_ui (AFluidSynth* self)
 		return;
 	}
 
-	LV2_Atom_Forge_Frame frame;
+	LV2_Atom_Forge_Frame sample;
 	lv2_atom_forge_frame_time (&self->forge, 0);
-	x_forge_object (&self->forge, &frame, 1, self->patch_Set);
+	x_forge_object (&self->forge, &sample, 1, self->patch_Set);
 	lv2_atom_forge_property_head (&self->forge, self->patch_property, 0);
 	lv2_atom_forge_urid (&self->forge, self->afs_sf2file);
 	lv2_atom_forge_property_head (&self->forge, self->patch_value, 0);
 	lv2_atom_forge_path (&self->forge, self->current_sf2_file_path, strlen (self->current_sf2_file_path));
 
-	lv2_atom_forge_pop (&self->forge, &frame);
+	lv2_atom_forge_pop (&self->forge, &sample);
 }
 
 static float
@@ -421,7 +421,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 	const uint32_t capacity = self->notify->atom.size;
 	lv2_atom_forge_set_buffer (&self->forge, (uint8_t*)self->notify, capacity);
-	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
+	lv2_atom_forge_sequence_head (&self->forge, &self->sample, 0);
 
 	if (!self->initialized || self->reinit_in_progress) {
 		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
@@ -570,10 +570,10 @@ run (LV2_Handle instance, uint32_t n_samples)
 		self->inform_ui = false;
 
 		/* emit stateChanged */
-		LV2_Atom_Forge_Frame frame;
+		LV2_Atom_Forge_Frame sample;
 		lv2_atom_forge_frame_time(&self->forge, 0);
-		x_forge_object(&self->forge, &frame, 1, self->state_Changed);
-		lv2_atom_forge_pop(&self->forge, &frame);
+		x_forge_object(&self->forge, &sample, 1, self->state_Changed);
+		lv2_atom_forge_pop(&self->forge, &sample);
 
 		/* send .sf2 filename */
 		inform_ui (self);

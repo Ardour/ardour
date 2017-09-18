@@ -178,13 +178,13 @@ BeatBox::process (int nsamples)
 		clear_pending = false;
 	}
 
-	framepos_t last_output_time = 0;
+	samplepos_t last_output_time = 0;
 
 	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ++ee) {
 		Event* e = (*ee);
 
 		if (e->size && (e->time >= process_start && e->time < process_end)) {
-			framepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _sample_rate);
+			samplepos_t sample_offset_in_buffer = superclock_to_samples (offset + e->time - process_start, _sample_rate);
 			if ((buffer = jack_midi_event_reserve (out_buf, sample_offset_in_buffer, e->size)) != 0) {
 				memcpy (buffer, e->buf, e->size);
 				outbound_tracker.track (e->buf);

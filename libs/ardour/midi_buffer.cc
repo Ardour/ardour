@@ -95,7 +95,7 @@ MidiBuffer::copy(MidiBuffer const * const copy)
  * Note that offset and nframes refer to sample time, NOT buffer offsets or event counts.
  */
 void
-MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset, frameoffset_t /* src_offset*/)
+MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t /* src_offset*/)
 {
 	assert (src.type() == DataType::MIDI);
 	assert (&src != this);
@@ -136,7 +136,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 			   Shift first, then check it is within range of this
 			   (split) cycle.
 			*/
-			const framepos_t evtime = ev.time() + dst_offset;
+			const samplepos_t evtime = ev.time() + dst_offset;
 
 			if (evtime >= 0 && evtime < nframes) {
 				push_back (evtime, ev.size(), ev.buffer());
@@ -150,7 +150,7 @@ MidiBuffer::read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_
 }
 
 void
-MidiBuffer::merge_from (const Buffer& src, framecnt_t /*nframes*/, frameoffset_t /*dst_offset*/, frameoffset_t /*src_offset*/)
+MidiBuffer::merge_from (const Buffer& src, samplecnt_t /*nframes*/, sampleoffset_t /*dst_offset*/, sampleoffset_t /*src_offset*/)
 {
 	const MidiBuffer* mbuf = dynamic_cast<const MidiBuffer*>(&src);
 	assert (mbuf);
@@ -307,7 +307,7 @@ MidiBuffer::reserve(TimeType time, size_t size)
 
 
 void
-MidiBuffer::silence (framecnt_t /*nframes*/, framecnt_t /*offset*/)
+MidiBuffer::silence (samplecnt_t /*nframes*/, samplecnt_t /*offset*/)
 {
 	/* XXX iterate over existing events, find all in range given by offset & nframes,
 	   and delete them.

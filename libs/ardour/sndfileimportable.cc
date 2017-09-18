@@ -47,7 +47,7 @@ SndFileImportableSource::get_timecode_info (SNDFILE* sf, SF_BROADCAST_INFO* binf
 	 * 0xffffffff 0xfffc5680
 	 * seems to be a bug in Presonus Capture (which generated the file)
 	 *
-	 * still since framepos_t is a signed int, ignore files that could
+	 * still since samplepos_t is a signed int, ignore files that could
 	 * lead to negative timestamps for now.
 	 */
 
@@ -97,10 +97,10 @@ SndFileImportableSource::~SndFileImportableSource ()
 {
 }
 
-framecnt_t
-SndFileImportableSource::read (Sample* buffer, framecnt_t nframes)
+samplecnt_t
+SndFileImportableSource::read (Sample* buffer, samplecnt_t nframes)
 {
-	framecnt_t per_channel = nframes / sf_info.channels;
+	samplecnt_t per_channel = nframes / sf_info.channels;
 	per_channel = sf_readf_float (in.get(), buffer, per_channel);
 	return per_channel * sf_info.channels;
 }
@@ -111,28 +111,28 @@ SndFileImportableSource::channels () const
 	return sf_info.channels;
 }
 
-framecnt_t
+samplecnt_t
 SndFileImportableSource::length () const
 {
-	return (framecnt_t) sf_info.frames;
+	return (samplecnt_t) sf_info.frames;
 }
 
-framecnt_t
+samplecnt_t
 SndFileImportableSource::samplerate () const
 {
 	return sf_info.samplerate;
 }
 
 void
-SndFileImportableSource::seek (framepos_t /*pos*/)
+SndFileImportableSource::seek (samplepos_t /*pos*/)
 {
 	sf_seek (in.get(), 0, SEEK_SET);
 }
 
-framepos_t
+samplepos_t
 SndFileImportableSource::natural_position () const
 {
-	return (framepos_t) timecode;
+	return (samplepos_t) timecode;
 }
 
 bool

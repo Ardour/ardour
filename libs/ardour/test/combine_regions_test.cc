@@ -97,7 +97,7 @@ CombineRegionsTest::check_crossfade1 ()
 void
 CombineRegionsTest::crossfadeTest1 ()
 {
-	/* Two regions, both 256 frames in length, overlapping by 128 frames in the middle */
+	/* Two regions, both 256 samples in length, overlapping by 128 samples in the middle */
 
 	_ar[0]->set_default_fade_in ();
 	_ar[0]->set_default_fade_out ();
@@ -201,7 +201,7 @@ CombineRegionsTest::check_crossfade2 ()
 void
 CombineRegionsTest::crossfadeTest2 ()
 {
-	/* Two regions, both 256 frames in length, overlapping by 128 frames in the middle */
+	/* Two regions, both 256 samples in length, overlapping by 128 samples in the middle */
 
 	_ar[0]->set_default_fade_in ();
 	_ar[0]->set_default_fade_out ();

@@ -230,7 +230,7 @@ FaderPort8::periodic ()
 		_timecode = Timecode::timecode_format_time(TC);
 
 		char buf[16];
-		Timecode::BBT_Time BBT = session->tempo_map ().bbt_at_frame (session->transport_frame ());
+		Timecode::BBT_Time BBT = session->tempo_map ().bbt_at_sample (session->transport_sample ());
 		snprintf (buf, sizeof (buf),
 				" %02" PRIu32 "|%02" PRIu32 "|%02" PRIu32 "|%02" PRIu32,
 				BBT.bars % 100, BBT.beats %100,
@@ -479,7 +479,7 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::A
 #ifdef VERBOSE_DEBUG
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
 #endif
-		framepos_t now = session->engine().sample_time();
+		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -1638,7 +1638,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 	if (s == first_selected_stripable () && !shift_mod ()) {
 		if (_ctrls.fader_mode () == ModeTrack) {
 			boost::shared_ptr<AutomationControl> ac = s->gain_control ();
-			ac->start_touch (ac->session().transport_frame());
+			ac->start_touch (ac->session().transport_sample());
 			ac->set_value (ac->normal (), PBD::Controllable::UseGroup);
 		}
 		return;

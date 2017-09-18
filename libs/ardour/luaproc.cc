@@ -236,7 +236,7 @@ LuaProc::load_script ()
 	luabridge::LuaRef lua_dsp_init = luabridge::getGlobal (L, "dsp_init");
 	if (lua_dsp_init.type () == LUA_TFUNCTION) {
 		try {
-			lua_dsp_init (_session.nominal_frame_rate ());
+			lua_dsp_init (_session.nominal_sample_rate ());
 		} catch (luabridge::LuaException const& e) {
 		} catch (...) { }
 	}
@@ -599,9 +599,9 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 
 int
 LuaProc::connect_and_run (BufferSet& bufs,
-		framepos_t start, framepos_t end, double speed,
+		samplepos_t start, samplepos_t end, double speed,
 		ChanMapping in, ChanMapping out,
-		pframes_t nframes, framecnt_t offset)
+		pframes_t nframes, samplecnt_t offset)
 {
 	if (!_lua_dsp) {
 		return 0;
@@ -673,7 +673,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					for (MidiBuffer::iterator m = bufs.get_midi(idx).begin();
 							m != bufs.get_midi(idx).end(); ++m, ++e) {
-						const Evoral::Event<framepos_t> ev(*m, false);
+						const Evoral::Event<samplepos_t> ev(*m, false);
 						luabridge::LuaRef lua_midi_data (luabridge::newTable (L));
 						const uint8_t* data = ev.buffer();
 						for (uint32_t i = 0; i < ev.size(); ++i) {
@@ -716,7 +716,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 						if (!i.value ()["time"].isNumber ()) { continue; }
 						if (!i.value ()["data"].isTable ()) { continue; }
 						luabridge::LuaRef data_tbl (i.value ()["data"]);
-						framepos_t tme = i.value ()["time"];
+						samplepos_t tme = i.value ()["time"];
 						if (tme < 1 || tme > nframes) { continue; }
 						uint8_t data[64];
 						size_t size = 0;

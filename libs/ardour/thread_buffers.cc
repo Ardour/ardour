@@ -94,7 +94,7 @@ ThreadBuffers::ensure_buffers (ChanCount howmany, size_t custom)
 }
 
 void
-ThreadBuffers::allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force)
+ThreadBuffers::allocate_pan_automation_buffers (samplecnt_t nframes, uint32_t howmany, bool force)
 {
 	/* we always need at least 2 pan buffers */
 

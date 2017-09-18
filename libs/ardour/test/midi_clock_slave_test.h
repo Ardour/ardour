@@ -28,11 +28,11 @@ namespace ARDOUR {
 
 class TestSlaveSessionProxy : public ISlaveSessionProxy {
   #define FRAME_RATE 44100
-  framecnt_t _period_size;
+  samplecnt_t _period_size;
 
   double       transport_speed;
-  framepos_t _transport_frame;
-  framepos_t _frame_time;
+  samplepos_t _transport_sample;
+  samplepos_t _sample_time;
   TempoMap    *_tempo_map;
 
   Tempo     tempo;
@@ -41,8 +41,8 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
   public:
         TestSlaveSessionProxy() :
            transport_speed  (1.0),
-          _transport_frame  (0),
-          _frame_time       (1000000),
+          _transport_sample  (0),
+          _sample_time       (1000000),
           _tempo_map        (0),
           tempo             (120, 4.0),
           meter             (4.0, 4.0)
@@ -53,23 +53,23 @@ class TestSlaveSessionProxy : public ISlaveSessionProxy {
         }
 
         // Controlling the mock object
-        void        set_period_size (framecnt_t a_size) { _period_size = a_size; }
-        framecnt_t period_size () const                 { return _period_size; }
+        void        set_period_size (samplecnt_t a_size) { _period_size = a_size; }
+        samplecnt_t period_size () const                 { return _period_size; }
         void next_period ()                       {
-          _transport_frame += double(_period_size) * double(transport_speed);
-          _frame_time += _period_size;
+          _transport_sample += double(_period_size) * double(transport_speed);
+          _sample_time += _period_size;
         }
 
         // Implementation
   	TempoMap&  tempo_map ()                const { return *_tempo_map; }
-	framecnt_t frame_rate ()               const { return FRAME_RATE; }
-	framepos_t audible_frame ()            const { return _transport_frame; }
-	framepos_t transport_frame ()          const { return _transport_frame; }
-	pframes_t  frames_since_cycle_start () const { return 0; }
-	framepos_t frame_time ()               const { return _frame_time; }
+	samplecnt_t sample_rate ()               const { return FRAME_RATE; }
+	samplepos_t audible_sample ()            const { return _transport_sample; }
+	samplepos_t transport_sample ()          const { return _transport_sample; }
+	pframes_t  samples_since_cycle_start () const { return 0; }
+	samplepos_t sample_time ()               const { return _sample_time; }
 
-	void request_locate (framepos_t frame, bool with_roll = false) {
-          _transport_frame = frame;
+	void request_locate (samplepos_t sample, bool with_roll = false) {
+          _transport_sample = sample;
         }
 
         void request_transport_speed (const double speed) { transport_speed = speed; }

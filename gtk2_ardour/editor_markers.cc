@@ -597,8 +597,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (framepos_t startf,
-				       framepos_t endf)
+Editor::LocationMarkers::set_position (samplepos_t startf,
+				       samplepos_t endf)
 {
 	start->set_position (startf);
 	if (end) {
@@ -643,7 +643,7 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
+Editor::mouse_add_new_marker (samplepos_t where, bool is_cd)
 {
 	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -674,7 +674,7 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
 }
 
 void
-Editor::mouse_add_new_loop (framepos_t where)
+Editor::mouse_add_new_loop (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -684,13 +684,13 @@ Editor::mouse_add_new_loop (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	set_loop_range (where, end,  _("set loop range"));
 }
 
 void
-Editor::mouse_add_new_punch (framepos_t where)
+Editor::mouse_add_new_punch (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -700,13 +700,13 @@ Editor::mouse_add_new_punch (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	set_punch_range (where, end,  _("set punch range"));
 }
 
 void
-Editor::mouse_add_new_range (framepos_t where)
+Editor::mouse_add_new_range (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -716,7 +716,7 @@ Editor::mouse_add_new_range (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
@@ -1220,11 +1220,11 @@ Editor::marker_menu_range_to_next ()
 		return;
 	}
 
-	framepos_t start;
-	framepos_t end;
+	samplepos_t start;
+	samplepos_t end;
 	_session->locations()->marks_either_side (marker->position(), start, end);
 
-	if (end != max_framepos) {
+	if (end != max_samplepos) {
 		string range_name = l->name();
 		range_name += "-range";
 
@@ -1250,13 +1250,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (_session->audible_frame (), false, true, divisions);
+			l->set_start (_session->audible_sample (), false, true, divisions);
 		}
 		else {
 			if (is_start) {
-				l->set_start (_session->audible_frame (), false, true, divisions);
+				l->set_start (_session->audible_sample (), false, true, divisions);
 			} else {
-				l->set_end (_session->audible_frame (), false, true, divisions);
+				l->set_end (_session->audible_sample (), false, true, divisions);
 			}
 		}
 	}
@@ -1284,9 +1284,9 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 		} else {
 
 			if (!selection->time.empty()) {
-				l->set (selection->time.start(), selection->time.end_frame());
+				l->set (selection->time.start(), selection->time.end_sample());
 			} else if (!selection->regions.empty()) {
-				l->set (selection->regions.start(), selection->regions.end_frame());
+				l->set (selection->regions.start(), selection->regions.end_sample());
 			}
 		}
 	}
@@ -1353,18 +1353,18 @@ Editor::marker_menu_zoom_to_range ()
 		return;
 	}
 
-	framecnt_t const extra = l->length() * 0.05;
-	framepos_t a = l->start ();
+	samplecnt_t const extra = l->length() * 0.05;
+	samplepos_t a = l->start ();
 	if (a >= extra) {
 		a -= extra;
 	}
 
-	framepos_t b = l->end ();
-	if (b < (max_framepos - extra)) {
+	samplepos_t b = l->end ();
+	if (b < (max_samplepos - extra)) {
 		b += extra;
 	}
 
-	temporal_zoom_by_frame (a, b);
+	temporal_zoom_by_sample (a, b);
 }
 
 void
@@ -1426,7 +1426,7 @@ Editor::toggle_marker_lock_style ()
 		const Timecode::BBT_Time bbt (msp->bbt());
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->frame(), pls);
+		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->sample(), pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1435,14 +1435,14 @@ Editor::toggle_marker_lock_style ()
 		TempoSection* tsp = &tm->tempo();
 
 		const double pulse = tsp->pulse();
-		const framepos_t frame = tsp->frame();
+		const samplepos_t sample = tsp->sample();
 		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
 
 		begin_reversible_command (_("change tempo lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, pls);
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1462,13 +1462,13 @@ Editor::toggle_tempo_type ()
 
 		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
-		const framepos_t frame = tsp->frame();
+		const samplepos_t sample = tsp->sample();
 		const PositionLockStyle pls = tsp->position_lock_style();
 
 		begin_reversible_command (_("set tempo to constant"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, pls);
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1518,13 +1518,13 @@ Editor::ramp_to_next_tempo ()
 		if (next_ts) {
 			const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), next_ts->note_types_per_minute());
 			const double pulse = tsp->pulse();
-			const framepos_t frame = tsp->frame();
+			const samplepos_t sample = tsp->sample();
 			const PositionLockStyle pls = tsp->position_lock_style();
 
 			begin_reversible_command (_("ramp to next tempo"));
 			XMLNode &before = _session->tempo_map().get_state();
 
-			tmap.replace_tempo (*tsp, tempo, pulse, frame, pls);
+			tmap.replace_tempo (*tsp, tempo, pulse, sample, pls);
 
 			XMLNode &after = _session->tempo_map().get_state();
 			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1696,7 +1696,7 @@ Editor::update_punch_range_view ()
 		if (_session->config.get_punch_out()) {
 			pixel_end = sample_to_pixel (tpl->end());
 		} else {
-			pixel_end = sample_to_pixel (max_framepos);
+			pixel_end = sample_to_pixel (max_samplepos);
 		}
 
 		transport_punch_range_rect->set_x0 (pixel_start);

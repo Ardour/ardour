@@ -40,7 +40,7 @@ public:
 
 	void add_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
 	void remove_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void transport_stop_automation_watches (ARDOUR::framepos_t);
+	void transport_stop_automation_watches (ARDOUR::samplepos_t);
 	void set_session (ARDOUR::Session*);
 
 	gint timer ();
@@ -54,7 +54,7 @@ private:
 
 	static AutomationWatch* _instance;
 	Glib::Threads::Thread*  _thread;
-	framepos_t              _last_time;
+	samplepos_t              _last_time;
 	bool                    _run_thread;
 	AutomationWatches        automation_watches;
 	AutomationConnection     automation_connections;

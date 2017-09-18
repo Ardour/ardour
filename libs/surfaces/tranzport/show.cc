@@ -284,7 +284,7 @@ TranzportControlProtocol::show_meter ()
 }
 
 void
-TranzportControlProtocol::show_bbt (framepos_t where)
+TranzportControlProtocol::show_bbt (samplepos_t where)
 {
 	if (where != last_where) {
 		char buf[16];
@@ -348,11 +348,11 @@ TranzportControlProtocol::show_bbt (framepos_t where)
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	show_bbt (session->transport_frame ());
+	show_bbt (session->transport_sample ());
 }
 
 void
-TranzportControlProtocol::show_timecode (framepos_t where)
+TranzportControlProtocol::show_timecode (samplepos_t where)
 {
 	if ((where != last_where) || lcd_isdamaged(1,9,10)) {
 

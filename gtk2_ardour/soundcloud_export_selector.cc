@@ -62,16 +62,16 @@ SoundcloudExportSelector::SoundcloudExportSelector () :
 	soundcloud_username_entry.set_text (ARDOUR::SessionMetadata::Metadata()->user_email());
 	soundcloud_password_entry.set_visibility (false);
 
-	Gtk::Frame *sc_frame = manage (new Gtk::Frame);
-	sc_frame->set_border_width (4);
-	sc_frame->set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-	sc_frame->set_name ("soundcloud_export_box");
-	pack_start (*sc_frame, false, false);
+	Gtk::Frame *sc_sample = manage (new Gtk::Frame);
+	sc_sample->set_border_width (4);
+	sc_sample->set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+	sc_sample->set_name ("soundcloud_export_box");
+	pack_start (*sc_sample, false, false);
 
 	sc_table.set_border_width (4);
 	sc_table.set_col_spacings (5);
 	sc_table.set_row_spacings (5);
-	sc_frame->add (sc_table);
+	sc_sample->add (sc_table);
 
 	sc_table.attach ( *(Gtk::manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon (X_("soundcloud"))))) , 0, 1,  0, 2);
 
@@ -84,7 +84,7 @@ SoundcloudExportSelector::SoundcloudExportSelector () :
 	sc_table.attach (soundcloud_download_checkbox, 2, 3,  5, 6);
 
 	pack_end (progress_bar, false, false);
-	sc_frame->show_all ();
+	sc_sample->show_all ();
 }
 
 

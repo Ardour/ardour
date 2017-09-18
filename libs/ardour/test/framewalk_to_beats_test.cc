@@ -14,29 +14,29 @@ FramewalkToBeatsTest::singleTempoTest ()
 	int const sampling_rate = 48000;
 	int const bpm = 120;
 
-	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
+	double const samples_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
 	Tempo tempo (bpm, 4.0);
 	Meter meter (4, 4);
 
-	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, AudioTime);
+	map.replace_meter (map.meter_section_at_sample (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_tempo (map.tempo_section_at_sample (0), tempo, 0.0, 0, AudioTime);
 
-	/* Walk 1 beats-worth of frames from beat 3 */
-	double r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1).to_double();
+	/* Walk 1 beats-worth of samples from beat 3 */
+	double r = map.framewalk_to_qn (samples_per_beat * 2, samples_per_beat * 1).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.0, r);
 
-	/* Walk 6 beats-worth of frames from beat 4 */
-	r = map.framewalk_to_qn (frames_per_beat * 3, frames_per_beat * 6).to_double();
+	/* Walk 6 beats-worth of samples from beat 4 */
+	r = map.framewalk_to_qn (samples_per_beat * 3, samples_per_beat * 6).to_double();
 	CPPUNIT_ASSERT_EQUAL (6.0, r);
 
-	/* Walk 1.5 beats-worth of frames from beat 3 */
-	r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1.5).to_double();
+	/* Walk 1.5 beats-worth of samples from beat 3 */
+	r = map.framewalk_to_qn (samples_per_beat * 2, samples_per_beat * 1.5).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.5, r);
 
-	/* Walk 1.5 beats-worth of frames from beat 2.5 */
-	r = map.framewalk_to_qn (frames_per_beat * 2.5, frames_per_beat * 1.5).to_double();
+	/* Walk 1.5 beats-worth of samples from beat 2.5 */
+	r = map.framewalk_to_qn (samples_per_beat * 2.5, samples_per_beat * 1.5).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.5, r);
 }
 
@@ -47,7 +47,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.meter_section_at_sample (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -61,8 +61,8 @@ FramewalkToBeatsTest::doubleTempoTest ()
 
 	  120bpm                                          240bpm
 	  0 beats                                         12 beats
-	  0 frames                                        288e3 frames
-	  24e3 frames per beat                            12e3 frames per beat
+	  0 samples                                        288e3 samples
+	  24e3 samples per beat                            12e3 samples per beat
 	  0 pulses                                        4 pulses
 	  |               |               |               |               |
 	  1.1 1.2 1.3 1.4 2.1 2.2 2.3 2.4 3.1 3.2 3.3 3.4 4.1 4.2 4.3 4.4 5.1
@@ -71,7 +71,7 @@ FramewalkToBeatsTest::doubleTempoTest ()
 	*/
 
 	Tempo tempoA (120);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, AudioTime);
+	map.replace_tempo (map.tempo_section_at_sample (0), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240);
 	map.add_tempo (tempoB, 12.0 / tempoB.note_type(), 0, MusicTime);
 
@@ -104,7 +104,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_meter (map.meter_section_at_sample (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 2, 160bpm at bar 3
@@ -119,7 +119,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 
 	  120bpm            240bpm            160bpm
 	  0 beats           4 beats           8 beats
-	  0 frames          96e3 frames       144e3 frames
+	  0 samples          96e3 samples       144e3 samples
 	  0 pulses          1 pulse           2 pulses
 	  |                 |                 |                 |                 |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
@@ -127,7 +127,7 @@ FramewalkToBeatsTest::tripleTempoTest ()
 	*/
 
 	Tempo tempoA (120, 4.0);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempoA, 0.0, 0, AudioTime);
+	map.replace_tempo (map.tempo_section_at_sample (0), tempoA, 0.0, 0, AudioTime);
 	Tempo tempoB (240, 4.0);
 	map.add_tempo (tempoB, 4.0 / tempoB.note_type(), 0, MusicTime);
 	Tempo tempoC (160, 4.0);
@@ -144,28 +144,28 @@ FramewalkToBeatsTest::singleTempoMeterTest ()
 	int const sampling_rate = 48000;
 	int const bpm = 120;
 
-	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
+	double const samples_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
 	Tempo tempo (bpm, 4.0);
 	Meter meter (7, 8);
 
-	map.replace_meter (map.meter_section_at_frame (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
-	map.replace_tempo (map.tempo_section_at_frame (0), tempo, 0.0, 0, AudioTime);
+	map.replace_meter (map.meter_section_at_sample (0), meter, BBT_Time (1, 1, 0), 0, AudioTime);
+	map.replace_tempo (map.tempo_section_at_sample (0), tempo, 0.0, 0, AudioTime);
 
-	/* Walk 1 qn beats-worth of frames from beat 3 */
-	double r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1).to_double();
+	/* Walk 1 qn beats-worth of samples from beat 3 */
+	double r = map.framewalk_to_qn (samples_per_beat * 2, samples_per_beat * 1).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.0, r);
 
-	/* Walk 6 qn beats-worth of frames from beat 4 */
-	r = map.framewalk_to_qn (frames_per_beat * 3, frames_per_beat * 6).to_double();
+	/* Walk 6 qn beats-worth of samples from beat 4 */
+	r = map.framewalk_to_qn (samples_per_beat * 3, samples_per_beat * 6).to_double();
 	CPPUNIT_ASSERT_EQUAL (6.0, r);
 
-	/* Walk 1.5 qn beats-worth of frames from beat 3 */
-	r = map.framewalk_to_qn (frames_per_beat * 2, frames_per_beat * 1.5).to_double();
+	/* Walk 1.5 qn beats-worth of samples from beat 3 */
+	r = map.framewalk_to_qn (samples_per_beat * 2, samples_per_beat * 1.5).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.5, r);
 
-	/* Walk 1.5 qn beats-worth of frames from beat 2.5 */
-	r = map.framewalk_to_qn (frames_per_beat * 2.5, frames_per_beat * 1.5).to_double();
+	/* Walk 1.5 qn beats-worth of samples from beat 2.5 */
+	r = map.framewalk_to_qn (samples_per_beat * 2.5, samples_per_beat * 1.5).to_double();
 	CPPUNIT_ASSERT_EQUAL (1.5, r);
 }

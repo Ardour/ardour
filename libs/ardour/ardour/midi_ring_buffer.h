@@ -48,15 +48,15 @@ public:
 	inline bool read_prefix(T* time, Evoral::EventType* type, uint32_t* size);
 	inline bool read_contents(uint32_t size, uint8_t* buf);
 
-	size_t read(MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset=0, bool stop_on_overflow_in_destination=false);
-	size_t skip_to(framepos_t start);
+	size_t read(MidiBuffer& dst, samplepos_t start, samplepos_t end, samplecnt_t offset=0, bool stop_on_overflow_in_destination=false);
+	size_t skip_to(samplepos_t start);
 
 	void dump(std::ostream& dst);
-	void flush (framepos_t start, framepos_t end);
+	void flush (samplepos_t start, samplepos_t end);
 
 	void reset_tracker ();
-	void resolve_tracker (MidiBuffer& dst, framepos_t);
-	void resolve_tracker (Evoral::EventSink<framepos_t>& dst, framepos_t);
+	void resolve_tracker (MidiBuffer& dst, samplepos_t);
+	void resolve_tracker (Evoral::EventSink<samplepos_t>& dst, samplepos_t);
 
 private:
 	MidiStateTracker _tracker;

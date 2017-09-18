@@ -233,7 +233,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double /*speed*/, pframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double /*speed*/, pframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -266,7 +266,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 	if (tgain != _current_gain) {
 		/* target gain has changed */
 
-		_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
+		_current_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate(), nframes, _current_gain, tgain);
 
 	} else if (tgain < GAIN_COEFF_SMALL) {
 
@@ -299,7 +299,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 
 		// Use the panner to distribute audio to output port buffers
 
-		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
+		_panshell->run (bufs, output_buffers(), start_sample, end_sample, nframes);
 
 		// non-audio data will not have been delivered by the panner
 
@@ -482,7 +482,7 @@ Delivery::reset_panners ()
 }
 
 void
-Delivery::flush_buffers (framecnt_t nframes)
+Delivery::flush_buffers (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -498,7 +498,7 @@ Delivery::flush_buffers (framecnt_t nframes)
 }
 
 void
-Delivery::non_realtime_transport_stop (framepos_t now, bool flush)
+Delivery::non_realtime_transport_stop (samplepos_t now, bool flush)
 {
 	Processor::non_realtime_transport_stop (now, flush);
 

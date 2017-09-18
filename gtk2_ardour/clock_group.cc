@@ -21,7 +21,7 @@
 
 ClockGroup::ClockGroup ()
 	: ignore_changes (false)
-	, _clock_mode (AudioClock::Frames)
+	, _clock_mode (AudioClock::Samples)
 {
 }
 

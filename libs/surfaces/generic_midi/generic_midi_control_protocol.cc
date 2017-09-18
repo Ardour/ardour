@@ -1240,7 +1240,7 @@ GenericMidiControlProtocol::maybe_start_touch (Controllable* controllable)
 {
 	AutomationControl *actl = dynamic_cast<AutomationControl*> (controllable);
 	if (actl) {
-		actl->start_touch (session->audible_frame ());
+		actl->start_touch (session->audible_sample ());
 	}
 }
 

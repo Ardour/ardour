@@ -25,7 +25,7 @@
 
 // Could call it FrameTimer and make it more generic
 // Could be an interface and or include clock source
-// include sample count/processed frames in iteration?
+// include sample count/processed samples in iteration?
 class CycleTimer {
 public:
 	CycleTimer ()

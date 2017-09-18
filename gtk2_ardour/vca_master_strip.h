@@ -63,7 +63,7 @@ private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	GainMeter    gain_meter;
 
-	Gtk::Frame                  global_frame;
+	Gtk::Frame                  global_sample;
 	Gtk::VBox                   global_vpacker;
 	Gtk::HBox                   top_padding;
 	Gtk::HBox                   bottom_padding;

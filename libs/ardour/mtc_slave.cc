@@ -49,7 +49,7 @@ using namespace Timecode;
    recently received position (and without the direction of timecode reversing too), we
    will stop+locate+wait+chase.
 */
-const int MTC_Slave::frame_tolerance = 2;
+const int MTC_Slave::sample_tolerance = 2;
 
 MTC_Slave::MTC_Slave (Session& s, MidiPort& p)
 	: session (s)
@@ -136,20 +136,20 @@ MTC_Slave::give_slave_full_control_over_transport_speed() const
 	// return false; // for Session-level computed varispeed
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 MTC_Slave::resolution () const
 {
-	return (framecnt_t) quarter_frame_duration * 4.0;
+	return (samplecnt_t) quarter_frame_duration * 4.0;
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 MTC_Slave::seekahead_distance () const
 {
 	return quarter_frame_duration * 8 * transport_direction;
 }
 
 bool
-MTC_Slave::outside_window (framepos_t pos) const
+MTC_Slave::outside_window (samplepos_t pos) const
 {
 	return ((pos < window_begin) || (pos > window_end));
 }
@@ -249,9 +249,9 @@ MTC_Slave::read_current (SafeTime *st) const
 }
 
 void
-MTC_Slave::init_mtc_dll(framepos_t tme, double qtr)
+MTC_Slave::init_mtc_dll(samplepos_t tme, double qtr)
 {
-	omega = 2.0 * M_PI * qtr / 2.0 / double(session.frame_rate());
+	omega = 2.0 * M_PI * qtr / 2.0 / double(session.sample_rate());
 	b = 1.4142135623730950488 * omega;
 	c = omega * omega;
 
@@ -263,7 +263,7 @@ MTC_Slave::init_mtc_dll(framepos_t tme, double qtr)
 
 /* called from MIDI parser */
 void
-MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
+MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, samplepos_t now)
 {
 	busy_guard1++;
 	const double qtr_d = quarter_frame_duration;
@@ -271,7 +271,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 	mtc_frame_dll += qtr_d * (double) transport_direction;
 	mtc_frame = rint(mtc_frame_dll);
 
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame %1 at %2 -> mtc_frame: %3\n", which_qtr, now, mtc_frame));
+	DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample %1 at %2 -> mtc_frame: %3\n", which_qtr, now, mtc_frame));
 
 	double mtc_speed = 0;
 	if (first_mtc_timestamp != 0) {
@@ -282,7 +282,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
 		e2 += c * e;
 
 		mtc_speed = (t1 - t0) / qtr_d;
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr frame DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
 		current.guard1++;
 		current.position = mtc_frame;
@@ -302,7 +302,7 @@ MTC_Slave::update_mtc_qtr (Parser& /*p*/, int which_qtr, framepos_t now)
  * when a full TC has been received
  * OR on locate */
 void
-MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now)
+MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, samplepos_t now)
 {
 	busy_guard1++;
 
@@ -414,10 +414,10 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 	   consideration.
 	*/
 
-	quarter_frame_duration = (double(session.frame_rate()) / (double) timecode.rate / 4.0);
+	quarter_frame_duration = (double(session.sample_rate()) / (double) timecode.rate / 4.0);
 
 	Timecode::timecode_to_sample (timecode, mtc_frame, true, false,
-		double(session.frame_rate()),
+		double(session.sample_rate()),
 		session.config.get_subframes_per_frame(),
 		timecode_negative_offset, timecode_offset
 		);
@@ -427,7 +427,7 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 
 	if (was_full || outside_window (mtc_frame)) {
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
-		session.set_requested_return_frame (-1);
+		session.set_requested_return_sample (-1);
 		session.request_transport_speed (0);
 		session.request_locate (mtc_frame, false);
 		update_mtc_status (MIDI::MTC_Stopped);
@@ -435,15 +435,15 @@ MTC_Slave::update_mtc_time (const MIDI::byte *msg, bool was_full, framepos_t now
 		reset_window (mtc_frame);
 	} else {
 
-		/* we've had the first set of 8 qtr frame messages, determine position
-		   and allow continuing qtr frame messages to provide position
+		/* we've had the first set of 8 qtr sample messages, determine position
+		   and allow continuing qtr sample messages to provide position
 		   and speed information.
 		*/
 
 		/* We received the last quarter frame 7 quarter frames (1.75 mtc
-		   frames) after the instance when the contents of the mtc quarter
-		   frames were decided. Add time to compensate for the elapsed 1.75
-		   frames.
+		   samples) after the instance when the contents of the mtc quarter
+		   samples were decided. Add time to compensate for the elapsed 1.75
+		   samples.
 		*/
 		double qtr = quarter_frame_duration;
 		long int mtc_off = (long) rint(7.0 * qtr);
@@ -526,14 +526,14 @@ MTC_Slave::update_mtc_status (MIDI::MTC_Status status)
 }
 
 void
-MTC_Slave::reset_window (framepos_t root)
+MTC_Slave::reset_window (samplepos_t root)
 {
 	/* if we're waiting for the master to catch us after seeking ahead, keep the window
-	   of acceptable MTC frames wide open. otherwise, shrink it down to just 2 video frames
+	   of acceptable MTC samples wide open. otherwise, shrink it down to just 2 video frames
 	   ahead of the window root (taking direction into account).
 	*/
 
-	framecnt_t const d = (quarter_frame_duration * 4 * frame_tolerance);
+	samplecnt_t const d = (quarter_frame_duration * 4 * sample_tolerance);
 
 	switch (port->self_parser().mtc_running()) {
 	case MTC_Forward:
@@ -562,7 +562,7 @@ MTC_Slave::reset_window (framepos_t root)
 }
 
 void
-MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
+MTC_Slave::init_engine_dll (samplepos_t pos, samplepos_t inc)
 {
 	/* the bandwidth of the DLL is a trade-off,
 	 * because the max-speed of the transport in ardour is
@@ -571,7 +571,7 @@ MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 	 * But this is only really a problem if the user performs manual
 	 * seeks while transport is running and slaved to MTC.
 	 */
-	oe = 2.0 * M_PI * double(inc) / 2.0 / double(session.frame_rate());
+	oe = 2.0 * M_PI * double(inc) / 2.0 / double(session.sample_rate());
 	be = 1.4142135623730950488 * oe;
 	ce = oe * oe;
 
@@ -584,14 +584,14 @@ MTC_Slave::init_engine_dll (framepos_t pos, framepos_t inc)
 /* main entry point from session_process.cc
 xo * in process callback context */
 bool
-MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
+MTC_Slave::speed_and_position (double& speed, samplepos_t& pos)
 {
-	framepos_t now = session.engine().sample_time_at_cycle_start();
-	framepos_t sess_pos = session.transport_frame(); // corresponds to now
-	//sess_pos -= session.engine().frames_since_cycle_start();
+	samplepos_t now = session.engine().sample_time_at_cycle_start();
+	samplepos_t sess_pos = session.transport_sample(); // corresponds to now
+	//sess_pos -= session.engine().samples_since_cycle_start();
 
 	SafeTime last;
-	frameoffset_t elapsed;
+	sampleoffset_t elapsed;
 	bool engine_dll_reinitialized = false;
 
 	read_current (&last);
@@ -616,22 +616,22 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 
 	if (last.timestamp == 0) {
 		speed = 0;
-		pos = session.transport_frame() ; // last.position;
+		pos = session.transport_sample() ; // last.position;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("first call to MTC_Slave::speed_and_position, pos = %1\n", pos));
 		return true;
 	}
 
-	/* no timecode for two frames - conclude that it's stopped */
+	/* no timecode for two samples - conclude that it's stopped */
 	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > labs(seekahead_distance())) {
 		speed = 0;
 		pos = last.position;
-		session.set_requested_return_frame (-1);
+		session.set_requested_return_sample (-1);
 		session.request_locate (pos, false);
 		session.request_transport_speed (0);
 		engine_dll_initstate = 0;
 		queue_reset (false);
 		ActiveChanged (false);
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC not seen for 2 frames - reset pending, pos = %1\n", pos));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC not seen for 2 samples - reset pending, pos = %1\n", pos));
 		return false;
 	}
 
@@ -646,9 +646,9 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 		elapsed = 0;
 	} else {
 		/* scale elapsed time by the current MTC speed */
-		elapsed = (framecnt_t) rint (speed_flt * (now - last.timestamp));
+		elapsed = (samplecnt_t) rint (speed_flt * (now - last.timestamp));
 		if (give_slave_full_control_over_transport_speed() && !engine_dll_reinitialized) {
-			/* there is an engine vs MTC position frame-delta.
+			/* there is an engine vs MTC position sample-delta.
 			 * This mostly due to quantization and rounding of (speed * nframes)
 			 * but can also due to the session-process not calling
 			 * speed_and_position() every cycle under some circumstances.
@@ -674,7 +674,7 @@ MTC_Slave::speed_and_position (double& speed, framepos_t& pos)
 	 */
 	if (!session.actively_recording()
 	    && speed != 0
-	    && ((pos < 0) || (labs(pos - sess_pos) > 3 * session.frame_rate()))) {
+	    && ((pos < 0) || (labs(pos - sess_pos) > 3 * session.sample_rate()))) {
 		engine_dll_initstate = 0;
 		queue_reset (false);
 	}
@@ -707,7 +707,7 @@ MTC_Slave::approximate_current_position() const
 	}
 	return Timecode::timecode_format_sampletime(
 		last.position,
-		double(session.frame_rate()),
+		double(session.sample_rate()),
 		Timecode::timecode_to_frames_per_second(mtc_timecode),
 		Timecode::timecode_has_drop_frames(mtc_timecode));
 }

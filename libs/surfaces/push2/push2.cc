@@ -181,7 +181,7 @@ Push2::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "begin using device\n");
 
-	/* set up periodic task used to push a frame buffer to the
+	/* set up periodic task used to push a sample buffer to the
 	 * device (25fps). The device can handle 60fps, but we don't
 	 * need that frame rate.
 	 */
@@ -560,7 +560,7 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
 		if (in_use) {
-			framepos_t now = AudioEngine::instance()->sample_time();
+			samplepos_t now = AudioEngine::instance()->sample_time();
 			port->parse (now);
 		}
 	}
@@ -1076,9 +1076,9 @@ Push2::other_vpot_touch (int n, bool touching)
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
 				if (touching) {
-					ac->start_touch (session->audible_frame());
+					ac->start_touch (session->audible_sample());
 				} else {
-					ac->stop_touch (session->audible_frame());
+					ac->stop_touch (session->audible_sample());
 				}
 			}
 		}

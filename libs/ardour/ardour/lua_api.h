@@ -292,8 +292,8 @@ namespace ARDOUR { namespace LuaAPI {
 		private:
 			::Vamp::Plugin* _plugin;
 			float           _sample_rate;
-			framecnt_t      _bufsize;
-			framecnt_t      _stepsize;
+			samplecnt_t      _bufsize;
+			samplecnt_t      _stepsize;
 			bool            _initialized;
 
 	};

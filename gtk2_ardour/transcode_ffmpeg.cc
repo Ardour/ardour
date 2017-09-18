@@ -177,16 +177,16 @@ TranscodeFfmpeg::probe ()
 					} else if (key == X_("codec_tag_string")) {
 						if (!m_codec.empty()) m_codec += " ";
 						m_codec += "(" + value + ")";
-					} else if (key == X_("r_frame_rate")) {
+					} else if (key == X_("r_sample_rate")) {
 						PARSE_FRACTIONAL_FPS(m_fps)
-					} else if (key == X_("avg_frame_rate") && m_fps == 0) {
+					} else if (key == X_("avg_sample_rate") && m_fps == 0) {
 						PARSE_FRACTIONAL_FPS(m_fps)
 					} else if (key == X_("time_base")) {
 						PARSE_FRACTIONAL_FPS(timebase)
 					} else if (key == X_("timecode") && m_duration == 0 && m_fps > 0) {
 						int h,m,s; char f[32];
 						if (sscanf(i->at(16).c_str(), "%d:%d:%d:%32s",&h,&m,&s,f) == 4) {
-							m_duration = (ARDOUR::framecnt_t) floor(m_fps * (
+							m_duration = (ARDOUR::samplecnt_t) floor(m_fps * (
 									h * 3600.0
 								+ m * 60.0
 								+ s * 1.0
@@ -257,7 +257,7 @@ TranscodeFfmpeg::probe ()
 
 #if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
-	printf("Duration: %lu frames\n",(unsigned long)m_duration);
+	printf("Duration: %lu samples\n",(unsigned long)m_duration);
 	printf("W/H: %ix%i\n",m_width, m_height);
 	printf("aspect: %f\n",m_aspect);
 	printf("codec: %s\n",m_codec.c_str());
@@ -425,7 +425,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 }
 
 bool
-TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::framecnt_t /*samplerate*/, unsigned int stream)
+TranscodeFfmpeg::extract_audio (std::string outfile, ARDOUR::samplecnt_t /*samplerate*/, unsigned int stream)
 {
 	if (!probeok) return false;
   if (stream >= m_audio.size()) return false;
@@ -566,12 +566,12 @@ TranscodeFfmpeg::ffmpegparse_a (std::string d, size_t /* s */)
 {
 	const char *t;
 	int h,m,s; char f[7];
-	ARDOUR::framecnt_t p = -1;
+	ARDOUR::samplecnt_t p = -1;
 
 	if (!(t=strstr(d.c_str(), "time="))) { return; }
 
 	if (sscanf(t+5, "%d:%d:%d.%s",&h,&m,&s,f) == 4) {
-		p = (ARDOUR::framecnt_t) floor( 100.0 * (
+		p = (ARDOUR::samplecnt_t) floor( 100.0 * (
 		      h * 3600.0
 		    + m * 60.0
 		    + s * 1.0
@@ -591,7 +591,7 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 	if (strstr(d.c_str(), "ERROR") || strstr(d.c_str(), "Error") || strstr(d.c_str(), "error")) {
 		warning << "ffmpeg-error: " << d << endmsg;
 	}
-	if (strncmp(d.c_str(), "frame=",6)) {
+	if (strncmp(d.c_str(), "sample=",6)) {
 #if 1 /* DEBUG */
 		if (debug_enable) {
 			d.erase(d.find_last_not_of(" \t\r\n") + 1);
@@ -601,7 +601,7 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 		Progress(0, 0); /* EMIT SIGNAL */
 		return;
 	}
-	ARDOUR::framecnt_t f = atol(d.substr(6));
+	ARDOUR::samplecnt_t f = atol(d.substr(6));
 	if (f == 0) {
 		Progress(0, 0); /* EMIT SIGNAL */
 	} else {

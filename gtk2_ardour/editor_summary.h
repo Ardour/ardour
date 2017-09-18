@@ -75,28 +75,28 @@ private:
 	void set_editor (std::pair<double, double>);
 	void set_editor_x (double);
 	void set_editor_x (std::pair<double, double>);
-	void playhead_position_changed (framepos_t);
+	void playhead_position_changed (samplepos_t);
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;
 	void set_cursor (Position);
 	void route_gui_changed (PBD::PropertyChange const&);
 	bool suspending_editor_updates () const;
-	double playhead_frame_to_position (framepos_t) const;
-	framepos_t position_to_playhead_frame_to_position (double pos) const;
+	double playhead_sample_to_position (samplepos_t) const;
+	samplepos_t position_to_playhead_sample_to_position (double pos) const;
 	void set_overlays_dirty_rect (int, int, int, int);
 
 	void summary_zoom_step (  int steps );
 
-	framepos_t _start; ///< start frame of the overview
-	framepos_t _end; ///< end frame of the overview
+	samplepos_t _start; ///< start sample of the overview
+	samplepos_t _end; ///< end sample of the overview
 
-	framepos_t _leftmost; ///< the earliest frame we ever viewed
-	framepos_t _rightmost; ///< the latest frame we ever viewed
+	samplepos_t _leftmost; ///< the earliest sample we ever viewed
+	samplepos_t _rightmost; ///< the latest sample we ever viewed
 
 	/** fraction of the session length by which the overview size should extend past the start and end markers */
 	double _overhang_fraction;
 
-	double _x_scale; ///< pixels per frame for the x axis of the pixmap
+	double _x_scale; ///< pixels per sample for the x axis of the pixmap
 	double _track_height;
 	double _last_playhead;
 

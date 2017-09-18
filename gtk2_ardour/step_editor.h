@@ -67,7 +67,7 @@ public:
 	void stop_step_editing ();
 
 private:
-	ARDOUR::framepos_t                    step_edit_insert_position;
+	ARDOUR::samplepos_t                    step_edit_insert_position;
 	Evoral::Beats                         step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::MidiRegion> step_edit_region;
 	MidiRegionView*                       step_edit_region_view;

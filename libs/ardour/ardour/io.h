@@ -92,7 +92,7 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	void set_pretty_name (const std::string& str);
 	std::string pretty_name () const { return _pretty_name_prefix; }
 
-	virtual void silence (framecnt_t);
+	virtual void silence (samplecnt_t);
 	void increment_port_buffer_offset (pframes_t offset);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
@@ -115,8 +115,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	bool connected () const;
 	bool physically_connected () const;
 
-	framecnt_t signal_latency () const { return 0; }
-	framecnt_t latency () const;
+	samplecnt_t signal_latency () const { return 0; }
+	samplecnt_t latency () const;
 
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
@@ -196,8 +196,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	/* three utility functions - this just seems to be simplest place to put them */
 
 	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset);
-	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes);
-	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset);
+	void process_input (boost::shared_ptr<Processor>, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes);
+	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecnt_t offset);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

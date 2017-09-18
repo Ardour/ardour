@@ -103,7 +103,7 @@ public:
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
-	bool paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num);
+	bool paste (ARDOUR::samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num);
 
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 

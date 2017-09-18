@@ -54,7 +54,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, framecnt_t oldlen, framecnt_t new_length, framepos_t position)
+TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, samplecnt_t oldlen, samplecnt_t new_length, samplepos_t position)
 	: ArdourDialog (X_("time fx dialog"))
 	, editor (e)
 	, pitching (pitch)
@@ -302,7 +302,7 @@ TimeFXDialog::duration_adjustment_changed ()
 
 	PBD::Unwinder<bool> uw (ignore_clock_change, true);
 
-	duration_clock->set ((framecnt_t) (original_length * (duration_adjustment.get_value()/ 100.0)));
+	duration_clock->set ((samplecnt_t) (original_length * (duration_adjustment.get_value()/ 100.0)));
 }
 
 void

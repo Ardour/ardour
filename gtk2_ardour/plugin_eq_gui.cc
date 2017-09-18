@@ -65,7 +65,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	, _plugin_insert(pluginInsert)
 {
 	_signal_analysis_running = false;
-	_samplerate = ARDOUR_UI::instance()->the_session()->frame_rate();
+	_samplerate = ARDOUR_UI::instance()->the_session()->sample_rate();
 
 	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0);
 	_log_max = log10f(1 + _log_coeff);
@@ -366,7 +366,7 @@ PluginEqGui::run_impulse_analysis()
 
 	_plugin->set_block_size (_buffer_size);
 	_plugin->connect_and_run(_bufferset, 0, _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
-	framecnt_t f = _plugin->signal_latency ();
+	samplecnt_t f = _plugin->signal_latency ();
 	// Adding user_latency() could be interesting
 
 	// Gather all output, taking latency into account.
@@ -387,9 +387,9 @@ PluginEqGui::run_impulse_analysis()
 		}
 	} else {
 		//int C = 0;
-		//std::cerr << (++C) << ": latency is " << f << " frames, doing split processing.." << std::endl;
-		framecnt_t target_offset = 0;
-		framecnt_t frames_left = _buffer_size; // refaktoroi
+		//std::cerr << (++C) << ": latency is " << f << " samples, doing split processing.." << std::endl;
+		samplecnt_t target_offset = 0;
+		samplecnt_t samples_left = _buffer_size; // refaktoroi
 		do {
 			if (f >= _buffer_size) {
 				//std::cerr << (++C) << ": f (=" << f << ") is larger than buffer_size, still trying to reach the actual output" << std::endl;
@@ -399,11 +399,11 @@ PluginEqGui::run_impulse_analysis()
 				// this buffer contains either the first, last or a whole bu the output of the impulse
 				// first part: offset is 0, so we copy to the start of _collect_bufferset
 				//             we start at output offset "f"
-				//             .. and copy "buffer size" - "f" - "offset" frames
+				//             .. and copy "buffer size" - "f" - "offset" samples
 
-				framecnt_t length = _buffer_size - f - target_offset;
+				samplecnt_t length = _buffer_size - f - target_offset;
 
-				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
+				//std::cerr << (++C) << ": copying " << length << " samples to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
 				for (uint32_t i = 0; i < outputs; ++i) {
 					memcpy(_collect_bufferset.get_audio(i).data(target_offset),
 							_bufferset.get_audio(inputs + i).data() + f,
@@ -411,10 +411,10 @@ PluginEqGui::run_impulse_analysis()
 				}
 
 				target_offset += length;
-				frames_left   -= length;
+				samples_left   -= length;
 				f = 0;
 			}
-			if (frames_left > 0) {
+			if (samples_left > 0) {
 				// Silence the buffers
 				for (uint32_t i = 0; i < inputs; ++i) {
 					ARDOUR::AudioBuffer &buf = _bufferset.get_audio(i);
@@ -424,7 +424,7 @@ PluginEqGui::run_impulse_analysis()
 
 				_plugin->connect_and_run (_bufferset, target_offset, target_offset + _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
 			}
-		} while ( frames_left > 0);
+		} while ( samples_left > 0);
 
 	}
 

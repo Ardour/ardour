@@ -187,7 +187,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, string namestr, boo
 	_frozen = other->_frozen;
 }
 
-Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, framecnt_t cnt, string str, bool hide)
+Playlist::Playlist (boost::shared_ptr<const Playlist> other, samplepos_t start, samplecnt_t cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
 	, regions (*this)
 	, _type(other->_type)
@@ -196,7 +196,7 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 {
 	RegionReadLock rlock2 (const_cast<Playlist*> (other.get()));
 
-	framepos_t end = start + cnt - 1;
+	samplepos_t end = start + cnt - 1;
 
 	init (hide);
 
@@ -206,9 +206,9 @@ Playlist::Playlist (boost::shared_ptr<const Playlist> other, framepos_t start, f
 
 		boost::shared_ptr<Region> region;
 		boost::shared_ptr<Region> new_region;
-		frameoffset_t offset = 0;
-		framepos_t position = 0;
-		framecnt_t len = 0;
+		sampleoffset_t offset = 0;
+		samplepos_t position = 0;
+		samplecnt_t len = 0;
 		string    new_name;
 		Evoral::OverlapType overlap;
 
@@ -482,7 +482,7 @@ Playlist::notify_region_removed (boost::shared_ptr<Region> r)
 void
 Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 {
-	Evoral::RangeMove<framepos_t> const move (r->last_position (), r->length (), r->position ());
+	Evoral::RangeMove<samplepos_t> const move (r->last_position (), r->length (), r->position ());
 
 	if (holding_state ()) {
 
@@ -490,7 +490,7 @@ Playlist::notify_region_moved (boost::shared_ptr<Region> r)
 
 	} else {
 
-		list< Evoral::RangeMove<framepos_t> > m;
+		list< Evoral::RangeMove<samplepos_t> > m;
 		m.push_back (move);
 		RangesMoved (m, false);
 	}
@@ -505,7 +505,7 @@ Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
 		return;
 	}
 
-	Evoral::Range<framepos_t> const extra (r->position(), r->last_position());
+	Evoral::Range<samplepos_t> const extra (r->position(), r->last_position());
 
 	if (holding_state ()) {
 
@@ -513,7 +513,7 @@ Playlist::notify_region_start_trimmed (boost::shared_ptr<Region> r)
 
 	} else {
 
-		list<Evoral::Range<framepos_t> > r;
+		list<Evoral::Range<samplepos_t> > r;
 		r.push_back (extra);
 		RegionsExtended (r);
 
@@ -527,7 +527,7 @@ Playlist::notify_region_end_trimmed (boost::shared_ptr<Region> r)
 		/* trimmed shorter */
 	}
 
-	Evoral::Range<framepos_t> const extra (r->position() + r->last_length(), r->position() + r->length());
+	Evoral::Range<samplepos_t> const extra (r->position() + r->last_length(), r->position() + r->length());
 
 	if (holding_state ()) {
 
@@ -535,7 +535,7 @@ Playlist::notify_region_end_trimmed (boost::shared_ptr<Region> r)
 
 	} else {
 
-		list<Evoral::Range<framepos_t> > r;
+		list<Evoral::Range<samplepos_t> > r;
 		r.push_back (extra);
 		RegionsExtended (r);
 	}
@@ -591,7 +591,7 @@ Playlist::flush_notifications (bool from_undo)
 	// RegionSortByLayer cmp;
 	// pending_bounds.sort (cmp);
 
-	list<Evoral::Range<framepos_t> > crossfade_ranges;
+	list<Evoral::Range<samplepos_t> > crossfade_ranges;
 
 	for (RegionList::iterator r = pending_bounds.begin(); r != pending_bounds.end(); ++r) {
 		crossfade_ranges.push_back ((*r)->last_range ());
@@ -666,14 +666,14 @@ Playlist::clear_pending ()
 
 /** Note: this calls set_layer (..., DBL_MAX) so it will reset the layering index of region */
 void
-Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, float times, bool auto_partition, int32_t sub_num, double quarter_note, bool for_music)
+Playlist::add_region (boost::shared_ptr<Region> region, samplepos_t position, float times, bool auto_partition, int32_t sub_num, double quarter_note, bool for_music)
 {
 	RegionWriteLock rlock (this);
 	times = fabs (times);
 
 	int itimes = (int) floor (times);
 
-	framepos_t pos = position;
+	samplepos_t pos = position;
 
 	if (times == 1 && auto_partition){
 		RegionList thawlist;
@@ -702,10 +702,10 @@ Playlist::add_region (boost::shared_ptr<Region> region, framepos_t position, flo
 		pos += region->length();
 	}
 
-	framecnt_t length = 0;
+	samplecnt_t length = 0;
 
 	if (floor (times) != times) {
-		length = (framecnt_t) floor (region->length() * (times - floor (times)));
+		length = (samplecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
 		RegionFactory::region_name (name, region->name(), false);
 
@@ -739,7 +739,7 @@ Playlist::set_region_ownership ()
 }
 
 bool
-Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t position, int32_t sub_num, double quarter_note, bool for_music)
+Playlist::add_region_internal (boost::shared_ptr<Region> region, samplepos_t position, int32_t sub_num, double quarter_note, bool for_music)
 {
 	if (region->data_type() != _type) {
 		return false;
@@ -778,7 +778,7 @@ Playlist::add_region_internal (boost::shared_ptr<Region> region, framepos_t posi
 }
 
 void
-Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, framepos_t pos)
+Playlist::replace_region (boost::shared_ptr<Region> old, boost::shared_ptr<Region> newr, samplepos_t pos)
 {
 	RegionWriteLock rlock (this);
 
@@ -816,8 +816,8 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 	for (i = regions.begin(); i != regions.end(); ++i) {
 		if (*i == region) {
 
-			framepos_t pos = (*i)->position();
-			framecnt_t distance = (*i)->length();
+			samplepos_t pos = (*i)->position();
+			samplecnt_t distance = (*i)->length();
 
 			regions.erase (i);
 
@@ -877,7 +877,7 @@ Playlist::get_source_equivalent_regions (boost::shared_ptr<Region> other, vector
 }
 
 void
-Playlist::partition (framepos_t start, framepos_t end, bool cut)
+Playlist::partition (samplepos_t start, samplepos_t end, bool cut)
 {
 	RegionList thawlist;
 	{
@@ -894,13 +894,13 @@ Playlist::partition (framepos_t start, framepos_t end, bool cut)
  * and _start is overwritten using Properties::start_beats in
  * add_region_internal() -> Region::set_position() -> MidiRegion::set_position_internal()
  */
-static void maybe_add_start_beats (TempoMap const& tm, PropertyList& plist, boost::shared_ptr<Region> r, framepos_t start, framepos_t end)
+static void maybe_add_start_beats (TempoMap const& tm, PropertyList& plist, boost::shared_ptr<Region> r, samplepos_t start, samplepos_t end)
 {
 	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
 	if (!mr) {
 		return;
 	}
-	double delta_beats = tm.quarter_notes_between_frames (start, end);
+	double delta_beats = tm.quarter_notes_between_samples (start, end);
 	plist.add (Properties::start_beats, mr->start_beats () + delta_beats);
 }
 
@@ -910,7 +910,7 @@ static void maybe_add_start_beats (TempoMap const& tm, PropertyList& plist, boos
  */
 
 void
-Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, RegionList& thawlist)
+Playlist::partition_internal (samplepos_t start, samplepos_t end, bool cutting, RegionList& thawlist)
 {
 	RegionList new_regions;
 
@@ -921,7 +921,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 		string new_name;
 		RegionList::iterator tmp;
 		Evoral::OverlapType overlap;
-		framepos_t pos1, pos2, pos3, pos4;
+		samplepos_t pos1, pos2, pos3, pos4;
 
 		in_partition = true;
 
@@ -938,7 +938,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 
 			current = *i;
 
-			if (current->first_frame() >= start && current->last_frame() < end) {
+			if (current->first_sample() >= start && current->last_sample() < end) {
 
 				if (cutting) {
 					remove_region_internal (current);
@@ -952,7 +952,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 			   so catch this special case.
 			*/
 
-			if (current->first_frame() >= end) {
+			if (current->first_sample() >= end) {
 				continue;
 			}
 
@@ -963,7 +963,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 			pos1 = current->position();
 			pos2 = start;
 			pos3 = end;
-			pos4 = current->last_frame();
+			pos4 = current->last_sample();
 
 			if (overlap == Evoral::OverlapInternal) {
 				/* split: we need 3 new regions, the front, middle and end.
@@ -999,9 +999,9 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
 					/* see note in :_split_region()
-					 * for MusicFrame is needed to offset region-gain
+					 * for MusicSample is needed to offset region-gain
 					 */
-					region = RegionFactory::create (current, MusicFrame (pos2 - pos1, 0), plist);
+					region = RegionFactory::create (current, MusicSample (pos2 - pos1, 0), plist);
 					add_region_internal (region, start);
 					new_regions.push_back (region);
 				}
@@ -1021,7 +1021,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 				plist.add (Properties::right_of_split, true);
 				maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos3 - pos1));
 
-				region = RegionFactory::create (current, MusicFrame (pos3 - pos1, 0), plist);
+				region = RegionFactory::create (current, MusicSample (pos3 - pos1, 0), plist);
 
 				add_region_internal (region, end);
 				new_regions.push_back (region);
@@ -1062,7 +1062,7 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 					plist.add (Properties::left_of_split, true);
 					maybe_add_start_beats (_session.tempo_map(), plist, current, current->start(), current->start() + (pos2 - pos1));
 
-					region = RegionFactory::create (current, MusicFrame(pos2 - pos1, 0), plist);
+					region = RegionFactory::create (current, MusicSample(pos2 - pos1, 0), plist);
 
 					add_region_internal (region, start);
 					new_regions.push_back (region);
@@ -1150,16 +1150,16 @@ Playlist::partition_internal (framepos_t start, framepos_t end, bool cutting, Re
 	}
 
 	//keep track of any dead space at end (for pasting into Ripple or Splice mode)
-	framepos_t wanted_length = end-start;
+	samplepos_t wanted_length = end-start;
 	_end_space = wanted_length - _get_extent().second - _get_extent().first;
 }
 
 boost::shared_ptr<Playlist>
-Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t, framecnt_t,bool), list<AudioRange>& ranges, bool result_is_hidden)
+Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(samplepos_t, samplecnt_t,bool), list<AudioRange>& ranges, bool result_is_hidden)
 {
 	boost::shared_ptr<Playlist> ret;
 	boost::shared_ptr<Playlist> pl;
-	framepos_t start;
+	samplepos_t start;
 
 	if (ranges.empty()) {
 		return boost::shared_ptr<Playlist>();
@@ -1190,19 +1190,19 @@ Playlist::cut_copy (boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t, fra
 boost::shared_ptr<Playlist>
 Playlist::cut (list<AudioRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t,framecnt_t,bool) = &Playlist::cut;
+	boost::shared_ptr<Playlist> (Playlist::*pmf)(samplepos_t,samplecnt_t,bool) = &Playlist::cut;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 
 boost::shared_ptr<Playlist>
 Playlist::copy (list<AudioRange>& ranges, bool result_is_hidden)
 {
-	boost::shared_ptr<Playlist> (Playlist::*pmf)(framepos_t,framecnt_t,bool) = &Playlist::copy;
+	boost::shared_ptr<Playlist> (Playlist::*pmf)(samplepos_t,samplecnt_t,bool) = &Playlist::copy;
 	return cut_copy (pmf, ranges, result_is_hidden);
 }
 
 boost::shared_ptr<Playlist>
-Playlist::cut (framepos_t start, framecnt_t cnt, bool result_is_hidden)
+Playlist::cut (samplepos_t start, samplecnt_t cnt, bool result_is_hidden)
 {
 	boost::shared_ptr<Playlist> the_copy;
 	RegionList thawlist;
@@ -1230,7 +1230,7 @@ Playlist::cut (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 }
 
 boost::shared_ptr<Playlist>
-Playlist::copy (framepos_t start, framecnt_t cnt, bool result_is_hidden)
+Playlist::copy (samplepos_t start, samplecnt_t cnt, bool result_is_hidden)
 {
 	char buf[32];
 
@@ -1245,7 +1245,7 @@ Playlist::copy (framepos_t start, framecnt_t cnt, bool result_is_hidden)
 }
 
 int
-Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float times, const int32_t sub_num)
+Playlist::paste (boost::shared_ptr<Playlist> other, samplepos_t position, float times, const int32_t sub_num)
 {
 	times = fabs (times);
 
@@ -1253,8 +1253,8 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 		RegionReadLock rl2 (other.get());
 
 		int itimes = (int) floor (times);
-		framepos_t pos = position;
-		framecnt_t const shift = other->_get_extent().second;
+		samplepos_t pos = position;
+		samplecnt_t const shift = other->_get_extent().second;
 		layer_t top = top_layer ();
 
 		{
@@ -1280,14 +1280,14 @@ Playlist::paste (boost::shared_ptr<Playlist> other, framepos_t position, float t
 
 
 void
-Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, float times)
+Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, float times)
 {
 	duplicate(region, position, region->length(), times);
 }
 
 /** @param gap from the beginning of the region to the next beginning */
 void
-Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, framecnt_t gap, float times)
+Playlist::duplicate (boost::shared_ptr<Region> region, samplepos_t position, samplecnt_t gap, float times)
 {
 	times = fabs (times);
 
@@ -1302,7 +1302,7 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, fram
 	}
 
 	if (floor (times) != times) {
-		framecnt_t length = (framecnt_t) floor (region->length() * (times - floor (times)));
+		samplecnt_t length = (samplecnt_t) floor (region->length() * (times - floor (times)));
 		string name;
 		RegionFactory::region_name (name, region->name(), false);
 
@@ -1321,9 +1321,9 @@ Playlist::duplicate (boost::shared_ptr<Region> region, framepos_t position, fram
 }
 
 /** @param gap from the beginning of the region to the next beginning */
-/** @param end the first frame that does _not_ contain a duplicated frame */
+/** @param end the first sample that does _not_ contain a duplicated sample */
 void
-Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position, framecnt_t gap, framepos_t end)
+Playlist::duplicate_until (boost::shared_ptr<Region> region, samplepos_t position, samplecnt_t gap, samplepos_t end)
 {
 	 RegionWriteLock rl (this);
 
@@ -1335,7 +1335,7 @@ Playlist::duplicate_until (boost::shared_ptr<Region> region, framepos_t position
 	 }
 
 	 if (position < end) {
-		 framecnt_t length = min (region->length(), end - position);
+		 samplecnt_t length = min (region->length(), end - position);
 		 string name;
 		 RegionFactory::region_name (name, region->name(), false);
 
@@ -1357,7 +1357,7 @@ void
 Playlist::duplicate_range (AudioRange& range, float times)
 {
 	boost::shared_ptr<Playlist> pl = copy (range.start, range.length(), true);
-	framecnt_t offset = range.end - range.start;
+	samplecnt_t offset = range.end - range.start;
 	paste (pl, range.start + offset, times, 0);
 }
 
@@ -1368,8 +1368,8 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 		return;
 	}
 
-	framepos_t min_pos = max_framepos;
-	framepos_t max_pos = 0;
+	samplepos_t min_pos = max_samplepos;
+	samplepos_t max_pos = 0;
 
 	for (std::list<AudioRange>::const_iterator i = ranges.begin();
 	     i != ranges.end();
@@ -1378,7 +1378,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 		max_pos = max (max_pos, (*i).end);
 	}
 
-	framecnt_t offset = max_pos - min_pos;
+	samplecnt_t offset = max_pos - min_pos;
 
 	int count = 1;
 	int itimes = (int) floor (times);
@@ -1392,7 +1392,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 }
 
  void
- Playlist::shift (framepos_t at, frameoffset_t distance, bool move_intersected, bool ignore_music_glue)
+ Playlist::shift (samplepos_t at, sampleoffset_t distance, bool move_intersected, bool ignore_music_glue)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1400,12 +1400,12 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 
 	 for (RegionList::iterator r = copy.begin(); r != copy.end(); ++r) {
 
-		 if ((*r)->last_frame() < at) {
+		 if ((*r)->last_sample() < at) {
 			 /* too early */
 			 continue;
 		 }
 
-		 if (at > (*r)->first_frame() && at < (*r)->last_frame()) {
+		 if (at > (*r)->first_sample() && at < (*r)->last_sample()) {
 			 /* intersected region */
 			 if (!move_intersected) {
 				 continue;
@@ -1431,7 +1431,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::split (const MusicFrame& at)
+ Playlist::split (const MusicSample& at)
  {
 	 RegionWriteLock rlock (this);
 	 RegionList copy (regions.rlist());
@@ -1445,29 +1445,29 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::split_region (boost::shared_ptr<Region> region, const MusicFrame& playlist_position)
+ Playlist::split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position)
  {
 	 RegionWriteLock rl (this);
 	 _split_region (region, playlist_position);
  }
 
  void
- Playlist::_split_region (boost::shared_ptr<Region> region, const MusicFrame& playlist_position)
+ Playlist::_split_region (boost::shared_ptr<Region> region, const MusicSample& playlist_position)
  {
-	 if (!region->covers (playlist_position.frame)) {
+	 if (!region->covers (playlist_position.sample)) {
 		 return;
 	 }
 
-	 if (region->position() == playlist_position.frame ||
-	     region->last_frame() == playlist_position.frame) {
+	 if (region->position() == playlist_position.sample ||
+	     region->last_sample() == playlist_position.sample) {
 		 return;
 	 }
 
 	 boost::shared_ptr<Region> left;
 	 boost::shared_ptr<Region> right;
 
-	 MusicFrame before (playlist_position.frame - region->position(), playlist_position.division);
-	 MusicFrame after (region->length() - before.frame, 0);
+	 MusicSample before (playlist_position.sample - region->position(), playlist_position.division);
+	 MusicSample after (region->length() - before.sample, 0);
 	 string before_name;
 	 string after_name;
 
@@ -1481,7 +1481,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::length, before.frame);
+		 plist.add (Properties::length, before.sample);
 		 plist.add (Properties::name, before_name);
 		 plist.add (Properties::left_of_split, true);
 		 plist.add (Properties::layering_index, region->layering_index ());
@@ -1491,7 +1491,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 		    since it supplies that offset to the Region constructor, which
 		    is necessary to get audio region gain envelopes right.
 		 */
-		 left = RegionFactory::create (region, MusicFrame (0, 0), plist, true);
+		 left = RegionFactory::create (region, MusicSample (0, 0), plist, true);
 	 }
 
 	 RegionFactory::region_name (after_name, region->name(), false);
@@ -1499,7 +1499,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 {
 		 PropertyList plist;
 
-		 plist.add (Properties::length, after.frame);
+		 plist.add (Properties::length, after.sample);
 		 plist.add (Properties::name, after_name);
 		 plist.add (Properties::right_of_split, true);
 		 plist.add (Properties::layering_index, region->layering_index ());
@@ -1510,7 +1510,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 }
 
 	 add_region_internal (left, region->position(), 0);
-	 add_region_internal (right, region->position() + before.frame, before.division);
+	 add_region_internal (right, region->position() + before.sample, before.division);
 
 	 remove_region_internal (region);
 
@@ -1518,7 +1518,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::possibly_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
+ Playlist::possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {
 	 if (_splicing || in_set_state) {
 		 /* don't respond to splicing moves or state setting */
@@ -1531,7 +1531,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::possibly_splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
+ Playlist::possibly_splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {
 	 if (_splicing || in_set_state) {
 		 /* don't respond to splicing moves or state setting */
@@ -1544,7 +1544,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::splice_locked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
+ Playlist::splice_locked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {
 	 {
 		 RegionWriteLock rl (this);
@@ -1553,13 +1553,13 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
  }
 
  void
- Playlist::splice_unlocked (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
+ Playlist::splice_unlocked (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {
 	 core_splice (at, distance, exclude);
  }
 
  void
- Playlist::core_splice (framepos_t at, framecnt_t distance, boost::shared_ptr<Region> exclude)
+ Playlist::core_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {
 	 _splicing = true;
 
@@ -1570,11 +1570,11 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 		 }
 
 		 if ((*i)->position() >= at) {
-			 framepos_t new_pos = (*i)->position() + distance;
+			 samplepos_t new_pos = (*i)->position() + distance;
 			 if (new_pos < 0) {
 				 new_pos = 0;
-			 } else if (new_pos >= max_framepos - (*i)->length()) {
-				 new_pos = max_framepos - (*i)->length();
+			 } else if (new_pos >= max_samplepos - (*i)->length()) {
+				 new_pos = max_samplepos - (*i)->length();
 			 }
 
 			 (*i)->set_position (new_pos);
@@ -1587,7 +1587,7 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 }
 
 void
-Playlist::ripple_locked (framepos_t at, framecnt_t distance, RegionList *exclude)
+Playlist::ripple_locked (samplepos_t at, samplecnt_t distance, RegionList *exclude)
 {
 	{
 		RegionWriteLock rl (this);
@@ -1596,13 +1596,13 @@ Playlist::ripple_locked (framepos_t at, framecnt_t distance, RegionList *exclude
 }
 
 void
-Playlist::ripple_unlocked (framepos_t at, framecnt_t distance, RegionList *exclude)
+Playlist::ripple_unlocked (samplepos_t at, samplecnt_t distance, RegionList *exclude)
 {
 	core_ripple (at, distance, exclude);
 }
 
 void
-Playlist::core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
+Playlist::core_ripple (samplepos_t at, samplecnt_t distance, RegionList *exclude)
 {
 	if (distance == 0) {
 		return;
@@ -1620,8 +1620,8 @@ Playlist::core_ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
 		}
 
 		if ((*i)->position() >= at) {
-			framepos_t new_pos = (*i)->position() + distance;
-			framepos_t limit = max_framepos - (*i)->length();
+			samplepos_t new_pos = (*i)->position() + distance;
+			samplepos_t limit = max_samplepos - (*i)->length();
 			if (new_pos < 0) {
 				new_pos = 0;
 			} else if (new_pos >= limit ) {
@@ -1668,7 +1668,7 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 
 	 if (what_changed.contains (Properties::position) || what_changed.contains (Properties::length)) {
 
-		 frameoffset_t delta = 0;
+		 sampleoffset_t delta = 0;
 
 		 if (what_changed.contains (Properties::position)) {
 			 delta = region->position() - region->last_position();
@@ -1687,9 +1687,9 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, boost::shar
 		 } else {
 			 notify_contents_changed ();
 			 relayer ();
-			 list<Evoral::Range<framepos_t> > xf;
-			 xf.push_back (Evoral::Range<framepos_t> (region->last_range()));
-			 xf.push_back (Evoral::Range<framepos_t> (region->range()));
+			 list<Evoral::Range<samplepos_t> > xf;
+			 xf.push_back (Evoral::Range<samplepos_t> (region->last_range()));
+			 xf.push_back (Evoral::Range<samplepos_t> (region->range()));
 			 coalesce_and_check_crossfades (xf);
 		 }
 	 }
@@ -1834,20 +1834,20 @@ Playlist::deep_sources (std::set<boost::shared_ptr<Source> >& sources) const
 }
 
 boost::shared_ptr<RegionList>
-Playlist::regions_at (framepos_t frame)
+Playlist::regions_at (samplepos_t sample)
 {
 	RegionReadLock rlock (this);
-	return find_regions_at (frame);
+	return find_regions_at (sample);
 }
 
  uint32_t
- Playlist::count_regions_at (framepos_t frame) const
+ Playlist::count_regions_at (samplepos_t sample) const
  {
 	 RegionReadLock rlock (const_cast<Playlist*>(this));
 	 uint32_t cnt = 0;
 
 	 for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		 if ((*i)->covers (frame)) {
+		 if ((*i)->covers (sample)) {
 			 cnt++;
 		 }
 	 }
@@ -1856,11 +1856,11 @@ Playlist::regions_at (framepos_t frame)
  }
 
  boost::shared_ptr<Region>
- Playlist::top_region_at (framepos_t frame)
+ Playlist::top_region_at (samplepos_t sample)
 
  {
 	 RegionReadLock rlock (this);
-	 boost::shared_ptr<RegionList> rlist = find_regions_at (frame);
+	 boost::shared_ptr<RegionList> rlist = find_regions_at (sample);
 	 boost::shared_ptr<Region> region;
 
 	 if (rlist->size()) {
@@ -1873,11 +1873,11 @@ Playlist::regions_at (framepos_t frame)
  }
 
  boost::shared_ptr<Region>
- Playlist::top_unmuted_region_at (framepos_t frame)
+ Playlist::top_unmuted_region_at (samplepos_t sample)
 
  {
 	 RegionReadLock rlock (this);
-	 boost::shared_ptr<RegionList> rlist = find_regions_at (frame);
+	 boost::shared_ptr<RegionList> rlist = find_regions_at (sample);
 
 	 for (RegionList::iterator i = rlist->begin(); i != rlist->end(); ) {
 
@@ -1904,14 +1904,14 @@ Playlist::regions_at (framepos_t frame)
  }
 
 boost::shared_ptr<RegionList>
-Playlist::find_regions_at (framepos_t frame)
+Playlist::find_regions_at (samplepos_t sample)
 {
 	/* Caller must hold lock */
 
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->covers (frame)) {
+		if ((*i)->covers (sample)) {
 			rlist->push_back (*i);
 		}
 	}
@@ -1920,13 +1920,13 @@ Playlist::find_regions_at (framepos_t frame)
 }
 
 boost::shared_ptr<RegionList>
-Playlist::regions_with_start_within (Evoral::Range<framepos_t> range)
+Playlist::regions_with_start_within (Evoral::Range<samplepos_t> range)
 {
 	RegionReadLock rlock (this);
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->first_frame() >= range.from && (*i)->first_frame() <= range.to) {
+		if ((*i)->first_sample() >= range.from && (*i)->first_sample() <= range.to) {
 			rlist->push_back (*i);
 		}
 	}
@@ -1935,13 +1935,13 @@ Playlist::regions_with_start_within (Evoral::Range<framepos_t> range)
 }
 
 boost::shared_ptr<RegionList>
-Playlist::regions_with_end_within (Evoral::Range<framepos_t> range)
+Playlist::regions_with_end_within (Evoral::Range<samplepos_t> range)
 {
 	RegionReadLock rlock (this);
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-		if ((*i)->last_frame() >= range.from && (*i)->last_frame() <= range.to) {
+		if ((*i)->last_sample() >= range.from && (*i)->last_sample() <= range.to) {
 			rlist->push_back (*i);
 		}
 	}
@@ -1954,14 +1954,14 @@ Playlist::regions_with_end_within (Evoral::Range<framepos_t> range)
  *  @return regions which have some part within this range.
  */
 boost::shared_ptr<RegionList>
-Playlist::regions_touched (framepos_t start, framepos_t end)
+Playlist::regions_touched (samplepos_t start, samplepos_t end)
 {
 	RegionReadLock rlock (this);
 	return regions_touched_locked (start, end);
 }
 
 boost::shared_ptr<RegionList>
-Playlist::regions_touched_locked (framepos_t start, framepos_t end)
+Playlist::regions_touched_locked (samplepos_t start, samplepos_t end)
 {
 	boost::shared_ptr<RegionList> rlist (new RegionList);
 
@@ -1974,8 +1974,8 @@ Playlist::regions_touched_locked (framepos_t start, framepos_t end)
 	return rlist;
 }
 
-framepos_t
-Playlist::find_next_transient (framepos_t from, int dir)
+samplepos_t
+Playlist::find_next_transient (samplepos_t from, int dir)
 {
 	RegionReadLock rlock (this);
 	AnalysisFeatureList points;
@@ -1983,20 +1983,20 @@ Playlist::find_next_transient (framepos_t from, int dir)
 
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 		if (dir > 0) {
-			if ((*i)->last_frame() < from) {
+			if ((*i)->last_sample() < from) {
 				continue;
 			}
 		} else {
-			if ((*i)->first_frame() > from) {
+			if ((*i)->first_sample() > from) {
 				continue;
 			}
 		}
 
 		(*i)->get_transients (these_points);
 
-		/* add first frame, just, err, because */
+		/* add first sample, just, err, because */
 
-		these_points.push_back ((*i)->first_frame());
+		these_points.push_back ((*i)->first_sample());
 
 		points.insert (points.end(), these_points.begin(), these_points.end());
 		these_points.clear ();
@@ -2006,7 +2006,7 @@ Playlist::find_next_transient (framepos_t from, int dir)
 		return -1;
 	}
 
-	TransientDetector::cleanup_transients (points, _session.frame_rate(), 3.0);
+	TransientDetector::cleanup_transients (points, _session.sample_rate(), 3.0);
 	bool reached = false;
 
 	if (dir > 0) {
@@ -2035,11 +2035,11 @@ Playlist::find_next_transient (framepos_t from, int dir)
 }
 
 boost::shared_ptr<Region>
-Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
+Playlist::find_next_region (samplepos_t sample, RegionPoint point, int dir)
 {
 	RegionReadLock rlock (this);
 	boost::shared_ptr<Region> ret;
-	framepos_t closest = max_framepos;
+	samplepos_t closest = max_samplepos;
 
 	bool end_iter = false;
 
@@ -2047,16 +2047,16 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 		if(end_iter) break;
 
-		frameoffset_t distance;
+		sampleoffset_t distance;
 		boost::shared_ptr<Region> r = (*i);
-		framepos_t pos = 0;
+		samplepos_t pos = 0;
 
 		switch (point) {
 		case Start:
-			pos = r->first_frame ();
+			pos = r->first_sample ();
 			break;
 		case End:
-			pos = r->last_frame ();
+			pos = r->last_sample ();
 			break;
 		case SyncPoint:
 			pos = r->sync_position ();
@@ -2066,8 +2066,8 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 		switch (dir) {
 		case 1: /* forwards */
 
-			if (pos > frame) {
-				if ((distance = pos - frame) < closest) {
+			if (pos > sample) {
+				if ((distance = pos - sample) < closest) {
 					closest = distance;
 					ret = r;
 					end_iter = true;
@@ -2078,8 +2078,8 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 
 		default: /* backwards */
 
-			if (pos < frame) {
-				if ((distance = frame - pos) < closest) {
+			if (pos < sample) {
+				if ((distance = sample - pos) < closest) {
 					closest = distance;
 					ret = r;
 				}
@@ -2094,39 +2094,39 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 	return ret;
 }
 
- framepos_t
- Playlist::find_next_region_boundary (framepos_t frame, int dir)
+ samplepos_t
+ Playlist::find_next_region_boundary (samplepos_t sample, int dir)
  {
 	 RegionReadLock rlock (this);
 
-	 framepos_t closest = max_framepos;
-	 framepos_t ret = -1;
+	 samplepos_t closest = max_samplepos;
+	 samplepos_t ret = -1;
 
 	 if (dir > 0) {
 
 		 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
 
 			 boost::shared_ptr<Region> r = (*i);
-			 frameoffset_t distance;
-			 const framepos_t first_frame = r->first_frame();
-			 const framepos_t last_frame = r->last_frame();
+			 sampleoffset_t distance;
+			 const samplepos_t first_sample = r->first_sample();
+			 const samplepos_t last_sample = r->last_sample();
 
-			 if (first_frame > frame) {
+			 if (first_sample > sample) {
 
-				 distance = first_frame - frame;
+				 distance = first_sample - sample;
 
 				 if (distance < closest) {
-					 ret = first_frame;
+					 ret = first_sample;
 					 closest = distance;
 				 }
 			 }
 
-			 if (last_frame > frame) {
+			 if (last_sample > sample) {
 
-				 distance = last_frame - frame;
+				 distance = last_sample - sample;
 
 				 if (distance < closest) {
-					 ret = last_frame;
+					 ret = last_sample;
 					 closest = distance;
 				 }
 			 }
@@ -2137,26 +2137,26 @@ Playlist::find_next_region (framepos_t frame, RegionPoint point, int dir)
 		 for (RegionList::reverse_iterator i = regions.rbegin(); i != regions.rend(); ++i) {
 
 			 boost::shared_ptr<Region> r = (*i);
-			 frameoffset_t distance;
-			 const framepos_t first_frame = r->first_frame();
-			 const framepos_t last_frame = r->last_frame();
+			 sampleoffset_t distance;
+			 const samplepos_t first_sample = r->first_sample();
+			 const samplepos_t last_sample = r->last_sample();
 
-			 if (last_frame < frame) {
+			 if (last_sample < sample) {
 
-				 distance = frame - last_frame;
+				 distance = sample - last_sample;
 
 				 if (distance < closest) {
-					 ret = last_frame;
+					 ret = last_sample;
 					 closest = distance;
 				 }
 			 }
 
-			 if (first_frame < frame) {
+			 if (first_sample < sample) {
 
-				 distance = frame - first_frame;
+				 distance = sample - first_sample;
 
 				 if (distance < closest) {
-					 ret = first_frame;
+					 ret = first_sample;
 					 closest = distance;
 				 }
 			 }
@@ -2396,25 +2396,25 @@ Playlist::all_regions_empty() const
 	return all_regions.empty();
 }
 
-pair<framepos_t, framepos_t>
+pair<samplepos_t, samplepos_t>
 Playlist::get_extent () const
 {
 	RegionReadLock rlock (const_cast<Playlist *>(this));
 	return _get_extent ();
 }
 
-pair<framepos_t, framepos_t>
+pair<samplepos_t, samplepos_t>
 Playlist::get_extent_with_endspace () const
 {
-	pair<framepos_t, framepos_t> l = get_extent();
+	pair<samplepos_t, samplepos_t> l = get_extent();
 	l.second += _end_space;
 	return l;
 }
 
-pair<framepos_t, framepos_t>
+pair<samplepos_t, samplepos_t>
 Playlist::_get_extent () const
 {
-	pair<framepos_t, framepos_t> ext (max_framepos, 0);
+	pair<samplepos_t, samplepos_t> ext (max_samplepos, 0);
 
 	if (regions.empty()) {
 		ext.first = 0;
@@ -2422,7 +2422,7 @@ Playlist::_get_extent () const
 	}
 
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-		pair<framepos_t, framepos_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
+		pair<samplepos_t, samplepos_t> const e ((*i)->position(), (*i)->position() + (*i)->length());
 		if (e.first < ext.first) {
 			ext.first = e.first;
 		}
@@ -2538,8 +2538,8 @@ Playlist::relayer ()
 	int const divisions = 512;
 
 	/* find the start and end positions of the regions on this playlist */
-	framepos_t start = INT64_MAX;
-	framepos_t end = 0;
+	samplepos_t start = INT64_MAX;
+	samplepos_t end = 0;
 	for (RegionList::const_iterator i = regions.begin(); i != regions.end(); ++i) {
 		start = min (start, (*i)->position());
 		end = max (end, (*i)->position() + (*i)->length());
@@ -2674,7 +2674,7 @@ Playlist::lower_region_to_bottom (boost::shared_ptr<Region> region)
 }
 
 void
-Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
+Playlist::nudge_after (samplepos_t start, samplecnt_t distance, bool forwards)
 {
 	RegionList::iterator i;
 	bool moved = false;
@@ -2688,12 +2688,12 @@ Playlist::nudge_after (framepos_t start, framecnt_t distance, bool forwards)
 
 			if ((*i)->position() >= start) {
 
-				framepos_t new_pos;
+				samplepos_t new_pos;
 
 				if (forwards) {
 
-					if ((*i)->last_frame() > max_framepos - distance) {
-						new_pos = max_framepos - (*i)->length();
+					if ((*i)->last_sample() > max_samplepos - distance) {
+						new_pos = max_samplepos - (*i)->length();
 					} else {
 						new_pos = (*i)->position() + distance;
 					}
@@ -2865,9 +2865,9 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							break;
 						}
 
-						framepos_t new_pos;
+						samplepos_t new_pos;
 
-						if ((*next)->position() != region->last_frame() + 1) {
+						if ((*next)->position() != region->last_sample() + 1) {
 							/* they didn't used to touch, so after shuffle,
 							   just have them swap positions.
 							*/
@@ -2908,8 +2908,8 @@ Playlist::shuffle (boost::shared_ptr<Region> region, int dir)
 							break;
 						}
 
-						framepos_t new_pos;
-						if (region->position() != (*prev)->last_frame() + 1) {
+						samplepos_t new_pos;
+						if (region->position() != (*prev)->last_sample() + 1) {
 							/* they didn't used to touch, so after shuffle,
 							   just have them swap positions.
 							*/
@@ -2962,7 +2962,7 @@ Playlist::region_is_shuffle_constrained (boost::shared_ptr<Region>)
 }
 
 void
-Playlist::ripple (framepos_t at, framecnt_t distance, RegionList *exclude)
+Playlist::ripple (samplepos_t at, samplecnt_t distance, RegionList *exclude)
 {
 	ripple_locked (at, distance, exclude);
 }
@@ -2992,7 +2992,7 @@ Playlist::foreach_region (boost::function<void(boost::shared_ptr<Region>)> s)
 }
 
 bool
-Playlist::has_region_at (framepos_t const p) const
+Playlist::has_region_at (samplepos_t const p) const
 {
 	RegionReadLock (const_cast<Playlist *> (this));
 
@@ -3004,13 +3004,13 @@ Playlist::has_region_at (framepos_t const p) const
 	return (i != regions.end());
 }
 
-/** Look from a session frame time and find the start time of the next region
+/** Look from a session sample time and find the start time of the next region
  *  which is on the top layer of this playlist.
  *  @param t Time to look from.
- *  @return Position of next top-layered region, or max_framepos if there isn't one.
+ *  @return Position of next top-layered region, or max_samplepos if there isn't one.
  */
-framepos_t
-Playlist::find_next_top_layer_position (framepos_t t) const
+samplepos_t
+Playlist::find_next_top_layer_position (samplepos_t t) const
 {
 	RegionReadLock rlock (const_cast<Playlist *> (this));
 
@@ -3025,7 +3025,7 @@ Playlist::find_next_top_layer_position (framepos_t t) const
 		}
 	}
 
-	return max_framepos;
+	return max_samplepos;
 }
 
 boost::shared_ptr<Region>
@@ -3034,7 +3034,7 @@ Playlist::combine (const RegionList& r)
 	PropertyList plist;
 	uint32_t channels = 0;
 	uint32_t layer = 0;
-	framepos_t earliest_position = max_framepos;
+	samplepos_t earliest_position = max_samplepos;
 	vector<TwoRegions> old_and_new_regions;
 	vector<boost::shared_ptr<Region> > originals;
 	vector<boost::shared_ptr<Region> > copies;
@@ -3104,7 +3104,7 @@ Playlist::combine (const RegionList& r)
 	/* now create a new PlaylistSource for each channel in the new playlist */
 
 	SourceList sources;
-	pair<framepos_t,framepos_t> extent = pl->get_extent();
+	pair<samplepos_t,samplepos_t> extent = pl->get_extent();
 
 	for (uint32_t chn = 0; chn < channels; ++chn) {
 		sources.push_back (SourceFactory::createFromPlaylist (_type, _session, pl, id(), parent_name, chn, 0, extent.second, false, false));
@@ -3174,8 +3174,8 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	pl = pls->playlist();
 
-	framepos_t adjusted_start = 0; // gcc isn't smart enough
-	framepos_t adjusted_end = 0;   // gcc isn't smart enough
+	samplepos_t adjusted_start = 0; // gcc isn't smart enough
+	samplepos_t adjusted_end = 0;   // gcc isn't smart enough
 
 	/* the leftmost (earliest) edge of the compound region
 	   starts at zero in its source, or larger if it
@@ -3190,7 +3190,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 
 	const RegionList& rl (pl->region_list_property().rlist());
 	RegionFactory::CompoundAssociations& cassocs (RegionFactory::compound_associations());
-	frameoffset_t move_offset = 0;
+	sampleoffset_t move_offset = 0;
 
 	/* there are two possibilities here:
 	   1) the playlist that the playlist source was based on
@@ -3225,7 +3225,7 @@ Playlist::uncombine (boost::shared_ptr<Region> target)
 		}
 
 		if (!same_playlist) {
-			framepos_t pos = original->position();
+			samplepos_t pos = original->position();
 			/* make a copy, but don't announce it */
 			original = RegionFactory::create (original, false);
 			/* the pure copy constructor resets position() to zero,
@@ -3409,7 +3409,7 @@ Playlist::reset_shares ()
  *  check_crossfades for each one.
  */
 void
-Playlist::coalesce_and_check_crossfades (list<Evoral::Range<framepos_t> > ranges)
+Playlist::coalesce_and_check_crossfades (list<Evoral::Range<samplepos_t> > ranges)
 {
 	/* XXX: it's a shame that this coalesce algorithm also exists in
 	   TimeSelection::consolidate().
@@ -3418,8 +3418,8 @@ Playlist::coalesce_and_check_crossfades (list<Evoral::Range<framepos_t> > ranges
 	/* XXX: xfade: this is implemented in Evoral::RangeList */
 
 restart:
-	for (list<Evoral::Range<framepos_t> >::iterator i = ranges.begin(); i != ranges.end(); ++i) {
-		for (list<Evoral::Range<framepos_t> >::iterator j = ranges.begin(); j != ranges.end(); ++j) {
+	for (list<Evoral::Range<samplepos_t> >::iterator i = ranges.begin(); i != ranges.end(); ++i) {
+		for (list<Evoral::Range<samplepos_t> >::iterator j = ranges.begin(); j != ranges.end(); ++j) {
 
 			if (i == j) {
 				continue;

@@ -31,7 +31,7 @@
 #include "pbd/unwind.h"
 
 #include "ardour/automation_control.h"
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/event_type_map.h"
 #include "ardour/parameter_types.h"
 #include "ardour/profile.h"
@@ -275,7 +275,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	controls_base_unselected_name = X_("AutomationTrackControlsBase");
 
 	controls_ebox.set_name (controls_base_unselected_name);
-	time_axis_frame.set_name (controls_base_unselected_name);
+	time_axis_sample.set_name (controls_base_unselected_name);
 
 	/* ask for notifications of any new RegionViews */
 	if (show_regions) {
@@ -726,7 +726,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame, double y, bool with_guard_points)
+AutomationTimeAxisView::add_automation_event (GdkEvent* event, samplepos_t sample, double y, bool with_guard_points)
 {
 	if (!_line) {
 		return;
@@ -741,14 +741,14 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame,
 		return;
 	}
 
-	MusicFrame when (frame, 0);
+	MusicSample when (sample, 0);
 	_editor.snap_to_with_modifier (when, event);
 
 	if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
 		if (_control->list()->size () == 0) {
 			y = _control->get_value ();
 		} else {
-			y = _control->list()->eval (when.frame);
+			y = _control->list()->eval (when.sample);
 		}
 	} else {
 		double x = 0;
@@ -762,12 +762,12 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame,
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
 
-	if (list->editor_add (when.frame, y, with_guard_points)) {
+	if (list->editor_add (when.sample, y, with_guard_points)) {
 		XMLNode& after = list->get_state();
 		_editor.begin_reversible_command (_("add automation event"));
 		_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
-		_line->get_selectables (when.frame, when.frame, 0.0, 1.0, results);
+		_line->get_selectables (when.sample, when.sample, 0.0, 1.0, results);
 		_editor.get_selection ().set (results);
 
 		_editor.commit_reversible_command ();
@@ -776,7 +776,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, framepos_t frame,
 }
 
 bool
-AutomationTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t divisions)
+AutomationTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t divisions)
 {
 	if (_line) {
 		return paste_one (pos, ctx.count, ctx.times, selection, ctx.counts, ctx.greedy);
@@ -797,7 +797,7 @@ AutomationTimeAxisView::paste (framepos_t pos, const Selection& selection, Paste
 }
 
 bool
-AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
+AutomationTimeAxisView::paste_one (samplepos_t pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
 {
 	boost::shared_ptr<AutomationList> alist(_line->the_list());
 
@@ -824,7 +824,7 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 
 	if (parameter_is_midi (src_type)) {
 		// convert length to samples (incl tempo-ramps)
-		len = DoubleBeatsFramesConverter (_session->tempo_map(), pos).to (len * paste_count);
+		len = DoubleBeatsSamplesConverter (_session->tempo_map(), pos).to (len * paste_count);
 		pos += _editor.get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
 	} else {
 		pos += _editor.get_paste_offset (pos, paste_count, len);
@@ -834,14 +834,14 @@ AutomationTimeAxisView::paste_one (framepos_t pos, unsigned paste_count, float t
 	double const model_pos = _line->time_converter().from (pos - _line->time_converter().origin_b ());
 
 	XMLNode &before = alist->get_state();
-	alist->paste (**p, model_pos, DoubleBeatsFramesConverter (_session->tempo_map(), pos));
+	alist->paste (**p, model_pos, DoubleBeatsSamplesConverter (_session->tempo_map(), pos));
 	_session->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
 
 	return true;
 }
 
 void
-AutomationTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool /*within*/)
+AutomationTimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool /*within*/)
 {
 	if (!_line && !_view) {
 		return;
@@ -1138,7 +1138,7 @@ AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& sel
 	XMLNode &before = alist->get_state();
 
 	/* convert time selection to automation list model coordinates */
-	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& tc = line.time_converter ();
+	const Evoral::TimeConverter<double, ARDOUR::samplepos_t>& tc = line.time_converter ();
 	double const start = tc.from (selection.time.front().start - tc.origin_b ());
 	double const end = tc.from (selection.time.front().end - tc.origin_b ());
 

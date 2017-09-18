@@ -79,7 +79,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool           recordable()  const { return _flags & Recordable; }
 	bool           non_layered()  const { return _flags & NonLayered; }
 
-	virtual void non_realtime_locate (framepos_t);
+	virtual void non_realtime_locate (samplepos_t);
 
 	void non_realtime_speed_change ();
 	bool realtime_speed_change ();
@@ -116,7 +116,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
   protected:
 	friend class Auditioner;
-	virtual int  seek (framepos_t which_sample, bool complete_refill = false) = 0;
+	virtual int  seek (samplepos_t which_sample, bool complete_refill = false) = 0;
 
   protected:
 	Flag         _flags;
@@ -129,9 +129,9 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool         _slaved;
 	Location*     loop_location;
 	bool          in_set_state;
-	framepos_t     playback_sample;
-	framecnt_t    wrap_buffer_size;
-	framecnt_t    speed_buffer_size;
+	samplepos_t     playback_sample;
+	samplecnt_t    wrap_buffer_size;
+	samplecnt_t    speed_buffer_size;
 	bool         _need_butler;
 	boost::shared_ptr<Route> _route;
 
@@ -140,10 +140,10 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	Glib::Threads::Mutex state_lock;
 
 	static bool get_buffering_presets (BufferingPreset bp,
-	                                   framecnt_t& read_chunk_size,
-	                                   framecnt_t& read_buffer_size,
-	                                   framecnt_t& write_chunk_size,
-	                                   framecnt_t& write_buffer_size);
+	                                   samplecnt_t& read_chunk_size,
+	                                   samplecnt_t& read_buffer_size,
+	                                   samplecnt_t& write_chunk_size,
+	                                   samplecnt_t& write_buffer_size);
 
 	enum TransitionType {
 		CaptureStart = 0,
@@ -152,7 +152,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	struct CaptureTransition {
 		TransitionType   type;
-		framepos_t       capture_val; ///< The start or end file frame position
+		samplepos_t       capture_val; ///< The start or end file sample position
 	};
 
 	/** Information about one audio channel, playback or capture
@@ -160,7 +160,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	 */
 	struct ChannelInfo : public boost::noncopyable {
 
-		ChannelInfo (framecnt_t buffer_size);
+		ChannelInfo (samplecnt_t buffer_size);
 		~ChannelInfo ();
 
 		/** A ringbuffer for data to be played back, written to in the
@@ -178,9 +178,9 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 		boost::shared_ptr<AudioFileSource> write_source;
 		PBD::RingBufferNPT<CaptureTransition> * capture_transition_buf;
 		// the following are used in the butler thread only
-		framecnt_t                     curr_capture_cnt;
+		samplecnt_t                     curr_capture_cnt;
 
-		void resize (framecnt_t);
+		void resize (samplecnt_t);
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
@@ -196,16 +196,16 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	virtual void playlist_changed (const PBD::PropertyChange&) {}
 	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
-	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<framepos_t> > const &, bool) {}
+	virtual void playlist_ranges_moved (std::list< Evoral::RangeMove<samplepos_t> > const &, bool) {}
 
 	/* The MIDI stuff */
 
-	MidiRingBuffer<framepos_t>*  _midi_buf;
-	gint                         _frames_written_to_ringbuffer;
-	gint                         _frames_read_from_ringbuffer;
+	MidiRingBuffer<samplepos_t>*  _midi_buf;
+	gint                         _samples_written_to_ringbuffer;
+	gint                         _samples_read_from_ringbuffer;
 	CubicMidiInterpolation        midi_interpolation;
 
-	static void get_location_times (const Location* location, framepos_t* start, framepos_t* end, framepos_t* length);
+	static void get_location_times (const Location* location, samplepos_t* start, samplepos_t* end, samplepos_t* length);
 };
 
 } // namespace ARDOUR

@@ -2833,7 +2833,7 @@ EngineControl::check_audio_latency_measurement ()
 	}
 
 	char buf[256];
-	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+	ARDOUR::samplecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
 
 	if (sample_rate == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Disconnected from audio engine")));
@@ -2841,12 +2841,12 @@ EngineControl::check_audio_latency_measurement ()
 		return false;
 	}
 
-	int frames_total = mtdm->del();
-	int extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+	int samples_total = mtdm->del();
+	int extra = samples_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
 
 	snprintf (buf, sizeof (buf), "%s%d samples (%.3lf ms)\n%s%d samples (%.3lf ms)",
 			_("Detected roundtrip latency: "),
-			frames_total, frames_total * 1000.0f/sample_rate,
+			samples_total, samples_total * 1000.0f/sample_rate,
 			_("Systemic latency: "),
 			extra, extra * 1000.0f/sample_rate);
 
@@ -2887,7 +2887,7 @@ EngineControl::check_midi_latency_measurement ()
 	}
 
 	char buf[256];
-	ARDOUR::framecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
+	ARDOUR::samplecnt_t const sample_rate = ARDOUR::AudioEngine::instance()->sample_rate();
 
 	if (sample_rate == 0) {
 		lm_results.set_markup (string_compose (results_markup, _("Disconnected from audio engine")));
@@ -2895,11 +2895,11 @@ EngineControl::check_midi_latency_measurement ()
 		return false;
 	}
 
-	ARDOUR::framecnt_t frames_total = mididm->latency();
-	ARDOUR::framecnt_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+	ARDOUR::samplecnt_t samples_total = mididm->latency();
+	ARDOUR::samplecnt_t extra = samples_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
 	snprintf (buf, sizeof (buf), "%s%" PRId64" samples (%.1lf ms) dev: %.2f[spl]\n%s%" PRId64" samples (%.1lf ms)",
 			_("Detected roundtrip latency: "),
-			frames_total, frames_total * 1000.0f / sample_rate, mididm->deviation (),
+			samples_total, samples_total * 1000.0f / sample_rate, mididm->deviation (),
 			_("Systemic latency: "),
 			extra, extra * 1000.0f / sample_rate);
 
@@ -3000,9 +3000,9 @@ EngineControl::use_latency_button_clicked ()
 		if (!mididm) {
 			return;
 		}
-		ARDOUR::framecnt_t frames_total = mididm->latency();
-		ARDOUR::framecnt_t extra = frames_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
-		uint32_t one_way = max ((ARDOUR::framecnt_t) 0, extra / 2);
+		ARDOUR::samplecnt_t samples_total = mididm->latency();
+		ARDOUR::samplecnt_t extra = samples_total - ARDOUR::AudioEngine::instance()->latency_signal_delay();
+		uint32_t one_way = max ((ARDOUR::samplecnt_t) 0, extra / 2);
 		_measure_midi->input_latency = one_way;
 		_measure_midi->output_latency = one_way;
 		if (backend->can_change_systemic_latency_when_running ()) {

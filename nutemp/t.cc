@@ -154,13 +154,13 @@ TempoMetric::superclock_per_note_type_at_superclock (superclock_t sc) const
 }
 
 superclock_t
-TempoMetric::superclocks_per_grid (framecnt_t sr) const
+TempoMetric::superclocks_per_grid (samplecnt_t sr) const
 {
 	return (superclock_ticks_per_second * Meter::note_value()) / (note_types_per_minute() / Tempo::note_type());
 }
 
 superclock_t
-TempoMetric::superclocks_per_bar (framecnt_t sr) const
+TempoMetric::superclocks_per_bar (samplecnt_t sr) const
 {
 	return superclocks_per_grid (sr) * _divisions_per_bar;
 }
@@ -275,7 +275,7 @@ It would be more accurate to substitute the work 'pulse' for 'beat' above.
  */
 
 void
-TempoMetric::compute_c_superclock (framecnt_t sr, superclock_t end_scpqn, superclock_t superclock_duration)
+TempoMetric::compute_c_superclock (samplecnt_t sr, superclock_t end_scpqn, superclock_t superclock_duration)
 {
 	if ((superclocks_per_quarter_note() == end_scpqn) || !ramped()) {
 		_c_per_superclock = 0.0;
@@ -285,7 +285,7 @@ TempoMetric::compute_c_superclock (framecnt_t sr, superclock_t end_scpqn, superc
 	_c_per_superclock = log ((double) superclocks_per_quarter_note () / end_scpqn) / superclock_duration;
 }
 void
-TempoMetric::compute_c_quarters (framecnt_t sr, superclock_t end_scpqn, Evoral::Beats const & quarter_duration)
+TempoMetric::compute_c_quarters (samplecnt_t sr, superclock_t end_scpqn, Evoral::Beats const & quarter_duration)
 {
 	if ((superclocks_per_quarter_note () == end_scpqn) || !ramped()) {
 		_c_per_quarter = 0.0;
@@ -354,7 +354,7 @@ TempoMapPoint::bbt_at (Evoral::Beats const & qn) const
 	return metric().bbt_add (_bbt, Timecode::BBT_Offset (0, 0,  ticks_delta));
 }
 
-TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, framecnt_t sr)
+TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr)
 	: _sample_rate (sr)
 	, _dirty (false)
 {
@@ -1099,7 +1099,7 @@ TempoMap::superclock_at_locked (Timecode::BBT_Time const & bbt) const
 }
 
 void
-TempoMap::set_sample_rate (framecnt_t new_sr)
+TempoMap::set_sample_rate (samplecnt_t new_sr)
 {
 	//Glib::Threads::RWLock::ReaderLock lm (_lock);
 	double ratio = new_sr / (double) _sample_rate;

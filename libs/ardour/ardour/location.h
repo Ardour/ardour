@@ -58,7 +58,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	};
 
 	Location (Session &);
-	Location (Session &, framepos_t, framepos_t, const std::string &, Flags bits = Flags(0), const uint32_t sub_num = 0);
+	Location (Session &, samplepos_t, samplepos_t, const std::string &, Flags bits = Flags(0), const uint32_t sub_num = 0);
 	Location (const Location& other);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
@@ -69,15 +69,15 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void lock ();
 	void unlock ();
 
-	framepos_t start() const  { return _start; }
-	framepos_t end() const { return _end; }
-	framecnt_t length() const { return _end - _start; }
+	samplepos_t start() const  { return _start; }
+	samplepos_t end() const { return _end; }
+	samplecnt_t length() const { return _end - _start; }
 
-	int set_start (framepos_t s, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
-	int set_end (framepos_t e, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
-	int set (framepos_t start, framepos_t end, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
+	int set_start (samplepos_t s, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
+	int set_end (samplepos_t e, bool force = false, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
+	int set (samplepos_t start, samplepos_t end, bool allow_beat_recompute = true, const uint32_t sub_num = 0);
 
-	int move_to (framepos_t pos, const uint32_t sub_num);
+	int move_to (samplepos_t pos, const uint32_t sub_num);
 
 	const std::string& name() const { return _name; }
 	void set_name (const std::string &str);
@@ -143,16 +143,16 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	PositionLockStyle position_lock_style() const { return _position_lock_style; }
 	void set_position_lock_style (PositionLockStyle ps);
-	void recompute_frames_from_beat ();
+	void recompute_samples_from_beat ();
 
 	static PBD::Signal0<void> scene_changed; /* for use by backend scene change management, class level */
         PBD::Signal0<void> SceneChangeChanged;   /* for use by objects interested in this object */
 
   private:
 	std::string        _name;
-	framepos_t         _start;
+	samplepos_t         _start;
 	double             _start_beat;
-	framepos_t         _end;
+	samplepos_t         _end;
 	double             _end_beat;
 	Flags              _flags;
 	bool               _locked;
@@ -161,7 +161,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
-	void recompute_beat_from_frames (const uint32_t sub_num);
+	void recompute_beat_from_samples (const uint32_t sub_num);
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
@@ -196,14 +196,14 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* mark_at (framepos_t, framecnt_t slop = 0) const;
+	Location* mark_at (samplepos_t, samplecnt_t slop = 0) const;
 
-	framepos_t first_mark_before (framepos_t, bool include_special_ranges = false);
-	framepos_t first_mark_after (framepos_t, bool include_special_ranges = false);
+	samplepos_t first_mark_before (samplepos_t, bool include_special_ranges = false);
+	samplepos_t first_mark_after (samplepos_t, bool include_special_ranges = false);
 
-	void marks_either_side (framepos_t const, framepos_t &, framepos_t &) const;
+	void marks_either_side (samplepos_t const, samplepos_t &, samplepos_t &) const;
 
-	void find_all_between (framepos_t start, framepos_t, LocationList&, Location::Flags);
+	void find_all_between (samplepos_t start, samplepos_t, LocationList&, Location::Flags);
 
 	PBD::Signal1<void,Location*> current_changed;
 

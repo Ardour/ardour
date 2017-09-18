@@ -110,7 +110,7 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	_device_status = STATUS_OFFLINE;
 	udev = 0;
 	current_track_id = 0;
-	last_where = max_frames;
+	last_where = max_samples;
 	wheel_mode = WheelTimeline;
 	wheel_shift_mode = WheelShiftGain;
 	wheel_increment = WheelIncrScreen;
@@ -555,7 +555,7 @@ TranzportControlProtocol::show_meter ()
 }
 
 void
-TranzportControlProtocol::show_bbt (framepos_t where)
+TranzportControlProtocol::show_bbt (samplepos_t where)
 {
 	if ((where != last_where) || lcd_isdamaged(1,9,8)) {
 		char buf[16];
@@ -591,11 +591,11 @@ TranzportControlProtocol::show_bbt (framepos_t where)
 void
 TranzportControlProtocol::show_transport_time ()
 {
-	show_bbt (session->transport_frame ());
+	show_bbt (session->transport_sample ());
 }
 
 void
-TranzportControlProtocol::show_smpte (framepos_t where)
+TranzportControlProtocol::show_smpte (samplepos_t where)
 {
 	if ((where != last_where) || lcd_isdamaged(1,9,10)) {
 
@@ -617,7 +617,7 @@ TranzportControlProtocol::show_smpte (framepos_t where)
 		sprintf (buf, "%02" PRIu32 ":", smpte.seconds);
 		print (1, 15, buf);
 
-		sprintf (buf, "%02" PRIu32, smpte.frames);
+		sprintf (buf, "%02" PRIu32, smpte.samples);
 		print_noretry (1, 18, buf);
 
 		last_where = where;

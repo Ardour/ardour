@@ -335,11 +335,11 @@ MixerStrip::init ()
 	global_vpacker.pack_end (spacer, false, false);
 #endif
 
-	global_frame.add (global_vpacker);
-	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("BaseFrame");
+	global_sample.add (global_vpacker);
+	global_sample.set_shadow_type (Gtk::SHADOW_IN);
+	global_sample.set_name ("BaseFrame");
 
-	add (global_frame);
+	add (global_sample);
 
 	/* force setting of visible selected status */
 
@@ -504,7 +504,7 @@ MixerStrip::trim_start_touch ()
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->start_touch (_session->transport_frame());
+		route()->trim()->gain_control ()->start_touch (_session->transport_sample());
 	}
 }
 
@@ -513,7 +513,7 @@ MixerStrip::trim_end_touch ()
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->stop_touch (_session->transport_frame());
+		route()->trim()->gain_control ()->stop_touch (_session->transport_sample());
 	}
 }
 
@@ -734,7 +734,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	width_button.show();
 	width_hide_box.show();
-	global_frame.show();
+	global_sample.show();
 	global_vpacker.show();
 	mute_solo_table.show();
 	bottom_button_table.show();
@@ -1835,14 +1835,14 @@ MixerStrip::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (selected()) {
-		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_frame.set_name ("MixerStripSelectedFrame");
+		global_sample.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		global_sample.set_name ("MixerStripSelectedFrame");
 	} else {
-		global_frame.set_shadow_type (Gtk::SHADOW_IN);
-		global_frame.set_name ("MixerStripFrame");
+		global_sample.set_shadow_type (Gtk::SHADOW_IN);
+		global_sample.set_name ("MixerStripFrame");
 	}
 
-	global_frame.queue_draw ();
+	global_sample.queue_draw ();
 
 //	if (!yn)
 //		processor_box.deselect_all_processors();

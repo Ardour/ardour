@@ -415,14 +415,14 @@ Track::set_name (const string& str)
 }
 
 void
-Track::set_latency_compensation (framecnt_t longest_session_latency)
+Track::set_latency_compensation (samplecnt_t longest_session_latency)
 {
 	Route::set_latency_compensation (longest_session_latency);
 	_disk_reader->set_roll_delay (_roll_delay);
 }
 
 int
-Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool session_state_changing)
+Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -457,7 +457,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
-			passthru_silence (start_frame, end_frame, nframes, 0);
+			passthru_silence (start_sample, end_sample, nframes, 0);
 			return 0;
 		}
 		/* we're really not rolling, so we're either delivery silence or actually
@@ -465,7 +465,7 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		*/
 	}
 
-	_disk_writer->check_record_status (start_frame, can_record);
+	_disk_writer->check_record_status (start_sample, can_record);
 
 	bool be_silent;
 
@@ -529,14 +529,14 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 
 			if (no_meter) {
 				BufferSet& bufs (_session.get_silent_buffers (n_process_buffers()));
-				_meter->run (bufs, start_frame, end_frame, 1.0, nframes, true);
-				_input->process_input (boost::shared_ptr<Processor>(), start_frame, end_frame, _session.transport_speed(), nframes);
+				_meter->run (bufs, start_sample, end_sample, 1.0, nframes, true);
+				_input->process_input (boost::shared_ptr<Processor>(), start_sample, end_sample, _session.transport_speed(), nframes);
 			} else {
-				_input->process_input (_meter, start_frame, end_frame, _session.transport_speed(), nframes);
+				_input->process_input (_meter, start_sample, end_sample, _session.transport_speed(), nframes);
 			}
 		}
 
-		passthru_silence (start_frame, end_frame, nframes, 0);
+		passthru_silence (start_sample, end_sample, nframes, 0);
 
 	} else {
 
@@ -545,10 +545,10 @@ Track::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
 		fill_buffers_with_input (bufs, _input, nframes);
 
 		if (_meter_point == MeterInput) {
-			_meter->run (bufs, start_frame, end_frame, _session.transport_speed(), nframes, true);
+			_meter->run (bufs, start_sample, end_sample, _session.transport_speed(), nframes, true);
 		}
 
-		passthru (bufs, start_frame, end_frame, nframes, false);
+		passthru (bufs, start_sample, end_sample, nframes, false);
 	}
 
 	flush_processor_buffers_locked (nframes);
@@ -594,7 +594,7 @@ void
 Track::update_latency_information ()
 {
 	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
-	framecnt_t chain_latency = _input->latency ();
+	samplecnt_t chain_latency = _input->latency ();
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
 		(*p)->set_input_latency (chain_latency);
@@ -645,7 +645,7 @@ Track::set_pending_overwrite (bool o)
 }
 
 int
-Track::seek (framepos_t p, bool complete_refill)
+Track::seek (samplepos_t p, bool complete_refill)
 {
 	if (_disk_reader->seek (p, complete_refill)) {
 		return -1;
@@ -654,19 +654,19 @@ Track::seek (framepos_t p, bool complete_refill)
 }
 
 int
-Track::can_internal_playback_seek (framecnt_t p)
+Track::can_internal_playback_seek (samplecnt_t p)
 {
 	return _disk_reader->can_internal_playback_seek (p);
 }
 
 int
-Track::internal_playback_seek (framecnt_t p)
+Track::internal_playback_seek (samplecnt_t p)
 {
 	return _disk_reader->internal_playback_seek (p);
 }
 
 void
-Track::non_realtime_locate (framepos_t p)
+Track::non_realtime_locate (samplepos_t p)
 {
 	Route::non_realtime_locate (p);
 
@@ -691,10 +691,10 @@ Track::overwrite_existing_buffers ()
 	return _disk_reader->overwrite_existing_buffers ();
 }
 
-framecnt_t
-Track::get_captured_frames (uint32_t n) const
+samplecnt_t
+Track::get_captured_samples (uint32_t n) const
 {
-	return _disk_writer->get_captured_frames (n);
+	return _disk_writer->get_captured_samples (n);
 }
 
 int
@@ -707,7 +707,7 @@ Track::set_loop (Location* l)
 }
 
 void
-Track::transport_looped (framepos_t p)
+Track::transport_looped (samplepos_t p)
 {
 	return _disk_writer->transport_looped (p);
 }
@@ -748,7 +748,7 @@ Track::pending_overwrite () const
 }
 
 void
-Track::prepare_to_stop (framepos_t t, framepos_t a)
+Track::prepare_to_stop (samplepos_t t, samplepos_t a)
 {
 	_disk_writer->prepare_to_stop (t, a);
 }
@@ -766,10 +766,10 @@ Track::n_channels ()
 	return _disk_reader->output_streams();
 }
 
-framepos_t
-Track::get_capture_start_frame (uint32_t n) const
+samplepos_t
+Track::get_capture_start_sample (uint32_t n) const
 {
-	return _disk_writer->get_capture_start_frame (n);
+	return _disk_writer->get_capture_start_sample (n);
 }
 
 AlignStyle
@@ -784,13 +784,13 @@ Track::alignment_choice () const
 	return _disk_writer->alignment_choice ();
 }
 
-framepos_t
+samplepos_t
 Track::current_capture_start () const
 {
 	return _disk_writer->current_capture_start ();
 }
 
-framepos_t
+samplepos_t
 Track::current_capture_end () const
 {
 	return _disk_writer->current_capture_end ();
@@ -1128,7 +1128,7 @@ Track::monitoring_state () const
 #endif
 
 void
-Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
+Track::maybe_declick (BufferSet& bufs, samplecnt_t nframes, int declick)
 {
         /* never declick if there is an internal generator - we just want it to
            keep generating sound without interruption.
@@ -1149,24 +1149,24 @@ Track::maybe_declick (BufferSet& bufs, framecnt_t nframes, int declick)
 	}
 }
 
-framecnt_t
-Track::check_initial_delay (framecnt_t nframes, framepos_t& transport_frame)
+samplecnt_t
+Track::check_initial_delay (samplecnt_t nframes, samplepos_t& transport_sample)
 {
 	if (_roll_delay > nframes) {
 
 		_roll_delay -= nframes;
 		silence_unlocked (nframes);
-		/* transport frame is not legal for caller to use */
+		/* transport sample is not legal for caller to use */
 		return 0;
 
 	} else if (_roll_delay > 0) {
 
 		nframes -= _roll_delay;
 		silence_unlocked (_roll_delay);
-		transport_frame += _roll_delay;
+		transport_sample += _roll_delay;
 
 		/* shuffle all the port buffers for things that lead "out" of this Route
-		   to reflect that we just wrote _roll_delay frames of silence.
+		   to reflect that we just wrote _roll_delay samples of silence.
 		*/
 
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -1269,10 +1269,10 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
-	framecnt_t total_capture = 0;
+	samplecnt_t total_capture = 0;
 
 	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		total_capture += (*ci)->frames;
+		total_capture += (*ci)->samples;
 	}
 
 	/* we will want to be able to keep (over)writing the source
@@ -1316,14 +1316,14 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 	pl->clear_changes ();
 	pl->freeze ();
 
-	/* Session frame time of the initial capture in this pass, which is where the source starts */
-	framepos_t initial_capture = 0;
+	/* Session sample time of the initial capture in this pass, which is where the source starts */
+	samplepos_t initial_capture = 0;
 	if (!capture_info.empty()) {
 		initial_capture = capture_info.front()->start;
 	}
 
-	BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
-	const framepos_t preroll_off = _session.preroll_record_trim_len ();
+	BeatsSamplesConverter converter (_session.tempo_map(), capture_info.front()->start);
+	const samplepos_t preroll_off = _session.preroll_record_trim_len ();
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
 
@@ -1332,18 +1332,18 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		RegionFactory::region_name (region_name, mfs->name(), false);
 
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture start @ %2 length %3 add new region %4\n",
-		                                                      _name, (*ci)->start, (*ci)->frames, region_name));
+		                                                      _name, (*ci)->start, (*ci)->samples, region_name));
 
 
-		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->frames << " add a region\n";
+		// cerr << _name << ": based on ci of " << (*ci)->start << " for " << (*ci)->samples << " add a region\n";
 
 		try {
 			PropertyList plist;
 
 			/* start of this region is the offset between the start of its capture and the start of the whole pass */
 			plist.add (Properties::start, (*ci)->start - initial_capture);
-			plist.add (Properties::length, (*ci)->frames);
-			plist.add (Properties::length_beats, converter.from((*ci)->frames).to_double());
+			plist.add (Properties::length, (*ci)->samples);
+			plist.add (Properties::length_beats, converter.from((*ci)->samples).to_double());
 			plist.add (Properties::name, region_name);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -1408,7 +1408,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	try {
 		PropertyList plist;
 
-		plist.add (Properties::start, afs->last_capture_start_frame());
+		plist.add (Properties::start, afs->last_capture_start_sample());
 		plist.add (Properties::length, afs->length(0));
 		plist.add (Properties::name, whole_file_region_name);
 		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -1429,8 +1429,8 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->set_capture_insertion_in_progress (true);
 	pl->freeze ();
 
-	const framepos_t preroll_off = _session.preroll_record_trim_len ();
-	framecnt_t buffer_position = afs->last_capture_start_frame ();
+	const samplepos_t preroll_off = _session.preroll_record_trim_len ();
+	samplecnt_t buffer_position = afs->last_capture_start_sample ();
 	CaptureInfos::const_iterator ci;
 
 	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
@@ -1440,14 +1440,14 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		RegionFactory::region_name (region_name, whole_file_region_name, false);
 
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 capture bufpos %5 start @ %2 length %3 add new region %4\n",
-		                                                      _name, (*ci)->start, (*ci)->frames, region_name, buffer_position));
+		                                                      _name, (*ci)->start, (*ci)->samples, region_name, buffer_position));
 
 		try {
 
 			PropertyList plist;
 
 			plist.add (Properties::start, buffer_position);
-			plist.add (Properties::length, (*ci)->frames);
+			plist.add (Properties::length, (*ci)->samples);
 			plist.add (Properties::name, region_name);
 
 			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
@@ -1465,7 +1465,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		pl->add_region (region, (*ci)->start + preroll_off, 1, _disk_writer->non_layered());
 		pl->set_layer (region, DBL_MAX);
 
-		buffer_position += (*ci)->frames;
+		buffer_position += (*ci)->samples;
 	}
 
 	pl->thaw ();

@@ -261,27 +261,27 @@ RegionSelection::involves (const TimeAxisView& tv) const
 	return false;
 }
 
-framepos_t
+samplepos_t
 RegionSelection::start () const
 {
-	framepos_t s = max_framepos;
+	samplepos_t s = max_samplepos;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
 		s = min (s, (*i)->region()->position ());
 	}
 
-	if (s == max_framepos) {
+	if (s == max_samplepos) {
 		return 0;
 	}
 
 	return s;
 }
 
-framepos_t
-RegionSelection::end_frame () const
+samplepos_t
+RegionSelection::end_sample () const
 {
-	framepos_t e = 0;
+	samplepos_t e = 0;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		e = max (e, (*i)->region()->last_frame ());
+		e = max (e, (*i)->region()->last_sample ());
 	}
 
 	return e;

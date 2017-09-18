@@ -260,7 +260,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 
 					int n;
 					for (int channel = 0; channel < n_inputs; channel++) {
-						framecnt_t x = 0;
+						samplecnt_t x = 0;
 
 						while (x < j->length()) {
 							// TODO: What about stereo+ channels? composite all to one, I guess
@@ -313,8 +313,8 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 				int n;
 				for (unsigned int channel = 0; channel < arv->region()->n_channels(); channel++) {
 
-					framecnt_t x = 0;
-					framecnt_t length = arv->region()->length();
+					samplecnt_t x = 0;
+					samplecnt_t length = arv->region()->length();
 
 					while (x < length) {
 						// TODO: What about stereo+ channels? composite all to one, I guess

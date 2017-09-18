@@ -33,7 +33,7 @@ public:
 	                    boost::shared_ptr<ARDOUR::AutomationList>,
 	                    boost::shared_ptr<ARDOUR::MidiRegion>,
 	                    Evoral::Parameter,
-	                    Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
+	                    Evoral::TimeConverter<double, ARDOUR::samplepos_t>* converter = 0);
 
 	MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 

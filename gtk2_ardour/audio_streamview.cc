@@ -210,10 +210,10 @@ AudioStreamView::setup_rec_box ()
 
 				// handle multi
 
-				framepos_t start = 0;
+				samplepos_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
-							+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
+							+ _trackview.track()->get_captured_samples(rec_regions.size()-1);
 				}
 
 				PropertyList plist;
@@ -227,17 +227,17 @@ AudioStreamView::setup_rec_box ()
 					boost::dynamic_pointer_cast<AudioRegion>(RegionFactory::create (sources, plist, false)));
 
 				assert(region);
-				region->set_position (_trackview.session()->transport_frame());
+				region->set_position (_trackview.session()->transport_sample());
 				rec_regions.push_back (make_pair(region, (RegionView*) 0));
 			}
 
 			/* start a new rec box */
 
 			boost::shared_ptr<AudioTrack> at = _trackview.audio_track();
-			framepos_t const frame_pos = at->current_capture_start ();
+			samplepos_t const sample_pos = at->current_capture_start ();
 			double     const width     = ((at->mode() == Destructive) ? 2 : 0);
 
-			create_rec_box(frame_pos, width);
+			create_rec_box(sample_pos, width);
 
 		} else if (rec_active &&
 		           (_trackview.session()->record_status() != Session::Recording ||
@@ -289,7 +289,7 @@ AudioStreamView::setup_rec_box ()
 }
 
 void
-AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::weak_ptr<Source> weak_src)
+AudioStreamView::rec_peak_range_ready (samplepos_t start, samplecnt_t cnt, boost::weak_ptr<Source> weak_src)
 {
 	ENSURE_GUI_THREAD (*this, &AudioStreamView::rec_peak_range_ready, start, cnt, weak_src)
 
@@ -301,8 +301,8 @@ AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::
 
 	// this is called from the peak building thread
 
-	if (rec_data_ready_map.size() == 0 || start + cnt > last_rec_data_frame) {
-		last_rec_data_frame = start + cnt;
+	if (rec_data_ready_map.size() == 0 || start + cnt > last_rec_data_sample) {
+		last_rec_data_sample = start + cnt;
 	}
 
 	rec_data_ready_map[src] = true;
@@ -314,7 +314,7 @@ AudioStreamView::rec_peak_range_ready (framepos_t start, framecnt_t cnt, boost::
 }
 
 void
-AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
+AudioStreamView::update_rec_regions (samplepos_t start, samplecnt_t cnt)
 {
 	if (!UIConfiguration::instance().get_show_waveforms_while_recording ()) {
 		return;
@@ -342,19 +342,19 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 			continue;
 		}
 
-		framecnt_t origlen = region->length();
+		samplecnt_t origlen = region->length();
 
 		if (region == rec_regions.back().first && rec_active) {
 
-			if (last_rec_data_frame > region->start()) {
+			if (last_rec_data_sample > region->start()) {
 
-				framecnt_t nlen = last_rec_data_frame - region->start();
+				samplecnt_t nlen = last_rec_data_sample - region->start();
 
 				if (nlen != region->length()) {
 
 					region->suspend_property_changes ();
 					/* set non-musical position / length */
-					region->set_position (_trackview.track()->get_capture_start_frame(n));
+					region->set_position (_trackview.track()->get_capture_start_sample(n));
 					region->set_length (nlen, 0);
 					region->resume_property_changes ();
 
@@ -374,14 +374,14 @@ AudioStreamView::update_rec_regions (framepos_t start, framecnt_t cnt)
 
 			} else {
 
-				framecnt_t nlen = _trackview.track()->get_captured_frames(n);
+				samplecnt_t nlen = _trackview.track()->get_captured_samples(n);
 
 				if (nlen != region->length()) {
 
 					if (region->source_length(0) >= region->start() + nlen) {
 
 						region->suspend_property_changes ();
-						region->set_position (_trackview.track()->get_capture_start_frame(n));
+						region->set_position (_trackview.track()->get_capture_start_sample(n));
 						region->set_length (nlen, 0);
 						region->resume_property_changes ();
 
@@ -438,7 +438,7 @@ AudioStreamView::hide_xfades_with (boost::shared_ptr<AudioRegion> ar)
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
 		if (arv) {
-			switch (arv->region()->coverage (ar->position(), ar->last_frame())) {
+			switch (arv->region()->coverage (ar->position(), ar->last_sample())) {
 			case Evoral::OverlapNone:
 				break;
 			default:

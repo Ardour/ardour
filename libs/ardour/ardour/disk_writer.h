@@ -48,12 +48,12 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	bool           recordable()  const { return _flags & Recordable; }
 
-	static framecnt_t chunk_frames() { return _chunk_frames; }
-	static framecnt_t default_chunk_frames ();
-	static void set_chunk_frames (framecnt_t n) { _chunk_frames = n; }
+	static samplecnt_t chunk_samples() { return _chunk_samples; }
+	static samplecnt_t default_chunk_samples ();
+	static void set_chunk_samples (samplecnt_t n) { _chunk_samples = n; }
 
-	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
-	void non_realtime_locate (framepos_t);
+	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
+	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
 
 	virtual XMLNode& state (bool full);
@@ -89,7 +89,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	PBD::Signal0<void> AlignmentStyleChanged;
 
-	void set_input_latency (framecnt_t);
+	void set_input_latency (samplecnt_t);
 
 	bool configure_io (ChanCount in, ChanCount out);
 
@@ -105,21 +105,21 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	int set_non_layered (bool yn);
 	bool can_become_destructive (bool& requires_bounce) const;
 
-	/** @return Start position of currently-running capture (in session frames) */
-	framepos_t current_capture_start() const { return capture_start_frame; }
-	framepos_t current_capture_end()   const { return capture_start_frame + capture_captured; }
-	framepos_t get_capture_start_frame (uint32_t n = 0) const;
-	framecnt_t get_captured_frames (uint32_t n = 0) const;
+	/** @return Start position of currently-running capture (in session samples) */
+	samplepos_t current_capture_start() const { return capture_start_sample; }
+	samplepos_t current_capture_end()   const { return capture_start_sample + capture_captured; }
+	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
+	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 
 	float buffer_load() const;
 
 	virtual void request_input_monitoring (bool) {}
 	virtual void ensure_input_monitoring (bool) {}
 
-	framecnt_t   capture_offset() const { return _capture_offset; }
+	samplecnt_t   capture_offset() const { return _capture_offset; }
 	virtual void set_capture_offset ();
 
-	int seek (framepos_t frame, bool complete_refill);
+	int seek (samplepos_t sample, bool complete_refill);
 
 	static PBD::Signal0<void> Overrun;
 
@@ -134,9 +134,9 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	PBD::Signal0<void> RecordEnableChanged;
 	PBD::Signal0<void> RecordSafeChanged;
 
-	void check_record_status (framepos_t transport_frame, bool can_record);
+	void check_record_status (samplepos_t transport_sample, bool can_record);
 
-	void transport_looped (framepos_t transport_frame);
+	void transport_looped (samplepos_t transport_sample);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 
 	void adjust_buffering ();
@@ -146,11 +146,11 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	int do_flush (RunContext context, bool force = false);
 
 	void get_input_sources ();
-	void prepare_record_status (framepos_t /*capture_start_frame*/);
+	void prepare_record_status (samplepos_t /*capture_start_sample*/);
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
-	void prepare_to_stop (framepos_t transport_pos, framepos_t audible_frame);
+	void prepare_to_stop (samplepos_t transport_pos, samplepos_t audible_sample);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
@@ -161,8 +161,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	bool prep_record_disable ();
 
 	void calculate_record_range (
-		Evoral::OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
-		framecnt_t& rec_nframes, framecnt_t& rec_offset
+		Evoral::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes,
+		samplecnt_t& rec_nframes, samplecnt_t& rec_offset
 		);
 
 	mutable Glib::Threads::Mutex capture_info_lock;
@@ -171,13 +171,13 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
   private:
 	gint         _record_enabled;
 	gint         _record_safe;
-	framepos_t    capture_start_frame;
-	framecnt_t    capture_captured;
+	samplepos_t    capture_start_sample;
+	samplecnt_t    capture_captured;
 	bool          was_recording;
-	framecnt_t    adjust_capture_position;
-	framecnt_t   _capture_offset;
-	framepos_t    first_recordable_frame;
-	framepos_t    last_recordable_frame;
+	samplecnt_t    adjust_capture_position;
+	samplecnt_t   _capture_offset;
+	samplepos_t    first_recordable_sample;
+	samplepos_t    last_recordable_sample;
 	int           last_possibly_recording;
 	AlignStyle   _alignment_style;
 	AlignChoice  _alignment_choice;
@@ -187,12 +187,12 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	std::list<boost::shared_ptr<Source> > _last_capture_sources;
 	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
 
-	static framecnt_t _chunk_frames;
+	static samplecnt_t _chunk_samples;
 
 	NoteMode                     _note_mode;
-	volatile gint                _frames_pending_write;
+	volatile gint                _samples_pending_write;
 	volatile gint                _num_captured_loops;
-	framepos_t                   _accumulated_capture_offset;
+	samplepos_t                   _accumulated_capture_offset;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	    the GUI to read (so that it can update itself).

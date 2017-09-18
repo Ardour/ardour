@@ -42,7 +42,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	ComboOption<TimecodeFormat>* smf = new ComboOption<TimecodeFormat> (
 		"timecode-format",
-		_("Timecode frames-per-second"),
+		_("Timecode samples-per-second"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_timecode_format),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_timecode_format)
 		);

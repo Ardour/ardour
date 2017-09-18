@@ -52,11 +52,11 @@ public:
 
 	void clear_all();
 
-	framepos_t start () const;
+	samplepos_t start () const;
 
 	/* "end" collides with list<>::end */
 
-	framepos_t end_frame () const;
+	samplepos_t end_sample () const;
 
 	const std::list<RegionView *>& by_layer() const { return _bylayer; }
 	void  by_position (std::list<RegionView*>&) const;

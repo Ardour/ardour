@@ -257,7 +257,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);
-	void transport_frame (lo_message msg);
+	void transport_sample (lo_message msg);
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
 
@@ -300,7 +300,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(route_get_sends);
 	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
-	PATH_CALLBACK_MSG(transport_frame);
+	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);
 	PATH_CALLBACK_MSG(record_enabled);
 	PATH_CALLBACK_MSG(refresh_surface);

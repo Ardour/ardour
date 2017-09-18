@@ -8,7 +8,7 @@
 namespace AudioGrapher {
 
 /* XXX: copied from libardour */
-typedef int64_t framecnt_t;
+typedef int64_t samplecnt_t;
 
 typedef uint8_t ChannelCount;
 

@@ -204,7 +204,7 @@ private:
 	void play_audition ();
 	void audition_active (bool);
 	void audition_seek (int, float);
-	void audition_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void audition_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 	void on_switch_page (GtkNotebookPage*, guint page_num);
 	void on_logscale_toggled (Gtk::ToggleButton*);
 	void on_rectivied_toggled (Gtk::ToggleButton*);

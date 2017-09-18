@@ -237,14 +237,14 @@ AlsaAudioSlave::process_thread ()
 					}
 
 					/* possible samples at end of first buffer chunk, 
-					 * incomplete audio-frame */
+					 * incomplete audio-sample */
 					uint32_t s = vec.len[0] - k * nchn;
 					assert (s < nchn);
 
 					for (c = 0; c < s; ++c) {
 						_pcmi.capt_chan (c, vec.buf[0] + k * nchn + c, 1, nchn);
 					}
-					/* cont'd audio-frame at second ringbuffer chunk */
+					/* cont'd audio-sample at second ringbuffer chunk */
 					for (; c < nchn; ++c) {
 						_pcmi.capt_chan (c, vec.buf[1] + c - s, spp - k, nchn);
 					}

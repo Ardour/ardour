@@ -55,14 +55,14 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              hidden;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              position_locked;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        length;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<double>            beat;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        sync_position;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framepos_t>        ancestral_start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<framecnt_t>        ancestral_length;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplepos_t>        ancestral_start;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<samplecnt_t>        ancestral_length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             stretch;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
@@ -104,56 +104,56 @@ class LIBARDOUR_API Region
 
 	/** How the region parameters play together:
 	 *
-	 * POSITION: first frame of the region along the timeline
-	 * START:    first frame of the region within its source(s)
-	 * LENGTH:   number of frames the region represents
+	 * POSITION: first sample of the region along the timeline
+	 * START:    first sample of the region within its source(s)
+	 * LENGTH:   number of samples the region represents
 	 */
-	framepos_t position ()  const { return _position; }
-	framepos_t start ()     const { return _start; }
-	framecnt_t length ()    const { return _length; }
+	samplepos_t position ()  const { return _position; }
+	samplepos_t start ()     const { return _start; }
+	samplecnt_t length ()    const { return _length; }
 	layer_t    layer ()     const { return _layer; }
 
-	framecnt_t source_length(uint32_t n) const;
+	samplecnt_t source_length(uint32_t n) const;
 	uint32_t   max_source_level () const;
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
-	framepos_t last_position () const { return _last_position; }
-	framecnt_t last_length ()   const { return _last_length; }
+	samplepos_t last_position () const { return _last_position; }
+	samplecnt_t last_length ()   const { return _last_length; }
 
-	framepos_t ancestral_start ()  const { return _ancestral_start; }
-	framecnt_t ancestral_length () const { return _ancestral_length; }
+	samplepos_t ancestral_start ()  const { return _ancestral_start; }
+	samplecnt_t ancestral_length () const { return _ancestral_length; }
 
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
 
-	void set_ancestral_data (framepos_t start, framecnt_t length, float stretch, float shift);
+	void set_ancestral_data (samplepos_t start, samplecnt_t length, float stretch, float shift);
 
-	frameoffset_t sync_offset (int& dir) const;
-	framepos_t sync_position () const;
+	sampleoffset_t sync_offset (int& dir) const;
+	samplepos_t sync_position () const;
 
-	framepos_t adjust_to_sync (framepos_t) const;
+	samplepos_t adjust_to_sync (samplepos_t) const;
 
-	/* first_frame() is an alias; last_frame() just hides some math */
+	/* first_sample() is an alias; last_sample() just hides some math */
 
-	framepos_t first_frame () const { return _position; }
-	framepos_t last_frame ()  const { return _position + _length - 1; }
+	samplepos_t first_sample () const { return _position; }
+	samplepos_t last_sample ()  const { return _position + _length - 1; }
 
 	/** Return the earliest possible value of _position given the
 	 *  value of _start within the region's sources
 	 */
-	framepos_t earliest_possible_position () const;
-	/** Return the last possible value of _last_frame given the
+	samplepos_t earliest_possible_position () const;
+	/** Return the last possible value of _last_sample given the
 	 *  value of _startin the regions's sources
 	 */
-	framepos_t latest_possible_frame () const;
+	samplepos_t latest_possible_sample () const;
 
-	Evoral::Range<framepos_t> last_range () const {
-		return Evoral::Range<framepos_t> (_last_position, _last_position + _last_length - 1);
+	Evoral::Range<samplepos_t> last_range () const {
+		return Evoral::Range<samplepos_t> (_last_position, _last_position + _last_length - 1);
 	}
 
-	Evoral::Range<framepos_t> range () const {
-		return Evoral::Range<framepos_t> (first_frame(), last_frame());
+	Evoral::Range<samplepos_t> range () const {
+		return Evoral::Range<samplepos_t> (first_sample(), last_sample());
 	}
 
 	bool hidden ()           const { return _hidden; }
@@ -185,8 +185,8 @@ class LIBARDOUR_API Region
 
 	void suspend_property_changes ();
 
-	bool covers (framepos_t frame) const {
-		return first_frame() <= frame && frame <= last_frame();
+	bool covers (samplepos_t sample) const {
+		return first_sample() <= sample && sample <= last_sample();
 	}
 
 	/** @return coverage of this region with the given range;
@@ -195,8 +195,8 @@ class LIBARDOUR_API Region
 	 *  OverlapEnd:      the range overlaps the end of this region.
 	 *  OverlapExternal: the range overlaps all of this region.
 	 */
-	Evoral::OverlapType coverage (framepos_t start, framepos_t end) const {
-		return Evoral::coverage (first_frame(), last_frame(), start, end);
+	Evoral::OverlapType coverage (samplepos_t start, samplepos_t end) const {
+		return Evoral::coverage (first_sample(), last_sample(), start, end);
 	}
 
 	bool equivalent (boost::shared_ptr<const Region>) const;
@@ -213,27 +213,27 @@ class LIBARDOUR_API Region
 
 	/* EDITING OPERATIONS */
 
-	void set_length (framecnt_t, const int32_t sub_num);
-	void set_start (framepos_t);
-	void set_position (framepos_t, int32_t sub_num = 0);
+	void set_length (samplecnt_t, const int32_t sub_num);
+	void set_start (samplepos_t);
+	void set_position (samplepos_t, int32_t sub_num = 0);
 	void set_position_music (double qn);
-	void set_initial_position (framepos_t);
-	void special_set_position (framepos_t);
+	void set_initial_position (samplepos_t);
+	void special_set_position (samplepos_t);
 	virtual void update_after_tempo_map_change (bool send_change = true);
-	void nudge_position (frameoffset_t);
+	void nudge_position (sampleoffset_t);
 
 	bool at_natural_position () const;
 	void move_to_natural_position ();
 
-	void move_start (frameoffset_t distance, const int32_t sub_num = 0);
-	void trim_front (framepos_t new_position, const int32_t sub_num = 0);
-	void trim_end (framepos_t new_position, const int32_t sub_num = 0);
-	void trim_to (framepos_t position, framecnt_t length, const int32_t sub_num = 0);
+	void move_start (sampleoffset_t distance, const int32_t sub_num = 0);
+	void trim_front (samplepos_t new_position, const int32_t sub_num = 0);
+	void trim_end (samplepos_t new_position, const int32_t sub_num = 0);
+	void trim_to (samplepos_t position, samplecnt_t length, const int32_t sub_num = 0);
 
-	virtual void fade_range (framepos_t, framepos_t) {}
+	virtual void fade_range (samplepos_t, samplepos_t) {}
 
-	void cut_front (framepos_t new_position, const int32_t sub_num = 0);
-	void cut_end (framepos_t new_position, const int32_t sub_num = 0);
+	void cut_front (samplepos_t new_position, const int32_t sub_num = 0);
+	void cut_end (samplepos_t new_position, const int32_t sub_num = 0);
 
 	void set_layer (layer_t l); /* ONLY Playlist can call this */
 	void raise ();
@@ -241,7 +241,7 @@ class LIBARDOUR_API Region
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void set_sync_position (framepos_t n);
+	void set_sync_position (samplepos_t n);
 	void clear_sync_position ();
 	void set_hidden (bool yn);
 	void set_muted (bool yn);
@@ -292,7 +292,7 @@ class LIBARDOUR_API Region
 	virtual bool is_dependent() const { return false; }
 	virtual bool depends_on (boost::shared_ptr<Region> /*other*/) const { return false; }
 
-	virtual void add_transient (framepos_t) {
+	virtual void add_transient (samplepos_t) {
 		// no transients, but its OK
 	}
 
@@ -300,11 +300,11 @@ class LIBARDOUR_API Region
 		// no transients, but its OK
 	}
 
-	virtual void update_transient (framepos_t /* old_position */, framepos_t /* new_position */) {
+	virtual void update_transient (samplepos_t /* old_position */, samplepos_t /* new_position */) {
 		// no transients, but its OK
 	}
 
-	virtual void remove_transient (framepos_t /* where */) {
+	virtual void remove_transient (samplepos_t /* where */) {
 		// no transients, but its OK
 	}
 
@@ -354,13 +354,13 @@ class LIBARDOUR_API Region
 	Region (boost::shared_ptr<const Region>);
 
 	/** Construct a region from another region, at an offset within that region */
-	Region (boost::shared_ptr<const Region>, ARDOUR::MusicFrame start_offset);
+	Region (boost::shared_ptr<const Region>, ARDOUR::MusicSample start_offset);
 
 	/** Construct a region as a copy of another region, but with different sources */
 	Region (boost::shared_ptr<const Region>, const SourceList&);
 
 	/** Constructor for derived types only */
-	Region (Session& s, framepos_t start, framecnt_t length, const std::string& name, DataType);
+	Region (Session& s, samplepos_t start, samplecnt_t length, const std::string& name, DataType);
 
 	virtual bool can_trim_start_before_source_start () const {
 		return false;
@@ -371,11 +371,11 @@ class LIBARDOUR_API Region
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	void post_set (const PBD::PropertyChange&);
-	virtual void set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
+	virtual void set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num);
 	virtual void set_position_music_internal (double qn);
-	virtual void set_length_internal (framecnt_t, const int32_t sub_num);
-	virtual void set_start_internal (framecnt_t, const int32_t sub_num = 0);
-	bool verify_start_and_length (framepos_t, framecnt_t&);
+	virtual void set_length_internal (samplecnt_t, const int32_t sub_num);
+	virtual void set_start_internal (samplecnt_t, const int32_t sub_num = 0);
+	bool verify_start_and_length (samplepos_t, samplecnt_t&);
 	void first_edit ();
 
 	DataType _type;
@@ -384,12 +384,12 @@ class LIBARDOUR_API Region
 	PBD::Property<bool>        _left_of_split;
 	PBD::Property<bool>        _right_of_split;
 	PBD::Property<bool>        _valid_transients;
-	PBD::Property<framepos_t>  _start;
-	PBD::Property<framecnt_t>  _length;
-	PBD::Property<framepos_t>  _position;
+	PBD::Property<samplepos_t>  _start;
+	PBD::Property<samplecnt_t>  _length;
+	PBD::Property<samplepos_t>  _position;
 	PBD::Property<double>      _beat;
 	/** Sync position relative to the start of our file */
-	PBD::Property<framepos_t>  _sync_position;
+	PBD::Property<samplepos_t>  _sync_position;
 
 	double                  _quarter_note;
 
@@ -399,31 +399,31 @@ class LIBARDOUR_API Region
 
 	boost::weak_ptr<ARDOUR::Playlist> _playlist;
 
-	void merge_features (AnalysisFeatureList&, const AnalysisFeatureList&, const frameoffset_t) const;
+	void merge_features (AnalysisFeatureList&, const AnalysisFeatureList&, const sampleoffset_t) const;
 
 	AnalysisFeatureList     _onsets; // used by the Ferret (Aubio OnsetDetector)
 
 	// _transient_user_start is covered by  _valid_transients
 	AnalysisFeatureList     _user_transients; // user added
-	framepos_t              _transient_user_start; // region's _start relative to user_transients
+	samplepos_t              _transient_user_start; // region's _start relative to user_transients
 
 	// these are used by Playlist::find_next_transient() in absence of onsets
 	AnalysisFeatureList     _transients; // Source Analysis (QM Transient), user read-only
-	framepos_t              _transient_analysis_start;
-	framepos_t              _transient_analysis_end;
+	samplepos_t              _transient_analysis_start;
+	samplepos_t              _transient_analysis_end;
 
   private:
 	void mid_thaw (const PBD::PropertyChange&);
 
-	virtual void trim_to_internal (framepos_t position, framecnt_t length, const int32_t sub_num);
-	void modify_front (framepos_t new_position, bool reset_fade, const int32_t sub_num);
-	void modify_end (framepos_t new_position, bool reset_fade, const int32_t sub_num);
+	virtual void trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num);
+	void modify_front (samplepos_t new_position, bool reset_fade, const int32_t sub_num);
+	void modify_end (samplepos_t new_position, bool reset_fade, const int32_t sub_num);
 
 	void maybe_uncopy ();
 
-	bool verify_start (framepos_t);
-	bool verify_start_mutable (framepos_t&_start);
-	bool verify_length (framecnt_t&);
+	bool verify_start (samplepos_t);
+	bool verify_start_mutable (samplepos_t&_start);
+	bool verify_length (samplecnt_t&);
 
 	virtual void recompute_at_start () = 0;
 	virtual void recompute_at_end () = 0;
@@ -438,15 +438,15 @@ class LIBARDOUR_API Region
 	PBD::Property<bool>        _external;
 	PBD::Property<bool>        _hidden;
 	PBD::Property<bool>        _position_locked;
-	PBD::Property<framepos_t>  _ancestral_start;
-	PBD::Property<framecnt_t>  _ancestral_length;
+	PBD::Property<samplepos_t>  _ancestral_start;
+	PBD::Property<samplecnt_t>  _ancestral_length;
 	PBD::Property<float>       _stretch;
 	PBD::Property<float>       _shift;
 	PBD::EnumProperty<PositionLockStyle> _position_lock_style;
 	PBD::Property<uint64_t>    _layering_index;
 
-	framecnt_t              _last_length;
-	framepos_t              _last_position;
+	samplecnt_t              _last_length;
+	samplepos_t              _last_position;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
 

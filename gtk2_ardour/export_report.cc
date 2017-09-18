@@ -123,9 +123,9 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 		SoundFileInfo info;
 		std::string errmsg;
 
-		framecnt_t file_length = 0;
-		framecnt_t sample_rate = 0;
-		framecnt_t start_off = 0;
+		samplecnt_t file_length = 0;
+		samplecnt_t sample_rate = 0;
+		samplecnt_t start_off = 0;
 		unsigned int channels = 0;
 		std::string file_fmt;
 
@@ -141,7 +141,7 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 
 			/* File Info Table */
 
-			framecnt_t const nfr = _session ? _session->nominal_frame_rate () : 25;
+			samplecnt_t const nfr = _session ? _session->nominal_sample_rate () : 25;
 			double src_coef = (double) nfr / info.samplerate;
 
 			l = manage (new Label (_("Format:"), ALIGN_END));
@@ -961,7 +961,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 				SourceFactory::createExternal (DataType::AUDIO, *_session,
 										 path, n,
 										 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
-			if (afs->sample_rate() != _session->nominal_frame_rate()) {
+			if (afs->sample_rate() != _session->nominal_sample_rate()) {
 				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcGood));
 				srclist.push_back(sfs);
 			} else {
@@ -1034,7 +1034,7 @@ ExportReport::on_switch_page (GtkNotebookPage*, guint page_num)
 }
 
 void
-ExportReport::audition_progress (framecnt_t pos, framecnt_t len)
+ExportReport::audition_progress (samplecnt_t pos, samplecnt_t len)
 {
 	if (_audition_num == _page_num && timeline.find (_audition_num) != timeline.end ()) {
 		const float p = (float)pos / len;
@@ -1169,7 +1169,7 @@ ExportReport::draw_waveform (Cairo::RefPtr<Cairo::ImageSurface>& wave, ExportAna
 
 	// >= -1dBTP (coeff >= .89125, libs/vamp-plugins/TruePeak.cpp)
 	cr->set_source_rgba (1.0, 0.7, 0, 0.7);
-	for (std::set<framepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
+	for (std::set<samplepos_t>::const_iterator i = p->truepeakpos[c].begin (); i != p->truepeakpos[c].end (); ++i) {
 		cr->move_to (m_l + (*i) - .5, clip_top);
 		cr->line_to (m_l + (*i) - .5, clip_bot);
 		cr->stroke ();

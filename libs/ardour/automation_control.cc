@@ -100,7 +100,7 @@ double
 AutomationControl::get_value() const
 {
 	bool from_list = alist() && alist()->automation_playback();
-	return Control::get_double (from_list, _session.transport_frame());
+	return Control::get_double (from_list, _session.transport_sample());
 }
 
 double
@@ -158,7 +158,7 @@ AutomationControl::grouped_controls () const
 }
 
 void
-AutomationControl::automation_run (framepos_t start, pframes_t nframes)
+AutomationControl::automation_run (samplepos_t start, pframes_t nframes)
 {
 	if (!automation_playback ()) {
 		return;
@@ -186,7 +186,7 @@ void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
 	boost::shared_ptr<AutomationList> al = alist ();
-	const framepos_t pos = _session.transport_frame();
+	const samplepos_t pos = _session.transport_sample();
 	bool to_list;
 
 	/* We cannot use ::get_value() here since that is virtual, and intended
@@ -255,8 +255,8 @@ AutomationControl::set_automation_state (AutoState as)
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		} else if (as & (Touch | Latch)) {
 			if (alist()->empty()) {
-				Control::set_double (val, _session.current_start_frame (), true);
-				Control::set_double (val, _session.current_end_frame (), true);
+				Control::set_double (val, _session.current_start_sample (), true);
+				Control::set_double (val, _session.current_end_sample (), true);
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {

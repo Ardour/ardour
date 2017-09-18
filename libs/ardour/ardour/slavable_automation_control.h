@@ -46,7 +46,7 @@ public:
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
 
-	virtual void automation_run (framepos_t start, pframes_t nframes);
+	virtual void automation_run (samplepos_t start, pframes_t nframes);
 
 	double get_masters_value () const {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
@@ -59,7 +59,7 @@ public:
 		return reduce_by_masters_locked (val, ignore_automation_state);
 	}
 
-	bool get_masters_curve (framepos_t s, framepos_t e, float* v, framecnt_t l) const {
+	bool get_masters_curve (samplepos_t s, samplepos_t e, float* v, samplecnt_t l) const {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_masters_curve_locked (s, e, v, l);
 	}
@@ -137,15 +137,15 @@ protected:
 	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
 
-	virtual bool get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const;
-	bool masters_curve_multiply (framepos_t, framepos_t, float*, framecnt_t) const;
+	virtual bool get_masters_curve_locked (samplepos_t, samplepos_t, float*, samplecnt_t) const;
+	bool masters_curve_multiply (samplepos_t, samplepos_t, float*, samplecnt_t) const;
 
 	virtual double reduce_by_masters_locked (double val, bool) const;
 	virtual double scale_automation_callback (double val, double ratio) const;
 
 	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
-	virtual bool boolean_automation_run_locked (framepos_t start, pframes_t len);
-	bool boolean_automation_run (framepos_t start, pframes_t len);
+	virtual bool boolean_automation_run_locked (samplepos_t start, pframes_t len);
+	bool boolean_automation_run (samplepos_t start, pframes_t len);
 
 	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::weak_ptr<AutomationControl>);
 	virtual double get_masters_value_locked () const;

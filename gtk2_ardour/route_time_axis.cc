@@ -867,7 +867,7 @@ RouteTimeAxisView::build_display_menu ()
 }
 
 void
-RouteTimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
+RouteTimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer)
 {
 	TimeAxisView::show_timestretch (start, end, layers, layer);
 
@@ -1292,7 +1292,7 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
  * @param results List to add things to.
  */
 void
-RouteTimeAxisView::get_selectables (framepos_t start, framepos_t end, double top, double bot, list<Selectable*>& results, bool within)
+RouteTimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
 	if ((_view && ((top < 0.0 && bot < 0.0))) || touched (top, bot)) {
 		_view->get_selectables (start, end, top, bot, results, within);
@@ -1360,7 +1360,7 @@ RouteTimeAxisView::name_entry_changed (string const& str)
 }
 
 boost::shared_ptr<Region>
-RouteTimeAxisView::find_next_region (framepos_t pos, RegionPoint point, int32_t dir)
+RouteTimeAxisView::find_next_region (samplepos_t pos, RegionPoint point, int32_t dir)
 {
 	boost::shared_ptr<Playlist> pl = playlist ();
 
@@ -1371,8 +1371,8 @@ RouteTimeAxisView::find_next_region (framepos_t pos, RegionPoint point, int32_t 
 	return boost::shared_ptr<Region> ();
 }
 
-framepos_t
-RouteTimeAxisView::find_next_region_boundary (framepos_t pos, int32_t dir)
+samplepos_t
+RouteTimeAxisView::find_next_region_boundary (samplepos_t pos, int32_t dir)
 {
 	boost::shared_ptr<Playlist> pl = playlist ();
 
@@ -1485,7 +1485,7 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 }
 
 bool
-RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+RouteTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	if (!is_track()) {
 		return false;
@@ -1503,15 +1503,15 @@ RouteTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteConte
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("paste to %1\n", pos));
 
 	/* add multi-paste offset if applicable */
-	std::pair<framepos_t, framepos_t> extent   = (*p)->get_extent();
-	const framecnt_t                  duration = extent.second - extent.first;
+	std::pair<samplepos_t, samplepos_t> extent   = (*p)->get_extent();
+	const samplecnt_t                  duration = extent.second - extent.first;
 	pos += _editor.get_paste_offset(pos, ctx.count, duration);
 
 	pl->clear_changes ();
 	pl->clear_owned_changes ();
 	if (Config->get_edit_mode() == Ripple) {
-		std::pair<framepos_t, framepos_t> extent = (*p)->get_extent_with_endspace();
-		framecnt_t amount = extent.second - extent.first;
+		std::pair<samplepos_t, samplepos_t> extent = (*p)->get_extent_with_endspace();
+		samplecnt_t amount = extent.second - extent.first;
 		pl->ripple(pos, amount * ctx.times, boost::shared_ptr<Region>());
 	}
 	pl->paste (*p, pos, ctx.times, sub_num);

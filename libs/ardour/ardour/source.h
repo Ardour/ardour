@@ -65,10 +65,10 @@ class LIBARDOUR_API Source : public SessionObject
 	void stamp (time_t when) { _timestamp = when; }
 
 	virtual bool       empty () const = 0;
-	virtual framecnt_t length (framepos_t pos) const = 0;
-	virtual void       update_length (framecnt_t cnt) = 0;
+	virtual samplecnt_t length (samplepos_t pos) const = 0;
+	virtual void       update_length (samplecnt_t cnt) = 0;
 
-	virtual framepos_t natural_position() const { return 0; }
+	virtual samplepos_t natural_position() const { return 0; }
 
 	void mark_for_remove();
 
@@ -98,8 +98,8 @@ class LIBARDOUR_API Source : public SessionObject
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 
-	framepos_t    timeline_position() const { return _timeline_position; }
-	virtual void set_timeline_position (framepos_t pos);
+	samplepos_t    timeline_position() const { return _timeline_position; }
+	virtual void set_timeline_position (samplepos_t pos);
 
 	void set_allow_remove_if_empty (bool yn);
 
@@ -119,7 +119,7 @@ class LIBARDOUR_API Source : public SessionObject
 	DataType            _type;
 	Flag                _flags;
 	time_t              _timestamp;
-	framepos_t          _timeline_position;
+	samplepos_t          _timeline_position;
 	bool                _analysed;
         mutable Glib::Threads::Mutex _lock;
         mutable Glib::Threads::Mutex _analysis_lock;

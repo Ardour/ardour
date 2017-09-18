@@ -1,4 +1,4 @@
-#include "framepos_plus_beats_test.h"
+#include "samplepos_plus_beats_test.h"
 #include "ardour/tempo.h"
 #include "timecode/bbt_time.h"
 
@@ -15,7 +15,7 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	int const sampling_rate = 48000;
 	int const bpm = 120;
 
-	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
+	double const samples_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
 	Tempo tempo (bpm, 4.0);
@@ -25,12 +25,12 @@ FrameposPlusBeatsTest::singleTempoTest ()
 	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, AudioTime);
 
 	/* Add 1 beat to beat 3 of the first bar */
-	framepos_t r = map.framepos_plus_qn (frames_per_beat * 2, Evoral::Beats(1));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (frames_per_beat * 3), r);
+	samplepos_t r = map.samplepos_plus_qn (samples_per_beat * 2, Evoral::Beats(1));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (samples_per_beat * 3), r);
 
-	/* Add 4 beats to a -ve frame of 1 beat before zero */
-	r = map.framepos_plus_qn (-frames_per_beat * 1, Evoral::Beats(4));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (frames_per_beat * 3), r);
+	/* Add 4 beats to a -ve sample of 1 beat before zero */
+	r = map.samplepos_plus_qn (-samples_per_beat * 1, Evoral::Beats(4));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (samples_per_beat * 3), r);
 }
 
 /* Test adding things that overlap a tempo change */
@@ -55,7 +55,7 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
+	  0 samples                                              288e3 samples
 	  0 pulses                                              3 pulses
 	  |                 |                 |                 |                 |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
@@ -70,16 +70,16 @@ FrameposPlusBeatsTest::doubleTempoTest ()
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_qn (24e3, Evoral::Beats(1));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (48e3), r);
+	samplepos_t r = map.samplepos_plus_qn (24e3, Evoral::Beats(1));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (48e3), r);
 
 	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3, Evoral::Beats(2));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3, Evoral::Beats(2));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 
 	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 }
 
 /* Same as doubleTempoTest () except put a meter change at the same time as the
@@ -108,7 +108,7 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
+	  0 samples                                              288e3 samples
 	  0 pulses                                              3 pulses
 	  |                 |                 |                 |             |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
@@ -125,16 +125,16 @@ FrameposPlusBeatsTest::doubleTempoWithMeterTest ()
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_qn (24e3, Evoral::Beats(1));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (48e3), r);
+	samplepos_t r = map.samplepos_plus_qn (24e3, Evoral::Beats(1));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (48e3), r);
 
 	/* Add 2 beats to 3|4 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3, Evoral::Beats(2));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3, Evoral::Beats(2));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 
 	/* Add 2.5 beats to 3|3|960 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 }
 
 /* Same as doubleTempoWithMeterTest () except use odd meter divisors
@@ -164,7 +164,7 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 	  120bpm                                    5/8                    240bpm
 	  0 beats                                   9 quarter note beats   12 quarter note beats
 	                                            9 meter-based beat     15 meter-based beat
-	  0 frames                                                         288e3 frames
+	  0 samples                                                         288e3 samples
 	  0 pulses                                  |                      3 pulses
 	  |             |             |             |                      |
 	  | 1.1 1.2 1.3 | 2.1 2.2 2.3 | 3.1 3.2 3.3 |4.14.24.34.44.5|5.15.2^5.35.45.5|
@@ -181,16 +181,16 @@ FrameposPlusBeatsTest::doubleTempoWithComplexMeterTest ()
 	/* Now some tests */
 
 	/* Add 1 beat to 1|2 */
-	framepos_t r = map.framepos_plus_qn (24e3, Evoral::Beats(1));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (48e3), r);
+	samplepos_t r = map.samplepos_plus_qn (24e3, Evoral::Beats(1));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (48e3), r);
 
 	/* Add 2 beats to 5|1 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3, Evoral::Beats(2));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3, Evoral::Beats(2));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 
 	/* Add 2.5 beats to 4|5 (over the tempo change) */
-	r = map.framepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
-	CPPUNIT_ASSERT_EQUAL (framepos_t (264e3 + 24e3 + 12e3), r);
+	r = map.samplepos_plus_qn (264e3 - 12e3, Evoral::Beats(2.5));
+	CPPUNIT_ASSERT_EQUAL (samplepos_t (264e3 + 24e3 + 12e3), r);
 }
 
 

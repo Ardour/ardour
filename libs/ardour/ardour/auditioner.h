@@ -47,10 +47,10 @@ class LIBARDOUR_API Auditioner : public Track
 
 	void audition_region (boost::shared_ptr<Region>);
 
-	void seek_to_frame (frameoffset_t pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = pos; }}
-	void seek_to_percent (float const pos) { if (_seek_frame < 0 && !_seeking) { _seek_frame = floorf(length * pos / 100.0); }}
+	void seek_to_sample (sampleoffset_t pos) { if (_seek_sample < 0 && !_seeking) { _seek_sample = pos; }}
+	void seek_to_percent (float const pos) { if (_seek_sample < 0 && !_seeking) { _seek_sample = floorf(length * pos / 100.0); }}
 
-	int play_audition (framecnt_t nframes);
+	int play_audition (samplecnt_t nframes);
 
 	MonitorState monitoring_state () const;
 
@@ -63,20 +63,20 @@ class LIBARDOUR_API Auditioner : public Track
 
 	virtual ChanCount input_streams () const;
 
-	frameoffset_t seek_frame() const { return _seeking ? _seek_frame : -1;}
-	void seek_response(frameoffset_t pos) {
+	sampleoffset_t seek_sample() const { return _seeking ? _seek_sample : -1;}
+	void seek_response(sampleoffset_t pos) {
 		_seek_complete = true;
-		if (_seeking) { current_frame = pos; _seek_complete = true;}
+		if (_seeking) { current_sample = pos; _seek_complete = true;}
 	}
 
-	PBD::Signal2<void, ARDOUR::framecnt_t, ARDOUR::framecnt_t> AuditionProgress;
+	PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> AuditionProgress;
 
 	/* Track */
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
 	DataType data_type () const;
 
-	int roll_audio (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
-	int roll_midi (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	int roll_audio (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
+	int roll_midi (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
 
 	/* fake track */
 	void set_state_part_two () {}
@@ -88,20 +88,20 @@ class LIBARDOUR_API Auditioner : public Track
 	boost::shared_ptr<Region> bounce (InterThreadInfo&)
 		{ return boost::shared_ptr<Region> (); }
 
-	boost::shared_ptr<Region> bounce_range (framepos_t, framepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool)
+	boost::shared_ptr<Region> bounce_range (samplepos_t, samplepos_t, InterThreadInfo&, boost::shared_ptr<Processor>, bool)
 		{ return boost::shared_ptr<Region> (); }
 
-	int export_stuff (BufferSet&, framepos_t, framecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
+	int export_stuff (BufferSet&, samplepos_t, samplecnt_t, boost::shared_ptr<Processor>, bool, bool, bool)
 		{ return -1; }
 
   private:
 	boost::shared_ptr<AudioRegion> the_region;
 	boost::shared_ptr<MidiRegion> midi_region;
-	framepos_t current_frame;
+	samplepos_t current_sample;
 	mutable gint _auditioning;
 	Glib::Threads::Mutex lock;
-	framecnt_t length;
-	frameoffset_t _seek_frame;
+	samplecnt_t length;
+	sampleoffset_t _seek_sample;
 	bool _seeking;
 	bool _seek_complete;
 	bool via_monitor;
@@ -118,7 +118,7 @@ class LIBARDOUR_API Auditioner : public Track
 	static void *_drop_ports (void *);
 	void actually_drop_ports ();
 	void output_changed (IOChange, void*);
-	frameoffset_t _import_position;
+	sampleoffset_t _import_position;
 };
 
 }; /* namespace ARDOUR */

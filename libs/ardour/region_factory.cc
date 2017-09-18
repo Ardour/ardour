@@ -54,7 +54,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 
-		ret = boost::shared_ptr<Region> (new AudioRegion (ar, MusicFrame (0, 0)));
+		ret = boost::shared_ptr<Region> (new AudioRegion (ar, MusicSample (0, 0)));
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
@@ -71,7 +71,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 			source->set_ancestor_name(mr->sources().front()->name());
 			ret = mr->clone(source);
 		} else {
-			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicFrame (0, 0)));
+			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicSample (0, 0)));
 		}
 
 	} else {
@@ -142,7 +142,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, MusicFrame offset, const PropertyList& plist, bool announce)
+RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, const PropertyList& plist, bool announce)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;

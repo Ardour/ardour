@@ -57,7 +57,7 @@ Panner::distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pfram
 
 void
 Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
-                              framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers)
+                              samplepos_t start, samplepos_t end, pframes_t nframes, pan_t** buffers)
 {
 	uint32_t which = 0;
 

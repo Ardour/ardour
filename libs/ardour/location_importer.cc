@@ -104,7 +104,7 @@ LocationImporter::~LocationImporter ()
 string
 LocationImporter::get_info () const
 {
-	framepos_t start, end;
+	samplepos_t start, end;
 	Timecode::Time start_time, end_time;
 
 	// Get sample positions

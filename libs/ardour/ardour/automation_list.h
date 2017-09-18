@@ -40,7 +40,7 @@
 namespace ARDOUR {
 
 class AutomationList;
-class DoubleBeatsFramesConverter;
+class DoubleBeatsSamplesConverter;
 
 /** A SharedStatefulProperty for AutomationLists */
 class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
@@ -82,7 +82,7 @@ public:
 	AutomationList& operator= (const AutomationList&);
 
 	void thaw ();
-	bool paste (const ControlList&, double, DoubleBeatsFramesConverter const&);
+	bool paste (const ControlList&, double, DoubleBeatsSamplesConverter const&);
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const;

@@ -184,11 +184,11 @@ static OSStatus render_callback_ptr (
 		AudioUnitRenderActionFlags* ioActionFlags,
 		const AudioTimeStamp* inTimeStamp,
 		UInt32 inBusNumber,
-		UInt32 inNumberFrames,
+		UInt32 inNumberSamples,
 		AudioBufferList* ioData)
 {
 	CoreAudioPCM * d = static_cast<CoreAudioPCM*> (inRefCon);
-	return d->render_callback(ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, ioData);
+	return d->render_callback(ioActionFlags, inTimeStamp, inBusNumber, inNumberSamples, ioData);
 }
 
 
@@ -752,7 +752,7 @@ static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 	printf ("  Format ID:%.*s\n",        (int)sizeof(inDesc->mFormatID), (char*)&inDesc->mFormatID);
 	printf ("  Format Flags:%X\n",       (unsigned int)inDesc->mFormatFlags);
 	printf ("  Bytes per Packet:%d\n",   (int)inDesc->mBytesPerPacket);
-	printf ("  Frames per Packet:%d\n",  (int)inDesc->mFramesPerPacket);
+	printf ("  Samples per Packet:%d\n",  (int)inDesc->mSamplesPerPacket);
 	printf ("  Bytes per Frame:%d\n",    (int)inDesc->mBytesPerFrame);
 	printf ("  Channels per Frame:%d\n", (int)inDesc->mChannelsPerFrame);
 	printf ("  Bits per Channel:%d\n",   (int)inDesc->mBitsPerChannel);
@@ -895,7 +895,7 @@ CoreAudioPCM::pcm_start (
 		srcFormat.mFormatID = kAudioFormatLinearPCM;
 		srcFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
 		srcFormat.mBytesPerPacket = sizeof(float);
-		srcFormat.mFramesPerPacket = 1;
+		srcFormat.mSamplesPerPacket = 1;
 		srcFormat.mBytesPerFrame = sizeof(float);
 		srcFormat.mChannelsPerFrame = chn_in;
 		srcFormat.mBitsPerChannel = 32;
@@ -903,8 +903,8 @@ CoreAudioPCM::pcm_start (
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, sizeof(AudioStreamBasicDescription));
 		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; _state = -6; goto error; }
 
-		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; _state = -6; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumSamplesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumSamplesPerSlice, Input"; _state = -6; goto error; }
 	}
 
 	if (chn_out > 0) {
@@ -912,7 +912,7 @@ CoreAudioPCM::pcm_start (
 		dstFormat.mFormatID = kAudioFormatLinearPCM;
 		dstFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
 		dstFormat.mBytesPerPacket = sizeof(float);
-		dstFormat.mFramesPerPacket = 1;
+		dstFormat.mSamplesPerPacket = 1;
 		dstFormat.mBytesPerFrame = sizeof(float);
 		dstFormat.mChannelsPerFrame = chn_out;
 		dstFormat.mBitsPerChannel = 32;
@@ -920,8 +920,8 @@ CoreAudioPCM::pcm_start (
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, sizeof(AudioStreamBasicDescription));
 		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; _state = -5; goto error; }
 
-		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; _state = -5; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumSamplesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumSamplesPerSlice, Output"; _state = -5; goto error; }
 	}
 
 	/* read back stream descriptions */
@@ -1111,19 +1111,19 @@ CoreAudioPCM::render_callback (
 		AudioUnitRenderActionFlags* ioActionFlags,
 		const AudioTimeStamp* inTimeStamp,
 		UInt32 inBusNumber,
-		UInt32 inNumberFrames,
+		UInt32 inNumberSamples,
 		AudioBufferList* ioData)
 {
 	OSStatus retVal = kAudioHardwareNoError;
 
-	if (_samples_per_period < inNumberFrames) {
+	if (_samples_per_period < inNumberSamples) {
 #ifndef NDEBUG
 		printf("samples per period exceeds configured value, cycle skipped (%u < %u)\n",
-				(unsigned int)_samples_per_period, (unsigned int)inNumberFrames);
+				(unsigned int)_samples_per_period, (unsigned int)inNumberSamples);
 #endif
 		for (uint32_t i = 0; _playback_channels > 0 && i < ioData->mNumberBuffers; ++i) {
 			float* ob = (float*) ioData->mBuffers[i].mData;
-			memset(ob, 0, sizeof(float) * inNumberFrames);
+			memset(ob, 0, sizeof(float) * inNumberSamples);
 		}
 		return noErr;
 	}
@@ -1131,17 +1131,17 @@ CoreAudioPCM::render_callback (
 	assert(_playback_channels == 0 || ioData->mNumberBuffers == _playback_channels);
 
 	UInt64 cur_cycle_start = AudioGetCurrentHostTime ();
-	_cur_samples_per_period = inNumberFrames;
+	_cur_samples_per_period = inNumberSamples;
 
 	if (_capture_channels > 0) {
 		_input_audio_buffer_list->mNumberBuffers = _capture_channels;
 		for (uint32_t i = 0; i < _capture_channels; ++i) {
 			_input_audio_buffer_list->mBuffers[i].mNumberChannels = 1;
-			_input_audio_buffer_list->mBuffers[i].mDataByteSize = inNumberFrames * sizeof(float);
+			_input_audio_buffer_list->mBuffers[i].mDataByteSize = inNumberSamples * sizeof(float);
 			_input_audio_buffer_list->mBuffers[i].mData = NULL;
 		}
 
-		retVal = AudioUnitRender(_auhal, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberFrames, _input_audio_buffer_list);
+		retVal = AudioUnitRender(_auhal, ioActionFlags, inTimeStamp, AUHAL_INPUT_ELEMENT, inNumberSamples, _input_audio_buffer_list);
 	}
 
 	if (retVal != kAudioHardwareNoError) {
@@ -1162,7 +1162,7 @@ CoreAudioPCM::render_callback (
 	int rv = -1;
 
 	if (_process_callback) {
-		rv = _process_callback(_process_arg, inNumberFrames, cur_cycle_start);
+		rv = _process_callback(_process_arg, inNumberSamples, cur_cycle_start);
 	}
 
 	_in_process = false;
@@ -1171,7 +1171,7 @@ CoreAudioPCM::render_callback (
 		// clear output
 		for (uint32_t i = 0; i < ioData->mNumberBuffers; ++i) {
 			float* ob = (float*) ioData->mBuffers[i].mData;
-			memset(ob, 0, sizeof(float) * inNumberFrames);
+			memset(ob, 0, sizeof(float) * inNumberSamples);
 		}
 	}
 	return noErr;

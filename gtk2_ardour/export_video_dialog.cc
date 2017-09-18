@@ -96,7 +96,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	, optimizations_checkbox (_("Codec Optimizations:"))
 	, optimizations_label ("-")
 	, deinterlace_checkbox (_("Deinterlace"))
-	, bframes_checkbox (_("Use [2] B-frames (MPEG 2 or 4 only)"))
+	, bframes_checkbox (_("Use [2] B-samples (MPEG 2 or 4 only)"))
 	, fps_checkbox (_("Override FPS (Default is to retain FPS from the input video file):"))
 	, meta_checkbox (_("Include Session Metadata"))
 #if 1 /* tentative debug mode */
@@ -334,14 +334,14 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 	outfn_path_entry.set_text (_session->session_directory().export_path() + G_DIR_SEPARATOR +"export.avi");
 
 	// TODO remember setting for export-range.. somehow, (let explicit range override)
-	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+	sampleoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
 	if (av_offset < 0 ) {
 		insnd_combo.append_text (_("from 00:00:00:00 to the video's end"));
 	} else {
 		insnd_combo.append_text (_("from the video's start to the video's end"));
 	}
 	if (!export_range.empty()) {
-		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_frame()
+		insnd_combo.append_text (_("Selected range"));  // TODO show export_range.start() -> export_range.end_sample()
 	}
 	if (range) {
 		insnd_combo.set_active(2);
@@ -424,7 +424,7 @@ ExportVideoDialog::apply_state (TimeSelection &tme, bool range)
 		if (node->get_property (X_("Deinterlace"), yn)) {
 			deinterlace_checkbox.set_active (yn);
 		}
-		if (node->get_property (X_("BFrames"), yn)) {
+		if (node->get_property (X_("BSamples"), yn)) {
 			bframes_checkbox.set_active (yn);
 		}
 		if (node->get_property (X_("ChangeFPS"), yn)) {
@@ -513,7 +513,7 @@ ExportVideoDialog::get_state ()
 	node->set_property (X_("TwoPassEncode"), twopass_checkbox.get_active());
 	node->set_property (X_("CodecOptimzations"), optimizations_checkbox.get_active());
 	node->set_property (X_("Deinterlace"), deinterlace_checkbox.get_active());
-	node->set_property (X_("BFrames"), bframes_checkbox.get_active());
+	node->set_property (X_("BSamples"), bframes_checkbox.get_active());
 	node->set_property (X_("ChangeFPS"), fps_checkbox.get_active());
 	node->set_property (X_("Metadata"), meta_checkbox.get_active());
 
@@ -555,7 +555,7 @@ ExportVideoDialog::abort_clicked ()
 }
 
 void
-ExportVideoDialog::update_progress (framecnt_t c, framecnt_t a)
+ExportVideoDialog::update_progress (samplecnt_t c, samplecnt_t a)
 {
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.1);
@@ -586,7 +586,7 @@ ExportVideoDialog::audio_progress_display ()
 			break;
 		case ExportStatus::Exporting:
 			pbar.set_text (_("Exporting audio"));
-			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
 			progress = progress / ((_twopass ? 2.0 : 1.0) + (_normalize ? 2.0 : 1.0));
 			break;
 		default:
@@ -685,13 +685,13 @@ ExportVideoDialog::launch_export ()
 "      <Start>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
 "        </Add>"
 "      </Start>"
 "      <End>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
 "        </Add>"
 "      </End>"
 "    </Silence>"
@@ -701,19 +701,19 @@ ExportVideoDialog::launch_export ()
 	boost::shared_ptr<ExportFormatSpecification> fmp = _session->get_export_handler()->add_format(*tree.root());
 
 	/* set up range */
-	framepos_t start, end;
+	samplepos_t start, end;
 	start = end = 0;
 	if (insnd_combo.get_active_row_number() == 1) {
 		_transcoder = new TranscodeFfmpeg(invid_path_entry.get_text());
 		if (_transcoder->probe_ok() && _transcoder->get_fps() > 0) {
-			end = _transcoder->get_duration() * _session->nominal_frame_rate() / _transcoder->get_fps();
+			end = _transcoder->get_duration() * _session->nominal_sample_rate() / _transcoder->get_fps();
 		} else {
 			warning << _("Export Video: Cannot query duration of video-file, using duration from timeline instead.") << endmsg;
 			end = ARDOUR_UI::instance()->video_timeline->get_duration();
 		}
 		if (_transcoder) {delete _transcoder; _transcoder = 0;}
 
-		frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+		sampleoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
 #if 0 /* DEBUG */
 		printf("audio-range -- AV offset: %lld\n", av_offset);
 #endif
@@ -723,19 +723,19 @@ ExportVideoDialog::launch_export ()
 		end += av_offset;
 	}
 	else if (insnd_combo.get_active_row_number() == 2) {
-		start = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(export_range.start());
-		end   = ARDOUR_UI::instance()->video_timeline->quantify_frames_to_apv(export_range.end_frame());
+		start = ARDOUR_UI::instance()->video_timeline->quantify_samples_to_apv(export_range.start());
+		end   = ARDOUR_UI::instance()->video_timeline->quantify_samples_to_apv(export_range.end_sample());
 	}
 	if (end <= 0) {
-		start = _session->current_start_frame();
-		end   = _session->current_end_frame();
+		start = _session->current_start_sample();
+		end   = _session->current_end_sample();
 	}
 #if 0 /* DEBUG */
 	printf("audio export-range %lld -> %lld\n", start, end);
 #endif
 
-	const frameoffset_t vstart = ARDOUR_UI::instance()->video_timeline->get_offset();
-	const frameoffset_t vend   = vstart + ARDOUR_UI::instance()->video_timeline->get_duration();
+	const sampleoffset_t vstart = ARDOUR_UI::instance()->video_timeline->get_offset();
+	const sampleoffset_t vend   = vstart + ARDOUR_UI::instance()->video_timeline->get_duration();
 
 	if ( (start >= end) || (end < vstart) || (start > vend)) {
 		warning << _("Export Video: export-range does not include video.") << endmsg;
@@ -936,23 +936,23 @@ ExportVideoDialog::encode_pass (int pass)
 		ffs["-passlogfile"] =  Glib::path_get_dirname (outfn) + G_DIR_SEPARATOR + "ffmpeg2pass";
 	}
 
-	frameoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
+	sampleoffset_t av_offset = ARDOUR_UI::instance()->video_timeline->get_offset();
 	double duration_s  = 0;
 
 	if (insnd_combo.get_active_row_number() == 0) {
 		/* session start to session end */
-		framecnt_t duration_f = _session->current_end_frame() - _session->current_start_frame();
-		duration_s = (double)duration_f / (double)_session->nominal_frame_rate();
+		samplecnt_t duration_f = _session->current_end_sample() - _session->current_start_sample();
+		duration_s = (double)duration_f / (double)_session->nominal_sample_rate();
 	} else if (insnd_combo.get_active_row_number() == 2) {
 		/* selected range */
-		duration_s = export_range.length() / (double)_session->nominal_frame_rate();
+		duration_s = export_range.length() / (double)_session->nominal_sample_rate();
 	} else {
 		/* video start to end */
-		framecnt_t duration_f = ARDOUR_UI::instance()->video_timeline->get_duration();
+		samplecnt_t duration_f = ARDOUR_UI::instance()->video_timeline->get_duration();
 		if (av_offset < 0 ) {
 			duration_f += av_offset;
 		}
-		duration_s = (double)duration_f / (double)_session->nominal_frame_rate();
+		duration_s = (double)duration_f / (double)_session->nominal_sample_rate();
 	}
 
 	std::ostringstream osstream; osstream << duration_s;
@@ -960,14 +960,14 @@ ExportVideoDialog::encode_pass (int pass)
 	_transcoder->set_duration(duration_s * _transcoder->get_fps());
 
 	if (insnd_combo.get_active_row_number() == 0 || insnd_combo.get_active_row_number() == 2) {
-		framepos_t start, snend;
-		const frameoffset_t vid_duration = ARDOUR_UI::instance()->video_timeline->get_duration();
+		samplepos_t start, snend;
+		const sampleoffset_t vid_duration = ARDOUR_UI::instance()->video_timeline->get_duration();
 		if (insnd_combo.get_active_row_number() == 0) {
-			start = _session->current_start_frame();
-			snend = _session->current_end_frame();
+			start = _session->current_start_sample();
+			snend = _session->current_end_sample();
 		} else {
 			start = export_range.start();
-			snend = export_range.end_frame();
+			snend = export_range.end_sample();
 		}
 
 #if 0 /* DEBUG */
@@ -976,27 +976,27 @@ ExportVideoDialog::encode_pass (int pass)
 #endif
 
 		if (av_offset > start && av_offset + vid_duration < snend) {
-			_transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_frame_rate(),
-				(snend - (av_offset + vid_duration)) / (double)_session->nominal_frame_rate());
+			_transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_sample_rate(),
+				(snend - (av_offset + vid_duration)) / (double)_session->nominal_sample_rate());
 		} else if (av_offset > start) {
-			_transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_frame_rate(), 0);
+			_transcoder->set_leadinout((av_offset - start) / (double)_session->nominal_sample_rate(), 0);
 		} else if (av_offset + vid_duration < snend) {
-			_transcoder->set_leadinout(0, (snend - (av_offset + vid_duration)) / (double)_session->nominal_frame_rate());
-			_transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
+			_transcoder->set_leadinout(0, (snend - (av_offset + vid_duration)) / (double)_session->nominal_sample_rate());
+			_transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_sample_rate());
 		}
 #if 0
 		else if (start > av_offset) {
-			std::ostringstream osstream; osstream << ((start - av_offset) / (double)_session->nominal_frame_rate());
+			std::ostringstream osstream; osstream << ((start - av_offset) / (double)_session->nominal_sample_rate());
 			ffs["-ss"] = osstream.str();
 		}
 #endif
 		else {
-			_transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_frame_rate());
+			_transcoder->set_avoffset((av_offset - start) / (double)_session->nominal_sample_rate());
 		}
 
 	} else if (av_offset < 0) {
 		/* from 00:00:00:00 to video-end */
-		_transcoder->set_avoffset(av_offset / (double)_session->nominal_frame_rate());
+		_transcoder->set_avoffset(av_offset / (double)_session->nominal_sample_rate());
 	}
 
 	TranscodeFfmpeg::FFSettings meta = _transcoder->default_meta_data();
@@ -1157,7 +1157,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_codec_combo.set_active(6);
 		audio_bitrate_combo.set_active(2);
 		video_bitrate_combo.set_active(4);
-		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+		if (_session->nominal_sample_rate() == 48000 || _session->nominal_sample_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
 			audio_samplerate_combo.set_active(1);
@@ -1169,7 +1169,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_codec_combo.set_active(2);
 		audio_bitrate_combo.set_active(3);
 		video_bitrate_combo.set_active(4);
-		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+		if (_session->nominal_sample_rate() == 48000 || _session->nominal_sample_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
 			audio_samplerate_combo.set_active(1);
@@ -1181,7 +1181,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_codec_combo.set_active(7);
 		audio_bitrate_combo.set_active(3);
 		video_bitrate_combo.set_active(4);
-		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+		if (_session->nominal_sample_rate() == 48000 || _session->nominal_sample_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
 			audio_samplerate_combo.set_active(1);
@@ -1212,7 +1212,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_codec_combo.set_active(5);
 		audio_bitrate_combo.set_active(4);
 		video_bitrate_combo.set_active(5);
-		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+		if (_session->nominal_sample_rate() == 48000 || _session->nominal_sample_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
 			audio_samplerate_combo.set_active(1);
@@ -1224,7 +1224,7 @@ ExportVideoDialog::preset_combo_changed ()
 		video_codec_combo.set_active(6);
 		audio_bitrate_combo.set_active(0);
 		video_bitrate_combo.set_active(0);
-		if (_session->nominal_frame_rate() == 48000 || _session->nominal_frame_rate() == 96000) {
+		if (_session->nominal_sample_rate() == 48000 || _session->nominal_sample_rate() == 96000) {
 			audio_samplerate_combo.set_active(2);
 		} else {
 			audio_samplerate_combo.set_active(1);

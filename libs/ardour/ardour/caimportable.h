@@ -38,12 +38,12 @@ class LIBARDOUR_API CAImportableSource : public ImportableSource {
 	CAImportableSource (const std::string& path);
 	virtual ~CAImportableSource();
 
-	framecnt_t read (Sample* buffer, framecnt_t nframes);
+	samplecnt_t read (Sample* buffer, samplecnt_t nframes);
 	uint32_t  channels() const;
-	framecnt_t length() const;
-	framecnt_t samplerate() const;
-	void      seek (framepos_t pos);
-	framepos_t natural_position() const { return 0; }
+	samplecnt_t length() const;
+	samplecnt_t samplerate() const;
+	void      seek (samplepos_t pos);
+	samplepos_t natural_position() const { return 0; }
 	bool clamped_at_unity () const { return false; }
 
    protected:

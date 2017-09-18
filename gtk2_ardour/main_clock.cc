@@ -76,7 +76,7 @@ MainClock::build_ops_menu ()
 	ops_items.push_back (MenuElem (_("Insert Meter Change"), sigc::mem_fun(*this, &MainClock::insert_new_meter)));
 }
 
-framepos_t
+samplepos_t
 MainClock::absolute_time () const
 {
 	if (get_is_duration ()) {
@@ -101,7 +101,7 @@ void
 MainClock::edit_current_tempo ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_frame (absolute_time()));
+	ARDOUR::TempoSection* ts = const_cast<ARDOUR::TempoSection*>(&PublicEditor::instance().session()->tempo_map().tempo_section_at_sample (absolute_time()));
 	PublicEditor::instance().edit_tempo_section (ts);
 }
 
@@ -109,7 +109,7 @@ void
 MainClock::edit_current_meter ()
 {
 	if (!PublicEditor::instance().session()) return;
-	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_frame (absolute_time()));
+	ARDOUR::MeterSection* ms = const_cast<ARDOUR::MeterSection*>(&PublicEditor::instance().session()->tempo_map().meter_section_at_sample (absolute_time()));
 	PublicEditor::instance().edit_meter_section (ms);
 }
 

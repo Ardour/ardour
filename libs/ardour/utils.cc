@@ -383,7 +383,7 @@ ARDOUR::CFStringRefToStdString(CFStringRef stringRef)
 #endif // __APPLE__
 
 void
-ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
+ARDOUR::compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
 {
 	double step;
 
@@ -391,7 +391,7 @@ ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 
-	for (framecnt_t i = 1; i < nframes - 1; ++i) {
+	for (samplecnt_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 
@@ -400,7 +400,7 @@ ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (framecnt_t n = 0; n < nframes; ++n) {
+	for (samplecnt_t n = 0; n < nframes; ++n) {
 		float inVal = in[n];
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);

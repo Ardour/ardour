@@ -47,7 +47,7 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _plugin (0)
 	, _pi (0)
 	, _num (0)
-	, _transport_frame (0)
+	, _transport_sample (0)
 	, _transport_speed (0.f)
 	, _eff_bypassed (false)
 {
@@ -62,7 +62,7 @@ VSTPlugin::VSTPlugin (const VSTPlugin& other)
 	, _pi (other._pi)
 	, _num (other._num)
 	, _midi_out_buf (other._midi_out_buf)
-	, _transport_frame (0)
+	, _transport_sample (0)
 	, _transport_speed (0.f)
 	, _parameter_defaults (other._parameter_defaults)
 	, _eff_bypassed (other._eff_bypassed)
@@ -89,7 +89,7 @@ void
 VSTPlugin::init_plugin ()
 {
 	/* set rate and blocksize */
-	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
+	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.sample_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
 }
 
@@ -606,7 +606,7 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 	return name;
 }
 
-framecnt_t
+samplecnt_t
 VSTPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -634,9 +634,9 @@ VSTPlugin::automatable () const
 
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
-		framepos_t start, framepos_t end, double speed,
+		samplepos_t start, samplepos_t end, double speed,
 		ChanMapping in_map, ChanMapping out_map,
-		pframes_t nframes, framecnt_t offset)
+		pframes_t nframes, samplecnt_t offset)
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
@@ -650,7 +650,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		return 0;
 	}
 
-	_transport_frame = start;
+	_transport_sample = start;
 	_transport_speed = speed;
 
 	ChanCount bufs_count;

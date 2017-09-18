@@ -48,19 +48,19 @@ class LIBARDOUR_API AnalysisGraph {
 		void cancel () { _canceled = true; }
 		bool canceled () const { return _canceled; }
 
-		void set_total_frames (framecnt_t p) { _frames_end = p; }
-		PBD::Signal2<void, framecnt_t, framecnt_t> Progress;
+		void set_total_samples (samplecnt_t p) { _samples_end = p; }
+		PBD::Signal2<void, samplecnt_t, samplecnt_t> Progress;
 
 	private:
 		ARDOUR::Session* _session;
 		AnalysisResults  _results;
-		framecnt_t       _max_chunksize;
+		samplecnt_t       _max_chunksize;
 
 		ARDOUR::Sample*  _buf;
 		ARDOUR::Sample*  _mixbuf;
 		float*           _gainbuf;
-		framecnt_t       _frames_read;
-		framecnt_t       _frames_end;
+		samplecnt_t       _samples_read;
+		samplecnt_t       _samples_end;
 		bool             _canceled;
 
 		typedef boost::shared_ptr<AudioGrapher::Analyser> AnalysisPtr;

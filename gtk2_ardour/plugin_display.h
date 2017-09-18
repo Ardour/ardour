@@ -43,7 +43,7 @@ protected:
 	virtual void update_height_alloc (uint32_t inline_height);
 	virtual uint32_t render_inline (cairo_t *, uint32_t width);
 
-	virtual void display_frame (cairo_t* cr, double w, double h);
+	virtual void display_sample (cairo_t* cr, double w, double h);
 
 	boost::shared_ptr<ARDOUR::Plugin> _plug;
 	PBD::ScopedConnection _qdraw_connection;

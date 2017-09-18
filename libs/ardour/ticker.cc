@@ -39,7 +39,7 @@ class MidiClockTicker::Position : public Timecode::BBT_Time
 {
 public:
 
-    Position() : speed(0.0f), frame(0), midi_beats(0) { }
+    Position() : speed(0.0f), sample(0), midi_beats(0) { }
     ~Position() { }
 
     /** Sync timing information taken from the given Session
@@ -51,24 +51,24 @@ public:
 	    bool changed = false;
 
 	    double     sp = s->transport_speed();
-	    framecnt_t fr = s->transport_frame();
+	    samplecnt_t fr = s->transport_sample();
 
 	    if (speed != sp) {
 		    speed = sp;
 		    changed = true;
 	    }
 
-	    if (frame != fr) {
-		    frame = fr;
+	    if (sample != fr) {
+		    sample = fr;
 		    changed = true;
 	    }
 
 	    /* Midi beats and clocks always gets updated for now */
 
-	    s->bbt_time (this->frame, *this);
+	    s->bbt_time (this->sample, *this);
 
 	    const TempoMap& tempo = s->tempo_map();
-	    const Meter& meter = tempo.meter_at_frame (frame);
+	    const Meter& meter = tempo.meter_at_sample (sample);
 
 	    const double divisions   = meter.divisions_per_bar();
 	    const double divisor     = meter.note_divisor();
@@ -93,12 +93,12 @@ public:
     }
 
     double      speed;
-    framecnt_t  frame;
+    samplecnt_t  sample;
     double      midi_beats;
     double      midi_clocks;
 
     void print (std::ostream& s) {
-	    s << "frames: " << frame << " midi beats: " << midi_beats << " speed: " << speed;
+	    s << "samples: " << sample << " midi beats: " << midi_beats << " speed: " << speed;
     }
 };
 
@@ -135,13 +135,13 @@ MidiClockTicker::set_session (Session* s)
 void
 MidiClockTicker::session_located()
 {
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Session Located: %1, speed: %2\n", _session->transport_frame(), _session->transport_speed()));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Session Located: %1, speed: %2\n", _session->transport_sample(), _session->transport_speed()));
 
 	if (!_session || !_pos->sync (_session)) {
 		return;
 	}
 
-	_last_tick = _pos->frame;
+	_last_tick = _pos->sample;
 
 	if (!Config->get_send_midi_clock()) {
 		return;
@@ -182,10 +182,10 @@ MidiClockTicker::transport_state_changed()
 
 	DEBUG_TRACE (DEBUG::MidiClock,
 		 string_compose ("Transport state change @ %4, speed: %1 position: %2 play loop: %3\n",
-							_pos->speed, _pos->frame, _session->get_play_loop(), _pos->frame)
+							_pos->speed, _pos->sample, _session->get_play_loop(), _pos->sample)
 	);
 
-	_last_tick = _pos->frame;
+	_last_tick = _pos->sample;
 
 	if (! Config->get_send_midi_clock()) {
 		return;
@@ -193,7 +193,7 @@ MidiClockTicker::transport_state_changed()
 
 	_send_state = true;
 
-	// tick (_pos->frame);
+	// tick (_pos->sample);
 }
 
 void
@@ -204,13 +204,13 @@ MidiClockTicker::transport_looped()
 
 	DEBUG_TRACE (DEBUG::MidiClock,
 		     string_compose ("Transport looped, position: %1, loop start: %2, loop end: %3, play loop: %4\n",
-				     _session->transport_frame(), loop_location->start(), loop_location->end(), _session->get_play_loop())
+				     _session->transport_sample(), loop_location->start(), loop_location->end(), _session->get_play_loop())
 		);
 
 	// adjust _last_tick, so that the next MIDI clock message is sent
 	// in due time (and the tick interval is still constant)
 
-	framecnt_t elapsed_since_last_tick = loop_location->end() - _last_tick;
+	samplecnt_t elapsed_since_last_tick = loop_location->end() - _last_tick;
 
 	if (loop_location->start() > elapsed_since_last_tick) {
 		_last_tick = loop_location->start() - elapsed_since_last_tick;
@@ -220,7 +220,7 @@ MidiClockTicker::transport_looped()
 }
 
 void
-MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframes)
+MidiClockTicker::tick (const samplepos_t& /* transport_sample */, pframes_t nframes)
 {
 	if (!Config->get_send_midi_clock() || _session == 0 || _midi_port == 0) {
 		return;
@@ -232,7 +232,7 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 		} else if (_pos->speed == 1.0f) {
 			send_stop_event (0, nframes);
 
-			if (_pos->frame == 0) {
+			if (_pos->sample == 0) {
 				send_start_event (0, nframes);
 			} else {
 				send_position_event (llrint (_pos->midi_beats), 0, nframes);
@@ -251,13 +251,13 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 			if (_session->get_play_loop()) {
 				assert(_session->locations()->auto_loop_location());
 
-				if (_pos->frame == _session->locations()->auto_loop_location()->start()) {
+				if (_pos->sample == _session->locations()->auto_loop_location()->start()) {
 					send_start_event (0, nframes);
 				} else {
 					send_continue_event (0, nframes);
 				}
 
-			} else if (_pos->frame == 0) {
+			} else if (_pos->sample == 0) {
 				send_start_event (0, nframes);
 			} else {
 				send_continue_event (0, nframes);
@@ -278,13 +278,13 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 		return;
 	}
 
-	const framepos_t end = _pos->frame + nframes;
+	const samplepos_t end = _pos->sample + nframes;
 	double iter = _last_tick;
 
 	while (true) {
-		double clock_delta = one_ppqn_in_frames (llrint (iter));
+		double clock_delta = one_ppqn_in_samples (llrint (iter));
 		double next_tick   = iter + clock_delta;
-		frameoffset_t next_tick_offset = llrint (next_tick) - end;
+		sampleoffset_t next_tick_offset = llrint (next_tick) - end;
 
 		DEBUG_TRACE (DEBUG::MidiClock,
 				 string_compose ("Tick: iter: %1, last tick time: %2, next tick time: %3, offset: %4, cycle length: %5\n",
@@ -302,15 +302,15 @@ MidiClockTicker::tick (const framepos_t& /* transport_frame */, pframes_t nframe
 	}
 
 	_last_tick  = iter;
-	_pos->frame = end;
+	_pos->sample = end;
 }
 
 double
-MidiClockTicker::one_ppqn_in_frames (framepos_t transport_position)
+MidiClockTicker::one_ppqn_in_samples (samplepos_t transport_position)
 {
-	const double frames_per_quarter_note = _session->tempo_map().frames_per_quarter_note_at (transport_position, _session->nominal_frame_rate());
+	const double samples_per_quarter_note = _session->tempo_map().samples_per_quarter_note_at (transport_position, _session->nominal_sample_rate());
 
-	return frames_per_quarter_note / double (_ppqn);
+	return samples_per_quarter_note / double (_ppqn);
 }
 
 void

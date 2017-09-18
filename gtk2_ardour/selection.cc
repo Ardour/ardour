@@ -338,7 +338,7 @@ Selection::toggle (vector<RegionView*>& r)
 }
 
 long
-Selection::toggle (framepos_t start, framepos_t end)
+Selection::toggle (samplepos_t start, samplepos_t end)
 {
 	clear_objects();  //enforce object/range exclusivity
 
@@ -484,7 +484,7 @@ Selection::add (MidiRegionView* mrv)
 }
 
 long
-Selection::add (framepos_t start, framepos_t end)
+Selection::add (samplepos_t start, samplepos_t end)
 {
 	clear_objects();  //enforce object/range exclusivity
 
@@ -502,7 +502,7 @@ Selection::add (framepos_t start, framepos_t end)
 }
 
 void
-Selection::move_time (framecnt_t distance)
+Selection::move_time (samplecnt_t distance)
 {
 	if (distance == 0) {
 		return;
@@ -517,7 +517,7 @@ Selection::move_time (framecnt_t distance)
 }
 
 void
-Selection::replace (uint32_t sid, framepos_t start, framepos_t end)
+Selection::replace (uint32_t sid, samplepos_t start, samplepos_t end)
 {
 	clear_objects();  //enforce object/range exclusivity
 
@@ -673,7 +673,7 @@ Selection::remove (uint32_t selection_id)
 }
 
 void
-Selection::remove (framepos_t /*start*/, framepos_t /*end*/)
+Selection::remove (samplepos_t /*start*/, samplepos_t /*end*/)
 {
 }
 
@@ -770,7 +770,7 @@ Selection::set (vector<RegionView*>& v)
  *  the list of tracks it applies to.
  */
 long
-Selection::set (framepos_t start, framepos_t end)
+Selection::set (samplepos_t start, samplepos_t end)
 {
 	clear_objects();  //enforce region/object exclusivity
 	clear_time();
@@ -807,7 +807,7 @@ Selection::set (framepos_t start, framepos_t end)
  *  @param end New end time.
  */
 void
-Selection::set_preserving_all_ranges (framepos_t start, framepos_t end)
+Selection::set_preserving_all_ranges (samplepos_t start, samplepos_t end)
 {
 	clear_objects();  //enforce region/object exclusivity
 
@@ -1108,9 +1108,9 @@ Selection::add (const list<ArdourMarker*>& m)
 }
 
 void
-MarkerSelection::range (framepos_t& s, framepos_t& e)
+MarkerSelection::range (samplepos_t& s, samplepos_t& e)
 {
-	s = max_framepos;
+	s = max_samplepos;
 	e = 0;
 
 	for (MarkerSelection::iterator i = begin(); i != end(); ++i) {
@@ -1370,8 +1370,8 @@ Selection::set_state (XMLNode const & node, int)
 			}
 
 		} else if  ((*i)->name() == X_("AudioRange")) {
-			framepos_t start;
-			framepos_t end;
+			samplepos_t start;
+			samplepos_t end;
 
 			if (!(*i)->get_property (X_("start"), start) || !(*i)->get_property (X_("end"), end)) {
 				assert(false);

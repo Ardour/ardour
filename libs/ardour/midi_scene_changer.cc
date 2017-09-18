@@ -94,7 +94,7 @@ MIDISceneChanger::gather (const Locations::LocationList& locations)
 }
 
 void
-MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, framepos_t when, boost::shared_ptr<MIDISceneChange> msc)
+MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, boost::shared_ptr<MIDISceneChange> msc)
 {
         if (!msc->active()) {
                 return;
@@ -157,7 +157,7 @@ MIDISceneChanger::non_rt_deliver (boost::shared_ptr<MIDISceneChange> msc)
 }
 
 void
-MIDISceneChanger::run (framepos_t start, framepos_t end)
+MIDISceneChanger::run (samplepos_t start, samplepos_t end)
 {
 	if (!output_port || recording() || !_session.transport_rolling()) {
 		return;
@@ -187,7 +187,7 @@ MIDISceneChanger::run (framepos_t start, framepos_t end)
 }
 
 void
-MIDISceneChanger::locate (framepos_t pos)
+MIDISceneChanger::locate (samplepos_t pos)
 {
 	boost::shared_ptr<MIDISceneChange> msc;
 
@@ -279,7 +279,7 @@ void
 void
 MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program, int channel)
 {
-	framecnt_t time = parser.get_timestamp ();
+	samplecnt_t time = parser.get_timestamp ();
 
 	last_program_message_time = time;
 
@@ -302,7 +302,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	/* check for marker at current location */
 
-	loc = locations->mark_at (time, Config->get_inter_scene_gap_frames());
+	loc = locations->mark_at (time, Config->get_inter_scene_gap_samples());
 
 	if (!loc) {
 		/* create a new marker at the desired position */
@@ -356,7 +356,7 @@ MIDISceneChanger::jump_to (int bank, int program)
 {
 	const Locations::LocationList& locations (_session.locations()->list());
 	boost::shared_ptr<SceneChange> sc;
-	framepos_t where = max_framepos;
+	samplepos_t where = max_samplepos;
 
 	for (Locations::LocationList::const_iterator l = locations.begin(); l != locations.end(); ++l) {
 
@@ -370,7 +370,7 @@ MIDISceneChanger::jump_to (int bank, int program)
 		}
 	}
 
-	if (where != max_framepos) {
+	if (where != max_samplepos) {
 		_session.request_locate (where);
 	}
 }

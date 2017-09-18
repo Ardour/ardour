@@ -27,7 +27,7 @@
 
 #include <sigc++/signal.h>
 #include "ardour/region.h"
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 
 #include "canvas/fwd.h"
 
@@ -71,14 +71,14 @@ public:
 
 	virtual void set_height (double);
 	virtual void set_samples_per_pixel (double);
-	virtual bool set_duration (framecnt_t, void*);
+	virtual bool set_duration (samplecnt_t, void*);
 
 	void move (double xdelta, double ydelta);
 
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	bool set_position(framepos_t pos, void* src, double* delta = 0);
+	bool set_position(samplepos_t pos, void* src, double* delta = 0);
 
 	virtual void show_region_editor ();
 	void hide_region_editor ();
@@ -95,25 +95,25 @@ public:
 	virtual void exited () {}
 
 	virtual void enable_display(bool yn) { _enable_display = yn; }
-	virtual void update_coverage_frames (LayerDisplay);
+	virtual void update_coverage_samples (LayerDisplay);
 
 	static PBD::Signal1<void,RegionView*> RegionViewGoingAway;
 
 	/** Called when a front trim is about to begin */
 	virtual void trim_front_starting () {}
 
-	bool trim_front (framepos_t, bool, const int32_t sub_num);
+	bool trim_front (samplepos_t, bool, const int32_t sub_num);
 
 	/** Called when a start trim has finished */
 	virtual void trim_front_ending () {}
 
-	bool trim_end (framepos_t, bool, const int32_t sub_num);
-	void move_contents (ARDOUR::frameoffset_t);
+	bool trim_end (samplepos_t, bool, const int32_t sub_num);
+	void move_contents (ARDOUR::sampleoffset_t);
 	virtual void thaw_after_trim ();
 
-	void set_silent_frames (const ARDOUR::AudioIntervalResult&, double threshold);
-	void drop_silent_frames ();
-	void hide_silent_frames ();
+	void set_silent_samples (const ARDOUR::AudioIntervalResult&, double threshold);
+	void drop_silent_samples ();
+	void hide_silent_samples ();
 
 	struct PositionOrder {
 		bool operator()(const RegionView* a, const RegionView* b) {
@@ -121,7 +121,7 @@ public:
 		}
 	};
 
-	ARDOUR::MusicFrame snap_frame_to_frame (ARDOUR::frameoffset_t, bool ensure_snap = false) const;
+	ARDOUR::MusicSample snap_sample_to_sample (ARDOUR::sampleoffset_t, bool ensure_snap = false) const;
 
 protected:
 
@@ -179,14 +179,14 @@ protected:
 	 * different bits of regions according to whether or not they are the one
 	 * that will be played at any given time.
 	 */
-	std::list<ArdourCanvas::Rectangle*> _coverage_frames;
+	std::list<ArdourCanvas::Rectangle*> _coverage_samples;
 
 	/** a list of rectangles used to show silent segments
 	*/
-	std::list<ArdourCanvas::Rectangle*> _silent_frames;
+	std::list<ArdourCanvas::Rectangle*> _silent_samples;
 	/** a list of rectangles used to show the current silence threshold
 	*/
-	std::list<ArdourCanvas::Rectangle*> _silent_threshold_frames;
+	std::list<ArdourCanvas::Rectangle*> _silent_threshold_samples;
 	/** a text item to display strip silence statistics */
 	ArdourCanvas::Text* _silence_text;
 };

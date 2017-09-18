@@ -52,7 +52,7 @@ public:
 	}
 
 	void append_event_beats (const Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
-	void append_event_frames (const Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_samples (const Lock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 
 	void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	void mark_streaming_write_completed (const Lock& lock);
@@ -79,29 +79,29 @@ public:
   private:
 	bool _open;
 	Evoral::Beats       _last_ev_time_beats;
-	framepos_t          _last_ev_time_frames;
+	samplepos_t          _last_ev_time_samples;
 	/** end time (start + duration) of last call to read_unlocked */
-	mutable framepos_t _smf_last_read_end;
+	mutable samplepos_t _smf_last_read_end;
 	/** time (in SMF ticks, 1 tick per _ppqn) of the last event read by read_unlocked */
-	mutable framepos_t _smf_last_read_time;
+	mutable samplepos_t _smf_last_read_time;
 
 	int open_for_write ();
 
 	void ensure_disk_file (const Lock& lock);
 
-	framecnt_t read_unlocked (const Lock&                    lock,
-	                          Evoral::EventSink<framepos_t>& dst,
-	                          framepos_t                     position,
-	                          framepos_t                     start,
-	                          framecnt_t                     cnt,
-	                          Evoral::Range<framepos_t>*     loop_range,
+	samplecnt_t read_unlocked (const Lock&                    lock,
+	                          Evoral::EventSink<samplepos_t>& dst,
+	                          samplepos_t                     position,
+	                          samplepos_t                     start,
+	                          samplecnt_t                     cnt,
+	                          Evoral::Range<samplepos_t>*     loop_range,
 	                          MidiStateTracker*              tracker,
 	                          MidiChannelFilter*             filter) const;
 
-	framecnt_t write_unlocked (const Lock&                 lock,
-	                           MidiRingBuffer<framepos_t>& src,
-	                           framepos_t                  position,
-	                           framecnt_t                  cnt);
+	samplecnt_t write_unlocked (const Lock&                 lock,
+	                           MidiRingBuffer<samplepos_t>& src,
+	                           samplepos_t                  position,
+	                           samplecnt_t                  cnt);
 
 };
 

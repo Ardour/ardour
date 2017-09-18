@@ -172,18 +172,18 @@ intptr_t Session::vst_callback (
 		timeinfo->nanoSeconds = g_get_monotonic_time () * 1000;
 
 		if (plug && session) {
-			framepos_t now = plug->transport_frame();
+			samplepos_t now = plug->transport_sample();
 
 			timeinfo->samplePos = now;
-			timeinfo->sampleRate = session->frame_rate();
+			timeinfo->sampleRate = session->sample_rate();
 
 			if (value & (kVstTempoValid)) {
-				const Tempo& t (session->tempo_map().tempo_at_frame (now));
+				const Tempo& t (session->tempo_map().tempo_at_sample (now));
 				timeinfo->tempo = t.quarter_notes_per_minute ();
 				newflags |= (kVstTempoValid);
 			}
 			if (value & (kVstTimeSigValid)) {
-				const MeterSection& ms (session->tempo_map().meter_section_at_frame (now));
+				const MeterSection& ms (session->tempo_map().meter_section_at_sample (now));
 				timeinfo->timeSigNumerator = ms.divisions_per_bar ();
 				timeinfo->timeSigDenominator = ms.note_divisor ();
 				newflags |= (kVstTimeSigValid);
@@ -192,13 +192,13 @@ intptr_t Session::vst_callback (
 				Timecode::BBT_Time bbt;
 
 				try {
-					bbt = session->tempo_map().bbt_at_frame_rt (now);
+					bbt = session->tempo_map().bbt_at_sample_rt (now);
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
 					double ppqBar = session->tempo_map().quarter_note_at_bbt_rt (bbt);
-					/* quarter note at frame position (not rounded to note subdivision) */
-					double ppqPos = session->tempo_map().quarter_note_at_frame_rt (now);
+					/* quarter note at sample position (not rounded to note subdivision) */
+					double ppqPos = session->tempo_map().quarter_note_at_sample_rt (now);
 					if (value & (kVstPpqPosValid)) {
 						timeinfo->ppqPos = ppqPos;
 						newflags |= kVstPpqPosValid;
@@ -225,7 +225,7 @@ intptr_t Session::vst_callback (
 					(t.frames) +
 					(t.subframes);
 
-				timeinfo->smpteOffset *= 80.0; /* VST spec is 1/80th frames */
+				timeinfo->smpteOffset *= 80.0; /* VST spec is 1/80th samples */
 
 				if (session->timecode_drop_frames()) {
 					if (session->timecode_frames_per_second() == 30.0) {
@@ -259,8 +259,8 @@ intptr_t Session::vst_callback (
 				newflags |= kVstTransportCycleActive;
 				Location * looploc = session->locations ()->auto_loop_location ();
 				if (looploc) try {
-					timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_frame_rt (looploc->start ());
-					timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_frame_rt (looploc->end ());
+					timeinfo->cycleStartPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->start ());
+					timeinfo->cycleEndPos = session->tempo_map ().quarter_note_at_sample_rt (looploc->end ());
 
 					newflags |= kVstCyclePosValid;
 				} catch (...) { }
@@ -289,7 +289,7 @@ intptr_t Session::vst_callback (
 			for (int n = 0 ; n < v->numEvents; ++n) {
 				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
 				if (vme->type == kVstMidiType) {
-					plug->midi_buffer()->push_back(vme->deltaFrames, 3, (uint8_t*)vme->midiData);
+					plug->midi_buffer()->push_back(vme->deltaSamples, 3, (uint8_t*)vme->midiData);
 				}
 			}
 		}
@@ -301,9 +301,9 @@ intptr_t Session::vst_callback (
 
 	case audioMasterTempoAt:
 		SHOW_CALLBACK ("audioMasterTempoAt");
-		// returns tempo (in bpm * 10000) at sample frame location passed in <value>
+		// returns tempo (in bpm * 10000) at sample sample location passed in <value>
 		if (session) {
-			const Tempo& t (session->tempo_map().tempo_at_frame (value));
+			const Tempo& t (session->tempo_map().tempo_at_sample (value));
 			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;
@@ -351,7 +351,7 @@ intptr_t Session::vst_callback (
 	case audioMasterGetSampleRate:
 		SHOW_CALLBACK ("audioMasterGetSampleRate");
 		if (session) {
-			return session->frame_rate();
+			return session->sample_rate();
 		}
 		return 0;
 

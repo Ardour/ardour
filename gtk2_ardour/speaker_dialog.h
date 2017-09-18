@@ -42,7 +42,7 @@ private:
 	boost::weak_ptr<ARDOUR::Speakers> _speakers;
 	Gtk::HBox        hbox;
 	Gtk::VBox        side_vbox;
-	Gtk::AspectFrame aspect_frame;
+	Gtk::AspectFrame aspect_sample;
 	Gtk::DrawingArea darea;
 	Gtk::Adjustment  azimuth_adjustment;
 	Gtk::SpinButton  azimuth_spinner;

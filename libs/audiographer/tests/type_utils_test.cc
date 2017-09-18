@@ -27,11 +27,11 @@ class TypeUtilsTest : public CppUnit::TestFixture
 
 	void testZeroFillPod()
 	{
-		unsigned frames = 10;
-		float buf[frames];
-		TypeUtils<float>::zero_fill (buf, frames);
+		unsigned samples = 10;
+		float buf[samples];
+		TypeUtils<float>::zero_fill (buf, samples);
 		float zero = 0.0;
-		for (unsigned i = 0; i < frames; ++i) {
+		for (unsigned i = 0; i < samples; ++i) {
 			CPPUNIT_ASSERT_EQUAL (zero, buf[i]);
 		}
 	}
@@ -39,11 +39,11 @@ class TypeUtilsTest : public CppUnit::TestFixture
 	void testZeroFillNonPod()
 	{
                 /* does not compile on OS X Lion
-		unsigned frames = 10;
-		NonPodType buf[frames];
-		TypeUtils<NonPodType>::zero_fill (buf, frames);
+		unsigned samples = 10;
+		NonPodType buf[samples];
+		TypeUtils<NonPodType>::zero_fill (buf, samples);
 		NonPodType zero;
-		for (unsigned i = 0; i < frames; ++i) {
+		for (unsigned i = 0; i < samples; ++i) {
 			CPPUNIT_ASSERT (zero == buf[i]);
 		}
                 */

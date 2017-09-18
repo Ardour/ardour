@@ -202,7 +202,7 @@ using namespace Editing;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
-sigc::signal<void, framepos_t, bool, framepos_t> ARDOUR_UI::Clock;
+sigc::signal<void, samplepos_t, bool, samplepos_t> ARDOUR_UI::Clock;
 sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 
 static bool
@@ -1581,7 +1581,7 @@ ARDOUR_UI::set_fps_timeout_connection ()
 		 * signals to the GUI Thread..
 		 */
 		interval = floor(500. /* update twice per FPS, since Glib::signal_timeout is very irregular */
-				* _session->frame_rate() / _session->nominal_frame_rate()
+				* _session->sample_rate() / _session->nominal_sample_rate()
 				/ _session->timecode_frames_per_second()
 				);
 #ifdef PLATFORM_WINDOWS
@@ -1601,7 +1601,7 @@ ARDOUR_UI::set_fps_timeout_connection ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (framecnt_t)
+ARDOUR_UI::update_sample_rate (samplecnt_t)
 {
 	char buf[64];
 
@@ -1613,7 +1613,7 @@ ARDOUR_UI::update_sample_rate (framecnt_t)
 
 	} else {
 
-		framecnt_t rate = AudioEngine::instance()->sample_rate();
+		samplecnt_t rate = AudioEngine::instance()->sample_rate();
 
 		if (rate == 0) {
 			/* no sample rate available */
@@ -1789,43 +1789,43 @@ ARDOUR_UI::update_disk_space()
 		return;
 	}
 
-	boost::optional<framecnt_t> opt_frames = _session->available_capture_duration();
+	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration();
 	char buf[64];
-	framecnt_t fr = _session->frame_rate();
+	samplecnt_t fr = _session->sample_rate();
 
 	if (fr == 0) {
 		/* skip update - no SR available */
 		return;
 	}
 
-	if (!opt_frames) {
+	if (!opt_samples) {
 		/* Available space is unknown */
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
-	} else if (opt_frames.get_value_or (0) == max_framecnt) {
+	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
 
-		framecnt_t frames = opt_frames.get_value_or (0);
+		samplecnt_t samples = opt_samples.get_value_or (0);
 
 		if (rec_enabled_streams) {
-			frames /= rec_enabled_streams;
+			samples /= rec_enabled_streams;
 		}
 
 		int hrs;
 		int mins;
 		int secs;
 
-		hrs  = frames / (fr * 3600);
+		hrs  = samples / (fr * 3600);
 
 		if (hrs > 24) {
 			snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
 		} else {
-			frames -= hrs * fr * 3600;
-			mins = frames / (fr * 60);
-			frames -= mins * fr * 60;
-			secs = frames / fr;
+			samples -= hrs * fr * 3600;
+			mins = samples / (fr * 60);
+			samples -= mins * fr * 60;
+			secs = samples / fr;
 
 			bool const low = (hrs == 0 && mins <= 30);
 
@@ -2180,7 +2180,7 @@ ARDOUR_UI::transport_goto_start ()
 		*/
 
 		if (editor) {
-			editor->center_screen (_session->current_start_frame ());
+			editor->center_screen (_session->current_start_sample ());
 		}
 	}
 }
@@ -2208,30 +2208,30 @@ ARDOUR_UI::transport_goto_wallclock ()
 
 		time_t now;
 		struct tm tmnow;
-		framepos_t frames;
+		samplepos_t samples;
 
 		time (&now);
 		localtime_r (&now, &tmnow);
 
-		framecnt_t frame_rate = _session->frame_rate();
+		samplecnt_t sample_rate = _session->sample_rate();
 
-		if (frame_rate == 0) {
+		if (sample_rate == 0) {
 			/* no frame rate available */
 			return;
 		}
 
-		frames = tmnow.tm_hour * (60 * 60 * frame_rate);
-		frames += tmnow.tm_min * (60 * frame_rate);
-		frames += tmnow.tm_sec * frame_rate;
+		samples = tmnow.tm_hour * (60 * 60 * sample_rate);
+		samples += tmnow.tm_min * (60 * sample_rate);
+		samples += tmnow.tm_sec * sample_rate;
 
-		_session->request_locate (frames, _session->transport_rolling ());
+		_session->request_locate (samples, _session->transport_rolling ());
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
 		*/
 
 		if (editor) {
-			editor->center_screen (frames);
+			editor->center_screen (samples);
 		}
 	}
 }
@@ -2240,15 +2240,15 @@ void
 ARDOUR_UI::transport_goto_end ()
 {
 	if (_session) {
-		framepos_t const frame = _session->current_end_frame();
-		_session->request_locate (frame);
+		samplepos_t const sample = _session->current_end_sample();
+		_session->request_locate (sample);
 
 		/* force displayed area in editor to start no matter
 		   what "follow playhead" setting is.
 		*/
 
 		if (editor) {
-			editor->center_screen (frame);
+			editor->center_screen (sample);
 		}
 	}
 }
@@ -2461,9 +2461,9 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			 * want to do this.
 			 */
 
-			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_frame() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
+			if (UIConfiguration::instance().get_follow_edits() && ( editor->get_selection().time.front().start == _session->transport_sample() ) ) {  //if playhead is exactly at the start of a range, we can assume it was placed there by follow_edits
 				_session->request_play_range (&editor->get_selection().time, true);
-				_session->set_requested_return_frame( editor->get_selection().time.front().start );  //force an auto-return here
+				_session->set_requested_return_sample( editor->get_selection().time.front().start );  //force an auto-return here
 			}
 			_session->request_transport_speed (1.0f);
 		}
@@ -2706,7 +2706,7 @@ ARDOUR_UI::update_clocks ()
 	if (!_session) return;
 
 	if (editor && !editor->dragging_playhead()) {
-		Clock (_session->audible_frame(), false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)); /* EMIT_SIGNAL */
+		Clock (_session->audible_sample(), false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)); /* EMIT_SIGNAL */
 	}
 }
 
@@ -4345,7 +4345,7 @@ ARDOUR_UI::cleanup_peakfiles ()
 	RegionSelection rs;
 	TrackViewList empty;
 	empty.clear();
-	editor->get_regions_after(rs, (framepos_t) 0, empty);
+	editor->get_regions_after(rs, (samplepos_t) 0, empty);
 	std::list<RegionView*> views = rs.by_layer();
 
 	// remove displayed audio-region-views waveforms
@@ -4794,10 +4794,10 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 				LTCFileReader ltcr (audio_from_video, video_timeline->get_video_file_fps());
 				/* TODO ASK user which channel:  0 .. ltcr->channels() - 1 */
 
-				ltc_seq = ltcr.read_ltc (/*channel*/ 0, /*max LTC frames to decode*/ 15);
+				ltc_seq = ltcr.read_ltc (/*channel*/ 0, /*max LTC samples to decode*/ 15);
 
 				/* TODO seek near end of file, and read LTC until end.
-				 * if it fails to find any LTC frames, scan complete file
+				 * if it fails to find any LTC samples, scan complete file
 				 *
 				 * calculate drift of LTC compared to video-duration,
 				 * ask user for reference (timecode from start/mid/end)
@@ -4813,16 +4813,16 @@ ARDOUR_UI::add_video (Gtk::Window* float_window)
 			} else {
 				/* the very first TC in the file is somteimes not aligned properly */
 				int i = ltc_seq.size() -1;
-				ARDOUR::frameoffset_t video_start_offset =
-					_session->nominal_frame_rate() * (ltc_seq[i].timecode_sec - ltc_seq[i].framepos_sec);
+				ARDOUR::sampleoffset_t video_start_offset =
+					_session->nominal_sample_rate() * (ltc_seq[i].timecode_sec - ltc_seq[i].framepos_sec);
 				PBD::info << string_compose (_("Align video-start to %1 [samples]"), video_start_offset) << endmsg;
 				video_timeline->set_offset(video_start_offset);
 			}
 		}
 
 		_session->maybe_update_session_range(
-			std::max(video_timeline->get_offset(), (ARDOUR::frameoffset_t) 0),
-			std::max(video_timeline->get_offset() + video_timeline->get_duration(), (ARDOUR::frameoffset_t) 0));
+			std::max(video_timeline->get_offset(), (ARDOUR::sampleoffset_t) 0),
+			std::max(video_timeline->get_offset() + video_timeline->get_duration(), (ARDOUR::sampleoffset_t) 0));
 
 
 		if (add_video_dialog->launch_xjadeo() && local_file) {
@@ -4988,7 +4988,7 @@ ARDOUR_UI::keyboard_settings () const
 }
 
 void
-ARDOUR_UI::create_xrun_marker (framepos_t where)
+ARDOUR_UI::create_xrun_marker (samplepos_t where)
 {
 	if (_session) {
 		Location *location = new Location (*_session, where, where, _("xrun"), Location::IsMark, 0);
@@ -5005,7 +5005,7 @@ ARDOUR_UI::halt_on_xrun_message ()
 }
 
 void
-ARDOUR_UI::xrun_handler (framepos_t where)
+ARDOUR_UI::xrun_handler (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -5229,7 +5229,7 @@ what you would like to do.\n"), PROGRAM_NAME));
 }
 
 int
-ARDOUR_UI::sr_mismatch_dialog (framecnt_t desired, framecnt_t actual)
+ARDOUR_UI::sr_mismatch_dialog (samplecnt_t desired, samplecnt_t actual)
 {
 	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_WARNING, ICON_SIZE_DIALOG);
@@ -5262,7 +5262,7 @@ audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual
 }
 
 void
-ARDOUR_UI::sr_mismatch_message (framecnt_t desired, framecnt_t actual)
+ARDOUR_UI::sr_mismatch_message (samplecnt_t desired, samplecnt_t actual)
 {
 	MessageDialog msg (string_compose (_("\
 This session was created with a sample rate of %1 Hz, but\n\
@@ -5286,7 +5286,7 @@ ARDOUR_UI::use_config ()
 }
 
 void
-ARDOUR_UI::update_transport_clocks (framepos_t pos)
+ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 {
 	if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
 		primary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));

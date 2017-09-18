@@ -513,15 +513,15 @@ Graph::dump (int chain)
 }
 
 int
-Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
+Graph::process_routes (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
 {
-	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
 	if (!_threads_active) return 0;
 
 	_process_nframes = nframes;
-	_process_start_frame = start_frame;
-	_process_end_frame = end_frame;
+	_process_start_sample = start_sample;
+	_process_end_sample = end_sample;
 	_process_declick = declick;
 
 	_process_noroll = false;
@@ -539,16 +539,16 @@ Graph::process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end
 }
 
 int
-Graph::routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+Graph::routes_no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
                        bool non_rt_pending, int declick)
 {
-	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_frame, end_frame, nframes));
+	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
 	if (!_threads_active) return 0;
 
 	_process_nframes = nframes;
-	_process_start_frame = start_frame;
-	_process_end_frame = end_frame;
+	_process_start_sample = start_sample;
+	_process_end_sample = end_sample;
 	_process_declick = declick;
 	_process_non_rt_pending = non_rt_pending;
 
@@ -575,10 +575,10 @@ Graph::process_one_route (Route* route)
 
 	if (_process_noroll) {
 		route->set_pending_declick (_process_declick);
-		retval = route->no_roll (_process_nframes, _process_start_frame, _process_end_frame, _process_non_rt_pending);
+		retval = route->no_roll (_process_nframes, _process_start_sample, _process_end_sample, _process_non_rt_pending);
 	} else {
 		route->set_pending_declick (_process_declick);
-		retval = route->roll (_process_nframes, _process_start_frame, _process_end_frame, _process_declick, need_butler);
+		retval = route->roll (_process_nframes, _process_start_sample, _process_end_sample, _process_declick, need_butler);
 	}
 
 	if (retval) {

@@ -68,7 +68,7 @@ public:
 	void set_mute_points (MuteMaster::MutePoint);
 	MuteMaster::MutePoint mute_points () const;
 
-	void automation_run (framepos_t start, pframes_t nframes);
+	void automation_run (samplepos_t start, pframes_t nframes);
 
 protected:
 	bool handle_master_change (boost::shared_ptr<AutomationControl>);

@@ -127,10 +127,10 @@ public:
 	static PBD::Signal0<void> PortDrop;
 	static PBD::Signal0<void> PortSignalDrop;
 
-	static void set_cycle_framecnt (pframes_t n) {
+	static void set_cycle_samplecnt (pframes_t n) {
 		_cycle_nframes = n;
 	}
-	static framecnt_t port_offset() { return _global_port_buffer_offset; }
+	static samplecnt_t port_offset() { return _global_port_buffer_offset; }
 	static void set_global_port_buffer_offset (pframes_t off) {
 		_global_port_buffer_offset = off;
 	}
@@ -155,7 +155,7 @@ protected:
 	static pframes_t  _global_port_buffer_offset;   /* access only from process() tree */
 	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
-	framecnt_t _port_buffer_offset; /* access only from process() tree */
+	samplecnt_t _port_buffer_offset; /* access only from process() tree */
 
 	LatencyRange _private_playback_latency;
 	LatencyRange _private_capture_latency;

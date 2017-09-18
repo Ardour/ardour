@@ -29,53 +29,53 @@ SlaveSessionProxy::tempo_map() const
 	return session.tempo_map();
 }
 
-framecnt_t
-SlaveSessionProxy::frame_rate() const
+samplecnt_t
+SlaveSessionProxy::sample_rate() const
 {
-	return session.frame_rate();
+	return session.sample_rate();
 }
 
 pframes_t
-SlaveSessionProxy::frames_per_cycle() const
+SlaveSessionProxy::samples_per_cycle() const
 {
 	return session.engine().samples_per_cycle();
 }
 
-framepos_t
-SlaveSessionProxy::audible_frame() const
+samplepos_t
+SlaveSessionProxy::audible_sample() const
 {
-	return session.audible_frame();
+	return session.audible_sample();
 }
 
-framepos_t
-SlaveSessionProxy::transport_frame() const
+samplepos_t
+SlaveSessionProxy::transport_sample() const
 {
-	return session.transport_frame();
+	return session.transport_sample();
 }
 
 pframes_t
-SlaveSessionProxy::frames_since_cycle_start() const
+SlaveSessionProxy::samples_since_cycle_start() const
 {
 	return session.engine().samples_since_cycle_start();
 }
 
-framepos_t
+samplepos_t
 SlaveSessionProxy::sample_time_at_cycle_start() const
 {
 	return session.engine().sample_time_at_cycle_start();
 }
 
 
-framepos_t
-SlaveSessionProxy::frame_time() const
+samplepos_t
+SlaveSessionProxy::sample_time() const
 {
 	return session.engine().sample_time();
 }
 
 void
-SlaveSessionProxy::request_locate(framepos_t frame, bool with_roll)
+SlaveSessionProxy::request_locate(samplepos_t sample, bool with_roll)
 {
-	session.request_locate(frame, with_roll);
+	session.request_locate(sample, with_roll);
 }
 
 void

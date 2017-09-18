@@ -716,7 +716,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 int
 PortAudioBackend::portaudio_callback(const void* input,
                                      void* output,
-                                     unsigned long frame_count,
+                                     unsigned long sample_count,
                                      const PaStreamCallbackTimeInfo* time_info,
                                      PaStreamCallbackFlags status_flags,
                                      void* user_data)
@@ -725,7 +725,7 @@ PortAudioBackend::portaudio_callback(const void* input,
 
 	if (!pa_backend->process_callback((const float*)input,
 	                                  (float*)output,
-	                                  frame_count,
+	                                  sample_count,
 	                                  time_info,
 	                                  status_flags)) {
 		return paAbort;
@@ -737,7 +737,7 @@ PortAudioBackend::portaudio_callback(const void* input,
 bool
 PortAudioBackend::process_callback(const float* input,
                                    float* output,
-                                   uint32_t frame_count,
+                                   uint32_t sample_count,
                                    const PaStreamCallbackTimeInfo* timeInfo,
                                    PaStreamCallbackFlags statusFlags)
 {
@@ -767,7 +767,7 @@ PortAudioBackend::process_callback(const float* input,
 	}
 
 	if (!_run || _freewheel) {
-		memset(output, 0, frame_count * sizeof(float) * _system_outputs.size());
+		memset(output, 0, sample_count * sizeof(float) * _system_outputs.size());
 		return true;
 	}
 
@@ -1004,13 +1004,13 @@ PortAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 PortAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 PortAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;

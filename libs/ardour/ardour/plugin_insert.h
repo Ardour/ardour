@@ -63,8 +63,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 	void set_owner (SessionObject*);
 	void set_state_dir (const std::string& d = "");
 
-	void run (BufferSet& in, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
-	void silence (framecnt_t nframes, framepos_t start_frame);
+	void run (BufferSet& in, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
+	void silence (samplecnt_t nframes, samplepos_t start_sample);
 
 	void activate ();
 	void deactivate ();
@@ -231,7 +231,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 		}
 	}
 
-	framecnt_t plugin_latency () const;
+	samplecnt_t plugin_latency () const;
 
 	bool has_sidechain () const {
 		return _sidechain ? true : false;
@@ -250,11 +250,11 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	std::string describe_parameter (Evoral::Parameter param);
 
-	framecnt_t signal_latency () const;
+	samplecnt_t signal_latency () const;
 
 	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
 
-	void collect_signal_for_analysis (framecnt_t nframes);
+	void collect_signal_for_analysis (samplecnt_t nframes);
 
 	bool strict_io_configured () const {
 		return _match.strict_io;
@@ -321,8 +321,8 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
-	framecnt_t _signal_analysis_collected_nframes;
-	framecnt_t _signal_analysis_collect_nframes_max;
+	samplecnt_t _signal_analysis_collected_nframes;
+	samplecnt_t _signal_analysis_collect_nframes_max;
 
 	BufferSet _signal_analysis_inputs;
 	BufferSet _signal_analysis_outputs;
@@ -357,10 +357,10 @@ class LIBARDOUR_API PluginInsert : public Processor
 	PinMappings _out_map;
 	ChanMapping _thru_map; // out-idx <=  in-idx
 
-	void automate_and_run (BufferSet& bufs, framepos_t start, framepos_t end, double speed, pframes_t nframes);
-	void connect_and_run (BufferSet& bufs, framepos_t start, framecnt_t end, double speed, pframes_t nframes, framecnt_t offset, bool with_auto);
+	void automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes);
+	void connect_and_run (BufferSet& bufs, samplepos_t start, samplecnt_t end, double speed, pframes_t nframes, samplecnt_t offset, bool with_auto);
 	void bypass (BufferSet& bufs, pframes_t nframes);
-	void inplace_silence_unconnected (BufferSet&, const PinMappings&, framecnt_t nframes, framecnt_t offset) const;
+	void inplace_silence_unconnected (BufferSet&, const PinMappings&, samplecnt_t nframes, samplecnt_t offset) const;
 
 	void create_automatable_parameters ();
 	void control_list_automation_state_changed (Evoral::Parameter, AutoState);

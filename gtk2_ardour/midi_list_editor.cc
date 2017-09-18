@@ -24,7 +24,7 @@
 #include "evoral/midi_util.h"
 #include "evoral/Note.hpp"
 
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -759,7 +759,7 @@ MidiListEditor::redisplay_model ()
 
 	if (_session) {
 
-		BeatsFramesConverter conv (_session->tempo_map(), region->position());
+		BeatsSamplesConverter conv (_session->tempo_map(), region->position());
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
 		stringstream ss;
@@ -771,7 +771,7 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_frame (region->position() + conv.to ((*i)->time())));
+			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_sample (region->position() + conv.to ((*i)->time())));
 
 			ss.str ("");
 			ss << bbt;

@@ -1049,13 +1049,13 @@ AlsaAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 AlsaAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 AlsaAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;

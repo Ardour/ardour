@@ -54,23 +54,23 @@ float Normalizer::set_peak (float peak)
   * non-const ProcessContexts are given to \a process() .
   * \n Not RT safe
   */
-void Normalizer::alloc_buffer(framecnt_t frames)
+void Normalizer::alloc_buffer(samplecnt_t samples)
 {
 	delete [] buffer;
-	buffer = new float[frames];
-	buffer_size = frames;
+	buffer = new float[samples];
+	buffer_size = samples;
 }
 
 /// Process a const ProcessContext \see alloc_buffer() \n RT safe
 void Normalizer::process (ProcessContext<float> const & c)
 {
-	if (throw_level (ThrowProcess) && c.frames() > buffer_size) {
-		throw Exception (*this, "Too many frames given to process()");
+	if (throw_level (ThrowProcess) && c.samples() > buffer_size) {
+		throw Exception (*this, "Too many samples given to process()");
 	}
 
 	if (enabled) {
-		memcpy (buffer, c.data(), c.frames() * sizeof(float));
-		Routines::apply_gain_to_buffer (buffer, c.frames(), gain);
+		memcpy (buffer, c.data(), c.samples() * sizeof(float));
+		Routines::apply_gain_to_buffer (buffer, c.samples(), gain);
 	}
 
 	ProcessContext<float> c_out (c, buffer);
@@ -81,7 +81,7 @@ void Normalizer::process (ProcessContext<float> const & c)
 void Normalizer::process (ProcessContext<float> & c)
 {
 	if (enabled) {
-		Routines::apply_gain_to_buffer (c.data(), c.frames(), gain);
+		Routines::apply_gain_to_buffer (c.data(), c.samples(), gain);
 	}
 	ListedSource<float>::output(c);
 }

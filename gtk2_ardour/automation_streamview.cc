@@ -275,15 +275,15 @@ AutomationStreamView::clear ()
 	}
 }
 
-/** @param start Start position in session frames.
- *  @param end End position in session frames.
+/** @param start Start position in session samples.
+ *  @param end End position in session samples.
  *  @param bot Bottom position expressed as a fraction of track height where 0 is the bottom of the track.
  *  @param top Top position expressed as a fraction of track height where 0 is the bottom of the track.
  *  NOTE: this y system is different to that for the StreamView method that this overrides, which is a little
  *  confusing.
  */
 void
-AutomationStreamView::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
+AutomationStreamView::get_selectables (samplepos_t start, samplepos_t end, double botfrac, double topfrac, list<Selectable*>& results, bool /*within*/)
 {
 	for (list<RegionView*>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AutomationRegionView* arv = dynamic_cast<AutomationRegionView*> (*i);
@@ -319,7 +319,7 @@ AutomationStreamView::get_lines () const
 }
 
 bool
-AutomationStreamView::paste (framepos_t                                pos,
+AutomationStreamView::paste (samplepos_t                                pos,
                              unsigned                                  paste_count,
                              float                                     times,
                              boost::shared_ptr<ARDOUR::AutomationList> alist)

@@ -146,13 +146,13 @@ class EngineStateController
 	 *
 	 * @return current sample rate
 	 */
-	ARDOUR::framecnt_t get_current_sample_rate () const;
+	ARDOUR::samplecnt_t get_current_sample_rate () const;
 
 	/** Get default sample rate for current backend.
 	 *
 	 * @return default sample rate for current backend
 	 */
-	ARDOUR::framecnt_t get_default_sample_rate () const;
+	ARDOUR::samplecnt_t get_default_sample_rate () const;
 
 	/** Get sample rates which are supported by current device and current backend.
 	 *
@@ -369,7 +369,7 @@ class EngineStateController
 	 * @note Use push_state_to_backend() method to update backend/device state with the most recent controller state
 	 * @param sample_rate - new sample rate
 	 */
-	bool        set_new_sample_rate_in_controller(framecnt_t sample_rate);
+	bool        set_new_sample_rate_in_controller(samplecnt_t sample_rate);
 	/** Set new buffer size for current device in EngineStateController database
 	 * @note Use push_state_to_backend() method to update backend/device state with the most recent controller state
 	 * @param buffer_size - new buffer size
@@ -470,7 +470,7 @@ class EngineStateController
 	struct State {
 		std::string backend_name; ///< state backend name
 		std::string device_name; ///< state device name
-		ARDOUR::framecnt_t sample_rate; ///< sample rate used by the device in this state
+		ARDOUR::samplecnt_t sample_rate; ///< sample rate used by the device in this state
 		ARDOUR::pframes_t buffer_size; ///< buffer size used by the device in this state
 
 		PortStateList input_channel_states; ///< states of device Audio inputs
@@ -609,7 +609,7 @@ class EngineStateController
 	void _on_device_error();
 	/** Invoked when current device changes sample rate
 	 */
-	void _on_sample_rate_change(ARDOUR::framecnt_t);
+	void _on_sample_rate_change(ARDOUR::samplecnt_t);
 	/** Invoked when current device changes buffer size
 	 */
 	void _on_buffer_size_change(ARDOUR::pframes_t);

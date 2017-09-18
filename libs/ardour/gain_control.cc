@@ -69,12 +69,12 @@ GainControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 }
 
 bool
-GainControl::get_masters_curve_locked (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
+GainControl::get_masters_curve_locked (samplepos_t start, samplepos_t end, float* vec, samplecnt_t veclen) const
 {
 	if (_masters.empty()) {
 		return list()->curve().rt_safe_get_vector (start, end, vec, veclen);
 	}
-	for (framecnt_t i = 0; i < veclen; ++i) {
+	for (samplecnt_t i = 0; i < veclen; ++i) {
 		vec[i] = 1.f;
 	}
 	return SlavableAutomationControl::masters_curve_multiply (start, end, vec, veclen);

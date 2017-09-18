@@ -225,7 +225,7 @@ Session::post_engine_init ()
 	BootMessage (_("Set block size and sample rate"));
 
 	set_block_size (_engine.samples_per_cycle());
-	set_frame_rate (_engine.sample_rate());
+	set_sample_rate (_engine.sample_rate());
 
 	BootMessage (_("Using configuration"));
 
@@ -237,7 +237,7 @@ Session::post_engine_init ()
 	msc->set_input_port (boost::dynamic_pointer_cast<MidiPort>(scene_input_port()));
 	msc->set_output_port (boost::dynamic_pointer_cast<MidiPort>(scene_output_port()));
 
-	boost::function<framecnt_t(void)> timer_func (boost::bind (&Session::audible_frame, this, (bool*)(0)));
+	boost::function<samplecnt_t(void)> timer_func (boost::bind (&Session::audible_sample, this, (bool*)(0)));
 	boost::dynamic_pointer_cast<AsyncMIDIPort>(scene_input_port())->set_timer (timer_func);
 
 	setup_midi_machine_control ();
@@ -262,7 +262,7 @@ Session::post_engine_init ()
 		/* tempo map requires sample rate knowledge */
 
 		delete _tempo_map;
-		_tempo_map = new TempoMap (_current_frame_rate);
+		_tempo_map = new TempoMap (_current_sample_rate);
 		_tempo_map->PropertyChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 		_tempo_map->MetricPositionChanged.connect_same_thread (*this, boost::bind (&Session::tempo_map_changed, this, _1));
 	} catch (std::exception const & e) {
@@ -282,7 +282,7 @@ Session::post_engine_init ()
 
 		/* crossfades require sample rate knowledge */
 
-		SndFileSource::setup_standard_crossfades (*this, frame_rate());
+		SndFileSource::setup_standard_crossfades (*this, sample_rate());
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this));
 		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
@@ -409,7 +409,7 @@ Session::post_engine_init ()
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (*r);
 		if (trk && !trk->is_private_route()) {
-			trk->seek (_transport_frame, true);
+			trk->seek (_transport_sample, true);
 		}
 	}
 
@@ -436,7 +436,7 @@ Session::session_loaded ()
 	/* Now, finally, we can fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
-	force_locate (_transport_frame, false);
+	force_locate (_transport_sample, false);
 }
 
 string
@@ -1133,7 +1133,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 	if (full_state) {
 
 		node->set_property ("name", _name);
-		node->set_property ("sample-rate", _base_frame_rate);
+		node->set_property ("sample-rate", _base_sample_rate);
 
 		if (session_dirs.size() > 1) {
 
@@ -1334,7 +1334,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 		// for a template, just create a new Locations, populate it
 		// with the default start and end, and get the state for that.
 		Location* range = new Location (*this, 0, 0, _("session"), Location::IsSessionRange, 0);
-		range->set (max_framepos, 0);
+		range->set (max_samplepos, 0);
 		loc.add (range);
 		XMLNode& locations_state = loc.get_state();
 
@@ -1468,13 +1468,13 @@ Session::set_state (const XMLNode& node, int version)
 
 	node.get_property ("name", _name);
 
-	if (node.get_property (X_("sample-rate"), _base_frame_rate)) {
+	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
 
-		_nominal_frame_rate = _base_frame_rate;
+		_nominal_sample_rate = _base_sample_rate;
 
 		assert (AudioEngine::instance()->running ());
-		if (_base_frame_rate != AudioEngine::instance()->sample_rate ()) {
-			boost::optional<int> r = AskAboutSampleRateMismatch (_base_frame_rate, _current_frame_rate);
+		if (_base_sample_rate != AudioEngine::instance()->sample_rate ()) {
+			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
 			if (r.get_value_or (0)) {
 				goto out;
 			}
@@ -2346,7 +2346,7 @@ retry:
 					switch (err.type) {
 
 						case DataType::AUDIO:
-							source = SourceFactory::createSilent (*this, **niter, max_framecnt, _current_frame_rate);
+							source = SourceFactory::createSilent (*this, **niter, max_samplecnt, _current_sample_rate);
 							break;
 
 						case DataType::MIDI:
@@ -2365,7 +2365,7 @@ retry:
 								return -1;
 							}
 							/* Note that we do not announce the source just yet - we need to reset its ID before we do that */
-							source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, false, _current_frame_rate, false, false);
+							source = SourceFactory::createWritable (DataType::MIDI, *this, fullpath, false, _current_sample_rate, false, false);
 							/* reset ID to match the missing one */
 							source->set_id (**niter);
 							/* Now we can announce it */
@@ -4203,7 +4203,7 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "timecode-offset" || p == "timecode-offset-negative") {
 		last_timecode_valid = false;
 	} else if (p == "playback-buffer-seconds") {
-		AudioSource::allocate_working_buffers (frame_rate());
+		AudioSource::allocate_working_buffers (sample_rate());
 	} else if (p == "ltc-source-port") {
 		reconnect_ltc_input ();
 	} else if (p == "ltc-sink-port") {

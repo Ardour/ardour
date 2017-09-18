@@ -46,8 +46,8 @@ public:
 
 	void silences (ARDOUR::AudioIntervalMap&);
 
-	ARDOUR::framecnt_t minimum_length () const;
-	ARDOUR::framecnt_t fade_length () const;
+	ARDOUR::samplecnt_t minimum_length () const;
+	ARDOUR::samplecnt_t fade_length () const;
 
 	void on_response (int response_id) {
 		Gtk::Dialog::on_response (response_id);

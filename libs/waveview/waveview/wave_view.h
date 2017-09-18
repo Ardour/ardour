@@ -86,7 +86,7 @@ public:
 	void set_samples_per_pixel (double);
 	void set_height (ArdourCanvas::Distance);
 	void set_channel (int);
-	void set_region_start (ARDOUR::frameoffset_t);
+	void set_region_start (ARDOUR::sampleoffset_t);
 
 	/** Change the first position drawn by @param pixels.
 	 * @param pixels must be positive. This is used by
@@ -177,13 +177,13 @@ private:
 	 * but if region_start has been reset, then we need to use this modified
 	 * computation.
 	 */
-	ARDOUR::framecnt_t region_length () const;
+	ARDOUR::samplecnt_t region_length () const;
 
 	/** Under almost conditions, this is going to return _region->start() +
 	 * _region->length(), but if region_start has been reset, then we need to use
 	 * this modified computation.
 	 */
-	ARDOUR::framepos_t region_end () const;
+	ARDOUR::samplepos_t region_end () const;
 
 	/**
 	 * _image stays non-null after the first time it is set
@@ -238,7 +238,7 @@ private:
 	                        boost::shared_ptr<WaveViewDrawRequest>);
 	static void draw_absent_image (Cairo::RefPtr<Cairo::ImageSurface>&, ARDOUR::PeakData*, int);
 
-	ARDOUR::framecnt_t optimal_image_width_samples () const;
+	ARDOUR::samplecnt_t optimal_image_width_samples () const;
 
 	void set_image (boost::shared_ptr<WaveViewImage> img) const;
 

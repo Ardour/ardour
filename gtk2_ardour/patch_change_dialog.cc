@@ -27,7 +27,7 @@
 
 #include "midi++/midnam_patch.h"
 
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/instrument_info.h"
 
 #include "patch_change_dialog.h"
@@ -41,7 +41,7 @@ using namespace Gtkmm2ext;
 
 /** @param tc If non-0, a time converter for this patch change.  If 0, time control will be desensitized */
 PatchChangeDialog::PatchChangeDialog (
-	const ARDOUR::BeatsFramesConverter*        tc,
+	const ARDOUR::BeatsSamplesConverter*        tc,
 	ARDOUR::Session*                           session,
 	Evoral::PatchChange<Evoral::Beats> const & patch,
 	ARDOUR::InstrumentInfo&                    info,

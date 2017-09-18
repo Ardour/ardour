@@ -243,7 +243,7 @@ TranzportControlProtocol::button_event_prev_release (bool shifted)
 }
 
 // Note - add_marker should adhere to the snap to setting
-// maybe session->audible_frame does that
+// maybe session->audible_sample does that
 
 void
 TranzportControlProtocol::button_event_add_press (bool shifted)

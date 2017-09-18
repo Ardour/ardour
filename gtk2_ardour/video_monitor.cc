@@ -37,7 +37,7 @@ using namespace ARDOUR_UI_UTILS;
 VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	: editor (ed)
 {
-	manually_seeked_frame = 0;
+	manually_seeked_sample = 0;
 	fps =0.0; // = _session->timecode_frames_per_second();
 	sync_by_manual_seek = true;
 	_restore_settings_mask = 0;
@@ -72,7 +72,7 @@ VideoMonitor::start ()
 		return true;
 	}
 
-	manually_seeked_frame = 0;
+	manually_seeked_sample = 0;
 	sync_by_manual_seek = false;
 	if (clock_connection.connected()) { clock_connection.disconnect(); }
 
@@ -126,7 +126,7 @@ void
 VideoMonitor::open (std::string filename)
 {
 	if (!is_started()) return;
-	manually_seeked_frame = 0;
+	manually_seeked_sample = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
 	starting = 15;
 	process->write_to_stdin("load " + filename + "\n");
@@ -384,8 +384,8 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						osdmode = atoi(value);
 						if (starting || atoi(xjadeo_settings["osd mode"]) != osdmode) {
 							if (!starting && _session) _session->set_dirty ();
-							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
-							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-frame-off"); }
+							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-sample-on"); }
+							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-sample-off"); }
 							if ((osdmode & 2) == 2) { UiState("xjadeo-window-osd-timecode-on"); }
 							if ((osdmode & 2) == 0) { UiState("xjadeo-window-osd-timecode-off"); }
 							if ((osdmode & 8) == 8) { UiState("xjadeo-window-osd-box-on"); }
@@ -467,31 +467,31 @@ VideoMonitor::get_custom_setting (const std::string k)
 	return (xjadeo_settings[k]);
 }
 
-#define NO_OFFSET (ARDOUR::max_framepos) //< skip setting or modifying offset
+#define NO_OFFSET (ARDOUR::max_samplepos) //< skip setting or modifying offset
 void
 VideoMonitor::srsupdate ()
 {
 	if (!_session) { return; }
 	if (editor->dragging_playhead()) { return ;}
-	manual_seek(_session->audible_frame(), false, NO_OFFSET);
+	manual_seek(_session->audible_sample(), false, NO_OFFSET);
 }
 
 void
-VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
+VideoMonitor::set_offset (ARDOUR::sampleoffset_t offset)
 {
 	if (!is_started()) { return; }
 	if (!_session) { return; }
 	if (offset == NO_OFFSET ) { return; }
 
-	framecnt_t video_frame_offset;
-	framecnt_t audio_sample_rate;
+	samplecnt_t video_frame_offset;
+	samplecnt_t audio_sample_rate;
 	if (_session->config.get_videotimeline_pullup()) {
-		audio_sample_rate = _session->frame_rate();
+		audio_sample_rate = _session->sample_rate();
 	} else {
-		audio_sample_rate = _session->nominal_frame_rate();
+		audio_sample_rate = _session->nominal_sample_rate();
 	}
 
-	/* Note: pull-up/down are applied here: frame_rate() vs. nominal_frame_rate() */
+	/* Note: pull-up/down are applied here: sample_rate() vs. nominal_sample_rate() */
 	if (_session->config.get_use_video_file_fps()) {
 		video_frame_offset = floor(offset * fps / audio_sample_rate);
 	} else {
@@ -506,19 +506,19 @@ VideoMonitor::set_offset (ARDOUR::frameoffset_t offset)
 }
 
 void
-VideoMonitor::manual_seek (framepos_t when, bool /*force*/, ARDOUR::frameoffset_t offset)
+VideoMonitor::manual_seek (samplepos_t when, bool /*force*/, ARDOUR::sampleoffset_t offset)
 {
 	if (!is_started()) { return; }
 	if (!_session) { return; }
-	framecnt_t video_frame;
-	framecnt_t audio_sample_rate;
+	samplecnt_t video_frame;
+	samplecnt_t audio_sample_rate;
 	if (_session->config.get_videotimeline_pullup()) {
-		audio_sample_rate = _session->frame_rate();
+		audio_sample_rate = _session->sample_rate();
 	} else {
-		audio_sample_rate = _session->nominal_frame_rate();
+		audio_sample_rate = _session->nominal_sample_rate();
 	}
 
-	/* Note: pull-up/down are applied here: frame_rate() vs. nominal_frame_rate() */
+	/* Note: pull-up/down are applied here: sample_rate() vs. nominal_sample_rate() */
 	if (_session->config.get_use_video_file_fps()) {
 		video_frame = floor(when * fps / audio_sample_rate);
 	} else {
@@ -526,8 +526,8 @@ VideoMonitor::manual_seek (framepos_t when, bool /*force*/, ARDOUR::frameoffset_
 	}
 	if (video_frame < 0 ) video_frame = 0;
 
-	if (video_frame == manually_seeked_frame) { return; }
-	manually_seeked_frame = video_frame;
+	if (video_frame == manually_seeked_sample) { return; }
+	manually_seeked_sample = video_frame;
 
 #if 0 /* DEBUG */
 	std::cout <<"seek: " << video_frame << std::endl;

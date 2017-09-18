@@ -73,7 +73,7 @@ LIBARDOUR_API int cmp_nocase_utf8 (const std::string& s1, const std::string& s2)
 LIBARDOUR_API std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 LIBARDOUR_API bool path_is_paired (std::string path, std::string& pair_base);
 
-LIBARDOUR_API void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
+LIBARDOUR_API void compute_equal_power_fades (ARDOUR::samplecnt_t nframes, float* in, float* out);
 
 LIBARDOUR_API const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
 LIBARDOUR_API ARDOUR::SyncSource string_to_sync_source (std::string str);

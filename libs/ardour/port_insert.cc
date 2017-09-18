@@ -49,7 +49,7 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 {
         _mtdm = 0;
         _latency_detect = false;
-        _latency_flush_frames = 0;
+        _latency_flush_samples = 0;
         _measured_latency = 0;
 }
 
@@ -70,8 +70,8 @@ void
 PortInsert::start_latency_detection ()
 {
 	delete _mtdm;
-        _mtdm = new MTDM (_session.frame_rate());
-        _latency_flush_frames = 0;
+        _mtdm = new MTDM (_session.sample_rate());
+        _latency_flush_samples = 0;
         _latency_detect = true;
         _measured_latency = 0;
 }
@@ -79,21 +79,21 @@ PortInsert::start_latency_detection ()
 void
 PortInsert::stop_latency_detection ()
 {
-        _latency_flush_frames = signal_latency() + _session.engine().samples_per_cycle();
+        _latency_flush_samples = signal_latency() + _session.engine().samples_per_cycle();
         _latency_detect = false;
 }
 
 void
-PortInsert::set_measured_latency (framecnt_t n)
+PortInsert::set_measured_latency (samplecnt_t n)
 {
         _measured_latency = n;
 }
 
-framecnt_t
+samplecnt_t
 PortInsert::latency() const
 {
 	/* because we deliver and collect within the same cycle,
-	   all I/O is necessarily delayed by at least frames_per_cycle().
+	   all I/O is necessarily delayed by at least samples_per_cycle().
 
 	   if the return port for insert has its own latency, we
 	   need to take that into account too.
@@ -107,7 +107,7 @@ PortInsert::latency() const
 }
 
 void
-PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports().n_total() == 0) {
 		return;
@@ -128,18 +128,18 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 
                 return;
 
-        } else if (_latency_flush_frames) {
+        } else if (_latency_flush_samples) {
 
                 /* wait for the entire input buffer to drain before picking up input again so that we can't
                    hear the remnants of whatever MTDM pumped into the pipeline.
                 */
 
-                silence (nframes, start_frame);
+                silence (nframes, start_sample);
 
-                if (_latency_flush_frames > nframes) {
-                        _latency_flush_frames -= nframes;
+                if (_latency_flush_samples > nframes) {
+                        _latency_flush_samples -= nframes;
                 } else {
-                        _latency_flush_frames = 0;
+                        _latency_flush_samples = 0;
                 }
 
                 return;
@@ -147,11 +147,11 @@ PortInsert::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, 
 
 	if (!_active && !_pending_active) {
 		/* deliver silence */
-		silence (nframes, start_frame);
+		silence (nframes, start_sample);
 		goto out;
 	}
 
-	_out->run (bufs, start_frame, end_frame, speed, nframes, true);
+	_out->run (bufs, start_sample, end_sample, speed, nframes, true);
 	_input->collect_input (bufs, nframes, ChanCount::ZERO);
 
   out:
@@ -228,11 +228,11 @@ PortInsert::set_state (const XMLNode& node, int version)
 	return 0;
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 PortInsert::signal_latency() const
 {
 	/* because we deliver and collect within the same cycle,
-	   all I/O is necessarily delayed by at least frames_per_cycle().
+	   all I/O is necessarily delayed by at least samples_per_cycle().
 
 	   if the return port for insert has its own latency, we
 	   need to take that into account too.

@@ -64,7 +64,7 @@ public:
 	void emit_configuration_changed ();
 
 	/** Compute peaks */
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	void activate ()   { }
 	void deactivate () { }

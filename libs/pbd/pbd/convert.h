@@ -42,8 +42,8 @@ LIBPBD_API std::string capitalize (const std::string&);
 LIBPBD_API std::string downcase (const std::string&);
 LIBPBD_API const char* downcase (const char*);
 
-// std::string length2string (const int32_t frames, const float sample_rate);
-LIBPBD_API std::string length2string (const int64_t frames, const double sample_rate);
+// std::string length2string (const int32_t samples, const float sample_rate);
+LIBPBD_API std::string length2string (const int64_t samples, const double sample_rate);
 
 LIBPBD_API std::vector<std::string> internationalize (const char *, const char **);
 LIBPBD_API bool strings_equal_ignore_case (const std::string& a, const std::string& b);

@@ -797,11 +797,11 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 }
 
 bool
-Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
+Editor::canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 
-	/* frame handles are not active when in internal edit mode, because actual notes
+	/* sample handles are not active when in internal edit mode, because actual notes
 	   might be in the area occupied by the handle - we want them to be editable as normal.
 	*/
 
@@ -809,7 +809,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		return false;
 	}
 
-	/* NOTE: frame handles pretend to be the colored trim bar from an event handling
+	/* NOTE: sample handles pretend to be the colored trim bar from an event handling
 	   perspective. XXX change this ??
 	*/
 
@@ -1264,7 +1264,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
-	framepos_t const pos = window_event_sample (&event, &px, &py);
+	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
 	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
 	if (!region) { return; }

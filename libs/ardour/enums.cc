@@ -143,6 +143,12 @@ setup_enum_writer ()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
 #define REGISTER_CLASS_ENUM(t,e) i.push_back (t::e); s.push_back (#e)
 
+	/* in mid-2017 the entire code base was changed to use "samples"
+	   instead of frames, which included several enums. This hack table
+	   entry will catch all of them.
+	*/
+	enum_writer.add_to_hack_table ("Frames", "Samples");
+
 	REGISTER_ENUM (NullAutomation);
 	REGISTER_ENUM (GainAutomation);
 	REGISTER_ENUM (PanAzimuthAutomation);
@@ -544,7 +550,7 @@ setup_enum_writer ()
 
 	REGISTER_CLASS_ENUM (AnyTime, Timecode);
 	REGISTER_CLASS_ENUM (AnyTime, BBT);
-	REGISTER_CLASS_ENUM (AnyTime, Frames);
+	REGISTER_CLASS_ENUM (AnyTime, Samples);
 	REGISTER_CLASS_ENUM (AnyTime, Seconds);
 	REGISTER (_AnyTime_Type);
 
@@ -627,7 +633,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (ExportProfileManager, Timecode);
 	REGISTER_CLASS_ENUM (ExportProfileManager, BBT);
 	REGISTER_CLASS_ENUM (ExportProfileManager, MinSec);
-	REGISTER_CLASS_ENUM (ExportProfileManager, Frames);
+	REGISTER_CLASS_ENUM (ExportProfileManager, Samples);
 	REGISTER (_ExportProfileManager_TimeFormat);
 
 	REGISTER_CLASS_ENUM (RegionExportChannelFactory, None);

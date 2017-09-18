@@ -40,24 +40,24 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ARDOUR::framecnt_t DiskReader::_chunk_frames = default_chunk_frames ();
+ARDOUR::samplecnt_t DiskReader::_chunk_samples = default_chunk_samples ();
 PBD::Signal0<void> DiskReader::Underrun;
 Sample* DiskReader::_mixdown_buffer = 0;
 gain_t* DiskReader::_gain_buffer = 0;
-framecnt_t DiskReader::midi_readahead = 4096;
+samplecnt_t DiskReader::midi_readahead = 4096;
 bool DiskReader::_no_disk_output = false;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, _roll_delay (0)
-	, overwrite_frame (0)
+	, overwrite_sample (0)
         , overwrite_offset (0)
         , _pending_overwrite (false)
         , overwrite_queued (false)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
-	file_frame[DataType::AUDIO] = 0;
-	file_frame[DataType::MIDI] = 0;
+	file_sample[DataType::AUDIO] = 0;
+	file_sample[DataType::MIDI] = 0;
 }
 
 DiskReader::~DiskReader ()
@@ -107,8 +107,8 @@ DiskReader::free_working_buffers()
 	_gain_buffer          = 0;
 }
 
-framecnt_t
-DiskReader::default_chunk_frames()
+samplecnt_t
+DiskReader::default_chunk_samples()
 {
 	return 65536;
 }
@@ -127,7 +127,7 @@ DiskReader::set_name (string const & str)
 }
 
 void
-DiskReader::set_roll_delay (ARDOUR::framecnt_t nframes)
+DiskReader::set_roll_delay (ARDOUR::samplecnt_t nframes)
 {
 	_roll_delay = nframes;
 }
@@ -237,13 +237,13 @@ DiskReader::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 }
 
 void
-DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
+DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                  double speed, pframes_t nframes, bool result_required)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	frameoffset_t disk_samples_to_consume;
+	sampleoffset_t disk_samples_to_consume;
 	MonitorState ms = _route->monitoring_state ();
 
 	if (_active) {
@@ -327,7 +327,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
 
-			if (disk_samples_to_consume <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+			if (disk_samples_to_consume <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
 				if (fabsf (speed) != 1.0f) {
 					(void) interpolation.interpolate (
@@ -340,7 +340,7 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			} else {
 
-				const framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
+				const samplecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
 				if (disk_samples_to_consume <= total) {
 
@@ -424,9 +424,9 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 						butler_required = true;
 					}
 				} else {
-					if ((framecnt_t) c->front()->buf->write_space() >= _chunk_frames) {
+					if ((samplecnt_t) c->front()->buf->write_space() >= _chunk_samples) {
 						DEBUG_TRACE (DEBUG::Butler, string_compose ("%1: write space = %2 of %3\n", name(), c->front()->buf->write_space(),
-						                                            _chunk_frames));
+						                                            _chunk_samples));
 						butler_required = true;
 					}
 				}
@@ -436,16 +436,16 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 		if (_playlists[DataType::MIDI]) {
 			/* MIDI butler needed part */
 
-			uint32_t frames_read = g_atomic_int_get(const_cast<gint*>(&_frames_read_from_ringbuffer));
-			uint32_t frames_written = g_atomic_int_get(const_cast<gint*>(&_frames_written_to_ringbuffer));
+			uint32_t samples_read = g_atomic_int_get(const_cast<gint*>(&_samples_read_from_ringbuffer));
+			uint32_t samples_written = g_atomic_int_get(const_cast<gint*>(&_samples_written_to_ringbuffer));
 
 			/*
-			  cerr << name() << " MDS written: " << frames_written << " - read: " << frames_read <<
-			  " = " << frames_written - frames_read
+			  cerr << name() << " MDS written: " << samples_written << " - read: " << samples_read <<
+			  " = " << samples_written - samples_read
 			  << " + " << disk_samples_to_consume << " < " << midi_readahead << " = " << need_butler << ")" << endl;
 			*/
 
-			/* frames_read will generally be less than frames_written, but
+			/* samples_read will generally be less than samples_written, but
 			 * immediately after an overwrite, we can end up having read some data
 			 * before we've written any. we don't need to trip an assert() on this,
 			 * but we do need to check so that the decision on whether or not we
@@ -456,13 +456,13 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			 *
 			 * Doing heavy GUI operations[1] can stall also the butler.
 			 * The RT-thread meanwhile will happily continue and
-			 * ‘frames_read’ (from buffer to output) will become larger
-			 * than ‘frames_written’ (from disk to buffer).
+			 * ‘samples_read’ (from buffer to output) will become larger
+			 * than ‘samples_written’ (from disk to buffer).
 			 *
 			 * The disk-stream is now behind..
 			 *
 			 * In those cases the butler needs to be summed to refill the buffer (done now)
-			 * AND we need to skip (frames_read - frames_written). ie remove old events
+			 * AND we need to skip (samples_read - samples_written). ie remove old events
 			 * before playback_sample from the rinbuffer.
 			 *
 			 * [1] one way to do so is described at #6170.
@@ -473,8 +473,8 @@ DiskReader::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			 * In both cases the root cause is that redrawing MIDI regions on the GUI is still very slow
 			 * and can stall
 			 */
-			if (frames_read <= frames_written) {
-				if ((frames_written - frames_read) + disk_samples_to_consume < midi_readahead) {
+			if (samples_read <= samples_written) {
+				if ((samples_written - samples_read) + disk_samples_to_consume < midi_readahead) {
 					butler_required = true;
 				}
 			} else {
@@ -496,7 +496,7 @@ DiskReader::set_pending_overwrite (bool yn)
 
 	_pending_overwrite = yn;
 
-	overwrite_frame = playback_sample;
+	overwrite_sample = playback_sample;
 
 	boost::shared_ptr<ChannelList> c = channels.reader ();
 	if (!c->empty ()) {
@@ -513,7 +513,7 @@ DiskReader::overwrite_existing_buffers ()
 
 	overwrite_queued = false;
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", overwrite_frame));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2\n", overwrite_sample));
 
 	if (!c->empty ()) {
 
@@ -522,7 +522,7 @@ DiskReader::overwrite_existing_buffers ()
 		const bool reversed = _session.transport_speed() < 0.0f;
 
 		/* assume all are the same size */
-		framecnt_t size = c->front()->buf->bufsize();
+		samplecnt_t size = c->front()->buf->bufsize();
 
 		std::auto_ptr<Sample> mixdown_buffer (new Sample[size]);
 		std::auto_ptr<float> gain_buffer (new float[size]);
@@ -533,12 +533,12 @@ DiskReader::overwrite_existing_buffers ()
 		size--;
 
 		uint32_t n=0;
-		framepos_t start;
+		samplepos_t start;
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-			start = overwrite_frame;
-			framecnt_t cnt = size;
+			start = overwrite_sample;
+			samplecnt_t cnt = size;
 
 			/* to fill the buffer without resetting the playback sample, we need to
 			   do it one or two chunks (normally two).
@@ -551,10 +551,10 @@ DiskReader::overwrite_existing_buffers ()
 
 			*/
 
-			framecnt_t to_read = size - overwrite_offset;
+			samplecnt_t to_read = size - overwrite_offset;
 
 			if (audio_read ((*chan)->buf->buffer() + overwrite_offset, mixdown_buffer.get(), gain_buffer.get(), start, to_read, n, reversed)) {
-				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at frame %3"),
+				error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"),
 				                        id(), size, playback_sample) << endmsg;
 				goto midi;
 			}
@@ -564,7 +564,7 @@ DiskReader::overwrite_existing_buffers ()
 				cnt -= to_read;
 
 				if (audio_read ((*chan)->buf->buffer(), mixdown_buffer.get(), gain_buffer.get(), start, cnt, n, reversed)) {
-					error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at frame %3"),
+					error << string_compose(_("DiskReader %1: when refilling, cannot read %2 from playlist at sample %3"),
 					                        id(), size, playback_sample) << endmsg;
 					goto midi;
 				}
@@ -585,18 +585,18 @@ DiskReader::overwrite_existing_buffers ()
 		_midi_buf->reset ();
 		_midi_buf->reset_tracker ();
 
-		g_atomic_int_set (&_frames_read_from_ringbuffer, 0);
-		g_atomic_int_set (&_frames_written_to_ringbuffer, 0);
+		g_atomic_int_set (&_samples_read_from_ringbuffer, 0);
+		g_atomic_int_set (&_samples_written_to_ringbuffer, 0);
 
 		/* Resolve all currently active notes in the playlist.  This is more
 		   aggressive than it needs to be: ideally we would only resolve what is
 		   absolutely necessary, but this seems difficult and/or impossible without
 		   having the old data or knowing what change caused the overwrite.
 		*/
-		midi_playlist()->resolve_note_trackers (*_midi_buf, overwrite_frame);
+		midi_playlist()->resolve_note_trackers (*_midi_buf, overwrite_sample);
 
-		midi_read (overwrite_frame, _chunk_frames, false);
-		file_frame[DataType::MIDI] = overwrite_frame; // overwrite_frame was adjusted by ::midi_read() to the new position
+		midi_read (overwrite_sample, _chunk_samples, false);
+		file_sample[DataType::MIDI] = overwrite_sample; // overwrite_sample was adjusted by ::midi_read() to the new position
 	}
 
 	_pending_overwrite = false;
@@ -605,7 +605,7 @@ DiskReader::overwrite_existing_buffers ()
 }
 
 int
-DiskReader::seek (framepos_t frame, bool complete_refill)
+DiskReader::seek (samplepos_t sample, bool complete_refill)
 {
 	uint32_t n;
 	int ret = -1;
@@ -616,7 +616,7 @@ DiskReader::seek (framepos_t frame, bool complete_refill)
 		(*chan)->buf->reset ();
 	}
 
-	if (g_atomic_int_get (&_frames_read_from_ringbuffer) == 0) {
+	if (g_atomic_int_get (&_samples_read_from_ringbuffer) == 0) {
 		/* we haven't read anything since the last seek,
 		   so flush all note trackers to prevent
 		   wierdness
@@ -625,12 +625,12 @@ DiskReader::seek (framepos_t frame, bool complete_refill)
 	}
 
 	_midi_buf->reset();
-	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
-	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
+	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
+	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
-	playback_sample = frame;
-	file_frame[DataType::AUDIO] = frame;
-	file_frame[DataType::MIDI] = frame;
+	playback_sample = sample;
+	file_sample[DataType::AUDIO] = sample;
+	file_sample[DataType::MIDI] = sample;
 
 	if (complete_refill) {
 		/* call _do_refill() to refill the entire buffer, using
@@ -649,7 +649,7 @@ DiskReader::seek (framepos_t frame, bool complete_refill)
 }
 
 int
-DiskReader::can_internal_playback_seek (framecnt_t distance)
+DiskReader::can_internal_playback_seek (samplecnt_t distance)
 {
 	/* 1. Audio */
 
@@ -664,14 +664,14 @@ DiskReader::can_internal_playback_seek (framecnt_t distance)
 
 	/* 2. MIDI */
 
-	uint32_t frames_read    = g_atomic_int_get(&_frames_read_from_ringbuffer);
-	uint32_t frames_written = g_atomic_int_get(&_frames_written_to_ringbuffer);
+	uint32_t samples_read    = g_atomic_int_get(&_samples_read_from_ringbuffer);
+	uint32_t samples_written = g_atomic_int_get(&_samples_written_to_ringbuffer);
 
-	return ((frames_written - frames_read) < distance);
+	return ((samples_written - samples_read) < distance);
 }
 
 int
-DiskReader::internal_playback_seek (framecnt_t distance)
+DiskReader::internal_playback_seek (samplecnt_t distance)
 {
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
@@ -697,21 +697,21 @@ void swap_by_ptr (Sample *first, Sample *last)
 
 /** Read some data for 1 channel from our playlist into a buffer.
  *  @param buf Buffer to write to.
- *  @param start Session frame to start reading from; updated to where we end up
+ *  @param start Session sample to start reading from; updated to where we end up
  *         after the read.
  *  @param cnt Count of samples to read.
  *  @param reversed true if we are running backwards, otherwise false.
  */
 int
 DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
-                        framepos_t& start, framecnt_t cnt,
+                        samplepos_t& start, samplecnt_t cnt,
                         int channel, bool reversed)
 {
-	framecnt_t this_read = 0;
+	samplecnt_t this_read = 0;
 	bool reloop = false;
-	framepos_t loop_end = 0;
-	framepos_t loop_start = 0;
-	framecnt_t offset = 0;
+	samplepos_t loop_end = 0;
+	samplepos_t loop_start = 0;
+	samplecnt_t offset = 0;
 	Location *loc = 0;
 
 	if (!_playlists[DataType::AUDIO]) {
@@ -723,7 +723,7 @@ DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 
 	if (!reversed) {
 
-		framecnt_t loop_length = 0;
+		samplecnt_t loop_length = 0;
 
 		/* Make the use of a Location atomic for this read operation.
 
@@ -739,7 +739,7 @@ DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 			loop_length = loop_end - loop_start;
 		}
 
-		/* if we are looping, ensure that the first frame we read is at the correct
+		/* if we are looping, ensure that the first sample we read is at the correct
 		   position within the loop.
 		*/
 
@@ -776,7 +776,7 @@ DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		this_read = min(cnt,this_read);
 
 		if (audio_playlist()->read (buf+offset, mixdown_buffer, gain_buffer, start, this_read, channel) != this_read) {
-			error << string_compose(_("DiskReader %1: cannot read %2 from playlist at frame %3"), id(), this_read,
+			error << string_compose(_("DiskReader %1: cannot read %2 from playlist at sample %3"), id(), this_read,
 					 start) << endmsg;
 			return -1;
 		}
@@ -816,7 +816,7 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 		std::auto_ptr<Sample> mix_buf (new Sample[2*1048576]);
 		std::auto_ptr<float>  gain_buf (new float[2*1048576]);
 
-		int ret = refill_audio (mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_frames : 0));
+		int ret = refill_audio (mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0));
 
 		if (ret) {
 			return ret;
@@ -827,7 +827,7 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 }
 
 int
-DiskReader::refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level)
+DiskReader::refill (Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
 {
 	int ret = refill_audio (mixdown_buffer, gain_buffer, fill_level);
 
@@ -849,7 +849,7 @@ DiskReader::refill (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_
  */
 
 int
-DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t fill_level)
+DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level)
 {
 	/* do not read from disk while session is marked as Loading, to avoid
 	   useless redundant I/O.
@@ -860,15 +860,15 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	}
 
 	int32_t ret = 0;
-	framecnt_t to_read;
+	samplecnt_t to_read;
 	RingBufferNPT<Sample>::rw_vector vector;
 	bool const reversed = _session.transport_speed() < 0.0f;
-	framecnt_t total_space;
-	framecnt_t zero_fill;
+	samplecnt_t total_space;
+	samplecnt_t zero_fill;
 	uint32_t chan_n;
 	ChannelList::iterator i;
 	boost::shared_ptr<ChannelList> c = channels.reader();
-	framecnt_t ts;
+	samplecnt_t ts;
 
 	if (c->empty()) {
 		return 0;
@@ -900,18 +900,18 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	}
 
 	/* if we're running close to normal speed and there isn't enough
-	   space to do disk_read_chunk_frames of I/O, then don't bother.
+	   space to do disk_read_chunk_samples of I/O, then don't bother.
 
 	   at higher speeds, just do it because the sync between butler
 	   and audio thread may not be good enough.
 
-	   Note: it is a design assumption that disk_read_chunk_frames is smaller
+	   Note: it is a design assumption that disk_read_chunk_samples is smaller
 	   than the playback buffer size, so this check should never trip when
 	   the playback buffer is empty.
 	*/
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: space to refill %2 vs. chunk %3 (speed = %4)\n", name(), total_space, _chunk_frames, _session.transport_speed()));
-	if ((total_space < _chunk_frames) && fabs (_session.transport_speed()) < 2.0f) {
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: space to refill %2 vs. chunk %3 (speed = %4)\n", name(), total_space, _chunk_samples, _session.transport_speed()));
+	if ((total_space < _chunk_samples) && fabs (_session.transport_speed()) < 2.0f) {
 		return 0;
 	}
 
@@ -920,12 +920,12 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	   work with.
 	*/
 
-	if (_slaved && total_space < (framecnt_t) (c->front()->buf->bufsize() / 2)) {
+	if (_slaved && total_space < (samplecnt_t) (c->front()->buf->bufsize() / 2)) {
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: not enough to refill while slaved\n", this));
 		return 0;
 	}
 
-	framepos_t ffa = file_frame[DataType::AUDIO];
+	samplepos_t ffa = file_sample[DataType::AUDIO];
 
 	if (reversed) {
 
@@ -962,7 +962,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 
 	} else {
 
-		if (ffa == max_framepos) {
+		if (ffa == max_samplepos) {
 
 			/* at end: nothing to do but fill with silence */
 
@@ -979,19 +979,19 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 			return 0;
 		}
 
-		if (ffa > max_framepos - total_space) {
+		if (ffa > max_samplepos - total_space) {
 
 			/* to close to the end: read what we can, and zero fill the rest */
 
-			zero_fill = total_space - (max_framepos - ffa);
-			total_space = max_framepos - ffa;
+			zero_fill = total_space - (max_samplepos - ffa);
+			total_space = max_samplepos - ffa;
 
 		} else {
 			zero_fill = 0;
 		}
 	}
 
-	framepos_t file_frame_tmp = 0;
+	samplepos_t file_sample_tmp = 0;
 
 	/* total_space is in samples. We want to optimize read sizes in various sizes using bytes */
 
@@ -1008,7 +1008,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 
 	/* now back to samples */
 
-	framecnt_t samples_to_read = byte_size_for_read / (bits_per_sample / 8);
+	samplecnt_t samples_to_read = byte_size_for_read / (bits_per_sample / 8);
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: will refill %2 channels with %3 samples\n", name(), c->size(), total_space));
 
@@ -1020,18 +1020,18 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 		ChannelInfo* chan (*i);
 		Sample* buf1;
 		Sample* buf2;
-		framecnt_t len1, len2;
+		samplecnt_t len1, len2;
 
 		chan->buf->get_write_vector (&vector);
 
-		if ((framecnt_t) vector.len[0] > samples_to_read) {
+		if ((samplecnt_t) vector.len[0] > samples_to_read) {
 
 			/* we're not going to fill the first chunk, so certainly do not bother with the
 			   other part. it won't be connected with the part we do fill, as in:
 
 			   .... => writable space
 			   ++++ => readable space
-			   ^^^^ => 1 x disk_read_chunk_frames that would be filled
+			   ^^^^ => 1 x disk_read_chunk_samples that would be filled
 
 			   |......|+++++++++++++|...............................|
 			   buf1                buf0
@@ -1048,7 +1048,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 		}
 
 		ts = total_space;
-		file_frame_tmp = ffa;
+		file_sample_tmp = ffa;
 
 		buf1 = vector.buf[0];
 		len1 = vector.len[0];
@@ -1056,13 +1056,13 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 		len2 = vector.len[1];
 
 		to_read = min (ts, len1);
-		to_read = min (to_read, (framecnt_t) samples_to_read);
+		to_read = min (to_read, (samplecnt_t) samples_to_read);
 
 		assert (to_read >= 0);
 
 		if (to_read) {
 
-			if (audio_read (buf1, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
+			if (audio_read (buf1, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1079,7 +1079,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 			   all of vector.len[1] as well.
 			*/
 
-			if (audio_read (buf2, mixdown_buffer, gain_buffer, file_frame_tmp, to_read, chan_n, reversed)) {
+			if (audio_read (buf2, mixdown_buffer, gain_buffer, file_sample_tmp, to_read, chan_n, reversed)) {
 				ret = -1;
 				goto out;
 			}
@@ -1096,10 +1096,10 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 	// elapsed = g_get_monotonic_time () - before;
 	// cerr << '\t' << name() << ": bandwidth = " << (byte_size_for_read / 1048576.0) / (elapsed/1000000.0) << "MB/sec\n";
 
-	file_frame[DataType::AUDIO] = file_frame_tmp;
-	assert (file_frame[DataType::AUDIO] >= 0);
+	file_sample[DataType::AUDIO] = file_sample_tmp;
+	assert (file_sample[DataType::AUDIO] >= 0);
 
-	ret = ((total_space - samples_to_read) > _chunk_frames);
+	ret = ((total_space - samples_to_read) > _chunk_samples);
 
 	c->front()->buf->get_write_vector (&vector);
 
@@ -1108,7 +1108,7 @@ DiskReader::refill_audio (Sample* mixdown_buffer, float* gain_buffer, framecnt_t
 }
 
 void
-DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const & movements_frames, bool from_undo)
+DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<samplepos_t> > const & movements_samples, bool from_undo)
 {
 	/* If we're coming from an undo, it will have handled
 	   automation undo (it must, since automation-follows-regions
@@ -1125,8 +1125,8 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
 
 	list< Evoral::RangeMove<double> > movements;
 
-	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin();
-	     i != movements_frames.end();
+	for (list< Evoral::RangeMove<samplepos_t> >::const_iterator i = movements_samples.begin();
+	     i != movements_samples.end();
 	     ++i) {
 
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
@@ -1153,11 +1153,11 @@ DiskReader::playlist_ranges_moved (list< Evoral::RangeMove<framepos_t> > const &
                 }
         }
 	/* move processor automation */
-        _route->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_frames));
+        _route->foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements_samples));
 }
 
 void
-DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<framepos_t> > const & movements_frames)
+DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evoral::RangeMove<samplepos_t> > const & movements_samples)
 {
 	boost::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {
@@ -1165,7 +1165,7 @@ DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 	}
 
 	list< Evoral::RangeMove<double> > movements;
-	for (list< Evoral::RangeMove<framepos_t> >::const_iterator i = movements_frames.begin(); i != movements_frames.end(); ++i) {
+	for (list< Evoral::RangeMove<samplepos_t> >::const_iterator i = movements_samples.begin(); i != movements_samples.end(); ++i) {
 		movements.push_back(Evoral::RangeMove<double>(i->from, i->length, i->to));
 	}
 
@@ -1211,7 +1211,7 @@ DiskReader::reset_tracker ()
 }
 
 void
-DiskReader::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t time)
+DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time)
 {
 	_midi_buf->resolve_tracker(buffer, time);
 
@@ -1226,7 +1226,7 @@ DiskReader::resolve_tracker (Evoral::EventSink<framepos_t>& buffer, framepos_t t
  *  so that an event at playback_sample has time = 0
  */
 void
-DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, framecnt_t disk_samples_to_consume)
+DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
 {
 	MidiBuffer* target;
 
@@ -1254,9 +1254,9 @@ DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState
 		size_t events_read = 0;
 
 		if (loc) {
-			framepos_t effective_start;
+			samplepos_t effective_start;
 
-			Evoral::Range<framepos_t> loop_range (loc->start(), loc->end() - 1);
+			Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
 			effective_start = loop_range.squish (playback_sample);
 
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
@@ -1278,7 +1278,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState
 				   for the 2nd read
 				*/
 
-				framecnt_t first, second;
+				samplecnt_t first, second;
 
 				first = loc->end() - effective_start;
 				second = nframes - first;
@@ -1319,7 +1319,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState
 			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr()));
 	}
 
-	g_atomic_int_add (&_frames_read_from_ringbuffer, nframes);
+	g_atomic_int_add (&_samples_read_from_ringbuffer, nframes);
 
 	/* vari-speed */
 
@@ -1339,23 +1339,23 @@ DiskReader::get_midi_playback (MidiBuffer& dst, framecnt_t nframes, MonitorState
 	//cerr << "----------------\n";
 }
 
-/** @a start is set to the new frame position (TIME) read up to */
+/** @a start is set to the new sample position (TIME) read up to */
 int
-DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
+DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 {
-	framecnt_t this_read   = 0;
-	framepos_t loop_end    = 0;
-	framepos_t loop_start  = 0;
-	framecnt_t loop_length = 0;
+	samplecnt_t this_read   = 0;
+	samplepos_t loop_end    = 0;
+	samplepos_t loop_start  = 0;
+	samplecnt_t loop_length = 0;
 	Location*  loc         = loop_location;
-	framepos_t effective_start = start;
-	Evoral::Range<framepos_t>*  loop_range (0);
+	samplepos_t effective_start = start;
+	Evoral::Range<samplepos_t>*  loop_range (0);
 
 	DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("MDS::midi_read @ %1 cnt %2\n", start, dur));
 
 	boost::shared_ptr<MidiTrack> mt = boost::dynamic_pointer_cast<MidiTrack>(_route);
 	MidiChannelFilter* filter = mt ? &mt->playback_filter() : 0;
-	frameoffset_t loop_offset = 0;
+	sampleoffset_t loop_offset = 0;
 
 	if (!reversed && loc) {
 		get_location_times (loc, &loop_start, &loop_end, &loop_length);
@@ -1368,10 +1368,10 @@ DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
 		if (loc && !reversed) {
 
 			if (!loop_range) {
-				loop_range = new Evoral::Range<framepos_t> (loop_start, loop_end-1); // inclusive semantics require -1
+				loop_range = new Evoral::Range<samplepos_t> (loop_start, loop_end-1); // inclusive semantics require -1
 			}
 
-			/* if we are (seamlessly) looping, ensure that the first frame we read is at the correct
+			/* if we are (seamlessly) looping, ensure that the first sample we read is at the correct
 			   position within the loop.
 			*/
 
@@ -1400,12 +1400,12 @@ DiskReader::midi_read (framepos_t& start, framecnt_t dur, bool reversed)
 
 		if (midi_playlist()->read (*_midi_buf, effective_start, this_read, loop_range, 0, filter) != this_read) {
 			error << string_compose(
-					_("MidiDiskstream %1: cannot read %2 from playlist at frame %3"),
+					_("MidiDiskstream %1: cannot read %2 from playlist at sample %3"),
 					id(), this_read, start) << endmsg;
 			return -1;
 		}
 
-		g_atomic_int_add (&_frames_written_to_ringbuffer, this_read);
+		g_atomic_int_add (&_samples_written_to_ringbuffer, this_read);
 
 		if (reversed) {
 
@@ -1443,7 +1443,7 @@ DiskReader::refill_midi ()
 	const size_t  write_space = _midi_buf->write_space();
 	const bool reversed    = _session.transport_speed() < 0.0f;
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file frame = %2\n", write_space, file_frame[DataType::MIDI]));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("MIDI refill, write space = %1 file sample = %2\n", write_space, file_sample[DataType::MIDI]));
 
 	/* no space to write */
 	if (write_space == 0) {
@@ -1456,30 +1456,30 @@ DiskReader::refill_midi ()
 
 	/* at end: nothing to do */
 
-	framepos_t ffm = file_frame[DataType::MIDI];
+	samplepos_t ffm = file_sample[DataType::MIDI];
 
-	if (ffm == max_framepos) {
+	if (ffm == max_samplepos) {
 		return 0;
 	}
 
 	int ret = 0;
-	const uint32_t frames_read = g_atomic_int_get (&_frames_read_from_ringbuffer);
-	const uint32_t frames_written = g_atomic_int_get (&_frames_written_to_ringbuffer);
+	const uint32_t samples_read = g_atomic_int_get (&_samples_read_from_ringbuffer);
+	const uint32_t samples_written = g_atomic_int_get (&_samples_written_to_ringbuffer);
 
-	if ((frames_read < frames_written) && (frames_written - frames_read) >= midi_readahead) {
+	if ((samples_read < samples_written) && (samples_written - samples_read) >= midi_readahead) {
 		return 0;
 	}
 
-	framecnt_t to_read = midi_readahead - ((framecnt_t)frames_written - (framecnt_t)frames_read);
+	samplecnt_t to_read = midi_readahead - ((samplecnt_t)samples_written - (samplecnt_t)samples_read);
 
-	to_read = min (to_read, (framecnt_t) (max_framepos - ffm));
-	to_read = min (to_read, (framecnt_t) write_space);
+	to_read = min (to_read, (samplecnt_t) (max_samplepos - ffm));
+	to_read = min (to_read, (samplecnt_t) write_space);
 
 	if (midi_read (ffm, to_read, reversed)) {
 		ret = -1;
 	}
 
-	file_frame[DataType::MIDI] = ffm;
+	file_sample[DataType::MIDI] = ffm;
 
 	return ret;
 }

@@ -562,8 +562,8 @@ ARDOUR_UI::reset_main_clocks ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::reset_main_clocks)
 
 	if (_session) {
-		primary_clock->set (_session->audible_frame(), true);
-		secondary_clock->set (_session->audible_frame(), true);
+		primary_clock->set (_session->audible_sample(), true);
+		secondary_clock->set (_session->audible_sample(), true);
 	} else {
 		primary_clock->set (0, true);
 		secondary_clock->set (0, true);

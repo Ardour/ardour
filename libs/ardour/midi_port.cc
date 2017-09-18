@@ -59,7 +59,7 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
-	framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+	samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
 	Port::cycle_start (nframes);
 
@@ -240,7 +240,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			if (sends_output() && _trace_on) {
 				uint8_t const * const buf = ev.buffer();
-				const framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
 				_self_parser.set_timestamp (now + ev.time());
 
@@ -252,12 +252,12 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 
 
-			// event times are in frames, relative to cycle start
+			// event times are in samples, relative to cycle start
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED (DEBUG::MidiIO)) {
 				const Session* s = AudioEngine::instance()->session();
-				const framepos_t now = (s ? s->transport_frame() : 0);
+				const samplepos_t now = (s ? s->transport_sample() : 0);
 				DEBUG_STR_DECL(a);
 				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev.time(), ev.size(),
 				                                    now + ev.time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));

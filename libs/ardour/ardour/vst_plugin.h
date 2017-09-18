@@ -58,7 +58,7 @@ public:
 	bool load_preset (PresetRecord);
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	std::string describe_parameter (Evoral::Parameter);
-	framecnt_t signal_latency() const;
+	samplecnt_t signal_latency() const;
 	std::set<Evoral::Parameter> automatable() const;
 
 	PBD::Signal0<void> LoadPresetProgram;
@@ -72,9 +72,9 @@ public:
 	uint32_t designated_bypass_port ();
 
 	int connect_and_run (BufferSet&,
-			framepos_t start, framepos_t end, double speed,
+			samplepos_t start, samplepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset
+			pframes_t nframes, samplecnt_t offset
 			);
 
 	std::string unique_id () const;
@@ -98,7 +98,7 @@ public:
 	PluginInsert* plugin_insert () const { return _pi; }
 	uint32_t plugin_number () const { return _num; }
 	VstTimeInfo* timeinfo () { return &_timeInfo; }
-	framepos_t transport_frame () const { return _transport_frame; }
+	samplepos_t transport_sample () const { return _transport_sample; }
 	float transport_speed () const { return _transport_speed; }
 
 
@@ -126,7 +126,7 @@ protected:
 	MidiBuffer* _midi_out_buf;
 	VstTimeInfo _timeInfo;
 
-	framepos_t _transport_frame;
+	samplepos_t _transport_sample;
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
 	bool       _eff_bypassed;

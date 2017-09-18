@@ -205,18 +205,18 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	filter_table->set_col_spacings (2);
 	filter_table->set_row_spacings (4);
 
-	Frame* filter_frame = manage (new Frame);
-	filter_frame->set_name ("BaseFrame");
-	filter_frame->set_label (_("Filter"));
-	filter_frame->add (*filter_table);
+	Frame* filter_sample = manage (new Frame);
+	filter_sample->set_name ("BaseFrame");
+	filter_sample->set_label (_("Filter"));
+	filter_sample->add (*filter_table);
 
-	filter_frame->show_all ();
+	filter_sample->show_all ();
 
 	HBox* side_by_side = manage (new HBox);
 	VBox* right_side = manage (new VBox);
 
 	table->attach (scroller, 0, 7, 0, 5);
-	table->attach (*filter_frame, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
+	table->attach (*filter_sample, 0, 7, 6, 7, FILL|EXPAND, FILL, 5, 5);
 
 	right_side->pack_start (ascroller);
 

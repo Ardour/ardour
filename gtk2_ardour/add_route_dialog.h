@@ -141,8 +141,8 @@ private:
 	void trk_template_row_selected ();
 
 	Gtk::TextView trk_template_desc;
-	Gtk::Frame    trk_template_outer_frame;
-	Gtk::Frame    trk_template_desc_frame;
+	Gtk::Frame    trk_template_outer_sample;
+	Gtk::Frame    trk_template_desc_sample;
 
 	void reset_template_option_visibility ();
 	void new_group_dialog_finished (int, RouteGroupDialog*);

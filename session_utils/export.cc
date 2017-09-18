@@ -90,13 +90,13 @@ static int export_session (Session *session,
 "      <Start>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
 "        </Add>"
 "      </Start>"
 "      <End>"
 "        <Trim enabled=\"false\"/>"
 "        <Add enabled=\"false\">"
-"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" frames=\"0\"/>"
+"          <Duration format=\"Timecode\" hours=\"0\" minutes=\"0\" seconds=\"0\" samples=\"0\"/>"
 "        </Add>"
 "      </End>"
 "    </Silence>"
@@ -107,9 +107,9 @@ static int export_session (Session *session,
 	boost::shared_ptr<ExportFormatSpecification> fmp = session->get_export_handler()->add_format(*tree.root());
 
 	/* set up range */
-	framepos_t start, end;
-	start = session->current_start_frame();
-	end   = session->current_end_frame();
+	samplepos_t start, end;
+	start = session->current_start_sample();
+	end   = session->current_end_sample();
 	tsp->set_range (start, end);
 	tsp->set_range_id ("session");
 
@@ -172,7 +172,7 @@ static int export_session (Session *session,
 			printf ("* Normalizing %.1f%%      \r", 100. * progress); fflush (stdout);
 			break;
 		case ExportStatus::Exporting:
-			progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+			progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
 			printf ("* Exporting Audio %.1f%%  \r", 100. * progress); fflush (stdout);
 			break;
 		default:
@@ -310,7 +310,7 @@ int main (int argc, char* argv[])
 	s = SessionUtils::load_session (argv[optind], argv[optind+1]);
 
 	if (settings._samplerate == 0) {
-		settings._samplerate = s->nominal_frame_rate ();
+		settings._samplerate = s->nominal_sample_rate ();
 	}
 
 	export_session (s, outfile, settings);

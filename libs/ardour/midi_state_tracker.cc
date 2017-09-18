@@ -110,7 +110,7 @@ MidiStateTracker::track (const uint8_t* evbuf)
 }
 
 void
-MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
+MidiStateTracker::resolve_notes (MidiBuffer &dst, samplepos_t time)
 {
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 MB-resolve notes @ %2 on = %3\n", this, time, _on));
 
@@ -138,7 +138,7 @@ MidiStateTracker::resolve_notes (MidiBuffer &dst, framepos_t time)
 }
 
 void
-MidiStateTracker::resolve_notes (Evoral::EventSink<framepos_t> &dst, framepos_t time)
+MidiStateTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t time)
 {
 	uint8_t buf[3];
 

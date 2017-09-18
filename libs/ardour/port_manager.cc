@@ -749,7 +749,7 @@ void
 PortManager::cycle_start (pframes_t nframes)
 {
 	Port::set_global_port_buffer_offset (0);
-        Port::set_cycle_framecnt (nframes);
+        Port::set_cycle_samplecnt (nframes);
 
 	_cycle_ports = ports.reader ();
 

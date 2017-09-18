@@ -90,22 +90,22 @@ public:
 
 	void set_samples_per_pixel (double);
 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
-	void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
+	void show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer);
 	void hide_timestretch ();
 	void selection_click (GdkEventButton*);
 	void set_selected_points (PointSelection&);
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void get_selectables (ARDOUR::samplepos_t start, ARDOUR::samplepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>&);
 	void set_layer_display (LayerDisplay d, bool apply_to_selection = false);
 	LayerDisplay layer_display () const;
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t pos, ARDOUR::RegionPoint, int32_t dir);
-	framepos_t find_next_region_boundary (framepos_t pos, int32_t dir);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t pos, ARDOUR::RegionPoint, int32_t dir);
+	samplepos_t find_next_region_boundary (samplepos_t pos, int32_t dir);
 
 	/* Editing operations */
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::framepos_t, const Selection&, PasteContext& ctx, const int32_t sub_num);
+	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext& ctx, const int32_t sub_num);
 	RegionView* combine_regions ();
 	void uncombine_regions ();
 	void uncombine_region (RegionView*);
@@ -228,7 +228,7 @@ protected:
 	virtual void show_existing_automation (bool apply_to_selection = false);
 	virtual void hide_all_automation (bool apply_to_selection = false);
 
-	void timestretch (framepos_t start, framepos_t end);
+	void timestretch (samplepos_t start, samplepos_t end);
 	void speed_changed ();
 	void map_frozen ();
 	void color_handler ();

@@ -77,7 +77,7 @@ AudioEngine::AudioEngine ()
 	, _freewheeling (false)
 	, monitor_check_interval (INT32_MAX)
 	, last_monitor_check (0)
-	, _processed_frames (0)
+	, _processed_samples (0)
 	, m_meter_thread (0)
 	, _main_thread (0)
 	, _mtdm (0)
@@ -85,7 +85,7 @@ AudioEngine::AudioEngine ()
 	, _measuring_latency (MeasureNone)
 	, _latency_input_port (0)
 	, _latency_output_port (0)
-	, _latency_flush_frames (0)
+	, _latency_flush_samples (0)
 	, _latency_signal_latency (0)
 	, _stopped_for_latency (false)
 	, _started_for_latency (false)
@@ -155,7 +155,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 	last_monitor_check = 0;
 
 	if (_session) {
-		_session->set_frame_rate (nframes);
+		_session->set_sample_rate (nframes);
 	}
 
 	SampleRateChanged (nframes); /* EMIT SIGNAL */
@@ -181,7 +181,7 @@ AudioEngine::buffer_size_change (pframes_t bufsiz)
 }
 
 /** Method called by our ::process_thread when there is work to be done.
- *  @param nframes Number of frames to process.
+ *  @param nframes Number of samples to process.
  */
 #ifdef __clang__
 __attribute__((annotate("realtime")))
@@ -194,15 +194,15 @@ AudioEngine::process_callback (pframes_t nframes)
 	PT_TIMING_REF;
 	PT_TIMING_CHECK (1);
 
-	/// The number of frames that will have been processed when we've finished
-	pframes_t next_processed_frames;
+	/// The number of samples that will have been processed when we've finished
+	pframes_t next_processed_samples;
 
-	/* handle wrap around of total frames counter */
+	/* handle wrap around of total samples counter */
 
-	if (max_framepos - _processed_frames < nframes) {
-		next_processed_frames = nframes - (max_framepos - _processed_frames);
+	if (max_samplepos - _processed_samples < nframes) {
+		next_processed_samples = nframes - (max_samplepos - _processed_samples);
 	} else {
-		next_processed_frames = _processed_frames + nframes;
+		next_processed_samples = _processed_samples + nframes;
 	}
 
 	if (!tm.locked()) {
@@ -286,7 +286,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		PortManager::cycle_end (nframes);
 		return_after_remove_check = true;
 
-	} else if (_latency_flush_frames) {
+	} else if (_latency_flush_samples) {
 
 		/* wait for the appropriate duration for the MTDM signal to
 		 * drain from the ports before we revert to normal behaviour.
@@ -296,10 +296,10 @@ AudioEngine::process_callback (pframes_t nframes)
 		PortManager::silence (nframes);
 		PortManager::cycle_end (nframes);
 
-		if (_latency_flush_frames > nframes) {
-			_latency_flush_frames -= nframes;
+		if (_latency_flush_samples > nframes) {
+			_latency_flush_samples -= nframes;
 		} else {
-			_latency_flush_frames = 0;
+			_latency_flush_samples = 0;
 		}
 
 		return_after_remove_check = true;
@@ -352,7 +352,7 @@ AudioEngine::process_callback (pframes_t nframes)
 			PortManager::cycle_end (nframes);
 		}
 
-		_processed_frames = next_processed_frames;
+		_processed_samples = next_processed_samples;
 
 		return 0;
 	}
@@ -382,14 +382,14 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (!_running) {
-		_processed_frames = next_processed_frames;
+		_processed_samples = next_processed_samples;
 		return 0;
 	}
 
-	if (last_monitor_check + monitor_check_interval < next_processed_frames) {
+	if (last_monitor_check + monitor_check_interval < next_processed_samples) {
 
 		PortManager::check_monitoring ();
-		last_monitor_check = next_processed_frames;
+		last_monitor_check = next_processed_samples;
 	}
 
 #ifdef SILENCE_AFTER_SECONDS
@@ -432,7 +432,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	PortManager::cycle_end (nframes);
 
-	_processed_frames = next_processed_frames;
+	_processed_samples = next_processed_samples;
 
 	PT_TIMING_CHECK (2);
 
@@ -871,7 +871,7 @@ AudioEngine::start (bool for_latency)
 		return 0;
 	}
 
-	_processed_frames = 0;
+	_processed_samples = 0;
 	last_monitor_check = 0;
 
 	int error_code = _backend->start (for_latency);
@@ -884,7 +884,7 @@ AudioEngine::start (bool for_latency)
 	_running = true;
 
 	if (_session) {
-		_session->set_frame_rate (_backend->sample_rate());
+		_session->set_sample_rate (_backend->sample_rate());
 
 		if (_session->config.get_jack_time_master()) {
 			_backend->set_time_master (true);
@@ -952,7 +952,7 @@ AudioEngine::stop (bool for_latency)
 			_stopped_for_latency = true;
 		}
 	}
-	_processed_frames = 0;
+	_processed_samples = 0;
 	_measuring_latency = MeasureNone;
 	_latency_output_port = 0;
 	_latency_input_port = 0;
@@ -1037,7 +1037,7 @@ AudioEngine::transport_state ()
 }
 
 void
-AudioEngine::transport_locate (framepos_t pos)
+AudioEngine::transport_locate (samplepos_t pos)
 {
 	if (!_backend) {
 		return;
@@ -1045,16 +1045,16 @@ AudioEngine::transport_locate (framepos_t pos)
 	return _backend->transport_locate (pos);
 }
 
-framepos_t
-AudioEngine::transport_frame()
+samplepos_t
+AudioEngine::transport_sample()
 {
 	if (!_backend) {
 		return 0;
 	}
-	return _backend->transport_frame ();
+	return _backend->transport_sample ();
 }
 
-framecnt_t
+samplecnt_t
 AudioEngine::sample_rate () const
 {
 	if (!_backend) {
@@ -1090,7 +1090,7 @@ AudioEngine::raw_buffer_size (DataType t)
 	return _backend->raw_buffer_size (t);
 }
 
-framepos_t
+samplepos_t
 AudioEngine::sample_time ()
 {
 	if (!_backend) {
@@ -1099,7 +1099,7 @@ AudioEngine::sample_time ()
 	return _backend->sample_time ();
 }
 
-framepos_t
+samplepos_t
 AudioEngine::sample_time_at_cycle_start ()
 {
 	if (!_backend) {
@@ -1267,7 +1267,7 @@ AudioEngine::thread_init_callback (void* arg)
 }
 
 int
-AudioEngine::sync_callback (TransportState state, framepos_t position)
+AudioEngine::sync_callback (TransportState state, samplepos_t position)
 {
 	if (_session) {
 		return _session->backend_sync_callback (state, position);
@@ -1452,7 +1452,7 @@ AudioEngine::start_latency_detection (bool for_midi)
 	_latency_signal_latency += lr.max;
 
 	/* all created and connected, lets go */
-	_latency_flush_frames = samples_per_cycle();
+	_latency_flush_samples = samples_per_cycle();
 	_measuring_latency = for_midi ? MeasureMIDI : MeasureAudio;
 
 	return 0;

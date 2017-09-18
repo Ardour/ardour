@@ -467,10 +467,10 @@ MidiStreamView::setup_rec_box ()
 
 				// handle multi
 
-				framepos_t start = 0;
+				samplepos_t start = 0;
 				if (rec_regions.size() > 0) {
 					start = rec_regions.back().first->start()
-						+ _trackview.track()->get_captured_frames(rec_regions.size()-1);
+						+ _trackview.track()->get_captured_samples(rec_regions.size()-1);
 				}
 
 				if (!rec_regions.empty()) {
@@ -486,10 +486,10 @@ MidiStreamView::setup_rec_box ()
 				   is so that the RegionView gets created with a non-zero width, as apparently
 				   creating a RegionView with a zero width causes it never to be displayed
 				   (there is a warning in TimeAxisViewItem::init about this).  However, we
-				   must also set length_beats to something non-zero, otherwise the frame length
+				   must also set length_beats to something non-zero, otherwise the sample length
 				   of 1 causes length_beats to be set to some small quantity << 1.  Then
 				   when the position is set up below, this length_beats is used to recompute
-				   length using BeatsFramesConverter::to, which is slightly innacurate for small
+				   length using BeatsSamplesConverter::to, which is slightly innacurate for small
 				   beats values because it converts floating point beats to bars, beats and
 				   integer ticks.  The upshot of which being that length gets set back to 0,
 				   meaning no region view is ever seen, meaning no MIDI notes during record (#3820).
@@ -502,8 +502,8 @@ MidiStreamView::setup_rec_box ()
 				                                      (RegionFactory::create (sources, plist, false)));
 				if (region) {
 					region->set_start (_trackview.track()->current_capture_start()
-					                   - _trackview.track()->get_capture_start_frame (0));
-					region->set_position (_trackview.session()->transport_frame());
+					                   - _trackview.track()->get_capture_start_sample (0));
+					region->set_position (_trackview.session()->transport_sample());
 
 					RegionView* rv = add_region_view_internal (region, false, true);
 					MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rv);
@@ -675,7 +675,7 @@ struct RegionPositionSorter {
 };
 
 bool
-MidiStreamView::paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+MidiStreamView::paste (ARDOUR::samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	/* Paste into the first region which starts on or before pos.  Only called when
 	   using an internal editing tool. */

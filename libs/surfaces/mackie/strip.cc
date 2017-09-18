@@ -790,7 +790,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 		boost::shared_ptr<AutomationControl> ac = _fader->control ();
 
 		_fader->set_in_use (true);
-		_fader->start_touch (_surface->mcp().transport_frame());
+		_fader->start_touch (_surface->mcp().transport_sample());
 
 		if (ac) {
 			do_parameter_display (ac->desc(), ac->get_value());
@@ -799,7 +799,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 	} else {
 
 		_fader->set_in_use (false);
-		_fader->stop_touch (_surface->mcp().transport_frame());
+		_fader->stop_touch (_surface->mcp().transport_sample());
 
 	}
 }
@@ -947,9 +947,9 @@ void
 Strip::handle_fader_touch (Fader& fader, bool touch_on)
 {
 	if (touch_on) {
-		fader.start_touch (_surface->mcp().transport_frame());
+		fader.start_touch (_surface->mcp().transport_sample());
 	} else {
-		fader.stop_touch (_surface->mcp().transport_frame());
+		fader.stop_touch (_surface->mcp().transport_sample());
 	}
 }
 

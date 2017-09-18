@@ -113,7 +113,7 @@ Return::set_state (const XMLNode& node, int version)
 }
 
 void
-Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+Return::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || _input->n_ports() == ChanCount::ZERO) {
 		return;
@@ -124,14 +124,14 @@ Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, doub
 
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
-	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (bufs, start_frame, end_frame, speed, nframes, true);
+	// _amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	if (_metering) {
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (bufs, start_frame, end_frame, speed, nframes, true);
+			_meter->run (bufs, start_sample, end_sample, speed, nframes, true);
 		}
 	}
 

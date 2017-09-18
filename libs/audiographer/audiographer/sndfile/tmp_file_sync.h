@@ -22,12 +22,12 @@ class TmpFileSync
   public:
 
 	/// \a filename_template must match the requirements for mkstemp, i.e. end in "XXXXXX"
-	TmpFileSync (char * filename_template, int format, ChannelCount channels, framecnt_t samplerate)
+	TmpFileSync (char * filename_template, int format, ChannelCount channels, samplecnt_t samplerate)
 		: SndfileHandle (g_mkstemp(filename_template), true, SndfileBase::ReadWrite, format, channels, samplerate)
 		, filename (filename_template)
 	{}
 
-	TmpFileSync (int format, ChannelCount channels, framecnt_t samplerate)
+	TmpFileSync (int format, ChannelCount channels, samplecnt_t samplerate)
 	  : SndfileHandle (fileno (tmpfile()), true, SndfileBase::ReadWrite, format, channels, samplerate)
 	{}
 

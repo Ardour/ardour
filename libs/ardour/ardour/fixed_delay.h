@@ -53,7 +53,7 @@ public:
 	 * @param max_delay the maximum number of samples to delay
 	 * @param shrink when false already allocated buffers are kept if both channel-count and max-delay requirements are satisified
 	 */
-	void configure (const ChanCount& count, framecnt_t max_delay, bool shrink = true);
+	void configure (const ChanCount& count, samplecnt_t max_delay, bool shrink = true);
 
 	/** set delay time and update active process buffers
 	 *
@@ -63,7 +63,7 @@ public:
 	 * @param count channels to be processed
 	 * @param delay number of audio samples to delay
 	 */
-	void set (const ChanCount& count, framecnt_t delay);
+	void set (const ChanCount& count, samplecnt_t delay);
 
 	/** process a channel
 	 *
@@ -78,15 +78,15 @@ public:
 	 * @param dst_offset offset in output buffer to start writing to
 	 * @param src_offset offset in input buffer to start reading from
 	 */
-	void delay (ARDOUR::DataType dt, uint32_t id, Buffer& out, const Buffer& in, pframes_t n_samples, framecnt_t dst_offset = 0, framecnt_t src_offset = 0);
+	void delay (ARDOUR::DataType dt, uint32_t id, Buffer& out, const Buffer& in, pframes_t n_samples, samplecnt_t dst_offset = 0, samplecnt_t src_offset = 0);
 
 	/** zero all buffers */
 	void flush();
 
 private:
-	framecnt_t _max_delay;
-	framecnt_t _buf_size;
-	framecnt_t _delay;
+	samplecnt_t _max_delay;
+	samplecnt_t _buf_size;
+	samplecnt_t _delay;
 	ChanCount  _count;
 
 	struct DelayBuffer {
@@ -96,7 +96,7 @@ private:
 			: buf (Buffer::create (dt, capacity)), pos (0) {}
 		~DelayBuffer () { delete buf; }
 		Buffer * buf;
-		framepos_t pos;
+		samplepos_t pos;
 	};
 
 	typedef std::vector<DelayBuffer*> BufferVec;

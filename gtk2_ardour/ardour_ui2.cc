@@ -456,19 +456,19 @@ ARDOUR_UI::setup_transport ()
 	transport_table.set_row_spacings (4);
 	transport_table.set_border_width (2);
 
-	transport_frame.set_name ("TransportFrame");
-	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
+	transport_sample.set_name ("TransportFrame");
+	transport_sample.set_shadow_type (Gtk::SHADOW_NONE);
 
 	/* An event box to hold the table. We use this because we want specific
 	   control over the background color, and without this event box,
-	   nothing inside the transport_frame actually draws a background. We
+	   nothing inside the transport_sample actually draws a background. We
 	   would therefore end up seeing the background of the parent widget,
 	   which is probably some default color. Adding the EventBox adds a
 	   widget that will draw the background, using a style based on
 	   the parent, "TransportFrame".
 	*/
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);
-	transport_frame.add (*ebox);
+	transport_sample.add (*ebox);
 	ebox->add (transport_table);
 
 	/* transport controls sub-group */

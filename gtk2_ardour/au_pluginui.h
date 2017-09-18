@@ -132,7 +132,7 @@ private:
 
 	NSWindow*           cocoa_window;
 	NSView*             au_view;
-	NSRect              last_au_frame;
+	NSRect              last_au_sample;
 	bool                in_live_resize;
 	uint32_t            plugin_requested_resize;
 

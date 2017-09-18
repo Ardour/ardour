@@ -32,7 +32,7 @@ using namespace ARDOUR;
  *  @param fade_length Length of fade in/out to apply to trimmed regions, in samples.
  */
 
-StripSilence::StripSilence (Session & s, const AudioIntervalMap& sm, framecnt_t fade_length)
+StripSilence::StripSilence (Session & s, const AudioIntervalMap& sm, samplecnt_t fade_length)
 	: Filter (s)
         , _smap (sm)
         , _fade_length (fade_length)
@@ -98,7 +98,7 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 	AudioIntervalResult::const_iterator last_silence = silence.end ();
 	--last_silence;
 
-	frameoffset_t const end_of_region = r->start() + r->length();
+	sampleoffset_t const end_of_region = r->start() + r->length();
 
 	if (last_silence->second < end_of_region - 1) {
 		audible.push_back (std::make_pair (last_silence->second, end_of_region - 1));
@@ -116,12 +116,12 @@ StripSilence::run (boost::shared_ptr<Region> r, Progress* progress)
 		plist.add (Properties::position, r->position() + (i->first - r->start()));
 
 		copy = boost::dynamic_pointer_cast<AudioRegion> (
-			RegionFactory::create (region, MusicFrame (i->first - r->start(), 0), plist)
+			RegionFactory::create (region, MusicSample (i->first - r->start(), 0), plist)
 			);
 
 		copy->set_name (RegionFactory::new_region_name (region->name ()));
 
-		framecnt_t const f = std::min (_fade_length, (i->second - i->first) / 2);
+		samplecnt_t const f = std::min (_fade_length, (i->second - i->first) / 2);
 
 		if (f > 0) {
 			copy->set_fade_in_active (true);

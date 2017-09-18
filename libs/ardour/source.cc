@@ -200,8 +200,8 @@ Source::load_transients (const string& path)
 			break;
 		}
 
-		framepos_t frame = (framepos_t) floor (val * _session.frame_rate());
-		transients.push_back (frame);
+		samplepos_t sample = (samplepos_t) floor (val * _session.sample_rate());
+		transients.push_back (sample);
 	}
 
 	::fclose (tf);
@@ -265,7 +265,7 @@ Source::mark_for_remove ()
 }
 
 void
-Source::set_timeline_position (framepos_t pos)
+Source::set_timeline_position (samplepos_t pos)
 {
 	_timeline_position = pos;
 }

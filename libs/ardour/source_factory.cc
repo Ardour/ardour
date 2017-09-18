@@ -134,7 +134,7 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createSilent (Session& s, const XMLNode& node, framecnt_t nframes, float sr)
+SourceFactory::createSilent (Session& s, const XMLNode& node, samplecnt_t nframes, float sr)
 {
 	Source* src = new SilentFileSource (s, node, nframes, sr);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -309,7 +309,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, const std::string& path,
-			       bool destructive, framecnt_t rate, bool announce, bool defer_peaks)
+			       bool destructive, samplecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
@@ -395,7 +395,7 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 
 boost::shared_ptr<Source>
 SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
-				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks)
+				   uint32_t chn, sampleoffset_t start, samplecnt_t len, bool copy, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
 		try {

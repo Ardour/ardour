@@ -315,7 +315,7 @@ RegionEditor::end_clock_changed ()
 void
 RegionEditor::length_clock_changed ()
 {
-	framecnt_t frames = length_clock.current_time();
+	samplecnt_t samples = length_clock.current_time();
 	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -324,7 +324,7 @@ RegionEditor::length_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (_region->position() + frames - 1);
+		_region->trim_end (_region->position() + samples - 1);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -370,7 +370,7 @@ RegionEditor::bounds_changed (const PropertyChange& what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
 		int dir;
-		frameoffset_t off = _region->sync_offset (dir);
+		sampleoffset_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}

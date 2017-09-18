@@ -49,16 +49,16 @@ public:
 
 	void init (bool wfd);
 
-	bool paste (framepos_t                                      pos,
+	bool paste (samplepos_t                                      pos,
 	            unsigned                                        paste_count,
 	            float                                           times,
 	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
 
-	ARDOUR::DoubleBeatsFramesConverter const & region_relative_time_converter () const {
+	ARDOUR::DoubleBeatsSamplesConverter const & region_relative_time_converter () const {
 		return _region_relative_time_converter;
 	}
 
-	ARDOUR::DoubleBeatsFramesConverter const & source_relative_time_converter () const {
+	ARDOUR::DoubleBeatsSamplesConverter const & source_relative_time_converter () const {
 		return _source_relative_time_converter;
 	}
 
@@ -77,17 +77,17 @@ public:
 
 protected:
 	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
-	bool set_position(framepos_t pos, void* src, double* ignored);
+	bool set_position(samplepos_t pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
-	void add_automation_event (GdkEvent* event, framepos_t when, double y, bool with_guard_points);
+	void add_automation_event (GdkEvent* event, samplepos_t when, double y, bool with_guard_points);
 	void mouse_mode_changed ();
 	void entered();
 	void exited();
 
 private:
-	ARDOUR::DoubleBeatsFramesConverter _region_relative_time_converter;
-	ARDOUR::DoubleBeatsFramesConverter _source_relative_time_converter;
+	ARDOUR::DoubleBeatsSamplesConverter _region_relative_time_converter;
+	ARDOUR::DoubleBeatsSamplesConverter _source_relative_time_converter;
 	Evoral::Parameter                  _parameter;
 	boost::shared_ptr<AutomationLine>  _line;
 	PBD::ScopedConnection              _mouse_mode_connection;

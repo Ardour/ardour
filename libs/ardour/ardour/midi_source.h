@@ -32,7 +32,7 @@
 #include "ardour/buffer.h"
 #include "ardour/midi_cursor.h"
 #include "ardour/source.h"
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 
 namespace ARDOUR {
 
@@ -79,21 +79,21 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	                     Evoral::Beats                 end);
 
 	/** Read the data in a given time range from the MIDI source.
-	 * All time stamps in parameters are in audio frames (even if the source has tempo time).
+	 * All time stamps in parameters are in audio samples (even if the source has tempo time).
 	 * \param dst Ring buffer where read events are written.
 	 * \param source_start Start position of the SOURCE in this read context.
 	 * \param start Start of range to be read.
-	 * \param cnt Length of range to be read (in audio frames).
+	 * \param cnt Length of range to be read (in audio samples).
 	 * \param loop_range If non-null, all event times will be mapped into this loop range.
 	 * \param tracker an optional pointer to MidiStateTracker object, for note on/off tracking.
 	 * \param filtered Parameters whose MIDI messages will not be returned.
 	 */
-	virtual framecnt_t midi_read (const Lock&                        lock,
-	                              Evoral::EventSink<framepos_t>&     dst,
-	                              framepos_t                         source_start,
-	                              framepos_t                         start,
-	                              framecnt_t                         cnt,
-	                              Evoral::Range<framepos_t>*         loop_range,
+	virtual samplecnt_t midi_read (const Lock&                        lock,
+	                              Evoral::EventSink<samplepos_t>&     dst,
+	                              samplepos_t                         source_start,
+	                              samplepos_t                         start,
+	                              samplecnt_t                         cnt,
+	                              Evoral::Range<samplepos_t>*         loop_range,
 	                              MidiCursor&                        cursor,
 	                              MidiStateTracker*                  tracker,
 	                              MidiChannelFilter*                 filter,
@@ -103,13 +103,13 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 
 	/** Write data from a MidiRingBuffer to this source.
 	 *  @param source Source to read from.
-	 *  @param source_start This source's start position in session frames.
+	 *  @param source_start This source's start position in session samples.
 	 *  @param cnt The length of time to write.
 	 */
-	virtual framecnt_t midi_write (const Lock&                 lock,
-	                               MidiRingBuffer<framepos_t>& src,
-	                               framepos_t                  source_start,
-	                               framecnt_t                  cnt);
+	virtual samplecnt_t midi_write (const Lock&                 lock,
+	                               MidiRingBuffer<samplepos_t>& src,
+	                               samplepos_t                  source_start,
+	                               samplecnt_t                  cnt);
 
 	/** Append a single event with a timestamp in beats.
 	 *
@@ -118,17 +118,17 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	virtual void append_event_beats(const Lock&                         lock,
 	                                const Evoral::Event<Evoral::Beats>& ev) = 0;
 
-	/** Append a single event with a timestamp in frames.
+	/** Append a single event with a timestamp in samples.
 	 *
 	 * Caller must ensure that the event is later than the last written event.
 	 */
-	virtual void append_event_frames(const Lock&                      lock,
-	                                 const Evoral::Event<framepos_t>& ev,
-	                                 framepos_t                       source_start) = 0;
+	virtual void append_event_samples(const Lock&                      lock,
+	                                 const Evoral::Event<samplepos_t>& ev,
+	                                 samplepos_t                       source_start) = 0;
 
 	virtual bool       empty () const;
-	virtual framecnt_t length (framepos_t pos) const;
-	virtual void       update_length (framecnt_t);
+	virtual samplecnt_t length (samplepos_t pos) const;
+	virtual void       update_length (samplecnt_t);
 
 	virtual void mark_streaming_midi_write_started (const Lock& lock, NoteMode mode);
 	virtual void mark_streaming_write_started (const Lock& lock);
@@ -144,9 +144,9 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * be zero if record is armed while rolling.
 	 * @param loop_length The loop length if looping, otherwise zero.
 	 */
-	void mark_write_starting_now (framecnt_t position,
-	                              framecnt_t capture_length,
-	                              framecnt_t loop_length);
+	void mark_write_starting_now (samplecnt_t position,
+	                              samplecnt_t capture_length,
+	                              samplecnt_t loop_length);
 
 	/* like ::mark_streaming_write_completed() but with more arguments to
 	 * allow control over MIDI-specific behaviour. Expected to be used only
@@ -208,24 +208,24 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
   protected:
 	virtual void flush_midi(const Lock& lock) = 0;
 
-	virtual framecnt_t read_unlocked (const Lock&                    lock,
-	                                  Evoral::EventSink<framepos_t>& dst,
-	                                  framepos_t                     position,
-	                                  framepos_t                     start,
-	                                  framecnt_t                     cnt,
-	                                  Evoral::Range<framepos_t>*     loop_range,
+	virtual samplecnt_t read_unlocked (const Lock&                    lock,
+	                                  Evoral::EventSink<samplepos_t>& dst,
+	                                  samplepos_t                     position,
+	                                  samplepos_t                     start,
+	                                  samplecnt_t                     cnt,
+	                                  Evoral::Range<samplepos_t>*     loop_range,
 	                                  MidiStateTracker*              tracker,
 	                                  MidiChannelFilter*             filter) const = 0;
 
 	/** Write data to this source from a MidiRingBuffer.
 	 *  @param source Buffer to read from.
-	 *  @param position This source's start position in session frames.
+	 *  @param position This source's start position in session samples.
 	 *  @param cnt The duration of this block to write for.
 	 */
-	virtual framecnt_t write_unlocked (const Lock&                 lock,
-	                                   MidiRingBuffer<framepos_t>& source,
-	                                   framepos_t                  position,
-	                                   framecnt_t                  cnt) = 0;
+	virtual samplecnt_t write_unlocked (const Lock&                 lock,
+	                                   MidiRingBuffer<samplepos_t>& source,
+	                                   samplepos_t                  position,
+	                                   samplecnt_t                  cnt) = 0;
 
 	std::string _captured_for;
 
@@ -235,10 +235,10 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	Evoral::Beats _length_beats;
 
 	/** The total duration of the current capture. */
-	framepos_t _capture_length;
+	samplepos_t _capture_length;
 
 	/** Length of transport loop during current capture, or zero. */
-	framepos_t _capture_loop_length;
+	samplepos_t _capture_loop_length;
 
 	/** Map of interpolation styles to use for Parameters; if they are not in this map,
 	 *  the correct interpolation style can be obtained from EventTypeMap::interpolation_of ()

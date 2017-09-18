@@ -221,28 +221,28 @@ ExportTimespanSelector::construct_label (ARDOUR::Location const * location) cons
 	std::string start;
 	std::string end;
 
-	framepos_t start_frame = location->start();
-	framepos_t end_frame = location->end();
+	samplepos_t start_sample = location->start();
+	samplepos_t end_sample = location->end();
 
 	switch (state->time_format) {
 	  case AudioClock::BBT:
-		start = bbt_str (start_frame);
-		end = bbt_str (end_frame);
+		start = bbt_str (start_sample);
+		end = bbt_str (end_sample);
 		break;
 
 	  case AudioClock::Timecode:
-		start = timecode_str (start_frame);
-		end = timecode_str (end_frame);
+		start = timecode_str (start_sample);
+		end = timecode_str (end_sample);
 		break;
 
 	  case AudioClock::MinSec:
-		start = ms_str (start_frame);
-		end = ms_str (end_frame);
+		start = ms_str (start_sample);
+		end = ms_str (end_sample);
 		break;
 
-	  case AudioClock::Frames:
-		start = to_string (start_frame);
-		end = to_string (end_frame);
+	  case AudioClock::Samples:
+		start = to_string (start_sample);
+		end = to_string (end_sample);
 		break;
 	}
 
@@ -287,7 +287,7 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 		s << ms_str (location->length ());
 		break;
 
-	case AudioClock::Frames:
+	case AudioClock::Samples:
 		s << location->length ();
 		break;
 	}
@@ -297,7 +297,7 @@ ExportTimespanSelector::construct_length (ARDOUR::Location const * location) con
 
 
 std::string
-ExportTimespanSelector::bbt_str (framepos_t frames) const
+ExportTimespanSelector::bbt_str (samplepos_t samples) const
 {
 	if (!_session) {
 		return "Error!";
@@ -305,14 +305,14 @@ ExportTimespanSelector::bbt_str (framepos_t frames) const
 
 	std::ostringstream oss;
 	Timecode::BBT_Time time;
-	_session->bbt_time (frames, time);
+	_session->bbt_time (samples, time);
 
 	print_padded (oss, time);
 	return oss.str ();
 }
 
 std::string
-ExportTimespanSelector::timecode_str (framecnt_t frames) const
+ExportTimespanSelector::timecode_str (samplecnt_t samples) const
 {
 	if (!_session) {
 		return "Error!";
@@ -321,7 +321,7 @@ ExportTimespanSelector::timecode_str (framecnt_t frames) const
 	std::ostringstream oss;
 	Timecode::Time time;
 
-	_session->timecode_time (frames, time);
+	_session->timecode_time (samples, time);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(2) <<
@@ -337,27 +337,27 @@ ExportTimespanSelector::timecode_str (framecnt_t frames) const
 }
 
 std::string
-ExportTimespanSelector::ms_str (framecnt_t frames) const
+ExportTimespanSelector::ms_str (samplecnt_t samples) const
 {
 	if (!_session) {
 		return "Error!";
 	}
 
 	std::ostringstream oss;
-	framecnt_t left;
+	samplecnt_t left;
 	int hrs;
 	int mins;
 	int secs;
 	int sec_promilles;
 
-	left = frames;
-	hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-	left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-	mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-	left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-	secs = (int) floor (left / (float) _session->frame_rate());
-	left -= (framecnt_t) floor ((double)(secs * _session->frame_rate()));
-	sec_promilles = (int) (left * 1000 / (float) _session->frame_rate() + 0.5);
+	left = samples;
+	hrs = (int) floor (left / (_session->sample_rate() * 60.0f * 60.0f));
+	left -= (samplecnt_t) floor (hrs * _session->sample_rate() * 60.0f * 60.0f);
+	mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+	left -= (samplecnt_t) floor (mins * _session->sample_rate() * 60.0f);
+	secs = (int) floor (left / (float) _session->sample_rate());
+	left -= (samplecnt_t) floor ((double)(secs * _session->sample_rate()));
+	sec_promilles = (int) (left * 1000 / (float) _session->sample_rate() + 0.5);
 
 	oss << std::setfill('0') << std::right <<
 	  std::setw(2) <<

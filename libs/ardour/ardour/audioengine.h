@@ -88,14 +88,14 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void           transport_start ();
 	void           transport_stop ();
 	TransportState transport_state ();
-	void           transport_locate (framepos_t pos);
-	framepos_t     transport_frame();
-	framecnt_t     sample_rate () const;
+	void           transport_locate (samplepos_t pos);
+	samplepos_t     transport_sample();
+	samplecnt_t     sample_rate () const;
 	pframes_t      samples_per_cycle () const;
 	int            usecs_per_cycle () const;
 	size_t         raw_buffer_size (DataType t);
-	framepos_t     sample_time ();
-	framepos_t     sample_time_at_cycle_start ();
+	samplepos_t     sample_time ();
+	samplepos_t     sample_time_at_cycle_start ();
 	pframes_t      samples_since_cycle_start ();
 	bool           get_sync_offset (pframes_t& offset) const;
 
@@ -138,7 +138,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 		return set_buffer_size (samples);
 	}
 
-	framecnt_t processed_frames() const { return _processed_frames; }
+	samplecnt_t processed_samples() const { return _processed_samples; }
 
 	void set_session (Session *);
 	void remove_session (); // not a replacement for SessionHandle::session_going_away()
@@ -166,7 +166,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	PBD::Signal0<void> Xrun;
 
 	/** this signal is emitted if the sample rate changes */
-	PBD::Signal1<void, framecnt_t> SampleRateChanged;
+	PBD::Signal1<void, samplecnt_t> SampleRateChanged;
 
 	/** this signal is emitted if the buffer size changes */
 	PBD::Signal1<void, pframes_t> BufferSizeChanged;
@@ -205,8 +205,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	int  buffer_size_change (pframes_t nframes);
 	int  sample_rate_change (pframes_t nframes);
 	void freewheel_callback (bool);
-	void timebase_callback (TransportState state, pframes_t nframes, framepos_t pos, int new_position);
-	int  sync_callback (TransportState state, framepos_t position);
+	void timebase_callback (TransportState state, pframes_t nframes, samplepos_t pos, int new_position);
+	int  sync_callback (TransportState state, samplepos_t position);
 	int  port_registration_callback ();
 	void latency_callback (bool for_playback);
 	void halted_callback (const char* reason);
@@ -258,17 +258,17 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	Glib::Threads::RecMutex    _state_lock;
 	Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;
-	frameoffset_t              session_removal_countdown;
+	sampleoffset_t              session_removal_countdown;
 	gain_t                     session_removal_gain;
 	gain_t                     session_removal_gain_step;
 	bool                      _running;
 	bool                      _freewheeling;
-	/// number of frames between each check for changes in monitor input
-	framecnt_t                 monitor_check_interval;
-	/// time of the last monitor check in frames
-	framecnt_t                 last_monitor_check;
-	/// the number of frames processed since start() was called
-	framecnt_t                _processed_frames;
+	/// number of samples between each check for changes in monitor input
+	samplecnt_t                 monitor_check_interval;
+	/// time of the last monitor check in samples
+	samplecnt_t                 last_monitor_check;
+	/// the number of samples processed since start() was called
+	samplecnt_t                _processed_samples;
 	Glib::Threads::Thread*     m_meter_thread;
 	ProcessThread*            _main_thread;
 	MTDM*                     _mtdm;
@@ -276,10 +276,10 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	LatencyMeasurement        _measuring_latency;
 	PortEngine::PortHandle    _latency_input_port;
 	PortEngine::PortHandle    _latency_output_port;
-	framecnt_t                _latency_flush_frames;
+	samplecnt_t                _latency_flush_samples;
 	std::string               _latency_input_name;
 	std::string               _latency_output_name;
-	framecnt_t                _latency_signal_latency;
+	samplecnt_t                _latency_signal_latency;
 	bool                      _stopped_for_latency;
 	bool                      _started_for_latency;
 	bool                      _in_destructor;
@@ -308,7 +308,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	void drop_backend ();
 
 #ifdef SILENCE_AFTER
-	framecnt_t _silence_countdown;
+	samplecnt_t _silence_countdown;
 	uint32_t   _silence_hit_cnt;
 #endif
 

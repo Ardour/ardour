@@ -19,12 +19,12 @@ class LIBAUDIOGRAPHER_API TypeUtilsBase
   protected:
 
 	template<typename T, bool b>
-	static void do_zero_fill(T * buffer, framecnt_t frames, const boost::integral_constant<bool, b>&)
-		{ std::uninitialized_fill_n (buffer, frames, T()); }
+	static void do_zero_fill(T * buffer, samplecnt_t samples, const boost::integral_constant<bool, b>&)
+		{ std::uninitialized_fill_n (buffer, samples, T()); }
 
 	template<typename T>
-	static void do_zero_fill(T * buffer, framecnt_t frames, const boost::true_type&)
-		{ memset (buffer, 0, frames * sizeof(T)); }
+	static void do_zero_fill(T * buffer, samplecnt_t samples, const boost::true_type&)
+		{ memset (buffer, 0, samples * sizeof(T)); }
 };
 
 /// Utilities for initializing, copying, moving, etc. data
@@ -42,26 +42,26 @@ class /*LIBAUDIOGRAPHER_API*/ TypeUtils : private TypeUtilsBase
 	  * if T is not a floating point or signed integer type
 	  * \n RT safe
 	  */
-	inline static void zero_fill (T * buffer, framecnt_t frames)
-		{ do_zero_fill(buffer, frames, zero_fillable()); }
+	inline static void zero_fill (T * buffer, samplecnt_t samples)
+		{ do_zero_fill(buffer, samples, zero_fillable()); }
 
-	/** Copies \a frames frames of data from \a source to \a destination
+	/** Copies \a samples frames of data from \a source to \a destination
 	  * The source and destination may NOT overlap.
 	  * \n RT safe
 	  */
-	inline static void copy (T const * source, T * destination, framecnt_t frames)
-		{ std::uninitialized_copy (source, &source[frames], destination); }
+	inline static void copy (T const * source, T * destination, samplecnt_t samples)
+		{ std::uninitialized_copy (source, &source[samples], destination); }
 
-	/** Moves \a frames frames of data from \a source to \a destination
+	/** Moves \a samples frames of data from \a source to \a destination
 	  * The source and destination may overlap in any way.
 	  * \n RT safe
 	  */
-	inline static void move (T const * source, T * destination, framecnt_t frames)
+	inline static void move (T const * source, T * destination, samplecnt_t samples)
 	{
 		if (destination < source) {
-			std::copy (source, &source[frames], destination);
+			std::copy (source, &source[samples], destination);
 		} else if (destination > source) {
-			std::copy_backward (source, &source[frames], destination + frames);
+			std::copy_backward (source, &source[samples], destination + samples);
 		}
 	}
 };

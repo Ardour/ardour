@@ -59,7 +59,7 @@ class OSCGlobalObserver
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	ARDOUR::Session* session;
-	framepos_t _last_frame;
+	samplepos_t _last_sample;
 	uint32_t _heartbeat;
 	float _last_meter;
 	uint32_t master_timeout;

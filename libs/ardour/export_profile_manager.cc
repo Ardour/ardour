@@ -353,7 +353,7 @@ ExportProfileManager::find_file (std::string const & pattern)
 }
 
 void
-ExportProfileManager::set_selection_range (framepos_t start, framepos_t end)
+ExportProfileManager::set_selection_range (samplepos_t start, samplepos_t end)
 {
 
 	if (start || end) {
@@ -370,7 +370,7 @@ ExportProfileManager::set_selection_range (framepos_t start, framepos_t end)
 }
 
 std::string
-ExportProfileManager::set_single_range (framepos_t start, framepos_t end, string name)
+ExportProfileManager::set_single_range (samplepos_t start, samplepos_t end, string name)
 {
 	single_range_mode = true;
 

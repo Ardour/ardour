@@ -88,7 +88,7 @@ private:
 
 	void distribute_one (AudioBuffer& src, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
 	void distribute_one_automated (AudioBuffer& src, BufferSet& obufs,
-                                          framepos_t start, framepos_t end, pframes_t nframes,
+                                          samplepos_t start, samplepos_t end, pframes_t nframes,
                                           pan_t** buffers, uint32_t which);
 };
 

@@ -46,8 +46,8 @@ EBUr128Analysis::run (Readable* src)
 {
 	int ret = -1;
 	bool done = false;
-	framecnt_t len = src->readable_length();
-	framepos_t pos = 0;
+	samplecnt_t len = src->readable_length();
+	samplepos_t pos = 0;
 	uint32_t n_channels = src->n_channels();
 	Plugin::FeatureSet features;
 
@@ -62,8 +62,8 @@ EBUr128Analysis::run (Readable* src)
 	}
 
 	while (!done) {
-		framecnt_t to_read;
-		to_read = min ((len - pos), (framecnt_t) bufsize);
+		samplecnt_t to_read;
+		to_read = min ((len - pos), (samplecnt_t) bufsize);
 
 		for (uint32_t c = 0; c < n_channels; ++c) {
 			if (src->read (bufs[c], pos, to_read, c) != to_read) {

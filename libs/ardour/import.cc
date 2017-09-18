@@ -73,7 +73,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 static boost::shared_ptr<ImportableSource>
-open_importable_source (const string& path, framecnt_t samplerate, ARDOUR::SrcQuality quality)
+open_importable_source (const string& path, samplecnt_t samplerate, ARDOUR::SrcQuality quality)
 {
 	/* try libsndfile first, because it can get BWF info from .wav, which ExtAudioFile cannot.
 	   We don't necessarily need that information in an ImportableSource, but it keeps the
@@ -183,7 +183,7 @@ static bool
 create_mono_sources_for_writing (const vector<string>& new_paths,
                                  Session& sess, uint32_t samplerate,
                                  vector<boost::shared_ptr<Source> >& newfiles,
-                                 framepos_t timeline_position)
+                                 samplepos_t timeline_position)
 {
 	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 
@@ -238,7 +238,7 @@ static void
 write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
                                vector<boost::shared_ptr<Source> >& newfiles)
 {
-	const framecnt_t nframes = ResampledImportableSource::blocksize;
+	const samplecnt_t nframes = ResampledImportableSource::blocksize;
 	boost::shared_ptr<AudioFileSource> afs;
 	uint32_t channels = source->channels();
 	if (channels == 0) {
@@ -272,7 +272,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		uint32_t read_count = 0;
 
 		while (!status.cancel) {
-			framecnt_t const nread = source->read (data.get(), nframes * channels);
+			samplecnt_t const nread = source->read (data.get(), nframes * channels);
 			if (nread == 0) {
 				break;
 			}
@@ -293,11 +293,11 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 		progress_base = 0.5;
 	}
 
-	framecnt_t read_count = 0;
+	samplecnt_t read_count = 0;
 
 	while (!status.cancel) {
 
-		framecnt_t nread, nfread;
+		samplecnt_t nread, nfread;
 		uint32_t x;
 		uint32_t chn;
 
@@ -324,7 +324,7 @@ write_audio_data_to_new_files (ImportableSource* source, ImportStatus& status,
 
 		for (chn = 0; chn < channels; ++chn) {
 
-			framecnt_t n;
+			samplecnt_t n;
 			for (x = chn, n = 0; n < nfread; x += channels, ++n) {
 				channel_data[chn][n] = (Sample) data[x];
 			}
@@ -439,9 +439,9 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				/* we wrote something */
 
-				const framepos_t     pos          = 0;
+				const samplepos_t     pos          = 0;
 				const Evoral::Beats  length_beats = Evoral::Beats::ticks_at_rate(t, source->ppqn());
-				BeatsFramesConverter converter(smfs->session().tempo_map(), pos);
+				BeatsSamplesConverter converter(smfs->session().tempo_map(), pos);
 				smfs->update_length(pos + converter.to(length_beats.round_up_to_beat()));
 				smfs->mark_streaming_write_completed (source_lock);
 
@@ -505,7 +505,7 @@ Session::import_files (ImportStatus& status)
 
 		if (type == DataType::AUDIO) {
 			try {
-				source = open_importable_source (*p, frame_rate(), status.quality);
+				source = open_importable_source (*p, sample_rate(), status.quality);
 				channels = source->channels();
 			} catch (const failed_constructor& err) {
 				error << string_compose(_("Import: cannot open input sound file \"%1\""), (*p)) << endmsg;
@@ -550,14 +550,14 @@ Session::import_files (ImportStatus& status)
 
 		vector<string> new_paths = get_paths_for_new_sources (status.replace_existing_source, *p, channels, smf_names);
 		Sources newfiles;
-		framepos_t natural_position = source ? source->natural_position() : 0;
+		samplepos_t natural_position = source ? source->natural_position() : 0;
 
 
 		if (status.replace_existing_source) {
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
-			status.cancel = !map_existing_mono_sources (new_paths, *this, frame_rate(), newfiles, this);
+			status.cancel = !map_existing_mono_sources (new_paths, *this, sample_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, frame_rate(), newfiles, natural_position);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below
@@ -575,7 +575,7 @@ Session::import_files (ImportStatus& status)
 
 		if (source) { // audio
 			status.doing_what = compose_status_message (*p, source->samplerate(),
-			                                            frame_rate(), status.current, status.total);
+			                                            sample_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
 		} else if (smf_reader.get()) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);

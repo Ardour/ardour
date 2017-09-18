@@ -44,9 +44,9 @@ using namespace PBD;
 /* BBT TIME*/
 
 void
-Session::bbt_time (framepos_t when, Timecode::BBT_Time& bbt)
+Session::bbt_time (samplepos_t when, Timecode::BBT_Time& bbt)
 {
-	bbt = _tempo_map->bbt_at_frame (when);
+	bbt = _tempo_map->bbt_at_sample (when);
 }
 
 /* Timecode TIME */
@@ -66,8 +66,8 @@ Session::timecode_drop_frames() const
 void
 Session::sync_time_vars ()
 {
-	_current_frame_rate = (framecnt_t) round (_nominal_frame_rate * (1.0 + (config.get_video_pullup()/100.0)));
-	_samples_per_timecode_frame = (double) _current_frame_rate / (double) timecode_frames_per_second();
+	_current_sample_rate = (samplecnt_t) round (_nominal_sample_rate * (1.0 + (config.get_video_pullup()/100.0)));
+	_samples_per_timecode_frame = (double) _current_sample_rate / (double) timecode_frames_per_second();
 	if (timecode_drop_frames()) {
 	  _frames_per_hour = (int32_t)(107892 * _samples_per_timecode_frame);
 	} else {
@@ -99,13 +99,13 @@ Session::sync_time_vars ()
 }
 
 void
-Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool use_offset, bool use_subframes ) const
+Session::timecode_to_sample( Timecode::Time& timecode, samplepos_t& sample, bool use_offset, bool use_subframes ) const
 {
 	timecode.rate = timecode_frames_per_second();
 
 	Timecode::timecode_to_sample(
 		timecode, sample, use_offset, use_subframes,
-		_current_frame_rate,
+		_current_sample_rate,
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
 		);
@@ -113,14 +113,14 @@ Session::timecode_to_sample( Timecode::Time& timecode, framepos_t& sample, bool 
 }
 
 void
-Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
+Session::sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes ) const
 {
 	Timecode::sample_to_timecode (
 		sample, timecode, use_offset, use_subframes,
 
 		timecode_frames_per_second(),
 		timecode_drop_frames(),
-		double(_current_frame_rate),
+		double(_current_sample_rate),
 
 		config.get_subframes_per_frame(),
 		config.get_timecode_offset_negative(), config.get_timecode_offset()
@@ -128,7 +128,7 @@ Session::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool u
 }
 
 void
-Session::timecode_time (framepos_t when, Timecode::Time& timecode)
+Session::timecode_time (samplepos_t when, Timecode::Time& timecode)
 {
 	if (last_timecode_valid && when == last_timecode_when) {
 		timecode = last_timecode;
@@ -143,7 +143,7 @@ Session::timecode_time (framepos_t when, Timecode::Time& timecode)
 }
 
 void
-Session::timecode_time_subframes (framepos_t when, Timecode::Time& timecode)
+Session::timecode_time_subframes (samplepos_t when, Timecode::Time& timecode)
 {
 	if (last_timecode_valid && when == last_timecode_when) {
 		timecode = last_timecode;
@@ -158,13 +158,13 @@ Session::timecode_time_subframes (framepos_t when, Timecode::Time& timecode)
 }
 
 void
-Session::timecode_duration (framecnt_t when, Timecode::Time& timecode) const
+Session::timecode_duration (samplecnt_t when, Timecode::Time& timecode) const
 {
 	this->sample_to_timecode( when, timecode, false /* use_offset */, true /* use_subframes */ );
 }
 
 void
-Session::timecode_duration_string (char* buf, size_t len, framepos_t when) const
+Session::timecode_duration_string (char* buf, size_t len, samplepos_t when) const
 {
 	Timecode::Time timecode;
 
@@ -176,14 +176,14 @@ void
 Session::timecode_time (Timecode::Time &t)
 
 {
-	timecode_time (_transport_frame, t);
+	timecode_time (_transport_sample, t);
 }
 
 int
-Session::backend_sync_callback (TransportState state, framepos_t pos)
+Session::backend_sync_callback (TransportState state, samplepos_t pos)
 {
 	bool slave = synced_to_engine();
-	// cerr << "Session::backend_sync_callback() _transport_frame: " << _transport_frame << " pos: " << pos << " audible_frame: " << audible_frame() << endl;
+	// cerr << "Session::backend_sync_callback() _transport_sample: " << _transport_sample << " pos: " << pos << " audible_sample: " << audible_sample() << endl;
 
 	if (slave) {
 		// cerr << "Session::backend_sync_callback() emitting Located()" << endl;
@@ -192,9 +192,9 @@ Session::backend_sync_callback (TransportState state, framepos_t pos)
 
 	switch (state) {
 	case TransportStopped:
-		if (slave && _transport_frame != pos && post_transport_work() == 0) {
+		if (slave && _transport_sample != pos && post_transport_work() == 0) {
 			request_locate (pos, false);
-			// cerr << "SYNC: stopped, locate to " << pos << " from " << _transport_frame << endl;
+			// cerr << "SYNC: stopped, locate to " << pos << " from " << _transport_sample << endl;
 			return false;
 		} else {
 			// cerr << "SYNC: stopped, nothing to do" << endl;
@@ -202,9 +202,9 @@ Session::backend_sync_callback (TransportState state, framepos_t pos)
 		}
 
 	case TransportStarting:
-		// cerr << "SYNC: starting @ " << pos << " a@ " << _transport_frame << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_frame == pos) << endl;
+		// cerr << "SYNC: starting @ " << pos << " a@ " << _transport_sample << " our work = " <<  post_transport_work() << " pos matches ? " << (_transport_sample == pos) << endl;
 		if (slave) {
-			return _transport_frame == pos && post_transport_work() == 0;
+			return _transport_sample == pos && post_transport_work() == 0;
 		} else {
 			return true;
 		}
@@ -226,14 +226,14 @@ Session::backend_sync_callback (TransportState state, framepos_t pos)
 }
 
 
-ARDOUR::framecnt_t
-Session::convert_to_frames (AnyTime const & position)
+ARDOUR::samplecnt_t
+Session::convert_to_samples (AnyTime const & position)
 {
 	double secs;
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return _tempo_map->frame_at_bbt (position.bbt);
+		return _tempo_map->sample_at_bbt (position.bbt);
 		break;
 
 	case AnyTime::Timecode:
@@ -243,32 +243,32 @@ Session::convert_to_frames (AnyTime const & position)
 		secs += position.timecode.seconds;
 		secs += position.timecode.frames / timecode_frames_per_second();
 		if (config.get_timecode_offset_negative()) {
-			return (framecnt_t) floor (secs * frame_rate()) - config.get_timecode_offset();
+			return (samplecnt_t) floor (secs * sample_rate()) - config.get_timecode_offset();
 		} else {
-			return (framecnt_t) floor (secs * frame_rate()) + config.get_timecode_offset();
+			return (samplecnt_t) floor (secs * sample_rate()) + config.get_timecode_offset();
 		}
 		break;
 
 	case AnyTime::Seconds:
-		return (framecnt_t) floor (position.seconds * frame_rate());
+		return (samplecnt_t) floor (position.seconds * sample_rate());
 		break;
 
-	case AnyTime::Frames:
-		return position.frames;
+	case AnyTime::Samples:
+		return position.samples;
 		break;
 	}
 
-	return position.frames;
+	return position.samples;
 }
 
-ARDOUR::framecnt_t
-Session::any_duration_to_frames (framepos_t position, AnyTime const & duration)
+ARDOUR::samplecnt_t
+Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration)
 {
 	double secs;
 
 	switch (duration.type) {
 	case AnyTime::BBT:
-		return (framecnt_t) ( _tempo_map->framepos_plus_bbt (position, duration.bbt) - position);
+		return (samplecnt_t) ( _tempo_map->samplepos_plus_bbt (position, duration.bbt) - position);
 		break;
 
 	case AnyTime::Timecode:
@@ -278,20 +278,20 @@ Session::any_duration_to_frames (framepos_t position, AnyTime const & duration)
 		secs += duration.timecode.seconds;
 		secs += duration.timecode.frames / timecode_frames_per_second();
 		if (config.get_timecode_offset_negative()) {
-			return (framecnt_t) floor (secs * frame_rate()) - config.get_timecode_offset();
+			return (samplecnt_t) floor (secs * sample_rate()) - config.get_timecode_offset();
 		} else {
-			return (framecnt_t) floor (secs * frame_rate()) + config.get_timecode_offset();
+			return (samplecnt_t) floor (secs * sample_rate()) + config.get_timecode_offset();
 		}
 		break;
 
 	case AnyTime::Seconds:
-                return (framecnt_t) floor (duration.seconds * frame_rate());
+                return (samplecnt_t) floor (duration.seconds * sample_rate());
 		break;
 
-	case AnyTime::Frames:
-		return duration.frames;
+	case AnyTime::Samples:
+		return duration.samples;
 		break;
 	}
 
-	return duration.frames;
+	return duration.samples;
 }

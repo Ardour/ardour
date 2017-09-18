@@ -71,11 +71,11 @@ private:
 	Gtk::ScrolledWindow      route_select_scroller;
 
 	Gtk::Notebook            notebook;
-	Gtk::Frame               input_frame;
-	Gtk::Frame               output_frame;
+	Gtk::Frame               input_sample;
+	Gtk::Frame               output_sample;
 	ArdourWidgets::HPane     redir_hpane;
 
-	Gtk::Frame               route_select_frame;
+	Gtk::Frame               route_select_sample;
 
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
@@ -86,11 +86,11 @@ private:
 
 	ArdourWidgets::HPane     right_hpane;
 
-	Gtk::Frame               route_param_frame;
+	Gtk::Frame               route_param_sample;
 
 	Gtk::VBox                choice_vpacker;
 
-	Gtk::Frame               latency_frame;
+	Gtk::Frame               latency_sample;
 	Gtk::VBox                latency_packer;
 	Gtk::HButtonBox          latency_button_box;
 	Gtk::Button              latency_apply_button;
@@ -160,11 +160,11 @@ private:
 	void route_selected();
 	//void route_unselected (gint row, gint col, GdkEvent *ev);
 
-	void setup_io_frames();
-	void cleanup_io_frames();
+	void setup_io_samples();
+	void cleanup_io_samples();
 	void cleanup_view(bool stopupdate = true);
-	void cleanup_latency_frame ();
-	void setup_latency_frame ();
+	void cleanup_latency_sample ();
+	void setup_latency_sample ();
 
 	void processors_changed (ARDOUR::RouteProcessorChange);
 

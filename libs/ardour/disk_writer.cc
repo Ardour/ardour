@@ -40,20 +40,20 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-ARDOUR::framecnt_t DiskWriter::_chunk_frames = DiskWriter::default_chunk_frames ();
+ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_samples ();
 PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
 	, _record_enabled (0)
 	, _record_safe (0)
-	, capture_start_frame (0)
+	, capture_start_sample (0)
         , capture_captured (0)
         , was_recording (false)
         , adjust_capture_position (0)
         , _capture_offset (0)
-        , first_recordable_frame (max_framepos)
-        , last_recordable_frame (max_framepos)
+        , first_recordable_sample (max_samplepos)
+        , last_recordable_sample (max_samplepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
         , _alignment_choice (Automatic)
@@ -75,8 +75,8 @@ DiskWriter::~DiskWriter ()
 	}
 }
 
-framecnt_t
-DiskWriter::default_chunk_frames ()
+samplecnt_t
+DiskWriter::default_chunk_samples ()
 {
 	return 65536;
 }
@@ -89,7 +89,7 @@ DiskWriter::set_write_source_name (string const & str)
 }
 
 void
-DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
+DiskWriter::check_record_status (samplepos_t transport_sample, bool can_record)
 {
 	int possibly_recording;
 	int rolling;
@@ -111,7 +111,7 @@ DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
 		return;
 	}
 
-	const framecnt_t existing_material_offset = _session.worst_playback_latency();
+	const samplecnt_t existing_material_offset = _session.worst_playback_latency();
 
 	if (possibly_recording == fully_rec_enabled) {
 
@@ -119,27 +119,27 @@ DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
 			return;
 		}
 
-		capture_start_frame = _session.transport_frame();
-		first_recordable_frame = capture_start_frame + _capture_offset;
-		last_recordable_frame = max_framepos;
+		capture_start_sample = _session.transport_sample();
+		first_recordable_sample = capture_start_sample + _capture_offset;
+		last_recordable_sample = max_samplepos;
 
                 DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 (%9) FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8 WOL %10 WTL %11\n",
-                                                                      name(), first_recordable_frame, last_recordable_frame, capture_start_frame,
+                                                                      name(), first_recordable_sample, last_recordable_sample, capture_start_sample,
                                                                       _capture_offset,
                                                                       existing_material_offset,
-                                                                      transport_frame,
-                                                                      _session.transport_frame(),
+                                                                      transport_sample,
+                                                                      _session.transport_sample(),
                                                                       _session.worst_output_latency(),
                                                                       _session.worst_track_latency()));
 
 
                 if (_alignment_style == ExistingMaterial) {
-                        first_recordable_frame += existing_material_offset;
+                        first_recordable_sample += existing_material_offset;
                         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift FRF by EMO %1\n",
-                                                                              first_recordable_frame));
+                                                                              first_recordable_sample));
                 }
 
-		prepare_record_status (capture_start_frame);
+		prepare_record_status (capture_start_sample);
 
 	} else {
 
@@ -149,7 +149,7 @@ DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
 
 			if (change & transport_rolling) {
 
-				/* transport-change (stopped rolling): last_recordable_frame was set in ::prepare_to_stop(). We
+				/* transport-change (stopped rolling): last_recordable_sample was set in ::prepare_to_stop(). We
 				 * had to set it there because we likely rolled past the stopping point to declick out,
 				 * and then backed up.
 				 */
@@ -157,10 +157,10 @@ DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
 			} else {
 				/* punch out */
 
-				last_recordable_frame = _session.transport_frame() + _capture_offset;
+				last_recordable_sample = _session.transport_sample() + _capture_offset;
 
 				if (_alignment_style == ExistingMaterial) {
-					last_recordable_frame += existing_material_offset;
+					last_recordable_sample += existing_material_offset;
 				}
 			}
 		}
@@ -170,8 +170,8 @@ DiskWriter::check_record_status (framepos_t transport_frame, bool can_record)
 }
 
 void
-DiskWriter::calculate_record_range (Evoral::OverlapType ot, framepos_t transport_frame, framecnt_t nframes,
-				    framecnt_t & rec_nframes, framecnt_t & rec_offset)
+DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes,
+				    samplecnt_t & rec_nframes, samplecnt_t & rec_offset)
 {
 	switch (ot) {
 	case Evoral::OverlapNone:
@@ -190,9 +190,9 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 		/*    |--------|    recrange
 		 *  -----|          transrange
 		 */
-		rec_nframes = transport_frame + nframes - first_recordable_frame;
+		rec_nframes = transport_sample + nframes - first_recordable_sample;
 		if (rec_nframes) {
-			rec_offset = first_recordable_frame - transport_frame;
+			rec_offset = first_recordable_sample - transport_sample;
 		}
 		break;
 
@@ -200,7 +200,7 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 		/*    |--------|    recrange
 		 *       |--------  transrange
 		 */
-		rec_nframes = last_recordable_frame - transport_frame;
+		rec_nframes = last_recordable_sample - transport_sample;
 		rec_offset = 0;
 		break;
 
@@ -208,34 +208,34 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, framepos_t transport
 		/*    |--------|    recrange
 		 *  --------------  transrange
 		 */
-		rec_nframes = last_recordable_frame - first_recordable_frame;
-		rec_offset = first_recordable_frame - transport_frame;
+		rec_nframes = last_recordable_sample - first_recordable_sample;
+		rec_offset = first_recordable_sample - transport_sample;
 		break;
 	}
 
         DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
-                                                              _name, enum_2_string (ot), transport_frame, nframes,
-                                                              first_recordable_frame, last_recordable_frame, rec_nframes, rec_offset));
+                                                              _name, enum_2_string (ot), transport_sample, nframes,
+                                                              first_recordable_sample, last_recordable_sample, rec_nframes, rec_offset));
 }
 
 void
-DiskWriter::prepare_to_stop (framepos_t transport_frame, framepos_t audible_frame)
+DiskWriter::prepare_to_stop (samplepos_t transport_sample, samplepos_t audible_sample)
 {
 	switch (_alignment_style) {
 	case ExistingMaterial:
-		last_recordable_frame = transport_frame + _capture_offset;
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to %2 + %3 = %4\n", _name, transport_frame, _capture_offset, last_recordable_frame));
+		last_recordable_sample = transport_sample + _capture_offset;
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable sample to %2 + %3 = %4\n", _name, transport_sample, _capture_offset, last_recordable_sample));
 		break;
 
 	case CaptureTime:
-		last_recordable_frame = audible_frame; // note that capture_offset is zero
-		/* we may already have captured audio before the last_recordable_frame (audible frame),
+		last_recordable_sample = audible_sample; // note that capture_offset is zero
+		/* we may already have captured audio before the last_recordable_sample (audible sample),
 		   so deal with this.
 		*/
-		if (last_recordable_frame > capture_start_frame) {
-			capture_captured = min (capture_captured, last_recordable_frame - capture_start_frame);
+		if (last_recordable_sample > capture_start_sample) {
+			capture_captured = min (capture_captured, last_recordable_sample - capture_start_sample);
 		}
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable frame to audible frame @ %2\n", _name, audible_frame));
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable sample to audible sample @ %2\n", _name, audible_sample));
 		break;
 	}
 
@@ -265,9 +265,9 @@ DiskWriter::disengage_record_safe ()
 	g_atomic_int_set (&_record_safe, 0);
 }
 
-/** Get the start position (in session frames) of the nth capture in the current pass */
-ARDOUR::framepos_t
-DiskWriter::get_capture_start_frame (uint32_t n) const
+/** Get the start position (in session samples) of the nth capture in the current pass */
+ARDOUR::samplepos_t
+DiskWriter::get_capture_start_sample (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
@@ -276,18 +276,18 @@ DiskWriter::get_capture_start_frame (uint32_t n) const
 		return capture_info[n]->start;
 	} else {
 		/* this is the currently in-progress capture */
-		return capture_start_frame;
+		return capture_start_sample;
 	}
 }
 
-ARDOUR::framecnt_t
-DiskWriter::get_captured_frames (uint32_t n) const
+ARDOUR::samplecnt_t
+DiskWriter::get_captured_samples (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
-		return capture_info[n]->frames;
+		return capture_info[n]->samples;
 	} else {
 		/* this is the currently in-progress capture */
 		return capture_captured;
@@ -295,7 +295,7 @@ DiskWriter::get_captured_frames (uint32_t n) const
 }
 
 void
-DiskWriter::set_input_latency (framecnt_t l)
+DiskWriter::set_input_latency (samplecnt_t l)
 {
 	Processor::set_input_latency (l);
 	set_capture_offset ();
@@ -392,7 +392,7 @@ DiskWriter::set_state (const XMLNode& node, int version)
 }
 
 void
-DiskWriter::non_realtime_locate (framepos_t position)
+DiskWriter::non_realtime_locate (samplepos_t position)
 {
 	if (_midi_write_source) {
 		_midi_write_source->set_timeline_position (position);
@@ -403,7 +403,7 @@ DiskWriter::non_realtime_locate (framepos_t position)
 
 
 void
-DiskWriter::prepare_record_status(framepos_t capture_start_frame)
+DiskWriter::prepare_record_status(samplepos_t capture_start_sample)
 {
 	if (recordable() && destructive()) {
 		boost::shared_ptr<ChannelList> c = channels.reader();
@@ -414,7 +414,7 @@ DiskWriter::prepare_record_status(framepos_t capture_start_frame)
 
 			if (transitions.len[0] > 0) {
 				transitions.buf[0]->type = CaptureStart;
-				transitions.buf[0]->capture_val = capture_start_frame;
+				transitions.buf[0]->capture_val = capture_start_sample;
 				(*chan)->capture_transition_buf->increment_write_ptr(1);
 			} else {
 				// bad!
@@ -435,14 +435,14 @@ DiskWriter::prepare_record_status(framepos_t capture_start_frame)
  *      that someone can read playback_distance worth of data from.
  */
 void
-DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
+DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                  double speed, pframes_t nframes, bool result_required)
 {
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
-	framecnt_t rec_offset = 0;
-	framecnt_t rec_nframes = 0;
+	samplecnt_t rec_offset = 0;
+	samplecnt_t rec_nframes = 0;
 	bool nominally_recording;
 	bool re = record_enabled ();
 	bool can_record = _session.actively_recording ();
@@ -462,7 +462,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	_need_butler = false;
 
-	check_record_status (start_frame, can_record);
+	check_record_status (start_sample, can_record);
 
 	if (nframes == 0) {
 		return;
@@ -471,16 +471,16 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	nominally_recording = (can_record && re);
 
 	// Safeguard against situations where process() goes haywire when autopunching
-	// and last_recordable_frame < first_recordable_frame
+	// and last_recordable_sample < first_recordable_sample
 
-	if (last_recordable_frame < first_recordable_frame) {
-		last_recordable_frame = max_framepos;
+	if (last_recordable_sample < first_recordable_sample) {
+		last_recordable_sample = max_samplepos;
 	}
 
 	const Location* const loop_loc    = loop_location;
-	framepos_t            loop_start  = 0;
-	framepos_t            loop_end    = 0;
-	framepos_t            loop_length = 0;
+	samplepos_t            loop_start  = 0;
+	samplepos_t            loop_end    = 0;
+	samplepos_t            loop_length = 0;
 
 	if (loop_loc) {
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
@@ -490,12 +490,12 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_punch_enabled()))) {
 
-		Evoral::OverlapType ot = Evoral::coverage (first_recordable_frame, last_recordable_frame, start_frame, end_frame);
-		// XXX should this be transport_frame + nframes - 1 ? coverage() expects its parameter ranges to include their end points
-		// XXX also, first_recordable_frame & last_recordable_frame may both be == max_framepos: coverage() will return OverlapNone in that case. Is thak OK?
-		calculate_record_range (ot, start_frame, nframes, rec_nframes, rec_offset);
+		Evoral::OverlapType ot = Evoral::coverage (first_recordable_sample, last_recordable_sample, start_sample, end_sample);
+		// XXX should this be transport_sample + nframes - 1 ? coverage() expects its parameter ranges to include their end points
+		// XXX also, first_recordable_sample & last_recordable_sample may both be == max_samplepos: coverage() will return OverlapNone in that case. Is thak OK?
+		calculate_record_range (ot, start_sample, nframes, rec_nframes, rec_offset);
 
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 frames, offset %4\n", _name, rec_nframes, nframes, rec_offset));
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: this time record %2 of %3 samples, offset %4\n", _name, rec_nframes, nframes, rec_offset));
 
 		if (rec_nframes && !was_recording) {
 			capture_captured = 0;
@@ -506,22 +506,22 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				   at the loop start and can handle time wrapping around.
 				   Otherwise, start the source right now as usual.
 				*/
-				capture_captured    = start_frame - loop_start;
-				capture_start_frame = loop_start;
+				capture_captured    = start_sample - loop_start;
+				capture_start_sample = loop_start;
 			}
 
 			if (_midi_write_source) {
-				_midi_write_source->mark_write_starting_now (capture_start_frame, capture_captured, loop_length);
+				_midi_write_source->mark_write_starting_now (capture_start_sample, capture_captured, loop_length);
 			}
 
-			g_atomic_int_set(const_cast<gint*> (&_frames_pending_write), 0);
+			g_atomic_int_set(const_cast<gint*> (&_samples_pending_write), 0);
 			g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
 
 			was_recording = true;
 
 		}
 
-		/* For audio: not writing frames to the capture ringbuffer offsets
+		/* For audio: not writing samples to the capture ringbuffer offsets
 		 * the recording. For midi: we need to keep track of the record range
 		 * and subtract the accumulated difference from the event time.
 		 */
@@ -550,14 +550,14 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 
 			chaninfo->buf->get_write_vector (&chaninfo->rw_vector);
 
-			if (rec_nframes <= (framecnt_t) chaninfo->rw_vector.len[0]) {
+			if (rec_nframes <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
 				Sample *incoming = buf.data (rec_offset);
 				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * rec_nframes);
 
 			} else {
 
-				framecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
+				samplecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
 				if (rec_nframes > total) {
                                         DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
@@ -567,7 +567,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				}
 
 				Sample *incoming = buf.data (rec_offset);
-				framecnt_t first = chaninfo->rw_vector.len[0];
+				samplecnt_t first = chaninfo->rw_vector.len[0];
 
 				memcpy (chaninfo->rw_vector.buf[0], incoming, sizeof (Sample) * first);
 				memcpy (chaninfo->rw_vector.buf[1], incoming + first, sizeof (Sample) * (rec_nframes - first));
@@ -593,7 +593,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			if (DEBUG_ENABLED(DEBUG::MidiIO)) {
 				const uint8_t* __data = ev.buffer();
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), start_frame, ev.size()));
+				DEBUG_STR_APPEND(a, string_compose ("mididiskstream %1 capture event @ %2 + %3 sz %4 ", this, ev.time(), start_sample, ev.size()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -604,7 +604,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				DEBUG_TRACE (DEBUG::MidiIO, DEBUG_STR(a).str());
 			}
 #endif
-			/* Write events to the capture buffer in frames from session start,
+			/* Write events to the capture buffer in samples from session start,
 			   but ignoring looping so event time progresses monotonically.
 			   The source knows the loop length so it knows exactly where the
 			   event occurs in the series of recorded loops and can implement
@@ -613,9 +613,9 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 			   reconstruct their actual time; future clever MIDI looping should
 			   probably be implemented in the source instead of here.
 			*/
-			const framecnt_t loop_offset = _num_captured_loops * loop_length;
-			const framepos_t event_time = start_frame + loop_offset - _accumulated_capture_offset + ev.time();
-			if (event_time < 0 || event_time < first_recordable_frame) {
+			const samplecnt_t loop_offset = _num_captured_loops * loop_length;
+			const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
+			if (event_time < 0 || event_time < first_recordable_sample) {
 				/* Event out of range, skip */
 				continue;
 			}
@@ -624,7 +624,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 				_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
-		g_atomic_int_add(const_cast<gint*>(&_frames_pending_write), nframes);
+		g_atomic_int_add(const_cast<gint*>(&_samples_pending_write), nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -639,7 +639,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 					/* This may fail if buf is larger than _gui_feed_buffer, but it's not really
 					   the end of the world if it does.
 					*/
-					_gui_feed_buffer.push_back ((*i).time() + start_frame, (*i).size(), (*i).buffer());
+					_gui_feed_buffer.push_back ((*i).time() + start_sample, (*i).size(), (*i).buffer());
 				}
 			}
 
@@ -662,7 +662,7 @@ DiskWriter::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame,
 	/* AUDIO BUTLER REQUIRED CODE */
 
 	if (_playlists[DataType::AUDIO] && !c->empty()) {
-		if (((framecnt_t) c->front()->buf->read_space() >= _chunk_frames)) {
+		if (((samplecnt_t) c->front()->buf->read_space() >= _chunk_samples)) {
 			_need_butler = true;
 		}
 	}
@@ -680,8 +680,8 @@ void
 DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 {
 	was_recording = false;
-	first_recordable_frame = max_framepos;
-	last_recordable_frame = max_framepos;
+	first_recordable_sample = max_samplepos;
+	last_recordable_sample = max_samplepos;
 
 	if (capture_captured == 0) {
 		return;
@@ -708,10 +708,10 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 
 	CaptureInfo* ci = new CaptureInfo;
 
-	ci->start =  capture_start_frame;
-	ci->frames = capture_captured;
+	ci->start =  capture_start_sample;
+	ci->samples = capture_captured;
 
-	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->frames));
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("Finish capture, add new CI, %1 + %2\n", ci->start, ci->samples));
 
 	/* XXX theoretical race condition here. Need atomic exchange ?
 	   However, the circumstances when this is called right
@@ -725,8 +725,8 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	capture_info.push_back (ci);
 	capture_captured = 0;
 
-	/* now we've finished a capture, reset first_recordable_frame for next time */
-	first_recordable_frame = max_framepos;
+	/* now we've finished a capture, reset first_recordable_sample for next time */
+	first_recordable_sample = max_samplepos;
 }
 
 void
@@ -738,7 +738,7 @@ DiskWriter::set_record_enabled (bool yn)
 
 	/* can't rec-enable in destructive mode if transport is before start */
 
-	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
+	if (destructive() && yn && _session.transport_sample() < _session.current_start_sample()) {
 		return;
 	}
 
@@ -767,7 +767,7 @@ DiskWriter::set_record_safe (bool yn)
 	/* can't rec-safe in destructive mode if transport is before start ????
 	 REQUIRES REVIEW */
 
-	if (destructive() && yn && _session.transport_frame() < _session.current_start_frame()) {
+	if (destructive() && yn && _session.transport_sample() < _session.current_start_sample()) {
 		return;
 	}
 
@@ -795,7 +795,7 @@ DiskWriter::prep_record_enable ()
 
 	/* can't rec-enable in destructive mode if transport is before start */
 
-	if (destructive() && _session.transport_frame() < _session.current_start_frame()) {
+	if (destructive() && _session.transport_sample() < _session.current_start_sample()) {
 		return false;
 	}
 
@@ -848,7 +848,7 @@ DiskWriter::set_note_mode (NoteMode m)
 }
 
 int
-DiskWriter::seek (framepos_t frame, bool complete_refill)
+DiskWriter::seek (samplepos_t sample, bool complete_refill)
 {
 	uint32_t n;
 	ChannelList::iterator chan;
@@ -859,16 +859,16 @@ DiskWriter::seek (framepos_t frame, bool complete_refill)
 	}
 
 	_midi_buf->reset ();
-	g_atomic_int_set(&_frames_read_from_ringbuffer, 0);
-	g_atomic_int_set(&_frames_written_to_ringbuffer, 0);
+	g_atomic_int_set(&_samples_read_from_ringbuffer, 0);
+	g_atomic_int_set(&_samples_written_to_ringbuffer, 0);
 
 	/* can't rec-enable in destructive mode if transport is before start */
 
-	if (destructive() && record_enabled() && frame < _session.current_start_frame()) {
+	if (destructive() && record_enabled() && sample < _session.current_start_sample()) {
 		disengage_record_enable ();
 	}
 
-	playback_sample = frame;
+	playback_sample = sample;
 
 	return 0;
 }
@@ -880,7 +880,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 	int32_t ret = 0;
 	RingBufferNPT<Sample>::rw_vector vector;
 	RingBufferNPT<CaptureTransition>::rw_vector transvec;
-	framecnt_t total;
+	samplecnt_t total;
 
 	transvec.buf[0] = 0;
 	transvec.buf[1] = 0;
@@ -894,7 +894,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 		total = vector.len[0] + vector.len[1];
 
-		if (total == 0 || (total < _chunk_frames && !force_flush && was_recording)) {
+		if (total == 0 || (total < _chunk_samples && !force_flush && was_recording)) {
 			goto out;
 		}
 
@@ -909,11 +909,11 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 		   let the caller know too.
 		*/
 
-		if (total >= 2 * _chunk_frames || ((force_flush || !was_recording) && total > _chunk_frames)) {
+		if (total >= 2 * _chunk_samples || ((force_flush || !was_recording) && total > _chunk_samples)) {
 			ret = 1;
 		}
 
-		to_write = min (_chunk_frames, (framecnt_t) vector.len[0]);
+		to_write = min (_chunk_samples, (samplecnt_t) vector.len[0]);
 
 		// check the transition buffer when recording destructive
 		// important that we get this after the capture buf
@@ -934,7 +934,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 				} else if (captrans.type == CaptureEnd) {
 
-					// capture end, the capture_val represents total frames in capture
+					// capture end, the capture_val represents total samples in capture
 
 					if (captrans.capture_val <= (*chan)->curr_capture_cnt + to_write) {
 
@@ -973,14 +973,14 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 		(*chan)->buf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
-		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < _chunk_frames) && !destructive()) {
+		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < _chunk_samples) && !destructive()) {
 
 			/* we wrote all of vector.len[0] but it wasn't an entire
-			   disk_write_chunk_frames of data, so arrange for some part
+			   disk_write_chunk_samples of data, so arrange for some part
 			   of vector.len[1] to be flushed to disk as well.
 			*/
 
-			to_write = min ((framecnt_t)(_chunk_frames - to_write), (framecnt_t) vector.len[1]);
+			to_write = min ((samplecnt_t)(_chunk_samples - to_write), (samplecnt_t) vector.len[1]);
 
                         DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 additional write of %2\n", name(), to_write));
 
@@ -998,11 +998,11 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	if (_midi_write_source) {
 
-		const framecnt_t total = g_atomic_int_get(const_cast<gint*> (&_frames_pending_write));
+		const samplecnt_t total = g_atomic_int_get(const_cast<gint*> (&_samples_pending_write));
 
 		if (total == 0 ||
 		    _midi_buf->read_space() == 0 ||
-		    (!force_flush && (total < _chunk_frames) && was_recording)) {
+		    (!force_flush && (total < _chunk_samples) && was_recording)) {
 			goto out;
 		}
 
@@ -1017,7 +1017,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 		   let the caller know too.
 		*/
 
-		if (total >= 2 * _chunk_frames || ((force_flush || !was_recording) && total > _chunk_frames)) {
+		if (total >= 2 * _chunk_samples || ((force_flush || !was_recording) && total > _chunk_samples)) {
 			ret = 1;
 		}
 
@@ -1025,16 +1025,16 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 			/* push out everything we have, right now */
 			to_write = UINT32_MAX;
 		} else {
-			to_write = _chunk_frames;
+			to_write = _chunk_samples;
 		}
 
-		if (record_enabled() && ((total > _chunk_frames) || force_flush)) {
+		if (record_enabled() && ((total > _chunk_samples) || force_flush)) {
 			Source::Lock lm(_midi_write_source->mutex());
-			if (_midi_write_source->midi_write (lm, *_midi_buf, get_capture_start_frame (0), to_write) != to_write) {
+			if (_midi_write_source->midi_write (lm, *_midi_buf, get_capture_start_sample (0), to_write) != to_write) {
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
-			g_atomic_int_add(const_cast<gint*> (&_frames_pending_write), -to_write);
+			g_atomic_int_add(const_cast<gint*> (&_samples_pending_write), -to_write);
 		}
 	}
 
@@ -1175,7 +1175,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 {
 	bool more_work = true;
 	int err = 0;
-	framecnt_t total_capture;
+	samplecnt_t total_capture;
 	SourceList audio_srcs;
 	SourceList midi_srcs;
 	ChannelList::iterator chan;
@@ -1239,7 +1239,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	for (total_capture = 0, ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
-		total_capture += (*ci)->frames;
+		total_capture += (*ci)->samples;
 	}
 
 	/* figure out the name for this take */
@@ -1298,7 +1298,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 		/* set length in beats to entire capture length */
 
-		BeatsFramesConverter converter (_session.tempo_map(), capture_info.front()->start);
+		BeatsSamplesConverter converter (_session.tempo_map(), capture_info.front()->start);
 		const Evoral::Beats total_capture_beats = converter.from (total_capture);
 		_midi_write_source->set_length_beats (total_capture_beats);
 
@@ -1330,11 +1330,11 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	capture_info.clear ();
-	capture_start_frame = 0;
+	capture_start_sample = 0;
 }
 
 void
-DiskWriter::transport_looped (framepos_t transport_frame)
+DiskWriter::transport_looped (samplepos_t transport_sample)
 {
 	if (was_recording) {
 		// all we need to do is finish this capture, with modified capture length
@@ -1345,9 +1345,9 @@ DiskWriter::transport_looped (framepos_t transport_frame)
 		// the next region will start recording via the normal mechanism
 		// we'll set the start position to the current transport pos
 		// no latency adjustment or capture offset needs to be made, as that already happened the first time
-		capture_start_frame = transport_frame;
-		first_recordable_frame = transport_frame; // mild lie
-		last_recordable_frame = max_framepos;
+		capture_start_sample = transport_sample;
+		first_recordable_sample = transport_sample; // mild lie
+		last_recordable_sample = max_samplepos;
 		was_recording = true;
 
 		if (recordable() && destructive()) {
@@ -1358,7 +1358,7 @@ DiskWriter::transport_looped (framepos_t transport_frame)
 
 				if (transvec.len[0] > 0) {
 					transvec.buf[0]->type = CaptureStart;
-					transvec.buf[0]->capture_val = capture_start_frame;
+					transvec.buf[0]->capture_val = capture_start_sample;
 					(*chan)->capture_transition_buf->increment_write_ptr(1);
 				}
 				else {
@@ -1400,7 +1400,7 @@ DiskWriter::setup_destructive_playlist ()
 	PropertyList plist;
 	plist.add (Properties::name, _name.val());
 	plist.add (Properties::start, 0);
-	plist.add (Properties::length, max_framepos - srcs.front()->natural_position());
+	plist.add (Properties::length, max_samplepos - srcs.front()->natural_position());
 
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist));
 	_playlists[DataType::AUDIO]->add_region (region, srcs.front()->natural_position());
@@ -1441,7 +1441,7 @@ DiskWriter::use_destructive_playlist ()
 
 	/* be sure to stretch the region out to the maximum length (non-musical)*/
 
-	region->set_length (max_framepos - region->position(), 0);
+	region->set_length (max_samplepos - region->position(), 0);
 
 	uint32_t n;
 	ChannelList::iterator chan;

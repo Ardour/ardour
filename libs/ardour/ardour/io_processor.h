@@ -64,7 +64,7 @@ class LIBARDOUR_API IOProcessor : public Processor
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
 
-	void silence (framecnt_t nframes, framepos_t start_frame);
+	void silence (samplecnt_t nframes, samplepos_t start_sample);
 	void disconnect ();
 
 	void increment_port_buffer_offset (pframes_t);

@@ -63,14 +63,14 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<bool> hidden;
 		PBD::PropertyDescriptor<bool> position_locked;
 		PBD::PropertyDescriptor<bool> valid_transients;
-		PBD::PropertyDescriptor<framepos_t> start;
-		PBD::PropertyDescriptor<framecnt_t> length;
-		PBD::PropertyDescriptor<framepos_t> position;
+		PBD::PropertyDescriptor<samplepos_t> start;
+		PBD::PropertyDescriptor<samplecnt_t> length;
+		PBD::PropertyDescriptor<samplepos_t> position;
 		PBD::PropertyDescriptor<double> beat;
-		PBD::PropertyDescriptor<framecnt_t> sync_position;
+		PBD::PropertyDescriptor<samplecnt_t> sync_position;
 		PBD::PropertyDescriptor<layer_t> layer;
-		PBD::PropertyDescriptor<framepos_t> ancestral_start;
-		PBD::PropertyDescriptor<framecnt_t> ancestral_length;
+		PBD::PropertyDescriptor<samplepos_t> ancestral_start;
+		PBD::PropertyDescriptor<samplecnt_t> ancestral_length;
 		PBD::PropertyDescriptor<float> stretch;
 		PBD::PropertyDescriptor<float> shift;
 		PBD::PropertyDescriptor<PositionLockStyle> position_lock_style;
@@ -234,7 +234,7 @@ Region::register_properties ()
 	, _layering_index (Properties::layering_index, other->_layering_index)
 
 /* derived-from-derived constructor (no sources in constructor) */
-Region::Region (Session& s, framepos_t start, framecnt_t length, const string& name, DataType type)
+Region::Region (Session& s, samplepos_t start, samplecnt_t length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type(type)
 	, REGION_DEFAULT_STATE(start,length)
@@ -331,7 +331,7 @@ Region::Region (boost::shared_ptr<const Region> other)
     the start within \a other is given by \a offset
     (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
 */
-Region::Region (boost::shared_ptr<const Region> other, MusicFrame offset)
+Region::Region (boost::shared_ptr<const Region> other, MusicSample offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -352,12 +352,12 @@ Region::Region (boost::shared_ptr<const Region> other, MusicFrame offset)
 	use_sources (other->_sources);
 	set_master_sources (other->_master_sources);
 
-	_position = other->_position + offset.frame;
-	_start = other->_start + offset.frame;
+	_position = other->_position + offset.sample;
+	_start = other->_start + offset.sample;
 
 	/* prevent offset of 0 from altering musical position */
-	if (offset.frame != 0) {
-		const double offset_qn = _session.tempo_map().exact_qn_at_frame (other->_position + offset.frame, offset.division)
+	if (offset.sample != 0) {
+		const double offset_qn = _session.tempo_map().exact_qn_at_sample (other->_position + offset.sample, offset.division)
 			- other->_quarter_note;
 
 		_quarter_note = other->_quarter_note + offset_qn;
@@ -439,7 +439,7 @@ Region::set_name (const std::string& str)
 }
 
 void
-Region::set_length (framecnt_t len, const int32_t sub_num)
+Region::set_length (samplecnt_t len, const int32_t sub_num)
 {
 	//cerr << "Region::set_length() len = " << len << endl;
 	if (locked()) {
@@ -452,7 +452,7 @@ Region::set_length (framecnt_t len, const int32_t sub_num)
 		   length impossible.
 		*/
 
-		if (max_framepos - len < _position) {
+		if (max_samplepos - len < _position) {
 			return;
 		}
 
@@ -476,7 +476,7 @@ Region::set_length (framecnt_t len, const int32_t sub_num)
 }
 
 void
-Region::set_length_internal (framecnt_t len, const int32_t sub_num)
+Region::set_length_internal (samplecnt_t len, const int32_t sub_num)
 {
 	_last_length = _length;
 	_length = len;
@@ -541,7 +541,7 @@ Region::move_to_natural_position ()
 }
 
 void
-Region::special_set_position (framepos_t pos)
+Region::special_set_position (samplepos_t pos)
 {
 	/* this is used when creating a whole file region as
 	   a way to store its "natural" or "captured" position.
@@ -580,8 +580,8 @@ Region::update_after_tempo_map_change (bool send)
 	}
 
 	/* prevent movement before 0 */
-	const framepos_t pos = max ((framepos_t) 0, _session.tempo_map().frame_at_beat (_beat));
-	/* we have _beat. update frame position non-musically */
+	const samplepos_t pos = max ((samplepos_t) 0, _session.tempo_map().sample_at_beat (_beat));
+	/* we have _beat. update sample position non-musically */
 	set_position_internal (pos, false, 0);
 
 	/* do this even if the position is the same. this helps out
@@ -594,7 +594,7 @@ Region::update_after_tempo_map_change (bool send)
 }
 
 void
-Region::set_position (framepos_t pos, int32_t sub_num)
+Region::set_position (samplepos_t pos, int32_t sub_num)
 {
 	if (!can_move()) {
 		return;
@@ -611,7 +611,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 		set_position_internal (pos, true, sub_num);
 	} else {
 		if (!_session.loading()) {
-			_beat = _session.tempo_map().exact_beat_at_frame (pos, sub_num);
+			_beat = _session.tempo_map().exact_beat_at_sample (pos, sub_num);
 			_quarter_note = _session.tempo_map().quarter_note_at_beat (_beat);
 		}
 
@@ -627,7 +627,7 @@ Region::set_position (framepos_t pos, int32_t sub_num)
 }
 
 void
-Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
+Region::set_position_internal (samplepos_t pos, bool allow_bbt_recompute, const int32_t sub_num)
 {
 	/* We emit a change of Properties::position even if the position hasn't changed
 	   (see Region::set_position), so we must always set this up so that
@@ -650,9 +650,9 @@ Region::set_position_internal (framepos_t pos, bool allow_bbt_recompute, const i
 
 		   XXX is this the right thing to do?
 		*/
-		if (max_framepos - _length < _position) {
+		if (max_samplepos - _length < _position) {
 			_last_length = _length;
-			_length = max_framepos - _position;
+			_length = max_samplepos - _position;
 		}
 	}
 }
@@ -675,7 +675,7 @@ Region::set_position_music (double qn)
 		_beat = _session.tempo_map().beat_at_quarter_note (qn);
 	}
 
-	/* will set frame accordingly */
+	/* will set sample accordingly */
 	set_position_music_internal (qn);
 
 	if (position_lock_style() == MusicTime) {
@@ -695,7 +695,7 @@ Region::set_position_music_internal (double qn)
 	_last_position = _position;
 
 	if (_quarter_note != qn) {
-		_position = _session.tempo_map().frame_at_quarter_note (qn);
+		_position = _session.tempo_map().sample_at_quarter_note (qn);
 		_quarter_note = qn;
 
 		/* check that the new _position wouldn't make the current
@@ -703,9 +703,9 @@ Region::set_position_music_internal (double qn)
 
 		   XXX is this the right thing to do?
 		*/
-		if (max_framepos - _length < _position) {
+		if (max_samplepos - _length < _position) {
 			_last_length = _length;
-			_length = max_framepos - _position;
+			_length = max_samplepos - _position;
 		}
 	}
 }
@@ -716,7 +716,7 @@ Region::set_position_music_internal (double qn)
  *  _last_position to prevent an implied move.
  */
 void
-Region::set_initial_position (framepos_t pos)
+Region::set_initial_position (samplepos_t pos)
 {
 	if (!can_move()) {
 		return;
@@ -731,9 +731,9 @@ Region::set_initial_position (framepos_t pos)
 		   XXX is this the right thing to do?
 		*/
 
-		if (max_framepos - _length < _position) {
+		if (max_samplepos - _length < _position) {
 			_last_length = _length;
-			_length = max_framepos - _position;
+			_length = max_samplepos - _position;
 		}
 
 		recompute_position_from_lock_style (0);
@@ -751,12 +751,12 @@ Region::set_initial_position (framepos_t pos)
 void
 Region::recompute_position_from_lock_style (const int32_t sub_num)
 {
-	_beat = _session.tempo_map().exact_beat_at_frame (_position, sub_num);
-	_quarter_note = _session.tempo_map().exact_qn_at_frame (_position, sub_num);
+	_beat = _session.tempo_map().exact_beat_at_sample (_position, sub_num);
+	_quarter_note = _session.tempo_map().exact_qn_at_sample (_position, sub_num);
 }
 
 void
-Region::nudge_position (frameoffset_t n)
+Region::nudge_position (sampleoffset_t n)
 {
 	if (locked() || video_locked()) {
 		return;
@@ -766,11 +766,11 @@ Region::nudge_position (frameoffset_t n)
 		return;
 	}
 
-	framepos_t new_position = _position;
+	samplepos_t new_position = _position;
 
 	if (n > 0) {
-		if (_position > max_framepos - n) {
-			new_position = max_framepos;
+		if (_position > max_samplepos - n) {
+			new_position = max_samplepos;
 		} else {
 			new_position += n;
 		}
@@ -788,7 +788,7 @@ Region::nudge_position (frameoffset_t n)
 }
 
 void
-Region::set_ancestral_data (framepos_t s, framecnt_t l, float st, float sh)
+Region::set_ancestral_data (samplepos_t s, samplecnt_t l, float st, float sh)
 {
 	_ancestral_length = l;
 	_ancestral_start = s;
@@ -797,7 +797,7 @@ Region::set_ancestral_data (framepos_t s, framecnt_t l, float st, float sh)
 }
 
 void
-Region::set_start (framepos_t pos)
+Region::set_start (samplepos_t pos)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
@@ -823,18 +823,18 @@ Region::set_start (framepos_t pos)
 }
 
 void
-Region::move_start (frameoffset_t distance, const int32_t sub_num)
+Region::move_start (sampleoffset_t distance, const int32_t sub_num)
 {
 	if (locked() || position_locked() || video_locked()) {
 		return;
 	}
 
-	framepos_t new_start;
+	samplepos_t new_start;
 
 	if (distance > 0) {
 
-		if (_start > max_framepos - distance) {
-			new_start = max_framepos; // makes no sense
+		if (_start > max_samplepos - distance) {
+			new_start = max_samplepos; // makes no sense
 		} else {
 			new_start = _start + distance;
 		}
@@ -868,32 +868,32 @@ Region::move_start (frameoffset_t distance, const int32_t sub_num)
 }
 
 void
-Region::trim_front (framepos_t new_position, const int32_t sub_num)
+Region::trim_front (samplepos_t new_position, const int32_t sub_num)
 {
 	modify_front (new_position, false, sub_num);
 }
 
 void
-Region::cut_front (framepos_t new_position, const int32_t sub_num)
+Region::cut_front (samplepos_t new_position, const int32_t sub_num)
 {
 	modify_front (new_position, true, sub_num);
 }
 
 void
-Region::cut_end (framepos_t new_endpoint, const int32_t sub_num)
+Region::cut_end (samplepos_t new_endpoint, const int32_t sub_num)
 {
 	modify_end (new_endpoint, true, sub_num);
 }
 
 void
-Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t sub_num)
+Region::modify_front (samplepos_t new_position, bool reset_fade, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
 	}
 
-	framepos_t end = last_frame();
-	framepos_t source_zero;
+	samplepos_t end = last_sample();
+	samplepos_t source_zero;
 
 	if (_position > _start) {
 		source_zero = _position - _start;
@@ -903,7 +903,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t su
 
 	if (new_position < end) { /* can't trim it zero or negative length */
 
-		framecnt_t newlen = 0;
+		samplecnt_t newlen = 0;
 
 		if (!can_trim_start_before_source_start ()) {
 			/* can't trim it back past where source position zero is located */
@@ -931,7 +931,7 @@ Region::modify_front (framepos_t new_position, bool reset_fade, const int32_t su
 }
 
 void
-Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t sub_num)
+Region::modify_end (samplepos_t new_endpoint, bool reset_fade, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
@@ -953,13 +953,13 @@ Region::modify_end (framepos_t new_endpoint, bool reset_fade, const int32_t sub_
  */
 
 void
-Region::trim_end (framepos_t new_endpoint, const int32_t sub_num)
+Region::trim_end (samplepos_t new_endpoint, const int32_t sub_num)
 {
 	modify_end (new_endpoint, false, sub_num);
 }
 
 void
-Region::trim_to (framepos_t position, framecnt_t length, const int32_t sub_num)
+Region::trim_to (samplepos_t position, samplecnt_t length, const int32_t sub_num)
 {
 	if (locked()) {
 		return;
@@ -974,20 +974,20 @@ Region::trim_to (framepos_t position, framecnt_t length, const int32_t sub_num)
 }
 
 void
-Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t sub_num)
+Region::trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num)
 {
-	framepos_t new_start;
+	samplepos_t new_start;
 
 	if (locked()) {
 		return;
 	}
 
-	frameoffset_t const start_shift = position - _position;
+	sampleoffset_t const start_shift = position - _position;
 
 	if (start_shift > 0) {
 
-		if (_start > max_framepos - start_shift) {
-			new_start = max_framepos;
+		if (_start > max_samplepos - start_shift) {
+			new_start = max_samplepos;
 		} else {
 			new_start = _start + start_shift;
 		}
@@ -1019,7 +1019,7 @@ Region::trim_to_internal (framepos_t position, framecnt_t length, const int32_t 
 	/* Set position before length, otherwise for MIDI regions this bad thing happens:
 	 * 1. we call set_length_internal; length in beats is computed using the region's current
 	 *    (soon-to-be old) position
-	 * 2. we call set_position_internal; position is set and length in frames re-computed using
+	 * 2. we call set_position_internal; position is set and length in samples re-computed using
 	 *    length in beats from (1) but at the new position, which is wrong if the region
 	 *    straddles a tempo/meter change.
 	 */
@@ -1128,10 +1128,10 @@ Region::set_position_locked (bool yn)
  *  @param absolute_pos Session time.
  */
 void
-Region::set_sync_position (framepos_t absolute_pos)
+Region::set_sync_position (samplepos_t absolute_pos)
 {
 	/* position within our file */
-	framepos_t const file_pos = _start + (absolute_pos - _position);
+	samplepos_t const file_pos = _start + (absolute_pos - _position);
 
 	if (file_pos != _sync_position) {
 		_sync_marked = true;
@@ -1157,8 +1157,8 @@ Region::clear_sync_position ()
 	}
 }
 
-/* @return the sync point relative the first frame of the region */
-frameoffset_t
+/* @return the sync point relative the first sample of the region */
+sampleoffset_t
 Region::sync_offset (int& dir) const
 {
 	if (sync_marked()) {
@@ -1175,11 +1175,11 @@ Region::sync_offset (int& dir) const
 	}
 }
 
-framepos_t
-Region::adjust_to_sync (framepos_t pos) const
+samplepos_t
+Region::adjust_to_sync (samplepos_t pos) const
 {
 	int sync_dir;
-	frameoffset_t offset = sync_offset (sync_dir);
+	sampleoffset_t offset = sync_offset (sync_dir);
 
 	// cerr << "adjusting pos = " << pos << " to sync at " << _sync_position << " offset = " << offset << " with dir = " << sync_dir << endl;
 
@@ -1190,7 +1190,7 @@ Region::adjust_to_sync (framepos_t pos) const
 			pos = 0;
 		}
 	} else {
-		if (max_framepos - pos > offset) {
+		if (max_samplepos - pos > offset) {
 			pos += offset;
 		}
 	}
@@ -1199,7 +1199,7 @@ Region::adjust_to_sync (framepos_t pos) const
 }
 
 /** @return Sync position in session time */
-framepos_t
+samplepos_t
 Region::sync_position() const
 {
 	if (sync_marked()) {
@@ -1367,7 +1367,7 @@ Region::_set_state (const XMLNode& node, int /*version*/, PropertyChange& what_c
 				    &bbt_time.beats,
 				    &bbt_time.ticks) != 3) {
 				_position_lock_style = AudioTime;
-				_beat = _session.tempo_map().beat_at_frame (_position);
+				_beat = _session.tempo_map().beat_at_sample (_position);
 			} else {
 				_beat = _session.tempo_map().beat_at_bbt (bbt_time);
 			}
@@ -1453,7 +1453,7 @@ Region::send_change (const PropertyChange& what_changed)
 bool
 Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 {
-	return coverage (other->first_frame(), other->last_frame()) != Evoral::OverlapNone;
+	return coverage (other->first_sample(), other->last_sample()) != Evoral::OverlapNone;
 }
 
 bool
@@ -1669,7 +1669,7 @@ Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
 }
 
 
-framecnt_t
+samplecnt_t
 Region::source_length(uint32_t n) const
 {
 	assert (n < _sources.size());
@@ -1677,13 +1677,13 @@ Region::source_length(uint32_t n) const
 }
 
 bool
-Region::verify_length (framecnt_t& len)
+Region::verify_length (samplecnt_t& len)
 {
 	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
-	framecnt_t maxlen = 0;
+	samplecnt_t maxlen = 0;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		maxlen = max (maxlen, source_length(n) - _start);
@@ -1695,13 +1695,13 @@ Region::verify_length (framecnt_t& len)
 }
 
 bool
-Region::verify_start_and_length (framepos_t new_start, framecnt_t& new_length)
+Region::verify_start_and_length (samplepos_t new_start, samplecnt_t& new_length)
 {
 	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
 	}
 
-	framecnt_t maxlen = 0;
+	samplecnt_t maxlen = 0;
 
 	for (uint32_t n = 0; n < _sources.size(); ++n) {
 		maxlen = max (maxlen, source_length(n) - new_start);
@@ -1713,7 +1713,7 @@ Region::verify_start_and_length (framepos_t new_start, framecnt_t& new_length)
 }
 
 bool
-Region::verify_start (framepos_t pos)
+Region::verify_start (samplepos_t pos)
 {
 	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
@@ -1728,7 +1728,7 @@ Region::verify_start (framepos_t pos)
 }
 
 bool
-Region::verify_start_mutable (framepos_t& new_start)
+Region::verify_start_mutable (samplepos_t& new_start)
 {
 	if (source() && (source()->destructive() || source()->length_mutable())) {
 		return true;
@@ -1794,7 +1794,7 @@ Region::transients (AnalysisFeatureList& afl)
 	if (cnt > 1 ) {
 		afl.sort ();
 		// remove exact duplicates
-		TransientDetector::cleanup_transients (afl, _session.frame_rate(), 0);
+		TransientDetector::cleanup_transients (afl, _session.sample_rate(), 0);
 	}
 }
 
@@ -1812,11 +1812,11 @@ Region::has_transients () const
 }
 
 void
-Region::merge_features (AnalysisFeatureList& result, const AnalysisFeatureList& src, const frameoffset_t off) const
+Region::merge_features (AnalysisFeatureList& result, const AnalysisFeatureList& src, const sampleoffset_t off) const
 {
 	for (AnalysisFeatureList::const_iterator x = src.begin(); x != src.end(); ++x) {
-		const frameoffset_t p = (*x) + off;
-		if (p < first_frame() || p > last_frame()) {
+		const sampleoffset_t p = (*x) + off;
+		if (p < first_sample() || p > last_sample()) {
 			continue;
 		}
 		result.push_back (p);
@@ -1913,12 +1913,12 @@ Region::post_set (const PropertyChange& pc)
 }
 
 void
-Region::set_start_internal (framecnt_t s, const int32_t sub_num)
+Region::set_start_internal (samplecnt_t s, const int32_t sub_num)
 {
 	_start = s;
 }
 
-framepos_t
+samplepos_t
 Region::earliest_possible_position () const
 {
 	if (_start > _position) {
@@ -1928,10 +1928,10 @@ Region::earliest_possible_position () const
 	}
 }
 
-framecnt_t
-Region::latest_possible_frame () const
+samplecnt_t
+Region::latest_possible_sample () const
 {
-	framecnt_t minlen = max_framecnt;
+	samplecnt_t minlen = max_samplecnt;
 
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 		/* non-audio regions have a length that may vary based on their
@@ -1940,7 +1940,7 @@ Region::latest_possible_frame () const
 		minlen = min (minlen, (*i)->length (_position));
 	}
 
-	/* the latest possible last frame is determined by the current
+	/* the latest possible last sample is determined by the current
 	 * position, plus the shortest source extent past _start.
 	 */
 

@@ -42,7 +42,7 @@ public:
 	MidiClockTicker ();
 	virtual ~MidiClockTicker();
 
-        void tick (const framepos_t& transport_frames, pframes_t nframes);
+        void tick (const samplepos_t& transport_samples, pframes_t nframes);
 
 	bool has_midi_port() const { return _midi_port != 0; }
 
@@ -74,7 +74,7 @@ public:
     class Position;
     boost::scoped_ptr<Position> _pos;
 
-    double one_ppqn_in_frames (framepos_t transport_position);
+    double one_ppqn_in_samples (samplepos_t transport_position);
 
     void send_midi_clock_event (pframes_t offset, pframes_t nframes);
     void send_start_event (pframes_t offset, pframes_t nframes);

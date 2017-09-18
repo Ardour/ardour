@@ -83,10 +83,10 @@ public:
 	virtual bool find_next_event (double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
-	virtual void non_realtime_locate (framepos_t now);
-	virtual void non_realtime_transport_stop (framepos_t now, bool flush);
+	virtual void non_realtime_locate (samplepos_t now);
+	virtual void non_realtime_transport_stop (samplepos_t now, bool flush);
 
-	virtual void automation_run (framepos_t, pframes_t);
+	virtual void automation_run (samplepos_t, pframes_t);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
 
@@ -117,7 +117,7 @@ protected:
 
 	std::set<Evoral::Parameter> _can_automate_list;
 
-	framepos_t _last_automation_snapshot;
+	samplepos_t _last_automation_snapshot;
 
 	SlavableControlList slavables () const { return SlavableControlList(); }
 

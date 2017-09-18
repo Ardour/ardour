@@ -341,7 +341,7 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::non_realtime_locate (framepos_t now)
+Automatable::non_realtime_locate (samplepos_t now)
 {
 	bool rolling = _a_session.transport_rolling ();
 
@@ -387,7 +387,7 @@ Automatable::non_realtime_locate (framepos_t now)
 }
 
 void
-Automatable::non_realtime_transport_stop (framepos_t now, bool /*flush_processors*/)
+Automatable::non_realtime_transport_stop (samplepos_t now, bool /*flush_processors*/)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationControl> c =
@@ -428,7 +428,7 @@ Automatable::non_realtime_transport_stop (framepos_t now, bool /*flush_processor
 }
 
 void
-Automatable::automation_run (framepos_t start, pframes_t nframes)
+Automatable::automation_run (samplepos_t start, pframes_t nframes)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationControl> c =

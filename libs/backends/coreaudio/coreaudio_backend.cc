@@ -756,13 +756,13 @@ CoreAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 CoreAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 CoreAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;

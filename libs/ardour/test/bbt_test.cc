@@ -16,7 +16,7 @@ BBTTest::addTest ()
 	Tempo    tempo(120, 4.0);
 	Meter    meter(4.0, 4.0);
 
-	/* no need to supply the frame for a new music-locked meter */
+	/* no need to supply the sample for a new music-locked meter */
 	map.add_meter (meter, BBT_Time(2, 1, 0), 0, MusicTime);
 
 	/* add some good stuff here */

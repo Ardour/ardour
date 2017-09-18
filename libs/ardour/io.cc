@@ -143,7 +143,7 @@ IO::increment_port_buffer_offset (pframes_t offset)
 }
 
 void
-IO::silence (framecnt_t nframes)
+IO::silence (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -1216,11 +1216,11 @@ IO::apply_pretty_name ()
 	}
 }
 
-framecnt_t
+samplecnt_t
 IO::latency () const
 {
-	framecnt_t max_latency;
-	framecnt_t latency;
+	samplecnt_t max_latency;
+	samplecnt_t latency;
 
 	max_latency = 0;
 
@@ -1604,7 +1604,7 @@ IO::connected_to (const string& str) const
  *  Caller must hold process lock.
  */
 void
-IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes)
+IO::process_input (boost::shared_ptr<Processor> proc, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
 {
 	/* don't read the data into new buffers - just use the port buffers directly */
 
@@ -1615,7 +1615,7 @@ IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, fr
 
 	_buffers.get_backend_port_addresses (_ports, nframes);
 	if (proc) {
-		proc->run (_buffers, start_frame, end_frame, speed, nframes, true);
+		proc->run (_buffers, start_sample, end_sample, speed, nframes, true);
 	}
 }
 
@@ -1648,7 +1648,7 @@ IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 }
 
 void
-IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset)
+IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecnt_t offset)
 {
 	PortSet::iterator o = _ports.begin(type);
 	BufferSet::iterator i = bufs.begin(type);

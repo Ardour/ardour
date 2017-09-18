@@ -82,9 +82,9 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 
 	if (_session && _session->transport_rolling() && ac->alist()->automation_write()) {
 		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, audible = %2so enter write pass\n",
-								_session->transport_speed(), _session->audible_frame()));
+								_session->transport_speed(), _session->audible_sample()));
 		/* add a guard point since we are already moving */
-		ac->list()->set_in_write_pass (true, true, _session->audible_frame());
+		ac->list()->set_in_write_pass (true, true, _session->audible_sample());
 	}
 
 	/* we can't store shared_ptr<Destructible> in connections because it
@@ -119,7 +119,7 @@ AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> a
 }
 
 void
-AutomationWatch::transport_stop_automation_watches (framepos_t when)
+AutomationWatch::transport_stop_automation_watches (samplepos_t when)
 {
 	DEBUG_TRACE (DEBUG::Automation, "clear all automation watches\n");
 
@@ -153,7 +153,7 @@ AutomationWatch::timer ()
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 
-		framepos_t time = _session->audible_frame ();
+		samplepos_t time = _session->audible_sample ();
 		if (time > _last_time) {  //we only write automation in the forward direction; this fixes automation-recording in a loop
 			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 				if ((*aw)->alist()->automation_write()) {
@@ -223,7 +223,7 @@ AutomationWatch::transport_state_change ()
 
 	bool rolling = _session->transport_rolling();
 
-	_last_time = _session->audible_frame ();
+	_last_time = _session->audible_sample ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);

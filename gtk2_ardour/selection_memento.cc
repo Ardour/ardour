@@ -67,7 +67,7 @@ SelectionMemento::set_state (const XMLNode& node, int /*version*/) {
 		editor.reset_zoom (llrintf (zoom));
 	}
 
-	framepos_t pos;
+	samplepos_t pos;
 	if (node.get_property ("left-frame", pos)) {
 		if (pos < 0) {
 			pos = 0;

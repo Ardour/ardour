@@ -170,7 +170,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
-	virtual void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
+	virtual void show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer);
 	virtual void hide_timestretch ();
 
 	/* editing operations */
@@ -178,11 +178,11 @@ class TimeAxisView : public virtual AxisView
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}
 
 	/** Paste a selection.
-	 *  @param pos Position to paste to (session frames).
+	 *  @param pos Position to paste to (session samples).
 	 *  @param selection Selection to paste.
 	 *  @param ctx Paste context.
 	 */
-	virtual bool paste (ARDOUR::framepos_t pos,
+	virtual bool paste (ARDOUR::samplepos_t pos,
 	                    const Selection&   selection,
 	                    PasteContext&      ctx,
 			    const int32_t sub_num) { return false; }
@@ -192,13 +192,13 @@ class TimeAxisView : public virtual AxisView
 
 	virtual void fade_range (TimeSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&, bool within = false);
+	virtual void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&, bool within = false);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 
 	void add_ghost (RegionView*);
@@ -231,7 +231,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              time_axis_vbox;
 	Gtk::HBox              time_axis_hbox;
-	Gtk::Frame             time_axis_frame;
+	Gtk::Frame             time_axis_sample;
 	Gtk::HBox              top_hbox;
 	Gtk::Fixed             scroomer_placeholder;
 	bool                  _name_editing;

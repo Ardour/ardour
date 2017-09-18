@@ -137,7 +137,7 @@ static void ardour_g_log (const gchar *log_domain, GLogLevelFlags log_level, con
 static gboolean
 tell_about_backend_death (void* /* ignored */)
 {
-	if (AudioEngine::instance()->processed_frames() == 0) {
+	if (AudioEngine::instance()->processed_samples() == 0) {
 		/* died during startup */
 		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_position (Gtk::WIN_POS_CENTER);

@@ -107,7 +107,7 @@ BasicUI::loop_toggle ()
 }
 
 void
-BasicUI::loop_location (framepos_t start, framepos_t end)
+BasicUI::loop_location (samplepos_t start, samplepos_t end)
 {
 	Location* tll;
 	if ((tll = session->locations()->auto_loop_location()) == 0) {
@@ -141,7 +141,7 @@ BasicUI::goto_end ()
 void
 BasicUI::add_marker (const std::string& markername)
 {
-	framepos_t where = session->audible_frame();
+	samplepos_t where = session->audible_sample();
 	Location *location = new Location (*session, where, where, markername, Location::IsMark);
 	session->begin_reversible_command (_("add marker"));
 	XMLNode &before = session->locations()->get_state();
@@ -161,7 +161,7 @@ BasicUI::remove_marker_at_playhead ()
 
 		//find location(s) at this time
 		Locations::LocationList locs;
-		session->locations()->find_all_between (session->audible_frame(), session->audible_frame()+1, locs, Location::Flags(0));
+		session->locations()->find_all_between (session->audible_sample(), session->audible_sample()+1, locs, Location::Flags(0));
 		for (Locations::LocationList::iterator i = locs.begin(); i != locs.end(); ++i) {
 			if ((*i)->is_mark()) {
 				session->locations()->remove (*i);
@@ -292,7 +292,7 @@ BasicUI::save_state ()
 void
 BasicUI::prev_marker ()
 {
-	framepos_t pos = session->locations()->first_mark_before (session->transport_frame());
+	samplepos_t pos = session->locations()->first_mark_before (session->transport_sample());
 
 	if (pos >= 0) {
 		session->request_locate (pos, session->transport_rolling());
@@ -304,7 +304,7 @@ BasicUI::prev_marker ()
 void
 BasicUI::next_marker ()
 {
-	framepos_t pos = session->locations()->first_mark_after (session->transport_frame());
+	samplepos_t pos = session->locations()->first_mark_after (session->transport_sample());
 
 	if (pos >= 0) {
 		session->request_locate (pos, session->transport_rolling());
@@ -375,14 +375,14 @@ BasicUI::set_record_enable (bool yn)
 	}
 }
 
-framepos_t
-BasicUI::transport_frame ()
+samplepos_t
+BasicUI::transport_sample ()
 {
-	return session->transport_frame();
+	return session->transport_sample();
 }
 
 void
-BasicUI::locate (framepos_t where, bool roll_after_locate)
+BasicUI::locate (samplepos_t where, bool roll_after_locate)
 {
 	session->request_locate (where, roll_after_locate);
 }
@@ -390,14 +390,14 @@ BasicUI::locate (framepos_t where, bool roll_after_locate)
 void
 BasicUI::jump_by_seconds (double secs)
 {
-	framepos_t current = session->transport_frame();
-	double s = (double) current / (double) session->nominal_frame_rate();
+	samplepos_t current = session->transport_sample();
+	double s = (double) current / (double) session->nominal_sample_rate();
 
 	s+= secs;
 	if (s < 0) {
 		s = 0;
 	}
-	s = s * session->nominal_frame_rate();
+	s = s * session->nominal_sample_rate();
 
 	session->request_locate ( floor(s) );
 }
@@ -406,7 +406,7 @@ void
 BasicUI::jump_by_bars (double bars)
 {
 	TempoMap& tmap (session->tempo_map());
-	Timecode::BBT_Time bbt (tmap.bbt_at_frame (session->transport_frame()));
+	Timecode::BBT_Time bbt (tmap.bbt_at_sample (session->transport_sample()));
 
 	bars += bbt.bars;
 	if (bars < 0) {
@@ -417,7 +417,7 @@ BasicUI::jump_by_bars (double bars)
 	any.type = AnyTime::BBT;
 	any.bbt.bars = bars;
 
-	session->request_locate ( session->convert_to_frames (any) );
+	session->request_locate ( session->convert_to_samples (any) );
 }
 
 void
@@ -535,26 +535,26 @@ BasicUI::locked ()
 	return session->transport_locked ();
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 BasicUI::timecode_frames_per_hour ()
 {
 	return session->timecode_frames_per_hour ();
 }
 
 void
-BasicUI::timecode_time (framepos_t where, Timecode::Time& timecode)
+BasicUI::timecode_time (samplepos_t where, Timecode::Time& timecode)
 {
 	session->timecode_time (where, *((Timecode::Time *) &timecode));
 }
 
 void
-BasicUI::timecode_to_sample (Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const
+BasicUI::timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const
 {
 	session->timecode_to_sample (*((Timecode::Time*)&timecode), sample, use_offset, use_subframes);
 }
 
 void
-BasicUI::sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
+BasicUI::sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const
 {
 	session->sample_to_timecode (sample, *((Timecode::Time*)&timecode), use_offset, use_subframes);
 }

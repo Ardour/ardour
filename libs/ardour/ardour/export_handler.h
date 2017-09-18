@@ -127,7 +127,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
   private:
 
 	void handle_duplicate_format_extensions();
-	int process (framecnt_t frames);
+	int process (samplecnt_t samples);
 
 	Session &          session;
 	boost::shared_ptr<ExportGraphBuilder> graph_builder;
@@ -144,7 +144,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	/* Timespan management */
 
 	void start_timespan ();
-	int  process_timespan (framecnt_t frames);
+	int  process_timespan (samplecnt_t samples);
 	int  post_process ();
 	void finish_timespan ();
 
@@ -153,7 +153,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	TimespanBounds        timespan_bounds;
 
 	PBD::ScopedConnection process_connection;
-	framepos_t             process_position;
+	samplepos_t             process_position;
 
 	/* CD Marker stuff */
 
@@ -168,7 +168,7 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 		  , track_number (1)
 		  , track_position (0)
 		  , track_duration (0)
-		  , track_start_frame (0)
+		  , track_start_sample (0)
 		  , index_number (1)
 		  , index_position (0)
 		  {}
@@ -192,13 +192,13 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 
 		/* Track info */
 		uint32_t        track_number;
-		framepos_t      track_position;
-		framepos_t      track_duration;
-		framepos_t      track_start_frame;
+		samplepos_t      track_position;
+		samplepos_t      track_duration;
+		samplepos_t      track_start_sample;
 
 		/* Index info */
 		uint32_t       index_number;
-		framepos_t      index_position;
+		samplepos_t      index_position;
 	};
 
 
@@ -217,8 +217,8 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	void write_index_info_toc (CDMarkerStatus & status);
 	void write_index_info_mp4ch (CDMarkerStatus & status);
 
-	void frames_to_cd_frames_string (char* buf, framepos_t when);
-	void frames_to_chapter_marks_string (char* buf, framepos_t when);
+	void samples_to_cd_samples_string (char* buf, samplepos_t when);
+	void samples_to_chapter_marks_string (char* buf, samplepos_t when);
 
 	std::string toc_escape_cdtext (const std::string&);
 	std::string toc_escape_filename (const std::string&);

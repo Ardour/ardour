@@ -50,7 +50,7 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callbck)(GdkEvent*,Ardour
 
 	_track_canvas_item->set_x (0);
 
-	_current_frame = 1; /* force redraw at 0 */
+	_current_sample = 1; /* force redraw at 0 */
 }
 
 EditorCursor::EditorCursor (Editor& ed)
@@ -66,7 +66,7 @@ EditorCursor::EditorCursor (Editor& ed)
 
 	_track_canvas_item->set_x (0);
 
-	_current_frame = 1; /* force redraw at 0 */
+	_current_sample = 1; /* force redraw at 0 */
 }
 
 EditorCursor::~EditorCursor ()
@@ -75,17 +75,17 @@ EditorCursor::~EditorCursor ()
 }
 
 void
-EditorCursor::set_position (framepos_t frame)
+EditorCursor::set_position (samplepos_t sample)
 {
-	if (_current_frame != frame) { PositionChanged (frame); }
+	if (_current_sample != sample) { PositionChanged (sample); }
 
-	double const new_pos = _editor.sample_to_pixel_unrounded (frame);
+	double const new_pos = _editor.sample_to_pixel_unrounded (sample);
 
 	if (rint(new_pos) != rint(_track_canvas_item->x ())) {
 		_track_canvas_item->set_x (new_pos);
 	}
 
-	_current_frame = frame;
+	_current_sample = sample;
 }
 
 void

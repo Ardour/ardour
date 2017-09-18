@@ -219,7 +219,7 @@ class MackieControlProtocol
 	void update_global_led (int id, Mackie::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
-	framepos_t transport_frame() const;
+	samplepos_t transport_sample() const;
 
 	int modifier_state() const { return _modifier_state; }
 	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
@@ -269,8 +269,8 @@ class MackieControlProtocol
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
-	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
-	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
+	std::string format_bbt_timecode (ARDOUR::samplepos_t now_sample);
+	std::string format_timecode_timecode (ARDOUR::samplepos_t now_sample);
 
 	void do_request (MackieControlUIRequest*);
 	int stop ();
@@ -313,7 +313,7 @@ class MackieControlProtocol
 	Mackie::Timer            _frm_left_last;
 	// last written timecode string
 	std::string              _timecode_last;
-	framepos_t				 _frame_last;
+	samplepos_t				 _sample_last;
 	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type    _timecode_type;
 	// Bundle to represent our input ports

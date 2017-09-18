@@ -26,11 +26,11 @@
 using namespace ARDOUR;
 
 
-framecnt_t
-LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
+samplecnt_t
+LinearInterpolation::interpolate (int channel, samplecnt_t nframes, Sample *input, Sample *output)
 {
 	// index in the input buffers
-	framecnt_t i = 0;
+	samplecnt_t i = 0;
 
 	double acceleration = 0;
 
@@ -38,7 +38,7 @@ LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input
 		acceleration = _target_speed - _speed;
 	}
 
-	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
+	for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		double const d = phase[channel] + outsample * (_speed + acceleration);
 		i = floor(d);
 		Sample fractional_phase_part = d - i;
@@ -61,11 +61,11 @@ LinearInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input
 	return i;
 }
 
-framecnt_t
-CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input, Sample *output)
+samplecnt_t
+CubicInterpolation::interpolate (int channel, samplecnt_t nframes, Sample *input, Sample *output)
 {
 	// index in the input buffers
-	framecnt_t i = 0;
+	samplecnt_t i = 0;
 
 	double acceleration;
 	double distance = phase[channel];
@@ -97,7 +97,7 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 		 */
 		Sample inm1 = input[i] - (input[i+1] - input[i]);
 
-		for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
+		for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
 			/* get the index into the input we should start with */
 			i = floor (distance);
 			float fractional_phase_part = fmod (distance, 1.0);
@@ -121,7 +121,7 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 		/* used to calculate play-distance with acceleration (silent roll)
 		 * (use same algorithm as real playback for identical rounding/floor'ing)
 		 */
-		for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
+		for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
 			distance += _speed + acceleration;
 		}
 		i = floor (distance);
@@ -134,12 +134,12 @@ CubicInterpolation::interpolate (int channel, framecnt_t nframes, Sample *input,
 /* CubicMidiInterpolation::distance is identical to
  * return CubicInterpolation::interpolate (0, nframes, NULL, NULL);
  */
-framecnt_t
-CubicMidiInterpolation::distance (framecnt_t nframes, bool /*roll*/)
+samplecnt_t
+CubicMidiInterpolation::distance (samplecnt_t nframes, bool /*roll*/)
 {
 	assert (phase.size () == 1);
 
-	framecnt_t i = 0;
+	samplecnt_t i = 0;
 
 	double acceleration;
 	double distance = phase[0];
@@ -156,7 +156,7 @@ CubicMidiInterpolation::distance (framecnt_t nframes, bool /*roll*/)
 		acceleration = 0.0;
 	}
 
-	for (framecnt_t outsample = 0; outsample < nframes; ++outsample) {
+	for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
 		distance += _speed + acceleration;
 	}
 

@@ -123,7 +123,7 @@ TranzportControlProtocol::TranzportControlProtocol (Session& s)
 	_device_status = STATUS_OFFLINE;
 	udev = 0;
 	current_track_id = 0;
-	last_where = max_frames;
+	last_where = max_samples;
 	wheel_mode = WheelTimeline;
 	wheel_shift_mode = WheelShiftGain;
 	wheel_increment = WheelIncrScreen;

@@ -69,16 +69,16 @@ using namespace PBD;
 using namespace Glib;
 
 PBD::Signal0<void> AudioFileSource::HeaderPositionOffsetChanged;
-framecnt_t         AudioFileSource::header_position_offset = 0;
+samplecnt_t         AudioFileSource::header_position_offset = 0;
 
 /* XXX maybe this too */
 char AudioFileSource::bwf_serial_number[13] = "000000000000";
 
 struct SizedSampleBuffer {
-	framecnt_t size;
+	samplecnt_t size;
 	Sample* buf;
 
-	SizedSampleBuffer (framecnt_t sz) : size (sz) {
+	SizedSampleBuffer (samplecnt_t sz) : size (sz) {
 		buf = new Sample[size];
 	}
 
@@ -249,7 +249,7 @@ AudioFileSource::move_dependents_to_trash()
 }
 
 void
-AudioFileSource::set_header_position_offset (framecnt_t offset)
+AudioFileSource::set_header_position_offset (samplecnt_t offset)
 {
 	header_position_offset = offset;
 	HeaderPositionOffsetChanged ();
@@ -349,7 +349,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 }
 
 Sample*
-AudioFileSource::get_interleave_buffer (framecnt_t size)
+AudioFileSource::get_interleave_buffer (samplecnt_t size)
 {
 	SizedSampleBuffer* ssb;
 

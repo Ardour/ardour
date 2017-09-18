@@ -83,7 +83,7 @@ AutomationRegionView::init (bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	fill_color_name = "midi frame base";
+	fill_color_name = "midi sample base";
 	set_colors ();
 
 	_enable_display = true;
@@ -110,11 +110,11 @@ AutomationRegionView::get_fill_color() const
 {
 	const std::string mod_name = (_dragging ? "dragging region" :
 	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi frame base");
+	                              "midi sample base");
 	if (_selected) {
 		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
 	} else if (high_enough_for_name || !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
+		return UIConfiguration::instance().color_mod ("midi sample base", mod_name);
 	}
 	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
@@ -122,8 +122,8 @@ AutomationRegionView::get_fill_color() const
 void
 AutomationRegionView::mouse_mode_changed ()
 {
-	// Adjust frame colour (become more transparent for internal tools)
-	set_frame_color();
+	// Adjust sample colour (become more transparent for internal tools)
+	set_sample_color();
 }
 
 bool
@@ -160,11 +160,11 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 	return RegionView::canvas_group_event (ev);
 }
 
-/** @param when Position in frames, where 0 is the start of the region.
+/** @param when Position in samples, where 0 is the start of the region.
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double y, bool with_guard_points)
+AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double y, bool with_guard_points)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
@@ -182,9 +182,9 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
 	y = 1.0 - (y / h);
 
-	/* snap frame */
+	/* snap sample */
 
-	when = snap_frame_to_frame (when - _region->start ()).frame + _region->start ();
+	when = snap_sample_to_sample (when - _region->start ()).sample + _region->start ();
 
 	/* map using line */
 
@@ -206,7 +206,7 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 }
 
 bool
-AutomationRegionView::paste (framepos_t                                      pos,
+AutomationRegionView::paste (samplepos_t                                      pos,
                              unsigned                                        paste_count,
                              float                                           times,
                              boost::shared_ptr<const ARDOUR::AutomationList> slist)
@@ -227,7 +227,7 @@ AutomationRegionView::paste (framepos_t                                      pos
 	/* add multi-paste offset if applicable */
 	if (parameter_is_midi (src_type)) {
 		// convert length to samples (incl tempo-ramps)
-		len = DoubleBeatsFramesConverter (view->session()->tempo_map(), pos).to (len * paste_count);
+		len = DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos).to (len * paste_count);
 		pos += view->editor ().get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
 	} else {
 		pos += view->editor ().get_paste_offset (pos, paste_count, len);
@@ -238,7 +238,7 @@ AutomationRegionView::paste (framepos_t                                      pos
 		pos - _source_relative_time_converter.origin_b());
 
 	XMLNode& before = my_list->get_state();
-	my_list->paste(*slist, model_pos, DoubleBeatsFramesConverter (view->session()->tempo_map(), pos));
+	my_list->paste(*slist, model_pos, DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos));
 	view->session()->add_command(
 		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
@@ -256,7 +256,7 @@ AutomationRegionView::set_height (double h)
 }
 
 bool
-AutomationRegionView::set_position (framepos_t pos, void* src, double* ignored)
+AutomationRegionView::set_position (samplepos_t pos, void* src, double* ignored)
 {
 	if (_line) {
 		_line->set_maximum_time (_region->length ());

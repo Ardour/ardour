@@ -499,7 +499,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					}
 
 					boost::shared_ptr<MuteControl> mc = _route->mute_control();
-					mc->start_touch (_session->audible_frame ());
+					mc->start_touch (_session->audible_sample ());
 					_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
 				}
 
@@ -515,7 +515,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				}
 
 				boost::shared_ptr<MuteControl> mc = _route->mute_control();
-				mc->start_touch (_session->audible_frame ());
+				mc->start_touch (_session->audible_sample ());
 				mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
 			}
 		}
@@ -533,7 +533,7 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 		_mute_release = 0;
 	}
 
-	_route->mute_control()->stop_touch (_session->audible_frame ());
+	_route->mute_control()->stop_touch (_session->audible_sample ());
 
 	return false;
 }
@@ -1920,7 +1920,7 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
-	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
+	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 }
 
 

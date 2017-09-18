@@ -41,8 +41,8 @@ public: // ctors
 
 public: // member variables
 
-	framepos_t            region_start;
-	framepos_t            region_end;
+	samplepos_t            region_start;
+	samplepos_t            region_end;
 	uint16_t              channel;
 	double                height;
 	double                samples_per_pixel;
@@ -60,8 +60,8 @@ public: // member variables
 
 private: // member variables
 
-	framepos_t            sample_start;
-	framepos_t            sample_end;
+	samplepos_t            sample_start;
+	samplepos_t            sample_end;
 
 public: // methods
 
@@ -70,13 +70,13 @@ public: // methods
 		return (sample_end != 0 && samples_per_pixel != 0);
 	}
 
-	void set_width_samples (ARDOUR::framecnt_t const width_samples)
+	void set_width_samples (ARDOUR::samplecnt_t const width_samples)
 	{
 		assert (is_valid());
 		assert (width_samples != 0);
-		ARDOUR::framecnt_t half_width = width_samples / 2;
-		framepos_t new_sample_start = std::max (region_start, get_center_sample () - half_width);
-		framepos_t new_sample_end = std::min (get_center_sample () + half_width, region_end);
+		ARDOUR::samplecnt_t half_width = width_samples / 2;
+		samplepos_t new_sample_start = std::max (region_start, get_center_sample () - half_width);
+		samplepos_t new_sample_end = std::min (get_center_sample () + half_width, region_end);
 		assert (new_sample_start <= new_sample_end);
 		sample_start = new_sample_start;
 		sample_end = new_sample_end;
@@ -88,7 +88,7 @@ public: // methods
 	}
 
 
-	void set_sample_offsets (framepos_t const start, framepos_t const end)
+	void set_sample_offsets (samplepos_t const start, samplepos_t const end)
 	{
 		assert (start <= end);
 
@@ -112,12 +112,12 @@ public: // methods
 		assert (sample_start <= sample_end);
 	}
 
-	framepos_t get_sample_start () const
+	samplepos_t get_sample_start () const
 	{
 		return sample_start;
 	}
 
-	framepos_t get_sample_end () const
+	samplepos_t get_sample_end () const
 	{
 		return sample_end;
 	}
@@ -129,18 +129,18 @@ public: // methods
 		 * It is possible for the new sample positions to be past the region_end,
 		 * so we have to do bounds checking/adjustment for this in set_sample_offsets.
 		 */
-		framepos_t new_sample_start = region_start + (start_pixel * samples_per_pixel);
-		framepos_t new_sample_end = region_start + (end_pixel * samples_per_pixel);
+		samplepos_t new_sample_start = region_start + (start_pixel * samples_per_pixel);
+		samplepos_t new_sample_end = region_start + (end_pixel * samples_per_pixel);
 		set_sample_offsets (new_sample_start, new_sample_end);
 	}
 
-	ARDOUR::framecnt_t get_length_samples () const
+	ARDOUR::samplecnt_t get_length_samples () const
 	{
 		assert (sample_start <= sample_end);
 		return sample_end - sample_start;
 	}
 
-	framepos_t get_center_sample ()
+	samplepos_t get_center_sample ()
 	{
 		return sample_start + (get_length_samples() / 2);
 	}
@@ -158,7 +158,7 @@ public: // methods
 		// region_start && start_shift??
 	}
 
-	bool contains (framepos_t start, framepos_t end)
+	bool contains (samplepos_t start, samplepos_t end)
 	{
 		return (sample_start <= start && end <= sample_end);
 	}

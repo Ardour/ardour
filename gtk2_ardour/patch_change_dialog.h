@@ -26,7 +26,7 @@
 #include "audio_clock.h"
 
 namespace ARDOUR {
-	class BeatsFramesConverter;
+	class BeatsSamplesConverter;
 	class Session;
 	class InstrumentInfo;
 }
@@ -41,7 +41,7 @@ class PatchChangeDialog : public ArdourDialog
 {
 public:
 	PatchChangeDialog (
-		const ARDOUR::BeatsFramesConverter *,
+		const ARDOUR::BeatsSamplesConverter *,
 		ARDOUR::Session *,
 		Evoral::PatchChange<Evoral::Beats> const &,
 		ARDOUR::InstrumentInfo&,
@@ -68,7 +68,7 @@ private:
 
 	int get_14bit_bank () const;
 
-	const ARDOUR::BeatsFramesConverter* _time_converter;
+	const ARDOUR::BeatsSamplesConverter* _time_converter;
 	ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
 	Gtk::SpinButton _channel;

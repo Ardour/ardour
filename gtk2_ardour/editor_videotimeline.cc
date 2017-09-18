@@ -82,7 +82,7 @@ Editor::toggle_video_timeline_locked ()
 }
 
 void
-Editor::embed_audio_from_video (std::string path, framepos_t n, bool lock_position_to_video)
+Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_position_to_video)
 {
 	vector<std::string> paths;
 	paths.push_back(path);

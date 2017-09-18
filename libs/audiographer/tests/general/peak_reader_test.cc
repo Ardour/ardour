@@ -13,8 +13,8 @@ class PeakReaderTest : public CppUnit::TestFixture
   public:
 	void setUp()
 	{
-		frames = 128;
-		random_data = TestUtils::init_random_data(frames);
+		samples = 128;
+		random_data = TestUtils::init_random_data(samples);
 	}
 
 	void tearDown()
@@ -25,7 +25,7 @@ class PeakReaderTest : public CppUnit::TestFixture
 	void testProcess()
 	{
 		reader.reset (new PeakReader());
-		ProcessContext<float> c (random_data, frames, 1);
+		ProcessContext<float> c (random_data, samples, 1);
 
 		float peak = 1.5;
 		random_data[10] = peak;
@@ -48,7 +48,7 @@ class PeakReaderTest : public CppUnit::TestFixture
 	boost::shared_ptr<PeakReader> reader;
 
 	float * random_data;
-	framecnt_t frames;
+	samplecnt_t samples;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (PeakReaderTest);

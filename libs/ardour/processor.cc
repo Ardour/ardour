@@ -292,7 +292,7 @@ Processor::owner() const
 }
 
 void
-Processor::set_input_latency (framecnt_t cnt)
+Processor::set_input_latency (samplecnt_t cnt)
 {
 	_input_latency = cnt;
 }

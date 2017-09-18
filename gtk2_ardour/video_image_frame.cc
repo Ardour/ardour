@@ -63,7 +63,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Container& par
 	image = new ArdourCanvas::Image (_parent, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
 	img = image->get_image();
-	fill_frame(0, 0, 0);
+	fill_sample(0, 0, 0);
 	draw_line();
 	draw_x();
 	image->put_image(img);
@@ -80,7 +80,7 @@ VideoImageFrame::~VideoImageFrame ()
 }
 
 void
-VideoImageFrame::set_position (framepos_t sample)
+VideoImageFrame::set_position (samplepos_t sample)
 {
 	double new_unit_position = editor.sample_to_pixel (sample);
 	image->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
@@ -100,7 +100,7 @@ VideoImageFrame::exposeimg () {
 }
 
 void
-VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
+VideoImageFrame::set_videoframe (samplepos_t videoframenumber, int re)
 {
 	if (video_frame_number == videoframenumber && rightend == re) return;
 
@@ -108,7 +108,7 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 	rightend = re;
 
 	img = image->get_image();
-	fill_frame(0, 0, 0);
+	fill_sample(0, 0, 0);
 	draw_x();
 	draw_line();
 	cut_rightend();
@@ -135,7 +135,7 @@ VideoImageFrame::draw_line ()
 }
 
 void
-VideoImageFrame::fill_frame (const uint8_t r, const uint8_t g, const uint8_t b)
+VideoImageFrame::fill_sample (const uint8_t r, const uint8_t g, const uint8_t b)
 {
 	const int rowstride = img->stride;
 	const int clip_height = img->height;
@@ -201,9 +201,9 @@ http_get_thread (void *arg) {
 	char url[2048];
 	pthread_setcancelstate(PTHREAD_CANCEL_ENABLE, NULL);
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
-	snprintf(url, sizeof(url), "%s?frame=%li&w=%d&h=%d&file=%s&format=bgra",
+	snprintf(url, sizeof(url), "%s?sample=%li&w=%d&h=%d&file=%s&format=bgra",
 	  vif->get_video_server_url().c_str(),
-	  (long int) vif->get_req_frame(), vif->get_width(), vif->get_height(),
+	  (long int) vif->get_req_sample(), vif->get_width(), vif->get_height(),
 	  vif->get_video_filename().c_str()
 	);
 	int status = 0;
@@ -234,7 +234,7 @@ VideoImageFrame::http_download_done (char *data){
 	if (!data) {
 		/* Image request failed (HTTP error or timeout) */
 		img = image->get_image();
-		fill_frame(128, 0, 0);
+		fill_sample(128, 0, 0);
 		draw_x();
 		cut_rightend();
 		draw_line();
@@ -250,7 +250,7 @@ VideoImageFrame::http_download_done (char *data){
 	}
 
 	exposeimg();
-	/* don't request frames too quickly, wait after user has zoomed */
+	/* don't request samples too quickly, wait after user has zoomed */
 	Glib::usleep(40000);
 
 	if (queued_request) {
@@ -261,7 +261,7 @@ VideoImageFrame::http_download_done (char *data){
 
 
 void
-VideoImageFrame::http_get(framepos_t fn) {
+VideoImageFrame::http_get(samplepos_t fn) {
 	if (pthread_mutex_trylock(&request_lock)) {
 		pthread_mutex_lock(&queue_lock);
 		queued_request=true;
@@ -284,7 +284,7 @@ VideoImageFrame::http_get(framepos_t fn) {
 }
 
 void
-VideoImageFrame::http_get_again(framepos_t /*fn*/) {
+VideoImageFrame::http_get_again(samplepos_t /*fn*/) {
 	pthread_mutex_lock(&queue_lock);
 	queued_request=false;
 	req_video_frame_number=want_video_frame_number;

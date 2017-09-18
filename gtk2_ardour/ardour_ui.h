@@ -228,12 +228,12 @@ public:
 
 	static PublicEditor* _instance;
 
-	/** Emitted frequently with the audible frame, false, and the edit point as
+	/** Emitted frequently with the audible sample, false, and the edit point as
 	 *  parameters respectively.
 	 *
 	 *  (either RapidScreenUpdate || SuperRapidScreenUpdate - user-config)
 	 */
-	static sigc::signal<void, framepos_t, bool, framepos_t> Clock;
+	static sigc::signal<void, samplepos_t, bool, samplepos_t> Clock;
 
 	static void close_all_dialogs () { CloseAllDialogs(); }
 	static sigc::signal<void> CloseAllDialogs;
@@ -249,8 +249,8 @@ public:
 	gboolean configure_handler (GdkEventConfigure* conf);
 
 	void halt_on_xrun_message ();
-	void xrun_handler (framepos_t);
-	void create_xrun_marker (framepos_t);
+	void xrun_handler (samplepos_t);
+	void create_xrun_marker (samplepos_t);
 
 	GUIObjectState* gui_object_state;
 
@@ -437,7 +437,7 @@ private:
 	void         start_clocking ();
 	void         stop_clocking ();
 
-	void update_transport_clocks (framepos_t pos);
+	void update_transport_clocks (samplepos_t pos);
 	void record_state_changed ();
 
 	std::list<MidiTracer*> _midi_tracer_windows;
@@ -445,7 +445,7 @@ private:
 	/* Transport Control */
 
 	Gtk::Table               transport_table;
-	Gtk::Frame               transport_frame;
+	Gtk::Frame               transport_sample;
 	Gtk::HBox                transport_hbox;
 
 	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
@@ -604,7 +604,7 @@ private:
 	void update_buffer_load ();
 
 	Gtk::Label   sample_rate_label;
-	void update_sample_rate (ARDOUR::framecnt_t);
+	void update_sample_rate (ARDOUR::samplecnt_t);
 
 	Gtk::Label    format_label;
 	void update_format ();
@@ -777,8 +777,8 @@ private:
 
 	void session_dialog (std::string);
 	int pending_state_dialog ();
-	int sr_mismatch_dialog (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
-	void sr_mismatch_message (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	int sr_mismatch_dialog (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
+	void sr_mismatch_message (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 
 	Gtk::MenuItem* jack_disconnect_item;
 	Gtk::MenuItem* jack_reconnect_item;

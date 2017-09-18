@@ -441,9 +441,9 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
 	vpacker.pack_end   (*out_packer,          false, false,
 #ifdef MIXBUS
-			scrollbar_height - 2 /* no outer frame */
+			scrollbar_height - 2 /* no outer sample */
 #else
-			scrollbar_height + 2 /* frame borders */
+			scrollbar_height + 2 /* sample borders */
 #endif
 			);
 

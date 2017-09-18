@@ -130,7 +130,7 @@ Send::deactivate ()
 }
 
 void
-Send::set_delay_in(framecnt_t delay)
+Send::set_delay_in(samplecnt_t delay)
 {
 	if (!_delayline) return;
 	if (_delay_in == delay) {
@@ -145,7 +145,7 @@ Send::set_delay_in(framecnt_t delay)
 }
 
 void
-Send::set_delay_out(framecnt_t delay)
+Send::set_delay_out(samplecnt_t delay)
 {
 	if (!_delayline) return;
 	if (_delay_out == delay) {
@@ -159,7 +159,7 @@ Send::set_delay_out(framecnt_t delay)
 }
 
 void
-Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
@@ -184,14 +184,14 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double
 	/* gain control */
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	_amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
-	_delayline->run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	_delayline->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* deliver to outputs */
 
-	Delivery::run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	Delivery::run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
 
@@ -199,7 +199,7 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (*_output_buffers, start_frame, end_frame, speed, nframes, true);
+			_meter->run (*_output_buffers, start_sample, end_sample, speed, nframes, true);
 		}
 	}
 

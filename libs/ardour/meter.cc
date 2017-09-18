@@ -38,10 +38,10 @@ using namespace ARDOUR;
 PeakMeter::PeakMeter (Session& s, const std::string& name)
     : Processor (s, string_compose ("meter-%1", name))
 {
-	Kmeterdsp::init(s.nominal_frame_rate());
-	Iec1ppmdsp::init(s.nominal_frame_rate());
-	Iec2ppmdsp::init(s.nominal_frame_rate());
-	Vumeterdsp::init(s.nominal_frame_rate());
+	Kmeterdsp::init(s.nominal_sample_rate());
+	Iec1ppmdsp::init(s.nominal_sample_rate());
+	Iec2ppmdsp::init(s.nominal_sample_rate());
+	Vumeterdsp::init(s.nominal_sample_rate());
 	_pending_active = true;
 	_meter_type = MeterPeak;
 	_reset_dpm = true;
@@ -78,7 +78,7 @@ PeakMeter::~PeakMeter ()
  * (runs in jack realtime context)
  */
 void
-PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t nframes, bool)
+PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;
@@ -96,8 +96,8 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 
 	uint32_t n = 0;
 
-	const float falloff_dB = Config->get_meter_falloff() * nframes / _session.nominal_frame_rate();
-	const uint32_t zoh = _session.nominal_frame_rate() * .021;
+	const float falloff_dB = Config->get_meter_falloff() * nframes / _session.nominal_sample_rate();
+	const uint32_t zoh = _session.nominal_sample_rate() * .021;
 	_bufcnt += nframes;
 
 	// Meter MIDI in to the first n_midi peaks
@@ -106,7 +106,7 @@ PeakMeter::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_fr
 		const MidiBuffer& buf (bufs.get_midi(i));
 
 		for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-			const Evoral::Event<framepos_t> ev(*e, false);
+			const Evoral::Event<samplepos_t> ev(*e, false);
 			if (ev.is_note_on()) {
 				const float this_vel = ev.buffer()[2] / 127.0;
 				if (this_vel > val) {

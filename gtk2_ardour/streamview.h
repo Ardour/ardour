@@ -47,8 +47,8 @@ namespace ArdourCanvas {
 
 struct RecBoxInfo {
 	ArdourCanvas::Rectangle*   rectangle;
-	framepos_t                 start;
-	ARDOUR::framecnt_t         length;
+	samplepos_t                 start;
+	ARDOUR::samplecnt_t         length;
 };
 
 class Selectable;
@@ -98,7 +98,7 @@ public:
 	void         foreach_selected_regionview (sigc::slot<void,RegionView*> slot);
 
 	void set_selected_regionviews (RegionSelection&);
-	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable* >&, bool within = false);
+	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable* >&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable* >& results);
 
 	virtual void update_contents_metrics(boost::shared_ptr<ARDOUR::Region>) {}
@@ -116,7 +116,7 @@ public:
 		return 0;
 	}
 
-	void check_record_layers (boost::shared_ptr<ARDOUR::Region>, ARDOUR::framepos_t);
+	void check_record_layers (boost::shared_ptr<ARDOUR::Region>, ARDOUR::samplepos_t);
 
 	virtual void playlist_layered (boost::weak_ptr<ARDOUR::Track>);
 
@@ -132,7 +132,7 @@ protected:
 	void         transport_looped();
 	void         rec_enable_changed();
 	void         sess_rec_enable_changed();
-	void         create_rec_box(framepos_t frame_pos, double width);
+	void         create_rec_box(samplepos_t sample_pos, double width);
 	virtual void setup_rec_box () = 0;
 	virtual void update_rec_box ();
 
@@ -151,7 +151,7 @@ protected:
 
 	RouteTimeAxisView&        _trackview;
 	ArdourCanvas::Container*      _canvas_group;
-	ArdourCanvas::Rectangle*   canvas_rect; /* frame around the whole thing */
+	ArdourCanvas::Rectangle*   canvas_rect; /* sample around the whole thing */
 
 	typedef std::list<RegionView* > RegionViewList;
 	RegionViewList  region_views;
@@ -176,16 +176,16 @@ protected:
 	double height;
 
 	PBD::ScopedConnectionList rec_data_ready_connections;
-	framepos_t                last_rec_data_frame;
+	samplepos_t                last_rec_data_sample;
 
 	/* When recording, the session time at which a new layer must be created for the region
-	   being recorded, or max_framepos if not applicable.
+	   being recorded, or max_samplepos if not applicable.
 	*/
-	framepos_t _new_rec_layer_time;
+	samplepos_t _new_rec_layer_time;
 	void setup_new_rec_layer_time (boost::shared_ptr<ARDOUR::Region>);
 
 private:
-	void update_coverage_frames ();
+	void update_coverage_samples ();
 };
 
 #endif /* __ardour_streamview_h__ */

@@ -233,10 +233,10 @@ TimeInfoBox::set_session (Session* s)
 void
 TimeInfoBox::region_selection_changed ()
 {
-	framepos_t s, e;
+	samplepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
 	s = selection.regions.start();
-	e = selection.regions.end_frame();
+	e = selection.regions.end_sample();
 	selection_start->set_off (false);
 	selection_end->set_off (false);
 	selection_length->set_off (false);
@@ -248,7 +248,7 @@ TimeInfoBox::region_selection_changed ()
 void
 TimeInfoBox::selection_changed ()
 {
-	framepos_t s, e;
+	samplepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
 
 	region_property_connections.drop_connections();
@@ -274,18 +274,18 @@ TimeInfoBox::selection_changed ()
 					selection_end->set_off (false);
 					selection_length->set_off (false);
 					selection_start->set (selection.time.start());
-					selection_end->set (selection.time.end_frame());
-					selection_length->set (selection.time.end_frame(), false, selection.time.start());
+					selection_end->set (selection.time.end_sample());
+					selection_length->set (selection.time.end_sample(), false, selection.time.start());
 				} else {
 					selection_start->set_off (true);
 					selection_end->set_off (true);
 					selection_length->set_off (true);
 				}
 			} else {
-				s = max_framepos;
+				s = max_samplepos;
 				e = 0;
 				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-					framepos_t const p = (*i)->line().session_position ((*i)->model ());
+					samplepos_t const p = (*i)->line().session_position ((*i)->model ());
 					s = min (s, p);
 					e = max (e, p);
 				}
@@ -321,7 +321,7 @@ TimeInfoBox::selection_changed ()
 			if (tact && tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
 				s = selection.regions.start();
-				e = selection.regions.end_frame();
+				e = selection.regions.end_sample();
 				selection_start->set_off (false);
 				selection_end->set_off (false);
 				selection_length->set_off (false);
@@ -338,8 +338,8 @@ TimeInfoBox::selection_changed ()
 			selection_end->set_off (false);
 			selection_length->set_off (false);
 			selection_start->set (selection.time.start());
-			selection_end->set (selection.time.end_frame());
-			selection_length->set (selection.time.end_frame(), false, selection.time.start());
+			selection_end->set (selection.time.end_sample());
+			selection_length->set (selection.time.end_sample(), false, selection.time.start());
 		}
 		break;
 

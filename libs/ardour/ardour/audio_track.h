@@ -37,7 +37,7 @@ class LIBARDOUR_API AudioTrack : public Track
 	AudioTrack (Session&, std::string name, TrackMode m = Normal);
 	~AudioTrack ();
 
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	          int declick, bool& need_butler);
 
 	void freeze_me (InterThreadInfo&);
@@ -45,9 +45,9 @@ class LIBARDOUR_API AudioTrack : public Track
 
 	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&,
+	boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
 						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
-	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze);
 
 	int set_state (const XMLNode&, int version);

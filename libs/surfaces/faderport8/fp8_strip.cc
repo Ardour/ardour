@@ -297,9 +297,9 @@ FP8Strip::midi_touch (bool t)
 		return false;
 	}
 	if (t) {
-		ac->start_touch (ac->session().transport_frame());
+		ac->start_touch (ac->session().transport_sample());
 	} else {
-		ac->stop_touch (ac->session().transport_frame());
+		ac->stop_touch (ac->session().transport_sample());
 	}
 	return true;
 }
@@ -315,7 +315,7 @@ FP8Strip::midi_fader (float val)
 	if (!ac) {
 		return false;
 	}
-	ac->start_touch (ac->session().transport_frame());
+	ac->start_touch (ac->session().transport_sample());
 	ac->set_value (ac->interface_to_internal (val), group_mode ());
 	return true;
 }
@@ -340,7 +340,7 @@ FP8Strip::set_mute (bool on)
 	if (!_mute_ctrl) {
 		return;
 	}
-	_mute_ctrl->start_touch (_mute_ctrl->session().transport_frame());
+	_mute_ctrl->start_touch (_mute_ctrl->session().transport_sample());
 	_mute_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 }
 
@@ -350,7 +350,7 @@ FP8Strip::set_solo (bool on)
 	if (!_solo_ctrl) {
 		return;
 	}
-	_solo_ctrl->start_touch (_solo_ctrl->session().transport_frame());
+	_solo_ctrl->start_touch (_solo_ctrl->session().transport_sample());
 	_solo_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 }
 
@@ -371,7 +371,7 @@ FP8Strip::set_select ()
 		assert (!_x_select_ctrl);
 		_select_plugin_functor ();
 	} else if (_x_select_ctrl) {
-		_x_select_ctrl->start_touch (_x_select_ctrl->session().transport_frame());
+		_x_select_ctrl->start_touch (_x_select_ctrl->session().transport_sample());
 		const bool on = !select_button ().is_active();
 		_x_select_ctrl->set_value (on ? 1.0 : 0.0, group_mode ());
 	}

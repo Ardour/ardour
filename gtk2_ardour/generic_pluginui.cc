@@ -429,8 +429,8 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	Gtk::Table* button_table = manage (new Gtk::Table (initial_button_rows, initial_button_cols));
 	Gtk::Table* output_table = manage (new Gtk::Table (initial_output_rows, initial_output_cols));
 
-	Frame* frame;
-	Frame* bt_frame;
+	Frame* sample;
+	Frame* bt_sample;
 	VBox* box;
 	int output_row, output_col;
 	int button_row, button_col;
@@ -460,21 +460,21 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	output_table->set_border_width (5);
 
 
-	bt_frame = manage (new Frame);
-	bt_frame->set_name ("BaseFrame");
-	bt_frame->set_label (_("Switches"));
-	bt_frame->add (*button_table);
-	hpacker.pack_start(*bt_frame, true, true);
+	bt_sample = manage (new Frame);
+	bt_sample->set_name ("BaseFrame");
+	bt_sample->set_label (_("Switches"));
+	bt_sample->add (*button_table);
+	hpacker.pack_start(*bt_sample, true, true);
 
 	box = manage (new VBox);
 	box->set_border_width (5);
 	box->set_spacing (1);
 
-	frame = manage (new Frame);
-	frame->set_name ("BaseFrame");
-	frame->set_label (_("Controls"));
-	frame->add (*box);
-	hpacker.pack_start(*frame, true, true);
+	sample = manage (new Frame);
+	sample->set_name ("BaseFrame");
+	sample->set_label (_("Controls"));
+	sample->add (*box);
+	hpacker.pack_start(*sample, true, true);
 
 	// Add special controls to UI, and build list of normal controls to be layed out later
 	std::vector<ControlUI *> cui_controls_list;
@@ -576,14 +576,14 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 
 		if (x > max_controls_per_column || similarity_scores[i] <= similarity_threshold) {
 			if (x > min_controls_per_column) {
-				frame = manage (new Frame);
-				frame->set_name ("BaseFrame");
-				frame->set_label (_("Controls"));
+				sample = manage (new Frame);
+				sample->set_name ("BaseFrame");
+				sample->set_label (_("Controls"));
 				box = manage (new VBox);
 				box->set_border_width (5);
 				box->set_spacing (1);
-				frame->add (*box);
-				hpacker.pack_start(*frame, true, true);
+				sample->add (*box);
+				hpacker.pack_start(*sample, true, true);
 				x = 0;
 			} else {
 				HSeparator *split = new HSeparator();
@@ -600,22 +600,22 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	}
 
 	if (box->children().empty()) {
-		hpacker.remove (*frame);
+		hpacker.remove (*sample);
 	}
 
 	if (button_table->children().empty()) {
-		hpacker.remove (*bt_frame);
+		hpacker.remove (*bt_sample);
 		delete button_table;
 	} else {
 		button_table->show_all ();
 	}
 
 	if (!output_table->children().empty()) {
-		frame = manage (new Frame);
-		frame->set_name ("BaseFrame");
-		frame->set_label(_("Meters"));
-		frame->add (*output_table);
-		hpacker.pack_end (*frame, true, true);
+		sample = manage (new Frame);
+		sample->set_name ("BaseFrame");
+		sample->set_label(_("Meters"));
+		sample->add (*output_table);
+		hpacker.pack_end (*sample, true, true);
 		output_table->show_all ();
 	} else {
 		delete output_table;
@@ -660,15 +660,15 @@ GenericPluginUI::build_midi_table ()
 	pgm_table->set_border_width (5);
 	pgm_table->set_col_spacing (2, 10);
 
-	Frame* frame = manage (new Frame);
-	frame->set_name ("BaseFrame");
+	Frame* sample = manage (new Frame);
+	sample->set_name ("BaseFrame");
 	if (dynamic_cast<MidiTrack*> (insert->owner())) {
-		frame->set_label (_("MIDI Progams (sent to track)"));
+		sample->set_label (_("MIDI Progams (sent to track)"));
 	} else {
-		frame->set_label (_("MIDI Progams (volatile)"));
+		sample->set_label (_("MIDI Progams (volatile)"));
 	}
-	frame->add (*pgm_table);
-	hpacker.pack_start (*frame, false, false);
+	sample->add (*pgm_table);
+	hpacker.pack_start (*sample, false, false);
 
 	for (uint8_t chn = 0; chn < 16; ++chn) {
 		int col = 3 * (chn / 8);

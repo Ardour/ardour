@@ -151,9 +151,9 @@ private:
 	Gtk::ScrolledWindow   group_display_scroller;
 	Gtk::ScrolledWindow   favorite_plugins_scroller;
 	Gtk::VBox             group_display_vbox;
-	Gtk::Frame            track_display_frame;
-	Gtk::Frame            group_display_frame;
-	Gtk::Frame            favorite_plugins_frame;
+	Gtk::Frame            track_display_sample;
+	Gtk::Frame            group_display_sample;
+	Gtk::Frame            favorite_plugins_sample;
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;

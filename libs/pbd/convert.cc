@@ -222,17 +222,17 @@ url_decode (string const & url)
 
 #if 0
 string
-length2string (const int32_t frames, const float sample_rate)
+length2string (const int32_t samples, const float sample_rate)
 {
-    int32_t secs = (int32_t) (frames / sample_rate);
+    int32_t secs = (int32_t) (samples / sample_rate);
     int32_t hrs =  secs / 3600;
     secs -= (hrs * 3600);
     int32_t mins = secs / 60;
     secs -= (mins * 60);
 
     int32_t total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int32_t frames_remaining = (int) floor (frames - (total_secs * sample_rate));
-    float fractional_secs = (float) frames_remaining / sample_rate;
+    int32_t samples_remaining = (int) floor (samples - (total_secs * sample_rate));
+    float fractional_secs = (float) samples_remaining / sample_rate;
 
     char duration_str[32];
     sprintf (duration_str, "%02" PRIi32 ":%02" PRIi32 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
@@ -242,17 +242,17 @@ length2string (const int32_t frames, const float sample_rate)
 #endif
 
 string
-length2string (const int64_t frames, const double sample_rate)
+length2string (const int64_t samples, const double sample_rate)
 {
-	int64_t secs = (int64_t) floor (frames / sample_rate);
+	int64_t secs = (int64_t) floor (samples / sample_rate);
 	int64_t hrs =  secs / 3600LL;
 	secs -= (hrs * 3600LL);
 	int64_t mins = secs / 60LL;
 	secs -= (mins * 60LL);
 
 	int64_t total_secs = (hrs * 3600LL) + (mins * 60LL) + secs;
-	int64_t frames_remaining = (int64_t) floor (frames - (total_secs * sample_rate));
-	float fractional_secs = (float) frames_remaining / sample_rate;
+	int64_t samples_remaining = (int64_t) floor (samples - (total_secs * sample_rate));
+	float fractional_secs = (float) samples_remaining / sample_rate;
 
 	char duration_str[64];
 	sprintf (duration_str, "%02" PRIi64 ":%02" PRIi64 ":%05.2f", hrs, mins, (float) secs + fractional_secs);

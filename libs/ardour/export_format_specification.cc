@@ -57,11 +57,11 @@ ExportFormatSpecification::Time::operator= (AnyTime const & other)
 	return *this;
 }
 
-framecnt_t
-ExportFormatSpecification::Time::get_frames_at (framepos_t position, framecnt_t target_rate) const
+samplecnt_t
+ExportFormatSpecification::Time::get_samples_at (samplepos_t position, samplecnt_t target_rate) const
 {
-	framecnt_t duration = session.any_duration_to_frames (position, *this);
-	return ((double) target_rate / session.frame_rate()) * duration + 0.5;
+	samplecnt_t duration = session.any_duration_to_samples (position, *this);
+	return ((double) target_rate / session.sample_rate()) * duration + 0.5;
 }
 
 XMLNode &
@@ -77,15 +77,15 @@ ExportFormatSpecification::Time::get_state ()
 		node->set_property ("hours", timecode.hours);
 		node->set_property ("minutes", timecode.minutes);
 		node->set_property ("seconds", timecode.seconds);
-		node->set_property ("frames", timecode.frames);
+		node->set_property ("samples", timecode.frames);
 		break;
 	  case BBT:
 		node->set_property ("bars", bbt.bars);
 		node->set_property ("beats", bbt.beats);
 		node->set_property ("ticks", bbt.ticks);
 		break;
-	  case Frames:
-		node->set_property ("frames", frames);
+	  case Samples:
+		node->set_property ("samples", samples);
 		break;
 	  case Seconds:
 		node->set_property ("seconds", seconds);
@@ -107,7 +107,7 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 		node.get_property ("hours", timecode.hours);
 		node.get_property ("minutes", timecode.minutes);
 		node.get_property ("seconds", timecode.seconds);
-		node.get_property ("frames", timecode.frames);
+		node.get_property ("samples", timecode.frames);
 		break;
 
 	case BBT:
@@ -116,8 +116,8 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 		node.get_property ("ticks", bbt.ticks);
 		break;
 
-	case Frames:
-		node.get_property ("frames", frames);
+	case Samples:
+		node.get_property ("samples", samples);
 		break;
 
 	case Seconds:

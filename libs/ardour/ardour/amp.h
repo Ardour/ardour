@@ -47,11 +47,11 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	void set_gain_automation_buffer (gain_t *);
 
-	void setup_gain_automation (framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
+	void setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes);
 
 	bool apply_gain_automation() const  { return _apply_gain_automation; }
 	void apply_gain_automation(bool yn) { _apply_gain_automation = yn; }
@@ -59,13 +59,13 @@ public:
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	static gain_t apply_gain (BufferSet& bufs, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target, bool midi_amp = true);
-	static void apply_simple_gain(BufferSet& bufs, framecnt_t nframes, gain_t target, bool midi_amp = true);
+	static gain_t apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target, bool midi_amp = true);
+	static void apply_simple_gain(BufferSet& bufs, samplecnt_t nframes, gain_t target, bool midi_amp = true);
 
-	static gain_t apply_gain (AudioBuffer& buf, framecnt_t sample_rate, framecnt_t nframes, gain_t initial, gain_t target);
-	static void apply_simple_gain(AudioBuffer& buf, framecnt_t nframes, gain_t target);
+	static gain_t apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target);
+	static void apply_simple_gain(AudioBuffer& buf, samplecnt_t nframes, gain_t target);
 
-	static void declick (BufferSet& bufs, framecnt_t nframes, int dir);
+	static void declick (BufferSet& bufs, samplecnt_t nframes, int dir);
 	static void update_meters();
 
 	boost::shared_ptr<GainControl> gain_control() {
@@ -80,7 +80,7 @@ private:
 	bool   _denormal_protection;
 	bool   _apply_gain_automation;
 	float  _current_gain;
-	framepos_t _current_automation_frame;
+	samplepos_t _current_automation_sample;
 
 	std::string _display_name;
 

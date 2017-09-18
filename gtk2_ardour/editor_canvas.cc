@@ -379,14 +379,14 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 }
 
 bool
-Editor::idle_drop_paths (vector<string> paths, framepos_t frame, double ypos, bool copy)
+Editor::idle_drop_paths (vector<string> paths, samplepos_t sample, double ypos, bool copy)
 {
-	drop_paths_part_two (paths, frame, ypos, copy);
+	drop_paths_part_two (paths, sample, ypos, copy);
 	return false;
 }
 
 void
-Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, double ypos, bool copy)
+Editor::drop_paths_part_two (const vector<string>& paths, samplepos_t sample, double ypos, bool copy)
 {
 	RouteTimeAxisView* tv;
 
@@ -412,15 +412,15 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 
 		/* drop onto canvas background: create new tracks */
 
-		frame = 0;
+		sample = 0;
 		InstrumentSelector is; // instantiation builds instrument-list and sets default.
-		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, frame, is.selected_instrument());
+		do_import (midi_paths, Editing::ImportDistinctFiles, ImportAsTrack, SrcBest, SMFTrackName, SMFTempoIgnore, sample, is.selected_instrument());
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 			do_import (audio_paths, Editing::ImportDistinctFiles, Editing::ImportAsTrack,
-			           SrcBest, SMFTrackName, SMFTempoIgnore, frame);
+			           SrcBest, SMFTrackName, SMFTempoIgnore, sample);
 		} else {
-			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, frame);
+			do_embed (audio_paths, Editing::ImportDistinctFiles, ImportAsTrack, sample);
 		}
 
 	} else if ((tv = dynamic_cast<RouteTimeAxisView*> (tvp.first)) != 0) {
@@ -432,13 +432,13 @@ Editor::drop_paths_part_two (const vector<string>& paths, framepos_t frame, doub
 			selection->set (tv);
 
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-				   SrcBest, SMFTrackName, SMFTempoIgnore, frame);
+				   SrcBest, SMFTrackName, SMFTempoIgnore, sample);
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, frame);
+					   SrcBest, SMFTrackName, SMFTempoIgnore, sample);
 			} else {
-				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, frame);
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, sample);
 			}
 		}
 	}
@@ -463,7 +463,7 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		ev.button.x = x;
 		ev.button.y = y;
 
-		MusicFrame when (window_event_sample (&ev, 0, &cy), 0);
+		MusicSample when (window_event_sample (&ev, 0, &cy), 0);
 		snap_to (when);
 
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
@@ -472,9 +472,9 @@ Editor::drop_paths (const RefPtr<Gdk::DragContext>& context,
 		   the main event loop with GTK/Quartz. Since import/embed wants
 		   to push up a progress dialog, defer all this till we go idle.
 		*/
-		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, when.frame, cy, copy));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (*this, &Editor::idle_drop_paths), paths, when.sample, cy, copy));
 #else
-		drop_paths_part_two (paths, when.frame, cy, copy);
+		drop_paths_part_two (paths, when.sample, cy, copy);
 #endif
 	}
 
@@ -569,7 +569,7 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 
 	toplevel->get_window()->get_pointer (x, y, mask);
 
-	if ((allow_horiz && ((x < scrolling_boundary.x0 && leftmost_frame > 0) || x >= scrolling_boundary.x1)) ||
+	if ((allow_horiz && ((x < scrolling_boundary.x0 && _leftmost_sample > 0) || x >= scrolling_boundary.x1)) ||
 	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
 		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
 	}
@@ -581,15 +581,15 @@ Editor::autoscroll_active () const
 	return autoscroll_connection.connected ();
 }
 
-std::pair <framepos_t,framepos_t>
+std::pair <samplepos_t,samplepos_t>
 Editor::session_gui_extents ( bool use_extra ) const
 {
 	if (!_session) {
-		return std::pair <framepos_t,framepos_t>(max_framepos,0);
+		return std::pair <samplepos_t,samplepos_t>(max_samplepos,0);
 	}
 	
-	framecnt_t session_extent_start = _session->current_start_frame();
-	framecnt_t session_extent_end = _session->current_end_frame();
+	samplecnt_t session_extent_start = _session->current_start_sample();
+	samplecnt_t session_extent_end = _session->current_end_sample();
 
 	//calculate the extents of all regions in every playlist
 	//NOTE:  we should listen to playlists, and cache these values so we don't calculate them every time.
@@ -600,7 +600,7 @@ Editor::session_gui_extents ( bool use_extra ) const
 			if (tr) {
 				boost::shared_ptr<Playlist> pl = tr->playlist();
 				if ( pl && !pl->all_regions_empty() ) {
-					pair<framepos_t, framepos_t> e;
+					pair<samplepos_t, samplepos_t> e;
 					e = pl->get_extent();
 					if (e.first < session_extent_start) {
 						session_extent_start = e.first;
@@ -617,20 +617,20 @@ Editor::session_gui_extents ( bool use_extra ) const
 
 	//add additional time to the ui extents ( user-defined in config )
 	if (use_extra) {
-		framecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_frame_rate();
+		samplecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_sample_rate();
 		session_extent_end += extra;
 		session_extent_start -= extra;
 	}
 			
 	//range-check
-	if (session_extent_end > max_framepos) {
-		session_extent_end = max_framepos;
+	if (session_extent_end > max_samplepos) {
+		session_extent_end = max_samplepos;
 	}
 	if (session_extent_start < 0) {
 		session_extent_start = 0;
 	}
 	
-	std::pair <framepos_t,framepos_t> ret (session_extent_start, session_extent_end);
+	std::pair <samplepos_t,samplepos_t> ret (session_extent_start, session_extent_end);
 	return ret;
 }
 
@@ -639,7 +639,7 @@ Editor::autoscroll_canvas ()
 {
 	int x, y;
 	Gdk::ModifierType mask;
-	frameoffset_t dx = 0;
+	sampleoffset_t dx = 0;
 	bool no_stop = false;
 	Gtk::Window* toplevel = dynamic_cast<Gtk::Window*>(contents().get_toplevel());
 
@@ -654,7 +654,7 @@ Editor::autoscroll_canvas ()
 
 	if (autoscroll_horizontal_allowed) {
 
-		framepos_t new_frame = leftmost_frame;
+		samplepos_t new_sample = _leftmost_sample;
 
 		/* horizontal */
 
@@ -668,10 +668,10 @@ Editor::autoscroll_canvas ()
 			
 			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
 
-			if (leftmost_frame < max_framepos - dx) {
-				new_frame = leftmost_frame + dx;
+			if (_leftmost_sample < max_samplepos - dx) {
+				new_sample = _leftmost_sample + dx;
 			} else {
-				new_frame = max_framepos;
+				new_sample = max_samplepos;
 			}
 
 			no_stop = true;
@@ -685,17 +685,17 @@ Editor::autoscroll_canvas ()
 
 			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
 
-			if (leftmost_frame >= dx) {
-				new_frame = leftmost_frame - dx;
+			if (_leftmost_sample >= dx) {
+				new_sample = _leftmost_sample - dx;
 			} else {
-				new_frame = 0;
+				new_sample = 0;
 			}
 
 			no_stop = true;
 		}
 
-		if (new_frame != leftmost_frame) {
-			vc.time_origin = new_frame;
+		if (new_sample != _leftmost_sample) {
+			vc.time_origin = new_sample;
 			vc.add (VisualChange::TimeOrigin);
 		}
 	}
@@ -969,7 +969,7 @@ Editor::set_horizontal_position (double p)
 {
 	horizontal_adjustment.set_value (p);
 
-	leftmost_frame = (framepos_t) floor (p * samples_per_pixel);
+	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
 }
 
 void
@@ -1052,7 +1052,7 @@ Editor::color_handler()
 double
 Editor::horizontal_position () const
 {
-	return sample_to_pixel (leftmost_frame);
+	return sample_to_pixel (_leftmost_sample);
 }
 
 bool

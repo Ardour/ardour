@@ -55,8 +55,8 @@ class LIBARDOUR_API AudioAnalyser : public boost::noncopyable {
 	AnalysisPlugin* plugin;
 	AnalysisPluginKey plugin_key;
 
-	framecnt_t bufsize;
-	framecnt_t stepsize;
+	samplecnt_t bufsize;
+	samplecnt_t stepsize;
 
 	int initialize_plugin (AnalysisPluginKey name, float sample_rate);
 	int analyse (const std::string& path, Readable*, uint32_t channel);

@@ -42,7 +42,7 @@ class                         Beats;
 namespace ARDOUR
 {
 
-class BeatsFramesConverter;
+class BeatsSamplesConverter;
 class MidiChannelFilter;
 class MidiRegion;
 class Session;
@@ -59,8 +59,8 @@ public:
 
 	/** This constructor does NOT notify others (session) */
 	MidiPlaylist (boost::shared_ptr<const MidiPlaylist> other,
-	              framepos_t                            start,
-	              framecnt_t                            cnt,
+	              samplepos_t                            start,
+	              samplecnt_t                            cnt,
 	              std::string                           name,
 	              bool                                  hidden = false);
 
@@ -69,25 +69,25 @@ public:
 	/** Read a range from the playlist into an event sink.
 	 *
 	 * @param buf Destination for events.
-	 * @param start First frame of read range.
-	 * @param cnt Number of frames in read range.
+	 * @param start First sample of read range.
+	 * @param cnt Number of samples in read range.
 	 * @param loop_range If non-null, all event times will be mapped into this loop range.
 	 * @param chan_n Must be 0 (this is the audio-style "channel", where each
 	 * channel is backed by a separate region, not MIDI channels, which all
 	 * exist in the same region and are not handled here).
-	 * @return The number of frames read (time, not an event count).
+	 * @return The number of samples read (time, not an event count).
 	 */
-	framecnt_t read (Evoral::EventSink<framepos_t>& buf,
-	                 framepos_t                     start,
-	                 framecnt_t                     cnt,
-	                 Evoral::Range<framepos_t>*     loop_range,
+	samplecnt_t read (Evoral::EventSink<samplepos_t>& buf,
+	                 samplepos_t                     start,
+	                 samplecnt_t                     cnt,
+	                 Evoral::Range<samplepos_t>*     loop_range,
 	                 uint32_t                       chan_n = 0,
 	                 MidiChannelFilter*             filter = NULL);
 
 	int set_state (const XMLNode&, int version);
 
 	bool destroy_region (boost::shared_ptr<Region>);
-	void _split_region (boost::shared_ptr<Region>, const MusicFrame& position);
+	void _split_region (boost::shared_ptr<Region>, const MusicSample& position);
 
 	void set_note_mode (NoteMode m) { _note_mode = m; }
 
@@ -110,7 +110,7 @@ public:
 	 * @param dst Sink to write note offs to.
 	 * @param time Time stamp of all written note offs.
 	 */
-	void resolve_note_trackers (Evoral::EventSink<framepos_t>& dst, framepos_t time);
+	void resolve_note_trackers (Evoral::EventSink<samplepos_t>& dst, samplepos_t time);
 
 protected:
 	void remove_dependents (boost::shared_ptr<Region> region);
@@ -118,7 +118,7 @@ protected:
 
 private:
 	typedef Evoral::Note<Evoral::Beats> Note;
-	typedef Evoral::Event<framepos_t>   Event;
+	typedef Evoral::Event<samplepos_t>   Event;
 
 	struct RegionTracker : public boost::noncopyable {
 		MidiCursor       cursor;   ///< Cursor (iterator and read state)
@@ -132,7 +132,7 @@ private:
 
 	NoteTrackers _note_trackers;
 	NoteMode     _note_mode;
-	framepos_t   _read_end;
+	samplepos_t   _read_end;
 };
 
 } /* namespace ARDOUR */

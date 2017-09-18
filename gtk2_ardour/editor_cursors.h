@@ -36,7 +36,7 @@ public:
 	EditorCursor (Editor&);
 	~EditorCursor ();
 
-	void set_position (framepos_t);
+	void set_position (samplepos_t);
 
 
 	void show ();
@@ -44,20 +44,20 @@ public:
 	void set_color (Gtkmm2ext::Color);
 	void set_sensitive (bool);
 
-	framepos_t current_frame () const {
-		return _current_frame;
+	samplepos_t current_sample () const {
+		return _current_sample;
 	}
 
 	ArdourCanvas::Arrow& track_canvas_item () {
 		return *_track_canvas_item;
 	}
 
-	PBD::Signal1<void, framepos_t> PositionChanged;
+	PBD::Signal1<void, samplepos_t> PositionChanged;
 
 private:
 	Editor&               _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
-	framepos_t            _current_frame;
+	samplepos_t            _current_sample;
 };
 
 #endif // __gtk_ardour_editor_cursors_h__

@@ -17,14 +17,14 @@
 #include <cstdlib>
 #include <ctime>
 
-using AudioGrapher::framecnt_t;
+using AudioGrapher::samplecnt_t;
 
 struct TestUtils
 {
 	template<typename T>
-	static bool array_equals (T const * a, T const * b, framecnt_t frames)
+	static bool array_equals (T const * a, T const * b, samplecnt_t samples)
 	{
-		for (framecnt_t i = 0; i < frames; ++i) {
+		for (samplecnt_t i = 0; i < samples; ++i) {
 			if (a[i] != b[i]) {
 				return false;
 			}
@@ -33,9 +33,9 @@ struct TestUtils
 	}
 
 	template<typename T>
-	static bool array_filled (T const * array, framecnt_t frames)
+	static bool array_filled (T const * array, samplecnt_t samples)
 	{
-		for (framecnt_t i = 0; i < frames; ++i) {
+		for (samplecnt_t i = 0; i < samples; ++i) {
 			if (array[i] == static_cast<T> (0.0)) {
 				return false;
 			}
@@ -44,13 +44,13 @@ struct TestUtils
 	}
 
 	/// Generate random data, all samples guaranteed not to be 0.0, 1.0 or -1.0
-	static float * init_random_data (framecnt_t frames, float range = 1.0)
+	static float * init_random_data (samplecnt_t samples, float range = 1.0)
 	{
 		unsigned int const granularity = 4096;
-		float * data = new float[frames];
+		float * data = new float[samples];
 		srand (std::time (NULL));
 
-		for (framecnt_t i = 0; i < frames; ++i) {
+		for (samplecnt_t i = 0; i < samples; ++i) {
 			do {
 				int biased_int = (rand() % granularity) - (granularity / 2);
 				data[i] = (range * biased_int) / granularity;
@@ -66,8 +66,8 @@ class VectorSink : public AudioGrapher::Sink<T>
   public:
 	virtual void process (AudioGrapher::ProcessContext<T> const & c)
 	{
-		data.resize (c.frames());
-		memcpy (&data[0], c.data(), c.frames() * sizeof(T));
+		data.resize (c.samples());
+		memcpy (&data[0], c.data(), c.samples() * sizeof(T));
 	}
 
 	void process (AudioGrapher::ProcessContext<T> & c) { AudioGrapher::Sink<T>::process (c); }
@@ -90,20 +90,20 @@ class AppendingVectorSink : public VectorSink<T>
 	void process (AudioGrapher::ProcessContext<T> const & c)
 	{
 		std::vector<T> & data (VectorSink<T>::data);
-		data.resize (total_frames + c.frames());
-		memcpy (&data[total_frames], c.data(), c.frames() * sizeof(T));
-		total_frames += c.frames();
+		data.resize (total_samples + c.samples());
+		memcpy (&data[total_samples], c.data(), c.samples() * sizeof(T));
+		total_samples += c.samples();
 	}
 	using AudioGrapher::Sink<T>::process;
 
 	void reset ()
 	{
-		total_frames = 0;
+		total_samples = 0;
 		VectorSink<T>::reset();
 	}
 
   private:
-	framecnt_t total_frames;
+	samplecnt_t total_samples;
 };
 
 

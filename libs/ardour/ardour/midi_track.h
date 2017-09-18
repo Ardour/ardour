@@ -42,10 +42,10 @@ public:
 
 	int init ();
 
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
 
 	void realtime_locate ();
-	void non_realtime_locate (framepos_t);
+	void non_realtime_locate (samplepos_t);
 
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
@@ -55,15 +55,15 @@ public:
 
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t                   start,
-	                                        framepos_t                   end,
+	boost::shared_ptr<Region> bounce_range (samplepos_t                   start,
+	                                        samplepos_t                   end,
 	                                        InterThreadInfo&             iti,
 	                                        boost::shared_ptr<Processor> endpoint,
 	                                        bool                         include_endpoint);
 
 	int export_stuff (BufferSet&                   bufs,
-	                  framepos_t                   start_frame,
-	                  framecnt_t                   end_frame,
+	                  samplepos_t                   start_sample,
+	                  samplecnt_t                   end_sample,
 	                  boost::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
 	                  bool                         for_export,
@@ -100,7 +100,7 @@ public:
 
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);
-	MidiRingBuffer<framepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
+	MidiRingBuffer<samplepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
@@ -138,21 +138,21 @@ protected:
 	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 private:
-	MidiRingBuffer<framepos_t> _immediate_events;
-	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
+	MidiRingBuffer<samplepos_t> _immediate_events;
+	MidiRingBuffer<samplepos_t> _step_edit_ring_buffer;
 	NoteMode                   _note_mode;
 	bool                       _step_editing;
 	bool                       _input_active;
 	MidiChannelFilter          _playback_filter;
 	MidiChannelFilter          _capture_filter;
 
-	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes);
 
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
-	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
+	int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
+	void push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes);
 
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);

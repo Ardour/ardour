@@ -42,14 +42,14 @@ using namespace ARDOUR;
 using namespace PBD;
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist> p,
-					  uint32_t chn, frameoffset_t begin, framecnt_t len, Source::Flag flags)
+					  uint32_t chn, sampleoffset_t begin, samplecnt_t len, Source::Flag flags)
 	: Source (s, DataType::AUDIO, name)
 	, PlaylistSource (s, orig, name, p, DataType::AUDIO, begin, len, flags)
 	, AudioSource (s, name)
 	, _playlist_channel (chn)
 {
 	AudioSource::_length = len;
-	ensure_buffers_for_level (_level, _session.frame_rate());
+	ensure_buffers_for_level (_level, _session.sample_rate());
 }
 
 AudioPlaylistSource::AudioPlaylistSource (Session& s, const XMLNode& node)
@@ -106,7 +106,7 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 		}
 	}
 
-	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
+	pair<samplepos_t,samplepos_t> extent = _playlist->get_extent();
 
 	AudioSource::_length = extent.second - extent.first;
 
@@ -114,18 +114,18 @@ AudioPlaylistSource::set_state (const XMLNode& node, int version, bool with_desc
 		throw failed_constructor ();
 	}
 
-	ensure_buffers_for_level (_level, _session.frame_rate());
+	ensure_buffers_for_level (_level, _session.sample_rate());
 
 	return 0;
 }
 
-framecnt_t
-AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cnt) const
+samplecnt_t
+AudioPlaylistSource::read_unlocked (Sample* dst, samplepos_t start, samplecnt_t cnt) const
 {
 	boost::shared_array<Sample> sbuf;
 	boost::shared_array<gain_t> gbuf;
-	framecnt_t to_read;
-	framecnt_t to_zero;
+	samplecnt_t to_read;
+	samplecnt_t to_zero;
 
 	/* we must be careful not to read beyond the end of our "section" of
 	 * the playlist, because otherwise we may read data that exists, but
@@ -160,8 +160,8 @@ AudioPlaylistSource::read_unlocked (Sample* dst, framepos_t start, framecnt_t cn
 	return cnt;
 }
 
-framecnt_t
-AudioPlaylistSource::write_unlocked (Sample *, framecnt_t)
+samplecnt_t
+AudioPlaylistSource::write_unlocked (Sample *, samplecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "AudioPlaylistSource::write() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
@@ -195,7 +195,7 @@ AudioPlaylistSource::sample_rate () const
 	/* use just the first region to decide */
 
 	if (empty()) {
-		_session.frame_rate ();
+		_session.sample_rate ();
 	}
 
 	boost::shared_ptr<Region> r = _playlist->region_list_property().front ();

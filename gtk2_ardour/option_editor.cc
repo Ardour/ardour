@@ -574,7 +574,7 @@ void
 ClockOption::set_state_from_config ()
 {
 	Timecode::Time TC;
-	framepos_t when;
+	samplepos_t when;
 	if (!Timecode::parse_timecode_format(_get(), TC)) {
 		_clock.set (0, true);
 	}

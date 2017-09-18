@@ -284,7 +284,7 @@ LocationEditRow::set_location (Location *loc)
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
 
-		if (location->start() == _session->current_start_frame()) {
+		if (location->start() == _session->current_start_sample()) {
 			cd_check_button.set_sensitive (false);
 		} else {
 			cd_check_button.set_sensitive (true);
@@ -418,10 +418,10 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 
 	switch (part) {
 		case LocStart:
-			location->set_start (_session->transport_frame (), false, true, divisions);
+			location->set_start (_session->transport_sample (), false, true, divisions);
 			break;
 		case LocEnd:
-			location->set_end (_session->transport_frame (), false, true,divisions);
+			location->set_end (_session->transport_sample (), false, true,divisions);
 			if (location->is_session_range()) {
 				_session->set_end_is_free (false);
 			}
@@ -524,7 +524,7 @@ LocationEditRow::cd_toggled ()
 	//}
 
 	if (cd_check_button.get_active()) {
-		if (location->start() <= _session->current_start_frame()) {
+		if (location->start() <= _session->current_start_sample()) {
 			error << _("You cannot put a CD marker at the start of the session") << endmsg;
 			cd_check_button.set_active (false);
 			return;
@@ -646,7 +646,7 @@ LocationEditRow::start_changed ()
 
 	start_clock.set (location->start());
 
-	if (location->start() == _session->current_start_frame()) {
+	if (location->start() == _session->current_start_sample()) {
 		cd_check_button.set_sensitive (false);
 	} else {
 		cd_check_button.set_sensitive (true);
@@ -753,7 +753,7 @@ LocationEditRow::set_clock_editable_status ()
 LocationUI::LocationUI (std::string state_node_name)
 	: add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
-	, _mode (AudioClock::Frames)
+	, _mode (AudioClock::Samples)
 	, _mode_set (false)
 	, _state_node_name (state_node_name)
 {
@@ -808,15 +808,15 @@ LocationUI::LocationUI (std::string state_node_name)
 
 	newest_location = 0;
 
-	loc_frame_box.set_spacing (5);
-	loc_frame_box.set_border_width (5);
-	loc_frame_box.set_name("LocationFrameBox");
+	loc_sample_box.set_spacing (5);
+	loc_sample_box.set_border_width (5);
+	loc_sample_box.set_name("LocationFrameBox");
 
-	loc_frame_box.pack_start (location_rows_scroller, true, true);
+	loc_sample_box.pack_start (location_rows_scroller, true, true);
 
 	add_location_button.set_name ("LocationAddLocationButton");
 
-	table->attach (loc_frame_box, 0, 2, table_row, table_row + 1);
+	table->attach (loc_sample_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.add (*table);
@@ -841,14 +841,14 @@ LocationUI::LocationUI (std::string state_node_name)
 	range_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	range_rows_scroller.set_size_request (-1, 130);
 
-	range_frame_box.set_spacing (5);
-	range_frame_box.set_name("LocationFrameBox");
-	range_frame_box.set_border_width (5);
-	range_frame_box.pack_start (range_rows_scroller, true, true);
+	range_sample_box.set_spacing (5);
+	range_sample_box.set_name("LocationFrameBox");
+	range_sample_box.set_border_width (5);
+	range_sample_box.pack_start (range_rows_scroller, true, true);
 
 	add_range_button.set_name ("LocationAddRangeButton");
 
-	table->attach (range_frame_box, 0, 2, table_row, table_row + 1);
+	table->attach (range_sample_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.add (*table);
@@ -1047,7 +1047,7 @@ LocationUI::add_new_location()
 	string markername;
 
 	if (_session) {
-		framepos_t where = _session->audible_frame();
+		samplepos_t where = _session->audible_sample();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (UIConfiguration::instance().get_name_new_markers()) {
@@ -1069,7 +1069,7 @@ LocationUI::add_new_range()
 	string rangename;
 
 	if (_session) {
-		framepos_t where = _session->audible_frame();
+		samplepos_t where = _session->audible_sample();
 		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
 		PublicEditor::instance().begin_reversible_command (_("add range marker"));

@@ -83,7 +83,7 @@ SlavableAutomationControl::get_value_locked() const
 	/* read or write masters lock must be held */
 
 	if (_masters.empty()) {
-		return Control::get_double (false, _session.transport_frame());
+		return Control::get_double (false, _session.transport_sample());
 	}
 
 	if (_desc.toggled) {
@@ -91,7 +91,7 @@ SlavableAutomationControl::get_value_locked() const
 		 * enabled, this slave is enabled. So check our own value
 		 * first, because if we are enabled, we can return immediately.
 		 */
-		if (Control::get_double (false, _session.transport_frame())) {
+		if (Control::get_double (false, _session.transport_sample())) {
 			return _desc.upper;
 		}
 	}
@@ -113,12 +113,12 @@ SlavableAutomationControl::get_value() const
 		}
 		return get_value_locked ();
 	} else {
-		return Control::get_double (true, _session.transport_frame()) * get_masters_value_locked();
+		return Control::get_double (true, _session.transport_sample()) * get_masters_value_locked();
 	}
 }
 
 bool
-SlavableAutomationControl::get_masters_curve_locked (framepos_t, framepos_t, float*, framecnt_t) const
+SlavableAutomationControl::get_masters_curve_locked (samplepos_t, samplepos_t, float*, samplecnt_t) const
 {
 	/* Every AutomationControl needs to implement this as-needed.
 	 *
@@ -130,13 +130,13 @@ SlavableAutomationControl::get_masters_curve_locked (framepos_t, framepos_t, flo
 }
 
 bool
-SlavableAutomationControl::masters_curve_multiply (framepos_t start, framepos_t end, float* vec, framecnt_t veclen) const
+SlavableAutomationControl::masters_curve_multiply (samplepos_t start, samplepos_t end, float* vec, samplecnt_t veclen) const
 {
 	gain_t* scratch = _session.scratch_automation_buffer ();
 	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
 	bool rv = from_list && list()->curve().rt_safe_get_vector (start, end, scratch, veclen);
 	if (rv) {
-		for (framecnt_t i = 0; i < veclen; ++i) {
+		for (samplecnt_t i = 0; i < veclen; ++i) {
 			vec[i] *= scratch[i];
 		}
 	} else {
@@ -526,7 +526,7 @@ SlavableAutomationControl::handle_master_change (boost::shared_ptr<AutomationCon
 }
 
 void
-SlavableAutomationControl::automation_run (framepos_t start, pframes_t nframes)
+SlavableAutomationControl::automation_run (samplepos_t start, pframes_t nframes)
 {
 	if (!automation_playback ()) {
 		return;
@@ -548,7 +548,7 @@ SlavableAutomationControl::automation_run (framepos_t start, pframes_t nframes)
 }
 
 bool
-SlavableAutomationControl::boolean_automation_run_locked (framepos_t start, pframes_t len)
+SlavableAutomationControl::boolean_automation_run_locked (samplepos_t start, pframes_t len)
 {
 	bool rv = false;
 	if (!_desc.toggled) {
@@ -583,7 +583,7 @@ SlavableAutomationControl::boolean_automation_run_locked (framepos_t start, pfra
 }
 
 bool
-SlavableAutomationControl::boolean_automation_run (framepos_t start, pframes_t len)
+SlavableAutomationControl::boolean_automation_run (samplepos_t start, pframes_t len)
 {
 	bool change = false;
 	{

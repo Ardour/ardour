@@ -30,12 +30,12 @@ class LIBARDOUR_API MIDIDM
 {
 public:
 
-	MIDIDM (framecnt_t sample_rate);
+	MIDIDM (samplecnt_t sample_rate);
 
 	int process (pframes_t nframes, PortEngine &pe, void *midi_in, void *midi_out);
 
-	framecnt_t latency (void) { return _cnt_total > 10 ? _avg_delay : 0; }
-	framecnt_t processed (void) { return _cnt_total; }
+	samplecnt_t latency (void) { return _cnt_total > 10 ? _avg_delay : 0; }
+	samplecnt_t processed (void) { return _cnt_total; }
 	double     deviation (void) { return _cnt_total > 1 ? sqrt(_var_s / ((double)(_cnt_total - 1))) : 0; }
 	bool       ok (void) { return _cnt_total > 200; }
 	bool       have_signal (void) { return (_monotonic_cnt - _last_signal_tme) < (uint64_t) _sample_rate ; }
@@ -44,7 +44,7 @@ private:
 	int64_t parse_mclk (uint8_t const * const buf, pframes_t timestamp) const;
 	int64_t parse_mtc  (uint8_t const * const buf, pframes_t timestamp) const;
 
-	framecnt_t _sample_rate;
+	samplecnt_t _sample_rate;
 
 	uint64_t _monotonic_cnt;
 	uint64_t _last_signal_tme;

@@ -117,11 +117,11 @@ class LIBARDOUR_API TempoMetric : public Tempo, public Meter {
 	double c_per_superclock () const { return _c_per_superclock; }
 	double c_per_quarter () const { return _c_per_quarter; }
 
-	void compute_c_superclock (framecnt_t sr, superclock_t end_superclocks_per_note_type, superclock_t duration);
-	void compute_c_quarters (framecnt_t sr, superclock_t end_superclocks_per_note_type, Evoral::Beats const & duration);
+	void compute_c_superclock (samplecnt_t sr, superclock_t end_superclocks_per_note_type, superclock_t duration);
+	void compute_c_quarters (samplecnt_t sr, superclock_t end_superclocks_per_note_type, Evoral::Beats const & duration);
 
-	superclock_t superclocks_per_bar (framecnt_t sr) const;
-	superclock_t superclocks_per_grid (framecnt_t sr) const;
+	superclock_t superclocks_per_bar (samplecnt_t sr) const;
+	superclock_t superclocks_per_grid (samplecnt_t sr) const;
 
 	superclock_t superclock_at_qn (Evoral::Beats const & qn) const;
 	superclock_t superclock_per_note_type_at_superclock (superclock_t) const;
@@ -224,8 +224,8 @@ class LIBARDOUR_API TempoMapPoint
 	TempoMetric const & metric() const      { return is_explicit() ? _explicit.metric : _reference->metric(); }
 	PositionLockStyle   lock_style() const  { return is_explicit() ? _explicit.lock_style : _reference->lock_style(); }
 
-	void compute_c_superclock (framecnt_t sr, superclock_t end_superclocks_per_note_type, superclock_t duration) { if (is_explicit()) { _explicit.metric.compute_c_superclock (sr, end_superclocks_per_note_type, duration); } }
-	void compute_c_quarters (framecnt_t sr, superclock_t end_superclocks_per_note_type, Evoral::Beats const & duration) { if (is_explicit()) { _explicit.metric.compute_c_quarters (sr, end_superclocks_per_note_type, duration); } }
+	void compute_c_superclock (samplecnt_t sr, superclock_t end_superclocks_per_note_type, superclock_t duration) { if (is_explicit()) { _explicit.metric.compute_c_superclock (sr, end_superclocks_per_note_type, duration); } }
+	void compute_c_quarters (samplecnt_t sr, superclock_t end_superclocks_per_note_type, Evoral::Beats const & duration) { if (is_explicit()) { _explicit.metric.compute_c_quarters (sr, end_superclocks_per_note_type, duration); } }
 
 	/* None of these properties can be set for an Implicit point, because
 	 * they are determined by the TempoMapPoint pointed to by _reference.
@@ -301,12 +301,12 @@ typedef std::list<TempoMapPoint> TempoMapPoints;
 class LIBARDOUR_API TempoMap
 {
    public:
-	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, framecnt_t sr);
+	TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, samplecnt_t sr);
 
 	void set_dirty (bool yn);
 
-	void set_sample_rate (framecnt_t sr);
-	framecnt_t sample_rate() const { return _sample_rate; }
+	void set_sample_rate (samplecnt_t sr);
+	samplecnt_t sample_rate() const { return _sample_rate; }
 
 	void remove_explicit_point (superclock_t);
 
@@ -367,7 +367,7 @@ class LIBARDOUR_API TempoMap
 
    private:
 	TempoMapPoints _points;
-	framecnt_t     _sample_rate;
+	samplecnt_t     _sample_rate;
 	mutable Glib::Threads::RWLock _lock;
 	bool _dirty;
 

@@ -27,7 +27,7 @@ class SndfileWriter
   , public FlagDebuggable<>
 {
   public:
-	SndfileWriter (std::string const & path, int format, ChannelCount channels, framecnt_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
+	SndfileWriter (std::string const & path, int format, ChannelCount channels, samplecnt_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
 	  : SndfileHandle (path, Write, format, channels, samplerate)
 	  , path (path)
 	{
@@ -42,8 +42,8 @@ class SndfileWriter
 
 	using SndfileHandle::operator=;
 
-	framecnt_t get_frames_written() const { return frames_written; }
-	void       reset_frames_written_count() { frames_written = 0; }
+	samplecnt_t get_samples_written() const { return samples_written; }
+	void       reset_samples_written_count() { samples_written = 0; }
 
 	/// Writes data to file
 	virtual void process (ProcessContext<T> const & c)
@@ -56,10 +56,10 @@ class SndfileWriter
 				% c.channels() % channels()));
 		}
 
-		framecnt_t const written = write (c.data(), c.frames());
-		frames_written += written;
+		samplecnt_t const written = write (c.data(), c.samples());
+		samples_written += written;
 
-		if (throw_level (ThrowProcess) && written != c.frames()) {
+		if (throw_level (ThrowProcess) && written != c.samples()) {
 			throw Exception (*this, boost::str (boost::format
 				("Could not write data to output file (%1%)")
 				% strError()));
@@ -84,13 +84,13 @@ class SndfileWriter
 
 	virtual void init()
 	{
-		frames_written = 0;
+		samples_written = 0;
 		add_supported_flag (ProcessContext<T>::EndOfInput);
 	}
 
   protected:
 	std::string path;
-	framecnt_t frames_written;
+	samplecnt_t samples_written;
 
 	private:
 	SndfileWriter (SndfileWriter const & other) {}

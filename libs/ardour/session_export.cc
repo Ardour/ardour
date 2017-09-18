@@ -86,7 +86,7 @@ Session::pre_export ()
 	/* no slaving */
 
 	post_export_sync = config.get_external_sync ();
-	post_export_position = _transport_frame;
+	post_export_position = _transport_sample;
 
 	config.set_external_sync (false);
 
@@ -104,7 +104,7 @@ Session::pre_export ()
 
 /** Called for each range that is being exported */
 int
-Session::start_audio_export (framepos_t position, bool realtime, bool region_export, bool comensate_master_latency)
+Session::start_audio_export (samplepos_t position, bool realtime, bool region_export, bool comensate_master_latency)
 {
 	if (!_exporting) {
 		pre_export ();
@@ -117,9 +117,9 @@ Session::start_audio_export (framepos_t position, bool realtime, bool region_exp
 		_export_preroll = 0;
 	}
 	else if (realtime) {
-		_export_preroll = nominal_frame_rate ();
+		_export_preroll = nominal_sample_rate ();
 	} else {
-		_export_preroll = Config->get_export_preroll() * nominal_frame_rate ();
+		_export_preroll = Config->get_export_preroll() * nominal_sample_rate ();
 	}
 
 	if (_export_preroll == 0) {
@@ -176,11 +176,11 @@ Session::start_audio_export (framepos_t position, bool realtime, bool region_exp
 	}
 
 	/* we just did the core part of a locate() call above, but
-	   for the sake of any GUI, put the _transport_frame in
+	   for the sake of any GUI, put the _transport_sample in
 	   the right place too.
 	*/
 
-	_transport_frame = position;
+	_transport_sample = position;
 	export_status->stop = false;
 
 	/* get transport ready. note how this is calling butler functions
@@ -262,7 +262,7 @@ Session::process_export_fw (pframes_t nframes)
 			_engine.main_thread()->drop_buffers ();
 		}
 
-		_export_preroll -= std::min ((framepos_t)nframes, _export_preroll);
+		_export_preroll -= std::min ((samplepos_t)nframes, _export_preroll);
 
 		if (_export_preroll > 0) {
 			// clear out buffers (reverb tails etc).
@@ -278,7 +278,7 @@ Session::process_export_fw (pframes_t nframes)
 	}
 
 	if (_export_latency > 0) {
-		framepos_t remain = std::min ((framepos_t)nframes, _export_latency);
+		samplepos_t remain = std::min ((samplepos_t)nframes, _export_latency);
 
 		if (need_buffers) {
 			_engine.main_thread()->get_buffers ();

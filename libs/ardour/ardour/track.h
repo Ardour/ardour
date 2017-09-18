@@ -69,17 +69,17 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                     bool state_changing);
 
-	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                  int declick, bool& need_butler) = 0;
 
 	bool needs_butler() const { return _needs_butler; }
 
 	bool can_record();
 
-	void set_latency_compensation (framecnt_t);
+	void set_latency_compensation (samplecnt_t);
 	void update_latency_information ();
 	enum FreezeState {
 		NoFreeze,
@@ -117,9 +117,9 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	 * @param include_endpoint include the given processor in the bounced audio.
 	 * @return a new audio region (or nil in case of error)
 	 */
-	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
+	virtual boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
-	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
 
 	XMLNode&    get_state();
@@ -150,27 +150,27 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
 	void set_pending_overwrite (bool);
-	int seek (framepos_t, bool complete_refill = false);
-	int can_internal_playback_seek (framecnt_t);
-	int internal_playback_seek (framecnt_t);
-	void non_realtime_locate (framepos_t);
+	int seek (samplepos_t, bool complete_refill = false);
+	int can_internal_playback_seek (samplecnt_t);
+	int internal_playback_seek (samplecnt_t);
+	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
 	void non_realtime_speed_change ();
 	int overwrite_existing_buffers ();
-	framecnt_t get_captured_frames (uint32_t n = 0) const;
+	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	int set_loop (ARDOUR::Location *);
-	void transport_looped (framepos_t);
+	void transport_looped (samplepos_t);
 	bool realtime_speed_change ();
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
-	void prepare_to_stop (framepos_t, framepos_t);
+	void prepare_to_stop (samplepos_t, samplepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
-	framepos_t get_capture_start_frame (uint32_t n = 0) const;
+	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
 	AlignStyle alignment_style () const;
 	AlignChoice alignment_choice () const;
-	framepos_t current_capture_start () const;
-	framepos_t current_capture_end () const;
+	samplepos_t current_capture_start () const;
+	samplepos_t current_capture_end () const;
 	void set_align_style (AlignStyle, bool force=false);
 	void set_align_choice (AlignChoice, bool force=false);
 	void playlist_modified ();
@@ -228,7 +228,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	XMLNode*      pending_state;
 	bool         _destructive;
 
-	void maybe_declick (BufferSet&, framecnt_t, int);
+	void maybe_declick (BufferSet&, samplecnt_t, int);
 
 	boost::shared_ptr<AutomationControl> _record_enable_control;
 	boost::shared_ptr<AutomationControl> _record_safe_control;
@@ -236,7 +236,7 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	virtual void record_enable_changed (bool, PBD::Controllable::GroupControlDisposition);
 	virtual void record_safe_changed (bool, PBD::Controllable::GroupControlDisposition);
 
-	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
+	samplecnt_t check_initial_delay (samplecnt_t nframes, samplepos_t&);
 	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 	AlignChoice _alignment_choice;

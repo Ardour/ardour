@@ -60,19 +60,19 @@ public:
 
 class LIBARDOUR_API LinearInterpolation : public Interpolation {
 public:
-	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
+	samplecnt_t interpolate (int channel, samplecnt_t nframes, Sample* input, Sample* output);
 };
 
 class LIBARDOUR_API CubicInterpolation : public Interpolation {
 public:
-	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
+	samplecnt_t interpolate (int channel, samplecnt_t nframes, Sample* input, Sample* output);
 };
 
 class BufferSet;
 
 class LIBARDOUR_API CubicMidiInterpolation : public Interpolation {
 public:
-	framecnt_t distance (framecnt_t nframes, bool roll = true);
+	samplecnt_t distance (samplecnt_t nframes, bool roll = true);
 };
 
 } // namespace ARDOUR

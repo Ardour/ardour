@@ -77,7 +77,7 @@ Session::setup_midi_control ()
 	outbound_mtc_timecode_frame = 0;
 	next_quarter_frame_to_send = 0;
 
-	/* Set up the qtr frame message */
+	/* Set up the qtr sample message */
 
 	mtc_msg[0] = 0xf1;
 	mtc_msg[2] = 0xf1;
@@ -283,7 +283,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 		return;
 	}
 
-	framepos_t target_frame;
+	samplepos_t target_sample;
 	Timecode::Time timecode;
 
 	timecode.hours = mmc_tc[0] & 0xf;
@@ -294,13 +294,13 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	timecode.drop = timecode_drop_frames();
 
 	// Also takes timecode offset into account:
-	timecode_to_sample( timecode, target_frame, true /* use_offset */, false /* use_subframes */ );
+	timecode_to_sample( timecode, target_sample, true /* use_offset */, false /* use_subframes */ );
 
-	if (target_frame > max_framepos) {
-		target_frame = max_framepos;
+	if (target_sample > max_samplepos) {
+		target_sample = max_samplepos;
 	}
 
-	/* Some (all?) MTC/MMC devices do not send a full MTC frame
+	/* Some (all?) MTC/MMC devices do not send a full MTC sample
 	   at the end of a locate, instead sending only an MMC
 	   locate command. This causes the current position
 	   of an MTC slave to become out of date. Catch this.
@@ -313,7 +313,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 		mtcs->handle_locate (mmc_tc);
 	} else {
 		// cerr << "Locate without MTC slave\n";
-		request_locate (target_frame, false);
+		request_locate (target_sample, false);
 	}
 }
 
@@ -389,9 +389,9 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
  * @param t time to send.
  */
 int
-Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
+Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 {
-	/* This function could easily send at a given frame offset, but would
+	/* This function could easily send at a given sample offset, but would
 	 * that be useful?  Does ardour do sub-block accurate locating? [DR] */
 
 	MIDI::byte msg[10];
@@ -410,26 +410,26 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 	sample_to_timecode (t, timecode, true /* use_offset */, false /* no subframes */);
 
 	// sample-align outbound to rounded (no subframes) timecode
-	framepos_t mtc_tc;
+	samplepos_t mtc_tc;
 	timecode_to_sample(timecode, mtc_tc, true, false);
 	outbound_mtc_timecode_frame = mtc_tc;
 	transmitting_timecode_time = timecode;
 
 	LatencyRange mtc_out_latency = {0, 0}; // TODO cache this, update on engine().GraphReordered()
 	_midi_ports->mtc_output_port ()->get_connected_latency_range (ltc_out_latency, true);
-	frameoffset_t mtc_offset = worst_playback_latency() - mtc_out_latency.max;
+	sampleoffset_t mtc_offset = worst_playback_latency() - mtc_out_latency.max;
 
 	// only if rolling.. ?
 	outbound_mtc_timecode_frame += mtc_offset;
 
-	// outbound_mtc_timecode_frame needs to be >= _transport_frame
+	// outbound_mtc_timecode_frame needs to be >= _transport_sample
 	// or a new full timecode will be queued next cycle.
 	while (outbound_mtc_timecode_frame < t) {
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
 
-	double const quarter_frame_duration = ((framecnt_t) _samples_per_timecode_frame) / 4.0;
+	double const quarter_frame_duration = ((samplecnt_t) _samples_per_timecode_frame) / 4.0;
 	if (ceil((t - mtc_tc) / quarter_frame_duration) > 0) {
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
@@ -439,9 +439,9 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 
 	// I don't understand this bit yet.. [DR]
 	// I do [rg]:
-	// according to MTC spec 24, 30 drop and 30 non-drop TC, the frame-number represented by 8 quarter frames must be even.
+	// according to MTC spec 24, 30 drop and 30 non-drop TC, the sample-number represented by 8 quarter frames must be even.
 	if (((mtc_timecode_bits >> 5) != MIDI::MTC_25_FPS) && (transmitting_timecode_time.frames % 2)) {
-		// start MTC quarter frame transmission on an even frame
+		// start MTC quarter frame transmission on an even sample
 		Timecode::increment (transmitting_timecode_time, config.get_subframes_per_frame());
 		outbound_mtc_timecode_frame += _samples_per_timecode_frame;
 	}
@@ -473,15 +473,15 @@ Session::send_full_time_code (framepos_t const t, MIDI::pframes_t nframes)
 /** Send MTC (quarter-frame) messages for this cycle.
  * Must be called exactly once per cycle from the process thread.  Realtime safe.
  * This function assumes the state of full Timecode is sane, eg. the slave is
- * expecting quarter frame messages and has the right frame of reference (any
+ * expecting quarter frame messages and has the right sample of reference (any
  * full MTC Timecode time messages that needed to be sent should have been sent
  * earlier already this cycle by send_full_time_code)
  */
 int
-Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_frame, ARDOUR::pframes_t nframes)
+Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t end_sample, ARDOUR::pframes_t nframes)
 {
-	// start_frame == start_frame  for normal cycles
-	// start_frame > _transport_frame  for split cycles
+	// start_sample == start_sample  for normal cycles
+	// start_sample > _transport_sample  for split cycles
 	if (_engine.freewheeling() || !_send_qf_mtc || transmitting_timecode_time.negative || (next_quarter_frame_to_send < 0)) {
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
@@ -510,23 +510,23 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 	double const quarter_frame_duration = _samples_per_timecode_frame / 4.0;
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("TF %1 SF %2 MT %3 QF %4 QD %5\n",
-				_transport_frame, start_frame, outbound_mtc_timecode_frame,
+				_transport_sample, start_sample, outbound_mtc_timecode_frame,
 				next_quarter_frame_to_send, quarter_frame_duration));
 
-	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_frame) {
+	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < _transport_sample) {
 		// send full timecode and set outbound_mtc_timecode_frame, next_quarter_frame_to_send
-		send_full_time_code (_transport_frame, nframes);
+		send_full_time_code (_transport_sample, nframes);
 	}
 
-	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < start_frame) {
+	if (rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration)) < start_sample) {
 		// no QF for this cycle
 		return 0;
 	}
 
 	/* Send quarter frames for this cycle */
-	while (end_frame > rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
+	while (end_sample > rint(outbound_mtc_timecode_frame + (next_quarter_frame_to_send * quarter_frame_duration))) {
 
-		DEBUG_TRACE (DEBUG::MTC, string_compose ("next frame to send: %1\n", next_quarter_frame_to_send));
+		DEBUG_TRACE (DEBUG::MTC, string_compose ("next sample to send: %1\n", next_quarter_frame_to_send));
 
 		switch (next_quarter_frame_to_send) {
 			case 0:
@@ -555,14 +555,14 @@ Session::send_midi_time_code_for_cycle (framepos_t start_frame, framepos_t end_f
 				break;
 		}
 
-		const framepos_t msg_time = rint(outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send));
+		const samplepos_t msg_time = rint(outbound_mtc_timecode_frame	+ (quarter_frame_duration * next_quarter_frame_to_send));
 
 		// This message must fall within this block or something is broken
-		assert (msg_time >= start_frame);
-		assert (msg_time < end_frame);
+		assert (msg_time >= start_sample);
+		assert (msg_time < end_sample);
 
-		/* convert from session frames back to JACK frames using the transport speed */
-		ARDOUR::pframes_t const out_stamp = (msg_time - start_frame) / _transport_speed;
+		/* convert from session samples back to JACK samples using the transport speed */
+		ARDOUR::pframes_t const out_stamp = (msg_time - start_sample) / _transport_speed;
 		assert (out_stamp < nframes);
 
 		MidiBuffer& mb (_midi_ports->mtc_output_port()->get_midi_buffer(nframes));
@@ -649,7 +649,7 @@ Session::mmc_step_timeout ()
 
 
 void
-Session::send_song_position_pointer (framepos_t)
+Session::send_song_position_pointer (samplepos_t)
 {
 	if (midi_clock) {
 		/* Do nothing for the moment */

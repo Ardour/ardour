@@ -140,7 +140,7 @@ public:
 	 *  @param ibufs Input buffers (one per panner input)
 	 *  @param obufs Output buffers (one per panner output).
 	 *  @param gain_coeff fixed, additional gain coefficient to apply to output samples.
-	 *  @param nframes Number of frames in the input.
+	 *  @param nframes Number of samples in the input.
 	 *
 	 *  Derived panners can choose to implement these if they need to gain more
 	 *  control over the panning algorithm.  The default is to call
@@ -152,7 +152,7 @@ public:
 	 */
 	virtual void distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 	virtual void distribute_automated (BufferSet& ibufs, BufferSet& obufs,
-	                                   framepos_t start, framepos_t end, pframes_t nframes,
+	                                   samplepos_t start, samplepos_t end, pframes_t nframes,
 	                                   pan_t** buffers);
 
 	int set_state (const XMLNode&, int version);
@@ -177,7 +177,7 @@ protected:
 
 	virtual void distribute_one (AudioBuffer&, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which) = 0;
 	virtual void distribute_one_automated (AudioBuffer&, BufferSet& obufs,
-	                                       framepos_t start, framepos_t end, pframes_t nframes,
+	                                       samplepos_t start, samplepos_t end, pframes_t nframes,
 	                                       pan_t** buffers, uint32_t which) = 0;
 
 	int32_t _frozen;

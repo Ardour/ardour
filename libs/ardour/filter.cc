@@ -70,9 +70,9 @@ Filter::make_new_sources (boost::shared_ptr<Region> region, SourceList& nsrcs, s
 		}
 
 		try {
-			framecnt_t sample_rate;
+			samplecnt_t sample_rate;
 			if (use_session_sample_rate) {
-				sample_rate = session.frame_rate();
+				sample_rate = session.sample_rate();
 			} else {
 				boost::shared_ptr<AudioRegion> aregion = boost::dynamic_pointer_cast<AudioRegion>(region);
 

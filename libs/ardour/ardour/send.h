@@ -61,16 +61,16 @@ class LIBARDOUR_API Send : public Delivery
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* latency compensation */
-	void set_delay_in (framecnt_t);
-	void set_delay_out (framecnt_t);
-	framecnt_t get_delay_in () const { return _delay_in; }
-	framecnt_t get_delay_out () const { return _delay_out; }
+	void set_delay_in (samplecnt_t);
+	void set_delay_out (samplecnt_t);
+	samplecnt_t get_delay_in () const { return _delay_in; }
+	samplecnt_t get_delay_out () const { return _delay_out; }
 
 	void activate ();
 	void deactivate ();
@@ -97,8 +97,8 @@ class LIBARDOUR_API Send : public Delivery
 
 	uint32_t  _bitslot;
 
-	framecnt_t _delay_in;
-	framecnt_t _delay_out;
+	samplecnt_t _delay_in;
+	samplecnt_t _delay_out;
 	bool       _remove_on_disconnect;
 };
 

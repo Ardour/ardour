@@ -44,8 +44,8 @@ public:
 	void track (const uint8_t* evbuf);
 	void add (uint8_t note, uint8_t chn);
 	void remove (uint8_t note, uint8_t chn);
-	void resolve_notes (MidiBuffer& buffer, framepos_t time);
-	void resolve_notes (Evoral::EventSink<framepos_t>& buffer, framepos_t time);
+	void resolve_notes (MidiBuffer& buffer, samplepos_t time);
+	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Evoral::Beats time);
 	void dump (std::ostream&);
 	void reset ();

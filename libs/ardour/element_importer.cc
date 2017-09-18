@@ -89,15 +89,15 @@ ElementImporter::timecode_to_string(Timecode::Time & time) const
 	return oss.str();
 }
 
-framecnt_t
-ElementImporter::rate_convert_samples (framecnt_t samples) const
+samplecnt_t
+ElementImporter::rate_convert_samples (samplecnt_t samples) const
 {
-	if (sample_rate == session.frame_rate()) {
+	if (sample_rate == session.sample_rate()) {
 		return samples;
 	}
 
 	// +0.5 for proper rounding
-	return static_cast<framecnt_t> (samples * (static_cast<double> (session.nominal_frame_rate()) / sample_rate) + 0.5);
+	return static_cast<samplecnt_t> (samples * (static_cast<double> (session.nominal_sample_rate()) / sample_rate) + 0.5);
 }
 
 string

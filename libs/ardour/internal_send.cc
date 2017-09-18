@@ -141,7 +141,7 @@ InternalSend::send_to_going_away ()
 }
 
 void
-InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || !_send_to) {
 		_meter->reset ();
@@ -153,7 +153,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 	if (_panshell && !_panshell->bypassed() && role() != Listen) {
 		if (mixbufs.count ().n_audio () > 0) {
-			_panshell->run (bufs, mixbufs, start_frame, end_frame, nframes);
+			_panshell->run (bufs, mixbufs, start_sample, end_sample, nframes);
 		}
 
 		/* non-audio data will not have been copied by the panner, do it now
@@ -230,7 +230,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 
 		/* target gain has changed */
 
-		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
+		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate(), nframes, _current_gain, tgain);
 
 	} else if (tgain == GAIN_COEFF_ZERO) {
 
@@ -248,10 +248,10 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 	}
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (mixbufs, start_frame, end_frame, speed, nframes, true);
+	_amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
-	_delayline->run (mixbufs, start_frame, end_frame, speed, nframes, true);
+	_delayline->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
 
@@ -259,7 +259,7 @@ InternalSend::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame
 		if (_amp->gain_control()->get_value() == GAIN_COEFF_ZERO) {
 			_meter->reset();
 		} else {
-			_meter->run (mixbufs, start_frame, end_frame, speed, nframes, true);
+			_meter->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 		}
 	}
 

@@ -59,7 +59,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-LadspaPlugin::LadspaPlugin (string module_path, AudioEngine& e, Session& session, uint32_t index, framecnt_t rate)
+LadspaPlugin::LadspaPlugin (string module_path, AudioEngine& e, Session& session, uint32_t index, samplecnt_t rate)
 	: Plugin (e, session)
 {
 	init (module_path, index, rate);
@@ -77,7 +77,7 @@ LadspaPlugin::LadspaPlugin (const LadspaPlugin &other)
 }
 
 void
-LadspaPlugin::init (string module_path, uint32_t index, framecnt_t rate)
+LadspaPlugin::init (string module_path, uint32_t index, samplecnt_t rate)
 {
 	void* func;
 	LADSPA_Descriptor_Function dfunc;
@@ -469,7 +469,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 
 	if (LADSPA_IS_HINT_BOUNDED_BELOW(prh.HintDescriptor)) {
 		if (LADSPA_IS_HINT_SAMPLE_RATE(prh.HintDescriptor)) {
-			desc.lower = prh.LowerBound * _session.frame_rate();
+			desc.lower = prh.LowerBound * _session.sample_rate();
 		} else {
 			desc.lower = prh.LowerBound;
 		}
@@ -480,7 +480,7 @@ LadspaPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& des
 
 	if (LADSPA_IS_HINT_BOUNDED_ABOVE(prh.HintDescriptor)) {
 		if (LADSPA_IS_HINT_SAMPLE_RATE(prh.HintDescriptor)) {
-			desc.upper = prh.UpperBound * _session.frame_rate();
+			desc.upper = prh.UpperBound * _session.sample_rate();
 		} else {
 			desc.upper = prh.UpperBound;
 		}
@@ -525,7 +525,7 @@ LadspaPlugin::describe_parameter (Evoral::Parameter which)
 	}
 }
 
-ARDOUR::framecnt_t
+ARDOUR::samplecnt_t
 LadspaPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -533,7 +533,7 @@ LadspaPlugin::signal_latency () const
 	}
 
 	if (_latency_control_port) {
-		return (framecnt_t) floor (*_latency_control_port);
+		return (samplecnt_t) floor (*_latency_control_port);
 	} else {
 		return 0;
 	}
@@ -557,9 +557,9 @@ LadspaPlugin::automatable () const
 
 int
 LadspaPlugin::connect_and_run (BufferSet& bufs,
-		framepos_t start, framepos_t end, double speed,
+		samplepos_t start, samplepos_t end, double speed,
 		ChanMapping in_map, ChanMapping out_map,
-		pframes_t nframes, framecnt_t offset)
+		pframes_t nframes, samplecnt_t offset)
 {
 	Plugin::connect_and_run (bufs, start, end, speed, in_map, out_map, nframes, offset);
 
@@ -685,7 +685,7 @@ LadspaPlugin::latency_compute_run ()
 	uint32_t port_index = 0;
 	uint32_t in_index = 0;
 	uint32_t out_index = 0;
-	const framecnt_t bufsize = 1024;
+	const samplecnt_t bufsize = 1024;
 	LADSPA_Data buffer[bufsize];
 
 	memset(buffer,0,sizeof(LADSPA_Data)*bufsize);
@@ -717,7 +717,7 @@ PluginPtr
 LadspaPluginInfo::load (Session& session)
 {
 	try {
-		PluginPtr plugin (new LadspaPlugin (path, session.engine(), session, index, session.frame_rate()));
+		PluginPtr plugin (new LadspaPlugin (path, session.engine(), session, index, session.sample_rate()));
 		plugin->set_info(PluginInfoPtr(new LadspaPluginInfo(*this)));
 		return plugin;
 	}

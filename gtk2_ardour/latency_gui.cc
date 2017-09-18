@@ -54,7 +54,7 @@ LatencyBarController::get_label (double&)
 	std::stringstream s;
 
 	if (nframes < (_latency_gui->sample_rate / 1000.0)) {
-		const framepos_t nf = (framepos_t) rint (nframes);
+		const samplepos_t nf = (samplepos_t) rint (nframes);
 		s << string_compose (P_("%1 sample", "%1 samples", nf), nf);
 	} else {
 		s << std::fixed << std::setprecision (2) << (nframes / (_latency_gui->sample_rate / 1000.0)) << " ms";
@@ -63,13 +63,13 @@ LatencyBarController::get_label (double&)
 	return s.str ();
 }
 
-LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
+LatencyGUI::LatencyGUI (Latent& l, samplepos_t sr, samplepos_t psz)
 	: _latent (l),
 	  initial_value (_latent.user_latency()),
 	  sample_rate (sr),
 	  period_size (psz),
 	  ignored (new PBD::IgnorableControllable()),
-	  /* max 1 second, step by frames, page by msecs */
+	  /* max 1 second, step by samples, page by msecs */
 	  adjustment (initial_value, 0.0, sample_rate, 1.0, sample_rate / 1000.0f),
 	  bc (adjustment, this),
 	  reset_button (_("Reset"))
@@ -116,7 +116,7 @@ LatencyGUI::LatencyGUI (Latent& l, framepos_t sr, framepos_t psz)
 void
 LatencyGUI::finish ()
 {
-	framepos_t new_value = (framepos_t) adjustment.get_value();
+	samplepos_t new_value = (samplepos_t) adjustment.get_value();
 	if (new_value != initial_value) {
 		_latent.set_user_latency (new_value);
 	}
@@ -161,7 +161,7 @@ LatencyGUI::change_latency_from_button (int dir)
 	}
 }
 
-LatencyDialog::LatencyDialog (const std::string& title, Latent& l, framepos_t sr, framepos_t psz)
+LatencyDialog::LatencyDialog (const std::string& title, Latent& l, samplepos_t sr, samplepos_t psz)
 	: ArdourDialog (title, false, true),
 	  lwidget (l, sr, psz)
 {

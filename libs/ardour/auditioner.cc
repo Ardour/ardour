@@ -47,10 +47,10 @@ using namespace PBD;
 
 Auditioner::Auditioner (Session& s)
 	: Track (s, "auditioner", PresentationInfo::Auditioner)
-	, current_frame (0)
+	, current_sample (0)
 	, _auditioning (0)
 	, length (0)
-	, _seek_frame (-1)
+	, _seek_sample (-1)
 	, _seeking (false)
 	, _seek_complete (false)
 	, via_monitor (false)
@@ -217,7 +217,7 @@ Auditioner::data_type () const {
 }
 
 int
-Auditioner::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
+Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
@@ -244,7 +244,7 @@ Auditioner::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_fram
 		}
 	}
 
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, !_session.transport_stopped());
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, !_session.transport_stopped());
 
 	/* note: auditioner never writes to disk, so we don't care about the
 	 * disk writer status (it's buffers will always have no data in them).
@@ -363,11 +363,11 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	/* force a panner reset now that we have all channels */
 	_main_outs->reset_panner();
 
-	_seek_frame = -1;
+	_seek_sample = -1;
 	_seeking = false;
 
 	int dir;
-	framecnt_t offset;
+	samplecnt_t offset;
 
 	if (_midi_audition) {
 		length = midi_region->length();
@@ -384,16 +384,16 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 	}
 
 	_disk_reader->seek (offset, true);
-	current_frame = offset;
+	current_sample = offset;
 
 	g_atomic_int_set (&_auditioning, 1);
 }
 
 int
-Auditioner::play_audition (framecnt_t nframes)
+Auditioner::play_audition (samplecnt_t nframes)
 {
 	bool need_butler = false;
-	framecnt_t this_nframes;
+	samplecnt_t this_nframes;
 	int ret;
 
 	if (g_atomic_int_get (&_auditioning) == 0) {
@@ -404,7 +404,7 @@ Auditioner::play_audition (framecnt_t nframes)
 #if 0 // TODO
 	if (_seeking && _seek_complete) {
 		// set FADE-IN
-	} else if (_seek_frame >= 0 && _seek_frame < length && !_seeking) {
+	} else if (_seek_sample >= 0 && _seek_sample < length && !_seeking) {
 		// set FADE-OUT -- use/override amp? || use region-gain ?
 	}
 #endif
@@ -412,26 +412,26 @@ Auditioner::play_audition (framecnt_t nframes)
 	if (_seeking && _seek_complete) {
 		_seek_complete = false;
 		_seeking = false;
-		_seek_frame = -1;
+		_seek_sample = -1;
 		_disk_reader->reset_tracker();
 	}
 
 	if(!_seeking) {
 		/* process audio */
-		this_nframes = min (nframes, length - current_frame + _import_position);
+		this_nframes = min (nframes, length - current_sample + _import_position);
 
-		if ((ret = roll (this_nframes, current_frame, current_frame + nframes, false, need_butler)) != 0) {
+		if ((ret = roll (this_nframes, current_sample, current_sample + nframes, false, need_butler)) != 0) {
 			silence (nframes);
 			return ret;
 		}
 
-		current_frame += this_nframes;
+		current_sample += this_nframes;
 
 	} else {
 		silence (nframes);
 	}
 
-	if (_seek_frame >= 0 && _seek_frame < length && !_seeking) {
+	if (_seek_sample >= 0 && _seek_sample < length && !_seeking) {
 		_queue_panic = true;
 		_seek_complete = false;
 		_seeking = true;
@@ -439,10 +439,10 @@ Auditioner::play_audition (framecnt_t nframes)
 	}
 
 	if (!_seeking) {
-		AuditionProgress(current_frame - _import_position, length); /* emit */
+		AuditionProgress(current_sample - _import_position, length); /* emit */
 	}
 
-	if (current_frame >= length + _import_position) {
+	if (current_sample >= length + _import_position) {
 		_session.cancel_audition ();
 		return 0;
 	} else {

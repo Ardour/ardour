@@ -1,4 +1,4 @@
-#include "framepos_minus_beats_test.h"
+#include "samplepos_minus_beats_test.h"
 #include "ardour/tempo.h"
 #include "timecode/bbt_time.h"
 
@@ -16,22 +16,22 @@ FrameposMinusBeatsTest::singleTempoTest ()
 	int const sampling_rate = 48000;
 	int const bpm = 120;
 
-	double const frames_per_beat = (60 / double (bpm)) * double (sampling_rate);
+	double const samples_per_beat = (60 / double (bpm)) * double (sampling_rate);
 
 	TempoMap map (sampling_rate);
 	Tempo tempo (bpm);
 	Meter meter (4, 4);
 
-	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
+	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), (samplepos_t) 0, AudioTime);
 	map.replace_tempo (map.first_tempo(), tempo, 0.0, 0, TempoSection::Constant, AudioTime);
 
 	/* Subtract 1 beat from beat 3 of the first bar */
-	framepos_t r = map.framepos_minus_qn (frames_per_beat * 2, Beats(1));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (frames_per_beat * 1));
+	samplepos_t r = map.samplepos_minus_qn (samples_per_beat * 2, Beats(1));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (samples_per_beat * 1));
 
 	/* Subtract 4 beats from 3 beats in, to go beyond zero */
-	r = map.framepos_minus_qn (frames_per_beat * 3, Beats(4));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (- frames_per_beat));
+	r = map.samplepos_minus_qn (samples_per_beat * 3, Beats(4));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (- samples_per_beat));
 }
 
 /* Test adding things that overlap a tempo change */
@@ -42,7 +42,7 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meter (4, 4);
-	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
+	map.replace_meter (map.first_meter(), meter, BBT_Time (1, 1, 0), (samplepos_t) 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -56,7 +56,7 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
+	  0 samples                                              288e3 samples
 	  0 pulses                                              4 pulses
 	  |                 |                 |                 |                 |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 4.4 |
@@ -71,16 +71,16 @@ FrameposMinusBeatsTest::doubleTempoTest ()
 	/* Now some tests */
 
 	/* Subtract 1 beat from 1|2 */
-	framepos_t r = map.framepos_minus_qn (24e3, Beats(1));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
+	samplepos_t r = map.samplepos_minus_qn (24e3, Beats(1));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (0));
 
 	/* Subtract 2 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
+	r = map.samplepos_minus_qn (288e3 + 12e3, Beats(2));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (288e3 - 24e3));
 
 	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2.5));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
+	r = map.samplepos_minus_qn (288e3 + 12e3, Beats(2.5));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (288e3 - 24e3 - 12e3));
 }
 
 /* Same as doubleTempoTest () except put a meter change at the same time as the
@@ -95,7 +95,7 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 
 	TempoMap map (sampling_rate);
 	Meter meterA (4, 4);
-	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), (framepos_t) 0, AudioTime);
+	map.replace_meter (map.first_meter(), meterA, BBT_Time (1, 1, 0), (samplepos_t) 0, AudioTime);
 
 	/*
 	  120bpm at bar 1, 240bpm at bar 4
@@ -109,7 +109,7 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 
 	  120bpm                                                240bpm
 	  0 beats                                               12 beats
-	  0 frames                                              288e3 frames
+	  0 samples                                              288e3 samples
 	  0 pulses                                              3 pulses
 	  |                 |                 |                 |             |
 	  | 1.1 1.2 1.3 1.4 | 2.1 2.2 2.3.2.4 | 3.1 3.2 3.3 3.4 | 4.1 4.2 4.3 |
@@ -126,16 +126,16 @@ FrameposMinusBeatsTest::doubleTempoWithMeterTest ()
 	/* Now some tests */
 
 	/* Subtract 1 beat from 1|2 */
-	framepos_t r = map.framepos_minus_qn (24e3, Beats(1));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (0));
+	samplepos_t r = map.samplepos_minus_qn (24e3, Beats(1));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (0));
 
 	/* Subtract 2 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3));
+	r = map.samplepos_minus_qn (288e3 + 12e3, Beats(2));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (288e3 - 24e3));
 
 	/* Subtract 2.5 beats from 4|2 (over the tempo change) */
-	r = map.framepos_minus_qn (288e3 + 12e3, Beats(2.5));
-	CPPUNIT_ASSERT_EQUAL (r, framepos_t (288e3 - 24e3 - 12e3));
+	r = map.samplepos_minus_qn (288e3 + 12e3, Beats(2.5));
+	CPPUNIT_ASSERT_EQUAL (r, samplepos_t (288e3 - 24e3 - 12e3));
 }
 
 

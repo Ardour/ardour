@@ -32,7 +32,7 @@ const uint32_t ResampledImportableSource::blocksize = 524288U;
 const uint32_t ResampledImportableSource::blocksize = 16384U;
 #endif
 
-ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, framecnt_t rate, SrcQuality srcq)
+ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, samplecnt_t rate, SrcQuality srcq)
 	: source (src)
 	, _src_state (0)
 {
@@ -69,8 +69,8 @@ ResampledImportableSource::~ResampledImportableSource ()
 	delete [] _input;
 }
 
-framecnt_t
-ResampledImportableSource::read (Sample* output, framecnt_t nframes)
+samplecnt_t
+ResampledImportableSource::read (Sample* output, samplecnt_t nframes)
 {
 	int err;
 	size_t bs = floor ((float)(blocksize / source->channels())) *  source->channels();
@@ -120,7 +120,7 @@ ResampledImportableSource::read (Sample* output, framecnt_t nframes)
 }
 
 void
-ResampledImportableSource::seek (framepos_t pos)
+ResampledImportableSource::seek (samplepos_t pos)
 {
 	source->seek (pos);
 
@@ -143,7 +143,7 @@ ResampledImportableSource::seek (framepos_t pos)
 	_end_of_input = false;
 }
 
-framepos_t
+samplepos_t
 ResampledImportableSource::natural_position () const
 {
         return source->natural_position() * ratio ();

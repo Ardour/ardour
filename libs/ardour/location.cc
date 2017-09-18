@@ -71,7 +71,7 @@ Location::Location (Session& s)
 }
 
 /** Construct a new Location, giving it the position lock style determined by glue-new-markers-to-bars-and-beats */
-Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, const std::string &name, Flags bits, const uint32_t sub_num)
+Location::Location (Session& s, samplepos_t sample_start, samplepos_t sample_end, const std::string &name, Flags bits, const uint32_t sub_num)
 	: SessionHandleRef (s)
 	, _name (name)
 	, _start (sample_start)
@@ -81,7 +81,7 @@ Location::Location (Session& s, framepos_t sample_start, framepos_t sample_end, 
 	, _position_lock_style (s.config.get_glue_new_markers_to_bars_and_beats() ? MusicTime : AudioTime)
 
 {
-	recompute_beat_from_frames (sub_num);
+	recompute_beat_from_samples (sub_num);
 
 	assert (_start >= 0);
 	assert (_end >= 0);
@@ -188,7 +188,7 @@ Location::set_name (const std::string& str)
  *  @param allow_beat_recompute True to recompute BEAT start time from the new given start time.
  */
 int
-Location::set_start (framepos_t s, bool force, bool allow_beat_recompute, const uint32_t sub_num)
+Location::set_start (samplepos_t s, bool force, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (s < 0) {
 		return -1;
@@ -209,7 +209,7 @@ Location::set_start (framepos_t s, bool force, bool allow_beat_recompute, const 
 			_start = s;
 			_end = s;
 			if (allow_beat_recompute) {
-				recompute_beat_from_frames (sub_num);
+				recompute_beat_from_samples (sub_num);
 			}
 
 			start_changed (this); /* EMIT SIGNAL */
@@ -239,11 +239,11 @@ Location::set_start (framepos_t s, bool force, bool allow_beat_recompute, const 
 
 	if (s != _start) {
 
-		framepos_t const old = _start;
+		samplepos_t const old = _start;
 
 		_start = s;
 		if (allow_beat_recompute) {
-			recompute_beat_from_frames (sub_num);
+			recompute_beat_from_samples (sub_num);
 		}
 		start_changed (this); /* EMIT SIGNAL */
 		StartChanged (); /* EMIT SIGNAL */
@@ -265,7 +265,7 @@ Location::set_start (framepos_t s, bool force, bool allow_beat_recompute, const 
  *  @param allow_beat_recompute True to recompute BEAT end time from the new given end time.
  */
 int
-Location::set_end (framepos_t e, bool force, bool allow_beat_recompute, const uint32_t sub_num)
+Location::set_end (samplepos_t e, bool force, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (e < 0) {
 		return -1;
@@ -286,7 +286,7 @@ Location::set_end (framepos_t e, bool force, bool allow_beat_recompute, const ui
 			_start = e;
 			_end = e;
 			if (allow_beat_recompute) {
-				recompute_beat_from_frames (sub_num);
+				recompute_beat_from_samples (sub_num);
 			}
 			//start_changed (this); /* EMIT SIGNAL */
 			//StartChanged (); /* EMIT SIGNAL */
@@ -307,11 +307,11 @@ Location::set_end (framepos_t e, bool force, bool allow_beat_recompute, const ui
 
 	if (e != _end) {
 
-		framepos_t const old = _end;
+		samplepos_t const old = _end;
 
 		_end = e;
 		if (allow_beat_recompute) {
-			recompute_beat_from_frames (sub_num);
+			recompute_beat_from_samples (sub_num);
 		}
 
 		end_changed(this); /* EMIT SIGNAL */
@@ -328,7 +328,7 @@ Location::set_end (framepos_t e, bool force, bool allow_beat_recompute, const ui
 }
 
 int
-Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint32_t sub_num)
+Location::set (samplepos_t s, samplepos_t e, bool allow_beat_recompute, const uint32_t sub_num)
 {
 	if (s < 0 || e < 0) {
 		return -1;
@@ -349,7 +349,7 @@ Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint
 			_end = s;
 
 			if (allow_beat_recompute) {
-				recompute_beat_from_frames (sub_num);
+				recompute_beat_from_samples (sub_num);
 			}
 
 			start_change = true;
@@ -368,11 +368,11 @@ Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint
 
 		if (s != _start) {
 
-			framepos_t const old = _start;
+			samplepos_t const old = _start;
 			_start = s;
 
 			if (allow_beat_recompute) {
-				recompute_beat_from_frames (sub_num);
+				recompute_beat_from_samples (sub_num);
 			}
 
 			start_change = true;
@@ -386,11 +386,11 @@ Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint
 
 		if (e != _end) {
 
-			framepos_t const old = _end;
+			samplepos_t const old = _end;
 			_end = e;
 
 			if (allow_beat_recompute) {
-				recompute_beat_from_frames (sub_num);
+				recompute_beat_from_samples (sub_num);
 			}
 
 			end_change = true;
@@ -418,7 +418,7 @@ Location::set (framepos_t s, framepos_t e, bool allow_beat_recompute, const uint
 }
 
 int
-Location::move_to (framepos_t pos, const uint32_t sub_num)
+Location::move_to (samplepos_t pos, const uint32_t sub_num)
 {
 	if (pos < 0) {
 		return -1;
@@ -431,7 +431,7 @@ Location::move_to (framepos_t pos, const uint32_t sub_num)
 	if (_start != pos) {
 		_start = pos;
 		_end = _start + length();
-		recompute_beat_from_frames (sub_num);
+		recompute_beat_from_samples (sub_num);
 
 		changed (this); /* EMIT SIGNAL */
 		Changed (); /* EMIT SIGNAL */
@@ -682,12 +682,12 @@ Location::set_state (const XMLNode& node, int version)
 	}
 
 	if (position_lock_style() == AudioTime) {
-		recompute_beat_from_frames (0);
+		recompute_beat_from_samples (0);
 	} else{
 		/* music */
 		if (!node.get_property ("start-beat", _start_beat) ||
 		    !node.get_property ("end-beat", _end_beat)) {
-			recompute_beat_from_frames (0);
+			recompute_beat_from_samples (0);
 		}
 	}
 
@@ -711,7 +711,7 @@ Location::set_position_lock_style (PositionLockStyle ps)
 	_position_lock_style = ps;
 
 	if (ps == MusicTime) {
-		recompute_beat_from_frames (0);
+		recompute_beat_from_samples (0);
 	}
 
 	position_lock_style_changed (this); /* EMIT SIGNAL */
@@ -719,21 +719,21 @@ Location::set_position_lock_style (PositionLockStyle ps)
 }
 
 void
-Location::recompute_beat_from_frames (const uint32_t sub_num)
+Location::recompute_beat_from_samples (const uint32_t sub_num)
 {
-	_start_beat = _session.tempo_map().exact_beat_at_frame (_start, sub_num);
-	_end_beat = _session.tempo_map().exact_beat_at_frame (_end, sub_num);
+	_start_beat = _session.tempo_map().exact_beat_at_sample (_start, sub_num);
+	_end_beat = _session.tempo_map().exact_beat_at_sample (_end, sub_num);
 }
 
 void
-Location::recompute_frames_from_beat ()
+Location::recompute_samples_from_beat ()
 {
 	if (_position_lock_style != MusicTime) {
 		return;
 	}
 
 	TempoMap& map (_session.tempo_map());
-	set (map.frame_at_beat (_start_beat), map.frame_at_beat (_end_beat), false);
+	set (map.sample_at_beat (_start_beat), map.sample_at_beat (_end_beat), false);
 }
 
 void
@@ -1176,7 +1176,7 @@ Locations::set_state (const XMLNode& node, int version)
 }
 
 
-typedef std::pair<framepos_t,Location*> LocationPair;
+typedef std::pair<samplepos_t,Location*> LocationPair;
 
 struct LocationStartEarlierComparison
 {
@@ -1192,8 +1192,8 @@ struct LocationStartLaterComparison
 	}
 };
 
-framepos_t
-Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
+samplepos_t
+Locations::first_mark_before (samplepos_t sample, bool include_special_ranges)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	vector<LocationPair> locs;
@@ -1217,7 +1217,7 @@ Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first < frame) {
+		if ((*i).first < sample) {
 			return (*i).first;
 		}
 	}
@@ -1226,12 +1226,12 @@ Locations::first_mark_before (framepos_t frame, bool include_special_ranges)
 }
 
 Location*
-Locations::mark_at (framepos_t pos, framecnt_t slop) const
+Locations::mark_at (samplepos_t pos, samplecnt_t slop) const
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	Location* closest = 0;
-	frameoffset_t mindelta = max_framepos;
-	frameoffset_t delta;
+	sampleoffset_t mindelta = max_samplepos;
+	sampleoffset_t delta;
 
 	/* locations are not necessarily stored in linear time order so we have
 	 * to iterate across all of them to find the one closest to a give point.
@@ -1263,8 +1263,8 @@ Locations::mark_at (framepos_t pos, framecnt_t slop) const
 	return closest;
 }
 
-framepos_t
-Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
+samplepos_t
+Locations::first_mark_after (samplepos_t sample, bool include_special_ranges)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 	vector<LocationPair> locs;
@@ -1288,7 +1288,7 @@ Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
 		}
-		if ((*i).first > frame) {
+		if ((*i).first > sample) {
 			return (*i).first;
 		}
 	}
@@ -1297,16 +1297,16 @@ Locations::first_mark_after (framepos_t frame, bool include_special_ranges)
 }
 
 /** Look for the `marks' (either locations which are marks, or start/end points of range markers) either
- *  side of a frame.  Note that if frame is exactly on a `mark', that mark will not be considered for returning
+ *  side of a sample.  Note that if sample is exactly on a `mark', that mark will not be considered for returning
  *  as before/after.
- *  @param frame Frame to look for.
- *  @param before Filled in with the position of the last `mark' before `frame' (or max_framepos if none exists)
- *  @param after Filled in with the position of the next `mark' after `frame' (or max_framepos if none exists)
+ *  @param sample Frame to look for.
+ *  @param before Filled in with the position of the last `mark' before `sample' (or max_samplepos if none exists)
+ *  @param after Filled in with the position of the next `mark' after `sample' (or max_samplepos if none exists)
  */
 void
-Locations::marks_either_side (framepos_t const frame, framepos_t& before, framepos_t& after) const
+Locations::marks_either_side (samplepos_t const sample, samplepos_t& before, samplepos_t& after) const
 {
-	before = after = max_framepos;
+	before = after = max_samplepos;
 
 	LocationList locs;
 
@@ -1317,7 +1317,7 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 
 	/* Get a list of positions; don't store any that are exactly on our requested position */
 
-	std::list<framepos_t> positions;
+	std::list<samplepos_t> positions;
 
 	for (LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
 		if (((*i)->is_auto_loop() || (*i)->is_auto_punch())) {
@@ -1326,14 +1326,14 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 
 		if (!(*i)->is_hidden()) {
 			if ((*i)->is_mark ()) {
-				if ((*i)->start() != frame) {
+				if ((*i)->start() != sample) {
 					positions.push_back ((*i)->start ());
 				}
 			} else {
-				if ((*i)->start() != frame) {
+				if ((*i)->start() != sample) {
 					positions.push_back ((*i)->start ());
 				}
-				if ((*i)->end() != frame) {
+				if ((*i)->end() != sample) {
 					positions.push_back ((*i)->end ());
 				}
 			}
@@ -1346,8 +1346,8 @@ Locations::marks_either_side (framepos_t const frame, framepos_t& before, framep
 
 	positions.sort ();
 
-	std::list<framepos_t>::iterator i = positions.begin ();
-	while (i != positions.end () && *i < frame) {
+	std::list<samplepos_t>::iterator i = positions.begin ();
+	while (i != positions.end () && *i < sample) {
 		++i;
 	}
 
@@ -1426,7 +1426,7 @@ Locations::get_location_by_id(PBD::ID id)
 }
 
 void
-Locations::find_all_between (framepos_t start, framepos_t end, LocationList& ll, Location::Flags flags)
+Locations::find_all_between (samplepos_t start, samplepos_t end, LocationList& ll, Location::Flags flags)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 

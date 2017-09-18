@@ -83,7 +83,7 @@ PlaylistReadTest::singleReadTest ()
 void
 PlaylistReadTest::overlappingReadTest ()
 {
-	/* Overlapping read; _ar[0] and _ar[1] are both 1024 frames long, _ar[0] starts at 0,
+	/* Overlapping read; _ar[0] and _ar[1] are both 1024 samples long, _ar[0] starts at 0,
 	   _ar[1] starts at 128.  We test a read from 0 to 256, which should consist
 	   of the start of _ar[0], with its fade in, followed by _ar[1]'s fade in (mixed with _ar[0]
 	   faded out with the inverse gain), and some more of _ar[1].

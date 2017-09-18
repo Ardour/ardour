@@ -47,7 +47,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 		Timecode,
 		BBT,
 		MinSec,
-		Frames
+		Samples
 	};
 
 	AudioClock (const std::string& clock_name, bool is_transient, const std::string& widget_name,
@@ -66,19 +66,19 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	void set (framepos_t, bool force = false, ARDOUR::framecnt_t offset = 0);
+	void set (samplepos_t, bool force = false, ARDOUR::samplecnt_t offset = 0);
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
-	void set_bbt_reference (framepos_t);
+	void set_bbt_reference (samplepos_t);
 	void set_is_duration (bool);
 
 	void copy_text_to_clipboard () const;
 
 	std::string name() const { return _name; }
 
-	framepos_t current_time (framepos_t position = 0) const;
-	framepos_t current_duration (framepos_t position = 0) const;
+	samplepos_t current_time (samplepos_t position = 0) const;
+	samplepos_t current_duration (samplepos_t position = 0) const;
 	void set_session (ARDOUR::Session *s);
 	void set_negative_allowed (bool yn);
 
@@ -93,7 +93,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	 */
 	void set_scale (double x, double y);
 
-	static void print_minsec (framepos_t, char* buf, size_t bufsize, float frame_rate);
+	static void print_minsec (samplepos_t, char* buf, size_t bufsize, float sample_rate);
 
 	sigc::signal<void> ValueChanged;
 	sigc::signal<void> mode_changed;
@@ -130,7 +130,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             _negative_allowed;
 	bool             edit_is_negative;
 
-	framepos_t       _limit_pos;
+	samplepos_t       _limit_pos;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 
@@ -158,7 +158,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 		Timecode_Hours = 1,
 		Timecode_Minutes,
 		Timecode_Seconds,
-		Timecode_Frames,
+		Timecode_frames,
 		MS_Hours,
 		MS_Minutes,
 		MS_Seconds,
@@ -166,7 +166,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 		Bars,
 		Beats,
 		Ticks,
-		AudioFrames,
+		S_Samples,
 	};
 
 	Field index_to_field (int index) const;
@@ -184,8 +184,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	std::string pre_edit_string;
 	std::string input_string;
 
-	framepos_t bbt_reference_time;
-	framepos_t last_when;
+	samplepos_t bbt_reference_time;
+	samplepos_t last_when;
 	bool last_pdelta;
 	bool last_sdelta;
 
@@ -205,25 +205,25 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool on_focus_out_event (GdkEventFocus*);
 
 	void set_slave_info ();
-	void set_timecode (framepos_t, bool);
-	void set_bbt (framepos_t, ARDOUR::framecnt_t, bool);
-	void set_minsec (framepos_t, bool);
-	void set_frames (framepos_t, bool);
+	void set_timecode (samplepos_t, bool);
+	void set_bbt (samplepos_t, ARDOUR::samplecnt_t, bool);
+	void set_minsec (samplepos_t, bool);
+	void set_samples (samplepos_t, bool);
 	void set_out_of_bounds (bool negative);
 
 	void set_clock_dimensions (Gtk::Requisition&);
 
-	framepos_t get_frame_step (Field, framepos_t pos = 0, int dir = 1);
+	samplepos_t get_sample_step (Field, samplepos_t pos = 0, int dir = 1);
 
 	bool timecode_validate_edit (const std::string&);
 	bool bbt_validate_edit (const std::string&);
 	bool minsec_validate_edit (const std::string&);
 
-	framepos_t frames_from_timecode_string (const std::string&) const;
-	framepos_t frames_from_bbt_string (framepos_t, const std::string&) const;
-	framepos_t frame_duration_from_bbt_string (framepos_t, const std::string&) const;
-	framepos_t frames_from_minsec_string (const std::string&) const;
-	framepos_t frames_from_audioframes_string (const std::string&) const;
+	samplepos_t samples_from_timecode_string (const std::string&) const;
+	samplepos_t samples_from_bbt_string (samplepos_t, const std::string&) const;
+	samplepos_t sample_duration_from_bbt_string (samplepos_t, const std::string&) const;
+	samplepos_t samples_from_minsec_string (const std::string&) const;
+	samplepos_t samples_from_audioframes_string (const std::string&) const;
 
 	void session_configuration_changed (std::string);
 	void session_property_changed (const PBD::PropertyChange&);
@@ -234,12 +234,12 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void end_edit (bool);
 	void end_edit_relative (bool);
 	void edit_next_field ();
-	ARDOUR::framecnt_t parse_as_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_distance (const std::string&);
 
-	ARDOUR::framecnt_t parse_as_timecode_distance (const std::string&);
-	ARDOUR::framecnt_t parse_as_minsec_distance (const std::string&);
-	ARDOUR::framecnt_t parse_as_bbt_distance (const std::string&);
-	ARDOUR::framecnt_t parse_as_frames_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_timecode_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_minsec_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_bbt_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_samples_distance (const std::string&);
 
 	void set_font (Pango::FontDescription);
 	void set_colors ();

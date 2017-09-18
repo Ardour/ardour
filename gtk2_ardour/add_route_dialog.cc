@@ -204,12 +204,12 @@ You may select:\n \
 	desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	desc_scroller->add (trk_template_desc);
 
-	//this is the outer frame that surrounds the description and the settings-table
-	trk_template_outer_frame.set_name (X_("TextHighlightFrame"));
+	//this is the outer sample that surrounds the description and the settings-table
+	trk_template_outer_sample.set_name (X_("TextHighlightFrame"));
 
 	//this is the "inner frame" that surrounds the description text
-	trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
-	trk_template_desc_frame.add (*desc_scroller);
+	trk_template_desc_sample.set_name (X_("TextHighlightFrame"));
+	trk_template_desc_sample.add (*desc_scroller);
 
 	/* template_chooser is the treeview showing available templates */
 	trk_template_model = TreeStore::create (track_template_columns);
@@ -238,14 +238,14 @@ You may select:\n \
 	settings_table->set_border_width	(12);
 
 	VBox* settings_vbox = manage (new VBox);
-	settings_vbox->pack_start(trk_template_desc_frame , true, true);
+	settings_vbox->pack_start(trk_template_desc_sample , true, true);
 	settings_vbox->pack_start(*settings_table , true, true);
 	settings_vbox->set_border_width	(4);
 
-	trk_template_outer_frame.add (*settings_vbox);
+	trk_template_outer_sample.add (*settings_vbox);
 
 	template_hbox->pack_start (*template_scroller, true, true);
-	template_hbox->pack_start (trk_template_outer_frame, true, true);
+	template_hbox->pack_start (trk_template_outer_sample, true, true);
 
 	vbox->pack_start (*template_hbox, true, true);
 

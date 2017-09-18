@@ -128,8 +128,8 @@ public:
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
-	long set (framepos_t, framepos_t);
-	void set_preserving_all_ranges (framepos_t, framepos_t);
+	long set (samplepos_t, samplepos_t);
+	void set_preserving_all_ranges (samplepos_t, samplepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -144,7 +144,7 @@ public:
 	void toggle (MidiRegionView*);
 	void toggle (MidiCutBuffer*);
 	void toggle (std::vector<RegionView*>&);
-	long toggle (framepos_t, framepos_t);
+	long toggle (samplepos_t, samplepos_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -159,7 +159,7 @@ public:
 	void add (MidiRegionView*);
 	void add (MidiCutBuffer*);
 	void add (std::vector<RegionView*>&);
-	long add (framepos_t, framepos_t);
+	long add (samplepos_t, samplepos_t);
 	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -176,7 +176,7 @@ public:
 	void remove (MidiRegionView*);
 	void remove (MidiCutBuffer*);
 	void remove (uint32_t selection_id);
-	void remove (framepos_t, framepos_t);
+	void remove (samplepos_t, samplepos_t);
 	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -186,9 +186,9 @@ public:
 
 	void remove_regions (TimeAxisView *);
 
-	void move_time (framecnt_t);
+	void move_time (samplecnt_t);
 
-	void replace (uint32_t time_index, framepos_t start, framepos_t end);
+	void replace (uint32_t time_index, samplepos_t start, samplepos_t end);
 
 	/*
 	 * A note about items in an editing Selection:

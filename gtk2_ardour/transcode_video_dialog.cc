@@ -321,7 +321,7 @@ TranscodeVideoDialog::abort_clicked ()
 }
 
 void
-TranscodeVideoDialog::update_progress (framecnt_t c, framecnt_t a)
+TranscodeVideoDialog::update_progress (samplecnt_t c, samplecnt_t a)
 {
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.5);
@@ -377,7 +377,7 @@ TranscodeVideoDialog::launch_extract ()
 	audio_stream = audio_combo.get_active_row_number() -1;
 	progress_label.set_text (_("Extracting Audio.."));
 
-	if (!transcoder->extract_audio(audiofile, _session->nominal_frame_rate(), audio_stream)) {
+	if (!transcoder->extract_audio(audiofile, _session->nominal_sample_rate(), audio_stream)) {
 		ARDOUR_UI::instance()->popup_error(_("Audio Extraction Failed."));
 		audiofile="";
 		Gtk::Dialog::response(RESPONSE_CANCEL);

@@ -80,7 +80,7 @@ Butler::config_changed (std::string p)
 		_session.adjust_playback_buffering ();
 		if (Config->get_buffering_preset() == Custom) {
 			/* size is in Samples, not bytes */
-			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+			audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 			_session.adjust_playback_buffering ();
 		} else {
 #ifndef NDEBUG
@@ -89,7 +89,7 @@ Butler::config_changed (std::string p)
 		}
 	} else if (p == "capture-buffer-seconds") {
 		if (Config->get_buffering_preset() == Custom) {
-			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
+			audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
 			_session.adjust_capture_buffering ();
 		} else {
 #ifndef NDEBUG
@@ -98,12 +98,12 @@ Butler::config_changed (std::string p)
 		}
 	} else if (p == "buffering-preset") {
 		DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
-		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.frame_rate());
-		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.frame_rate());
+		audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * _session.sample_rate());
+		audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * _session.sample_rate());
 		_session.adjust_capture_buffering ();
 		_session.adjust_playback_buffering ();
 	} else if (p == "midi-readahead") {
-		DiskReader::set_midi_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * _session.frame_rate()));
+		DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * _session.sample_rate()));
 	}
 }
 
@@ -114,7 +114,7 @@ Butler::start_thread()
 	DiskIOProcessor::set_buffering_parameters (Config->get_buffering_preset());
 
 	/* size is in Samples, not bytes */
-	const float rate = (float)_session.frame_rate();
+	const float rate = (float)_session.sample_rate();
 	audio_dstream_capture_buffer_size = (uint32_t) floor (Config->get_audio_capture_buffer_seconds() * rate);
 	audio_dstream_playback_buffer_size = (uint32_t) floor (Config->get_audio_playback_buffer_seconds() * rate);
 
@@ -124,7 +124,7 @@ Butler::start_thread()
 	 */
 	midi_dstream_buffer_size = (uint32_t) floor (Config->get_midi_track_buffer_seconds() * rate);
 
-	DiskReader::set_midi_readahead_frames ((framecnt_t) (Config->get_midi_readahead() * rate));
+	DiskReader::set_midi_readahead_samples ((samplecnt_t) (Config->get_midi_readahead() * rate));
 
 	should_run = false;
 
@@ -215,8 +215,8 @@ Butler::thread_work ()
 			DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttransport work complete @ %1, twr = %2\n", g_get_monotonic_time(), transport_work_requested()));
 		}
 
-		frameoffset_t audition_seek;
-		if (should_run && _session.is_auditioning() && (audition_seek = _session.the_auditioner()->seek_frame()) >= 0) {
+		sampleoffset_t audition_seek;
+		if (should_run && _session.is_auditioning() && (audition_seek = _session.the_auditioner()->seek_sample()) >= 0) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner());
 			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
 			tr->seek(audition_seek);

@@ -912,7 +912,7 @@ ProcessorEntry::Control::start_touch ()
 	if (!c) {
 		return;
 	}
-	c->start_touch (c->session().transport_frame());
+	c->start_touch (c->session().transport_sample());
 }
 
 void
@@ -922,7 +922,7 @@ ProcessorEntry::Control::end_touch ()
 	if (!c) {
 		return;
 	}
-	c->stop_touch (c->session().transport_frame());
+	c->stop_touch (c->session().transport_sample());
 }
 
 void
@@ -1648,7 +1648,7 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 }
 
 void
-ProcessorEntry::PluginInlineDisplay::display_frame (cairo_t* cr, double w, double h)
+ProcessorEntry::PluginInlineDisplay::display_sample (cairo_t* cr, double w, double h)
 {
 	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, w - 1, h + 1, 7);
 }

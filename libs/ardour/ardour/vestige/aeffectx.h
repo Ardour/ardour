@@ -159,7 +159,7 @@ struct _VstMidiEvent
 	// 04
 	int byteSize;
 	// 08
-	int deltaFrames;
+	int deltaSamples;
 	// 0c?
 	int flags;
 	// 10?

@@ -169,7 +169,7 @@ namespace ARDOUR { namespace DSP {
 	void process_map (BufferSet* bufs,
 	                  const ChanMapping& in,
 	                  const ChanMapping& out,
-	                  pframes_t nframes, framecnt_t offset,
+	                  pframes_t nframes, samplecnt_t offset,
 	                  const DataType&);
 
 	/** 1st order Low Pass filter */

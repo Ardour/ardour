@@ -182,12 +182,12 @@ private:
 
 	ArdourWidgets::VPane loc_range_panes;
 
-	Gtk::VBox  loc_frame_box;
+	Gtk::VBox  loc_sample_box;
 	Gtk::Button add_location_button;
 	Gtk::ScrolledWindow  location_rows_scroller;
 	Gtk::VBox            location_rows;
 
-	Gtk::VBox  range_frame_box;
+	Gtk::VBox  range_sample_box;
 	Gtk::Button add_range_button;
 	Gtk::ScrolledWindow  range_rows_scroller;
 	Gtk::VBox            range_rows;

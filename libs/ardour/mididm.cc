@@ -21,7 +21,7 @@
 
 using namespace ARDOUR;
 
-MIDIDM::MIDIDM (framecnt_t sample_rate)
+MIDIDM::MIDIDM (samplecnt_t sample_rate)
   : _sample_rate (sample_rate)
   , _monotonic_cnt (sample_rate)
   , _last_signal_tme (0)
@@ -78,7 +78,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	obuf[1] = (_monotonic_cnt)      & 0x7f;
 	obuf[2] = (_monotonic_cnt >> 7) & 0x7f;
 	pe.midi_event_put (midi_out, 0, obuf, 3);
-#else // sysex MTC frame
+#else // sysex MTC sample
 	uint8_t obuf[10];
 	obuf[0] = 0xf0;
 	obuf[1] = 0x7f;

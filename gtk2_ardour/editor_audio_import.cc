@@ -263,7 +263,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
+Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 {
 	if (!_session) {
 		return;
@@ -275,7 +275,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 		return;
 	}
 
-	const framecnt_t sample_rate = _session->frame_rate ();
+	const samplecnt_t sample_rate = _session->sample_rate ();
 	TempoMap new_map (sample_rate);
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
@@ -297,8 +297,8 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 			}
 
 		} else {
-			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, pos, AudioTime);
-			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, AudioTime);
+			new_map.replace_meter (new_map.meter_section_at_sample (0), meter, bbt, pos, AudioTime);
+			new_map.replace_tempo (new_map.tempo_section_at_sample (0), tempo, 0.0, pos, AudioTime);
 			have_initial_meter = true;
 
 		}
@@ -322,7 +322,7 @@ Editor::do_import (vector<string>        paths,
                    SrcQuality            quality,
                    MidiTrackNameSource   midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
-                   framepos_t&           pos,
+                   samplepos_t&           pos,
                    ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
@@ -461,7 +461,7 @@ Editor::do_import (vector<string>        paths,
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, framepos_t& pos, ARDOUR::PluginInfoPtr instrument)
+Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, samplepos_t& pos, ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -547,7 +547,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          ImportDisposition         disposition,
                          ImportMode                mode,
                          SrcQuality                quality,
-                         framepos_t&               pos,
+                         samplepos_t&               pos,
                          int                       target_regions,
                          int                       target_tracks,
                          boost::shared_ptr<Track>& track,
@@ -617,7 +617,7 @@ Editor::embed_sndfiles (vector<string>            paths,
                         bool&                     check_sample_rate,
                         ImportDisposition         disposition,
                         ImportMode                mode,
-                        framepos_t&               pos,
+                        samplepos_t&               pos,
                         int                       target_regions,
                         int                       target_tracks,
                         boost::shared_ptr<Track>& track,
@@ -643,7 +643,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 			return -3;
 		}
 
-		if (check_sample_rate  && (finfo.samplerate != (int) _session->frame_rate())) {
+		if (check_sample_rate  && (finfo.samplerate != (int) _session->sample_rate())) {
 			vector<string> choices;
 
 			if (multifile) {
@@ -739,7 +739,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 int
 Editor::add_sources (vector<string>            paths,
                      SourceList&               sources,
-                     framepos_t&               pos,
+                     samplepos_t&               pos,
                      ImportDisposition         disposition,
                      ImportMode                mode,
                      int                       target_regions,
@@ -857,12 +857,12 @@ Editor::add_sources (vector<string>            paths,
 
 			/* Fudge region length to ensure it is non-zero; make it 1 beat at 120bpm
 			   for want of a better idea.  It can't be too small, otherwise if this
-			   is a MIDI region the conversion from frames -> beats -> frames will
+			   is a MIDI region the conversion from samples -> beats -> samples will
 			   round it back down to 0 again.
 			*/
-			framecnt_t len = (*x)->length (pos);
+			samplecnt_t len = (*x)->length (pos);
 			if (len == 0) {
-				len = (60.0 / 120.0) * _session->frame_rate ();
+				len = (60.0 / 120.0) * _session->sample_rate ();
 			}
 
 			plist.add (ARDOUR::Properties::start, 0);
@@ -899,7 +899,7 @@ Editor::add_sources (vector<string>            paths,
 	}
 
 	int n = 0;
-	framepos_t rlen = 0;
+	samplepos_t rlen = 0;
 
 	begin_reversible_command (Operations::insert_file);
 
@@ -970,7 +970,7 @@ int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
                                      uint32_t                  in_chans,
                                      uint32_t                  out_chans,
-                                     framepos_t&               pos,
+                                     samplepos_t&               pos,
                                      ImportMode                mode,
                                      boost::shared_ptr<Track>& existing_track,
                                      const string&             new_track_name,

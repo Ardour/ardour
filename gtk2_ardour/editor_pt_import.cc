@@ -122,12 +122,12 @@ Editor::do_ptimport (std::string ptpath,
 	bool ok = false;
 	bool onefailed = false;
 	PTFFormat ptf;
-	framepos_t pos = -1;
+	samplepos_t pos = -1;
 
 	vector<ptflookup_t> ptfwavpair;
 	vector<ptflookup_t> ptfregpair;
 
-	if (ptf.load(ptpath, _session->frame_rate()) == -1) {
+	if (ptf.load(ptpath, _session->sample_rate()) == -1) {
 		MessageDialog msg (_("Doesn't seem to be a valid PT session file"));
 		msg.run ();
 		return;
@@ -229,9 +229,9 @@ Editor::do_ptimport (std::string ptpath,
 			/* Empty wave - assume MIDI region */
 			boost::shared_ptr<MidiTrack> midi_track = mt.back();
 			boost::shared_ptr<Playlist> playlist = midi_track->playlist();
-			framepos_t f = (framepos_t)a->startpos;
-			framecnt_t length = (framecnt_t)a->length;
-			MusicFrame pos (f, 0);
+			samplepos_t f = (samplepos_t)a->startpos;
+			samplecnt_t length = (samplecnt_t)a->length;
+			MusicSample pos (f, 0);
 			boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (midi_track);
 			PropertyList plist;
 			plist.add (ARDOUR::Properties::start, 0);
@@ -239,8 +239,8 @@ Editor::do_ptimport (std::string ptpath,
 			plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
 			boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 			/* sets beat position */
-			region->set_position (pos.frame, pos.division);
-			midi_track->playlist()->add_region (region, pos.frame, 1.0, false, pos.division);
+			region->set_position (pos.sample, pos.division);
+			midi_track->playlist()->add_region (region, pos.sample, 1.0, false, pos.division);
 
 			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
 			boost::shared_ptr<MidiModel> mm = mr->midi_source(0)->model();

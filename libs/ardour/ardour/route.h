@@ -133,26 +133,26 @@ public:
 
 	/* these are the core of the API of a Route. see the protected sections as well */
 
-	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                  int declick, bool& need_butler);
 
-	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                     bool state_changing);
 
-	virtual int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
+	virtual int silent_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                         bool& need_butler);
 
 	virtual bool can_record() { return false; }
 
-	virtual void non_realtime_transport_stop (framepos_t now, bool flush);
+	virtual void non_realtime_transport_stop (samplepos_t now, bool flush);
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
-	virtual void non_realtime_locate (framepos_t);
+	virtual void non_realtime_locate (samplepos_t);
 	virtual void set_pending_declick (int);
 
 	/* end of vfunc-based API */
 
-	void shift (framepos_t, framecnt_t);
+	void shift (samplepos_t, samplecnt_t);
 
 	void set_trim (gain_t val, PBD::Controllable::GroupControlDisposition);
 
@@ -336,15 +336,15 @@ public:
 	 */
 	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
-	framecnt_t set_private_port_latencies (bool playback) const;
-	void       set_public_port_latencies (framecnt_t, bool playback) const;
+	samplecnt_t set_private_port_latencies (bool playback) const;
+	void       set_public_port_latencies (samplecnt_t, bool playback) const;
 
-	framecnt_t   update_signal_latency();
-	virtual void set_latency_compensation (framecnt_t);
+	samplecnt_t   update_signal_latency();
+	virtual void set_latency_compensation (samplecnt_t);
 
-	void set_user_latency (framecnt_t);
-	framecnt_t initial_delay() const { return _initial_delay; }
-	framecnt_t signal_latency() const { return _signal_latency; }
+	void set_user_latency (samplecnt_t);
+	samplecnt_t initial_delay() const { return _initial_delay; }
+	samplecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void>       active_changed;
 	PBD::Signal0<void>       denormal_protection_changed;
@@ -582,7 +582,7 @@ public:
 	/* can only be executed by a route for which is_monitor() is true
 	 *	 (i.e. the monitor out)
 	 */
-	void monitor_run (framepos_t start_frame, framepos_t end_frame,
+	void monitor_run (samplepos_t start_sample, samplepos_t end_sample,
 			pframes_t nframes, int declick);
 
 	bool slaved_to (boost::shared_ptr<VCA>) const;
@@ -599,39 +599,39 @@ public:
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
-	virtual framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&) { return nframes; }
+	virtual samplecnt_t check_initial_delay (samplecnt_t nframes, samplepos_t&) { return nframes; }
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
-	void passthru (BufferSet&, framepos_t start_frame, framepos_t end_frame, pframes_t nframes, int declick);
+	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick);
 
-	virtual void write_out_of_band_data (BufferSet& /* bufs */, framepos_t /* start_frame */, framepos_t /* end_frame */,
-					     framecnt_t /* nframes */) {}
+	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */,
+					     samplecnt_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
-	                                     framepos_t start_frame, framepos_t end_frame,
+	                                     samplepos_t start_sample, samplepos_t end_sample,
 	                                     pframes_t nframes, int declick,
 	                                     bool gain_automation_ok);
 
-	void flush_processor_buffers_locked (framecnt_t nframes);
+	void flush_processor_buffers_locked (samplecnt_t nframes);
 
 	virtual void bounce_process (BufferSet& bufs,
-	                             framepos_t start_frame, framecnt_t nframes,
+	                             samplepos_t start_sample, samplecnt_t nframes,
 															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,
 	                             bool for_export, bool for_freeze);
 
-	framecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	samplecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 
 	boost::shared_ptr<IO> _input;
 	boost::shared_ptr<IO> _output;
 
 	bool           _active;
-	framecnt_t     _signal_latency;
-	framecnt_t     _signal_latency_at_amp_position;
-	framecnt_t     _signal_latency_at_trim_position;
-	framecnt_t     _initial_delay;
-	framecnt_t     _roll_delay;
+	samplecnt_t     _signal_latency;
+	samplecnt_t     _signal_latency_at_amp_position;
+	samplecnt_t     _signal_latency_at_trim_position;
+	samplecnt_t     _initial_delay;
+	samplecnt_t     _roll_delay;
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock   _processor_lock;
@@ -686,11 +686,11 @@ public:
 
 	int configure_processors (ProcessorStreams*);
 
-	void passthru_silence (framepos_t start_frame, framepos_t end_frame,
+	void passthru_silence (samplepos_t start_sample, samplepos_t end_sample,
 	                       pframes_t nframes, int declick);
 
-	void silence (framecnt_t);
-	void silence_unlocked (framecnt_t);
+	void silence (samplecnt_t);
+	void silence_unlocked (samplecnt_t);
 
 	ChanCount processor_max_streams;
 	ChanCount processor_out_streams;
@@ -698,7 +698,7 @@ public:
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-	virtual void maybe_declick (BufferSet&, framecnt_t, int);
+	virtual void maybe_declick (BufferSet&, samplecnt_t, int);
 
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp>       _amp;
@@ -746,7 +746,7 @@ private:
 	void set_self_solo (bool yn);
 
 	void set_processor_positions ();
-	framecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, framecnt_t) const;
+	samplecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, samplecnt_t) const;
 
 	void setup_invisible_processors ();
 

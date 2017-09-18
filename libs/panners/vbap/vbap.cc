@@ -356,7 +356,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
 void
 VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
-                                     framepos_t /*start*/, framepos_t /*end*/,
+                                     samplepos_t /*start*/, samplepos_t /*end*/,
 				     pframes_t /*nframes*/, pan_t** /*buffers*/, uint32_t /*which*/)
 {
 	/* XXX to be implemented */

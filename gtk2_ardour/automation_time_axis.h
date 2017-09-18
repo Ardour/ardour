@@ -80,7 +80,7 @@ public:
 	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
 
-	void add_automation_event (GdkEvent *, framepos_t, double, bool with_guard_points);
+	void add_automation_event (GdkEvent *, samplepos_t, double, bool with_guard_points);
 
 	void clear_lines ();
 
@@ -91,16 +91,16 @@ public:
 	std::list<boost::shared_ptr<AutomationLine> > lines () const;
 
 	void set_selected_points (PointSelection&);
-	void get_selectables (ARDOUR::framepos_t start, ARDOUR::framepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
+	void get_selectables (ARDOUR::samplepos_t start, ARDOUR::samplepos_t end, double top, double bot, std::list<Selectable *>&, bool within = false);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	void show_timestretch (framepos_t /*start*/, framepos_t /*end*/, int /*layers*/, int /*layer*/) {}
+	void show_timestretch (samplepos_t /*start*/, samplepos_t /*end*/, int /*layers*/, int /*layer*/) {}
 	void hide_timestretch () {}
 
 	/* editing operations */
 
 	void cut_copy_clear (Selection&, Editing::CutCopyOp);
-	bool paste (ARDOUR::framepos_t, const Selection&, PasteContext&, const int32_t sub_num);
+	bool paste (ARDOUR::samplepos_t, const Selection&, PasteContext&, const int32_t sub_num);
 
 	int  set_state (const XMLNode&, int version);
 
@@ -183,7 +183,7 @@ protected:
 	void build_display_menu ();
 
 	void cut_copy_clear_one (AutomationLine&, Selection&, Editing::CutCopyOp);
-	bool paste_one (ARDOUR::framepos_t, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
+	bool paste_one (ARDOUR::samplepos_t, unsigned, float times, const Selection&, ItemCounts& counts, bool greedy=false);
 	void route_going_away ();
 
 	void set_automation_state (ARDOUR::AutoState);

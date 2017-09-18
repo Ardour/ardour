@@ -197,7 +197,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	framecnt_t const region_samples = _time_clock.current_time() - (_region_view->region()->position() - _region_view->region()->start());
+	samplecnt_t const region_samples = _time_clock.current_time() - (_region_view->region()->position() - _region_view->region()->start());
 	Evoral::Beats const t = _region_view->source_relative_time_converter().from (region_samples);
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
@@ -211,7 +211,7 @@ EditNoteDialog::done (int r)
 
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
-			framepos_t const note_end_sample = region_samples + _length_clock.current_duration (_time_clock.current_time());
+			samplepos_t const note_end_sample = region_samples + _length_clock.current_duration (_time_clock.current_time());
 			Evoral::Beats const d = _region_view->source_relative_time_converter().from (note_end_sample) - (*i)->note()->time();
 			if (d != (*i)->note()->length()) {
 				_region_view->change_note_length (*i, d);

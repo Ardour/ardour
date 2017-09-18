@@ -26,7 +26,7 @@ public:
 		get_vbox()->pack_start (*cancel_button, PACK_SHRINK);
 	}
 
-	void update_progress (framecnt_t c, framecnt_t t) {
+	void update_progress (samplecnt_t c, samplecnt_t t) {
 		pbar->set_fraction ((float) c / (float) t);
 		// see also ARDOUR_UI::gui_idle_handler();
 		int timeout = 30;

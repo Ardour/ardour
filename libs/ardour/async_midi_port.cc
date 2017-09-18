@@ -59,7 +59,7 @@ AsyncMIDIPort::~AsyncMIDIPort ()
 }
 
 void
-AsyncMIDIPort::set_timer (boost::function<MIDI::framecnt_t (void)>& f)
+AsyncMIDIPort::set_timer (boost::function<MIDI::samplecnt_t (void)>& f)
 {
 	timer = f;
 	have_timer = true;
@@ -131,7 +131,7 @@ AsyncMIDIPort::cycle_start (MIDI::pframes_t nframes)
 
 	if (ARDOUR::Port::receives_input()) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
-		framecnt_t when;
+		samplecnt_t when;
 
 		if (have_timer) {
 			when = timer ();
@@ -326,7 +326,7 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 }
 
 void
-AsyncMIDIPort::parse (MIDI::framecnt_t)
+AsyncMIDIPort::parse (MIDI::samplecnt_t)
 {
 	MIDI::byte buf[1];
 

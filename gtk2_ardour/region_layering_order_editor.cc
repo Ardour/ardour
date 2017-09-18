@@ -186,7 +186,7 @@ RegionLayeringOrderEditor::refill ()
 }
 
 void
-RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAxisView* tav, boost::shared_ptr<Playlist> pl, framepos_t pos)
+RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAxisView* tav, boost::shared_ptr<Playlist> pl, samplepos_t pos)
 {
 	track_name_label.set_text (a_name);
 

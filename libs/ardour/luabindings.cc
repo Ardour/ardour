@@ -35,7 +35,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/buffer_set.h"
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
 #include "ardour/dsp_filter.h"
@@ -170,8 +170,8 @@ CLASSKEYS(Selectable*);
 CLASSKEYS(std::list<Selectable*>);
 
 CLASSKEYS(ARDOUR::AudioEngine);
-CLASSKEYS(ARDOUR::BeatsFramesConverter);
-CLASSKEYS(ARDOUR::DoubleBeatsFramesConverter);
+CLASSKEYS(ARDOUR::BeatsSamplesConverter);
+CLASSKEYS(ARDOUR::DoubleBeatsSamplesConverter);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
@@ -207,7 +207,7 @@ CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(PBD::StatefulDestructible);
 
 CLASSKEYS(Evoral::Beats);
-CLASSKEYS(Evoral::Event<framepos_t>);
+CLASSKEYS(Evoral::Event<samplepos_t>);
 CLASSKEYS(Evoral::ControlEvent);
 
 
@@ -347,7 +347,7 @@ LuaBindings::stddef (lua_State* L)
 		.beginStdVector <float*> ("FloatArrayVector")
 		.endClass ()
 
-		// framepos_t, frameoffset_t lists e.g. AnalysisFeatureList
+		// samplepos_t, sampleoffset_t lists e.g. AnalysisFeatureList
 		.beginStdList <int64_t> ("Int64List")
 		.endClass ()
 
@@ -508,12 +508,12 @@ LuaBindings::common (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 
 		.beginNamespace ("Evoral")
-		.beginClass <Evoral::Event<framepos_t> > ("Event")
-		.addFunction ("clear", &Evoral::Event<framepos_t>::clear)
-		.addFunction ("size", &Evoral::Event<framepos_t>::size)
-		.addFunction ("set_buffer", &Evoral::Event<framepos_t>::set_buffer)
-		.addFunction ("buffer", (uint8_t*(Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::buffer)
-		.addFunction ("time", (framepos_t (Evoral::Event<framepos_t>::*)())&Evoral::Event<framepos_t>::time)
+		.beginClass <Evoral::Event<samplepos_t> > ("Event")
+		.addFunction ("clear", &Evoral::Event<samplepos_t>::clear)
+		.addFunction ("size", &Evoral::Event<samplepos_t>::size)
+		.addFunction ("set_buffer", &Evoral::Event<samplepos_t>::set_buffer)
+		.addFunction ("buffer", (uint8_t*(Evoral::Event<samplepos_t>::*)())&Evoral::Event<samplepos_t>::buffer)
+		.addFunction ("time", (samplepos_t (Evoral::Event<samplepos_t>::*)())&Evoral::Event<samplepos_t>::time)
 		.endClass ()
 
 		.beginClass <Evoral::Beats> ("Beats")
@@ -564,10 +564,10 @@ LuaBindings::common (lua_State* L)
 		.addData ("logarithmic", &Evoral::ParameterDescriptor::logarithmic)
 		.endClass ()
 
-		.beginClass <Evoral::Range<framepos_t> > ("Range")
-		.addConstructor <void (*) (framepos_t, framepos_t)> ()
-		.addData ("from", &Evoral::Range<framepos_t>::from)
-		.addData ("to", &Evoral::Range<framepos_t>::to)
+		.beginClass <Evoral::Range<samplepos_t> > ("Range")
+		.addConstructor <void (*) (samplepos_t, samplepos_t)> ()
+		.addData ("from", &Evoral::Range<samplepos_t>::from)
+		.addData ("to", &Evoral::Range<samplepos_t>::to)
 		.endClass ()
 
 		.deriveWSPtrClass <Evoral::Sequence<Evoral::Beats>, Evoral::ControlSet> ("Sequence")
@@ -722,15 +722,15 @@ LuaBindings::common (lua_State* L)
 		.beginClass <Progress> ("Progress")
 		.endClass ()
 
-		.beginClass <MusicFrame> ("MusicFrame")
-		.addConstructor <void (*) (framepos_t, int32_t)> ()
-		.addFunction ("set", &MusicFrame::set)
-		.addData ("frame", &MusicFrame::frame)
-		.addData ("division", &MusicFrame::division)
+		.beginClass <MusicSample> ("MusicSample")
+		.addConstructor <void (*) (samplepos_t, int32_t)> ()
+		.addFunction ("set", &MusicSample::set)
+		.addData ("frame", &MusicSample::sample)
+		.addData ("division", &MusicSample::division)
 		.endClass ()
 
 		.beginClass <AudioRange> ("AudioRange")
-		.addConstructor <void (*) (framepos_t, framepos_t, uint32_t)> ()
+		.addConstructor <void (*) (samplepos_t, samplepos_t, uint32_t)> ()
 		.addFunction ("length", &AudioRange::length)
 		.addFunction ("equal", &AudioRange::equal)
 		.addData ("start", &AudioRange::start)
@@ -772,7 +772,7 @@ LuaBindings::common (lua_State* L)
 		// templated class definitions
 		.beginClass <PBD::PropertyDescriptor<bool> > ("BoolProperty").endClass ()
 		.beginClass <PBD::PropertyDescriptor<float> > ("FloatProperty").endClass ()
-		.beginClass <PBD::PropertyDescriptor<framepos_t> > ("FrameposProperty").endClass ()
+		.beginClass <PBD::PropertyDescriptor<samplepos_t> > ("FrameposProperty").endClass ()
 		// actual references (TODO: also expose GQuark for std::set)
 		//   ardour/region.h
 		.addConst ("Start", &ARDOUR::Properties::start)
@@ -787,7 +787,7 @@ LuaBindings::common (lua_State* L)
 		// expand templated PropertyDescriptor<T>
 		.addFunction ("containsBool", &PBD::PropertyChange::contains<bool>)
 		.addFunction ("containsFloat", &PBD::PropertyChange::contains<float>)
-		.addFunction ("containsFramePos", &PBD::PropertyChange::contains<framepos_t>)
+		.addFunction ("containsFramePos", &PBD::PropertyChange::contains<samplepos_t>)
 		.endClass ()
 
 		.beginClass <PBD::PropertyList> ("PropertyList")
@@ -1067,7 +1067,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("region_by_id", &Playlist::region_by_id)
 		.addFunction ("data_type", &Playlist::data_type)
 		.addFunction ("n_regions", &Playlist::n_regions)
-		//.addFunction ("get_extent", &Playlist::get_extent) // pair<framepos_t, framepos_t>
+		//.addFunction ("get_extent", &Playlist::get_extent) // pair<samplepos_t, samplepos_t>
 		.addFunction ("region_list", &Playlist::region_list)
 		.addFunction ("add_region", &Playlist::add_region)
 		.addFunction ("remove_region", &Playlist::remove_region)
@@ -1085,13 +1085,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("lower_region", &Playlist::lower_region)
 		.addFunction ("raise_region_to_top", &Playlist::raise_region_to_top)
 		.addFunction ("lower_region_to_bottom", &Playlist::lower_region_to_bottom)
-		.addFunction ("duplicate", (void (Playlist::*)(boost::shared_ptr<Region>, framepos_t, framecnt_t, float))&Playlist::duplicate)
+		.addFunction ("duplicate", (void (Playlist::*)(boost::shared_ptr<Region>, samplepos_t, samplecnt_t, float))&Playlist::duplicate)
 		.addFunction ("duplicate_until", &Playlist::duplicate_until)
 		.addFunction ("duplicate_range", &Playlist::duplicate_range)
 		.addFunction ("combine", &Playlist::combine)
 		.addFunction ("uncombine", &Playlist::uncombine)
 		.addFunction ("split_region", &Playlist::split_region)
-		.addFunction ("split", (void (Playlist::*)(framepos_t))&Playlist::split)
+		.addFunction ("split", (void (Playlist::*)(samplepos_t))&Playlist::split)
 		.addFunction ("cut", (boost::shared_ptr<Playlist> (Playlist::*)(std::list<AudioRange>&, bool))&Playlist::cut)
 #if 0
 		.addFunction ("copy", &Playlist::copy)
@@ -1602,41 +1602,41 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("note_type", &Tempo::note_type)
 		.addFunction ("note_types_per_minute",  (double (Tempo::*)() const)&Tempo::note_types_per_minute)
 		.addFunction ("quarter_notes_per_minute", &Tempo::quarter_notes_per_minute)
-		.addFunction ("frames_per_quarter_note", &Tempo::frames_per_quarter_note)
-		.addFunction ("frames_per_note_type", &Tempo::frames_per_note_type)
+		.addFunction ("samples_per_quarter_note", &Tempo::samples_per_quarter_note)
+		.addFunction ("samples_per_note_type", &Tempo::samples_per_note_type)
 		.endClass ()
 
 		.beginClass <Meter> ("Meter")
 		.addConstructor <void (*) (double, double)> ()
 		.addFunction ("divisions_per_bar", &Meter::divisions_per_bar)
 		.addFunction ("note_divisor", &Meter::note_divisor)
-		.addFunction ("frames_per_bar", &Meter::frames_per_bar)
-		.addFunction ("frames_per_grid", &Meter::frames_per_grid)
+		.addFunction ("samples_per_bar", &Meter::samples_per_bar)
+		.addFunction ("samples_per_grid", &Meter::samples_per_grid)
 		.endClass ()
 
-		.beginClass <BeatsFramesConverter> ("BeatsFramesConverter")
-		.addConstructor <void (*) (const TempoMap&, framepos_t)> ()
-		.addFunction ("to", &BeatsFramesConverter::to)
-		.addFunction ("from", &BeatsFramesConverter::from)
+		.beginClass <BeatsSamplesConverter> ("BeatsSamplesConverter")
+		.addConstructor <void (*) (const TempoMap&, samplepos_t)> ()
+		.addFunction ("to", &BeatsSamplesConverter::to)
+		.addFunction ("from", &BeatsSamplesConverter::from)
 		.endClass ()
 
-		.beginClass <DoubleBeatsFramesConverter> ("DoubleBeatsFramesConverter")
-		.addConstructor <void (*) (const TempoMap&, framepos_t)> ()
-		.addFunction ("to", &DoubleBeatsFramesConverter::to)
-		.addFunction ("from", &DoubleBeatsFramesConverter::from)
+		.beginClass <DoubleBeatsSamplesConverter> ("DoubleBeatsSamplesConverter")
+		.addConstructor <void (*) (const TempoMap&, samplepos_t)> ()
+		.addFunction ("to", &DoubleBeatsSamplesConverter::to)
+		.addFunction ("from", &DoubleBeatsSamplesConverter::from)
 		.endClass ()
 
 		.beginClass <TempoMap> ("TempoMap")
 		.addFunction ("add_tempo", &TempoMap::add_tempo)
 		.addFunction ("add_meter", &TempoMap::add_meter)
-		.addFunction ("tempo_section_at_frame", (TempoSection& (TempoMap::*)(framepos_t))&TempoMap::tempo_section_at_frame)
-		.addFunction ("tempo_section_at_frame", (const TempoSection& (TempoMap::*)(framepos_t) const)&TempoMap::tempo_section_at_frame)
-		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_frame)
+		.addFunction ("tempo_section_at_frame", (TempoSection& (TempoMap::*)(samplepos_t))&TempoMap::tempo_section_at_sample)
+		.addFunction ("tempo_section_at_frame", (const TempoSection& (TempoMap::*)(samplepos_t) const)&TempoMap::tempo_section_at_sample)
+		.addFunction ("meter_section_at_frame", &TempoMap::meter_section_at_sample)
 		.addFunction ("meter_section_at_beat", &TempoMap::meter_section_at_beat)
-		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_frame)
-		.addFunction ("exact_beat_at_frame", &TempoMap::exact_beat_at_frame)
-		.addFunction ("exact_qn_at_frame", &TempoMap::exact_qn_at_frame)
-		.addFunction ("framepos_plus_qn", &TempoMap::framepos_plus_qn)
+		.addFunction ("bbt_at_frame", &TempoMap::bbt_at_sample)
+		.addFunction ("exact_beat_at_frame", &TempoMap::exact_beat_at_sample)
+		.addFunction ("exact_qn_at_frame", &TempoMap::exact_qn_at_sample)
+		.addFunction ("samplepos_plus_qn", &TempoMap::samplepos_plus_qn)
 		.addFunction ("framewalk_to_qn", &TempoMap::framewalk_to_qn)
 		.endClass ()
 
@@ -2099,10 +2099,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("scripts_changed", &Session::scripts_changed) // used internally
 		.addFunction ("transport_rolling", &Session::transport_rolling)
 		.addFunction ("request_transport_speed", &Session::request_transport_speed)
-		.addFunction ("transport_frame", &Session::transport_frame)
+		.addFunction ("transport_frame", &Session::transport_sample)
 		.addFunction ("transport_speed", &Session::transport_speed)
-		.addFunction ("frame_rate", &Session::frame_rate)
-		.addFunction ("nominal_frame_rate", &Session::nominal_frame_rate)
+		.addFunction ("sample_rate", &Session::sample_rate)
+		.addFunction ("nominal_sample_rate", &Session::nominal_sample_rate)
 		.addFunction ("samples_per_timecode_frame", &Session::samples_per_timecode_frame)
 		.addFunction ("timecode_frames_per_hour", &Session::timecode_frames_per_hour)
 		.addFunction ("timecode_frames_per_second", &Session::timecode_frames_per_second)
@@ -2114,8 +2114,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("last_transport_start", &Session::last_transport_start)
 		.addFunction ("goto_start", &Session::goto_start)
 		.addFunction ("goto_end", &Session::goto_end)
-		.addFunction ("current_start_frame", &Session::current_start_frame)
-		.addFunction ("current_end_frame", &Session::current_end_frame)
+		.addFunction ("current_start_frame", &Session::current_start_sample)
+		.addFunction ("current_end_frame", &Session::current_end_sample)
 		.addFunction ("actively_recording", &Session::actively_recording)
 		.addFunction ("new_audio_track", &Session::new_audio_track)
 		.addFunction ("new_audio_route", &Session::new_audio_route)
@@ -2320,11 +2320,11 @@ LuaBindings::dsp (lua_State* L)
 
 		.beginClass <AudioBuffer> ("AudioBuffer")
 		.addEqualCheck ()
-		.addFunction ("data", (Sample*(AudioBuffer::*)(framecnt_t))&AudioBuffer::data)
+		.addFunction ("data", (Sample*(AudioBuffer::*)(samplecnt_t))&AudioBuffer::data)
 		.addFunction ("silence", &AudioBuffer::silence)
 		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
 		.addFunction ("check_silence", &AudioBuffer::check_silence)
-		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, framecnt_t, framecnt_t, framecnt_t))&AudioBuffer::check_silence)
+		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, samplecnt_t, samplecnt_t, samplecnt_t))&AudioBuffer::check_silence)
 		.endClass()
 
 		.beginClass <MidiBuffer> ("MidiBuffer")
@@ -2334,10 +2334,10 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("empty", &MidiBuffer::empty)
 		.addFunction ("resize", &MidiBuffer::resize)
 		.addFunction ("copy", (void (MidiBuffer::*)(MidiBuffer const * const))&MidiBuffer::copy)
-		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::Event<framepos_t>&))&MidiBuffer::push_back)
-		.addFunction ("push_back", (bool (MidiBuffer::*)(framepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
+		.addFunction ("push_event", (bool (MidiBuffer::*)(const Evoral::Event<samplepos_t>&))&MidiBuffer::push_back)
+		.addFunction ("push_back", (bool (MidiBuffer::*)(samplepos_t, size_t, const uint8_t*))&MidiBuffer::push_back)
 		// TODO iterators..
-		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::Event<framepos_t>, MidiBuffer>)
+		.addExtCFunction ("table", &luabridge::CFunc::listToTable<const Evoral::Event<samplepos_t>, MidiBuffer>)
 		.endClass()
 
 		.beginClass <BufferSet> ("BufferSet")
@@ -2350,12 +2350,12 @@ LuaBindings::dsp (lua_State* L)
 
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Evoral")
-		.deriveClass <Evoral::Event<framepos_t>, Evoral::Event<framepos_t> > ("Event")
+		.deriveClass <Evoral::Event<samplepos_t>, Evoral::Event<samplepos_t> > ("Event")
 		// add Ctor?
-		.addFunction ("type", &Evoral::Event<framepos_t>::type)
-		.addFunction ("channel", &Evoral::Event<framepos_t>::channel)
-		.addFunction ("set_type", &Evoral::Event<framepos_t>::set_type)
-		.addFunction ("set_channel", &Evoral::Event<framepos_t>::set_channel)
+		.addFunction ("type", &Evoral::Event<samplepos_t>::type)
+		.addFunction ("channel", &Evoral::Event<samplepos_t>::channel)
+		.addFunction ("set_type", &Evoral::Event<samplepos_t>::set_type)
+		.addFunction ("set_channel", &Evoral::Event<samplepos_t>::set_channel)
 		.endClass ()
 		.endNamespace ();
 

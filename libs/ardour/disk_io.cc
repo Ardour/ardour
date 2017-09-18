@@ -59,9 +59,9 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
         , speed_buffer_size (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
-	, _midi_buf (new MidiRingBuffer<framepos_t> (s.butler()->midi_diskstream_buffer_size()))
-	, _frames_written_to_ringbuffer (0)
-	, _frames_read_from_ringbuffer (0)
+	, _midi_buf (new MidiRingBuffer<samplepos_t> (s.butler()->midi_diskstream_buffer_size()))
+	, _samples_written_to_ringbuffer (0)
+	, _samples_read_from_ringbuffer (0)
 {
 	midi_interpolation.add_channel_to (0,0);
 	set_display_to_user (false);
@@ -76,17 +76,17 @@ DiskIOProcessor::init ()
 void
 DiskIOProcessor::set_buffering_parameters (BufferingPreset bp)
 {
-	framecnt_t read_chunk_size;
-	framecnt_t read_buffer_size;
-	framecnt_t write_chunk_size;
-	framecnt_t write_buffer_size;
+	samplecnt_t read_chunk_size;
+	samplecnt_t read_buffer_size;
+	samplecnt_t write_chunk_size;
+	samplecnt_t write_buffer_size;
 
 	if (!get_buffering_presets (bp, read_chunk_size, read_buffer_size, write_chunk_size, write_buffer_size)) {
 		return;
 	}
 
-	DiskReader::set_chunk_frames (read_chunk_size);
-	DiskWriter::set_chunk_frames (write_chunk_size);
+	DiskReader::set_chunk_samples (read_chunk_size);
+	DiskWriter::set_chunk_samples (write_chunk_size);
 
 	Config->set_audio_capture_buffer_seconds (write_buffer_size);
 	Config->set_audio_playback_buffer_seconds (read_buffer_size);
@@ -94,10 +94,10 @@ DiskIOProcessor::set_buffering_parameters (BufferingPreset bp)
 
 bool
 DiskIOProcessor::get_buffering_presets (BufferingPreset bp,
-                                        framecnt_t& read_chunk_size,
-                                        framecnt_t& read_buffer_size,
-                                        framecnt_t& write_chunk_size,
-                                        framecnt_t& write_buffer_size)
+                                        samplecnt_t& read_chunk_size,
+                                        samplecnt_t& read_buffer_size,
+                                        samplecnt_t& write_chunk_size,
+                                        samplecnt_t& write_buffer_size)
 {
 	switch (bp) {
 	case Small:
@@ -168,13 +168,13 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 
 	if (in.n_midi() > 0 && !_midi_buf) {
 		const size_t size = _session.butler()->midi_diskstream_buffer_size();
-		_midi_buf = new MidiRingBuffer<framepos_t>(size);
+		_midi_buf = new MidiRingBuffer<samplepos_t>(size);
 		midi_interpolation.add_channel_to (0,0);
 		changed = true;
 	}
 
 	if (changed) {
-		seek (_session.transport_frame());
+		seek (_session.transport_sample());
 	}
 
 	return Processor::configure_io (in, out);
@@ -203,7 +203,7 @@ DiskIOProcessor::set_loop (Location *location)
 }
 
 void
-DiskIOProcessor::non_realtime_locate (framepos_t location)
+DiskIOProcessor::non_realtime_locate (samplepos_t location)
 {
 	/* now refill channel buffers */
 
@@ -218,7 +218,7 @@ DiskIOProcessor::non_realtime_speed_change ()
 	}
 
 	if (_seek_required) {
-		seek (_session.transport_frame(), true);
+		seek (_session.transport_sample(), true);
 		_seek_required = false;
 	}
 }
@@ -226,7 +226,7 @@ DiskIOProcessor::non_realtime_speed_change ()
 bool
 DiskIOProcessor::realtime_speed_change ()
 {
-	const framecnt_t required_wrap_size = (framecnt_t) ceil (_session.get_block_size() * fabs (_session.transport_speed())) + 2;
+	const samplecnt_t required_wrap_size = (samplecnt_t) ceil (_session.get_block_size() * fabs (_session.transport_speed())) + 2;
 	bool _buffer_reallocation_required;
 
 	if (required_wrap_size > wrap_buffer_size) {
@@ -367,7 +367,7 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 	return 0;
 }
 
-DiskIOProcessor::ChannelInfo::ChannelInfo (framecnt_t bufsize)
+DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
 {
 	buf = new RingBufferNPT<Sample> (bufsize);
 
@@ -382,7 +382,7 @@ DiskIOProcessor::ChannelInfo::ChannelInfo (framecnt_t bufsize)
 }
 
 void
-DiskIOProcessor::ChannelInfo::resize (framecnt_t bufsize)
+DiskIOProcessor::ChannelInfo::resize (samplecnt_t bufsize)
 {
 	delete buf;
 	buf = new RingBufferNPT<Sample> (bufsize);
@@ -423,9 +423,9 @@ DiskIOProcessor::set_route (boost::shared_ptr<Route> r)
  */
 void
 DiskIOProcessor::get_location_times(const Location* location,
-                   framepos_t*     start,
-                   framepos_t*     end,
-                   framepos_t*     length)
+                   samplepos_t*     start,
+                   samplepos_t*     end,
+                   samplepos_t*     length)
 {
 	if (location) {
 		*start  = location->start();

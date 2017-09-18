@@ -79,7 +79,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	++n;
 
 	_minimum_length->set_session (s);
-	_minimum_length->set_mode (AudioClock::Frames);
+	_minimum_length->set_mode (AudioClock::Samples);
 	_minimum_length->set (1000, true);
 
 	table->attach (*Gtk::manage (new Gtk::Label (_("Fade length"), 1, 0.5)), 0, 1, n, n + 1, Gtk::FILL);
@@ -87,7 +87,7 @@ StripSilenceDialog::StripSilenceDialog (Session* s, list<RegionView*> const & v)
 	++n;
 
 	_fade_length->set_session (s);
-	_fade_length->set_mode (AudioClock::Frames);
+	_fade_length->set_mode (AudioClock::Samples);
 	_fade_length->set (64, true);
 
 	hbox->pack_start (*table);
@@ -176,7 +176,7 @@ StripSilenceDialog::drop_rects ()
 	_lock.unlock ();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->drop_silent_frames ();
+		v->view->drop_silent_samples ();
 	}
 
 	cancel_button->set_sensitive (false);
@@ -223,7 +223,7 @@ StripSilenceDialog::update_silence_rects ()
 	double const y = _threshold.get_value();
 
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		v->view->set_silent_frames (v->intervals, y);
+		v->view->set_silent_samples (v->intervals, y);
 	}
 }
 
@@ -320,16 +320,16 @@ StripSilenceDialog::threshold_changed ()
 	restart_thread ();
 }
 
-framecnt_t
+samplecnt_t
 StripSilenceDialog::minimum_length () const
 {
-	return std::max((framecnt_t)1, _minimum_length->current_duration (views.front().view->region()->position()));
+	return std::max((samplecnt_t)1, _minimum_length->current_duration (views.front().view->region()->position()));
 }
 
-framecnt_t
+samplecnt_t
 StripSilenceDialog::fade_length () const
 {
-	return std::max((framecnt_t)0, _fade_length->current_duration (views.front().view->region()->position()));
+	return std::max((samplecnt_t)0, _fade_length->current_duration (views.front().view->region()->position()));
 }
 
 void

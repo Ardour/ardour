@@ -727,7 +727,7 @@ EditorRegions::update_all_rows ()
 }
 
 void
-EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool onoff)
+EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
 {
 	Timecode::BBT_Time bbt;
 	Timecode::Time timecode;
@@ -740,7 +740,7 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 
 	switch (ARDOUR_UI::instance()->secondary_clock->mode ()) {
 	case AudioClock::BBT:
-		bbt = _session->tempo_map().bbt_at_frame (pos);
+		bbt = _session->tempo_map().bbt_at_sample (pos);
 		if (onoff) {
 			snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		} else {
@@ -749,17 +749,17 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 		break;
 
 	case AudioClock::MinSec:
-		framepos_t left;
+		samplepos_t left;
 		int hrs;
 		int mins;
 		float secs;
 
 		left = pos;
-		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-		secs = left / (float) _session->frame_rate();
+		hrs = (int) floor (left / (_session->sample_rate() * 60.0f * 60.0f));
+		left -= (samplecnt_t) floor (hrs * _session->sample_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplecnt_t) floor (mins * _session->sample_rate() * 60.0f);
+		secs = left / (float) _session->sample_rate();
 		if (onoff) {
 			snprintf (buf, bufsize, "%02d:%02d:%06.3f", hrs, mins, secs);
 		} else {
@@ -767,7 +767,7 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 		}
 		break;
 
-	case AudioClock::Frames:
+	case AudioClock::Samples:
 		if (onoff) {
 			snprintf (buf, bufsize, "%" PRId64, pos);
 		} else {
@@ -840,27 +840,27 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 #if 0
 	if (audioRegion && fades_in_seconds) {
 
-		framepos_t left;
+		samplepos_t left;
 		int mins;
 		int millisecs;
 
 		left = audioRegion->fade_in()->back()->when;
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
+		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
 
-		if (audioRegion->fade_in()->back()->when >= _session->frame_rate()) {
+		if (audioRegion->fade_in()->back()->when >= _session->sample_rate()) {
 			sprintf (fadein_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadein_str, "%01dmS", millisecs);
 		}
 
 		left = audioRegion->fade_out()->back()->when;
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
+		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
 
-		if (audioRegion->fade_out()->back()->when >= _session->frame_rate()) {
+		if (audioRegion->fade_out()->back()->when >= _session->sample_rate()) {
 			sprintf (fadeout_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadeout_str, "%01dmS", millisecs);
@@ -883,7 +883,7 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 
 	if (ARDOUR_UI::instance()->secondary_clock->mode () == AudioClock::BBT) {
 		TempoMap& map (_session->tempo_map());
-		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_frame (region->last_frame()) - map.beat_at_frame (region->first_frame()));
+		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample()) - map.beat_at_sample (region->first_sample()));
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 	} else {
 		format_position (region->length(), buf, sizeof (buf));
@@ -899,9 +899,9 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 		row[_columns.end] = "";
 	} else if (used > 1) {
 		row[_columns.end] = _("Mult.");
-	} else if (region->last_frame() >= region->first_frame()) {
+	} else if (region->last_sample() >= region->first_sample()) {
 		char buf[16];
-		format_position (region->last_frame(), buf, sizeof (buf));
+		format_position (region->last_sample(), buf, sizeof (buf));
 		row[_columns.end] = buf;
 	} else {
 		row[_columns.end] = "empty";
@@ -932,7 +932,7 @@ EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::R
 	} else {
 		if (region->sync_position() == region->position()) {
 			row[_columns.sync] = _("Start");
-		} else if (region->sync_position() == (region->last_frame())) {
+		} else if (region->sync_position() == (region->last_sample())) {
 			row[_columns.sync] = _("End");
 		} else {
 			char buf[16];
@@ -1319,7 +1319,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 
 	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		framepos_t pos = 0;
+		samplepos_t pos = 0;
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {

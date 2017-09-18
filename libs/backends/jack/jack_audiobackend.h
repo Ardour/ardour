@@ -100,8 +100,8 @@ class JACKAudioBackend : public AudioBackend {
 
     float dsp_load() const;
 
-    framepos_t sample_time ();
-    framepos_t sample_time_at_cycle_start ();
+    samplepos_t sample_time ();
+    samplepos_t sample_time_at_cycle_start ();
     pframes_t samples_since_cycle_start ();
 
     size_t raw_buffer_size (DataType t);
@@ -113,9 +113,9 @@ class JACKAudioBackend : public AudioBackend {
 
     void transport_start ();
     void transport_stop ();
-    void transport_locate (framepos_t /*pos*/);
+    void transport_locate (samplepos_t /*pos*/);
     TransportState transport_state () const;
-    framepos_t transport_frame() const;
+    samplepos_t transport_sample() const;
 
     int set_time_master (bool /*yn*/);
     bool get_sync_offset (pframes_t& /*offset*/) const;
@@ -207,7 +207,7 @@ class JACKAudioBackend : public AudioBackend {
 
     /* transport sync */
 
-    bool speed_and_position (double& sp, framepos_t& pos);
+    bool speed_and_position (double& sp, samplepos_t& pos);
 
   private:
     boost::shared_ptr<JackConnection>  _jack_connection;

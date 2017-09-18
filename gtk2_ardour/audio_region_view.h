@@ -97,14 +97,14 @@ public:
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
-	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
+	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, samplecnt_t, bool drag_active = false);
+	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, samplecnt_t, bool drag_active = false);
 
-	framepos_t get_fade_in_shape_width ();
-	framepos_t get_fade_out_shape_width ();
+	samplepos_t get_fade_in_shape_width ();
+	samplepos_t get_fade_out_shape_width ();
 
 	void set_fade_visibility (bool);
-	void update_coverage_frames (LayerDisplay);
+	void update_coverage_samples (LayerDisplay);
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
@@ -119,8 +119,8 @@ public:
 	void drag_start ();
 	void drag_end ();
 
-	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double);
-	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double, double);
+	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, samplecnt_t, ArdourCanvas::Points&, double, double);
+	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, samplecnt_t, ArdourCanvas::Points&, double, double, double);
 	void redraw_start_xfade ();
 	void redraw_end_xfade ();
 
@@ -155,7 +155,7 @@ protected:
 	std::vector<ArdourWaveView::WaveView *> waves;
 	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see ::create_waves()
 
-	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
+	std::list<std::pair<samplepos_t, ArdourCanvas::Line*> > feature_lines;
 
 	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
@@ -197,7 +197,7 @@ protected:
 	void set_colors ();
 	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
-	void set_frame_color ();
+	void set_sample_color ();
 
 	void color_handler ();
 

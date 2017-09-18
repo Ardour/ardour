@@ -99,10 +99,10 @@ SessionDialog::SessionDialog (bool require_new, const std::string& session_name,
 	 * and invisible most of the time.
 	 */
 
-	info_frame.set_shadow_type(SHADOW_ETCHED_OUT);
-	info_frame.set_no_show_all (true);
-	info_frame.set_border_width (12);
-	get_vbox()->pack_start (info_frame, false, false);
+	info_sample.set_shadow_type(SHADOW_ETCHED_OUT);
+	info_sample.set_no_show_all (true);
+	info_sample.set_border_width (12);
+	get_vbox()->pack_start (info_sample, false, false);
 
 	setup_new_session_page ();
 
@@ -453,9 +453,9 @@ SessionDialog::setup_initial_choice_box ()
 
 		info_box->pack_start (*updates_button, false, false);
 
-		info_frame.add (*info_box);
+		info_sample.add (*info_box);
 		info_box->show_all ();
-		info_frame.show ();
+		info_sample.show ();
 	}
 
 	/* recent session scroller */
@@ -698,9 +698,9 @@ SessionDialog::setup_new_session_page ()
 
 		template_hbox->pack_start (*template_scroller, true, true);
 
-		template_desc_frame.set_name (X_("TextHighlightFrame"));
-		template_desc_frame.add (*desc_scroller);
-		template_hbox->pack_start (template_desc_frame, true, true);
+		template_desc_sample.set_name (X_("TextHighlightFrame"));
+		template_desc_sample.add (*desc_scroller);
+		template_hbox->pack_start (template_desc_sample, true, true);
 	}
 
 	//template_desc is the textview that displays the currently selected template's description

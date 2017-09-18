@@ -153,10 +153,10 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 
 	preview_label.set_markup (_("<b>Sound File Information</b>"));
 
-	border_frame.set_label_widget (preview_label);
-	border_frame.add (main_box);
+	border_sample.set_label_widget (preview_label);
+	border_sample.add (main_box);
 
-	pack_start (border_frame, true, true);
+	pack_start (border_sample, true, true);
 	set_border_width (6);
 
 	main_box.set_border_width (6);
@@ -275,7 +275,7 @@ SoundFileBox::audition_active(bool active) {
 }
 
 void
-SoundFileBox::audition_progress(ARDOUR::framecnt_t pos, ARDOUR::framecnt_t len) {
+SoundFileBox::audition_progress(ARDOUR::samplecnt_t pos, ARDOUR::samplecnt_t len) {
 	if (!_seeking) {
 		seek_slider.set_value( 1000.0 * pos / len);
 		seek_slider.set_sensitive (true);
@@ -397,7 +397,7 @@ SoundFileBox::setup_labels (const string& filename)
 	format_text.set_text (n);
 	channels_value.set_text (to_string (sf_info.channels));
 
-	if (_session && sf_info.samplerate != _session->frame_rate()) {
+	if (_session && sf_info.samplerate != _session->sample_rate()) {
 		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample rate:")));
 		samplerate_value.set_markup (string_compose (X_("<b>%1 Hz</b>"), sf_info.samplerate));
 		samplerate_value.set_name ("NewSessionSR1Label");
@@ -409,7 +409,7 @@ SoundFileBox::setup_labels (const string& filename)
 		samplerate.set_name ("NewSessionSR2Label");
 	}
 
-	framecnt_t const nfr = _session ? _session->nominal_frame_rate() : 25;
+	samplecnt_t const nfr = _session ? _session->nominal_sample_rate() : 25;
 	double src_coef = (double) nfr / sf_info.samplerate;
 
 	length_clock.set (sf_info.length * src_coef + 0.5, true);
@@ -516,7 +516,7 @@ SoundFileBox::audition ()
 					SourceFactory::createExternal (DataType::AUDIO, *_session,
 											 path, n,
 											 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
-				if (afs->sample_rate() != _session->nominal_frame_rate()) {
+				if (afs->sample_rate() != _session->nominal_sample_rate()) {
 					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
 					srclist.push_back(sfs);
 				} else {
@@ -549,16 +549,16 @@ SoundFileBox::audition ()
 		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
 
-	frameoffset_t audition_position = 0;
+	sampleoffset_t audition_position = 0;
 	switch(_import_position) {
 		case ImportAtTimestamp:
 			audition_position = 0;
 			break;
 		case ImportAtPlayhead:
-			audition_position = _session->transport_frame();
+			audition_position = _session->transport_sample();
 			break;
 		case ImportAtStart:
-			audition_position = _session->current_start_frame();
+			audition_position = _session->current_start_sample();
 			break;
 		case ImportAtEditPoint:
 			audition_position = PublicEditor::instance().get_preferred_edit_position ();
@@ -1636,7 +1636,7 @@ bool
 SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
 	SoundFileInfo info;
-	framepos_t sz = 0;
+	samplepos_t sz = 0;
 	bool err = false;
 	string errmsg;
 
@@ -1658,7 +1658,7 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 				}
 			}
 
-			if (info.samplerate != _session->frame_rate()) {
+			if (info.samplerate != _session->sample_rate()) {
 				src_needed = true;
 			}
 
@@ -2066,7 +2066,7 @@ SoundFileOmega::do_something (int action)
 	ImportMode mode = get_mode ();
 	ImportDisposition chns = get_channel_disposition ();
 	PluginInfoPtr instrument = instrument_combo.selected_instrument();
-	framepos_t where;
+	samplepos_t where;
 	MidiTrackNameSource mts = get_midi_track_name_source ();
 	MidiTempoMapDisposition mtd = (get_use_smf_tempo_map () ? SMFTempoUse : SMFTempoIgnore);
 
@@ -2078,10 +2078,10 @@ SoundFileOmega::do_something (int action)
 		where = -1;
 		break;
 	case ImportAtPlayhead:
-		where = _session->transport_frame();
+		where = _session->transport_sample();
 		break;
 	case ImportAtStart:
-		where = _session->current_start_frame();
+		where = _session->current_start_sample();
 		break;
 	}
 

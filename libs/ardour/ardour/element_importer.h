@@ -110,13 +110,13 @@ class LIBARDOUR_API ElementImporter
 	std::string  name;
 
 	/// The sample rate of the session from which we are importing
-	framecnt_t sample_rate;
+	samplecnt_t sample_rate;
 
 	/// Converts timecode time to a string
 	std::string timecode_to_string (Timecode::Time & time) const;
 
 	/// Converts samples so that times match the sessions sample rate
-	framecnt_t rate_convert_samples (framecnt_t samples) const;
+	samplecnt_t rate_convert_samples (samplecnt_t samples) const;
 
 	/// Converts samples so that times match the sessions sample rate (for straight use in XML)
 	std::string rate_convert_samples (std::string const & samples) const;

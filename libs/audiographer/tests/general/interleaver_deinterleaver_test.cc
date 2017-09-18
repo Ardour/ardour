@@ -16,12 +16,12 @@ class InterleaverDeInterleaverTest : public CppUnit::TestFixture
 	void setUp()
 	{
 		channels = 3;
-		frames_per_channel = 128;
-		total_frames = channels * frames_per_channel;
+		samples_per_channel = 128;
+		total_samples = channels * samples_per_channel;
 
-		random_data_a = TestUtils::init_random_data (total_frames, 1.0);
-		random_data_b = TestUtils::init_random_data (frames_per_channel, 1.0);
-		random_data_c = TestUtils::init_random_data (frames_per_channel, 1.0);
+		random_data_a = TestUtils::init_random_data (total_samples, 1.0);
+		random_data_b = TestUtils::init_random_data (samples_per_channel, 1.0);
+		random_data_c = TestUtils::init_random_data (samples_per_channel, 1.0);
 
 		deinterleaver.reset (new DeInterleaver<float>());
 		interleaver.reset (new Interleaver<float>());
@@ -40,8 +40,8 @@ class InterleaverDeInterleaverTest : public CppUnit::TestFixture
 
 	void testInterleavedInput()
 	{
-		deinterleaver->init (channels, frames_per_channel);
-		interleaver->init (channels, frames_per_channel);
+		deinterleaver->init (channels, samples_per_channel);
+		interleaver->init (channels, samples_per_channel);
 
 		deinterleaver->output (0)->add_output (interleaver->input (0));
 		deinterleaver->output (1)->add_output (interleaver->input (1));
@@ -50,20 +50,20 @@ class InterleaverDeInterleaverTest : public CppUnit::TestFixture
 		interleaver->add_output (sink_a);
 
 		// Process and assert
-		ProcessContext<float> c (random_data_a, total_frames, channels);
+		ProcessContext<float> c (random_data_a, total_samples, channels);
 		deinterleaver->process (c);
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), total_frames));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), total_samples));
 
 		// And a second round...
-		framecnt_t less_frames = (frames_per_channel / 10) * channels;
-		deinterleaver->process (c.beginning (less_frames));
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), less_frames));
+		samplecnt_t less_samples = (samples_per_channel / 10) * channels;
+		deinterleaver->process (c.beginning (less_samples));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), less_samples));
 	}
 
 	void testDeInterleavedInput()
 	{
-		deinterleaver->init (channels, frames_per_channel);
-		interleaver->init (channels, frames_per_channel);
+		deinterleaver->init (channels, samples_per_channel);
+		interleaver->init (channels, samples_per_channel);
 
 		interleaver->add_output (deinterleaver);
 
@@ -71,28 +71,28 @@ class InterleaverDeInterleaverTest : public CppUnit::TestFixture
 		deinterleaver->output (1)->add_output (sink_b);
 		deinterleaver->output (2)->add_output (sink_c);
 
-		ProcessContext<float> c_a (random_data_a, frames_per_channel, 1);
-		ProcessContext<float> c_b (random_data_b, frames_per_channel, 1);
-		ProcessContext<float> c_c (random_data_c, frames_per_channel, 1);
+		ProcessContext<float> c_a (random_data_a, samples_per_channel, 1);
+		ProcessContext<float> c_b (random_data_b, samples_per_channel, 1);
+		ProcessContext<float> c_c (random_data_c, samples_per_channel, 1);
 
 		// Process and assert
 		interleaver->input (0)->process (c_a);
 		interleaver->input (1)->process (c_b);
 		interleaver->input (2)->process (c_c);
 
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), frames_per_channel));
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_b, sink_b->get_array(), frames_per_channel));
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_c, sink_c->get_array(), frames_per_channel));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), samples_per_channel));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_b, sink_b->get_array(), samples_per_channel));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_c, sink_c->get_array(), samples_per_channel));
 
 		// And a second round...
-		framecnt_t less_frames = frames_per_channel / 5;
-		interleaver->input (0)->process (c_a.beginning (less_frames));
-		interleaver->input (1)->process (c_b.beginning (less_frames));
-		interleaver->input (2)->process (c_c.beginning (less_frames));
+		samplecnt_t less_samples = samples_per_channel / 5;
+		interleaver->input (0)->process (c_a.beginning (less_samples));
+		interleaver->input (1)->process (c_b.beginning (less_samples));
+		interleaver->input (2)->process (c_c.beginning (less_samples));
 
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), less_frames));
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_b, sink_b->get_array(), less_frames));
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_c, sink_c->get_array(), less_frames));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_a, sink_a->get_array(), less_samples));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_b, sink_b->get_array(), less_samples));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data_c, sink_c->get_array(), less_samples));
 
 	}
 
@@ -108,8 +108,8 @@ class InterleaverDeInterleaverTest : public CppUnit::TestFixture
 	float * random_data_b;
 	float * random_data_c;
 
-	framecnt_t frames_per_channel;
-	framecnt_t total_frames;
+	samplecnt_t samples_per_channel;
+	samplecnt_t total_samples;
 	unsigned int channels;
 };
 

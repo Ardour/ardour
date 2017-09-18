@@ -25,39 +25,39 @@ class LIBAUDIOGRAPHER_API Routines
 	/** Computes peak in float buffer
 	  * \n RT safe
 	  * \param data buffer from which the peak is computed
-	  * \param frames length of the portion of \a buffer that is checked
+	  * \param samples length of the portion of \a buffer that is checked
 	  * \param current_peak current peak of buffer, if calculated in several passes
-	  * \return maximum of values in [\a data, \a data + \a frames) and \a current_peak
+	  * \return maximum of values in [\a data, \a data + \a samples) and \a current_peak
 	  */
-	static inline float compute_peak (float const * data, uint_type frames, float current_peak)
+	static inline float compute_peak (float const * data, uint_type samples, float current_peak)
 	{
-		return (*_compute_peak) (data, frames, current_peak);
+		return (*_compute_peak) (data, samples, current_peak);
 	}
 
 	/** Applies constant gain to buffer
 	 * \n RT safe
 	 * \param data data to which the gain is applied
-	 * \param frames length of data
+	 * \param samples length of data
 	 * \param gain gain that is applied
 	 */
-	static inline void apply_gain_to_buffer (float * data, uint_type frames, float gain)
+	static inline void apply_gain_to_buffer (float * data, uint_type samples, float gain)
 	{
-		(*_apply_gain_to_buffer) (data, frames, gain);
+		(*_apply_gain_to_buffer) (data, samples, gain);
 	}
 
   private:
-	static inline float default_compute_peak (float const * data, uint_type frames, float current_peak)
+	static inline float default_compute_peak (float const * data, uint_type samples, float current_peak)
 	{
-		for (uint_type i = 0; i < frames; ++i) {
+		for (uint_type i = 0; i < samples; ++i) {
 			float abs = std::fabs(data[i]);
 			if (abs > current_peak) { current_peak = abs; }
 		}
 		return current_peak;
 	}
 
-	static inline void default_apply_gain_to_buffer (float * data, uint_type frames, float gain)
+	static inline void default_apply_gain_to_buffer (float * data, uint_type samples, float gain)
 	{
-		for (uint_type i = 0; i < frames; ++i) {
+		for (uint_type i = 0; i < samples; ++i) {
 			data[i] *= gain;
 		}
 	}

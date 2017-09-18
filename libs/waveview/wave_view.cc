@@ -848,7 +848,7 @@ WaveView::draw_image (Cairo::RefPtr<Cairo::ImageSurface>& image, PeakData* peaks
 	context->fill ();
 }
 
-framecnt_t
+samplecnt_t
 WaveView::optimal_image_width_samples () const
 {
 	/* Compute how wide the image should be in samples.
@@ -865,15 +865,15 @@ WaveView::optimal_image_width_samples () const
 	 * the canvas that are the width of the canvas then we don't want to have to
 	 * draw the images for them all at once as it will cause a spike in render
 	 * time, or in threaded rendering mode it will mean all the draw requests will
-	 * the queued during the same frame/expose event. This issue can be
+	 * the queued during the same sample/expose event. This issue can be
 	 * alleviated by using an element of randomness in selecting the image width.
 	 *
 	 * If the value of samples per pixel is less than 1/10th of a second, use
 	 * 1/10th of a second instead.
 	 */
 
-	framecnt_t canvas_width_samples = _canvas->visible_area().width() * _props->samples_per_pixel;
-	const framecnt_t one_tenth_of_second = _region->session().frame_rate() / 10;
+	samplecnt_t canvas_width_samples = _canvas->visible_area().width() * _props->samples_per_pixel;
+	const samplecnt_t one_tenth_of_second = _region->session().sample_rate() / 10;
 
 	/* If zoomed in where a canvas item interects with the canvas area but
 	 * stretches for many pages either side, to avoid having draw all images when
@@ -904,11 +904,11 @@ WaveView::optimal_image_width_samples () const
 	const double cairo_image_limit = 32767.0;
 	const double max_image_width = cairo_image_limit / max_multiplier;
 
-	framecnt_t max_width_samples = floor (max_image_width / _props->samples_per_pixel);
+	samplecnt_t max_width_samples = floor (max_image_width / _props->samples_per_pixel);
 
-	const framecnt_t one_tenth_of_second_limited = std::min (one_tenth_of_second, max_width_samples);
+	const samplecnt_t one_tenth_of_second_limited = std::min (one_tenth_of_second, max_width_samples);
 
-	framecnt_t new_sample_count = std::max (canvas_width_samples, one_tenth_of_second_limited);
+	samplecnt_t new_sample_count = std::max (canvas_width_samples, one_tenth_of_second_limited);
 
 	const double multiplier = g_random_double_range (min_multiplier, max_multiplier);
 
@@ -948,7 +948,7 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 	   the Region itself.
 	*/
 
-	framecnt_t peaks_read =
+	samplecnt_t peaks_read =
 	    region->read_peaks (peaks.get (), n_peaks, props.get_sample_start (),
 	                        props.get_length_samples (), props.channel, props.samples_per_pixel);
 
@@ -976,7 +976,7 @@ WaveView::process_draw_request (boost::shared_ptr<WaveViewDrawRequest> req)
 		const double amplitude_above_axis = props.amplitude_above_axis;
 
 		if (amplitude_above_axis != 1.0) {
-			for (framecnt_t i = 0; i < n_peaks; ++i) {
+			for (samplecnt_t i = 0; i < n_peaks; ++i) {
 				peaks[i].max *= amplitude_above_axis;
 				peaks[i].min *= amplitude_above_axis;
 			}
@@ -1325,20 +1325,20 @@ WaveView::set_global_logscaled (bool yn)
 	}
 }
 
-framecnt_t
+samplecnt_t
 WaveView::region_length() const
 {
 	return _region->length() - (_props->region_start - _region->start());
 }
 
-framepos_t
+samplepos_t
 WaveView::region_end() const
 {
 	return _props->region_start + region_length();
 }
 
 void
-WaveView::set_region_start (frameoffset_t start)
+WaveView::set_region_start (sampleoffset_t start)
 {
 	if (!_region) {
 		return;

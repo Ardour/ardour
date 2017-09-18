@@ -48,7 +48,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface
 	session = &s;
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
-	_last_frame = -1;
+	_last_sample = -1;
 	if (feedback[4]) {
 
 		// connect to all the things we want to send feed back from
@@ -143,13 +143,13 @@ OSCGlobalObserver::tick ()
 	if (_init) {
 		return;
 	}
-	framepos_t now_frame = session->transport_frame();
-	if (now_frame != _last_frame) {
+	samplepos_t now_sample = session->transport_sample();
+	if (now_sample != _last_sample) {
 		if (feedback[6]) { // timecode enabled
 			Timecode::Time timecode;
-			session->timecode_time (now_frame, timecode);
+			session->timecode_time (now_sample, timecode);
 
-			// Timecode mode: Hours/Minutes/Seconds/Frames
+			// Timecode mode: Hours/Minutes/Seconds/Samples
 			ostringstream os;
 			os << setw(2) << setfill('0') << timecode.hours;
 			os << ':';
@@ -164,7 +164,7 @@ OSCGlobalObserver::tick ()
 		if (feedback[5]) { // Bar beat enabled
 			Timecode::BBT_Time bbt_time;
 
-			session->bbt_time (now_frame, bbt_time);
+			session->bbt_time (now_sample, bbt_time);
 
 			// semantics:  BBB/bb/tttt
 			ostringstream os;
@@ -178,14 +178,14 @@ OSCGlobalObserver::tick ()
 			text_message ("/position/bbt", os.str());
 		}
 		if (feedback[11]) { // minutes/seconds enabled
-			framepos_t left = now_frame;
-			int hrs = (int) floor (left / (session->frame_rate() * 60.0f * 60.0f));
-			left -= (framecnt_t) floor (hrs * session->frame_rate() * 60.0f * 60.0f);
-			int mins = (int) floor (left / (session->frame_rate() * 60.0f));
-			left -= (framecnt_t) floor (mins * session->frame_rate() * 60.0f);
-			int secs = (int) floor (left / (float) session->frame_rate());
-			left -= (framecnt_t) floor ((double)(secs * session->frame_rate()));
-			int millisecs = floor (left * 1000.0 / (float) session->frame_rate());
+			samplepos_t left = now_sample;
+			int hrs = (int) floor (left / (session->sample_rate() * 60.0f * 60.0f));
+			left -= (samplecnt_t) floor (hrs * session->sample_rate() * 60.0f * 60.0f);
+			int mins = (int) floor (left / (session->sample_rate() * 60.0f));
+			left -= (samplecnt_t) floor (mins * session->sample_rate() * 60.0f);
+			int secs = (int) floor (left / (float) session->sample_rate());
+			left -= (samplecnt_t) floor ((double)(secs * session->sample_rate()));
+			int millisecs = floor (left * 1000.0 / (float) session->sample_rate());
 
 			// Min/sec mode: Hours/Minutes/Seconds/msec
 			ostringstream os;
@@ -201,10 +201,10 @@ OSCGlobalObserver::tick ()
 		}
 		if (feedback[10]) { // samples
 			ostringstream os;
-			os << now_frame;
+			os << now_sample;
 			text_message ("/position/samples", os.str());
 		}
-		_last_frame = now_frame;
+		_last_sample = now_sample;
 	}
 	if (feedback[3]) { //heart beat enabled
 		if (_heartbeat == 10) {

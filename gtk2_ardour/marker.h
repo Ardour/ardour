@@ -61,7 +61,7 @@ public:
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, const std::string& text, Type,
-	              framepos_t frame = 0, bool handle_events = true);
+	              samplepos_t sample = 0, bool handle_events = true);
 
 	virtual ~ArdourMarker ();
 
@@ -75,13 +75,13 @@ public:
 	void set_show_line (bool);
 	void canvas_height_set (double);
 
-	void set_position (framepos_t);
+	void set_position (samplepos_t);
 	void set_name (const std::string&);
 	void set_points_color (uint32_t rgba);
 	void set_color_rgba (uint32_t rgba);
 	void setup_line ();
 
-	framepos_t position() const { return frame_position; }
+	samplepos_t position() const { return sample_position; }
 
 	ArdourCanvas::Container * get_parent() { return _parent; }
 	void reparent (ArdourCanvas::Container & parent);
@@ -115,7 +115,7 @@ protected:
 
 	std::string  _name;
 	double        unit_position;
-	framepos_t    frame_position;
+	samplepos_t    sample_position;
 	double       _shift;
 	Type         _type;
 	int           name_height;

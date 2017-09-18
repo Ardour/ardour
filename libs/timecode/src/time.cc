@@ -30,7 +30,7 @@ namespace Timecode {
 double Time::default_rate = 30.0;
 
 
-/** Increment @a timecode by exactly one frame (keep subframes value).
+/** Increment @a timecode by exactly one sample (keep subframes value).
  * Realtime safe.
  * @return true if seconds wrap.
  */
@@ -117,7 +117,7 @@ increment (Time& timecode, uint32_t subframes_per_frame)
 }
 
 
-/** Decrement @a timecode by exactly one frame (keep subframes value)
+/** Decrement @a timecode by exactly one sample (keep subframes value)
  * Realtime safe.
  * @return true if seconds wrap. */
 Wrap
@@ -204,9 +204,9 @@ decrement (Time& timecode, uint32_t subframes_per_frame)
 }
 
 
-/** Go to lowest absolute subframe value in this frame (set to 0 :-)) */
+/** Go to lowest absolute subframe value in this sample (set to 0 :-)) */
 void
-frames_floor (Time& timecode)
+frames_floot (Time& timecode)
 {
 	timecode.subframes = 0;
 	if (Timecode_IS_ZERO (timecode)) {
@@ -274,25 +274,25 @@ decrement_subframes (Time& timecode, uint32_t subframes_per_frame)
 }
 
 
-/** Go to next whole second (frames == 0 or frames == 2) */
+/** Go to next whole second (samples == 0 or samples == 2) */
 Wrap
 increment_seconds (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
 
 	// Clear subframes
-	frames_floor (timecode);
+	frames_floot (timecode);
 
 	if (timecode.negative) {
 		// Wrap second if on second boundary
 		wrap = increment (timecode, subframes_per_frame);
-		// Go to lowest absolute frame value
+		// Go to lowest absolute sample value
 		seconds_floor (timecode);
 		if (Timecode_IS_ZERO (timecode)) {
 			timecode.negative = false;
 		}
 	} else {
-		// Go to highest possible frame in this second
+		// Go to highest possible sample in this second
 		switch ((int)ceil (timecode.rate)) {
 		case 24:
 			timecode.frames = 23;
@@ -308,7 +308,7 @@ increment_seconds (Time& timecode, uint32_t subframes_per_frame)
 			break;
 		}
 
-		// Increment by one frame
+		// Increment by one sample
 		wrap = increment (timecode, subframes_per_frame);
 	}
 
@@ -316,15 +316,15 @@ increment_seconds (Time& timecode, uint32_t subframes_per_frame)
 }
 
 
-/** Go to lowest (absolute) frame value in this second
+/** Go to lowest (absolute) sample value in this second
  * Doesn't care about positive/negative */
 void
 seconds_floor (Time& timecode)
 {
 	// Clear subframes
-	frames_floor (timecode);
+	frames_floot (timecode);
 
-	// Go to lowest possible frame in this second
+	// Go to lowest possible sample in this second
 	switch ((int)ceil (timecode.rate)) {
 	case 24:
 	case 25:
@@ -348,14 +348,14 @@ seconds_floor (Time& timecode)
 }
 
 
-/** Go to next whole minute (seconds == 0, frames == 0 or frames == 2) */
+/** Go to next whole minute (seconds == 0, samples == 0 or samples == 2) */
 Wrap
 increment_minutes (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
 
 	// Clear subframes
-	frames_floor (timecode);
+	frames_floot (timecode);
 
 	if (timecode.negative) {
 		// Wrap if on minute boundary
@@ -379,7 +379,7 @@ minutes_floor (Time& timecode)
 {
 	// Go to lowest possible second
 	timecode.seconds = 0;
-	// Go to lowest possible frame
+	// Go to lowest possible sample
 	seconds_floor (timecode);
 
 	if (Timecode_IS_ZERO (timecode)) {
@@ -388,14 +388,14 @@ minutes_floor (Time& timecode)
 }
 
 
-/** Go to next whole hour (minute = 0, second = 0, frame = 0) */
+/** Go to next whole hour (minute = 0, second = 0, sample = 0) */
 Wrap
 increment_hours (Time& timecode, uint32_t subframes_per_frame)
 {
 	Wrap wrap = NONE;
 
 	// Clear subframes
-	frames_floor (timecode);
+	frames_floot (timecode);
 
 	if (timecode.negative) {
 		// Wrap if on hour boundary
@@ -612,14 +612,14 @@ std::string timecode_format_time (Timecode::Time TC)
 
 std::string timecode_format_sampletime (
 		int64_t sample,
-		double sample_frame_rate,
+		double sample_sample_rate,
 		double timecode_frames_per_second, bool timecode_drop_frames)
 {
 	Time t;
 	sample_to_timecode(
 			sample, t, false, false,
 			timecode_frames_per_second, timecode_drop_frames,
-			sample_frame_rate,
+			sample_sample_rate,
 			80, false, 0);
 	return timecode_format_time(t);
 }
@@ -647,30 +647,30 @@ timecode_to_sample(
 		Timecode::Time& timecode, int64_t& sample,
 		bool use_offset, bool use_subframes,
     /* Note - framerate info is taken from Timecode::Time& */
-		double sample_frame_rate /**< may include pull up/down */,
+		double sample_sample_rate /**< may include pull up/down */,
 		uint32_t subframes_per_frame,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples
 		)
 {
-	const double samples_per_timecode_frame = (double) sample_frame_rate / (double) timecode.rate;
+	const double samples_per_timecode_frame = (double) sample_sample_rate / (double) timecode.rate;
 
 	if (timecode.drop) {
-		// The drop frame format was created to better approximate the 30000/1001 = 29.97002997002997....
-		// framerate of NTSC color TV. The used frame rate of drop frame is 29.97, which drifts by about
-		// 0.108 frame per hour, or about 1.3 frames per 12 hours. This is not perfect, but a lot better
-		// than using 30 non drop, which will drift with about 1.8 frame per minute.
-		// Using 29.97, drop frame real time can be accurate only every 10th minute (10 minutes of 29.97 fps
-		// is exactly 17982 frames). One minute is 1798.2 frames, but we count 30 frames per second
+		// The drop sample format was created to better approximate the 30000/1001 = 29.97002997002997....
+		// framerate of NTSC color TV. The used frame rate of drop sample is 29.97, which drifts by about
+		// 0.108 sample per hour, or about 1.3 samples per 12 hours. This is not perfect, but a lot better
+		// than using 30 non drop, which will drift with about 1.8 sample per minute.
+		// Using 29.97, drop sample real time can be accurate only every 10th minute (10 minutes of 29.97 fps
+		// is exactly 17982 samples). One minute is 1798.2 samples, but we count 30 samples per second
 		// (30 * 60 = 1800). This means that at the first minute boundary (at the end of 0:0:59:29) we
-		// are 1.8 frames too late relative to real time. By dropping 2 frames (jumping to 0:1:0:2) we are
-		// approx. 0.2 frames too early. This adds up with 0.2 too early for each minute until we are 1.8
-		// frames too early at 0:9:0:2 (9 * 0.2 = 1.8). The 10th minute brings us 1.8 frames later again
+		// are 1.8 samples too late relative to real time. By dropping 2 samples (jumping to 0:1:0:2) we are
+		// approx. 0.2 samples too early. This adds up with 0.2 too early for each minute until we are 1.8
+		// samples too early at 0:9:0:2 (9 * 0.2 = 1.8). The 10th minute brings us 1.8 samples later again
 		// (at end of 0:9:59:29), which sums up to 0 (we are back to zero at 0:10:0:0 :-).
 		//
 		// In table form:
 		//
-		// Timecode value    frames offset   subframes offset   seconds (rounded)  44100 sample (rounded)
+		// Timecode value    samples offset   subframes offset   seconds (rounded)  44100 sample (rounded)
 		//  0:00:00:00        0.0             0                     0.000                0 (accurate)
 		//  0:00:59:29        1.8           144                    60.027          2647177
 		//  0:01:00:02       -0.2           -16                    60.060          2648648
@@ -707,13 +707,13 @@ timecode_to_sample(
 			+ fps_i * 60 * timecode.minutes
 			+ fps_i * timecode.seconds + timecode.frames
 			- 2 * (totalMinutes - totalMinutes / 10);
-		sample = frameNumber * sample_frame_rate / (double) timecode.rate;
+		sample = frameNumber * sample_sample_rate / (double) timecode.rate;
 	} else {
 		/*
 		   Non drop is easy.. just note the use of
 		   rint(timecode.rate) * samples_per_timecode_frame
-		   (frames per Timecode second), which is larger than
-		   frame_rate() in the non-integer Timecode rate case.
+		   (samples per Timecode second), which is larger than
+		   sample_rate() in the non-integer Timecode rate case.
 		*/
 
 		sample = (int64_t) rint(
@@ -760,7 +760,7 @@ sample_to_timecode (
     /* framerate info */
 		double timecode_frames_per_second,
 		bool   timecode_drop_frames,
-		double sample_frame_rate/**< can include pull up/down */,
+		double sample_sample_rate/**< can include pull up/down */,
 		uint32_t subframes_per_frame,
     /* optional offset  - can be improved: function pointer to lazily query this*/
 		bool offset_is_negative, int64_t offset_samples
@@ -787,14 +787,14 @@ sample_to_timecode (
 	}
 
 	if (timecode_drop_frames) {
-		int64_t frameNumber = floor( (double)offset_sample * timecode_frames_per_second / sample_frame_rate);
+		int64_t frameNumber = floor( (double)offset_sample * timecode_frames_per_second / sample_sample_rate);
 
-		/* there are 17982 frames in 10 min @ 29.97df */
+		/* there are 17982 samples in 10 min @ 29.97df */
 		const int64_t D = frameNumber / 17982;
 		const int64_t M = frameNumber % 17982;
 
 		timecode.subframes = rint(subframes_per_frame
-				* ((double)offset_sample * timecode_frames_per_second / sample_frame_rate - (double)frameNumber));
+				* ((double)offset_sample * timecode_frames_per_second / sample_sample_rate - (double)frameNumber));
 
 		if (timecode.subframes == subframes_per_frame) {
 			timecode.subframes = 0;
@@ -812,7 +812,7 @@ sample_to_timecode (
 		double timecode_frames_left_exact;
 		double timecode_frames_fraction;
 		int64_t timecode_frames_left;
-		const double samples_per_timecode_frame = sample_frame_rate / timecode_frames_per_second;
+		const double samples_per_timecode_frame = sample_sample_rate / timecode_frames_per_second;
 		const int64_t frames_per_hour = (int64_t)(3600. * rint(timecode_frames_per_second) * samples_per_timecode_frame);
 
 		timecode.hours = offset_sample / frames_per_hour;
@@ -839,7 +839,7 @@ sample_to_timecode (
 	if (!use_subframes) {
 		timecode.subframes = 0;
 	}
-	/* set frame rate and drop frame */
+	/* set frame rate and drop sample */
 	timecode.rate = timecode_frames_per_second;
 	timecode.drop = timecode_drop_frames;
 }

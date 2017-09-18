@@ -21,53 +21,53 @@
 
 #include "pbd/stacktrace.h"
 
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/tempo.h"
 
 namespace ARDOUR {
 
 /** Takes a positive duration in quarter-note beats and considers it as a distance from the origin
- *  supplied to the constructor.  Returns the equivalent number of frames,
+ *  supplied to the constructor.  Returns the equivalent number of samples,
  *  taking tempo changes into account.
  */
-framepos_t
-BeatsFramesConverter::to (Evoral::Beats beats) const
+samplepos_t
+BeatsSamplesConverter::to (Evoral::Beats beats) const
 {
 	if (beats < Evoral::Beats()) {
 		std::cerr << "negative beats passed to BFC: " << beats << std::endl;
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.framepos_plus_qn (_origin_b, beats) - _origin_b;
+	return _tempo_map.samplepos_plus_qn (_origin_b, beats) - _origin_b;
 }
 
-/** Takes a duration in frames and considers it as a distance from the origin
+/** Takes a duration in samples and considers it as a distance from the origin
  *  supplied to the constructor.  Returns the equivalent number of quarter-note beats,
  *  taking tempo changes into account.
  */
 Evoral::Beats
-BeatsFramesConverter::from (framepos_t frames) const
+BeatsSamplesConverter::from (samplepos_t samples) const
 {
-	return _tempo_map.framewalk_to_qn (_origin_b, frames);
+	return _tempo_map.framewalk_to_qn (_origin_b, samples);
 }
 
 /** As above, but with quarter-note beats in double instead (for GUI). */
-framepos_t
-DoubleBeatsFramesConverter::to (double beats) const
+samplepos_t
+DoubleBeatsSamplesConverter::to (double beats) const
 {
 	if (beats < 0.0) {
 		std::cerr << "negative beats passed to BFC: " << beats << std::endl;
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.framepos_plus_qn (_origin_b, Evoral::Beats(beats)) - _origin_b;
+	return _tempo_map.samplepos_plus_qn (_origin_b, Evoral::Beats(beats)) - _origin_b;
 }
 
 /** As above, but with quarter-note beats in double instead (for GUI). */
 double
-DoubleBeatsFramesConverter::from (framepos_t frames) const
+DoubleBeatsSamplesConverter::from (samplepos_t samples) const
 {
-	return _tempo_map.framewalk_to_qn (_origin_b, frames).to_double();
+	return _tempo_map.framewalk_to_qn (_origin_b, samples).to_double();
 }
 
 } /* namespace ARDOUR */

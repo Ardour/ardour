@@ -34,7 +34,7 @@
 #include "evoral/midi_util.h"
 
 #include "ardour/amp.h"
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
@@ -307,11 +307,11 @@ MidiTrack::update_controls(const BufferSet& bufs)
 {
 	const MidiBuffer& buf = bufs.get_midi(0);
 	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-		const Evoral::Event<framepos_t>&         ev      = *e;
+		const Evoral::Event<samplepos_t>&         ev      = *e;
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
 		const boost::shared_ptr<AutomationControl> control = automation_control (param);
 		if (control) {
-			control->set_double(ev.value(), _session.transport_frame(), false);
+			control->set_double(ev.value(), _session.transport_sample(), false);
 			control->Changed (false, Controllable::NoGroup);
 		}
 	}
@@ -321,7 +321,7 @@ MidiTrack::update_controls(const BufferSet& bufs)
  *  or set to false.
  */
 int
-MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
+MidiTrack::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -352,16 +352,16 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 	_capture_filter.filter (bufs);
 
 	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
-		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
+		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
 	}
 
 	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
-	write_out_of_band_data (bufs, start_frame, end_frame, nframes);
+	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
 
 	/* final argument: don't waste time with automation if we're not recording or rolling */
 
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!_disk_writer->record_enabled() && !_session.transport_stopped()));
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer->record_enabled() && !_session.transport_stopped()));
 
 	if (_disk_reader->need_butler() || _disk_writer->need_butler()) {
 		need_butler = true;
@@ -373,9 +373,9 @@ MidiTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame
 }
 
 int
-MidiTrack::no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing)
+MidiTrack::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing)
 {
-	int ret = Track::no_roll (nframes, start_frame, end_frame, state_changing);
+	int ret = Track::no_roll (nframes, start_sample, end_sample, state_changing);
 
 	if (ret == 0 && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);
@@ -401,7 +401,7 @@ MidiTrack::realtime_locate ()
 }
 
 void
-MidiTrack::non_realtime_locate (framepos_t pos)
+MidiTrack::non_realtime_locate (samplepos_t pos)
 {
 	Track::non_realtime_locate(pos);
 
@@ -428,8 +428,8 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 	}
 
 	/* Update track controllers based on its "automation". */
-	const framepos_t     origin = region->position() - region->start();
-	BeatsFramesConverter bfc(_session.tempo_map(), origin);
+	const samplepos_t     origin = region->position() - region->start();
+	BeatsSamplesConverter bfc(_session.tempo_map(), origin);
 	for (Controls::const_iterator c = _controls.begin(); c != _controls.end(); ++c) {
 		boost::shared_ptr<MidiTrack::MidiControl> tcontrol;
 		boost::shared_ptr<Evoral::Control>        rcontrol;
@@ -444,7 +444,7 @@ MidiTrack::non_realtime_locate (framepos_t pos)
 }
 
 void
-MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
+MidiTrack::push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes)
 {
 	PortSet& ports (_input->ports());
 
@@ -456,7 +456,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 
 		for (MidiBuffer::const_iterator e = mb->begin(); e != mb->end(); ++e) {
 
-			const Evoral::Event<framepos_t> ev(*e, false);
+			const Evoral::Event<samplepos_t> ev(*e, false);
 
 			/* note on, since for step edit, note length is determined
 			   elsewhere
@@ -471,7 +471,7 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes)
 }
 
 void
-MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framepos_t /*end*/, framecnt_t nframes)
+MidiTrack::write_out_of_band_data (BufferSet& bufs, samplepos_t /*start*/, samplepos_t /*end*/, samplecnt_t nframes)
 {
 	MidiBuffer& buf (bufs.get_midi (0));
 
@@ -499,8 +499,8 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, framepos_t /*start*/, framep
 
 int
 MidiTrack::export_stuff (BufferSet&                   buffers,
-                         framepos_t                   start,
-                         framecnt_t                   nframes,
+                         samplepos_t                   start,
+                         samplecnt_t                   nframes,
                          boost::shared_ptr<Processor> endpoint,
                          bool                         include_endpoint,
                          bool                         for_export,
@@ -530,12 +530,12 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 boost::shared_ptr<Region>
 MidiTrack::bounce (InterThreadInfo& itt)
 {
-	return bounce_range (_session.current_start_frame(), _session.current_end_frame(), itt, main_outs(), false);
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false);
 }
 
 boost::shared_ptr<Region>
-MidiTrack::bounce_range (framepos_t                   start,
-                         framepos_t                   end,
+MidiTrack::bounce_range (samplepos_t                   start,
+                         samplepos_t                   end,
                          InterThreadInfo&             itt,
                          boost::shared_ptr<Processor> endpoint,
                          bool                         include_endpoint)

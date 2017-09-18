@@ -236,8 +236,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 		}
 	}
 
-	DiskReader::set_chunk_frames (minimum_disk_read_bytes.get() / sizeof (Sample));
-	DiskWriter::set_chunk_frames (minimum_disk_write_bytes.get() / sizeof (Sample));
+	DiskReader::set_chunk_samples (minimum_disk_read_bytes.get() / sizeof (Sample));
+	DiskWriter::set_chunk_samples (minimum_disk_write_bytes.get() / sizeof (Sample));
 
 	return 0;
 }

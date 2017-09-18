@@ -37,8 +37,8 @@ namespace ArdourCanvas {
  	class Text;
 }
 
-using ARDOUR::framepos_t;
-using ARDOUR::framecnt_t;
+using ARDOUR::samplepos_t;
+using ARDOUR::samplecnt_t;
 
 /**
  * Base class for items that may appear upon a TimeAxisView.
@@ -49,14 +49,14 @@ class TimeAxisViewItem : public Selectable, public PBD::ScopedConnectionList
 public:
 	virtual ~TimeAxisViewItem();
 
-	virtual bool set_position(framepos_t, void*, double* delta = 0);
-	framepos_t get_position() const;
-	virtual bool set_duration(framecnt_t, void*);
-	framecnt_t get_duration() const;
-	virtual void set_max_duration(framecnt_t, void*);
-	framecnt_t get_max_duration() const;
-	virtual void set_min_duration(framecnt_t, void*);
-	framecnt_t get_min_duration() const;
+	virtual bool set_position(samplepos_t, void*, double* delta = 0);
+	samplepos_t get_position() const;
+	virtual bool set_duration(samplecnt_t, void*);
+	samplecnt_t get_duration() const;
+	virtual void set_max_duration(samplecnt_t, void*);
+	samplecnt_t get_max_duration() const;
+	virtual void set_min_duration(samplecnt_t, void*);
+	samplecnt_t get_min_duration() const;
 	virtual void set_position_locked(bool, void*);
 	bool get_position_locked() const;
 	void set_max_duration_active(bool, void*);
@@ -78,7 +78,7 @@ public:
 
 	virtual uint32_t get_fill_color () const;
 
-	ArdourCanvas::Item* get_canvas_frame();
+	ArdourCanvas::Item* get_canvas_sample();
 	ArdourCanvas::Item* get_canvas_group();
 	ArdourCanvas::Item* get_name_highlight();
 
@@ -127,19 +127,19 @@ public:
 	sigc::signal<void,std::string,std::string,void*> NameChanged;
 
 	/** Emiited when the position of this item changes */
-	sigc::signal<void,framepos_t,void*> PositionChanged;
+	sigc::signal<void,samplepos_t,void*> PositionChanged;
 
 	/** Emitted when the position lock of this item is changed */
 	sigc::signal<void,bool,void*> PositionLockChanged;
 
 	/** Emitted when the duration of this item changes */
-	sigc::signal<void,framecnt_t,void*> DurationChanged;
+	sigc::signal<void,samplecnt_t,void*> DurationChanged;
 
 	/** Emitted when the maximum item duration is changed */
-	sigc::signal<void,framecnt_t,void*> MaxDurationChanged;
+	sigc::signal<void,samplecnt_t,void*> MaxDurationChanged;
 
 	/** Emitted when the mionimum item duration is changed */
-	sigc::signal<void,framecnt_t,void*> MinDurationChanged;
+	sigc::signal<void,samplecnt_t,void*> MinDurationChanged;
 
 	enum Visibility {
 		ShowFrame = 0x1,
@@ -154,17 +154,17 @@ public:
 
 protected:
 	TimeAxisViewItem (const std::string &, ArdourCanvas::Item&, TimeAxisView&, double, uint32_t fill_color,
-	                  framepos_t, framecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
+	                  samplepos_t, samplecnt_t, bool recording = false, bool automation = false, Visibility v = Visibility (0));
 
 	TimeAxisViewItem (const TimeAxisViewItem&);
 
-	void init (ArdourCanvas::Item*, double, uint32_t, framepos_t, framepos_t, Visibility, bool, bool);
+	void init (ArdourCanvas::Item*, double, uint32_t, samplepos_t, samplepos_t, Visibility, bool, bool);
 
 	virtual bool canvas_group_event (GdkEvent*);
 
 	virtual void set_colors();
-	virtual void set_frame_color();
-	virtual void set_frame_gradient ();
+	virtual void set_sample_color();
+	virtual void set_sample_gradient ();
 	void set_trim_handle_colors();
 
 	virtual void reset_width_dependent_items (double);
@@ -178,16 +178,16 @@ protected:
 	bool position_locked;
 
 	/** position of this item on the timeline */
-	framepos_t frame_position;
+	samplepos_t sample_position;
 
 	/** duration of this item upon the timeline */
-	framecnt_t item_duration;
+	samplecnt_t item_duration;
 
 	/** maximum duration that this item can have */
-	framecnt_t max_item_duration;
+	samplecnt_t max_item_duration;
 
 	/** minimum duration that this item can have */
-	framecnt_t min_item_duration;
+	samplecnt_t min_item_duration;
 
 	/** indicates whether the max duration constraint is active */
 	bool max_duration_active;
@@ -195,7 +195,7 @@ protected:
 	/** indicates whether the min duration constraint is active */
 	bool min_duration_active;
 
-	/** frames per canvas pixel */
+	/** samples per canvas pixel */
 	double samples_per_pixel;
 
 	/** should the item respond to events */
@@ -218,16 +218,16 @@ protected:
 	bool high_enough_for_name;
 
 	ArdourCanvas::Container*      group;
-	ArdourCanvas::Rectangle* frame;
-	ArdourCanvas::Rectangle* selection_frame;
+	ArdourCanvas::Rectangle* sample;
+	ArdourCanvas::Rectangle* selection_sample;
 	ArdourCanvas::Text*      name_text;
 	ArdourCanvas::Rectangle* name_highlight;
 
-	/* with these two values, if frame_handle_start == 0 then frame_handle_end will also be 0 */
-	ArdourCanvas::Rectangle* frame_handle_start; ///< `frame' (fade) handle for the start of the item, or 0
-	ArdourCanvas::Rectangle* frame_handle_end; ///< `frame' (fade) handle for the end of the item, or 0
+	/* with these two values, if sample_handle_start == 0 then sample_handle_end will also be 0 */
+	ArdourCanvas::Rectangle* sample_handle_start; ///< `sample' (fade) handle for the start of the item, or 0
+	ArdourCanvas::Rectangle* sample_handle_end; ///< `sample' (fade) handle for the end of the item, or 0
 
-	bool frame_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
+	bool sample_handle_crossing (GdkEvent*, ArdourCanvas::Rectangle*);
 
 	double _height;
 	Visibility visibility;

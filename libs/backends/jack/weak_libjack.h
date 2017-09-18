@@ -52,9 +52,9 @@ int have_libjack(void);
 #define jack_get_client_name                WJACK_get_client_name
 #define jack_get_sample_rate                WJACK_get_sample_rate
 #define jack_get_buffer_size                WJACK_get_buffer_size
-#define jack_frames_since_cycle_start       WJACK_frames_since_cycle_start
-#define jack_frame_time                     WJACK_frame_time
-#define jack_last_frame_time                WJACK_last_frame_time
+#define jack_frames_since_cycle_start       WJACK_samples_since_cycle_start
+#define jack_frame_time                     WJACK_sample_time
+#define jack_last_frame_time                WJACK_last_sample_time
 #define jack_get_time                       WJACK_get_time
 #define jack_cpu_load                       WJACK_cpu_load
 #define jack_is_realtime                    WJACK_is_realtime
@@ -115,7 +115,7 @@ int have_libjack(void);
 #define jack_set_thread_init_callback       WJACK_set_thread_init_callback
 
 /* <jack/transport.h> */
-#define jack_get_current_transport_frame    WJACK_get_current_transport_frame
+#define jack_get_current_transport_frame    WJACK_get_current_transport_sample
 #define jack_transport_locate               WJACK_transport_locate
 #define jack_transport_start                WJACK_transport_start
 #define jack_transport_stop                 WJACK_transport_stop

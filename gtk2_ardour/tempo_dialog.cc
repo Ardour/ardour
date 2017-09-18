@@ -34,7 +34,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
 
-TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
+TempoDialog::TempoDialog (TempoMap& map, samplepos_t sample, const string&)
 	: ArdourDialog (_("New Tempo"))
 	, _map (&map)
 	, _section (0)
@@ -48,8 +48,8 @@ TempoDialog::TempoDialog (TempoMap& map, framepos_t frame, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Tempo tempo (map.tempo_at_frame (frame));
-	Timecode::BBT_Time when (map.bbt_at_frame (frame));
+	Tempo tempo (map.tempo_at_sample (sample));
+	Timecode::BBT_Time when (map.bbt_at_sample (sample));
 
 	init (when, tempo.note_types_per_minute(), tempo.end_note_types_per_minute(), tempo.note_type(), TempoSection::Constant, true, MusicTime);
 }
@@ -68,7 +68,7 @@ TempoDialog::TempoDialog (TempoMap& map, TempoSection& section, const string&)
 	, pulse_selector_label (_("Pulse:"), ALIGN_LEFT, ALIGN_CENTER)
 	, tap_tempo_button (_("Tap tempo"))
 {
-	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
+	Timecode::BBT_Time when (map.bbt_at_sample (section.sample()));
 	init (when, section.note_types_per_minute(), section.end_note_types_per_minute(), section.note_type(), section.type()
 	      , section.initial() || section.locked_to_meter(), section.position_lock_style());
 }
@@ -477,12 +477,12 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 	return false;
 }
 
-MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
+MeterDialog::MeterDialog (TempoMap& map, samplepos_t sample, const string&)
 	: ArdourDialog (_("New Meter"))
 {
-	frame = map.round_to_bar(frame, RoundNearest).frame;
-	Timecode::BBT_Time when (map.bbt_at_frame (frame));
-	Meter meter (map.meter_at_frame (frame));
+	sample = map.round_to_bar(sample, RoundNearest).sample;
+	Timecode::BBT_Time when (map.bbt_at_sample (sample));
+	Meter meter (map.meter_at_sample (sample));
 
 	init (when, meter.divisions_per_bar(), meter.note_divisor(), false, MusicTime);
 }
@@ -490,7 +490,7 @@ MeterDialog::MeterDialog (TempoMap& map, framepos_t frame, const string&)
 MeterDialog::MeterDialog (TempoMap& map, MeterSection& section, const string&)
 	: ArdourDialog (_("Edit Meter"))
 {
-	Timecode::BBT_Time when (map.bbt_at_frame (section.frame()));
+	Timecode::BBT_Time when (map.bbt_at_sample (section.sample()));
 
 	init (when, section.divisions_per_bar(), section.note_divisor(), section.initial(), section.position_lock_style());
 }

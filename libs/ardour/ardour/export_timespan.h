@@ -42,7 +42,7 @@ class LIBARDOUR_API ExportTimespan
 
   private:
 	friend class ExportElementFactory;
-	ExportTimespan (ExportStatusPtr status, framecnt_t frame_rate);
+	ExportTimespan (ExportStatusPtr status, samplecnt_t sample_rate);
 
   public:
 	~ExportTimespan ();
@@ -56,26 +56,26 @@ class LIBARDOUR_API ExportTimespan
 	bool realtime () const { return _realtime; }
 	void set_realtime (bool rt) { _realtime = rt; }
 
-	void set_range (framepos_t start, framepos_t end);
-	framecnt_t get_length () const { return end_frame - start_frame; }
-	framepos_t get_start () const { return start_frame; }
-	framepos_t get_end () const { return end_frame; }
+	void set_range (samplepos_t start, samplepos_t end);
+	samplecnt_t get_length () const { return end_sample - start_sample; }
+	samplepos_t get_start () const { return start_sample; }
+	samplepos_t get_end () const { return end_sample; }
 
 	/// Primarily compare start time, then end time
 	bool operator< (ExportTimespan const & other) {
-		if (start_frame < other.start_frame) { return true; }
-		if (start_frame > other.start_frame) { return false; }
-		return end_frame < other.end_frame;
+		if (start_sample < other.start_sample) { return true; }
+		if (start_sample > other.start_sample) { return false; }
+		return end_sample < other.end_sample;
 	}
 
   private:
 
 	ExportStatusPtr status;
 
-	framepos_t      start_frame;
-	framepos_t      end_frame;
-	framepos_t      position;
-	framecnt_t      frame_rate;
+	samplepos_t      start_sample;
+	samplepos_t      end_sample;
+	samplepos_t      position;
+	samplecnt_t      sample_rate;
 
 	std::string _name;
 	std::string _range_id;

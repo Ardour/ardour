@@ -50,14 +50,14 @@ DelayLine::~DelayLine ()
 
 #define FADE_LEN (16)
 void
-DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end_frame */, double /* speed */, pframes_t nsamples, bool)
+DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* end_sample */, double /* speed */, pframes_t nsamples, bool)
 {
 	const uint32_t chn = _configured_output.n_audio();
 	pframes_t p0 = 0;
 	uint32_t c;
 
-	const frameoffset_t pending_delay = _pending_delay;
-	const frameoffset_t delay_diff = _delay - pending_delay;
+	const sampleoffset_t pending_delay = _pending_delay;
+	const sampleoffset_t delay_diff = _delay - pending_delay;
 	const bool pending_flush = _pending_flush;
 	_pending_flush = false;
 
@@ -72,12 +72,12 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 		const size_t boff = _pending_bsiz - _bsiz;
 		if (_bsiz > 0) {
 			/* write offset is retained. copy existing data to new buffer */
-			frameoffset_t wl = _bsiz - _woff;
+			sampleoffset_t wl = _bsiz - _woff;
 			memcpy(_pending_buf.get(), _buf.get(), sizeof(Sample) * _woff * chn);
 			memcpy(_pending_buf.get() + (_pending_bsiz - wl) * chn, _buf.get() + _woff * chn, sizeof(Sample) * wl * chn);
 
 			/* new buffer is all zero by default, fade into the existing data copied above */
-			frameoffset_t wo = _pending_bsiz - wl;
+			sampleoffset_t wo = _pending_bsiz - wl;
 			for (pframes_t pos = 0; pos < FADE_LEN; ++pos) {
 				const gain_t gain = (gain_t)pos / (gain_t)FADE_LEN;
 				for (c = 0; c < _configured_output.n_audio(); ++c) {
@@ -89,8 +89,8 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			/* read-pointer will be moved and may up anywhere..
 			 * copy current data for smooth fade-out below
 			 */
-			frameoffset_t roold = _roff;
-			frameoffset_t ro = _roff;
+			sampleoffset_t roold = _roff;
+			sampleoffset_t ro = _roff;
 			if (ro > _woff) {
 				ro += boff;
 			}
@@ -126,7 +126,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 	if (buf && _configured_output.n_audio() > 0) {
 
 		assert (_bsiz >= pending_delay);
-		const framecnt_t rbs = _bsiz + 1;
+		const samplecnt_t rbs = _bsiz + 1;
 
 		if (pending_delay != _delay || pending_flush) {
 			const pframes_t fade_len = (nsamples >= FADE_LEN) ? FADE_LEN : nsamples / 2;
@@ -139,8 +139,8 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			c = 0;
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 				Sample * const data = i->data();
-				frameoffset_t roff = _roff;
-				frameoffset_t woff = _woff;
+				sampleoffset_t roff = _roff;
+				sampleoffset_t woff = _woff;
 				for (pframes_t pos = 0; pos < fade_len; ++pos) {
 					const gain_t gain = (gain_t)(fade_len - pos) / (gain_t)fade_len;
 					buf[ woff * chn + c ] = data[ pos ];
@@ -170,8 +170,8 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 			c = 0;
 			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 				Sample * const data = i->data();
-				frameoffset_t roff = _roff;
-				frameoffset_t woff = _woff;
+				sampleoffset_t roff = _roff;
+				sampleoffset_t woff = _woff;
 				for (pframes_t pos = fade_len; pos < 2 * fade_len; ++pos) {
 					const gain_t gain = (gain_t)(pos - fade_len) / (gain_t)fade_len;
 					buf[ woff * chn + c ] = data[ pos ];
@@ -196,8 +196,8 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 		c = 0;
 		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end() && c <= chn; ++i, ++c) {
 			Sample * const data = i->data();
-			frameoffset_t roff = _roff;
-			frameoffset_t woff = _woff;
+			sampleoffset_t roff = _roff;
+			sampleoffset_t woff = _woff;
 			for (pframes_t pos = p0; pos < nsamples; ++pos) {
 				buf[ woff * chn + c ] = data[ pos ];
 				data[ pos ] = buf[ roff * chn + c ];
@@ -278,7 +278,7 @@ DelayLine::run (BufferSet& bufs, framepos_t /* start_frame */, framepos_t /* end
 }
 
 void
-DelayLine::set_delay(framecnt_t signal_delay)
+DelayLine::set_delay(samplecnt_t signal_delay)
 {
 	if (signal_delay < 0) {
 		signal_delay = 0;
@@ -320,10 +320,10 @@ DelayLine::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 }
 
 void
-DelayLine::allocate_pending_buffers (framecnt_t signal_delay)
+DelayLine::allocate_pending_buffers (samplecnt_t signal_delay)
 {
 	assert (signal_delay >= 0);
-	const framecnt_t rbs = signal_delay + 1;
+	const samplecnt_t rbs = signal_delay + 1;
 
 	if (_configured_output.n_audio() > 0 ) {
 		_pending_buf.reset(new Sample[_configured_output.n_audio() * rbs]);

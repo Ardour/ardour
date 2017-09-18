@@ -83,7 +83,7 @@ namespace ARDOUR {
 
 		PeakData peaks[2][800];
 		float spectrum[800][200];
-		std::set<framecnt_t> truepeakpos[2]; // bins with >= -1dBTB
+		std::set<samplecnt_t> truepeakpos[2]; // bins with >= -1dBTB
 	};
 
 	typedef boost::shared_ptr<ExportAnalysis> ExportAnalysisPtr;

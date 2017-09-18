@@ -79,16 +79,16 @@ class Push2Canvas : public ArdourCanvas::Canvas
 	static const int pixels_per_row;
 	int pixel_area () const { return _rows * pixels_per_row; }
 
-	uint8_t   frame_header[16];
-	uint16_t* device_frame_buffer;
+	uint8_t   sample_header[16];
+	uint16_t* device_sample_buffer;
 
-	Cairo::RefPtr<Cairo::ImageSurface> frame_buffer;
+	Cairo::RefPtr<Cairo::ImageSurface> sample_buffer;
 	Cairo::RefPtr<Cairo::Context> context;
 	Cairo::RefPtr<Cairo::Region> expose_region;
 	Glib::RefPtr<Pango::Context> pango_context;
 
 	bool expose ();
-	int blit_to_device_frame_buffer ();
+	int blit_to_device_sample_buffer ();
 };
 
 } /* namespace ArdourSurface */

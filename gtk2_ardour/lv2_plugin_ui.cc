@@ -103,9 +103,9 @@ LV2PluginUI::touch(void*    controller,
 
 	ControllableRef control = me->_controllables[port_index];
 	if (grabbed) {
-		control->start_touch(control->session().transport_frame());
+		control->start_touch(control->session().transport_sample());
 	} else {
-		control->stop_touch(control->session().transport_frame());
+		control->stop_touch(control->session().transport_sample());
 	}
 }
 

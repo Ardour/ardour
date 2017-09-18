@@ -432,7 +432,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/transport_stop", "f", transport_stop);
 		REGISTER_CALLBACK (serv, "/transport_play", "", transport_play);
 		REGISTER_CALLBACK (serv, "/transport_play", "f", transport_play);
-		REGISTER_CALLBACK (serv, "/transport_frame", "", transport_frame);
+		REGISTER_CALLBACK (serv, "/transport_frame", "", transport_sample);
 		REGISTER_CALLBACK (serv, "/transport_speed", "", transport_speed);
 		REGISTER_CALLBACK (serv, "/record_enabled", "", record_enabled);
 		REGISTER_CALLBACK (serv, "/set_transport_speed", "f", set_transport_speed);
@@ -1187,37 +1187,37 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	if (strcmp (argv[0]->s, "transport_frame") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, "transport_speed") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, "transport_locked") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, "punch_in") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, "punch_out") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else if (strcmp (argv[0]->s, "rec_enable") == 0) {
 
 		if (session) {
-			lo_send (addr, retpath, "i", session->transport_frame());
+			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
 	} else {
@@ -1313,8 +1313,8 @@ OSC::routes_list (lo_message msg)
 	lo_message reply = lo_message_new ();
 
 	lo_message_add_string (reply, "end_route_list");
-	lo_message_add_int64 (reply, session->frame_rate());
-	lo_message_add_int64 (reply, session->current_end_frame());
+	lo_message_add_int64 (reply, session->sample_rate());
+	lo_message_add_int64 (reply, session->current_end_sample());
 	if (session->monitor_out()) {
 		// this session has a monitor section
 		lo_message_add_int32 (reply, 1);
@@ -2168,13 +2168,13 @@ OSC::_sel_plugin (int id, lo_address addr)
 }
 
 void
-OSC::transport_frame (lo_message msg)
+OSC::transport_sample (lo_message msg)
 {
 	if (!session) {
 		return;
 	}
 	check_surface (msg);
-	framepos_t pos = session->transport_frame ();
+	samplepos_t pos = session->transport_sample ();
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_int64 (reply, pos);
@@ -2224,7 +2224,7 @@ OSC::scrub (float delta, lo_message msg)
 	if (!session) return -1;
 	check_surface (msg);
 
-	scrub_place = session->transport_frame ();
+	scrub_place = session->transport_sample ();
 
 	float speed;
 
@@ -2871,11 +2871,11 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		if (control) {
 			if (touch) {
 				//start touch
-				control->start_touch (control->session().transport_frame());
+				control->start_touch (control->session().transport_sample());
 				ret = 0;
 			} else {
 				// end touch
-				control->stop_touch (control->session().transport_frame());
+				control->stop_touch (control->session().transport_sample());
 				ret = 0;
 			}
 			// just in case some crazy surface starts sending control values before touch
@@ -2895,7 +2895,7 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 	if (ctrl) {
 		//start touch
 		if (ctrl->automation_state() == Touch && !ctrl->touching ()) {
-		ctrl->start_touch (ctrl->session().transport_frame());
+		ctrl->start_touch (ctrl->session().transport_sample());
 		_touch_timeout[ctrl] = 10;
 		}
 	}
@@ -4892,7 +4892,7 @@ OSC::periodic (void)
 		if (!(*x).second) {
 			boost::shared_ptr<ARDOUR::AutomationControl> ctrl = (*x).first;
 			// turn touch off
-			ctrl->stop_touch (ctrl->session().transport_frame());
+			ctrl->stop_touch (ctrl->session().transport_sample());
 			_touch_timeout.erase (x++);
 		} else {
 			x++;

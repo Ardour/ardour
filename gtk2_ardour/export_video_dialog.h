@@ -88,7 +88,7 @@ private:
 	bool _normalize;
 
 	void finished ();
-	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void update_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 
 	boost::shared_ptr<ARDOUR::ExportStatus> status;
 	sigc::connection audio_progress_connection;

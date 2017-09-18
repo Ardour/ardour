@@ -63,7 +63,7 @@ private:
 	LTCDecoder*  decoder;
 	float*      _interleaved_audio_buffer;
 	uint32_t    _frames_decoded;
-	framecnt_t  _samples_read;
+	samplecnt_t  _samples_read;
 
 };
 

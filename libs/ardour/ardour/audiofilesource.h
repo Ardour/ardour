@@ -50,14 +50,14 @@ public:
 	/* this block of methods do nothing for regular file sources, but are significant
 	   for files used in destructive recording.
 	*/
-	virtual framepos_t last_capture_start_frame() const { return 0; }
-	virtual void      mark_capture_start (framepos_t) {}
+	virtual samplepos_t last_capture_start_sample() const { return 0; }
+	virtual void      mark_capture_start (samplepos_t) {}
 	virtual void      mark_capture_end () {}
 	virtual void      clear_capture_marks() {}
 	virtual bool      one_of_several_channels () const { return false; }
 
 	virtual void flush () = 0;
-	virtual int update_header (framepos_t when, struct tm&, time_t) = 0;
+	virtual int update_header (samplepos_t when, struct tm&, time_t) = 0;
 	virtual int flush_header () = 0;
 
 	void mark_streaming_write_completed (const Lock& lock);
@@ -76,7 +76,7 @@ public:
 	static bool is_empty (Session&, std::string path);
 
 	static void set_bwf_serial_number (int);
-	static void set_header_position_offset (framecnt_t offset);
+	static void set_header_position_offset (samplecnt_t offset);
 
 	static PBD::Signal0<void> HeaderPositionOffsetChanged;
 
@@ -104,14 +104,14 @@ protected:
 
 	int move_dependents_to_trash();
 
-	static Sample* get_interleave_buffer (framecnt_t size);
+	static Sample* get_interleave_buffer (samplecnt_t size);
 
 	static char bwf_country_code[3];
 	static char bwf_organization_code[4];
 	static char bwf_serial_number[13];
 
 	/** Kept up to date with the position of the session location start */
-	static framecnt_t header_position_offset;
+	static samplecnt_t header_position_offset;
 };
 
 } // namespace ARDOUR

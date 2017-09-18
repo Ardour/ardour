@@ -58,11 +58,11 @@ SessionEvent::create_per_thread_pool (const std::string& name, uint32_t nitems)
 	pool->create_per_thread_pool (name, sizeof (SessionEvent), nitems);
 }
 
-SessionEvent::SessionEvent (Type t, Action a, framepos_t when, framepos_t where, double spd, bool yn, bool yn2, bool yn3)
+SessionEvent::SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn, bool yn2, bool yn3)
 	: type (t)
 	, action (a)
-	, action_frame (when)
-	, target_frame (where)
+	, action_sample (when)
+	, target_sample (where)
 	, speed (spd)
 	, yes_or_no (yn)
 	, second_yes_or_no (yn2)
@@ -108,23 +108,23 @@ SessionEvent::operator delete (void *ptr, size_t /*size*/)
 }
 
 void
-SessionEventManager::add_event (framepos_t frame, SessionEvent::Type type, framepos_t target_frame)
+SessionEventManager::add_event (samplepos_t sample, SessionEvent::Type type, samplepos_t target_sample)
 {
-	SessionEvent* ev = new SessionEvent (type, SessionEvent::Add, frame, target_frame, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Add, sample, target_sample, 0);
 	queue_event (ev);
 }
 
 void
-SessionEventManager::remove_event (framepos_t frame, SessionEvent::Type type)
+SessionEventManager::remove_event (samplepos_t sample, SessionEvent::Type type)
 {
-	SessionEvent* ev = new SessionEvent (type, SessionEvent::Remove, frame, 0, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Remove, sample, 0, 0);
 	queue_event (ev);
 }
 
 void
-SessionEventManager::replace_event (SessionEvent::Type type, framepos_t frame, framepos_t target)
+SessionEventManager::replace_event (SessionEvent::Type type, samplepos_t sample, samplepos_t target)
 {
-	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, frame, target, 0);
+	SessionEvent* ev = new SessionEvent (type, SessionEvent::Replace, sample, target, 0);
 	queue_event (ev);
 }
 
@@ -160,20 +160,20 @@ SessionEventManager::dump_events () const
 	cerr << "EVENT DUMP" << endl;
 	for (Events::const_iterator i = events.begin(); i != events.end(); ++i) {
 
-		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string ((*i)->type) << " target = " << (*i)->target_frame << endl;
+		cerr << "\tat " << (*i)->action_sample << ' ' << enum_2_string ((*i)->type) << " target = " << (*i)->target_sample << endl;
 	}
 	cerr << "Next event: ";
 
 	if ((Events::const_iterator) next_event == events.end()) {
 		cerr << "none" << endl;
 	} else {
-		cerr << "at " << (*next_event)->action_frame << ' '
+		cerr << "at " << (*next_event)->action_sample << ' '
 		     << enum_2_string ((*next_event)->type) << " target = "
-		     << (*next_event)->target_frame << endl;
+		     << (*next_event)->target_sample << endl;
 	}
 	cerr << "Immediate events pending:\n";
 	for (Events::const_iterator i = immediate_events.begin(); i != immediate_events.end(); ++i) {
-		cerr << "\tat " << (*i)->action_frame << ' ' << enum_2_string((*i)->type) << " target = " << (*i)->target_frame << endl;
+		cerr << "\tat " << (*i)->action_sample << ' ' << enum_2_string((*i)->type) << " target = " << (*i)->target_sample << endl;
 	}
 	cerr << "END EVENT_DUMP" << endl;
 }
@@ -216,7 +216,7 @@ SessionEventManager::merge_event (SessionEvent* ev)
 		_clear_event_type (ev->type);
 	}
 
-	if (ev->action_frame == SessionEvent::Immediate) {
+	if (ev->action_sample == SessionEvent::Immediate) {
 		process_event (ev);
 		return;
 	}
@@ -229,9 +229,9 @@ SessionEventManager::merge_event (SessionEvent* ev)
 		break;
 	default:
 		for (Events::iterator i = events.begin(); i != events.end(); ++i) {
-			if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
-			  error << string_compose(_("Session: cannot have two events of type %1 at the same frame (%2)."),
-						  enum_2_string (ev->type), ev->action_frame) << endmsg;
+			if ((*i)->type == ev->type && (*i)->action_sample == ev->action_sample) {
+			  error << string_compose(_("Session: cannot have two events of type %1 at the same sample (%2)."),
+						  enum_2_string (ev->type), ev->action_sample) << endmsg;
 				return;
 			}
 		}
@@ -254,8 +254,8 @@ SessionEventManager::_replace_event (SessionEvent* ev)
 
 	for (i = events.begin(); i != events.end(); ++i) {
 		if ((*i)->type == ev->type) {
-			(*i)->action_frame = ev->action_frame;
-			(*i)->target_frame = ev->target_frame;
+			(*i)->action_sample = ev->action_sample;
+			(*i)->target_sample = ev->target_sample;
 			if ((*i) == ev) {
 				ret = true;
 			}
@@ -283,7 +283,7 @@ SessionEventManager::_remove_event (SessionEvent* ev)
 	Events::iterator i;
 
 	for (i = events.begin(); i != events.end(); ++i) {
-		if ((*i)->type == ev->type && (*i)->action_frame == ev->action_frame) {
+		if ((*i)->type == ev->type && (*i)->action_sample == ev->action_sample) {
 			if ((*i) == ev) {
 				ret = true;
 			}

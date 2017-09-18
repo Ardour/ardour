@@ -255,7 +255,7 @@ private:
 		bool on_button_press_event (GdkEventButton *ev);
 		void update_height_alloc (uint32_t inline_height);
 
-		void display_frame (cairo_t* cr, double w, double h);
+		void display_sample (cairo_t* cr, double w, double h);
 
 		ProcessorEntry& _entry;
 		bool _scroll;

@@ -47,17 +47,17 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	AudioSource (Session&, const XMLNode&);
 	virtual ~AudioSource ();
 
-	framecnt_t readable_length() const { return _length; }
+	samplecnt_t readable_length() const { return _length; }
 	virtual uint32_t n_channels()      const { return 1; }
 
 	virtual bool       empty() const;
-	framecnt_t length (framepos_t pos) const;
-	void       update_length (framecnt_t cnt);
+	samplecnt_t length (samplepos_t pos) const;
+	void       update_length (samplecnt_t cnt);
 
-	virtual framecnt_t available_peaks (double zoom) const;
+	virtual samplecnt_t available_peaks (double zoom) const;
 
-	virtual framecnt_t read (Sample *dst, framepos_t start, framecnt_t cnt, int channel=0) const;
-	virtual framecnt_t write (Sample *src, framecnt_t cnt);
+	virtual samplecnt_t read (Sample *dst, samplepos_t start, samplecnt_t cnt, int channel=0) const;
+	virtual samplecnt_t write (Sample *src, samplecnt_t cnt);
 
 	virtual float sample_rate () const = 0;
 
@@ -68,14 +68,14 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	void set_captured_for (std::string str) { _captured_for = str; }
 	std::string captured_for() const { return _captured_for; }
 
-	int read_peaks (PeakData *peaks, framecnt_t npeaks,
-			framepos_t start, framecnt_t cnt, double samples_per_visual_peak) const;
+	int read_peaks (PeakData *peaks, samplecnt_t npeaks,
+			samplepos_t start, samplecnt_t cnt, double samples_per_visual_peak) const;
 
 	int  build_peaks ();
 	bool peaks_ready (boost::function<void()> callWhenReady, PBD::ScopedConnection** connection_created_if_not_ready, PBD::EventLoop* event_loop) const;
 
 	mutable PBD::Signal0<void>  PeaksReady;
-	mutable PBD::Signal2<void,framepos_t,framepos_t>  PeakRangeReady;
+	mutable PBD::Signal2<void,samplepos_t,samplepos_t>  PeakRangeReady;
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
@@ -104,7 +104,7 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	/** @return true if the each source sample s must be clamped to -1 < s < 1 */
 	virtual bool clamped_at_unity () const = 0;
 
-	static void allocate_working_buffers (framecnt_t framerate);
+	static void allocate_working_buffers (samplecnt_t framerate);
 
   protected:
 	static bool _build_missing_peakfiles;
@@ -120,32 +120,32 @@ class LIBARDOUR_API AudioSource : virtual public Source,
 	static std::vector<boost::shared_array<gain_t> > _gain_buffers;
 	static Glib::Threads::Mutex    _level_buffer_lock;
 
-	static void ensure_buffers_for_level (uint32_t, framecnt_t);
-	static void ensure_buffers_for_level_locked (uint32_t, framecnt_t);
+	static void ensure_buffers_for_level (uint32_t, samplecnt_t);
+	static void ensure_buffers_for_level_locked (uint32_t, samplecnt_t);
 
-	framecnt_t           _length;
+	samplecnt_t           _length;
 	std::string         _peakpath;
 	std::string        _captured_for;
 
 	int initialize_peakfile (const std::string& path, const bool in_session = false);
 	int build_peaks_from_scratch ();
-	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
+	int compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
 	bool force, bool intermediate_peaks_ready_signal);
 	void truncate_peakfile();
 
 	mutable off_t _peak_byte_max; // modified in compute_and_write_peak()
 
-	virtual framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const = 0;
-	virtual framecnt_t write_unlocked (Sample *dst, framecnt_t cnt) = 0;
+	virtual samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const = 0;
+	virtual samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt) = 0;
 	virtual std::string construct_peak_filepath (const std::string& audio_path, const bool in_session = false, const bool old_peak_name = false) const = 0;
 
 	virtual int read_peaks_with_fpp (PeakData *peaks,
-					 framecnt_t npeaks, framepos_t start, framecnt_t cnt,
-					 double samples_per_visual_peak, framecnt_t fpp) const;
+					 samplecnt_t npeaks, samplepos_t start, samplecnt_t cnt,
+					 double samples_per_visual_peak, samplecnt_t fpp) const;
 
-	int compute_and_write_peaks (Sample* buf, framecnt_t first_frame, framecnt_t cnt,
+	int compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, samplecnt_t cnt,
 				     bool force, bool intermediate_peaks_ready_signal,
-				     framecnt_t frames_per_peak);
+				     samplecnt_t samples_per_peak);
 
   private:
 	bool _peaks_built;
@@ -159,10 +159,10 @@ class LIBARDOUR_API AudioSource : virtual public Source,
         Glib::Threads::Mutex _initialize_peaks_lock;
 
 	int        _peakfile_fd;
-	framecnt_t peak_leftover_cnt;
-	framecnt_t peak_leftover_size;
+	samplecnt_t peak_leftover_cnt;
+	samplecnt_t peak_leftover_size;
 	Sample*    peak_leftovers;
-	framepos_t peak_leftover_frame;
+	samplepos_t peak_leftover_sample;
 
 	mutable bool _first_run;
 	mutable double _last_scale;

@@ -31,12 +31,12 @@ namespace ARDOUR {
 
 class LIBARDOUR_API Click {
 public:
-	framepos_t start;
-	framecnt_t duration;
-	framecnt_t offset;
+	samplepos_t start;
+	samplecnt_t duration;
+	samplecnt_t offset;
 	const Sample *data;
 
-	Click (framepos_t s, framecnt_t d, const Sample *b) : start (s), duration (d), offset (0), data (b) {}
+	Click (samplepos_t s, samplecnt_t d, const Sample *b) : start (s), duration (d), offset (0), data (b) {}
 
 	void *operator new (size_t) {
 		return pool.alloc ();

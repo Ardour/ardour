@@ -78,7 +78,7 @@ public:
 		uint32_t time_beatUnit;
 		uint32_t time_beatsPerBar;
 		uint32_t time_beatsPerMinute;
-		uint32_t time_frame;
+		uint32_t time_sample;
 		uint32_t time_speed;
 		uint32_t patch_Get;
 		uint32_t patch_Set;

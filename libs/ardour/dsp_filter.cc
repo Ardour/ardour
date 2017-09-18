@@ -75,7 +75,7 @@ ARDOUR::DSP::peaks (const float *data, float &min, float &max, uint32_t n_sample
 }
 
 void
-ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, framecnt_t offset, const DataType& dt)
+ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, samplecnt_t offset, const DataType& dt)
 {
 	const ChanMapping::Mappings& im (in.mappings());
 	const ChanMapping::Mappings& om (out.mappings());

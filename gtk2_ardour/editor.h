@@ -149,10 +149,10 @@ public:
 	void             first_idle ();
 	virtual bool     have_idled () const { return _have_idled; }
 
-	framepos_t leftmost_sample() const { return leftmost_frame; }
+	samplepos_t leftmost_sample() const { return _leftmost_sample; }
 
-	framecnt_t current_page_samples() const {
-		return (framecnt_t) _visible_canvas_width * samples_per_pixel;
+	samplecnt_t current_page_samples() const {
+		return (samplecnt_t) _visible_canvas_width * samples_per_pixel;
 	}
 
 	double visible_canvas_height () const {
@@ -219,7 +219,7 @@ public:
 	   account any scrolling offsets.
 	*/
 
-	framepos_t pixel_to_sample_from_event (double pixel) const {
+	samplepos_t pixel_to_sample_from_event (double pixel) const {
 
 		/* pixel can be less than zero when motion events
 		   are processed. since we've already run the world->canvas
@@ -234,22 +234,22 @@ public:
 		}
 	}
 
-	framepos_t pixel_to_sample (double pixel) const {
+	samplepos_t pixel_to_sample (double pixel) const {
 		return pixel * samples_per_pixel;
 	}
 
-	double sample_to_pixel (framepos_t sample) const {
+	double sample_to_pixel (samplepos_t sample) const {
 		return round (sample / (double) samples_per_pixel);
 	}
 
-	double sample_to_pixel_unrounded (framepos_t sample) const {
+	double sample_to_pixel_unrounded (samplepos_t sample) const {
 		return sample / (double) samples_per_pixel;
 	}
 
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
-	bool get_selection_extents (framepos_t &start, framepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
+	bool get_selection_extents (samplepos_t &start, samplepos_t &end) const;  // the time extents of the current selection, whether Range, Region(s), Control Points, or Notes
 	Selection& get_cut_buffer() const { return *cut_buffer; }
 
 	void set_selection (std::list<Selectable*>, Selection::Operation);
@@ -257,7 +257,7 @@ public:
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
-	void maybe_locate_with_edit_preroll (framepos_t);
+	void maybe_locate_with_edit_preroll (samplepos_t);
 	void play_with_preroll ();
 	void rec_with_preroll ();
 	void rec_with_count_in ();
@@ -266,7 +266,7 @@ public:
 	void invert_selection_in_track ();
 	void invert_selection ();
 	void deselect_all ();
-	long select_range (framepos_t, framepos_t);
+	long select_range (samplepos_t, samplepos_t);
 
 	void set_selected_regionview_from_region_list (boost::shared_ptr<ARDOUR::Region> region, Selection::Operation op = Selection::Set);
 
@@ -297,7 +297,7 @@ public:
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	framecnt_t         get_current_zoom () const { return samples_per_pixel; }
+	samplecnt_t         get_current_zoom () const { return samples_per_pixel; }
 	void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool zoom_out);
 	void temporal_zoom_step_scale (bool zoom_out, double scale);
@@ -331,10 +331,10 @@ public:
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
-	framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next);
-	framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration);
-	unsigned get_grid_beat_divisions(framepos_t position);
-	Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position);
+	samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next);
+	samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration);
+	unsigned get_grid_beat_divisions(samplepos_t position);
+	Evoral::Beats get_grid_type_as_beats (bool& success, samplepos_t position);
 
 	int32_t get_grid_music_divisions (uint32_t event_state);
 
@@ -365,7 +365,7 @@ public:
 	void toggle_measure_visibility ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
-	std::pair <framepos_t,framepos_t> session_gui_extents( bool use_extra = true ) const; 
+	std::pair <samplepos_t,samplepos_t> session_gui_extents( bool use_extra = true ) const; 
 
 	/* fades */
 
@@ -401,13 +401,13 @@ public:
 	void restore_editing_space();
 
 	double get_y_origin () const;
-	void reset_x_origin (framepos_t);
+	void reset_x_origin (samplepos_t);
 	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
-	void reset_zoom (framecnt_t);
-	void reposition_and_zoom (framepos_t, double);
+	void reset_zoom (samplecnt_t);
+	void reposition_and_zoom (samplepos_t, double);
 
-	framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
+	samplepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
 	                                        bool use_context_click = false,
 	                                        bool from_outside_canvas = false);
 
@@ -439,13 +439,13 @@ public:
 	                ARDOUR::SrcQuality                    quality,
 	                ARDOUR::MidiTrackNameSource           mts,
 	                ARDOUR::MidiTempoMapDisposition       mtd,
-	                framepos_t&                           pos,
+	                samplepos_t&                           pos,
 	                boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void do_embed (std::vector<std::string>              paths,
 	               Editing::ImportDisposition            disposition,
 	               Editing::ImportMode                   mode,
-	               framepos_t&                           pos,
+	               samplepos_t&                           pos,
 	               boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>());
 
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
@@ -453,22 +453,22 @@ public:
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const;
 
-	void center_screen (framepos_t);
+	void center_screen (samplepos_t);
 
 	TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const;
 
-	void snap_to (ARDOUR::MusicFrame& first,
+	void snap_to (ARDOUR::MusicSample& first,
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	              bool                for_mark  = false,
 		      bool                ensure_snap = false);
 
-	void snap_to_with_modifier (ARDOUR::MusicFrame& first,
+	void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                            GdkEvent const *    ev,
 	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                            bool                for_mark  = false);
 
-	void snap_to (ARDOUR::MusicFrame& first,
-	              ARDOUR::MusicFrame& last,
+	void snap_to (ARDOUR::MusicSample& first,
+	              ARDOUR::MusicSample& last,
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	              bool                for_mark  = false);
 
@@ -546,19 +546,19 @@ public:
 	void metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>&, gdouble, gdouble, gint);
 
 	/* editing operations that need to be public */
-	void mouse_add_new_marker (framepos_t where, bool is_cd=false);
-	void split_regions_at (ARDOUR::MusicFrame, RegionSelection&, bool snap = true);
+	void mouse_add_new_marker (samplepos_t where, bool is_cd=false);
+	void split_regions_at (ARDOUR::MusicSample, RegionSelection&, bool snap = true);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
-	RegionSelection get_regions_from_selection_and_mouse (framepos_t);
+	RegionSelection get_regions_from_selection_and_mouse (samplepos_t);
 
-	void mouse_add_new_tempo_event (framepos_t where);
-	void mouse_add_new_meter_event (framepos_t where);
+	void mouse_add_new_tempo_event (samplepos_t where);
+	void mouse_add_new_meter_event (samplepos_t where);
 	void edit_tempo_section (ARDOUR::TempoSection*);
 	void edit_meter_section (ARDOUR::MeterSection*);
 
 protected:
 	void map_transport_state ();
-	void map_position_change (framepos_t);
+	void map_position_change (samplepos_t);
 	void transport_looped ();
 
 	void on_realize();
@@ -573,7 +573,7 @@ private:
 	bool                 constructed;
 
 	// to keep track of the playhead position for control_scroll
-	boost::optional<framepos_t> _control_scroll_target;
+	boost::optional<samplepos_t> _control_scroll_target;
 
 	PlaylistSelector* _playlist_selector;
 
@@ -585,8 +585,8 @@ private:
 		VisualState (bool with_tracks);
 		~VisualState ();
 		double              y_position;
-		framecnt_t          samples_per_pixel;
-		framepos_t          leftmost_frame;
+		samplecnt_t          samples_per_pixel;
+		samplepos_t          _leftmost_sample;
 		Editing::ZoomFocus  zoom_focus;
 		GUIObjectState*     gui_state;
 	};
@@ -604,11 +604,11 @@ private:
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
 
-	framepos_t         leftmost_frame;
-	framecnt_t         samples_per_pixel;
+	samplepos_t         _leftmost_sample;
+	samplecnt_t         samples_per_pixel;
 	Editing::ZoomFocus zoom_focus;
 
-	void set_samples_per_pixel (framecnt_t);
+	void set_samples_per_pixel (samplecnt_t);
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
@@ -688,7 +688,7 @@ private:
 		void setup_lines ();
 
 		void set_name (const std::string&);
-		void set_position (framepos_t start, framepos_t end = 0);
+		void set_position (samplepos_t start, samplepos_t end = 0);
 		void set_color_rgba (uint32_t);
 	};
 
@@ -716,9 +716,9 @@ private:
 
 	void hide_marker (ArdourCanvas::Item*, GdkEvent*);
 	void clear_marker_display ();
-	void mouse_add_new_range (framepos_t);
-	void mouse_add_new_loop (framepos_t);
-	void mouse_add_new_punch (framepos_t);
+	void mouse_add_new_range (samplepos_t);
+	void mouse_add_new_loop (samplepos_t);
+	void mouse_add_new_punch (samplepos_t);
 	bool choose_new_marker_name(std::string &name);
 	void update_cd_marker_display ();
 	void ensure_cd_marker_updated (LocationMarkers * lam, ARDOUR::Location * location);
@@ -915,7 +915,7 @@ private:
 	void compute_fixed_ruler_scale (); //calculates the RulerScale of the fixed rulers
 	void update_fixed_rulers ();
 	void update_tempo_based_rulers ();
-	void popup_ruler_menu (framepos_t where = 0, ItemType type = RegionItem);
+	void popup_ruler_menu (samplepos_t where = 0, ItemType type = RegionItem);
 	void update_ruler_visibility ();
 	void set_ruler_visible (RulerType, bool);
 	void toggle_ruler_visibility (RulerType rt);
@@ -936,14 +936,14 @@ private:
 
 	MinsecRulerScale minsec_ruler_scale;
 
-	framecnt_t minsec_mark_interval;
+	samplecnt_t minsec_mark_interval;
 	gint minsec_mark_modulo;
 	gint minsec_nmarks;
-	void set_minsec_ruler_scale (framepos_t, framepos_t);
+	void set_minsec_ruler_scale (samplepos_t, samplepos_t);
 
 	enum TimecodeRulerScale {
 		timecode_show_bits,
-		timecode_show_frames,
+		timecode_show_samples,
 		timecode_show_seconds,
 		timecode_show_minutes,
 		timecode_show_hours,
@@ -954,10 +954,10 @@ private:
 
 	gint timecode_mark_modulo;
 	gint timecode_nmarks;
-	void set_timecode_ruler_scale (framepos_t, framepos_t);
+	void set_timecode_ruler_scale (samplepos_t, samplepos_t);
 
-	framecnt_t _samples_ruler_interval;
-	void set_samples_ruler_scale (framepos_t, framepos_t);
+	samplecnt_t _samples_ruler_interval;
+	void set_samples_ruler_scale (samplepos_t, samplepos_t);
 
 	enum BBTRulerScale {
 		bbt_show_many,
@@ -977,7 +977,7 @@ private:
 	gint bbt_nmarks;
 	uint32_t bbt_bar_helper_on;
 	uint32_t bbt_accent_modulo;
-	void compute_bbt_ruler_scale (framepos_t lower, framepos_t upper);
+	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
 	ArdourCanvas::Ruler* bbt_ruler;
@@ -1013,7 +1013,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_proc_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_ontop_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_timecode_action;
-	Glib::RefPtr<Gtk::ToggleAction> xjadeo_frame_action;
+	Glib::RefPtr<Gtk::ToggleAction> xjadeo_sample_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_osdbg_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_fullscreen_action;
 	Glib::RefPtr<Gtk::ToggleAction> xjadeo_letterbox_action;
@@ -1032,9 +1032,9 @@ private:
 	friend class EditorCursor;
 
 	EditorCursor* playhead_cursor;
-	framepos_t playhead_cursor_sample () const;
+	samplepos_t playhead_cursor_sample () const;
 
-	framepos_t get_region_boundary (framepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
+	samplepos_t get_region_boundary (samplepos_t pos, int32_t dir, bool with_selection, bool only_onscreen);
 
 	void    cursor_to_region_boundary (bool with_selection, int32_t dir);
 	void    cursor_to_next_region_boundary (bool with_selection);
@@ -1059,10 +1059,10 @@ private:
 	void    select_all_selectables_between (bool within);
 	void    select_range_between ();
 
-	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::framepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
-	ARDOUR::framepos_t find_next_region_boundary (ARDOUR::framepos_t, int32_t dir, const TrackViewList&);
+	boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::samplepos_t, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView ** = 0);
+	ARDOUR::samplepos_t find_next_region_boundary (ARDOUR::samplepos_t, int32_t dir, const TrackViewList&);
 
-	std::vector<ARDOUR::framepos_t> region_boundary_cache;
+	std::vector<ARDOUR::samplepos_t> region_boundary_cache;
 	void build_region_boundary_cache ();
 
 	Gtk::HBox           toplevel_hpacker;
@@ -1119,7 +1119,7 @@ private:
 	void control_unselect ();
 	void access_action (const std::string&, const std::string&);
 	void set_toggleaction (const std::string&, const std::string&, bool);
-	bool deferred_control_scroll (framepos_t);
+	bool deferred_control_scroll (samplepos_t);
 	sigc::connection control_scroll_connection;
 
 	void tie_vertical_scrolling ();
@@ -1135,8 +1135,8 @@ private:
 		};
 
 		Type       pending;
-		framepos_t time_origin;
-	        framecnt_t samples_per_pixel;
+		samplepos_t time_origin;
+	        samplecnt_t samples_per_pixel;
 		double     y_origin;
 
 		int idle_handler_id;
@@ -1173,7 +1173,7 @@ private:
 	TrackViewList get_tracks_for_range_action () const;
 
 	sigc::connection super_rapid_screen_update_connection;
-	void center_screen_internal (framepos_t, float);
+	void center_screen_internal (samplepos_t, float);
 
 	void super_rapid_screen_update ();
 
@@ -1182,8 +1182,8 @@ private:
 
 	void session_going_away ();
 
-	framepos_t cut_buffer_start;
-	framecnt_t cut_buffer_length;
+	samplepos_t cut_buffer_start;
+	samplecnt_t cut_buffer_length;
 
 	boost::shared_ptr<CursorContext> _press_cursor_ctx;  ///< Button press cursor context
 
@@ -1216,7 +1216,7 @@ private:
 
 	/* CUT/COPY/PASTE */
 
-	framepos_t last_paste_pos;
+	samplepos_t last_paste_pos;
 	unsigned   paste_count;
 
 	void cut_copy (Editing::CutCopyOp);
@@ -1227,7 +1227,7 @@ private:
 	void cut_copy_midi (Editing::CutCopyOp);
 
 	void mouse_paste ();
-	void paste_internal (framepos_t position, float times, const int32_t sub_num);
+	void paste_internal (samplepos_t position, float times, const int32_t sub_num);
 
 	/* EDITING OPERATIONS */
 
@@ -1255,14 +1255,14 @@ private:
 	void lower_region_to_bottom ();
 	void split_region_at_transients ();
 	void crop_region_to_selection ();
-	void crop_region_to (framepos_t start, framepos_t end);
-	void set_sync_point (framepos_t, const RegionSelection&);
+	void crop_region_to (samplepos_t start, samplepos_t end);
+	void set_sync_point (samplepos_t, const RegionSelection&);
 	void set_region_sync_position ();
 	void remove_region_sync();
 	void align_regions (ARDOUR::RegionPoint);
 	void align_regions_relative (ARDOUR::RegionPoint point);
-	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
-	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, framepos_t position);
+	void align_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, samplepos_t position);
+	void align_region_internal (boost::shared_ptr<ARDOUR::Region>, ARDOUR::RegionPoint point, samplepos_t position);
 	void remove_selected_regions ();
 	void remove_clicked_region ();
 	void show_region_properties ();
@@ -1295,10 +1295,10 @@ private:
 	void fork_region ();
 
 	void do_insert_time ();
-	void insert_time (framepos_t, framecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
+	void insert_time (samplepos_t, samplecnt_t, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
 
 	void do_remove_time ();
-	void remove_time (framepos_t pos, framecnt_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
+	void remove_time (samplepos_t pos, samplecnt_t distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
 			bool glued_markers_too, bool locked_markers_too, bool tempo_too);
 
 	void tab_to_transient (bool forward);
@@ -1306,7 +1306,7 @@ private:
 	void set_tempo_from_region ();
 	void use_range_as_bar ();
 
-	void define_one_bar (framepos_t start, framepos_t end);
+	void define_one_bar (samplepos_t start, samplepos_t end);
 
 	void audition_region_from_region_list ();
 	void hide_region_from_region_list ();
@@ -1339,13 +1339,13 @@ private:
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
-	void calc_extra_zoom_edges(framepos_t &start, framepos_t &end);
+	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
 	void temporal_zoom_selection (Editing::ZoomAxis);
 	void temporal_zoom_session ();
 	void temporal_zoom_extents ();
-	void temporal_zoom (framecnt_t samples_per_pixel);
-	void temporal_zoom_by_frame (framepos_t start, framepos_t end);
-	void temporal_zoom_to_frame (bool coarser, framepos_t frame);
+	void temporal_zoom (samplecnt_t samples_per_pixel);
+	void temporal_zoom_by_sample (samplepos_t start, samplepos_t end);
+	void temporal_zoom_to_sample (bool coarser, samplepos_t sample);
 
 	void insert_region_list_selection (float times);
 
@@ -1370,16 +1370,16 @@ private:
 
 	SoundFileOmega* sfbrowser;
 
-	void bring_in_external_audio (Editing::ImportMode mode,  framepos_t& pos);
+	void bring_in_external_audio (Editing::ImportMode mode,  samplepos_t& pos);
 
-	bool  idle_drop_paths  (std::vector<std::string> paths, framepos_t frame, double ypos, bool copy);
-	void  drop_paths_part_two  (const std::vector<std::string>& paths, framepos_t frame, double ypos, bool copy);
+	bool  idle_drop_paths  (std::vector<std::string> paths, samplepos_t sample, double ypos, bool copy);
+	void  drop_paths_part_two  (const std::vector<std::string>& paths, samplepos_t sample, double ypos, bool copy);
 
 	int import_sndfiles (std::vector<std::string>              paths,
 	                     Editing::ImportDisposition            disposition,
 	                     Editing::ImportMode                   mode,
 	                     ARDOUR::SrcQuality                    quality,
-	                     framepos_t&                           pos,
+	                     samplepos_t&                           pos,
 	                     int                                   target_regions,
 	                     int                                   target_tracks,
 	                     boost::shared_ptr<ARDOUR::Track>&     track,
@@ -1391,7 +1391,7 @@ private:
 	                    bool&                                 check_sample_rate,
 	                    Editing::ImportDisposition            disposition,
 	                    Editing::ImportMode                   mode,
-	                    framepos_t&                           pos,
+	                    samplepos_t&                           pos,
 	                    int                                   target_regions,
 	                    int                                   target_tracks,
 	                    boost::shared_ptr<ARDOUR::Track>&     track,
@@ -1399,7 +1399,7 @@ private:
 
 	int add_sources (std::vector<std::string>              paths,
 	                 ARDOUR::SourceList&                   sources,
-	                 framepos_t&                           pos,
+	                 samplepos_t&                           pos,
 	                 Editing::ImportDisposition            disposition,
 	                 Editing::ImportMode                   mode,
 	                 int                                   target_regions,
@@ -1411,7 +1411,7 @@ private:
 	int finish_bringing_in_material (boost::shared_ptr<ARDOUR::Region>     region,
 	                                 uint32_t                              in_chans,
 	                                 uint32_t                              out_chans,
-	                                 framepos_t&                           pos,
+	                                 samplepos_t&                           pos,
 	                                 Editing::ImportMode                   mode,
 	                                 boost::shared_ptr<ARDOUR::Track>&     existing_track,
 	                                 const std::string&                    new_track_name,
@@ -1434,7 +1434,7 @@ private:
 
 	struct EditorImportStatus : public ARDOUR::ImportStatus {
 	    Editing::ImportMode mode;
-	    framepos_t pos;
+	    samplepos_t pos;
 	    int target_tracks;
 	    int target_regions;
 	    boost::shared_ptr<ARDOUR::Track> track;
@@ -1450,7 +1450,7 @@ private:
 
 	void import_audio (bool as_tracks);
 	void do_import (std::vector<std::string> paths, bool split, bool as_tracks);
-	void import_smf_tempo_map (Evoral::SMF const &, framepos_t pos);
+	void import_smf_tempo_map (Evoral::SMF const &, samplepos_t pos);
 	void move_to_start ();
 	void move_to_end ();
 	void center_playhead ();
@@ -1480,7 +1480,7 @@ private:
 	void set_selection_from_loop ();
 	void set_selection_from_region ();
 
-	void add_location_mark (framepos_t where);
+	void add_location_mark (samplepos_t where);
 	void add_location_from_region ();
 	void add_locations_from_region ();
 	void add_location_from_selection ();
@@ -1495,8 +1495,8 @@ private:
 
 	void set_loop_from_region (bool play);
 
-	void set_loop_range (framepos_t start, framepos_t end, std::string cmd);
-	void set_punch_range (framepos_t start, framepos_t end, std::string cmd);
+	void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd);
+	void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd);
 
 	void toggle_location_at_playhead_cursor ();
 	void add_location_from_playhead_cursor ();
@@ -1511,7 +1511,7 @@ private:
 	int scrubbing_direction;
 	int scrub_reversals;
 	int scrub_reverse_distance;
-	void scrub (framepos_t, double);
+	void scrub (samplepos_t, double);
 
 	void set_punch_start_from_edit_point ();
 	void set_punch_end_from_edit_point ();
@@ -1521,7 +1521,7 @@ private:
 	void keyboard_selection_begin ( Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE );
 	void keyboard_selection_finish (bool add, Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE);
 	bool have_pending_keyboard_selection;
-	framepos_t pending_keyboard_selection_start;
+	samplepos_t pending_keyboard_selection_start;
 
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
@@ -1583,7 +1583,7 @@ private:
 	bool can_remove_control_point (ArdourCanvas::Item *);
 	void remove_control_point (ArdourCanvas::Item *);
 
-	void mouse_brush_insert_region (RegionView*, framepos_t pos);
+	void mouse_brush_insert_region (RegionView*, samplepos_t pos);
 
 	/* Canvas event handlers */
 
@@ -1601,7 +1601,7 @@ private:
 	bool canvas_fade_out_handle_event (GdkEvent* event,ArdourCanvas::Item*, AudioRegionView*, bool trim = false);
 	bool canvas_region_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_wave_view_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
-	bool canvas_frame_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
+	bool canvas_sample_handle_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_highlight_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_region_view_name_event (GdkEvent* event,ArdourCanvas::Item*, RegionView*);
 	bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*);
@@ -1628,7 +1628,7 @@ private:
 	void toggle_video_timeline_locked ();
 	void set_video_timeline_locked (const bool);
 	void queue_visual_videotimeline_update ();
-	void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true);
+	void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true);
 
 	bool track_selection_change_without_scroll () const {
 		return _track_selection_change_without_scroll;
@@ -1754,7 +1754,7 @@ private:
 	void remove_metric_marks ();
 	void draw_metric_marks (const ARDOUR::Metrics& metrics);
 
-	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, framepos_t left, framepos_t right);
+	void compute_current_bbt_points (std::vector<ARDOUR::TempoMap::BBTPoint>& grid, samplepos_t left, samplepos_t right);
 
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void tempometric_position_changed (const PBD::PropertyChange&);
@@ -1889,7 +1889,7 @@ private:
 
 	bool get_smart_mode() const;
 
-	bool audio_region_selection_covers (framepos_t where);
+	bool audio_region_selection_covers (samplepos_t where);
 
 	/* transport range select process */
 
@@ -1913,7 +1913,7 @@ private:
 
 	/* object rubberband select process */
 
-	void select_all_within (framepos_t, framepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
+	void select_all_within (samplepos_t, samplepos_t, double, double, TrackViewList const &, Selection::Operation, bool);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -1947,7 +1947,7 @@ private:
 	void stop_canvas_autoscroll ();
 
 	/* trimming */
-	void point_trim (GdkEvent *, framepos_t);
+	void point_trim (GdkEvent *, samplepos_t);
 
 	void trim_region_front();
 	void trim_region_back();
@@ -2047,19 +2047,19 @@ private:
 	void duplicate_range (bool with_dialog);
 	void duplicate_regions (float times);
 
-	/** computes the timeline frame (sample) of an event whose coordinates
+	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
 	 */
-	framepos_t canvas_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
+	samplepos_t canvas_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
 
-	/** computes the timeline frame (sample) of an event whose coordinates
+	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in window units (pixels, no scroll offset).
 	 */
-	framepos_t window_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
+	samplepos_t window_event_sample (GdkEvent const *, double* px = 0, double* py = 0) const;
 
 	/* returns false if mouse pointer is not in track or marker canvas
 	 */
-	bool mouse_frame (framepos_t&, bool& in_track_canvas) const;
+	bool mouse_sample (samplepos_t&, bool& in_track_canvas) const;
 
 	TimeFXDialog* current_timefx;
 	static void* timefx_thread (void *arg);
@@ -2166,10 +2166,10 @@ private:
 
 	void selected_marker_moved (ARDOUR::Location*);
 
-	bool get_edit_op_range (framepos_t& start, framepos_t& end) const;
+	bool get_edit_op_range (samplepos_t& start, samplepos_t& end) const;
 
-	void get_regions_at (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
-	void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const;
+	void get_regions_at (RegionSelection&, samplepos_t where, const TrackViewList& ts) const;
+	void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const;
 
 	RegionSelection get_regions_from_selection_and_edit_point (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
 	                                                           bool use_context_click = false,
@@ -2183,12 +2183,12 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	void snap_to_internal (ARDOUR::MusicFrame& first,
+	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                       bool                for_mark  = false,
 			       bool                ensure_snap = false);
 
-	void timecode_snap_to_internal (ARDOUR::MusicFrame& first,
+	void timecode_snap_to_internal (ARDOUR::MusicSample& first,
 	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                                bool                for_mark  = false);
 

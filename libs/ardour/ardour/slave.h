@@ -116,7 +116,7 @@ class LIBARDOUR_API Slave {
 	 * @param position - The transport position requested
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (double& speed, framepos_t& position) = 0;
+	virtual bool speed_and_position (double& speed, samplepos_t& position) = 0;
 
 	/**
 	 * reports to ARDOUR whether the Slave is currently synced to its external
@@ -146,7 +146,7 @@ class LIBARDOUR_API Slave {
 	 * @return - the timing resolution of the Slave - If the distance of ARDOURs transport
 	 * to the slave becomes greater than the resolution, sound will stop
 	 */
-	virtual framecnt_t resolution() const = 0;
+	virtual samplecnt_t resolution() const = 0;
 
 	/**
 	 * @return - when returning true, ARDOUR will wait for seekahead_distance() before transport
@@ -155,11 +155,11 @@ class LIBARDOUR_API Slave {
 	virtual bool requires_seekahead () const = 0;
 
 	/**
-	 * @return the number of frames that this slave wants to seek ahead. Relevant
+	 * @return the number of samples that this slave wants to seek ahead. Relevant
 	 * only if requires_seekahead() returns true.
 	 */
 
-	virtual framecnt_t seekahead_distance() const { return 0; }
+	virtual samplecnt_t seekahead_distance() const { return 0; }
 
 	/**
 	 * @return - when returning true, ARDOUR will use transport speed 1.0 no matter what
@@ -184,15 +184,15 @@ class LIBARDOUR_API ISlaveSessionProxy {
   public:
 	virtual ~ISlaveSessionProxy() {}
 	virtual TempoMap&  tempo_map()                  const   { return *((TempoMap *) 0); }
-	virtual framecnt_t frame_rate()                 const   { return 0; }
-	virtual pframes_t  frames_per_cycle()           const   { return 0; }
-	virtual framepos_t audible_frame ()             const   { return 0; }
-	virtual framepos_t transport_frame ()           const   { return 0; }
-	virtual pframes_t  frames_since_cycle_start ()  const   { return 0; }
-	virtual framepos_t sample_time_at_cycle_start() const   { return 0; }
-	virtual framepos_t frame_time ()                const   { return 0; }
+	virtual samplecnt_t sample_rate()                 const   { return 0; }
+	virtual pframes_t  samples_per_cycle()           const   { return 0; }
+	virtual samplepos_t audible_sample ()             const   { return 0; }
+	virtual samplepos_t transport_sample ()           const   { return 0; }
+	virtual pframes_t  samples_since_cycle_start ()  const   { return 0; }
+	virtual samplepos_t sample_time_at_cycle_start() const   { return 0; }
+	virtual samplepos_t sample_time ()                const   { return 0; }
 
-	virtual void request_locate (framepos_t /*frame*/, bool with_roll = false) {
+	virtual void request_locate (samplepos_t /*sample*/, bool with_roll = false) {
 		(void) with_roll;
 	}
 	virtual void request_transport_speed (double /*speed*/)                   {}
@@ -207,22 +207,22 @@ class LIBARDOUR_API SlaveSessionProxy : public ISlaveSessionProxy {
 	SlaveSessionProxy(Session &s) : session(s) {}
 
 	TempoMap&  tempo_map()                   const;
-	framecnt_t frame_rate()                  const;
-	pframes_t  frames_per_cycle()            const;
-	framepos_t audible_frame ()              const;
-	framepos_t transport_frame ()            const;
-	pframes_t  frames_since_cycle_start ()   const;
-	framepos_t sample_time_at_cycle_start()  const;
-	framepos_t frame_time ()                 const;
+	samplecnt_t sample_rate()                  const;
+	pframes_t  samples_per_cycle()            const;
+	samplepos_t audible_sample ()              const;
+	samplepos_t transport_sample ()            const;
+	pframes_t  samples_since_cycle_start ()   const;
+	samplepos_t sample_time_at_cycle_start()  const;
+	samplepos_t sample_time ()                 const;
 
-	void request_locate (framepos_t frame, bool with_roll = false);
+	void request_locate (samplepos_t sample, bool with_roll = false);
 	void request_transport_speed (double speed);
 };
 
 struct LIBARDOUR_API SafeTime {
 	volatile int guard1;
-	framepos_t   position;
-	framepos_t   timestamp;
+	samplepos_t   position;
+	samplepos_t   timestamp;
 	double       speed;
 	volatile int guard2;
 
@@ -248,7 +248,7 @@ class LIBARDOUR_API TimecodeSlave : public Slave {
 	*/
 	virtual std::string approximate_current_position() const = 0;
 
-	framepos_t        timecode_offset;
+	samplepos_t        timecode_offset;
 	bool              timecode_negative_offset;
 
 	PBD::Signal1<void, bool> ActiveChanged;
@@ -260,15 +260,15 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
 	~MTC_Slave ();
 
 	void rebind (MidiPort&);
-	bool speed_and_position (double&, framepos_t&);
+	bool speed_and_position (double&, samplepos_t&);
 
 	bool locked() const;
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
 
-	framecnt_t resolution () const;
+	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
-	framecnt_t seekahead_distance() const;
+	samplecnt_t seekahead_distance() const;
 	bool give_slave_full_control_over_transport_speed() const;
 
         Timecode::TimecodeFormat apparent_timecode_format() const;
@@ -282,16 +282,16 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
 	PBD::ScopedConnection     config_connection;
 	bool        can_notify_on_unknown_rate;
 
-	static const int frame_tolerance;
+	static const int sample_tolerance;
 
 	SafeTime       current;
-	framepos_t     mtc_frame;               /* current time */
+	samplepos_t     mtc_frame;               /* current time */
 	double         mtc_frame_dll;
-	framepos_t     last_inbound_frame;      /* when we got it; audio clocked */
+	samplepos_t     last_inbound_frame;      /* when we got it; audio clocked */
 	MIDI::byte     last_mtc_fps_byte;
-	framepos_t     window_begin;
-	framepos_t     window_end;
-	framepos_t     first_mtc_timestamp;
+	samplepos_t     window_begin;
+	samplepos_t     window_end;
+	samplepos_t     first_mtc_timestamp;
 	bool           did_reset_tc_format;
 	Timecode::TimecodeFormat saved_tc_format;
 	Glib::Threads::Mutex    reset_lock;
@@ -307,11 +307,11 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
 	Timecode::TimecodeFormat a3e_timecode;
 	Timecode::Time timecode;
 	bool           printed_timecode_warning;
-	frameoffset_t  current_delta;
+	sampleoffset_t  current_delta;
 
 	/* DLL - chase MTC */
-	double t0; ///< time at the beginning of the MTC quater frame
-	double t1; ///< calculated end of the MTC quater frame
+	double t0; ///< time at the beginning of the MTC quater sample
+	double t1; ///< calculated end of the MTC quater sample
 	double e2; ///< second order loop error
 	double b, c, omega; ///< DLL filter coefficients
 
@@ -326,14 +326,14 @@ class LIBARDOUR_API MTC_Slave : public TimecodeSlave {
 	void queue_reset (bool with_pos);
 	void maybe_reset ();
 
-	void update_mtc_qtr (MIDI::Parser&, int, framepos_t);
-	void update_mtc_time (const MIDI::byte *, bool, framepos_t);
+	void update_mtc_qtr (MIDI::Parser&, int, samplepos_t);
+	void update_mtc_time (const MIDI::byte *, bool, samplepos_t);
 	void update_mtc_status (MIDI::MTC_Status);
 	void read_current (SafeTime *) const;
-	void reset_window (framepos_t);
-	bool outside_window (framepos_t) const;
-	void init_mtc_dll(framepos_t, double);
-	void init_engine_dll (framepos_t, framepos_t);
+	void reset_window (samplepos_t);
+	bool outside_window (samplepos_t) const;
+	void init_mtc_dll(samplepos_t, double);
+	void init_engine_dll (samplepos_t, samplepos_t);
 	void parse_timecode_offset();
 	void parameter_changed(std::string const & p);
 };
@@ -343,14 +343,14 @@ public:
 	LTC_Slave (Session&);
 	~LTC_Slave ();
 
-	bool speed_and_position (double&, framepos_t&);
+	bool speed_and_position (double&, samplepos_t&);
 
 	bool locked() const;
 	bool ok() const;
 
-	framecnt_t resolution () const;
+	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
-	framecnt_t seekahead_distance () const { return 0; }
+	samplecnt_t seekahead_distance () const { return 0; }
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
 	Timecode::TimecodeFormat apparent_timecode_format() const;
@@ -358,12 +358,12 @@ public:
 	std::string approximate_current_delta() const;
 
   private:
-	void parse_ltc(const pframes_t, const Sample* const, const framecnt_t);
-	void process_ltc(framepos_t const);
-	void init_engine_dll (framepos_t, int32_t);
+	void parse_ltc(const pframes_t, const Sample* const, const samplecnt_t);
+	void process_ltc(samplepos_t const);
+	void init_engine_dll (samplepos_t, int32_t);
 	bool detect_discontinuity(LTCFrameExt *, int, bool);
 	bool detect_ltc_fps(int, bool);
-	bool equal_ltc_frame_time(LTCFrame *a, LTCFrame *b);
+	bool equal_ltc_sample_time(LTCFrame *a, LTCFrame *b);
 	void reset (bool with_ts = true);
 	void resync_xrun();
 	void resync_latency();
@@ -375,16 +375,16 @@ public:
 	Timecode::TimecodeFormat saved_tc_format;
 
 	LTCDecoder *   decoder;
-	double         frames_per_ltc_frame;
+	double         samples_per_ltc_frame;
 	Timecode::Time timecode;
-	LTCFrameExt    prev_frame;
+	LTCFrameExt    prev_sample;
 	bool           fps_detected;
 
-	framecnt_t     monotonic_cnt;
-	framecnt_t     last_timestamp;
-	framecnt_t     last_ltc_frame;
+	samplecnt_t     monotonic_cnt;
+	samplecnt_t     last_timestamp;
+	samplecnt_t     last_ltc_sample;
 	double         ltc_speed;
-	frameoffset_t  current_delta;
+	sampleoffset_t  current_delta;
 	int            delayedlocked;
 
 	int            ltc_detect_fps_cnt;
@@ -401,8 +401,8 @@ public:
 	/* DLL - chase LTC */
 	int    transport_direction;
 	int    engine_dll_initstate;
-	double t0; ///< time at the beginning of the MTC quater frame
-	double t1; ///< calculated end of the MTC quater frame
+	double t0; ///< time at the beginning of the MTC quater sample
+	double t1; ///< calculated end of the MTC quater sample
 	double e2; ///< second order loop error
 	double b, c; ///< DLL filter coefficients
 };
@@ -416,13 +416,13 @@ class LIBARDOUR_API MIDIClock_Slave : public Slave {
 	~MIDIClock_Slave ();
 
 	void rebind (MidiPort&);
-	bool speed_and_position (double&, framepos_t&);
+	bool speed_and_position (double&, samplepos_t&);
 
 	bool locked() const;
 	bool ok() const;
 	bool starting() const;
 
-	framecnt_t resolution () const;
+	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
 	bool give_slave_full_control_over_transport_speed() const { return true; }
 
@@ -433,17 +433,17 @@ class LIBARDOUR_API MIDIClock_Slave : public Slave {
 	ISlaveSessionProxy* session;
 	PBD::ScopedConnectionList port_connections;
 
-	/// pulses per quarter note for one MIDI clock frame (default 24)
+	/// pulses per quarter note for one MIDI clock sample (default 24)
 	int         ppqn;
 
-	/// the duration of one ppqn in frame time
-	double      one_ppqn_in_frames;
+	/// the duration of one ppqn in sample time
+	double      one_ppqn_in_samples;
 
 	/// the timestamp of the first MIDI clock message
-	framepos_t  first_timestamp;
+	samplepos_t  first_timestamp;
 
 	/// the time stamp and should-be transport position of the last inbound MIDI clock message
-	framepos_t  last_timestamp;
+	samplepos_t  last_timestamp;
 	double      should_be_position;
 
 	/// the number of midi clock messages received (zero-based)
@@ -452,10 +452,10 @@ class LIBARDOUR_API MIDIClock_Slave : public Slave {
 
 	//the delay locked loop (DLL), see www.kokkinizita.net/papers/usingdll.pdf
 
-	/// time at the beginning of the MIDI clock frame
+	/// time at the beginning of the MIDI clock sample
 	double t0;
 
-	/// calculated end of the MIDI clock frame
+	/// calculated end of the MIDI clock sample
 	double t1;
 
 	/// loop error = real value - expected value
@@ -470,20 +470,20 @@ class LIBARDOUR_API MIDIClock_Slave : public Slave {
 	/// DLL filter coefficients
 	double b, c, omega;
 
-	frameoffset_t  current_delta;
+	sampleoffset_t  current_delta;
 
 	void reset ();
-	void start (MIDI::Parser& parser, framepos_t timestamp);
-	void contineu (MIDI::Parser& parser, framepos_t timestamp);
-	void stop (MIDI::Parser& parser, framepos_t timestamp);
+	void start (MIDI::Parser& parser, samplepos_t timestamp);
+	void contineu (MIDI::Parser& parser, samplepos_t timestamp);
+	void stop (MIDI::Parser& parser, samplepos_t timestamp);
 	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size);
 	// we can't use continue because it is a C++ keyword
-	void calculate_one_ppqn_in_frames_at(framepos_t time);
-	framepos_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
+	void calculate_one_ppqn_in_samples_at(samplepos_t time);
+	samplepos_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
 	void calculate_filter_coefficients();
-	void update_midi_clock (MIDI::Parser& parser, framepos_t timestamp);
+	void update_midi_clock (MIDI::Parser& parser, samplepos_t timestamp);
 	void read_current (SafeTime *) const;
-	bool stop_if_no_more_clock_events(framepos_t& pos, framepos_t now);
+	bool stop_if_no_more_clock_events(samplepos_t& pos, samplepos_t now);
 
 	/// whether transport should be rolling
 	bool _started;
@@ -499,12 +499,12 @@ class LIBARDOUR_API Engine_Slave : public Slave
 	Engine_Slave (AudioEngine&);
 	~Engine_Slave ();
 
-	bool speed_and_position (double& speed, framepos_t& pos);
+	bool speed_and_position (double& speed, samplepos_t& pos);
 
 	bool starting() const { return _starting; }
 	bool locked() const;
 	bool ok() const;
-	framecnt_t resolution () const { return 1; }
+	samplecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
 	bool is_always_synced() const { return true; }
 

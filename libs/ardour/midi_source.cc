@@ -156,19 +156,19 @@ MidiSource::empty () const
 	return !_length_beats;
 }
 
-framecnt_t
-MidiSource::length (framepos_t pos) const
+samplecnt_t
+MidiSource::length (samplepos_t pos) const
 {
 	if (!_length_beats) {
 		return 0;
 	}
 
-	BeatsFramesConverter converter(_session.tempo_map(), pos);
+	BeatsSamplesConverter converter(_session.tempo_map(), pos);
 	return converter.to(_length_beats);
 }
 
 void
-MidiSource::update_length (framecnt_t)
+MidiSource::update_length (samplecnt_t)
 {
 	// You're not the boss of me!
 }
@@ -179,13 +179,13 @@ MidiSource::invalidate (const Lock& lock)
 	Invalidated(_session.transport_rolling());
 }
 
-framecnt_t
+samplecnt_t
 MidiSource::midi_read (const Lock&                        lm,
-                       Evoral::EventSink<framepos_t>&     dst,
-                       framepos_t                         source_start,
-                       framepos_t                         start,
-                       framecnt_t                         cnt,
-                       Evoral::Range<framepos_t>*         loop_range,
+                       Evoral::EventSink<samplepos_t>&     dst,
+                       samplepos_t                         source_start,
+                       samplepos_t                         start,
+                       samplecnt_t                         cnt,
+                       Evoral::Range<samplepos_t>*         loop_range,
                        MidiCursor&                        cursor,
                        MidiStateTracker*                  tracker,
                        MidiChannelFilter*                 filter,
@@ -193,7 +193,7 @@ MidiSource::midi_read (const Lock&                        lm,
                        const double                       pos_beats,
                        const double                       start_beats) const
 {
-	BeatsFramesConverter converter(_session.tempo_map(), source_start);
+	BeatsSamplesConverter converter(_session.tempo_map(), source_start);
 
 	const double start_qn = pos_beats - start_beats;
 
@@ -227,18 +227,18 @@ MidiSource::midi_read (const Lock&                        lm,
 
 		// Offset by source start to convert event time to session time
 
-		framepos_t time_frames = _session.tempo_map().frame_at_quarter_note (i->time().to_double() + start_qn);
+		samplepos_t time_samples = _session.tempo_map().sample_at_quarter_note (i->time().to_double() + start_qn);
 
-		if (time_frames < start + source_start) {
+		if (time_samples < start + source_start) {
 			/* event too early */
 
 			continue;
 
-		} else if (time_frames >= start + cnt + source_start) {
+		} else if (time_samples >= start + cnt + source_start) {
 
 			DEBUG_TRACE (DEBUG::MidiSourceIO,
 			             string_compose ("%1: reached end with event @ %2 vs. %3\n",
-			                             _name, time_frames, start+cnt));
+			                             _name, time_samples, start+cnt));
 			break;
 
 		} else {
@@ -246,7 +246,7 @@ MidiSource::midi_read (const Lock&                        lm,
 			/* in range */
 
 			if (loop_range) {
-				time_frames = loop_range->squish (time_frames);
+				time_samples = loop_range->squish (time_samples);
 			}
 
 			const uint8_t status           = i->buffer()[0];
@@ -258,21 +258,21 @@ MidiSource::midi_read (const Lock&                        lm,
 				   destroying events in the model during read. */
 				Evoral::Event<Evoral::Beats> ev(*i, true);
 				if (!filter->filter(ev.buffer(), ev.size())) {
-					dst.write(time_frames, ev.event_type(), ev.size(), ev.buffer());
+					dst.write(time_samples, ev.event_type(), ev.size(), ev.buffer());
 				} else {
 					DEBUG_TRACE (DEBUG::MidiSourceIO,
 					             string_compose ("%1: filter event @ %2 type %3 size %4\n",
-					                             _name, time_frames, i->event_type(), i->size()));
+					                             _name, time_samples, i->event_type(), i->size()));
 				}
 			} else {
-				dst.write (time_frames, i->event_type(), i->size(), i->buffer());
+				dst.write (time_samples, i->event_type(), i->size(), i->buffer());
 			}
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED(DEBUG::MidiSourceIO)) {
 				DEBUG_STR_DECL(a);
 				DEBUG_STR_APPEND(a, string_compose ("%1 added event @ %2 sz %3 within %4 .. %5 ",
-				                                    _name, time_frames, i->size(),
+				                                    _name, time_samples, i->size(),
 				                                    start + source_start, start + cnt + source_start));
 				for (size_t n=0; n < i->size(); ++n) {
 					DEBUG_STR_APPEND(a,hex);
@@ -294,15 +294,15 @@ MidiSource::midi_read (const Lock&                        lm,
 	return cnt;
 }
 
-framecnt_t
+samplecnt_t
 MidiSource::midi_write (const Lock&                 lm,
-                        MidiRingBuffer<framepos_t>& source,
-                        framepos_t                  source_start,
-                        framecnt_t                  cnt)
+                        MidiRingBuffer<samplepos_t>& source,
+                        samplepos_t                  source_start,
+                        samplecnt_t                  cnt)
 {
-	const framecnt_t ret = write_unlocked (lm, source, source_start, cnt);
+	const samplecnt_t ret = write_unlocked (lm, source, source_start, cnt);
 
-	if (cnt == max_framecnt) {
+	if (cnt == max_samplecnt) {
 		invalidate(lm);
 	} else {
 		_capture_length += cnt;
@@ -323,12 +323,12 @@ MidiSource::mark_streaming_midi_write_started (const Lock& lock, NoteMode mode)
 }
 
 void
-MidiSource::mark_write_starting_now (framecnt_t position,
-                                     framecnt_t capture_length,
-                                     framecnt_t loop_length)
+MidiSource::mark_write_starting_now (samplecnt_t position,
+                                     samplecnt_t capture_length,
+                                     samplecnt_t loop_length)
 {
 	/* I'm not sure if this is the best way to approach this, but
-	   _capture_length needs to be set up with the transport frame
+	   _capture_length needs to be set up with the transport sample
 	   when a record actually starts, as it is used by
 	   SMFSource::write_unlocked to decide whether incoming notes
 	   are within the correct time range.
@@ -343,7 +343,7 @@ MidiSource::mark_write_starting_now (framecnt_t position,
 	_capture_loop_length = loop_length;
 
 	TempoMap& map (_session.tempo_map());
-	BeatsFramesConverter converter(map, position);
+	BeatsSamplesConverter converter(map, position);
 	_length_beats = converter.from(capture_length);
 }
 

@@ -59,7 +59,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2Plugin (ARDOUR::AudioEngine& engine,
 	           ARDOUR::Session&     session,
 	           const void*          c_plugin,
-	           framecnt_t           sample_rate);
+	           samplecnt_t           sample_rate);
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
@@ -74,8 +74,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	uint32_t    num_ports () const;
 	uint32_t    parameter_count () const;
 	float       default_value (uint32_t port);
-	framecnt_t  max_latency () const;
-	framecnt_t  signal_latency () const;
+	samplecnt_t  max_latency () const;
+	samplecnt_t  signal_latency () const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	std::string get_docs() const;
@@ -112,9 +112,9 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	bool requires_fixed_sized_buffers () const;
 
 	int connect_and_run (BufferSet& bufs,
-	                     framepos_t start, framepos_t end, double speed,
+	                     samplepos_t start, samplepos_t end, double speed,
 	                     ChanMapping in, ChanMapping out,
-	                     pframes_t nframes, framecnt_t offset);
+	                     pframes_t nframes, samplecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name () const { return "lv2"; }
@@ -181,7 +181,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2_Feature** _features;
 	Worker*       _worker;
 	Worker*       _state_worker;
-	framecnt_t    _sample_rate;
+	samplecnt_t    _sample_rate;
 	float*        _control_data;
 	float*        _shadow_data;
 	float*        _defaults;
@@ -190,8 +190,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	float*        _bpm_control_port;  ///< Special input set by ardour
 	float*        _freewheel_control_port;  ///< Special input set by ardour
 	float*        _latency_control_port;  ///< Special output set by ardour
-	framepos_t    _next_cycle_start;  ///< Expected start frame of next run cycle
-	double        _next_cycle_speed;  ///< Expected start frame of next run cycle
+	samplepos_t    _next_cycle_start;  ///< Expected start sample of next run cycle
+	double        _next_cycle_speed;  ///< Expected start sample of next run cycle
 	double        _next_cycle_beat;  ///< Expected bar_beat of next run cycle
 	double        _current_bpm;
 	PBD::ID       _insert_id;
@@ -201,8 +201,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	URIMap&       _uri_map;
 	bool          _no_sample_accurate_ctrl;
 	bool          _can_write_automation;
-	framecnt_t    _max_latency;
-	framecnt_t    _current_latency;
+	samplecnt_t    _max_latency;
+	samplecnt_t    _current_latency;
 
 	friend const void* lv2plugin_get_port_value(const char* port_symbol,
 	                                            void*       user_data,
@@ -330,7 +330,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static char* lv2_state_make_path (void*       host_data,
 	                                  const char* path);
 
-	void init (const void* c_plugin, framecnt_t rate);
+	void init (const void* c_plugin, samplecnt_t rate);
 	void allocate_atom_event_buffers ();
 	void run (pframes_t nsamples, bool sync_work = false);
 

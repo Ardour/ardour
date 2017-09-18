@@ -25,7 +25,7 @@ class /*LIBAUDIOGRAPHER_API*/ PeakReader : public ListedSource<float>, public Si
 	/// Finds peaks from the data \n RT safe
 	void process (ProcessContext<float> const & c)
 	{
-		peak = Routines::compute_peak (c.data(), c.frames(), peak);
+		peak = Routines::compute_peak (c.data(), c.samples(), peak);
 		ListedSource<float>::output(c);
 	}
 

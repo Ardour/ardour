@@ -155,7 +155,7 @@ private:
 
 	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
 
-	void format_position (ARDOUR::framepos_t pos, char* buf, size_t bufsize, bool onoff = true);
+	void format_position (ARDOUR::samplepos_t pos, char* buf, size_t bufsize, bool onoff = true);
 
 	void add_region (boost::shared_ptr<ARDOUR::Region>);
 
@@ -194,7 +194,7 @@ private:
 
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
-	Gtk::Frame _frame;
+	Gtk::Frame _sample;
 
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 

@@ -26,7 +26,7 @@
 
 namespace ARDOUR {
 
-CapturingProcessor::CapturingProcessor (Session & session, framecnt_t latency)
+CapturingProcessor::CapturingProcessor (Session & session, samplecnt_t latency)
 	: Processor (session, X_("capture point"))
 	, block_size (AudioEngine::instance()->samples_per_cycle())
 	, _latency (latency)
@@ -47,7 +47,7 @@ CapturingProcessor::set_block_size (pframes_t nframes)
 }
 
 void
-CapturingProcessor::run (BufferSet& bufs, framepos_t, framepos_t, double, pframes_t nframes, bool)
+CapturingProcessor::run (BufferSet& bufs, samplepos_t, samplepos_t, double, pframes_t nframes, bool)
 {
 	if (!active()) {
 		_delaybuffers.flush ();

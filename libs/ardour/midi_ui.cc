@@ -99,7 +99,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, boost::weak_ptr<AsyncMIDIPor
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", boost::shared_ptr<ARDOUR::Port>(port)->name()));
-		framepos_t now = _session.engine().sample_time();
+		samplepos_t now = _session.engine().sample_time();
 		port->parse (now);
 	}
 

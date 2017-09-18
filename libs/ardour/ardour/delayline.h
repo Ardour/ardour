@@ -42,9 +42,9 @@ public:
 
 	bool display_to_user() const { return false; }
 
-	void run (BufferSet&, framepos_t, framepos_t, double, pframes_t, bool);
-	void set_delay(framecnt_t signal_delay);
-	framecnt_t get_delay() { return _pending_delay; }
+	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
+	void set_delay(samplecnt_t signal_delay);
+	samplecnt_t get_delay() { return _pending_delay; }
 
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
@@ -57,12 +57,12 @@ public:
 	XMLNode& state (bool full);
 
 private:
-	void allocate_pending_buffers (framecnt_t);
+	void allocate_pending_buffers (samplecnt_t);
 
 	friend class IO;
-	framecnt_t _delay, _pending_delay;
-	framecnt_t _bsiz,  _pending_bsiz;
-	frameoffset_t _roff, _woff;
+	samplecnt_t _delay, _pending_delay;
+	samplecnt_t _bsiz,  _pending_bsiz;
+	sampleoffset_t _roff, _woff;
 	boost::shared_array<Sample> _buf;
 	boost::shared_array<Sample> _pending_buf;
 	boost::shared_ptr<MidiBuffer> _midi_buf;

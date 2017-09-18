@@ -38,7 +38,7 @@ AudioRegionReadTest::readTest ()
 
 	int const P = 100;
 
-	/* Simple read: 256 frames from start of region, no fades */
+	/* Simple read: 256 samples from start of region, no fades */
 
 	_ar[0]->set_position (P);
 	_ar[0]->set_length (1024);
@@ -50,11 +50,11 @@ AudioRegionReadTest::readTest ()
 		buf[i] = 0;
 	}
 
-	/* Offset read: 256 frames from 128 frames into the region, no fades */
+	/* Offset read: 256 samples from 128 samples into the region, no fades */
 	_ar[0]->read_from_sources (_ar[0]->_sources, _ar[0]->_length, buf, P + 128, 256, 0);
 	check_staircase (buf, 128, 256);
 
-	/* Simple read with a fade-in: 256 frames from start of region, with fades */
+	/* Simple read with a fade-in: 256 samples from start of region, with fades */
 	_ar[0]->set_default_fade_in ();
 	CPPUNIT_ASSERT_EQUAL (double (64), _ar[0]->_fade_in->back()->when);
 
@@ -71,7 +71,7 @@ AudioRegionReadTest::readTest ()
 		CPPUNIT_ASSERT_EQUAL (i, int (buf[i]));
 	}
 
-	/* Offset read: 256 frames from 128 frames into the region, with fades
+	/* Offset read: 256 samples from 128 samples into the region, with fades
 	   (though the fade should not affect it, as it is finished before the read starts)
 	*/
 

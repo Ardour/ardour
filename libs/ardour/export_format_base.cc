@@ -178,7 +178,7 @@ ExportFormatBase::do_set_operation (ExportFormatBase const & other, SetOperation
 }
 
 ExportFormatBase::SampleRate
-ExportFormatBase::nearest_sample_rate (framecnt_t sample_rate)
+ExportFormatBase::nearest_sample_rate (samplecnt_t sample_rate)
 {
 	int diff = 0;
 	int smallest_diff = INT_MAX;
