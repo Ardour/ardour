@@ -770,7 +770,7 @@ ARDOUR_UI::post_engine ()
 		vector<string>::iterator l;
 
 		for (p = paths.begin(), l = labels.begin(); p != paths.end(); ++p, ++l) {
-			output << "	<tr><th><kbd class=\"osc\">" << (*p).substr (9, string::npos);
+			output << "	<tr><th><kbd class=\"osc\">" << (*p).substr (10, string::npos);
 			output << "</kbd></th><td>" << *l << "</td></tr>" << endl;
 		}
 		output << "  </tbody>\n  </table>" << endl;
@@ -782,7 +782,7 @@ ARDOUR_UI::post_engine ()
 		GError *err = NULL;
 		gint fd;
 
-		if ((fd = g_file_open_tmp ("akprintXXXXXX.html", &file_name, &err)) < 0) {
+		if ((fd = g_file_open_tmp ("list-of-menu-actionsXXXXXX.html", &file_name, &err)) < 0) {
 			if (err) {
 				error << string_compose (_("Could not open temporary file to print bindings (%1)"), err->message) << endmsg;
 				g_error_free (err);
