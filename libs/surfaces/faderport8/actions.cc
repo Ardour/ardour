@@ -322,7 +322,7 @@ FaderPort8::button_solo_clear ()
 				_solo_state.push_back (boost::weak_ptr<AutomationControl>(sc));
 			}
 		}
-		AccessAction ("Main", "cancel-solo");
+		cancel_all_solo (); // AccessAction ("Main", "cancel-solo");
 	} else {
 		/* restore solo */
 		boost::shared_ptr<ControlList> cl (new ControlList);
