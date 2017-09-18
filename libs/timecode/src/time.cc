@@ -429,57 +429,57 @@ double
 timecode_to_frames_per_second(TimecodeFormat t)
 {
 	switch (t) {
-		case timecode_23976:
-			return (24000.0/1001.0); //23.976;
+	case timecode_23976:
+		return (24000.0/1001.0); //23.976;
 
-			break;
-		case timecode_24:
-			return 24;
+		break;
+	case timecode_24:
+		return 24;
 
-			break;
-		case timecode_24976:
-			return (25000.0/1001.0); //24.976;
+		break;
+	case timecode_24976:
+		return (25000.0/1001.0); //24.976;
 
-			break;
-		case timecode_25:
-			return 25;
+		break;
+	case timecode_25:
+		return 25;
 
-			break;
-		case timecode_2997:
-			return (30000.0/1001.0); //29.97;
+		break;
+	case timecode_2997:
+		return (30000.0/1001.0); //29.97;
 
-			break;
-		case timecode_2997drop:
-			return (30000.0/1001.0); //29.97;
+		break;
+	case timecode_2997drop:
+		return (30000.0/1001.0); //29.97;
 
-			break;
-		case timecode_2997000:
-			return 29.97;
+		break;
+	case timecode_2997000:
+		return 29.97;
 
-			break;
-		case timecode_2997000drop:
-			return 29.97;
+		break;
+	case timecode_2997000drop:
+		return 29.97;
 
-			break;
-		case timecode_30:
-			return 30;
+		break;
+	case timecode_30:
+		return 30;
 
-			break;
-		case timecode_30drop:
-			return 30;
+		break;
+	case timecode_30drop:
+		return 30;
 
-			break;
-		case timecode_5994:
-			return (60000.0/1001.0); //59.94;
+		break;
+	case timecode_5994:
+		return (60000.0/1001.0); //59.94;
 
-			break;
-		case timecode_60:
-			return 60;
+		break;
+	case timecode_60:
+		return 60;
 
-			break;
-	        default:
-			//std::cerr << "Editor received unexpected timecode type" << std::endl;
-			break;
+		break;
+	default:
+		//std::cerr << "Editor received unexpected timecode type" << std::endl;
+		break;
 	}
 	return 30.0;
 }
@@ -488,57 +488,57 @@ bool
 timecode_has_drop_frames(TimecodeFormat t)
 {
 	switch (t) {
-		case timecode_23976:
-			return false;
+	case timecode_23976:
+		return false;
 
-			break;
-		case timecode_24:
-			return false;
+		break;
+	case timecode_24:
+		return false;
 
-			break;
-		case timecode_24976:
-			return false;
+		break;
+	case timecode_24976:
+		return false;
 
-			break;
-		case timecode_25:
-			return false;
+		break;
+	case timecode_25:
+		return false;
 
-			break;
-		case timecode_2997:
-			return false;
+		break;
+	case timecode_2997:
+		return false;
 
-			break;
-		case timecode_2997drop:
-			return true;
+		break;
+	case timecode_2997drop:
+		return true;
 
-			break;
-		case timecode_2997000:
-			return false;
+		break;
+	case timecode_2997000:
+		return false;
 
-			break;
-		case timecode_2997000drop:
-			return true;
+		break;
+	case timecode_2997000drop:
+		return true;
 
-			break;
-		case timecode_30:
-			return false;
+		break;
+	case timecode_30:
+		return false;
 
-			break;
-		case timecode_30drop:
-			return true;
+		break;
+	case timecode_30drop:
+		return true;
 
-			break;
-		case timecode_5994:
-			return false;
+		break;
+	case timecode_5994:
+		return false;
 
-			break;
-		case timecode_60:
-			return false;
+		break;
+	case timecode_60:
+		return false;
 
-			break;
-	        default:
-			//error << "Editor received unexpected timecode type" << endmsg;
-			break;
+		break;
+	default:
+		//error << "Editor received unexpected timecode type" << endmsg;
+		break;
 	}
 
 	return false;
@@ -548,50 +548,50 @@ std::string
 timecode_format_name (TimecodeFormat const t)
 {
 	switch (t) {
-		case timecode_23976:
-			return "23.98";
+	case timecode_23976:
+		return "23.98";
 
-			break;
-		case timecode_24:
-			return "24";
+		break;
+	case timecode_24:
+		return "24";
 
-			break;
-		case timecode_24976:
-			return "24.98";
+		break;
+	case timecode_24976:
+		return "24.98";
 
-			break;
-		case timecode_25:
-			return "25";
+		break;
+	case timecode_25:
+		return "25";
 
-			break;
-		case timecode_2997000:
-		case timecode_2997:
-			return "29.97";
+		break;
+	case timecode_2997000:
+	case timecode_2997:
+		return "29.97";
 
-			break;
-		case timecode_2997000drop:
-		case timecode_2997drop:
-			return "29.97 drop";
+		break;
+	case timecode_2997000drop:
+	case timecode_2997drop:
+		return "29.97 drop";
 
-			break;
-		case timecode_30:
-			return "30";
+		break;
+	case timecode_30:
+		return "30";
 
-			break;
-		case timecode_30drop:
-			return "30 drop";
+		break;
+	case timecode_30drop:
+		return "30 drop";
 
-			break;
-		case timecode_5994:
-			return "59.94";
+		break;
+	case timecode_5994:
+		return "59.94";
 
-			break;
-		case timecode_60:
-			return "60";
+		break;
+	case timecode_60:
+		return "60";
 
-			break;
-	        default:
-			break;
+		break;
+	default:
+		break;
 	}
 
 	return "??";
@@ -602,25 +602,25 @@ std::string timecode_format_time (Timecode::Time TC)
 	char buf[32];
 	if (TC.negative) {
 		snprintf (buf, sizeof (buf), "-%02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "%c%02" PRIu32,
-				TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
+		          TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
 	} else {
 		snprintf (buf, sizeof (buf), " %02" PRIu32 ":%02" PRIu32 ":%02" PRIu32 "%c%02" PRIu32,
-				TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
+		          TC.hours, TC.minutes, TC.seconds, TC.drop ? ';' : ':', TC.frames);
 	}
 	return std::string(buf);
 }
 
 std::string timecode_format_sampletime (
-		int64_t sample,
-		double sample_sample_rate,
-		double timecode_frames_per_second, bool timecode_drop_frames)
+	int64_t sample,
+	double sample_sample_rate,
+	double timecode_frames_per_second, bool timecode_drop_frames)
 {
 	Time t;
 	sample_to_timecode(
-			sample, t, false, false,
-			timecode_frames_per_second, timecode_drop_frames,
-			sample_sample_rate,
-			80, false, 0);
+		sample, t, false, false,
+		timecode_frames_per_second, timecode_drop_frames,
+		sample_sample_rate,
+		80, false, 0);
 	return timecode_format_time(t);
 }
 
@@ -629,7 +629,7 @@ bool parse_timecode_format(std::string tc, Timecode::Time &TC) {
 	char ignored[2];
 	TC.subframes = 0;
 	if (sscanf (tc.c_str(), "%[- ]%" PRId32 ":%" PRId32 ":%" PRId32 "%[:;]%" PRId32,
-				negative, &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
+	            negative, &TC.hours, &TC.minutes, &TC.seconds, ignored, &TC.frames) != 6) {
 		TC.hours = TC.minutes = TC.seconds = TC.frames = 0;
 		TC.negative = false;
 		return false;
@@ -644,14 +644,14 @@ bool parse_timecode_format(std::string tc, Timecode::Time &TC) {
 
 void
 timecode_to_sample(
-		Timecode::Time& timecode, int64_t& sample,
-		bool use_offset, bool use_subframes,
-    /* Note - framerate info is taken from Timecode::Time& */
-		double sample_sample_rate /**< may include pull up/down */,
-		uint32_t subframes_per_frame,
-    /* optional offset  - can be improved: function pointer to lazily query this*/
-		bool offset_is_negative, int64_t offset_samples
-		)
+	Timecode::Time& timecode, int64_t& sample,
+	bool use_offset, bool use_subframes,
+	/* Note - framerate info is taken from Timecode::Time& */
+	double sample_sample_rate /**< may include pull up/down */,
+	uint32_t subframes_per_frame,
+	/* optional offset  - can be improved: function pointer to lazily query this*/
+	bool offset_is_negative, int64_t offset_samples
+	)
 {
 	const double samples_per_timecode_frame = (double) sample_sample_rate / (double) timecode.rate;
 
@@ -710,19 +710,19 @@ timecode_to_sample(
 		sample = frameNumber * sample_sample_rate / (double) timecode.rate;
 	} else {
 		/*
-		   Non drop is easy.. just note the use of
-		   rint(timecode.rate) * samples_per_timecode_frame
-		   (frames per Timecode second), which is larger than
-		   sample_rate() in the non-integer Timecode rate case.
+		  Non drop is easy.. just note the use of
+		  rint(timecode.rate) * samples_per_timecode_frame
+		  (frames per Timecode second), which is larger than
+		  sample_rate() in the non-integer Timecode rate case.
 		*/
 
 		sample = (int64_t) rint(
-				(
-				 ((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds)
-				 *
-				 (rint(timecode.rate) * samples_per_timecode_frame)
+			(
+				((timecode.hours * 60 * 60) + (timecode.minutes * 60) + timecode.seconds)
+				*
+				(rint(timecode.rate) * samples_per_timecode_frame)
 				)
-				+ (timecode.frames * samples_per_timecode_frame)
+			+ (timecode.frames * samples_per_timecode_frame)
 			);
 	}
 
@@ -755,16 +755,16 @@ timecode_to_sample(
 
 void
 sample_to_timecode (
-		int64_t sample, Timecode::Time& timecode,
-		bool use_offset, bool use_subframes,
-    /* framerate info */
-		double timecode_frames_per_second,
-		bool   timecode_drop_frames,
-		double sample_sample_rate/**< can include pull up/down */,
-		uint32_t subframes_per_frame,
-    /* optional offset  - can be improved: function pointer to lazily query this*/
-		bool offset_is_negative, int64_t offset_samples
-		)
+	int64_t sample, Timecode::Time& timecode,
+	bool use_offset, bool use_subframes,
+	/* framerate info */
+	double timecode_frames_per_second,
+	bool   timecode_drop_frames,
+	double sample_sample_rate/**< can include pull up/down */,
+	uint32_t subframes_per_frame,
+	/* optional offset  - can be improved: function pointer to lazily query this*/
+	bool offset_is_negative, int64_t offset_samples
+	)
 {
 	int64_t offset_sample;
 
@@ -794,7 +794,7 @@ sample_to_timecode (
 		const int64_t M = frameNumber % 17982;
 
 		timecode.subframes = rint(subframes_per_frame
-				* ((double)offset_sample * timecode_frames_per_second / sample_sample_rate - (double)frameNumber));
+		                          * ((double)offset_sample * timecode_frames_per_second / sample_sample_rate - (double)frameNumber));
 
 		if (timecode.subframes == subframes_per_frame) {
 			timecode.subframes = 0;
