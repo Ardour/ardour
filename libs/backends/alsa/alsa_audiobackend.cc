@@ -23,12 +23,17 @@
 
 #include <glibmm.h>
 
+#include <boost/foreach.hpp>
+#include <boost/tokenizer.hpp>
+
 #include "alsa_audiobackend.h"
 
 #include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
+
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "ardouralsautil/devicelist.h"
@@ -668,6 +673,11 @@ AlsaAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 	nfo->enabled = enable;
 
 	if (_run && prev_enabled != enable) {
+		// XXX actually we should not change system-ports while running,
+		// because iterators in main_process_thread will become invalid.
+		//
+		// Luckily the engine dialog does not call this while the engine is running,
+		// This code is currently not used.
 		if (enable) {
 			// add ports for the given device
 			register_system_midi_ports(device);
@@ -940,6 +950,34 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return ProcessThreadStartError;
 	}
 
+#if 1
+	if (NULL != getenv ("ALSAEXT")) {
+		boost::char_separator<char> sep (";");
+		boost::tokenizer<boost::char_separator<char> > devs (std::string(getenv ("ALSAEXT")), sep);
+		BOOST_FOREACH (const std::string& tmp, devs) {
+			std::string dev (tmp);
+			std::string::size_type n = dev.find ('@');
+			unsigned int sr = _samplerate;
+			unsigned int spp = _samples_per_period;
+			unsigned int duplex = 3; // TODO parse 1: play, 2: capt, 3:both
+			if (n != std::string::npos) {
+				std::string opt (dev.substr (n + 1));
+				sr = PBD::atoi (opt);
+				dev = dev.substr (0, n);
+				std::string::size_type n = opt.find ('/');
+				if (n != std::string::npos) {
+					spp = PBD::atoi (opt.substr (n + 1));
+				}
+			}
+			if (add_slave (dev.c_str(), sr, spp, duplex)) {
+				PBD::info << string_compose (_("ALSA slave '%1' added"), dev) << endmsg;
+			} else {
+				PBD::error << string_compose (_("ALSA failed to add '%1' as slave"), dev) << endmsg;
+			}
+		}
+	}
+#endif
+
 	return NoError;
 }
 
@@ -968,6 +1006,12 @@ AlsaAudioBackend::stop ()
 		m->stop();
 		_rmidi_in.pop_back ();
 		delete m;
+	}
+
+	while (!_slaves.empty ()) {
+		AudioSlave* s = _slaves.back ();
+		_slaves.pop_back ();
+		delete s;
 	}
 
 	unregister_ports();
@@ -1819,7 +1863,13 @@ AlsaAudioBackend::main_process_thread ()
 {
 	AudioEngine::thread_init_callback (this);
 	_active = true;
+	bool reset_dll = true;
+	int last_n_periods = 0;
 	_processed_samples = 0;
+
+	double dll_dt = (double) _samples_per_period / (double) _samplerate;
+	double dll_w1 = 2 * M_PI * 0.1 * dll_dt;
+	double dll_w2 = dll_w1 * dll_w1;
 
 	uint64_t clock1;
 	_pcmi->pcm_start ();
@@ -1829,17 +1879,69 @@ AlsaAudioBackend::main_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
+	const double sr_norm = 1e-6 * (double) _samplerate / (double)_samples_per_period;
+
 	while (_run) {
 		long nr;
 		bool xrun = false;
+		bool drain_slaves = false;
 
 		if (_freewheeling != _freewheel) {
 			_freewheel = _freewheeling;
 			engine.freewheel_callback (_freewheel);
+			for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+				(*s)->freewheel (_freewheel);
+			}
+			if (!_freewheel) {
+				_pcmi->pcm_stop ();
+				_pcmi->pcm_start ();
+				drain_slaves = true;
+			}
 		}
 
 		if (!_freewheel) {
 			nr = _pcmi->pcm_wait ();
+
+			/* update DLL */
+			uint64_t clock0 = g_get_monotonic_time();
+			if (reset_dll || last_n_periods != 1) {
+				reset_dll = false;
+				drain_slaves = true;
+				dll_dt = 1e6 * (double) _samples_per_period / (double)_samplerate;
+				_t0 = clock0;
+				_t1 = clock0 + dll_dt;
+			} else {
+				const double er = clock0 - _t1;
+				_t0 = _t1;
+				_t1 = _t1 + dll_w1 * er + dll_dt;
+				dll_dt += dll_w2 * er;
+			}
+
+			for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+				if ((*s)->dead) {
+					continue;
+				}
+				if ((*s)->halt) {
+					/* slave died, unregister its ports (not rt-safe, but no matter) */
+					PBD::error << _("ALSA Slave device halted") << endmsg;
+					for (std::vector<AlsaPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
+						unregister_port (*it);
+					}
+					for (std::vector<AlsaPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
+						unregister_port (*it);
+					}
+					(*s)->inputs.clear ();
+					(*s)->outputs.clear ();
+					(*s)->active = false;
+					(*s)->dead = true;
+					continue;
+				}
+				(*s)->active = (*s)->running () && (*s)->state () >= 0;
+				if (!(*s)->active) {
+					continue;
+				}
+				(*s)->cycle_start (_t0, (_t1 - _t0) * sr_norm, drain_slaves);
+			}
 
 			if (_pcmi->state () > 0) {
 				++no_proc_errors;
@@ -1858,6 +1960,7 @@ AlsaAudioBackend::main_process_thread ()
 				break;
 			}
 
+			last_n_periods = 0;
 			while (nr >= (long)_samples_per_period && _freewheeling == _freewheel) {
 				uint32_t i = 0;
 				clock1 = g_get_monotonic_time();
@@ -1868,6 +1971,16 @@ AlsaAudioBackend::main_process_thread ()
 					_pcmi->capt_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
 				}
 				_pcmi->capt_done (_samples_per_period);
+
+				for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+					if (!(*s)->active) {
+						continue;
+					}
+					i = 0;
+					for (std::vector<AlsaPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it, ++i) {
+						(*s)->capt_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+					}
+				}
 
 				/* de-queue incoming midi*/
 				i = 0;
@@ -1924,6 +2037,18 @@ AlsaAudioBackend::main_process_thread ()
 					_pcmi->clear_chan (i, _samples_per_period);
 				}
 				_pcmi->play_done (_samples_per_period);
+
+				for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+					if (!(*s)->active) {
+						continue;
+					}
+					i = 0;
+					for (std::vector<AlsaPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it, ++i) {
+						(*s)->play_chan (i, (float*)((*it)->get_buffer(_samples_per_period)), _samples_per_period);
+					}
+					(*s)->cycle_end ();
+				}
+
 				nr -= _samples_per_period;
 				_processed_samples += _samples_per_period;
 
@@ -1931,10 +2056,12 @@ AlsaAudioBackend::main_process_thread ()
 				_dsp_load_calc.set_start_timestamp_us (clock1);
 				_dsp_load_calc.set_stop_timestamp_us (g_get_monotonic_time());
 				_dsp_load = _dsp_load_calc.get_dsp_load ();
+				++last_n_periods;
 			}
 
 			if (xrun && (_pcmi->capt_xrun() > 0 || _pcmi->play_xrun() > 0)) {
 				engine.Xrun ();
+				reset_dll = true;
 #if 0
 				fprintf(stderr, "ALSA x-run read: %.2f ms, write: %.2f ms\n",
 						_pcmi->capt_xrun() * 1000.0, _pcmi->play_xrun() * 1000.0);
@@ -1980,6 +2107,7 @@ AlsaAudioBackend::main_process_thread ()
 			}
 
 			_dsp_load = 1.0;
+			reset_dll = true;
 			Glib::usleep (100); // don't hog cpu
 		}
 
@@ -2021,6 +2149,119 @@ AlsaAudioBackend::main_process_thread ()
 	return 0;
 }
 
+/******************************************************************************/
+
+bool
+AlsaAudioBackend::add_slave (const char*  device,
+                             unsigned int slave_rate,
+                             unsigned int slave_spp,
+                             unsigned int duplex)
+{
+	AudioSlave* s = new AudioSlave (device, duplex,
+			_samplerate, _samples_per_period,
+			slave_rate, slave_spp, 2);
+
+	if (s->state ()) {
+		// TODO parse error status
+		PBD::error << string_compose (_("Failed to create slave device '%1' error %2\n"), device, s->state ()) << endmsg;
+		goto errout;
+	}
+
+	for (uint32_t i = 0, n = 1; i < s->ncapt (); ++i) {
+		char tmp[64];
+		do {
+			snprintf(tmp, sizeof(tmp), "extern:capture_%d", n);
+			if (find_port (tmp)) {
+				++n;
+			} else {
+				break;
+			}
+		} while (1);
+		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsOutput | IsPhysical | IsTerminal));
+		if (!p) goto errout;
+		AlsaPort *ap = static_cast<AlsaPort*>(p);
+		s->inputs.push_back (ap);
+	}
+
+	for (uint32_t i = 0, n = 1; i < s->nplay (); ++i) {
+		char tmp[64];
+		do {
+			snprintf(tmp, sizeof(tmp), "extern:playback_%d", n);
+			if (find_port (tmp)) {
+				++n;
+			} else {
+				break;
+			}
+		} while (1);
+		PortHandle p = add_port(std::string(tmp), DataType::AUDIO, static_cast<PortFlags>(IsInput | IsPhysical | IsTerminal));
+		if (!p) goto errout;
+		AlsaPort *ap = static_cast<AlsaPort*>(p);
+		s->outputs.push_back (ap);
+	}
+
+	if (!s->start ()) {
+		PBD::error << string_compose (_("Failed to start slave device '%1'\n"), device) << endmsg;
+		goto errout;
+	}
+	s->UpdateLatency.connect_same_thread (s->latency_connection, boost::bind (&AlsaAudioBackend::update_latencies, this));
+	_slaves.push_back (s);
+	return true;
+
+errout:
+	delete s; // releases device
+	return false;
+}
+
+AlsaAudioBackend::AudioSlave::AudioSlave (
+		const char*  device,
+		unsigned int duplex,
+		unsigned int master_rate,
+		unsigned int master_samples_per_period,
+		unsigned int slave_rate,
+		unsigned int slave_samples_per_period,
+		unsigned int periods_per_cycle)
+	: AlsaDeviceReservation (device)
+	, AlsaAudioSlave (
+			(duplex & 1) ? device : NULL /* playback */,
+			(duplex & 2) ? device : NULL /* capture */,
+			master_rate, master_samples_per_period,
+			slave_rate, slave_samples_per_period, periods_per_cycle)
+	, active (false)
+	, halt (false)
+	, dead (false)
+{
+	Halted.connect_same_thread (_halted_connection, boost::bind (&AudioSlave::halted, this));
+}
+
+AlsaAudioBackend::AudioSlave::~AudioSlave ()
+{
+	stop ();
+}
+
+void
+AlsaAudioBackend::AudioSlave::halted ()
+{
+	// Note: Halted() is emitted from the Slave's process thread.
+	release_device ();
+	halt = true;
+}
+
+void
+AlsaAudioBackend::AudioSlave::update_latencies (uint32_t play, uint32_t capt)
+{
+	 LatencyRange lr;
+	 lr.min = lr.max = (capt);
+	 for (std::vector<AlsaPort*>::const_iterator it = inputs.begin (); it != inputs.end (); ++it) {
+		(*it)->set_latency_range (lr, false);
+	 }
+
+	lr.min = lr.max = play;
+	for (std::vector<AlsaPort*>::const_iterator it = outputs.begin (); it != outputs.end (); ++it) {
+		(*it)->set_latency_range (lr, true);
+	}
+	printf (" ----- SLAVE LATENCY play=%d capt=%d\n", play, capt); // XXX DEBUG
+	UpdateLatency (); /* EMIT SIGNAL */
+}
 
 /******************************************************************************/
 

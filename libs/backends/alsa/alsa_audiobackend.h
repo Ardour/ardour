@@ -41,6 +41,7 @@
 #include "zita-alsa-pcmi.h"
 #include "alsa_rawmidi.h"
 #include "alsa_sequencer.h"
+#include "alsa_slave.h"
 
 namespace ARDOUR {
 
@@ -397,6 +398,9 @@ class AlsaAudioBackend : public AudioBackend {
 		framecnt_t _processed_samples;
 		pthread_t _main_thread;
 
+		/* DLL, track main process callback timing */
+		double _t0, _t1;
+
 		/* process threads */
 		static void* alsa_process_thread (void *);
 		std::vector<pthread_t> _threads;
@@ -479,6 +483,46 @@ class AlsaAudioBackend : public AudioBackend {
 
 		void update_systemic_audio_latencies ();
 		void update_systemic_midi_latencies ();
+
+		/* additional re-sampled I/O */
+		bool add_slave (const char*  slave_device,
+		                unsigned int slave_rate,
+		                unsigned int slave_spp,
+		                unsigned int duplex = 3);
+
+		class AudioSlave : public AlsaDeviceReservation, public AlsaAudioSlave {
+			public:
+				AudioSlave (
+						const char*  device,
+						unsigned int duplex,
+						unsigned int master_rate,
+						unsigned int master_samples_per_period,
+						unsigned int slave_rate,
+						unsigned int slave_samples_per_period,
+						unsigned int periods_per_cycle);
+
+				~AudioSlave ();
+
+				bool active; // set in sync with process-cb
+				bool halt;
+				bool dead;
+
+				std::vector<AlsaPort *> inputs;
+				std::vector<AlsaPort *> outputs;
+
+				PBD::Signal0<void> UpdateLatency;
+				PBD::ScopedConnection latency_connection;
+
+			protected:
+				void update_latencies (uint32_t, uint32_t);
+
+			private:
+				PBD::ScopedConnection _halted_connection;
+				void halted ();
+		};
+
+		typedef std::vector<AudioSlave*> AudioSlaves;
+		AudioSlaves _slaves;
 
 }; // class AlsaAudioBackend
 

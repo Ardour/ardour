@@ -23,13 +23,14 @@ def build(bld):
             'alsa_midi.cc',
             'alsa_rawmidi.cc',
             'alsa_sequencer.cc',
+            'alsa_slave.cc',
             'zita-alsa-pcmi.cc',
             ]
     obj.includes = ['.']
     obj.name     = 'alsa_audiobackend'
     obj.target   = 'alsa_audiobackend'
-    obj.use      = 'libardour libpbd ardouralsautil'
-    obj.uselib   = 'ALSA GLIBMM XML'
+    obj.use      = 'libardour libpbd ardouralsautil zita-resampler'
+    obj.uselib   = 'ALSA GLIBMM XML LIBZRESAMPLER'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
