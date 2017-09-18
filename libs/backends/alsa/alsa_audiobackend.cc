@@ -59,7 +59,6 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _input_audio_device("")
 	, _output_audio_device("")
 	, _midi_driver_option(get_standard_device_name(DeviceNone))
-	, _device_reservation(0)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
@@ -140,83 +139,6 @@ AlsaAudioBackend::enumerate_output_devices () const
 		_output_audio_device_status.push_back (DeviceStatus (i->first, true));
 	}
 	return _output_audio_device_status;
-}
-
-void
-AlsaAudioBackend::reservation_stdout (std::string d, size_t /* s */)
-{
-  if (d.substr(0, 19) == "Acquired audio-card") {
-		_reservation_succeeded = true;
-	}
-}
-
-void
-AlsaAudioBackend::release_device()
-{
-	_reservation_connection.drop_connections();
-	ARDOUR::SystemExec * tmp = _device_reservation;
-	_device_reservation = 0;
-	delete tmp;
-}
-
-bool
-AlsaAudioBackend::acquire_device(const char* device_name)
-{
-	/* This is  quick hack, ideally we'll link against libdbus and implement a dbus-listener
-	 * that owns the device. here we try to get away by just requesting it and then block it...
-	 * (pulseaudio periodically checks anyway)
-	 *
-	 * dbus-send --session --print-reply --type=method_call --dest=org.freedesktop.ReserveDevice1.Audio2 /org/freedesktop/ReserveDevice1/Audio2 org.freedesktop.ReserveDevice1.RequestRelease int32:4
-	 * -> should not return  'boolean false'
-	 */
-	int device_number = card_to_num(device_name);
-	if (device_number < 0) return false;
-
-	assert(_device_reservation == 0);
-	_reservation_succeeded = false;
-
-	std::string request_device_exe;
-	if (!PBD::find_file (
-				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "ardouralsautil")
-					+ G_SEARCHPATH_SEPARATOR_S + ARDOUR::ardour_dll_directory()),
-				"ardour-request-device", request_device_exe))
-	{
-		PBD::warning << "ardour-request-device binary was not found..'" << endmsg;
-		return false;
-	}
-	else
-	{
-		char **argp;
-		char tmp[128];
-		argp=(char**) calloc(5,sizeof(char*));
-		argp[0] = strdup(request_device_exe.c_str());
-		argp[1] = strdup("-P");
-		snprintf(tmp, sizeof(tmp), "%d", getpid());
-		argp[2] = strdup(tmp);
-		snprintf(tmp, sizeof(tmp), "Audio%d", device_number);
-		argp[3] = strdup(tmp);
-		argp[4] = 0;
-
-		_device_reservation = new ARDOUR::SystemExec(request_device_exe, argp);
-		_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaAudioBackend::reservation_stdout, this, _1 ,_2));
-		_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaAudioBackend::release_device, this));
-		if (_device_reservation->start(0)) {
-			PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
-			release_device();
-			return false;
-		}
-	}
-	// wait to check if reservation suceeded.
-	int timeout = 500; // 5 sec
-	while (_device_reservation && !_reservation_succeeded && --timeout > 0) {
-		Glib::usleep(10000);
-	}
-	if (timeout == 0 || !_reservation_succeeded) {
-		PBD::warning << _("AlsaAudioBackend: Device Reservation failed.") << endmsg;
-		release_device();
-		return false;
-	}
-	return true;
 }
 
 std::vector<float>
@@ -834,7 +756,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	_freewheel = false;
 	_last_process_start = 0;
 
-	release_device();
+	_device_reservation.release_device();
 
 	assert(_rmidi_in.size() == 0);
 	assert(_rmidi_out.size() == 0);
@@ -881,7 +803,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		return AudioDeviceNotAvailableError;
 	}
 
-	acquire_device(alsa_device.c_str());
+	_device_reservation.acquire_device(alsa_device.c_str());
 	_pcmi = new Alsa_pcmi (
 			(duplex & 2) ? alsa_device.c_str() : NULL,
 			(duplex & 1) ? alsa_device.c_str() : NULL,
@@ -929,7 +851,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	if (_pcmi->state ()) {
 		delete _pcmi; _pcmi = 0;
-		release_device();
+		_device_reservation.release_device();
 		return error_code;
 	}
 
@@ -974,7 +896,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	if (register_system_audio_ports()) {
 		PBD::error << _("AlsaAudioBackend: failed to register system ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
-		release_device();
+		_device_reservation.release_device();
 		return PortRegistrationError;
 	}
 
@@ -984,7 +906,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("AlsaAudioBackend: Could not re-establish ports.") << endmsg;
 		delete _pcmi; _pcmi = 0;
-		release_device();
+		_device_reservation.release_device();
 		return PortReconnectError;
 	}
 
@@ -999,7 +921,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 		{
 			PBD::error << _("AlsaAudioBackend: failed to create process thread.") << endmsg;
 			delete _pcmi; _pcmi = 0;
-			release_device();
+			_device_reservation.release_device();
 			_run = false;
 			return ProcessThreadStartError;
 		} else {
@@ -1013,7 +935,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	if (timeout == 0 || !_active) {
 		PBD::error << _("AlsaAudioBackend: failed to start process thread.") << endmsg;
 		delete _pcmi; _pcmi = 0;
-		release_device();
+		_device_reservation.release_device();
 		_run = false;
 		return ProcessThreadStartError;
 	}
@@ -1051,7 +973,7 @@ AlsaAudioBackend::stop ()
 	unregister_ports();
 	delete _pcmi; _pcmi = 0;
 	_midi_ins = _midi_outs = 0;
-	release_device();
+	_device_reservation.release_device();
 	_measure_latency = false;
 
 	return (_active == false) ? 0 : -1;
@@ -2377,3 +2299,91 @@ AlsaMidiEvent::AlsaMidiEvent (const AlsaMidiEvent& other)
 		memcpy (_data, other._data, other._size);
 	}
 };
+
+/******************************************************************************/
+
+AlsaDeviceReservation::AlsaDeviceReservation ()
+	: _device_reservation (0)
+{}
+
+AlsaDeviceReservation::AlsaDeviceReservation (const char* device_name)
+	: _device_reservation (0)
+{
+	acquire_device (device_name);
+}
+
+AlsaDeviceReservation::~AlsaDeviceReservation ()
+{
+	release_device ();
+}
+
+bool
+AlsaDeviceReservation::acquire_device (const char* device_name)
+{
+	int device_number = card_to_num(device_name);
+	if (device_number < 0) return false;
+
+	assert(_device_reservation == 0);
+	_reservation_succeeded = false;
+
+	std::string request_device_exe;
+	if (!PBD::find_file (
+				PBD::Searchpath(Glib::build_filename(ARDOUR::ardour_dll_directory(), "ardouralsautil")
+					+ G_SEARCHPATH_SEPARATOR_S + ARDOUR::ardour_dll_directory()),
+				"ardour-request-device", request_device_exe))
+	{
+		PBD::warning << "ardour-request-device binary was not found..'" << endmsg;
+		return false;
+	}
+
+	char **argp;
+	char tmp[128];
+	argp=(char**) calloc(5,sizeof(char*));
+	argp[0] = strdup(request_device_exe.c_str());
+	argp[1] = strdup("-P");
+	snprintf(tmp, sizeof(tmp), "%d", getpid());
+	argp[2] = strdup(tmp);
+	snprintf(tmp, sizeof(tmp), "Audio%d", device_number);
+	argp[3] = strdup(tmp);
+	argp[4] = 0;
+
+	_device_reservation = new ARDOUR::SystemExec(request_device_exe, argp);
+	_device_reservation->ReadStdout.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::reservation_stdout, this, _1 ,_2));
+	_device_reservation->Terminated.connect_same_thread (_reservation_connection, boost::bind (&AlsaDeviceReservation::release_device, this));
+
+	if (_device_reservation->start(0)) {
+		PBD::warning << _("AlsaAudioBackend: Device Request failed.") << endmsg;
+		release_device();
+		return false;
+	}
+
+	/* wait to check if reservation suceeded. */
+	int timeout = 500; // 5 sec
+	while (_device_reservation && !_reservation_succeeded && --timeout > 0) {
+		Glib::usleep(10000);
+	}
+
+	if (timeout == 0 || !_reservation_succeeded) {
+		PBD::warning << _("AlsaAudioBackend: Device Reservation failed.") << endmsg;
+		release_device();
+		return false;
+	}
+	return true;
+}
+
+void
+AlsaDeviceReservation::release_device ()
+{
+	_reservation_connection.drop_connections();
+	ARDOUR::SystemExec* tmp = _device_reservation;
+	_device_reservation = 0;
+	delete tmp;
+}
+
+void
+AlsaDeviceReservation::reservation_stdout (std::string d, size_t /* s */)
+{
+  if (d.substr(0, 19) == "Acquired audio-card") {
+		_reservation_succeeded = true;
+	}
+}

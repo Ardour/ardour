@@ -158,6 +158,23 @@ class AlsaMidiPort : public AlsaPort {
 		int _bufperiod;
 }; // class AlsaMidiPort
 
+class AlsaDeviceReservation
+{
+	public:
+		AlsaDeviceReservation ();
+		AlsaDeviceReservation (const char* device_name);
+		~AlsaDeviceReservation ();
+
+		bool acquire_device (const char* device_name);
+		void release_device ();
+
+	private:
+		ARDOUR::SystemExec* _device_reservation;
+		PBD::ScopedConnectionList _reservation_connection;
+		void reservation_stdout (std::string, size_t);
+		bool _reservation_succeeded;
+};
+
 class AlsaAudioBackend : public AudioBackend {
 	friend class AlsaPort;
 	public:
@@ -345,12 +362,7 @@ class AlsaAudioBackend : public AudioBackend {
 		std::string _midi_driver_option;
 
 		/* audio device reservation */
-		ARDOUR::SystemExec *_device_reservation;
-		PBD::ScopedConnectionList _reservation_connection;
-		void reservation_stdout (std::string, size_t);
-		bool acquire_device(const char* device_name);
-		void release_device();
-		bool _reservation_succeeded;
+		AlsaDeviceReservation _device_reservation;
 
 		/* audio settings */
 		float  _samplerate;
