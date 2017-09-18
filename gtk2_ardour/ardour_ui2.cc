@@ -456,8 +456,8 @@ ARDOUR_UI::setup_transport ()
 	transport_table.set_row_spacings (4);
 	transport_table.set_border_width (2);
 
-	transport_sample.set_name ("TransportFrame");
-	transport_sample.set_shadow_type (Gtk::SHADOW_NONE);
+	transport_frame.set_name ("TransportFrame");
+	transport_frame.set_shadow_type (Gtk::SHADOW_NONE);
 
 	/* An event box to hold the table. We use this because we want specific
 	   control over the background color, and without this event box,
@@ -468,7 +468,7 @@ ARDOUR_UI::setup_transport ()
 	   the parent, "TransportFrame".
 	*/
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);
-	transport_sample.add (*ebox);
+	transport_frame.add (*ebox);
 	ebox->add (transport_table);
 
 	/* transport controls sub-group */

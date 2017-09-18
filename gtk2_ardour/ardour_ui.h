@@ -445,7 +445,7 @@ private:
 	/* Transport Control */
 
 	Gtk::Table               transport_table;
-	Gtk::Frame               transport_sample;
+	Gtk::Frame               transport_frame;
 	Gtk::HBox                transport_hbox;
 
 	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;

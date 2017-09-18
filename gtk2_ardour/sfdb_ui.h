@@ -96,7 +96,7 @@ protected:
 	AudioClock length_clock;
 	AudioClock timecode_clock;
 
-	Gtk::Frame border_sample;
+	Gtk::Frame border_frame;
 	Gtk::Label preview_label;
 
 	Gtk::TextView tags_entry;

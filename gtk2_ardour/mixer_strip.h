@@ -168,7 +168,7 @@ private:
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 
-	Gtk::Frame          global_sample;
+	Gtk::Frame          global_frame;
 	Gtk::VBox           global_vpacker;
 
 	ProcessorBox processor_box;

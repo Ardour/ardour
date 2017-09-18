@@ -231,7 +231,7 @@ class TimeAxisView : public virtual AxisView
 	Gtk::VBox              controls_vbox;
 	Gtk::VBox              time_axis_vbox;
 	Gtk::HBox              time_axis_hbox;
-	Gtk::Frame             time_axis_sample;
+	Gtk::Frame             time_axis_frame;
 	Gtk::HBox              top_hbox;
 	Gtk::Fixed             scroomer_placeholder;
 	bool                  _name_editing;

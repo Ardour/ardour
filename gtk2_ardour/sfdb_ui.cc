@@ -153,10 +153,10 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 
 	preview_label.set_markup (_("<b>Sound File Information</b>"));
 
-	border_sample.set_label_widget (preview_label);
-	border_sample.add (main_box);
+	border_frame.set_label_widget (preview_label);
+	border_frame.add (main_box);
 
-	pack_start (border_sample, true, true);
+	pack_start (border_frame, true, true);
 	set_border_width (6);
 
 	main_box.set_border_width (6);

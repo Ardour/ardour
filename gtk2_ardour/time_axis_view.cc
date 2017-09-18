@@ -199,9 +199,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	controls_ebox.signal_leave_notify_event().connect (sigc::mem_fun (*this, &TimeAxisView::controls_ebox_leave));
 	controls_ebox.show ();
 
-	time_axis_sample.set_shadow_type (Gtk::SHADOW_NONE);
-	time_axis_sample.add(top_hbox);
-	time_axis_sample.show();
+	time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
+	time_axis_frame.add(top_hbox);
+	time_axis_frame.show();
 
 	HSeparator* separator = manage (new HSeparator());
 	separator->set_name("TrackSeparator");
@@ -213,7 +213,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	midi_scroomer_size_group->add_widget (scroomer_placeholder);
 
 	time_axis_vbox.pack_start (*separator, false, false);
-	time_axis_vbox.pack_start (time_axis_sample, true, true);
+	time_axis_vbox.pack_start (time_axis_frame, true, true);
 	time_axis_vbox.show();
 	time_axis_hbox.pack_start (time_axis_vbox, true, true);
 	time_axis_hbox.show();
@@ -757,14 +757,14 @@ TimeAxisView::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (_selected) {
-		time_axis_sample.set_shadow_type (Gtk::SHADOW_IN);
-		time_axis_sample.set_name ("MixerStripSelectedFrame");
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_IN);
+		time_axis_frame.set_name ("MixerStripSelectedFrame");
 		controls_ebox.set_name (controls_base_selected_name);
 		controls_vbox.set_name (controls_base_selected_name);
 		time_axis_vbox.set_name (controls_base_selected_name);
 	} else {
-		time_axis_sample.set_shadow_type (Gtk::SHADOW_NONE);
-		time_axis_sample.set_name (controls_base_unselected_name);
+		time_axis_frame.set_shadow_type (Gtk::SHADOW_NONE);
+		time_axis_frame.set_name (controls_base_unselected_name);
 		controls_ebox.set_name (controls_base_unselected_name);
 		controls_vbox.set_name (controls_base_unselected_name);
 		time_axis_vbox.set_name (controls_base_unselected_name);
@@ -772,7 +772,7 @@ TimeAxisView::set_selected (bool yn)
 		hide_selection ();
 	}
 
-	time_axis_sample.show();
+	time_axis_frame.show();
 }
 
 void
@@ -818,8 +818,9 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x1;
 	double x2;
 	double y2;
-	SelectionRect *rect;	time_axis_sample.show();
+	SelectionRect *rect;
 
+	time_axis_frame.show();
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->selected () && !(*i)->propagate_time_selection ()) {

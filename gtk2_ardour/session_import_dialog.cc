@@ -62,12 +62,12 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	file_hbox.pack_start (file_entry, true, true);
 	file_hbox.pack_start (file_browse_button, false, false);
 
-	file_sample.add (file_hbox);
-	file_sample.set_border_width (5);
-	file_sample.set_name ("ImportFrom");
-	file_sample.set_label (_("Import from Session"));
+	file_frame.add (file_hbox);
+	file_frame.set_border_width (5);
+	file_frame.set_name ("ImportFrom");
+	file_frame.set_label (_("Import from Session"));
 
-	get_vbox()->pack_start (file_sample, false, false);
+	get_vbox()->pack_start (file_frame, false, false);
 
 	// Session browser
 	session_tree = TreeStore::create (sb_cols);

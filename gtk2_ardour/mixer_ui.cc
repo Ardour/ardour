@@ -213,9 +213,9 @@ Mixer_UI::Mixer_UI ()
 	group_display_vbox.pack_start (group_display_scroller, true, true);
 	group_display_vbox.pack_start (*route_group_display_button_box, false, false);
 
-	group_display_sample.set_name ("BaseFrame");
-	group_display_sample.set_shadow_type (Gtk::SHADOW_IN);
-	group_display_sample.add (group_display_vbox);
+	group_display_frame.set_name ("BaseFrame");
+	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
+	group_display_frame.add (group_display_vbox);
 
 
 	list<TargetEntry> target_list;
@@ -244,15 +244,15 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_scroller.add (favorite_plugins_display);
 	favorite_plugins_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	favorite_plugins_sample.set_name ("BaseFrame");
-	favorite_plugins_sample.set_shadow_type (Gtk::SHADOW_IN);
-	favorite_plugins_sample.add (favorite_plugins_scroller);
+	favorite_plugins_frame.set_name ("BaseFrame");
+	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
+	favorite_plugins_frame.add (favorite_plugins_scroller);
 
-	rhs_pane1.add (favorite_plugins_sample);
-	rhs_pane1.add (track_display_sample);
+	rhs_pane1.add (favorite_plugins_frame);
+	rhs_pane1.add (track_display_frame);
 
 	rhs_pane2.add (rhs_pane1);
-	rhs_pane2.add (group_display_sample);
+	rhs_pane2.add (group_display_frame);
 
 	list_vpacker.pack_start (rhs_pane2, true, true);
 
@@ -331,8 +331,8 @@ Mixer_UI::Mixer_UI ()
 	group_display_scroller.show();
 	favorite_plugins_scroller.show();
 	group_display_vbox.show();
-	group_display_sample.show();
-	favorite_plugins_sample.show();
+	group_display_frame.show();
+	favorite_plugins_frame.show();
 	rhs_pane1.show();
 	rhs_pane2.show();
 	strip_packer.show();
@@ -2358,12 +2358,12 @@ Mixer_UI::setup_track_display ()
 
 	v->pack_start (*b, false, false);
 
-	track_display_sample.set_name("BaseFrame");
-	track_display_sample.set_shadow_type (Gtk::SHADOW_IN);
-	track_display_sample.add (*v);
+	track_display_frame.set_name("BaseFrame");
+	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
+	track_display_frame.add (*v);
 
 	track_display_scroller.show();
-	track_display_sample.show();
+	track_display_frame.show();
 	track_display.show();
 }
 

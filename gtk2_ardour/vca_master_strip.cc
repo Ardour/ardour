@@ -124,14 +124,14 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	global_vpacker.pack_start (gain_meter.gain_automation_state_button, false, false, 1);
 	global_vpacker.pack_start (bottom_padding, false, false, 0);
 
-	global_sample.add (global_vpacker);
-	global_sample.set_shadow_type (Gtk::SHADOW_IN);
-	global_sample.set_name ("BaseFrame");
+	global_frame.add (global_vpacker);
+	global_frame.set_shadow_type (Gtk::SHADOW_IN);
+	global_frame.set_name ("BaseFrame");
 
-	add (global_sample);
+	add (global_frame);
 
 	global_vpacker.show ();
-	global_sample.show ();
+	global_frame.show ();
 	top_padding.show ();
 	vertical_button.show ();
 	hide_button.show ();
@@ -305,14 +305,14 @@ VCAMasterStrip::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (_selected) {
-		global_sample.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_sample.set_name ("MixerStripSelectedFrame");
+		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
+		global_frame.set_name ("MixerStripSelectedFrame");
 	} else {
-		global_sample.set_shadow_type (Gtk::SHADOW_IN);
-		global_sample.set_name ("MixerStripFrame");
+		global_frame.set_shadow_type (Gtk::SHADOW_IN);
+		global_frame.set_name ("MixerStripFrame");
 	}
 
-	global_sample.queue_draw ();
+	global_frame.queue_draw ();
 }
 
 bool

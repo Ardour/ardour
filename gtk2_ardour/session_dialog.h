@@ -84,7 +84,7 @@ private:
 	bool back_button_pressed (GdkEventButton*);
 	bool open_button_pressed (GdkEventButton*);
 
-	Gtk::Frame info_sample;
+	Gtk::Frame info_frame;
 
 	/* initial choice page */
 
@@ -175,7 +175,7 @@ private:
 	void template_row_selected ();
 
 	Gtk::TextView template_desc;
-	Gtk::Frame    template_desc_sample;
+	Gtk::Frame    template_desc_frame;
 
 	Gtk::VBox session_new_vbox;
 	Gtk::VBox session_existing_vbox;

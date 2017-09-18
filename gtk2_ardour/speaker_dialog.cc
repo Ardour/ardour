@@ -34,7 +34,7 @@ using namespace Gtkmm2ext;
 
 SpeakerDialog::SpeakerDialog ()
 	: ArdourWindow (_("Speaker Configuration"))
-	, aspect_sample ("", 0.5, 0.5, 1.5, false)
+	, aspect_frame ("", 0.5, 0.5, 1.5, false)
 	, azimuth_adjustment (0, 0.0, 360.0, 10.0, 1.0)
 	, azimuth_spinner (azimuth_adjustment)
 	, add_speaker_button (_("Add Speaker"))
@@ -49,13 +49,13 @@ SpeakerDialog::SpeakerDialog ()
 	side_vbox.set_spacing (6);
 	side_vbox.pack_start (add_speaker_button, false, false);
 
-	aspect_sample.set_size_request (300, 200);
-	aspect_sample.set_shadow_type (SHADOW_NONE);
-	aspect_sample.add (darea);
+	aspect_frame.set_size_request (300, 200);
+	aspect_frame.set_shadow_type (SHADOW_NONE);
+	aspect_frame.add (darea);
 
 	hbox.set_spacing (6);
 	hbox.set_border_width (6);
-	hbox.pack_start (aspect_sample, true, true);
+	hbox.pack_start (aspect_frame, true, true);
 	hbox.pack_start (side_vbox, false, false);
 
 	HBox* current_speaker_hbox = manage (new HBox);

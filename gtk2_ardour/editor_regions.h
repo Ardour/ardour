@@ -194,7 +194,7 @@ private:
 
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
-	Gtk::Frame _sample;
+	Gtk::Frame _frame;
 
 	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
 

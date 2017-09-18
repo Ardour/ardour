@@ -111,7 +111,7 @@ VCATimeAxisView::VCATimeAxisView (PublicEditor& ed, Session* s, ArdourCanvas::Ca
 	gain_meter.get_gain_slider().show ();
 
 	controls_ebox.set_name (controls_base_unselected_name);
-	time_axis_sample.set_name (controls_base_unselected_name);
+	time_axis_frame.set_name (controls_base_unselected_name);
 
 	s->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&VCATimeAxisView::parameter_changed, this, _1), gui_context());

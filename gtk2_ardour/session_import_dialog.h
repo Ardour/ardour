@@ -78,7 +78,7 @@ private:
 	XMLTree            tree;
 
 	// GUI
-	Gtk::Frame                    file_sample;
+	Gtk::Frame                    file_frame;
 	Gtk::HBox                     file_hbox;
 	Gtk::Entry                    file_entry;
 	Gtk::Button                   file_browse_button;
