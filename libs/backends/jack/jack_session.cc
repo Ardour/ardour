@@ -142,7 +142,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_samples_per_video_frame = _session->sample_rate() / _session->timecode_frames_per_second();
+	pos->audio_frames_per_video_frame = _session->sample_rate() / _session->timecode_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 #endif
 
