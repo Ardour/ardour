@@ -37,9 +37,6 @@ class LIBARDOUR_API AudioTrack : public Track
 	AudioTrack (Session&, std::string name, TrackMode m = Normal);
 	~AudioTrack ();
 
-	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	          int declick, bool& need_butler);
-
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 

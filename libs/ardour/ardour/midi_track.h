@@ -42,8 +42,6 @@ public:
 
 	int init ();
 
-	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
-
 	void realtime_locate ();
 	void non_realtime_locate (samplepos_t);
 
@@ -119,6 +117,8 @@ public:
 
 	MidiChannelFilter& playback_filter() { return _playback_filter; }
 	MidiChannelFilter& capture_filter()  { return _capture_filter; }
+
+	virtual void filter_input (BufferSet& bufs);
 
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 

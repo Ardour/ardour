@@ -57,6 +57,7 @@
 #include "ardour/delayline.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_port.h"
+#include "ardour/monitor_control.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
@@ -598,11 +599,11 @@ Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t 
 	assert (is_monitor());
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 	fill_buffers_with_input (bufs, _input, nframes);
-	passthru (bufs, start_sample, end_sample, nframes, declick);
+	passthru (bufs, start_sample, end_sample, nframes, declick, true);
 }
 
 void
-Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
+Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok)
 {
 	_silent = false;
 
@@ -616,8 +617,13 @@ Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		bufs.silence (nframes, 0);
 	}
 
+	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
+
 	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, true);
+
+	/* run processor chain */
+
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok);
 }
 
 void
@@ -3581,7 +3587,7 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 
 	_amp->apply_gain_automation (false);
 	_trim->apply_gain_automation (false);
-	passthru (bufs, start_sample, end_sample, nframes, 0);
+	passthru (bufs, start_sample, end_sample, nframes, 0, true);
 
 	flush_processor_buffers_locked (nframes);
 
@@ -3589,35 +3595,42 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 }
 
 int
-Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& /* need_butler */)
+Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
 	if (!lm.locked()) {
 		return 0;
 	}
 
 	if (!_active) {
 		silence_unlocked (nframes);
-		return 0;
-	}
-
-	samplepos_t unused = 0;
-
-	if ((nframes = check_initial_delay (nframes, unused)) == 0) {
+		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || (!_disk_writer || _disk_writer->record_enabled()))) {
+			_meter->reset();
+		}
 		return 0;
 	}
 
 	_silent = false;
+	_amp->apply_gain_automation(false);
 
-	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
+	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
 
 	fill_buffers_with_input (bufs, _input, nframes);
 
-	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_sample, end_sample, 1.0, nframes, true);
+	/* filter captured data before meter sees it */
+	filter_input (bufs);
+
+	if (_meter_point == MeterInput &&
+	    ((_monitoring_control->monitoring_choice() & MonitorInput) || (_disk_writer && _disk_writer->record_enabled()))) {
+		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
 	}
 
-	passthru (bufs, start_sample, end_sample, nframes, declick);
+	passthru (bufs, start_sample, end_sample, nframes, declick, ((_disk_writer && !_disk_writer->record_enabled()) && _session.transport_rolling()));
+
+	if ((_disk_reader && _disk_reader->need_butler()) || (_disk_writer && _disk_writer->need_butler())) {
+		need_butler = true;
+	}
 
 	flush_processor_buffers_locked (nframes);
 
@@ -4811,15 +4824,6 @@ Route::processor_by_id (PBD::ID id) const
 	return boost::shared_ptr<Processor> ();
 }
 
-/** @return the monitoring state, or in other words what data we are pushing
- *  into the route (data from the inputs, data from disk or silence)
- */
-MonitorState
-Route::monitoring_state () const
-{
-	return MonitoringInput;
-}
-
 /** @return what we should be metering; either the data coming from the input
  *  IO or the data that is flowing through the route.
  */
@@ -5670,3 +5674,154 @@ Route::set_disk_io_point (DiskIOPoint diop)
 
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
+
+#ifdef USE_TRACKS_CODE_FEATURES
+
+/* This is the Tracks version of Track::monitoring_state().
+ *
+ * Ardour developers: try to flag or fix issues if parts of the libardour API
+ * change in ways that invalidate this
+ */
+
+MonitorState
+Route::monitoring_state () const
+{
+	/* Explicit requests */
+
+	if (_monitoring != MonitorInput) {
+		return MonitoringInput;
+	}
+
+	if (_monitoring & MonitorDisk) {
+		return MonitoringDisk;
+	}
+
+	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	   I don't think it's ever going to be too pretty too look at.
+	*/
+
+	// GZ: NOT USED IN TRACKS
+	//bool const auto_input = _session.config.get_auto_input ();
+	//bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+	//bool const tape_machine_mode = Config->get_tape_machine_mode ();
+
+	bool const roll = _session.transport_rolling ();
+	bool const track_rec = _diskstream->record_enabled ();
+	bool session_rec = _session.actively_recording ();
+
+	if (track_rec) {
+
+		if (!session_rec && roll) {
+			return MonitoringDisk;
+		} else {
+			return MonitoringInput;
+		}
+
+	} else {
+
+		if (roll) {
+			return MonitoringDisk;
+		}
+	}
+
+	return MonitoringSilence;
+}
+
+#else
+
+/* This is the Ardour/Mixbus version of Track::monitoring_state().
+ *
+ * Tracks developers: do NOT modify this method under any circumstances.
+ */
+
+MonitorState
+Route::monitoring_state () const
+{
+	if (!_disk_reader) {
+		return MonitoringInput;
+	}
+
+	/* Explicit requests */
+	MonitorChoice m (_monitoring_control->monitoring_choice());
+
+	if (m != MonitorAuto) {
+
+		MonitorState ms ((MonitorState) 0);
+
+		if (m & MonitorInput) {
+			ms = MonitoringInput;
+		}
+
+		if (m & MonitorDisk) {
+			ms = MonitorState (ms | MonitoringDisk);
+		}
+
+		return ms;
+	}
+
+	switch (_session.config.get_session_monitoring ()) {
+		case MonitorDisk:
+			return MonitoringDisk;
+			break;
+		case MonitorInput:
+			return MonitoringInput;
+			break;
+		default:
+			break;
+	}
+
+	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	   I don't think it's ever going to be too pretty too look at.
+	*/
+
+	bool const roll = _session.transport_rolling ();
+	bool const track_rec = _disk_writer->record_enabled ();
+	bool const auto_input = _session.config.get_auto_input ();
+	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+	bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	bool session_rec;
+
+	/* I suspect that just use actively_recording() is good enough all the
+	 * time, but just to keep the semantics the same as they were before
+	 * sept 26th 2012, we differentiate between the cases where punch is
+	 * enabled and those where it is not.
+	 *
+	 * rg: I suspect this is not the case: monitoring may differ
+	 */
+
+	if (_session.config.get_punch_in() || _session.config.get_punch_out() || _session.preroll_record_punch_enabled ()) {
+		session_rec = _session.actively_recording ();
+	} else {
+		session_rec = _session.get_record_enabled();
+	}
+
+	if (track_rec) {
+
+		if (!session_rec && roll && auto_input) {
+			return MonitoringDisk;
+		} else {
+			return software_monitor ? MonitoringInput : MonitoringSilence;
+		}
+
+	} else {
+
+		if (tape_machine_mode) {
+
+			return MonitoringDisk;
+
+		} else {
+
+			if (!roll && auto_input) {
+				return software_monitor ? MonitoringInput : MonitoringSilence;
+			} else {
+				return MonitoringDisk;
+			}
+
+		}
+	}
+
+	abort(); /* NOTREACHED */
+	return MonitoringSilence;
+}
+
+#endif

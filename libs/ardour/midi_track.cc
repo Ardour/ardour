@@ -317,61 +317,6 @@ MidiTrack::update_controls(const BufferSet& bufs)
 	}
 }
 
-/** @param need_butler to be set to true if this track now needs the butler, otherwise it can be left alone
- *  or set to false.
- */
-int
-MidiTrack::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked()) {
-		return 0;
-	}
-
-	if (n_outputs().n_total() == 0 && _processors.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
-			_meter->reset();
-		}
-		return 0;
-	}
-
-	_silent = false;
-	_amp->apply_gain_automation (false);
-
-	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
-
-	fill_buffers_with_input (bufs, _input, nframes);
-
-	/* filter captured data before meter sees it */
-	_capture_filter.filter (bufs);
-
-	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _disk_writer->record_enabled())) {
-		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
-	}
-
-	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
-
-	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
-
-	/* final argument: don't waste time with automation if we're not recording or rolling */
-
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer->record_enabled() && !_session.transport_stopped()));
-
-	if (_disk_reader->need_butler() || _disk_writer->need_butler()) {
-		need_butler = true;
-	}
-
-	flush_processor_buffers_locked (nframes);
-
-	return 0;
-}
-
 int
 MidiTrack::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing)
 {
@@ -862,4 +807,10 @@ MidiTrack::monitoring_state () const
 		return MonitoringInput;
 	}
 	return ms;
+}
+
+void
+MidiTrack::filter_input (BufferSet& bufs)
+{
+	_capture_filter.filter (bufs);
 }

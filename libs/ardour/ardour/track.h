@@ -38,7 +38,6 @@ class DiskReader;
 class DiskWriter;
 class IO;
 class Location;
-class MonitorControl;
 class RecordEnableControl;
 class RecordSafeControl;
 
@@ -62,18 +61,12 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	TrackMode mode () const { return _mode; }
 
-	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
-
-	MonitorState monitoring_state () const;
 	MeterState metering_state () const;
 
 	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
 	virtual int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                     bool state_changing);
-
-	virtual int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	                  int declick, bool& need_butler) = 0;
 
 	bool needs_butler() const { return _needs_butler; }
 
@@ -197,7 +190,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
 	bool          _needs_butler;
-	boost::shared_ptr<MonitorControl> _monitoring_control;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {

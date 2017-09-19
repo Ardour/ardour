@@ -77,6 +77,7 @@ class PluginInsert;
 class RouteGroup;
 class Send;
 class InternalReturn;
+class MonitorControl;
 class MonitorProcessor;
 class Pannable;
 class CapturingProcessor;
@@ -128,10 +129,14 @@ public:
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &, bool rename_playlist = true);
 
+	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
+
 	MonitorState monitoring_state () const;
 	virtual MeterState metering_state () const;
 
 	/* these are the core of the API of a Route. see the protected sections as well */
+
+	virtual void filter_input (BufferSet &) {}
 
 	virtual int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
 	                  int declick, bool& need_butler);
@@ -474,13 +479,6 @@ public:
 		return _solo_safe_control;
 	}
 
-	boost::shared_ptr<MonitorControl> monitoring_control() const {
-		/* tracks override this to provide actual monitoring control;
-		   busses have no possible choices except input monitoring.
-		*/
-		return boost::shared_ptr<MonitorControl> ();
-	}
-
 	/* Route doesn't own these items, but sub-objects that it does own have them
 	   and to make UI code a bit simpler, we provide direct access to them
 	   here.
@@ -603,7 +601,7 @@ public:
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
-	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick);
+	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */,
 					     samplecnt_t /* nframes */) {}
@@ -640,6 +638,7 @@ public:
 	boost::shared_ptr<Pannable> _pannable;
 	boost::shared_ptr<DiskReader> _disk_reader;
 	boost::shared_ptr<DiskWriter> _disk_writer;
+	boost::shared_ptr<MonitorControl> _monitoring_control;
 
 	DiskIOPoint    _disk_io_point;
 
