@@ -49,7 +49,6 @@ bool DiskReader::_no_disk_output = false;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
-	, _roll_delay (0)
 	, overwrite_sample (0)
         , overwrite_offset (0)
         , _pending_overwrite (false)
@@ -124,12 +123,6 @@ DiskReader::set_name (string const & str)
 	}
 
 	return true;
-}
-
-void
-DiskReader::set_roll_delay (ARDOUR::samplecnt_t nframes)
-{
-	_roll_delay = nframes;
 }
 
 XMLNode&
