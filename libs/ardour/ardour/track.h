@@ -72,7 +72,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	bool can_record();
 
-	void set_latency_compensation (samplecnt_t);
 	void update_latency_information ();
 	enum FreezeState {
 		NoFreeze,
@@ -228,7 +227,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	virtual void record_enable_changed (bool, PBD::Controllable::GroupControlDisposition);
 	virtual void record_safe_changed (bool, PBD::Controllable::GroupControlDisposition);
 
-	samplecnt_t check_initial_delay (samplecnt_t nframes, samplepos_t&);
 	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
 	AlignChoice _alignment_choice;

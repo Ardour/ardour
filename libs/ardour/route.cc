@@ -96,7 +96,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _active (true)
 	, _signal_latency (0)
 	, _initial_delay (0)
-	, _roll_delay (0)
 	, _disk_io_point (DiskIOPreFader)
 	, _pending_process_reorder (0)
 	, _pending_signals (0)
@@ -3353,7 +3352,9 @@ Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 		}
 	}
 
-	_roll_delay = _initial_delay;
+	if (_disk_reader) {
+		_disk_reader->set_roll_delay (_initial_delay);
+	}
 }
 
 void
@@ -3941,7 +3942,9 @@ Route::set_latency_compensation (samplecnt_t longest_session_latency)
 	}
 
 	if (_session.transport_stopped()) {
-		_roll_delay = _initial_delay;
+		if (_disk_reader) {
+			_disk_reader->set_roll_delay (_initial_delay);
+		}
 	}
 }
 
@@ -4885,7 +4888,10 @@ Route::non_realtime_locate (samplepos_t pos)
 			(*i)->non_realtime_locate (pos);
 		}
 	}
-	_roll_delay = _initial_delay;
+
+	if (_disk_reader) {
+		_disk_reader->set_roll_delay (_initial_delay);
+	}
 }
 
 void

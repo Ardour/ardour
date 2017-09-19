@@ -627,7 +627,6 @@ public:
 	bool           _active;
 	samplecnt_t     _signal_latency;
 	samplecnt_t     _initial_delay;
-	samplecnt_t     _roll_delay;
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock   _processor_lock;

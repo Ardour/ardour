@@ -414,13 +414,6 @@ Track::set_name (const string& str)
 	return ret;
 }
 
-void
-Track::set_latency_compensation (samplecnt_t longest_session_latency)
-{
-	Route::set_latency_compensation (longest_session_latency);
-	_disk_reader->set_roll_delay (_roll_delay);
-}
-
 int
 Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
@@ -999,42 +992,6 @@ Track::maybe_declick (BufferSet& bufs, samplecnt_t nframes, int declick)
 	if (declick != 0) {
 		Amp::declick (bufs, nframes, declick);
 	}
-}
-
-samplecnt_t
-Track::check_initial_delay (samplecnt_t nframes, samplepos_t& transport_sample)
-{
-	if (_roll_delay > nframes) {
-
-		_roll_delay -= nframes;
-		silence_unlocked (nframes);
-		/* transport sample is not legal for caller to use */
-		return 0;
-
-	} else if (_roll_delay > 0) {
-
-		nframes -= _roll_delay;
-		silence_unlocked (_roll_delay);
-		transport_sample += _roll_delay;
-
-		/* shuffle all the port buffers for things that lead "out" of this Route
-		   to reflect that we just wrote _roll_delay samples of silence.
-		*/
-
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-			if (iop) {
-				iop->increment_port_buffer_offset (_roll_delay);
-			}
-		}
-		_output->increment_port_buffer_offset (_roll_delay);
-
-		_roll_delay = 0;
-
-	}
-
-	return nframes;
 }
 
 void

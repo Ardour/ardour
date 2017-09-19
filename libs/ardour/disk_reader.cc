@@ -129,6 +129,7 @@ DiskReader::set_name (string const & str)
 void
 DiskReader::set_roll_delay (ARDOUR::samplecnt_t nframes)
 {
+	/* Must be called from process context or with process lock held */
 	_roll_delay = nframes;
 }
 
@@ -278,14 +279,38 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = nframes;
 	}
 
+	bool roll_delayed = false;
+	samplecnt_t roll_delay_offset = 0;
+
+	if (speed != 0.0) {
+		if (_roll_delay > disk_samples_to_consume) {
+			/* still waiting for _roll_delay to end */
+			_roll_delay -= disk_samples_to_consume;
+			/* we could set disk_samples_to_consume to zero here, but it
+			   won't be used anyway.
+			*/
+			roll_delayed = true;
+
+		} else if (_roll_delay > 0) {
+			/* roll delay will end during this call to ::run(), but
+			 * there's some silence needed in the signal-from-disk first
+			 */
+			roll_delay_offset = _roll_delay;
+			bufs.silence (_roll_delay, 0);
+			disk_samples_to_consume -= _roll_delay;
+			start_sample += _roll_delay;
+			_roll_delay = 0;
+		}
+	}
+
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 	const bool still_locating = _session.global_locate_pending();
 
-	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
+	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output || roll_delayed) {
 
 		/* no need for actual disk data, just advance read pointer and return */
 
-		if (!still_locating || _no_disk_output) {
+		if (!roll_delayed && (!still_locating || _no_disk_output)) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 				(*chan)->buf->increment_read_ptr (disk_samples_to_consume);
 			}
@@ -293,7 +318,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		/* if monitoring disk but locating put silence in the buffers */
 
-		if ((_no_disk_output || still_locating) && (ms == MonitoringDisk)) {
+		if ((roll_delayed || _no_disk_output || still_locating) && (ms == MonitoringDisk)) {
 			bufs.silence (nframes, 0);
 		}
 
@@ -325,13 +350,35 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				disk_signal = output.data ();
 			}
 
+			/* if we skipped some number of samples at the start
+			   because of the _roll_delay being non-zero but small
+			   enough that we will process some data from disk,
+			   advance where we're going to write that data to,
+			   thus skipping over the silence that was written
+			   there.
+			*/
+			disk_signal += roll_delay_offset;
+
+			assert (start_sample >= playback_sample);
+
+			if (start_sample != playback_sample) {
+				cerr << owner()->name() << " playback not aligned, jump ahead " << (start_sample - playback_sample) << endl;
+
+				if (can_internal_playback_seek (start_sample - playback_sample)) {
+					internal_playback_seek (start_sample - playback_sample);
+				} else {
+					cerr << owner()->name() << " playback not possible: ss = " << start_sample << " ps = " << playback_sample << endl;
+					goto midi;
+				}
+			}
+
 			chaninfo->buf->get_read_vector (&(*chan)->rw_vector);
 
 			if (disk_samples_to_consume <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
 				if (fabsf (speed) != 1.0f) {
 					(void) interpolation.interpolate (
-						n, nframes,
+						n, disk_samples_to_consume,
 						chaninfo->rw_vector.buf[0],
 						disk_signal);
 				} else if (speed != 0.0) {
@@ -377,20 +424,23 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if (scaling != 1.0f && speed != 0.0) {
-				apply_gain_to_buffer (disk_signal, nframes, scaling);
+				apply_gain_to_buffer (disk_signal, disk_samples_to_consume, scaling);
 			}
 
 			chaninfo->buf->increment_read_ptr (disk_samples_to_consume);
 
-			if ((speed != 0.0) && (ms & MonitoringInput)) {
+		  monitor_mix:
+
+			if (ms & MonitoringInput) {
 				/* mix the disk signal into the input signal (already in bufs) */
-				mix_buffers_no_gain (output.data(), disk_signal, speed == 0.0 ? nframes : disk_samples_to_consume);
+				mix_buffers_no_gain (output.data(), disk_signal, disk_samples_to_consume);
 			}
 		}
 	}
 
 	/* MIDI data handling */
 
+  midi:
 	if (!_session.declick_out_pending() && bufs.count().n_midi()) {
 		MidiBuffer* dst;
 
