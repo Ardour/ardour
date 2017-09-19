@@ -83,7 +83,7 @@ AutomationRegionView::init (bool /*wfd*/)
 
 	set_height (trackview.current_height());
 
-	fill_color_name = "midi sample base";
+	fill_color_name = "midi frame base";
 	set_colors ();
 
 	_enable_display = true;
@@ -110,11 +110,11 @@ AutomationRegionView::get_fill_color() const
 {
 	const std::string mod_name = (_dragging ? "dragging region" :
 	                              trackview.editor().internal_editing() ? "editable region" :
-	                              "midi sample base");
+	                              "midi frame base");
 	if (_selected) {
 		return UIConfiguration::instance().color_mod ("selected region base", mod_name);
 	} else if (high_enough_for_name || !UIConfiguration::instance().get_color_regions_using_track_color()) {
-		return UIConfiguration::instance().color_mod ("midi sample base", mod_name);
+		return UIConfiguration::instance().color_mod ("midi frame base", mod_name);
 	}
 	return UIConfiguration::instance().color_mod (fill_color, mod_name);
 }
