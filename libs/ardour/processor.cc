@@ -69,6 +69,7 @@ Processor::Processor(Session& session, const string& name)
 	, _pinmgr_proxy (0)
 	, _owner (0)
 	, _input_latency (0)
+	, _output_latency (0)
 {
 }
 
@@ -290,10 +291,3 @@ Processor::owner() const
 {
 	return _owner;
 }
-
-void
-Processor::set_input_latency (samplecnt_t cnt)
-{
-	_input_latency = cnt;
-}
-

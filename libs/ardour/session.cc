@@ -199,6 +199,8 @@ Session::Session (AudioEngine &eng,
 	, _worst_output_latency (0)
 	, _worst_input_latency (0)
 	, _worst_track_latency (0)
+	, _worst_track_out_latency (0)
+	, _worst_track_roll_delay (0)
 	, _have_captured (false)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
@@ -6915,15 +6917,25 @@ Session::post_playback_latency ()
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
+	_worst_track_out_latency = 0;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		assert (!(*i)->is_auditioner()); // XXX remove me
-		if ((*i)->active()) {
-			_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
+		if (!(*i)->active()) { continue ; }
+		_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
+		if (boost::dynamic_pointer_cast<Track> (*i)) {
+			_worst_track_out_latency = max (_worst_track_out_latency, (*i)->output ()->latency ());
 		}
 	}
 
+	_worst_track_roll_delay = 0;
+
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->set_latency_compensation (_worst_track_latency);
+		if (!(*i)->active()) { continue ; }
+		(*i)->set_latency_compensation (_worst_track_latency + _worst_track_out_latency - (*i)->output ()->latency ());
+		if (boost::dynamic_pointer_cast<Track> (*i)) {
+			_worst_track_roll_delay = max (_worst_track_roll_delay, (*i)->initial_delay ());
+		}
 	}
 }
 

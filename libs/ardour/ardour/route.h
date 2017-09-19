@@ -339,11 +339,11 @@ public:
 	samplecnt_t set_private_port_latencies (bool playback) const;
 	void       set_public_port_latencies (samplecnt_t, bool playback) const;
 
-	samplecnt_t   update_signal_latency();
+	samplecnt_t   update_signal_latency (bool set_initial_delay = false);
 	virtual void set_latency_compensation (samplecnt_t);
 
 	void set_user_latency (samplecnt_t);
-	samplecnt_t initial_delay() const { return _initial_delay; }
+	samplecnt_t initial_delay() const  { return _initial_delay; }
 	samplecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void>       active_changed;
@@ -628,8 +628,6 @@ public:
 
 	bool           _active;
 	samplecnt_t     _signal_latency;
-	samplecnt_t     _signal_latency_at_amp_position;
-	samplecnt_t     _signal_latency_at_trim_position;
 	samplecnt_t     _initial_delay;
 	samplecnt_t     _roll_delay;
 

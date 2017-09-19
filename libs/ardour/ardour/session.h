@@ -473,11 +473,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_end_is_free (bool);
 	int location_name(std::string& result, std::string base = std::string(""));
 
-	pframes_t get_block_size()        const { return current_block_size; }
-	samplecnt_t worst_output_latency () const { return _worst_output_latency; }
-	samplecnt_t worst_input_latency ()  const { return _worst_input_latency; }
-	samplecnt_t worst_track_latency ()  const { return _worst_track_latency; }
-	samplecnt_t worst_playback_latency () const { return _worst_output_latency + _worst_track_latency; }
+	pframes_t get_block_size () const            { return current_block_size; }
+	samplecnt_t worst_output_latency ()const     { return _worst_output_latency; }
+	samplecnt_t worst_input_latency () const     { return _worst_input_latency; }
+	samplecnt_t worst_track_latency () const     { return _worst_track_latency; }
+	samplecnt_t worst_track_roll_delay () const  { return _worst_track_roll_delay; }
+	samplecnt_t worst_track_out_latency () const { return _worst_track_out_latency; }
+	samplecnt_t worst_playback_latency  () const { return _worst_output_latency + _worst_track_latency; }
 
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
@@ -1264,6 +1266,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	samplecnt_t              _worst_output_latency;
 	samplecnt_t              _worst_input_latency;
 	samplecnt_t              _worst_track_latency;
+	samplecnt_t              _worst_track_out_latency;
+	samplecnt_t              _worst_track_roll_delay;
 	bool                    _have_captured;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;

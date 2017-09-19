@@ -94,8 +94,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, Muteable (sess, name)
 	, _active (true)
 	, _signal_latency (0)
-	, _signal_latency_at_amp_position (0)
-	, _signal_latency_at_trim_position (0)
 	, _initial_delay (0)
 	, _roll_delay (0)
 	, _disk_io_point (DiskIOPreFader)
@@ -332,14 +330,14 @@ Route::process_output_buffers (BufferSet& bufs,
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
 		_amp->setup_gain_automation (
-				start_sample + _signal_latency_at_amp_position,
-				end_sample + _signal_latency_at_amp_position,
+				start_sample + _amp->output_latency (),
+				end_sample + _amp->output_latency (),
 				nframes);
 
 		_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
 		_trim->setup_gain_automation (
-				start_sample + _signal_latency_at_trim_position,
-				end_sample + _signal_latency_at_trim_position,
+				start_sample + _trim->output_latency (),
+				end_sample + _trim->output_latency (),
 				nframes);
 	} else {
 		_amp->apply_gain_automation (false);
@@ -1809,8 +1807,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 	// TODO check for a potential ReaderLock after ReaderLock ??
 	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
 
-	samplecnt_t chain_latency = _input->latency ();
-
 	list< pair<ChanCount,ChanCount> >::iterator c = configuration.begin();
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++c) {
 
@@ -1821,9 +1817,6 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 			lm->acquire ();
 			return -1;
 		}
-
-		(*p)->set_input_latency (chain_latency);
-		chain_latency += (*p)->signal_latency ();
 
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
@@ -2103,6 +2096,11 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 		_pending_processor_order = new_order;
 		g_atomic_int_set (&_pending_process_reorder, 1);
 	}
+
+	/* update processor input/output latency
+	 * (total signal_latency does not change)
+	 */
+	update_signal_latency (true);
 
 	return 0;
 }
@@ -3679,6 +3677,10 @@ Route::apply_processor_changes_rt ()
 	}
 	if (changed) {
 		set_processor_positions ();
+		/* update processor input/output latency
+		 * (total signal_latency does not change)
+		 */
+		update_signal_latency (true);
 	}
 	if (emissions != 0) {
 		g_atomic_int_set (&_pending_signals, emissions);
@@ -3851,8 +3853,9 @@ Route::add_export_point()
 		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
 		// this aligns all tracks; but not tracks + busses
-		assert (_session.worst_track_latency () >= _initial_delay);
-		_capturing_processor.reset (new CapturingProcessor (_session, _session.worst_track_latency () - _initial_delay));
+		samplecnt_t latency = _session.worst_track_roll_delay ();
+		assert (latency >= _initial_delay);
+		_capturing_processor.reset (new CapturingProcessor (_session, latency - _initial_delay));
 		_capturing_processor->activate ();
 
 		configure_processors_unlocked (0, &lw);
@@ -3863,40 +3866,40 @@ Route::add_export_point()
 }
 
 samplecnt_t
-Route::update_signal_latency ()
+Route::update_signal_latency (bool set_initial_delay)
 {
-	samplecnt_t l = _output->user_latency();
-	samplecnt_t lamp = 0;
-	bool before_amp = true;
-	samplecnt_t ltrim = 0;
-	bool before_trim = true;
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
+	samplecnt_t l_in  = _input->latency ();
+	samplecnt_t l_out = 0;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
-			l += (*i)->signal_latency ();
+			l_out += (*i)->signal_latency ();
+			l_in += (*i)->signal_latency ();
 		}
-		if ((*i) == _amp) {
-			before_amp = false;
-		}
-		if ((*i) == _trim) {
-			before_amp = false;
-		}
-		if (before_amp) {
-			lamp = l;
-		}
-		if (before_trim) {
-			lamp = l;
-		}
+		(*i)->set_input_latency (l_in);
+		(*i)->set_output_latency (l_out);
 	}
 
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l));
+	l_out += _output->user_latency();
 
-	// TODO: (lamp - _signal_latency) to sync to output (read-ahed),  currently _roll_delay shifts this around
-	_signal_latency_at_amp_position = lamp;
-	_signal_latency_at_trim_position = ltrim;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->set_output_latency (l_out - (*i)->output_latency ());
+	}
 
-	if (_signal_latency != l) {
-		_signal_latency = l;
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l_out));
+
+	_signal_latency = l_out;
+
+	lm.release ();
+
+	if (set_initial_delay) {
+		/* see also Session::post_playback_latency() */
+		set_latency_compensation (_session.worst_track_latency () + _session.worst_track_out_latency () - output ()->latency ());
+	}
+
+	if (_signal_latency != l_out) {
 		signal_latency_changed (); /* EMIT SIGNAL */
 	}
 
@@ -3914,9 +3917,10 @@ void
 Route::set_latency_compensation (samplecnt_t longest_session_latency)
 {
 	samplecnt_t old = _initial_delay;
+	assert (!_disk_reader || _disk_reader->output_latency () <= _signal_latency);
 
-	if (_signal_latency < longest_session_latency) {
-		_initial_delay = longest_session_latency - _signal_latency;
+	if (_disk_reader &&  _signal_latency < longest_session_latency) {
+		_initial_delay = longest_session_latency - (_signal_latency - _disk_reader->input_latency ());
 	} else {
 		_initial_delay = 0;
 	}
@@ -4651,7 +4655,7 @@ Route::setup_invisible_processors ()
 
 	ProcessorList::iterator trim = new_processors.end();
 
-	if (_trim && _trim->active()) {
+	if (_trim->active()) {
 		assert (!_trim->display_to_user ());
 		new_processors.push_front (_trim);
 		trim = new_processors.begin();
@@ -4669,11 +4673,6 @@ Route::setup_invisible_processors ()
 	}
 
 	/* EXPORT PROCESSOR */
-
-	if (_capturing_processor) {
-		assert (!_capturing_processor->display_to_user ());
-		new_processors.push_front (_capturing_processor);
-	}
 
 	/* DISK READER & WRITER (for Track objects) */
 
@@ -4713,6 +4712,18 @@ Route::setup_invisible_processors ()
 			break;
 		}
 	}
+
+	if (_capturing_processor) {
+		assert (!_capturing_processor->display_to_user ());
+		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
+		if (reader_pos != new_processors.end()) {
+			/* insert after disk-reader */
+			new_processors.insert (++reader_pos, _capturing_processor);
+		} else {
+			new_processors.push_front (_capturing_processor);
+		}
+	}
+
 
 	_processors = new_processors;
 
