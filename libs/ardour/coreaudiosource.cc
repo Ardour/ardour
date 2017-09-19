@@ -85,7 +85,7 @@ CoreAudioSource::init_cafile ()
 			throw failed_constructor();
 		}
 
-		_length = af.GetNumberSamples();
+		_length = af.GetNumberFrames();
 
 		CAStreamBasicDescription client_format (file_format);
 
@@ -282,7 +282,7 @@ CoreAudioSource::get_soundfile_info (string path, SoundFileInfo& _info, string&)
 	_info.channels   = absd.mChannelsPerFrame;
 
 	size = sizeof(_info.length);
-	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthSamples, &size, &_info.length) != noErr) {
+	if (ExtAudioFileGetProperty(af, kExtAudioFileProperty_FileLengthFrames, &size, &_info.length) != noErr) {
 		goto out;
 	}
 

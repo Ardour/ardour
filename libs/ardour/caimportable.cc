@@ -107,7 +107,7 @@ CAImportableSource::channels () const
 samplecnt_t
 CAImportableSource::length () const
 {
-	return af.GetNumberSamples();
+	return af.GetNumberFrames();
 }
 
 samplecnt_t

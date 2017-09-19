@@ -738,7 +738,7 @@ AUPlugin::discover_parameters ()
 			  kAudioUnitParameterUnit_Boolean             = 2
 			  kAudioUnitParameterUnit_Percent             = 3
 			  kAudioUnitParameterUnit_Seconds             = 4
-			  kAudioUnitParameterUnit_SampleSamples        = 5
+			  kAudioUnitParameterUnit_SampleFrames        = 5
 			  kAudioUnitParameterUnit_Phase               = 6
 			  kAudioUnitParameterUnit_Rate                = 7
 			  kAudioUnitParameterUnit_Hertz               = 8
@@ -787,7 +787,7 @@ AUPlugin::discover_parameters ()
 			d.integer_step = (info.unit == kAudioUnitParameterUnit_Indexed);
 			d.toggled = (info.unit == kAudioUnitParameterUnit_Boolean) ||
 				(d.integer_step && ((d.upper - d.lower) == 1.0));
-			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleSamples);
+			d.sr_dependent = (info.unit == kAudioUnitParameterUnit_SampleFrames);
 			d.automatable = /* !d.toggled && -- ardour can automate toggles, can AU ? */
 				!(info.flags & kAudioUnitParameterFlag_NonRealTime) &&
 				(info.flags & kAudioUnitParameterFlag_IsWritable);
@@ -1074,8 +1074,8 @@ AUPlugin::set_block_size (pframes_t nframes)
 		deactivate ();
 	}
 
-	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set MaximumSamplesPerSlice in global scope to %1\n", numSamples));
-	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumSamplesPerSlice, kAudioUnitScope_Global,
+	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("set MaximumFramesPerSlice in global scope to %1\n", numSamples));
+	if ((err = unit->SetProperty (kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global,
 				      0, &numSamples, sizeof (numSamples))) != noErr) {
 		error << string_compose (_("AU: cannot set max samples (err = %1)"), err) << endmsg;
 		return -1;
@@ -1121,7 +1121,7 @@ AUPlugin::configure_io (ChanCount in, ChanCount out)
 #endif
 
 	streamFormat.mBitsPerChannel = 32;
-	streamFormat.mSamplesPerPacket = 1;
+	streamFormat.mFramesPerPacket = 1;
 
 	/* apple says that for non-interleaved data, these
 	 * values always refer to a single channel.
