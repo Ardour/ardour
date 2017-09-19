@@ -752,7 +752,7 @@ static void PrintStreamDesc (AudioStreamBasicDescription *inDesc)
 	printf ("  Format ID:%.*s\n",        (int)sizeof(inDesc->mFormatID), (char*)&inDesc->mFormatID);
 	printf ("  Format Flags:%X\n",       (unsigned int)inDesc->mFormatFlags);
 	printf ("  Bytes per Packet:%d\n",   (int)inDesc->mBytesPerPacket);
-	printf ("  Samples per Packet:%d\n",  (int)inDesc->mSamplesPerPacket);
+	printf ("  Frames per Packet:%d\n",  (int)inDesc->mFramesPerPacket);
 	printf ("  Bytes per Frame:%d\n",    (int)inDesc->mBytesPerFrame);
 	printf ("  Channels per Frame:%d\n", (int)inDesc->mChannelsPerFrame);
 	printf ("  Bits per Channel:%d\n",   (int)inDesc->mBitsPerChannel);
@@ -895,7 +895,7 @@ CoreAudioPCM::pcm_start (
 		srcFormat.mFormatID = kAudioFormatLinearPCM;
 		srcFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
 		srcFormat.mBytesPerPacket = sizeof(float);
-		srcFormat.mSamplesPerPacket = 1;
+		srcFormat.mFramesPerPacket = 1;
 		srcFormat.mBytesPerFrame = sizeof(float);
 		srcFormat.mChannelsPerFrame = chn_in;
 		srcFormat.mBitsPerChannel = 32;
@@ -903,8 +903,8 @@ CoreAudioPCM::pcm_start (
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Output, AUHAL_INPUT_ELEMENT, &srcFormat, sizeof(AudioStreamBasicDescription));
 		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat, Output"; _state = -6; goto error; }
 
-		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumSamplesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumSamplesPerSlice, Input"; _state = -6; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_INPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Input"; _state = -6; goto error; }
 	}
 
 	if (chn_out > 0) {
@@ -912,7 +912,7 @@ CoreAudioPCM::pcm_start (
 		dstFormat.mFormatID = kAudioFormatLinearPCM;
 		dstFormat.mFormatFlags = kAudioFormatFlagsNativeFloatPacked | kLinearPCMFormatFlagIsNonInterleaved;
 		dstFormat.mBytesPerPacket = sizeof(float);
-		dstFormat.mSamplesPerPacket = 1;
+		dstFormat.mFramesPerPacket = 1;
 		dstFormat.mBytesPerFrame = sizeof(float);
 		dstFormat.mChannelsPerFrame = chn_out;
 		dstFormat.mBitsPerChannel = 32;
@@ -920,8 +920,8 @@ CoreAudioPCM::pcm_start (
 		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_StreamFormat, kAudioUnitScope_Input, AUHAL_OUTPUT_ELEMENT, &dstFormat, sizeof(AudioStreamBasicDescription));
 		if (err != noErr) { errorMsg="kAudioUnitProperty_StreamFormat Input"; _state = -5; goto error; }
 
-		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumSamplesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
-		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumSamplesPerSlice, Output"; _state = -5; goto error; }
+		err = AudioUnitSetProperty(_auhal, kAudioUnitProperty_MaximumFramesPerSlice, kAudioUnitScope_Global, AUHAL_OUTPUT_ELEMENT, (UInt32*)&_samples_per_period, sizeof(UInt32));
+		if (err != noErr) { errorMsg="kAudioUnitProperty_MaximumFramesPerSlice, Output"; _state = -5; goto error; }
 	}
 
 	/* read back stream descriptions */

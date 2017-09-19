@@ -126,7 +126,7 @@ public:
 			AudioUnitRenderActionFlags* ioActionFlags,
 			const AudioTimeStamp* inTimeStamp,
 			UInt32 inBusNumber,
-			UInt32 inNumberSamples,
+			UInt32 inNumberFrames,
 			AudioBufferList* ioData);
 
 	void xrun_callback ();
