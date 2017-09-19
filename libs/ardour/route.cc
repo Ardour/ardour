@@ -3620,7 +3620,7 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
 	}
 
-	passthru (bufs, start_sample, end_sample, nframes, declick, ((_disk_writer && !_disk_writer->record_enabled()) && _session.transport_rolling()));
+	passthru (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling());
 
 	if ((_disk_reader && _disk_reader->need_butler()) || (_disk_writer && _disk_writer->need_butler())) {
 		need_butler = true;

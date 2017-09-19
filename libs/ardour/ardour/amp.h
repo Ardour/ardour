@@ -53,8 +53,6 @@ public:
 
 	void setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes);
 
-	bool apply_gain_automation() const  { return _apply_gain_automation; }
-
 	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 

@@ -78,6 +78,8 @@ void
 Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
+		/* disregard potentially prepared gain-automation. */
+		_apply_gain_automation = false;
 		return;
 	}
 
@@ -121,7 +123,7 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 		}
 
 		/* used it, don't do it again until setup_gain_automation() is
-		   called successfully.
+		 * called successfully.
 		*/
 		_apply_gain_automation = false;
 
@@ -389,6 +391,9 @@ Amp::set_state (const XMLNode& node, int version)
 /** Write gain automation for this cycle into the buffer previously passed in to
  *  set_gain_automation_buffer (if we are in automation playback mode and the
  *  transport is rolling).
+ *
+ *  After calling this, the gain-automation buffer is valid for the next run.
+ *  so make sure to call ::run() which invalidates the buffer again.
  */
 void
 Amp::setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes)
