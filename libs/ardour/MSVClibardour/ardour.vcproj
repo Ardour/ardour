@@ -300,10 +300,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\audio_diskstream.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\audio_library.cc"
 				>
 			</File>
@@ -384,7 +380,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\beats_frames_converter.cc"
+				RelativePath="..\beats_samples_converter.cc"
 				>
 			</File>
 			<File
@@ -468,7 +464,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\diskstream.cc"
+				RelativePath="..\disk_io.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\disk_reader.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\disk_writer.cc"
 				>
 			</File>
 			<File
@@ -705,10 +709,6 @@
 			</File>
 			<File
 				RelativePath="..\midi_clock_slave.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\midi_diskstream.cc"
 				>
 			</File>
 			<File
@@ -1482,10 +1482,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\audio_diskstream.h"
-				>
-			</File>
-			<File
 				RelativePath="..\ardour\audio_library.h"
 				>
 			</File>
@@ -1574,7 +1570,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\beats_frames_converter.h"
+				RelativePath="..\ardour\beats_samples_converter.h"
 				>
 			</File>
 			<File
@@ -1678,7 +1674,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\diskstream.h"
+				RelativePath="..\ardour\disk_io.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\disk_reader.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\disk_writer.h"
 				>
 			</File>
 			<File
@@ -1962,10 +1966,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\ardour\midi_diskstream.h"
-				>
-			</File>
-			<File
 				RelativePath="..\ardour\midi_model.h"
 				>
 			</File>
@@ -2183,10 +2183,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\proxy_controllable.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\public_diskstream.h"
 				>
 			</File>
 			<File
@@ -2423,6 +2419,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\stripable.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\superclock.h"
 				>
 			</File>
 			<File
