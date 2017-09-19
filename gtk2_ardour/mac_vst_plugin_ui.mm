@@ -146,6 +146,21 @@ MacVSTPluginUI::package (Gtk::Window& win)
 void
 MacVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
+	NSEvent* nsevent = gdk_quartz_event_get_nsevent ((GdkEvent*)ev);
+
+	if (_ns_view && nsevent) {
+		/* filter on nsevent type here because GDK massages FlagsChanged
+		 * messages into GDK_KEY_{PRESS,RELEASE} but Cocoa won't
+		 * handle a FlagsChanged message as a keyDown or keyUp
+		 */
+		if ([nsevent type] == NSKeyDown) {
+			[[[_ns_view window] firstResponder] keyDown:nsevent];
+		} else if ([nsevent type] == NSKeyUp) {
+			[[[_ns_view window] firstResponder] keyUp:nsevent];
+		} else if ([nsevent type] == NSFlagsChanged) {
+			[[[_ns_view window] firstResponder] flagsChanged:nsevent];
+		}
+	}
 }
 
 void
