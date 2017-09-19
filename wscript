@@ -882,7 +882,7 @@ def configure(conf):
         conf.env.append_value('CXXFLAGS',  [prefinclude ])
         conf.env.append_value('LINKFLAGS', [ preflib ])
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack in ' + user_gtk_root, 'yes')
-        conf.env['DEPSTACK_REV'] = get_depstack_rev (Options.options.depstack_root)
+        conf.env['DEPSTACK_REV'] = get_depstack_rev (user_gtk_root)
     else:
         autowaf.display_msg(conf, 'Will build against private GTK dependency stack', 'no')
         conf.env['DEPSTACK_REV'] = '-system-'
@@ -1305,7 +1305,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Dummy backend',         conf.env['BUILD_DUMMYBACKEND'])
     write_config_text('JACK Backend',          conf.env['BUILD_JACKBACKEND'])
     config_text.write("\\n\\\n")
-    write_config_text('Builstack', conf.env['DEPSTACK_REV'])
+    write_config_text('Buildstack', conf.env['DEPSTACK_REV'])
     write_config_text('Mac i386 Architecture', opts.generic)
     write_config_text('Mac ppc Architecture',  opts.ppc)
     config_text.write("\\n\\\n")
