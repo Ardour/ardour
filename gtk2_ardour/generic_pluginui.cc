@@ -224,12 +224,16 @@ GenericPluginUI::~GenericPluginUI ()
 void
 GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 {
-	Glib::RefPtr<Gdk::Screen> screen = get_screen();
-	if (!screen)
-		screen = Gdk::Screen::get_default();
+	Glib::RefPtr<Gdk::Window> window (get_window());
+	Glib::RefPtr<Gdk::Screen> screen;
 
-	int maximum_width;
-	{
+	if (window) {
+		screen = get_screen();
+	}
+
+	int maximum_width = -1;
+
+	if (screen) {
 		Gdk::Rectangle monitor;
 		const int monitor_num = screen->get_monitor_at_window (get_window ());
 		screen->get_monitor_geometry (
