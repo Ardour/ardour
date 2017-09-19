@@ -340,9 +340,6 @@ Route::process_output_buffers (BufferSet& bufs,
 				start_sample + _trim->output_latency (),
 				end_sample + _trim->output_latency (),
 				nframes);
-	} else {
-		_amp->apply_gain_automation (false);
-		_trim->apply_gain_automation (false);
 	}
 
 	/* Tell main outs what to do about monitoring.  We do this so that
@@ -3585,8 +3582,6 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		_meter->run (bufs, start_sample, end_sample, 0.0, nframes, true);
 	}
 
-	_amp->apply_gain_automation (false);
-	_trim->apply_gain_automation (false);
 	passthru (bufs, start_sample, end_sample, nframes, 0, true);
 
 	flush_processor_buffers_locked (nframes);
@@ -3612,7 +3607,6 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 	}
 
 	_silent = false;
-	_amp->apply_gain_automation(false);
 
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
 

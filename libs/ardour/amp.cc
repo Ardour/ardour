@@ -120,6 +120,11 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 			_current_gain = lpf;
 		}
 
+		/* used it, don't do it again until setup_gain_automation() is
+		   called successfully.
+		*/
+		_apply_gain_automation = false;
+
 	} else { /* manual (scalar) gain */
 
 		gain_t const target_gain = _gain_control->get_value();

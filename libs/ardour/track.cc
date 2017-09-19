@@ -493,8 +493,6 @@ Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		be_silent = false;
 	}
 
-	_amp->apply_gain_automation (false);
-
 	/* if have_internal_generator, or .. */
 
 	if (be_silent) {
