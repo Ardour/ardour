@@ -37,7 +37,7 @@ def options(opt):
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):
-        autowaf.check_pkg(conf, 'zita-reampler', uselib_store='LIBZRESAMPLER', atleast_version=ZRESAMPLER_LIB_VERSION, mandatory=True)
+        autowaf.check_pkg(conf, 'zita-resampler', uselib_store='LIBZRESAMPLER', atleast_version=ZRESAMPLER_LIB_VERSION, mandatory=True)
     else:
         conf.load ('compiler_cxx')
         autowaf.configure(conf)
