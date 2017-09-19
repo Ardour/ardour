@@ -1,4 +1,4 @@
-#include "framewalk_to_beats_test.h"
+#include "samplewalk_to_beats_test.h"
 #include "ardour/tempo.h"
 #include "timecode/bbt_time.h"
 

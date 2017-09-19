@@ -524,8 +524,8 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'framewalk_to_beats', 'test_framewalk_to_beats', ['test/framewalk_to_beats_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'framepos_plus_beats', 'test_framepos_plus_beats', ['test/framepos_plus_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'samplepos_plus_beats', 'test_samplepos_plus_beats', ['test/samplepos_plus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'plugins_test', 'test_plugins', ['test/plugins_test.cc'])
@@ -546,8 +546,8 @@ def build(bld):
             test/lua_script_test.cc
             test/midi_clock_slave_test.cc
             test/resampled_source_test.cc
-            test/framewalk_to_beats_test.cc
-            test/framepos_plus_beats_test.cc
+            test/samplewalk_to_beats_test.cc
+            test/samplepos_plus_beats_test.cc
             test/playlist_equivalent_regions_test.cc
             test/playlist_layering_test.cc
             test/plugins_test.cc
