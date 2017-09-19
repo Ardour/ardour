@@ -3878,21 +3878,20 @@ Route::update_signal_latency (bool set_initial_delay)
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	samplecnt_t l_in  = _input->latency ();
-	samplecnt_t l_out = 0;
+	samplecnt_t l_out = _output->user_latency();
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		if ((*i)->active ()) {
-			l_out += (*i)->signal_latency ();
 			l_in += (*i)->signal_latency ();
 		}
 		(*i)->set_input_latency (l_in);
-		(*i)->set_output_latency (l_out);
 	}
 
-	l_out += _output->user_latency();
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->set_output_latency (l_out - (*i)->output_latency ());
+	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
+		(*i)->set_output_latency (l_out);
+		if ((*i)->active ()) {
+			l_out += (*i)->signal_latency ();
+		}
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: internal signal latency = %2\n", _name, l_out));
@@ -3926,8 +3925,8 @@ Route::set_latency_compensation (samplecnt_t longest_session_latency)
 	samplecnt_t old = _initial_delay;
 	assert (!_disk_reader || _disk_reader->output_latency () <= _signal_latency);
 
-	if (_disk_reader &&  _signal_latency < longest_session_latency) {
-		_initial_delay = longest_session_latency - (_signal_latency - _disk_reader->input_latency ());
+	if (_disk_reader &&  _disk_reader->output_latency () < longest_session_latency) {
+		_initial_delay = longest_session_latency - _disk_reader->output_latency ();
 	} else {
 		_initial_delay = 0;
 	}
