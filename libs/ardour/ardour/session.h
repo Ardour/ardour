@@ -474,7 +474,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int location_name(std::string& result, std::string base = std::string(""));
 
 	pframes_t get_block_size () const            { return current_block_size; }
-	samplecnt_t worst_output_latency ()const     { return _worst_output_latency; }
+	samplecnt_t worst_output_latency () const    { return _worst_output_latency; }
 	samplecnt_t worst_input_latency () const     { return _worst_input_latency; }
 	samplecnt_t worst_track_latency () const     { return _worst_track_latency; }
 	samplecnt_t worst_track_out_latency () const { return _worst_track_out_latency; }
@@ -678,8 +678,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	/* Time */
 
-	samplepos_t transport_sample () const {return _transport_sample; }
-	samplepos_t record_location () const {return _last_record_location; }
+	samplepos_t transport_sample () const { return _transport_sample; }
+	samplepos_t record_location () const { return _last_record_location; }
 	samplepos_t audible_sample (bool* latent_locate = NULL) const;
 	samplepos_t requested_return_sample() const { return _requested_return_sample; }
 	void set_requested_return_sample(samplepos_t return_to);
@@ -1238,11 +1238,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _bounce_processing_active;
 	bool                     waiting_for_sync_offset;
 	samplecnt_t              _base_sample_rate;     // sample-rate of the session at creation time, "native" SR
-	samplecnt_t              _nominal_sample_rate;  // overridden by audioengine setting
-	samplecnt_t              _current_sample_rate;  // this includes video pullup offset
+	samplecnt_t             _nominal_sample_rate;  // overridden by audioengine setting
+	samplecnt_t             _current_sample_rate;  // this includes video pullup offset
 	int                      transport_sub_state;
 	mutable gint            _record_status;
-	samplepos_t              _transport_sample;
+	samplepos_t             _transport_sample;
 	gint                    _seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_end_is_free;

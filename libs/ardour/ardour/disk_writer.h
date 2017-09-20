@@ -37,29 +37,29 @@ class MidiSource;
 
 class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 {
-  public:
+public:
 	DiskWriter (Session&, std::string const & name, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
 	~DiskWriter ();
 
 	bool set_name (std::string const & str);
 	std::string display_name() const { return std::string (_("recorder")); }
 
-	virtual bool set_write_source_name (const std::string& str);
-
-	bool           recordable()  const { return _flags & Recordable; }
+	bool               recordable()  const { return _flags & Recordable; }
 
 	static samplecnt_t chunk_samples() { return _chunk_samples; }
 	static samplecnt_t default_chunk_samples ();
-	static void set_chunk_samples (samplecnt_t n) { _chunk_samples = n; }
+	static void        set_chunk_samples (samplecnt_t n) { _chunk_samples = n; }
 
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
+
 	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
 
 	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
-	std::string write_source_name () const {
+	virtual bool set_write_source_name (const std::string& str);
+	std::string  write_source_name () const {
 		if (_write_source_name.empty()) {
 			return name();
 		} else {
@@ -79,7 +79,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	boost::shared_ptr<SMFSource> midi_write_source () { return _midi_write_source; }
 
 	virtual std::string steal_write_source_name ();
-	int use_new_write_source (DataType, uint32_t n = 0);
+	int  use_new_write_source (DataType, uint32_t n = 0);
 	void reset_write_sources (bool, bool force = false);
 
 	AlignStyle alignment_style() const { return _alignment_style; }
@@ -97,8 +97,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	virtual void set_record_safe (bool yn);
 
 	bool destructive() const { return _flags & Destructive; }
-	int set_destructive (bool yn);
-	int set_non_layered (bool yn);
+	int  set_destructive (bool yn);
+	int  set_non_layered (bool yn);
 	bool can_become_destructive (bool& requires_bounce) const;
 
 	/** @return Start position of currently-running capture (in session samples) */
@@ -132,7 +132,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	void adjust_buffering ();
 
-  protected:
+protected:
 	friend class Track;
 	int do_flush (RunContext context, bool force = false);
 
@@ -158,17 +158,18 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	mutable Glib::Threads::Mutex capture_info_lock;
 	CaptureInfos capture_info;
 
-  private:
+private:
 	gint         _record_enabled;
 	gint         _record_safe;
-	samplepos_t    capture_start_sample;
-	samplecnt_t    capture_captured;
-	bool          was_recording;
-	samplepos_t    first_recordable_sample;
-	samplepos_t    last_recordable_sample;
-	int           last_possibly_recording;
+	samplepos_t  capture_start_sample;
+	samplecnt_t  capture_captured;
+	bool         was_recording;
+	samplepos_t  first_recordable_sample;
+	samplepos_t  last_recordable_sample;
+	int          last_possibly_recording;
 	AlignStyle   _alignment_style;
-	std::string   _write_source_name;
+	std::string  _write_source_name;
+
 	boost::shared_ptr<SMFSource> _midi_write_source;
 
 	std::list<boost::shared_ptr<Source> > _last_capture_sources;
@@ -176,10 +177,10 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	static samplecnt_t _chunk_samples;
 
-	NoteMode                     _note_mode;
-	volatile gint                _samples_pending_write;
-	volatile gint                _num_captured_loops;
-	samplepos_t                   _accumulated_capture_offset;
+	NoteMode           _note_mode;
+	volatile gint      _samples_pending_write;
+	volatile gint      _num_captured_loops;
+	samplepos_t        _accumulated_capture_offset;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	    the GUI to read (so that it can update itself).

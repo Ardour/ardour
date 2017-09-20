@@ -107,7 +107,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 Send::~Send ()
 {
-        _session.unmark_send_id (_bitslot);
+	_session.unmark_send_id (_bitslot);
 }
 
 void
@@ -397,7 +397,7 @@ Send::display_to_user () const
 	/* we ignore Deliver::_display_to_user */
 
 	if (_role == Listen) {
-                /* don't make the monitor/control/listen send visible */
+		/* don't make the monitor/control/listen send visible */
 		return false;
 	}
 

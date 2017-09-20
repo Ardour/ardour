@@ -3346,19 +3346,17 @@ Route::feeds_according_to_graph (boost::shared_ptr<Route> other)
 void
 Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 {
-	{
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-		Automatable::non_realtime_transport_stop (now, flush);
+	Automatable::non_realtime_transport_stop (now, flush);
 
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
-			if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && flush)) {
-				(*i)->flush ();
-			}
-
-			(*i)->non_realtime_transport_stop (now, flush);
+		if (!_have_internal_generator && (Config->get_plugins_stop_with_transport() && flush)) {
+			(*i)->flush ();
 		}
+
+		(*i)->non_realtime_transport_stop (now, flush);
 	}
 }
 

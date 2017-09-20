@@ -351,9 +351,9 @@ public:
 	samplecnt_t initial_delay() const  { return _initial_delay; }
 	samplecnt_t signal_latency() const { return _signal_latency; }
 
-	PBD::Signal0<void>       active_changed;
-	PBD::Signal0<void>       denormal_protection_changed;
-	PBD::Signal0<void>       comment_changed;
+	PBD::Signal0<void> active_changed;
+	PBD::Signal0<void> denormal_protection_changed;
+	PBD::Signal0<void> comment_changed;
 
 	/** track numbers - assigned by session
 	 * nubers > 0 indicate tracks (audio+midi)
@@ -618,28 +618,30 @@ public:
 															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,
 	                             bool for_export, bool for_freeze);
 
-	samplecnt_t   bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	samplecnt_t  bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
-
-	boost::shared_ptr<IO> _input;
-	boost::shared_ptr<IO> _output;
 
 	bool           _active;
 	samplecnt_t     _signal_latency;
 	samplecnt_t     _initial_delay;
 
 	ProcessorList  _processors;
-	mutable Glib::Threads::RWLock   _processor_lock;
-	boost::shared_ptr<Delivery> _main_outs;
-	boost::shared_ptr<InternalSend> _monitor_send;
-	boost::shared_ptr<InternalReturn> _intreturn;
-	boost::shared_ptr<MonitorProcessor> _monitor_control;
-	boost::shared_ptr<Pannable> _pannable;
-	boost::shared_ptr<DiskReader> _disk_reader;
-	boost::shared_ptr<DiskWriter> _disk_writer;
-	boost::shared_ptr<MonitorControl> _monitoring_control;
+	mutable Glib::Threads::RWLock _processor_lock;
 
-	DiskIOPoint    _disk_io_point;
+	boost::shared_ptr<IO>               _input;
+	boost::shared_ptr<IO>               _output;
+
+	boost::shared_ptr<Delivery>         _main_outs;
+	boost::shared_ptr<InternalSend>     _monitor_send;
+	boost::shared_ptr<InternalReturn>   _intreturn;
+	boost::shared_ptr<MonitorProcessor> _monitor_control;
+	boost::shared_ptr<Pannable>         _pannable;
+	boost::shared_ptr<DiskReader>       _disk_reader;
+	boost::shared_ptr<DiskWriter>       _disk_writer;
+
+	boost::shared_ptr<MonitorControl>   _monitoring_control;
+
+	DiskIOPoint _disk_io_point;
 
 	enum {
 		EmitNone = 0x00,
@@ -701,6 +703,7 @@ public:
 	boost::shared_ptr<GainControl> _trim_control;
 	boost::shared_ptr<Amp>       _trim;
 	boost::shared_ptr<PeakMeter> _meter;
+
 	boost::shared_ptr<DelayLine> _delayline;
 
 	bool is_internal_processor (boost::shared_ptr<Processor>) const;

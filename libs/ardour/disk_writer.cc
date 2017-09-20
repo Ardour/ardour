@@ -204,9 +204,9 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transpor
 		break;
 	}
 
-        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
-                                                              _name, enum_2_string (ot), transport_sample, nframes,
-                                                              first_recordable_sample, last_recordable_sample, rec_nframes, rec_offset));
+	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1 rec? %2 @ %3 (for %4) FRF %5 LRF %6 : rf %7 @ %8\n",
+	                                                      _name, enum_2_string (ot), transport_sample, nframes,
+	                                                      first_recordable_sample, last_recordable_sample, rec_nframes, rec_offset));
 }
 
 void
@@ -312,10 +312,10 @@ DiskWriter::non_realtime_locate (samplepos_t position)
 
 
 void
-DiskWriter::prepare_record_status(samplepos_t capture_start_sample)
+DiskWriter::prepare_record_status (samplepos_t capture_start_sample)
 {
 	if (recordable() && destructive()) {
-		boost::shared_ptr<ChannelList> c = channels.reader();
+		boost::shared_ptr<ChannelList> c = channels.reader ();
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
 			RingBufferNPT<CaptureTransition>::rw_vector transitions;
@@ -387,9 +387,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	const Location* const loop_loc    = loop_location;
-	samplepos_t            loop_start  = 0;
-	samplepos_t            loop_end    = 0;
-	samplepos_t            loop_length = 0;
+	samplepos_t           loop_start  = 0;
+	samplepos_t           loop_end    = 0;
+	samplepos_t           loop_length = 0;
 
 	if (loop_loc) {
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
@@ -413,7 +413,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   at the loop start and can handle time wrapping around.
 				   Otherwise, start the source right now as usual.
 				*/
-				capture_captured    = start_sample - loop_start;
+				capture_captured     = start_sample - loop_start;
 				capture_start_sample = loop_start;
 			}
 
@@ -421,8 +421,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_write_source->mark_write_starting_now (capture_start_sample, capture_captured, loop_length);
 			}
 
-			g_atomic_int_set(const_cast<gint*> (&_samples_pending_write), 0);
-			g_atomic_int_set(const_cast<gint*> (&_num_captured_loops), 0);
+			g_atomic_int_set (const_cast<gint*> (&_samples_pending_write), 0);
+			g_atomic_int_set (const_cast<gint*> (&_num_captured_loops), 0);
 
 			was_recording = true;
 
@@ -440,7 +440,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	}
 
-	if (can_record && !_last_capture_sources.empty()) {
+	if (can_record && !_last_capture_sources.empty ()) {
 		_last_capture_sources.clear ();
 	}
 
@@ -467,9 +467,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				samplecnt_t total = chaninfo->rw_vector.len[0] + chaninfo->rw_vector.len[1];
 
 				if (rec_nframes > total) {
-                                        DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
-                                                                                    DEBUG_THREAD_SELF, name(), rec_nframes, total));
-                                        Overrun ();
+					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 overrun in %2, rec_nframes = %3 total space = %4\n",
+					                                            DEBUG_THREAD_SELF, name(), rec_nframes, total));
+					Overrun ();
 					return;
 				}
 
@@ -492,7 +492,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		MidiChannelFilter* filter = mt ? &mt->capture_filter() : 0;
 
 		for (MidiBuffer::iterator i = buf.begin(); i != buf.end(); ++i) {
-			Evoral::Event<MidiBuffer::TimeType> ev(*i, false);
+			Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
 			if (ev.time() + rec_offset > rec_nframes) {
 				break;
 			}
@@ -531,7 +531,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
 			}
 		}
-		g_atomic_int_add(const_cast<gint*>(&_samples_pending_write), nframes);
+		g_atomic_int_add (const_cast<gint*>(&_samples_pending_write), nframes);
 
 		if (buf.size() != 0) {
 			Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
