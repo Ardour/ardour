@@ -359,7 +359,10 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			*/
 			disk_signal += roll_delay_offset;
 
-			assert (start_sample >= playback_sample);
+			if (start_sample < playback_sample) {
+				cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << endl;
+				abort ();
+			}
 
 			if (start_sample != playback_sample) {
 				cerr << owner()->name() << " playback not aligned, jump ahead " << (start_sample - playback_sample) << endl;
