@@ -307,7 +307,7 @@ def create_stored_revision():
 def get_depstack_rev(depstack_root):
     try:
         with open(depstack_root + '/../.vers', 'r') as f:
-            return f.readline()
+            return f.readline().decode('utf-8').strip()[:7]
     except IOError:
         return '-unknown-';
 
@@ -874,7 +874,9 @@ def configure(conf):
     pkg_config_path = os.getenv('PKG_CONFIG_PATH')
     user_gtk_root = os.path.expanduser (Options.options.depstack_root + '/gtk/inst')
 
-    if pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0:
+    if os.getenv('DEPSTACK_ROOT') is not None and os.path.exists (os.getenv('DEPSTACK_ROOT') + '/lib'):
+        conf.env['DEPSTACK_REV'] = get_depstack_rev (os.getenv('DEPSTACK_ROOT') + '/lib')
+    elif pkg_config_path is not None and pkg_config_path.find (user_gtk_root) >= 0:
         # told to search user_gtk_root
         prefinclude = ''.join ([ '-I', user_gtk_root + '/include'])
         preflib = ''.join ([ '-L', user_gtk_root + '/lib'])

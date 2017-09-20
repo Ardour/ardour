@@ -75,6 +75,7 @@ fi
 CFLAGS="-mstackrealign$OPT" \
 CXXFLAGS="-mstackrealign$OPT" \
 LDFLAGS="-L${PREFIX}/lib" ./waf configure \
+DEPSTACK_ROOT="$PREFIX" \
 	--keepflags \
 	--dist-target=mingw \
 	--also-include=${PREFIX}/include \
