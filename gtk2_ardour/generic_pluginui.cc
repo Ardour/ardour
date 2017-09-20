@@ -224,6 +224,8 @@ GenericPluginUI::~GenericPluginUI ()
 void
 GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 {
+	GtkRequisition request = hpacker.size_request();
+
 	Glib::RefPtr<Gdk::Window> window (get_window());
 	Glib::RefPtr<Gdk::Screen> screen;
 
@@ -232,6 +234,7 @@ GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 	}
 
 	if (!screen) {
+		a->width = request.width;
 		return;
 	}
 
@@ -242,8 +245,6 @@ GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 			monitor);
 
 	const int maximum_width = monitor.get_width() * 0.9;
-
-	GtkRequisition request = hpacker.size_request();
 
 	if (request.width > maximum_width) {
 		for (vector<ControlUI*>::const_iterator cuip = input_controls.begin();
