@@ -74,13 +74,15 @@ fi
 
 CFLAGS="-mstackrealign$OPT" \
 CXXFLAGS="-mstackrealign$OPT" \
-LDFLAGS="-L${PREFIX}/lib" ./waf configure \
+LDFLAGS="-L${PREFIX}/lib" \
 DEPSTACK_ROOT="$PREFIX" \
+./waf configure \
 	--keepflags \
 	--dist-target=mingw \
 	--also-include=${PREFIX}/include \
 	$ARDOURCFG \
 	--prefix=${PREFIX}
+
 ./waf ${CONCURRENCY}
 
 if [ "$(id -u)" = "0" ]; then
