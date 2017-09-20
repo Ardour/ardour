@@ -231,17 +231,17 @@ GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 		screen = get_screen();
 	}
 
-	int maximum_width = -1;
-
-	if (screen) {
-		Gdk::Rectangle monitor;
-		const int monitor_num = screen->get_monitor_at_window (get_window ());
-		screen->get_monitor_geometry (
-				(monitor_num < 0) ? 0 : monitor_num,
-				monitor);
-
-		maximum_width = monitor.get_width() * 0.9;
+	if (!screen) {
+		return;
 	}
+
+	Gdk::Rectangle monitor;
+	const int monitor_num = screen->get_monitor_at_window (window);
+	screen->get_monitor_geometry (
+			(monitor_num < 0) ? 0 : monitor_num,
+			monitor);
+
+	const int maximum_width = monitor.get_width() * 0.9;
 
 	GtkRequisition request = hpacker.size_request();
 
