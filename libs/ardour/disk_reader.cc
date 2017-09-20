@@ -283,7 +283,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	samplecnt_t roll_delay_offset = 0;
 
 	if (speed != 0.0) {
-		if (_roll_delay > disk_samples_to_consume) {
+		if (_roll_delay >= disk_samples_to_consume) {
 			/* still waiting for _roll_delay to end */
 			_roll_delay -= disk_samples_to_consume;
 			/* we could set disk_samples_to_consume to zero here, but it
