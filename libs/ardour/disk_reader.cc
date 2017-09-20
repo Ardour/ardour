@@ -458,7 +458,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (!still_locating) {
+	if (!still_locating && !roll_delayed) {
 
 		bool butler_required = false;
 
