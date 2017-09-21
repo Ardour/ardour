@@ -56,7 +56,6 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
         , last_recordable_sample (max_samplepos)
         , last_possibly_recording (0)
         , _alignment_style (ExistingMaterial)
-        , _alignment_choice (Automatic)
 	, _num_captured_loops (0)
 	, _accumulated_capture_offset (0)
 	, _gui_feed_buffer(AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
@@ -333,36 +332,11 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 	}
 }
 
-void
-DiskWriter::set_align_choice (AlignChoice a, bool force)
-{
-	if (record_enabled() && _session.actively_recording()) {
-		return;
-	}
-
-	if ((a != _alignment_choice) || force) {
-		_alignment_choice = a;
-
-		switch (_alignment_choice) {
-		case UseExistingMaterial:
-			set_align_style (ExistingMaterial);
-			break;
-		case UseCaptureTime:
-			set_align_style (CaptureTime);
-			break;
-		default:
-			error << string_compose (_("programming error: %1"), "DiskWriter: asked to use illegal alignment style") << endmsg;
-			break;
-		}
-	}
-}
-
 XMLNode&
 DiskWriter::state (bool full)
 {
 	XMLNode& node (DiskIOProcessor::state (full));
 	node.set_property (X_("type"), X_("diskwriter"));
-	node.set_property (X_("capture-alignment"), enum_2_string (_alignment_choice));
 	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
 	return node;
 }
@@ -373,14 +347,6 @@ DiskWriter::set_state (const XMLNode& node, int version)
 	if (DiskIOProcessor::set_state (node, version)) {
 		return -1;
 	}
-
-	AlignChoice ac;
-
-	if (node.get_property (X_("capture-alignment"), ac)) {
-		set_align_choice (ac, true);
-        } else {
-                set_align_choice (Automatic, true);
-        }
 
 	if (!node.get_property (X_("record-safe"), _record_safe)) {
 		_record_safe = false;

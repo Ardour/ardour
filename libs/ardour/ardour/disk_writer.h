@@ -82,10 +82,8 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	int use_new_write_source (DataType, uint32_t n = 0);
 	void reset_write_sources (bool, bool force = false);
 
-	AlignStyle  alignment_style() const { return _alignment_style; }
-	AlignChoice alignment_choice() const { return _alignment_choice; }
+	AlignStyle alignment_style() const { return _alignment_style; }
 	void       set_align_style (AlignStyle, bool force=false);
-	void       set_align_choice (AlignChoice a, bool force=false);
 
 	PBD::Signal0<void> AlignmentStyleChanged;
 
@@ -180,7 +178,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	samplepos_t    last_recordable_sample;
 	int           last_possibly_recording;
 	AlignStyle   _alignment_style;
-	AlignChoice  _alignment_choice;
 	std::string   _write_source_name;
 	boost::shared_ptr<SMFSource> _midi_write_source;
 

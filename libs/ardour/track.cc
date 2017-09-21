@@ -97,6 +97,7 @@ Track::init ()
         _disk_reader->set_block_size (_session.get_block_size ());
         _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 
+	set_align_choice_from_io ();
         _disk_writer.reset (new DiskWriter (_session, name(), dflags));
         _disk_writer->set_block_size (_session.get_block_size ());
         _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
@@ -772,7 +773,7 @@ Track::alignment_style () const
 AlignChoice
 Track::alignment_choice () const
 {
-	return _disk_writer->alignment_choice ();
+	return _alignment_choice;
 }
 
 samplepos_t
@@ -876,17 +877,18 @@ Track::use_new_playlist (DataType dt)
 void
 Track::set_align_choice (AlignChoice ac, bool force)
 {
-	switch (ac) {
-	case Automatic:
-		_alignment_choice = Automatic;
-		set_align_choice_from_io ();
-		return;
-	default:
-		break;
-	}
-
-	_disk_writer->set_align_choice (ac, force);
 	_alignment_choice = ac;
+	switch (ac) {
+		case Automatic:
+			set_align_choice_from_io ();
+			break;
+		case UseCaptureTime:
+			_disk_writer->set_align_style (CaptureTime, force);
+			break;
+		case UseExistingMaterial:
+			_disk_writer->set_align_style (ExistingMaterial, force);
+			break;
+	}
 }
 
 void
