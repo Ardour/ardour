@@ -110,14 +110,14 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 
 			XMLNode* root = tree.root();
 			
-			rti.created_with = _("(unknown)");
+			rti.modified_with = _("(unknown)");
 			try {
 				XMLNode *pv = root->child("ProgramVersion");
-				string created_with;
+				string modified_with;
 				if (pv != 0) {
-					pv->get_property (X_("created-with"), created_with);
+					pv->get_property (X_("modified-with"), modified_with);
 				}
-				rti.created_with = created_with;
+				rti.modified_with = modified_with;
 			} catch (XMLException &e) {}
 
 			rti.description = _("No Description");
@@ -158,14 +158,14 @@ find_route_templates (vector<TemplateInfo>& template_names)
 
 		TemplateInfo rti;
 
-		rti.created_with = _("(unknown)");
+		rti.modified_with = _("(unknown)");
 		try {
 			XMLNode *pv = root->child("ProgramVersion");
-			string created_with;
+			string modified_with;
 			if (pv != 0) {
-				pv->get_property (X_("created-with"), created_with);
+				pv->get_property (X_("modified-with"), modified_with);
 			}
-			rti.created_with = created_with;
+			rti.modified_with = modified_with;
 		} catch (XMLException &e) {}
 
 		rti.description = _("No Description");

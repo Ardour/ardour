@@ -38,7 +38,7 @@ namespace ARDOUR {
 		std::string name;
 		std::string path;
 		std::string description;
-		std::string created_with;
+		std::string modified_with;
 	};
 
 	LIBARDOUR_API void find_route_templates (std::vector<TemplateInfo>& template_names);

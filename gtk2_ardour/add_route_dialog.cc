@@ -216,7 +216,7 @@ You may select:\n \
 	trk_template_chooser.set_model (trk_template_model);
 	trk_template_chooser.append_column (_("Template/Type"), track_template_columns.name);
 #ifdef MIXBUS
-	trk_template_chooser.append_column (_("Created With"), track_template_columns.created_with);
+	trk_template_chooser.append_column (_("Modified With"), track_template_columns.modified_with);
 #endif
 	trk_template_chooser.set_headers_visible (true);
 	trk_template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
@@ -925,7 +925,7 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.name] = (*i).first;
 		row[track_template_columns.path] = "";
 		row[track_template_columns.description] = (*i).second;
-		row[track_template_columns.created_with] = "";
+		row[track_template_columns.modified_with] = "";
 
 		if (!selected_default && !Profile->get_mixbus ()) {
 			trk_template_chooser.get_selection()->select(row);
@@ -949,7 +949,7 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.name] = (*s)->name;
 		row[track_template_columns.path] = "urn:ardour:" + (*s)->path;
 		row[track_template_columns.description] = (*s)->description;
-		row[track_template_columns.created_with] = _("{Factory Template}");
+		row[track_template_columns.modified_with] = _("{Factory Template}");
 
 		if ((*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
 			trk_template_chooser.get_selection()->select(row);
@@ -966,7 +966,7 @@ AddRouteDialog::refill_channel_setups ()
 		row[track_template_columns.name] = x->name;
 		row[track_template_columns.path] = x->path;
 		row[track_template_columns.description] = x->description;
-		row[track_template_columns.created_with] = x->created_with;
+		row[track_template_columns.modified_with] = x->modified_with;
 	}
 
 	set_popdown_strings (channel_combo, channel_combo_strings);

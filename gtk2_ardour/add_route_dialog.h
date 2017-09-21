@@ -124,13 +124,13 @@ private:
 			add (name);
 			add (path);
 			add (description);
-			add (created_with);
+			add (modified_with);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> description;
-		Gtk::TreeModelColumn<std::string> created_with;
+		Gtk::TreeModelColumn<std::string> modified_with;
 	};
 
 	TrackTemplateColumns track_template_columns;

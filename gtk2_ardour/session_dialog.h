@@ -113,7 +113,7 @@ private:
 			add (fullpath);
 			add (sample_rate);
 			add (disk_format);
-			add (created_with);
+			add (modified_with);
 			add (time_modified);
 			add (time_formatted);
 		}
@@ -122,7 +122,7 @@ private:
 		Gtk::TreeModelColumn<std::string> fullpath;
 		Gtk::TreeModelColumn<std::string> sample_rate;
 		Gtk::TreeModelColumn<std::string> disk_format;
-		Gtk::TreeModelColumn<std::string> created_with;
+		Gtk::TreeModelColumn<std::string> modified_with;
 		Gtk::TreeModelColumn<int64_t>     time_modified;
 		Gtk::TreeModelColumn<std::string> time_formatted;
 	};
@@ -155,15 +155,15 @@ private:
 			add (name);
 			add (path);
 			add (description);
-			add (created_with_short);
-			add (created_with_long);
+			add (modified_with_short);
+			add (modified_with_long);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> description;
-		Gtk::TreeModelColumn<std::string> created_with_short;
-		Gtk::TreeModelColumn<std::string> created_with_long;
+		Gtk::TreeModelColumn<std::string> modified_with_short;
+		Gtk::TreeModelColumn<std::string> modified_with_long;
 	};
 
 	SessionTemplateColumns session_template_columns;
