@@ -19,7 +19,6 @@
 
 #include "pbd/debug.h"
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioplaylist.h"
 #include "ardour/butler.h"
@@ -35,6 +34,8 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

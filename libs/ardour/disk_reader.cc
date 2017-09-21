@@ -18,7 +18,6 @@
 */
 
 #include "pbd/enumwriter.h"
-#include "pbd/i18n.h"
 #include "pbd/memento_command.h"
 
 #include "ardour/audioengine.h"
@@ -35,6 +34,8 @@
 #include "ardour/playlist_factory.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

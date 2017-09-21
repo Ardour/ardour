@@ -17,8 +17,6 @@
 
 */
 
-#include "pbd/i18n.h"
-
 #include "ardour/analyser.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
@@ -35,6 +33,8 @@
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
