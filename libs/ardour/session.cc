@@ -749,8 +749,13 @@ Session::destroy ()
 	clear_clicks ();
 
 	/* need to remove auditioner before monitoring section
-	 * otherwise it is re-connected */
-	auditioner->drop_references ();
+	 * otherwise it is re-connected.
+	 * Note: If a session was never successfully loaded, there
+	 * may not yet be an auditioner.
+	 */
+	if (auditioner) {
+		auditioner->drop_references ();
+	}
 	auditioner.reset ();
 
 	/* drop references to routes held by the monitoring section
