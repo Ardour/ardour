@@ -54,12 +54,12 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
-        , _saved_meter_point (_meter_point)
-        , _mode (mode)
+	, _saved_meter_point (_meter_point)
+	, _mode (mode)
 	, _alignment_choice (Automatic)
 {
 	_freeze_record.state = NoFreeze;
-        _declickable = true;
+	_declickable = true;
 
 }
 
@@ -81,30 +81,31 @@ Track::~Track ()
 int
 Track::init ()
 {
-        if (Route::init ()) {
-                return -1;
-        }
+	if (Route::init ()) {
+		return -1;
+	}
 
-        DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
+	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-        if (_mode == Destructive && !Profile->get_trx()) {
-	        dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
-        } else if (_mode == NonLayered){
-	        dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
-        }
+	if (_mode == Destructive && !Profile->get_trx()) {
+		dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
+	} else if (_mode == NonLayered){
+		dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
+	}
 
-        _disk_reader.reset (new DiskReader (_session, name(), dflags));
-        _disk_reader->set_block_size (_session.get_block_size ());
-        _disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	_disk_reader.reset (new DiskReader (_session, name(), dflags));
+	_disk_reader->set_block_size (_session.get_block_size ());
+	_disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+
+	_disk_writer.reset (new DiskWriter (_session, name(), dflags));
+	_disk_writer->set_block_size (_session.get_block_size ());
+	_disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 
 	set_align_choice_from_io ();
-        _disk_writer.reset (new DiskWriter (_session, name(), dflags));
-        _disk_writer->set_block_size (_session.get_block_size ());
-        _disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 
-        use_new_playlist (data_type());
+	use_new_playlist (data_type());
 
-        boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
 	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
 
 	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this));
@@ -118,13 +119,13 @@ Track::init ()
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
 
-        _monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
-        _record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
-        _record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
+	_monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
+	_record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
+	_record_enable_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_enable_changed, this, _1, _2));
 
-        _input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
+	_input->changed.connect_same_thread (*this, boost::bind (&Track::input_changed, this));
 
-        return 0;
+	return 0;
 }
 
 void
