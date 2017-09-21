@@ -60,6 +60,7 @@
 #include "ardour/mac_vst_support.h"
 #include "ardour/mac_vst_plugin.h"
 #include "pbd/basename.h"
+#include "pbd/pathexpand.h"
 #include <cstring>
 #endif //MACVST_SUPPORT
 
@@ -1034,11 +1035,8 @@ PluginManager::mac_vst_refresh (bool cache_only)
 	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
 }
 
-static bool mac_vst_filter (const string& str, void *)
+static bool mac_vst_filter (const string& str)
 {
-	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
-		return false;
-	}
 	string plist = Glib::build_filename (str, "Contents", "Info.plist");
 	if (!Glib::file_test (plist, Glib::FILE_TEST_IS_REGULAR)) {
 		return false;
@@ -1049,20 +1047,43 @@ static bool mac_vst_filter (const string& str, void *)
 int
 PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 {
-	vector<string> plugin_objects;
-	vector<string>::iterator x;
-
 	if (Session::get_disable_all_loaded_plugins ()) {
 		info << _("Disabled MacVST scan (safe mode)") << endmsg;
 		return -1;
 	}
 
-	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, true);
+	Searchpath paths (path);
+	/* customized version of run_functor_for_paths() */
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		string expanded_path = path_expand (*i);
+		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
+		try {
+			Glib::Dir dir(expanded_path);
+			for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
+				string fullpath = Glib::build_filename (expanded_path, *di);
 
-	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
-		ARDOUR::PluginScanMessage(_("MacVST"), *x, !cache_only && !cancelled());
-		mac_vst_discover (*x, cache_only || cancelled());
+				/* we're only interested in bundles */
+				if (!Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) {
+					continue;
+				}
+
+				if (mac_vst_filter (fullpath)) {
+					ARDOUR::PluginScanMessage(_("MacVST"), fullpath, !cache_only && !cancelled());
+					mac_vst_discover (fullpath, cache_only || cancelled());
+					continue;
+				}
+
+				/* don't descend into AU bundles in the VST dir */
+				if (fullpath[0] == '.' || (fullpath.length() > 10 && strings_equal_ignore_case (".component", fullpath.substr(fullpath.length() - 10)))) {
+					continue;
+				}
+
+				/* recurse */
+				mac_vst_discover_from_path (fullpath, cache_only);
+			}
+		} catch (Glib::FileError& err) { }
 	}
+
 	return 0;
 }
 

@@ -63,7 +63,7 @@ using namespace std;
 
 namespace PBD {
 
-void
+static void
 run_functor_for_paths (vector<string>& result,
                        const Searchpath& paths,
                        bool (*functor)(const string &, void *),
