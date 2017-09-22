@@ -3582,8 +3582,8 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 	graph_reordered ();
 
-	update_latency (true);
 	update_latency (false);
+	update_latency (true);
 
 	set_dirty();
 
