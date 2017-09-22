@@ -6858,6 +6858,7 @@ Session::unknown_processors () const
 	return p;
 }
 
+/* this is always called twice, first for playback (true), then for capture */
 void
 Session::update_latency (bool playback)
 {
@@ -6871,37 +6872,38 @@ Session::update_latency (bool playback)
 		return;
 	}
 
+	/* Note; RouteList is sorted as process-graph */
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	samplecnt_t max_latency = 0;
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
-                RouteList* rl = routes.reader().get();
-                r.reset (new RouteList (*rl));
+		RouteList* rl = routes.reader().get();
+		r.reset (new RouteList (*rl));
 		reverse (r->begin(), r->end());
 	}
 
 	/* compute actual latency values for the given direction and store them all in per-port
-	   structures. this will also publish the same values (to JACK) so that computation of latency
-	   for routes can consistently use public latency values.
-	*/
+	 * structures. this will also publish the same values (to JACK) so that computation of latency
+	 * for routes can consistently use public latency values.
+	 */
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
 	}
 
-        /* because we latency compensate playback, our published playback latencies should
-           be the same for all output ports - all material played back by ardour has
-           the same latency, whether its caused by plugins or by latency compensation. since
-           these may differ from the values computed above, reset all playback port latencies
-           to the same value.
-        */
+	/* because we latency compensate playback, our published playback latencies should
+	 * be the same for all output ports - all material played back by ardour has
+	 * the same latency, whether its caused by plugins or by latency compensation. since
+	 * these may differ from the values computed above, reset all playback port latencies
+	 * to the same value.
+	 */
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
 
-        for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-                (*i)->set_public_port_latencies (max_latency, playback);
-        }
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		(*i)->set_public_port_latencies (max_latency, playback);
+	}
 
 	if (playback) {
 
@@ -6964,13 +6966,13 @@ Session::post_capture_latency ()
 void
 Session::initialize_latencies ()
 {
-        {
-                Glib::Threads::Mutex::Lock lm (_engine.process_lock());
-                update_latency (false);
-                update_latency (true);
-        }
+	{
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		update_latency (false);
+		update_latency (true);
+	}
 
-        set_worst_io_latencies ();
+	set_worst_io_latencies ();
 }
 
 void
