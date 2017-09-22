@@ -2362,7 +2362,7 @@ PamPort::update_connected_latency (bool for_playback)
 {
 	LatencyRange lr;
 	lr.min = lr.max = 0;
-	for (std::set<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
 		LatencyRange l;
 		l = (*it)->latency_range (for_playback);
 		lr.min = std::max (lr.min, l.min);
