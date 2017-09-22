@@ -93,17 +93,9 @@ class PamPort { // PortAudio / PortMidi Backend Port
 			return for_playback ? _playback_latency_range : _capture_latency_range;
 		}
 
-		void set_latency_range (const LatencyRange &latency_range, bool for_playback)
-		{
-			if (for_playback)
-			{
-				_playback_latency_range = latency_range;
-			}
-			else
-			{
-				_capture_latency_range = latency_range;
-			}
-		}
+		void set_latency_range (const LatencyRange &latency_range, bool for_playback);
+
+		void update_connected_latency (bool for_playback);
 
 	private:
 		PortAudioBackend &_osx_backend;
@@ -436,6 +428,7 @@ class PortAudioBackend : public AudioBackend {
 		int register_system_audio_ports ();
 		int register_system_midi_ports ();
 		void unregister_ports (bool system_only = false);
+		void update_system_port_latecies ();
 
 		std::vector<PamPort *> _ports;
 		std::vector<PamPort *> _system_inputs;

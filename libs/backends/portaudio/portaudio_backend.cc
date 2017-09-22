@@ -1500,6 +1500,24 @@ PortAudioBackend::unregister_ports (bool system_only)
 	}
 }
 
+void
+PortAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+}
+
 int
 PortAudioBackend::connect (const std::string& src, const std::string& dst)
 {
@@ -2132,6 +2150,7 @@ PortAudioBackend::process_port_connection_changes ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
+		update_system_port_latecies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}
@@ -2320,6 +2339,36 @@ bool PamPort::is_physically_connected () const
 		}
 	}
 	return false;
+}
+
+void
+PamPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+PamPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	for (std::set<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
 }
 
 /******************************************************************************/

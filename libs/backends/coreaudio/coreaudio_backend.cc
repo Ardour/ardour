@@ -1163,6 +1163,24 @@ CoreAudioBackend::register_system_audio_ports()
 }
 
 void
+CoreAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+}
+
+void
 CoreAudioBackend::coremidi_rediscover()
 {
 	if (!_run) { return; }
@@ -1644,6 +1662,7 @@ CoreAudioBackend::pre_process ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
+		update_system_port_latecies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}
@@ -2081,7 +2100,6 @@ void CoreBackendPort::_disconnect (CoreBackendPort *port, bool callback)
 	}
 }
 
-
 void CoreBackendPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
@@ -2106,6 +2124,37 @@ bool CoreBackendPort::is_physically_connected () const
 		}
 	}
 	return false;
+}
+
+void
+CoreBackendPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::set<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+CoreBackendPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	const std::set<CoreBackendPort *>& cp = get_connections ();
+	for (std::set<CoreBackendPort*>::const_iterator it = cp.begin (); it != cp.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
 }
 
 /******************************************************************************/

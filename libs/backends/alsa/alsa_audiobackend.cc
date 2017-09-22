@@ -1386,6 +1386,39 @@ AlsaAudioBackend::register_system_audio_ports()
 	return 0;
 }
 
+/* set playback-latency for _system_inputs
+ * and capture-latency for _system_outputs
+ */
+void
+AlsaAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<AlsaPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<AlsaPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<AlsaPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<AlsaPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (AudioSlaves::iterator s = _slaves.begin (); s != _slaves.end (); ++s) {
+		if ((*s)->dead) {
+			continue;
+		}
+		for (std::vector<AlsaPort*>::const_iterator it = (*s)->inputs.begin (); it != (*s)->inputs.end (); ++it) {
+			(*it)->update_connected_latency (true);
+		}
+		for (std::vector<AlsaPort*>::const_iterator it = (*s)->outputs.begin (); it != (*s)->outputs.end (); ++it) {
+			(*it)->update_connected_latency (false);
+		}
+	}
+}
+
 /* libs/ardouralsautil/devicelist.cc appends either of
  * " (IO)", " (I)", or " (O)"
  * depending of the device is full-duples or half-duplex
@@ -2136,6 +2169,7 @@ AlsaAudioBackend::main_process_thread ()
 			manager.graph_order_callback();
 		}
 		if (connections_changed || ports_changed) {
+			update_system_port_latecies (); // flush, clear
 			engine.latency_callback(false);
 			engine.latency_callback(true);
 		}
@@ -2339,7 +2373,6 @@ AlsaPort::~AlsaPort () {
 	disconnect_all ();
 }
 
-
 int AlsaPort::connect (AlsaPort *port)
 {
 	if (!port) {
@@ -2379,7 +2412,6 @@ int AlsaPort::connect (AlsaPort *port)
 	_connect (port, true);
 	return 0;
 }
-
 
 void AlsaPort::_connect (AlsaPort *port, bool callback)
 {
@@ -2443,6 +2475,36 @@ bool AlsaPort::is_physically_connected () const
 		}
 	}
 	return false;
+}
+
+void
+AlsaPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::set<AlsaPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+AlsaPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	for (std::set<AlsaPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
 }
 
 /******************************************************************************/
