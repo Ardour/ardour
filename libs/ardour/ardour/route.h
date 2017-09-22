@@ -703,6 +703,8 @@ public:
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _delayline;
 
+	bool is_internal_processor (boost::shared_ptr<Processor>) const;
+
 	boost::shared_ptr<Processor> the_instrument_unlocked() const;
 
 	SlavableControlList slavables () const;

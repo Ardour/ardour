@@ -1251,7 +1251,7 @@ Route::clear_processors (Placement p)
 				seen_amp = true;
 			}
 
-			if ((*i) == _amp || (*i) == _meter || (*i) == _main_outs || (*i) == _delayline || (*i) == _trim) {
+			if (is_internal_processor (*i)) {
 
 				/* you can't remove these */
 
@@ -1301,6 +1301,15 @@ Route::clear_processors (Placement p)
 	}
 }
 
+bool
+Route::is_internal_processor (boost::shared_ptr<Processor> p) const
+{
+	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim) {
+		return true;
+	}
+	return false;
+}
+
 int
 Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
@@ -1320,7 +1329,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 
 	/* these can never be removed */
 
-	if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline || processor == _trim) {
+	if (is_internal_processor (processor)) {
 		return 0;
 	}
 
@@ -1422,11 +1431,11 @@ int
 Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Processor> sub, ProcessorStreams* err)
 {
 	/* these can never be removed */
-	if (old == _amp || old == _meter || old == _main_outs || old == _delayline || old == _trim) {
+	if (is_internal_processor (old)) {
 		return 1;
 	}
 	/* and can't be used as substitute, either */
-	if (sub == _amp || sub == _meter || sub == _main_outs || sub == _delayline || sub == _trim) {
+	if (is_internal_processor (sub)) {
 		return 1;
 	}
 
@@ -1541,7 +1550,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 
 			/* these can never be removed */
 
-			if (processor == _amp || processor == _meter || processor == _main_outs || processor == _delayline || processor == _trim) {
+			if (is_internal_processor (processor)) {
 				++i;
 				continue;
 			}
