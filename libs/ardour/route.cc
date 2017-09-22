@@ -4681,8 +4681,6 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_intreturn);
 	}
 
-	/* EXPORT PROCESSOR */
-
 	/* DISK READER & WRITER (for Track objects) */
 
 	if (_disk_reader || _disk_writer) {
@@ -4722,6 +4720,21 @@ Route::setup_invisible_processors ()
 		}
 	}
 
+	/* ensure dist-writer is before disk-reader */
+	if (_disk_reader && _disk_writer) {
+		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
+		ProcessorList::iterator writer_pos = find (new_processors.begin(), new_processors.end(), _disk_writer);
+		assert (reader_pos != new_processors.end ());
+		assert (writer_pos != new_processors.end ());
+		if (std::distance (new_processors.begin(), reader_pos) < std::distance (new_processors.begin(), writer_pos)) {
+			new_processors.erase (reader_pos);
+			assert (writer_pos == find (new_processors.begin(), new_processors.end(), _disk_writer));
+			new_processors.insert (++writer_pos, _disk_reader);
+		}
+	}
+
+
+	/* EXPORT PROCESSOR */
 	if (_capturing_processor) {
 		assert (!_capturing_processor->display_to_user ());
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
