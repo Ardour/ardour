@@ -123,7 +123,7 @@ PlaylistSelector::show_for (RouteUI* ruix)
 
 		string nodename;
 
-		if (tr->name().empty()) {
+		if (!tr || tr->name().empty()) {
 			nodename = _("unassigned");
 		} else {
 			nodename = tr->name().c_str();
