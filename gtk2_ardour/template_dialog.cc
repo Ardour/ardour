@@ -708,6 +708,10 @@ SessionTemplateManager::rename_template (TreeModel::iterator& item, const Glib::
 	const string old_name = item->get_value (_template_columns.name);
 	const string new_name = string (new_name_);
 
+	if (old_name == new_name) {
+		return;
+	}
+
 	const string old_file_old_path = Glib::build_filename (old_path, old_name+".template");
 
 	XMLTree tree;
@@ -811,6 +815,10 @@ RouteTemplateManager::rename_template (TreeModel::iterator& item, const Glib::us
 	const string old_name = item->get_value (_template_columns.name);
 	const string old_filepath = item->get_value (_template_columns.path);
 	const string new_filepath = Glib::build_filename (user_route_template_directory(), new_name+".template");
+
+	if (old_name == new_name) {
+		return;
+	}
 
 	XMLTree tree;
 	if (!tree.read (old_filepath)) {
