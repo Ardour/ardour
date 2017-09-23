@@ -141,7 +141,7 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 	 * (this is all still very [w]hacky. Individual Bus and Track outputs
 	 * are not aligned but one can select them in the PortExportChannelSelector)
 	 */
-	_export_latency = worst_track_roll_delay ();
+	_export_latency = worst_track_out_latency ();
 
 	boost::shared_ptr<Route> master = master_out ();
 	if (master && comensate_master_latency) {

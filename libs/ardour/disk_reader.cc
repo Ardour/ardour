@@ -50,11 +50,10 @@ bool DiskReader::_no_disk_output = false;
 
 DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	: DiskIOProcessor (s, str, f)
-	, _roll_delay (0)
 	, overwrite_sample (0)
-        , overwrite_offset (0)
-        , _pending_overwrite (false)
-        , overwrite_queued (false)
+	, overwrite_offset (0)
+	, _pending_overwrite (false)
+	, overwrite_queued (false)
 	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	file_sample[DataType::AUDIO] = 0;
@@ -125,13 +124,6 @@ DiskReader::set_name (string const & str)
 	}
 
 	return true;
-}
-
-void
-DiskReader::set_roll_delay (ARDOUR::samplecnt_t nframes)
-{
-	/* Must be called from process context or with process lock held */
-	_roll_delay = nframes;
 }
 
 XMLNode&
@@ -280,38 +272,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = nframes;
 	}
 
-	bool roll_delayed = false;
-	samplecnt_t roll_delay_offset = 0;
-
-	if (speed != 0.0) {
-		if (_roll_delay >= disk_samples_to_consume) {
-			/* still waiting for _roll_delay to end */
-			_roll_delay -= disk_samples_to_consume;
-			/* we could set disk_samples_to_consume to zero here, but it
-			   won't be used anyway.
-			*/
-			roll_delayed = true;
-
-		} else if (_roll_delay > 0) {
-			/* roll delay will end during this call to ::run(), but
-			 * there's some silence needed in the signal-from-disk first
-			 */
-			roll_delay_offset = _roll_delay;
-			bufs.silence (_roll_delay, 0);
-			disk_samples_to_consume -= _roll_delay;
-			start_sample += _roll_delay;
-			_roll_delay = 0;
-		}
-	}
-
 	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
 	const bool still_locating = _session.global_locate_pending();
 
-	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output || roll_delayed) {
+	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
 		/* no need for actual disk data, just advance read pointer and return */
 
-		if (!roll_delayed && (!still_locating || _no_disk_output)) {
+		if (!still_locating || _no_disk_output) {
 			for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 				(*chan)->buf->increment_read_ptr (disk_samples_to_consume);
 			}
@@ -319,7 +287,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		/* if monitoring disk but locating put silence in the buffers */
 
-		if ((roll_delayed || _no_disk_output || still_locating) && (ms == MonitoringDisk)) {
+		if ((_no_disk_output || still_locating) && (ms == MonitoringDisk)) {
 			bufs.silence (nframes, 0);
 		}
 
@@ -350,15 +318,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				/* no input stream needed, just overwrite buffers */
 				disk_signal = output.data ();
 			}
-
-			/* if we skipped some number of samples at the start
-			   because of the _roll_delay being non-zero but small
-			   enough that we will process some data from disk,
-			   advance where we're going to write that data to,
-			   thus skipping over the silence that was written
-			   there.
-			*/
-			disk_signal += roll_delay_offset;
 
 			if (start_sample < playback_sample) {
 				cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << endl;
@@ -459,7 +418,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (!still_locating && !roll_delayed) {
+	if (!still_locating) {
 
 		bool butler_required = false;
 

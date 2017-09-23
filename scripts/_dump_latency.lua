@@ -8,7 +8,6 @@ function factory () return function ()
 	print ("Worst Output Latency:  ", Session:worst_output_latency ())
 	print ("Worst Input Latency:   ", Session:worst_input_latency ())
 	print ("Worst Track Latency:   ", Session:worst_track_latency ())
-	print ("Worst Track Roll Delay:", Session:worst_track_roll_delay ())
 	print ("Worst Playback Latency:", Session:worst_playback_latency ())
 	print (" -- Tracks --")
 	for t in Session:get_tracks ():iter () do

@@ -3360,10 +3360,6 @@ Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 			(*i)->non_realtime_transport_stop (now, flush);
 		}
 	}
-
-	if (_disk_reader) {
-		_disk_reader->set_roll_delay (_initial_delay);
-	}
 }
 
 void
@@ -3870,7 +3866,7 @@ Route::add_export_point()
 		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
 		// this aligns all tracks; but not tracks + busses
-		samplecnt_t latency = _session.worst_track_roll_delay ();
+		samplecnt_t latency = _session.worst_track_out_latency (); // FIXME
 		assert (latency >= _initial_delay);
 		_capturing_processor.reset (new CapturingProcessor (_session, latency - _initial_delay));
 		_capturing_processor->activate ();
@@ -3950,11 +3946,6 @@ Route::set_latency_compensation (samplecnt_t longest_session_latency)
 		initial_delay_changed (); /* EMIT SIGNAL */
 	}
 
-	if (_session.transport_stopped()) {
-		if (_disk_reader) {
-			_disk_reader->set_roll_delay (_initial_delay);
-		}
-	}
 }
 
 void
@@ -4909,10 +4900,6 @@ Route::non_realtime_locate (samplepos_t pos)
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 			(*i)->non_realtime_locate (pos);
 		}
-	}
-
-	if (_disk_reader) {
-		_disk_reader->set_roll_delay (_initial_delay);
 	}
 }
 

@@ -477,7 +477,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	samplecnt_t worst_output_latency ()const     { return _worst_output_latency; }
 	samplecnt_t worst_input_latency () const     { return _worst_input_latency; }
 	samplecnt_t worst_track_latency () const     { return _worst_track_latency; }
-	samplecnt_t worst_track_roll_delay () const  { return _worst_track_roll_delay; }
 	samplecnt_t worst_track_out_latency () const { return _worst_track_out_latency; }
 	samplecnt_t worst_playback_latency  () const { return _worst_output_latency + _worst_track_latency; }
 
@@ -1267,7 +1266,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	samplecnt_t              _worst_input_latency;
 	samplecnt_t              _worst_track_latency;
 	samplecnt_t              _worst_track_out_latency;
-	samplecnt_t              _worst_track_roll_delay;
 	bool                    _have_captured;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;

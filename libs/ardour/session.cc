@@ -200,7 +200,6 @@ Session::Session (AudioEngine &eng,
 	, _worst_input_latency (0)
 	, _worst_track_latency (0)
 	, _worst_track_out_latency (0)
-	, _worst_track_roll_delay (0)
 	, _have_captured (false)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
@@ -6935,14 +6934,9 @@ Session::post_playback_latency ()
 		}
 	}
 
-	_worst_track_roll_delay = 0;
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->active()) { continue ; }
-		(*i)->set_latency_compensation (_worst_track_latency + _worst_track_out_latency - (*i)->output ()->latency ());
-		if (boost::dynamic_pointer_cast<Track> (*i)) {
-			_worst_track_roll_delay = max (_worst_track_roll_delay, (*i)->initial_delay ());
-		}
+		(*i)->set_latency_compensation (_worst_track_out_latency - (*i)->output ()->latency ());
 	}
 }
 

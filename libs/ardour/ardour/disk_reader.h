@@ -52,9 +52,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int overwrite_existing_buffers ();
 	void set_pending_overwrite (bool yn);
 
-	samplecnt_t roll_delay() const { return _roll_delay; }
-	void set_roll_delay (samplecnt_t);
-
 	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
@@ -117,13 +114,12 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	/** The number of samples by which this diskstream's output should be delayed
 	    with respect to the transport sample.  This is used for latency compensation.
 	*/
-	samplecnt_t   _roll_delay;
-	samplepos_t    overwrite_sample;
+	samplepos_t   overwrite_sample;
 	off_t         overwrite_offset;
 	bool          _pending_overwrite;
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
-	samplepos_t    file_sample[DataType::num_types];
+	samplepos_t   file_sample[DataType::num_types];
 
 	int _do_refill_with_alloc (bool partial_fill);
 
