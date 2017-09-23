@@ -1014,7 +1014,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 			Adjustment* adj = control_ui->controller->adjustment();
 
-			if (desc.integer_step && !desc.toggled) {
+			if (false /* desc.integer_step && !desc.toggled */) {
 				control_ui->clickbox = new ArdourWidgets::ClickBox (adj, "PluginUIClickBox", true);
 				Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
 				if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
@@ -1034,6 +1034,11 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else {
 				control_ui->controller->set_size_request (200, -1);
 				control_ui->controller->set_name (X_("ProcessorControlSlider"));
+				if (desc.integer_step) {
+					AutomationBarController* abc = dynamic_cast <AutomationBarController*> (control_ui->controller->widget ());
+					assert (abc);
+					abc->set_digits (0);
+				}
 			}
 
 			if (!desc.integer_step && !desc.toggled && use_knob) {
