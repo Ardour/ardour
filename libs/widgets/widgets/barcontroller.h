@@ -36,6 +36,7 @@ public:
 	virtual ~BarController ();
 
 	void set_sensitive (bool yn);
+	void set_digits (guint d) { _slider.get_spin_button().set_digits (d); }
 
 	ArdourFader::Tweaks tweaks() const { return _slider.tweaks (); }
 	void set_tweaks (ArdourFader::Tweaks t) { _slider.set_tweaks (t);}

@@ -58,7 +58,7 @@ BarController::BarController (Gtk::Adjustment& adj,
 	Gtk::SpinButton& spinner = _slider.get_spin_button();
 	spinner.signal_activate().connect (mem_fun (*this, &BarController::entry_activated));
 	spinner.signal_focus_out_event().connect (mem_fun (*this, &BarController::entry_focus_out));
-	spinner.set_digits (9);
+	spinner.set_digits (4);
 	spinner.set_numeric (true);
 	spinner.set_name ("BarControlSpinner");
 	add (_slider);
