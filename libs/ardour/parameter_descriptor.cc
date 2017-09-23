@@ -384,7 +384,7 @@ ParameterDescriptor::from_interface (float val) const
 				 * e.g. 5 integers 0,1,2,3,4 are mapped to a fader
 				 * [0.0 .. 0.2 | 0.2 .. 0.4 | 0.4 .. 0.6 | 0.6 .. 0.8 | 0.8 .. 1.0]
 				 */
-				val =  round (lower + val * (1.f + upper - lower) - .5f);
+				val = floor (lower + val * (1.f + upper - lower));
 			} else if (rangesteps > 1) {
 				/* similar to above, but for float controls */
 				val = floor (val * (rangesteps - 1.f)) / (rangesteps - 1.f); // XXX
