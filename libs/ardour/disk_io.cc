@@ -55,9 +55,9 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, _slaved (false)
 	, loop_location (0)
 	, in_set_state (false)
-        , playback_sample (0)
-        , wrap_buffer_size (0)
-        , speed_buffer_size (0)
+	, playback_sample (0)
+	, wrap_buffer_size (0)
+	, speed_buffer_size (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
 	, _midi_buf (new MidiRingBuffer<samplepos_t> (s.butler()->midi_diskstream_buffer_size()))
@@ -335,30 +335,30 @@ DiskIOProcessor::midi_playlist () const
 int
 DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
 {
-        if (!playlist) {
-                return 0;
-        }
+	if (!playlist) {
+		return 0;
+	}
 
-        DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: set to use playlist %2 (%3)\n", name(), playlist->name(), dt.to_string()));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: set to use playlist %2 (%3)\n", name(), playlist->name(), dt.to_string()));
 
-        if (playlist == _playlists[dt]) {
-	        DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: already using that playlist\n", name()));
-	        return 0;
-        }
+	if (playlist == _playlists[dt]) {
+		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: already using that playlist\n", name()));
+		return 0;
+	}
 
-        playlist_connections.drop_connections ();
+	playlist_connections.drop_connections ();
 
-        if (_playlists[dt]) {
-	        _playlists[dt]->release();
-        }
+	if (_playlists[dt]) {
+		_playlists[dt]->release();
+	}
 
-        _playlists[dt] = playlist;
-        playlist->use();
+	_playlists[dt] = playlist;
+	playlist->use();
 
-        playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-        playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-        playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
-        playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
+	playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+	playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
+	playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
+	playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now using playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
 
