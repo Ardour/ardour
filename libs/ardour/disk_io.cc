@@ -362,9 +362,6 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now using playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));
 
-	PlaylistChanged (dt); /* EMIT SIGNAL */
-	_session.set_dirty ();
-
 	return 0;
 }
 

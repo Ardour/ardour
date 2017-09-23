@@ -110,8 +110,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	virtual void playlist_modified () {}
 	virtual int use_playlist (DataType, boost::shared_ptr<Playlist>);
 
-	PBD::Signal1<void,DataType>   PlaylistChanged;
-
 	virtual void adjust_buffering() = 0;
 
   protected:

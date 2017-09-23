@@ -827,6 +827,9 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p)
 		_playlists[dt] = p;
 	}
 
+	_session.set_dirty ();
+	PlaylistChanged (); /* EMIT SIGNAL */
+
 	return ret;
 }
 
