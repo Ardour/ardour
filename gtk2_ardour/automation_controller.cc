@@ -142,8 +142,8 @@ AutomationController::create(const Evoral::Parameter&             param,
 	const double lo        = ac->internal_to_interface(desc.lower);
 	const double up        = ac->internal_to_interface(desc.upper);
 	const double normal    = ac->internal_to_interface(desc.normal);
-	const double smallstep = ac->internal_to_interface(desc.lower + desc.smallstep);
-	const double largestep = ac->internal_to_interface(desc.lower + desc.largestep);
+	const double smallstep = ac->internal_to_interface(desc.lower + desc.smallstep) - lo;
+	const double largestep = ac->internal_to_interface(desc.lower + desc.largestep) - lo;
 
 	Gtk::Adjustment* adjustment = manage (
 		new Gtk::Adjustment (normal, lo, up, smallstep, largestep));
