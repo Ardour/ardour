@@ -6745,7 +6745,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	const double qn_length = map.quarter_notes_between_samples (start_sess_rel, start_sess_rel + length);
 	Evoral::Beats qn_length_beats = max (Evoral::Beats::ticks(1), Evoral::Beats (qn_length));
 
-	_editor->begin_reversible_command (_("Create Note"));
+	_editor->begin_reversible_command (_("add note"));
 	_region_view->clear_editor_note_selection();
 	_region_view->create_note_at (start, _drag_rect->y0(), qn_length_beats, ev->button.state, false);
 	_editor->commit_reversible_command ();
