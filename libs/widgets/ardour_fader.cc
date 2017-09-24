@@ -490,27 +490,27 @@ ArdourFader::on_button_release_event (GdkEventButton* ev)
 bool
 ArdourFader::on_scroll_event (GdkEventScroll* ev)
 {
-	double scale;
+	double increment = 0;
 	bool ret = false;
 
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
-			scale = 0.005;
+			increment = 0.05 * _adjustment.get_step_increment();
 		} else {
-			scale = 0.1;
+			increment = _adjustment.get_step_increment();
 		}
 	} else {
-		scale = 1.0;
+		increment = _adjustment.get_page_increment();
 	}
 
 	if (_orien == VERT) {
 		switch (ev->direction) {
 			case GDK_SCROLL_UP:
-				_adjustment.set_value (_adjustment.get_value() + (_adjustment.get_page_increment() * scale));
+				_adjustment.set_value (_adjustment.get_value() + increment);
 				ret = true;
 				break;
 			case GDK_SCROLL_DOWN:
-				_adjustment.set_value (_adjustment.get_value() - (_adjustment.get_page_increment() * scale));
+				_adjustment.set_value (_adjustment.get_value() - increment);
 				ret = true;
 				break;
 			default:
@@ -526,11 +526,11 @@ ArdourFader::on_scroll_event (GdkEventScroll* ev)
 
 		switch (dir) {
 			case GDK_SCROLL_RIGHT:
-				_adjustment.set_value (_adjustment.get_value() + (_adjustment.get_page_increment() * scale));
+				_adjustment.set_value (_adjustment.get_value() + increment);
 				ret = true;
 				break;
 			case GDK_SCROLL_LEFT:
-				_adjustment.set_value (_adjustment.get_value() - (_adjustment.get_page_increment() * scale));
+				_adjustment.set_value (_adjustment.get_value() - increment);
 				ret = true;
 				break;
 			default:
