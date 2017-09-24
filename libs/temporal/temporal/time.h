@@ -50,7 +50,7 @@ enum TimecodeFormat {
 	timecode_60
 };
 
-struct LIBTIMECODE_API Time {
+struct LIBTEMPORAL_API Time {
 	bool          negative;
 	uint32_t      hours;
 	uint32_t      minutes;
@@ -91,34 +91,34 @@ struct LIBTIMECODE_API Time {
 
 };
 
-Wrap LIBTIMECODE_API increment (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API decrement (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API increment_subframes (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API decrement_subframes (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API increment_seconds (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API increment_minutes (Time& timecode, uint32_t);
-Wrap LIBTIMECODE_API increment_hours (Time& timecode, uint32_t);
-void LIBTIMECODE_API frames_floot (Time& timecode);
-void LIBTIMECODE_API seconds_floor (Time& timecode);
-void LIBTIMECODE_API minutes_floor (Time& timecode);
-void LIBTIMECODE_API hours_floor (Time& timecode);
+Wrap LIBTEMPORAL_API increment (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API decrement (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API increment_subframes (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API decrement_subframes (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API increment_seconds (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API increment_minutes (Time& timecode, uint32_t);
+Wrap LIBTEMPORAL_API increment_hours (Time& timecode, uint32_t);
+void LIBTEMPORAL_API frames_floot (Time& timecode);
+void LIBTEMPORAL_API seconds_floor (Time& timecode);
+void LIBTEMPORAL_API minutes_floor (Time& timecode);
+void LIBTEMPORAL_API hours_floor (Time& timecode);
 
-double LIBTIMECODE_API timecode_to_frames_per_second(TimecodeFormat const t);
-bool LIBTIMECODE_API timecode_has_drop_frames(TimecodeFormat const t);
+double LIBTEMPORAL_API timecode_to_frames_per_second(TimecodeFormat const t);
+bool LIBTEMPORAL_API timecode_has_drop_frames(TimecodeFormat const t);
 
-std::string LIBTIMECODE_API timecode_format_name (TimecodeFormat const t);
+std::string LIBTEMPORAL_API timecode_format_name (TimecodeFormat const t);
 
-std::string LIBTIMECODE_API timecode_format_time (Timecode::Time const timecode);
+std::string LIBTEMPORAL_API timecode_format_time (Timecode::Time const timecode);
 
-std::string LIBTIMECODE_API timecode_format_sampletime (
+std::string LIBTEMPORAL_API timecode_format_sampletime (
 		int64_t sample,
 		double sample_sample_rate,
 		double timecode_frames_per_second, bool timecode_drop_frames
 		);
 
-bool LIBTIMECODE_API parse_timecode_format(std::string tc, Timecode::Time &TC);
+bool LIBTEMPORAL_API parse_timecode_format(std::string tc, Timecode::Time &TC);
 
-void LIBTIMECODE_API timecode_to_sample(
+void LIBTEMPORAL_API timecode_to_sample(
 		Timecode::Time& timecode, int64_t& sample,
 		bool use_offset, bool use_subframes,
     /* Note - framerate info is taken from Timecode::Time& */
@@ -128,7 +128,7 @@ void LIBTIMECODE_API timecode_to_sample(
 		bool offset_is_negative, int64_t offset_samples
 		);
 
-void LIBTIMECODE_API sample_to_timecode (
+void LIBTEMPORAL_API sample_to_timecode (
 		int64_t sample, Timecode::Time& timecode,
 		bool use_offset, bool use_subframes,
     /* framerate info */
@@ -143,6 +143,6 @@ void LIBTIMECODE_API sample_to_timecode (
 
 } // namespace Timecode
 
-extern LIBTIMECODE_API std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
+extern LIBTEMPORAL_API std::ostream& operator<< (std::ostream& ostr, const Timecode::Time& t);
 
 #endif  // __timecode_time_h__

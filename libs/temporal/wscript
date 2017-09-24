@@ -16,12 +16,12 @@ def configure(conf):
 
 def build(bld):
     bld.shlib (
-               source   = [ 'src/time.cc', 'src/bbt_time.cc' ],
-               name     = 'libtimecode',
-               target   = 'timecode',
+               source   = [ 'time.cc', 'bbt_time.cc' ],
+               name     = 'libtemporal',
+               target   = 'temporal',
                includes = ['.'],
                export_includes = ['.'],
-               defines  = [ 'LIBTIMECODE_DLL_EXPORTS' ],
+               defines  = [ 'LIBTEMPORAL_DLL_EXPORTS' ],
                install_path = bld.env['LIBDIR']
                )
 

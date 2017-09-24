@@ -29,7 +29,7 @@
 namespace Timecode {
 
 /** Bar, Beat, Tick Time (i.e. Tempo-Based Time) */
-struct LIBTIMECODE_API BBT_Time
+struct LIBTEMPORAL_API BBT_Time
 {
 	static const double ticks_per_beat;
 
@@ -95,7 +95,7 @@ struct LIBTIMECODE_API BBT_Time
 	 */
 };
 
-struct LIBTIMECODE_API BBT_Offset
+struct LIBTEMPORAL_API BBT_Offset
 {
 	int32_t bars;
 	int32_t beats;

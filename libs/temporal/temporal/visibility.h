@@ -21,20 +21,20 @@
 #define __libtimecode_visibility_h__
 
 #if defined(COMPILER_MSVC)
-  #define LIBTIMECODE_DLL_IMPORT __declspec(dllimport)
-  #define LIBTIMECODE_DLL_EXPORT __declspec(dllexport)
-  #define LIBTIMECODE_DLL_LOCAL
+  #define LIBTEMPORAL_DLL_IMPORT __declspec(dllimport)
+  #define LIBTEMPORAL_DLL_EXPORT __declspec(dllexport)
+  #define LIBTEMPORAL_DLL_LOCAL
 #else
-  #define LIBTIMECODE_DLL_IMPORT __attribute__ ((visibility ("default")))
-  #define LIBTIMECODE_DLL_EXPORT __attribute__ ((visibility ("default")))
-  #define LIBTIMECODE_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
+  #define LIBTEMPORAL_DLL_IMPORT __attribute__ ((visibility ("default")))
+  #define LIBTEMPORAL_DLL_EXPORT __attribute__ ((visibility ("default")))
+  #define LIBTEMPORAL_DLL_LOCAL  __attribute__ ((visibility ("hidden")))
 #endif
 
-#ifdef LIBTIMECODE_DLL_EXPORTS // defined if we are building the libtimecode DLL (instead of using it)
-    #define LIBTIMECODE_API LIBTIMECODE_DLL_EXPORT
+#ifdef LIBTEMPORAL_DLL_EXPORTS // defined if we are building the libtimecode DLL (instead of using it)
+    #define LIBTEMPORAL_API LIBTEMPORAL_DLL_EXPORT
 #else
-    #define LIBTIMECODE_API LIBTIMECODE_DLL_IMPORT
+    #define LIBTEMPORAL_API LIBTEMPORAL_DLL_IMPORT
 #endif
-#define LIBTIMECODE_LOCAL LIBTIMECODE_DLL_LOCAL
+#define LIBTEMPORAL_LOCAL LIBTEMPORAL_DLL_LOCAL
 
 #endif /* __libtimecode_visibility_h__ */

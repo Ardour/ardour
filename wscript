@@ -233,7 +233,7 @@ children = [
         'libs/surfaces',
         'libs/panners',
         'libs/backends',
-        'libs/timecode',
+        'libs/temporal',
         'libs/ardour',
         'libs/gtkmm2ext',
         'libs/audiographer',
@@ -1331,7 +1331,7 @@ def build(bld):
         bld.path.find_dir ('libs/libltc/ltc')
     bld.path.find_dir ('libs/evoral/evoral')
     bld.path.find_dir ('libs/surfaces/control_protocol/control_protocol')
-    bld.path.find_dir ('libs/timecode/timecode')
+    bld.path.find_dir ('libs/temporal/temporal')
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
