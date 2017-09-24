@@ -31,7 +31,7 @@ Legatize::~Legatize ()
 
 Command*
 Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
-                     Temporal::Beats                        position,
+                     Temporal::Beats                      position,
                      std::vector<Legatize::Notes>&        seqs)
 {
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand(model, name ());

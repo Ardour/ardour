@@ -18,6 +18,7 @@
 */
 
 #include "temporal/beats.h"
+
 #include "evoral/Note.hpp"
 
 #include "canvas/polygon.h"

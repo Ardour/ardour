@@ -18,9 +18,11 @@
 
 #include <glibmm.h>
 
-#include "temporal/bbt_time.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
+
+#include "temporal/bbt_time.h"
+
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/Range.hpp"

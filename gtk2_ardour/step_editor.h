@@ -25,6 +25,7 @@
 #include <sigc++/trackable.h>
 
 #include "pbd/signals.h"
+
 #include "temporal/beats.h"
 
 namespace ARDOUR {
@@ -68,19 +69,19 @@ public:
 
 private:
 	ARDOUR::samplepos_t                    step_edit_insert_position;
-	Temporal::Beats                         step_edit_beat_pos;
+	Temporal::Beats                       step_edit_beat_pos;
 	boost::shared_ptr<ARDOUR::MidiRegion> step_edit_region;
 	MidiRegionView*                       step_edit_region_view;
 	uint8_t                               _step_edit_triplet_countdown;
 	bool                                  _step_edit_within_chord;
-	Temporal::Beats                         _step_edit_chord_duration;
+	Temporal::Beats                       _step_edit_chord_duration;
 	PBD::ScopedConnection                 step_edit_region_connection;
 	PublicEditor&                         _editor;
 	boost::shared_ptr<ARDOUR::MidiTrack>  _track;
 	StepEntry*                            step_editor;
 	MidiTimeAxisView&                     _mtv;
 	int8_t                                last_added_pitch;
-	Temporal::Beats                         last_added_end;
+	Temporal::Beats                       last_added_end;
 
 	void region_removed (boost::weak_ptr<ARDOUR::Region>);
 	void playlist_changed ();

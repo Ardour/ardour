@@ -132,7 +132,7 @@ public:
 	Transform(const Program& prog);
 
 	Command* operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
-	                    Temporal::Beats                        position,
+	                    Temporal::Beats                      position,
 	                    std::vector<Notes>&                  seqs);
 
 	std::string name() const { return std::string ("transform"); }

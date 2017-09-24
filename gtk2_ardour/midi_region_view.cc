@@ -3476,7 +3476,7 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 	*/
 
 	const samplepos_t ref_point = source_beats_to_absolute_samples ((*(_selection.begin()))->note()->time());
-	Temporal::Beats    delta;
+	Temporal::Beats  delta;
 
 	if (!fine) {
 
@@ -3786,7 +3786,7 @@ MidiRegionView::paste_internal (samplepos_t pos, unsigned paste_count, float tim
 	const Temporal::Beats snap_duration = duration.snap_to(snap_beats);
 	const Temporal::Beats paste_offset  = snap_duration * paste_count;
 	const Temporal::Beats quarter_note     = absolute_samples_to_source_beats(pos) + paste_offset;
-	Temporal::Beats       end_point     = Temporal::Beats();
+	Temporal::Beats     end_point     = Temporal::Beats();
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,

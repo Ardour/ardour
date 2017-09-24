@@ -28,6 +28,7 @@
 #include "pbd/enumwriter.h"
 
 #include "midi++/parser.h"
+
 #include "temporal/time.h"
 #include "temporal/bbt_time.h"
 

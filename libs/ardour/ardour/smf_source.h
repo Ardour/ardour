@@ -78,7 +78,7 @@ public:
 
   private:
 	bool _open;
-	Temporal::Beats       _last_ev_time_beats;
+	Temporal::Beats     _last_ev_time_beats;
 	samplepos_t          _last_ev_time_samples;
 	/** end time (start + duration) of last call to read_unlocked */
 	mutable samplepos_t _smf_last_read_end;

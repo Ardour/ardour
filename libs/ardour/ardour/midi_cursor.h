@@ -24,10 +24,14 @@
 
 #include <boost/utility.hpp>
 
-#include "ardour/types.h"
+
+
+#include "pbd/signals.h"
+
 #include "temporal/beats.h"
 #include "evoral/Sequence.hpp"
-#include "pbd/signals.h"
+
+#include "ardour/types.h"
 
 namespace ARDOUR {
 

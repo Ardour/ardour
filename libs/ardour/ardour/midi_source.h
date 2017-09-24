@@ -62,8 +62,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int write_to (const Lock&                   lock,
 	              boost::shared_ptr<MidiSource> newsrc,
-	              Temporal::Beats                 begin = Temporal::Beats(),
-	              Temporal::Beats                 end   = std::numeric_limits<Temporal::Beats>::max());
+	              Temporal::Beats               begin = Temporal::Beats(),
+	              Temporal::Beats               end   = std::numeric_limits<Temporal::Beats>::max());
 
 	/** Export the midi data in the given time range to another MidiSource
 	 * \param newsrc MidiSource to which data will be written. Should be a
@@ -75,8 +75,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int export_write_to (const Lock&                   lock,
 	                     boost::shared_ptr<MidiSource> newsrc,
-	                     Temporal::Beats                 begin,
-	                     Temporal::Beats                 end);
+	                     Temporal::Beats               begin,
+	                     Temporal::Beats               end);
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio samples (even if the source has tempo time).
@@ -156,7 +156,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	virtual void mark_midi_streaming_write_completed (
 		const Lock&                                      lock,
 		Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_option,
-		Temporal::Beats                                    when = Temporal::Beats());
+		Temporal::Beats                                  when = Temporal::Beats());
 
 	virtual void session_saved();
 

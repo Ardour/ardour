@@ -290,7 +290,7 @@ class LIBARDOUR_API TempoMapPoint
 		ExplicitInfo          _explicit;
 	};
 	superclock_t          _sclock;
-	Temporal::Beats         _quarters;
+	Temporal::Beats       _quarters;
 	Timecode::BBT_Time    _bbt;
 	bool                  _dirty;
 	TempoMap*             _map;

@@ -24,10 +24,12 @@
 
 #include <boost/utility.hpp>
 
+#include "temporal/beats.h"
+
+#include "evoral/Note.hpp"
+
 #include "ardour/midi_model.h"
 #include "ardour/types.h"
-#include "temporal/beats.h"
-#include "evoral/Note.hpp"
 
 namespace Evoral { template<typename Time> class EventSink; }
 

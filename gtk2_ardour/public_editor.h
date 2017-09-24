@@ -35,10 +35,11 @@
 #include <gtkmm/notebook.h>
 #include <sigc++/signal.h>
 
-#include "temporal/beats.h"
-#include "evoral/Note.hpp"
-
 #include "pbd/statefuldestructible.h"
+
+#include "temporal/beats.h"
+
+#include "evoral/Note.hpp"
 
 #include "ardour/session_handle.h"
 

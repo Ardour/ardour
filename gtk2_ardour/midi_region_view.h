@@ -436,8 +436,8 @@ private:
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
 	ArdourCanvas::Rectangle*             _step_edit_cursor;
-	Temporal::Beats                        _step_edit_cursor_width;
-	Temporal::Beats                        _step_edit_cursor_position;
+	Temporal::Beats                      _step_edit_cursor_width;
+	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
 
 	MouseState _mouse_state;

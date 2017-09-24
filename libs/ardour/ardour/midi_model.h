@@ -265,8 +265,8 @@ public:
 
 	bool write_section_to(boost::shared_ptr<MidiSource>     source,
 	                      const Glib::Threads::Mutex::Lock& source_lock,
-	                      Temporal::Beats                     begin = Temporal::Beats(),
-	                      Temporal::Beats                     end   = std::numeric_limits<Temporal::Beats>::max(),
+	                      Temporal::Beats                   begin = Temporal::Beats(),
+	                      Temporal::Beats                   end   = std::numeric_limits<Temporal::Beats>::max(),
 	                      bool                              offset_events = false);
 
 	// MidiModel doesn't use the normal AutomationList serialisation code

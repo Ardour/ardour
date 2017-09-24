@@ -357,7 +357,7 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 void
 MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
                                                  Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
-                                                 Temporal::Beats                                    end)
+                                                 Temporal::Beats                                  end)
 {
 	if (_model) {
 		_model->end_write (option, end);
