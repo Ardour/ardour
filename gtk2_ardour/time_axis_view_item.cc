@@ -168,7 +168,7 @@ TimeAxisViewItem::init (ArdourCanvas::Item* parent, double fpp, uint32_t base_co
 	item_duration = duration;
 	name_connected = false;
 	position_locked = false;
-	max_item_duration = ARDOUR::max_samplepos;
+	max_item_duration = Temporal::max_samplepos;
 	min_item_duration = 0;
 	visibility = vis;
 	_sensitive = true;

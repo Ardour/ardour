@@ -206,7 +206,7 @@ MidiSource::midi_read (const Lock&                        lm,
 	}
 
 	// Find appropriate model iterator
-	Evoral::Sequence<Evoral::Beats>::const_iterator& i = cursor.iter;
+	Evoral::Sequence<Temporal::Beats>::const_iterator& i = cursor.iter;
 	const bool linear_read = cursor.last_read_end != 0 && start == cursor.last_read_end;
 	if (!linear_read || !i.valid()) {
 		/* Cached iterator is invalid, search for the first event past start.
@@ -256,7 +256,7 @@ MidiSource::midi_read (const Lock&                        lm,
 				   sure if this is necessary here (channels are mapped later in
 				   buffers anyway), but it preserves existing behaviour without
 				   destroying events in the model during read. */
-				Evoral::Event<Evoral::Beats> ev(*i, true);
+				Evoral::Event<Temporal::Beats> ev(*i, true);
 				if (!filter->filter(ev.buffer(), ev.size())) {
 					dst.write(time_samples, ev.event_type(), ev.size(), ev.buffer());
 				} else {
@@ -356,8 +356,8 @@ MidiSource::mark_streaming_write_started (const Lock& lock)
 
 void
 MidiSource::mark_midi_streaming_write_completed (const Lock&                                      lock,
-                                                 Evoral::Sequence<Evoral::Beats>::StuckNoteOption option,
-                                                 Evoral::Beats                                    end)
+                                                 Evoral::Sequence<Temporal::Beats>::StuckNoteOption option,
+                                                 Temporal::Beats                                    end)
 {
 	if (_model) {
 		_model->end_write (option, end);
@@ -378,11 +378,11 @@ MidiSource::mark_midi_streaming_write_completed (const Lock&                    
 void
 MidiSource::mark_streaming_write_completed (const Lock& lock)
 {
-	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Evoral::Beats>::DeleteStuckNotes);
+	mark_midi_streaming_write_completed (lock, Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
 }
 
 int
-MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
+MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
@@ -399,7 +399,7 @@ MidiSource::export_write_to (const Lock& lock, boost::shared_ptr<MidiSource> new
 }
 
 int
-MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Evoral::Beats begin, Evoral::Beats end)
+MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Temporal::Beats begin, Temporal::Beats end)
 {
 	Lock newsrc_lock (newsrc->mutex ());
 
@@ -408,7 +408,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 	newsrc->copy_automation_state_from (this);
 
 	if (_model) {
-		if (begin == Evoral::Beats() && end == std::numeric_limits<Evoral::Beats>::max()) {
+		if (begin == Temporal::Beats() && end == std::numeric_limits<Temporal::Beats>::max()) {
 			_model->write_to (newsrc, newsrc_lock);
 		} else {
 			_model->write_section_to (newsrc, newsrc_lock, begin, end);
@@ -422,7 +422,7 @@ MidiSource::write_to (const Lock& lock, boost::shared_ptr<MidiSource> newsrc, Ev
 
 	/* force a reload of the model if the range is partial */
 
-	if (begin != Evoral::Beats() || end != std::numeric_limits<Evoral::Beats>::max()) {
+	if (begin != Temporal::Beats() || end != std::numeric_limits<Temporal::Beats>::max()) {
 		newsrc->load_model (newsrc_lock, true);
 	} else {
 		newsrc->set_model (newsrc_lock, _model);

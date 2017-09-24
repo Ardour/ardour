@@ -467,7 +467,7 @@ VideoMonitor::get_custom_setting (const std::string k)
 	return (xjadeo_settings[k]);
 }
 
-#define NO_OFFSET (ARDOUR::max_samplepos) //< skip setting or modifying offset
+#define NO_OFFSET (Temporal::max_samplepos) //< skip setting or modifying offset
 void
 VideoMonitor::srsupdate ()
 {

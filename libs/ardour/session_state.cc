@@ -1254,7 +1254,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 					if (!ms->model()) {
 						ms->load_model (lm);
 					}
-					if (ms->write_to (lm, newsrc, Evoral::Beats(), std::numeric_limits<Evoral::Beats>::max())) {
+					if (ms->write_to (lm, newsrc, Temporal::Beats(), std::numeric_limits<Temporal::Beats>::max())) {
 						error << string_compose (_("Session-Save: Failed to copy MIDI Source '%1' for snapshot"), ancestor_name) << endmsg;
 					} else {
 						if (snapshot_type == SnapshotKeep) {

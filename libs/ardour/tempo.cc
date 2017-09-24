@@ -27,7 +27,7 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 #include "ardour/debug.h"
 #include "ardour/lmath.h"
@@ -2423,7 +2423,7 @@ TempoMap::sample_at_quarter_note (const double quarter_note) const
  * @param beat The BBT (meter-based) beat.
  * @return The quarter-note position of the supplied BBT (meter-based) beat.
  *
- * a quarter-note may be compared with and assigned to Evoral::Beats.
+ * a quarter-note may be compared with and assigned to Temporal::Beats.
  *
  */
 double
@@ -2438,7 +2438,7 @@ TempoMap::quarter_note_at_beat (const double beat) const
  * @param quarter_note The position in quarter-note beats.
  * @return the BBT (meter-based) beat position of the supplied quarter-note beats.
  *
- * a quarter-note is the musical unit of Evoral::Beats.
+ * a quarter-note is the musical unit of Temporal::Beats.
  *
  */
 double
@@ -4821,7 +4821,7 @@ TempoMap::remove_time (samplepos_t where, samplecnt_t amount)
  *  pos can be -ve, if required.
  */
 samplepos_t
-TempoMap::samplepos_plus_qn (samplepos_t sample, Evoral::Beats beats) const
+TempoMap::samplepos_plus_qn (samplepos_t sample, Temporal::Beats beats) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 	const double sample_qn = pulse_at_minute_locked (_metrics, minute_at_sample (sample)) * 4.0;
@@ -4856,12 +4856,12 @@ TempoMap::samplepos_plus_bbt (samplepos_t pos, BBT_Time op) const
 /** Count the number of beats that are equivalent to distance when going forward,
     starting at pos.
 */
-Evoral::Beats
+Temporal::Beats
 TempoMap::framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
-	return Evoral::Beats (quarter_notes_between_samples_locked (_metrics, pos, pos + distance));
+	return Temporal::Beats (quarter_notes_between_samples_locked (_metrics, pos, pos + distance));
 }
 
 struct bbtcmp {

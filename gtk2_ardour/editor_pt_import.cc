@@ -250,11 +250,11 @@ Editor::do_ptimport (std::string ptpath,
 			for (vector<PTFFormat::midi_ev_t>::iterator
 					j = a->midi.begin();
 					j != a->midi.end(); ++j) {
-				Evoral::Beats start = (Evoral::Beats)(j->pos/960000.);
-				Evoral::Beats len = (Evoral::Beats)(j->length/960000.);
+				Temporal::Beats start = (Temporal::Beats)(j->pos/960000.);
+				Temporal::Beats len = (Temporal::Beats)(j->length/960000.);
 				// PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert...
-				midicmd->add(boost::shared_ptr<Evoral::Note<Evoral::Beats> >
-					(new Evoral::Note<Evoral::Beats>( (uint8_t)1, start, len, j->note - 12, j->velocity )));
+				midicmd->add(boost::shared_ptr<Evoral::Note<Temporal::Beats> >
+					(new Evoral::Note<Temporal::Beats>( (uint8_t)1, start, len, j->note - 12, j->velocity )));
 			}
 			mm->apply_command (_session, midicmd);
 			boost::shared_ptr<Region> copy (RegionFactory::create (mr, true));

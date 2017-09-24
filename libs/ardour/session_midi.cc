@@ -35,7 +35,7 @@
 #include "pbd/timersub.h"
 #include "pbd/stacktrace.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"

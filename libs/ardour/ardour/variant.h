@@ -27,7 +27,7 @@
 #include <stdexcept>
 
 #include "ardour/libardour_visibility.h"
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "pbd/compose.h"
 
 namespace ARDOUR {
@@ -57,7 +57,7 @@ public:
 	explicit Variant(int32_t value) : _type(INT)     { _int    = value; }
 	explicit Variant(int64_t value) : _type(LONG)    { _long   = value; }
 
-	explicit Variant(const Evoral::Beats& beats)
+	explicit Variant(const Temporal::Beats& beats)
 		: _type(BEATS)
 		, _beats(beats)
 	{}
@@ -94,7 +94,7 @@ public:
 			                                std::min(value, (double)INT64_MAX)));
 			break;
 		case BEATS:
-			_beats = Evoral::Beats(value);
+			_beats = Temporal::Beats(value);
 			break;
 		default:
 			_type = NOTHING;
@@ -158,19 +158,19 @@ public:
 		return false;
 	}
 
-	bool operator==(const Evoral::Beats& v) const {
+	bool operator==(const Temporal::Beats& v) const {
 		return _type == BEATS && _beats == v;
 	}
 
 	bool operator!() const { return _type == NOTHING; }
 
-	Variant& operator=(Evoral::Beats v) {
+	Variant& operator=(Temporal::Beats v) {
 		_type  = BEATS;
 		_beats = v;
 		return *this;
 	}
 
-	const Evoral::Beats& get_beats() const {
+	const Temporal::Beats& get_beats() const {
 		ensure_type(BEATS); return _beats;
 	}
 
@@ -204,7 +204,7 @@ private:
 
 	Type          _type;    ///< Type tag
 	std::string   _string;  ///< PATH, STRING, URI
-	Evoral::Beats _beats;   ///< BEATS
+	Temporal::Beats _beats;   ///< BEATS
 
 	// Union of all primitive numeric types
 	union {

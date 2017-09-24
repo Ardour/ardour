@@ -23,7 +23,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 namespace Timecode {
 

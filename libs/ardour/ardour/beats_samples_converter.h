@@ -19,7 +19,7 @@
     $Id: midiregion.h 733 2006-08-01 17:19:38Z drobilla $
 */
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/TimeConverter.hpp"
 
 #include "ardour/libardour_visibility.h"
@@ -37,15 +37,15 @@ class TempoMap;
  *  them to the opposite unit, taking tempo changes into account.
  */
 class LIBARDOUR_API BeatsSamplesConverter
-	: public Evoral::TimeConverter<Evoral::Beats,samplepos_t> {
+	: public Evoral::TimeConverter<Temporal::Beats,samplepos_t> {
 public:
 	BeatsSamplesConverter (const TempoMap& tempo_map, samplepos_t origin)
-		: Evoral::TimeConverter<Evoral::Beats, samplepos_t> (origin)
+		: Evoral::TimeConverter<Temporal::Beats, samplepos_t> (origin)
 		, _tempo_map(tempo_map)
 	{}
 
-	samplepos_t    to (Evoral::Beats beats) const;
-	Evoral::Beats from (samplepos_t samples) const;
+	samplepos_t    to (Temporal::Beats beats) const;
+	Temporal::Beats from (samplepos_t samples) const;
 
 private:
 	const TempoMap& _tempo_map;

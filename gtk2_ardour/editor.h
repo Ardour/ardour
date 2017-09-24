@@ -334,7 +334,7 @@ public:
 	samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next);
 	samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration);
 	unsigned get_grid_beat_divisions(samplepos_t position);
-	Evoral::Beats get_grid_type_as_beats (bool& success, samplepos_t position);
+	Temporal::Beats get_grid_type_as_beats (bool& success, samplepos_t position);
 
 	int32_t get_grid_music_divisions (uint32_t event_state);
 
@@ -451,7 +451,7 @@ public:
 	void get_regions_corresponding_to (boost::shared_ptr<ARDOUR::Region> region, std::vector<RegionView*>& regions, bool src_comparison);
 
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
-	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const;
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const;
 
 	void center_screen (samplepos_t);
 
@@ -1221,7 +1221,7 @@ private:
 
 	void cut_copy (Editing::CutCopyOp);
 	bool can_cut_copy () const;
-	void cut_copy_points (Editing::CutCopyOp, Evoral::Beats earliest=Evoral::Beats(), bool midi=false);
+	void cut_copy_points (Editing::CutCopyOp, Temporal::Beats earliest=Temporal::Beats(), bool midi=false);
 	void cut_copy_regions (Editing::CutCopyOp, RegionSelection&);
 	void cut_copy_ranges (Editing::CutCopyOp);
 	void cut_copy_midi (Editing::CutCopyOp);

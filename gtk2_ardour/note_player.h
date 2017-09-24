@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class NotePlayer : public sigc::trackable {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 
 	NotePlayer (boost::shared_ptr<ARDOUR::MidiTrack>);
 	~NotePlayer ();

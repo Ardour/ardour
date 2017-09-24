@@ -6646,8 +6646,8 @@ samplecnt_t
 NoteCreateDrag::grid_samples (samplepos_t t) const
 {
 
-	const Evoral::Beats grid_beats = _region_view->get_grid_beats (t);
-	const Evoral::Beats t_beats = _region_view->region_samples_to_region_beats (t);
+	const Temporal::Beats grid_beats = _region_view->get_grid_beats (t);
+	const Temporal::Beats t_beats = _region_view->region_samples_to_region_beats (t);
 
 	return _region_view->region_beats_to_region_samples (t_beats + grid_beats)
 		- _region_view->region_beats_to_region_samples (t_beats);
@@ -6664,7 +6664,7 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const samplepos_t pf = _drags->current_pointer_sample ();
 	const int32_t divisions = _editor->get_grid_music_divisions (event->button.state);
 
-	const Evoral::Beats grid_beats = _region_view->get_grid_beats (pf);
+	const Temporal::Beats grid_beats = _region_view->get_grid_beats (pf);
 
 	double eqaf = map.exact_qn_at_sample (pf, divisions);
 
@@ -6706,7 +6706,7 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 
 	if (divisions != 0) {
 
-		const Evoral::Beats grid_beats = _region_view->get_grid_beats (pf);
+		const Temporal::Beats grid_beats = _region_view->get_grid_beats (pf);
 
 		const double qaf = map.quarter_note_at_sample (pf);
 		/* Hack so that we always snap to the note that we are over, instead of snapping
@@ -6743,7 +6743,7 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	TempoMap& map (_editor->session()->tempo_map());
 	const double qn_length = map.quarter_notes_between_samples (start_sess_rel, start_sess_rel + length);
-	Evoral::Beats qn_length_beats = max (Evoral::Beats::ticks(1), Evoral::Beats (qn_length));
+	Temporal::Beats qn_length_beats = max (Temporal::Beats::ticks(1), Temporal::Beats (qn_length));
 
 	_editor->begin_reversible_command (_("Create Note"));
 	_region_view->clear_editor_note_selection();
@@ -6798,7 +6798,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 	const samplepos_t start = map.sample_at_quarter_note (eqaf) - _region_view->region()->position();
-	Evoral::Beats length = _region_view->get_grid_beats (pf);
+	Temporal::Beats length = _region_view->get_grid_beats (pf);
 
 	_editor->begin_reversible_command (_("Create Hit"));
 	_region_view->clear_editor_note_selection();
@@ -6826,7 +6826,7 @@ HitCreateDrag::motion (GdkEvent* event, bool)
 		return;
 	}
 
-	Evoral::Beats length = _region_view->get_grid_beats (pf);
+	Temporal::Beats length = _region_view->get_grid_beats (pf);
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
 

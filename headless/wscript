@@ -47,7 +47,7 @@ def build(bld):
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
-                     'libtimecode',
+                     'libtemporal',
                      'libmidipp',
                      ]
 

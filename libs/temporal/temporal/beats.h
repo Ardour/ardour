@@ -16,8 +16,8 @@
  * 51 Franklin St, Fifth Floor, Boston, MA 02110-1301 USA
  */
 
-#ifndef EVORAL_BEATS_HPP
-#define EVORAL_BEATS_HPP
+#ifndef TEMPORAL_BEATS_HPP
+#define TEMPORAL_BEATS_HPP
 
 #include <float.h>
 #include <math.h>
@@ -27,14 +27,14 @@
 #include <iostream>
 #include <limits>
 
-#include "evoral/visibility.h"
+#include "temporal/visibility.h"
 
-namespace Evoral {
+namespace Temporal {
 
 /** Musical time in beats. */
-class /*LIBEVORAL_API*/ Beats {
+class /*LIBTEMPORAL_API*/ Beats {
 public:
-	LIBEVORAL_API static const int32_t PPQN = 1920;
+	LIBTEMPORAL_API static const int32_t PPQN = 1920;
 
 	Beats() : _beats(0), _ticks(0) {}
 
@@ -126,7 +126,7 @@ public:
 		return Beats(_beats, 0);
 	}
 
-	Beats snap_to(const Evoral::Beats& snap) const {
+	Beats snap_to(const Temporal::Beats& snap) const {
 		const double snap_time = snap.to_double();
 		return Beats(ceil(to_double() / snap_time) * snap_time);
 	}
@@ -272,7 +272,7 @@ private:
 
 /*
   TIL, several horrible hours later, that sometimes the compiler looks in the
-  namespace of a type (Evoral::Beats in this case) for an operator, and
+  namespace of a type (Temporal::Beats in this case) for an operator, and
   does *NOT* look in the global namespace.
 
   C++ is proof that hell exists and we are living in it.  In any case, move
@@ -300,15 +300,15 @@ operator>>(std::istream& is, Beats& t)
 
 namespace PBD {
 	namespace DEBUG {
-		LIBEVORAL_API extern uint64_t Beats;
+		LIBTEMPORAL_API extern uint64_t Beats;
 	}
 }
 
 namespace std {
 	template<>
-	struct numeric_limits<Evoral::Beats> {
-		static Evoral::Beats lowest() {
-			return Evoral::Beats(std::numeric_limits<int32_t>::min(),
+	struct numeric_limits<Temporal::Beats> {
+		static Temporal::Beats lowest() {
+			return Temporal::Beats(std::numeric_limits<int32_t>::min(),
 			                     std::numeric_limits<int32_t>::min());
 		}
 
@@ -316,11 +316,11 @@ namespace std {
 		   but Beats is used as both.  Better to avoid providing a min at all
 		   than a confusing one. */
 
-		static Evoral::Beats max() {
-			return Evoral::Beats(std::numeric_limits<int32_t>::max(),
+		static Temporal::Beats max() {
+			return Temporal::Beats(std::numeric_limits<int32_t>::max(),
 			                     std::numeric_limits<int32_t>::max());
 		}
 	};
 }
 
-#endif // EVORAL_BEATS_HPP
+#endif // TEMPORAL_BEATS_HPP

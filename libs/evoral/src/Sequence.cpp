@@ -31,7 +31,8 @@
 #include "pbd/compose.h"
 #include "pbd/error.h"
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
+
 #include "evoral/Control.hpp"
 #include "evoral/ControlList.hpp"
 #include "evoral/ControlSet.hpp"
@@ -1408,6 +1409,6 @@ Sequence<Time>::dump (ostream& str) const
 	str << "--- dump\n";
 }
 
-template class Sequence<Evoral::Beats>;
+template class Sequence<Temporal::Beats>;
 
 } // namespace Evoral

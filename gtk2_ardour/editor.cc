@@ -4090,23 +4090,23 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 	return 0;
 }
 
-Evoral::Beats
+Temporal::Beats
 Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 {
 	success = true;
 
 	const unsigned divisions = get_grid_beat_divisions(position);
 	if (divisions) {
-		return Evoral::Beats(1.0 / (double)get_grid_beat_divisions(position));
+		return Temporal::Beats(1.0 / (double)get_grid_beat_divisions(position));
 	}
 
 	switch (_snap_type) {
 	case SnapToBeat:
-		return Evoral::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
+		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
 	case SnapToBar:
 		if (_session) {
 			const Meter& m = _session->tempo_map().meter_at_sample (position);
-			return Evoral::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
+			return Temporal::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
 		}
 		break;
 	default:
@@ -4114,7 +4114,7 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 		break;
 	}
 
-	return Evoral::Beats();
+	return Temporal::Beats();
 }
 
 samplecnt_t
@@ -5021,7 +5021,7 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 }
 
 void
-Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection) const
+Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection) const
 {
 
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {

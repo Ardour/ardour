@@ -55,7 +55,7 @@
 #include "midi++/types.h"
 #include "midi++/mmc.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "ardour/ardour.h"
 #include "ardour/chan_count.h"

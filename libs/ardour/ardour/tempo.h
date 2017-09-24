@@ -32,7 +32,7 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 #include "ardour/ardour.h"
 
@@ -450,7 +450,7 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	   that align with the grid formed by tempo and meter sections.
 
 	   They SHOULD NOT be used to determine the position of events
-	   whose location is canonically defined in Evoral::Beats.
+	   whose location is canonically defined in Temporal::Beats.
 	*/
 
 	double beat_at_sample (const samplecnt_t sample) const;
@@ -482,14 +482,14 @@ class LIBARDOUR_API TempoMap : public PBD::StatefulDestructible
 	   when tempo matters but meter does not.
 
 	   They SHOULD be used to determine the position of events
-	   whose location is canonically defined in Evoral::Beats.
+	   whose location is canonically defined in Temporal::Beats.
 	*/
 
-	samplepos_t samplepos_plus_qn (samplepos_t, Evoral::Beats) const;
-	Evoral::Beats framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const;
+	samplepos_t samplepos_plus_qn (samplepos_t, Temporal::Beats) const;
+	Temporal::Beats framewalk_to_qn (samplepos_t pos, samplecnt_t distance) const;
 
 	/* quarter note related functions are also tempo-sensitive and ignore meter.
-	   quarter notes may be compared with and assigned to Evoral::Beats.
+	   quarter notes may be compared with and assigned to Temporal::Beats.
 	*/
 	double quarter_note_at_sample (const samplepos_t sample) const;
 	double quarter_note_at_sample_rt (const samplepos_t sample) const;

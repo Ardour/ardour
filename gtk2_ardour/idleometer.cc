@@ -25,7 +25,7 @@
 #include <pbd/windows_timer_utils.h>
 #endif
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "idleometer.h"
 #include "pbd/i18n.h"

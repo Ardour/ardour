@@ -21,7 +21,7 @@
 #include "ardour/route.h"
 #include "ardour/session.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "audiographer/process_context.h"
 #include "audiographer/general/chunker.h"

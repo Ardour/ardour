@@ -6,7 +6,7 @@ using std::cout;
 using std::endl;
 
 /* overloaded operator* that avoids floating point math when multiplying a superclock position by a number of quarter notes */
-superclock_t operator*(superclock_t sc, Evoral::Beats const & b) { return (sc * ((b.get_beats() * Evoral::Beats::PPQN) + b.get_ticks())) / Evoral::Beats::PPQN; }
+superclock_t operator*(superclock_t sc, Temporal::Beats const & b) { return (sc * ((b.get_beats() * Temporal::Beats::PPQN) + b.get_ticks())) / Temporal::Beats::PPQN; }
 
 Timecode::BBT_Time
 Meter::bbt_add (Timecode::BBT_Time const & bbt, Timecode::BBT_Offset const & add) const
@@ -43,9 +43,9 @@ Meter::bbt_add (Timecode::BBT_Time const & bbt, Timecode::BBT_Offset const & add
 
 	Timecode::BBT_Offset r (bars + add.bars, beats + add.beats, ticks + add.ticks);
 
-	if (r.ticks >= Evoral::Beats::PPQN) {
-		r.beats += r.ticks / Evoral::Beats::PPQN;
-		r.ticks %= Evoral::Beats::PPQN;
+	if (r.ticks >= Temporal::Beats::PPQN) {
+		r.beats += r.ticks / Temporal::Beats::PPQN;
+		r.ticks %= Temporal::Beats::PPQN;
 	}
 
 	if (r.beats > _divisions_per_bar) {
@@ -98,8 +98,8 @@ Meter::bbt_subtract (Timecode::BBT_Time const & bbt, Timecode::BBT_Offset const 
 	Timecode::BBT_Offset r (bars - sub.bars, beats - sub.beats, ticks - sub.ticks);
 
 	if (r.ticks < 0) {
-		r.beats -= 1 - (r.ticks / Evoral::Beats::PPQN);
-		r.ticks = Evoral::Beats::PPQN + (r.ticks % Evoral::Beats::PPQN);
+		r.beats -= 1 - (r.ticks / Temporal::Beats::PPQN);
+		r.ticks = Temporal::Beats::PPQN + (r.ticks % Temporal::Beats::PPQN);
 	}
 
 	if (r.beats <= 0) {
@@ -135,14 +135,14 @@ Meter::round_up_to_bar (Timecode::BBT_Time const & bbt) const
 	return b;
 }
 
-Evoral::Beats
+Temporal::Beats
 Meter::to_quarters (Timecode::BBT_Offset const & offset) const
 {
-	Evoral::Beats b;
+	Temporal::Beats b;
 
 	b += (offset.bars * _divisions_per_bar * 4) / _note_value;
 	b += (offset.beats * 4) / _note_value;
-	b += Evoral::Beats::ticks (offset.ticks);
+	b += Temporal::Beats::ticks (offset.ticks);
 
 	return b;
 }
@@ -285,7 +285,7 @@ TempoMetric::compute_c_superclock (samplecnt_t sr, superclock_t end_scpqn, super
 	_c_per_superclock = log ((double) superclocks_per_quarter_note () / end_scpqn) / superclock_duration;
 }
 void
-TempoMetric::compute_c_quarters (samplecnt_t sr, superclock_t end_scpqn, Evoral::Beats const & quarter_duration)
+TempoMetric::compute_c_quarters (samplecnt_t sr, superclock_t end_scpqn, Temporal::Beats const & quarter_duration)
 {
 	if ((superclocks_per_quarter_note () == end_scpqn) || !ramped()) {
 		_c_per_quarter = 0.0;
@@ -296,7 +296,7 @@ TempoMetric::compute_c_quarters (samplecnt_t sr, superclock_t end_scpqn, Evoral:
 }
 
 superclock_t
-TempoMetric::superclock_at_qn (Evoral::Beats const & qn) const
+TempoMetric::superclock_at_qn (Temporal::Beats const & qn) const
 {
 	if (_c_per_quarter == 0.0) {
 		/* not ramped, use linear */
@@ -323,19 +323,19 @@ TempoMapPoint::set_dirty (bool yn)
 	}
 }
 
-Evoral::Beats
+Temporal::Beats
 TempoMapPoint::quarters_at (superclock_t sc) const
 {
 	/* This TempoMapPoint must already have a fully computed metric and position */
 
 	if (!ramped()) {
-		return _quarters + Evoral::Beats ((sc - _sclock) / (double) (metric().superclocks_per_quarter_note ()));
+		return _quarters + Temporal::Beats ((sc - _sclock) / (double) (metric().superclocks_per_quarter_note ()));
 	}
 
-	return _quarters + Evoral::Beats (expm1 (metric().c_per_superclock() * (sc - _sclock)) / (metric().c_per_superclock() * metric().superclocks_per_quarter_note ()));
+	return _quarters + Temporal::Beats (expm1 (metric().c_per_superclock() * (sc - _sclock)) / (metric().c_per_superclock() * metric().superclocks_per_quarter_note ()));
 }
 
-Evoral::Beats
+Temporal::Beats
 TempoMapPoint::quarters_at (Timecode::BBT_Time const & bbt) const
 {
 	/* This TempoMapPoint must already have a fully computed metric and position */
@@ -345,12 +345,12 @@ TempoMapPoint::quarters_at (Timecode::BBT_Time const & bbt) const
 }
 
 Timecode::BBT_Time
-TempoMapPoint::bbt_at (Evoral::Beats const & qn) const
+TempoMapPoint::bbt_at (Temporal::Beats const & qn) const
 {
 	/* This TempoMapPoint must already have a fully computed metric and position */
 
-	Evoral::Beats quarters_delta = qn - _quarters;
-	int32_t ticks_delta = quarters_delta.to_ticks (Evoral::Beats::PPQN);
+	Temporal::Beats quarters_delta = qn - _quarters;
+	int32_t ticks_delta = quarters_delta.to_ticks (Temporal::Beats::PPQN);
 	return metric().bbt_add (_bbt, Timecode::BBT_Offset (0, 0,  ticks_delta));
 }
 
@@ -358,7 +358,7 @@ TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter, sa
 	: _sample_rate (sr)
 	, _dirty (false)
 {
-	TempoMapPoint tmp (TempoMapPoint::Flag (TempoMapPoint::ExplicitMeter|TempoMapPoint::ExplicitTempo), initial_tempo, initial_meter, 0, Evoral::Beats(), Timecode::BBT_Time(), AudioTime);
+	TempoMapPoint tmp (TempoMapPoint::Flag (TempoMapPoint::ExplicitMeter|TempoMapPoint::ExplicitTempo), initial_tempo, initial_meter, 0, Temporal::Beats(), Timecode::BBT_Time(), AudioTime);
 	_points.push_back (tmp);
 }
 
@@ -376,7 +376,7 @@ TempoMap::meter_at (superclock_t sc) const
 }
 
 Meter const &
-TempoMap::meter_at (Evoral::Beats const & b) const
+TempoMap::meter_at (Temporal::Beats const & b) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return meter_at_locked (b);
@@ -397,7 +397,7 @@ TempoMap::tempo_at (superclock_t sc) const
 }
 
 Tempo const &
-TempoMap::tempo_at (Evoral::Beats const &b) const
+TempoMap::tempo_at (Temporal::Beats const &b) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return tempo_at_locked (b);
@@ -471,7 +471,7 @@ TempoMap::rebuild (superclock_t limit)
 			if ((tmp->lock_style() == MusicTime)) {
 				/* determine superclock and quarter note time for this (music-time) locked point */
 
-				Evoral::Beats qn = prev->quarters_at (tmp->bbt());
+				Temporal::Beats qn = prev->quarters_at (tmp->bbt());
 				superclock_t sc = prev->sclock() + prev->metric().superclock_at_qn (qn - prev->quarters());
 
 				if (qn != tmp->quarters() || tmp->sclock() != sc) {
@@ -530,14 +530,14 @@ TempoMap::rebuild (superclock_t limit)
 		}
 
 		superclock_t sc = tmp->sclock();
-		Evoral::Beats qn (tmp->quarters ());
+		Temporal::Beats qn (tmp->quarters ());
 		Timecode::BBT_Time bbt (tmp->bbt());
 		const bool ramped = tmp->ramped () && next != _points.end();
 
-		/* Evoral::Beats are really quarter notes. This counts how many quarter notes
+		/* Temporal::Beats are really quarter notes. This counts how many quarter notes
 		   there are between grid points in this section of the tempo map.
 		 */
-		const Evoral::Beats qn_step = (Evoral::Beats (1) * 4) / tmp->metric().note_value();
+		const Temporal::Beats qn_step = (Temporal::Beats (1) * 4) / tmp->metric().note_value();
 
 		/* compute implicit points as far as the next explicit point, or limit,
 		   whichever comes first.
@@ -590,7 +590,7 @@ TempoMap::set_tempo_and_meter (Tempo const & tempo, Meter const & meter, supercl
 		   fractional.
 		*/
 
-		Evoral::Beats b = _points.front().quarters_at (sc).round_to_beat();
+		Temporal::Beats b = _points.front().quarters_at (sc).round_to_beat();
 		Timecode::BBT_Time bbt = _points.front().bbt_at (b).round_to_beat ();
 
 		_points.insert (_points.begin(), TempoMapPoint (TempoMapPoint::ExplicitTempo, tempo, meter, sc, b, bbt, AudioTime, ramp));
@@ -646,7 +646,7 @@ TempoMap::set_tempo_and_meter (Tempo const & tempo, Meter const & meter, supercl
 	   fractional.
 	 */
 
-	Evoral::Beats qn = i->quarters_at (sc).round_to_beat();
+	Temporal::Beats qn = i->quarters_at (sc).round_to_beat();
 
 	/* rule: all Tempo changes must be on-beat. So determine the nearest later beat to "sc"
 	 */
@@ -681,7 +681,7 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc, bool ramp)
 		   fractional.
 		*/
 
-		Evoral::Beats b = _points.front().quarters_at (sc).round_to_beat();
+		Temporal::Beats b = _points.front().quarters_at (sc).round_to_beat();
 		Timecode::BBT_Time bbt = _points.front().bbt_at (b).round_to_beat ();
 
 		_points.insert (_points.begin(), TempoMapPoint (TempoMapPoint::ExplicitTempo, t, _points.front().metric(), sc, b, bbt, AudioTime, ramp));
@@ -737,7 +737,7 @@ TempoMap::set_tempo (Tempo const & t, superclock_t sc, bool ramp)
 	   fractional.
 	 */
 
-	Evoral::Beats qn = i->quarters_at (sc).round_to_beat();
+	Temporal::Beats qn = i->quarters_at (sc).round_to_beat();
 
 	/* rule: all Tempo changes must be on-beat. So determine the nearest later beat to "sc"
 	 */
@@ -789,7 +789,7 @@ TempoMap::set_tempo (Tempo const & t, Timecode::BBT_Time const & bbt, bool ramp)
 	++i;
 
 	/* stick a prototype music-locked point up front and let ::rebuild figure out the superclock and quarter time */
-	_points.insert (i, TempoMapPoint (TempoMapPoint::ExplicitTempo, t, meter, 0, Evoral::Beats(), on_beat, MusicTime, ramp));
+	_points.insert (i, TempoMapPoint (TempoMapPoint::ExplicitTempo, t, meter, 0, Temporal::Beats(), on_beat, MusicTime, ramp));
 	return true;
 }
 
@@ -821,7 +821,7 @@ TempoMap::set_meter (Meter const & m, Timecode::BBT_Time const & bbt)
 		return true;
 	}
 
-	Evoral::Beats qn = i->quarters_at (measure_start);
+	Temporal::Beats qn = i->quarters_at (measure_start);
 	superclock_t sc = i->sclock() + i->metric().superclock_at_qn (qn);
 
 	Tempo const & tempo (i->metric());
@@ -845,7 +845,7 @@ TempoMap::set_meter (Meter const & m, superclock_t sc)
 		   fractional.
 		*/
 
-		Evoral::Beats b = _points.front().quarters_at (sc).round_to_beat();
+		Temporal::Beats b = _points.front().quarters_at (sc).round_to_beat();
 		Timecode::BBT_Time bbt = _points.front().bbt_at (b).round_to_beat ();
 
 		_points.insert (_points.begin(), TempoMapPoint (TempoMapPoint::ExplicitMeter, _points.front().metric(), m, sc, b, bbt, AudioTime));
@@ -891,7 +891,7 @@ TempoMap::set_meter (Meter const & m, superclock_t sc)
 	   fractional.
 	*/
 
-	Evoral::Beats b = i->quarters_at (sc).round_to_beat();
+	Temporal::Beats b = i->quarters_at (sc).round_to_beat();
 
 	/* rule: all Meter changes must start a new measure. So determine the nearest, lower beat to "sc". If this is not
 	   the first division of the measure, move to the next measure.
@@ -930,7 +930,7 @@ TempoMap::iterator_at (superclock_t sc)
 	*/
 
 	TempoMetric const & metric (_points.front().metric());
-	const TempoMapPoint tp (TempoMapPoint::Flag (0), metric, metric, sc, Evoral::Beats(), Timecode::BBT_Time(), AudioTime);
+	const TempoMapPoint tp (TempoMapPoint::Flag (0), metric, metric, sc, Temporal::Beats(), Timecode::BBT_Time(), AudioTime);
 	TempoMapPoint::SuperClockComparator scmp;
 
 	TempoMapPoints::iterator tmp = upper_bound (_points.begin(), _points.end(), tp, scmp);
@@ -943,7 +943,7 @@ TempoMap::iterator_at (superclock_t sc)
 }
 
 TempoMapPoints::iterator
-TempoMap::iterator_at (Evoral::Beats const & qn)
+TempoMap::iterator_at (Temporal::Beats const & qn)
 {
 	/* CALLER MUST HOLD LOCK */
 
@@ -990,7 +990,7 @@ TempoMap::iterator_at (Timecode::BBT_Time const & bbt)
 	*/
 
 	TempoMetric const & metric (_points.front().metric());
-	const TempoMapPoint tp (TempoMapPoint::Flag(0), metric, metric, 0, Evoral::Beats(), bbt, MusicTime);
+	const TempoMapPoint tp (TempoMapPoint::Flag(0), metric, metric, 0, Temporal::Beats(), bbt, MusicTime);
 	TempoMapPoint::BBTComparator bcmp;
 
 	TempoMapPoints::iterator tmp = upper_bound (_points.begin(), _points.end(), tp, bcmp);
@@ -1013,35 +1013,35 @@ Timecode::BBT_Time
 TempoMap::bbt_at_locked (superclock_t sc) const
 {
 	TempoMapPoint point (const_point_at (sc));
-	Evoral::Beats b ((sc - point.sclock()) / (double) point.metric().superclocks_per_quarter_note());
+	Temporal::Beats b ((sc - point.sclock()) / (double) point.metric().superclocks_per_quarter_note());
 	return point.metric().bbt_add (point.bbt(), Timecode::BBT_Offset (0, b.get_beats(), b.get_ticks()));
 }
 
 Timecode::BBT_Time
-TempoMap::bbt_at (Evoral::Beats const & qn) const
+TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return bbt_at_locked (qn);
 }
 
 Timecode::BBT_Time
-TempoMap::bbt_at_locked (Evoral::Beats const & qn) const
+TempoMap::bbt_at_locked (Temporal::Beats const & qn) const
 {
 	//Glib::Threads::RWLock::ReaderLock lm (_lock);
 	TempoMapPoint const & point (const_point_at (qn));
-	Evoral::Beats delta (qn - point.quarters());
+	Temporal::Beats delta (qn - point.quarters());
 	return point.metric().bbt_add (point.bbt(), Timecode::BBT_Offset (0, delta.get_beats(), delta.get_ticks()));
 }
 
 superclock_t
-TempoMap::superclock_at (Evoral::Beats const & qn) const
+TempoMap::superclock_at (Temporal::Beats const & qn) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return superclock_at_locked (qn);
 }
 
 superclock_t
-TempoMap::superclock_at_locked (Evoral::Beats const & qn) const
+TempoMap::superclock_at_locked (Temporal::Beats const & qn) const
 {
 	assert (!_points.empty());
 
@@ -1055,9 +1055,9 @@ TempoMap::superclock_at_locked (Evoral::Beats const & qn) const
 		--i;
 	}
 
-	/* compute distance from reference point to b. Remember that Evoral::Beats is always interpreted as quarter notes */
+	/* compute distance from reference point to b. Remember that Temporal::Beats is always interpreted as quarter notes */
 
-	const Evoral::Beats q_delta = qn - i->quarters();
+	const Temporal::Beats q_delta = qn - i->quarters();
 	superclock_t sclock_delta = i->metric().superclock_at_qn (q_delta);
 	return i->sclock() + sclock_delta;
 }
@@ -1076,7 +1076,7 @@ TempoMap::superclock_at_locked (Timecode::BBT_Time const & bbt) const
 	assert (!_points.empty());
 
 	/* only the bbt property matters, since we're just using it to compare */
-	const TempoMapPoint tmp (TempoMapPoint::Flag (0), Tempo (120), Meter (4, 4), 0, Evoral::Beats(), bbt, MusicTime);
+	const TempoMapPoint tmp (TempoMapPoint::Flag (0), Tempo (120), Meter (4, 4), 0, Temporal::Beats(), bbt, MusicTime);
 	TempoMapPoint::BBTComparator bcmp;
 
 	TempoMapPoints::const_iterator i = upper_bound (_points.begin(), _points.end(), tmp, bcmp);
@@ -1092,10 +1092,10 @@ TempoMap::superclock_at_locked (Timecode::BBT_Time const & bbt) const
 	const Timecode::BBT_Offset delta = i->metric().bbt_delta (bbt, i->bbt());
 
 	/* convert to quarter notes */
-	const int32_t ticks = delta.ticks + (Evoral::Beats::PPQN * delta.beats * 4) / i->metric().note_value();
+	const int32_t ticks = delta.ticks + (Temporal::Beats::PPQN * delta.beats * 4) / i->metric().note_value();
 
 	/* get distance in superclocks */
-	return i->sclock() + i->metric().superclock_at_qn (Evoral::Beats::ticks (ticks));
+	return i->sclock() + i->metric().superclock_at_qn (Temporal::Beats::ticks (ticks));
 }
 
 void
@@ -1191,7 +1191,7 @@ TempoMap::move_to (superclock_t current, superclock_t destination, bool push)
 }
 
 void
-TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, Evoral::Beats const & resolution)
+TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, Temporal::Beats const & resolution)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	TempoMapPoints::iterator p = iterator_at (start);
@@ -1200,7 +1200,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, E
 		++p;
 	}
 
-	if (resolution == Evoral::Beats()) {
+	if (resolution == Temporal::Beats()) {
 		/* just hand over the points as-is */
 		while (p != _points.end() && p->sclock() < end) {
 			ret.push_back (*p);
@@ -1210,7 +1210,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, E
 	}
 
 	superclock_t pos = p->sclock();
-	Evoral::Beats qpos;
+	Temporal::Beats qpos;
 	TempoMapPoints::iterator nxt = p;
 	++nxt;
 
@@ -1323,24 +1323,24 @@ test_bbt_math ()
 			for (int b = 1; b < 13; ++b) {
 				PRINT_RESULT((*m), "+", bbt_add, a, B, b, 0);
 				PRINT_RESULT((*m), "+", bbt_add, a, B, b, 1);
-				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Evoral::Beats::PPQN/2);
-				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Evoral::Beats::PPQN);
-				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Evoral::Beats::PPQN - 1);
-				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Evoral::Beats::PPQN - 2);
+				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Temporal::Beats::PPQN/2);
+				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Temporal::Beats::PPQN);
+				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Temporal::Beats::PPQN - 1);
+				PRINT_RESULT((*m), "+", bbt_add, a, B, b, Temporal::Beats::PPQN - 2);
 
 				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, 0);
 				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, 1);
-				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Evoral::Beats::PPQN/2);
-				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Evoral::Beats::PPQN);
-				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Evoral::Beats::PPQN - 1);
-				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Evoral::Beats::PPQN - 2);
+				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Temporal::Beats::PPQN/2);
+				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Temporal::Beats::PPQN);
+				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Temporal::Beats::PPQN - 1);
+				PRINT_RESULT((*m), "+", bbt_add, b1, B, b, Temporal::Beats::PPQN - 2);
 
 				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, 0);
 				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, 1);
-				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Evoral::Beats::PPQN/2);
-				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Evoral::Beats::PPQN);
-				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Evoral::Beats::PPQN - 1);
-				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Evoral::Beats::PPQN - 2);
+				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Temporal::Beats::PPQN/2);
+				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Temporal::Beats::PPQN);
+				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Temporal::Beats::PPQN - 1);
+				PRINT_RESULT((*m), "+", bbt_add, n1, B, b, Temporal::Beats::PPQN - 2);
 			}
 		}
 
@@ -1348,10 +1348,10 @@ test_bbt_math ()
 			for (int b = 1; b < 13; ++b) {
 				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, 0);
 				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, 1);
-				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Evoral::Beats::PPQN/2);
-				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Evoral::Beats::PPQN);
-				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Evoral::Beats::PPQN - 1);
-				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Evoral::Beats::PPQN - 2);
+				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Temporal::Beats::PPQN/2);
+				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Temporal::Beats::PPQN);
+				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Temporal::Beats::PPQN - 1);
+				PRINT_RESULT ((*m), "-", bbt_subtract, a, B, b, Temporal::Beats::PPQN - 2);
 			}
 		}
 	}
@@ -1389,7 +1389,7 @@ main ()
 	}
 
 	TempoMapPoints grid;
-	tmap.get_grid (grid, SECONDS_TO_SUPERCLOCK (12.3), SECONDS_TO_SUPERCLOCK (44), Evoral::Beats::ticks ((Evoral::Beats::PPQN * 4) / 12));
+	tmap.get_grid (grid, SECONDS_TO_SUPERCLOCK (12.3), SECONDS_TO_SUPERCLOCK (44), Temporal::Beats::ticks ((Temporal::Beats::PPQN * 4) / 12));
 	cout << "grid contains " << grid.size() << endl;
 	for (TempoMapPoints::iterator p = grid.begin(); p != grid.end(); ++p) {
 		cout << *p << endl;

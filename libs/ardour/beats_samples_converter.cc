@@ -31,9 +31,9 @@ namespace ARDOUR {
  *  taking tempo changes into account.
  */
 samplepos_t
-BeatsSamplesConverter::to (Evoral::Beats beats) const
+BeatsSamplesConverter::to (Temporal::Beats beats) const
 {
-	if (beats < Evoral::Beats()) {
+	if (beats < Temporal::Beats()) {
 		std::cerr << "negative beats passed to BFC: " << beats << std::endl;
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
@@ -45,7 +45,7 @@ BeatsSamplesConverter::to (Evoral::Beats beats) const
  *  supplied to the constructor.  Returns the equivalent number of quarter-note beats,
  *  taking tempo changes into account.
  */
-Evoral::Beats
+Temporal::Beats
 BeatsSamplesConverter::from (samplepos_t samples) const
 {
 	return _tempo_map.framewalk_to_qn (_origin_b, samples);
@@ -60,7 +60,7 @@ DoubleBeatsSamplesConverter::to (double beats) const
 		PBD::stacktrace (std::cerr, 30);
 		return 0;
 	}
-	return _tempo_map.samplepos_plus_qn (_origin_b, Evoral::Beats(beats)) - _origin_b;
+	return _tempo_map.samplepos_plus_qn (_origin_b, Temporal::Beats(beats)) - _origin_b;
 }
 
 /** As above, but with quarter-note beats in double instead (for GUI). */

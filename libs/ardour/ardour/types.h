@@ -31,8 +31,9 @@
 
 #include <inttypes.h>
 
-#include "timecode/bbt_time.h"
-#include "timecode/time.h"
+#include "temporal/bbt_time.h"
+#include "temporal/time.h"
+#include "temporal/types.h"
 
 #include "pbd/id.h"
 
@@ -42,6 +43,9 @@
 #include "ardour/plugin_types.h"
 
 #include <map>
+
+using Temporal::max_samplepos;
+using Temporal::max_samplecnt;
 
 #if __GNUC__ < 3
 typedef int intptr_t;
@@ -65,23 +69,11 @@ namespace ARDOUR {
 	typedef uint64_t microseconds_t;
 	typedef uint32_t pframes_t;
 
-	/* Any position measured in audio samples.
-	   Assumed to be non-negative but not enforced.
-	*/
-	typedef int64_t samplepos_t;
+	/* rebind Temporal position types into ARDOUR namespace */
+	typedef Temporal::samplecnt_t samplecnt_t;
+	typedef Temporal::samplepos_t samplepos_t;
+	typedef Temporal::sampleoffset_t sampleoffset_t;
 
-	/* Any distance from a given samplepos_t.
-	   Maybe positive or negative.
-	*/
-	typedef int64_t sampleoffset_t;
-
-	/* Any count of audio samples.
-	   Assumed to be positive but not enforced.
-	*/
-	typedef int64_t samplecnt_t;
-
-	static const samplepos_t max_samplepos = INT64_MAX;
-	static const samplecnt_t max_samplecnt = INT64_MAX;
 	static const layer_t    max_layer    = UINT32_MAX;
 
 	// a set of (time) intervals: first of pair is the offset of the start within the region, second is the offset of the end
@@ -720,38 +712,8 @@ namespace ARDOUR {
 
 } // namespace ARDOUR
 
-static inline ARDOUR::samplepos_t
-session_sample_to_track_sample (ARDOUR::samplepos_t session_sample, double speed)
-{
-	long double result = (long double) session_sample * (long double) speed;
-
-	if (result >= (long double) ARDOUR::max_samplepos) {
-		return ARDOUR::max_samplepos;
-	} else if (result <= (long double) (ARDOUR::max_samplepos) * (ARDOUR::samplepos_t)(-1)) {
-		return (ARDOUR::max_samplepos * (ARDOUR::samplepos_t)(-1));
-	} else {
-		return result;
-	}
-}
-
-static inline ARDOUR::samplepos_t
-track_sample_to_session_sample (ARDOUR::samplepos_t track_sample, double speed)
-{
-	/* NB - do we need a check for speed == 0 ??? */
-	long double result = (long double) track_sample / (long double) speed;
-
-	if (result >= (long double) ARDOUR::max_samplepos) {
-		return ARDOUR::max_samplepos;
-	} else if (result <= (long double) (ARDOUR::max_samplepos) * (ARDOUR::samplepos_t)(-1)) {
-		return (ARDOUR::max_samplepos * (ARDOUR::samplepos_t)(-1));
-	} else {
-		return result;
-	}
-}
-
 /* for now, break the rules and use "using" to make this "global" */
 
 using ARDOUR::samplepos_t;
-
 
 #endif /* __ardour_types_h__ */

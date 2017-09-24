@@ -127,7 +127,7 @@ private:
 	ArdourCanvas::Polygon* _tmp_poly;
 
 	MidiRegionView& parent_mrv;
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 	MidiGhostRegion::GhostEvent* find_event (boost::shared_ptr<NoteType>);
 
 	typedef boost::unordered_map<boost::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;

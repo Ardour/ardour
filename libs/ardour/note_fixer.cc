@@ -126,7 +126,7 @@ NoteFixer::emit(Evoral::EventSink<samplepos_t>& dst,
 }
 
 NoteFixer::Event*
-NoteFixer::copy_event(samplepos_t time, const Evoral::Event<Evoral::Beats>& ev)
+NoteFixer::copy_event(samplepos_t time, const Evoral::Event<Temporal::Beats>& ev)
 {
 	return new Event(ev.event_type(), time, ev.size(), ev.buffer());
 }

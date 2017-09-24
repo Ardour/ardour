@@ -45,7 +45,7 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
+	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Temporal::Beats>& ev);
 	void append_event_samples(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 	void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
 	void destroy_model(const Glib::Threads::Mutex::Lock& lock);

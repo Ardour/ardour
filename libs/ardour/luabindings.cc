@@ -18,7 +18,7 @@
 
 #include <glibmm.h>
 
-#include "timecode/bbt_time.h"
+#include "temporal/bbt_time.h"
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
 #include "evoral/Control.hpp"
@@ -206,7 +206,7 @@ CLASSKEYS(PBD::Configuration);
 CLASSKEYS(PBD::PropertyChange);
 CLASSKEYS(PBD::StatefulDestructible);
 
-CLASSKEYS(Evoral::Beats);
+CLASSKEYS(Temporal::Beats);
 CLASSKEYS(Evoral::Event<samplepos_t>);
 CLASSKEYS(Evoral::ControlEvent);
 
@@ -235,7 +235,7 @@ CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Evoral::Beats> >);
+CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
 CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::FileSource>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
@@ -247,8 +247,8 @@ CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Readable>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
 CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
-CLASSKEYS(boost::shared_ptr<Evoral::Note<Evoral::Beats> >);
-CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Evoral::Beats> >);
+CLASSKEYS(boost::shared_ptr<Evoral::Note<Temporal::Beats> >);
+CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
 CLASSKEYS(boost::shared_ptr<ARDOUR::Playlist>);
 CLASSKEYS(boost::shared_ptr<ARDOUR::Route>);
@@ -516,9 +516,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("time", (samplepos_t (Evoral::Event<samplepos_t>::*)())&Evoral::Event<samplepos_t>::time)
 		.endClass ()
 
-		.beginClass <Evoral::Beats> ("Beats")
+		.beginClass <Temporal::Beats> ("Beats")
 		.addConstructor <void (*) (double)> ()
-		.addFunction ("to_double", &Evoral::Beats::to_double)
+		.addFunction ("to_double", &Temporal::Beats::to_double)
 		.endClass ()
 
 		.beginClass <Evoral::Parameter> ("Parameter")
@@ -570,16 +570,16 @@ LuaBindings::common (lua_State* L)
 		.addData ("to", &Evoral::Range<samplepos_t>::to)
 		.endClass ()
 
-		.deriveWSPtrClass <Evoral::Sequence<Evoral::Beats>, Evoral::ControlSet> ("Sequence")
+		.deriveWSPtrClass <Evoral::Sequence<Temporal::Beats>, Evoral::ControlSet> ("Sequence")
 		.endClass ()
 
-		.beginWSPtrClass <Evoral::Note<Evoral::Beats> > ("NotePtr")
-		.addFunction ("time", &Evoral::Note<Evoral::Beats>::time)
-		.addFunction ("note", &Evoral::Note<Evoral::Beats>::note)
-		.addFunction ("velocity", &Evoral::Note<Evoral::Beats>::velocity)
-		.addFunction ("off_velocity", &Evoral::Note<Evoral::Beats>::off_velocity)
-		.addFunction ("length", &Evoral::Note<Evoral::Beats>::length)
-		.addFunction ("channel", &Evoral::Note<Evoral::Beats>::channel)
+		.beginWSPtrClass <Evoral::Note<Temporal::Beats> > ("NotePtr")
+		.addFunction ("time", &Evoral::Note<Temporal::Beats>::time)
+		.addFunction ("note", &Evoral::Note<Temporal::Beats>::note)
+		.addFunction ("velocity", &Evoral::Note<Temporal::Beats>::velocity)
+		.addFunction ("off_velocity", &Evoral::Note<Temporal::Beats>::off_velocity)
+		.addFunction ("length", &Evoral::Note<Temporal::Beats>::length)
+		.addFunction ("channel", &Evoral::Note<Temporal::Beats>::channel)
 		.endClass ()
 
 		/* libevoral enums */
@@ -1267,11 +1267,11 @@ LuaBindings::common (lua_State* L)
 		//.addFunction ("what_can_be_automated", &Automatable::what_can_be_automated)
 		.endClass ()
 
-		.deriveWSPtrClass <AutomatableSequence<Evoral::Beats>, Automatable> ("AutomatableSequence")
-		.addCast<Evoral::Sequence<Evoral::Beats> > ("to_sequence")
+		.deriveWSPtrClass <AutomatableSequence<Temporal::Beats>, Automatable> ("AutomatableSequence")
+		.addCast<Evoral::Sequence<Temporal::Beats> > ("to_sequence")
 		.endClass ()
 
-		.deriveWSPtrClass <MidiModel, AutomatableSequence<Evoral::Beats> > ("MidiModel")
+		.deriveWSPtrClass <MidiModel, AutomatableSequence<Temporal::Beats> > ("MidiModel")
 		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_command)
 		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
 		.endClass ()
@@ -1583,14 +1583,14 @@ LuaBindings::common (lua_State* L)
 		.addVoidPtrConstructor<std::list<boost::shared_ptr <AutomationControl> > > ()
 		.endClass ()
 
-		.beginStdList <boost::shared_ptr<Evoral::Note<Evoral::Beats> > > ("NotePtrList")
+		.beginStdList <boost::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
 		.endClass ()
 
 		.beginConstStdList <Evoral::ControlEvent*> ("EventList")
 		.endClass ()
 
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
-	// typedef Evoral::Note<Evoral::Beats> Note;
+	// typedef Evoral::Note<Temporal::Beats> Note;
 	// std::set< boost::weak_ptr<Note> >
 		.beginStdSet <boost::weak_ptr<Note> > ("WeakNoteSet")
 		.endClass ()

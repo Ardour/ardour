@@ -23,7 +23,7 @@
 
 #include <vector>
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/Range.hpp"
 
 #include "pbd/string_convert.h"

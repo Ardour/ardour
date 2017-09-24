@@ -22,6 +22,7 @@
 
 #include <glibmm/threads.h>
 
+#include "temporal/beats.h"
 #include "ardour/midi_buffer.h"
 
 namespace Evoral {
@@ -46,7 +47,7 @@ public:
 	void remove (uint8_t note, uint8_t chn);
 	void resolve_notes (MidiBuffer& buffer, samplepos_t time);
 	void resolve_notes (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
-	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Evoral::Beats time);
+	void resolve_notes (MidiSource& src, const Glib::Threads::Mutex::Lock& lock, Temporal::Beats time);
 	void dump (std::ostream&);
 	void reset ();
 	bool empty() const { return _on == 0; }

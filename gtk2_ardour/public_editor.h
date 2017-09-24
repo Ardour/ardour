@@ -35,7 +35,7 @@
 #include <gtkmm/notebook.h>
 #include <sigc++/signal.h>
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/Note.hpp"
 
 #include "pbd/statefuldestructible.h"
@@ -339,7 +339,7 @@ public:
 	virtual samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next) = 0;
 	virtual samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration) = 0;
 	virtual unsigned get_grid_beat_divisions(samplepos_t position) = 0;
-	virtual Evoral::Beats get_grid_type_as_beats (bool& success, samplepos_t position) = 0;
+	virtual Temporal::Beats get_grid_type_as_beats (bool& success, samplepos_t position) = 0;
 	virtual int32_t get_grid_music_divisions (uint32_t event_state) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
 
@@ -470,7 +470,7 @@ public:
 	virtual void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (samplepos_t) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
-	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 
 	virtual void mouse_add_new_tempo_event (samplepos_t where) = 0;
 	virtual void mouse_add_new_meter_event (samplepos_t where) = 0;

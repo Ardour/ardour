@@ -561,7 +561,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	}
 
 	int old_val;
-	Evoral::Beats old_time;
+	Temporal::Beats old_time;
 	if ((change.property == StartTime || change.property == Length) &&
 	    xml_change->get_property ("old", old_time)) {
 		change.old_value = old_time;
@@ -573,7 +573,7 @@ MidiModel::NoteDiffCommand::unmarshal_change (XMLNode *xml_change)
 	}
 
 	int new_val;
-	Evoral::Beats new_time;
+	Temporal::Beats new_time;
 	if ((change.property == StartTime || change.property == Length) &&
 	    xml_change->get_property ("new", new_time)) {
 		change.new_value = new_time;
@@ -1113,7 +1113,7 @@ MidiModel::PatchChangeDiffCommand::unmarshal_patch_change (XMLNode* n)
 		assert(false);
 	}
 
-	Evoral::Beats time = Evoral::Beats();
+	Temporal::Beats time = Temporal::Beats();
 	if (!n->get_property ("time", time)) {
 		// warning??
 	}
@@ -1832,7 +1832,7 @@ MidiModel::transpose (NoteDiffCommand* c, const NotePtr note_ptr, int semitones)
 void
 MidiModel::control_list_marked_dirty ()
 {
-	AutomatableSequence<Evoral::Beats>::control_list_marked_dirty ();
+	AutomatableSequence<Temporal::Beats>::control_list_marked_dirty ();
 
 	ContentsChanged (); /* EMIT SIGNAL */
 }

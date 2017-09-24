@@ -29,7 +29,7 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 #include "ardour/ltc_file_reader.h"
 
 #include "pbd/i18n.h"

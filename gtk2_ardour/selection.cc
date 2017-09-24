@@ -1159,15 +1159,15 @@ Selection::get_state () const
 	}
 
 	/* midi region views have thir own internal selection. */
-	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > rid_notes;
+	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > rid_notes;
 	editor->get_per_region_note_selection (rid_notes);
 
-	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >::iterator rn_it;
+	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
 		XMLNode* n = node->add_child (X_("MIDINotes"));
 		n->set_property (X_("region-id"), (*rn_it).first);
 
-		for (std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
+		for (std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
 			XMLNode* nc = n->add_child(X_("note"));
 			nc->set_property(X_("note-id"), (*i)->id());
 		}

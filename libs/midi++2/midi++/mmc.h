@@ -20,7 +20,7 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"

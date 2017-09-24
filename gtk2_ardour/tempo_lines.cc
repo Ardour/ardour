@@ -80,7 +80,7 @@ TempoLines::draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		/* draw line with alpha corresponding to coarsest level */
 		const uint8_t    a = max(8, (int)rint(UINT_RGBA_A(base) / (0.8 * log2(level))));
 		const uint32_t   c = UINT_RGBA_CHANGE_A(base, a);
-		const samplepos_t f = _bfc->to (Evoral::Beats (grid.begin()->qn + (l / (double) divisions))) + _bfc->origin_b();
+		const samplepos_t f = _bfc->to (Temporal::Beats (grid.begin()->qn + (l / (double) divisions))) + _bfc->origin_b();
 
 		if (f > leftmost_sample) {
 			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (f), 1.0, c);

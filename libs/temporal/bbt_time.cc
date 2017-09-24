@@ -19,7 +19,7 @@
 #include <cmath>
 #include <cassert>
 
-#include "timecode/bbt_time.h"
+#include "temporal/bbt_time.h"
 
 using namespace Timecode;
 
@@ -30,7 +30,7 @@ using namespace Timecode;
 
    1920 has many factors, though going up to 3840 gets a couple more.
 
-   This needs to match Evoral::Beats::PPQN
+   This needs to match Temporal::Beats::PPQN
 */
 
 const double BBT_Time::ticks_per_beat = 1920.0;

@@ -22,7 +22,7 @@
 
 #include "pbd/enum_convert.h"
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/ControlList.hpp"
 
 namespace PBD {
@@ -30,24 +30,24 @@ namespace PBD {
 DEFINE_ENUM_CONVERT(Evoral::ControlList::InterpolationStyle)
 
 template <>
-inline bool to_string (Evoral::Beats beats, std::string& str)
+inline bool to_string (Temporal::Beats beats, std::string& str)
 {
 	return double_to_string (beats.to_double (), str);
 }
 
 template <>
-inline bool string_to (const std::string& str, Evoral::Beats& beats)
+inline bool string_to (const std::string& str, Temporal::Beats& beats)
 {
 	double tmp;
 	if (!string_to_double (str, tmp)) {
 		return false;
 	}
-	beats = Evoral::Beats(tmp);
+	beats = Temporal::Beats(tmp);
 	return true;
 }
 
 template <>
-inline std::string to_string (Evoral::Beats beats)
+inline std::string to_string (Temporal::Beats beats)
 {
 	std::string tmp;
 	double_to_string (beats.to_double (), tmp);
@@ -55,11 +55,11 @@ inline std::string to_string (Evoral::Beats beats)
 }
 
 template <>
-inline Evoral::Beats string_to (const std::string& str)
+inline Temporal::Beats string_to (const std::string& str)
 {
 	double tmp;
 	string_to_double (str, tmp);
-	return Evoral::Beats (tmp);
+	return Temporal::Beats (tmp);
 }
 
 } // namespace PBD

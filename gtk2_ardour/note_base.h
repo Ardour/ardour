@@ -22,6 +22,7 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "temporal/beats.h"
 #include "canvas/types.h"
 
 #include "rgb_macros.h"
@@ -53,7 +54,7 @@ namespace ArdourCanvas {
 class NoteBase : public sigc::trackable
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();

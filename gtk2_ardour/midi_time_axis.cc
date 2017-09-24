@@ -1418,7 +1418,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >& selection)
+MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >& selection)
 {
 	_view->foreach_regionview (
 		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
@@ -1449,14 +1449,14 @@ MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t not
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection)
+MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection)
 {
-	Evoral::Sequence<Evoral::Beats>::Notes selected;
+	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	dynamic_cast<MidiRegionView*>(rv)->selection_as_notelist (selected, false);
 
-	std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+	std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > notes;
 
-	Evoral::Sequence<Evoral::Beats>::Notes::iterator sel_it;
+	Evoral::Sequence<Temporal::Beats>::Notes::iterator sel_it;
 	for (sel_it = selected.begin(); sel_it != selected.end(); ++sel_it) {
 		notes.insert (*sel_it);
 	}

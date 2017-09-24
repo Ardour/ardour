@@ -41,14 +41,14 @@ public:
 	void note_off_event_handler (int note);
 	void rest_event_handler ();
 
-	Evoral::Beats note_length();
+	Temporal::Beats note_length();
 	uint8_t note_velocity() const;
 	uint8_t note_channel() const;
 
 	int current_octave () const { return (int) floor (octave_adjustment.get_value()); }
 
 private:
-	Evoral::Beats _current_note_length;
+	Temporal::Beats _current_note_length;
 	uint8_t _current_note_velocity;
 
 	Gtk::VBox packer;

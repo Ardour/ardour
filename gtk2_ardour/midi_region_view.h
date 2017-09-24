@@ -65,8 +65,8 @@ class CursorContext;
 class MidiRegionView : public RegionView
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
-	typedef Evoral::Sequence<Evoral::Beats>::Notes Notes;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
+	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
 	                RouteTimeAxisView&                    tv,
@@ -99,8 +99,8 @@ public:
 	{ return midi_view()->midi_view(); }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
-	                    Evoral::Beats pos, Evoral::Beats len);
-	void step_sustain (Evoral::Beats beats);
+	                    Temporal::Beats pos, Temporal::Beats len);
+	void step_sustain (Temporal::Beats beats);
 	void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
@@ -109,17 +109,17 @@ public:
 	uint32_t get_fill_color() const;
 	void color_handler ();
 
-	void show_step_edit_cursor (Evoral::Beats pos);
-	void move_step_edit_cursor (Evoral::Beats pos);
+	void show_step_edit_cursor (Temporal::Beats pos);
+	void move_step_edit_cursor (Temporal::Beats pos);
 	void hide_step_edit_cursor ();
-	void set_step_edit_cursor_width (Evoral::Beats beats);
+	void set_step_edit_cursor_width (Temporal::Beats beats);
 
 	void redisplay_model();
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
 	NoteBase* add_note(const boost::shared_ptr<NoteType> note, bool visible);
-	void resolve_note(uint8_t note_num, Evoral::Beats end_time);
+	void resolve_note(uint8_t note_num, Temporal::Beats end_time);
 
 	void cut_copy_clear (Editing::CutCopyOp);
 	bool paste (samplepos_t pos, const ::Selection& selection, PasteContext& ctx, const int32_t sub_num);
@@ -134,7 +134,7 @@ public:
 	 * @key a reference to an instance of MIDI::Name::PatchPrimaryKey whose fields will
 	 *        will be set according to the result of the lookup
 	 */
-	void get_patch_key_at (Evoral::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
+	void get_patch_key_at (Temporal::Beats time, uint8_t channel, MIDI::Name::PatchPrimaryKey& key) const;
 
 	/** Convert a given PatchChange into a PatchPrimaryKey
 	 */
@@ -145,10 +145,10 @@ public:
 	 * @param new_patch new patch
 	 */
 	void change_patch_change (PatchChange& old_patch, const MIDI::Name::PatchPrimaryKey& new_patch);
-	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Evoral::Beats> const &);
+	void change_patch_change (ARDOUR::MidiModel::PatchChangePtr, Evoral::PatchChange<Temporal::Beats> const &);
 
-	void add_patch_change (samplecnt_t, Evoral::PatchChange<Evoral::Beats> const &);
-	void move_patch_change (PatchChange &, Evoral::Beats);
+	void add_patch_change (samplecnt_t, Evoral::PatchChange<Temporal::Beats> const &);
+	void move_patch_change (PatchChange &, Temporal::Beats);
 	void delete_patch_change (PatchChange *);
 	void edit_patch_change (PatchChange *);
 
@@ -176,7 +176,7 @@ public:
 
 	void start_note_diff_command (std::string name = "midi edit");
 	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, uint8_t val);
-	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Evoral::Beats val);
+	void note_diff_add_change (NoteBase* ev, ARDOUR::MidiModel::NoteDiffCommand::Property, Temporal::Beats val);
 	void note_diff_add_note (const boost::shared_ptr<NoteType> note, bool selected, bool show_velocity = false);
 	void note_diff_remove_note (NoteBase* ev);
 
@@ -200,7 +200,7 @@ public:
 	void   select_range(samplepos_t start, samplepos_t end);
 	void   invert_selection ();
 
-	Evoral::Beats earliest_in_selection ();
+	Temporal::Beats earliest_in_selection ();
 	void move_selection(double dx, double dy, double cumulative_dy);
 	void note_dropped (NoteBase* ev, double d_qn, int8_t d_note, bool copy);
 	NoteBase* copy_selection (NoteBase* primary);
@@ -268,23 +268,23 @@ public:
 	samplepos_t snap_pixel_to_sample(double x, bool ensure_snap = false);
 
 	/** Convert a timestamp in beats into samples (both relative to region position) */
-	samplepos_t region_beats_to_region_samples(Evoral::Beats beats) const;
+	samplepos_t region_beats_to_region_samples(Temporal::Beats beats) const;
 	/** Convert a timestamp in beats into absolute samples */
-	samplepos_t region_beats_to_absolute_samples(Evoral::Beats beats) const {
+	samplepos_t region_beats_to_absolute_samples(Temporal::Beats beats) const {
 		return _region->position() + region_beats_to_region_samples (beats);
 	}
 	/** Convert a timestamp in samples to beats (both relative to region position) */
-	Evoral::Beats region_samples_to_region_beats(samplepos_t) const;
+	Temporal::Beats region_samples_to_region_beats(samplepos_t) const;
 	double region_samples_to_region_beats_double(samplepos_t) const;
 
 	/** Convert a timestamp in beats measured from source start into absolute samples */
-	samplepos_t source_beats_to_absolute_samples(Evoral::Beats beats) const;
+	samplepos_t source_beats_to_absolute_samples(Temporal::Beats beats) const;
 	/** Convert a timestamp in beats measured from source start into region-relative samples */
-	samplepos_t source_beats_to_region_samples(Evoral::Beats beats) const {
+	samplepos_t source_beats_to_region_samples(Temporal::Beats beats) const {
 		return source_beats_to_absolute_samples (beats) - _region->position();
 	}
 	/** Convert a timestamp in absolute samples to beats measured from source start*/
-	Evoral::Beats absolute_samples_to_source_beats(samplepos_t) const;
+	Temporal::Beats absolute_samples_to_source_beats(samplepos_t) const;
 
 	ARDOUR::BeatsSamplesConverter const & region_relative_time_converter () const {
 		return _region_relative_time_converter;
@@ -302,7 +302,7 @@ public:
 
 	void goto_previous_note (bool add_to_selection);
 	void goto_next_note (bool add_to_selection);
-	void change_note_lengths (bool, bool, Evoral::Beats beats, bool start, bool end);
+	void change_note_lengths (bool, bool, Temporal::Beats beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
@@ -333,7 +333,7 @@ public:
 	 * \param state the keyboard modifier mask for the canvas event (click).
 	 * \param shift_snap true alters snap behavior to round down always (false if the gui has already done that).
 	 */
-	void create_note_at (samplepos_t t, double y, Evoral::Beats length, uint32_t state, bool shift_snap);
+	void create_note_at (samplepos_t t, double y, Temporal::Beats length, uint32_t state, bool shift_snap);
 
 	/** An external request to clear the note selection, remove MRV from editor
 	 * selection.
@@ -436,8 +436,8 @@ private:
 	double                               _last_ghost_x;
 	double                               _last_ghost_y;
 	ArdourCanvas::Rectangle*             _step_edit_cursor;
-	Evoral::Beats                        _step_edit_cursor_width;
-	Evoral::Beats                        _step_edit_cursor_position;
+	Temporal::Beats                        _step_edit_cursor_width;
+	Temporal::Beats                        _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
 
 	MouseState _mouse_state;
@@ -495,7 +495,7 @@ private:
 
 	void drop_down_keys ();
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
-	void get_events (Events& e, Evoral::Sequence<Evoral::Beats>::NoteOperator op, uint8_t val, int chan_mask = 0);
+	void get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOperator op, uint8_t val, int chan_mask = 0);
 
 	void display_patch_changes_on_channel (uint8_t, bool);
 
@@ -503,7 +503,7 @@ private:
 	void data_recorded (boost::weak_ptr<ARDOUR::MidiSource>);
 
 	/** Get grid type as beats, or default to 1 if not snapped to beats. */
-	Evoral::Beats get_grid_beats(samplepos_t pos) const;
+	Temporal::Beats get_grid_beats(samplepos_t pos) const;
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
@@ -524,7 +524,7 @@ private:
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
 
-	Evoral::Beats snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const;
+	Temporal::Beats snap_sample_to_grid_underneath (samplepos_t p, int32_t divisions, bool shift_snap) const;
 
 	PBD::ScopedConnection _mouse_mode_connection;
 

@@ -424,9 +424,9 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 
 				smfs->append_event_beats(
 					source_lock,
-					Evoral::Event<Evoral::Beats>(
+					Evoral::Event<Temporal::Beats>(
 						Evoral::MIDI_EVENT,
-						Evoral::Beats::ticks_at_rate(t, source->ppqn()),
+						Temporal::Beats::ticks_at_rate(t, source->ppqn()),
 						size,
 						buf));
 
@@ -440,7 +440,7 @@ write_midi_data_to_new_files (Evoral::SMF* source, ImportStatus& status,
 				/* we wrote something */
 
 				const samplepos_t     pos          = 0;
-				const Evoral::Beats  length_beats = Evoral::Beats::ticks_at_rate(t, source->ppqn());
+				const Temporal::Beats  length_beats = Temporal::Beats::ticks_at_rate(t, source->ppqn());
 				BeatsSamplesConverter converter(smfs->session().tempo_map(), pos);
 				smfs->update_length(pos + converter.to(length_beats.round_up_to_beat()));
 				smfs->mark_streaming_write_completed (source_lock);

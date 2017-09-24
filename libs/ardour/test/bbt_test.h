@@ -2,7 +2,7 @@
 #include <sigc++/sigc++.h>
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
-#include "timecode/bbt_time.h"
+#include "temporal/bbt_time.h"
 
 class BBTTest : public CppUnit::TestFixture
 {

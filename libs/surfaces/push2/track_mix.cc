@@ -29,8 +29,8 @@
 #include "pbd/enumwriter.h"
 
 #include "midi++/parser.h"
-#include "timecode/time.h"
-#include "timecode/bbt_time.h"
+#include "temporal/time.h"
+#include "temporal/bbt_time.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"

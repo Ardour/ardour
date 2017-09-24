@@ -1,6 +1,6 @@
 #include "samplepos_minus_beats_test.h"
 #include "ardour/tempo.h"
-#include "timecode/bbt_time.h"
+#include "temporal/bbt_time.h"
 
 CPPUNIT_TEST_SUITE_REGISTRATION (FrameposMinusBeatsTest);
 

@@ -29,7 +29,7 @@
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "control_protocol/visibility.h"
 

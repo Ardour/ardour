@@ -46,7 +46,7 @@ template<typename T> class MidiRingBuffer;
 class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
 {
   public:
-	typedef Evoral::Beats TimeType;
+	typedef Temporal::Beats TimeType;
 
 	MidiSource (Session& session, std::string name, Source::Flag flags = Source::Flag(0));
 	MidiSource (Session& session, const XMLNode&);
@@ -62,8 +62,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int write_to (const Lock&                   lock,
 	              boost::shared_ptr<MidiSource> newsrc,
-	              Evoral::Beats                 begin = Evoral::Beats(),
-	              Evoral::Beats                 end   = std::numeric_limits<Evoral::Beats>::max());
+	              Temporal::Beats                 begin = Temporal::Beats(),
+	              Temporal::Beats                 end   = std::numeric_limits<Temporal::Beats>::max());
 
 	/** Export the midi data in the given time range to another MidiSource
 	 * \param newsrc MidiSource to which data will be written. Should be a
@@ -75,8 +75,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	int export_write_to (const Lock&                   lock,
 	                     boost::shared_ptr<MidiSource> newsrc,
-	                     Evoral::Beats                 begin,
-	                     Evoral::Beats                 end);
+	                     Temporal::Beats                 begin,
+	                     Temporal::Beats                 end);
 
 	/** Read the data in a given time range from the MIDI source.
 	 * All time stamps in parameters are in audio samples (even if the source has tempo time).
@@ -116,7 +116,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 * Caller must ensure that the event is later than the last written event.
 	 */
 	virtual void append_event_beats(const Lock&                         lock,
-	                                const Evoral::Event<Evoral::Beats>& ev) = 0;
+	                                const Evoral::Event<Temporal::Beats>& ev) = 0;
 
 	/** Append a single event with a timestamp in samples.
 	 *
@@ -155,8 +155,8 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	 */
 	virtual void mark_midi_streaming_write_completed (
 		const Lock&                                      lock,
-		Evoral::Sequence<Evoral::Beats>::StuckNoteOption stuck_option,
-		Evoral::Beats                                    when = Evoral::Beats());
+		Evoral::Sequence<Temporal::Beats>::StuckNoteOption stuck_option,
+		Temporal::Beats                                    when = Temporal::Beats());
 
 	virtual void session_saved();
 
@@ -232,7 +232,7 @@ class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_sha
 	boost::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 
-	Evoral::Beats _length_beats;
+	Temporal::Beats _length_beats;
 
 	/** The total duration of the current capture. */
 	samplepos_t _capture_length;

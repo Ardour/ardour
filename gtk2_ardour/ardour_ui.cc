@@ -124,7 +124,7 @@
 #undef check
 #endif
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 typedef uint64_t microseconds_t;
 

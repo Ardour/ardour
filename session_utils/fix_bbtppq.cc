@@ -69,8 +69,8 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = bbt_source->model()->begin(MidiModel::TimeType(), true); i != bbt_source->model()->end(); ++i) {
 		const double new_time = map.quarter_note_at_beat ((*i).time().to_double() + map.beat_at_quarter_note (session_offset * 4.0)) - (session_offset * 4.0);
-		Evoral::Event<Evoral::Beats> new_ev (*i, true);
-		new_ev.set_time (Evoral::Beats (new_time));
+		Evoral::Event<Temporal::Beats> new_ev (*i, true);
+		new_ev.set_time (Temporal::Beats (new_time));
 		source->append_event_beats (source_lock, new_ev);
 	}
 

@@ -380,7 +380,7 @@ MidiTrack::non_realtime_locate (samplepos_t pos)
 		boost::shared_ptr<Evoral::Control>        rcontrol;
 		if ((tcontrol = boost::dynamic_pointer_cast<MidiTrack::MidiControl>(c->second)) &&
 		    (rcontrol = region->control(tcontrol->parameter()))) {
-			const Evoral::Beats pos_beats = bfc.from(pos - origin);
+			const Temporal::Beats pos_beats = bfc.from(pos - origin);
 			if (rcontrol->list()->size() > 0) {
 				tcontrol->set_value(rcontrol->list()->eval(pos_beats.to_double()), Controllable::NoGroup);
 			}

@@ -43,7 +43,7 @@ using namespace Gtkmm2ext;
 PatchChangeDialog::PatchChangeDialog (
 	const ARDOUR::BeatsSamplesConverter*        tc,
 	ARDOUR::Session*                           session,
-	Evoral::PatchChange<Evoral::Beats> const & patch,
+	Evoral::PatchChange<Temporal::Beats> const & patch,
 	ARDOUR::InstrumentInfo&                    info,
 	const Gtk::BuiltinStockID&                 ok,
 	bool                                       allow_delete,
@@ -168,16 +168,16 @@ PatchChangeDialog::instrument_info_changed ()
 	fill_patch_combo ();
 }
 
-Evoral::PatchChange<Evoral::Beats>
+Evoral::PatchChange<Temporal::Beats>
 PatchChangeDialog::patch () const
 {
-	Evoral::Beats t = Evoral::Beats();
+	Temporal::Beats t = Temporal::Beats();
 
 	if (_time_converter) {
 		t = _time_converter->from (_time.current_time ());
 	}
 
-	return Evoral::PatchChange<Evoral::Beats> (
+	return Evoral::PatchChange<Temporal::Beats> (
 		t,
 		_channel.get_value_as_int() - 1,
 		_program.get_value_as_int() - 1,

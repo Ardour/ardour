@@ -394,7 +394,7 @@ def build(bld):
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
-                        'libtimecode',
+                        'libtemporal',
                         'liblua',
                         ]
     if bld.env['build_target'] != 'mingw':
@@ -478,7 +478,7 @@ def build(bld):
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],
-                use = [ 'libtimecode', 'libpbd', 'libevoral', 'liblua' ],
+                use = [ 'libtemporal', 'libpbd', 'libevoral', 'liblua' ],
                 uselib = [ 'GLIBMM', 'XML' ],
                 target   = 'sse_avx_functions')
 

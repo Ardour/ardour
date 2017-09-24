@@ -23,7 +23,7 @@
 #include <ostream>
 #include <inttypes.h>
 
-#include "timecode/visibility.h"
+#include "temporal/visibility.h"
 
 namespace Timecode {
 

@@ -25,7 +25,7 @@
 #include <boost/utility.hpp>
 
 #include "ardour/types.h"
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/Sequence.hpp"
 #include "pbd/signals.h"
 
@@ -45,8 +45,8 @@ struct MidiCursor : public boost::noncopyable {
 		last_read_end = 0;
 	}
 
-	Evoral::Sequence<Evoral::Beats>::const_iterator        iter;
-	std::set<Evoral::Sequence<Evoral::Beats>::WeakNotePtr> active_notes;
+	Evoral::Sequence<Temporal::Beats>::const_iterator        iter;
+	std::set<Evoral::Sequence<Temporal::Beats>::WeakNotePtr> active_notes;
 	samplepos_t                                             last_read_end;
 	PBD::ScopedConnectionList                              connections;
 };

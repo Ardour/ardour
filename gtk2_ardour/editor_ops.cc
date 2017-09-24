@@ -4247,7 +4247,7 @@ struct PointsSelectionPositionSorter {
  *  @param op Operation (Cut, Copy or Clear)
  */
 void
-Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool midi)
+Editor::cut_copy_points (Editing::CutCopyOp op, Temporal::Beats earliest, bool midi)
 {
 	if (selection->points.empty ()) {
 		return;
@@ -4292,7 +4292,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 			lists[al].copy->fast_simple_add ((*ctrl_evt)->when, (*ctrl_evt)->value);
 			if (midi) {
 				/* Update earliest MIDI start time in beats */
-				earliest = std::min(earliest, Evoral::Beats((*ctrl_evt)->when));
+				earliest = std::min(earliest, Temporal::Beats((*ctrl_evt)->when));
 			} else {
 				/* Update earliest session start time in samples */
 				start.sample = std::min(start.sample, (*sel_point)->line().session_position(ctrl_evt));
@@ -4301,8 +4301,8 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 
 		/* Snap start time backwards, so copy/paste is snap aligned. */
 		if (midi) {
-			if (earliest == std::numeric_limits<Evoral::Beats>::max()) {
-				earliest = Evoral::Beats();  // Weird... don't offset
+			if (earliest == std::numeric_limits<Temporal::Beats>::max()) {
+				earliest = Temporal::Beats();  // Weird... don't offset
 			}
 			earliest.round_down_to_beat();
 		} else {
@@ -4369,7 +4369,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, Evoral::Beats earliest, bool mid
 void
 Editor::cut_copy_midi (CutCopyOp op)
 {
-	Evoral::Beats earliest = std::numeric_limits<Evoral::Beats>::max();
+	Temporal::Beats earliest = std::numeric_limits<Temporal::Beats>::max();
 	for (MidiRegionSelection::iterator i = selection->midi_regions.begin(); i != selection->midi_regions.end(); ++i) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
 		if (mrv) {
@@ -5322,13 +5322,13 @@ Editor::strip_region_silence ()
 Command*
 Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
 {
-	Evoral::Sequence<Evoral::Beats>::Notes selected;
+	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	mrv.selection_as_notelist (selected, true);
 
-	vector<Evoral::Sequence<Evoral::Beats>::Notes> v;
+	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
-	Evoral::Beats pos_beats  = Evoral::Beats (mrv.midi_region()->beat()) - mrv.midi_region()->start_beats();
+	Temporal::Beats pos_beats  = Temporal::Beats (mrv.midi_region()->beat()) - mrv.midi_region()->start_beats();
 
 	return op (mrv.midi_region()->model(), pos_beats, v);
 }
@@ -5543,7 +5543,7 @@ Editor::insert_patch_change (bool from_context)
 	*/
 	MidiRegionView* first = dynamic_cast<MidiRegionView*> (rs.front ());
 
-	Evoral::PatchChange<Evoral::Beats> empty (Evoral::Beats(), 0, 0, 0);
+	Evoral::PatchChange<Temporal::Beats> empty (Temporal::Beats(), 0, 0, 0);
 	PatchChangeDialog d (0, _session, empty, first->instrument_info(), Gtk::Stock::ADD);
 
 	if (d.run() == RESPONSE_CANCEL) {

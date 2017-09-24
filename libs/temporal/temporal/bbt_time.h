@@ -24,7 +24,7 @@
 #include <iomanip>
 #include <exception>
 
-#include "timecode/visibility.h"
+#include "temporal/visibility.h"
 
 namespace Timecode {
 

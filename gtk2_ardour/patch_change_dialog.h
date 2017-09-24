@@ -43,14 +43,14 @@ public:
 	PatchChangeDialog (
 		const ARDOUR::BeatsSamplesConverter *,
 		ARDOUR::Session *,
-		Evoral::PatchChange<Evoral::Beats> const &,
+		Evoral::PatchChange<Temporal::Beats> const &,
 		ARDOUR::InstrumentInfo&,
 		const Gtk::BuiltinStockID &,
 		bool allow_delete = false,
 		bool modal = true
 		);
 
-	Evoral::PatchChange<Evoral::Beats> patch () const;
+	Evoral::PatchChange<Temporal::Beats> patch () const;
 
 protected:
 	void on_response (int);

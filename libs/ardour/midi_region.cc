@@ -28,7 +28,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
@@ -144,8 +144,8 @@ MidiRegion::do_export (string path) const
 		                              path, false, _session.sample_rate()));
 
 	BeatsSamplesConverter bfc (_session.tempo_map(), _position);
-	Evoral::Beats const bbegin = bfc.from (_start);
-	Evoral::Beats const bend = bfc.from (_start + _length);
+	Temporal::Beats const bbegin = bfc.from (_start);
+	Temporal::Beats const bend = bfc.from (_start + _length);
 
 	{
 		/* Lock our source since we'll be reading from it.  write_to() will
@@ -180,8 +180,8 @@ boost::shared_ptr<MidiRegion>
 MidiRegion::clone (boost::shared_ptr<MidiSource> newsrc) const
 {
 	BeatsSamplesConverter bfc (_session.tempo_map(), _position);
-	Evoral::Beats const bbegin = bfc.from (_start);
-	Evoral::Beats const bend = bfc.from (_start + _length);
+	Temporal::Beats const bbegin = bfc.from (_start);
+	Temporal::Beats const bend = bfc.from (_start + _length);
 
 	{
 		boost::shared_ptr<MidiSource> ms = midi_source(0);
@@ -647,7 +647,7 @@ MidiRegion::fix_negative_start ()
 
 	_ignore_shift = true;
 
-	model()->insert_silence_at_start (Evoral::Beats (- _start_beats));
+	model()->insert_silence_at_start (Temporal::Beats (- _start_beats));
 
 	_start = 0;
 	_start_beats = 0.0;

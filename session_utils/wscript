@@ -43,7 +43,7 @@ def build_ardour_util(bld, util):
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
-                     'libtimecode',
+                     'libtemporal',
                      'libmidipp',
                      ]
     obj.defines = [

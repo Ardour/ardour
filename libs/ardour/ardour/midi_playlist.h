@@ -117,7 +117,7 @@ protected:
 	void region_going_away (boost::weak_ptr<Region> region);
 
 private:
-	typedef Evoral::Note<Evoral::Beats> Note;
+	typedef Evoral::Note<Temporal::Beats> Note;
 	typedef Evoral::Event<samplepos_t>   Event;
 
 	struct RegionTracker : public boost::noncopyable {

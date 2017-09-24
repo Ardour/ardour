@@ -24,7 +24,7 @@
 #include "evoral/Note.hpp"
 #endif
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 namespace Evoral {
 
@@ -90,7 +90,7 @@ Note<Time>::set_id (event_id_t id)
 	_off_event.set_id (id);
 }
 
-template class Note<Evoral::Beats>;
+template class Note<Temporal::Beats>;
 
 } // namespace Evoral
 
