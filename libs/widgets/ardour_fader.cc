@@ -491,8 +491,6 @@ bool
 ArdourFader::on_scroll_event (GdkEventScroll* ev)
 {
 	double increment = 0;
-	bool ret = false;
-
 	if (ev->state & Keyboard::GainFineScaleModifier) {
 		if (ev->state & Keyboard::GainExtraFineScaleModifier) {
 			increment = 0.05 * _adjustment.get_step_increment();
@@ -503,41 +501,34 @@ ArdourFader::on_scroll_event (GdkEventScroll* ev)
 		increment = _adjustment.get_page_increment();
 	}
 
-	if (_orien == VERT) {
-		switch (ev->direction) {
-			case GDK_SCROLL_UP:
-				_adjustment.set_value (_adjustment.get_value() + increment);
-				ret = true;
-				break;
-			case GDK_SCROLL_DOWN:
-				_adjustment.set_value (_adjustment.get_value() - increment);
-				ret = true;
-				break;
-			default:
-				break;
-		}
-	} else {
-		int dir = ev->direction;
-
-		if (ev->state & Keyboard::ScrollHorizontalModifier || !(_tweaks & NoVerticalScroll)) {
-			if (ev->direction == GDK_SCROLL_UP) dir = GDK_SCROLL_RIGHT;
-			if (ev->direction == GDK_SCROLL_DOWN) dir = GDK_SCROLL_LEFT;
-		}
-
-		switch (dir) {
-			case GDK_SCROLL_RIGHT:
-				_adjustment.set_value (_adjustment.get_value() + increment);
-				ret = true;
-				break;
-			case GDK_SCROLL_LEFT:
-				_adjustment.set_value (_adjustment.get_value() - increment);
-				ret = true;
-				break;
-			default:
-				break;
-		}
+	bool vertical = false;
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+		case GDK_SCROLL_DOWN:
+			vertical = !(ev->state & Keyboard::ScrollHorizontalModifier);
+			break;
+		default:
+			break;
 	}
-	return ret;
+	if ((_orien == VERT && !vertical) ||
+	    ((_tweaks & NoVerticalScroll) && vertical)) {
+		return false;
+	}
+
+	switch (ev->direction) {
+		case GDK_SCROLL_UP:
+		case GDK_SCROLL_RIGHT:
+			_adjustment.set_value (_adjustment.get_value() + increment);
+			break;
+		case GDK_SCROLL_DOWN:
+		case GDK_SCROLL_LEFT:
+			_adjustment.set_value (_adjustment.get_value() - increment);
+			break;
+		default:
+			return false;
+	}
+
+	return true;
 }
 
 bool
