@@ -21,7 +21,7 @@
 
 #include <stdint.h>
 
-namespace PBD {
+namespace Temporal {
 
 /* Any position measured in audio samples.
    Assumed to be non-negative but not enforced.
