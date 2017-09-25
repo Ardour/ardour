@@ -40,8 +40,9 @@ libs/
  - vamp-plugins
    VAMP plugins for audio analysis and offline processing (uses qm-dsp)
 
- - timecode
-   Timecode (FPS) and musical time conversions
+ - temporal
+   various utility code for dealing with different kinds of time,
+   including Timecode (FPS) and musical time conversions
 
  - lua
    Lua Script interpreter and C++ class abstraction

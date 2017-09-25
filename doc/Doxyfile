@@ -768,7 +768,7 @@ INPUT                  = ../libs/ardour \
                          ../libs/pbd \
                          ../libs/ptformat \
                          ../libs/qm-dsp \
-                         ../libs/timecode \
+                         ../libs/temporal \
                          ../gtk2_ardour \
                          mainpage.txt
 
