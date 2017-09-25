@@ -72,7 +72,6 @@ namespace PBD {
 }
 
 namespace ArdourWidgets {
-	class ClickBox;
 	class FastMeter;
 }
 
@@ -232,7 +231,6 @@ private:
 		ArdourWidgets::ArdourButton             automate_button;
 		Gtk::Label                              label;
 		ArdourWidgets::ArdourDropdown*          combo;
-		ArdourWidgets::ClickBox*                clickbox;
 		Gtk::FileChooserButton*                 file_button;
 		ArdourWidgets::ArdourSpinner*           spin_box;
 

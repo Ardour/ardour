@@ -51,7 +51,6 @@
 #include "gtkmm2ext/doi.h"
 
 #include "widgets/ardour_knob.h"
-#include "widgets/click_box.h"
 #include "widgets/fastmeter.h"
 #include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
@@ -500,7 +499,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 			                     FILL|EXPAND, FILL);
 			button_row++;
 
-		} else if (cui->controller || cui->clickbox || cui->combo) {
+		} else if (cui->controller || cui->combo) {
 			// Get all of the controls into a list, so that
 			// we can lay them out a bit more nicely later.
 			cui_controls_list.push_back(cui);
@@ -797,7 +796,6 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	: param(p)
 	, automate_button (X_("")) // force creation of a label
 	, combo (0)
-	, clickbox (0)
 	, file_button (0)
 	, spin_box (0)
 	, display (0)
@@ -1014,16 +1012,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 			Adjustment* adj = control_ui->controller->adjustment();
 
-			if (false /* desc.integer_step && !desc.toggled */) {
-				control_ui->clickbox = new ArdourWidgets::ClickBox (adj, "PluginUIClickBox", true);
-				Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-				if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
-					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
-				} else {
-					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
-				}
-				control_ui->clickbox->set_controllable (mcontrol);
-			} else if (desc.toggled) {
+			if (desc.toggled) {
 				ArdourButton* but = dynamic_cast<ArdourButton*> (control_ui->controller->widget());
 				assert(but);
 				but->set_tweaks(ArdourButton::Square);
@@ -1059,10 +1048,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			if (control_ui->combo) {
 				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
 				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
-			} else if (control_ui->clickbox) {
-				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
 			} else if (control_ui->spin_box) {
 				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
 				knob->set_tooltip_prefix (desc.label + ": ");
@@ -1088,8 +1073,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->pack_start (control_ui->label, true, true);
 			if (control_ui->combo) {
 				control_ui->pack_start(*control_ui->combo, false, true);
-			} else if (control_ui->clickbox) {
-				control_ui->pack_start (*control_ui->clickbox, false, false);
 			} else if (control_ui->spin_box) {
 				control_ui->pack_start (*control_ui->spin_box, false, false);
 				control_ui->pack_start (*control_ui->controller, false, false);
