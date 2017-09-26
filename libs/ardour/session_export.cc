@@ -294,6 +294,7 @@ Session::process_export_fw (pframes_t nframes)
 		if (nframes == 0) {
 			return;
 		}
+		_engine.split_cycle (remain);
 	}
 
 	if (need_buffers) {
