@@ -91,8 +91,9 @@ FixedDelay::configure (const ChanCount& count, samplecnt_t max_delay, bool shrin
 			return;
 		}
 		_max_delay = max_delay;
-	} else if (max_delay <= _max_delay || count <= _count) {
+	} else if (max_delay <= _max_delay && count <= _count) {
 		return;
+	} else {
 		_max_delay = std::max (_max_delay, max_delay);
 	}
 
