@@ -193,7 +193,6 @@ ExportHandler::start_timespan ()
 	handle_duplicate_format_extensions();
 	bool realtime = current_timespan->realtime ();
 	bool region_export = true;
-	bool incl_master_bus = false;
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
 		// Filenames can be shared across timespans
 		FileSpec & spec = it->second;
@@ -206,33 +205,6 @@ ExportHandler::start_timespan ()
 			default:
 				break;
 		}
-#if 1 // hack alert -- align master bus, compensate master latency
-
-		/* there's no easier way to get this information here.
-		 * Ports are configured in the PortExportChannelSelector GUI,
-		 * This ExportHandler has no context of routes.
-		 */
-		boost::shared_ptr<Route> master_bus = session.master_out ();
-		if (master_bus) {
-			const PortSet& ps = master_bus->output ()->ports();
-
-			const ExportChannelConfiguration::ChannelList& channels = spec.channel_config->get_channels ();
-			for (ExportChannelConfiguration::ChannelList::const_iterator it = channels.begin(); it != channels.end(); ++it) {
-
-				boost::shared_ptr <PortExportChannel> pep = boost::dynamic_pointer_cast<PortExportChannel> (*it);
-				if (!pep) {
-					continue;
-				}
-				PortExportChannel::PortSet const& ports = pep->get_ports ();
-				for (PortExportChannel::PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
-					boost::shared_ptr<AudioPort> ap = (*it).lock();
-					if (ps.contains (ap)) {
-						incl_master_bus = true;
-					}
-				}
-			}
-		}
-#endif
 		graph_builder->add_config (spec, realtime);
 	}
 
@@ -245,7 +217,7 @@ ExportHandler::start_timespan ()
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
 	// TODO check if it's a RegionExport.. set flag to skip  process_without_events()
-	session.start_audio_export (process_position, realtime, region_export, incl_master_bus);
+	session.start_audio_export (process_position, realtime, region_export);
 }
 
 void

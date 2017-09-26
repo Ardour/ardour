@@ -22,11 +22,13 @@
 #define __ardour_export_channel_h__
 
 #include <set>
+#include <list>
 
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
+#include "pbd/ringbuffer.h"
 
 #include "ardour/buffer_set.h"
 #include "ardour/export_pointers.h"
@@ -68,6 +70,8 @@ class LIBARDOUR_API PortExportChannel : public ExportChannel
 	typedef std::set<boost::weak_ptr<AudioPort> > PortSet;
 
 	PortExportChannel ();
+	~PortExportChannel ();
+
 	void set_max_buffer_size(samplecnt_t samples);
 
 	void read (Sample const *& data, samplecnt_t samples) const;
@@ -83,8 +87,9 @@ class LIBARDOUR_API PortExportChannel : public ExportChannel
 
   private:
 	PortSet ports;
-	boost::scoped_array<Sample> buffer;
-	samplecnt_t buffer_size;
+	samplecnt_t                 _buffer_size;
+	boost::scoped_array<Sample> _buffer;
+	std::list <boost::shared_ptr<PBD::RingBuffer<Sample> > >  _delaylines;
 };
 
 

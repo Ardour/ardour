@@ -35,14 +35,33 @@
 using namespace ARDOUR;
 
 PortExportChannel::PortExportChannel ()
-	: buffer_size(0)
+	: _buffer_size (0)
 {
+}
+
+PortExportChannel::~PortExportChannel ()
+{
+	_delaylines.clear ();
 }
 
 void PortExportChannel::set_max_buffer_size(samplecnt_t samples)
 {
-	buffer_size = samples;
-	buffer.reset (new Sample[samples]);
+	_buffer_size = samples;
+	_buffer.reset (new Sample[samples]);
+
+	_delaylines.clear ();
+
+	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
+		boost::shared_ptr<AudioPort> p = it->lock ();
+		if (!p) { continue; }
+		samplecnt_t latency = p->private_latency_range (true).max;
+		PBD::RingBuffer<Sample>* rb = new PBD::RingBuffer<Sample> (latency + 1 + _buffer_size);
+		for (samplepos_t i = 0; i < latency; ++i) {
+			Sample zero = 0;
+			rb->write (&zero, 1);
+		}
+		_delaylines.push_back (boost::shared_ptr<PBD::RingBuffer<Sample> >(rb));
+	}
 }
 
 bool
@@ -58,10 +77,10 @@ PortExportChannel::operator< (ExportChannel const & other) const
 void
 PortExportChannel::read (Sample const *& data, samplecnt_t samples) const
 {
-	assert(buffer);
-	assert(samples <= buffer_size);
+	assert(_buffer);
+	assert(samples <= _buffer_size);
 
-	if (ports.size() == 1) {
+	if (ports.size() == 1 && _delaylines.size() ==1 && _delaylines.front()->bufsize () == _buffer_size + 1) {
 		boost::shared_ptr<AudioPort> p = ports.begin()->lock ();
 		AudioBuffer& ab (p->get_audio_buffer(samples)); // unsets AudioBuffer::_written
 		data = ab.data();
@@ -69,22 +88,28 @@ PortExportChannel::read (Sample const *& data, samplecnt_t samples) const
 		return;
 	}
 
-	memset (buffer.get(), 0, samples * sizeof (Sample));
+	memset (_buffer.get(), 0, samples * sizeof (Sample));
 
+	std::list <boost::shared_ptr<PBD::RingBuffer<Sample> > >::const_iterator di = _delaylines.begin ();
 	for (PortSet::const_iterator it = ports.begin(); it != ports.end(); ++it) {
 		boost::shared_ptr<AudioPort> p = it->lock ();
-		if (p) {
-			AudioBuffer& ab (p->get_audio_buffer(samples)); // unsets AudioBuffer::_written
-			Sample* port_buffer = ab.data();
-			ab.set_written (true);
-
-			for (uint32_t i = 0; i < samples; ++i) {
-				buffer[i] += (float) port_buffer[i];
-			}
+		if (!p) {
+			continue;
 		}
+		AudioBuffer& ab (p->get_audio_buffer(samples)); // unsets AudioBuffer::_written
+		Sample* port_buffer = ab.data();
+		ab.set_written (true);
+		(*di)->write (port_buffer, samples);
+		// TODO optimze, get_read_vector()
+		for (uint32_t i = 0; i < samples; ++i) {
+			Sample spl;
+			(*di)->read (&spl, 1);
+			_buffer[i] += spl;
+		}
+		++di;
 	}
 
-	data = buffer.get();
+	data = _buffer.get();
 }
 
 void

@@ -751,7 +751,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	boost::shared_ptr<ExportHandler> get_export_handler ();
 	boost::shared_ptr<ExportStatus> get_export_status ();
 
-	int start_audio_export (samplepos_t position, bool realtime = false, bool region_export = false, bool comensate_master_latency = false);
+	int start_audio_export (samplepos_t position, bool realtime = false, bool region_export = false);
 
 	PBD::Signal1<int, samplecnt_t> ProcessExport;
 	static PBD::Signal2<void,std::string, std::string> Exported;
@@ -1345,7 +1345,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool _realtime_export;
 	bool _region_export;
 	samplepos_t _export_preroll;
-	samplepos_t _export_latency;
 
 	boost::shared_ptr<ExportHandler> export_handler;
 	boost::shared_ptr<ExportStatus>  export_status;
