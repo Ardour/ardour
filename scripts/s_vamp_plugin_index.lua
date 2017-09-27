@@ -3,7 +3,7 @@ function factory () return function ()
 
 	local plugins = ARDOUR.LuaAPI.Vamp.list_plugins ();
 	for id in plugins:iter () do
-		local vamp = ARDOUR.LuaAPI.Vamp(id, Session:nominal_frame_rate())
+		local vamp = ARDOUR.LuaAPI.Vamp(id, Session:nominal_sample_rate())
 		local vp = vamp:plugin ()
 		print (" --- VAMP Plugin ---")
 		print ("Id:", vp:getIdentifier ())

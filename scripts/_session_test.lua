@@ -21,13 +21,13 @@ function factory (params)
 		local p = params["print"] or "no"
 		local timeout = params["time"] or 90
 		a = a or 0
-		if p ~= "no" then print (a, n_samples, Session:frame_rate (), Session:transport_rolling ()) end -- debug output (not rt safe)
+		if p ~= "no" then print (a, n_samples, Session:sample_rate (), Session:transport_rolling ()) end -- debug output (not rt safe)
 		if (not Session:transport_rolling()) then
 			a = 0
 			return
 		end
 		a = a + n_samples
-		if (a > timeout * Session:frame_rate()) then
+		if (a > timeout * Session:sample_rate()) then
 			Session:request_transport_speed(0.0, true)
 		end
 	end

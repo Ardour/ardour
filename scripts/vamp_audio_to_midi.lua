@@ -15,13 +15,13 @@ The plugin works best at 44.1KHz input sample rate, and is tuned for piano and g
 
 function factory () return function ()
 	local sel = Editor:get_selection ()
-	local sr = Session:nominal_frame_rate ()
+	local sr = Session:nominal_sample_rate ()
 	local tm = Session:tempo_map ()
 	local vamp = ARDOUR.LuaAPI.Vamp ("libardourvampplugins:qm-transcription", sr)
 	local midi_region
 	local audio_regions = {}
-	local start_time = Session:current_end_frame ()
-	local end_time = Session:current_start_frame ()
+	local start_time = Session:current_end_sample ()
+	local end_time = Session:current_start_sample ()
 	for r in sel.regions:regionlist ():iter () do
 		if r:to_midiregion():isnil() then
 			local st = r:position()
@@ -56,8 +56,8 @@ function factory () return function ()
 				local fd = Vamp.RealTime.realTime2Frame (f.duration, sr)
 				local fn = f.values:at (0)
 
-				local bs = tm:exact_qn_at_frame (a_off + ft, 0)
-				local be = tm:exact_qn_at_frame (a_off + ft + fd, 0)
+				local bs = tm:exact_qn_at_sample (a_off + ft, 0)
+				local be = tm:exact_qn_at_sample (a_off + ft + fd, 0)
 
 				local pos = Evoral.Beats (bs - b_off)
 				local len = Evoral.Beats (be - bs)

@@ -19,7 +19,7 @@ have to wait for the export.
 
 function factory (unused_params) return function ()
 
-	local fr = Session:frame_rate()
+	local fr = Session:sample_rate()
 	local chaps = {}
 
 	for l in Session:locations():list():iter() do

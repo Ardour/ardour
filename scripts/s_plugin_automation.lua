@@ -2,8 +2,8 @@ ardour { ["type"] = "Snippet", name = "Plugin automation" }
 
 function factory () return function ()
 	-- query playhead position and session sample-rate
-	local playhead = Session:transport_frame ()
-	local samplerate = Session:nominal_frame_rate ()
+	local playhead = Session:transport_sample ()
+	local samplerate = Session:nominal_sample_rate ()
 
 	-- get Track/Bus with RID 3
 	local r = Session:get_remote_nth_route(3)

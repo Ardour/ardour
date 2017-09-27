@@ -39,7 +39,7 @@ function factory (params)
 			tx:send ("/session/solo_changed", "")
 		elseif (signal == LuaSignal.TransportStateChange) then
 			tx:send ("/session/transport", "if",
-				Session:transport_frame(), Session:transport_speed())
+				Session:transport_sample(), Session:transport_speed())
 		elseif (signal == LuaSignal.RegionPropertyChanged) then
 			obj,pch = ...
 			tx:send ("/region_property_changed", "sTTiii",

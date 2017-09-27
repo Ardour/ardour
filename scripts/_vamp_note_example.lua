@@ -19,7 +19,7 @@ function factory () return function ()
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:Editor
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ArdourUI:Selection
 	local sel = Editor:get_selection ()
-	local sr = Session:nominal_frame_rate ()
+	local sr = Session:nominal_sample_rate ()
 
 	-- Instantiate a Vamp Plugin
 	-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:LuaAPI:Vamp

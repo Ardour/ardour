@@ -171,7 +171,7 @@ function factory (params) return function ()
 	local itt      = ARDOUR.InterThreadInfo () -- bounce progress info (unused)
 
 	local loop     = Session:locations ():auto_loop_location ()
-	local playhead = Session:transport_frame ()
+	local playhead = Session:transport_sample ()
 
 	-- make sure we have a loop, and the playhead (edit point) is after it
 	if not loop then

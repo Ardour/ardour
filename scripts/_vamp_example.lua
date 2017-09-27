@@ -14,7 +14,7 @@ function factory () return function ()
 
 	-- load the Vamp Plugin with Id "libardourvampplugins:dBTP"
 	-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:LuaAPI:Vamp
-	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:dBTP", Session:nominal_frame_rate())
+	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:dBTP", Session:nominal_sample_rate())
 	print (vamp:plugin():getName())
 
 	-- for each selected region

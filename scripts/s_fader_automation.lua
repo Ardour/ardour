@@ -1,8 +1,8 @@
 ardour { ["type"] = "Snippet", name = "Fader Automation" }
 
 function factory () return function ()
-	local playhead = Session:transport_frame ()
-	local samplerate = Session:nominal_frame_rate ()
+	local playhead = Session:transport_sample ()
+	local samplerate = Session:nominal_sample_rate ()
 
 	-- get selected tracks
 	rl = Editor:get_selection ().tracks:routelist ()

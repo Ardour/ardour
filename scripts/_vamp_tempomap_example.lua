@@ -10,7 +10,7 @@ function factory () return function ()
 	-- Instantiate the QM BarBeat Tracker
 	-- see http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:LuaAPI:Vamp
 	-- http://vamp-plugins.org/plugin-doc/qm-vamp-plugins.html#qm-barbeattracker
-	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:qm-barbeattracker", Session:nominal_frame_rate())
+	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:qm-barbeattracker", Session:nominal_sample_rate())
 
 	-- prepare table to hold results
 	local beats = {}

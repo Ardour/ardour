@@ -13,7 +13,7 @@ function factory ()
 			return
 		end
 
-		local pos = Session:transport_frame () -- current playhead position
+		local pos = Session:transport_sample () -- current playhead position
 		local loc = Session:locations () -- all marker locations
 
 		-- find first marker after the current playhead position, ignore loop + punch ranges

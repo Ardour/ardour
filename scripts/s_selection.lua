@@ -11,8 +11,8 @@ function factory () return function ()
 	--
 	
 	-- Range selection, total span of all ranges (0, 0 if no time range is selected)
-	if sel.time:start () < sel.time:end_frame () then
-		print ("Total Range:", sel.time:start (), sel.time:end_frame ())
+	if sel.time:start () < sel.time:end_sample () then
+		print ("Total Range:", sel.time:start (), sel.time:end_sample ())
 	end
 
 	-- Range selection, individual ranges.
