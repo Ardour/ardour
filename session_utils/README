@@ -7,15 +7,19 @@ sessions.
 The overall goal it to provide some non-interactive unix-style commandline
 tools, which are installed along with DAW.
 
+These tools depend on the "dummy" backend to be available, configure ardour with e.g.
+
+  ./waf configure --with-backends=jack,alsa,dummy ...
+
 
 Adding new tools
 ----------------
 
-One c++ source per tool, see "example.cc" and "export.cc"
+One C++ source per tool, see "example.cc" and "export.cc"
 
   cp session_utils/example.cc session_utils/your_new_tool_name.cc
   edit session_utils/new_tool_name.cc
-	./waf
+  ./waf
 
 The tool is automatically compiled and deployed when installing, using the
 program-name as prefix.  e.g.  "export.cc" becomes "ardour4-export".
@@ -26,4 +30,12 @@ Test run from the source
 ------------------------
 
   cd session_utils
-  ./run ardour4-your_new_tool_name
+  ./run ardour6-your_new_tool_name
+
+or
+
+  ./run ardour6-export --help
+
+and to debug the tool under gdb/lldb:
+
+  ./debug ardour6-export
