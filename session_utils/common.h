@@ -25,8 +25,15 @@ namespace SessionUtils {
 
 	/** @param dir Session directory.
 	 *  @param state Session state file, without .ardour suffix.
+	 *  @returns an ardour session object (free with \ref unload_session) or NULL
 	 */
-	ARDOUR::Session * load_session (std::string dir, std::string state, bool exit_at_failure = true);
+	ARDOUR::Session* load_session (std::string dir, std::string state, bool exit_at_failure = true);
+
+	/** @param dir Session directory.
+	 *  @param state Session state file, without .ardour suffix.
+	 *  @returns an ardour session object (free with \ref unload_session) or NULL on error
+	 */
+	ARDOUR::Session* create_session (std::string dir, std::string state, float sample_rate);
 
 	/** close session and stop engine
 	 * @param s Session to close (may me NULL)

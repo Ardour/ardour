@@ -176,6 +176,46 @@ SessionUtils::load_session (string dir, string state, bool exit_at_failure)
 	return s;
 }
 
+Session *
+SessionUtils::create_session (string dir, string state, float sample_rate)
+{
+	AudioEngine* engine = AudioEngine::create ();
+
+	if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
+		std::cerr << "Cannot create Audio/MIDI engine\n";
+		::exit (EXIT_FAILURE);
+	}
+
+	engine->set_input_channels (256);
+	engine->set_output_channels (256);
+
+	if (engine->set_sample_rate (sample_rate)) {
+		std::cerr << "Cannot set session's samplerate.\n";
+		return 0;
+	}
+
+	init_post_engine ();
+
+	if (engine->start () != 0) {
+		std::cerr << "Cannot start Audio/MIDI engine\n";
+		return 0;
+	}
+
+	std::string s = Glib::build_filename (dir, state + statefile_suffix);
+
+	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
+		std::cerr << "Session folder already exists '"<< dir << "'\n";
+	}
+	if (Glib::file_test (s, Glib::FILE_TEST_EXISTS)) {
+		std::cerr << "Session file exists '"<< s << "'\n";
+		return 0;
+	}
+
+	Session* session = new Session (*engine, dir, state);
+	engine->set_session (session);
+	return session;
+}
+
 void
 SessionUtils::unload_session (Session *s)
 {
