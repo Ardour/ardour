@@ -70,6 +70,8 @@ Processor::Processor(Session& session, const string& name)
 	, _owner (0)
 	, _input_latency (0)
 	, _output_latency (0)
+	, _capture_offset (0)
+	, _playback_offset (0)
 {
 }
 

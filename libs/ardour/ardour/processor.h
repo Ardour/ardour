@@ -76,6 +76,12 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void set_output_latency (samplecnt_t cnt) { _output_latency = cnt; }
 	samplecnt_t output_latency () const               { return _output_latency; }
 
+	virtual void set_capture_offset (samplecnt_t cnt) { _capture_offset = cnt; }
+	samplecnt_t capture_offset () const               { return _capture_offset; }
+
+	virtual void set_playback_offset (samplecnt_t cnt) { _playback_offset = cnt; }
+	samplecnt_t playback_offset () const               { return _playback_offset; }
+
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
 	virtual bool requires_fixed_sized_buffers() const { return false; }
 
@@ -155,8 +161,12 @@ protected:
 	ProcessorWindowProxy *_window_proxy;
 	PluginPinWindowProxy *_pinmgr_proxy;
 	SessionObject* _owner;
+	// relative to route
 	samplecnt_t _input_latency;
 	samplecnt_t _output_latency;
+	// absolute alignment to session i/o
+	samplecnt_t _capture_offset;
+	samplecnt_t _playback_offset;
 };
 
 } // namespace ARDOUR
