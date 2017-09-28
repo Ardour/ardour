@@ -193,7 +193,7 @@ Route::init ()
 	}
 
 	if (!is_master() && !is_monitor() && !is_auditioner()) {
-		_delayline.reset (new DelayLine (_session, name () + ":in"));
+		_delayline.reset (new DelayLine (_session, name ()));
 	}
 
 	/* and input trim */
@@ -2472,6 +2472,9 @@ Route::state(bool full_state)
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (i = _processors.begin(); i != _processors.end(); ++i) {
+			if (*i == _delayline) {
+				continue;
+			}
 			if (!full_state) {
 				/* template save: do not include internal sends functioning as
 					 aux sends because the chance of the target ID
@@ -2686,6 +2689,10 @@ Route::set_state (const XMLNode& node, int version)
 		} else if (child->name() == Automatable::xml_node_name) {
 			set_automation_xml_state (*child, Evoral::Parameter(NullAutomation));
 		}
+	}
+
+	if (_delayline) {
+		_delayline->set_name (name ());
 	}
 
 	return 0;

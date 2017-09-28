@@ -26,6 +26,7 @@
 #include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
+#include "ardour/delayline.h"
 #include "ardour/gain_control.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
@@ -95,7 +96,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
 
-	_delayline.reset (new DelayLine (_session, name()));
+	_delayline.reset (new DelayLine (_session, "Send-" + name()));
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
@@ -280,6 +281,8 @@ Send::set_state (const XMLNode& node, int version)
 			_amp->set_state (**i, version);
 		}
 	}
+
+	_delayline->set_name ("Send-" + name());
 
 	return 0;
 }

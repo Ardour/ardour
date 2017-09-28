@@ -26,13 +26,13 @@
 
 #include "ardour/ardour.h"
 #include "ardour/delivery.h"
-#include "ardour/delayline.h"
 
 namespace ARDOUR {
 
 class PeakMeter;
 class Amp;
 class GainControl;
+class DelayLine;
 
 class LIBARDOUR_API Send : public Delivery
 {

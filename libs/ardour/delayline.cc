@@ -33,7 +33,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 DelayLine::DelayLine (Session& s, const std::string& name)
-    : Processor (s, string_compose ("latency-compensation-%1-%2", name, this))
+    : Processor (s, string_compose ("latcomp-%1-%2", name, this))
 		, _delay(0)
 		, _pending_delay(0)
 		, _bsiz(0)
@@ -46,6 +46,12 @@ DelayLine::DelayLine (Session& s, const std::string& name)
 
 DelayLine::~DelayLine ()
 {
+}
+
+bool
+DelayLine::set_name (const string& name)
+{
+	return Processor::set_name (string_compose ("latcomp-%1-%2", name, this));
 }
 
 #define FADE_LEN (16)

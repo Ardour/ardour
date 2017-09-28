@@ -54,6 +54,8 @@ public:
 	void realtime_locate () { flush(); }
 	void monitoring_changed() { flush(); }
 
+	bool set_name (const std::string& str);
+
 	XMLNode& state (bool full);
 
 private:

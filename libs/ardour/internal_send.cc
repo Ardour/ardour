@@ -23,6 +23,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
+#include "ardour/delayline.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/meter.h"
