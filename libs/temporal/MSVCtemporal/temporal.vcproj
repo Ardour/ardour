@@ -262,11 +262,11 @@
 			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
 			>
 			<File
-				RelativePath="..\src\bbt_time.cc"
+				RelativePath="..\bbt_time.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\src\time.cc"
+				RelativePath="..\time.cc"
 				>
 			</File>
 		</Filter>
@@ -280,7 +280,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\temporal\beats.h"
+				>
+			</File>
+			<File
 				RelativePath="..\temporal\time.h"
+				>
+			</File>
+			<File
+				RelativePath="..\temporal\types.h"
 				>
 			</File>
 		</Filter>
