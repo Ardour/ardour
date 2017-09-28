@@ -106,17 +106,9 @@ class DummyPort {
 			return for_playback ? _playback_latency_range : _capture_latency_range;
 		}
 
-		void set_latency_range (const LatencyRange &latency_range, bool for_playback)
-		{
-			if (for_playback)
-			{
-				_playback_latency_range = latency_range;
-			}
-			else
-			{
-				_capture_latency_range = latency_range;
-			}
-		}
+		void set_latency_range (const LatencyRange &latency_range, bool for_playback);
+
+		void update_connected_latency (bool for_playback);
 
 	private:
 		DummyAudioBackend &_dummy_backend;
@@ -456,6 +448,7 @@ class DummyAudioBackend : public AudioBackend {
 		PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 		int register_system_ports ();
 		void unregister_ports (bool system_only = false);
+		void update_system_port_latecies ();
 
 		std::vector<DummyAudioPort *> _system_inputs;
 		std::vector<DummyAudioPort *> _system_outputs;
