@@ -536,7 +536,7 @@ Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 			_meter->run (bufs, start_sample, end_sample, _session.transport_speed(), nframes, true);
 		}
 
-		passthru (bufs, start_sample, end_sample, nframes, false, true);
+		passthru (bufs, start_sample, end_sample, nframes, false, true, false);
 	}
 
 	flush_processor_buffers_locked (nframes);

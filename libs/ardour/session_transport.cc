@@ -1171,6 +1171,12 @@ Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flus
 	}
 }
 
+samplecnt_t
+Session::worst_latency_preroll () const
+{
+	return _worst_output_latency + _worst_input_latency;
+}
+
 int
 Session::micro_locate (samplecnt_t distance)
 {
@@ -1250,15 +1256,16 @@ Session::locate (samplepos_t target_sample, bool with_roll, bool with_flush, boo
 	// thread(s?) can restart.
 	g_atomic_int_inc (&_seek_counter);
 	_last_roll_or_reversal_location = target_sample;
-	timecode_time(_transport_sample, transmitting_timecode_time);
+	_remaining_latency_preroll = worst_latency_preroll ();
+	timecode_time(_transport_sample, transmitting_timecode_time); // XXX here?
 
 	/* do "stopped" stuff if:
 	 *
 	 * we are rolling AND
-	 *    no autoplay in effect AND
-         *       we're not going to keep rolling after the locate AND
-         *           !(playing a loop with JACK sync)
-         *
+	 * no autoplay in effect AND
+	 * we're not going to keep rolling after the locate AND
+	 * !(playing a loop with JACK sync)
+	 *
 	 */
 
 	bool transport_was_stopped = !transport_rolling();
@@ -1492,6 +1499,9 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 
 		/* not zero, not 1.0 ... varispeed */
 
+		// TODO handled transport start..  _remaining_latency_preroll
+		// and reversal of playback direction.
+
 		if ((synced_to_engine()) && speed != 0.0 && speed != 1.0) {
 			warning << string_compose (
 				_("Global varispeed cannot be supported while %1 is connected to JACK transport control"),
@@ -1659,6 +1669,7 @@ Session::start_transport ()
 
 	_last_roll_location = _transport_sample;
 	_last_roll_or_reversal_location = _transport_sample;
+	_remaining_latency_preroll = worst_latency_preroll ();
 
 	have_looped = false;
 
@@ -1728,12 +1739,21 @@ Session::start_transport ()
 				_count_in_samples *= 1. + bar_fract;
 			}
 
+			if (_count_in_samples > _remaining_latency_preroll) {
+				_remaining_latency_preroll = _count_in_samples;
+			}
+
 			int clickbeat = 0;
 			samplepos_t cf = _transport_sample - _count_in_samples;
-			while (cf < _transport_sample) {
-				add_click (cf - _worst_track_latency, clickbeat == 0);
+			samplecnt_t offset = _click_io->connected_latency (true);
+			while (cf < _transport_sample + offset) {
+				add_click (cf, clickbeat == 0);
 				cf += dt;
 				clickbeat = fmod (clickbeat + 1, num);
+			}
+
+			if (_count_in_samples < _remaining_latency_preroll) {
+				_count_in_samples = _remaining_latency_preroll;
 			}
 		}
 	}

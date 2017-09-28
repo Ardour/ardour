@@ -292,18 +292,47 @@ Session::process_with_events (pframes_t nframes)
 		process_event (ev);
 	}
 
-	/* count in */
+	/* only count-in when going to roll at speed 1.0 */
 	if (_transport_speed != 1.0 && _count_in_samples > 0) {
 		_count_in_samples = 0;
 	}
+	if (_transport_speed == 0.0) {
+		_remaining_latency_preroll = 0;
+	}
 
-	if (_count_in_samples > 0) {
-		samplecnt_t ns = std::min ((samplecnt_t)nframes, _count_in_samples);
+	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-		no_roll (ns);
-		run_click (_transport_sample - _count_in_samples, ns);
+	if (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
+		samplecnt_t ns;
 
-		_count_in_samples -= ns;
+		if (_remaining_latency_preroll > 0) {
+			ns = std::min ((samplecnt_t)nframes, _remaining_latency_preroll);
+		} else {
+			ns = std::min ((samplecnt_t)nframes, _count_in_samples);
+		}
+
+		if (_count_in_samples > 0) {
+			run_click (_transport_sample - _count_in_samples, ns);
+			assert (_count_in_samples >= ns);
+			_count_in_samples -= ns;
+		}
+
+		if (_remaining_latency_preroll > 0) {
+			if (_count_in_samples == 0) {
+				click (_transport_sample - _remaining_latency_preroll, ns);
+			}
+			if (process_routes (ns, session_needs_butler)) {
+				fail_roll (ns);
+			}
+		} else {
+			no_roll (ns);
+		}
+
+		if (_remaining_latency_preroll > 0) {
+			assert (_remaining_latency_preroll >= ns);
+			_remaining_latency_preroll -= ns;
+		}
+
 		nframes -= ns;
 
 		/* process events.. */

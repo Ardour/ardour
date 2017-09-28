@@ -246,7 +246,7 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 		}
 	}
 
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, !_session.transport_stopped());
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, !_session.transport_stopped(), true);
 
 	/* note: auditioner never writes to disk, so we don't care about the
 	 * disk writer status (it's buffers will always have no data in them).

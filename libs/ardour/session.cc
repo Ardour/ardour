@@ -186,6 +186,7 @@ Session::Session (AudioEngine &eng,
 	, _session_range_end_is_free (true)
 	, _slave (0)
 	, _silent (false)
+	, _remaining_latency_preroll (0)
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
 	, _last_transport_speed (0)
@@ -2171,13 +2172,11 @@ Session::maybe_enable_record (bool rt_context)
 samplepos_t
 Session::audible_sample (bool* latent_locate) const
 {
-	samplepos_t ret;
-
-	sampleoffset_t offset = worst_playback_latency (); // - _engine.samples_since_cycle_start ();
-	offset *= transport_speed ();
 	if (latent_locate) {
 		*latent_locate = false;
 	}
+
+	samplepos_t ret;
 
 	if (synced_to_engine()) {
 		/* Note: this is basically just sync-to-JACK */
@@ -2186,56 +2185,36 @@ Session::audible_sample (bool* latent_locate) const
 		ret = _transport_sample;
 	}
 
-	if (transport_rolling()) {
-		ret -= offset;
+	assert (ret >= 0);
 
-		/* Check to see if we have passed the first guaranteed
-		 * audible sample past our last start position. if not,
-		 * return that last start point because in terms
-		 * of audible samples, we have not moved yet.
-		 *
-		 * `Start position' in this context means the time we last
-		 * either started, located, or changed transport direction.
-		 */
+	if (!transport_rolling()) {
+		return ret;
+	}
 
-		if (_transport_speed > 0.0f) {
-
-			if (!play_loop || !have_looped) {
-				if (ret < _last_roll_or_reversal_location) {
-					if (latent_locate) {
-						*latent_locate = true;
-					}
-					return _last_roll_or_reversal_location;
+#if 0 // TODO looping
+	if (_transport_speed > 0.0f) {
+		if (play_loop && have_looped) {
+			/* the play-position wrapped at the loop-point
+			 * ardour is already playing the beginning of the loop,
+			 * but due to playback latency, the "audible frame"
+			 * is still at the end of the loop.
+			 */
+			Location *location = _locations->auto_loop_location();
+			sampleoffset_t lo = location->start() - ret;
+			if (lo > 0) {
+				ret = location->end () - lo;
+				if (latent_locate) {
+					*latent_locate = true;
 				}
-			} else {
-				/* the play-position wrapped at the loop-point
-				 * ardour is already playing the beginning of the loop,
-				 * but due to playback latency, the "audible frame"
-				 * is still at the end of the loop.
-				 */
-				Location *location = _locations->auto_loop_location();
-				sampleoffset_t lo = location->start() - ret;
-				if (lo > 0) {
-					ret = location->end () - lo;
-					if (latent_locate) {
-						*latent_locate = true;
-					}
-				}
-			}
-
-		} else if (_transport_speed < 0.0f) {
-
-			/* XXX wot? no backward looping? */
-
-			if (ret > _last_roll_or_reversal_location) {
-				return _last_roll_or_reversal_location;
 			}
 		}
+	} else if (_transport_speed < 0.0f) {
+		/* XXX wot? no backward looping? */
 	}
+#endif
 
 	return std::max ((samplepos_t)0, ret);
 }
-
 
 samplecnt_t
 Session::preroll_samples (samplepos_t pos) const
@@ -5744,10 +5723,7 @@ Session::graph_reordered ()
 
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->update_latency_information ();
-		}
+		(*i)->update_signal_latency (true); // XXX
 	}
 }
 
@@ -6857,7 +6833,6 @@ Session::unknown_processors () const
 	return p;
 }
 
-/* this is always called twice, first for playback (true), then for capture */
 void
 Session::update_latency (bool playback)
 {
@@ -6873,7 +6848,6 @@ Session::update_latency (bool playback)
 
 	/* Note; RouteList is sorted as process-graph */
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	samplecnt_t max_latency = 0;
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
@@ -6882,34 +6856,14 @@ Session::update_latency (bool playback)
 		reverse (r->begin(), r->end());
 	}
 
-	/* compute actual latency values for the given direction and store them all in per-port
-	 * structures. this will also publish the same values (to JACK) so that computation of latency
-	 * for routes can consistently use public latency values.
-	 */
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		max_latency = max (max_latency, (*i)->set_private_port_latencies (playback));
-	}
-
-	/* because we latency compensate playback, our published playback latencies should
-	 * be the same for all output ports - all material played back by ardour has
-	 * the same latency, whether its caused by plugins or by latency compensation. since
-	 * these may differ from the values computed above, reset all playback port latencies
-	 * to the same value.
-	 */
-
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("Set public port latencies to %1\n", max_latency));
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->set_public_port_latencies (max_latency, playback);
+		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
+		(*i)->set_public_port_latencies (latency, playback);
 	}
 
 	if (playback) {
-
 		post_playback_latency ();
-
 	} else {
-
 		post_capture_latency ();
 	}
 
@@ -6923,20 +6877,16 @@ Session::post_playback_latency ()
 
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	_worst_track_out_latency = 0;
+	_worst_track_out_latency = 0; // XXX remove me
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		assert (!(*i)->is_auditioner()); // XXX remove me
-		if (!(*i)->active()) { continue ; }
 		_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
-		if (boost::dynamic_pointer_cast<Track> (*i)) {
-			_worst_track_out_latency = max (_worst_track_out_latency, (*i)->output ()->latency ());
-		}
 	}
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 		if (!(*i)->active()) { continue ; }
-		(*i)->set_latency_compensation (_worst_track_out_latency - (*i)->output ()->latency ());
+		(*i)->apply_latency_compensation ();
 	}
 }
 
@@ -6945,15 +6895,11 @@ Session::post_capture_latency ()
 {
 	set_worst_capture_latency ();
 
-	/* reflect any changes in capture latencies into capture offsets
-	 */
+	/* reflect any changes in capture latencies into capture offsets */
 
 	boost::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->update_latency_information ();
-		}
+		(*i)->update_signal_latency ();
 	}
 }
 
@@ -6995,6 +6941,8 @@ Session::set_worst_playback_latency ()
 		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
 	}
 
+	_worst_output_latency = max (_worst_output_latency, _click_io->latency());
+
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst output latency: %1\n", _worst_output_latency));
 }
 
@@ -7014,6 +6962,10 @@ Session::set_worst_capture_latency ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (!tr) {
+			continue;
+		}
 		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
 	}
 
@@ -7023,6 +6975,7 @@ Session::set_worst_capture_latency ()
 void
 Session::update_latency_compensation (bool force_whole_graph)
 {
+	// TODO: consolidate
 	bool some_track_latency_changed = false;
 
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
@@ -7039,7 +6992,7 @@ Session::update_latency_compensation (bool force_whole_graph)
 		assert (!(*i)->is_auditioner()); // XXX remove me
 		if ((*i)->active()) {
 			samplecnt_t tl;
-			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency ())) {
+			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency () /* - (*i)->output()->user_latency()*/)) {
 				some_track_latency_changed = true;
 			}
 			_worst_track_latency = max (tl, _worst_track_latency);
@@ -7055,13 +7008,8 @@ Session::update_latency_compensation (bool force_whole_graph)
 		_engine.update_latencies ();
 	}
 
-
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (!tr) {
-			continue;
-		}
-		tr->update_latency_information ();
+		(*i)->update_signal_latency (true);
 	}
 }
 
@@ -7394,10 +7342,9 @@ Session::auto_connect_thread_run ()
 			/* this is only used for updating plugin latencies, the
 			 * graph does not change. so it's safe in general.
 			 * BUT..
-			 * .. update_latency_compensation () entails Track::update_latency_information()
-			 * which calls DiskWriter::set_capture_offset () which
-			 * modifies the capture offset... which can be a proplem
-			 * in "prepare_to_stop"
+			 * update_latency_compensation ()
+			 * calls DiskWriter::set_capture_offset () which
+			 * modifies the capture-offset, which can be a problem.
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
 				update_latency_compensation ();

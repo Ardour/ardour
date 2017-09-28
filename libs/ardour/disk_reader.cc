@@ -253,11 +253,17 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (speed == 0.0 && (ms == MonitoringDisk)) {
-		/* stopped. Don't accidentally pass any data from disk
-		 * into our outputs (e.g. via interpolation)
-		 */
-		bufs.silence (nframes, 0);
+	if (speed == 0.0) {
+			/* stopped. Don't accidentally pass any data from disk
+			 * into our outputs (e.g. via interpolation)
+			 * nor jump ahead playback_sample when not rolling
+			 */
+		if (ms == MonitoringDisk) {
+			/* when monitoring disk, clear input data so far,
+			 * everything before the disk processor is not relevant.
+			 */
+			bufs.silence (nframes, 0);
+		}
 		return;
 	}
 
@@ -624,6 +630,8 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	int ret = -1;
 	ChannelList::iterator chan;
 	boost::shared_ptr<ChannelList> c = channels.reader();
+
+	//sample = std::max ((samplecnt_t)0, sample -_session.worst_output_latency ());
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->buf->reset ();

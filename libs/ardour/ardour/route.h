@@ -203,7 +203,6 @@ public:
 	boost::shared_ptr<PeakMeter>       peak_meter()       { return _meter; }
 	boost::shared_ptr<const PeakMeter> peak_meter() const { return _meter; }
 	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
-	boost::shared_ptr<DelayLine> delay_line() const  { return _delayline; }
 
 	void flush_processors ();
 
@@ -341,14 +340,15 @@ public:
 	 */
 	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
+	samplecnt_t  update_signal_latency (bool apply_to_delayline = false);
+	virtual void apply_latency_compensation ();
 
 	samplecnt_t  set_private_port_latencies (bool playback) const;
 	void         set_public_port_latencies (samplecnt_t, bool playback) const;
-	samplecnt_t   update_signal_latency (bool set_initial_delay = false);
-	virtual void set_latency_compensation (samplecnt_t);
 
 	void set_user_latency (samplecnt_t);
 	samplecnt_t signal_latency() const { return _signal_latency; }
+	samplecnt_t playback_latency (bool incl_downstream = false) const;
 
 	PBD::Signal0<void> active_changed;
 	PBD::Signal0<void> denormal_protection_changed;
@@ -598,18 +598,17 @@ public:
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
 
-	virtual samplecnt_t check_initial_delay (samplecnt_t nframes, samplepos_t&) { return nframes; }
-
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
-	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok);
+	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader);
 
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */, samplecnt_t /* nframes */) {}
 
-	virtual void process_output_buffers (BufferSet& bufs,
-	                                     samplepos_t start_sample, samplepos_t end_sample,
-	                                     pframes_t nframes, int declick,
-	                                     bool gain_automation_ok);
+	void process_output_buffers (BufferSet& bufs,
+	                             samplepos_t start_sample, samplepos_t end_sample,
+	                             pframes_t nframes, int declick,
+	                             bool gain_automation_ok,
+	                             bool run_disk_processors);
 
 	void flush_processor_buffers_locked (samplecnt_t nframes);
 
@@ -623,7 +622,6 @@ public:
 
 	bool           _active;
 	samplecnt_t    _signal_latency;
-	samplecnt_t    _initial_delay; // remove me
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock _processor_lock;
@@ -749,6 +747,8 @@ private:
 
 	void setup_invisible_processors ();
 
+	void no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample);
+	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
 
 	void reset_instrument_info ();
 	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);

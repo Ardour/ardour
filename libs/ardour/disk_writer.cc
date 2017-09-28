@@ -96,11 +96,9 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 	const int global_rec_enabled = 0x1;
 	const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
 
-	/* merge together the 3 factors that affect record status, and compute
-	 * what has changed.
-	 */
+	/* merge together the 3 factors that affect record status, and compute what has changed. */
 
-	rolling = _session.transport_speed() != 0.0f;
+	rolling = speed != 0.0f;
 	possibly_recording = (rolling << 2) | ((int)record_enabled() << 1) | (int)can_record;
 	change = possibly_recording ^ last_possibly_recording;
 
@@ -114,20 +112,28 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			return;
 		}
 
-		capture_start_sample = transport_sample;
-		first_recordable_sample = capture_start_sample + _input_latency;
+		capture_start_sample = _session.transport_sample ();
+		first_recordable_sample = capture_start_sample;
+
 		if (_alignment_style == ExistingMaterial) {
-			// XXX
+			first_recordable_sample += _capture_offset + _playback_offset;
 		}
 
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 (%9) FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8 WOL %10 WTL %11\n",
-		                                                      name(), first_recordable_sample, last_recordable_sample, capture_start_sample,
-		                                                      0,
-		                                                      0,
+		last_recordable_sample = max_samplepos;
+
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %2 (STS: %3) CS:%4 FRS: %5 IL: %7, OL: %8 CO: %r9 PO: %10 WOL: %11 WIL: %12\n",
+		                                                      name(),
 		                                                      transport_sample,
 		                                                      _session.transport_sample(),
+																													capture_start_sample,
+																													first_recordable_sample,
+																													last_recordable_sample,
+		                                                      _input_latency,
+		                                                      _output_latency,
+		                                                      _capture_offset,
+		                                                      _playback_offset,
 		                                                      _session.worst_output_latency(),
-		                                                      _session.worst_track_latency()));
+		                                                      _session.worst_input_latency()));
 
 
 		prepare_record_status (capture_start_sample);
@@ -161,8 +167,7 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 }
 
 void
-DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes,
-				    samplecnt_t & rec_nframes, samplecnt_t & rec_offset)
+DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transport_sample, samplecnt_t nframes, samplecnt_t & rec_nframes, samplecnt_t & rec_offset)
 {
 	switch (ot) {
 	case Evoral::OverlapNone:
@@ -347,31 +352,31 @@ void
 DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
                  double speed, pframes_t nframes, bool result_required)
 {
+	if (!_active && !_pending_active) {
+		return;
+	}
+	_active = _pending_active;
+
 	uint32_t n;
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
+
 	samplecnt_t rec_offset = 0;
 	samplecnt_t rec_nframes = 0;
 	bool nominally_recording;
+
 	bool re = record_enabled ();
 	bool can_record = _session.actively_recording ();
 
-	if (_active) {
-		if (!_pending_active) {
-			_active = false;
-			return;
-		}
-	} else {
-		if (_pending_active) {
-			_active = true;
-		} else {
-			return;
-		}
-	}
-
 	_need_butler = false;
 
-	check_record_status (start_sample, 1, can_record);
+#ifndef NDEBUG
+	if (speed != 0 && re) {
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: run() start: %2 end: %3 NF: %4\n", _name, start_sample, end_sample, nframes));
+	}
+#endif
+
+	check_record_status (start_sample, speed, can_record);
 
 	if (nframes == 0) {
 		return;

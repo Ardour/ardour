@@ -95,7 +95,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, Muteable (sess, name)
 	, _active (true)
 	, _signal_latency (0)
-	, _initial_delay (0)
 	, _disk_io_point (DiskIOPreFader)
 	, _pending_process_reorder (0)
 	, _pending_signals (0)
@@ -193,12 +192,9 @@ Route::init ()
 		_amp->set_display_name (_("Monitor"));
 	}
 
-#if 0 // not used - just yet
 	if (!is_master() && !is_monitor() && !is_auditioner()) {
-		_delayline.reset (new DelayLine (_session, _name));
-		add_processor (_delayline, PreFader);
+		_delayline.reset (new DelayLine (_session, name () + ":in"));
 	}
-#endif
 
 	/* and input trim */
 
@@ -311,19 +307,27 @@ Route::maybe_declick (BufferSet&, samplecnt_t, int)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes,
-			       int declick, bool gain_automation_ok)
+			       int declick, bool gain_automation_ok, bool run_disk_reader)
 {
 	/* Caller must hold process lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
-		// can this actually happen? functions calling process_output_buffers()
-		// already take a reader-lock.
+		// can this actually happen?
+		// Places that need a WriterLock on (_processor_lock) must also take the process-lock.
 		bufs.silence (nframes, 0);
+		assert (0); // ...one way to find out.
 		return;
 	}
 
+	/* We should offset the route-owned ctrls by the given latency, however
+	 * this only affects Mute. Other route-owned controls (solo, polarity..)
+	 * are not automatable.
+	 *
+	 * Mute has its own issues since there's not a single mute-point,
+	 * but in general
+	 */
 	automation_run (start_sample, nframes);
 
 	/* figure out if we're going to use gain automation */
@@ -341,13 +345,53 @@ Route::process_output_buffers (BufferSet& bufs,
 				nframes);
 	}
 
-	/* Tell main outs what to do about monitoring.  We do this so that
-	   on a transition between monitoring states we get a de-clicking gain
-	   change in the _main_outs delivery, if config.get_use_monitor_fades()
-	   is true.
+	/* We align the playhead to output. The user hears what the clock says:
+	 * When the playhead/clock says 1:00:00:00 the user will hear the audio sample
+	 * at 1:00:00:00. sample_start will be [sample at] 1:00:00:00
+	 *
+	 * e.g. clock says Time T = 0,  sample_start = 0
+	 * Disk-read(play) -> latent-plugin (+10) -> fader-automation -> output (+5)
+	 * -> total playback latency "disk -> out" is 15.
+	 * -> at Time T= -15, the disk-reader reads sample T=0.
+	 * By the Time T=0 is reached (dt=15 later) that sample is audible.
+	 */
 
-	   We override this in the case where we have an internal generator.
-	*/
+	start_sample += _signal_latency;
+	end_sample += _signal_latency;
+
+	start_sample += _output->latency ();
+	end_sample += _output->latency ();
+
+	/* Note: during intial pre-roll 'start_sample' as passed as argument can be negative.
+	 * Functions calling process_output_buffers() will set  "run_disk_reader"
+	 * to false if the pre-roll count-down is larger than playback_latency ().
+	 *
+	 * playback_latency() is guarnteed to be <= _signal_latency + _output->latency ()
+	 */
+	assert (!_disk_reader || !run_disk_reader || start_sample >= 0);
+
+	/* however the disk-writer may need to pick up output from other tracks
+	 * during pre-roll (in particular if this route has latent effects after the disk).
+	 *
+	 * e.g. track 1 play -> latency A --port--> track2 capture -> latency B ---> out
+	 * total pre-roll = A + B.
+	 *
+	 * Note the disk-writer has built-in overlap detection (it's safe to run it early)
+	 * given that
+	 */
+	bool run_disk_writer = false;
+	if (_disk_writer) {
+		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
+		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output->latency ());
+	}
+
+	/* Tell main outs what to do about monitoring.  We do this so that
+	 * on a transition between monitoring states we get a de-clicking gain
+	 * change in the _main_outs delivery, if config.get_use_monitor_fades()
+	 * is true.
+	 *
+	 * We override this in the case where we have an internal generator.
+	 */
 	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
 
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
@@ -356,6 +400,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	   GLOBAL DECLICK (for transport changes etc.)
 	   ----------------------------------------------------------------------------------------- */
 
+	// XXX not latency compensated. calls Amp::declick, but there may be
+	// plugins between disk and Fader.
 	maybe_declick (bufs, nframes, declick);
 	_pending_declick = 0;
 
@@ -363,6 +409,14 @@ Route::process_output_buffers (BufferSet& bufs,
 	   DENORMAL CONTROL/PHASE INVERT
 	   ----------------------------------------------------------------------------------------- */
 
+	/* TODO phase-control should become a processor, or rather a Stub-processor:
+	 * a point in the chain which calls a special-cased private Route method.
+	 * _phase_control is route-owned and dynamic.)
+	 * and we should rename it to polarity.
+	 *
+	 * denormals: we'll need to protect silent inputs as well as silent disk
+	 * (when not monitoring input).  Or simply drop that feature.
+	 */
 	if (!_phase_control->none()) {
 
 		int chn = 0;
@@ -407,8 +461,8 @@ Route::process_output_buffers (BufferSet& bufs,
 					sp[nx] += 1.0e-27f;
 				}
 			}
-
 		}
+
 	}
 
 	/* -------------------------------------------------------------------------------------------
@@ -422,6 +476,12 @@ Route::process_output_buffers (BufferSet& bufs,
 	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		/* TODO check for split cycles here.
+		 *
+		 * start_frame, end_frame is adjusted by latency and may
+		 * cross loop points.
+		 */
 
 		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
 			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
@@ -442,26 +502,55 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 #endif
 
-		/* should we NOT run plugins here if the route is inactive?
-		   do we catch route != active somewhere higher?
-		*/
-
 		if (boost::dynamic_pointer_cast<Send>(*i) != 0) {
-			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in(_signal_latency - latency);
+			// inform the reader that we're sending a late signal,
+			// relative to original (output aligned) start_sample
+			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in (latency);
 		}
 		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
-			const samplecnt_t longest_session_latency = _initial_delay + _signal_latency;
+			/* set potential sidechain ports, capture and playback latency.
+			 * This effectively sets jack port latency which should include
+			 * up/downstream latencies.
+			 *
+			 * However, the value is not used by Ardour (2017-09-20) and calling
+			 * IO::latency() is expensive, so we punt.
+			 *
+			 * capture should be
+			 *      input()->latenct + latency,
+			 * playback should be
+			 *      output->latency() + _signal_latency - latency
+			 *
+			 * Also see note below, _signal_latency may be smaller than latency
+			 * if a plugin's latency increases while it's running.
+			 */
+			const samplecnt_t playback_latency = std::max ((samplecnt_t)0, _signal_latency - latency);
 			boost::dynamic_pointer_cast<PluginInsert>(*i)->set_sidechain_latency (
-					_initial_delay + latency, longest_session_latency - latency);
+					/* input->latency() + */ latency, /* output->latency() + */ playback_latency);
 		}
 
-		//cerr << name() << " run " << (*i)->name() << endl;
-		(*i)->run (bufs, start_sample - latency, end_sample - latency, speed, nframes, *i != _processors.back());
+		double pspeed = speed;
+		if ((!run_disk_reader && (*i) == _disk_reader) || (!run_disk_writer && (*i) == _disk_writer)) {
+			/* run with speed 0, no-roll */
+			pspeed = 0;
+		}
+
+		(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
 		bufs.set_count ((*i)->output_streams());
 
+		/* Note: plugin latency may change. While the plugin does inform the session via
+		 * processor_latency_changed(). But the session may not yet have gotten around to
+		 * update the actual worste-case and update this track's _signal_latency.
+		 *
+		 * So there can be cases where adding up all latencies may not equal _signal_latency.
+		 */
 		if ((*i)->active ()) {
 			latency += (*i)->signal_latency ();
 		}
+#if 0
+		if ((*i) == _delayline) {
+			latency += _delayline->get_delay ();
+		}
+#endif
 	}
 }
 
@@ -595,11 +684,11 @@ Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t 
 	assert (is_monitor());
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 	fill_buffers_with_input (bufs, _input, nframes);
-	passthru (bufs, start_sample, end_sample, nframes, declick, true);
+	passthru (bufs, start_sample, end_sample, nframes, declick, true, false);
 }
 
 void
-Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok)
+Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader)
 {
 	_silent = false;
 
@@ -619,7 +708,7 @@ Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	/* run processor chain */
 
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok, run_disk_reader);
 }
 
 void
@@ -629,7 +718,7 @@ Route::passthru_silence (samplepos_t start_sample, samplepos_t end_sample, pfram
 
 	bufs.set_count (_input->n_ports());
 	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, false);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, false, false);
 }
 
 void
@@ -2834,10 +2923,7 @@ Route::set_processor_state (const XMLNode& node)
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
 		} else if (prop->value() == "delay") {
-			if (_delayline) {
-				_delayline->set_state (**niter, Stateful::current_state_version);
-				new_order.push_back (_delayline);
-			}
+			// skip -- internal
 		} else if (prop->value() == "main-outs") {
 			_main_outs->set_state (**niter, Stateful::current_state_version);
 		} else if (prop->value() == "intreturn") {
@@ -3578,19 +3664,95 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		*/
 	}
 
+	no_roll_unlocked (nframes, start_sample, end_sample);
+
+	return 0;
+}
+
+void
+Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample)
+{
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
+
+	/* filter captured data before meter sees it */
+	filter_input (bufs);
 
 	if (_meter_point == MeterInput) {
 		_meter->run (bufs, start_sample, end_sample, 0.0, nframes, true);
 	}
 
-	passthru (bufs, start_sample, end_sample, nframes, 0, true);
+	passthru (bufs, start_sample, end_sample, nframes, 0, true, false);
 
 	flush_processor_buffers_locked (nframes);
+}
 
-	return 0;
+samplecnt_t
+Route::playback_latency (bool incl_downstream) const
+{
+	samplecnt_t rv;
+	if (_disk_reader) {
+		rv = _disk_reader->output_latency ();
+	} else {
+		rv = _signal_latency;
+	}
+	if (incl_downstream) {
+		rv += _output->connected_latency (true);
+	} else {
+		rv += _output->latency ();
+	}
+	return rv;
+}
+
+pframes_t
+Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample)
+{
+	samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
+	if (latency_preroll == 0) {
+		return nframes;
+	}
+	if (!_disk_reader) {
+		start_sample -= latency_preroll;
+		end_sample   -= latency_preroll;
+		return nframes;
+	}
+
+	samplecnt_t route_offset = playback_latency ();
+
+	if (latency_preroll > route_offset + nframes) {
+		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll);
+		return 0;
+	}
+
+	if (latency_preroll > route_offset) {
+
+		samplecnt_t skip = latency_preroll - route_offset;
+		no_roll_unlocked (skip, start_sample - latency_preroll, start_sample - latency_preroll + skip);
+
+		if (nframes == skip) {
+			return 0;
+		}
+
+		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
+			if (iop) {
+				iop->increment_port_buffer_offset (skip);
+			}
+		}
+		_input->increment_port_buffer_offset (skip);
+		_output->increment_port_buffer_offset (skip);
+
+		start_sample -= route_offset;
+		end_sample -= route_offset;
+
+		return nframes - skip;
+	}
+
+	start_sample -= latency_preroll;
+	end_sample -= latency_preroll;
+	return nframes;
 }
 
 int
@@ -3609,6 +3771,9 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 		}
 		return 0;
 	}
+	if ((nframes = latency_preroll (nframes, start_sample, end_sample)) == 0) {
+		return 0;
+	}
 
 	_silent = false;
 
@@ -3624,7 +3789,7 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
 	}
 
-	passthru (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling());
+	passthru (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
 
 	if ((_disk_reader && _disk_reader->need_butler()) || (_disk_writer && _disk_writer->need_butler())) {
 		need_butler = true;
@@ -3863,34 +4028,25 @@ Route::add_export_point()
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
 
-		// this aligns all tracks; but not tracks + busses
-		samplecnt_t latency = _session.worst_track_out_latency (); // FIXME
-		assert (latency >= _initial_delay);
-		_capturing_processor.reset (new CapturingProcessor (_session, latency - _initial_delay));
-		_capturing_processor->activate ();
-
+		/* Align all tracks for stem-export w/o processing.
+		 * Compensate for all plugins between the this route's disk-reader
+		 * and the common final downstream output (ie alignment point for playback).
+		 */
+		_capturing_processor.reset (new CapturingProcessor (_session, playback_latency (true)));
 		configure_processors_unlocked (0, &lw);
-
+		_capturing_processor->activate ();
 	}
 
 	return _capturing_processor;
 }
 
 samplecnt_t
-Route::update_signal_latency (bool set_initial_delay)
+Route::update_signal_latency (bool apply_to_delayline)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-	samplecnt_t l_in  = _input->latency ();
+	samplecnt_t l_in  = 0; // _input->latency ();
 	samplecnt_t l_out = _output->user_latency();
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			l_in += (*i)->signal_latency ();
-		}
-		(*i)->set_input_latency (l_in);
-	}
-
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
 		(*i)->set_output_latency (l_out);
 		if ((*i)->active ()) {
@@ -3902,11 +4058,21 @@ Route::update_signal_latency (bool set_initial_delay)
 
 	_signal_latency = l_out;
 
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		if ((*i)->active ()) {
+			l_in += (*i)->signal_latency ();
+		}
+		(*i)->set_input_latency (l_in);
+		(*i)->set_playback_offset (_signal_latency + _output->latency ());
+		(*i)->set_capture_offset (_input->latency ());
+	}
+
+
 	lm.release ();
 
-	if (set_initial_delay) {
+	if (apply_to_delayline) {
 		/* see also Session::post_playback_latency() */
-		set_latency_compensation (_session.worst_track_latency () + _session.worst_track_out_latency () - output ()->latency ());
+		apply_latency_compensation ();
 	}
 
 	if (_signal_latency != l_out) {
@@ -3924,26 +4090,29 @@ Route::set_user_latency (samplecnt_t nframes)
 }
 
 void
-Route::set_latency_compensation (samplecnt_t longest_session_latency)
+Route::apply_latency_compensation ()
 {
-	samplecnt_t old = _initial_delay;
-	assert (!_disk_reader || _disk_reader->output_latency () <= _signal_latency);
+	if (_delayline) {
+		samplecnt_t old = _delayline->get_delay ();
 
-	if (_disk_reader &&  _disk_reader->output_latency () < longest_session_latency) {
-		_initial_delay = longest_session_latency - _disk_reader->output_latency ();
-	} else {
-		_initial_delay = 0;
+		samplecnt_t play_lat_in = _input->connected_latency (true);
+		samplecnt_t play_lat_out = _output->connected_latency (true);
+		samplecnt_t latcomp = play_lat_in - play_lat_out - _signal_latency;
+
+#if 0 // DEBUG
+		samplecnt_t capt_lat_in = _input->connected_latency (false);
+		samplecnt_t capt_lat_out = _output->connected_latency (false);
+		samplecnt_t latcomp_capt = capt_lat_out - capt_lat_in - _signal_latency;
+
+		cout << "ROUTE " << name() << " delay for " << latcomp << " (c: " << latcomp_capt << ")" << endl;
+#endif
+
+		_delayline->set_delay (latcomp > 0 ? latcomp : 0);
+
+		if (old !=  _delayline->get_delay ()) {
+			signal_latency_updated (); /* EMIT SIGNAL */
+		}
 	}
-
-	DEBUG_TRACE (DEBUG::Latency, string_compose (
-		             "%1: compensate for maximum latency of %2,"
-		             "given own latency of %3, using initial delay of %4\n",
-		             name(), longest_session_latency, _signal_latency, _initial_delay));
-
-	if (_initial_delay != old) {
-		//initial_delay_changed (); /* EMIT SIGNAL */
-	}
-
 }
 
 void
@@ -4645,12 +4814,6 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-#if 0 // not used - just yet
-	if (!is_master() && !is_monitor() && !is_auditioner()) {
-		new_processors.push_front (_delayline);
-	}
-#endif
-
 	/* MONITOR CONTROL */
 
 	if (_monitor_control && is_monitor ()) {
@@ -4744,6 +4907,15 @@ Route::setup_invisible_processors ()
 		}
 	}
 
+	if (!is_master() && !is_monitor() && !is_auditioner()) {
+		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
+		if (reader_pos != new_processors.end()) {
+			/* insert before disk-reader */
+			new_processors.insert (reader_pos, _delayline);
+		} else {
+			new_processors.push_front (_delayline);
+		}
+	}
 
 	_processors = new_processors;
 
@@ -4887,9 +5059,11 @@ Route::non_realtime_locate (samplepos_t pos)
 		_pannable->non_realtime_locate (pos);
 	}
 
-	if (_delayline.get()) {
-		_delayline.get()->flush();
+#if 0 // XXX mayhaps clear delayline here (and at stop?)
+	if (_delayline) {
+		_delayline->flush ();
 	}
+#endif
 
 	{
 		//Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());

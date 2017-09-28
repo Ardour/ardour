@@ -478,7 +478,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	samplecnt_t worst_input_latency () const     { return _worst_input_latency; }
 	samplecnt_t worst_track_latency () const     { return _worst_track_latency; }
 	samplecnt_t worst_track_out_latency () const { return _worst_track_out_latency; }
-	samplecnt_t worst_playback_latency  () const { return _worst_output_latency + _worst_track_latency; }
+	samplecnt_t worst_playback_latency () const  { return std::max (_worst_output_latency, _worst_track_latency); }
+	samplecnt_t worst_latency_preroll () const;
 
 	struct SaveAs {
 		std::string new_parent_folder;  /* parent folder where new session folder will be created */
@@ -684,6 +685,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	samplepos_t requested_return_sample() const { return _requested_return_sample; }
 	void set_requested_return_sample(samplepos_t return_to);
 
+	samplecnt_t remaining_latency_preroll () const { return _remaining_latency_preroll; }
+
 	enum PullupFormat {
 		pullup_Plus4Plus1,
 		pullup_Plus4,
@@ -721,7 +724,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0; }
-	bool   transport_rolling() const { return _transport_speed != 0.0 && _count_in_samples == 0; }
+	bool   transport_rolling() const { return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0; }
 
 	bool silent () { return _silent; }
 
@@ -1248,6 +1251,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	bool                    _session_range_end_is_free;
 	Slave*                  _slave;
 	bool                    _silent;
+	samplecnt_t             _remaining_latency_preroll;
 
 	// varispeed playback
 	double                  _transport_speed;
