@@ -348,7 +348,6 @@ public:
 	virtual void set_latency_compensation (samplecnt_t);
 
 	void set_user_latency (samplecnt_t);
-	samplecnt_t initial_delay() const  { return _initial_delay; }
 	samplecnt_t signal_latency() const { return _signal_latency; }
 
 	PBD::Signal0<void> active_changed;
@@ -387,7 +386,8 @@ public:
 	PBD::Signal0<void> meter_change;
 	/** a processor's latency has changed */
 	PBD::Signal0<void> signal_latency_changed;
-	PBD::Signal0<void>       initial_delay_changed;
+	/** route has updated its latency compensation */
+	PBD::Signal0<void> signal_latency_updated;
 
 	/** Emitted with the process lock held */
 	PBD::Signal0<void>       io_changed;
@@ -623,7 +623,7 @@ public:
 
 	bool           _active;
 	samplecnt_t    _signal_latency;
-	samplecnt_t     _initial_delay;
+	samplecnt_t    _initial_delay; // remove me
 
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock _processor_lock;

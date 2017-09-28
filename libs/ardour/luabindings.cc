@@ -1062,7 +1062,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("trim", &Route::trim)
 		.addFunction ("peak_meter", (boost::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
 		.addFunction ("set_meter_point", &Route::set_meter_point)
-		.addFunction ("initial_delay", &Route::initial_delay)
 		.addFunction ("signal_latency", &Route::signal_latency)
 		.endClass ()
 

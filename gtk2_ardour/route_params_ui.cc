@@ -269,7 +269,7 @@ RouteParams_UI::refresh_latency ()
 		latency_widget->refresh();
 
 		char buf[128];
-		snprintf (buf, sizeof (buf), _("Playback delay: %" PRId64 " samples"), _route->initial_delay());
+		snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency ());
 		delay_label.set_text (buf);
 	}
 }
@@ -297,7 +297,7 @@ RouteParams_UI::setup_latency_frame ()
 	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 
 	char buf[128];
-	snprintf (buf, sizeof (buf), _("Playback delay: %" PRId64 " samples"), _route->initial_delay());
+	snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency());
 	delay_label.set_text (buf);
 
 	latency_packer.pack_start (*latency_widget, false, false);
@@ -305,8 +305,7 @@ RouteParams_UI::setup_latency_frame ()
 	latency_packer.pack_start (delay_label);
 
 	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
-	_route->signal_latency_changed.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
-	_route->initial_delay_changed.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
+	_route->signal_latency_updated.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
 
 	latency_frame.add (latency_packer);
 	latency_frame.show_all ();

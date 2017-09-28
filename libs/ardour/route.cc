@@ -3941,7 +3941,7 @@ Route::set_latency_compensation (samplecnt_t longest_session_latency)
 		             name(), longest_session_latency, _signal_latency, _initial_delay));
 
 	if (_initial_delay != old) {
-		initial_delay_changed (); /* EMIT SIGNAL */
+		//initial_delay_changed (); /* EMIT SIGNAL */
 	}
 
 }
