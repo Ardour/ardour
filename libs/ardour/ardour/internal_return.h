@@ -44,6 +44,8 @@ class LIBARDOUR_API InternalReturn : public Return
 	void add_send (InternalSend *);
 	void remove_send (InternalSend *);
 
+	void set_playback_offset (samplecnt_t cnt);
+
   private:
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;

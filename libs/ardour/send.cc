@@ -131,7 +131,14 @@ Send::deactivate ()
 }
 
 void
-Send::set_delay_in(samplecnt_t delay)
+Send::set_output_latency (samplecnt_t cnt)
+{
+	Processor::set_output_latency (cnt);
+	set_delay_in (cnt);
+}
+
+void
+Send::set_delay_in (samplecnt_t delay)
 {
 	if (!_delayline) return;
 	if (_delay_in == delay) {
@@ -140,13 +147,13 @@ Send::set_delay_in(samplecnt_t delay)
 	_delay_in = delay;
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
-			string_compose ("Send::set_delay_in(%1) + %2 = %3\n",
-				delay, _delay_out, _delay_out + _delay_in));
-	_delayline.get()->set_delay(_delay_out + _delay_in);
+			string_compose ("Send::set_delay_in %1: (%2) - %3 = %4\n",
+				name (), _delay_in, _delay_out, _delay_in - _delay_out));
+	_delayline->set_delay(_delay_in - _delay_out);
 }
 
 void
-Send::set_delay_out(samplecnt_t delay)
+Send::set_delay_out (samplecnt_t delay)
 {
 	if (!_delayline) return;
 	if (_delay_out == delay) {
@@ -154,9 +161,9 @@ Send::set_delay_out(samplecnt_t delay)
 	}
 	_delay_out = delay;
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
-			string_compose ("Send::set_delay_out(%1) + %2 = %3\n",
-				delay, _delay_in, _delay_out + _delay_in));
-	_delayline.get()->set_delay(_delay_out + _delay_in);
+			string_compose ("Send::set_delay_out %1: %2 - (%3) = %4\n",
+				name (), _delay_in, _delay_out, _delay_in - _delay_out));
+	_delayline->set_delay(_delay_in - _delay_out);
 }
 
 void

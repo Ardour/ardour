@@ -67,6 +67,7 @@ class LIBARDOUR_API Send : public Delivery
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* latency compensation */
+	void set_output_latency (samplecnt_t cnt);
 	void set_delay_in (samplecnt_t);
 	void set_delay_out (samplecnt_t);
 	samplecnt_t get_delay_in () const { return _delay_in; }

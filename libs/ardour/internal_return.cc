@@ -65,6 +65,17 @@ InternalReturn::remove_send (InternalSend* send)
 	_sends.remove (send);
 }
 
+void
+InternalReturn::set_playback_offset (samplecnt_t cnt)
+{
+	Processor::set_playback_offset (cnt);
+
+	Glib::Threads::Mutex::Lock lm (_sends_mutex); // TODO reader lock
+	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+		(*i)->set_delay_out (cnt);
+	}
+}
+
 XMLNode&
 InternalReturn::state (bool full)
 {

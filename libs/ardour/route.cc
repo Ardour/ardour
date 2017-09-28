@@ -502,11 +502,6 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 #endif
 
-		if (boost::dynamic_pointer_cast<Send>(*i) != 0) {
-			// inform the reader that we're sending a late signal,
-			// relative to original (output aligned) start_sample
-			boost::dynamic_pointer_cast<Send>(*i)->set_delay_in (latency);
-		}
 		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
 			/* set potential sidechain ports, capture and playback latency.
 			 * This effectively sets jack port latency which should include
