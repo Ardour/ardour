@@ -116,7 +116,10 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	bool physically_connected () const;
 
 	samplecnt_t signal_latency () const { return 0; }
+
 	samplecnt_t latency () const;
+	samplecnt_t public_latency () const;
+	samplecnt_t connected_latency (bool for_playback) const;
 
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }

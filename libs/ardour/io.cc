@@ -1219,14 +1219,12 @@ IO::apply_pretty_name ()
 samplecnt_t
 IO::latency () const
 {
-	samplecnt_t max_latency;
-	samplecnt_t latency;
-
-	max_latency = 0;
+	samplecnt_t max_latency = 0;
 
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		samplecnt_t latency;
 		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
 			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
 			                                             name(),
@@ -1239,6 +1237,61 @@ IO::latency () const
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
 	                                             name(), _ports.num_ports(), max_latency,
 	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	return max_latency;
+}
+
+samplecnt_t
+IO::public_latency () const
+{
+	samplecnt_t max_latency = 0;
+
+	/* io lock not taken - must be protected by other means */
+
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		samplecnt_t latency;
+		if ((latency = i->public_latency_range (_direction == Output).max) > max_latency) {
+			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                             name(),
+			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                             latency));
+			max_latency = latency;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 public latency from %2 ports = %3\n",
+	                                             name(), _ports.num_ports(), max_latency,
+	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	return max_latency;
+}
+
+samplecnt_t
+IO::connected_latency (bool for_playback) const
+{
+	/* io lock not taken - must be protected by other means */
+	samplecnt_t max_latency = 0;
+	bool connected = false;
+
+	/* if output is not connected to anything, use private latency */
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		if (i->connected()) {
+			connected = true;
+			max_latency = 0;
+			break;
+		}
+		samplecnt_t latency;
+		if ((latency = i->private_latency_range (for_playback).max) > max_latency) {
+			max_latency = latency;
+		}
+	}
+	if (connected) {
+		for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+			LatencyRange lr;
+			i->get_connected_latency_range (lr, for_playback);
+			if (lr.max > max_latency) {
+				max_latency = lr.max;
+			}
+		}
+	}
 	return max_latency;
 }
 
