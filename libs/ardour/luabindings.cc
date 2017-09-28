@@ -40,6 +40,8 @@
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/dsp_filter.h"
 #include "ardour/file_source.h"
 #include "ardour/fluid_synth.h"
@@ -64,7 +66,9 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/return.h"
 #include "ardour/route_group.h"
+#include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
 #include "ardour/sidechain.h"
@@ -872,6 +876,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("connected_to", (bool (Port::*)(std::string const &)const)&Port::connected_to)
 		.addFunction ("connect", (int (Port::*)(std::string const &))&Port::connect)
 		.addFunction ("disconnect", (int (Port::*)(std::string const &))&Port::disconnect)
+		.addFunction ("physically_connected", &Port::physically_connected)
+		.addFunction ("private_latency_range", &Port::private_latency_range)
+		.addFunction ("public_latency_range", &Port::public_latency_range)
+		.addRefFunction ("get_connected_latency_range", &Port::get_connected_latency_range)
 		//.addStaticFunction ("port_offset", &Port::port_offset) // static
 		.endClass ()
 
@@ -909,6 +917,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("port_by_name", &IO::nth)
 		.addFunction ("n_ports", &IO::n_ports)
 		.addFunction ("latency", &IO::latency)
+		.addFunction ("public_latency", &IO::latency)
 		.endClass ()
 
 		.deriveWSPtrClass <PannerShell, SessionObject> ("PannerShell")
@@ -1063,6 +1072,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("peak_meter", (boost::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
 		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.addFunction ("signal_latency", &Route::signal_latency)
+		.addFunction ("playback_latency", &Route::playback_latency)
 		.endClass ()
 
 		.deriveWSPtrClass <Playlist, SessionObject> ("Playlist")
@@ -1314,8 +1324,12 @@ LuaBindings::common (lua_State* L)
 		.addCast<IOProcessor> ("to_ioprocessor")
 		.addCast<UnknownProcessor> ("to_unknownprocessor")
 		.addCast<Amp> ("to_amp")
+		.addCast<DiskIOProcessor> ("to_diskioprocessor")
+		.addCast<DiskReader> ("to_diskreader")
+		.addCast<DiskWriter> ("to_diskwriter")
 		.addCast<PeakMeter> ("to_peakmeter")
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
+		.addCast<Send> ("to_send")
 #if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
 		.addCast<DelayLine> ("to_delayline")
@@ -1326,8 +1340,22 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("active", &Processor::active)
 		.addFunction ("activate", &Processor::activate)
 		.addFunction ("deactivate", &Processor::deactivate)
-		.addFunction ("output_streams", &PluginInsert::output_streams)
-		.addFunction ("input_streams", &PluginInsert::input_streams)
+		.addFunction ("input_latency", &Processor::input_latency)
+		.addFunction ("output_latency", &Processor::output_latency)
+		.addFunction ("capture_offset", &Processor::capture_offset)
+		.addFunction ("playback_offset", &Processor::playback_offset)
+		.addFunction ("output_streams", &Processor::output_streams)
+		.addFunction ("input_streams", &Processor::input_streams)
+		.addFunction ("signal_latency", &Processor::signal_latency)
+		.endClass ()
+
+		.deriveWSPtrClass <DiskIOProcessor, Processor> ("DiskIOProcessor")
+		.endClass ()
+
+		.deriveWSPtrClass <DiskReader, DiskIOProcessor> ("DiskReader")
+		.endClass ()
+
+		.deriveWSPtrClass <DiskWriter, DiskIOProcessor> ("DiskWriter")
 		.endClass ()
 
 		.deriveWSPtrClass <IOProcessor, Processor> ("IOProcessor")
@@ -1342,6 +1370,20 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Delivery, IOProcessor> ("Delivery")
 		.addFunction ("panner_shell", &Route::panner_shell)
+		.endClass ()
+
+		.deriveWSPtrClass <Send, Delivery> ("Send")
+		.addFunction ("get_delay_in", &Send::get_delay_in)
+		.addFunction ("get_delay_out", &Send::get_delay_out)
+		.endClass ()
+
+		.deriveWSPtrClass <InternalSend, Send> ("InternalSend")
+		.endClass ()
+
+		.deriveWSPtrClass <Return, IOProcessor> ("Return")
+		.endClass ()
+
+		.deriveWSPtrClass <InternalReturn, Return> ("InternalReturn")
 		.endClass ()
 
 		.beginNamespace ("Plugin")
@@ -2007,7 +2049,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_output_device_name", &AudioBackend::set_output_device_name)
 		.endClass()
 
-		.beginClass <PortEngine> ("PortEngine")
+		.beginClass <LatencyRange> ("LatencyRange")
+		.addVoidConstructor ()
+		.addData ("min", &LatencyRange::min)
+		.addData ("max", &LatencyRange::max)
 		.endClass()
 
 		.beginClass <PortManager> ("PortManager")
@@ -2169,9 +2214,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_block_size", &Session::get_block_size)
 		.addFunction ("worst_output_latency", &Session::worst_output_latency)
 		.addFunction ("worst_input_latency", &Session::worst_input_latency)
-		.addFunction ("worst_track_latency", &Session::worst_track_latency)
-		.addFunction ("worst_track_out_latency", &Session::worst_track_out_latency)
-		.addFunction ("worst_playback_latency", &Session::worst_playback_latency)
+		.addFunction ("worst_route_latency", &Session::worst_route_latency)
+		.addFunction ("worst_latency_preroll", &Session::worst_latency_preroll)
 		.addFunction ("cfg", &Session::cfg)
 		.addFunction ("route_groups", &Session::route_groups)
 		.addFunction ("new_route_group", &Session::new_route_group)
