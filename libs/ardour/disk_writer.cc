@@ -50,8 +50,6 @@ DiskWriter::DiskWriter (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, capture_start_sample (0)
 	, capture_captured (0)
 	, was_recording (false)
-	, adjust_capture_position (0)
-	, _capture_offset (0)
 	, first_recordable_sample (max_samplepos)
 	, last_recordable_sample (max_samplepos)
 	, last_possibly_recording (0)
@@ -88,7 +86,7 @@ DiskWriter::set_write_source_name (string const & str)
 }
 
 void
-DiskWriter::check_record_status (samplepos_t transport_sample, bool can_record)
+DiskWriter::check_record_status (samplepos_t transport_sample, double speed, bool can_record)
 {
 	int possibly_recording;
 	int rolling;
@@ -110,33 +108,27 @@ DiskWriter::check_record_status (samplepos_t transport_sample, bool can_record)
 		return;
 	}
 
-	const samplecnt_t existing_material_offset = _session.worst_playback_latency();
-
 	if (possibly_recording == fully_rec_enabled) {
 
 		if (last_possibly_recording == fully_rec_enabled) {
 			return;
 		}
 
-		capture_start_sample = _session.transport_sample();
-		first_recordable_sample = capture_start_sample + _capture_offset;
-		last_recordable_sample = max_samplepos;
+		capture_start_sample = transport_sample;
+		first_recordable_sample = capture_start_sample + _input_latency;
+		if (_alignment_style == ExistingMaterial) {
+			// XXX
+		}
 
-                DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 (%9) FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8 WOL %10 WTL %11\n",
-                                                                      name(), first_recordable_sample, last_recordable_sample, capture_start_sample,
-                                                                      _capture_offset,
-                                                                      existing_material_offset,
-                                                                      transport_sample,
-                                                                      _session.transport_sample(),
-                                                                      _session.worst_output_latency(),
-                                                                      _session.worst_track_latency()));
+		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %7 (%9) FRF = %2 CSF = %4 CO = %5, EMO = %6 RD = %8 WOL %10 WTL %11\n",
+		                                                      name(), first_recordable_sample, last_recordable_sample, capture_start_sample,
+		                                                      0,
+		                                                      0,
+		                                                      transport_sample,
+		                                                      _session.transport_sample(),
+		                                                      _session.worst_output_latency(),
+		                                                      _session.worst_track_latency()));
 
-
-                if (_alignment_style == ExistingMaterial) {
-                        first_recordable_sample += existing_material_offset;
-                        DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("\tshift FRF by EMO %1\n",
-                                                                              first_recordable_sample));
-                }
 
 		prepare_record_status (capture_start_sample);
 
@@ -156,10 +148,10 @@ DiskWriter::check_record_status (samplepos_t transport_sample, bool can_record)
 			} else {
 				/* punch out */
 
-				last_recordable_sample = _session.transport_sample() + _capture_offset;
+				last_recordable_sample = _session.transport_sample();
 
 				if (_alignment_style == ExistingMaterial) {
-					last_recordable_sample += existing_material_offset;
+					//XXX
 				}
 			}
 		}
@@ -218,29 +210,6 @@ DiskWriter::calculate_record_range (Evoral::OverlapType ot, samplepos_t transpor
 }
 
 void
-DiskWriter::prepare_to_stop (samplepos_t transport_sample, samplepos_t audible_sample)
-{
-	switch (_alignment_style) {
-	case ExistingMaterial:
-		last_recordable_sample = transport_sample + _capture_offset;
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable sample to %2 + %3 = %4\n", _name, transport_sample, _capture_offset, last_recordable_sample));
-		break;
-
-	case CaptureTime:
-		last_recordable_sample = audible_sample; // note that capture_offset is zero
-		/* we may already have captured audio before the last_recordable_sample (audible sample),
-		   so deal with this.
-		*/
-		if (last_recordable_sample > capture_start_sample) {
-			capture_captured = min (capture_captured, last_recordable_sample - capture_start_sample);
-		}
-		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose("%1: prepare to stop sets last recordable sample to audible sample @ %2\n", _name, audible_sample));
-		break;
-	}
-
-}
-
-void
 DiskWriter::engage_record_enable ()
 {
 	g_atomic_int_set (&_record_enabled, 1);
@@ -294,31 +263,6 @@ DiskWriter::get_captured_samples (uint32_t n) const
 }
 
 void
-DiskWriter::set_input_latency (samplecnt_t l)
-{
-	Processor::set_input_latency (l);
-	set_capture_offset ();
-}
-
-void
-DiskWriter::set_capture_offset ()
-{
-	switch (_alignment_style) {
-	case ExistingMaterial:
-		_capture_offset = _input_latency;
-		break;
-
-	case CaptureTime:
-	default:
-		_capture_offset = 0;
-		break;
-	}
-
-	DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: using input latency %4, capture offset set to %2 with style = %3\n", name(), _capture_offset, enum_2_string (_alignment_style), _input_latency));
-}
-
-
-void
 DiskWriter::set_align_style (AlignStyle a, bool force)
 {
 	if (record_enabled() && _session.actively_recording()) {
@@ -327,7 +271,6 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 
 	if ((a != _alignment_style) || force) {
 		_alignment_style = a;
-		set_capture_offset ();
 		AlignmentStyleChanged ();
 	}
 }
@@ -428,7 +371,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	_need_butler = false;
 
-	check_record_status (start_sample, can_record);
+	check_record_status (start_sample, 1, can_record);
 
 	if (nframes == 0) {
 		return;
@@ -451,8 +394,6 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	if (loop_loc) {
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
 	}
-
-	adjust_capture_position = 0;
 
 	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_punch_enabled()))) {
 

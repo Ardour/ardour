@@ -425,8 +425,6 @@ Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		return 0;
 	}
 
-	bool can_record = _session.actively_recording ();
-
 	/* no outputs? nothing to do ... what happens if we have sends etc. ? */
 
 	if (n_outputs().n_total() == 0 && !ARDOUR::Profile->get_mixbus()) {
@@ -460,10 +458,7 @@ Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		*/
 	}
 
-	_disk_writer->check_record_status (start_sample, can_record);
-
 	bool be_silent;
-
 	MonitorState const s = monitoring_state ();
 	/* we are not rolling, so be silent even if we are monitoring disk, as there
 	   will be no disk data coming in.
@@ -738,12 +733,6 @@ bool
 Track::pending_overwrite () const
 {
 	return _disk_reader->pending_overwrite ();
-}
-
-void
-Track::prepare_to_stop (samplepos_t t, samplepos_t a)
-{
-	_disk_writer->prepare_to_stop (t, a);
 }
 
 void

@@ -87,8 +87,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 
 	PBD::Signal0<void> AlignmentStyleChanged;
 
-	void set_input_latency (samplecnt_t);
-
 	bool configure_io (ChanCount in, ChanCount out);
 
 	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
@@ -114,9 +112,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	virtual void request_input_monitoring (bool) {}
 	virtual void ensure_input_monitoring (bool) {}
 
-	samplecnt_t   capture_offset() const { return _capture_offset; }
-	virtual void set_capture_offset ();
-
 	int seek (samplepos_t sample, bool complete_refill);
 
 	static PBD::Signal0<void> Overrun;
@@ -132,8 +127,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	PBD::Signal0<void> RecordEnableChanged;
 	PBD::Signal0<void> RecordSafeChanged;
 
-	void check_record_status (samplepos_t transport_sample, bool can_record);
-
 	void transport_looped (samplepos_t transport_sample);
 	void transport_stopped_wallclock (struct tm&, time_t, bool abort);
 
@@ -148,7 +141,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
-	void prepare_to_stop (samplepos_t transport_pos, samplepos_t audible_sample);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
@@ -172,8 +164,6 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	samplepos_t    capture_start_sample;
 	samplecnt_t    capture_captured;
 	bool          was_recording;
-	samplecnt_t    adjust_capture_position;
-	samplecnt_t   _capture_offset;
 	samplepos_t    first_recordable_sample;
 	samplepos_t    last_recordable_sample;
 	int           last_possibly_recording;
@@ -197,6 +187,7 @@ class LIBARDOUR_API DiskWriter : public DiskIOProcessor
 	MidiBuffer                   _gui_feed_buffer;
 	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
 
+	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
 	void finish_capture (boost::shared_ptr<ChannelList> c);
 };
 

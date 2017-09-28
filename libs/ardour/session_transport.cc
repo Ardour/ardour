@@ -1590,13 +1590,6 @@ Session::stop_transport (bool abort, bool clear_state)
 		boost::shared_ptr<RouteList> rl = routes.reader();
 		samplepos_t stop_target = audible_sample();
 
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr) {
-				tr->prepare_to_stop (_transport_sample, stop_target);
-			}
-		}
-
 		SubState new_bits;
 
 		if (actively_recording() &&                           /* we are recording */

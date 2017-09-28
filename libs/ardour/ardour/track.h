@@ -155,7 +155,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	bool realtime_speed_change ();
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
-	void prepare_to_stop (samplepos_t, samplepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
 	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
