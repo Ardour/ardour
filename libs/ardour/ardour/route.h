@@ -341,9 +341,9 @@ public:
 	 */
 	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
-	samplecnt_t set_private_port_latencies (bool playback) const;
-	void       set_public_port_latencies (samplecnt_t, bool playback) const;
 
+	samplecnt_t  set_private_port_latencies (bool playback) const;
+	void         set_public_port_latencies (samplecnt_t, bool playback) const;
 	samplecnt_t   update_signal_latency (bool set_initial_delay = false);
 	virtual void set_latency_compensation (samplecnt_t);
 
@@ -384,8 +384,9 @@ public:
 	PBD::Signal1<void,void*> record_enable_changed;
 	PBD::Signal0<void> processor_latency_changed;
 	/** the metering point has changed */
-	PBD::Signal0<void>       meter_change;
-	PBD::Signal0<void>       signal_latency_changed;
+	PBD::Signal0<void> meter_change;
+	/** a processor's latency has changed */
+	PBD::Signal0<void> signal_latency_changed;
 	PBD::Signal0<void>       initial_delay_changed;
 
 	/** Emitted with the process lock held */
@@ -603,8 +604,7 @@ public:
 
 	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok);
 
-	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */,
-					     samplecnt_t /* nframes */) {}
+	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */, samplecnt_t /* nframes */) {}
 
 	virtual void process_output_buffers (BufferSet& bufs,
 	                                     samplepos_t start_sample, samplepos_t end_sample,
@@ -622,7 +622,7 @@ public:
 	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 
 	bool           _active;
-	samplecnt_t     _signal_latency;
+	samplecnt_t    _signal_latency;
 	samplecnt_t     _initial_delay;
 
 	ProcessorList  _processors;
@@ -713,7 +713,8 @@ public:
 	SlavableControlList slavables () const;
 
 private:
-	int64_t _track_number;
+	/* no copy construction */
+	Route (Route const &);
 
 	int set_state_2X (const XMLNode&, int);
 	void set_processor_state_2X (XMLNodeList const &, int);
@@ -729,10 +730,6 @@ private:
 	bool input_port_count_changing (ChanCount);
 	bool output_port_count_changing (ChanCount);
 
-	bool _in_configure_processors;
-	bool _initial_io_setup;
-	bool _in_sidechain_setup;
-
 	int configure_processors_unlocked (ProcessorStreams*, Glib::Threads::RWLock::WriterLock*);
 	bool set_meter_point_unlocked ();
 	void apply_processor_order (const ProcessorList& new_order);
@@ -745,17 +742,19 @@ private:
 	void placement_range (Placement p, ProcessorList::iterator& start, ProcessorList::iterator& end);
 
 	void set_self_solo (bool yn);
+	void unpan ();
 
 	void set_processor_positions ();
 	samplecnt_t update_port_latencies (PortSet& ports, PortSet& feeders, bool playback, samplecnt_t) const;
 
 	void setup_invisible_processors ();
 
-	void unpan ();
+
+	void reset_instrument_info ();
+	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
+	void maybe_note_meter_position ();
 
 	void set_plugin_state_dir (boost::weak_ptr<Processor>, const std::string&);
-
-	boost::shared_ptr<CapturingProcessor> _capturing_processor;
 
 	/** A handy class to keep processor state while we attempt a reconfiguration
 	 *  that may fail.
@@ -784,12 +783,13 @@ private:
 
 	friend class ProcessorState;
 
-	bool _strict_io;
+	boost::shared_ptr<CapturingProcessor> _capturing_processor;
 
-	/* no copy construction */
-	Route (Route const &);
-
-	void maybe_note_meter_position ();
+	int64_t _track_number;
+	bool    _strict_io;
+	bool    _in_configure_processors;
+	bool    _initial_io_setup;
+	bool    _in_sidechain_setup;
 
 	/** true if we've made a note of a custom meter position in these variables */
 	bool _custom_meter_position_noted;
@@ -797,12 +797,9 @@ private:
 	    or 0.
 	*/
 	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
-	RoutePinWindowProxy *_pinmgr_proxy;
+
+	RoutePinWindowProxy*   _pinmgr_proxy;
 	PatchChangeGridDialog* _patch_selector_dialog;
-
-	void reset_instrument_info ();
-
-	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
 };
 
 } // namespace ARDOUR
