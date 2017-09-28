@@ -295,10 +295,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\auto_spin.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\barcontroller.cc"
 				>
 			</File>
@@ -308,10 +304,6 @@
 			</File>
 			<File
 				RelativePath="..\choice.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\click_box.cc"
 				>
 			</File>
 			<File
@@ -413,10 +405,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\widgets\auto_spin.h"
-				>
-			</File>
-			<File
 				RelativePath="..\widgets\barcontroller.h"
 				>
 			</File>
@@ -426,10 +414,6 @@
 			</File>
 			<File
 				RelativePath="..\widgets\choice.h"
-				>
-			</File>
-			<File
-				RelativePath="..\widgets\click_box.h"
 				>
 			</File>
 			<File
