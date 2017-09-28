@@ -578,18 +578,6 @@ Track::last_capture_sources ()
 	return _disk_writer->last_capture_sources ();
 }
 
-void
-Track::update_latency_information ()
-{
-	Glib::Threads::RWLock::ReaderLock lr (_processor_lock);
-	samplecnt_t chain_latency = _input->latency ();
-
-	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-		(*p)->set_input_latency (chain_latency);
-		chain_latency += (*p)->signal_latency ();
-	}
-}
-
 std::string
 Track::steal_write_source_name()
 {

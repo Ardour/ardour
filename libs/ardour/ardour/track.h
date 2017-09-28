@@ -72,7 +72,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	bool can_record();
 
-	void update_latency_information ();
 	enum FreezeState {
 		NoFreeze,
 		Frozen,
