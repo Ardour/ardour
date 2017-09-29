@@ -5,6 +5,7 @@
 *.so
 *.dylib
 *.pyc
+*.orig
 
 # autotools
 aclocal.m4
