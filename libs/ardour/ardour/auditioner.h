@@ -32,7 +32,6 @@ namespace ARDOUR {
 class Session;
 class AudioRegion;
 class AudioPlaylist;
-class MidiDiskstream;
 class MidiRegion;
 
 class LIBARDOUR_API Auditioner : public Track
