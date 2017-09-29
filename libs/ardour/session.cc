@@ -2118,7 +2118,6 @@ Session::disable_record (bool rt_context, bool force)
 		if (!rt_context) {
 			remove_pending_capture_state ();
 		}
-		unset_preroll_record_punch ();
 	}
 }
 
