@@ -263,16 +263,15 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	 * buffer.
 	 *
 	 * The timecode is generated directly in the Session process callback
-	 * using _transport_sample. It requires that the session has set the
-	 * port's playback latency to worst_playback_latency() prior to
-	 * calling ltc_tx_send_time_code_for_cycle().
+	 * using _transport_sample (which is the audible frame at the
+	 * output).
 	 */
 	samplepos_t cycle_start_sample;
 
 	if (current_speed < 0) {
-		cycle_start_sample = (start_sample - ltc_out_latency.max + worst_playback_latency());
+		cycle_start_sample = (start_sample + ltc_out_latency.max);
 	} else if (current_speed > 0) {
-		cycle_start_sample = (start_sample + ltc_out_latency.max - worst_playback_latency());
+		cycle_start_sample = (start_sample - ltc_out_latency.max);
 	} else {
 		/* There is no need to compensate for latency when not rolling
 		 * rather send the accurate NOW timecode

@@ -417,7 +417,7 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 
 	LatencyRange mtc_out_latency = {0, 0}; // TODO cache this, update on engine().GraphReordered()
 	_midi_ports->mtc_output_port ()->get_connected_latency_range (ltc_out_latency, true);
-	sampleoffset_t mtc_offset = worst_playback_latency() - mtc_out_latency.max;
+	sampleoffset_t mtc_offset = mtc_out_latency.max;
 
 	// only if rolling.. ?
 	outbound_mtc_timecode_frame += mtc_offset;

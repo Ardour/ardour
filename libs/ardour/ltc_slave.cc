@@ -390,7 +390,7 @@ LTC_Slave::process_ltc(samplepos_t const /*now*/)
 			timecode_negative_offset, timecode_offset
 			);
 
-		ltc_frame += ltc_slave_latency.max + session.worst_playback_latency();
+		ltc_frame += ltc_slave_latency.max;
 
 		samplepos_t cur_timestamp = sample.off_end + 1;
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC F: %1 LF: %2  N: %3 L: %4\n", ltc_frame, last_ltc_sample, cur_timestamp, last_timestamp));
