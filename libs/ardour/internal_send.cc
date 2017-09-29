@@ -100,9 +100,7 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 
 	_meter->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
 
-	if (_delayline) {
-		_delayline->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
-	}
+	_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()));
 
 	reset_panner ();
 
@@ -252,7 +250,7 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	_amp->setup_gain_automation (start_sample, end_sample, nframes);
 	_amp->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
-	_delayline->run (mixbufs, start_sample, end_sample, speed, nframes, true);
+	_send_delay->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
 
@@ -263,6 +261,8 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			_meter->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 		}
 	}
+
+	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	/* target will pick up our output when it is ready */
 

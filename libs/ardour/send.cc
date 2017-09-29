@@ -46,6 +46,8 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
+PBD::Signal0<void> Send::ChangedLatency;
+
 string
 Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
 {
@@ -96,7 +98,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
 
-	_delayline.reset (new DelayLine (_session, "Send-" + name()));
+	_send_delay.reset (new DelayLine (_session, "Send-" + name()));
+	_thru_delay.reset (new DelayLine (_session, "Thru-" + name()));
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
@@ -130,17 +133,56 @@ Send::deactivate ()
 	Processor::deactivate ();
 }
 
-void
-Send::set_output_latency (samplecnt_t cnt)
+samplecnt_t
+Send::signal_latency () const
 {
-	Processor::set_output_latency (cnt);
-	set_delay_in (cnt);
+	if (!_pending_active) {
+		 return 0;
+	}
+	if (_user_latency) {
+		return _user_latency;
+	}
+	if (_delay_out > _delay_in) {
+		return _delay_out - _delay_in;
+	}
+	return 0;
+}
+
+void
+Send::update_delaylines ()
+{
+	if (_role == Listen) {
+		/* Don't align monitor-listen (just yet).
+		 * They're present on each route, may change positions
+		 * and could potentially signficiantly increase worst-case
+		 * Latency: In PFL mode all tracks/busses would additionally be
+		 * aligned at PFL position.
+		 *
+		 * We should only align active monitor-sends when at least one is active.
+		 */
+		return;
+	}
+
+	bool changed;
+	if (_delay_out > _delay_in) {
+		changed = _thru_delay->set_delay(_delay_out - _delay_in);
+		_send_delay->set_delay(0);
+	} else {
+		changed = _thru_delay->set_delay(0);
+		_send_delay->set_delay(_delay_in - _delay_out);
+	}
+
+	if (changed) {
+		// TODO -- ideally postpone for effective no-op changes
+		// (in case both  _delay_out and _delay_in are changed by the
+		// same amount in a single latency-update cycle).
+		ChangedLatency (); /* EMIT SIGNAL */
+	}
 }
 
 void
 Send::set_delay_in (samplecnt_t delay)
 {
-	if (!_delayline) return;
 	if (_delay_in == delay) {
 		return;
 	}
@@ -149,13 +191,13 @@ Send::set_delay_in (samplecnt_t delay)
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
 			string_compose ("Send::set_delay_in %1: (%2) - %3 = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
-	_delayline->set_delay(_delay_in - _delay_out);
+
+	update_delaylines ();
 }
 
 void
 Send::set_delay_out (samplecnt_t delay)
 {
-	if (!_delayline) return;
 	if (_delay_out == delay) {
 		return;
 	}
@@ -163,7 +205,8 @@ Send::set_delay_out (samplecnt_t delay)
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
 			string_compose ("Send::set_delay_out %1: %2 - (%3) = %4\n",
 				name (), _delay_in, _delay_out, _delay_in - _delay_out));
-	_delayline->set_delay(_delay_in - _delay_out);
+
+	update_delaylines ();
 }
 
 void
@@ -195,7 +238,7 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 	_amp->setup_gain_automation (start_sample, end_sample, nframes);
 	_amp->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
-	_delayline->run (sendbufs, start_sample, end_sample, speed, nframes, true);
+	_send_delay->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* deliver to outputs */
 
@@ -210,6 +253,8 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 			_meter->run (*_output_buffers, start_sample, end_sample, speed, nframes, true);
 		}
 	}
+
+	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	/* _active was set to _pending_active by Delivery::run() */
 }
@@ -289,7 +334,8 @@ Send::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	_delayline->set_name ("Send-" + name());
+	_send_delay->set_name ("Send-" + name());
+	_thru_delay->set_name ("Thru-" + name());
 
 	return 0;
 }
@@ -356,8 +402,11 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (_delayline && !_delayline->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
-		cerr << "send delayline config failed\n";
+	if (!_thru_delay->configure_io (in, out)) {
+		return false;
+	}
+
+	if (!_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
 		return false;
 	}
 

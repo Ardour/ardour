@@ -67,11 +67,13 @@ class LIBARDOUR_API Send : public Delivery
 	bool configure_io (ChanCount in, ChanCount out);
 
 	/* latency compensation */
-	void set_output_latency (samplecnt_t cnt);
-	void set_delay_in (samplecnt_t);
-	void set_delay_out (samplecnt_t);
+	void set_delay_in (samplecnt_t); // should only be called by Route::update_signal_latency
+	void set_delay_out (samplecnt_t);  // should only be called by InternalReturn::set_playback_offset (via Route::update_signal_latency)
 	samplecnt_t get_delay_in () const { return _delay_in; }
 	samplecnt_t get_delay_out () const { return _delay_out; }
+	samplecnt_t signal_latency () const;
+
+	static PBD::Signal0<void> ChangedLatency;
 
 	void activate ();
 	void deactivate ();
@@ -86,13 +88,17 @@ class LIBARDOUR_API Send : public Delivery
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
-	boost::shared_ptr<DelayLine> _delayline;
+	boost::shared_ptr<DelayLine> _send_delay;
+	boost::shared_ptr<DelayLine> _thru_delay;
 
   private:
 	/* disallow copy construction */
 	Send (const Send&);
+
 	void panshell_changed ();
 	void snd_output_changed (IOChange, void*);
+
+	void update_delaylines ();
 
 	int set_state_2X (XMLNode const &, int);
 
