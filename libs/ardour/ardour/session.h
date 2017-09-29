@@ -170,7 +170,7 @@ private:
 /** Ardour Session */
 class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager
 {
-  private:
+private:
 	enum SubState {
 		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
 		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
@@ -180,7 +180,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 		PendingLocate         = 0x20,
 	};
 
-  public:
+public:
 	enum RecordState {
 		Disabled = 0,
 		Enabled = 1,
@@ -473,12 +473,10 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void set_end_is_free (bool);
 	int location_name(std::string& result, std::string base = std::string(""));
 
-	pframes_t get_block_size () const            { return current_block_size; }
-	samplecnt_t worst_output_latency () const    { return _worst_output_latency; }
-	samplecnt_t worst_input_latency () const     { return _worst_input_latency; }
-	samplecnt_t worst_track_latency () const     { return _worst_track_latency; }
-	samplecnt_t worst_track_out_latency () const { return _worst_track_out_latency; }
-	samplecnt_t worst_playback_latency () const  { return std::max (_worst_output_latency, _worst_track_latency); }
+	pframes_t get_block_size () const         { return current_block_size; }
+	samplecnt_t worst_output_latency () const { return _worst_output_latency; }
+	samplecnt_t worst_input_latency () const  { return _worst_input_latency; }
+	samplecnt_t worst_route_latency () const  { return _worst_route_latency; }
 	samplecnt_t worst_latency_preroll () const;
 
 	struct SaveAs {
@@ -1207,7 +1205,7 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void auto_connect_thread_wakeup ();
 
 
-  protected:
+protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
 	void set_sample_rate (samplecnt_t nframes);
@@ -1215,12 +1213,11 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	void reconnect_existing_routes (bool withLock, bool reconnect_master = true, bool reconnect_inputs = true, bool reconnect_outputs = true);
 #endif
 
-  protected:
 	friend class Route;
 	void schedule_curve_reallocation ();
 	void update_latency_compensation (bool force = false);
 
-  private:
+private:
 	int  create (const std::string& mix_template, BusProfile*);
 	void destroy ();
 
@@ -1262,14 +1259,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	CubicInterpolation       interpolation;
 
 	bool                     auto_play_legal;
-	samplepos_t              _last_slave_transport_sample;
-	samplecnt_t               maximum_output_latency;
-	samplepos_t              _requested_return_sample;
+	samplepos_t             _last_slave_transport_sample;
+	samplepos_t             _requested_return_sample;
 	pframes_t                current_block_size;
-	samplecnt_t              _worst_output_latency;
-	samplecnt_t              _worst_input_latency;
-	samplecnt_t              _worst_track_latency;
-	samplecnt_t              _worst_track_out_latency;
+	samplecnt_t             _worst_output_latency;
+	samplecnt_t             _worst_input_latency;
+	samplecnt_t             _worst_route_latency;
+	uint32_t                _send_latency_changes;
 	bool                    _have_captured;
 	bool                    _non_soloed_outs_muted;
 	bool                    _listening;
@@ -1288,16 +1284,15 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	PBD::ScopedConnection ltc_status_connection;
 
 	void initialize_latencies ();
-	void set_worst_io_latencies ();
-	void set_worst_playback_latency ();
-	void set_worst_capture_latency ();
-	void set_worst_io_latencies_x (IOChange, void *) {
-		set_worst_io_latencies ();
-	}
-	void post_capture_latency ();
-	void post_playback_latency ();
+	void update_latency (bool playback);
+	bool update_route_latency (bool reverse, bool apply_to_delayline);
 
-	void update_latency_compensation_proxy (void* ignored);
+	void set_worst_io_latencies ();
+	void set_worst_output_latency ();
+	void set_worst_input_latency ();
+
+	void send_latency_compensation_change ();
+	void set_worst_io_latencies_x (IOChange, void *);
 
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
@@ -1793,15 +1788,13 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 
 	mutable Glib::Threads::Mutex source_lock;
 
-  public:
+public:
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
 
-  private:
+private:
 	void reset_write_sources (bool mark_write_complete, bool force = false);
 	SourceMap sources;
 
-
-  private:
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
 
@@ -1902,8 +1895,6 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 	int  backend_sync_callback (TransportState, samplepos_t);
 
 	void process_rtop (SessionEvent*);
-
-	void  update_latency (bool playback);
 
 	enum snapshot_t {
 		NormalSave,

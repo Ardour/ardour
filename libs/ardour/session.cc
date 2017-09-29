@@ -194,13 +194,12 @@ Session::Session (AudioEngine &eng,
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
 	, _last_slave_transport_sample (0)
-	, maximum_output_latency (0)
 	, _requested_return_sample (-1)
 	, current_block_size (0)
 	, _worst_output_latency (0)
 	, _worst_input_latency (0)
-	, _worst_track_latency (0)
-	, _worst_track_out_latency (0)
+	, _worst_route_latency (0)
+	, _send_latency_changes (0)
 	, _have_captured (false)
 	, _non_soloed_outs_muted (false)
 	, _listening (false)
@@ -462,6 +461,8 @@ Session::Session (AudioEngine &eng,
 
 	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
+
+	Send::ChangedLatency.connect_same_thread (*this, boost::bind (&Session::send_latency_compensation_change, this));
 
 	emit_thread_start ();
 	auto_connect_thread_start ();
@@ -5717,13 +5718,9 @@ Session::graph_reordered ()
 	resort_routes ();
 
 	/* force all diskstreams to update their capture offset values to
-	   reflect any changes in latencies within the graph.
-	*/
-
-	boost::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		(*i)->update_signal_latency (true); // XXX
-	}
+	 * reflect any changes in latencies within the graph.
+	 */
+	update_route_latency (false, true);
 }
 
 /** @return Number of samples that there is disk space available to write,
@@ -6833,9 +6830,76 @@ Session::unknown_processors () const
 }
 
 void
+Session::set_worst_io_latencies_x (IOChange, void *)
+{
+		set_worst_io_latencies ();
+}
+
+void
+Session::send_latency_compensation_change ()
+{
+	/* As a result of Send::set_output_latency()
+	 * or InternalReturn::set_playback_offset ()
+	 * the send's own latency can change (source track
+	 * is aligned with target bus).
+	 *
+	 * This can only happen be triggered by
+	 * Route::update_signal_latency ()
+	 * when updating the processor latency.
+	 *
+	 * We need to walk the graph again to take those changes into account
+	 * (we should probably recurse or process the graph in a 2 step process).
+	 */
+	++_send_latency_changes;
+}
+
+bool
+Session::update_route_latency (bool playback, bool apply_to_delayline)
+{
+	/* Note: RouteList is process-graph sorted */
+	boost::shared_ptr<RouteList> r = routes.reader ();
+
+	if (playback) {
+		/* reverse the list so that we work backwards from the last route to run to the first,
+		 * this is not needed, but can help to reduce the iterations for aux-sends.
+		 */
+		RouteList* rl = routes.reader().get();
+		r.reset (new RouteList (*rl));
+		reverse (r->begin(), r->end());
+	}
+
+	bool changed = false;
+	int bailout = 0;
+restart:
+	_send_latency_changes = 0;
+	_worst_route_latency = 0;
+
+	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		// if (!(*i)->active()) { continue ; } // TODO
+		samplecnt_t l;
+		if ((*i)->signal_latency () != (l = (*i)->update_signal_latency (apply_to_delayline))) {
+			changed = true;
+		}
+		_worst_route_latency = std::max (l, _worst_route_latency);
+	}
+
+	if (_send_latency_changes > 0) {
+		// only 1 extra iteration is needed (we allow only 1 level of aux-sends)
+		// BUT..  jack'n'sends'n'bugs
+		if (++bailout < 5) {
+			cerr << "restarting Session::update_latency. # of send changes: " << _send_latency_changes << " iteration: " << bailout << endl;
+			goto restart;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_route_latency, (changed ? "yes" : "no")));
+
+	return changed;
+}
+
+void
 Session::update_latency (bool playback)
 {
-
 	DEBUG_TRACE (DEBUG::Latency, string_compose ("JACK latency callback: %1\n", (playback ? "PLAYBACK" : "CAPTURE")));
 
 	if ((_state_of_the_state & (InitialConnecting|Deletion)) || _adding_routes_in_progress || _route_deletion_in_progress) {
@@ -6861,45 +6925,14 @@ Session::update_latency (bool playback)
 	}
 
 	if (playback) {
-		post_playback_latency ();
+		set_worst_output_latency ();
+		update_route_latency (true, true);
 	} else {
-		post_capture_latency ();
+		set_worst_input_latency ();
+		update_route_latency (false, false);
 	}
 
 	DEBUG_TRACE (DEBUG::Latency, "JACK latency callback: DONE\n");
-}
-
-void
-Session::post_playback_latency ()
-{
-	set_worst_playback_latency ();
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	_worst_track_out_latency = 0; // XXX remove me
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		assert (!(*i)->is_auditioner()); // XXX remove me
-		_worst_track_latency = max (_worst_track_latency, (*i)->update_signal_latency ());
-	}
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if (!(*i)->active()) { continue ; }
-		(*i)->apply_latency_compensation ();
-	}
-}
-
-void
-Session::post_capture_latency ()
-{
-	set_worst_capture_latency ();
-
-	/* reflect any changes in capture latencies into capture offsets */
-
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		(*i)->update_signal_latency ();
-	}
 }
 
 void
@@ -6917,12 +6950,12 @@ Session::initialize_latencies ()
 void
 Session::set_worst_io_latencies ()
 {
-	set_worst_playback_latency ();
-	set_worst_capture_latency ();
+	set_worst_output_latency ();
+	set_worst_input_latency ();
 }
 
 void
-Session::set_worst_playback_latency ()
+Session::set_worst_output_latency ()
 {
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
@@ -6946,7 +6979,7 @@ Session::set_worst_playback_latency ()
 }
 
 void
-Session::set_worst_capture_latency ()
+Session::set_worst_input_latency ()
 {
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
@@ -6961,54 +6994,32 @@ Session::set_worst_capture_latency ()
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (!tr) {
-			continue;
-		}
 		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst input latency: %1\n", _worst_input_latency));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("Worst input latency: %1\n", _worst_input_latency));
 }
 
 void
 Session::update_latency_compensation (bool force_whole_graph)
 {
-	// TODO: consolidate
-	bool some_track_latency_changed = false;
-
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
 
-	DEBUG_TRACE(DEBUG::Latency, "---------------------------- update latency compensation\n\n");
-
-	_worst_track_latency = 0;
-
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		assert (!(*i)->is_auditioner()); // XXX remove me
-		if ((*i)->active()) {
-			samplecnt_t tl;
-			if ((*i)->signal_latency () != (tl = (*i)->update_signal_latency () /* - (*i)->output()->user_latency()*/)) {
-				some_track_latency_changed = true;
-			}
-			_worst_track_latency = max (tl, _worst_track_latency);
-		}
-	}
-
-	DEBUG_TRACE (DEBUG::Latency, string_compose ("worst signal processing latency: %1 (changed ? %2)\n", _worst_track_latency,
-	                                             (some_track_latency_changed ? "yes" : "no")));
-
-	DEBUG_TRACE(DEBUG::Latency, "---------------------------- DONE update latency compensation\n\n");
+	bool some_track_latency_changed = update_route_latency (false, false);
 
 	if (some_track_latency_changed || force_whole_graph)  {
 		_engine.update_latencies ();
-	}
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->update_signal_latency (true);
+		/* above call will ask the backend up update its latencies, which
+		 * eventually will trigger  AudioEngine::latency_callback () and
+		 * call Session::update_latency ()
+		 */
+	} else {
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			(*i)->apply_latency_compensation ();
+		}
 	}
 }
 

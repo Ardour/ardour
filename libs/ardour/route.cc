@@ -4045,11 +4045,18 @@ Route::add_export_point()
 samplecnt_t
 Route::update_signal_latency (bool apply_to_delayline)
 {
+	// TODO: bail out if !active() and set/assume _signal_latency = 0,
+	// here or in Session::* ? -> also zero send latencies,
+	// and make sure that re-enabling a route updates things again...
+
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-	samplecnt_t l_in  = 0; // _input->latency ();
+	samplecnt_t l_in  = 0;
 	samplecnt_t l_out = _output->user_latency();
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
+		if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
+			snd->set_delay_in (l_out + _output->latency());
+		}
 		(*i)->set_output_latency (l_out);
 		if ((*i)->active ()) {
 			l_out += (*i)->signal_latency ();
@@ -4068,7 +4075,6 @@ Route::update_signal_latency (bool apply_to_delayline)
 		(*i)->set_playback_offset (_signal_latency + _output->latency ());
 		(*i)->set_capture_offset (_input->latency ());
 	}
-
 
 	lm.release ();
 
