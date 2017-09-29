@@ -54,23 +54,27 @@ Session::add_click (samplepos_t pos, bool emphasis)
 }
 
 void
-Session::click (samplepos_t start, samplecnt_t nframes)
+Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 {
-	vector<TempoMap::BBTPoint> points;
-	samplecnt_t click_distance;
+	vector<TempoMap::BBTPoint> points; // TODO use mempool allocator
 
 	if (_click_io == 0) {
 		return;
 	}
 
+	/* transport_frame is audible-frame (what you hear,
+	 * incl output latency). So internally we're ahead,
+	 * we need to prepare frames that the user will hear
+	 * in "output latency's" worth of time.
+	 */
+	samplecnt_t offset = _click_io->connected_latency (true);
+
 	Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
-	/* how far have we moved since the last time the clicks got cleared
-	 */
+	/* how far have we moved since the last time the clicks got cleared */
+	const samplecnt_t click_distance = cycle_start + offset - _clicks_cleared;
 
-	click_distance = start - _clicks_cleared;
-
-	if (!clickm.locked() || !_clicking || click_data == 0 || ((click_distance + nframes) < _worst_track_latency)) {
+	if (!clickm.locked() || !_clicking || click_data == 0 || ((click_distance + nframes) < 0)) {
 		_click_io->silence (nframes);
 		return;
 	}
@@ -79,18 +83,15 @@ Session::click (samplepos_t start, samplecnt_t nframes)
 		return;
 	}
 
-	start -= _worst_track_latency;
-#ifdef MIXBUS
-	if (_master_out) {
-		start -= _master_out->signal_latency (); // delay signal by mixbus' internal latency
-	}
-#endif
-	/* start could be negative at this point */
+	/* range to check for clicks */
+	samplepos_t start = cycle_start + offset;
 	const samplepos_t end = start + nframes;
 	/* correct start, potentially */
 	start = max (start, (samplepos_t) 0);
 
-	_tempo_map->get_grid (points, start, end);
+	if (end > start) {
+		_tempo_map->get_grid (points, start, end);
+	}
 
 	if (distance (points.begin(), points.end()) == 0) {
 		goto run_clicks;
@@ -102,7 +103,7 @@ Session::click (samplepos_t start, samplecnt_t nframes)
 			add_click ((*i).sample, true);
 			break;
 		default:
-			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??
+			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??  (*i).beat !=1 must be true here
 				add_click ((*i).sample, false);
 			}
 			break;
@@ -111,13 +112,16 @@ Session::click (samplepos_t start, samplecnt_t nframes)
 
   run_clicks:
 	clickm.release ();
-	run_click (start, nframes);
+	run_click (cycle_start, nframes);
 }
 
 void
 Session::run_click (samplepos_t start, samplepos_t nframes)
 {
 	Glib::Threads::RWLock::ReaderLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+
+	/* align to output */
+	start += _click_io->connected_latency (true);
 
 	if (!clickm.locked() || click_data == 0) {
 		_click_io->silence (nframes);
