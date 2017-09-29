@@ -20,6 +20,7 @@
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
 #include "ardour/audiofilesource.h"
+#include "ardour/audioplaylist.h"
 #include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/delivery.h"
@@ -28,6 +29,7 @@
 #include "ardour/event_type_map.h"
 #include "ardour/io_processor.h"
 #include "ardour/meter.h"
+#include "ardour/midi_playlist.h"
 #include "ardour/midi_region.h"
 #include "ardour/monitor_control.h"
 #include "ardour/playlist.h"
@@ -172,22 +174,33 @@ Track::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	XMLNode* child;
+	if (version >= 3000 && version < 6000) {
+		if (XMLNode* ds_node = find_named_node (node, "Diskstream")) {
+			std::string name;
+			if (ds_node->get_property ("name", name)) {
 
-	if (version >= 3000 && version < 4000) {
-		if ((child = find_named_node (node, X_("Diskstream"))) != 0) {
-			/* XXX if we remember anything from stored DiskStream
-			   state (older Ardour versions) that is needed by a
-			   DiskReader or DiskWriter, we should cook up a new
-			   XMLNode here, populate it with that information
-			   (child nodes, properties, etc.) and then call
-			   ::set_state() on the writer/reader.
+				ds_node->set_property ("active", true);
 
-			   But at present (June 2017), there's no such state.
-			*/
+				_disk_writer->set_state (*ds_node, version);
+				_disk_reader->set_state (*ds_node, version);
+
+				AlignChoice ac;
+				if (ds_node->get_property (X_("capture-alignment"), ac)) {
+					set_align_choice (ac, true);
+				}
+
+				if (boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlists->by_name (name))) {
+					use_playlist (DataType::AUDIO, pl);
+				}
+
+				if (boost::shared_ptr<MidiPlaylist> pl = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists->by_name (name))) {
+					use_playlist (DataType::MIDI, pl);
+				}
+			}
 		}
 	}
 
+	XMLNode* child;
 	std::string playlist_id;
 
 	if (node.get_property (X_("audio-playlist"), playlist_id)) {
