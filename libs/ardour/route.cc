@@ -5977,7 +5977,7 @@ Route::monitoring_state () const
 	 * rg: I suspect this is not the case: monitoring may differ
 	 */
 
-	if (_session.config.get_punch_in() || _session.config.get_punch_out() || _session.preroll_record_punch_enabled ()) {
+	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
 		session_rec = _session.actively_recording ();
 	} else {
 		session_rec = _session.get_record_enabled();

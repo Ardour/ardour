@@ -1011,12 +1011,8 @@ public:
 	/* preroll */
 	samplecnt_t preroll_samples (samplepos_t) const;
 
-	void request_preroll_record_punch (samplepos_t start, samplecnt_t preroll);
 	void request_preroll_record_trim (samplepos_t start, samplecnt_t preroll);
 	void request_count_in_record ();
-
-	samplepos_t preroll_record_punch_pos () const { return _preroll_record_punch_pos; }
-	bool preroll_record_punch_enabled () const { return _preroll_record_punch_pos >= 0; }
 
 	samplecnt_t preroll_record_trim_len () const { return _preroll_record_trim_len; }
 
@@ -1945,10 +1941,8 @@ private:
 	Evoral::Range<samplepos_t> _range_selection;
 	Evoral::Range<samplepos_t> _object_selection;
 
-	void unset_preroll_record_punch ();
 	void unset_preroll_record_trim ();
 
-	samplepos_t _preroll_record_punch_pos;
 	samplecnt_t _preroll_record_trim_len;
 	bool _count_in_once;
 

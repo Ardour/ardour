@@ -311,7 +311,6 @@ Session::Session (AudioEngine &eng,
 	, _play_range (false)
 	, _range_selection (-1,-1)
 	, _object_selection (-1,-1)
-	, _preroll_record_punch_pos (-1)
 	, _preroll_record_trim_len (0)
 	, _count_in_once (false)
 	, main_outs (0)
@@ -851,7 +850,6 @@ Session::destroy ()
 			case SessionEvent::Skip:
 			case SessionEvent::PunchIn:
 			case SessionEvent::PunchOut:
-			case SessionEvent::RecordStart:
 			case SessionEvent::StopOnce:
 			case SessionEvent::RangeStop:
 			case SessionEvent::RangeLocate:
@@ -2158,7 +2156,7 @@ Session::maybe_enable_record (bool rt_context)
 	}
 
 	if (_transport_speed) {
-		if (!config.get_punch_in() && !preroll_record_punch_enabled ()) {
+		if (!config.get_punch_in()) {
 			enable_record ();
 		}
 	} else {
@@ -3416,7 +3414,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 			}
 
 			/* set this name in the XML description that we are about to use */
-
+#warning fixme -- no more Diskstream
 			if (pd == CopyPlaylist) {
 				XMLNode* ds_node = find_named_node (node_copy, "Diskstream");
 				if (ds_node) {

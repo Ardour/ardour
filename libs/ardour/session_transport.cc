@@ -149,39 +149,9 @@ Session::force_locate (samplepos_t target_sample, bool with_roll)
 }
 
 void
-Session::unset_preroll_record_punch ()
-{
-	if (_preroll_record_punch_pos >= 0) {
-		remove_event (_preroll_record_punch_pos, SessionEvent::RecordStart);
-	}
-	_preroll_record_punch_pos = -1;
-}
-
-void
 Session::unset_preroll_record_trim ()
 {
 	_preroll_record_trim_len = 0;
-}
-
-void
-Session::request_preroll_record_punch (samplepos_t rec_in, samplecnt_t preroll)
-{
-	if (actively_recording ()) {
-		return;
-	}
-	unset_preroll_record_punch ();
-	unset_preroll_record_trim ();
-	samplepos_t start = std::max ((samplepos_t)0, rec_in - preroll);
-
-	_preroll_record_punch_pos = rec_in;
-	if (_preroll_record_punch_pos >= 0) {
-		replace_event (SessionEvent::RecordStart, _preroll_record_punch_pos);
-		config.set_punch_in (false);
-		config.set_punch_out (false);
-	}
-	maybe_enable_record ();
-	request_locate (start, true);
-	set_requested_return_sample (rec_in);
 }
 
 void
@@ -190,7 +160,6 @@ Session::request_preroll_record_trim (samplepos_t rec_in, samplecnt_t preroll)
 	if (actively_recording ()) {
 		return;
 	}
-	unset_preroll_record_punch ();
 	unset_preroll_record_trim ();
 
 	config.set_punch_in (false);
@@ -1679,7 +1648,7 @@ Session::start_transport ()
 
 	switch (record_status()) {
 	case Enabled:
-		if (!config.get_punch_in() && !preroll_record_punch_enabled()) {
+		if (!config.get_punch_in()) {
 			enable_record ();
 		}
 		break;

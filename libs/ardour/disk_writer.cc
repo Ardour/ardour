@@ -400,7 +400,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
 	}
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && (_session.config.get_punch_in() || _session.preroll_record_punch_enabled()))) {
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in ())) {
 
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_sample, last_recordable_sample, start_sample, end_sample);
 		// XXX should this be transport_sample + nframes - 1 ? coverage() expects its parameter ranges to include their end points
