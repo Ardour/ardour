@@ -30,7 +30,6 @@
 namespace ARDOUR {
 
 class Session;
-class AudioDiskstream;
 class AudioRegion;
 class AudioPlaylist;
 class MidiDiskstream;

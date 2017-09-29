@@ -28,7 +28,6 @@ namespace ARDOUR
 {
 
 class InterThreadInfo;
-class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
 class SMFSource;

@@ -26,7 +26,6 @@
 namespace ARDOUR {
 
 class Session;
-class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
 class AudioFileSource;
