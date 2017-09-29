@@ -43,7 +43,7 @@ public:
 	bool display_to_user() const { return false; }
 
 	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
-	void set_delay(samplecnt_t signal_delay);
+	bool set_delay(samplecnt_t signal_delay);
 	samplecnt_t get_delay() { return _pending_delay; }
 
 	bool configure_io (ChanCount in, ChanCount out);

@@ -283,12 +283,19 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	_delay = pending_delay;
 }
 
-void
+bool
 DelayLine::set_delay(samplecnt_t signal_delay)
 {
 	if (signal_delay < 0) {
 		signal_delay = 0;
 		cerr << "WARNING: latency compensation is not possible.\n";
+	}
+
+	if (signal_delay == _pending_delay) {
+		DEBUG_TRACE (DEBUG::LatencyCompensation,
+				string_compose ("%1 set_delay - no change: %2 samples for %3 channels\n",
+					name(), signal_delay, _configured_output.n_audio()));
+		return false;
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
@@ -297,7 +304,7 @@ DelayLine::set_delay(samplecnt_t signal_delay)
 
 	if (signal_delay <= _bsiz) {
 		_pending_delay = signal_delay;
-		return;
+		return true;
 	}
 
 	if (_pending_bsiz) {
@@ -306,7 +313,7 @@ DelayLine::set_delay(samplecnt_t signal_delay)
 		} else {
 			_pending_delay = signal_delay;
 		}
-		return;
+		return true;
 	}
 
 	allocate_pending_buffers (signal_delay);
@@ -316,6 +323,8 @@ DelayLine::set_delay(samplecnt_t signal_delay)
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
 			string_compose ("allocated buffer for %1 of size %2\n",
 				name(), signal_delay));
+
+	return true;
 }
 
 bool
