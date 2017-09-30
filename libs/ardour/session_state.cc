@@ -4147,6 +4147,11 @@ Session::config_changed (std::string p, bool ours)
 	} else if (p == "send-mmc") {
 
 		_mmc->enable_send (Config->get_send_mmc ());
+		if (Config->get_send_mmc ()) {
+			/* re-initialize MMC */
+			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdMmcReset));
+			send_immediate_mmc (MIDI::MachineControlCommand (Timecode::Time ()));
+		}
 
 	} else if (p == "jack-time-master") {
 
