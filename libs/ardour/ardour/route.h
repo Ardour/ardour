@@ -597,10 +597,6 @@ protected:
 
 	virtual int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing);
 
-	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
-
-	void passthru (BufferSet&, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader);
-
 	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */, samplecnt_t /* nframes */) {}
 
 	void process_output_buffers (BufferSet& bufs,
@@ -680,9 +676,6 @@ protected:
 
 	int configure_processors (ProcessorStreams*);
 
-	void passthru_silence (samplepos_t start_sample, samplepos_t end_sample,
-	                       pframes_t nframes, int declick);
-
 	void silence (samplecnt_t);
 	void silence_unlocked (samplecnt_t);
 
@@ -746,6 +739,9 @@ private:
 	void setup_invisible_processors ();
 
 	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
+
+	void run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader);
+	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
 	void reset_instrument_info ();
 	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);

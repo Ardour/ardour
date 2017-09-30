@@ -65,8 +65,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 
 	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	virtual int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
-
 	bool needs_butler() const { return _needs_butler; }
 
 	bool can_record();

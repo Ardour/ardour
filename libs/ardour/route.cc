@@ -678,14 +678,18 @@ void
 Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
 {
 	assert (is_monitor());
-	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
-	fill_buffers_with_input (bufs, _input, nframes);
-	passthru (bufs, start_sample, end_sample, nframes, declick, true, false);
+	run_route (start_sample, end_sample, nframes, declick, true, false);
 }
 
 void
-Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader)
+Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader)
 {
+	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
+
+	fill_buffers_with_input (bufs, _input, nframes);
+
+	/* filter captured data before meter sees it */
+	filter_input (bufs);
 
 	if (is_monitor() && _session.listening() && !_session.is_auditioning()) {
 
@@ -704,16 +708,8 @@ Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* run processor chain */
 
 	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok, run_disk_reader);
-}
 
-void
-Route::passthru_silence (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
-{
-	BufferSet& bufs (_session.get_route_buffers (n_process_buffers(), true));
-
-	bufs.set_count (_input->n_ports());
-	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, false, false);
+	flush_processor_buffers_locked (nframes);
 }
 
 void
@@ -3645,8 +3641,11 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 int
 Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
+	/* Must be called with the processor lock held */
+
 	if (!_active) {
 		silence_unlocked (nframes);
+		_meter->reset();
 		return 0;
 	}
 
@@ -3658,6 +3657,7 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
 			*/
 			silence_unlocked (nframes);
+			_meter->reset();
 			return 0;
 		}
 		/* we're really not rolling, so we're either delivery silence or actually
@@ -3665,16 +3665,7 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 		*/
 	}
 
-	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
-
-	fill_buffers_with_input (bufs, _input, nframes);
-
-	/* filter captured data before meter sees it */
-	filter_input (bufs);
-
-	passthru (bufs, start_sample, end_sample, nframes, 0, true, false);
-
-	flush_processor_buffers_locked (nframes);
+	run_route (start_sample, end_sample, nframes, 0, false, false);
 	return 0;
 }
 
@@ -3729,30 +3720,19 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 
 	if (!_active) {
 		silence_unlocked (nframes);
-		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || (!_disk_writer || _disk_writer->record_enabled()))) {
-			_meter->reset();
-		}
+		_meter->reset();
 		return 0;
 	}
+
 	if ((nframes = latency_preroll (nframes, start_sample, end_sample)) == 0) {
 		return 0;
 	}
 
-	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
-
-	fill_buffers_with_input (bufs, _input, nframes);
-
-	/* filter captured data before meter sees it */
-	filter_input (bufs);
-
-	passthru (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
+	run_route (start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
 
 	if ((_disk_reader && _disk_reader->need_butler()) || (_disk_writer && _disk_writer->need_butler())) {
 		need_butler = true;
 	}
-
-	flush_processor_buffers_locked (nframes);
-
 	return 0;
 }
 
