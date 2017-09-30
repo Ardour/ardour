@@ -311,6 +311,22 @@ Session::process_with_events (pframes_t nframes)
 			ns = std::min ((samplecnt_t)nframes, _count_in_samples);
 		}
 
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			samplecnt_t route_offset = (*i)->playback_latency ();
+			if (_remaining_latency_preroll > route_offset + ns) {
+				/* route will no-roll for complete pre-roll cycle */
+				continue;
+			}
+			if (_remaining_latency_preroll > route_offset) {
+				/* route may need partial no-roll and partial roll from
+				* (_transport_sample - _remaining_latency_preroll) ..  +ns.
+				* shorten and split the cycle.
+				*/
+				ns = std::min (ns, (_remaining_latency_preroll - route_offset));
+			}
+		}
+
 		if (_count_in_samples > 0) {
 			run_click (_transport_sample - _count_in_samples, ns);
 			assert (_count_in_samples >= ns);

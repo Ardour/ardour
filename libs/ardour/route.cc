@@ -383,6 +383,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	 */
 	bool run_disk_writer = false;
 	if (_disk_writer && speed != 0) {
+		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
+		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output->latency ());
 		if (end_sample - _disk_writer->input_latency () < _session.transport_sample ()) {
 			run_disk_writer = true;
 		}
@@ -3728,36 +3730,9 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 		return nframes;
 	}
 
-	samplecnt_t route_offset = playback_latency ();
-
-	if (latency_preroll > route_offset + nframes) {
+	if (latency_preroll > playback_latency ()) {
 		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll);
 		return 0;
-	}
-
-	if (latency_preroll > route_offset) {
-
-		samplecnt_t skip = latency_preroll - route_offset;
-		no_roll_unlocked (skip, start_sample - latency_preroll, start_sample - latency_preroll + skip);
-
-		if (nframes == skip) {
-			return 0;
-		}
-
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-			if (iop) {
-				iop->increment_port_buffer_offset (skip);
-			}
-		}
-		_input->increment_port_buffer_offset (skip);
-		_output->increment_port_buffer_offset (skip);
-
-		start_sample -= route_offset;
-		end_sample -= route_offset;
-
-		return nframes - skip;
 	}
 
 	start_sample -= latency_preroll;
