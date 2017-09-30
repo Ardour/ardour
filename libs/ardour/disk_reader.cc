@@ -416,7 +416,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		if ((ms & MonitoringDisk) && !still_locating) {
-			get_midi_playback (*dst, disk_samples_to_consume, ms, scratch_bufs, speed, disk_samples_to_consume);
+			get_midi_playback (*dst, start_sample, end_sample, ms, scratch_bufs, speed, disk_samples_to_consume);
 		}
 	}
 
@@ -1243,25 +1243,26 @@ DiskReader::resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t
  *  so that an event at playback_sample has time = 0
  */
 void
-DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
+DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, samplepos_t end_sample, MonitorState ms, BufferSet& scratch_bufs, double speed, samplecnt_t disk_samples_to_consume)
 {
 	MidiBuffer* target;
+	samplepos_t nframes = end_sample - start_sample;
 
 	if ((ms & MonitoringInput) == 0) {
-		dst.clear();
+		/* Route::process_output_buffers() clears the buffer as-needed */
 		target = &dst;
 	} else {
 		target = &scratch_bufs.get_midi (0);
 	}
 
 	if (ms & MonitoringDisk) {
-		/* no disk data needed */
+		/* disk data needed */
 
 		Location* loc = loop_location;
 
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 			             "%1 MDS pre-read read %8 offset = %9 @ %4..%5 from %2 write to %3, LOOPED ? %6 .. %7\n", _name,
-			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr(), playback_sample, playback_sample + nframes,
+			             _midi_buf->get_read_ptr(), _midi_buf->get_write_ptr(), start_sample, end_sample,
 			             (loc ? loc->start() : -1), (loc ? loc->end() : -1), nframes, Port::port_offset()));
 
 		//cerr << "======== PRE ========\n";
@@ -1274,7 +1275,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorStat
 			samplepos_t effective_start;
 
 			Evoral::Range<samplepos_t> loop_range (loc->start(), loc->end() - 1);
-			effective_start = loop_range.squish (playback_sample);
+			effective_start = loop_range.squish (start_sample);
 
 			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("looped, effective start adjusted to %1\n", effective_start));
 
@@ -1321,12 +1322,12 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorStat
 				events_read = _midi_buf->read (*target, effective_start, effective_start + nframes);
 			}
 		} else {
-			const size_t n_skipped = _midi_buf->skip_to (playback_sample);
+			const size_t n_skipped = _midi_buf->skip_to (start_sample);
 			if (n_skipped > 0) {
 				warning << string_compose(_("MidiDiskstream %1: skipped %2 events, possible underflow"), id(), n_skipped) << endmsg;
 			}
-			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("playback buffer read, from %1 to %2 (%3)", playback_sample, playback_sample + nframes, nframes));
-			events_read = _midi_buf->read (*target, playback_sample, playback_sample + nframes);
+			DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose ("playback buffer read, from %1 to %2 (%3)", start_sample, end_sample, nframes));
+			events_read = _midi_buf->read (*target, start_sample, end_sample, Port::port_offset ());
 		}
 
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
@@ -1339,10 +1340,12 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorStat
 	g_atomic_int_add (&_samples_read_from_ringbuffer, nframes);
 
 	/* vari-speed */
-
 	if (speed != 0.0 && fabsf (speed) != 1.0f) {
 		for (MidiBuffer::iterator i = target->begin(); i != target->end(); ++i) {
 			MidiBuffer::TimeType *tme = i.timeptr();
+			// XXX need to subtract port offsets before scaling
+			// also we must only scale events read from disk
+			// and not existing input data in the buffer.
 			*tme = (*tme) * nframes / disk_samples_to_consume;
 		}
 	}
