@@ -465,6 +465,8 @@ Track::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 		*/
 	}
 
+	// XXX this needs to go away.. disk-reader or Route::process_output_buffers  needs to handle this XXX //
+
 	bool be_silent;
 	MonitorState const s = monitoring_state ();
 	/* we are not rolling, so be silent even if we are monitoring disk, as there
@@ -493,6 +495,9 @@ Track::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 	/* if have_internal_generator, or .. */
 
 	if (be_silent) {
+
+#if 0
+		// XXX this is also the only user of IO::process_input ()
 
 		if (_meter_point == MeterInput) {
 			/* still need input monitoring and metering */
@@ -530,6 +535,7 @@ Track::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 				_input->process_input (_meter, start_sample, end_sample, _session.transport_speed(), nframes);
 			}
 		}
+#endif
 
 		passthru_silence (start_sample, end_sample, nframes, 0);
 
@@ -538,10 +544,6 @@ Track::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 		BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 		fill_buffers_with_input (bufs, _input, nframes);
-
-		if (_meter_point == MeterInput) {
-			_meter->run (bufs, start_sample, end_sample, _session.transport_speed(), nframes, true);
-		}
 
 		passthru (bufs, start_sample, end_sample, nframes, false, true, false);
 	}

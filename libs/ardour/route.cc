@@ -480,9 +480,6 @@ Route::process_output_buffers (BufferSet& bufs,
 	   and go ....
 	   ----------------------------------------------------------------------------------------- */
 
-	/* set this to be true if the meter will already have been ::run() earlier */
-	bool const meter_already_run = metering_state() == MeteringInput;
-
 	samplecnt_t latency = 0;
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
@@ -492,11 +489,6 @@ Route::process_output_buffers (BufferSet& bufs,
 		 * start_frame, end_frame is adjusted by latency and may
 		 * cross loop points.
 		 */
-
-		if (meter_already_run && boost::dynamic_pointer_cast<PeakMeter> (*i)) {
-			/* don't ::run() the meter, otherwise it will have its previous peak corrupted */
-			continue;
-		}
 
 #ifndef NDEBUG
 		/* if it has any inputs, make sure they match */
@@ -3689,10 +3681,6 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 	/* filter captured data before meter sees it */
 	filter_input (bufs);
 
-	if (_meter_point == MeterInput) {
-		_meter->run (bufs, start_sample, end_sample, 0.0, nframes, true);
-	}
-
 	passthru (bufs, start_sample, end_sample, nframes, 0, true, false);
 
 	flush_processor_buffers_locked (nframes);
@@ -3767,11 +3755,6 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 
 	/* filter captured data before meter sees it */
 	filter_input (bufs);
-
-	if (_meter_point == MeterInput &&
-	    ((_monitoring_control->monitoring_choice() & MonitorInput) || (_disk_writer && _disk_writer->record_enabled()))) {
-		_meter->run (bufs, start_sample, end_sample, 1.0 /*speed()*/, nframes, true);
-	}
 
 	passthru (bufs, start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
 
@@ -4724,28 +4707,12 @@ Route::setup_invisible_processors ()
 	ProcessorList::iterator after_amp = amp;
 	++after_amp;
 
-	/* METER */
+	/* Pre-fader METER */
 
-	if (_meter) {
-		switch (_meter_point) {
-		case MeterInput:
-			assert (!_meter->display_to_user ());
-			new_processors.push_front (_meter);
-			break;
-		case MeterPreFader:
-			assert (!_meter->display_to_user ());
-			new_processors.insert (amp, _meter);
-			break;
-		case MeterPostFader:
-			/* do nothing here */
-			break;
-		case MeterOutput:
-			/* do nothing here */
-			break;
-		case MeterCustom:
-			/* the meter is visible, so we don't touch it here */
-			break;
-		}
+	if (_meter && _meter_point == MeterPreFader) {
+		/* add meter just before the fader */
+		assert (!_meter->display_to_user ());
+		new_processors.insert (amp, _meter);
 	}
 
 	/* MAIN OUTS */
@@ -4894,6 +4861,21 @@ Route::setup_invisible_processors ()
 			new_processors.insert (++reader_pos, _capturing_processor);
 		} else {
 			new_processors.push_front (_capturing_processor);
+		}
+	}
+
+	/* Input meter */
+	if (_meter && _meter_point == MeterInput) {
+		/* add meter just before the disk-writer (if any)
+		 * otherwise at the top, but after the latency delayline
+		 * (perhaps it should also be after intreturn on busses ??)
+		 */
+		assert (!_meter->display_to_user ());
+		ProcessorList::iterator writer_pos = find (new_processors.begin(), new_processors.end(), _disk_writer);
+		if (writer_pos != new_processors.end()) {
+			new_processors.insert (writer_pos, _meter);
+		} else {
+			new_processors.push_front (_meter);
 		}
 	}
 
