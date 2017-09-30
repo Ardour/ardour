@@ -1351,9 +1351,25 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplecnt_t nframes, MonitorStat
 		dst.merge_from (*target, nframes);
 	}
 
-	//cerr << "======== POST ========\n";
-	//_midi_buf->dump (cerr);
-	//cerr << "----------------\n";
+#if 0
+	if (!target->empty ()) {
+		cerr << "======== MIDI OUT ========\n";
+		for (MidiBuffer::iterator i = target->begin(); i != target->end(); ++i) {
+			const Evoral::Event<MidiBuffer::TimeType> ev (*i, false);
+			cerr << "MIDI EVENT (from disk) @ " << ev.time();
+			for (size_t xx = 0; xx < ev.size(); ++xx) {
+				cerr << ' ' << hex << (int) ev.buffer()[xx];
+			}
+			cerr << dec << endl;
+		}
+		cerr << "----------------\n";
+	}
+#endif
+#if 0
+	cerr << "======== MIDI Disk Buffer ========\n";
+	_midi_buf->dump (cerr);
+	cerr << "----------------\n";
+#endif
 }
 
 /** @a start is set to the new sample position (TIME) read up to */

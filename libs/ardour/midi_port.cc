@@ -143,7 +143,11 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				    (timestamp >= (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
 					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
 						<< _global_port_buffer_offset << " limit="
-						<< (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+						<< (_global_port_buffer_offset + _port_buffer_offset + nframes)
+						<< " = (" << _global_port_buffer_offset
+						<< " + " << _port_buffer_offset
+						<< " + " << nframes
+						<< ")\n";
 					continue;
 				}
 
