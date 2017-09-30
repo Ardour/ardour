@@ -525,6 +525,20 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				continue;
 			}
 
+			bool skip_event = false;
+			if (mt) {
+				/* skip injected immediate/out-of-band events */
+				MidiBuffer const& ieb (mt->immediate_event_buffer());
+				for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
+					if (*j == ev) {
+						skip_event = true;
+					}
+				}
+			}
+			if (skip_event) {
+				continue;
+			}
+
 			if (!filter || !filter->filter(ev.buffer(), ev.size())) {
 				_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
 			}
