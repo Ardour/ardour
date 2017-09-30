@@ -1653,25 +1653,6 @@ IO::connected_to (const string& str) const
 	return false;
 }
 
-/** Call a processor's ::run() method, giving it our buffers
- *  Caller must hold process lock.
- */
-void
-IO::process_input (boost::shared_ptr<Processor> proc, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
-{
-	/* don't read the data into new buffers - just use the port buffers directly */
-
-	if (n_ports().n_total() == 0) {
-		/* We have no ports, so nothing to process */
-		return;
-	}
-
-	_buffers.get_backend_port_addresses (_ports, nframes);
-	if (proc) {
-		proc->run (_buffers, start_sample, end_sample, speed, nframes, true);
-	}
-}
-
 void
 IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 {
