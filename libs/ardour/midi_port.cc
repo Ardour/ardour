@@ -272,12 +272,13 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 #endif
 
-			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
+			assert (ev.time() < (nframes + _global_port_buffer_offset));
 
-			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
-				if (port_engine.midi_event_put (port_buffer, (pframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, drop flushed note off on the floor, time "
-					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
+			if (ev.time() >= _global_port_buffer_offset) {
+				if (port_engine.midi_event_put (port_buffer, (pframes_t) ev.time() + _port_buffer_offset, ev.buffer(), ev.size()) != 0) {
+					cerr << "write failed, dropped event, time "
+					     << ev.time() << " + " << _port_buffer_offset
+							 << " > " << _global_port_buffer_offset << endl;
 				}
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev.time()
