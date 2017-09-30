@@ -3626,47 +3626,14 @@ Route::flush_processor_buffers_locked (samplecnt_t nframes)
 	}
 }
 
-int
-Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
+void
+Route::flush_processors ()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
-	if (!lm.locked()) {
-		return 0;
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->flush ();
 	}
-
-	return no_roll_unlocked (nframes, start_sample, end_sample, session_state_changing);
-}
-
-int
-Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
-{
-	/* Must be called with the processor lock held */
-
-	if (!_active) {
-		silence_unlocked (nframes);
-		_meter->reset();
-		return 0;
-	}
-
-	if (session_state_changing) {
-		if (_session.transport_speed() != 0.0f) {
-			/* we're rolling but some state is changing (e.g. our diskstream contents)
-			   so we cannot use them. Be silent till this is over.
-
-			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
-			*/
-			silence_unlocked (nframes);
-			_meter->reset();
-			return 0;
-		}
-		/* we're really not rolling, so we're either delivery silence or actually
-		   monitoring, both of which are safe to do while session_state_changing is true.
-		*/
-	}
-
-	run_route (start_sample, end_sample, nframes, 0, false, false);
-	return 0;
 }
 
 samplecnt_t
@@ -3737,21 +3704,54 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 }
 
 int
+Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		return 0;
+	}
+
+	return no_roll_unlocked (nframes, start_sample, end_sample, session_state_changing);
+}
+
+int
+Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
+{
+	/* Must be called with the processor lock held */
+
+	if (!_active) {
+		silence_unlocked (nframes);
+		_meter->reset();
+		return 0;
+	}
+
+	if (session_state_changing) {
+		if (_session.transport_speed() != 0.0f) {
+			/* we're rolling but some state is changing (e.g. our diskstream contents)
+			   so we cannot use them. Be silent till this is over.
+
+			   XXX note the absurdity of ::no_roll() being called when we ARE rolling!
+			*/
+			silence_unlocked (nframes);
+			_meter->reset();
+			return 0;
+		}
+		/* we're really not rolling, so we're either delivery silence or actually
+		   monitoring, both of which are safe to do while session_state_changing is true.
+		*/
+	}
+
+	run_route (start_sample, end_sample, nframes, 0, false, false);
+	return 0;
+}
+
+int
 Route::silent_roll (pframes_t nframes, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, bool& /* need_butler */)
 {
 	silence (nframes);
 	flush_processor_buffers_locked (nframes);
 	return 0;
-}
-
-void
-Route::flush_processors ()
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->flush ();
-	}
 }
 
 #ifdef __clang__
