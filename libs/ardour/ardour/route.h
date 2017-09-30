@@ -138,14 +138,11 @@ public:
 
 	virtual void filter_input (BufferSet &) {}
 
-	virtual int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	                  int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
 
-	virtual int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	                     bool state_changing);
+	int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
 
-	virtual int silent_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	                         bool& need_butler);
+	int silent_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
 	virtual bool can_record() { return false; }
 
@@ -589,14 +586,16 @@ public:
 
 	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
 
-  protected:
-        friend class Session;
+protected:
+	friend class Session;
 
 	void catch_up_on_solo_mute_override ();
 	void set_listen (bool);
 
 	void curve_reallocate ();
 	virtual void set_block_size (pframes_t nframes);
+
+	virtual int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing);
 
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
@@ -747,7 +746,6 @@ private:
 
 	void setup_invisible_processors ();
 
-	void no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample);
 	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
 
 	void reset_instrument_info ();

@@ -318,9 +318,9 @@ MidiTrack::update_controls(const BufferSet& bufs)
 }
 
 int
-MidiTrack::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing)
+MidiTrack::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing)
 {
-	int ret = Track::no_roll (nframes, start_sample, end_sample, state_changing);
+	int ret = Track::no_roll_unlocked (nframes, start_sample, end_sample, state_changing);
 
 	if (ret == 0 && _step_editing) {
 		push_midi_input_to_step_edit_ringbuffer (nframes);

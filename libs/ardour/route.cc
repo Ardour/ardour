@@ -3656,6 +3656,12 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		return 0;
 	}
 
+	return no_roll_unlocked (nframes, start_sample, end_sample, session_state_changing);
+}
+
+int
+Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
+{
 	if (!_active) {
 		silence_unlocked (nframes);
 		return 0;
@@ -3676,14 +3682,6 @@ Route::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sam
 		*/
 	}
 
-	no_roll_unlocked (nframes, start_sample, end_sample);
-
-	return 0;
-}
-
-void
-Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample)
-{
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
 	fill_buffers_with_input (bufs, _input, nframes);
@@ -3698,6 +3696,7 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 	passthru (bufs, start_sample, end_sample, nframes, 0, true, false);
 
 	flush_processor_buffers_locked (nframes);
+	return 0;
 }
 
 samplecnt_t
@@ -3731,7 +3730,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 	}
 
 	if (latency_preroll > playback_latency ()) {
-		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll);
+		no_roll_unlocked (nframes, start_sample - latency_preroll, end_sample - latency_preroll, false);
 		return 0;
 	}
 

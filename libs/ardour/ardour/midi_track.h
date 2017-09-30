@@ -150,7 +150,7 @@ private:
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-	int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
+	int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
 	void push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes);
 
 	void track_input_active (IOChange, void*);

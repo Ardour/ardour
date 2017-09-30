@@ -430,14 +430,8 @@ Track::set_name (const string& str)
 }
 
 int
-Track::no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
+Track::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing)
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked()) {
-		return 0;
-	}
-
 	/* no outputs? nothing to do ... what happens if we have sends etc. ? */
 
 	if (n_outputs().n_total() == 0 && !ARDOUR::Profile->get_mixbus()) {
