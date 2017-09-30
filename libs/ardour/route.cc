@@ -362,6 +362,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	start_sample += _output->latency ();
 	end_sample += _output->latency ();
 
+	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
+
 	/* Note: during intial pre-roll 'start_sample' as passed as argument can be negative.
 	 * Functions calling process_output_buffers() will set  "run_disk_reader"
 	 * to false if the pre-roll count-down is larger than playback_latency ().
@@ -380,9 +382,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * given that
 	 */
 	bool run_disk_writer = false;
-	if (_disk_writer) {
-		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
-		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output->latency ());
+	if (_disk_writer && speed != 0) {
+		if (end_sample - _disk_writer->input_latency () < _session.transport_sample ()) {
+			run_disk_writer = true;
+		}
 	}
 
 	/* Tell main outs what to do about monitoring.  We do this so that
@@ -391,6 +394,12 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * is true.
 	 *
 	 * We override this in the case where we have an internal generator.
+	 *
+	 * FIXME: when punching in/out this also depends on latency compensated time
+	 * for this route. monitoring_state() does not currently handle that correctly,.
+	 *
+	 * Also during remaining_latency_preroll, transport_rolling () is false, but
+	 * we may need to monitor disk instead.
 	 */
 	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
 
@@ -473,7 +482,6 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool const meter_already_run = metering_state() == MeteringInput;
 
 	samplecnt_t latency = 0;
-	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
@@ -4068,12 +4076,12 @@ Route::update_signal_latency (bool apply_to_delayline)
 	_signal_latency = l_out;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if ((*i)->active ()) {
-			l_in += (*i)->signal_latency ();
-		}
 		(*i)->set_input_latency (l_in);
 		(*i)->set_playback_offset (_signal_latency + _output->latency ());
 		(*i)->set_capture_offset (_input->latency ());
+		if ((*i)->active ()) {
+			l_in += (*i)->signal_latency ();
+		}
 	}
 
 	lm.release ();
@@ -5974,7 +5982,17 @@ Route::monitoring_state () const
 	 * sept 26th 2012, we differentiate between the cases where punch is
 	 * enabled and those where it is not.
 	 *
-	 * rg: I suspect this is not the case: monitoring may differ
+	 * rg: sept 30 2017: Above is not the case: punch-in/out location is
+	 * global session playhead position.
+	 * When this method is called from process_output_buffers() we need
+	 * to use delay-compensated route's process-position.
+	 *
+	 * NB. Disk reader/writer may also be offset by a same amount of time.
+	 *
+	 * Also keep in mind that _session.transport_rolling() is false during
+	 * pre-roll but the disk already produces output.
+	 *
+	 * TODO: FIXME
 	 */
 
 	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {

@@ -89,18 +89,14 @@ void
 DiskWriter::check_record_status (samplepos_t transport_sample, double speed, bool can_record)
 {
 	int possibly_recording;
-	int rolling;
-	int change;
 	const int transport_rolling = 0x4;
 	const int track_rec_enabled = 0x2;
 	const int global_rec_enabled = 0x1;
-	const int fully_rec_enabled = (transport_rolling|track_rec_enabled|global_rec_enabled);
+	const int fully_rec_enabled = (transport_rolling |track_rec_enabled | global_rec_enabled);
 
 	/* merge together the 3 factors that affect record status, and compute what has changed. */
 
-	rolling = speed != 0.0f;
-	possibly_recording = (rolling << 2) | ((int)record_enabled() << 1) | (int)can_record;
-	change = possibly_recording ^ last_possibly_recording;
+	possibly_recording = (speed != 0.0f ? 4 : 0)  | (record_enabled() ? 2 : 0) | (can_record ? 1 : 0);
 
 	if (possibly_recording == last_possibly_recording) {
 		return;
@@ -112,14 +108,32 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 			return;
 		}
 
-		capture_start_sample = _session.transport_sample ();
+		Location* loc;
+		if  (_session.config.get_punch_in () && 0 != (loc = _session.locations()->auto_punch_location ())) {
+			capture_start_sample = loc->start ();
+		} else {
+			capture_start_sample = _session.transport_sample ();
+		}
+
 		first_recordable_sample = capture_start_sample;
 
 		if (_alignment_style == ExistingMaterial) {
 			first_recordable_sample += _capture_offset + _playback_offset;
 		}
 
-		last_recordable_sample = max_samplepos;
+		if  (_session.config.get_punch_out () && 0 != (loc = _session.locations()->auto_punch_location ())) {
+			/* this freezes the punch-out point when starting to record.
+			 *
+			 * We should allow to move it or at least allow to disable punch-out
+			 * while rolling..
+			 */
+			last_recordable_sample = loc->end ();
+			if (_alignment_style == ExistingMaterial) {
+				last_recordable_sample += _capture_offset + _playback_offset;
+			}
+		} else {
+			last_recordable_sample = max_samplepos;
+		}
 
 		DEBUG_TRACE (DEBUG::CaptureAlignment, string_compose ("%1: @ %2 (STS: %3) CS:%4 FRS: %5 IL: %7, OL: %8 CO: %r9 PO: %10 WOL: %11 WIL: %12\n",
 		                                                      name(),
@@ -138,29 +152,6 @@ DiskWriter::check_record_status (samplepos_t transport_sample, double speed, boo
 
 		prepare_record_status (capture_start_sample);
 
-	} else {
-
-		if (last_possibly_recording == fully_rec_enabled) {
-
-			/* we were recording last time */
-
-			if (change & transport_rolling) {
-
-				/* transport-change (stopped rolling): last_recordable_sample was set in ::prepare_to_stop(). We
-				 * had to set it there because we likely rolled past the stopping point to declick out,
-				 * and then backed up.
-				 */
-
-			} else {
-				/* punch out */
-
-				last_recordable_sample = _session.transport_sample();
-
-				if (_alignment_style == ExistingMaterial) {
-					//XXX
-				}
-			}
-		}
 	}
 
 	last_possibly_recording = possibly_recording;
@@ -366,7 +357,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	bool nominally_recording;
 
 	bool re = record_enabled ();
+	bool punch_in = _session.config.get_punch_in () && _session.locations()->auto_punch_location ();
 	bool can_record = _session.actively_recording ();
+	can_record |= _session.get_record_enabled () && punch_in && _session.transport_sample () <= _session.locations()->auto_punch_location ()->start ();
 
 	_need_butler = false;
 
@@ -400,7 +393,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		get_location_times (loop_loc, &loop_start, &loop_end, &loop_length);
 	}
 
-	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && _session.config.get_punch_in ())) {
+	if (nominally_recording || (re && was_recording && _session.get_record_enabled() && punch_in)) {
 
 		Evoral::OverlapType ot = Evoral::coverage (first_recordable_sample, last_recordable_sample, start_sample, end_sample);
 		// XXX should this be transport_sample + nframes - 1 ? coverage() expects its parameter ranges to include their end points

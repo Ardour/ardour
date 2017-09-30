@@ -1649,6 +1649,13 @@ Session::start_transport ()
 	switch (record_status()) {
 	case Enabled:
 		if (!config.get_punch_in()) {
+			/* This is only for UIs (keep blinking rec-en before
+			 * punch-in, don't show rec-region etc). The UI still
+			 * depends on SessionEvent::PunchIn and ensuing signals.
+			 *
+			 * The disk-writers handle punch in/out internally
+			 * in their local delay-compensated timeframe.
+			 */
 			enable_record ();
 		}
 		break;

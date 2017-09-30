@@ -1655,7 +1655,7 @@ Session::auto_punch_start_changed (Location* location)
 {
 	replace_event (SessionEvent::PunchIn, location->start());
 
-	if (get_record_enabled() && config.get_punch_in()) {
+	if (get_record_enabled() && config.get_punch_in() && !actively_recording ()) {
 		/* capture start has been changed, so save new pending state */
 		save_state ("", true);
 	}
@@ -1664,19 +1664,14 @@ Session::auto_punch_start_changed (Location* location)
 void
 Session::auto_punch_end_changed (Location* location)
 {
-	samplepos_t when_to_stop = location->end();
-	// when_to_stop += _worst_output_latency + _worst_input_latency;
-	replace_event (SessionEvent::PunchOut, when_to_stop);
+	replace_event (SessionEvent::PunchOut, location->end());
 }
 
 void
 Session::auto_punch_changed (Location* location)
 {
-	samplepos_t when_to_stop = location->end();
-
-	replace_event (SessionEvent::PunchIn, location->start());
-	//when_to_stop += _worst_output_latency + _worst_input_latency;
-	replace_event (SessionEvent::PunchOut, when_to_stop);
+	auto_punch_start_changed (location);
+	auto_punch_end_changed (location);
 }
 
 /** @param loc A loop location.
@@ -1754,7 +1749,7 @@ Session::set_auto_punch_location (Location* location)
 	if ((existing = _locations->auto_punch_location()) != 0 && existing != location) {
 		punch_connections.drop_connections();
 		existing->set_auto_punch (false, this);
-		remove_event (existing->start(), SessionEvent::PunchIn);
+		clear_events (SessionEvent::PunchIn);
 		clear_events (SessionEvent::PunchOut);
 		auto_punch_location_changed (0);
 	}
