@@ -104,7 +104,6 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _meter_type (MeterPeak)
 	, _denormal_protection (false)
 	, _recordable (true)
-	, _silent (false)
 	, _declickable (false)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
@@ -687,7 +686,6 @@ Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t 
 void
 Route::passthru (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader)
 {
-	_silent = false;
 
 	if (is_monitor() && _session.listening() && !_session.is_auditioning()) {
 
@@ -3106,29 +3104,22 @@ Route::silence_unlocked (samplecnt_t nframes)
 
 	const samplepos_t now = _session.transport_sample ();
 
-	if (!_silent) {
+	_output->silence (nframes);
 
-		_output->silence (nframes);
+	// update owned automated controllables
+	automation_run (now, nframes);
 
-		// update owned automated controllables
-		automation_run (now, nframes);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<PluginInsert> pi;
 
-		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi;
-
-			if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
-				/* evaluate automated automation controls */
-				pi->automation_run (now, nframes);
-				/* skip plugins, they don't need anything when we're not active */
-				continue;
-			}
-
-			(*i)->silence (nframes, now);
+		if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
+			/* evaluate automated automation controls */
+			pi->automation_run (now, nframes);
+			/* skip plugins, they don't need anything when we're not active */
+			continue;
 		}
 
-		if (nframes == _session.get_block_size()) {
-			// _silent = true;
-		}
+		(*i)->silence (nframes, now);
 	}
 }
 
@@ -3746,8 +3737,6 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 	if ((nframes = latency_preroll (nframes, start_sample, end_sample)) == 0) {
 		return 0;
 	}
-
-	_silent = false;
 
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
 

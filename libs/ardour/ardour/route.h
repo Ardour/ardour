@@ -659,7 +659,6 @@ protected:
 	bool           _denormal_protection;
 
 	bool _recordable : 1;
-	bool _silent : 1;
 	bool _declickable : 1;
 
 	boost::shared_ptr<SoloControl> _solo_control;

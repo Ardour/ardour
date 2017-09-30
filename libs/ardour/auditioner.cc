@@ -231,8 +231,6 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 
 	BufferSet& bufs = _session.get_route_buffers (n_process_buffers());
 
-	_silent = false;
-
 	if (_queue_panic) {
 		MidiBuffer& mbuf (bufs.get_midi (0));
 		_queue_panic = false;
