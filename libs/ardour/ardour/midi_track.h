@@ -126,6 +126,8 @@ public:
 
 	MonitorState monitoring_state () const;
 
+	MidiBuffer const& immediate_event_buffer () const { return _immediate_event_buffer; }
+
 	void set_input_active (bool);
 	bool input_active () const;
 	PBD::Signal0<void> InputActiveChanged;
@@ -136,16 +138,19 @@ protected:
 	void act_on_mute ();
 	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
+	void snapshot_out_of_band_data (samplecnt_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, samplecnt_t /* nframes */) const;
+
+
 private:
 	MidiRingBuffer<samplepos_t> _immediate_events;
+	MidiBuffer                  _immediate_event_buffer;
 	MidiRingBuffer<samplepos_t> _step_edit_ring_buffer;
-	NoteMode                   _note_mode;
-	bool                       _step_editing;
-	bool                       _input_active;
-	MidiChannelFilter          _playback_filter;
-	MidiChannelFilter          _capture_filter;
-
-	void write_out_of_band_data (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, samplecnt_t nframes);
+	NoteMode                    _note_mode;
+	bool                        _step_editing;
+	bool                        _input_active;
+	MidiChannelFilter           _playback_filter;
+	MidiChannelFilter           _capture_filter;
 
 	void set_state_part_two ();
 	void set_state_part_three ();
@@ -157,7 +162,7 @@ private:
 	void map_input_active (bool);
 
 	/** Update automation controls to reflect any changes in buffers. */
-	void update_controls (const BufferSet& bufs);
+	void update_controls (BufferSet const& bufs);
 	void restore_controls ();
 };
 

@@ -597,7 +597,9 @@ protected:
 
 	virtual int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool session_state_changing);
 
-	virtual void write_out_of_band_data (BufferSet& /* bufs */, samplepos_t /* start_sample */, samplepos_t /* end_sample */, samplecnt_t /* nframes */) {}
+	virtual void snapshot_out_of_band_data (samplecnt_t /* nframes */) {}
+	virtual void write_out_of_band_data (BufferSet&, samplecnt_t /* nframes */) const {}
+	virtual void update_controls (BufferSet const&) {}
 
 	void process_output_buffers (BufferSet& bufs,
 	                             samplepos_t start_sample, samplepos_t end_sample,

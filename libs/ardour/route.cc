@@ -402,7 +402,8 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * Also during remaining_latency_preroll, transport_rolling () is false, but
 	 * we may need to monitor disk instead.
 	 */
-	bool silence = _have_internal_generator ? false : (monitoring_state () == MonitoringSilence);
+	MonitorState ms = monitoring_state ();
+	bool silence = _have_internal_generator ? false : (ms == MonitoringSilence);
 
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
 
@@ -524,6 +525,24 @@ Route::process_output_buffers (BufferSet& bufs,
 					/* input->latency() + */ latency, /* output->latency() + */ playback_latency);
 		}
 
+		bool re_inject_oob_data = false;
+		if ((*i) == _disk_reader) {
+			/* Well now, we've made it past the disk-writer and to the disk-reader.
+			 * Time to decide what to do about monitoring.
+			 *
+			 * Even when not doing MonitoringDisk, we need to run the processors,
+			 * so that it advances its internal buffers (IFF run_disk_reader is true).
+			 *
+			 */
+			if (ms == MonitoringDisk || ms == MonitoringSilence) {
+				/* this will clear out-of-band data, too (e.g. MIDI-PC, Panic etc.
+				 * OOB data is written at the end of the cycle (nframes - 1),
+				 * and jack does not re-order events, so we push them back later */
+				re_inject_oob_data = true;
+				bufs.silence (nframes, 0);
+			}
+		}
+
 		double pspeed = speed;
 		if ((!run_disk_reader && (*i) == _disk_reader) || (!run_disk_writer && (*i) == _disk_writer)) {
 			/* run with speed 0, no-roll */
@@ -531,6 +550,7 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 
 		(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
+
 		bufs.set_count ((*i)->output_streams());
 
 		/* Note: plugin latency may change. While the plugin does inform the session via
@@ -542,6 +562,11 @@ Route::process_output_buffers (BufferSet& bufs,
 		if ((*i)->active ()) {
 			latency += (*i)->signal_latency ();
 		}
+
+		if (re_inject_oob_data) {
+			write_out_of_band_data (bufs, nframes);
+		}
+
 #if 0
 		if ((*i) == _delayline) {
 			latency += _delayline->get_delay ();
@@ -701,13 +726,17 @@ Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nf
 		bufs.silence (nframes, 0);
 	}
 
+	snapshot_out_of_band_data (nframes);
 	/* append immediate messages to the first MIDI buffer (thus sending it to the first output port) */
 
-	write_out_of_band_data (bufs, start_sample, end_sample, nframes);
+	write_out_of_band_data (bufs, nframes);
 
 	/* run processor chain */
 
 	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok, run_disk_reader);
+
+	/* map events (e.g. MIDI-CC) back to control-parameters */
+	update_controls (bufs);
 
 	flush_processor_buffers_locked (nframes);
 }

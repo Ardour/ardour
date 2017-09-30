@@ -73,6 +73,7 @@ using namespace PBD;
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
 	, _immediate_events(6096) // FIXME: size?
+	, _immediate_event_buffer(6096)
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode (Sustained)
 	, _step_editing (false)
@@ -303,16 +304,19 @@ MidiTrack::restore_controls ()
 }
 
 void
-MidiTrack::update_controls(const BufferSet& bufs)
+MidiTrack::update_controls (BufferSet const& bufs)
 {
 	const MidiBuffer& buf = bufs.get_midi(0);
 	for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
-		const Evoral::Event<samplepos_t>&         ev      = *e;
+		const Evoral::Event<samplepos_t>&         ev     = *e;
 		const Evoral::Parameter                  param   = midi_parameter(ev.buffer(), ev.size());
 		const boost::shared_ptr<AutomationControl> control = automation_control (param);
 		if (control) {
-			control->set_double(ev.value(), _session.transport_sample(), false);
-			control->Changed (false, Controllable::NoGroup);
+			double old = control->get_double (false, 0);
+			control->set_double (ev.value(), 0, false);
+			if (old != ev.value()) {
+				control->Changed (false, Controllable::NoGroup);
+			}
 		}
 	}
 }
@@ -416,30 +420,35 @@ MidiTrack::push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes)
 }
 
 void
-MidiTrack::write_out_of_band_data (BufferSet& bufs, samplepos_t /*start*/, samplepos_t /*end*/, samplecnt_t nframes)
+MidiTrack::snapshot_out_of_band_data (samplecnt_t nframes)
+{
+	_immediate_event_buffer.clear ();
+	if (0 == _immediate_events.read_space()) {
+		return;
+	}
+
+	assert (nframes > 0);
+
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n",
+				name(), _immediate_events.read_space()));
+
+	/* write as many of the immediate events as we can, but give "true" as
+	 * the last argument ("stop on overflow in destination") so that we'll
+	 * ship the rest out next time.
+	 *
+	 * the Port::port_offset() + (nframes-1) argument puts all these events at the last
+	 * possible position of the output buffer, so that we do not
+	 * violate monotonicity when writing. Port::port_offset() will
+	 * be non-zero if we're in a split process cycle.
+	 */
+	_immediate_events.read (_immediate_event_buffer, 0, 1, Port::port_offset() + nframes - 1, true);
+}
+
+void
+MidiTrack::write_out_of_band_data (BufferSet& bufs, samplecnt_t nframes) const
 {
 	MidiBuffer& buf (bufs.get_midi (0));
-
-	update_controls (bufs);
-
-	// Append immediate events
-
-	if (_immediate_events.read_space()) {
-
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of immediate events to deliver\n",
-		                                            name(), _immediate_events.read_space()));
-
-		/* write as many of the immediate events as we can, but give "true" as
-		 * the last argument ("stop on overflow in destination") so that we'll
-		 * ship the rest out next time.
-		 *
-		 * the Port::port_offset() + (nframes-1) argument puts all these events at the last
-		 * possible position of the output buffer, so that we do not
-		 * violate monotonicity when writing. Port::port_offset() will
-		 * be non-zero if we're in a split process cycle.
-		 */
-		_immediate_events.read (buf, 0, 1, Port::port_offset() + nframes - 1, true);
-	}
+	buf.merge_from (_immediate_event_buffer, nframes);
 }
 
 int
