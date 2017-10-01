@@ -96,10 +96,12 @@ Track::init ()
 	_disk_reader.reset (new DiskReader (_session, name(), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
 	_disk_reader->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	_disk_reader->set_owner (this);
 
 	_disk_writer.reset (new DiskWriter (_session, name(), dflags));
 	_disk_writer->set_block_size (_session.get_block_size ());
 	_disk_writer->set_route (boost::dynamic_pointer_cast<Route> (shared_from_this()));
+	_disk_writer->set_owner (this);
 
 	set_align_choice_from_io ();
 
