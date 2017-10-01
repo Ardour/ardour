@@ -98,7 +98,15 @@ MidiTrack::init ()
 	_disk_writer->set_note_mode (_note_mode);
 	_disk_reader->reset_tracker ();
 
+	_disk_writer->DataRecorded.connect_same_thread (*this, boost::bind (&MidiTrack::data_recorded, this, _1));
+
 	return 0;
+}
+
+void
+MidiTrack::data_recorded (boost::weak_ptr<MidiSource> src)
+{
+	DataRecorded (src); /* EMIT SIGNAL */
 }
 
 bool

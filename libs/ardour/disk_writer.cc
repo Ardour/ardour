@@ -359,7 +359,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	bool re = record_enabled ();
 	bool punch_in = _session.config.get_punch_in () && _session.locations()->auto_punch_location ();
 	bool can_record = _session.actively_recording ();
-	can_record |= _session.get_record_enabled () && punch_in && _session.transport_sample () <= _session.locations()->auto_punch_location ()->start ();
+	can_record |= speed != 0 && _session.get_record_enabled () && punch_in && _session.transport_sample () <= _session.locations()->auto_punch_location ()->start ();
 
 	_need_butler = false;
 
@@ -1371,14 +1371,8 @@ DiskWriter::use_destructive_playlist ()
 		assert((*chan)->write_source);
 		(*chan)->write_source->set_allow_remove_if_empty (false);
 
-		/* this might be false if we switched modes, so force it */
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-		(*chan)->write_source->set_destructive (true);
-#else
 		// should be set when creating the source or loading the state
 		assert ((*chan)->write_source->destructive());
-#endif
 	}
 
 	/* the source list will never be reset for a destructive track */

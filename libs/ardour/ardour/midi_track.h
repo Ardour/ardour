@@ -161,6 +161,8 @@ private:
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
 
+	void data_recorded (boost::weak_ptr<MidiSource> src);
+
 	/** Update automation controls to reflect any changes in buffers. */
 	void update_controls (BufferSet const& bufs);
 	void restore_controls ();

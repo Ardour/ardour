@@ -50,7 +50,7 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 		Recordable  = 0x1,
 		Hidden      = 0x2,
 		Destructive = 0x4,
-		NonLayered   = 0x8
+		NonLayered  = 0x8 // deprecated (kept only for enum compat)
 	};
 
 	static const std::string state_node_name;
@@ -77,7 +77,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	bool           hidden()      const { return _flags & Hidden; }
 	bool           recordable()  const { return _flags & Recordable; }
-	bool           non_layered()  const { return _flags & NonLayered; }
 
 	virtual void non_realtime_locate (samplepos_t);
 

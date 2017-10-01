@@ -91,8 +91,6 @@ Track::init ()
 
 	if (_mode == Destructive && !Profile->get_trx()) {
 		dflags = DiskIOProcessor::Flag (dflags | DiskIOProcessor::Destructive);
-	} else if (_mode == NonLayered){
-		dflags = DiskIOProcessor::Flag(dflags | DiskIOProcessor::NonLayered);
 	}
 
 	_disk_reader.reset (new DiskReader (_session, name(), dflags));
@@ -1035,9 +1033,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			continue; /* XXX is this OK? */
 		}
 
-		// cerr << "add new region, buffer position = " << buffer_position << " @ " << (*ci)->start << endl;
+		cerr << "add new region, len = " << (*ci)->samples << " @ " << (*ci)->start << endl;
 
-		pl->add_region (midi_region, (*ci)->start + preroll_off, _disk_writer->non_layered());
+		pl->add_region (midi_region, (*ci)->start + preroll_off, 1, _session.config.get_layered_record_mode ());
 	}
 
 	pl->thaw ();
@@ -1139,7 +1137,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			continue; /* XXX is this OK? */
 		}
 
-		pl->add_region (region, (*ci)->start + preroll_off, 1, _disk_writer->non_layered());
+		pl->add_region (region, (*ci)->start + preroll_off, 1, _session.config.get_layered_record_mode());
 		pl->set_layer (region, DBL_MAX);
 
 		buffer_position += (*ci)->samples;

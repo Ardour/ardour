@@ -97,9 +97,6 @@ public:
 	virtual void set_record_safe (bool yn);
 
 	bool destructive() const { return _flags & Destructive; }
-	int  set_destructive (bool yn);
-	int  set_non_layered (bool yn);
-	bool can_become_destructive (bool& requires_bounce) const;
 
 	/** @return Start position of currently-running capture (in session samples) */
 	samplepos_t current_capture_start() const { return capture_start_sample; }
