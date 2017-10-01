@@ -104,7 +104,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	friend class MidiTrack;
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
-	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	void playlist_changed (const PBD::PropertyChange&);
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
@@ -126,14 +125,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	static samplecnt_t _chunk_samples;
 	static samplecnt_t midi_readahead;
 	static bool       _no_disk_output;
-
-	/* The MIDI stuff */
-
-	/** A buffer that we use to put newly-arrived MIDI data in for
-	    the GUI to read (so that it can update itself).
-	*/
-	MidiBuffer                   _gui_feed_buffer;
-	mutable Glib::Threads::Mutex _gui_feed_buffer_mutex;
 
 	int audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 	                samplepos_t& start, samplecnt_t cnt,

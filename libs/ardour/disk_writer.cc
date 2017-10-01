@@ -648,6 +648,16 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	first_recordable_sample = max_samplepos;
 }
 
+boost::shared_ptr<MidiBuffer>
+DiskWriter::get_gui_feed_buffer () const
+{
+	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
+
+	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
+	b->copy (_gui_feed_buffer);
+	return b;
+}
+
 void
 DiskWriter::set_record_enabled (bool yn)
 {

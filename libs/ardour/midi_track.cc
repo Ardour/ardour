@@ -752,7 +752,7 @@ MidiTrack::track_input_active (IOChange change, void* /* src */)
 boost::shared_ptr<MidiBuffer>
 MidiTrack::get_gui_feed_buffer () const
 {
-	return _disk_reader->get_gui_feed_buffer ();
+	return _disk_writer->get_gui_feed_buffer ();
 }
 
 void

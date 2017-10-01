@@ -54,7 +54,6 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, overwrite_offset (0)
 	, _pending_overwrite (false)
 	, overwrite_queued (false)
-	, _gui_feed_buffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI))
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI] = 0;
@@ -1203,16 +1202,6 @@ DiskReader::move_processor_automation (boost::weak_ptr<Processor> p, list< Evora
 				);
 		}
 	}
-}
-
-boost::shared_ptr<MidiBuffer>
-DiskReader::get_gui_feed_buffer () const
-{
-	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
-
-	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
-	b->copy (_gui_feed_buffer);
-	return b;
 }
 
 void

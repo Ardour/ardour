@@ -129,6 +129,8 @@ public:
 
 	void adjust_buffering ();
 
+	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
+
 protected:
 	friend class Track;
 	int do_flush (RunContext context, bool force = false);
