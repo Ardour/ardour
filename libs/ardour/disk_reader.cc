@@ -251,12 +251,14 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (speed == 0.0) {
-		/* Nothing to do here.
-		 *
-		 * Do not clear input buffers here when (ms == MonitoringDisk)
-		 * we need to allow out-of-band data to pass thru from the input.
-		 * (e.g. MIDI immediate events)
+	if (c->empty()) {
+		/* do nothing */
+		return;
+	}
+
+	if ((speed == 0.0) && (ms == MonitoringDisk)) {
+		/* no channels, or stopped. Don't accidentally pass any data
+		 * from disk into our outputs (e.g. via interpolation)
 		 */
 		return;
 	}
