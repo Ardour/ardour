@@ -42,6 +42,7 @@
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
+#include "pbd/file_archive.h"
 #include "pbd/rcu.h"
 #include "pbd/reallocpool.h"
 #include "pbd/statefuldestructible.h"
@@ -523,7 +524,11 @@ public:
 		FLAC_24BIT
 	};
 
-	int archive_session (const std::string&, const std::string&, ArchiveEncode compress_audio = FLAC_16BIT, bool only_used_sources = false, Progress* p = 0);
+	int archive_session (const std::string&, const std::string&,
+	                     ArchiveEncode compress_audio = FLAC_16BIT,
+	                     PBD::FileArchive::CompressionLevel compression_level = PBD::FileArchive::CompressGood,
+	                     bool only_used_sources = false,
+	                     Progress* p = 0);
 
 	int restore_state (std::string snapshot_name);
 	int save_template (const std::string& template_name, const std::string& description = "", bool replace_existing = false);

@@ -5217,6 +5217,7 @@ int
 Session::archive_session (const std::string& dest,
                           const std::string& name,
                           ArchiveEncode compress_audio,
+                          FileArchive::CompressionLevel compression_level,
                           bool only_used_sources,
                           Progress* progress)
 {
@@ -5539,7 +5540,7 @@ Session::archive_session (const std::string& dest,
 		i->first->set_gain (i->second, true);
 	}
 
-	int rv = ar.create (filemap, PBD::FileArchive::CompressGood);
+	int rv = ar.create (filemap, compression_level);
 	remove_directory (to_dir);
 
 	return rv;
