@@ -148,7 +148,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
 	int set_loop (ARDOUR::Location *);
 	void transport_looped (samplepos_t);
-	bool realtime_speed_change ();
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
 	void set_slaved (bool);

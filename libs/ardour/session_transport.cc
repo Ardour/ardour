@@ -1511,14 +1511,6 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			_default_transport_speed = speed;
 		}
 
-		boost::shared_ptr<RouteList> rl = routes.reader();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-			if (tr && tr->realtime_speed_change()) {
-				todo = PostTransportWork (todo | PostTransportSpeed);
-			}
-		}
-
 		if (todo) {
 			add_post_transport_work (todo);
 			_butler->schedule_transport_work ();
@@ -1674,14 +1666,6 @@ Session::start_transport ()
 
 	_transport_speed = _default_transport_speed;
 	_target_transport_speed = _transport_speed;
-
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->realtime_speed_change ();
-		}
-	}
 
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
@@ -1861,9 +1845,6 @@ Session::use_sync_source (Slave* new_slave)
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 		if (tr && !tr->is_private_route()) {
-			if (tr->realtime_speed_change()) {
-				non_rt_required = true;
-			}
 			tr->set_slaved (_slave != 0);
 		}
 	}

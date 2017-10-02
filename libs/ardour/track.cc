@@ -573,15 +573,6 @@ Track::transport_looped (samplepos_t p)
 	return _disk_writer->transport_looped (p);
 }
 
-bool
-Track::realtime_speed_change ()
-{
-	if (_disk_reader->realtime_speed_change ()) {
-		return -1;
-	}
-	return _disk_writer->realtime_speed_change ();
-}
-
 void
 Track::realtime_handle_transport_stopped ()
 {
