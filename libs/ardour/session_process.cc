@@ -436,9 +436,12 @@ Session::process_with_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		samples_moved = (samplecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
-		samples_moved = (samplecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		/* use a cubic midi interpolation to compute the number of
+		 * samples we will move at the current speed.
+		 */
+		CubicInterpolation interp;
+		interp.set_speed (_transport_speed);
+		samples_moved = interp.distance (nframes);
 	}
 
 	end_sample = _transport_sample + samples_moved;
@@ -887,9 +890,8 @@ Session::process_without_events (pframes_t nframes)
 	if (_transport_speed == 1.0) {
 		samples_moved = (samplecnt_t) nframes;
 	} else {
-		interpolation.set_target_speed (_target_transport_speed);
 		interpolation.set_speed (_transport_speed);
-		samples_moved = (samplecnt_t) interpolation.interpolate (0, nframes, 0, 0);
+		samples_moved = interpolation.distance (nframes);
 	}
 
 	if (!_exporting && !timecode_transmission_suspended()) {

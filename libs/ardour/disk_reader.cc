@@ -265,8 +265,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 	if (speed != 1.0f && speed != -1.0f) {
 		interpolation.set_speed (speed);
-		midi_interpolation.set_speed (speed);
-		disk_samples_to_consume = midi_interpolation.distance (nframes);
+		disk_samples_to_consume = interpolation.distance (nframes);
 		if (speed < 0.0) {
 			disk_samples_to_consume = -disk_samples_to_consume;
 		}
@@ -321,12 +320,19 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				disk_signal = output.data ();
 			}
 
-			if (start_sample < playback_sample) {
-				cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << endl;
-				abort ();
+			if (speed > 0) {
+				if (start_sample < playback_sample) {
+					cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << endl;
+					abort ();
+				}
+			} else if (speed < 0) {
+				if (playback_sample < start_sample) {
+					cerr << owner()->name() << " SS = " << start_sample << " PS = " << playback_sample << " REVERSE" << endl;
+					abort ();
+				}
 			}
 
-			if (start_sample != playback_sample) {
+			if ((speed > 0) && (start_sample != playback_sample)) {
 				cerr << owner()->name() << " playback not aligned, jump ahead " << (start_sample - playback_sample) << endl;
 
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
@@ -342,10 +348,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			if (disk_samples_to_consume <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
 				if (fabsf (speed) != 1.0f) {
-					(void) interpolation.interpolate (
-						n, disk_samples_to_consume,
-						chaninfo->rw_vector.buf[0],
-						disk_signal);
+					samplecnt_t ocnt = nframes;
+					samplecnt_t icnt = chaninfo->rw_vector.len[0];
+					(void) interpolation.interpolate (n, icnt, chaninfo->rw_vector.buf[0], ocnt, disk_signal);
 				} else if (speed != 0.0) {
 					memcpy (disk_signal, chaninfo->rw_vector.buf[0], sizeof (Sample) * disk_samples_to_consume);
 				}
@@ -356,18 +361,18 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (disk_samples_to_consume <= total) {
 
-					/* We have enough samples, but not in one lump.
-					 */
-
 					if (fabsf (speed) != 1.0f) {
-						interpolation.interpolate (n, chaninfo->rw_vector.len[0],
-						                           chaninfo->rw_vector.buf[0],
-						                           disk_signal);
-						disk_signal += chaninfo->rw_vector.len[0];
-						interpolation.interpolate (n, disk_samples_to_consume - chaninfo->rw_vector.len[0],
-						                           chaninfo->rw_vector.buf[1],
-						                           disk_signal);
+						samplecnt_t ocnt = nframes;
+						samplecnt_t icnt = interpolation.interpolate (n, chaninfo->rw_vector.len[0], chaninfo->rw_vector.buf[0], ocnt, disk_signal);
+
+						if (ocnt < nframes) {
+							disk_signal += ocnt;
+							ocnt = nframes - ocnt;
+							icnt = interpolation.interpolate (n, chaninfo->rw_vector.len[1], chaninfo->rw_vector.buf[1], ocnt, disk_signal);
+						}
+
 					} else if (speed != 0.0) {
+
 						memcpy (disk_signal,
 						        chaninfo->rw_vector.buf[0],
 						        chaninfo->rw_vector.len[0] * sizeof (Sample));
