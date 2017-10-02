@@ -1177,10 +1177,18 @@ AutomationLine::view_to_model_coord_y (double& y) const
 {
 	if (alist->default_interpolation () != alist->interpolation()) {
 		switch (alist->interpolation()) {
+			case AutomationList::Discrete:
+				/* toggles and MIDI only -- see is_stepped() */
+				assert (alist->default_interpolation () == AutomationList::Linear);
+				break;
 			case AutomationList::Linear:
 				y = y * (_desc.upper - _desc.lower) + _desc.lower;
 				return;
 			default:
+				/* types that default to linear, can't be use
+				 * Logarithmic or Exponential interpolation.
+				 * "Curved" is invalid for automation (only x-fads)
+				 */
 				assert (0);
 				break;
 		}
@@ -1211,10 +1219,18 @@ AutomationLine::model_to_view_coord_y (double& y) const
 {
 	if (alist->default_interpolation () != alist->interpolation()) {
 		switch (alist->interpolation()) {
+			case AutomationList::Discrete:
+				/* toggles and MIDI only -- see is_stepped */
+				assert (alist->default_interpolation () == AutomationList::Linear);
+				break;
 			case AutomationList::Linear:
 				y = (y - _desc.lower) / (_desc.upper - _desc.lower);
 				return;
 			default:
+				/* types that default to linear, can't be use
+				 * Logarithmic or Exponential interpolation.
+				 * "Curved" is invalid for automation (only x-fads)
+				 */
 				assert (0);
 				break;
 		}
