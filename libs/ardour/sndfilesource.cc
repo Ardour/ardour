@@ -276,6 +276,21 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		throw failed_constructor();
 	}
 
+#if 0
+	/* setting flac compression quality above the default does not produce a significant size
+	 * improvement (not for large raw recordings anyway, the_CLA tests 2017-10-02, >> 250MB files,
+	 * ~1% smaller), but does have a significant encoding speed penalty.
+	 *
+	 * We still may expose this as option someday though, perhaps for opposite reason: "fast encoding"
+	 */
+	double flac_quality = 1; // libsndfile uses range 0..1 (mapped to flac 0..8), default is (5/8)
+	if (sf_command (_sndfile, SFC_SET_COMPRESSION_LEVEL, &flac_quality, sizeof (double)) != SF_TRUE) {
+		char errbuf[256];
+		sf_error_str (_sndfile, errbuf, sizeof (errbuf) - 1);
+		error << string_compose (_("Cannot set flac compression level: %1"), errbuf) << endmsg;
+	}
+#endif
+
 	Sample buf[8192];
 	samplecnt_t off = 0;
 	float peak = 0;
