@@ -17,151 +17,209 @@
 
 */
 
-#include <stdint.h>
+#include <limits>
 #include <cstdio>
+
+#include <stdint.h>
 
 #include "ardour/interpolation.h"
 #include "ardour/midi_buffer.h"
 
 using namespace ARDOUR;
+using std::cerr;
+using std::endl;
 
-
-samplecnt_t
-LinearInterpolation::interpolate (int channel, samplecnt_t nframes, Sample *input, Sample *output)
+CubicInterpolation::CubicInterpolation ()
+	: valid_z_bits (0)
 {
-	// index in the input buffers
-	samplecnt_t i = 0;
-
-	double acceleration = 0;
-
-	if (_speed != _target_speed) {
-		acceleration = _target_speed - _speed;
-	}
-
-	for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
-		double const d = phase[channel] + outsample * (_speed + acceleration);
-		i = floor(d);
-		Sample fractional_phase_part = d - i;
-		if (fractional_phase_part >= 1.0) {
-			fractional_phase_part -= 1.0;
-			i++;
-		}
-
-		if (input && output) {
-			// Linearly interpolate into the output buffer
-			output[outsample] =
-				input[i] * (1.0f - fractional_phase_part) +
-				input[i+1] * fractional_phase_part;
-		}
-	}
-
-	double const distance = phase[channel] + nframes * (_speed + acceleration);
-	i = floor(distance);
-	phase[channel] = distance - i;
-	return i;
 }
 
 samplecnt_t
-CubicInterpolation::interpolate (int channel, samplecnt_t nframes, Sample *input, Sample *output)
+CubicInterpolation::interpolate (int channel, samplecnt_t input_samples, Sample *input, samplecnt_t &  output_samples, Sample *output)
 {
-	// index in the input buffers
-	samplecnt_t i = 0;
+	assert (input_samples > 0);
+	assert (output_samples > 0);
+	assert (input);
+	assert (output);
 
-	double acceleration;
-	double distance = phase[channel];
+	_speed = fabs (_speed);
 
-	if (_speed != _target_speed) {
-		acceleration = _target_speed - _speed;
-	} else {
-		acceleration = 0.0;
-	}
+	if (invalid (0)) {
 
-	if (nframes < 3) {
-		/* no interpolation possible */
+		/* z[0] not set. Two possibilities
+		 *
+		 * 1) we have just been constructed or ::reset()
+		 *
+		 * 2) we were only given 1 sample after construction or
+		 *    ::reset, and stored it in z[1]
+		 */
 
-		if (input && output) {
-			for (i = 0; i < nframes; ++i) {
-				output[i] = input[i];
+		if (invalid (1)) {
+
+			/* first call after construction or after ::reset */
+
+			switch (input_samples) {
+			case 1:
+				/* store one sample for use next time. We don't
+				 * have enough points to interpolate or even
+				 * compute the first z[0] value, but keep z[1]
+				 * around.
+				 */
+				z[1] = input[0]; validate (1);
+				output_samples = 0;
+				return 0;
+			case 2:
+				/* store two samples for use next time, and
+				 * compute a value for z[0] that will maintain
+				 * the slope of the first actual segment. We
+				 * still don't have enough samples to interpolate.
+				 */
+				z[0] = input[0] - (input[1] - input[0]); validate (0);
+				z[1] = input[0]; validate (1);
+				z[2] = input[1]; validate (2);
+				output_samples = 0;
+				return 0;
+			default:
+				/* We have enough samples to interpolate this time,
+				 * but don't have a valid z[0] value because this is the
+				 * first call after construction or ::reset.
+				 *
+				 * First point is based on a requirement to maintain
+				 * the slope of the first actual segment
+				 */
+				z[0] = input[0] - (input[1] - input[0]); validate (0);
+				break;
 			}
+		} else {
+
+			/* at least one call since construction or
+			 * after::reset, since we have z[1] set
+			 *
+			 * we can now compute z[0] as required
+			 */
+
+			z[0] = z[1] - (input[0] - z[1]); validate (0);
+
+			/* we'll check the number of samples we've been given
+			   in the next switch() statement below, and either
+			   just save some more samples or actual interpolate
+			*/
 		}
 
-		phase[channel] = 0;
-		return nframes;
+		assert (is_valid (0));
 	}
 
-	/* keep this condition out of the inner loop */
-
-	if (input && output) {
-		/* best guess for the fake point we have to add to be able to interpolate at i == 0:
-		 * .... maintain slope of first actual segment ...
-		 */
-		Sample inm1 = input[i] - (input[i+1] - input[i]);
-
-		for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
-			/* get the index into the input we should start with */
-			i = floor (distance);
-			float fractional_phase_part = fmod (distance, 1.0);
-
-			// Cubically interpolate into the output buffer: keep this inlined for speed and rely on compiler
-			// optimization to take care of the rest
-			// shamelessly ripped from Steve Harris' swh-plugins (ladspa-util.h)
-
-			output[outsample] = input[i] + 0.5f * fractional_phase_part * (input[i+1] - inm1 +
-					fractional_phase_part * (4.0f * input[i+1] + 2.0f * inm1 - 5.0f * input[i] - input[i+2] +
-						fractional_phase_part * (3.0f * (input[i] - input[i+1]) - inm1 + input[i+2])));
-
-			distance += _speed + acceleration;
-			inm1 = input[i];
+	switch (input_samples) {
+	case 1:
+		/* one more sample of input. find the right vX to store
+		   it in, and decide if we're ready to interpolate
+		*/
+		if (invalid (1)) {
+			z[1] = input[0]; validate (1);
+			/* still not ready to interpolate */
+			output_samples = 0;
+			return 0;
+		} else if (invalid (2)) {
+			/* still not ready to interpolate */
+			z[2] = input[0]; validate (2);
+			output_samples = 0;
+			return 0;
+		} else if (invalid (3)) {
+			z[3] = input[0]; validate (3);
+			/* ready to interpolate */
 		}
-
-		i = floor (distance);
-		phase[channel] = fmod (distance, 1.0);
-
-	} else {
-		/* used to calculate play-distance with acceleration (silent roll)
-		 * (use same algorithm as real playback for identical rounding/floor'ing)
-		 */
-		for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
-			distance += _speed + acceleration;
+		break;
+	case 2:
+		/* two more samples of input. find the right vX to store
+		   them in, and decide if we're ready to interpolate
+		*/
+		if (invalid (1)) {
+			z[1] = input[0]; validate (1);
+			z[2] = input[1]; validate (2);
+			/* still not ready to interpolate */
+			output_samples = 0;
+			return 0;
+		} else if (invalid (2)) {
+			z[2] = input[0]; validate (2);
+			z[3] = input[1]; validate (3);
+			/* ready to interpolate */
+		} else if (invalid (3)) {
+			z[3] = input[0]; validate (3);
+			/* ready to interpolate */
 		}
-		i = floor (distance);
-		phase[channel] = fmod (distance, 1.0);
+		break;
+
+	default:
+		/* caller has given us at least enough samples to interpolate a
+		   single value.
+		*/
+		z[1] = input[0]; validate (1);
+		z[2] = input[1]; validate (2);
+		z[3] = input[2]; validate (3);
 	}
 
-	return i;
-}
+	/* ready to interpolate using z[0], z[1], z[2] and z[3] */
 
-/* CubicMidiInterpolation::distance is identical to
- * return CubicInterpolation::interpolate (0, nframes, NULL, NULL);
- */
-samplecnt_t
-CubicMidiInterpolation::distance (samplecnt_t nframes, bool /*roll*/)
-{
-	assert (phase.size () == 1);
+	assert (is_valid (0));
+	assert (is_valid (1));
+	assert (is_valid (2));
+	assert (is_valid (3));
 
+	/* we can use up to (input_samples - 2) of the input, so compute the
+	 * maximum number of output samples that represents.
+	 *
+	 * Remember that the expected common case here is to be given
+	 * input_samples that is substantially larger than output_samples,
+	 * thus allowing us to always compute output_samples in one call.
+	 */
+
+	const samplecnt_t output_from_input = floor ((input_samples - 2) / _speed);
+
+	/* limit output to either the caller's requested number or the number
+	 * determined by the input size.
+	 */
+
+	const samplecnt_t limit = std::min (output_samples, output_from_input);
+
+	samplecnt_t outsample = 0;
+	double distance = phase[channel];
+	samplecnt_t used = floor (distance);
 	samplecnt_t i = 0;
 
-	double acceleration;
-	double distance = phase[0];
+	while (outsample < limit) {
 
-	if (nframes < 3) {
-		/* no interpolation possible */
-		phase[0] = 0;
-		return nframes;
+		i = floor (distance);
+
+		/* this call may stop the loop from being vectorized */
+		float fractional_phase_part = fmod (distance, 1.0);
+
+		/* Cubically interpolate into the output buffer */
+		output[outsample++] = z[1] + 0.5f * fractional_phase_part *
+			(z[2] - z[0] + fractional_phase_part * (4.0f * z[2] + 2.0f * z[0] - 5.0f * z[1] - z[3] +
+			                                      fractional_phase_part * (3.0f * (z[1] - z[2]) - z[0] + z[3])));
+
+		distance += _speed;
+
+		z[0] = z[1];
+		z[1] = input[i];
+		z[2] = input[i+1];
+		z[3] = input[i+2];
 	}
 
-	if (_speed != _target_speed) {
-		acceleration = _target_speed - _speed;
-	} else {
-		acceleration = 0.0;
-	}
+	output_samples = outsample;
+	phase[channel] = fmod (distance, 1.0);
+	return i - used;
+}
 
-	for (samplecnt_t outsample = 0; outsample < nframes; ++outsample) {
-		distance += _speed + acceleration;
-	}
+void
+CubicInterpolation::reset ()
+{
+	Interpolation::reset ();
+	valid_z_bits = 0;
+}
 
-	i = floor (distance);
-	phase[0] = fmod (distance, 1.0);
-
-	return i;
+samplecnt_t
+CubicInterpolation::distance (samplecnt_t nsamples)
+{
+	return floor (floor (phase[0]) + (_speed * nsamples));
 }
