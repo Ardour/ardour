@@ -250,12 +250,12 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 
 	assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 
-	_channel = other.channel ();
+	_channel = 0;
 	init_sndfile ();
 
 	_file_is_new = true;
 
-	_info.channels = other.n_channels();
+	_info.channels = 1;
 	_info.samplerate = other.sample_rate ();
 	_info.format = SF_FORMAT_FLAC | (use16bits ? SF_FORMAT_PCM_16 : SF_FORMAT_PCM_24);
 
@@ -297,11 +297,11 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 	float norm = 1.f;
 
 	/* normalize before converting to fixed point, calc gain factor */
-	samplecnt_t len = other.read (buf, off, 8192, /*channel*/0);
+	samplecnt_t len = other.read (buf, off, 8192, other.channel ());
 	while (len > 0) {
 		peak = compute_peak (buf, len, peak);
 		off += len;
-		len = other.read (buf, off, 8192, /*channel*/0);
+		len = other.read (buf, off, 8192, other.channel ());
 		if (progress) {
 			progress->set_progress (0.5f * (float) off / other.readable_length ());
 		}
@@ -314,7 +314,7 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 
 	/* copy file */
 	off = 0;
-	len = other.read (buf, off, 8192, /*channel*/0);
+	len = other.read (buf, off, 8192, other.channel ());
 	while (len > 0) {
 		if (norm != 1.f) {
 			for (samplecnt_t i = 0; i < len; ++i) {
@@ -323,7 +323,7 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		}
 		write (buf, len);
 		off += len;
-		len = other.read (buf, off, 8192, /*channel*/0);
+		len = other.read (buf, off, 8192, other.channel ());
 		if (progress) {
 			progress->set_progress (0.5f + 0.5f * (float) off / other.readable_length ());
 		}

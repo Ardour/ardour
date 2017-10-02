@@ -67,7 +67,6 @@
 #include "pbd/debug.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
-#include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 #include "pbd/pthread_utils.h"
@@ -842,7 +841,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 	std::string tmp_path(_session_dir->root_path());
 	tmp_path = Glib::build_filename (tmp_path, legalize_for_path (snapshot_name) + temp_suffix);
 
+#ifndef NDEBUG
 	cerr << "actually writing state to " << tmp_path << endl;
+#endif
 
 	if (!tree.write (tmp_path)) {
 		error << string_compose (_("state could not be saved to %1"), tmp_path) << endmsg;
@@ -854,7 +855,9 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 
 	} else {
 
+#ifndef NDEBUG
 		cerr << "renaming state to " << xml_path << endl;
+#endif
 
 		if (::g_rename (tmp_path.c_str(), xml_path.c_str()) != 0) {
 			error << string_compose (_("could not rename temporary session file %1 to %2 (%3)"),
@@ -5277,7 +5280,7 @@ Session::archive_session (const std::string& dest,
 	}
 
 	/* prepare archive */
-	string archive = Glib::build_filename (dest, name + ".tar.xz");
+	string archive = Glib::build_filename (dest, name + session_archive_suffix);
 
 	PBD::ScopedConnectionList progress_connection;
 	PBD::FileArchive ar (archive);
@@ -5374,8 +5377,15 @@ Session::archive_session (const std::string& dest,
 			orig_gain[afs]    = afs->gain();
 
 			std::string new_path = make_new_media_path (afs->path (), to_dir, name);
-			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + ".flac");
+
+			std::string channelsuffix = "";
+			if (afs->channel() > 0) {  /* n_channels() is /wrongly/ 1. */
+				/* embedded external multi-channel files are converted to multiple-mono */
+				channelsuffix = string_compose ("-c%1", afs->channel ());
+			}
+			new_path = Glib::build_filename (Glib::path_get_dirname (new_path), PBD::basename_nosuffix (new_path) + channelsuffix + ".flac");
 			g_mkdir_with_parents (Glib::path_get_dirname (new_path).c_str (), 0755);
+
 
 			if (progress) {
 				progress->descend ((float)afs->readable_length () / total_size);
@@ -5461,7 +5471,20 @@ Session::archive_session (const std::string& dest,
 #ifdef LV2_SUPPORT
 	PBD::Unwinder<bool> uw (LV2Plugin::force_state_save, true);
 #endif
-	save_state (name);
+	save_state (name, /*pending, don't fork MIDI, don't mark clean */ true);
+
+#ifndef NDEBUG
+	cerr << "archiving state from "
+		<< Glib::build_filename (to_dir, legalize_for_path (name) + pending_suffix)
+		<< " to "
+		<< Glib::build_filename (to_dir, legalize_for_path (name) + statefile_suffix)
+		<< endl;
+#endif
+
+	::g_rename (
+			Glib::build_filename (to_dir, legalize_for_path (name) + pending_suffix).c_str(),
+			Glib::build_filename (to_dir, legalize_for_path (name) + statefile_suffix).c_str());
+
 	save_default_options ();
 
 	size_t prefix_len = _path.size();
@@ -5516,7 +5539,7 @@ Session::archive_session (const std::string& dest,
 		i->first->set_gain (i->second, true);
 	}
 
-	int rv = ar.create (filemap);
+	int rv = ar.create (filemap, PBD::FileArchive::CompressGood);
 	remove_directory (to_dir);
 
 	return rv;
