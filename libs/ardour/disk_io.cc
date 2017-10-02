@@ -350,9 +350,8 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 }
 
 DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
+	: buf (new RingBufferNPT<Sample> (bufsize))
 {
-	buf = new RingBufferNPT<Sample> (bufsize);
-
 	/* touch the ringbuffer buffer, which will cause
 	   them to be mapped into locked physical RAM if
 	   we're running with mlockall(). this doesn't do
