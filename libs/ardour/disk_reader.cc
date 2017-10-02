@@ -146,7 +146,6 @@ DiskReader::set_state (const XMLNode& node, int version)
 void
 DiskReader::realtime_handle_transport_stopped ()
 {
-	realtime_speed_change ();
 }
 
 void
