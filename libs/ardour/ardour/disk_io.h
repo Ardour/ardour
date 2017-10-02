@@ -192,7 +192,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	MidiRingBuffer<samplepos_t>*  _midi_buf;
 	gint                         _samples_written_to_ringbuffer;
 	gint                         _samples_read_from_ringbuffer;
-	CubicMidiInterpolation        midi_interpolation;
 
 	static void get_location_times (const Location* location, samplepos_t* start, samplepos_t* end, samplepos_t* length);
 };
