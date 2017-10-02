@@ -160,11 +160,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 		    butler thread, read from in the process thread.
 		*/
 		PBD::RingBufferNPT<Sample>* buf;
-
-		Sample* scrub_buffer;
-		Sample* scrub_forward_buffer;
-		Sample* scrub_reverse_buffer;
-
 		PBD::RingBufferNPT<Sample>::rw_vector rw_vector;
 
 		/* used only by capture */
