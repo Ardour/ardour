@@ -165,8 +165,9 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 		/* used only by capture */
 		boost::shared_ptr<AudioFileSource> write_source;
 		PBD::RingBufferNPT<CaptureTransition> * capture_transition_buf;
-		// the following are used in the butler thread only
-		samplecnt_t                     curr_capture_cnt;
+
+		/* used in the butler thread only */
+		samplecnt_t curr_capture_cnt;
 
 		void resize (samplecnt_t);
 	};
