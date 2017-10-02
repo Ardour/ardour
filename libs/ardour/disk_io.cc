@@ -50,14 +50,11 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
 	, i_am_the_modifier (false)
-	, _buffer_reallocation_required (false)
 	, _seek_required (false)
 	, _slaved (false)
 	, loop_location (0)
 	, in_set_state (false)
 	, playback_sample (0)
-	, wrap_buffer_size (0)
-	, speed_buffer_size (0)
 	, _need_butler (false)
 	, channels (new ChannelList)
 	, _midi_buf (new MidiRingBuffer<samplepos_t> (s.butler()->midi_diskstream_buffer_size()))
@@ -214,10 +211,6 @@ DiskIOProcessor::non_realtime_locate (samplepos_t location)
 void
 DiskIOProcessor::non_realtime_speed_change ()
 {
-	if (_buffer_reallocation_required) {
-		_buffer_reallocation_required = false;
-	}
-
 	if (_seek_required) {
 		seek (_session.transport_sample(), true);
 		_seek_required = false;
@@ -227,16 +220,7 @@ DiskIOProcessor::non_realtime_speed_change ()
 bool
 DiskIOProcessor::realtime_speed_change ()
 {
-	const samplecnt_t required_wrap_size = (samplecnt_t) ceil (_session.get_block_size() * fabs (_session.transport_speed())) + 2;
-	bool _buffer_reallocation_required;
-
-	if (required_wrap_size > wrap_buffer_size) {
-		_buffer_reallocation_required = true;
-	} else {
-		_buffer_reallocation_required = false;
-	}
-
-	return _buffer_reallocation_required;
+	return true;
 }
 
 int

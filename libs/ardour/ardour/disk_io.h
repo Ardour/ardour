@@ -120,15 +120,11 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	uint32_t      i_am_the_modifier;
 	double       _actual_speed;
 	double       _target_speed;
-	/* items needed for speed change logic */
-	bool         _buffer_reallocation_required;
 	bool         _seek_required;
 	bool         _slaved;
 	Location*     loop_location;
 	bool          in_set_state;
-	samplepos_t     playback_sample;
-	samplecnt_t    wrap_buffer_size;
-	samplecnt_t    speed_buffer_size;
+	samplepos_t   playback_sample;
 	bool         _need_butler;
 	boost::shared_ptr<Route> _route;
 
