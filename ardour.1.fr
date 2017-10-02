@@ -27,6 +27,8 @@ Il supporte MIDI Machine Control, et peut ainsi être contrôlé depuis
 n'importe quel contrôleur MMC, comme le Mackie Digital 8 Bus mixer et de nombreux autres mélangeurs audio-numériques modernes.
 .SH OPTIONS
 .TP
+.B \-a
+Ne contacte pas ardour.org au lancement du programme afin de vérifier les annonces disponibles
 .B \-b
 Affiche tous les noms des codes clavier possibles.
 .TP
@@ -60,6 +62,7 @@ Chemin vers ardour_system.rc
 Chemin vers les greffons LADSPA.
 .SH BOGUES
 Oui.
+Le traqueur de bogues préféré est http://tracker.ardour.org/ (page en anglais)
 .SH AUTEUR
 Paul Davis.
 Ne
