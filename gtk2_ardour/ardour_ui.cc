@@ -1981,7 +1981,7 @@ ARDOUR_UI::open_session ()
 	open_session_selector.add_filter (session_filter);
 
 	FileFilter archive_filter;
-	archive_filter.add_pattern (X_("*.tar.xz"));
+	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
 	archive_filter.set_name (_("Session Archives"));
 
 	open_session_selector.add_filter (archive_filter);

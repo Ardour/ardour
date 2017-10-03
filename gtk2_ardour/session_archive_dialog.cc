@@ -21,6 +21,8 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
 
+#include "ardour/filename_extensions.h"
+
 #include "session_archive_dialog.h"
 
 #include "pbd/i18n.h"
@@ -38,8 +40,8 @@ SessionArchiveDialog::SessionArchiveDialog ()
 
 	vbox->set_spacing (6);
 
-	format_selector.append_text (".tar.xz");
-	format_selector.set_active_text (".tar.xz");
+	format_selector.append_text (ARDOUR::session_archive_suffix);
+	format_selector.set_active_text (ARDOUR::session_archive_suffix);
 
 	encode_selector.append_text (_("None"));
 	encode_selector.append_text (_("FLAC 16bit"));
