@@ -95,9 +95,9 @@ AudioTrack::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-AudioTrack::state (bool full_state)
+AudioTrack::state (bool save_template)
 {
-	XMLNode& root (Track::state(full_state));
+	XMLNode& root (Track::state (save_template));
 	XMLNode* freeze_node;
 
 	if (_freeze_record.playlist) {

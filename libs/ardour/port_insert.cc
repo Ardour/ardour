@@ -159,15 +159,9 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 XMLNode&
-PortInsert::get_state(void)
+PortInsert::state ()
 {
-	return state (true);
-}
-
-XMLNode&
-PortInsert::state (bool full)
-{
-	XMLNode& node = IOProcessor::state(full);
+	XMLNode& node = IOProcessor::state ();
 	node.set_property ("type", "port");
 	node.set_property ("bitslot", _bitslot);
 	node.set_property ("latency", _measured_latency);

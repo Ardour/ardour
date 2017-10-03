@@ -125,7 +125,7 @@ private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
 
-	XMLNode& state (bool full, bool need_lock);
+	XMLNode& state (bool save_auto_state, bool need_lock);
 	XMLNode& serialize_events (bool need_lock);
 
 	void maybe_signal_changed ();

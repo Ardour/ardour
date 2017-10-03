@@ -48,6 +48,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/* used for templates (previously: !full_state) */
+bool Automatable::skip_saving_automation = false;
+
 const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)

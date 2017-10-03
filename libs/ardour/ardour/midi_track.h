@@ -133,7 +133,8 @@ public:
 	PBD::Signal0<void> InputActiveChanged;
 
 protected:
-	XMLNode& state (bool full);
+
+	XMLNode& state (bool save_template);
 
 	void act_on_mute ();
 	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);

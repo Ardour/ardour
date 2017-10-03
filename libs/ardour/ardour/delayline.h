@@ -56,7 +56,8 @@ public:
 
 	bool set_name (const std::string& str);
 
-	XMLNode& state (bool full);
+protected:
+	XMLNode& state ();
 
 private:
 	void allocate_pending_buffers (samplecnt_t);

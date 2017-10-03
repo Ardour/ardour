@@ -2428,17 +2428,17 @@ Route::set_strict_io (const bool enable)
 XMLNode&
 Route::get_state()
 {
-	return state(true);
+	return state (false);
 }
 
 XMLNode&
 Route::get_template()
 {
-	return state(false);
+	return state (true);
 }
 
 XMLNode&
-Route::state(bool full_state)
+Route::state (bool save_template)
 {
 	if (!_session._template_state_dir.empty()) {
 		foreach_processor (sigc::bind (sigc::mem_fun (*this, &Route::set_plugin_state_dir), _session._template_state_dir));
@@ -2469,14 +2469,14 @@ Route::state(bool full_state)
 	node->add_child_nocopy (_solo_isolate_control->get_state ());
 	node->add_child_nocopy (_solo_safe_control->get_state ());
 
-	node->add_child_nocopy (_input->state (full_state));
-	node->add_child_nocopy (_output->state (full_state));
+	node->add_child_nocopy (_input->get_state ());
+	node->add_child_nocopy (_output->get_state ());
 	node->add_child_nocopy (_mute_master->get_state ());
 
 	node->add_child_nocopy (_mute_control->get_state ());
 	node->add_child_nocopy (_phase_control->get_state ());
 
-	if (full_state) {
+	if (!skip_saving_automation) {
 		node->add_child_nocopy (Automatable::get_automation_xml_state ());
 	}
 
@@ -2486,7 +2486,7 @@ Route::state(bool full_state)
 	}
 
 	if (_pannable) {
-		node->add_child_nocopy (_pannable->state (full_state));
+		node->add_child_nocopy (_pannable->get_state ());
 	}
 
 	{
@@ -2495,7 +2495,7 @@ Route::state(bool full_state)
 			if (*i == _delayline) {
 				continue;
 			}
-			if (!full_state) {
+			if (save_template) {
 				/* template save: do not include internal sends functioning as
 					 aux sends because the chance of the target ID
 					 in the session where this template is used
@@ -2513,7 +2513,7 @@ Route::state(bool full_state)
 					}
 				}
 			}
-			node->add_child_nocopy((*i)->state (full_state));
+			node->add_child_nocopy((*i)->get_state ());
 		}
 	}
 
@@ -2908,7 +2908,7 @@ Route::get_processor_state ()
 {
 	XMLNode* root = new XMLNode (X_("redirects"));
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		root->add_child_nocopy ((*i)->state (true));
+		root->add_child_nocopy ((*i)->get_state ());
 	}
 
 	return *root;

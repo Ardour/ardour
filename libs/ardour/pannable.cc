@@ -166,11 +166,11 @@ Pannable::stop_touch (double when)
 XMLNode&
 Pannable::get_state ()
 {
-	return state (true);
+	return state ();
 }
 
 XMLNode&
-Pannable::state (bool /*full*/)
+Pannable::state ()
 {
 	XMLNode* node = new XMLNode (X_("Pannable"));
 

@@ -51,7 +51,7 @@ class LIBARDOUR_API AudioTrack : public Track
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
-	XMLNode& state (bool full);
+	XMLNode& state (bool save_template);
 
   private:
 	int  deprecated_use_diskstream_connections ();

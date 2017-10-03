@@ -355,9 +355,9 @@ out:
 }
 
 XMLNode&
-Delivery::state (bool full_state)
+Delivery::state ()
 {
-	XMLNode& node (IOProcessor::state (full_state));
+	XMLNode& node (IOProcessor::state ());
 
 	if (_role & Main) {
 		node.set_property("type", "main-outs");

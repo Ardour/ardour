@@ -260,15 +260,9 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 }
 
 XMLNode&
-Send::get_state(void)
+Send::state ()
 {
-	return state (true);
-}
-
-XMLNode&
-Send::state (bool full)
-{
-	XMLNode& node = Delivery::state(full);
+	XMLNode& node = Delivery::state ();
 
 	node.set_property ("type", "send");
 
@@ -278,7 +272,7 @@ Send::state (bool full)
 
 	node.set_property ("selfdestruct", _remove_on_disconnect);
 
-	node.add_child_nocopy (_amp->state (full));
+	node.add_child_nocopy (_amp->get_state ());
 
 	return node;
 }

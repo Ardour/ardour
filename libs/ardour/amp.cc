@@ -365,9 +365,9 @@ Amp::apply_simple_gain (AudioBuffer& buf, samplecnt_t nframes, gain_t target)
 }
 
 XMLNode&
-Amp::state (bool full_state)
+Amp::state ()
 {
-	XMLNode& node (Processor::state (full_state));
+	XMLNode& node (Processor::state ());
 	node.set_property("type", _gain_control->parameter().type() == GainAutomation ? "amp" : "trim");
 	node.add_child_nocopy (_gain_control->get_state());
 

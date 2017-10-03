@@ -88,7 +88,7 @@ class LIBARDOUR_API Region
 	, public Trimmable
 	, public Movable
 {
-  public:
+public:
 	typedef std::vector<boost::shared_ptr<Source> > SourceList;
 
 	static void make_property_quarks ();
@@ -281,7 +281,6 @@ class LIBARDOUR_API Region
 	/* serialization */
 
 	XMLNode&         get_state ();
-	virtual XMLNode& state ();
 	virtual int      set_state (const XMLNode&, int version);
 
 	virtual boost::shared_ptr<Region> get_parent() const;
@@ -344,7 +343,9 @@ class LIBARDOUR_API Region
 
 	void drop_sources ();
 
-  protected:
+protected:
+	virtual XMLNode& state ();
+
 	friend class RegionFactory;
 
 	/** Construct a region from multiple sources*/
@@ -366,7 +367,7 @@ class LIBARDOUR_API Region
 		return false;
 	}
 
-  protected:
+protected:
 
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
@@ -412,7 +413,7 @@ class LIBARDOUR_API Region
 	samplepos_t              _transient_analysis_start;
 	samplepos_t              _transient_analysis_end;
 
-  private:
+private:
 	void mid_thaw (const PBD::PropertyChange&);
 
 	virtual void trim_to_internal (samplepos_t position, samplecnt_t length, const int32_t sub_num);

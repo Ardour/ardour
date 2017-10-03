@@ -84,9 +84,9 @@ CapturingProcessor::realloc_buffers()
 }
 
 XMLNode &
-CapturingProcessor::state (bool full)
+CapturingProcessor::state ()
 {
-	XMLNode& node = Processor::state (full);
+	XMLNode& node = Processor::state ();
 
 	node.set_property (X_("type"), X_("capture"));
 	return node;

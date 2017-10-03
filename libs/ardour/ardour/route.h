@@ -390,10 +390,9 @@ public:
 	PBD::Signal0<void>       io_changed;
 
 	/* stateful */
-
 	XMLNode& get_state();
+	XMLNode& get_template();
 	virtual int set_state (const XMLNode&, int version);
-	virtual XMLNode& get_template();
 
 	XMLNode& get_processor_state ();
 	void set_processor_state (const XMLNode&);
@@ -674,7 +673,7 @@ protected:
 
 	virtual ChanCount input_streams () const;
 
-	virtual XMLNode& state(bool);
+	virtual XMLNode& state (bool save_template);
 
 	int configure_processors (ProcessorStreams*);
 

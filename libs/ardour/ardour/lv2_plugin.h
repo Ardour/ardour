@@ -63,7 +63,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	LV2Plugin (const LV2Plugin &);
 	~LV2Plugin ();
 
-	static bool force_state_save;
+	static bool force_state_save; // to be used only by session-state
 
 	std::string unique_id () const;
 	const char* uri () const;

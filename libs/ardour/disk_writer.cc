@@ -272,9 +272,9 @@ DiskWriter::set_align_style (AlignStyle a, bool force)
 }
 
 XMLNode&
-DiskWriter::state (bool full)
+DiskWriter::state ()
 {
-	XMLNode& node (DiskIOProcessor::state (full));
+	XMLNode& node (DiskIOProcessor::state ());
 	node.set_property (X_("type"), X_("diskwriter"));
 	node.set_property (X_("record-safe"), (_record_safe ? X_("yes" : "no")));
 	return node;

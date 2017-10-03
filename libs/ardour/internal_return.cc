@@ -77,18 +77,12 @@ InternalReturn::set_playback_offset (samplecnt_t cnt)
 }
 
 XMLNode&
-InternalReturn::state (bool full)
+InternalReturn::state ()
 {
-	XMLNode& node (Return::state (full));
+	XMLNode& node (Return::state ());
 	/* override type */
 	node.set_property("type", "intreturn");
 	return node;
-}
-
-XMLNode&
-InternalReturn::get_state()
-{
-	return state (true);
 }
 
 bool

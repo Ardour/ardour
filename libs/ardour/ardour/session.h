@@ -563,10 +563,7 @@ public:
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
 
-	XMLNode& get_state();
-	int      set_state(const XMLNode& node, int version); // not idempotent
-	XMLNode& get_template();
-	bool     export_track_state (boost::shared_ptr<RouteList> rl, const std::string& path);
+	bool export_track_state (boost::shared_ptr<RouteList> rl, const std::string& path);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
@@ -1903,7 +1900,11 @@ private:
 		SwitchToSnapshot
 	};
 
-	XMLNode& state(bool, snapshot_t snapshot_type = NormalSave);
+	XMLNode& state (bool save_template, snapshot_t snapshot_type = NormalSave);
+
+	XMLNode& get_state ();
+	int      set_state (const XMLNode& node, int version); // not idempotent
+	XMLNode& get_template ();
 
 	/* click track */
 	typedef std::list<Click*> Clicks;

@@ -59,7 +59,7 @@ UnknownProcessor::~UnknownProcessor () {
 }
 
 XMLNode &
-UnknownProcessor::state (bool)
+UnknownProcessor::state ()
 {
 	return *(new XMLNode (_state));
 }

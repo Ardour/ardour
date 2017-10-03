@@ -218,9 +218,9 @@ MonitorProcessor::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-MonitorProcessor::state (bool full)
+MonitorProcessor::state ()
 {
-	XMLNode& node(Processor::state(full));
+	XMLNode& node(Processor::state ());
 
 	/* this replaces any existing "type" property */
 

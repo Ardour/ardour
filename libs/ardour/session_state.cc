@@ -808,7 +808,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		mark_as_clean = false;
 		tree.set_root (&get_template());
 	} else {
-		tree.set_root (&state (true, fork_state));
+		tree.set_root (&state (false, fork_state));
 	}
 
 	if (snapshot_name.empty()) {
@@ -1013,13 +1013,15 @@ Session::save_default_options ()
 }
 
 XMLNode&
-Session::get_state()
+Session::get_state ()
 {
-	return state(true);
+	/* this is not directly called, but required by PBD::Stateful */
+	assert (0);
+	return state (false, NormalSave);
 }
 
 XMLNode&
-Session::get_template()
+Session::get_template ()
 {
 	/* if we don't disable rec-enable, diskstreams
 	   will believe they need to store their capture
@@ -1028,7 +1030,7 @@ Session::get_template()
 
 	disable_record (false);
 
-	return state(false);
+	return state (true, NormalSave);
 }
 
 typedef std::set<boost::shared_ptr<Playlist> > PlaylistSet;
@@ -1117,11 +1119,13 @@ struct route_id_compare {
 } // anon namespace
 
 XMLNode&
-Session::state (bool full_state, snapshot_t snapshot_type)
+Session::state (bool save_template, snapshot_t snapshot_type)
 {
 	LocaleGuard lg;
 	XMLNode* node = new XMLNode("Session");
 	XMLNode* child;
+
+	PBD::Unwinder<bool> uw (Automatable::skip_saving_automation, save_template);
 
 	node->set_property("version", CURRENT_SESSION_FILE_VERSION);
 
@@ -1133,7 +1137,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 
 	/* store configuration settings */
 
-	if (full_state) {
+	if (!save_template) {
 
 		node->set_property ("name", _name);
 		node->set_property ("sample-rate", _base_sample_rate);
@@ -1195,7 +1199,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 	}
 
 	XMLNode& cfgxml (config.get_variables ());
-	if (!full_state) {
+	if (save_template) {
 		/* exclude search-paths from template */
 		cfgxml.remove_nodes_and_delete ("name", "audio-search-path");
 		cfgxml.remove_nodes_and_delete ("name", "midi-search-path");
@@ -1207,7 +1211,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 
 	child = node->add_child ("Sources");
 
-	if (full_state) {
+	if (!save_template) {
 		Glib::Threads::Mutex::Lock sl (source_lock);
 
 		for (SourceMap::iterator siter = sources.begin(); siter != sources.end(); ++siter) {
@@ -1295,7 +1299,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 
 	child = node->add_child ("Regions");
 
-	if (full_state) {
+	if (!save_template) {
 		Glib::Threads::Mutex::Lock rl (region_lock);
 		const RegionFactory::RegionMap& region_map (RegionFactory::all_regions());
 		for (RegionFactory::RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
@@ -1324,7 +1328,7 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 		}
 	}
 
-	if (full_state) {
+	if (!save_template) {
 
 		node->add_child_nocopy (_selection->get_state());
 
@@ -1384,16 +1388,16 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 
 		for (RouteList::const_iterator i = xml_node_order.begin(); i != xml_node_order.end(); ++i) {
 			if (!(*i)->is_auditioner()) {
-				if (full_state) {
-					child->add_child_nocopy ((*i)->get_state());
-				} else {
+				if (save_template) {
 					child->add_child_nocopy ((*i)->get_template());
+				} else {
+					child->add_child_nocopy ((*i)->get_state());
 				}
 			}
 		}
 	}
 
-	playlists->add_state (node, full_state);
+	playlists->add_state (node, save_template, /* include unused*/ true);
 
 	child = node->add_child ("RouteGroups");
 	for (list<RouteGroup *>::iterator i = _route_groups.begin(); i != _route_groups.end(); ++i) {
@@ -1402,18 +1406,18 @@ Session::state (bool full_state, snapshot_t snapshot_type)
 
 	if (_click_io) {
 		XMLNode* gain_child = node->add_child ("Click");
-		gain_child->add_child_nocopy (_click_io->state (full_state));
-		gain_child->add_child_nocopy (_click_gain->state (full_state));
+		gain_child->add_child_nocopy (_click_io->get_state ());
+		gain_child->add_child_nocopy (_click_gain->get_state ());
 	}
 
 	if (_ltc_input) {
 		XMLNode* ltc_input_child = node->add_child ("LTC-In");
-		ltc_input_child->add_child_nocopy (_ltc_input->state (full_state));
+		ltc_input_child->add_child_nocopy (_ltc_input->get_state ());
 	}
 
 	if (_ltc_input) {
 		XMLNode* ltc_output_child = node->add_child ("LTC-Out");
-		ltc_output_child->add_child_nocopy (_ltc_output->state (full_state));
+		ltc_output_child->add_child_nocopy (_ltc_output->get_state ());
 	}
 
 	node->add_child_nocopy (_speakers->get_state());

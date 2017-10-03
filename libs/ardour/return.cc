@@ -64,15 +64,9 @@ Return::~Return ()
 }
 
 XMLNode&
-Return::get_state(void)
+Return::state()
 {
-	return state (true);
-}
-
-XMLNode&
-Return::state(bool full)
-{
-	XMLNode& node = IOProcessor::state(full);
+	XMLNode& node = IOProcessor::state ();
 	node.set_property ("type", "return");
 	node.set_property ("bitslot", _bitslot);
 

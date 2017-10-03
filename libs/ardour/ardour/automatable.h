@@ -52,6 +52,8 @@ public:
 
 	virtual ~Automatable();
 
+	static bool skip_saving_automation; // to be used only by session-state
+
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
 	boost::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;

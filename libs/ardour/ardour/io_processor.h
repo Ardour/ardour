@@ -74,7 +74,7 @@ class LIBARDOUR_API IOProcessor : public Processor
 	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	PBD::Signal2<void,IOProcessor*,uint32_t> AutomationChanged;
 
-	XMLNode& state (bool full_state);
+	XMLNode& state ();
 	int set_state (const XMLNode&, int version);
 
 	static void prepare_for_reset (XMLNode& state, const std::string& name);

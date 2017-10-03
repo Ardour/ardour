@@ -120,8 +120,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	   smoothly.
 	 */
 
-	virtual XMLNode& state (bool full);
-	XMLNode& get_state (void);
+	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
 	virtual void set_pre_fader (bool);
@@ -147,6 +146,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	SessionObject* owner() const;
 
 protected:
+	virtual XMLNode& state ();
 	virtual int set_state_2X (const XMLNode&, int version);
 
 	int       _pending_active;

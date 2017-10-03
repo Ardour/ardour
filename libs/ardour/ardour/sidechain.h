@@ -39,8 +39,10 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
-	XMLNode& state(bool full);
-	int      set_state(const XMLNode&, int version);
+	int  set_state(const XMLNode&, int version);
+
+protected:
+	XMLNode& state ();
 
 private:
 	/* disallow copy construction */

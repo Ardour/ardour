@@ -35,7 +35,7 @@ template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API DiskReader : public DiskIOProcessor
 {
-  public:
+public:
 	DiskReader (Session&, std::string const & name, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
 	~DiskReader ();
 
@@ -52,7 +52,6 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int overwrite_existing_buffers ();
 	void set_pending_overwrite (bool yn);
 
-	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
 	PBD::Signal0<void>            AlignmentStyleChanged;
@@ -99,9 +98,11 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	static void set_no_disk_output (bool yn);
 	static bool no_disk_output() { return _no_disk_output; }
 
-  protected:
+protected:
 	friend class Track;
 	friend class MidiTrack;
+
+	XMLNode& state ();
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 
@@ -109,7 +110,7 @@ class LIBARDOUR_API DiskReader : public DiskIOProcessor
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
 	void playlist_ranges_moved (std::list< Evoral::RangeMove<samplepos_t> > const &, bool);
 
-  private:
+private:
 	/** The number of samples by which this diskstream's output should be delayed
 	    with respect to the transport sample.  This is used for latency compensation.
 	*/

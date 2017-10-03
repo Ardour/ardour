@@ -36,7 +36,7 @@ class DelayLine;
 
 class LIBARDOUR_API Send : public Delivery
 {
-  public:
+public:
 	Send (Session&, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster>, Delivery::Role r = Delivery::Send, bool ignore_bitslot = false);
 	virtual ~Send ();
 
@@ -51,8 +51,6 @@ class LIBARDOUR_API Send : public Delivery
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
 
-	XMLNode& state (bool full);
-	XMLNode& get_state ();
 	int set_state(const XMLNode&, int version);
 
 	PBD::Signal0<void> SelfDestruct;
@@ -83,7 +81,9 @@ class LIBARDOUR_API Send : public Delivery
 	static uint32_t how_many_sends();
 	static std::string name_and_id_new_send (Session&, Delivery::Role r, uint32_t&, bool);
 
-  protected:
+protected:
+	XMLNode& state ();
+
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;
@@ -91,7 +91,7 @@ class LIBARDOUR_API Send : public Delivery
 	boost::shared_ptr<DelayLine> _send_delay;
 	boost::shared_ptr<DelayLine> _thru_delay;
 
-  private:
+private:
 	/* disallow copy construction */
 	Send (const Send&);
 

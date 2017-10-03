@@ -498,11 +498,11 @@ IO::ensure_io (ChanCount count, bool clear, void* src)
 XMLNode&
 IO::get_state ()
 {
-	return state (true);
+	return state ();
 }
 
 XMLNode&
-IO::state (bool /*full_state*/)
+IO::state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	int n;

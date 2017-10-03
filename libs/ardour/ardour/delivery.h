@@ -84,7 +84,6 @@ public:
 
 	PBD::Signal0<void> MuteChange;
 
-	XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
 	/* Panning */
@@ -103,7 +102,9 @@ public:
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
 	virtual uint32_t pan_outs() const;
 
-  protected:
+protected:
+	XMLNode& state ();
+
 	Role        _role;
 	BufferSet*  _output_buffers;
 	gain_t      _current_gain;
@@ -111,7 +112,7 @@ public:
 
 	gain_t target_gain ();
 
-  private:
+private:
 	bool        _no_outs_cuz_we_no_monitor;
 	boost::shared_ptr<MuteMaster> _mute_master;
 

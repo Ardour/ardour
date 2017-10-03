@@ -297,9 +297,9 @@ InternalSend::feeds (boost::shared_ptr<Route> other) const
 }
 
 XMLNode&
-InternalSend::state (bool full)
+InternalSend::state ()
 {
-	XMLNode& node (Send::state (full));
+	XMLNode& node (Send::state ());
 
 	/* this replaces any existing "type" property */
 
@@ -311,12 +311,6 @@ InternalSend::state (bool full)
 	node.set_property ("allow-feedback", _allow_feedback);
 
 	return node;
-}
-
-XMLNode&
-InternalSend::get_state()
-{
-	return state (true);
 }
 
 int

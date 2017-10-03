@@ -427,9 +427,9 @@ PeakMeter::set_type(MeterType t)
 }
 
 XMLNode&
-PeakMeter::state (bool full_state)
+PeakMeter::state ()
 {
-	XMLNode& node (Processor::state (full_state));
+	XMLNode& node (Processor::state ());
 	node.set_property("type", "meter");
 	return node;
 }

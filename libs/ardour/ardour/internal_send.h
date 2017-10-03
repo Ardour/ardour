@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class LIBARDOUR_API InternalSend : public Send
 {
-  public:
+public:
 	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_from, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
 	virtual ~InternalSend ();
 
@@ -35,8 +35,6 @@ class LIBARDOUR_API InternalSend : public Send
 	bool set_name (const std::string&);
 	bool visible() const;
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
 	int set_state(const XMLNode& node, int version);
 
 	void cycle_start (pframes_t);
@@ -62,7 +60,10 @@ class LIBARDOUR_API InternalSend : public Send
 
 	static PBD::Signal1<void, pframes_t> CycleStart;
 
-  private:
+protected:
+	XMLNode& state();
+
+private:
 	BufferSet mixbufs;
 	boost::shared_ptr<Route> _send_from;
 	boost::shared_ptr<Route> _send_to;

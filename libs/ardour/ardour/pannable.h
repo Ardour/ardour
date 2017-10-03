@@ -38,7 +38,7 @@ class Panner;
 
 class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public SessionHandleRef
 {
-  public:
+public:
 	Pannable (Session& s);
 	~Pannable ();
 
@@ -73,12 +73,13 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
 	bool touch_enabled() const { return _auto_state & (Touch | Latch); }
 
 	XMLNode& get_state ();
-	XMLNode& state (bool full_state);
 	int set_state (const XMLNode&, int version);
 
 	bool has_state() const { return _has_state; }
 
-  protected:
+protected:
+	virtual XMLNode& state ();
+
 	boost::weak_ptr<Panner> _panner;
 	AutoState _auto_state;
 	gint      _touching;
@@ -87,7 +88,7 @@ class LIBARDOUR_API Pannable : public PBD::Stateful, public Automatable, public 
 
 	void control_auto_state_changed (AutoState);
 
-  private:
+private:
 	void value_changed ();
 };
 

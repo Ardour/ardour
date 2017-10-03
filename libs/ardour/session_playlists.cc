@@ -325,7 +325,7 @@ get_id_sorted_playlists (const List& playlists, IDSortedList& id_sorted_playlist
 } // anonymous namespace
 
 void
-SessionPlaylists::add_state (XMLNode* node, bool full_state)
+SessionPlaylists::add_state (XMLNode* node, bool save_template, bool include_unused)
 {
 	XMLNode* child = node->add_child ("Playlists");
 
@@ -334,12 +334,16 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 
 	for (IDSortedList::iterator i = id_sorted_playlists.begin (); i != id_sorted_playlists.end (); ++i) {
 		if (!(*i)->hidden ()) {
-			if (full_state) {
-				child->add_child_nocopy ((*i)->get_state ());
-			} else {
+			if (save_template) {
 				child->add_child_nocopy ((*i)->get_template ());
+			} else {
+				child->add_child_nocopy ((*i)->get_state ());
 			}
 		}
+	}
+
+	if (!include_unused) {
+		return;
 	}
 
 	child = node->add_child ("UnusedPlaylists");
@@ -351,10 +355,10 @@ SessionPlaylists::add_state (XMLNode* node, bool full_state)
 	     i != id_sorted_unused_playlists.end (); ++i) {
 		if (!(*i)->hidden()) {
 			if (!(*i)->empty()) {
-				if (full_state) {
-					child->add_child_nocopy ((*i)->get_state());
-				} else {
+				if (save_template) {
 					child->add_child_nocopy ((*i)->get_template());
+				} else {
+					child->add_child_nocopy ((*i)->get_state());
 				}
 			}
 		}

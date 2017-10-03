@@ -195,9 +195,9 @@ MidiTrack::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-MidiTrack::state(bool full_state)
+MidiTrack::state(bool save_template)
 {
-	XMLNode& root (Track::state(full_state));
+	XMLNode& root (Track::state (save_template));
 	XMLNode* freeze_node;
 	char buf[64];
 

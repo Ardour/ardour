@@ -385,9 +385,9 @@ DelayLine::flush()
 }
 
 XMLNode&
-DelayLine::state (bool full_state)
+DelayLine::state ()
 {
-	XMLNode& node (Processor::state (full_state));
+	XMLNode& node (Processor::state ());
 	node.set_property("type", "delay");
 	return node;
 }

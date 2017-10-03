@@ -344,7 +344,7 @@ AutomationList::get_state ()
 }
 
 XMLNode&
-AutomationList::state (bool full, bool need_lock)
+AutomationList::state (bool save_auto_state, bool need_lock)
 {
 	XMLNode* root = new XMLNode (X_("AutomationList"));
 
@@ -352,7 +352,7 @@ AutomationList::state (bool full, bool need_lock)
 	root->set_property ("id", id());
 	root->set_property ("interpolation-style", _interpolation);
 
-	if (full) {
+	if (save_auto_state) {
 		/* never serialize state with Write enabled - too dangerous
 		   for the user's data
 		*/

@@ -67,7 +67,7 @@ class UserBundle;
  */
 class LIBARDOUR_API IO : public SessionObject, public Latent
 {
-  public:
+public:
 	static const std::string state_node_name;
 
 	enum Direction {
@@ -147,8 +147,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	 */
 	PBD::Signal2<void, IOChange, void *> changed;
 
-	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
+
 	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
 	static void prepare_for_reset (XMLNode&, const std::string&);
@@ -205,17 +205,17 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 
 	int set_ports (const std::string& str);
 
-  private:
-	mutable Glib::Threads::Mutex io_lock;
+protected:
+	virtual XMLNode& state ();
 
-  protected:
 	PortSet   _ports;
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
 	bool     _sendish;
 
-  private:
+private:
+	mutable Glib::Threads::Mutex io_lock;
 	int connecting_became_legal ();
 	PBD::ScopedConnection connection_legal_c;
 

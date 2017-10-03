@@ -102,7 +102,7 @@ Processor::~Processor ()
 XMLNode&
 Processor::get_state (void)
 {
-	return state (true);
+	return state ();
 }
 
 /* NODE STRUCTURE
@@ -120,7 +120,7 @@ Processor::get_state (void)
 */
 
 XMLNode&
-Processor::state (bool full_state)
+Processor::state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 
@@ -132,7 +132,7 @@ Processor::state (bool full_state)
 		node->add_child_copy (*_extra_xml);
 	}
 
-	if (full_state) {
+	if (!skip_saving_automation) {
 		XMLNode& automation = Automatable::get_automation_xml_state();
 		if (!automation.children().empty() || !automation.properties().empty()) {
 			node->add_child_nocopy (automation);

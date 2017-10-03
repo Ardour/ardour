@@ -48,7 +48,8 @@ public:
 	bool can_support_io_configuration (const ChanCount &, ChanCount &);
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
 
-	XMLNode & state (bool);
+protected:
+	XMLNode& state ();
 
 private:
 	XMLNode _state;

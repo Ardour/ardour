@@ -139,15 +139,9 @@ Track::input_changed ()
 }
 
 XMLNode&
-Track::get_state ()
+Track::state (bool save_template)
 {
-	return state (true);
-}
-
-XMLNode&
-Track::state (bool full)
-{
-	XMLNode& root (Route::state (full));
+	XMLNode& root (Route::state (save_template));
 
 	if (_playlists[DataType::AUDIO]) {
 		root.set_property (X_("audio-playlist"), _playlists[DataType::AUDIO]->id().to_s());
@@ -243,12 +237,6 @@ Track::set_state (const XMLNode& node, int version)
 	}
 
 	return 0;
-}
-
-XMLNode&
-Track::get_template ()
-{
-	return state (false);
 }
 
 Track::FreezeRecord::~FreezeRecord ()

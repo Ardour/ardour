@@ -55,7 +55,6 @@ public:
 	void non_realtime_locate (samplepos_t);
 	void realtime_handle_transport_stopped ();
 
-	virtual XMLNode& state (bool full);
 	int set_state (const XMLNode&, int version);
 
 	virtual bool set_write_source_name (const std::string& str);
@@ -133,6 +132,9 @@ public:
 
 protected:
 	friend class Track;
+
+	virtual XMLNode& state ();
+
 	int do_flush (RunContext context, bool force = false);
 
 	void get_input_sources ();

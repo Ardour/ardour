@@ -31,11 +31,8 @@ class InternalSend;
 
 class LIBARDOUR_API InternalReturn : public Return
 {
-  public:
+public:
 	InternalReturn (Session&);
-
-	XMLNode& state (bool full);
-	XMLNode& get_state ();
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 	bool configure_io (ChanCount, ChanCount);
@@ -46,7 +43,10 @@ class LIBARDOUR_API InternalReturn : public Return
 
 	void set_playback_offset (samplecnt_t cnt);
 
-  private:
+protected:
+	XMLNode& state ();
+
+private:
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;
 	/** mutex to protect _sends */

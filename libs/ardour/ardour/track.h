@@ -50,7 +50,7 @@ class RecordSafeControl;
  */
 class LIBARDOUR_API Track : public Route, public Recordable
 {
-  public:
+public:
 	Track (Session&, std::string name, PresentationInfo::Flag f = PresentationInfo::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 	virtual ~Track ();
 
@@ -110,8 +110,6 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
 
-	XMLNode&    get_state();
-	XMLNode&    get_template();
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
@@ -175,8 +173,8 @@ class LIBARDOUR_API Track : public Route, public Recordable
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
 
-  protected:
-	XMLNode& state (bool full);
+protected:
+	XMLNode& state (bool save_template);
 
 	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
 

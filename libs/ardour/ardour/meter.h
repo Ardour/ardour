@@ -77,9 +77,11 @@ public:
 	void set_type(MeterType t);
 	MeterType get_type() { return _meter_type; }
 
-	XMLNode& state (bool full);
 
 	PBD::Signal1<void, MeterType> TypeChanged;
+
+protected:
+	XMLNode& state ();
 
 private:
 	friend class IO;

@@ -45,12 +45,10 @@ class Pannable;
  */
 class LIBARDOUR_API PortInsert : public IOProcessor
 {
-  public:
+public:
 	PortInsert (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm);
 	~PortInsert ();
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
 	int set_state (const XMLNode&, int version);
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
@@ -82,7 +80,9 @@ class LIBARDOUR_API PortInsert : public IOProcessor
 
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
-  private:
+protected:
+	XMLNode& state ();
+private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
 

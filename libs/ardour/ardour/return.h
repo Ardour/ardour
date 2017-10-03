@@ -51,8 +51,6 @@ public:
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
 	int      set_state(const XMLNode&, int version);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
@@ -63,7 +61,9 @@ public:
 	static uint32_t how_many_returns();
 	static std::string name_and_id_new_return (Session&, uint32_t&);
 
-  protected:
+protected:
+	XMLNode& state();
+
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;

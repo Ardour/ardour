@@ -2358,15 +2358,9 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const & inx, Cha
 
 
 XMLNode&
-PluginInsert::get_state ()
+PluginInsert::state ()
 {
-	return state (true);
-}
-
-XMLNode&
-PluginInsert::state (bool full)
-{
-	XMLNode& node = Processor::state (full);
+	XMLNode& node = Processor::state ();
 
 	node.set_property("type", _plugins[0]->state_node_name());
 	node.set_property("unique-id", _plugins[0]->unique_id());
@@ -2391,7 +2385,7 @@ PluginInsert::state (bool full)
 	node.add_child_nocopy (* _thru_map.state ("ThruMap"));
 
 	if (_sidechain) {
-		node.add_child_nocopy (_sidechain->state (full));
+		node.add_child_nocopy (_sidechain->get_state ());
 	}
 
 	_plugins[0]->set_insert_id(this->id());

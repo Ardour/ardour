@@ -50,14 +50,12 @@ class Plugin;
  */
 class LIBARDOUR_API PluginInsert : public Processor
 {
-  public:
+public:
 	PluginInsert (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	static const std::string port_automation_node_name;
 
-	XMLNode& state(bool);
-	XMLNode& get_state(void);
 	int set_state(const XMLNode&, int version);
 	void update_id (PBD::ID);
 	void set_owner (SessionObject*);
@@ -215,7 +213,7 @@ class LIBARDOUR_API PluginInsert : public Processor
 
 		double get_value (void) const;
 		XMLNode& get_state();
-        protected:
+	protected:
 		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 
 	private:
@@ -301,7 +299,10 @@ class LIBARDOUR_API PluginInsert : public Processor
 		bool custom_cfg;       ///< custom config (if not strict)
 	};
 
-  private:
+protected:
+	XMLNode& state ();
+
+private:
 	/* disallow copy construction */
 	PluginInsert (const PluginInsert&);
 
