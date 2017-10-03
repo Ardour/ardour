@@ -196,7 +196,7 @@ find_session (string str, string& path, string& snapshot, bool& isnew)
 int
 inflate_session (const std::string& zipfile, const std::string& target_dir, string& path, string& snapshot)
 {
-	if (zipfile.find (".tar.xz") == string::npos) {
+	if (zipfile.find (session_archive_suffix) == string::npos) {
 		return 1;
 	}
 
