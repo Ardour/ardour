@@ -27,6 +27,9 @@
 #include <gtkmm/filechooserbutton.h>
 #include <gtkmm/progressbar.h>
 
+#include "pbd/file_archive.h"
+#include "ardour/session.h"
+
 #include "ardour_dialog.h"
 #include "progress_reporter.h"
 
@@ -38,11 +41,13 @@ public:
 	std::string target_folder () const;
 	std::string name () const;
 	ARDOUR::Session::ArchiveEncode encode_option () const;
+	PBD::FileArchive::CompressionLevel compression_level () const;
 	bool only_used_sources () const;
 
 	void set_name (const std::string&);
 	void set_target_folder (const std::string&);
 	void set_encode_option (ARDOUR::Session::ArchiveEncode);
+	void set_compression_level (PBD::FileArchive::CompressionLevel);
 	void set_only_used_sources (bool);
 
 	void on_response (int response_id) {
@@ -54,6 +59,7 @@ private:
 	Gtk::Entry             name_entry;
 	Gtk::ComboBoxText      format_selector;
 	Gtk::ComboBoxText      encode_selector;
+	Gtk::ComboBoxText      compression_selector;
 	Gtk::CheckButton       only_used_checkbox;
 
 	Gtk::ProgressBar progress_bar;

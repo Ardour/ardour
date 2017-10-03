@@ -481,6 +481,7 @@ SessionDialog::setup_initial_choice_box ()
 	existing_session_chooser.add_filter (session_filter);
 
 	FileFilter archive_filter;
+	session_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
 	archive_filter.add_pattern (X_("*.tar.xz"));
 	archive_filter.set_name (_("Session Archives"));
 	existing_session_chooser.add_filter (archive_filter);

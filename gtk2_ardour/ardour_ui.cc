@@ -2877,7 +2877,7 @@ ARDOUR_UI::archive_session ()
 		return;
 	}
 
-	if (_session->archive_session (sad.target_folder(), sad.name(), sad.encode_option (), sad.only_used_sources (), &sad)) {
+	if (_session->archive_session (sad.target_folder(), sad.name(), sad.encode_option (), sad.compression_level (), sad.only_used_sources (), &sad)) {
 		MessageDialog msg (_("Session Archiving failed."));
 		msg.run ();
 	}
