@@ -126,8 +126,14 @@ VResampler::set_rratio (double r)
 {
 	if (!_table) return;
 	if (r > 16.0) r = 16.0;
+#if 0 // original upstream
 	if (r < 0.95) r = 0.95;
 	_qstep = _table->_np / (_ratio * r);
+#else
+	if (r < 0.05) r = 0.05;
+	_qstep = _table->_np / (_ratio * r);
+	if (_qstep < 4) _qstep = 4;
+#endif
 }
 
 double
