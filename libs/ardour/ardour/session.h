@@ -509,6 +509,7 @@ public:
 	};
 
 	int save_as (SaveAs&);
+
 	/** save session
 	 * @param snapshot_name name of the session (use an empty string for the current name)
 	 * @param pending save a 'recovery', not full state (default: false)
@@ -516,7 +517,12 @@ public:
 	 * @param template_only save a session template (default: false)
 	 * @return zero on success
 	 */
-	int save_state (std::string snapshot_name, bool pending = false, bool switch_to_snapshot = false, bool template_only = false);
+	int save_state (std::string snapshot_name,
+	                bool pending = false,
+	                bool switch_to_snapshot = false,
+	                bool template_only = false,
+	                bool for_archive = false,
+	                bool only_used_assets = false);
 
 	enum ArchiveEncode {
 		NO_ENCODE,
@@ -1413,6 +1419,7 @@ private:
 	gint            _suspend_save; /* atomic */
 	volatile bool   _save_queued;
 	Glib::Threads::Mutex save_state_lock;
+	Glib::Threads::Mutex save_source_lock;
 	Glib::Threads::Mutex peak_cleanup_lock;
 
 	int        load_options (const XMLNode&);
@@ -1900,7 +1907,9 @@ private:
 		SwitchToSnapshot
 	};
 
-	XMLNode& state (bool save_template, snapshot_t snapshot_type = NormalSave);
+	XMLNode& state (bool save_template,
+	                snapshot_t snapshot_type = NormalSave,
+	                bool only_used_assets = false);
 
 	XMLNode& get_state ();
 	int      set_state (const XMLNode& node, int version); // not idempotent
