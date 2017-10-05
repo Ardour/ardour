@@ -86,6 +86,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits CC121;
 		LIBARDOUR_API extern DebugBits VCA;
 		LIBARDOUR_API extern DebugBits Push2;
+		LIBARDOUR_API extern DebugBits US2400;
 
 	}
 }

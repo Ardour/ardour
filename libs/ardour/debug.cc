@@ -83,3 +83,4 @@ PBD::DebugBits PBD::DEBUG::FaderPort8 = PBD::new_debug_bit ("faderport8");
 PBD::DebugBits PBD::DEBUG::CC121 = PBD::new_debug_bit ("cc121");
 PBD::DebugBits PBD::DEBUG::VCA = PBD::new_debug_bit ("vca");
 PBD::DebugBits PBD::DEBUG::Push2 = PBD::new_debug_bit ("push2");
+PBD::DebugBits PBD::DEBUG::US2400 = PBD::new_debug_bit ("us2400");
