@@ -137,6 +137,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	std::string comp_speed_name (uint32_t mode) const { return std::string(); }
 	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
 	std::string send_name (uint32_t n) const { return std::string(); }
 	boost::shared_ptr<AutomationControl> master_send_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<MonitorProcessor> monitor_control() const { return boost::shared_ptr<MonitorProcessor>(); }

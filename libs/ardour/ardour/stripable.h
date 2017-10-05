@@ -177,6 +177,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 */
 	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const = 0;
 
 	/* for the same value of @param n, this returns the name of the send
 	 * associated with the pair of controllables returned by the above two methods.

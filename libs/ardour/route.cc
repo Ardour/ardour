@@ -5585,6 +5585,43 @@ Route::comp_speed_name (uint32_t mode) const
 }
 
 boost::shared_ptr<AutomationControl>
+Route::send_pan_azi_controllable (uint32_t n) const
+{
+#ifdef  MIXBUS
+# undef MIXBUS_PORTS_H
+# include "../../gtk2_ardour/mixbus_ports.h"
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	if (plug && !mixbus()) {
+		uint32_t port_id = 0;
+		switch (n) {
+# ifdef MIXBUS32C
+			case  0: port_id = port_channel_post_aux0_pan; break;  //32c mb "pan" controls use zero-based names, unlike levels. ugh
+			case  1: port_id = port_channel_post_aux1_pan; break;
+			case  2: port_id = port_channel_post_aux2_pan; break;
+			case  3: port_id = port_channel_post_aux3_pan; break;
+			case  4: port_id = port_channel_post_aux4_pan; break;
+			case  5: port_id = port_channel_post_aux5_pan; break;
+			case  6: port_id = port_channel_post_aux6_pan; break;
+			case  7: port_id = port_channel_post_aux7_pan; break;
+			case  8: port_id = port_channel_post_aux8_pan; break;
+			case  9: port_id = port_channel_post_aux9_pan; break;
+			case 10: port_id = port_channel_post_aux10_pan; break;
+			case 11: port_id = port_channel_post_aux11_pan; break;
+# endif
+			default:
+				break;
+		}
+
+		if (port_id > 0) {
+			return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_id)));
+		}
+	}
+#endif
+	
+	boost::shared_ptr<AutomationControl>();
+}
+
+boost::shared_ptr<AutomationControl>
 Route::send_level_controllable (uint32_t n) const
 {
 #ifdef  MIXBUS
