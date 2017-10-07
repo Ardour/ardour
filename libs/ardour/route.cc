@@ -5618,7 +5618,7 @@ Route::send_pan_azi_controllable (uint32_t n) const
 	}
 #endif
 	
-	boost::shared_ptr<AutomationControl>();
+	return boost::shared_ptr<AutomationControl>();
 }
 
 boost::shared_ptr<AutomationControl>
