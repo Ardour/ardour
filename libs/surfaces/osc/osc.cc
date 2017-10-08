@@ -719,7 +719,7 @@ OSC::listen_to_route (boost::shared_ptr<Stripable> strip, lo_address addr)
 
 	OSCSurface *s = get_surface(addr);
 	uint32_t ssid = get_sid (strip, addr);
-	OSCRouteObserver* o = new OSCRouteObserver (strip, ssid, s);
+	OSCRouteObserver* o = new OSCRouteObserver (*this, ssid, s);
 	route_observers.push_back (o);
 
 	strip->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::route_lost, this, boost::weak_ptr<Stripable> (strip)), this);
@@ -3929,7 +3929,7 @@ OSC::sel_master_send_enable (int state, lo_message msg)
 			return 0;
 		}
 	}
-	return cue_float_message ("/select/master_send_enable", 0, get_address(msg));
+	return float_message ("/select/master_send_enable", 0, get_address(msg));
 }
 
 int
@@ -5299,7 +5299,7 @@ OSC::cue_aux_fader (float position, lo_message msg)
 			}
 		}
 	}
-	cue_float_message ("/cue/fader", 0, get_address (msg));
+	float_message ("/cue/fader", 0, get_address (msg));
 	return -1;
 }
 
@@ -5320,7 +5320,7 @@ OSC::cue_aux_mute (float state, lo_message msg)
 			}
 		}
 	}
-	cue_float_message ("/cue/mute", 0, get_address (msg));
+	float_message ("/cue/mute", 0, get_address (msg));
 	return -1;
 }
 
@@ -5337,7 +5337,7 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	cue_float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
+	float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
 	return -1;
 }
 
@@ -5355,12 +5355,13 @@ OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 		}
 		return 0;
 	}
-	cue_float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
+	float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
 	return -1;
 }
 
+// generic send message
 int
-OSC::cue_float_message (string path, float val, lo_address addr)
+OSC::float_message (string path, float val, lo_address addr)
 {
 
 	lo_message reply;
@@ -5370,6 +5371,40 @@ OSC::cue_float_message (string path, float val, lo_address addr)
 	lo_send_message (addr, path.c_str(), reply);
 	lo_message_free (reply);
 
+	return 0;
+}
+
+int
+OSC::float_message_with_id (std::string path, uint32_t ssid, float value, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+	lo_message msg = lo_message_new ();
+	if (sur->feedback[2]) {
+		path = string_compose ("%1/%2", path, ssid);
+	} else {
+		lo_message_add_int32 (msg, ssid);
+	}
+	lo_message_add_float (msg, value);
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+	return 0;
+}
+
+int
+OSC::int_message_with_id (std::string path, uint32_t ssid, int value, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+	lo_message msg = lo_message_new ();
+	if (sur->feedback[2]) {
+		path = string_compose ("%1/%2", path, ssid);
+	} else {
+		lo_message_add_int32 (msg, ssid);
+	}
+	lo_message_add_int32 (msg, value);
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
 	return 0;
 }
 
@@ -5387,6 +5422,23 @@ OSC::text_message (string path, string val, lo_address addr)
 	return 0;
 }
 
+int
+OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+	lo_message msg = lo_message_new ();
+	if (sur->feedback[2]) {
+		path = string_compose ("%1/%2", path, ssid);
+	} else {
+		lo_message_add_int32 (msg, ssid);
+	}
+
+	lo_message_add_string (msg, val.c_str());
+
+	lo_send_message (addr, path.c_str(), msg);
+	lo_message_free (msg);
+	return 0;
+}
 
 // we have to have a sorted list of stripables that have sends pointed at our aux
 // we can use the one in osc.cc to get an aux list

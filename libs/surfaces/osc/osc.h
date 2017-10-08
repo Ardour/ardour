@@ -87,6 +87,14 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_active (bool yn);
 	bool get_active () const;
 
+	// generic osc send
+
+	int float_message (std::string, float value, lo_address addr);
+	int text_message (std::string path, std::string val, lo_address addr);
+	int float_message_with_id (std::string, uint32_t ssid, float value, lo_address addr);
+	int int_message_with_id (std::string, uint32_t ssid, int value, lo_address addr);
+	int text_message_with_id (std::string path, uint32_t ssid, std::string val, lo_address addr);
+
 	int start ();
 	int stop ();
 
@@ -273,8 +281,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int cue_aux_fader (float position, lo_message msg);
 	int cue_aux_mute (float state, lo_message msg);
 	void cue_set_aux (uint32_t aux, lo_message msg);
-	int cue_float_message (std::string, float value, lo_address addr);
-	int text_message (std::string path, std::string val, lo_address addr);
 	boost::shared_ptr<ARDOUR::Send> cue_get_send (uint32_t id, lo_address addr);
 	// end cue
 

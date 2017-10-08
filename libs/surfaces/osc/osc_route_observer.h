@@ -36,24 +36,24 @@ class OSCRouteObserver
 {
 
   public:
-	OSCRouteObserver (boost::shared_ptr<ARDOUR::Stripable>, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
+	OSCRouteObserver (ArdourSurface::OSC& o, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCRouteObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
 	void send_select_status (const PBD::PropertyChange&);
+	void refresh_strip (bool force);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
 
 	PBD::ScopedConnectionList strip_connections;
 
+	ArdourSurface::OSC& _osc;
 	lo_address addr;
 	std::string path;
 	uint32_t ssid;
-	uint32_t gainmode;
-	std::bitset<32> feedback;
 	ArdourSurface::OSC::OSCSurface* sur;
 	float _last_meter;
 	uint32_t gain_timeout;
@@ -66,13 +66,10 @@ class OSCRouteObserver
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void text_with_id (std::string path, uint32_t id, std::string name);
 	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
-	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void gain_automation (std::string path);
-	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	std::string set_path (std::string path);
-	void clear_strip (std::string path, float val);
+	void send_gain_message ();
+	void gain_automation ();
+	void send_trim_message ();
 };
 
 #endif /* __osc_oscrouteobserver_h__ */
