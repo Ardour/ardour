@@ -703,6 +703,7 @@ void
 Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
 {
 	assert (is_monitor());
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	run_route (start_sample, end_sample, nframes, declick, true, false);
 }
 
