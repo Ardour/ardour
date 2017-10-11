@@ -302,7 +302,7 @@ Session::process_with_events (pframes_t nframes)
 
 	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-	if (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
+	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
 		samplecnt_t ns;
 
 		if (_remaining_latency_preroll > 0) {
