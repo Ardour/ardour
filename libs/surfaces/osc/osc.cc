@@ -1428,42 +1428,42 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int bank_size = sur->bank_size;
 
 
-	if (!strncmp (path, "/set_surface/feedback", 21)) {
+	if (argc == 1 && !strncmp (path, "/set_surface/feedback", 21)) {
 		if (types[0] == 'f') {
 			ret = set_surface_feedback ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_feedback (argv[0]->i, msg);
 		}
 	}
-	else if (!strncmp (path, "/set_surface/bank_size", 22)) {
+	else if (argc == 1 && !strncmp (path, "/set_surface/bank_size", 22)) {
 		if (types[0] == 'f') {
 			ret = set_surface_bank_size ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_bank_size (argv[0]->i, msg);
 		}
 	}
-	else if (!strncmp (path, "/set_surface/gainmode", 21)) {
+	else if (argc == 1 && !strncmp (path, "/set_surface/gainmode", 21)) {
 		if (types[0] == 'f') {
 			ret = set_surface_gainmode ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_gainmode (argv[0]->i, msg);
 		}
 	}
-	else if (!strncmp (path, "/set_surface/strip_types", 24)) {
+	else if (argc == 1 && !strncmp (path, "/set_surface/strip_types", 24)) {
 		if (types[0] == 'f') {
 			ret = set_surface_strip_types ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_strip_types (argv[0]->i, msg);
 		}
 	}
-	else if (!strncmp (path, "/set_surface/send_page_size", 27)) {
+	else if (argc == 1 && !strncmp (path, "/set_surface/send_page_size", 27)) {
 		if (types[0] == 'f') {
 			ret = sel_send_pagesize ((int)argv[0]->f, msg);
 		} else {
 			ret = sel_send_pagesize (argv[0]->i, msg);
 		}
 	}
-	else if (!strncmp (path, "/set_surface/plugin_page_size", 29)) {
+	else if (argc == 1 && !strncmp (path, "/set_surface/plugin_page_size", 29)) {
 		if (types[0] == 'f') {
 			ret = sel_plug_pagesize ((int)argv[0]->f, msg);
 		} else {
