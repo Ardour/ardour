@@ -527,6 +527,7 @@ public:
 	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
 	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
+	boost::shared_ptr<AutomationControl> tape_drive_controllable () const;
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.

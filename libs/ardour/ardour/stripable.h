@@ -147,6 +147,8 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
 	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
+	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
 	 */

@@ -776,8 +776,64 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	_vpot->set_mode(Pot::wrap);
 
 #ifdef MIXBUS
+
+	//Trim & dynamics
+	switch (global_pos) {
+	case 0:
+		pc = r->trim_control ();
+		_vpot->set_mode(Pot::boost_cut);
+		break;
+		
+	case 1:
+		pc = r->pan_azimuth_control ();
+		_vpot->set_mode(Pot::dot);
+		break;
+
+	case 2:
+		pc = r->comp_threshold_controllable();
+		break;
+		
+	case 3:
+		pc = r->comp_speed_controllable();
+		break;
+		
+	case 4:
+		pc = r->comp_mode_controllable();
+		_vpot->set_mode(Pot::wrap);
+		break;
+		
+	case 5:
+		pc = r->comp_makeup_controllable();
+		break;
+		
+		
+	}  //trim & dynamics
+	
+	
+	//EQ
 	int eq_band = -1;
-	if (r->is_input_strip ()) {
+	if (r->mixbus ()) {
+		
+		switch (global_pos) {
+
+			case 6:
+				pc = r->pan_width_control();
+				break;
+
+			case 7:
+				pc = r->tape_drive_controllable();
+				break;
+
+			case 8:
+			case 9:
+			case 10:
+				eq_band = (global_pos-8);
+				pc = r->eq_gain_controllable (eq_band);
+				_vpot->set_mode(Pot::boost_cut);
+				break;
+		}
+
+	} else if (r->is_input_strip ()) {
 
 #ifdef MIXBUS32C
 		switch (global_pos) {
@@ -828,39 +884,6 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	
 #endif
 
-		//trim & dynamics
-
-		switch (global_pos) {
-		case 0:
-			pc = r->trim_control ();
-			_vpot->set_mode(Pot::boost_cut);
-			break;
-			
-		case 1:
-			pc = r->pan_azimuth_control ();
-			_vpot->set_mode(Pot::dot);
-			break;
-
-		case 2:
-			pc = r->comp_threshold_controllable();
-			break;
-			
-		case 3:
-			pc = r->comp_speed_controllable();
-			break;
-			
-		case 4:
-			pc = r->comp_mode_controllable();
-			_vpot->set_mode(Pot::wrap);
-			break;
-			
-		case 5:
-			pc = r->comp_makeup_controllable();
-			break;
-			
-			
-		}  //trim & dynamics
-		
 		//mixbus sends
 		switch (global_pos) {
 		case 16:
@@ -873,7 +896,6 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		case 23:
 			pc = r->send_level_controllable ( global_pos - 16 );
 			break;
-		
 		}  //global_pos switch
 		
 	} //if input_strip
