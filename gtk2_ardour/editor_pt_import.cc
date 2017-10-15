@@ -192,11 +192,16 @@ Editor::do_ptimport (std::string ptpath,
 		return;
 	}
 
+	vector<uint16_t> indexes;
+	vector<uint16_t>::iterator used_idx;
+
 	for (vector<PTFFormat::region_t>::iterator a = ptf.regions.begin();
 			a != ptf.regions.end(); ++a) {
 		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin();
 				p != ptfwavpair.end(); ++p) {
-			if ((p->index1 == a->wave.index) && (strcmp(a->wave.filename.c_str(), "") != 0)) {
+
+			used_idx = std::find(indexes.begin(), indexes.end(), a->wave.index);
+			if ((p->index1 == a->wave.index) && (strcmp(a->wave.filename.c_str(), "") != 0) && used_idx == indexes.end()) {
 				for (SourceList::iterator x = imported.begin();
 						x != imported.end(); ++x) {
 					if ((*x)->id() == p->id) {
@@ -223,6 +228,7 @@ Editor::do_ptimport (std::string ptpath,
 						ptfregpair.push_back(rp);
 					}
 				}
+				indexes.push_back(a->wave.index);
 			}
 		}
 		if (strcmp(a->wave.filename.c_str(), "") == 0) {
