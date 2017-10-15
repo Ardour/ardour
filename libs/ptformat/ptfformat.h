@@ -128,6 +128,7 @@ public:
 
 private:
 	bool foundin(std::string haystack, std::string needle);
+	int64_t foundat(unsigned char *haystack, uint64_t n, const char *needle);
 	int parse(void);
 	bool parse_version();
 	uint8_t gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative);
