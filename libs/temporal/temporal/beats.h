@@ -317,8 +317,11 @@ namespace std {
 		   than a confusing one. */
 
 		static Temporal::Beats max() {
+			// The number of ticks can technically be higher than PPQN - 1, but that causes the number
+			// of beats to overflow during normalization. This is the largest valid value that a
+			// Temporal::Beats object can have without overflowing the beats.
 			return Temporal::Beats(std::numeric_limits<int32_t>::max(),
-			                     std::numeric_limits<int32_t>::max());
+			                       Temporal::Beats::PPQN - 1);
 		}
 	};
 }
