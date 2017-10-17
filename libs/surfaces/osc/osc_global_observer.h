@@ -33,13 +33,15 @@ class OSCGlobalObserver
 {
 
   public:
-	OSCGlobalObserver (ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* su);
+	OSCGlobalObserver (ArdourSurface::OSC& o, ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* su);
 	~OSCGlobalObserver ();
 
 	lo_address address() const { return addr; };
 	void tick (void);
+	void clear_observer (void);
 
   private:
+	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
 	PBD::ScopedConnectionList session_connections;
@@ -71,9 +73,7 @@ class OSCGlobalObserver
 	void send_transport_state_changed (void);
 	void send_record_state_changed (void);
 	void solo_active (bool active);
-	void text_message (std::string path, std::string text);
-	void float_message (std::string path, float value);
-	void int_message (std::string path, uint32_t value);
+	void session_name (std::string path, std::string name);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */

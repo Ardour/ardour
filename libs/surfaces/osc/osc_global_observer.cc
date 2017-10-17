@@ -36,8 +36,9 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface* su)
-	: sur (su)
+OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OSCSurface* su)
+	: _osc (o)
+	,sur (su)
 	,_init (true)
 	,_last_master_gain (0.0)
 	,_last_master_trim (0.0)
@@ -59,7 +60,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface
 		*/
 
 		// Master channel first
-		text_message (X_("/master/name"), "Master");
+		_osc.text_message (X_("/master/name"), "Master", addr);
 		boost::shared_ptr<Stripable> strip = session->master_out();
 
 		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
@@ -83,7 +84,7 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface
 		// monitor stuff next
 		strip = session->monitor_out();
 		if (strip) {
-			text_message (X_("/monitor/name"), "Monitor");
+			_osc.text_message (X_("/monitor/name"), "Monitor", addr);
 
 			boost::shared_ptr<Controllable> mon_mute_cont = strip->monitor_control()->cut_control();
 			mon_mute_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/monitor/mute"), mon_mute_cont), OSC::instance());
@@ -114,8 +115,8 @@ OSCGlobalObserver::OSCGlobalObserver (Session& s, ArdourSurface::OSC::OSCSurface
 		send_record_state_changed ();
 
 		// session feedback
-		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::text_message, this, X_("/session_name"), _1), OSC::instance());
-		text_message (X_("/session_name"), session->snap_name());
+		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::session_name, this, X_("/session_name"), _1), OSC::instance());
+		session_name (X_("/session_name"), session->snap_name());
 		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
@@ -135,6 +136,61 @@ OSCGlobalObserver::~OSCGlobalObserver ()
 	session_connections.drop_connections ();
 
 	lo_address_free (addr);
+}
+
+void
+OSCGlobalObserver::clear_observer ()
+{
+	strip_connections.drop_connections ();
+	session_connections.drop_connections ();
+	_osc.text_message (X_("/master/name"), " ", addr);
+	_osc.text_message (X_("/monitor/name"), " ", addr);
+	_osc.text_message (X_("/session_name"), " ", addr);
+	if (feedback[6]) { // timecode enabled
+		_osc.text_message (X_("/position/smpte"), " ", addr);
+	}
+	if (feedback[5]) { // Bar beat enabled
+		_osc.text_message (X_("/position/bbt"), " ", addr);
+	}
+	if (feedback[11]) { // minutes/seconds enabled
+		_osc.text_message (X_("/position/time"), " ", addr);
+	}
+	if (feedback[10]) { // samples
+		_osc.text_message (X_("/position/samples"), " ", addr);
+	}
+	if (feedback[3]) { //heart beat enabled
+		_osc.float_message (X_("/heartbeat"), 0.0, addr);
+	}
+	if (feedback[7] || feedback[8]) { // meters enabled
+		float meter = 0;
+		if (feedback[7] && !gainmode) {
+			meter = -193;
+		}
+		_osc.float_message (X_("/master/meter"), meter, addr);
+	}
+	if (feedback[9]) {
+		_osc.float_message (X_("/master/signal"), 0, addr);
+	}
+	_osc.float_message ("/master/fader", 0, addr);
+	_osc.float_message ("/monitor/fader", 0, addr);
+	_osc.float_message ("/master/gain", -193, addr);
+	_osc.float_message ("/monitor/gain", -193, addr);
+	_osc.float_message (X_("/master/trimdB"), 0, addr);
+	_osc.float_message ("/master/mute", 0, addr);
+	_osc.float_message ("/master/pan_stereo_position", 0.5, addr);
+	_osc.float_message ("/monitor/mute", 0, addr);
+	_osc.float_message ("/monitor/dim", 0, addr);
+	_osc.float_message ("/monitor/mono", 0, addr);
+	_osc.float_message (X_("/loop_toggle"), 0, addr);
+	_osc.float_message (X_("/transport_play"), 0, addr);
+	_osc.float_message (X_("/transport_stop"), 0, addr);
+	_osc.float_message (X_("/rewind"), 0, addr);
+	_osc.float_message (X_("/ffwd"), 0, addr);
+	_osc.float_message (X_("/record_tally"), 0, addr);
+	_osc.float_message (X_("/rec_enable_toggle"), 0, addr);
+	_osc.float_message (X_("/cancel_all_solos"), 0, addr);
+
+
 }
 
 void
@@ -159,7 +215,7 @@ OSCGlobalObserver::tick ()
 			os << ':';
 			os << setw(2) << setfill('0') << timecode.frames;
 
-			text_message ("/position/smpte", os.str());
+			_osc.text_message ("/position/smpte", os.str(), addr);
 		}
 		if (feedback[5]) { // Bar beat enabled
 			Timecode::BBT_Time bbt_time;
@@ -175,7 +231,7 @@ OSCGlobalObserver::tick ()
 			os << '|';
 			os << setw(4) << setfill('0') << bbt_time.ticks;
 
-			text_message ("/position/bbt", os.str());
+			_osc.text_message ("/position/bbt", os.str(), addr);
 		}
 		if (feedback[11]) { // minutes/seconds enabled
 			samplepos_t left = now_sample;
@@ -197,21 +253,21 @@ OSCGlobalObserver::tick ()
 			os << '.';
 			os << setw(3) << setfill('0') << millisecs;
 
-			text_message ("/position/time", os.str());
+			_osc.text_message ("/position/time", os.str(), addr);
 		}
 		if (feedback[10]) { // samples
 			ostringstream os;
 			os << now_sample;
-			text_message ("/position/samples", os.str());
+			_osc.text_message ("/position/samples", os.str(), addr);
 		}
 		_last_sample = now_sample;
 	}
 	if (feedback[3]) { //heart beat enabled
 		if (_heartbeat == 10) {
-			float_message (X_("/heartbeat"), 1.0);
+			_osc.float_message (X_("/heartbeat"), 1.0, addr);
 		}
 		if (!_heartbeat) {
-			float_message (X_("/heartbeat"), 0.0);
+			_osc.float_message (X_("/heartbeat"), 0.0, addr);
 		}
 		_heartbeat++;
 		if (_heartbeat > 20) _heartbeat = 0;
@@ -224,13 +280,13 @@ OSCGlobalObserver::tick ()
 			if (feedback[7] || feedback[8]) {
 				if (gainmode && feedback[7]) {
 					// change from db to 0-1
-					float_message (X_("/master/meter"), ((now_meter + 94) / 100));
+					_osc.float_message (X_("/master/meter"), ((now_meter + 94) / 100), addr);
 				} else if ((!gainmode) && feedback[7]) {
-					float_message (X_("/master/meter"), now_meter);
+					_osc.float_message (X_("/master/meter"), now_meter, addr);
 				} else if (feedback[8]) {
 					uint32_t ledlvl = (uint32_t)(((now_meter + 54) / 3.75)-1);
 					uint32_t ledbits = ~(0xfff<<ledlvl);
-					int_message (X_("/master/meter"), ledbits);
+					_osc.float_message (X_("/master/meter"), ledbits, addr);
 				}
 			}
 			if (feedback[9]) {
@@ -240,7 +296,7 @@ OSCGlobalObserver::tick ()
 				} else {
 					signal = 1;
 				}
-				float_message (X_("/master/signal"), signal);
+				_osc.float_message (X_("/master/signal"), signal, addr);
 			}
 		}
 		_last_meter = now_meter;
@@ -249,13 +305,13 @@ OSCGlobalObserver::tick ()
 	if (feedback[4]) {
 		if (master_timeout) {
 			if (master_timeout == 1) {
-				text_message (X_("/master/name"), "Master");
+				_osc.text_message (X_("/master/name"), "Master", addr);
 			}
 			master_timeout--;
 		}
 		if (monitor_timeout) {
 			if (monitor_timeout == 1) {
-				text_message (X_("/monitor/name"), "Monitor");
+				_osc.text_message (X_("/monitor/name"), "Monitor", addr);
 			}
 			monitor_timeout--;
 		}
@@ -265,7 +321,13 @@ OSCGlobalObserver::tick ()
 void
 OSCGlobalObserver::send_change_message (string path, boost::shared_ptr<Controllable> controllable)
 {
-	float_message (path, (float) controllable->get_value());
+	_osc.float_message (path, (float) controllable->get_value(), addr);
+}
+
+void
+OSCGlobalObserver::session_name (string path, string name)
+{
+	_osc.text_message (path, name, addr);
 }
 
 void
@@ -287,8 +349,8 @@ OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 		}
 	}
 	if (gainmode) {
-		float_message (string_compose ("%1fader", path), controllable->internal_to_interface (controllable->get_value()));
-		text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
+		_osc.float_message (string_compose ("%1fader", path), controllable->internal_to_interface (controllable->get_value()), addr);
+		_osc.text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
 		if (ismaster) {
 			master_timeout = 8;
 		} else {
@@ -297,9 +359,9 @@ OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 
 	} else {
 		if (controllable->get_value() < 1e-15) {
-			float_message (string_compose ("%1gain",path), -200);
+			_osc.float_message (string_compose ("%1gain",path), -200, addr);
 		} else {
-			float_message (string_compose ("%1gain",path), accurate_coefficient_to_dB (controllable->get_value()));
+			_osc.float_message (string_compose ("%1gain",path), accurate_coefficient_to_dB (controllable->get_value()), addr);
 		}
 	}
 }
@@ -312,67 +374,34 @@ OSCGlobalObserver::send_trim_message (string path, boost::shared_ptr<Controllabl
 	} else {
 		return;
 	}
-	float_message (X_("/master/trimdB"), (float) accurate_coefficient_to_dB (controllable->get_value()));
+	_osc.float_message (X_("/master/trimdB"), (float) accurate_coefficient_to_dB (controllable->get_value()), addr);
 }
 
 
 void
 OSCGlobalObserver::send_transport_state_changed()
 {
-	int_message (X_("/loop_toggle"), session->get_play_loop());
-	int_message (X_("/transport_play"), session->transport_speed() == 1.0);
-	int_message (X_("/transport_stop"), session->transport_stopped());
-	int_message (X_("/rewind"), session->transport_speed() < 0.0);
-	int_message (X_("/ffwd"), (session->transport_speed() != 1.0 && session->transport_speed() > 0.0));
+	_osc.float_message (X_("/loop_toggle"), session->get_play_loop(), addr);
+	_osc.float_message (X_("/transport_play"), session->transport_speed() == 1.0, addr);
+	_osc.float_message (X_("/transport_stop"), session->transport_stopped(), addr);
+	_osc.float_message (X_("/rewind"), session->transport_speed() < 0.0, addr);
+	_osc.float_message (X_("/ffwd"), (session->transport_speed() != 1.0 && session->transport_speed() > 0.0), addr);
 }
 
 void
 OSCGlobalObserver::send_record_state_changed ()
 {
-	int_message (X_("/rec_enable_toggle"), (int)session->get_record_enabled ());
+	_osc.float_message (X_("/rec_enable_toggle"), (int)session->get_record_enabled (), addr);
 
 	if (session->have_rec_enabled_track ()) {
-		int_message (X_("/record_tally"), 1);
+		_osc.float_message (X_("/record_tally"), 1, addr);
 	} else {
-		int_message (X_("/record_tally"), 0);
+		_osc.float_message (X_("/record_tally"), 0, addr);
 	}
 }
 
 void
 OSCGlobalObserver::solo_active (bool active)
 {
-	float_message (X_("/cancel_all_solos"), (float) active);
-}
-
-void
-OSCGlobalObserver::text_message (string path, std::string text)
-{
-	lo_message msg = lo_message_new ();
-
-	lo_message_add_string (msg, text.c_str());
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-}
-
-void
-OSCGlobalObserver::float_message (string path, float value)
-{
-	lo_message msg = lo_message_new ();
-
-	lo_message_add_float (msg, value);
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-}
-
-void
-OSCGlobalObserver::int_message (string path, uint32_t value)
-{
-	lo_message msg = lo_message_new ();
-
-	lo_message_add_int32 (msg, value);
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	_osc.float_message (X_("/cancel_all_solos"), (float) active, addr);
 }

@@ -37,7 +37,7 @@ class OSCSelectObserver
 {
 
   public:
-	OSCSelectObserver (boost::shared_ptr<ARDOUR::Stripable>, lo_address addr, ArdourSurface::OSC::OSCSurface* sur);
+	OSCSelectObserver (ArdourSurface::OSC& o, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCSelectObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
@@ -46,10 +46,14 @@ class OSCSelectObserver
 	void renew_sends (void);
 	void renew_plugin (void);
 	void eq_restart (int);
+	void clear_observer (void);
+	void refresh_strip (bool force);
+	void no_strip ();
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
-
+	ArdourSurface::OSC& _osc;
+	
 	PBD::ScopedConnectionList strip_connections;
 	// sends, plugins and eq need their own
 	PBD::ScopedConnectionList send_connections;
@@ -81,8 +85,6 @@ class OSCSelectObserver
 	void comp_mode (void);
 	void change_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void enable_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void text_message (std::string path, std::string text);
-	void text_with_id (std::string path, uint32_t id, std::string name);
 	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void gain_message ();
 	void gain_automation ();
@@ -98,8 +100,6 @@ class OSCSelectObserver
 	void eq_init (void);
 	void eq_end (void);
 	std::string set_path (std::string path, uint32_t id);
-	void send_float (std::string path, float val);
-	void send_float_with_id (std::string path, uint32_t id, float val);
 };
 
 #endif /* __osc_oscselectobserver_h__ */

@@ -40,10 +40,12 @@ class OSCRouteObserver
 	~OSCRouteObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
-	lo_address address() const { return addr; };
+	uint32_t strip_id () const { return ssid; }
+	lo_address address () const { return addr; };
 	void tick (void);
 	void send_select_status (const PBD::PropertyChange&);
 	void refresh_strip (bool force);
+	void clear_strip ();
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
@@ -70,6 +72,7 @@ class OSCRouteObserver
 	void send_gain_message ();
 	void gain_automation ();
 	void send_trim_message ();
+	void no_strip ();
 };
 
 #endif /* __osc_oscrouteobserver_h__ */
