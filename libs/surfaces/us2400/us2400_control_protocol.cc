@@ -117,7 +117,6 @@ US2400Protocol::US2400Protocol (Session& session)
 	, _scrub_mode (false)
 	, _view_mode (Mixer)
 	, _subview_mode (None)
-	, _current_selected_track (-1)
 	, _modifier_state (0)
 	, _metering_active (true)
 	, _initialized (false)
@@ -343,7 +342,6 @@ US2400Protocol::switch_banks (uint32_t initial, bool force)
 	}
 
 	_current_initial_bank = initial;
-	_current_selected_track = -1;
 
 	// Map current bank of stripables onto each surface(+strip)
 
@@ -558,6 +556,9 @@ US2400Protocol::device_ready ()
 
 	update_global_button (Button::Flip, on);
 	update_global_button (Button::Flip, off);
+
+	update_global_button (Button::MstrSelect, on);
+	update_global_button (Button::MstrSelect, off);
 
 	set_subview_mode (US2400Protocol::None, first_selected_stripable());
 }
@@ -1186,6 +1187,7 @@ US2400Protocol::build_button_map ()
 	DEFINE_BUTTON_HANDLER (Button::Left, &US2400Protocol::left_press, &US2400Protocol::left_release);
 	DEFINE_BUTTON_HANDLER (Button::Right, &US2400Protocol::right_press, &US2400Protocol::right_release);
 	DEFINE_BUTTON_HANDLER (Button::Flip, &US2400Protocol::flip_press, &US2400Protocol::flip_release);
+	DEFINE_BUTTON_HANDLER (Button::MstrSelect, &US2400Protocol::mstr_press, &US2400Protocol::mstr_release);
 //	DEFINE_BUTTON_HANDLER (Button::F1, &US2400Protocol::F1_press, &US2400Protocol::F1_release);
 //	DEFINE_BUTTON_HANDLER (Button::F2, &US2400Protocol::F2_press, &US2400Protocol::F2_release);
 //	DEFINE_BUTTON_HANDLER (Button::F3, &US2400Protocol::F3_press, &US2400Protocol::F3_release);
@@ -1851,7 +1853,21 @@ US2400Protocol::stripable_selection_changed ()
 		(*si)->update_strip_selection ();
 	}
 
-	boost::shared_ptr<Stripable> s = first_selected_stripable ();
+printf("stripable_selection_changed\n");
+
+	//first check for the dedicated Master strip
+	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	if (s && s->is_master()) {
+printf("stripable_selection_changed  found master as selected_stripable\n");
+		update_global_button(Button::MstrSelect, on);  //NOTE:  surface does not respond to this
+	} else {
+if (s) printf("stripable_selection_changed  not master:  %s\n", s->name().c_str());
+		update_global_button(Button::MstrSelect, off);
+
+		//not the master;  now check for other strips ( this will only allow a selection if the strip is mapped on our surface )
+		s = first_selected_stripable ();
+	}
+	
 	if (s) {
 		check_fader_automation_state ();
 
@@ -1863,6 +1879,7 @@ US2400Protocol::stripable_selection_changed ()
 		 */
 
 		if (set_subview_mode (TrackView, s)) {
+printf("set_subview_mode failed for master... (?)\n");
 			set_subview_mode (None, boost::shared_ptr<Stripable>());
 		}
 

@@ -769,6 +769,21 @@ US2400Protocol::flip_release (Button &)
 {
 	return none;
 }
+
+LedState
+US2400Protocol::mstr_press (Button &)
+{
+//	access_action("Mixer/select-none");
+	SetStripableSelection( session->master_out() );
+	return on;
+}
+
+LedState
+US2400Protocol::mstr_release (Button &)
+{
+	return none;
+}
+
 LedState
 US2400Protocol::name_value_press (Button &)
 {

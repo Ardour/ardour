@@ -821,7 +821,7 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	
 	//EQ
 	int eq_band = -1;
-	if (r->mixbus ()) {
+	if (r->mixbus () || r->is_master()) {
 		
 		switch (global_pos) {
 

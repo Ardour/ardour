@@ -414,6 +414,7 @@ Surface::setup_master ()
 	_master_fader->set_control (m->gain_control());
 	m->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
 	_last_master_gain_written = FLT_MAX; /* some essentially impossible value */
+	_port->write (_master_fader->set_position (0.0));
 	master_gain_changed ();
 }
 

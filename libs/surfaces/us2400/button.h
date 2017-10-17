@@ -57,6 +57,7 @@ public:
 		Left,
 		Right,
 		Flip,
+		MstrSelect,
 
 		FinalGlobalButton,
 

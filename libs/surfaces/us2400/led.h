@@ -43,7 +43,7 @@ public:
 		: Control (id, name, group)
 		, state (off)
 		, last_state (off)
-		, llast_state (off)
+		, llast_state (on)
 	{
 	}
 

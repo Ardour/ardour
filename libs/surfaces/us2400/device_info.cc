@@ -121,6 +121,8 @@ DeviceInfo::shared_buttons ()
 
 	_global_buttons[Button::Flip] = GlobalButtonInfo ("Flip", "assignment", 0x32);
 
+	_global_buttons[Button::MstrSelect] = GlobalButtonInfo ("Mstr Select", "assignment", 0x48);
+
 	_global_buttons[Button::F1] = GlobalButtonInfo ("F1", "function select", 0x36);
 	_global_buttons[Button::F2] = GlobalButtonInfo ("F2", "function select", 0x37);
 	_global_buttons[Button::F3] = GlobalButtonInfo ("F3", "function select", 0x38);

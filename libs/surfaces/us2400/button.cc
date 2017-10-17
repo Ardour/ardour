@@ -77,6 +77,7 @@ Button::name_to_id (const std::string& name)
 	if (!g_ascii_strcasecmp (name.c_str(), "Bank Left")) { return Left; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Bank Right")) { return Right; }
 	if (!g_ascii_strcasecmp (name.c_str(), "Flip")) { return Flip; }
+	if (!g_ascii_strcasecmp (name.c_str(), "Mstr Select")) { return MstrSelect; }
 	if (!g_ascii_strcasecmp (name.c_str(), "F1")) { return F1; }
 	if (!g_ascii_strcasecmp (name.c_str(), "F2")) { return F2; }
 	if (!g_ascii_strcasecmp (name.c_str(), "F3")) { return F3; }
@@ -115,6 +116,7 @@ Button::id_to_name (Button::ID id)
 	if (id == Left) { return "Bank Left"; }
 	if (id == Right) { return "Bank Right"; }
 	if (id == Flip) { return "Flip"; }
+	if (id == MstrSelect) { return "Mstr Select"; }
 	if (id == F1) { return "F1"; }
 	if (id == F2) { return "F2"; }
 	if (id == F3) { return "F3"; }
