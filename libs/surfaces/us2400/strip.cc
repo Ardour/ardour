@@ -171,6 +171,15 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
 
+	_surface->write (_solo->set_state(on));
+	_surface->write (_solo->set_state(off));
+	
+	_surface->write (_mute->set_state(on));
+	_surface->write (_mute->set_state(off));
+	
+	_surface->write (_select->set_state(on));
+	_surface->write (_select->set_state(off));
+
 	_stripable = r;
 
 	reset_saved_values ();

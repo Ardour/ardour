@@ -544,9 +544,19 @@ US2400Protocol::device_ready ()
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("device ready init (active=%1)\n", active()));
 	update_surfaces ();
 
+	update_global_button (Button::Send, on);
 	update_global_button (Button::Send, off);
+
+	update_global_button (Button::Scrub, on);
 	update_global_button (Button::Scrub, off);
+
+	update_global_button (Button::ClearSolo, on);
+	update_global_button (Button::ClearSolo, off);
+
+	update_global_button (Button::Pan, off);
 	update_global_button (Button::Pan, on);
+
+	update_global_button (Button::Flip, on);
 	update_global_button (Button::Flip, off);
 
 	set_subview_mode (US2400Protocol::None, first_selected_stripable());
