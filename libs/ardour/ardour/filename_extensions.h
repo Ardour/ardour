@@ -35,6 +35,7 @@ namespace ARDOUR {
 	LIBARDOUR_API extern const char* const export_preset_suffix;
 	LIBARDOUR_API extern const char* const export_format_suffix;
 	LIBARDOUR_API extern const char* const session_archive_suffix;
+	LIBARDOUR_API extern const char* const template_archive_suffix;
 
 }
 
