@@ -851,12 +851,3 @@ OSCSelectObserver::eq_restart(int x)
 	eq_end();
 	eq_init();
 }
-
-string
-OSCSelectObserver::set_path (string path, uint32_t id)
-{
-	if (feedback[2]) {
-		path = string_compose ("%1/%2", path, id);
-	}
-	return path;
-}
