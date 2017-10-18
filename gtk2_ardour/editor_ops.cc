@@ -7078,12 +7078,12 @@ Editor::close_region_gaps ()
 	list <boost::shared_ptr<Playlist > > used_playlists;
 
 	RegionSelection rs = get_regions_from_selection_and_entered ();
-
+						
 	if (!_session || rs.empty()) {
 		return;
 	}
-
-	Dialog dialog (_("Close Region Gaps"));
+	
+    Dialog dialog (_("Close Region Gaps"));
 
 	Table table (2, 3);
 	table.set_spacings (12);
@@ -7094,7 +7094,7 @@ Editor::close_region_gaps ()
 	SpinButton spin_crossfade (1, 0);
 	spin_crossfade.set_range (0, 15);
 	spin_crossfade.set_increments (1, 1);
-	spin_crossfade.set_value (5);
+	spin_crossfade.set_value (0);
 	table.attach (spin_crossfade, 1, 2, 0, 1);
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 0, 1);
@@ -7105,7 +7105,7 @@ Editor::close_region_gaps ()
 	SpinButton spin_pullback (1, 0);
 	spin_pullback.set_range (0, 100);
 	spin_pullback.set_increments (1, 1);
-	spin_pullback.set_value(30);
+	spin_pullback.set_value(10);
 	table.attach (spin_pullback, 1, 2, 1, 2);
 
 	table.attach (*manage (new Label (_("ms"))), 2, 3, 1, 2);
@@ -7119,51 +7119,104 @@ Editor::close_region_gaps ()
 		return;
 	}
 
-	samplepos_t crossfade_len = spin_crossfade.get_value();
-	samplepos_t pull_back_samples = spin_pullback.get_value();
-
-	crossfade_len = lrintf (crossfade_len * _session->sample_rate()/1000);
-	pull_back_samples = lrintf (pull_back_samples * _session->sample_rate()/1000);
+	framepos_t crossfade_len = spin_crossfade.get_value();
+	framepos_t pull_back_frames = spin_pullback.get_value();
+		
+	crossfade_len = lrintf (crossfade_len * _session->frame_rate()/1000);
+	pull_back_frames = lrintf (pull_back_frames * _session->frame_rate()/1000);
 
 	/* Iterate over the region list and make adjacent regions overlap by crossfade_len_ms */
 
 	begin_reversible_command (_("close region gaps"));
 
 	int idx = 0;
+	bool playlist_is_audio = false;
 	boost::shared_ptr<Region> last_region;
-
+	boost::shared_ptr<AudioRegion> last_audio_region;
+		
 	rs.sort_by_position_and_track();
 
 	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); ++r) {
 
 		boost::shared_ptr<Playlist> pl = (*r)->region()->playlist();
-
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*r);
+				
 		if (!pl->frozen()) {
 			/* we haven't seen this playlist before */
-
+			
 			/* remember used playlists so we can thaw them later */
 			used_playlists.push_back(pl);
 			pl->freeze();
+			if (playlist_is_audio != bool(arv)){
+					/* Change of playlist type (audio or midi), reset idx */
+					idx = 0;
+			}
+			playlist_is_audio = bool(arv);
 		}
+		
+		framepos_t position = (*r)->region()->position();
 
-		samplepos_t position = (*r)->region()->position();
+		if (playlist_is_audio) {
+			if (idx == 0 || position <= last_region->position()){
+				last_region = (*r)->region();
+				last_audio_region = arv->audio_region();
+				idx++;
+				continue;
+			}
+			
+			framepos_t last_region_end = ( last_audio_region->position() + last_audio_region->length() );
+			framecnt_t tmp_crossfade_len = crossfade_len;
+			
+			/* If fade length is set to 0, then use the default fade (64samples) */
+			if(tmp_crossfade_len == 0){
+				tmp_crossfade_len = 64;
+			};
+			
+			arv->audio_region()->clear_changes ();
+			last_audio_region->clear_changes ();
 
-		if (idx == 0 || position < last_region->position()){
+			if ((last_region_end - pull_back_frames) > (position - tmp_crossfade_len)){
+				arv->audio_region()->trim_front( (position - pull_back_frames));
+				last_audio_region->trim_end( (position - pull_back_frames + tmp_crossfade_len + 64) );
+			} else {
+				arv->audio_region()->trim_front( (last_region_end - pull_back_frames - tmp_crossfade_len));
+				last_audio_region->trim_end( (last_region_end - pull_back_frames + 64) );
+			}
+			
+			arv->audio_region()->set_fade_in_length(tmp_crossfade_len);
+			last_audio_region->set_default_fade_out();
+			
+			_session->add_command (new StatefulDiffCommand (arv->audio_region()));
+			_session->add_command (new StatefulDiffCommand (last_audio_region));
+			
+			last_audio_region = arv->audio_region();
 			last_region = (*r)->region();
-			idx++;
-			continue;
+		} else { 
+			/* MIDI */
+			if (idx == 0 || position <= last_region->position()){
+				last_region = (*r)->region();
+				idx++;
+				continue;
+			}
+			
+			framepos_t last_region_end = ( last_region->position() + last_region->length() );
+			
+			(*r)->region()->clear_changes ();
+			last_region->clear_changes ();
+			
+			if ((last_region_end - pull_back_frames) > (position - crossfade_len)){
+				(*r)->region()->trim_front( (position - pull_back_frames));
+				last_region->trim_end((position - pull_back_frames + crossfade_len));
+			} else {
+				(*r)->region()->trim_front( (last_region_end - pull_back_frames - crossfade_len));
+				last_region->trim_end( (last_region_end - pull_back_frames) );
+			}
+			
+			_session->add_command (new StatefulDiffCommand ((*r)->region()));
+			_session->add_command (new StatefulDiffCommand (last_region));
+			
+			last_region = (*r)->region();
 		}
-
-		(*r)->region()->clear_changes ();
-		(*r)->region()->trim_front( (position - pull_back_samples));
-
-		last_region->clear_changes ();
-		last_region->trim_end( (position - pull_back_samples + crossfade_len));
-
-		_session->add_command (new StatefulDiffCommand ((*r)->region()));
-		_session->add_command (new StatefulDiffCommand (last_region));
-
-		last_region = (*r)->region();
 		idx++;
 	}
 
@@ -7175,6 +7228,7 @@ Editor::close_region_gaps ()
 
 	commit_reversible_command ();
 }
+
 
 void
 Editor::tab_to_transient (bool forward)
