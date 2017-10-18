@@ -45,6 +45,7 @@
 
 #include "gtkmm2ext/gui_thread.h"
 
+#include "ardour/filename_extensions.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/template_utils.h"
 
@@ -489,13 +490,13 @@ TemplateManager::export_all_templates ()
 	g_clear_error (&err);
 
 	FileChooserDialog dialog(_("Save Exported Template Archive"), FILE_CHOOSER_ACTION_SAVE);
-	dialog.set_filename (X_("templates.tar.xz"));
+	dialog.set_filename (X_("templates"));
 
 	dialog.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	FileFilter archive_filter;
-	archive_filter.add_pattern (X_("*.tar.xz"));
+	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::template_archive_suffix));
 	archive_filter.set_name (_("Template archives"));
 	dialog.add_filter (archive_filter);
 
@@ -507,9 +508,7 @@ TemplateManager::export_all_templates ()
 	}
 
 	string filename = dialog.get_filename ();
-	if (filename.compare (filename.size () - 7, 7, ".tar.xz")) {
-		filename += ".tar.xz";
-	}
+	filename += ARDOUR::template_archive_suffix;
 
 	if (g_file_test (filename.c_str(), G_FILE_TEST_EXISTS)) {
 		ArdourDialog dlg (_("File exists"), true);
@@ -573,7 +572,7 @@ TemplateManager::import_template_set ()
 	dialog.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
 
 	FileFilter archive_filter;
-	archive_filter.add_pattern (X_("*.tar.xz"));
+	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::template_archive_suffix));
 	archive_filter.set_name (_("Template archives"));
 	dialog.add_filter (archive_filter);
 

@@ -1190,15 +1190,13 @@ ARDOUR_UI::starting ()
 			Searchpath ds (ARDOUR::ardour_data_search_path());
 			ds.add_subdirectory_to_paths ("sessions");
 			vector<string> demos;
-			find_files_matching_pattern (demos, ds, "*.tar.xz");
+			find_files_matching_pattern (demos, ds, ARDOUR::session_archive_suffix);
 
 			ARDOUR::RecentSessions rs;
 			ARDOUR::read_recent_sessions (rs);
 
 			for (vector<string>::iterator i = demos.begin(); i != demos.end (); ++i) {
-				/* "demo-session" must be inside "demo-session.tar.xz"
-				 * strip ".tar.xz"
-				 */
+				/* "demo-session" must be inside "demo-session.<session_archive_suffix>" */
 				std::string name = basename_nosuffix (basename_nosuffix (*i));
 				std::string path = Glib::build_filename (dspd, name);
 				/* skip if session-dir already exists */
