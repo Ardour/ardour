@@ -69,8 +69,6 @@ public:
 	*/
 	int32_t   get_boolean_masters () const;
 
-	std::vector<PBD::ID> masters () const;
-
 	PBD::Signal0<void> MasterStatusChange;
 
 	void use_saved_master_ratios ();
