@@ -171,18 +171,9 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_fader->set_control (boost::shared_ptr<AutomationControl>());
 	_vpot->set_control (boost::shared_ptr<AutomationControl>());
 
-	_surface->write (_solo->set_state(on));
-	_surface->write (_solo->set_state(off));
-	
-	_surface->write (_mute->set_state(on));
-	_surface->write (_mute->set_state(off));
-	
-	_surface->write (_select->set_state(on));
-	_surface->write (_select->set_state(off));
-
 	_stripable = r;
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	if (!r) {
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("Surface %1 Strip %2 mapped to null route\n", _surface->number(), _index));
@@ -263,7 +254,7 @@ Strip::reset_stripable ()
 
 	_stripable.reset();
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	notify_all ();
 }
@@ -300,6 +291,7 @@ Strip::notify_solo_changed ()
 //		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
 //	}
 
+	_solo->mark_dirty ();
 	_trickle_counter = 0;
 }
 
@@ -316,6 +308,7 @@ Strip::notify_mute_changed ()
 //		_surface->write (_mute->zero());
 //	}
 
+	_mute->mark_dirty ();
 	_trickle_counter = 0;
 }
 
@@ -334,6 +327,7 @@ Strip::notify_stripable_deleted ()
 void
 Strip::notify_gain_changed (bool force_update)
 {
+	_fader->mark_dirty();
 	_trickle_counter = 0;
 }
 
@@ -350,6 +344,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void
 Strip::update_selection_state ()
 {
+	_select->mark_dirty ();
 	_trickle_counter = 0;
 
 //	if(_stripable) {
@@ -365,12 +360,14 @@ Strip::show_stripable_name ()
 void
 Strip::notify_vpot_change ()
 {
+	_vpot->mark_dirty();
 	_trickle_counter = 0;
 }
 
 void
 Strip::notify_panner_azi_changed (bool force_update)
 {
+	_vpot->mark_dirty();
 	_trickle_counter = 0;
 }
 
@@ -402,6 +399,8 @@ Strip::select_event (Button&, ButtonState bs)
 		DEBUG_TRACE (DEBUG::US2400, "remove select button on release\n");
 		_surface->mcp().remove_down_select_button (_surface->number(), _index);
 	}
+
+	_trickle_counter = 0;
 }
 
 void
@@ -602,7 +601,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 
 	update_meter ();
 
-	if ( _trickle_counter %5 == 0 ) {
+	if ( _trickle_counter %24 == 0 ) {
 
 		if ( _fader->control() ) {
 			_surface->write (_fader->set_position (_fader->control()->internal_to_interface (_fader->control()->get_value ())));
@@ -627,7 +626,13 @@ Strip::periodic (ARDOUR::microseconds_t now)
 		}
 	
 	}
+	
+	//after a hard write, queue us for trickling data later
+	if (_trickle_counter == 0)
+		_trickle_counter = global_index()+1;
+
 	_trickle_counter++;
+	
 }
 
 void
@@ -932,7 +937,7 @@ Strip::set_vpot_parameter (AutomationType p)
 
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("switch to vpot mode %1\n", p));
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	switch (p) {
 	case PanAzimuthAutomation:
@@ -967,8 +972,13 @@ Strip::is_midi_track () const
 }
 
 void
-Strip::reset_saved_values ()
+Strip::mark_dirty ()
 {
+	_fader->mark_dirty();
+	_vpot->mark_dirty();
+	_solo->mark_dirty();
+	_mute->mark_dirty();
+	_trickle_counter=0;
 }
 
 void

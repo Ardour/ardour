@@ -85,7 +85,8 @@ public:
 
 	void update_selection_state ();
 
-	int global_index() { return _surface->mcp().global_index (*this); }
+	void set_global_index( int g ) { _global_index = g; }
+	int global_index() { return _global_index; }
 
 private:
 	enum VPotDisplayMode {
@@ -101,6 +102,7 @@ private:
 	Fader*   _fader;
 	Meter*   _meter;
 	int      _index;
+	int      _global_index;
 	Surface* _surface;
 	bool     _controls_locked;
 	bool     _transport_is_rolling;
@@ -139,7 +141,7 @@ private:
 	void set_vpot_parameter (ARDOUR::AutomationType);
 	void show_stripable_name ();
 
-	void reset_saved_values ();
+	void mark_dirty ();
 
 	bool is_midi_track () const;
 

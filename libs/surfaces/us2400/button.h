@@ -104,6 +104,8 @@ public:
 
 	Surface& surface() const { return _surface; }
 
+	void mark_dirty() { _led.mark_dirty(); }
+
 	void pressed ();
 	void released ();
 

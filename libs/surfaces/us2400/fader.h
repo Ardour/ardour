@@ -26,6 +26,8 @@ class Fader : public Control
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 
+	void mark_dirty() { last_update_position = llast_update_position = -1; }
+
   private:
 	float position;
 	int   last_update_position;

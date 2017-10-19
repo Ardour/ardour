@@ -155,7 +155,7 @@ int
 SurfacePort::write (const MidiByteArray & mba)
 {
 	if (mba.empty()) {
-		DEBUG_TRACE (DEBUG::US2400, string_compose ("port %1 asked to write an empty MBA\n", output_port().name()));
+//		DEBUG_TRACE (DEBUG::US2400, string_compose ("port %1 asked to write an empty MBA\n", output_port().name()));
 		return 0;
 	}
 
@@ -170,6 +170,7 @@ SurfacePort::write (const MidiByteArray & mba)
 	 */
 
 	int count = output_port().write (&mba[0], mba.size(), 0);
+	g_usleep (1000);
 
 	if  (count != (int) mba.size()) {
 

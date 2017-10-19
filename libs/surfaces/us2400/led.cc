@@ -52,12 +52,9 @@ Led::set_state (LedState new_state)
 	llast_state = last_state;
 	last_state = new_state;
 	
-
-	state = new_state;
-
 	MIDI::byte msg = 0;
 
-	switch  (state.state()) {
+	switch  (new_state.state()) {
 	case LedState::on:
 		msg = 0x7f;
 		break;

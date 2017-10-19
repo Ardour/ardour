@@ -412,7 +412,7 @@ US2400Protocol::set_active (bool yn)
 		/* set up periodic task for timecode display and metering and automation
 		 */
 
-		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (10); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &US2400Protocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
@@ -540,25 +540,11 @@ void
 US2400Protocol::device_ready ()
 {
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("device ready init (active=%1)\n", active()));
+
+	//this gets called every time a new surface appears; we have to do this to reset the banking etc
+	//particularly when the user is setting it up the first time; we can't guarantee the order that they will be connected
+	
 	update_surfaces ();
-
-	update_global_button (Button::Send, on);
-	update_global_button (Button::Send, off);
-
-	update_global_button (Button::Scrub, on);
-	update_global_button (Button::Scrub, off);
-
-	update_global_button (Button::ClearSolo, on);
-	update_global_button (Button::ClearSolo, off);
-
-	update_global_button (Button::Pan, off);
-	update_global_button (Button::Pan, on);
-
-	update_global_button (Button::Flip, on);
-	update_global_button (Button::Flip, off);
-
-	update_global_button (Button::MstrSelect, on);
-	update_global_button (Button::MstrSelect, off);
 
 	set_subview_mode (US2400Protocol::None, first_selected_stripable());
 }
@@ -595,7 +581,22 @@ US2400Protocol::initialize()
 
 	}
 
-	// update global buttons and displays
+	update_global_button (Button::Send, on);
+	update_global_button (Button::Send, off);
+
+	update_global_button (Button::Scrub, on);
+	update_global_button (Button::Scrub, off);
+
+	notify_solo_active_changed(false);
+
+	update_global_button (Button::Pan, off);
+	update_global_button (Button::Pan, on);
+
+	update_global_button (Button::Flip, on);
+	update_global_button (Button::Flip, off);
+
+	update_global_button (Button::MstrSelect, on);
+	update_global_button (Button::MstrSelect, off);
 
 	notify_transport_state_changed();
 
@@ -1853,15 +1854,11 @@ US2400Protocol::stripable_selection_changed ()
 		(*si)->update_strip_selection ();
 	}
 
-printf("stripable_selection_changed\n");
-
 	//first check for the dedicated Master strip
 	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
 	if (s && s->is_master()) {
-printf("stripable_selection_changed  found master as selected_stripable\n");
 		update_global_button(Button::MstrSelect, on);  //NOTE:  surface does not respond to this
 	} else {
-if (s) printf("stripable_selection_changed  not master:  %s\n", s->name().c_str());
 		update_global_button(Button::MstrSelect, off);
 
 		//not the master;  now check for other strips ( this will only allow a selection if the strip is mapped on our surface )
@@ -1879,7 +1876,6 @@ if (s) printf("stripable_selection_changed  not master:  %s\n", s->name().c_str(
 		 */
 
 		if (set_subview_mode (TrackView, s)) {
-printf("set_subview_mode failed for master... (?)\n");
 			set_subview_mode (None, boost::shared_ptr<Stripable>());
 		}
 
