@@ -60,11 +60,66 @@ OSCRouteObserver::~OSCRouteObserver ()
 }
 
 void
+OSCRouteObserver::no_strip ()
+{
+	// This gets called on drop references
+	_init = true;
+
+	strip_connections.drop_connections ();
+	/*
+	 * The strip will sit idle at this point doing nothing until
+	 * the surface has recalculated it's strip list and then calls
+	 * refresh_strip. Otherwise refresh strip will get a strip address
+	 * that does not exist... Crash
+	 */
+ }
+	
+void
 OSCRouteObserver::refresh_strip (bool force)
 {
 	_init = true;
+	uint32_t sid = sur->bank + ssid - 2;
+	if (sid >= sur->strips.size ()) {
+		// this _should_ only occure if the number of strips is less than banksize
+		clear_strip ();
+		return;
+	}
+	// future
+	/*if (sur->linkset) {
+		//to be added with linkset stuff
+		if (_osc.linksets[sur->linkset]->not_ready)
+			clear_strip ();
+			switch (ssid) {
+				case 1:
+					_osc.text_message_with_id ("/strip/name", ssid, "Device", addr);
+					break;
+				case 2:
+					_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), addr);
+					break;
+				case 3:
+					_osc.text_message_with_id ("/strip/name", ssid, "Missing", addr);
+					break;
+				case 4:
+					_osc.text_message_with_id ("/strip/name", ssid, "from", addr);
+					break;
+				case 5:
+					_osc.text_message_with_id ("/strip/name", ssid, "Linkset", addr);
+					break;
+				default:
+					break;
+			}
+			return;
+		}
+	}*/
 
-	_strip = sur->strips[sur->bank + ssid - 2];
+	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->strips[sur->bank + ssid - 2];
+	if (_strip && (new_strip == _strip) && !force) {
+		_init = false;
+		return;
+	}
+
+	_strip = new_strip;
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::no_strip, this), OSC::instance());
 	as = ARDOUR::Off;
 
 	if (sur->feedback[0]) { // buttons are separate feedback
@@ -129,6 +184,50 @@ OSCRouteObserver::refresh_strip (bool force)
 	tick();
 
 }
+
+void
+OSCRouteObserver::clear_strip ()
+{
+	_init = true;
+
+	strip_connections.drop_connections ();
+
+	// all strip buttons should be off and faders 0 and etc.
+	_osc.float_message_with_id ("/strip/expand", ssid, 0, addr);
+	if (sur->feedback[0]) { // buttons are separate feedback
+		_osc.text_message_with_id ("/strip/name", ssid, " ", addr);
+		_osc.float_message_with_id ("/strip/mute", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/solo", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/recenable", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/record_safe", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/monitor_input", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/monitor_disk", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/gui_select", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/select", ssid, 0, addr);
+	}
+	if (sur->feedback[1]) { // level controls
+		if (sur->gainmode) {
+			_osc.float_message_with_id ("/strip/fader", ssid, 0, addr);
+		} else {
+			_osc.float_message_with_id ("/strip/gain", ssid, -193, addr);
+		}
+		_osc.float_message_with_id ("/strip/trimdB", ssid, 0, addr);
+		_osc.float_message_with_id ("/strip/pan_stereo_position", ssid, 0.5, addr);
+	}
+	if (sur->feedback[9]) {
+		_osc.float_message_with_id ("/strip/signal", ssid, 0, addr);
+	}
+	if (sur->feedback[7]) {
+		if (sur->gainmode) {
+			_osc.float_message_with_id ("/strip/meter", ssid, 0, addr);
+		} else {
+			_osc.float_message_with_id ("/strip/meter", ssid, -193, addr);
+		}
+	}else if (sur->feedback[8]) {
+		_osc.float_message_with_id ("/strip/meter", ssid, 0, addr);
+	}
+}
+
 
 void
 OSCRouteObserver::tick ()

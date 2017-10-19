@@ -125,11 +125,26 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 // keep a surface's global setup by remote server url
 	struct OSCSurface {
 	public:
+		//global
 		std::string remote_url;		// the url these setting belong to
 		bool no_clear;				// don't send osc clear messages on strip change
 		JogMode jogmode;			// current jogmode
+		OSCGlobalObserver* global_obs;	// pointer to this surface's global observer
+		uint32_t nstrips;			// how many strips are there for strip_types
+		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
+		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
+		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
+		Sorted strips;				// list of stripables for this surface
+		// strips
 		uint32_t bank;				// current bank
 		uint32_t bank_size;			// size of banks for this surface
+		std::vector<OSCRouteObserver*> observers;	// route observers for this surface
+		std::bitset<32> strip_types;// what strip types are a part of this bank
+		//select
+		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
+		uint32_t expand;			// Used by /select/select
+		bool expand_enable;			// use expand instead of select
+		boost::shared_ptr<ARDOUR::Stripable> select; // stripable this surface uses (maybe expand strip)		
 		int plug_page;				// current plugin page
 		uint32_t plug_page_size;	// plugin page size (number of controls)
 		int plugin_id;			// id of current plugin
@@ -138,18 +153,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		int send_page;				// current send page
 		uint32_t send_page_size;	// send page size in channels
 		PBD::ScopedConnection proc_connection; // for processor signal monitoring
-		std::bitset<32> strip_types;// what strip types are a part of this bank
-		uint32_t nstrips;			// how many strips are there for strip_types
-		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
-		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
-		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
-		uint32_t expand;			// Used by /select/select
-		bool expand_enable;			// use expand instead of select
-		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
-		Sorted strips;				// list of stripables for this surface
+		// cue
 		bool cue;					// is this a cue surface
 		uint32_t aux;				// aux index for this cue surface
 		Sorted sends;				// list of sends for cue aux
+		OSCCueObserver* cue_obs;	// pointer to this surface's cue observer
 	};
 		/*
 		 * feedback bits:
@@ -248,7 +256,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int check_surface (lo_message msg);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
-	void global_feedback (OSCSurface sur, lo_address addr);
+	void global_feedback (OSCSurface* sur, lo_address addr);
+	void strip_feedback (OSCSurface* sur);
+	void surface_destroy (OSCSurface* sur);
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
 	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);
@@ -677,9 +687,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_eq_shape (int id, float val, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
-	void end_listen (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
-	void drop_route (boost::weak_ptr<ARDOUR::Stripable>);
-	void route_lost (boost::weak_ptr<ARDOUR::Stripable>);
 	void gui_selection_changed (void);
 
 	void route_name_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> r, lo_address addr);
@@ -694,19 +701,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PBD::ScopedConnectionList session_connections;
 	PBD::ScopedConnectionList cueobserver_connections;
 
-	int route_send_fail (std::string path, uint32_t ssid, float val, lo_address addr);
 	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
 	int sel_fail (std::string path, float val, lo_address addr);
-
-	typedef std::list<OSCRouteObserver*> RouteObservers;
-
-	RouteObservers route_observers;
-
-	typedef std::list<OSCGlobalObserver*> GlobalObservers;
-	GlobalObservers global_observers;
-
-	typedef std::list<OSCCueObserver*> CueObservers;
-	CueObservers cue_observers;
 
 	void debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc);
 

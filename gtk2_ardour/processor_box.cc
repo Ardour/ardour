@@ -2627,28 +2627,14 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	if (p->window_proxy()) {
 		return;
 	}
-
-	/* not on the list; add it */
-
-	string loc;
-#if 0 // is this still needed? Why?
-	if (_parent_strip) {
-		if (_parent_strip->mixer_owned()) {
-			loc = X_("M");
-		} else {
-			loc = X_("R");
-		}
-	} else {
-		loc = X_("P");
+	if (!boost::dynamic_pointer_cast<PluginInsert> (p)) {
+		return;
 	}
-#else
-	loc = X_("P");
-#endif
 
 	ProcessorWindowProxy* wp = new ProcessorWindowProxy (
-		string_compose ("%1-%2-%3", loc, _route->id(), p->id()),
-		this,
-		w);
+			string_compose ("P-%1-%2", _route->id(), p->id()),
+			this,
+			w);
 
 	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
 
@@ -2667,9 +2653,12 @@ ProcessorBox::maybe_add_processor_pin_mgr (boost::weak_ptr<Processor> w)
 	if (!p || p->pinmgr_proxy ()) {
 		return;
 	}
+	if (!boost::dynamic_pointer_cast<PluginInsert> (p)) {
+		return;
+	}
 
 	PluginPinWindowProxy* wp = new PluginPinWindowProxy (
-			string_compose ("PM-%2-%3", _route->id(), p->id()), w);
+			string_compose ("PM-%1-%2", _route->id(), p->id()), w);
 	wp->set_session (_session);
 
 	const XMLNode* ui_xml = _session->extra_xml (X_("UI"));
