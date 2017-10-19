@@ -35,12 +35,73 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boost::shared_ptr<ARDOUR::Stripable> >& snds, lo_address a)
-	: sends (snds)
-	, _strip (s)
+OSCCueObserver::OSCCueObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su)
+	:  _osc (o)
+	,sur (su)
 	, tick_enable (false)
 {
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	refresh_strip (true);
+}
+
+OSCCueObserver::~OSCCueObserver ()
+{
+	tick_enable = false;
+	no_strip ();
+	lo_address_free (addr);
+}
+
+void
+OSCCueObserver::clear_observer ()
+{
+	tick_enable = false;
+
+	strip_connections.drop_connections ();
+	send_end ();
+	// all strip buttons should be off and faders 0 and etc.
+	_osc.text_message_with_id ("/cue/name", 0, " ", addr);
+	_osc.float_message ("/cue/mute", 0, addr);
+	_osc.float_message ("/cue/fader", 0, addr);
+	_osc.float_message ("/cue/signal", 0, addr);
+
+}
+
+void
+OSCCueObserver::no_strip ()
+{
+	// This gets called on drop references
+	tick_enable = false;
+
+	strip_connections.drop_connections ();
+	/*
+	 * The strip will sit idle at this point doing nothing until
+	 * the surface has recalculated it's strip list and then calls
+	 * refresh_strip. Otherwise refresh strip will get a strip address
+	 * that does not exist... Crash
+	 */
+ }
+
+void
+OSCCueObserver::refresh_strip (bool force)
+{
+	tick_enable = false;
+
+	uint32_t sid = sur->aux - 1;
+	if (sid >= sur->strips.size ()) {
+		sid = 0;
+	}
+
+	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->strips[sid];
+	if (_strip && (new_strip == _strip) && !force) {
+		tick_enable = true;
+		return;
+	}
+	strip_connections.drop_connections ();
+
+	send_end ();
+	_strip = new_strip;
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::no_strip, this), OSC::instance());
+	sends = sur->sends;
 
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
 	name_changed (ARDOUR::Properties::name, 0);
@@ -49,29 +110,14 @@ OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boos
 	send_change_message ("/cue/mute", 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
-	_last_gain.push_back (0.0);
-	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
-	send_gain_message (0, _strip->gain_control());
+	_last_gain.push_back (-1.0);
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control(), false), OSC::instance());
+	send_gain_message (0, _strip->gain_control(), true);
 
 	send_init ();
 
 	tick_enable = true;
 	tick ();
-}
-
-OSCCueObserver::~OSCCueObserver ()
-{
-	tick_enable = false;
-
-	strip_connections.drop_connections ();
-	send_end ();
-	// all strip buttons should be off and faders 0 and etc.
-	text_with_id ("/cue/name", 0, " ");
-	clear_strip ("/cue/mute", 0);
-	clear_strip ("/cue/fader", 0);
-	clear_strip ("/cue/signal", 0);
-
-	lo_address_free (addr);
 }
 
 void
@@ -88,17 +134,13 @@ OSCCueObserver::tick ()
 	}
 	if (now_meter < -120) now_meter = -193;
 	if (_last_meter != now_meter) {
-		string path = "/cue/signal";
-		lo_message msg = lo_message_new ();
 		float signal;
 		if (now_meter < -40) {
 			signal = 0;
 		} else {
 			signal = 1;
 		}
-		lo_message_add_float (msg, signal);
-		lo_send_message (addr, path.c_str(), msg);
-		lo_message_free (msg);
+		_osc.float_message ("/cue/signal", signal, addr);
 	}
 	_last_meter = now_meter;
 
@@ -133,9 +175,9 @@ OSCCueObserver::send_init()
 
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
-				_last_gain.push_back (0.0);
-				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control()), OSC::instance());
-				send_gain_message (i + 1, send->gain_control());
+				_last_gain.push_back (-1.0);
+				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control(), false), OSC::instance());
+				send_gain_message (i + 1, send->gain_control(), true);
 			}
 			
 			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
@@ -151,10 +193,12 @@ OSCCueObserver::send_end ()
 {
 	send_connections.drop_connections ();
 	for (uint32_t i = 1; i <= sends.size(); i++) {
-		clear_strip (string_compose ("/cue/send/fader/%1", i), 0);
-		clear_strip (string_compose ("/cue/send/enable/%1", i), 0);
-		text_with_id ("/cue/send/name", i, " ");
+		_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
+		_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
+		_osc.text_message_with_id ("/cue/send/name", i, " ", addr);
 	}
+	gain_timeout.clear ();
+	_last_gain.clear ();
 }
 
 void
@@ -177,90 +221,48 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 		return;
 	}
 	if (id) {
-		text_with_id ("/cue/send/name", id, sends[id - 1]->name());
+		_osc.text_message_with_id ("/cue/send/name", id, sends[id - 1]->name(), addr);
 	} else {
-		text_with_id ("/cue/name", 0, _strip->name());
+		_osc.text_message ("/cue/name", _strip->name(), addr);
 	}
 }
 
 void
 OSCCueObserver::send_change_message (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
 {
-	lo_message msg = lo_message_new ();
-
+	// maybe don't need ID only used for mute- maybe mute can use enable
 	if (id) {
 		path = string_compose("%1/%2", path, id);
 	}
 	float val = controllable->get_value();
-	lo_message_add_float (msg, (float) controllable->internal_to_interface (val));
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	_osc.float_message (path, (float) controllable->internal_to_interface (val), addr);
 }
 
 void
-OSCCueObserver::text_with_id (string path, uint32_t id, string val)
-{
-	lo_message msg = lo_message_new ();
-	if (id) {
-		path = string_compose("%1/%2", path, id);
-	}
-
-	lo_message_add_string (msg, val.c_str());
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-}
-
-void
-OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable)
+OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable, bool force)
 {
 	if (_last_gain[id] != controllable->get_value()) {
 		_last_gain[id] = controllable->get_value();
 	} else {
 		return;
 	}
-	string path = "/cue";
 	if (id) {
-		path = "/cue/send";
+		_osc.text_message_with_id ("/cue/send/name", id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
+		_osc.float_message_with_id ("/cue/send/fader", id, controllable->internal_to_interface (controllable->get_value()), addr);
+	} else {
+		_osc.text_message ("/cue/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
+		_osc.float_message ("/cue/fader", controllable->internal_to_interface (controllable->get_value()), addr);
 	}
 
-	text_with_id (string_compose ("%1/name", path), id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
-	path = string_compose ("%1/fader", path);
-	if (id) {
-		path = string_compose ("%1/%2", path, id);
-	}
-	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, controllable->internal_to_interface (controllable->get_value()));
 	gain_timeout[id] = 8;
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
 }
 
 void
 OSCCueObserver::send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc)
 {
-	lo_message msg = lo_message_new ();
-
 	if (id) {
-		path = string_compose("%1/%2", path, id);
+		_osc.float_message_with_id (path, id, (float) proc->enabled(), addr);
+	} else {
+		_osc.float_message (path, (float) proc->enabled(), addr);
 	}
-	lo_message_add_float (msg, (float) proc->enabled());
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-	
 }
-
-void
-OSCCueObserver::clear_strip (string path, float val)
-{
-	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, val);
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-
-}
-

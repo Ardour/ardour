@@ -116,10 +116,9 @@ OSC::OSC (Session& s, uint32_t port)
 OSC::~OSC()
 {
 	tick = false;
-	std::cout << "OSC term before stop\n";
 	stop ();
-	std::cout << "OSC term after stop\n";
 	tear_down_gui ();
+	std::cout << "OSC stopped.\n";
 	_instance = 0;
 }
 
@@ -307,7 +306,6 @@ OSC::stop ()
 		surface_destroy (sur);
 	}
 	_surface.clear();
-	std::cout << "sur cleared.\n";
 
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
@@ -357,7 +355,7 @@ OSC::surface_destroy (OSCSurface* sur)
 		sur->sel_obs = 0;
 	}
 	if (sur->cue_obs) {
-		// sur->cue_obs->clear_observer ();
+		sur->cue_obs->clear_observer ();
 		delete sur->cue_obs;
 		sur->cue_obs = 0;
 	}
@@ -1598,22 +1596,16 @@ OSC::get_surface (lo_address addr)
 	{
 		_surface.push_back (s);
 	}
-	std::cout << "surface saved, do gui_selection\n";
 	// moved this down here as selection may need s.<anything to do with select> set
 	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
 		gui_selection_changed();
 	}
-	std::cout << "after gui_selection, call strip_feedback\n";
 
 	// set bank and strip feedback
 	strip_feedback (&s);
-	std::cout << "after strip_feedback, call global_feedback\n";
 
 	// Set global/master feedback
 	global_feedback (&s, addr);
-	usleep ((uint32_t) 20000);
-
-	std::cout << "after global_feedback\n";
 
 	return &_surface[_surface.size() - 1];
 }
@@ -1634,14 +1626,12 @@ OSC::global_feedback (OSCSurface* sur, lo_address addr)
 void
 OSC::strip_feedback (OSCSurface* sur)
 {
-	std::cout << "strip_feedback, begin\n";
 	// delete old observers
 	for (uint32_t i = 0; i < sur->observers.size(); i++) {
 		sur->observers[i]->clear_strip ();
 		delete sur->observers[i];
 	}
 	sur->observers.clear();
-	std::cout << string_compose ("observers delected: size: %1\n", sur->observers.size());
 
 	// get freash striplist - just in case
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
@@ -1657,7 +1647,6 @@ OSC::strip_feedback (OSCSurface* sur)
 			sur->observers.push_back (o);
 		}
 	}
-	std::cout << string_compose ("observers created: size: %1\n", sur->observers.size());
 }
 
 void
@@ -4976,6 +4965,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 int
 OSC::cue_set (uint32_t aux, lo_message msg)
 {
+	set_surface_feedback (0, msg);
 	return _cue_set (aux, get_address (msg));
 }
 
@@ -5014,9 +5004,13 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 
 				// make a list of stripables with sends that go to this bus
 				s->sends = cue_get_sorted_stripables(stp, aux, addr);
-				// start cue observer
-				OSCCueObserver* co = new OSCCueObserver (stp, s->sends, addr);
-				s->cue_obs = co;
+				if (s->cue_obs) {
+					s->cue_obs->refresh_strip (false);
+				} else {
+					// start cue observer
+					OSCCueObserver* co = new OSCCueObserver (*this, s);
+					s->cue_obs = co;
+				}
 				ret = 0;
 			}
 
@@ -5170,7 +5164,7 @@ OSC::float_message_with_id (std::string path, uint32_t ssid, float value, lo_add
 {
 	OSCSurface *sur = get_surface(addr);
 	lo_message msg = lo_message_new ();
-	if (sur->feedback[2]) {
+	if (sur->cue || sur->feedback[2]) {
 		path = string_compose ("%1/%2", path, ssid);
 	} else {
 		lo_message_add_int32 (msg, ssid);
@@ -5187,7 +5181,7 @@ OSC::int_message_with_id (std::string path, uint32_t ssid, int value, lo_address
 {
 	OSCSurface *sur = get_surface(addr);
 	lo_message msg = lo_message_new ();
-	if (sur->feedback[2]) {
+	if (sur->cue || sur->feedback[2]) {
 		path = string_compose ("%1/%2", path, ssid);
 	} else {
 		lo_message_add_int32 (msg, ssid);
@@ -5218,7 +5212,7 @@ OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, lo_
 {
 	OSCSurface *sur = get_surface(addr);
 	lo_message msg = lo_message_new ();
-	if (sur->feedback[2]) {
+	if (sur->cue || sur->feedback[2]) {
 		path = string_compose ("%1/%2", path, ssid);
 	} else {
 		lo_message_add_int32 (msg, ssid);
