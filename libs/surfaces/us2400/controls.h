@@ -71,6 +71,8 @@ public:
 	virtual void set_control (boost::shared_ptr<ARDOUR::AutomationControl>);
 	virtual void reset_control () { normal_ac.reset(); } 
 
+	virtual void mark_dirty() = 0;
+
 	float get_value ();
 	void set_value (float val, PBD::Controllable::GroupControlDisposition gcd = PBD::Controllable::UseGroup);
 

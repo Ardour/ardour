@@ -57,6 +57,7 @@ public:
 		Left,
 		Right,
 		Flip,
+		MstrSelect,
 
 		FinalGlobalButton,
 
@@ -102,6 +103,8 @@ public:
 	static std::string id_to_name (Button::ID);
 
 	Surface& surface() const { return _surface; }
+
+	void mark_dirty() { _led.mark_dirty(); }
 
 	void pressed ();
 	void released ();

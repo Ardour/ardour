@@ -41,11 +41,12 @@ public:
 
 	Led (int id, std::string name, Group & group)
 		: Control (id, name, group)
-		, state (off)
-		, last_state (off)
-		, llast_state (off)
+		, last_state (none)
+		, llast_state (none)
 	{
 	}
+
+	void mark_dirty() { last_state = llast_state = none; }
 
 	Led & led() { return *this; }
 	MidiByteArray set_state (LedState);
@@ -55,7 +56,6 @@ public:
 	static Control* factory (Surface&, int id, const char*, Group&);
 
   private:
-	LedState state;
 	LedState last_state;
 	LedState llast_state;
 };

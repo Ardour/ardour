@@ -33,18 +33,44 @@ using namespace ARDOUR;
 using namespace ArdourSurface;
 using namespace ArdourSurface::FP8Types;
 
+uint8_t /* static */
+FP8Strip::midi_ctrl_id (CtrlElement type, uint8_t id)
+{
+	assert (id < N_STRIPS);
+	switch (type) {
+		case BtnSolo:
+			return 0x08 + id;
+		case BtnMute:
+			return 0x10 + id;
+		case BtnSelect:
+			return 0x18 + id;
+		case Fader:
+			return 0xe0 + id;
+		case Meter:
+			return 0xd0 + id;
+		case Redux:
+			return 0xd8 + id;
+		case BarVal:
+			return 0x30 + id;
+		case BarMode:
+			return 0x38 + id;
+	}
+	assert (0);
+	return 0;
+}
+
 FP8Strip::FP8Strip (FP8Base& b, uint8_t id)
 	: _base (b)
 	, _id (id)
-	, _solo   (b, 0x08 + id)
-	, _mute   (b, 0x10 + id)
-	, _selrec (b, 0x18 + id, true)
+	, _solo   (b, midi_ctrl_id (BtnSolo, id))
+	, _mute   (b, midi_ctrl_id (BtnMute, id))
+	, _selrec (b, midi_ctrl_id (BtnSelect, id), true)
 	, _touching (false)
 	, _strip_mode (0)
 	, _bar_mode (0)
 	, _displaymode (Stripables)
 {
-	assert (id < 8);
+	assert (id < N_STRIPS);
 
 	_last_fader = 65535;
 	_last_meter = _last_redux = _last_barpos = 0xff;
@@ -121,10 +147,10 @@ FP8Strip::initialize ()
 
 	set_bar_mode (4); // off
 
-	_base.tx_midi2 (0xd0 + _id, 0); // reset meter
-	_base.tx_midi2 (0xd8 + _id, 0); // reset redux
+	_base.tx_midi2 (midi_ctrl_id (Meter, _id), 0); // reset meter
+	_base.tx_midi2 (midi_ctrl_id (Redux, _id), 0); // reset redux
 
-	_base.tx_midi3 (0xe0 + _id, 0, 0); // fader
+	_base.tx_midi3 (midi_ctrl_id (Fader, _id), 0, 0); // fader
 
 	/* clear cached values */
 	_last_fader = 65535;
@@ -398,7 +424,7 @@ FP8Strip::notify_fader_changed ()
 		return;
 	}
 	_last_fader = mv;
-	_base.tx_midi3 (0xe0 + _id, (mv & 0x7f), (mv >> 7) & 0x7f);
+	_base.tx_midi3 (midi_ctrl_id (Fader, _id), (mv & 0x7f), (mv >> 7) & 0x7f);
 }
 
 void
@@ -501,13 +527,13 @@ FP8Strip::periodic_update_meter ()
 		// TODO: deflect meter
 		int val = std::min (127.f, std::max (0.f, 2.f * dB + 127.f));
 		if (val != _last_meter || val > 0) {
-			_base.tx_midi2 (0xd0 + _id, val & 0x7f); // falls off automatically
+			_base.tx_midi2 (midi_ctrl_id (Meter, _id), val & 0x7f); // falls off automatically
 			_last_meter = val;
 		}
 
 	} else if (show_meters) {
 		if (0 != _last_meter) {
-			_base.tx_midi2 (0xd0 + _id, 0);
+			_base.tx_midi2 (midi_ctrl_id (Meter, _id), 0);
 			_last_meter = 0;
 		}
 	}
@@ -518,12 +544,12 @@ FP8Strip::periodic_update_meter ()
 		// TODO: deflect redux
 		int val = std::min (127.f, std::max (0.f, rx));
 		if (val != _last_redux) {
-			_base.tx_midi2 (0xd8 + _id, val & 0x7f);
+			_base.tx_midi2 (midi_ctrl_id (Redux, _id), val & 0x7f);
 			_last_redux = val;
 		}
 	} else if (show_meters) {
 		if (0 != _last_redux) {
-			_base.tx_midi2 (0xd8 + _id, 0);
+			_base.tx_midi2 (midi_ctrl_id (Redux, _id), 0);
 			_last_redux = 0;
 		}
 	}
@@ -535,7 +561,7 @@ FP8Strip::periodic_update_meter ()
 			float barpos = _fader_ctrl->internal_to_interface (_fader_ctrl->get_value());
 			int val = std::min (127.f, std::max (0.f, barpos * 128.f));
 			if (val != _last_barpos) {
-				_base.tx_midi3 (0xb0, 0x30 + _id, val & 0x7f);
+				_base.tx_midi3 (0xb0, midi_ctrl_id (BarVal, _id), val & 0x7f);
 				_last_barpos = val;
 			}
 		} else {
@@ -559,7 +585,7 @@ FP8Strip::periodic_update_meter ()
 		int val = std::min (127.f, std::max (0.f, panpos * 128.f));
 		set_bar_mode (have_panner ? 1 : 4); // Bipolar or Off
 		if (val != _last_barpos && have_panner) {
-			_base.tx_midi3 (0xb0, 0x30 + _id, val & 0x7f);
+			_base.tx_midi3 (0xb0, midi_ctrl_id (BarVal, _id), val & 0x7f);
 			_last_barpos = val;
 		}
 		if (_base.twolinetext ()) {
@@ -620,12 +646,12 @@ FP8Strip::set_bar_mode (uint8_t bar_mode, bool force)
 	}
 
 	if (bar_mode == 4) {
-		_base.tx_midi3 (0xb0, 0x30 + _id, 0);
+		_base.tx_midi3 (0xb0, midi_ctrl_id (BarVal, _id), 0);
 		_last_barpos = 0xff;
 	}
 
 	_bar_mode = bar_mode;
-	_base.tx_midi3 (0xb0, 0x38 + _id, bar_mode);
+	_base.tx_midi3 (0xb0, midi_ctrl_id (BarMode, _id), bar_mode);
 }
 
 void

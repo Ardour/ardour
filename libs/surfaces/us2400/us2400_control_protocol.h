@@ -293,7 +293,6 @@ class US2400Protocol
 	ViewMode                 _view_mode;
 	SubViewMode              _subview_mode;
 	boost::shared_ptr<ARDOUR::Stripable> _subview_stripable;
-	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;
 	bool                     _metering_active;
@@ -396,6 +395,8 @@ class US2400Protocol
 	US2400::LedState dyn_release (US2400::Button &);
 	US2400::LedState flip_press (US2400::Button &);
 	US2400::LedState flip_release (US2400::Button &);
+	US2400::LedState mstr_press (US2400::Button &);
+	US2400::LedState mstr_release (US2400::Button &);
 	US2400::LedState name_value_press (US2400::Button &);
 	US2400::LedState name_value_release (US2400::Button &);
 //	US2400::LedState F1_press (US2400::Button &);

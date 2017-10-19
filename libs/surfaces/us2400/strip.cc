@@ -173,7 +173,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	_stripable = r;
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	if (!r) {
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("Surface %1 Strip %2 mapped to null route\n", _surface->number(), _index));
@@ -254,7 +254,7 @@ Strip::reset_stripable ()
 
 	_stripable.reset();
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	notify_all ();
 }
@@ -291,6 +291,7 @@ Strip::notify_solo_changed ()
 //		_surface->write (_solo->set_state (_stripable->solo_control()->soloed() ? on : off));
 //	}
 
+	_solo->mark_dirty ();
 	_trickle_counter = 0;
 }
 
@@ -307,6 +308,7 @@ Strip::notify_mute_changed ()
 //		_surface->write (_mute->zero());
 //	}
 
+	_mute->mark_dirty ();
 	_trickle_counter = 0;
 }
 
@@ -325,6 +327,7 @@ Strip::notify_stripable_deleted ()
 void
 Strip::notify_gain_changed (bool force_update)
 {
+	_fader->mark_dirty();
 	_trickle_counter = 0;
 }
 
@@ -341,6 +344,7 @@ Strip::notify_property_changed (const PropertyChange& what_changed)
 void
 Strip::update_selection_state ()
 {
+	_select->mark_dirty ();
 	_trickle_counter = 0;
 
 //	if(_stripable) {
@@ -356,12 +360,14 @@ Strip::show_stripable_name ()
 void
 Strip::notify_vpot_change ()
 {
+	_vpot->mark_dirty();
 	_trickle_counter = 0;
 }
 
 void
 Strip::notify_panner_azi_changed (bool force_update)
 {
+	_vpot->mark_dirty();
 	_trickle_counter = 0;
 }
 
@@ -393,6 +399,8 @@ Strip::select_event (Button&, ButtonState bs)
 		DEBUG_TRACE (DEBUG::US2400, "remove select button on release\n");
 		_surface->mcp().remove_down_select_button (_surface->number(), _index);
 	}
+
+	_trickle_counter = 0;
 }
 
 void
@@ -593,7 +601,7 @@ Strip::periodic (ARDOUR::microseconds_t now)
 
 	update_meter ();
 
-	if ( _trickle_counter %5 == 0 ) {
+	if ( _trickle_counter %24 == 0 ) {
 
 		if ( _fader->control() ) {
 			_surface->write (_fader->set_position (_fader->control()->internal_to_interface (_fader->control()->get_value ())));
@@ -618,7 +626,13 @@ Strip::periodic (ARDOUR::microseconds_t now)
 		}
 	
 	}
+	
+	//after a hard write, queue us for trickling data later
+	if (_trickle_counter == 0)
+		_trickle_counter = global_index()+1;
+
 	_trickle_counter++;
+	
 }
 
 void
@@ -776,8 +790,64 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	_vpot->set_mode(Pot::wrap);
 
 #ifdef MIXBUS
+
+	//Trim & dynamics
+	switch (global_pos) {
+	case 0:
+		pc = r->trim_control ();
+		_vpot->set_mode(Pot::boost_cut);
+		break;
+		
+	case 1:
+		pc = r->pan_azimuth_control ();
+		_vpot->set_mode(Pot::dot);
+		break;
+
+	case 2:
+		pc = r->comp_threshold_controllable();
+		break;
+		
+	case 3:
+		pc = r->comp_speed_controllable();
+		break;
+		
+	case 4:
+		pc = r->comp_mode_controllable();
+		_vpot->set_mode(Pot::wrap);
+		break;
+		
+	case 5:
+		pc = r->comp_makeup_controllable();
+		break;
+		
+		
+	}  //trim & dynamics
+	
+	
+	//EQ
 	int eq_band = -1;
-	if (r->is_input_strip ()) {
+	if (r->mixbus () || r->is_master()) {
+		
+		switch (global_pos) {
+
+			case 6:
+				pc = r->pan_width_control();
+				break;
+
+			case 7:
+				pc = r->tape_drive_controllable();
+				break;
+
+			case 8:
+			case 9:
+			case 10:
+				eq_band = (global_pos-8);
+				pc = r->eq_gain_controllable (eq_band);
+				_vpot->set_mode(Pot::boost_cut);
+				break;
+		}
+
+	} else if (r->is_input_strip ()) {
 
 #ifdef MIXBUS32C
 		switch (global_pos) {
@@ -828,39 +898,6 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	
 #endif
 
-		//trim & dynamics
-
-		switch (global_pos) {
-		case 0:
-			pc = r->trim_control ();
-			_vpot->set_mode(Pot::boost_cut);
-			break;
-			
-		case 1:
-			pc = r->pan_azimuth_control ();
-			_vpot->set_mode(Pot::dot);
-			break;
-
-		case 2:
-			pc = r->comp_threshold_controllable();
-			break;
-			
-		case 3:
-			pc = r->comp_speed_controllable();
-			break;
-			
-		case 4:
-			pc = r->comp_mode_controllable();
-			_vpot->set_mode(Pot::wrap);
-			break;
-			
-		case 5:
-			pc = r->comp_makeup_controllable();
-			break;
-			
-			
-		}  //trim & dynamics
-		
 		//mixbus sends
 		switch (global_pos) {
 		case 16:
@@ -873,7 +910,6 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		case 23:
 			pc = r->send_level_controllable ( global_pos - 16 );
 			break;
-		
 		}  //global_pos switch
 		
 	} //if input_strip
@@ -901,7 +937,7 @@ Strip::set_vpot_parameter (AutomationType p)
 
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("switch to vpot mode %1\n", p));
 
-	reset_saved_values ();
+	mark_dirty ();
 
 	switch (p) {
 	case PanAzimuthAutomation:
@@ -936,8 +972,13 @@ Strip::is_midi_track () const
 }
 
 void
-Strip::reset_saved_values ()
+Strip::mark_dirty ()
 {
+	_fader->mark_dirty();
+	_vpot->mark_dirty();
+	_solo->mark_dirty();
+	_mute->mark_dirty();
+	_trickle_counter=0;
 }
 
 void

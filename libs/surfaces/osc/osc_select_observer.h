@@ -48,7 +48,6 @@ class OSCSelectObserver
 	void eq_restart (int);
 	void clear_observer (void);
 	void refresh_strip (bool force);
-	void no_strip ();
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
@@ -99,7 +98,7 @@ class OSCSelectObserver
 	void send_enable (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
 	void eq_init (void);
 	void eq_end (void);
-	std::string set_path (std::string path, uint32_t id);
+	void no_strip ();
 };
 
 #endif /* __osc_oscselectobserver_h__ */

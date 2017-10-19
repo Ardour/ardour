@@ -352,6 +352,8 @@ Surface::init_strips (uint32_t n)
 
 		Strip* strip = new Strip (*this, name, i, strip_buttons);
 
+		strip->set_global_index( _number*n + i );
+
 		groups[name] = strip;
 		strips.push_back (strip);
 	}
@@ -414,6 +416,7 @@ Surface::setup_master ()
 	_master_fader->set_control (m->gain_control());
 	m->gain_control()->Changed.connect (master_connection, MISSING_INVALIDATOR, boost::bind (&Surface::master_gain_changed, this), ui_context());
 	_last_master_gain_written = FLT_MAX; /* some essentially impossible value */
+	_port->write (_master_fader->set_position (0.0));
 	master_gain_changed ();
 }
 
@@ -800,8 +803,7 @@ Surface::turn_it_on ()
 
 	_active = true;
 
-	if ( _stype == st_mcu )  //do this once, when we hear from the master. this sets up current bank, etc
-		_mcp.device_ready ();
+	_mcp.device_ready ();  //this gets redundantly called with each new surface connection; but this is desirable to get the banks set up correctly
 
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->notify_all ();
@@ -895,9 +897,11 @@ Surface::zero_controls ()
 void
 Surface::periodic (uint64_t now_usecs)
 {
-	master_gain_changed();
-	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
-		(*s)->periodic (now_usecs);
+	if (_active) {
+		master_gain_changed();
+		for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
+			(*s)->periodic (now_usecs);
+		}
 	}
 }
 

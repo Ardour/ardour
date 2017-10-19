@@ -46,6 +46,8 @@ public:
 	void send_update (Surface&, float dB);
 	bool enabled () const { return _enabled; }
 
+	void mark_dirty() {}
+
 	MidiByteArray zero();
 
 	static Control* factory (Surface&, int id, const char*, Group&);

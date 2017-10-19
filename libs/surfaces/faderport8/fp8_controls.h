@@ -154,7 +154,7 @@ protected:
 	CtrlButtonMap _ctrlmap;
 	MidiButtonMap _midimap_strip;
 
-	FP8Strip* chanstrip[8];
+	FP8Strip* chanstrip[N_STRIPS];
 
 	FP8Types::FaderMode      _fadermode;
 	FP8Types::NavigationMode _navmode;
