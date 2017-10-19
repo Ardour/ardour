@@ -96,7 +96,7 @@ public:
 		 std::vector<uint8_t> d;
 		 sysexhdr (d);
 		 d.push_back (0x12);
-		 d.push_back (id & 0x07);
+		 d.push_back (id & 0x0f);
 		 d.push_back (line & 0x03);
 		 d.push_back (align & 0x07);
 

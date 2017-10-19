@@ -28,6 +28,8 @@
 #include "fp8_base.h"
 #include "fp8_button.h"
 
+#define N_STRIPS 8
+
 namespace ARDOUR {
 	class Stripable;
 	class AutomationControl;
@@ -42,6 +44,19 @@ class FP8Strip
 public:
 	FP8Strip (FP8Base& b, uint8_t id);
 	~FP8Strip ();
+
+	enum CtrlElement {
+		BtnSolo,
+		BtnMute,
+		BtnSelect,
+		Fader,
+		Meter,
+		Redux,
+		BarVal,
+		BarMode
+	};
+
+	static uint8_t midi_ctrl_id (CtrlElement type, uint8_t id);
 
 	FP8ButtonInterface& solo_button () { return _solo; }
 	FP8ButtonInterface& mute_button () { return _mute; }

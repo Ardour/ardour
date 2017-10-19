@@ -354,7 +354,7 @@ FaderPort8::disconnected ()
 {
 	stop_midi_handling ();
 	if (_device_active) {
-		for (uint8_t id = 0; id < 8; ++id) {
+		for (uint8_t id = 0; id < N_STRIPS; ++id) {
 			_ctrls.strip(id).unset_controllables ();
 		}
 		_ctrls.all_lights_off ();
@@ -937,7 +937,7 @@ FaderPort8::assign_stripables (bool select_only)
 
 	int n_strips = strips.size();
 	int channel_off = get_channel_off (_ctrls.mix_mode ());
-	channel_off = std::min (channel_off, n_strips - 8);
+	channel_off = std::min (channel_off, n_strips - N_STRIPS);
 	channel_off = std::max (0, channel_off);
 	set_channel_off (_ctrls.mix_mode (), channel_off);
 
@@ -972,11 +972,11 @@ FaderPort8::assign_stripables (bool select_only)
 		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, boost::weak_ptr<Stripable> (*s)));
 		 _ctrls.strip(id).set_select_cb (cb);
 
-		if (++id == 8) {
+		if (++id == N_STRIPS) {
 			break;
 		}
 	}
-	for (; id < 8; ++id) {
+	for (; id < N_STRIPS; ++id) {
 		_ctrls.strip(id).unset_controllables (select_only ? (FP8Strip::CTRL_SELECT | FP8Strip::CTRL_TEXT3) : FP8Strip::CTRL_ALL);
 		_ctrls.strip(id).set_periodic_display_mode (FP8Strip::Stripables);
 	}
@@ -1106,7 +1106,7 @@ FaderPort8::assign_processor_ctrls ()
 
 	int n_parameters = std::max (toggle_params.size(), slider_params.size());
 
-	_parameter_off = std::min (_parameter_off, n_parameters - 8);
+	_parameter_off = std::min (_parameter_off, n_parameters - N_STRIPS);
 	_parameter_off = std::max (0, _parameter_off);
 
 	uint8_t id = 0;
@@ -1130,13 +1130,13 @@ FaderPort8::assign_processor_ctrls ()
 			_ctrls.strip(id).set_select_controllable (toggle_params[i]->ac);
 			_ctrls.strip(id).set_text_line (3, toggle_params[i]->name, true);
 		}
-		if (++id == 8) {
+		if (++id == N_STRIPS) {
 			break;
 		}
 	}
 
 	// clear remaining
-	for (; id < 8; ++id) {
+	for (; id < N_STRIPS; ++id) {
 		_ctrls.strip(id).unset_controllables ();
 	}
 }
@@ -1156,7 +1156,7 @@ FaderPort8::assign_plugin_presets (boost::shared_ptr<PluginInsert> pi)
 
 	int n_parameters = presets.size ();
 
-	_parameter_off = std::min (_parameter_off, n_parameters - 7);
+	_parameter_off = std::min (_parameter_off, n_parameters - (N_STRIPS - 1));
 	_parameter_off = std::max (0, _parameter_off);
 	Plugin::PresetRecord active = plugin->last_preset ();
 
@@ -1177,18 +1177,18 @@ FaderPort8::assign_plugin_presets (boost::shared_ptr<PluginInsert> pi)
 		_ctrls.strip(id).set_text_line (0, label.substr (0, 9));
 		_ctrls.strip(id).set_text_line (1, label.length () > 9 ? label.substr (9) : "");
 		_ctrls.strip(id).set_text_line (3, "PRESET", true);
-		if (++id == 7) {
+		if (++id == (N_STRIPS - 1)) {
 			break;
 		}
 	}
 
 	// clear remaining
-	for (; id < 7; ++id) {
+	for (; id < (N_STRIPS - 1); ++id) {
 		_ctrls.strip(id).unset_controllables ();
 	}
 
 	// pin clear-preset to the last slot
-	assert (id == 7);
+	assert (id == (N_STRIPS - 1));
 	_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT0 & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 	 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin_preset, this, SIZE_MAX));
 	_ctrls.strip(id).set_select_cb (cb);
@@ -1413,7 +1413,7 @@ FaderPort8::spill_plugins ()
 	}
 
 	int n_plugins = procs.size();
-	int spillwidth = 8;
+	int spillwidth = N_STRIPS;
 	bool have_well_known_eq = false;
 	bool have_well_known_comp = false;
 
@@ -1471,7 +1471,7 @@ FaderPort8::spill_plugins ()
 	}
 
 	if (have_well_known_comp) {
-			assert (id < 8);
+			assert (id < N_STRIPS);
 		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
@@ -1485,7 +1485,7 @@ FaderPort8::spill_plugins ()
 		 ++id;
 	}
 	if (have_well_known_eq) {
-			assert (id < 8);
+			assert (id < N_STRIPS);
 		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -1));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
@@ -1498,7 +1498,7 @@ FaderPort8::spill_plugins ()
 		 _ctrls.strip(id).set_text_line (3, "");
 		 ++id;
 	}
-	assert (id == 8);
+	assert (id == N_STRIPS);
 }
 
 /* ****************************************************************************
@@ -1528,7 +1528,7 @@ FaderPort8::assign_sends ()
 
 	set_periodic_display_mode (FP8Strip::SendDisplay);
 
-	_plugin_off = std::min (_plugin_off, n_sends - 8);
+	_plugin_off = std::min (_plugin_off, n_sends - N_STRIPS);
 	_plugin_off = std::max (0, _plugin_off);
 
 	uint8_t id = 0;
@@ -1548,16 +1548,16 @@ FaderPort8::assign_sends ()
 		_ctrls.strip(id).set_text_line (0, s->send_name (i));
 		_ctrls.strip(id).set_mute_controllable (s->send_enable_controllable (i));
 
-		if (++id == 8) {
+		if (++id == N_STRIPS) {
 			break;
 		}
 	}
 	// clear remaining
-	for (; id < 8; ++id) {
+	for (; id < N_STRIPS; ++id) {
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT3 & ~FP8Strip::CTRL_SELECT);
 	}
 #ifdef MIXBUS // master-assign on last solo
-	_ctrls.strip(7).set_solo_controllable (s->master_send_enable_controllable ());
+	_ctrls.strip(N_STRIPS - 1).set_solo_controllable (s->master_send_enable_controllable ());
 #endif
 	/* set select buttons */
 	assigned_stripable_connections.drop_connections ();
@@ -1602,7 +1602,7 @@ FaderPort8::assign_strips ()
 void
 FaderPort8::set_periodic_display_mode (FP8Strip::DisplayMode m)
 {
-	for (uint8_t id = 0; id < 8; ++id) {
+	for (uint8_t id = 0; id < N_STRIPS; ++id) {
 		_ctrls.strip(id).set_periodic_display_mode (m);
 	}
 }
@@ -1854,14 +1854,14 @@ FaderPort8::move_selected_into_view ()
 	int off = std::distance (strips.begin(), it);
 
 	int channel_off = get_channel_off (_ctrls.mix_mode ());
-	if (channel_off <= off && off < channel_off + 8) {
+	if (channel_off <= off && off < channel_off + N_STRIPS) {
 		return;
 	}
 
 	if (channel_off > off) {
 		channel_off = off;
 	} else {
-		channel_off = off - 7;
+		channel_off = off - (N_STRIPS - 1);
 	}
 	set_channel_off (_ctrls.mix_mode (), channel_off);
 	assign_strips ();
@@ -1913,7 +1913,7 @@ FaderPort8::select_prev_next (bool next)
 void
 FaderPort8::bank (bool down, bool page)
 {
-	int dt = page ? 8 : 1;
+	int dt = page ? N_STRIPS : 1;
 	if (down) {
 		dt *= -1;
 	}
@@ -1924,7 +1924,7 @@ FaderPort8::bank (bool down, bool page)
 void
 FaderPort8::bank_param (bool down, bool page)
 {
-	int dt = page ? 8 : 1;
+	int dt = page ? N_STRIPS : 1;
 	if (down) {
 		dt *= -1;
 	}

@@ -156,11 +156,11 @@ FP8Controls::FP8Controls (FP8Base& b)
 	BindMix (BtnMUser,    MixUser);
 
 	/* create channelstrips */
-	for (uint8_t id = 0; id < 8; ++id) {
+	for (uint8_t id = 0; id < N_STRIPS; ++id) {
 		chanstrip[id] = new FP8Strip (b, id);
-		_midimap_strip[0x08 + id] = &(chanstrip[id]->solo_button());
-		_midimap_strip[0x10 + id] = &(chanstrip[id]->mute_button());
-		_midimap_strip[0x18 + id] = &(chanstrip[id]->selrec_button());
+		_midimap_strip[FP8Strip::midi_ctrl_id (FP8Strip::BtnSolo, id)] = &(chanstrip[id]->solo_button());
+		_midimap_strip[FP8Strip::midi_ctrl_id (FP8Strip::BtnMute, id)] = &(chanstrip[id]->mute_button());
+		_midimap_strip[FP8Strip::midi_ctrl_id (FP8Strip::BtnSelect, id)] = &(chanstrip[id]->selrec_button());
 	}
 
 	/* set User button names */
@@ -190,7 +190,7 @@ FP8Controls::~FP8Controls ()
 	for (MidiButtonMap::const_iterator i = _midimap.begin (); i != _midimap.end (); ++i) {
 		delete i->second;
 	}
-	for (uint8_t id = 0; id < 8; ++id) {
+	for (uint8_t id = 0; id < N_STRIPS; ++id) {
 		delete chanstrip[id];
 	}
 	_midimap_strip.clear ();
@@ -260,7 +260,7 @@ FP8Controls::initialize ()
 	button (BtnMFX).set_color (0x0000ffff);
 	button (BtnMUser).set_color (0x0000ffff);
 
-	for (uint8_t id = 0; id < 8; ++id) {
+	for (uint8_t id = 0; id < N_STRIPS; ++id) {
 		chanstrip[id]->initialize ();
 	}
 
@@ -298,7 +298,7 @@ FP8Controls::button (ButtonId id)
 FP8Strip&
 FP8Controls::strip (uint8_t id)
 {
-	assert (id < 8);
+	assert (id < N_STRIPS);
 	return *chanstrip[id];
 }
 
@@ -326,14 +326,14 @@ FP8Controls::midi_event (uint8_t id, uint8_t val)
 bool
 FP8Controls::midi_touch (uint8_t id, uint8_t val)
 {
-	assert (id < 8);
+	assert (id < N_STRIPS);
 	return chanstrip[id]->midi_touch (val > 0x40);
 }
 
 bool
 FP8Controls::midi_fader (uint8_t id, unsigned short val)
 {
-	assert (id < 8);
+	assert (id < N_STRIPS);
 	return chanstrip[id]->midi_fader ((val >> 4) / 1023.f);
 }
 
