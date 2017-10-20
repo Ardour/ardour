@@ -191,6 +191,8 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		return;
 	}
 
+	PBD::Unwinder<bool> uw (_track_selection_change_without_scroll, true);
+
 	RouteGroup* group = NULL;
 	if (clicked_routeview) {
 		group = clicked_routeview->route()->route_group();
