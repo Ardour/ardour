@@ -974,6 +974,8 @@ LuaBindings::common (lua_State* L)
 		.beginWSPtrClass <Slavable> ("Slavable")
 		.addFunction ("assign", &Slavable::assign)
 		.addFunction ("unassign", &Slavable::unassign)
+		.addFunction ("masters", &Slavable::masters)
+		.addFunction ("assigned_to", &Slavable::assigned_to)
 		.endClass ()
 
 		.deriveWSPtrClass <Stripable, SessionObject> ("Stripable")
@@ -1035,6 +1037,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("gain_control", &VCA::gain_control)
 		.addFunction ("solo_control", &VCA::solo_control)
 		.addFunction ("mute_control", &VCA::mute_control)
+		.addFunction ("slaved_to", &VCA::slaved_to)
+		.addFunction ("slaved", &VCA::slaved)
 		.endClass ()
 
 		.deriveWSPtrClass <Route, Stripable> ("Route")
@@ -1563,6 +1567,10 @@ LuaBindings::common (lua_State* L)
 
 		// VCAList == std::list<boost::shared_ptr<VCA> >
 		.beginConstStdList <boost::shared_ptr<VCA> > ("VCAList")
+		.endClass ()
+
+		// VCAVector == std::vector<boost::shared_ptr<VCA> >
+		.beginConstStdVector <boost::shared_ptr<VCA> > ("VCAVector")
 		.endClass ()
 
 		// boost::shared_ptr<RouteList>
@@ -2185,6 +2193,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("disable_record", &Session::disable_record)
 		.addFunction ("route_by_id", &Session::route_by_id)
 		.addFunction ("route_by_name", &Session::route_by_name)
+		.addFunction ("stripable_by_id", &Session::stripable_by_id)
 		.addFunction ("get_remote_nth_stripable", &Session::get_remote_nth_stripable)
 		.addFunction ("get_remote_nth_route", &Session::get_remote_nth_route)
 		.addFunction ("route_by_selected_count", &Session::route_by_selected_count)
