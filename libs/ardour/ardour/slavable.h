@@ -51,7 +51,7 @@ public:
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int);
 
-	void assign (boost::shared_ptr<VCA>);
+	virtual void assign (boost::shared_ptr<VCA>);
 	void unassign (boost::shared_ptr<VCA>);
 
 	PBD::Signal2<void,boost::shared_ptr<VCA>,bool> AssignmentChange;
@@ -62,6 +62,11 @@ public:
 
 	/* signal sent VCAManager once assignment is possible */
 	static PBD::Signal1<void,VCAManager*> Assign;
+
+	std::vector<boost::shared_ptr<VCA> > masters (VCAManager*) const;
+
+	/** recursively test for master assignment to given VCA */
+	bool assigned_to (VCAManager*, boost::shared_ptr<VCA>) const;
 
 protected:
 	virtual SlavableControlList slavables () const = 0;

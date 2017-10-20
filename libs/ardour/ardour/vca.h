@@ -64,8 +64,10 @@ class LIBARDOUR_API VCA : public Stripable,
 
 	/* Slavable API */
 
-        bool slaved_to (boost::shared_ptr<VCA>) const;
-        bool slaved () const;
+	void assign (boost::shared_ptr<VCA>);
+
+	bool slaved_to (boost::shared_ptr<VCA>) const;
+	bool slaved () const;
 
 	/* Soloable API */
 

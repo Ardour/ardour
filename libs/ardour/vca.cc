@@ -208,6 +208,17 @@ VCA::slaved_to (boost::shared_ptr<VCA> vca) const
 	return _gain_control->slaved_to (vca->gain_control());
 }
 
+void
+VCA::assign (boost::shared_ptr<VCA> v)
+{
+	/* prevent recursive assignments */
+	if (assigned_to (_session.vca_manager_ptr (), v)) {
+		warning << _("Master assignment inored to prevent recursion") << endmsg;
+		return;
+	}
+	Slavable::assign (v);
+}
+
 SlavableControlList
 VCA::slavables () const
 {
