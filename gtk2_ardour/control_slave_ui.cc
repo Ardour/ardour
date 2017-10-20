@@ -191,21 +191,16 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 
-		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
-		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
-
-		if (gcs == gcm) {
-			/* asked to slave to self. not ok */
-			continue;
-		}
-
-		if (gcm->slaved_to (gcs)) {
-			/* master is already slaved to slave */
+		if (stripable->assigned_to (_session->vca_manager_ptr (), *v)) {
+			/* master(stripable) is directly or indirectly controlled by slave (v) */
 			continue;
 		}
 
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+
+		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
+		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
 
 		if (gcs->slaved_to (gcm)) {
 			item->set_active (true);
