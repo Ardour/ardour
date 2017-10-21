@@ -38,35 +38,9 @@ public:
 
 	Beats() : _beats(0), _ticks(0) {}
 
-	/** Normalize so ticks is within PPQN. */
-	void normalize() {
-		// First, fix negative ticks with positive beats
-		if (_beats >= 0) {
-			while (_ticks < 0) {
-				--_beats;
-				_ticks += PPQN;
-			}
-		}
-
-		// Work with positive beats and ticks to normalize
-		const int32_t sign  = _beats < 0 ? -1 : 1;
-		int32_t       beats = abs(_beats);
-		int32_t       ticks = abs(_ticks);
-
-		// Fix ticks greater than 1 beat
-		while (ticks >= PPQN) {
-			++beats;
-			ticks -= PPQN;
-		}
-
-		// Set fields with appropriate sign
-		_beats = sign * beats;
-		_ticks = sign * ticks;
-	}
-
 	/** Create from a precise BT time. */
-	explicit Beats(int32_t b, int32_t t) : _beats(b), _ticks(t) {
-		normalize();
+	explicit Beats(int32_t b, int32_t t) {
+		normalize(b, t);
 	}
 
 	/** Create from a real number of beats. */
@@ -74,8 +48,10 @@ public:
 		double       whole;
 		const double frac = modf(time, &whole);
 
-		_beats = whole;
-		_ticks = frac * PPQN;
+		int64_t beats = whole;
+		int64_t ticks = round(frac * PPQN);
+
+		normalize(beats, ticks);
 	}
 
 	/** Create from an integer number of beats. */
@@ -103,8 +79,9 @@ public:
 		double       whole;
 		const double frac = modf(time, &whole);
 
-		_beats = whole;
-		_ticks = frac * PPQN;
+		int64_t beats = whole;
+		int64_t ticks = round(frac * PPQN);
+		normalize(beats, ticks);
 		return *this;
 	}
 
@@ -115,19 +92,32 @@ public:
 	}
 
 	Beats round_to_beat() const {
-		return (_ticks >= (PPQN/2)) ? Beats (_beats + 1, 0) : Beats (_beats, 0);
+		int32_t extra_ticks;
+		div_rtni(_ticks, PPQN, &extra_ticks);
+		if (extra_ticks >= PPQN / 2) {
+			return round_up_to_beat();
+		}
+		else {
+			return round_down_to_beat();
+		}
 	}
 
 	Beats round_up_to_beat() const {
-		return (_ticks == 0) ? *this : Beats(_beats + 1, 0);
+		int32_t remainder;
+		div_rtni(_ticks, PPQN, &remainder);
+		return make_normalized(_beats,
+		                       ((int64_t) _ticks) + PPQN - remainder);
 	}
 
 	Beats round_down_to_beat() const {
-		return Beats(_beats, 0);
+		int32_t remainder;
+		div_rtni(_ticks, PPQN, &remainder);
+		return make_normalized(_beats,
+		                       ((int64_t) _ticks) - remainder);
 	}
 
 	Beats snap_to(const Temporal::Beats& snap) const {
-		const double snap_time = snap.to_double();
+		const double snap_time = abs(snap.to_double());
 		return Beats(ceil(to_double() / snap_time) * snap_time);
 	}
 
@@ -153,7 +143,7 @@ public:
 	}
 
 	inline bool operator<=(const Beats& b) const {
-		return _beats < b._beats || (_beats == b._beats && _ticks <= b._ticks);
+		return *this == b || *this < b;
 	}
 
 	inline bool operator>(const Beats& b) const {
@@ -161,7 +151,7 @@ public:
 	}
 
 	inline bool operator>=(const Beats& b) const {
-		return _beats > b._beats || (_beats == b._beats && _ticks >= b._ticks);
+		return *this == b || *this > b;
 	}
 
 	inline bool operator<(double b) const {
@@ -193,11 +183,13 @@ public:
 	}
 
 	Beats operator+(const Beats& b) const {
-		return Beats(_beats + b._beats, _ticks + b._ticks);
+		return make_normalized(_beats + (int64_t) b._beats,
+		                       _ticks + (int64_t) b._ticks);
 	}
 
 	Beats operator-(const Beats& b) const {
-		return Beats(_beats - b._beats, _ticks - b._ticks);
+		return make_normalized(_beats - (int64_t) b._beats,
+		                       _ticks - (int64_t) b._ticks);
 	}
 
 	Beats operator+(double d) const {
@@ -208,57 +200,82 @@ public:
 		return Beats(to_double() - d);
 	}
 
+	Beats& operator+=(double d) {
+		*this = Beats(to_double() + d);
+		return *this;
+	}
+
+	Beats& operator-=(double d) {
+		*this = Beats(to_double() - d);
+		return *this;
+	}
+
 	Beats operator+(int b) const {
-		return Beats (_beats + b, _ticks);
+		return make_normalized(_beats + (int64_t) b, _ticks);
 	}
 
 	Beats operator-(int b) const {
-		return Beats (_beats - b, _ticks);
+		return make_normalized(_beats - (int64_t) b, _ticks);
 	}
 
 	Beats& operator+=(int b) {
-		_beats += b;
+		normalize(_beats + (int64_t) b, _ticks);
 		return *this;
 	}
 
 	Beats& operator-=(int b) {
-		_beats -= b;
+		normalize(_beats - (int64_t) b, _ticks);
 		return *this;
 	}
 
 	Beats operator-() const {
-		return Beats(-_beats, -_ticks);
+		return make_normalized(- (int64_t) _beats, - (int64_t) _ticks);
 	}
 
-	template<typename Number>
-	Beats operator*(Number factor) const {
-		return Beats(_beats * factor, _ticks * factor);
-	}
-
-	template<typename Number>
-	Beats operator/(Number factor) const {
-		return ticks ((_beats * PPQN + _ticks) / factor);
+	Beats operator/(float factor) const {
+		return Beats(to_double() / factor);
 	}
 
 	Beats& operator+=(const Beats& b) {
-		_beats += b._beats;
-		_ticks += b._ticks;
-		normalize();
+		normalize(_beats + (int64_t) b._beats, _ticks + (int64_t) b._ticks);
 		return *this;
 	}
 
 	Beats& operator-=(const Beats& b) {
-		_beats -= b._beats;
-		_ticks -= b._ticks;
-		normalize();
+		normalize(_beats - (int64_t) b._beats, _ticks - (int64_t) b._ticks);
 		return *this;
+	}
+
+	template<typename Number>
+	Beats operator*(Number factor) const {
+		return make_normalized(0,
+		                       round((((int64_t) _beats) * PPQN + _ticks) * factor));
+	}
+
+	template<typename Number>
+	Beats operator/(Number factor) const {
+		return make_normalized(0,
+		                       round((((int64_t) _beats) * PPQN + _ticks) / factor));
 	}
 
 	double  to_double()              const { return (double)_beats + (_ticks / (double)PPQN); }
 	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
-	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
+	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + ((int64_t)_ticks * ppqn / PPQN); }
 
+	/**
+	 * Gets the number of whole beats rounded down, if this number fits in an
+	 * int32_t. If the number of whole beats is outside the range of int32_t,
+	 * the closest int32_t value is returned, and the remaining beats are
+	 * represented by having get_ticks return a value outside the range
+	 * [0, PPQN).
+	 */
 	int32_t get_beats() const { return _beats; }
+
+	/**
+	 * Gets the number of ticks representing the fractional part of the beats.
+	 * Always returns a value in the range [0, PPQN), EXCEPT if the true
+	 * number of beats is outside the range of int32_t.
+	 */
 	int32_t get_ticks() const { return _ticks; }
 
 	bool operator!() const { return _beats == 0 && _ticks == 0; }
@@ -266,8 +283,105 @@ public:
 	static Beats tick() { return Beats(0, 1); }
 
 private:
+	// Number of whole beats, rounded toward negative infinity. If the number
+	// of whole beats does not fit in an int32_t, some of the beats will be
+	// represented by a _ticks value outside the range [0, PPQN) (see below).
 	int32_t _beats;
+	
+	// Number of ticks forming the fractional part of the beats.
+	// This should always be in the range [0, PPQN) after normalization,
+	// EXCEPT if the true number of beats is outside the range of an int32_t.
+	// In that case, _ticks may be negative and/or larger than the number of
+	// ticks in a beat. This issue arises mainly in computing
+	// std::numeric_limits<Temporal::Beats>::max() and
+	// std::numeric_limits<Temporal::Beats>::lowest().
 	int32_t _ticks;
+
+	/**
+	 * Normalizes the specified beats and ticks, and sets _beats and _ticks to
+	 * the result. Attempts to produce a result where _ticks is in the range
+	 * [0, PPQN) and _beats is inside the range of an int32_t. Arguments
+	 * accepted are 64 bits wide in order to gracefully handle calculations
+	 * where the number of beats is too large to fit in an int32_t, in which
+	 * case the extra beats are stored implicitly in _ticks.
+	 */
+	void normalize(int64_t beats, int64_t ticks) {
+		int64_t new_beats = beats;
+		int64_t new_ticks = ticks;
+
+		// Normalize so new_ticks is in the range [0, PPQN).
+		if (new_ticks < 0) {
+			int64_t beats_to_shift = div_rtni(new_ticks, (int64_t) PPQN,
+			                                  (int64_t*) 0);
+			shift_beats(beats_to_shift, new_beats, new_ticks);
+		}
+		if (new_ticks >= PPQN) {
+			int64_t beats_to_shift = new_ticks / PPQN;
+			shift_beats(beats_to_shift, new_beats, new_ticks);
+		}
+
+		// Adjust so new_beats is inside the range of an int32_t. This might
+		// move new_ticks outside the range [0, PPQN), but that is what we want
+		// if the true number of beats can't fit in an int32_t.
+		if (new_beats < std::numeric_limits<int32_t>::lowest()) {
+			shift_beats(std::numeric_limits<int32_t>::lowest() - new_beats,
+			            new_beats, new_ticks);
+		}
+		if (new_beats > std::numeric_limits<int32_t>::max()) {
+			shift_beats(std::numeric_limits<int32_t>::max() - new_beats,
+			            new_beats, new_ticks);
+		}
+
+		// Convert to int32_t and store.
+		_beats = new_beats;
+		_ticks = new_ticks;
+	}
+
+	/**
+	 * Similar to normalize(), except it stores the result in a new Beats object
+	 * instead of *this.
+	 */
+	static Beats make_normalized(int64_t beats, int64_t ticks) {
+		Beats result;
+		result.normalize(beats, ticks);
+		return result;
+	}
+
+	/**
+	 * Adjusts the beats argument by the specified amount, and adjusts the ticks
+	 * argument by the opposite amount to keep the overall value the same.
+	 */
+	static void shift_beats(int64_t num_to_shift, int64_t& beats,
+	                        int64_t& ticks)
+	{
+		beats += num_to_shift;
+		ticks -= num_to_shift * PPQN;
+	}
+
+	// TODO: Move this to some general-purpose math utility file.
+	/**
+	 * Integer division that rounds toward negative infinity instead of toward
+	 * zero. Returns the quotient, and stores the remainder in *remainder if
+	 * remainder is non-null. The remainder is always nonnegative.
+	 */
+	template <typename Number> static Number div_rtni(Number numer,
+	                                                  Number denom,
+	                                                  Number* remainder)
+	{
+		Number result_quotient = numer / denom;
+		Number result_remainder = numer % denom;
+
+		if (result_remainder < 0) {
+			result_remainder += denom;
+			--result_quotient;
+		}
+
+		if (remainder) {
+			*remainder = result_remainder;
+		}
+
+		return result_quotient;
+	}
 };
 
 /*
@@ -290,9 +404,19 @@ operator<<(std::ostream& os, const Beats& t)
 inline std::istream&
 operator>>(std::istream& is, Beats& t)
 {
-	double beats;
-	is >> beats;
-	t = Beats(beats);
+	int32_t beats;
+	int32_t ticks;
+	char separator;
+
+	is >> beats >> separator >> ticks;
+	
+	// Separator should be '.'
+	if (separator != '.') {
+		is.setstate(std::ios_base::failbit);
+	}
+
+	t = Beats(beats, ticks);
+
 	return is;
 }
 
