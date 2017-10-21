@@ -60,6 +60,32 @@ Slavable::get_state () const
 	return *node;
 }
 
+std::vector<boost::shared_ptr<VCA> >
+Slavable::masters (VCAManager* manager) const
+{
+	std::vector<boost::shared_ptr<VCA> > rv;
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
+		rv.push_back (manager->vca_by_number (*i));
+	}
+	return rv;
+}
+
+bool
+Slavable::assigned_to (VCAManager* manager, boost::shared_ptr<VCA> mst) const
+{
+	if (mst.get () == this) {
+		return true;
+	}
+	std::vector<boost::shared_ptr<VCA> > ml = mst->masters (manager);
+	for (std::vector<boost::shared_ptr<VCA> >::const_iterator i = ml.begin (); i != ml.end(); ++i) {
+		if (assigned_to (manager, *i)) {
+			return true;
+		}
+	}
+	return false;
+}
+
 int
 Slavable::set_state (XMLNode const& node, int version)
 {
