@@ -51,6 +51,19 @@ def build(bld):
     obj.vnum         = TEMPORAL_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    
+    # Unit tests
+    if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
+        test_obj                 = bld(features = 'cxx cxxprogram')
+        test_obj.source          = ['test/beats_test.cc']
+        test_obj.export_includes = ['.']
+        test_obj.includes        = ['.']
+        test_obj.use             = ['testcommon']
+        test_obj.uselib          = ['CPPUNIT']
+        test_obj.target          = 'run-tests'
+        test_obj.name            = 'libtemporal-tests'
+        test_obj.install_path    = ''
+        test_obj.defines         = ['PACKAGE="libtemporaltest"']
 
 def shutdown():
     autowaf.shutdown()
