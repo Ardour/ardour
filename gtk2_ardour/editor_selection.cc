@@ -191,7 +191,7 @@ Editor::set_selected_track_as_side_effect (Selection::Operation op)
 		return;
 	}
 
-	PBD::Unwinder<bool> uw (_track_selection_change_without_scroll, true);
+	PBD::Unwinder<bool> uw (_editor_track_selection_change_without_scroll, true);
 
 	RouteGroup* group = NULL;
 	if (clicked_routeview) {
@@ -1039,7 +1039,7 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 			break;
 		default:
 			set_selected_mixer_strip (*(selection->tracks.back()));
-			if (!_track_selection_change_without_scroll) {
+			if (!_track_selection_change_without_scroll && !_editor_track_selection_change_without_scroll) {
 				ensure_time_axis_view_is_visible (*(selection->tracks.back()), false);
 			}
 			break;

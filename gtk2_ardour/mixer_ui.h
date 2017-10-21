@@ -376,6 +376,8 @@ private:
 	// true if mixer list is visible
 	bool _show_mixer_list;
 
+	bool _strip_selection_change_without_scroll;
+
 	mutable boost::weak_ptr<ARDOUR::Stripable> spilled_strip;
 
 	void escape ();
