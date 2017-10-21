@@ -111,6 +111,7 @@ Mixer_UI::Mixer_UI ()
 	, _route_deletion_in_progress (false)
 	, _maximised (false)
 	, _show_mixer_list (true)
+	, _strip_selection_change_without_scroll (false)
 	, myactions (X_("mixer"))
 	, _selection (*this, *this)
 {
@@ -826,7 +827,7 @@ Mixer_UI::sync_treeview_from_presentation_info (PropertyChange const & what_chan
 			}
 		}
 
-		if (!_selection.axes.empty() && !PublicEditor::instance().track_selection_change_without_scroll ()) {
+		if (!_selection.axes.empty() && !PublicEditor::instance().track_selection_change_without_scroll () && !_strip_selection_change_without_scroll) {
 			move_stripable_into_view ((*_selection.axes.begin())->stripable());
 		}
 
@@ -918,6 +919,17 @@ struct MixerStripSorter {
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 {
+	/* Selecting a mixer-strip may also select grouped-tracks, and
+	 * presentation_info_changed() being emitted and
+	 * _selection.axes.begin() is being moved into view. This may
+	 * effectively move the track that was clicked-on out of view.
+	 *
+	 * So here only the track that is actually clicked-on is moved into
+	 * view (in case it's partially visible)
+	 */
+	PBD::Unwinder<bool> uw (_strip_selection_change_without_scroll, true);
+	move_stripable_into_view (strip->stripable());
+
 	if (ev->button == 1) {
 		if (_selection.selected (strip)) {
 			/* primary-click: toggle selection state of strip */

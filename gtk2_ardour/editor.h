@@ -1883,6 +1883,7 @@ private:
 	void marker_selection_changed ();
 
 	bool _track_selection_change_without_scroll;
+	bool _editor_track_selection_change_without_scroll;
 
 	void cancel_selection ();
 	void cancel_time_selection ();
