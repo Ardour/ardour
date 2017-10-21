@@ -5428,9 +5428,9 @@ Route::tape_drive_controllable () const
 	if ( _ch_pre && (is_master() || mixbus()) ) {
 		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_pre->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4)));
 	}
+#endif
 
 	return boost::shared_ptr<AutomationControl>();
-#endif
 }
 
 string
