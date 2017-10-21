@@ -27,6 +27,7 @@
 #include <iostream>
 #include <limits>
 
+#include "temporal/math_utils.h"
 #include "temporal/visibility.h"
 
 namespace Temporal {
@@ -356,31 +357,6 @@ private:
 	{
 		beats += num_to_shift;
 		ticks -= num_to_shift * PPQN;
-	}
-
-	// TODO: Move this to some general-purpose math utility file.
-	/**
-	 * Integer division that rounds toward negative infinity instead of toward
-	 * zero. Returns the quotient, and stores the remainder in *remainder if
-	 * remainder is non-null. The remainder is always nonnegative.
-	 */
-	template <typename Number> static Number div_rtni(Number numer,
-	                                                  Number denom,
-	                                                  Number* remainder)
-	{
-		Number result_quotient = numer / denom;
-		Number result_remainder = numer % denom;
-
-		if (result_remainder < 0) {
-			result_remainder += denom;
-			--result_quotient;
-		}
-
-		if (remainder) {
-			*remainder = result_remainder;
-		}
-
-		return result_quotient;
 	}
 };
 
