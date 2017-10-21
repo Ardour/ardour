@@ -1019,12 +1019,13 @@ def configure(conf):
                 conf.check_cc(function_name='dlopen', header_name='dlfcn.h', uselib_store='DL')
             else:
                 conf.check_cc(function_name='dlopen', header_name='dlfcn.h', lib='dl', uselib_store='DL')
-        conf.check_cxx(fragment = "#include <boost/version.hpp>\nint main(void) { return (BOOST_VERSION >= 103900 ? 0 : 1); }\n",
-                  execute = "1",
-                  mandatory = True,
-                  msg = 'Checking for boost library >= 1.39',
-                  okmsg = 'ok',
-                  errmsg = 'too old\nPlease install boost version 1.39 or higher.')
+
+    conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 103900\n#error boost >= 1.39 is not available\n#endif\nint main(void) { return 0; }\n",
+              execute = False,
+              mandatory = True,
+              msg = 'Checking for boost library >= 1.39',
+              okmsg = 'ok',
+              errmsg = 'too old\nPlease install boost version 1.39 or higher.')
 
     if re.search ("linux", sys.platform) != None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
