@@ -49,8 +49,8 @@ public:
 		double       whole;
 		const double frac = modf(time, &whole);
 
-		int64_t beats = whole;
-		int64_t ticks = round(frac * PPQN);
+		const int64_t beats = whole;
+		const int64_t ticks = round(frac * PPQN);
 
 		normalize(beats, ticks);
 	}
@@ -80,8 +80,8 @@ public:
 		double       whole;
 		const double frac = modf(time, &whole);
 
-		int64_t beats = whole;
-		int64_t ticks = round(frac * PPQN);
+		const int64_t beats = whole;
+		const int64_t ticks = round(frac * PPQN);
 		normalize(beats, ticks);
 		return *this;
 	}
@@ -322,12 +322,13 @@ private:
 
 		// Normalize so new_ticks is in the range [0, PPQN).
 		if (new_ticks < 0) {
-			int64_t beats_to_shift = div_rem_in_range(new_ticks, (int64_t) PPQN,
-			                                          (int64_t*) 0);
+			const int64_t beats_to_shift = div_rem_in_range(new_ticks,
+			                                                (int64_t) PPQN,
+			                                                (int64_t*) 0);
 			shift_beats(beats_to_shift, new_beats, new_ticks);
 		}
 		if (new_ticks >= PPQN) {
-			int64_t beats_to_shift = new_ticks / PPQN;
+			const int64_t beats_to_shift = new_ticks / PPQN;
 			shift_beats(beats_to_shift, new_beats, new_ticks);
 		}
 
@@ -392,7 +393,7 @@ operator>>(std::istream& is, Beats& t)
 {
 	int32_t beats;
 	int32_t ticks;
-	char separator;
+	char    separator;
 
 	is >> beats >> separator >> ticks;
 	

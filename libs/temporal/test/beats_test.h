@@ -107,7 +107,7 @@ private:
 	void multiply_check(const Temporal::Beats& beats, T to_multiply,
 	                    int32_t expected_beats, int32_t expected_ticks)
 	{
-		Temporal::Beats result_beats = beats * to_multiply;
+		const Temporal::Beats result_beats = beats * to_multiply;
 		basic_beats_check(result_beats, expected_beats, expected_ticks);
 	}
 
@@ -119,7 +119,7 @@ private:
 	void divide_check(const Temporal::Beats& beats, T to_divide,
 	                  int32_t expected_beats, int32_t expected_ticks)
 	{
-		Temporal::Beats result_beats = beats / to_divide;
+		const Temporal::Beats result_beats = beats / to_divide;
 		basic_beats_check(result_beats, expected_beats, expected_ticks);
 	}
 };

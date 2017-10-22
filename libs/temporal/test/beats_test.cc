@@ -104,11 +104,11 @@ void BeatsTest::rounding_test()
 
 	// Test rounding when we are already exactly on a beat.
 	beats = Beats::beats(6);
-	//basic_beats_check(beats.round_to_beat(), 6, 0);
+	basic_beats_check(beats.round_to_beat(), 6, 0);
 	basic_beats_check(beats.round_up_to_beat(), 6, 0);
-	//basic_beats_check(beats.round_down_to_beat(), 6, 0);
-	//basic_beats_check(beats.snap_to(Beats::beats(3)), 6, 0);
-	//basic_beats_check(beats.snap_to(Beats::beats(-3)), 6, 0);
+	basic_beats_check(beats.round_down_to_beat(), 6, 0);
+	basic_beats_check(beats.snap_to(Beats::beats(3)), 6, 0);
+	basic_beats_check(beats.snap_to(Beats::beats(-3)), 6, 0);
 
 	// Test cases where the number of beats does not fit in an int32_t.
 
@@ -327,7 +327,7 @@ void BeatsTest::serialization_test()
 
 void BeatsTest::misc_test()
 {
-	Beats one_tick = Beats::tick();
+	const Beats one_tick = Beats::tick();
 	basic_beats_check(one_tick, 0, 1);
 
 	Beats beats(100, PPQN);
