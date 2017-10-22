@@ -94,7 +94,7 @@ public:
 
 	Beats round_to_beat() const {
 		int32_t extra_ticks;
-		div_rtni(_ticks, PPQN, &extra_ticks);
+		div_rem_in_range(_ticks, PPQN, &extra_ticks);
 		if (extra_ticks >= PPQN / 2) {
 			return round_up_to_beat();
 		}
@@ -105,16 +105,26 @@ public:
 
 	Beats round_up_to_beat() const {
 		int32_t remainder;
-		div_rtni(_ticks, PPQN, &remainder);
-		return make_normalized(_beats,
-		                       ((int64_t) _ticks) + PPQN - remainder);
+		div_rem_in_range(_ticks, PPQN, &remainder);
+		if (remainder == 0) {
+			return *this;
+		}
+		else {
+			return make_normalized(_beats,
+			                       ((int64_t) _ticks) + PPQN - remainder);
+		}
 	}
 
 	Beats round_down_to_beat() const {
 		int32_t remainder;
-		div_rtni(_ticks, PPQN, &remainder);
-		return make_normalized(_beats,
-		                       ((int64_t) _ticks) - remainder);
+		div_rem_in_range(_ticks, PPQN, &remainder);
+		if (remainder == 0) {
+			return *this;
+		}
+		else {
+			return make_normalized(_beats,
+			                       ((int64_t) _ticks) - remainder);
+		}
 	}
 
 	Beats snap_to(const Temporal::Beats& snap) const {
@@ -312,8 +322,8 @@ private:
 
 		// Normalize so new_ticks is in the range [0, PPQN).
 		if (new_ticks < 0) {
-			int64_t beats_to_shift = div_rtni(new_ticks, (int64_t) PPQN,
-			                                  (int64_t*) 0);
+			int64_t beats_to_shift = div_rem_in_range(new_ticks, (int64_t) PPQN,
+			                                          (int64_t*) 0);
 			shift_beats(beats_to_shift, new_beats, new_ticks);
 		}
 		if (new_ticks >= PPQN) {

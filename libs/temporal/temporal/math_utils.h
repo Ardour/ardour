@@ -21,20 +21,26 @@
 
 namespace Temporal {
 	/**
-	 * Integer division that rounds toward negative infinity instead of toward
-	 * zero. Returns the quotient, and stores the remainder in *remainder if
-	 * remainder is non-null. The remainder is always nonnegative.
+	 * Integer division that ensures the remainder is in the range
+	 * [0, abs(denom)). Returns the quotient, and stores the remainder in
+	 * *remainder if remainder is non-null.
 	 */
-	template <typename Number> static Number div_rtni(Number numer,
-	                                                  Number denom,
-	                                                  Number* remainder)
+	template <typename Number> static Number div_rem_in_range(Number numer,
+	                                                          Number denom,
+	                                                          Number* remainder)
 	{
 		Number result_quotient = numer / denom;
 		Number result_remainder = numer % denom;
 
 		if (result_remainder < 0) {
-			result_remainder += denom;
-			--result_quotient;
+			if (denom < 0) {
+				result_remainder -= denom;
+				++result_quotient;
+			}
+			else {
+				result_remainder += denom;
+				--result_quotient;
+			}
 		}
 
 		if (remainder) {
