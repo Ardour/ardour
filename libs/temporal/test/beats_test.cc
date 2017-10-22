@@ -394,6 +394,9 @@ void BeatsTest::beats_serialize_check(const Beats& beats)
 	std::istringstream in_stream(out_stream.str());
 	Beats deserialized_beats;
 	in_stream >> deserialized_beats;
+
+	CPPUNIT_ASSERT(out_stream.good());
+	CPPUNIT_ASSERT(in_stream.good());
 	CPPUNIT_ASSERT_EQUAL(beats, deserialized_beats);
 }
 
