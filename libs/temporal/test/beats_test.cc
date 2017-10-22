@@ -18,11 +18,17 @@ void BeatsTest::basic_test()
 	beats = Beats::beats(-100);
 	basic_beats_check(beats, -100, 0);
 
+	beats = Beats::beats(0);
+	basic_beats_check(beats, 0, 0);
+
 	beats = Beats::ticks(PPQN - 1);
 	basic_beats_check(beats, 0, PPQN - 1);
 	
 	beats = Beats::ticks(-1);
 	basic_beats_check(beats, -1, PPQN - 1);
+
+	beats = Beats::ticks(0);
+	basic_beats_check(beats, 0, 0);
 
 	beats = Beats(100, PPQN - 1);
 	basic_beats_check(beats, 100, PPQN - 1);
@@ -53,16 +59,23 @@ void BeatsTest::basic_test()
 
 	beats = Beats(-10.5);
 	basic_beats_check(beats, -11, PPQN / 2);
-	
-	beats = 10.5;
-	
+
+	beats = Beats(0.0);
+	basic_beats_check(beats, 0, 0);
+
 	// Test cases where the number of beats does not fit in an int32_t.
-	
+
 	beats = Beats(MAX_INT32, PPQN + 1);
 	basic_beats_check(beats, MAX_INT32, PPQN + 1);
-	
+
+	beats = Beats(MAX_INT32, PPQN * 2 + 1);
+	basic_beats_check(beats, MAX_INT32, PPQN * 2 + 1);
+
 	beats = Beats(LOWEST_INT32, -1);
 	basic_beats_check(beats, LOWEST_INT32, -1);
+
+	beats = Beats(LOWEST_INT32, -(PPQN + 1));
+	basic_beats_check(beats, LOWEST_INT32, -(PPQN + 1));
 }
 
 void BeatsTest::limits_test()
@@ -82,12 +95,20 @@ void BeatsTest::rounding_test()
 	basic_beats_check(beats.snap_to(Beats::beats(3)), 6, 0);
 	basic_beats_check(beats.snap_to(Beats::beats(-3)), 6, 0);
 
-	beats = Beats(-4.6);
+	beats = -4.6;
 	basic_beats_check(beats.round_to_beat(), -5, 0);
 	basic_beats_check(beats.round_up_to_beat(), -4, 0);
 	basic_beats_check(beats.round_down_to_beat(), -5, 0);
 	basic_beats_check(beats.snap_to(Beats::beats(3)), -3, 0);
 	basic_beats_check(beats.snap_to(Beats::beats(-3)), -3, 0);
+
+	// Test rounding when we are already exactly on a beat.
+	beats = Beats::beats(6);
+	//basic_beats_check(beats.round_to_beat(), 6, 0);
+	basic_beats_check(beats.round_up_to_beat(), 6, 0);
+	//basic_beats_check(beats.round_down_to_beat(), 6, 0);
+	//basic_beats_check(beats.snap_to(Beats::beats(3)), 6, 0);
+	//basic_beats_check(beats.snap_to(Beats::beats(-3)), 6, 0);
 
 	// Test cases where the number of beats does not fit in an int32_t.
 
@@ -236,13 +257,17 @@ void BeatsTest::multiply_test()
 	multiply_check(beats, 2, 50, 10);
 	multiply_check(beats, 2.0, 50, 10);
 	multiply_check(beats, 0.2, 5, 1);
+	multiply_check(beats, -2, -51, PPQN - 10);
 	multiply_check(beats, -2.0, -51, PPQN - 10);
+	multiply_check(beats, -0.2, -6, PPQN - 1);
 
 	beats = Beats(-25, -5);
 	multiply_check(beats, 2, -51, PPQN - 10);
 	multiply_check(beats, 2.0, -51, PPQN - 10);
 	multiply_check(beats, 0.2, -6, PPQN - 1);
+	multiply_check(beats, -2, 50, 10);
 	multiply_check(beats, -2.0, 50, 10);
+	multiply_check(beats, -0.2, 5, 1);
 
 	// Test cases where the resulting number of beats does not fit in an
 	// int32_t.
@@ -309,10 +334,10 @@ void BeatsTest::misc_test()
 	CPPUNIT_ASSERT_EQUAL(((int64_t) 101) * PPQN, beats.to_ticks());
 	CPPUNIT_ASSERT_EQUAL(((int64_t) 101) * PPQN * 2, beats.to_ticks(PPQN * 2));
 
-	beats = Beats::ticks_at_rate(PPQN * 2, PPQN * 2);
-	basic_beats_check(beats, 1, 0);
+	beats = Beats::ticks_at_rate(PPQN, PPQN * 2);
+	basic_beats_check(beats, 0, PPQN / 2);
 
-	beats = Beats(10.5);
+	beats = 10.5;
 	basic_beats_check(beats, 10, PPQN / 2);
 
 	beats = -Beats(10, 1);
@@ -328,13 +353,12 @@ void BeatsTest::basic_beats_check(const Beats& beats, int32_t expected_beats,
 	CPPUNIT_ASSERT_EQUAL(expected_ticks, beats.get_ticks());
 	CPPUNIT_ASSERT_EQUAL(((int64_t) expected_beats) * PPQN + expected_ticks,
 	                     beats.to_ticks());
-
-	// Miscellaneous checks.
-
 	CPPUNIT_ASSERT_DOUBLES_EQUAL(expected_beats + ((double) expected_ticks) / PPQN,
 	                             beats.to_double(), 1.0 / PPQN);
 
-	Temporal::Beats clone = beats;
+	// Miscellaneous checks.
+
+	Beats clone = beats;
 	CPPUNIT_ASSERT_EQUAL(beats, clone);
 	
 	clone = beats.to_double();

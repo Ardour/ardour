@@ -54,12 +54,10 @@ private:
 	                            const Temporal::Beats& smaller);
 
 	/**
-	 * Tests serialization by serializing beats to an ostringstream, checking
-	 * that the serialized string matches expected_str, then deserializing a new
-	 * Beats object and checking that it equals the original.
+	 * Tests serialization by serializing beats to a stream, then deserializing
+	 * a new Beats object and checking that it equals the original.
 	 */
-	void beats_serialize_check(const Temporal::Beats& beats,
-	                           const std::string& expected_str);
+	void beats_serialize_check(const Temporal::Beats& beats);
 
 	/**
 	 * Tests the + and += operators by adding to_add to beats, and checking that
