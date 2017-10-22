@@ -55,7 +55,8 @@ def build(bld):
     # Unit tests
     if bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):
         test_obj                 = bld(features = 'cxx cxxprogram')
-        test_obj.source          = ['test/beats_test.cc']
+        test_obj.source          = ['test/beats_test.cc',
+                                    'test/math_utils_test.cc']
         test_obj.export_includes = ['.']
         test_obj.includes        = ['.']
         test_obj.use             = ['testcommon']
