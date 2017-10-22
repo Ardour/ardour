@@ -127,7 +127,7 @@ public:
 		}
 	}
 
-	Beats snap_to(const Temporal::Beats& snap) const {
+	Beats snap_to(const Beats& snap) const {
 		const double snap_time = abs(snap.to_double());
 		return Beats(ceil(to_double() / snap_time) * snap_time);
 	}
@@ -274,11 +274,11 @@ public:
 	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + ((int64_t)_ticks * ppqn / PPQN); }
 
 	/**
-	 * Gets the number of whole beats rounded down, if this number fits in an
-	 * int32_t. If the number of whole beats is outside the range of int32_t,
-	 * the closest int32_t value is returned, and the remaining beats are
-	 * represented by having get_ticks return a value outside the range
-	 * [0, PPQN).
+	 * Gets the number of whole beats rounded toward negative infinity, if this
+	 * number fits in an int32_t. If the number of whole beats is outside the
+	 * range of int32_t, the closest int32_t value is returned, and the
+	 * remaining beats are represented by having get_ticks return a value
+	 * outside the range [0, PPQN).
 	 */
 	int32_t get_beats() const { return _beats; }
 
@@ -332,8 +332,8 @@ private:
 		}
 
 		// Adjust so new_beats is inside the range of an int32_t. This might
-		// move new_ticks outside the range [0, PPQN), but that is what we want
-		// if the true number of beats can't fit in an int32_t.
+		// move new_ticks outside the range [0, PPQN), if the true number of
+		// beats can't fit in an int32_t.
 		if (new_beats < std::numeric_limits<int32_t>::lowest()) {
 			shift_beats(std::numeric_limits<int32_t>::lowest() - new_beats,
 			            new_beats, new_ticks);
