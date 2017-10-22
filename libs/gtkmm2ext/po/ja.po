@@ -6,8 +6,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-11 23:49-0800\n"
-"PO-Revision-Date: 2017-02-12 01:41-0800\n"
+"POT-Creation-Date: 2017-10-21 23:44-0700\n"
+"PO-Revision-Date: 2017-10-22 06:13-0700\n"
 "Last-Translator: Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
 "Language-Team: Japanese <ardour-dev@lists.ardour.org>\n"
 "Language: ja\n"
@@ -17,31 +17,23 @@ msgstr ""
 "Plural-Forms: nplurals=1; plural=0;\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: actions.cc:261
-msgid "Unknown action name: %1"
-msgstr "不明なアクション名: %1"
+#: actions.cc:256
+msgid "Unknown action name: %1/%2"
+msgstr "不明なアクション名: %1/%2"
 
-#: binding_proxy.cc:81
-msgid "operate controller now"
-msgstr "今すぐコントローラーを操作"
-
-#: bindable_button.cc:48
-msgid "button cannot watch state of non-existing Controllable\n"
-msgstr "ボタンが存在しない Controllable が状態を監視できません\n"
-
-#: bindings.cc:820 bindings.cc:822
+#: bindings.cc:855 bindings.cc:857
 msgid "Window"
 msgstr "ウインドウ"
 
-#: bindings.cc:820
+#: bindings.cc:855
 msgid " (Categorized)"
 msgstr "(カテゴリ化済み)"
 
-#: bindings.cc:822
+#: bindings.cc:857
 msgid " (Alphabetical)"
 msgstr "(アルファベット順)"
 
-#: bindings.cc:838
+#: bindings.cc:873
 msgid "Uncategorized"
 msgstr "カテゴリなし"
 
@@ -53,11 +45,11 @@ msgstr "カーソル・ホットスポット情報ファイル %1 は %2 行目�
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:119
+#: gtk_ui.cc:117
 msgid "Log"
 msgstr "ログ"
 
-#: gtk_ui.cc:388
+#: gtk_ui.cc:386
 msgid ""
 "\n"
 "\n"
@@ -67,11 +59,11 @@ msgstr ""
 "\n"
 "ショートカット: "
 
-#: gtk_ui.cc:688
+#: gtk_ui.cc:659
 msgid "Press To Exit"
 msgstr "押して終了"
 
-#: gtk_ui.cc:724
+#: gtk_ui.cc:695
 msgid "I'm sorry %1, I can't do that"
 msgstr "すみません %1、それはできません"
 
@@ -115,50 +107,53 @@ msgstr "Windows"
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:154 keyboard.cc:635
+#: keyboard.cc:154 keyboard.cc:597
 msgid "Unknown"
 msgstr "不明"
 
-#: keyboard.cc:646
+#: keyboard.cc:608
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr "“%2” にキーバインドファイルが見つからなか、エラーが含まれています。"
 
-#: keyboard.cc:672
+#: keyboard.cc:634
 msgid "Keyboard binding found without a name"
 msgstr "名前のないキーボードバインドが見つかりました"
 
-#: keyboard.cc:702
+#: keyboard.cc:664
 msgid "Cannot save key bindings to %1"
 msgstr "キーバインドを %1 に保存できません"
 
-#: keyboard.cc:718
+#: keyboard.cc:680
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "利用中のキーバインドファイルを名前変更できません (%1)"
-
-#: paths_dialog.cc:32
-msgid "Add"
-msgstr "追加"
-
-#: paths_dialog.cc:33
-msgid "Delete"
-msgstr "削除"
-
-#: paths_dialog.cc:34
-msgid "Reset to Default"
-msgstr "デフォルトに戻す"
-
-#: paths_dialog.cc:109
-msgid "Add folder to search path"
-msgstr "検索するパスのフォルダを追加"
-
-#: tearoff.cc:57
-msgid "Click to tear this into its own window"
-msgstr "クリックして個別のウインドウに切り離す"
-
-#: tearoff.cc:63
-msgid "Click to put this back in the main window"
-msgstr "クリックしてメインウインドウに戻す"
 
 #: textviewer.cc:32
 msgid "Close"
 msgstr "閉じる"
+
+#~ msgid "Unknown action name: %1"
+#~ msgstr "不明なアクション名: %1"
+
+#~ msgid "operate controller now"
+#~ msgstr "今すぐコントローラーを操作"
+
+#~ msgid "button cannot watch state of non-existing Controllable\n"
+#~ msgstr "ボタンが存在しない Controllable が状態を監視できません\n"
+
+#~ msgid "Add"
+#~ msgstr "追加"
+
+#~ msgid "Delete"
+#~ msgstr "削除"
+
+#~ msgid "Reset to Default"
+#~ msgstr "デフォルトに戻す"
+
+#~ msgid "Add folder to search path"
+#~ msgstr "検索するパスのフォルダを追加"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "クリックして個別のウインドウに切り離す"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "クリックしてメインウインドウに戻す"
