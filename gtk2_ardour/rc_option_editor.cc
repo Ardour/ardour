@@ -3882,7 +3882,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
 
-	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary\
+	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary \
 with each version of your OS, and the preferences that you've set in your OS.\n\n\
 You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
 These settings will only take effect after %1 is restarted.\n\
