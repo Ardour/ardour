@@ -55,6 +55,8 @@ class OSCRouteObserver
 	ArdourSurface::OSC& _osc;
 	lo_address addr;
 	std::string path;
+	uint32_t gainmode;
+	std::bitset<32> feedback;
 	uint32_t ssid;
 	ArdourSurface::OSC::OSCSurface* sur;
 	float _last_meter;
@@ -63,6 +65,8 @@ class OSCRouteObserver
 	float _last_gain;
 	float _last_trim;
 	bool _init;
+	bool _expand;
+	bool in_line;
 	ARDOUR::AutoState as;
 
 

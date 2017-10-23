@@ -91,9 +91,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	int float_message (std::string, float value, lo_address addr);
 	int text_message (std::string path, std::string val, lo_address addr);
-	int float_message_with_id (std::string, uint32_t ssid, float value, lo_address addr);
-	int int_message_with_id (std::string, uint32_t ssid, int value, lo_address addr);
-	int text_message_with_id (std::string path, uint32_t ssid, std::string val, lo_address addr);
+	int float_message_with_id (std::string, uint32_t ssid, float value, bool in_line, lo_address addr);
+	int int_message_with_id (std::string, uint32_t ssid, int value, bool in_line, lo_address addr);
+	int text_message_with_id (std::string path, uint32_t ssid, std::string val, bool in_line, lo_address addr);
 
 	int start ();
 	int stop ();
@@ -234,6 +234,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	uint32_t default_plugin_size;
 	bool tick;
 	bool bank_dirty;
+	bool observer_busy;
 	float scrub_speed;		// Current scrub speed
 	double scrub_place;		// place of play head at latest jog/scrub wheel tick
 	int64_t scrub_time;		// when did the wheel move last?
@@ -252,13 +253,14 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	std::string get_unix_server_url ();
 	lo_address get_address (lo_message msg);
-	OSCSurface * get_surface (lo_address addr);
+	OSCSurface * get_surface (lo_address addr, bool quiet = false);
 	int check_surface (lo_message msg);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
-	void global_feedback (OSCSurface* sur, lo_address addr);
-	void strip_feedback (OSCSurface* sur);
+	void global_feedback (OSCSurface* sur);
+	void strip_feedback (OSCSurface* sur, bool new_bank_size);
 	void surface_destroy (OSCSurface* sur);
+	void bank_leds (OSCSurface* sur);
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
 	void current_value_query (const char* path, size_t len, lo_arg **argv, int argc, lo_message msg);
@@ -699,7 +701,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	bool periodic (void);
 	sigc::connection periodic_connection;
 	PBD::ScopedConnectionList session_connections;
-	PBD::ScopedConnectionList cueobserver_connections;
 
 	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
 	int sel_fail (std::string path, float val, lo_address addr);

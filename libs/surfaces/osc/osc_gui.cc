@@ -980,6 +980,7 @@ OSC_GUI::load_preset (std::string preset)
 			gainmode_combo.set_active (atoi (prop->value().c_str()));
 		}
 		cp.gui_changed();
+		clear_device ();
 
 	}
 }

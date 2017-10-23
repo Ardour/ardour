@@ -59,7 +59,7 @@ OSCCueObserver::clear_observer ()
 	strip_connections.drop_connections ();
 	send_end ();
 	// all strip buttons should be off and faders 0 and etc.
-	_osc.text_message_with_id ("/cue/name", 0, " ", addr);
+	_osc.text_message_with_id ("/cue/name", 0, " ", true, addr);
 	_osc.float_message ("/cue/mute", 0, addr);
 	_osc.float_message ("/cue/fader", 0, addr);
 	_osc.float_message ("/cue/signal", 0, addr);
@@ -195,7 +195,7 @@ OSCCueObserver::send_end ()
 	for (uint32_t i = 1; i <= sends.size(); i++) {
 		_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
 		_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
-		_osc.text_message_with_id ("/cue/send/name", i, " ", addr);
+		_osc.text_message_with_id ("/cue/send/name", i, " ", true, addr);
 	}
 	gain_timeout.clear ();
 	_last_gain.clear ();
@@ -221,7 +221,7 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 		return;
 	}
 	if (id) {
-		_osc.text_message_with_id ("/cue/send/name", id, sends[id - 1]->name(), addr);
+		_osc.text_message_with_id ("/cue/send/name", id, sends[id - 1]->name(), true, addr);
 	} else {
 		_osc.text_message ("/cue/name", _strip->name(), addr);
 	}
@@ -247,8 +247,8 @@ OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable>
 		return;
 	}
 	if (id) {
-		_osc.text_message_with_id ("/cue/send/name", id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
-		_osc.float_message_with_id ("/cue/send/fader", id, controllable->internal_to_interface (controllable->get_value()), addr);
+		_osc.text_message_with_id ("/cue/send/name", id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), true, addr);
+		_osc.float_message_with_id ("/cue/send/fader", id, controllable->internal_to_interface (controllable->get_value()), true, addr);
 	} else {
 		_osc.text_message ("/cue/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
 		_osc.float_message ("/cue/fader", controllable->internal_to_interface (controllable->get_value()), addr);
@@ -261,7 +261,7 @@ void
 OSCCueObserver::send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc)
 {
 	if (id) {
-		_osc.float_message_with_id (path, id, (float) proc->enabled(), addr);
+		_osc.float_message_with_id (path, id, (float) proc->enabled(), true, addr);
 	} else {
 		_osc.float_message (path, (float) proc->enabled(), addr);
 	}

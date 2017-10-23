@@ -63,6 +63,7 @@ class OSCSelectObserver
 	std::string path;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
+	bool in_line;
 	ArdourSurface::OSC::OSCSurface* sur;
 	std::vector<int> send_timeout;
 	uint32_t gain_timeout;
@@ -77,6 +78,7 @@ class OSCSelectObserver
 	uint32_t send_size;
 	uint32_t nplug_params;
 	uint32_t plug_size;
+	uint32_t eq_bands;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

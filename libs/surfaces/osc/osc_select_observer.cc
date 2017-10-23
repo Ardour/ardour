@@ -58,7 +58,6 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	,_init (true)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
-	std::cout << "select observer created\n";
 	refresh_strip (true);
 }
 
@@ -76,6 +75,9 @@ OSCSelectObserver::no_strip ()
 	_init = true;
 
 	strip_connections.drop_connections ();
+	send_connections.drop_connections ();
+	plugin_connections.drop_connections ();
+	eq_connections.drop_connections ();
 	/*
 	 * The strip will sit idle at this point doing nothing until
 	 * the surface has recalculated it's strip list and then calls
@@ -89,18 +91,30 @@ OSCSelectObserver::refresh_strip (bool force)
 {
 	_init = true;
 
+	// this has to be done first because expand may change with no strip change
+	if (sur->expand_enable) {
+		_osc.float_message ("/select/expand", 1.0, addr);
+	} else {
+		_osc.float_message ("/select/expand", 0.0, addr);
+	}
+
 	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->select;
 	if (_strip && (new_strip == _strip) && !force) {
 		_init = false;
 		return;
 	}
-	std::cout << string_compose ("new select: %1\n", new_strip->name());
 
 	_strip = new_strip;
+	if (!_strip) {
+		clear_observer ();
+		return;
+	}
+
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::no_strip, this), OSC::instance());
 	as = ARDOUR::Off;
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
+	in_line = feedback[2];
 	as = ARDOUR::Off;
 	send_size = 0;
 	plug_size = 0;
@@ -218,7 +232,9 @@ OSCSelectObserver::refresh_strip (bool force)
 		_strip->comp_makeup_controllable ()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->comp_makeup_controllable()), OSC::instance());
 		change_message ("/select/comp_makeup", _strip->comp_makeup_controllable());
 	}
-
+	renew_sends ();
+	renew_plugin ();
+	eq_restart(0);
 	_init = false;
 
 	tick();
@@ -227,6 +243,7 @@ OSCSelectObserver::refresh_strip (bool force)
 void
 OSCSelectObserver::clear_observer ()
 {
+	_init = true;
 	strip_connections.drop_connections ();
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.float_message ("/select/expand", 0, addr);
@@ -271,6 +288,7 @@ OSCSelectObserver::clear_observer ()
 	_osc.text_message ("/select/comp_mode_name", " ", addr);
 	_osc.text_message ("/select/comp_speed_name", " ", addr);
 	_osc.float_message ("/select/comp_makeup", 0, addr);
+	_osc.float_message ("/select/expand", 0.0, addr);
 	send_end();
 	plugin_end();
 	eq_end();
@@ -342,17 +360,17 @@ OSCSelectObserver::send_init()
 			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
 			if (!r) {
 				// should never get here
-				_osc.float_message_with_id ("/select/send_enable", c, 0, addr);
+				_osc.float_message_with_id ("/select/send_enable", c, 0, in_line, addr);
 			}
 			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(s));
 			if (snd) {
 				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
 				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), c, proc), OSC::instance());
-				_osc.float_message_with_id ("/select/send_enable", c, proc->enabled(), addr);
+				_osc.float_message_with_id ("/select/send_enable", c, proc->enabled(), in_line, addr);
 			}
 		}
 		if (!gainmode && send_valid) {
-			_osc.text_message_with_id ("/select/send_name", c, _strip->send_name(s), addr);
+			_osc.text_message_with_id ("/select/send_name", c, _strip->send_name(s), in_line, addr);
 		}
 	}
 }
@@ -360,7 +378,7 @@ OSCSelectObserver::send_init()
 void
 OSCSelectObserver::plugin_init()
 {
-	if (!sur->plugin_id) {
+	if (!sur->plugin_id || !sur->plugins.size ()) {
 		return;
 	}
 
@@ -404,8 +422,8 @@ OSCSelectObserver::plugin_init()
 	int pid = 1;
 	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++pid) {
 		if (ppi >= nplug_params) {
-			_osc.text_message_with_id ("/select/plugin/parameter/name", pid, " ", addr);
-			_osc.float_message_with_id ("/select/plugin/parameter", pid, 0, addr);
+			_osc.text_message_with_id ("/select/plugin/parameter/name", pid, " ", in_line, addr);
+			_osc.float_message_with_id ("/select/plugin/parameter", pid, 0, in_line, addr);
 			continue;
 		}
 
@@ -415,7 +433,7 @@ OSCSelectObserver::plugin_init()
 		}
 		ParameterDescriptor pd;
 		pip->get_parameter_descriptor(controlid, pd);
-		_osc.text_message_with_id ("/select/plugin/parameter/name", pid, pd.label, addr);
+		_osc.text_message_with_id ("/select/plugin/parameter/name", pid, pd.label, in_line, addr);
 		if ( pip->parameter_is_input(controlid)) {
 			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 			if (c) {
@@ -436,14 +454,14 @@ OSCSelectObserver::send_end ()
 	send_connections.drop_connections ();
 	for (uint32_t i = 1; i <= send_size; i++) {
 		if (gainmode) {
-			_osc.float_message_with_id ("/select/send_fader", i, 0, addr);
+			_osc.float_message_with_id ("/select/send_fader", i, 0, in_line, addr);
 		} else {
-			_osc.float_message_with_id ("/select/send_gain", i, -193, addr);
+			_osc.float_message_with_id ("/select/send_gain", i, -193, in_line, addr);
 		}
 		// next enable
-		_osc.float_message_with_id ("/select/send_enable", i, 0, addr);
+		_osc.float_message_with_id ("/select/send_enable", i, 0, in_line, addr);
 		// next name
-		_osc.text_message_with_id ("/select/send_name", i, " ", addr);
+		_osc.text_message_with_id ("/select/send_name", i, " ", in_line, addr);
 	}
 	// need to delete or clear send_timeout
 	send_timeout.clear();
@@ -466,9 +484,9 @@ OSCSelectObserver::plugin_end ()
 	plugin_connections.drop_connections ();
 	_osc.text_message ("/select/plugin/name", " ", addr);
 	for (uint32_t i = 1; i <= plug_size; i++) {
-		_osc.float_message_with_id ("/select/plugin/parameter", i, 0, addr);
+		_osc.float_message_with_id ("/select/plugin/parameter", i, 0, in_line, addr);
 		// next name
-		_osc.text_message_with_id ("/select/plugin/parameter/name", i, " ", addr);
+		_osc.text_message_with_id ("/select/plugin/parameter/name", i, " ", in_line, addr);
 	}
 	nplug_params = 0;
 }
@@ -538,7 +556,7 @@ OSCSelectObserver::tick ()
 		if (send_timeout[i]) {
 			if (send_timeout[i] == 1) {
 				uint32_t pg_offset = (sur->send_page - 1) * sur->send_page_size;
-				_osc.text_message_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1), addr);
+				_osc.text_message_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1), in_line, addr);
 			}
 			send_timeout[i]--;
 		}
@@ -593,7 +611,7 @@ OSCSelectObserver::change_message_with_id (string path, uint32_t id, boost::shar
 {
 	float val = controllable->get_value();
 
-	_osc.float_message_with_id (path, id, (float) controllable->internal_to_interface (val), addr);
+	_osc.float_message_with_id (path, id, (float) controllable->internal_to_interface (val), in_line, addr);
 }
 
 void
@@ -601,9 +619,9 @@ OSCSelectObserver::enable_message_with_id (string path, uint32_t id, boost::shar
 {
 	float val = controllable->get_value();
 	if (val) {
-		_osc.float_message_with_id (path, id, 1, addr);
+		_osc.float_message_with_id (path, id, 1, in_line, addr);
 	} else {
-		_osc.float_message_with_id (path, id, 0, addr);
+		_osc.float_message_with_id (path, id, 0, in_line, addr);
 	}
 }
 
@@ -727,7 +745,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 	if (gainmode) {
 		path = "/select/send_fader";
 		value = controllable->internal_to_interface (controllable->get_value());
-	_osc.text_message_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db), addr);
+		_osc.text_message_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db), in_line, addr);
 	if (send_timeout.size() > id) {
 		send_timeout[id] = 8;
 	}
@@ -736,7 +754,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 		value = db;
 	}
 
-	_osc.float_message_with_id (path, id, value, addr);
+	_osc.float_message_with_id (path, id, value, in_line, addr);
 }
 
 void
@@ -745,7 +763,7 @@ OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Proc
 	// with no delay value is wrong
 	Glib::usleep(10);
 
-	_osc.float_message_with_id ("/select/send_enable", id, proc->enabled(), addr);
+	_osc.float_message_with_id ("/select/send_enable", id, proc->enabled(), in_line, addr);
 }
 
 void
@@ -795,14 +813,14 @@ OSCSelectObserver::eq_init()
 		enable_message ("/select/eq_enable", _strip->eq_enable_controllable());
 	}
 
-	uint32_t eq_bands = _strip->eq_band_cnt ();
+	eq_bands = _strip->eq_band_cnt ();
 	if (!eq_bands) {
 		return;
 	}
 
 	for (uint32_t i = 0; i < eq_bands; i++) {
 		if (_strip->eq_band_name(i).size()) {
-			_osc.text_message_with_id ("/select/eq_band_name", i + 1, _strip->eq_band_name (i), addr);
+			_osc.text_message_with_id ("/select/eq_band_name", i + 1, _strip->eq_band_name (i), in_line, addr);
 		}
 		if (_strip->eq_gain_controllable (i)) {
 			_strip->eq_gain_controllable(i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_gain"), i + 1, _strip->eq_gain_controllable(i)), OSC::instance());
@@ -827,19 +845,15 @@ void
 OSCSelectObserver::eq_end ()
 {
 	eq_connections.drop_connections ();
-	if (_strip->filter_freq_controllable (true)) {
 		_osc.float_message ("/select/eq_hpf", 0, addr);
-	}
-	if (_strip->eq_enable_controllable ()) {
 		_osc.float_message ("/select/eq_enable", 0, addr);
-	}
 
-	for (uint32_t i = 1; i <= _strip->eq_band_cnt (); i++) {
-		_osc.text_message_with_id ("/select/eq_band_name", i, " ", addr);
-		_osc.float_message_with_id ("/select/eq_gain", i, 0, addr);
-		_osc.float_message_with_id ("/select/eq_freq", i, 0, addr);
-		_osc.float_message_with_id ("/select/eq_q", i, 0, addr);
-		_osc.float_message_with_id ("/select/eq_shape", i, 0, addr);
+	for (uint32_t i = 1; i <= eq_bands; i++) {
+		_osc.text_message_with_id ("/select/eq_band_name", i, " ", in_line, addr);
+		_osc.float_message_with_id ("/select/eq_gain", i, 0, in_line, addr);
+		_osc.float_message_with_id ("/select/eq_freq", i, 0, in_line, addr);
+		_osc.float_message_with_id ("/select/eq_q", i, 0, in_line, addr);
+		_osc.float_message_with_id ("/select/eq_shape", i, 0, in_line, addr);
 
 
 	}
