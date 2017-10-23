@@ -414,7 +414,9 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	_was_activated          = false;
 	_has_state_interface    = false;
 	_can_write_automation   = false;
+#ifdef LV2_EXTENDED
 	_inline_display_in_gui  = false;
+#endif
 	_max_latency            = 0;
 	_current_latency        = 0;
 	_impl->block_length     = _session.get_block_size();
