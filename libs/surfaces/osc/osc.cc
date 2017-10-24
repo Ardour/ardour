@@ -1242,11 +1242,7 @@ OSC::routes_list (lo_message msg)
 	strip_feedback (sur, true);
 	global_feedback (sur);
 	// need to add select start
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 
 }
 
@@ -1497,11 +1493,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	strip_feedback(s, true);
 
 	global_feedback (s);
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 	sel_send_pagesize (se_size, msg);
 	sel_plug_pagesize (pi_size, msg);
 	return 0;
@@ -1519,11 +1511,7 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 
 	// set bank and strip feedback
 	strip_feedback (s, true);
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 	return 0;
 }
 
@@ -1544,11 +1532,7 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	// set bank and strip feedback
 	s->bank = 1;
 	strip_feedback (s, true);
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 	return 0;
 }
 
@@ -1567,11 +1551,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 
 	// Set global/master feedback
 	global_feedback (s);
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 	return 0;
 }
 
@@ -1589,11 +1569,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 
 	// Set global/master feedback
 	global_feedback (s);
-	if(ControlProtocol::first_selected_stripable()) {
-		_strip_select (ControlProtocol::first_selected_stripable(), get_address (msg));
-	} else {
-		_strip_select (session->master_out (), get_address (msg));
-	}
+	_strip_select (0, get_address (msg));
 	return 0;
 }
 
@@ -1669,11 +1645,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 
 		// Set global/master feedback
 		global_feedback (&s);
-		if(ControlProtocol::first_selected_stripable()) {
-			_strip_select (ControlProtocol::first_selected_stripable(), addr);
-		} else {
-			_strip_select (session->master_out (), addr);
-		}
+		_strip_select (0, addr);
 	}
 
 	return &_surface[_surface.size() - 1];
@@ -1755,10 +1727,6 @@ OSC::_recalcbanks ()
 	if (observer_busy) {
 		return;
 	}
-	if (!_select || (_select != ControlProtocol::first_selected_stripable())) {
-		_select = ControlProtocol::first_selected_stripable();
-		gui_selection_changed ();
-	}
 	/*
 	 * We have two different ways of working here:
 	 * 1) banked: The controller has a bank of strips and only can deal
@@ -1777,6 +1745,7 @@ OSC::_recalcbanks ()
 		OSCSurface* sur = &_surface[it];
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
+		_strip_select (0, addr);
 		if (sur->cue) {
 			_cue_set (sur->aux, addr);
 		} else if (!sur->bank_size) {
@@ -1815,7 +1784,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	// revert any expand to select
 	 s->expand = 0;
 	 s->expand_enable = false;
-	_strip_select (ControlProtocol::first_selected_stripable(), addr);
+	_strip_select (0, addr);
 
 	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 	s->nstrips = s->strips.size();
@@ -1840,10 +1809,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	s->bank = bank_start;
 
 	if (s->feedback[0] || s->feedback[1]) {
-
-		for (uint32_t i = 0; i < s->observers.size(); i++) {
-			s->observers[i]->refresh_strip (false);
-		}
+		strip_feedback (s, false);
 	}
 	bank_leds (s);
 	bank_dirty = false;
@@ -2705,7 +2671,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 		if (sur->expand_enable && sur->expand) {
 			strp = get_strip (sur->expand, get_address (msg));
 		} else {
-			strp = ControlProtocol::first_selected_stripable();
+			strp = _select;
 		}
 		ctr = 8;
 	} else {
@@ -2791,7 +2757,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		if (sur->expand_enable && sur->expand) {
 			strp = get_strip (sur->expand, get_address (msg));
 		} else {
-			strp = ControlProtocol::first_selected_stripable();
+			strp = _select;
 		}
 		ctr = 8;
 	} else {
@@ -3210,7 +3176,7 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 	if (yn) {
 		s = get_strip (ssid, get_address (msg));
 	} else {
-		s = ControlProtocol::first_selected_stripable();
+		s = _select;
 	}
 
 	return _strip_select (s, get_address (msg));
@@ -3223,18 +3189,21 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr, true);
-	if (s) {
-		sur->select = s;
-		s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
-	} else if (sur->expand_enable) {
-		// expand doesn't point to a stripable, turn it off and use select
-		sur->expand = 0;
-		sur->expand_enable = false;
-		if (_select) {
-			s = _select;
-			sur->select = s;
+	if (!s) {
+		if (sur->expand_enable) {
+			// expand doesn't point to a stripable, turn it off and use select
+			sur->expand = 0;
+			sur->expand_enable = false;
 		}
+		if(ControlProtocol::first_selected_stripable()) {
+			s = ControlProtocol::first_selected_stripable();
+		} else {
+			s = session->master_out ();
+		}
+			_select = s;
 	}
+	sur->select = s;
+	s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
 	OSCSelectObserver* so = 0;
 	if (sur->feedback[13]) {
@@ -3259,12 +3228,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		processor_changed (addr);
 	}
 
-	for (uint32_t i = 0; i < sur->observers.size(); i++) {
-		OSCRouteObserver* ro;
-		if ((ro = dynamic_cast<OSCRouteObserver*>(sur->observers[i])) != 0) {
-			ro->refresh_strip (false);
-		}
-	}
+	strip_feedback (sur, false);
 
 	return 0;
 }
@@ -3313,7 +3277,7 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 	if (state && sur->expand) {
 		s = get_strip (sur->expand, get_address (msg));
 	} else {
-		s = ControlProtocol::first_selected_stripable();
+		s = _select;
 	}
 
 	return _strip_select (s, get_address (msg));
@@ -4711,23 +4675,6 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 		}
 	}
 	return sel_send_fail ("eq_shape", id + 1, 0, get_address (msg));
-}
-
-void
-OSC::gui_selection_changed ()
-{
-	boost::shared_ptr<Stripable> strip = ControlProtocol::first_selected_stripable();
-
-	if (strip) {
-		_select = strip;
-		for (uint32_t it = 0; it < _surface.size(); ++it) {
-			OSCSurface* sur = &_surface[it];
-			if(!sur->expand_enable) {
-				lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-				_strip_select (strip, addr);
-			}
-		}
-	}
 }
 
 // timer callbacks
