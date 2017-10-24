@@ -81,10 +81,15 @@ OSCRouteObserver::refresh_strip (bool force)
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	in_line = feedback[2];
+	_last_gain =-1.0;
+	_last_trim =-1.0;
 	uint32_t sid = sur->bank + ssid - 2;
 	if (sid >= sur->strips.size ()) {
 		// this _should_ only occure if the number of strips is less than banksize
-		clear_strip ();
+		if (_strip) {
+			_strip = 0;
+			clear_strip ();
+		}
 		return;
 	}
 	// future

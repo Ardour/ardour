@@ -119,7 +119,6 @@ OSC::~OSC()
 	tick = false;
 	stop ();
 	tear_down_gui ();
-	std::cout << "OSC stopped.\n";
 	_instance = 0;
 }
 
@@ -1695,6 +1694,8 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
+	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+	sur->nstrips = sur->strips.size();
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
@@ -1706,8 +1707,6 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 		sur->observers.clear();
 
 		// get freash striplist - just in case
-		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
-		sur->nstrips = sur->strips.size();
 		uint32_t bank_size = sur->bank_size;
 		if (!bank_size) {
 			bank_size = sur->nstrips;
@@ -1788,9 +1787,7 @@ OSC::_recalcbanks ()
 			lo_send_message (addr, "/strip/list", reply);
 			lo_message_free (reply);
 		} else {
-			for (uint32_t i = 0; i < sur->observers.size(); i++) {
-				sur->observers[i]->refresh_strip (false);
-			}
+			strip_feedback (sur, false);
 		}
 	}
 }
