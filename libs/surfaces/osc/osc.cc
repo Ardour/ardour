@@ -2588,6 +2588,7 @@ OSC::route_get_receives(lo_message msg) {
 	boost::shared_ptr<RouteList> route_list = session->get_routes();
 
 	lo_message reply = lo_message_new();
+	lo_message_add_int32(reply, rid);
 
 	for (RouteList::iterator i = route_list->begin(); i != route_list->end(); ++i) {
 		boost::shared_ptr<Route> tr = boost::dynamic_pointer_cast<Route> (*i);
