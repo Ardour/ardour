@@ -3052,7 +3052,9 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
 			if (track->monitoring_control()) {
-				track->monitoring_control()->set_value (yn ? 1.0 : 0.0, sur->usegroup);
+				std::bitset<32> value = track->monitoring_control()->get_value ();
+				value[0] = yn ? 1 : 0;
+				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
 				return 0;
 			}
 		}
@@ -3075,7 +3077,9 @@ OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
 			if (track->monitoring_control()) {
-				track->monitoring_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
+				std::bitset<32> value = track->monitoring_control()->get_value ();
+				value[0] = yn ? 1 : 0;
+				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
 				return 0;
 			}
 		}
@@ -3094,7 +3098,9 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
 			if (track->monitoring_control()) {
-				track->monitoring_control()->set_value (yn ? 2.0 : 0.0, sur->usegroup);
+				std::bitset<32> value = track->monitoring_control()->get_value ();
+				value[1] = yn ? 1 : 0;
+				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
 				return 0;
 			}
 		}
@@ -3117,7 +3123,9 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
 			if (track->monitoring_control()) {
-				track->monitoring_control()->set_value (yn ? 2.0 : 0.0, PBD::Controllable::NoGroup);
+				std::bitset<32> value = track->monitoring_control()->get_value ();
+				value[1] = yn ? 1 : 0;
+				track->monitoring_control()->set_value (value.to_ulong(), sur->usegroup);
 				return 0;
 			}
 		}
