@@ -1241,7 +1241,6 @@ OSC::routes_list (lo_message msg)
 	// send feedback for newly created control surface
 	strip_feedback (sur, true);
 	global_feedback (sur);
-	// need to add select start
 	_strip_select (0, get_address (msg));
 
 }
@@ -1270,10 +1269,16 @@ int
 OSC::refresh_surface (lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg), true);
+	uint32_t bs = s->bank_size;
+	uint32_t st = (uint32_t) s->strip_types.to_ulong();
+	uint32_t fb = (uint32_t) s->feedback.to_ulong();
+	uint32_t gm = (uint32_t) s->gainmode;
+	uint32_t sp = s->send_page_size;
+	uint32_t pp = s->plug_page_size;
+
 	surface_destroy (s);
 	// restart all observers
-	set_surface (s->bank_size, (uint32_t) s->strip_types.to_ulong(), (uint32_t) s->feedback.to_ulong(), \
-		(uint32_t) s->gainmode, (uint32_t) s->send_page_size, (uint32_t) s->plug_page_size, msg);
+	set_surface (bs, st, fb, gm, sp, pp, msg);
 	return 0;
 }
 
@@ -1546,10 +1551,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->feedback = fb;
 
-	// set strip feedback
 	strip_feedback (s, false);
-
-	// Set global/master feedback
 	global_feedback (s);
 	_strip_select (0, get_address (msg));
 	return 0;
@@ -1564,10 +1566,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->gainmode = gm;
 
-	// set strip feedback
 	strip_feedback (s, false);
-
-	// Set global/master feedback
 	global_feedback (s);
 	_strip_select (0, get_address (msg));
 	return 0;
@@ -1639,11 +1638,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	}
 
 	if (!quiet) {
-		// set bank and strip feedback
-
 		strip_feedback (&s, true);
-
-		// Set global/master feedback
 		global_feedback (&s);
 		_strip_select (0, addr);
 	}
