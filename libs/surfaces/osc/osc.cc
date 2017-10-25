@@ -2844,7 +2844,7 @@ OSC::sel_mute (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("mute", 0, get_address (msg));
+	return float_message("/select/mute", 0, get_address (msg));
 }
 
 int
@@ -2912,7 +2912,7 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 		}
 	}
-	return sel_fail ("solo", 0, get_address (msg));
+	return float_message("/select/solo", 0, get_address (msg));
 }
 
 int
@@ -2931,7 +2931,7 @@ OSC::sel_solo_iso (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("solo_iso", 0, get_address (msg));
+	return float_message("/select/solo_iso", 0, get_address (msg));
 }
 
 int
@@ -2950,7 +2950,7 @@ OSC::sel_solo_safe (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("solo_safe", 0, get_address (msg));
+	return float_message("/select/solo_safe", 0, get_address (msg));
 }
 
 int
@@ -2971,7 +2971,7 @@ OSC::sel_recenable (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return sel_fail ("recenable", 0, get_address (msg));
+	return float_message("/select/recenable", 0, get_address (msg));
 }
 
 int
@@ -3025,7 +3025,7 @@ OSC::sel_recsafe (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return sel_fail ("record_safe", 0, get_address (msg));
+	return float_message("/select/record_safe", 0, get_address (msg));
 }
 
 int
@@ -3084,7 +3084,7 @@ OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return sel_fail ("monitor_input", 0, get_address (msg));
+	return float_message("/select/monitor_input", 0, get_address (msg));
 }
 
 int
@@ -3126,7 +3126,7 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return sel_fail ("monitor_disk", 0, get_address (msg));
+	return float_message("/select/monitor_disk", 0, get_address (msg));
 }
 
 
@@ -3163,7 +3163,7 @@ OSC::sel_phase (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("polarity", 0, get_address (msg));
+	return float_message("/select/polarity", 0, get_address (msg));
 }
 
 int
@@ -3350,7 +3350,7 @@ OSC::sel_gain (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("gain", -193, get_address (msg));
+	return float_message("/select/gain", -193, get_address (msg));
 }
 
 int
@@ -3381,7 +3381,7 @@ OSC::sel_dB_delta (float delta, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("gain", -193, get_address (msg));
+	return float_message("/select/gain", -193, get_address (msg));
 }
 
 int
@@ -3447,7 +3447,7 @@ OSC::sel_fader (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("fader", 0, get_address (msg));
+	return float_message("/select/fader", 0, get_address (msg));
 }
 
 int
@@ -3497,7 +3497,7 @@ OSC::sel_trim (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("trimdB", 0, get_address (msg));
+	return float_message("/select/trimdB", 0, get_address (msg));
 }
 
 int
@@ -3516,7 +3516,7 @@ OSC::sel_pan_position (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_stereo_position", 0.5, get_address (msg));
+	return float_message("/select/pan_stereo_position", 0.5, get_address (msg));
 }
 
 int
@@ -3535,7 +3535,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_stereo_width", 1, get_address (msg));
+	return float_message("/select/pan_stereo_width", 1, get_address (msg));
 }
 
 int
@@ -3631,7 +3631,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return sel_send_fail ("send_gain", id, -193, get_address (msg));
+		return float_message_with_id ("/select/send_gain", id, -193, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -3662,7 +3662,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_gain", id, -193, get_address (msg));
+	return float_message_with_id ("/select/send_gain", id, -193, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3670,7 +3670,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return sel_send_fail ("send_fader", id, 0, get_address (msg));
+		return float_message_with_id ("/select/send_fader", id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -3695,7 +3695,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_fader", id, 0, get_address (msg));
+	return float_message_with_id ("/select/send_fader", id, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3746,7 +3746,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return sel_send_fail ("send_enable", id, 0, get_address (msg));
+		return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -3770,7 +3770,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 			if (!r) {
 				// should never get here
-				return sel_send_fail ("send_enable", id, 0, get_address (msg));
+				return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
 			}
 			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(send_id));
 			if (snd) {
@@ -3783,7 +3783,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("send_enable", id, 0, get_address (msg));
+	return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3809,7 +3809,7 @@ int
 OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg) {
 	OSCSurface *sur = get_surface(get_address (msg));
 	int paid;
-	int piid = sur->plugin_id;
+	uint32_t piid = sur->plugin_id;
 	float value = 0;
 	if (argc > 1) {
 		// no inline args
@@ -3855,13 +3855,11 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		PBD::warning << "OSC: Must have parameters." << endmsg;
 		return -1;
 	}
-	if (piid != sur->plugin_id) {
-		// if the user is sending to a non-existant plugin, don't adjust one we do have
-		PBD::warning << "OSC: plugin: " << piid << " out of range" << endmsg;
-		return -1;
+	if (!piid || piid > sur->plugins.size ()) {
+		return float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
 	}
 	if (sur->plug_page_size && (paid > (int)sur->plug_page_size)) {
-		return sel_send_fail ("plugin/parameter", paid, 0, get_address (msg));
+		return float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -3884,7 +3882,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	int parid = paid + (int)(sur->plug_page_size * (sur->plug_page - 1));
 	if (parid > (int) sur->plug_params.size ()) {
 		if (sur->feedback[13]) {
-			sel_send_fail ("plugin/parameter", paid, 0, get_address (msg));
+			float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
 		}
 		return 0;
 	}
@@ -4317,7 +4315,7 @@ OSC::sel_pan_elevation (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_elevation_position", 0, get_address (msg));
+	return float_message("/select/pan_elevation_position", 0, get_address (msg));
 }
 
 int
@@ -4336,7 +4334,7 @@ OSC::sel_pan_frontback (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_frontback_position", 0.5, get_address (msg));
+	return float_message("/select/pan_frontback_position", 0.5, get_address (msg));
 }
 
 int
@@ -4355,7 +4353,7 @@ OSC::sel_pan_lfe (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("pan_lfe_control", 0, get_address (msg));
+	return float_message("/select/pan_lfe_control", 0, get_address (msg));
 }
 
 // compressor control
@@ -4375,7 +4373,7 @@ OSC::sel_comp_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("comp_enable", 0, get_address (msg));
+	return float_message("/select/comp_enable", 0, get_address (msg));
 }
 
 int
@@ -4394,7 +4392,7 @@ OSC::sel_comp_threshold (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("comp_threshold", 0, get_address (msg));
+	return float_message("/select/comp_threshold", 0, get_address (msg));
 }
 
 int
@@ -4413,7 +4411,7 @@ OSC::sel_comp_speed (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("comp_speed", 0, get_address (msg));
+	return float_message("/select/comp_speed", 0, get_address (msg));
 }
 
 int
@@ -4432,7 +4430,7 @@ OSC::sel_comp_mode (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("comp_mode", 0, get_address (msg));
+	return float_message("/select/comp_mode", 0, get_address (msg));
 }
 
 int
@@ -4451,7 +4449,7 @@ OSC::sel_comp_makeup (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("comp_makeup", 0, get_address (msg));
+	return float_message("/select/comp_makeup", 0, get_address (msg));
 }
 
 // EQ control
@@ -4472,7 +4470,7 @@ OSC::sel_eq_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_enable", 0, get_address (msg));
+	return float_message("/select/eq_enable", 0, get_address (msg));
 }
 
 int
@@ -4491,7 +4489,7 @@ OSC::sel_eq_hpf_freq (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_hpf/freq", 0, get_address (msg));
+	return float_message("/select/eq_hpf/freq", 0, get_address (msg));
 }
 
 int
@@ -4510,7 +4508,7 @@ OSC::sel_eq_lpf_freq (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_lpf/freq", 0, get_address (msg));
+	return float_message("/select/eq_lpf/freq", 0, get_address (msg));
 }
 
 int
@@ -4529,7 +4527,7 @@ OSC::sel_eq_hpf_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_hpf/enable", 0, get_address (msg));
+	return float_message("/select/eq_hpf/enable", 0, get_address (msg));
 }
 
 int
@@ -4548,7 +4546,7 @@ OSC::sel_eq_lpf_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_lpf/enable", 0, get_address (msg));
+	return float_message("/select/eq_lpf/enable", 0, get_address (msg));
 }
 
 int
@@ -4567,7 +4565,7 @@ OSC::sel_eq_hpf_slope (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_hpf/slope", 0, get_address (msg));
+	return float_message("/select/eq_hpf/slope", 0, get_address (msg));
 }
 
 int
@@ -4586,7 +4584,7 @@ OSC::sel_eq_lpf_slope (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_fail ("eq_lpf/slope", 0, get_address (msg));
+	return float_message("/select/eq_lpf/slope", 0, get_address (msg));
 }
 
 int
@@ -4608,7 +4606,7 @@ OSC::sel_eq_gain (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("eq_gain", id + 1, 0, get_address (msg));
+	return float_message_with_id ("/select/eq_gain", id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4630,7 +4628,7 @@ OSC::sel_eq_freq (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("eq_freq", id + 1, 0, get_address (msg));
+	return float_message_with_id ("/select/eq_freq", id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4652,7 +4650,7 @@ OSC::sel_eq_q (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("eq_q", id + 1, 0, get_address (msg));
+	return float_message_with_id ("/select/eq_q", id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4674,7 +4672,7 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return sel_send_fail ("eq_shape", id + 1, 0, get_address (msg));
+	return float_message_with_id ("/select/eq_shape", id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 // timer callbacks
@@ -4747,44 +4745,6 @@ OSC::periodic (void)
 		}
 	}
 	return true;
-}
-
-int
-OSC::sel_fail (string path, float val, lo_address addr)
-{
-	ostringstream os;
-	os.str("");
-	os << "/select/" << path;
-	string sel_pth = os.str();
-	lo_message reply = lo_message_new ();
-	lo_message_add_float (reply, (float) val);
-	lo_send_message (addr, sel_pth.c_str(), reply);
-	lo_message_free (reply);
-
-	return 0;
-}
-
-int
-OSC::sel_send_fail (string path, uint32_t id, float val, lo_address addr)
-{
-	OSCSurface *sur = get_surface(addr);
-
-	ostringstream os;
-	lo_message reply;
-	reply = lo_message_new ();
-	if (sur->feedback[2]) {
-		os << "/select/" << path << "/" << id;
-	} else {
-		os << "/select/" << path;
-		lo_message_add_int32 (reply, id);
-	}
-	string str_pth = os.str();
-	lo_message_add_float (reply, (float) val);
-
-	lo_send_message (addr, str_pth.c_str(), reply);
-	lo_message_free (reply);
-
-	return 0;
 }
 
 XMLNode&

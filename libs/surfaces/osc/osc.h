@@ -701,9 +701,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	sigc::connection periodic_connection;
 	PBD::ScopedConnectionList session_connections;
 
-	int sel_send_fail (std::string path, uint32_t id, float val, lo_address addr);
-	int sel_fail (std::string path, float val, lo_address addr);
-
 	void debugmsg (const char *prefix, const char *path, const char* types, lo_arg **argv, int argc);
 
 	static OSC* _instance;
