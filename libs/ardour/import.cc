@@ -38,6 +38,7 @@
 #include <glibmm.h>
 
 #include <boost/scoped_array.hpp>
+#include <boost/scoped_ptr.hpp>
 #include <boost/shared_array.hpp>
 
 #include "pbd/basename.h"
@@ -500,8 +501,9 @@ Session::import_files (ImportStatus& status)
 	     ++p)
 	{
 		boost::shared_ptr<ImportableSource> source;
-		std::auto_ptr<Evoral::SMF>          smf_reader;
+
 		const DataType type = SMFSource::safe_midi_file_extension (*p) ? DataType::MIDI : DataType::AUDIO;
+		boost::scoped_ptr<Evoral::SMF> smf_reader;
 
 		if (type == DataType::AUDIO) {
 			try {
@@ -515,7 +517,7 @@ Session::import_files (ImportStatus& status)
 
 		} else {
 			try {
-				smf_reader = std::auto_ptr<Evoral::SMF>(new Evoral::SMF());
+				smf_reader.reset (new Evoral::SMF());
 
 				if (smf_reader->open(*p)) {
 					throw Evoral::SMF::FileError (*p);
@@ -577,7 +579,7 @@ Session::import_files (ImportStatus& status)
 			status.doing_what = compose_status_message (*p, source->samplerate(),
 			                                            sample_rate(), status.current, status.total);
 			write_audio_data_to_new_files (source.get(), status, newfiles);
-		} else if (smf_reader.get()) { // midi
+		} else if (smf_reader) { // midi
 			status.doing_what = string_compose(_("Loading MIDI file %1"), *p);
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, status.split_midi_channels);
 		}
