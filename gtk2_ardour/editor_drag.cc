@@ -2873,7 +2873,6 @@ void
 TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 
 	samplepos_t const region_start = _primary->region()->position();
 	samplepos_t const region_end = _primary->region()->last_sample();
@@ -2935,7 +2934,6 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 	RegionView* rv = _primary;
 
 	TimeAxisView* tvp = &_primary->get_time_axis_view ();
-	RouteTimeAxisView* tv = dynamic_cast<RouteTimeAxisView*>(tvp);
 	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	sampleoffset_t sample_delta = 0;
 
