@@ -473,6 +473,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/mark_out", "f", mark_out);
 		REGISTER_CALLBACK (serv, "/toggle_click", "", toggle_click);
 		REGISTER_CALLBACK (serv, "/toggle_click", "f", toggle_click);
+		REGISTER_CALLBACK (serv, "/click/level", "f", click_level);
 		REGISTER_CALLBACK (serv, "/midi_panic", "", midi_panic);
 		REGISTER_CALLBACK (serv, "/midi_panic", "f", midi_panic);
 		REGISTER_CALLBACK (serv, "/toggle_roll", "", toggle_roll);
@@ -2300,6 +2301,16 @@ OSC::jog_mode (float mode, lo_message msg)
 	}
 	return 0;
 
+}
+
+int
+OSC::click_level (float position)
+{
+	if (!session) return -1;
+	if (session->click_gain()->gain_control()) {
+		session->click_gain()->gain_control()->set_value (session->click_gain()->gain_control()->interface_to_internal (position), PBD::Controllable::NoGroup);
+	}
+	return 0;
 }
 
 // master and monitor calls
