@@ -366,12 +366,12 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 					if (fabsf (speed) != 1.0f) {
 						samplecnt_t ocnt = nframes;
-						samplecnt_t icnt = interpolation.interpolate (n, chaninfo->rw_vector.len[0], chaninfo->rw_vector.buf[0], ocnt, disk_signal);
+						interpolation.interpolate (n, chaninfo->rw_vector.len[0], chaninfo->rw_vector.buf[0], ocnt, disk_signal);
 
 						if (ocnt < nframes) {
 							disk_signal += ocnt;
 							ocnt = nframes - ocnt;
-							icnt = interpolation.interpolate (n, chaninfo->rw_vector.len[1], chaninfo->rw_vector.buf[1], ocnt, disk_signal);
+							interpolation.interpolate (n, chaninfo->rw_vector.len[1], chaninfo->rw_vector.buf[1], ocnt, disk_signal);
 						}
 
 					} else if (speed != 0.0) {
@@ -401,8 +401,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			chaninfo->buf->increment_read_ptr (disk_samples_to_consume);
-
-		  monitor_mix:
 
 			if (ms & MonitoringInput) {
 				/* mix the disk signal into the input signal (already in bufs) */
