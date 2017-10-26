@@ -17,6 +17,8 @@
 
 */
 
+#include <boost/smart_ptr/scoped_ptr.hpp>
+
 #include "pbd/enumwriter.h"
 #include "pbd/memento_command.h"
 
@@ -545,8 +547,8 @@ DiskReader::overwrite_existing_buffers ()
 		/* assume all are the same size */
 		samplecnt_t size = c->front()->buf->bufsize();
 
-		std::auto_ptr<Sample> mixdown_buffer (new Sample[size]);
-		std::auto_ptr<float> gain_buffer (new float[size]);
+		boost::scoped_ptr<Sample> mixdown_buffer (new Sample[size]);
+		boost::scoped_ptr<float> gain_buffer (new float[size]);
 
 		/* reduce size so that we can fill the buffer correctly (ringbuffers
 		   can only handle size-1, otherwise they appear to be empty)
@@ -836,8 +838,8 @@ DiskReader::_do_refill_with_alloc (bool partial_fill)
 	*/
 
 	{
-		std::auto_ptr<Sample> mix_buf (new Sample[2*1048576]);
-		std::auto_ptr<float>  gain_buf (new float[2*1048576]);
+		boost::scoped_ptr<Sample> mix_buf (new Sample[2*1048576]);
+		boost::scoped_ptr<float>  gain_buf (new float[2*1048576]);
 
 		int ret = refill_audio (mix_buf.get(), gain_buf.get(), (partial_fill ? _chunk_samples : 0));
 
