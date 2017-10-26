@@ -21,6 +21,7 @@
 
 #include "pbd/control_math.h"
 
+#include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
@@ -43,6 +44,9 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	,_last_master_gain (0.0)
 	,_last_master_trim (0.0)
 	,_last_monitor_gain (0.0)
+	,last_punchin (4)
+	,last_punchout (4)
+	,last_click (4)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	//addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
@@ -120,6 +124,12 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		session->SoloActive.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::solo_active, this, _1), OSC::instance());
 		solo_active (session->soloing() || session->listening());
 
+		boost::shared_ptr<Controllable> click_controllable = boost::dynamic_pointer_cast<Controllable>(session->click_gain()->gain_control());
+		click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
+		send_change_message ("/click/level", click_controllable);
+
+		extra_check ();
+
 		/*
 		* 	Maybe (many) more
 		*/
@@ -184,11 +194,16 @@ OSCGlobalObserver::clear_observer ()
 	_osc.float_message (X_("/loop_toggle"), 0, addr);
 	_osc.float_message (X_("/transport_play"), 0, addr);
 	_osc.float_message (X_("/transport_stop"), 0, addr);
+	_osc.float_message (X_("/toggle_roll"), 0, addr);
 	_osc.float_message (X_("/rewind"), 0, addr);
 	_osc.float_message (X_("/ffwd"), 0, addr);
 	_osc.float_message (X_("/record_tally"), 0, addr);
 	_osc.float_message (X_("/rec_enable_toggle"), 0, addr);
 	_osc.float_message (X_("/cancel_all_solos"), 0, addr);
+	_osc.float_message (X_("/toggle_punch_out"), 0, addr);
+	_osc.float_message (X_("/toggle_punch_in"), 0, addr);
+	_osc.float_message (X_("/toggle_click"), 0, addr);
+	_osc.float_message (X_("/click/level"), 0, addr);
 
 
 }
@@ -315,13 +330,15 @@ OSCGlobalObserver::tick ()
 			}
 			monitor_timeout--;
 		}
+		extra_check ();
 	}
 }
 
 void
 OSCGlobalObserver::send_change_message (string path, boost::shared_ptr<Controllable> controllable)
 {
-	_osc.float_message (path, (float) controllable->get_value(), addr);
+	float val = controllable->get_value();
+	_osc.float_message (path, (float) controllable->internal_to_interface (val), addr);
 }
 
 void
@@ -406,3 +423,21 @@ OSCGlobalObserver::solo_active (bool active)
 {
 	_osc.float_message (X_("/cancel_all_solos"), (float) active, addr);
 }
+
+void
+OSCGlobalObserver::extra_check ()
+{
+	if (last_punchin != session->config.get_punch_in()) {
+		last_punchin = session->config.get_punch_in();
+		_osc.float_message (X_("/toggle_punch_in"), last_punchin, addr);
+	}
+	if (last_punchout != session->config.get_punch_out()) {
+		last_punchout = session->config.get_punch_out();
+		_osc.float_message (X_("/toggle_punch_out"), last_punchout, addr);
+	}
+	if (last_click != Config->get_clicking()) {
+		last_click = Config->get_clicking();
+		_osc.float_message (X_("/toggle_click"), last_click, addr);
+	}
+}
+

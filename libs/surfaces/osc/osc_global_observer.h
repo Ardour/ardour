@@ -66,6 +66,9 @@ class OSCGlobalObserver
 	float _last_meter;
 	uint32_t master_timeout;
 	uint32_t monitor_timeout;
+	uint32_t last_punchin;
+	uint32_t last_punchout;
+	uint32_t last_click;
 
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
@@ -74,6 +77,7 @@ class OSCGlobalObserver
 	void send_record_state_changed (void);
 	void solo_active (bool active);
 	void session_name (std::string path, std::string name);
+	void extra_check (void);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */
