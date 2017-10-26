@@ -117,7 +117,7 @@ Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::
 								   _surface->number(), index, Button::id_to_name (bb->bid()),
 								   bb->id(), b->second.base_id));
 	}
-	
+
 	_trickle_counter = 0;
 }
 
@@ -244,7 +244,7 @@ void
 Strip::reset_stripable ()
 {
 	stripable_connections.drop_connections ();
-	
+
 	_solo->set_control (boost::shared_ptr<AutomationControl>());
 	_mute->set_control (boost::shared_ptr<AutomationControl>());
 	_select->set_control (boost::shared_ptr<AutomationControl>());
@@ -624,15 +624,15 @@ Strip::periodic (ARDOUR::microseconds_t now)
 			_surface->write (_mute->set_state (off));
 			_surface->write (_select->set_state (off));
 		}
-	
+
 	}
-	
+
 	//after a hard write, queue us for trickling data later
 	if (_trickle_counter == 0)
 		_trickle_counter = global_index()+1;
 
 	_trickle_counter++;
-	
+
 }
 
 void
@@ -726,11 +726,11 @@ Strip::next_pot_mode ()
 
 void
 /*
- * 
+ *
  * name: Strip::subview_mode_changed
  * @param
  * @return
- * 
+ *
  */
 Strip::subview_mode_changed ()
 {
@@ -797,7 +797,7 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		pc = r->trim_control ();
 		_vpot->set_mode(Pot::boost_cut);
 		break;
-		
+
 	case 1:
 		pc = r->pan_azimuth_control ();
 		_vpot->set_mode(Pot::dot);
@@ -806,28 +806,28 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	case 2:
 		pc = r->comp_threshold_controllable();
 		break;
-		
+
 	case 3:
 		pc = r->comp_speed_controllable();
 		break;
-		
+
 	case 4:
 		pc = r->comp_mode_controllable();
 		_vpot->set_mode(Pot::wrap);
 		break;
-		
+
 	case 5:
 		pc = r->comp_makeup_controllable();
 		break;
-		
-		
+
+
 	}  //trim & dynamics
-	
-	
+
+
 	//EQ
 	int eq_band = -1;
 	if (r->mixbus () || r->is_master()) {
-		
+
 		switch (global_pos) {
 
 			case 6:
@@ -894,8 +894,8 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 				pc = r->eq_freq_controllable (eq_band);
 				break;
 		}
-		
-	
+
+
 #endif
 
 		//mixbus sends
@@ -911,17 +911,17 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 			pc = r->send_level_controllable ( global_pos - 16 );
 			break;
 		}  //global_pos switch
-		
+
 	} //if input_strip
 #endif //ifdef MIXBUS
-	
+
 	if (pc) {  //control found; set our knob to watch for changes in it
 		_vpot->set_control (pc);
 		pc->Changed.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_vpot_change, this), ui_context());
 	} else {  //no control, just set the knob to "empty"
 		_vpot->reset_control ();
 	}
-	
+
 	notify_vpot_change ();
 }
 
