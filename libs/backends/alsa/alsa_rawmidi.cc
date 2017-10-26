@@ -280,8 +280,12 @@ AlsaRawMidiIn::main_process_thread ()
 		uint64_t time = g_get_monotonic_time();
 		ssize_t err = snd_rawmidi_read (_device, data, sizeof(data));
 
-		if ((err == -EAGAIN) || (err == -EWOULDBLOCK)) {
-			continue;
+#if EAGAIN != EWOULDBLOCK
+		if ((err == -EAGAIN) || (err == -EWOULDBLOCK))  {
+#else
+		if (err == -EAGAIN) {
+#endif
+		    continue;
 		}
 		if (err < 0) {
 			PBD::error << _("AlsaRawMidiIn: read error. Terminating Midi") << endmsg;
