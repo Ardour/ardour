@@ -251,16 +251,19 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 	}
 
-	if (c->empty()) {
-		/* do nothing */
-		return;
-	}
-
 	if ((speed == 0.0) && (ms == MonitoringDisk)) {
 		/* no channels, or stopped. Don't accidentally pass any data
 		 * from disk into our outputs (e.g. via interpolation)
 		 */
 		return;
+	}
+
+	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
+	const bool still_locating = _session.global_locate_pending();
+
+	if (c->empty()) {
+		/* do nothing with audio */
+		goto midi;
 	}
 
 	if (speed != 1.0f && speed != -1.0f) {
@@ -273,8 +276,6 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		disk_samples_to_consume = nframes;
 	}
 
-	BufferSet& scratch_bufs (_session.get_scratch_buffers (bufs.count()));
-	const bool still_locating = _session.global_locate_pending();
 
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
