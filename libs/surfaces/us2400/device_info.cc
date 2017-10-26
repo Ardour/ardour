@@ -156,7 +156,6 @@ DeviceInfo::shared_buttons ()
 int
 DeviceInfo::set_state (const XMLNode& node, int /* version */)
 {
-	const XMLProperty* prop;
 	const XMLNode* child;
 
 	if (node.name() != "US-2400Device") {
