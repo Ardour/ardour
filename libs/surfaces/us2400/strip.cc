@@ -781,7 +781,6 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 		return;
 	}
 
-	const uint32_t global_pos = _surface->mcp().global_index (*this);
 
 	boost::shared_ptr<AutomationControl> pc;
 	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (r);
@@ -790,6 +789,7 @@ Strip::setup_trackview_vpot (boost::shared_ptr<Stripable> r)
 	_vpot->set_mode(Pot::wrap);
 
 #ifdef MIXBUS
+	const uint32_t global_pos = _surface->mcp().global_index (*this);
 
 	//Trim & dynamics
 	switch (global_pos) {
