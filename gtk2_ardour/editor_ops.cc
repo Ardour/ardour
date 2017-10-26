@@ -837,7 +837,6 @@ Editor::find_next_region (samplepos_t sample, RegionPoint point, int32_t dir, Tr
 	samplepos_t rpos = 0;
 
 	samplepos_t track_sample;
-	RouteTimeAxisView *rtav;
 
 	for (i = tracks.begin(); i != tracks.end(); ++i) {
 
