@@ -23,6 +23,8 @@
 #include <string>
 #include <list>
 
+#include <boost/smart_ptr/scoped_ptr.hpp>
+
 #include <gtkmm/separator.h>
 
 #include "pbd/error.h"
@@ -149,7 +151,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
 	{
-		std::auto_ptr<Gtk::Entry> an_entry (new FocusEntry);
+		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
 		Gtk::Requisition req;
 		an_entry->size_request (req);
