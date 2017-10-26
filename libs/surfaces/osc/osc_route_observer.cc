@@ -87,7 +87,7 @@ OSCRouteObserver::refresh_strip (bool force)
 	if (sid >= sur->strips.size ()) {
 		// this _should_ only occure if the number of strips is less than banksize
 		if (_strip) {
-			_strip = 0;
+			_strip = boost::shared_ptr<ARDOUR::Stripable>();
 			clear_strip ();
 		}
 		return;

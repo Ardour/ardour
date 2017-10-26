@@ -1242,7 +1242,7 @@ OSC::routes_list (lo_message msg)
 	// send feedback for newly created control surface
 	strip_feedback (sur, true);
 	global_feedback (sur);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 
 }
 
@@ -1499,7 +1499,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	strip_feedback(s, true);
 
 	global_feedback (s);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	sel_send_pagesize (se_size, msg);
 	sel_plug_pagesize (pi_size, msg);
 	return 0;
@@ -1517,7 +1517,7 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 
 	// set bank and strip feedback
 	strip_feedback (s, true);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
 }
 
@@ -1538,7 +1538,7 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	// set bank and strip feedback
 	s->bank = 1;
 	strip_feedback (s, true);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
 }
 
@@ -1554,7 +1554,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 
 	strip_feedback (s, false);
 	global_feedback (s);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
 }
 
@@ -1569,7 +1569,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 
 	strip_feedback (s, false);
 	global_feedback (s);
-	_strip_select (0, get_address (msg));
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
 }
 
@@ -1641,7 +1641,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	if (!quiet) {
 		strip_feedback (&s, true);
 		global_feedback (&s);
-		_strip_select (0, addr);
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 	}
 
 	return &_surface[_surface.size() - 1];
@@ -1741,7 +1741,7 @@ OSC::_recalcbanks ()
 		OSCSurface* sur = &_surface[it];
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-		_strip_select (0, addr);
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 		if (sur->cue) {
 			_cue_set (sur->aux, addr);
 		} else if (!sur->bank_size) {
@@ -1780,7 +1780,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	// revert any expand to select
 	 s->expand = 0;
 	 s->expand_enable = false;
-	_strip_select (0, addr);
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 
 	s->strips = get_sorted_stripables(s->strip_types, s->cue);
 	s->nstrips = s->strips.size();
