@@ -70,6 +70,7 @@ libpbd_sources = [
     'semutils.cc',
     'shortpath.cc',
     'signals.cc',
+    'spinlock.cc',
     'stacktrace.cc',
     'stateful_diff_command.cc',
     'stateful.cc',
