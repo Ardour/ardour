@@ -427,6 +427,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\spinlock.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\stacktrace.cc"
 				>
 			</File>
@@ -786,6 +790,10 @@
 			</File>
 			<File
 				RelativePath="..\pbd\signals.h"
+				>
+			</File>
+			<File
+				RelativePath="..\pbd\spinlock.h"
 				>
 			</File>
 			<File
