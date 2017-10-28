@@ -1891,7 +1891,7 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 			_ltcbuf = new PBD::RingBuffer<Sample> (std::max (DummyAudioBackend::max_buffer_size() * 2.f, samplerate));
 			break;
 		case Loopback:
-			_wavetable = (Sample*) malloc (DummyAudioBackend::max_buffer_size() * sizeof(Sample));
+			_wavetable = (Sample*) calloc (DummyAudioBackend::max_buffer_size(), sizeof(Sample));
 			break;
 	}
 	return name;
