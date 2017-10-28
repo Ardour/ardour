@@ -162,6 +162,7 @@ TempoSection::TempoSection (const XMLNode& node, samplecnt_t sample_rate)
 {
 	BBT_Time bbt;
 	std::string start_bbt;
+	_legacy_bbt.bars = 0; // legacy session check compars .bars != 0; default BBT_Time c'tor uses 1.
 	if (node.get_property ("start", start_bbt)) {
 		if (string_to_bbt_time (start_bbt, bbt)) {
 			/* legacy session - start used to be in bbt*/
