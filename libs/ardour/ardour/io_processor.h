@@ -67,8 +67,6 @@ class LIBARDOUR_API IOProcessor : public Processor
 	void silence (samplecnt_t nframes, samplepos_t start_sample);
 	void disconnect ();
 
-	void increment_port_buffer_offset (pframes_t);
-
 	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
 	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;

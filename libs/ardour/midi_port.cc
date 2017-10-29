@@ -141,17 +141,16 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				timestamp = floor (timestamp * _speed_ratio);
 
 				/* check that the event is in the acceptable time range */
-				if ((timestamp <  (_global_port_buffer_offset + _port_buffer_offset)) ||
-				    (timestamp >= (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
+				if ((timestamp <  (_global_port_buffer_offset)) ||
+				    (timestamp >= (_global_port_buffer_offset + nframes))) {
 					// XXX this is normal after a split cycles:
 					// The engine buffer contains the data for the complete cycle, but
 					// only the part after _global_port_buffer_offset is needed.
 #ifndef NDEBUG
 					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
 						<< _global_port_buffer_offset << " limit="
-						<< (_global_port_buffer_offset + _port_buffer_offset + nframes)
+						<< (_global_port_buffer_offset + nframes)
 						<< " = (" << _global_port_buffer_offset
-						<< " + " << _port_buffer_offset
 						<< " + " << nframes
 						<< ")\n";
 #endif
@@ -159,7 +158,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 				}
 
 				/* adjust timestamp to match current cycle */
-				timestamp -= _global_port_buffer_offset + _port_buffer_offset;
+				timestamp -= _global_port_buffer_offset;
 				assert (timestamp >= 0 && timestamp < nframes);
 
 				if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
@@ -275,8 +274,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 				const Session* s = AudioEngine::instance()->session();
 				const samplepos_t now = (s ? s->transport_sample() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev.time(), ev.size(),
-				                                    now + ev.time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2 (global %4, within %5 gpbo %6 sz %3 ", _buffer, ev.time(), ev.size(),
+				                                    now + ev.time(), nframes, _global_port_buffer_offset, name()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -291,16 +290,15 @@ MidiPort::flush_buffers (pframes_t nframes)
 			assert (ev.time() < (nframes + _global_port_buffer_offset));
 
 			if (ev.time() >= _global_port_buffer_offset) {
-				pframes_t tme = floor ((ev.time() + _port_buffer_offset) / _speed_ratio);
+				pframes_t tme = floor (ev.time() / _speed_ratio);
 				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, dropped event, time "
-					     << ev.time() << " + " << _port_buffer_offset
+					     << ev.time()
 							 << " > " << _global_port_buffer_offset << endl;
 				}
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev.time()
-				     << " too early for " << _global_port_buffer_offset
-				     << " + " << _port_buffer_offset;
+				     << " too early for " << _global_port_buffer_offset;
 				for (size_t xx = 0; xx < ev.size(); ++xx) {
 					cerr << ' ' << hex << (int) ev.buffer()[xx];
 				}

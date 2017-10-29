@@ -55,8 +55,7 @@ const uint32_t Port::_resampler_quality = 12;
 
 /** @param n Port short name */
 Port::Port (std::string const & n, DataType t, PortFlags f)
-	: _port_buffer_offset (0)
-	, _name (n)
+	: _name (n)
 	, _flags (f)
 	, _last_monitor (false)
 {
@@ -342,13 +341,6 @@ Port::reset ()
 void
 Port::cycle_start (pframes_t)
 {
-	_port_buffer_offset = 0;
-}
-
-void
-Port::increment_port_buffer_offset (pframes_t nframes)
-{
-	_port_buffer_offset += nframes;
 }
 
 void

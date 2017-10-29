@@ -139,8 +139,6 @@ public:
 		_global_port_buffer_offset += n;
 	}
 
-	virtual void increment_port_buffer_offset (pframes_t n);
-
 	virtual XMLNode& get_state (void) const;
 	virtual int set_state (const XMLNode&, int version);
 
@@ -158,7 +156,6 @@ protected:
 	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
 	static pframes_t  _global_port_buffer_offset; /* access only from process() tree */
-	samplecnt_t       _port_buffer_offset; /* access only from process() tree */
 
 	LatencyRange _private_playback_latency;
 	LatencyRange _private_capture_latency;

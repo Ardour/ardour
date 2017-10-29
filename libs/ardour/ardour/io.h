@@ -93,7 +93,6 @@ public:
 	std::string pretty_name () const { return _pretty_name_prefix; }
 
 	virtual void silence (samplecnt_t);
-	void increment_port_buffer_offset (pframes_t offset);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 

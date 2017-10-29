@@ -230,14 +230,6 @@ IOProcessor::silence (samplecnt_t nframes, samplepos_t /* start_sample */)
 	}
 }
 
-void
-IOProcessor::increment_port_buffer_offset (pframes_t offset)
-{
-        if (_own_output && _output) {
-                _output->increment_port_buffer_offset (offset);
-        }
-}
-
 ChanCount
 IOProcessor::natural_output_streams() const
 {

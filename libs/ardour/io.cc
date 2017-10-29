@@ -131,18 +131,6 @@ IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 }
 
 void
-IO::increment_port_buffer_offset (pframes_t offset)
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (_direction == Output) {
-		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-			i->increment_port_buffer_offset (offset);
-		}
-	}
-}
-
-void
 IO::silence (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */

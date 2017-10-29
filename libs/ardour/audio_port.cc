@@ -133,9 +133,9 @@ AudioPort::get_audio_buffer (pframes_t nframes)
 	assert (_port_handle);
 	if (!externally_connected ()) {
 		_buffer->set_data ((Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes) +
-				_global_port_buffer_offset + _port_buffer_offset, nframes);
+				_global_port_buffer_offset, nframes);
 	} else {
-		_buffer->set_data (&_data[_global_port_buffer_offset + _port_buffer_offset], nframes);
+		_buffer->set_data (&_data[_global_port_buffer_offset], nframes);
 	}
 	return *_buffer;
 }
