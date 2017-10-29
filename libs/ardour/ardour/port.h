@@ -106,7 +106,7 @@ public:
 	void set_private_latency_range (LatencyRange& range, bool playback);
 	const LatencyRange&  private_latency_range (bool playback) const;
 
-	void set_public_latency_range (LatencyRange& range, bool playback) const;
+	void set_public_latency_range (LatencyRange const& range, bool playback) const;
 	LatencyRange public_latency_range (bool playback) const;
 
 	virtual void reset ();
@@ -121,15 +121,16 @@ public:
 	virtual void realtime_locate () {}
 
 	bool physically_connected () const;
+	bool externally_connected () const;
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
 	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
 	static PBD::Signal0<void> PortDrop;
 	static PBD::Signal0<void> PortSignalDrop;
 
-	static void set_cycle_samplecnt (pframes_t n) {
-		_cycle_nframes = n;
-	}
+	static void set_speed_ratio (double s);
+	static void set_cycle_samplecnt (pframes_t n);
+
 	static samplecnt_t port_offset() { return _global_port_buffer_offset; }
 	static void set_global_port_buffer_offset (pframes_t off) {
 		_global_port_buffer_offset = off;
@@ -145,20 +146,25 @@ public:
 
 	static std::string state_node_name;
 
+	static pframes_t cycle_nframes () { return _cycle_nframes; }
+
 protected:
 
 	Port (std::string const &, DataType, PortFlags);
 
-        PortEngine::PortHandle _port_handle;
+	PortEngine::PortHandle _port_handle;
 
-	static bool	  _connecting_blocked;
-	static pframes_t  _global_port_buffer_offset;   /* access only from process() tree */
+	static bool	      _connecting_blocked;
 	static pframes_t  _cycle_nframes; /* access only from process() tree */
 
-	samplecnt_t _port_buffer_offset; /* access only from process() tree */
+	static pframes_t  _global_port_buffer_offset; /* access only from process() tree */
+	samplecnt_t       _port_buffer_offset; /* access only from process() tree */
 
 	LatencyRange _private_playback_latency;
 	LatencyRange _private_capture_latency;
+
+	static double _speed_ratio;
+	static const uint32_t _resampler_quality; /* also latency of the resampler */
 
 private:
 	std::string _name;  ///< port short name

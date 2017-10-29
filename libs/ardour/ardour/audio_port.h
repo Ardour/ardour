@@ -21,6 +21,8 @@
 #ifndef __ardour_audio_port_h__
 #define __ardour_audio_port_h__
 
+#include "zita-resampler/vmresampler.h"
+
 #include "ardour/port.h"
 #include "ardour/audio_buffer.h"
 
@@ -49,12 +51,14 @@ class LIBARDOUR_API AudioPort : public Port
 	friend class PortManager;
 	AudioPort (std::string const &, PortFlags);
 
-        /* special access for PortManager only (hah, C++) */
-        Sample* engine_get_whole_audio_buffer ();
+	/* special access for PortManager only (hah, C++) */
+	Sample* engine_get_whole_audio_buffer ();
 
   private:
-	AudioBuffer* _buffer;
-        bool         _buf_valid;
+	AudioBuffer*            _buffer;
+	ArdourZita::VMResampler _src;
+	Sample*                 _data;
+	bool                    _buf_valid;
 };
 
 } // namespace ARDOUR

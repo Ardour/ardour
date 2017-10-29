@@ -749,10 +749,11 @@ void
 PortManager::cycle_start (pframes_t nframes)
 {
 	Port::set_global_port_buffer_offset (0);
-        Port::set_cycle_samplecnt (nframes);
+	Port::set_cycle_samplecnt (nframes);
 
 	_cycle_ports = ports.reader ();
 
+	// TODO parallelize
 	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
 		p->second->cycle_start (nframes);
 	}

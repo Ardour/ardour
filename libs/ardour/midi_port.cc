@@ -138,9 +138,15 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 					continue;
 				}
 
+				timestamp = floor (timestamp * _speed_ratio);
+
 				/* check that the event is in the acceptable time range */
 				if ((timestamp <  (_global_port_buffer_offset + _port_buffer_offset)) ||
 				    (timestamp >= (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
+					// XXX this is normal after a split cycles:
+					// The engine buffer contains the data for the complete cycle, but
+					// only the part after _global_port_buffer_offset is needed.
+#ifndef NDEBUG
 					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
 						<< _global_port_buffer_offset << " limit="
 						<< (_global_port_buffer_offset + _port_buffer_offset + nframes)
@@ -148,8 +154,13 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 						<< " + " << _port_buffer_offset
 						<< " + " << nframes
 						<< ")\n";
+#endif
 					continue;
 				}
+
+				/* adjust timestamp to match current cycle */
+				timestamp -= _global_port_buffer_offset + _port_buffer_offset;
+				assert (timestamp >= 0 && timestamp < nframes);
 
 				if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 					/* normalize note on with velocity 0 to proper note off */
@@ -196,19 +207,20 @@ MidiPort::resolve_notes (void* port_buffer, MidiBuffer::TimeType when)
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
 		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
+		pframes_t tme = floor (when / _speed_ratio);
 
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
 		 * that prioritize sustain over AllNotesOff
 		 */
 
-		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, tme, ev, 3) != 0) {
 			cerr << "failed to deliver sustain-zero on channel " << (int)channel << " on port " << name() << endl;
 		}
 
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 
-		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, tme, ev, 3) != 0) {
 			cerr << "failed to deliver ALL NOTES OFF on channel " << (int)channel << " on port " << name() << endl;
 		}
 	}
@@ -279,7 +291,8 @@ MidiPort::flush_buffers (pframes_t nframes)
 			assert (ev.time() < (nframes + _global_port_buffer_offset));
 
 			if (ev.time() >= _global_port_buffer_offset) {
-				if (port_engine.midi_event_put (port_buffer, (pframes_t) ev.time() + _port_buffer_offset, ev.buffer(), ev.size()) != 0) {
+				pframes_t tme = floor ((ev.time() + _port_buffer_offset) / _speed_ratio);
+				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
 					cerr << "write failed, dropped event, time "
 					     << ev.time() << " + " << _port_buffer_offset
 							 << " > " << _global_port_buffer_offset << endl;

@@ -190,6 +190,7 @@ int
 AudioEngine::process_callback (pframes_t nframes)
 {
 	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
+	Port::set_speed_ratio (1.0);
 
 	PT_TIMING_REF;
 	PT_TIMING_CHECK (1);
@@ -357,6 +358,14 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
+	if (!_freewheeling || Freewheel.empty()) {
+		// run a list of slaves here
+		// - multiple slaves (ow_many_dsp_threads() in paralell)
+		// - session can pick one (ask for position & speed)
+		// - GUI can display all
+		Port::set_speed_ratio (_session->engine_speed ());
+	}
+
 	/* tell all relevant objects that we're starting a new cycle */
 
 	InternalSend::CycleStart (nframes);
@@ -373,7 +382,19 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_freewheeling && !Freewheel.empty()) {
 		Freewheel (nframes);
 	} else {
-		_session->process (nframes);
+		if (Port::cycle_nframes () <= nframes) {
+			_session->process (Port::cycle_nframes ());
+		} else {
+			pframes_t remain = Port::cycle_nframes ();
+			while (remain > 0) {
+				pframes_t nf = std::min (remain, nframes);
+				_session->process (nf);
+				remain -= nf;
+				if (remain > 0) {
+					split_cycle (nf);
+				}
+			}
+		}
 	}
 
 	if (_freewheeling) {

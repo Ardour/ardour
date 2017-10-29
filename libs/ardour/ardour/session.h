@@ -728,6 +728,12 @@ public:
 	bool   synced_to_mtc () const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
 	bool   synced_to_ltc () const { return config.get_external_sync() && Config->get_sync_source() == LTC && g_atomic_int_get (const_cast<gint*>(&_ltc_active)); }
 
+	double engine_speed() const { return _engine_speed; }
+	double actual_speed() const {
+		if (_transport_speed > 0) return _engine_speed;
+		if (_transport_speed < 0) return - _engine_speed;
+		return 0;
+	}
 	double transport_speed() const { return _count_in_samples > 0 ? 0. : _transport_speed; }
 	bool   transport_stopped() const { return _transport_speed == 0.0; }
 	bool   transport_rolling() const { return _transport_speed != 0.0 && _count_in_samples == 0 && _remaining_latency_preroll == 0; }
@@ -1255,6 +1261,7 @@ private:
 	samplecnt_t             _remaining_latency_preroll;
 
 	// varispeed playback
+	double                  _engine_speed;
 	double                  _transport_speed;
 	double                  _default_transport_speed;
 	double                  _last_transport_speed;

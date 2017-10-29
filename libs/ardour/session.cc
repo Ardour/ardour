@@ -187,6 +187,7 @@ Session::Session (AudioEngine &eng,
 	, _slave (0)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
+	, _engine_speed (1.0)
 	, _transport_speed (0)
 	, _default_transport_speed (1.0)
 	, _last_transport_speed (0)

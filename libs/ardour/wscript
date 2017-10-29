@@ -396,6 +396,7 @@ def build(bld):
                         'libaudiographer',
                         'libtemporal',
                         'liblua',
+                        'zita-resampler',
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
