@@ -49,6 +49,7 @@ private:
 
 	friend class Resampler;
 	friend class VResampler;
+	friend class VMResampler;
 
 	Resampler_table     *_next;
 	unsigned int         _refc;

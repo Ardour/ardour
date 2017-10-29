@@ -30,6 +30,7 @@ zresampler_sources = [
         'resampler-table.cc',
         'cresampler.cc',
         'vresampler.cc',
+        'vmresampler.cc'
 ]
 
 def options(opt):
