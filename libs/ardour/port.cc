@@ -342,13 +342,13 @@ Port::reset ()
 void
 Port::cycle_start (pframes_t)
 {
-        _port_buffer_offset = 0;
+	_port_buffer_offset = 0;
 }
 
 void
 Port::increment_port_buffer_offset (pframes_t nframes)
 {
-        _port_buffer_offset += nframes;
+	_port_buffer_offset += nframes;
 }
 
 void
@@ -463,57 +463,57 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: %2 connections to check for latency range\n", name(), connections.size()));
 
 		for (vector<string>::const_iterator c = connections.begin();
-		     c != connections.end(); ++c) {
+				c != connections.end(); ++c) {
 
-                        LatencyRange lr;
+			LatencyRange lr;
 
-                        if (!AudioEngine::instance()->port_is_mine (*c)) {
+			if (!AudioEngine::instance()->port_is_mine (*c)) {
 
-                                /* port belongs to some other port-system client, use
-                                 * the port engine to lookup its latency information.
-                                 */
+				/* port belongs to some other port-system client, use
+				 * the port engine to lookup its latency information.
+				 */
 
 				PortEngine::PortHandle remote_port = port_engine.get_port_by_name (*c);
 
-                                if (remote_port) {
-                                        lr = port_engine.get_latency_range (remote_port, playback);
-                                        if (externally_connected ()) {
+				if (remote_port) {
+					lr = port_engine.get_latency_range (remote_port, playback);
+					if (externally_connected ()) {
 #if 0
-                                          lr.min /= _speed_ratio;
-                                          lr.max /= _speed_ratio;
+						lr.min /= _speed_ratio;
+						lr.max /= _speed_ratio;
 #endif
-                                          lr.min += (_resampler_quality - 1);
-                                          lr.max += (_resampler_quality - 1);
-                                        }
+						lr.min += (_resampler_quality - 1);
+						lr.max += (_resampler_quality - 1);
+					}
 
-                                        DEBUG_TRACE (DEBUG::Latency, string_compose (
-                                                             "\t%1 <-> %2 : latter has latency range %3 .. %4\n",
-                                                             name(), *c, lr.min, lr.max));
+					DEBUG_TRACE (DEBUG::Latency, string_compose (
+								"\t%1 <-> %2 : latter has latency range %3 .. %4\n",
+								name(), *c, lr.min, lr.max));
 
-                                        range.min = min (range.min, lr.min);
-                                        range.max = max (range.max, lr.max);
-                                }
+					range.min = min (range.min, lr.min);
+					range.max = max (range.max, lr.max);
+				}
 
 			} else {
 
-                                /* port belongs to this instance of ardour,
-                                   so look up its latency information
-                                   internally, because our published/public
-                                   values already contain our plugin
-                                   latency compensation.
-                                */
+				/* port belongs to this instance of ardour,
+					 so look up its latency information
+					 internally, because our published/public
+					 values already contain our plugin
+					 latency compensation.
+					 */
 
-                                boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
-                                if (remote_port) {
-                                        lr = remote_port->private_latency_range ((playback ? true : false));
-                                        DEBUG_TRACE (DEBUG::Latency, string_compose (
-                                                             "\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
-                                                             name(), *c, lr.min, lr.max));
+				boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
+				if (remote_port) {
+					lr = remote_port->private_latency_range ((playback ? true : false));
+					DEBUG_TRACE (DEBUG::Latency, string_compose (
+								"\t%1 <-LOCAL-> %2 : latter has latency range %3 .. %4\n",
+								name(), *c, lr.min, lr.max));
 
-                                        range.min = min (range.min, lr.min);
-                                        range.max = max (range.max, lr.max);
-                                }
-                        }
+					range.min = min (range.min, lr.min);
+					range.max = max (range.max, lr.max);
+				}
+			}
 		}
 
 	} else {
@@ -522,7 +522,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 		range.max = 0;
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: final connected latency range [ %2 .. %3 ] \n", name(), range.min, range.max));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: final connected latency range [ %2 .. %3 ] \n", name(), range.min, range.max));
 }
 
 int

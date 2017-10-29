@@ -166,11 +166,11 @@ PortManager::port_is_mine (const string& portname) const
 
 	if (portname.find_first_of (':') != string::npos) {
 		if (portname.substr (0, self.length ()) != self) {
-                        return false;
-                }
-        }
+			return false;
+		}
+	}
 
-        return true;
+	return true;
 }
 
 bool
@@ -270,7 +270,6 @@ PortManager::n_physical_inputs () const
 /** @param name Full or short name of port
  *  @return Corresponding Port or 0.
  */
-
 boost::shared_ptr<Port>
 PortManager::get_port_by_name (const string& portname)
 {
@@ -278,10 +277,10 @@ PortManager::get_port_by_name (const string& portname)
 		return boost::shared_ptr<Port>();
 	}
 
-        if (!port_is_mine (portname)) {
-                /* not an ardour port */
-                return boost::shared_ptr<Port> ();
-        }
+	if (!port_is_mine (portname)) {
+		/* not an ardour port */
+		return boost::shared_ptr<Port> ();
+	}
 
 	boost::shared_ptr<Ports> pr = ports.reader();
 	std::string rel = make_port_name_relative (portname);
@@ -289,10 +288,10 @@ PortManager::get_port_by_name (const string& portname)
 
 	if (x != pr->end()) {
 		/* its possible that the port was renamed by some 3rd party and
-		   we don't know about it. check for this (the check is quick
-		   and cheap), and if so, rename the port (which will alter
-		   the port map as a side effect).
-		*/
+		 * we don't know about it. check for this (the check is quick
+		 * and cheap), and if so, rename the port (which will alter
+		 * the port map as a side effect).
+		 */
 		const std::string check = make_port_name_relative (_backend->get_port_name (x->second->port_handle()));
 		if (check != rel) {
 			x->second->set_name (check);
@@ -300,7 +299,7 @@ PortManager::get_port_by_name (const string& portname)
 		return x->second;
 	}
 
-        return boost::shared_ptr<Port> ();
+	return boost::shared_ptr<Port> ();
 }
 
 void

@@ -30,7 +30,7 @@ namespace ARDOUR {
 
 class LIBARDOUR_API AudioPort : public Port
 {
-   public:
+public:
 	~AudioPort ();
 
 	DataType type () const {
@@ -47,14 +47,14 @@ class LIBARDOUR_API AudioPort : public Port
 
 	AudioBuffer& get_audio_buffer (pframes_t nframes);
 
-  protected:
+protected:
 	friend class PortManager;
 	AudioPort (std::string const &, PortFlags);
 
 	/* special access for PortManager only (hah, C++) */
 	Sample* engine_get_whole_audio_buffer ();
 
-  private:
+private:
 	AudioBuffer*            _buffer;
 	ArdourZita::VMResampler _src;
 	Sample*                 _data;
