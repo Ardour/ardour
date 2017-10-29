@@ -323,6 +323,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	_transport_speed = 0;
 	_target_transport_speed = 0;
+	_engine_speed = 1.0;
 
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
@@ -1373,23 +1374,7 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %5 Set transport speed to %1, abort = %2 clear_state = %3, current = %4 as_default %6\n",
 						       speed, abort, clear_state, _transport_speed, _transport_sample, as_default));
 
-	if (_transport_speed == speed) {
-		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
-			_default_transport_speed = 1.0;
-		}
-		return;
-	}
-
-	if (actively_recording() && speed != 1.0 && speed != 0.0) {
-		/* no varispeed during recording */
-		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, sample %2\n",
-						       _transport_speed, _transport_sample));
-		return;
-	}
-
-	_target_transport_speed = fabs(speed);
-
-	/* 8.0 max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
+	/* max speed is somewhat arbitrary but based on guestimates regarding disk i/o capability
 	   and user needs. We really need CD-style "skip" playback for ffwd and rewind.
 	*/
 
@@ -1398,6 +1383,32 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 	} else if (speed < 0) {
 		speed = max (-8.0, speed);
 	}
+
+	double new_engine_speed = 1.0;
+	if (speed != 0) {
+		new_engine_speed = fabs (speed);
+		if (speed < 0) speed = -1;
+		if (speed > 0) speed = 1;
+	}
+
+	if (_transport_speed == speed && new_engine_speed == _engine_speed) {
+		if (as_default && speed == 0.0) { // => reset default transport speed. hacky or what?
+			_default_transport_speed = 1.0;
+		}
+		return;
+	}
+
+#if 0 // TODO pref: allow vari-speed recording
+	if (actively_recording() && speed != 1.0 && speed != 0.0) {
+		/* no varispeed during recording */
+		DEBUG_TRACE (DEBUG::Transport, string_compose ("No varispeed during recording cur_speed %1, sample %2\n",
+						       _transport_speed, _transport_sample));
+		return;
+	}
+#endif
+
+	_target_transport_speed = fabs(speed);
+	_engine_speed = new_engine_speed;
 
 	if (transport_rolling() && speed == 0.0) {
 
@@ -1479,9 +1490,11 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 			return;
 		}
 
+#if 0
 		if (actively_recording()) {
 			return;
 		}
+#endif
 
 		if (speed > 0.0 && _transport_sample == current_end_sample()) {
 			return;
@@ -1530,14 +1543,14 @@ Session::set_transport_speed (double speed, samplepos_t destination_sample, bool
 		 * The 0.2% dead-zone is somewhat arbitrary. Main use-case
 		 * for TransportStateChange() here is the ShuttleControl display.
 		 */
-		if (fabs (_signalled_varispeed - speed) > .002
+		if (fabs (_signalled_varispeed - actual_speed ()) > .002
 		    // still, signal hard changes to 1.0 and 0.0:
-		    || ( speed == 1.0 && _signalled_varispeed != 1.0)
-		    || ( speed == 0.0 && _signalled_varispeed != 0.0)
+		    || (actual_speed () == 1.0 && _signalled_varispeed != 1.0)
+		    || (actual_speed () == 0.0 && _signalled_varispeed != 0.0)
 		   )
 		{
 			TransportStateChange (); /* EMIT SIGNAL */
-			_signalled_varispeed = speed;
+			_signalled_varispeed = actual_speed ();
 		}
 	}
 }
