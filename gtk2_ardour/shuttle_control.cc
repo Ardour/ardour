@@ -154,7 +154,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 void
 ShuttleControl::map_transport_state ()
 {
-	float speed = _session->transport_speed ();
+	float speed = _session->actual_speed ();
 
 	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
 	     && !( speed == 1.f && last_speed_displayed != 1.f)
@@ -299,7 +299,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 		} else {
 			add_modal_grab ();
 			shuttle_grabbed = true;
-			shuttle_speed_on_grab = _session->transport_speed ();
+			shuttle_speed_on_grab = _session->actual_speed ();
 			requested_speed = shuttle_speed_on_grab;
 			mouse_shuttle (ev->x, true);
 			gdk_pointer_grab(ev->window,false,
@@ -590,7 +590,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	char buf[32];
 
 	if (_session) {
-		speed = _session->transport_speed ();
+		speed = _session->actual_speed ();
 		acutal_speed = speed;
 		if (shuttle_grabbed) {
 			speed = requested_speed;
@@ -699,7 +699,7 @@ ShuttleControl::parameter_changed (std::string p)
 			 */
 			if (_session) {
 				if (_session->transport_rolling()) {
-					if (_session->transport_speed() == 1.0) {
+					if (_session->actual_speed() == 1.0) {
 						queue_draw ();
 					} else {
 						/* reset current speed and

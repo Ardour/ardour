@@ -1477,7 +1477,7 @@ EditorRoutes::initial_display ()
 {
 
 	if (!_session) {
-		_model->clear ();
+		clear ();
 		return;
 	}
 
