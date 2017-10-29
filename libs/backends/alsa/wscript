@@ -29,8 +29,8 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'alsa_audiobackend'
     obj.target   = 'alsa_audiobackend'
-    obj.use      = 'libardour libpbd ardouralsautil zita-resampler'
-    obj.uselib   = 'ALSA GLIBMM XML LIBZRESAMPLER'
+    obj.use      = ['zita-resampler', 'libardour', 'libpbd', 'ardouralsautil']
+    obj.uselib   = 'ALSA GLIBMM XML'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',
                    'ARDOURBACKEND_DLL_EXPORTS'
