@@ -68,11 +68,6 @@ AudioPort::cycle_start (pframes_t nframes)
 		_src.set_rratio (_cycle_nframes / (double)nframes);
 		_src.out_data  = _data;
 		_src.process ();
-#ifndef NDEBUG
-		if (_src.inp_count != 0 || _src.out_count != 0) {
-			printf ("AudioPort::cycle_start x-flow: %d/%d\n", _src.inp_count, _src.out_count);
-		}
-#endif
 		while (_src.out_count > 0) {
 			*_src.out_data =  _src.out_data[-1];
 			++_src.out_data;
@@ -108,11 +103,6 @@ AudioPort::cycle_end (pframes_t nframes)
 		_src.inp_data  = _data;
 		_src.out_data  = (float*)port_engine.get_buffer (_port_handle, nframes);
 		_src.process ();
-#ifndef NDEBUG
-		if (_src.inp_count != 0 || _src.out_count != 0) {
-			printf ("AudioPort::cycle_end x-flow: %d/%d\n", _src.inp_count, _src.out_count);
-		}
-#endif
 		while (_src.out_count > 0) {
 			*_src.out_data =  _src.out_data[-1];
 			++_src.out_data;
