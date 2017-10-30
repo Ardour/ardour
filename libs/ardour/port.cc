@@ -589,11 +589,7 @@ Port::externally_connected () const
 	if (!_port_handle) {
 		return false;
 	}
-
-	// TODO: When used with JACK, check if this port
-	// is connected to any non-ardour ports.
-
-	return port_engine.physically_connected (_port_handle);
+	return port_engine.externally_connected (_port_handle);
 }
 
 XMLNode&
