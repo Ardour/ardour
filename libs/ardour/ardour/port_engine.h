@@ -228,6 +228,14 @@ class LIBARDOUR_API PortEngine {
      */
     virtual bool  physically_connected (PortHandle port, bool process_callback_safe = true) = 0;
 
+    /** Return true if the port referred to by @param port has any connections
+     * to external, not-ardour owned, ports.
+     */
+    virtual bool  externally_connected (PortHandle port, bool process_callback_safe = true) {
+      /* only with JACK, provides client ports that are not physical */
+      return physically_connected (port, process_callback_safe);
+    }
+
     /** Place the names of all ports connected to the port named by @param
      * ports into @param names, and return the number of connections.
      */

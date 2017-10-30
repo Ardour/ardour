@@ -145,6 +145,7 @@ class JACKAudioBackend : public AudioBackend {
     bool  connected (PortHandle, bool process_callback_safe);
     bool  connected_to (PortHandle, const std::string&, bool process_callback_safe);
     bool  physically_connected (PortHandle, bool process_callback_safe);
+    bool  externally_connected (PortHandle, bool process_callback_safe);
     int   get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
     int   connect (PortHandle, const std::string&);
 

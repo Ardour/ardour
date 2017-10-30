@@ -275,12 +275,46 @@ JACKAudioBackend::physically_connected (PortHandle p, bool process_callback_safe
 			jack_port_t* other = jack_port_by_name (_priv_jack, ports[i]);
 
 			if (other && (jack_port_flags (other) & JackPortIsPhysical)) {
+				jack_free (ports);
 				return true;
 			}
 		}
 		jack_free (ports);
 	}
 
+	return false;
+}
+
+bool
+JACKAudioBackend::externally_connected (PortHandle p, bool process_callback_safe)
+{
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
+	jack_port_t* port = (jack_port_t*) p;
+
+	const char** ports;
+
+	if (process_callback_safe) {
+		ports = jack_port_get_connections ((jack_port_t*)port);
+	} else {
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, false);
+		ports = jack_port_get_all_connections (_priv_jack, (jack_port_t*)port);
+	}
+
+	if (ports) {
+		for (int i = 0; ports[i]; ++i) {
+			jack_port_t* other = jack_port_by_name (_priv_jack, ports[i]);
+
+			if (other && (jack_port_flags (other) & JackPortIsPhysical)) {
+				jack_free (ports);
+				return true;
+			}
+			if (other && !jack_port_is_mine (_priv_jack, other)) {
+				jack_free (ports);
+				return true;
+			}
+		}
+		jack_free (ports);
+	}
 	return false;
 }
 
