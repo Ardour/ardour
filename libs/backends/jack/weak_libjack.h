@@ -190,6 +190,7 @@ int have_libjack(void);
 #include <jack/midiport.h>
 #include <jack/session.h>
 #include <jack/thread.h>
+#include <jack/statistics.h>
 
 #ifdef HAVE_JACK_METADATA
 #include <jack/metadata.h>
