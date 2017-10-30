@@ -372,7 +372,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	/* tell all Ports that we're starting a new cycle */
 
-	PortManager::cycle_start (nframes);
+	PortManager::cycle_start (nframes, _session);
 
 	/* test if we are freewheeling and there are freewheel signals connected.
 	 * ardour should act normally even when freewheeling unless /it/ is
@@ -398,7 +398,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (_freewheeling) {
-		PortManager::cycle_end (nframes);
+		PortManager::cycle_end (nframes, _session);
 		return 0;
 	}
 
@@ -451,7 +451,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		session_removal_gain -= (nframes * session_removal_gain_step);
 	}
 
-	PortManager::cycle_end (nframes);
+	PortManager::cycle_end (nframes, _session);
 
 	_processed_samples = next_processed_samples;
 

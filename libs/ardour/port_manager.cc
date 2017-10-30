@@ -38,6 +38,7 @@
 #include "ardour/midiport_manager.h"
 #include "ardour/port_manager.h"
 #include "ardour/profile.h"
+#include "ardour/rt_tasklist.h"
 #include "ardour/session.h"
 #include "ardour/types_convert.h"
 
@@ -745,24 +746,39 @@ PortManager::graph_order_callback ()
 }
 
 void
-PortManager::cycle_start (pframes_t nframes)
+PortManager::cycle_start (pframes_t nframes, Session* s)
 {
 	Port::set_global_port_buffer_offset (0);
 	Port::set_cycle_samplecnt (nframes);
 
 	_cycle_ports = ports.reader ();
 
-	// TODO parallelize
-	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-		p->second->cycle_start (nframes);
+	if (s && s->rt_tasklist ()) {
+		RTTaskList::TaskList tl;
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
+		}
+		s->rt_tasklist()->process (tl);
+	} else {
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			p->second->cycle_start (nframes);
+		}
 	}
 }
 
 void
-PortManager::cycle_end (pframes_t nframes)
+PortManager::cycle_end (pframes_t nframes, Session* s)
 {
-	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
-		p->second->cycle_end (nframes);
+	if (s && s->rt_tasklist ()) {
+		RTTaskList::TaskList tl;
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+		}
+		s->rt_tasklist()->process (tl);
+	} else {
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			p->second->cycle_end (nframes);
+		}
 	}
 
 	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {

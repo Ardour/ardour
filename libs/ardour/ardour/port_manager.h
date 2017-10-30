@@ -189,14 +189,14 @@ class LIBARDOUR_API PortManager
 	 * This MUST be called before any reading/writing for this cycle.
 	 * Realtime safe.
 	 */
-	void cycle_start (pframes_t nframes);
+	void cycle_start (pframes_t nframes, Session* s = 0);
 
 	/** Signal the end of an audio cycle.
 	 * This signifies that the cycle began with @ref cycle_start has ended.
 	 * This MUST be called at the end of each cycle.
 	 * Realtime safe.
 	 */
-	void cycle_end (pframes_t nframes);
+	void cycle_end (pframes_t nframes, Session* s = 0);
 
 	typedef std::map<std::string,MidiPortInformation> MidiPortInfo;
 

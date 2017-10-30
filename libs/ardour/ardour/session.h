@@ -141,6 +141,7 @@ class Region;
 class Return;
 class Route;
 class RouteGroup;
+class RTTaskList;
 class SMFSource;
 class Send;
 class SceneChanger;
@@ -287,6 +288,8 @@ public:
 	boost::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
 	}
+
+	boost::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 
 	CoreSelection& selection () { return *_selection; }
 
@@ -2078,6 +2081,8 @@ private:
 
 	boost::shared_ptr<IO>   _ltc_input;
 	boost::shared_ptr<IO>   _ltc_output;
+
+	boost::shared_ptr<RTTaskList> _rt_tasklist;
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;

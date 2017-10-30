@@ -93,6 +93,7 @@
 #include "ardour/revision.h"
 #include "ardour/route_graph.h"
 #include "ardour/route_group.h"
+#include "ardour/rt_tasklist.h"
 #include "ardour/send.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -599,6 +600,8 @@ Session::immediately_post_engine ()
 	 * know that the engine is running, but before we either create a
 	 * session or set state for an existing one.
 	 */
+
+	_rt_tasklist.reset (new RTTaskList ());
 
 	if (how_many_dsp_threads () > 1) {
 		/* For now, only create the graph if we are using >1 DSP threads, as
