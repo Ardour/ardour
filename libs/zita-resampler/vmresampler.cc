@@ -22,7 +22,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
-#include <assert.h>
 
 #include "zita-resampler/vmresampler.h"
 
@@ -166,7 +165,6 @@ VMResampler::process (void)
 	float          a, *p1, *p2;
 
 	if (!_table) return 1;
-	assert (inp_data != NULL && out_data != NULL);
 
 	const int hl = _table->_hl;
 	const unsigned int np = _table->_np;
