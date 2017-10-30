@@ -349,8 +349,7 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_session == 0) {
 
 		if (!_freewheeling) {
-			PortManager::cycle_start (nframes);
-			PortManager::cycle_end (nframes);
+			PortManager::silence_outputs (nframes);
 		}
 
 		_processed_samples = next_processed_samples;
@@ -440,7 +439,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (session_remove_pending && session_removal_countdown) {
 
-		PortManager::fade_out (session_removal_gain, session_removal_gain_step, nframes);
+		PortManager::cycle_end_fade_out (session_removal_gain, session_removal_gain_step, nframes, _session);
 
 		if (session_removal_countdown > nframes) {
 			session_removal_countdown -= nframes;
@@ -449,9 +448,9 @@ AudioEngine::process_callback (pframes_t nframes)
 		}
 
 		session_removal_gain -= (nframes * session_removal_gain_step);
+	} else {
+		PortManager::cycle_end (nframes, _session);
 	}
-
-	PortManager::cycle_end (nframes, _session);
 
 	_processed_samples = next_processed_samples;
 

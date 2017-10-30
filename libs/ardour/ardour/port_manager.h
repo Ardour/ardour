@@ -181,7 +181,6 @@ class LIBARDOUR_API PortManager
 	 */
 	boost::shared_ptr<Ports> _cycle_ports;
 
-	void fade_out (gain_t, gain_t, pframes_t);
 	void silence (pframes_t nframes, Session *s = 0);
 	void silence_outputs (pframes_t nframes);
 	void check_monitoring ();
@@ -197,6 +196,8 @@ class LIBARDOUR_API PortManager
 	 * Realtime safe.
 	 */
 	void cycle_end (pframes_t nframes, Session* s = 0);
+
+	void cycle_end_fade_out (gain_t, gain_t, pframes_t, Session* s = 0);
 
 	typedef std::map<std::string,MidiPortInformation> MidiPortInfo;
 

@@ -869,13 +869,26 @@ PortManager::check_monitoring ()
 }
 
 void
-PortManager::fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes)
+PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes, Session* s)
 {
-	for (Ports::iterator i = _cycle_ports->begin(); i != _cycle_ports->end(); ++i) {
+	if (s && s->rt_tasklist ()) {
+		RTTaskList::TaskList tl;
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+		}
+		s->rt_tasklist()->process (tl);
+	} else {
+		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+			p->second->cycle_end (nframes);
+		}
+	}
 
-		if (i->second->sends_output()) {
+	for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
+		p->second->flush_buffers (nframes);
 
-			boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (i->second);
+		if (p->second->sends_output()) {
+
+			boost::shared_ptr<AudioPort> ap = boost::dynamic_pointer_cast<AudioPort> (p->second);
 			if (ap) {
 				Sample* s = ap->engine_get_whole_audio_buffer ();
 				gain_t g = base_gain;
@@ -887,6 +900,8 @@ PortManager::fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes)
 			}
 		}
 	}
+	_cycle_ports.reset ();
+	/* we are done */
 }
 
 PortEngine&
