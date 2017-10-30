@@ -439,7 +439,6 @@ class CoreAudioBackend : public AudioBackend {
 
 	/* process threads */
 	static void* coreaudio_process_thread (void *);
-	bool coreaudio_set_realtime_policy (pthread_t) const;
 	std::vector<pthread_t> _threads;
 
 	struct ThreadData {

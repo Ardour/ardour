@@ -266,3 +266,37 @@ pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 
 	return pthread_setschedparam (thread, SCHED_FIFO, &param);
 }
+
+bool
+pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
+{
+#ifdef _APPLE_
+	thread_time_constraint_policy_data_t policy;
+#ifndef NDEBUG
+	mach_msg_type_number_t msgt = 4;
+	boolean_t dflt = false;
+	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (_main_thread),
+			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
+			&msgt, &dflt);
+	printf ("Mach Thread(%p) %d %d %d %d DFLT %d OK: %d\n", _main_thread, policy.period, policy.computation, policy.constraint, policy.preemptible, dflt, rv == KERN_SUCCESS);
+#endif
+
+	mach_timebase_info_data_t timebase_info;
+	mach_timebase_info(&timebase_info);
+	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
+
+	policy.period = period_clk;
+	policy.computation = period_clk * .9;
+	policy.constraint = period_clk * .95;
+	policy.preemptible = true;
+	kern_return_t res = thread_policy_set (pthread_mach_thread_np (thread_id),
+			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
+			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+
+#ifndef NDEBUG
+	printf ("Mach Thread(%p) %d %d %d %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
+#endif
+	return res != KERN_SUCCESS;
+#endif
+	return false; // OK
+}

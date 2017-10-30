@@ -333,10 +333,10 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	_samples_per_period = bs;
 	_pcmio->set_samples_per_period(bs);
 	if (_run) {
-		coreaudio_set_realtime_policy (_main_thread);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
 	}
 	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
-		coreaudio_set_realtime_policy (*i);
+		pbd_mach_set_realtime_policy (*i, 1e9 * _samples_per_period / _samplerate);
 	}
 	//engine.buffer_size_change (bs);
 	return 0;
@@ -822,34 +822,6 @@ CoreAudioBackend::coreaudio_process_thread (void *arg)
 	return 0;
 }
 
-bool
-CoreAudioBackend::coreaudio_set_realtime_policy (pthread_t thread_id) const
-{
-	thread_time_constraint_policy_data_t policy;
-#ifndef NDEBUG
-	mach_msg_type_number_t msgt = 4;
-	boolean_t dflt = false;
-	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (_main_thread),
-			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
-			&msgt, &dflt);
-	printf ("Coreaudio Main Thread(%p) %d %d %d %d DFLT %d OK: %d\n", _main_thread, policy.period, policy.computation, policy.constraint, policy.preemptible, dflt, rv == KERN_SUCCESS);
-#endif
-
-	double period_ns = 1e9 * _samples_per_period / _samplerate;
-	policy.period = AudioConvertNanosToHostTime (period_ns);
-	policy.computation = AudioConvertNanosToHostTime (period_ns * .9);
-	policy.constraint = AudioConvertNanosToHostTime (period_ns * .95);
-	policy.preemptible = true;
-	kern_return_t res = thread_policy_set (pthread_mach_thread_np (thread_id),
-			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
-			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
-
-#ifndef NDEBUG
-	printf ("Coreaudio Proc Thread(%p) %d %d %d %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
-#endif
-	return res != KERN_SUCCESS;
-}
-
 int
 CoreAudioBackend::create_process_thread (boost::function<void()> func)
 {
@@ -872,7 +844,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 		pthread_attr_destroy (&attr);
 	}
 
-	if (coreaudio_set_realtime_policy (thread_id)) {
+	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate)) {
 		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
@@ -1733,7 +1705,7 @@ CoreAudioBackend::freewheel_thread ()
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 			reset_midi_parsers ();
-			coreaudio_set_realtime_policy (_main_thread);
+			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
 		}
 
 		// process port updates first in every cycle.
@@ -1799,7 +1771,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
-		coreaudio_set_realtime_policy (_main_thread);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
 	}
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {
