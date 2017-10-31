@@ -61,6 +61,7 @@
 #include "ardour/playlist.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/polarity_processor.h"
 #include "ardour/port_manager.h"
 #include "ardour/progress.h"
 #include "ardour/runtime_functions.h"
@@ -1335,6 +1336,7 @@ LuaBindings::common (lua_State* L)
 		.addCast<PeakMeter> ("to_peakmeter")
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
 		.addCast<Send> ("to_send")
+		.addCast<PolarityProcessor> ("to_polarityprocessor")
 #if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
 		.addCast<DelayLine> ("to_delayline")
@@ -1540,6 +1542,9 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <UnknownProcessor, Processor> ("UnknownProcessor")
+		.endClass ()
+
+		.deriveWSPtrClass <PolarityProcessor, Processor> ("PolarityProcessor")
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")

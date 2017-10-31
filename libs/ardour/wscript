@@ -168,6 +168,7 @@ libardour_sources = [
         'plugin.cc',
         'plugin_insert.cc',
         'plugin_manager.cc',
+        'polarity_processor.cc',
         'port.cc',
         'port_insert.cc',
         'port_manager.cc',
