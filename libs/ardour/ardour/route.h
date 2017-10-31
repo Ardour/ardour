@@ -71,6 +71,7 @@ class DiskWriter;
 class IOProcessor;
 class Panner;
 class PannerShell;
+class PolarityProcessor;
 class PortSet;
 class Processor;
 class PluginInsert;
@@ -662,7 +663,6 @@ protected:
 
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
-	boost::shared_ptr<PhaseControl> _phase_control;
 	boost::shared_ptr<SoloIsolateControl> _solo_isolate_control;
 	boost::shared_ptr<SoloSafeControl> _solo_safe_control;
 
@@ -690,11 +690,13 @@ protected:
 
 	virtual void maybe_declick (BufferSet&, samplecnt_t, int);
 
-	boost::shared_ptr<GainControl> _gain_control;
-	boost::shared_ptr<Amp>       _amp;
-	boost::shared_ptr<GainControl> _trim_control;
-	boost::shared_ptr<Amp>       _trim;
-	boost::shared_ptr<PeakMeter> _meter;
+	boost::shared_ptr<GainControl>  _gain_control;
+	boost::shared_ptr<GainControl>  _trim_control;
+	boost::shared_ptr<PhaseControl> _phase_control;
+	boost::shared_ptr<Amp>               _amp;
+	boost::shared_ptr<Amp>               _trim;
+	boost::shared_ptr<PeakMeter>         _meter;
+	boost::shared_ptr<PolarityProcessor> _polarity;
 
 	boost::shared_ptr<DelayLine> _delayline;
 

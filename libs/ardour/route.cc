@@ -65,6 +65,7 @@
 #include "ardour/parameter_descriptor.h"
 #include "ardour/phase_control.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/polarity_processor.h"
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
 #include "ardour/processor.h"
@@ -186,6 +187,10 @@ Route::init ()
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));
 	add_processor (_amp, PostFader);
+
+	_polarity.reset (new PolarityProcessor (_session, _phase_control));
+	_polarity->activate();
+	_polarity->set_owner (this);
 
 	if (is_monitor ()) {
 		_amp->set_display_name (_("Monitor"));
@@ -417,64 +422,24 @@ Route::process_output_buffers (BufferSet& bufs,
 	_pending_declick = 0;
 
 	/* -------------------------------------------------------------------------------------------
-	   DENORMAL CONTROL/PHASE INVERT
+	   DENORMAL CONTROL
 	   ----------------------------------------------------------------------------------------- */
-
-	/* TODO phase-control should become a processor, or rather a Stub-processor:
-	 * a point in the chain which calls a special-cased private Route method.
-	 * _phase_control is route-owned and dynamic.)
-	 * and we should rename it to polarity.
+	/* XXX We'll need to protect silent inputs as well as silent disk
+	 * (when not monitoring input or monitoring disk and there's no region
+	 * for a longer time).
 	 *
-	 * denormals: we'll need to protect silent inputs as well as silent disk
-	 * (when not monitoring input).  Or simply drop that feature.
+	 * ...or simply drop that feature.
 	 */
-	if (!_phase_control->none()) {
+	if (_denormal_protection || Config->get_denormal_protection()) {
 
-		int chn = 0;
-
-		if (_denormal_protection || Config->get_denormal_protection()) {
-
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
-				Sample* const sp = i->data();
-
-				if (_phase_control->inverted (chn)) {
-					for (pframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx]  = -sp[nx];
-						sp[nx] += 1.0e-27f;
-					}
-				} else {
-					for (pframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] += 1.0e-27f;
-					}
-				}
-			}
-
-		} else {
-
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
-				Sample* const sp = i->data();
-
-				if (_phase_control->inverted (chn)) {
-					for (pframes_t nx = 0; nx < nframes; ++nx) {
-						sp[nx] = -sp[nx];
-					}
-				}
+		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
+			Sample* const sp = i->data();
+			for (pframes_t nx = 0; nx < nframes; ++nx) {
+				sp[nx] += 1.0e-27f;
 			}
 		}
-
-	} else {
-
-		if (_denormal_protection || Config->get_denormal_protection()) {
-
-			for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-				Sample* const sp = i->data();
-				for (pframes_t nx = 0; nx < nframes; ++nx) {
-					sp[nx] += 1.0e-27f;
-				}
-			}
-		}
-
 	}
+
 
 	/* -------------------------------------------------------------------------------------------
 	   and go ....
@@ -1414,7 +1379,7 @@ Route::clear_processors (Placement p)
 bool
 Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 {
-	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim) {
+	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity) {
 		return true;
 	}
 	return false;
@@ -2950,6 +2915,9 @@ Route::set_processor_state (const XMLNode& node)
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, Stateful::current_state_version);
 			new_order.push_back (_meter);
+		} else if (prop->value() == "polarity") {
+			_polarity->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_polarity);
 		} else if (prop->value() == "delay") {
 			// skip -- internal
 		} else if (prop->value() == "main-outs") {
@@ -4850,7 +4818,6 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-
 	/* EXPORT PROCESSOR */
 	if (_capturing_processor) {
 		assert (!_capturing_processor->display_to_user ());
@@ -4859,7 +4826,30 @@ Route::setup_invisible_processors ()
 			/* insert after disk-reader */
 			new_processors.insert (++reader_pos, _capturing_processor);
 		} else {
-			new_processors.push_front (_capturing_processor);
+			ProcessorList::iterator return_pos = find (new_processors.begin(), new_processors.end(), _intreturn);
+			/* insert after return */
+			if (return_pos != new_processors.end()) {
+				new_processors.insert (++return_pos, _capturing_processor);
+			} else {
+				new_processors.push_front (_capturing_processor);
+			}
+		}
+	}
+
+	/* Polarity Invert */
+	if (_polarity) {
+		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
+		if (reader_pos != new_processors.end()) {
+			/* insert after disk-reader */
+			new_processors.insert (++reader_pos, _polarity);
+		} else {
+			ProcessorList::iterator return_pos = find (new_processors.begin(), new_processors.end(), _intreturn);
+			/* insert after return */
+			if (return_pos != new_processors.end()) {
+				new_processors.insert (++return_pos, _polarity);
+			} else {
+				new_processors.push_front (_polarity);
+			}
 		}
 	}
 
@@ -4872,9 +4862,16 @@ Route::setup_invisible_processors ()
 		assert (!_meter->display_to_user ());
 		ProcessorList::iterator writer_pos = find (new_processors.begin(), new_processors.end(), _disk_writer);
 		if (writer_pos != new_processors.end()) {
+			/* insert before disk-writer */
 			new_processors.insert (writer_pos, _meter);
 		} else {
-			new_processors.push_front (_meter);
+			ProcessorList::iterator return_pos = find (new_processors.begin(), new_processors.end(), _intreturn);
+			/* insert after return */
+			if (return_pos != new_processors.end()) {
+				new_processors.insert (++return_pos, _meter);
+			} else {
+				new_processors.push_front (_meter);
+			}
 		}
 	}
 
