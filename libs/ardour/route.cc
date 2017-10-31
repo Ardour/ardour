@@ -379,7 +379,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	 *
 	 * playback_latency() is guarnteed to be <= _signal_latency + _output->latency ()
 	 */
-	assert (!_disk_reader || !run_disk_reader || start_sample >= 0);
+	assert (!_disk_reader || !run_disk_reader || start_sample >= 0 || speed < 0);
 
 	/* however the disk-writer may need to pick up output from other tracks
 	 * during pre-roll (in particular if this route has latent effects after the disk).
