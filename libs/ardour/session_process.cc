@@ -433,16 +433,9 @@ Session::process_with_events (pframes_t nframes)
 		}
 	}
 
-	if (_transport_speed == 1.0) {
-		samples_moved = (samplecnt_t) nframes;
-	} else {
-		/* use a cubic midi interpolation to compute the number of
-		 * samples we will move at the current speed.
-		 */
-		CubicInterpolation interp;
-		interp.set_speed (_transport_speed);
-		samples_moved = interp.distance (nframes);
-	}
+	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
+
+	samples_moved = (samplecnt_t) nframes * _transport_speed;
 
 	end_sample = _transport_sample + samples_moved;
 
