@@ -16,9 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/phase_control.h"
 #include "ardour/polarity_processor.h"
+#include "ardour/session.h"
 
 #include "pbd/i18n.h"
 
@@ -45,29 +47,26 @@ PolarityProcessor::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
+	_current_gain.resize (in.n_audio (), 0.f);
+
 	return Processor::configure_io (in, out);
 }
 
 void
 PolarityProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
+	int chn = 0;
 	if (!_active && !_pending_active) {
+		/* fade all to unity */
+		for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
+			_current_gain[chn] = Amp::apply_gain (*i, _session.nominal_sample_rate(), nframes, _current_gain[chn], 1.0);
+		}
 		return;
 	}
 	_active = _pending_active;
 
-	if (_control->none()) {
-		return;
-	}
-	int chn = 0;
-
 	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i, ++chn) {
-		Sample* const sp = i->data();
-		if (_control->inverted (chn)) {
-			for (pframes_t nx = 0; nx < nframes; ++nx) {
-				sp[nx] = -sp[nx];
-			}
-		}
+		_current_gain[chn] = Amp::apply_gain (*i, _session.nominal_sample_rate(), nframes, _current_gain[chn], _control->inverted (chn) ? -1.f : 1.f);
 	}
 }
 

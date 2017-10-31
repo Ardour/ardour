@@ -43,6 +43,7 @@ protected:
 
 private:
 	boost::shared_ptr<PhaseControl> _control;
+	std::vector<gain_t> _current_gain;
 };
 
 }
