@@ -153,7 +153,7 @@ public:
 	virtual void realtime_locate () {}
 	virtual void non_realtime_locate (samplepos_t);
 	virtual void set_pending_declick (int);
-	int set_loop (ARDOUR::Location *);
+	void set_loop (ARDOUR::Location *);
 
 	/* end of vfunc-based API */
 

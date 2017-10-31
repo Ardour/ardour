@@ -5882,7 +5882,7 @@ Route::set_disk_io_point (DiskIOPoint diop)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
 
-int
+void
 Route::set_loop (Location* l)
 {
 	_loop_location = l;
