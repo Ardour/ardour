@@ -108,6 +108,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _declickable (false)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
+	, _loop_location (NULL)
 	, _track_number (0)
 	, _strict_io (false)
 	, _in_configure_processors (false)
@@ -5881,6 +5882,16 @@ Route::set_disk_io_point (DiskIOPoint diop)
 	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 }
 
+int
+Route::set_loop (Location* l)
+{
+	_loop_location = l;
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->set_loop (l);
+	}
+}
+
 #ifdef USE_TRACKS_CODE_FEATURES
 
 /* This is the Tracks version of Track::monitoring_state().
@@ -6039,5 +6050,4 @@ Route::monitoring_state () const
 	abort(); /* NOTREACHED */
 	return MonitoringSilence;
 }
-
 #endif

@@ -756,7 +756,7 @@ DiskReader::audio_read (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
 		   just once.
 		*/
 
-		if ((loc = loop_location) != 0) {
+		if ((loc = _loop_location) != 0) {
 			loop_start = loc->start();
 			loop_end = loc->end();
 			loop_length = loop_end - loop_start;
@@ -1254,7 +1254,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 	if (ms & MonitoringDisk) {
 		/* disk data needed */
 
-		Location* loc = loop_location;
+		Location* loc = _loop_location;
 
 		DEBUG_TRACE (DEBUG::MidiDiskstreamIO, string_compose (
 			             "%1 MDS pre-read read %8 offset = %9 @ %4..%5 from %2 write to %3, LOOPED ? %6 .. %7\n", _name,
@@ -1379,7 +1379,7 @@ DiskReader::midi_read (samplepos_t& start, samplecnt_t dur, bool reversed)
 	samplepos_t loop_end    = 0;
 	samplepos_t loop_start  = 0;
 	samplecnt_t loop_length = 0;
-	Location*  loc         = loop_location;
+	Location*  loc         = _loop_location;
 	samplepos_t effective_start = start;
 	Evoral::Range<samplepos_t>*  loop_range (0);
 

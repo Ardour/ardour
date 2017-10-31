@@ -89,9 +89,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	bool slaved() const      { return _slaved; }
 	void set_slaved(bool yn) { _slaved = yn; }
 
-	int set_loop (Location *loc);
-
-	PBD::Signal1<void,Location *> LoopSet;
 	PBD::Signal0<void>            SpeedChanged;
 	PBD::Signal0<void>            ReverseChanged;
 
@@ -122,7 +119,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 	double       _target_speed;
 	bool         _seek_required;
 	bool         _slaved;
-	Location*     loop_location;
 	bool          in_set_state;
 	samplepos_t   playback_sample;
 	bool         _need_butler;

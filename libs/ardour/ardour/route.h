@@ -78,6 +78,7 @@ class PluginInsert;
 class RouteGroup;
 class Send;
 class InternalReturn;
+class Location;
 class MonitorControl;
 class MonitorProcessor;
 class Pannable;
@@ -152,6 +153,7 @@ public:
 	virtual void realtime_locate () {}
 	virtual void non_realtime_locate (samplepos_t);
 	virtual void set_pending_declick (int);
+	int set_loop (ARDOUR::Location *);
 
 	/* end of vfunc-based API */
 
@@ -672,6 +674,7 @@ protected:
 	FedBy          _fed_by;
 
 	InstrumentInfo _instrument_info;
+	Location*      _loop_location;
 
 	virtual ChanCount input_streams () const;
 

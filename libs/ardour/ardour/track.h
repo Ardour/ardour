@@ -37,7 +37,6 @@ class Region;
 class DiskReader;
 class DiskWriter;
 class IO;
-class Location;
 class RecordEnableControl;
 class RecordSafeControl;
 
@@ -144,7 +143,6 @@ public:
 	void non_realtime_speed_change ();
 	int overwrite_existing_buffers ();
 	samplecnt_t get_captured_samples (uint32_t n = 0) const;
-	int set_loop (ARDOUR::Location *);
 	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;

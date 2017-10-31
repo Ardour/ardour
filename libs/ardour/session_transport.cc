@@ -1000,9 +1000,8 @@ Session::set_track_loop (bool yn)
 	boost::shared_ptr<RouteList> rl = routes.reader ();
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->is_private_route()) {
-			tr->set_loop (yn ? loc : 0);
+		if (*i && !(*i)->is_private_route()) {
+			(*i)->set_loop (yn ? loc : 0);
 		}
 	}
 }

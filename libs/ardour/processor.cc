@@ -72,6 +72,7 @@ Processor::Processor(Session& session, const string& name)
 	, _output_latency (0)
 	, _capture_offset (0)
 	, _playback_offset (0)
+	, _loop_location (0)
 {
 }
 
@@ -91,6 +92,10 @@ Processor::Processor (const Processor& other)
 	, _pinmgr_proxy (0)
 	, _owner (0)
 	, _input_latency (0)
+	, _output_latency (0)
+	, _capture_offset (0)
+	, _playback_offset (0)
+	, _loop_location (other._loop_location)
 {
 }
 

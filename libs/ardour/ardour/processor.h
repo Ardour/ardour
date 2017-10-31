@@ -40,6 +40,7 @@ class PluginPinWindowProxy;
 
 namespace ARDOUR {
 
+class Location;
 class Session;
 class Route;
 
@@ -108,6 +109,8 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
 
+	virtual void set_loop (Location *loc) { _loop_location = loc; }
+
 	/* most processors won't care about this, but plugins that
 	   receive MIDI or similar data from an input source that
 	   may suddenly go "quiet" because of monitoring changes
@@ -167,6 +170,7 @@ protected:
 	// absolute alignment to session i/o
 	samplecnt_t _capture_offset;
 	samplecnt_t _playback_offset;
+	Location*   _loop_location;
 };
 
 } // namespace ARDOUR

@@ -538,15 +538,6 @@ Track::get_captured_samples (uint32_t n) const
 	return _disk_writer->get_captured_samples (n);
 }
 
-int
-Track::set_loop (Location* l)
-{
-	if (_disk_reader->set_loop (l)) {
-		return -1;
-	}
-	return _disk_writer->set_loop (l);
-}
-
 void
 Track::transport_looped (samplepos_t p)
 {

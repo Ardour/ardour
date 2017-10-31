@@ -384,7 +384,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		last_recordable_sample = max_samplepos;
 	}
 
-	const Location* const loop_loc    = loop_location;
+	const Location* const loop_loc    = _loop_location;
 	samplepos_t           loop_start  = 0;
 	samplepos_t           loop_end    = 0;
 	samplepos_t           loop_length = 0;

@@ -52,7 +52,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	, i_am_the_modifier (false)
 	, _seek_required (false)
 	, _slaved (false)
-	, loop_location (0)
 	, in_set_state (false)
 	, playback_sample (0)
 	, _need_butler (false)
@@ -179,22 +178,6 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 int
 DiskIOProcessor::set_block_size (pframes_t nframes)
 {
-	return 0;
-}
-
-int
-DiskIOProcessor::set_loop (Location *location)
-{
-	if (location) {
-		if (location->start() >= location->end()) {
-			error << string_compose(_("Location \"%1\" not valid for track loop (start >= end)"), location->name()) << endl;
-			return -1;
-		}
-	}
-
-	loop_location = location;
-
-	LoopSet (location); /* EMIT SIGNAL */
 	return 0;
 }
 
