@@ -41,6 +41,7 @@ CubicInterpolation::interpolate (int channel, samplecnt_t input_samples, Sample 
 	assert (output_samples > 0);
 	assert (input);
 	assert (output);
+	assert (phase.size () > channel);
 
 	_speed = fabs (_speed);
 
@@ -221,5 +222,6 @@ CubicInterpolation::reset ()
 samplecnt_t
 CubicInterpolation::distance (samplecnt_t nsamples)
 {
+	assert (phase.size () > 0);
 	return floor (floor (phase[0]) + (_speed * nsamples));
 }
