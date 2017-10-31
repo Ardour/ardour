@@ -360,13 +360,17 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * By the Time T=0 is reached (dt=15 later) that sample is audible.
 	 */
 
-	start_sample += _signal_latency;
-	end_sample += _signal_latency;
-
-	start_sample += _output->latency ();
-	end_sample += _output->latency ();
-
 	const double speed = (is_auditioner() ? 1.0 : _session.transport_speed ());
+
+	const sampleoffset_t latency_offset = _signal_latency + _output->latency ();
+	if (speed < 0) {
+		/* when rolling backwards this can become negative */
+		start_sample -= latency_offset;
+		end_sample -= latency_offset;
+	} else {
+		start_sample += latency_offset;
+		end_sample += latency_offset;
+	}
 
 	/* Note: during intial pre-roll 'start_sample' as passed as argument can be negative.
 	 * Functions calling process_output_buffers() will set  "run_disk_reader"
@@ -386,7 +390,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	 * given that
 	 */
 	bool run_disk_writer = false;
-	if (_disk_writer && speed != 0) {
+	if (_disk_writer && speed > 0) {
 		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
 		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output->latency ());
 		if (end_sample - _disk_writer->input_latency () < _session.transport_sample ()) {
@@ -514,7 +518,11 @@ Route::process_output_buffers (BufferSet& bufs,
 			pspeed = 0;
 		}
 
-		(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
+		if (speed < 0) {
+			(*i)->run (bufs, start_sample + latency, end_sample + latency, pspeed, nframes, *i != _processors.back());
+		} else {
+			(*i)->run (bufs, start_sample - latency, end_sample - latency, pspeed, nframes, *i != _processors.back());
+		}
 
 		bufs.set_count ((*i)->output_streams());
 
