@@ -275,6 +275,34 @@ Processor::configure_io (ChanCount in, ChanCount out)
 	return true;
 }
 
+bool
+Processor::map_loop_range (samplepos_t& start, samplepos_t& end) const
+{
+	if (!_loop_location) {
+		return false;
+	}
+	if (start >= end) {
+		/* no backwards looping */
+		return false;
+	}
+
+	const samplepos_t loop_end = _loop_location->end ();
+	if (start < loop_end) {
+		return false;
+	}
+
+	const samplepos_t loop_start   = _loop_location->start ();
+	const samplecnt_t looplen      = loop_end - loop_start;
+	const sampleoffset_t start_off = (start - loop_start) % looplen;
+	const samplepos_t start_pos    = loop_start + start_off;
+
+	assert (start >= start_pos);
+	end -= start - start_pos;
+	start = start_pos;
+	assert (end > start);
+	return true;
+}
+
 void
 Processor::set_display_to_user (bool yn)
 {

@@ -152,6 +152,8 @@ protected:
 	virtual XMLNode& state ();
 	virtual int set_state_2X (const XMLNode&, int version);
 
+	bool map_loop_range (samplepos_t& start, samplepos_t& end) const;
+
 	int       _pending_active;
 	bool      _active;
 	bool      _next_ab_is_active;

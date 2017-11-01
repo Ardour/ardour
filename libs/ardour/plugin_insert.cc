@@ -589,6 +589,53 @@ PluginInsert::set_block_size (pframes_t nframes)
 }
 
 void
+PluginInsert::automation_run (samplepos_t start, pframes_t nframes)
+{
+	// XXX does not work when rolling backwards
+	if (_loop_location && nframes > 0) {
+		const samplepos_t loop_start = _loop_location->start ();
+		const samplepos_t loop_end   = _loop_location->end ();
+		const samplecnt_t looplen    = loop_end - loop_start;
+
+		samplecnt_t remain = nframes;
+		samplepos_t start_pos = start;
+
+		while (remain > 0) {
+			if (start_pos >= loop_end) {
+				sampleoffset_t start_off = (start_pos - loop_start) % looplen;
+				start_pos = loop_start + start_off;
+			}
+			samplecnt_t move = std::min ((samplecnt_t)nframes, loop_end - start_pos);
+
+			Automatable::automation_run (start_pos, move);
+			remain -= move;
+			start_pos += move;
+		}
+		return;
+	}
+	Automatable::automation_run (start, nframes);
+}
+
+bool
+PluginInsert::find_next_event (double now, double end, Evoral::ControlEvent& next_event, bool only_active) const
+{
+	bool rv = Automatable::find_next_event (now, end, next_event, only_active);
+
+	if (_loop_location && now < end) {
+		if (rv) {
+			end = ceil (next_event.when);
+		}
+		const samplepos_t loop_end = _loop_location->end ();
+		assert (now < loop_end); // due to map_loop_range ()
+		if (end > loop_end) {
+			next_event.when = loop_end;
+			rv = true;
+		}
+	}
+	return rv;
+}
+
+void
 PluginInsert::activate ()
 {
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
@@ -1215,6 +1262,9 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 		return;
 	}
 
+	/* map start back into loop-range, adjust end */
+	map_loop_range (start, end);
+
 	if (!find_next_event (start, end, next_event) || _plugins.front()->requires_fixed_sized_buffers()) {
 
 		/* no events have a time within the relevant range */
@@ -1232,6 +1282,8 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 		nframes -= cnt;
 		offset += cnt;
 		start += cnt;
+
+		map_loop_range (start, end);
 
 		if (!find_next_event (start, end, next_event)) {
 			break;
