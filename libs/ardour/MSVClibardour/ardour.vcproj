@@ -880,6 +880,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\polarity_processor.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\port.cc"
 				>
 			</File>
@@ -977,6 +981,10 @@
 			</File>
 			<File
 				RelativePath="..\route_group_member.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\rt_tasklist.cc"
 				>
 			</File>
 			<File
@@ -2150,6 +2158,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\ardour\polarity_processor.h"
+				>
+			</File>
+			<File
 				RelativePath="..\ardour\port.h"
 				>
 			</File>
@@ -2263,6 +2275,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\route_group_specialized.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\rt_tasklist.h"
 				>
 			</File>
 			<File
