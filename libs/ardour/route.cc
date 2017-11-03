@@ -3452,7 +3452,6 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 		   contains ConfigurationChanged
 		*/
 		configure_processors (0);
-		_phase_control->resize (_input->n_ports().n_audio ());
 		io_changed (); /* EMIT SIGNAL */
 	}
 

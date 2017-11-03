@@ -47,7 +47,8 @@ PolarityProcessor::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	_current_gain.resize (in.n_audio (), 0.f);
+	_control->resize (in.n_audio ());
+	_current_gain.resize (in.n_audio (), 1.f);
 
 	return Processor::configure_io (in, out);
 }
