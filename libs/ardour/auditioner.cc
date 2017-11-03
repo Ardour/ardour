@@ -425,12 +425,19 @@ Auditioner::play_audition (samplecnt_t nframes)
 		/* process audio */
 		this_nframes = min (nframes, length - current_sample + _import_position);
 
-		if ((ret = roll (this_nframes, current_sample, current_sample + nframes, false, need_butler)) != 0) {
+		if (this_nframes > 0 && 0 != (ret = roll (this_nframes, current_sample, current_sample + this_nframes, false, need_butler))) {
 			silence (nframes);
 			return ret;
 		}
 
 		current_sample += this_nframes;
+
+		if (this_nframes < nframes) {
+			if (this_nframes > 0) {
+				_session.engine().split_cycle (this_nframes);
+			}
+			silence (nframes - this_nframes);
+		}
 
 	} else {
 		silence (nframes);
