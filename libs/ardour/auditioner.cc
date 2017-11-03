@@ -377,6 +377,11 @@ Auditioner::audition_region (boost::shared_ptr<Region> region)
 		offset = the_region->sync_offset (dir);
 	}
 
+	if (length == 0) {
+		error << _("Cannot audition empty file.") << endmsg;
+		return;
+	}
+
 	/* can't audition from a negative sync point */
 
 	if (dir < 0) {
