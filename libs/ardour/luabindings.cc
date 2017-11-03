@@ -40,6 +40,7 @@
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
 #include "ardour/dB.h"
+#include "ardour/delayline.h"
 #include "ardour/disk_reader.h"
 #include "ardour/disk_writer.h"
 #include "ardour/dsp_filter.h"
@@ -1337,9 +1338,9 @@ LuaBindings::common (lua_State* L)
 		.addCast<MonitorProcessor> ("to_monitorprocessor")
 		.addCast<Send> ("to_send")
 		.addCast<PolarityProcessor> ("to_polarityprocessor")
+		.addCast<DelayLine> ("to_delayline")
 #if 0 // those objects are not yet bound
 		.addCast<CapturingProcessor> ("to_capturingprocessor")
-		.addCast<DelayLine> ("to_delayline")
 #endif
 		.addCast<PeakMeter> ("to_meter")
 		.addFunction ("display_name", &Processor::display_name)
@@ -1545,6 +1546,10 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <PolarityProcessor, Processor> ("PolarityProcessor")
+		.endClass ()
+
+		.deriveWSPtrClass <DelayLine, Processor> ("DelayLine")
+		.addFunction ("delay", &DelayLine::delay)
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")

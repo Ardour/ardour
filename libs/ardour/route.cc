@@ -543,7 +543,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 #if 0
 		if ((*i) == _delayline) {
-			latency += _delayline->get_delay ();
+			latency += _delayline->delay ();
 		}
 #endif
 	}
@@ -4041,7 +4041,7 @@ void
 Route::apply_latency_compensation ()
 {
 	if (_delayline) {
-		samplecnt_t old = _delayline->get_delay ();
+		samplecnt_t old = _delayline->delay ();
 
 		samplecnt_t play_lat_in = _input->connected_latency (true);
 		samplecnt_t play_lat_out = _output->connected_latency (true);
@@ -4057,7 +4057,7 @@ Route::apply_latency_compensation ()
 
 		_delayline->set_delay (latcomp > 0 ? latcomp : 0);
 
-		if (old !=  _delayline->get_delay ()) {
+		if (old !=  _delayline->delay ()) {
 			signal_latency_updated (); /* EMIT SIGNAL */
 		}
 	}

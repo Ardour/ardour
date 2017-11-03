@@ -44,7 +44,7 @@ public:
 
 	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
 	bool set_delay(samplecnt_t signal_delay);
-	samplecnt_t get_delay() { return _pending_delay; }
+	samplecnt_t delay() { return _pending_delay; }
 
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
