@@ -68,6 +68,7 @@ class OSCRouteObserver
 	bool _expand;
 	bool in_line;
 	ARDOUR::AutoState as;
+	bool _tick_busy;
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);

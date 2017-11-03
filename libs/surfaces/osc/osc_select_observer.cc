@@ -56,6 +56,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	,_last_gain (-1.0)
 	,_last_trim (-1.0)
 	,_init (true)
+	,eq_bands (0)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	refresh_strip (true);
@@ -115,7 +116,6 @@ OSCSelectObserver::refresh_strip (bool force)
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	in_line = feedback[2];
-	as = ARDOUR::Off;
 	send_size = 0;
 	plug_size = 0;
 	_comp_redux = 1;
@@ -814,11 +814,14 @@ OSCSelectObserver::eq_init()
 	}
 
 	eq_bands = _strip->eq_band_cnt ();
+	if (eq_bands < 0) {
+		eq_bands = 0;
+	}
 	if (!eq_bands) {
 		return;
 	}
 
-	for (uint32_t i = 0; i < eq_bands; i++) {
+	for (int i = 0; i < eq_bands; i++) {
 		if (_strip->eq_band_name(i).size()) {
 			_osc.text_message_with_id ("/select/eq_band_name", i + 1, _strip->eq_band_name (i), in_line, addr);
 		}
@@ -848,7 +851,7 @@ OSCSelectObserver::eq_end ()
 		_osc.float_message ("/select/eq_hpf", 0, addr);
 		_osc.float_message ("/select/eq_enable", 0, addr);
 
-	for (uint32_t i = 1; i <= eq_bands; i++) {
+	for (int i = 1; i <= eq_bands; i++) {
 		_osc.text_message_with_id ("/select/eq_band_name", i, " ", in_line, addr);
 		_osc.float_message_with_id ("/select/eq_gain", i, 0, in_line, addr);
 		_osc.float_message_with_id ("/select/eq_freq", i, 0, in_line, addr);

@@ -158,6 +158,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t aux;				// aux index for this cue surface
 		Sorted sends;				// list of sends for cue aux
 		OSCCueObserver* cue_obs;	// pointer to this surface's cue observer
+		uint32_t linkset;			// ID of a set of surfaces used as one
+		uint32_t linkid;			// ID of this surface within a linkset
 	};
 		/*
 		 * feedback bits:
@@ -184,6 +186,22 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	typedef std::vector<OSCSurface> Surface;
 	Surface _surface;
 
+// linked surfaces
+	struct LinkSet {
+	public:
+		std::vector<OSCSurface*> linked;	//linked surfaces
+		uint32_t banksize;				// linkset banksize
+		uint32_t bank;					// linkset current bank
+		bool autobank;					// banksize is derived from total
+		uint32_t not_ready;				// number of 1st device, 0 = ready
+		std::bitset<32> strip_types;	// strip_types for this linkset
+		Sorted strips;					// list of valid strips in order for this set
+	};
+
+	std::map<uint32_t, LinkSet> link_sets;
+	 // list of linksets
+
+// GUI calls
 	std::string get_server_url ();
 	void set_debug_mode (OSCDebugMode m) { _debugmode = m; }
 	OSCDebugMode get_debug_mode () { return _debugmode; }
@@ -260,6 +278,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void global_feedback (OSCSurface* sur);
 	void strip_feedback (OSCSurface* sur, bool new_bank_size);
 	void surface_destroy (OSCSurface* sur);
+	uint32_t bank_limits_check (uint32_t bank, uint32_t size, uint32_t total);
 	void bank_leds (OSCSurface* sur);
 
 	void send_current_value (const char* path, lo_arg** argv, int argc, lo_message msg);
@@ -277,6 +296,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);
+	void surface_list (lo_message msg);
 	void transport_sample (lo_message msg);
 	void transport_speed (lo_message msg);
 	void record_enabled (lo_message msg);
@@ -295,6 +315,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void cue_set_aux (uint32_t aux, lo_message msg);
 	boost::shared_ptr<ARDOUR::Send> cue_get_send (uint32_t id, lo_address addr);
 	// end cue
+
+	// link
+	int parse_link (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int link_check (uint32_t linkset);
 
 	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int surface_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
@@ -318,6 +342,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(route_get_sends);
 	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
+	PATH_CALLBACK_MSG(surface_list);
 	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);
 	PATH_CALLBACK_MSG(record_enabled);
@@ -591,7 +616,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_monitor_disk (int rid, int yn, lo_message msg);
 	int strip_phase (int rid, int yn, lo_message msg);
 	int strip_expand (int rid, int yn, lo_message msg);
-	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
+	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr, bool quiet = false);
 	int strip_gui_select (int rid, int yn, lo_message msg);
 	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);

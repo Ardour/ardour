@@ -20,6 +20,8 @@
 #include "boost/lambda/lambda.hpp"
 
 #include "pbd/control_math.h"
+#include <glibmm.h>
+
 
 #include "ardour/session.h"
 #include "ardour/track.h"
@@ -78,6 +80,9 @@ void
 OSCRouteObserver::refresh_strip (bool force)
 {
 	_init = true;
+	if (_tick_busy) {
+		Glib::usleep(100); // let tick finish
+	}
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	in_line = feedback[2];
@@ -92,33 +97,32 @@ OSCRouteObserver::refresh_strip (bool force)
 		}
 		return;
 	}
-	// future
-	/*if (sur->linkset) {
-		//to be added with linkset stuff
-		if (_osc.linksets[sur->linkset]->not_ready)
+	if (sur->linkset) {
+		uint32_t not_ready = _osc.link_sets[sur->linkset].not_ready;
+		if (not_ready) {
 			clear_strip ();
 			switch (ssid) {
 				case 1:
-					_osc.text_message_with_id ("/strip/name", ssid, "Device", addr);
+					_osc.text_message_with_id ("/strip/name", ssid, "Device", in_line, addr);
 					break;
 				case 2:
-					_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), addr);
+					_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), in_line, addr);
 					break;
 				case 3:
-					_osc.text_message_with_id ("/strip/name", ssid, "Missing", addr);
+					_osc.text_message_with_id ("/strip/name", ssid, "Missing", in_line, addr);
 					break;
 				case 4:
-					_osc.text_message_with_id ("/strip/name", ssid, "from", addr);
+					_osc.text_message_with_id ("/strip/name", ssid, "from", in_line, addr);
 					break;
 				case 5:
-					_osc.text_message_with_id ("/strip/name", ssid, "Linkset", addr);
+					_osc.text_message_with_id ("/strip/name", ssid, "Linkset", in_line, addr);
 					break;
 				default:
 					break;
 			}
 			return;
 		}
-	}*/
+	}
 
 	// this has to be done first because expand may change with no strip change
 	bool new_expand;
@@ -219,7 +223,7 @@ OSCRouteObserver::clear_strip ()
 
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.float_message_with_id ("/strip/expand", ssid, 0, in_line, addr);
-	if (sur->feedback[0]) { // buttons are separate feedback
+	if (feedback[0]) { // buttons are separate feedback
 		_osc.text_message_with_id ("/strip/name", ssid, " ", in_line, addr);
 		_osc.float_message_with_id ("/strip/mute", ssid, 0, in_line, addr);
 		_osc.float_message_with_id ("/strip/solo", ssid, 0, in_line, addr);
@@ -230,8 +234,8 @@ OSCRouteObserver::clear_strip ()
 		_osc.float_message_with_id ("/strip/gui_select", ssid, 0, in_line, addr);
 		_osc.float_message_with_id ("/strip/select", ssid, 0, in_line, addr);
 	}
-	if (sur->feedback[1]) { // level controls
-		if (sur->gainmode) {
+	if (feedback[1]) { // level controls
+		if (gainmode) {
 			_osc.float_message_with_id ("/strip/fader", ssid, 0, in_line, addr);
 		} else {
 			_osc.float_message_with_id ("/strip/gain", ssid, -193, in_line, addr);
@@ -239,16 +243,16 @@ OSCRouteObserver::clear_strip ()
 		_osc.float_message_with_id ("/strip/trimdB", ssid, 0, in_line, addr);
 		_osc.float_message_with_id ("/strip/pan_stereo_position", ssid, 0.5, in_line, addr);
 	}
-	if (sur->feedback[9]) {
+	if (feedback[9]) {
 		_osc.float_message_with_id ("/strip/signal", ssid, 0, in_line, addr);
 	}
-	if (sur->feedback[7]) {
-		if (sur->gainmode) {
+	if (feedback[7]) {
+		if (gainmode) {
 			_osc.float_message_with_id ("/strip/meter", ssid, 0, in_line, addr);
 		} else {
 			_osc.float_message_with_id ("/strip/meter", ssid, -193, in_line, addr);
 		}
-	}else if (sur->feedback[8]) {
+	}else if (feedback[8]) {
 		_osc.float_message_with_id ("/strip/meter", ssid, 0, in_line, addr);
 	}
 }
@@ -260,7 +264,8 @@ OSCRouteObserver::tick ()
 	if (_init) {
 		return;
 	}
-	if (sur->feedback[7] || sur->feedback[8] || sur->feedback[9]) { // meters enabled
+	_tick_busy = true;
+	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
 		float now_meter;
 		if (_strip->peak_meter()) {
@@ -270,18 +275,18 @@ OSCRouteObserver::tick ()
 		}
 		if (now_meter < -120) now_meter = -193;
 		if (_last_meter != now_meter) {
-			if (sur->feedback[7] || sur->feedback[8]) {
-				if (sur->gainmode && sur->feedback[7]) {
+			if (feedback[7] || feedback[8]) {
+				if (gainmode && feedback[7]) {
 					_osc.float_message_with_id ("/strip/meter", ssid, ((now_meter + 94) / 100), in_line, addr);
-				} else if ((!sur->gainmode) && sur->feedback[7]) {
+				} else if ((!gainmode) && feedback[7]) {
 					_osc.float_message_with_id ("/strip/meter", ssid, now_meter, in_line, addr);
-				} else if (sur->feedback[8]) {
+				} else if (feedback[8]) {
 					uint32_t ledlvl = (uint32_t)(((now_meter + 54) / 3.75)-1);
 					uint16_t ledbits = ~(0xfff<<ledlvl);
 					_osc.int_message_with_id ("/strip/meter", ssid, ledbits, in_line, addr);
 				}
 			}
-			if (sur->feedback[9]) {
+			if (feedback[9]) {
 				float signal;
 				if (now_meter < -40) {
 					signal = 0;
@@ -294,7 +299,7 @@ OSCRouteObserver::tick ()
 		_last_meter = now_meter;
 
 	}
-	if (sur->feedback[1]) {
+	if (feedback[1]) {
 		if (gain_timeout) {
 			if (gain_timeout == 1) {
 				_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
@@ -314,7 +319,7 @@ OSCRouteObserver::tick ()
 			}
 		}
 	}
-
+	_tick_busy = false;
 }
 
 void
@@ -371,7 +376,7 @@ OSCRouteObserver::send_trim_message ()
 	} else {
 		return;
 	}
-	if (sur->gainmode) {
+	if (gainmode) {
 		_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (_last_trim)), in_line, addr);
 		trim_timeout = 8;
 	}
@@ -389,7 +394,7 @@ OSCRouteObserver::send_gain_message ()
 		return;
 	}
 
-	if (sur->gainmode) {
+	if (gainmode) {
 		_osc.float_message_with_id ("/strip/fader", ssid, controllable->internal_to_interface (_last_gain), in_line, addr);
 		_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
 		gain_timeout = 8;
@@ -406,7 +411,7 @@ void
 OSCRouteObserver::gain_automation ()
 {
 	string path = "/strip/gain";
-	if (sur->gainmode) {
+	if (gainmode) {
 		path = "/strip/fader";
 	}
 	send_gain_message ();

@@ -415,6 +415,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
+		REGISTER_CALLBACK (serv, "/surface/list", "", surface_list);
+		REGISTER_CALLBACK (serv, "/surface/list", "f", surface_list);
 		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
 		REGISTER_CALLBACK (serv, "/add_marker", "f", add_marker);
 		REGISTER_CALLBACK (serv, "/access_action", "s", access_action);
@@ -992,6 +994,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (!strncmp (path, "/set_surface", 12)) {
 		ret = surface_parse (path, types, argv, argc, msg);
 	}
+	else if (strstr (path, "/link")) {
+		ret = parse_link (path, types, argv, argc, msg);
+	}
 	if (ret) {
 		check_surface (msg);
 	}
@@ -1246,6 +1251,54 @@ OSC::routes_list (lo_message msg)
 
 }
 
+void
+OSC::surface_list (lo_message msg)
+{
+	/* this function is for debugging and prints lots of
+	 * information about what surfaces Ardour knows about and their
+	 * internal parameters. It is best accessed by sending:
+	 * /surface/list from oscsend. This command does not create
+	 * a surface entry.
+	 */
+
+	cerr << "List of known Surfaces: " << _surface.size() << "\n\n";
+
+	Glib::Threads::Mutex::Lock lm (surfaces_lock);
+	for (uint32_t it = 0; it < _surface.size(); it++) {
+		OSCSurface* sur = &_surface[it];
+		cerr << string_compose ("  Surface: %1 URL: %2\n", it, sur->remote_url);
+		cerr << string_compose ("	Number of strips: %1 Bank size: %2 Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
+		bool ug = false;
+		if (sur->usegroup == PBD::Controllable::UseGroup) {
+			ug = true;
+		}
+		cerr << string_compose ("	Strip Types: %1 Feedback: %2 no_clear: %3 gain mode: %4 use groups? %5\n", \
+			sur->strip_types.to_ulong(), sur->feedback.to_ulong(), sur->no_clear, sur->gainmode, ug);
+		cerr << string_compose ("	using plugin: %1 of %2 plugins, with %3 params. page size: %4 page: %5\n", \
+			sur->plugin_id, sur->plugins.size(), sur->plug_params.size(), sur->plug_page_size, sur->plug_page);
+		cerr << string_compose ("	send page size: %1 page: %2\n", sur->send_page_size, sur->send_page);
+		cerr << string_compose ("	expanded? %1 track: %2 jogmode: %3\n", sur->expand_enable, sur->expand, sur->jogmode);
+		cerr << string_compose ("	personal monitor? %1, Aux master: %2, number of sends: %3\n", sur->cue, sur->aux, sur->sends.size());
+		cerr << string_compose ("	Linkset: %1 Device Id: %2\n", sur->linkset, sur->linkid);
+	}
+	cerr << "\nList of LinkSets " << link_sets.size() << "\n\n";
+	std::map<uint32_t, LinkSet>::iterator it;
+	for (it = link_sets.begin(); it != link_sets.end(); it++) {
+		if (!(*it).first) {
+			continue;
+		}
+		uint32_t devices = 0;
+		LinkSet* set = &(*it).second;
+		if (set->linked.size()) {
+			devices = set->linked.size() - 1;
+		}
+		cerr << string_compose ("  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
+		cerr << string_compose ("	Bank size: %1 Current bank: %2 Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
+		cerr << string_compose ("	auto bank sizing: %1 linkset not ready: %2\n", set->autobank, set->not_ready);
+	}
+	cerr << "\n";
+}
+
 int
 OSC::cancel_all_solos ()
 {
@@ -1295,11 +1348,140 @@ OSC::clear_devices ()
 		surface_destroy (sur);
 	}
 	_surface.clear();
+	link_sets.clear ();
 
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
 	observer_busy = false;
 	tick = true;
+}
+
+int
+OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	int ret = 1; /* unhandled */
+	int set = 0;
+	if (!argc) {
+		PBD::warning << "OSC: /link/* needs at least one parameter" << endmsg;
+		return ret;
+	}
+	float data = 0;
+	if (types[argc - 1] == 'f') {
+		data = argv[argc - 1]->f;
+	} else {
+		data = argv[argc - 1]->i;
+	}
+	if (isdigit(strrchr (path, '/')[1])) {
+		set = atoi (&(strrchr (path, '/')[1]));
+	} else if (argc == 2) {
+		if (types[0] == 'f') {
+			set = (int) argv[0]->f;
+		} else {
+			set = argv[0]->i;
+		}
+	} else {
+		PBD::warning << "OSC: wrong number of parameters." << endmsg;
+		return ret;
+	}
+	OSCSurface *sur = get_surface(get_address (msg));
+	LinkSet *ls = 0;
+
+	if (set) {
+		// need to check if set is wanted
+		std::map<uint32_t, LinkSet>::iterator it;
+		it = link_sets.find(set);
+		if (it == link_sets.end()) {
+			// no such linkset make it
+			LinkSet new_ls;
+			new_ls.banksize = 0;
+			new_ls.bank = 1;
+			new_ls.autobank = true;
+			new_ls.not_ready = true;
+			new_ls.strip_types = sur->strip_types;
+			new_ls.strips = sur->strips;
+			link_sets[set] = new_ls;
+		}
+		ls = &link_sets[set];
+
+	} else {
+		// User expects this surface to be removed from any sets
+		int oldset = sur->linkset;
+		if (oldset) {
+			int oldid = sur->linkid;
+			sur->linkid = 1;
+			sur->linkset = 0;
+			ls = &link_sets[oldid];
+			if (ls) {
+				ls->not_ready = 1;
+				ls->linked[(uint32_t) data] = 0;
+			}
+		}
+		return 0;
+	}
+	if (!strncmp (path, "/link/bank_size", 15)) {
+		ls->banksize = (uint32_t) data;
+		ls->autobank = false;
+		ls->not_ready = link_check (set);
+		if (ls->not_ready) {
+			ls->bank = 1;
+			strip_feedback (sur, true);
+		} else {
+			_set_bank (ls->bank, get_address (msg));
+		}
+		ret = 0;
+
+	} else if (!strncmp (path, "/link/set", 9)) {
+		sur->linkset = set;
+		sur->linkid = (uint32_t) data;
+		if (ls->linked.size() <= (uint32_t) data) {
+			ls->linked.resize((int) data + 1);
+		}
+		ls->linked[(uint32_t) data] = sur;
+		ls->not_ready = link_check (set);
+		if (ls->not_ready) {
+			strip_feedback (sur, true);
+		} else {
+			_set_bank (1, get_address (msg));
+		}
+		ret = 0;
+	}
+
+	return ret;
+}
+
+int
+OSC::link_check (uint32_t set)
+{
+	LinkSet *ls = 0;
+
+	if (!set) {
+		return 1;
+	}
+	std::map<uint32_t, LinkSet>::iterator it;
+	it = link_sets.find(set);
+	if (it == link_sets.end()) {
+		// this should never happen... but
+		return 1;
+	}
+	ls = &link_sets[set];
+	uint32_t bank_total = 0;
+	uint32_t set_ready = 0;
+	for (uint32_t dv = 1; dv < ls->linked.size(); dv++) {
+		if ((ls->linked[dv]) && ((ls->linked[dv]))->linkset == set) {
+			OSCSurface *su = (ls->linked[dv]);
+			bank_total = bank_total + su->bank_size;
+		} else if (!set_ready) {
+			set_ready = dv;
+		}
+	}
+	if (ls->autobank) {
+		ls->banksize = bank_total;
+	} else {
+		if (!set_ready && bank_total != ls->banksize) {
+			set_ready = ls->linked.size();
+		}
+	}
+	return set_ready;
 }
 
 int
@@ -1496,10 +1678,11 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->send_page_size = se_size;
 	s->plug_page_size = pi_size;
 	// set bank and strip feedback
+	// XXXX check if we are already in a linkset
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg), true);
 	strip_feedback(s, true);
 
 	global_feedback (s);
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	sel_send_pagesize (se_size, msg);
 	sel_plug_pagesize (pi_size, msg);
 	return 0;
@@ -1513,6 +1696,7 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = bs;
+	// XXXX check if we are already in a linkset
 	s->bank = 1;
 
 	// set bank and strip feedback
@@ -1536,6 +1720,7 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	}
 
 	// set bank and strip feedback
+	// XXXX check for linkset
 	s->bank = 1;
 	strip_feedback (s, true);
 	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
@@ -1599,7 +1784,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	free (rurl);
 	{
 		for (uint32_t it = 0; it < _surface.size(); ++it) {
-			//find setup for this server
+			//find setup for this surface
 			if (!_surface[it].remote_url.find(r_url)){
 				return &_surface[it];
 			}
@@ -1632,6 +1817,8 @@ OSC::get_surface (lo_address addr , bool quiet)
 	s.plug_page = 1;
 	s.plug_page_size = default_plugin_size;
 	s.plugin_id = 1;
+	s.linkset = 0;
+	s.linkid = 1;
 
 	s.nstrips = s.strips.size();
 	{
@@ -1674,7 +1861,6 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 		}
 		sur->observers.clear();
 
-		// get freash striplist - just in case
 		uint32_t bank_size = sur->bank_size;
 		if (!bank_size) {
 			bank_size = sur->nstrips;
@@ -1739,9 +1925,11 @@ OSC::_recalcbanks ()
 	// refresh each surface we know about.
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+		sur->nstrips = sur->strips.size();
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
 		if (sur->cue) {
 			_cue_set (sur->aux, addr);
 		} else if (!sur->bank_size) {
@@ -1770,58 +1958,107 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	if (!session) {
 		return -1;
 	}
-	// no nstripables yet
 	if (!session->nroutes()) {
 		return -1;
 	}
 
-	OSCSurface *s = get_surface (addr);
+	OSCSurface *s = get_surface (addr, true);
 
-	// revert any expand to select
-	 s->expand = 0;
-	 s->expand_enable = false;
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
+	Sorted striplist = s->strips;
+	uint32_t nstrips = s->nstrips;
 
-	s->strips = get_sorted_stripables(s->strip_types, s->cue);
-	s->nstrips = s->strips.size();
+	LinkSet *set;
+	uint32_t l_set = s->linkset;
 
-	uint32_t b_size;
-	if (!s->bank_size) {
-		// no banking - bank includes all stripables
-		b_size = s->nstrips;
+	if (l_set) {
+		//we have a linkset... deal with each surface
+		set = &(link_sets[l_set]);
+		if (set->not_ready) {
+			return 1;
+		}
+		uint32_t s_count = set->linked.size();
+		set->strips = striplist;
+		bank_start = bank_limits_check (bank_start, set->banksize, nstrips);
+		set->bank = bank_start;
+		for (uint32_t ls = 1; ls < s_count; ls++) {
+			OSCSurface *sur = (set->linked[ls]);
+			if (!sur || sur->linkset != l_set) {
+				if (!set->not_ready) {
+					set->not_ready = ls;
+				}
+				set->bank = 1;
+				return 1;
+			}
+			lo_address sur_addr = lo_address_new_from_url (sur->remote_url.c_str());
+			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
+
+			sur->bank = bank_start;
+			bank_start = bank_start + sur->bank_size;
+			strip_feedback (sur, false);
+			bank_leds (sur);
+			lo_address_free (sur_addr);
+		}
 	} else {
-		b_size = s->bank_size;
+
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
+		s->bank = bank_limits_check (bank_start, s->bank_size, nstrips);
+		strip_feedback (s, true);
+		bank_leds (s);
 	}
 
-	// Do limits checking
-	if (bank_start < 1) bank_start = 1;
-	if (b_size >= s->nstrips)  {
-		bank_start = 1;
-	} else if (bank_start > ((s->nstrips - b_size) + 1)) {
-		// top bank is always filled if there are enough strips for at least one bank
-		bank_start = (uint32_t)((s->nstrips - b_size) + 1);
-	}
-	//save bank after bank limit checks
-	s->bank = bank_start;
 
-	if (s->feedback[0] || s->feedback[1]) {
-		strip_feedback (s, false);
-	}
-	bank_leds (s);
 	bank_dirty = false;
 	tick = true;
 	return 0;
 }
 
+uint32_t
+OSC::bank_limits_check (uint32_t bank, uint32_t size, uint32_t total)
+{
+	uint32_t b_size;
+	if (!size) {
+		// no banking - bank includes all stripables
+		b_size = total;
+	} else {
+		b_size = size;
+	}
+	// Do limits checking
+	if (bank < 1) bank = 1;
+	if (b_size >= total)  {
+		bank = 1;
+	} else if (bank > ((total - b_size) + 1)) {
+		// top bank is always filled if there are enough strips for at least one bank
+		bank = (uint32_t)((total - b_size) + 1);
+	}
+	return bank;
+}
+
 void
 OSC::bank_leds (OSCSurface* s)
 {
+	uint32_t bank = 0;
+	uint32_t size = 0;
+	uint32_t total = 0;
 	// light bankup or bankdown buttons if it is possible to bank in that direction
 	lo_address addr = lo_address_new_from_url (s->remote_url.c_str());
-	if (s->feedback[4] && !s->no_clear) {
+	if (s->linkset) {
+		LinkSet *set;
+		set = &(link_sets[s->linkset]);
+		bank = set->bank;
+		size = set->banksize;
+		total = s->nstrips;
+		if (set->not_ready) {
+			total = 1;
+		}
+	} else {
+		bank = s->bank;
+		size = s->bank_size;
+		total = s->nstrips;
+	}
+	if (size && (s->feedback[0] || s->feedback[1] || s->feedback[4])) {
 		lo_message reply;
 		reply = lo_message_new ();
-		if ((s->bank > (s->nstrips - s->bank_size)) || (s->nstrips < s->bank_size)) {
+		if ((total <= size) || (bank > (total - size))) {
 			lo_message_add_int32 (reply, 0);
 		} else {
 			lo_message_add_int32 (reply, 1);
@@ -1829,7 +2066,7 @@ OSC::bank_leds (OSCSurface* s)
 		lo_send_message (addr, "/bank_up", reply);
 		lo_message_free (reply);
 		reply = lo_message_new ();
-		if (s->bank > 1) {
+		if (bank > 1) {
 			lo_message_add_int32 (reply, 1);
 		} else {
 			lo_message_add_int32 (reply, 0);
@@ -1842,12 +2079,7 @@ OSC::bank_leds (OSCSurface* s)
 int
 OSC::bank_up (lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *s = get_surface(get_address (msg));
-	set_bank (s->bank + s->bank_size, msg);
-	return 0;
+	return bank_delta (1.0, msg);
 }
 
 int
@@ -1856,12 +2088,34 @@ OSC::bank_delta (float delta, lo_message msg)
 	if (!session) {
 		return -1;
 	}
+	// only do deltas of -1 0 or 1
+	if (delta > 0) {
+		delta = 1;
+	} else if (delta < 0) {
+		delta = -1;
+	} else {
+		// 0  key release ignore
+		return 0;
+	}
 	OSCSurface *s = get_surface(get_address (msg));
-	uint32_t new_bank = s->bank + (s->bank_size * (int) delta);
+	if (!s->bank_size) {
+		// bank size of 0 means use all strips no banking
+		return 0;
+	}
+	uint32_t old_bank = 0;
+	uint32_t bank_size = 0;
+	if (s->linkset) {
+		old_bank = link_sets[s->linkset].bank;
+		bank_size = link_sets[s->linkset].banksize;
+	} else {
+		old_bank = s->bank;
+		bank_size = s->bank_size;
+	}
+	uint32_t new_bank = old_bank + (bank_size * (int) delta);
 	if ((int)new_bank < 1) {
 		new_bank = 1;
 	}
-	if (new_bank != s->bank) {
+	if (new_bank != old_bank) {
 		set_bank (new_bank, msg);
 	}
 	return 0;
@@ -1870,16 +2124,7 @@ OSC::bank_delta (float delta, lo_message msg)
 int
 OSC::bank_down (lo_message msg)
 {
-	if (!session) {
-		return -1;
-	}
-	OSCSurface *s = get_surface(get_address (msg));
-	if (s->bank < s->bank_size) {
-		set_bank (1, msg);
-	} else {
-		set_bank (s->bank - s->bank_size, msg);
-	}
-	return 0;
+	return bank_delta (-1.0, msg);
 }
 
 int
@@ -3198,7 +3443,7 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 }
 
 int
-OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
+OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr, bool quiet)
 {
 	if (!session) {
 		return -1;
@@ -3220,14 +3465,13 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	sur->select = s;
 	s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
-	OSCSelectObserver* so = 0;
+	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
 	if (sur->feedback[13]) {
-		if ((so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs)) != 0) {
-			so->refresh_strip (false);
-		} else {
-			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
-			sur->sel_obs = sel_fb;
+		if (so != 0) {
+			delete so;
 		}
+		OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
+		sur->sel_obs = sel_fb;
 	} else {
 		if (so != 0) {
 			delete so;
@@ -3243,7 +3487,9 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		processor_changed (addr);
 	}
 
-	strip_feedback (sur, false);
+	if (!quiet) {
+		strip_feedback (sur, false);
+	}
 
 	return 0;
 }
