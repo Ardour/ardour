@@ -40,21 +40,16 @@ public:
   DelayLine (Session& s, const std::string& name);
 	~DelayLine ();
 
-	bool display_to_user () const { return false; }
-
-	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
+	bool set_name (const std::string& str);
 	bool set_delay (samplecnt_t signal_delay);
 	samplecnt_t delay () { return _pending_delay; }
 
+	/* processor interface */
+	bool display_to_user () const { return false; }
+	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
-
 	void flush ();
-	void realtime_handle_transport_stopped () { flush (); }
-	void realtime_locate () { flush (); }
-	void monitoring_changed () { flush (); }
-
-	bool set_name (const std::string& str);
 
 protected:
 	XMLNode& state ();

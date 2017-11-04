@@ -69,6 +69,8 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 	const bool pending_flush = _pending_flush;
 	_pending_flush = false;
 
+	// TODO handle pending_flush.
+
 	/* Audio buffers */
 	if (_buf.size () == bufs.count ().n_audio () && _buf.size () > 0) {
 
@@ -154,6 +156,26 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 
 		/* set new delay */
 		_delay = pending_delay;
+
+		if (pending_flush) {
+			/* fade out data after read-pointer, clear buffer until write-pointer */
+			const samplecnt_t fade_out_len = std::min (_delay, (samplecnt_t)FADE_LEN);
+
+			for (AudioDlyBuf::iterator i = _buf.begin(); i != _buf.end (); ++i) {
+				Sample* rb = (*i).get ();
+				uint32_t s = 0;
+				for (; s < fade_out_len; ++s) {
+					sampleoffset_t off = (_roff + s) % _bsiz;
+					rb[off] *= 1. - (s / (float) fade_out_len);
+				}
+				for (; s < _delay; ++s) {
+					sampleoffset_t off = (_roff + s) % _bsiz;
+					rb[off] = 0;
+				}
+				assert (_woff == ((_roff + s) % _bsiz));
+			}
+			// TODO consider adding a fade-in to bufs
+		}
 
 		/* delay audio buffers */
 		assert (_delay == ((_woff - _roff + _bsiz) % _bsiz));
