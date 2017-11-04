@@ -93,7 +93,7 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 						Sample* rb = (*bi).get ();
 						write_to_rb (rb, i->data (), add);
 					}
-					_woff = (_woff + add) % _bsiz;
+					_woff = (_woff + add) & _bsiz_mask;
 					delay_diff += add;
 				}
 			} else {
@@ -104,18 +104,18 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 			for (AudioDlyBuf::iterator i = _buf.begin(); i != _buf.end (); ++i) {
 				Sample* rb = (*i).get ();
 				for (uint32_t s = 0; s < fade_out_len; ++s) {
-					sampleoffset_t off = (_woff + _bsiz - s) % _bsiz;
+					sampleoffset_t off = (_woff + _bsiz - s) & _bsiz_mask;
 					rb[off] *= s / (float) fade_out_len;
 				}
 				/* clear data in rb */
 				// TODO optimize this using memset
 				for (uint32_t s = 0; s < -delay_diff; ++s) {
-					sampleoffset_t off = (_woff + _bsiz + s) % _bsiz;
+					sampleoffset_t off = (_woff + _bsiz + s) & _bsiz_mask;
 					rb[off] = 0.f;
 				}
 			}
 
-			_woff = (_woff - delay_diff) % _bsiz;
+			_woff = (_woff - delay_diff) & _bsiz_mask;
 
 			/* fade-in, directly apply to input buffer */
 			for (BufferSet::audio_iterator i = bufs.audio_begin (); i != bufs.audio_end (); ++i) {
@@ -138,7 +138,7 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				// TODO consider handling fade_out & fade_in separately
 				// if fade_out_len < fade_in_len.
 				for (uint32_t s = 0; s < xfade_len; ++s) {
-					sampleoffset_t off = (_roff + s) % _bsiz;
+					sampleoffset_t off = (_roff + s) & _bsiz_mask;
 					const gain_t g = s / (float) xfade_len;
 					src[s] *= g;
 					src[s] += (1.f - g) * rb[off];
@@ -146,9 +146,9 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 			}
 
 #ifndef NDEBUG
-			sampleoffset_t check = (_roff + delay_diff) % _bsiz;
+			sampleoffset_t check = (_roff + delay_diff) & _bsiz_mask;
 #endif
-			_roff = (_woff + _bsiz - pending_delay) % _bsiz;
+			_roff = (_woff + _bsiz - pending_delay) & _bsiz_mask;
 #ifndef NDEBUG
 			assert (_roff == check);
 #endif
@@ -165,20 +165,20 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				Sample* rb = (*i).get ();
 				uint32_t s = 0;
 				for (; s < fade_out_len; ++s) {
-					sampleoffset_t off = (_roff + s) % _bsiz;
+					sampleoffset_t off = (_roff + s) & _bsiz_mask;
 					rb[off] *= 1. - (s / (float) fade_out_len);
 				}
 				for (; s < _delay; ++s) {
-					sampleoffset_t off = (_roff + s) % _bsiz;
+					sampleoffset_t off = (_roff + s) & _bsiz_mask;
 					rb[off] = 0;
 				}
-				assert (_woff == ((_roff + s) % _bsiz));
+				assert (_woff == ((_roff + s) & _bsiz_mask));
 			}
 			// TODO consider adding a fade-in to bufs
 		}
 
 		/* delay audio buffers */
-		assert (_delay == ((_woff - _roff + _bsiz) % _bsiz));
+		assert (_delay == ((_woff - _roff + _bsiz) & _bsiz_mask));
 		AudioDlyBuf::iterator bi = _buf.begin ();
 		if (_delay == 0) {
 			/* do nothing */
@@ -189,8 +189,8 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				write_to_rb (rb, i->data (), n_samples);
 				read_from_rb (rb, i->data (), n_samples);
 			}
-			_roff = (_roff + n_samples) % _bsiz;
-			_woff = (_woff + n_samples) % _bsiz;
+			_roff = (_roff + n_samples) & _bsiz_mask;
+			_woff = (_woff + n_samples) & _bsiz_mask;
 		} else {
 			/* only write _delay samples to ringbuffer, memmove buffer */
 			samplecnt_t tail = n_samples - _delay;
@@ -201,8 +201,8 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				memmove (&src[_delay], src, tail * sizeof(Sample));
 				read_from_rb (rb, src, _delay);
 			}
-			_roff = (_roff + _delay) % _bsiz;
-			_woff = (_woff + _delay) % _bsiz;
+			_roff = (_roff + _delay) & _bsiz_mask;
+			_woff = (_woff + _delay) & _bsiz_mask;
 		}
 	} else {
 		/* set new delay for MIDI only */
@@ -319,6 +319,10 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 	samplecnt_t rbs = signal_delay + 8192 + 1;
 	rbs = std::max (_bsiz, rbs);
 
+	uint64_t power_of_two;
+	for (power_of_two = 1; 1 << power_of_two < rbs; ++power_of_two) {}
+	rbs = 1 << power_of_two;
+
 	if (cc.n_audio () == _buf.size () && _bsiz == rbs) {
 		return;
 	}
@@ -356,6 +360,7 @@ DelayLine::allocate_pending_buffers (samplecnt_t signal_delay, ChanCount const& 
 		}
 	}
 	_bsiz = rbs;
+	_bsiz_mask = _bsiz - 1;
 	_buf.swap (pending_buf);
 }
 

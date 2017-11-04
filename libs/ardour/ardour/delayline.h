@@ -63,6 +63,7 @@ private:
 	friend class IO;
 
 	samplecnt_t    _bsiz;
+	samplecnt_t    _bsiz_mask;
 	samplecnt_t    _delay, _pending_delay;
 	sampleoffset_t _roff, _woff;
 	bool           _pending_flush;
