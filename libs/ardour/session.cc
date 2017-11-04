@@ -7353,6 +7353,7 @@ Session::auto_connect_thread_run ()
 			 * modifies the capture-offset, which can be a problem.
 			 */
 			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
+				Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 				update_latency_compensation ();
 			}
 		}

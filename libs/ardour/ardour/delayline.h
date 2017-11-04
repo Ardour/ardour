@@ -40,19 +40,19 @@ public:
   DelayLine (Session& s, const std::string& name);
 	~DelayLine ();
 
-	bool display_to_user() const { return false; }
+	bool display_to_user () const { return false; }
 
 	void run (BufferSet&, samplepos_t, samplepos_t, double, pframes_t, bool);
-	bool set_delay(samplecnt_t signal_delay);
-	samplecnt_t delay() { return _pending_delay; }
+	bool set_delay (samplecnt_t signal_delay);
+	samplecnt_t delay () { return _pending_delay; }
 
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
-	void flush();
-	void realtime_handle_transport_stopped () { flush(); }
-	void realtime_locate () { flush(); }
-	void monitoring_changed() { flush(); }
+	void flush ();
+	void realtime_handle_transport_stopped () { flush (); }
+	void realtime_locate () { flush (); }
+	void monitoring_changed () { flush (); }
 
 	bool set_name (const std::string& str);
 
@@ -60,16 +60,27 @@ protected:
 	XMLNode& state ();
 
 private:
-	void allocate_pending_buffers (samplecnt_t);
+	void allocate_pending_buffers (samplecnt_t, ChanCount const&);
+
+	void write_to_rb (Sample* rb, Sample* src, samplecnt_t); // honor _woff, _bsiz.
+	void read_from_rb (Sample* rb, Sample* dst, samplecnt_t); // honor _roff, _bsiz
 
 	friend class IO;
-	samplecnt_t _delay, _pending_delay;
-	samplecnt_t _bsiz,  _pending_bsiz;
+
+	samplecnt_t    _bsiz;
+	samplecnt_t    _delay, _pending_delay;
 	sampleoffset_t _roff, _woff;
-	boost::shared_array<Sample> _buf;
-	boost::shared_array<Sample> _pending_buf;
+	bool           _pending_flush;
+
+	typedef std::vector<boost::shared_array<Sample> > AudioDlyBuf;
+	typedef std::vector<boost::shared_array<MidiBuffer> > MidiDlyBuf;
+
+	AudioDlyBuf _buf;
 	boost::shared_ptr<MidiBuffer> _midi_buf;
-	bool _pending_flush;
+
+#ifndef NDEBUG
+	Glib::Threads::Mutex _set_delay_mutex;
+#endif
 };
 
 } // namespace ARDOUR
