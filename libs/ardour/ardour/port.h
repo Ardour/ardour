@@ -145,6 +145,7 @@ public:
 	static std::string state_node_name;
 
 	static pframes_t cycle_nframes () { return _cycle_nframes; }
+	static double speed_ratio () { return _speed_ratio; }
 
 protected:
 

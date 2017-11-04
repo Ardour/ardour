@@ -753,7 +753,21 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 
 	_cycle_ports = ports.reader ();
 
-	if (s && s->rt_tasklist ()) {
+	/* TODO optimize
+	 *  - when speed == 1.0, the resampler copies data without processing
+	 *   it may be more efficient to just run all in sequence
+	 *
+	 *  - single sequential task for 'lightweight' tasks would make sense
+	 *    (run it in parallel with 'heavy' resampling.
+	 *    * output ports (sends_output()) only set a flag
+	 *    * midi-ports only scale event timestamps
+	 *
+	 *  - a threshold parallel vs searial processing may be appropriate.
+	 *    amount of work (how many connected ports are there, how
+	 *    many resamplers need to run) vs. available CPU cores and semaphore
+	 *    synchronization overhead.
+	 */
+	if (s && s->rt_tasklist () /* && fabs (Port::speed_ratio ()) != 1.0 */) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
 			tl.push_back (boost::bind (&Port::cycle_start, p->second, nframes));
@@ -769,7 +783,8 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 void
 PortManager::cycle_end (pframes_t nframes, Session* s)
 {
-	if (s && s->rt_tasklist ()) {
+	// see optimzation note in ::cycle_start()
+	if (s && s->rt_tasklist () /* && fabs (Port::speed_ratio ()) != 1.0 */) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
 			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
@@ -871,7 +886,8 @@ PortManager::check_monitoring ()
 void
 PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t nframes, Session* s)
 {
-	if (s && s->rt_tasklist ()) {
+	// see optimzation note in ::cycle_start()
+	if (s && s->rt_tasklist () /* && fabs (Port::speed_ratio ()) != 1.0 */) {
 		RTTaskList::TaskList tl;
 		for (Ports::iterator p = _cycle_ports->begin(); p != _cycle_ports->end(); ++p) {
 			tl.push_back (boost::bind (&Port::cycle_end, p->second, nframes));
