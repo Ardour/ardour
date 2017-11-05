@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <algorithm>
 
 #include "zita-resampler/vmresampler.h"
 
@@ -173,6 +174,44 @@ VMResampler::process (void)
 	ph = _phase;
 	dp = _pstep;
 	n = 2 * hl - nr;
+
+#if 1
+	/* optimized full-cycle no-resampling */
+	if (dp == np && _qstep == np && nr == 1 && inp_count == out_count) {
+
+		if (out_count >= n) {
+			const unsigned int h1 = hl - 1;
+			const unsigned int head = out_count - h1;
+			const unsigned int tail = out_count - n;
+
+			memcpy (out_data, &_buff[in + hl], h1 * sizeof (float));
+			memcpy (&out_data[h1], inp_data, head * sizeof (float));
+			memcpy (_buff, &inp_data[tail], n * sizeof (float));
+			_index = 0;
+			inp_count = 0;
+			out_count = 0;
+			return 0;
+		}
+
+		while (out_count) {
+			unsigned int to_proc = std::min (out_count, _inmax - in);
+			memcpy (&_buff[in + n], inp_data, to_proc * sizeof (float));
+			memcpy (out_data, &_buff[in + hl], to_proc * sizeof (float));
+			inp_data  += to_proc;
+			out_data  += to_proc;
+			out_count -= to_proc;
+			in        += to_proc;
+			if (in >= _inmax) {
+				memcpy (_buff, _buff + in, (2 * hl - 1) * sizeof (float));
+				in = 0;
+			}
+		}
+		inp_count = out_count;
+		_index = in;
+		return 0;
+	}
+#endif
+
 	p1 = _buff + in;
 	p2 = p1 + n;
 
