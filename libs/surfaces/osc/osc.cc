@@ -1289,8 +1289,8 @@ OSC::surface_list (lo_message msg)
 		}
 		uint32_t devices = 0;
 		LinkSet* set = &(*it).second;
-		if (set->linked.size()) {
-			devices = set->linked.size() - 1;
+		if (set->urls.size()) {
+			devices = set->urls.size() - 1;
 		}
 		cerr << string_compose ("  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
 		cerr << string_compose ("	Bank size: %1 Current bank: %2 Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
@@ -1399,6 +1399,7 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 			new_ls.not_ready = true;
 			new_ls.strip_types = sur->strip_types;
 			new_ls.strips = sur->strips;
+			new_ls.urls.resize (2);
 			link_sets[set] = new_ls;
 		}
 		ls = &link_sets[set];
@@ -1413,7 +1414,7 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 			ls = &link_sets[oldid];
 			if (ls) {
 				ls->not_ready = 1;
-				ls->linked[(uint32_t) data] = 0;
+				ls->urls[(uint32_t) data] = "";
 			}
 		}
 		return 0;
@@ -1433,10 +1434,10 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 	} else if (!strncmp (path, "/link/set", 9)) {
 		sur->linkset = set;
 		sur->linkid = (uint32_t) data;
-		if (ls->linked.size() <= (uint32_t) data) {
-			ls->linked.resize((int) data + 1);
+		if (ls->urls.size() <= (uint32_t) data) {
+			ls->urls.resize ((int) data + 1);
 		}
-		ls->linked[(uint32_t) data] = sur;
+		ls->urls[(uint32_t) data] = sur->remote_url;
 		ls->not_ready = link_check (set);
 		if (ls->not_ready) {
 			strip_feedback (sur, true);
@@ -1465,23 +1466,35 @@ OSC::link_check (uint32_t set)
 	}
 	ls = &link_sets[set];
 	uint32_t bank_total = 0;
-	uint32_t set_ready = 0;
-	for (uint32_t dv = 1; dv < ls->linked.size(); dv++) {
-		if ((ls->linked[dv]) && ((ls->linked[dv]))->linkset == set) {
-			OSCSurface *su = (ls->linked[dv]);
+	for (uint32_t dv = 1; dv < ls->urls.size(); dv++) {
+		std::cout << string_compose ("link_check dv %1 banksize: %2\n", dv, bank_total);
+		OSCSurface *su;
+
+		if (ls->urls[dv] != "") {
+			string url = ls->urls[dv];
+			su = get_surface (lo_address_new_from_url (url.c_str()));
+		} else {
+			return dv;
+		}
+		if (su->linkset == set) {
+			std::cout << string_compose ("checking sur %1 %2 banksize %3\n", dv, su->remote_url, su->bank_size);
 			bank_total = bank_total + su->bank_size;
-		} else if (!set_ready) {
-			set_ready = dv;
+		} else {
+			std::cout << "dv not ready\n";
+			ls->urls[dv] = "";
+			return dv;
+		}
+			std::cout << string_compose ("link_checked dv %1 banksize: %2\n", dv, bank_total);
+		//std::cout << string_compose ("link_check notready %1 banksize: %2\n", set_ready, bank_total);
+		if (ls->autobank) {
+			ls->banksize = bank_total;
+		} else {
+			if (bank_total != ls->banksize) {
+				return ls->urls.size();
+			}
 		}
 	}
-	if (ls->autobank) {
-		ls->banksize = bank_total;
-	} else {
-		if (!set_ready && bank_total != ls->banksize) {
-			set_ready = ls->linked.size();
-		}
-	}
-	return set_ready;
+	return 0;
 }
 
 int
@@ -1679,8 +1692,8 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->plug_page_size = pi_size;
 	// set bank and strip feedback
 	// XXXX check if we are already in a linkset
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg), true);
 	strip_feedback(s, true);
+	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 
 	global_feedback (s);
 	sel_send_pagesize (se_size, msg);
@@ -1849,6 +1862,7 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
+	new_bank_size = true;
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
 	sur->nstrips = sur->strips.size();
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
@@ -1929,7 +1943,6 @@ OSC::_recalcbanks ()
 		sur->nstrips = sur->strips.size();
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
-		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
 		if (sur->cue) {
 			_cue_set (sur->aux, addr);
 		} else if (!sur->bank_size) {
@@ -1942,6 +1955,7 @@ OSC::_recalcbanks ()
 		} else {
 			strip_feedback (sur, false);
 		}
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 	}
 }
 
@@ -1968,41 +1982,52 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 	uint32_t nstrips = s->nstrips;
 
 	LinkSet *set;
-	uint32_t l_set = s->linkset;
+	uint32_t ls = s->linkset;
 
-	if (l_set) {
+	if (ls) {
 		//we have a linkset... deal with each surface
-		set = &(link_sets[l_set]);
+		set = &(link_sets[ls]);
 		if (set->not_ready) {
 			return 1;
 		}
-		uint32_t s_count = set->linked.size();
+		uint32_t d_count = set->urls.size();
 		set->strips = striplist;
 		bank_start = bank_limits_check (bank_start, set->banksize, nstrips);
 		set->bank = bank_start;
-		for (uint32_t ls = 1; ls < s_count; ls++) {
-			OSCSurface *sur = (set->linked[ls]);
-			if (!sur || sur->linkset != l_set) {
+		uint32_t not_ready = 0;
+		for (uint32_t dv = 1; dv < d_count; dv++) {
+			OSCSurface *sur;
+			if (set->urls[dv] != "") {
+				string url = set->urls[dv];
+				sur = get_surface (lo_address_new_from_url (url.c_str()));
+			} else {
+				not_ready = dv;
+			}
+			if (sur->linkset != ls) {
+				set->urls[dv] = "";
+				not_ready = dv;
+			}
+			if (not_ready) {
 				if (!set->not_ready) {
-					set->not_ready = ls;
+					set->not_ready = not_ready;
 				}
 				set->bank = 1;
-				return 1;
+				break;
 			}
 			lo_address sur_addr = lo_address_new_from_url (sur->remote_url.c_str());
-			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
 
 			sur->bank = bank_start;
 			bank_start = bank_start + sur->bank_size;
 			strip_feedback (sur, false);
+			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 			bank_leds (sur);
 			lo_address_free (sur_addr);
 		}
 	} else {
 
-		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr, true);
 		s->bank = bank_limits_check (bank_start, s->bank_size, nstrips);
 		strip_feedback (s, true);
+		_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
 		bank_leds (s);
 	}
 
@@ -3443,19 +3468,17 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 }
 
 int
-OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr, bool quiet)
+OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 {
 	if (!session) {
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr, true);
 	if (!s) {
-		if (sur->expand_enable) {
-			// expand doesn't point to a stripable, turn it off and use select
-			sur->expand = 0;
-			sur->expand_enable = false;
-		}
-		if(ControlProtocol::first_selected_stripable()) {
+		// expand doesn't point to a stripable, turn it off and use select
+		sur->expand = 0;
+		sur->expand_enable = false;
+		if (ControlProtocol::first_selected_stripable()) {
 			s = ControlProtocol::first_selected_stripable();
 		} else {
 			s = session->master_out ();
@@ -3472,6 +3495,15 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr, bool quiet)
 		}
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
 		sur->sel_obs = sel_fb;
+		uint32_t obs_expand = 0;
+		if (sur->expand_enable) {
+			obs_expand = sur->expand;
+		} else {
+			obs_expand = 0;
+		}
+		for (uint32_t i = 0; i < sur->observers.size(); i++) {
+			sur->observers[i]->set_expand (obs_expand);
+		}
 	} else {
 		if (so != 0) {
 			delete so;
@@ -3480,15 +3512,10 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr, bool quiet)
 	}
 
 	// need to set monitor for processor changed signal (for paging)
-	// detecting processor changes requires cast to route
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 	if (r) {
 		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, addr), this);
 		processor_changed (addr);
-	}
-
-	if (!quiet) {
-		strip_feedback (sur, false);
 	}
 
 	return 0;
@@ -3534,10 +3561,11 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	sur->expand_enable = (bool) state;
 	if (state && sur->expand) {
+		sur->expand_enable = (bool) state;
 		s = get_strip (sur->expand, get_address (msg));
 	} else {
+		sur->expand_enable = false;
 		s = _select;
 	}
 

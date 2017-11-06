@@ -47,9 +47,17 @@ OSCRouteObserver::OSCRouteObserver (OSC& o, uint32_t ss, ArdourSurface::OSC::OSC
 	,_last_gain (-1.0)
 	,_last_trim (-1.0)
 	,_init (true)
-	,_expand (false)
+	,_expand (2048)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	gainmode = sur->gainmode;
+	feedback = sur->feedback;
+	in_line = feedback[2];
+	if (sur->expand_enable) {
+		set_expand (sur->expand);
+	} else {
+		set_expand (0);
+	}
 	refresh_strip (true);
 }
 
@@ -83,9 +91,6 @@ OSCRouteObserver::refresh_strip (bool force)
 	if (_tick_busy) {
 		Glib::usleep(100); // let tick finish
 	}
-	gainmode = sur->gainmode;
-	feedback = sur->feedback;
-	in_line = feedback[2];
 	_last_gain =-1.0;
 	_last_trim =-1.0;
 	uint32_t sid = sur->bank + ssid - 2;
@@ -124,21 +129,6 @@ OSCRouteObserver::refresh_strip (bool force)
 		}
 	}
 
-	// this has to be done first because expand may change with no strip change
-	bool new_expand;
-	if (sur->expand_enable && sur->expand == ssid) {
-		new_expand = true;
-	} else {
-		new_expand = false;
-	}
-	if (new_expand != _expand) {
-		_expand = new_expand;
-		if (_expand) {
-			_osc.float_message_with_id ("/strip/expand", ssid, 1.0, in_line, addr);
-		} else {
-			_osc.float_message_with_id ("/strip/expand", ssid, 0.0, in_line, addr);
-		}
-	}
 	send_select_status (ARDOUR::Properties::selected);
 
 	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->strips[sur->bank + ssid - 2];
@@ -212,6 +202,19 @@ OSCRouteObserver::refresh_strip (bool force)
 	_init = false;
 	tick();
 
+}
+
+void
+OSCRouteObserver::set_expand (uint32_t expand)
+{
+	if (expand != _expand) {
+		_expand = expand;
+		if (expand == ssid) {
+			_osc.float_message_with_id ("/strip/expand", ssid, 1.0, in_line, addr);
+		} else {
+			_osc.float_message_with_id ("/strip/expand", ssid, 0.0, in_line, addr);
+		}
+	}
 }
 
 void

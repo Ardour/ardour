@@ -45,6 +45,7 @@ class OSCRouteObserver
 	void tick (void);
 	void send_select_status (const PBD::PropertyChange&);
 	void refresh_strip (bool force);
+	void set_expand (uint32_t expand);
 	void clear_strip ();
 
   private:
@@ -65,7 +66,7 @@ class OSCRouteObserver
 	float _last_gain;
 	float _last_trim;
 	bool _init;
-	bool _expand;
+	uint32_t _expand;
 	bool in_line;
 	ARDOUR::AutoState as;
 	bool _tick_busy;

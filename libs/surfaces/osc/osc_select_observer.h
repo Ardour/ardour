@@ -79,6 +79,7 @@ class OSCSelectObserver
 	uint32_t nplug_params;
 	uint32_t plug_size;
 	int eq_bands;
+	bool _tick_busy;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

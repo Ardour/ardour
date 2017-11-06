@@ -189,7 +189,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 // linked surfaces
 	struct LinkSet {
 	public:
-		std::vector<OSCSurface*> linked;	//linked surfaces
+		std::vector<std::string> urls;	//urls of linked surfaces
 		uint32_t banksize;				// linkset banksize
 		uint32_t bank;					// linkset current bank
 		bool autobank;					// banksize is derived from total
@@ -616,7 +616,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_monitor_disk (int rid, int yn, lo_message msg);
 	int strip_phase (int rid, int yn, lo_message msg);
 	int strip_expand (int rid, int yn, lo_message msg);
-	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr, bool quiet = false);
+	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
 	int strip_gui_select (int rid, int yn, lo_message msg);
 	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);

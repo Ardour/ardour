@@ -59,6 +59,9 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	,eq_bands (0)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	gainmode = sur->gainmode;
+	feedback = sur->feedback;
+	in_line = feedback[2];
 	refresh_strip (true);
 }
 
@@ -91,6 +94,9 @@ void
 OSCSelectObserver::refresh_strip (bool force)
 {
 	_init = true;
+	if (_tick_busy) {
+		Glib::usleep(100); // let tick finish
+	}
 
 	// this has to be done first because expand may change with no strip change
 	if (sur->expand_enable) {
@@ -113,9 +119,6 @@ OSCSelectObserver::refresh_strip (bool force)
 
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::no_strip, this), OSC::instance());
 	as = ARDOUR::Off;
-	gainmode = sur->gainmode;
-	feedback = sur->feedback;
-	in_line = feedback[2];
 	send_size = 0;
 	plug_size = 0;
 	_comp_redux = 1;
@@ -497,6 +500,7 @@ OSCSelectObserver::tick ()
 	if (_init) {
 		return;
 	}
+	_tick_busy = true;
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		float now_meter;
 		if (_strip->peak_meter()) {
@@ -561,6 +565,7 @@ OSCSelectObserver::tick ()
 			send_timeout[i]--;
 		}
 	}
+	_tick_busy = false;
 }
 
 void
