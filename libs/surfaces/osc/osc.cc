@@ -1406,15 +1406,16 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 
 	} else {
 		// User expects this surface to be removed from any sets
-		int oldset = sur->linkset;
+		uint32_t oldset = sur->linkset;
 		if (oldset) {
-			int oldid = sur->linkid;
+			uint32_t oldid = sur->linkid;
 			sur->linkid = 1;
 			sur->linkset = 0;
-			ls = &link_sets[oldid];
+			ls = &link_sets[oldset];
 			if (ls) {
-				ls->not_ready = 1;
-				ls->urls[(uint32_t) data] = "";
+				ls->not_ready = oldid;
+				ls->urls[oldid] = "";
+				surface_link_state (ls);
 			}
 		}
 		return 0;
@@ -1440,7 +1441,7 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 		ls->urls[(uint32_t) data] = sur->remote_url;
 		ls->not_ready = link_check (set);
 		if (ls->not_ready) {
-			strip_feedback (sur, true);
+			surface_link_state (ls);
 		} else {
 			_set_bank (1, get_address (msg));
 		}
@@ -1448,6 +1449,22 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 	}
 
 	return ret;
+}
+
+void
+OSC::surface_link_state (LinkSet * set)
+{
+	for (uint32_t dv = 1; dv < set->urls.size(); dv++) {
+		OSCSurface *sur;
+
+		if (set->urls[dv] != "") {
+			string url = set->urls[dv];
+			sur = get_surface (lo_address_new_from_url (url.c_str()));
+			for (uint32_t i = 0; i < sur->observers.size(); i++) {
+				sur->observers[i]->set_link_ready (set->not_ready);
+			}
+		}
+	}
 }
 
 int
@@ -1862,7 +1879,6 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
-	new_bank_size = true;
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
 	sur->nstrips = sur->strips.size();
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
@@ -1889,7 +1905,8 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 	} else {
 		if (sur->feedback[0] || sur->feedback[1]) {
 			for (uint32_t i = 0; i < sur->observers.size(); i++) {
-				sur->observers[i]->refresh_strip(true);
+				boost::shared_ptr<ARDOUR::Stripable> str = get_strip (i + 1, lo_address_new_from_url (sur->remote_url.c_str()));
+				sur->observers[i]->refresh_strip(str, true);
 			}
 		}
 	}
@@ -2023,6 +2040,10 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 			bank_leds (sur);
 			lo_address_free (sur_addr);
 		}
+		if (not_ready) {
+			surface_link_state (set);
+		}
+
 	} else {
 
 		s->bank = bank_limits_check (bank_start, s->bank_size, nstrips);

@@ -277,6 +277,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
 	void global_feedback (OSCSurface* sur);
 	void strip_feedback (OSCSurface* sur, bool new_bank_size);
+	void surface_link_state (LinkSet * sur);
 	void surface_destroy (OSCSurface* sur);
 	uint32_t bank_limits_check (uint32_t bank, uint32_t size, uint32_t total);
 	void bank_leds (OSCSurface* sur);

@@ -44,8 +44,9 @@ class OSCRouteObserver
 	lo_address address () const { return addr; };
 	void tick (void);
 	void send_select_status (const PBD::PropertyChange&);
-	void refresh_strip (bool force);
+	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> strip, bool force);
 	void set_expand (uint32_t expand);
+	void set_link_ready (uint32_t not_ready);
 	void clear_strip ();
 
   private:

@@ -49,16 +49,30 @@ OSCRouteObserver::OSCRouteObserver (OSC& o, uint32_t ss, ArdourSurface::OSC::OSC
 	,_init (true)
 	,_expand (2048)
 {
-	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	addr = lo_address_new_from_url (sur->remote_url.c_str());
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	in_line = feedback[2];
+	uint32_t sid = sur->bank + ssid - 2;
+	uint32_t not_ready = 0;
+	if (sur->linkset) {
+		not_ready = _osc.link_sets[sur->linkset].not_ready;
+	}
+	if (not_ready) {
+		set_link_ready (not_ready);
+	} else if (sid >= sur->strips.size ()) {
+		// this _should_ only occure if the number of strips is less than banksize
+		_strip = boost::shared_ptr<ARDOUR::Stripable>();
+		clear_strip ();
+	} else {
+		_strip = sur->strips[sid];
+		refresh_strip (_strip, true);
+	}
 	if (sur->expand_enable) {
 		set_expand (sur->expand);
 	} else {
 		set_expand (0);
 	}
-	refresh_strip (true);
 }
 
 OSCRouteObserver::~OSCRouteObserver ()
@@ -85,7 +99,7 @@ OSCRouteObserver::no_strip ()
  }
 	
 void
-OSCRouteObserver::refresh_strip (bool force)
+OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, bool force)
 {
 	_init = true;
 	if (_tick_busy) {
@@ -93,51 +107,22 @@ OSCRouteObserver::refresh_strip (bool force)
 	}
 	_last_gain =-1.0;
 	_last_trim =-1.0;
-	uint32_t sid = sur->bank + ssid - 2;
-	if (sid >= sur->strips.size ()) {
-		// this _should_ only occure if the number of strips is less than banksize
-		if (_strip) {
-			_strip = boost::shared_ptr<ARDOUR::Stripable>();
-			clear_strip ();
-		}
-		return;
-	}
-	if (sur->linkset) {
-		uint32_t not_ready = _osc.link_sets[sur->linkset].not_ready;
-		if (not_ready) {
-			clear_strip ();
-			switch (ssid) {
-				case 1:
-					_osc.text_message_with_id ("/strip/name", ssid, "Device", in_line, addr);
-					break;
-				case 2:
-					_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), in_line, addr);
-					break;
-				case 3:
-					_osc.text_message_with_id ("/strip/name", ssid, "Missing", in_line, addr);
-					break;
-				case 4:
-					_osc.text_message_with_id ("/strip/name", ssid, "from", in_line, addr);
-					break;
-				case 5:
-					_osc.text_message_with_id ("/strip/name", ssid, "Linkset", in_line, addr);
-					break;
-				default:
-					break;
-			}
-			return;
-		}
-	}
 
 	send_select_status (ARDOUR::Properties::selected);
 
-	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->strips[sur->bank + ssid - 2];
-	if (_strip && (new_strip == _strip) && !force) {
+	if ((new_strip == _strip) && !force) {
+		// no change don't send feedback
 		_init = false;
 		return;
 	}
 	strip_connections.drop_connections ();
 	_strip = new_strip;
+	if (!_strip) {
+		// this strip is blank and should be cleared
+		clear_strip ();
+		_init = false;
+		return;
+	}
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::no_strip, this), OSC::instance());
 	as = ARDOUR::Off;
 
@@ -214,6 +199,35 @@ OSCRouteObserver::set_expand (uint32_t expand)
 		} else {
 			_osc.float_message_with_id ("/strip/expand", ssid, 0.0, in_line, addr);
 		}
+	}
+}
+
+void
+OSCRouteObserver::set_link_ready (uint32_t not_ready)
+{
+	if (not_ready) {
+		clear_strip ();
+		switch (ssid) {
+			case 1:
+				_osc.text_message_with_id ("/strip/name", ssid, "Device", in_line, addr);
+				break;
+			case 2:
+				_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), in_line, addr);
+				break;
+			case 3:
+				_osc.text_message_with_id ("/strip/name", ssid, "Missing", in_line, addr);
+				break;
+			case 4:
+				_osc.text_message_with_id ("/strip/name", ssid, "from", in_line, addr);
+				break;
+			case 5:
+				_osc.text_message_with_id ("/strip/name", ssid, "Linkset", in_line, addr);
+				break;
+			default:
+				break;
+		}
+	} else {
+		refresh_strip (_strip, true);
 	}
 }
 
