@@ -277,7 +277,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	boost::shared_ptr<ARDOUR::Stripable> get_strip (uint32_t ssid, lo_address addr);
 	void global_feedback (OSCSurface* sur);
 	void strip_feedback (OSCSurface* sur, bool new_bank_size);
-	void surface_link_state (LinkSet * sur);
 	void surface_destroy (OSCSurface* sur);
 	uint32_t bank_limits_check (uint32_t bank, uint32_t size, uint32_t total);
 	void bank_leds (OSCSurface* sur);
@@ -318,11 +317,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// end cue
 
 	// link
+	LinkSet * get_linkset (uint32_t set, lo_address addr);
 	int parse_link (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int link_check (uint32_t linkset);
-
-	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
-	int surface_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int set_link (uint32_t set, uint32_t id, lo_address addr);
+	void surface_link_state (LinkSet * set);
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \
@@ -645,18 +644,22 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int bank_delta (float delta, lo_message msg);
 	int use_group (float value, lo_message msg);
 	int bank_down (lo_message msg);
+	// surface set up
+	int surface_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gmode, uint32_t se_size, uint32_t pi_size, lo_message msg);
 	int set_surface_bank_size (uint32_t bs, lo_message msg);
 	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 	int refresh_surface (lo_message msg);
+	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
 	int sel_send_page (int page, lo_message msg);
 	int sel_plug_pagesize (uint32_t size, lo_message msg);
 	int sel_plug_page (int page, lo_message msg);
 	int sel_plugin (int delta, lo_message msg);
 	int _sel_plugin (int id, lo_address addr);
+	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	void processor_changed (lo_address addr);
 
 	int scrub (float delta, lo_message msg);

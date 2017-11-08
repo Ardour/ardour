@@ -1383,7 +1383,34 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 		PBD::warning << "OSC: wrong number of parameters." << endmsg;
 		return ret;
 	}
-	OSCSurface *sur = get_surface(get_address (msg));
+	LinkSet *ls = get_linkset (set, get_address (msg));
+
+	if (!set) {
+		return 0;
+	}
+	if (!strncmp (path, "/link/bank_size", 15)) {
+		ls->banksize = (uint32_t) data;
+		ls->autobank = false;
+		ls->not_ready = link_check (set);
+		if (ls->not_ready) {
+			ls->bank = 1;
+			surface_link_state (ls);
+		} else {
+			_set_bank (ls->bank, get_address (msg));
+		}
+		ret = 0;
+
+	} else if (!strncmp (path, "/link/set", 9)) {
+		ret = set_link (set, (uint32_t) data, get_address (msg));
+	}
+
+	return ret;
+}
+
+OSC::LinkSet *
+OSC::get_linkset (uint32_t set, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
 	LinkSet *ls = 0;
 
 	if (set) {
@@ -1411,44 +1438,35 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 			uint32_t oldid = sur->linkid;
 			sur->linkid = 1;
 			sur->linkset = 0;
-			ls = &link_sets[oldset];
-			if (ls) {
-				ls->not_ready = oldid;
-				ls->urls[oldid] = "";
-				surface_link_state (ls);
+			LinkSet *ols = &link_sets[oldset];
+			if (ols) {
+				ols->not_ready = oldid;
+				ols->urls[oldid] = "";
+				surface_link_state (ols);
 			}
 		}
-		return 0;
 	}
-	if (!strncmp (path, "/link/bank_size", 15)) {
-		ls->banksize = (uint32_t) data;
-		ls->autobank = false;
-		ls->not_ready = link_check (set);
-		if (ls->not_ready) {
-			ls->bank = 1;
-			strip_feedback (sur, true);
-		} else {
-			_set_bank (ls->bank, get_address (msg));
-		}
-		ret = 0;
+	return ls;
+}
 
-	} else if (!strncmp (path, "/link/set", 9)) {
-		sur->linkset = set;
-		sur->linkid = (uint32_t) data;
-		if (ls->urls.size() <= (uint32_t) data) {
-			ls->urls.resize ((int) data + 1);
-		}
-		ls->urls[(uint32_t) data] = sur->remote_url;
-		ls->not_ready = link_check (set);
-		if (ls->not_ready) {
-			surface_link_state (ls);
-		} else {
-			_set_bank (1, get_address (msg));
-		}
-		ret = 0;
+int
+OSC::set_link (uint32_t set, uint32_t id, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr, true);
+	sur->linkset = set;
+	sur->linkid = id;
+	LinkSet *ls = get_linkset (set, addr);
+	if (ls->urls.size() <= (uint32_t) id) {
+		ls->urls.resize ((int) id + 1);
 	}
-
-	return ret;
+	ls->urls[(uint32_t) id] = sur->remote_url;
+	ls->not_ready = link_check (set);
+	if (ls->not_ready) {
+		surface_link_state (ls);
+	} else {
+		_set_bank (1, addr);
+	}
+	return 0;
 }
 
 void
@@ -1458,7 +1476,7 @@ OSC::surface_link_state (LinkSet * set)
 
 		if (set->urls[dv] != "") {
 			string url = set->urls[dv];
-			OSCSurface *sur = get_surface (lo_address_new_from_url (url.c_str()));
+			OSCSurface *sur = get_surface (lo_address_new_from_url (url.c_str()), true);
 			for (uint32_t i = 0; i < sur->observers.size(); i++) {
 				sur->observers[i]->set_link_ready (set->not_ready);
 			}
@@ -1487,7 +1505,7 @@ OSC::link_check (uint32_t set)
 
 		if (ls->urls[dv] != "") {
 			string url = ls->urls[dv];
-			su = get_surface (lo_address_new_from_url (url.c_str()));
+			su = get_surface (lo_address_new_from_url (url.c_str()), true);
 		} else {
 			return dv;
 		}
@@ -1519,6 +1537,8 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int feedback = sur->feedback.to_ulong();
 	int strip_types = sur->strip_types.to_ulong();
 	int bank_size = sur->bank_size;
+	int linkset = sur->linkset;
+	int linkid = sur->linkid;
 
 
 	if (argc == 1 && !strncmp (path, "/set_surface/feedback", 21)) {
@@ -1566,6 +1586,18 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 
 		// command is in /set_surface iii form
 		switch (argc) {
+			case 8:
+				if (types[7] == 'f') {
+					linkid = (int) argv[7]->f;
+				} else {
+					linkid = argv[7]->i;
+				}
+			case 7:
+				if (types[6] == 'f') {
+					linkset = (int) argv[6]->f;
+				} else {
+					linkset = argv[6]->i;
+				}
 			case 6:
 				if (types[5] == 'f') {
 					pi_page = (int) argv[5]->f;
@@ -1603,6 +1635,9 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 					bank_size = argv[0]->i;
 				}
 				ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
+				if ((uint32_t) linkset != sur->linkset) {
+					set_link (linkset, linkid, get_address (msg));
+				}
 				break;
 			case 0:
 				// send current setup
@@ -1614,6 +1649,8 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 					lo_message_add_int32 (reply, fadermode);
 					lo_message_add_int32 (reply, se_page);
 					lo_message_add_int32 (reply, pi_page);
+					lo_message_add_int32 (reply, (int) linkset);
+					lo_message_add_int32 (reply, (int) linkid);
 					lo_send_message (get_address (msg), "/set_surface", reply);
 					lo_message_free (reply);
 					return 0;
@@ -1643,6 +1680,26 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 						const char * pp = strstr (&sp[1], "/");
 						if (pp) {
 							pi_page = atoi (&pp[1]);
+							const char * ls = strstr (&pp[1], "/");
+							if (ls) {
+								linkset = atoi (&ls[1]);
+								const char * li = strstr (&ls[1], "/");
+								if (li) {
+									linkid = atoi (&li[1]);
+								} else {
+									if (types[0] == 'f') {
+										linkid = (int) argv[0]->f;
+									} else if (types[0] == 'i') {
+										linkid = argv[0]->i;
+									}
+								}
+							} else {
+								if (types[0] == 'f') {
+									linkset = (int) argv[0]->f;
+								} else if (types[0] == 'i') {
+									linkset = argv[0]->i;
+								}
+							}
 						} else {
 							if (types[0] == 'f') {
 								pi_page = (int) argv[0]->f;
@@ -1679,6 +1736,9 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 			}
 		}
 		ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
+		if ((uint32_t) linkset != sur->linkset) {
+			set_link (linkset, linkid, get_address (msg));
+		}
 	}
 	return ret;
 }
@@ -1701,10 +1761,13 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	}
 	s->send_page_size = se_size;
 	s->plug_page_size = pi_size;
-	// set bank and strip feedback
-	// XXXX check if we are already in a linkset
-	strip_feedback(s, true);
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
+	if (s->linkset) {
+		set_link (s->linkset, s->linkid, get_address (msg));
+	} else {
+		// set bank and strip feedback
+		strip_feedback(s, true);
+		_set_bank (1, get_address (msg));
+	}
 
 	global_feedback (s);
 	sel_send_pagesize (se_size, msg);
@@ -1720,12 +1783,12 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = bs;
-	// XXXX check if we are already in a linkset
-	s->bank = 1;
-
-	// set bank and strip feedback
-	strip_feedback (s, true);
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
+	if (s->linkset) {
+		set_link (s->linkset, s->linkid, get_address (msg));
+	} else {
+		// set bank and strip feedback
+		_set_bank (1, get_address (msg));
+	}
 	return 0;
 }
 
@@ -1744,10 +1807,7 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	}
 
 	// set bank and strip feedback
-	// XXXX check for linkset
-	s->bank = 1;
-	strip_feedback (s, true);
-	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
+	_set_bank (1, get_address (msg));
 	return 0;
 }
 
@@ -1761,7 +1821,7 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->feedback = fb;
 
-	strip_feedback (s, false);
+	strip_feedback (s, true);
 	global_feedback (s);
 	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
@@ -1776,7 +1836,7 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->gainmode = gm;
 
-	strip_feedback (s, false);
+	strip_feedback (s, true);
 	global_feedback (s);
 	_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), get_address (msg));
 	return 0;
@@ -2030,7 +2090,7 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 			sur->bank = bank_start;
 			bank_start = bank_start + sur->bank_size;
 			strip_feedback (sur, false);
-			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), addr);
+			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), sur_addr);
 			bank_leds (sur);
 			lo_address_free (sur_addr);
 		}
