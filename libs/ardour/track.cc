@@ -543,20 +543,6 @@ Track::transport_looped (samplepos_t p)
 }
 
 void
-Track::realtime_handle_transport_stopped ()
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked ()) {
-		return;
-	}
-
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		(*i)->realtime_handle_transport_stopped ();
-	}
-}
-
-void
 Track::transport_stopped_wallclock (struct tm & n, time_t t, bool g)
 {
 	_disk_writer->transport_stopped_wallclock (n, t, g);

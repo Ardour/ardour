@@ -3413,6 +3413,18 @@ Route::non_realtime_transport_stop (samplepos_t now, bool flush)
 }
 
 void
+Route::realtime_handle_transport_stopped ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
+	/* currently only by Plugin, queue note-off events */
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		(*i)->realtime_handle_transport_stopped ();
+	}
+}
+
+
+void
 Route::input_change_handler (IOChange change, void * /*src*/)
 {
 	if ((change.type & IOChange::ConfigurationChanged)) {
