@@ -379,6 +379,8 @@ run (LV2_Handle instance, uint32_t n_samples)
 			activate (self);
 		}
 		self->v_mix = mix;
+		self->r.wet = self->v_mix;
+		self->r.dry = 1.0 - self->v_mix;
 	} else {
 		iterpolate |= 1;
 	}
