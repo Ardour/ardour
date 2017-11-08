@@ -42,7 +42,7 @@ class OSCCueObserver
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted sends;
 	void clear_observer (void);
-	void refresh_strip (bool force);
+	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force);
 
   private:
 
@@ -67,7 +67,6 @@ class OSCCueObserver
 	void send_init (void);
 	void send_end (void);
 	void send_restart (void);
-	void no_strip ();
 };
 
 #endif /* __osc_osccueobserver_h__ */

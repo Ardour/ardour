@@ -363,9 +363,9 @@ OSC::surface_destroy (OSCSurface* sur)
 
 	OSCCueObserver* co;
 	if ((co = dynamic_cast<OSCCueObserver*>(sur->cue_obs)) != 0) {
-		co->clear_observer ();
 		delete co;
 		sur->cue_obs = 0;
+		sur->sends.clear ();
 	}
 
 	OSCGlobalObserver* go;
@@ -1455,11 +1455,10 @@ void
 OSC::surface_link_state (LinkSet * set)
 {
 	for (uint32_t dv = 1; dv < set->urls.size(); dv++) {
-		OSCSurface *sur;
 
 		if (set->urls[dv] != "") {
 			string url = set->urls[dv];
-			sur = get_surface (lo_address_new_from_url (url.c_str()));
+			OSCSurface *sur = get_surface (lo_address_new_from_url (url.c_str()));
 			for (uint32_t i = 0; i < sur->observers.size(); i++) {
 				sur->observers[i]->set_link_ready (set->not_ready);
 			}
@@ -1484,7 +1483,6 @@ OSC::link_check (uint32_t set)
 	ls = &link_sets[set];
 	uint32_t bank_total = 0;
 	for (uint32_t dv = 1; dv < ls->urls.size(); dv++) {
-		std::cout << string_compose ("link_check dv %1 banksize: %2\n", dv, bank_total);
 		OSCSurface *su;
 
 		if (ls->urls[dv] != "") {
@@ -1494,15 +1492,11 @@ OSC::link_check (uint32_t set)
 			return dv;
 		}
 		if (su->linkset == set) {
-			std::cout << string_compose ("checking sur %1 %2 banksize %3\n", dv, su->remote_url, su->bank_size);
 			bank_total = bank_total + su->bank_size;
 		} else {
-			std::cout << "dv not ready\n";
 			ls->urls[dv] = "";
 			return dv;
 		}
-			std::cout << string_compose ("link_checked dv %1 banksize: %2\n", dv, bank_total);
-		//std::cout << string_compose ("link_check notready %1 banksize: %2\n", set_ready, bank_total);
 		if (ls->autobank) {
 			ls->banksize = bank_total;
 		} else {
@@ -5194,19 +5188,28 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 int
 OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
+	OSCSurface *s = get_surface(get_address (msg), true);
+	s->bank_size = 0;
+	float value = 0;
 	int ret = 1; /* unhandled */
-
 	if (!strncmp (path, "/cue/aux", 8)) {
 		// set our Aux bus
-		if (argv[0]->f) {
-			ret = cue_set (argv[0]->f, msg);
-		} else {
-			ret = 0;
+		if (argc) {
+			if (types[0] == 'f') {
+				value = argv[0]->f;
+			} else if (types[0] == 'i') {
+				value = (float) argv[0]->i;
+			}
+			if (value) {
+				ret = cue_set ((uint32_t) argv[0]->f, msg);
+			} else {
+				ret = 0;
+			}
 		}
 	}
 	else if (!strncmp (path, "/cue/connect", 12)) {
 		// Connect to default Aux bus
-		if ((!argc) || argv[0]->f) {
+		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_set (1, msg);
 		} else {
 			ret = 0;
@@ -5214,7 +5217,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	}
 	else if (!strncmp (path, "/cue/next_aux", 13)) {
 		// switch to next Aux bus
-		if ((!argc) || argv[0]->f) {
+		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_next (msg);
 		} else {
 			ret = 0;
@@ -5222,25 +5225,33 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	}
 	else if (!strncmp (path, "/cue/previous_aux", 17)) {
 		// switch to previous Aux bus
-		if ((!argc) || argv[0]->f) {
+		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_previous (msg);
 		} else {
 			ret = 0;
 		}
 	}
 	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
-		int id = atoi (&path[16]);
-		ret = cue_send_fader (id, argv[0]->f, msg);
+		if (argc == 1) {
+			int id = atoi (&path[16]);
+			ret = cue_send_fader (id, argv[0]->f, msg);
+		}
 	}
 	else if (!strncmp (path, "/cue/send/enable/", 17) && strlen (path) > 17) {
-		int id = atoi (&path[17]);
-		ret = cue_send_enable (id, argv[0]->f, msg);
+		if (argc == 1) {
+			int id = atoi (&path[17]);
+			ret = cue_send_enable (id, argv[0]->f, msg);
+		}
 	}
 	else if (!strncmp (path, "/cue/fader", 10)) {
-		ret = cue_aux_fader (argv[0]->f, msg);
+		if (argc == 1) {
+			ret = cue_aux_fader (argv[0]->f, msg);
+		}
 	}
 	else if (!strncmp (path, "/cue/mute", 9)) {
-		ret = cue_aux_mute (argv[0]->f, msg);
+		if (argc == 1) {
+			ret = cue_aux_mute (argv[0]->f, msg);
+		}
 	}
 
 	return ret;
@@ -5249,7 +5260,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 int
 OSC::cue_set (uint32_t aux, lo_message msg)
 {
-	set_surface_feedback (0, msg);
+
 	return _cue_set (aux, get_address (msg));
 }
 
@@ -5257,7 +5268,7 @@ int
 OSC::_cue_set (uint32_t aux, lo_address addr)
 {
 	int ret = 1;
-	OSCSurface *s = get_surface(addr);
+	OSCSurface *s = get_surface(addr, true);
 	s->bank_size = 0;
 	s->strip_types = 128;
 	s->feedback = 0;
@@ -5273,7 +5284,6 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 		aux = s->nstrips;
 	}
 	s->aux = aux;
-
 	// get a list of Auxes
 	for (uint32_t n = 0; n < s->nstrips; ++n) {
 		boost::shared_ptr<Stripable> stp = s->strips[n];
@@ -5281,13 +5291,12 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 			text_message (string_compose ("/cue/name/%1", n+1), stp->name(), addr);
 			if (aux == n+1) {
 				// aux must be at least one
-				// need a signal if aux vanishes
-				stp->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, aux, addr), this);
 
+				stp->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::_cue_set, this, aux, addr), this);
 				// make a list of stripables with sends that go to this bus
 				s->sends = cue_get_sorted_stripables(stp, aux, addr);
 				if (s->cue_obs) {
-					s->cue_obs->refresh_strip (false);
+					s->cue_obs->refresh_strip (stp, s->sends, false);
 				} else {
 					// start cue observer
 					OSCCueObserver* co = new OSCCueObserver (*this, s);
@@ -5305,7 +5314,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 int
 OSC::cue_next (lo_message msg)
 {
-	OSCSurface *s = get_surface(get_address (msg));
+	OSCSurface *s = get_surface(get_address (msg), true);
 	int ret = 1;
 
 	if (!s->cue) {
@@ -5322,7 +5331,7 @@ OSC::cue_next (lo_message msg)
 int
 OSC::cue_previous (lo_message msg)
 {
-	OSCSurface *s = get_surface(get_address (msg));
+	OSCSurface *s = get_surface(get_address (msg), true);
 	int ret = 1;
 	if (!s->cue) {
 		ret = cue_set (1, msg);
@@ -5336,7 +5345,7 @@ OSC::cue_previous (lo_message msg)
 boost::shared_ptr<Send>
 OSC::cue_get_send (uint32_t id, lo_address addr)
 {
-	OSCSurface *s = get_surface(addr);
+	OSCSurface *s = get_surface(addr, true);
 	if (id && s->aux > 0 && id <= s->sends.size()) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s->sends[id - 1]);
 		boost::shared_ptr<Stripable> aux = get_strip (s->aux, addr);
@@ -5353,7 +5362,7 @@ OSC::cue_aux_fader (float position, lo_message msg)
 {
 	if (!session) return -1;
 
-	OSCSurface *sur = get_surface(get_address (msg));
+	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
 		if (sur->aux) {
 			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));
@@ -5375,7 +5384,7 @@ OSC::cue_aux_mute (float state, lo_message msg)
 {
 	if (!session) return -1;
 
-	OSCSurface *sur = get_surface(get_address (msg));
+	OSCSurface *sur = get_surface(get_address (msg), true);
 	if (sur->cue) {
 		if (sur->aux) {
 			boost::shared_ptr<Stripable> s = get_strip (sur->aux, get_address (msg));

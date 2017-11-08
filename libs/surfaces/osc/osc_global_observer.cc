@@ -49,7 +49,6 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	,last_click (4)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
-	//addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
 	session = &s;
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
@@ -107,10 +106,6 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 				send_gain_message ("/monitor/", strip->gain_control());
 		}
 
-		/*
-		* 	Transport (todo)
-		* 		punchin/out
-		*/
 		//Transport feedback
 		session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
 		send_transport_state_changed ();

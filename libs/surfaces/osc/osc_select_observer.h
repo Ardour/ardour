@@ -75,6 +75,7 @@ class OSCSelectObserver
 	bool _init;
 	float _comp_redux;
 	ARDOUR::AutoState as;
+	uint32_t send_page_size;
 	uint32_t send_size;
 	uint32_t nplug_params;
 	uint32_t plug_size;

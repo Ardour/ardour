@@ -63,6 +63,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	feedback = sur->feedback;
 	in_line = feedback[2];
 	refresh_strip (true);
+	send_page_size = sur->send_page_size;
 }
 
 OSCSelectObserver::~OSCSelectObserver ()
@@ -328,8 +329,8 @@ OSCSelectObserver::send_init()
 
 	// paging should be done in osc.cc in case there is no feedback
 	send_size = nsends;
-	if (sur->send_page_size) {
-		send_size = sur->send_page_size;
+	if (send_page_size) {
+		send_size = send_page_size;
 	}
 	// check limits
 	uint32_t max_page = (uint32_t)(nsends / send_size) + 1;
@@ -559,7 +560,7 @@ OSCSelectObserver::tick ()
 	for (uint32_t i = 1; i <= send_timeout.size(); i++) {
 		if (send_timeout[i]) {
 			if (send_timeout[i] == 1) {
-				uint32_t pg_offset = (sur->send_page - 1) * sur->send_page_size;
+				uint32_t pg_offset = (sur->send_page - 1) * send_page_size;
 				_osc.text_message_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1), in_line, addr);
 			}
 			send_timeout[i]--;

@@ -41,13 +41,20 @@ OSCCueObserver::OSCCueObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su)
 	, tick_enable (false)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
-	refresh_strip (true);
+	uint32_t sid = sur->aux - 1;
+	if (sid >= sur->strips.size ()) {
+		sid = 0;
+	}
+
+	_strip = sur->strips[sid];
+	sends = sur->sends;
+	refresh_strip (_strip, sends, true);
 }
 
 OSCCueObserver::~OSCCueObserver ()
 {
 	tick_enable = false;
-	no_strip ();
+	clear_observer ();
 	lo_address_free (addr);
 }
 
@@ -67,41 +74,16 @@ OSCCueObserver::clear_observer ()
 }
 
 void
-OSCCueObserver::no_strip ()
-{
-	// This gets called on drop references
-	tick_enable = false;
-
-	strip_connections.drop_connections ();
-	/*
-	 * The strip will sit idle at this point doing nothing until
-	 * the surface has recalculated it's strip list and then calls
-	 * refresh_strip. Otherwise refresh strip will get a strip address
-	 * that does not exist... Crash
-	 */
- }
-
-void
-OSCCueObserver::refresh_strip (bool force)
+OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force)
 {
 	tick_enable = false;
 
-	uint32_t sid = sur->aux - 1;
-	if (sid >= sur->strips.size ()) {
-		sid = 0;
-	}
-
-	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->strips[sid];
-	if (_strip && (new_strip == _strip) && !force) {
-		tick_enable = true;
-		return;
-	}
 	strip_connections.drop_connections ();
 
 	send_end ();
 	_strip = new_strip;
-	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::no_strip, this), OSC::instance());
-	sends = sur->sends;
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::clear_observer, this), OSC::instance());
+	sends = new_sends;
 
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
 	name_changed (ARDOUR::Properties::name, 0);
@@ -199,6 +181,7 @@ OSCCueObserver::send_end ()
 	}
 	gain_timeout.clear ();
 	_last_gain.clear ();
+	sends.clear ();
 }
 
 void
@@ -230,7 +213,6 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 void
 OSCCueObserver::send_change_message (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
 {
-	// maybe don't need ID only used for mute- maybe mute can use enable
 	if (id) {
 		path = string_compose("%1/%2", path, id);
 	}
