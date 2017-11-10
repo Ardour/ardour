@@ -280,7 +280,7 @@ Amp::declick (BufferSet& bufs, samplecnt_t nframes, int dir)
 
 
 gain_t
-Amp::apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target)
+Amp::apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target, sampleoffset_t offset)
 {
 	/* Apply a (potentially) declicked gain to the contents of @a buf
 	 * -- used by MonitorProcessor::run()
@@ -292,11 +292,11 @@ Amp::apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes,
 
 	// if we don't need to declick, defer to apply_simple_gain
 	if (initial == target) {
-		apply_simple_gain (buf, nframes, target);
+		apply_simple_gain (buf, nframes, target, offset);
 		return target;
 	}
 
-	Sample* const buffer = buf.data();
+	Sample* const buffer = buf.data (offset);
 	const gain_t a = 156.825f / (gain_t)sample_rate; // 25 Hz LPF, see [other] Amp::apply_gain() above for details
 
 	gain_t lpf = initial;
@@ -355,12 +355,12 @@ Amp::apply_simple_gain (BufferSet& bufs, samplecnt_t nframes, gain_t target, boo
 }
 
 void
-Amp::apply_simple_gain (AudioBuffer& buf, samplecnt_t nframes, gain_t target)
+Amp::apply_simple_gain (AudioBuffer& buf, samplecnt_t nframes, gain_t target, sampleoffset_t offset)
 {
 	if (fabsf (target) < GAIN_COEFF_SMALL) {
-		memset (buf.data(), 0, sizeof (Sample) * nframes);
+		memset (buf.data (offset), 0, sizeof (Sample) * nframes);
 	} else if (target != GAIN_COEFF_UNITY) {
-		apply_gain_to_buffer (buf.data(), nframes, target);
+		apply_gain_to_buffer (buf.data(offset), nframes, target);
 	}
 }
 
