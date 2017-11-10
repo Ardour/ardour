@@ -949,6 +949,8 @@ PortManager::port_is_control_only (std::string const& name)
 			X_(".*Ableton Push.*"),
 			X_(".*FaderPort .*"),
 			X_(".*FaderPort8 .*"),
+			X_(".*US-2400 .*"),
+			X_(".*Mackie .*"),
 		};
 
 		pattern = "(";
