@@ -120,7 +120,6 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 	if (!_strip) {
 		// this strip is blank and should be cleared
 		clear_strip ();
-		_init = false;
 		return;
 	}
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::no_strip, this), OSC::instance());

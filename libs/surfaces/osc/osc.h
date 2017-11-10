@@ -322,6 +322,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int link_check (uint32_t linkset);
 	int set_link (uint32_t set, uint32_t id, lo_address addr);
 	void surface_link_state (LinkSet * set);
+	void link_strip_types (uint32_t linkset, uint32_t striptypes);
 
 #define OSC_DEBUG \
 	if (_debugmode == All) { \

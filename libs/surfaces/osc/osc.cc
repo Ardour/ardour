@@ -1470,6 +1470,42 @@ OSC::set_link (uint32_t set, uint32_t id, lo_address addr)
 }
 
 void
+OSC::link_strip_types (uint32_t linkset, uint32_t striptypes)
+{
+	LinkSet *ls = 0;
+
+	if (!linkset) {
+		return;
+	}
+	std::map<uint32_t, LinkSet>::iterator it;
+	it = link_sets.find(linkset);
+	if (it == link_sets.end()) {
+		// this should never happen... but
+		return;
+	}
+	ls = &link_sets[linkset];
+	ls->strip_types = striptypes;
+	for (uint32_t dv = 1; dv < ls->urls.size(); dv++) {
+		OSCSurface *su;
+
+		if (ls->urls[dv] != "") {
+			string url = ls->urls[dv];
+			su = get_surface (lo_address_new_from_url (url.c_str()), true);
+			if (su->linkset == linkset) {
+				su->strip_types = striptypes;
+				if (su->strip_types[10]) {
+					su->usegroup = PBD::Controllable::UseGroup;
+				} else {
+					su->usegroup = PBD::Controllable::NoGroup;
+				}
+			} else {
+				ls->urls[dv] = "";
+			}
+		}
+	}
+}
+
+void
 OSC::surface_link_state (LinkSet * set)
 {
 	for (uint32_t dv = 1; dv < set->urls.size(); dv++) {
@@ -1763,6 +1799,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->plug_page_size = pi_size;
 	if (s->linkset) {
 		set_link (s->linkset, s->linkid, get_address (msg));
+		link_strip_types (s->linkset, s->strip_types.to_ulong());
 	} else {
 		// set bank and strip feedback
 		strip_feedback(s, true);
@@ -1804,6 +1841,9 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 		s->usegroup = PBD::Controllable::UseGroup;
 	} else {
 		s->usegroup = PBD::Controllable::NoGroup;
+	}
+	if (s->linkset) {
+		link_strip_types (s->linkset, st);
 	}
 
 	// set bank and strip feedback
