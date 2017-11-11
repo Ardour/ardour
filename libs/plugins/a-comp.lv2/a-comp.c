@@ -83,7 +83,6 @@ typedef struct {
 	float old_yg;
 
 	float makeup_gain;
-	float tau;
 
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
@@ -126,7 +125,7 @@ instantiate(const LV2_Descriptor* descriptor,
 
 	acomp->srate = rate;
 	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
-	acomp->tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
+	acomp->makeup_gain = 1.f;
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
 	acomp->v_lvl_out = -70.f;
@@ -291,7 +290,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const float tau = acomp->tau;
+	const float tau = (1.0 - exp (-2.f * M_PI * n_samples * 25.f / acomp->srate));
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
@@ -363,7 +362,6 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		lgaininp = in0 * Lgain;
 
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 		output[i] = lgaininp * makeup_gain;
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
@@ -373,6 +371,12 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		acomp->old_yl = Lyl;
 		acomp->old_y1 = Ly1;
 		acomp->old_yg = Lyg;
+	}
+
+	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
+		makeup_gain = 1.0;
+	} else {
+		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
@@ -441,7 +445,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const float tau = acomp->tau;
+	const float tau = (1.0 - exp (-2.f * M_PI * n_samples * 25.f / acomp->srate));
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
@@ -516,8 +520,6 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
 
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
-
 		output0[i] = lgaininp * makeup_gain;
 		output1[i] = rgaininp * makeup_gain;
 
@@ -528,6 +530,12 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		acomp->old_yl = Lyl;
 		acomp->old_y1 = Ly1;
 		acomp->old_yg = Lyg;
+	}
+
+	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
+		makeup_gain = 1.0;
+	} else {
+		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
