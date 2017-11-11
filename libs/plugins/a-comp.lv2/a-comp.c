@@ -374,7 +374,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
-		makeup_gain = 1.0;
+		makeup_gain = makeup_target;
 	} else {
 		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
@@ -533,7 +533,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	}
 
 	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
-		makeup_gain = 1.0;
+		makeup_gain = makeup_target;
 	} else {
 		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
