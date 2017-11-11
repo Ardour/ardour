@@ -310,5 +310,33 @@ namespace ARDOUR { namespace DSP {
 			fftwf_plan _fftplan;
 	};
 
+	class LIBARDOUR_API Generator {
+		public:
+			Generator ();
+
+			enum Type {
+				UniformWhiteNoise,
+				GaussianWhiteNoise,
+				PinkNoise,
+			};
+
+			void run (float *data, const uint32_t n_samples);
+			void set_type (Type t);
+
+		private:
+			uint32_t randi ();
+			float    randf () { return (randi () / 1073741824.f) - 1.f; }
+			float    grandf ();
+
+			Type     _type;
+			uint32_t _rseed;
+			/* pink-noise */
+			float _b0, _b1, _b2, _b3, _b4, _b5, _b6;
+			/* gaussian white */
+			bool _pass;
+			float _rn;
+
+	};
+
 } } /* namespace */
 #endif

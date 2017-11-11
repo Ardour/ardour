@@ -425,3 +425,85 @@ FFTSpectrum::power_at_bin (const uint32_t b, const float norm) const {
 	const float a = _fft_power[b] * norm;
 	return a > 1e-12 ? 10.0 * fast_log10 (a) : -INFINITY;
 }
+
+Generator::Generator ()
+	: _type (UniformWhiteNoise)
+	, _rseed (1)
+{
+	set_type (UniformWhiteNoise);
+}
+
+void
+Generator::set_type (Generator::Type t) {
+	_type = t;
+	_b0 = _b1 = _b2 = _b3 = _b4 = _b5 = _b6 = 0;
+	_pass = false;
+	_rn = 0;
+}
+
+void
+Generator::run (float *data, const uint32_t n_samples)
+{
+	switch (_type) {
+		default:
+		case UniformWhiteNoise:
+			for (uint32_t i = 0; i < n_samples; ++i) {
+				data[i] = randf();
+			}
+			break;
+		case GaussianWhiteNoise:
+			for (uint32_t i = 0 ; i < n_samples; ++i) {
+				data[i] = 0.7079f * grandf();
+			}
+			break;
+		case PinkNoise:
+			for (uint32_t i = 0 ; i < n_samples; ++i) {
+				const float white = .39572f * randf ();
+				_b0 = .99886f * _b0 + white * .0555179f;
+				_b1 = .99332f * _b1 + white * .0750759f;
+				_b2 = .96900f * _b2 + white * .1538520f;
+				_b3 = .86650f * _b3 + white * .3104856f;
+				_b4 = .55000f * _b4 + white * .5329522f;
+				_b5 = -.7616f * _b5 - white * .0168980f;
+				data[i] = _b0 + _b1 + _b2 + _b3 + _b4 + _b5 + _b6 + white * 0.5362f;
+				_b6 = white * 0.115926f;
+			}
+			break;
+	}
+}
+
+inline uint32_t
+Generator::randi ()
+{
+	// 31bit Park-Miller-Carta Pseudo-Random Number Generator
+	uint32_t hi, lo;
+	lo = 16807 * (_rseed & 0xffff);
+	hi = 16807 * (_rseed >> 16);
+	lo += (hi & 0x7fff) << 16;
+	lo += hi >> 15;
+	lo = (lo & 0x7fffffff) + (lo >> 31);
+	return (_rseed = lo);
+}
+
+inline float
+Generator::grandf ()
+{
+	float x1, x2, r;
+
+	if (_pass) {
+		_pass = false;
+		return _rn;
+	}
+
+	do {
+		x1 = randf ();
+		x2 = randf ();
+		r = x1 * x1 + x2 * x2;
+	} while ((r >= 1.0f) || (r < 1e-22f));
+
+	r = sqrtf (-2.f * logf (r) / r);
+
+	_pass = true;
+	_rn = r * x2;
+	return r * x1;
+}
