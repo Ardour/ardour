@@ -5291,17 +5291,19 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = 0;
 	float value = 0;
+	if (argc == 1) {
+		if (types[0] == 'f') {
+			value = argv[0]->f;
+		} else if (types[0] == 'i') {
+			value = (float) argv[0]->i;
+		}
+	}
 	int ret = 1; /* unhandled */
 	if (!strncmp (path, "/cue/aux", 8)) {
 		// set our Aux bus
 		if (argc) {
-			if (types[0] == 'f') {
-				value = argv[0]->f;
-			} else if (types[0] == 'i') {
-				value = (float) argv[0]->i;
-			}
 			if (value) {
-				ret = cue_set ((uint32_t) argv[0]->f, msg);
+				ret = cue_set ((uint32_t) value, msg);
 			} else {
 				ret = 0;
 			}
@@ -5334,23 +5336,23 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
 		if (argc == 1) {
 			int id = atoi (&path[16]);
-			ret = cue_send_fader (id, argv[0]->f, msg);
+			ret = cue_send_fader (id, value, msg);
 		}
 	}
 	else if (!strncmp (path, "/cue/send/enable/", 17) && strlen (path) > 17) {
 		if (argc == 1) {
 			int id = atoi (&path[17]);
-			ret = cue_send_enable (id, argv[0]->f, msg);
+			ret = cue_send_enable (id, value, msg);
 		}
 	}
 	else if (!strncmp (path, "/cue/fader", 10)) {
 		if (argc == 1) {
-			ret = cue_aux_fader (argv[0]->f, msg);
+			ret = cue_aux_fader (value, msg);
 		}
 	}
 	else if (!strncmp (path, "/cue/mute", 9)) {
 		if (argc == 1) {
-			ret = cue_aux_mute (argv[0]->f, msg);
+			ret = cue_aux_mute (value, msg);
 		}
 	}
 
@@ -5396,7 +5398,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 				// make a list of stripables with sends that go to this bus
 				s->sends = cue_get_sorted_stripables(stp, aux, addr);
 				if (s->cue_obs) {
-					s->cue_obs->refresh_strip (stp, s->sends, false);
+					s->cue_obs->refresh_strip (stp, s->sends, true);
 				} else {
 					// start cue observer
 					OSCCueObserver* co = new OSCCueObserver (*this, s);
