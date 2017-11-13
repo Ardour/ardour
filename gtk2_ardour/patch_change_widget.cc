@@ -560,7 +560,7 @@ PatchChangeWidget::program (uint8_t chn) const
 /* ***************************************************************************/
 
 PatchChangeGridDialog::PatchChangeGridDialog (boost::shared_ptr<ARDOUR::Route> r)
-	: ArdourDialog (string_compose (_("Select Patch for '%1"), r->name()), false, false)
+	: ArdourDialog (string_compose (_("Select Patch for \"%1\""), r->name()), false, false)
 	, w (r)
 {
 	r->PropertyChanged.connect (_route_connection, invalidator (*this), boost::bind (&PatchChangeGridDialog::route_property_changed, this, _1, boost::weak_ptr<Route>(r)), gui_context());
@@ -573,6 +573,6 @@ PatchChangeGridDialog::route_property_changed (const PBD::PropertyChange& what_c
 {
 	boost::shared_ptr<ARDOUR::Route> r = wr.lock ();
 	if (r && what_changed.contains (ARDOUR::Properties::name)) {
-		set_title (string_compose (_("Select Patch for '%1"), r->name()));
+		set_title (string_compose (_("Select Patch for \"%1\"'"), r->name()));
 	}
 }
