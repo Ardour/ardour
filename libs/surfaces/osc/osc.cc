@@ -5440,6 +5440,8 @@ OSC::cue_previous (lo_message msg)
 	}
 	if (s->aux > 1) {
 		ret = cue_set (s->aux - 1, msg);
+	} else {
+		ret = cue_set (1, msg);
 	}
 	return ret;
 }
