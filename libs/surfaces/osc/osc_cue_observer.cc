@@ -175,7 +175,7 @@ OSCCueObserver::send_end (uint32_t new_size)
 {
 	send_connections.drop_connections ();
 	if (new_size < sends.size()) {
-		for (uint32_t i = new_size; i <= sends.size(); i++) {
+		for (uint32_t i = new_size + 1; i <= sends.size(); i++) {
 			_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
 			_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
 			_osc.text_message_with_id ("/cue/send/name", i, " ", true, addr);
