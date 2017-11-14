@@ -64,7 +64,7 @@ OSCCueObserver::clear_observer ()
 	tick_enable = false;
 
 	strip_connections.drop_connections ();
-	send_end ();
+	send_end (0);
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.text_message_with_id ("/cue/name", 0, " ", true, addr);
 	_osc.float_message ("/cue/mute", 0, addr);
@@ -80,7 +80,7 @@ OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, S
 
 	strip_connections.drop_connections ();
 
-	send_end ();
+	send_end (new_sends.size ());
 	_strip = new_strip;
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::clear_observer, this), OSC::instance());
 	sends = new_sends;
@@ -171,13 +171,15 @@ OSCCueObserver::send_init()
 }
 
 void
-OSCCueObserver::send_end ()
+OSCCueObserver::send_end (uint32_t new_size)
 {
 	send_connections.drop_connections ();
-	for (uint32_t i = 1; i <= sends.size(); i++) {
-		_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
-		_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
-		_osc.text_message_with_id ("/cue/send/name", i, " ", true, addr);
+	if (new_size < sends.size()) {
+		for (uint32_t i = new_size; i <= sends.size(); i++) {
+			_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
+			_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
+			_osc.text_message_with_id ("/cue/send/name", i, " ", true, addr);
+		}
 	}
 	gain_timeout.clear ();
 	_last_gain.clear ();
@@ -188,7 +190,7 @@ void
 OSCCueObserver::send_restart ()
 {
 	tick_enable = false;
-	send_end();
+	send_end(sends.size());
 	send_init();
 	tick_enable = true;
 }

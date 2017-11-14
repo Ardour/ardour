@@ -65,7 +65,7 @@ class OSCCueObserver
 	void send_gain_message (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable, bool force);
 	void send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
 	void send_init (void);
-	void send_end (void);
+	void send_end (uint32_t new_sends_size);
 	void send_restart (void);
 };
 
