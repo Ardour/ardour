@@ -7057,7 +7057,7 @@ Editor::snap_regions_to_grid ()
 		(*r)->region()->clear_changes ();
 
 		MusicSample start ((*r)->region()->first_sample (), 0);
-		snap_to (start);
+		snap_to (start, ARDOUR::RoundNearest, false, true);
 		(*r)->region()->set_position (start.sample, start.division);
 		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
