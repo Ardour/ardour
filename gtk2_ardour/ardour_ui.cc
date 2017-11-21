@@ -3586,10 +3586,6 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
 				exit (1);
 			}
-			
-			if (_nsm_switches && ret != 0 ) {
-				exit (1);
-			}
 
 			if (!ARDOUR_COMMAND_LINE::immediate_save.empty()) {
 				_session->save_state (ARDOUR_COMMAND_LINE::immediate_save, false);
@@ -3602,6 +3598,11 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 
 			ARDOUR_COMMAND_LINE::session_name = "";
 		}
+	}
+	
+	if (_nsm_switches && ret != 0 ) {
+			/*If there is an error at nsm open or switch, don't loop an error dialog, just quit. */
+			exit (1);
 	}
 
 	_nsm_switches = false;
