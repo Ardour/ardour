@@ -974,6 +974,10 @@ ARDOUR_UI::get_transport_controllable_state ()
 void
 ARDOUR_UI::save_session_at_its_request (std::string snapshot_name)
 {
+	if (_nsm_switches) {
+		return;
+	}
+	
 	if (_session) {
 		_session->save_state (snapshot_name);
 	}
@@ -991,6 +995,10 @@ ARDOUR_UI::autosave_session ()
 	}
 
 	if (!Config->get_periodic_safety_backups()) {
+		return 1;
+	}
+	
+	if (_nsm_switches) {
 		return 1;
 	}
 
@@ -1107,7 +1115,7 @@ ARDOUR_UI::starting ()
 			 * The wrapper startup script should set the environment variable 'ARDOUR_SELF'
 			 */
 			const char *process_name = g_getenv ("ARDOUR_SELF");
-			nsm->announce (PROGRAM_NAME, ":dirty:", process_name ? process_name : "ardour6");
+			nsm->announce (PROGRAM_NAME, ":dirty:switch:", process_name ? process_name : "ardour6");
 
 			unsigned int i = 0;
 			// wait for announce reply from nsm server
@@ -3334,6 +3342,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	int ret = -1;
 	bool likely_new = false;
 	bool cancel_not_quit;
+	
+	if (nsm) {
+		/* during NSM switch, we need to not provide dialog about save, 
+		 * and we need to prevent auto-save or other save from ardour
+		 * because NSM saves before switch and Ardour could unsave JACK connections
+		 * or simply generate a .bak session younger than session file for no good reason.*/
+		_nsm_switches = true;
+	}
 
 	/* deal with any existing DIRTY session now, rather than later. don't
 	 * treat a non-dirty session this way, so that it stays visible
@@ -3349,7 +3365,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 	*/
 	cancel_not_quit = (_session != 0) && !quit_on_cancel;
 
-	if (_session && _session->dirty()) {
+	if (_session && _session->dirty() && !_nsm_switches) {
 		if (unload_session (false)) {
 			/* unload cancelled by user */
 			return 0;
@@ -3370,6 +3386,14 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 			if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_REGULAR)) {
 				/* session/snapshot file, change path to be dir */
 				session_path = Glib::path_get_dirname (session_path);
+			} else if (Glib::file_test (session_path.c_str(), Glib::FILE_TEST_IS_DIR)) {
+				/* loading a directory, prefer last used snapshot if it exists */
+				session_name = Session::get_snapshot_from_instant(session_path);
+				string full_snapshot_path = session_path + "/" + session_name + ".ardour";
+				
+				if ( session_name.empty() || !(Glib::file_test (full_snapshot_path.c_str(), Glib::FILE_TEST_IS_REGULAR))) {
+					session_name = basename_nosuffix (ARDOUR_COMMAND_LINE::session_name);
+				}
 			}
 		}
 	}
@@ -3553,13 +3577,17 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		} else if (likely_new && template_name.empty()) {
 
 			ret = build_session_from_dialog (session_dialog, session_path, session_name);
-
+			
 		} else {
 
 			ret = load_session (session_path, session_name, template_name);
-
+			
 			if (ret == -2) {
 				/* not connected to the AudioEngine, so quit to avoid an infinite loop */
+				exit (1);
+			}
+			
+			if (_nsm_switches && ret != 0 ) {
 				exit (1);
 			}
 
@@ -3576,6 +3604,7 @@ ARDOUR_UI::get_session_parameters (bool quit_on_cancel, bool should_be_new, stri
 		}
 	}
 
+	_nsm_switches = false;
 	_session_dialog = NULL;
 
 	return ret;

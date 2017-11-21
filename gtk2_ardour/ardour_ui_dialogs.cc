@@ -264,7 +264,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 		ARDOUR_UI::instance()->video_timeline->sync_session_state();
 	}
 
-	if (_session && _session->dirty()) {
+	if (_session && _session->dirty() && !_nsm_switches) {
 		std::vector<std::string> actions;
 		actions.push_back (_("Don't close"));
 		actions.push_back (_("Just close"));

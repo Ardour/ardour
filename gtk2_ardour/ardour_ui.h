@@ -381,6 +381,7 @@ private:
 	Mixer_UI*      mixer;
 	Gtk::Tooltips _tooltips;
 	NSM_Client*    nsm;
+	bool          _nsm_switches;
 	bool          _was_dirty;
 	bool          _mixer_on_top;
 	bool          _initial_verbose_plugin_scan;
