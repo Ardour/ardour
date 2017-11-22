@@ -334,8 +334,8 @@ ARDOUR_UI::setup_transport ()
 	monitor_disk_button.set_related_action (act);
 
 	/* connect signals */
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (primary_clock, &AudioClock::set));
-	ARDOUR_UI::Clock.connect (sigc::mem_fun (secondary_clock, &AudioClock::set));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (primary_clock, &MainClock::set), false, 0));
+	ARDOUR_UI::Clock.connect (sigc::bind (sigc::mem_fun (secondary_clock, &MainClock::set), false, 0));
 
 	primary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::primary_clock_value_changed));
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));

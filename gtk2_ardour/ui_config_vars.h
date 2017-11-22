@@ -62,8 +62,8 @@ UI_CONFIG_VARIABLE (std::string, mixer_strip_visibility, "mixer-element-visibili
 UI_CONFIG_VARIABLE (bool, allow_non_quarter_pulse, "allow-non-quarter-pulse", false)
 UI_CONFIG_VARIABLE (bool, show_region_gain, "show-region-gain", false)
 UI_CONFIG_VARIABLE (bool, show_name_highlight, "show-name-highlight", false)
-UI_CONFIG_VARIABLE (bool, primary_clock_delta_edit_cursor, "primary-clock-delta-edit-cursor", false)
-UI_CONFIG_VARIABLE (bool, secondary_clock_delta_edit_cursor, "secondary-clock-delta-edit-cursor", false)
+UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, primary_clock_delta_mode, "primary-clock-delta-mode", NoDelta)
+UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, secondary_clock_delta_mode, "secondary-clock-delta-mode", NoDelta)
 UI_CONFIG_VARIABLE (uint64_t, clock_display_limit, "clock-display-limit", 2592000) /* seconds; default 30days (720h), 0 = unlimited */
 UI_CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 UI_CONFIG_VARIABLE (bool, editor_stereo_only_meters, "editor-stereo-only-meters", false)

@@ -67,7 +67,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	void focus ();
 
-	void set (samplepos_t, bool force = false, ARDOUR::samplecnt_t offset = 0);
+	virtual void set (samplepos_t, bool force = false, ARDOUR::samplecnt_t offset = 0);
 	void set_from_playhead ();
 	void locate ();
 	void set_mode (Mode, bool noemit = false);
@@ -105,7 +105,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 
 	protected:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
-	bool get_is_duration () const { return is_duration; } ;
+	bool get_is_duration () const { return is_duration; }
+	ARDOUR::samplecnt_t offset () const { return _offset; }
 
 	virtual void build_ops_menu ();
 	Gtk::Menu  *ops_menu;
@@ -132,6 +133,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	bool             edit_is_negative;
 
 	samplepos_t       _limit_pos;
+
+	ARDOUR::samplecnt_t _offset;
 
 	Glib::RefPtr<Pango::Layout> _layout;
 

@@ -202,7 +202,7 @@ using namespace Editing;
 
 ARDOUR_UI *ARDOUR_UI::theArdourUI = 0;
 
-sigc::signal<void, samplepos_t, bool, samplepos_t> ARDOUR_UI::Clock;
+sigc::signal<void, samplepos_t> ARDOUR_UI::Clock;
 sigc::signal<void> ARDOUR_UI::CloseAllDialogs;
 
 static bool
@@ -2704,7 +2704,7 @@ ARDOUR_UI::update_clocks ()
 	if (!_session) return;
 
 	if (editor && !editor->dragging_playhead()) {
-		Clock (_session->audible_sample(), false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD)); /* EMIT_SIGNAL */
+		Clock (_session->audible_sample()); /* EMIT_SIGNAL */
 	}
 }
 
@@ -5286,16 +5286,34 @@ ARDOUR_UI::use_config ()
 void
 ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 {
-	if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
-		primary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
-	} else {
-		primary_clock->set (pos);
+	switch (UIConfiguration::instance().get_primary_clock_delta_mode()) {
+		case NoDelta:
+			primary_clock->set (pos);
+			break;
+		case DeltaEditPoint:
+			primary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
+			break;
+		case DeltaOriginMarker:
+			{
+				Location* loc = _session->locations()->clock_origin_location ();
+				primary_clock->set (pos, false, loc ? loc->start() : 0);
+			}
+			break;
 	}
 
-	if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor()) {
-		secondary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
-	} else {
-		secondary_clock->set (pos);
+	switch (UIConfiguration::instance().get_secondary_clock_delta_mode()) {
+		case NoDelta:
+			secondary_clock->set (pos);
+			break;
+		case DeltaEditPoint:
+			secondary_clock->set (pos, false, editor->get_preferred_edit_position (EDIT_IGNORE_PHEAD));
+			break;
+		case DeltaOriginMarker:
+			{
+				Location* loc = _session->locations()->clock_origin_location ();
+				secondary_clock->set (pos, false, loc ? loc->start() : 0);
+			}
+			break;
 	}
 
 	if (big_clock_window) {

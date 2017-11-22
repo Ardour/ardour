@@ -108,7 +108,7 @@ AudioClock::AudioClock (const string& clock_name, bool transient, const string& 
 
 	_mode = BBT; /* lie to force mode switch */
 	set_mode (Timecode);
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 
 	if (!is_transient) {
 		clocks.push_back (this);
@@ -187,7 +187,7 @@ AudioClock::set_font (Pango::FontDescription font)
 	tmp->get_pixel_size (em_width, ignore_height);
 
 	/* force redraw of markup with new font-size */
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 }
 
 void
@@ -554,7 +554,7 @@ AudioClock::end_edit (bool modify)
 				break;
 			}
 
-			set (pos, true);
+			AudioClock::set (pos, true);
 			_layout->set_attributes (normal_attributes);
 			ValueChanged(); /* EMIT_SIGNAL */
 		}
@@ -781,14 +781,14 @@ AudioClock::end_edit_relative (bool add)
 
 	if (samples != 0) {
 		if (add) {
-			set (current_time() + samples, true);
+			AudioClock::set (current_time() + samples, true);
 		} else {
 			samplepos_t c = current_time();
 
 			if (c > samples || _negative_allowed) {
-				set (c - samples, true);
+				AudioClock::set (c - samples, true);
 			} else {
-				set (0, true);
+				AudioClock::set (0, true);
 			}
 		}
 		ValueChanged (); /* EMIT SIGNAL */
@@ -802,7 +802,7 @@ AudioClock::end_edit_relative (bool add)
 void
 AudioClock::session_property_changed (const PropertyChange&)
 {
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 }
 
 void
@@ -814,7 +814,7 @@ AudioClock::session_configuration_changed (std::string p)
 	}
 
 	if (p == "sync-source" || p == "external-sync") {
-		set (current_time(), true);
+		AudioClock::set (current_time(), true);
 		return;
 	}
 
@@ -831,7 +831,7 @@ AudioClock::session_configuration_changed (std::string p)
 		} else {
 			current = current_time ();
 		}
-		set (current, true);
+		AudioClock::set (current, true);
 		break;
 	default:
 		break;
@@ -845,6 +845,7 @@ AudioClock::set (samplepos_t when, bool force, samplecnt_t offset)
 		return;
 	}
 
+	_offset = offset;
 	if (is_duration) {
 		when = when - offset;
 	}
@@ -1312,7 +1313,7 @@ AudioClock::set_session (Session *s)
 			}
 		}
 
-		set (last_when, true);
+		AudioClock::set (last_when, true);
 	}
 }
 
@@ -1744,7 +1745,7 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
 				samples *= 10;
 			}
-			set (current_time() + samples, true);
+			AudioClock::set (current_time() + samples, true);
 			ValueChanged (); /* EMIT_SIGNAL */
 		}
 		break;
@@ -1757,9 +1758,9 @@ AudioClock::on_scroll_event (GdkEventScroll *ev)
 			}
 
 			if (!_negative_allowed && (double)current_time() - (double)samples < 0.0) {
-				set (0, true);
+				AudioClock::set (0, true);
 			} else {
-				set (current_time() - samples, true);
+				AudioClock::set (current_time() - samples, true);
 			}
 
 			ValueChanged (); /* EMIT_SIGNAL */
@@ -1809,9 +1810,9 @@ AudioClock::on_motion_notify_event (GdkEventMotion *ev)
 		samples = get_sample_step (drag_field, pos, dir);
 
 		if (samples  != 0 &&  samples * drag_accum < current_time()) {
-			set ((samplepos_t) floor (pos - drag_accum * samples), false); // minus because up is negative in GTK
+			AudioClock::set ((samplepos_t) floor (pos - drag_accum * samples), false); // minus because up is negative in GTK
 		} else {
-			set (0 , false);
+			AudioClock::set (0 , false);
 		}
 
 		drag_accum= 0;
@@ -2154,7 +2155,7 @@ AudioClock::set_from_playhead ()
 		return;
 	}
 
-	set (_session->transport_sample());
+	AudioClock::set (_session->transport_sample());
 	ValueChanged ();
 }
 
@@ -2237,7 +2238,7 @@ AudioClock::set_mode (Mode m, bool noemit)
 		break;
 	}
 
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 
 	if (!is_transient && !noemit) {
 		ModeChanged (); /* EMIT SIGNAL (the static one)*/
@@ -2279,7 +2280,7 @@ AudioClock::set_is_duration (bool yn)
 	}
 
 	is_duration = yn;
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 }
 
 void
@@ -2295,7 +2296,7 @@ AudioClock::set_off (bool yn)
 	 * change
 	 */
 
-	set (last_when, true);
+	AudioClock::set (last_when, true);
 }
 
 void

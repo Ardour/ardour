@@ -442,8 +442,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
-	} else if (p == "primary-clock-delta-edit-cursor") {
-		if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
+	} else if (p == "primary-clock-delta-mode") {
+		if (UIConfiguration::instance().get_primary_clock_delta_mode() != NoDelta) {
 			primary_clock->set_is_duration (true);
 			primary_clock->set_editable (false);
 			primary_clock->set_widget_name ("transport delta");
@@ -452,8 +452,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 			primary_clock->set_editable (true);
 			primary_clock->set_widget_name ("transport");
 		}
-	} else if (p == "secondary-clock-delta-edit-cursor") {
-		if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor()) {
+	} else if (p == "secondary-clock-delta-mode") {
+		if (UIConfiguration::instance().get_secondary_clock_delta_mode() != NoDelta) {
 			secondary_clock->set_is_duration (true);
 			secondary_clock->set_editable (false);
 			secondary_clock->set_widget_name ("secondary delta");
