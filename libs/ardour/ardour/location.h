@@ -55,6 +55,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 		IsSessionRange = 0x40,
 		IsSkip = 0x80,
 		IsSkipping = 0x100, /* skipping is active (or not) */
+		IsClockOrigin = 0x200,
 	};
 
 	Location (Session &);
@@ -87,6 +88,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	void set_hidden (bool yn, void *src);
 	void set_cd (bool yn, void *src);
 	void set_is_range_marker (bool yn, void* src);
+	void set_is_clock_origin (bool yn, void* src);
 	void set_skip (bool yn);
 	void set_skipping (bool yn);
 
@@ -98,6 +100,7 @@ class LIBARDOUR_API Location : public SessionHandleRef, public PBD::StatefulDest
 	bool is_session_range () const { return _flags & IsSessionRange; }
 	bool is_range_marker() const { return _flags & IsRangeMarker; }
 	bool is_skip() const { return _flags & IsSkip; }
+	bool is_clock_origin() const { return _flags & IsClockOrigin; }
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool matches (Flags f) const { return _flags & f; }
 
@@ -189,6 +192,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	Location* auto_loop_location () const;
 	Location* auto_punch_location () const;
 	Location* session_range_location() const;
+	Location* clock_origin_location() const;
 
 	int next_available_name(std::string& result,std::string base);
 	uint32_t num_range_markers() const;
@@ -197,6 +201,8 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 	Location *current () const { return current_location; }
 
 	Location* mark_at (samplepos_t, samplecnt_t slop = 0) const;
+
+	void set_clock_origin (Location*, void *src);
 
 	samplepos_t first_mark_before (samplepos_t, bool include_special_ranges = false);
 	samplepos_t first_mark_after (samplepos_t, bool include_special_ranges = false);

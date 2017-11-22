@@ -479,6 +479,15 @@ Location::set_is_range_marker (bool yn, void*)
 }
 
 void
+Location::set_is_clock_origin (bool yn, void*)
+{
+	if (set_flag_internal (yn, IsClockOrigin)) {
+		flags_changed (this);
+		FlagsChanged (); /* EMIT SIGNAL */
+	}
+}
+
+void
 Location::set_skip (bool yn)
 {
 	if (is_range_marker() && length() > 0) {
@@ -798,6 +807,20 @@ Locations::set_current (Location *loc, bool want_lock)
 		current_changed (current_location); /* EMIT SIGNAL */
 	}
 	return ret;
+}
+
+void
+Locations::set_clock_origin (Location* loc, void *src)
+{
+	LocationList::iterator i;
+	for (i = locations.begin(); i != locations.end(); ++i) {
+		if ((*i)->is_clock_origin ()) {
+			(*i)->set_is_clock_origin (false, src);
+		}
+		if (*i == loc) {
+			(*i)->set_is_clock_origin (true, src);
+		}
+	}
 }
 
 int
@@ -1399,6 +1422,17 @@ Locations::auto_punch_location () const
 		}
 	}
 	return 0;
+}
+
+Location*
+Locations::clock_origin_location () const
+{
+	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
+		if ((*i)->is_clock_origin()) {
+			return const_cast<Location*> (*i);
+		}
+	}
+	return session_range_location ();
 }
 
 uint32_t
