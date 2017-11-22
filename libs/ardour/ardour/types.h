@@ -462,6 +462,12 @@ namespace ARDOUR {
 		AFLFromAfterProcessors
 	};
 
+	enum ClockDeltaMode {
+		NoDelta,
+		DeltaEditPoint,
+		DeltaOriginMarker
+	};
+
 	enum DenormalModel {
 		DenormalNone,
 		DenormalFTZ,

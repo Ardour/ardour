@@ -77,6 +77,7 @@ setup_enum_writer ()
 	PFLPosition _PFLPosition;
 	AFLPosition _AFLPosition;
 	DenormalModel _DenormalModel;
+	ClockDeltaMode _ClockDeltaMode;
 	LayerModel _LayerModel;
 	InsertMergePolicy _InsertMergePolicy;
 	ListenPosition _ListenPosition;
@@ -315,6 +316,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (AFLFromBeforeProcessors);
 	REGISTER_ENUM (AFLFromAfterProcessors);
 	REGISTER (_AFLPosition);
+
+	REGISTER_ENUM (NoDelta);
+	REGISTER_ENUM (DeltaEditPoint);
+	REGISTER_ENUM (DeltaOriginMarker);
+	REGISTER (_ClockDeltaMode);
 
 	REGISTER_ENUM (DenormalNone);
 	REGISTER_ENUM (DenormalFTZ);
