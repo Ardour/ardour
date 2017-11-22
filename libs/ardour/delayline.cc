@@ -388,7 +388,7 @@ DelayLine::configure_io (ChanCount in, ChanCount out)
 	if (in.n_midi () > 0 && !_midi_buf) {
 		_midi_buf.reset (new MidiBuffer (16384));
 	}
-#ifdef NDEBUG
+#ifndef NDEBUG
 	lm.release ();
 #endif
 
