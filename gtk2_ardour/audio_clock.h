@@ -47,6 +47,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 		Timecode,
 		BBT,
 		MinSec,
+		Seconds,
 		Samples
 	};
 
@@ -166,6 +167,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 		Bars,
 		Beats,
 		Ticks,
+		SS_Seconds,
+		SS_Deciseconds,
 		S_Samples,
 	};
 
@@ -208,6 +211,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	void set_timecode (samplepos_t, bool);
 	void set_bbt (samplepos_t, ARDOUR::samplecnt_t, bool);
 	void set_minsec (samplepos_t, bool);
+	void set_seconds (samplepos_t, bool);
 	void set_samples (samplepos_t, bool);
 	void set_out_of_bounds (bool negative);
 
@@ -223,7 +227,8 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	samplepos_t samples_from_bbt_string (samplepos_t, const std::string&) const;
 	samplepos_t sample_duration_from_bbt_string (samplepos_t, const std::string&) const;
 	samplepos_t samples_from_minsec_string (const std::string&) const;
-	samplepos_t samples_from_audioframes_string (const std::string&) const;
+	samplepos_t samples_from_seconds_string (const std::string&) const;
+	samplepos_t samples_from_audiosamples_string (const std::string&) const;
 
 	void session_configuration_changed (std::string);
 	void session_property_changed (const PBD::PropertyChange&);
@@ -239,6 +244,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	ARDOUR::samplecnt_t parse_as_timecode_distance (const std::string&);
 	ARDOUR::samplecnt_t parse_as_minsec_distance (const std::string&);
 	ARDOUR::samplecnt_t parse_as_bbt_distance (const std::string&);
+	ARDOUR::samplecnt_t parse_as_seconds_distance (const std::string&);
 	ARDOUR::samplecnt_t parse_as_samples_distance (const std::string&);
 
 	void set_font (Pango::FontDescription);

@@ -568,6 +568,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
 	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (transport_actions, X_("primary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Seconds, false));
+	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Samples, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
@@ -576,6 +578,8 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-bbt"), _("Bars & Beats"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::BBT, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Seconds, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Samples, false));
 	ActionManager::session_sensitive_actions.push_back (act);

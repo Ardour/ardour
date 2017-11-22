@@ -917,6 +917,7 @@ ExportFormatDialog::update_time (AnyTime & time, AudioClock const & clock)
 		time.type = AnyTime::BBT;
 		_session->bbt_time (samples, time.bbt);
 		break;
+	  case AudioClock::Seconds:
 	  case AudioClock::MinSec:
 		time.type = AnyTime::Seconds;
 		time.seconds = (double) samples / _session->sample_rate();

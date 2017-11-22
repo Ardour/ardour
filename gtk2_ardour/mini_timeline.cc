@@ -242,6 +242,7 @@ MiniTimeline::calculate_time_width ()
 		case AudioClock::MinSec:
 			_layout->set_text ("88:88:88,88");
 			break;
+		case AudioClock::Seconds:
 		case AudioClock::Samples:
 			_layout->set_text ("8888888888");
 			break;
@@ -291,6 +292,13 @@ MiniTimeline::format_time (samplepos_t when)
 				char buf[32];
 				AudioClock::print_minsec (when, buf, sizeof (buf), _session->sample_rate());
 				_layout->set_text (std::string(buf).substr(1));
+			}
+			break;
+		case AudioClock::Seconds:
+			{
+				char buf[32];
+				snprintf (buf, sizeof (buf), "%.1f", when / (float)_session->sample_rate());
+				_layout->set_text (buf);
 			}
 			break;
 		case AudioClock::Samples:

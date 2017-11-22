@@ -767,6 +767,14 @@ EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 		}
 		break;
 
+	case AudioClock::Seconds:
+		if (onoff) {
+			snprintf (buf, bufsize, "%.1f", pos / (float)_session->sample_rate());
+		} else {
+			snprintf (buf, bufsize, "(%.1f)", pos / (float)_session->sample_rate());
+		}
+		break;
+
 	case AudioClock::Samples:
 		if (onoff) {
 			snprintf (buf, bufsize, "%" PRId64, pos);

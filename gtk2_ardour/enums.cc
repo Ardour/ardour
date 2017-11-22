@@ -59,6 +59,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AudioClock, Timecode);
 	REGISTER_CLASS_ENUM (AudioClock, BBT);
 	REGISTER_CLASS_ENUM (AudioClock, MinSec);
+	REGISTER_CLASS_ENUM (AudioClock, Seconds);
 	REGISTER_CLASS_ENUM (AudioClock, Samples);
 	REGISTER (clock_mode);
 
