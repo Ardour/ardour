@@ -911,6 +911,7 @@ Editor::build_marker_menu (Location* loc)
 
 	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
+	items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
@@ -970,6 +971,7 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
+	items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
 	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
@@ -1083,6 +1085,24 @@ Editor::marker_menu_hide ()
 
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 		l->set_hidden (true, this);
+	}
+}
+
+void
+Editor::marker_menu_set_origin ()
+{
+	ArdourMarker* marker;
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+		_session->locations()->set_clock_origin (l, this);
 	}
 }
 
