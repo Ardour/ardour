@@ -158,8 +158,8 @@ AudioLibrary::search_members_and (vector<string>& members, const vector<string>&
 		}
 		lrdf_free_uris(ulist);
 
-	    sort(members.begin(), members.end());
-	    unique(members.begin(), members.end());
+	    sort (members.begin(), members.end());
+	    members.erase (unique (members.begin(), members.end()), members.end());
 	}
 
 	// memory clean up
