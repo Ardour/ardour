@@ -57,13 +57,17 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	,_last_trim (-1.0)
 	,_init (true)
 	,eq_bands (0)
+	,_expand (2048)
 {
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
 	in_line = feedback[2];
-	refresh_strip (true);
 	send_page_size = sur->send_page_size;
+	plug_page_size = sur->plug_page_size;
+	send_page = sur->send_page;
+	refresh_strip (sur->select, sur->nsends, true);
+	set_expand (sur->expand_enable);
 }
 
 OSCSelectObserver::~OSCSelectObserver ()
@@ -92,21 +96,13 @@ OSCSelectObserver::no_strip ()
  }
 
 void
-OSCSelectObserver::refresh_strip (bool force)
+OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t s_nsends, bool force)
 {
 	_init = true;
 	if (_tick_busy) {
 		Glib::usleep(100); // let tick finish
 	}
 
-	// this has to be done first because expand may change with no strip change
-	if (sur->expand_enable) {
-		_osc.float_message ("/select/expand", 1.0, addr);
-	} else {
-		_osc.float_message ("/select/expand", 0.0, addr);
-	}
-
-	boost::shared_ptr<ARDOUR::Stripable> new_strip = sur->select;
 	if (_strip && (new_strip == _strip) && !force) {
 		_init = false;
 		return;
@@ -123,7 +119,7 @@ OSCSelectObserver::refresh_strip (bool force)
 	send_size = 0;
 	plug_size = 0;
 	_comp_redux = 1;
-	nsends = 0;
+	nsends = s_nsends;
 	_last_gain = -1.0;
 	_last_trim = -1.0;
 
@@ -245,6 +241,33 @@ OSCSelectObserver::refresh_strip (bool force)
 }
 
 void
+OSCSelectObserver::set_expand (uint32_t expand)
+{
+	if (expand != _expand) {
+		_expand = expand;
+		if (expand) {
+			_osc.float_message ("/select/expand", 1.0, addr);
+		} else {
+			_osc.float_message ("/select/expand", 0.0, addr);
+		}
+	}
+}
+
+void
+OSCSelectObserver::set_send_page (uint32_t page)
+{
+	send_page = page;
+	renew_sends ();
+}
+
+void
+OSCSelectObserver::set_send_size (uint32_t size)
+{
+	send_page_size = size;
+	renew_sends ();
+}
+
+void
 OSCSelectObserver::clear_observer ()
 {
 	_init = true;
@@ -300,7 +323,8 @@ OSCSelectObserver::clear_observer ()
 
 void
 OSCSelectObserver::renew_sends () {
-	send_end();
+	send_connections.drop_connections ();
+	send_timeout.clear();
 	send_init();
 }
 
@@ -313,34 +337,15 @@ OSCSelectObserver::renew_plugin () {
 void
 OSCSelectObserver::send_init()
 {
-	// we don't know how many there are, so find out.
-	bool sends;
-	nsends  = 0;
-	do {
-		sends = false;
-		if (_strip->send_level_controllable (nsends)) {
-			sends = true;
-			nsends++;
-		}
-	} while (sends);
-	if (!nsends) {
-		return;
-	}
-
-	// paging should be done in osc.cc in case there is no feedback
 	send_size = nsends;
 	if (send_page_size) {
 		send_size = send_page_size;
 	}
-	// check limits
-	uint32_t max_page = (uint32_t)(nsends / send_size) + 1;
-	if (sur->send_page < 1) {
-		sur->send_page = 1;
-	} else if ((uint32_t)sur->send_page > max_page) {
-		sur->send_page = max_page;
+	if (!send_size) {
+		return;
 	}
-	uint32_t page_start = ((sur->send_page - 1) * send_size);
-	uint32_t last_send = sur->send_page * send_size;
+	uint32_t page_start = ((send_page - 1) * send_size);
+	uint32_t last_send = send_page * send_size;
 	uint32_t c = 1;
 	send_timeout.push_back (2);
 	_last_send.clear();
@@ -352,9 +357,13 @@ OSCSelectObserver::send_init()
 		if (_strip->send_level_controllable (s)) {
 			_strip->send_level_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_gain, this, c, _strip->send_level_controllable(s)), OSC::instance());
 			send_timeout.push_back (2);
-			_last_send.push_back (0.0);
+			_last_send.push_back (20.0);
 			send_gain (c, _strip->send_level_controllable(s));
 			send_valid = true;
+		} else {
+			send_gain (c, _strip->send_level_controllable(s));
+			_osc.float_message_with_id ("/select/send_enable", c, 0, in_line, addr);
+			_osc.text_message_with_id ("/select/send_name", c, " ", in_line, addr);
 		}
 
 		if (_strip->send_enable_controllable (s)) {
@@ -404,8 +413,8 @@ OSCSelectObserver::plugin_init()
 
 	// default of 0 page size means show all
 	plug_size = nplug_params;
-	if (sur->plug_page_size) {
-		plug_size = sur->plug_page_size;
+	if (plug_page_size) {
+		plug_size = plug_page_size;
 	}
 	_osc.text_message ("/select/plugin/name", pip->name(), addr);
 	uint32_t page_end = nplug_params;
@@ -469,7 +478,6 @@ OSCSelectObserver::send_end ()
 	}
 	// need to delete or clear send_timeout
 	send_timeout.clear();
-	nsends = 0;
 }
 
 void
@@ -560,7 +568,7 @@ OSCSelectObserver::tick ()
 	for (uint32_t i = 1; i <= send_timeout.size(); i++) {
 		if (send_timeout[i]) {
 			if (send_timeout[i] == 1) {
-				uint32_t pg_offset = (sur->send_page - 1) * send_page_size;
+				uint32_t pg_offset = (send_page - 1) * send_page_size;
 				_osc.text_message_with_id ("/select/send_name", i, _strip->send_name(pg_offset + i - 1), in_line, addr);
 			}
 			send_timeout[i]--;
@@ -730,31 +738,41 @@ OSCSelectObserver::gain_automation ()
 void
 OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable)
 {
-	if (_last_send[id] != controllable->get_value()) {
-		_last_send[id] = controllable->get_value();
+	float raw_value = 0.0;
+	if (controllable) {
+		raw_value = controllable->get_value();
+	}
+	if (_last_send[id] != raw_value) {
+		_last_send[id] = raw_value;
 	} else {
 		return;
 	}
 	string path;
-	float value;
+	float value = 0.0;
 	float db;
 #ifdef MIXBUS
-		db = controllable->get_value();
+	if (controllable) {
+		db = raw_value;
+	} else {
+		db = -193;
+	}
 #else
-		if (controllable->get_value() < 1e-15) {
-			db = -193;
-		} else {
-			db = accurate_coefficient_to_dB (controllable->get_value());
-		}
+	if (raw_value < 1e-15) {
+		db = -193;
+	} else {
+		db = accurate_coefficient_to_dB (raw_value);
+	}
 #endif
 
 	if (gainmode) {
 		path = "/select/send_fader";
-		value = controllable->internal_to_interface (controllable->get_value());
+		if (controllable) {
+			value = controllable->internal_to_interface (raw_value);
+		}
 		_osc.text_message_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db), in_line, addr);
-	if (send_timeout.size() > id) {
-		send_timeout[id] = 8;
-	}
+		if (send_timeout.size() > id) {
+			send_timeout[id] = 8;
+		}
 	} else {
 		path = "/select/send_gain";
 		value = db;
@@ -871,6 +889,7 @@ OSCSelectObserver::eq_end ()
 void
 OSCSelectObserver::eq_restart(int x)
 {
-	eq_end();
+	eq_connections.drop_connections ();
+	//eq_end();
 	eq_init();
 }

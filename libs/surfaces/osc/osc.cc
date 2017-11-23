@@ -2328,7 +2328,7 @@ OSC::sel_send_pagesize (uint32_t size, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg));
 	if  (size != s->send_page_size) {
 		s->send_page_size = size;
-		s->sel_obs->renew_sends();
+		s->sel_obs->set_send_size(size);
 	}
 	return 0;
 }
@@ -2337,8 +2337,18 @@ int
 OSC::sel_send_page (int page, lo_message msg)
 {
 	OSCSurface *s = get_surface(get_address (msg));
+	uint32_t send_size = s->send_page_size;
+	if (!send_size) {
+		send_size = s->nsends;
+	}
+	uint32_t max_page = (uint32_t)(s->nsends / send_size) + 1;
 	s->send_page = s->send_page + page;
-	s->sel_obs->renew_sends();
+	if (s->send_page < 1) {
+		s->send_page = 1;
+	} else if ((uint32_t)s->send_page > max_page) {
+		s->send_page = max_page;
+	}
+	s->sel_obs->set_send_page (s->send_page);
 	return 0;
 }
 
@@ -3601,6 +3611,17 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 			_select = s;
 	}
 	sur->select = s;
+	bool sends;
+	uint32_t nsends  = 0;
+	do {
+		sends = false;
+		if (s->send_level_controllable (nsends)) {
+			sends = true;
+			nsends++;
+		}
+	} while (sends);
+	sur->nsends = nsends;
+
 	s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
 	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
@@ -3610,6 +3631,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		}
 		OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
 		sur->sel_obs = sel_fb;
+		sur->sel_obs->set_expand (sur->expand_enable);
 		uint32_t obs_expand = 0;
 		if (sur->expand_enable) {
 			obs_expand = sur->expand;
@@ -3630,7 +3652,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 	if (r) {
 		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, addr), this);
-		processor_changed (addr);
+		_sel_plugin (sur->plugin_id, addr);
 	}
 
 	return 0;
@@ -3640,7 +3662,6 @@ void
 OSC::processor_changed (lo_address addr)
 {
 	OSCSurface *sur = get_surface (addr);
-	sur->proc_connection.disconnect ();
 	_sel_plugin (sur->plugin_id, addr);
 	if (sur->sel_obs) {
 		sur->sel_obs->renew_sends ();

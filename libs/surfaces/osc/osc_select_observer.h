@@ -47,7 +47,10 @@ class OSCSelectObserver
 	void renew_plugin (void);
 	void eq_restart (int);
 	void clear_observer (void);
-	void refresh_strip (bool force);
+	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t nsends, bool force);
+	void set_expand (uint32_t expand);
+	void set_send_page (uint32_t page);
+	void set_send_size (uint32_t size);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
@@ -77,10 +80,13 @@ class OSCSelectObserver
 	ARDOUR::AutoState as;
 	uint32_t send_page_size;
 	uint32_t send_size;
+	uint32_t send_page;
 	uint32_t nplug_params;
+	uint32_t plug_page_size;
 	uint32_t plug_size;
 	int eq_bands;
 	bool _tick_busy;
+	uint32_t _expand;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

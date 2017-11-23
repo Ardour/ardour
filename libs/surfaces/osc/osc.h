@@ -152,6 +152,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		std::vector<int> plugins;	// stores allowable plugins with index (work around MB strip PIs)
 		int send_page;				// current send page
 		uint32_t send_page_size;	// send page size in channels
+		uint32_t nsends;			// number of sends select has
 		PBD::ScopedConnection proc_connection; // for processor signal monitoring
 		// cue
 		bool cue;					// is this a cue surface
