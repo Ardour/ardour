@@ -1913,7 +1913,6 @@ AudioClock::current_duration (samplepos_t pos) const
 	case Seconds:
 	case Samples:
 		ret = last_when;
-		ret = last_when;
 		break;
 	}
 
