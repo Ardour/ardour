@@ -259,14 +259,14 @@ read_string (FILE *fp)
 		return 0;
 	}
 
-	if (strlen (buf) < MAX_STRING_LEN) {
-		if (strlen (buf)) {
-			buf[strlen (buf)-1] = 0;
-		}
+	if (strlen (buf)) {
+		/* strip lash char here: '\n',
+		 * since VST-params cannot be longer than 127 chars.
+		 */
+		buf[strlen (buf)-1] = 0;
 		return strdup (buf);
-	} else {
-		return 0;
 	}
+	return 0;
 }
 
 /** Read an integer value from a line in fp into n,
