@@ -139,7 +139,7 @@ HttpGet::HttpGet (bool p, bool ssl)
 	, _status (-1)
 	, _result (-1)
 {
-	memset (error_buffer, 0, sizeof (*error_buffer));
+	error_buffer[0] = 0;
 	_curl = curl_easy_init ();
 
 	if (!_curl) {
@@ -205,7 +205,7 @@ HttpGet::get (const char* url)
 		free (mem.data);
 	} // otherwise caller is expected to have free()d or re-used it.
 
-	memset (error_buffer, 0, sizeof (*error_buffer));
+	error_buffer[0] = 0;
 	mem.data = NULL;
 	mem.size = 0;
 
