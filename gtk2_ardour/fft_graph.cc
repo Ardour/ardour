@@ -420,8 +420,6 @@ FFTGraph::draw_scales (cairo_t* cr)
 void
 FFTGraph::redraw ()
 {
-	Glib::Threads::Mutex::Lock lm  (_a_window->track_list_lock);
-
 	assert (_surface);
 	cairo_t* cr = cairo_create (_surface);
 
@@ -432,6 +430,8 @@ FFTGraph::redraw ()
 		queue_draw ();
 		return;
 	}
+
+	Glib::Threads::Mutex::Lock lm  (_a_window->track_list_lock);
 
 	if (!_a_window->track_list_ready) {
 		cairo_destroy (cr);
