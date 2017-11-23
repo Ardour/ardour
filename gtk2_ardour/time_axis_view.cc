@@ -153,8 +153,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	{
 		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
-		Gtk::Requisition req;
-		an_entry->size_request (req);
+		Gtk::Requisition req = an_entry->size_request ();
 
 		name_label.set_size_request (-1, req.height);
 		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
