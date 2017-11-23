@@ -310,10 +310,6 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions, bool snap
 				}
 			}
 		}
-	} else {
-		if( working_on_selection ) {
-			selection->add (latest_regionviews);  //these are the new regions created after the split
-		}
 	}
 
 	commit_reversible_command ();
