@@ -4060,11 +4060,7 @@ Session::config_changed (std::string p, bool ours)
 		set_dirty ();
 	}
 
-	if (p == "seamless-loop") {
-
-	} else if (p == "rf-speed") {
-
-	} else if (p == "auto-loop") {
+	if (p == "auto-loop") {
 
 	} else if (p == "session-monitoring") {
 
