@@ -488,7 +488,7 @@ MeterStrip::set_tick_bar (int m)
 	} else {
 		n = meter_ticks1_area.get_name();
 		if (n.substr(0,3) == "Bar") {
-			meter_ticks1_area.set_name(n.substr(3,-1));
+			meter_ticks1_area.set_name (n.substr (3));
 		}
 	}
 	if (_tick_bar & 2) {
@@ -499,7 +499,7 @@ MeterStrip::set_tick_bar (int m)
 	} else {
 		n = meter_ticks2_area.get_name();
 		if (n.substr(0,3) == "Bar") {
-			meter_ticks2_area.set_name(n.substr(3,-1));
+			meter_ticks2_area.set_name (n.substr (3));
 		}
 	}
 }
