@@ -2388,6 +2388,7 @@ MixerStrip::parameter_changed (string p)
 		_visibility.set_state (UIConfiguration::instance().get_mixer_strip_visibility ());
 	} else if (p == "track-name-number") {
 		name_changed ();
+		update_track_number_visibility();
 	} else if (p == "use-monitor-bus") {
 		if (monitor_section_button) {
 			if (mute_button->get_parent()) {
@@ -2406,8 +2407,6 @@ MixerStrip::parameter_changed (string p)
 				mute_button->show();
 			}
 		}
-	} else if (p == "track-name-number") {
-		update_track_number_visibility();
 	}
 }
 
