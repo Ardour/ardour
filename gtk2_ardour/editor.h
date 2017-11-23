@@ -181,7 +181,7 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void set_mouse_mode (Editing::MouseMode, bool force=true);
+	void set_mouse_mode (Editing::MouseMode, bool force = false);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	Editing::MidiEditMode current_midi_edit_mode () const;
