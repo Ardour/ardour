@@ -1969,7 +1969,7 @@ ARDOUR_UI::open_session ()
 		string default_session_folder = Config->get_default_session_parent_dir();
 		open_session_selector.add_shortcut_folder (default_session_folder);
 	}
-	catch (Glib::Error & e) {
+	catch (Glib::Error const& e) {
 		std::cerr << "open_session_selector.add_shortcut_folder() threw Glib::Error " << e.what() << std::endl;
 	}
 
@@ -3642,7 +3642,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 
 	/* this one is special */
 
-	catch (AudioEngine::PortRegistrationFailure& err) {
+	catch (AudioEngine::PortRegistrationFailure const& err) {
 
 		MessageDialog msg (err.what(),
 				   true,
@@ -3667,7 +3667,7 @@ ARDOUR_UI::load_session (const std::string& path, const std::string& snap_name, 
 		}
 		goto out;
 	}
-	catch (SessionException e) {
+	catch (SessionException const& e) {
 		MessageDialog msg (string_compose(
 			                   _("Session \"%1 (snapshot %2)\" did not load successfully:\n%3"),
 			                   path, snap_name, e.what()),
@@ -3803,7 +3803,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile);
 	}
 
-	catch (SessionException e) {
+	catch (SessionException const& e) {
 		cerr << "Here are the errors associated with this failed session:\n";
 		dump_errors (cerr);
 		cerr << "---------\n";

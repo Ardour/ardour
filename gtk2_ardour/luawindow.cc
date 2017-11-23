@@ -464,7 +464,7 @@ LuaWindow::save_script ()
 			update_gui_state (); // XXX here?
 			append_text (X_("> ") + string_compose (_("Saved as %1"), sb.path));
 			return; // OK
-		} catch (Glib::FileError e) {
+		} catch (Glib::FileError const& e) {
 			msg = string_compose (_("Error saving file: %1"), e.what());
 			goto errorout;
 		}
@@ -516,7 +516,7 @@ LuaWindow::save_script ()
 		LuaScripting::instance().refresh (true);
 		append_text (X_("> ") + string_compose (_("Saved as %1"), path));
 		return; // OK
-	} catch (Glib::FileError e) {
+	} catch (Glib::FileError const& e) {
 		msg = string_compose (_("Error saving file: %1"), e.what());
 		goto errorout;
 	}
@@ -743,7 +743,7 @@ LuaWindow::ScriptBuffer::load ()
 		script = Glib::file_get_contents (path);
 		flags |= Buffer_Valid;
 		flags &= BufferFlags(~Buffer_Dirty);
-	} catch (Glib::FileError e) {
+	} catch (Glib::FileError const& e) {
 		return false;
 	}
 	return true;

@@ -1323,7 +1323,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 
 	try {
 		script = Glib::file_get_contents (spi->path);
-	} catch (Glib::FileError e) {
+	} catch (Glib::FileError const& e) {
 		string msg = string_compose (_("Cannot read script '%1': %2"), spi->path, e.what());
 		Gtk::MessageDialog am (msg);
 		am.run ();
@@ -1360,7 +1360,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 				string msg = string_compose (_("Session script '%1' instantiation failed: %2"), spd.name(), e.what ());
 				Gtk::MessageDialog am (msg);
 				am.run ();
-			} catch (SessionException e) {
+			} catch (SessionException const& e) {
 				string msg = string_compose (_("Loading Session script '%1' failed: %2"), spd.name(), e.what ());
 				Gtk::MessageDialog am (msg);
 				am.run ();
