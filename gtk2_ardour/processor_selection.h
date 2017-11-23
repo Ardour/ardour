@@ -67,7 +67,6 @@ class ProcessorSelection : public PBD::ScopedConnectionList, public sigc::tracka
 	XMLProcessorSelection processors;
 	sigc::signal<void> ProcessorsChanged;
 
-	ProcessorSelection& operator= (const ProcessorSelection& other);
 
 	void clear ();
 	bool empty();
@@ -76,6 +75,10 @@ class ProcessorSelection : public PBD::ScopedConnectionList, public sigc::tracka
 	void add (XMLNode* node);
 
 	void clear_processors ();
+
+	private:
+	ProcessorSelection& operator= (const ProcessorSelection& other);
+	ProcessorSelection (ProcessorSelection const&);
 };
 
 bool operator==(const ProcessorSelection& a, const ProcessorSelection& b);

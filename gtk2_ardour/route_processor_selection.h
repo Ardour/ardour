@@ -39,8 +39,6 @@ public:
 
 	RouteProcessorSelection (ARDOUR::SessionHandlePtr&, AxisViewProvider&);
 
-	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
-
 	void clear ();
 	bool empty();
 
@@ -58,6 +56,9 @@ private:
 	AxisViewProvider& avp;
 	void removed (AxisView*);
 	std::list<AxisView*> add_grouped_tracks (AxisView*) const;
+
+	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
+	RouteProcessorSelection (RouteProcessorSelection const&);
 };
 
 bool operator==(const RouteProcessorSelection& a, const RouteProcessorSelection& b);

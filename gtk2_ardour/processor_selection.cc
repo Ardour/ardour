@@ -18,16 +18,6 @@
 
 #include "processor_selection.h"
 
-ProcessorSelection&
-ProcessorSelection::operator= (ProcessorSelection const & other)
-{
-	if (this != &other) {
-		processors = other.processors;
-	}
-
-	return *this;
-}
-
 void
 ProcessorSelection::clear_processors ()
 {
