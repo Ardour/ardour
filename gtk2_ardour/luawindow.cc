@@ -483,11 +483,12 @@ LuaWindow::save_script ()
 
 	// 5) construct filename -- TODO ask user for name, ask to replace file.
 	do {
+		char tme[80];
 		char buf[80];
 		time_t t = time(0);
 		struct tm * timeinfo = localtime (&t);
-		strftime (buf, sizeof(buf), "%s%d", timeinfo);
-		sprintf (buf, "%s%ld", buf, random ()); // is this valid?
+		strftime (tme, sizeof(tme), "%s", timeinfo);
+		snprintf (buf, sizeof(buf), "%s%ld", tme, random ());
 		MD5 md5;
 		std::string fn = md5.digestString (buf);
 
