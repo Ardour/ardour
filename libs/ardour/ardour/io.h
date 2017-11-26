@@ -120,6 +120,9 @@ public:
 	samplecnt_t public_latency () const;
 	samplecnt_t connected_latency (bool for_playback) const;
 
+	void set_private_port_latencies (samplecnt_t value, bool playback);
+	void set_public_port_latencies (samplecnt_t value, bool playback) const;
+
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
 

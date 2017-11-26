@@ -1204,6 +1204,26 @@ IO::apply_pretty_name ()
 	}
 }
 
+void
+IO::set_private_port_latencies (samplecnt_t value, bool playback)
+{
+	LatencyRange lat;
+	lat.min = lat.max = value;
+	for (PortSet::iterator i = _ports.begin (); i != _ports.end(); ++i) {
+		 i->set_private_latency_range (lat, playback);
+	}
+}
+
+void
+IO::set_public_port_latencies (samplecnt_t value, bool playback) const
+{
+	LatencyRange lat;
+	lat.min = lat.max = value;
+	for (PortSet::const_iterator i = _ports.begin (); i != _ports.end(); ++i) {
+		 i->set_public_latency_range (lat, playback);
+	}
+}
+
 samplecnt_t
 IO::latency () const
 {
