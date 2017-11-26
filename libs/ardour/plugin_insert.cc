@@ -237,24 +237,6 @@ PluginInsert::del_sidechain ()
 }
 
 void
-PluginInsert::set_sidechain_latency (uint32_t capture, uint32_t playback)
-{
-	if (_sidechain &&
-			(_sc_playback_latency != playback || _sc_capture_latency != capture)) {
-		_sc_capture_latency = capture;
-		_sc_playback_latency = playback;
-		LatencyRange pl; pl.min = pl.max = playback;
-		LatencyRange cl; cl.min = cl.max = capture;
-		DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: capture %2 playback; %3\n", _sidechain->name (), capture, playback));
-		PortSet& ps (_sidechain->input ()->ports ());
-		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
-			p->set_private_latency_range (pl, true);
-			p->set_private_latency_range (cl, false);
-		}
-	}
-}
-
-void
 PluginInsert::control_list_automation_state_changed (Evoral::Parameter which, AutoState s)
 {
 	if (which.type() != PluginAutomation)

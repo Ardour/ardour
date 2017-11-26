@@ -164,7 +164,6 @@ public:
 	bool set_preset_out (const ChanCount&);
 	bool add_sidechain  (uint32_t n_audio = 1, uint32_t n_midi = 0);
 	bool del_sidechain ();
-	void set_sidechain_latency (uint32_t, uint32_t);
 	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
 	// end C++ class slavery!
 
