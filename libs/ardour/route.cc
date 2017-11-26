@@ -474,27 +474,6 @@ Route::process_output_buffers (BufferSet& bufs,
 		}
 #endif
 
-		if (boost::dynamic_pointer_cast<PluginInsert>(*i) != 0) {
-			/* set potential sidechain ports, capture and playback latency.
-			 * This effectively sets jack port latency which should include
-			 * up/downstream latencies.
-			 *
-			 * However, the value is not used by Ardour (2017-09-20) and calling
-			 * IO::latency() is expensive, so we punt.
-			 *
-			 * capture should be
-			 *      input()->latenct + latency,
-			 * playback should be
-			 *      output->latency() + _signal_latency - latency
-			 *
-			 * Also see note below, _signal_latency may be smaller than latency
-			 * if a plugin's latency increases while it's running.
-			 */
-			const samplecnt_t playback_latency = std::max ((samplecnt_t)0, _signal_latency - latency);
-			boost::dynamic_pointer_cast<PluginInsert>(*i)->set_sidechain_latency (
-					/* input->latency() + */ latency, /* output->latency() + */ playback_latency);
-		}
-
 		bool re_inject_oob_data = false;
 		if ((*i) == _disk_reader) {
 			/* Well now, we've made it past the disk-writer and to the disk-reader.
@@ -3989,6 +3968,9 @@ Route::update_signal_latency (bool apply_to_delayline)
 	// here or in Session::* ? -> also zero send latencies,
 	// and make sure that re-enabling a route updates things again...
 
+	samplecnt_t capt_lat_in = _input->connected_latency (false);
+	samplecnt_t play_lat_out = _output->connected_latency (true);
+
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	samplecnt_t l_in  = 0;
@@ -3996,6 +3978,14 @@ Route::update_signal_latency (bool apply_to_delayline)
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
 		if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
 			snd->set_delay_in (l_out + _output->latency());
+		}
+
+		if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (boost::shared_ptr<IO> pio = pi->sidechain_input ()) {
+				samplecnt_t lat = l_out + _output->latency();
+				pio->set_private_port_latencies (lat, true);
+				pio->set_public_port_latencies (lat, true);
+			}
 		}
 		(*i)->set_output_latency (l_out);
 		if ((*i)->active ()) {
@@ -4008,6 +3998,27 @@ Route::update_signal_latency (bool apply_to_delayline)
 	_signal_latency = l_out;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
+		/* set sidechain, send and insert port latencies */
+		if (boost::shared_ptr<PortInsert> pi = boost::dynamic_pointer_cast<PortInsert> (*i)) {
+			if (pi->input ()) {
+				/* propagate playback latency from output to input */
+				pi->input ()->set_private_port_latencies (play_lat_out + l_in, true);
+			}
+			if (pi->output ()) {
+				/* propagate capture latency from input to output */
+				pi->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
+			}
+
+		} else if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
+			if (snd->output ()) {
+				/* set capture latency */
+				snd->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
+				/* take send-target's playback latency into account */
+				snd->set_delay_out (snd->output ()->connected_latency (true));
+			}
+		}
+
 		(*i)->set_input_latency (l_in);
 		(*i)->set_playback_offset (_signal_latency + _output->latency ());
 		(*i)->set_capture_offset (_input->latency ());
@@ -4590,6 +4601,7 @@ Route::set_private_port_latencies (bool playback) const
 	*/
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+
 		if ((*i)->active ()) {
 			own_latency += (*i)->signal_latency ();
 		}
@@ -4607,28 +4619,26 @@ Route::set_private_port_latencies (bool playback) const
 void
 Route::set_public_port_latencies (samplecnt_t value, bool playback) const
 {
+	/* publish private latencies */
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*i);
+		if (!iop) {
+			continue;
+		}
+		if (iop->input ()) {
+			iop->input ()->set_public_port_latencies (iop->input()->latency(), true);
+		}
+		if (iop->output ()) {
+			iop->output ()->set_public_port_latencies (iop->output()->latency(), false);
+		}
+	}
+
 	/* this is called to set the JACK-visible port latencies, which take
-	   latency compensation into account.
-	*/
-
-	LatencyRange range;
-
-	range.min = value;
-	range.max = value;
-
-	{
-		const PortSet& ports (_input->ports());
-		for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-			p->set_public_latency_range (range, playback);
-		}
-	}
-
-	{
-		const PortSet& ports (_output->ports());
-		for (PortSet::const_iterator p = ports.begin(); p != ports.end(); ++p) {
-			p->set_public_latency_range (range, playback);
-		}
-	}
+	 * latency compensation into account.
+	 */
+	_input->set_public_port_latencies (value, playback);
+	_output->set_public_port_latencies (value, playback);
 }
 
 /** Put the invisible processors in the right place in _processors.
