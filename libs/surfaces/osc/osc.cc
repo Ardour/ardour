@@ -582,6 +582,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/send_page", "f", sel_send_page);
 		REGISTER_CALLBACK (serv, "/select/plug_page", "f", sel_plug_page);
 		REGISTER_CALLBACK (serv, "/select/plugin", "f", sel_plugin);
+		REGISTER_CALLBACK (serv, "/select/plugin/activate", "f", sel_plugin_activate);
 		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
 		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
 		REGISTER_CALLBACK (serv, "/select/pan_frontback_position", "f", sel_pan_frontback);
@@ -2358,7 +2359,7 @@ OSC::sel_plug_pagesize (uint32_t size, lo_message msg)
 	OSCSurface *s = get_surface(get_address (msg));
 	if (size != s->plug_page_size) {
 		s->plug_page_size = size;
-		s->sel_obs->renew_plugin();
+		s->sel_obs->set_plugin_size(size);
 	}
 	return 0;
 }
@@ -2366,15 +2367,35 @@ OSC::sel_plug_pagesize (uint32_t size, lo_message msg)
 int
 OSC::sel_plug_page (int page, lo_message msg)
 {
+	if (!page) {
+		return 0;
+	}
+	int new_page = 0;
 	OSCSurface *s = get_surface(get_address (msg));
-	s->plug_page = s->plug_page + page;
-	s->sel_obs->renew_plugin();
+	if (page > 0) {
+		new_page = s->plug_page + s->plug_page_size;
+		if ((uint32_t) new_page > s->plug_params.size ()) {
+			new_page = s->plug_page;
+		}
+	} else {
+		new_page = s->plug_page - s->plug_page_size;
+		if (new_page < 1) {
+			new_page = 1;
+		}
+	}
+	if (new_page != s->plug_page) {
+		s->plug_page = new_page;
+		s->sel_obs->set_plugin_page(s->plug_page);
+	}
 	return 0;
 }
 
 int
 OSC::sel_plugin (int delta, lo_message msg)
 {
+	if (!delta) {
+		return 0;
+	}
 	OSCSurface *sur = get_surface(get_address (msg));
 	return _sel_plugin (sur->plugin_id + delta, get_address (msg));
 }
@@ -2383,12 +2404,7 @@ int
 OSC::_sel_plugin (int id, lo_address addr)
 {
 	OSCSurface *sur = get_surface(addr);
-	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, addr);
-	} else {
-		s = _select;
-	}
+	boost::shared_ptr<Stripable> s = sur->select;
 	if (s) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 		if (!r) {
@@ -2412,24 +2428,28 @@ OSC::_sel_plugin (int id, lo_address addr)
 						if (!pi->is_channelstrip()) {
 #endif
 							sur->plugins.push_back (nplugs);
+							nplugs++;
 #ifdef MIXBUS
 						}
 					}
 #endif
 				}
 				plugs = true;
-				nplugs++;
 			}
 		} while (plugs);
 
 		// limit plugin_id to actual plugins
-		if (!sur->plugins.size()) {
+		if (sur->plugins.size() < 1) {
 			sur->plugin_id = 0;
+			sur->plug_page = 1;
+			if (sur->sel_obs) {
+				sur->sel_obs->set_plugin_id(-1, 1);
+			}
 			return 0;
+		} else if (id < 1) {
+			sur->plugin_id = 1;
 		} else if (sur->plugins.size() < (uint32_t) id) {
 			sur->plugin_id = sur->plugins.size();
-		} else  if (sur->plugins.size() && !id) {
-			sur->plugin_id = 1;
 		} else {
 			sur->plugin_id = id;
 		}
@@ -2459,7 +2479,7 @@ OSC::_sel_plugin (int id, lo_address addr)
 		sur->plug_page = 1;
 
 		if (sur->sel_obs) {
-			sur->sel_obs->renew_plugin();
+			sur->sel_obs->set_plugin_id(sur->plugins[sur->plugin_id - 1], sur->plug_page);
 		}
 		return 0;
 	}
@@ -3627,10 +3647,11 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
 	if (sur->feedback[13]) {
 		if (so != 0) {
-			delete so;
+			so->refresh_strip (s, nsends, true);
+		} else {
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
+			sur->sel_obs = sel_fb;
 		}
-		OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
-		sur->sel_obs = sel_fb;
 		sur->sel_obs->set_expand (sur->expand_enable);
 		uint32_t obs_expand = 0;
 		if (sur->expand_enable) {
@@ -4286,12 +4307,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	if (sur->plug_page_size && (paid > (int)sur->plug_page_size)) {
 		return float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
 	}
-	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	boost::shared_ptr<Stripable> s = sur->select;
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 	if (!r) {
 		return 1;
@@ -4304,7 +4320,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	}
 	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// paid is paged parameter convert to absolute
-	int parid = paid + (int)(sur->plug_page_size * (sur->plug_page - 1));
+	int parid = paid + (int)sur->plug_page - 1;
 	if (parid > (int) sur->plug_params.size ()) {
 		if (sur->feedback[13]) {
 			float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
@@ -4335,6 +4351,36 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		}
 	}
 	return 1;
+}
+
+int
+OSC::sel_plugin_activate (float state, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s = sur->select;
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
+	if (r) {
+		boost::shared_ptr<Processor> redi=r->nth_plugin (sur->plugins[sur->plugin_id -1]);
+		if (redi) {
+			boost::shared_ptr<PluginInsert> pi;
+			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+				if(state > 0) {
+					pi->activate();
+				} else {
+					pi->deactivate();
+				}
+				return 0;
+			}
+		}
+	}
+	float_message ("/select/plugin/activate", 0, get_address (msg));
+	PBD::warning << "OSC: Select has no Plugin." << endmsg;
+	return 0;
 }
 
 int

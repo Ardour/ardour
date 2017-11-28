@@ -64,8 +64,15 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	feedback = sur->feedback;
 	in_line = feedback[2];
 	send_page_size = sur->send_page_size;
-	plug_page_size = sur->plug_page_size;
+	send_size = send_page_size;
 	send_page = sur->send_page;
+	plug_page_size = sur->plug_page_size;
+	plug_page = sur->plug_page;
+	if (sur->plugins.size () > 0) {
+		plug_id = sur->plugins[sur->plugin_id - 1];
+	} else {
+		plug_id = -1;
+	}
 	refresh_strip (sur->select, sur->nsends, true);
 	set_expand (sur->expand_enable);
 }
@@ -116,8 +123,6 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 
 	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::no_strip, this), OSC::instance());
 	as = ARDOUR::Off;
-	send_size = 0;
-	plug_size = 0;
 	_comp_redux = 1;
 	nsends = s_nsends;
 	_last_gain = -1.0;
@@ -254,20 +259,6 @@ OSCSelectObserver::set_expand (uint32_t expand)
 }
 
 void
-OSCSelectObserver::set_send_page (uint32_t page)
-{
-	send_page = page;
-	renew_sends ();
-}
-
-void
-OSCSelectObserver::set_send_size (uint32_t size)
-{
-	send_page_size = size;
-	renew_sends ();
-}
-
-void
 OSCSelectObserver::clear_observer ()
 {
 	_init = true;
@@ -322,16 +313,26 @@ OSCSelectObserver::clear_observer ()
 }
 
 void
+OSCSelectObserver::set_send_page (uint32_t page)
+{
+	if (send_page != page) {
+		send_page = page;
+		renew_sends ();
+	}
+}
+
+void
+OSCSelectObserver::set_send_size (uint32_t size)
+{
+	send_page_size = size;
+	renew_sends ();
+}
+
+void
 OSCSelectObserver::renew_sends () {
 	send_connections.drop_connections ();
 	send_timeout.clear();
 	send_init();
-}
-
-void
-OSCSelectObserver::renew_plugin () {
-	plugin_end();
-	plugin_init();
 }
 
 void
@@ -389,27 +390,92 @@ OSCSelectObserver::send_init()
 }
 
 void
+OSCSelectObserver::send_end ()
+{
+	send_connections.drop_connections ();
+	for (uint32_t i = 1; i <= send_size; i++) {
+		if (gainmode) {
+			_osc.float_message_with_id ("/select/send_fader", i, 0, in_line, addr);
+		} else {
+			_osc.float_message_with_id ("/select/send_gain", i, -193, in_line, addr);
+		}
+		// next enable
+		_osc.float_message_with_id ("/select/send_enable", i, 0, in_line, addr);
+		// next name
+		_osc.text_message_with_id ("/select/send_name", i, " ", in_line, addr);
+	}
+	// need to delete or clear send_timeout
+	send_size = 0;
+	send_timeout.clear();
+}
+
+void
+OSCSelectObserver::set_plugin_id (int id, uint32_t page)
+{
+	plug_id = id;
+	plug_page = page;
+	renew_plugin ();
+}
+
+void
+OSCSelectObserver::set_plugin_page (uint32_t page)
+{
+	plug_page = page;
+	renew_plugin ();
+}
+
+void
+OSCSelectObserver::set_plugin_size (uint32_t size)
+{
+	plug_page_size = size;
+	renew_plugin ();
+}
+
+void
+OSCSelectObserver::renew_plugin () {
+	plugin_connections.drop_connections ();
+	plugin_init();
+}
+
+void
 OSCSelectObserver::plugin_init()
 {
-	if (!sur->plugin_id || !sur->plugins.size ()) {
+	if (plug_id < 0) {
+		plugin_end ();
 		return;
 	}
-
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
 	if (!r) {
+		plugin_end ();
 		return;
 	}
 
 	// we have a plugin number now get the processor
-	boost::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[sur->plugin_id - 1]);
+	boost::shared_ptr<Processor> proc = r->nth_plugin (plug_id);
 	boost::shared_ptr<PluginInsert> pi;
 	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+		plugin_end ();
 		return;
 	}
 	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	// we have a plugin we can ask if it is activated
+	proc->ActiveChanged.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plug_enable, this, X_("/select/plugin/activate"), proc), OSC::instance());
+	_osc.float_message ("/select/plugin/activate", proc->enabled(), addr);
 
 	bool ok = false;
-	nplug_params = sur->plug_params.size ();
+	// put only input controls into a vector
+	plug_params.clear ();
+	uint32_t nplug_params  = pip->parameter_count();
+	for ( uint32_t ppi = 0;  ppi < nplug_params; ++ppi) {
+		uint32_t controlid = pip->nth_parameter(ppi, ok);
+		if (!ok) {
+			continue;
+		}
+		if (pip->parameter_is_input(controlid)) {
+			plug_params.push_back (ppi);
+		}
+	}
+	nplug_params = plug_params.size ();
 
 	// default of 0 page size means show all
 	plug_size = nplug_params;
@@ -417,20 +483,8 @@ OSCSelectObserver::plugin_init()
 		plug_size = plug_page_size;
 	}
 	_osc.text_message ("/select/plugin/name", pip->name(), addr);
-	uint32_t page_end = nplug_params;
-	uint32_t max_page = 1;
-	if (plug_size && nplug_params) {
-		max_page = (uint32_t)((nplug_params - 1) / plug_size) + 1;
-	}
-
-	if (sur->plug_page < 1) {
-		sur->plug_page = 1;
-	}
-	if ((uint32_t)sur->plug_page > max_page) {
-		sur->plug_page = max_page;
-	}
-	uint32_t page_start = ((sur->plug_page - 1) * plug_size);
-	page_end = sur->plug_page * plug_size;
+	uint32_t page_start = plug_page - 1;
+	uint32_t page_end = page_start + plug_size;
 
 	int pid = 1;
 	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++pid) {
@@ -440,7 +494,7 @@ OSCSelectObserver::plugin_init()
 			continue;
 		}
 
-		uint32_t controlid = pip->nth_parameter(sur->plug_params[ppi], ok);
+		uint32_t controlid = pip->nth_parameter(plug_params[ppi], ok);
 		if (!ok) {
 			continue;
 		}
@@ -462,25 +516,6 @@ OSCSelectObserver::plugin_init()
 }
 
 void
-OSCSelectObserver::send_end ()
-{
-	send_connections.drop_connections ();
-	for (uint32_t i = 1; i <= send_size; i++) {
-		if (gainmode) {
-			_osc.float_message_with_id ("/select/send_fader", i, 0, in_line, addr);
-		} else {
-			_osc.float_message_with_id ("/select/send_gain", i, -193, in_line, addr);
-		}
-		// next enable
-		_osc.float_message_with_id ("/select/send_enable", i, 0, in_line, addr);
-		// next name
-		_osc.text_message_with_id ("/select/send_name", i, " ", in_line, addr);
-	}
-	// need to delete or clear send_timeout
-	send_timeout.clear();
-}
-
-void
 OSCSelectObserver::plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable)
 {
 	if (swtch) {
@@ -494,12 +529,14 @@ void
 OSCSelectObserver::plugin_end ()
 {
 	plugin_connections.drop_connections ();
+	_osc.float_message ("/select/plugin/activate", 0, addr);
 	_osc.text_message ("/select/plugin/name", " ", addr);
 	for (uint32_t i = 1; i <= plug_size; i++) {
 		_osc.float_message_with_id ("/select/plugin/parameter", i, 0, in_line, addr);
 		// next name
 		_osc.text_message_with_id ("/select/plugin/parameter/name", i, " ", in_line, addr);
 	}
+	plug_size = 0;
 	nplug_params = 0;
 }
 
@@ -618,6 +655,15 @@ OSCSelectObserver::enable_message (string path, boost::shared_ptr<Controllable> 
 		_osc.float_message (path, 0, addr);
 	}
 
+}
+
+void
+OSCSelectObserver::plug_enable (string path, boost::shared_ptr<Processor> proc)
+{
+	// with no delay value is wrong
+	Glib::usleep(10);
+
+	_osc.float_message (path, proc->enabled(), addr);
 }
 
 void

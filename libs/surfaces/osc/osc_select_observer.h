@@ -51,6 +51,9 @@ class OSCSelectObserver
 	void set_expand (uint32_t expand);
 	void set_send_page (uint32_t page);
 	void set_send_size (uint32_t size);
+	void set_plugin_id (int id, uint32_t page);
+	void set_plugin_page (uint32_t page);
+	void set_plugin_size (uint32_t size);
 
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
@@ -81,9 +84,13 @@ class OSCSelectObserver
 	uint32_t send_page_size;
 	uint32_t send_size;
 	uint32_t send_page;
+
 	uint32_t nplug_params;
 	uint32_t plug_page_size;
+	uint32_t plug_page;
+	int plug_id;
 	uint32_t plug_size;
+	std::vector<int> plug_params;
 	int eq_bands;
 	bool _tick_busy;
 	uint32_t _expand;
@@ -106,6 +113,7 @@ class OSCSelectObserver
 	void plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_enable (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
+	void plug_enable (std::string path, boost::shared_ptr<ARDOUR::Processor> proc);
 	void eq_init (void);
 	void eq_end (void);
 	void no_strip ();

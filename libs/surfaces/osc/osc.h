@@ -494,6 +494,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_send_page,f);
 	PATH_CALLBACK1_MSG(sel_plug_page,f);
 	PATH_CALLBACK1_MSG(sel_plugin,f);
+	PATH_CALLBACK1_MSG(sel_plugin_activate,f);
 	PATH_CALLBACK1_MSG(sel_comp_enable,f);
 	PATH_CALLBACK1_MSG(sel_comp_threshold,f);
 	PATH_CALLBACK1_MSG(sel_comp_speed,f);
@@ -661,6 +662,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_plug_page (int page, lo_message msg);
 	int sel_plugin (int delta, lo_message msg);
 	int _sel_plugin (int id, lo_address addr);
+	int sel_plugin_activate (float state, lo_message msg);
 	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	void processor_changed (lo_address addr);
 
