@@ -853,6 +853,10 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 {
 	focus_handler (this);
 
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return _fallthrough_to_parent ? false : true;
+	}
+
 	if (ev->button == 1 && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
@@ -874,15 +878,15 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 		}
 	}
 
-	if (_fallthrough_to_parent)
-		return false;
-
-	return true;
+	return _fallthrough_to_parent ? false : true;
 }
 
 bool
 ArdourButton::on_button_release_event (GdkEventButton *ev)
 {
+	if (ev->type == GDK_2BUTTON_PRESS || ev->type == GDK_3BUTTON_PRESS) {
+		return _fallthrough_to_parent ? false : true;
+	}
 	if (ev->button == 1 && _hovering && (_elements & Indicator) && _led_rect && _distinct_led_click) {
 		if (ev->x >= _led_rect->x && ev->x < _led_rect->x + _led_rect->width &&
 		    ev->y >= _led_rect->y && ev->y < _led_rect->y + _led_rect->height) {
@@ -904,10 +908,7 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 		}
 	}
 
-	if (_fallthrough_to_parent)
-		return false;
-
-	return true;
+	return _fallthrough_to_parent ? false : true;
 }
 
 void
