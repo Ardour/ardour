@@ -26,6 +26,7 @@
 
 #include <sys/types.h>
 #include <fcntl.h>
+#include <utime.h>
 #include <unistd.h>
 #include <errno.h>
 
@@ -1078,6 +1079,19 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	} else {
 		vstfx_write_info_file (infofile, infos);
 		fclose (infofile);
+
+		/* In some cases the .dll may have a modification time in the future,
+		 * (e.g. unzip a VST plugin: .zip files don't include timezones)
+		 */
+		string const fsipath = vstfx_infofile_path (dllpath);
+		GStatBuf dllstat;
+		GStatBuf fsistat;
+		if (g_stat (dllpath, &dllstat) == 0 && g_stat (fsipath.c_str (), &fsistat) == 0) {
+			struct utimbuf utb;
+			utb.actime = fsistat.st_atime;
+			utb.modtime = std::max (dllstat.st_mtime, fsistat.st_mtime);
+			g_utime (fsipath.c_str (), &utb);
+		}
 	}
 	return infos;
 }
