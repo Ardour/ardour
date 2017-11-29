@@ -744,7 +744,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	int64_t t1 = g_get_monotonic_time ();
 #endif
 
-	lua.collect_garbage_step ();
+	lua.collect_garbage_step (100 /*kB*/);
 #ifdef WITH_LUAPROC_STATS
 	++_stats_cnt;
 	int64_t t2 = g_get_monotonic_time ();

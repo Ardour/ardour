@@ -77,8 +77,8 @@ LuaState::collect_garbage () {
 }
 
 void
-LuaState::collect_garbage_step () {
-	lua_gc (L, LUA_GCSTEP, 0);
+LuaState::collect_garbage_step (int debt) {
+	lua_gc (L, LUA_GCSTEP, debt);
 }
 
 void

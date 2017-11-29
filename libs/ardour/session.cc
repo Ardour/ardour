@@ -5486,7 +5486,7 @@ Session::try_run_lua (pframes_t nframes)
 	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
 	if (tm.locked ()) {
 		try { (*_lua_run)(nframes); } catch (...) { }
-		lua.collect_garbage_step ();
+		lua.collect_garbage_step (100 /*kB*/);
 	}
 }
 
