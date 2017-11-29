@@ -134,10 +134,7 @@ Resources=$APPROOT/Resources
 Shared=$Resources
 Etc=$Resources
 Locale=$Resources/locale
-#
-# Bundled Plugins live in a top level folder
-# 
-Plugins=$APPROOT/Plugins
+
 Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
 Backends=$Frameworks/backends
@@ -155,7 +152,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do
+for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -174,7 +171,6 @@ echo "Building new app directory structure ..."
 
 mkdir -p $APPROOT/MacOS
 mkdir -p $APPROOT/Resources
-mkdir -p $Plugins
 mkdir -p $Surfaces
 mkdir -p $Panners
 mkdir -p $Backends
@@ -436,7 +432,7 @@ fi
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
