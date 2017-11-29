@@ -131,7 +131,8 @@ void
 LuaProc::init ()
 {
 #ifdef WITH_LUAPROC_STATS
-	_stats_avg[0] = _stats_avg[1] = _stats_max[0] = _stats_max[1] = _stats_cnt = 0;
+	_stats_avg[0] = _stats_avg[1] = _stats_max[0] = _stats_max[1] = 0;
+	_stats_cnt = -25;
 #endif
 
 	lua.tweak_rt_gc ();
@@ -746,14 +747,15 @@ LuaProc::connect_and_run (BufferSet& bufs,
 
 	lua.collect_garbage_step (100 /*kB*/);
 #ifdef WITH_LUAPROC_STATS
-	++_stats_cnt;
-	int64_t t2 = g_get_monotonic_time ();
-	int64_t ela0 = t1 - t0;
-	int64_t ela1 = t2 - t1;
-	if (ela0 > _stats_max[0]) _stats_max[0] = ela0;
-	if (ela1 > _stats_max[1]) _stats_max[1] = ela1;
-	_stats_avg[0] += ela0;
-	_stats_avg[1] += ela1;
+	if (++_stats_cnt > 0) {
+		int64_t t2 = g_get_monotonic_time ();
+		int64_t ela0 = t1 - t0;
+		int64_t ela1 = t2 - t1;
+		if (ela0 > _stats_max[0]) _stats_max[0] = ela0;
+		if (ela1 > _stats_max[1]) _stats_max[1] = ela1;
+		_stats_avg[0] += ela0;
+		_stats_avg[1] += ela1;
+	}
 #endif
 	return 0;
 }
