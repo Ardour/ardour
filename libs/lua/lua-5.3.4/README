@@ -1,4 +1,4 @@
-This is Lua 5.3.3, released on 30 May 2016.
+This is Lua 5.3.4, released on 12 Jan 2017.
 
 The Lua source is imported in the repository in order to ensure that it
 is compiled with the same C++ compiler as Ardour (setjmp/longjmp, exceptions)
