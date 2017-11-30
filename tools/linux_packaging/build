@@ -252,7 +252,7 @@ fi
 # jack in the places where it might be
 #
 
-echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
+echo export 'PATH="/usr/local/bin:/opt/bin:$PATH"' >> $ENVIRONMENT
 
 # create startup helper script
 if test -d $BUILD_ROOT/vst; then
