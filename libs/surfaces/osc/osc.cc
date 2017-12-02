@@ -415,6 +415,9 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
+		REGISTER_CALLBACK (serv, "/strip/custom/enable", "f", custom_enable);
+		REGISTER_CALLBACK (serv, "/strip/custom/clear", "f", custom_clear);
+		REGISTER_CALLBACK (serv, "/strip/custom/clear", "", custom_clear);
 		REGISTER_CALLBACK (serv, "/surface/list", "", surface_list);
 		REGISTER_CALLBACK (serv, "/surface/list", "f", surface_list);
 		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
@@ -794,10 +797,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	/* 15 for /#current_value plus 2 for /<path> */
 
 	len = strlen (path);
-	/*
-	 * not needed until /strip/listen/ignore fixed
-	OSCSurface *sur = get_surface(get_address (msg));
-	*/
+	OSCSurface *sur = get_surface(get_address (msg), true);
 
 	if (strstr (path, "/automation")) {
 		ret = set_automation (path, types, argv, argc, msg);
@@ -832,56 +832,38 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else
-/*	if (strcmp (path, "/strip/listen") == 0) {
-		check_surface (msg);
-
-		cerr << "set up listener\n";
-
-		lo_message reply = lo_message_new ();
-
+	if (strcmp (path, "/strip/listen") == 0) {
 		if (argc <= 0) {
-			lo_message_add_string (reply, "syntax error");
+			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
+		} else if (sur->custom_enable) {
+			PBD::warning << "OSC: Can't add strips with custom enabled." << endmsg;
 		} else {
 			for (int n = 0; n < argc; ++n) {
 
-				boost::shared_ptr<Route> r = session->get_remote_nth_route (argv[n]->i);
-
-				if (!r) {
-					lo_message_add_string (reply, "not found");
-					cerr << "no such route\n";
-					break;
-				} else {
-					cerr << "add listener\n";
-					listen_to_route (r, get_address (msg));
-					lo_message_add_int32 (reply, argv[n]->i);
+				boost::shared_ptr<Stripable> s = get_strip (argv[n]->i, get_address (msg));
+				if (s) {
+					sur->custom_strips.push_back (s);
 				}
 			}
 		}
-
-		if (sur->feedback[14]) {
-			lo_send_message (get_address (msg), "/reply", reply);
-		} else {
-			lo_send_message (get_address (msg), "#reply", reply);
-		}
-		lo_message_free (reply);
-
 		ret = 0;
-
 	} else
 	if (strcmp (path, "/strip/ignore") == 0) {
-		check_surface (msg);
-
-		for (int n = 0; n < argc; ++n) {
-
-			boost::shared_ptr<Route> r = session->get_remote_nth_route (argv[n]->i);
-
-			if (r) {
-				end_listen (r, get_address (msg));
+		if (argc <= 0) {
+			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
+		} else if (!sur->custom_enable) {
+			PBD::warning << "OSC: Can't remove strips without custom enabled." << endmsg;
+		} else {
+			for (int n = 0; n < argc; ++n) {
+				if ((uint32_t) argv[n]->i <= sur->custom_strips.size ()) {
+					sur->custom_strips[argv[n]->i - 1] = boost::shared_ptr<Stripable>();
+				}
 			}
+			ret = set_bank (sur->bank, msg);
 		}
 
 		ret = 0;
-	} else */
+	} else
 	if (strstr (path, "/strip") && (argc != 1)) {
 		// All of the strip commands below require 1 parameter
 		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
@@ -1269,6 +1251,7 @@ OSC::surface_list (lo_message msg)
 		OSCSurface* sur = &_surface[it];
 		cerr << string_compose ("  Surface: %1 URL: %2\n", it, sur->remote_url);
 		cerr << string_compose ("	Number of strips: %1 Bank size: %2 Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
+		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", sur->custom_enable, sur->custom_strips.size ());
 		bool ug = false;
 		if (sur->usegroup == PBD::Controllable::UseGroup) {
 			ug = true;
@@ -1298,6 +1281,47 @@ OSC::surface_list (lo_message msg)
 		cerr << string_compose ("	auto bank sizing: %1 linkset not ready: %2\n", set->autobank, set->not_ready);
 	}
 	cerr << "\n";
+}
+
+int
+OSC::custom_clear (lo_message msg)
+{
+	if (!session) {
+		return 0;
+	}
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	sur->custom_enable = false;
+	sur->custom_strips.clear ();
+	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+	sur->nstrips = sur->strips.size();
+	return set_bank (1, msg);
+}
+
+int
+OSC::custom_enable (float state, lo_message msg)
+{
+	if (!session) {
+		return 0;
+	}
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	if (state > 0){
+		if (sur->custom_strips.size () == 0) {
+			PBD::warning << "No custom strips set to enable" << endmsg;
+			sur->custom_enable = false;
+			return -1;
+		} else {
+			sur->custom_enable = true;
+			sur->strips = sur->custom_strips;
+			sur->nstrips = sur->custom_strips.size();
+			return set_bank (1, msg);
+		}
+	} else {
+		sur->custom_enable = false;
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+		sur->nstrips = sur->strips.size();
+		return set_bank (1, msg);
+	}
+	return -1;
 }
 
 int
@@ -1930,6 +1954,8 @@ OSC::get_surface (lo_address addr , bool quiet)
 	s.feedback = default_feedback;
 	s.gainmode = default_gainmode;
 	s.usegroup = PBD::Controllable::NoGroup;
+	s.custom_strips.clear ();
+	s.custom_enable = false;
 	s.sel_obs = 0;
 	s.expand = 0;
 	s.expand_enable = false;
@@ -1974,8 +2000,14 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
-	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
-	sur->nstrips = sur->strips.size();
+	if (sur->custom_enable && (sur->custom_strips.size () > 0)) {
+		sur->strips = sur->custom_strips;
+		sur->nstrips = sur->custom_strips.size ();
+	} else {
+		sur->custom_enable = false;
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+		sur->nstrips = sur->strips.size();
+	}
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
@@ -2051,8 +2083,8 @@ OSC::_recalcbanks ()
 	// refresh each surface we know about.
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
-		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
-		sur->nstrips = sur->strips.size();
+		//sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+		//sur->nstrips = sur->strips.size();
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
 		if (sur->cue) {

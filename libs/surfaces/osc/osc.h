@@ -134,6 +134,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
 		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
+		Sorted custom_strips;		// a sorted list of user selected strips
+		int custom_enable;			// use custom strip list
 		Sorted strips;				// list of stripables for this surface
 		// strips
 		uint32_t bank;				// current bank
@@ -352,6 +354,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(bank_up);
 	PATH_CALLBACK_MSG(bank_down);
 	PATH_CALLBACK_MSG(master_select);
+	PATH_CALLBACK_MSG(custom_clear);
 
 #define PATH_CALLBACK(name) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -508,6 +511,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_eq_lpf_enable,f);
 	PATH_CALLBACK1_MSG(sel_eq_lpf_slope,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
+	PATH_CALLBACK1_MSG(custom_enable,f);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -655,6 +659,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 	int refresh_surface (lo_message msg);
+	int custom_clear (lo_message msg);
+	int custom_enable (float state, lo_message msg);
 	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
 	int sel_send_page (int page, lo_message msg);
