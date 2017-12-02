@@ -25,9 +25,15 @@
 #include <cassert>
 
 #include <sys/types.h>
-#include <fcntl.h>
-#include <utime.h>
+
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
 #include <unistd.h>
+#include <utime.h>
+#endif
+
+#include <fcntl.h>
 #include <errno.h>
 
 #include <stdlib.h>
