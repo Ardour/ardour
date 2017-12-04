@@ -374,9 +374,15 @@ LuaScriptParams::script_params (const LuaScriptInfoPtr& lsi, const std::string &
 LuaScriptParamList
 LuaScriptParams::script_params (const std::string& s, const std::string &pname, bool file)
 {
+	LuaState lua;
+	return LuaScriptParams::script_params (lua, s, pname, file);
+}
+
+LuaScriptParamList
+LuaScriptParams::script_params (LuaState& lua, const std::string& s, const std::string &pname, bool file)
+{
 	LuaScriptParamList rv;
 
-	LuaState lua;
 	lua_State* L = lua.getState();
 	lua.sandbox (true);
 	lua.do_command ("function ardour () end");

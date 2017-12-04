@@ -19,6 +19,8 @@
 #ifndef _ardour_lua_script_params_h_
 #define _ardour_lua_script_params_h_
 
+#include "lua/luastate.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/luascripting.h"
 
@@ -38,6 +40,7 @@ namespace ARDOUR { namespace LuaScriptParams {
 
 	LIBARDOUR_API LuaScriptParamList script_params (const LuaScriptInfoPtr&, const std::string &);
 	LIBARDOUR_API LuaScriptParamList script_params (const std::string &, const std::string &, bool file=true);
+	LIBARDOUR_API LuaScriptParamList script_params (LuaState&, const std::string &, const std::string &, bool file=true);
 	LIBARDOUR_API void params_to_ref (luabridge::LuaRef *tbl_args, const LuaScriptParamList&);
 	LIBARDOUR_API void ref_to_params (LuaScriptParamList&, luabridge::LuaRef *tbl_args);
 
