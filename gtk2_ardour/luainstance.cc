@@ -1330,11 +1330,20 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		return false;
 	}
 
-	LuaScriptParamList lsp = LuaScriptParams::script_params (spi, param_function);
+	LuaState ls;
+	register_classes (ls.getState ());
+	LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, param_function);
+
+	/* allow cancel */
+	for (size_t i = 0; i < lsp.size(); ++i) {
+		if (lsp[i]->preseeded && lsp[i]->name == "x-script-abort") {
+			return false;
+		}
+	}
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
 
-	if (!spd.need_interation ()) {
+	if (spd.need_interation ()) {
 		switch (spd.run ()) {
 			case Gtk::RESPONSE_ACCEPT:
 				break;
@@ -1343,7 +1352,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 		}
 	}
 
-	LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false));
+	LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false, true));
 	lsp.push_back (lspp);
 
 	switch (type) {

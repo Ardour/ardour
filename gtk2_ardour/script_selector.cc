@@ -162,6 +162,13 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	t->set_spacings (6);
 
 	_name_entry.set_text (spi->name);
+
+	for (size_t i = 0; i < _lsp.size(); ++i) {
+		if (_lsp[i]->preseeded && _lsp[i]->name == "x-script-name" && !_lsp[i]->value.empty ()) {
+			_name_entry.set_text (_lsp[i]->value);
+		}
+	}
+
 	_name_entry.signal_changed().connect (sigc::mem_fun (*this, &ScriptParameterDialog::update_sensitivity));
 
 	int ty = 0;
@@ -211,13 +218,15 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 bool
 ScriptParameterDialog::need_interation () const
 {
-	if (_lsp.size () > 0) {
-		return false;
-	}
 	if (!parameters_ok ()) {
-		return false;
+		return true;
 	}
-	return true;
+	for (size_t i = 0; i < _lsp.size(); ++i) {
+		if (!_lsp[i]->optional && !_lsp[i]->preseeded) {
+			return true;
+		}
+	}
+	return false;
 }
 
 bool
