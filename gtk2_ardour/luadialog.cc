@@ -16,6 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <algorithm>
+
 #include <gtkmm.h>
 
 #include "ardour/dB.h"
@@ -451,18 +453,27 @@ protected:
 	void populate (Gtk::Menu_Helpers::MenuList& items, luabridge::LuaRef values, std::string const& dflt)
 	{
 		using namespace Gtk::Menu_Helpers;
+		std::vector<std::string> keys;
+
 		for (luabridge::Iterator i (values); !i.isNil (); ++i) {
 			if (!i.key ().isString ())  { continue; }
-			std::string key = i.key ().cast<std::string> ();
-			if (i.value ().isTable ())  {
+			keys.push_back (i.key ().cast<std::string> ());
+		}
+
+		std::sort (keys.begin(), keys.end());
+
+		for (std::vector<std::string>::const_iterator i = keys.begin (); i != keys.end(); ++i) {
+			std::string key = *i;
+
+			if (values[key].isTable ())  {
 				Gtk::Menu* menu  = Gtk::manage (new Gtk::Menu);
 				items.push_back (MenuElem (key, *menu));
-				populate (menu->items (), i.value (), dflt);
+				populate (menu->items (), values[key], dflt);
 				continue;
 			}
-			luabridge::LuaRef* ref = new luabridge::LuaRef (i.value ());
+			luabridge::LuaRef* ref = new luabridge::LuaRef (values[key]);
 			_refs.push_back (ref);
-			items.push_back (MenuElem (i.key ().cast<std::string> (),
+			items.push_back (MenuElem (key,
 						sigc::bind (sigc::mem_fun (*this, &LuaDialogDropDown::dd_select), key, ref)));
 
 			if (!_rv || key == dflt) {
