@@ -28,7 +28,7 @@
 
 /* max bytes per individual midi-event
  * events larger than this are ignored */
-#define MaxAlsaMidiEventSize (64)
+#define MaxAlsaMidiEventSize (128)
 
 namespace ARDOUR {
 
