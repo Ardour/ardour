@@ -20,6 +20,9 @@
 #include <cairomm/surface.h>
 #include <pango/pangocairo.h>
 
+#include "pbd/strsplit.h"
+
+#include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour/audioengine.h"
@@ -424,6 +427,69 @@ lua_exec (std::string cmd)
 	return 0;
 }
 #endif
+
+////////////////////////////////////////////////////////////////////////////////
+
+static int
+lua_actionlist (lua_State *L)
+{
+	using namespace std;
+
+	vector<string> paths;
+	vector<string> labels;
+	vector<string> tooltips;
+	vector<string> keys;
+	vector<Glib::RefPtr<Gtk::Action> > actions;
+	Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+
+	vector<string>::iterator p;
+	vector<string>::iterator l;
+
+	luabridge::LuaRef action_tbl (luabridge::newTable (L));
+
+	for (l = labels.begin(), p = paths.begin(); l != labels.end(); ++p, ++l) {
+		if (l->empty ()) {
+			continue;
+		}
+
+		vector<string> parts;
+		split (*p, parts, '/');
+
+		if (parts.empty()) {
+			continue;
+		}
+
+		//kinda kludgy way to avoid displaying menu items as mappable
+		if (parts[1] == _("Main_menu"))
+			continue;
+		if (parts[1] == _("JACK"))
+			continue;
+		if (parts[1] == _("redirectmenu"))
+			continue;
+		if (parts[1] == _("Editor_menus"))
+			continue;
+		if (parts[1] == _("RegionList"))
+			continue;
+		if (parts[1] == _("ProcessorMenu"))
+			continue;
+
+		/* strip <Actions>/ from the start */
+		string path = (*p);
+		path = path.substr (strlen ("<Actions>/"));
+
+		if (!action_tbl[parts[1]].isTable()) {
+			action_tbl[parts[1]] = luabridge::newTable (L);
+		}
+		assert (action_tbl[parts[1]].isTable());
+		luabridge::LuaRef tbl (action_tbl[parts[1]]);
+		assert (tbl.isTable());
+		tbl[*l] = path;
+	}
+
+	luabridge::push (L, action_tbl);
+	return 1;
+}
+
 ////////////////////////////////////////////////////////////////////////////////
 
 // ARDOUR_UI and instance() are not exposed.
@@ -948,6 +1014,8 @@ LuaInstance::register_classes (lua_State* L)
 		.addConst ("Extend", Selection::Operation(Selection::Extend))
 		.addConst ("Add", Selection::Operation(Selection::Add))
 		.endNamespace ()
+
+		.addCFunction ("actionlist", &lua_actionlist)
 
 		.endNamespace () // end ArdourUI
 
