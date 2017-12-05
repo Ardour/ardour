@@ -180,6 +180,7 @@ libardour_sources = [
         'quantize.cc',
         'rc_configuration.cc',
         'readonly_control.cc',
+        'raw_midi_parser.cc',
         'recent_sessions.cc',
         'record_enable_control.cc',
         'record_safe_control.cc',
