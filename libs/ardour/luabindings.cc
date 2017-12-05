@@ -28,6 +28,7 @@
 #include "evoral/Range.hpp"
 
 #include "ardour/amp.h"
+#include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
@@ -65,6 +66,7 @@
 #include "ardour/polarity_processor.h"
 #include "ardour/port_manager.h"
 #include "ardour/progress.h"
+#include "ardour/raw_midi_parser.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
@@ -869,6 +871,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <Port> ("Port")
 		.addCast<MidiPort> ("to_midiport")
+		.addCast<AsyncMIDIPort> ("to_asyncmidiport")
 		.addCast<AudioPort> ("to_audioport")
 		.addFunction ("name", &Port::name)
 		.addFunction ("pretty_name", &Port::pretty_name)
@@ -890,9 +893,14 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiPort, Port> ("MidiPort")
+		.addCast<AsyncMIDIPort> ("to_asyncmidiport")
 		.addFunction ("input_active", &MidiPort::input_active)
 		.addFunction ("set_input_active", &MidiPort::set_input_active)
 		.addFunction ("get_midi_buffer", &MidiPort::get_midi_buffer) // DSP only
+		.endClass ()
+
+		.deriveWSPtrClass <AsyncMIDIPort, MidiPort> ("AsyncMIDIPort")
+		.addFunction ("write", &AsyncMIDIPort::write)
 		.endClass ()
 
 		.beginWSPtrClass <PortSet> ("PortSet")
@@ -1553,6 +1561,14 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")
+		.endClass ()
+
+		.beginClass <RawMidiParser> ("RawMidiParser")
+		.addVoidConstructor ()
+		.addFunction ("reset", &RawMidiParser::reset)
+		.addFunction ("process_byte", &RawMidiParser::process_byte)
+		.addFunction ("buffer_size", &RawMidiParser::buffer_size)
+		.addFunction ("midi_buffer", &RawMidiParser::midi_buffer)
 		.endClass ()
 
 		.deriveWSPtrClass <AudioSource, Source> ("AudioSource")
