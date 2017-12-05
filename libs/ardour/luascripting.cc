@@ -410,6 +410,7 @@ LuaScriptParams::script_params (LuaState& lua, const std::string& s, const std::
 				std::string title = i.value ()["title"].cast<std::string> ();
 				std::string dflt;
 				bool optional = false;
+				bool preseeded = false;
 
 				if (i.value ()["default"].isString ()) {
 					dflt = i.value ()["default"].cast<std::string> ();
@@ -417,7 +418,10 @@ LuaScriptParams::script_params (LuaState& lua, const std::string& s, const std::
 				if (i.value ()["optional"].isBoolean ()) {
 					optional = i.value ()["optional"].cast<bool> ();
 				}
-				LuaScriptParamPtr lsspp (new LuaScriptParam(name, title, dflt, optional));
+				if (i.value ()["preseeded"].isBoolean ()) {
+					preseeded = i.value ()["preseeded"].cast<bool> ();
+				}
+				LuaScriptParamPtr lsspp (new LuaScriptParam(name, title, dflt, optional, preseeded));
 				rv.push_back (lsspp);
 			}
 		}

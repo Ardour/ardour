@@ -80,11 +80,12 @@ struct LIBARDOUR_API LuaScriptParam {
 				const std::string& n,
 				const std::string& t,
 				const std::string& d,
-				bool o)
+				bool o, bool p)
 			: name (n)
 			, title (t)
 			, dflt (d)
 			, optional (o)
+			, preseeded (p)
 			, is_set (false)
 			, value (d)
 	{}
@@ -93,6 +94,7 @@ struct LIBARDOUR_API LuaScriptParam {
 		std::string title;
 		std::string dflt;
 		bool optional;
+		bool preseeded;
 		bool is_set;
 		std::string value;
 };
