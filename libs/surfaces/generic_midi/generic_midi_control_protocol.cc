@@ -42,6 +42,7 @@
 #include "ardour/session.h"
 #include "ardour/midi_ui.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/raw_midi_parser.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/debug.h"
 
@@ -241,6 +242,8 @@ GenericMidiControlProtocol::drop_all ()
 		delete *i;
 	}
 	actions.clear ();
+
+	_sysex_init = "";
 }
 
 void
@@ -266,6 +269,7 @@ GenericMidiControlProtocol::drop_bindings ()
 	_current_binding = "";
 	_bank_size = 0;
 	_current_bank = 0;
+	_sysex_init = "";
 }
 
 int
@@ -720,7 +724,7 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 	DEBUG_TRACE (DEBUG::GenericMidi, "Load bindings: Reading midi map\n");
 	XMLTree state_tree;
 
-	if (!state_tree.read (xmlpath.c_str())) {
+	if (!state_tree.read (xmlpath)) {
 		error << string_compose(_("Could not understand MIDI bindings file %1"), xmlpath) << endmsg;
 		return -1;
 	}
@@ -792,12 +796,25 @@ GenericMidiControlProtocol::load_bindings (const string& xmlpath)
 				}
 			}
 		}
+
+		if ((*citer)->name() == "Sysex") {
+			for (XMLNodeList::const_iterator n = (*citer)->children ().begin (); n != (*citer)->children ().end (); ++n) {
+				if (!(*n)->is_content ()) { continue; }
+				_sysex_init = (*n)->content ();
+				break;
+			}
+		}
+
 	}
 
 	if ((prop = root->property ("name")) != 0) {
 		_current_binding = prop->value ();
 	}
 
+	if ((connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+
+		send_sysex_init ();
+	}
 	reset_controllables ();
 
 	return 0;
@@ -1221,6 +1238,31 @@ void
 GenericMidiControlProtocol::connected ()
 {
 	cerr << "Now connected\n";
+	send_sysex_init ();
+}
+
+void
+GenericMidiControlProtocol::send_sysex_init ()
+{
+	if (_sysex_init.empty ()) {
+		return;
+	}
+
+	boost::shared_ptr<AsyncMIDIPort> p = boost::dynamic_pointer_cast<AsyncMIDIPort> (_output_port);
+	assert (p);
+
+	gsize size = 0;
+	guchar* buf = g_base64_decode (_sysex_init.c_str(), &size);
+
+	RawMidiParser mp;
+	for (size_t i = 0; i < size; ++i) {
+		if (mp.process_byte (buf[i])) {
+			p->write (mp.midi_buffer (), mp.buffer_size (), 0);
+			/* delay for physical MIDI rate; 320usec / byte */
+			g_usleep (400 * mp.buffer_size ());
+		}
+	}
+	g_free (buf);
 }
 
 boost::shared_ptr<Port>

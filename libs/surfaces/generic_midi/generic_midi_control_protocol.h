@@ -162,6 +162,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 
 	void reset_controllables ();
 	void drop_all ();
+	void send_sysex_init ();
 
 	enum ConnectionState {
 		InputConnected = 0x1,
@@ -174,6 +175,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	void connected();
 
 	std::string _current_binding;
+	std::string _sysex_init;
 	uint32_t _bank_size;
 	uint32_t _current_bank;
 	/** true if this surface is motorised.  If it is, we assume
