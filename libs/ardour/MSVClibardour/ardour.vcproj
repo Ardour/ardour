@@ -920,6 +920,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\raw_midi_parser.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\rb_effect.cc"
 				>
 			</File>
@@ -2199,6 +2203,10 @@
 			</File>
 			<File
 				RelativePath="..\ardour\quantize.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\raw_midi_parser.h"
 				>
 			</File>
 			<File
