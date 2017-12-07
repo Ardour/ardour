@@ -34,11 +34,14 @@ private:
 	void setup_list ();
 	void refresh ();
 	void script_combo_changed ();
-
+	bool script_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i);
+	
 	Gtk::Button* _add;
 	Gtk::ComboBoxText _script_combo;
 
+	Gtk::Label  _type_label;
 	Gtk::Label  _type;
+	Gtk::Label  _author_label;
 	Gtk::Label  _author;
 	Gtk::Label  _description;
 

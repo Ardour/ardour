@@ -31,28 +31,26 @@ using namespace ARDOUR;
 
 ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType type)
 	: ArdourDialog (title)
+	, _type_label ("<b>Type:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
 	, _type ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+	, _author_label ("<b>Author:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
 	, _author ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
 	, _description ("", Gtk::ALIGN_START, Gtk::ALIGN_START)
 	, _scripts (LuaScripting::instance ().scripts (type))
 	, _script_type (type)
 {
-	Gtk::Label* l;
-
 	Table* t = manage (new Table (3, 2));
 	t->set_spacings (6);
 
 	int ty = 0;
 
-	l = manage (new Label (_("<b>Type:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	_type_label.set_use_markup ();
+	t->attach (_type_label, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
 	t->attach (_type, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
-	l = manage (new Label (_("<b>Author:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	_author_label.set_use_markup ();
+	t->attach (_author_label, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
 	t->attach (_author, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
@@ -81,36 +79,78 @@ ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType typ
 
 	setup_list ();
 	show_all ();
+	
+	script_combo_changed();
+}
+
+bool
+ScriptSelector::script_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i)
+{
+	_script_combo.set_active (i);
+
+	return _script_combo.get_active_text () == "separator";
 }
 
 void
 ScriptSelector::setup_list ()
 {
 	_combocon.block();
+	
 	vector<string> script_names;
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		script_names.push_back ((*s)->name);
+		if ( (*s)->name != "Shortcut" ) {
+			script_names.push_back ((*s)->name);
+		}
+	}
+	
+	_script_combo.clear();
+	_script_combo.set_row_separator_func ( sigc::mem_fun (*this, &ScriptSelector::script_separator) );
+
+	_script_combo.append_text ("Shortcut");
+	_script_combo.append_text ("separator");
+	
+	vector<string>::const_iterator i;
+	for (i = script_names.begin(); i != script_names.end(); ++i) {
+		_script_combo.append_text (*i);
 	}
 
-	Gtkmm2ext::set_popdown_strings (_script_combo, script_names);
-	if (script_names.size() > 0) {
-		_script_combo.set_active(0);
-		script_combo_changed ();
-	}
+	_script_combo.set_active(0);
+	script_combo_changed ();
+
 	_combocon.unblock();
 }
 
 void
 ScriptSelector::script_combo_changed ()
 {
-	int i = _script_combo.get_active_row_number();
-	_script = _scripts[i];
+	std::string nm = _script_combo.get_active_text();
 
-	_type.set_text(LuaScriptInfo::type2str (_script->type));
-	_author.set_text (_script->author);
-	_description.set_text (_script->description);
+	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
+		if ( (*s)->name == nm ) {
+			_script = (*s);
+		}
+	}
 
-	_add->set_sensitive (Glib::file_test(_script->path, Glib::FILE_TEST_EXISTS));
+	if (_script) {
+		
+		if (_script->name == "Shortcut" ) {
+			_type.hide();
+			_type_label.hide();
+			_author.hide();
+			_author_label.hide();
+			_description.set_text (_script->description);
+		} else {
+			_type.show();
+			_type_label.show();
+			_author.show();
+			_author_label.show();
+			_type.set_text(LuaScriptInfo::type2str (_script->type));
+			_author.set_text (_script->author);
+			_description.set_text (_script->description);
+		}
+
+		_add->set_sensitive (Glib::file_test(_script->path, Glib::FILE_TEST_EXISTS));
+	}
 }
 
 void

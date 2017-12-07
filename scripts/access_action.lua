@@ -3,7 +3,7 @@ ardour {
 	name        = "Shortcut",
 	license     = "MIT",
 	author      = "me",
-	description = [[Shortcut call any action]]
+	description = [[Trigger a keyboard shortcut.  You will be prompted for the shortcut's action in the next step.]]
 }
 
 function action_params ()

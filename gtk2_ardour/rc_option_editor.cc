@@ -3814,7 +3814,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 			new ColumVisibilityOption (
-				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
+				"action-table-columns", _("Display Action-Buttons"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)

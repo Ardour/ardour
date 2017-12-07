@@ -1358,7 +1358,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 	switch (type) {
 		case LuaScriptInfo::EditorAction:
 			reg = lua_action_names ();
-			title = _("Add Lua Action");
+			title = _("Add Shortcut or Lua Script");
 			break;
 		case LuaScriptInfo::EditorHook:
 			reg = lua_slot_names ();
