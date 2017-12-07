@@ -33,11 +33,14 @@
 #include "canvas/canvas.h"
 #include "canvas/pixbuf.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "editing.h"
 #include "editor.h"
 #include "gui_thread.h"
+#include "luainstance.h"
 #include "main_clock.h"
 #include "time_axis_view.h"
 #include "ui_config.h"
@@ -744,6 +747,61 @@ Editor::register_actions ()
 	/* MIDI stuff */
 	reg_sens (editor_actions, "quantize", _("Quantize"), sigc::mem_fun (*this, &Editor::quantize_region));
 
+}
+
+static void _lua_print (std::string s) {
+#ifndef NDEBUG
+	std::cout << "LuaInstance: " << s << "\n";
+#endif
+	PBD::info << "LuaInstance: " << s << endmsg;
+}
+
+void
+Editor::trigger_script_by_name ( const std::string script_name )
+{
+	string script_path;
+	ARDOUR::LuaScriptList scr = LuaScripting::instance ().scripts(LuaScriptInfo::EditorAction);
+	for (ARDOUR::LuaScriptList::const_iterator s = scr.begin(); s != scr.end(); ++s) {
+
+		if ( (*s)->name == script_name ) {
+			script_path = (*s)->path;
+
+			if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+				cerr << "Lua Script action: path to " << script_path << " does not appear to be valid" << endl;
+				return;
+			}
+
+			LuaState lua;
+			lua.Print.connect (&_lua_print);  //ToDo
+			lua.sandbox (true);
+			lua_State* L = lua.getState();
+			LuaInstance::register_classes (L);
+			LuaBindings::set_session (L, _session);
+			luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
+			lua_setglobal (L, "Editor");
+			lua.do_command ("function ardour () end");
+			lua.do_file (script_path);
+			luabridge::LuaRef args (luabridge::newTable (L));
+
+			//ToDo:  args?
+			//	args["how_many"]   = count;
+
+			try {
+				luabridge::LuaRef fn = luabridge::getGlobal (L, "factory");
+				if (fn.isFunction()) {
+					fn (args)();
+				}
+			} catch (luabridge::LuaException const& e) {
+				cerr << "LuaException:" << e.what () << endl;
+			} catch (...) {
+				cerr << "Lua script failed: " << script_path << endl;
+			}
+				
+			continue;  //script found; we're done
+		}
+	}
+
+	cerr << "Lua script was not found: " << script_name << endl;
 }
 
 void
