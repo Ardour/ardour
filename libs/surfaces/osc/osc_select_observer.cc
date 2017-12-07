@@ -67,6 +67,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	send_size = send_page_size;
 	send_page = sur->send_page;
 	plug_page_size = sur->plug_page_size;
+	plug_size = plug_page_size;
 	plug_page = sur->plug_page;
 	if (sur->plugins.size () > 0) {
 		plug_id = sur->plugins[sur->plugin_id - 1];
