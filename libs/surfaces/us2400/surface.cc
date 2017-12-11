@@ -99,6 +99,7 @@ Surface::Surface (US2400Protocol& mcp, const std::string& device_name, uint32_t 
 	, _last_master_gain_written (-0.0f)
 	, connection_state (0)
 	, input_source (0)
+	, _joystick_active (false)
 {
 	DEBUG_TRACE (DEBUG::US2400, "Surface::Surface init\n");
 
@@ -601,8 +602,21 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 
 	turn_it_on ();
 
+	//the joystick is not touch sensitive.
+	//ignore the joystick until the user clicks the "null" button. the joystick sends spurious controller messages.
+	//and since they are absolute values (joy position) this can send undesired changes. 
+	if ( _stype == st_joy && ev->controller_number == 0x01 ) {
+		_joystick_active = true;
+
+//unfortunately the device does not appear to respond to the NULL button's LED, to indicate that the joystick is active.
+//		MidiByteArray joy_active (3, 0xB0, 0x01, 0x01);
+//		_port->write (joy_active);
+
+	}
+
 #ifdef MIXBUS32C  //in 32C, we can use the joystick for the last 2 mixbus send level & pans
-	if (_stype == st_joy) {
+
+	if (_stype == st_joy && _joystick_active ) {
 		if ( ev->controller_number == 0x03 ) {
 			float value = (float)ev->value / 127.0;
 			float db_value = 20.0 * value;
@@ -965,6 +979,11 @@ Surface::subview_mode_changed ()
 {
 	for (Strips::iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->subview_mode_changed ();
+	}
+	
+	//channel selection likely changed.  disable the joystick so it doesn't send spurious messages
+	if ( _stype == st_joy ) {
+		_joystick_active = false;
 	}
 }
 
