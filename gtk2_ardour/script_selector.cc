@@ -98,13 +98,13 @@ ScriptSelector::setup_list ()
 	
 	vector<string> script_names;
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		if ( (*s)->name != "Shortcut" ) {
+		if ((*s)->name != "Shortcut") {
 			script_names.push_back ((*s)->name);
 		}
 	}
 	
 	_script_combo.clear();
-	_script_combo.set_row_separator_func ( sigc::mem_fun (*this, &ScriptSelector::script_separator) );
+	_script_combo.set_row_separator_func (sigc::mem_fun (*this, &ScriptSelector::script_separator));
 
 	_script_combo.append_text ("Shortcut");
 	_script_combo.append_text ("separator");
@@ -126,14 +126,14 @@ ScriptSelector::script_combo_changed ()
 	std::string nm = _script_combo.get_active_text();
 
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		if ( (*s)->name == nm ) {
+		if ((*s)->name == nm) {
 			_script = (*s);
 		}
 	}
 
 	if (_script) {
 		
-		if (_script->name == "Shortcut" ) {
+		if (_script->name == "Shortcut") {
 			_type.hide();
 			_type_label.hide();
 			_author.hide();

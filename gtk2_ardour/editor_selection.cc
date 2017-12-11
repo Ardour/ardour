@@ -399,7 +399,7 @@ Editor::mapover_tracks (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeA
 
 	RouteGroup* group = route_basis->route()->route_group();
 
-	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id) ) {
+	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
 		/* the basis is a member of an active route group, with the appropriate
 		   properties; find other members */
@@ -443,7 +443,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 
 	RouteGroup* group = route_basis->route()->route_group(); // could be null, not a problem
 
-	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id) ) {
+	if (group && group->enabled_property(prop) && group->enabled_property (Properties::active.property_id)) {
 
 		/* the basis is a member of an active route group, with the appropriate
 		   properties; find other members */
@@ -1844,7 +1844,7 @@ Editor::set_selection_from_range (Location& loc)
 
 	// if no tracks are selected, enable all tracks
 	// (_something_ has to be selected for any range selection, otherwise the user won't see anything)
-	if ( selection->tracks.empty() ) {
+	if (selection->tracks.empty()) {
 		select_all_tracks();
 	}
 
@@ -2103,7 +2103,7 @@ Editor::select_range_between ()
 	samplepos_t start;
 	samplepos_t end;
 
-	if ( !selection->time.empty() ) {
+	if (!selection->time.empty()) {
 		selection->clear_time ();
 	}
 
@@ -2128,7 +2128,7 @@ Editor::get_edit_op_range (samplepos_t& start, samplepos_t& end) const
 
 	/* if an explicit range exists, use it */
 
-	if ( (mouse_mode == MouseRange || get_smart_mode() ) &&  !selection->time.empty()) {
+	if ((mouse_mode == MouseRange || get_smart_mode()) &&  !selection->time.empty()) {
 		/* we know that these are ordered */
 		start = selection->time.start();
 		end = selection->time.end_sample();

@@ -365,7 +365,7 @@ public:
 	void toggle_measure_visibility ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
-	std::pair <samplepos_t,samplepos_t> session_gui_extents( bool use_extra = true ) const; 
+	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;
 
 	/* fades */
 
@@ -658,7 +658,7 @@ private:
 	gint really_remove_marker (ARDOUR::Location* loc);
 	void goto_nth_marker (int nth);
 	void trigger_script (int nth);
-	void trigger_script_by_name ( const std::string script_name );
+	void trigger_script_by_name (const std::string script_name);
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 
@@ -1519,7 +1519,7 @@ private:
 	void set_loop_start_from_edit_point ();
 	void set_loop_end_from_edit_point ();
 
-	void keyboard_selection_begin ( Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE );
+	void keyboard_selection_begin (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE);
 	void keyboard_selection_finish (bool add, Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE);
 	bool have_pending_keyboard_selection;
 	samplepos_t pending_keyboard_selection_start;
