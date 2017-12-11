@@ -175,7 +175,7 @@ public:
 	Fader*                 _master_fader;
 	float                  _last_master_gain_written;
 	PBD::ScopedConnection   master_connection;
-	bool					_joystick_active;
+	bool                   _joystick_active;
 
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 	MidiByteArray host_connection_query (MidiByteArray& bytes);

@@ -342,7 +342,7 @@ Surface::init_strips (uint32_t n)
 	const map<Button::ID,StripButtonInfo>& strip_buttons (_mcp.device_info().strip_buttons());
 
 	//surface 4  has no strips
-	if ( (_stype != st_mcu) && (_stype != st_ext) )
+	if ((_stype != st_mcu) && (_stype != st_ext))
 		return;
 	
 	for (uint32_t i = 0; i < n; ++i) {
@@ -353,7 +353,7 @@ Surface::init_strips (uint32_t n)
 
 		Strip* strip = new Strip (*this, name, i, strip_buttons);
 
-		strip->set_global_index( _number*n + i );
+		strip->set_global_index (_number*n + i);
 
 		groups[name] = strip;
 		strips.push_back (strip);
@@ -401,12 +401,12 @@ Surface::setup_master ()
 		DeviceInfo device_info = _mcp.device_info();
 		GlobalButtonInfo master_button = device_info.get_global_button(Button::MasterFaderTouch);
 		Button* bb = dynamic_cast<Button*> (Button::factory (
-			                                    *this,
-			                                    Button::MasterFaderTouch,
-			                                    master_button.id,
-			                                    master_button.label,
-			                                    *(group_it->second)
-			                                    ));
+		                                    *this,
+		                                    Button::MasterFaderTouch,
+		                                    master_button.id,
+		                                    master_button.label,
+		                                    *(group_it->second)
+		                                    ));
 
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("surface %1 Master Fader new button BID %2 id %3\n",
 		                                                   number(), Button::MasterFaderTouch, bb->id()));
@@ -602,50 +602,55 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 
 	turn_it_on ();
 
-	//the joystick is not touch sensitive.
-	//ignore the joystick until the user clicks the "null" button. the joystick sends spurious controller messages.
-	//and since they are absolute values (joy position) this can send undesired changes. 
-	if ( _stype == st_joy && ev->controller_number == 0x01 ) {
+	/* The joystick is not touch sensitive.
+	 * ignore the joystick until the user clicks the "null" button.
+	 * The joystick sends spurious controller messages,
+	 * and since they are absolute values (joy position) this can send undesired changes. 
+	 */
+	if (_stype == st_joy && ev->controller_number == 0x01) {
 		_joystick_active = true;
 
-//unfortunately the device does not appear to respond to the NULL button's LED, to indicate that the joystick is active.
-//		MidiByteArray joy_active (3, 0xB0, 0x01, 0x01);
-//		_port->write (joy_active);
-
+	/* Unfortunately the device does not appear to respond to the NULL button's LED,
+	 * to indicate that the joystick is active.
+	 */
+#if 0 // this approach doesn't seem to work
+		MidiByteArray joy_active (3, 0xB0, 0x01, 0x01);
+		_port->write (joy_active);
+#endif
 	}
 
 #ifdef MIXBUS32C  //in 32C, we can use the joystick for the last 2 mixbus send level & pans
 
-	if (_stype == st_joy && _joystick_active ) {
-		if ( ev->controller_number == 0x03 ) {
+	if (_stype == st_joy && _joystick_active) {
+		if (ev->controller_number == 0x03) {
 			float value = (float)ev->value / 127.0;
 			float db_value = 20.0 * value;
 			float inv_db = 20.0 - db_value; 
 			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
-			if (r && r->is_input_strip() ) {
-				boost::shared_ptr<AutomationControl> pc = r->send_level_controllable ( 10 );
+			if (r && r->is_input_strip()) {
+				boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (10);
 				if (pc) {
-					pc->set_value( -db_value , PBD::Controllable::NoGroup );
+					pc->set_value (-db_value , PBD::Controllable::NoGroup);
 				}
-				pc = r->send_level_controllable ( 11 );
+				pc = r->send_level_controllable (11);
 				if (pc) {
-					pc->set_value( -inv_db, PBD::Controllable::NoGroup );
+					pc->set_value (-inv_db, PBD::Controllable::NoGroup);
 				}
 			}
 		}
-		if ( ev->controller_number == 0x02 ) {
+		if (ev->controller_number == 0x02) {
 			float value = (float)ev->value / 127.0;
 			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
 			if (r && r->is_input_strip()) {
-				boost::shared_ptr<AutomationControl> pc = r->send_pan_azi_controllable ( 10 );
+				boost::shared_ptr<AutomationControl> pc = r->send_pan_azi_controllable (10);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
-					pc->set_value( v, PBD::Controllable::NoGroup );
+					pc->set_value (v, PBD::Controllable::NoGroup);
 				}
-				pc = r->send_pan_azi_controllable ( 11 );
+				pc = r->send_pan_azi_controllable (11);
 				if (pc) {
 					float v = pc->interface_to_internal(value);
-					pc->set_value( v, PBD::Controllable::NoGroup );
+					pc->set_value (v, PBD::Controllable::NoGroup);
 				}
 			}
 		}
@@ -760,7 +765,7 @@ calculate_challenge_response (MidiByteArray::iterator begin, MidiByteArray::iter
 	// this is how to calculate the response to the challenge.
 	// from the Logic docs.
 	retval <<  (0x7f &  (l[0] +  (l[1] ^ 0xa) - l[3]));
-	retval <<  (0x7f &  ( (l[2] >> l[3]) ^  (l[0] + l[3])));
+	retval <<  (0x7f &  ((l[2] >> l[3]) ^  (l[0] + l[3])));
 	retval <<  (0x7f &  ((l[3] -  (l[2] << 2)) ^  (l[0] | l[1])));
 	retval <<  (0x7f &  (l[1] - l[2] +  (0xf0 ^  (l[3] << 4))));
 
@@ -962,7 +967,7 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 		*/
 
 		if (!(*s)->locked()) {
-			DEBUG_TRACE (DEBUG::US2400, string_compose ("Mapping stripable \"%1\" to strip %2\n", (*r)->name(), (*s)->global_index() ));
+			DEBUG_TRACE (DEBUG::US2400, string_compose ("Mapping stripable \"%1\" to strip %2\n", (*r)->name(), (*s)->global_index()));
 			(*s)->set_stripable (*r);
 			++r;
 		}
@@ -982,7 +987,7 @@ Surface::subview_mode_changed ()
 	}
 	
 	//channel selection likely changed.  disable the joystick so it doesn't send spurious messages
-	if ( _stype == st_joy ) {
+	if (_stype == st_joy) {
 		_joystick_active = false;
 	}
 }
