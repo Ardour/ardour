@@ -1977,6 +1977,10 @@ Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 	if (axes == Vertical || axes == Both) {
 		fit_selection ();
 	}
+	
+	//normally, we don't do anything "automatic" to the user's selection.
+	//but in this case, we will clear the selection after a zoom-to-selection.
+	selection->clear();  
 }
 
 void
