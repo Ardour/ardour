@@ -97,9 +97,9 @@ Surface::Surface (US2400Protocol& mcp, const std::string& device_name, uint32_t 
 	, _jog_wheel (0)
 	, _master_fader (0)
 	, _last_master_gain_written (-0.0f)
+	, _joystick_active (false)
 	, connection_state (0)
 	, input_source (0)
-	, _joystick_active (false)
 {
 	DEBUG_TRACE (DEBUG::US2400, "Surface::Surface init\n");
 
