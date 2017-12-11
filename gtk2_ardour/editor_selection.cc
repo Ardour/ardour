@@ -1839,7 +1839,15 @@ void
 Editor::set_selection_from_range (Location& loc)
 {
 	begin_reversible_selection_op (X_("set selection from range"));
+
 	selection->set (loc.start(), loc.end());
+
+	// if no tracks are selected, enable all tracks
+	// (_something_ has to be selected for any range selection, otherwise the user won't see anything)
+	if ( selection->tracks.empty() ) {
+		select_all_tracks();
+	}
+
 	commit_reversible_selection_op ();
 
 	if (!get_smart_mode () || mouse_mode != Editing::MouseObject) {
