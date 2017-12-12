@@ -1292,7 +1292,7 @@ OSC::custom_clear (lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg), true);
 	sur->custom_enable = false;
 	sur->custom_strips.clear ();
-	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, false, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
 	return set_bank (1, msg);
 }
@@ -1311,13 +1311,13 @@ OSC::custom_enable (float state, lo_message msg)
 			return -1;
 		} else {
 			sur->custom_enable = true;
-			sur->strips = sur->custom_strips;
+			sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, true, sur->custom_strips);
 			sur->nstrips = sur->custom_strips.size();
 			return set_bank (1, msg);
 		}
 	} else {
 		sur->custom_enable = false;
-		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, false, sur->custom_strips);
 		sur->nstrips = sur->strips.size();
 		return set_bank (1, msg);
 	}
@@ -1962,7 +1962,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	s.cue = false;
 	s.aux = 0;
 	s.cue_obs = 0;
-	s.strips = get_sorted_stripables(s.strip_types, s.cue);
+	s.strips = get_sorted_stripables(s.strip_types, s.cue, false, s.custom_strips);
 	s.send_page = 1;
 	s.send_page_size = default_send_size;
 	s.plug_page = 1;
@@ -2000,14 +2000,11 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
-	if (sur->custom_enable && (sur->custom_strips.size () > 0)) {
-		sur->strips = sur->custom_strips;
-		sur->nstrips = sur->custom_strips.size ();
-	} else {
+	if (sur->custom_strips.size () == 0) {
 		sur->custom_enable = false;
-		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
-		sur->nstrips = sur->strips.size();
 	}
+	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_enable, sur->custom_strips);
+	sur->nstrips = sur->strips.size();
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
@@ -2083,8 +2080,6 @@ OSC::_recalcbanks ()
 	// refresh each surface we know about.
 	for (uint32_t it = 0; it < _surface.size(); ++it) {
 		OSCSurface* sur = &_surface[it];
-		//sur->strips = get_sorted_stripables(sur->strip_types, sur->cue);
-		//sur->nstrips = sur->strips.size();
 		// find lo_address
 		lo_address addr = lo_address_new_from_url (sur->remote_url.c_str());
 		if (sur->cue) {
@@ -5312,7 +5307,7 @@ struct StripableByPresentationOrder
 };
 
 OSC::Sorted
-OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
+OSC::get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted my_list)
 {
 	Sorted sorted;
 	StripableList stripables;
@@ -5320,6 +5315,25 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue)
 	// fetch all stripables
 	session->get_stripables (stripables);
 
+	if (custom) {
+		uint32_t nstps = my_list.size ();
+		boost::shared_ptr<Stripable> s;
+		for (uint32_t i = 0; i < nstps; i++) {
+			bool exists = false;
+			s = my_list[i];
+			for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+				boost::shared_ptr<Stripable> sl = *it;
+				if (s == sl) {
+					exists = true;
+					break;
+				}
+			}
+			if(!exists) {
+				my_list[i] = boost::shared_ptr<Stripable>();
+			}
+		}
+		return my_list;
+	}
 	// Look for stripables that match bit in sur->strip_types
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
@@ -5475,7 +5489,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	s->feedback = 0;
 	s->gainmode = 1;
 	s->cue = true;
-	s->strips = get_sorted_stripables(s->strip_types, s->cue);
+	s->strips = get_sorted_stripables(s->strip_types, s->cue, false, s->custom_strips);
 
 	s->nstrips = s->strips.size();
 

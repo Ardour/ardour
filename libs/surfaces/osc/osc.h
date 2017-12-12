@@ -118,7 +118,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	};
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
-	Sorted get_sorted_stripables(std::bitset<32> types, bool cue);
+	Sorted get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted my_list);
 	typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, uint32_t> FakeTouchMap;
 	FakeTouchMap _touch_timeout;
 
