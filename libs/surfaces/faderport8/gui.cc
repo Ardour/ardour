@@ -41,10 +41,10 @@
 
 using namespace PBD;
 using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourSurface::FP_NAMESPACE;
 
 void*
 FaderPort8::get_gui () const

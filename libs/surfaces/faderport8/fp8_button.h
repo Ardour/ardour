@@ -27,7 +27,7 @@
 
 #include "fp8_base.h"
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace FP_NAMESPACE {
 
 /* virtual base-class and interface */
 class FP8ButtonInterface
@@ -505,5 +505,5 @@ private:
 	sigc::connection _press_timeout_connection;
 };
 
-} /* namespace */
+} } /* namespace */
 #endif /* _ardour_surfaces_fp8button_h_ */

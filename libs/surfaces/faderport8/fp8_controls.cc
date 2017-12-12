@@ -20,8 +20,8 @@
 
 #include "fp8_controls.h"
 
-using namespace ArdourSurface;
-using namespace ArdourSurface::FP8Types;
+using namespace ArdourSurface::FP_NAMESPACE;
+using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 bool FP8ButtonInterface::force_change = false;
 

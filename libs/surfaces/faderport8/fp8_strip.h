@@ -41,7 +41,7 @@ namespace ARDOUR {
 	class ReadOnlyControl;
 }
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace FP_NAMESPACE {
 
 class FP8Strip
 {
@@ -189,5 +189,5 @@ private:
 	std::string _last_line[4];
 };
 
-} /* namespace */
+} } /* namespace */
 #endif /* _ardour_surfaces_fp8strip_h_ */

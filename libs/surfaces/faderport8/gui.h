@@ -37,7 +37,7 @@ namespace Gtk {
 
 #include "faderport8.h"
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace FP_NAMESPACE {
 
 class FP8GUI : public Gtk::VBox
 {
@@ -108,6 +108,6 @@ private:
 	bool find_action_in_model (const Gtk::TreeModel::iterator& iter, std::string const & action_path, Gtk::TreeModel::iterator* found);
 };
 
-}
+} }
 
 #endif /* __ardour_faderport8_gui_h__ */

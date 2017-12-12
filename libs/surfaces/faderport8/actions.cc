@@ -31,10 +31,10 @@
 
 #include "pbd/i18n.h"
 
-using namespace ARDOUR;
-using namespace ArdourSurface;
 using namespace std;
-using namespace ArdourSurface::FP8Types;
+using namespace ARDOUR;
+using namespace ArdourSurface::FP_NAMESPACE;
+using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 #define BindMethod(ID, CB) \
 	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this));

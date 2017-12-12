@@ -25,7 +25,7 @@
 #include "fp8_button.h"
 #include "fp8_strip.h"
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace FP_NAMESPACE {
 
 class FP8Controls
 {
@@ -170,5 +170,5 @@ protected:
 	PBD::ScopedConnectionList button_connections;
 };
 
-} /* namespace */
+} } /* namespace */
 #endif /* _ardour_surfaces_fp8controls_h_ */

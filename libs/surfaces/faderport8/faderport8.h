@@ -53,7 +53,7 @@ namespace ARDOUR {
 	class PluginInsert;
 }
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace FP_NAMESPACE {
 
 struct FaderPort8Request : public BaseUI::BaseRequestObject
 {
@@ -401,6 +401,6 @@ private:
 	UserActionMap _user_action_map;
 };
 
-} /* namespace */
+} } /* namespace */
 
 #endif /* ardour_surface_faderport8_h */

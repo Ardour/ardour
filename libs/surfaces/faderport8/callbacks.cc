@@ -30,8 +30,8 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ArdourSurface;
-using namespace ArdourSurface::FP8Types;
+using namespace ArdourSurface::FP_NAMESPACE;
+using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 void
 FaderPort8::connect_session_signals ()
