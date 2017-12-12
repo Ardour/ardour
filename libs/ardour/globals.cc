@@ -571,6 +571,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("FaderPort Send")] = false;
 	reserved_io_names[_("FaderPort8 Recv")] = false;
 	reserved_io_names[_("FaderPort8 Send")] = false;
+	reserved_io_names[_("FaderPort16 Recv")] = false;
+	reserved_io_names[_("FaderPort16 Send")] = false;
 
 	libardour_initialized = true;
 
