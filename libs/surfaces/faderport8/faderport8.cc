@@ -86,7 +86,11 @@ debug_2byte_msg (std::string const& msg, int b0, int b1)
 }
 
 FaderPort8::FaderPort8 (Session& s)
+#ifdef FADERPORT16
+	: ControlProtocol (s, _("PreSonus FaderPort16"))
+#else
 	: ControlProtocol (s, _("PreSonus FaderPort8"))
+#endif
 	, AbstractUI<FaderPort8Request> (name())
 	, _connection_state (ConnectionState (0))
 	, _device_active (false)
@@ -95,6 +99,7 @@ FaderPort8::FaderPort8 (Session& s)
 	, _parameter_off (0)
 	, _show_presets (false)
 	, _showing_well_known (0)
+	, _timer_divider (0)
 	, _blink_onoff (false)
 	, _shift_lock (false)
 	, _shift_pressed (0)
@@ -109,8 +114,13 @@ FaderPort8::FaderPort8 (Session& s)
 	boost::shared_ptr<ARDOUR::Port> inp;
 	boost::shared_ptr<ARDOUR::Port> outp;
 
+#ifdef FADERPORT16
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort8 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort8 Send", true);
+#else
+	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort16 Recv", true);
+	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort16 Send", true);
+#endif
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(inp);
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(outp);
 
@@ -118,8 +128,13 @@ FaderPort8::FaderPort8 (Session& s)
 		throw failed_constructor();
 	}
 
+#ifdef FADERPORT16
 	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Receive)"), true));
 	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Send) "), false));
+#else
+	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Receive)"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Send) "), false));
+#endif
 
 	_input_bundle->add_channel (
 		inp->name(),
@@ -241,6 +256,14 @@ FaderPort8::periodic ()
 		_musical_time.clear ();
 	}
 
+#ifdef FADERPORT16
+	/* every second, send "running" */
+	if (++_timer_divider == 10) {
+		_timer_divider = 0;
+		tx_midi3 (0xa0, 0x00, 0x00);
+	}
+#endif
+
 	/* update stripables */
 	Periodic ();
 	return true;
@@ -322,6 +345,7 @@ FaderPort8::connected ()
 	_blink_onoff = false;
 	_shift_lock = false;
 	_shift_pressed = 0;
+	_timer_divider = 0;
 
 	start_midi_handling ();
 	_ctrls.initialize ();
@@ -553,13 +577,25 @@ void
 FaderPort8::controller_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	debug_2byte_msg ("CC", tb->controller_number, tb->value);
-	// encoder
-	// val Bit 7 = direction, Bits 0-6 = number of steps
+	/* encoder
+	 * FaderPort8:
+	 *    val Bit 7 = direction, Bits 0-6 = number of steps
+	 * FaderPort16:
+	 *    val Bit 6 = direction, Bits 0-5 = number of steps
+	 */
+#ifdef FADERPORT16
+	static const uint8_t dir_mask = 0x20;
+	static const uint8_t step_mask = 0x1f;
+#else
+	static const uint8_t dir_mask = 0x40;
+	static const uint8_t step_mask = 0x3f;
+#endif
+
 	if (tb->controller_number == 0x3c) {
-		encoder_navigate (tb->value & 0x40 ? true : false, tb->value & 0x3f);
+		encoder_navigate (tb->value & dir_mask ? true : false, tb->value & step_mask);
 	}
 	if (tb->controller_number == 0x10) {
-		encoder_parameter (tb->value & 0x40 ? true : false, tb->value & 0x3f);
+		encoder_parameter (tb->value & dir_mask ? true : false, tb->value & step_mask);
 	}
 }
 
@@ -569,7 +605,12 @@ FaderPort8::note_on_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	debug_2byte_msg ("ON", tb->note_number, tb->velocity);
 
 	/* fader touch */
-	if (tb->note_number >= 0x68 && tb->note_number <= 0x6f) {
+#ifdef FaderPort16
+	static const uint8_t touch_id_uppper = 0x77;
+#else
+	static const uint8_t touch_id_uppper = 0x6f;
+#endif
+	if (tb->note_number >= 0x68 && tb->note_number <= touch_id_uppper) {
 		_ctrls.midi_touch (tb->note_number - 0x68, tb->velocity);
 		return;
 	}

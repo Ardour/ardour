@@ -127,7 +127,11 @@ private:
 		d.push_back (0x00);
 		d.push_back (0x01);
 		d.push_back (0x06);
+#ifdef FADERPORT16
+		d.push_back (0x16);
+#else
 		d.push_back (0x02);
+#endif
 	}
 };
 

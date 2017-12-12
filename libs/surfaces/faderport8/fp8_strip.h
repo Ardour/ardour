@@ -28,7 +28,11 @@
 #include "fp8_base.h"
 #include "fp8_button.h"
 
-#define N_STRIPS 8
+#ifdef FADERPORT16
+# define N_STRIPS 16
+#else
+# define N_STRIPS 8
+#endif
 
 namespace ARDOUR {
 	class Stripable;

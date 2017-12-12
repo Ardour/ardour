@@ -37,23 +37,49 @@ uint8_t /* static */
 FP8Strip::midi_ctrl_id (CtrlElement type, uint8_t id)
 {
 	assert (id < N_STRIPS);
-	switch (type) {
-		case BtnSolo:
-			return 0x08 + id;
-		case BtnMute:
-			return 0x10 + id;
-		case BtnSelect:
-			return 0x18 + id;
-		case Fader:
-			return 0xe0 + id;
-		case Meter:
-			return 0xd0 + id;
-		case Redux:
-			return 0xd8 + id;
-		case BarVal:
-			return 0x30 + id;
-		case BarMode:
-			return 0x38 + id;
+	if (id < 8) {
+		switch (type) {
+			case BtnSolo:
+				return 0x08 + id;
+			case BtnMute:
+				return 0x10 + id;
+			case BtnSelect:
+				return 0x18 + id;
+			case Fader:
+				return 0xe0 + id;
+			case Meter:
+				return 0xd0 + id;
+			case Redux:
+				return 0xd8 + id;
+			case BarVal:
+				return 0x30 + id;
+			case BarMode:
+				return 0x38 + id;
+		}
+	} else {
+		id -= 8;
+		switch (type) {
+			case BtnSolo:
+				return 0x50 + id;
+			case BtnMute:
+				return 0x78 + id;
+			case BtnSelect:
+				if (id == 0) { // strip 8
+					return 0x07;
+				} else {
+					return 0x21 + id;
+				}
+			case Fader:
+				return 0xe8 + id;
+			case Meter:
+				return 0xc0 + id;
+			case Redux:
+				return 0xc8 + id;
+			case BarVal:
+				return 0x40 + id;
+			case BarMode:
+				return 0x48 + id;
+		}
 	}
 	assert (0);
 	return 0;

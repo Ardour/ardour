@@ -93,7 +93,11 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	table.set_homogeneous (false);
 
 	std::string data_file_path;
+#ifdef FADERPORT16
+	string name = "faderport16-small.png";
+#else
 	string name = "faderport8-small.png";
+#endif
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
 	find_file (spath, name, data_file_path);
