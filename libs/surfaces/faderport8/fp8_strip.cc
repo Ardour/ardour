@@ -67,7 +67,7 @@ FP8Strip::midi_ctrl_id (CtrlElement type, uint8_t id)
 				if (id == 0) { // strip 8
 					return 0x07;
 				} else {
-					return 0x21 + id;
+					return 0x20 + id;
 				}
 			case Fader:
 				return 0xe8 + id;
