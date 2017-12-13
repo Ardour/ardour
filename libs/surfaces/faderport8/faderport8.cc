@@ -115,11 +115,11 @@ FaderPort8::FaderPort8 (Session& s)
 	boost::shared_ptr<ARDOUR::Port> outp;
 
 #ifdef FADERPORT16
-	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort8 Recv", true);
-	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort8 Send", true);
-#else
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort16 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort16 Send", true);
+#else
+	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort8 Recv", true);
+	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort8 Send", true);
 #endif
 	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(inp);
 	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(outp);
@@ -129,11 +129,11 @@ FaderPort8::FaderPort8 (Session& s)
 	}
 
 #ifdef FADERPORT16
-	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Receive)"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Send) "), false));
-#else
 	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Receive)"), true));
 	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Send) "), false));
+#else
+	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Receive)"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Send) "), false));
 #endif
 
 	_input_bundle->add_channel (
