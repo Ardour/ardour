@@ -649,7 +649,12 @@ FaderPort8::note_off_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	debug_2byte_msg ("OF", tb->note_number, tb->velocity);
 
-	if (tb->note_number >= 0x68 && tb->note_number <= 0x6f) {
+#ifdef FaderPort16
+	static const uint8_t touch_id_uppper = 0x77;
+#else
+	static const uint8_t touch_id_uppper = 0x6f;
+#endif
+	if (tb->note_number >= 0x68 && tb->note_number <= touch_id_uppper) {
 		// fader touch
 		_ctrls.midi_touch (tb->note_number - 0x68, tb->velocity);
 		return;
