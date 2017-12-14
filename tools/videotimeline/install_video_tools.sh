@@ -130,16 +130,16 @@ done
 echo "installing video-tools to '${TARGETDIR}'."
 cd "$TARGETDIR" || exit 1
 
-HARVID_VERSION=$(curl -s http://ardour.org/files/video-tools/harvid_version.txt)
+HARVID_VERSION=$(curl -s https://ardour.org/files/video-tools/harvid_version.txt)
 echo "Downloading harvid-${MULTIARCH}-${HARVID_VERSION}."
 curl -L --progress-bar \
-	http://ardour.org/files/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
+	https://ardour.org/files/video-tools/harvid-${MULTIARCH}-${HARVID_VERSION}.tgz \
 	| tar -x -z --exclude=README --exclude=harvid.1 --strip-components=1 || exit 1
 
-XJADEO_VERSION=$(curl -s http://ardour.org/files/video-tools/xjadeo_version.txt)
+XJADEO_VERSION=$(curl -s https://ardour.org/files/video-tools/xjadeo_version.txt)
 echo "Downloading xjadeo-${MULTIARCH}-${XJADEO_VERSION}."
 curl -L --progress-bar \
-	http://ardour.org/files/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
+	https://ardour.org/files/video-tools/xjadeo-${MULTIARCH}-${XJADEO_VERSION}.tgz \
 	| tar -x -z --exclude=README --exclude=xjadeo.1 --strip-components=1 || exit 1
 mv xjadeo xjremote
 
