@@ -118,7 +118,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	};
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
-	Sorted get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted my_list);
+	Sorted get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sorted my_list);
 	typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, uint32_t> FakeTouchMap;
 	FakeTouchMap _touch_timeout;
 
@@ -135,7 +135,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
 		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
 		Sorted custom_strips;		// a sorted list of user selected strips
-		int custom_enable;			// use custom strip list
+		uint32_t custom_mode;			// use custom strip list
 		Sorted strips;				// list of stripables for this surface
 		// strips
 		uint32_t bank;				// current bank
@@ -511,7 +511,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_eq_lpf_enable,f);
 	PATH_CALLBACK1_MSG(sel_eq_lpf_slope,f);
 	PATH_CALLBACK1_MSG(sel_expand,i);
-	PATH_CALLBACK1_MSG(custom_enable,f);
+	PATH_CALLBACK1_MSG(custom_mode,f);
 
 #define PATH_CALLBACK2(name,arg1type,arg2type) \
 	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
@@ -660,7 +660,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
 	int refresh_surface (lo_message msg);
 	int custom_clear (lo_message msg);
-	int custom_enable (float state, lo_message msg);
+	int custom_mode (float state, lo_message msg);
 	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
 	int sel_send_page (int page, lo_message msg);
@@ -670,7 +670,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int _sel_plugin (int id, lo_address addr);
 	int sel_plugin_activate (float state, lo_message msg);
 	int select_plugin_parameter (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
-	void processor_changed (lo_address addr);
+	void processor_changed (std::string remote_url);
 
 	int scrub (float delta, lo_message msg);
 	int jog (float delta, lo_message msg);

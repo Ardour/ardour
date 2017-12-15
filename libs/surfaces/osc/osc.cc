@@ -415,7 +415,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
-		REGISTER_CALLBACK (serv, "/strip/custom/enable", "f", custom_enable);
+		REGISTER_CALLBACK (serv, "/strip/custom/mode", "f", custom_mode);
 		REGISTER_CALLBACK (serv, "/strip/custom/clear", "f", custom_clear);
 		REGISTER_CALLBACK (serv, "/strip/custom/clear", "", custom_clear);
 		REGISTER_CALLBACK (serv, "/surface/list", "", surface_list);
@@ -835,7 +835,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	if (strcmp (path, "/strip/listen") == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
-		} else if (sur->custom_enable) {
+		} else if (sur->custom_mode) {
 			PBD::warning << "OSC: Can't add strips with custom enabled." << endmsg;
 		} else {
 			for (int n = 0; n < argc; ++n) {
@@ -851,7 +851,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	if (strcmp (path, "/strip/ignore") == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
-		} else if (!sur->custom_enable) {
+		} else if (!sur->custom_mode) {
 			PBD::warning << "OSC: Can't remove strips without custom enabled." << endmsg;
 		} else {
 			for (int n = 0; n < argc; ++n) {
@@ -1251,7 +1251,7 @@ OSC::surface_list (lo_message msg)
 		OSCSurface* sur = &_surface[it];
 		cerr << string_compose ("  Surface: %1 URL: %2\n", it, sur->remote_url);
 		cerr << string_compose ("	Number of strips: %1 Bank size: %2 Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
-		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", sur->custom_enable, sur->custom_strips.size ());
+		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", sur->custom_mode, sur->custom_strips.size ());
 		bool ug = false;
 		if (sur->usegroup == PBD::Controllable::UseGroup) {
 			ug = true;
@@ -1290,7 +1290,7 @@ OSC::custom_clear (lo_message msg)
 		return 0;
 	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
-	sur->custom_enable = false;
+	sur->custom_mode = 0;
 	sur->custom_strips.clear ();
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, false, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
@@ -1298,7 +1298,7 @@ OSC::custom_clear (lo_message msg)
 }
 
 int
-OSC::custom_enable (float state, lo_message msg)
+OSC::custom_mode (float state, lo_message msg)
 {
 	if (!session) {
 		return 0;
@@ -1307,17 +1307,21 @@ OSC::custom_enable (float state, lo_message msg)
 	if (state > 0){
 		if (sur->custom_strips.size () == 0) {
 			PBD::warning << "No custom strips set to enable" << endmsg;
-			sur->custom_enable = false;
+			sur->custom_mode = 0;
 			return -1;
 		} else {
-			sur->custom_enable = true;
-			sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, true, sur->custom_strips);
+			if (sur->bank_size) {
+				sur->custom_mode = (uint32_t) state | 0x4;
+			} else {
+				sur->custom_mode = (uint32_t) state;
+			}
+			sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
 			sur->nstrips = sur->custom_strips.size();
 			return set_bank (1, msg);
 		}
 	} else {
-		sur->custom_enable = false;
-		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, false, sur->custom_strips);
+		sur->custom_mode = 0;
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 0, sur->custom_strips);
 		sur->nstrips = sur->strips.size();
 		return set_bank (1, msg);
 	}
@@ -1812,6 +1816,9 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = b_size;
+	if (s->custom_mode && b_size) {
+		s->custom_mode = s->custom_mode | 0x4;
+	}
 	s->strip_types = strips;
 	s->feedback = fb;
 	s->gainmode = gm;
@@ -1845,6 +1852,9 @@ OSC::set_surface_bank_size (uint32_t bs, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = bs;
+	if (s->custom_mode && bs) {
+		s->custom_mode = s->custom_mode | 0x4;
+	}
 	if (s->linkset) {
 		set_link (s->linkset, s->linkid, get_address (msg));
 	} else {
@@ -1955,7 +1965,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	s.gainmode = default_gainmode;
 	s.usegroup = PBD::Controllable::NoGroup;
 	s.custom_strips.clear ();
-	s.custom_enable = false;
+	s.custom_mode = 0;
 	s.sel_obs = 0;
 	s.expand = 0;
 	s.expand_enable = false;
@@ -2001,9 +2011,9 @@ void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
 	if (sur->custom_strips.size () == 0) {
-		sur->custom_enable = false;
+		sur->custom_mode = 0;
 	}
-	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_enable, sur->custom_strips);
+	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
@@ -3695,11 +3705,11 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 			sur->sel_obs = 0;
 		}
 	}
-
 	// need to set monitor for processor changed signal (for paging)
+	string address = lo_address_get_url (addr);
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 	if (r) {
-		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, addr), this);
+		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, address), this);
 		_sel_plugin (sur->plugin_id, addr);
 	}
 
@@ -3707,8 +3717,9 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 }
 
 void
-OSC::processor_changed (lo_address addr)
+OSC::processor_changed (string address)
 {
+	lo_address addr = lo_address_new_from_url (address.c_str());
 	OSCSurface *sur = get_surface (addr);
 	_sel_plugin (sur->plugin_id, addr);
 	if (sur->sel_obs) {
@@ -5307,16 +5318,17 @@ struct StripableByPresentationOrder
 };
 
 OSC::Sorted
-OSC::get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted my_list)
+OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sorted my_list)
 {
 	Sorted sorted;
 	StripableList stripables;
+	StripableList custom_list;
 
 	// fetch all stripables
 	session->get_stripables (stripables);
-
 	if (custom) {
 		uint32_t nstps = my_list.size ();
+		// check each custom strip to see if it still exists
 		boost::shared_ptr<Stripable> s;
 		for (uint32_t i = 0; i < nstps; i++) {
 			bool exists = false;
@@ -5330,14 +5342,27 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted 
 			}
 			if(!exists) {
 				my_list[i] = boost::shared_ptr<Stripable>();
+			} else {
+				custom_list.push_back (s);
 			}
 		}
-		return my_list;
+		if (custom == 1) {
+			return my_list;
+		} else {
+			stripables = custom_list;
+		}
 	}
 	// Look for stripables that match bit in sur->strip_types
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
 		boost::shared_ptr<Stripable> s = *it;
+		if (!s) {
+			break;
+		}
+		if (custom == 2) {
+			// banking off use all valid custom strips
+			sorted.push_back (s);
+		} else
 		if ((!cue) && (!types[9]) && (s->presentation_info().flags() & PresentationInfo::Hidden)) {
 			// do nothing... skip it
 		} else if (types[8] && (s->is_selected())) {
@@ -5385,14 +5410,18 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, bool custom, Sorted 
 			}
 		}
 	}
-	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
-	// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
-	if (types[5]) {
-		sorted.push_back (session->master_out());
+	if (!custom || (custom & 0x2)) {
+		sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 	}
-	if (types[6]) {
-		if (session->monitor_out()) {
-			sorted.push_back (session->monitor_out());
+	if (!custom) {
+		// Master/Monitor might be anywhere... we put them at the end - Sorry ;)
+		if (types[5]) {
+			sorted.push_back (session->master_out());
+		}
+		if (types[6]) {
+			if (session->monitor_out()) {
+				sorted.push_back (session->monitor_out());
+			}
 		}
 	}
 	return sorted;
