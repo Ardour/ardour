@@ -80,7 +80,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     if (!child) {
-	    error << string_compose (_("Tried to reconstitute a MementoCommand with no contents, failing. id=%1"), id.to_s()) << endmsg;
+	    info << string_compose (_("Tried to reconstitute a MementoCommand with no contents, failing. id=%1"), id.to_s()) << endmsg;
 	    return 0;
     }
 
@@ -142,7 +142,7 @@ Session::memento_command_factory(XMLNode *n)
     }
 
     /* we failed */
-    info << string_compose (_("could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s()) << endmsg;
+    info << string_compose (_("Could not reconstitute MementoCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s()) << endmsg;
 
     return 0 ;
 }
@@ -175,8 +175,8 @@ Session::stateful_diff_command_factory (XMLNode* n)
 
 	/* we failed */
 
-	error << string_compose (
-		_("could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s())
+	info << string_compose (
+		_("Could not reconstitute StatefulDiffCommand from XMLNode. object type = %1 id = %2"), type_name, id.to_s())
 	      << endmsg;
 
 	return 0;
