@@ -798,6 +798,14 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 	len = strlen (path);
 	OSCSurface *sur = get_surface(get_address (msg), true);
+	LinkSet *set;
+	uint32_t ls = sur->linkset;
+
+	if (ls) {
+		set = &(link_sets[ls]);
+		sur->custom_mode = set->custom_mode;
+		sur->custom_strips = set->custom_strips;
+	}
 
 	if (strstr (path, "/automation")) {
 		ret = set_automation (path, types, argv, argc, msg);
@@ -839,11 +847,18 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 			PBD::warning << "OSC: Can't add strips with custom enabled." << endmsg;
 		} else {
 			for (int n = 0; n < argc; ++n) {
-
-				boost::shared_ptr<Stripable> s = get_strip (argv[n]->i, get_address (msg));
+				boost::shared_ptr<Stripable> s = boost::shared_ptr<Stripable>();
+				if (types[n] == 'f') {
+					s = get_strip ((uint32_t) argv[n]->f, get_address (msg));
+				} else if (types[n] == 'i') {
+					s = get_strip (argv[n]->i, get_address (msg));
+				}
 				if (s) {
 					sur->custom_strips.push_back (s);
 				}
+			}
+			if (ls) {
+				set->custom_strips = sur->custom_strips;
 			}
 		}
 		ret = 0;
@@ -855,9 +870,18 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 			PBD::warning << "OSC: Can't remove strips without custom enabled." << endmsg;
 		} else {
 			for (int n = 0; n < argc; ++n) {
-				if ((uint32_t) argv[n]->i <= sur->custom_strips.size ()) {
+				uint32_t st_no = 0;
+				if (types[n] == 'f') {
+					st_no = (uint32_t) argv[n]->f;
+				} else if (types[n] == 'i') {
+					st_no = (uint32_t) argv[n]->i;
+				}
+				if (st_no && st_no <= sur->custom_strips.size ()) {
 					sur->custom_strips[argv[n]->i - 1] = boost::shared_ptr<Stripable>();
 				}
+			}
+			if (ls) {
+				set->custom_strips = sur->custom_strips;
 			}
 			ret = set_bank (sur->bank, msg);
 		}
@@ -1279,6 +1303,7 @@ OSC::surface_list (lo_message msg)
 		cerr << string_compose ("  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
 		cerr << string_compose ("	Bank size: %1 Current bank: %2 Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
 		cerr << string_compose ("	auto bank sizing: %1 linkset not ready: %2\n", set->autobank, set->not_ready);
+		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", set->custom_mode, set->custom_strips.size ());
 	}
 	cerr << "\n";
 }
@@ -1294,6 +1319,14 @@ OSC::custom_clear (lo_message msg)
 	sur->custom_strips.clear ();
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, false, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
+	LinkSet *set;
+	uint32_t ls = sur->linkset;
+	if (ls) {
+		set = &(link_sets[ls]);
+		set->custom_mode = 0;
+		set->custom_strips.clear ();
+		set->strips = sur->strips;
+	}
 	return set_bank (1, msg);
 }
 
@@ -1304,10 +1337,21 @@ OSC::custom_mode (float state, lo_message msg)
 		return 0;
 	}
 	OSCSurface *sur = get_surface(get_address (msg), true);
+	LinkSet *set;
+	uint32_t ls = sur->linkset;
+
+	if (ls) {
+		set = &(link_sets[ls]);
+		sur->custom_mode = set->custom_mode;
+		sur->custom_strips = set->custom_strips;
+	}
 	if (state > 0){
 		if (sur->custom_strips.size () == 0) {
 			PBD::warning << "No custom strips set to enable" << endmsg;
 			sur->custom_mode = 0;
+			if (ls) {
+				set->custom_mode = 0;
+			}
 			return -1;
 		} else {
 			if (sur->bank_size) {
@@ -1317,15 +1361,17 @@ OSC::custom_mode (float state, lo_message msg)
 			}
 			sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
 			sur->nstrips = sur->custom_strips.size();
-			return set_bank (1, msg);
 		}
 	} else {
 		sur->custom_mode = 0;
 		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 0, sur->custom_strips);
 		sur->nstrips = sur->strips.size();
-		return set_bank (1, msg);
 	}
-	return -1;
+	if (ls) {
+		set->custom_mode = sur->custom_mode;
+		set->strips = sur->strips;
+	}
+	return set_bank (1, msg);
 }
 
 int
@@ -1455,6 +1501,8 @@ OSC::get_linkset (uint32_t set, lo_address addr)
 			new_ls.not_ready = true;
 			new_ls.strip_types = sur->strip_types;
 			new_ls.strips = sur->strips;
+			new_ls.custom_strips = sur->custom_strips;
+			new_ls.custom_mode = sur->custom_mode;
 			new_ls.urls.resize (2);
 			link_sets[set] = new_ls;
 		}
@@ -2010,11 +2058,26 @@ OSC::global_feedback (OSCSurface* sur)
 void
 OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 {
+	LinkSet *set;
+	uint32_t ls = sur->linkset;
+
+	if (ls) {
+		set = &(link_sets[ls]);
+		if (set->not_ready) {
+			return;
+		}
+		sur->custom_mode = set->custom_mode;
+		sur->custom_strips = set->custom_strips;
+	}
 	if (sur->custom_strips.size () == 0) {
 		sur->custom_mode = 0;
 	}
 	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
+	if (ls) {
+		set->strips = sur->strips;
+	}
+
 	if (new_bank_size || (!sur->feedback[0] && !sur->feedback[1])) {
 		// delete old observers
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {

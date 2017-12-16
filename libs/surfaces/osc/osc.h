@@ -197,6 +197,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t bank;					// linkset current bank
 		bool autobank;					// banksize is derived from total
 		uint32_t not_ready;				// number of 1st device, 0 = ready
+		Sorted custom_strips;			// a sorted list of user selected strips
+		uint32_t custom_mode;			// use custom strip list
 		std::bitset<32> strip_types;	// strip_types for this linkset
 		Sorted strips;					// list of valid strips in order for this set
 	};
