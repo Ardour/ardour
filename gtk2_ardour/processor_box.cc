@@ -2627,7 +2627,28 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 	if (p->window_proxy()) {
 		return;
 	}
-	if (!boost::dynamic_pointer_cast<PluginInsert> (p)) {
+
+	/* see also ProcessorBox::get_editor_window */
+	bool have_ui = false;
+
+	if (boost::dynamic_pointer_cast<PluginInsert> (p)) {
+		have_ui = true;
+	}
+	else if (boost::dynamic_pointer_cast<PortInsert> (p)) {
+		have_ui = true;
+	}
+	else if (boost::dynamic_pointer_cast<Send> (p)) {
+		if (!boost::dynamic_pointer_cast<InternalSend> (p)) {
+			have_ui = true;
+		}
+	}
+	else if (boost::dynamic_pointer_cast<Return> (p)) {
+		if (!boost::dynamic_pointer_cast<InternalReturn> (p)) {
+			have_ui = true;
+		}
+	}
+
+	if (!have_ui) {
 		return;
 	}
 
