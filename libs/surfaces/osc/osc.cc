@@ -1268,28 +1268,28 @@ OSC::surface_list (lo_message msg)
 	 * a surface entry.
 	 */
 
-	cerr << "List of known Surfaces: " << _surface.size() << "\n\n";
+	PBD::info << string_compose ("\nList of known Surfaces (%1):\n", _surface.size());
 
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	for (uint32_t it = 0; it < _surface.size(); it++) {
 		OSCSurface* sur = &_surface[it];
-		cerr << string_compose ("  Surface: %1 URL: %2\n", it, sur->remote_url);
-		cerr << string_compose ("	Number of strips: %1 Bank size: %2 Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
-		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", sur->custom_mode, sur->custom_strips.size ());
+		PBD::info << string_compose ("\n  Surface: %1 - URL: %2\n", it, sur->remote_url);
+		PBD::info << string_compose ("	Number of strips: %1   Bank size: %2   Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
+		PBD::info << string_compose ("	Use Custom: %1   Custom Strips: %2\n", sur->custom_mode, sur->custom_strips.size ());
 		bool ug = false;
 		if (sur->usegroup == PBD::Controllable::UseGroup) {
 			ug = true;
 		}
-		cerr << string_compose ("	Strip Types: %1 Feedback: %2 no_clear: %3 gain mode: %4 use groups? %5\n", \
+		PBD::info << string_compose ("	Strip Types: %1   Feedback: %2   No_clear flag: %3   Gain mode: %4   Use groups flag %5\n", \
 			sur->strip_types.to_ulong(), sur->feedback.to_ulong(), sur->no_clear, sur->gainmode, ug);
-		cerr << string_compose ("	using plugin: %1 of %2 plugins, with %3 params. page size: %4 page: %5\n", \
+		PBD::info << string_compose ("	Using plugin: %1  of  %2 plugins, with %3 params.  Page size: %4  Page: %5\n", \
 			sur->plugin_id, sur->plugins.size(), sur->plug_params.size(), sur->plug_page_size, sur->plug_page);
-		cerr << string_compose ("	send page size: %1 page: %2\n", sur->send_page_size, sur->send_page);
-		cerr << string_compose ("	expanded? %1 track: %2 jogmode: %3\n", sur->expand_enable, sur->expand, sur->jogmode);
-		cerr << string_compose ("	personal monitor? %1, Aux master: %2, number of sends: %3\n", sur->cue, sur->aux, sur->sends.size());
-		cerr << string_compose ("	Linkset: %1 Device Id: %2\n", sur->linkset, sur->linkid);
+		PBD::info << string_compose ("	Send page size: %1  Page: %2\n", sur->send_page_size, sur->send_page);
+		PBD::info << string_compose ("	Expanded flag %1   Track: %2   Jogmode: %3\n", sur->expand_enable, sur->expand, sur->jogmode);
+		PBD::info << string_compose ("	Personal monitor flag %1,   Aux master: %2,   Number of sends: %3\n", sur->cue, sur->aux, sur->sends.size());
+		PBD::info << string_compose ("	Linkset: %1   Device Id: %2\n", sur->linkset, sur->linkid);
 	}
-	cerr << "\nList of LinkSets " << link_sets.size() << "\n\n";
+	PBD::info << string_compose ("\nList of LinkSets (%1):\n", link_sets.size());
 	std::map<uint32_t, LinkSet>::iterator it;
 	for (it = link_sets.begin(); it != link_sets.end(); it++) {
 		if (!(*it).first) {
@@ -1300,12 +1300,12 @@ OSC::surface_list (lo_message msg)
 		if (set->urls.size()) {
 			devices = set->urls.size() - 1;
 		}
-		cerr << string_compose ("  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
-		cerr << string_compose ("	Bank size: %1 Current bank: %2 Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
-		cerr << string_compose ("	auto bank sizing: %1 linkset not ready: %2\n", set->autobank, set->not_ready);
-		cerr << string_compose ("	Use Custom: %1 Custom Strips: %2\n", set->custom_mode, set->custom_strips.size ());
+		PBD::info << string_compose ("\n  Linkset %1 has %2 devices and sees %3 strips\n", (*it).first, devices, set->strips.size());
+		PBD::info << string_compose ("	Bank size: %1   Current bank: %2   Strip Types: %3\n", set->banksize, set->bank, set->strip_types.to_ulong());
+		PBD::info << string_compose ("	Auto bank sizing: %1 Linkset not ready flag: %2\n", set->autobank, set->not_ready);
+		PBD::info << string_compose ("	Use Custom: %1 Number of Custom Strips: %2\n", set->custom_mode, set->custom_strips.size ());
 	}
-	cerr << "\n";
+	PBD::info << endmsg;
 }
 
 int
