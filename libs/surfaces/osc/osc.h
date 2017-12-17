@@ -226,6 +226,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	void set_plugin_size (int ps) { default_plugin_size = ps; }
 	void clear_devices ();
 	void gui_changed ();
+	void get_surfaces ();
 	std::string get_remote_port () { return remote_port; }
 	void set_remote_port (std::string pt) { remote_port = pt; }
 

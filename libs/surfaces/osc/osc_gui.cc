@@ -154,6 +154,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	debug_options.push_back (_("Off"));
 	debug_options.push_back (_("Log invalid messages"));
 	debug_options.push_back (_("Log all messages"));
+	debug_options.push_back (_("Print surface information to Log window"));
 
 	set_popdown_strings (debug_combo, debug_options);
 	debug_combo.set_active ((int)cp.get_debug_mode());
@@ -494,6 +495,10 @@ OSC_GUI::debug_changed ()
 	}
 	else if (str == _("Log all messages")) {
 		cp.set_debug_mode (OSC::All);
+	}
+	else if (str == _("Print surface information to Log window")) {
+		cp.get_surfaces ();
+		debug_combo.set_active ((int)cp.get_debug_mode());
 	}
 	else {
 		std::cerr << "Invalid OSC Debug Mode\n";

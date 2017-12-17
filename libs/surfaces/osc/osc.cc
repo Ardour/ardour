@@ -1261,6 +1261,13 @@ OSC::routes_list (lo_message msg)
 void
 OSC::surface_list (lo_message msg)
 {
+		get_surfaces ();
+}
+
+void
+OSC::get_surfaces ()
+{
+
 	/* this function is for debugging and prints lots of
 	 * information about what surfaces Ardour knows about and their
 	 * internal parameters. It is best accessed by sending:
