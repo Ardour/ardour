@@ -282,6 +282,8 @@ ARDOUR_UI::setup_windows ()
 	status_bar_event_box->add (status_bar_label);
 	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	status_bar_label.set_size_request (300, -1);
+	status_bar_label.set_ellipsize (Pango::ELLIPSIZE_END);
+	status_bar_label.set_single_line_mode (true);
 
 	status_bar_label.show ();
 	status_bar_event_box->show ();
