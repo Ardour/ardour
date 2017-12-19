@@ -73,9 +73,9 @@ function factory () return function ()
 			-- parse MIDI data byte-by-byte
 			for i = 1, #bytes do
 				if parser:process_byte (bytes:byte (i)) then
-					if parser:buffer_size () > 127 then
+					if parser:buffer_size () > 255 then
 						long_message = true
-						print ("WARNING -- single large message > 127, bytes: ", parser:buffer_size ())
+						print ("WARNING -- single large message > 255, bytes: ", parser:buffer_size ())
 					end
 					-- parsed complete normalized MIDI message, send it
 					async_midi_port:write (parser:midi_buffer (), parser:buffer_size (), 0)
