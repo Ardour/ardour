@@ -857,6 +857,7 @@ AddRouteDialog::on_show ()
 	reset_name_edited ();
 
 	refill_route_groups ();
+	refill_channel_setups ();
 
 	Dialog::on_show ();
 }
