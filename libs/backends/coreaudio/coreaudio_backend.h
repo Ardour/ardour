@@ -38,7 +38,7 @@
 #include "coreaudio_pcmio.h"
 #include "coremidi_io.h"
 
-#define MaxCoreMidiEventSize 128 // matches CoreMidi's MIDIPacket
+#define MaxCoreMidiEventSize 256 // matches CoreMidi's MIDIPacket (https://developer.apple.com/documentation/coremidi/midipacket)
 
 namespace ARDOUR {
 
