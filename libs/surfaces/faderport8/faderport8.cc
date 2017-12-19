@@ -605,7 +605,7 @@ FaderPort8::note_on_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	debug_2byte_msg ("ON", tb->note_number, tb->velocity);
 
 	/* fader touch */
-#ifdef FaderPort16
+#ifdef FADERPORT16
 	static const uint8_t touch_id_uppper = 0x77;
 #else
 	static const uint8_t touch_id_uppper = 0x6f;
@@ -649,7 +649,7 @@ FaderPort8::note_off_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	debug_2byte_msg ("OF", tb->note_number, tb->velocity);
 
-#ifdef FaderPort16
+#ifdef FADERPORT16
 	static const uint8_t touch_id_uppper = 0x77;
 #else
 	static const uint8_t touch_id_uppper = 0x6f;
