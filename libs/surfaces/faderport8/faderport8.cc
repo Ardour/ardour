@@ -578,18 +578,10 @@ FaderPort8::controller_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
 	debug_2byte_msg ("CC", tb->controller_number, tb->value);
 	/* encoder
-	 * FaderPort8:
-	 *    val Bit 7 = direction, Bits 0-6 = number of steps
-	 * FaderPort16:
-	 *    val Bit 6 = direction, Bits 0-5 = number of steps
+	 *  val Bit 6 = direction, Bits 0-5 = number of steps
 	 */
-#ifdef FADERPORT16
-	static const uint8_t dir_mask = 0x20;
-	static const uint8_t step_mask = 0x1f;
-#else
 	static const uint8_t dir_mask = 0x40;
 	static const uint8_t step_mask = 0x3f;
-#endif
 
 	if (tb->controller_number == 0x3c) {
 		encoder_navigate (tb->value & dir_mask ? true : false, tb->value & step_mask);
