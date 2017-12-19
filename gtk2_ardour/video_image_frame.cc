@@ -63,7 +63,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Container& par
 	image = new ArdourCanvas::Image (_parent, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
 	img = image->get_image();
-	fill_sample(0, 0, 0);
+	fill_frame (0, 0, 0);
 	draw_line();
 	draw_x();
 	image->put_image(img);
@@ -108,7 +108,7 @@ VideoImageFrame::set_videoframe (samplepos_t videoframenumber, int re)
 	rightend = re;
 
 	img = image->get_image();
-	fill_sample(0, 0, 0);
+	fill_frame (0, 0, 0);
 	draw_x();
 	draw_line();
 	cut_rightend();
@@ -116,7 +116,7 @@ VideoImageFrame::set_videoframe (samplepos_t videoframenumber, int re)
 	exposeimg();
 
 	/* request video-frame from decoder in background thread */
-	http_get(video_frame_number);
+	http_get (video_frame_number);
 }
 
 void
@@ -135,7 +135,7 @@ VideoImageFrame::draw_line ()
 }
 
 void
-VideoImageFrame::fill_sample (const uint8_t r, const uint8_t g, const uint8_t b)
+VideoImageFrame::fill_frame (const uint8_t r, const uint8_t g, const uint8_t b)
 {
 	const int rowstride = img->stride;
 	const int clip_height = img->height;
@@ -203,7 +203,7 @@ http_get_thread (void *arg) {
 	pthread_setcanceltype(PTHREAD_CANCEL_ASYNCHRONOUS, NULL);
 	snprintf(url, sizeof(url), "%s?sample=%li&w=%d&h=%d&file=%s&format=bgra",
 	  vif->get_video_server_url().c_str(),
-	  (long int) vif->get_req_sample(), vif->get_width(), vif->get_height(),
+	  (long int) vif->get_req_frame(), vif->get_width(), vif->get_height(),
 	  vif->get_video_filename().c_str()
 	);
 	int status = 0;
@@ -234,7 +234,7 @@ VideoImageFrame::http_download_done (char *data){
 	if (!data) {
 		/* Image request failed (HTTP error or timeout) */
 		img = image->get_image();
-		fill_sample(128, 0, 0);
+		fill_frame (128, 0, 0);
 		draw_x();
 		cut_rightend();
 		draw_line();
@@ -261,7 +261,7 @@ VideoImageFrame::http_download_done (char *data){
 
 
 void
-VideoImageFrame::http_get(samplepos_t fn) {
+VideoImageFrame::http_get (samplepos_t fn) {
 	if (pthread_mutex_trylock(&request_lock)) {
 		pthread_mutex_lock(&queue_lock);
 		queued_request=true;

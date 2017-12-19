@@ -56,7 +56,7 @@ class VideoImageFrame : public sigc::trackable
 	int get_height () {return clip_height;}
 	int get_width ()  {return clip_width;}
 	int get_rightend() { return rightend;}
-	samplepos_t get_req_sample () {return req_video_frame_number;}
+	samplepos_t get_req_frame () {return req_video_frame_number;}
 	std::string get_video_server_url () {return video_server_url;}
 	std::string get_video_filename ()   {return video_filename;}
 
@@ -84,14 +84,14 @@ class VideoImageFrame : public sigc::trackable
 	void reposition ();
 	void exposeimg ();
 
-	void fill_sample (const uint8_t r, const uint8_t g, const uint8_t b);
+	void fill_frame (const uint8_t r, const uint8_t g, const uint8_t b);
 	void draw_line ();
 	void draw_x ();
 	void cut_rightend ();
 
 
-	void http_get(samplepos_t fn);
-	void http_get_again(samplepos_t fn);
+	void http_get (samplepos_t fn);
+	void http_get_again (samplepos_t fn);
 
 	samplepos_t req_video_frame_number;
 	samplepos_t want_video_frame_number;
