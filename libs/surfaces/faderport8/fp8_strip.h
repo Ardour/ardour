@@ -68,6 +68,14 @@ public:
 	FP8ButtonInterface& recarm_button () { return *_selrec.button_shift(); }
 	FP8ButtonInterface& select_button () { return *_selrec.button(); }
 
+	void set_select_button_color (uint32_t color) {
+		if ((color & 0xffffff00) == 0) {
+			select_button ().set_color (0xffffffff);
+		} else {
+			select_button ().set_color (color);
+		}
+	}
+
 	bool midi_touch (bool t);
 	bool midi_fader (float val);
 

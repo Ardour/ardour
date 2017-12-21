@@ -1007,7 +1007,7 @@ FaderPort8::assign_stripables (bool select_only)
 		if (select_only) {
 			/* used in send mode */
 			_ctrls.strip(id).set_text_line (3, (*s)->name (), true);
-			_ctrls.strip(id).select_button ().set_color ((*s)->presentation_info ().color());
+			_ctrls.strip(id).set_select_button_color ((*s)->presentation_info ().color());
 			/* update selection lights */
 			_ctrls.strip(id).select_button ().set_active ((*s)->is_selected ());
 			_ctrls.strip(id).select_button ().set_blinking (*s == first_selected_stripable ());
@@ -1803,7 +1803,7 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 	uint8_t id = _assigned_strips[s];
 
 	if (what_changed.contains (Properties::color)) {
-		_ctrls.strip(id).select_button ().set_color (s->presentation_info ().color());
+		_ctrls.strip(id).set_select_button_color (s->presentation_info ().color());
 	}
 
 	if (what_changed.empty ()) {

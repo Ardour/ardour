@@ -321,7 +321,8 @@ FP8Strip::set_stripable (boost::shared_ptr<Stripable> s, bool panmode)
 
 	set_select_controllable (boost::shared_ptr<AutomationControl>());
 	select_button ().set_active (s->is_selected ());
-	select_button ().set_color (s->presentation_info ().color());
+
+	set_select_button_color (s->presentation_info ().color());
 	//select_button ().set_blinking (false);
 
 	_stripable_name = s->name ();
