@@ -37,6 +37,7 @@
 #include "ardour/debug.h"
 #include "ardour/midi_track.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/panner_shell.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
@@ -996,6 +997,13 @@ FaderPort8::assign_stripables (bool select_only)
 		(*s)->presentation_info ().PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
 				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), _1), this);
 
+		if (boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*s)) {
+			if (r->panner_shell()) {
+				r->panner_shell()->Changed.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
+				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), PropertyChange()), this);
+			}
+		}
+
 		if (select_only) {
 			/* used in send mode */
 			_ctrls.strip(id).set_text_line (3, (*s)->name (), true);
@@ -1796,6 +1804,10 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 
 	if (what_changed.contains (Properties::color)) {
 		_ctrls.strip(id).select_button ().set_color (s->presentation_info ().color());
+	}
+
+	if (what_changed.empty ()) {
+		_ctrls.strip(id).set_stripable (s, _ctrls.fader_mode() == ModePan);
 	}
 
 	if (what_changed.contains (Properties::name)) {
