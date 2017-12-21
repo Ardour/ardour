@@ -635,7 +635,10 @@ FP8Strip::periodic_update_meter ()
 		set_strip_mode (5); // small meters + 3 lines of text (3rd is large)  + value-bar
 	}
 	else if (have_meter) {
-		set_strip_mode (4); // big meters + 3 lines of text (3rd line is large)
+		/* we cannot use "big meters" mode 4, since that implies
+		 * 2 "Large" (4char) text lines, followed by a HUGE 2 char line
+		 * and hides timecode-clock */
+		set_strip_mode (5);
 	}
 	else if (have_panner) {
 		set_strip_mode (0); // 3 lines of text (3rd line is large + long) + value-bar
