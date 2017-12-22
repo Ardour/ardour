@@ -21,6 +21,7 @@
 
 #include "ardour_ui.h"
 #include "big_transport_window.h"
+#include "utils.h"
 
 #include "pbd/i18n.h"
 
@@ -38,4 +39,17 @@ BigTransportWindow::BigTransportWindow ()
 	vbox->pack_start (transport_ctrl, true, true);
 	add (*vbox);
 	vbox->show_all();
+}
+
+void
+BigTransportWindow::on_unmap ()
+{
+	ArdourWindow::on_unmap ();
+	ARDOUR_UI::instance()->reset_focus (this);
+}
+
+bool
+BigTransportWindow::on_key_press_event (GdkEventKey* ev)
+{
+	return ARDOUR_UI_UTILS::relay_key_press (ev, this);
 }

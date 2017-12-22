@@ -36,6 +36,10 @@ public:
 		transport_ctrl.set_session (s);
 	}
 
+protected:
+	void on_unmap ();
+	bool on_key_press_event (GdkEventKey*);
+
 private:
 	TransportControlUI transport_ctrl;
 };
