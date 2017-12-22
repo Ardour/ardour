@@ -569,6 +569,7 @@
       <menuitem action='toggle-bundle-manager'/>
 #endif
       <menuitem action='toggle-big-clock'/>
+      <menuitem action='toggle-big-transport'/>
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif

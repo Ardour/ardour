@@ -87,6 +87,7 @@
 #include "about.h"
 #include "add_video_dialog.h"
 #include "big_clock_window.h"
+#include "big_transport_window.h"
 #include "bundle_manager.h"
 #include "engine_dialog.h"
 #include "export_video_dialog.h"
@@ -105,6 +106,7 @@ class About;
 class AddRouteDialog;
 class AddVideoDialog;
 class BigClockWindow;
+class BigTransportWindow;
 class BundleManager;
 class EngineControl;
 class ExportVideoDialog;
@@ -679,6 +681,7 @@ private:
 	WM::ProxyWithConstructor<AddVideoDialog> add_video_dialog;
 	WM::ProxyWithConstructor<BundleManager> bundle_manager;
 	WM::ProxyWithConstructor<BigClockWindow> big_clock_window;
+	WM::ProxyWithConstructor<BigTransportWindow> big_transport_window;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> audio_port_matrix;
 	WM::ProxyWithConstructor<GlobalPortMatrixWindow> midi_port_matrix;
 	WM::ProxyWithConstructor<KeyEditor> key_editor;
@@ -689,6 +692,7 @@ private:
 	BundleManager*          create_bundle_manager ();
 	AddVideoDialog*         create_add_video_dialog ();
 	BigClockWindow*         create_big_clock_window();
+	BigTransportWindow*     create_big_transport_window();
 	GlobalPortMatrixWindow* create_global_port_matrix (ARDOUR::DataType);
 	KeyEditor*              create_key_editor ();
 

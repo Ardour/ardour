@@ -53,6 +53,7 @@ gtk2_ardour_sources = [
         'automation_time_axis.cc',
         'axis_view.cc',
         'big_clock_window.cc',
+        'big_transport_window.cc',
         'bundle_manager.cc',
         'clock_group.cc',
         'color_theme_manager.cc',

@@ -45,6 +45,7 @@
 #include "add_video_dialog.h"
 #include "ardour_ui.h"
 #include "big_clock_window.h"
+#include "big_transport_window.h"
 #include "bundle_manager.h"
 #include "global_port_matrix.h"
 #include "gui_object.h"
@@ -87,6 +88,10 @@ ARDOUR_UI::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	transport_ctrl.set_session (s);
+
+	if (big_transport_window) {
+		big_transport_window->set_session (s);
+	}
 
 	if (!_session) {
 		WM::Manager::instance().set_session (s);
@@ -868,6 +873,14 @@ ARDOUR_UI::create_big_clock_window ()
 	return new BigClockWindow (*big_clock);
 }
 
+BigTransportWindow*
+ARDOUR_UI::create_big_transport_window ()
+{
+	BigTransportWindow* btw = new BigTransportWindow ();
+	btw->set_session (_session);
+	return btw;
+}
+
 void
 ARDOUR_UI::handle_locations_change (Location *)
 {
@@ -890,6 +903,9 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 			if (big_clock_window) {
 				big_clock_window->set_transient_for (*editor->own_window());
 			}
+			if (big_transport_window) {
+				big_transport_window->set_transient_for (*editor->own_window());
+			}
 		}
 
 	} else if (object == mixer) {
@@ -898,6 +914,9 @@ ARDOUR_UI::tabbed_window_state_event_handler (GdkEventWindowState* ev, void* obj
 		    (ev->new_window_state & GDK_WINDOW_STATE_FULLSCREEN)) {
 			if (big_clock_window) {
 				big_clock_window->set_transient_for (*mixer->own_window());
+			}
+			if (big_transport_window) {
+				big_transport_window->set_transient_for (*mixer->own_window());
 			}
 		}
 	}
