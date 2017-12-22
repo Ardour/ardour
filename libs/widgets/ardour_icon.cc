@@ -614,7 +614,7 @@ static void icon_transport_play (cairo_t *cr, const int width, const int height)
 {
 	const int wh = std::min (width, height) * .5;
 	const double y = height * .5;
-	const double x = width - wh;
+	const double x = width * .5;
 
 	const double tri = ceil (.577 * wh); // 1/sqrt(3)
 
@@ -631,13 +631,14 @@ static void icon_transport_panic (cairo_t *cr, const int width, const int height
 {
 	const int wh = ceil (std::min (width, height) * .1) - .5;
 	const double xc = rint (width * .5);
-	const double yh = height;
+	const double yh = std::min (width, height);
+	const double y0 = (height - yh) * .5;
 	cairo_rectangle (cr,
-	                 xc - wh, yh *.19,
-	                 wh * 2,  yh *.41);
+	                 xc - wh, y0 + yh *.12,
+	                 wh * 2,  yh *.48);
 	VECTORICONSTROKEFILL(0.9);
 
-	cairo_arc (cr, xc, yh *.75, wh, 0, 2 * M_PI);
+	cairo_arc (cr, xc, y0 + yh *.78, wh, 0, 2 * M_PI);
 	VECTORICONSTROKEFILL(0.9);
 }
 
@@ -649,7 +650,7 @@ static void icon_transport_ck (cairo_t *cr,
 	// small play triangle
 	int wh = std::min (width, height);
 	const double y = height * .5;
-	const double x = width - wh * .5;
+	const double x = width * .5;
 	wh *= .18;
 	const double tri = ceil (.577 * wh * 2); // 1/sqrt(3)
 
