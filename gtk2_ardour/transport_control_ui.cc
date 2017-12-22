@@ -20,6 +20,7 @@
 #include <gtkmm/sizegroup.h>
 
 #include "ardour/dB.h"
+#include "ardour/profile.h"
 #include "widgets/tooltips.h"
 #include "gtkmm2ext/gui_thread.h"
 
@@ -105,7 +106,12 @@ TransportControlUI::setup (TransportControlProvider* ui)
 	transport_button_size_group->add_widget (goto_end_button);
 	transport_button_size_group->add_widget (auto_loop_button);
 	transport_button_size_group->add_widget (rec_button);
-	transport_button_size_group->add_widget (play_selection_button);
+	if (!ARDOUR::Profile->get_mixbus()) {
+		/*note: since we aren't showing this button, it doesn't get allocated
+		 * and therefore blows-up the size-group.  so remove it.
+		 */
+		transport_button_size_group->add_widget (play_selection_button);
+	}
 	transport_button_size_group->add_widget (roll_button);
 	transport_button_size_group->add_widget (stop_button);
 
@@ -119,12 +125,18 @@ TransportControlUI::setup (TransportControlProvider* ui)
 
 #undef PX_SCALE
 
-	pack_start (midi_panic_button, true, true, 0);
+	if (!ARDOUR::Profile->get_mixbus()) {
+		pack_start (midi_panic_button, true, true, 0);
+	} else {
+		pack_start (midi_panic_button, true, true, 3);
+	}
 	pack_start (click_button, true, true, 0);
 	pack_start (goto_start_button, true, true);
 	pack_start (goto_end_button, true, true);
 	pack_start (auto_loop_button, true, true);
-	pack_start (play_selection_button, true, true);
+	if (!ARDOUR::Profile->get_mixbus()) {
+		pack_start (play_selection_button, true, true);
+	}
 	pack_start (roll_button, true, true);
 	pack_start (stop_button, true, true);
 	pack_start (rec_button, true, true, 3);
