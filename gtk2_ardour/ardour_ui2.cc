@@ -74,14 +74,6 @@ ARDOUR_UI::setup_tooltips ()
 {
 	ArdourCanvas::Canvas::set_tooltip_timeout (Gtk::Settings::get_default()->property_gtk_tooltip_timeout ());
 
-	set_tip (roll_button, _("Play from playhead"));
-	set_tip (stop_button, _("Stop playback"));
-	set_tip (rec_button, _("Toggle record"));
-	set_tip (play_selection_button, _("Play range/selection"));
-	set_tip (goto_start_button, _("Go to start of session"));
-	set_tip (goto_end_button, _("Go to end of session"));
-	set_tip (auto_loop_button, _("Play loop range"));
-	set_tip (midi_panic_button, _("MIDI Panic\nSend note off and reset controller messages on all MIDI channels"));
 	set_tip (auto_return_button, _("Return to last playback start when stopped"));
 	set_tip (follow_edits_button, _("Playhead follows Range tool clicks, and Range selections"));
 	set_tip (auto_input_button, _("Track Input Monitoring automatically follows transport state"));
@@ -273,29 +265,7 @@ ARDOUR_UI::setup_transport ()
 	RefPtr<Action> act;
 	/* setup actions */
 
-	act = ActionManager::get_action ("Transport", "ToggleClick");
-	click_button.set_related_action (act);
-	click_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_clicked), false);
-	click_button.signal_scroll_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::click_button_scroll), false);
-
-	act = ActionManager::get_action (X_("Transport"), X_("Stop"));
-	stop_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Roll"));
-	roll_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Record"));
-	rec_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("GotoStart"));
-	goto_start_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("GotoEnd"));
-	goto_end_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("Loop"));
-	auto_loop_button.set_related_action (act);
-	act = ActionManager::get_action (X_("Transport"), X_("PlaySelection"));
-	play_selection_button.set_related_action (act);
-	act = ActionManager::get_action (X_("MIDI"), X_("panic"));
-	midi_panic_button.set_related_action (act);
 	act = ActionManager::get_action (X_("Transport"), X_("ToggleExternalSync"));
-
 	sync_button.set_related_action (act);
 	sync_button.signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::sync_button_clicked), false);
 
@@ -381,7 +351,6 @@ ARDOUR_UI::setup_transport ()
 	monitor_disk_button.set_name ("monitor button");
 	auto_input_button.set_name ("transport option button");
 
-	click_button.set_name ("transport button");
 	sync_button.set_name ("transport active option button");
 
 	/* and widget text */
@@ -418,28 +387,7 @@ ARDOUR_UI::setup_transport ()
 	Gtkmm2ext::UI::instance()->set_tip (monitor_in_button, _("Force all tracks to monitor Input, unless they are explicitly set to monitor Disk"));
 	Gtkmm2ext::UI::instance()->set_tip (monitor_disk_button, _("Force all tracks to monitor Disk playback, unless they are explicitly set to Input"));
 
-	/* setup icons */
-
-	click_button.set_icon (ArdourIcon::TransportMetronom);
-	goto_start_button.set_icon (ArdourIcon::TransportStart);
-	goto_end_button.set_icon (ArdourIcon::TransportEnd);
-	roll_button.set_icon (ArdourIcon::TransportPlay);
-	stop_button.set_icon (ArdourIcon::TransportStop);
-	play_selection_button.set_icon (ArdourIcon::TransportRange);
-	auto_loop_button.set_icon (ArdourIcon::TransportLoop);
-	rec_button.set_icon (ArdourIcon::RecButton);
-	midi_panic_button.set_icon (ArdourIcon::TransportPanic);
-
 	/* transport control size-group */
-
-	Glib::RefPtr<SizeGroup> transport_button_size_group = SizeGroup::create (SIZE_GROUP_BOTH);
-	transport_button_size_group->add_widget (goto_start_button);
-	transport_button_size_group->add_widget (goto_end_button);
-	transport_button_size_group->add_widget (auto_loop_button);
-	transport_button_size_group->add_widget (rec_button);
-	transport_button_size_group->add_widget (play_selection_button);
-	transport_button_size_group->add_widget (roll_button);
-	transport_button_size_group->add_widget (stop_button);
 
 	Glib::RefPtr<SizeGroup> punch_button_size_group = SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL);
 	punch_button_size_group->add_widget (punch_in_button);
@@ -471,23 +419,6 @@ ARDOUR_UI::setup_transport ()
 	transport_frame.add (*ebox);
 	ebox->add (transport_table);
 
-	/* transport controls sub-group */
-	click_button.set_size_request (PX_SCALE(20), PX_SCALE(20));
-
-	HBox* tbox = manage (new HBox);
-	tbox->set_spacing (PX_SCALE(2));
-
-	tbox->pack_start (midi_panic_button, true, true, 0);
-	tbox->pack_start (click_button, true, true, 0);
-	tbox->pack_start (goto_start_button, true, true);
-	tbox->pack_start (goto_end_button, true, true);
-	tbox->pack_start (auto_loop_button, true, true);
-	tbox->pack_start (play_selection_button, true, true);
-
-	tbox->pack_start (roll_button, true, true);
-	tbox->pack_start (stop_button, true, true);
-	tbox->pack_start (rec_button, true, true, 3);
-
 	/* alert box sub-group */
 	VBox* alert_box = manage (new VBox);
 	alert_box->set_homogeneous (true);
@@ -505,7 +436,7 @@ ARDOUR_UI::setup_transport ()
 	button_height_size_group->add_widget (*secondary_clock->left_btn());
 	button_height_size_group->add_widget (*secondary_clock->right_btn());
 
-	button_height_size_group->add_widget (stop_button);
+	button_height_size_group->add_widget (transport_ctrl.size_button ());
 //	button_height_size_group->add_widget (sync_button);
 	button_height_size_group->add_widget (auto_return_button);
 
@@ -545,7 +476,7 @@ ARDOUR_UI::setup_transport ()
 	int col = 0;
 #define TCOL col, col + 1
 
-	transport_table.attach (*tbox, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
+	transport_table.attach (transport_ctrl, TCOL, 0, 1 , SHRINK, SHRINK, 0, 0);
 	transport_table.attach (*ssbox, TCOL, 1, 2 , FILL, SHRINK, 0, 0);
 	++col;
 
@@ -631,7 +562,6 @@ ARDOUR_UI::setup_transport ()
 	auditioning_alert_button.set_sensitive (false);
 	auditioning_alert_button.set_visual_state (Gtkmm2ext::NoVisualState);
 
-	stop_button.set_active (true);
 	set_transport_sensitivity (false);
 }
 #undef PX_SCALE
@@ -794,17 +724,6 @@ ARDOUR_UI::error_blink (bool onoff)
 			break;
 	}
 }
-
-void
-ARDOUR_UI::set_loop_sensitivity ()
-{
-	if (!_session || _session->config.get_external_sync()) {
-		auto_loop_button.set_sensitive (false);
-	} else {
-		auto_loop_button.set_sensitive (_session && _session->locations()->auto_loop_location());
-	}
-}
-
 void
 ARDOUR_UI::set_transport_sensitivity (bool yn)
 {
@@ -856,29 +775,6 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 
 	show_tabbable (rc_option_editor);
 	rc_option_editor->set_current_page (_("Metronome"));
-	return true;
-}
-
-bool
-ARDOUR_UI::click_button_scroll (GdkEventScroll* ev)
-{
-	gain_t gain = Config->get_click_gain();
-	float gain_db = accurate_coefficient_to_dB (gain);
-
-	switch (ev->direction) {
-		case GDK_SCROLL_UP:
-		case GDK_SCROLL_LEFT:
-			gain_db += 1;
-			break;
-		case GDK_SCROLL_DOWN:
-		case GDK_SCROLL_RIGHT:
-			gain_db -= 1;
-			break;
-	}
-	gain_db = std::max (-60.f, gain_db);
-	gain = dB_to_coefficient (gain_db);
-	gain = std::min (gain, Config->get_max_gain());
-	Config->set_click_gain (gain);
 	return true;
 }
 

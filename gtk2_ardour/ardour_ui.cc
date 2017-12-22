@@ -285,13 +285,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, _initial_verbose_plugin_scan (false)
 	, first_time_engine_run (true)
 	, secondary_clock_spacer (0)
-	, roll_controllable (new TransportControllable ("transport roll", *this, TransportControllable::Roll))
-	, stop_controllable (new TransportControllable ("transport stop", *this, TransportControllable::Stop))
-	, goto_start_controllable (new TransportControllable ("transport goto start", *this, TransportControllable::GotoStart))
-	, goto_end_controllable (new TransportControllable ("transport goto end", *this, TransportControllable::GotoEnd))
-	, auto_loop_controllable (new TransportControllable ("transport auto loop", *this, TransportControllable::AutoLoop))
-	, play_selection_controllable (new TransportControllable ("transport play selection", *this, TransportControllable::PlaySelection))
-	, rec_controllable (new TransportControllable ("transport rec-enable", *this, TransportControllable::RecordEnable))
 	, auto_input_button (ArdourButton::led_default_elements)
 	, time_info_box (0)
 	, auto_return_button (ArdourButton::led_default_elements)
@@ -380,22 +373,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	boost::function<void (string)> pc (boost::bind (&ARDOUR_UI::parameter_changed, this, _1));
 	UIConfiguration::instance().map_parameters (pc);
 
-	roll_button.set_controllable (roll_controllable);
-	stop_button.set_controllable (stop_controllable);
-	goto_start_button.set_controllable (goto_start_controllable);
-	goto_end_button.set_controllable (goto_end_controllable);
-	auto_loop_button.set_controllable (auto_loop_controllable);
-	play_selection_button.set_controllable (play_selection_controllable);
-	rec_button.set_controllable (rec_controllable);
-
-	roll_button.set_name ("transport button");
-	stop_button.set_name ("transport button");
-	goto_start_button.set_name ("transport button");
-	goto_end_button.set_name ("transport button");
-	auto_loop_button.set_name ("transport button");
-	play_selection_button.set_name ("transport button");
-	rec_button.set_name ("transport recenable button");
-	midi_panic_button.set_name ("transport button");
+	transport_ctrl.setup (this);
 
 	ARDOUR::DiskWriter::Overrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_overrun_handler, this), gui_context());
 	ARDOUR::DiskReader::Underrun.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::disk_underrun_handler, this), gui_context());
@@ -679,6 +657,8 @@ ARDOUR_UI::post_engine ()
 	if (setup_windows ()) {
 		throw failed_constructor ();
 	}
+
+	transport_ctrl.map_actions ();
 
 	/* Do this after setup_windows (), as that's when the _status_bar_visibility is created */
 	XMLNode* n = Config->extra_xml (X_("UI"));
@@ -2620,10 +2600,6 @@ void
 ARDOUR_UI::map_transport_state ()
 {
 	if (!_session) {
-		auto_loop_button.unset_active_state ();
-		play_selection_button.unset_active_state ();
-		roll_button.unset_active_state ();
-		stop_button.set_active_state (Gtkmm2ext::ExplicitActive);
 		layered_button.set_sensitive (false);
 		return;
 	}
@@ -2633,52 +2609,9 @@ ARDOUR_UI::map_transport_state ()
 	float sp = _session->transport_speed();
 
 	if (sp != 0.0f) {
-
-		/* we're rolling */
-
-		if (_session->get_play_range()) {
-
-			play_selection_button.set_active_state (Gtkmm2ext::ExplicitActive);
-			roll_button.unset_active_state ();
-			auto_loop_button.unset_active_state ();
-
-		} else if (_session->get_play_loop ()) {
-
-			auto_loop_button.set_active (true);
-			play_selection_button.set_active (false);
-			if (Config->get_loop_is_mode()) {
-				roll_button.set_active (true);
-			} else {
-				roll_button.set_active (false);
-			}
-
-		} else {
-
-			roll_button.set_active (true);
-			play_selection_button.set_active (false);
-			auto_loop_button.set_active (false);
-		}
-
-		if (UIConfiguration::instance().get_follow_edits() && !_session->config.get_external_sync()) {
-			/* light up both roll and play-selection if they are joined */
-			roll_button.set_active (true);
-			play_selection_button.set_active (true);
-		}
 		layered_button.set_sensitive (!_session->actively_recording ());
-
-		stop_button.set_active (false);
-
 	} else {
-
 		layered_button.set_sensitive (true);
-		stop_button.set_active (true);
-		roll_button.set_active (false);
-		play_selection_button.set_active (false);
-		if (Config->get_loop_is_mode ()) {
-			auto_loop_button.set_active (_session->get_play_loop());
-		} else {
-			auto_loop_button.set_active (false);
-		}
 		update_disk_space ();
 	}
 }
@@ -2686,7 +2619,6 @@ ARDOUR_UI::map_transport_state ()
 void
 ARDOUR_UI::blink_handler (bool blink_on)
 {
-	transport_rec_enable_blink (blink_on);
 	sync_blink (blink_on);
 
 	if (!UIConfiguration::instance().get_blink_alert_indicators()) {
@@ -3130,34 +3062,6 @@ ARDOUR_UI::secondary_clock_value_changed ()
 		_session->request_locate (secondary_clock->current_time ());
 	}
 }
-
-void
-ARDOUR_UI::transport_rec_enable_blink (bool onoff)
-{
-	if (_session == 0) {
-		return;
-	}
-
-	if (_session->step_editing()) {
-		return;
-	}
-
-	Session::RecordState const r = _session->record_status ();
-	bool const h = _session->have_rec_enabled_track ();
-
-	if (r == Session::Enabled || (r == Session::Recording && !h)) {
-		if (onoff) {
-			rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
-		} else {
-			rec_button.set_active_state (Gtkmm2ext::Off);
-		}
-	} else if (r == Session::Recording && h) {
-		rec_button.set_active_state (Gtkmm2ext::ExplicitActive);
-	} else {
-		rec_button.unset_active_state ();
-	}
-}
-
 void
 ARDOUR_UI::save_template_dialog_response (int response, SaveTemplateDialog* d)
 {
@@ -5322,20 +5226,6 @@ ARDOUR_UI::update_transport_clocks (samplepos_t pos)
 	ARDOUR_UI::instance()->video_timeline->manual_seek_video_monitor(pos);
 }
 
-void
-ARDOUR_UI::step_edit_status_change (bool yn)
-{
-	// XXX should really store pre-step edit status of things
-	// we make insensitive
-
-	if (yn) {
-		rec_button.set_active_state (Gtkmm2ext::ImplicitActive);
-		rec_button.set_sensitive (false);
-	} else {
-		rec_button.unset_active_state ();;
-		rec_button.set_sensitive (true);
-	}
-}
 
 void
 ARDOUR_UI::record_state_changed ()
@@ -5400,86 +5290,6 @@ ARDOUR_UI::store_clock_modes ()
 
 	_session->add_extra_xml (*node);
 	_session->set_dirty ();
-}
-
-ARDOUR_UI::TransportControllable::TransportControllable (std::string name, ARDOUR_UI& u, ToggleType tp)
-	: Controllable (name), ui (u), type(tp)
-{
-
-}
-
-void
-ARDOUR_UI::TransportControllable::set_value (double val, PBD::Controllable::GroupControlDisposition /*group_override*/)
-{
-	if (val < 0.5) {
-		/* do nothing: these are radio-style actions */
-		return;
-	}
-
-	const char *action = 0;
-
-	switch (type) {
-	case Roll:
-		action = X_("Roll");
-		break;
-	case Stop:
-		action = X_("Stop");
-		break;
-	case GotoStart:
-		action = X_("GotoStart");
-		break;
-	case GotoEnd:
-		action = X_("GotoEnd");
-		break;
-	case AutoLoop:
-		action = X_("Loop");
-		break;
-	case PlaySelection:
-		action = X_("PlaySelection");
-		break;
-	case RecordEnable:
-		action = X_("Record");
-		break;
-	default:
-		break;
-	}
-
-	if (action == 0) {
-		return;
-	}
-
-	Glib::RefPtr<Action> act = ActionManager::get_action ("Transport", action);
-
-	if (act) {
-		act->activate ();
-	}
-}
-
-double
-ARDOUR_UI::TransportControllable::get_value (void) const
-{
-	float val = 0.0;
-
-	switch (type) {
-	case Roll:
-		break;
-	case Stop:
-		break;
-	case GotoStart:
-		break;
-	case GotoEnd:
-		break;
-	case AutoLoop:
-		break;
-	case PlaySelection:
-		break;
-	case RecordEnable:
-		break;
-	default:
-		break;
-	}
-
-	return val;
 }
 
 void

@@ -37,7 +37,6 @@
 
 
 #include "pbd/xml++.h"
-#include "pbd/controllable.h"
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
@@ -79,6 +78,8 @@
 #include "enums.h"
 #include "mini_timeline.h"
 #include "shuttle_control.h"
+#include "transport_control.h"
+#include "transport_control_ui.h"
 #include "visibility_group.h"
 #include "window_manager.h"
 
@@ -158,7 +159,7 @@ namespace ArdourWidgets {
 	class Tabbable;
 }
 
-class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr
+class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
 public:
 	ARDOUR_UI (int *argcp, char **argvp[], const char* localedir);
@@ -372,6 +373,7 @@ protected:
 	void toggle_session_options_window ();
 
 private:
+
 	Gtk::Window   _main_window;
 	Gtkmm2ext::VisibilityTracker* main_window_visibility;
 	Gtk::VBox      main_vpacker;
@@ -451,46 +453,13 @@ private:
 	ArdourWidgets::ArdourVSpacer* secondary_clock_spacer;
 	void repack_transport_hbox ();
 	void update_clock_visibility ();
-
-	struct TransportControllable : public PBD::Controllable {
-		enum ToggleType {
-			Roll = 0,
-			Stop,
-			RecordEnable,
-			GotoStart,
-			GotoEnd,
-			AutoLoop,
-			PlaySelection,
-	    	};
-
-		TransportControllable (std::string name, ARDOUR_UI&, ToggleType);
-		void set_value (double, PBD::Controllable::GroupControlDisposition group_override);
-		double get_value (void) const;
-
-		ARDOUR_UI& ui;
-		ToggleType type;
-	};
-
-	boost::shared_ptr<TransportControllable> roll_controllable;
-	boost::shared_ptr<TransportControllable> stop_controllable;
-	boost::shared_ptr<TransportControllable> goto_start_controllable;
-	boost::shared_ptr<TransportControllable> goto_end_controllable;
-	boost::shared_ptr<TransportControllable> auto_loop_controllable;
-	boost::shared_ptr<TransportControllable> play_selection_controllable;
-	boost::shared_ptr<TransportControllable> rec_controllable;
-
 	void toggle_follow_edits ();
 
 	void set_transport_controllable_state (const XMLNode&);
 	XMLNode& get_transport_controllable_state ();
 
-	ArdourWidgets::ArdourButton roll_button;
-	ArdourWidgets::ArdourButton stop_button;
-	ArdourWidgets::ArdourButton goto_start_button;
-	ArdourWidgets::ArdourButton goto_end_button;
-	ArdourWidgets::ArdourButton auto_loop_button;
-	ArdourWidgets::ArdourButton play_selection_button;
-	ArdourWidgets::ArdourButton rec_button;
+	TransportControlUI transport_ctrl;
+
 	ArdourWidgets::ArdourButton punch_in_button;
 	ArdourWidgets::ArdourButton punch_out_button;
 	ArdourWidgets::ArdourButton layered_button;
@@ -518,7 +487,6 @@ private:
 
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;
-	ArdourWidgets::ArdourButton click_button;
 	ArdourWidgets::ArdourButton sync_button;
 
 	ArdourWidgets::ArdourButton auditioning_alert_button;
@@ -632,7 +600,6 @@ private:
 	void edit_metadata ();
 	void import_metadata ();
 
-	void set_loop_sensitivity ();
 	void set_transport_sensitivity (bool);
 
 	//stuff for ProTools-style numpad
@@ -818,8 +785,6 @@ private:
 	PBD::ScopedConnection halt_connection;
 	PBD::ScopedConnection editor_meter_connection;
 
-	void step_edit_status_change (bool);
-
 	/* these are used only in response to a platform-specific "ShouldQuit" signal */
 	bool idle_finish ();
 	void queue_finish ();
@@ -829,7 +794,6 @@ private:
 	int ambiguous_file (std::string file, std::vector<std::string> hits);
 
 	bool click_button_clicked (GdkEventButton *);
-	bool click_button_scroll (GdkEventScroll *);
 	bool sync_button_clicked (GdkEventButton *);
 
 	VisibilityGroup _status_bar_visibility;

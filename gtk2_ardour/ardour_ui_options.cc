@@ -369,7 +369,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
-		set_loop_sensitivity ();
 
 	} else if (p == "follow-edits") {
 
@@ -426,13 +425,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "clicking") {
 		ActionManager::map_some_state ("Transport", "ToggleClick", &RCConfiguration::get_clicking);
-	} else if (p == "click-record-only") {
-		// TODO set a flag, blink or gray-out metronome button while rolling, only
-		if (Config->get_click_record_only()) {
-			click_button.set_name ("generic button"); // XXX
-		} else {
-			click_button.set_name ("transport button");
-		}
 	} else if (p == "use-video-sync") {
 		ActionManager::map_some_state ("Transport",  "ToggleVideoSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_use_video_sync));
 	} else if (p == "sync-source") {
@@ -521,11 +513,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
 		}
-	} else if (p == "click-gain") {
-		float gain_db = accurate_coefficient_to_dB (Config->get_click_gain());
-		char tmp[32];
-		snprintf(tmp, 31, "%+.1f", gain_db);
-		set_tip (click_button, string_compose (_("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\nSignal Level: %1 dBFS"), tmp));
 	}
 }
 

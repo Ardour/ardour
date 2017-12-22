@@ -86,6 +86,8 @@ ARDOUR_UI::set_session (Session *s)
 {
 	SessionHandlePtr::set_session (s);
 
+	transport_ctrl.set_session (s);
+
 	if (!_session) {
 		WM::Manager::instance().set_session (s);
 		/* Session option editor cannot exist across change-of-session */
@@ -158,8 +160,6 @@ ARDOUR_UI::set_session (Session *s)
 	ActionManager::set_sensitive (ActionManager::point_selection_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::playlist_selection_sensitive_actions, false);
 
-	rec_button.set_sensitive (true);
-
 	solo_alert_button.set_active (_session->soloing());
 
 	setup_session_options ();
@@ -169,7 +169,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->SaveSessionRequested.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::save_session_at_its_request, this, _1), gui_context());
 	_session->StateSaved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_title, this), gui_context());
 	_session->RecordStateChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::record_state_changed, this), gui_context());
-	_session->StepEditStatusChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::step_edit_status_change, this, _1), gui_context());
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
 
@@ -179,7 +178,6 @@ ARDOUR_UI::set_session (Session *s)
 	_session->locations()->added.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->locations()->removed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::handle_locations_change, this, _1), gui_context());
 	_session->config.ParameterChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_parameter_changed, this, _1), gui_context ());
-	_session->auto_loop_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_loop_sensitivity, this), gui_context ());
 
 	/* Clocks are on by default after we are connected to a session, so show that here.
 	*/
@@ -313,8 +311,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	}
 
 	ActionManager::set_sensitive (ActionManager::session_sensitive_actions, false);
-
-	rec_button.set_sensitive (false);
 
 	WM::Manager::instance().set_session ((ARDOUR::Session*) 0);
 
