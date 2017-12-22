@@ -998,6 +998,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		int ssid = atoi (&path[17]);
 		ret = sel_eq_shape (ssid, argv[0]->f, msg);
 	}
+	else if (!strncmp (path, "/marker", 7)) {
+		ret = set_marker (types, argv, argc, msg);
+	}
 	else if (!strncmp (path, "/set_surface", 12)) {
 		ret = surface_parse (path, types, argv, argc, msg);
 	}
@@ -2823,6 +2826,70 @@ OSC::jog_mode (float mode, lo_message msg)
 	}
 	return 0;
 
+}
+
+// two structs to help with going to markers
+struct LocationMarker {
+	LocationMarker (const std::string& l, samplepos_t w)
+		: label (l), when (w) {}
+	std::string label;
+	samplepos_t  when;
+};
+
+struct LocationMarkerSort {
+	bool operator() (const LocationMarker& a, const LocationMarker& b) {
+		return (a.when < b.when);
+	}
+};
+
+int
+OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	if (argc != 1) {
+		PBD::warning << "Wrong number of parameters, one only." << endmsg;
+		return -1;
+	}
+	const Locations::LocationList& ll (session->locations ()->list ());
+	uint32_t marker = 0;
+
+	switch (types[0]) {
+		case 's':
+			for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
+				if ((*l)->is_mark ()) {
+					if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
+						session->request_locate ((*l)->start (), false);
+						return 0;
+					}
+				}
+			}
+			break;
+		case 'i':
+			marker = (uint32_t) argv[0]->i - 1;
+			break;
+		case 'f':
+			marker = (uint32_t) argv[0]->f - 1;
+			break;
+		default:
+			return -1;
+			break;
+	}
+	std::vector<LocationMarker> lm;
+	// get Locations that are marks
+	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
+		if ((*l)->is_mark ()) {
+			lm.push_back (LocationMarker((*l)->name(), (*l)->start ()));
+		}
+	}
+	// sort them by position
+	LocationMarkerSort location_marker_sort;
+	std::sort (lm.begin(), lm.end(), location_marker_sort);
+	// go there
+	if (marker < lm.size()) {
+		session->request_locate (lm[marker].when, false);
+		return 0;
+	}
+	// we were unable to deal with things
+	return -1;
 }
 
 int
