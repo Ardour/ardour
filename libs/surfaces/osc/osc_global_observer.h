@@ -69,6 +69,22 @@ class OSCGlobalObserver
 	uint32_t last_punchin;
 	uint32_t last_punchout;
 	uint32_t last_click;
+	samplepos_t prev_mark;
+	samplepos_t next_mark;
+	struct LocationMarker {
+		LocationMarker (const std::string& l, samplepos_t w)
+			: label (l), when (w) {}
+		std::string label;
+		samplepos_t  when;
+	};
+	std::vector<LocationMarker> lm;
+
+	struct LocationMarkerSort {
+		bool operator() (const LocationMarker& a, const LocationMarker& b) {
+			return (a.when < b.when);
+		}
+	};
+
 
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
@@ -78,6 +94,8 @@ class OSCGlobalObserver
 	void solo_active (bool active);
 	void session_name (std::string path, std::string name);
 	void extra_check (void);
+	void marks_changed (void);
+	void mark_update (void);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */

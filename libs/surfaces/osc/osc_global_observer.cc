@@ -112,6 +112,8 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		session->TransportLooped.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_transport_state_changed, this), OSC::instance());
 		session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_record_state_changed, this), OSC::instance());
 		send_record_state_changed ();
+		session->locations_modified.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::marks_changed, this), OSC::instance());
+		marks_changed ();
 
 		// session feedback
 		session->StateSaved.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::session_name, this, X_("/session_name"), _1), OSC::instance());
@@ -151,6 +153,7 @@ OSCGlobalObserver::clear_observer ()
 	_osc.text_message (X_("/master/name"), " ", addr);
 	_osc.text_message (X_("/monitor/name"), " ", addr);
 	_osc.text_message (X_("/session_name"), " ", addr);
+	_osc.text_message (X_("/marker"), " ", addr);
 	if (feedback[6]) { // timecode enabled
 		_osc.text_message (X_("/position/smpte"), " ", addr);
 	}
@@ -271,6 +274,7 @@ OSCGlobalObserver::tick ()
 			_osc.text_message ("/position/samples", os.str(), addr);
 		}
 		_last_sample = now_sample;
+		mark_update ();
 	}
 	if (feedback[3]) { //heart beat enabled
 		if (_heartbeat == 10) {
@@ -399,6 +403,61 @@ OSCGlobalObserver::send_transport_state_changed()
 	_osc.float_message (X_("/transport_stop"), session->transport_stopped(), addr);
 	_osc.float_message (X_("/rewind"), session->transport_speed() < 0.0, addr);
 	_osc.float_message (X_("/ffwd"), (session->transport_speed() != 1.0 && session->transport_speed() > 0.0), addr);
+}
+
+void
+OSCGlobalObserver::marks_changed ()
+{
+	const Locations::LocationList& ll (session->locations ()->list ());
+	// get Locations that are marks
+	for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
+		if ((*l)->is_session_range ()) {
+			lm.push_back (LocationMarker(_("start"), (*l)->start ()));
+			lm.push_back (LocationMarker(_("end"), (*l)->end ()));
+			continue;
+		}
+		if ((*l)->is_mark ()) {
+			lm.push_back (LocationMarker((*l)->name(), (*l)->start ()));
+		}
+	}
+	// sort them by position
+	LocationMarkerSort location_marker_sort;
+	std::sort (lm.begin(), lm.end(), location_marker_sort);
+	mark_update ();
+
+}
+
+void
+OSCGlobalObserver::mark_update ()
+{
+	uint32_t prev = 0;
+	uint32_t next = lm.size() - 1;
+	for (uint32_t i = 0; i < lm.size (); i++) {
+		if ((lm[i].when <= _last_sample) && (i > prev)) {
+			prev = i;
+		}
+		if ((lm[i].when >= _last_sample) && (i < next)) {
+			next = i;
+			break;
+		}
+	}
+	if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
+		string send_str = lm[prev].label;
+		prev_mark = lm[prev].when;
+		next_mark = lm[next].when;
+		if (prev != next) {
+			send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
+		}
+		if (_last_sample > lm[lm.size() - 1].when) {
+			send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
+		}
+		if (_last_sample < lm[0].when) {
+			send_str = string_compose ("-> %1", lm[0].label);
+		}
+		_osc.text_message (X_("/marker"), send_str, addr);
+	}
+		
+
 }
 
 void
