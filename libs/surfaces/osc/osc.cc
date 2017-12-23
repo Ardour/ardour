@@ -2818,12 +2818,12 @@ OSC::jog_mode (float mode, lo_message msg)
 		default:
 			PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
 			break;
+	}
 	lo_message reply = lo_message_new ();
 	lo_message_add_int32 (reply, s->jogmode);
 	lo_send_message (get_address(msg), "/jog/mode", reply);
 	lo_message_free (reply);
 
-	}
 	return 0;
 
 }
