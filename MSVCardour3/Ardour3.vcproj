@@ -392,6 +392,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\big_transport_window.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\bundle_env_msvc.cc"
 				>
 			</File>
@@ -1244,6 +1248,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\transport_control.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\transport_control_ui.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\transpose_dialog.cc"
 				>
 			</File>
@@ -1427,6 +1439,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\big_clock_window.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\big_transport_window.h"
 				>
 			</File>
 			<File
@@ -2331,6 +2347,14 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\transform_dialog.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\transport_control.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\transport_control_ui.h"
 				>
 			</File>
 			<File
