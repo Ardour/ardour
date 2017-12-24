@@ -475,7 +475,6 @@ public:
 	void set_session_extents (samplepos_t start, samplepos_t end);
 	bool end_is_free () const { return _session_range_end_is_free; }
 	void set_end_is_free (bool);
-	int location_name(std::string& result, std::string base = std::string(""));
 
 	pframes_t get_block_size () const         { return current_block_size; }
 	samplecnt_t worst_output_latency () const { return _worst_output_latency; }
