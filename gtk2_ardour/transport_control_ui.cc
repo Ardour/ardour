@@ -169,6 +169,7 @@ TransportControlUI::set_session (ARDOUR::Session *s)
 {
 	SessionHandlePtr::set_session (s);
 	set_loop_sensitivity ();
+	map_transport_state ();
 
 	if (!_session) {
 		rec_button.set_sensitive (false);
