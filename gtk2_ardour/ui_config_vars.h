@@ -82,6 +82,7 @@ UI_CONFIG_VARIABLE (bool, show_toolbar_recpunch, "show-toolbar-recpunch", true)
 UI_CONFIG_VARIABLE (bool, show_toolbar_monitoring, "show-toolbar-monitoring", false)
 UI_CONFIG_VARIABLE (bool, show_toolbar_selclock, "show-toolbar-selclock", false)
 UI_CONFIG_VARIABLE (bool, show_mini_timeline, "show-mini-timeline", true)
+UI_CONFIG_VARIABLE (bool, show_dsp_load_info, "show-dsp-load-info", true)
 UI_CONFIG_VARIABLE (bool, show_secondary_clock, "show-secondary-clock", true)
 UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.0933967) /* units of dB */
 UI_CONFIG_VARIABLE (bool, hiding_groups_deactivates_groups, "hiding-groups-deactivates-groups", true)

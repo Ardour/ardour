@@ -74,6 +74,7 @@
 #include "add_route_dialog.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
+#include "dsp_load_indicator.h"
 #include "editing.h"
 #include "enums.h"
 #include "mini_timeline.h"
@@ -483,9 +484,10 @@ private:
 	void toggle_time_master ();
 	void toggle_video_sync ();
 
-	ShuttleControl shuttle_box;
-	MiniTimeline   mini_timeline;
-	TimeInfoBox   *time_info_box;
+	ShuttleControl   shuttle_box;
+	MiniTimeline     mini_timeline;
+	TimeInfoBox*     time_info_box;
+	DspLoadIndicator dsp_load_indicator;
 
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;

@@ -1687,6 +1687,7 @@ ARDOUR_UI::update_xrun_count ()
 
 	if (_session) {
 		const unsigned int x = _session->get_xrun_count ();
+		dsp_load_indicator.set_xrun_count (x);
 		if (x > 9999) {
 			snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">&gt;10K</span>"), X_("red"));
 		} else {
@@ -1694,6 +1695,7 @@ ARDOUR_UI::update_xrun_count ()
 		}
 	} else {
 		snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">?</span>"), X_("yellow"));
+		dsp_load_indicator.set_xrun_count (UINT_MAX);
 	}
 	xrun_label.set_markup (buf);
 	set_tip (xrun_label, _("Audio dropouts. Shift+click to reset"));
@@ -1709,6 +1711,7 @@ ARDOUR_UI::update_cpu_load ()
 	*/
 
 	double const c = AudioEngine::instance()->get_dsp_load ();
+	dsp_load_indicator.set_dsp_load (c);
 	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
 	cpu_load_label.set_markup (buf);
 }

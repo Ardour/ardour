@@ -470,6 +470,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-mini-timeline") {
 		repack_transport_hbox ();
+	} else if (p == "show-dsp-load-info") {
+		repack_transport_hbox ();
 	} else if (p == "show-toolbar-recpunch") {
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-monitoring") {

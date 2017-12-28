@@ -190,6 +190,14 @@ ARDOUR_UI::repack_transport_hbox ()
 		mini_timeline.show();
 	}
 
+	if (dsp_load_indicator.get_parent()) {
+		transport_hbox.remove (dsp_load_indicator);
+	}
+	if (UIConfiguration::instance().get_show_dsp_load_info ()) {
+		transport_hbox.pack_start (dsp_load_indicator, false, false);
+		dsp_load_indicator.show();
+	}
+
 	if (editor_meter) {
 		if (meter_box.get_parent()) {
 			transport_hbox.remove (meter_box);
