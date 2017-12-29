@@ -430,6 +430,10 @@ OSCGlobalObserver::marks_changed ()
 void
 OSCGlobalObserver::mark_update ()
 {
+	if (!lm.size()) {
+		_osc.text_message (X_("/marker"), "No Marks", addr);
+		return;
+	}
 	uint32_t prev = 0;
 	uint32_t next = lm.size() - 1;
 	for (uint32_t i = 0; i < lm.size (); i++) {
