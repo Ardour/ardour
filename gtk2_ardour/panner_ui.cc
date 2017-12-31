@@ -535,14 +535,6 @@ PannerUI::pan_automation_state_changed ()
 	}
 
 	update_pan_sensitive ();
-
-	/* start watching automation so that things move */
-
-	pan_watching.disconnect();
-
-	if (x) {
-		pan_watching = Timers::rapid_connect (sigc::mem_fun (*this, &PannerUI::effective_pan_display));
-	}
 }
 
 string

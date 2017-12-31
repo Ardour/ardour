@@ -140,7 +140,6 @@ private:
 
 	void pan_automation_state_changed();
 	gint pan_automation_state_button_event (GdkEventButton *);
-	sigc::connection pan_watching;
 
 	std::string astate_string (ARDOUR::AutoState);
 	std::string short_astate_string (ARDOUR::AutoState);
