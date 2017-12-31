@@ -545,6 +545,7 @@ LuaBindings::common (lua_State* L)
 
 		.beginWSPtrClass <Evoral::ControlList> ("ControlList")
 		.addFunction ("add", &Evoral::ControlList::add)
+		.addFunction ("editor_add", &Evoral::ControlList::editor_add)
 		.addFunction ("thin", &Evoral::ControlList::thin)
 		.addFunction ("eval", &Evoral::ControlList::eval)
 		.addRefFunction ("rt_safe_eval", &Evoral::ControlList::rt_safe_eval)
