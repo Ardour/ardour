@@ -50,6 +50,7 @@
 #include "luawindow.h"
 #include "public_editor.h"
 #include "utils.h"
+#include "ui_config.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
@@ -107,6 +108,16 @@ LuaWindow::LuaWindow ()
 	reinit_lua ();
 	update_title ();
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
+
+#ifdef __APPLE__
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+#else
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+#endif
 
 	script_select.disable_scrolling ();
 
