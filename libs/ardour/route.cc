@@ -335,6 +335,10 @@ Route::process_output_buffers (BufferSet& bufs,
 	 */
 	automation_run (start_sample, nframes);
 
+	if (_pannable) {
+		_pannable->automation_run (start_sample + _signal_latency, nframes);
+	}
+
 	/* figure out if we're going to use gain automation */
 	if (gain_automation_ok) {
 		_amp->set_gain_automation_buffer (_session.gain_automation_buffer ());
@@ -3090,6 +3094,9 @@ Route::silence_unlocked (samplecnt_t nframes)
 
 	// update owned automated controllables
 	automation_run (now, nframes);
+	if (_pannable) {
+		_pannable->automation_run (now, nframes);
+	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<PluginInsert> pi;
