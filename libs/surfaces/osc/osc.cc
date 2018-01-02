@@ -4535,21 +4535,23 @@ OSC::sel_plugin_activate (float state, lo_message msg)
 		return -1;
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = sur->select;
+	if (sur->plugins.size() > 0) {
+		boost::shared_ptr<Stripable> s = sur->select;
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 
-	if (r) {
-		boost::shared_ptr<Processor> redi=r->nth_plugin (sur->plugins[sur->plugin_id -1]);
-		if (redi) {
-			boost::shared_ptr<PluginInsert> pi;
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
-				if(state > 0) {
-					pi->activate();
-				} else {
-					pi->deactivate();
+		if (r) {
+			boost::shared_ptr<Processor> redi=r->nth_plugin (sur->plugins[sur->plugin_id -1]);
+			if (redi) {
+				boost::shared_ptr<PluginInsert> pi;
+				if ((pi = boost::dynamic_pointer_cast<PluginInsert>(redi))) {
+					if(state > 0) {
+						pi->activate();
+					} else {
+						pi->deactivate();
+					}
+					return 0;
 				}
-				return 0;
 			}
 		}
 	}
