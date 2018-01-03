@@ -1067,7 +1067,7 @@ CoreAudioPCM::cache_port_names(AudioDeviceID id, bool input)
 
 		ss << (c + 1);
 
-		if (cstr_name && decoded && (0 != std::strlen(cstr_name) ) ) {
+		if (cstr_name && decoded && (0 != ::strlen(cstr_name) ) ) {
 			ss << " - " <<  cstr_name;
 		}
 #if 0
