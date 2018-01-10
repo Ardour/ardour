@@ -2057,6 +2057,8 @@ OSC::get_surface (lo_address addr , bool quiet)
 void
 OSC::global_feedback (OSCSurface* sur)
 {
+	OSCGlobalObserver* o = sur->global_obs;
+	delete o;
 	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6]) {
 
 		// create a new Global Observer for this surface
@@ -3821,7 +3823,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
 	if (sur->feedback[13]) {
 		if (so != 0) {
-			so->refresh_strip (s, nsends, true);
+			so->refresh_strip (s, nsends, sur->gainmode, true);
 		} else {
 			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
 			sur->sel_obs = sel_fb;

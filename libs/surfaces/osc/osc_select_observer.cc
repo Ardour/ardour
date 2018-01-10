@@ -74,7 +74,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	} else {
 		plug_id = -1;
 	}
-	refresh_strip (sur->select, sur->nsends, true);
+	refresh_strip (sur->select, sur->nsends, gainmode, true);
 	set_expand (sur->expand_enable);
 }
 
@@ -104,12 +104,13 @@ OSCSelectObserver::no_strip ()
  }
 
 void
-OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t s_nsends, bool force)
+OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t s_nsends, uint32_t gm, bool force)
 {
 	_init = true;
 	if (_tick_busy) {
 		Glib::usleep(100); // let tick finish
 	}
+	gainmode = gm;
 
 	if (_strip && (new_strip == _strip) && !force) {
 		_init = false;
@@ -384,7 +385,7 @@ OSCSelectObserver::send_init()
 				_osc.float_message_with_id ("/select/send_enable", c, proc->enabled(), in_line, addr);
 			}
 		}
-		if (!gainmode && send_valid) {
+		if ((gainmode != 1) && send_valid) {
 			_osc.text_message_with_id ("/select/send_name", c, _strip->send_name(s), in_line, addr);
 		}
 	}
@@ -732,10 +733,13 @@ OSCSelectObserver::gain_message ()
 	}
 
 	if (gainmode) {
-		_osc.text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)), addr);
-		gain_timeout = 8;
 		_osc.float_message ("/select/fader", _strip->gain_control()->internal_to_interface (value), addr);
-	} else {
+		if (gainmode == 1) {
+			_osc.text_message ("/select/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (value)), addr);
+			gain_timeout = 8;
+		}
+	}
+	if (!gainmode || gainmode == 2) {
 		if (value < 1e-15) {
 			_osc.float_message ("/select/gain", -200, addr);
 		} else {
@@ -812,20 +816,21 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 #endif
 
 	if (gainmode) {
-		path = "/select/send_fader";
 		if (controllable) {
 			value = controllable->internal_to_interface (raw_value);
 		}
-		_osc.text_message_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db), in_line, addr);
-		if (send_timeout.size() > id) {
-			send_timeout[id] = 8;
+		_osc.float_message_with_id ("/select/send_fader", id, value, in_line, addr);
+		if (gainmode == 1) {
+			_osc.text_message_with_id ("/select/send_name" , id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), db), in_line, addr);
+			if (send_timeout.size() > id) {
+				send_timeout[id] = 8;
+			}
 		}
-	} else {
-		path = "/select/send_gain";
-		value = db;
+	}
+	if (!gainmode || gainmode == 2) {
+		_osc.float_message_with_id ("/select/send_gain", id, db, in_line, addr);
 	}
 
-	_osc.float_message_with_id (path, id, value, in_line, addr);
 }
 
 void

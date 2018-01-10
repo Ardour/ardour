@@ -138,6 +138,8 @@ OSC_GUI::OSC_GUI (OSC& p)
 	table->attach (gainmode_combo, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	std::vector<std::string> gainmode_options;
 	gainmode_options.push_back (_("/strip/gain (dB)"));
+	gainmode_options.push_back (_("/strip/fader (Position) and dB in control name"));
+	gainmode_options.push_back (_("/strip/fader (Position) and /strip/gain (dB)"));
 	gainmode_options.push_back (_("/strip/fader (Position)"));
 
 	set_popdown_strings (gainmode_combo, gainmode_options);
@@ -583,8 +585,14 @@ OSC_GUI::gainmode_changed ()
 	if (str == _("/strip/gain (dB)")) {
 		cp.set_gainmode (0);
 	}
-	else if (str == _("/strip/fader (Position)")) {
+	else if (str == _("/strip/fader (Position) and dB in control name")) {
 		cp.set_gainmode (1);
+	}
+	else if (str == _("/strip/fader (Position) and /strip/gain (dB)")) {
+		cp.set_gainmode (2);
+	}
+	else if (str == _("/strip/fader (Position)")) {
+		cp.set_gainmode (3);
 	}
 	else {
 		std::cerr << "Invalid OSC Gain Mode\n";

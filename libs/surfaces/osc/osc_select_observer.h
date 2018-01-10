@@ -47,7 +47,7 @@ class OSCSelectObserver
 	void renew_plugin (void);
 	void eq_restart (int);
 	void clear_observer (void);
-	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t nsends, bool force);
+	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t nsends, uint32_t g_mode, bool force);
 	void set_expand (uint32_t expand);
 	void set_send_page (uint32_t page);
 	void set_send_size (uint32_t size);

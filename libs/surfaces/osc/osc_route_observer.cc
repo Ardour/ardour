@@ -322,12 +322,6 @@ OSCRouteObserver::tick ()
 			}
 			gain_timeout--;
 		}
-		if (trim_timeout) {
-			if (trim_timeout == 1) {
-				_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
-			}
-			trim_timeout--;
-		}
 		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
 			if(_last_gain != _strip->gain_control()->get_value()) {
 				_last_gain = _strip->gain_control()->get_value();
@@ -392,11 +386,6 @@ OSCRouteObserver::send_trim_message ()
 	} else {
 		return;
 	}
-	if (gainmode) {
-		_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (_last_trim)), in_line, addr);
-		trim_timeout = 8;
-	}
-
 	_osc.float_message_with_id ("/strip/trimdB", ssid, (float) accurate_coefficient_to_dB (_last_trim), in_line, addr);
 }
 
@@ -412,9 +401,12 @@ OSCRouteObserver::send_gain_message ()
 
 	if (gainmode) {
 		_osc.float_message_with_id ("/strip/fader", ssid, controllable->internal_to_interface (_last_gain), in_line, addr);
-		_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
-		gain_timeout = 8;
-	} else {
+		if (gainmode == 1) {
+			_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
+			gain_timeout = 8;
+		}
+	}
+	if (!gainmode || gainmode == 2) {
 		if (controllable->get_value() < 1e-15) {
 			_osc.float_message_with_id ("/strip/gain", ssid, -200, in_line, addr);
 		} else {

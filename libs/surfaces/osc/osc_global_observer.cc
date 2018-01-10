@@ -366,14 +366,16 @@ OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllabl
 	}
 	if (gainmode) {
 		_osc.float_message (string_compose ("%1fader", path), controllable->internal_to_interface (controllable->get_value()), addr);
-		_osc.text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
-		if (ismaster) {
-			master_timeout = 8;
-		} else {
-			monitor_timeout = 8;
+		if (gainmode == 1) {
+			_osc.text_message (string_compose ("%1name", path), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
+			if (ismaster) {
+				master_timeout = 8;
+			} else {
+				monitor_timeout = 8;
+			}
 		}
-
-	} else {
+	}
+	if (!gainmode || gainmode == 2) {
 		if (controllable->get_value() < 1e-15) {
 			_osc.float_message (string_compose ("%1gain",path), -200, addr);
 		} else {
@@ -460,7 +462,6 @@ OSCGlobalObserver::mark_update ()
 		}
 		_osc.text_message (X_("/marker"), send_str, addr);
 	}
-		
 
 }
 
