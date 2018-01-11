@@ -1269,7 +1269,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
 			int32_t possible_in = i->first;
 			int32_t possible_out = i->second;
-			if (possible_in < 1 || possible_out < 1) {
+			if (possible_in < 0) {
 				continue;
 			}
 			for (uint32_t i = 1; i < input_elements; ++i) {
@@ -1286,7 +1286,7 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		for (vector<pair<int,int> >::const_iterator i = ioc.begin(); i != ioc.end(); ++i) {
 			int32_t possible_in = i->first;
 			int32_t possible_out = i->second;
-			if (possible_in < 1 || possible_out < 1) {
+			if (possible_out < 0) {
 				continue;
 			}
 			for (uint32_t i = 1; i < output_elements; ++i) {
