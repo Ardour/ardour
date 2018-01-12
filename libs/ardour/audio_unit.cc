@@ -1278,6 +1278,11 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 				// on the 2nd bus.
 				io_configs.push_back (pair<int,int> (possible_in + bus_inputs[i], possible_out));
 			}
+			/* only add additional, optional busses to first available config.
+			 * AUPluginInfo::cached_io_configuration () already incrementally
+			 * adds busses (for instruments w/ multiple configurations)
+			 */
+			break;
 		}
 	}
 
@@ -1296,6 +1301,11 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 				}
 				io_configs.push_back (pair<int,int> (possible_in, possible_out + c));
 			}
+			/* only add additional, optional busses to first available config.
+			 * AUPluginInfo::cached_io_configuration () already incrementally
+			 * adds busses (for instruments w/ multiple configurations)
+			 */
+			break;
 		}
 	}
 
