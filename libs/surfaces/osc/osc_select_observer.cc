@@ -133,6 +133,9 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 	name_changed (ARDOUR::Properties::name);
 
+	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::pi_changed, this, _1), OSC::instance());
+	_osc.float_message ("/select/hide", _strip->is_hidden (), addr);
+
 	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/mute"), _strip->mute_control()), OSC::instance());
 	change_message ("/select/mute", _strip->mute_control());
 
@@ -637,6 +640,12 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 		// lets tell the surface how many outputs this strip has
 		_osc.float_message ("/select/n_outputs", (float) route->n_outputs().n_total(), addr);
 	}
+}
+
+void
+OSCSelectObserver::pi_changed (PBD::PropertyChange const& what_changed)
+{
+	_osc.float_message ("/select/hide", _strip->is_hidden (), addr);
 }
 
 void
