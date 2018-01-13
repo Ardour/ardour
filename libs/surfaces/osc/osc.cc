@@ -576,6 +576,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/select/fader", "f", sel_fader);
 		REGISTER_CALLBACK (serv, "/select/db_delta", "f", sel_dB_delta);
 		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
+		REGISTER_CALLBACK (serv, "/select/hide", "i", sel_hide);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
 		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
@@ -4121,6 +4122,24 @@ OSC::sel_trim (float val, lo_message msg)
 		}
 	}
 	return float_message("/select/trimdB", 0, get_address (msg));
+}
+
+int
+OSC::sel_hide (uint32_t state, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		if (state != s->is_hidden ()) {
+			s->presentation_info().set_hidden ((bool) state);
+		}
+	}
+	return 0;
 }
 
 int
