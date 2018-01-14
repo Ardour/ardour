@@ -16,32 +16,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkardour_dsp_load_indicator_h__
-#define __gtkardour_dsp_load_indicator_h__
+#ifndef __gtkardour_gauge_h__
+#define __gtkardour_gauge_h__
 
 #include <pangomm.h>
 
-#include "ardour_gauge.h"
+#include "gtkmm2ext/cairo_widget.h"
 
-class DspLoadIndicator : public ArdourGauge
+class ArdourGauge : public CairoWidget
 {
 public:
-	DspLoadIndicator ();
-
-	void set_xrun_count (const unsigned int xruns);
-	void set_dsp_load (const double load);
+	ArdourGauge (std::string const& max_text = "00.0%");
+	virtual ~ArdourGauge ();
 
 protected:
-	bool alert () const;
-	ArdourGauge::Status indicator () const;
-	float level () const;
-	std::string tooltip_text ();
+
+	enum Status {
+		Level_OK,   /* green */
+		Level_WARN, /* yellow */
+		Level_CRIT  /* red */
+	};
+
+	/* gauge's background, indicate alarming conditions eg. xrun */
+	virtual bool alert () const { return false; }
+	/* guage inidicator color */
+	virtual Status indicator () const = 0;
+	/* gauge level 0 <= level <= 1 */
+	virtual float level () const = 0;
+
+	virtual std::string tooltip_text () = 0;
+
+	void update ();
+	void update (std::string const &);
 
 private:
-	bool on_button_release_event (GdkEventButton*);
+	void on_size_request (Gtk::Requisition*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
-	float _dsp_load;
-	unsigned int _xrun_count;
+	Glib::RefPtr<Pango::Layout> _layout;
 };
 
 #endif
