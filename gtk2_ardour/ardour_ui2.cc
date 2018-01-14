@@ -198,6 +198,14 @@ ARDOUR_UI::repack_transport_hbox ()
 		dsp_load_indicator.show();
 	}
 
+	if (disk_space_indicator.get_parent()) {
+		transport_hbox.remove (disk_space_indicator);
+	}
+	if (UIConfiguration::instance().get_show_disk_space_info ()) {
+		transport_hbox.pack_start (disk_space_indicator, false, false);
+		disk_space_indicator.show();
+	}
+
 	if (editor_meter) {
 		if (meter_box.get_parent()) {
 			transport_hbox.remove (meter_box);

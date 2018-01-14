@@ -1771,6 +1771,7 @@ void
 ARDOUR_UI::update_disk_space()
 {
 	if (_session == 0) {
+		disk_space_indicator.set_available_disk_sec (-1);
 		return;
 	}
 
@@ -1780,14 +1781,17 @@ ARDOUR_UI::update_disk_space()
 
 	if (fr == 0) {
 		/* skip update - no SR available */
+		disk_space_indicator.set_available_disk_sec (-1);
 		return;
 	}
 
 	if (!opt_samples) {
 		/* Available space is unknown */
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
+		disk_space_indicator.set_available_disk_sec (-1);
 	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
 		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
+		disk_space_indicator.set_available_disk_sec (max_samplecnt);
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
@@ -1801,6 +1805,8 @@ ARDOUR_UI::update_disk_space()
 		int hrs;
 		int mins;
 		int secs;
+
+		disk_space_indicator.set_available_disk_sec (samples / (float)fr);
 
 		hrs  = samples / (fr * 3600);
 

@@ -472,6 +472,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 		repack_transport_hbox ();
 	} else if (p == "show-dsp-load-info") {
 		repack_transport_hbox ();
+	} else if (p == "show-disk-space-info") {
+		repack_transport_hbox ();
 	} else if (p == "show-toolbar-recpunch") {
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-monitoring") {
