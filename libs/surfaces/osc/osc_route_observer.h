@@ -73,6 +73,7 @@ class OSCRouteObserver
 
 
 	void name_changed (const PBD::PropertyChange& what_changed);
+	void pi_changed (PBD::PropertyChange const&);
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message ();

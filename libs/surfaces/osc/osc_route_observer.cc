@@ -129,6 +129,9 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 		name_changed (ARDOUR::Properties::name);
 
+		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::pi_changed, this, _1), OSC::instance());
+		_osc.int_message_with_id ("/strip/hide", ssid, _strip->is_hidden (), in_line, addr);
+
 		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
 		send_change_message ("/strip/mute", _strip->mute_control());
 
@@ -342,6 +345,12 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 	if (_strip) {
 		_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
 	}
+}
+
+void
+OSCRouteObserver::pi_changed (PBD::PropertyChange const& what_changed)
+{
+	_osc.int_message_with_id ("/strip/hide", ssid, _strip->is_hidden (), in_line, addr);
 }
 
 void
