@@ -68,11 +68,11 @@ ArdourGauge::Status
 DspLoadIndicator::indicator () const
 {
 	if (_dsp_load > 90) {
-		return ArdourGauge::Level_OK;
+		return ArdourGauge::Level_CRIT;
 	} else if (_dsp_load > 80) {
 		return ArdourGauge::Level_WARN;
 	} else {
-		return ArdourGauge::Level_CRIT;
+		return ArdourGauge::Level_OK;
 	}
 }
 
