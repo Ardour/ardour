@@ -618,6 +618,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
 		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
 		REGISTER_CALLBACK (serv, "/strip/expand", "ii", strip_expand);
+		REGISTER_CALLBACK (serv, "/strip/hide", "ii", strip_hide);
 		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_gui_select);
 		REGISTER_CALLBACK (serv, "/strip/polarity", "ii", strip_phase);
 		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
@@ -962,6 +963,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (!strncmp (path, "/strip/expand/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = strip_expand (ssid, argv[0]->i, msg);
+	}
+	else if (!strncmp (path, "/strip/hide/", 12) && strlen (path) > 12) {
+		int ssid = atoi (&path[12]);
+		ret = strip_hide (ssid, argv[0]->i, msg);
 	}
 	else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
@@ -3787,6 +3792,19 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 	}
 
 	return _strip_select (s, get_address (msg));
+}
+
+int
+OSC::strip_hide (int ssid, int state, lo_message msg)
+{
+	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
+
+	if (s) {
+		if (state != s->is_hidden ()) {
+			s->presentation_info().set_hidden ((bool) state);
+		}
+	}
+	return 0;
 }
 
 int
