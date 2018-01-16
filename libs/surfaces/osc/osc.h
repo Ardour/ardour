@@ -206,6 +206,14 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	std::map<uint32_t, LinkSet> link_sets;
 	 // list of linksets
 
+	struct PortAdd {
+	public:
+		std::string host;
+		std::string port;
+	};
+
+	std::vector<PortAdd> _ports;
+
 // GUI calls
 	std::string get_server_url ();
 	void set_debug_mode (OSCDebugMode m) { _debugmode = m; }

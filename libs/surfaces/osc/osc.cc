@@ -1400,12 +1400,34 @@ OSC::cancel_all_solos ()
 lo_address
 OSC::get_address (lo_message msg)
 {
+	lo_address addr = lo_message_get_source (msg);
+	string host = lo_address_get_hostname (addr);
+	string port = lo_address_get_port (addr);
+	int protocol = lo_address_get_protocol (addr);
+	for (uint32_t i = 0; i < _ports.size (); i++) {
+		std::cout << string_compose ("_ports at %1 of %2\n", i + 1, _ports.size ());
+		if (_ports[i].host == host) {
+			std::cout << "found host " << host << "\n";
+			if (_ports[i].port != "auto") {
+				port = _ports[i].port;
+				return lo_address_new_with_proto (protocol, host.c_str(), port.c_str());
+			} else {
+				return lo_message_get_source (msg);
+			}
+		}
+	}
+	std::cout << "host not found\n";
+
+	// if we get here we need to add a new entry for this surface
+	PortAdd new_port;
+	new_port.host = host;
 	if (address_only) {
-		lo_address addr = lo_message_get_source (msg);
-		string host = lo_address_get_hostname (addr);
-		int protocol = lo_address_get_protocol (addr);
+		new_port.port = remote_port;
+		_ports.push_back (new_port);
 		return lo_address_new_with_proto (protocol, host.c_str(), remote_port.c_str());
 	} else {
+		new_port.port = "auto";
+		_ports.push_back (new_port);
 		return lo_message_get_source (msg);
 	}
 }
@@ -1440,6 +1462,7 @@ OSC::clear_devices ()
 	}
 	_surface.clear();
 	link_sets.clear ();
+	_ports.clear ();
 
 	PresentationInfo::Change.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
 
