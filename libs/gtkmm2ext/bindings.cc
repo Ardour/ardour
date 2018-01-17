@@ -781,6 +781,7 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "<html>\n<head>\n<title>";
 	ostr << PROGRAM_NAME;
 	ostr << "</title>\n";
+	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
 
 	ostr << "</head>\n<body>\n";
 
