@@ -77,7 +77,7 @@ ExportFormatSpecification::Time::get_state ()
 		node->set_property ("hours", timecode.hours);
 		node->set_property ("minutes", timecode.minutes);
 		node->set_property ("seconds", timecode.seconds);
-		node->set_property ("samples", timecode.frames);
+		node->set_property ("frames", timecode.frames);
 		break;
 	  case BBT:
 		node->set_property ("bars", bbt.bars);
@@ -107,7 +107,7 @@ ExportFormatSpecification::Time::set_state (const XMLNode & node)
 		node.get_property ("hours", timecode.hours);
 		node.get_property ("minutes", timecode.minutes);
 		node.get_property ("seconds", timecode.seconds);
-		node.get_property ("samples", timecode.frames);
+		node.get_property ("frames", timecode.frames);
 		break;
 
 	case BBT:
