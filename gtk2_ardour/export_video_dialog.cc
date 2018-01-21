@@ -96,7 +96,7 @@ ExportVideoDialog::ExportVideoDialog ()
 	, optimizations_checkbox (_("Codec Optimizations:"))
 	, optimizations_label ("-")
 	, deinterlace_checkbox (_("Deinterlace"))
-	, bframes_checkbox (_("Use [2] B-samples (MPEG 2 or 4 only)"))
+	, bframes_checkbox (_("Use [2] B-frames (MPEG 2 or 4 only)"))
 	, fps_checkbox (_("Override FPS (Default is to retain FPS from the input video file):"))
 	, meta_checkbox (_("Include Session Metadata"))
 #if 1 /* tentative debug mode */

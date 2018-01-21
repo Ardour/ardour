@@ -37,7 +37,7 @@ using namespace ARDOUR_UI_UTILS;
 VideoMonitor::VideoMonitor (PublicEditor *ed, std::string xjadeo_bin_path)
 	: editor (ed)
 {
-	manually_seeked_sample = 0;
+	manually_seeked_frame = 0;
 	fps =0.0; // = _session->timecode_frames_per_second();
 	sync_by_manual_seek = true;
 	_restore_settings_mask = 0;
@@ -72,7 +72,7 @@ VideoMonitor::start ()
 		return true;
 	}
 
-	manually_seeked_sample = 0;
+	manually_seeked_frame = 0;
 	sync_by_manual_seek = false;
 	if (clock_connection.connected()) { clock_connection.disconnect(); }
 
@@ -126,7 +126,7 @@ void
 VideoMonitor::open (std::string filename)
 {
 	if (!is_started()) return;
-	manually_seeked_sample = 0;
+	manually_seeked_frame = 0;
 	osdmode = 10; // 1: frameno, 2: timecode, 8: box
 	starting = 15;
 	process->write_to_stdin("load " + filename + "\n");
@@ -384,8 +384,8 @@ VideoMonitor::parse_output (std::string d, size_t /*s*/)
 						osdmode = atoi(value);
 						if (starting || atoi(xjadeo_settings["osd mode"]) != osdmode) {
 							if (!starting && _session) _session->set_dirty ();
-							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-sample-on"); }
-							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-sample-off"); }
+							if ((osdmode & 1) == 1) { UiState("xjadeo-window-osd-frame-on"); }
+							if ((osdmode & 1) == 0) { UiState("xjadeo-window-osd-frame-off"); }
 							if ((osdmode & 2) == 2) { UiState("xjadeo-window-osd-timecode-on"); }
 							if ((osdmode & 2) == 0) { UiState("xjadeo-window-osd-timecode-off"); }
 							if ((osdmode & 8) == 8) { UiState("xjadeo-window-osd-box-on"); }
@@ -526,8 +526,8 @@ VideoMonitor::manual_seek (samplepos_t when, bool /*force*/, ARDOUR::sampleoffse
 	}
 	if (video_frame < 0 ) video_frame = 0;
 
-	if (video_frame == manually_seeked_sample) { return; }
-	manually_seeked_sample = video_frame;
+	if (video_frame == manually_seeked_frame) { return; }
+	manually_seeked_frame = video_frame;
 
 #if 0 /* DEBUG */
 	std::cout <<"seek: " << video_frame << std::endl;

@@ -250,7 +250,7 @@ VideoImageFrame::http_download_done (char *data){
 	}
 
 	exposeimg();
-	/* don't request samples too quickly, wait after user has zoomed */
+	/* don't request frames too quickly, wait after user has zoomed */
 	Glib::usleep(40000);
 
 	if (queued_request) {

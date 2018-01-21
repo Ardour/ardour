@@ -45,7 +45,7 @@ class PublicEditor;
  *  creates \ref VideoImageFrame as neccesary (which
  *  query the server for image-data).
  *
- *  This class contains the algorithm to position the single samples
+ *  This class contains the algorithm to position the single frames
  *  on the timeline according to current-zoom level and video-file
  *  attributes. see \ref update_video_timeline()
  *
@@ -94,8 +94,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void close_session ();
 	void sync_session_state (); /* video-monitor does not actively report window/pos changes, query it */
 	float get_apv(); /* audio samples per video frame; */
-	ARDOUR::samplecnt_t get_duration () { return video_duration;}
-	ARDOUR::sampleoffset_t get_offset () { return video_offset;}
+	ARDOUR::samplecnt_t    get_duration () { return video_duration;}
+	ARDOUR::sampleoffset_t get_offset ()   { return video_offset;}
 	ARDOUR::sampleoffset_t quantify_samples_to_apv (ARDOUR::sampleoffset_t offset) { return rint(offset/get_apv())*get_apv(); }
 	void set_offset (ARDOUR::sampleoffset_t offset) { video_offset = quantify_samples_to_apv(offset); } // this function does not update video_offset_p, call save_undo() to finalize changes to this! - this fn is currently only used from editor_drag.cc
 
@@ -129,11 +129,12 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	std::string xjadeo_version;
 	std::string harvid_version;
 
-	typedef std::list<VideoImageFrame*> VideoSamples;
-	VideoSamples video_frames;
-	VideoImageFrame *get_video_frame (samplepos_t vfn, int cut=0, int rightend = -1);
-	bool        flush_samples;
-	void        remove_samples ();
+	typedef std::list<VideoImageFrame*> VideoFrames;
+	VideoFrames video_frames;
+	VideoImageFrame* get_video_frame (samplepos_t vfn, int cut=0, int rightend = -1);
+
+	void remove_frames ();
+	bool _flush_frames;
 
 	std::string translated_filename ();
 
