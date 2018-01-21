@@ -177,9 +177,9 @@ TranscodeFfmpeg::probe ()
 					} else if (key == X_("codec_tag_string")) {
 						if (!m_codec.empty()) m_codec += " ";
 						m_codec += "(" + value + ")";
-					} else if (key == X_("r_sample_rate")) {
+					} else if (key == X_("r_frame_rate")) {
 						PARSE_FRACTIONAL_FPS(m_fps)
-					} else if (key == X_("avg_sample_rate") && m_fps == 0) {
+					} else if (key == X_("avg_frame_rate") && m_fps == 0) {
 						PARSE_FRACTIONAL_FPS(m_fps)
 					} else if (key == X_("time_base")) {
 						PARSE_FRACTIONAL_FPS(timebase)
@@ -257,7 +257,7 @@ TranscodeFfmpeg::probe ()
 
 #if 0 /* DEBUG */
 	printf("FPS: %f\n", m_fps);
-	printf("Duration: %lu samples\n",(unsigned long)m_duration);
+	printf("Duration: %lu frames\n",(unsigned long)m_duration);
 	printf("W/H: %ix%i\n",m_width, m_height);
 	printf("aspect: %f\n",m_aspect);
 	printf("codec: %s\n",m_codec.c_str());
@@ -591,7 +591,7 @@ TranscodeFfmpeg::ffmpegparse_v (std::string d, size_t /* s */)
 	if (strstr(d.c_str(), "ERROR") || strstr(d.c_str(), "Error") || strstr(d.c_str(), "error")) {
 		warning << "ffmpeg-error: " << d << endmsg;
 	}
-	if (strncmp(d.c_str(), "sample=",6)) {
+	if (strncmp(d.c_str(), "frame=",6)) {
 #if 1 /* DEBUG */
 		if (debug_enable) {
 			d.erase(d.find_last_not_of(" \t\r\n") + 1);
