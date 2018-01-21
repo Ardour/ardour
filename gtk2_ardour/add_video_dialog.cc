@@ -693,7 +693,7 @@ AddVideoDialog::request_preview(std::string u)
 	clip_yoff = (PREVIEW_HEIGHT - clip_height)/2;
 
 	char url[2048];
-	snprintf(url, sizeof(url), "%s%s?sample=%lli&w=%d&h=%di&file=%s&format=rgb"
+	snprintf(url, sizeof(url), "%s%s?frame=%lli&w=%d&h=%di&file=%s&format=rgb"
 		, video_server_url.c_str()
 		, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 		, (long long) (video_duration * seek_slider.get_value() / 1000.0)
