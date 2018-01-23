@@ -285,6 +285,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 
 	std::string get_unix_server_url ();
 	lo_address get_address (lo_message msg);
+	std::string get_port (std::string host);
 	OSCSurface * get_surface (lo_address addr, bool quiet = false);
 	int check_surface (lo_message msg);
 	uint32_t get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr);
@@ -672,6 +673,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int set_surface_strip_types (uint32_t st, lo_message msg);
 	int set_surface_feedback (uint32_t fb, lo_message msg);
 	int set_surface_gainmode (uint32_t gm, lo_message msg);
+	int set_surface_port (uint32_t po, lo_message msg);
 	int refresh_surface (lo_message msg);
 	int custom_clear (lo_message msg);
 	int custom_mode (float state, lo_message msg);

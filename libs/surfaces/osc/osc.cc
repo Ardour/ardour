@@ -1289,7 +1289,16 @@ OSC::get_surfaces ()
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	for (uint32_t it = 0; it < _surface.size(); it++) {
 		OSCSurface* sur = &_surface[it];
-		PBD::info << string_compose ("\n  Surface: %1 - URL: %2\n", it, sur->remote_url);
+		char *chost = lo_url_get_hostname (sur->remote_url.c_str());
+		string host = chost;
+		free (chost);
+		string port = get_port (host);
+		if (port != "auto") {
+			port = "Manual port";
+		} else {
+			port = "Auto port";
+		}
+		PBD::info << string_compose ("\n  Surface: %1 - URL: %2  %3\n", it, sur->remote_url, port);
 		PBD::info << string_compose ("	Number of strips: %1   Bank size: %2   Current Bank %3\n", sur->nstrips, sur->bank_size, sur->bank);
 		PBD::info << string_compose ("	Use Custom: %1   Custom Strips: %2\n", sur->custom_mode, sur->custom_strips.size ());
 		bool ug = false;
@@ -1404,19 +1413,15 @@ OSC::get_address (lo_message msg)
 	string host = lo_address_get_hostname (addr);
 	string port = lo_address_get_port (addr);
 	int protocol = lo_address_get_protocol (addr);
-	for (uint32_t i = 0; i < _ports.size (); i++) {
-		std::cout << string_compose ("_ports at %1 of %2\n", i + 1, _ports.size ());
-		if (_ports[i].host == host) {
-			std::cout << "found host " << host << "\n";
-			if (_ports[i].port != "auto") {
-				port = _ports[i].port;
-				return lo_address_new_with_proto (protocol, host.c_str(), port.c_str());
-			} else {
-				return lo_message_get_source (msg);
-			}
+	string saved_port = get_port (host);
+	if (saved_port != "") {
+		if (saved_port != "auto") {
+			port = saved_port;
+			return lo_address_new_with_proto (protocol, host.c_str(), port.c_str());
+		} else {
+			return lo_message_get_source (msg);
 		}
 	}
-	std::cout << "host not found\n";
 
 	// if we get here we need to add a new entry for this surface
 	PortAdd new_port;
@@ -1430,6 +1435,17 @@ OSC::get_address (lo_message msg)
 		_ports.push_back (new_port);
 		return lo_message_get_source (msg);
 	}
+}
+
+string
+OSC::get_port (string host)
+{
+	for (uint32_t i = 0; i < _ports.size (); i++) {
+		if (_ports[i].host == host) {
+			return _ports[i].port;
+		}
+	}
+	return "";
 }
 
 int
@@ -1691,7 +1707,8 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int bank_size = sur->bank_size;
 	int linkset = sur->linkset;
 	int linkid = sur->linkid;
-
+	string host = lo_url_get_hostname(sur->remote_url.c_str());
+	int port = atoi (get_port (host).c_str());
 
 	if (argc == 1 && !strncmp (path, "/set_surface/feedback", 21)) {
 		if (types[0] == 'f') {
@@ -1734,10 +1751,23 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 		} else {
 			ret = sel_plug_pagesize (argv[0]->i, msg);
 		}
+	}
+	else if (argc == 1 && !strncmp (path, "/set_surface/port", 17)) {
+		if (types[0] == 'f') {
+			ret = set_surface_port ((int)argv[0]->f, msg);
+		} else {
+			ret = set_surface_port (argv[0]->i, msg);
+		}
 	} else if (strlen(path) == 12) {
 
 		// command is in /set_surface iii form
 		switch (argc) {
+			case 9:
+				if (types[8] == 'f') {
+					port = (int) argv[7]->f;
+				} else {
+					port = argv[7]->i;
+				}
 			case 8:
 				if (types[7] == 'f') {
 					linkid = (int) argv[7]->f;
@@ -1786,6 +1816,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				} else {
 					bank_size = argv[0]->i;
 				}
+				set_surface_port (port, msg);
 				ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
 				if ((uint32_t) linkset != sur->linkset) {
 					set_link (linkset, linkid, get_address (msg));
@@ -1803,6 +1834,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 					lo_message_add_int32 (reply, pi_page);
 					lo_message_add_int32 (reply, (int) linkset);
 					lo_message_add_int32 (reply, (int) linkid);
+					lo_message_add_int32 (reply, (int) port);
 					lo_send_message (get_address (msg), "/set_surface", reply);
 					lo_message_free (reply);
 					return 0;
@@ -1838,6 +1870,16 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 								const char * li = strstr (&ls[1], "/");
 								if (li) {
 									linkid = atoi (&li[1]);
+									const char * po = strstr (&li[1], "/");
+									if (po) {
+										port = atoi (&po[1]);
+									} else {
+										if (types[0] == 'f') {
+											port = (int) argv[0]->f;
+										} else if (types[0] == 'i') {
+											port = argv[0]->i;
+										}
+									}
 								} else {
 									if (types[0] == 'f') {
 										linkid = (int) argv[0]->f;
@@ -1887,6 +1929,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				strip_types = argv[0]->i;
 			}
 		}
+		set_surface_port (port, msg);
 		ret = set_surface (bank_size, strip_types, feedback, fadermode, se_page, pi_page, msg);
 		if ((uint32_t) linkset != sur->linkset) {
 			set_link (linkset, linkid, get_address (msg));
@@ -2005,6 +2048,62 @@ OSC::set_surface_gainmode (uint32_t gm, lo_message msg)
 }
 
 int
+OSC::set_surface_port (uint32_t po, lo_message msg)
+{
+	string new_port;
+	if (!po) {
+		new_port = "auto";
+	} else if (po > 1024) {
+		new_port = string_compose ("%1", po);
+	} else {
+		PBD::warning << "Port value must be greater than 1024" << endmsg;
+		return -1;
+	}
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	lo_address addr = lo_message_get_source (msg);
+	string host = lo_address_get_hostname (addr);
+	string port = lo_address_get_port (addr);
+	int protocol = lo_address_get_protocol (addr);
+	for (uint32_t i = 0; i < _ports.size (); i++) {
+		if (_ports[i].host == host) {
+			if (_ports[i].port == new_port) {
+				// no change - do nothing
+				return 0;
+			} else {
+				lo_address new_addr;
+				_ports[i].port = new_port;
+				if (new_port == "auto") {
+					new_addr = addr;
+				} else {
+					new_addr = lo_address_new_with_proto (protocol, host.c_str(), new_port.c_str());
+				}
+				char * rurl;
+				rurl = lo_address_get_url (new_addr);
+				sur->remote_url = rurl;
+				free (rurl);
+				for (uint32_t it = 0; it < _surface.size();) {
+					if (&_surface[it] == sur) {
+						it++;
+						continue;
+					}
+					char *sur_host = lo_url_get_hostname(_surface[it].remote_url.c_str());
+					if (strstr (sur_host, host.c_str())) {
+						surface_destroy (&_surface[it]);
+						_surface.erase (_surface.begin() + it);
+					} else {
+						it++;
+					}
+				}
+				set_surface_feedback ((uint32_t) sur->feedback.to_ulong(), msg);
+				return 0;
+			}
+		}
+	}
+	// should not get here
+	return -1;
+}
+
+int
 OSC::check_surface (lo_message msg)
 {
 	if (!session) {
@@ -2019,21 +2118,13 @@ OSC::get_surface (lo_address addr , bool quiet)
 {
 	string r_url;
 	char * rurl;
-	if (address_only) {
-		string host = lo_address_get_hostname (addr);
-		int protocol = lo_address_get_protocol (addr);
-		addr = lo_address_new_with_proto (protocol, host.c_str(), remote_port.c_str());
-	}
-
 	rurl = lo_address_get_url (addr);
 	r_url = rurl;
 	free (rurl);
-	{
-		for (uint32_t it = 0; it < _surface.size(); ++it) {
-			//find setup for this surface
-			if (!_surface[it].remote_url.find(r_url)){
-				return &_surface[it];
-			}
+	for (uint32_t it = 0; it < _surface.size(); ++it) {
+		//find setup for this surface
+		if (!_surface[it].remote_url.find(r_url)){
+			return &_surface[it];
 		}
 	}
 
