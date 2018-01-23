@@ -640,7 +640,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int strip_hide (int ssid, int yn, lo_message msg);
 	int _strip_select (boost::shared_ptr<ARDOUR::Stripable> s, lo_address addr);
 	int strip_gui_select (int rid, int yn, lo_message msg);
-	int route_set_gain_abs (int rid, float level, lo_message msg);
 	int route_set_gain_dB (int rid, float dB, lo_message msg);
 	int route_set_gain_fader (int rid, float pos, lo_message msg);
 	int strip_db_delta (int ssid, float delta, lo_message msg);

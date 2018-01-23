@@ -1764,21 +1764,21 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 		switch (argc) {
 			case 9:
 				if (types[8] == 'f') {
-					port = (int) argv[7]->f;
+					linkid = (int) argv[8]->f;
 				} else {
-					port = argv[7]->i;
+					linkid = argv[8]->i;
 				}
 			case 8:
 				if (types[7] == 'f') {
-					linkid = (int) argv[7]->f;
+					linkset = (int) argv[7]->f;
 				} else {
-					linkid = argv[7]->i;
+					linkset = argv[7]->i;
 				}
 			case 7:
 				if (types[6] == 'f') {
-					linkset = (int) argv[6]->f;
+					port = (int) argv[6]->f;
 				} else {
-					linkset = argv[6]->i;
+					port = argv[6]->i;
 				}
 			case 6:
 				if (types[5] == 'f') {
@@ -1864,34 +1864,34 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 						const char * pp = strstr (&sp[1], "/");
 						if (pp) {
 							pi_page = atoi (&pp[1]);
-							const char * ls = strstr (&pp[1], "/");
-							if (ls) {
-								linkset = atoi (&ls[1]);
-								const char * li = strstr (&ls[1], "/");
-								if (li) {
-									linkid = atoi (&li[1]);
-									const char * po = strstr (&li[1], "/");
-									if (po) {
-										port = atoi (&po[1]);
+							const char * po = strstr (&pp[1], "/");
+							if (po) {
+								port = atoi (&po[1]);
+								const char * ls = strstr (&po[1], "/");
+								if (ls) {
+									linkset = atoi (&ls[1]);
+									const char * li = strstr (&ls[1], "/");
+									if (li) {
+										linkid = atoi (&li[1]);
 									} else {
 										if (types[0] == 'f') {
-											port = (int) argv[0]->f;
+											linkid = (int) argv[0]->f;
 										} else if (types[0] == 'i') {
-											port = argv[0]->i;
+											linkid = argv[0]->i;
 										}
 									}
 								} else {
 									if (types[0] == 'f') {
-										linkid = (int) argv[0]->f;
+										linkset = (int) argv[0]->f;
 									} else if (types[0] == 'i') {
-										linkid = argv[0]->i;
+										linkset = argv[0]->i;
 									}
 								}
 							} else {
 								if (types[0] == 'f') {
-									linkset = (int) argv[0]->f;
+									port = (int) argv[0]->f;
 								} else if (types[0] == 'i') {
-									linkset = argv[0]->i;
+									port = argv[0]->i;
 								}
 							}
 						} else {
@@ -4040,43 +4040,31 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 }
 
 int
-OSC::route_set_gain_abs (int ssid, float level, lo_message msg)
-{
-	if (!session) return -1;
-	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
-	OSCSurface *sur = get_surface(get_address (msg));
-
-	if (s) {
-		if (s->gain_control()) {
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (level, sur->usegroup);
-		} else {
-			return 1;
-		}
-	} else {
-		return 1;
-	}
-
-	return 0;
-}
-
-int
 OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 {
 	if (!session) {
 		return -1;
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
-	int ret;
-	if (dB < -192) {
-		ret = route_set_gain_abs (ssid, 0.0, msg);
-	} else {
-		ret = route_set_gain_abs (ssid, dB_to_coefficient (dB), msg);
+	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
+	if (s) {
+		float abs;
+		if (s->gain_control()) {
+			if (dB < -192) {
+				abs = 0;
+			} else {
+				abs = dB_to_coefficient (dB);
+				float top = s->gain_control()->upper();
+				if (abs > top) {
+					abs = top;
+				}
+			}
+			fake_touch (s->gain_control());
+			s->gain_control()->set_value (abs, sur->usegroup);
+			return 0;
+		}
 	}
-	if (ret != 0) {
-		return float_message_with_id ("/strip/gain", ssid, -193, sur->feedback[2], get_address (msg));
-	}
-	return 0;
+	return float_message_with_id ("/strip/gain", ssid, -193, sur->feedback[2], get_address (msg));
 }
 
 int
