@@ -2094,7 +2094,7 @@ OSC::set_surface_port (uint32_t po, lo_message msg)
 						it++;
 					}
 				}
-				set_surface_feedback ((uint32_t) sur->feedback.to_ulong(), msg);
+				refresh_surface (msg);
 				return 0;
 			}
 		}
