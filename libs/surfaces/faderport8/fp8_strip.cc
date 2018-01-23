@@ -60,7 +60,14 @@ FP8Strip::midi_ctrl_id (CtrlElement type, uint8_t id)
 		id -= 8;
 		switch (type) {
 			case BtnSolo:
-				return 0x50 + id;
+				switch (id) {
+					case 3:
+						return 0x58;
+					case 6:
+						return 0x59;
+					default:
+						return 0x50 + id;
+				}
 			case BtnMute:
 				return 0x78 + id;
 			case BtnSelect:
