@@ -388,6 +388,10 @@ ArdourMarker::set_name (const string& new_name)
 {
 	_name = new_name;
 
+	mark->set_tooltip(new_name);
+	_name_background->set_tooltip(new_name);
+	_name_item->set_tooltip(new_name);
+
 	setup_name_display ();
 }
 
