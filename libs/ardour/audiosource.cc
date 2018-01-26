@@ -926,7 +926,9 @@ AudioSource::compute_and_write_peaks (Sample* buf, samplecnt_t first_sample, sam
 		memcpy (buf2.get(), peak_leftovers, peak_leftover_cnt * sizeof (Sample));
 
 		/* the new stuff */
-		memcpy (buf2.get()+peak_leftover_cnt, buf, cnt * sizeof (Sample));
+		if (buf && cnt > 0) {
+			memcpy (buf2.get()+peak_leftover_cnt, buf, cnt * sizeof (Sample));
+		}
 
 		/* no more leftovers */
 		peak_leftover_cnt = 0;

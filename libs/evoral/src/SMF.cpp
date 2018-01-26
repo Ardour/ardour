@@ -326,6 +326,7 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 		if (*size < (unsigned)event_size) {
 			*buf = (uint8_t*)realloc(*buf, event_size);
 		}
+		assert (*buf);
 		memcpy(*buf, event->midi_buffer, size_t(event_size));
 		*size = event_size;
 		if (((*buf)[0] & 0xF0) == 0x90 && (*buf)[2] == 0) {
