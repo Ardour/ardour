@@ -1846,6 +1846,9 @@ FaderPort8::stripable_selection_changed ()
 				int wk = _showing_well_known;
 				drop_ctrl_connections ();
 				select_plugin (wk);
+			} else if (_proc_params.size() == 0) {
+				/* selecting plugin, update available */
+				spill_plugins ();
 			}
 			return;
 		case ModeSend:
