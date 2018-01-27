@@ -3974,7 +3974,6 @@ Session::restore_history (string snapshot_name)
 	for (XMLNodeConstIterator it  = tree.root()->children().begin(); it != tree.root()->children().end(); ++it) {
 
 		XMLNode *t = *it;
-		UndoTransaction* ut = new UndoTransaction ();
 
 		std::string name;
 		int64_t tv_sec;
@@ -3985,6 +3984,7 @@ Session::restore_history (string snapshot_name)
 			continue;
 		}
 
+		UndoTransaction* ut = new UndoTransaction ();
 		ut->set_name (name);
 
 		struct timeval tv;
