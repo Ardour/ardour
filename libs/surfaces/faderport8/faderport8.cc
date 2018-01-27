@@ -1438,12 +1438,14 @@ FaderPort8::spill_plugins ()
 
 	for (uint32_t i = 0; 0 != (proc = r->nth_plugin (i)); ++i) {
 		if (!proc->display_to_user ()) {
-#ifdef MIXBUS
-			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
-			if (pi->is_channelstrip ()) // don't skip MB PRE
-#endif
 			continue;
 		}
+#ifdef MIXBUS
+		/* don't show channelstrip plugins, use "well known" */
+		if (boost::dynamic_pointer_cast<PluginInsert> (proc)->is_channelstrip ()) {
+			continue;
+		}
+#endif
 		int n_controls = 0;
 		set<Evoral::Parameter> p = proc->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator j = p.begin(); j != p.end(); ++j) {
