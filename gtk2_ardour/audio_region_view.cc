@@ -1397,6 +1397,8 @@ AudioRegionView::add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *ev, b
 
 		trackview.editor ().commit_reversible_command ();
 		trackview.session ()->set_dirty ();
+	} else {
+		delete region_memento;
 	}
 }
 

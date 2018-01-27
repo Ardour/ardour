@@ -204,6 +204,7 @@ StepEditor::check_step_edit ()
 			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
 		}
 	}
+	delete [] buf;
 }
 
 int
