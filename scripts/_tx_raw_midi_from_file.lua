@@ -108,3 +108,21 @@ function factory () return function ()
 	rv = nil
 	collectgarbage ()
 end end
+
+function icon (params) return function (ctx, width, height, fg)
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(math.min (width, height) * .5) .. "px")
+	txt:set_text ("S")
+	ctx:move_to (1, 1)
+	txt:show_in_cairo_context (ctx)
+
+	txt:set_text ("Y")
+	local tw, th = txt:get_pixel_size ()
+	ctx:move_to (.5 * (width - tw), .5 * (height - th))
+	txt:show_in_cairo_context (ctx)
+
+	txt:set_text ("X")
+	tw, th = txt:get_pixel_size ()
+	ctx:move_to ((width - tw - 1), (height - th -1))
+	txt:show_in_cairo_context (ctx)
+end end
