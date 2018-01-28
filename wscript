@@ -135,7 +135,7 @@ clang_dict['sse'] = ''
 clang_dict['fpmath-sse'] = ''
 clang_dict['xmmintrinsics'] = ''
 clang_dict['silence-unused-arguments'] = '-Qunused-arguments'
-clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-tags', '-Wno-cast-align', '-Wno-unused-local-typedefs' ]
+clang_dict['extra-cxx-warnings'] = [ '-Woverloaded-virtual', '-Wno-mismatched-tags', '-Wno-cast-align', '-Wno-unused-local-typedefs', '-Wunneeded-internal-declaration' ]
 clang_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded-virtual', '-fstrict-overflow' ]
 clang_dict['strict'] = ['-Wall', '-Wcast-align', '-Wextra', '-Wwrite-strings' ]
 clang_dict['generic-x86'] = [ '-arch', 'i386' ]
@@ -385,6 +385,8 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'el_capitan'
         elif re.search ("^16[.]", version) != None:
             conf.env['build_host'] = 'sierra'
+        elif re.search ("^17[.]", version) != None:
+            conf.env['build_host'] = 'high_sierra'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -410,8 +412,10 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'yosemite'
             elif re.search ("^15[.]", version) != None:
                 conf.env['build_target'] = 'el_capitan'
-            else:
+            elif re.search ("^16[.]", version) != None:
                 conf.env['build_target'] = 'sierra'
+            else:
+                conf.env['build_target'] = 'high_sierra'
         else:
             match = re.search(
                     "(?P<cpu>i[0-6]86|x86_64|powerpc|ppc|ppc64|arm|s390x?)",
@@ -432,11 +436,11 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra' ]:
+    if opt.use_libcpp or conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra' ]:
        cxx_flags.append('--stdlib=libc++')
        linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -444,7 +448,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'el_capitan', 'sierra', 'high_sierra' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -453,7 +457,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
 
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra' ]:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -569,7 +573,7 @@ int main() { return 0; }''',
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.8"))
 
-    elif conf.env['build_target'] in ['el_capitan', 'sierra' ]:
+    elif conf.env['build_target'] in ['el_capitan', 'sierra', 'high_sierra' ]:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=1090",
                  "-mmacosx-version-min=10.9"))
