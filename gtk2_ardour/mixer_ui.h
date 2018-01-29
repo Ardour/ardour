@@ -26,6 +26,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/menu.h>
@@ -154,6 +155,8 @@ private:
 	Gtk::Frame            track_display_frame;
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
+	Gtk::VBox             favorite_plugins_vbox;
+	Gtk::ComboBoxText     favorite_plugins_tag_combo;
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
@@ -365,7 +368,13 @@ private:
 
 	void store_current_favorite_order();
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
+	void plugin_status_changed (ARDOUR::PluginType t, std::string unique_id, ARDOUR::PluginManager::PluginStatusType s);
 	void refill_favorite_plugins ();
+
+	void refill_tag_combo ();
+	void tags_changed (ARDOUR::PluginType t, std::string unique_id, std::string tag);
+	void tag_combo_changed ();
+
 	void sync_treeview_from_favorite_order ();
 	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
 	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);

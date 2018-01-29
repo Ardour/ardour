@@ -247,7 +247,11 @@ Mixer_UI::Mixer_UI ()
 
 	favorite_plugins_frame.set_name ("BaseFrame");
 	favorite_plugins_frame.set_shadow_type (Gtk::SHADOW_IN);
-	favorite_plugins_frame.add (favorite_plugins_scroller);
+	favorite_plugins_frame.add (favorite_plugins_vbox);
+
+	favorite_plugins_vbox.pack_start (favorite_plugins_scroller, true, true);
+	favorite_plugins_vbox.pack_start (favorite_plugins_tag_combo, false, false);
+	favorite_plugins_tag_combo.signal_changed().connect (sigc::mem_fun (*this, &Mixer_UI::tag_combo_changed));
 
 	rhs_pane1.add (favorite_plugins_frame);
 	rhs_pane1.add (track_display_frame);
@@ -362,8 +366,10 @@ Mixer_UI::Mixer_UI ()
 #error implement deferred Plugin-Favorite list
 #endif
 	PluginManager::instance ().PluginListChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
-	//PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::plugin_status_changed, this, _1, _2, _3), gui_context());
+	PluginManager::instance ().PluginStatusesChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::plugin_status_changed, this, _1, _2, _3), gui_context());
 	ARDOUR::Plugin::PresetsChanged.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::refill_favorite_plugins, this), gui_context());
+
+	PluginManager::instance ().PluginTagsChanged.connect(*this, invalidator (*this), boost::bind (&Mixer_UI::tags_changed, this, _1, _2, _3), gui_context());
 }
 
 Mixer_UI::~Mixer_UI ()
@@ -380,6 +386,12 @@ void
 Mixer_UI::escape ()
 {
 	select_none ();
+}
+
+void
+Mixer_UI::tag_combo_changed ()
+{
+	refill_favorite_plugins();
 }
 
 Gtk::Window*
@@ -1036,6 +1048,7 @@ Mixer_UI::set_session (Session* sess)
 	}
 
 	refill_favorite_plugins();
+	refill_tag_combo();
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node, 0);
@@ -2573,9 +2586,24 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 {
 	PluginManager& manager (PluginManager::instance());
 	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
+
+		/* not a Favorite? skip it */
 		if (manager.get_status (*i) != PluginManager::Favorite) {
 			continue;
 		}
+
+		/* Check the tag combo selection, and skip this plugin if it doesn't match the selected tag(s) */
+		string test = favorite_plugins_tag_combo.get_active_text();
+		if (test != _("Show All")) {
+			vector<string> tags = manager.get_tags(*i);
+
+			//does the selected tag match any of the tags in the plugin?
+			vector<string>::iterator tt =  find (tags.begin(), tags.end(), test);
+			if (tt == tags.end()) {
+				continue;
+			}
+		}
+
 		result.push_back (*i);
 	}
 }
@@ -2636,6 +2664,36 @@ Mixer_UI::refill_favorite_plugins ()
 	favorite_order = plugs;
 
 	sync_treeview_from_favorite_order ();
+}
+
+void
+Mixer_UI::plugin_status_changed (PluginType, std::string, PluginManager::PluginStatusType)
+{
+	refill_favorite_plugins();
+	refill_tag_combo();
+}
+
+void
+Mixer_UI::tags_changed (PluginType t, std::string unique_id, std::string tag)
+{
+	refill_tag_combo();
+}
+
+void
+Mixer_UI::refill_tag_combo ()
+{
+	PluginManager& mgr (PluginManager::instance());
+
+	std::vector<std::string> tags = mgr.get_all_tags (true);
+
+	favorite_plugins_tag_combo.clear();
+	favorite_plugins_tag_combo.append_text (_("Show All"));
+
+	for (vector<string>::iterator t = tags.begin (); t != tags.end (); ++t) {
+		favorite_plugins_tag_combo.append_text (*t);
+	}
+
+	favorite_plugins_tag_combo.set_active_text (_("Show All"));
 }
 
 void
@@ -2724,7 +2782,7 @@ Mixer_UI::popup_note_context_menu (GdkEventButton *ev)
 bool
 Mixer_UI::plugin_row_button_press (GdkEventButton *ev)
 {
-	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3) ) {
+	if ((ev->type == GDK_BUTTON_PRESS) && (ev->button == 3)) {
 		TreeModel::Path path;
 		TreeViewColumn* column;
 		int cellx, celly;
