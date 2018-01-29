@@ -689,11 +689,11 @@ PluginManager::ladspa_discover (string path)
 		info->unique_id = buf;
 
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
-			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
-				if ( LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n]) ) {
+			if (LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n])) {
+				if (LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n])) {
 					info->n_inputs.set_audio(info->n_inputs.n_audio() + 1);
 				}
-				else if ( LADSPA_IS_PORT_OUTPUT (descriptor->PortDescriptors[n]) ) {
+				else if (LADSPA_IS_PORT_OUTPUT (descriptor->PortDescriptors[n])) {
 					info->n_outputs.set_audio(info->n_outputs.n_audio() + 1);
 				}
 			}
@@ -1268,12 +1268,14 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
 
-					/* Make sure we don't find the same plugin in more than one place along
-			 the LXVST_PATH We can't use a simple 'find' because the path is included
-			 in the PluginInfo, and that is the one thing we can be sure MUST be
-			 different if a duplicate instance is found.  So we just compare the type
-			 and unique ID (which for some VSTs isn't actually unique...)
-		*/
+		set_tags (info->type, info->unique_id, info->category, true);
+
+		/* Make sure we don't find the same plugin in more than one place along
+		 * the LXVST_PATH We can't use a simple 'find' because the path is included
+		 * in the PluginInfo, and that is the one thing we can be sure MUST be
+		 * different if a duplicate instance is found.  So we just compare the type
+		 * and unique ID (which for some VSTs isn't actually unique...)
+		 */
 
 		// TODO: check dup-IDs with windowsVST, too
 		bool duplicate = false;
