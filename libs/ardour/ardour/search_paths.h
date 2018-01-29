@@ -107,6 +107,12 @@ namespace ARDOUR {
 
 	/**
 	 * return a Searchpath containing directories in which to look for
+	 * plugin metadata ( tags and favorite/hidden status ).
+	 */
+	LIBARDOUR_API PBD::Searchpath plugin_metadata_search_path ();
+
+	/**
+	 * return a Searchpath containing directories in which to look for
 	 * route templates.
 	 */
 	LIBARDOUR_API PBD::Searchpath route_template_search_path ();

@@ -139,6 +139,7 @@ Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
 Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
+PluginMetadata=$Shared/plugin_metadata
 ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
@@ -346,6 +347,9 @@ done
 
 #Session templates
 cp -av $BUILD_ROOT/../templates $Templates
+
+# PluginMetadata
+cp -av $BUILD_ROOT/../plugin_metadata $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here

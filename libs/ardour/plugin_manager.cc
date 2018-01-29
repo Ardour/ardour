@@ -72,6 +72,7 @@
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
 
+#include "ardour/directory_names.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/ladspa.h"
@@ -1435,6 +1436,14 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	}
 
 	statuses.insert (ps);
+}
+
+std::string
+PluginManager::user_plugin_metadata_dir () const
+{
+	std::string dir = Glib::build_filename (user_config_directory(), plugin_metadata_dir_name);
+	g_mkdir_with_parents (dir.c_str(), 0744);
+	return dir;
 }
 
 const ARDOUR::PluginInfoList&

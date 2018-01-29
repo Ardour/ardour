@@ -355,8 +355,17 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		/* presets */
 
-		old_name = Glib::build_filename (old_dir, X_("plugin_statuses"));
-		new_name = Glib::build_filename (new_dir, X_("plugin_statuses"));
+		old_name = Glib::build_filename (old_dir, X_("plugin_statuses")); /* until 6.0 */
+		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
+		copy_file (old_name, new_name); /* can fail silently */
+
+		old_name = Glib::build_filename (old_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
+		copy_file (old_name, new_name);
+
+		/* plugin tags */
+
+		old_name = Glib::build_filename (old_dir, plugin_metadata_dir_name, X_("plugin_tags"));
+		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_tags"));
 
 		copy_file (old_name, new_name);
 

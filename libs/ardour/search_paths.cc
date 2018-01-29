@@ -167,6 +167,14 @@ template_search_path ()
 }
 
 Searchpath
+plugin_metadata_search_path ()
+{
+	Searchpath spath (ardour_data_search_path());
+	spath.add_subdirectory_to_paths(plugin_metadata_dir_name);
+	return spath;
+}
+
+Searchpath
 route_template_search_path ()
 {
 	Searchpath spath (ardour_data_search_path());

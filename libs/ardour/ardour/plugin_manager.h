@@ -73,6 +73,7 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 		Hidden
 	};
 
+	std::string user_plugin_metadata_dir () const;
 	void load_statuses ();
 	void save_statuses ();
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);

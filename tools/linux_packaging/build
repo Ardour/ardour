@@ -186,6 +186,7 @@ Backends=$APPLIB/backends
 
 Themes=$Shared/themes
 Templates=$Shared/templates
+PluginMetadata=$Shared/plugin_metadata
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
@@ -399,6 +400,9 @@ done
 
 #Session templates
 cp -av $BUILD_ROOT/../templates $Templates
+
+# PluginMetadata
+cp -av $BUILD_ROOT/../plugin_metadata $PluginMetadata
 
 # ExportFormats
 # got to be careful with names here
