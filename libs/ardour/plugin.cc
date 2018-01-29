@@ -87,12 +87,6 @@ PluginInfo::needs_midi_input () const
 	return (n_inputs.n_midi() != 0);
 }
 
-bool
-PluginInfo::is_instrument () const
-{
-	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
-}
-
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)
@@ -525,4 +519,34 @@ Plugin::parameter_label (uint32_t which) const
 	ParameterDescriptor pd;
 	get_parameter_descriptor (which, pd);
 	return pd.label;
+}
+
+bool
+PluginInfo::is_effect () const
+{
+	return (!is_instrument () && !is_utility ()  && !is_analyzer ());
+}
+
+bool
+PluginInfo::is_instrument () const
+{
+	if (category == "Instrument") {
+		return true;
+	}
+
+	// second check: if we have  midi input and audio output, we're likely an instrument
+	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
+}
+
+bool
+PluginInfo::is_utility () const
+{
+	/* XXX beware of translations, e.g. LV2 categories */
+	return (category == "Utility" || category == "MIDI" || category == "Generator");
+}
+
+bool
+PluginInfo::is_analyzer () const
+{
+	return (category == "Analyser" || category == "Anaylsis" || category == "Analyzer");
 }

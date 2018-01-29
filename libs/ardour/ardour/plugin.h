@@ -425,9 +425,17 @@ class LIBARDOUR_API PluginInfo {
 	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
-	virtual bool is_instrument() const;
+
+	/* NOTE: it is possible for a plugin to be an effect AND an instrument.
+	 * override these funcs as necessary to support that.
+	 */
+	virtual bool is_effect () const;
+	virtual bool is_instrument () const;
+	virtual bool is_utility () const;  //this includes things like "generators" and "midi filters"
+	virtual bool is_analyzer () const;
+
 	virtual bool needs_midi_input() const;
-	virtual bool in_category (const std::string &) const { return false; }
+	virtual bool in_category (const std::string &) const { return false; } // deprecated
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;
 

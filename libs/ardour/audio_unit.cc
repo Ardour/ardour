@@ -38,13 +38,13 @@
 #include <glibmm/miscutils.h>
 
 #include "ardour/ardour.h"
+#include "ardour/audio_unit.h"
 #include "ardour/audioengine.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/debug.h"
-#include "ardour/midi_buffer.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/io.h"
-#include "ardour/audio_unit.h"
+#include "ardour/midi_buffer.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
@@ -2916,14 +2916,14 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			continue;
 
 		case kAudioUnitType_Output:
-			info->category = _("AudioUnit Output");
+			info->category = _("Output");
 			break;
 		case kAudioUnitType_MusicDevice:
 			info->category = _("Instrument");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_MusicEffect:
-			info->category = _("Music Effect");
+			info->category = _("Effect");
 			has_midi_in = true;
 			break;
 		case kAudioUnitType_Effect:
@@ -2936,7 +2936,7 @@ AUPluginInfo::discover_by_description (PluginInfoList& plugs, CAComponentDescrip
 			info->category = _("Generator");
 			break;
 		default:
-			info->category = _("AudioUnit (Unknown)");
+			info->category = _("(Unknown)");
 			break;
 		}
 
@@ -3308,6 +3308,13 @@ bool
 AUPluginInfo::is_instrument () const
 {
 	return descriptor->IsMusicDevice();
+}
+
+bool
+AUPluginInfo::is_utility () const
+{
+	return (descriptor->IsGenerator() || descriptor->componentType == 'aumi');
+	// kAudioUnitType_MidiProcessor  ..looks like we aren't even scanning for these yet?
 }
 
 void

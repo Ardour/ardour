@@ -386,10 +386,7 @@ bool
 PluginInsert::is_instrument() const
 {
 	PluginInfoPtr pip = _plugins[0]->get_info();
-	if (pip->is_instrument ()) {
-		return true;
-	}
-	return pip->n_inputs.n_midi () != 0 && pip->n_outputs.n_audio () > 0 && pip->n_inputs.n_audio () == 0;
+	return (pip->is_instrument ());
 }
 
 bool

@@ -984,7 +984,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "VST";
+		info->category = finfo->category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1121,7 +1121,7 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "MacVST";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1240,7 +1240,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "linuxVSTs";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;

@@ -251,10 +251,13 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
 	bool needs_midi_input () const;
-	bool is_effect () const;
 	bool is_effect_without_midi_input () const;
 	bool is_effect_with_midi_input () const;
+
+	/* note: AU's have an explicit way to prompt for instrument/fx category */
+	bool is_effect () const;
 	bool is_instrument () const;
+	bool is_utility () const;
 
 	AUPluginCachedInfo cache;
 

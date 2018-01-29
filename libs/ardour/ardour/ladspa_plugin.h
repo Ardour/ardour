@@ -151,6 +151,13 @@ class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
 	LadspaPluginInfo ();
 	~LadspaPluginInfo () { };
 
+	bool is_instrument () const { return false; } /* ladspa's are never instruments */
+#ifdef MIXBUS
+	/* for mixbus, relegate ladspa's to the Utils folder. */
+	bool is_effect () const { return false; }
+	bool is_utility () const { return true; }
+#endif
+
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 };
