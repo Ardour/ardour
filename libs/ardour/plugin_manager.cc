@@ -71,6 +71,7 @@
 
 #include "pbd/whitespace.h"
 #include "pbd/file_utils.h"
+#include "pbd/tokenizer.h"
 
 #include "ardour/directory_names.h"
 #include "ardour/debug.h"
@@ -171,6 +172,8 @@ PluginManager::PluginManager ()
 #endif
 
 	load_statuses ();
+
+	load_tags ();
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -505,6 +508,7 @@ PluginManager::lua_refresh ()
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
 		LuaPluginInfoPtr lpi (new LuaPluginInfo(*s));
 		_lua_plugin_info->push_back (lpi);
+		set_tags (lpi->type, lpi->unique_id, lpi->category, true);
 	}
 }
 
@@ -795,6 +799,10 @@ PluginManager::lv2_refresh ()
 	DEBUG_TRACE (DEBUG::PluginManager, "LV2: refresh\n");
 	delete _lv2_plugin_info;
 	_lv2_plugin_info = LV2PluginInfo::discover();
+
+	for (PluginInfoList::iterator i = _lv2_plugin_info->begin(); i != _lv2_plugin_info->end(); ++i) {
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, true);
+	}
 }
 #endif
 
@@ -815,6 +823,10 @@ PluginManager::au_refresh (bool cache_only)
 	// successful scan re-enabled automatic discovery if it was set
 	Config->set_discover_audio_units (discover_at_start);
 	Config->save_state();
+
+	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, true);
+	}
 }
 
 #endif
@@ -994,6 +1006,9 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::Windows_VST;
 
+		/* if we don't have any tags for this plugin, make some up. */
+		set_tags (info->type, info->unique_id, info->category, true);
+
 		// TODO: check dup-IDs (lxvst AND windows vst)
 		bool duplicate = false;
 
@@ -1130,6 +1145,9 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::MacVST;
+
+		/* if we don't have any tags for this plugin, make some up. */
+		set_tags (info->type, info->unique_id, info->category, true);
 
 		bool duplicate = false;
 		if (!_mac_vst_plugin_info->empty()) {
@@ -1287,7 +1305,7 @@ PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
 	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
-	if (i ==  statuses.end() ) {
+	if (i ==  statuses.end()) {
 		return Normal;
 	} else {
 		return i->status;
@@ -1297,7 +1315,7 @@ PluginManager::get_status (const PluginInfoPtr& pi) const
 void
 PluginManager::save_statuses ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_statuses");
 	stringstream ofs;
 
 	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
@@ -1340,17 +1358,18 @@ PluginManager::save_statuses ()
 		}
 
 		ofs << ' ';
+
 		ofs << (*i).unique_id;;
 		ofs << endl;
 	}
 	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
-	PluginStatusesChanged (); /* EMIT SIGNAL */
 }
 
 void
 PluginManager::load_statuses ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	std::string path;
+	find_file (plugin_metadata_search_path(), "plugin_statuses", path);  //note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
 	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
 		return;
@@ -1431,11 +1450,65 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
 
-	if (status == Normal) {
-		return;
+	if (status != Normal) {
+		statuses.insert (ps);
 	}
 
-	statuses.insert (ps);
+	PluginStatusesChanged (t, id, status); /* EMIT SIGNAL */
+}
+
+PluginType
+PluginManager::to_generic_vst (const PluginType t)
+{
+	switch (t) {
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+			return LXVST;
+		default:
+			break;
+	}
+	return t;
+}
+
+struct SortByTag {
+	bool operator() (std::string a, std::string b) {
+		return a.compare (b) < 0;
+	}
+};
+
+vector<std::string>
+PluginManager::get_tags (const PluginInfoPtr& pi) const
+{
+	vector<std::string> tags;
+
+	PluginTag ps (to_generic_vst(pi->type), pi->unique_id, "", false);
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i != ptags.end ()) {
+
+		if (!PBD::tokenize (i->tags, string(" "), std::back_inserter (tags), true)) {
+			cout << _("PluginManager: Could not tokenize string: ") << i->tags << endmsg;
+		}
+		SortByTag sorter;
+		sort (tags.begin(), tags.end(), sorter);
+	}
+	return tags;
+}
+
+std::string
+PluginManager::get_tags_as_string (const PluginInfoPtr& pi) const
+{
+	std::string ret;
+
+	vector<std::string> tags = get_tags(pi);
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		if (t != tags.begin ()) {
+			ret.append(" ");
+		}
+		ret.append(*t);
+	}
+
+	return ret;
 }
 
 std::string
@@ -1445,6 +1518,159 @@ PluginManager::user_plugin_metadata_dir () const
 	g_mkdir_with_parents (dir.c_str(), 0744);
 	return dir;
 }
+
+void
+PluginManager::save_tags ()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_tags");
+	XMLNode* root = new XMLNode (X_("PluginTags"));
+
+	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+		if (!(*i).user_set) {
+			continue;
+		}
+		XMLNode* node = new XMLNode (X_("Plugin"));
+		node->set_property (X_("type"), to_generic_vst ((*i).type));
+		node->set_property (X_("id"), (*i).unique_id);
+		node->set_property (X_("tags"), (*i).tags);
+		node->set_property (X_("user-set"), (*i).user_set);
+		root->add_child_nocopy (*node);
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Tags info to %1"), path) << endmsg;
+	}
+}
+
+void
+PluginManager::load_tags ()
+{
+	vector<std::string> tmp;
+	find_files_matching_pattern (tmp, plugin_metadata_search_path (), "plugin_tags");
+
+	for (vector<std::string>::const_iterator p = tmp.begin (); p != tmp.end(); ++p) {
+		std::string path = *p;
+		info << string_compose (_("Loading plugin meta data file %1"), path) << endmsg;
+		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+			return;
+		}
+
+		XMLTree tree;
+		if (!tree.read (path)) {
+			error << string_compose (_("Cannot parse plugin tag info from %1"), path) << endmsg;
+			return;
+		}
+
+		for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+			PluginType type;
+			string id;
+			string tags;
+			bool user_set;
+			if (!(*i)->get_property (X_("type"), type) ||
+					!(*i)->get_property (X_("id"), id) ||
+					!(*i)->get_property (X_("tags"), tags)) {
+			}
+			if (!(*i)->get_property (X_("user-set"), user_set)) {
+				user_set = false;
+			}
+			strip_whitespace_edges (tags);
+			set_tags (type, id, tags, !user_set);
+		}
+	}
+}
+
+void
+PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool force)
+{
+	string sanitized = sanitize_tag (tag);
+
+	PluginTag ps (to_generic_vst (t), id, sanitized, !factory);
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i == ptags.end()) {
+		ptags.insert (ps);
+	} else {
+		if (!(*i).user_set || force || ((*i).user_set && !factory)) {
+			ptags.erase (ps);
+			ptags.insert (ps);
+		}
+	}
+	if (!factory || force) {
+		PluginTagsChanged (t, id, sanitized); /* EMIT SIGNAL */
+	}
+}
+
+std::string
+PluginManager::sanitize_tag (const std::string to_sanitize) const
+{
+	string sanitized = to_sanitize;
+	vector<string> tags;
+	if (!PBD::tokenize (sanitized, string(" "), std::back_inserter (tags), true)) {
+		cout << _("PluginManager::sanitize_tag could not tokenize string: ") << sanitized << endmsg;
+		return "";
+	}
+
+	/* convert tokens to lower-case, comma-separated list */
+	sanitized = "";
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		string temp(*t);
+		std::transform (temp.begin(), temp.end(), temp.begin(), ::tolower);
+		sanitized.append(temp);
+		sanitized.append(" ");
+	}
+
+	/* remove trailing space */
+	if (sanitized.length() > 0) {
+		sanitized.erase (sanitized.length()-1, 1);
+	}
+
+	return sanitized;
+}
+
+std::vector<std::string>
+PluginManager::get_all_tags (bool favorites_only) const
+{
+	std::vector<std::string> ret;
+
+	PluginTagList::const_iterator pt;
+	for (pt = ptags.begin(); pt != ptags.end(); ++pt) {
+
+		/* if favorites_only then we need to check the info ptr and maybe skip */
+		if (favorites_only) {
+			PluginStatus stat ((*pt).type, (*pt).unique_id);
+			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && (i->status == Favorite)) {
+				/* it's a favorite! */
+			} else {
+				continue;
+			}
+		}
+
+		/* parse each plugin's tag string into separate tags */
+		vector<string> tags;
+		if (!PBD::tokenize ((*pt).tags, string(",\n"), std::back_inserter (tags), true)) {
+			cout << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+			continue;
+		}
+
+		/* maybe add the tags we've found */
+		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+			/* if this tag isn't already in the list, add it */
+			vector<string>::iterator i =  find (ret.begin(), ret.end(), *t);
+			if (i == ret.end()) {
+				ret.push_back (*t);
+			}
+		}
+	}
+
+	/* sort in alphabetical order */
+	SortByTag sorter;
+	sort (ret.begin(), ret.end(), sorter);
+
+	return ret;
+}
+
 
 const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()

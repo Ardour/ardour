@@ -39,7 +39,7 @@ namespace ARDOUR {
 class Plugin;
 
 class LIBARDOUR_API PluginManager : public boost::noncopyable {
-  public:
+public:
 	static PluginManager& instance();
 	static std::string scanner_bin_path;
 
@@ -64,6 +64,9 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	const std::string get_default_windows_vst_path() const { return windows_vst_path; }
 	const std::string get_default_lxvst_path() const { return lxvst_path; }
 
+	/* always return LXVST for any VST subtype */
+	static PluginType to_generic_vst (PluginType);
+
 	bool cancelled () { return _cancel_scan; }
 	bool no_timeout () { return _cancel_timeout; }
 
@@ -79,12 +82,52 @@ class LIBARDOUR_API PluginManager : public boost::noncopyable {
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
 
+	void load_tags ();
+	void save_tags ();
+
+	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool factory, bool force = false);
+	std::string get_tags_as_string (PluginInfoPtr const&) const;
+	std::vector<std::string> get_tags (PluginInfoPtr const&) const;
+	std::vector<std::string> get_all_tags (bool favorites_only) const;
+
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;
-	/** Plugin Hidden/Favorite status changed */
-	PBD::Signal0<void> PluginStatusesChanged;
 
-  private:
+	/** Plugin Hidden/Favorite status changed */
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusesChanged; //PluginType t, string id, string tag
+
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagsChanged; //PluginType t, string id, string tag
+
+private:
+
+	struct PluginTag {
+	    ARDOUR::PluginType type;
+	    std::string unique_id;
+	    std::string tags;
+			bool user_set;
+
+	    PluginTag (ARDOUR::PluginType t, std::string id, std::string s, bool user_set)
+	    : type (t), unique_id (id), tags (s), user_set (user_set) {}
+
+	    bool operator== (PluginTag const& other) const {
+		    return other.type == type && other.unique_id == unique_id;
+	    }
+
+	    bool operator< (PluginTag const& other) const {
+		    if (other.type < type) {
+			    return true;
+		    } else if (other.type == type && other.unique_id < unique_id) {
+			    return true;
+		    }
+		    return false;
+	    }
+	};
+
+	typedef std::set<PluginTag> PluginTagList;
+	PluginTagList ptags;
+
+	std::string sanitize_tag (const std::string) const;
+
 	struct PluginStatus {
 	    ARDOUR::PluginType type;
 	    std::string unique_id;
