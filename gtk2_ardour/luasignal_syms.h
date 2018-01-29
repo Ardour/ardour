@@ -74,7 +74,8 @@ SESSION(RouteGroupsReordered, route_groups_reordered, 0)
 
 // plugin manager instance
 STATIC(PluginListChanged, &(PluginManager::instance().PluginListChanged), 0)
-//STATIC(PluginStatusesChanged, &(PluginManager::instance().PluginStatusesChanged), 3)
+STATIC(PluginStatusesChanged, &(PluginManager::instance().PluginStatusesChanged), 3)
+//STATIC(PluginStatusesChanged, &(PluginManager::instance().PluginTagsChanged), 3)
 
 // Diskstream static global
 STATIC(DiskOverrun, &ARDOUR::DiskWriter::Overrun, 0)
