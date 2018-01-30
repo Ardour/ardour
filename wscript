@@ -252,6 +252,7 @@ children = [
         'mcp',
         'osc',
         'patchfiles',
+        'plugin_metadata',
         'scripts',
         'headless',
         'session_utils',

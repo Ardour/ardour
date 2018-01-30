@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PluginTags>
+  <Plugin type="LV2" id="urn:ardour:a-reverb" tags="reverb"/>
+  <Plugin type="LV2" id="urn:ardour:a-fluidsynth" tags="sampler piano organ drum synth bass trumpet horn rhodes guitar"/>
+  <Plugin type="LV2" id="urn:ardour:a-eq" tags="eq:parametric"/>
+  <Plugin type="LV2" id="urn:ardour:a-delay" tags="delay"/>
+  <Plugin type="LV2" id="urn:ardour:a-comp#stereo" tags="compressor dynamic"/>
+  <Plugin type="LV2" id="urn:ardour:a-comp" tags="compressor dynamic"/>
+</PluginTags>
