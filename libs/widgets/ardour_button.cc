@@ -55,7 +55,7 @@ ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (Ar
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
 
-ArdourButton::ArdourButton (Element e)
+ArdourButton::ArdourButton (Element e, bool toggle)
 	: _sizing_text("")
 	, _markup (false)
 	, _elements (e)
@@ -87,6 +87,7 @@ ArdourButton::ArdourButton (Element e)
 	, led_inset_pattern (0)
 	, _led_rect (0)
 	, _act_on_release (true)
+	, _auto_toggle (toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
@@ -103,7 +104,7 @@ ArdourButton::ArdourButton (Element e)
 	signal_grab_broken_event().connect (sigc::mem_fun (*this, &ArdourButton::on_grab_broken_event));
 }
 
-ArdourButton::ArdourButton (const std::string& str, Element e)
+ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	: _sizing_text("")
 	, _markup (false)
 	, _elements (e)
@@ -133,6 +134,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e)
 	, led_inset_pattern (0)
 	, _led_rect (0)
 	, _act_on_release (true)
+	, _auto_toggle (toggle)
 	, _led_left (false)
 	, _distinct_led_click (false)
 	, _hovering (false)
@@ -880,6 +882,10 @@ ArdourButton::on_button_press_event (GdkEventButton *ev)
 		if (_action) {
 			_action->activate ();
 			return true;
+		} else if (_auto_toggle) {
+			set_active (!get_active ());
+			signal_clicked ();
+			return true;
 		}
 	}
 
@@ -904,6 +910,9 @@ ArdourButton::on_button_release_event (GdkEventButton *ev)
 	CairoWidget::set_dirty ();
 
 	if (ev->button == 1 && _hovering) {
+		if (_act_on_release && _auto_toggle && !_action) {
+			set_active (!get_active ());
+		}
 		signal_clicked ();
 		if (_act_on_release) {
 			if (_action) {
@@ -1111,6 +1120,9 @@ ArdourButton::on_key_release_event (GdkEventKey *ev) {
 	if (_act_on_release && _focused &&
 			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
 	{
+		if (_auto_toggle && !_action) {
+				set_active (!get_active ());
+		}
 		signal_clicked();
 		if (_action) {
 			_action->activate ();
@@ -1125,6 +1137,9 @@ ArdourButton::on_key_press_event (GdkEventKey *ev) {
 	if (!_act_on_release && _focused &&
 			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
 	{
+		if (_auto_toggle && !_action) {
+				set_active (!get_active ());
+		}
 		signal_clicked();
 		if (_action) {
 			_action->activate ();

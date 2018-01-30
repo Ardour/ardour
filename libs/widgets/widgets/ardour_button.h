@@ -55,8 +55,8 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	static Element led_default_elements;
 	static Element just_led_default_elements;
 
-	ArdourButton (Element e = default_elements);
-	ArdourButton (const std::string&, Element e = default_elements);
+	ArdourButton (Element e = default_elements, bool toggle = false);
+	ArdourButton (const std::string&, Element e = default_elements, bool toggle = false);
 	virtual ~ArdourButton ();
 
 	enum Tweaks {
@@ -193,6 +193,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	cairo_rectangle_t* _led_rect;
 
 	bool _act_on_release;
+	bool _auto_toggle;
 	bool _led_left;
 	bool _distinct_led_click;
 	bool _hovering;
