@@ -2396,9 +2396,13 @@ ProcessorBox::use_plugins (const SelectedPlugins& plugins)
 			return true;
 			// XXX SHAREDPTR delete plugin here .. do we even need to care?
 		} else if (plugins.size() == 1 && UIConfiguration::instance().get_open_gui_after_adding_plugin()) {
-			if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && UIConfiguration::instance().get_prefer_inline_over_gui()) {
-				;
-			} else if (_session->engine().connected () && processor_can_be_edited (processor)) {
+			if (processor->what_can_be_automated ().size () == 0) {
+				; /* plugin without controls, don't show ui */
+			}
+			else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->has_inline_display() && UIConfiguration::instance().get_prefer_inline_over_gui()) {
+				; /* only show inline display */
+			}
+			else if (_session->engine().connected () && processor_can_be_edited (processor)) {
 				if ((*p)->has_editor ()) {
 					edit_processor (processor);
 				} else if (boost::dynamic_pointer_cast<PluginInsert>(processor)->plugin()->parameter_count() > 0) {
