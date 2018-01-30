@@ -28,6 +28,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/menu_elems.h"
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gui_thread.h"
 
@@ -161,4 +162,16 @@ void
 ArdourDropdown::disable_scrolling()
 {
 	_scrolling_disabled = true;
+}
+
+void
+ArdourDropdown::append_text_item (std::string const& text) {
+	using namespace Gtkmm2ext;
+	AddMenuElem (MenuElemNoMnemonic (text, sigc::bind (sigc::mem_fun (*this, &ArdourDropdown::default_text_handler), text)));
+}
+
+void
+ArdourDropdown::default_text_handler (std::string const& text) {
+	set_text (text);
+	StateChanged (); /* EMIT SIGNAL */
 }

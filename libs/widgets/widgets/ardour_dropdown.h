@@ -49,6 +49,11 @@ public:
 
 	Gtk::Menu_Helpers::MenuList& items () { return _menu.items (); }
 
+	void append_text_item (std::string const& text);
+
+protected:
+	void default_text_handler (std::string const& text);
+
 private:
 	Gtk::Menu      _menu;
 
