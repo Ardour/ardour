@@ -618,6 +618,11 @@ ArdourButton::on_size_request (Gtk::Requisition* req)
 			 * of text.
 			 */
 
+		} else if (_layout_ellipsize_width > 0 && _sizing_text.empty()) {
+
+			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
+			req->width += _layout_ellipsize_width / PANGO_SCALE;
+
 		} else /*if (!_text.empty() || !_sizing_text.empty()) */ {
 
 			req->height = std::max(req->height, (int) ceil(char_pixel_height() * BASELINESTRETCH + 1.0));
