@@ -1496,7 +1496,7 @@ PluginManager::get_tags (const PluginInfoPtr& pi) const
 }
 
 std::string
-PluginManager::get_tags_as_string (const PluginInfoPtr& pi) const
+PluginManager::get_tags_as_string (PluginInfoPtr const& pi) const
 {
 	std::string ret;
 
@@ -1599,6 +1599,12 @@ PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool
 	if (!factory || force) {
 		PluginTagsChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
+}
+
+void
+PluginManager::reset_tags (PluginInfoPtr const& pi)
+{
+	set_tags (pi->type, pi->unique_id, pi->category, true, true);
 }
 
 std::string
