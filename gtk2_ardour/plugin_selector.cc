@@ -44,6 +44,7 @@
 
 #include "plugin_selector.h"
 #include "gui_thread.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -186,8 +187,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 
 	/* FILTER */
 
-	Gtk::Table* filter_table = manage(new Gtk::Table(1, 10));
-
 	Gtk::RadioButtonGroup fil_radio_group;
 
 	_fil_effects_radio = manage (new RadioButton (fil_radio_group, _("Show Effects Only")));
@@ -197,53 +196,52 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_hidden_radio = manage (new RadioButton (fil_radio_group, _("Show Hidden Only")));
 	_fil_all_radio = manage (new RadioButton (fil_radio_group, _("Show All")));
 
-	_fil_type_combo = manage (new ComboBoxText);
-	_fil_type_combo->append_text (_("Show All Formats"));
-	_fil_type_combo->append_text (X_("VST"));
+	//_fil_type_combo = manage (new ComboBoxText);
+	_fil_type_combo.append_text_item (_("Show All Formats"));
+	_fil_type_combo.append_text_item (X_("VST"));
 #ifdef AUDIOUNIT_SUPPORT
-	_fil_type_combo->append_text (X_("AudioUnit"));
+	_fil_type_combo.append_text_item (X_("AudioUnit"));
 #endif
 #ifdef LV2_SUPPORT
-	_fil_type_combo->append_text (X_("LV2"));
+	_fil_type_combo.append_text_item (X_("LV2"));
 #endif
-	_fil_type_combo->append_text (X_("LUA"));
-	_fil_type_combo->append_text (X_("LADSPA"));
-	_fil_type_combo->set_active_text (_("Show All Formats"));
+	_fil_type_combo.append_text_item (X_("LUA"));
+	_fil_type_combo.append_text_item (X_("LADSPA"));
+	_fil_type_combo.set_text (_("Show All Formats"));
 
-	_fil_creator_combo = manage (new ComboBoxText);
-	//note: _fil_creator_combo menu gets filled in build_plugin_menu
+	/* note: _fil_creator_combo menu gets filled in build_plugin_menu */
+	_fil_creator_combo.set_text_ellipsize (Pango::ELLIPSIZE_END);
+	_fil_creator_combo.set_layout_ellipsize_width (PANGO_SCALE * 160 * UIConfiguration::instance ().get_ui_scale ());
 
-	_fil_channel_combo = manage (new ComboBoxText);
-	_fil_channel_combo->append_text (_("Audio I/O"));
-	_fil_channel_combo->append_text (_("Mono Audio I/O"));
-	_fil_channel_combo->append_text (_("Stereo Audio I/O"));
-	_fil_channel_combo->append_text (_("MIDI I/O (only)"));
-	_fil_channel_combo->append_text (_("Show All I/O"));
+	_fil_channel_combo.append_text_item (_("Audio I/O"));
+	_fil_channel_combo.append_text_item (_("Mono Audio I/O"));
+	_fil_channel_combo.append_text_item (_("Stereo Audio I/O"));
+	_fil_channel_combo.append_text_item (_("MIDI I/O (only)"));
+	_fil_channel_combo.append_text_item (_("Show All I/O"));
 #ifdef MIXBUS
-	_fil_channel_combo->set_active_text (_("Audio I/O"));
+	_fil_channel_combo.set_text (_("Audio I/O"));
 #else
-	_fil_channel_combo->set_active_text (_("Show All I/O"));
+	_fil_channel_combo.set_text (_("Show All I/O"));
 #endif
 
-	int p = 0;
-	filter_table->attach (*_fil_effects_radio,       2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_instruments_radio,   2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_utils_radio,         2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_favorites_radio,     2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_hidden_radio,        2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_all_radio,           2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_type_combo,          2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_creator_combo,       2, 3, p, p+1, FILL, FILL); p++;
-	filter_table->attach (*_fil_channel_combo,       2, 3, p, p+1, FILL, FILL); p++;
+	VBox* filter_vbox = manage (new VBox);
+	filter_vbox->pack_start (*_fil_effects_radio,     false, false);
+	filter_vbox->pack_start (*_fil_instruments_radio, false, false);
+	filter_vbox->pack_start (*_fil_utils_radio,       false, false);
+	filter_vbox->pack_start (*_fil_favorites_radio,   false, false);
+	filter_vbox->pack_start (*_fil_hidden_radio,      false, false);
+	filter_vbox->pack_start (*_fil_all_radio,         false, false);
+	filter_vbox->pack_start (_fil_type_combo,         false, false);
+	filter_vbox->pack_start (_fil_creator_combo,      false, false);
+	filter_vbox->pack_start (_fil_channel_combo,      false, false);
 
-	filter_table->set_border_width (4);
-	filter_table->set_col_spacings (4);
-	filter_table->set_row_spacings (4);
+	filter_vbox->set_border_width (4);
+	filter_vbox->set_spacing (4);
 
 	Frame* filter_frame = manage (new Frame);
 	filter_frame->set_name ("BaseFrame");
 	filter_frame->set_label (_("Filter"));
-	filter_frame->add (*filter_table);
+	filter_frame->add (*filter_vbox);
 	filter_frame->show_all ();
 
 	_fil_effects_radio->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::refill));
@@ -252,9 +250,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_favorites_radio->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::refill));
 	_fil_hidden_radio->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::refill));
 
-	_fil_type_combo->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::refill));
-	_fil_creator_combo->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::refill));
-	_fil_channel_combo->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_fil_type_combo.StateChanged.connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_fil_creator_combo.StateChanged.connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_fil_channel_combo.StateChanged.connect (sigc::mem_fun (*this, &PluginSelector::refill));
 
 	/* TAG entry */
 
@@ -278,7 +276,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	Gtk::Label* tagging_help_label3 = manage (new Label(
 		_("Ex: \"dynamic de-esser vocal\" applies 3 Tags."), Gtk::ALIGN_LEFT));
 
-	p = 0;
+	int p = 0;
 	tagging_table->attach (*tag_entry,           0, 1, p, p+1, FILL|EXPAND, FILL);
 	tagging_table->attach (*tag_reset_button,    1, 2, p, p+1, FILL, FILL); p++;
 	tagging_table->attach (*tagging_help_label1, 0, 2, p, p+1, FILL, FILL); p++;
@@ -414,44 +412,39 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 	/* Filter "type" combobox */
 
-	if (_fil_type_combo->get_active_text() == X_("VST") && PluginManager::to_generic_vst(info->type) != LXVST) {
+	if (_fil_type_combo.get_text() == X_("VST") && PluginManager::to_generic_vst(info->type) != LXVST) {
 		return false;
 	}
 
-	if (_fil_type_combo->get_active_text() == X_("AudioUnit") && info->type != AudioUnit) {
+	if (_fil_type_combo.get_text() == X_("AudioUnit") && info->type != AudioUnit) {
 		return false;
 	}
 
 #ifdef LV2_SUPPORT
-	if (_fil_type_combo->get_active_text() == X_("LV2") && info->type != LV2) {
+	if (_fil_type_combo.get_text() == X_("LV2") && info->type != LV2) {
 		return false;
 	}
 #endif
 
-	if (_fil_type_combo->get_active_text() == X_("LUA") && info->type != Lua) {
+	if (_fil_type_combo.get_text() == X_("LUA") && info->type != Lua) {
 		return false;
 	}
 
-	if (_fil_type_combo->get_active_text() == X_("LADSPA") && info->type != LADSPA) {
+	if (_fil_type_combo.get_text() == X_("LADSPA") && info->type != LADSPA) {
 		return false;
 	}
 
 	/* Filter "creator" combobox */
 
-	if (_fil_creator_combo->get_active_text() != _("Show All Creators")) {
-		string cmp = info->creator;
-		if (cmp.length() > MAX_CREATOR_LEN) {
-			cmp = cmp.substr (0, MAX_CREATOR_LEN);
-			cmp.append("...");
-		}
-		if (_fil_creator_combo->get_active_text() != cmp) {
+	if (_fil_creator_combo.get_text() != _("Show All Creators")) {
+		if (_fil_creator_combo.get_text() != info->creator) {
 			return false;
 		}
 	}
 
 	/* Filter "I/O" combobox */
 
-	if (_fil_channel_combo->get_active_text() != _("Show All I/O") || info->reconfigurable_io ()) {
+	if (_fil_channel_combo.get_text() != _("Show All I/O") || info->reconfigurable_io ()) {
 
 #if 0
 		if (info->reconfigurable_io ()) {
@@ -459,25 +452,25 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		}
 #endif
 
-		if (_fil_channel_combo->get_active_text() == _("Audio I/O")) {
+		if (_fil_channel_combo.get_text() == _("Audio I/O")) {
 			if ((info->n_inputs.n_audio() == 0 || info->n_outputs.n_audio() == 0)) {
 				return false;
 			}
 		}
 
-		if (_fil_channel_combo->get_active_text() == _("Mono Audio I/O")) {
+		if (_fil_channel_combo.get_text() == _("Mono Audio I/O")) {
 			if (info->n_inputs.n_audio() != 1 || info->n_outputs.n_audio() != 1) {
 				return false;
 			}
 		}
 
-		if (_fil_channel_combo->get_active_text() == _("Stereo Audio I/O")) {
+		if (_fil_channel_combo.get_text() == _("Stereo Audio I/O")) {
 			if (info->n_inputs.n_audio() != 2 || info->n_outputs.n_audio() != 2) {
 				return false;
 			}
 		}
 
-		if (_fil_channel_combo->get_active_text() == _("MIDI I/O (only)")) {
+		if (_fil_channel_combo.get_text() == _("MIDI I/O (only)")) {
 			if ((info->n_inputs.n_audio() != 0 || info->n_outputs.n_audio() == 0)) {
 				return false;
 			}
@@ -505,9 +498,9 @@ PluginSelector::set_sensitive_widgets ()
 		_fil_favorites_radio->set_sensitive(false);
 		_fil_hidden_radio->set_sensitive(false);
 		_fil_all_radio->set_sensitive(false);
-		_fil_type_combo->set_sensitive(false);
-		_fil_creator_combo->set_sensitive(false);
-		_fil_channel_combo->set_sensitive(false);
+		_fil_type_combo.set_sensitive(false);
+		_fil_creator_combo.set_sensitive(false);
+		_fil_channel_combo.set_sensitive(false);
 	} else {
 		_fil_effects_radio->set_sensitive(true);
 		_fil_instruments_radio->set_sensitive(true);
@@ -515,9 +508,9 @@ PluginSelector::set_sensitive_widgets ()
 		_fil_favorites_radio->set_sensitive(true);
 		_fil_hidden_radio->set_sensitive(true);
 		_fil_all_radio->set_sensitive(true);
-		_fil_type_combo->set_sensitive(true);
-		_fil_creator_combo->set_sensitive(true);
-		_fil_channel_combo->set_sensitive(true);
+		_fil_type_combo.set_sensitive(true);
+		_fil_creator_combo.set_sensitive(true);
+		_fil_channel_combo.set_sensitive(true);
 	}
 	if (!search_entry.get_text().empty()) {
 		refill ();
@@ -1066,9 +1059,9 @@ Gtk::Menu*
 PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 {
 	inhibit_refill = true;
-	_fil_creator_combo->clear();
-	_fil_creator_combo->append_text (_("Show All Creators"));
-	_fil_creator_combo->set_active_text (_("Show All Creators"));
+	_fil_creator_combo.clear_items ();
+	_fil_creator_combo.append_text_item (_("Show All Creators"));
+	_fil_creator_combo.set_text (_("Show All Creators"));
 	inhibit_refill = false;
 
 	using namespace Menu_Helpers;
@@ -1110,19 +1103,13 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 			creator = creator.substr (0, pos);
 		}
 
-		/* trim the creator length so we don't make a giant pulldown menu */
-		if (creator.length() > MAX_CREATOR_LEN) {
-			creator = creator.substr (0, MAX_CREATOR_LEN);
-			creator.append("...");
-		}
-
 		SubmenuMap::iterator x;
 		Gtk::Menu* submenu;
 		if ((x = creator_submenu_map.find (creator)) != creator_submenu_map.end()) {
 			submenu = x->second;
 		} else {
 
-			_fil_creator_combo->append_text(creator);
+			_fil_creator_combo.append_text_item (creator);
 
 			submenu = new Gtk::Menu;
 			by_creator_items.push_back (MenuElem (creator, *manage (submenu)));

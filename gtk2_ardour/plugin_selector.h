@@ -30,6 +30,8 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
+#include "widgets/ardour_dropdown.h"
+
 #include "gtkmm2ext/dndtreeview.h"
 
 #include "ardour/plugin.h"
@@ -76,10 +78,10 @@ private:
 	Gtk::RadioButton *_fil_hidden_radio;
 	Gtk::RadioButton *_fil_all_radio;
 
-	//combobox filters
-	Gtk::ComboBoxText *_fil_type_combo;
-	Gtk::ComboBoxText *_fil_creator_combo;
-	Gtk::ComboBoxText *_fil_channel_combo;
+	/* combobox filters */
+	ArdourWidgets::ArdourDropdown _fil_type_combo;
+	ArdourWidgets::ArdourDropdown _fil_creator_combo;
+	ArdourWidgets::ArdourDropdown _fil_channel_combo;
 
 	PluginInterestedObject* interested_object;
 
