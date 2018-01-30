@@ -1607,11 +1607,9 @@ PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else {
-		if (force || ((*i).user_set && !factory)) {
-			ptags.erase (ps);
-			ptags.insert (ps);
-		}
+	} else if (!factory || force || !(*i).user_set) {
+		ptags.erase (ps);
+		ptags.insert (ps);
 	}
 	if (!factory || force) {
 		PluginTagsChanged (t, id, sanitized); /* EMIT SIGNAL */
