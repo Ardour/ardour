@@ -180,7 +180,7 @@ function factory (params) return function ()
 		goto errorout
 	end
 	assert (loop:start () < loop:_end ())
-	if loop:_end () >= playhead then
+	if loop:_end () > playhead then
 		print_help();
 		print ("Error: The Playhead (paste point) needs to be after the loop.")
 		goto errorout
