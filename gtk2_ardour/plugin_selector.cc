@@ -1081,26 +1081,12 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 		if (manager.get_status (*i) == PluginManager::Hidden) continue;
 
 		string creator = (*i)->creator;
-		string::size_type pos = 0;
-
-		if ((*i)->type == ARDOUR::LADSPA) {
-			/* stupid LADSPA creator strings */
-#ifdef PLATFORM_WINDOWS
-			while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
-#else
-			while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]))) ++pos;
-#endif
-		} else {
-			pos = creator.length ();
-		}
 
 		/* If there were too few characters to create a
 		 * meaningful name, mark this creator as 'Unknown'
 		 */
-		if (creator.length() < 2 || pos < 3) {
+		if (creator.length() < 2) {
 			creator = "Unknown";
-		} else{
-			creator = creator.substr (0, pos);
 		}
 
 		SubmenuMap::iterator x;
