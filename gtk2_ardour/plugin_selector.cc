@@ -161,7 +161,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 		_("All search terms must be matched."), Gtk::ALIGN_LEFT));
 
 	Gtk::Label* search_help_label2 = manage (new Label(
-		_("Ex: \"ess dyn\" will return \"dynamic de-esser\" but not \"de-esser\"."), Gtk::ALIGN_LEFT));
+		_("Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."), Gtk::ALIGN_LEFT));
 
 	search_table->attach (search_entry,            0, 3, 0, 1, FILL|EXPAND, FILL);
 	search_table->attach (search_clear_button,     3, 4, 0, 1, FILL, FILL);
@@ -172,7 +172,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	search_table->attach (*search_help_label2,     0, 3, 3, 4, FILL, FILL);
 
 	search_table->set_border_width (4);
-	search_table->set_col_spacings (2);
+	search_table->set_col_spacings (4);
 	search_table->set_row_spacings (4);
 
 	Frame* search_frame = manage (new Frame);
