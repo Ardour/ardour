@@ -435,7 +435,6 @@ class LIBARDOUR_API PluginInfo {
 	virtual bool is_analyzer () const;
 
 	virtual bool needs_midi_input() const;
-	virtual bool in_category (const std::string &) const { return false; } // deprecated
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;
 
