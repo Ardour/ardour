@@ -678,12 +678,29 @@ PluginManager::ladspa_discover (string path)
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
-		info->creator = descriptor->Maker;
 		info->path = path;
 		info->index = i;
 		info->n_inputs = ChanCount();
 		info->n_outputs = ChanCount();
 		info->type = ARDOUR::LADSPA;
+
+		string::size_type pos = 0;
+		string creator = descriptor->Maker;
+		/* stupid LADSPA creator strings */
+#ifdef PLATFORM_WINDOWS
+		while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]) || creator[pos] == '.')) ++pos;
+#else
+		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]) || creator[pos] == '.')) ++pos;
+#endif
+
+		/* If there were too few characters to create a
+		 * meaningful name, mark this creator as 'Unknown'
+		 */
+		if (creator.length() < 2 || pos < 3) {
+			info->creator = "Unknown";
+		} else{
+			info->creator = creator.substr (0, pos);
+		}
 
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
