@@ -120,7 +120,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 2; i <=7; i++) {
+	for (int i = 2; i <= 7; i++) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		if (column) {
 			column->set_sort_column(i);
@@ -196,10 +196,6 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_favorites_radio = manage (new RadioButton (fil_radio_group, _("Show Favorites Only")));
 	_fil_hidden_radio = manage (new RadioButton (fil_radio_group, _("Show Hidden Only")));
 	_fil_all_radio = manage (new RadioButton (fil_radio_group, _("Show All")));
-
-#ifndef MIXBUS
-	_fil_all_radio->set_active ();
-#endif
 
 	_fil_type_combo = manage (new ComboBoxText);
 	_fil_type_combo->append_text (_("Show All Formats"));
@@ -502,7 +498,7 @@ PluginSelector::setup_search_string (string& searchstr)
 void
 PluginSelector::set_sensitive_widgets ()
 {
-	if (_search_ignore_checkbox->get_active() && (search_entry.get_text() != "")) {
+	if (_search_ignore_checkbox->get_active() && !search_entry.get_text().empty()) {
 		_fil_effects_radio->set_sensitive(false);
 		_fil_instruments_radio->set_sensitive(false);
 		_fil_utils_radio->set_sensitive(false);
@@ -522,6 +518,9 @@ PluginSelector::set_sensitive_widgets ()
 		_fil_type_combo->set_sensitive(true);
 		_fil_creator_combo->set_sensitive(true);
 		_fil_channel_combo->set_sensitive(true);
+	}
+	if (!search_entry.get_text().empty()) {
+		refill ();
 	}
 }
 
@@ -850,7 +849,9 @@ void
 PluginSelector::search_entry_changed ()
 {
 	set_sensitive_widgets();
-	refill ();
+	if (search_entry.get_text().empty()) {
+		refill ();
+	}
 }
 
 void
@@ -895,8 +896,16 @@ PluginSelector::plugin_status_changed (PluginType t, std::string uid, PluginMana
 			(*i)[plugin_columns.hidden] = (stat == PluginManager::Hidden) ? true : false;
 
 			/* if plug was hidden, remove it from the view */
-			if (stat==PluginManager::Hidden) {
+			if (stat == PluginManager::Hidden) {
+				if (!_fil_hidden_radio->get_active() && !_fil_all_radio->get_active()) {
+					plugin_model->erase(i);
+				}
+			} else if (_fil_hidden_radio->get_active()) {
 				plugin_model->erase(i);
+			}
+			/* if no longer a favorite, remove it from the view */
+			if (stat != PluginManager::Favorite && _fil_favorites_radio->get_active()) {
+					plugin_model->erase(i);
 			}
 
 			/* plugin menu must be re-built to accommodate Hidden and Favorite plugins */
