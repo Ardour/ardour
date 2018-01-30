@@ -69,9 +69,10 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "pbd/whitespace.h"
+#include "pbd/convert.h"
 #include "pbd/file_utils.h"
 #include "pbd/tokenizer.h"
+#include "pbd/whitespace.h"
 
 #include "ardour/directory_names.h"
 #include "ardour/debug.h"
@@ -1487,10 +1488,7 @@ PluginManager::get_tags (const PluginInfoPtr& pi) const
 	PluginTag ps (to_generic_vst(pi->type), pi->unique_id, "", false);
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i != ptags.end ()) {
-
-		if (!PBD::tokenize (i->tags, string(" "), std::back_inserter (tags), true)) {
-			cout << _("PluginManager: Could not tokenize string: ") << i->tags << endmsg;
-		}
+		PBD::tokenize (i->tags, string(" "), std::back_inserter (tags), true);
 		SortByTag sorter;
 		sort (tags.begin(), tags.end(), sorter);
 	}
@@ -1606,25 +1604,25 @@ PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool
 std::string
 PluginManager::sanitize_tag (const std::string to_sanitize) const
 {
+	if (to_sanitize.empty ()) {
+		return "";
+	}
 	string sanitized = to_sanitize;
 	vector<string> tags;
-	if (!PBD::tokenize (sanitized, string(" "), std::back_inserter (tags), true)) {
-		cout << _("PluginManager::sanitize_tag could not tokenize string: ") << sanitized << endmsg;
+	if (!PBD::tokenize (sanitized, string(" ,\n"), std::back_inserter (tags), true)) {
+#ifndef NDEBUG
+		cerr << _("PluginManager::sanitize_tag could not tokenize string: ") << sanitized << endmsg;
+#endif
 		return "";
 	}
 
-	/* convert tokens to lower-case, comma-separated list */
+	/* convert tokens to lower-case, space-separated list */
 	sanitized = "";
 	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
-		string temp(*t);
-		std::transform (temp.begin(), temp.end(), temp.begin(), ::tolower);
-		sanitized.append(temp);
-		sanitized.append(" ");
-	}
-
-	/* remove trailing space */
-	if (sanitized.length() > 0) {
-		sanitized.erase (sanitized.length()-1, 1);
+		if (t != tags.begin ()) {
+			sanitized.append(" ");
+		}
+		sanitized.append (downcase (*t));
 	}
 
 	return sanitized;
@@ -1637,6 +1635,9 @@ PluginManager::get_all_tags (bool favorites_only) const
 
 	PluginTagList::const_iterator pt;
 	for (pt = ptags.begin(); pt != ptags.end(); ++pt) {
+		if ((*pt).tags.empty ()) {
+			continue;
+		}
 
 		/* if favorites_only then we need to check the info ptr and maybe skip */
 		if (favorites_only) {
@@ -1651,8 +1652,10 @@ PluginManager::get_all_tags (bool favorites_only) const
 
 		/* parse each plugin's tag string into separate tags */
 		vector<string> tags;
-		if (!PBD::tokenize ((*pt).tags, string(",\n"), std::back_inserter (tags), true)) {
-			cout << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+		if (!PBD::tokenize ((*pt).tags, string(" "), std::back_inserter (tags), true)) {
+#ifndef NDEBUG
+			cerr << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+#endif
 			continue;
 		}
 
