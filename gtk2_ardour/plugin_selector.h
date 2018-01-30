@@ -30,6 +30,7 @@
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
 
+#include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 
 #include "gtkmm2ext/dndtreeview.h"
@@ -66,9 +67,9 @@ public:
 private:
 
 	//search
-	Gtk::CheckButton *_search_name_checkbox;
-	Gtk::CheckButton *_search_tags_checkbox;
-	Gtk::CheckButton *_search_ignore_checkbox;
+	ArdourWidgets::ArdourButton* _search_name_checkbox;
+	ArdourWidgets::ArdourButton* _search_tags_checkbox;
+	ArdourWidgets::ArdourButton* _search_ignore_checkbox;
 
 	//radio-button filters
 	Gtk::RadioButton *_fil_effects_radio;

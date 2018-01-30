@@ -148,15 +148,17 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	search_entry.signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::search_entry_changed));
 	search_clear_button.signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::search_clear_button_clicked));
 
-	_search_name_checkbox = manage (new CheckButton (_("Name")));
-	_search_name_checkbox->set_active();
+	_search_name_checkbox = manage (new ArdourButton (_("Name"), ArdourButton::led_default_elements, true));
+	_search_name_checkbox->set_active(true);
+	_search_name_checkbox->set_name ("pluginlist filter button");
 
-	_search_tags_checkbox = manage (new CheckButton (_("Tags")));
-	_search_tags_checkbox->set_active();
+	_search_tags_checkbox = manage (new ArdourButton (_("Tags"), ArdourButton::led_default_elements, true));
+	_search_tags_checkbox->set_active(true);
+	_search_tags_checkbox->set_name ("pluginlist filter button");
 
-	_search_ignore_checkbox = manage (new CheckButton(_("Ignore Filters when searching")));
-	_search_ignore_checkbox->set_active();
-	_search_ignore_checkbox->signal_toggled().connect (sigc::mem_fun (*this, &PluginSelector::set_sensitive_widgets));
+	_search_ignore_checkbox = manage (new ArdourButton(_("Ignore Filters when searching"), ArdourButton::led_default_elements, true));
+	_search_ignore_checkbox->set_active(true);
+	_search_ignore_checkbox->set_name ("pluginlist filter button");
 
 	Gtk::Label* search_help_label1 = manage (new Label(
 		_("All search terms must be matched."), Gtk::ALIGN_LEFT));
@@ -182,8 +184,9 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	search_frame->add (*search_table);
 	search_frame->show_all ();
 
-	_search_name_checkbox->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::refill));
-	_search_tags_checkbox->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_search_name_checkbox->signal_clicked.connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_search_tags_checkbox->signal_clicked.connect (sigc::mem_fun (*this, &PluginSelector::refill));
+	_search_ignore_checkbox->signal_clicked.connect (sigc::mem_fun (*this, &PluginSelector::set_sensitive_widgets));
 
 	/* FILTER */
 
