@@ -112,14 +112,12 @@ private:
 			add (type_name);
 			add (audio_io);
 			add (midi_io);
-			add (category);
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<bool> favorite;
 		Gtk::TreeModelColumn<bool> hidden;
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type_name;
-		Gtk::TreeModelColumn<std::string> category;
 		Gtk::TreeModelColumn<std::string> creator;
 		Gtk::TreeModelColumn<std::string> tags;
 		Gtk::TreeModelColumn<std::string> audio_io;

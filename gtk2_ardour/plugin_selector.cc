@@ -120,7 +120,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	added_list.set_headers_visible (true);
 	added_list.set_reorderable (false);
 
-	for (int i = 2; i <= 7; i++) {
+	for (int i = 2; i <= 7; ++i) {
 		Gtk::TreeView::Column* column = plugin_display.get_column(i);
 		if (column) {
 			column->set_sort_column(i);
@@ -571,7 +571,6 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 			newrow[plugin_columns.name] = name;
 
 			newrow[plugin_columns.type_name] = type;
-			newrow[plugin_columns.category] = (*i)->category;
 
 			/* Creator */
 			string creator = (*i)->creator;
@@ -831,16 +830,11 @@ PluginSelector::search_clear_button_clicked ()
 void
 PluginSelector::tag_reset_button_clicked ()
 {
-	/* XXX: this should probably be a backend function
-	 * -> remove "category" from GUI and code-dup to set
-	 * factory tags in PluginManager */
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
-		std::string str = row[plugin_columns.category];
-		std::transform (str.begin(), str.end(), str.begin(), ::tolower);
-
 		ARDOUR::PluginInfoPtr pi = row[plugin_columns.plugin];
-		manager.set_tags (pi->type, pi->unique_id, str, true, true);
+		manager.reset_tags (pi);
+		display_selection_changed ();
 		_need_tag_save = true;
 	}
 }
