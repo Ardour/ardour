@@ -1014,7 +1014,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = finfo->category;
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
