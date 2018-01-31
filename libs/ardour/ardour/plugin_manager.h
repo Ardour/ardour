@@ -89,7 +89,13 @@ public:
 	void reset_tags (PluginInfoPtr const&);
 	std::string get_tags_as_string (PluginInfoPtr const&) const;
 	std::vector<std::string> get_tags (PluginInfoPtr const&) const;
-	std::vector<std::string> get_all_tags (bool favorites_only) const;
+
+	enum TagFilter {
+		All,
+		OnlyFavorites,
+		NoHidden
+	};
+	std::vector<std::string> get_all_tags (enum TagFilter) const;
 
 	/** plugins were added to or removed from one of the PluginInfoLists */
 	PBD::Signal0<void> PluginListChanged;

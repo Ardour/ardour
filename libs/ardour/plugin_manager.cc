@@ -1650,7 +1650,7 @@ PluginManager::sanitize_tag (const std::string to_sanitize) const
 }
 
 std::vector<std::string>
-PluginManager::get_all_tags (bool favorites_only) const
+PluginManager::get_all_tags (TagFilter tag_filter) const
 {
 	std::vector<std::string> ret;
 
@@ -1661,12 +1661,19 @@ PluginManager::get_all_tags (bool favorites_only) const
 		}
 
 		/* if favorites_only then we need to check the info ptr and maybe skip */
-		if (favorites_only) {
+		if (tag_filter == OnlyFavorites) {
 			PluginStatus stat ((*pt).type, (*pt).unique_id);
 			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
 			if ((i != statuses.end()) && (i->status == Favorite)) {
 				/* it's a favorite! */
 			} else {
+				continue;
+			}
+		}
+		if (tag_filter == NoHidden) {
+			PluginStatus stat ((*pt).type, (*pt).unique_id);
+			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && (i->status == Hidden)) {
 				continue;
 			}
 		}
