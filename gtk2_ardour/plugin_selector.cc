@@ -1126,7 +1126,7 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 	by_tags->set_name("ArdourContextMenu");
 	MenuList& by_tags_items = by_tags->items();
 
-	std::vector<std::string> all_tags = manager.get_all_tags(false);
+	std::vector<std::string> all_tags = manager.get_all_tags (PluginManager::NoHidden);
 	for (vector<string>::iterator t = all_tags.begin(); t != all_tags.end(); ++t) {
 		Gtk::Menu *submenu = new Gtk::Menu;
 		by_tags_items.push_back (MenuElem (*t, *manage (submenu)));

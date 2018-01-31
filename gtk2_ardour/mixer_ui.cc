@@ -2684,7 +2684,7 @@ Mixer_UI::refill_tag_combo ()
 {
 	PluginManager& mgr (PluginManager::instance());
 
-	std::vector<std::string> tags = mgr.get_all_tags (true);
+	std::vector<std::string> tags = mgr.get_all_tags (PluginManager::OnlyFavorites);
 
 	favorite_plugins_tag_combo.clear();
 	favorite_plugins_tag_combo.append_text (_("Show All"));
