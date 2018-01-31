@@ -267,7 +267,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_entry = manage (new Gtk::Entry);
 	tag_entry_connection = tag_entry->signal_changed().connect (sigc::mem_fun (*this, &PluginSelector::tag_entry_changed));
 
-	Gtk::Button* tag_reset_button = manage (new Button (_("Reset")));
+	tag_reset_button = manage (new Button (_("Reset")));
 	tag_reset_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_reset_button_clicked));
 
 	Gtk::Label* tagging_help_label1 = manage (new Label(
@@ -331,6 +331,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	plugin_display.grab_focus();
 
 	build_plugin_menu ();
+	display_selection_changed ();
 }
 
 PluginSelector::~PluginSelector ()
@@ -699,6 +700,10 @@ PluginSelector::load_plugin (PluginInfoPtr pi)
 void
 PluginSelector::btn_add_clicked()
 {
+	if (plugin_display.get_selection()->count_selected_rows() == 0) {
+		/* may happen with ctrl + double-click un-selecting but activating a row */
+		return;
+	}
 	std::string name;
 	PluginInfoPtr pi;
 	TreeModel::Row newrow = *(amodel->append());
@@ -739,12 +744,14 @@ PluginSelector::display_selection_changed()
 		tag_entry->set_text (tags);
 
 		tag_entry->set_sensitive (true);
+		tag_reset_button->set_sensitive (true);
 		btn_add->set_sensitive (true);
 
 	} else {
 		tag_entry->set_text ("");
 
 		tag_entry->set_sensitive (false);
+		tag_reset_button->set_sensitive (false);
 		btn_add->set_sensitive (false);
 	}
 	tag_entry_connection.unblock ();

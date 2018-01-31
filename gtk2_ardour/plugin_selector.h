@@ -93,6 +93,7 @@ private:
 	Gtk::Button search_clear_button;
 
 	Gtk::Entry *tag_entry;
+	Gtk::Button* tag_reset_button;
 	void tag_reset_button_clicked ();
 
 	void set_sensitive_widgets();
