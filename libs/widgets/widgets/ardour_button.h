@@ -87,7 +87,7 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	void set_corner_radius (float);
 
 	void set_text (const std::string&, bool markup = false);
-	const std::string& get_text () { return _text; }
+	const std::string& get_text () const { return _text; }
 	bool get_markup () const { return _markup; }
 	void set_angle (const double);
 	void set_alignment (const float, const float);
