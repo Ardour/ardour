@@ -160,17 +160,19 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_search_ignore_checkbox->set_active(true);
 	_search_ignore_checkbox->set_name ("pluginlist filter button");
 
-	Gtk::Label* search_help_label = manage (new Label(
-			_("All search terms must be matched.\n"
-			  "Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."
-			 ), Gtk::ALIGN_LEFT));
+	Gtk::Label* search_help_label1 = manage (new Label(
+		_("All search terms must be matched."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* search_help_label2 = manage (new Label(
+		_("Ex: \"ess dyn\" will find \"dynamic de-esser\" but not \"de-esser\"."), Gtk::ALIGN_LEFT));
 
 	search_table->attach (search_entry,            0, 3, 0, 1, FILL|EXPAND, FILL);
 	search_table->attach (search_clear_button,     3, 4, 0, 1, FILL, FILL);
 	search_table->attach (*_search_name_checkbox,  0, 1, 1, 2, FILL, FILL);
 	search_table->attach (*_search_tags_checkbox,  1, 2, 1, 2, FILL, FILL);
 	search_table->attach (*_search_ignore_checkbox,2, 3, 1, 2, FILL, FILL);
-	search_table->attach (*search_help_label,      0, 3, 2, 3, FILL, FILL);
+	search_table->attach (*search_help_label1,     0, 3, 2, 3, FILL, FILL);
+	search_table->attach (*search_help_label2,     0, 3, 3, 4, FILL, FILL);
 
 	search_table->set_border_width (4);
 	search_table->set_col_spacings (4);
@@ -268,16 +270,21 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	tag_reset_button = manage (new Button (_("Reset")));
 	tag_reset_button->signal_clicked().connect (sigc::mem_fun (*this, &PluginSelector::tag_reset_button_clicked));
 
-	Gtk::Label* tagging_help_label = manage (new Label(
-			_("Enter space-separated, one-word Tags for the selected plugin.\n"
-			  "You can include dashes, colons or underscores in a Tag.\n"
-			  "Ex: \"dynamic de-esser vocal\" applies 3 Tags."
-			 ), Gtk::ALIGN_LEFT));
+	Gtk::Label* tagging_help_label1 = manage (new Label(
+		_("Enter space-separated, one-word Tags for the selected plugin."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* tagging_help_label2 = manage (new Label(
+		_("You can include dashes, colons or underscores in a Tag."), Gtk::ALIGN_LEFT));
+
+	Gtk::Label* tagging_help_label3 = manage (new Label(
+		_("Ex: \"dynamic de-esser vocal\" applies 3 Tags."), Gtk::ALIGN_LEFT));
 
 	int p = 0;
 	tagging_table->attach (*tag_entry,           0, 1, p, p+1, FILL|EXPAND, FILL);
 	tagging_table->attach (*tag_reset_button,    1, 2, p, p+1, FILL, FILL); p++;
-	tagging_table->attach (*tagging_help_label,  0, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label1, 0, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label2, 0, 2, p, p+1, FILL, FILL); p++;
+	tagging_table->attach (*tagging_help_label3, 0, 2, p, p+1, FILL, FILL); p++;
 
 	Frame* tag_frame = manage (new Frame);
 	tag_frame->set_name ("BaseFrame");
