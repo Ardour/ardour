@@ -31,6 +31,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/send.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -132,6 +133,10 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 	name_changed (ARDOUR::Properties::name);
+
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_name, this), OSC::instance());
+	group_name ();
 
 	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::pi_changed, this, _1), OSC::instance());
 	_osc.float_message ("/select/hide", _strip->is_hidden (), addr);
@@ -271,6 +276,7 @@ OSCSelectObserver::clear_observer ()
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.float_message ("/select/expand", 0, addr);
 	_osc.text_message ("/select/name", " ", addr);
+	_osc.text_message ("/select/group/name", " ", addr);
 	_osc.text_message ("/select/comment", " ", addr);
 	_osc.float_message ("/select/mute", 0, addr);
 	_osc.float_message ("/select/solo", 0, addr);
@@ -639,6 +645,19 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 		_osc.float_message ("/select/n_inputs", (float) route->n_inputs().n_total(), addr);
 		// lets tell the surface how many outputs this strip has
 		_osc.float_message ("/select/n_outputs", (float) route->n_outputs().n_total(), addr);
+	}
+}
+
+void
+OSCSelectObserver::group_name ()
+{
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+
+	RouteGroup *rg = rt->route_group();
+	if (rg) {
+		_osc.text_message ("/select/group/name", rg->name(), addr);
+	} else {
+		_osc.text_message ("/select/group/name", " ", addr);
 	}
 }
 

@@ -28,6 +28,8 @@
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
+#include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/solo_isolate_control.h"
 
 #include "osc.h"
@@ -128,6 +130,10 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 	if (feedback[0]) { // buttons are separate feedback
 		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 		name_changed (ARDOUR::Properties::name);
+
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+		rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::group_name, this), OSC::instance());
+		group_name ();
 
 		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::pi_changed, this, _1), OSC::instance());
 		_osc.int_message_with_id ("/strip/hide", ssid, _strip->is_hidden (), in_line, addr);
@@ -244,6 +250,7 @@ OSCRouteObserver::clear_strip ()
 	_osc.float_message_with_id ("/strip/expand", ssid, 0, in_line, addr);
 	if (feedback[0]) { // buttons are separate feedback
 		_osc.text_message_with_id ("/strip/name", ssid, " ", in_line, addr);
+		_osc.text_message_with_id ("/strip/group/name", ssid, " ", in_line, addr);
 		_osc.float_message_with_id ("/strip/mute", ssid, 0, in_line, addr);
 		_osc.float_message_with_id ("/strip/solo", ssid, 0, in_line, addr);
 		_osc.float_message_with_id ("/strip/recenable", ssid, 0, in_line, addr);
@@ -344,6 +351,19 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 
 	if (_strip) {
 		_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
+	}
+}
+
+void
+OSCRouteObserver::group_name ()
+{
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+
+	RouteGroup *rg = rt->route_group();
+	if (rg) {
+		_osc.text_message_with_id ("/strip/group/name", ssid, rg->name(), in_line, addr);
+	} else {
+		_osc.text_message_with_id ("/strip/group/name", ssid, " ", in_line, addr);
 	}
 }
 
