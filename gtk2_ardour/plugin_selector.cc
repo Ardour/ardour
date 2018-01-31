@@ -377,6 +377,9 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 
 		/* user asked to ignore filters */
 		if (maybe_show && _search_ignore_checkbox->get_active()) {
+			if (manager.get_status (info) == PluginManager::Hidden) {
+				return false;
+			}
 			return true;
 		}
 	}
@@ -401,10 +404,8 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 		return false;
 	}
 
-	if (manager.get_status (info) == PluginManager::Hidden) {
-		if (!_fil_hidden_radio->get_active() && !_fil_all_radio->get_active()) {
-			return false;
-		}
+	if (!_fil_hidden_radio->get_active() && manager.get_status (info) == PluginManager::Hidden) {
+		return false;
 	}
 
 	/* Filter "type" combobox */
