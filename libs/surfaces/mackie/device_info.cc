@@ -56,6 +56,7 @@ DeviceInfo::DeviceInfo()
 	, _uses_logic_control_buttons (false)
 	, _uses_ipmidi (false)
 	, _no_handshake (false)
+	, _is_qcon(false)
 	, _has_meters (true)
 	, _has_separate_meters (false)
 	, _device_type (MCU)
@@ -320,6 +321,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 		_has_meters = true;
 	}
 
+	if ((child = node.child ("IsQCon")) != 0) {
+		child->get_property ("value", _is_qcon);
+	} else {
+		_is_qcon = false;
+	}
+
 	if ((child = node.child ("HasSeparateMeters")) != 0) {
 		child->get_property ("value", _has_separate_meters);
 	} else {
@@ -454,6 +461,12 @@ bool
 DeviceInfo::no_handshake () const
 {
 	return _no_handshake;
+}
+
+bool
+DeviceInfo::is_qcon () const
+{
+	return _is_qcon;
 }
 
 bool

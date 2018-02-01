@@ -80,6 +80,7 @@ class DeviceInfo
 	bool has_touch_sense_faders() const;
 	bool uses_ipmidi() const;
 	bool no_handshake() const;
+	bool is_qcon() const;
 	bool has_meters() const;
 	bool has_separate_meters() const;
 	const std::string& name() const;
@@ -109,6 +110,7 @@ class DeviceInfo
 	bool     _uses_logic_control_buttons;
 	bool     _uses_ipmidi;
 	bool     _no_handshake;
+	bool     _is_qcon;
 	bool     _has_meters;
 	bool     _has_separate_meters;
 	DeviceType _device_type;

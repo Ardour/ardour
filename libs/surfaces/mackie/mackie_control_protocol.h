@@ -364,7 +364,7 @@ class MackieControlProtocol
         void initialize ();
         int set_device_info (const std::string& device_name);
 	void update_configuration_state ();
-
+	
 	/* MIDI port connection management */
 
 	PBD::ScopedConnection port_connection;
