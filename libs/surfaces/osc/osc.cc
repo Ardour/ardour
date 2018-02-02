@@ -2184,6 +2184,40 @@ OSC::global_feedback (OSCSurface* sur)
 		// create a new Global Observer for this surface
 		OSCGlobalObserver* o = new OSCGlobalObserver (*this, *session, sur);
 		sur->global_obs = o;
+		uint32_t mode = sur->jogmode;
+		lo_address addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+
+		switch(mode)
+		{
+			case JOG  :
+				text_message ("/jog/mode/name", "Jog", addr);
+				break;
+			case SCRUB:
+				text_message ("/jog/mode/name", "Scrub", addr);
+				break;
+			case SHUTTLE:
+				text_message ("/jog/mode/name", "Shuttle", addr);
+				break;
+			case SCROLL:
+				text_message ("/jog/mode/name", "Scroll", addr);
+				break;
+			case TRACK:
+				text_message ("/jog/mode/name", "Track", addr);
+				break;
+			case BANK:
+				text_message ("/jog/mode/name", "Bank", addr);
+				break;
+			case NUDGE:
+				text_message ("/jog/mode/name", "Nudge", addr);
+				break;
+			case MARKER:
+				text_message ("/jog/mode/name", "Marker", addr);
+				break;
+			default:
+				PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
+				break;
+		}
+		int_message ("/jog/mode", mode, addr);
 	}
 }
 
@@ -5989,6 +6023,20 @@ OSC::float_message_with_id (std::string path, uint32_t ssid, float value, bool i
 
 	lo_send_message (addr, path.c_str(), msg);
 	lo_message_free (msg);
+	return 0;
+}
+
+int
+OSC::int_message (string path, int val, lo_address addr)
+{
+
+	lo_message reply;
+	reply = lo_message_new ();
+	lo_message_add_int32 (reply, (float) val);
+
+	lo_send_message (addr, path.c_str(), reply);
+	lo_message_free (reply);
+
 	return 0;
 }
 

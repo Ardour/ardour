@@ -90,6 +90,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	// generic osc send
 
 	int float_message (std::string, float value, lo_address addr);
+	int int_message (std::string, int value, lo_address addr);
 	int text_message (std::string path, std::string val, lo_address addr);
 	int float_message_with_id (std::string, uint32_t ssid, float value, bool in_line, lo_address addr);
 	int int_message_with_id (std::string, uint32_t ssid, int value, bool in_line, lo_address addr);
