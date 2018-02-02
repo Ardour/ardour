@@ -47,6 +47,8 @@ public:
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 
+	bool is_qcon;
+
 };
 
 }

@@ -50,6 +50,9 @@ public:
 
 	static Control* factory (Surface&, int id, const char*, Group&);
 
+	// qcon flag
+	bool is_qcon;
+
   private:
 	LedState state;
 };

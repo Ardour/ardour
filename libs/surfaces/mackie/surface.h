@@ -176,6 +176,8 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	bool get_qcon_flag() { return is_qcon; }
+
   private:
 	MackieControlProtocol& _mcp;
 	SurfacePort*           _port;
@@ -205,6 +207,9 @@ public:
 	};
 
 	int connection_state;
+
+	// QCon Flag
+	bool is_qcon = false;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
 

@@ -116,6 +116,13 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		throw failed_constructor ();
 	}
 
+	//Store Qcon flag
+	if( mcp.device_info().is_qcon() ) {
+		is_qcon = true;
+	} else {
+		is_qcon = false;
+	}
+
 	/* only the first Surface object has global controls */
 	/* lets use master_position instead */
 	uint32_t mp = _mcp.device_info().master_position();
@@ -1044,6 +1051,8 @@ Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/
 void
 Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
 {
+	//TODO: Fix for Qcon to correct timecode value if is over 1000 bars
+
 	if (!_active || !_mcp.device_info().has_timecode_display()) {
 		return;
 	}
@@ -1288,18 +1297,20 @@ Surface::set_touch_sensitivity (int sensitivity)
 
 	/* sensitivity already clamped by caller */
 
-	if (_port) {
-		MidiByteArray msg;
+	if( !is_qcon ) { // Qcon doesn't support fader sensitivity
+		if (_port) {
+			MidiByteArray msg;
 
-		msg << sysex_hdr ();
-		msg << 0x0e;
-		msg << 0xff; /* overwritten for each fader below */
-		msg << (sensitivity & 0x7f);
-		msg << MIDI::eox;
+			msg << sysex_hdr ();
+			msg << 0x0e;
+			msg << 0xff; /* overwritten for each fader below */
+			msg << (sensitivity & 0x7f);
+			msg << MIDI::eox;
 
-		for (int fader = 0; fader < 9; ++fader) {
-			msg[6] = fader;
-			_port->write (msg);
+			for (int fader = 0; fader < 9; ++fader) {
+				msg[6] = fader;
+				_port->write (msg);
+			}
 		}
 	}
 }
