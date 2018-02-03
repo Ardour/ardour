@@ -20,7 +20,9 @@
 #ifndef __ardour_port_h__
 #define __ardour_port_h__
 
+#ifdef WAF_BUILD
 #include "libardour-config.h"
+#endif
 
 #include <set>
 #include <string>

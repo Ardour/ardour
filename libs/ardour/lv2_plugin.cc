@@ -45,7 +45,9 @@
 #include "pbd/windows_special_dirs.h"
 #endif
 
+#ifdef WAF_BUILD
 #include "libardour-config.h"
+#endif
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"

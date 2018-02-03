@@ -20,7 +20,9 @@
 #ifndef __ardour_session_h__
 #define __ardour_session_h__
 
+#ifdef WAF_BUILD
 #include "libardour-config.h"
+#endif
 
 #include <exception>
 #include <list>
