@@ -97,13 +97,14 @@ public:
 	};
 	std::vector<std::string> get_all_tags (enum TagFilter) const;
 
-	/** plugins were added to or removed from one of the PluginInfoLists */
+	/** plugins were added to or removed from one of the PluginInfoLists, OR the user has made changes to the status/tags */
 	PBD::Signal0<void> PluginListChanged;
 
-	/** Plugin Hidden/Favorite status changed */
-	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusesChanged; //PluginType t, string id, string tag
+	/** A single plugin's Hidden/Favorite status changed */
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, PluginStatusType> PluginStatusChanged; //PluginType t, string id, string tag
 
-	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagsChanged; //PluginType t, string id, string tag
+	/** A single plugin's Tags status changed */
+	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagChanged; //PluginType t, string id, string tag
 
 private:
 

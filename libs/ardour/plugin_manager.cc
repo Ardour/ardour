@@ -1474,7 +1474,7 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 		statuses.insert (ps);
 	}
 
-	PluginStatusesChanged (t, id, status); /* EMIT SIGNAL */
+	PluginStatusChanged (t, id, status); /* EMIT SIGNAL */
 }
 
 PluginType
@@ -1612,7 +1612,7 @@ PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool
 		ptags.insert (ps);
 	}
 	if (!factory || force) {
-		PluginTagsChanged (t, id, sanitized); /* EMIT SIGNAL */
+		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
 }
 

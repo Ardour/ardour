@@ -368,11 +368,12 @@ private:
 
 	void store_current_favorite_order();
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
-	void plugin_status_changed (ARDOUR::PluginType t, std::string unique_id, ARDOUR::PluginManager::PluginStatusType s);
-	void refill_favorite_plugins ();
 
+	void plugin_list_changed ();
+
+	void refill_favorite_plugins ();
 	void refill_tag_combo ();
-	void tags_changed (ARDOUR::PluginType t, std::string unique_id, std::string tag);
+
 	void tag_combo_changed ();
 
 	void sync_treeview_from_favorite_order ();
