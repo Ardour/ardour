@@ -107,6 +107,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _last_master_gain_written (-0.0f)
 	, connection_state (0)
 	, input_source (0)
+	, is_qcon (false)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
 

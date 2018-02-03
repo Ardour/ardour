@@ -209,7 +209,7 @@ public:
 	int connection_state;
 
 	// QCon Flag
-	bool is_qcon = false;
+	bool is_qcon;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
 
