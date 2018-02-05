@@ -39,6 +39,7 @@ class OSCGlobalObserver
 	lo_address address() const { return addr; };
 	void tick (void);
 	void clear_observer (void);
+	void jog_mode (uint32_t jogmode);
 
   private:
 	ArdourSurface::OSC& _osc;
@@ -61,6 +62,7 @@ class OSCGlobalObserver
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	ARDOUR::Session* session;
+	uint32_t _jog_mode;
 	samplepos_t _last_sample;
 	uint32_t _heartbeat;
 	float _last_meter;

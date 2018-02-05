@@ -44,6 +44,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	,_last_master_gain (0.0)
 	,_last_master_trim (0.0)
 	,_last_monitor_gain (0.0)
+	,_jog_mode (1024)
 	,last_punchin (4)
 	,last_punchout (4)
 	,last_click (4)
@@ -52,6 +53,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	session = &s;
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
+	uint32_t jogmode = sur->jogmode;
 	_last_sample = -1;
 	if (feedback[4]) {
 
@@ -126,6 +128,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		send_change_message ("/click/level", click_controllable);
 
 		extra_check ();
+		jog_mode (jogmode);
 
 		/*
 		* 	Maybe (many) more
@@ -202,6 +205,8 @@ OSCGlobalObserver::clear_observer ()
 	_osc.float_message (X_("/toggle_punch_in"), 0, addr);
 	_osc.float_message (X_("/toggle_click"), 0, addr);
 	_osc.float_message (X_("/click/level"), 0, addr);
+	_osc.text_message (X_("/jog/mode/name"), " ", addr);
+	_osc.int_message (X_("/jog/mode"), 0, addr);
 
 
 }
@@ -498,5 +503,47 @@ OSCGlobalObserver::extra_check ()
 		last_click = Config->get_clicking();
 		_osc.float_message (X_("/toggle_click"), last_click, addr);
 	}
+}
+
+void
+OSCGlobalObserver::jog_mode (uint32_t jogmode)
+{
+	if (jogmode == _jog_mode || !feedback[4]) {
+		// no change
+		return;
+	}
+	_jog_mode = jogmode;
+
+	switch(jogmode)
+	{
+		case 0:
+			_osc.text_message (X_("/jog/mode/name"), "Jog", addr);
+			break;
+		case 1:
+			_osc.text_message (X_("/jog/mode/name"), "Nudge", addr);
+			break;
+		case 2:
+			_osc.text_message (X_("/jog/mode/name"), "Scrub", addr);
+			break;
+		case 3:
+			_osc.text_message (X_("/jog/mode/name"), "Shuttle", addr);
+			break;
+		case 4:
+			_osc.text_message (X_("/jog/mode/name"), "Marker", addr);
+			break;
+		case 5:
+			_osc.text_message (X_("/jog/mode/name"), "Scroll", addr);
+			break;
+		case 6:
+			_osc.text_message (X_("/jog/mode/name"), "Track", addr);
+			break;
+		case 7:
+			_osc.text_message (X_("/jog/mode/name"), "Bank", addr);
+			break;
+		default:
+			PBD::warning << X_("Jog Mode: ") << jogmode << X_(" is not valid.") << endmsg;
+			break;
+	}
+	_osc.int_message (X_("/jog/mode"), jogmode, addr);
 }
 

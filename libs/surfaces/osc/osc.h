@@ -107,17 +107,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		All
 	};
 
-	enum JogMode {
-		JOG,
-		NUDGE,
-		SCRUB,
-		SHUTTLE,
-		MARKER,
-		SCROLL,
-		TRACK,
-		BANK
-	};
-
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sorted my_list);
 	typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, uint32_t> FakeTouchMap;
@@ -129,7 +118,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		//global
 		std::string remote_url;		// the url these setting belong to
 		bool no_clear;				// don't send osc clear messages on strip change
-		JogMode jogmode;			// current jogmode
+		uint32_t jogmode;			// current jogmode
 		OSCGlobalObserver* global_obs;	// pointer to this surface's global observer
 		uint32_t nstrips;			// how many strips are there for strip_types
 		std::bitset<32> feedback;	// What is fed back? strips/meters/timecode/bar_beat/global

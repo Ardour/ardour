@@ -2132,7 +2132,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	OSCSurface s;
 	s.remote_url = r_url;
 	s.no_clear = false;
-	s.jogmode = JOG;
+	s.jogmode = 0;
 	s.bank = 1;
 	s.bank_size = default_banksize;
 	s.observers.clear();
@@ -2184,40 +2184,7 @@ OSC::global_feedback (OSCSurface* sur)
 		// create a new Global Observer for this surface
 		OSCGlobalObserver* o = new OSCGlobalObserver (*this, *session, sur);
 		sur->global_obs = o;
-		uint32_t mode = sur->jogmode;
-		lo_address addr = lo_address_new_from_url 	(sur->remote_url.c_str());
-
-		switch(mode)
-		{
-			case JOG  :
-				text_message ("/jog/mode/name", "Jog", addr);
-				break;
-			case SCRUB:
-				text_message ("/jog/mode/name", "Scrub", addr);
-				break;
-			case SHUTTLE:
-				text_message ("/jog/mode/name", "Shuttle", addr);
-				break;
-			case SCROLL:
-				text_message ("/jog/mode/name", "Scroll", addr);
-				break;
-			case TRACK:
-				text_message ("/jog/mode/name", "Track", addr);
-				break;
-			case BANK:
-				text_message ("/jog/mode/name", "Bank", addr);
-				break;
-			case NUDGE:
-				text_message ("/jog/mode/name", "Nudge", addr);
-				break;
-			case MARKER:
-				text_message ("/jog/mode/name", "Marker", addr);
-				break;
-			default:
-				PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
-				break;
-		}
-		int_message ("/jog/mode", mode, addr);
+		o->jog_mode (sur->jogmode);
 	}
 }
 
@@ -2857,21 +2824,24 @@ OSC::jog (float delta, lo_message msg)
 
 	OSCSurface *s = get_surface(get_address (msg));
 
-	string path = "/jog/mode/name";
 	switch(s->jogmode)
 	{
-		case JOG  :
-			text_message (path, "Jog", get_address (msg));
+		case 0:
 			if (delta) {
 				jump_by_seconds (delta / 5);
 			}
 			break;
-		case SCRUB:
-			text_message (path, "Scrub", get_address (msg));
+		case 1:
+			if (delta > 0) {
+				access_action ("Common/nudge-playhead-forward");
+			} else if (delta < 0) {
+				access_action ("Common/nudge-playhead-backward");
+			}
+			break;
+		case 2:
 			scrub (delta, msg);
 			break;
-		case SHUTTLE:
-			text_message (path, "Shuttle", get_address (msg));
+		case 3:
 			if (delta) {
 				double speed = get_transport_speed ();
 				set_transport_speed (speed + (delta / 8.1));
@@ -2879,44 +2849,32 @@ OSC::jog (float delta, lo_message msg)
 				set_transport_speed (0);
 			}
 			break;
-		case SCROLL:
-			text_message (path, "Scroll", get_address (msg));
+		case 4:
+			if (delta > 0) {
+				next_marker ();
+			} else if (delta < 0) {
+				prev_marker ();
+			}
+			break;
+		case 5:
 			if (delta > 0) {
 				access_action ("Editor/scroll-forward");
 			} else if (delta < 0) {
 				access_action ("Editor/scroll-backward");
 			}
 			break;
-		case TRACK:
-			text_message (path, "Track", get_address (msg));
+		case 6:
 			if (delta > 0) {
 				set_bank (s->bank + 1, msg);
 			} else if (delta < 0) {
 				set_bank (s->bank - 1, msg);
 			}
 			break;
-		case BANK:
-			text_message (path, "Bank", get_address (msg));
+		case 7:
 			if (delta > 0) {
 				bank_up (msg);
 			} else if (delta < 0) {
 				bank_down (msg);
-			}
-			break;
-		case NUDGE:
-			text_message (path, "Nudge", get_address (msg));
-			if (delta > 0) {
-				access_action ("Common/nudge-playhead-forward");
-			} else if (delta < 0) {
-				access_action ("Common/nudge-playhead-backward");
-			}
-			break;
-		case MARKER:
-			text_message (path, "Marker", get_address (msg));
-			if (delta > 0) {
-				next_marker ();
-			} else if (delta < 0) {
-				prev_marker ();
 			}
 			break;
 		default:
@@ -2936,52 +2894,9 @@ OSC::jog_mode (float mode, lo_message msg)
 	if (get_transport_speed () != 1.0) {
 		set_transport_speed (0);
 	}
-
-	switch((uint32_t)mode)
-	{
-		case JOG  :
-			text_message ("/jog/mode/name", "Jog", get_address (msg));
-			s->jogmode = JOG;
-			break;
-		case SCRUB:
-			text_message ("/jog/mode/name", "Scrub", get_address (msg));
-			s->jogmode = SCRUB;
-			break;
-		case SHUTTLE:
-			text_message ("/jog/mode/name", "Shuttle", get_address (msg));
-			s->jogmode = SHUTTLE;
-			break;
-		case SCROLL:
-			text_message ("/jog/mode/name", "Scroll", get_address (msg));
-			s->jogmode = SCROLL;
-			break;
-		case TRACK:
-			text_message ("/jog/mode/name", "Track", get_address (msg));
-			s->jogmode = TRACK;
-			break;
-		case BANK:
-			text_message ("/jog/mode/name", "Bank", get_address (msg));
-			s->jogmode = BANK;
-			break;
-		case NUDGE:
-			text_message ("/jog/mode/name", "Nudge", get_address (msg));
-			s->jogmode = NUDGE;
-			break;
-		case MARKER:
-			text_message ("/jog/mode/name", "Marker", get_address (msg));
-			s->jogmode = MARKER;
-			break;
-		default:
-			PBD::warning << "Jog Mode: " << mode << " is not valid." << endmsg;
-			break;
-	}
-	lo_message reply = lo_message_new ();
-	lo_message_add_int32 (reply, s->jogmode);
-	lo_send_message (get_address(msg), "/jog/mode", reply);
-	lo_message_free (reply);
-
+	s->jogmode = (uint32_t) mode;
+	s->global_obs->jog_mode (mode);
 	return 0;
-
 }
 
 // two structs to help with going to markers
