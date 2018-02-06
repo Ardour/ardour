@@ -96,6 +96,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int int_message_with_id (std::string, uint32_t ssid, int value, bool in_line, lo_address addr);
 	int text_message_with_id (std::string path, uint32_t ssid, std::string val, bool in_line, lo_address addr);
 
+	int send_group_list (lo_address addr);
+
 	int start ();
 	int stop ();
 
@@ -301,6 +303,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);
+	int group_list (lo_message msg);
 	void surface_list (lo_message msg);
 	void transport_sample (lo_message msg);
 	void transport_speed (lo_message msg);
@@ -348,6 +351,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(route_get_sends);
 	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
+	PATH_CALLBACK_MSG(group_list);
 	PATH_CALLBACK_MSG(surface_list);
 	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);

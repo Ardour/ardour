@@ -37,6 +37,7 @@
 #include "ardour/amp.h"
 #include "ardour/session.h"
 #include "ardour/route.h"
+#include "ardour/route_group.h"
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/vca.h"
@@ -415,6 +416,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
 		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
 		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
+		REGISTER_CALLBACK (serv, "/group/list", "", group_list);
+		REGISTER_CALLBACK (serv, "/group/list", "f", group_list);
 		REGISTER_CALLBACK (serv, "/strip/custom/mode", "f", custom_mode);
 		REGISTER_CALLBACK (serv, "/strip/custom/clear", "f", custom_clear);
 		REGISTER_CALLBACK (serv, "/strip/custom/clear", "", custom_clear);
@@ -2961,6 +2964,31 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 	}
 	// we were unable to deal with things
 	return -1;
+}
+
+int
+OSC::group_list (lo_message msg)
+{
+	return send_group_list (get_address (msg));
+}
+
+int
+OSC::send_group_list (lo_address addr)
+{
+		//std::list<RouteGroup*> const & route_groups () const {
+	lo_message reply;
+	reply = lo_message_new ();
+
+	lo_message_add_string (reply, X_("none"));
+
+	std::list<RouteGroup*> groups = session->route_groups ();
+	for (std::list<RouteGroup *>::iterator i = groups.begin(); i != groups.end(); ++i) {
+		RouteGroup *rg = *i;
+		lo_message_add_string (reply, rg->name().c_str());
+	}
+	lo_send_message (addr, X_("/group/list"), reply);
+	lo_message_free (reply);
+	return 0;
 }
 
 int

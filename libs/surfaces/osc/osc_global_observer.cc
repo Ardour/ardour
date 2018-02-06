@@ -127,6 +127,11 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 		click_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/click/level"), click_controllable), OSC::instance());
 		send_change_message ("/click/level", click_controllable);
 
+		session->route_group_added.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this, _1), OSC::instance());
+		session->route_group_removed.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this), OSC::instance());
+		session->route_groups_reordered.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::group_changed, this), OSC::instance());
+		_osc.send_group_list (addr);
+
 		extra_check ();
 		jog_mode (jogmode);
 
@@ -205,6 +210,7 @@ OSCGlobalObserver::clear_observer ()
 	_osc.float_message (X_("/toggle_punch_in"), 0, addr);
 	_osc.float_message (X_("/toggle_click"), 0, addr);
 	_osc.float_message (X_("/click/level"), 0, addr);
+	_osc.text_message (X_("/group/list"), " ", addr);
 	_osc.text_message (X_("/jog/mode/name"), " ", addr);
 	_osc.int_message (X_("/jog/mode"), 0, addr);
 
@@ -545,5 +551,17 @@ OSCGlobalObserver::jog_mode (uint32_t jogmode)
 			break;
 	}
 	_osc.int_message (X_("/jog/mode"), jogmode, addr);
+}
+
+void
+OSCGlobalObserver::group_changed (ARDOUR::RouteGroup *rg)
+{
+	_osc.send_group_list (addr);
+}
+
+void
+OSCGlobalObserver::group_changed ()
+{
+	_osc.send_group_list (addr);
 }
 
