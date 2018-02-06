@@ -136,22 +136,22 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		group_name ();
 
 		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::pi_changed, this, _1), OSC::instance());
-		_osc.int_message_with_id ("/strip/hide", ssid, _strip->is_hidden (), in_line, addr);
+		_osc.int_message_with_id (X_("/strip/hide"), ssid, _strip->is_hidden (), in_line, addr);
 
 		_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/mute"), _strip->mute_control()), OSC::instance());
-		send_change_message ("/strip/mute", _strip->mute_control());
+		send_change_message (X_("/strip/mute"), _strip->mute_control());
 
 		_strip->solo_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo"), _strip->solo_control()), OSC::instance());
-		send_change_message ("/strip/solo", _strip->solo_control());
+		send_change_message (X_("/strip/solo"), _strip->solo_control());
 
 		if (_strip->solo_isolate_control()) {
 			_strip->solo_isolate_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_iso"), _strip->solo_isolate_control()), OSC::instance());
-			send_change_message ("/strip/solo_iso", _strip->solo_isolate_control());
+			send_change_message (X_("/strip/solo_iso"), _strip->solo_isolate_control());
 		}
 
 		if (_strip->solo_safe_control()) {
 			_strip->solo_safe_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCRouteObserver::send_change_message, this, X_("/strip/solo_safe"), _strip->solo_safe_control()), OSC::instance());
-			send_change_message ("/strip/solo_safe", _strip->solo_safe_control());
+			send_change_message (X_("/strip/solo_safe"), _strip->solo_safe_control());
 		}
 
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
@@ -163,12 +163,12 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
 		if (rec_controllable) {
 			rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/recenable"), _strip->rec_enable_control()), OSC::instance());
-			send_change_message ("/strip/recenable", _strip->rec_enable_control());
+			send_change_message (X_("/strip/recenable"), _strip->rec_enable_control());
 		}
 		boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
 		if (rec_controllable) {
 			recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/record_safe"), _strip->rec_safe_control()), OSC::instance());
-			send_change_message ("/strip/record_safe", _strip->rec_safe_control());
+			send_change_message (X_("/strip/record_safe"), _strip->rec_safe_control());
 		}
 		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_select_status, this, _1), OSC::instance());
 		send_select_status (ARDOUR::Properties::selected);
@@ -189,7 +189,7 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 		if (pan_controllable) {
 			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
-			send_change_message ("/strip/pan_stereo_position", _strip->pan_azimuth_control());
+			send_change_message (X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control());
 		}
 	}
 	_init = false;
@@ -203,9 +203,9 @@ OSCRouteObserver::set_expand (uint32_t expand)
 	if (expand != _expand) {
 		_expand = expand;
 		if (expand == ssid) {
-			_osc.float_message_with_id ("/strip/expand", ssid, 1.0, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/expand"), ssid, 1.0, in_line, addr);
 		} else {
-			_osc.float_message_with_id ("/strip/expand", ssid, 0.0, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/expand"), ssid, 0.0, in_line, addr);
 		}
 	}
 }
@@ -217,19 +217,19 @@ OSCRouteObserver::set_link_ready (uint32_t not_ready)
 		clear_strip ();
 		switch (ssid) {
 			case 1:
-				_osc.text_message_with_id ("/strip/name", ssid, "Device", in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, "Device", in_line, addr);
 				break;
 			case 2:
-				_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1", not_ready), in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1", not_ready), in_line, addr);
 				break;
 			case 3:
-				_osc.text_message_with_id ("/strip/name", ssid, "Missing", in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, "Missing", in_line, addr);
 				break;
 			case 4:
-				_osc.text_message_with_id ("/strip/name", ssid, "from", in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, "from", in_line, addr);
 				break;
 			case 5:
-				_osc.text_message_with_id ("/strip/name", ssid, "Linkset", in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, "Linkset", in_line, addr);
 				break;
 			default:
 				break;
@@ -247,39 +247,39 @@ OSCRouteObserver::clear_strip ()
 	strip_connections.drop_connections ();
 
 	// all strip buttons should be off and faders 0 and etc.
-	_osc.float_message_with_id ("/strip/expand", ssid, 0, in_line, addr);
+	_osc.float_message_with_id (X_("/strip/expand"), ssid, 0, in_line, addr);
 	if (feedback[0]) { // buttons are separate feedback
-		_osc.text_message_with_id ("/strip/name", ssid, " ", in_line, addr);
-		_osc.text_message_with_id ("/strip/group/name", ssid, " ", in_line, addr);
-		_osc.float_message_with_id ("/strip/mute", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/solo", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/recenable", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/record_safe", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/monitor_input", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/monitor_disk", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/gui_select", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/select", ssid, 0, in_line, addr);
+		_osc.text_message_with_id (X_("/strip/name"), ssid, " ", in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group/name"), ssid, " ", in_line, addr);
+		_osc.float_message_with_id (X_("/strip/mute"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/solo"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/recenable"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/record_safe"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/monitor_input"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/monitor_disk"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/gui_select"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/select"), ssid, 0, in_line, addr);
 	}
 	if (feedback[1]) { // level controls
 		if (gainmode) {
-			_osc.float_message_with_id ("/strip/fader", ssid, 0, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/fader"), ssid, 0, in_line, addr);
 		} else {
-			_osc.float_message_with_id ("/strip/gain", ssid, -193, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/gain"), ssid, -193, in_line, addr);
 		}
-		_osc.float_message_with_id ("/strip/trimdB", ssid, 0, in_line, addr);
-		_osc.float_message_with_id ("/strip/pan_stereo_position", ssid, 0.5, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/trimdB"), ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
 	}
 	if (feedback[9]) {
-		_osc.float_message_with_id ("/strip/signal", ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/signal"), ssid, 0, in_line, addr);
 	}
 	if (feedback[7]) {
 		if (gainmode) {
-			_osc.float_message_with_id ("/strip/meter", ssid, 0, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/meter"), ssid, 0, in_line, addr);
 		} else {
-			_osc.float_message_with_id ("/strip/meter", ssid, -193, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/meter"), ssid, -193, in_line, addr);
 		}
 	}else if (feedback[8]) {
-		_osc.float_message_with_id ("/strip/meter", ssid, 0, in_line, addr);
+		_osc.float_message_with_id (X_("/strip/meter"), ssid, 0, in_line, addr);
 	}
 }
 
@@ -303,13 +303,13 @@ OSCRouteObserver::tick ()
 		if (_last_meter != now_meter) {
 			if (feedback[7] || feedback[8]) {
 				if (gainmode && feedback[7]) {
-					_osc.float_message_with_id ("/strip/meter", ssid, ((now_meter + 94) / 100), in_line, addr);
+					_osc.float_message_with_id (X_("/strip/meter"), ssid, ((now_meter + 94) / 100), in_line, addr);
 				} else if ((!gainmode) && feedback[7]) {
-					_osc.float_message_with_id ("/strip/meter", ssid, now_meter, in_line, addr);
+					_osc.float_message_with_id (X_("/strip/meter"), ssid, now_meter, in_line, addr);
 				} else if (feedback[8]) {
 					uint32_t ledlvl = (uint32_t)(((now_meter + 54) / 3.75)-1);
 					uint16_t ledbits = ~(0xfff<<ledlvl);
-					_osc.int_message_with_id ("/strip/meter", ssid, ledbits, in_line, addr);
+					_osc.int_message_with_id (X_("/strip/meter"), ssid, ledbits, in_line, addr);
 				}
 			}
 			if (feedback[9]) {
@@ -319,7 +319,7 @@ OSCRouteObserver::tick ()
 				} else {
 					signal = 1;
 				}
-				_osc.float_message_with_id ("/strip/signal", ssid, signal, in_line, addr);
+				_osc.float_message_with_id (X_("/strip/signal"), ssid, signal, in_line, addr);
 			}
 		}
 		_last_meter = now_meter;
@@ -328,7 +328,7 @@ OSCRouteObserver::tick ()
 	if (feedback[1]) {
 		if (gain_timeout) {
 			if (gain_timeout == 1) {
-				_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
+				_osc.text_message_with_id (X_("/strip/name"), ssid, _strip->name(), in_line, addr);
 			}
 			gain_timeout--;
 		}
@@ -350,7 +350,7 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 	}
 
 	if (_strip) {
-		_osc.text_message_with_id ("/strip/name", ssid, _strip->name(), in_line, addr);
+		_osc.text_message_with_id (X_("/strip/name"), ssid, _strip->name(), in_line, addr);
 	}
 }
 
@@ -361,16 +361,16 @@ OSCRouteObserver::group_name ()
 
 	RouteGroup *rg = rt->route_group();
 	if (rg) {
-		_osc.text_message_with_id ("/strip/group/name", ssid, rg->name(), in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group/name"), ssid, rg->name(), in_line, addr);
 	} else {
-		_osc.text_message_with_id ("/strip/group/name", ssid, " ", in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group/name"), ssid, " ", in_line, addr);
 	}
 }
 
 void
 OSCRouteObserver::pi_changed (PBD::PropertyChange const& what_changed)
 {
-	_osc.int_message_with_id ("/strip/hide", ssid, _strip->is_hidden (), in_line, addr);
+	_osc.int_message_with_id (X_("/strip/hide"), ssid, _strip->is_hidden (), in_line, addr);
 }
 
 void
@@ -402,8 +402,8 @@ OSCRouteObserver::send_monitor_status (boost::shared_ptr<Controllable> controlla
 			disk = 0;
 			input = 0;
 	}
-	_osc.int_message_with_id ("/strip/monitor_input", ssid, input, in_line, addr);
-	_osc.int_message_with_id ("/strip/monitor_disk", ssid, disk, in_line, addr);
+	_osc.int_message_with_id (X_("/strip/monitor_input"), ssid, input, in_line, addr);
+	_osc.int_message_with_id (X_("/strip/monitor_disk"), ssid, disk, in_line, addr);
 
 }
 
@@ -415,7 +415,7 @@ OSCRouteObserver::send_trim_message ()
 	} else {
 		return;
 	}
-	_osc.float_message_with_id ("/strip/trimdB", ssid, (float) accurate_coefficient_to_dB (_last_trim), in_line, addr);
+	_osc.float_message_with_id (X_("/strip/trimdB"), ssid, (float) accurate_coefficient_to_dB (_last_trim), in_line, addr);
 }
 
 void
@@ -429,17 +429,17 @@ OSCRouteObserver::send_gain_message ()
 	}
 
 	if (gainmode) {
-		_osc.float_message_with_id ("/strip/fader", ssid, controllable->internal_to_interface (_last_gain), in_line, addr);
+		_osc.float_message_with_id (X_("/strip/fader"), ssid, controllable->internal_to_interface (_last_gain), in_line, addr);
 		if (gainmode == 1) {
-			_osc.text_message_with_id ("/strip/name", ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
+			_osc.text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
 			gain_timeout = 8;
 		}
 	}
 	if (!gainmode || gainmode == 2) {
 		if (controllable->get_value() < 1e-15) {
-			_osc.float_message_with_id ("/strip/gain", ssid, -200, in_line, addr);
+			_osc.float_message_with_id (X_("/strip/gain"), ssid, -200, in_line, addr);
 		} else {
-			_osc.float_message_with_id ("/strip/gain", ssid, accurate_coefficient_to_dB (_last_gain), in_line, addr);
+			_osc.float_message_with_id (X_("/strip/gain"), ssid, accurate_coefficient_to_dB (_last_gain), in_line, addr);
 		}
 	}
 }
@@ -447,9 +447,9 @@ OSCRouteObserver::send_gain_message ()
 void
 OSCRouteObserver::gain_automation ()
 {
-	string path = "/strip/gain";
+	string path = X_("/strip/gain");
 	if (gainmode) {
-		path = "/strip/fader";
+		path = X_("/strip/fader");
 	}
 	send_gain_message ();
 	as = _strip->gain_control()->alist()->automation_state();
@@ -479,8 +479,8 @@ OSCRouteObserver::gain_automation ()
 		default:
 			break;
 	}
-	_osc.float_message_with_id (string_compose ("%1/automation", path), ssid, output, in_line, addr);
-	_osc.text_message_with_id (string_compose ("%1/automation_name", path), ssid, auto_name, in_line, addr);
+	_osc.float_message_with_id (string_compose (X_("%1/automation"), path), ssid, output, in_line, addr);
+	_osc.text_message_with_id (string_compose (X_("%1/automation_name"), path), ssid, auto_name, in_line, addr);
 }
 
 void
@@ -488,7 +488,7 @@ OSCRouteObserver::send_select_status (const PropertyChange& what)
 {
 	if (what == PropertyChange(ARDOUR::Properties::selected)) {
 		if (_strip) {
-			_osc.float_message_with_id ("/strip/select", ssid, _strip->is_selected(), in_line, addr);
+			_osc.float_message_with_id (X_("/strip/select"), ssid, _strip->is_selected(), in_line, addr);
 		}
 	}
 }

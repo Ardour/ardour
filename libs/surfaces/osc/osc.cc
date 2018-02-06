@@ -412,237 +412,237 @@ OSC::register_callbacks()
 		// Some controls have optional "f" for feedback or touchosc
 		// http://hexler.net/docs/touchosc-controls-reference
 
-		REGISTER_CALLBACK (serv, "/refresh", "", refresh_surface);
-		REGISTER_CALLBACK (serv, "/refresh", "f", refresh_surface);
-		REGISTER_CALLBACK (serv, "/strip/list", "", routes_list);
-		REGISTER_CALLBACK (serv, "/strip/list", "f", routes_list);
-		REGISTER_CALLBACK (serv, "/group/list", "", group_list);
-		REGISTER_CALLBACK (serv, "/group/list", "f", group_list);
-		REGISTER_CALLBACK (serv, "/strip/custom/mode", "f", custom_mode);
-		REGISTER_CALLBACK (serv, "/strip/custom/clear", "f", custom_clear);
-		REGISTER_CALLBACK (serv, "/strip/custom/clear", "", custom_clear);
-		REGISTER_CALLBACK (serv, "/surface/list", "", surface_list);
-		REGISTER_CALLBACK (serv, "/surface/list", "f", surface_list);
-		REGISTER_CALLBACK (serv, "/add_marker", "", add_marker);
-		REGISTER_CALLBACK (serv, "/add_marker", "f", add_marker);
-		REGISTER_CALLBACK (serv, "/access_action", "s", access_action);
-		REGISTER_CALLBACK (serv, "/loop_toggle", "", loop_toggle);
-		REGISTER_CALLBACK (serv, "/loop_toggle", "f", loop_toggle);
-		REGISTER_CALLBACK (serv, "/loop_location", "ii", loop_location);
-		REGISTER_CALLBACK (serv, "/goto_start", "", goto_start);
-		REGISTER_CALLBACK (serv, "/goto_start", "f", goto_start);
-		REGISTER_CALLBACK (serv, "/goto_end", "", goto_end);
-		REGISTER_CALLBACK (serv, "/goto_end", "f", goto_end);
-		REGISTER_CALLBACK (serv, "/scrub", "f", scrub);
-		REGISTER_CALLBACK (serv, "/jog", "f", jog);
-		REGISTER_CALLBACK (serv, "/jog/mode", "f", jog_mode);
-		REGISTER_CALLBACK (serv, "/rewind", "", rewind);
-		REGISTER_CALLBACK (serv, "/rewind", "f", rewind);
-		REGISTER_CALLBACK (serv, "/ffwd", "", ffwd);
-		REGISTER_CALLBACK (serv, "/ffwd", "f", ffwd);
-		REGISTER_CALLBACK (serv, "/transport_stop", "", transport_stop);
-		REGISTER_CALLBACK (serv, "/transport_stop", "f", transport_stop);
-		REGISTER_CALLBACK (serv, "/transport_play", "", transport_play);
-		REGISTER_CALLBACK (serv, "/transport_play", "f", transport_play);
-		REGISTER_CALLBACK (serv, "/transport_frame", "", transport_sample);
-		REGISTER_CALLBACK (serv, "/transport_speed", "", transport_speed);
-		REGISTER_CALLBACK (serv, "/record_enabled", "", record_enabled);
-		REGISTER_CALLBACK (serv, "/set_transport_speed", "f", set_transport_speed);
+		REGISTER_CALLBACK (serv, X_("/refresh"), "", refresh_surface);
+		REGISTER_CALLBACK (serv, X_("/refresh"), "f", refresh_surface);
+		REGISTER_CALLBACK (serv, X_("/strip/list"), "", routes_list);
+		REGISTER_CALLBACK (serv, X_("/strip/list"), "f", routes_list);
+		REGISTER_CALLBACK (serv, X_("/group/list"), "", group_list);
+		REGISTER_CALLBACK (serv, X_("/group/list"), "f", group_list);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/mode"), "f", custom_mode);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "f", custom_clear);
+		REGISTER_CALLBACK (serv, X_("/strip/custom/clear"), "", custom_clear);
+		REGISTER_CALLBACK (serv, X_("/surface/list"), "", surface_list);
+		REGISTER_CALLBACK (serv, X_("/surface/list"), "f", surface_list);
+		REGISTER_CALLBACK (serv, X_("/add_marker"), "", add_marker);
+		REGISTER_CALLBACK (serv, X_("/add_marker"), "f", add_marker);
+		REGISTER_CALLBACK (serv, X_("/access_action"), "s", access_action);
+		REGISTER_CALLBACK (serv, X_("/loop_toggle"), "", loop_toggle);
+		REGISTER_CALLBACK (serv, X_("/loop_toggle"), "f", loop_toggle);
+		REGISTER_CALLBACK (serv, X_("/loop_location"), "ii", loop_location);
+		REGISTER_CALLBACK (serv, X_("/goto_start"), "", goto_start);
+		REGISTER_CALLBACK (serv, X_("/goto_start"), "f", goto_start);
+		REGISTER_CALLBACK (serv, X_("/goto_end"), "", goto_end);
+		REGISTER_CALLBACK (serv, X_("/goto_end"), "f", goto_end);
+		REGISTER_CALLBACK (serv, X_("/scrub"), "f", scrub);
+		REGISTER_CALLBACK (serv, X_("/jog"), "f", jog);
+		REGISTER_CALLBACK (serv, X_("/jog/mode"), "f", jog_mode);
+		REGISTER_CALLBACK (serv, X_("/rewind"), "", rewind);
+		REGISTER_CALLBACK (serv, X_("/rewind"), "f", rewind);
+		REGISTER_CALLBACK (serv, X_("/ffwd"), "", ffwd);
+		REGISTER_CALLBACK (serv, X_("/ffwd"), "f", ffwd);
+		REGISTER_CALLBACK (serv, X_("/transport_stop"), "", transport_stop);
+		REGISTER_CALLBACK (serv, X_("/transport_stop"), "f", transport_stop);
+		REGISTER_CALLBACK (serv, X_("/transport_play"), "", transport_play);
+		REGISTER_CALLBACK (serv, X_("/transport_play"), "f", transport_play);
+		REGISTER_CALLBACK (serv, X_("/transport_frame"), "", transport_sample);
+		REGISTER_CALLBACK (serv, X_("/transport_speed"), "", transport_speed);
+		REGISTER_CALLBACK (serv, X_("/record_enabled"), "", record_enabled);
+		REGISTER_CALLBACK (serv, X_("/set_transport_speed"), "f", set_transport_speed);
 		// locate ii is position and bool roll
-		REGISTER_CALLBACK (serv, "/locate", "ii", locate);
-		REGISTER_CALLBACK (serv, "/save_state", "", save_state);
-		REGISTER_CALLBACK (serv, "/save_state", "f", save_state);
-		REGISTER_CALLBACK (serv, "/prev_marker", "", prev_marker);
-		REGISTER_CALLBACK (serv, "/prev_marker", "f", prev_marker);
-		REGISTER_CALLBACK (serv, "/next_marker", "", next_marker);
-		REGISTER_CALLBACK (serv, "/next_marker", "f", next_marker);
-		REGISTER_CALLBACK (serv, "/undo", "", undo);
-		REGISTER_CALLBACK (serv, "/undo", "f", undo);
-		REGISTER_CALLBACK (serv, "/redo", "", redo);
-		REGISTER_CALLBACK (serv, "/redo", "f", redo);
-		REGISTER_CALLBACK (serv, "/toggle_punch_in", "", toggle_punch_in);
-		REGISTER_CALLBACK (serv, "/toggle_punch_in", "f", toggle_punch_in);
-		REGISTER_CALLBACK (serv, "/toggle_punch_out", "", toggle_punch_out);
-		REGISTER_CALLBACK (serv, "/toggle_punch_out", "f", toggle_punch_out);
-		REGISTER_CALLBACK (serv, "/rec_enable_toggle", "", rec_enable_toggle);
-		REGISTER_CALLBACK (serv, "/rec_enable_toggle", "f", rec_enable_toggle);
-		REGISTER_CALLBACK (serv, "/toggle_all_rec_enables", "", toggle_all_rec_enables);
-		REGISTER_CALLBACK (serv, "/toggle_all_rec_enables", "f", toggle_all_rec_enables);
-		REGISTER_CALLBACK (serv, "/all_tracks_rec_in", "f", all_tracks_rec_in);
-		REGISTER_CALLBACK (serv, "/all_tracks_rec_out", "f", all_tracks_rec_out);
-		REGISTER_CALLBACK (serv, "/cancel_all_solos", "f", cancel_all_solos);
-		REGISTER_CALLBACK (serv, "/remove_marker", "", remove_marker_at_playhead);
-		REGISTER_CALLBACK (serv, "/remove_marker", "f", remove_marker_at_playhead);
-		REGISTER_CALLBACK (serv, "/jump_bars", "f", jump_by_bars);
-		REGISTER_CALLBACK (serv, "/jump_seconds", "f", jump_by_seconds);
-		REGISTER_CALLBACK (serv, "/mark_in", "", mark_in);
-		REGISTER_CALLBACK (serv, "/mark_in", "f", mark_in);
-		REGISTER_CALLBACK (serv, "/mark_out", "", mark_out);
-		REGISTER_CALLBACK (serv, "/mark_out", "f", mark_out);
-		REGISTER_CALLBACK (serv, "/toggle_click", "", toggle_click);
-		REGISTER_CALLBACK (serv, "/toggle_click", "f", toggle_click);
-		REGISTER_CALLBACK (serv, "/click/level", "f", click_level);
-		REGISTER_CALLBACK (serv, "/midi_panic", "", midi_panic);
-		REGISTER_CALLBACK (serv, "/midi_panic", "f", midi_panic);
-		REGISTER_CALLBACK (serv, "/toggle_roll", "", toggle_roll);
-		REGISTER_CALLBACK (serv, "/toggle_roll", "f", toggle_roll);
-		REGISTER_CALLBACK (serv, "/stop_forget", "", stop_forget);
-		REGISTER_CALLBACK (serv, "/stop_forget", "f", stop_forget);
-		REGISTER_CALLBACK (serv, "/set_punch_range", "", set_punch_range);
-		REGISTER_CALLBACK (serv, "/set_punch_range", "f", set_punch_range);
-		REGISTER_CALLBACK (serv, "/set_loop_range", "", set_loop_range);
-		REGISTER_CALLBACK (serv, "/set_loop_range", "f", set_loop_range);
-		REGISTER_CALLBACK (serv, "/set_session_range", "", set_session_range);
-		REGISTER_CALLBACK (serv, "/set_session_range", "f", set_session_range);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "", toggle_monitor_mute);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_mute", "f", toggle_monitor_mute);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "", toggle_monitor_dim);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_dim", "f", toggle_monitor_dim);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_mono", "", toggle_monitor_mono);
-		REGISTER_CALLBACK (serv, "/toggle_monitor_mono", "f", toggle_monitor_mono);
-		REGISTER_CALLBACK (serv, "/quick_snapshot_switch", "", quick_snapshot_switch);
-		REGISTER_CALLBACK (serv, "/quick_snapshot_switch", "f", quick_snapshot_switch);
-		REGISTER_CALLBACK (serv, "/quick_snapshot_stay", "", quick_snapshot_stay);
-		REGISTER_CALLBACK (serv, "/quick_snapshot_stay", "f", quick_snapshot_stay);
-		REGISTER_CALLBACK (serv, "/fit_1_track", "", fit_1_track);
-		REGISTER_CALLBACK (serv, "/fit_1_track", "f", fit_1_track);
-		REGISTER_CALLBACK (serv, "/fit_2_tracks", "", fit_2_tracks);
-		REGISTER_CALLBACK (serv, "/fit_2_tracks", "f", fit_2_tracks);
-		REGISTER_CALLBACK (serv, "/fit_4_tracks", "", fit_4_tracks);
-		REGISTER_CALLBACK (serv, "/fit_4_tracks", "f", fit_4_tracks);
-		REGISTER_CALLBACK (serv, "/fit_8_tracks", "", fit_8_tracks);
-		REGISTER_CALLBACK (serv, "/fit_8_tracks", "f", fit_8_tracks);
-		REGISTER_CALLBACK (serv, "/fit_16_tracks", "", fit_16_tracks);
-		REGISTER_CALLBACK (serv, "/fit_16_tracks", "f", fit_16_tracks);
-		REGISTER_CALLBACK (serv, "/fit_32_tracks", "", fit_32_tracks);
-		REGISTER_CALLBACK (serv, "/fit_32_tracks", "f", fit_32_tracks);
-		REGISTER_CALLBACK (serv, "/fit_all_tracks", "", fit_all_tracks);
-		REGISTER_CALLBACK (serv, "/fit_all_tracks", "f", fit_all_tracks);
-		REGISTER_CALLBACK (serv, "/zoom_100_ms", "", zoom_100_ms);
-		REGISTER_CALLBACK (serv, "/zoom_100_ms", "f", zoom_100_ms);
-		REGISTER_CALLBACK (serv, "/zoom_1_sec", "", zoom_1_sec);
-		REGISTER_CALLBACK (serv, "/zoom_1_sec", "f", zoom_1_sec);
-		REGISTER_CALLBACK (serv, "/zoom_10_sec", "", zoom_10_sec);
-		REGISTER_CALLBACK (serv, "/zoom_10_sec", "f", zoom_10_sec);
-		REGISTER_CALLBACK (serv, "/zoom_1_min", "", zoom_1_min);
-		REGISTER_CALLBACK (serv, "/zoom_1_min", "f", zoom_1_min);
-		REGISTER_CALLBACK (serv, "/zoom_5_min", "", zoom_5_min);
-		REGISTER_CALLBACK (serv, "/zoom_5_min", "f", zoom_5_min);
-		REGISTER_CALLBACK (serv, "/zoom_10_min", "", zoom_10_min);
-		REGISTER_CALLBACK (serv, "/zoom_10_min", "f", zoom_10_min);
-		REGISTER_CALLBACK (serv, "/zoom_to_session", "", zoom_to_session);
-		REGISTER_CALLBACK (serv, "/zoom_to_session", "f", zoom_to_session);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "f", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_in", "", temporal_zoom_in);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "", temporal_zoom_out);
-		REGISTER_CALLBACK (serv, "/temporal_zoom_out", "f", temporal_zoom_out);
-		REGISTER_CALLBACK (serv, "/scroll_up_1_track", "f", scroll_up_1_track);
-		REGISTER_CALLBACK (serv, "/scroll_up_1_track", "", scroll_up_1_track);
-		REGISTER_CALLBACK (serv, "/scroll_dn_1_track", "f", scroll_dn_1_track);
-		REGISTER_CALLBACK (serv, "/scroll_dn_1_track", "", scroll_dn_1_track);
-		REGISTER_CALLBACK (serv, "/scroll_up_1_page", "f", scroll_up_1_page);
-		REGISTER_CALLBACK (serv, "/scroll_up_1_page", "", scroll_up_1_page);
-		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "f", scroll_dn_1_page);
-		REGISTER_CALLBACK (serv, "/scroll_dn_1_page", "", scroll_dn_1_page);
-		REGISTER_CALLBACK (serv, "/bank_up", "", bank_up);
-		REGISTER_CALLBACK (serv, "/bank_up", "f", bank_delta);
-		REGISTER_CALLBACK (serv, "/bank_down", "", bank_down);
-		REGISTER_CALLBACK (serv, "/bank_down", "f", bank_down);
-		REGISTER_CALLBACK (serv, "/use_group", "f", use_group);
+		REGISTER_CALLBACK (serv, X_("/locate"), "ii", locate);
+		REGISTER_CALLBACK (serv, X_("/save_state"), "", save_state);
+		REGISTER_CALLBACK (serv, X_("/save_state"), "f", save_state);
+		REGISTER_CALLBACK (serv, X_("/prev_marker"), "", prev_marker);
+		REGISTER_CALLBACK (serv, X_("/prev_marker"), "f", prev_marker);
+		REGISTER_CALLBACK (serv, X_("/next_marker"), "", next_marker);
+		REGISTER_CALLBACK (serv, X_("/next_marker"), "f", next_marker);
+		REGISTER_CALLBACK (serv, X_("/undo"), "", undo);
+		REGISTER_CALLBACK (serv, X_("/undo"), "f", undo);
+		REGISTER_CALLBACK (serv, X_("/redo"), "", redo);
+		REGISTER_CALLBACK (serv, X_("/redo"), "f", redo);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch_in"), "", toggle_punch_in);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch_in"), "f", toggle_punch_in);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch_out"), "", toggle_punch_out);
+		REGISTER_CALLBACK (serv, X_("/toggle_punch_out"), "f", toggle_punch_out);
+		REGISTER_CALLBACK (serv, X_("/rec_enable_toggle"), "", rec_enable_toggle);
+		REGISTER_CALLBACK (serv, X_("/rec_enable_toggle"), "f", rec_enable_toggle);
+		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, X_("/toggle_all_rec_enables"), "f", toggle_all_rec_enables);
+		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_in"), "f", all_tracks_rec_in);
+		REGISTER_CALLBACK (serv, X_("/all_tracks_rec_out"), "f", all_tracks_rec_out);
+		REGISTER_CALLBACK (serv, X_("/cancel_all_solos"), "f", cancel_all_solos);
+		REGISTER_CALLBACK (serv, X_("/remove_marker"), "", remove_marker_at_playhead);
+		REGISTER_CALLBACK (serv, X_("/remove_marker"), "f", remove_marker_at_playhead);
+		REGISTER_CALLBACK (serv, X_("/jump_bars"), "f", jump_by_bars);
+		REGISTER_CALLBACK (serv, X_("/jump_seconds"), "f", jump_by_seconds);
+		REGISTER_CALLBACK (serv, X_("/mark_in"), "", mark_in);
+		REGISTER_CALLBACK (serv, X_("/mark_in"), "f", mark_in);
+		REGISTER_CALLBACK (serv, X_("/mark_out"), "", mark_out);
+		REGISTER_CALLBACK (serv, X_("/mark_out"), "f", mark_out);
+		REGISTER_CALLBACK (serv, X_("/toggle_click"), "", toggle_click);
+		REGISTER_CALLBACK (serv, X_("/toggle_click"), "f", toggle_click);
+		REGISTER_CALLBACK (serv, X_("/click/level"), "f", click_level);
+		REGISTER_CALLBACK (serv, X_("/midi_panic"), "", midi_panic);
+		REGISTER_CALLBACK (serv, X_("/midi_panic"), "f", midi_panic);
+		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "", toggle_roll);
+		REGISTER_CALLBACK (serv, X_("/toggle_roll"), "f", toggle_roll);
+		REGISTER_CALLBACK (serv, X_("/stop_forget"), "", stop_forget);
+		REGISTER_CALLBACK (serv, X_("/stop_forget"), "f", stop_forget);
+		REGISTER_CALLBACK (serv, X_("/set_punch_range"), "", set_punch_range);
+		REGISTER_CALLBACK (serv, X_("/set_punch_range"), "f", set_punch_range);
+		REGISTER_CALLBACK (serv, X_("/set_loop_range"), "", set_loop_range);
+		REGISTER_CALLBACK (serv, X_("/set_loop_range"), "f", set_loop_range);
+		REGISTER_CALLBACK (serv, X_("/set_session_range"), "", set_session_range);
+		REGISTER_CALLBACK (serv, X_("/set_session_range"), "f", set_session_range);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_mute"), "", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_mute"), "f", toggle_monitor_mute);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_dim"), "", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_dim"), "f", toggle_monitor_dim);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_mono"), "", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, X_("/toggle_monitor_mono"), "f", toggle_monitor_mono);
+		REGISTER_CALLBACK (serv, X_("/quick_snapshot_switch"), "", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, X_("/quick_snapshot_switch"), "f", quick_snapshot_switch);
+		REGISTER_CALLBACK (serv, X_("/quick_snapshot_stay"), "", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, X_("/quick_snapshot_stay"), "f", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, X_("/fit_1_track"), "", fit_1_track);
+		REGISTER_CALLBACK (serv, X_("/fit_1_track"), "f", fit_1_track);
+		REGISTER_CALLBACK (serv, X_("/fit_2_tracks"), "", fit_2_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_2_tracks"), "f", fit_2_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_4_tracks"), "", fit_4_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_4_tracks"), "f", fit_4_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_8_tracks"), "", fit_8_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_8_tracks"), "f", fit_8_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_16_tracks"), "", fit_16_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_16_tracks"), "f", fit_16_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_32_tracks"), "", fit_32_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_32_tracks"), "f", fit_32_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_all_tracks"), "", fit_all_tracks);
+		REGISTER_CALLBACK (serv, X_("/fit_all_tracks"), "f", fit_all_tracks);
+		REGISTER_CALLBACK (serv, X_("/zoom_100_ms"), "", zoom_100_ms);
+		REGISTER_CALLBACK (serv, X_("/zoom_100_ms"), "f", zoom_100_ms);
+		REGISTER_CALLBACK (serv, X_("/zoom_1_sec"), "", zoom_1_sec);
+		REGISTER_CALLBACK (serv, X_("/zoom_1_sec"), "f", zoom_1_sec);
+		REGISTER_CALLBACK (serv, X_("/zoom_10_sec"), "", zoom_10_sec);
+		REGISTER_CALLBACK (serv, X_("/zoom_10_sec"), "f", zoom_10_sec);
+		REGISTER_CALLBACK (serv, X_("/zoom_1_min"), "", zoom_1_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_1_min"), "f", zoom_1_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_5_min"), "", zoom_5_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_5_min"), "f", zoom_5_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_10_min"), "", zoom_10_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_10_min"), "f", zoom_10_min);
+		REGISTER_CALLBACK (serv, X_("/zoom_to_session"), "", zoom_to_session);
+		REGISTER_CALLBACK (serv, X_("/zoom_to_session"), "f", zoom_to_session);
+		REGISTER_CALLBACK (serv, X_("/temporal_zoom_in"), "f", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, X_("/temporal_zoom_in"), "", temporal_zoom_in);
+		REGISTER_CALLBACK (serv, X_("/temporal_zoom_out"), "", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, X_("/temporal_zoom_out"), "f", temporal_zoom_out);
+		REGISTER_CALLBACK (serv, X_("/scroll_up_1_track"), "f", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, X_("/scroll_up_1_track"), "", scroll_up_1_track);
+		REGISTER_CALLBACK (serv, X_("/scroll_dn_1_track"), "f", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, X_("/scroll_dn_1_track"), "", scroll_dn_1_track);
+		REGISTER_CALLBACK (serv, X_("/scroll_up_1_page"), "f", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, X_("/scroll_up_1_page"), "", scroll_up_1_page);
+		REGISTER_CALLBACK (serv, X_("/scroll_dn_1_page"), "f", scroll_dn_1_page);
+		REGISTER_CALLBACK (serv, X_("/scroll_dn_1_page"), "", scroll_dn_1_page);
+		REGISTER_CALLBACK (serv, X_("/bank_up"), "", bank_up);
+		REGISTER_CALLBACK (serv, X_("/bank_up"), "f", bank_delta);
+		REGISTER_CALLBACK (serv, X_("/bank_down"), "", bank_down);
+		REGISTER_CALLBACK (serv, X_("/bank_down"), "f", bank_down);
+		REGISTER_CALLBACK (serv, X_("/use_group"), "f", use_group);
 
 		// controls for "special" strips
-		REGISTER_CALLBACK (serv, "/master/gain", "f", master_set_gain);
-		REGISTER_CALLBACK (serv, "/master/fader", "f", master_set_fader);
-		REGISTER_CALLBACK (serv, "/master/db_delta", "f", master_delta_gain);
-		REGISTER_CALLBACK (serv, "/master/mute", "i", master_set_mute);
-		REGISTER_CALLBACK (serv, "/master/trimdB", "f", master_set_trim);
-		REGISTER_CALLBACK (serv, "/master/pan_stereo_position", "f", master_set_pan_stereo_position);
-		REGISTER_CALLBACK (serv, "/master/select", "f", master_select);
-		REGISTER_CALLBACK (serv, "/monitor/gain", "f", monitor_set_gain);
-		REGISTER_CALLBACK (serv, "/monitor/fader", "f", monitor_set_fader);
-		REGISTER_CALLBACK (serv, "/monitor/db_delta", "f", monitor_delta_gain);
-		REGISTER_CALLBACK (serv, "/monitor/mute", "i", monitor_set_mute);
-		REGISTER_CALLBACK (serv, "/monitor/dim", "i", monitor_set_dim);
-		REGISTER_CALLBACK (serv, "/monitor/mono", "i", monitor_set_mono);
+		REGISTER_CALLBACK (serv, X_("/master/gain"), "f", master_set_gain);
+		REGISTER_CALLBACK (serv, X_("/master/fader"), "f", master_set_fader);
+		REGISTER_CALLBACK (serv, X_("/master/db_delta"), "f", master_delta_gain);
+		REGISTER_CALLBACK (serv, X_("/master/mute"), "i", master_set_mute);
+		REGISTER_CALLBACK (serv, X_("/master/trimdB"), "f", master_set_trim);
+		REGISTER_CALLBACK (serv, X_("/master/pan_stereo_position"), "f", master_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, X_("/master/select"), "f", master_select);
+		REGISTER_CALLBACK (serv, X_("/monitor/gain"), "f", monitor_set_gain);
+		REGISTER_CALLBACK (serv, X_("/monitor/fader"), "f", monitor_set_fader);
+		REGISTER_CALLBACK (serv, X_("/monitor/db_delta"), "f", monitor_delta_gain);
+		REGISTER_CALLBACK (serv, X_("/monitor/mute"), "i", monitor_set_mute);
+		REGISTER_CALLBACK (serv, X_("/monitor/dim"), "i", monitor_set_dim);
+		REGISTER_CALLBACK (serv, X_("/monitor/mono"), "i", monitor_set_mono);
 
 		// Controls for the Selected strip
-		REGISTER_CALLBACK (serv, "/select/recenable", "i", sel_recenable);
-		REGISTER_CALLBACK (serv, "/select/record_safe", "i", sel_recsafe);
-		REGISTER_CALLBACK (serv, "/select/mute", "i", sel_mute);
-		REGISTER_CALLBACK (serv, "/select/solo", "i", sel_solo);
-		REGISTER_CALLBACK (serv, "/select/solo_iso", "i", sel_solo_iso);
-		REGISTER_CALLBACK (serv, "/select/solo_safe", "i", sel_solo_safe);
-		REGISTER_CALLBACK (serv, "/select/monitor_input", "i", sel_monitor_input);
-		REGISTER_CALLBACK (serv, "/select/monitor_disk", "i", sel_monitor_disk);
-		REGISTER_CALLBACK (serv, "/select/polarity", "i", sel_phase);
-		REGISTER_CALLBACK (serv, "/select/gain", "f", sel_gain);
-		REGISTER_CALLBACK (serv, "/select/fader", "f", sel_fader);
-		REGISTER_CALLBACK (serv, "/select/db_delta", "f", sel_dB_delta);
-		REGISTER_CALLBACK (serv, "/select/trimdB", "f", sel_trim);
-		REGISTER_CALLBACK (serv, "/select/hide", "i", sel_hide);
-		REGISTER_CALLBACK (serv, "/select/pan_stereo_position", "f", sel_pan_position);
-		REGISTER_CALLBACK (serv, "/select/pan_stereo_width", "f", sel_pan_width);
-		REGISTER_CALLBACK (serv, "/select/send_gain", "if", sel_sendgain);
-		REGISTER_CALLBACK (serv, "/select/send_fader", "if", sel_sendfader);
-		REGISTER_CALLBACK (serv, "/select/send_enable", "if", sel_sendenable);
-		REGISTER_CALLBACK (serv, "/select/master_send_enable", "i", sel_master_send_enable);
-		REGISTER_CALLBACK (serv, "/select/send_page", "f", sel_send_page);
-		REGISTER_CALLBACK (serv, "/select/plug_page", "f", sel_plug_page);
-		REGISTER_CALLBACK (serv, "/select/plugin", "f", sel_plugin);
-		REGISTER_CALLBACK (serv, "/select/plugin/activate", "f", sel_plugin_activate);
-		REGISTER_CALLBACK (serv, "/select/expand", "i", sel_expand);
-		REGISTER_CALLBACK (serv, "/select/pan_elevation_position", "f", sel_pan_elevation);
-		REGISTER_CALLBACK (serv, "/select/pan_frontback_position", "f", sel_pan_frontback);
-		REGISTER_CALLBACK (serv, "/select/pan_lfe_control", "f", sel_pan_lfe);
-		REGISTER_CALLBACK (serv, "/select/comp_enable", "f", sel_comp_enable);
-		REGISTER_CALLBACK (serv, "/select/comp_threshold", "f", sel_comp_threshold);
-		REGISTER_CALLBACK (serv, "/select/comp_speed", "f", sel_comp_speed);
-		REGISTER_CALLBACK (serv, "/select/comp_mode", "f", sel_comp_mode);
-		REGISTER_CALLBACK (serv, "/select/comp_makeup", "f", sel_comp_makeup);
-		REGISTER_CALLBACK (serv, "/select/eq_enable", "f", sel_eq_enable);
-		REGISTER_CALLBACK (serv, "/select/eq_hpf/freq", "f", sel_eq_hpf_freq);
-		REGISTER_CALLBACK (serv, "/select/eq_hpf/enable", "f", sel_eq_hpf_enable);
-		REGISTER_CALLBACK (serv, "/select/eq_hpf/slope", "f", sel_eq_hpf_slope);
-		REGISTER_CALLBACK (serv, "/select/eq_lpf/freq", "f", sel_eq_lpf_freq);
-		REGISTER_CALLBACK (serv, "/select/eq_lpf/enable", "f", sel_eq_lpf_enable);
-		REGISTER_CALLBACK (serv, "/select/eq_lpf/slope", "f", sel_eq_lpf_slope);
-		REGISTER_CALLBACK (serv, "/select/eq_gain", "if", sel_eq_gain);
-		REGISTER_CALLBACK (serv, "/select/eq_freq", "if", sel_eq_freq);
-		REGISTER_CALLBACK (serv, "/select/eq_q", "if", sel_eq_q);
-		REGISTER_CALLBACK (serv, "/select/eq_shape", "if", sel_eq_shape);
+		REGISTER_CALLBACK (serv, X_("/select/recenable"), "i", sel_recenable);
+		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
+		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
+		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
+		REGISTER_CALLBACK (serv, X_("/select/solo_iso"), "i", sel_solo_iso);
+		REGISTER_CALLBACK (serv, X_("/select/solo_safe"), "i", sel_solo_safe);
+		REGISTER_CALLBACK (serv, X_("/select/monitor_input"), "i", sel_monitor_input);
+		REGISTER_CALLBACK (serv, X_("/select/monitor_disk"), "i", sel_monitor_disk);
+		REGISTER_CALLBACK (serv, X_("/select/polarity"), "i", sel_phase);
+		REGISTER_CALLBACK (serv, X_("/select/gain"), "f", sel_gain);
+		REGISTER_CALLBACK (serv, X_("/select/fader"), "f", sel_fader);
+		REGISTER_CALLBACK (serv, X_("/select/db_delta"), "f", sel_dB_delta);
+		REGISTER_CALLBACK (serv, X_("/select/trimdB"), "f", sel_trim);
+		REGISTER_CALLBACK (serv, X_("/select/hide"), "i", sel_hide);
+		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_position"), "f", sel_pan_position);
+		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_width"), "f", sel_pan_width);
+		REGISTER_CALLBACK (serv, X_("/select/send_gain"), "if", sel_sendgain);
+		REGISTER_CALLBACK (serv, X_("/select/send_fader"), "if", sel_sendfader);
+		REGISTER_CALLBACK (serv, X_("/select/send_enable"), "if", sel_sendenable);
+		REGISTER_CALLBACK (serv, X_("/select/master_send_enable"), "i", sel_master_send_enable);
+		REGISTER_CALLBACK (serv, X_("/select/send_page"), "f", sel_send_page);
+		REGISTER_CALLBACK (serv, X_("/select/plug_page"), "f", sel_plug_page);
+		REGISTER_CALLBACK (serv, X_("/select/plugin"), "f", sel_plugin);
+		REGISTER_CALLBACK (serv, X_("/select/plugin/activate"), "f", sel_plugin_activate);
+		REGISTER_CALLBACK (serv, X_("/select/expand"), "i", sel_expand);
+		REGISTER_CALLBACK (serv, X_("/select/pan_elevation_position"), "f", sel_pan_elevation);
+		REGISTER_CALLBACK (serv, X_("/select/pan_frontback_position"), "f", sel_pan_frontback);
+		REGISTER_CALLBACK (serv, X_("/select/pan_lfe_control"), "f", sel_pan_lfe);
+		REGISTER_CALLBACK (serv, X_("/select/comp_enable"), "f", sel_comp_enable);
+		REGISTER_CALLBACK (serv, X_("/select/comp_threshold"), "f", sel_comp_threshold);
+		REGISTER_CALLBACK (serv, X_("/select/comp_speed"), "f", sel_comp_speed);
+		REGISTER_CALLBACK (serv, X_("/select/comp_mode"), "f", sel_comp_mode);
+		REGISTER_CALLBACK (serv, X_("/select/comp_makeup"), "f", sel_comp_makeup);
+		REGISTER_CALLBACK (serv, X_("/select/eq_enable"), "f", sel_eq_enable);
+		REGISTER_CALLBACK (serv, X_("/select/eq_hpf/freq"), "f", sel_eq_hpf_freq);
+		REGISTER_CALLBACK (serv, X_("/select/eq_hpf/enable"), "f", sel_eq_hpf_enable);
+		REGISTER_CALLBACK (serv, X_("/select/eq_hpf/slope"), "f", sel_eq_hpf_slope);
+		REGISTER_CALLBACK (serv, X_("/select/eq_lpf/freq"), "f", sel_eq_lpf_freq);
+		REGISTER_CALLBACK (serv, X_("/select/eq_lpf/enable"), "f", sel_eq_lpf_enable);
+		REGISTER_CALLBACK (serv, X_("/select/eq_lpf/slope"), "f", sel_eq_lpf_slope);
+		REGISTER_CALLBACK (serv, X_("/select/eq_gain"), "if", sel_eq_gain);
+		REGISTER_CALLBACK (serv, X_("/select/eq_freq"), "if", sel_eq_freq);
+		REGISTER_CALLBACK (serv, X_("/select/eq_q"), "if", sel_eq_q);
+		REGISTER_CALLBACK (serv, X_("/select/eq_shape"), "if", sel_eq_shape);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
-		REGISTER_CALLBACK (serv, "/strip/mute", "ii", route_mute);
-		REGISTER_CALLBACK (serv, "/strip/solo", "ii", route_solo);
-		REGISTER_CALLBACK (serv, "/strip/solo_iso", "ii", route_solo_iso);
-		REGISTER_CALLBACK (serv, "/strip/solo_safe", "ii", route_solo_safe);
-		REGISTER_CALLBACK (serv, "/strip/recenable", "ii", route_recenable);
-		REGISTER_CALLBACK (serv, "/strip/record_safe", "ii", route_recsafe);
-		REGISTER_CALLBACK (serv, "/strip/monitor_input", "ii", route_monitor_input);
-		REGISTER_CALLBACK (serv, "/strip/monitor_disk", "ii", route_monitor_disk);
-		REGISTER_CALLBACK (serv, "/strip/expand", "ii", strip_expand);
-		REGISTER_CALLBACK (serv, "/strip/hide", "ii", strip_hide);
-		REGISTER_CALLBACK (serv, "/strip/select", "ii", strip_gui_select);
-		REGISTER_CALLBACK (serv, "/strip/polarity", "ii", strip_phase);
-		REGISTER_CALLBACK (serv, "/strip/gain", "if", route_set_gain_dB);
-		REGISTER_CALLBACK (serv, "/strip/fader", "if", route_set_gain_fader);
-		REGISTER_CALLBACK (serv, "/strip/trimdB", "if", route_set_trim_dB);
-		REGISTER_CALLBACK (serv, "/strip/pan_stereo_position", "if", route_set_pan_stereo_position);
-		REGISTER_CALLBACK (serv, "/strip/pan_stereo_width", "if", route_set_pan_stereo_width);
-		REGISTER_CALLBACK (serv, "/strip/plugin/parameter", "iiif", route_plugin_parameter);
+		REGISTER_CALLBACK (serv, X_("/strip/mute"), "ii", route_mute);
+		REGISTER_CALLBACK (serv, X_("/strip/solo"), "ii", route_solo);
+		REGISTER_CALLBACK (serv, X_("/strip/solo_iso"), "ii", route_solo_iso);
+		REGISTER_CALLBACK (serv, X_("/strip/solo_safe"), "ii", route_solo_safe);
+		REGISTER_CALLBACK (serv, X_("/strip/recenable"), "ii", route_recenable);
+		REGISTER_CALLBACK (serv, X_("/strip/record_safe"), "ii", route_recsafe);
+		REGISTER_CALLBACK (serv, X_("/strip/monitor_input"), "ii", route_monitor_input);
+		REGISTER_CALLBACK (serv, X_("/strip/monitor_disk"), "ii", route_monitor_disk);
+		REGISTER_CALLBACK (serv, X_("/strip/expand"), "ii", strip_expand);
+		REGISTER_CALLBACK (serv, X_("/strip/hide"), "ii", strip_hide);
+		REGISTER_CALLBACK (serv, X_("/strip/select"), "ii", strip_gui_select);
+		REGISTER_CALLBACK (serv, X_("/strip/polarity"), "ii", strip_phase);
+		REGISTER_CALLBACK (serv, X_("/strip/gain"), "if", route_set_gain_dB);
+		REGISTER_CALLBACK (serv, X_("/strip/fader"), "if", route_set_gain_fader);
+		REGISTER_CALLBACK (serv, X_("/strip/trimdB"), "if", route_set_trim_dB);
+		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_position"), "if", route_set_pan_stereo_position);
+		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_width"), "if", route_set_pan_stereo_width);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter"), "iiif", route_plugin_parameter);
 		// prints to cerr only
-		REGISTER_CALLBACK (serv, "/strip/plugin/parameter/print", "iii", route_plugin_parameter_print);
-		REGISTER_CALLBACK (serv, "/strip/plugin/activate", "ii", route_plugin_activate);
-		REGISTER_CALLBACK (serv, "/strip/plugin/deactivate", "ii", route_plugin_deactivate);
-		REGISTER_CALLBACK (serv, "/strip/send/gain", "iif", route_set_send_gain_dB);
-		REGISTER_CALLBACK (serv, "/strip/send/fader", "iif", route_set_send_fader);
-		REGISTER_CALLBACK (serv, "/strip/send/enable", "iif", route_set_send_enable);
-		REGISTER_CALLBACK(serv, "/strip/name", "is", route_rename);
-		REGISTER_CALLBACK(serv, "/strip/sends", "i", route_get_sends);
-		REGISTER_CALLBACK(serv, "/strip/receives", "i", route_get_receives);
-		REGISTER_CALLBACK(serv, "/strip/plugin/list", "i", route_plugin_list);
-		REGISTER_CALLBACK(serv, "/strip/plugin/descriptor", "ii", route_plugin_descriptor);
-		REGISTER_CALLBACK(serv, "/strip/plugin/reset", "ii", route_plugin_reset);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/parameter/print"), "iii", route_plugin_parameter_print);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/activate"), "ii", route_plugin_activate);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/deactivate"), "ii", route_plugin_deactivate);
+		REGISTER_CALLBACK (serv, X_("/strip/send/gain"), "iif", route_set_send_gain_dB);
+		REGISTER_CALLBACK (serv, X_("/strip/send/fader"), "iif", route_set_send_fader);
+		REGISTER_CALLBACK (serv, X_("/strip/send/enable"), "iif", route_set_send_enable);
+		REGISTER_CALLBACK (serv, X_("/strip/name"), "is", route_rename);
+		REGISTER_CALLBACK (serv, X_("/strip/sends"), "i", route_get_sends);
+		REGISTER_CALLBACK (serv, X_("/strip/receives"), "i", route_get_receives);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/list"), "i", route_plugin_list);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/descriptor"), "ii", route_plugin_descriptor);
+		REGISTER_CALLBACK (serv, X_("/strip/plugin/reset"), "ii", route_plugin_reset);
 
 		/* still not-really-standardized query interface */
 		//REGISTER_CALLBACK (serv, "/ardour/*/#current_value", "", current_value);
@@ -748,7 +748,7 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 			lo_message_add_string (reply, "not found");
 		} else {
 
-			if (strcmp (path, "/strip/state") == 0) {
+			if (strcmp (path, X_("/strip/state")) == 0) {
 
 				if (boost::dynamic_pointer_cast<AudioTrack>(r)) {
 					lo_message_add_string (reply, "AT");
@@ -764,11 +764,11 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 				lo_message_add_int32 (reply, r->muted());
 				lo_message_add_int32 (reply, r->soloed());
 
-			} else if (strcmp (path, "/strip/mute") == 0) {
+			} else if (strcmp (path, X_("/strip/mute")) == 0) {
 
 				lo_message_add_int32 (reply, (float) r->muted());
 
-			} else if (strcmp (path, "/strip/solo") == 0) {
+			} else if (strcmp (path, X_("/strip/solo")) == 0) {
 
 				lo_message_add_int32 (reply, r->soloed());
 			}
@@ -777,9 +777,9 @@ OSC::send_current_value (const char* path, lo_arg** argv, int argc, lo_message m
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (sur->feedback[14]) {
-		lo_send_message (get_address (msg), "/reply", reply);
+		lo_send_message (get_address (msg), X_("/reply"), reply);
 	} else {
-		lo_send_message (get_address (msg), "#reply", reply);
+		lo_send_message (get_address (msg), X_("#reply"), reply);
 	}
 	lo_message_free (reply);
 }
@@ -812,30 +812,30 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		sur->custom_strips = set->custom_strips;
 	}
 
-	if (strstr (path, "/automation")) {
+	if (strstr (path, X_("/automation"))) {
 		ret = set_automation (path, types, argv, argc, msg);
 
 	} else
-	if (strstr (path, "/touch")) {
+	if (strstr (path, X_("/touch"))) {
 		ret = touch_detect (path, types, argv, argc, msg);
 
 	} else
-	if (len >= 17 && !strcmp (&path[len-15], "/#current_value")) {
+	if (len >= 17 && !strcmp (&path[len-15], X_("/#current_value"))) {
 		current_value_query (path, len, argv, argc, msg);
 		ret = 0;
 
 	} else
-	if (!strncmp (path, "/cue/", 5)) {
+	if (!strncmp (path, X_("/cue/"), 5)) {
 
 		ret = cue_parse (path, types, argv, argc, msg);
 
 	} else
-	if (!strncmp (path, "/select/plugin/parameter", 24)) {
+	if (!strncmp (path, X_("/select/plugin/parameter"), 24)) {
 
 		ret = select_plugin_parameter (path, types, argv, argc, msg);
 
 	} else
-	if (!strncmp (path, "/access_action/", 15)) {
+	if (!strncmp (path, X_("/access_action/"), 15)) {
 		check_surface (msg);
 		if (!(argc && !argv[0]->i)) {
 			std::string action_path = path;
@@ -845,7 +845,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else
-	if (strcmp (path, "/strip/listen") == 0) {
+	if (strcmp (path, X_("/strip/listen")) == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 		} else if (sur->custom_mode) {
@@ -868,7 +868,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 		ret = 0;
 	} else
-	if (strcmp (path, "/strip/ignore") == 0) {
+	if (strcmp (path, X_("/strip/ignore")) == 0) {
 		if (argc <= 0) {
 			PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 		} else if (!sur->custom_mode) {
@@ -893,21 +893,21 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 
 		ret = 0;
 	} else
-	if (strstr (path, "/strip") && (argc != 1)) {
+	if (strstr (path, X_("/strip")) && (argc != 1)) {
 		// All of the strip commands below require 1 parameter
 		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 	} else
-	if (!strncmp (path, "/strip/gain/", 12) && strlen (path) > 12) {
+	if (!strncmp (path, X_("/strip/gain/"), 12) && strlen (path) > 12) {
 		// in dB
 		int ssid = atoi (&path[12]);
 		ret = route_set_gain_dB (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/strip/fader/", 13) && strlen (path) > 13) {
+	else if (!strncmp (path, X_("/strip/fader/"), 13) && strlen (path) > 13) {
 		// in fader position
 		int ssid = atoi (&path[13]);
 		ret = route_set_gain_fader (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/strip/db_delta", 15)) {
+	else if (!strncmp (path, X_("/strip/db_delta"), 15)) {
 		// in db delta
 		int ssid;
 		int ar_off = 0;
@@ -931,89 +931,89 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		}
 		ret = strip_db_delta (ssid, delta, msg);
 	}
-	else if (!strncmp (path, "/strip/trimdB/", 14) && strlen (path) > 14) {
+	else if (!strncmp (path, X_("/strip/trimdB/"), 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = route_set_trim_dB (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/strip/pan_stereo_position/", 27) && strlen (path) > 27) {
+	else if (!strncmp (path, X_("/strip/pan_stereo_position/"), 27) && strlen (path) > 27) {
 		int ssid = atoi (&path[27]);
 		ret = route_set_pan_stereo_position (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/strip/mute/", 12) && strlen (path) > 12) {
+	else if (!strncmp (path, X_("/strip/mute/"), 12) && strlen (path) > 12) {
 		int ssid = atoi (&path[12]);
 		ret = route_mute (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/solo/", 12) && strlen (path) > 12) {
+	else if (!strncmp (path, X_("/strip/solo/"), 12) && strlen (path) > 12) {
 		int ssid = atoi (&path[12]);
 		ret = route_solo (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/monitor_input/", 21) && strlen (path) > 21) {
+	else if (!strncmp (path, X_("/strip/monitor_input/"), 21) && strlen (path) > 21) {
 		int ssid = atoi (&path[21]);
 		ret = route_monitor_input (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/monitor_disk/", 20) && strlen (path) > 20) {
+	else if (!strncmp (path, X_("/strip/monitor_disk/"), 20) && strlen (path) > 20) {
 		int ssid = atoi (&path[20]);
 		ret = route_monitor_disk (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/recenable/", 17) && strlen (path) > 17) {
+	else if (!strncmp (path, X_("/strip/recenable/"), 17) && strlen (path) > 17) {
 		int ssid = atoi (&path[17]);
 		ret = route_recenable (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/record_safe/", 19) && strlen (path) > 19) {
+	else if (!strncmp (path, X_("/strip/record_safe/"), 19) && strlen (path) > 19) {
 		int ssid = atoi (&path[19]);
 		ret = route_recsafe (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/expand/", 14) && strlen (path) > 14) {
+	else if (!strncmp (path, X_("/strip/expand/"), 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = strip_expand (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/hide/", 12) && strlen (path) > 12) {
+	else if (!strncmp (path, X_("/strip/hide/"), 12) && strlen (path) > 12) {
 		int ssid = atoi (&path[12]);
 		ret = strip_hide (ssid, argv[0]->i, msg);
 	}
-	else if (!strncmp (path, "/strip/select/", 14) && strlen (path) > 14) {
+	else if (!strncmp (path, X_("/strip/select/"), 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = strip_gui_select (ssid, argv[0]->i, msg);
 	} else
-	if (strstr (path, "/select") && (argc != 1)) {
+	if (strstr (path, X_("/select")) && (argc != 1)) {
 		// All of the select commands below require 1 parameter
 		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 	}
-	else if (!strncmp (path, "/select/send_gain/", 18) && strlen (path) > 18) {
+	else if (!strncmp (path, X_("/select/send_gain/"), 18) && strlen (path) > 18) {
 		int ssid = atoi (&path[18]);
 		ret = sel_sendgain (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/select/send_fader/", 19) && strlen (path) > 19) {
+	else if (!strncmp (path, X_("/select/send_fader/"), 19) && strlen (path) > 19) {
 		int ssid = atoi (&path[19]);
 		ret = sel_sendfader (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/select/send_enable/", 20) && strlen (path) > 20) {
+	else if (!strncmp (path, X_("/select/send_enable/"), 20) && strlen (path) > 20) {
 		int ssid = atoi (&path[20]);
 		ret = sel_sendenable (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/select/eq_gain/", 16) && strlen (path) > 16) {
+	else if (!strncmp (path, X_("/select/eq_gain/"), 16) && strlen (path) > 16) {
 		int ssid = atoi (&path[16]);
 		ret = sel_eq_gain (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/select/eq_freq/", 16) && strlen (path) > 16) {
+	else if (!strncmp (path, X_("/select/eq_freq/"), 16) && strlen (path) > 16) {
 		int ssid = atoi (&path[16]);
 		ret = sel_eq_freq (ssid, argv[0]->f , msg);
 	}
-	else if (!strncmp (path, "/select/eq_q/", 13) && strlen (path) > 13) {
+	else if (!strncmp (path, X_("/select/eq_q/"), 13) && strlen (path) > 13) {
 		int ssid = atoi (&path[13]);
 		ret = sel_eq_q (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/select/eq_shape/", 17) && strlen (path) > 17) {
+	else if (!strncmp (path, X_("/select/eq_shape/"), 17) && strlen (path) > 17) {
 		int ssid = atoi (&path[17]);
 		ret = sel_eq_shape (ssid, argv[0]->f, msg);
 	}
-	else if (!strncmp (path, "/marker", 7)) {
+	else if (!strncmp (path, X_("/marker"), 7)) {
 		ret = set_marker (types, argv, argc, msg);
 	}
-	else if (!strncmp (path, "/set_surface", 12)) {
+	else if (!strncmp (path, X_("/set_surface"), 12)) {
 		ret = surface_parse (path, types, argv, argc, msg);
 	}
-	else if (strstr (path, "/link")) {
+	else if (strstr (path, X_("/link"))) {
 		ret = parse_link (path, types, argv, argc, msg);
 	}
 	if (ret) {
@@ -1099,7 +1099,7 @@ void
 OSC::session_exported (std::string path, std::string name)
 {
 	lo_address listener = lo_address_new (NULL, "7770");
-	lo_send (listener, "/session/exported", "ss", path.c_str(), name.c_str());
+	lo_send (listener, X_("/session/exported"), "ss", path.c_str(), name.c_str());
 	lo_address_free (listener);
 }
 
@@ -1123,37 +1123,37 @@ OSC::current_value (const char */*path*/, const char */*types*/, lo_arg **/*argv
 	const char *retpath = argv[2]->s;
 
 
-	if (strcmp (argv[0]->s, "transport_frame") == 0) {
+	if (strcmp (argv[0]->s, X_("transport_frame")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
-	} else if (strcmp (argv[0]->s, "transport_speed") == 0) {
+	} else if (strcmp (argv[0]->s, X_("transport_speed")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
-	} else if (strcmp (argv[0]->s, "transport_locked") == 0) {
+	} else if (strcmp (argv[0]->s, X_("transport_locked")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
-	} else if (strcmp (argv[0]->s, "punch_in") == 0) {
+	} else if (strcmp (argv[0]->s, X_("punch_in")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
-	} else if (strcmp (argv[0]->s, "punch_out") == 0) {
+	} else if (strcmp (argv[0]->s, X_("punch_out")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
 		}
 
-	} else if (strcmp (argv[0]->s, "rec_enable") == 0) {
+	} else if (strcmp (argv[0]->s, X_("rec_enable")) == 0) {
 
 		if (session) {
 			lo_send (addr, retpath, "i", session->transport_sample());
@@ -1235,9 +1235,9 @@ OSC::routes_list (lo_message msg)
 				lo_message_add_int32 (reply, s->rec_enable_control()->get_value());
 			}
 			if (sur->feedback[14]) {
-				lo_send_message (get_address (msg), "/reply", reply);
+				lo_send_message (get_address (msg), X_("/reply"), reply);
 			} else {
-				lo_send_message (get_address (msg), "#reply", reply);
+				lo_send_message (get_address (msg), X_("#reply"), reply);
 			}
 			lo_message_free (reply);
 		}
@@ -1246,7 +1246,7 @@ OSC::routes_list (lo_message msg)
 	// Send end of listing message
 	lo_message reply = lo_message_new ();
 
-	lo_message_add_string (reply, "end_route_list");
+	lo_message_add_string (reply, X_("end_route_list"));
 	lo_message_add_int64 (reply, session->sample_rate());
 	lo_message_add_int64 (reply, session->current_end_sample());
 	if (session->monitor_out()) {
@@ -1257,9 +1257,9 @@ OSC::routes_list (lo_message msg)
 	}
 
 	if (sur->feedback[14]) {
-		lo_send_message (get_address (msg), "/reply", reply);
+		lo_send_message (get_address (msg), X_("/reply"), reply);
 	} else {
-		lo_send_message (get_address (msg), "#reply", reply);
+		lo_send_message (get_address (msg), X_("#reply"), reply);
 	}
 
 	lo_message_free (reply);
@@ -1521,7 +1521,7 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 	if (!set) {
 		return 0;
 	}
-	if (!strncmp (path, "/link/bank_size", 15)) {
+	if (!strncmp (path, X_("/link/bank_size"), 15)) {
 		ls->banksize = (uint32_t) data;
 		ls->autobank = false;
 		ls->not_ready = link_check (set);
@@ -1533,7 +1533,7 @@ OSC::parse_link (const char *path, const char* types, lo_arg **argv, int argc, l
 		}
 		ret = 0;
 
-	} else if (!strncmp (path, "/link/set", 9)) {
+	} else if (!strncmp (path, X_("/link/set"), 9)) {
 		ret = set_link (set, (uint32_t) data, get_address (msg));
 	}
 
@@ -1713,49 +1713,49 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	string host = lo_url_get_hostname(sur->remote_url.c_str());
 	int port = atoi (get_port (host).c_str());
 
-	if (argc == 1 && !strncmp (path, "/set_surface/feedback", 21)) {
+	if (argc == 1 && !strncmp (path, X_("/set_surface/feedback"), 21)) {
 		if (types[0] == 'f') {
 			ret = set_surface_feedback ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_feedback (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/bank_size", 22)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/bank_size"), 22)) {
 		if (types[0] == 'f') {
 			ret = set_surface_bank_size ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_bank_size (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/gainmode", 21)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/gainmode"), 21)) {
 		if (types[0] == 'f') {
 			ret = set_surface_gainmode ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_gainmode (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/strip_types", 24)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/strip_types"), 24)) {
 		if (types[0] == 'f') {
 			ret = set_surface_strip_types ((int)argv[0]->f, msg);
 		} else {
 			ret = set_surface_strip_types (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/send_page_size", 27)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/send_page_size"), 27)) {
 		if (types[0] == 'f') {
 			ret = sel_send_pagesize ((int)argv[0]->f, msg);
 		} else {
 			ret = sel_send_pagesize (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/plugin_page_size", 29)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/plugin_page_size"), 29)) {
 		if (types[0] == 'f') {
 			ret = sel_plug_pagesize ((int)argv[0]->f, msg);
 		} else {
 			ret = sel_plug_pagesize (argv[0]->i, msg);
 		}
 	}
-	else if (argc == 1 && !strncmp (path, "/set_surface/port", 17)) {
+	else if (argc == 1 && !strncmp (path, X_("/set_surface/port"), 17)) {
 		if (types[0] == 'f') {
 			ret = set_surface_port ((int)argv[0]->f, msg);
 		} else {
@@ -1838,7 +1838,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 					lo_message_add_int32 (reply, (int) linkset);
 					lo_message_add_int32 (reply, (int) linkid);
 					lo_message_add_int32 (reply, (int) port);
-					lo_send_message (get_address (msg), "/set_surface", reply);
+					lo_send_message (get_address (msg), X_("/set_surface"), reply);
 					lo_message_free (reply);
 					return 0;
 				}
@@ -2298,7 +2298,7 @@ OSC::_recalcbanks ()
 			// This surface uses /strip/list tell it routes have changed
 			lo_message reply;
 			reply = lo_message_new ();
-			lo_send_message (addr, "/strip/list", reply);
+			lo_send_message (addr, X_("/strip/list"), reply);
 			lo_message_free (reply);
 		} else {
 			strip_feedback (sur, false);
@@ -2440,7 +2440,7 @@ OSC::bank_leds (OSCSurface* s)
 		} else {
 			lo_message_add_int32 (reply, 1);
 		}
-		lo_send_message (addr, "/bank_up", reply);
+		lo_send_message (addr, X_("/bank_up"), reply);
 		lo_message_free (reply);
 		reply = lo_message_new ();
 		if (bank > 1) {
@@ -2448,7 +2448,7 @@ OSC::bank_leds (OSCSurface* s)
 		} else {
 			lo_message_add_int32 (reply, 0);
 		}
-		lo_send_message (addr, "/bank_down", reply);
+		lo_send_message (addr, X_("/bank_down"), reply);
 		lo_message_free (reply);
 	}
 }
@@ -2734,7 +2734,7 @@ OSC::transport_sample (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_int64 (reply, pos);
 
-	lo_send_message (get_address (msg), "/transport_frame", reply);
+	lo_send_message (get_address (msg), X_("/transport_frame"), reply);
 
 	lo_message_free (reply);
 }
@@ -2751,7 +2751,7 @@ OSC::transport_speed (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_double (reply, ts);
 
-	lo_send_message (get_address (msg), "/transport_speed", reply);
+	lo_send_message (get_address (msg), X_("/transport_speed"), reply);
 
 	lo_message_free (reply);
 }
@@ -2768,7 +2768,7 @@ OSC::record_enabled (lo_message msg)
 	lo_message reply = lo_message_new ();
 	lo_message_add_int32 (reply, re);
 
-	lo_send_message (get_address (msg), "/record_enabled", reply);
+	lo_send_message (get_address (msg), X_("/record_enabled"), reply);
 
 	lo_message_free (reply);
 }
@@ -3087,7 +3087,7 @@ OSC::master_set_pan_stereo_position (float position, lo_message msg)
 		lo_message reply = lo_message_new ();
 		lo_message_add_float (reply, endposition);
 
-		lo_send_message (get_address (msg), "/master/pan_stereo_position", reply);
+		lo_send_message (get_address (msg), X_("/master/pan_stereo_position"), reply);
 		lo_message_free (reply);
 	}
 
@@ -3256,7 +3256,7 @@ OSC::route_get_sends(lo_message msg) {
 	}
 	// if used dedicated message path to identify this reply in async operation.
 	// Naming it #reply wont help the client to identify the content.
-	lo_send_message(get_address (msg), "/strip/sends", reply);
+	lo_send_message(get_address (msg), X_("/strip/sends"), reply);
 
 	lo_message_free(reply);
 
@@ -3320,7 +3320,7 @@ OSC::route_get_receives(lo_message msg) {
 
 	// I have used a dedicated message path to identify this reply in async operation.
 	// Naming it #reply wont help the client to identify the content.
-	lo_send_message(get_address (msg), "/strip/receives", reply);
+	lo_send_message(get_address (msg), X_("/strip/receives"), reply);
 	lo_message_free(reply);
 	return 0;
 }
@@ -3348,7 +3348,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 	}
 
 	//parse path first to find stripable
-	if (!strncmp (path, "/strip/", 7)) {
+	if (!strncmp (path, X_("/strip/"), 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
 			if (types[1] == 'f') {
@@ -3362,7 +3362,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 			strp = get_strip (ssid, get_address (msg));
 		}
 		ctr = 7;
-	} else if (!strncmp (path, "/select/", 8)) {
+	} else if (!strncmp (path, X_("/select/"), 8)) {
 		if (sur->expand_enable && sur->expand) {
 			strp = get_strip (sur->expand, get_address (msg));
 		} else {
@@ -3375,7 +3375,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 	if (strp) {
 		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
 		// other automatable controls can be added by repeating the next 6.5 lines
-		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
+		if ((!strncmp (&path[ctr], X_("fader"), 5)) || (!strncmp (&path[ctr], X_("gain"), 4))) {
 			if (strp->gain_control ()) {
 				control = strp->gain_control ();
 			} else {
@@ -3434,7 +3434,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 	}
 
 	//parse path first to find stripable
-	if (!strncmp (path, "/strip/", 7)) {
+	if (!strncmp (path, X_("/strip/"), 7)) {
 		// find ssid and stripable
 		if (argc > 1) {
 			if (types[0] == 'f') {
@@ -3448,7 +3448,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 			strp = get_strip (ssid, get_address (msg));
 		}
 		ctr = 7;
-	} else if (!strncmp (path, "/select/", 8)) {
+	} else if (!strncmp (path, X_("/select/"), 8)) {
 		if (sur->expand_enable && sur->expand) {
 			strp = get_strip (sur->expand, get_address (msg));
 		} else {
@@ -3461,7 +3461,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 	if (strp) {
 		boost::shared_ptr<AutomationControl> control = boost::shared_ptr<AutomationControl>();
 		// other automatable controls can be added by repeating the next 6.5 lines
-		if ((!strncmp (&path[ctr], "fader", 5)) || (!strncmp (&path[ctr], "gain", 4))) {
+		if ((!strncmp (&path[ctr], X_("fader"), 5)) || (!strncmp (&path[ctr], X_("gain"), 4))) {
 			if (strp->gain_control ()) {
 				control = strp->gain_control ();
 			} else {
@@ -3520,7 +3520,7 @@ OSC::route_mute (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/mute", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/mute"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3539,7 +3539,7 @@ OSC::sel_mute (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/mute", 0, get_address (msg));
+	return float_message(X_("/select/mute"), 0, get_address (msg));
 }
 
 int
@@ -3555,7 +3555,7 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/solo", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3572,7 +3572,7 @@ OSC::route_solo_iso (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/solo_iso", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/solo_iso"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3589,7 +3589,7 @@ OSC::route_solo_safe (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/solo_safe", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/solo_safe"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3607,7 +3607,7 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
 		}
 	}
-	return float_message("/select/solo", 0, get_address (msg));
+	return float_message(X_("/select/solo"), 0, get_address (msg));
 }
 
 int
@@ -3626,7 +3626,7 @@ OSC::sel_solo_iso (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/solo_iso", 0, get_address (msg));
+	return float_message(X_("/select/solo_iso"), 0, get_address (msg));
 }
 
 int
@@ -3645,7 +3645,7 @@ OSC::sel_solo_safe (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/solo_safe", 0, get_address (msg));
+	return float_message(X_("/select/solo_safe"), 0, get_address (msg));
 }
 
 int
@@ -3666,7 +3666,7 @@ OSC::sel_recenable (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return float_message("/select/recenable", 0, get_address (msg));
+	return float_message(X_("/select/recenable"), 0, get_address (msg));
 }
 
 int
@@ -3684,7 +3684,7 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 			}
 		}
 	}
-	return float_message_with_id ("/strip/recenable", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/recenable"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3720,7 +3720,7 @@ OSC::sel_recsafe (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return float_message("/select/record_safe", 0, get_address (msg));
+	return float_message(X_("/select/record_safe"), 0, get_address (msg));
 }
 
 int
@@ -3737,7 +3737,7 @@ OSC::route_recsafe (int ssid, int yn, lo_message msg)
 			}
 		}
 	}
-	return float_message_with_id ("/strip/record_safe", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/record_safe"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3759,7 +3759,7 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/monitor_input", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/monitor_input"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3783,7 +3783,7 @@ OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return float_message("/select/monitor_input", 0, get_address (msg));
+	return float_message(X_("/select/monitor_input"), 0, get_address (msg));
 }
 
 int
@@ -3805,7 +3805,7 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/monitor_disk", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/monitor_disk"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3829,7 +3829,7 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 			}
 		}
 	}
-	return float_message("/select/monitor_disk", 0, get_address (msg));
+	return float_message(X_("/select/monitor_disk"), 0, get_address (msg));
 }
 
 
@@ -3847,7 +3847,7 @@ OSC::strip_phase (int ssid, int yn, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/polarity", ssid, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/polarity"), ssid, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -3866,7 +3866,7 @@ OSC::sel_phase (uint32_t yn, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/polarity", 0, get_address (msg));
+	return float_message(X_("/select/polarity"), 0, get_address (msg));
 }
 
 int
@@ -3993,7 +3993,7 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 		SetStripableSelection (s);
 	} else {
 		if ((int) (sur->feedback.to_ulong())) {
-			float_message_with_id ("/strip/select", ssid, 0, sur->feedback[2], get_address (msg));
+			float_message_with_id (X_("/strip/select"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 	}
 
@@ -4041,7 +4041,7 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/strip/gain", ssid, -193, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/gain"), ssid, -193, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4071,7 +4071,7 @@ OSC::sel_gain (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/gain", -193, get_address (msg));
+	return float_message(X_("/select/gain"), -193, get_address (msg));
 }
 
 int
@@ -4102,7 +4102,7 @@ OSC::sel_dB_delta (float delta, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/gain", -193, get_address (msg));
+	return float_message(X_("/select/gain"), -193, get_address (msg));
 }
 
 int
@@ -4119,10 +4119,10 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 			fake_touch (s->gain_control());
 			s->gain_control()->set_value (s->gain_control()->interface_to_internal (pos), sur->usegroup);
 		} else {
-			return float_message_with_id ("/strip/fader", ssid, 0, sur->feedback[2], get_address (msg));
+			return float_message_with_id (X_("/strip/fader"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 	} else {
-		return float_message_with_id ("/strip/fader", ssid, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/strip/fader"), ssid, 0, sur->feedback[2], get_address (msg));
 	}
 	return 0;
 }
@@ -4168,7 +4168,7 @@ OSC::sel_fader (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/fader", 0, get_address (msg));
+	return float_message(X_("/select/fader"), 0, get_address (msg));
 }
 
 int
@@ -4196,7 +4196,7 @@ OSC::route_set_trim_dB (int ssid, float dB, lo_message msg)
 	int ret;
 	ret = route_set_trim_abs(ssid, dB_to_coefficient (dB), msg);
 	if (ret != 0) {
-		return float_message_with_id ("/strip/trimdB", ssid, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/strip/trimdB"), ssid, 0, sur->feedback[2], get_address (msg));
 	}
 
 return 0;
@@ -4218,7 +4218,7 @@ OSC::sel_trim (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/trimdB", 0, get_address (msg));
+	return float_message(X_("/select/trimdB"), 0, get_address (msg));
 }
 
 int
@@ -4255,7 +4255,7 @@ OSC::sel_pan_position (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/pan_stereo_position", 0.5, get_address (msg));
+	return float_message(X_("/select/pan_stereo_position"), 0.5, get_address (msg));
 }
 
 int
@@ -4274,7 +4274,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/pan_stereo_width", 1, get_address (msg));
+	return float_message(X_("/select/pan_stereo_width"), 1, get_address (msg));
 }
 
 int
@@ -4291,7 +4291,7 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/pan_stereo_position", ssid, 0.5, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4308,7 +4308,7 @@ OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 		}
 	}
 
-	return float_message_with_id ("/strip/pan_stereo_width", ssid, 1, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4370,7 +4370,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return float_message_with_id ("/select/send_gain", id, -193, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/select/send_gain"), id, -193, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -4401,7 +4401,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/send_gain", id, -193, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/send_gain"), id, -193, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4409,7 +4409,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return float_message_with_id ("/select/send_fader", id, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/select/send_fader"), id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -4434,7 +4434,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/send_fader", id, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/send_fader"), id, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4485,7 +4485,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (sur->send_page_size && (id > (int)sur->send_page_size)) {
-		return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/select/send_enable"), id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
 	if (sur->expand_enable) {
@@ -4509,7 +4509,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
 			if (!r) {
 				// should never get here
-				return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
+				return float_message_with_id (X_("/select/send_enable"), id, 0, sur->feedback[2], get_address (msg));
 			}
 			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(send_id));
 			if (snd) {
@@ -4522,7 +4522,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/send_enable", id, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/send_enable"), id, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -4541,7 +4541,7 @@ OSC::sel_master_send_enable (int state, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message ("/select/master_send_enable", 0, get_address(msg));
+	return float_message (X_("/select/master_send_enable"), 0, get_address(msg));
 }
 
 int
@@ -4595,10 +4595,10 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 		return -1;
 	}
 	if (!piid || piid > sur->plugins.size ()) {
-		return float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/select/plugin/parameter"), paid, 0, sur->feedback[2], get_address (msg));
 	}
 	if (sur->plug_page_size && (paid > (int)sur->plug_page_size)) {
-		return float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
+		return float_message_with_id (X_("/select/plugin/parameter"), paid, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s = sur->select;
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
@@ -4616,7 +4616,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	int parid = paid + (int)sur->plug_page - 1;
 	if (parid > (int) sur->plug_params.size ()) {
 		if (sur->feedback[13]) {
-			float_message_with_id ("/select/plugin/parameter", paid, 0, sur->feedback[2], get_address (msg));
+			float_message_with_id (X_("/select/plugin/parameter"), paid, 0, sur->feedback[2], get_address (msg));
 		}
 		return 0;
 	}
@@ -4673,7 +4673,7 @@ OSC::sel_plugin_activate (float state, lo_message msg)
 			}
 		}
 	}
-	float_message ("/select/plugin/activate", 0, get_address (msg));
+	float_message (X_("/select/plugin/activate"), 0, get_address (msg));
 	PBD::warning << "OSC: Select has no Plugin." << endmsg;
 	return 0;
 }
@@ -4717,7 +4717,7 @@ OSC::route_plugin_list (int ssid, lo_message msg) {
 		piid++;
 	}
 
-	lo_send_message (get_address (msg), "/strip/plugin/list", reply);
+	lo_send_message (get_address (msg), X_("/strip/plugin/list"), reply);
 	lo_message_free (reply);
 	return 0;
 }
@@ -4837,14 +4837,14 @@ OSC::route_plugin_descriptor (int ssid, int piid, lo_message msg) {
 			lo_message_add_double (reply, 0);
 		}
 
-		lo_send_message (get_address (msg), "/strip/plugin/descriptor", reply);
+		lo_send_message (get_address (msg), X_("/strip/plugin/descriptor"), reply);
 		lo_message_free (reply);
 	}
 
 	lo_message reply = lo_message_new ();
 	lo_message_add_int32 (reply, ssid);
 	lo_message_add_int32 (reply, piid);
-	lo_send_message (get_address (msg), "/strip/plugin/descriptor_end", reply);
+	lo_send_message (get_address (msg), X_("/strip/plugin/descriptor_end"), reply);
 	lo_message_free (reply);
 
 	return 0;
@@ -5081,7 +5081,7 @@ OSC::sel_pan_elevation (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/pan_elevation_position", 0, get_address (msg));
+	return float_message(X_("/select/pan_elevation_position"), 0, get_address (msg));
 }
 
 int
@@ -5100,7 +5100,7 @@ OSC::sel_pan_frontback (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/pan_frontback_position", 0.5, get_address (msg));
+	return float_message(X_("/select/pan_frontback_position"), 0.5, get_address (msg));
 }
 
 int
@@ -5119,7 +5119,7 @@ OSC::sel_pan_lfe (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/pan_lfe_control", 0, get_address (msg));
+	return float_message(X_("/select/pan_lfe_control"), 0, get_address (msg));
 }
 
 // compressor control
@@ -5139,7 +5139,7 @@ OSC::sel_comp_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/comp_enable", 0, get_address (msg));
+	return float_message(X_("/select/comp_enable"), 0, get_address (msg));
 }
 
 int
@@ -5158,7 +5158,7 @@ OSC::sel_comp_threshold (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/comp_threshold", 0, get_address (msg));
+	return float_message(X_("/select/comp_threshold"), 0, get_address (msg));
 }
 
 int
@@ -5177,7 +5177,7 @@ OSC::sel_comp_speed (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/comp_speed", 0, get_address (msg));
+	return float_message(X_("/select/comp_speed"), 0, get_address (msg));
 }
 
 int
@@ -5196,7 +5196,7 @@ OSC::sel_comp_mode (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/comp_mode", 0, get_address (msg));
+	return float_message(X_("/select/comp_mode"), 0, get_address (msg));
 }
 
 int
@@ -5215,7 +5215,7 @@ OSC::sel_comp_makeup (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/comp_makeup", 0, get_address (msg));
+	return float_message(X_("/select/comp_makeup"), 0, get_address (msg));
 }
 
 // EQ control
@@ -5236,7 +5236,7 @@ OSC::sel_eq_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_enable", 0, get_address (msg));
+	return float_message(X_("/select/eq_enable"), 0, get_address (msg));
 }
 
 int
@@ -5255,7 +5255,7 @@ OSC::sel_eq_hpf_freq (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_hpf/freq", 0, get_address (msg));
+	return float_message(X_("/select/eq_hpf/freq"), 0, get_address (msg));
 }
 
 int
@@ -5274,7 +5274,7 @@ OSC::sel_eq_lpf_freq (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_lpf/freq", 0, get_address (msg));
+	return float_message(X_("/select/eq_lpf/freq"), 0, get_address (msg));
 }
 
 int
@@ -5293,7 +5293,7 @@ OSC::sel_eq_hpf_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_hpf/enable", 0, get_address (msg));
+	return float_message(X_("/select/eq_hpf/enable"), 0, get_address (msg));
 }
 
 int
@@ -5312,7 +5312,7 @@ OSC::sel_eq_lpf_enable (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_lpf/enable", 0, get_address (msg));
+	return float_message(X_("/select/eq_lpf/enable"), 0, get_address (msg));
 }
 
 int
@@ -5331,7 +5331,7 @@ OSC::sel_eq_hpf_slope (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_hpf/slope", 0, get_address (msg));
+	return float_message(X_("/select/eq_hpf/slope"), 0, get_address (msg));
 }
 
 int
@@ -5350,7 +5350,7 @@ OSC::sel_eq_lpf_slope (float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message("/select/eq_lpf/slope", 0, get_address (msg));
+	return float_message(X_("/select/eq_lpf/slope"), 0, get_address (msg));
 }
 
 int
@@ -5372,7 +5372,7 @@ OSC::sel_eq_gain (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/eq_gain", id + 1, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/eq_gain"), id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -5394,7 +5394,7 @@ OSC::sel_eq_freq (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/eq_freq", id + 1, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/eq_freq"), id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -5416,7 +5416,7 @@ OSC::sel_eq_q (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/eq_q", id + 1, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/eq_q"), id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 int
@@ -5438,7 +5438,7 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	return float_message_with_id ("/select/eq_shape", id + 1, 0, sur->feedback[2], get_address (msg));
+	return float_message_with_id (X_("/select/eq_shape"), id + 1, 0, sur->feedback[2], get_address (msg));
 }
 
 // timer callbacks
@@ -5517,15 +5517,15 @@ XMLNode&
 OSC::get_state ()
 {
 	XMLNode& node (ControlProtocol::get_state());
-	node.set_property ("debugmode", (int32_t) _debugmode); // TODO: enum2str
-	node.set_property ("address-only", address_only);
-	node.set_property ("remote-port", remote_port);
-	node.set_property ("banksize", default_banksize);
-	node.set_property ("striptypes", default_strip);
-	node.set_property ("feedback", default_feedback);
-	node.set_property ("gainmode", default_gainmode);
-	node.set_property ("send-page-size", default_send_size);
-	node.set_property ("plug-page-size", default_plugin_size);
+	node.set_property (X_("debugmode"), (int32_t) _debugmode); // TODO: enum2str
+	node.set_property (X_("address-only"), address_only);
+	node.set_property (X_("remote-port"), remote_port);
+	node.set_property (X_("banksize"), default_banksize);
+	node.set_property (X_("striptypes"), default_strip);
+	node.set_property (X_("feedback"), default_feedback);
+	node.set_property (X_("gainmode"), default_gainmode);
+	node.set_property (X_("send-page-size"), default_send_size);
+	node.set_property (X_("plug-page-size"), default_plugin_size);
 	return node;
 }
 
@@ -5698,7 +5698,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 		}
 	}
 	int ret = 1; /* unhandled */
-	if (!strncmp (path, "/cue/aux", 8)) {
+	if (!strncmp (path, X_("/cue/aux"), 8)) {
 		// set our Aux bus
 		if (argc) {
 			if (value) {
@@ -5708,7 +5708,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			}
 		}
 	}
-	else if (!strncmp (path, "/cue/connect", 12)) {
+	else if (!strncmp (path, X_("/cue/connect"), 12)) {
 		// Connect to default Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_set (1, msg);
@@ -5716,7 +5716,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = 0;
 		}
 	}
-	else if (!strncmp (path, "/cue/next_aux", 13)) {
+	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
 		// switch to next Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_next (msg);
@@ -5724,7 +5724,7 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = 0;
 		}
 	}
-	else if (!strncmp (path, "/cue/previous_aux", 17)) {
+	else if (!strncmp (path, X_("/cue/previous_aux"), 17)) {
 		// switch to previous Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
 			ret = cue_previous (msg);
@@ -5732,24 +5732,24 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = 0;
 		}
 	}
-	else if (!strncmp (path, "/cue/send/fader/", 16) && strlen (path) > 16) {
+	else if (!strncmp (path, X_("/cue/send/fader/"), 16) && strlen (path) > 16) {
 		if (argc == 1) {
 			int id = atoi (&path[16]);
 			ret = cue_send_fader (id, value, msg);
 		}
 	}
-	else if (!strncmp (path, "/cue/send/enable/", 17) && strlen (path) > 17) {
+	else if (!strncmp (path, X_("/cue/send/enable/"), 17) && strlen (path) > 17) {
 		if (argc == 1) {
 			int id = atoi (&path[17]);
 			ret = cue_send_enable (id, value, msg);
 		}
 	}
-	else if (!strncmp (path, "/cue/fader", 10)) {
+	else if (!strncmp (path, X_("/cue/fader"), 10)) {
 		if (argc == 1) {
 			ret = cue_aux_fader (value, msg);
 		}
 	}
-	else if (!strncmp (path, "/cue/mute", 9)) {
+	else if (!strncmp (path, X_("/cue/mute"), 9)) {
 		if (argc == 1) {
 			ret = cue_aux_mute (value, msg);
 		}
@@ -5789,7 +5789,7 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	for (uint32_t n = 0; n < s->nstrips; ++n) {
 		boost::shared_ptr<Stripable> stp = s->strips[n];
 		if (stp) {
-			text_message (string_compose ("/cue/name/%1", n+1), stp->name(), addr);
+			text_message (string_compose (X_("/cue/name/%1"), n+1), stp->name(), addr);
 			if (aux == n+1) {
 				// aux must be at least one
 
@@ -5878,7 +5878,7 @@ OSC::cue_aux_fader (float position, lo_message msg)
 			}
 		}
 	}
-	float_message ("/cue/fader", 0, get_address (msg));
+	float_message (X_("/cue/fader"), 0, get_address (msg));
 	return -1;
 }
 
@@ -5899,7 +5899,7 @@ OSC::cue_aux_mute (float state, lo_message msg)
 			}
 		}
 	}
-	float_message ("/cue/mute", 0, get_address (msg));
+	float_message (X_("/cue/mute"), 0, get_address (msg));
 	return -1;
 }
 
@@ -5916,7 +5916,7 @@ OSC::cue_send_fader (uint32_t id, float val, lo_message msg)
 			return 0;
 		}
 	}
-	float_message (string_compose ("/cue/send/fader/%1", id), 0, get_address (msg));
+	float_message (string_compose (X_("/cue/send/fader/%1"), id), 0, get_address (msg));
 	return -1;
 }
 
@@ -5934,7 +5934,7 @@ OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 		}
 		return 0;
 	}
-	float_message (string_compose ("/cue/send/enable/%1", id), 0, get_address (msg));
+	float_message (string_compose (X_("/cue/send/enable/%1"), id), 0, get_address (msg));
 	return -1;
 }
 

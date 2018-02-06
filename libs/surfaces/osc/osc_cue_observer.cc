@@ -66,10 +66,10 @@ OSCCueObserver::clear_observer ()
 	strip_connections.drop_connections ();
 	send_end (0);
 	// all strip buttons should be off and faders 0 and etc.
-	_osc.text_message_with_id ("/cue/name", 0, " ", true, addr);
-	_osc.float_message ("/cue/mute", 0, addr);
-	_osc.float_message ("/cue/fader", 0, addr);
-	_osc.float_message ("/cue/signal", 0, addr);
+	_osc.text_message_with_id (X_("/cue/name"), 0, " ", true, addr);
+	_osc.float_message (X_("/cue/mute"), 0, addr);
+	_osc.float_message (X_("/cue/fader"), 0, addr);
+	_osc.float_message (X_("/cue/signal"), 0, addr);
 
 }
 
@@ -89,7 +89,7 @@ OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, S
 	name_changed (ARDOUR::Properties::name, 0);
 
 	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
-	send_change_message ("/cue/mute", 0, _strip->mute_control());
+	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
 
 	gain_timeout.push_back (0);
 	_last_gain.push_back (-1.0);
@@ -122,7 +122,7 @@ OSCCueObserver::tick ()
 		} else {
 			signal = 1;
 		}
-		_osc.float_message ("/cue/signal", signal, addr);
+		_osc.float_message (X_("/cue/signal"), signal, addr);
 	}
 	_last_meter = now_meter;
 
@@ -176,9 +176,9 @@ OSCCueObserver::send_end (uint32_t new_size)
 	send_connections.drop_connections ();
 	if (new_size < sends.size()) {
 		for (uint32_t i = new_size + 1; i <= sends.size(); i++) {
-			_osc.float_message (string_compose ("/cue/send/fader/%1", i), 0, addr);
-			_osc.float_message (string_compose ("/cue/send/enable/%1", i), 0, addr);
-			_osc.text_message_with_id ("/cue/send/name", i, " ", true, addr);
+			_osc.float_message (string_compose (X_("/cue/send/fader/%1"), i), 0, addr);
+			_osc.float_message (string_compose (X_("/cue/send/enable/%1"), i), 0, addr);
+			_osc.text_message_with_id (X_("/cue/send/name"), i, " ", true, addr);
 		}
 	}
 	gain_timeout.clear ();
@@ -206,9 +206,9 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 		return;
 	}
 	if (id) {
-		_osc.text_message_with_id ("/cue/send/name", id, sends[id - 1]->name(), true, addr);
+		_osc.text_message_with_id (X_("/cue/send/name"), id, sends[id - 1]->name(), true, addr);
 	} else {
-		_osc.text_message ("/cue/name", _strip->name(), addr);
+		_osc.text_message (X_("/cue/name"), _strip->name(), addr);
 	}
 }
 
@@ -231,11 +231,11 @@ OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable>
 		return;
 	}
 	if (id) {
-		_osc.text_message_with_id ("/cue/send/name", id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), true, addr);
-		_osc.float_message_with_id ("/cue/send/fader", id, controllable->internal_to_interface (controllable->get_value()), true, addr);
+		_osc.text_message_with_id (X_("/cue/send/name"), id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), true, addr);
+		_osc.float_message_with_id (X_("/cue/send/fader"), id, controllable->internal_to_interface (controllable->get_value()), true, addr);
 	} else {
-		_osc.text_message ("/cue/name", string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
-		_osc.float_message ("/cue/fader", controllable->internal_to_interface (controllable->get_value()), addr);
+		_osc.text_message (X_("/cue/name"), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
+		_osc.float_message (X_("/cue/fader"), controllable->internal_to_interface (controllable->get_value()), addr);
 	}
 
 	gain_timeout[id] = 8;
