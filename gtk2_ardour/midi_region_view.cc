@@ -683,10 +683,8 @@ MidiRegionView::motion (GdkEventMotion* ev)
 
 	}
 
-	/* we may be dragging some non-note object (eg. patch-change, sysex)
-	 */
-
-	return editor.drags()->motion_handler ((GdkEvent *) ev, false);
+	//let RegionView do it's thing.  drags are handled in here
+	return RegionView::canvas_group_event ((GdkEvent *) ev);
 }
 
 
