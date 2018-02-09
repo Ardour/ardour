@@ -759,7 +759,7 @@ private:
 	ARDOUR::MeterSection* _real_section;
 
 	bool _copy;
-	Editing::SnapType _old_snap_type;
+	Editing::GridType _old_grid_type;
 	Editing::SnapMode _old_snap_mode;
 	XMLNode* before_state;
 };

@@ -585,7 +585,7 @@ Editor::update_ruler_visibility ()
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
-	redisplay_tempo (false);
+	redisplay_grid (false);
 
 	/* Changing ruler visibility means that any lines on markers might need updating */
 	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
@@ -989,73 +989,72 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_ruler_scale =  bbt_show_many;
 
-	switch (_snap_type) {
-	case SnapToBeatDiv2:
+	switch (_grid_type) {
+	case GridTypeBeatDiv2:
 		bbt_beat_subdivision = 2;
 		break;
-	case SnapToBeatDiv3:
+	case GridTypeBeatDiv3:
 		bbt_beat_subdivision = 3;
 		break;
-	case SnapToBeatDiv4:
+	case GridTypeBeatDiv4:
 		bbt_beat_subdivision = 4;
 		break;
-	case SnapToBeatDiv5:
+	case GridTypeBeatDiv5:
 		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv6:
+	case GridTypeBeatDiv6:
 		bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv7:
+	case GridTypeBeatDiv7:
 		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv8:
+	case GridTypeBeatDiv8:
 		bbt_beat_subdivision = 8;
 		bbt_accent_modulo = 2;
 		break;
-	case SnapToBeatDiv10:
+	case GridTypeBeatDiv10:
 		bbt_beat_subdivision = 10;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
-	case SnapToBeatDiv12:
+	case GridTypeBeatDiv12:
 		bbt_beat_subdivision = 12;
 		bbt_accent_modulo = 3;
 		break;
-	case SnapToBeatDiv14:
+	case GridTypeBeatDiv14:
 		bbt_beat_subdivision = 14;
 		bbt_accent_modulo = 3; // XXX YIKES!
 		break;
-	case SnapToBeatDiv16:
+	case GridTypeBeatDiv16:
 		bbt_beat_subdivision = 16;
 		bbt_accent_modulo = 4;
 		break;
-	case SnapToBeatDiv20:
+	case GridTypeBeatDiv20:
 		bbt_beat_subdivision = 20;
 		bbt_accent_modulo = 5;
 		break;
-	case SnapToBeatDiv24:
+	case GridTypeBeatDiv24:
 		bbt_beat_subdivision = 24;
 		bbt_accent_modulo = 6;
 		break;
-	case SnapToBeatDiv28:
+	case GridTypeBeatDiv28:
 		bbt_beat_subdivision = 28;
 		bbt_accent_modulo = 7;
 		break;
-	case SnapToBeatDiv32:
+	case GridTypeBeatDiv32:
 		bbt_beat_subdivision = 32;
 		bbt_accent_modulo = 8;
 		break;
-	case SnapToBeatDiv64:
-		bbt_beat_subdivision = 64;
-		bbt_accent_modulo = 8;
+	case GridTypeBar:
+	case GridTypeBeat:
+		bbt_beat_subdivision = 4;
 		break;
-	case SnapToBeatDiv128:
-		bbt_beat_subdivision = 128;
-		bbt_accent_modulo = 8;
-		break;
-	default:
+	case GridTypeNone:
+	case GridTypeSmpte:
+	case GridTypeMinSec:
+	case GridTypeSamples:
 		bbt_beat_subdivision = 4;
 		break;
 	}
@@ -1075,6 +1074,21 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_bar_helper_on = true;
 	}
 
+	//set upper limits on the beat_density based on the user's grid selection
+	if ( _grid_type == GridTypeBar ) {
+		beat_density = fmax (beat_density, 16.01);
+	} else if ( _grid_type == GridTypeBeat ) {
+		beat_density = fmax (beat_density, 4.001);
+	}  else if ( _grid_type == GridTypeBeatDiv4) {
+		beat_density = fmax (beat_density, 2.001);
+	} else if ( _grid_type == GridTypeBeatDiv8) {
+		beat_density = fmax (beat_density, 1.001);
+	} else if ( _grid_type == GridTypeBeatDiv16) {
+		beat_density = fmax (beat_density, 0.2501);
+	} else if ( _grid_type == GridTypeBeatDiv32) {
+		beat_density = fmax (beat_density, 0.12501);
+	}
+
 	if (beat_density > 8192) {
 		bbt_ruler_scale = bbt_show_many;
 	} else if (beat_density > 1024) {
@@ -1084,16 +1098,14 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	} else if (beat_density > 128) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 16) {
-		bbt_ruler_scale =  bbt_show_1;
-	} else if (beat_density > 2) {
+		bbt_ruler_scale = bbt_show_1;
+	} else if (beat_density > 4) {
 		bbt_ruler_scale =  bbt_show_beats;
-	} else  if (beat_density > 0.5) {
+	} else  if (beat_density > 1) {
 		bbt_ruler_scale =  bbt_show_ticks;
-	} else {
+	} else  if (beat_density > 0.25) {
 		bbt_ruler_scale =  bbt_show_ticks_detail;
-	}
-
-	if ((bbt_ruler_scale == bbt_show_ticks_detail) && beats < 3) {
+	} else {
 		bbt_ruler_scale =  bbt_show_ticks_super_detail;
 	}
 }
@@ -1713,6 +1725,10 @@ Editor::metric_get_minsec (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdoubl
 		lower = 0;
 	}
 
+	if ( minsec_mark_interval== 0) {  //we got here too early; divide-by-zero imminent
+		return;
+	}
+	
 	pos = (((1000 * (samplepos_t) floor(lower)) + (minsec_mark_interval/2))/minsec_mark_interval) * minsec_mark_interval;
 
 	switch (minsec_ruler_scale) {

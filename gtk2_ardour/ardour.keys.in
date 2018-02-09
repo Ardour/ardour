@@ -341,11 +341,9 @@ This mode provides many different operations on both regions and control points,
 ;; numbers
 
 @vis|Editor/cycle-zoom-focus|1|cycle to next zoom focus
-@grid|Editor/cycle-snap-mode|2|cycle to next grid snap mode
-@grid|Editor/prev-snap-choice|3|use next grid unit
-@grid|Editor/prev-snap-choice-music-only|<@PRIMARY@>3|use previous grid unit
-@grid|Editor/next-snap-choice|4|use next grid unit
-@grid|Editor/next-snap-choice-music-only|<@PRIMARY@>4|use next musical grid unit
+@grid|Editor/cycle-snap-mode|2|cycle to next snap mode
+@grid|Editor/prev-grid-choice|3|use prev grid unit
+@grid|Editor/next-grid-choice|4|use next grid unit
 @gmode|Transport/ToggleAutoPlay|5|toggle auto play
 @gmode|Transport/ToggleAutoReturn|6|toggle auto return
 @gmode|Transport/ToggleClick|7|toggle click (metronome)

@@ -193,16 +193,16 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions, bool snap
 	// region boundaries, don't pay attention to them
 
 	if (regions.size() == 1) {
-		switch (_snap_type) {
-		case SnapToRegionStart:
-		case SnapToRegionSync:
-		case SnapToRegionEnd:
-			break;
-		default:
-			if (snap_sample) {
+//		switch (_snap_type) {   //ToDo !!!
+//		case SnapToRegionStart:
+//		case SnapToRegionSync:
+//		case SnapToRegionEnd:
+//			break;
+//		default:
+//			if (snap_sample) {
 				snap_to (where);
-			}
-		}
+//			}
+//		}
 	} else {
 		if (snap_sample) {
 			snap_to (where);
@@ -707,6 +707,13 @@ Editor::move_to_end ()
 void
 Editor::build_region_boundary_cache ()
 {
+
+	//ToDo:  maybe set a timer so we don't recalutate when lots of changes are coming in 
+	//ToDo:  maybe somehow defer this until session is fully loaded.
+	
+	if ( !_region_boundary_cache_dirty )
+		return;
+	
 	samplepos_t pos = 0;
 	vector<RegionPoint> interesting_points;
 	boost::shared_ptr<Region> r;
@@ -720,37 +727,30 @@ Editor::build_region_boundary_cache ()
 	}
 
 	bool maybe_first_sample = false;
-
-	switch (_snap_type) {
-	case SnapToRegionStart:
+		
+	if ( UIConfiguration::instance().get_snap_to_region_start() ) {
 		interesting_points.push_back (Start);
 		maybe_first_sample = true;
-		break;
-	case SnapToRegionEnd:
-		interesting_points.push_back (End);
-		break;
-	case SnapToRegionSync:
-		interesting_points.push_back (SyncPoint);
-		break;
-	case SnapToRegionBoundary:
-		interesting_points.push_back (Start);
-		interesting_points.push_back (End);
-		maybe_first_sample = true;
-		break;
-	default:
-		fatal << string_compose (_("build_region_boundary_cache called with snap_type = %1"), _snap_type) << endmsg;
-		abort(); /*NOTREACHED*/
-		return;
 	}
-
+	
+	if ( UIConfiguration::instance().get_snap_to_region_end() ) {
+		interesting_points.push_back (End);
+	}
+	
+	if ( UIConfiguration::instance().get_snap_to_region_sync() ) {
+		interesting_points.push_back (SyncPoint);
+	}
+	
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;
 
-	if (!selection->tracks.empty()) {
-		tlist = selection->tracks.filter_to_unique_playlists ();
-	} else {
+	//in the past, we used the track selection to limit snap.  I think this is not desired.
+	//or if it is,  it needs to be updated every time the track selection changes (so the snapped-cursor can show it)
+//	if (!selection->tracks.empty()) {
+//		tlist = selection->tracks.filter_to_unique_playlists ();
+//	} else {
 		tlist = track_views.filter_to_unique_playlists ();
-	}
+//	}
 
 	if (maybe_first_sample) {
 		TrackViewList::const_iterator i;
@@ -822,6 +822,8 @@ Editor::build_region_boundary_cache ()
 	/* finally sort to be sure that the order is correct */
 
 	sort (region_boundary_cache.begin(), region_boundary_cache.end());
+	
+	_region_boundary_cache_dirty = false;
 }
 
 boost::shared_ptr<Region>
@@ -7057,7 +7059,7 @@ Editor::snap_regions_to_grid ()
 		(*r)->region()->clear_changes ();
 
 		MusicSample start ((*r)->region()->first_sample (), 0);
-		snap_to (start);
+		snap_to (start, RoundNearest, SnapToGrid );
 		(*r)->region()->set_position (start.sample, start.division);
 		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
@@ -7266,7 +7268,7 @@ Editor::playhead_forward_to_grid ()
 
 	if (pos.sample < max_samplepos - 1) {
 		pos.sample += 2;
-		snap_to_internal (pos, RoundUpAlways, false, true);
+		snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
 	}
 }
@@ -7283,7 +7285,7 @@ Editor::playhead_backward_to_grid ()
 
 	if (pos.sample > 2) {
 		pos.sample -= 2;
-		snap_to_internal (pos, RoundDownAlways, false, true);
+		snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
 	}
 }

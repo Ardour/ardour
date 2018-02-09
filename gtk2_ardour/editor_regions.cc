@@ -516,6 +516,15 @@ EditorRegions::remove_unused_regions ()
 void
 EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
+	//maybe update the grid here
+	PropertyChange grid_interests;
+	grid_interests.add (ARDOUR::Properties::position);
+	grid_interests.add (ARDOUR::Properties::length);
+	grid_interests.add (ARDOUR::Properties::sync_position);
+	if (what_changed.contains (grid_interests)) {
+		_editor->mark_region_boundary_cache_dirty();
+	}
+
 	PropertyChange our_interests;
 
 	our_interests.add (ARDOUR::Properties::name);

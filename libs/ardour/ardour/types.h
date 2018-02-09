@@ -238,6 +238,11 @@ namespace ARDOUR {
 		RoundUpMaybe    = 2    ///< Round up only if necessary
 	};
 
+	enum SnapPref {
+		SnapToAny    = 0,   ///< Snaps to the closest of ( snap prefs, grid quantization )
+		SnapToGrid   = 1,   ///< Prefer snapping to the closest grid quantization, if a Grid selection is enabled
+	};
+
 	class AnyTime {
 	public:
 		enum Type {

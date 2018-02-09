@@ -133,9 +133,9 @@ public:
 	/** Set the snap type.
 	 * @param t Snap type (defined in editing_syms.h)
 	 */
-	virtual void set_snap_to (Editing::SnapType t) = 0;
+	virtual void set_grid_to (Editing::GridType t) = 0;
 
-	virtual Editing::SnapType snap_type () const = 0;
+	virtual Editing::GridType grid_type () const = 0;
 	virtual Editing::SnapMode snap_mode () const = 0;
 
 	/** Set the snap mode.
@@ -149,6 +149,7 @@ public:
 	 */
 	virtual void snap_to (ARDOUR::MusicSample& first,
 	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
 	                      bool                for_mark  = false,
 	                      bool                ensure_snap = false) = 0;
 
@@ -219,8 +220,7 @@ public:
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void set_show_measures (bool yn) = 0;
-	virtual bool show_measures () const = 0;
+	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
 	virtual void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
 	virtual void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
@@ -461,7 +461,8 @@ public:
 	virtual void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                                    GdkEvent const *    ev,
 	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                    bool                for_mark  = false) = 0;
+	                                    ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
+	                                    bool                for_mark = false) = 0;
 
 	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
 
@@ -470,6 +471,9 @@ public:
 	virtual RegionSelection get_regions_from_selection_and_mouse (samplepos_t) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
+
+	virtual void build_region_boundary_cache () = 0;
+	virtual void mark_region_boundary_cache_dirty () = 0;
 
 	virtual void mouse_add_new_tempo_event (samplepos_t where) = 0;
 	virtual void mouse_add_new_meter_event (samplepos_t where) = 0;

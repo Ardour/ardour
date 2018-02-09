@@ -58,6 +58,7 @@
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
+#include "rc_option_editor.h"
 #include "automation_time_axis.h"
 #include "control_point.h"
 #include "selection.h"
@@ -217,6 +218,25 @@ Editor::mouse_mode_object_range_toggled()
 	set_mouse_mode(m, true);  //call this so the button styles can get updated
 }
 
+bool
+Editor::snap_mode_button_clicked (GdkEventButton* ev)
+{
+	if (ev->button != 3) {
+		cycle_snap_mode();
+		return true;
+	}
+
+	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
+	if ( rc_option_editor ) {
+		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
+		rc_option_editor->set_current_page (_("Editor/Snap"));
+	}
+
+	return true;
+}
+
+
+
 static Glib::RefPtr<Action>
 get_mouse_mode_action(MouseMode m)
 {
@@ -296,10 +316,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
 	if (!was_internal && internal_editing()) {
-		snap_type_action(internal_snap_type)->set_active(true);
+		grid_type_action(internal_grid_type)->set_active(true);
 		snap_mode_action(internal_snap_mode)->set_active(true);
 	} else if (was_internal && !internal_editing()) {
-		snap_type_action(pre_internal_snap_type)->set_active(true);
+		grid_type_action(pre_internal_grid_type)->set_active(true);
 		snap_mode_action(pre_internal_snap_mode)->set_active(true);
 	}
 
@@ -1571,7 +1591,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MarkerBarItem:
 			if (!_dragging_playhead) {
-				snap_to_with_modifier (where, event, RoundNearest, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
 				mouse_add_new_marker (where.sample);
 			}
 			return true;
@@ -1579,7 +1599,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case CdMarkerBarItem:
 			if (!_dragging_playhead) {
 				// if we get here then a dragged range wasn't done
-				snap_to_with_modifier (where, event, RoundNearest, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
 				mouse_add_new_marker (where.sample, true);
 			}
 			return true;
@@ -2085,7 +2105,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		snap_to_with_modifier (where, event);
 		set_snapped_cursor_position (where.sample);
 	}
-		
+
 	//drags might also change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 	if (_drags->active ()) {
 	 	return _drags->motion_handler (event, from_autoscroll);
@@ -2377,22 +2397,9 @@ Editor::mouse_rename_region (ArdourCanvas::Item* /*item*/, GdkEvent* /*event*/)
 void
 Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
 {
-	/* no brushing without a useful snap setting */
-
-	switch (_snap_mode) {
-	case SnapMagnetic:
-		return; /* can't work because it allows region to be placed anywhere */
-	default:
-		break; /* OK */
-	}
-
-	switch (_snap_type) {
-	case SnapToMark:
+	/* no brushing without a useful quantize setting */
+	if (_grid_type == GridTypeNone)
 		return;
-
-	default:
-		break;
-	}
 
 	/* don't brush a copy over the original */
 

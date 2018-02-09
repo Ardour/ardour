@@ -133,7 +133,7 @@
 #include "selection.h"
 #include "simple_progress_dialog.h"
 #include "sfdb_ui.h"
-#include "tempo_lines.h"
+#include "grid_lines.h"
 #include "time_axis_view.h"
 #include "time_info_box.h"
 #include "timers.h"
@@ -160,44 +160,28 @@ using Gtkmm2ext::Keyboard;
 
 double Editor::timebar_height = 15.0;
 
-static const gchar *_snap_type_strings[] = {
-	N_("CD Samples"),
-	N_("TC Frames"),
-	N_("TC Seconds"),
-	N_("TC Minutes"),
-	N_("Seconds"),
-	N_("Minutes"),
-	N_("Beats/128"),
-	N_("Beats/64"),
-	N_("Beats/32"),
-	N_("Beats/28"),
-	N_("Beats/24"),
-	N_("Beats/20"),
-	N_("Beats/16"),
-	N_("Beats/14"),
-	N_("Beats/12"),
-	N_("Beats/10"),
-	N_("Beats/8"),
-	N_("Beats/7"),
-	N_("Beats/6"),
-	N_("Beats/5"),
-	N_("Beats/4"),
-	N_("Beats/3"),
-	N_("Beats/2"),
-	N_("Beats"),
-	N_("Bars"),
-	N_("Marks"),
-	N_("Region starts"),
-	N_("Region ends"),
-	N_("Region syncs"),
-	N_("Region bounds"),
-	0
-};
-
-static const gchar *_snap_mode_strings[] = {
+static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
-	N_("Grid"),
-	N_("Magnetic"),
+	N_("Bar"),
+	N_("1/4 Note"),
+	N_("1/8 Note"),
+	N_("1/16 Note"),
+	N_("1/32 Note"),
+	N_("1/64 Note"),
+	N_("1/128 Note"),
+	N_("1/3 (8th triplet)"), // or "1/12" ?
+	N_("1/6 (16th triplet)"),
+	N_("1/12 (32nd triplet)"),
+	N_("1/24 (64th triplet)"),
+	N_("1/5 (8th quintuplet)"),
+	N_("1/10 (16th quintuplet)"),
+	N_("1/20 (32nd quintuplet)"),
+	N_("1/7 (8th septuplet)"),
+	N_("1/14 (16th septuplet)"),
+	N_("1/28 (32nd septuplet)"),
+	N_("Smpte"),
+	N_("MinSec"),
+	N_("Samples"),
 	0
 };
 
@@ -252,9 +236,9 @@ Editor::Editor ()
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
 	, mouse_mode (MouseObject)
-	, pre_internal_snap_type (SnapToBeat)
+	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
-	, internal_snap_type (SnapToBeat)
+	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
@@ -337,6 +321,7 @@ Editor::Editor ()
 	, videotl_group (0)
 	, snapped_cursor (0)
 	, playhead_cursor (0)
+	, _region_boundary_cache_dirty (true)
 	, edit_packer (4, 4, true)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
@@ -366,7 +351,7 @@ Editor::Editor ()
 	, scrub_reverse_distance (0)
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
-	, _snap_type (SnapToBeat)
+	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
@@ -374,11 +359,10 @@ Editor::Editor ()
 	  /* , last_event_time { 0, 0 } */ /* this initialization style requires C++11 */
 	, _dragging_playhead (false)
 	, _dragging_edit_point (false)
-	, _show_measures (true)
 	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
-	, tempo_lines (0)
+	, grid_lines (0)
 	, global_rect_group (0)
 	, time_line_group (0)
 	, tempo_marker_menu (0)
@@ -472,8 +456,7 @@ Editor::Editor ()
 	selection_op_history.clear();
 	before.clear();
 
-	snap_type_strings =  I18N (_snap_type_strings);
-	snap_mode_strings =  I18N (_snap_mode_strings);
+	grid_type_strings =  I18N (_grid_type_strings);
 	zoom_focus_strings = I18N (_zoom_focus_strings);
 	edit_mode_strings = I18N (_edit_mode_strings);
 	edit_point_strings = I18N (_edit_point_strings);
@@ -485,8 +468,7 @@ Editor::Editor ()
 	build_edit_mode_menu();
 	build_zoom_focus_menu();
 	build_track_count_menu();
-	build_snap_mode_menu();
-	build_snap_type_menu();
+	build_grid_type_menu();
 	build_edit_point_menu();
 
 	location_marker_color = UIConfiguration::instance().color ("location marker");
@@ -855,6 +837,8 @@ Editor::Editor ()
 
 	setup_fade_images ();
 
+	set_grid_to (GridTypeNone);
+
 	instant_save ();
 }
 
@@ -908,7 +892,7 @@ Editor::button_settings () const
 bool
 Editor::get_smart_mode () const
 {
-	return ((current_mouse_mode() == Editing::MouseObject) && smart_mode_action->get_active());
+	return ((current_mouse_mode() == MouseObject) && smart_mode_action->get_active());
 }
 
 void
@@ -1428,18 +1412,6 @@ Editor::set_session (Session *t)
 	super_rapid_screen_update_connection = Timers::super_rapid_connect (
 		sigc::mem_fun (*this, &Editor::super_rapid_screen_update)
 		);
-
-	switch (_snap_type) {
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
-		build_region_boundary_cache ();
-		break;
-
-	default:
-		break;
-	}
 
 	/* register for undo history */
 	_session->register_with_memento_command_factory(id(), this);
@@ -2138,43 +2110,73 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
-SnapType
-Editor::snap_type() const
+GridType
+Editor::grid_type() const
 {
-	return _snap_type;
+	return _grid_type;
 }
 
 bool
-Editor::snap_musical() const
+Editor::grid_musical() const
 {
-	switch (_snap_type) {
-	case SnapToBeatDiv128:
-	case SnapToBeatDiv64:
-	case SnapToBeatDiv32:
-	case SnapToBeatDiv28:
-	case SnapToBeatDiv24:
-	case SnapToBeatDiv20:
-	case SnapToBeatDiv16:
-	case SnapToBeatDiv14:
-	case SnapToBeatDiv12:
-	case SnapToBeatDiv10:
-	case SnapToBeatDiv8:
-	case SnapToBeatDiv7:
-	case SnapToBeatDiv6:
-	case SnapToBeatDiv5:
-	case SnapToBeatDiv4:
-	case SnapToBeatDiv3:
-	case SnapToBeatDiv2:
-	case SnapToBeat:
-	case SnapToBar:
+	switch (_grid_type) {
+	case GridTypeBeatDiv32:
+	case GridTypeBeatDiv28:
+	case GridTypeBeatDiv24:
+	case GridTypeBeatDiv20:
+	case GridTypeBeatDiv16:
+	case GridTypeBeatDiv14:
+	case GridTypeBeatDiv12:
+	case GridTypeBeatDiv10:
+	case GridTypeBeatDiv8:
+	case GridTypeBeatDiv7:
+	case GridTypeBeatDiv6:
+	case GridTypeBeatDiv5:
+	case GridTypeBeatDiv4:
+	case GridTypeBeatDiv3:
+	case GridTypeBeatDiv2:
+	case GridTypeBeat:
+	case GridTypeBar:
 		return true;
-	default:
-		break;
+	case GridTypeNone:
+	case GridTypeSmpte:
+	case GridTypeMinSec:
+	case GridTypeSamples:
+		return false;
 	}
-
 	return false;
 }
 
+bool
+Editor::grid_nonmusical() const
+{
+	switch (_grid_type) {
+	case GridTypeSmpte:
+	case GridTypeMinSec:
+	case GridTypeSamples:
+		return true;
+	case GridTypeBeatDiv32:
+	case GridTypeBeatDiv28:
+	case GridTypeBeatDiv24:
+	case GridTypeBeatDiv20:
+	case GridTypeBeatDiv16:
+	case GridTypeBeatDiv14:
+	case GridTypeBeatDiv12:
+	case GridTypeBeatDiv10:
+	case GridTypeBeatDiv8:
+	case GridTypeBeatDiv7:
+	case GridTypeBeatDiv6:
+	case GridTypeBeatDiv5:
+	case GridTypeBeatDiv4:
+	case GridTypeBeatDiv3:
+	case GridTypeBeatDiv2:
+	case GridTypeBeat:
+	case GridTypeBar:
+	case GridTypeNone:
+		return false;
+	}
+	return false;
+}
 SnapMode
 Editor::snap_mode() const
 {
@@ -2182,67 +2184,79 @@ Editor::snap_mode() const
 }
 
 void
-Editor::set_snap_to (SnapType st)
+Editor::set_grid_to (GridType gt)
 {
-	unsigned int snap_ind = (unsigned int)st;
+	if (_grid_type == gt) {  //already set
+		return;
+	}
+
+	unsigned int grid_ind = (unsigned int)gt;
 
 	if (internal_editing()) {
-		internal_snap_type = st;
+		internal_grid_type = gt;
 	} else {
-		pre_internal_snap_type = st;
+		pre_internal_grid_type = gt;
 	}
 
-	_snap_type = st;
+	_grid_type = gt;
 
-	if (snap_ind > snap_type_strings.size() - 1) {
-		snap_ind = 0;
-		_snap_type = (SnapType)snap_ind;
+	if (grid_ind > grid_type_strings.size() - 1) {
+		grid_ind = 0;
+		_grid_type = (GridType)grid_ind;
 	}
 
-	string str = snap_type_strings[snap_ind];
+	string str = grid_type_strings[grid_ind];
 
-	if (str != snap_type_selector.get_text()) {
-		snap_type_selector.set_text (str);
+	if (str != grid_type_selector.get_text()) {
+		grid_type_selector.set_text (str);
+	}
+
+	//show appropriate rulers for this grid setting.  (ToDo:  perhaps make this optional)
+	//Currently this is 'required' because the RULER calculates the grid_marks which will be used by grid_lines 
+	if ( grid_musical() ) {
+		ruler_tempo_action->set_active(true);
+		ruler_meter_action->set_active(true);
+
+		ruler_bbt_action->set_active(true);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeSmpte ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(true);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeMinSec ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(true);
+		ruler_samples_action->set_active(false);
+	} else if (_grid_type == GridTypeSamples ) {
+		ruler_tempo_action->set_active(false);
+		ruler_meter_action->set_active(false);
+
+		ruler_bbt_action->set_active(false);
+		ruler_timecode_action->set_active(false);
+		ruler_minsec_action->set_active(false);
+		ruler_samples_action->set_active(true);
 	}
 
 	instant_save ();
 
-	switch (_snap_type) {
-	case SnapToBeatDiv128:
-	case SnapToBeatDiv64:
-	case SnapToBeatDiv32:
-	case SnapToBeatDiv28:
-	case SnapToBeatDiv24:
-	case SnapToBeatDiv20:
-	case SnapToBeatDiv16:
-	case SnapToBeatDiv14:
-	case SnapToBeatDiv12:
-	case SnapToBeatDiv10:
-	case SnapToBeatDiv8:
-	case SnapToBeatDiv7:
-	case SnapToBeatDiv6:
-	case SnapToBeatDiv5:
-	case SnapToBeatDiv4:
-	case SnapToBeatDiv3:
-	case SnapToBeatDiv2: {
+	if ( grid_musical() ) {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
-		break;
 	}
 
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
-		build_region_boundary_cache ();
-		break;
+	mark_region_boundary_cache_dirty ();
 
-	default:
-		/* relax */
-		break;
-	}
-
-	redisplay_tempo (false);
+	redisplay_grid (false);
 
 	SnapChanged (); /* EMIT SIGNAL */
 }
@@ -2250,8 +2264,6 @@ Editor::set_snap_to (SnapType st)
 void
 Editor::set_snap_mode (SnapMode mode)
 {
-	string str = snap_mode_strings[(int)mode];
-
 	if (internal_editing()) {
 		internal_snap_mode = mode;
 	} else {
@@ -2259,9 +2271,11 @@ Editor::set_snap_mode (SnapMode mode)
 	}
 
 	_snap_mode = mode;
-
-	if (str != snap_mode_selector.get_text ()) {
-		snap_mode_selector.set_text (str);
+	
+	if (_snap_mode == SnapOff ) {
+		snap_mode_button.set_active_state (Gtkmm2ext::Off);
+	} else {
+		snap_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	}
 
 	instant_save ();
@@ -2292,7 +2306,6 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
-//ToDo:  hide or show mouse_cursor
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
@@ -2360,11 +2373,11 @@ Editor::set_state (const XMLNode& node, int version)
 		set_visible_track_count (cnt);
 	}
 
-	SnapType snap_type;
-	if (!node.get_property ("snap-to", snap_type)) {
-		snap_type = _snap_type;
+	GridType grid_type;
+	if (!node.get_property ("grid-type", grid_type)) {
+		grid_type = _grid_type;
 	}
-	set_snap_to (snap_type);
+	set_grid_to (grid_type);
 
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
@@ -2378,9 +2391,9 @@ Editor::set_state (const XMLNode& node, int version)
 		set_snap_mode (_snap_mode);
 	}
 
-	node.get_property ("internal-snap-to", internal_snap_type);
+	node.get_property ("internal-grid-type", internal_grid_type);
 	node.get_property ("internal-snap-mode", internal_snap_mode);
-	node.get_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node.get_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 
 	std::string mm_str;
@@ -2420,8 +2433,6 @@ Editor::set_state (const XMLNode& node, int version)
 	} else {
 		set_edit_point_preference (_edit_point);
 	}
-
-	node.get_property ("show-measures", _show_measures);
 
 	if (node.get_property ("follow-playhead", yn)) {
 		set_follow_playhead (yn);
@@ -2508,15 +2519,6 @@ Editor::set_state (const XMLNode& node, int version)
 		 */
 		RefPtr<Action> act;
 
-		act = ActionManager::get_action (X_("Editor"), X_("ToggleMeasureVisibility"));
-		if (act) {
-			yn = _show_measures;
-			RefPtr<ToggleAction> tact = RefPtr<ToggleAction>::cast_dynamic(act);
-			/* do it twice to force the change */
-			tact->set_active (!yn);
-			tact->set_active (yn);
-		}
-
 		act = ActionManager::get_action (X_("Editor"), X_("toggle-follow-playhead"));
 		yn = _follow_playhead;
 		if (act) {
@@ -2557,11 +2559,11 @@ Editor::get_state ()
 	node->set_property ("zoom-focus", zoom_focus);
 
 	node->set_property ("zoom", samples_per_pixel);
-	node->set_property ("snap-to", _snap_type);
+	node->set_property ("grid-type", _grid_type);
 	node->set_property ("snap-mode", _snap_mode);
-	node->set_property ("internal-snap-to", internal_snap_type);
+	node->set_property ("internal-grid-type", internal_grid_type);
 	node->set_property ("internal-snap-mode", internal_snap_mode);
-	node->set_property ("pre-internal-snap-to", pre_internal_snap_type);
+	node->set_property ("pre-internal-grid-type", pre_internal_grid_type);
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
@@ -2570,7 +2572,6 @@ Editor::get_state ()
 	node->set_property ("left-frame", _leftmost_sample);
 	node->set_property ("y-origin", vertical_adjustment.get_value ());
 
-	node->set_property ("show-measures", _show_measures);
 	node->set_property ("maximised", _maximised);
 	node->set_property ("follow-playhead", _follow_playhead);
 	node->set_property ("stationary-playhead", _stationary_playhead);
@@ -2658,7 +2659,7 @@ Editor::set_snapped_cursor_position (samplepos_t pos)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, RoundMode direction, bool for_mark)
+Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, RoundMode direction, SnapPref pref, bool for_mark)
 {
 	if (!_session || !event) {
 		return;
@@ -2666,16 +2667,16 @@ Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, Round
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else {
 			start.set (start.sample, 0);
 		}
 	} else {
 		if (_snap_mode != SnapOff) {
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
-			snap_to_internal (start, direction, for_mark);
+			snap_to_internal (start, direction, pref, for_mark);
 		} else {
 			start.set (start.sample, 0);
 		}
@@ -2683,249 +2684,142 @@ Editor::snap_to_with_modifier (MusicSample& start, GdkEvent const * event, Round
 }
 
 void
-Editor::snap_to (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
 	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
 		start.set (start.sample, 0);
 		return;
 	}
 
-	snap_to_internal (start, direction, for_mark, ensure_snap);
+	snap_to_internal (start, direction, pref, for_mark, ensure_snap);
 }
 
 void
-Editor::timecode_snap_to_internal (MusicSample& pos, RoundMode direction, bool /*for_mark*/)
+check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samplepos_t &best  )
 {
-	samplepos_t start = pos.sample;
-	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
-	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
-
-	switch (_snap_type) {
-	case SnapToTimecodeFrame:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    fmod((double)start, (double)_session->samples_per_timecode_frame()) == 0) {
-			/* start is already on a whole timecode frame, do nothing */
-		} else if (((direction == 0) && (fmod((double)start, (double)_session->samples_per_timecode_frame()) > (_session->samples_per_timecode_frame() / 2))) || (direction > 0)) {
-			start = (samplepos_t) (ceil ((double) start / _session->samples_per_timecode_frame()) * _session->samples_per_timecode_frame());
-		} else {
-			start = (samplepos_t) (floor ((double) start / _session->samples_per_timecode_frame()) *  _session->samples_per_timecode_frame());
-		}
-		break;
-
-	case SnapToTimecodeSeconds:
-		if (_session->config.get_timecode_offset_negative()) {
-			start += _session->config.get_timecode_offset ();
-		} else {
-			start -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    (start % one_timecode_second == 0)) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start % one_timecode_second > one_timecode_second / 2)) || direction > 0) {
-			start = (samplepos_t) ceil ((double) start / one_timecode_second) * one_timecode_second;
-		} else {
-			start = (samplepos_t) floor ((double) start / one_timecode_second) * one_timecode_second;
-		}
-
-		if (_session->config.get_timecode_offset_negative()) {
-			start -= _session->config.get_timecode_offset ();
-		} else {
-			start += _session->config.get_timecode_offset ();
-		}
-		break;
-
-	case SnapToTimecodeMinutes:
-		if (_session->config.get_timecode_offset_negative()) {
-			start += _session->config.get_timecode_offset ();
-		} else {
-			start -= _session->config.get_timecode_offset ();
-		}
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    (start % one_timecode_minute == 0)) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start % one_timecode_minute > one_timecode_minute / 2)) || direction > 0) {
-			start = (samplepos_t) ceil ((double) start / one_timecode_minute) * one_timecode_minute;
-		} else {
-			start = (samplepos_t) floor ((double) start / one_timecode_minute) * one_timecode_minute;
-		}
-		if (_session->config.get_timecode_offset_negative()) {
-			start -= _session->config.get_timecode_offset ();
-		} else {
-			start += _session->config.get_timecode_offset ();
-		}
-		break;
-	default:
-		fatal << "Editor::smpte_snap_to_internal() called with non-timecode snap type!" << endmsg;
-		abort(); /*NOTREACHED*/
+	samplepos_t diff = abs( test - presnap );
+	if ( diff < dist ) {
+		dist = diff;
+		best = test;
 	}
 
-	pos.set (start, 0);
+	test = max_samplepos; //reset this so it doesn't get accidentally reused
+}
+
+samplepos_t
+Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presnap, RoundMode direction)
+{
+	samplepos_t before;
+	samplepos_t after;
+	samplepos_t test;
+
+	before = after = max_samplepos;
+
+	//get marks to either side of presnap
+	vector<ArdourCanvas::Ruler::Mark>::const_iterator m = marks.begin();
+	while ( m != marks.end() && (m->position < presnap) ) {
+		++m;
+	}
+
+	if (m == marks.end ()) {
+		/* ran out of marks */
+		before = grid_marks.back().position;
+	}
+
+	after = m->position;
+
+	if (m != marks.begin ()) {
+		--m;
+		before = m->position;
+	}
+
+	if (before == max_samplepos && after == max_samplepos) {
+		/* No smpte to snap to, so just don't snap */
+		return presnap;
+	} else if (before == max_samplepos) {
+		test = after;
+	} else if (after == max_samplepos) {
+		test = before;
+	} else  {
+		if ((direction == RoundUpMaybe || direction == RoundUpAlways))
+			test = after;
+		else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+			test = before;
+		else if (direction ==  0 ) {
+			if ((presnap - before) < (after - presnap)) {
+				test = before;
+			} else {
+				test = after;
+			}
+		}
+	}
+
+	return test;
+}
+
+samplepos_t
+Editor::marker_snap_to_internal (samplepos_t presnap, RoundMode direction)
+{
+	samplepos_t before;
+	samplepos_t after;
+	samplepos_t test;
+
+	_session->locations()->marks_either_side (presnap, before, after);
+
+	if (before == max_samplepos && after == max_samplepos) {
+		/* No marks to snap to, so just don't snap */
+		return presnap;
+	} else if (before == max_samplepos) {
+		test = after;
+	} else if (after == max_samplepos) {
+		test = before;
+	} else  {
+		if ((direction == RoundUpMaybe || direction == RoundUpAlways)) {
+			test = after;
+		} else if ((direction == RoundDownMaybe || direction == RoundDownAlways)) {
+			test = before;
+		} else if (direction ==  0 ) {
+			if ((presnap - before) < (after - presnap)) {
+				test = before;
+			} else {
+				test = after;
+			}
+		}
+	}
+
+	return test;
 }
 
 void
-Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark, bool ensure_snap)
+Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref, bool for_mark, bool ensure_snap)
 {
-	const samplepos_t one_second = _session->sample_rate();
-	const samplepos_t one_minute = _session->sample_rate() * 60;
-	samplepos_t presnap = start.sample;
-	samplepos_t before;
-	samplepos_t after;
+	const samplepos_t presnap = start.sample;
 
-	int snap_threshold_s = pixel_to_sample(UIConfiguration::instance().get_snap_threshold());
+	samplepos_t test = max_samplepos;  //for each snap, we'll use this value
+	samplepos_t dist = max_samplepos;  //this records the distance of the best snap result we've found so far
+	samplepos_t best = max_samplepos;  //this records the best snap-result we've found so far
 
-	switch (_snap_type) {
-	case SnapToTimecodeFrame:
-	case SnapToTimecodeSeconds:
-	case SnapToTimecodeMinutes:
-		return timecode_snap_to_internal (start, direction, for_mark);
-
-	case SnapToCDFrame:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % (one_second/75) == 0) {
-			/* start is already on a whole CD sample, do nothing */
-		} else if (((direction == 0) && (start.sample % (one_second/75) > (one_second/75) / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / (one_second / 75)) * (one_second / 75);
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / (one_second / 75)) * (one_second / 75);
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToSeconds:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % one_second == 0) {
-			/* start is already on a whole second, do nothing */
-		} else if (((direction == 0) && (start.sample % one_second > one_second / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / one_second) * one_second;
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / one_second) * one_second;
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToMinutes:
-		if ((direction == RoundUpMaybe || direction == RoundDownMaybe) &&
-		    start.sample % one_minute == 0) {
-			/* start is already on a whole minute, do nothing */
-		} else if (((direction == 0) && (start.sample % one_minute > one_minute / 2)) || (direction > 0)) {
-			start.sample = (samplepos_t) ceil ((double) start.sample / one_minute) * one_minute;
-		} else {
-			start.sample = (samplepos_t) floor ((double) start.sample / one_minute) * one_minute;
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToBar:
-		start = _session->tempo_map().round_to_bar (start.sample, direction);
-		break;
-
-	case SnapToBeat:
-		start = _session->tempo_map().round_to_beat (start.sample, direction);
-		break;
-
-	case SnapToBeatDiv128:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 128, direction);
-		break;
-	case SnapToBeatDiv64:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 64, direction);
-		break;
-	case SnapToBeatDiv32:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 32, direction);
-		break;
-	case SnapToBeatDiv28:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 28, direction);
-		break;
-	case SnapToBeatDiv24:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 24, direction);
-		break;
-	case SnapToBeatDiv20:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 20, direction);
-		break;
-	case SnapToBeatDiv16:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 16, direction);
-		break;
-	case SnapToBeatDiv14:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 14, direction);
-		break;
-	case SnapToBeatDiv12:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 12, direction);
-		break;
-	case SnapToBeatDiv10:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 10, direction);
-		break;
-	case SnapToBeatDiv8:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 8, direction);
-		break;
-	case SnapToBeatDiv7:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 7, direction);
-		break;
-	case SnapToBeatDiv6:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 6, direction);
-		break;
-	case SnapToBeatDiv5:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 5, direction);
-		break;
-	case SnapToBeatDiv4:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 4, direction);
-		break;
-	case SnapToBeatDiv3:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 3, direction);
-		break;
-	case SnapToBeatDiv2:
-		start = _session->tempo_map().round_to_quarter_note_subdivision (start.sample, 2, direction);
-		break;
-
-	case SnapToMark:
+	//check snap-to-marker
+	if ( UIConfiguration::instance().get_snap_to_marks() ) {
 		if (for_mark) {
 			return;
 		}
 
-		_session->locations()->marks_either_side (start.sample, before, after);
+		test = marker_snap_to_internal ( presnap, direction );
+		check_best_snap(presnap, test, dist, best);
+	}
 
-		if (before == max_samplepos && after == max_samplepos) {
-			/* No marks to snap to, so just don't snap */
-			return;
-		} else if (before == max_samplepos) {
-			start.sample = after;
-		} else if (after == max_samplepos) {
-			start.sample = before;
-		} else if (before != max_samplepos && after != max_samplepos) {
-			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
-				start.sample = after;
-			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
-				start.sample = before;
-			else if (direction ==  0 ) {
-				if ((start.sample - before) < (after - start.sample)) {
-					start.sample = before;
-				} else {
-					start.sample = after;
-				}
-			}
-		}
-
-		start.set (start.sample, 0);
-
-		break;
-
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
+	//check snap-to-region-{start/end/sync}
+	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
 		if (!region_boundary_cache.empty()) {
 
 			vector<samplepos_t>::iterator prev = region_boundary_cache.end ();
 			vector<samplepos_t>::iterator next = region_boundary_cache.end ();
 
 			if (direction > 0) {
-				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.sample);
+				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
 			} else {
-				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), start.sample);
+				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
 			}
 
 			if (next != region_boundary_cache.begin ()) {
@@ -2936,43 +2830,45 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 			samplepos_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
 			samplepos_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
 
-			if (start.sample > (p + n) / 2) {
-				start.sample = n;
+			if (presnap > (p + n) / 2) {
+				test = n;
 			} else {
-				start.sample = p;
+				test = p;
 			}
 		}
 
-		start.set (start.sample, 0);
-
-		break;
+		check_best_snap(presnap, test, dist, best);
 	}
 
-	switch (_snap_mode) {
-	case SnapNormal:
-		return;
+	//check Grid
+	if (UIConfiguration::instance().get_snap_to_grid() && (_grid_type != GridTypeNone) ) {
 
-	case SnapMagnetic:
+		//if SnapToGrid is selected, the user wants to prioritize the music grid
+		//in this case we should reset the best distance, so Grid will prevail
+		dist = max_samplepos;
 
-		if (ensure_snap) {
-			return;
-		}
-
-		if (presnap > start.sample) {
-			if (presnap > (start.sample + snap_threshold_s)) {
-				start.set (presnap, 0);
-			}
-
-		} else if (presnap < start.sample) {
-			if (presnap < (start.sample - snap_threshold_s)) {
-				start.set (presnap, 0);
-			}
-		}
-
-	default:
-		/* handled at entry */
-		return;
+		test = snap_to_grid (grid_marks, presnap, direction);
+		check_best_snap(presnap, test, dist, best);
 	}
+
+	//now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	//this also helps to avoid snapping to somewhere the user can't see.  ( i.e.:  I clicked on a region and it disappeared!! )
+	//ToDo:  perhaps this should only occur if EditPointMouse?
+	int snap_threshold_s = pixel_to_sample(UIConfiguration::instance().get_snap_threshold());
+	if (ensure_snap) {
+		start.set (best, 0);
+		return;
+	} else if (presnap > best) {
+		if (presnap > (best+ snap_threshold_s)) {
+			best = presnap;
+		}
+	} else if (presnap < best) {
+		if (presnap < (best - snap_threshold_s)) {
+			 best = presnap;
+		}
+	}
+
+	start.set (best, 0);
 }
 
 
@@ -3010,8 +2906,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
 	}
 
-	mouse_mode_size_group->add_widget (snap_type_selector);
-	mouse_mode_size_group->add_widget (snap_mode_selector);
+	mouse_mode_size_group->add_widget (grid_type_selector);
+	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_size_group->add_widget (edit_point_selector);
 	mouse_mode_size_group->add_widget (edit_mode_selector);
@@ -3129,14 +3025,14 @@ Editor::setup_toolbar ()
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
-	snap_type_selector.set_name ("mouse mode button");
+	grid_type_selector.set_name ("mouse mode button");
 
-	snap_mode_selector.set_name ("mouse mode button");
+	snap_mode_button.set_name ("mouse mode button");
 
 	edit_point_selector.set_name ("mouse mode button");
 
-	snap_box.pack_start (snap_mode_selector, false, false);
-	snap_box.pack_start (snap_type_selector, false, false);
+	snap_box.pack_start (snap_mode_button, false, false);
+	snap_box.pack_start (grid_type_selector, false, false);
 
 	/* Edit Point*/
 	HBox *ep_box = manage (new HBox);
@@ -3219,55 +3115,58 @@ Editor::build_edit_mode_menu ()
 }
 
 void
-Editor::build_snap_mode_menu ()
+Editor::build_grid_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapOff], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapOff)));
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapNormal], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapNormal)));
-	snap_mode_selector.AddMenuElem (MenuElem ( snap_mode_strings[(int)SnapMagnetic], sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_selection_done), (SnapMode) SnapMagnetic)));
+	//main grid: bars, quarter-notes, etc
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeNone],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeNone)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBar)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeat)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv2)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv4)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv8)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv16)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv32)));
 
-	set_size_request_to_display_given_text (snap_mode_selector, snap_mode_strings, COMBO_TRIANGLE_WIDTH, 2);
-}
+	//triplet grid
+	grid_type_selector.AddMenuElem(SeparatorElem());
+	Gtk::Menu *_triplet_menu = manage (new Menu);
+	MenuList& triplet_items (_triplet_menu->items());
+	{
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv3],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv3) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv6],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv6) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv12) ));
+		triplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv24) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Triplets"), *_triplet_menu));
 
-void
-Editor::build_snap_type_menu ()
-{
-	using namespace Menu_Helpers;
+	//quintuplet grid
+	Gtk::Menu *_quintuplet_menu = manage (new Menu);
+	MenuList& quintuplet_items (_quintuplet_menu->items());
+	{
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv5],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv5) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv10) ));
+		quintuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv20) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Quintuplets"), *_quintuplet_menu));
 
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToCDFrame)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeFrame], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeFrame)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeSeconds], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeSeconds)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToTimecodeMinutes], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToTimecodeMinutes)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToSeconds], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToSeconds)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToMinutes], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToMinutes)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv128], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv128)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv64], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv64)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv32)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv28)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv24], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv24)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv20], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv20)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv16)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv14)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv12], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv12)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv10], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv10)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv8], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv8)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv7], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv7)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv6], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv6)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv5], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv5)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv4], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv4)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv3], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv3)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeatDiv2], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeatDiv2)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBeat], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBeat)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToBar], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToBar)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToMark], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToMark)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionStart], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionStart)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionEnd], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionEnd)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionSync], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionSync)));
-	snap_type_selector.AddMenuElem (MenuElem ( snap_type_strings[(int)SnapToRegionBoundary], sigc::bind (sigc::mem_fun(*this, &Editor::snap_type_selection_done), (SnapType) SnapToRegionBoundary)));
+	//septuplet grid
+	Gtk::Menu *_septuplet_menu = manage (new Menu);
+	MenuList& septuplet_items (_septuplet_menu->items());
+	{
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv7) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv14) ));
+		septuplet_items.push_back( MenuElem( grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv28) ));
+	}
+	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
 
-	set_size_request_to_display_given_text (snap_type_selector, snap_type_strings, COMBO_TRIANGLE_WIDTH, 2);
+	grid_type_selector.AddMenuElem(SeparatorElem());
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSmpte], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSmpte)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
+	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSamples], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSamples)));
 
+	set_size_request_to_display_given_text (grid_type_selector, "No Grid", COMBO_TRIANGLE_WIDTH, 2);
 }
 
 void
@@ -3292,8 +3191,8 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
-	set_tooltip (snap_type_selector, _("Snap/Grid Units"));
-	set_tooltip (snap_mode_selector, _("Snap/Grid Mode"));
+	set_tooltip (grid_type_selector, _("Grid Mode"));
+	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
 	set_tooltip (edit_point_selector, _("Edit Point"));
 	set_tooltip (edit_mode_selector, _("Edit Mode"));
 	set_tooltip (nudge_clock, _("Nudge Clock\n(controls distance used to nudge regions and selections)"));
@@ -3644,7 +3543,7 @@ Editor::duplicate_range (bool with_dialog)
 		times = adjustment.get_value();
 	}
 
-	if ((current_mouse_mode() == Editing::MouseRange)) {
+	if ((current_mouse_mode() == MouseRange)) {
 		if (selection->time.length()) {
 			duplicate_selection (times);
 		}
@@ -3688,9 +3587,9 @@ Editor::edit_mode_selection_done ( EditMode m )
 }
 
 void
-Editor::snap_type_selection_done (SnapType snaptype)
+Editor::grid_type_selection_done (GridType gridtype)
 {
-	RefPtr<RadioAction> ract = snap_type_action (snaptype);
+	RefPtr<RadioAction> ract = grid_type_action (gridtype);
 	if (ract) {
 		ract->set_active ();
 	}
@@ -3949,22 +3848,18 @@ Editor::cycle_zoom_focus ()
 }
 
 void
-Editor::set_show_measures (bool yn)
+Editor::update_grid ()
 {
-	if (_show_measures != yn) {
-		hide_measures ();
-
-		if ((_show_measures = yn) == true) {
-			if (tempo_lines) {
-				tempo_lines->show();
-			}
-
-			std::vector<TempoMap::BBTPoint> grid;
+	if ( grid_musical() ) {
+		std::vector<TempoMap::BBTPoint> grid;
+		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
-			draw_measures (grid);
 		}
-
-		instant_save ();
+		maybe_draw_grid_lines ();
+	} else if ( grid_nonmusical() ) {
+		maybe_draw_grid_lines ();
+	} else {
+		hide_grid_lines ();
 	}
 }
 
@@ -4044,25 +3939,28 @@ Editor::get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t dur
 unsigned
 Editor::get_grid_beat_divisions(samplepos_t position)
 {
-	switch (_snap_type) {
-	case SnapToBeatDiv128: return 128;
-	case SnapToBeatDiv64:  return 64;
-	case SnapToBeatDiv32:  return 32;
-	case SnapToBeatDiv28:  return 28;
-	case SnapToBeatDiv24:  return 24;
-	case SnapToBeatDiv20:  return 20;
-	case SnapToBeatDiv16:  return 16;
-	case SnapToBeatDiv14:  return 14;
-	case SnapToBeatDiv12:  return 12;
-	case SnapToBeatDiv10:  return 10;
-	case SnapToBeatDiv8:   return 8;
-	case SnapToBeatDiv7:   return 7;
-	case SnapToBeatDiv6:   return 6;
-	case SnapToBeatDiv5:   return 5;
-	case SnapToBeatDiv4:   return 4;
-	case SnapToBeatDiv3:   return 3;
-	case SnapToBeatDiv2:   return 2;
-	default:               return 0;
+	switch (_grid_type) {
+	case GridTypeBeatDiv32:  return 32;
+	case GridTypeBeatDiv28:  return 28;
+	case GridTypeBeatDiv24:  return 24;
+	case GridTypeBeatDiv20:  return 20;
+	case GridTypeBeatDiv16:  return 16;
+	case GridTypeBeatDiv14:  return 14;
+	case GridTypeBeatDiv12:  return 12;
+	case GridTypeBeatDiv10:  return 10;
+	case GridTypeBeatDiv8:   return 8;
+	case GridTypeBeatDiv7:   return 7;
+	case GridTypeBeatDiv6:   return 6;
+	case GridTypeBeatDiv5:   return 5;
+	case GridTypeBeatDiv4:   return 4;
+	case GridTypeBeatDiv3:   return 3;
+	case GridTypeBeatDiv2:   return 2;
+
+	case GridTypeNone:       return 0;
+	case GridTypeSmpte:      return 0;
+	case GridTypeMinSec:     return 0;
+	case GridTypeSamples:    return 0;
+	default:                 return 0;
 	}
 	return 0;
 }
@@ -4075,35 +3973,37 @@ Editor::get_grid_beat_divisions(samplepos_t position)
 int32_t
 Editor::get_grid_music_divisions (uint32_t event_state)
 {
-	if (snap_mode() == Editing::SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
+	if (snap_mode() == SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
 		return 0;
 	}
 
-	if (snap_mode() != Editing::SnapOff && ArdourKeyboard::indicates_snap (event_state)) {
+	if (snap_mode() != SnapOff && ArdourKeyboard::indicates_snap (event_state)) {
 		return 0;
 	}
 
-	switch (_snap_type) {
-	case SnapToBeatDiv128: return 128;
-	case SnapToBeatDiv64:  return 64;
-	case SnapToBeatDiv32:  return 32;
-	case SnapToBeatDiv28:  return 28;
-	case SnapToBeatDiv24:  return 24;
-	case SnapToBeatDiv20:  return 20;
-	case SnapToBeatDiv16:  return 16;
-	case SnapToBeatDiv14:  return 14;
-	case SnapToBeatDiv12:  return 12;
-	case SnapToBeatDiv10:  return 10;
-	case SnapToBeatDiv8:   return 8;
-	case SnapToBeatDiv7:   return 7;
-	case SnapToBeatDiv6:   return 6;
-	case SnapToBeatDiv5:   return 5;
-	case SnapToBeatDiv4:   return 4;
-	case SnapToBeatDiv3:   return 3;
-	case SnapToBeatDiv2:   return 2;
-	case SnapToBeat:       return 1;
-	case SnapToBar :       return -1;
-	default:               return 0;
+	switch (_grid_type) {
+	case GridTypeBeatDiv32:  return 32;
+	case GridTypeBeatDiv28:  return 28;
+	case GridTypeBeatDiv24:  return 24;
+	case GridTypeBeatDiv20:  return 20;
+	case GridTypeBeatDiv16:  return 16;
+	case GridTypeBeatDiv14:  return 14;
+	case GridTypeBeatDiv12:  return 12;
+	case GridTypeBeatDiv10:  return 10;
+	case GridTypeBeatDiv8:   return 8;
+	case GridTypeBeatDiv7:   return 7;
+	case GridTypeBeatDiv6:   return 6;
+	case GridTypeBeatDiv5:   return 5;
+	case GridTypeBeatDiv4:   return 4;
+	case GridTypeBeatDiv3:   return 3;
+	case GridTypeBeatDiv2:   return 2;
+	case GridTypeBeat:       return 1;
+	case GridTypeBar :       return -1;
+
+	case GridTypeNone:       return 0;
+	case GridTypeSmpte:      return 0;
+	case GridTypeMinSec:     return 0;
+	case GridTypeSamples:    return 0;
 	}
 	return 0;
 }
@@ -4118,10 +4018,10 @@ Editor::get_grid_type_as_beats (bool& success, samplepos_t position)
 		return Temporal::Beats(1.0 / (double)get_grid_beat_divisions(position));
 	}
 
-	switch (_snap_type) {
-	case SnapToBeat:
+	switch (_grid_type) {
+	case GridTypeBeat:
 		return Temporal::Beats(4.0 / _session->tempo_map().meter_at_sample (position).note_divisor());
-	case SnapToBar:
+	case GridTypeBar:
 		if (_session) {
 			const Meter& m = _session->tempo_map().meter_at_sample (position);
 			return Temporal::Beats((4.0 * m.divisions_per_bar()) / m.note_divisor());
@@ -4534,10 +4434,6 @@ Editor::set_samples_per_pixel (samplecnt_t spp)
 void
 Editor::on_samples_per_pixel_changed ()
 {
-	if (tempo_lines) {
-		tempo_lines->tempo_map_changed(_session->tempo_map().music_origin());
-	}
-
 	bool const showing_time_selection = selection->time.length() > 0;
 
 	if (showing_time_selection && selection->time.start () != selection->time.end_sample ()) {
@@ -4691,7 +4587,7 @@ Editor::visual_changer (const VisualChange& vc)
 	// If we are only scrolling vertically there is no need to update these
 	if (vc.pending != VisualChange::YOrigin) {
 		update_fixed_rulers ();
-		redisplay_tempo (true);
+		redisplay_grid (true);
 
 		/* video frames & position need to be updated for zoom, horiz-scroll
 		 * and (explicitly) VisualChange::VideoTimeline.
@@ -5278,12 +5174,16 @@ Editor::region_view_added (RegionView * rv)
 	}
 
 	_summary->set_background_dirty ();
+
+	mark_region_boundary_cache_dirty ();
 }
 
 void
 Editor::region_view_removed ()
 {
 	_summary->set_background_dirty ();
+
+	mark_region_boundary_cache_dirty ();
 }
 
 AxisView*
@@ -5853,7 +5753,7 @@ Editor::super_rapid_screen_update ()
 	} else {
 		_last_update_time = now;
 	}
-	
+
 	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
 	bool ignored;
 	MusicSample where (sample, 0);
@@ -5875,7 +5775,7 @@ Editor::super_rapid_screen_update ()
 	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
 		snapped_cursor->hide ();
 	}
-	
+
 	/* There are a few reasons why we might not update the playhead / viewport stuff:
 	 *
 	 * 1.  we don't update things when there's a pending locate request, otherwise
@@ -5989,11 +5889,11 @@ Editor::session_going_away ()
 
 	/* clear tempo/meter rulers */
 	remove_metric_marks ();
-	hide_measures ();
 	clear_marker_display ();
 
-	delete tempo_lines;
-	tempo_lines = 0;
+	hide_grid_lines ();
+	delete grid_lines;
+	grid_lines = 0;
 
 	stop_step_editing ();
 

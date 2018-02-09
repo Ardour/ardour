@@ -200,6 +200,9 @@ public:
 
 	bool get_smart_mode () const;
 
+	RCOptionEditor* get_rc_option_editor() { return rc_option_editor; }
+	void show_tabbable (ArdourWidgets::Tabbable*);
+
 	int get_session_parameters (bool quit_on_cancel, bool should_be_new = false, std::string load_template = "");
 	int  build_session_from_dialog (SessionDialog&, const std::string& session_name, const std::string& session_path);
 	bool ask_about_loading_existing_session (const std::string& session_path);
@@ -392,7 +395,6 @@ private:
 	bool          _initial_verbose_plugin_scan;
 	bool           first_time_engine_run;
 
-	void show_tabbable (ArdourWidgets::Tabbable*);
 	void hide_tabbable (ArdourWidgets::Tabbable*);
 	void detach_tabbable (ArdourWidgets::Tabbable*);
 	void attach_tabbable (ArdourWidgets::Tabbable*);

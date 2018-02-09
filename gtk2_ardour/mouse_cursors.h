@@ -48,7 +48,6 @@ public:
 	Gdk::Cursor* selector;
 	Gdk::Cursor* grabber;
 	Gdk::Cursor* grabber_note;
-	Gdk::Cursor* grabber_edit_point;
 	Gdk::Cursor* zoom_in;
 	Gdk::Cursor* zoom_out;
 	Gdk::Cursor* time_fx;

@@ -27,7 +27,7 @@
 namespace PBD {
 
 DEFINE_ENUM_CONVERT(Editing::ZoomFocus)
-DEFINE_ENUM_CONVERT(Editing::SnapType)
+DEFINE_ENUM_CONVERT(Editing::GridType)
 DEFINE_ENUM_CONVERT(Editing::SnapMode)
 DEFINE_ENUM_CONVERT(Editing::EditPoint)
 DEFINE_ENUM_CONVERT(Editing::RegionListSortType)

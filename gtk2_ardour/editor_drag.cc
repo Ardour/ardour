@@ -293,16 +293,9 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor *cursor)
 		_was_rolling = false;
 	}
 
-	switch (_editor->snap_type()) {
-	case SnapToRegionStart:
-	case SnapToRegionEnd:
-	case SnapToRegionSync:
-	case SnapToRegionBoundary:
-		_editor->build_region_boundary_cache ();
-		break;
-	default:
-		break;
-	}
+//	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
+//		_editor->build_region_boundary_cache ();
+//	}
 }
 
 /** Call to end a drag `successfully'.  Ungrabs item and calls
@@ -388,7 +381,7 @@ Drag::setup_snap_delta (MusicSample pos)
 {
 	TempoMap& map (_editor->session()->tempo_map());
 	MusicSample snap (pos);
-	_editor->snap_to (snap, ARDOUR::RoundNearest, false, true);
+	_editor->snap_to (snap, ARDOUR::RoundNearest, ARDOUR::SnapToAny, false, true);
 	_snap_delta = snap.sample - pos.sample;
 
 	_snap_delta_music = 0.0;
@@ -3231,7 +3224,7 @@ TrimDrag::setup_pointer_sample_offset ()
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
 	: Drag (e, i)
 	, _copy (c)
-	, _old_snap_type (e->snap_type())
+	, _old_grid_type (e->grid_type())
 	, _old_snap_mode (e->snap_mode())
 	, before_state (0)
 {
@@ -3304,14 +3297,14 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		}
 		/* only snap to bars. leave snap mode alone for audio locked meters.*/
 		if (_real_section->position_lock_style() != AudioTime) {
-			_editor->set_snap_to (SnapToBar);
-			_editor->set_snap_mode (SnapNormal);
+			_editor->set_grid_to (GridTypeBar);
+			_editor->set_snap_mode (SnapMagnetic);
 		}
 	}
 
 	samplepos_t pf = adjusted_current_sample (event);
 
-	if (_real_section->position_lock_style() == AudioTime && _editor->snap_musical()) {
+	if (_real_section->position_lock_style() == AudioTime && _editor->grid_musical()) {
 		/* never snap to music for audio locked */
 		pf = adjusted_current_sample (event, false);
 	}
@@ -3336,7 +3329,7 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	}
 
 	/* reinstate old snap setting */
-	_editor->set_snap_to (_old_snap_type);
+	_editor->set_grid_to (_old_grid_type);
 	_editor->set_snap_mode (_old_snap_mode);
 
 	TempoMap& map (_editor->session()->tempo_map());
@@ -3356,7 +3349,7 @@ MeterMarkerDrag::aborted (bool moved)
 	_marker->set_position (_marker->meter().sample ());
 	if (moved) {
 		/* reinstate old snap setting */
-		_editor->set_snap_to (_old_snap_type);
+		_editor->set_grid_to (_old_grid_type);
 		_editor->set_snap_mode (_old_snap_mode);
 
 		_editor->session()->tempo_map().set_state (*before_state, Stateful::current_state_version);
@@ -3473,7 +3466,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	} else if (_movable && !_real_section->locked_to_meter()) {
 		samplepos_t pf;
 
-		if (_editor->snap_musical()) {
+		if (_editor->grid_musical()) {
 			/* we can't snap to a grid that we are about to move.
 			 * gui_move_tempo() will sort out snap using the supplied beat divisions.
 			*/
@@ -3607,7 +3600,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 	TempoMap& map (_editor->session()->tempo_map());
 	samplepos_t pf;
 
-	if (_editor->snap_musical()) {
+	if (_editor->grid_musical()) {
 		pf = adjusted_current_sample (event, false);
 	} else {
 		pf = adjusted_current_sample (event);
@@ -3755,7 +3748,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	samplepos_t pf;
 
-	if (_editor->snap_musical()) {
+	if (_editor->grid_musical()) {
 		pf = adjusted_current_sample (event, false);
 	} else {
 		pf = adjusted_current_sample (event);
@@ -5099,7 +5092,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	MusicSample grab (grab_sample (), 0);
 
 	if (UIConfiguration::instance().get_rubberbanding_snaps_to_grid ()) {
-		_editor->snap_to_with_modifier (grab, event);
+		_editor->snap_to_with_modifier (grab, event, RoundNearest, SnapToGrid);
 	} else {
 		grab.sample = raw_grab_sample ();
 	}
@@ -6078,7 +6071,7 @@ NoteDrag::total_dx (GdkEvent * event) const
 
 	/* possibly snap and return corresponding delta in quarter notes */
 	MusicSample snap (st, 0);
-	_editor->snap_to_with_modifier (snap, event);
+	_editor->snap_to_with_modifier (snap, event, RoundNearest, SnapToGrid);
 	double ret = map.exact_qn_at_sample (snap.sample, snap.division) - n_qn - snap_delta_music (event->button.state);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */

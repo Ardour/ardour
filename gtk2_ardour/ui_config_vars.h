@@ -103,3 +103,8 @@ UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palet
 
 UI_CONFIG_VARIABLE (bool, show_snapped_cursor, "show-snapped-cursor", true)
 UI_CONFIG_VARIABLE (uint32_t, snap_threshold, "snap-threshold", 25)
+UI_CONFIG_VARIABLE (bool, snap_to_marks, "snap-to-marks", true)
+UI_CONFIG_VARIABLE (bool, snap_to_region_sync, "snap-to-region-sync", true)
+UI_CONFIG_VARIABLE (bool, snap_to_region_start, "snap-to-region-start", true)
+UI_CONFIG_VARIABLE (bool, snap_to_region_end, "snap-to-region-end", true)
+UI_CONFIG_VARIABLE (bool, snap_to_grid, "snap-to-grid", false)

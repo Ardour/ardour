@@ -44,7 +44,6 @@ MouseCursors::MouseCursors ()
 	, selector (0)
 	, grabber (0)
 	, grabber_note (0)
-	, grabber_edit_point (0)
 	, zoom_in (0)
 	, zoom_out (0)
 	, time_fx (0)
@@ -94,7 +93,6 @@ MouseCursors::drop_all ()
 	delete selector; selector = 0;
 	delete grabber; grabber = 0;
 	delete grabber_note; grabber_note = 0;
-	delete grabber_edit_point; grabber_edit_point = 0;
 	delete zoom_in; zoom_in = 0;
 	delete zoom_out; zoom_out = 0;
 	delete time_fx; time_fx = 0;
@@ -164,7 +162,6 @@ MouseCursors::set_cursor_set (const std::string& name)
 	scissors = make_cursor ("scissors", 5, 0);
 	grabber = make_cursor ("grabber", 5, 0);
 	grabber_note = make_cursor ("grabber_note", 5, 10);
-	grabber_edit_point = make_cursor ("grabber_edit_point", 5, 17);
 	left_side_trim = make_cursor ("trim_left_cursor", 5, 11);
 	anchored_left_side_trim = make_cursor ("anchored_trim_left_cursor", 5, 11);
 	right_side_trim = make_cursor ("trim_right_cursor", 23, 11);

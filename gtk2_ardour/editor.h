@@ -128,6 +128,7 @@ class RulerDialog;
 class Selection;
 class SoundFileOmega;
 class StreamView;
+class GridLines;
 class TempoLines;
 class TimeAxisView;
 class TimeInfoBox;
@@ -161,18 +162,15 @@ public:
 	double trackviews_height () const;
 
 	void cycle_snap_mode ();
-	void next_snap_choice ();
-	void next_snap_choice_music_only ();
-	void next_snap_choice_music_and_time ();
-	void prev_snap_choice ();
-	void prev_snap_choice_music_only ();
-	void prev_snap_choice_music_and_time ();
-	void set_snap_to (Editing::SnapType);
+	void next_grid_choice ();
+	void prev_grid_choice ();
+	void set_grid_to (Editing::GridType);
 	void set_snap_mode (Editing::SnapMode);
 
 	Editing::SnapMode  snap_mode () const;
-	Editing::SnapType  snap_type () const;
-	bool  snap_musical () const;
+	Editing::GridType  grid_type () const;
+	bool  grid_musical () const;
+	bool  grid_nonmusical () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -273,8 +271,7 @@ public:
 
 	/* tempo */
 
-	void set_show_measures (bool yn);
-	bool show_measures () const { return _show_measures; }
+	void update_grid ();
 
 	/* analysis window */
 
@@ -361,7 +358,6 @@ public:
 	void toggle_zero_line_visibility ();
 	void set_summary ();
 	void set_group_tabs ();
-	void toggle_measure_visibility ();
 
 	/* returns the left-most and right-most time that the gui should allow the user to scroll to */
 	std::pair <samplepos_t,samplepos_t> session_gui_extents (bool use_extra = true) const;
@@ -458,18 +454,15 @@ public:
 
 	void snap_to (ARDOUR::MusicSample& first,
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	              ARDOUR::SnapPref    pref = ARDOUR::SnapToAny,
 	              bool                for_mark  = false,
-		      bool                ensure_snap = false);
+	              bool                ensure_snap = false);
 
 	void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                            GdkEvent const *    ev,
 	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                            ARDOUR::SnapPref    pref = ARDOUR::SnapToAny,
 	                            bool                for_mark  = false);
-
-	void snap_to (ARDOUR::MusicSample& first,
-	              ARDOUR::MusicSample& last,
-	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	              bool                for_mark  = false);
 
 	void set_snapped_cursor_position (samplepos_t pos);
 
@@ -614,9 +607,9 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
-	Editing::SnapType  pre_internal_snap_type;
+	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
-	Editing::SnapType  internal_snap_type;
+	Editing::GridType  internal_grid_type;
 	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
@@ -816,7 +809,6 @@ private:
 	size_t push_canvas_cursor (Gdk::Cursor*);
 	void pop_canvas_cursor ();
 
-	Gdk::Cursor* which_grabber_cursor () const;
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
@@ -1068,7 +1060,9 @@ private:
 	ARDOUR::samplepos_t find_next_region_boundary (ARDOUR::samplepos_t, int32_t dir, const TrackViewList&);
 
 	std::vector<ARDOUR::samplepos_t> region_boundary_cache;
+	void mark_region_boundary_cache_dirty () { _region_boundary_cache_dirty = true; }
 	void build_region_boundary_cache ();
+	bool	_region_boundary_cache_dirty;
 
 	Gtk::HBox           toplevel_hpacker;
 
@@ -1530,7 +1524,7 @@ private:
 
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
 
-	Editing::SnapType _snap_type;
+	Editing::GridType _grid_type;
 	Editing::SnapMode _snap_mode;
 
 	bool ignore_gui_changes;
@@ -1668,7 +1662,6 @@ private:
 
 	/* display control */
 
-	bool _show_measures;
 	/// true if the editor should follow the playhead, otherwise false
 	bool _follow_playhead;
 	/// true if we scroll the tracks rather than the playhead
@@ -1676,16 +1669,16 @@ private:
 	/// true if we are in fullscreen mode
 	bool _maximised;
 
-	TempoLines* tempo_lines;
+	std::vector<ArdourCanvas::Ruler::Mark> grid_marks;
+	GridLines* grid_lines;
 
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
 
-	void hide_measures ();
-	void draw_measures (std::vector<ARDOUR::TempoMap::BBTPoint>&);
+	void hide_grid_lines ();
+	void maybe_draw_grid_lines ();
 
 	void new_tempo_section ();
-
 
 	void remove_tempo_marker (ArdourCanvas::Item*);
 	void remove_meter_marker (ArdourCanvas::Item*);
@@ -1761,7 +1754,8 @@ private:
 
 	void tempo_map_changed (const PBD::PropertyChange&);
 	void tempometric_position_changed (const PBD::PropertyChange&);
-	void redisplay_tempo (bool immediate_redraw);
+
+	void redisplay_grid (bool immediate_redraw);
 
 	uint32_t bbt_beat_subdivision;
 
@@ -1821,22 +1815,25 @@ private:
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
 
-	ArdourWidgets::ArdourDropdown snap_type_selector;
-	void build_snap_type_menu ();
+	ArdourWidgets::ArdourDropdown grid_type_selector;
+	void build_grid_type_menu ();
 
-	ArdourWidgets::ArdourDropdown snap_mode_selector;
-	void build_snap_mode_menu ();
+	ArdourWidgets::ArdourButton snap_mode_button;
+	bool snap_mode_button_clicked (GdkEventButton *);
+
 	Gtk::HBox snap_box;
 
-	std::vector<std::string> snap_type_strings;
+	Gtk::HBox _box;
+
+	std::vector<std::string> grid_type_strings;
 	std::vector<std::string> snap_mode_strings;
 
-	void snap_type_selection_done (Editing::SnapType);
+	void grid_type_selection_done (Editing::GridType);
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
-	void snap_type_chosen (Editing::SnapType);
+	void grid_type_chosen (Editing::GridType);
 
-	Glib::RefPtr<Gtk::RadioAction> snap_type_action (Editing::SnapType);
+	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
 	//zoom focus meu stuff
@@ -2187,14 +2184,18 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
+	samplepos_t snap_to_grid (      std::vector<ArdourCanvas::Ruler::Mark>  marks, 
+                                    samplepos_t                             presnap,
+                                    ARDOUR::RoundMode                       direction = ARDOUR::RoundNearest);
+
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
+	                       ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
 	                       bool                for_mark  = false,
-			       bool                ensure_snap = false);
+	                       bool                ensure_snap = false);
 
-	void timecode_snap_to_internal (ARDOUR::MusicSample& first,
-	                                ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                bool                for_mark  = false);
+	samplepos_t marker_snap_to_internal (samplepos_t        presnap,
+	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
 
 	RhythmFerret* rhythm_ferret;
 

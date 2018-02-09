@@ -33,7 +33,7 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 static const gchar *_grid_strings[] = {
-	N_("main grid"),
+	N_("Main Grid"),
 	N_("Beats/128"),
 	N_("Beats/64"),
 	N_("Beats/32"),

@@ -232,48 +232,29 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
-      <menu name='SnapMode' action='SnapMode'>
-        <menuitem action='snap-off'/>
-        <menuitem action='snap-normal'/>
-        <menuitem action='snap-magnetic'/>
+      <menuitem action='cycle-snap-mode'/>
+      <menu name='GridChoice' action='GridChoice'>
+        <menuitem action='prev-grid-choice'/>
+        <menuitem action='next-grid-choice'/>
         <separator/>
-        <menuitem action='cycle-snap-mode'/>
-        <menuitem action='next-snap-choice'/>
-        <menuitem action='prev-snap-choice'/>
-        <menuitem action='next-snap-choice-music-only'/>
-        <menuitem action='prev-snap-choice-music-only'/>
-      </menu>
-      <menu name='SnapTo' action='SnapTo'>
-        <menuitem action='snap-to-cd-frame'/>
-        <menuitem action='snap-to-timecode-frame'/>
-        <menuitem action='snap-to-timecode-seconds'/>
-        <menuitem action='snap-to-timecode-minutes'/>
-        <menuitem action='snap-to-seconds'/>
-        <menuitem action='snap-to-minutes'/>
-        <menuitem action='snap-to-onetwentyeighths'/>
-        <menuitem action='snap-to-sixtyfourths'/>
-        <menuitem action='snap-to-thirtyseconds'/>
-        <menuitem action='snap-to-twentyeighths'/>
-        <menuitem action='snap-to-twentyfourths'/>
-        <menuitem action='snap-to-twentieths'/>
-        <menuitem action='snap-to-asixteenthbeat'/>
-        <menuitem action='snap-to-fourteenths'/>
-        <menuitem action='snap-to-twelfths'/>
-        <menuitem action='snap-to-tenths'/>
-        <menuitem action='snap-to-eighths'/>
-        <menuitem action='snap-to-sevenths'/>
-        <menuitem action='snap-to-sixths'/>
-        <menuitem action='snap-to-fifths'/>
-        <menuitem action='snap-to-quarters'/>
-        <menuitem action='snap-to-thirds'/>
-        <menuitem action='snap-to-halves'/>
-        <menuitem action='snap-to-beat'/>
-        <menuitem action='snap-to-bar'/>
-        <menuitem action='snap-to-mark'/>
-        <menuitem action='snap-to-region-start'/>
-        <menuitem action='snap-to-region-end'/>
-        <menuitem action='snap-to-region-sync'/>
-        <menuitem action='snap-to-region-boundary'/>
+        <menuitem action='grid-type-none'/>
+        <menuitem action='grid-type-bar'/>
+        <menuitem action='grid-type-beat'/>
+        <menuitem action='grid-type-halves'/>
+        <menuitem action='grid-type-quarters'/>
+        <menuitem action='grid-type-eighths'/>
+        <menuitem action='grid-type-asixteenthbeat'/>
+        <menuitem action='grid-type-thirtyseconds'/>
+        <menuitem action='grid-type-thirds'/>
+        <menuitem action='grid-type-sixths'/>
+        <menuitem action='grid-type-twelfths'/>
+        <menuitem action='grid-type-twentyfourths'/>
+        <menuitem action='grid-type-fifths'/>
+        <menuitem action='grid-type-tenths'/>
+        <menuitem action='grid-type-twentieths'/>
+        <menuitem action='grid-type-sevenths'/>
+        <menuitem action='grid-type-fourteenths'/>
+        <menuitem action='grid-type-twentyeighths'/>
       </menu>
       <separator/>
       <menu action="TempoMenu">
@@ -532,7 +513,6 @@
       <menuitem action='show-editor-list'/>
       <menuitem action='ToggleMixerList'/>
       <menuitem action='ToggleMonitorSection'/>
-      <menuitem action='ToggleMeasureVisibility'/>
       <menuitem action='ToggleSummary'/>
       <menuitem action='ToggleGroupTabs'/>
       <menuitem action='show-marker-lines'/>
