@@ -101,6 +101,8 @@ private:
 
 	Gtk::Menu* _minitl_context_menu;
 
+	uint32_t _phead_color;
+
 	struct JumpRange {
 		JumpRange (int l, int r, samplepos_t t, bool p = false)
 			: left (l), right (r), to (t), prelight (p) {}

@@ -511,7 +511,6 @@ public:
 	void aborted (bool);
 
 private:
-	EditorCursor* line;
 };
 
 /** Drags to create regions */

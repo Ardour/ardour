@@ -217,6 +217,8 @@ Editor::initialize_canvas ()
 
 	playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event);
 
+	snapped_cursor = new EditorCursor (*this);
+
 	_canvas_drop_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
 	/* this thing is transparent */
 	_canvas_drop_zone->set_fill (false);

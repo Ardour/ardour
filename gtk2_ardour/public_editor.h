@@ -143,11 +143,6 @@ public:
 	 */
 	virtual void set_snap_mode (Editing::SnapMode m) = 0;
 
-	/** Set the snap threshold.
-	 * @param t Snap threshold in `units'.
-	 */
-	virtual void set_snap_threshold (double t) = 0;
-
 	/**
 	 * Snap a value according to the current snap setting.
 	 * ensure_snap overrides SnapOff and magnetic snap
@@ -426,6 +421,7 @@ public:
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
+	virtual ArdourCanvas::Container* get_drag_motion_group () const = 0;
 
 	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
@@ -466,6 +462,8 @@ public:
 	                                    GdkEvent const *    ev,
 	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	                                    bool                for_mark  = false) = 0;
+
+	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
 
 	virtual void get_regions_at (RegionSelection &, samplepos_t where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const = 0;

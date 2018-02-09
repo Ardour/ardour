@@ -2490,6 +2490,26 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), rsas);
 
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("General Snap options:")));
+	
+	add_option (_("Editor/Snap"),
+		    new SpinOption<uint32_t> (
+			    "snap-threshold",
+			    _("Snap Threshold (pixels)"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_threshold),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_threshold),
+			    10, 200,
+			    1, 10
+			    ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "show-snapped-cursor",
+		     _("Show Snapped Cursor"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_snapped_cursor),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_snapped_cursor)
+		     ));
+
 	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
 	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());

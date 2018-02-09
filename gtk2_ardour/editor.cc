@@ -335,6 +335,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
+	, snapped_cursor (0)
 	, playhead_cursor (0)
 	, edit_packer (4, 4, true)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
@@ -367,7 +368,6 @@ Editor::Editor ()
 	, pending_keyboard_selection_start (0)
 	, _snap_type (SnapToBeat)
 	, _snap_mode (SnapOff)
-	, snap_threshold (5.0)
 	, ignore_gui_changes (false)
 	, _drags (new DragManager (this))
 	, lock_dialog (0)
@@ -1406,7 +1406,12 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
+	playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	playhead_cursor->show ();
+
+	snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
+	snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
+	snapped_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -2287,6 +2292,7 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 
 	switch (_edit_point) {
 	case EditAtPlayhead:
+//ToDo:  hide or show mouse_cursor
 		action = "edit-at-playhead";
 		break;
 	case EditAtSelectedMarker:
@@ -2637,6 +2643,15 @@ Editor::trackview_by_y_position (double y, bool trackview_relative_offset) const
 	return std::make_pair ( (TimeAxisView *) 0, 0);
 }
 
+void
+Editor::set_snapped_cursor_position (samplepos_t pos)
+{
+	if ( _edit_point == EditAtMouse ) {
+		snapped_cursor->set_position(pos);
+	}
+}
+
+
 /** Snap a position to the grid, if appropriate, taking into account current
  *  grid settings and also the state of any snap modifier keys that may be pressed.
  *  @param start Position to snap.
@@ -2755,6 +2770,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 	samplepos_t presnap = start.sample;
 	samplepos_t before;
 	samplepos_t after;
+
+	int snap_threshold_s = pixel_to_sample(UIConfiguration::instance().get_snap_threshold());
 
 	switch (_snap_type) {
 	case SnapToTimecodeFrame:
@@ -2942,12 +2959,12 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, bool for_mark
 		}
 
 		if (presnap > start.sample) {
-			if (presnap > (start.sample + pixel_to_sample(snap_threshold))) {
+			if (presnap > (start.sample + snap_threshold_s)) {
 				start.set (presnap, 0);
 			}
 
 		} else if (presnap < start.sample) {
-			if (presnap < (start.sample - pixel_to_sample(snap_threshold))) {
+			if (presnap < (start.sample - snap_threshold_s)) {
 				start.set (presnap, 0);
 			}
 		}
@@ -5797,27 +5814,6 @@ Editor::super_rapid_screen_update ()
 		current_mixer_strip->fast_update ();
 	}
 
-	/* PLAYHEAD AND VIEWPORT */
-
-	/* There are a few reasons why we might not update the playhead / viewport stuff:
-	 *
-	 * 1.  we don't update things when there's a pending locate request, otherwise
-	 *     when the editor requests a locate there is a chance that this method
-	 *     will move the playhead before the locate request is processed, causing
-	 *     a visual glitch.
-	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
-	 * 3.  if we're still at the same sample that we were last time, there's nothing to do.
-	 */
-	if (_pending_locate_request || !_session->transport_rolling ()) {
-		_last_update_time = 0;
-		return;
-	}
-
-	if (_dragging_playhead) {
-		_last_update_time = 0;
-		return;
-	}
-
 	bool latent_locate = false;
 	samplepos_t sample = _session->audible_sample (&latent_locate);
 	const int64_t now = g_get_monotonic_time ();
@@ -5856,6 +5852,47 @@ Editor::super_rapid_screen_update ()
 		sample = _session->audible_sample ();
 	} else {
 		_last_update_time = now;
+	}
+	
+	//snapped cursor stuff ( the snapped_cursor shows where an operation is going to occur )
+	bool ignored;
+	MusicSample where (sample, 0);
+	if ( !UIConfiguration::instance().get_show_snapped_cursor() ) {
+		snapped_cursor->hide ();
+	} else if ( _edit_point == EditAtPlayhead && !_dragging_playhead) {
+		snap_to (where);  // can't use snap_to_with_modifier?
+		snapped_cursor->set_position (where.sample);
+		snapped_cursor->show ();
+	} else if ( _edit_point == EditAtSelectedMarker ) {
+		//NOTE:  I don't think EditAtSelectedMarker should snap.  they are what they are.
+		//however, the current editing code -does- snap so I'll draw it that way for now.
+		MusicSample ms (selection->markers.front()->position(), 0);
+		snap_to (ms);  // should use snap_to_with_modifier?
+		snapped_cursor->set_position ( ms.sample );
+		snapped_cursor->show ();
+	} else if (mouse_sample (where.sample, ignored)) {   //cursor is in the editing canvas. show it.
+		snapped_cursor->show ();
+	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
+		snapped_cursor->hide ();
+	}
+	
+	/* There are a few reasons why we might not update the playhead / viewport stuff:
+	 *
+	 * 1.  we don't update things when there's a pending locate request, otherwise
+	 *     when the editor requests a locate there is a chance that this method
+	 *     will move the playhead before the locate request is processed, causing
+	 *     a visual glitch.
+	 * 2.  if we're not rolling, there's nothing to do here (locates are handled elsewhere).
+	 * 3.  if we're still at the same frame that we were last time, there's nothing to do.
+	 */
+	if (_pending_locate_request) {
+		_last_update_time = 0;
+		return;
+	}
+
+	if (_dragging_playhead) {
+		_last_update_time = 0;
+		return;
 	}
 
 	if (playhead_cursor->current_sample () == sample) {

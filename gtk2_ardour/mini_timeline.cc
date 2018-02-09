@@ -151,6 +151,7 @@ void
 MiniTimeline::set_colors ()
 {
 	// TODO  UIConfiguration::instance().color & font
+	_phead_color = UIConfiguration::instance().color ("play head");
 }
 
 void
@@ -648,7 +649,8 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	/* playhead on top */
 	int xc = width * 0.5f;
 	cairo_set_line_width (cr, 1.0);
-	cairo_set_source_rgb (cr, 1, 0, 0); // playhead color
+	double r,g,b,a;  Gtkmm2ext::color_to_rgba(_phead_color, r,g,b,a);
+	cairo_set_source_rgb (cr, r,g,b); // playhead color
 	cairo_move_to (cr, xc - .5, 0);
 	cairo_rel_line_to (cr, 0, height);
 	cairo_stroke (cr);

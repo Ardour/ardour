@@ -348,7 +348,6 @@ ArdourMarker::setup_line ()
 		if (_track_canvas_line == 0) {
 
 			_track_canvas_line = new ArdourCanvas::Line (editor.get_hscroll_group());
-			_track_canvas_line->set_outline_color (UIConfiguration::instance().color ("edit point"));
 			_track_canvas_line->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_marker_event), group, this));
 		}
 
@@ -359,7 +358,7 @@ ArdourMarker::setup_line ()
 		_track_canvas_line->set_x1 (d.x);
 		_track_canvas_line->set_y0 (d.y);
 		_track_canvas_line->set_y1 (ArdourCanvas::COORD_MAX);
-		_track_canvas_line->set_outline_color (_selected ? UIConfiguration::instance().color ("edit point") : _color);
+		_track_canvas_line->set_outline_color ( _selected ? UIConfiguration::instance().color ("entered marker") : _color );
 		_track_canvas_line->raise_to_top ();
 		_track_canvas_line->show ();
 

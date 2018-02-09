@@ -719,6 +719,8 @@ RegionMotionDrag::compute_x_delta (GdkEvent const * event, MusicSample* pending_
 		}
 	}
 
+	_editor->set_snapped_cursor_position(pending_region_position->sample);
+
 	return dx;
 }
 
@@ -3320,6 +3322,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	_marker->set_position (adjusted_current_sample (event, false));
 
 	show_verbose_cursor_time (_real_section->sample());
+	_editor->set_snapped_cursor_position(_real_section->sample());
 }
 
 void
@@ -3485,6 +3488,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		map.gui_set_tempo_position (_real_section, pf, sub_num);
 
 		show_verbose_cursor_time (_real_section->sample());
+		_editor->set_snapped_cursor_position(_real_section->sample());
 	}
 	_marker->set_position (adjusted_current_sample (event, false));
 }
@@ -4609,6 +4613,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	assert (!_copied_locations.empty());
 
 	show_verbose_cursor_time (newframe);
+	_editor->set_snapped_cursor_position(newframe);
 }
 
 void
@@ -6144,6 +6149,8 @@ NoteDrag::motion (GdkEvent * event, bool first_move)
 			uint8_t new_note = min (max (_primary->note()->note() + note_delta, 0), 127);
 
 			_region->show_verbose_cursor_for_new_note_value (_primary->note(), new_note);
+
+			_editor->set_snapped_cursor_position( _region->source_beats_to_absolute_samples(_primary->note()->time()) );
 		}
 	}
 }
@@ -6956,16 +6963,11 @@ CrossfadeEdgeDrag::aborted (bool)
 
 RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, samplepos_t pos)
 	: Drag (e, item, true)
-	, line (new EditorCursor (*e))
 {
-	line->set_position (pos);
-	line->show ();
-	line->track_canvas_item().reparent (_editor->_drag_motion_group);
 }
 
 RegionCutDrag::~RegionCutDrag ()
 {
-	delete line;
 }
 
 void
@@ -6978,10 +6980,6 @@ RegionCutDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 RegionCutDrag::motion (GdkEvent* event, bool)
 {
-	MusicSample pos (_drags->current_pointer_sample(), 0);
-	_editor->snap_to_with_modifier (pos, event);
-
-	line->set_position (pos.sample);
 }
 
 void
@@ -6992,7 +6990,6 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 
 	MusicSample pos (_drags->current_pointer_sample(), 0);
 	_editor->snap_to_with_modifier (pos, event);
-	line->hide ();
 
 	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos.sample);
 

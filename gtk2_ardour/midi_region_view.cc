@@ -347,6 +347,9 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
+	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
+	//trackview.editor().set_snapped_cursor_position(_region->position());
+
 	bool r;
 
 	switch (ev->type) {
@@ -3035,6 +3038,7 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			} else {
 				snapped_x = trackview.editor ().pixel_to_sample (current_x);
 			}
+
 			const Temporal::Beats beats = Temporal::Beats (tmap.exact_beat_at_sample (snapped_x + midi_region()->position(), divisions)
 								     - midi_region()->beat()) + midi_region()->start_beats();
 
@@ -3058,6 +3062,8 @@ MidiRegionView::update_resizing (NoteBase* primary, bool at_front, double delta_
 			show_verbose_cursor (buf, 0, 0);
 
 			cursor_set = true;
+
+			trackview.editor().set_snapped_cursor_position ( snapped_x + midi_region()->position() );
 		}
 
 	}

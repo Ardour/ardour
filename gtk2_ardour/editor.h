@@ -169,7 +169,6 @@ public:
 	void prev_snap_choice_music_and_time ();
 	void set_snap_to (Editing::SnapType);
 	void set_snap_mode (Editing::SnapMode);
-	void set_snap_threshold (double pixel_distance) {snap_threshold = pixel_distance;}
 
 	Editing::SnapMode  snap_mode () const;
 	Editing::SnapType  snap_type () const;
@@ -472,6 +471,8 @@ public:
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
 	              bool                for_mark  = false);
 
+	void set_snapped_cursor_position (samplepos_t pos);
+
 	void begin_selection_op_history ();
 	void begin_reversible_selection_op (std::string cmd_name);
 	void commit_reversible_selection_op ();
@@ -533,6 +534,7 @@ public:
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_hvscroll_group () const { return hv_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
+	ArdourCanvas::Container* get_drag_motion_group () const { return _drag_motion_group; }
 
 	ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
 
@@ -1032,6 +1034,8 @@ private:
 
 	friend class EditorCursor;
 
+	EditorCursor* snapped_cursor;
+
 	EditorCursor* playhead_cursor;
 	samplepos_t playhead_cursor_sample () const;
 
@@ -1528,9 +1532,6 @@ private:
 
 	Editing::SnapType _snap_type;
 	Editing::SnapMode _snap_mode;
-
-	/// Snap threshold in pixels
-	double snap_threshold;
 
 	bool ignore_gui_changes;
 
