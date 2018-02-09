@@ -5766,10 +5766,12 @@ Editor::super_rapid_screen_update ()
 	} else if ( _edit_point == EditAtSelectedMarker ) {
 		//NOTE:  I don't think EditAtSelectedMarker should snap.  they are what they are.
 		//however, the current editing code -does- snap so I'll draw it that way for now.
-		MusicSample ms (selection->markers.front()->position(), 0);
-		snap_to (ms);  // should use snap_to_with_modifier?
-		snapped_cursor->set_position ( ms.sample );
-		snapped_cursor->show ();
+		if ( !selection->markers.empty() ) {
+			MusicSample ms (selection->markers.front()->position(), 0);
+			snap_to (ms);  // should use snap_to_with_modifier?
+			snapped_cursor->set_position ( ms.sample );
+			snapped_cursor->show ();
+		}
 	} else if (mouse_sample (where.sample, ignored)) {   //cursor is in the editing canvas. show it.
 		snapped_cursor->show ();
 	} else { //mouse is out of the editing canvas.  hide the snapped_cursor
