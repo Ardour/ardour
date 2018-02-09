@@ -56,16 +56,6 @@ GridLines::hide ()
 void
 GridLines::draw (std::vector<Ruler::Mark>     marks)
 {
-
-//	if (line_density > 2.0f) {
-//		lines.clear ();
-//		return;
-//	}
-
-//	if (_lower == _upper) {
-//		return;
-//	}
-
 	lines.clear();
 	
 	const uint32_t c = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
