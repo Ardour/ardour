@@ -2723,7 +2723,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 
 	if (m == marks.end ()) {
 		/* ran out of marks */
-		before = grid_marks.back().position;
+		before = marks.back().position;
 	}
 
 	after = m->position;
