@@ -115,6 +115,11 @@ public:
 	bool frozen() const { return _frozen; }
 	void set_frozen (bool yn);
 
+	void AddToSoloSelectedList(const Region*);
+	void RemoveFromSoloSelectedList(const Region*);
+	bool SoloSelectedListIncludes(const Region*);
+	bool SoloSelectedActive();
+
 	bool hidden() const { return _hidden; }
 	bool empty() const;
 
@@ -293,6 +298,8 @@ public:
 	RegionList       pending_bounds;
 	bool             pending_contents_change;
 	bool             pending_layering;
+
+	std::set<const Region*>   _soloSelectedRegions;
 
 	/** Movements of time ranges caused by region moves; note that
 	 *  region trims are not included in this list; it is used to

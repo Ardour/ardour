@@ -43,6 +43,7 @@
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/location.h"
+#include "ardour/playlist.h"
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
@@ -267,6 +268,58 @@ Session::request_cancel_play_range ()
 }
 
 
+bool
+Session::solo_selection_active ()
+{
+	if ( _soloSelection.empty() ) {
+		return false;
+	}
+	return true;
+}
+
+void
+Session::solo_selection ( StripableList &list, bool new_state  )
+{
+	boost::shared_ptr<ControlList> solo_list (new ControlList);
+	boost::shared_ptr<ControlList> unsolo_list (new ControlList);
+
+	if (new_state)
+		_soloSelection = list;
+	else
+		_soloSelection.clear();
+	
+	boost::shared_ptr<RouteList> rl = get_routes();
+ 
+	for (ARDOUR::RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+
+		if ( !(*i)->is_track() ) {
+			continue;
+		}
+		
+		boost::shared_ptr<Stripable> s (*i);
+
+		bool found = (std::find(list.begin(), list.end(), s) != list.end());
+		if ( new_state && found ) {
+			
+			solo_list->push_back (s->solo_control());
+			
+			//must invalidate playlists on selected tracks, so only selected regions get heard
+			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
+			if (track) {
+				boost::shared_ptr<Playlist> playlist = track->playlist();
+				if (playlist) {
+					playlist->ContentsChanged();
+				}
+			}
+		} else {
+			unsolo_list->push_back (s->solo_control());
+		}
+	}
+
+	set_controls (solo_list, 1.0, Controllable::NoGroup);
+	set_controls (unsolo_list, 0.0, Controllable::NoGroup);
+}
+
 void
 Session::realtime_stop (bool abort, bool clear_state)
 {
@@ -312,6 +365,11 @@ Session::realtime_stop (bool abort, bool clear_state)
 	_clear_event_type (SessionEvent::RangeStop);
 	_clear_event_type (SessionEvent::RangeLocate);
 
+	//clear our solo-selection, if there is one
+	if ( solo_selection_active() ) {
+		solo_selection ( _soloSelection, false );
+	}
+	
 	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
 	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 

@@ -861,6 +861,9 @@ public:
 	bool solo_isolated() const { return _solo_isolated_cnt > 0; }
 	void cancel_all_solo ();
 
+	bool solo_selection_active();
+	void solo_selection( StripableList&, bool );
+
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	void clear_all_solo_state (boost::shared_ptr<RouteList>);
@@ -2113,6 +2116,8 @@ private:
 	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
 	void rewire_midi_selection_ports ();
 	boost::weak_ptr<MidiTrack> current_midi_target;
+
+	StripableList _soloSelection;  //the items that are soloe'd during a solo-selection operation; need to unsolo after the roll
 
 	CoreSelection* _selection;
 

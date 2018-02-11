@@ -211,6 +211,11 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, sa
 		if ( ar->muted() )
 			continue;
 
+		/* check for the case of solo_selection */
+		bool force_transparent = ( _session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i) ) );
+		if ( force_transparent )
+			continue;
+
 		/* Work out which bits of this region need to be read;
 		   first, trim to the range we are reading...
 		*/

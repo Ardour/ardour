@@ -354,6 +354,8 @@ public:
 	PBD::Signal0<void> denormal_protection_changed;
 	PBD::Signal0<void> comment_changed;
 
+	bool is_track();
+
 	/** track numbers - assigned by session
 	 * nubers > 0 indicate tracks (audio+midi)
 	 * nubers < 0 indicate busses

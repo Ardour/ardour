@@ -216,6 +216,7 @@ Region::register_properties ()
 	, _transients (other->_transients) \
 	, _transient_analysis_start (other->_transient_analysis_start) \
 	, _transient_analysis_end (other->_transient_analysis_end) \
+	, _soloSelected (false) \
 	, _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
@@ -436,6 +437,25 @@ Region::set_name (const std::string& str)
 	}
 
 	return true;
+}
+
+void
+Region::set_selected_for_solo(bool yn)
+{
+	if ( _soloSelected != yn) {
+
+		boost::shared_ptr<Playlist> pl (playlist());
+		if (pl){
+			if (yn) {
+				pl->AddToSoloSelectedList(this);
+			} else {
+				pl->RemoveFromSoloSelectedList(this);
+			}
+		}
+
+		_soloSelected = yn;
+	}
+	
 }
 
 void

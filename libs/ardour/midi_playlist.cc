@@ -134,6 +134,12 @@ MidiPlaylist::read (Evoral::EventSink<samplepos_t>& dst,
 	std::vector< boost::shared_ptr<Region> > regs;
 	std::vector< boost::shared_ptr<Region> > ended;
 	for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+
+		/* check for the case of solo_selection */
+		bool force_transparent = ( _session.solo_selection_active() && SoloSelectedActive() && !SoloSelectedListIncludes( (const Region*) &(**i) ) );
+		if ( force_transparent )
+			continue;
+
 		switch ((*i)->coverage (start, end)) {
 		case Evoral::OverlapStart:
 		case Evoral::OverlapInternal:

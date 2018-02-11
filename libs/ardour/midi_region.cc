@@ -39,6 +39,7 @@
 #include "ardour/midi_region.h"
 #include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_source.h"
+#include "ardour/playlist.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
 #include "ardour/source_factory.h"

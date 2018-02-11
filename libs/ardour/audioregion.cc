@@ -509,7 +509,11 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 		return 0; /* read nothing */
 	}
 
-
+	boost::shared_ptr<Playlist> pl (playlist());
+	if (!pl){
+		return 0;
+	}
+	
 	/* COMPUTE DETAILS OF ANY FADES INVOLVED IN THIS READ */
 
 	/* Amount (length) of fade in that we are dealing with in this read */
@@ -605,10 +609,12 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 	 * "buf" contains data from lower regions already. So this operation
 	 * fades out the existing material.
 	 */
+ 
+	bool is_opaque = opaque();
 
 	if (fade_in_limit != 0) {
 
-		if (opaque()) {
+		if (is_opaque) {
 			if (_inverse_fade_in) {
 
 				/* explicit inverse fade in curve (e.g. for constant
@@ -652,7 +658,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 		samplecnt_t const curve_offset = fade_interval_start - (_length - _fade_out->back()->when);
 
-		if (opaque()) {
+		if (is_opaque) {
 			if (_inverse_fade_out) {
 
 				_inverse_fade_out->curve().get_vector (curve_offset, curve_offset + fade_out_limit, gain_buffer, fade_out_limit);
@@ -695,7 +701,7 @@ AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
 
 	samplecnt_t const N = to_read - fade_in_limit - fade_out_limit;
 	if (N > 0) {
-		if (opaque ()) {
+		if (is_opaque) {
 			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 memcpy into buf @ %2 + %3, from mixdown buffer @ %4 + %5, len = %6 cnt was %7\n",
 									   name(), buf, fade_in_limit, mixdown_buffer, fade_in_limit, N, cnt));
 			memcpy (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N * sizeof (Sample));

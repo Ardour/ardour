@@ -5041,7 +5041,11 @@ Route::the_instrument_unlocked () const
 	return boost::shared_ptr<Processor>();
 }
 
-
+bool
+Route::is_track()
+{
+	return dynamic_cast<Track*>(this) != 0;
+}
 
 void
 Route::non_realtime_locate (samplepos_t pos)

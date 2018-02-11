@@ -1517,6 +1517,35 @@ Playlist::duplicate_ranges (std::list<AudioRange>& ranges, float times)
 	 _splicing = old_sp;
  }
 
+void
+Playlist::AddToSoloSelectedList(const Region* r)
+{
+	_soloSelectedRegions.insert (r);	
+}
+
+
+void
+Playlist::RemoveFromSoloSelectedList(const Region* r)
+{
+	_soloSelectedRegions.erase (r);	
+}
+
+
+bool
+Playlist::SoloSelectedListIncludes(const Region* r)
+{
+	std::set<const Region*>::iterator i = _soloSelectedRegions.find(r);
+
+	return ( i != _soloSelectedRegions.end() );
+}
+
+bool
+Playlist::SoloSelectedActive()
+{
+	return !_soloSelectedRegions.empty();
+}
+
+
  void
  Playlist::possibly_splice (samplepos_t at, samplecnt_t distance, boost::shared_ptr<Region> exclude)
  {

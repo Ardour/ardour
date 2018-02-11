@@ -113,6 +113,8 @@ public:
 	samplecnt_t length ()    const { return _length; }
 	layer_t    layer ()     const { return _layer; }
 
+	void set_selected_for_solo(bool yn);
+
 	samplecnt_t source_length(uint32_t n) const;
 	uint32_t   max_source_level () const;
 
@@ -412,6 +414,8 @@ protected:
 	AnalysisFeatureList     _transients; // Source Analysis (QM Transient), user read-only
 	samplepos_t              _transient_analysis_start;
 	samplepos_t              _transient_analysis_end;
+
+	bool                    _soloSelected;
 
 private:
 	void mid_thaw (const PBD::PropertyChange&);
