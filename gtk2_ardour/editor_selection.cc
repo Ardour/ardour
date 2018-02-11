@@ -1156,6 +1156,13 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 }
 
 void
+Editor::track_selection_changed ()
+{
+	if ( _session->solo_selection_active() )
+		play_solo_selection(false);
+}
+
+void
 Editor::time_selection_changed ()
 {
 	/* XXX this is superficially inefficient. Hide the selection in all
@@ -1577,6 +1584,8 @@ Editor::region_selection_changed ()
 		}
 	}
 
+	if ( _session->solo_selection_active() )
+		play_solo_selection(false);
 }
 
 void

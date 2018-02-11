@@ -61,6 +61,7 @@
       <menuitem action='ToggleRoll'/>
       <menu action="PlayMenu">
         <menuitem action='PlaySelection'/>
+        <menuitem action='solo-selection'/>
         <menuitem action='PlayPreroll'/>
         <menuitem action='ToggleRollMaybe'/>
         <menuitem action='play-from-edit-point-and-return'/>

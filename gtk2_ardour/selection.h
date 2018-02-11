@@ -94,6 +94,7 @@ public:
 
 	// Selection& operator= (const Selection& other);
 
+	sigc::signal<void> TracksChanged;
 	sigc::signal<void> RegionsChanged;
 	sigc::signal<void> TimeChanged;
 	sigc::signal<void> LinesChanged;

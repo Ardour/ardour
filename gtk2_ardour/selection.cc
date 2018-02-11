@@ -1693,4 +1693,6 @@ Selection::core_selection_changed (PropertyChange const & what_changed)
 			tracks.push_back (tav);
 		}
 	}
+	
+	TracksChanged();
 }

@@ -5675,12 +5675,16 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* XXX what if its a music time selection? */
 		if (s) {
-			if (s->get_play_range() && s->transport_rolling()) {
-				s->request_play_range (&_editor->selection->time, true);
-			} else if (!s->config.get_external_sync()) {
-				if (UIConfiguration::instance().get_follow_edits() && !s->transport_rolling()) {
-					s->request_locate (_editor->get_selection().time.start());
+
+			//if Follow Edits is on, maybe try to follow the range selection  ... also consider range-audition mode
+			if ( !s->config.get_external_sync() && s->transport_rolling() ) {
+				if ( s->solo_selection_active() ) {
+					_editor->play_solo_selection(true);  //play the newly selected range, and move solos to match
+				} else if ( UIConfiguration::instance().get_follow_edits() && s->get_play_range() ) {  //already rolling a selected range
+					s->request_play_range (&_editor->selection->time, true);  //play the newly selected range
 				}
+			} else if ( !s->transport_rolling() && UIConfiguration::instance().get_follow_edits() ) {
+				s->request_locate (_editor->get_selection().time.start());
 			}
 
 			if (_editor->get_selection().time.length() != 0) {

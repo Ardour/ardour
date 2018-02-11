@@ -61,6 +61,11 @@ public:
 
 	~RegionView ();
 
+	virtual void set_selected (bool yn) {
+		_region->set_selected_for_solo(yn);
+		TimeAxisViewItem::set_selected(yn);
+	}
+
 	virtual void init (bool wait_for_data);
 
 	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }

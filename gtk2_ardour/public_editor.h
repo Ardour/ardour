@@ -211,6 +211,7 @@ public:
 	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
 
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
+	virtual void play_solo_selection(bool restart) = 0;
 	virtual void play_selection () = 0;
 	virtual void play_with_preroll () = 0;
 	virtual void rec_with_preroll () = 0;

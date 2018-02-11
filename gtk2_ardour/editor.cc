@@ -568,6 +568,7 @@ Editor::Editor ()
 	_summary = new EditorSummary (this);
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
+	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
 
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
@@ -2927,11 +2928,11 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_mixbus()) {
 		mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 	}
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
-		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 	}

@@ -1962,6 +1962,31 @@ void
 Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 {
 	if (!selection) return;
+	
+	if ( selection->regions.empty() && selection->time.empty() ) {
+		if (axes == Horizontal || axes == Both) {
+			temporal_zoom_step(true);
+		}
+		if (axes == Vertical || axes == Both) {
+			if ( !track_views.empty() ) {
+
+				TrackViewList tvl;
+
+				//implicit hack: by extending the top & bottom check outside the current view limits, we include the trackviews immediately above & below what is visible
+				const double top = vertical_adjustment.get_value() - 10;
+				const double btm = top + _visible_canvas_height + 10;
+
+				for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+					if ( (*iter)->covered_by_y_range (top, btm) ) {
+						tvl.push_back(*iter);
+					}
+				}
+
+				fit_tracks (tvl);
+			}
+		}
+		return;
+	}
 
 	//ToDo:  if notes are selected, zoom to that
 
@@ -5862,6 +5887,54 @@ Editor::toggle_record_enable ()
 		}
 
 		rtav->track()->rec_enable_control()->set_value (new_state, Controllable::UseGroup);
+	}
+}
+
+StripableList
+tracklist_to_stripables( TrackViewList list )
+{
+	StripableList ret;
+	
+	for (TrackSelection::iterator i = list.begin(); i != list.end(); ++i) {
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
+
+		if (rtv && rtv->is_track()) {
+			ret.push_back( rtv->track() );
+		}
+	}
+	
+	return ret;
+}
+
+void
+Editor::play_solo_selection (bool restart)
+{
+	//note: session::solo_selection takes care of invalidating the region playlist
+
+	if ( (!selection->tracks.empty()) && selection->time.length() > 0 ) {  //a range is selected; solo the tracks and roll
+	
+		StripableList sl = tracklist_to_stripables (selection->tracks);
+		_session->solo_selection( sl, true );
+
+		if ( restart ) {
+			samplepos_t start = selection->time.start();
+			samplepos_t end = selection->time.end_sample();
+			_session->request_bounded_roll (start, end);
+		}
+	} else if ( ! selection->tracks.empty() ) {  //no range is selected, but tracks are selected; solo the tracks and roll
+		StripableList sl = tracklist_to_stripables (selection->tracks);
+		_session->solo_selection( sl, true );
+		_session->request_cancel_play_range();
+		transition_to_rolling (true);
+	
+	} else if ( ! selection->regions.empty() ) {  //solo any tracks with selected regions, and roll
+		StripableList sl = tracklist_to_stripables ( get_tracks_for_range_action() );
+		_session->solo_selection( sl, true );
+		_session->request_cancel_play_range();
+		transition_to_rolling (true);
+	} else {
+		_session->request_cancel_play_range();
+		transition_to_rolling (true);  //no selection.  just roll.
 	}
 }
 
