@@ -2710,6 +2710,8 @@ check_best_snap ( samplepos_t presnap, samplepos_t &test, samplepos_t &dist, sam
 samplepos_t
 Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presnap, RoundMode direction)
 {
+	if  (marks.empty() ) return presnap;
+
 	samplepos_t before;
 	samplepos_t after;
 	samplepos_t test;
