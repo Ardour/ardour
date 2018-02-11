@@ -459,13 +459,25 @@ MackieControlProtocol::set_active (bool yn)
 		/* set up periodic task for timecode display and metering and automation
 		 */
 
-		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+		// set different refresh time for qcon and standard mackie MCU
+
+		int iTimeCodeRefreshTime = 100; // default value for mackie MCU (100ms)
+		int iStripDisplayRefreshTime = 10; // default value for Mackie MCU (10ms)
+
+		if(_device_info.is_qcon()){
+			// set faster timecode display refresh speed (55ms)
+			iTimeCodeRefreshTime = 55;
+			// set slower refresh time on qcon than on mackie (15ms)
+			iStripDisplayRefreshTime = 15;
+		}
+
+		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (iTimeCodeRefreshTime); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
 		/* periodic task used to update strip displays */
 
-		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (10); // milliseconds
+		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (iStripDisplayRefreshTime); // milliseconds
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
 
@@ -1382,8 +1394,21 @@ MackieControlProtocol::notify_record_state_changed ()
 				ls = on;
 				break;
 			case Session::Enabled:
-				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
-				ls = flashing;
+				
+				if(_device_info.is_qcon()){
+					// For qcon the rec button is two state only (on/off)
+					DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED on (QCon)\n");
+					ls = on;
+					break;
+
+				}
+				else{
+					// For standard Mackie MCU the record LED is flashing
+					DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
+					ls = flashing;
+					break;
+				}
+
 				break;
 			}
 
