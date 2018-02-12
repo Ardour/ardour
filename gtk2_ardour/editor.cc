@@ -179,7 +179,7 @@ static const gchar *_grid_type_strings[] = {
 	N_("1/7 (8th septuplet)"),
 	N_("1/14 (16th septuplet)"),
 	N_("1/28 (32nd septuplet)"),
-	N_("Smpte"),
+	N_("Timecode"),
 	N_("MinSec"),
 	N_("Samples"),
 	0
