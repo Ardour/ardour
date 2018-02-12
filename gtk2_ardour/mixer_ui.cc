@@ -252,7 +252,6 @@ Mixer_UI::Mixer_UI ()
 	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_scroller_base.set_name (X_("MixerWindow"));
 	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
-	vca_hpacker.pack_end (vca_scroller_base, true, true);
 
 	vca_scroller.add (vca_hpacker);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
@@ -1437,8 +1436,20 @@ Mixer_UI::redisplay_track_list ()
 	uint32_t n_masters = 0;
 
 	container_clear (vca_hpacker);
-	vca_hpacker.pack_end (vca_scroller_base, true, true);
 
+	//create a button to add mixer strips ( replaces the old buttons in the mixer list )
+	Button* add_vca_button = manage (new Button);
+	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show ();
+	add_vca_button->add (*w);
+	add_vca_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+
+	vca_hpacker.pack_end (vca_scroller_base, true, true);
+	vca_hpacker.pack_end (*add_vca_button, false, false);
+
+	add_vca_button->show ();
+	vca_scroller_base.show();
+	
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
 		AxisView* s = (*i)[stripable_columns.strip];
