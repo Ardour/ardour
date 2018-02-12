@@ -135,8 +135,17 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
+	//create a button to add mixer strips ( replaces the old buttons in the mixer list )
+	Button* add_button = manage (new Button);
+	add_button->show ();
+	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show ();
+	add_button->add (*w);
+	add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+
 	// add as last item of strip packer
 	strip_packer.pack_end (scroller_base, true, true);
+	strip_packer.pack_end (*add_button, false, false);
 
 	_group_tabs = new MixerGroupTabs (this);
 	VBox* b = manage (new VBox);
@@ -188,36 +197,12 @@ Mixer_UI::Mixer_UI ()
 	group_display_scroller.add (group_display);
 	group_display_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	HBox* route_group_display_button_box = manage (new HBox());
-
-	Button* route_group_add_button = manage (new Button ());
-	Button* route_group_remove_button = manage (new Button ());
-
-	Widget* w;
-
-	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show();
-	route_group_add_button->add (*w);
-
-	w = manage (new Image (Stock::REMOVE, ICON_SIZE_BUTTON));
-	w->show();
-	route_group_remove_button->add (*w);
-
-	route_group_display_button_box->set_homogeneous (true);
-
-	route_group_add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_route_group));
-	route_group_remove_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::remove_selected_route_group));
-
-	route_group_display_button_box->add (*route_group_add_button);
-	route_group_display_button_box->add (*route_group_remove_button);
 
 	group_display_vbox.pack_start (group_display_scroller, true, true);
-	group_display_vbox.pack_start (*route_group_display_button_box, false, false);
 
 	group_display_frame.set_name ("BaseFrame");
 	group_display_frame.set_shadow_type (Gtk::SHADOW_IN);
 	group_display_frame.add (group_display_vbox);
-
 
 	list<TargetEntry> target_list;
 	target_list.push_back (TargetEntry ("PluginPresetPtr"));
@@ -317,10 +302,6 @@ Mixer_UI::Mixer_UI ()
 	_content.pack_start (list_hpane, true, true);
 
 	update_title ();
-
-	route_group_display_button_box->show();
-	route_group_add_button->show();
-	route_group_remove_button->show();
 
 	_content.show ();
 	_content.set_name ("MixerWindow");
@@ -2370,16 +2351,6 @@ Mixer_UI::setup_track_display ()
 	VBox* v = manage (new VBox);
 	v->show ();
 	v->pack_start (track_display_scroller, true, true);
-
-	Button* b = manage (new Button);
-	b->show ();
-	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	b->add (*w);
-
-	b->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
-	v->pack_start (*b, false, false);
 
 	track_display_frame.set_name("BaseFrame");
 	track_display_frame.set_shadow_type (Gtk::SHADOW_IN);
