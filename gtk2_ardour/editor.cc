@@ -2950,6 +2950,9 @@ Editor::setup_toolbar ()
 
 	if (!ARDOUR::Profile->get_trx()) {
 		mode_box->pack_start (edit_mode_selector, false, false);
+		mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
+		mode_box->pack_start (edit_point_selector, false, false);
+		mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	}
 
 	mode_box->pack_start (*mouse_mode_box, false, false);
@@ -3037,13 +3040,6 @@ Editor::setup_toolbar ()
 	snap_box.pack_start (snap_mode_button, false, false);
 	snap_box.pack_start (grid_type_selector, false, false);
 
-	/* Edit Point*/
-	HBox *ep_box = manage (new HBox);
-	ep_box->set_spacing (2);
-	ep_box->set_border_width (2);
-
-	ep_box->pack_start (edit_point_selector, false, false);
-
 	/* Nudge */
 
 	HBox *nudge_box = manage (new HBox);
@@ -3069,23 +3065,20 @@ Editor::setup_toolbar ()
 
 		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
-		toolbar_hbox.pack_start (_zoom_box, false, false);
-
-		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-
-		toolbar_hbox.pack_start (_track_box, false, false);
-
-		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-
 		toolbar_hbox.pack_start (snap_box, false, false);
 
 		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
-		toolbar_hbox.pack_start (*ep_box, false, false);
-
-		toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
-
 		toolbar_hbox.pack_start (*nudge_box, false, false);
+
+		//zoom tools on right ege
+
+		toolbar_hbox.pack_end (_zoom_box, false, false);
+
+		toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
+
+		toolbar_hbox.pack_end (_track_box, false, false);
+
 	}
 
 	toolbar_hbox.show_all ();

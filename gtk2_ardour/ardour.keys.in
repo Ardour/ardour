@@ -102,8 +102,6 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/zoom-to-session|<@TERTIARY@>underscore|zoom to session
 @eep|Editor/edit-cursor-to-previous-region-sync|apostrophe|EP to prev region sync
 @eep|Editor/edit-cursor-to-next-region-sync|semicolon|EP to next region sync
-@eep|Editor/cycle-edit-point|grave|next EP w/o marker
-@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>grave|next EP w/marker
 
 @trans|Transport/ToggleRoll|space|toggle roll
 @trans|Transport/PlaySelection|<@SECONDARY@>space|play edit range
@@ -174,7 +172,6 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-session-options-editor|<@SECONDARY@>o|toggle preferences dialog
 @edit|Editor/set-playhead|p|set playhead position
 @wvis|Window/toggle-audio-connection-manager|<@SECONDARY@>p|toggle global audio patchbay
-@midi|MIDI/panic|<@PRIMARY@><@SECONDARY@>p|MIDI panic (stop all notes etc)
 
 ;; MIDDLE ROW
 
@@ -194,8 +191,8 @@ This mode provides many different operations on both regions and control points,
 @select|Editor/select-all-in-punch-range|<@PRIMARY@>d|select all in punch range
 @vis|Editor/fit-selection|f|fit selection vertically
 @edit|Editor/toggle-follow-playhead|<@PRIMARY@>f|toggle playhead tracking
+@edit|Editor/toggle-stationary-playhead|<@TERTIARY@>f|toggle stationary playhead
 @rop|Region/show-rhythm-ferret|<@SECONDARY@>f|show rhythm ferret window 
-@gmode|Transport/ToggleFollowEdits|<@TERTIARY@>f|toggle playhead follows edits
 @wvis|Common/ToggleMaximalEditor|<@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|<@PRIMARY@><@TERTIARY@>f|maximise mixer space
 @edit|Region/play-selected-regions|h|play selected region(s)
@@ -340,14 +337,21 @@ This mode provides many different operations on both regions and control points,
 
 ;; numbers
 
-@vis|Editor/cycle-zoom-focus|1|cycle to next zoom focus
-@grid|Editor/cycle-snap-mode|2|cycle to next snap mode
-@grid|Editor/prev-grid-choice|3|use prev grid unit
-@grid|Editor/next-grid-choice|4|use next grid unit
-@gmode|Transport/ToggleAutoPlay|5|toggle auto play
-@gmode|Transport/ToggleAutoReturn|6|toggle auto return
-@gmode|Transport/ToggleClick|7|toggle click (metronome)
-@mmode|MouseMode/set-mouse-mode-object-range|8|link object/range tools
+@gmode|Transport/ToggleClick|grave|toggle click (metronome)
+@midi|MIDI/panic|<@PRIMARY@>grave|MIDI panic (stop all midi notes)
+@trans|Transport/ToggleExternalSync|<@SECONDARY@>grave|toggle external sync
+@eep|Editor/cycle-edit-mode|1|cycle edit mode {slide, lock, ripple}
+@eep|Editor/cycle-edit-point|2|next EP w/o marker {playhead, mouse}
+@eep|Editor/cycle-edit-point-with-marker|<@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
+@mmode|MouseMode/set-mouse-mode-object-range|3|Smart Mode (provide some Range tools in Object mode)
+@gmode|Transport/ToggleFollowEdits|<@PRIMARY@>3|toggle playhead follows edits
+@grid|Editor/cycle-snap-mode|4|cycle to next snap mode {On/Off}
+@grid|Editor/prev-grid-choice|5|use prev grid unit
+@grid|Editor/next-grid-choice|6|use next grid unit
+@gmode|Transport/ToggleAutoReturn|7|toggle auto return
+@gmode|Transport/ToggleAutoPlay|<@PRIMARY@>7|toggle auto play
+@gmode|Transport/TogglePunch|8|toggle punch in+out
+; ToDo @gmode|Transport/ToggleRecMode|<@PRIMARY@>8|toggle recording mode ( layered, overwrite, merge )
 @ranges|Region/set-tempo-from-region|9|set tempo (1 bar) from region(s)
 @ranges|Editor/set-tempo-from-edit-range|0|set tempo (1 bar) from edit range
 
