@@ -223,7 +223,7 @@ static const gchar *_rb_opt_strings[] = {
 };
 #endif
 
-#define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
+#define COMBO_TRIANGLE_WIDTH 10 // as-measured. was 25:  ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
 
 Editor::Editor ()
 	: PublicEditor (global_hpacker)
@@ -3169,7 +3169,7 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
 	grid_type_selector.AddMenuElem (MenuElem ( grid_type_strings[(int)GridTypeSamples], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSamples)));
 
-	set_size_request_to_display_given_text (grid_type_selector, "No Grid", COMBO_TRIANGLE_WIDTH, 2);
+	set_size_request_to_display_given_text (grid_type_selector, _("Long Grid"), COMBO_TRIANGLE_WIDTH, 2);  //problem: some of the rarely-used grid names are very long.  Just do something arbitary, translators: rename this if needed
 }
 
 void
