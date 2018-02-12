@@ -268,7 +268,7 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.set_check_divider_position (true);
 	list_hpane.add (list_vpacker);
 	list_hpane.add (global_hpacker);
-	list_hpane.set_child_minsize (list_vpacker, 1);
+	list_hpane.set_child_minsize (list_vpacker, 30);
 
 	XMLNode const * settings = ARDOUR_UI::instance()->mixer_settings();
 	float fract;
