@@ -223,7 +223,8 @@ static const gchar *_rb_opt_strings[] = {
 };
 #endif
 
-#define COMBO_TRIANGLE_WIDTH 10 // as-measured. was 25:  ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
+//Robin says: this should be odd to accomodate cairo drawing offset ( width/2 rounds up to pixel boundary )
+#define COMBO_TRIANGLE_WIDTH 11 // as-measured. was 25:  ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
 
 Editor::Editor ()
 	: PublicEditor (global_hpacker)
