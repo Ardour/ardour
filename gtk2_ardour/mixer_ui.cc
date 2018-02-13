@@ -135,9 +135,14 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
-	/* create a button to add mixer strips */
-	add_button.show ();
+	/* create a button to add VCA strips ... will get packed in redisplay_track_list() */
 	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
+	w->show ();
+	add_vca_button.add (*w);
+	add_vca_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+
+	/* create a button to add mixer strips */
+	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
 	add_button.add (*w);
 	add_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
@@ -330,6 +335,7 @@ Mixer_UI::Mixer_UI ()
 	list_hpane.show();
 	group_display.show();
 	favorite_plugins_display.show();
+	add_button.show ();
 
 	MixerStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_strip, this, _1), gui_context());
 	VCAMasterStrip::CatchDeletion.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::remove_master, this, _1), gui_context());
@@ -1435,17 +1441,10 @@ Mixer_UI::redisplay_track_list ()
 
 	container_clear (vca_hpacker);
 
-	/* create a button to add mixer strips */
-	Button* add_vca_button = manage (new Button);
-	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
-	w->show ();
-	add_vca_button->add (*w);
-	add_vca_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
-
 	vca_hpacker.pack_end (vca_scroller_base, true, true);
-	vca_hpacker.pack_end (*add_vca_button, false, false);
+	vca_hpacker.pack_end (add_vca_button, false, false);
 
-	add_vca_button->show ();
+	add_vca_button.show ();
 	vca_scroller_base.show();
 	
 	for (i = rows.begin(); i != rows.end(); ++i) {

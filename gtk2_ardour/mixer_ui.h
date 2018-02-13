@@ -167,8 +167,9 @@ private:
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	Gtk::Button           add_button; // should really be an ArdourButton
 	ArdourWidgets::HPane  list_hpane;
+	Gtk::Button           add_button; // should really be an ArdourButton
+	Gtk::Button           add_vca_button;
 
 	MixerGroupTabs* _group_tabs;
 
