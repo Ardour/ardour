@@ -660,6 +660,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\grid_lines.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\group_tabs.cc"
 				>
 			</File>
@@ -1695,6 +1699,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\global_port_matrix.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\grid_lines.h"
 				>
 			</File>
 			<File
