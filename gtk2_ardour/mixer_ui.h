@@ -147,7 +147,6 @@ private:
 	Gtk::VBox             mixer_scroller_vpacker;
 	Gtk::VBox             list_vpacker;
 	Gtk::Label            group_display_button_label;
-	Gtk::Button           group_display_button;
 	Gtk::ScrolledWindow   track_display_scroller;
 	Gtk::ScrolledWindow   group_display_scroller;
 	Gtk::ScrolledWindow   favorite_plugins_scroller;

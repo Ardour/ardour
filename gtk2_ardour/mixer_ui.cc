@@ -312,7 +312,6 @@ Mixer_UI::Mixer_UI ()
 	mixer_scroller_vpacker.show();
 	list_vpacker.show();
 	group_display_button_label.show();
-	group_display_button.show();
 	group_display_scroller.show();
 	favorite_plugins_scroller.show();
 	group_display_vbox.show();
