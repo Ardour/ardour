@@ -135,17 +135,16 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.drag_dest_set (target_table);
 	scroller_base.signal_drag_data_received().connect (sigc::mem_fun(*this, &Mixer_UI::scroller_drag_data_received));
 
-	//create a button to add mixer strips ( replaces the old buttons in the mixer list )
-	Button* add_button = manage (new Button);
-	add_button->show ();
+	/* create a button to add mixer strips */
+	add_button.show ();
 	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
-	add_button->add (*w);
-	add_button->signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
+	add_button.add (*w);
+	add_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
 
-	// add as last item of strip packer
+	/* add as last item of strip packer */
 	strip_packer.pack_end (scroller_base, true, true);
-	strip_packer.pack_end (*add_button, false, false);
+	strip_packer.pack_end (add_button, false, false);
 
 	_group_tabs = new MixerGroupTabs (this);
 	VBox* b = manage (new VBox);
@@ -1436,7 +1435,7 @@ Mixer_UI::redisplay_track_list ()
 
 	container_clear (vca_hpacker);
 
-	//create a button to add mixer strips ( replaces the old buttons in the mixer list )
+	/* create a button to add mixer strips */
 	Button* add_vca_button = manage (new Button);
 	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
@@ -2230,6 +2229,9 @@ Mixer_UI::scroll_left ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if (i->get_widget() == & add_button) {
+			continue;
+		}
 		lm += i->get_widget()->get_width ();
 		if (lm >= lp) {
 			lm -= i->get_widget()->get_width ();
@@ -2254,6 +2256,9 @@ Mixer_UI::scroll_right ()
 	using namespace Gtk::Box_Helpers;
 	const BoxList& strips = strip_packer.children();
 	for (BoxList::const_iterator i = strips.begin(); i != strips.end(); ++i) {
+		if (i->get_widget() == & add_button) {
+			continue;
+		}
 		lm += i->get_widget()->get_width ();
 		if (lm > lp + 1) {
 			break;
