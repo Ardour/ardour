@@ -700,10 +700,10 @@ ARDOUR_UI::build_menu_bar ()
 	format_label.set_name ("Format");
 	format_label.set_use_markup ();
 
-#ifndef TOP_MENUBAR
-	menu_hbox.pack_start (*menu_bar, false, false);
-#else
+#ifdef GTKOSX
 	use_menubar_as_top_menubar ();
+#else
+	menu_hbox.pack_start (*menu_bar, false, false);
 #endif
 
 	hbox->pack_end (error_alert_button, false, false, 2);
