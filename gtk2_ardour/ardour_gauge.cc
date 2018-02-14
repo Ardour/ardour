@@ -72,23 +72,28 @@ void
 ArdourGauge::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
 	cairo_t* cr = ctx->cobj ();
+	Gtkmm2ext::Color bg = UIConfiguration::instance().color ("gtk_background");
 	Gtkmm2ext::Color base = UIConfiguration::instance ().color ("ruler base");
 	Gtkmm2ext::Color text = UIConfiguration::instance ().color ("ruler text");
 
 	const int width = get_width ();
 	const int height = get_height ();
 
-	Gtkmm2ext::rounded_rectangle (cr, 0, 0, width, height, PADDING + 1);
-	Gtkmm2ext::set_source_rgba (cr, base);
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_set_source_rgba (cr, 0,0,0,1 );
+	cairo_fill (cr);
+
+	cairo_rectangle (cr, 1, 1, width-2, height-2);
+	Gtkmm2ext::set_source_rgba (cr, bg);
 	cairo_fill (cr);
 
 	if (alert () && _blink) {
-		Gtkmm2ext::rounded_rectangle (cr, 1, 1, width - 2, height - 2, PADDING + 1);
+		Gtkmm2ext::rounded_rectangle (cr, 1, 1, width - 2, height - 2, 1);
 		cairo_set_source_rgba (cr, 0.5, 0, 0, 1.0);
 		cairo_fill (cr);
 	}
 
-	Gtkmm2ext::rounded_rectangle (cr, PADDING, PADDING, width - PADDING - PADDING, height - PADDING - PADDING, PADDING + 1);
+	cairo_rectangle (cr, PADDING, PADDING, width - PADDING - PADDING, height - PADDING - PADDING);
 	cairo_clip (cr);
 
 	const float lvl = level ();
