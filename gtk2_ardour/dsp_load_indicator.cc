@@ -71,6 +71,8 @@ DspLoadIndicator::alert () const
 
 	//engine OFF
 	ret |= !ARDOUR::AudioEngine::instance()->running();
+	
+	return ret;
 }
 
 ArdourGauge::Status
