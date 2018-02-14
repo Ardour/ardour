@@ -237,10 +237,9 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter->show();
 			editor_meter->ButtonPress.connect_same_thread (editor_meter_connection, boost::bind (&ARDOUR_UI::editor_meter_button_press, this, _1));
 
-			editor_meter_table.set_homogeneous(true);
 			editor_meter_table.set_spacings(3);
-			editor_meter_table.attach(*editor_meter,             0,1, 0,2, SHRINK, EXPAND);
-			editor_meter_table.attach(editor_meter_peak_display, 0,1, 2,3, EXPAND|FILL, EXPAND|FILL);
+			editor_meter_table.attach(*editor_meter,             0,1, 0,1, FILL, FILL);
+			editor_meter_table.attach(editor_meter_peak_display, 0,1, 1,2, FILL, EXPAND|FILL);
 
 			editor_meter->show();
 			editor_meter_peak_display.show();
@@ -252,7 +251,7 @@ ARDOUR_UI::set_session (Session *s)
 
 		editor_meter_peak_display.set_name ("meterbridge peakindicator");
 		editor_meter_peak_display.unset_flags (Gtk::CAN_FOCUS);
-		editor_meter_peak_display.set_size_request (std::max(9.f, rintf(8.f * UIConfiguration::instance().get_ui_scale())), -1);
+		editor_meter_peak_display.set_size_request (-1, std::max(6.f, rintf(5.f * UIConfiguration::instance().get_ui_scale())) );
 		editor_meter_peak_display.set_corner_radius (3.0);
 
 		editor_meter_max_peak = -INFINITY;
