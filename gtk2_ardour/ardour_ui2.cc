@@ -172,6 +172,27 @@ bool drag_failed (const Glib::RefPtr<Gdk::DragContext>& context, DragResult resu
 void
 ARDOUR_UI::repack_transport_hbox ()
 {
+	if (dsp_load_indicator.get_parent()) {
+		transport_hbox.remove (dsp_load_indicator);
+	}
+	if (UIConfiguration::instance().get_show_dsp_load_info ()) {
+		transport_hbox.pack_start (dsp_load_indicator, false, false);
+		dsp_load_indicator.show();
+	}
+
+	if (disk_space_indicator.get_parent()) {
+		transport_hbox.remove (disk_space_indicator);
+	}
+	if (UIConfiguration::instance().get_show_disk_space_info ()) {
+		transport_hbox.pack_start (disk_space_indicator, false, false);
+		disk_space_indicator.show();
+	}
+
+	if (status_spacer.get_parent()) {
+		transport_hbox.remove (status_spacer);
+	}
+	transport_hbox.pack_start (status_spacer, false, false, 3);
+
 	if (time_info_box) {
 		if (time_info_box->get_parent()) {
 			transport_hbox.remove (*time_info_box);
@@ -188,22 +209,6 @@ ARDOUR_UI::repack_transport_hbox ()
 	if (UIConfiguration::instance().get_show_mini_timeline ()) {
 		transport_hbox.pack_start (mini_timeline, true, true);
 		mini_timeline.show();
-	}
-
-	if (dsp_load_indicator.get_parent()) {
-		transport_hbox.remove (dsp_load_indicator);
-	}
-	if (UIConfiguration::instance().get_show_dsp_load_info ()) {
-		transport_hbox.pack_start (dsp_load_indicator, false, false);
-		dsp_load_indicator.show();
-	}
-
-	if (disk_space_indicator.get_parent()) {
-		transport_hbox.remove (disk_space_indicator);
-	}
-	if (UIConfiguration::instance().get_show_disk_space_info ()) {
-		transport_hbox.pack_start (disk_space_indicator, false, false);
-		disk_space_indicator.show();
 	}
 
 	if (editor_meter) {
@@ -551,9 +556,6 @@ ARDOUR_UI::setup_transport ()
 	}
 
 	transport_table.attach (*alert_box, TCOL, 0, 2, SHRINK, EXPAND|FILL, hpadding, 0);
-	++col;
-
-	transport_table.attach (*(manage (new ArdourVSpacer ())), TCOL, 0, 2 , SHRINK, EXPAND|FILL, 3, 0);
 	++col;
 
 	/* editor-meter, mini-timeline and selection clock are options in the transport_hbox */

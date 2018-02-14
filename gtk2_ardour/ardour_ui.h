@@ -493,6 +493,8 @@ private:
 	DspLoadIndicator   dsp_load_indicator;
 	DiskSpaceIndicator disk_space_indicator;
 
+	ArdourWidgets::ArdourVSpacer      status_spacer;
+
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;
 	ArdourWidgets::ArdourButton sync_button;
