@@ -29,6 +29,8 @@ public:
 	ArdourGauge (std::string const& max_text = "00.0%");
 	virtual ~ArdourGauge ();
 
+	void blink (bool onoff);
+
 protected:
 
 	enum Status {
@@ -54,6 +56,8 @@ private:
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
 	Glib::RefPtr<Pango::Layout> _layout;
+
+	bool _blink;
 };
 
 #endif

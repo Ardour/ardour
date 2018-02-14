@@ -31,6 +31,8 @@ public:
 	void set_xrun_count (const unsigned int xruns);
 	void set_dsp_load (const double load);
 
+	void set_xrun_while_recording () {_xrun_while_recording = true;}
+
 protected:
 	bool alert () const;
 	ArdourGauge::Status indicator () const;
@@ -42,6 +44,7 @@ private:
 
 	float _dsp_load;
 	unsigned int _xrun_count;
+	bool _xrun_while_recording;
 };
 
 #endif

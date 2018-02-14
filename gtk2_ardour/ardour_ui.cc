@@ -2640,6 +2640,9 @@ ARDOUR_UI::blink_handler (bool blink_on)
 	solo_blink (blink_on);
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
+
+	dsp_load_indicator.blink(blink_on);
+	disk_space_indicator.blink(blink_on);
 }
 
 void
@@ -4926,6 +4929,10 @@ ARDOUR_UI::xrun_handler (samplepos_t where)
 	}
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
+
+	if (_session && _session->actively_recording()) {
+		dsp_load_indicator.set_xrun_while_recording();
+	}
 
 	if (_session && Config->get_create_xrun_marker() && _session->actively_recording()) {
 		create_xrun_marker(where);

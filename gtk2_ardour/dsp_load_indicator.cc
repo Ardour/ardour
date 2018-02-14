@@ -19,6 +19,8 @@
 #include "ardour_ui.h"
 #include "dsp_load_indicator.h"
 
+#include "ardour/audioengine.h"
+
 #include "pbd/i18n.h"
 
 #define PADDING 3
@@ -27,6 +29,7 @@ DspLoadIndicator::DspLoadIndicator ()
 	: ArdourGauge ("00.0%")
 	, _dsp_load (0)
 	, _xrun_count (0)
+	, _xrun_while_recording (false)
 {
 }
 
@@ -61,7 +64,13 @@ DspLoadIndicator::level () const {
 bool
 DspLoadIndicator::alert () const
 {
-	return _xrun_count > 0;
+	bool ret = false;
+	
+	//xrun while recording
+	ret |= _xrun_while_recording;
+
+	//engine OFF
+	ret |= !ARDOUR::AudioEngine::instance()->running();
 }
 
 ArdourGauge::Status
@@ -80,6 +89,8 @@ std::string
 DspLoadIndicator::tooltip_text ()
 {
 	char buf[64];
+
+	//xruns
 	if (_xrun_count == UINT_MAX) {
 		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: ?"), _dsp_load);
 	} else if (_xrun_count > 9999) {
@@ -87,6 +98,7 @@ DspLoadIndicator::tooltip_text ()
 	} else {
 		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: %u"), _dsp_load, _xrun_count);
 	}
+
 	return buf;
 }
 
@@ -96,6 +108,7 @@ DspLoadIndicator::on_button_release_event (GdkEventButton *ev)
 	ARDOUR::Session* s = ARDOUR_UI::instance ()->the_session ();
 	if (s) {
 		s->reset_xrun_count ();
+		_xrun_while_recording = false;
 	}
 	return true;
 }
