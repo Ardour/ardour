@@ -212,16 +212,18 @@ ARDOUR_UI::repack_transport_hbox ()
 	}
 
 	if (editor_meter) {
-		if (meter_box.get_parent()) {
-			transport_hbox.remove (meter_box);
-			transport_hbox.remove (editor_meter_peak_display);
+		if (editor_meter_table.get_parent()) {
+			transport_hbox.remove (editor_meter_table);
+		}
+		if (meterbox_spacer.get_parent()) {
+			transport_hbox.remove (meterbox_spacer);
 		}
 
 		if (UIConfiguration::instance().get_show_editor_meter()) {
-			transport_hbox.pack_end (editor_meter_peak_display, false, false);
-			transport_hbox.pack_end (meter_box, false, false);
-			meter_box.show();
-			editor_meter_peak_display.show();
+			transport_hbox.pack_end (editor_meter_table, false, false);
+			transport_hbox.pack_end (meterbox_spacer, false, false, 3);
+			editor_meter_table.show();
+			meterbox_spacer.show();
 		}
 	}
 

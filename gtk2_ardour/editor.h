@@ -637,7 +637,6 @@ private:
 	ArdourWidgets::VPane editor_summary_pane;
 
 	Gtk::EventBox meter_base;
-	Gtk::HBox     meter_box;
 	Gtk::EventBox marker_base;
 	Gtk::HBox     marker_box;
 	Gtk::VBox     scrollers_rulers_markers_box;

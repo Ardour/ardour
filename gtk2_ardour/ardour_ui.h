@@ -494,6 +494,7 @@ private:
 	DiskSpaceIndicator disk_space_indicator;
 
 	ArdourWidgets::ArdourVSpacer      status_spacer;
+	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
 
 	ArdourWidgets::ArdourButton auto_return_button;
 	ArdourWidgets::ArdourButton follow_edits_button;
@@ -508,7 +509,7 @@ private:
 	Gtk::Table action_script_table;
 
 	Gtk::VBox alert_box;
-	Gtk::VBox meter_box;
+	Gtk::Table editor_meter_table;
 	ArdourWidgets::ArdourButton editor_meter_peak_display;
 	LevelMeterHBox *            editor_meter;
 	float                       editor_meter_max_peak;

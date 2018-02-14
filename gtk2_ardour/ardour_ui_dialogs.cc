@@ -209,21 +209,19 @@ ARDOUR_UI::set_session (Session *s)
 
 	update_format ();
 
-	if (meter_box.get_parent()) {
-		transport_hbox.remove (meter_box);
-		transport_hbox.remove (editor_meter_peak_display);
+	if (editor_meter_table.get_parent()) {
+		transport_hbox.remove (editor_meter_table);
 	}
 
 	if (editor_meter) {
-		meter_box.remove(*editor_meter);
+		editor_meter_table.remove(*editor_meter);
 		delete editor_meter;
 		editor_meter = 0;
 		editor_meter_peak_display.hide();
 	}
 
-	if (meter_box.get_parent()) {
-		transport_hbox.remove (meter_box);
-		transport_hbox.remove (editor_meter_peak_display);
+	if (editor_meter_table.get_parent()) {
+		transport_hbox.remove (editor_meter_table);
 	}
 
 	if (_session &&
@@ -237,9 +235,14 @@ ARDOUR_UI::set_session (Session *s)
 			editor_meter->set_meter_type (_session->master_out()->meter_type());
 			editor_meter->setup_meters (30, 10, 6);
 			editor_meter->show();
-			meter_box.pack_start(*editor_meter);
-
 			editor_meter->ButtonPress.connect_same_thread (editor_meter_connection, boost::bind (&ARDOUR_UI::editor_meter_button_press, this, _1));
+
+			editor_meter_table.set_homogeneous(true);
+			editor_meter_table.attach(*editor_meter,             0,1, 0,2, SHRINK, EXPAND);
+			editor_meter_table.attach(editor_meter_peak_display, 0,1, 2,3, EXPAND|FILL, EXPAND|FILL);
+
+			editor_meter->show();
+			editor_meter_peak_display.show();
 		}
 
 		ArdourMeter::ResetAllPeakDisplays.connect (sigc::mem_fun(*this, &ARDOUR_UI::reset_peak_display));
@@ -309,7 +312,7 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 	fps_connection.disconnect();
 
 	if (editor_meter) {
-		meter_box.remove(*editor_meter);
+		editor_meter_table.remove(*editor_meter);
 		delete editor_meter;
 		editor_meter = 0;
 		editor_meter_peak_display.hide();
