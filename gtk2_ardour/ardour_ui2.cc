@@ -108,39 +108,6 @@ ARDOUR_UI::status_bar_button_press (GdkEventButton* ev)
 	return handled;
 }
 
-void
-ARDOUR_UI::display_message (const char *prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char *msg)
-{
-	string text;
-
-	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
-
-	ArdourLogLevel ll = LogLevelNone;
-
-	if (strcmp (prefix, _("[ERROR]: ")) == 0) {
-		text = "<span color=\"red\" weight=\"bold\">";
-		ll = LogLevelError;
-	} else if (strcmp (prefix, _("[WARNING]: ")) == 0) {
-		text = "<span color=\"yellow\" weight=\"bold\">";
-		ll = LogLevelWarning;
-	} else if (strcmp (prefix, _("[INFO]: ")) == 0) {
-		text = "<span color=\"green\" weight=\"bold\">";
-		ll = LogLevelInfo;
-	} else {
-		text = "<span color=\"white\" weight=\"bold\">???";
-	}
-
-	_log_not_acknowledged = std::max(_log_not_acknowledged, ll);
-
-#ifdef TOP_MENUBAR
-	text += prefix;
-	text += "</span>";
-	text += msg;
-
-	status_bar_label.set_markup (text);
-#endif
-}
-
 XMLNode*
 ARDOUR_UI::tearoff_settings (const char* name) const
 {
