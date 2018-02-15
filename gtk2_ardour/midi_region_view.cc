@@ -1054,14 +1054,15 @@ MidiRegionView::note_diff_add_change (NoteBase* ev,
 void
 MidiRegionView::apply_diff (bool as_subcommand, bool was_copy)
 {
-	bool add_or_remove;
 	bool commit = false;
 
 	if (!_note_diff_command) {
 		return;
 	}
 
-	if (!was_copy && (add_or_remove = _note_diff_command->adds_or_removes())) {
+	bool add_or_remove = _note_diff_command->adds_or_removes();
+
+	if (!was_copy && add_or_remove) {
 		// Mark all selected notes for selection when model reloads
 		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 			_marked_for_selection.insert((*i)->note());

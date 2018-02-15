@@ -120,7 +120,6 @@ class PluginPinWindowProxy : public WM::ProxyBase
 	ARDOUR::SessionHandlePtr* session_handle();
 
   private:
-	ProcessorBox* _processor_box;
 	boost::weak_ptr<ARDOUR::Processor> _processor;
 
 	void processor_going_away ();

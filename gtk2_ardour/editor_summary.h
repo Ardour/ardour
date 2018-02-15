@@ -93,9 +93,6 @@ private:
 	samplepos_t _leftmost; ///< the earliest sample we ever viewed
 	samplepos_t _rightmost; ///< the latest sample we ever viewed
 
-	/** fraction of the session length by which the overview size should extend past the start and end markers */
-	double _overhang_fraction;
-
 	double _x_scale; ///< pixels per sample for the x axis of the pixmap
 	double _track_height;
 	double _last_playhead;

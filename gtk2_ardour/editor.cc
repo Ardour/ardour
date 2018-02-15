@@ -2719,7 +2719,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 
 	samplepos_t before;
 	samplepos_t after;
-	samplepos_t test;
+	samplepos_t test = presnap;
 
 	before = after = max_samplepos;
 
@@ -2742,7 +2742,7 @@ Editor::snap_to_grid (vector<ArdourCanvas::Ruler::Mark> marks, samplepos_t presn
 	}
 
 	if (before == max_samplepos && after == max_samplepos) {
-		/* No smpte to snap to, so just don't snap */
+		/* No grid to snap to, so just don't snap */
 		return presnap;
 	} else if (before == max_samplepos) {
 		test = after;

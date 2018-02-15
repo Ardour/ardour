@@ -1816,7 +1816,7 @@ Editor::set_selection_from_region ()
 
 	selection->set (tvl);
 
-	if (!get_smart_mode () || !mouse_mode == Editing::MouseObject) {
+	if (!get_smart_mode () || !(mouse_mode == Editing::MouseObject) ) {
 		set_mouse_mode (Editing::MouseRange, false);
 	}
 }
