@@ -432,6 +432,7 @@ namespace ARDOUR {
 		MonitoringSilence = 0x1,
 		MonitoringInput = 0x2,
 		MonitoringDisk = 0x4,
+		MonitoringCue = 0x6,
 	};
 
 	enum MeterState {

@@ -125,6 +125,7 @@ public:
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	MonitorState monitoring_state () const;
+	MonitorState get_auto_monitoring_state () const;
 
 	MidiBuffer const& immediate_event_buffer () const { return _immediate_event_buffer; }
 

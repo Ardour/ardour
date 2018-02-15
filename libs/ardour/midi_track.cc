@@ -826,6 +826,13 @@ MidiTrack::monitoring_state () const
 	return ms;
 }
 
+MonitorState
+MidiTrack::get_auto_monitoring_state () const
+{
+	//if we are a midi track,  we ignore auto_input, tape_mode, etc etc.  "Auto" will monitor Disk+In
+	return MonitoringCue;
+}
+
 void
 MidiTrack::filter_input (BufferSet& bufs)
 {
