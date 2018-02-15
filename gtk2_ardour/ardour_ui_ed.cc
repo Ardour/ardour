@@ -700,7 +700,7 @@ ARDOUR_UI::build_menu_bar ()
 	format_label.set_name ("Format");
 	format_label.set_use_markup ();
 
-#ifdef GTKOSX
+#ifdef __APPLE__
 	use_menubar_as_top_menubar ();
 #else
 	menu_hbox.pack_start (*menu_bar, false, false);

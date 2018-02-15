@@ -132,7 +132,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 gint
 ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 {
-#ifdef GTKOSX
+#ifdef __APPLE__
 	/* just hide the window, and return - the top menu stays up */
 	editor->hide ();
 	return TRUE;
