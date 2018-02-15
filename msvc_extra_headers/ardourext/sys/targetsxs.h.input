@@ -16,6 +16,14 @@
 /* Comment out the above line to build Mixbus without VST support */
 #endif
 
+#ifndef CURRENT_SESSION_FILE_VERSION
+#ifdef  MIXBUS
+#define CURRENT_SESSION_FILE_VERSION 5990
+#else
+#define CURRENT_SESSION_FILE_VERSION 5990
+#endif
+#endif
+
 #ifndef JACK_32_64
 #define JACK_32_64
 /* Shouldn't really be needed but make sure that any structs we
