@@ -3853,22 +3853,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
-		     "show-dsp-load-info",
-		     _("Display DSP Load Information"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_dsp_load_info),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_dsp_load_info)
-		     ));
-
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
-		     "show-disk-space-info",
-		     _("Display Disk Space Information"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_disk_space_info),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_disk_space_info)
-		     ));
-
-	add_option (_("Appearance/Toolbar"),
-	     new BoolOption (
 		     "show-mini-timeline",
 		     _("Display Navigation Timeline"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_mini_timeline),

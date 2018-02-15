@@ -666,20 +666,16 @@ void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
-	menu_bar->set_name ("MainMenuBar");
+	menu_bar->set_name ("gtk_background");
 
 	EventBox* ev = manage (new EventBox);
 	ev->show ();
 	CairoHPacker* hbox = manage (new CairoHPacker);
-	hbox->set_name (X_("StatusBarBox"));
+	hbox->set_name (X_("gtk_background"));
 	hbox->show ();
-	hbox->set_border_width (3);
+	hbox->set_border_width (2);
 
-	VBox* vbox = manage (new VBox);
-	vbox->pack_start (*hbox, true, false);
-	vbox->show();
-
-	ev->add (*vbox);
+	ev->add (*hbox);
 
 	wall_clock_label.set_name ("WallClock");
 	wall_clock_label.set_use_markup ();
@@ -707,28 +703,34 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 
 	hbox->pack_end (error_alert_button, false, false, 2);
+	hbox->pack_end (dsp_load_indicator, false, false, 4);
 
 	hbox->pack_end (wall_clock_label, false, false, 2);
+	hbox->pack_end (disk_space_indicator, false, false, 4);
+#if 0
 	hbox->pack_end (disk_space_label, false, false, 4);
+#endif
 	hbox->pack_end (xrun_label, false, false, 4);
-	hbox->pack_end (peak_thread_work_label, false, false, 4);
+#if 0
 	hbox->pack_end (cpu_load_label, false, false, 4);
+#endif
 	hbox->pack_end (buffer_load_label, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
+	hbox->pack_end (peak_thread_work_label, false, false, 4);
 
 	menu_hbox.pack_end (*ev, false, false, 2);
 
-	menu_bar_base.set_name ("MainMenuBar");
+	menu_bar_base.set_name ("gtk_background");
 	menu_bar_base.add (menu_hbox);
 
 #ifndef __APPLE__
 	// OSX provides its own wallclock, thank you very much
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), true);
 #endif
-	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
-	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&disk_space_indicator,  X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&dsp_load_indicator,    X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);

@@ -493,7 +493,6 @@ private:
 	DspLoadIndicator   dsp_load_indicator;
 	DiskSpaceIndicator disk_space_indicator;
 
-	ArdourWidgets::ArdourVSpacer      status_spacer;
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer2;
 
