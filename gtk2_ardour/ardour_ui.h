@@ -74,9 +74,9 @@
 #include "add_route_dialog.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
-#include "dsp_load_indicator.h"
-#include "disk_space_indicator.h"
-#include "disk_io_indicator.h"
+#include "dsp_load_gauge.h"
+#include "disk_space_gauge.h"
+#include "disk_io_gauge.h"
 #include "editing.h"
 #include "enums.h"
 #include "mini_timeline.h"
@@ -491,9 +491,10 @@ private:
 	ShuttleControl     shuttle_box;
 	MiniTimeline       mini_timeline;
 	TimeInfoBox*       time_info_box;
-	DspLoadIndicator   dsp_load_indicator;
-	DiskIoIndicator    disk_io_indicator;
-	DiskSpaceIndicator disk_space_indicator;
+
+	DspLoadGauge   dsp_load_gauge;
+	DiskIoGauge    disk_io_gauge;
+	DiskSpaceGauge disk_space_gauge;
 
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer2;

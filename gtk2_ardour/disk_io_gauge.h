@@ -16,17 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkardour_disk_io_indicator_h__
-#define __gtkardour_disk_io_indicator_h__
+#ifndef __gtkardour_disk_io_gauge_h__
+#define __gtkardour_disk_io_gauge_h__
 
 #include <pangomm.h>
 
 #include "ardour_gauge.h"
 
-class DiskIoIndicator : public ArdourGauge
+class DiskIoGauge : public ArdourGauge
 {
 public:
-	DiskIoIndicator ();
+	DiskIoGauge ();
 
 	void set_disk_io (const double load);
 

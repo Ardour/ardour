@@ -1684,9 +1684,9 @@ ARDOUR_UI::update_xrun_count ()
 
 	if (_session) {
 		const unsigned int x = _session->get_xrun_count ();
-		dsp_load_indicator.set_xrun_count (x);
+		dsp_load_gauge.set_xrun_count (x);
 	} else {
-		dsp_load_indicator.set_xrun_count (UINT_MAX);
+		dsp_load_gauge.set_xrun_count (UINT_MAX);
 	}
 }
 
@@ -1698,7 +1698,7 @@ ARDOUR_UI::update_cpu_load ()
 	*/
 
 	double const c = AudioEngine::instance()->get_dsp_load ();
-	dsp_load_indicator.set_dsp_load (c);
+	dsp_load_gauge.set_dsp_load (c);
 }
 
 void
@@ -1720,7 +1720,7 @@ ARDOUR_UI::update_buffer_load ()
 	uint32_t const playback = _session ? _session->playback_load () : 100;
 	uint32_t const capture = _session ? _session->capture_load () : 100;
 	uint32_t max_load = std::min ( playback, capture );
-	disk_io_indicator.set_disk_io(max_load);
+	disk_io_gauge.set_disk_io(max_load);
 }
 
 void
@@ -1736,7 +1736,7 @@ void
 ARDOUR_UI::update_disk_space()
 {
 	if (_session == 0) {
-		disk_space_indicator.set_available_disk_sec (-1);
+		disk_space_gauge.set_available_disk_sec (-1);
 		return;
 	}
 
@@ -1745,15 +1745,15 @@ ARDOUR_UI::update_disk_space()
 
 	if (fr == 0) {
 		/* skip update - no SR available */
-		disk_space_indicator.set_available_disk_sec (-1);
+		disk_space_gauge.set_available_disk_sec (-1);
 		return;
 	}
 
 	if (!opt_samples) {
 		/* Available space is unknown */
-		disk_space_indicator.set_available_disk_sec (-1);
+		disk_space_gauge.set_available_disk_sec (-1);
 	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
-		disk_space_indicator.set_available_disk_sec (max_samplecnt);
+		disk_space_gauge.set_available_disk_sec (max_samplecnt);
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
@@ -1764,11 +1764,7 @@ ARDOUR_UI::update_disk_space()
 			samples /= rec_enabled_streams;
 		}
 
-		int hrs;
-		int mins;
-		int secs;
-
-		disk_space_indicator.set_available_disk_sec (samples / (float)fr);
+		disk_space_gauge.set_available_disk_sec (samples / (float)fr);
 	}
 
 }
@@ -2583,8 +2579,8 @@ ARDOUR_UI::blink_handler (bool blink_on)
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
 
-	dsp_load_indicator.blink(blink_on);
-	disk_space_indicator.blink(blink_on);
+	dsp_load_gauge.blink(blink_on);
+	disk_space_gauge.blink(blink_on);
 }
 
 void
@@ -4873,7 +4869,7 @@ ARDOUR_UI::xrun_handler (samplepos_t where)
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
 
 	if (_session && _session->actively_recording()) {
-		dsp_load_indicator.set_xrun_while_recording();
+		dsp_load_gauge.set_xrun_while_recording();
 	}
 
 	if (_session && Config->get_create_xrun_marker() && _session->actively_recording()) {

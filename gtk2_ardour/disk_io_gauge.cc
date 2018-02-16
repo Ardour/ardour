@@ -17,7 +17,7 @@
  */
 
 #include "ardour_ui.h"
-#include "disk_io_indicator.h"
+#include "disk_io_gauge.h"
 
 #include "ardour/audioengine.h"
 
@@ -25,14 +25,14 @@
 
 #define PADDING 3
 
-DiskIoIndicator::DiskIoIndicator ()
+DiskIoGauge::DiskIoGauge ()
 	: ArdourGauge ("00.0%")
 	, _disk_io (0)
 {
 }
 
 void
-DiskIoIndicator::set_disk_io (const double load)
+DiskIoGauge::set_disk_io (const double load)
 {
 	if (load == _disk_io) {
 		return;
@@ -45,18 +45,18 @@ DiskIoIndicator::set_disk_io (const double load)
 }
 
 float
-DiskIoIndicator::level () const {
+DiskIoGauge::level () const {
 	return (_disk_io / 100.f);
 }
 
 bool
-DiskIoIndicator::alert () const
+DiskIoGauge::alert () const
 {
 	return false;
 }
 
 ArdourGauge::Status
-DiskIoIndicator::indicator () const
+DiskIoGauge::indicator () const
 {
 	if (_disk_io < 50) {
 		return ArdourGauge::Level_CRIT;
@@ -68,7 +68,7 @@ DiskIoIndicator::indicator () const
 }
 
 std::string
-DiskIoIndicator::tooltip_text ()
+DiskIoGauge::tooltip_text ()
 {
 	char buf[64];
 

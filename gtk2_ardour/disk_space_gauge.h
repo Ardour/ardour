@@ -16,17 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkardour_disk_space_indicator_h__
-#define __gtkardour_disk_space_indicator_h__
+#ifndef __gtkardour_disk_space_gauge_h__
+#define __gtkardour_disk_space_gauge_h__
 
 #include <pangomm.h>
 
 #include "ardour_gauge.h"
 
-class DiskSpaceIndicator : public ArdourGauge
+class DiskSpaceGauge : public ArdourGauge
 {
 public:
-	DiskSpaceIndicator ();
+	DiskSpaceGauge ();
 
 	void set_available_disk_sec (float);
 

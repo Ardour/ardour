@@ -17,7 +17,7 @@
  */
 
 #include "ardour_ui.h"
-#include "dsp_load_indicator.h"
+#include "dsp_load_gauge.h"
 
 #include "ardour/audioengine.h"
 
@@ -25,7 +25,7 @@
 
 #define PADDING 3
 
-DspLoadIndicator::DspLoadIndicator ()
+DspLoadGauge::DspLoadGauge ()
 	: ArdourGauge ("00.0%")
 	, _dsp_load (0)
 	, _xrun_count (0)
@@ -34,7 +34,7 @@ DspLoadIndicator::DspLoadIndicator ()
 }
 
 void
-DspLoadIndicator::set_xrun_count (const unsigned int xruns)
+DspLoadGauge::set_xrun_count (const unsigned int xruns)
 {
 	if (xruns == _xrun_count) {
 		return;
@@ -44,7 +44,7 @@ DspLoadIndicator::set_xrun_count (const unsigned int xruns)
 }
 
 void
-DspLoadIndicator::set_dsp_load (const double load)
+DspLoadGauge::set_dsp_load (const double load)
 {
 	if (load == _dsp_load) {
 		return;
@@ -61,12 +61,12 @@ DspLoadIndicator::set_dsp_load (const double load)
 }
 
 float
-DspLoadIndicator::level () const {
+DspLoadGauge::level () const {
 	return (100.0-_dsp_load) / 100.f;
 }
 
 bool
-DspLoadIndicator::alert () const
+DspLoadGauge::alert () const
 {
 	bool ret = false;
 	
@@ -80,7 +80,7 @@ DspLoadIndicator::alert () const
 }
 
 ArdourGauge::Status
-DspLoadIndicator::indicator () const
+DspLoadGauge::indicator () const
 {
 	if (_dsp_load > 90) {
 		return ArdourGauge::Level_CRIT;
@@ -92,7 +92,7 @@ DspLoadIndicator::indicator () const
 }
 
 std::string
-DspLoadIndicator::tooltip_text ()
+DspLoadGauge::tooltip_text ()
 {
 	char buf[64];
 
@@ -109,7 +109,7 @@ DspLoadIndicator::tooltip_text ()
 }
 
 bool
-DspLoadIndicator::on_button_release_event (GdkEventButton *ev)
+DspLoadGauge::on_button_release_event (GdkEventButton *ev)
 {
 	ARDOUR::Session* s = ARDOUR_UI::instance ()->the_session ();
 	if (s) {

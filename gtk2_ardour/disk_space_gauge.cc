@@ -17,20 +17,20 @@
  */
 
 #include "ardour_ui.h"
-#include "dsp_load_indicator.h"
+#include "dsp_load_gauge.h"
 
 #include "pbd/i18n.h"
 
 #define PADDING 3
 
-DiskSpaceIndicator::DiskSpaceIndicator ()
+DiskSpaceGauge::DiskSpaceGauge ()
 	: ArdourGauge (">24h")
 	, _sec (-1)
 {
 }
 
 void
-DiskSpaceIndicator::set_available_disk_sec (float sec)
+DiskSpaceGauge::set_available_disk_sec (float sec)
 {
 	if (_sec == sec) {
 		return;
@@ -57,7 +57,7 @@ DiskSpaceIndicator::set_available_disk_sec (float sec)
 }
 
 float
-DiskSpaceIndicator::level () const {
+DiskSpaceGauge::level () const {
 	static const float lm = 6.f * 3600.f;
 	if (_sec < 0) return 0;
 	if (_sec > lm) return 1.0;
@@ -65,13 +65,13 @@ DiskSpaceIndicator::level () const {
 }
 
 bool
-DiskSpaceIndicator::alert () const
+DiskSpaceGauge::alert () const
 {
 	return _sec >=0 && _sec < 60.f * 10.f;
 }
 
 ArdourGauge::Status
-DiskSpaceIndicator::indicator () const
+DiskSpaceGauge::indicator () const
 {
 	if (_sec > 3600.f) {
 		return ArdourGauge::Level_OK;
@@ -82,7 +82,7 @@ DiskSpaceIndicator::indicator () const
 }
 
 std::string
-DiskSpaceIndicator::tooltip_text ()
+DiskSpaceGauge::tooltip_text ()
 {
 	if (_sec < 0) {
 		return _("Unkown");

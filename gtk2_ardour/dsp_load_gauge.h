@@ -16,17 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#ifndef __gtkardour_dsp_load_indicator_h__
-#define __gtkardour_dsp_load_indicator_h__
+#ifndef __gtkardour_dsp_load_gauge_h__
+#define __gtkardour_dsp_load_gauge_h__
 
 #include <pangomm.h>
 
 #include "ardour_gauge.h"
 
-class DspLoadIndicator : public ArdourGauge
+class DspLoadGauge : public ArdourGauge
 {
 public:
-	DspLoadIndicator ();
+	DspLoadGauge ();
 
 	void set_xrun_count (const unsigned int xruns);
 	void set_dsp_load (const double load);

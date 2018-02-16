@@ -696,10 +696,10 @@ ARDOUR_UI::build_menu_bar ()
 
 	hbox->pack_end (error_alert_button, false, false, 2);
 
-	hbox->pack_end (dsp_load_indicator, false, false, 4);
+	hbox->pack_end (dsp_load_gauge, false, false, 4);
 
-	hbox->pack_end (disk_space_indicator, false, false, 4);
-	hbox->pack_end (disk_io_indicator, false, false, 4);
+	hbox->pack_end (disk_space_gauge, false, false, 4);
+	hbox->pack_end (disk_io_gauge, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
@@ -715,10 +715,10 @@ ARDOUR_UI::build_menu_bar ()
 	// OSX provides its own wallclock, thank you very much
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), true);
 #endif
-	_status_bar_visibility.add (&disk_space_indicator,  X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
-	_status_bar_visibility.add (&dsp_load_indicator,    X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&disk_space_gauge,  X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&dsp_load_gauge,    X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
-	_status_bar_visibility.add (&disk_io_indicator,     X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&disk_io_gauge,     X_("Buffers"),   _("Buffers"), true);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
