@@ -103,16 +103,16 @@ ArdourGauge::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 
 	switch (indicator ()) {
 		case Level_OK:
-			cairo_set_source_rgba (cr, 0, .5, 0, 1.0);
 			break;
 		case Level_WARN:
 			cairo_set_source_rgba (cr, .7, .6, 0, 1.0);
+			cairo_fill (cr);
 			break;
 		case Level_CRIT:
 			cairo_set_source_rgba (cr, .9, 0, 0, 1.0);
+			cairo_fill (cr);
 			break;
 	}
-	cairo_fill (cr);
 
 	int w, h;
 	_layout->get_pixel_size (w, h);
