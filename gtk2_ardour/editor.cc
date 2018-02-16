@@ -3078,7 +3078,7 @@ Editor::setup_toolbar ()
 
 		//zoom tools on right ege
 
-		toolbar_hbox.pack_end (_zoom_box, false, false);
+		toolbar_hbox.pack_end (_zoom_box, false, false, 2);
 
 		toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
 
