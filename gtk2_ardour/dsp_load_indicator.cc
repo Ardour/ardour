@@ -52,13 +52,13 @@ DspLoadIndicator::set_dsp_load (const double load)
 	_dsp_load = load;
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "%.1f%%", _dsp_load);
+	snprintf (buf, sizeof (buf), "DSP %.1f%%", _dsp_load);
 	update (std::string (buf));
 }
 
 float
 DspLoadIndicator::level () const {
-	return _dsp_load / 100.f;
+	return (100.0-_dsp_load) / 100.f;
 }
 
 bool

@@ -43,7 +43,7 @@ ArdourGauge::on_size_request (Gtk::Requisition* req)
 	int w, h;
 	_layout->get_pixel_size (w, h);
 
-	req->width = std::max (req->width, 50 /*std::max (20, w + PADDING) */);
+	req->width = std::max (req->width, 80  /*std::max (20, w + PADDING) */);
 	req->height = std::max (req->height, std::max (12, h + PADDING));
 }
 
@@ -99,7 +99,7 @@ ArdourGauge::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	const float lvl = level ();
 
 	int bw = (width - PADDING - PADDING) * lvl;
-	cairo_rectangle (cr, width-PADDING-bw, PADDING, bw, height-PADDING);
+	cairo_rectangle (cr, PADDING, PADDING, bw, height-PADDING);
 
 	switch (indicator ()) {
 		case Level_OK:
