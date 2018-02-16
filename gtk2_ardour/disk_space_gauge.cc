@@ -24,8 +24,8 @@
 #define PADDING 3
 
 DiskSpaceGauge::DiskSpaceGauge ()
-	: ArdourGauge (">24h")
-	, _sec (-1)
+	: ArdourGauge (" ")
+	, _sec (12*60*60)
 {
 }
 
