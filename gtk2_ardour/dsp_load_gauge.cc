@@ -62,7 +62,7 @@ DspLoadGauge::set_dsp_load (const double load)
 
 float
 DspLoadGauge::level () const {
-	return (100.0-_dsp_load) / 100.f;
+	return (_dsp_load / 100.f);
 }
 
 bool
@@ -84,7 +84,7 @@ DspLoadGauge::indicator () const
 {
 	if (_dsp_load > 90) {
 		return ArdourGauge::Level_CRIT;
-	} else if (_dsp_load > 80) {
+	} else if (_dsp_load > 75) {
 		return ArdourGauge::Level_WARN;
 	} else {
 		return ArdourGauge::Level_OK;

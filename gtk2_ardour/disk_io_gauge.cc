@@ -27,26 +27,36 @@
 
 DiskIoGauge::DiskIoGauge ()
 	: ArdourGauge ("00.0%")
-	, _disk_io (0)
+	, _disk_play (0)
+	, _disk_capture (0)
 {
 }
 
 void
-DiskIoGauge::set_disk_io (const double load)
+DiskIoGauge::set_disk_io (const double play, const double capture)
 {
-	if (load == _disk_io) {
+	if (play == _disk_play && capture == _disk_capture) {
 		return;
 	}
-	_disk_io = load;
+	_disk_play = 100.0-play;
+	_disk_capture = 100.0-capture;
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "Dsk: %.1f%%", _disk_io);
+	if ( _disk_play > 1.0 && _disk_play < 10.0 && _disk_capture < 2.0 ) {
+		snprintf (buf, sizeof (buf), "Disk:  %.0f%% / 0%%", _disk_play);
+	} else if ( _disk_play > 1.0 && _disk_capture < 2.0 ) {
+		snprintf (buf, sizeof (buf), "Disk: %.0f%% / 0%%", _disk_play);
+	} else if ( _disk_play > 1.0 && _disk_capture > 1.0 ) {
+		snprintf (buf, sizeof (buf), "Disk: %.0f%% / %.0f%%", _disk_play, _disk_capture);
+	} else {
+		snprintf (buf, sizeof (buf), " ");
+	}
 	update (std::string (buf));
 }
 
 float
 DiskIoGauge::level () const {
-	return (_disk_io / 100.f);
+	return min ( _disk_play / 100.f, _disk_capture / 100.f);
 }
 
 bool
@@ -58,9 +68,11 @@ DiskIoGauge::alert () const
 ArdourGauge::Status
 DiskIoGauge::indicator () const
 {
-	if (_disk_io < 50) {
+	float lvl = level();
+	
+	if (lvl > 0.6) {
 		return ArdourGauge::Level_CRIT;
-	} else if (_disk_io < 75) {
+	} else if (lvl > 0.4) {
 		return ArdourGauge::Level_WARN;
 	} else {
 		return ArdourGauge::Level_OK;
@@ -70,9 +82,9 @@ DiskIoGauge::indicator () const
 std::string
 DiskIoGauge::tooltip_text ()
 {
-	char buf[64];
+	char buf[128];
 
-	snprintf (buf, sizeof (buf), _("Disk I/O cache: %.1f"), _disk_io);
+	snprintf (buf, sizeof (buf), "Disk Play/Record cache: %.0f%% / %.0f%%", _disk_play, _disk_capture);
 
 	return buf;
 }

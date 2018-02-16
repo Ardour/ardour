@@ -28,7 +28,7 @@ class DiskIoGauge : public ArdourGauge
 public:
 	DiskIoGauge ();
 
-	void set_disk_io (const double load);
+	void set_disk_io (const double playback, const double capture);
 
 protected:
 	bool alert () const;
@@ -38,7 +38,8 @@ protected:
 
 private:
 
-	float _disk_io;
+	float _disk_play;
+	float _disk_capture;
 };
 
 #endif

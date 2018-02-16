@@ -713,15 +713,15 @@ ARDOUR_UI::build_menu_bar ()
 
 #ifndef __APPLE__
 	// OSX provides its own wallclock, thank you very much
-	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), true);
+	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), false);
 #endif
+	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
+	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
+	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
+	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
+	_status_bar_visibility.add (&disk_io_gauge,     X_("Buffers"),   _("Buffers"), true);
 	_status_bar_visibility.add (&disk_space_gauge,  X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
 	_status_bar_visibility.add (&dsp_load_gauge,    X_("DSP"),       _("DSP"), true);
-	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
-	_status_bar_visibility.add (&disk_io_gauge,     X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
-	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
-	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 	ev->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));

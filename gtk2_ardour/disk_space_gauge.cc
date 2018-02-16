@@ -58,10 +58,10 @@ DiskSpaceGauge::set_available_disk_sec (float sec)
 
 float
 DiskSpaceGauge::level () const {
-	static const float lm = 6.f * 3600.f;
-	if (_sec < 0) return 0;
-	if (_sec > lm) return 1.0;
-	return _sec / lm;
+	static const float six_hours = 6.f * 3600.f;
+	if (_sec < 0) return 1.0;
+	if (_sec > six_hours) return 0.0;
+	return (1.0 - (_sec / six_hours));
 }
 
 bool

@@ -1719,8 +1719,7 @@ ARDOUR_UI::update_buffer_load ()
 {
 	uint32_t const playback = _session ? _session->playback_load () : 100;
 	uint32_t const capture = _session ? _session->capture_load () : 100;
-	uint32_t max_load = std::min ( playback, capture );
-	disk_io_gauge.set_disk_io(max_load);
+	disk_io_gauge.set_disk_io(playback, capture);
 }
 
 void
