@@ -276,7 +276,7 @@ OSCSelectObserver::clear_observer ()
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.float_message (X_("/select/expand"), 0, addr);
 	_osc.text_message (X_("/select/name"), " ", addr);
-	_osc.text_message (X_("/select/group/name"), " ", addr);
+	_osc.text_message (X_("/select/group"), " ", addr);
 	_osc.text_message (X_("/select/comment"), " ", addr);
 	_osc.float_message (X_("/select/mute"), 0, addr);
 	_osc.float_message (X_("/select/solo"), 0, addr);
@@ -655,9 +655,9 @@ OSCSelectObserver::group_name ()
 
 	RouteGroup *rg = rt->route_group();
 	if (rg) {
-		_osc.text_message (X_("/select/group/name"), rg->name(), addr);
+		_osc.text_message (X_("/select/group"), rg->name(), addr);
 	} else {
-		_osc.text_message (X_("/select/group/name"), " ", addr);
+		_osc.text_message (X_("/select/group"), " ", addr);
 	}
 }
 

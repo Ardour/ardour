@@ -568,6 +568,7 @@ OSC::register_callbacks()
 		// Controls for the Selected strip
 		REGISTER_CALLBACK (serv, X_("/select/recenable"), "i", sel_recenable);
 		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
+		REGISTER_CALLBACK (serv, X_("/select/group"), "s", sel_group);
 		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
 		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
 		REGISTER_CALLBACK (serv, X_("/select/solo_iso"), "i", sel_solo_iso);
@@ -638,6 +639,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/strip/send/fader"), "iif", route_set_send_fader);
 		REGISTER_CALLBACK (serv, X_("/strip/send/enable"), "iif", route_set_send_enable);
 		REGISTER_CALLBACK (serv, X_("/strip/name"), "is", route_rename);
+		REGISTER_CALLBACK (serv, X_("/strip/group"), "is", strip_group);
 		REGISTER_CALLBACK (serv, X_("/strip/sends"), "i", route_get_sends);
 		REGISTER_CALLBACK (serv, X_("/strip/receives"), "i", route_get_receives);
 		REGISTER_CALLBACK (serv, X_("/strip/plugin/list"), "i", route_plugin_list);
@@ -3688,18 +3690,97 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 }
 
 int
-OSC::route_rename(int ssid, char *newname, lo_message msg) {
-    if (!session) {
-        return -1;
-    }
+OSC::route_rename (int ssid, char *newname, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
 
-    boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
+	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
 
-    if (s) {
-        s->set_name(std::string(newname));
-    }
+	if (s) {
+		s->set_name(std::string(newname));
+	}
 
-    return 0;
+	return 0;
+}
+
+int
+OSC::strip_group (int ssid, char *group, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
+	return strip_select_group (s, group);
+}
+
+int
+OSC::sel_group (char *group, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	return strip_select_group (s, group);
+}
+
+int
+OSC::strip_select_group (boost::shared_ptr<Stripable> s, char *group)
+{
+	string grp = group;
+	if (grp == "" || grp == " ") {
+			grp = "none";
+		}
+
+	if (s) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		if (!rt) {
+			return -1;
+		}
+		RouteGroup *rg = rt->route_group();
+		RouteGroup* new_rg = session->route_group_by_name (grp);
+		if (rg) {
+			string old_group = rg->name();
+			if (grp == "none") {
+				if (rg->size () == 1) {
+					session->remove_route_group (*rg);
+				} else {
+					rg->remove (rt);
+				}
+			} else if (grp != old_group) {
+				if (new_rg) {
+					// group exists switch to it
+					if (rg->size () == 1) {
+						session->remove_route_group (rg);
+					} else {
+						rg->remove (rt);
+					}
+					new_rg->add (rt);
+				} else {
+					rg->set_name (grp);
+				}
+			} else {
+				// nothing to change
+				return 0;
+			}
+		} else {
+			if (grp == "none") {
+				return 0;
+			} else if (new_rg) {
+				new_rg->add (rt);
+			} else {
+				// create new group with this strip in it
+				RouteGroup* new_rg = new RouteGroup (*session, grp);
+				session->add_route_group (new_rg);
+				new_rg->add (rt);
+			}
+		}
+	}
+	return 0;
 }
 
 int

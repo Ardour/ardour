@@ -473,6 +473,18 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		return 0; \
 	}
 
+#define PATH_CALLBACK1_MSG_s(name,arg1type) \
+	static int _ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data, void *user_data) { \
+		return static_cast<OSC*>(user_data)->cb_ ## name (path, types, argv, argc, data); \
+	} \
+	int cb_ ## name (const char *path, const char *types, lo_arg **argv, int argc, void *data) { \
+		OSC_DEBUG; \
+		if (argc > 0) { \
+			name (&argv[0]->arg1type, data); \
+		} \
+		return 0; \
+	}
+
 	// pan position needs message info to send feedback
 	PATH_CALLBACK1_MSG(master_set_pan_stereo_position,f);
 
@@ -481,6 +493,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(jog_mode,f);
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
+	PATH_CALLBACK1_MSG_s(sel_group,s);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -592,6 +605,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2(locate,i,i);
 	PATH_CALLBACK2(loop_location,i,i);
 	PATH_CALLBACK2_MSG_s(route_rename,i,s);
+	PATH_CALLBACK2_MSG_s(strip_group,i,s);
 	PATH_CALLBACK2_MSG(route_mute,i,i);
 	PATH_CALLBACK2_MSG(route_solo,i,i);
 	PATH_CALLBACK2_MSG(route_solo_iso,i,i);
@@ -621,6 +635,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(route_plugin_reset,i,i);
 
 	int route_rename (int rid, char *s, lo_message msg);
+	int strip_group (int ssid, char *g, lo_message msg);
+	int strip_select_group (boost::shared_ptr<ARDOUR::Stripable> s, char *g);
 	int route_mute (int rid, int yn, lo_message msg);
 	int route_solo (int rid, int yn, lo_message msg);
 	int route_solo_iso (int rid, int yn, lo_message msg);
@@ -699,6 +715,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int monitor_set_mute (uint32_t state);
 	int monitor_set_dim (uint32_t state);
 	int monitor_set_mono (uint32_t state);
+	int sel_group (char *g, lo_message msg);
 	int sel_recenable (uint32_t state, lo_message msg);
 	int sel_recsafe (uint32_t state, lo_message msg);
 	int sel_mute (uint32_t state, lo_message msg);

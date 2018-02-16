@@ -250,7 +250,7 @@ OSCRouteObserver::clear_strip ()
 	_osc.float_message_with_id (X_("/strip/expand"), ssid, 0, in_line, addr);
 	if (feedback[0]) { // buttons are separate feedback
 		_osc.text_message_with_id (X_("/strip/name"), ssid, " ", in_line, addr);
-		_osc.text_message_with_id (X_("/strip/group/name"), ssid, " ", in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group"), ssid, "none", in_line, addr);
 		_osc.float_message_with_id (X_("/strip/mute"), ssid, 0, in_line, addr);
 		_osc.float_message_with_id (X_("/strip/solo"), ssid, 0, in_line, addr);
 		_osc.float_message_with_id (X_("/strip/recenable"), ssid, 0, in_line, addr);
@@ -361,9 +361,9 @@ OSCRouteObserver::group_name ()
 
 	RouteGroup *rg = rt->route_group();
 	if (rg) {
-		_osc.text_message_with_id (X_("/strip/group/name"), ssid, rg->name(), in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group"), ssid, rg->name(), in_line, addr);
 	} else {
-		_osc.text_message_with_id (X_("/strip/group/name"), ssid, " ", in_line, addr);
+		_osc.text_message_with_id (X_("/strip/group"), ssid, " ", in_line, addr);
 	}
 }
 
