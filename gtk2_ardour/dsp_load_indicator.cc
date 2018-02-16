@@ -52,7 +52,11 @@ DspLoadIndicator::set_dsp_load (const double load)
 	_dsp_load = load;
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "DSP %.1f%%", _dsp_load);
+	if (_xrun_count > 0) {
+		snprintf (buf, sizeof (buf), "DSP: %.1f%% (%d)", _dsp_load, _xrun_count);
+	} else {
+		snprintf (buf, sizeof (buf), "DSP: %.1f%%", _dsp_load);
+	}
 	update (std::string (buf));
 }
 
@@ -94,11 +98,11 @@ DspLoadIndicator::tooltip_text ()
 
 	//xruns
 	if (_xrun_count == UINT_MAX) {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: ?"), _dsp_load);
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: ?\nClick to clear xruns."), _dsp_load);
 	} else if (_xrun_count > 9999) {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: >10k"), _dsp_load);
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: >10k\nClick to clear xruns."), _dsp_load);
 	} else {
-		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: %u"), _dsp_load, _xrun_count);
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: %u\nClick to clear xruns."), _dsp_load, _xrun_count);
 	}
 
 	return buf;

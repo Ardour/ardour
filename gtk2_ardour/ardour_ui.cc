@@ -1739,22 +1739,10 @@ ARDOUR_UI::update_buffer_load ()
 	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
 	   should also be changed.
 	*/
-
-	if (_session) {
-		snprintf (
-			buf, sizeof (buf),
-			_("Buffers: <span foreground=\"green\">p:</span><span foreground=\"%s\">%" PRIu32 "%%</span> "
-			           "<span foreground=\"green\">c:</span><span foreground=\"%s\">%" PRIu32 "%%</span>"),
-			playback <= 5 ? X_("red") : X_("green"),
-			playback,
-			capture <= 5 ? X_("red") : X_("green"),
-			capture
-			);
-
-		buffer_load_label.set_markup (buf);
-	} else {
-		buffer_load_label.set_text ("");
-	}
+	
+	uint32_t max_load = std::min ( playback, capture );
+	
+	disk_io_indicator.set_disk_io(max_load);
 }
 
 void

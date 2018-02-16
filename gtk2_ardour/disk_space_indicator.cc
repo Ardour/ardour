@@ -44,14 +44,14 @@ DiskSpaceIndicator::set_available_disk_sec (float sec)
 
 	char buf[64];
 	if (_sec > 86400) {
-		update (_(">24h"));
+		update (_("Rec: >24h"));
 		return;
 	} else if (_sec > 32400 /* 9 hours */) {
-		snprintf (buf, sizeof (buf), "%.0fh", _sec / 3600.f);
+		snprintf (buf, sizeof (buf), "Rec: %.0fh", _sec / 3600.f);
 	} else if (_sec > 5940 /* 99 mins */) {
-		snprintf (buf, sizeof (buf), "%.1fh", _sec / 3600.f);
+		snprintf (buf, sizeof (buf), "Rec: %.1fh", _sec / 3600.f);
 	} else {
-		snprintf (buf, sizeof (buf), "%.0fm", _sec / 60.f);
+		snprintf (buf, sizeof (buf), "Rec: %.0fm", _sec / 60.f);
 	}
 	update (std::string (buf));
 }

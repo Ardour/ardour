@@ -43,7 +43,7 @@ ArdourGauge::on_size_request (Gtk::Requisition* req)
 	int w, h;
 	_layout->get_pixel_size (w, h);
 
-	req->width = std::max (req->width, 80  /*std::max (20, w + PADDING) */);
+	req->width = std::max (req->width, 100  /*std::max (20, w + PADDING) */);
 	req->height = std::max (req->height, std::max (12, h + PADDING));
 }
 

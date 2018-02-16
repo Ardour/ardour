@@ -76,6 +76,7 @@
 #include "ardour_window.h"
 #include "dsp_load_indicator.h"
 #include "disk_space_indicator.h"
+#include "disk_io_indicator.h"
 #include "editing.h"
 #include "enums.h"
 #include "mini_timeline.h"
@@ -491,6 +492,7 @@ private:
 	MiniTimeline       mini_timeline;
 	TimeInfoBox*       time_info_box;
 	DspLoadIndicator   dsp_load_indicator;
+	DiskIoIndicator    disk_io_indicator;
 	DiskSpaceIndicator disk_space_indicator;
 
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;

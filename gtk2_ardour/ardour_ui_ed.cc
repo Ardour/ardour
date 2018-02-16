@@ -714,7 +714,7 @@ ARDOUR_UI::build_menu_bar ()
 #if 0
 	hbox->pack_end (cpu_load_label, false, false, 4);
 #endif
-	hbox->pack_end (buffer_load_label, false, false, 4);
+	hbox->pack_end (disk_io_indicator, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
@@ -733,7 +733,7 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&dsp_load_indicator,    X_("DSP"),       _("DSP"), true);
 	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
-	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&disk_io_indicator,     X_("Buffers"),   _("Buffers"), true);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
