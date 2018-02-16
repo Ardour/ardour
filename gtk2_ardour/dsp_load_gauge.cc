@@ -26,7 +26,7 @@
 #define PADDING 3
 
 DspLoadGauge::DspLoadGauge ()
-	: ArdourGauge ("00.0%")
+	: ArdourGauge (" ")
 	, _dsp_load (0)
 	, _xrun_count (0)
 	, _xrun_while_recording (false)

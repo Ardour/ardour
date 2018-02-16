@@ -666,12 +666,12 @@ void
 ARDOUR_UI::build_menu_bar ()
 {
 	menu_bar = dynamic_cast<MenuBar*> (ActionManager::get_widget (X_("/Main")));
-	menu_bar->set_name ("gtk_background");
+	menu_bar->set_name ("MainMenuBar");
 
 	EventBox* ev = manage (new EventBox);
 	ev->show ();
 	CairoHPacker* hbox = manage (new CairoHPacker);
-	hbox->set_name (X_("gtk_background"));
+	hbox->set_name (X_("StatusBarBox"));
 	hbox->show ();
 	hbox->set_border_width (2);
 
@@ -708,7 +708,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	menu_hbox.pack_end (*ev, false, false, 2);
 
-	menu_bar_base.set_name ("gtk_background");
+	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
 #ifndef __APPLE__

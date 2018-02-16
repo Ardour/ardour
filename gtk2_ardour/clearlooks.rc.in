@@ -277,7 +277,7 @@ style "time_info_box"
 
 style "status_bar_box"
 {
-        bg[NORMAL] = @darkest
+        bg[NORMAL] = @background
 }
 
 style "very_small_text"
@@ -1219,6 +1219,7 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*ProcessorList*" style:highest "processor_list"
 widget "*PortMatrixLabel*" style:highest "small_text"
+widget "*MainMenuBar" style:highest "status_bar_box"
 widget "*midi device" style:highest "midi_device"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*meterbridge label" style:highest "meterbridge_label"

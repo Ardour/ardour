@@ -26,7 +26,7 @@
 #define PADDING 3
 
 DiskIoGauge::DiskIoGauge ()
-	: ArdourGauge ("00.0%")
+	: ArdourGauge (" ")
 	, _disk_play (0)
 	, _disk_capture (0)
 {

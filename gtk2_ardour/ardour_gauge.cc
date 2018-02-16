@@ -118,17 +118,9 @@ ArdourGauge::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	_layout->get_pixel_size (w, h);
 
 	cairo_save (cr);
-	cairo_new_path (cr);
-	cairo_translate (cr, width * .5, height * .5);
 
-	cairo_move_to (cr, w * -.5, h * -.5);
-	pango_cairo_update_layout (cr, _layout->gobj());
-	Gtkmm2ext::set_source_rgb_a (cr, base, 0.5);
-	pango_cairo_layout_path (cr, _layout->gobj());
-	cairo_set_line_width (cr, 1.5);
-	cairo_stroke (cr);
-
-	cairo_move_to (cr, w * -.5, h * -.5);
+	cairo_translate (cr, 2+PADDING, height * .5);
+	cairo_move_to (cr, 0, h * -.5);  //vertically center the text
 	pango_cairo_update_layout (cr, _layout->gobj());
 	Gtkmm2ext::set_source_rgba (cr, text);
 	pango_cairo_show_layout (cr, _layout->gobj());
