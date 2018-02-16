@@ -115,6 +115,7 @@ DspLoadIndicator::on_button_release_event (GdkEventButton *ev)
 	if (s) {
 		s->reset_xrun_count ();
 		_xrun_while_recording = false;
+		queue_draw();
 	}
 	return true;
 }

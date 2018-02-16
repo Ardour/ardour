@@ -1678,8 +1678,6 @@ ARDOUR_UI::update_format ()
 void
 ARDOUR_UI::update_xrun_count ()
 {
-	char buf[64];
-
 	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
 	   should also be changed.
 	*/
@@ -1687,32 +1685,20 @@ ARDOUR_UI::update_xrun_count ()
 	if (_session) {
 		const unsigned int x = _session->get_xrun_count ();
 		dsp_load_indicator.set_xrun_count (x);
-		if (x > 9999) {
-			snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">&gt;10K</span>"), X_("red"));
-		} else {
-			snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">%u</span>"), x > 0 ? X_("red") : X_("green"), x);
-		}
 	} else {
-		snprintf (buf, sizeof (buf), _("X: <span foreground=\"%s\">?</span>"), X_("yellow"));
 		dsp_load_indicator.set_xrun_count (UINT_MAX);
 	}
-	xrun_label.set_markup (buf);
-	set_tip (xrun_label, _("Audio dropouts. Shift+click to reset"));
 }
 
 void
 ARDOUR_UI::update_cpu_load ()
 {
-	char buf[64];
-
 	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
 	   should also be changed.
 	*/
 
 	double const c = AudioEngine::instance()->get_dsp_load ();
 	dsp_load_indicator.set_dsp_load (c);
-	snprintf (buf, sizeof (buf), _("DSP: <span foreground=\"%s\">%5.1f%%</span>"), c >= 90 ? X_("red") : X_("green"), c);
-	cpu_load_label.set_markup (buf);
 }
 
 void
@@ -1731,17 +1717,9 @@ ARDOUR_UI::update_peak_thread_work ()
 void
 ARDOUR_UI::update_buffer_load ()
 {
-	char buf[256];
-
 	uint32_t const playback = _session ? _session->playback_load () : 100;
 	uint32_t const capture = _session ? _session->capture_load () : 100;
-
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
-	   should also be changed.
-	*/
-	
 	uint32_t max_load = std::min ( playback, capture );
-	
 	disk_io_indicator.set_disk_io(max_load);
 }
 
@@ -1763,7 +1741,6 @@ ARDOUR_UI::update_disk_space()
 	}
 
 	boost::optional<samplecnt_t> opt_samples = _session->available_capture_duration();
-	char buf[64];
 	samplecnt_t fr = _session->sample_rate();
 
 	if (fr == 0) {
@@ -1774,10 +1751,8 @@ ARDOUR_UI::update_disk_space()
 
 	if (!opt_samples) {
 		/* Available space is unknown */
-		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">Unknown</span>"));
 		disk_space_indicator.set_available_disk_sec (-1);
 	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
-		snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">24hrs+</span>"));
 		disk_space_indicator.set_available_disk_sec (max_samplecnt);
 	} else {
 		rec_enabled_streams = 0;
@@ -1794,29 +1769,8 @@ ARDOUR_UI::update_disk_space()
 		int secs;
 
 		disk_space_indicator.set_available_disk_sec (samples / (float)fr);
-
-		hrs  = samples / (fr * 3600);
-
-		if (hrs > 24) {
-			snprintf (buf, sizeof (buf), "%s", _("Disk: <span foreground=\"green\">&gt;24 hrs</span>"));
-		} else {
-			samples -= hrs * fr * 3600;
-			mins = samples / (fr * 60);
-			samples -= mins * fr * 60;
-			secs = samples / fr;
-
-			bool const low = (hrs == 0 && mins <= 30);
-
-			snprintf (
-				buf, sizeof(buf),
-				_("Disk: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"),
-				low ? X_("red") : X_("green"),
-				hrs, mins, secs
-				);
-		}
 	}
 
-	disk_space_label.set_markup (buf);
 }
 
 void

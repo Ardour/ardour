@@ -566,22 +566,18 @@ private:
 	Gtk::Label   wall_clock_label;
 	gint update_wall_clock ();
 
-	Gtk::Label   disk_space_label;
 	void update_disk_space ();
 
 	Gtk::Label   timecode_format_label;
 	void update_timecode_format ();
 
-	Gtk::Label   cpu_load_label;
 	void update_cpu_load ();
 
-	Gtk::Label   xrun_label;
 	void update_xrun_count ();
 
 	Gtk::Label   peak_thread_work_label;
 	void update_peak_thread_work ();
 
-	Gtk::Label   buffer_load_label;
 	void update_buffer_load ();
 
 	Gtk::Label   sample_rate_label;
