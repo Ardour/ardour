@@ -494,6 +494,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG_s(sel_group,s);
+	PATH_CALLBACK1_MSG_s(sel_rename,s);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -716,6 +717,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int monitor_set_dim (uint32_t state);
 	int monitor_set_mono (uint32_t state);
 	int sel_group (char *g, lo_message msg);
+	int sel_rename (char *n, lo_message msg);
 	int sel_recenable (uint32_t state, lo_message msg);
 	int sel_recsafe (uint32_t state, lo_message msg);
 	int sel_mute (uint32_t state, lo_message msg);

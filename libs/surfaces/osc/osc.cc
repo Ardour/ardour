@@ -568,6 +568,7 @@ OSC::register_callbacks()
 		// Controls for the Selected strip
 		REGISTER_CALLBACK (serv, X_("/select/recenable"), "i", sel_recenable);
 		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
+		REGISTER_CALLBACK (serv, X_("/select/name"), "s", sel_rename);
 		REGISTER_CALLBACK (serv, X_("/select/group"), "s", sel_group);
 		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
 		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
@@ -3697,6 +3698,26 @@ OSC::route_rename (int ssid, char *newname, lo_message msg) {
 
 	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
 
+	if (s) {
+		s->set_name(std::string(newname));
+	}
+
+	return 0;
+}
+
+int
+OSC::sel_rename (char *newname, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
 	if (s) {
 		s->set_name(std::string(newname));
 	}
