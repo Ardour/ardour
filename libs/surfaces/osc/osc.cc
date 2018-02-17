@@ -3812,7 +3812,6 @@ OSC::strip_select_group (boost::shared_ptr<Stripable> s, char *group)
 					rg->set_name (grp);
 				}
 			} else {
-				// nothing to change
 				return 0;
 			}
 		} else {

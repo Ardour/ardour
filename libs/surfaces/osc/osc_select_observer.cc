@@ -135,8 +135,13 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	name_changed (ARDOUR::Properties::name);
 
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
-	rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_name, this), OSC::instance());
-	group_name ();
+	if (rt) {
+		rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_name, this), OSC::instance());
+		group_name ();
+
+		rt->comment_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::comment_changed, this), OSC::instance());
+		comment_changed ();
+	}
 
 	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::pi_changed, this, _1), OSC::instance());
 	_osc.float_message (X_("/select/hide"), _strip->is_hidden (), addr);
@@ -639,8 +644,6 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 	_osc.text_message (X_("/select/name"), _strip->name(), addr);
 	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_strip);
 	if (route) {
-		//spit out the comment at the same time
-		_osc.text_message (X_("/select/comment"), route->comment(), addr);
 		// lets tell the surface how many inputs this strip has
 		_osc.float_message (X_("/select/n_inputs"), (float) route->n_inputs().n_total(), addr);
 		// lets tell the surface how many outputs this strip has
@@ -658,6 +661,15 @@ OSCSelectObserver::group_name ()
 		_osc.text_message (X_("/select/group"), rg->name(), addr);
 	} else {
 		_osc.text_message (X_("/select/group"), " ", addr);
+	}
+}
+
+void
+OSCSelectObserver::comment_changed ()
+{
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	if (rt) {
+		_osc.text_message (X_("/select/comment"), rt->comment(), addr);
 	}
 }
 
