@@ -569,6 +569,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/recenable"), "i", sel_recenable);
 		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
 		REGISTER_CALLBACK (serv, X_("/select/name"), "s", sel_rename);
+		REGISTER_CALLBACK (serv, X_("/select/comment"), "s", sel_comment);
 		REGISTER_CALLBACK (serv, X_("/select/group"), "s", sel_group);
 		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
 		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
@@ -3726,6 +3727,31 @@ OSC::sel_rename (char *newname, lo_message msg) {
 }
 
 int
+OSC::sel_comment (char *newcomment, lo_message msg) {
+	if (!session) {
+		return -1;
+	}
+
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	if (s) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		if (!rt) {
+			PBD::warning << "OSC: can not set comment on VCAs." << endmsg;
+			return -1;
+		}
+		rt->set_comment (newcomment, this);
+	}
+
+	return 0;
+}
+
+int
 OSC::strip_group (int ssid, char *group, lo_message msg) {
 	if (!session) {
 		return -1;
@@ -3760,6 +3786,7 @@ OSC::strip_select_group (boost::shared_ptr<Stripable> s, char *group)
 	if (s) {
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		if (!rt) {
+			PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
 			return -1;
 		}
 		RouteGroup *rg = rt->route_group();
