@@ -2497,7 +2497,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "show-snapped-cursor",
-		     _("Show Snapped Cursor"),
+		     _("Show \"snapped cursor\""),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_snapped_cursor),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_snapped_cursor)
 		     ));
@@ -2505,7 +2505,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
-		     _("Snap rubberband to grid"),
+		     _("Snap rubberband selection to grid"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
