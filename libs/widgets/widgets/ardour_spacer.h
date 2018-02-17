@@ -31,9 +31,12 @@ public:
 	ArdourVSpacer (float r = 0.75f);
 
 protected:
-	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t* r) {
-		float h = r->height * ratio;
-		float t = .5f * (r->height - h);
+	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
+
+		float height = get_height();
+
+		float h = height * ratio;
+		float t = .5f * (height - h);
 		ctx->rectangle (0, t, 1, h);
 		ctx->set_source_rgb (0, 0, 0);
 		ctx->fill ();
