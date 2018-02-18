@@ -2932,13 +2932,24 @@ OSC::set_marker (const char* types, lo_arg **argv, int argc, lo_message msg)
 
 	switch (types[0]) {
 		case 's':
-			for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
-				if ((*l)->is_mark ()) {
-					if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
-						session->request_locate ((*l)->start (), false);
-						return 0;
+			{
+				Location *cur_mark = 0;
+				for (Locations::LocationList::const_iterator l = ll.begin(); l != ll.end(); ++l) {
+					if ((*l)->is_mark ()) {
+						if (strcmp (&argv[0]->s, (*l)->name().c_str()) == 0) {
+							session->request_locate ((*l)->start (), false);
+							return 0;
+						} else if ((*l)->start () == session->transport_sample()) {
+							cur_mark = (*l);
+						}
 					}
 				}
+				if (cur_mark) {
+					cur_mark->set_name (&argv[0]->s);
+					return 0;
+				}
+				PBD::warning << string_compose ("Marker: \"%1\" - does not exist", &argv[0]->s) << endmsg;
+				return -1;
 			}
 			break;
 		case 'i':
@@ -2979,7 +2990,6 @@ OSC::group_list (lo_message msg)
 int
 OSC::send_group_list (lo_address addr)
 {
-		//std::list<RouteGroup*> const & route_groups () const {
 	lo_message reply;
 	reply = lo_message_new ();
 
