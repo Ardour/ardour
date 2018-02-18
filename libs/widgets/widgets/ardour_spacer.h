@@ -51,6 +51,29 @@ protected:
 	float ratio;
 };
 
+class LIBWIDGETS_API ArdourDropShadow : public CairoWidget
+{
+public:
+	ArdourDropShadow (float a = 0.75f);
+
+protected:
+	void render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*) {
+		float width = get_width();
+		float height = get_height();
+
+		Cairo::RefPtr<Cairo::LinearGradient> _gradient = Cairo::LinearGradient::create (0, 0, 0, height);
+		_gradient->add_color_stop_rgba (0, 0, 0, 0, alpha);
+		_gradient->add_color_stop_rgba (1, 0, 0, 0, 0);
+
+		ctx->set_source (_gradient);
+
+		ctx->rectangle (0, 0, width, height);
+		ctx->fill ();
+	}
+
+	float alpha;
+};
+
 } /* end namespace */
 
 #endif
