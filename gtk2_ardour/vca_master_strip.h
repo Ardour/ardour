@@ -65,7 +65,6 @@ private:
 
 	Gtk::Frame                  global_frame;
 	Gtk::VBox                   global_vpacker;
-	Gtk::HBox                   top_padding;
 	Gtk::HBox                   bottom_padding;
 	Gtk::HBox                   solo_mute_box;
 	ArdourWidgets::ArdourButton width_button;

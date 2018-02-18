@@ -132,7 +132,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 
 	global_vpacker.show ();
 	global_frame.show ();
-	top_padding.show ();
 	vertical_button.show ();
 	hide_button.show ();
 	number_label.show ();
