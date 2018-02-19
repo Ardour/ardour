@@ -444,11 +444,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\disk_space_indicator.cc"
+				RelativePath="..\gtk2_ardour\disk_io_gauge.cc"
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\dsp_load_indicator.cc"
+				RelativePath="..\gtk2_ardour\disk_space_gauge.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\dsp_load_gauge.cc"
 				>
 			</File>
 			<File
@@ -1530,11 +1534,15 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\disk_space_indicator.h"
+				RelativePath="..\gtk2_ardour\disk_io_gauge.h"
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\dsp_load_indicator.h"
+				RelativePath="..\gtk2_ardour\disk_space_gauge.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\dsp_load_gauge.h"
 				>
 			</File>
 			<File
