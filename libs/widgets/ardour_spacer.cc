@@ -26,8 +26,9 @@ ArdourVSpacer::ArdourVSpacer (float r)
 {
 }
 
-ArdourDropShadow::ArdourDropShadow (float a)
+ArdourDropShadow::ArdourDropShadow (ShadowMode m, float a)
 	: CairoWidget ()
 	, alpha (a)
+	, mode (m)
 {
 }
