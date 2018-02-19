@@ -669,6 +669,7 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar->set_name ("MainMenuBar");
 
 	EventBox* ev = manage (new EventBox);
+	ev->set_name ("MainMenuBar");
 	ev->show ();
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
