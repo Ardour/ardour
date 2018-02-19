@@ -624,12 +624,19 @@ Editor::Editor ()
 	time_bars_event_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	time_bars_event_box.signal_button_release_event().connect (sigc::mem_fun(*this, &Editor::ruler_label_button_release));
 
+	ArdourWidgets::ArdourDropShadow *axis_view_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
+	axis_view_shadow->set_size_request( 4, -1 );
+	axis_view_shadow->set_name("EditorWindow");
+	axis_view_shadow->show();
+
+	edit_packer.attach (*axis_view_shadow,     0, 1, 0, 2,    FILL,        FILL|EXPAND, 0, 0);
+
 	/* labels for the time bars */
-	edit_packer.attach (time_bars_event_box,     0, 1, 0, 1,    FILL,        SHRINK, 0, 0);
+	edit_packer.attach (time_bars_event_box,     1, 2, 0, 1,    FILL,        SHRINK, 0, 0);
 	/* track controls */
-	edit_packer.attach (controls_layout,         0, 1, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
+	edit_packer.attach (controls_layout,         1, 2, 1, 2,    FILL,        FILL|EXPAND, 0, 0);
 	/* canvas */
-	edit_packer.attach (*_track_canvas_viewport,  1, 2, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
+	edit_packer.attach (*_track_canvas_viewport,  2, 3, 0, 2,    FILL|EXPAND, FILL|EXPAND, 0, 0);
 
 	bottom_hbox.set_border_width (2);
 	bottom_hbox.set_spacing (3);
@@ -730,14 +737,14 @@ Editor::Editor ()
 	}
 	editor_summary_pane.set_divider (0, fract);
 
-	global_vpacker.set_spacing (2);
+	global_vpacker.set_spacing (0);
 	global_vpacker.set_border_width (0);
 
 	//the next three EventBoxes provide the ability for their child widgets to have a background color.  That is all.
 
 	Gtk::EventBox* ebox = manage (new Gtk::EventBox);  //a themeable box
 	ebox->set_name("EditorWindow");
-	ebox->add (toolbar_hbox);
+	ebox->add (ebox_hpacker);
 
 	Gtk::EventBox* epane_box = manage (new EventBoxExt);  //a themeable box
 	epane_box->set_name("EditorWindow");
@@ -747,6 +754,13 @@ Editor::Editor ()
 	epane_box2->set_name("EditorWindow");
 	epane_box2->add (global_vpacker);
 
+	ArdourWidgets::ArdourDropShadow *toolbar_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
+	toolbar_shadow->set_size_request( -1, 4 );
+	toolbar_shadow->set_mode(ArdourWidgets::ArdourDropShadow::DropShadowBoth);
+	toolbar_shadow->set_name("EditorWindow");
+	toolbar_shadow->show();	
+
+	global_vpacker.pack_start (*toolbar_shadow, false, false);
 	global_vpacker.pack_start (*ebox, false, false);
 	global_vpacker.pack_start (*epane_box, true, true);
 	global_hpacker.pack_start (*epane_box2, true, true);
@@ -755,6 +769,8 @@ Editor::Editor ()
 	 */
 
 	global_hpacker.show ();
+	ebox_hpacker.show();
+	ebox->show();
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -3063,6 +3079,22 @@ Editor::setup_toolbar ()
 
 	toolbar_hbox.set_spacing (2);
 	toolbar_hbox.set_border_width (2);
+
+	ArdourWidgets::ArdourDropShadow *tool_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
+	tool_shadow->set_size_request( 4, -1 );
+	tool_shadow->show();
+
+	ebox_hpacker.pack_start (*tool_shadow, false, false);
+	ebox_hpacker.pack_start(ebox_vpacker, true, true);
+
+	Gtk::EventBox* spacer = manage (new Gtk::EventBox);  //extra space under the mouse toolbar, for aesthetics
+	spacer->set_name("EditorWindow");
+	spacer->set_size_request(-1,4);
+	spacer->show();
+
+	ebox_vpacker.pack_start(toolbar_hbox, false, false);
+	ebox_vpacker.pack_start(*spacer, false, false);
+	ebox_vpacker.show();
 
 	toolbar_hbox.pack_start (*mode_box, false, false);
 

@@ -670,11 +670,10 @@ ARDOUR_UI::build_menu_bar ()
 
 	EventBox* ev = manage (new EventBox);
 	ev->show ();
-	CairoHPacker* hbox = manage (new CairoHPacker);
-	hbox->set_name (X_("StatusBarBox"));
+
+	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
 	hbox->set_border_width (2);
-
 	ev->add (*hbox);
 
 	wall_clock_label.set_name ("WallClock");
@@ -706,7 +705,7 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (peak_thread_work_label, false, false, 4);
 	hbox->pack_end (wall_clock_label, false, false, 2);
 
-	menu_hbox.pack_end (*ev, false, false, 2);
+	menu_hbox.pack_end (*ev, true, true, 2);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);

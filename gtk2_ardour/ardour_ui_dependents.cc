@@ -280,8 +280,13 @@ ARDOUR_UI::setup_windows ()
 
 	main_vpacker.pack_start (top_packer, false, false);
 
+	ArdourWidgets::ArdourDropShadow *spacer = manage (new (ArdourWidgets::ArdourDropShadow));
+	spacer->set_size_request( -1, 4 );
+	spacer->show();
+
 	/* now add the transport sample to the top of main window */
 
+	main_vpacker.pack_start ( *spacer, false, false);
 	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
 

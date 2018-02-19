@@ -1824,6 +1824,9 @@ private:
 
 	Gtk::HBox snap_box;
 
+	Gtk::HBox ebox_hpacker;
+	Gtk::VBox ebox_vpacker;
+
 	Gtk::HBox _box;
 
 	std::vector<std::string> grid_type_strings;
