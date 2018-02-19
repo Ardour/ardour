@@ -139,12 +139,14 @@ Mixer_UI::Mixer_UI ()
 	Widget* w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
 	add_vca_button.add (*w);
+	add_vca_button.set_can_focus(false);
 	add_vca_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
 
 	/* create a button to add mixer strips */
 	w = manage (new Image (Stock::ADD, ICON_SIZE_BUTTON));
 	w->show ();
 	add_button.add (*w);
+	add_button.set_can_focus(false);
 	add_button.signal_clicked().connect (sigc::mem_fun (*this, &Mixer_UI::new_track_or_bus));
 
 	/* add as last item of strip packer */
