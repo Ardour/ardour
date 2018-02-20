@@ -223,7 +223,7 @@ class AudioClock : public CairoWidget, public ARDOUR::SessionHandlePtr
 	samplepos_t get_sample_step (Field, samplepos_t pos = 0, int dir = 1);
 
 	bool timecode_validate_edit (const std::string&);
-	bool bbt_validate_edit (const std::string&);
+	bool bbt_validate_edit (std::string&);
 	bool minsec_validate_edit (const std::string&);
 
 	samplepos_t samples_from_timecode_string (const std::string&) const;

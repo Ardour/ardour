@@ -1920,7 +1920,7 @@ AudioClock::current_duration (samplepos_t pos) const
 }
 
 bool
-AudioClock::bbt_validate_edit (const string& str)
+AudioClock::bbt_validate_edit (string & str)
 {
 	AnyTime any;
 
@@ -1937,7 +1937,14 @@ AudioClock::bbt_validate_edit (const string& str)
 	}
 
 	if (!is_duration && any.bbt.beats == 0) {
-		return false;
+		/* user could not have mean zero beats because for a
+		 * non-duration clock that's impossible. Assume that they
+		 * mis-entered things and meant Bar|1|ticks
+		 */
+
+		char buf[128];
+		snprintf (buf, sizeof (buf), "%" PRIu32 "|%" PRIu32 "|%" PRIu32, any.bbt.bars, 1, any.bbt.ticks);
+		str = buf;
 	}
 
 	return true;
