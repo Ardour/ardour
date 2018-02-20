@@ -1679,16 +1679,18 @@ ARDOUR_UI::update_cpu_load ()
 	const unsigned int x = _session ? _session->get_xrun_count () : 0;
 	double const c = AudioEngine::instance()->get_dsp_load ();
 
+	const char* const bg = c > 90 ? " background=\"red\"" : "";
+
 	char buf[64];
 	if (x > 9999) {
-		snprintf (buf, sizeof (buf), "DSP: %.0f%% (>10k)", c);
+		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span> (>10k)", bg, c);
 	} else if (x > 0) {
-		snprintf (buf, sizeof (buf), "DSP: %.0f%% (%d)", c, x);
+		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span> (%d)", bg, c, x);
 	} else {
-		snprintf (buf, sizeof (buf), "DSP: %.0f%%", c);
+		snprintf (buf, sizeof (buf), "DSP: <span%s>%.0f%%</span>", bg, c);
 	}
 
-	dsp_load_label.set_text (buf);
+	dsp_load_label.set_markup (buf);
 
 	if (x > 9999) {
 		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: >10k\n%s"), c, _("Shift+Click to clear xruns."));
