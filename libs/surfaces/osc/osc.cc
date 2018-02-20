@@ -504,6 +504,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/quick_snapshot_switch"), "f", quick_snapshot_switch);
 		REGISTER_CALLBACK (serv, X_("/quick_snapshot_stay"), "", quick_snapshot_stay);
 		REGISTER_CALLBACK (serv, X_("/quick_snapshot_stay"), "f", quick_snapshot_stay);
+		REGISTER_CALLBACK (serv, X_("/session_name"), "s", name_session);
 		REGISTER_CALLBACK (serv, X_("/fit_1_track"), "", fit_1_track);
 		REGISTER_CALLBACK (serv, X_("/fit_1_track"), "f", fit_1_track);
 		REGISTER_CALLBACK (serv, X_("/fit_2_tracks"), "", fit_2_tracks);
@@ -2521,6 +2522,34 @@ OSC::use_group (float value, lo_message msg)
 		s->usegroup = PBD::Controllable::NoGroup;
 	}
 	return 0;
+}
+
+int
+OSC::name_session (char *n, lo_message msg)
+{
+	if (!session) {
+		return -1;
+	}
+	string new_name = n;
+	char illegal = Session::session_name_is_legal (new_name);
+
+	if (illegal) {
+		PBD::warning  << (string_compose (_("To ensure compatibility with various systems\n"
+				    "session names may not contain a '%1' character"), illegal)) << endmsg;
+		return -1;
+	}
+	switch (session->rename (new_name)) {
+		case -1:
+			PBD::warning  << (_("That name is already in use by another directory/folder. Please try again.")) << endmsg;
+			break;
+		case 0:
+			return 0;
+			break;
+		default:
+			PBD::warning  << (_("Renaming this session failed.\nThings could be seriously messed up at this point")) << endmsg;
+			break;
+	}
+	return -1;
 }
 
 uint32_t

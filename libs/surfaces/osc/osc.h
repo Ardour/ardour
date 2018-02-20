@@ -493,6 +493,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(jog_mode,f);
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
+	PATH_CALLBACK1_MSG_s(name_session,s);
 	PATH_CALLBACK1_MSG_s(sel_group,s);
 	PATH_CALLBACK1_MSG_s(sel_rename,s);
 	PATH_CALLBACK1_MSG_s(sel_comment,s);
@@ -688,6 +689,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int refresh_surface (lo_message msg);
 	int custom_clear (lo_message msg);
 	int custom_mode (float state, lo_message msg);
+	int name_session (char *n, lo_message msg);
 	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
 	int sel_send_page (int page, lo_message msg);
