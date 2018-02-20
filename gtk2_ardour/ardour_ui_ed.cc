@@ -695,11 +695,8 @@ ARDOUR_UI::build_menu_bar ()
 #endif
 
 	hbox->pack_end (error_alert_button, false, false, 2);
-
-	hbox->pack_end (dsp_load_gauge, false, false, 4);
-
-	hbox->pack_end (disk_space_gauge, false, false, 4);
-	hbox->pack_end (disk_io_gauge, false, false, 4);
+	hbox->pack_end (dsp_load_label, false, false, 4);
+	hbox->pack_end (disk_space_label, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
@@ -719,9 +716,8 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
 	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
-	_status_bar_visibility.add (&disk_io_gauge,     X_("Buffers"),   _("Buffers"), true);
-	_status_bar_visibility.add (&disk_space_gauge,  X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
-	_status_bar_visibility.add (&dsp_load_gauge,    X_("DSP"),       _("DSP"), true);
+	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&dsp_load_label,        X_("DSP"),       _("DSP"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 	ev->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
@@ -857,7 +853,6 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::resize_text_widgets ()
 {
-	//ToDo:  maybe resize the gauges to fit translated text
 }
 
 void
@@ -877,7 +872,7 @@ ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
 
 	if (_session) {
 		_session->reset_xrun_count ();
-		update_xrun_count ();
+		update_cpu_load ();
 	}
 	return true;
 }

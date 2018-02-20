@@ -337,7 +337,6 @@ ARDOUR_UI::unload_session (bool hide_stuff)
 
 	session_loaded = false;
 
-	update_buffer_load ();
 	update_title ();
 
 	return 0;

@@ -79,6 +79,7 @@
 
 #include "widgets/fastmeter.h"
 #include "widgets/prompter.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/ardour.h"
 #include "ardour/audio_backend.h"
@@ -583,7 +584,6 @@ ARDOUR_UI::engine_running ()
 	}
 	update_disk_space ();
 	update_cpu_load ();
-	update_xrun_count ();
 	update_sample_rate (AudioEngine::instance()->sample_rate());
 	update_timecode_format ();
 	update_peak_thread_work ();
@@ -1508,8 +1508,6 @@ void
 ARDOUR_UI::every_second ()
 {
 	update_cpu_load ();
-	update_xrun_count ();
-	update_buffer_load ();
 	update_disk_space ();
 	update_timecode_format ();
 	update_peak_thread_work ();
@@ -1676,29 +1674,31 @@ ARDOUR_UI::update_format ()
 }
 
 void
-ARDOUR_UI::update_xrun_count ()
-{
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
-	   should also be changed.
-	*/
-
-	if (_session) {
-		const unsigned int x = _session->get_xrun_count ();
-		dsp_load_gauge.set_xrun_count (x);
-	} else {
-		dsp_load_gauge.set_xrun_count (UINT_MAX);
-	}
-}
-
-void
 ARDOUR_UI::update_cpu_load ()
 {
-	/* If this text is changed, the set_size_request_to_display_given_text call in ARDOUR_UI::resize_text_widgets
-	   should also be changed.
-	*/
-
+	const unsigned int x = _session ? _session->get_xrun_count () : 0;
 	double const c = AudioEngine::instance()->get_dsp_load ();
-	dsp_load_gauge.set_dsp_load (c);
+
+	char buf[64];
+	if (x > 9999) {
+		snprintf (buf, sizeof (buf), "DSP: %.0f%% (>10k)", c);
+	} else if (x > 0) {
+		snprintf (buf, sizeof (buf), "DSP: %.0f%% (%d)", c, x);
+	} else {
+		snprintf (buf, sizeof (buf), "DSP: %.0f%%", c);
+	}
+
+	dsp_load_label.set_text (buf);
+
+	if (x > 9999) {
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: >10k\n%s"), c, _("Shift+Click to clear xruns."));
+	} else if (x > 0) {
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%% X: %u\n%s"), c, x, _("Shift+Click to clear xruns."));
+	} else {
+		snprintf (buf, sizeof (buf), _("DSP: %.1f%%"), c);
+	}
+
+	ArdourWidgets::set_tooltip (dsp_load_label, buf);
 }
 
 void
@@ -1715,14 +1715,6 @@ ARDOUR_UI::update_peak_thread_work ()
 }
 
 void
-ARDOUR_UI::update_buffer_load ()
-{
-	uint32_t const playback = _session ? _session->playback_load () : 100;
-	uint32_t const capture = _session ? _session->capture_load () : 100;
-	disk_io_gauge.set_disk_io(playback, capture);
-}
-
-void
 ARDOUR_UI::count_recenabled_streams (Route& route)
 {
 	Track* track = dynamic_cast<Track*>(&route);
@@ -1732,10 +1724,42 @@ ARDOUR_UI::count_recenabled_streams (Route& route)
 }
 
 void
+ARDOUR_UI::format_disk_space_label (float remain_sec)
+{
+	if (remain_sec < 0) {
+		disk_space_label.set_text (_("N/A"));
+		ArdourWidgets::set_tooltip (disk_space_label, _("Unknown"));
+		return;
+	}
+
+	char buf[64];
+
+	int sec = floor (remain_sec);
+	int hrs  = sec / 3600;
+	int mins = (sec / 60) % 60;
+	int secs = sec % 60;
+	snprintf (buf, sizeof(buf), _("%02dh:%02dm:%02ds"), hrs, mins, secs);
+	ArdourWidgets::set_tooltip (disk_space_label, buf);
+
+	if (remain_sec > 86400) {
+		disk_space_label.set_text (_("Rec: >24h"));
+		return;
+	} else if (remain_sec > 32400 /* 9 hours */) {
+		snprintf (buf, sizeof (buf), "Rec: %.0fh", remain_sec / 3600.f);
+	} else if (remain_sec > 5940 /* 99 mins */) {
+		snprintf (buf, sizeof (buf), "Rec: %.1fh", remain_sec / 3600.f);
+	} else {
+		snprintf (buf, sizeof (buf), "Rec: %.0fm", remain_sec / 60.f);
+	}
+	disk_space_label.set_text (buf);
+
+}
+
+void
 ARDOUR_UI::update_disk_space()
 {
 	if (_session == 0) {
-		disk_space_gauge.set_available_disk_sec (-1);
+		format_disk_space_label (-1);
 		return;
 	}
 
@@ -1744,15 +1768,15 @@ ARDOUR_UI::update_disk_space()
 
 	if (fr == 0) {
 		/* skip update - no SR available */
-		disk_space_gauge.set_available_disk_sec (-1);
+		format_disk_space_label (-1);
 		return;
 	}
 
 	if (!opt_samples) {
 		/* Available space is unknown */
-		disk_space_gauge.set_available_disk_sec (-1);
+		format_disk_space_label (-1);
 	} else if (opt_samples.get_value_or (0) == max_samplecnt) {
-		disk_space_gauge.set_available_disk_sec (max_samplecnt);
+		format_disk_space_label (max_samplecnt);
 	} else {
 		rec_enabled_streams = 0;
 		_session->foreach_route (this, &ARDOUR_UI::count_recenabled_streams, false);
@@ -1763,7 +1787,7 @@ ARDOUR_UI::update_disk_space()
 			samples /= rec_enabled_streams;
 		}
 
-		disk_space_gauge.set_available_disk_sec (samples / (float)fr);
+		format_disk_space_label (samples / (float)fr);
 	}
 
 }
@@ -2577,9 +2601,6 @@ ARDOUR_UI::blink_handler (bool blink_on)
 	solo_blink (blink_on);
 	audition_blink (blink_on);
 	feedback_blink (blink_on);
-
-	dsp_load_gauge.blink(blink_on);
-	disk_space_gauge.blink(blink_on);
 }
 
 void
@@ -4866,10 +4887,6 @@ ARDOUR_UI::xrun_handler (samplepos_t where)
 	}
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::xrun_handler, where)
-
-	if (_session && _session->actively_recording()) {
-		dsp_load_gauge.set_xrun_while_recording();
-	}
 
 	if (_session && Config->get_create_xrun_marker() && _session->actively_recording()) {
 		create_xrun_marker(where);

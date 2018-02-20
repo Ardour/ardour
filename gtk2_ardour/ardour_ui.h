@@ -74,9 +74,6 @@
 #include "add_route_dialog.h"
 #include "ardour_dialog.h"
 #include "ardour_window.h"
-#include "dsp_load_gauge.h"
-#include "disk_space_gauge.h"
-#include "disk_io_gauge.h"
 #include "editing.h"
 #include "enums.h"
 #include "mini_timeline.h"
@@ -492,9 +489,6 @@ private:
 	MiniTimeline       mini_timeline;
 	TimeInfoBox*       time_info_box;
 
-	DspLoadGauge   dsp_load_gauge;
-	DiskIoGauge    disk_io_gauge;
-	DiskSpaceGauge disk_space_gauge;
 
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer;
 	ArdourWidgets::ArdourVSpacer      meterbox_spacer2;
@@ -567,19 +561,18 @@ private:
 	Gtk::Label   wall_clock_label;
 	gint update_wall_clock ();
 
+	Gtk::Label  disk_space_label;
 	void update_disk_space ();
+	void format_disk_space_label (float);
 
 	Gtk::Label   timecode_format_label;
 	void update_timecode_format ();
 
+	Gtk::Label  dsp_load_label;
 	void update_cpu_load ();
-
-	void update_xrun_count ();
 
 	Gtk::Label   peak_thread_work_label;
 	void update_peak_thread_work ();
-
-	void update_buffer_load ();
 
 	Gtk::Label   sample_rate_label;
 	void update_sample_rate (ARDOUR::samplecnt_t);
