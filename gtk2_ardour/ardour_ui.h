@@ -785,6 +785,7 @@ private:
 
 	void audioengine_setup ();
 
+	void display_message (const char* prefix, gint prefix_len, Glib::RefPtr<Gtk::TextBuffer::Tag>, Glib::RefPtr<Gtk::TextBuffer::Tag>, const char* msg);
 	Gtk::Label status_bar_label;
 	bool status_bar_button_press (GdkEventButton*);
 

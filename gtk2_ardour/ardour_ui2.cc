@@ -108,6 +108,24 @@ ARDOUR_UI::status_bar_button_press (GdkEventButton* ev)
 	return handled;
 }
 
+void
+ARDOUR_UI::display_message (const char* prefix, gint prefix_len, RefPtr<TextBuffer::Tag> ptag, RefPtr<TextBuffer::Tag> mtag, const char* msg)
+{
+	UI::display_message (prefix, prefix_len, ptag, mtag, msg);
+
+	ArdourLogLevel ll = LogLevelNone;
+
+	if (strcmp (prefix, _("[ERROR]: ")) == 0) {
+		ll = LogLevelError;
+	} else if (strcmp (prefix, _("[WARNING]: ")) == 0) {
+		ll = LogLevelWarning;
+	} else if (strcmp (prefix, _("[INFO]: ")) == 0) {
+		ll = LogLevelInfo;
+	}
+
+	_log_not_acknowledged = std::max(_log_not_acknowledged, ll);
+}
+
 XMLNode*
 ARDOUR_UI::tearoff_settings (const char* name) const
 {
