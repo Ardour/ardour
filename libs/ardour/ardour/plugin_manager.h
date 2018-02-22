@@ -85,7 +85,7 @@ public:
 	void load_tags ();
 	void save_tags ();
 
-	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool factory, bool force = false);
+	void set_tags (std::string name, ARDOUR::PluginType type, std::string unique_id, std::string tags, bool factory, bool force = false);
 	void reset_tags (PluginInfoPtr const&);
 	std::string get_tags_as_string (PluginInfoPtr const&) const;
 	std::vector<std::string> get_tags (PluginInfoPtr const&) const;
@@ -109,13 +109,14 @@ public:
 private:
 
 	struct PluginTag {
+	    std::string name;
 	    ARDOUR::PluginType type;
 	    std::string unique_id;
 	    std::string tags;
 			bool user_set;
 
-	    PluginTag (ARDOUR::PluginType t, std::string id, std::string s, bool user_set)
-	    : type (t), unique_id (id), tags (s), user_set (user_set) {}
+	    PluginTag (std::string n, ARDOUR::PluginType t, std::string id, std::string s, bool user_set)
+	    : name (n), type (t), unique_id (id), tags (s), user_set (user_set) {}
 
 	    bool operator== (PluginTag const& other) const {
 		    return other.type == type && other.unique_id == unique_id;

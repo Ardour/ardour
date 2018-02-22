@@ -862,7 +862,7 @@ PluginSelector::tag_entry_changed ()
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 
 		ARDOUR::PluginInfoPtr pi = row[plugin_columns.plugin];
-		manager.set_tags (pi->type, pi->unique_id, tag_entry->get_text(), false);
+		manager.set_tags (pi->name, pi->type, pi->unique_id, tag_entry->get_text(), false);
 
 		_need_tag_save = true;
 		_need_menu_rebuild = true;
