@@ -1025,7 +1025,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->type = ARDOUR::Windows_VST;
 
 		/* if we don't have any tags for this plugin, make some up. */
-		set_tags ((*i)->name, info->type, info->unique_id, info->category, true);
+		set_tags (info->name, info->type, info->unique_id, info->category, true);
 
 		// TODO: check dup-IDs (lxvst AND windows vst)
 		bool duplicate = false;
