@@ -2349,15 +2349,23 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 		set->bank = bank_start;
 		uint32_t not_ready = 0;
 		for (uint32_t dv = 1; dv < d_count; dv++) {
-			OSCSurface *sur;
 			if (set->urls[dv] != "") {
 				string url = set->urls[dv];
-				sur = get_surface (lo_address_new_from_url (url.c_str()));
+				OSCSurface *sur = get_surface (lo_address_new_from_url (url.c_str()));
+				if (sur->linkset != ls) {
+					set->urls[dv] = "";
+					not_ready = dv;
+				} else {
+					lo_address sur_addr = lo_address_new_from_url (sur->remote_url.c_str());
+
+					sur->bank = bank_start;
+					bank_start = bank_start + sur->bank_size;
+					strip_feedback (sur, false);
+					_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), sur_addr);
+					bank_leds (sur);
+					lo_address_free (sur_addr);
+				}
 			} else {
-				not_ready = dv;
-			}
-			if (sur->linkset != ls) {
-				set->urls[dv] = "";
 				not_ready = dv;
 			}
 			if (not_ready) {
@@ -2367,14 +2375,6 @@ OSC::_set_bank (uint32_t bank_start, lo_address addr)
 				set->bank = 1;
 				break;
 			}
-			lo_address sur_addr = lo_address_new_from_url (sur->remote_url.c_str());
-
-			sur->bank = bank_start;
-			bank_start = bank_start + sur->bank_size;
-			strip_feedback (sur, false);
-			_strip_select (boost::shared_ptr<ARDOUR::Stripable>(), sur_addr);
-			bank_leds (sur);
-			lo_address_free (sur_addr);
 		}
 		if (not_ready) {
 			surface_link_state (set);
