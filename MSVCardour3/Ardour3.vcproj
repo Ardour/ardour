@@ -308,10 +308,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\ardour_gauge.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\ardour_http.cc"
 				>
 			</File>
@@ -441,18 +437,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\debug.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\disk_io_gauge.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\disk_space_gauge.cc"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\dsp_load_gauge.cc"
 				>
 			</File>
 			<File
@@ -1390,10 +1374,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\ardour_gauge.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\ardour_http.h"
 				>
 			</File>
@@ -1531,18 +1511,6 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\debug.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\disk_io_gauge.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\disk_space_gauge.h"
-				>
-			</File>
-			<File
-				RelativePath="..\gtk2_ardour\dsp_load_gauge.h"
 				>
 			</File>
 			<File
