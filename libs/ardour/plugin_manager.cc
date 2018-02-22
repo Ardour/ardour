@@ -1286,7 +1286,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
 
-		set_tags ((*i)->name, info->type, info->unique_id, info->category, true);
+		set_tags (info->name, info->type, info->unique_id, info->category, true);
 
 		/* Make sure we don't find the same plugin in more than one place along
 		 * the LXVST_PATH We can't use a simple 'find' because the path is included
