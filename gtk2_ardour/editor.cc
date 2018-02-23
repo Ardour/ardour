@@ -5759,7 +5759,7 @@ Editor::super_rapid_screen_update ()
 		_last_update_time = 0;
 	}
 
-	if (_session->transport_speed () == 0) {
+	if (_session->transport_stopped()) {
 		//we are stopped.  don't interpolate the playhead position; just set it
 		_last_update_time = 0;
 	}
