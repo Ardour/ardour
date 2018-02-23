@@ -123,6 +123,20 @@ MidiSource::set_state (const XMLNode& node, int /*version*/)
 			}
 			Evoral::Parameter p = EventTypeMap::instance().from_symbol (str);
 
+			switch (p.type()) {
+			case MidiCCAutomation:
+			case MidiPgmChangeAutomation:       break;
+			case MidiChannelPressureAutomation: break;
+			case MidiNotePressureAutomation:    break;
+			case MidiPitchBenderAutomation:     break;
+			case MidiSystemExclusiveAutomation:
+				cerr << "Parameter \"" << str << "\" is system exclusive - no automation possible!\n";
+				continue;
+			default:
+				cerr << "Parameter \"" << str << "\" found for MIDI source ... not legal; ignoring this parameter\n";
+				continue;
+			}
+
 			if (!(*i)->get_property (X_("style"), str)) {
 				error << _("Missing style property on InterpolationStyle") << endmsg;
 				return -1;
