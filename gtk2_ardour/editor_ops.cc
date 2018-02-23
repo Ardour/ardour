@@ -7588,9 +7588,21 @@ void
 Editor::do_insert_time ()
 {
 	if (selection->tracks.empty()) {
+		MessageDialog msg (_("You must first select some tracks to Insert Time."),
+				   true, MESSAGE_INFO, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
 		return;
 	}
 
+	if (Config->get_edit_mode() == Lock) {
+		MessageDialog msg (_("You cannot insert time in Lock Edit mode."),
+				   true, MESSAGE_INFO, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
+		return;
+	}
+	
 	InsertRemoveTimeDialog d (*this);
 	int response = d.run ();
 
@@ -7751,6 +7763,18 @@ void
 Editor::do_remove_time ()
 {
 	if (selection->tracks.empty()) {
+		MessageDialog msg (_("You must first select some tracks to Remove Time."),
+				   true, MESSAGE_INFO, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
+		return;
+	}
+
+	if (Config->get_edit_mode() == Lock) {
+		MessageDialog msg (_("You cannot remove time in Lock Edit mode."),
+				   true, MESSAGE_INFO, BUTTONS_OK, true);
+		msg.set_position (WIN_POS_MOUSE);
+		msg.run ();
 		return;
 	}
 
