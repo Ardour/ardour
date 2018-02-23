@@ -104,7 +104,6 @@ ArdourKeyboard::setup_keybindings ()
 
 	string lowercase_program_name = downcase (string(PROGRAM_NAME));
 
-#ifndef MIXBUS // not for v4.0 just yet
 	/* extract and append minor vesion */
 	std::string rev (revision);
 	std::size_t pos = rev.find_first_of("-");
@@ -112,7 +111,6 @@ ArdourKeyboard::setup_keybindings ()
 		lowercase_program_name += "-";
 		lowercase_program_name += rev.substr (0, pos);
 	}
-#endif
 
 	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + binding_filename_suffix);
 
