@@ -5759,6 +5759,11 @@ Editor::super_rapid_screen_update ()
 		_last_update_time = 0;
 	}
 
+	if (_session->transport_speed () == 0) {
+		//we are stopped.  don't interpolate the playhead position; just set it
+		_last_update_time = 0;
+	}
+
 	if (_last_update_time > 0) {
 		/* interpolate and smoothen playhead position */
 		const double ds =  (now - _last_update_time) * _session->transport_speed() * _session->nominal_sample_rate () * 1e-6;
