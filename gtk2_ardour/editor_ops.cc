@@ -708,8 +708,8 @@ void
 Editor::build_region_boundary_cache ()
 {
 
-	//ToDo:  maybe set a timer so we don't recalutate when lots of changes are coming in
-	//ToDo:  maybe somehow defer this until session is fully loaded.
+	/* TODO:  maybe set a timer so we don't recalutate when lots of changes are coming in */
+	/* TODO:  maybe somehow defer this until session is fully loaded.  */
 
 	if (!_region_boundary_cache_dirty)
 		return;
@@ -741,16 +741,15 @@ Editor::build_region_boundary_cache ()
 		interesting_points.push_back (SyncPoint);
 	}
 
+	/* if no snap selections are set, boundary cache should be left empty */
+	if ( interesting_points.empty() ) {
+		return;
+	}
+
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;
 
-	//in the past, we used the track selection to limit snap.  I think this is not desired.
-	//or if it is,  it needs to be updated every time the track selection changes (so the snapped-cursor can show it)
-//	if (!selection->tracks.empty()) {
-//		tlist = selection->tracks.filter_to_unique_playlists ();
-//	} else {
-		tlist = track_views.filter_to_unique_playlists ();
-//	}
+	tlist = track_views.filter_to_unique_playlists ();
 
 	if (maybe_first_sample) {
 		TrackViewList::const_iterator i;
@@ -763,10 +762,13 @@ Editor::build_region_boundary_cache ()
 		}
 	}
 
-	while (pos < _session->current_end_sample() && !at_end) {
+	std::pair<samplepos_t, samplepos_t> ext = session_gui_extents (false);
+	samplepos_t session_end = ext.second;
+
+	while (pos < session_end && !at_end) {
 
 		samplepos_t rpos;
-		samplepos_t lpos = max_samplepos;
+		samplepos_t lpos = session_end;
 
 		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
 
