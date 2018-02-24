@@ -143,9 +143,9 @@ EditorSummary::render_background_image ()
 	double theoretical_end = ext.second;
 
 	/* the summary should encompass the full extent of everywhere we've visited since the session was opened */
-	if ( _leftmost < theoretical_start)
+	if (_leftmost < theoretical_start)
 		theoretical_start = _leftmost;
-	if ( _rightmost > theoretical_end )
+	if (_rightmost > theoretical_end)
 		theoretical_end = _rightmost;
 
 	/* range-check */
@@ -184,24 +184,24 @@ EditorSummary::render_background_image ()
 
 		/* paint a non-bg colored strip to represent the track itself */
 
-		if ( _track_height > 4 ) {
+		if (_track_height > 4) {
 			cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 			cairo_set_line_width (cr, _track_height - 1);
 			cairo_move_to (cr, 0, y + _track_height / 2);
 			cairo_line_to (cr, get_width(), y + _track_height / 2);
 			cairo_stroke (cr);
 		}
-		
+
 		StreamView* s = (*i)->view ();
 
 		if (s) {
 			cairo_set_line_width (cr, _track_height * 0.8);
 
 			s->foreach_regionview (sigc::bind (
-						       sigc::mem_fun (*this, &EditorSummary::render_region),
-						       cr,
-						       y + _track_height / 2
-						       ));
+			                                   sigc::mem_fun (*this, &EditorSummary::render_region),
+			                                   cr,
+			                                   y + _track_height / 2
+			                                  ));
 		}
 
 		y += _track_height;
@@ -238,17 +238,17 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 
 	/* maintain the leftmost and rightmost locations that we've ever reached */
 	samplecnt_t const leftmost = _editor->leftmost_sample ();
-	if ( leftmost < _leftmost) {
+	if (leftmost < _leftmost) {
 		_leftmost = leftmost;
 		_background_dirty = true;
 	}
 	samplecnt_t const rightmost = leftmost + _editor->current_page_samples();
-	if ( rightmost > _rightmost) {
+	if (rightmost > _rightmost) {
 		_rightmost = rightmost;
 		_background_dirty = true;
 	}
 
-	//draw the background (regions, markers, etc ) if they've changed
+	/* draw the background (regions, markers, etc) if they've changed */
 	if (!_image || _background_dirty) {
 		render_background_image ();
 		_background_dirty = false;
@@ -439,7 +439,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 {
 	_old_follow_playhead = _editor->follow_playhead ();
 
-	if (ev->button == 3) {  //right-click:  show the reset menu action
+	if (ev->button == 3) { // right-click:  show the reset menu action
 		using namespace Gtk::Menu_Helpers;
 		Gtk::Menu* m = manage (new Gtk::Menu);
 		MenuList& items = m->items ();
@@ -495,7 +495,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		_editor->set_follow_playhead (false);
 
 		_move_dragging = true;
-		
+
 		_last_mx = ev->x;
 		_last_my = ev->y;
 		_last_dx = 0;
@@ -503,7 +503,7 @@ EditorSummary::on_button_press_event (GdkEventButton* ev)
 		_last_y_delta = 0;
 
 		get_window()->set_cursor (*_editor->_cursors->expand_left_right);
-	
+
 	}
 
 	return true;
@@ -576,7 +576,7 @@ EditorSummary::get_position (double x, double y) const
 void
 EditorSummary::reset_to_extents()
 {
-	//reset as if the user never went anywhere outside the extents
+	/* reset as if the user never went anywhere outside the extents */
 	_leftmost = max_samplepos;
 	_rightmost = 0;
 
@@ -609,7 +609,7 @@ EditorSummary::set_cursor (Position p)
 }
 
 void
-EditorSummary::summary_zoom_step ( int steps /* positive steps to zoom "out" , negative steps to zoom "in" */  )
+EditorSummary::summary_zoom_step (int steps /* positive steps to zoom "out" , negative steps to zoom "in" */  )
 {
 	pair<double, double> xn;
 
@@ -618,9 +618,12 @@ EditorSummary::summary_zoom_step ( int steps /* positive steps to zoom "out" , n
 	xn.first -= steps;
 	xn.second += steps;
 
-	//for now, disallow really close zooming-in from the scroomer. ( currently it causes the start-offset to 'walk' because of integer limitations.  to fix this, probably need to maintain float throught the get/set_editor() path )
+	/* for now, disallow really close zooming-in from the scroomer. (Currently it
+	 * causes the start-offset to 'walk' because of integer limitations.
+	 * To fix this, probably need to maintain float throught the get/set_editor() path.)
+	 */
 	if (steps<0) {
-      if ( (xn.second-xn.first) < 2)
+      if ((xn.second - xn.first) < 2)
 		return;
 	}
 
@@ -634,49 +637,48 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 {
 	if (_move_dragging) {
 
-		//To avoid accidental zooming, the mouse must move exactly vertical, not diagonal, to trigger a zoom step
-		//we use screen coordinates for this, not canvas-based grab_x
+		/* To avoid accidental zooming, the mouse must move exactly vertical, not diagonal, to trigger a zoom step
+		 * we use screen coordinates for this, not canvas-based grab_x */
 		double mx = ev->x;
 		double dx = mx - _last_mx;
 		double my = ev->y;
 		double dy = my - _last_my;
 
-		//do zooming in windowed "steps" so it feels more reversible ?
+		/* do zooming in windowed "steps" so it feels more reversible ? */
 		const int stepsize = 2;
 		int y_delta = _start_mouse_y - my;
 		y_delta = y_delta / stepsize;
 
-		//do the zoom?
+		/* do the zoom? */
 		const float zscale = 3;
-		if ( (dx==0) && (_last_dx ==0) && (y_delta != _last_y_delta) ) {
+		if ((dx == 0) && (_last_dx == 0) && (y_delta != _last_y_delta)) {
 
-			summary_zoom_step( dy * zscale );
+			summary_zoom_step (dy * zscale);
 
-			//after the zoom we must re-calculate x-pos grabs
+			/* after the zoom we must re-calculate x-pos grabs */
 			pair<double, double> xr;
 			get_editor (&xr);
 			_start_editor_x = xr;
 			_start_mouse_x = ev->x;
-			
+
 			_last_y_delta = y_delta;
 		}
-		
-		//always track horizontal movement, if any
-		if ( dx != 0 ) {
+
+		/* always track horizontal movement, if any */
+		if (dx != 0) {
 
 			double x = _start_editor_x.first;
 			x += ev->x - _start_mouse_x;
-			
+
 			if (x < 0) {
 				x = 0;
 			}
 
-			//zoom-behavior-tweaks
-			//protect the right edge from expanding beyond the end
+			/* zoom-behavior-tweaks: protect the right edge from expanding beyond the end */
 			pair<double, double> xr;
 			get_editor (&xr);
 			double w = xr.second - xr.first;
-			if ( x + w < get_width() ) {
+			if (x + w < get_width()) {
 				set_editor (x);
 			}
 		}
@@ -696,9 +698,8 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 			xr.first += dx;
 		} else if (_zoom_trim_position == RIGHT) {
 
-			//zoom-behavior-tweaks
-			//protect the right edge from expanding beyond the edge
-			if ( (xr.second + dx) < get_width() ) {
+			/* zoom-behavior-tweaks: protect the right edge from expanding beyond the edge */
+			if ((xr.second + dx) < get_width()) {
 				xr.second += dx;
 			}
 
@@ -712,7 +713,7 @@ EditorSummary::on_motion_notify_event (GdkEventMotion* ev)
 		set_editor (xr);
 
 	} else {
-		set_cursor ( get_position(ev->x, ev->y) );
+		set_cursor (get_position (ev->x, ev->y));
 	}
 
 	return true;
@@ -745,19 +746,19 @@ EditorSummary::on_scroll_event (GdkEventScroll* ev)
 
 	switch (ev->direction) {
 		case GDK_SCROLL_UP: {
-			
-			summary_zoom_step( -4 );
-		
+
+			summary_zoom_step (-4);
+
 			return true;
 		} break;
-		
+
 		case GDK_SCROLL_DOWN: {
-			
-			summary_zoom_step( 4 );
-		
+
+			summary_zoom_step (4);
+
 			return true;
 		} break;
-		
+
 		case GDK_SCROLL_LEFT:
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::ScrollZoomHorizontalModifier)) {
 				_editor->temporal_zoom_step (false);

@@ -1256,7 +1256,6 @@ MixerStrip::guess_main_type(bool for_input, bool favor_connected) const
 
 /*
  * Output port labelling
- * =====================
  *
  * Case 1: Each output has one connection, all connections are to system:playback_%i
  *   out 1 -> system:playback_1
@@ -1280,8 +1279,9 @@ MixerStrip::guess_main_type(bool for_input, bool favor_connected) const
  * Default case (unusual routing):
  *   Display as: *number of connections*
  *
+ *
  * Tooltips
- * ========
+ *
  * .-----------------------------------------------.
  * | Mixdown                                       |
  * | out 1 -> ardour:master/in 1, jamin:input/in 1 |

@@ -708,12 +708,12 @@ void
 Editor::build_region_boundary_cache ()
 {
 
-	//ToDo:  maybe set a timer so we don't recalutate when lots of changes are coming in 
+	//ToDo:  maybe set a timer so we don't recalutate when lots of changes are coming in
 	//ToDo:  maybe somehow defer this until session is fully loaded.
-	
-	if ( !_region_boundary_cache_dirty )
+
+	if (!_region_boundary_cache_dirty)
 		return;
-	
+
 	samplepos_t pos = 0;
 	vector<RegionPoint> interesting_points;
 	boost::shared_ptr<Region> r;
@@ -727,20 +727,20 @@ Editor::build_region_boundary_cache ()
 	}
 
 	bool maybe_first_sample = false;
-		
-	if ( UIConfiguration::instance().get_snap_to_region_start() ) {
+
+	if (UIConfiguration::instance().get_snap_to_region_start()) {
 		interesting_points.push_back (Start);
 		maybe_first_sample = true;
 	}
-	
-	if ( UIConfiguration::instance().get_snap_to_region_end() ) {
+
+	if (UIConfiguration::instance().get_snap_to_region_end()) {
 		interesting_points.push_back (End);
 	}
-	
-	if ( UIConfiguration::instance().get_snap_to_region_sync() ) {
+
+	if (UIConfiguration::instance().get_snap_to_region_sync()) {
 		interesting_points.push_back (SyncPoint);
 	}
-	
+
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;
 
@@ -822,7 +822,7 @@ Editor::build_region_boundary_cache ()
 	/* finally sort to be sure that the order is correct */
 
 	sort (region_boundary_cache.begin(), region_boundary_cache.end());
-	
+
 	_region_boundary_cache_dirty = false;
 }
 
@@ -1962,13 +1962,13 @@ void
 Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 {
 	if (!selection) return;
-	
-	if ( selection->regions.empty() && selection->time.empty() ) {
+
+	if (selection->regions.empty() && selection->time.empty()) {
 		if (axes == Horizontal || axes == Both) {
 			temporal_zoom_step(true);
 		}
 		if (axes == Vertical || axes == Both) {
-			if ( !track_views.empty() ) {
+			if (!track_views.empty()) {
 
 				TrackViewList tvl;
 
@@ -1977,7 +1977,7 @@ Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 				const double btm = top + _visible_canvas_height + 10;
 
 				for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-					if ( (*iter)->covered_by_y_range (top, btm) ) {
+					if ((*iter)->covered_by_y_range (top, btm)) {
 						tvl.push_back(*iter);
 					}
 				}
@@ -2004,10 +2004,10 @@ Editor::temporal_zoom_selection (Editing::ZoomAxis axes)
 	if (axes == Vertical || axes == Both) {
 		fit_selection ();
 	}
-	
+
 	//normally, we don't do anything "automatic" to the user's selection.
 	//but in this case, we will clear the selection after a zoom-to-selection.
-	selection->clear();  
+	selection->clear();
 }
 
 void
@@ -5891,18 +5891,18 @@ Editor::toggle_record_enable ()
 }
 
 StripableList
-tracklist_to_stripables( TrackViewList list )
+tracklist_to_stripables (TrackViewList list)
 {
 	StripableList ret;
-	
+
 	for (TrackSelection::iterator i = list.begin(); i != list.end(); ++i) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> ((*i));
 
 		if (rtv && rtv->is_track()) {
-			ret.push_back( rtv->track() );
+			ret.push_back (rtv->track());
 		}
 	}
-	
+
 	return ret;
 }
 
@@ -5911,25 +5911,25 @@ Editor::play_solo_selection (bool restart)
 {
 	//note: session::solo_selection takes care of invalidating the region playlist
 
-	if ( (!selection->tracks.empty()) && selection->time.length() > 0 ) {  //a range is selected; solo the tracks and roll
-	
-		StripableList sl = tracklist_to_stripables (selection->tracks);
-		_session->solo_selection( sl, true );
+	if ((!selection->tracks.empty()) && selection->time.length() > 0) {  //a range is selected; solo the tracks and roll
 
-		if ( restart ) {
+		StripableList sl = tracklist_to_stripables (selection->tracks);
+		_session->solo_selection (sl, true);
+
+		if (restart) {
 			samplepos_t start = selection->time.start();
 			samplepos_t end = selection->time.end_sample();
 			_session->request_bounded_roll (start, end);
 		}
-	} else if ( ! selection->tracks.empty() ) {  //no range is selected, but tracks are selected; solo the tracks and roll
+	} else if (! selection->tracks.empty()) {  //no range is selected, but tracks are selected; solo the tracks and roll
 		StripableList sl = tracklist_to_stripables (selection->tracks);
-		_session->solo_selection( sl, true );
+		_session->solo_selection (sl, true);
 		_session->request_cancel_play_range();
 		transition_to_rolling (true);
-	
-	} else if ( ! selection->regions.empty() ) {  //solo any tracks with selected regions, and roll
-		StripableList sl = tracklist_to_stripables ( get_tracks_for_range_action() );
-		_session->solo_selection( sl, true );
+
+	} else if (! selection->regions.empty()) {  //solo any tracks with selected regions, and roll
+		StripableList sl = tracklist_to_stripables (get_tracks_for_range_action());
+		_session->solo_selection (sl, true);
 		_session->request_cancel_play_range();
 		transition_to_rolling (true);
 	} else {
@@ -6621,7 +6621,7 @@ Editor::set_punch_start_from_edit_point ()
 		snap_to(start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
-		if (start.sample > end ) {
+		if (start.sample > end) {
 			end = max_samplepos;
 		}
 
@@ -6682,7 +6682,7 @@ Editor::set_loop_start_from_edit_point ()
 		snap_to (start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
-		if (start.sample > end ) {
+		if (start.sample > end) {
 			end = max_samplepos;
 		}
 
@@ -7132,7 +7132,7 @@ Editor::snap_regions_to_grid ()
 		(*r)->region()->clear_changes ();
 
 		MusicSample start ((*r)->region()->first_sample (), 0);
-		snap_to (start, RoundNearest, SnapToGrid );
+		snap_to (start, RoundNearest, SnapToGrid);
 		(*r)->region()->set_position (start.sample, start.division);
 		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
@@ -7549,7 +7549,7 @@ edit your ardour.rc file to set the\n\
 		/* Route deletion calls Editor::timeaxisview_deleted() iteratively (for each deleted
 		 * route). If the deleted route is currently displayed in the Editor-Mixer (highly
 		 * likely because deletion requires selection) this will call
-		 * Editor::set_selected_mixer_strip () which is expensive ( MixerStrip::set_route() ).
+		 * Editor::set_selected_mixer_strip () which is expensive (MixerStrip::set_route()).
 		 * It's likewise likely that the route that has just been displayed in the
 		 * Editor-Mixer will be next in line for deletion.
 		 *
@@ -7602,7 +7602,7 @@ Editor::do_insert_time ()
 		msg.run ();
 		return;
 	}
-	
+
 	InsertRemoveTimeDialog d (*this);
 	int response = d.run ();
 

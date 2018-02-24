@@ -584,24 +584,25 @@ Editor::autoscroll_active () const
 }
 
 std::pair <samplepos_t,samplepos_t>
-Editor::session_gui_extents ( bool use_extra ) const
+Editor::session_gui_extents (bool use_extra) const
 {
 	if (!_session) {
 		return std::pair <samplepos_t,samplepos_t>(max_samplepos,0);
 	}
-	
+
 	samplecnt_t session_extent_start = _session->current_start_sample();
 	samplecnt_t session_extent_end = _session->current_end_sample();
 
-	//calculate the extents of all regions in every playlist
-	//NOTE:  we should listen to playlists, and cache these values so we don't calculate them every time.
+	/* calculate the extents of all regions in every playlist
+	 * NOTE: we should listen to playlists, and cache these values so we don't calculate them every time.
+	 */
 	{
 		boost::shared_ptr<RouteList> rl = _session->get_routes();
 		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
 			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
 			if (tr) {
 				boost::shared_ptr<Playlist> pl = tr->playlist();
-				if ( pl && !pl->all_regions_empty() ) {
+				if (pl && !pl->all_regions_empty()) {
 					pair<samplepos_t, samplepos_t> e;
 					e = pl->get_extent();
 					if (e.first < session_extent_start) {
@@ -615,23 +616,23 @@ Editor::session_gui_extents ( bool use_extra ) const
 		}
 	}
 
-	//ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like)
+	/* ToDo: also incorporate automation regions (in case the session has no audio/midi but is just used for automating plugins or the like) */
 
-	//add additional time to the ui extents ( user-defined in config )
+	/* add additional time to the ui extents (user-defined in config) */
 	if (use_extra) {
 		samplecnt_t const extra = UIConfiguration::instance().get_extra_ui_extents_time() * 60 * _session->nominal_sample_rate();
 		session_extent_end += extra;
 		session_extent_start -= extra;
 	}
-			
-	//range-check
+
+	/* range-check */
 	if (session_extent_end > max_samplepos) {
 		session_extent_end = max_samplepos;
 	}
 	if (session_extent_start < 0) {
 		session_extent_start = 0;
 	}
-	
+
 	std::pair <samplepos_t,samplepos_t> ret (session_extent_start, session_extent_end);
 	return ret;
 }
@@ -667,7 +668,7 @@ Editor::autoscroll_canvas ()
 			dx += 10 + (2 * (autoscroll_cnt/2));
 
 			dx = pixel_to_sample (dx);
-			
+
 			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
 
 			if (_leftmost_sample < max_samplepos - dx) {
@@ -1336,13 +1337,13 @@ Editor::which_canvas_cursor(ItemType type) const
 			cursor = _cursors->cross_hair;
 			break;
 		case LeftFrameHandle:
-			if ( effective_mouse_mode() == MouseObject )  // (smart mode): if the user is in the btm half, show the trim cursor
+			if (effective_mouse_mode() == MouseObject) // (smart mode): if the user is in the btm half, show the trim cursor
 				cursor = which_trim_cursor (true);
 			else
-				cursor = _cursors->selector;  // (smart mode): in the top half, just show the selection (range) cursor
+				cursor = _cursors->selector; // (smart mode): in the top half, just show the selection (range) cursor
 			break;
 		case RightFrameHandle:
-			if ( effective_mouse_mode() == MouseObject )  //see above
+			if (effective_mouse_mode() == MouseObject) // see above
 				cursor = which_trim_cursor (false);
 			else
 				cursor = _cursors->selector;

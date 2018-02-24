@@ -89,7 +89,7 @@ AddRouteDialog::AddRouteDialog ()
 
 	if (builtin_types.empty()) {
 		builtin_types.push_back (
-			std::pair<string,string>(_("Audio Tracks"),  _( " \
+			std::pair<string,string>(_("Audio Tracks"),  _(" \
 Use the settings, below, to create 1 or more new Audio tracks.\n \
 \n\n \
 You may select:\n \
@@ -185,17 +185,17 @@ You may select:\n \
 	strict_io_combo.append_text (_("Strict-I/O"));
 	strict_io_combo.set_active (Config->get_strict_io () ? 1 : 0);
 
-	//top-level VBox
+	/* top-level VBox */
 	VBox* vbox = manage (new VBox);
 	get_vbox()->set_spacing (4);
 	vbox->set_spacing (18);
 	vbox->set_border_width (5);
 
-	//this box contains the template chooser, and the template details
+	/* this box contains the template chooser, and the template details */
 	HBox* template_hbox = manage (new HBox);
 	template_hbox->set_spacing (8);
 
-	//scrollbars for the template chooser and template descriptions....
+	/* scrollbars for the template chooser and template descriptions.... */
 	Gtk::ScrolledWindow *template_scroller = manage (new Gtk::ScrolledWindow());
 	template_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	template_scroller->add (trk_template_chooser);
@@ -204,10 +204,10 @@ You may select:\n \
 	desc_scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	desc_scroller->add (trk_template_desc);
 
-	//this is the outer sample that surrounds the description and the settings-table
+	/* this is the outer sample that surrounds the description and the settings-table */
 	trk_template_outer_frame.set_name (X_("TextHighlightFrame"));
 
-	//this is the "inner frame" that surrounds the description text
+	/* this is the "inner frame" that surrounds the description text */
 	trk_template_desc_frame.set_name (X_("TextHighlightFrame"));
 	trk_template_desc_frame.add (*desc_scroller);
 
@@ -250,7 +250,7 @@ You may select:\n \
 	vbox->pack_start (*template_hbox, true, true);
 
 
-	//Now pack the "settings table" with manual controls (these controls are sensitized by the left-side selection) 
+	/* Now pack the "settings table" with manual controls (these controls are sensitized by the left-side selection) */
 
 	int n = 0;
 
@@ -262,7 +262,7 @@ You may select:\n \
 
 	++n;
 
-	// Number
+	/* Number */
 	add_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	settings_table->attach (add_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	Gtk::Alignment *align = manage (new Alignment (0, .5, 0, 0));
@@ -271,31 +271,31 @@ You may select:\n \
 
 	++n;
 
-	// Name
+	/* Name */
 	name_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	settings_table->attach (name_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (name_template_entry, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
-	// Route configuration
+	/* Route configuration */
 	configuration_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	settings_table->attach (configuration_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (channel_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
-	// instrument choice (for MIDI)
+	/* instrument choice (for MIDI) */
 	instrument_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	settings_table->attach (instrument_label, 0, 1, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (instrument_combo, 1, 3, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
-	// Group choice
+	/* Group choice */
 	group_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	settings_table->attach (group_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 	settings_table->attach (route_group_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 
 	++n;
 
-	// New Route's I/O is.. {strict/flexible}
+	/* New Route's I/O is.. {strict/flexible} */
 	if (Profile->get_mixbus ()) {
 		strict_io_combo.set_active (1);
 	} else {
@@ -306,7 +306,7 @@ You may select:\n \
 		ArdourWidgets::set_tooltip (strict_io_combo,
 				_("With strict-i/o enabled, Effect Processors will not modify the number of channels on a track. The number of output channels will always match the number of input channels."));
 
-		// recording mode
+		/* recording mode */
 		mode_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 		settings_table->attach (mode_label, 4, 5, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
 		settings_table->attach (mode_combo, 5, 6, n, n + 1, Gtk::FILL, Gtk::SHRINK, 0, 0);
@@ -317,12 +317,12 @@ You may select:\n \
 	HBox* outer_box = manage (new HBox);
 	outer_box->set_spacing (4);
 
-	// New route will be inserted at..
+	/* New route will be inserted at.. */
 	insert_label.set_alignment (Gtk::ALIGN_RIGHT, Gtk::ALIGN_CENTER);
 	outer_box->pack_start (insert_label, false, false);
 	outer_box->pack_start (insert_at_combo, false, false);
 
-	//quick-add button  (add item but don't close dialog)
+	/* quick-add button (add item but don't close dialog) */
 	Gtk::Button* addnoclose_button = manage (new Gtk::Button(_("Add selected items (and leave dialog open)")));
 	addnoclose_button->set_can_default ();
 	addnoclose_button->signal_clicked ().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Add));
@@ -425,7 +425,6 @@ AddRouteDialog::trk_template_row_selected ()
 		} else {
 			name_template_entry.set_text ("");
 		}
-	
 
 		if ((it = rs.find ("how_many")) != rs.end()) {
 			if (atoi (it->second.c_str()) > 0) {
@@ -534,13 +533,13 @@ std::string
 AddRouteDialog::get_template_path ()
 {
 	string p;
-	
+
 	if (trk_template_chooser.get_selection()->count_selected_rows() > 0) {
 		TreeIter iter = trk_template_chooser.get_selection()->get_selected();
 
 		if (iter) {
 			string n = (*iter)[track_template_columns.name];
-			if ( n != _("Manual Configuration") ) {
+			if (n != _("Manual Configuration")) {
 				p = (*iter)[track_template_columns.path];
 			}
 		}
@@ -630,7 +629,7 @@ AddRouteDialog::track_type_chosen ()
 
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
-		
+
 		break;
 	case MidiTrack:
 
@@ -651,7 +650,7 @@ AddRouteDialog::track_type_chosen ()
 
 		insert_label.set_sensitive (true);
 		insert_at_combo.set_sensitive (true);
-		
+
 		break;
 	case MixedTrack:
 		{
@@ -721,7 +720,7 @@ AddRouteDialog::track_type_chosen ()
 
 		insert_label.set_sensitive (false);
 		insert_at_combo.set_sensitive (false);
-		
+
 		break;
 	case MidiBus:
 
@@ -941,8 +940,8 @@ AddRouteDialog::refill_channel_setups ()
 			continue;
 		}
 		TreeModel::Row row;
-		if ( (*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
-			// somewhat-special, Ben says: "most-used template"
+		if ((*s)->name == "Create Audio Tracks Interactively" && Profile->get_mixbus ()) {
+			/* somewhat-special, Ben says: "most-used template" */
 			row = *(trk_template_model->prepend ());
 		} else {
 			row = *(trk_template_model->append ());

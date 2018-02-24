@@ -79,7 +79,7 @@ ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType typ
 
 	setup_list ();
 	show_all ();
-	
+
 	script_combo_changed();
 }
 
@@ -95,20 +95,20 @@ void
 ScriptSelector::setup_list ()
 {
 	_combocon.block();
-	
+
 	vector<string> script_names;
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
 		if ((*s)->name != "Shortcut") {
 			script_names.push_back ((*s)->name);
 		}
 	}
-	
+
 	_script_combo.clear();
 	_script_combo.set_row_separator_func (sigc::mem_fun (*this, &ScriptSelector::script_separator));
 
 	_script_combo.append_text ("Shortcut");
 	_script_combo.append_text ("separator");
-	
+
 	vector<string>::const_iterator i;
 	for (i = script_names.begin(); i != script_names.end(); ++i) {
 		_script_combo.append_text (*i);
@@ -132,7 +132,7 @@ ScriptSelector::script_combo_changed ()
 	}
 
 	if (_script) {
-		
+
 		if (_script->name == "Shortcut") {
 			_type.hide();
 			_type_label.hide();

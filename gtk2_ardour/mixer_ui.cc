@@ -1448,7 +1448,7 @@ Mixer_UI::redisplay_track_list ()
 
 	add_vca_button.show ();
 	vca_scroller_base.show();
-	
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
 
 		AxisView* s = (*i)[stripable_columns.strip];

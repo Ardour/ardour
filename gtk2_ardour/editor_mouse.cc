@@ -215,7 +215,7 @@ Editor::mouse_mode_object_range_toggled()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic (act);
 	assert (tact);
 
-	set_mouse_mode(m, true);  //call this so the button styles can get updated
+	set_mouse_mode (m, true); // call this so the button styles can get updated
 }
 
 bool
@@ -227,7 +227,7 @@ Editor::snap_mode_button_clicked (GdkEventButton* ev)
 	}
 
 	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
-	if ( rc_option_editor ) {
+	if (rc_option_editor) {
 		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
 		rc_option_editor->set_current_page (_("Editor/Snap"));
 	}
@@ -271,8 +271,8 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	}
 
 	if (ARDOUR::Profile->get_mixbus()) {
-		if ( m == MouseCut) m = MouseObject;
-		if ( m == MouseAudition) m = MouseRange;
+		if (m == MouseCut) m = MouseObject;
+		if (m == MouseAudition) m = MouseRange;
 	}
 
 	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
@@ -282,15 +282,15 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 	tact->set_active (false);
 	tact->set_active (true);
 
-	//NOTE:  this will result in a call to mouse_mode_toggled which does the heavy lifting
+	/* NOTE: this will result in a call to mouse_mode_toggled which does the heavy lifting */
 }
 
 void
 Editor::mouse_mode_toggled (MouseMode m)
 {
 	if (ARDOUR::Profile->get_mixbus()) {
-		if ( m == MouseCut)  m = MouseObject;
-		if ( m == MouseAudition)  m = MouseRange;
+		if (m == MouseCut)  m = MouseObject;
+		if (m == MouseAudition)  m = MouseRange;
 	}
 
 	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
@@ -932,7 +932,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case StreamItem:
-			//in the past, we created a new midi region here, but perhaps that is best left to the Draw mode
+			/* in the past, we created a new midi region here, but perhaps that is best left to the Draw mode */
 			break;
 
 		case AutomationTrackItem:
@@ -977,11 +977,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case StartCrossFadeItem:
 			case EndCrossFadeItem:
-				/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.  for not this is not fully implemented */
-//				if (!clicked_regionview->region()->locked()) {
-//					_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
-//					return true;
-//				}
+			/* we might allow user to grab inside the fade to trim a region with preserve_fade_anchor.
+			 * For not this is not fully implemented */
+#if 0
+			if (!clicked_regionview->region()->locked()) {
+				_drags->set (new TrimDrag (this, item, clicked_regionview, selection->regions.by_layer(), true), event);
+				return true;
+			}
+#endif
 				break;
 
 			case FeatureLineItem:
@@ -1127,7 +1130,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				pair<TimeAxisView*, int> tvp = trackview_by_y_position (y, false);
 				if (tvp.first) {
 					AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*> (tvp.first);
-					if ( atv) {
+					if (atv) {
 						/* smart "join" mode: drag automation */
 						_drags->set (new AutomationRangeDrag (this, atv, selection->time), event, _cursors->up_down);
 					}
@@ -1298,11 +1301,11 @@ Editor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemTyp
 
 	if ((item_type != FadeInHandleItem) &&
 	    (item_type != FadeOutHandleItem) &&
-	    !_drags->active () && 
-	    _session && 
-	    !_session->transport_rolling() && 
-	    (effective_mouse_mode() == MouseRange) && 
-	    UIConfiguration::instance().get_follow_edits() && 
+	    !_drags->active () &&
+	    _session &&
+	    !_session->transport_rolling() &&
+	    (effective_mouse_mode() == MouseRange) &&
+	    UIConfiguration::instance().get_follow_edits() &&
 	    !_session->config.get_external_sync()) {
 
 		MusicSample where (canvas_event_sample (event), 0);
@@ -1600,7 +1603,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case CdMarkerBarItem:
 			if (!_dragging_playhead) {
-				// if we get here then a dragged range wasn't done
+				/* if we get here then a dragged range wasn't done */
 				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
 				mouse_add_new_marker (where.sample, true);
 			}
@@ -1702,7 +1705,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				} else if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier|Keyboard::SecondaryModifier))) {
 					lower_region ();
 				} else {
-					// Button2 click is unused
+					/* Button2 click is unused */
 				}
 				return true;
 
@@ -2100,7 +2103,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 
 	update_join_object_range_location (event->motion.y);
 
-	//snapped_cursor stuff ( the snapped_cursor shows where an operation is going to occur )
+	/* snapped_cursor stuff (the snapped_cursor shows where an operation is going to occur) */
 	bool ignored;
 	MusicSample where (0, 0);
 	if (mouse_sample (where.sample, ignored)) {
@@ -2108,7 +2111,7 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 		set_snapped_cursor_position (where.sample);
 	}
 
-	//drags might also change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
+	/* drags might also change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor */
 	if (_drags->active ()) {
 	 	return _drags->motion_handler (event, from_autoscroll);
 	}
@@ -2421,7 +2424,7 @@ Editor::mouse_brush_insert_region (RegionView* rv, samplepos_t pos)
 	playlist->add_region (new_region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist));
 
-	// playlist is frozen, so we have to update manually XXX this is disgusting
+	/* playlist is frozen, so we have to update manually XXX this is disgusting */
 
 	//playlist->RegionAdded (new_region); /* EMIT SIGNAL */
 }
@@ -2558,17 +2561,16 @@ Editor::escape ()
 		_drags->abort ();
 	} else {
 		selection->clear ();
-		
-		//if session is playing a range, cancel that
+
+		/* if session is playing a range, cancel that */
 		if (_session->get_play_range()) {
 			_session->request_cancel_play_range();
 		}
 
-		if ( _session->solo_selection_active() ) {
+		if (_session->solo_selection_active()) {
 			StripableList sl;
-			_session->solo_selection( sl, false );
+			_session->solo_selection (sl, false);
 		}
-		
 	}
 
 	ARDOUR_UI::instance()->reset_focus (&contents());
@@ -2596,9 +2598,10 @@ Editor::update_join_object_range_location (double y)
 
 	if (entered_regionview) {
 
-		//ToDo:  there is currently a bug here(?)
-		//when we are inside a region fade handle, it acts as though we are in range mode because it is in the top half of the region
-		//can it be fixed here?
+		/* TODO: there is currently a bug here(?)
+		 * when we are inside a region fade handle, it acts as though we are in range mode because it is in the top half of the region
+		 * can it be fixed here?
+		 */
 
 		ArdourCanvas::Duple const item_space = entered_regionview->get_canvas_group()->canvas_to_item (ArdourCanvas::Duple (0, y));
 		double const c = item_space.y / entered_regionview->height();
