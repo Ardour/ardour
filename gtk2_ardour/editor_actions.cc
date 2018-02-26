@@ -579,7 +579,7 @@ Editor::register_actions ()
 
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-smpte"),         grid_type_strings[(int)GridTypeSmpte].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSmpte)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeMinSec)));
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-samples"),         grid_type_strings[(int)GridTypeSamples].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSamples)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),         grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeCDFrame)));
 
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
@@ -1095,8 +1095,8 @@ Editor::grid_type_action (GridType type)
 	case Editing::GridTypeSmpte:
 		action = "grid-type-smpte";
 		break;
-	case Editing::GridTypeSamples:
-		action = "grid-type-samples";
+	case Editing::GridTypeCDFrame:
+		action = "grid-type-cdframe";
 		break;
 	case Editing::GridTypeMinSec:
 		action = "grid-type-minsec";
@@ -1158,7 +1158,7 @@ Editor::next_grid_choice ()
 	case Editing::GridTypeBeatDiv28:
 	case Editing::GridTypeSmpte:
 	case Editing::GridTypeMinSec:
-	case Editing::GridTypeSamples:
+	case Editing::GridTypeCDFrame:
 		break;  //do nothing
 	}
 }
@@ -1203,7 +1203,7 @@ Editor::prev_grid_choice ()
 	case Editing::GridTypeBeatDiv28:
 	case Editing::GridTypeSmpte:
 	case Editing::GridTypeMinSec:
-	case Editing::GridTypeSamples:
+	case Editing::GridTypeCDFrame:
 		break;  //do nothing
 	}
 }

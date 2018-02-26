@@ -38,7 +38,7 @@ GRIDTYPE(GridTypeBeatDiv14)
 GRIDTYPE(GridTypeBeatDiv28)
 GRIDTYPE(GridTypeSmpte)
 GRIDTYPE(GridTypeMinSec)
-GRIDTYPE(GridTypeSamples)
+GRIDTYPE(GridTypeCDFrame)
 
 
 /* Changing this order will break the menu */

@@ -181,7 +181,7 @@ static const gchar *_grid_type_strings[] = {
 	N_("1/28 (32nd septuplet)"),
 	N_("Timecode"),
 	N_("MinSec"),
-	N_("Samples"),
+	N_("CD Frames"),
 	0
 };
 
@@ -2164,7 +2164,7 @@ Editor::grid_musical() const
 	case GridTypeNone:
 	case GridTypeSmpte:
 	case GridTypeMinSec:
-	case GridTypeSamples:
+	case GridTypeCDFrame:
 		return false;
 	}
 	return false;
@@ -2176,7 +2176,7 @@ Editor::grid_nonmusical() const
 	switch (_grid_type) {
 	case GridTypeSmpte:
 	case GridTypeMinSec:
-	case GridTypeSamples:
+	case GridTypeCDFrame:
 		return true;
 	case GridTypeBeatDiv32:
 	case GridTypeBeatDiv28:
@@ -2262,13 +2262,15 @@ Editor::set_grid_to (GridType gt)
 		ruler_timecode_action->set_active(false);
 		ruler_minsec_action->set_active(true);
 		ruler_samples_action->set_active(false);
-	} else if (_grid_type == GridTypeSamples) {
+	} else if (_grid_type == GridTypeCDFrame) {
 		ruler_tempo_action->set_active(false);
 		ruler_meter_action->set_active(false);
 
 		ruler_bbt_action->set_active(false);
 		ruler_timecode_action->set_active(false);
 		ruler_minsec_action->set_active(false);
+
+		ruler_cd_marker_action->set_active(true);
 		ruler_samples_action->set_active(true);
 	}
 
@@ -3194,7 +3196,7 @@ Editor::build_grid_type_menu ()
 	grid_type_selector.AddMenuElem(SeparatorElem());
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeSmpte], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSmpte)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeMinSec], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeMinSec)));
-	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeSamples], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeSamples)));
+	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeCDFrame], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeCDFrame)));
 
 	set_size_request_to_display_given_text (grid_type_selector, _("Long Grid"), COMBO_TRIANGLE_WIDTH, 2); // problem: some of the rarely-used grid names are very long.  Just do something arbitary, translators: rename this if needed
 }
@@ -3987,7 +3989,7 @@ Editor::get_grid_beat_divisions(samplepos_t position)
 	case GridTypeNone:       return 0;
 	case GridTypeSmpte:      return 0;
 	case GridTypeMinSec:     return 0;
-	case GridTypeSamples:    return 0;
+	case GridTypeCDFrame:    return 0;
 	default:                 return 0;
 	}
 	return 0;
@@ -4031,7 +4033,7 @@ Editor::get_grid_music_divisions (uint32_t event_state)
 	case GridTypeNone:       return 0;
 	case GridTypeSmpte:      return 0;
 	case GridTypeMinSec:     return 0;
-	case GridTypeSamples:    return 0;
+	case GridTypeCDFrame:    return 0;
 	}
 	return 0;
 }

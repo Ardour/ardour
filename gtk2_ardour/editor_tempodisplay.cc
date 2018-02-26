@@ -382,7 +382,7 @@ Editor::maybe_draw_grid_lines ()
 		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	} else if (_grid_type== GridTypeSmpte) {
 		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type == GridTypeSamples) {
+	} else if (_grid_type == GridTypeCDFrame) {
 		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	} else if (_grid_type == GridTypeMinSec) {
 		metric_get_minsec (grid_marks, _leftmost_sample, rightmost_sample, 12);

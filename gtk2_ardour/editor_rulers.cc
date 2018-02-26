@@ -1054,7 +1054,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	case GridTypeNone:
 	case GridTypeSmpte:
 	case GridTypeMinSec:
-	case GridTypeSamples:
+	case GridTypeCDFrame:
 		bbt_beat_subdivision = 4;
 		break;
 	}
