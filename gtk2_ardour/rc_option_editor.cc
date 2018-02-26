@@ -2515,6 +2515,14 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
+		     "snap-to-marks",
+		     _("Markers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_marks),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_marks)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
 		     "snap-to-region-sync",
 		     _("Region Sync Points"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_sync),
