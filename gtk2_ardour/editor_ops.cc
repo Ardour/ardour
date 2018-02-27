@@ -6373,7 +6373,7 @@ Editor::split_region ()
 	}
 
 	//if no range was selected, try to find some regions to split
-	if (current_mouse_mode() == MouseObject) {  //don't try this for Internal Edit, Stretch, Draw, etc.
+	if (current_mouse_mode() == MouseObject || current_mouse_mode() == MouseRange ) {  //don't try this for Internal Edit, Stretch, Draw, etc.
 
 		RegionSelection rs = get_regions_from_selection_and_edit_point ();
 		const samplepos_t pos = get_preferred_edit_position();
