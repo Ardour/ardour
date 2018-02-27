@@ -173,7 +173,7 @@ Editor::redo (uint32_t n)
 }
 
 void
-Editor::split_regions_at (MusicSample where, RegionSelection& regions, bool snap_sample)
+Editor::split_regions_at (MusicSample where, RegionSelection& regions)
 {
 	bool frozen = false;
 
@@ -189,25 +189,11 @@ Editor::split_regions_at (MusicSample where, RegionSelection& regions, bool snap
 
 	begin_reversible_command (_("split"));
 
-	// if splitting a single region, and snap-to is using
-	// region boundaries, don't pay attention to them
 
 	if (regions.size() == 1) {
-//		switch (_snap_type) {   //ToDo !!!
-//		case SnapToRegionStart:
-//		case SnapToRegionSync:
-//		case SnapToRegionEnd:
-//			break;
-//		default:
-//			if (snap_sample) {
-				snap_to (where);
-//			}
-//		}
+		/* TODO:  if splitting a single region, and snap-to is using
+		 region boundaries, mabye we shouldn't pay attention to them? */
 	} else {
-		if (snap_sample) {
-			snap_to (where);
-		}
-
 		frozen = true;
 		EditorFreeze(); /* Emit Signal */
 	}
@@ -6618,9 +6604,6 @@ Editor::set_punch_start_from_edit_point ()
 			start.sample = get_preferred_edit_position();
 		}
 
-		//snap the selection start/end
-		snap_to(start);
-
 		//if there's not already a sensible selection endpoint, go "forever"
 		if (start.sample > end) {
 			end = max_samplepos;
@@ -6651,9 +6634,6 @@ Editor::set_punch_end_from_edit_point ()
 			end.sample = get_preferred_edit_position();
 		}
 
-		//snap the selection start/end
-		snap_to (end);
-
 		set_punch_range (start, end.sample, _("set punch end from EP"));
 
 	}
@@ -6678,9 +6658,6 @@ Editor::set_loop_start_from_edit_point ()
 		} else {
 			start.sample = get_preferred_edit_position();
 		}
-
-		//snap the selection start/end
-		snap_to (start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
 		if (start.sample > end) {
@@ -6711,9 +6688,6 @@ Editor::set_loop_end_from_edit_point ()
 		} else {
 			end.sample = get_preferred_edit_position();
 		}
-
-		//snap the selection start/end
-		snap_to(end);
 
 		set_loop_range (start, end.sample, _("set loop end from EP"));
 	}

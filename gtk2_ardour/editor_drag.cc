@@ -6994,7 +6994,7 @@ RegionCutDrag::finished (GdkEvent* event, bool)
 		return;
 	}
 
-	_editor->split_regions_at (pos, rs, false);
+	_editor->split_regions_at (pos, rs);
 }
 
 void

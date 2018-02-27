@@ -542,7 +542,7 @@ public:
 
 	/* editing operations that need to be public */
 	void mouse_add_new_marker (samplepos_t where, bool is_cd=false);
-	void split_regions_at (ARDOUR::MusicSample, RegionSelection&, bool snap = true);
+	void split_regions_at (ARDOUR::MusicSample, RegionSelection&);
 	void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false);
 	RegionSelection get_regions_from_selection_and_mouse (samplepos_t);
 

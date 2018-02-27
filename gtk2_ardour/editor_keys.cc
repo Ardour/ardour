@@ -51,9 +51,6 @@ Editor::keyboard_selection_finish (bool /*add*/, Editing::EditIgnoreOption ign)
 			end = get_preferred_edit_position(ign);
 		}
 
-		//snap the selection start/end
-		snap_to (start);
-
 		//if no tracks are selected and we're working from the keyboard, enable all tracks (_something_ has to be selected for any range selection)
 		if ( (_edit_point == EditAtPlayhead) && selection->tracks.empty() )
 			select_all_tracks();
@@ -79,9 +76,6 @@ Editor::keyboard_selection_begin (Editing::EditIgnoreOption ign)
 		} else {
 			start.sample = get_preferred_edit_position(ign);
 		}
-
-		//snap the selection start/end
-		snap_to(start);
 
 		//if there's not already a sensible selection endpoint, go "forever"
 		if (start.sample > end.sample) {
