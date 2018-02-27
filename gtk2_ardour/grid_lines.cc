@@ -58,13 +58,21 @@ GridLines::draw (std::vector<Ruler::Mark>     marks)
 {
 	lines.clear();
 	
-	const uint32_t c = UIConfiguration::instance().color_mod("measure line beat", "measure line beat");
+	const uint32_t major_color = UIConfiguration::instance().color_mod("grid line major", "grid line");
+	const uint32_t minor_color = UIConfiguration::instance().color_mod("grid line minor", "grid line");
+	const uint32_t micro_color = UIConfiguration::instance().color_mod("grid line micro", "grid line");
 
 	for (vector<Ruler::Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
 
 		samplepos_t s = m->position;
-		lines.add (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, c);
 
+		if ((*m).style == ArdourCanvas::Ruler::Mark::Major) {
+			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, major_color);
+		} else if ((*m).style == ArdourCanvas::Ruler::Mark::Minor) {
+			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, minor_color);
+		} else {
+			lines.add (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, micro_color);
+		}
 	}
 }
 
