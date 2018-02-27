@@ -577,9 +577,9 @@ Editor::register_actions ()
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv3)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv2)));
 
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-smpte"),         grid_type_strings[(int)GridTypeSmpte].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeSmpte)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-timecode"),       grid_type_strings[(int)GridTypeTimecode].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeTimecode)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeMinSec)));
-	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),         grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeCDFrame)));
+	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),        grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeCDFrame)));
 
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
 	myactions.register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
@@ -1092,8 +1092,8 @@ Editor::grid_type_action (GridType type)
 	case Editing::GridTypeNone:
 		action = "grid-type-none";
 		break;
-	case Editing::GridTypeSmpte:
-		action = "grid-type-smpte";
+	case Editing::GridTypeTimecode:
+		action = "grid-type-timecode";
 		break;
 	case Editing::GridTypeCDFrame:
 		action = "grid-type-cdframe";
@@ -1156,7 +1156,7 @@ Editor::next_grid_choice ()
 	case Editing::GridTypeBeatDiv7:
 	case Editing::GridTypeBeatDiv14:
 	case Editing::GridTypeBeatDiv28:
-	case Editing::GridTypeSmpte:
+	case Editing::GridTypeTimecode:
 	case Editing::GridTypeMinSec:
 	case Editing::GridTypeCDFrame:
 		break;  //do nothing
@@ -1201,7 +1201,7 @@ Editor::prev_grid_choice ()
 	case Editing::GridTypeBeatDiv7:
 	case Editing::GridTypeBeatDiv14:
 	case Editing::GridTypeBeatDiv28:
-	case Editing::GridTypeSmpte:
+	case Editing::GridTypeTimecode:
 	case Editing::GridTypeMinSec:
 	case Editing::GridTypeCDFrame:
 		break;  //do nothing

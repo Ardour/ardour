@@ -36,7 +36,7 @@ GRIDTYPE(GridTypeBeatDiv20)
 GRIDTYPE(GridTypeBeatDiv7)  //Septuplet eighths
 GRIDTYPE(GridTypeBeatDiv14)
 GRIDTYPE(GridTypeBeatDiv28)
-GRIDTYPE(GridTypeSmpte)
+GRIDTYPE(GridTypeTimecode)
 GRIDTYPE(GridTypeMinSec)
 GRIDTYPE(GridTypeCDFrame)
 

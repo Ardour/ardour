@@ -380,7 +380,7 @@ Editor::maybe_draw_grid_lines ()
 
 	if ( grid_musical() ) {
 		 metric_get_bbt (grid_marks, _leftmost_sample, rightmost_sample, 12);
-	} else if (_grid_type== GridTypeSmpte) {
+	} else if (_grid_type== GridTypeTimecode) {
 		 metric_get_timecode (grid_marks, _leftmost_sample, rightmost_sample, 12);
 	} else if (_grid_type == GridTypeCDFrame) {
 		metric_get_samples (grid_marks, _leftmost_sample, rightmost_sample, 12);
