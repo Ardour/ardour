@@ -1158,6 +1158,11 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 void
 Editor::track_selection_changed ()
 {
+cout << "resetting paste count" << endl;
+	/* reset paste count, so the plaste location doesn't get incremented
+	 * if we want to paste in the same place, but different track. */ 
+	paste_count = 0;
+	
 	if ( _session->solo_selection_active() )
 		play_solo_selection(false);
 }

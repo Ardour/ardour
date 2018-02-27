@@ -4774,10 +4774,7 @@ Editor::paste_internal (samplepos_t position, float times, const int32_t sub_num
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("preferred edit position is %1\n", position));
 	}
 
-	if (position == last_paste_pos) {
-		/* repeated paste in the same position */
-		++paste_count;
-	} else {
+	if (position != last_paste_pos) {
 		/* paste in new location, reset repeated paste state */
 		paste_count = 0;
 		last_paste_pos = position;
@@ -4865,6 +4862,8 @@ Editor::paste_internal (samplepos_t position, float times, const int32_t sub_num
 			(*i)->paste (position, *cut_buffer, ctx, sub_num);
 		}
 	}
+
+	++paste_count;
 
 	commit_reversible_command ();
 }
