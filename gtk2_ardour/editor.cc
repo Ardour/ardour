@@ -2268,10 +2268,10 @@ Editor::set_grid_to (GridType gt)
 
 		ruler_bbt_action->set_active(false);
 		ruler_timecode_action->set_active(false);
-		ruler_minsec_action->set_active(false);
+		ruler_minsec_action->set_active(true);
 
 		ruler_cd_marker_action->set_active(true);
-		ruler_samples_action->set_active(true);
+		ruler_samples_action->set_active(false);
 	}
 
 	instant_save ();
