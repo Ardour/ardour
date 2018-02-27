@@ -571,7 +571,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/record_safe"), "i", sel_recsafe);
 		REGISTER_CALLBACK (serv, X_("/select/name"), "s", sel_rename);
 		REGISTER_CALLBACK (serv, X_("/select/comment"), "s", sel_comment);
-		REGISTER_CALLBACK (serv, X_("/select/group"), "s", sel_group);
 		REGISTER_CALLBACK (serv, X_("/select/mute"), "i", sel_mute);
 		REGISTER_CALLBACK (serv, X_("/select/solo"), "i", sel_solo);
 		REGISTER_CALLBACK (serv, X_("/select/solo_iso"), "i", sel_solo_iso);
@@ -815,6 +814,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		set = &(link_sets[ls]);
 		sur->custom_mode = set->custom_mode;
 		sur->custom_strips = set->custom_strips;
+		sur->temp_strips = set->temp_strips;
 	}
 
 	if (strstr (path, X_("/automation"))) {
@@ -979,8 +979,11 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (!strncmp (path, X_("/strip/select/"), 14) && strlen (path) > 14) {
 		int ssid = atoi (&path[14]);
 		ret = strip_gui_select (ssid, argv[0]->i, msg);
-	} else
-	if (strstr (path, X_("/select")) && (argc != 1)) {
+	}
+	else if (strstr (path, X_("/select/group"))) {
+		ret = parse_sel_group (path, types, argv, argc, msg);
+	}
+	else if (strstr (path, X_("/select")) && (argc != 1)) {
 		// All of the select commands below require 1 parameter
 		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
 	}
@@ -2209,11 +2212,13 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 		}
 		sur->custom_mode = set->custom_mode;
 		sur->custom_strips = set->custom_strips;
+		sur->temp_strips = set->temp_strips;
 	}
-	if (sur->custom_strips.size () == 0) {
-		sur->custom_mode = 0;
+	if (sur->custom_mode < 7) {
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
+	} else {
+		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 	}
-	sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
 	sur->nstrips = sur->strips.size();
 	if (ls) {
 		set->strips = sur->strips;
@@ -2523,6 +2528,79 @@ OSC::use_group (float value, lo_message msg)
 	}
 	return 0;
 }
+
+// this gets called for anything that starts with /select/group
+int
+OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	int ret = 1; /* unhandled */
+	if (s) {
+		if (!strncmp (path, X_("/select/group"), 13)) {
+			if (argc == 1) {
+				if (types[0] == 's') {
+					return strip_select_group (s, &argv[0]->s);
+				}
+			}
+		}
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		if (!rt) {
+			PBD::warning << "OSC: VCAs can not be part of a group." << endmsg;
+			return ret;
+		}
+		RouteGroup *rg = rt->route_group();
+		if (!rg) {
+			PBD::warning << "OSC: This strip is not part of a group." << endmsg;
+			return ret;
+		}
+		float value = 0;
+		if (argc == 1) {
+			if (types[0] == 'f') {
+				value = (uint32_t) argv[0]->f;
+			} else if (types[0] == 'i') {
+				value = (uint32_t) argv[0]->i;
+			}
+		}
+		if (!strncmp (path, X_("/select/group/enable"), 20)) {
+			if (argc == 1) {
+				rg->set_active (value, this);
+				ret = 0;
+			}
+		}
+		else if (!strncmp (path, X_("/select/group/only"), 18)) {
+			if ((argc == 1 && value) || !argc) {
+				// fill sur->strips with routes from this group and hit bank1
+				sur->temp_strips.clear();
+				boost::shared_ptr<RouteList> rl = rg->route_list();
+				for (RouteList::iterator it = rl->begin(); it != rl->end(); ++it) {
+					boost::shared_ptr<Route> r = *it;
+					boost::shared_ptr<Stripable> s = boost::dynamic_pointer_cast<Stripable> (r);
+					sur->temp_strips.push_back(s);
+				}
+				sur->custom_mode = 7;
+				set_bank (1, msg);
+				ret = 0;
+			} else {
+				// key off is ignored
+				ret = 0;
+			}
+		}
+		else if (!strncmp (path, X_("/select/group/sharing"), 21)) {
+			if (argc == 9) {
+				// set 9 parameters
+			} else {
+				PBD::warning << "OSC: Sharing can only be set if all 9 parameters are sent." << endmsg;
+			}
+		}
+	}
+	return ret;
+ }
 
 int
 OSC::name_session (char *n, lo_message msg)

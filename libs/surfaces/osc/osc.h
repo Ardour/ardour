@@ -127,7 +127,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
 		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
 		Sorted custom_strips;		// a sorted list of user selected strips
-		uint32_t custom_mode;			// use custom strip list
+		uint32_t custom_mode;		// use custom strip list
+		Sorted temp_strips;			// temp strip list for grouponly, vcaonly, auxonly
 		Sorted strips;				// list of stripables for this surface
 		// strips
 		uint32_t bank;				// current bank
@@ -191,6 +192,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t not_ready;				// number of 1st device, 0 = ready
 		Sorted custom_strips;			// a sorted list of user selected strips
 		uint32_t custom_mode;			// use custom strip list
+		Sorted temp_strips;			// temp strip list for grouponly, vcaonly, auxonly
 		std::bitset<32> strip_types;	// strip_types for this linkset
 		Sorted strips;					// list of valid strips in order for this set
 	};
@@ -762,6 +764,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_eq_freq (int id, float val, lo_message msg);
 	int sel_eq_q (int id, float val, lo_message msg);
 	int sel_eq_shape (int id, float val, lo_message msg);
+	int parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 
