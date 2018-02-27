@@ -4674,8 +4674,9 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 
 	switch (ep) {
 	case EditAtPlayhead:
-		if (_dragging_playhead && _control_scroll_target) {
-			where = *_control_scroll_target;
+		if (_dragging_playhead) {
+			/* NOTE: since the user is dragging with the mouse, this operation will implicitly be Snapped */
+			where = playhead_cursor->current_sample();
 		} else {
 			where = _session->audible_sample();
 		}
@@ -5792,9 +5793,7 @@ Editor::super_rapid_screen_update ()
 	if (!UIConfiguration::instance().get_show_snapped_cursor()) {
 		snapped_cursor->hide ();
 	} else if (_edit_point == EditAtPlayhead && !_dragging_playhead) {
-		snap_to (where);  // can't use snap_to_with_modifier?
-		snapped_cursor->set_position (where.sample);
-		snapped_cursor->show ();
+		/* EditAtPlayhead does not snap */
 	} else if (_edit_point == EditAtSelectedMarker) {
 		/* NOTE: I don't think EditAtSelectedMarker should snap. They are what they are.
 		 * however, the current editing code -does- snap so I'll draw it that way for now.

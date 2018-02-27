@@ -6348,7 +6348,10 @@ Editor::set_playhead_cursor ()
 void
 Editor::split_region ()
 {
-	if (_drags->active ()) {
+	if (_dragging_playhead) {
+		/*continue*/
+	} else if (_drags->active ()) {
+		/*any other kind of drag, bail out so we avoid Undo snafu*/
 		return;
 	}
 
