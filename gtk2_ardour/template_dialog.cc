@@ -313,7 +313,7 @@ TemplateManager::handle_dirty_description ()
 	if (_desc_dirty && _current_selection) {
 		ArdourDialog dlg (_("Description not saved"), true);
 		const string name = _current_selection->get_value (_template_columns.name);
-		Label msg (string_compose (_("The discription of template \"%1\" has been modfied but has not been saved yet.\n"
+		Label msg (string_compose (_("The description of template \"%1\" has been modified but has not been saved yet.\n"
 					     "Do you want to save it?"), name));
 		dlg.get_vbox()->pack_start (msg);
 		msg.show ();

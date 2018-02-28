@@ -2671,7 +2671,7 @@ ARDOUR_UI::save_session_as ()
 					MessageDialog msg (_main_window,
 							string_compose (_("\
 %1 was unable to save your session.\n\n\
-If you still wish to proceeed, please use the\n\n\
+If you still wish to proceed, please use the\n\n\
 \"Don't save now\" option."), PROGRAM_NAME));
 					pop_back_splash(msg);
 					msg.run ();
@@ -2867,7 +2867,7 @@ ARDOUR_UI::snapshot_session (bool switch_to_it)
 					MessageDialog msg (_main_window,
 							string_compose (_("\
 %1 was unable to save your session.\n\n\
-If you still wish to proceeed, please use the\n\n\
+If you still wish to proceed, please use the\n\n\
 \"Don't save now\" option."), PROGRAM_NAME));
 					pop_back_splash(msg);
 					msg.run ();

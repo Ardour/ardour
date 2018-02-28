@@ -667,9 +667,9 @@ GenericPluginUI::build_midi_table ()
 	Frame* sample = manage (new Frame);
 	sample->set_name ("BaseFrame");
 	if (dynamic_cast<MidiTrack*> (insert->owner())) {
-		sample->set_label (_("MIDI Progams (sent to track)"));
+		sample->set_label (_("MIDI Programs (sent to track)"));
 	} else {
-		sample->set_label (_("MIDI Progams (volatile)"));
+		sample->set_label (_("MIDI Programs (volatile)"));
 	}
 	sample->add (*pgm_table);
 	hpacker.pack_start (*sample, false, false);
