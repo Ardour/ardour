@@ -203,7 +203,7 @@ SampleFormatConverter<TOut>::check_sample_and_channel_count (samplecnt_t samples
 
 	if (throw_level (ThrowProcess) && samples  > data_out_size) {
 		throw Exception (*this, boost::str (boost::format
-			("Too many samples given to process(), %1% instad of %2%")
+			("Too many samples given to process(), %1% instead of %2%")
 			% samples % data_out_size));
 	}
 }
