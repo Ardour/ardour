@@ -239,7 +239,7 @@ static void usage (int status) {
   -d, --debug                print pre-processed XML for each route\n\
   -l, --log-messages         display libardour log messages\n\
   -s, --snapshot <name>      create a new snapshot in dst\n\
-  -v, --verbose              show performed copy opeations\n\
+  -v, --verbose              show performed copy operations\n\
   -V, --version              print version information and exit\n\
 \n");
 
