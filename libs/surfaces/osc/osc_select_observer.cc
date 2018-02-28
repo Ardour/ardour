@@ -32,6 +32,7 @@
 #include "ardour/solo_safe_control.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
+#include "ardour/route_group_member.h"
 #include "ardour/send.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
@@ -50,7 +51,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su)
+OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* su)
 	: _osc (o)
 	,sur (su)
 	,nsends (0)
@@ -60,6 +61,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su
 	,eq_bands (0)
 	,_expand (2048)
 {
+	session = &s;
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
 	feedback = sur->feedback;
@@ -141,6 +143,9 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 
 		rt->comment_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::comment_changed, this), OSC::instance());
 		comment_changed ();
+
+		session->RouteGroupPropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_sharing, this, _1), OSC::instance());
+		group_sharing (rt->route_group ());
 	}
 
 	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::pi_changed, this, _1), OSC::instance());
@@ -665,6 +670,34 @@ OSCSelectObserver::group_name ()
 }
 
 void
+OSCSelectObserver::group_sharing (RouteGroup *rgc)
+{
+	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	if (rt) {
+		RouteGroup *rg = rt->route_group();
+		if (rg) {
+			if (rg != rgc) {
+				return;
+			}
+			lo_message reply = lo_message_new ();
+			lo_message_add_int32 (reply, rg->is_gain ());
+			lo_message_add_int32 (reply, rg->is_relative ());
+			lo_message_add_int32 (reply, rg->is_mute ());
+			lo_message_add_int32 (reply, rg->is_solo ());
+			lo_message_add_int32 (reply, rg->is_recenable ());
+			lo_message_add_int32 (reply, rg->is_select ());
+			lo_message_add_int32 (reply, rg->is_route_active ());
+			lo_message_add_int32 (reply, rg->is_color ());
+			lo_message_add_int32 (reply, rg->is_monitoring ());
+			lo_send_message (addr, "/select/group/sharing", reply);
+			lo_message_free (reply);
+		}
+	}
+
+
+}
+
+void
 OSCSelectObserver::comment_changed ()
 {
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
@@ -676,6 +709,9 @@ OSCSelectObserver::comment_changed ()
 void
 OSCSelectObserver::pi_changed (PBD::PropertyChange const& what_changed)
 {
+	if (!what_changed.contains (ARDOUR::Properties::hidden)) {
+		return;
+	}
 	_osc.float_message (X_("/select/hide"), _strip->is_hidden (), addr);
 }
 

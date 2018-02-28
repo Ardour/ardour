@@ -37,7 +37,7 @@ class OSCSelectObserver
 {
 
   public:
-	OSCSelectObserver (ArdourSurface::OSC& o, ArdourSurface::OSC::OSCSurface* sur);
+	OSCSelectObserver (ArdourSurface::OSC& o, ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCSelectObserver ();
 
 	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
@@ -94,9 +94,11 @@ class OSCSelectObserver
 	int eq_bands;
 	bool _tick_busy;
 	uint32_t _expand;
+	ARDOUR::Session* session;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
 	void group_name ();
+	void group_sharing (ARDOUR::RouteGroup *rg_c);
 	void comment_changed ();
 	void pi_changed (PBD::PropertyChange const&);
 	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);

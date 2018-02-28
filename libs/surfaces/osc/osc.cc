@@ -2593,15 +2593,34 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 		}
 		else if (!strncmp (path, X_("/select/group/sharing"), 21)) {
 			if (argc == 9) {
-				rg->set_gain ((bool) argv[0]->i);
-				rg->set_relative ((bool) argv[1]->i, this);
-				rg->set_mute ((bool) argv[2]->i);
-				rg->set_solo ((bool) argv[3]->i);
-				rg->set_recenable ((bool) argv[4]->i);
-				rg->set_select ((bool) argv[5]->i);
-				rg->set_route_active ((bool) argv[6]->i);
-				rg->set_color ((bool) argv[7]->i);
-				rg->set_monitoring ((bool) argv[8]->i);
+				if (rg->is_gain() != (bool) argv[0]->i) {
+					rg->set_gain ((bool) argv[0]->i);
+				}
+				if (rg->is_relative() != (bool) argv[1]->i) {
+					rg->set_relative ((bool) argv[1]->i, this);
+				}
+				if (rg->is_mute() != (bool) argv[2]->i) {
+					rg->set_mute ((bool) argv[2]->i);
+				}
+				if (rg->is_solo() != (bool) argv[3]->i) {
+					rg->set_solo ((bool) argv[3]->i);
+				}
+				if (rg->is_recenable() != (bool) argv[4]->i) {
+					rg->set_recenable ((bool) argv[4]->i);
+				}
+				if (rg->is_select() != (bool) argv[5]->i) {
+					rg->set_select ((bool) argv[5]->i);
+				}
+				if (rg->is_route_active() != (bool) argv[6]->i) {
+					rg->set_route_active ((bool) argv[6]->i);
+				}
+				if (rg->is_color() != (bool) argv[7]->i) {
+					rg->set_color ((bool) argv[7]->i);
+				}
+				if (rg->is_monitoring() != (bool) argv[8]->i) {
+					rg->set_monitoring ((bool) argv[8]->i);
+				}
+				ret = 0;
 			} else {
 				PBD::warning << "OSC: Sharing can only be set if all 9 parameters are sent." << endmsg;
 			}
@@ -4188,7 +4207,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		if (so != 0) {
 			so->refresh_strip (s, nsends, sur->gainmode, true);
 		} else {
-			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, sur);
+			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, *session, sur);
 			sur->sel_obs = sel_fb;
 		}
 		sur->sel_obs->set_expand (sur->expand_enable);
