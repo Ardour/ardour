@@ -1544,8 +1544,8 @@ PluginManager::save_tags ()
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
 	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
-		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromFactoryFile ) {
-			/* user file should contain only plugins that are (a) user-tagged or (b) previously unknown */
+		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile ) {
+			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
 			continue;
 		}
 		XMLNode* node = new XMLNode (X_("Plugin"));
