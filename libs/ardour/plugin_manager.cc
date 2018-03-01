@@ -509,7 +509,7 @@ PluginManager::lua_refresh ()
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
 		LuaPluginInfoPtr lpi (new LuaPluginInfo(*s));
 		_lua_plugin_info->push_back (lpi);
-		set_tags (lpi->type, lpi->unique_id, lpi->category, true);
+		set_tags (lpi->type, lpi->unique_id, lpi->category, lpi->name, FromPlug);
 	}
 }
 
@@ -733,6 +733,7 @@ PluginManager::ladspa_discover (string path)
 
 		if(!found){
 		    _ladspa_plugin_info->push_back (info);
+			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 		}
 
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
@@ -819,7 +820,7 @@ PluginManager::lv2_refresh ()
 	_lv2_plugin_info = LV2PluginInfo::discover();
 
 	for (PluginInfoList::iterator i = _lv2_plugin_info->begin(); i != _lv2_plugin_info->end(); ++i) {
-		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, true);
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
 	}
 }
 #endif
@@ -843,7 +844,7 @@ PluginManager::au_refresh (bool cache_only)
 	Config->save_state();
 
 	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {
-		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, true);
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
 	}
 }
 
@@ -1025,7 +1026,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->type = ARDOUR::Windows_VST;
 
 		/* if we don't have any tags for this plugin, make some up. */
-		set_tags (info->type, info->unique_id, info->category, true);
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 
 		// TODO: check dup-IDs (lxvst AND windows vst)
 		bool duplicate = false;
@@ -1165,7 +1166,7 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 		info->type = ARDOUR::MacVST;
 
 		/* if we don't have any tags for this plugin, make some up. */
-		set_tags (info->type, info->unique_id, info->category, true);
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 
 		bool duplicate = false;
 		if (!_mac_vst_plugin_info->empty()) {
@@ -1286,7 +1287,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
 
-		set_tags (info->type, info->unique_id, info->category, true);
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 
 		/* Make sure we don't find the same plugin in more than one place along
 		 * the LXVST_PATH We can't use a simple 'find' because the path is included
@@ -1502,7 +1503,7 @@ PluginManager::get_tags (const PluginInfoPtr& pi) const
 {
 	vector<std::string> tags;
 
-	PluginTag ps (to_generic_vst(pi->type), pi->unique_id, "", false);
+	PluginTag ps (to_generic_vst(pi->type), pi->unique_id, "", "", FromPlug);
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i != ptags.end ()) {
 		PBD::tokenize (i->tags, string(" "), std::back_inserter (tags), true);
@@ -1543,14 +1544,16 @@ PluginManager::save_tags ()
 	XMLNode* root = new XMLNode (X_("PluginTags"));
 
 	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
-		if (!(*i).user_set) {
+		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromFactoryFile ) {
+			/* user file should contain only plugins that are (a) user-tagged or (b) previously unknown */
 			continue;
 		}
 		XMLNode* node = new XMLNode (X_("Plugin"));
 		node->set_property (X_("type"), to_generic_vst ((*i).type));
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("tags"), (*i).tags);
-		node->set_property (X_("user-set"), (*i).user_set);
+		node->set_property (X_("name"), (*i).name);
+		node->set_property (X_("user-set"), "1");
 		root->add_child_nocopy (*node);
 	}
 
@@ -1584,42 +1587,44 @@ PluginManager::load_tags ()
 			PluginType type;
 			string id;
 			string tags;
+			string name;
 			bool user_set;
 			if (!(*i)->get_property (X_("type"), type) ||
 					!(*i)->get_property (X_("id"), id) ||
-					!(*i)->get_property (X_("tags"), tags)) {
+					!(*i)->get_property (X_("tags"), tags) ||
+					!(*i)->get_property (X_("name"), name)) {
 			}
 			if (!(*i)->get_property (X_("user-set"), user_set)) {
 				user_set = false;
 			}
 			strip_whitespace_edges (tags);
-			set_tags (type, id, tags, !user_set);
+			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile );
 		}
 	}
 }
 
 void
-PluginManager::set_tags (PluginType t, string id, string tag, bool factory, bool force)
+PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype )
 {
 	string sanitized = sanitize_tag (tag);
 
-	PluginTag ps (to_generic_vst (t), id, sanitized, !factory);
+	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype );
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else if (!factory || force || !(*i).user_set) {
+	} else if ( (uint32_t) ttype >  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
-	if (!factory || force) {
+	if ( ttype == FromGui ) {
 		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
 	}
 }
 
 void
-PluginManager::reset_tags (PluginInfoPtr const& pi)
+PluginManager::reset_tags (PluginInfoPtr const& pi, TagType tt)
 {
-	set_tags (pi->type, pi->unique_id, pi->category, true, true);
+	set_tags (pi->type, pi->unique_id, pi->category, pi->name, tt);
 }
 
 std::string

@@ -839,7 +839,7 @@ PluginSelector::tag_reset_button_clicked ()
 	if (plugin_display.get_selection()->count_selected_rows() != 0) {
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 		ARDOUR::PluginInfoPtr pi = row[plugin_columns.plugin];
-		manager.reset_tags (pi);
+		manager.reset_tags (pi, PluginManager::FromGui);
 		display_selection_changed ();
 		_need_tag_save = true;
 		_need_menu_rebuild = true;
@@ -862,7 +862,7 @@ PluginSelector::tag_entry_changed ()
 		TreeModel::Row row = *(plugin_display.get_selection()->get_selected());
 
 		ARDOUR::PluginInfoPtr pi = row[plugin_columns.plugin];
-		manager.set_tags (pi->type, pi->unique_id, tag_entry->get_text(), false);
+		manager.set_tags (pi->type, pi->unique_id, tag_entry->get_text(), pi->name, PluginManager::FromGui);
 
 		_need_tag_save = true;
 		_need_menu_rebuild = true;

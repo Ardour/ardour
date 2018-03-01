@@ -85,8 +85,14 @@ public:
 	void load_tags ();
 	void save_tags ();
 
-	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, bool factory, bool force = false);
-	void reset_tags (PluginInfoPtr const&);
+	enum TagType {
+		FromPlug,           //tag info is being set from plugin metadata
+		FromFactoryFile,    // ... from the factory metadata file
+		FromUserFile,       // ... from the user's config data
+		FromGui             // ... from the UI, in realtime: will emit a signal so ui can show "sanitized" string as it is generated
+	};
+	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, std::string name, TagType tagtype);
+	void reset_tags (PluginInfoPtr const&, TagType);
 	std::string get_tags_as_string (PluginInfoPtr const&) const;
 	std::vector<std::string> get_tags (PluginInfoPtr const&) const;
 
@@ -112,10 +118,11 @@ private:
 	    ARDOUR::PluginType type;
 	    std::string unique_id;
 	    std::string tags;
-			bool user_set;
+	    std::string name;
+		TagType tagtype;
 
-	    PluginTag (ARDOUR::PluginType t, std::string id, std::string s, bool user_set)
-	    : type (t), unique_id (id), tags (s), user_set (user_set) {}
+	    PluginTag (ARDOUR::PluginType t, std::string id, std::string tag, std::string n, TagType tt)
+	    : type (t), unique_id (id), tags (tag), name(n), tagtype (tt) {}
 
 	    bool operator== (PluginTag const& other) const {
 		    return other.type == type && other.unique_id == unique_id;
