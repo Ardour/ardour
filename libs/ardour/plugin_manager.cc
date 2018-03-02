@@ -1613,7 +1613,7 @@ PluginManager::set_tags (PluginType t, string id, string tag, std::string name, 
 	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
 	if (i == ptags.end()) {
 		ptags.insert (ps);
-	} else if ( (uint32_t) ttype >  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
+	} else if ( (uint32_t) ttype >=  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
 		ptags.erase (ps);
 		ptags.insert (ps);
 	}
