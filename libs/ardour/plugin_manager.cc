@@ -1570,7 +1570,8 @@ PluginManager::load_tags ()
 	vector<std::string> tmp;
 	find_files_matching_pattern (tmp, plugin_metadata_search_path (), "plugin_tags");
 
-	for (vector<std::string>::const_reverse_iterator p = tmp.rbegin (); p != tmp.rend(); ++p) {
+	for (vector<std::string>::const_reverse_iterator p = tmp.rbegin ();
+			p != (vector<std::string>::const_reverse_iterator)tmp.rend(); ++p) {
 		std::string path = *p;
 		info << string_compose (_("Loading plugin meta data file %1"), path) << endmsg;
 		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
