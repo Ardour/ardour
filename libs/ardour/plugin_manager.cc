@@ -1553,7 +1553,9 @@ PluginManager::save_tags ()
 		node->set_property (X_("id"), (*i).unique_id);
 		node->set_property (X_("tags"), (*i).tags);
 		node->set_property (X_("name"), (*i).name);
-		node->set_property (X_("user-set"), "1");
+		if ( (*i).tagtype >= FromUserFile ) {
+			node->set_property (X_("user-set"), "1");
+		}
 		root->add_child_nocopy (*node);
 	}
 
