@@ -524,7 +524,6 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'automation_list_property_test', 'test_automation_list_property', ['test/automation_list_property_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'interpolation', 'test_interpolation', ['test/interpolation_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
@@ -546,7 +545,6 @@ def build(bld):
             test/bbt_test.cc
             test/dsp_load_calculator_test.cc
             test/tempo_test.cc
-            test/interpolation_test.cc
             test/lua_script_test.cc
             test/midi_clock_slave_test.cc
             test/resampled_source_test.cc
