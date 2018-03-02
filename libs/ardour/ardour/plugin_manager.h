@@ -92,7 +92,7 @@ public:
 		FromGui             // ... from the UI, in realtime: will emit a signal so ui can show "sanitized" string as it is generated
 	};
 	void set_tags (ARDOUR::PluginType type, std::string unique_id, std::string tags, std::string name, TagType tagtype);
-	void reset_tags (PluginInfoPtr const&, TagType);
+	void reset_tags (PluginInfoPtr const&);
 	std::string get_tags_as_string (PluginInfoPtr const&) const;
 	std::vector<std::string> get_tags (PluginInfoPtr const&) const;
 

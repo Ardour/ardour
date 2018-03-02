@@ -1622,9 +1622,15 @@ PluginManager::set_tags (PluginType t, string id, string tag, std::string name, 
 }
 
 void
-PluginManager::reset_tags (PluginInfoPtr const& pi, TagType tt)
+PluginManager::reset_tags (PluginInfoPtr const& pi)
 {
-	set_tags (pi->type, pi->unique_id, pi->category, pi->name, tt);
+	PluginTag ps (pi->type, pi->unique_id, pi->category, pi->name, FromPlug);
+
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i != ptags.end()) {
+		ptags.erase (ps);
+		ptags.insert (ps);
+	}
 }
 
 std::string
