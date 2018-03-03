@@ -54,6 +54,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	, _momentary (m)
 {
 	_learned = false; /* from URI */
+	_ctltype = Ctl_Momentary;
 	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
@@ -74,6 +75,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	set_controllable (&c);
 
 	_learned = true; /* from controllable */
+	_ctltype = Ctl_Momentary;
 	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
@@ -392,10 +394,18 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			 * (0x40). It is hard to imagine why anyone would make
 			 * a MIDI controller button that sent 0x0 when pressed.
 			 */
-
 			if (msg->value >= 0x40) {
 				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
 				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			} else {
+				switch (get_ctltype()) {
+					case Ctl_Momentary:
+						break;
+					case Ctl_Toggle:
+						controllable->set_value (0.0, Controllable::NoGroup);
+						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
+						break;
+				}
 			}
 		}
 

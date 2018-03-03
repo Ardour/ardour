@@ -59,6 +59,11 @@ class MIDIControllable : public PBD::Stateful
 	uint32_t rid() const { return _rid; }
 	std::string what() const { return _what; }
 
+	enum CtlType {
+		Ctl_Momentary,
+		Ctl_Toggle,
+	};
+
 	enum Encoder {
 		No_enc,
 		Enc_R,
@@ -79,6 +84,9 @@ class MIDIControllable : public PBD::Stateful
 	float midi_to_control(int val);
 
 	bool learned() const { return _learned; }
+
+	CtlType get_ctltype() const { return _ctltype; }
+	void set_ctltype (CtlType val) { _ctltype = val; }
 
 	Encoder get_encoder() const { return _encoder; }
 	void set_encoder (Encoder val) { _encoder = val; }
@@ -122,6 +130,7 @@ class MIDIControllable : public PBD::Stateful
 	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;
+	CtlType         _ctltype;
 	Encoder			_encoder;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];

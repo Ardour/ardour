@@ -813,6 +813,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	MIDI::eventType ev;
 	int intval;
 	bool momentary;
+	MIDIControllable::CtlType ctltype;
 	MIDIControllable::Encoder encoder = MIDIControllable::No_enc;
 	bool rpn_value = false;
 	bool nrpn_value = false;
@@ -820,6 +821,10 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	bool nrpn_change = false;
 
 	if ((prop = node.property (X_("ctl"))) != 0) {
+		ctltype = MIDIControllable::Ctl_Momentary;
+		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("ctl-toggle"))) !=0) {
+		ctltype = MIDIControllable::Ctl_Toggle;
 		ev = MIDI::controller;
 	} else if ((prop = node.property (X_("note"))) != 0) {
 		ev = MIDI::on;
@@ -895,6 +900,7 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else if (nrpn_change) {
 		mc->bind_nrpn_change (channel, detail);
 	} else {
+		mc->set_ctltype (ctltype);
 		mc->set_encoder (encoder);
 		mc->bind_midi (channel, ev, detail);
 	}
