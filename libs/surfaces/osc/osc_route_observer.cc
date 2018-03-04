@@ -132,8 +132,10 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		name_changed (ARDOUR::Properties::name);
 
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
-		rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::group_name, this), OSC::instance());
-		group_name ();
+		if (rt) {
+			rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::group_name, this), OSC::instance());
+			group_name ();
+		}
 
 		_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::pi_changed, this, _1), OSC::instance());
 		_osc.int_message_with_id (X_("/strip/hide"), ssid, _strip->is_hidden (), in_line, addr);
