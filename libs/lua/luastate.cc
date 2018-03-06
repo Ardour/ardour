@@ -90,9 +90,9 @@ LuaState::tweak_rt_gc () {
 
 void
 LuaState::sandbox (bool rt_safe) {
-	do_command ("loadfile = nil dofile = nil require = nil dofile = nil package = nil debug = nil os.exit = nil os.setlocale = nil rawget = nil rawset = nil coroutine = nil module = nil");
+	do_command ("dofile = nil require = nil dofile = nil package = nil debug = nil os.exit = nil os.setlocale = nil rawget = nil rawset = nil coroutine = nil module = nil");
 	if (rt_safe) {
-		do_command ("os = nil io = nil");
+		do_command ("os = nil io = nil loadfile = nil");
 	}
 }
 
