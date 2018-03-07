@@ -1960,9 +1960,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = b_size;
-	if (s->custom_mode && b_size) {
-		s->custom_mode = s->custom_mode | 0x4;
-	}
+	s->custom_mode = 0;
 	s->strip_types = strips;
 	s->feedback = fb;
 	s->gainmode = gm;
@@ -2016,6 +2014,7 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->strip_types = st;
+	s->custom_mode = 0;
 	if (s->strip_types[10]) {
 		s->usegroup = PBD::Controllable::UseGroup;
 	} else {
@@ -2681,11 +2680,9 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 					ivalue = (uint32_t) argv[0]->i;
 				}
 			}
-			// first check that we are a vca
 			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
 			if (vca) {
 				if ((argc == 1 && ivalue) || !argc) {
-					// fill sur->strips with routes from this group and hit bank1
 					sur->temp_strips.clear();
 					StripableList stripables;
 					session->get_stripables (stripables);
@@ -2718,8 +2715,6 @@ OSC::get_vca_by_name (std::string vname)
 	session->get_stripables (stripables);
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 		boost::shared_ptr<Stripable> s = *it;
-
-		// we only want VCAs
 		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
 		if (v) {
 			if (vname == v->name()) {
