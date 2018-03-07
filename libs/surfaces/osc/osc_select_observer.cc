@@ -38,6 +38,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/processor.h"
 #include "ardour/readonly_control.h"
+#include "ardour/vca.h"
 
 #include "osc.h"
 #include "osc_select_observer.h"
@@ -194,6 +195,10 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	_strip->gain_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_automation, this), OSC::instance());
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this), OSC::instance());
 	gain_automation ();
+
+	boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (_strip);
+	slv->AssignmentChange.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::slaved_changed, this, _1, _2), OSC::instance());
+	slaved_changed (boost::shared_ptr<VCA>(), false);
 
 	boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 	if (trim_controllable) {
@@ -1020,4 +1025,29 @@ OSCSelectObserver::eq_restart(int x)
 	eq_connections.drop_connections ();
 	//eq_end();
 	eq_init();
+}
+
+void
+OSCSelectObserver::slaved_changed (boost::shared_ptr<VCA> vca, bool state)
+{
+	lo_message reply;
+	reply = lo_message_new ();
+	StripableList stripables;
+	session->get_stripables (stripables);
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+		boost::shared_ptr<Stripable> s = *it;
+
+		// we only want VCAs
+		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
+		if (v) {
+			lo_message_add_string (reply, v->name().c_str());
+			if (_strip->slaved_to (v)) {
+				lo_message_add_int32 (reply, 1);
+			} else {
+				lo_message_add_int32 (reply, 0);
+			}
+		}
+	}
+	lo_send_message (addr, X_("/select/vcas"), reply);
+	lo_message_free (reply);
 }

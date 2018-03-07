@@ -122,6 +122,7 @@ class OSCSelectObserver
 	void eq_init (void);
 	void eq_end (void);
 	void no_strip ();
+	void slaved_changed (boost::shared_ptr<ARDOUR::VCA> vca, bool state);
 };
 
 #endif /* __osc_oscselectobserver_h__ */
