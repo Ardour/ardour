@@ -2647,7 +2647,7 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 	if (s) {
 		string svalue = "";
 		uint32_t ivalue = 1024;
-		if (!strncmp (path, X_("/select/vca"), 11)) {
+		if (strcmp (path, X_("/select/vca")) == 0) {
 			if (argc == 2) {
 				if (types[0] == 's') {
 					svalue = &argv[0]->s;
@@ -2673,7 +2673,40 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 				PBD::warning << "OSC: setting a vca needs both the vca name and it's state" << endmsg;
 			}
 		}
-		//boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		else if (!strncmp (path, X_("/select/vca/only"), 16)) {
+			if (argc == 1) {
+				if (types[0] == 'f') {
+					ivalue = (uint32_t) argv[0]->f;
+				} else if (types[0] == 'i') {
+					ivalue = (uint32_t) argv[0]->i;
+				}
+			}
+			// first check that we are a vca
+			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
+			if (vca) {
+				if ((argc == 1 && ivalue) || !argc) {
+					// fill sur->strips with routes from this group and hit bank1
+					sur->temp_strips.clear();
+					StripableList stripables;
+					session->get_stripables (stripables);
+					for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+						boost::shared_ptr<Stripable> st = *it;
+						if (st->slaved_to (vca)) {
+							sur->temp_strips.push_back(st);
+						}
+					}
+					sur->temp_strips.push_back(s);
+					sur->custom_mode = 7;
+					set_bank (1, msg);
+					ret = 0;
+				} else {
+					// key off is ignored
+					ret = 0;
+				}
+			} else {
+				PBD::warning << "OSC: Select is not a VCA right now" << endmsg;
+			}
+		}
 	}
 	return ret;
 }
