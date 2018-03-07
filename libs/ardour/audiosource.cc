@@ -410,14 +410,16 @@ AudioSource::read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos
 
 	/* fix for near-end-of-file conditions */
 
-	if (cnt > _length - start) {
+	if (cnt + start > _length) {
 		// cerr << "too close to end @ " << _length << " given " << start << " + " << cnt << " (" << _length - start << ")" << endl;
-		cnt = _length - start;
+		cnt = std::max ((samplecnt_t)0, _length - start);
 		read_npeaks = min ((samplecnt_t) floor (cnt / samples_per_visual_peak), npeaks);
 		zero_fill = npeaks - read_npeaks;
 		expected_peaks = (cnt / (double) samples_per_file_peak);
 		scale = npeaks/expected_peaks;
 	}
+
+	assert (cnt >= 0);
 
 	// cerr << "actual npeaks = " << read_npeaks << " zf = " << zero_fill << endl;
 
