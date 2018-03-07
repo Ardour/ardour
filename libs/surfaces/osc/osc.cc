@@ -983,6 +983,9 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	else if (strstr (path, X_("/select/group"))) {
 		ret = parse_sel_group (path, types, argv, argc, msg);
 	}
+	else if (strstr (path, X_("/select/vca"))) {
+		ret = parse_sel_vca (path, types, argv, argc, msg);
+	}
 	else if (strstr (path, X_("/select")) && (argc != 1)) {
 		// All of the select commands below require 1 parameter
 		PBD::warning << "OSC: Wrong number of parameters." << endmsg;
@@ -2628,6 +2631,71 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 	}
 	return ret;
  }
+
+// this gets called for anything that starts with /select/vca
+int
+OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	if (sur->expand_enable) {
+		s = get_strip (sur->expand, get_address (msg));
+	} else {
+		s = _select;
+	}
+	int ret = 1; /* unhandled */
+	if (s) {
+		string svalue = "";
+		uint32_t ivalue = 1024;
+		if (!strncmp (path, X_("/select/vca"), 11)) {
+			if (argc == 2) {
+				if (types[0] == 's') {
+					svalue = &argv[0]->s;
+					if (types[1] == 'i') {
+						ivalue = argv[1]->i;
+					} else if (types[1] == 'f') {
+						ivalue = (uint32_t) argv[1]->f;
+					} else {
+						return 1;
+					}
+					boost::shared_ptr<VCA> vca = get_vca_by_name (svalue);
+					if (vca) {
+						boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (s);
+						if (ivalue) {
+							slv->assign (vca);
+						} else {
+							slv->unassign (vca);
+						}
+						ret = 0;
+					}
+				}
+			} else {
+				PBD::warning << "OSC: setting a vca needs both the vca name and it's state" << endmsg;
+			}
+		}
+		//boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+	}
+	return ret;
+}
+
+boost::shared_ptr<VCA>
+OSC::get_vca_by_name (std::string vname)
+{
+	StripableList stripables;
+	session->get_stripables (stripables);
+	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+		boost::shared_ptr<Stripable> s = *it;
+
+		// we only want VCAs
+		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
+		if (v) {
+			if (vname == v->name()) {
+				return v;
+			}
+		}
+	}
+	return boost::shared_ptr<VCA>();
+}
 
 int
 OSC::name_session (char *n, lo_message msg)

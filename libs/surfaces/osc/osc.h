@@ -496,7 +496,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(bank_delta,f);
 	PATH_CALLBACK1_MSG(use_group,f);
 	PATH_CALLBACK1_MSG_s(name_session,s);
-	PATH_CALLBACK1_MSG_s(sel_group,s);
 	PATH_CALLBACK1_MSG_s(sel_rename,s);
 	PATH_CALLBACK1_MSG_s(sel_comment,s);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
@@ -765,6 +764,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_eq_q (int id, float val, lo_message msg);
 	int sel_eq_shape (int id, float val, lo_message msg);
 	int parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	boost::shared_ptr<ARDOUR::VCA> get_vca_by_name (std::string vname);
 
 	void listen_to_route (boost::shared_ptr<ARDOUR::Stripable>, lo_address);
 
