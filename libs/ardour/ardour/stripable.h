@@ -121,6 +121,9 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> rec_enable_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> rec_safe_control() const { return boost::shared_ptr<AutomationControl>(); }
 
+	virtual bool slaved_to (boost::shared_ptr<VCA>) const = 0;
+	virtual bool slaved () const = 0;
+
 	/* "well-known" controls for panning. Any or all of these may return
 	 * null.
 	 */
