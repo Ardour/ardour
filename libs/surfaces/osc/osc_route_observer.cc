@@ -372,6 +372,9 @@ OSCRouteObserver::group_name ()
 void
 OSCRouteObserver::pi_changed (PBD::PropertyChange const& what_changed)
 {
+	if (!what_changed.contains (ARDOUR::Properties::hidden)) {
+		return;
+	}
 	_osc.int_message_with_id (X_("/strip/hide"), ssid, _strip->is_hidden (), in_line, addr);
 }
 
