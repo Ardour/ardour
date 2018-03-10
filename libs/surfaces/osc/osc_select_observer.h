@@ -92,8 +92,10 @@ class OSCSelectObserver
 	uint32_t plug_size;
 	std::vector<int> plug_params;
 	int eq_bands;
-	bool _tick_busy;
 	uint32_t _expand;
+	std::string _group_name;
+	std::bitset<16> _group_sharing;
+	bool _tick_busy;
 	ARDOUR::Session* session;
 
 	void name_changed (const PBD::PropertyChange& what_changed);
