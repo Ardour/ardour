@@ -313,6 +313,7 @@ OSCSelectObserver::clear_observer ()
 	_osc.int_message (X_("/select/group/active"), 0, addr);
 	_osc.int_message (X_("/select/group/color"), 0, addr);
 	_osc.int_message (X_("/select/group/monitoring"), 0, addr);
+	_osc.int_message (X_("/select/group/enable"), 0, addr);
 	if (gainmode) {
 		_osc.float_message (X_("/select/fader"), 0, addr);
 	} else {
@@ -736,6 +737,10 @@ OSCSelectObserver::group_sharing (RouteGroup *rgc)
 				_group_sharing[8] = rg->is_monitoring ();
 				_osc.int_message (X_("/select/group/monitoring"), _group_sharing[8], addr);
 			}
+			if (rg->is_active () != _group_sharing[9] || _group_sharing[15]) {
+				_group_sharing[9] = rg->is_active ();
+				_osc.int_message (X_("/select/group/enable"), _group_sharing[9], addr);
+			}
 		} else {
 			_osc.int_message (X_("/select/group/gain"), 0, addr);
 			_osc.int_message (X_("/select/group/relative"), 0, addr);
@@ -746,6 +751,7 @@ OSCSelectObserver::group_sharing (RouteGroup *rgc)
 			_osc.int_message (X_("/select/group/active"), 0, addr);
 			_osc.int_message (X_("/select/group/color"), 0, addr);
 			_osc.int_message (X_("/select/group/monitoring"), 0, addr);
+			_osc.int_message (X_("/select/group/enable"), 0, addr);
 		}
 	}
 	_group_sharing[15] = 0;

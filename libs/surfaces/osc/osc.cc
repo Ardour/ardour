@@ -2559,7 +2559,6 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 		RouteGroup *rg = rt->route_group();
 		if (!rg) {
 			PBD::warning << "OSC: This strip is not part of a group." << endmsg;
-			return ret;
 		}
 		float value = 0;
 		if (argc == 1) {
@@ -2569,13 +2568,10 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 				value = (uint32_t) argv[0]->i;
 			}
 		}
-		if (!strncmp (path, X_("/select/group/enable"), 20)) {
-			if (argc == 1) {
-				rg->set_active (value, this);
-				ret = 0;
+		if (!strncmp (path, X_("/select/group/only"), 18)) {
+			if (!rg) {
+				return ret;
 			}
-		}
-		else if (!strncmp (path, X_("/select/group/only"), 18)) {
 			if ((argc == 1 && value) || !argc) {
 				// fill sur->strips with routes from this group and hit bank1
 				sur->temp_strips.clear();
@@ -2593,58 +2589,104 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 				ret = 0;
 			}
 		}
+		else if (!strncmp (path, X_("/select/group/enable"), 20)) {
+			if (rg) {
+				if (argc == 1) {
+					rg->set_active (value, this);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/enable"), 0, get_address (msg));
+			}
+		}
 		else if (strcmp (path, X_("/select/group/gain")) == 0) {
-			if (argc == 1) {
-				rg->set_gain ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_gain ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/gain"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/relative")) == 0) {
-			if (argc == 1) {
-				rg->set_relative ((bool) value, this);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_relative ((bool) value, this);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/relative"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/mute")) == 0) {
-			if (argc == 1) {
-				rg->set_mute ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_mute ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/mute"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/solo")) == 0) {
-			if (argc == 1) {
-				rg->set_solo ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_solo ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/solo"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/recenable")) == 0) {
-			if (argc == 1) {
-				rg->set_recenable ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_recenable ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/recenable"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/select")) == 0) {
-			if (argc == 1) {
-				rg->set_select ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_select ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/select"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/active")) == 0) {
-			if (argc == 1) {
-				rg->set_route_active ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_route_active ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/active"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/color")) == 0) {
-			if (argc == 1) {
-				rg->set_color ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_color ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/color"), 0, get_address (msg));
 			}
 		}
 		else if (strcmp (path, X_("/select/group/monitoring")) == 0) {
-			if (argc == 1) {
-				rg->set_monitoring ((bool) value);
-				ret = 0;
+			if (rg) {
+				if (argc == 1) {
+					rg->set_monitoring ((bool) value);
+					ret = 0;
+				}
+			} else {
+				int_message (X_("/select/group/monitoring"), 0, get_address (msg));
 			}
 		}
 	}
