@@ -583,7 +583,12 @@ Mixer_UI::add_stripables (StripableList& slist)
 
 				show_strip (strip);
 
-				if (!route->is_master()) {
+				if (route->is_master()) {
+
+					out_packer.pack_start (*strip, false, false);
+					strip->set_packed (true);
+
+				} else {
 
 					TreeModel::Row row = *(track_model->insert (insert_iter));
 
@@ -591,11 +596,6 @@ Mixer_UI::add_stripables (StripableList& slist)
 					row[stripable_columns.visible] = strip->marked_for_display();
 					row[stripable_columns.stripable] = route;
 					row[stripable_columns.strip] = strip;
-
-				} else {
-
-					out_packer.pack_start (*strip, false, false);
-					strip->set_packed (true);
 				}
 
 				strip->WidthChanged.connect (sigc::mem_fun(*this, &Mixer_UI::strip_width_changed));
