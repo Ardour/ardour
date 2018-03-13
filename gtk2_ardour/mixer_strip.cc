@@ -2174,7 +2174,10 @@ MixerStrip::drop_send ()
 	monitor_disk_button->set_sensitive (true);
 	_comment_button.set_sensitive (true);
 	trim_control.set_sensitive (true);
-	control_slave_ui.set_sensitive(true);
+	if (midi_input_enable_button) {
+		midi_input_enable_button->set_sensitive (true);
+	}
+	control_slave_ui.set_sensitive (true);
 	RouteUI::check_rec_enable_sensitivity ();
 	set_button_names (); // update solo button visual state
 }
@@ -2224,7 +2227,10 @@ MixerStrip::show_send (boost::shared_ptr<Send> send)
 	monitor_disk_button->set_sensitive (false);
 	_comment_button.set_sensitive (false);
 	trim_control.set_sensitive (false);
-	control_slave_ui.set_sensitive(false);
+	if (midi_input_enable_button) {
+		midi_input_enable_button->set_sensitive (false);
+	}
+	control_slave_ui.set_sensitive (false);
 
 	if (boost::dynamic_pointer_cast<InternalSend>(send)) {
 		output_button.set_sensitive (false);
