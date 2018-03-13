@@ -20,6 +20,8 @@
 #include <iostream>
 #include <list>
 #include <string>
+#include <vector>
+#include <algorithm>
 
 #include <gtkmm/comboboxtext.h>
 #include <gtkmm/label.h>
@@ -137,11 +139,14 @@ GMCPGUI::GMCPGUI (GenericMidiControlProtocol& p)
 	, ignore_active_change (false)
 {
 	vector<string> popdowns;
-	popdowns.push_back (_("Reset All"));
 
 	for (list<GenericMidiControlProtocol::MapInfo>::iterator x = cp.map_info.begin(); x != cp.map_info.end(); ++x) {
 		popdowns.push_back (x->name);
 	}
+
+	sort (popdowns.begin(), popdowns.end(), less<string>());
+
+	popdowns.insert (popdowns.begin(), _("Reset All"));
 
 	set_popdown_strings (map_combo, popdowns);
 
