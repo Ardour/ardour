@@ -1,8 +1,8 @@
 ardour {
     ["type"] = "EditorAction",
     name = "Mixer Store",
-    author = "Mixbus Lua Taskforce",
-    description = [[]]
+    author = "Ardour Lua Taskforce",
+    description = [[Stores the current Mixer state as a file that can be recalled arbitrarily. Supports: processor settings, gain, trim, pan and processor ordering.]]
 }
 
 function factory() return function()
@@ -94,8 +94,7 @@ function factory() return function()
                 local old_order = ARDOUR.ProcessorList()
                 for k, v in pairs(instance["order"]) do
                     local proc = Session:processor_by_id(PBD.ID(v))
-                    if proc:isnil() then goto nextline end
-                    old_order:push_back(proc)
+                    if not(proc:isnil()) then old_order:push_back(proc) end
                 end
                 local rid = PBD.ID(instance["route_id"])
                 local rt = Session:route_by_id(rid)
