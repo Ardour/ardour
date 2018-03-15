@@ -78,7 +78,7 @@ VCAManager::vcas () const
 	return _vcas;
 }
 
-int
+VCAList
 VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 {
 	VCAList vcal;
@@ -113,9 +113,8 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 
 	_session.set_dirty ();
 
-	return 0;
+	return vcal;
 }
-
 
 void
 VCAManager::remove_vca (boost::shared_ptr<VCA> vca)

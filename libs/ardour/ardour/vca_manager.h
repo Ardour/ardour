@@ -44,7 +44,7 @@ public:
 	VCAManager (ARDOUR::Session&);
 	~VCAManager ();
 
-	int create_vca (uint32_t how_many, std::string const & name = std::string());
+	VCAList create_vca (uint32_t how_many, std::string const & name = std::string());
 	void remove_vca (boost::shared_ptr<VCA>);
 
 	boost::shared_ptr<VCA> vca_by_number(int32_t) const;
