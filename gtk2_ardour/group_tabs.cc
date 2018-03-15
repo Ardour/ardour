@@ -442,7 +442,7 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 	boost::shared_ptr<VCA> master;
 
 	if (which == 0) {
-		if (_session->vca_manager().create_vca (1)) {
+		if (_session->vca_manager().create_vca (1).empty ()) {
 			/* error */
 			return;
 		}
@@ -499,7 +499,7 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl, std::string vcan
 	bool set_name = false;
 
 	if (which == 0) {
-		if (_session->vca_manager().create_vca (1)) {
+		if (_session->vca_manager().create_vca (1).empty ()) {
 			/* error */
 			return;
 		}
