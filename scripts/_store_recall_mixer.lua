@@ -25,7 +25,7 @@ function factory() return function()
 				x = x + 1
 			until proc:isnil()
 
-			local route_str, proc_order_str = "", ""
+			local route_str, proc_order_str, cache_str = "", "", ""
 			local rid = r:to_stateful():id():to_s()
 			local pan = r:pan_azimuth_control()
 			if pan:isnil() then pan = false else pan = pan:get_value() end --sometimes a route doesn't have pan, like the master.
@@ -34,10 +34,11 @@ function factory() return function()
 			for p in order:iter() do
 				local pid = p:to_stateful():id():to_s()
 				proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
+				cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
 				on = on + 1
 			end
 
-			route_str = "instance = {route_id = " .. rid .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", order = {" .. proc_order_str .."}" .. "}"
+			route_str = "instance = {route_id = " .. rid .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}" .. "}"
 			file = io.open(path, "a")
 			file:write(route_str, "\r\n")
 			file:close()
@@ -77,11 +78,12 @@ function factory() return function()
 			::nextroute::
 		end
 	end
-
+	local invalidate = {}
 	function recall()
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
 		for l in file:lines() do
+			--print(l)
 
 			local plugin, route = false, false
 			local f = load(l)
@@ -90,16 +92,32 @@ function factory() return function()
 			if instance["route_id"]  ~= nil then route = true end
 			if instance["plugin_id"] ~= nil then plugin = true end
 
+			function new_plugin(name)
+				local plugin = nil
+				for x = 0, 6 do
+					plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
+					if not(plugin:isnil()) then break end
+				end return plugin
+			end
+
 			if route then
 				local old_order = ARDOUR.ProcessorList()
-				for k, v in pairs(instance["order"]) do
-					local proc = Session:processor_by_id(PBD.ID(v))
-					if not(proc:isnil()) then old_order:push_back(proc) end
-				end
 				local rid = PBD.ID(instance["route_id"])
 				local rt = Session:route_by_id(rid)
 				if rt:isnil() then goto nextline end
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
+				for k, v in pairs(instance["order"]) do
+					local proc = Session:processor_by_id(PBD.ID(v))
+					if proc:isnil() then
+						for id, name in pairs(instance["cache"]) do
+							if v == id then
+								proc = new_plugin(name)
+								invalidate[v] = proc:to_stateful():id():to_s()
+							end
+						end
+					end
+					if not(proc:isnil()) then old_order:push_back(proc) end
+				end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
 				if pc ~= false then rt:pan_azimuth_control():set_value(pc, 1) end
@@ -107,6 +125,11 @@ function factory() return function()
 			end
 
 			if plugin then
+				for k, v in pairs(invalidate) do --invalidate deleted plugin id's
+					if instance["plugin_id"] == k then
+						instance["plugin_id"] = v
+					end
+				end
 				local act = instance["active"]
 				local id = PBD.ID(instance["plugin_id"])
 				local proc = Session:processor_by_id(id)
