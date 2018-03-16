@@ -254,6 +254,9 @@ Please choose whichever one is right for your setup.\n\n\
 	set_page_title (mon_vbox, _("Monitoring Choices"));
 	set_page_header_image (mon_vbox, icon_pixbuf);
 
+	monitor_via_hardware_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+	monitor_via_ardour_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+
 	/* user could just click on "Forward" if default
 	 * choice is correct.
 	 */
