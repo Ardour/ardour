@@ -276,33 +276,35 @@ Editor::do_ptimport (std::string ptpath,
 	}
 
 	/* MIDI - Find list of unique midi tracks first */
-	typedef struct midipair {
+	struct midipair {
+		midipair (uint16_t idx, string n)
+			: ptfindex (idx)
+			, trname (n)
+		{}
 		uint16_t ptfindex;
 		string trname;
-	} midipair_t;
+	};
 
-	vector<midipair_t> uniquetr;
+	vector<midipair> uniquetr;
 	uint16_t ith = 0;
-	bool found;
 
 	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
-		found = false;
-		for (vector<midipair_t>::iterator b = uniquetr.begin (); b != uniquetr.end (); ++b) {
+		bool found = false;
+		for (vector<midipair>::iterator b = uniquetr.begin (); b != uniquetr.end (); ++b) {
 			if (b->trname == a->name) {
 				found = true;
 				break;
 			}
 		}
 		if (!found) {
-			uniquetr.push_back ({ith, a->name});
+			uniquetr.push_back (midipair (ith, a->name));
 			//printf(" : %d : %s\n", ith, a->name.c_str());
 			ith++;
 		}
 	}
 
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
-	for (vector<midipair_t>::iterator a = uniquetr.begin ();
-			a != uniquetr.end (); ++a) {
+	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
 		ptflookup_t miditr;
 		list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (
 				ChanCount (DataType::MIDI, 1),
