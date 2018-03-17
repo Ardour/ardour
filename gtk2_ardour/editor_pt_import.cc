@@ -110,6 +110,15 @@ Editor::external_pt_dialog ()
 	}
 }
 
+struct midipair {
+	midipair (uint16_t idx, string n)
+		: ptfindex (idx)
+		  , trname (n)
+	{}
+	uint16_t ptfindex;
+	string trname;
+};
+
 void
 Editor::do_ptimport (std::string ptpath,
                       SrcQuality  quality)
@@ -276,14 +285,6 @@ Editor::do_ptimport (std::string ptpath,
 	}
 
 	/* MIDI - Find list of unique midi tracks first */
-	struct midipair {
-		midipair (uint16_t idx, string n)
-			: ptfindex (idx)
-			, trname (n)
-		{}
-		uint16_t ptfindex;
-		string trname;
-	};
 
 	vector<midipair> uniquetr;
 	uint16_t ith = 0;
