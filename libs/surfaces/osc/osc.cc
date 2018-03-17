@@ -583,6 +583,8 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/db_delta"), "f", sel_dB_delta);
 		REGISTER_CALLBACK (serv, X_("/select/trimdB"), "f", sel_trim);
 		REGISTER_CALLBACK (serv, X_("/select/hide"), "i", sel_hide);
+		REGISTER_CALLBACK (serv, X_("/select/bus/only"), "f", sel_bus_only);
+		REGISTER_CALLBACK (serv, X_("/select/bus/only"), "", sel_bus_only);
 		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_position"), "f", sel_pan_position);
 		REGISTER_CALLBACK (serv, X_("/select/pan_stereo_width"), "f", sel_pan_width);
 		REGISTER_CALLBACK (serv, X_("/select/send_gain"), "if", sel_sendgain);
@@ -629,6 +631,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/strip/polarity"), "ii", strip_phase);
 		REGISTER_CALLBACK (serv, X_("/strip/gain"), "if", route_set_gain_dB);
 		REGISTER_CALLBACK (serv, X_("/strip/fader"), "if", route_set_gain_fader);
+		REGISTER_CALLBACK (serv, X_("/strip/db_delta"), "if", strip_db_delta);
 		REGISTER_CALLBACK (serv, X_("/strip/trimdB"), "if", route_set_trim_dB);
 		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_position"), "if", route_set_pan_stereo_position);
 		REGISTER_CALLBACK (serv, X_("/strip/pan_stereo_width"), "if", route_set_pan_stereo_width);
@@ -2755,7 +2758,7 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 						}
 					}
 					sur->temp_strips.push_back(s);
-					sur->custom_mode = 7;
+					sur->custom_mode = 8;
 					set_bank (1, msg);
 					ret = 0;
 				} else {
@@ -2785,6 +2788,51 @@ OSC::get_vca_by_name (std::string vname)
 		}
 	}
 	return boost::shared_ptr<VCA>();
+}
+
+int
+OSC::sel_bus_only (lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s = sur->select;
+	if (s) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		if (rt) {
+			if (!rt->is_track () && rt->can_solo () && rt->fed_by().size()) {
+				// this is a bus, but not master, monitor or audition
+				sur->temp_strips.clear();
+				StripableList stripables;
+				session->get_stripables (stripables);
+				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+					boost::shared_ptr<Stripable> st = *it;
+					boost::shared_ptr<Route> ri = boost::dynamic_pointer_cast<Route> (st);
+					bool sends = true;
+					if (ri && ri->direct_feeds_according_to_graph (rt, &sends)) {
+						sur->temp_strips.push_back(st);
+					}
+				}
+				sur->temp_strips.push_back(s);
+				sur->custom_mode = 9;
+				set_bank (1, msg);
+				return 0;
+			}
+		}
+	}
+	return 1;
+}
+
+boost::shared_ptr<Send>
+OSC::get_send (boost::shared_ptr<Stripable> st, lo_address addr)
+{
+	OSCSurface *sur = get_surface(addr);
+	boost::shared_ptr<Stripable> s = sur->select;
+	if (st && s && (st != s)) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+		boost::shared_ptr<Route> rst = boost::dynamic_pointer_cast<Route> (st);
+		//find what send number feeds s
+		return rst->internal_send_for (rt);
+	}
+	return boost::shared_ptr<Send> ();
 }
 
 int
@@ -4455,19 +4503,25 @@ OSC::route_set_gain_dB (int ssid, float dB, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
+		boost::shared_ptr<GainControl> gain_control;
+		if (sur->custom_mode == 9 && get_send (s, get_address (msg))) {
+			gain_control = get_send(s, get_address (msg))->gain_control();
+		} else {
+			gain_control = s->gain_control();
+		}
 		float abs;
-		if (s->gain_control()) {
+		if (gain_control) {
 			if (dB < -192) {
 				abs = 0;
 			} else {
 				abs = dB_to_coefficient (dB);
-				float top = s->gain_control()->upper();
+				float top = gain_control->upper();
 				if (abs > top) {
 					abs = top;
 				}
 			}
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (abs, sur->usegroup);
+			fake_touch (gain_control);
+			gain_control->set_value (abs, sur->usegroup);
 			return 0;
 		}
 	}
@@ -4479,11 +4533,7 @@ OSC::sel_gain (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		float abs;
 		if (s->gain_control()) {
@@ -4509,11 +4559,7 @@ OSC::sel_dB_delta (float delta, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->gain_control()) {
 			float dB = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
@@ -4545,9 +4591,15 @@ OSC::route_set_gain_fader (int ssid, float pos, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if (s->gain_control()) {
-			fake_touch (s->gain_control());
-			s->gain_control()->set_value (s->gain_control()->interface_to_internal (pos), sur->usegroup);
+		boost::shared_ptr<GainControl> gain_control;
+		if (sur->custom_mode == 9 && get_send (s, get_address (msg))) {
+			gain_control = get_send(s, get_address (msg))->gain_control();
+		} else {
+			gain_control = s->gain_control();
+		}
+		if (gain_control) {
+			fake_touch (gain_control);
+			gain_control->set_value (gain_control->interface_to_internal (pos), sur->usegroup);
 		} else {
 			return float_message_with_id (X_("/strip/fader"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
@@ -4564,18 +4616,24 @@ OSC::strip_db_delta (int ssid, float delta, lo_message msg)
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (s) {
-		float db = accurate_coefficient_to_dB (s->gain_control()->get_value()) + delta;
+		boost::shared_ptr<GainControl> gain_control;
+		if (sur->custom_mode == 9 && get_send (s, get_address (msg))) {
+			gain_control = get_send(s, get_address (msg))->gain_control();
+		} else {
+			gain_control = s->gain_control();
+		}
+		float db = accurate_coefficient_to_dB (gain_control->get_value()) + delta;
 		float abs;
 		if (db < -192) {
 			abs = 0;
 		} else {
 			abs = dB_to_coefficient (db);
-			float top = s->gain_control()->upper();
+			float top = gain_control->upper();
 			if (abs > top) {
 				abs = top;
 			}
 		}
-		s->gain_control()->set_value (abs, sur->usegroup);
+		gain_control->set_value (abs, sur->usegroup);
 		return 0;
 	}
 	return -1;

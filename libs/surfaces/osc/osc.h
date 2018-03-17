@@ -354,6 +354,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(group_list);
+	PATH_CALLBACK_MSG(sel_bus_only);
 	PATH_CALLBACK_MSG(surface_list);
 	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);
@@ -624,6 +625,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK2_MSG(strip_gui_select,i,i);
 	PATH_CALLBACK2_MSG(route_set_gain_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_gain_fader,i,f);
+	PATH_CALLBACK2_MSG(strip_db_delta,i,f);
 	PATH_CALLBACK2_MSG(route_set_trim_dB,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_position,i,f);
 	PATH_CALLBACK2_MSG(route_set_pan_stereo_width,i,f);
@@ -737,6 +739,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_dB_delta (float delta, lo_message msg);
 	int sel_trim (float val, lo_message msg);
 	int sel_hide (uint32_t state, lo_message msg);
+	int sel_bus_only (lo_message msg);
+	boost::shared_ptr<ARDOUR::Send> get_send (boost::shared_ptr<ARDOUR::Stripable> st, lo_address addr);
 	int sel_pan_position (float val, lo_message msg);
 	int sel_pan_width (float val, lo_message msg);
 	int sel_sendgain (int id, float dB, lo_message msg);
