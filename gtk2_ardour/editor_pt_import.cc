@@ -232,7 +232,7 @@ Editor::do_ptimport (std::string ptpath,
 				vector<ptflookup_t>::iterator found;
 				if ((found = std::find (lookuptr, usedtracks.end (), utr)) != usedtracks.end ()) {
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) ptf_tr(%3) ard_tr(%4)\n", a->reg.wave.filename.c_str (), a->reg.index, found->index1, found->index2));
-					existing_track =  get_nth_selected_audio_track (found->index2);
+					existing_track =  midi_tracks.at (found->index2);
 					/* Put on existing track */
 					boost::shared_ptr<Playlist> playlist = existing_track->playlist ();
 					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
@@ -303,6 +303,7 @@ Editor::do_ptimport (std::string ptpath,
 		}
 	}
 
+	vector<boost::shared_ptr<MidiTrack> > midi_tracks;
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
 	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
 		ptflookup_t miditr;
@@ -316,32 +317,15 @@ Editor::do_ptimport (std::string ptpath,
 				a->trname,
 				PresentationInfo::max_order,
 				Normal));
+		assert (mt.size () == 1);
+		midi_tracks.push_back (mt.front ());
 	}
-
-	/* Select all MIDI tracks by selecting all tracks then subsetting to midi */
-	select_all_tracks ();
-
-	TrackViewList miditracks;
-	MidiTimeAxisView* mtv;
-	TrackSelection::iterator x;
-
-	for (x = selection->tracks.begin (); x != selection->tracks.end (); ++x) {
-
-		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
-
-		if (!mtv) {
-			continue;
-		} else if (mtv->is_midi_track ()) {
-			miditracks.push_back (dynamic_cast<TimeAxisView*> (*x));
-		}
-	}
-
-	selection->set (miditracks);
 
 	/* MIDI - Add midi regions one-by-one to corresponding midi tracks */
 	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
 
-		boost::shared_ptr<MidiTrack> midi_track = get_nth_selected_midi_track (a->index);
+		boost::shared_ptr<MidiTrack> midi_track = midi_tracks.at (a->index);
+		assert (midi_track);
 		boost::shared_ptr<Playlist> playlist = midi_track->playlist ();
 		samplepos_t f = (samplepos_t)a->reg.startpos * srate / 1920000.;
 		samplecnt_t length = (samplecnt_t)a->reg.length * srate / 1920000.;
