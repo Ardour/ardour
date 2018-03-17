@@ -232,7 +232,7 @@ Editor::do_ptimport (std::string ptpath,
 				vector<ptflookup_t>::iterator found;
 				if ((found = std::find (lookuptr, usedtracks.end (), utr)) != usedtracks.end ()) {
 					DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) ptf_tr(%3) ard_tr(%4)\n", a->reg.wave.filename.c_str (), a->reg.index, found->index1, found->index2));
-					existing_track =  midi_tracks.at (found->index2);
+					existing_track = get_nth_selected_audio_track (found->index2); // FIXME, don't rely on selection
 					/* Put on existing track */
 					boost::shared_ptr<Playlist> playlist = existing_track->playlist ();
 					boost::shared_ptr<Region> copy (RegionFactory::create (r, true));
