@@ -85,7 +85,9 @@ public:
 
 	std::vector<wav_t> audiofiles;
 	std::vector<region_t> regions;
+	std::vector<region_t> midiregions;
 	std::vector<track_t> tracks;
+	std::vector<track_t> miditracks;
 
 	static bool regionexistsin(std::vector<region_t> reg, uint16_t index) {
 		std::vector<region_t>::iterator begin = reg.begin();

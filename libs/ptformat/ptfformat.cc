@@ -719,37 +719,47 @@ PTFFormat::parseaudio5(void) {
 
 void
 PTFFormat::parsemidi(void) {
-	uint64_t i, k, n_midi_events, zero_ticks;
-	uint64_t midi_pos, midi_len, max_pos;
+	uint64_t tr, i, k, lastk, n_midi_events, zero_ticks;
+	uint64_t midi_pos, midi_len, max_pos, region_pos;
 	uint8_t midi_velocity, midi_note;
-	uint16_t rsize;
+	uint16_t ridx;
+	uint16_t nmiditracks, regionnumber = 0;
+	uint32_t nregions, mr;
+	struct mchunk_t {
+		uint64_t zero;
+		uint64_t maxlen;
+		std::vector<midi_ev_t> chunk;
+	};
+	std::vector<struct mchunk_t> midichunks;
 	midi_ev_t m;
 	bool found = false;
-	int max_regions = regions.size();
-	char midiname[26] = { 0 };
 
 	// Find MdNLB
 	k = 0;
+	lastk = 0;
 
-	// Parse all midi tracks, treat each group of midi bytes as a track
+	// Parse all midi chunks, not 1:1 mapping to regions yet
 	while (k + 35 < len) {
+		found = false;
 		max_pos = 0;
 		std::vector<midi_ev_t> midi;
 
-		while (k < len) {
+		while (k < len && !found) {
 			if (		(ptfunxored[k  ] == 'M') &&
 					(ptfunxored[k+1] == 'd') &&
 					(ptfunxored[k+2] == 'N') &&
 					(ptfunxored[k+3] == 'L') &&
 					(ptfunxored[k+4] == 'B')) {
 				found = true;
+				lastk = k;
 				break;
 			}
 			k++;
 		}
 
 		if (!found) {
-			return;
+			k = lastk;
+			break;
 		}
 
 		k += 11;
@@ -758,10 +768,10 @@ PTFFormat::parsemidi(void) {
 
 		k += 4;
 		zero_ticks = (uint64_t)ptfunxored[k] |
-				(uint64_t)ptfunxored[k+1] << 8 |
-				(uint64_t)ptfunxored[k+2] << 16 |
-				(uint64_t)ptfunxored[k+3] << 24 |
-				(uint64_t)ptfunxored[k+4] << 32;
+			(uint64_t)ptfunxored[k+1] << 8 |
+			(uint64_t)ptfunxored[k+2] << 16 |
+			(uint64_t)ptfunxored[k+3] << 24 |
+			(uint64_t)ptfunxored[k+4] << 32;
 		for (i = 0; i < n_midi_events && k < len; i++, k += 35) {
 			midi_pos = (uint64_t)ptfunxored[k] |
 				(uint64_t)ptfunxored[k+1] << 8 |
@@ -794,23 +804,199 @@ PTFFormat::parsemidi(void) {
 			}
 #endif
 			midi.push_back(m);
+		}
+		midichunks.push_back({zero_ticks, max_pos, midi});
+	}
 
-			//fprintf(stderr, "MIDI:  Note=%d Vel=%d Start=%d(samples) Len=%d(samples)\n", midi_note, midi_velocity, midi_pos, midi_len);
+	lastk = k;
+
+	// Map midi chunks to regions
+	while (k < len) {
+		char midiregionname[256];
+		uint8_t namelen;
+
+		found = false;
+		while (k < len && !found) {
+			if (		(ptfunxored[k  ] == 'M') &&
+					(ptfunxored[k+1] == 'd') &&
+					(ptfunxored[k+2] == 'T') &&
+					(ptfunxored[k+3] == 'E') &&
+					(ptfunxored[k+4] == 'L')) {
+				found = true;
+				lastk = k;
+				break;
+			}
+			k++;
 		}
 
-		rsize = (uint16_t)regions.size();
-		snprintf(midiname, 20, "MIDI-%d", rsize - max_regions + 1);
-		wav_t w = { std::string(""), 0, 0, 0 };
-		region_t r = {
-			midiname,
-			rsize,
-			(int64_t)(0),
-			(int64_t)(0),
-			(int64_t)(max_pos*sessionrate*60/(960000*120)),
-			w,
-			midi,
-		};
-		regions.push_back(r);
+		if (!found) {
+			k = lastk;
+			break;
+		}
+
+		k += 41;
+
+		nregions = 0;
+		nregions |= ptfunxored[k];
+		nregions |= ptfunxored[k+1] << 8;
+
+		for (mr = 0; mr < nregions; mr++) {
+			found = false;
+			while (k < len && !found) {
+				if (		(ptfunxored[k  ] == 0x5a) &&
+						(ptfunxored[k+1] == 0x0c)) {
+					found = true;
+					lastk = k;
+					break;
+				}
+				k++;
+			}
+
+			if (!found) {
+				k = lastk;
+				break;
+			}
+
+			k += 9;
+
+			namelen = ptfunxored[k];
+			for (i = 0; i < namelen; i++) {
+				midiregionname[i] = ptfunxored[k+4+i];
+			}
+			midiregionname[namelen] = '\0';
+			k += 4 + namelen;
+
+			k += 5;
+			/*
+			region_pos = (uint64_t)ptfunxored[k] |
+					(uint64_t)ptfunxored[k+1] << 8 |
+					(uint64_t)ptfunxored[k+2] << 16 |
+					(uint64_t)ptfunxored[k+3] << 24 |
+					(uint64_t)ptfunxored[k+4] << 32;
+			*/
+			found = false;
+			while (k < len && !found) {
+				if (		(ptfunxored[k  ] == 0xfe) &&
+						(ptfunxored[k+1] == 0xff) &&
+						(ptfunxored[k+2] == 0xff) &&
+						(ptfunxored[k+3] == 0xff)) {
+					found = true;
+					lastk = k;
+					break;
+				}
+				k++;
+			}
+
+			if (!found) {
+				k = lastk;
+				break;
+			}
+
+			k += 40;
+
+			ridx = ptfunxored[k];
+			ridx |= ptfunxored[k+1] << 8;
+
+			struct mchunk_t mchunk = *(midichunks.begin()+ridx);
+
+			wav_t w = { std::string(""), 0, 0, 0 };
+			region_t r = {
+				midiregionname,
+				regionnumber++,
+				//(int64_t)mchunk.zero,
+				(int64_t)0xe8d4a51000ull,
+				(int64_t)(0),
+				//(int64_t)(max_pos*sessionrate*60/(960000*120)),
+				(int64_t)mchunk.maxlen,
+				w,
+				mchunk.chunk,
+			};
+			midiregions.push_back(r);
+		}
+	}
+
+	found = false;
+	// Put midi regions on midi tracks
+	while (k < len && !found) {
+		if (		(ptfunxored[k  ] == 0x5a) &&
+				(ptfunxored[k+1] == 0x03)) {
+			found = true;
+			break;
+		}
+		k++;
+	}
+
+	if (!found)
+		return;
+
+	k -= 4;
+
+	nmiditracks = 0;
+	nmiditracks |= ptfunxored[k];
+	nmiditracks |= ptfunxored[k+1] << 8;
+
+	k += 4;
+
+	for (tr = 0; tr < nmiditracks; tr++) {
+		char miditrackname[256];
+		uint8_t namelen;
+		found = false;
+		while (k < len && !found) {
+			if (		(ptfunxored[k  ] == 0x5a) &&
+					(ptfunxored[k+1] == 0x03)) {
+				found = true;
+				break;
+			}
+			k++;
+		}
+
+		if (!found)
+			return;
+
+		namelen = ptfunxored[k+9];
+		for (i = 0; i < namelen; i++) {
+			miditrackname[i] = ptfunxored[k+13+i];
+		}
+		miditrackname[namelen] = '\0';
+		k += 13 + namelen;
+		nregions = 0;
+		nregions |= ptfunxored[k];
+		nregions |= ptfunxored[k+1] << 8;
+
+		for (i = 0; (i < nregions) && (k < len); i++) {
+			k += 24;
+
+			ridx = 0;
+			ridx |= ptfunxored[k];
+			ridx |= ptfunxored[k+1] << 8;
+
+			k += 5;
+
+			region_pos = (uint64_t)ptfunxored[k] |
+					(uint64_t)ptfunxored[k+1] << 8 |
+					(uint64_t)ptfunxored[k+2] << 16 |
+					(uint64_t)ptfunxored[k+3] << 24 |
+					(uint64_t)ptfunxored[k+4] << 32;
+
+			k += 20;
+
+			track_t mtr;
+			mtr.name = string(miditrackname);
+			mtr.index = tr;
+			mtr.playlist = 0;
+			// Find the midi region with index 'ridx'
+			std::vector<region_t>::iterator begin = midiregions.begin();
+			std::vector<region_t>::iterator finish = midiregions.end();
+			std::vector<region_t>::iterator mregion;
+			wav_t w = { std::string(""), 0, 0, 0 };
+			std::vector<midi_ev_t> m;
+			region_t r = { std::string(""), ridx, 0, 0, 0, w, m};
+			if ((mregion = std::find(begin, finish, r)) != finish) {
+				mtr.reg = *mregion;
+				mtr.reg.startpos = std::labs(region_pos - mtr.reg.startpos);
+				miditracks.push_back(mtr);
+			}
+		}
 	}
 }
 
