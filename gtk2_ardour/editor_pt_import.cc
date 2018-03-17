@@ -123,16 +123,17 @@ Editor::do_ptimport (std::string ptpath,
 	bool onefailed = false;
 	PTFFormat ptf;
 	samplepos_t pos = -1;
+	uint32_t srate = _session->sample_rate();
 
 	vector<ptflookup_t> ptfwavpair;
 	vector<ptflookup_t> ptfregpair;
 
-	if (ptf.load(ptpath, _session->sample_rate()) == -1) {
+	if (ptf.load(ptpath, srate) == -1) {
 		MessageDialog msg (_("Doesn't seem to be a valid PT session file"));
 		msg.run ();
 		return;
 	} else {
-		MessageDialog msg (string_compose (_("PT v%1 Session @ %2Hz\n\n%3 audio files\n%4 regions\n%5 active regions\n\nContinue..."), (int)ptf.version, ptf.sessionrate, ptf.audiofiles.size(), ptf.regions.size(), ptf.tracks.size()));
+		MessageDialog msg (string_compose (_("PT v%1 Session @ %2Hz\n\n%3 audio files\n%4 audio regions\n%5 active audio regions\n%6 midi regions\n%7 active midi regions\n\nContinue..."), (int)ptf.version, ptf.sessionrate, ptf.audiofiles.size(), ptf.regions.size() - ptf.midiregions.size(), ptf.tracks.size(), ptf.midiregions.size(), ptf.miditracks.size()));
 		msg.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
 		int result = msg.run ();
@@ -178,20 +179,6 @@ Editor::do_ptimport (std::string ptpath,
 		msg.run ();
 	}
 
-	// Create a dummy midi track first to get a midi Source
-	list<boost::shared_ptr<MidiTrack> > mt (
-		_session->new_midi_track (ChanCount (DataType::MIDI, 1),
-		                          ChanCount (DataType::MIDI, 1),
-		                          true,
-		                          instrument, (Plugin::PresetRecord*) 0,
-		                          (RouteGroup*) 0,
-		                          1,
-		                          string(),
-		                          PresentationInfo::max_order));
-	if (mt.empty()) {
-		return;
-	}
-
 	for (vector<PTFFormat::region_t>::iterator a = ptf.regions.begin();
 			a != ptf.regions.end(); ++a) {
 		for (vector<ptflookup_t>::iterator p = ptfwavpair.begin();
@@ -224,42 +211,6 @@ Editor::do_ptimport (std::string ptpath,
 					}
 				}
 			}
-		}
-		if (strcmp(a->wave.filename.c_str(), "") == 0) {
-			/* Empty wave - assume MIDI region */
-			boost::shared_ptr<MidiTrack> midi_track = mt.back();
-			boost::shared_ptr<Playlist> playlist = midi_track->playlist();
-			samplepos_t f = (samplepos_t)a->startpos;
-			samplecnt_t length = (samplecnt_t)a->length;
-			MusicSample pos (f, 0);
-			boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (midi_track);
-			PropertyList plist;
-			plist.add (ARDOUR::Properties::start, 0);
-			plist.add (ARDOUR::Properties::length, length);
-			plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
-			boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
-			/* sets beat position */
-			region->set_position (pos.sample, pos.division);
-			midi_track->playlist()->add_region (region, pos.sample, 1.0, false, pos.division);
-
-			boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
-			boost::shared_ptr<MidiModel> mm = mr->midi_source(0)->model();
-			MidiModel::NoteDiffCommand *midicmd;
-			midicmd = mm->new_note_diff_command ("Import ProTools MIDI");
-
-			for (vector<PTFFormat::midi_ev_t>::iterator
-					j = a->midi.begin();
-					j != a->midi.end(); ++j) {
-				Temporal::Beats start = (Temporal::Beats)(j->pos/960000.);
-				Temporal::Beats len = (Temporal::Beats)(j->length/960000.);
-				// PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert...
-				midicmd->add(boost::shared_ptr<Evoral::Note<Temporal::Beats> >
-					(new Evoral::Note<Temporal::Beats>( (uint8_t)1, start, len, j->note - 12, j->velocity )));
-			}
-			mm->apply_command (_session, midicmd);
-			boost::shared_ptr<Region> copy (RegionFactory::create (mr, true));
-			playlist->clear_changes ();
-			playlist->add_region (copy, a->startpos);
 		}
 	}
 
@@ -324,6 +275,110 @@ Editor::do_ptimport (std::string ptpath,
 				usedtracks.push_back(utr);
 			}
 		}
+	}
+
+	// MIDI - Find list of unique midi tracks first
+	typedef struct midipair {
+		uint16_t ptfindex;
+		string trname;
+	} midipair_t;
+
+	vector<midipair_t> uniquetr;
+	uint16_t ith = 0;
+	bool found;
+
+	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin();
+			a != ptf.miditracks.end(); ++a) {
+		found = false;
+		for (vector<midipair_t>::iterator b = uniquetr.begin();
+				b != uniquetr.end(); ++b) {
+			if (b->trname == a->name) {
+				found = true;
+				break;
+			}
+		}
+		if (!found) {
+			uniquetr.push_back({ith, a->name});
+			//printf(" : %d : %s\n", ith, a->name.c_str());
+			ith++;
+		}
+	}
+
+	// MIDI - Create unique midi tracks and a lookup table for used tracks
+	for (vector<midipair_t>::iterator a = uniquetr.begin();
+			a != uniquetr.end(); ++a) {
+		ptflookup_t miditr;
+		list<boost::shared_ptr<MidiTrack> > mt (_session->new_midi_track (
+				ChanCount (DataType::MIDI, 1),
+				ChanCount (DataType::MIDI, 1),
+				true,
+				instrument, (Plugin::PresetRecord*) 0,
+				(RouteGroup*) 0,
+				1,
+				a->trname,
+				PresentationInfo::max_order,
+				Normal));
+	}
+
+	// Select all MIDI tracks by selecting all tracks then subsetting to midi
+	select_all_tracks();
+
+	TrackViewList miditracks;
+	MidiTimeAxisView* mtv;
+	TrackSelection::iterator x;
+
+	for (x = selection->tracks.begin(); x != selection->tracks.end(); ++x) {
+
+		mtv = dynamic_cast<MidiTimeAxisView*>(*x);
+
+		if (!mtv) {
+			continue;
+		} else if (mtv->is_midi_track()) {
+			miditracks.push_back(dynamic_cast<TimeAxisView*>(*x));
+		}
+	}
+
+	selection->set(miditracks);
+
+	// MIDI - Add midi regions one-by-one to corresponding midi tracks
+	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin();
+			a != ptf.miditracks.end(); ++a) {
+
+		boost::shared_ptr<MidiTrack> midi_track = get_nth_selected_midi_track(a->index);
+		boost::shared_ptr<Playlist> playlist = midi_track->playlist();
+		samplepos_t f = (samplepos_t)a->reg.startpos * srate / 1920000.;
+		samplecnt_t length = (samplecnt_t)a->reg.length * srate / 1920000.;
+		MusicSample pos (f, 0);
+		boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (midi_track);
+		PropertyList plist;
+		plist.add (ARDOUR::Properties::start, 0);
+		plist.add (ARDOUR::Properties::length, length);
+		plist.add (ARDOUR::Properties::name, PBD::basename_nosuffix(src->name()));
+		//printf(" : %d - trackname: (%s)\n", a->index, src->name().c_str());
+		boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
+		// sets beat position
+		region->set_position (pos.sample, pos.division);
+		midi_track->playlist()->add_region (region, pos.sample, 1.0, false, pos.division);
+
+		boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
+		boost::shared_ptr<MidiModel> mm = mr->midi_source(0)->model();
+		MidiModel::NoteDiffCommand *midicmd;
+		midicmd = mm->new_note_diff_command ("Import ProTools MIDI");
+
+		for (vector<PTFFormat::midi_ev_t>::iterator
+				j = a->reg.midi.begin();
+				j != a->reg.midi.end(); ++j) {
+			//printf(" : MIDI : pos=%f len=%f\n", (float)j->pos / 960000., (float)j->length / 960000.);
+			Temporal::Beats start = (Temporal::Beats)(j->pos / 960000.);
+			Temporal::Beats len = (Temporal::Beats)(j->length / 960000.);
+			// PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert ?
+			midicmd->add(boost::shared_ptr<Evoral::Note<Temporal::Beats> >
+				(new Evoral::Note<Temporal::Beats>( (uint8_t)1, start, len, j->note, j->velocity )));
+		}
+		mm->apply_command (_session, midicmd);
+		boost::shared_ptr<Region> copy (RegionFactory::create (mr, true));
+		playlist->clear_changes ();
+		playlist->add_region (copy, f);
 	}
 
 	import_status.sources.clear();
