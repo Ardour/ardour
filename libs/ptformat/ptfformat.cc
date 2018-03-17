@@ -717,6 +717,17 @@ PTFFormat::parseaudio5(void) {
 	resort(audiofiles);
 }
 
+struct mchunk {
+	mchunk (uint64_t zt, uint64_t ml, std::vector<PTFFormat::midi_ev_t> const& c)
+	: zero (zt)
+	, maxlen (ml)
+	, chunk (c)
+	{}
+	uint64_t zero;
+	uint64_t maxlen;
+	std::vector<PTFFormat::midi_ev_t> chunk;
+};
+
 void
 PTFFormat::parsemidi(void) {
 	uint64_t tr, i, k, lastk, n_midi_events, zero_ticks;
@@ -725,12 +736,8 @@ PTFFormat::parsemidi(void) {
 	uint16_t ridx;
 	uint16_t nmiditracks, regionnumber = 0;
 	uint32_t nregions, mr;
-	struct mchunk_t {
-		uint64_t zero;
-		uint64_t maxlen;
-		std::vector<midi_ev_t> chunk;
-	};
-	std::vector<struct mchunk_t> midichunks;
+
+	std::vector<mchunk> midichunks;
 	midi_ev_t m;
 	bool found = false;
 
@@ -805,7 +812,7 @@ PTFFormat::parsemidi(void) {
 #endif
 			midi.push_back(m);
 		}
-		midichunks.push_back({zero_ticks, max_pos, midi});
+		midichunks.push_back(mchunk (zero_ticks, max_pos, midi));
 	}
 
 	lastk = k;
@@ -897,19 +904,19 @@ PTFFormat::parsemidi(void) {
 			ridx = ptfunxored[k];
 			ridx |= ptfunxored[k+1] << 8;
 
-			struct mchunk_t mchunk = *(midichunks.begin()+ridx);
+			struct mchunk mc = *(midichunks.begin()+ridx);
 
 			wav_t w = { std::string(""), 0, 0, 0 };
 			region_t r = {
 				midiregionname,
 				regionnumber++,
-				//(int64_t)mchunk.zero,
+				//(int64_t)mc.zero,
 				(int64_t)0xe8d4a51000ull,
 				(int64_t)(0),
 				//(int64_t)(max_pos*sessionrate*60/(960000*120)),
-				(int64_t)mchunk.maxlen,
+				(int64_t)mc.maxlen,
 				w,
-				mchunk.chunk,
+				mc.chunk,
 			};
 			midiregions.push_back(r);
 		}
