@@ -907,6 +907,10 @@ OSCSelectObserver::gain_automation ()
 			output = 3;
 			auto_name = "Touch";
 			break;
+		case ARDOUR::Latch:
+			output = 4;
+			auto_name = "Latch";
+			break;
 		default:
 			break;
 	}
