@@ -287,7 +287,6 @@ Editor::do_ptimport (std::string ptpath,
 	/* MIDI - Find list of unique midi tracks first */
 
 	vector<midipair> uniquetr;
-	uint16_t ith = 0;
 
 	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
 		bool found = false;
@@ -298,13 +297,12 @@ Editor::do_ptimport (std::string ptpath,
 			}
 		}
 		if (!found) {
-			uniquetr.push_back (midipair (ith, a->name));
-			//printf(" : %d : %s\n", ith, a->name.c_str());
-			ith++;
+			uniquetr.push_back (midipair (a->index, a->name));
+			//printf(" : %d : %s\n", a->index, a->name.c_str());
 		}
 	}
 
-	vector<boost::shared_ptr<MidiTrack> > midi_tracks;
+	std::map <int, boost::shared_ptr<MidiTrack> > midi_tracks;
 	/* MIDI - Create unique midi tracks and a lookup table for used tracks */
 	for (vector<midipair>::iterator a = uniquetr.begin (); a != uniquetr.end (); ++a) {
 		ptflookup_t miditr;
@@ -319,13 +317,13 @@ Editor::do_ptimport (std::string ptpath,
 				PresentationInfo::max_order,
 				Normal));
 		assert (mt.size () == 1);
-		midi_tracks.push_back (mt.front ());
+		midi_tracks[a->ptfindex] = mt.front ();
 	}
 
 	/* MIDI - Add midi regions one-by-one to corresponding midi tracks */
 	for (vector<PTFFormat::track_t>::iterator a = ptf.miditracks.begin (); a != ptf.miditracks.end (); ++a) {
 
-		boost::shared_ptr<MidiTrack> midi_track = midi_tracks.at (a->index);
+		boost::shared_ptr<MidiTrack> midi_track = midi_tracks[a->index];
 		assert (midi_track);
 		boost::shared_ptr<Playlist> playlist = midi_track->playlist ();
 		samplepos_t f = (samplepos_t)a->reg.startpos * srate / 1920000.;
