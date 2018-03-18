@@ -28,8 +28,12 @@
 #include "ardour/monitor_control.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
+#include "ardour/panner.h"
+#include "ardour/panner_shell.h"
+#include "ardour/pannable.h"
 #include "ardour/route.h"
 #include "ardour/route_group.h"
+#include "ardour/send.h"
 #include "ardour/solo_isolate_control.h"
 
 #include "osc.h"
@@ -75,6 +79,7 @@ OSCRouteObserver::OSCRouteObserver (OSC& o, uint32_t ss, ArdourSurface::OSC::OSC
 	} else {
 		set_expand (0);
 	}
+	_send = boost::shared_ptr<ARDOUR::Send> ();
 }
 
 OSCRouteObserver::~OSCRouteObserver ()
@@ -109,6 +114,7 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 	}
 	_last_gain =-1.0;
 	_last_trim =-1.0;
+	_send = boost::shared_ptr<ARDOUR::Send> ();
 
 	send_select_status (ARDOUR::Properties::selected);
 
@@ -177,9 +183,9 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 	}
 
 	if (feedback[1]) { // level controls
-		boost::shared_ptr<GainControl> gain_cont = _strip->gain_control();
-		gain_cont->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this), OSC::instance());
-		gain_cont->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this), OSC::instance());
+		_gain_control = _strip->gain_control();
+		_gain_control->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this), OSC::instance());
+		_gain_control->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this), OSC::instance());
 		gain_automation ();
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
@@ -192,6 +198,60 @@ OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip,
 		if (pan_controllable) {
 			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 			send_change_message (X_("/strip/pan_stereo_position"), _strip->pan_azimuth_control());
+		}
+	}
+	_init = false;
+	tick();
+
+}
+
+void
+OSCRouteObserver::refresh_send (boost::shared_ptr<ARDOUR::Send> new_send, bool force)
+{
+	_init = true;
+	if (_tick_busy) {
+		Glib::usleep(100); // let tick finish
+	}
+	_last_gain =-1.0;
+	_last_trim =-1.0;
+
+	send_select_status (ARDOUR::Properties::selected);
+
+	if ((new_send == _send) && !force) {
+		// no change don't send feedback
+		_init = false;
+		return;
+	}
+	strip_connections.drop_connections ();
+	if (!_strip) {
+		// this strip is blank and should be cleared
+		clear_strip ();
+		return;
+	}
+	_send = new_send;
+	send_clear ();
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::no_strip, this), OSC::instance());
+	as = ARDOUR::Off;
+
+	if (feedback[0]) { // buttons are separate feedback
+		_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::name_changed, this, boost::lambda::_1), OSC::instance());
+		name_changed (ARDOUR::Properties::name);
+	}
+
+	if (feedback[1]) { // level controls
+		_gain_control = _send->gain_control();
+		_gain_control->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::gain_automation, this), OSC::instance());
+		_gain_control->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_gain_message, this), OSC::instance());
+		gain_automation ();
+
+		if (_send->pan_outs() > 1) {
+			boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_send->panner_shell()->panner()->pannable()->pan_azimuth_control);
+			if (pan_controllable) {
+				pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCRouteObserver::send_change_message, this, X_("/strip/pan_stereo_position"), pan_controllable), OSC::instance());
+				send_change_message (X_("/strip/pan_stereo_position"), pan_controllable);
+			}
+		} else {
+			_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
 		}
 	}
 	_init = false;
@@ -244,6 +304,23 @@ OSCRouteObserver::set_link_ready (uint32_t not_ready)
 void
 OSCRouteObserver::clear_strip ()
 {
+	send_clear ();
+	if (feedback[0]) { // buttons are separate feedback
+		_osc.text_message_with_id (X_("/strip/name"), ssid, " ", in_line, addr);
+	}
+	if (feedback[1]) { // level controls
+		if (gainmode) {
+			_osc.float_message_with_id (X_("/strip/fader"), ssid, 0, in_line, addr);
+		} else {
+			_osc.float_message_with_id (X_("/strip/gain"), ssid, -193, in_line, addr);
+		}
+		_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
+	}
+}
+
+void
+OSCRouteObserver::send_clear ()
+{
 	_init = true;
 
 	strip_connections.drop_connections ();
@@ -251,7 +328,6 @@ OSCRouteObserver::clear_strip ()
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.float_message_with_id (X_("/strip/expand"), ssid, 0, in_line, addr);
 	if (feedback[0]) { // buttons are separate feedback
-		_osc.text_message_with_id (X_("/strip/name"), ssid, " ", in_line, addr);
 		_osc.text_message_with_id (X_("/strip/group"), ssid, "none", in_line, addr);
 		_osc.float_message_with_id (X_("/strip/mute"), ssid, 0, in_line, addr);
 		_osc.float_message_with_id (X_("/strip/solo"), ssid, 0, in_line, addr);
@@ -263,13 +339,7 @@ OSCRouteObserver::clear_strip ()
 		_osc.float_message_with_id (X_("/strip/select"), ssid, 0, in_line, addr);
 	}
 	if (feedback[1]) { // level controls
-		if (gainmode) {
-			_osc.float_message_with_id (X_("/strip/fader"), ssid, 0, in_line, addr);
-		} else {
-			_osc.float_message_with_id (X_("/strip/gain"), ssid, -193, in_line, addr);
-		}
 		_osc.float_message_with_id (X_("/strip/trimdB"), ssid, 0, in_line, addr);
-		_osc.float_message_with_id (X_("/strip/pan_stereo_position"), ssid, 0.5, in_line, addr);
 	}
 	if (feedback[9]) {
 		_osc.float_message_with_id (X_("/strip/signal"), ssid, 0, in_line, addr);
@@ -295,6 +365,9 @@ OSCRouteObserver::tick ()
 	_tick_busy = true;
 	if (feedback[7] || feedback[8] || feedback[9]) { // meters enabled
 		// the only meter here is master
+		/* XXXX need to add send meter for send mode or
+		 * disable for send mode
+		 */
 		float now_meter;
 		if (_strip->peak_meter()) {
 			now_meter = _strip->peak_meter()->meter_level(0, MeterMCP);
@@ -330,13 +403,13 @@ OSCRouteObserver::tick ()
 	if (feedback[1]) {
 		if (gain_timeout) {
 			if (gain_timeout == 1) {
-				_osc.text_message_with_id (X_("/strip/name"), ssid, _strip->name(), in_line, addr);
+				name_changed (ARDOUR::Properties::name);
 			}
 			gain_timeout--;
 		}
 		if (as == ARDOUR::Play ||  as == ARDOUR::Touch) {
-			if(_last_gain != _strip->gain_control()->get_value()) {
-				_last_gain = _strip->gain_control()->get_value();
+			if(_last_gain != _gain_control->get_value()) {
+				_last_gain = _gain_control->get_value();
 				send_gain_message ();
 			}
 		}
@@ -350,9 +423,15 @@ OSCRouteObserver::name_changed (const PBD::PropertyChange& what_changed)
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 	    return;
 	}
+	string name = "";
+	if (!_send) {
+		name = _strip->name();
+	} else {
+		name = string_compose ("%1-Send", _strip->name());
+	}
 
 	if (_strip) {
-		_osc.text_message_with_id (X_("/strip/name"), ssid, _strip->name(), in_line, addr);
+		_osc.text_message_with_id (X_("/strip/name"), ssid, name, in_line, addr);
 	}
 }
 
@@ -426,22 +505,21 @@ OSCRouteObserver::send_trim_message ()
 void
 OSCRouteObserver::send_gain_message ()
 {
-	boost::shared_ptr<Controllable> controllable = _strip->gain_control();
-	if (_last_gain != controllable->get_value()) {
-		_last_gain = controllable->get_value();
+	if (_last_gain != _gain_control->get_value()) {
+		_last_gain = _gain_control->get_value();
 	} else {
 		return;
 	}
 
 	if (gainmode) {
-		_osc.float_message_with_id (X_("/strip/fader"), ssid, controllable->internal_to_interface (_last_gain), in_line, addr);
+		_osc.float_message_with_id (X_("/strip/fader"), ssid, _gain_control->internal_to_interface (_last_gain), in_line, addr);
 		if (gainmode == 1) {
-			_osc.text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), in_line, addr);
+			_osc.text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (_last_gain)), in_line, addr);
 			gain_timeout = 8;
 		}
 	}
 	if (!gainmode || gainmode == 2) {
-		if (controllable->get_value() < 1e-15) {
+		if (_last_gain < 1e-15) {
 			_osc.float_message_with_id (X_("/strip/gain"), ssid, -200, in_line, addr);
 		} else {
 			_osc.float_message_with_id (X_("/strip/gain"), ssid, accurate_coefficient_to_dB (_last_gain), in_line, addr);
@@ -457,7 +535,7 @@ OSCRouteObserver::gain_automation ()
 		path = X_("/strip/fader");
 	}
 	send_gain_message ();
-	as = _strip->gain_control()->alist()->automation_state();
+	as = _gain_control->alist()->automation_state();
 	string auto_name;
 	float output = 0;
 	switch (as) {

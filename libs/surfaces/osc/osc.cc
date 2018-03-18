@@ -29,6 +29,7 @@
 #include <glibmm.h>
 
 #include "pbd/control_math.h"
+#include "pbd/controllable.h"
 #include <pbd/convert.h>
 #include <pbd/pthread_utils.h>
 #include <pbd/file_utils.h>
@@ -45,6 +46,8 @@
 #include "ardour/dB.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/panner.h"
+#include "ardour/panner_shell.h"
+#include "ardour/pannable.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/presentation_info.h"
@@ -2248,6 +2251,14 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 			for (uint32_t i = 0; i < bank_size; i++) {
 				OSCRouteObserver* o = new OSCRouteObserver (*this, i + 1, sur);
 				sur->observers.push_back (o);
+				if (sur->custom_mode == 9) {
+					boost::shared_ptr<ARDOUR::Stripable> str = get_strip (i + 1, lo_address_new_from_url (sur->remote_url.c_str()));
+					boost::shared_ptr<ARDOUR::Send> send = get_send (str, lo_address_new_from_url (sur->remote_url.c_str()));
+					if (send) {
+						o->refresh_send (send, true);
+					}
+				}
+
 			}
 		}
 	} else {
@@ -2255,6 +2266,12 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 			for (uint32_t i = 0; i < sur->observers.size(); i++) {
 				boost::shared_ptr<ARDOUR::Stripable> str = get_strip (i + 1, lo_address_new_from_url (sur->remote_url.c_str()));
 				sur->observers[i]->refresh_strip(str, true);
+				if (sur->custom_mode == 9) {
+					boost::shared_ptr<ARDOUR::Send> send = get_send (str, lo_address_new_from_url (sur->remote_url.c_str()));
+					if (send) {
+						sur->observers[i]->refresh_send (send, true);
+					}
+				}
 			}
 		}
 	}
@@ -3692,6 +3709,7 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 	uint32_t ctr = 0;
 	uint32_t aut = 0;
 	uint32_t ssid;
+	boost::shared_ptr<Send> send = boost::shared_ptr<Send> ();
 
 	if (argc) {
 		if (types[argc - 1] == 'f') {
@@ -3715,13 +3733,10 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 			ssid = atoi (&(strrchr (path, '/' ))[1]);
 			strp = get_strip (ssid, get_address (msg));
 		}
+		send = get_send (strp, get_address (msg));
 		ctr = 7;
 	} else if (!strncmp (path, X_("/select/"), 8)) {
-		if (sur->expand_enable && sur->expand) {
-			strp = get_strip (sur->expand, get_address (msg));
-		} else {
-			strp = _select;
-		}
+		strp = sur->select;
 		ctr = 8;
 	} else {
 		return ret;
@@ -3734,6 +3749,9 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 				control = strp->gain_control ();
 			} else {
 				PBD::warning << "No fader for this strip" << endmsg;
+			}
+			if (send) {
+				control = send->gain_control ();
 			}
 		} else {
 			PBD::warning << "Automation not available for " << path << endmsg;
@@ -3756,6 +3774,10 @@ OSC::set_automation (const char *path, const char* types, lo_arg **argv, int arg
 					break;
 				case 3:
 					control->set_automation_state (ARDOUR::Touch);
+					ret = 0;
+					break;
+				case 4:
+					control->set_automation_state (ARDOUR::Latch);
 					ret = 0;
 					break;
 				default:
@@ -4773,8 +4795,17 @@ OSC::route_set_pan_stereo_position (int ssid, float pos, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if(s->pan_azimuth_control()) {
-			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (pos), sur->usegroup);
+		boost::shared_ptr<PBD::Controllable> pan_control = boost::shared_ptr<PBD::Controllable>();
+		if (sur->custom_mode == 9 && get_send (s, get_address (msg))) {
+			boost::shared_ptr<ARDOUR::Send> send = get_send (s, get_address (msg));
+			if (send->pan_outs() > 1) {
+				pan_control = send->panner_shell()->panner()->pannable()->pan_azimuth_control;
+			}
+		} else {
+			pan_control = s->pan_azimuth_control();
+		}
+		if(pan_control) {
+			pan_control->set_value (s->pan_azimuth_control()->interface_to_internal (pos), sur->usegroup);
 			return 0;
 		}
 	}
