@@ -210,8 +210,14 @@ GCObject *luaC_newobj (lua_State *L, int tt, size_t sz) {
   GCObject *o = cast(GCObject *, luaM_newobject(L, novariant(tt), sz));
   o->marked = luaC_white(g);
   o->tt = tt;
-  o->next = g->allgc;
-  g->allgc = o;
+  if (g->gcmlock) {
+    white2gray(o); /* gray forever */
+    o->next = g->fixedgc;
+    g->fixedgc = o;
+  } else {
+    o->next = g->allgc;
+    g->allgc = o;
+  }
   return o;
 }
 
@@ -1175,4 +1181,7 @@ void luaC_fullgc (lua_State *L, int isemergency) {
 
 /* }====================================================== */
 
-
+LUA_API void lua_mlock (lua_State *L, int en) {
+  global_State *g = G(L);
+  g->gcmlock = en;
+}

@@ -144,6 +144,7 @@ typedef struct global_State {
   unsigned int gcfinnum;  /* number of finalizers to call in each GC step */
   int gcpause;  /* size of pause between successive GCs */
   int gcstepmul;  /* GC 'granularity' */
+  int gcmlock;  /* memory lock new objects - fixedgc */
   lua_CFunction panic;  /* to be called in unprotected errors */
   struct lua_State *mainthread;
   const lua_Number *version;  /* pointer to version number */

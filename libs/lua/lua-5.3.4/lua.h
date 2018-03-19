@@ -311,6 +311,8 @@ LUA_API int (lua_isyieldable) (lua_State *L);
 
 LUA_API int (lua_gc) (lua_State *L, int what, int data);
 
+LUA_API void (lua_mlock) (lua_State *L, int enable);
+
 
 /*
 ** miscellaneous functions
