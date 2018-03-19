@@ -211,7 +211,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 #ifdef LV2_SUPPORT
 	_fil_type_combo.append_text_item (X_("LV2"));
 #endif
-	_fil_type_combo.append_text_item (X_("LUA"));
+	_fil_type_combo.append_text_item (X_("Lua"));
 	_fil_type_combo.append_text_item (X_("LADSPA"));
 	_fil_type_combo.set_text (_("Show All Formats"));
 
@@ -434,7 +434,7 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	}
 #endif
 
-	if (_fil_type_combo.get_text() == X_("LUA") && info->type != Lua) {
+	if (_fil_type_combo.get_text() == X_("Lua") && info->type != Lua) {
 		return false;
 	}
 
