@@ -5486,7 +5486,7 @@ Session::try_run_lua (pframes_t nframes)
 	Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
 	if (tm.locked ()) {
 		try { (*_lua_run)(nframes); } catch (...) { }
-		lua.collect_garbage_step (100 /*kB*/);
+		lua.collect_garbage_step ();
 	}
 }
 
@@ -5496,7 +5496,6 @@ Session::setup_lua ()
 #ifndef NDEBUG
 	lua.Print.connect (&_lua_print);
 #endif
-	lua.tweak_rt_gc ();
 	lua.sandbox (true);
 	lua.do_command (
 			"function ArdourSession ()"
@@ -5627,9 +5626,11 @@ Session::setup_lua ()
 		abort(); /*NOTREACHED*/
 	}
 
+	lua_mlock (L, 1);
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::dsp (L);
+	lua_mlock (L, 0);
 	luabridge::push <Session *> (L, this);
 	lua_setglobal (L, "Session");
 }

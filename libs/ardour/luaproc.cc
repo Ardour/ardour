@@ -111,14 +111,16 @@ LuaProc::LuaProc (const LuaProc &other)
 LuaProc::~LuaProc () {
 #ifdef WITH_LUAPROC_STATS
 	if (_info && _stats_cnt > 0) {
-		printf ("LuaProc: '%s' run()  avg: %.3f  max: %.3f [ms]\n",
+		printf ("LuaProc: '%s' run()  avg: %.3f  max: %.3f [ms] p: %.1f\n",
 				_info->name.c_str (),
 				0.0001f * _stats_avg[0] / (float) _stats_cnt,
-				0.0001f * _stats_max[0]);
-		printf ("LuaProc: '%s' gc()   avg: %.3f  max: %.3f [ms]\n",
+				0.0001f * _stats_max[0],
+				_stats_max[0] * (float)_stats_cnt / _stats_avg[0]);
+		printf ("LuaProc: '%s' gc()   avg: %.3f  max: %.3f [ms] p: %.1f\n",
 				_info->name.c_str (),
 				0.0001f * _stats_avg[1] / (float) _stats_cnt,
-				0.0001f * _stats_max[1]);
+				0.0001f * _stats_max[1],
+				_stats_max[1] * (float)_stats_cnt / _stats_avg[1]);
 	}
 #endif
 	lua.do_command ("collectgarbage();");
@@ -135,10 +137,10 @@ LuaProc::init ()
 	_stats_cnt = -25;
 #endif
 
-	lua.tweak_rt_gc ();
 	lua.Print.connect (sigc::mem_fun (*this, &LuaProc::lua_print));
 	// register session object
 	lua_State* L = lua.getState ();
+	lua_mlock (L, 1);
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::dsp (L);
@@ -154,6 +156,7 @@ LuaProc::init ()
 		.addFunction ("name", &LuaProc::name)
 		.endClass ()
 		.endNamespace ();
+	lua_mlock (L, 0);
 
 	// add session to global lua namespace
 	luabridge::push <Session *> (L, &_session);
@@ -745,7 +748,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 	int64_t t1 = g_get_monotonic_time ();
 #endif
 
-	lua.collect_garbage_step (100 /*kB*/);
+	lua.collect_garbage_step ();
 #ifdef WITH_LUAPROC_STATS
 	if (++_stats_cnt > 0) {
 		int64_t t2 = g_get_monotonic_time ();
