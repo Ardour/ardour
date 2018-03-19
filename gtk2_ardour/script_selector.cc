@@ -88,7 +88,7 @@ ScriptSelector::script_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gt
 {
 	_script_combo.set_active (i);
 
-	return _script_combo.get_active_text () == "separator";
+	return _script_combo.get_active_text () == "--separator--";
 }
 
 void
@@ -98,7 +98,7 @@ ScriptSelector::setup_list ()
 
 	vector<string> script_names;
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		if ((*s)->name != "Shortcut") {
+		if ((*s)->name != "Shortcut" || _script_type != LuaScriptInfo::EditorAction) {
 			script_names.push_back ((*s)->name);
 		}
 	}
@@ -106,8 +106,10 @@ ScriptSelector::setup_list ()
 	_script_combo.clear();
 	_script_combo.set_row_separator_func (sigc::mem_fun (*this, &ScriptSelector::script_separator));
 
-	_script_combo.append_text ("Shortcut");
-	_script_combo.append_text ("separator");
+	if (_script_type == LuaScriptInfo::EditorAction) {
+		_script_combo.append_text ("Shortcut");
+		_script_combo.append_text ("--separator--");
+	}
 
 	vector<string>::const_iterator i;
 	for (i = script_names.begin(); i != script_names.end(); ++i) {
