@@ -131,7 +131,6 @@ function factory() return function()
 				local enable = {}
 				local params = instance["parameters"]
 				local p_id   = instance["plugin_id"]
-				local id = PBD.ID(p_id)
 				local act = instance["active"]
 
 				for k, v in pairs(invalidate) do --invalidate any deleted plugin's id
@@ -140,7 +139,7 @@ function factory() return function()
 					end
 				end
 
-				local proc = Session:processor_by_id(id)
+				local proc = Session:processor_by_id(PBD.ID(p_id))
 				if proc:isnil() then goto nextline end
 				local plug = proc:to_insert():plugin(0)
 
@@ -172,6 +171,5 @@ function factory() return function()
 	local c = rv["select"]
 	if c == "mark" then mark() end
 	if c == "recall" then recall() end
-	invalidate = {}
 
 end end
