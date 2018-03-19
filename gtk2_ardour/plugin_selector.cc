@@ -32,6 +32,7 @@
 #include <gtkmm/notebook.h>
 #include <gtkmm/stock.h>
 #include <gtkmm/table.h>
+#include <gtkmm/treestore.h>
 
 #include "gtkmm2ext/utils.h"
 
@@ -60,7 +61,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	: ArdourDialog (_("Plugin Manager"), true, false)
 	, search_clear_button (Stock::CLEAR)
 	, manager (mgr)
-	, inhibit_refill (false)
+	, _inhibit_refill (false)
 {
 	set_name ("PluginSelectorWindow");
 	add_events (Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
@@ -505,9 +506,11 @@ PluginSelector::set_sensitive_widgets ()
 		_fil_favorites_radio->set_sensitive(false);
 		_fil_hidden_radio->set_sensitive(false);
 		_fil_all_radio->set_sensitive(false);
+		_inhibit_refill = true;
 		_fil_type_combo.set_sensitive(false);
 		_fil_creator_combo.set_sensitive(false);
 		_fil_channel_combo.set_sensitive(false);
+		_inhibit_refill = false;
 	} else {
 		_fil_effects_radio->set_sensitive(true);
 		_fil_instruments_radio->set_sensitive(true);
@@ -515,9 +518,11 @@ PluginSelector::set_sensitive_widgets ()
 		_fil_favorites_radio->set_sensitive(true);
 		_fil_hidden_radio->set_sensitive(true);
 		_fil_all_radio->set_sensitive(true);
+		_inhibit_refill = true;
 		_fil_type_combo.set_sensitive(true);
 		_fil_creator_combo.set_sensitive(true);
 		_fil_channel_combo.set_sensitive(true);
+		_inhibit_refill = false;
 	}
 	if (!search_entry.get_text().empty()) {
 		refill ();
@@ -527,13 +532,22 @@ PluginSelector::set_sensitive_widgets ()
 void
 PluginSelector::refill ()
 {
-	if (inhibit_refill) {
+	if (_inhibit_refill) {
 		return;
 	}
 
 	std::string searchstr;
 
 	in_row_change = true;
+
+	plugin_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
+
+	int sort_col;
+	SortType sort_type;
+	bool sorted = plugin_model->get_sort_column_id (sort_col, sort_type);
+
+	/* Disable sorting to gain performance */
+	plugin_model->set_sort_column (-2, SORT_ASCENDING);
 
 	plugin_model->clear ();
 
@@ -548,6 +562,11 @@ PluginSelector::refill ()
 	lua_refiller (searchstr);
 
 	in_row_change = false;
+
+	plugin_display.set_model (plugin_model);
+	if (sorted) {
+		plugin_model->set_sort_column (sort_col, sort_type);
+	}
 }
 
 void
@@ -1065,11 +1084,11 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 Gtk::Menu*
 PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 {
-	inhibit_refill = true;
+	_inhibit_refill = true;
 	_fil_creator_combo.clear_items ();
 	_fil_creator_combo.append_text_item (_("Show All Creators"));
 	_fil_creator_combo.set_text (_("Show All Creators"));
-	inhibit_refill = false;
+	_inhibit_refill = false;
 
 	using namespace Menu_Helpers;
 

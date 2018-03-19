@@ -189,7 +189,7 @@ private:
 	bool _need_status_save;
 	bool _need_menu_rebuild;
 
-	bool inhibit_refill;
+	bool _inhibit_refill;
 };
 
 #endif // __ardour_plugin_selector_h__
