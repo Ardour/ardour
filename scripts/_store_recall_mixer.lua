@@ -7,6 +7,14 @@ ardour {
 
 function factory() return function()
 
+	function new_plugin(name)
+		local plugin = nil
+		for x = 0, 6 do
+			plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
+			if not(plugin:isnil()) then break end
+		end return plugin
+	end
+
 	local path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua")
 	function mark()
 		local file = io.open(path, "w")
@@ -59,9 +67,7 @@ function factory() return function()
 						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
 							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
 							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
-							if not(val == pd.normal) then
-								params[n] = val
-							end
+							params[n] = val
 						end
 						n = n + 1
 					end
@@ -92,24 +98,20 @@ function factory() return function()
 			if instance["route_id"]  ~= nil then route = true end
 			if instance["plugin_id"] ~= nil then plugin = true end
 
-			function new_plugin(name)
-				local plugin = nil
-				for x = 0, 6 do
-					plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
-					if not(plugin:isnil()) then break end
-				end return plugin
-			end
-
 			if route then
 				local old_order = ARDOUR.ProcessorList()
 				local rid = PBD.ID(instance["route_id"])
+				local order = instance["order"]
+				local cache = instance["cache"]
+				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
+
 				local rt = Session:route_by_id(rid)
 				if rt:isnil() then goto nextline end
-				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
-				for k, v in pairs(instance["order"]) do
+
+				for k, v in pairs(order) do
 					local proc = Session:processor_by_id(PBD.ID(v))
 					if proc:isnil() then
-						for id, name in pairs(instance["cache"]) do
+						for id, name in pairs(cache) do
 							if v == id then
 								proc = new_plugin(name)
 								invalidate[v] = proc:to_stateful():id():to_s()
@@ -117,6 +119,7 @@ function factory() return function()
 						end
 					end
 					if not(proc:isnil()) then old_order:push_back(proc) end
+					proc:activate()
 				end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
@@ -125,16 +128,31 @@ function factory() return function()
 			end
 
 			if plugin then
-				for k, v in pairs(invalidate) do --invalidate deleted plugin id's
-					if instance["plugin_id"] == k then
-						instance["plugin_id"] = v
+				local enable = {}
+				local params = instance["parameters"]
+				local p_id   = instance["plugin_id"]
+				local id = PBD.ID(p_id)
+				local act = instance["active"]
+
+				for k, v in pairs(invalidate) do --invalidate any deleted plugin's id
+					if p_id == k then
+						p_id = v
 					end
 				end
-				local act = instance["active"]
-				local id = PBD.ID(instance["plugin_id"])
+
 				local proc = Session:processor_by_id(id)
 				if proc:isnil() then goto nextline end
-				for k, v in pairs(instance["parameters"]) do
+				local plug = proc:to_insert():plugin(0)
+
+				for k, v in pairs(params) do
+					local label = plug:parameter_label(k)
+					if string.find(label, "Assign") or string.find(label, "Enable") then --@ToDo: Check Plugin type == LADSPA or VST?
+						enable[k] = v --queue any assignments/enables for after the initial parameter recalling to duck the 'in-on-change' feature
+					end
+					ARDOUR.LuaAPI.set_processor_param(proc, k, v)
+				end
+
+				for k, v in pairs(enable) do
 					ARDOUR.LuaAPI.set_processor_param(proc, k, v)
 				end
 				if act then proc:activate() else proc:deactivate() end
@@ -154,5 +172,6 @@ function factory() return function()
 	local c = rv["select"]
 	if c == "mark" then mark() end
 	if c == "recall" then recall() end
+	invalidate = {}
 
 end end
