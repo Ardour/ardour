@@ -69,8 +69,8 @@ function factory() return function()
 			local on = 0
 			for p in order:iter() do
 				local pid = p:to_stateful():id():to_s()
-				proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
 				if not(string.find(p:display_name(), "latcomp")) then
+					proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
 					cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
 				end
 				on = on + 1
