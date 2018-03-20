@@ -212,7 +212,15 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 				run_new_group_dialog (&routes, false);
 			} else {
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
-				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				/* First add new ones, then remove old ones.
+				 * We cannot allow the group to become temporarily empty, because
+				 * Session::route_removed_from_route_group() will delete empty groups.
+				 */
+				for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
+					/* RouteGroup::add () ignores routes already present in the set */
+					_dragging->group->add (*i);
+				}
+				for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 
 					bool const was_in_tab = find (
 						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
@@ -222,10 +230,9 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 
 					if (was_in_tab && !now_in_tab) {
 						_dragging->group->remove (*i);
-					} else if (!was_in_tab && now_in_tab) {
-						_dragging->group->add (*i);
 					}
 				}
+
 			}
 		}
 
