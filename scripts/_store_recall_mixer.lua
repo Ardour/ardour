@@ -2,7 +2,8 @@ ardour {
 	["type"] = "EditorAction",
 	name = "Mixer Store",
 	author = "Ardour Lua Taskforce",
-	description = [[Stores the current Mixer state as a file that can be recalled arbitrarily. Supports: processor settings, gain, trim, pan and processor ordering.]]
+	description = [[Stores the current Mixer state as a file that can be recalled arbitrarily.
+	Supports: processor settings, gain, trim, pan and processor ordering plus some fancy voodoo magic for re-adding deleted plugins.]]
 }
 
 function factory() return function()
@@ -15,11 +16,38 @@ function factory() return function()
 		end return plugin
 	end
 
+	function group_by_id(id)
+		local group = nil
+		for g in Session:route_groups():iter() do
+			local group_id = tonumber(g:to_stateful():id():to_s())
+			if group_id == id then group = g end
+		end return group
+	end
+
 	local path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua")
 	function mark()
+
 		local file = io.open(path, "w")
 		file:write("") --empty current file from last run
 		file:close()
+
+		local g_route_str, group_str = "", ""
+		local i = 0
+		for g in Session:route_groups():iter() do
+			group_str = "instance = {group_id = " .. g:to_stateful():id():to_s() .. ", routes = {"
+			for t in g:route_list():iter() do
+				g_route_str = g_route_str .."[".. i .."] = " .. t:to_stateful():id():to_s() .. ","
+				i = i + 1
+			end
+			group_str = group_str .. g_route_str .. "}}"
+		end
+
+		if not(group_str == "") then --sometimes there are no groups in the session
+			file = io.open(path, "a")
+			file:write(group_str, "\r\n")
+			file:close()
+		end
+
 		for r in Session:get_routes():iter() do
 			if r:is_monitor () or r:is_auditioner () then goto nextroute end -- skip special routes
 
@@ -42,7 +70,9 @@ function factory() return function()
 			for p in order:iter() do
 				local pid = p:to_stateful():id():to_s()
 				proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
-				cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
+				if not(string.find(p:display_name(), "latcomp")) then
+					cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
+				end
 				on = on + 1
 			end
 
@@ -91,21 +121,33 @@ function factory() return function()
 		for l in file:lines() do
 			--print(l)
 
-			local plugin, route = false, false
+			local plugin, route, group = false, false, false
 			local f = load(l)
 			f ()
 
 			if instance["route_id"]  ~= nil then route = true end
 			if instance["plugin_id"] ~= nil then plugin = true end
+			if instance["group_id"]  ~= nil then group = true end
+
+			if group then
+				local g_id = instance["group_id"]
+				local routes = instance["routes"]
+				local group = group_by_id(g_id)
+				if group == nil then goto nextline end
+				for k, v in pairs(routes) do
+					local rt = Session:route_by_id(PBD.ID(v))
+					if not(rt:isnil()) then group:add(rt) end
+				end
+			end
 
 			if route then
 				local old_order = ARDOUR.ProcessorList()
-				local rid = PBD.ID(instance["route_id"])
+				local r_id = PBD.ID(instance["route_id"])
 				local order = instance["order"]
 				local cache = instance["cache"]
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
 
-				local rt = Session:route_by_id(rid)
+				local rt = Session:route_by_id(r_id)
 				if rt:isnil() then goto nextline end
 
 				for k, v in pairs(order) do
@@ -114,12 +156,12 @@ function factory() return function()
 						for id, name in pairs(cache) do
 							if v == id then
 								proc = new_plugin(name)
+								rt:add_processor_by_index(proc, 0, nil, true)
 								invalidate[v] = proc:to_stateful():id():to_s()
 							end
 						end
 					end
 					if not(proc:isnil()) then old_order:push_back(proc) end
-					proc:activate()
 				end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
