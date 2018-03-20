@@ -692,6 +692,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int refresh_surface (lo_message msg);
 	int custom_clear (lo_message msg);
 	int custom_mode (float state, lo_message msg);
+	int _custom_mode (uint32_t state, lo_address addr);
 	int name_session (char *n, lo_message msg);
 	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
