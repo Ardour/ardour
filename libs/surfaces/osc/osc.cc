@@ -1972,7 +1972,6 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->bank_size = b_size;
-	s->custom_mode = CusOff;
 	s->strip_types = strips;
 	s->feedback = fb;
 	s->gainmode = gm;
@@ -1983,6 +1982,9 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	}
 	s->send_page_size = se_size;
 	s->plug_page_size = pi_size;
+	if (s->custom_mode >= GroupOnly) {
+		custom_mode (0.0, msg);
+	}
 	if (s->linkset) {
 		set_link (s->linkset, s->linkid, get_address (msg));
 		link_strip_types (s->linkset, s->strip_types.to_ulong());
@@ -2026,7 +2028,9 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->strip_types = st;
-	s->custom_mode = CusOff;
+	if (s->custom_mode >= GroupOnly) {
+		custom_mode (0.0, msg);
+	}
 	if (s->strip_types[10]) {
 		s->usegroup = PBD::Controllable::UseGroup;
 	} else {
@@ -2562,12 +2566,7 @@ int
 OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	boost::shared_ptr<Stripable> s = sur->select;
 	int ret = 1; /* unhandled */
 	if (s) {
 		if (!strncmp (path, X_("/select/group"), 13)) {
@@ -2608,6 +2607,17 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 					sur->temp_strips.push_back(s);
 				}
 				sur->custom_mode = GroupOnly;
+				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+				sur->nstrips = sur->custom_strips.size();
+				LinkSet *set;
+				uint32_t ls = sur->linkset;
+				if (ls) {
+					set = &(link_sets[ls]);
+					set->custom_mode = GroupOnly;
+					set->temp_strips.clear ();
+					set->temp_strips = sur->temp_strips;
+					set->strips = sur->strips;
+				}
 				set_bank (1, msg);
 				ret = 0;
 			} else {
@@ -2782,6 +2792,17 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 					}
 					sur->temp_strips.push_back(s);
 					sur->custom_mode = VCAOnly;
+					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+					sur->nstrips = sur->custom_strips.size();
+					LinkSet *set;
+					uint32_t ls = sur->linkset;
+					if (ls) {
+						set = &(link_sets[ls]);
+						set->custom_mode = VCAOnly;
+						set->temp_strips.clear ();
+						set->temp_strips = sur->temp_strips;
+						set->strips = sur->strips;
+					}
 					set_bank (1, msg);
 					ret = 0;
 				} else {
@@ -2836,6 +2857,17 @@ OSC::sel_bus_only (lo_message msg)
 				}
 				sur->temp_strips.push_back(s);
 				sur->custom_mode = BusOnly;
+				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+				sur->nstrips = sur->custom_strips.size();
+				LinkSet *set;
+				uint32_t ls = sur->linkset;
+				if (ls) {
+					set = &(link_sets[ls]);
+					set->custom_mode = BusOnly;
+					set->temp_strips.clear ();
+					set->temp_strips = sur->temp_strips;
+					set->strips = sur->strips;
+				}
 				set_bank (1, msg);
 				return 0;
 			}
