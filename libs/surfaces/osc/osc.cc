@@ -2735,11 +2735,7 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	int ret = 1; /* unhandled */
 	if (s) {
 		string svalue = "";
@@ -3865,11 +3861,7 @@ OSC::touch_detect (const char *path, const char* types, lo_arg **argv, int argc,
 		send = get_send (strp, get_address (msg));
 		ctr = 7;
 	} else if (!strncmp (path, X_("/select/"), 8)) {
-		if (sur->expand_enable && sur->expand) {
-			strp = get_strip (sur->expand, get_address (msg));
-		} else {
-			strp = _select;
-		}
+		strp = sur->select;
 		ctr = 8;
 	} else {
 		return ret;
@@ -3950,11 +3942,7 @@ OSC::sel_mute (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->mute_control()) {
 			s->mute_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4028,11 +4016,7 @@ OSC::sel_solo (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->solo_control()) {
 			session->set_control (s->solo_control(), yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4046,11 +4030,7 @@ OSC::sel_solo_iso (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->solo_isolate_control()) {
 			s->solo_isolate_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4065,11 +4045,7 @@ OSC::sel_solo_safe (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->solo_safe_control()) {
 			s->solo_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4084,11 +4060,7 @@ OSC::sel_recenable (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->rec_enable_control()) {
 			s->rec_enable_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4148,11 +4120,7 @@ OSC::sel_rename (char *newname, lo_message msg) {
 
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		s->set_name(std::string(newname));
 	}
@@ -4168,11 +4136,7 @@ OSC::sel_comment (char *newcomment, lo_message msg) {
 
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		if (!rt) {
@@ -4201,11 +4165,7 @@ OSC::sel_group (char *group, lo_message msg) {
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	return strip_select_group (s, group);
 }
 
@@ -4269,11 +4229,7 @@ OSC::sel_recsafe (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->rec_safe_control()) {
 			s->rec_safe_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4335,11 +4291,7 @@ OSC::sel_monitor_input (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
@@ -4384,11 +4336,7 @@ OSC::sel_monitor_disk (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
 		if (track) {
@@ -4429,11 +4377,7 @@ OSC::sel_phase (uint32_t yn, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->phase_control()) {
 			s->phase_control()->set_value (yn ? 1.0 : 0.0, PBD::Controllable::NoGroup);
@@ -4763,11 +4707,7 @@ OSC::sel_fader (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->gain_control()) {
 			fake_touch (s->gain_control());
@@ -4817,11 +4757,7 @@ OSC::sel_trim (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->trim_control()) {
 			s->trim_control()->set_value (dB_to_coefficient (val), PBD::Controllable::NoGroup);
@@ -4836,11 +4772,7 @@ OSC::sel_hide (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (state != s->is_hidden ()) {
 			s->presentation_info().set_hidden ((bool) state);
@@ -4854,11 +4786,7 @@ OSC::sel_pan_position (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if(s->pan_azimuth_control()) {
 			s->pan_azimuth_control()->set_value (s->pan_azimuth_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -4873,11 +4801,7 @@ OSC::sel_pan_width (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->pan_width_control()) {
 			s->pan_width_control()->set_value (s->pan_width_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -4995,11 +4919,7 @@ OSC::sel_sendgain (int id, float val, lo_message msg)
 		return float_message_with_id (X_("/select/send_gain"), id, -193, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	float abs;
 	int send_id = 0;
 	if (s) {
@@ -5034,11 +4954,7 @@ OSC::sel_sendfader (int id, float val, lo_message msg)
 		return float_message_with_id (X_("/select/send_fader"), id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	float abs;
 	int send_id = 0;
 	if (s) {
@@ -5110,11 +5026,7 @@ OSC::sel_sendenable (int id, float val, lo_message msg)
 		return float_message_with_id (X_("/select/send_enable"), id, 0, sur->feedback[2], get_address (msg));
 	}
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	int send_id = 0;
 	if (s) {
 		if (id > 0) {
@@ -5152,11 +5064,7 @@ OSC::sel_master_send_enable (int state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->master_send_enable_controllable ()) {
 			s->master_send_enable_controllable()->set_value (state, PBD::Controllable::NoGroup);
@@ -5692,11 +5600,7 @@ OSC::sel_pan_elevation (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->pan_elevation_control()) {
 			s->pan_elevation_control()->set_value (s->pan_elevation_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5711,11 +5615,7 @@ OSC::sel_pan_frontback (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->pan_frontback_control()) {
 			s->pan_frontback_control()->set_value (s->pan_frontback_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5730,11 +5630,7 @@ OSC::sel_pan_lfe (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->pan_lfe_control()) {
 			s->pan_lfe_control()->set_value (s->pan_lfe_control()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5750,11 +5646,7 @@ OSC::sel_comp_enable (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->comp_enable_controllable()) {
 			s->comp_enable_controllable()->set_value (s->comp_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5769,11 +5661,7 @@ OSC::sel_comp_threshold (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->comp_threshold_controllable()) {
 			s->comp_threshold_controllable()->set_value (s->comp_threshold_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5788,11 +5676,7 @@ OSC::sel_comp_speed (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->comp_speed_controllable()) {
 			s->comp_speed_controllable()->set_value (s->comp_speed_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5807,11 +5691,7 @@ OSC::sel_comp_mode (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->comp_mode_controllable()) {
 			s->comp_mode_controllable()->set_value (s->comp_mode_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5826,11 +5706,7 @@ OSC::sel_comp_makeup (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->comp_makeup_controllable()) {
 			s->comp_makeup_controllable()->set_value (s->comp_makeup_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5847,11 +5723,7 @@ OSC::sel_eq_enable (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->eq_enable_controllable()) {
 			s->eq_enable_controllable()->set_value (s->eq_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5866,11 +5738,7 @@ OSC::sel_eq_hpf_freq (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_freq_controllable(true)) {
 			s->filter_freq_controllable(true)->set_value (s->filter_freq_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5885,11 +5753,7 @@ OSC::sel_eq_lpf_freq (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_freq_controllable(false)) {
 			s->filter_freq_controllable(false)->set_value (s->filter_freq_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5904,11 +5768,7 @@ OSC::sel_eq_hpf_enable (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_enable_controllable(true)) {
 			s->filter_enable_controllable(true)->set_value (s->filter_enable_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5923,11 +5783,7 @@ OSC::sel_eq_lpf_enable (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_enable_controllable(false)) {
 			s->filter_enable_controllable(false)->set_value (s->filter_enable_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5942,11 +5798,7 @@ OSC::sel_eq_hpf_slope (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_slope_controllable(true)) {
 			s->filter_slope_controllable(true)->set_value (s->filter_slope_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5961,11 +5813,7 @@ OSC::sel_eq_lpf_slope (float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (s->filter_slope_controllable(false)) {
 			s->filter_slope_controllable(false)->set_value (s->filter_slope_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
@@ -5980,11 +5828,7 @@ OSC::sel_eq_gain (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (id > 0) {
 			--id;
@@ -6002,11 +5846,7 @@ OSC::sel_eq_freq (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (id > 0) {
 			--id;
@@ -6024,11 +5864,7 @@ OSC::sel_eq_q (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (id > 0) {
 			--id;
@@ -6046,11 +5882,7 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (sur->expand_enable) {
-		s = get_strip (sur->expand, get_address (msg));
-	} else {
-		s = _select;
-	}
+	s = sur->select;
 	if (s) {
 		if (id > 0) {
 			--id;
