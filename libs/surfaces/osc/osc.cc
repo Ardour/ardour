@@ -1378,7 +1378,7 @@ OSC::custom_clear (lo_message msg)
 int
 OSC::custom_mode (float state, lo_message msg)
 {
-	return _custom_mode ((OSCCustomMode) state, get_address (msg));
+	return _custom_mode ((OSCCustomMode) (int)state, get_address (msg));
 }
 
 int
