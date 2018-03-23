@@ -107,7 +107,7 @@ function factory() return function()
 						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
 							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
 							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
-							print(proc:display_name(), label, val)
+							--print(r:name(), "->", proc:display_name(), label, val)
 							params[n] = val
 						end
 						n = n + 1
@@ -164,10 +164,11 @@ function factory() return function()
 
 				local rt = Session:route_by_id(r_id)
 				if rt:isnil() then goto nextline end
+
 				local cur_group_id = route_group_interrogate(rt)
-				if not(group) and (cur_group_id ~= false) then
+				if not(group) and (cur_group_id) then
 					local g = group_by_id(cur_group_id)
-					if g ~= nil then g:remove(rt) end
+					if g then g:remove(rt) end
 				end
 
 				for k, v in pairs(order) do
@@ -179,11 +180,11 @@ function factory() return function()
 								if not(proc:isnil()) then
 									rt:add_processor_by_index(proc, 0, nil, true)
 									invalidate[v] = proc:to_stateful():id():to_s()
-									old_order:push_back(proc)
 								end
 							end
 						end
 					end
+					if not(proc:isnil()) then old_order:push_back(proc) end
 				end
 
 				if muted  then rt:mute_control():set_value(1, 1) else rt:mute_control():set_value(0, 1) end
@@ -234,9 +235,10 @@ function factory() return function()
 	}
 
 	local rv = LuaDialog.Dialog("Mixer Store:", dialog_options):run()
-	assert(rv, 'Dialog box was canceled or is ' .. type(rv))
-	local c = rv["select"]
-	if c == "mark" then mark() end
-	if c == "recall" then recall() end
+	if rv then
+		local c = rv["select"]
+		if c == "mark" then mark() end
+		if c == "recall" then recall() end
+	end
 
 end end
