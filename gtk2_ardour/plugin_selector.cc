@@ -632,7 +632,7 @@ PluginSelector::refiller (const PluginInfoList& plugs, const::std::string& searc
 			} else {
 				snprintf (buf, sizeof(buf), "%d / %d", (*i)->n_inputs.n_audio(), (*i)->n_outputs.n_audio());
 				newrow[plugin_columns.audio_io] = buf;
-				snprintf (buf, sizeof(buf), "%d / %d", (*i)->n_inputs.n_audio(), (*i)->n_outputs.n_audio());
+				snprintf (buf, sizeof(buf), "%d / %d", (*i)->n_inputs.n_midi(), (*i)->n_outputs.n_midi());
 				newrow[plugin_columns.midi_io] = buf;
 			}
 
