@@ -314,15 +314,15 @@ bool
 FaderPort::button_long_press_timeout (ButtonID id)
 {
 	if (buttons_down.find (id) != buttons_down.end()) {
-		get_button (id).invoke (ButtonState (LongPress|button_state), false);
+		if (get_button (id).invoke (ButtonState (LongPress|button_state), false)) {
+			/* whichever button this was, we've used it ... don't invoke the
+			   release action.
+			*/
+			consumed.insert (id);
+		}
 	} else {
 		/* release happened and somehow we were not cancelled */
 	}
-
-	/* whichever button this was, we've used it ... don't invoke the
-	   release action.
-	*/
-	consumed.insert (id);
 
 	return false; /* don't get called again */
 }
@@ -401,7 +401,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	set<ButtonID>::iterator c = consumed.find (id);
 
 	if (c == consumed.end()) {
-		button.invoke (button_state, tb->value ? true : false);
+		(void) button.invoke (button_state, tb->value ? true : false);
 	} else {
 		DEBUG_TRACE (DEBUG::FaderPort, "button was consumed, ignored\n");
 		consumed.erase (c);
@@ -918,7 +918,7 @@ FaderPort::connected ()
 	_output_port->write (buf, 6, 0);
 }
 
-void
+bool 
 FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
 	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("invoke button %1 for %2 state %3%4%5\n", id, (press ? "press":"release"), hex, bs, dec));
@@ -928,12 +928,12 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 	if (press) {
 		if ((x = on_press.find (bs)) == on_press.end()) {
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no press action for button %1 state %2 @ %3 in %4\n", id, bs, this, &on_press));
-			return;
+			return false;
 		}
 	} else {
 		if ((x = on_release.find (bs)) == on_release.end()) {
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no release action for button %1 state %2 @%3 in %4\n", id, bs, this, &on_release));
-			return;
+			return false;
 		}
 	}
 
@@ -941,13 +941,17 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 	case NamedAction:
 		if (!x->second.action_name.empty()) {
 			fp.access_action (x->second.action_name);
+			return true;
 		}
 		break;
 	case InternalFunction:
 		if (x->second.function) {
 			x->second.function ();
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void
