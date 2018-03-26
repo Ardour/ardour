@@ -364,6 +364,9 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		break;
 	case User:
 		bs = UserDown;
+		if (tb->value) {
+			start_press_timeout (button, id);
+		}
 		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
@@ -966,6 +969,13 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
+			if (id == User) {
+				/* if the binding is for the User button, we
+				   need to store the button state as it will be
+				   seen on button release, which will include UserDown.
+				*/
+				bs = FaderPort::ButtonState (bs|UserDown);
+			}
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 to action %2 on release + %3%4%5\n", id, name, bs));
 			todo.action_name = name;
 			on_release[bs] = todo;
