@@ -177,7 +177,10 @@ void
 AutomationController::value_adjusted ()
 {
 	if (!_ignore_change) {
-		_controllable->set_value (_controllable->interface_to_internal(_adjustment->get_value()), Controllable::NoGroup);
+		const double new_val = _controllable->interface_to_internal(_adjustment->get_value());
+		if (_controllable->user_double() != new_val) {
+			_controllable->set_value (new_val, Controllable::NoGroup);
+		}
 	}
 
 	/* A bar controller will automatically follow the adjustment, but for a
