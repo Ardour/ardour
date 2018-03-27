@@ -613,36 +613,37 @@ MidiTrack::MidiControl::actually_set_value (double val, PBD::Controllable::Group
 		uint8_t ev[3] = { parameter.channel(), uint8_t (val), 0 };
 		switch(parameter.type()) {
 		case MidiCCAutomation:
-			ev[0] += MIDI_CMD_CONTROL;
+			ev[0] |= MIDI_CMD_CONTROL;
 			ev[1] = parameter.id();
 			ev[2] = int(val);
 			break;
 
 		case MidiPgmChangeAutomation:
 			size = 2;
-			ev[0] += MIDI_CMD_PGM_CHANGE;
+			ev[0] |= MIDI_CMD_PGM_CHANGE;
 			ev[1] = int(val);
 			break;
 
 		case MidiChannelPressureAutomation:
 			size = 2;
-			ev[0] += MIDI_CMD_CHANNEL_PRESSURE;
+			ev[0] |= MIDI_CMD_CHANNEL_PRESSURE;
 			ev[1] = int(val);
 			break;
 
 		case MidiNotePressureAutomation:
-			ev[0] += MIDI_CMD_NOTE_PRESSURE;
+			ev[0] |= MIDI_CMD_NOTE_PRESSURE;
 			ev[1] = parameter.id();
 			ev[2] = int(val);
 			break;
 
 		case MidiPitchBenderAutomation:
-			ev[0] += MIDI_CMD_BENDER;
+			ev[0] |= MIDI_CMD_BENDER;
 			ev[1] = 0x7F & int(val);
 			ev[2] = 0x7F & (int(val) >> 7);
 			break;
 
 		default:
+			size = 0;
 			assert(false);
 		}
 		_route->write_immediate_event(size,  ev);
