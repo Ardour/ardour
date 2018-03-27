@@ -4892,7 +4892,17 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		samplepos_t const position = end_sample + (r->first_sample() - start_sample + 1);
 		playlist = (*i)->region()->playlist();
 		playlist->clear_changes ();
+
+		/* ripple first */
+
+		if (Config->get_edit_mode() == Ripple) {
+			playlist->ripple (position, (*i)->region()->length() * times, (*i)->region());
+		}
+
+		/* now duplicate */
+
 		playlist->duplicate (r, position, gap, times);
+
 		_session->add_command(new StatefulDiffCommand (playlist));
 
 		c.disconnect ();
