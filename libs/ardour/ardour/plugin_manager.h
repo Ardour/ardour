@@ -24,6 +24,7 @@
 #include "libardour-config.h"
 #endif
 
+#include <deque>
 #include <list>
 #include <map>
 #include <string>
@@ -81,6 +82,11 @@ public:
 	void save_statuses ();
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
+
+	typedef std::deque<std::string> RecentPluginList;
+
+	const RecentPluginList get_recents() const;
+	void add_recent(const PluginInfoPtr&);
 
 	void load_tags ();
 	void save_tags ();
@@ -166,6 +172,11 @@ private:
 	};
 	typedef std::set<PluginStatus> PluginStatusList;
 	PluginStatusList statuses;
+
+	void load_recents ();
+	void save_recents ();
+
+	RecentPluginList recents;
 
 	ARDOUR::PluginInfoList  _empty_plugin_info;
 	ARDOUR::PluginInfoList* _windows_vst_plugin_info;

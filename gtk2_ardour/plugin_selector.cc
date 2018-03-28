@@ -815,6 +815,11 @@ PluginSelector::run ()
 				}
 			}
 			if (interested_object && !plugins.empty()) {
+				for  (vector<PluginPtr>::iterator j = plugins.begin(); j != plugins.end(); ++j) {
+					manager.add_recent((*j)->get_info());
+				}
+
+				_need_menu_rebuild = true;
 				finish = !interested_object->use_plugins (plugins);
 			}
 
@@ -1022,6 +1027,10 @@ PluginSelector::build_plugin_menu ()
 	items.push_back (MenuElem (_("Favorites"), *manage (favs)));
 
 	items.push_back (MenuElem (_("Plugin Manager..."), sigc::mem_fun (*this, &PluginSelector::show_manager)));
+
+	Gtk::Menu* recent = create_recent_menu(all_plugs);
+	items.push_back (MenuElem (_("Recent"), *manage (recent)));
+
 	items.push_back (SeparatorElem ());
 
 	Menu* by_creator = create_by_creator_menu(all_plugs);
@@ -1079,6 +1088,30 @@ PluginSelector::create_favs_menu (PluginInfoList& all_plugs)
 		}
 	}
 	return favs;
+}
+
+Gtk::Menu*
+PluginSelector::create_recent_menu(PluginInfoList& all_plugs)
+{
+	using namespace Menu_Helpers;
+
+	Menu* recents = new Menu();
+	recents->set_name("ArdourContextMenu");
+
+	PluginManager::RecentPluginList recent_plugs = manager.get_recents();
+
+	// plugins are sorted alphabetically to keep conformity with the Recent Session window
+	PluginMenuCompareByName cmp_by_name;
+	all_plugs.sort(cmp_by_name);
+	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
+		if (std::find(recent_plugs.begin(), recent_plugs.end(), (*i)->unique_id) != recent_plugs.end()) {
+			string type = GetPluginTypeStr(*i);
+			MenuElem elem ((*i)->name + type, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
+			elem.get_child()->set_use_underline (false);
+			recents->items().push_back (elem);
+		}
+	}
+	return recents;
 }
 
 Gtk::Menu*
@@ -1189,6 +1222,8 @@ PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
 	if (p && interested_object) {
 		SelectedPlugins plugins;
 		plugins.push_back (p);
+		manager.add_recent(pi);
+		manager.PluginListChanged();
 		interested_object->use_plugins (plugins);
 	}
 

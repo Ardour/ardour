@@ -176,6 +176,8 @@ PluginManager::PluginManager ()
 
 	load_tags ();
 
+	load_recents();
+
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
 	}
@@ -1476,6 +1478,74 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	}
 
 	PluginStatusChanged (t, id, status); /* EMIT SIGNAL */
+}
+
+void
+PluginManager::load_recents()
+{
+	recents.clear();
+
+	std::string path;
+	find_file (plugin_metadata_search_path(), "plugin_recent", path);  //note: if no user folder is found, this will find the resources path
+	gchar *fbuf = NULL;
+	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
+		return;
+	}
+	stringstream ifs (fbuf);
+	g_free (fbuf);
+
+	std::string id;
+	char buf[1024];
+
+	while (ifs) {
+		ifs.getline (buf, sizeof (buf), '\n');
+		if (!ifs) {
+			break;
+		}
+
+		id = buf;
+		strip_whitespace_edges (id);
+
+		recents.push_back(id);
+	}
+}
+
+void
+PluginManager::save_recents()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_recent");
+	stringstream ofs;
+
+	for (RecentPluginList::iterator i = recents.begin(); i != recents.end(); ++i) {
+		ofs << *i;
+		ofs << endl;
+	}
+	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
+}
+
+void
+PluginManager::add_recent(const PluginInfoPtr & piptr)
+{
+	load_recents();
+
+	std::remove(recents.begin(), recents.end(), piptr->unique_id);
+
+	recents.push_front(piptr->unique_id);
+
+	// TODO ConfigValue
+	uint32_t max_recent_sessions = Config->get_max_recent_plugins();
+
+	if (recents.size() > max_recent_sessions) {
+		recents.erase(recents.begin()+max_recent_sessions, recents.end());
+	}
+
+	save_recents();
+}
+
+const PluginManager::RecentPluginList
+PluginManager::get_recents() const
+{
+	return recents;
 }
 
 PluginType

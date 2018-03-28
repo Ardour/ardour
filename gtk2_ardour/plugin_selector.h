@@ -180,6 +180,7 @@ private:
 	void plugin_status_changed ( ARDOUR::PluginType t, std::string unique_id, ARDOUR::PluginManager::PluginStatusType s );
 
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
+	Gtk::Menu* create_recent_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_tags_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
