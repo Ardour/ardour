@@ -4869,16 +4869,39 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	}
 
 	boost::shared_ptr<Playlist> playlist;
+	std::set<boost::shared_ptr<Playlist> > playlists; // list of unique playlists affected by duplication
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
 
 	samplepos_t const start_sample = regions.start ();
 	samplepos_t const end_sample = regions.end_sample ();
-	samplecnt_t const gap = end_sample - start_sample + 1;
+	samplecnt_t const span = end_sample - start_sample + 1;
 
 	begin_reversible_command (Operations::duplicate_region);
 
 	selection->clear_regions ();
+
+	/* ripple first so that we don't move the duplicates that will be added */
+
+	if (Config->get_edit_mode() == Ripple) {
+
+		/* convert RegionSelection into RegionList so that we can pass it to ripple and exclude the regions we will duplicate */
+
+		RegionList exclude;
+
+		for (RegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
+			exclude.push_back ((*i)->region());
+			playlist = (*i)->region()->playlist();
+			if (playlists.insert (playlist).second) {
+				/* successfully inserted into set, so it's the first time we've seen this playlist */
+				playlist->clear_changes ();
+			}
+		}
+
+		for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+			(*p)->ripple (start_sample, span * times, &exclude);
+		}
+	}
 
 	for (RegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
 
@@ -4891,23 +4914,25 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		samplepos_t const position = end_sample + (r->first_sample() - start_sample + 1);
 		playlist = (*i)->region()->playlist();
-		playlist->clear_changes ();
 
-		/* ripple first */
-
-		if (Config->get_edit_mode() == Ripple) {
-			playlist->ripple (position, (*i)->region()->length() * times, (*i)->region());
+		if (Config->get_edit_mode() != Ripple) {
+			if (playlists.insert (playlist).second) {
+				playlist->clear_changes ();
+			}
 		}
 
-		/* now duplicate */
-
-		playlist->duplicate (r, position, gap, times);
-
-		_session->add_command(new StatefulDiffCommand (playlist));
+		playlist->duplicate (r, position, span, times);
 
 		c.disconnect ();
 
 		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
+	}
+
+	for (set<boost::shared_ptr<Playlist> >::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		_session->add_command (new StatefulDiffCommand (*p));
+		vector<Command*> cmds;
+		(*p)->rdiff (cmds);
+		_session->add_commands (cmds);
 	}
 
 	if (!foo.empty()) {
