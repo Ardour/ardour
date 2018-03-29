@@ -157,19 +157,25 @@ DuplicateRouteDialog::on_response (int response)
 	ARDOUR::PlaylistDisposition playlist_action = playlist_disposition ();
 	uint32_t cnt = count ();
 
+	/* Copy the track selection because it will/may change as we add new ones */
+	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
 	int err = 0;
 
-	RouteList sorted_routes;
-	get_ordered_selected_route_list(sorted_routes);
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
 
-	for (RouteList::iterator r = sorted_routes.begin(); r != sorted_routes.end(); ++r) {
+		RouteUI* rui = dynamic_cast<RouteUI*> (*t);
 
-		if ((*r)->is_master() || (*r)->is_monitor()) {
+		if (!rui) {
+			/* some other type of timeaxis view, not a route */
+			continue;
+		}
+
+		if (rui->route()->is_master() || rui->route()->is_monitor()) {
 			/* no option to duplicate these */
 			continue;
 		}
 
-		XMLNode& state ((*r)->get_state());
+		XMLNode& state (rui->route()->get_state());
 		RouteList rl = _session->new_route_from_template (cnt, ARDOUR_UI::instance()->translate_order (insert_at()), state, std::string(), playlist_action);
 
 		/* normally the state node would be added to a parent, and
@@ -190,33 +196,6 @@ DuplicateRouteDialog::on_response (int response)
 		                     true, MESSAGE_ERROR, BUTTONS_OK, true);
 		msg.set_position (WIN_POS_MOUSE);
 		msg.run ();
-	}
-}
-
-void
-DuplicateRouteDialog::get_ordered_selected_route_list(RouteList& sorted_routes)
-{
-	/* Copy the track selection because it will/may change as we add new ones */
-	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
-
-	/* We have to get the UI order of the Tracks, not the selection order */
-	TrackViewList tvl_Ui = PublicEditor::instance().get_track_views();
-
-	for (TrackViewList::iterator it = tvl_Ui.begin(); it != tvl_Ui.end(); ++it) {
-		for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-			RouteUI* rui_UI = dynamic_cast<RouteUI*> (*it);
-			RouteUI* rui_Sel = dynamic_cast<RouteUI*> (*t);
-
-			if (!rui_UI || !rui_Sel) {
-				/* some other type of timeaxis view, not a route */
-				continue;
-			}
-
-			if (rui_UI == rui_Sel) {
-				sorted_routes.push_back(rui_Sel->route());
-				break;
-			}
-		}
 	}
 }
 
