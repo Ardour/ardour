@@ -199,25 +199,18 @@ DuplicateRouteDialog::get_ordered_selected_route_list(RouteList& sorted_routes)
 	/* Copy the track selection because it will/may change as we add new ones */
 	TrackSelection tracks  (PublicEditor::instance().get_selection().tracks);
 
-	/* We have to get the UI order of the Tracks, not the selection order */
-	TrackViewList tvl_Ui = PublicEditor::instance().get_track_views();
+	for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
+		RouteUI* rui_Sel = dynamic_cast<RouteUI*> (*t);
 
-	for (TrackViewList::iterator it = tvl_Ui.begin(); it != tvl_Ui.end(); ++it) {
-		for (TrackSelection::iterator t = tracks.begin(); t != tracks.end(); ++t) {
-			RouteUI* rui_UI = dynamic_cast<RouteUI*> (*it);
-			RouteUI* rui_Sel = dynamic_cast<RouteUI*> (*t);
-
-			if (!rui_UI || !rui_Sel) {
-				/* some other type of timeaxis view, not a route */
-				continue;
-			}
-
-			if (rui_UI == rui_Sel) {
-				sorted_routes.push_back(rui_Sel->route());
-				break;
-			}
+		if (!rui_Sel) {
+			/* some other type of timeaxis view, not a route */
+			continue;
 		}
+
+		sorted_routes.push_back(rui_Sel->route());
 	}
+
+	sorted_routes.sort(Stripable::Sorter());
 }
 
 RouteDialogs::InsertAt
