@@ -485,6 +485,7 @@ class CoreAudioBackend : public AudioBackend {
 
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
+	pthread_mutex_t _port_registration_mutex;
 	bool _port_change_flag;
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {

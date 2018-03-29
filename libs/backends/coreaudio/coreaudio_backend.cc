@@ -110,6 +110,7 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
+	pthread_mutex_init (&_port_registration_mutex, 0);
 	pthread_mutex_init (&_process_callback_mutex, 0);
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init  (&_freewheel_signal, 0);
@@ -128,6 +129,7 @@ CoreAudioBackend::~CoreAudioBackend ()
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
 	pthread_mutex_destroy (&_port_callback_mutex);
+	pthread_mutex_destroy (&_port_registration_mutex);
 	pthread_mutex_destroy (&_process_callback_mutex);
 	pthread_mutex_destroy (&_freewheel_mutex);
 	pthread_cond_destroy  (&_freewheel_signal);
@@ -938,8 +940,10 @@ CoreAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string&
 	}
 
 	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	pthread_mutex_lock (&_port_registration_mutex);
 	_portmap.erase (p->name());
 	_portmap.insert (make_pair (newname, p));
+	pthread_mutex_unlock (&_port_registration_mutex);
 	return p->set_name (newname);
 }
 
@@ -1066,8 +1070,10 @@ CoreAudioBackend::add_port (
 		return 0;
 	}
 
+	pthread_mutex_lock (&_port_registration_mutex);
 	_ports.insert (port);
 	_portmap.insert (make_pair (name, port));
+	pthread_mutex_unlock (&_port_registration_mutex);
 
 	return port;
 }
@@ -1085,8 +1091,10 @@ CoreAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	disconnect_all(port_handle);
+	pthread_mutex_lock (&_port_registration_mutex);
 	_portmap.erase (port->name());
 	_ports.erase (i);
+	pthread_mutex_unlock (&_port_registration_mutex);
 	delete port;
 }
 
