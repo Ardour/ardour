@@ -45,9 +45,6 @@ public:
 
 	int restart (ARDOUR::Session*);
 
-protected:
-	 void get_ordered_selected_route_list(ARDOUR::RouteList&);
-
 private:
 	Gtk::Entry name_template_entry;
 	Gtk::VBox playlist_button_box;
