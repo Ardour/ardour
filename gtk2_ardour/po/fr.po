@@ -12098,7 +12098,7 @@ msgstr ""
 #: rc_option_editor.cc:3173
 #, fuzzy
 msgid "Silence plugins when the transport is stopped"
-msgstr "Greffons silencieux à l'arrêt"
+msgstr "Faire taire les greffons lorsque le transport s'arrête"
 
 #: rc_option_editor.cc:3179
 msgid ""
@@ -12107,6 +12107,12 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>Si actif</b>, les greffons seront réinitialisés lorsque le transport "
+"s'arrête. Lorsque l'option est désactivée, les greffons seront laissés en "
+"l'état lorsque le transport s'arrête.\n"
+"\n"
+"Les greffons concernés sont principalement ceux avec une \"queue\" comme "
+"les réverbérations."
 
 #: rc_option_editor.cc:3183
 msgid "Make new plugins active"
