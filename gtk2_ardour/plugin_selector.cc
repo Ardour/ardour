@@ -1098,13 +1098,11 @@ PluginSelector::create_recent_menu(PluginInfoList& all_plugs)
 	Menu* recents = new Menu();
 	recents->set_name("ArdourContextMenu");
 
-	PluginManager::RecentPluginList recent_plugs = manager.get_recents();
-
 	// plugins are sorted alphabetically to keep conformity with the Recent Session window
 	PluginMenuCompareByName cmp_by_name;
 	all_plugs.sort(cmp_by_name);
 	for (PluginInfoList::const_iterator i = all_plugs.begin(); i != all_plugs.end(); ++i) {
-		if (std::find(recent_plugs.begin(), recent_plugs.end(), (*i)->unique_id) != recent_plugs.end()) {
+		if (manager.is_recent(*i)) {
 			string type = GetPluginTypeStr(*i);
 			MenuElem elem ((*i)->name + type, (sigc::bind (sigc::mem_fun (*this, &PluginSelector::plugin_chosen_from_menu), *i)));
 			elem.get_child()->set_use_underline (false);

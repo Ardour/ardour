@@ -83,10 +83,8 @@ public:
 	void set_status (ARDOUR::PluginType type, std::string unique_id, PluginStatusType status);
 	PluginStatusType get_status (const PluginInfoPtr&) const;
 
-	typedef std::deque<std::string> RecentPluginList;
-
-	const RecentPluginList get_recents() const;
 	void add_recent(const PluginInfoPtr&);
+	bool is_recent(const PluginInfoPtr&) const;
 
 	void load_tags ();
 	void save_tags ();
@@ -119,6 +117,18 @@ public:
 	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagChanged; //PluginType t, string id, string tag
 
 private:
+	struct PluginRecent {
+		ARDOUR::PluginType type;
+		std::string unique_id;
+		std::string name;
+
+		PluginRecent (ARDOUR::PluginType t, std::string id, std::string n)
+			: type (t), unique_id (id), name (n) {}
+
+		bool operator== (PluginRecent const& other) const {
+			return other.type == type && other.unique_id == unique_id;
+		}
+	};
 
 	struct PluginTag {
 	    ARDOUR::PluginType type;
@@ -176,6 +186,7 @@ private:
 	void load_recents ();
 	void save_recents ();
 
+	typedef std::deque<PluginRecent> RecentPluginList;
 	RecentPluginList recents;
 
 	ARDOUR::PluginInfoList  _empty_plugin_info;

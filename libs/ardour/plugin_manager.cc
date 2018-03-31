@@ -1483,30 +1483,27 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 void
 PluginManager::load_recents()
 {
-	recents.clear();
-
-	std::string path;
-	find_file (plugin_metadata_search_path(), "plugin_recent", path);  //note: if no user folder is found, this will find the resources path
-	gchar *fbuf = NULL;
-	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
+	std::string path = Glib::build_filename(user_plugin_metadata_dir(), "plugin_recent");
+	if (!Glib::file_test(path, Glib::FILE_TEST_EXISTS)) {
 		return;
 	}
-	stringstream ifs (fbuf);
-	g_free (fbuf);
 
-	std::string id;
-	char buf[1024];
+	XMLTree tree;
+	if (!tree.read(path)) {
+		error << string_compose (_("Cannot parse Recent Plugin info from %1"), path) << endmsg;
+		return;
+	}
 
-	while (ifs) {
-		ifs.getline (buf, sizeof (buf), '\n');
-		if (!ifs) {
-			break;
-		}
+	recents.clear();
+	for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+		PluginType type;
+		string id;
+		string name;
+		(*i)->get_property(X_("type"), type);
+		(*i)->get_property(X_("id"), id);
+		(*i)->get_property(X_("name"), name);
 
-		id = buf;
-		strip_whitespace_edges (id);
-
-		recents.push_back(id);
+		recents.push_back(PluginRecent(type, id, name));
 	}
 }
 
@@ -1514,13 +1511,24 @@ void
 PluginManager::save_recents()
 {
 	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_recent");
-	stringstream ofs;
+	XMLNode* root = new XMLNode (X_("RecentPlugins"));
 
 	for (RecentPluginList::iterator i = recents.begin(); i != recents.end(); ++i) {
-		ofs << *i;
-		ofs << endl;
+		XMLNode* node = new XMLNode (X_("Plugin"));
+
+		node->set_property (X_("type"), to_generic_vst ((*i).type));
+		node->set_property(X_("id"), (*i).unique_id);
+		node->set_property(X_("name"), (*i).name);
+
+		root->add_child_nocopy(*node);
 	}
-	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
+
+	XMLTree tree;
+	tree.set_root(root);
+
+	if (!tree.write(path)) {
+		error << string_compose (_("Could not save Recent Plugins info to %1"), path) << endmsg;
+	}
 }
 
 void
@@ -1528,11 +1536,11 @@ PluginManager::add_recent(const PluginInfoPtr & piptr)
 {
 	load_recents();
 
-	std::remove(recents.begin(), recents.end(), piptr->unique_id);
+	PluginRecent pr(piptr->type, piptr->unique_id, piptr->name);
+	std::remove(recents.begin(), recents.end(), pr);
 
-	recents.push_front(piptr->unique_id);
+	recents.push_front(pr);
 
-	// TODO ConfigValue
 	uint32_t max_recent_sessions = Config->get_max_recent_plugins();
 
 	if (recents.size() > max_recent_sessions) {
@@ -1542,10 +1550,10 @@ PluginManager::add_recent(const PluginInfoPtr & piptr)
 	save_recents();
 }
 
-const PluginManager::RecentPluginList
-PluginManager::get_recents() const
-{
-	return recents;
+bool
+PluginManager::is_recent(const PluginInfoPtr& piptr) const {
+	PluginRecent pr (piptr->type, piptr->unique_id, piptr->name);
+	return find(recents.begin(), recents.end(), pr) != recents.end();
 }
 
 PluginType
