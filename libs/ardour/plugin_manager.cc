@@ -1547,6 +1547,8 @@ PluginManager::add_recent(const PluginInfoPtr & piptr)
 		recents.erase(recents.begin()+max_recent_sessions, recents.end());
 	}
 
+	PluginListChanged();
+
 	save_recents();
 }
 

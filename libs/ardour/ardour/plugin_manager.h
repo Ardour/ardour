@@ -107,7 +107,7 @@ public:
 	};
 	std::vector<std::string> get_all_tags (enum TagFilter) const;
 
-	/** plugins were added to or removed from one of the PluginInfoLists, OR the user has made changes to the status/tags */
+	/** plugins were added to or removed from one of the PluginInfoLists, OR the user has made changes to the status/tags/recents */
 	PBD::Signal0<void> PluginListChanged;
 
 	/** A single plugin's Hidden/Favorite status changed */

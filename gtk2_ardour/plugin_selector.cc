@@ -815,11 +815,6 @@ PluginSelector::run ()
 				}
 			}
 			if (interested_object && !plugins.empty()) {
-				for  (vector<PluginPtr>::iterator j = plugins.begin(); j != plugins.end(); ++j) {
-					manager.add_recent((*j)->get_info());
-				}
-
-				_need_menu_rebuild = true;
 				finish = !interested_object->use_plugins (plugins);
 			}
 
@@ -1220,8 +1215,6 @@ PluginSelector::plugin_chosen_from_menu (const PluginInfoPtr& pi)
 	if (p && interested_object) {
 		SelectedPlugins plugins;
 		plugins.push_back (p);
-		manager.add_recent(pi);
-		manager.PluginListChanged();
 		interested_object->use_plugins (plugins);
 	}
 

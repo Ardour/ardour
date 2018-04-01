@@ -66,6 +66,7 @@
 #include "ardour/parameter_descriptor.h"
 #include "ardour/phase_control.h"
 #include "ardour/plugin_insert.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/polarity_processor.h"
 #include "ardour/port.h"
 #include "ardour/port_insert.h"
@@ -1079,6 +1080,10 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				pi->set_strict_io (_strict_io);
+
+				for (uint32_t pc = 0; pc < pi->get_count(); ++pc) {
+					PluginManager::instance().add_recent(pi->plugin(pc)->get_info());
+				}
 			}
 
 			if (*i == _amp) {
@@ -4771,7 +4776,7 @@ Route::setup_invisible_processors ()
 		new_processors.insert (amp, _monitor_control);
 	}
 
-	/* TRIM CONTROL */
+	/* TRIM CONTROL */
 
 	ProcessorList::iterator trim = new_processors.end();
 
