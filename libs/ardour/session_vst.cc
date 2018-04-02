@@ -500,11 +500,23 @@ intptr_t Session::vst_callback (
 	case audioMasterBeginEdit:
 		SHOW_CALLBACK ("audioMasterBeginEdit");
 		// begin of automation session (when mouse down), parameter index in <index>
+		if (plug && plug->plugin_insert ()) {
+			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			if (ac) {
+				ac->start_touch (ac->session().transport_sample());
+			}
+		}
 		return 0;
 
 	case audioMasterEndEdit:
 		SHOW_CALLBACK ("audioMasterEndEdit");
 		// end of automation session (when mouse up),     parameter index in <index>
+		if (plug && plug->plugin_insert ()) {
+			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			if (ac) {
+				ac->stop_touch (ac->session().transport_sample());
+			}
+		}
 		return 0;
 
 	case audioMasterOpenFileSelector:
