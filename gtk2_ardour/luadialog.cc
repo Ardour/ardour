@@ -22,6 +22,7 @@
 
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
+#include "gtk2_ardour/stripable_colorpicker.h"
 
 #include "gtkmm2ext/utils.h"
 
@@ -168,6 +169,34 @@ public:
 protected:
 	Gtk::HSeparator _sep;
 };
+
+class LuaColorPicker : public LuaDialogWidget
+{
+public:
+	LuaColorPicker (std::string const& key)
+		: LuaDialogWidget (key, "", 0, 1)
+	{}
+
+	Gtk::Widget* widget ()
+	{
+		return &_cs;
+	}
+	void assign (luabridge::LuaRef* rv) const {
+		uint32_t rgba = ARDOUR_UI_UTILS::gdk_color_to_rgba(_cs.get_color());
+		(*rv)[_key] = rgba;
+	}
+protected:
+	Gtk::ColorButton _cs;
+};
+/*
+local a = {
+	{type = "color", key = "col", title = ""}
+}
+
+local rv = LuaDialog.Dialog("", a):run()
+
+print(rv['col'])
+*/
 
 class LuaDialogCheckbox : public LuaDialogWidget
 {
@@ -675,6 +704,8 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 				path = i.value ()["path"].cast<std::string> ();
 			}
 			w = new LuaFileChooser (key, title, Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER, path);
+		} else if (type == "color") {
+			w = new LuaColorPicker (key);
 		}
 
 		if (w) {

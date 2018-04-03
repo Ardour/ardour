@@ -19,6 +19,7 @@
 #include "pbd/compose.h"
 #include "pbd/i18n.h"
 
+#include "public_editor.h"
 #include "stripable_colorpicker.h"
 #include "ui_config.h"
 #include "utils.h"
@@ -142,10 +143,15 @@ StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
 void
 StripableColorDialog::finish_color_edit (int response)
 {
+	ARDOUR::RouteList rl = PublicEditor::instance().get_selection().tracks.routelist();
+
 	if (response == RESPONSE_OK) {
 		ColorChanged (gdk_color_to_rgba (get_colorsel()->get_current_color())); /* EMIT SIGNAL */
 	}
 	if (_stripable && response == RESPONSE_OK) {
+		for (ARDOUR::RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
+			(*i)->presentation_info().set_color (gdk_color_to_rgba (get_colorsel()->get_current_color()));
+		}
 		_stripable->presentation_info().set_color (gdk_color_to_rgba (get_colorsel()->get_current_color()));
 	} else if (_stripable) {
 		_stripable->presentation_info().set_color (_initial_color);
