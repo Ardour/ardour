@@ -188,15 +188,6 @@ public:
 protected:
 	Gtk::ColorButton _cs;
 };
-/*
-local a = {
-	{type = "color", key = "col", title = ""}
-}
-
-local rv = LuaDialog.Dialog("", a):run()
-
-print(rv['col'])
-*/
 
 class LuaDialogCheckbox : public LuaDialogWidget
 {
