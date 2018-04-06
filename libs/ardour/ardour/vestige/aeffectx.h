@@ -235,10 +235,10 @@ typedef struct _VstEvents VstEvents;
 /* this struct taken from http://asseca.com/vst-24-specs/efGetParameterProperties.html */
 struct _VstParameterProperties
 {
-	float stepFloat;              /* float step */
-	float smallStepFloat;         /* small float step */
-	float largeStepFloat;         /* large float step */
-	char label[VestigeMaxLabelLen];  /* parameter label */
+	float stepFloat;             /* float step */
+	float smallStepFloat;        /* small float step */
+	float largeStepFloat;        /* large float step */
+	char label[64];              /* parameter label */
 	int32_t flags;               /* @see VstParameterFlags */
 	int32_t minInteger;          /* integer minimum */
 	int32_t maxInteger;          /* integer maximum */
