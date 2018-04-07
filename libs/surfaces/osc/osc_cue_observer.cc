@@ -64,6 +64,7 @@ OSCCueObserver::clear_observer ()
 	tick_enable = false;
 
 	strip_connections.drop_connections ();
+	_strip = boost::shared_ptr<ARDOUR::Stripable> ();
 	send_end (0);
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.text_message_with_id (X_("/cue/name"), 0, " ", true, addr);

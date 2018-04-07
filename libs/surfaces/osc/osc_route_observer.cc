@@ -97,6 +97,9 @@ OSCRouteObserver::no_strip ()
 	_init = true;
 
 	strip_connections.drop_connections ();
+	_gain_control = boost::shared_ptr<ARDOUR::GainControl> ();
+	_send = boost::shared_ptr<ARDOUR::Send> ();
+	_strip = boost::shared_ptr<Stripable> ();
 	/*
 	 * The strip will sit idle at this point doing nothing until
 	 * the surface has recalculated it's strip list and then calls

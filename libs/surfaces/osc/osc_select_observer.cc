@@ -101,6 +101,7 @@ OSCSelectObserver::no_strip ()
 	send_connections.drop_connections ();
 	plugin_connections.drop_connections ();
 	eq_connections.drop_connections ();
+	_strip = boost::shared_ptr<Stripable> ();
 	/*
 	 * The strip will sit idle at this point doing nothing until
 	 * the surface has recalculated it's strip list and then calls
