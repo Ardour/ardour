@@ -4437,17 +4437,23 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		return -1;
 	}
 	OSCSurface *sur = get_surface(addr, true);
-	boost::shared_ptr<Stripable> old_sel = sur->select;
+	boost::weak_ptr<Stripable> o_sel = sur->select;
+	boost::shared_ptr<Stripable> old_sel= o_sel.lock ();
+
 	if (!s) {
-		// expand doesn't point to a stripable, turn it off and use select
-		sur->expand = 0;
-		sur->expand_enable = false;
-		if (ControlProtocol::first_selected_stripable()) {
-			s = ControlProtocol::first_selected_stripable();
+		// we got a null strip check that old strip is valid
+		if (old_sel && sur->expand_enable) {
+			s = old_sel;
 		} else {
-			s = session->master_out ();
-		}
+			sur->expand = 0;
+			sur->expand_enable = false;
+			if (ControlProtocol::first_selected_stripable()) {
+				s = ControlProtocol::first_selected_stripable();
+			} else {
+				s = session->master_out ();
+			}
 			_select = s;
+		}
 	}
 	if (s != old_sel) {
 		sur->select = s;
