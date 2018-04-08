@@ -142,7 +142,7 @@ Editor::do_ptimport (std::string ptpath,
 		msg.run ();
 		return;
 	} else {
-		MessageDialog msg (string_compose (_("PT v%1 Session @ %2Hz\n\n%3 audio files\n%4 audio regions\n%5 active audio regions\n%6 midi regions\n%7 active midi regions\n\nContinue..."), (int)ptf.version, ptf.sessionrate, ptf.audiofiles.size (), ptf.regions.size () - ptf.midiregions.size (), ptf.tracks.size (), ptf.midiregions.size (), ptf.miditracks.size ()));
+		MessageDialog msg (string_compose (_("PT v%1 Session @ %2Hz\n\n%3 audio files\n%4 audio regions\n%5 active audio regions\n%6 midi regions\n%7 active midi regions\n\nContinue..."), (int)ptf.version, ptf.sessionrate, ptf.audiofiles.size (), ptf.regions.size (), ptf.tracks.size (), ptf.midiregions.size (), ptf.miditracks.size ()));
 		msg.add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 
 		int result = msg.run ();
@@ -176,15 +176,26 @@ Editor::do_ptimport (std::string ptpath,
 			ptfwavpair.push_back (p);
 			imported.push_back (import_status.sources.back ());
 		} else {
+			/* ptformat does not know the length of sources so we cannot do this:
+			XMLNode srcxml (X_("Source"));
+			srcxml.set_property ("name", a->filename);
+			srcxml.set_property ("type", "audio");
+			srcxml.set_property ("id", PBD::ID ().to_s ());
+			boost::shared_ptr<Source> source = SourceFactory::createSilent (*_session, srcxml, a->length, _session->sample_rate ());
+			p.index1 = a->index;
+			p.id = source->id ();
+			ptfwavpair.push_back (p);
+			imported.push_back (source);
+			*/
 			onefailed = true;
 		}
 	}
 
 	if (onefailed) {
-		MessageDialog msg (_("Failed to load one or more of the audio files, but continuing to attempt import."));
+		MessageDialog msg (_("Failed to load one or more of the audio files. Click to attempt partial import."));
 		msg.run ();
 	} else {
-		MessageDialog msg (_("Success! Import should complete soon."));
+		MessageDialog msg (_("Success! All audio files found.  Click to complete import."));
 		msg.run ();
 	}
 
