@@ -97,10 +97,11 @@ SMF::test(const std::string& path)
 	smf_t* test_smf = smf_load(f);
 	fclose(f);
 
-	const bool success = (test_smf != NULL);
+	if (!test_smf) {
+		return false;
+	}
 	smf_delete(test_smf);
-
-	return success;
+	return true;
 }
 
 /** Attempt to open the SMF file for reading and/or writing.
