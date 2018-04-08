@@ -1154,7 +1154,7 @@ PTFFormat::parsemidi12(void) {
 			region_t r = { std::string(""), ridx, 0, 0, 0, w, m};
 			if ((mregion = std::find(begin, finish, r)) != finish) {
 				mtr.reg = *mregion;
-				mtr.reg.startpos = std::labs(region_pos - mtr.reg.startpos);
+				mtr.reg.startpos = labs(region_pos - mtr.reg.startpos);
 				miditracks.push_back(mtr);
 			}
 			if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\xff\xff\xff\xff\xff\xff\xff\xff", 8)) {
@@ -1235,7 +1235,8 @@ PTFFormat::parseaudio(void) {
 		std::reverse(wave.begin(), wave.end());
 		wav_t f = { wave, (uint16_t)(numberofwavs - i - 1), 0, 0 };
 
-		if (foundin(wave, string("Audio Files"))) {
+		if (foundin(wave, string("Audio Files")) ||
+				foundin(wave, string("Fade Files"))) {
 			i--;
 			continue;
 		}
@@ -1380,7 +1381,6 @@ PTFFormat::parserest89(void) {
 			// Add file to list only if it is an actual wav
 			if ((found = std::find(begin, finish, f)) != finish) {
 				f.filename = (*found).filename;
-				audiofiles.push_back(f);
 				// Also add plain wav as region
 				std::vector<midi_ev_t> m;
 				region_t r = {
