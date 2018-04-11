@@ -4567,7 +4567,7 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 		s = sur->expand_strip;
 	} else {
 		sur->expand_enable = false;
-		s = _select;
+		s = boost::shared_ptr<Stripable> ();
 	}
 
 	return _strip_select (s, get_address (msg));
