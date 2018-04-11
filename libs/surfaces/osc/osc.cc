@@ -2176,6 +2176,7 @@ OSC::get_surface (lo_address addr , bool quiet)
 	s.sel_obs = 0;
 	s.expand = 0;
 	s.expand_enable = false;
+	s.expand_strip = boost::shared_ptr<Stripable> ();
 	s.cue = false;
 	s.aux = 0;
 	s.cue_obs = 0;
@@ -4409,7 +4410,7 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 	if (yn) {
 		sel = get_strip (ssid, get_address (msg));
 	} else {
-		sel = _select;
+		sel = boost::shared_ptr<Stripable> ();
 	}
 
 	return _strip_select (sel, get_address (msg));
@@ -4458,6 +4459,8 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	if (!s) {
 		sur->expand = 0;
 		sur->expand_enable = false;
+		// XXXX fix this to be more like editor mixer selection
+		// may have to be it's own call
 		if (ControlProtocol::first_selected_stripable()) {
 			s = ControlProtocol::first_selected_stripable();
 		} else {
@@ -4495,6 +4498,7 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		sur->sel_obs->set_expand (sur->expand_enable);
 		uint32_t obs_expand = 0;
 		if (sur->expand_enable) {
+			sur->expand = get_sid (s, addr);
 			obs_expand = sur->expand;
 		} else {
 			obs_expand = 0;
@@ -4562,9 +4566,13 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
+	if (!sur->expand_strip) {
+		state = 0;
+		float_message (X_("/select/expand"), 0.0, get_address (msg));
+	}
 	if (state) {
 		sur->expand_enable = (bool) state;
-		s = sur->expand_strip;
+		s = boost::shared_ptr<Stripable> ();
 	} else {
 		sur->expand_enable = false;
 		s = boost::shared_ptr<Stripable> ();
