@@ -150,7 +150,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		OSCSelectObserver* sel_obs;	// So we can sync select feedback with selected channel
 		uint32_t expand;			// Used by /select/select
 		bool expand_enable;			// use expand instead of select
-		boost::shared_ptr<ARDOUR::Stripable> select; // stripable this surface uses (maybe expand strip)		
+		boost::shared_ptr<ARDOUR::Stripable> expand_strip; // stripable this surface uses for expand
+		boost::shared_ptr<ARDOUR::Stripable> select; // stripable this surface uses as selected
 		int plug_page;				// current plugin page
 		uint32_t plug_page_size;	// plugin page size (number of controls)
 		int plugin_id;			// id of current plugin
@@ -185,8 +186,21 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [12]	- Send Playhead position like primary/secondary GUI clocks
 		 * [13] - Send well known feedback (for /select/command
 		 * [14] - use OSC 1.0 only (#reply -> /reply)
+		 *
+		 * Strip_type bits:
+		 * [0] - Audio Tracks
+		 * [1] - Midi Tracks
+		 * [2] - Audio Bus
+		 * [3] - Midi Bus
+		 * [4] - VCAs
+		 * [5] - master
+		 * [6] - Monitor
+		 * [7] - Aux Bus
+		 * [8] - Selected
+		 * [9] - Hidden
+		 * [10] - Use Groups
+		 * [11] - Global Expand
 		 */
-
 
 // storage for  each surface's settings
 	mutable Glib::Threads::Mutex surfaces_lock;

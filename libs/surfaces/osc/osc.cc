@@ -2938,7 +2938,7 @@ OSC::get_sid (boost::shared_ptr<ARDOUR::Stripable> strip, lo_address addr)
 			}
 		}
 	}
-	// failsafe... should never get here.
+	// strip not in current bank
 	return 0;
 }
 
@@ -4399,6 +4399,8 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 				val = 1;
 			}
 			return float_message_with_id (X_("/strip/expand"), ssid, val, sur->feedback[2], get_address (msg));
+		} else {
+			sur->expand_strip = s;
 		}
 	}
 	sur->expand_enable = (bool) yn;
@@ -4439,21 +4441,29 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	OSCSurface *sur = get_surface(addr, true);
 	boost::weak_ptr<Stripable> o_sel = sur->select;
 	boost::shared_ptr<Stripable> old_sel= o_sel.lock ();
+	boost::weak_ptr<Stripable> o_expand = sur->expand_strip;
+	boost::shared_ptr<Stripable> old_expand= o_expand.lock ();
 
 	if (!s) {
-		// we got a null strip check that old strip is valid
-		if (old_sel && sur->expand_enable) {
-			s = old_sel;
-		} else {
-			sur->expand = 0;
-			sur->expand_enable = false;
-			if (ControlProtocol::first_selected_stripable()) {
-				s = ControlProtocol::first_selected_stripable();
+		// we got a null strip check that old strips are valid
+		if (old_expand && sur->expand_enable) {
+			sur->expand = get_sid (old_expand, addr);
+			if (sur->strip_types[11] || sur->expand) {
+				s = old_expand;
 			} else {
-				s = session->master_out ();
+				sur->expand_strip = boost::shared_ptr<Stripable> ();
 			}
-			_select = s;
 		}
+	}
+	if (!s) {
+		sur->expand = 0;
+		sur->expand_enable = false;
+		if (ControlProtocol::first_selected_stripable()) {
+			s = ControlProtocol::first_selected_stripable();
+		} else {
+			s = session->master_out ();
+		}
+		_select = s;
 	}
 	if (s != old_sel) {
 		sur->select = s;
@@ -4552,9 +4562,9 @@ OSC::sel_expand (uint32_t state, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
-	if (state && sur->expand) {
+	if (state) {
 		sur->expand_enable = (bool) state;
-		s = get_strip (sur->expand, get_address (msg));
+		s = sur->expand_strip;
 	} else {
 		sur->expand_enable = false;
 		s = _select;
