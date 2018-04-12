@@ -483,7 +483,14 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == SetTip) {
 
-		gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
+		gchar* old = gtk_widget_get_tooltip_markup (req->widget->gobj());
+		if (
+				(old && req->msg && strcmp (old, req->msg))
+				||
+				((old == NULL) != (req->msg == NULL || req->msg[0] == '\0'))
+			 ) {
+			gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
+		}
 
 	} else {
 
