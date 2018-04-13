@@ -164,6 +164,7 @@ PluginEqGui::start_listening ()
 
 	_plugin->activate();
 	set_buffer_size(4096, 16384);
+	_plugin->set_block_size (_buffer_size);
 	// Connect the realtime signal collection callback
 	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), boost::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
@@ -364,7 +365,6 @@ PluginEqGui::run_impulse_analysis()
 	// map output buffers after input buffers (no inplace for VST)
 	out_map.offset_to (DataType::AUDIO, inputs);
 
-	_plugin->set_block_size (_buffer_size);
 	_plugin->connect_and_run(_bufferset, 0, _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
 	samplecnt_t f = _plugin->signal_latency ();
 	// Adding user_latency() could be interesting
