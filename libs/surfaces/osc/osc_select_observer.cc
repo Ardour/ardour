@@ -150,6 +150,8 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 
 		session->RouteGroupPropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_sharing, this, _1), OSC::instance());
 		group_sharing (rt->route_group ());
+	} else {
+		group_sharing (0);
 	}
 
 	_strip->presentation_info().PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::pi_changed, this, _1), OSC::instance());
@@ -696,64 +698,62 @@ void
 OSCSelectObserver::group_sharing (RouteGroup *rgc)
 {
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	RouteGroup *rg;
 	if (rt) {
-		RouteGroup *rg = rt->route_group();
-		if (rg) {
-			if (rg != rgc) {
-				return;
-			}
-			if (rg->is_gain () != _group_sharing[0] || _group_sharing[15]) {
-				_group_sharing[0] = rg->is_gain ();
-				_osc.int_message (X_("/select/group/gain"), _group_sharing[0], addr);
-			}
-			if (rg->is_relative () != _group_sharing[1] || _group_sharing[15]) {
-				_group_sharing[1] = rg->is_relative ();
-				_osc.int_message (X_("/select/group/relative"), _group_sharing[1], addr);
-			}
-			if (rg->is_mute () != _group_sharing[2] || _group_sharing[15]) {
-				_group_sharing[2] = rg->is_mute ();
-				_osc.int_message (X_("/select/group/mute"), _group_sharing[2], addr);
-			}
-			if (rg->is_solo () != _group_sharing[3] || _group_sharing[15]) {
-				_group_sharing[3] = rg->is_solo ();
-				_osc.int_message (X_("/select/group/solo"), _group_sharing[3], addr);
-			}
-			if (rg->is_recenable () != _group_sharing[4] || _group_sharing[15]) {
-				_group_sharing[4] = rg->is_recenable ();
-				_osc.int_message (X_("/select/group/recenable"), _group_sharing[4], addr);
-			}
-			if (rg->is_select () != _group_sharing[5] || _group_sharing[15]) {
-				_group_sharing[5] = rg->is_select ();
-				_osc.int_message (X_("/select/group/select"), _group_sharing[5], addr);
-			}
-			if (rg->is_route_active () != _group_sharing[6] || _group_sharing[15]) {
-				_group_sharing[6] = rg->is_route_active ();
-				_osc.int_message (X_("/select/group/active"), _group_sharing[6], addr);
-			}
-			if (rg->is_color () != _group_sharing[7] || _group_sharing[15]) {
-				_group_sharing[7] = rg->is_color ();
-				_osc.int_message (X_("/select/group/color"), _group_sharing[7], addr);
-			}
-			if (rg->is_monitoring () != _group_sharing[8] || _group_sharing[15]) {
-				_group_sharing[8] = rg->is_monitoring ();
-				_osc.int_message (X_("/select/group/monitoring"), _group_sharing[8], addr);
-			}
-			if (rg->is_active () != _group_sharing[9] || _group_sharing[15]) {
-				_group_sharing[9] = rg->is_active ();
-				_osc.int_message (X_("/select/group/enable"), _group_sharing[9], addr);
-			}
-		} else {
-			_osc.int_message (X_("/select/group/gain"), 0, addr);
-			_osc.int_message (X_("/select/group/relative"), 0, addr);
-			_osc.int_message (X_("/select/group/mute"), 0, addr);
-			_osc.int_message (X_("/select/group/solo"), 0, addr);
-			_osc.int_message (X_("/select/group/recenable"), 0, addr);
-			_osc.int_message (X_("/select/group/select"), 0, addr);
-			_osc.int_message (X_("/select/group/active"), 0, addr);
-			_osc.int_message (X_("/select/group/color"), 0, addr);
-			_osc.int_message (X_("/select/group/monitoring"), 0, addr);
-			_osc.int_message (X_("/select/group/enable"), 0, addr);
+		rg = rt->route_group();
+	}
+	if (rg && rt) {
+		if (rg->is_gain () != _group_sharing[0] || _group_sharing[15]) {
+			_group_sharing[0] = rg->is_gain ();
+			_osc.int_message (X_("/select/group/gain"), _group_sharing[0], addr);
 		}
+		if (rg->is_relative () != _group_sharing[1] || _group_sharing[15]) {
+			_group_sharing[1] = rg->is_relative ();
+			_osc.int_message (X_("/select/group/relative"), _group_sharing[1], addr);
+		}
+		if (rg->is_mute () != _group_sharing[2] || _group_sharing[15]) {
+			_group_sharing[2] = rg->is_mute ();
+			_osc.int_message (X_("/select/group/mute"), _group_sharing[2], addr);
+		}
+		if (rg->is_solo () != _group_sharing[3] || _group_sharing[15]) {
+			_group_sharing[3] = rg->is_solo ();
+			_osc.int_message (X_("/select/group/solo"), _group_sharing[3], addr);
+		}
+		if (rg->is_recenable () != _group_sharing[4] || _group_sharing[15]) {
+			_group_sharing[4] = rg->is_recenable ();
+			_osc.int_message (X_("/select/group/recenable"), _group_sharing[4], addr);
+		}
+		if (rg->is_select () != _group_sharing[5] || _group_sharing[15]) {
+			_group_sharing[5] = rg->is_select ();
+			_osc.int_message (X_("/select/group/select"), _group_sharing[5], addr);
+		}
+		if (rg->is_route_active () != _group_sharing[6] || _group_sharing[15]) {
+			_group_sharing[6] = rg->is_route_active ();
+			_osc.int_message (X_("/select/group/active"), _group_sharing[6], addr);
+		}
+		if (rg->is_color () != _group_sharing[7] || _group_sharing[15]) {
+			_group_sharing[7] = rg->is_color ();
+			_osc.int_message (X_("/select/group/color"), _group_sharing[7], addr);
+		}
+		if (rg->is_monitoring () != _group_sharing[8] || _group_sharing[15]) {
+			_group_sharing[8] = rg->is_monitoring ();
+			_osc.int_message (X_("/select/group/monitoring"), _group_sharing[8], addr);
+		}
+		if (rg->is_active () != _group_sharing[9] || _group_sharing[15]) {
+			_group_sharing[9] = rg->is_active ();
+			_osc.int_message (X_("/select/group/enable"), _group_sharing[9], addr);
+		}
+	} else {
+		_osc.int_message (X_("/select/group/gain"), 0, addr);
+		_osc.int_message (X_("/select/group/relative"), 0, addr);
+		_osc.int_message (X_("/select/group/mute"), 0, addr);
+		_osc.int_message (X_("/select/group/solo"), 0, addr);
+		_osc.int_message (X_("/select/group/recenable"), 0, addr);
+		_osc.int_message (X_("/select/group/select"), 0, addr);
+		_osc.int_message (X_("/select/group/active"), 0, addr);
+		_osc.int_message (X_("/select/group/color"), 0, addr);
+		_osc.int_message (X_("/select/group/monitoring"), 0, addr);
+		_osc.int_message (X_("/select/group/enable"), 0, addr);
 	}
 	_group_sharing[15] = 0;
 }
