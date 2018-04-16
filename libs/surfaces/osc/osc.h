@@ -109,15 +109,11 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		All
 	};
 
-	enum OSCCustomMode {
-		CusOff = 0,
-		CusRawOrder = 1,
-		CusSort =2,
-		CusFilterRaw = 5,
-		CusFilter = 6,
-		GroupOnly = 7,
-		VCAOnly = 8,
-		BusOnly = 9
+	enum OSCTempMode {
+		TempOff = 0,
+		GroupOnly = 1,
+		VCAOnly = 2,
+		BusOnly = 3
 	};
 
 	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
@@ -138,7 +134,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		int gainmode;				// what kind of faders do we have Gain db or position 0 to 1?
 		PBD::Controllable::GroupControlDisposition usegroup;	// current group disposition
 		Sorted custom_strips;		// a sorted list of user selected strips
-		OSCCustomMode custom_mode;	// use custom strip list
+		uint32_t custom_mode;		// use custom strip list
+		OSCTempMode temp_mode;		// use temp strip list
 		Sorted temp_strips;			// temp strip list for grouponly, vcaonly, auxonly
 		Sorted strips;				// list of stripables for this surface
 		// strips
@@ -216,8 +213,9 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		bool autobank;					// banksize is derived from total
 		uint32_t not_ready;				// number of 1st device, 0 = ready
 		Sorted custom_strips;			// a sorted list of user selected strips
-		OSCCustomMode custom_mode;	// use custom strip list
-		Sorted temp_strips;			// temp strip list for grouponly, vcaonly, auxonly
+		uint32_t custom_mode;			// use custom strip list
+		OSCTempMode temp_mode;			// use custom strip list
+		Sorted temp_strips;				// temp strip list for grouponly, vcaonly, auxonly
 		std::bitset<32> strip_types;	// strip_types for this linkset
 		Sorted strips;					// list of valid strips in order for this set
 	};
@@ -380,6 +378,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(group_list);
 	PATH_CALLBACK_MSG(sel_bus_only);
+	PATH_CALLBACK_MSG(sel_previous);
+	PATH_CALLBACK_MSG(sel_next);
 	PATH_CALLBACK_MSG(surface_list);
 	PATH_CALLBACK_MSG(transport_sample);
 	PATH_CALLBACK_MSG(transport_speed);
@@ -717,7 +717,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int refresh_surface (lo_message msg);
 	int custom_clear (lo_message msg);
 	int custom_mode (float state, lo_message msg);
-	int _custom_mode (OSCCustomMode state, lo_address addr);
+	int _custom_mode (uint32_t state, lo_address addr);
 	int name_session (char *n, lo_message msg);
 	// select
 	int sel_send_pagesize (uint32_t size, lo_message msg);
@@ -766,6 +766,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_trim (float val, lo_message msg);
 	int sel_hide (uint32_t state, lo_message msg);
 	int sel_bus_only (lo_message msg);
+	int _sel_bus_only (lo_address addr);
+	int sel_previous (lo_message msg);
+	int sel_next (lo_message msg);
+	int sel_delta (int delta, lo_message msg);
 	boost::shared_ptr<ARDOUR::Send> get_send (boost::shared_ptr<ARDOUR::Stripable> st, lo_address addr);
 	int sel_pan_position (float val, lo_message msg);
 	int sel_pan_width (float val, lo_message msg);
