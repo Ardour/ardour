@@ -59,6 +59,7 @@ class OSCGlobalObserver
 	float _last_monitor_gain;
 	lo_address addr;
 	std::string path;
+	std::string mark_text;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	ARDOUR::Session* session;

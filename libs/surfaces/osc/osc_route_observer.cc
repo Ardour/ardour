@@ -107,7 +107,7 @@ OSCRouteObserver::no_strip ()
 	 * that does not exist... Crash
 	 */
  }
-	
+
 void
 OSCRouteObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, bool force)
 {

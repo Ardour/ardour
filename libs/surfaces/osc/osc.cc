@@ -1737,6 +1737,7 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int se_page = sur->send_page_size;
 	int fadermode = sur->gainmode;
 	int feedback = sur->feedback.to_ulong();
+	sur->feedback = 0;
 	int strip_types = sur->strip_types.to_ulong();
 	int bank_size = sur->bank_size;
 	int linkset = sur->linkset;
@@ -2129,7 +2130,9 @@ OSC::set_surface_port (uint32_t po, lo_message msg)
 						it++;
 					}
 				}
-				refresh_surface (msg);
+				if (sur->feedback.to_ulong()) {
+					refresh_surface (msg);
+				}
 				return 0;
 			}
 		}
@@ -2215,7 +2218,9 @@ void
 OSC::global_feedback (OSCSurface* sur)
 {
 	OSCGlobalObserver* o = sur->global_obs;
-	delete o;
+	if (o) {
+		delete o;
+	}
 	if (sur->feedback[4] || sur->feedback[3] || sur->feedback[5] || sur->feedback[6]) {
 
 		// create a new Global Observer for this surface
@@ -2850,7 +2855,6 @@ OSC::_sel_bus_only (lo_address addr)
 {
 	OSCSurface *sur = get_surface(addr);
 	boost::shared_ptr<Stripable> s = sur->select;
-	std::cout << string_compose ("bus_only for: %1\n", s->name());
 	if (s) {
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		if (rt) {
@@ -4482,7 +4486,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		_select = s;
 	}
 	if (s != old_sel) {
-		std::cout << string_compose ("new Select: %1\n", s->name());
 		sur->select = s;
 
 /*
@@ -4507,7 +4510,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	OSCSelectObserver* so = dynamic_cast<OSCSelectObserver*>(sur->sel_obs);
 	if (sur->feedback[13]) {
 		if (so != 0) {
-			std::cout << string_compose ("refreshing select: %1\n", s->name());
 			so->refresh_strip (s, nsends, sur->gainmode, true);
 		} else {
 			OSCSelectObserver* sel_fb = new OSCSelectObserver (*this, *session, sur);
@@ -4531,7 +4533,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		}
 	}
 	if (s != old_sel) {
-		std::cout << string_compose ("new Select2: %1\n", s->name());
 		sur->select = s;
 		if (sur->temp_mode == GroupOnly) {
 			boost::shared_ptr<Route> ort = boost::dynamic_pointer_cast<Route> (old_sel);
@@ -4577,7 +4578,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 				_set_bank (1, addr);
 			}
 		} else if (sur->temp_mode == BusOnly) {
-			std::cout << string_compose ("bus only select: %1\n", s->name());
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 			if (rt) {
 				if (!rt->is_track () && rt->can_solo ()) {
@@ -4705,9 +4705,7 @@ OSC::sel_delta (int delta, lo_message msg)
 	boost::weak_ptr<Stripable> o_sel = sur->select;
 	boost::shared_ptr<Stripable> old_sel= o_sel.lock ();
 	for (uint32_t i = 0; i < nstps; i++) {
-		std::cout << string_compose ("try strip %1 - %2\n", i, sel_strips[i]->name());
 		if (old_sel == sel_strips[i]) {
-			std::cout << string_compose ("got strip %1 - %2\n", i, sel_strips[i]->name());
 			if (i && delta < 0) {
 				new_sel = sel_strips[i - 1];
 			} else if ((i + 1) < nstps && delta > 0) {
@@ -4720,7 +4718,6 @@ OSC::sel_delta (int delta, lo_message msg)
 				// should not happen
 				return -1;
 			}
-			std::cout << string_compose ("New strip %1\n",new_sel->name());
 		}
 	}
 	if (!new_sel) {
@@ -6577,13 +6574,16 @@ OSC::cue_send_enable (uint32_t id, float state, lo_message msg)
 int
 OSC::float_message (string path, float val, lo_address addr)
 {
+	_lo_lock.lock ();
 
 	lo_message reply;
 	reply = lo_message_new ();
 	lo_message_add_float (reply, (float) val);
 
 	lo_send_message (addr, path.c_str(), reply);
+	Glib::usleep(1);
 	lo_message_free (reply);
+	_lo_lock.unlock ();
 
 	return 0;
 }
@@ -6591,6 +6591,7 @@ OSC::float_message (string path, float val, lo_address addr)
 int
 OSC::float_message_with_id (std::string path, uint32_t ssid, float value, bool in_line, lo_address addr)
 {
+	_lo_lock.lock ();
 	lo_message msg = lo_message_new ();
 	if (in_line) {
 		path = string_compose ("%1/%2", path, ssid);
@@ -6600,20 +6601,25 @@ OSC::float_message_with_id (std::string path, uint32_t ssid, float value, bool i
 	lo_message_add_float (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
+	Glib::usleep(1);
 	lo_message_free (msg);
+	_lo_lock.unlock ();
 	return 0;
 }
 
 int
 OSC::int_message (string path, int val, lo_address addr)
 {
+	_lo_lock.lock ();
 
 	lo_message reply;
 	reply = lo_message_new ();
 	lo_message_add_int32 (reply, (float) val);
 
 	lo_send_message (addr, path.c_str(), reply);
+	Glib::usleep(1);
 	lo_message_free (reply);
+	_lo_lock.unlock ();
 
 	return 0;
 }
@@ -6621,6 +6627,7 @@ OSC::int_message (string path, int val, lo_address addr)
 int
 OSC::int_message_with_id (std::string path, uint32_t ssid, int value, bool in_line, lo_address addr)
 {
+	_lo_lock.lock ();
 	lo_message msg = lo_message_new ();
 	if (in_line) {
 		path = string_compose ("%1/%2", path, ssid);
@@ -6630,20 +6637,25 @@ OSC::int_message_with_id (std::string path, uint32_t ssid, int value, bool in_li
 	lo_message_add_int32 (msg, value);
 
 	lo_send_message (addr, path.c_str(), msg);
+	Glib::usleep(1);
 	lo_message_free (msg);
+	_lo_lock.unlock ();
 	return 0;
 }
 
 int
 OSC::text_message (string path, string val, lo_address addr)
 {
+	_lo_lock.lock ();
 
 	lo_message reply;
 	reply = lo_message_new ();
 	lo_message_add_string (reply, val.c_str());
 
 	lo_send_message (addr, path.c_str(), reply);
+	Glib::usleep(1);
 	lo_message_free (reply);
+	_lo_lock.unlock ();
 
 	return 0;
 }
@@ -6651,6 +6663,7 @@ OSC::text_message (string path, string val, lo_address addr)
 int
 OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, bool in_line, lo_address addr)
 {
+	_lo_lock.lock ();
 	lo_message msg = lo_message_new ();
 	if (in_line) {
 		path = string_compose ("%1/%2", path, ssid);
@@ -6661,7 +6674,9 @@ OSC::text_message_with_id (std::string path, uint32_t ssid, std::string val, boo
 	lo_message_add_string (msg, val.c_str());
 
 	lo_send_message (addr, path.c_str(), msg);
+	Glib::usleep(1);
 	lo_message_free (msg);
+	_lo_lock.unlock ();
 	return 0;
 }
 

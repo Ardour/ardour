@@ -41,9 +41,9 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	: _osc (o)
 	,sur (su)
 	,_init (true)
-	,_last_master_gain (0.0)
-	,_last_master_trim (0.0)
-	,_last_monitor_gain (0.0)
+	,_last_master_gain (-1.0)
+	,_last_master_trim (-1.0)
+	,_last_monitor_gain (-1.0)
 	,_jog_mode (1024)
 	,last_punchin (4)
 	,last_punchout (4)
@@ -55,6 +55,7 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 	feedback = sur->feedback;
 	uint32_t jogmode = sur->jogmode;
 	_last_sample = -1;
+	mark_text = "";
 	if (feedback[4]) {
 
 		// connect to all the things we want to send feed back from
@@ -70,21 +71,21 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 
 		boost::shared_ptr<Controllable> mute_controllable = boost::dynamic_pointer_cast<Controllable>(strip->mute_control());
 		mute_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/mute"), strip->mute_control()), OSC::instance());
-		send_change_message (X_("/master/mute"), strip->mute_control());
+		send_change_message (X_("/master/mute"), mute_controllable);
 
 		boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(strip->trim_control());
 		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_trim_message, this, X_("/master/trimdB"), strip->trim_control()), OSC::instance());
-		send_trim_message (X_("/master/trimdB"), strip->trim_control());
+		send_trim_message (X_("/master/trimdB"), trim_controllable);
 
 		boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(strip->pan_azimuth_control());
 		if (pan_controllable) {
 			pan_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_change_message, this, X_("/master/pan_stereo_position"), strip->pan_azimuth_control()), OSC::instance());
-			send_change_message (X_("/master/pan_stereo_position"), strip->pan_azimuth_control());
+			send_change_message (X_("/master/pan_stereo_position"), pan_controllable);
 		}
 
 		boost::shared_ptr<Controllable> gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
 		gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/master/"), strip->gain_control()), OSC::instance());
-		send_gain_message (X_("/master/"), strip->gain_control());
+		send_gain_message (X_("/master/"), gain_controllable);
 
 		// monitor stuff next
 		strip = session->monitor_out();
@@ -104,8 +105,8 @@ OSCGlobalObserver::OSCGlobalObserver (OSC& o, Session& s, ArdourSurface::OSC::OS
 			send_change_message (X_("/monitor/mono"), mon_mono_cont);
 
 			gain_controllable = boost::dynamic_pointer_cast<Controllable>(strip->gain_control());
-				gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
-				send_gain_message (X_("/monitor/"), strip->gain_control());
+			gain_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCGlobalObserver::send_gain_message, this, X_("/monitor/"), strip->gain_control()), OSC::instance());
+			send_gain_message (X_("/monitor/"), gain_controllable);
 		}
 
 		//Transport feedback
@@ -361,6 +362,7 @@ void
 OSCGlobalObserver::send_gain_message (string path, boost::shared_ptr<Controllable> controllable)
 {
 	bool ismaster = false;
+
 	if (path.find(X_("master")) != std::string::npos) {
 		ismaster = true;
 		if (_last_master_gain != controllable->get_value()) {
@@ -443,34 +445,36 @@ OSCGlobalObserver::marks_changed ()
 void
 OSCGlobalObserver::mark_update ()
 {
-	if (!lm.size()) {
-		_osc.text_message (X_("/marker"), "No Marks", addr);
-		return;
+	string send_str = "No Marks";
+	if (lm.size()) {
+		uint32_t prev = 0;
+		uint32_t next = lm.size() - 1;
+		for (uint32_t i = 0; i < lm.size (); i++) {
+			if ((lm[i].when <= _last_sample) && (i > prev)) {
+				prev = i;
+			}
+			if ((lm[i].when >= _last_sample) && (i < next)) {
+				next = i;
+				break;
+			}
+		}
+		if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
+			string send_str = lm[prev].label;
+			prev_mark = lm[prev].when;
+			next_mark = lm[next].when;
+			if (prev != next) {
+				send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
+			}
+			if (_last_sample > lm[lm.size() - 1].when) {
+				send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
+			}
+			if (_last_sample < lm[0].when) {
+				send_str = string_compose ("-> %1", lm[0].label);
+			}
+		}
 	}
-	uint32_t prev = 0;
-	uint32_t next = lm.size() - 1;
-	for (uint32_t i = 0; i < lm.size (); i++) {
-		if ((lm[i].when <= _last_sample) && (i > prev)) {
-			prev = i;
-		}
-		if ((lm[i].when >= _last_sample) && (i < next)) {
-			next = i;
-			break;
-		}
-	}
-	if ((prev_mark != lm[prev].when) || (next_mark != lm[next].when)) {
-		string send_str = lm[prev].label;
-		prev_mark = lm[prev].when;
-		next_mark = lm[next].when;
-		if (prev != next) {
-			send_str = string_compose ("%1 <-> %2", lm[prev].label, lm[next].label);
-		}
-		if (_last_sample > lm[lm.size() - 1].when) {
-			send_str = string_compose ("%1 <-", lm[lm.size() - 1].label);
-		}
-		if (_last_sample < lm[0].when) {
-			send_str = string_compose ("-> %1", lm[0].label);
-		}
+	if (send_str != mark_text) {
+		mark_text = send_str;
 		_osc.text_message (X_("/marker"), send_str, addr);
 	}
 
