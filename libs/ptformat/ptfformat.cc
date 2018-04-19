@@ -1760,9 +1760,9 @@ nocustom:
 			j+=startbytes;
 
 			if (offsetbytes == 5)
-				sampleoffset -= 1000000000000ul;
+				sampleoffset -= 1000000000000;
 			if (startbytes == 5)
-				start -= 1000000000000ul;
+				start -= 1000000000000;
 
 			std::string filename = string(name);
 			wav_t f = {
@@ -1873,8 +1873,8 @@ nocustom:
 					}
 					m+=8;
 					findex3 = ptfunxored[m] | (ptfunxored[m+1] << 8);
-					sampleoffset -= 1000000000000ul;
-					start -= 1000000000000ul;
+					sampleoffset -= 1000000000000;
+					start -= 1000000000000;
 
 					/*
 					// Find wav with correct findex
@@ -2031,9 +2031,9 @@ nocustom:
 			j+=startbytes;
 
 			if (offsetbytes == 5)
-				sampleoffset -= 1000000000000ul;
+				sampleoffset -= 1000000000000;
 			if (startbytes == 5)
-				start -= 1000000000000ul;
+				start -= 1000000000000;
 
 			std::string filename = string(name);
 			wav_t f = {
