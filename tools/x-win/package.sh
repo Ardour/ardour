@@ -19,7 +19,7 @@ test -f gtk2_ardour/wscript || exit 1
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
+: ${HARRISONDSPURL=https://www.harrisonconsoles.com/plugins/releases/public}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
