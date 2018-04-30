@@ -121,6 +121,10 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBSelectBin->add( *manage(dBScaleCombo));
 
 	// Phase checkbutton
+	_signal_button = new Gtk::CheckButton (_("Plot live signal"));
+	_signal_button->set_active(true);
+
+	// Phase checkbutton
 	_phase_button = new Gtk::CheckButton (_("Show phase"));
 	_phase_button->set_active(true);
 	_phase_button->signal_toggled().connect( sigc::mem_fun(*this, &PluginEqGui::redraw_scales));
@@ -131,10 +135,11 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	_pointer_info->set_name("PluginAnalysisInfoLabel");
 
 	// populate table
-	attach( *manage(_analysis_area), 1, 4, 1, 2);
-	attach( *manage(dBSelectBin),    1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	attach( *manage(_phase_button),  2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	attach( *manage(_pointer_info),  3, 4, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	attach (*manage(_analysis_area), 0, 4, 0, 1);
+	attach (*manage(dBSelectBin),    0, 1, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_signal_button), 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_phase_button),  2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_pointer_info),  3, 4, 1, 2, Gtk::FILL,   Gtk::SHRINK);
 }
 
 PluginEqGui::~PluginEqGui()
@@ -535,8 +540,9 @@ PluginEqGui::redraw_analysis_area()
 	}
 	plot_impulse_amplitude(_analysis_area, cr);
 
-	// TODO: make this optional
-	plot_signal_amplitude_difference(_analysis_area, cr);
+	if (_signal_button->get_active()) {
+		plot_signal_amplitude_difference(_analysis_area, cr);
+	}
 
 	cairo_destroy(cr);
 }

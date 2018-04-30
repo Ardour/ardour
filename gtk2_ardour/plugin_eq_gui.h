@@ -142,6 +142,7 @@ private:
 	Gtk::ComboBox *dBScaleCombo;
 	Glib::RefPtr<Gtk::ListStore> dBScaleModel;
 
+	Gtk::CheckButton *_signal_button;
 	Gtk::CheckButton *_phase_button;
 
 	// signals and connections
