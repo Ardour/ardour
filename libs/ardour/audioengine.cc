@@ -358,11 +358,16 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (!_freewheeling || Freewheel.empty()) {
-		// run a list of slaves here
-		// - multiple slaves (ow_many_dsp_threads() in paralell)
-		// - session can pick one (ask for position & speed)
-		// - GUI can display all
-		Port::set_speed_ratio (_session->engine_speed ());
+		// TODO: Run a list of slaves here
+		// - multiple TC slaves (how_many_dsp_threads() in parallel)
+		//   (note this can be multiple slaves of each type. e.g.
+		//    3 LTC slaves on different ports, 2 MTC..)
+		// - GUI can display all slaves, user picks one.
+		// - active "slave" is a session property.
+		// - here we ask the session about the active slave
+		//   and get playback speed (for this cycle) here.
+		// - Internal Transport is-a Slave too (!)
+		Port::set_speed_ratio (_session->engine_speed ()); // HACK
 	}
 
 	/* tell all relevant objects that we're starting a new cycle */
