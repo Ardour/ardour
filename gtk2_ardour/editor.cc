@@ -2829,7 +2829,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t best = max_samplepos; // this records the best snap-result we've found so far
 
 	/* check snap-to-marker */
-	if (UIConfiguration::instance().get_snap_to_marks()) {
+	if ( (pref == SnapToAny) && UIConfiguration::instance().get_snap_to_marks()) {
 		if (for_mark) {
 			return;
 		}
@@ -2839,31 +2839,31 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	}
 
 	/* check snap-to-region-{start/end/sync} */
-	if (UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync()) {
+	if ( 
+		(pref == SnapToAny) && 
+		(UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync())
+		) {
 		if (!region_boundary_cache.empty()) {
 
-			vector<samplepos_t>::iterator prev = region_boundary_cache.end ();
-			vector<samplepos_t>::iterator next = region_boundary_cache.end ();
-
-			if (direction > 0) {
-				next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
-			} else {
-				next = std::lower_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
-			}
-
+			vector<samplepos_t>::iterator prev = region_boundary_cache.begin();
+			vector<samplepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin(), region_boundary_cache.end(), presnap);
 			if (next != region_boundary_cache.begin ()) {
 				prev = next;
 				prev--;
 			}
 
-			samplepos_t const p = (prev == region_boundary_cache.end()) ? region_boundary_cache.front () : *prev;
-			samplepos_t const n = (next == region_boundary_cache.end()) ? region_boundary_cache.back () : *next;
-
-			if (presnap > (p + n) / 2) {
-				test = n;
-			} else {
-				test = p;
+			if ((direction == RoundUpMaybe || direction == RoundUpAlways))
+				test = *next;
+			else if ((direction == RoundDownMaybe || direction == RoundDownAlways))
+				test = *prev;
+			else if (direction ==  0) {
+				if ((presnap - *prev) < (*next - presnap)) {
+					test = *prev;
+				} else {
+					test = *next;
+				}
 			}
+			
 		}
 
 		check_best_snap(presnap, test, dist, best);
