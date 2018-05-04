@@ -257,7 +257,11 @@ AlsaSeqMidiIn::main_process_thread ()
 		uint64_t time = g_get_monotonic_time();
 		ssize_t err = snd_seq_event_input (_seq, &event);
 
+#if EAGAIN == EWOULDBLOCK
+		if (err == -EAGAIN) {
+#else
 		if ((err == -EAGAIN) || (err == -EWOULDBLOCK)) {
+#endif
 			do_poll = true;
 			continue;
 		}
