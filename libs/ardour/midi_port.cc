@@ -159,7 +159,7 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 				/* adjust timestamp to match current cycle */
 				timestamp -= _global_port_buffer_offset;
-				assert (timestamp >= 0 && timestamp < nframes);
+				assert (timestamp < nframes);
 
 				if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
 					/* normalize note on with velocity 0 to proper note off */
