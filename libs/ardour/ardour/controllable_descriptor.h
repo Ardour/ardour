@@ -24,6 +24,7 @@
 #include <stdint.h>
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
@@ -38,23 +39,9 @@ public:
 	    SelectionCount,
     };
 
-    enum SubType {
-	    Gain,
-	    Trim,
-	    Solo,
-	    Mute,
-	    Recenable,
-	    PanDirection,
-	    PanWidth,
-	    PanElevation,
-	    Balance,
-	    SendGain,
-	    PluginParameter
-    };
-
     ControllableDescriptor ()
 	    : _top_level_type (PresentationOrderRoute)
-	    , _subtype (Gain)
+	    , _subtype (GainAutomation)
 	    , _banked (false)
 	    , _bank_offset (0)
     {}
@@ -68,7 +55,7 @@ public:
     TopLevelType top_level_type() const { return _top_level_type; }
     const std::string& top_level_name() const { return _top_level_name; }
 
-    SubType subtype() const { return _subtype; }
+    AutomationType subtype() const { return _subtype; }
 
     uint32_t presentation_order() const;
     uint32_t selection_id() const;
@@ -79,7 +66,7 @@ public:
 
 private:
     TopLevelType          _top_level_type;
-    SubType               _subtype;
+    AutomationType        _subtype;
     std::string           _top_level_name;
     union {
 	    uint32_t  _presentation_order;

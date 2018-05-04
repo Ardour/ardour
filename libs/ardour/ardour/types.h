@@ -151,7 +151,10 @@ namespace ARDOUR {
 		PhaseAutomation,
 		MonitoringAutomation,
 		BusSendLevel,
-		BusSendEnable
+		BusSendEnable,
+		SendLevelAutomation, /* used only by a controllable descriptor
+		                        to refer to gain of a particular send
+		                     */
 	};
 
 	enum AutoState {

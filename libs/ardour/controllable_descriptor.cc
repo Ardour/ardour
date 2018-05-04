@@ -138,33 +138,30 @@ ControllableDescriptor::set (const std::string& str)
 	}
 
 	if (path[1] == "gain") {
-		_subtype = Gain;
+		_subtype = GainAutomation;
 
 	} else if (path[1] == "trim") {
-		_subtype = Trim;
+		_subtype = TrimAutomation;
 
 	} else if (path[1] == "solo") {
-		_subtype = Solo;
+		_subtype = SoloAutomation;
 
 	} else if (path[1] == "mute") {
-		_subtype = Mute;
+		_subtype = MuteAutomation;
 
 	} else if (path[1] == "recenable") {
-		_subtype = Recenable;
-
-	} else if (path[1] == "balance") {
-		_subtype = Balance;
+		_subtype = RecEnableAutomation;
 
 	} else if (path[1] == "panwidth") {
-		_subtype = PanWidth;
+		_subtype = PanWidthAutomation;
 
-	} else if (path[1] == "pandirection") {
-		_subtype = PanDirection;
+	} else if (path[1] == "pandirection" || path[1] == "balance") {
+		_subtype = PanAzimuthAutomation;
 
 	} else if (path[1] == "plugin") {
 		if (path.size() == 3 && rest.size() == 3) {
 			if (path[2] == "parameter") {
-				_subtype = PluginParameter;
+				_subtype = PluginAutomation;
 				_target.push_back (atoi (rest[1]));
 				_target.push_back (atoi (rest[2]));
 			} else {
@@ -177,7 +174,7 @@ ControllableDescriptor::set (const std::string& str)
 
 		if (path.size() == 3 && rest.size() == 2) {
 			if (path[2] == "gain") {
-				_subtype = SendGain;
+				_subtype = SendLevelAutomation;
 				_target.push_back (atoi (rest[1]));
 			} else {
 				return -1;

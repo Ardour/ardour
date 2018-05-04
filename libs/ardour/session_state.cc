@@ -3784,43 +3784,39 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	r = boost::dynamic_pointer_cast<Route> (s);
 
 	switch (desc.subtype()) {
-	case ControllableDescriptor::Gain:
+	case GainAutomation:
 		c = s->gain_control ();
 		break;
 
-	case ControllableDescriptor::Trim:
+	case TrimAutomation:
 		c = s->trim_control ();
 		break;
 
-	case ControllableDescriptor::Solo:
+	case SoloAutomation:
 		c = s->solo_control();
 		break;
 
-	case ControllableDescriptor::Mute:
+	case MuteAutomation:
 		c = s->mute_control();
 		break;
 
-	case ControllableDescriptor::Recenable:
+	case RecEnableAutomation:
 		c = s->rec_enable_control ();
 		break;
 
-	case ControllableDescriptor::PanDirection:
+	case PanAzimuthAutomation:
 		c = s->pan_azimuth_control();
 		break;
 
-	case ControllableDescriptor::PanWidth:
+	case PanWidthAutomation:
 	        c = s->pan_width_control();
 		break;
 
-	case ControllableDescriptor::PanElevation:
+	case PanElevationAutomation:
 	        c = s->pan_elevation_control();
 		break;
 
-	case ControllableDescriptor::Balance:
-		/* XXX simple pan control */
-		break;
-
-	case ControllableDescriptor::PluginParameter:
+	case PluginAutomation:
 	{
 		uint32_t plugin = desc.target (0);
 		uint32_t parameter_index = desc.target (1);
@@ -3848,7 +3844,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		break;
 	}
 
-	case ControllableDescriptor::SendGain: {
+	case SendLevelAutomation: {
 		uint32_t send = desc.target (0);
 		if (send > 0) {
 			--send;
