@@ -177,11 +177,11 @@ ControllableDescriptor::set (const std::string& str)
 				_subtype = SendLevelAutomation;
 				_target.push_back (atoi (rest[1]));
 
-			} else if (path[2] == "gain") {
-				_subtype = SendLevelAutomation;
+			} else if (path[2] == "direction") {
+				_subtype = SendAzimuthAutomation;
 				_target.push_back (atoi (rest[1]));
 			} else if (path[2] == "enable") {
-				_subtype = SendLevelAutomation;
+				_subtype = SendEnableAutomation;
 				_target.push_back (atoi (rest[1]));
 			} else {
 				return -1;
