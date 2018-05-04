@@ -176,9 +176,89 @@ ControllableDescriptor::set (const std::string& str)
 			if (path[2] == "gain") {
 				_subtype = SendLevelAutomation;
 				_target.push_back (atoi (rest[1]));
+
+			} else if (path[2] == "gain") {
+				_subtype = SendLevelAutomation;
+				_target.push_back (atoi (rest[1]));
+			} else if (path[2] == "enable") {
+				_subtype = SendLevelAutomation;
+				_target.push_back (atoi (rest[1]));
 			} else {
 				return -1;
+
 			}
+		} else {
+			return -1;
+		}
+	} else if (path[1] == "eq") {
+
+		/* /route/eq/gain/<band> */
+
+		if (path.size() != 3) {
+			return -1;
+		}
+
+		_target.push_back (atoi (path[3])); /* band number */
+
+		if (path[2] == "enable") {
+			_subtype = EQEnableAutomation;
+		} else if (path[2] == "gain") {
+			_subtype = EQGainAutomation;
+		} else if (path[2] == "freq") {
+			_subtype = EQFreqAutomation;
+		} else if (path[2] == "q") {
+			_subtype = EQQAutomation;
+		} else if (path[2] == "shape") {
+			_subtype = EQShapeAutomation;
+		} else {
+			return -1;
+		}
+
+		/* get desired band number */
+		_target.push_back (atoi (rest[1]));
+
+	} else if (path[1] == "filter") {
+
+		/* /route/filter/hi/freq */
+
+		if (path.size() != 4) {
+			return -1;
+		}
+
+		if (path[2] == "hi") {
+			_target.push_back (1); /* high pass filter */
+		} else {
+			_target.push_back (0); /* low pass filter */
+		}
+
+		if (path[3] == "enable") {
+			_subtype = FilterFreqAutomation;
+		} else if (path[3] == "freq") {
+			_subtype = FilterFreqAutomation;
+		} else if (path[3] == "slope") {
+			_subtype = FilterSlopeAutomation;
+		} else {
+			return -1;
+		}
+
+		_target.push_back (atoi (rest[1]));
+
+	} else if (path[1] == "compressor") {
+
+		if (path.size() != 3) {
+			return -1;
+		}
+
+		if (path[2] == "enable") {
+			_subtype = CompressorEnableAutomation;
+		} else if (path[2] == "threshold") {
+			_subtype = CompressorThresholdAutomation;
+		} else if (path[2] == "mode") {
+			_subtype = CompressorModeAutomation;
+		} else if (path[2] == "speed") {
+			_subtype = CompressorSpeedAutomation;
+		} else if (path[2] == "makeup") {
+			_subtype = CompressorMakeupAutomation;
 		} else {
 			return -1;
 		}

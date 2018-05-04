@@ -3816,6 +3816,58 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 	        c = s->pan_elevation_control();
 		break;
 
+	case EQEnableAutomation:
+		c = s->eq_enable_controllable();
+		break;
+
+	case EQGainAutomation:
+		c = s->eq_gain_controllable(desc.target (0));
+		break;
+
+	case EQFreqAutomation:
+		c = s->eq_freq_controllable(desc.target(0));
+		break;
+
+	case EQQAutomation:
+		c = s->eq_q_controllable(desc.target(0));
+		break;
+
+	case EQShapeAutomation:
+		c = s->eq_shape_controllable(desc.target(0));
+		break;
+
+	case FilterFreqAutomation:
+		c = s->filter_freq_controllable(desc.target(0));
+		break;
+
+	case FilterSlopeAutomation:
+		c = s->filter_slope_controllable(desc.target(0));
+		break;
+
+	case FilterEnableAutomation:
+		c = s->filter_enable_controllable(desc.target(0));
+		break;
+
+	case CompressorEnableAutomation:
+		c = s->comp_enable_controllable();
+		break;
+
+	case CompressorThresholdAutomation:
+		c = s->comp_threshold_controllable();
+		break;
+
+	case CompressorSpeedAutomation:
+		c = s->comp_speed_controllable();
+		break;
+
+	case CompressorModeAutomation:
+		c = s->comp_mode_controllable();
+		break;
+
+	case CompressorMakeupAutomation:
+		c = s->comp_makeup_controllable();
+		break;
+
 	case PluginAutomation:
 	{
 		uint32_t plugin = desc.target (0);
@@ -3855,6 +3907,7 @@ Session::controllable_by_descriptor (const ControllableDescriptor& desc)
 		c = r->send_level_controllable (send);
 		break;
 	}
+
 
 	default:
 		/* relax and return a null pointer */
