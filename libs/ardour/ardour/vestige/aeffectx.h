@@ -74,8 +74,8 @@
 #define audioMasterCloseWindow 40
 #define audioMasterGetDirectory 41
 #define audioMasterUpdateDisplay 42
-#define audioMasterBeginEdit 43
-#define audioMasterEndEdit 44
+#define audioMasterBeginEdit 43  //BeginGesture
+#define audioMasterEndEdit 44   //EndGesture
 #define audioMasterOpenFileSelector 45
 #define audioMasterCloseFileSelector 46 // currently unused
 #define audioMasterEditFile 47 // currently unused
