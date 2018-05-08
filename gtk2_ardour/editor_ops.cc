@@ -7350,13 +7350,24 @@ Editor::playhead_forward_to_grid ()
 		return;
 	}
 
-	MusicSample pos (playhead_cursor->current_sample (), 0);
+	MusicSample pos  (playhead_cursor->current_sample (), 0);
 
-	if (pos.sample < max_samplepos - 1) {
-		pos.sample += 2;
-		snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
-		_session->request_locate (pos.sample);
+	if ( _grid_type == GridTypeNone) {
+		if (pos.sample < max_samplepos - current_page_samples()*0.1) {
+			pos.sample += current_page_samples()*0.1;
+			_session->request_locate (pos.sample);
+		} else {
+			_session->request_locate (0);
+		}
+	} else {
+		
+		if (pos.sample < max_samplepos - 1) {
+			pos.sample += 2;
+			snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
+			_session->request_locate (pos.sample);
+		}
 	}
+
 	
 	/* keep PH visible in window */
 	if (pos.sample > (_leftmost_sample + current_page_samples() *0.9)) {
@@ -7374,12 +7385,22 @@ Editor::playhead_backward_to_grid ()
 
 	MusicSample pos  (playhead_cursor->current_sample (), 0);
 
-	if (pos.sample > 2) {
-		pos.sample -= 2;
-		snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
-		_session->request_locate (pos.sample);
+	if ( _grid_type == GridTypeNone) {
+		if ( pos.sample > current_page_samples()*0.1 ) {
+			pos.sample -= current_page_samples()*0.1;
+			_session->request_locate (pos.sample);
+		} else {
+			_session->request_locate (0);
+		}
+	} else {
+		
+		if (pos.sample > 2) {
+			pos.sample -= 2;
+			snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
+			_session->request_locate (pos.sample);
+		}
 	}
-
+	
 	/* keep PH visible in window */
 	if (pos.sample < (_leftmost_sample + current_page_samples() *0.1)) {
 		reset_x_origin (pos.sample - (current_page_samples()*0.1));
