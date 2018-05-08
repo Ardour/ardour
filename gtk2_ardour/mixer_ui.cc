@@ -2205,7 +2205,6 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 void
 Mixer_UI::save_plugin_order_file ()
 {
-printf("save_plugin_order_file\n");
 	//this writes the plugin order to the user's preference file ( plugin_metadata/plugin_order )
 
 	//NOTE:  this replaces the old code that stores info in instant.xml
