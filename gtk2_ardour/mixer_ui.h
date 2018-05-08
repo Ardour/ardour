@@ -99,6 +99,8 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int /* version */);
 
+	void save_plugin_order_file ();
+
 	void show_mixer_list (bool yn);
 	void show_monitor_section (bool);
 

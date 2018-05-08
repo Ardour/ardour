@@ -2153,12 +2153,12 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		show_monitor_section (yn);
 	}
 
-
-	XMLNode* plugin_order;
-	if ((plugin_order = find_named_node (node, "PluginOrder")) != 0) {
+	//check for the user's plugin_order file
+	XMLNode plugin_order_new(X_("PO"));
+	if (PluginManager::instance().load_plugin_order_file(plugin_order_new)) {
 		store_current_favorite_order ();
 		std::list<string> order;
-		const XMLNodeList& kids = plugin_order->children("PluginInfo");
+		const XMLNodeList& kids = plugin_order_new.children("PluginInfo");
 		XMLNodeConstIterator i;
 		for (i = kids.begin(); i != kids.end(); ++i) {
 			std::string unique_id;
@@ -2172,8 +2172,58 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 		PluginStateSorter cmp (order);
 		favorite_order.sort (cmp);
 		sync_treeview_from_favorite_order ();
+
+	} else {
+		//if there is no user file, then use an existing one from instant.xml
+		//NOTE: if you are loading an old session, this might come from the session's instant.xml
+		//Todo:  in the next major version, we should probably stop doing the instant.xml check, and just use the new file
+		XMLNode* plugin_order;
+		if ((plugin_order = find_named_node (node, "PluginOrder")) != 0) {
+			store_current_favorite_order ();
+			std::list<string> order;
+			const XMLNodeList& kids = plugin_order->children("PluginInfo");
+			XMLNodeConstIterator i;
+			for (i = kids.begin(); i != kids.end(); ++i) {
+				std::string unique_id;
+				if ((*i)->get_property ("unique-id", unique_id)) {
+					order.push_back (unique_id);
+					if ((*i)->get_property ("expanded", yn)) {
+						favorite_ui_state[unique_id] = yn;
+					}
+				}
+			}
+
+			PluginStateSorter cmp (order);
+			favorite_order.sort (cmp);
+			sync_treeview_from_favorite_order ();
+		}
 	}
+
 	return 0;
+}
+
+void
+Mixer_UI::save_plugin_order_file ()
+{
+printf("save_plugin_order_file\n");
+	//this writes the plugin order to the user's preference file ( plugin_metadata/plugin_order )
+
+	//NOTE:  this replaces the old code that stores info in instant.xml
+	//why?  because instant.xml prefers the per-session settings, and we want this to be a global pref
+
+	store_current_favorite_order ();
+	XMLNode plugin_order ("PluginOrder");
+	uint32_t cnt = 0;
+	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
+		XMLNode* p = new XMLNode ("PluginInfo");
+		p->set_property ("sort", cnt);
+		p->set_property ("unique-id", (*i)->unique_id);
+		if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
+			p->set_property ("expanded", favorite_ui_state[(*i)->unique_id]);
+		}
+		plugin_order.add_child_nocopy (*p);
+	}
+	PluginManager::instance().save_plugin_order_file( plugin_order );
 }
 
 XMLNode&
@@ -2197,20 +2247,6 @@ Mixer_UI::get_state ()
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 	assert (tact);
 	node->set_property ("monitor-section-visible", tact->get_active ());
-
-	store_current_favorite_order ();
-	XMLNode* plugin_order = new XMLNode ("PluginOrder");
-	uint32_t cnt = 0;
-	for (PluginInfoList::const_iterator i = favorite_order.begin(); i != favorite_order.end(); ++i, ++cnt) {
-		XMLNode* p = new XMLNode ("PluginInfo");
-		p->set_property ("sort", cnt);
-		p->set_property ("unique-id", (*i)->unique_id);
-		if (favorite_ui_state.find ((*i)->unique_id) != favorite_ui_state.end ()) {
-			p->set_property ("expanded", favorite_ui_state[(*i)->unique_id]);
-		}
-		plugin_order->add_child_nocopy (*p);
-	}
-	node->add_child_nocopy (*plugin_order);
 
 	return *node;
 }

@@ -820,6 +820,8 @@ ARDOUR_UI::save_ardour_state ()
 
 	Config->save_state();
 
+	mixer->save_plugin_order_file();
+
 	UIConfiguration::instance().save_state ();
 
 	if (_session) {
