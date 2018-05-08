@@ -7357,6 +7357,11 @@ Editor::playhead_forward_to_grid ()
 		snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
 	}
+	
+	/* keep PH visible in window */
+	if (pos.sample > (_leftmost_sample + current_page_samples() *0.9)) {
+		reset_x_origin (pos.sample - (current_page_samples()*0.9));
+	}
 }
 
 
@@ -7373,6 +7378,11 @@ Editor::playhead_backward_to_grid ()
 		pos.sample -= 2;
 		snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
 		_session->request_locate (pos.sample);
+	}
+
+	/* keep PH visible in window */
+	if (pos.sample < (_leftmost_sample + current_page_samples() *0.1)) {
+		reset_x_origin (pos.sample - (current_page_samples()*0.1));
 	}
 }
 
