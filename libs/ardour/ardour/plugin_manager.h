@@ -85,6 +85,9 @@ public:
 	void load_tags ();
 	void save_tags ();
 
+	bool load_plugin_order_file (XMLNode &n) const;  //returns TRUE if the passed-in node has valid info
+	void save_plugin_order_file (XMLNode &elem) const;
+
 	enum TagType {
 		FromPlug,           //tag info is being set from plugin metadata
 		FromFactoryFile,    // ... from the factory metadata file

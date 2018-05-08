@@ -1537,6 +1537,43 @@ PluginManager::user_plugin_metadata_dir () const
 	return dir;
 }
 
+bool
+PluginManager::load_plugin_order_file (XMLNode &n) const
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
+
+	info << string_compose (_("Loading plugin order file %1"), path) << endmsg;
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	XMLTree tree;
+	if (tree.read (path)) {
+		n = *(tree.root());
+		return true;
+	} else {
+		error << string_compose (_("Cannot parse Plugin Order info from %1"), path) << endmsg;
+		return false;
+	}
+}
+
+
+void
+PluginManager::save_plugin_order_file (XMLNode &elem) const
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
+
+	info << string_compose (_("Saving plugin order file %1"), path) << endmsg;
+
+	XMLTree tree;
+	tree.set_root (&elem);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Order info to %1"), path) << endmsg;
+	}
+	tree.set_root (0);  //note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
+}
+
+
 void
 PluginManager::save_tags ()
 {
