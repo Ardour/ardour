@@ -34,31 +34,34 @@ using namespace ARDOUR;
 
 static const gchar *_grid_strings[] = {
 	N_("Main Grid"),
-	N_("Beats/128"),
-	N_("Beats/64"),
-	N_("Beats/32"),
-	N_("Beats/28"),
-	N_("Beats/24"),
-	N_("Beats/20"),
-	N_("Beats/16"),
-	N_("Beats/14"),
-	N_("Beats/12"),
-	N_("Beats/10"),
-	N_("Beats/8"),
-	N_("Beats/7"),
-	N_("Beats/6"),
-	N_("Beats/5"),
-	N_("Beats/4"),
-	N_("Beats/3"),
-	N_("Beats/2"),
-	N_("Beats"),
+	N_("1/4 Note"),
+	N_("1/8 Note"),
+	N_("1/16 Note"),
+	N_("1/32 Note"),
+	N_("1/64 Note"),
+	N_("1/128 Note"),
+	
+	N_("1/3 (8th triplet)"),
+	N_("1/6 (16th triplet)"),
+	N_("1/12 (32nd triplet)"),
+
+	N_("1/5 (8th quintuplet)"),
+	N_("1/10 (16th quintuplet)"),
+	N_("1/20 (32nd quintuplet)"),
+
+	N_("1/7 (8th septuplet)"),
+	N_("1/14 (16th septuplet)"),
+	N_("1/28 (32nd septuplet)"),
+
 	0
 };
 
 static const int _grid_beats[] = {
 	0,
-	128, 64, 32, 28, 24, 20, 16, 14,
-	12, 10, 8, 7, 6, 5, 4, 3, 2, 1,
+	1, 2, 4, 8, 16, 32,
+	3, 6, 12,
+	5, 10, 20,
+	7, 14, 28,
 	0
 };
 
