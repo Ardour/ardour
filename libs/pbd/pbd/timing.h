@@ -24,6 +24,8 @@
 
 #include <stdint.h>
 
+#include <cmath>
+#include <limits>
 #include <string>
 #include <vector>
 
@@ -108,6 +110,84 @@ private:
 	uint64_t m_start_val;
 	uint64_t m_last_val;
 
+};
+
+class LIBPBD_API TimingStats : public Timing
+{
+public:
+	TimingStats ()
+	{
+		/* override implicit Timing::start () */
+		reset ();
+	}
+
+	void update ()
+	{
+		Timing::update ();
+		calc ();
+	}
+
+	void reset ()
+	{
+		Timing::reset ();
+		_min = std::numeric_limits<uint64_t>::max();
+		_max = 0;
+		_cnt = 0;
+		_avg = 0.;
+		_vm  = 0.;
+		_vs  = 0.;
+	}
+
+	bool valid () const {
+		return Timing::valid () && _cnt > 1;
+	}
+
+	bool get_stats (uint64_t& min,
+	                uint64_t& max,
+	                double& avg,
+	                double& dev) const
+	{
+		if (_cnt < 2) {
+			return false;
+		}
+		min = _min;
+		max = _max;
+		avg = _avg / (double)_cnt;
+		dev = sqrt (_vs / (_cnt - 1.0));
+		return true;
+	}
+
+private:
+	void calc ()
+	{
+		const uint64_t diff = elapsed ();
+
+		_avg += diff;
+
+		if (diff > _max) {
+			_max = diff;
+		}
+		if (diff < _min) {
+			_min = diff;
+		}
+
+		if (_cnt == 0) {
+			_vm = diff;
+		} else {
+			const double ela = diff;
+			const double var_m1 = _vm;
+			_vm = _vm + (ela - _vm) / (1.0 + _cnt);
+			_vs = _vs + (ela - _vm) * (ela - var_m1);
+		}
+		++_cnt;
+	}
+
+	uint64_t _cnt;
+	uint64_t _min;
+	uint64_t _max;
+	double   _avg;
+	double   _vm;
+	double   _vs;
 };
 
 class LIBPBD_API TimingData
