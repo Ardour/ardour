@@ -71,6 +71,7 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
+#include "timers.h"
 #include "new_plugin_preset_dialog.h"
 
 #include "pbd/i18n.h"
@@ -460,6 +461,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, pin_management_button (_("Pinout"))
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
+	, cpuload_expander (_("CPU Profile"))
 	, latency_gui (0)
 	, latency_dialog (0)
 	, eqgui (0)
@@ -519,6 +521,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
+
+	cpuload_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_cpuload_display));
+	cpuload_expander.set_expanded(false);
 
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
@@ -811,6 +816,53 @@ PlugUIBase::toggle_plugin_analysis()
 			toplevel->resize (wr.width, wr.height);
 		}
 	}
+}
+
+void
+PlugUIBase::update_cpu_label()
+{
+	uint64_t min, max;
+	double avg, dev;
+	string t;
+	if (insert->get_stats (min, max, avg, dev)) {
+		t = string_compose (_("Timing min: %1 [ms] max: %2 [ms]\navg: %3 [ms] std.dev: %4"),
+				rint (min / 100.) / 10.,
+				rint (max / 100.) / 10.,
+				rint (avg) / 1000.,
+				rint (dev) / 1000.);
+	} else {
+		t = _("No data available");
+	}
+	cpuload_label.set_text (t);
+}
+
+void
+PlugUIBase::toggle_cpuload_display()
+{
+	if (cpuload_expander.get_expanded() && !cpuload_expander.get_child()) {
+		update_cpu_label ();
+		cpuload_label.set_line_wrap(true);
+		cpuload_label.set_line_wrap_mode(Pango::WRAP_WORD);
+		update_cpu_label_connection = Timers::second_connect (sigc::mem_fun(*this, &PlugUIBase::update_cpu_label));
+
+		cpuload_expander.add(cpuload_label);
+		cpuload_expander.show_all();
+	}
+
+	if (!cpuload_expander.get_expanded()) {
+		update_cpu_label_connection.disconnect ();
+		const int child_height = cpuload_expander.get_child ()->get_height ();
+		cpuload_expander.remove();
+		Gtk::Window *toplevel = (Gtk::Window*) cpuload_expander.get_ancestor (GTK_TYPE_WINDOW);
+
+		if (toplevel) {
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
+		}
+	}
+
 }
 
 void

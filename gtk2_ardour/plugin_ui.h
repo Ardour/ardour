@@ -137,6 +137,8 @@ protected:
 	Gtk::Expander description_expander;
 	/** an expander containing the plugin analysis graph */
 	Gtk::Expander plugin_analysis_expander;
+	/** an expander containing the plugin cpu profile */
+	Gtk::Expander cpuload_expander;
 	/** a button which, when clicked, opens the latency GUI */
 	ArdourWidgets::ArdourButton latency_button;
 	/** a button which sets all controls' automation setting to Manual */
@@ -149,8 +151,12 @@ protected:
 	ArdourWidgets::ArdourButton automation_touch_all_button;
 	/** a button which sets all controls' automation setting to Latch */
 	ArdourWidgets::ArdourButton automation_latch_all_button;
+	/**  */
+	Gtk::Label cpuload_label;
 
 	void set_latency_label ();
+	void update_cpu_label ();
+	sigc::connection update_cpu_label_connection;
 
 	LatencyGUI* latency_gui;
 	ArdourWindow* latency_dialog;
@@ -171,6 +177,7 @@ protected:
 	bool bypass_button_release(GdkEventButton*);
 	void toggle_description ();
 	void toggle_plugin_analysis ();
+	void toggle_cpuload_display ();
 	void processor_active_changed (boost::weak_ptr<ARDOUR::Processor> p);
 	void plugin_going_away ();
 	void automation_state_changed ();
