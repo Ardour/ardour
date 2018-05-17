@@ -7397,8 +7397,17 @@ Editor::playhead_backward_to_grid ()
 		if (pos.sample > 2) {
 			pos.sample -= 2;
 			snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
-			_session->request_locate (pos.sample);
 		}
+
+		//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
+		//also see:  jump_backward_to_mark
+		if (_session->transport_rolling()) {
+			if ((playhead_cursor->current_sample() - pos.sample) < _session->sample_rate()/2) {
+				snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
+			}
+		}
+
+		_session->request_locate (pos.sample, _session->transport_rolling());
 	}
 	
 	/* keep PH visible in window */
