@@ -25,6 +25,8 @@
 
 #include <boost/weak_ptr.hpp>
 
+#include "pbd/timing.h"
+
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
 #include "ardour/chan_mapping.h"
@@ -189,6 +191,8 @@ public:
 	void monitoring_changed ();
 
 	bool load_preset (Plugin::PresetRecord);
+
+	bool get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const;
 
 	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl
@@ -389,6 +393,8 @@ private:
 	CtrlOutMap _control_outputs;
 
 	void preset_load_set_value (uint32_t, float);
+
+	PBD::TimingStats _timing_stats;
 };
 
 } // namespace ARDOUR

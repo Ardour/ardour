@@ -617,6 +617,7 @@ PluginInsert::find_next_event (double now, double end, Evoral::ControlEvent& nex
 void
 PluginInsert::activate ()
 {
+	_timing_stats.reset ();
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 		(*i)->activate ();
 	}
@@ -638,6 +639,7 @@ PluginInsert::activate ()
 void
 PluginInsert::deactivate ()
 {
+	_timing_stats.reset ();
 	Processor::deactivate ();
 
 	for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
@@ -1204,6 +1206,7 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	}
 
 	if (_pending_active) {
+		_timing_stats.start ();
 		/* run as normal if we are active or moving from inactive to active */
 
 		if (_session.transport_rolling() || _session.bounce_processing()) {
@@ -1212,8 +1215,10 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			Glib::Threads::Mutex::Lock lm (control_lock(), Glib::Threads::TRY_LOCK);
 			connect_and_run (bufs, start_sample, end_sample, speed, nframes, 0, lm.locked());
 		}
+		_timing_stats.update ();
 
 	} else {
+		_timing_stats.reset ();
 		// XXX should call ::silence() to run plugin(s) for consistent load.
 		// We'll need to change this anyway when bypass can be automated
 		bypass (bufs, nframes);
@@ -3121,6 +3126,15 @@ PluginInsert::end_touch (uint32_t param_id)
 		// ToDo subtract _plugin_signal_latency  from audible_sample() when rolling, assert > 0
 		ac->stop_touch (session().audible_sample());
 	}
+}
+
+bool
+PluginInsert::get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const
+{
+	/* TODO: consider taking a try/lock: Don't run concurrently with
+	 * TimingStats::update, TimingStats::reset.
+	 */
+	return _timing_stats.get_stats (min, max, avg, dev);
 }
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
