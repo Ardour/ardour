@@ -31,6 +31,11 @@
 
 #include "pbd/libpbd_visibility.h"
 
+#ifdef COMPILER_MSVC
+#undef min
+#undef max
+#endif
+
 namespace PBD {
 
 LIBPBD_API bool get_min_max_avg_total (const std::vector<uint64_t>& values, uint64_t& min, uint64_t& max, uint64_t& avg, uint64_t& total);
