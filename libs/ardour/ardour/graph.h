@@ -65,11 +65,9 @@ public:
 
 	void helper_thread();
 
-	int process_routes (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick,
-	                    bool& need_butler);
+	int process_routes (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
-	int routes_no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample,
-	                    bool non_rt_pending, int declick);
+	int routes_no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending );
 
 	void process_one_route (Route * route);
 
@@ -125,7 +123,6 @@ private:
 	samplepos_t _process_end_sample;
 	bool	   _process_can_record;
 	bool	   _process_non_rt_pending;
-	int        _process_declick;
 
 	bool _process_noroll;
 	int  _process_retval;

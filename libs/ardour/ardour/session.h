@@ -175,12 +175,8 @@ class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::Scop
 {
 private:
 	enum SubState {
-		PendingDeclickIn      = 0x1,  ///< pending de-click fade-in for start
-		PendingDeclickOut     = 0x2,  ///< pending de-click fade-out for stop
-		StopPendingCapture    = 0x4,
 		PendingLoopDeclickIn  = 0x8,  ///< pending de-click fade-in at the start of a loop
 		PendingLoopDeclickOut = 0x10, ///< pending de-click fade-out at the end of a loop
-		PendingLocate         = 0x20,
 	};
 
 public:
@@ -440,7 +436,6 @@ public:
 
 	bool global_locate_pending() const { return _global_locate_pending; }
 	bool locate_pending() const { return static_cast<bool>(post_transport_work()&PostTransportLocate); }
-	bool declick_out_pending() const { return static_cast<bool>(transport_sub_state&(PendingDeclickOut)); }
 	bool transport_locked () const;
 
 	int wipe ();
@@ -1376,30 +1371,8 @@ private:
 	    -1 if there is a pending declick fade-out,
 	    0 if there is no pending declick.
 	*/
-	int get_transport_declick_required () {
-		if (transport_sub_state & PendingDeclickIn) {
-			transport_sub_state &= ~PendingDeclickIn;
-			return 1;
-		} else if (transport_sub_state & PendingDeclickOut) {
-			/* XXX: not entirely sure why we don't clear this */
-			return -1;
-		} else if (transport_sub_state & PendingLoopDeclickOut) {
-			/* Return the declick out first ... */
-			transport_sub_state &= ~PendingLoopDeclickOut;
-			return -1;
-		} else if (transport_sub_state & PendingLoopDeclickIn) {
-			/* ... then the declick in on the next call */
-			transport_sub_state &= ~PendingLoopDeclickIn;
-			return 1;
-		} else {
-			return 0;
-		}
-	}
-
 	bool maybe_stop (samplepos_t limit);
 	bool maybe_sync_start (pframes_t &);
-
-	void check_declick_out ();
 
 	std::string             _path;
 	std::string             _name;
@@ -1443,9 +1416,6 @@ private:
 	samplepos_t _last_roll_or_reversal_location;
 	samplepos_t _last_record_location;
 
-	bool              pending_locate_roll;
-	samplepos_t        pending_locate_sample;
-	bool              pending_locate_flush;
 	bool              pending_abort;
 	bool              pending_auto_loop;
 

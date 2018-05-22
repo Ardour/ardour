@@ -209,8 +209,6 @@ protected:
 	XMLNode*      pending_state;
 	bool         _destructive;
 
-	void maybe_declick (BufferSet&, samplecnt_t, int);
-
 	boost::shared_ptr<AutomationControl> _record_enable_control;
 	boost::shared_ptr<AutomationControl> _record_safe_control;
 

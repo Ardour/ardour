@@ -70,11 +70,11 @@ class LIBARDOUR_API Auditioner : public Track
 	PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> AuditionProgress;
 
 	/* Track */
-	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 	DataType data_type () const;
 
-	int roll_audio (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
-	int roll_midi (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
+	int roll_audio (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
+	int roll_midi (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
 	/* fake track */
 	void set_state_part_two () {}

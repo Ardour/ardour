@@ -237,48 +237,6 @@ Amp::apply_gain (BufferSet& bufs, samplecnt_t sample_rate, samplecnt_t nframes, 
 	return rv;
 }
 
-void
-Amp::declick (BufferSet& bufs, samplecnt_t nframes, int dir)
-{
-	if (nframes == 0 || bufs.count().n_total() == 0) {
-		return;
-	}
-
-	const samplecnt_t declick = std::min ((samplecnt_t) 512, nframes);
-	const double     fractional_shift = 1.0 / declick ;
-	gain_t           delta, initial;
-
-	if (dir < 0) {
-		/* fade out: remove more and more of delta from initial */
-		delta = -1.0;
-		initial = GAIN_COEFF_UNITY;
-	} else {
-		/* fade in: add more and more of delta from initial */
-		delta = 1.0;
-		initial = GAIN_COEFF_ZERO;
-	}
-
-	/* Audio Gain */
-	for (BufferSet::audio_iterator i = bufs.audio_begin(); i != bufs.audio_end(); ++i) {
-		Sample* const buffer = i->data();
-
-		double fractional_pos = 0.0;
-
-		for (pframes_t nx = 0; nx < declick; ++nx) {
-			buffer[nx] *= initial + (delta * fractional_pos);
-			fractional_pos += fractional_shift;
-		}
-
-		/* now ensure the rest of the buffer has the target value applied, if necessary. */
-		if (declick != nframes) {
-			if (dir < 0) {
-				memset (&buffer[declick], 0, sizeof (Sample) * (nframes - declick));
-			}
-		}
-	}
-}
-
-
 gain_t
 Amp::apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target, sampleoffset_t offset)
 {

@@ -100,13 +100,11 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	, _disk_io_point (DiskIOPreFader)
 	, _pending_process_reorder (0)
 	, _pending_signals (0)
-	, _pending_declick (true)
 	, _meter_point (MeterPostFader)
 	, _pending_meter_point (MeterPostFader)
 	, _meter_type (MeterPeak)
 	, _denormal_protection (false)
 	, _recordable (true)
-	, _declickable (false)
 	, _have_internal_generator (false)
 	, _default_type (default_type)
 	, _loop_location (NULL)
@@ -292,14 +290,6 @@ Route::set_trim (gain_t val, Controllable::GroupControlDisposition /* group over
 	// _trim_control->route_set_value (val);
 }
 
-void
-Route::maybe_declick (BufferSet&, samplecnt_t, int)
-{
-	/* this is the "bus" implementation and they never declick.
-	 */
-	return;
-}
-
 /** Process this route for one (sub) cycle (process thread)
  *
  * @param bufs Scratch buffers to use for the signal path
@@ -313,7 +303,7 @@ Route::maybe_declick (BufferSet&, samplecnt_t, int)
 void
 Route::process_output_buffers (BufferSet& bufs,
 			       samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes,
-			       int declick, bool gain_automation_ok, bool run_disk_reader)
+			       bool gain_automation_ok, bool run_disk_reader)
 {
 	/* Caller must hold process lock */
 	assert (!AudioEngine::instance()->process_lock().trylock());
@@ -421,15 +411,6 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool silence = _have_internal_generator ? false : (ms == MonitoringSilence);
 
 	_main_outs->no_outs_cuz_we_no_monitor (silence);
-
-	/* -------------------------------------------------------------------------------------------
-	   GLOBAL DECLICK (for transport changes etc.)
-	   ----------------------------------------------------------------------------------------- */
-
-	// XXX not latency compensated. calls Amp::declick, but there may be
-	// plugins between disk and Fader.
-	maybe_declick (bufs, nframes, declick);
-	_pending_declick = 0;
 
 	/* -------------------------------------------------------------------------------------------
 	   DENORMAL CONTROL
@@ -658,15 +639,15 @@ Route::n_process_buffers ()
 }
 
 void
-Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick)
+Route::monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes)
 {
 	assert (is_monitor());
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-	run_route (start_sample, end_sample, nframes, declick, true, false);
+	run_route (start_sample, end_sample, nframes, true, false);
 }
 
 void
-Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader)
+Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, bool gain_automation_ok, bool run_disk_reader)
 {
 	BufferSet& bufs (_session.get_route_buffers (n_process_buffers()));
 
@@ -692,7 +673,7 @@ Route::run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nf
 
 	/* run processor chain */
 
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, gain_automation_ok, run_disk_reader);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, gain_automation_ok, run_disk_reader);
 
 	/* map events (e.g. MIDI-CC) back to control-parameters */
 	update_controls (bufs);
@@ -3670,7 +3651,7 @@ Route::latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_
 }
 
 int
-Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
+Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 
@@ -3688,7 +3669,7 @@ Route::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample
 		return 0;
 	}
 
-	run_route (start_sample, end_sample, nframes, declick, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
+	run_route (start_sample, end_sample, nframes, (!_disk_writer || !_disk_writer->record_enabled()) && _session.transport_rolling(), true);
 
 	if ((_disk_reader && _disk_reader->need_butler()) || (_disk_writer && _disk_writer->need_butler())) {
 		need_butler = true;
@@ -3735,7 +3716,7 @@ Route::no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_
 		*/
 	}
 
-	run_route (start_sample, end_sample, nframes, 0, false, false);
+	run_route (start_sample, end_sample, nframes, false, false);
 	return 0;
 }
 
@@ -4097,22 +4078,6 @@ Route::protect_automation ()
 {
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i)
 		(*i)->protect_automation();
-}
-
-/** @param declick 1 to set a pending declick fade-in,
- *                -1 to set a pending declick fade-out
- */
-void
-Route::set_pending_declick (int declick)
-{
-	if (_declickable) {
-		/* this call is not allowed to turn off a pending declick */
-		if (declick) {
-			_pending_declick = declick;
-		}
-	} else {
-		_pending_declick = 0;
-	}
 }
 
 /** Shift automation forwards from a particular place, thereby inserting time.

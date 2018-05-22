@@ -142,7 +142,7 @@ public:
 
 	virtual void filter_input (BufferSet &) {}
 
-	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler);
+	int roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
 	int no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
 
@@ -154,7 +154,6 @@ public:
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
 	virtual void non_realtime_locate (samplepos_t);
-	virtual void set_pending_declick (int);
 	void set_loop (ARDOUR::Location *);
 
 	/* end of vfunc-based API */
@@ -586,8 +585,7 @@ public:
 	/* can only be executed by a route for which is_monitor() is true
 	 *	 (i.e. the monitor out)
 	 */
-	void monitor_run (samplepos_t start_sample, samplepos_t end_sample,
-			pframes_t nframes, int declick);
+	void monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes);
 
 	bool slaved_to (boost::shared_ptr<VCA>) const;
 	bool slaved () const;
@@ -611,7 +609,7 @@ protected:
 
 	void process_output_buffers (BufferSet& bufs,
 	                             samplepos_t start_sample, samplepos_t end_sample,
-	                             pframes_t nframes, int declick,
+	                             pframes_t nframes,
 	                             bool gain_automation_ok,
 	                             bool run_disk_processors);
 
@@ -657,7 +655,6 @@ protected:
 	gint           _pending_process_reorder; // atomic
 	gint           _pending_signals; // atomic
 
-	int            _pending_declick;
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
 	MeterType      _meter_type;
@@ -665,7 +662,6 @@ protected:
 	bool           _denormal_protection;
 
 	bool _recordable : 1;
-	bool _declickable : 1;
 
 	boost::shared_ptr<SoloControl> _solo_control;
 	boost::shared_ptr<MuteControl> _mute_control;
@@ -694,8 +690,6 @@ protected:
 
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
-
-	virtual void maybe_declick (BufferSet&, samplecnt_t, int);
 
 	boost::shared_ptr<GainControl>  _gain_control;
 	boost::shared_ptr<GainControl>  _trim_control;
@@ -752,7 +746,7 @@ private:
 
 	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
 
-	void run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, int declick, bool gain_automation_ok, bool run_disk_reader);
+	void run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, bool gain_automation_ok, bool run_disk_reader);
 	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
 
 	void reset_instrument_info ();

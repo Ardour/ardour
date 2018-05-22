@@ -61,8 +61,6 @@ Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode
 	, _alignment_choice (Automatic)
 {
 	_freeze_record.state = NoFreeze;
-	_declickable = true;
-
 }
 
 Track::~Track ()
@@ -799,29 +797,6 @@ Track::adjust_capture_buffering ()
         if (_disk_writer) {
                 _disk_writer->adjust_buffering ();
         }
-}
-
-
-void
-Track::maybe_declick (BufferSet& bufs, samplecnt_t nframes, int declick)
-{
-        /* never declick if there is an internal generator - we just want it to
-           keep generating sound without interruption.
-
-	   ditto if we are monitoring inputs.
-        */
-
-	if (_have_internal_generator || (_monitoring_control->monitoring_choice() == MonitorInput)) {
-                return;
-        }
-
-        if (!declick) {
-		declick = _pending_declick;
-	}
-
-	if (declick != 0) {
-		Amp::declick (bufs, nframes, declick);
-	}
 }
 
 void

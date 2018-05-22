@@ -136,7 +136,6 @@ Session::no_roll (pframes_t nframes)
 
 	samplepos_t end_sample = _transport_sample + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
-	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
@@ -152,7 +151,7 @@ Session::no_roll (pframes_t nframes)
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-		_process_graph->routes_no_roll( nframes, _transport_sample, end_sample, non_realtime_work_pending(), declick);
+		_process_graph->routes_no_roll( nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
 		PT_TIMING_CHECK (10);
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -160,8 +159,6 @@ Session::no_roll (pframes_t nframes)
 			if ((*i)->is_auditioner()) {
 				continue;
 			}
-
-			(*i)->set_pending_declick (declick);
 
 			if ((*i)->no_roll (nframes, _transport_sample, end_sample, non_realtime_work_pending())) {
 				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
@@ -182,7 +179,6 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	const samplepos_t start_sample = _transport_sample;
@@ -197,7 +193,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		if (_process_graph->process_routes (nframes, start_sample, end_sample, declick, need_butler) < 0) {
+		if (_process_graph->process_routes (nframes, start_sample, end_sample, need_butler) < 0) {
 			stop_transport ();
 			return -1;
 		}
@@ -211,11 +207,9 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 				continue;
 			}
 
-			(*i)->set_pending_declick (declick);
-
 			bool b = false;
 
-			if ((ret = (*i)->roll (nframes, start_sample, end_sample, declick, b)) < 0) {
+			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
 				stop_transport ();
 				return -1;
 			}
@@ -369,8 +363,6 @@ Session::process_with_events (pframes_t nframes)
 			set_next_event ();
 		}
 
-		check_declick_out ();
-
 		if (nframes == 0) {
 			return;
 		} else {
@@ -514,7 +506,6 @@ Session::process_with_events (pframes_t nframes)
 				}
 
 				maybe_stop (stop_limit);
-				check_declick_out ();
 			}
 
 			if (nframes > 0) {
@@ -920,7 +911,6 @@ Session::process_without_events (pframes_t nframes)
 	}
 
 	maybe_stop (stop_limit);
-	check_declick_out ();
 
 	if (session_needs_butler) {
 		DEBUG_TRACE (DEBUG::Butler, "p-without-events: session needs butler, call it\n");
@@ -953,7 +943,7 @@ Session::process_audition (pframes_t nframes)
 	/* if using a monitor section, run it because otherwise we don't hear anything */
 
 	if (_monitor_out && auditioner->needs_monitor()) {
-		_monitor_out->monitor_run (_transport_sample, _transport_sample + nframes, nframes, false);
+		_monitor_out->monitor_run (_transport_sample, _transport_sample + nframes, nframes);
 	}
 
 	/* handle pending events */

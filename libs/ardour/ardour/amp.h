@@ -32,9 +32,7 @@ class BufferSet;
 class GainControl;
 class IO;
 
-/** Applies a declick operation to all audio inputs, passing the same number of
- * audio outputs, and passing through any other types unchanged.
- */
+/** Gain Stage (Fader, Trim).  */
 class LIBARDOUR_API Amp : public Processor {
 public:
 	Amp(Session& s, const std::string& display_name, boost::shared_ptr<GainControl> control, bool control_midi_also);
@@ -61,9 +59,6 @@ public:
 
 	static gain_t apply_gain (AudioBuffer& buf, samplecnt_t sample_rate, samplecnt_t nframes, gain_t initial, gain_t target, sampleoffset_t offset = 0);
 	static void apply_simple_gain (AudioBuffer& buf, samplecnt_t nframes, gain_t target, sampleoffset_t offset = 0);
-
-	static void declick (BufferSet& bufs, samplecnt_t nframes, int dir);
-	static void update_meters();
 
 	boost::shared_ptr<GainControl> gain_control() {
 		return _gain_control;

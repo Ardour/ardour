@@ -220,7 +220,7 @@ Auditioner::data_type () const {
 }
 
 int
-Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, int declick, bool& need_butler)
+Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
 	if (!lm.locked()) {
@@ -244,7 +244,7 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 		}
 	}
 
-	process_output_buffers (bufs, start_sample, end_sample, nframes, declick, !_session.transport_stopped(), true);
+	process_output_buffers (bufs, start_sample, end_sample, nframes, !_session.transport_stopped(), true);
 
 	/* note: auditioner never writes to disk, so we don't care about the
 	 * disk writer status (it's buffers will always have no data in them).
@@ -425,7 +425,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 		/* process audio */
 		this_nframes = min (nframes, length - current_sample + _import_position);
 
-		if (this_nframes > 0 && 0 != (ret = roll (this_nframes, current_sample, current_sample + this_nframes, false, need_butler))) {
+		if (this_nframes > 0 && 0 != (ret = roll (this_nframes, current_sample, current_sample + this_nframes, need_butler))) {
 			silence (nframes);
 			return ret;
 		}
