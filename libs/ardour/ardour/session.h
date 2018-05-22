@@ -1256,14 +1256,13 @@ private:
 	bool                    _silent;
 	samplecnt_t             _remaining_latency_preroll;
 
-	// varispeed playback
+	// varispeed playback -- TODO: move out of session to backend.
 	double                  _engine_speed;
-	double                  _transport_speed;
+	double                  _transport_speed; // only: -1, 0, +1
 	double                  _default_transport_speed;
 	double                  _last_transport_speed;
 	double                  _signalled_varispeed;
 	double                  _target_transport_speed;
-	CubicInterpolation       interpolation;
 
 	bool                     auto_play_legal;
 	samplepos_t             _last_slave_transport_sample;

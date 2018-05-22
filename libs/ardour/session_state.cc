@@ -182,7 +182,6 @@ Session::pre_engine_init (string fullpath)
 	g_atomic_int_set (&_capture_load, 100);
 	set_next_event ();
 	_all_route_group->set_active (true, this);
-	interpolation.add_channel ();
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;

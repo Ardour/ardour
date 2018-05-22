@@ -871,12 +871,8 @@ Session::process_without_events (pframes_t nframes)
 		return;
 	}
 
-	if (_transport_speed == 1.0) {
-		samples_moved = (samplecnt_t) nframes;
-	} else {
-		interpolation.set_speed (_transport_speed);
-		samples_moved = interpolation.distance (nframes);
-	}
+	assert (_transport_speed == 1.f || _transport_speed == -1.f);
+	samples_moved = (samplecnt_t) nframes * _transport_speed;
 
 	if (!_exporting && !timecode_transmission_suspended()) {
 		send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, nframes);
