@@ -102,6 +102,15 @@ protected:
 	friend class Track;
 	friend class MidiTrack;
 
+	struct ReaderChannelInfo : public DiskIOProcessor::ChannelInfo {
+		ReaderChannelInfo (samplecnt_t buffer_size)
+			: DiskIOProcessor::ChannelInfo::ChannelInfo (buffer_size)
+		{
+			resize (buffer_size);
+		}
+		void resize (samplecnt_t);
+	};
+
 	XMLNode& state ();
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
@@ -109,6 +118,8 @@ protected:
 	void playlist_changed (const PBD::PropertyChange&);
 	int use_playlist (DataType, boost::shared_ptr<Playlist>);
 	void playlist_ranges_moved (std::list< Evoral::RangeMove<samplepos_t> > const &, bool);
+
+	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
 private:
 	/** The number of samples by which this diskstream's output should be delayed

@@ -133,6 +133,15 @@ public:
 protected:
 	friend class Track;
 
+	struct WriterChannelInfo : public DiskIOProcessor::ChannelInfo {
+		WriterChannelInfo (samplecnt_t buffer_size)
+			: DiskIOProcessor::ChannelInfo::ChannelInfo (buffer_size)
+		{
+			resize (buffer_size);
+		}
+		void resize (samplecnt_t);
+	};
+
 	virtual XMLNode& state ();
 
 	int do_flush (RunContext context, bool force = false);
@@ -142,6 +151,8 @@ protected:
 	void set_align_style_from_io();
 	void setup_destructive_playlist ();
 	void use_destructive_playlist ();
+
+	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();

@@ -56,6 +56,7 @@ public:
 	static const std::string state_node_name;
 
 	DiskIOProcessor (Session&, const std::string& name, Flag f);
+	virtual ~DiskIOProcessor ();
 
 	void set_route (boost::shared_ptr<Route>);
 	void drop_route ();
@@ -150,28 +151,33 @@ protected:
 	struct ChannelInfo : public boost::noncopyable {
 
 		ChannelInfo (samplecnt_t buffer_size);
-		~ChannelInfo ();
+		virtual ~ChannelInfo ();
 
-		/** A ringbuffer for data to be played back, written to in the
-		    butler thread, read from in the process thread.
-		*/
+		/** Ringbuffer for data to be played back.
+		 * written to in the butler thread, read from in the process thread.
+		 */
 		PBD::RingBufferNPT<Sample>* buf;
+
+		/** A ringbuffer for data to be recorded back, written to in the
+		 * process thread, read from in the butler thread.
+		 */
+		PBD::RingBufferNPT<Sample>* wbuf;
 		PBD::RingBufferNPT<Sample>::rw_vector rw_vector;
 
 		/* used only by capture */
 		boost::shared_ptr<AudioFileSource> write_source;
-		PBD::RingBufferNPT<CaptureTransition> * capture_transition_buf;
+		PBD::RingBufferNPT<CaptureTransition>* capture_transition_buf;
 
 		/* used in the butler thread only */
 		samplecnt_t curr_capture_cnt;
 
-		void resize (samplecnt_t);
+		virtual void resize (samplecnt_t) = 0;
 	};
 
 	typedef std::vector<ChannelInfo*> ChannelList;
 	SerializedRCUManager<ChannelList> channels;
 
-	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	virtual int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many) = 0;
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
 
 	boost::shared_ptr<Playlist> _playlists[DataType::num_types];

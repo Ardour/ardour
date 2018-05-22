@@ -78,6 +78,34 @@ DiskWriter::default_chunk_samples ()
 	return 65536;
 }
 
+void
+DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
+{
+	if (!capture_transition_buf) {
+		capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
+	}
+	delete wbuf;
+	wbuf = new RingBufferNPT<Sample> (bufsize);
+	/* touch memory to lock it */
+	memset (wbuf->buffer(), 0, sizeof (Sample) * wbuf->bufsize());
+}
+
+int
+DiskWriter::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+{
+	while (how_many--) {
+		c->push_back (new WriterChannelInfo (_session.butler()->audio_diskstream_capture_buffer_size()));
+		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new writer channel, write space = %2 read = %3\n",
+		                                            name(),
+		                                            c->back()->wbuf->write_space(),
+		                                            c->back()->wbuf->read_space()));
+	}
+
+	return 0;
+}
+
+
+
 bool
 DiskWriter::set_write_source_name (string const & str)
 {
@@ -453,7 +481,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			ChannelInfo* chaninfo (*chan);
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
 
-			chaninfo->buf->get_write_vector (&chaninfo->rw_vector);
+			chaninfo->wbuf->get_write_vector (&chaninfo->rw_vector);
 
 			if (rec_nframes <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
@@ -478,7 +506,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				memcpy (chaninfo->rw_vector.buf[1], incoming + first, sizeof (Sample) * (rec_nframes - first));
 			}
 
-			chaninfo->buf->increment_write_ptr (rec_nframes);
+			chaninfo->wbuf->increment_write_ptr (rec_nframes);
 
 		}
 
@@ -581,7 +609,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	/* AUDIO BUTLER REQUIRED CODE */
 
 	if (_playlists[DataType::AUDIO] && !c->empty()) {
-		if (((samplecnt_t) c->front()->buf->read_space() >= _chunk_samples)) {
+		if (((samplecnt_t) c->front()->wbuf->read_space() >= _chunk_samples)) {
 			_need_butler = true;
 		}
 	}
@@ -757,8 +785,8 @@ DiskWriter::buffer_load () const
 		return 1.0;
 	}
 
-	return (float) ((double) c->front()->buf->write_space()/
-			(double) c->front()->buf->bufsize());
+	return (float) ((double) c->front()->wbuf->write_space()/
+			(double) c->front()->wbuf->bufsize());
 }
 
 void
@@ -784,7 +812,7 @@ DiskWriter::seek (samplepos_t sample, bool complete_refill)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
-		(*chan)->buf->reset ();
+		(*chan)->wbuf->reset ();
 	}
 
 	_midi_buf->reset ();
@@ -819,7 +847,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 	boost::shared_ptr<ChannelList> c = channels.reader();
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
-		(*chan)->buf->get_read_vector (&vector);
+		(*chan)->wbuf->get_read_vector (&vector);
 
 		total = vector.len[0] + vector.len[1];
 
@@ -899,7 +927,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 			return -1;
 		}
 
-		(*chan)->buf->increment_read_ptr (to_write);
+		(*chan)->wbuf->increment_read_ptr (to_write);
 		(*chan)->curr_capture_cnt += to_write;
 
 		if ((to_write == vector.len[0]) && (total > to_write) && (to_write < _chunk_samples) && !destructive()) {
@@ -918,7 +946,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 				return -1;
 			}
 
-			(*chan)->buf->increment_read_ptr (to_write);
+			(*chan)->wbuf->increment_read_ptr (to_write);
 			(*chan)->curr_capture_cnt += to_write;
 		}
 	}

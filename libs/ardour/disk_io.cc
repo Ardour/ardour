@@ -63,6 +63,23 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	set_display_to_user (false);
 }
 
+DiskIOProcessor::~DiskIOProcessor ()
+{
+	{
+		RCUWriter<ChannelList> writer (channels);
+		boost::shared_ptr<ChannelList> c = writer.get_copy();
+
+		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
+			delete *chan;
+		}
+
+		c->clear();
+	}
+
+	channels.flush ();
+}
+
+
 void
 DiskIOProcessor::init ()
 {
@@ -219,20 +236,6 @@ DiskIOProcessor::set_state (const XMLNode& node, int version)
 }
 
 int
-DiskIOProcessor::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
-{
-	while (how_many--) {
-		c->push_back (new ChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size()));
-		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new channel, write space = %2 read = %3\n",
-		                                            name(),
-		                                            c->back()->buf->write_space(),
-		                                            c->back()->buf->read_space()));
-	}
-
-	return 0;
-}
-
-int
 DiskIOProcessor::add_channel (uint32_t how_many)
 {
 	RCUWriter<ChannelList> writer (channels);
@@ -329,32 +332,20 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 }
 
 DiskIOProcessor::ChannelInfo::ChannelInfo (samplecnt_t bufsize)
-	: buf (new RingBufferNPT<Sample> (bufsize))
+	: buf (0)
+	, wbuf (0)
+	, capture_transition_buf (0)
+	, curr_capture_cnt (0)
 {
-	/* touch the ringbuffer buffer, which will cause
-	   them to be mapped into locked physical RAM if
-	   we're running with mlockall(). this doesn't do
-	   much if we're not.
-	*/
-
-	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
-	capture_transition_buf = new RingBufferNPT<CaptureTransition> (256);
-}
-
-void
-DiskIOProcessor::ChannelInfo::resize (samplecnt_t bufsize)
-{
-	delete buf;
-	buf = new RingBufferNPT<Sample> (bufsize);
-	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
 }
 
 DiskIOProcessor::ChannelInfo::~ChannelInfo ()
 {
 	delete buf;
-	buf = 0;
-
+	delete wbuf;
 	delete capture_transition_buf;
+	buf = 0;
+	wbuf = 0;
 	capture_transition_buf = 0;
 }
 

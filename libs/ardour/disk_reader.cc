@@ -70,21 +70,30 @@ DiskReader::~DiskReader ()
 			_playlists[n]->release ();
 		}
 	}
+	delete _midi_buf;
+}
 
-	{
-		RCUWriter<ChannelList> writer (channels);
-		boost::shared_ptr<ChannelList> c = writer.get_copy();
+void
+DiskReader::ReaderChannelInfo::resize (samplecnt_t bufsize)
+{
+	delete buf;
+	/* touch memory to lock it */
+	buf = new RingBufferNPT<Sample> (bufsize);
+	memset (buf->buffer(), 0, sizeof (Sample) * buf->bufsize());
+}
 
-		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
-			delete *chan;
-		}
-
-		c->clear();
+int
+DiskReader::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+{
+	while (how_many--) {
+		c->push_back (new ReaderChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size()));
+		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new reader channel, write space = %2 read = %3\n",
+		                                            name(),
+		                                            c->back()->buf->write_space(),
+		                                            c->back()->buf->read_space()));
 	}
 
-	channels.flush ();
-
-	delete _midi_buf;
+	return 0;
 }
 
 void
