@@ -63,7 +63,6 @@ public:
 
 		StopOnce,
 		AutoLoop,
-		AutoLoopDeclick,
 	};
 
 	enum Action {

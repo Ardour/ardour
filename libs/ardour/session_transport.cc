@@ -989,7 +989,6 @@ Session::unset_play_loop ()
 	if (play_loop) {
 		play_loop = false;
 		clear_events (SessionEvent::AutoLoop);
-		clear_events (SessionEvent::AutoLoopDeclick);
 		set_track_loop (false);
 
 
@@ -1070,7 +1069,6 @@ Session::set_play_loop (bool yn, double speed)
 			samplepos_t dcp;
 			samplecnt_t dcl;
 			auto_loop_declick_range (loc, dcp, dcl);
-			merge_event (new SessionEvent (SessionEvent::AutoLoopDeclick, SessionEvent::Replace, dcp, dcl, 0.0f));
 			merge_event (new SessionEvent (SessionEvent::AutoLoop, SessionEvent::Replace, loc->end(), loc->start(), 0.0f));
 
 			/* if requested to roll, locate to start of loop and

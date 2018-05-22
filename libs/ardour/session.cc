@@ -846,7 +846,6 @@ Session::destroy ()
 		bool del = true;
 		switch (ev->type) {
 			case SessionEvent::AutoLoop:
-			case SessionEvent::AutoLoopDeclick:
 			case SessionEvent::Skip:
 			case SessionEvent::PunchIn:
 			case SessionEvent::PunchOut:
@@ -1693,34 +1692,17 @@ Session::auto_loop_changed (Location* location)
 	samplecnt_t dcl;
 	auto_loop_declick_range (location, dcp, dcl);
 
-	if (transport_rolling() && play_loop) {
+	bool rolling = transport_rolling ();
 
-		replace_event (SessionEvent::AutoLoopDeclick, dcp, dcl);
-
-		// if (_transport_sample > location->end()) {
+	if (rolling && play_loop) {
 
 		if (_transport_sample < location->start() || _transport_sample > location->end()) {
 			// relocate to beginning of loop
 			clear_events (SessionEvent::LocateRoll);
-
 			request_locate (location->start(), true);
 
 		}
-		else if (Config->get_seamless_loop() && !loop_changing) {
-
-			// schedule a locate-roll to refill the disk readers at the
-			// previous loop end
-			loop_changing = true;
-
-			if (location->end() > last_loopend) {
-				clear_events (SessionEvent::LocateRoll);
-				SessionEvent *ev = new SessionEvent (SessionEvent::LocateRoll, SessionEvent::Add, last_loopend, last_loopend, 0, true);
-				queue_event (ev);
-			}
-
-		}
 	} else {
-		clear_events (SessionEvent::AutoLoopDeclick);
 		clear_events (SessionEvent::AutoLoop);
 	}
 
@@ -1730,12 +1712,11 @@ Session::auto_loop_changed (Location* location)
 
 	samplepos_t pos;
 
-	if (!transport_rolling() && select_playhead_priority_target (pos)) {
+	if (!rolling && select_playhead_priority_target (pos)) {
 		if (pos == location->start()) {
 			request_locate (pos);
 		}
 	}
-
 
 	last_loopend = location->end();
 	set_dirty ();
@@ -1809,7 +1790,6 @@ Session::set_auto_loop_location (Location* location)
 		samplepos_t dcp;
 		samplecnt_t dcl;
 		auto_loop_declick_range (existing, dcp, dcl);
-		remove_event (dcp, SessionEvent::AutoLoopDeclick);
 		auto_loop_location_changed (0);
 	}
 

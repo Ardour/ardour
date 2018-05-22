@@ -1092,17 +1092,6 @@ Session::process_event (SessionEvent* ev)
 		del = false;
 		break;
 
-	case SessionEvent::AutoLoopDeclick:
-		if (play_loop) {
-			/* Request a declick fade-out and a fade-in; the fade-out will happen
-			   at the end of the loop, and the fade-in at the start.
-			*/
-			transport_sub_state |= (PendingLoopDeclickOut | PendingLoopDeclickIn);
-		}
-		remove = false;
-		del = false;
-		break;
-
 	case SessionEvent::Locate:
 		if (ev->yes_or_no) { /* force locate */
 			/* args: do not roll after locate, do flush, not with loop */
