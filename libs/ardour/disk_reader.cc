@@ -268,16 +268,15 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		goto midi;
 	}
 
-	if (speed != 1.0f && speed != -1.0f) {
-		interpolation.set_speed (speed);
-		disk_samples_to_consume = interpolation.distance (nframes);
-		if (speed < 0.0) {
-			disk_samples_to_consume = -disk_samples_to_consume;
-		}
-	} else {
-		disk_samples_to_consume = nframes;
-	}
+	assert (speed == -1 || speed == 0 || speed == 1);
 
+	if (speed < 0) {
+		disk_samples_to_consume = -nframes;
+	} else if (speed > 0) {
+		disk_samples_to_consume = nframes;
+	} else {
+		disk_samples_to_consume = 0;
+	}
 
 	if (!result_required || ((ms & MonitoringDisk) == 0) || still_locating || _no_disk_output) {
 
@@ -350,11 +349,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 			if (disk_samples_to_consume <= (samplecnt_t) chaninfo->rw_vector.len[0]) {
 
-				if (fabsf (speed) != 1.0f) {
-					samplecnt_t ocnt = nframes;
-					samplecnt_t icnt = chaninfo->rw_vector.len[0];
-					(void) interpolation.interpolate (n, icnt, chaninfo->rw_vector.buf[0], ocnt, disk_signal);
-				} else if (speed != 0.0) {
+				if (speed != 0.0) {
 					memcpy (disk_signal, chaninfo->rw_vector.buf[0], sizeof (Sample) * disk_samples_to_consume);
 				}
 
@@ -364,22 +359,11 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (disk_samples_to_consume <= total) {
 
-					if (fabsf (speed) != 1.0f) {
-						samplecnt_t ocnt = nframes;
-						interpolation.interpolate (n, chaninfo->rw_vector.len[0], chaninfo->rw_vector.buf[0], ocnt, disk_signal);
-
-						if (ocnt < nframes) {
-							disk_signal += ocnt;
-							ocnt = nframes - ocnt;
-							interpolation.interpolate (n, chaninfo->rw_vector.len[1], chaninfo->rw_vector.buf[1], ocnt, disk_signal);
-						}
-
-					} else if (speed != 0.0) {
-
-						memcpy (disk_signal,
+						if (speed != 0.0) {
+							memcpy (disk_signal,
 						        chaninfo->rw_vector.buf[0],
 						        chaninfo->rw_vector.len[0] * sizeof (Sample));
-						memcpy (disk_signal + chaninfo->rw_vector.len[0],
+							memcpy (disk_signal + chaninfo->rw_vector.len[0],
 						        chaninfo->rw_vector.buf[1],
 						        (disk_samples_to_consume - chaninfo->rw_vector.len[0]) * sizeof (Sample));
 					}

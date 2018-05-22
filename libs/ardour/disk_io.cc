@@ -223,7 +223,6 @@ DiskIOProcessor::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_
 {
 	while (how_many--) {
 		c->push_back (new ChannelInfo (_session.butler()->audio_diskstream_playback_buffer_size()));
-		interpolation.add_channel ();
 		DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1: new channel, write space = %2 read = %3\n",
 		                                            name(),
 		                                            c->back()->buf->write_space(),
@@ -248,7 +247,6 @@ DiskIOProcessor::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t
 	while (how_many-- && !c->empty()) {
 		delete c->back();
 		c->pop_back();
-		interpolation.remove_channel ();
 	}
 
 	return 0;

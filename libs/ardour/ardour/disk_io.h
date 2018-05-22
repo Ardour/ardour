@@ -45,7 +45,7 @@ template<typename T> class MidiRingBuffer;
 
 class LIBARDOUR_API DiskIOProcessor : public Processor
 {
-  public:
+public:
 	enum Flag {
 		Recordable  = 0x1,
 		Hidden      = 0x2,
@@ -108,11 +108,11 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	virtual void adjust_buffering() = 0;
 
-  protected:
+protected:
 	friend class Auditioner;
 	virtual int  seek (samplepos_t which_sample, bool complete_refill = false) = 0;
 
-  protected:
+protected:
 	Flag         _flags;
 	uint32_t      i_am_the_modifier;
 	double       _actual_speed;
@@ -173,8 +173,6 @@ class LIBARDOUR_API DiskIOProcessor : public Processor
 
 	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
 	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
-
-	CubicInterpolation interpolation;
 
 	boost::shared_ptr<Playlist> _playlists[DataType::num_types];
 	PBD::ScopedConnectionList playlist_connections;
