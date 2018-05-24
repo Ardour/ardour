@@ -186,7 +186,6 @@ HttpGet::get (const char* url)
 #endif
 	_status = _result = -1;
 	if (!_curl || !url) {
-		PBD::error << "HttpGet::get() not initialized (or NULL url)"<< endmsg;
 #ifdef ARDOURCURLDEBUG
 		std::cerr << "HttpGet::get() not initialized (or NULL url)"<< std::endl;
 #endif
@@ -194,7 +193,6 @@ HttpGet::get (const char* url)
 	}
 
 	if (strncmp ("http://", url, 7) && strncmp ("https://", url, 8)) {
-		PBD::error << "HttpGet::get() not a http[s] URL"<< endmsg;
 #ifdef ARDOURCURLDEBUG
 		std::cerr << "HttpGet::get() not a http[s] URL"<< std::endl;
 #endif
@@ -218,14 +216,12 @@ HttpGet::get (const char* url)
 	CCERR ("CURLINFO_RESPONSE_CODE,");
 
 	if (_result) {
-		PBD::error << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer) << endmsg;
 #ifdef ARDOURCURLDEBUG
 		std::cerr << string_compose (_("HTTP request failed: (%1) %2"), _result, error_buffer) << std::endl;
 #endif
 		return NULL;
 	}
 	if (_status != 200) {
-		PBD::error << string_compose (_("HTTP request status: %1"), _status) << endmsg;
 #ifdef ARDOURCURLDEBUG
 		std::cerr << string_compose (_("HTTP request status: %1"), _status) << std::endl;
 #endif
