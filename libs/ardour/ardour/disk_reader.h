@@ -93,6 +93,10 @@ public:
 	void playlist_modified ();
 	void reset_tracker ();
 
+	bool declick_in_progress () const {
+		return _declick_gain != 0; // declick-out
+	}
+
 	static void set_midi_readahead_samples (samplecnt_t samples_ahead) { midi_readahead = samples_ahead; }
 
 	static void set_no_disk_output (bool yn);
@@ -131,6 +135,8 @@ private:
 	bool          overwrite_queued;
 	IOChange      input_change_pending;
 	samplepos_t   file_sample[DataType::num_types];
+
+	gain_t        _declick_gain;
 
 	int _do_refill_with_alloc (bool partial_fill);
 

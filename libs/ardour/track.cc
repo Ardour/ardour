@@ -251,6 +251,12 @@ Track::freeze_state() const
 }
 
 bool
+Track::declick_in_progress () const
+{
+	return _disk_reader->declick_in_progress ();
+}
+
+bool
 Track::can_record()
 {
 	bool will_record = true;

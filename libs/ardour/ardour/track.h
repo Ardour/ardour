@@ -64,7 +64,8 @@ public:
 
 	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	bool needs_butler() const { return _needs_butler; }
+	bool needs_butler () const { return _needs_butler; }
+	bool declick_in_progress () const;
 
 	bool can_record();
 

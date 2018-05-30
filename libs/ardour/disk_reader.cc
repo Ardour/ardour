@@ -56,6 +56,7 @@ DiskReader::DiskReader (Session& s, string const & str, DiskIOProcessor::Flag f)
 	, overwrite_offset (0)
 	, _pending_overwrite (false)
 	, overwrite_queued (false)
+	, _declick_gain (0)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI] = 0;
