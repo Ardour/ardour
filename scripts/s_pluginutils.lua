@@ -3,6 +3,18 @@ ardour { ["type"] = "Snippet", name = "Plugin Utils" }
 function factory () return function ()
 
 	-------------------------------------------------------------------------------
+	-- List all Plugins
+	for p in ARDOUR.LuaAPI.list_plugins():iter() do
+		print (p.name, p.unique_id, p.type)
+		local psets = p:get_presets()
+		if not empty:empty() then
+			for pset in psets:iter() do
+				print (" - ", pset.label)
+			end
+		end
+	end
+
+	-------------------------------------------------------------------------------
 	-- add a Plugin (here LV2) to all mono tracks that contain the pattern "dru"
 	-- and load a plugin-preset (if it exists)
 	for r in Session:get_routes():iter() do
