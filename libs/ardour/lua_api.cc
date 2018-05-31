@@ -103,6 +103,30 @@ ARDOUR::LuaAPI::new_luaproc (Session *s, const string& name)
 	return boost::shared_ptr<Processor> (new PluginInsert (*s, p));
 }
 
+PluginInfoList
+ARDOUR::LuaAPI::list_plugins ()
+{
+	PluginManager& manager = PluginManager::instance ();
+	PluginInfoList all_plugs;
+	all_plugs.insert (all_plugs.end (), manager.ladspa_plugin_info ().begin (), manager.ladspa_plugin_info ().end ());
+	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
+#ifdef WINDOWS_VST_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.windows_vst_plugin_info ().begin (), manager.windows_vst_plugin_info ().end ());
+#endif
+#ifdef LXVST_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.lxvst_plugin_info ().begin (), manager.lxvst_plugin_info ().end ());
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.au_plugin_info ().begin (), manager.au_plugin_info ().end ());
+#endif
+#ifdef LV2_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.lv2_plugin_info ().begin (), manager.lv2_plugin_info ().end ());
+#endif
+	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
+
+	return all_plugs;
+}
+
 PluginInfoPtr
 ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 {

@@ -199,6 +199,7 @@ CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
 CLASSKEYS(ARDOUR::PeakMeter);
 CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(ARDOUR::PluginInfo);
 CLASSKEYS(ARDOUR::Plugin::PresetRecord);
 CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
@@ -232,6 +233,7 @@ CLASSKEYS(std::list<Evoral::ControlEvent*>);
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
 CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
+CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<TimeAxisView*>);
@@ -1324,6 +1326,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginStdVector <Plugin::PresetRecord> ("PresetVector").endClass ()
+		.beginStdList <boost::shared_ptr<ARDOUR::PluginInfo> > ("PluginInfoList").endClass ()
 
 		.deriveClass <ParameterDescriptor, Evoral::ParameterDescriptor> ("ParameterDescriptor")
 		.addVoidConstructor ()
@@ -2303,6 +2306,7 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("LuaAPI")
 		.addFunction ("nil_proc", ARDOUR::LuaAPI::nil_processor)
 		.addFunction ("new_luaproc", ARDOUR::LuaAPI::new_luaproc)
+		.addFunction ("list_plugins", ARDOUR::LuaAPI::list_plugins)
 		.addFunction ("new_plugin_info", ARDOUR::LuaAPI::new_plugin_info)
 		.addFunction ("new_plugin", ARDOUR::LuaAPI::new_plugin)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)

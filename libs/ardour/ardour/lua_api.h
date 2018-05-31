@@ -65,6 +65,10 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
 
+	/** return a PluginInfoList (all plugin)
+	 */
+	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
+
 	/** search a Plugin
 	 *
 	 * @param id Plugin Name, ID or URI
