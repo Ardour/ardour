@@ -1,0 +1,48 @@
+ardour {
+    ["type"] = "EditorAction",
+    name = "Meter Tap",
+    author = "Ardour Lua Taskforce",
+    description = [[Change Metering  Point for tracks in your session.]]
+}
+
+function factory () return function ()
+
+	local dialog_options = {
+		{ type = "label", colspan = 5, title = "" },
+		{ type = "radio", col = 1, colspan = 7, key = "select", title = "", values ={ ["Set All: Input"] = ARDOUR.MeterPoint.MeterInput, ["Set All: Pre Fader"] = ARDOUR.MeterPoint.MeterPreFader, ["Set All: Post Fader"] = ARDOUR.MeterPoint.MeterPostFader, ["Set All: Output"] = ARDOUR.MeterPoint.MeterOutput, ["Set All: Custom"] = ARDOUR.MeterPoint.MeterCustom}, default = "Set All: Input"},
+		{ type = "label", colspan = 5, title = "" },
+		{ type = "checkbox", col=1, colspan = 1, key = "select-tracks", default = true, title = "Selected tracks only"},
+		{ type = "checkbox", col=2, colspan = 1, key = "rec-tracks", default = true, title = "Record Enabled tracks only"},
+		{ type = "label", colspan = 5, title = "" },
+	}
+
+	local rv = LuaDialog.Dialog("Change all Meter Taps:", dialog_options):run()
+
+	meter_point = rv['select']
+	if rv['select-tracks'] then
+		local sel = Editor:get_selection ()
+		for route in sel.tracks:routelist():iter() do
+			if not(route:to_track():isnil()) then
+				if rv['rec-tracks'] then
+					if route:rec_enable_control():get_value() == 1.0 then
+						route:to_track():set_meter_point(meter_point, false)
+					end
+				else
+					route:to_track():set_meter_point(meter_point, false)
+				end
+			end
+		end
+	end
+
+	for route in Session:get_routes():iter() do
+		if not(route:to_track():isnil()) then
+			if rv['rec-tracks'] then
+				if route:rec_enable_control():get_value() == 1.0 then
+					route:to_track():set_meter_point(meter_point, false)
+				end
+			else
+				route:to_track():set_meter_point(meter_point, false)
+			end
+		end
+	end
+end end
