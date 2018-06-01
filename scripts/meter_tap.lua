@@ -32,17 +32,18 @@ function factory () return function ()
 				end
 			end
 		end
-	end
-
-	for route in Session:get_routes():iter() do
-		if not(route:to_track():isnil()) then
-			if rv['rec-tracks'] then
-				if route:rec_enable_control():get_value() == 1.0 then
+	else
+		for route in Session:get_routes():iter() do
+			if not(route:to_track():isnil()) then
+				if rv['rec-tracks'] then
+					if route:rec_enable_control():get_value() == 1.0 then
+						route:to_track():set_meter_point(meter_point, false)
+					end
+				else
 					route:to_track():set_meter_point(meter_point, false)
 				end
-			else
-				route:to_track():set_meter_point(meter_point, false)
 			end
 		end
 	end
+	
 end end
