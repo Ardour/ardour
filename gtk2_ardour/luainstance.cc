@@ -744,7 +744,7 @@ LuaInstance::register_classes (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ArdourUI")
 
-		.addFunction ("http_get", (std::string (*)(const std::string&))&ArdourCurl::http_get)
+		.addFunction ("http_get", (std::string (*)(const std::string&))&ArdourCurl::http_get_unlogged)
 
 		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 

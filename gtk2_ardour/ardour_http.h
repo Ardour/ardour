@@ -40,10 +40,10 @@ class HttpGet {
 		std::map<std::string, std::string> h;
 	};
 
-	char* get (const char* url);
+	char* get (const char* url, bool with_error_logging = false);
 
-	std::string get (const std::string& url) {
-		char *rv = get (url.c_str ());
+	std::string get (const std::string& url, bool with_error_logging = false) {
+		char *rv = get (url.c_str (), with_error_logging);
 		return rv ? std::string (rv) : std::string ("");
 	}
 
@@ -89,9 +89,14 @@ class HttpGet {
 	static const char* ca_info;
 };
 
-char* http_get (const char* url, int* status);
+char* http_get (const char* url, int* status, bool with_error_logging);
+std::string http_get (const std::string& url, bool with_error_logging);
 
-std::string http_get (const std::string& url);
+/* For use from Lua scripts */
+
+static char* http_get_unlogged (const char* url, int* status) { return http_get (url, status, false); }
+static std::string http_get_unlogged (const std::string& url) { return http_get (url, false); }
+
 
 } // namespace
 

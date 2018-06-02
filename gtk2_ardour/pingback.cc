@@ -172,7 +172,7 @@ _pingback (void *arg)
 
 #endif /* PLATFORM_WINDOWS */
 
-	return_str = h.get (url);
+	return_str = h.get (url, false);
 
 	if (!return_str.empty ()) {
 		if ( return_str.length() > 140 ) { // like a tweet :)

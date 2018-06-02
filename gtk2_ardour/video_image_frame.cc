@@ -210,7 +210,7 @@ http_get_thread (void *arg) {
 	int timeout = 1000; // * 5ms -> 5sec
 	char *res = NULL;
 	do {
-		res = ArdourCurl::http_get (url, &status);
+		res = ArdourCurl::http_get (url, &status, false);
 		if (status == 503) Glib::usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 

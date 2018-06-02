@@ -273,7 +273,7 @@ VideoUtils::video_query_info (
 			, video_server_url.c_str()
 			, (video_server_url.length()>0 && video_server_url.at(video_server_url.length()-1) == '/')?"":"/"
 			, filepath.c_str());
-	std::string res = ArdourCurl::http_get (url);
+	std::string res = ArdourCurl::http_get (url, false);
 	if (res.empty ()) {
 		return false;
 	}

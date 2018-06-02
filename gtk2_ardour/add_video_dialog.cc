@@ -519,7 +519,7 @@ AddVideoDialog::harvid_request(std::string u)
 
 	harvid_list->clear();
 
-	char* res = ArdourCurl::http_get (url, &status);
+	char* res = ArdourCurl::http_get (url, &status, false);
 	if (status != 200) {
 		printf("request failed\n"); // XXX
 		harvid_path.set_text(" - request failed -");
@@ -699,7 +699,7 @@ AddVideoDialog::request_preview(std::string u)
 		, (long long) (video_duration * seek_slider.get_value() / 1000.0)
 		, clip_width, clip_height, u.c_str());
 
-	char* data = ArdourCurl::http_get (url, NULL);
+	char* data = ArdourCurl::http_get (url, NULL, false);
 	if (!data) {
 		printf("image preview request failed %s\n", url);
 		imgbuf->fill(RGBA_TO_UINT(0,0,0,255));
