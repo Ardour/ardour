@@ -28,7 +28,7 @@
 #include "ardour/tempo.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/windows_vst_plugin.h"
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 #include "ardour/vst_types.h"
 #ifdef WINDOWS_VST_SUPPORT
 #include <fst.h>

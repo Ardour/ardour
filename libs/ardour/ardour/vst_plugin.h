@@ -30,7 +30,7 @@ typedef struct _VSTHandle VSTHandle;
 struct _VSTState;
 typedef struct _VSTState VSTState;
 
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 
 namespace ARDOUR {
 

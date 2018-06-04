@@ -1,5 +1,5 @@
 /*
- * aeffectx.h - simple header to allow VeSTige compilation and eventually work
+ * vestige.h - simple header to allow VeSTige compilation and eventually work
  *
  * Copyright (c) 2006 Javier Serrano Polo <jasp00/at/users.sourceforge.net>
  *
@@ -20,10 +20,15 @@
  * Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
  * Boston, MA 02110-1301 USA.
  *
+ * This VeSTige header is included in this package in the good-faith
+ * belief that it has been cleanly and legally reverse engineered
+ * without reference to the official VST SDK and without its
+ * developer(s) having agreed to the VST SDK license agreement.
  */
+
 #include <stdint.h>
-#ifndef _AEFFECTX_H
-#define _AEFFECTX_H
+#ifndef _VESTIGE_H
+#define _VESTIGE_H
 
 #define CCONST(a, b, c, d)( ( ( (int) a ) << 24 ) |		\
 				( ( (int) b ) << 16 ) |		\

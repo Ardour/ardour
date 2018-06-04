@@ -28,7 +28,7 @@
 #include "pbd/locale_guard.h"
 
 #include "ardour/vst_plugin.h"
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 #include "ardour/session.h"
 #include "ardour/vst_types.h"
 #include "ardour/filesystem_paths.h"

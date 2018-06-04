@@ -40,7 +40,7 @@
 #include "ardour/uri_map.h"
 #endif
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 #endif
 
 namespace ARDOUR {

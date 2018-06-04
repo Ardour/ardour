@@ -7,7 +7,7 @@
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/vst_types.h"
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 
 #ifdef __cplusplus
 extern "C" {

@@ -233,7 +233,7 @@
 		432654C5194EF73D00BEFB46 /* user_bundle.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653DB194EF73C00BEFB46 /* user_bundle.h */; };
 		432654C6194EF73D00BEFB46 /* utils.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653DC194EF73C00BEFB46 /* utils.h */; };
 		432654C7194EF73D00BEFB46 /* version.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653DD194EF73C00BEFB46 /* version.h */; };
-		432654C8194EF73D00BEFB46 /* aeffectx.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653DF194EF73C00BEFB46 /* aeffectx.h */; };
+		432654C8194EF73D00BEFB46 /* vestige.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653DF194EF73C00BEFB46 /* vestige.h */; };
 		432654C9194EF73D00BEFB46 /* vst_info_file.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E0194EF73C00BEFB46 /* vst_info_file.h */; };
 		432654CA194EF73D00BEFB46 /* vst_plugin.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E1194EF73C00BEFB46 /* vst_plugin.h */; };
 		432654CB194EF73D00BEFB46 /* vst_types.h in Headers */ = {isa = PBXBuildFile; fileRef = 432653E2194EF73C00BEFB46 /* vst_types.h */; };
@@ -752,7 +752,7 @@
 		43AA86C1194EEB8B00A67B56 /* vumeterdsp.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA85D9194EEB8B00A67B56 /* vumeterdsp.h */; };
 		43AA86C2194EEB8B00A67B56 /* windows_vst_plugin.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA85DA194EEB8B00A67B56 /* windows_vst_plugin.h */; };
 		43AA86C3194EEB8B00A67B56 /* worker.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA85DB194EEB8B00A67B56 /* worker.h */; };
-		43AA86C6194EEBAF00A67B56 /* aeffectx.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86C5194EEBAF00A67B56 /* aeffectx.h */; };
+		43AA86C6194EEBAF00A67B56 /* vestige.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86C5194EEBAF00A67B56 /* vestige.h */; };
 		43AA86D0194EEC1400A67B56 /* gettext.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86CD194EEC1400A67B56 /* gettext.h */; };
 		43AA86D1194EEC1400A67B56 /* lv2_evbuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86CE194EEC1400A67B56 /* lv2_evbuf.h */; };
 		43AA86D2194EEC1400A67B56 /* rdff.h in Headers */ = {isa = PBXBuildFile; fileRef = 43AA86CF194EEC1400A67B56 /* rdff.h */; };
@@ -985,7 +985,7 @@
 		432653DB194EF73C00BEFB46 /* user_bundle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = user_bundle.h; sourceTree = "<group>"; };
 		432653DC194EF73C00BEFB46 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		432653DD194EF73C00BEFB46 /* version.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = version.h; sourceTree = "<group>"; };
-		432653DF194EF73C00BEFB46 /* aeffectx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = aeffectx.h; sourceTree = "<group>"; };
+		432653DF194EF73C00BEFB46 /* vestige.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vestige.h; sourceTree = "<group>"; };
 		432653E0194EF73C00BEFB46 /* vst_info_file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vst_info_file.h; sourceTree = "<group>"; };
 		432653E1194EF73C00BEFB46 /* vst_plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vst_plugin.h; sourceTree = "<group>"; };
 		432653E2194EF73C00BEFB46 /* vst_types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vst_types.h; sourceTree = "<group>"; };
@@ -1528,7 +1528,7 @@
 		43AA85D9194EEB8B00A67B56 /* vumeterdsp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vumeterdsp.h; path = ../ardour/vumeterdsp.h; sourceTree = SOURCE_ROOT; };
 		43AA85DA194EEB8B00A67B56 /* windows_vst_plugin.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = windows_vst_plugin.h; path = ../ardour/windows_vst_plugin.h; sourceTree = SOURCE_ROOT; };
 		43AA85DB194EEB8B00A67B56 /* worker.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = worker.h; path = ../ardour/worker.h; sourceTree = SOURCE_ROOT; };
-		43AA86C5194EEBAF00A67B56 /* aeffectx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = aeffectx.h; path = ../ardour/vestige/aeffectx.h; sourceTree = SOURCE_ROOT; };
+		43AA86C5194EEBAF00A67B56 /* vestige.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = vestige.h; path = ../ardour/vestige/vestige.h; sourceTree = SOURCE_ROOT; };
 		43AA86C8194EEBF100A67B56 /* run-profiling.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-profiling.sh"; path = "../run-profiling.sh"; sourceTree = SOURCE_ROOT; };
 		43AA86C9194EEBF100A67B56 /* run-session-tests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-session-tests.sh"; path = "../run-session-tests.sh"; sourceTree = SOURCE_ROOT; };
 		43AA86CA194EEBF100A67B56 /* run-tests.sh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; name = "run-tests.sh"; path = "../run-tests.sh"; sourceTree = SOURCE_ROOT; };
@@ -1794,7 +1794,7 @@
 		432653DE194EF73C00BEFB46 /* vestige */ = {
 			isa = PBXGroup;
 			children = (
-				432653DF194EF73C00BEFB46 /* aeffectx.h */,
+				432653DF194EF73C00BEFB46 /* vestige.h */,
 			);
 			path = vestige;
 			sourceTree = "<group>";
@@ -2524,7 +2524,7 @@
 		43AA86C4194EEBAF00A67B56 /* vestige */ = {
 			isa = PBXGroup;
 			children = (
-				43AA86C5194EEBAF00A67B56 /* aeffectx.h */,
+				43AA86C5194EEBAF00A67B56 /* vestige.h */,
 			);
 			name = vestige;
 			path = ../../../libs/ardour/ardour/vestige;
@@ -2810,7 +2810,7 @@
 				43AA86C1194EEB8B00A67B56 /* vumeterdsp.h in Headers */,
 				43AA86C2194EEB8B00A67B56 /* windows_vst_plugin.h in Headers */,
 				43AA86C3194EEB8B00A67B56 /* worker.h in Headers */,
-				43AA86C6194EEBAF00A67B56 /* aeffectx.h in Headers */,
+				43AA86C6194EEBAF00A67B56 /* vestige.h in Headers */,
 				43AA86D0194EEC1400A67B56 /* gettext.h in Headers */,
 				43AA86D1194EEC1400A67B56 /* lv2_evbuf.h in Headers */,
 				43AA86D2194EEC1400A67B56 /* rdff.h in Headers */,
@@ -3041,7 +3041,7 @@
 				432654C5194EF73D00BEFB46 /* user_bundle.h in Headers */,
 				432654C6194EF73D00BEFB46 /* utils.h in Headers */,
 				432654C7194EF73D00BEFB46 /* version.h in Headers */,
-				432654C8194EF73D00BEFB46 /* aeffectx.h in Headers */,
+				432654C8194EF73D00BEFB46 /* vestige.h in Headers */,
 				432654C9194EF73D00BEFB46 /* vst_info_file.h in Headers */,
 				432654CA194EF73D00BEFB46 /* vst_plugin.h in Headers */,
 				432654CB194EF73D00BEFB46 /* vst_types.h in Headers */,

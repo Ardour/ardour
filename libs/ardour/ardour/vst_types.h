@@ -22,7 +22,7 @@
 
 #include <pthread.h>
 #include "ardour/libardour_visibility.h"
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 
 struct LIBARDOUR_API _VSTKey
 {
