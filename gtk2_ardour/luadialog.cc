@@ -22,13 +22,13 @@
 
 #include "ardour/dB.h"
 #include "ardour/rc_configuration.h"
-#include "gtk2_ardour/stripable_colorpicker.h"
 
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_dropdown.h"
 #include "widgets/slider_controller.h"
 
+#include "stripable_colorpicker.h"
 #include "ardour_dialog.h"
 #include "luadialog.h"
 #include "splash.h"
