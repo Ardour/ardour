@@ -68,6 +68,7 @@
 #include "canvas/canvas.h"
 
 #include "actions.h"
+#include "ardour_ui.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
 #include "audio_time_axis.h"
@@ -748,6 +749,11 @@ Editor::build_region_boundary_cache ()
 		}
 	}
 
+	//allow regions to snap to the video start (if any) as if it were a "region"
+	if (ARDOUR_UI::instance()->video_timeline) {
+		region_boundary_cache.push_back (ARDOUR_UI::instance()->video_timeline->get_video_start_offset());
+	}
+	
 	std::pair<samplepos_t, samplepos_t> ext = session_gui_extents (false);
 	samplepos_t session_end = ext.second;
 

@@ -74,6 +74,8 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void toggle_offset_locked ();
 	bool is_offset_locked () { return video_offset_lock; }
 
+	ARDOUR::sampleoffset_t get_video_start_offset() { return video_start_offset; }
+
 	void open_video_monitor ();
 	void close_video_monitor ();
 	void control_video_monitor (int, int);
