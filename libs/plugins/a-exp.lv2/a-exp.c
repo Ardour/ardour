@@ -43,6 +43,11 @@
 #define isfinite_local isfinite
 #endif
 
+#ifndef FLT_EPSILON
+#  define FLT_EPSILON 1.192093e-07
+#endif
+
+
 typedef enum {
 	AEXP_ATTACK = 0,
 	AEXP_RELEASE,
@@ -87,7 +92,6 @@ typedef struct {
 	float srate;
 
 	float makeup_gain;
-	float tau;
 
 	bool was_disabled;
 
@@ -132,7 +136,6 @@ instantiate(const LV2_Descriptor* descriptor,
 	}
 
 	aexp->srate = rate;
-	aexp->tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
 #ifdef LV2_EXTENDED
 	aexp->need_expose = true;
 	aexp->v_lvl_out = -70.f;
@@ -306,7 +309,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = aexp->makeup_gain;
 
-	const float tau = aexp->tau;
+	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
 
 	if (*aexp->enable <= 0) {
 		ratio = 1.f;
@@ -395,10 +398,14 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		lgaininp = in0 * Lgain;
 
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
+		makeup_gain += tau * (makeup_target - makeup_gain);
 		output[i] = lgaininp * makeup_gain;
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
+	}
+
+	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
+		makeup_gain = makeup_target;
 	}
 
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
@@ -476,7 +483,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = aexp->makeup_gain;
 
-	const float tau = aexp->tau;
+	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
 
 	if (*aexp->enable <= 0) {
 		ratio = 1.f;
@@ -569,12 +576,16 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
 
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
+		makeup_gain += tau * (makeup_target - makeup_gain);
 
 		output0[i] = lgaininp * makeup_gain;
 		output1[i] = rgaininp * makeup_gain;
 
 		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
+	}
+
+	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
+		makeup_gain = makeup_target;
 	}
 
 	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
