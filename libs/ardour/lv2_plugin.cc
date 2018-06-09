@@ -2325,18 +2325,22 @@ LV2Plugin::describe_parameter(Evoral::Parameter which)
 {
 	if (( which.type() == PluginAutomation) && ( which.id() < parameter_count()) ) {
 
-		if (lilv_port_has_property(_impl->plugin,
-					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.ext_notOnGUI)) {
+		const LilvPort* port = lilv_plugin_get_port_by_index(_impl->plugin, which.id());
+
+		if (lilv_port_has_property(_impl->plugin, port, _world.ext_notOnGUI)) {
 			return X_("hidden");
 		}
 
-		if (lilv_port_has_property(_impl->plugin,
-					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_freewheeling)) {
+		const LilvPort* fwport = lilv_plugin_get_port_by_designation(_impl->plugin, _world.lv2_InputPort, _world.lv2_freewheeling);
+		if (fwport && fwport == port) {
 			return X_("hidden");
 		}
 
-		if (lilv_port_has_property(_impl->plugin,
-					lilv_plugin_get_port_by_index(_impl->plugin, which.id()), _world.lv2_reportsLatency)) {
+		if (lilv_port_has_property(_impl->plugin, port, _world.lv2_freewheeling)) {
+			return X_("hidden");
+		}
+
+		if (lilv_port_has_property(_impl->plugin, port, _world.lv2_reportsLatency)) {
 			return X_("latency");
 		}
 
