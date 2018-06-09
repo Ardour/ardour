@@ -269,7 +269,7 @@ TemplateManager::TemplateManager ()
 	vb->pack_start (*sw);
 	vb->pack_start (_progress_bar);
 
-	Frame* desc_sample = manage (new Frame (_("Description")));
+	Frame* desc_frame = manage (new Frame (_("Description")));
 
 	_description_editor.set_wrap_mode (Gtk::WRAP_WORD);
 	_description_editor.set_size_request (300,400);
@@ -280,10 +280,10 @@ TemplateManager::TemplateManager ()
 
 	_description_editor.get_buffer()->signal_changed().connect (sigc::mem_fun (*this, &TemplateManager::set_desc_dirty));
 
-	desc_sample->add (_description_editor);
+	desc_frame->add (_description_editor);
 
 	pack_start (*vb);
-	pack_start (*desc_sample);
+	pack_start (*desc_frame);
 	pack_start (*vb_btns);
 
 	show_all_children ();

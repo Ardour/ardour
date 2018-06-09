@@ -698,14 +698,14 @@ Editor::Editor ()
 	VBox* summary_arrows_right = manage (new VBox);
 	summary_arrows_right->pack_start (*summary_arrow_right);
 
-	Frame* summary_sample = manage (new Frame);
-	summary_sample->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+	Frame* summary_frame = manage (new Frame);
+	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
-	summary_sample->add (*_summary);
-	summary_sample->show ();
+	summary_frame->add (*_summary);
+	summary_frame->show ();
 
 	_summary_hbox.pack_start (*summary_arrows_left, false, false);
-	_summary_hbox.pack_start (*summary_sample, true, true);
+	_summary_hbox.pack_start (*summary_frame, true, true);
 	_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
 	if (!ARDOUR::Profile->get_trx()) {
@@ -2839,8 +2839,8 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	}
 
 	/* check snap-to-region-{start/end/sync} */
-	if ( 
-		(pref == SnapToAny) && 
+	if (
+		(pref == SnapToAny) &&
 		(UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync())
 		) {
 		if (!region_boundary_cache.empty()) {
@@ -2863,7 +2863,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 					test = *next;
 				}
 			}
-			
+
 		}
 
 		check_best_snap(presnap, test, dist, best);

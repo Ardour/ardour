@@ -808,15 +808,15 @@ LocationUI::LocationUI (std::string state_node_name)
 
 	newest_location = 0;
 
-	loc_sample_box.set_spacing (5);
-	loc_sample_box.set_border_width (5);
-	loc_sample_box.set_name("LocationFrameBox");
+	loc_frame_box.set_spacing (5);
+	loc_frame_box.set_border_width (5);
+	loc_frame_box.set_name("LocationFrameBox");
 
-	loc_sample_box.pack_start (location_rows_scroller, true, true);
+	loc_frame_box.pack_start (location_rows_scroller, true, true);
 
 	add_location_button.set_name ("LocationAddLocationButton");
 
-	table->attach (loc_sample_box, 0, 2, table_row, table_row + 1);
+	table->attach (loc_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.add (*table);
@@ -841,14 +841,14 @@ LocationUI::LocationUI (std::string state_node_name)
 	range_rows_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	range_rows_scroller.set_size_request (-1, 130);
 
-	range_sample_box.set_spacing (5);
-	range_sample_box.set_name("LocationFrameBox");
-	range_sample_box.set_border_width (5);
-	range_sample_box.pack_start (range_rows_scroller, true, true);
+	range_frame_box.set_spacing (5);
+	range_frame_box.set_name("LocationFrameBox");
+	range_frame_box.set_border_width (5);
+	range_frame_box.pack_start (range_rows_scroller, true, true);
 
 	add_range_button.set_name ("LocationAddRangeButton");
 
-	table->attach (range_sample_box, 0, 2, table_row, table_row + 1);
+	table->attach (range_frame_box, 0, 2, table_row, table_row + 1);
 	++table_row;
 
 	loc_range_panes.add (*table);
