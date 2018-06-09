@@ -40,6 +40,10 @@
 #define isfinite_local isfinite
 #endif
 
+#ifndef FLT_EPSILON
+#  define FLT_EPSILON 1.192093e-07
+#endif
+
 typedef enum {
 	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
@@ -310,7 +314,7 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const float tau = (1.0 - exp (-2.f * M_PI * n_samples * 25.f / acomp->srate));
+	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
@@ -392,15 +396,14 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 
 		lgaininp = in0 * Lgain;
 
+		makeup_gain += tau * (makeup_target - makeup_gain);
 		output[i] = lgaininp * makeup_gain;
 
 		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
 	}
 
-	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
+	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
 		makeup_gain = makeup_target;
-	} else {
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
@@ -489,7 +492,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const float tau = (1.0 - exp (-2.f * M_PI * n_samples * 25.f / acomp->srate));
+	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
@@ -573,16 +576,16 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		lgaininp = in0 * Lgain;
 		rgaininp = in1 * Lgain;
 
+		makeup_gain += tau * (makeup_target - makeup_gain);
+
 		output0[i] = lgaininp * makeup_gain;
 		output1[i] = rgaininp * makeup_gain;
 
 		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
 	}
 
-	if ( fabsf(makeup_target - makeup_gain) < 1e-6 ) {
+	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
 		makeup_gain = makeup_target;
-	} else {
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
 	}
 
 	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
