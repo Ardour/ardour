@@ -89,6 +89,8 @@ typedef struct {
 	float* output0;
 	float* output1;
 
+	uint32_t n_channels;
+
 	float srate;
 
 	float makeup_gain;
@@ -127,6 +129,15 @@ instantiate(const LV2_Descriptor* descriptor,
             const LV2_Feature* const* features)
 {
 	AComp* acomp = (AComp*)calloc(1, sizeof(AComp));
+
+	if (!strcmp (descriptor->URI, ACOMP_URI)) {
+		acomp->n_channels = 1;
+	} else if (!strcmp (descriptor->URI, ACOMP_STEREO_URI)) {
+		acomp->n_channels = 2;
+	} else {
+		free (acomp);
+		return NULL;
+	}
 
 	for (int i=0; features[i]; ++i) {
 #ifdef LV2_EXTENDED
@@ -282,21 +293,20 @@ activate(LV2_Handle instance)
 }
 
 static void
-run_mono(LV2_Handle instance, uint32_t n_samples)
+run(LV2_Handle instance, uint32_t n_samples)
 {
 	AComp* acomp = (AComp*)instance;
 
-	const float* const input = acomp->input0;
+	const float* const ins[2] = { acomp->input0, acomp->input1 };
 	const float* const sc = acomp->sc;
-	float* const output = acomp->output0;
+	float* const outs[2] = { acomp->output0, acomp->output1 };
 
 	float srate = acomp->srate;
 	float width = (6.f * *(acomp->knee)) + 0.01;
 	float attack_coeff = exp(-1000.f/(*(acomp->attack) * srate));
 	float release_coeff = exp(-1000.f/(*(acomp->release) * srate));
 
-	float max = 0.f;
-	float lgaininp = 0.f;
+	float max_out = 0.f;
 	float Lgain = 1.f;
 	float Lxg, Lyg;
 	float current_gainr;
@@ -305,8 +315,10 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
-	float in0;
 	float sc0;
+	float maxabs;
+
+	uint32_t n_channels = acomp->n_channels;
 
 	float ratio = *acomp->ratio;
 	float thresdb = *acomp->thresdb;
@@ -355,189 +367,12 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
-		in0 = input[i];
+		maxabs = 0.f;
+		for (uint32_t c=0; c<n_channels; ++c) {
+			maxabs = fmaxf(fabsf(ins[c][i]), maxabs);
+		}
 		sc0 = sc[i];
-		ingain = usesidechain ? fabs(sc0) : fabs(in0);
-		Lyg = 0.f;
-		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
-		Lxg = sanitize_denormal(Lxg);
-
-		if (Lxg > in_peak_db) {
-			in_peak_db = Lxg;
-		}
-
-		if (2.f*(Lxg-thresdb) < -width) {
-			Lyg = Lxg;
-		} else if (2.f*(Lxg-thresdb) > width) {
-			Lyg = thresdb + (Lxg-thresdb)/ratio;
-			Lyg = sanitize_denormal(Lyg);
-		} else {
-			Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
-		}
-
-		current_gainr = Lxg - Lyg;
-
-		if (current_gainr < old_gainr) {
-			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
-		} else if (current_gainr > old_gainr) {
-			current_gainr = attack_coeff*old_gainr + (1.f-attack_coeff)*current_gainr;
-		}
-
-		current_gainr = sanitize_denormal(current_gainr);
-
-		Lgain = from_dB(-current_gainr);
-
-		old_gainr = current_gainr;
-
-		*(acomp->gainr) = current_gainr;
-		if (current_gainr > max_gainr) {
-			max_gainr = current_gainr;
-		}
-
-		lgaininp = in0 * Lgain;
-
-		makeup_gain += tau * (makeup_target - makeup_gain);
-		output[i] = lgaininp * makeup_gain;
-
-		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
-	}
-
-	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
-		makeup_gain = makeup_target;
-	}
-
-	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
-	*(acomp->inlevel) = in_peak_db;
-	acomp->makeup_gain = makeup_gain;
-
-#ifdef LV2_EXTENDED
-	acomp->v_gainr = max_gainr;
-
-	if (in_peak_db > acomp->v_peakdb) {
-		acomp->v_peakdb = in_peak_db;
-		acomp->peakdb_samples = 0;
-	} else {
-		acomp->peakdb_samples += n_samples;
-		if ((float)acomp->peakdb_samples/acomp->srate > RESET_PEAK_AFTER_SECONDS) {
-			acomp->v_peakdb = in_peak_db;
-			acomp->peakdb_samples = 0;
-			acomp->need_expose = true;
-		}
-	}
-
-	const float v_lvl_in = in_peak_db;
-	const float v_lvl_out = *acomp->outlevel;
-
-	float state_x;
-
-	const float knee_lim_gr = (1.f - 1.f/ratio) * width/2.f;
-
-	if (acomp->v_gainr > knee_lim_gr) {
-		state_x = acomp->v_gainr / (1.f - 1.f/ratio) + thresdb;
-	} else {
-		state_x = sqrt ( (2.f*width*acomp->v_gainr) / (1.f-1.f/ratio) ) + thresdb - width/2.f;
-	}
-
-	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= .1f ||
-	    fabsf (acomp->v_lvl_in - v_lvl_in) >= .1f ||
-	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
-		// >= 0.1dB difference
-		acomp->need_expose = true;
-		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out;
-		acomp->v_state_x = state_x;
-	}
-	if (acomp->need_expose && acomp->queue_draw) {
-		acomp->need_expose = false;
-		acomp->queue_draw->queue_draw (acomp->queue_draw->handle);
-	}
-#endif
-}
-
-static void
-run_stereo(LV2_Handle instance, uint32_t n_samples)
-{
-	AComp* acomp = (AComp*)instance;
-
-	const float* const input0 = acomp->input0;
-	const float* const input1 = acomp->input1;
-	const float* const sc = acomp->sc;
-	float* const output0 = acomp->output0;
-	float* const output1 = acomp->output1;
-
-	float srate = acomp->srate;
-	float width = (6.f * *(acomp->knee)) + 0.01;
-	float attack_coeff = exp(-1000.f/(*(acomp->attack) * srate));
-	float release_coeff = exp(-1000.f/(*(acomp->release) * srate));
-
-	float max = 0.f;
-	float lgaininp = 0.f;
-	float rgaininp = 0.f;
-	float Lgain = 1.f;
-	float Lxg, Lyg;
-	float current_gainr;
-	float old_gainr = *acomp->gainr;
-
-	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
-	uint32_t i;
-	float ingain;
-	float in0;
-	float in1;
-	float sc0;
-	float maxabslr;
-
-	float ratio = *acomp->ratio;
-	float thresdb = *acomp->thresdb;
-	float makeup = *acomp->makeup;
-	float makeup_target = from_dB(makeup);
-	float makeup_gain = acomp->makeup_gain;
-
-	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
-
-	if (*acomp->enable <= 0) {
-		ratio = 1.f;
-		thresdb = 0.f;
-		makeup = 0.f;
-		makeup_target = 1.f;
-	}
-
-#ifdef LV2_EXTENDED
-	if (acomp->v_knee != *acomp->knee) {
-		acomp->v_knee = *acomp->knee;
-		acomp->need_expose = true;
-	}
-
-	if (acomp->v_ratio != ratio) {
-		acomp->v_ratio = ratio;
-		acomp->need_expose = true;
-	}
-
-	if (acomp->v_thresdb != thresdb) {
-		acomp->v_thresdb = thresdb;
-		acomp->need_expose = true;
-	}
-
-	if (acomp->v_makeup != makeup) {
-		acomp->v_makeup = makeup;
-		acomp->need_expose = true;
-	}
-
-	bool full_inline = *acomp->full_inline_display > 0.5;
-	if (full_inline != acomp->v_full_inline_display) {
-		acomp->v_full_inline_display = full_inline;
-		acomp->need_expose = true;
-	}
-#endif
-
-	float in_peak_db = -160.f;
-	float max_gainr = 0.f;
-
-	for (i = 0; i < n_samples; i++) {
-		in0 = input0[i];
-		in1 = input1[i];
-		sc0 = sc[i];
-		maxabslr = fmaxf(fabs(in0), fabs(in1));
-		ingain = usesidechain ? fabs(sc0) : maxabslr;
+		ingain = usesidechain ? fabs(sc0) : maxabs;
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -573,22 +408,24 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 			max_gainr = current_gainr;
 		}
 
-		lgaininp = in0 * Lgain;
-		rgaininp = in1 * Lgain;
-
 		makeup_gain += tau * (makeup_target - makeup_gain);
 
-		output0[i] = lgaininp * makeup_gain;
-		output1[i] = rgaininp * makeup_gain;
-
-		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
+		for (uint32_t c=0; c<n_channels; ++c) {
+			float out = ins[c][i] * Lgain * makeup_gain;
+			outs[c][i] = out;
+			out = fabsf (out);
+			if (out > max_out) {
+				max_out = out;
+				sanitize_denormal(max_out);
+			}
+		}
 	}
 
 	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
 		makeup_gain = makeup_target;
 	}
 
-	*(acomp->outlevel) = (max < 0.0056f) ? -70.f : to_dB(max);
+	*(acomp->outlevel) = (max_out < 0.0056f) ? -70.f : to_dB(max_out);
 	*(acomp->inlevel) = in_peak_db;
 	acomp->makeup_gain = makeup_gain;
 
@@ -980,7 +817,7 @@ static const LV2_Descriptor descriptor_mono = {
 	instantiate,
 	connect_mono,
 	activate,
-	run_mono,
+	run,
 	deactivate,
 	cleanup,
 	extension_data
@@ -991,7 +828,7 @@ static const LV2_Descriptor descriptor_stereo = {
 	instantiate,
 	connect_stereo,
 	activate,
-	run_stereo,
+	run,
 	deactivate,
 	cleanup,
 	extension_data

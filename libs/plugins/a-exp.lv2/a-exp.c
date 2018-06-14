@@ -89,6 +89,8 @@ typedef struct {
 	float* output0;
 	float* output1;
 
+	uint32_t n_channels;
+
 	float srate;
 
 	float makeup_gain;
@@ -126,6 +128,15 @@ instantiate(const LV2_Descriptor* descriptor,
             const LV2_Feature* const* features)
 {
 	AExp* aexp = (AExp*)calloc(1, sizeof(AExp));
+
+	if (!strcmp (descriptor->URI, AEXP_URI)) {
+		aexp->n_channels = 1;
+	} else if (!strcmp (descriptor->URI, AEXP_STEREO_URI)) {
+		aexp->n_channels = 2;
+	} else {
+		free (aexp);
+		return NULL;
+	}
 
 	for (int i=0; features[i]; ++i) {
 #ifdef LV2_EXTENDED
@@ -276,194 +287,22 @@ activate(LV2_Handle instance)
 #endif
 }
 
+
 static void
-run_mono(LV2_Handle instance, uint32_t n_samples)
+run(LV2_Handle instance, uint32_t n_samples)
 {
 	AExp* aexp = (AExp*)instance;
 
-	const float* const input = aexp->input0;
+	const float* const ins[2] = { aexp->input0, aexp->input1 };
 	const float* const sc = aexp->sc;
-	float* const output = aexp->output0;
+	float* const outs[2] = { aexp->output0, aexp->output1 };
 
 	float srate = aexp->srate;
 	float width = (6.f * *(aexp->knee)) + 0.01;
 	float attack_coeff = exp(-1000.f/(*(aexp->attack) * srate));
 	float release_coeff = exp(-1000.f/(*(aexp->release) * srate));
 
-	float max = 0.f;
-	float lgaininp = 0.f;
-	float Lgain = 1.f;
-	float Lxg, Lyg;
-	float current_gainr;
-	float old_gainr;
-
-	int usesidechain = (*(aexp->sidechain) <= 0.f) ? 0 : 1;
-	uint32_t i;
-	float ingain;
-	float in0;
-	float sc0;
-
-	float ratio = *aexp->ratio;
-	float thresdb = *aexp->thresdb;
-	float makeup = *aexp->makeup;
-	float makeup_target = from_dB(makeup);
-	float makeup_gain = aexp->makeup_gain;
-
-	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / aexp->srate));
-
-	if (*aexp->enable <= 0) {
-		ratio = 1.f;
-		thresdb = 0.f;
-		makeup = 0.f;
-		makeup_target = 1.f;
-		if (!aexp->was_disabled) {
-			*aexp->gainr = 0.f;
-			aexp->was_disabled = true;
-		}
-	} else {
-		if (aexp->was_disabled) {
-			*aexp->gainr = 160.f;
-			aexp->was_disabled = false;
-		}
-	}
-
-#ifdef LV2_EXTENDED
-	if (aexp->v_knee != *aexp->knee) {
-		aexp->v_knee = *aexp->knee;
-		aexp->need_expose = true;
-	}
-
-	if (aexp->v_ratio != ratio) {
-		aexp->v_ratio = ratio;
-		aexp->need_expose = true;
-	}
-
-	if (aexp->v_thresdb != thresdb) {
-		aexp->v_thresdb = thresdb;
-		aexp->need_expose = true;
-	}
-
-	if (aexp->v_makeup != makeup) {
-		aexp->v_makeup = makeup;
-		aexp->need_expose = true;
-	}
-#endif
-	float in_peak_db = -160.f;
-	old_gainr = *aexp->gainr;
-	float max_gainr = 0.0;
-
-	for (i = 0; i < n_samples; i++) {
-		in0 = input[i];
-		sc0 = sc[i];
-		ingain = usesidechain ? fabs(sc0) : fabs(in0);
-		Lyg = 0.f;
-		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
-		Lxg = sanitize_denormal(Lxg);
-
-		if (Lxg > in_peak_db) {
-			in_peak_db = Lxg;
-		}
-
-		if (2.f*(Lxg-thresdb) < -width) {
-			Lyg = thresdb + (Lxg-thresdb) * ratio;
-			Lyg = sanitize_denormal(Lyg);
-		} else if (2.f*(Lxg-thresdb) > width) {
-			Lyg = Lxg;
-		} else {
-			Lyg = Lxg + (1.f-ratio)*(Lxg-thresdb-width/2.f)*(Lxg-thresdb-width/2.f)/(2.f*width);
-		}
-
-		current_gainr = Lxg - Lyg;
-
-		if (current_gainr > 160.f) {
-			current_gainr = 160.f;
-		}
-
-		if (current_gainr > old_gainr) {
-			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
-		} else if (current_gainr < old_gainr) {
-			current_gainr = attack_coeff*old_gainr + (1.f-attack_coeff)*current_gainr;
-		}
-
-		current_gainr = sanitize_denormal(current_gainr);
-
-		Lgain = from_dB(-current_gainr);
-
-		old_gainr = current_gainr;
-
-		*(aexp->gainr) = current_gainr;
-		if (current_gainr > max_gainr) {
-			max_gainr = current_gainr;
-		}
-
-		lgaininp = in0 * Lgain;
-
-		makeup_gain += tau * (makeup_target - makeup_gain);
-		output[i] = lgaininp * makeup_gain;
-
-		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
-	}
-
-	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
-		makeup_gain = makeup_target;
-	}
-
-	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
-	*(aexp->inlevel) = in_peak_db;
-	aexp->makeup_gain = makeup_gain;
-
-#ifdef LV2_EXTENDED
-	if (in_peak_db > aexp->v_peakdb) {
-		aexp->v_peakdb = in_peak_db;
-		aexp->peakdb_samples = 0;
-	} else {
-		aexp->peakdb_samples += n_samples;
-		if ((float)aexp->peakdb_samples/aexp->srate > RESET_PEAK_AFTER_SECONDS) {
-			aexp->v_peakdb = in_peak_db;
-			aexp->peakdb_samples = 0;
-			aexp->need_expose = true;
-		}
-	}
-
-	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
-	const float v_lvl_in = in_peak_db;
-
-	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= .1 ||
-	    fabsf (aexp->v_lvl_in - v_lvl_in) >= .1 ||
-	    fabsf (aexp->v_gainr - max_gainr) >= .1) {
-		// >= 0.1dB difference
-		aexp->need_expose = true;
-		aexp->v_lvl_in = v_lvl_in;
-		aexp->v_lvl_out = v_lvl_out;
-		aexp->v_gainr = max_gainr;
-	}
-	if (aexp->need_expose && aexp->queue_draw) {
-		aexp->need_expose = false;
-		aexp->queue_draw->queue_draw (aexp->queue_draw->handle);
-	}
-#endif
-}
-
-
-static void
-run_stereo(LV2_Handle instance, uint32_t n_samples)
-{
-	AExp* aexp = (AExp*)instance;
-
-	const float* const input0 = aexp->input0;
-	const float* const input1 = aexp->input1;
-	const float* const sc = aexp->sc;
-	float* const output0 = aexp->output0;
-	float* const output1 = aexp->output1;
-
-	float srate = aexp->srate;
-	float width = (6.f * *(aexp->knee)) + 0.01;
-	float attack_coeff = exp(-1000.f/(*(aexp->attack) * srate));
-	float release_coeff = exp(-1000.f/(*(aexp->release) * srate));
-
-	float max = 0.f;
-	float lgaininp = 0.f;
-	float rgaininp = 0.f;
+	float max_out = 0.f;
 	float Lgain = 1.f;
 	float Lxg, Lyg;
 	float current_gainr;
@@ -472,10 +311,10 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	int usesidechain = (*(aexp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
-	float in0;
-	float in1;
 	float sc0;
-	float maxabslr;
+	float maxabs;
+
+	uint32_t n_channels = aexp->n_channels;
 
 	float ratio = *aexp->ratio;
 	float thresdb = *aexp->thresdb;
@@ -528,11 +367,12 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 	float max_gainr = 0.0;
 
 	for (i = 0; i < n_samples; i++) {
-		in0 = input0[i];
-		in1 = input1[i];
+		maxabs = 0.f;
+		for (uint32_t c=0; c<n_channels; ++c) {
+			maxabs = fmaxf(fabsf(ins[c][i]), maxabs);
+		}
 		sc0 = sc[i];
-		maxabslr = fmaxf(fabs(in0), fabs(in1));
-		ingain = usesidechain ? fabs(sc0) : maxabslr;
+		ingain = usesidechain ? fabs(sc0) : maxabs;
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
@@ -573,22 +413,24 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 			max_gainr = current_gainr;
 		}
 
-		lgaininp = in0 * Lgain;
-		rgaininp = in1 * Lgain;
-
 		makeup_gain += tau * (makeup_target - makeup_gain);
 
-		output0[i] = lgaininp * makeup_gain;
-		output1[i] = rgaininp * makeup_gain;
-
-		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
+		for (uint32_t c=0; c<n_channels; ++c) {
+			float out = ins[c][i] * Lgain * makeup_gain;
+			outs[c][i] = out;
+			out = fabsf (out);
+			if (out > max_out) {
+				max_out = out;
+				sanitize_denormal(max_out);
+			}
+		}
 	}
 
 	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
 		makeup_gain = makeup_target;
 	}
 
-	*(aexp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	*(aexp->outlevel) = (max_out < 0.0056f) ? -45.f : to_dB(max_out);
 	*(aexp->inlevel) = in_peak_db;
 	aexp->makeup_gain = makeup_gain;
 
@@ -605,7 +447,7 @@ run_stereo(LV2_Handle instance, uint32_t n_samples)
 		}
 	}
 
-	const float v_lvl_out = (max < 0.001f) ? -1600.f : to_dB(max);
+	const float v_lvl_out = (max_out < 0.001f) ? -1600.f : to_dB(max_out);
 	const float v_lvl_in = in_peak_db;
 
 	if (fabsf (aexp->v_lvl_out - v_lvl_out) >= .1 ||
@@ -973,7 +815,7 @@ static const LV2_Descriptor descriptor_mono = {
 	instantiate,
 	connect_mono,
 	activate,
-	run_mono,
+	run,
 	deactivate,
 	cleanup,
 	extension_data
@@ -984,7 +826,7 @@ static const LV2_Descriptor descriptor_stereo = {
 	instantiate,
 	connect_stereo,
 	activate,
-	run_stereo,
+	run,
 	deactivate,
 	cleanup,
 	extension_data
