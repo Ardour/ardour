@@ -600,28 +600,28 @@
     </menu>
   </menubar>
 
-  <popup action="editorTabbableButtonMenu">
+  <popup action="editorTabbableButtonMenu" accelerators='true'>
     <menuitem action='show-editor'/>
     <menuitem action='hide-editor'/>
     <menuitem action='attach-editor'/>
     <menuitem action='detach-editor'/>
   </popup>
 
-  <popup action="mixerTabbableButtonMenu">
+  <popup action="mixerTabbableButtonMenu" accelerators='true'>
     <menuitem action='show-mixer'/>
     <menuitem action='hide-mixer'/>
     <menuitem action='attach-mixer'/>
     <menuitem action='detach-mixer'/>
   </popup>
 
-  <popup action="preferencesTabbableButtonMenu">
+  <popup action="preferencesTabbableButtonMenu" accelerators='true'>
     <menuitem action='show-preferences'/>
     <menuitem action='hide-preferences'/>
     <menuitem action='attach-preferences'/>
     <menuitem action='detach-preferences'/>
   </popup>
 
-  <popup action="RulerMenuPopup">
+  <popup action="RulerMenuPopup" accelerators='true'>
     <menuitem action="toggle-minsec-ruler"/>
     <menuitem action="toggle-timecode-ruler"/>
     <menuitem action="toggle-samples-ruler"/>
@@ -638,7 +638,7 @@
     <menuitem action="toggle-video-ruler"/>
   </popup>
 
-  <popup name='ProcessorMenu'>
+  <popup name='ProcessorMenu' accelerators='true'>
     <menuitem action='newplugin'/>
     <menuitem action='newinsert'/>
     <menuitem action='newsend'/>
@@ -679,12 +679,12 @@
     <menuitem action='edit-generic'/>
   </popup>
 
-  <popup name='ShuttleUnitPopup'>
+  <popup name='ShuttleUnitPopup' accelerators='true'>
     <menuitem action='SetShuttleUnitsPercentage'/>
     <menuitem action='SetShuttleUnitsSemitones'/>
   </popup>
 
-  <popup name='RegionListMenu'>
+  <popup name='RegionListMenu' accelerators='true'>
     <menuitem action='rlAudition'/>
     <menuitem action='rlHide'/>
     <menuitem action='rlShow'/>
@@ -712,7 +712,7 @@
     <menuitem action='removeUnusedRegions'/>
   </popup>
 
-  <popup name='PopupRegionMenu' action='PopupRegionMenu'>
+  <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
