@@ -521,6 +521,9 @@ comp_curve (const AComp* self, float xg) {
 	return yg;
 }
 
+
+#include "dynamic_display.c"
+
 static void
 render_inline_full (cairo_t* cr, const AComp* self)
 {
@@ -529,76 +532,16 @@ render_inline_full (cairo_t* cr, const AComp* self)
 
 	const float makeup_thres = self->v_thresdb + self->v_makeup;
 
-	// clear background
-	cairo_rectangle (cr, 0, 0, w, h);
-	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
-	cairo_fill (cr);
+	draw_grid (cr, w,h);
 
-	cairo_set_line_width(cr, 1.0);
-
-	// draw grid 10dB steps
-	const double dash1[] = {1, 2};
-	const double dash2[] = {1, 3};
-	cairo_save (cr);
-	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-	cairo_set_dash(cr, dash2, 2, 2);
-	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-
-	for (uint32_t d = 1; d < 7; ++d) {
-		const float x = -.5 + floorf (w * (d * 10.f / 70.f));
-		const float y = -.5 + floorf (h * (d * 10.f / 70.f));
-
-		cairo_move_to (cr, x, 0);
-		cairo_line_to (cr, x, h);
-		cairo_stroke (cr);
-
-		cairo_move_to (cr, 0, y);
-		cairo_line_to (cr, w, y);
-		cairo_stroke (cr);
-	}
-	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
-	cairo_set_dash(cr, dash1, 2, 2);
 	if (self->v_thresdb < 0) {
 		const float y = -.5 + floorf (h * ((makeup_thres - 10.f) / -70.f));
 		cairo_move_to (cr, 0, y);
 		cairo_line_to (cr, w, y);
 		cairo_stroke (cr);
 	}
-	// diagonal unity
-	cairo_move_to (cr, 0, h);
-	cairo_line_to (cr, w, 0);
-	cairo_stroke (cr);
-	cairo_restore (cr);
 
-	{ // 0, 0
-		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-		const float x = -.5 + floorf (w * (60.f / 70.f));
-		const float y = -.5 + floorf (h * (10.f / 70.f));
-		cairo_move_to (cr, x, 0);
-		cairo_line_to (cr, x, h);
-		cairo_stroke (cr);
-		cairo_move_to (cr, 0, y);
-		cairo_line_to (cr, w, y);
-		cairo_stroke (cr);
-	}
-
-	{ // GR
-		const float x = -.5 + floorf (w * (62.5f / 70.f));
-		const float y = -.5 + floorf (h * (10.0f / 70.f));
-		const float wd = floorf (w * (5.f / 70.f));
-		const float ht = floorf (h * (55.f / 70.f));
-		cairo_rectangle (cr, x, y, wd, ht);
-		cairo_fill (cr);
-
-		const float h_gr = fminf (ht, floorf (h * self->v_gainr / 70.f));
-		cairo_set_source_rgba (cr, 0.95, 0.0, 0.0, 1.0);
-		cairo_rectangle (cr, x, y, wd, h_gr);
-		cairo_fill (cr);
-		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-		cairo_rectangle (cr, x, y, wd, ht);
-		cairo_set_source_rgba (cr, 0.75, 0.75, 0.75, 1.0);
-		cairo_stroke (cr);
-	}
+	draw_GR_bar (cr, w,h, self->v_gainr);
 
 	// draw state
 	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
@@ -659,108 +602,10 @@ render_inline_full (cairo_t* cr, const AComp* self)
 static void
 render_inline_only_bars (cairo_t* cr, const AComp* self)
 {
-	const float w = self->w;
-	const float h = self->h;
-
-	cairo_rectangle (cr, 0, 0, w, h);
-	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
-	cairo_fill (cr);
-
-
-	cairo_save (cr);
-
-	const float ht = 0.25f * h;
-
-	const float x1 = w*0.05;
-	const float wd = w - 2.0f*x1;
-
-	const float y1 = 0.17*h;
-	const float y2 = h - y1 - ht;
-
-	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-
-	cairo_rectangle (cr, x1, y1, wd, ht);
-	cairo_fill (cr);
-
-	cairo_rectangle (cr, x1, y2, wd, ht);
-	cairo_fill (cr);
-
-	cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
-	const float w_gr = (self->v_gainr > 60.f) ? wd : wd * self->v_gainr * (1.f/60.f);
-	cairo_rectangle (cr, x1+wd-w_gr, y2, w_gr, ht);
-	cairo_fill (cr);
-
-	if (self->v_lvl_in > -60.f) {
-		if (self->v_lvl_out > 6.f) {
-			cairo_set_source_rgba (cr, 0.75, 0.0, 0.0, 1.0);
-		} else if (self->v_lvl_out > 0.f) {
-			cairo_set_source_rgba (cr, 0.66, 0.66, 0.0, 1.0);
-		} else {
-			cairo_set_source_rgba (cr, 0.0, 0.66, 0.0, 1.0);
-		}
-		const float w_g = (self->v_lvl_in > 10.f) ? wd : wd * (60.f+self->v_lvl_in) / 70.f;
-		cairo_rectangle (cr, x1, y1, w_g, ht);
-		cairo_fill (cr);
-	}
-
-	cairo_set_source_rgba (cr, 1.0, 1.0, 1.0, 1.0);
-
-	const float tck = 0.33*ht;
-
-	cairo_set_line_width (cr, .5);
-
-	for (uint32_t d = 1; d < 7; ++d) {
-		const float x = x1 + (d * wd * (10.f / 70.f));
-
-		cairo_move_to (cr, x, y1);
-		cairo_line_to (cr, x, y1+tck);
-
-		cairo_move_to (cr, x, y1+ht);
-		cairo_line_to (cr, x, y1+ht-tck);
-
-		cairo_move_to (cr, x, y2);
-		cairo_line_to (cr, x, y2+tck);
-
-		cairo_move_to (cr, x, y2+ht);
-		cairo_line_to (cr, x, y2+ht-tck);
-	}
-
-	cairo_stroke (cr);
-
-	const float x_0dB = x1 + wd*(60.f/70.f);
-
-	cairo_move_to (cr, x_0dB, y1);
-	cairo_line_to (cr, x_0dB, y1+ht);
-
-	cairo_rectangle (cr, x1, y1, wd, ht);
-	cairo_rectangle (cr, x1, y2, wd, ht);
-	cairo_stroke (cr);
-
-	cairo_set_line_width (cr, 2.0);
-
-	// visualize threshold
-	const float tr = x1 + wd * (60.f+self->v_thresdb) / 70.f;
-	cairo_set_source_rgba (cr, 0.95, 0.95, 0.0, 1.0);
-	cairo_move_to (cr, tr, y1);
-	cairo_line_to (cr, tr, y1+ht);
-	cairo_stroke (cr);
-
-	// visualize ratio
-	const float reduced_0dB = self->v_thresdb * (1.f - 1.f/self->v_ratio);
-	const float rt = x1 + wd * (60.f+reduced_0dB) / 70.f;
-	cairo_set_source_rgba (cr, 0.95, 0.0, 0.0, 1.0);
-	cairo_move_to (cr, rt, y1);
-	cairo_line_to (cr, rt, y1+ht);
-	cairo_stroke (cr);
-
-	// visualize in peak
-	if (self->v_peakdb > -60.f) {
-		cairo_set_source_rgba (cr, 0.0, 1.0, 0.0, 1.0);
-		const float pk = (self->v_peakdb > 10.f) ? x1+wd : wd * (60.f+self->v_peakdb) / 70.f;
-		cairo_move_to (cr, pk, y1);
-		cairo_line_to (cr, pk, y1+ht);
-		cairo_stroke (cr);
-	}
+	draw_inline_bars (cr, self->w, self->h,
+			  self->v_thresdb, self->v_ratio,
+			  self->v_peakdb, self->v_gainr,
+			  self->v_lvl_in, self->v_lvl_out);
 }
 
 static LV2_Inline_Display_Image_Surface *

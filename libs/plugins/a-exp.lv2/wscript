@@ -40,7 +40,7 @@ def build(bld):
                   source       = 'a-exp.c',
                   name         = 'a-exp',
                   cflags       = [ '-fPIC',  bld.env['compiler_flags_dict']['c99'] ],
-                  includes     = [ '../../ardour' ],
+                  includes     = [ '../../ardour', '../shared' ],
                   target       = '../../LV2/%s/a-exp' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,
                   uselib       = 'CAIRO',
