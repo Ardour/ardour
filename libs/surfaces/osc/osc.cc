@@ -1737,7 +1737,6 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 	int se_page = sur->send_page_size;
 	int fadermode = sur->gainmode;
 	int feedback = sur->feedback.to_ulong();
-	sur->feedback = 0;
 	int strip_types = sur->strip_types.to_ulong();
 	int bank_size = sur->bank_size;
 	int linkset = sur->linkset;
@@ -1803,48 +1802,56 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				} else {
 					linkid = argv[8]->i;
 				}
+				[[fallthrough]];
 			case 8:
 				if (types[7] == 'f') {
 					linkset = (int) argv[7]->f;
 				} else {
 					linkset = argv[7]->i;
 				}
+				[[fallthrough]];
 			case 7:
 				if (types[6] == 'f') {
 					port = (int) argv[6]->f;
 				} else {
 					port = argv[6]->i;
 				}
+				[[fallthrough]];
 			case 6:
 				if (types[5] == 'f') {
 					pi_page = (int) argv[5]->f;
 				} else {
 					pi_page = argv[5]->i;
 				}
+				[[fallthrough]];
 			case 5:
 				if (types[4] == 'f') {
 					se_page = (int) argv[4]->f;
 				} else {
 					se_page = argv[4]->i;
 				}
+				[[fallthrough]];
 			case 4:
 				if (types[3] == 'f') {
 					fadermode = (int) argv[3]->f;
 				} else {
 					fadermode = argv[3]->i;
 				}
+				[[fallthrough]];
 			case 3:
 				if (types[2] == 'f') {
 					feedback = (int) argv[2]->f;
 				} else {
 					feedback = argv[2]->i;
 				}
+				[[fallthrough]];
 			case 2:
 				if (types[1] == 'f') {
 					strip_types = (int) argv[1]->f;
 				} else {
 					strip_types = argv[1]->i;
 				}
+				[[fallthrough]];
 			case 1:
 				if (types[0] == 'f') {
 					bank_size = (int) argv[0]->f;
@@ -2001,6 +2008,7 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 		// set bank and strip feedback
 		strip_feedback(s, true);
 		_set_bank (1, get_address (msg));
+		_strip_select (boost::shared_ptr<Stripable> (), get_address (msg));
 	}
 
 	global_feedback (s);
@@ -2046,9 +2054,10 @@ OSC::set_surface_strip_types (uint32_t st, lo_message msg)
 	if (s->linkset) {
 		link_strip_types (s->linkset, st);
 	}
-
 	// set bank and strip feedback
-	_set_bank (1, get_address (msg));
+	strip_feedback(s, false);
+	set_bank (1, msg);
+	_strip_select (boost::shared_ptr<Stripable> (), get_address (msg));
 	return 0;
 }
 
@@ -2613,27 +2622,9 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 			}
 			if ((argc == 1 && value) || !argc) {
 				// fill sur->strips with routes from this group and hit bank1
-				sur->temp_strips.clear();
-				boost::shared_ptr<RouteList> rl = rg->route_list();
-				for (RouteList::iterator it = rl->begin(); it != rl->end(); ++it) {
-					boost::shared_ptr<Route> r = *it;
-					boost::shared_ptr<Stripable> s = boost::dynamic_pointer_cast<Stripable> (r);
-					sur->temp_strips.push_back(s);
-				}
 				sur->temp_mode = GroupOnly;
-				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
-				sur->nstrips = sur->custom_strips.size();
-				LinkSet *set;
-				uint32_t ls = sur->linkset;
-				if (ls) {
-					set = &(link_sets[ls]);
-					set->temp_mode = GroupOnly;
-					set->temp_strips.clear ();
-					set->temp_strips = sur->temp_strips;
-					set->strips = sur->strips;
-				}
+				ret = set_temp_mode (get_address (msg));
 				set_bank (1, msg);
-				ret = 0;
 			} else {
 				// key off is ignored
 				ret = 0;
@@ -2791,30 +2782,9 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
 			if (vca) {
 				if ((argc == 1 && ivalue) || !argc) {
-					sur->temp_strips.clear();
-					StripableList stripables;
-					session->get_stripables (stripables);
-					for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-						boost::shared_ptr<Stripable> st = *it;
-						if (st->slaved_to (vca)) {
-							sur->temp_strips.push_back(st);
-						}
-					}
-					sur->temp_strips.push_back(s);
 					sur->temp_mode = VCAOnly;
-					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
-					sur->nstrips = sur->custom_strips.size();
-					LinkSet *set;
-					uint32_t ls = sur->linkset;
-					if (ls) {
-						set = &(link_sets[ls]);
-						set->temp_mode = VCAOnly;
-						set->temp_strips.clear ();
-						set->temp_strips = sur->temp_strips;
-						set->strips = sur->strips;
-					}
+					ret = set_temp_mode (get_address (msg));
 					set_bank (1, msg);
-					ret = 0;
 				} else {
 					// key off is ignored
 					ret = 0;
@@ -2847,49 +2817,122 @@ OSC::get_vca_by_name (std::string vname)
 int
 OSC::sel_bus_only (lo_message msg)
 {
-	return _sel_bus_only (get_address (msg));
-}
-
-int
-OSC::_sel_bus_only (lo_address addr)
-{
-	OSCSurface *sur = get_surface(addr);
+	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s = sur->select;
 	if (s) {
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		if (rt) {
 			if (!rt->is_track () && rt->can_solo ()) {
 				// this is a bus, but not master, monitor or audition
-				sur->temp_strips.clear();
-				StripableList stripables;
-				session->get_stripables (stripables);
-				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-					boost::shared_ptr<Stripable> st = *it;
-					boost::shared_ptr<Route> ri = boost::dynamic_pointer_cast<Route> (st);
-					bool sends = true;
-					if (ri && ri->direct_feeds_according_to_graph (rt, &sends)) {
-						sur->temp_strips.push_back(st);
-					}
-				}
-				sur->temp_strips.push_back(s);
 				sur->temp_mode = BusOnly;
-				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
-				sur->nstrips = sur->custom_strips.size();
-				LinkSet *set;
-				uint32_t ls = sur->linkset;
-				if (ls) {
-					set = &(link_sets[ls]);
-					set->temp_mode = BusOnly;
-					set->temp_strips.clear ();
-					set->temp_strips = sur->temp_strips;
-					set->strips = sur->strips;
-				}
-				_set_bank (1, addr);
+				set_temp_mode (get_address (msg));
+				set_bank (1, msg);
 				return 0;
 			}
 		}
 	}
 	return 1;
+}
+
+int
+OSC::set_temp_mode (lo_address addr)
+{
+	bool ret = 1;
+	OSCSurface *sur = get_surface(addr);
+	boost::shared_ptr<Stripable> s = sur->select;
+	if (s) {
+		if (sur->temp_mode == GroupOnly) {
+			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+			if (rt) {
+				RouteGroup *rg = rt->route_group();
+				if (rg) {
+					sur->temp_strips.clear();
+					boost::shared_ptr<RouteList> rl = rg->route_list();
+					for (RouteList::iterator it = rl->begin(); it != rl->end(); ++it) {
+						boost::shared_ptr<Route> r = *it;
+						boost::shared_ptr<Stripable> st = boost::dynamic_pointer_cast<Stripable> (r);
+						sur->temp_strips.push_back(st);
+					}
+					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+					sur->nstrips = sur->temp_strips.size();
+					LinkSet *set;
+					uint32_t ls = sur->linkset;
+					if (ls) {
+						set = &(link_sets[ls]);
+						set->temp_mode = GroupOnly;
+						set->temp_strips.clear ();
+						set->temp_strips = sur->temp_strips;
+						set->strips = sur->strips;
+					}
+					ret = 0;
+				}
+			}
+		} else if (sur->temp_mode == VCAOnly) {
+			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
+			if (vca) {
+				sur->temp_strips.clear();
+				StripableList stripables;
+				session->get_stripables (stripables);
+				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+					boost::shared_ptr<Stripable> st = *it;
+					if (st->slaved_to (vca)) {
+						sur->temp_strips.push_back(st);
+					}
+				}
+				sur->temp_strips.push_back(s);
+				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+				sur->nstrips = sur->temp_strips.size();
+				LinkSet *set;
+				uint32_t ls = sur->linkset;
+				if (ls) {
+					set = &(link_sets[ls]);
+					set->temp_mode = VCAOnly;
+					set->temp_strips.clear ();
+					set->temp_strips = sur->temp_strips;
+					set->strips = sur->strips;
+				}
+				ret = 0;
+			}
+		} else if (sur->temp_mode == BusOnly) {
+			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
+			if (rt) {
+				if (!rt->is_track () && rt->can_solo ()) {
+					// this is a bus, but not master, monitor or audition
+					sur->temp_strips.clear();
+					StripableList stripables;
+					session->get_stripables (stripables);
+					for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
+						boost::shared_ptr<Stripable> st = *it;
+						boost::shared_ptr<Route> ri = boost::dynamic_pointer_cast<Route> (st);
+						bool sends = true;
+						if (ri && ri->direct_feeds_according_to_graph (rt, &sends)) {
+							sur->temp_strips.push_back(st);
+						}
+					}
+					sur->temp_strips.push_back(s);
+					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
+					sur->nstrips = sur->temp_strips.size();
+					LinkSet *set;
+					uint32_t ls = sur->linkset;
+					if (ls) {
+						set = &(link_sets[ls]);
+						set->temp_mode = BusOnly;
+						set->temp_strips.clear ();
+						set->temp_strips = sur->temp_strips;
+						set->strips = sur->strips;
+					}
+					ret = 0;
+				}
+			}
+		} else if (sur->temp_mode == TempOff) {
+			sur->temp_mode = TempOff;
+			ret = 0;
+		}
+	}
+	if (ret) {
+		sur->temp_mode = TempOff;
+	}
+	return ret;
 }
 
 boost::shared_ptr<Send>
@@ -4464,8 +4507,8 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	boost::weak_ptr<Stripable> o_expand = sur->expand_strip;
 	boost::shared_ptr<Stripable> old_expand= o_expand.lock ();
 
+	// we got a null strip check that old strips are valid
 	if (!s) {
-		// we got a null strip check that old strips are valid
 		if (old_expand && sur->expand_enable) {
 			sur->expand = get_sid (old_expand, addr);
 			if (sur->strip_types[11] || sur->expand) {
@@ -4487,12 +4530,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 	}
 	if (s != old_sel) {
 		sur->select = s;
-
-/*
-			return parse_sel_group ("/select/group/only", "", lo_message_get_argv (msg), 0, msg);
-			return parse_sel_vca ("/select/vca/only", "", lo_message_get_argv (msg), 0, msg);
-			return sel_bus_only (msg);
-*/
 	}
 	bool sends;
 	uint32_t nsends  = 0;
@@ -4516,6 +4553,13 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 			sur->sel_obs = sel_fb;
 		}
 		sur->sel_obs->set_expand (sur->expand_enable);
+	} else {
+		if (so != 0) {
+			delete so;
+			sur->sel_obs = 0;
+		}
+	}
+	if (sur->feedback[0] || sur->feedback[1]) {
 		uint32_t obs_expand = 0;
 		if (sur->expand_enable) {
 			sur->expand = get_sid (s, addr);
@@ -4526,74 +4570,15 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 		for (uint32_t i = 0; i < sur->observers.size(); i++) {
 			sur->observers[i]->set_expand (obs_expand);
 		}
-	} else {
-		if (so != 0) {
-			delete so;
-			sur->sel_obs = 0;
-		}
 	}
 	if (s != old_sel) {
-		sur->select = s;
-		if (sur->temp_mode == GroupOnly) {
-			boost::shared_ptr<Route> ort = boost::dynamic_pointer_cast<Route> (old_sel);
-			bool grp_ok = false;
-			if (ort) {
-				RouteGroup *org = ort->route_group();
-				boost::shared_ptr<Route> nrt = boost::dynamic_pointer_cast<Route> (s);
-				if (nrt) {
-					RouteGroup *nrg = nrt->route_group();
-					if (nrg == org) {
-						grp_ok = true;
-					}
-				}
-			}
-			if (!grp_ok) {
-				sur->temp_mode = TempOff;
-				_set_bank (1, addr);
-			}
-		} else if (sur->temp_mode == VCAOnly) {
-			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
-			if (vca) {
-				sur->temp_strips.clear();
-				StripableList stripables;
-				session->get_stripables (stripables);
-				for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-					boost::shared_ptr<Stripable> st = *it;
-					if (st->slaved_to (vca)) {
-						sur->temp_strips.push_back(st);
-					}
-				}
-				sur->temp_strips.push_back(s);
-				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
-				sur->nstrips = sur->custom_strips.size();
-				LinkSet *set;
-				uint32_t ls = sur->linkset;
-				if (ls) {
-					set = &(link_sets[ls]);
-					set->temp_mode = VCAOnly;
-					set->temp_strips.clear ();
-					set->temp_strips = sur->temp_strips;
-					set->strips = sur->strips;
-				}
-				_set_bank (1, addr);
-			}
-		} else if (sur->temp_mode == BusOnly) {
-			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
-			if (rt) {
-				if (!rt->is_track () && rt->can_solo ()) {
-					_sel_bus_only (addr);
-				}
-			} else {
-				sur->temp_mode = TempOff;
-				_set_bank (1, addr);
+		if (sur->temp_mode) {
+			set_temp_mode (addr);
+			if (sur->temp_mode > GroupOnly) {
+				sur->bank = 1;
+				strip_feedback (sur, false);
 			}
 		}
-
-/*
-			return parse_sel_group ("/select/group/only", "", lo_message_get_argv (msg), 0, msg);
-			return parse_sel_vca ("/select/vca/only", "", lo_message_get_argv (msg), 0, msg);
-			return sel_bus_only (msg);
-*/
 	}
 	// need to set monitor for processor changed signal (for paging)
 	string address = lo_address_get_url (addr);
@@ -4699,20 +4684,21 @@ OSC::sel_delta (int delta, lo_message msg)
 		return -1;
 	}
 	boost::shared_ptr<Stripable> new_sel = boost::shared_ptr<Stripable> ();
-	if (nstps == 1) {
-		new_sel = sel_strips[0];
-	}
 	boost::weak_ptr<Stripable> o_sel = sur->select;
 	boost::shared_ptr<Stripable> old_sel= o_sel.lock ();
 	for (uint32_t i = 0; i < nstps; i++) {
 		if (old_sel == sel_strips[i]) {
 			if (i && delta < 0) {
+				// i is > 0 and delta is -1
 				new_sel = sel_strips[i - 1];
 			} else if ((i + 1) < nstps && delta > 0) {
+				// i is at least 1 less than greatest and delta = 1
 				new_sel = sel_strips[i + 1];
 			} else if ((i + 1) >= nstps && delta > 0) {
+				// i is greatest strip and delta 1
 				new_sel = sel_strips[0];
 			} else if (!i && delta < 0) {
+				// i = 0 and delta -1
 				new_sel = sel_strips[nstps - 1];
 			} else {
 				// should not happen

@@ -766,7 +766,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_trim (float val, lo_message msg);
 	int sel_hide (uint32_t state, lo_message msg);
 	int sel_bus_only (lo_message msg);
-	int _sel_bus_only (lo_address addr);
 	int sel_previous (lo_message msg);
 	int sel_next (lo_message msg);
 	int sel_delta (int delta, lo_message msg);
@@ -797,6 +796,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_eq_freq (int id, float val, lo_message msg);
 	int sel_eq_q (int id, float val, lo_message msg);
 	int sel_eq_shape (int id, float val, lo_message msg);
+	int set_temp_mode (lo_address addr);
 	int parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	boost::shared_ptr<ARDOUR::VCA> get_vca_by_name (std::string vname);
