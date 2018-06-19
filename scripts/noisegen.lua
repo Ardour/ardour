@@ -19,7 +19,14 @@ function dsp_ioconfig ()
 	return { [1] = { audio_in = -1, audio_out = -1}, }
 end
 
+local rate = 0
+
+function dsp_init (rate)
+	sr = rate
+end
+
 local ao = 0
+local draw = 0
 
 function dsp_run (ins, outs, n_samples)
 
@@ -57,15 +64,16 @@ function dsp_run (ins, outs, n_samples)
 		end
 	end
 
+	if (draw > (sr/15)) then
+		self:queue_draw()
+		draw = 0
+	end
+
 	-- passes array a {} into buffer
 	for c = 1,#outs do
 		outs[c]:set_table(a, n_samples)
 	end
-
-	if (a ~= ao) then
-		self:queue_draw()
-	end
-	ao = amplitude
+	draw = draw + n_samples
 end
 
 function render_inline (ctx, w, max_h) --inline display
