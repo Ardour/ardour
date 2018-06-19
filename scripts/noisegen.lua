@@ -19,7 +19,7 @@ function dsp_ioconfig ()
 	return { [1] = { audio_in = -1, audio_out = -1}, }
 end
 
-local rate = 0
+local sr = 0
 
 function dsp_init (rate)
 	sr = rate
