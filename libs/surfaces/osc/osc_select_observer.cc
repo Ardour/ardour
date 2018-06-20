@@ -1100,12 +1100,13 @@ OSCSelectObserver::slaved_changed (boost::shared_ptr<VCA> vca, bool state)
 		// we only want VCAs
 		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
 		if (v) {
-			lo_message_add_string (reply, v->name().c_str());
+			string name;
 			if (_strip->slaved_to (v)) {
-				lo_message_add_int32 (reply, 1);
+				name = string_compose ("%1 [X]", v->name());
 			} else {
-				lo_message_add_int32 (reply, 0);
+				name = string_compose ("%1 [_]", v->name());
 			}
+			lo_message_add_string (reply, name.c_str());
 		}
 	}
 	lo_send_message (addr, X_("/select/vcas"), reply);

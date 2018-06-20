@@ -2743,6 +2743,7 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 	s = sur->select;
 	int ret = 1; /* unhandled */
 	if (s) {
+		boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (s);
 		string svalue = "";
 		uint32_t ivalue = 1024;
 		if (strcmp (path, X_("/select/vca")) == 0) {
@@ -2758,7 +2759,6 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 					}
 					boost::shared_ptr<VCA> vca = get_vca_by_name (svalue);
 					if (vca) {
-						boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (s);
 						if (ivalue) {
 							slv->assign (vca);
 						} else {
@@ -2770,6 +2770,26 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 			} else {
 				PBD::warning << "OSC: setting a vca needs both the vca name and it's state" << endmsg;
 			}
+		}
+		else if (!strncmp (path, X_("/select/vca/toggle"), 18)) {
+			if (argc == 1) {
+				if (types[0] == 's') {
+					svalue = &argv[0]->s;
+					string v_name = svalue.substr (0, svalue.rfind (" ["));
+					boost::shared_ptr<VCA> vca = get_vca_by_name (v_name);
+					if (s->slaved_to (vca)) {
+						slv->unassign (vca);
+					} else {
+						slv->assign (vca);
+					}
+					ret = 0;
+				} else {
+					PBD::warning << "OSC: toggling needs the vca name as a string" << endmsg;
+				}
+			} else {
+				PBD::warning << "OSC: toggling a vca needs the vca name" << endmsg;
+			}
+
 		}
 		else if (!strncmp (path, X_("/select/vca/only"), 16)) {
 			if (argc == 1) {
