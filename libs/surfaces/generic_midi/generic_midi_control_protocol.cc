@@ -22,25 +22,35 @@
 #include <sstream>
 #include <algorithm>
 
+#ifdef COMPILER_MSVC
+#include <io.h> // Microsoft's nearest equivalent to <unistd.h>
+#include <ardourext/misc.h>
+#else
+#include <regex.h>
+#endif
+
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/compose.h"
+#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/i18n.h"
+#include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
-#include "pbd/compose.h"
 
 #include "midi++/port.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
-#include "ardour/audioengine.h"
-#include "ardour/controllable_descriptor.h"
+#include "ardour/auditioner.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/session.h"
 #include "ardour/midi_ui.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/debug.h"
@@ -919,11 +929,6 @@ GenericMidiControlProtocol::reset_controllables ()
 		++next;
 
 		if (!existingBinding->learned()) {
-			ControllableDescriptor& desc (existingBinding->descriptor());
-
-			if (desc.banked()) {
-				desc.set_bank_offset (_current_bank * _bank_size);
-			}
 
 			/* its entirely possible that the session doesn't have
 			 * the specified controllable (e.g. it has too few
@@ -940,9 +945,318 @@ GenericMidiControlProtocol::reset_controllables ()
 }
 
 boost::shared_ptr<Controllable>
-GenericMidiControlProtocol::lookup_controllable (const ControllableDescriptor& desc) const
+GenericMidiControlProtocol::lookup_controllable (const string & str) const
 {
-	return session->controllable_by_descriptor (desc);
+	boost::shared_ptr<Controllable> c;
+
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("lookup controllable from \"%1\"\n", str));
+
+	if (!session) {
+		DEBUG_TRACE (DEBUG::GenericMidi, "no session\n");
+		return c;
+	}
+
+	/* step 1: split string apart */
+
+	string::size_type first_space = str.find_first_of (" ");
+
+	if (first_space == string::npos) {
+		return c;
+	}
+
+	string front = str.substr (0, first_space);
+	vector<string> path;
+	split (front, path, '/');
+
+	if (path.size() < 2) {
+		return c;
+	}
+
+	string back = str.substr (first_space);
+	vector<string> rest;
+	split (back, rest, ' ');
+
+	if (rest.empty()) {
+		return c;
+	}
+
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("parsed into path of %1, rest of %1\n", path.size(), rest.size()));
+
+	/* Step 2: analyse parts of the string to figure out what type of
+	 * Stripable we're looking for
+	 */
+
+	enum Type {
+		Selection,
+		PresentationOrder,
+		Named,
+	};
+	Type type = Named;
+	int id = 1;
+	string name;
+
+	static regex_t compiled_pattern;
+	static bool compiled = false;
+
+	if (!compiled) {
+		const char * const pattern = "^[BS]?[0-9]+";
+		/* this pattern compilation is not going to fail */
+		regcomp (&compiled_pattern, pattern, REG_EXTENDED|REG_NOSUB);
+		/* leak compiled pattern */
+		compiled = true;
+	}
+
+	/* Step 3: identify what "rest" looks like - name, or simple nueric, or
+	 * banked/selection specifier
+	 */
+
+	bool matched = (regexec (&compiled_pattern, rest[0].c_str(), 0, 0, 0) == 0);
+
+	if (matched) {
+		bool banked = false;
+
+		if (rest[0][0] == 'B') {
+			banked = true;
+			/* already matched digits, so we know atoi() will succeed */
+			id = atoi (rest[0].substr (1));
+			type = PresentationOrder;
+		} else if (rest[0][0] == 'S') {
+			/* already matched digits, so we know atoi() will succeed */
+			id = atoi (rest[0].substr (1));
+			type = Selection;
+		} else if (isdigit (rest[0][0])) {
+			/* already matched digits, so we know atoi() will succeed */
+			id = atoi (rest[0]);
+			type = PresentationOrder;
+		} else {
+			return c;
+		}
+
+		id -= 1; /* order is zero-based, but maps use 1-based */
+
+		if (banked) {
+			id += _current_bank * _bank_size;
+		}
+
+	} else {
+
+		type = Named;
+		name = rest[0];
+	}
+
+	/* step 4: find the reference Stripable */
+
+	boost::shared_ptr<Stripable> s;
+
+	if (path[0] == X_("route") || path[0] == X_("rid")) {
+
+		std::string name;
+
+		switch (type) {
+		case PresentationOrder:
+			s = session->get_remote_nth_stripable (id, PresentationInfo::Route);
+			break;
+		case Named:
+			/* name */
+			name = rest[0];
+
+			if (name == "Master" || name == X_("master")) {
+				s = session->master_out();
+			} else if (name == X_("control") || name == X_("listen") || name == X_("monitor") || name == "Monitor") {
+				s = session->monitor_out();
+			} else if (name == X_("auditioner")) {
+				s = session->the_auditioner();
+			} else {
+				s = session->route_by_name (name);
+			}
+			break;
+
+		case Selection:
+			s = session->route_by_selected_count (id);
+			break;
+		}
+
+	} else if (path[0] == X_("vca")) {
+
+		s = session->get_remote_nth_stripable (id, PresentationInfo::VCA);
+
+	} else if (path[0] == X_("bus")) {
+
+		switch (type) {
+		case Named:
+			s = session->route_by_name (name);
+			break;
+		default:
+			s = session->get_remote_nth_stripable (id, PresentationInfo::Bus);
+		}
+
+	} else if (path[0] == X_("track")) {
+
+		switch (type) {
+		case Named:
+			s = session->route_by_name (name);
+			break;
+		default:
+			s = session->get_remote_nth_stripable (id, PresentationInfo::Track);
+		}
+	}
+
+	if (!s) {
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("no stripable found for \"%1\"\n", str));
+		return c;
+	}
+
+	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("found stripable %1\n", s->name()));
+
+	/* step 5: find the referenced controllable for that stripable.
+	 *
+	 * Some controls exist only for Route, so we need that too
+	 */
+
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
+
+	if (path[1] == X_("gain")) {
+		c = s->gain_control();
+	} else if (path[1] == X_("trim")) {
+		c = s->trim_control ();
+	} else if (path[1] == X_("solo")) {
+		c = s->solo_control();
+	} else if (path[1] == X_("mute")) {
+		c = s->mute_control();
+	} else if (path[1] == X_("recenable")) {
+		c = s->rec_enable_control ();
+	} else if (path[1] == X_("panwidth")) {
+		c = s->pan_width_control ();
+	} else if (path[1] == X_("pandirection") || path[1] == X_("balance")) {
+		c = s->pan_azimuth_control ();
+	} else if (path[1] == X_("plugin")) {
+
+		/* /route/plugin/parameter */
+
+		if (path.size() == 3 && rest.size() == 3) {
+			if (path[2] == X_("parameter")) {
+
+				int plugin = atoi (rest[1]);
+				int parameter_index = atoi (rest[2]);
+
+				/* revert to zero based counting */
+				if (plugin > 0) {
+					--plugin;
+				}
+				if (parameter_index > 0) {
+					--parameter_index;
+				}
+
+				if (r) {
+					boost::shared_ptr<Processor> proc = r->nth_plugin (plugin);
+
+					if (proc) {
+						boost::shared_ptr<PluginInsert> p = boost::dynamic_pointer_cast<PluginInsert> (proc);
+						if (p) {
+							uint32_t param;
+							bool ok;
+							param = p->plugin()->nth_parameter (parameter_index, ok);
+							if (ok) {
+								c = boost::dynamic_pointer_cast<Controllable> (proc->control (Evoral::Parameter (PluginAutomation, 0, param)));
+							}
+						}
+					}
+				}
+			}
+		}
+
+	} else if (path[1] == X_("send")) {
+
+		if (path.size() == 3 && rest.size() == 2) {
+			if (path[2] == X_("gain")) {
+				uint32_t send = atoi (rest[1]);
+				if (send > 0) {
+					--send;
+				}
+				c = s->send_level_controllable (send);
+			} else if (path[2] == X_("direction")) {
+				/* XXX not implemented yet */
+
+			} else if (path[2] == X_("enable")) {
+				/* XXX not implemented yet */
+			}
+		}
+
+	} else if (path[1] == X_("eq")) {
+
+		/* /route/eq/enable */
+		/* /route/eq/gain/<band> */
+		/* /route/eq/freq/<band> */
+		/* /route/eq/q/<band> */
+		/* /route/eq/shape/<band> */
+
+		if (path.size() == 3) {
+
+			if (path[2] == X_("enable")) {
+				c = s->eq_enable_controllable ();
+			}
+
+		} else if (path.size() == 4) {
+
+			int band = atoi (path[3]); /* band number */
+
+			if (path[2] == X_("gain")) {
+				c = s->eq_gain_controllable (band);
+			} else if (path[2] == X_("freq")) {
+				c = s->eq_freq_controllable (band);
+			} else if (path[2] == X_("q")) {
+				c = s->eq_q_controllable (band);
+			} else if (path[2] == X_("shape")) {
+				c = s->eq_shape_controllable (band);
+			}
+		}
+	} else if (path[1] == X_("filter")) {
+
+		/* /route/filter/hi/freq */
+
+		if (path.size() == 4) {
+
+			int filter;
+
+			if (path[2] == X_("hi")) {
+				filter = 1; /* high pass filter */
+			} else {
+				filter = 0; /* low pass filter */
+			}
+
+			if (path[3] == X_("enable")) {
+				c = s->filter_enable_controllable (filter);
+			} else if (path[3] == X_("freq")) {
+				c = s->filter_freq_controllable (filter);
+			} else if (path[3] == X_("slope")) {
+				c = s->filter_slope_controllable (filter);
+			}
+
+		} else if (path[1] == X_("compressor")) {
+
+			if (path.size() == 3) {
+				if (path[2] == X_("enable")) {
+					c = s->comp_enable_controllable ();
+				} else if (path[2] == X_("threshold")) {
+					c = s->comp_threshold_controllable ();
+				} else if (path[2] == X_("mode")) {
+					c = s->comp_mode_controllable ();
+				} else if (path[2] == X_("speed")) {
+					c = s->comp_speed_controllable ();
+				} else if (path[2] == X_("makeup")) {
+					c = s->comp_makeup_controllable ();
+				}
+			}
+		}
+	}
+
+	if (c) {
+		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("found controllable \"%1\"\n", c->name()));
+	} else {
+		DEBUG_TRACE (DEBUG::GenericMidi, "no controllable found\n");
+	}
+
+	return c;
 }
 
 MIDIFunction*
@@ -1226,7 +1540,6 @@ GenericMidiControlProtocol::connection_handler (boost::weak_ptr<ARDOUR::Port>, s
 void
 GenericMidiControlProtocol::connected ()
 {
-	cerr << "Now connected\n";
 }
 
 boost::shared_ptr<Port>
@@ -1249,4 +1562,3 @@ GenericMidiControlProtocol::maybe_start_touch (Controllable* controllable)
 		actl->start_touch (session->audible_sample ());
 	}
 }
-

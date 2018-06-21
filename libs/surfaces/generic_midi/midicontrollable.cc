@@ -34,7 +34,6 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/automation_control.h"
-#include "ardour/controllable_descriptor.h"
 #include "ardour/midi_ui.h"
 #include "ardour/debug.h"
 
@@ -49,7 +48,6 @@ using namespace ARDOUR;
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, bool m)
 	: _surface (s)
 	, controllable (0)
-	, _descriptor (0)
 	, _parser (p)
 	, _momentary (m)
 {
@@ -68,7 +66,6 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, Controllable& c, bool m)
 	: _surface (s)
-	, _descriptor (0)
 	, _parser (p)
 	, _momentary (m)
 {
@@ -90,17 +87,13 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 MIDIControllable::~MIDIControllable ()
 {
 	drop_external_control ();
-	delete _descriptor;
-	_descriptor = 0;
 }
 
 int
 MIDIControllable::init (const std::string& s)
 {
 	_current_uri = s;
-	delete _descriptor;
-	_descriptor = new ControllableDescriptor;
-	return _descriptor->set (s);
+	return 0;
 }
 
 void
@@ -250,11 +243,11 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 int
 MIDIControllable::lookup_controllable()
 {
-	if (!_descriptor) {
+	if (_current_uri.empty()) {
 		return -1;
 	}
 
-	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (*_descriptor);
+	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
 
 	if (!c) {
 		return -1;

@@ -116,7 +116,6 @@ class BufferSet;
 class Bundle;
 class Butler;
 class Click;
-class ControllableDescriptor;
 class CoreSelection;
 class ExportHandler;
 class ExportStatus;
@@ -1082,7 +1081,6 @@ public:
 
 	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
 	boost::shared_ptr<AutomationControl> automation_control_by_id (const PBD::ID&);
-	boost::shared_ptr<PBD::Controllable> controllable_by_descriptor (const ARDOUR::ControllableDescriptor&);
 
 	void add_controllable (boost::shared_ptr<PBD::Controllable>);
 	void remove_controllable (PBD::Controllable*);

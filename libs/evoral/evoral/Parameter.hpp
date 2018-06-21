@@ -88,5 +88,9 @@ private:
 
 } // namespace Evoral
 
+namespace std {
+std::ostream& operator<< (std::ostream &str, Evoral::Parameter const &);
+}
+
 #endif // EVORAL_PARAMETER_HPP
 

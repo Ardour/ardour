@@ -34,7 +34,6 @@ namespace PBD {
 
 namespace ARDOUR {
 	class AsyncMIDIPort;
-	class ControllableDescriptor;
 	class MidiPort;
 	class Session;
 }
@@ -67,7 +66,7 @@ class GenericMidiControlProtocol : public ARDOUR::ControlProtocol {
 	int set_feedback (bool yn);
 	bool get_feedback () const;
 
-        boost::shared_ptr<PBD::Controllable> lookup_controllable (const ARDOUR::ControllableDescriptor&) const;
+	boost::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
 
 	void maybe_start_touch (PBD::Controllable*);
 

@@ -158,26 +158,6 @@ namespace ARDOUR {
 		SendLevelAutomation,
 		SendEnableAutomation,
 		SendAzimuthAutomation,
-
-		/* these describe "well known" controls of a Stripable that are
-		   covered by the types above. They should be used only as part
-		   of ControllableDescriptor
-		*/
-
-		EQEnableAutomation,
-		EQGainAutomation,
-		EQFreqAutomation,
-		EQQAutomation,
-		EQShapeAutomation,
-		FilterFreqAutomation,
-		FilterSlopeAutomation,
-		FilterEnableAutomation,
-		CompressorEnableAutomation,
-		CompressorThresholdAutomation,
-		CompressorSpeedAutomation,
-		CompressorModeAutomation,
-		CompressorMakeupAutomation,
-		/* Redux not included because it is read-only */
 	};
 
 	enum AutoState {

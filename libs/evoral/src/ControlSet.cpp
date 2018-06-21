@@ -74,6 +74,8 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 {
 	Controls::iterator i = _controls.find(parameter);
 
+	cerr << "Look for " << parameter << endl;
+
 	if (i != _controls.end()) {
 		return i->second;
 
@@ -103,3 +105,11 @@ ControlSet::clear_controls ()
 }
 
 } // namespace Evoral
+
+/* No good place for this so just put it here */
+
+std::ostream&
+std::operator<< (std::ostream & str, Evoral::Parameter const & p)
+{
+	return str << p.type() << '-' << p.id() << '-' << (int) p.channel();
+}
