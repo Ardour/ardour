@@ -74,8 +74,6 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 {
 	Controls::iterator i = _controls.find(parameter);
 
-	cerr << "Look for " << parameter << endl;
-
 	if (i != _controls.end()) {
 		return i->second;
 
