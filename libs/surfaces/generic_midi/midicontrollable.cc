@@ -56,6 +56,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
+	last_incoming = 256; // any out of band value
 	last_controllable_value = 0.0f;
 	control_type = none;
 	control_rpn = -1;
@@ -134,6 +135,8 @@ MIDIControllable::set_controllable (Controllable* c)
 	} else {
 		last_controllable_value = 0.0f; // is there a better value?
 	}
+
+	last_incoming = 256;
 
 	if (controllable) {
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
@@ -372,32 +375,40 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			}
 		} else {
 
-			/* toggle control: make the toggle flip only if the
-			 * incoming control value exceeds 0.5 (0x40), so that
-			 * the typical button which sends "CC N=0x7f" on press
-			 * and "CC N=0x0" on release can be used to drive
-			 * toggles on press.
-			 *
-			 * No other arrangement really makes sense for a toggle
-			 * controllable. Acting on the press+release makes the
-			 * action momentary, which is almost never
-			 * desirable. If the physical button only sends a
-			 * message on press (or release), then it will be
-			 * expected to send a controller value >= 0.5
-			 * (0x40). It is hard to imagine why anyone would make
-			 * a MIDI controller button that sent 0x0 when pressed.
-			 */
-			if (msg->value >= 0x40) {
-				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
-			} else {
-				switch (get_ctltype()) {
-					case Ctl_Momentary:
-						break;
-					case Ctl_Toggle:
-						controllable->set_value (0.0, Controllable::NoGroup);
-						DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
-						break;
+			switch (get_ctltype()) {
+			case Ctl_Dial:
+				/* toggle value whenever direction of knob motion changes */
+				if (last_incoming > 127) {
+					/* relax ... first incoming message */
+				} else {
+					if (msg->value > last_incoming) {
+						controllable->set_value (1.0, Controllable::UseGroup);
+					} else {
+						controllable->set_value (0.0, Controllable::UseGroup);
+					}
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+				}
+				last_incoming = msg->value;
+				break;
+			case Ctl_Momentary:
+				/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
+				 * time they are pressed.
+				 */
+				if (msg->value >= 0x40) {
+					controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+				}
+				break;
+			case Ctl_Toggle:
+				/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
+				   maintain state (i.e. they know they were pressed) and then send zero the next time.
+				*/
+				if (msg->value >= 0x40) {
+					controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+				} else {
+					controllable->set_value (0.0, Controllable::NoGroup);
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
+					break;
 				}
 			}
 		}

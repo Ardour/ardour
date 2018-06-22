@@ -58,6 +58,7 @@ class MIDIControllable : public PBD::Stateful
 	enum CtlType {
 		Ctl_Momentary,
 		Ctl_Toggle,
+		Ctl_Dial,
 	};
 
 	enum Encoder {
@@ -119,6 +120,7 @@ class MIDIControllable : public PBD::Stateful
         MIDI::Parser&   _parser;
 	bool             setting;
 	int              last_value;
+	int              last_incoming;
 	float            last_controllable_value;
 	bool            _momentary;
 	bool            _is_gain_controller;

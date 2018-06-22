@@ -836,6 +836,9 @@ GenericMidiControlProtocol::create_binding (const XMLNode& node)
 	} else if ((prop = node.property (X_("ctl-toggle"))) !=0) {
 		ctltype = MIDIControllable::Ctl_Toggle;
 		ev = MIDI::controller;
+	} else if ((prop = node.property (X_("ctl-dial"))) !=0) {
+		ctltype = MIDIControllable::Ctl_Dial;
+		ev = MIDI::controller;
 	} else if ((prop = node.property (X_("note"))) != 0) {
 		ev = MIDI::on;
 	} else if ((prop = node.property (X_("pgm"))) != 0) {
