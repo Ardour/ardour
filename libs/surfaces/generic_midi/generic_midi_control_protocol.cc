@@ -1213,6 +1213,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 				c = s->eq_shape_controllable (band);
 			}
 		}
+
 	} else if (path[1] == X_("filter")) {
 
 		/* /route/filter/hi/freq */
@@ -1235,20 +1236,21 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 				c = s->filter_slope_controllable (filter);
 			}
 
-		} else if (path[1] == X_("compressor")) {
+		}
 
-			if (path.size() == 3) {
-				if (path[2] == X_("enable")) {
-					c = s->comp_enable_controllable ();
-				} else if (path[2] == X_("threshold")) {
-					c = s->comp_threshold_controllable ();
-				} else if (path[2] == X_("mode")) {
-					c = s->comp_mode_controllable ();
-				} else if (path[2] == X_("speed")) {
-					c = s->comp_speed_controllable ();
-				} else if (path[2] == X_("makeup")) {
-					c = s->comp_makeup_controllable ();
-				}
+	} else if (path[1] == X_("compressor")) {
+
+		if (path.size() == 3) {
+			if (path[2] == X_("enable")) {
+				c = s->comp_enable_controllable ();
+			} else if (path[2] == X_("threshold")) {
+				c = s->comp_threshold_controllable ();
+			} else if (path[2] == X_("mode")) {
+				c = s->comp_mode_controllable ();
+			} else if (path[2] == X_("speed")) {
+				c = s->comp_speed_controllable ();
+			} else if (path[2] == X_("makeup")) {
+				c = s->comp_makeup_controllable ();
 			}
 		}
 	}
