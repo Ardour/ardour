@@ -137,6 +137,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		uint32_t custom_mode;		// use custom strip list
 		OSCTempMode temp_mode;		// use temp strip list
 		Sorted temp_strips;			// temp strip list for grouponly, vcaonly, auxonly
+		boost::shared_ptr<ARDOUR::Stripable> temp_master; // stripable this surface uses as temp master
 		Sorted strips;				// list of stripables for this surface
 		// strips
 		uint32_t bank;				// current bank

@@ -2616,6 +2616,7 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 			if ((argc == 1 && value) || !argc) {
 				// fill sur->strips with routes from this group and hit bank1
 				sur->temp_mode = GroupOnly;
+				sur->temp_master = sur->select;
 				ret = set_temp_mode (get_address (msg));
 				set_bank (1, msg);
 			} else {
@@ -2796,6 +2797,7 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 			if (vca) {
 				if ((argc == 1 && ivalue) || !argc) {
 					sur->temp_mode = VCAOnly;
+					sur->temp_master = sur->select;
 					ret = set_temp_mode (get_address (msg));
 					set_bank (1, msg);
 				} else {
@@ -2838,6 +2840,7 @@ OSC::sel_bus_only (lo_message msg)
 			if (!rt->is_track () && rt->can_solo ()) {
 				// this is a bus, but not master, monitor or audition
 				sur->temp_mode = BusOnly;
+				sur->temp_master = sur->select;
 				set_temp_mode (get_address (msg));
 				set_bank (1, msg);
 				return 0;
@@ -2852,7 +2855,7 @@ OSC::set_temp_mode (lo_address addr)
 {
 	bool ret = 1;
 	OSCSurface *sur = get_surface(addr);
-	boost::shared_ptr<Stripable> s = sur->select;
+	boost::shared_ptr<Stripable> s = sur->temp_master;
 	if (s) {
 		if (sur->temp_mode == GroupOnly) {
 			boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
@@ -2952,7 +2955,7 @@ boost::shared_ptr<Send>
 OSC::get_send (boost::shared_ptr<Stripable> st, lo_address addr)
 {
 	OSCSurface *sur = get_surface(addr);
-	boost::shared_ptr<Stripable> s = sur->select;
+	boost::shared_ptr<Stripable> s = sur->temp_master;
 	if (st && s && (st != s)) {
 		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
 		boost::shared_ptr<Route> rst = boost::dynamic_pointer_cast<Route> (st);
@@ -4001,7 +4004,7 @@ OSC::route_mute (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/mute"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->mute_control()) {
@@ -4036,7 +4039,7 @@ OSC::route_solo (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/solo"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->solo_control()) {
@@ -4055,7 +4058,7 @@ OSC::route_solo_iso (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/solo_iso"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->solo_isolate_control()) {
@@ -4075,7 +4078,7 @@ OSC::route_solo_safe (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/solo_safe"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->solo_safe_control()) {
@@ -4156,7 +4159,7 @@ OSC::route_recenable (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/recenable"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->rec_enable_control()) {
@@ -4178,7 +4181,7 @@ OSC::route_rename (int ssid, char *newname, lo_message msg) {
 	boost::shared_ptr<Stripable> s = get_strip(ssid, get_address(msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			text_message_with_id (X_("/strip/name"), ssid, string_compose ("%1-Send", s->name()), sur->feedback[2], get_address(msg));
 			return 1;
 		}
@@ -4324,7 +4327,7 @@ OSC::route_recsafe (int ssid, int yn, lo_message msg)
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	OSCSurface *sur = get_surface(get_address (msg));
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/record_safe"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->rec_safe_control()) {
@@ -4345,7 +4348,7 @@ OSC::route_monitor_input (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/monitor_input"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
@@ -4390,7 +4393,7 @@ OSC::route_monitor_disk (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/monitor_disk"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (s);
@@ -4436,7 +4439,7 @@ OSC::strip_phase (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/polarity"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->phase_control()) {
@@ -4469,15 +4472,7 @@ OSC::strip_expand (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
-		if ((sur->temp_mode == BusOnly)/* && (s != sur->select)*/) {
-			uint32_t val = 0;
-			if (ssid == (int) sur->expand) {
-				val = 1;
-			}
-			return float_message_with_id (X_("/strip/expand"), ssid, val, sur->feedback[2], get_address (msg));
-		} else {
-			sur->expand_strip = s;
-		}
+		sur->expand_strip = s;
 	}
 	sur->expand_enable = (bool) yn;
 	sur->expand = ssid;
@@ -4498,7 +4493,7 @@ OSC::strip_hide (int ssid, int state, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/hide"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (state != s->is_hidden ()) {
@@ -4584,15 +4579,6 @@ OSC::_strip_select (boost::shared_ptr<Stripable> s, lo_address addr)
 			sur->observers[i]->set_expand (obs_expand);
 		}
 	}
-	if (s != old_sel) {
-		if (sur->temp_mode) {
-			set_temp_mode (addr);
-			if (sur->temp_mode > GroupOnly) {
-				sur->bank = 1;
-				strip_feedback (sur, false);
-			}
-		}
-	}
 	// need to set monitor for processor changed signal (for paging)
 	string address = lo_address_get_url (addr);
 	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
@@ -4628,9 +4614,6 @@ OSC::strip_gui_select (int ssid, int yn, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s = get_strip (ssid, get_address (msg));
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
-			return -1;
-		}
 		sur->expand_enable = false;
 		SetStripableSelection (s);
 	} else {
@@ -4682,15 +4665,7 @@ OSC::sel_delta (int delta, lo_message msg)
 	}
 	OSCSurface *sur = get_surface(get_address (msg));
 	Sorted sel_strips;
-	if (sur->temp_mode < VCAOnly) {
-		sel_strips = sur->strips;
-	} else if (sur->temp_mode == VCAOnly) {
-		sel_strips = get_sorted_stripables(16, false, 0, sur->strips);
-	} else if (sur->temp_mode == BusOnly) {
-		sel_strips = get_sorted_stripables(132, false, 0, sur->strips);
-	} else {
-		return -1;
-	}
+	sel_strips = sur->strips;
 	// the current selected strip _should_ be in sel_strips
 	uint32_t nstps = sel_strips.size ();
 	if (!nstps) {
@@ -4903,7 +4878,7 @@ OSC::route_set_trim_abs (int ssid, float level, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/trimdB"), ssid, 0, sur->feedback[2], get_address (msg));
 		}
 		if (s->trim_control()) {
@@ -5022,7 +4997,7 @@ OSC::route_set_pan_stereo_width (int ssid, float pos, lo_message msg)
 	OSCSurface *sur = get_surface(get_address (msg));
 
 	if (s) {
-		if ((sur->temp_mode == BusOnly) && (s != sur->select)) {
+		if ((sur->temp_mode == BusOnly) && (s != sur->temp_master)) {
 			return float_message_with_id (X_("/strip/pan_stereo_width"), ssid, 1, sur->feedback[2], get_address (msg));
 		}
 		if (s->pan_width_control()) {
