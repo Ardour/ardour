@@ -432,10 +432,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\controllable_descriptor.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\cycle_timer.cc"
 				>
 			</File>
@@ -1643,10 +1639,6 @@
 			</File>
 			<File
 				RelativePath="..\ardour\control_protocol_manager.h"
-				>
-			</File>
-			<File
-				RelativePath="..\ardour\controllable_descriptor.h"
 				>
 			</File>
 			<File
