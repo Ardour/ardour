@@ -287,9 +287,12 @@ IOProcessor::prepare_for_reset (XMLNode &state, const std::string& name)
 	state.set_property ("ignore-bitslot", true);
 	state.set_property ("ignore-name", true);
 
-	XMLNode* io_node = state.child (IO::state_node_name.c_str());
+	XMLNodeList nlist = state.children();
+	XMLNodeIterator niter;
 
-	if (io_node) {
-		IO::prepare_for_reset (*io_node, name);
+	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
+		if ((*niter)->name() == IO::state_node_name.c_str()) {
+			IO::prepare_for_reset (**niter, name);
+		}
 	}
 }
