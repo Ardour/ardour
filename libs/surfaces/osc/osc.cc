@@ -586,8 +586,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/db_delta"), "f", sel_dB_delta);
 		REGISTER_CALLBACK (serv, X_("/select/trimdB"), "f", sel_trim);
 		REGISTER_CALLBACK (serv, X_("/select/hide"), "i", sel_hide);
-		REGISTER_CALLBACK (serv, X_("/select/bus/only"), "f", sel_bus_only);
-		REGISTER_CALLBACK (serv, X_("/select/bus/only"), "", sel_bus_only);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "f", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/previous"), "", sel_previous);
 		REGISTER_CALLBACK (serv, X_("/select/next"), "f", sel_next);
@@ -834,6 +832,10 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 	} else
 	if (strstr (path, X_("/touch"))) {
 		ret = touch_detect (path, types, argv, argc, msg);
+
+	} else
+	if (strstr (path, X_("/collect"))) {
+		ret = collect (path, types, argv, argc, msg);
 
 	} else
 	if (len >= 17 && !strcmp (&path[len-15], X_("/#current_value"))) {
@@ -2609,22 +2611,7 @@ OSC::parse_sel_group (const char *path, const char* types, lo_arg **argv, int ar
 				value = (uint32_t) argv[0]->i;
 			}
 		}
-		if (!strncmp (path, X_("/select/group/only"), 18)) {
-			if (!rg) {
-				return ret;
-			}
-			if ((argc == 1 && value) || !argc) {
-				// fill sur->strips with routes from this group and hit bank1
-				sur->temp_mode = GroupOnly;
-				sur->temp_master = sur->select;
-				ret = set_temp_mode (get_address (msg));
-				set_bank (1, msg);
-			} else {
-				// key off is ignored
-				ret = 0;
-			}
-		}
-		else if (!strncmp (path, X_("/select/group/enable"), 20)) {
+		if (!strncmp (path, X_("/select/group/enable"), 20)) {
 			if (rg) {
 				if (argc == 1) {
 					rg->set_active (value, this);
@@ -2785,29 +2772,6 @@ OSC::parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc
 			}
 
 		}
-		else if (!strncmp (path, X_("/select/vca/only"), 16)) {
-			if (argc == 1) {
-				if (types[0] == 'f') {
-					ivalue = (uint32_t) argv[0]->f;
-				} else if (types[0] == 'i') {
-					ivalue = (uint32_t) argv[0]->i;
-				}
-			}
-			boost::shared_ptr<VCA> vca = boost::dynamic_pointer_cast<VCA> (s);
-			if (vca) {
-				if ((argc == 1 && ivalue) || !argc) {
-					sur->temp_mode = VCAOnly;
-					sur->temp_master = sur->select;
-					ret = set_temp_mode (get_address (msg));
-					set_bank (1, msg);
-				} else {
-					// key off is ignored
-					ret = 0;
-				}
-			} else {
-				PBD::warning << "OSC: Select is not a VCA right now" << endmsg;
-			}
-		}
 	}
 	return ret;
 }
@@ -2830,27 +2794,6 @@ OSC::get_vca_by_name (std::string vname)
 }
 
 int
-OSC::sel_bus_only (lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	boost::shared_ptr<Stripable> s = sur->select;
-	if (s) {
-		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (s);
-		if (rt) {
-			if (!rt->is_track () && rt->can_solo ()) {
-				// this is a bus, but not master, monitor or audition
-				sur->temp_mode = BusOnly;
-				sur->temp_master = sur->select;
-				set_temp_mode (get_address (msg));
-				set_bank (1, msg);
-				return 0;
-			}
-		}
-	}
-	return 1;
-}
-
-int
 OSC::set_temp_mode (lo_address addr)
 {
 	bool ret = 1;
@@ -2868,6 +2811,22 @@ OSC::set_temp_mode (lo_address addr)
 						boost::shared_ptr<Route> r = *it;
 						boost::shared_ptr<Stripable> st = boost::dynamic_pointer_cast<Stripable> (r);
 						sur->temp_strips.push_back(st);
+					}
+					// check if this group feeds a bus or is slaved
+					boost::shared_ptr<Stripable> mstr = boost::shared_ptr<Stripable> ();
+					if (rg->has_control_master()) {
+						boost::shared_ptr<VCA> vca = session->vca_manager().vca_by_number (rg->group_master_number());
+						if (vca) {
+							mstr = boost::dynamic_pointer_cast<Stripable> (vca);
+						}
+					} else if (rg->has_subgroup()) {
+						boost::shared_ptr<Route> sgr = rg->subgroup_bus().lock();
+						if (sgr) {
+							mstr = boost::dynamic_pointer_cast<Stripable> (sgr);
+						}
+					}
+					if (mstr) {
+						sur->temp_strips.push_back(mstr);
 					}
 					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 					sur->nstrips = sur->temp_strips.size();
@@ -3994,6 +3953,104 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 	}
 
 	return 0;
+}
+
+int
+OSC::collect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+{
+	/*
+	 * collect should have the form of:
+	 * /select/collect (may have i or f keypress/release)
+	 * /strip/collect i (may have keypress and i may be inline)
+	 */
+	if (!session || argc > 1) return -1;
+
+	int ret = 1;
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> strp = boost::shared_ptr<Stripable>();
+	uint32_t value = 0;
+	OSCTempMode new_mode = TempOff;
+
+	if (argc) {
+		if (types[0] == 'f') {
+			value = (int)argv[0]->f;
+		} else {
+			value = argv[0]->i;
+		}
+		if (!value) {
+			// key release ignore
+			return 0;
+		}
+	}
+
+	//parse path first to find stripable
+	if (!strncmp (path, X_("/strip/"), 7)) {
+		/*
+		 * we don't know if value is press or ssid
+		 * so we have to check if the last / has an int after it first
+		 * if not then we use value
+		 */
+		uint32_t ssid = 0;
+		ssid = atoi (&(strrchr (path, '/' ))[1]);
+		if (!ssid) {
+			ssid = value;
+		}
+		strp = get_strip (ssid, get_address (msg));
+	} else if (!strncmp (path, X_("/select/"), 8)) {
+		strp = sur->select;
+	} else {
+		return ret;
+	}
+	if (strp) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (strp);
+		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (strp);
+		if (strstr (path, X_("/vca")) || v) {
+			//strp must be a VCA
+			if (v) {
+				new_mode = VCAOnly;
+			} else {
+				return ret;
+			}
+		} else
+		if (strstr (path, X_("/group"))) {
+			//strp must be in a group
+			if (rt) {
+				RouteGroup *rg = rt->route_group();
+				if (rg) {
+					new_mode = GroupOnly;
+				} else {
+					return ret;
+				}
+			}
+		} else
+		if (strstr (path, X_("/bus"))) {
+			//strp must be a bus with either sends or no inputs
+			if (rt) {
+				if (!rt->is_track () && rt->can_solo ()) {
+					new_mode = BusOnly;
+				}
+			}
+		} else {
+			// decide by auto
+			// vca should never get here
+			if (rt->is_track ()) {
+				if (rt->route_group()) {
+					new_mode = GroupOnly;
+				}
+			} else if (!rt->is_track () && rt->can_solo ()) {
+						new_mode = BusOnly;
+			}
+		}
+		if (new_mode) {
+			sur->temp_mode = new_mode;
+			sur->temp_master = strp;
+			set_temp_mode (get_address (msg));
+			set_bank (1, msg);
+			return 0;
+		}
+
+	}
+	return ret;
 }
 
 int

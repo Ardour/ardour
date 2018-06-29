@@ -326,6 +326,8 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl);
 
+	int collect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
 	void routes_list (lo_message msg);
@@ -378,7 +380,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK_MSG(route_get_receives);
 	PATH_CALLBACK_MSG(routes_list);
 	PATH_CALLBACK_MSG(group_list);
-	PATH_CALLBACK_MSG(sel_bus_only);
 	PATH_CALLBACK_MSG(sel_previous);
 	PATH_CALLBACK_MSG(sel_next);
 	PATH_CALLBACK_MSG(surface_list);
@@ -766,7 +767,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_dB_delta (float delta, lo_message msg);
 	int sel_trim (float val, lo_message msg);
 	int sel_hide (uint32_t state, lo_message msg);
-	int sel_bus_only (lo_message msg);
 	int sel_previous (lo_message msg);
 	int sel_next (lo_message msg);
 	int sel_delta (int delta, lo_message msg);
