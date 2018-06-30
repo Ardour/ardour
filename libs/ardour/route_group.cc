@@ -261,8 +261,8 @@ RouteGroup::get_state ()
 	node->set_property ("id", id());
 	node->set_property ("rgba", _rgba);
 	node->set_property ("used-to-share-gain", _used_to_share_gain);
-	if (subgroup_bus) {
-		node->set_property ("subgroup-bus", subgroup_bus->id ());
+	if (_subgroup_bus) {
+		node->set_property ("subgroup-bus", _subgroup_bus->id ());
 	}
 
 	add_properties (*node);
@@ -312,7 +312,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 	if (node.get_property ("subgroup-bus", subgroup_id)) {
 		boost::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
 		if (r) {
-			subgroup_bus = r;
+			_subgroup_bus = r;
 		}
 	}
 
@@ -560,16 +560,16 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 		return;
 	}
 
-	subgroup_bus = rl.front();
-	subgroup_bus->set_name (_name);
+	_subgroup_bus = rl.front();
+	_subgroup_bus->set_name (_name);
 
 	if (aux) {
 
-		_session.add_internal_sends (subgroup_bus, placement, routes);
+		_session.add_internal_sends (_subgroup_bus, placement, routes);
 
 	} else {
 
-		boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
+		boost::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
@@ -581,7 +581,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 void
 RouteGroup::destroy_subgroup ()
 {
-	if (!subgroup_bus) {
+	if (!_subgroup_bus) {
 		return;
 	}
 
@@ -590,14 +590,14 @@ RouteGroup::destroy_subgroup ()
 		/* XXX find a new bundle to connect to */
 	}
 
-	_session.remove_route (subgroup_bus);
-	subgroup_bus.reset ();
+	_session.remove_route (_subgroup_bus);
+	_subgroup_bus.reset ();
 }
 
 bool
 RouteGroup::has_subgroup() const
 {
-	return subgroup_bus != 0;
+	return _subgroup_bus != 0;
 }
 
 bool

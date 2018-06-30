@@ -161,7 +161,7 @@ public:
 
 private:
 	boost::shared_ptr<RouteList> routes;
-	boost::shared_ptr<Route> subgroup_bus;
+	boost::shared_ptr<Route> _subgroup_bus;
 	boost::weak_ptr<VCA> group_master;
 
 	PBD::Property<bool> _relative;
