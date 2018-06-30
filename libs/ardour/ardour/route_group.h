@@ -85,6 +85,7 @@ public:
 	bool is_color () const { return _color.val(); }
 	bool is_monitoring() const { return _monitoring.val(); }
 	int32_t group_master_number() const { return _group_master_number.val(); }
+	boost::weak_ptr<Route> subgroup_bus() const { return _subgroup_bus; }
 
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
