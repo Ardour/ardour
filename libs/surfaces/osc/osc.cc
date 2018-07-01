@@ -4759,6 +4759,7 @@ OSC::sel_delta (int delta, lo_message msg)
 		if (!sur->expand_enable) {
 			SetStripableSelection (new_sel);
 		} else {
+			sur->expand_strip = new_sel;
 			_strip_select (new_sel, get_address (msg));
 		}
 		return 0;
