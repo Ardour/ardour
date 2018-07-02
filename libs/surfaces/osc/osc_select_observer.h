@@ -58,7 +58,7 @@ class OSCSelectObserver
   private:
 	boost::shared_ptr<ARDOUR::Stripable> _strip;
 	ArdourSurface::OSC& _osc;
-	
+
 	PBD::ScopedConnectionList strip_connections;
 	// sends, plugins and eq need their own
 	PBD::ScopedConnectionList send_connections;
@@ -93,7 +93,6 @@ class OSCSelectObserver
 	std::vector<int> plug_params;
 	int eq_bands;
 	uint32_t _expand;
-	std::string _group_name;
 	std::bitset<16> _group_sharing;
 	bool _tick_busy;
 	ARDOUR::Session* session;

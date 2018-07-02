@@ -78,7 +78,6 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface:
 	} else {
 		plug_id = -1;
 	}
-	_group_name = "\n";
 	_group_sharing[15] = 1;
 	refresh_strip (sur->select, sur->nsends, gainmode, true);
 	set_expand (sur->expand_enable);
@@ -680,29 +679,24 @@ void
 OSCSelectObserver::group_name ()
 {
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
-	string new_name = " ";
 	RouteGroup *rg = rt->route_group();
-	if (rg) {
-		new_name = rg->name();
-	}
-	if (new_name != _group_name) {
-		_osc.text_message (X_("/select/group"), new_name, addr);
-		_group_name = new_name;
-		_group_sharing[15] = 1;
-	}
-	_osc.send_group_list (addr);
 	group_sharing (rg);
 }
 
 void
 OSCSelectObserver::group_sharing (RouteGroup *rgc)
 {
+	_group_sharing[15] = 1;
 	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	string new_name = "none";
 	RouteGroup *rg;
 	if (rt) {
 		rg = rt->route_group();
 	}
 	if (rg && rt) {
+		new_name = rg->name();
+		_osc.text_message (X_("/select/group"), new_name, addr);
+		_osc.send_group_list (addr);
 		if (rg->is_gain () != _group_sharing[0] || _group_sharing[15]) {
 			_group_sharing[0] = rg->is_gain ();
 			_osc.int_message (X_("/select/group/gain"), _group_sharing[0], addr);
@@ -744,6 +738,7 @@ OSCSelectObserver::group_sharing (RouteGroup *rgc)
 			_osc.int_message (X_("/select/group/enable"), _group_sharing[9], addr);
 		}
 	} else {
+		_osc.text_message (X_("/select/group"), new_name, addr);
 		_osc.int_message (X_("/select/group/gain"), 0, addr);
 		_osc.int_message (X_("/select/group/relative"), 0, addr);
 		_osc.int_message (X_("/select/group/mute"), 0, addr);
