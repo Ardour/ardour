@@ -503,10 +503,14 @@ namespace ARDOUR {
 		AutoConnectMaster = 0x2
 	};
 
-    enum TracksAutoNamingRule {
-        UseDefaultNames = 0x1,
-        NameAfterDriver = 0x2
-    };
+	enum VelocityDisplayOption {
+		NoteBars = 0x1
+	};
+
+	enum TracksAutoNamingRule {
+		UseDefaultNames = 0x1,
+		NameAfterDriver = 0x2
+	};
 
 	enum SampleFormat {
 		FormatFloat = 0,
