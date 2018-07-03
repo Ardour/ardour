@@ -1489,6 +1489,8 @@ Editor::parameter_changed (std::string p)
 				tact->set_active (s);
 			}
 		}
+	} else if (p == "velocity-display") {
+		_track_canvas->request_redraw (_track_canvas->visible_area());
 	}
 }
 
