@@ -19,6 +19,7 @@
 #include <cairomm/context.h>
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "canvas/note.h"
 #include "canvas/debug.h"
@@ -58,18 +59,18 @@ Note::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		Rect self (item_to_window (Rectangle::get().translate (_position), false));
 
-		if ((self.y1 - self.y0) < 5) {
+		if ((self.y1 - self.y0) < ((outline_width() * 2) + 1)) {
 			/* not tall enough to show a velocity bar */
 			return;
 		}
 
-		/* 2 pixel margin above and below
-		   outline_width() margin on left
-		   set width based on velocity
+		/* 2 pixel margin above and below (taking outline width into account).
+		   outline_width() margin on left.
+		   set width based on velocity.
 		*/
 
-		self.y0  = self.y0 + 2;
-		self.y1  = self.y1 - 2;
+		self.y0  = self.y0 + outline_width() + 2;
+		self.y1  = self.y1 - outline_width() - 1;
 		const double width = (self.x1 - self.x0) - (2 * outline_width());
 		self.x0  = self.x0 + outline_width();
 		self.x1  = self.x0 + (width * _velocity);
@@ -90,5 +91,5 @@ void
 Note::set_fill_color (Gtkmm2ext::Color c)
 {
 	Fill::set_fill_color (c);
-	_velocity_color = Gtkmm2ext::HSV (c).opposite().color ();
+	_velocity_color = UINT_INTERPOLATE (c, 0x000000ff, 0.5);
 }
