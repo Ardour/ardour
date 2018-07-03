@@ -2483,7 +2483,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Editor"), rsas);
 
 	add_option (_("Editor/Snap"), new OptionEditorHeading (_("General Snap options:")));
-	
+
 	add_option (_("Editor/Snap"),
 		    new SpinOption<uint32_t> (
 			    "snap-threshold",
@@ -2501,7 +2501,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_snapped_cursor),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_snapped_cursor)
 		     ));
-	
+
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
 		     "rubberbanding-snaps-to-grid",
@@ -2902,6 +2902,24 @@ RCOptionEditor::RCOptionEditor ()
 #endif
 
 	add_option (_("MIDI"), audition_synth);
+
+	add_option (_("MIDI"), new OptionEditorHeading (_("Velocity Display")));
+
+	add_option (_("MIDI"),
+	            new BoolOption (
+		            "use-note-bars-for-velocity",
+		            _("Show velocity horizontally inside notes"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
+		            ));
+
+	add_option (_("MIDI"),
+	            new BoolOption (
+		            "use-note-color-for-velocity",
+		            _("Use colors to show note velocity"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
+		            ));
 
 	/* Click */
 

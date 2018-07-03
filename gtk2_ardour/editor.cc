@@ -79,6 +79,7 @@
 #include "ardour/vca.h"
 
 #include "canvas/debug.h"
+#include "canvas/note.h"
 #include "canvas/text.h"
 
 #include "widgets/ardour_spacer.h"
@@ -6165,6 +6166,9 @@ Editor::ui_parameter_changed (string parameter)
 		if (_verbose_cursor) {
 			playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
 		}
+	} else if (parameter == "use-note-bars-for-velocity") {
+		ArdourCanvas::Note::set_show_velocity_bars (UIConfiguration::instance().get_use_note_bars_for_velocity());
+		_track_canvas->request_redraw (_track_canvas->visible_area());
 	}
 }
 
