@@ -55,8 +55,8 @@ Rectangle::Rectangle (Item* parent, Rect const & rect)
 {
 }
 
-Rect
-Rectangle::get_self_for_render () const
+void
+Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* In general, a Rectangle will have a _position of (0,0) within its
 	   parent, and its extent is actually defined by _rect. But in the
@@ -64,19 +64,12 @@ Rectangle::get_self_for_render () const
 	   we should take that into account when rendering.
 	*/
 
-	return item_to_window (_rect.translate (_position), false);
-}
+	Rect self (item_to_window (_rect.translate (_position), false));
+	const Rect draw = self.intersection (area);
 
-void
-Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context, Rect self) const
-{
-	Rect r = self.intersection (area);
-
-	if (!r) {
+	if (!draw) {
 		return;
 	}
-
-	Rect draw = r;
 
 	if (_fill && !_transparent) {
 		if (_stops.empty()) {
@@ -140,12 +133,6 @@ Rectangle::render_self (Rect const & area, Cairo::RefPtr<Cairo::Context> context
 
 		context->stroke ();
 	}
-}
-
-void
-Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
-{
-	render_self (area, context, get_self_for_render ());
 }
 
 void
