@@ -201,7 +201,13 @@ NoteBase::base_color()
 		                          _selected_col, 0.5);
 
 	default:
-		return meter_style_fill_color(_note->velocity(), selected());
+		if (UIConfiguration::instance().get_use_note_color_for_velocity()) {
+			return meter_style_fill_color(_note->velocity(), selected());
+		} else {
+			const uint32_t region_color = _region.midi_stream_view()->get_region_color();
+			return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
+			                         0.5);
+		}
 	};
 
 	return 0;

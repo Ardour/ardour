@@ -6169,6 +6169,8 @@ Editor::ui_parameter_changed (string parameter)
 	} else if (parameter == "use-note-bars-for-velocity") {
 		ArdourCanvas::Note::set_show_velocity_bars (UIConfiguration::instance().get_use_note_bars_for_velocity());
 		_track_canvas->request_redraw (_track_canvas->visible_area());
+	} else if (parameter == "use-note-color-for-velocity") {
+		UIConfiguration::instance().ColorsChanged(); /* EMIT SIGNAL */
 	}
 }
 
