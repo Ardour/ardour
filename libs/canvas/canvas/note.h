@@ -33,10 +33,12 @@ public:
 
 	void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void set_velocity (double fract);
+	void set_fill_color (Gtkmm2ext::Color);
 
   private:
-	static bool _show_velocity_bars;
-	double _velocity;
+	static bool      _show_velocity_bars;
+	double           _velocity;
+	Gtkmm2ext::Color _velocity_color;
 };
 
 }

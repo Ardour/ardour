@@ -30,13 +30,15 @@ bool Note::_show_velocity_bars = true;
 
 Note::Note (Canvas* c)
 	: Rectangle (c)
-	, _velocity (0.5)
+	, _velocity (0.0)
+	, _velocity_color (0)
 {
 }
 
 Note::Note (Item* parent)
 	: Rectangle (parent)
-	, _velocity (0.5)
+	, _velocity (0.0)
+	, _velocity_color (0)
 {
 }
 
@@ -78,8 +80,15 @@ Note::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			return;
 		}
 
-		Gtkmm2ext::set_source_rgba (context, Gtkmm2ext::contrasting_text_color (fill_color()));
+		Gtkmm2ext::set_source_rgba (context, _velocity_color);
 		context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
 		context->fill ();
 	}
+}
+
+void
+Note::set_fill_color (Gtkmm2ext::Color c)
+{
+	Fill::set_fill_color (c);
+	_velocity_color = Gtkmm2ext::HSV (c).opposite().color ();
 }
