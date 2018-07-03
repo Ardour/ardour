@@ -133,6 +133,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
 	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiRegionView::parameter_changed));
+
 	connect_to_diskstream ();
 }
 
@@ -191,6 +193,8 @@ MidiRegionView::parameter_changed (std::string const & p)
 		}
 	} else if (p == "color-regions-using-track-color") {
 		set_colors ();
+	} else if (p == "use-note-color-for-velocity") {
+		color_handler ();
 	}
 }
 
