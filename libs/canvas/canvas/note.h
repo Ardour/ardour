@@ -35,6 +35,8 @@ public:
 	void set_velocity (double fract);
 	void set_fill_color (Gtkmm2ext::Color);
 
+	static void set_show_velocity_bars (bool);
+
   private:
 	static bool      _show_velocity_bars;
 	double           _velocity;

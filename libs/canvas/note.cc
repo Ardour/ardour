@@ -29,6 +29,12 @@ using namespace ArdourCanvas;
 
 bool Note::_show_velocity_bars = true;
 
+void
+Note::set_show_velocity_bars (bool yn)
+{
+	_show_velocity_bars = yn;
+}
+
 Note::Note (Canvas* c)
 	: Rectangle (c)
 	, _velocity (0.0)
