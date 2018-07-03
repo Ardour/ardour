@@ -64,6 +64,7 @@ public:
 
 	void set_ignore_events (bool);
 
+	void set_velocity (double);
 	void move_event (double dx, double dy);
 
 private:

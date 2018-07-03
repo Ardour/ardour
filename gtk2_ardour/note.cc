@@ -145,3 +145,10 @@ Note::set_ignore_events (bool ignore)
 {
 	_note->set_ignore_events (ignore);
 }
+
+void
+Note::set_velocity (double fract)
+{
+	_note->set_velocity (fract);
+}
+

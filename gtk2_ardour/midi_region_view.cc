@@ -1765,6 +1765,7 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
+	ev->set_velocity (note->velocity()/127.0);
 
 	if (!note->length()) {
 		if (_active_notes && note->note() < 128) {
