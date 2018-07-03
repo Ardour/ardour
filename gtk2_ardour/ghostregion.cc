@@ -41,8 +41,8 @@
 
 using namespace std;
 using namespace Editing;
-using namespace ArdourCanvas;
 using namespace ARDOUR;
+using ArdourCanvas::Duple;
 
 GhostRegion::GhostRegion(RegionView& rv,
                          ArdourCanvas::Container* parent,
@@ -325,7 +325,7 @@ MidiGhostRegion::update_contents_height ()
 			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
 		} else {
 			_tmp_poly = static_cast<ArdourCanvas::Polygon*>(it->second->item);
-			Duple position = _tmp_poly->position();
+			ArdourCanvas::Duple position = _tmp_poly->position();
 			position.y = y;
 			_tmp_poly->set_position(position);
 			_tmp_poly->set(Hit::points(h));

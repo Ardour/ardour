@@ -27,6 +27,7 @@
 
 namespace ArdourCanvas {
 	class Container;
+	class Note;
 }
 
 class Note : public NoteBase
@@ -66,7 +67,7 @@ public:
 	void move_event (double dx, double dy);
 
 private:
-	ArdourCanvas::Rectangle* _rectangle;
+	ArdourCanvas::Note* _note;
 };
 
 #endif /* __gtk_ardour_note_h__ */

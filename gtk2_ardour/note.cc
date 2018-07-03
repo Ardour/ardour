@@ -20,127 +20,128 @@
 
 #include "evoral/Note.hpp"
 
-#include "canvas/rectangle.h"
+#include "canvas/note.h"
 #include "canvas/debug.h"
 
 #include "note.h"
 #include "public_editor.h"
 
 using namespace ARDOUR;
-using namespace ArdourCanvas;
+using ArdourCanvas::Coord;
+using ArdourCanvas::Duple;
 
 Note::Note (
-	MidiRegionView& region, Item* parent, const boost::shared_ptr<NoteType> note, bool with_events)
+	MidiRegionView& region, ArdourCanvas::Item* parent, const boost::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
-	, _rectangle (new ArdourCanvas::Rectangle (parent))
+	, _note (new ArdourCanvas::Note (parent))
 {
-	CANVAS_DEBUG_NAME (_rectangle, "note");
-	set_item (_rectangle);
+	CANVAS_DEBUG_NAME (_note, "note");
+	set_item (_note);
 }
 
 Note::~Note ()
 {
-	delete _rectangle;
+	delete _note;
 }
 
 void
 Note::move_event (double dx, double dy)
 {
-	_rectangle->set (_rectangle->get().translate (Duple (dx, dy)));
+	_note->set (_note->get().translate (Duple (dx, dy)));
 }
 
 Coord
 Note::x0 () const
 {
-	return _rectangle->x0 ();
+	return _note->x0 ();
 }
 
 Coord
 Note::x1 () const
 {
-	return _rectangle->x1 ();
+	return _note->x1 ();
 }
 
 Coord
 Note::y0 () const
 {
-	return _rectangle->y0 ();
+	return _note->y0 ();
 }
 
 Coord
 Note::y1 () const
 {
-	return _rectangle->y1 ();
+	return _note->y1 ();
 }
 
 void
 Note::set_outline_color (uint32_t color)
 {
-	_rectangle->set_outline_color (color);
+	_note->set_outline_color (color);
 }
 
 void
 Note::set_fill_color (uint32_t color)
 {
-	_rectangle->set_fill_color (color);
+	_note->set_fill_color (color);
 }
 
 void
 Note::show ()
 {
-	_rectangle->show ();
+	_note->show ();
 }
 
 void
 Note::hide ()
 {
-	_rectangle->hide ();
+	_note->hide ();
 }
 
 void
 Note::set (ArdourCanvas::Rect rect)
 {
-	_rectangle->set (rect);
+	_note->set (rect);
 }
 
 void
 Note::set_x0 (Coord x0)
 {
-	_rectangle->set_x0 (x0);
+	_note->set_x0 (x0);
 }
 
 void
 Note::set_y0 (Coord y0)
 {
-	_rectangle->set_y0 (y0);
+	_note->set_y0 (y0);
 }
 
 void
 Note::set_x1 (Coord x1)
 {
-	_rectangle->set_x1 (x1);
+	_note->set_x1 (x1);
 }
 
 void
 Note::set_y1 (Coord y1)
 {
-	_rectangle->set_y1 (y1);
+	_note->set_y1 (y1);
 }
 
 void
 Note::set_outline_what (ArdourCanvas::Rectangle::What what)
 {
-	_rectangle->set_outline_what (what);
+	_note->set_outline_what (what);
 }
 
 void
 Note::set_outline_all ()
 {
-	_rectangle->set_outline_all ();
+	_note->set_outline_all ();
 }
 
 void
 Note::set_ignore_events (bool ignore)
 {
-	_rectangle->set_ignore_events (ignore);
+	_note->set_ignore_events (ignore);
 }
