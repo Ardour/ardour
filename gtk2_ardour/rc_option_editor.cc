@@ -2903,24 +2903,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI"), audition_synth);
 
-	add_option (_("MIDI"), new OptionEditorHeading (_("Velocity Display")));
-
-	add_option (_("MIDI"),
-	            new BoolOption (
-		            "use-note-bars-for-velocity",
-		            _("Show velocity horizontally inside notes"),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
-		            ));
-
-	add_option (_("MIDI"),
-	            new BoolOption (
-		            "use-note-color-for-velocity",
-		            _("Use colors to show note velocity"),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
-		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
-		            ));
-
 	/* Click */
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
@@ -3808,6 +3790,23 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_never_display_periodic_midi),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
+
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-bars-for-velocity",
+		            _("Show velocity horizontally inside notes"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
+		            ));
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-color-for-velocity",
+		            _("Use colors to show note velocity"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
+		            ));
 
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
