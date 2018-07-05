@@ -295,6 +295,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\note.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\outline.cc"
 				>
 			</File>
@@ -442,6 +446,10 @@
 			</File>
 			<File
 				RelativePath="..\canvas\meter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\canvas\note.h"
 				>
 			</File>
 			<File
