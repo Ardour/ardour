@@ -548,7 +548,6 @@ SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence
 	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
 
 	if (!writable()) {
-		cerr << "not writable\n";
 		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
 		return;
 	}
