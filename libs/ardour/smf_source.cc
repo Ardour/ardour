@@ -548,6 +548,7 @@ SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence
 	MidiSource::mark_midi_streaming_write_completed (lm, stuck_notes_option, when);
 
 	if (!writable()) {
+		cerr << "not writable\n";
 		warning << string_compose ("attempt to write to unwritable SMF file %1", _path) << endmsg;
 		return;
 	}
@@ -556,7 +557,11 @@ SMFSource::mark_midi_streaming_write_completed (const Lock& lm, Evoral::Sequence
 		_model->set_edited(false);
 	}
 
-	Evoral::SMF::end_write (_path);
+	try {
+		Evoral::SMF::end_write (_path);
+	} catch (std::exception & e) {
+		error << string_compose (_("Exception while writing %1, file may be corrupt/unusable"), _path) << endmsg;
+	}
 
 	/* data in the file now, not removable */
 

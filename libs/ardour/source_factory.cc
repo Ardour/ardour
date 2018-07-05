@@ -220,15 +220,18 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 			}
 		}
 	} else if (type == DataType::MIDI) {
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
-		src->check_for_analysis_data_on_disk ();
-		SourceCreated (src);
-		return src;
+			src->check_for_analysis_data_on_disk ();
+			SourceCreated (src);
+			return src;
+		} catch (...) {
+		}
 	}
 
 	return boost::shared_ptr<Source>();
@@ -289,18 +292,21 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 
-		if (announce) {
-			SourceCreated (src);
-		}
+			if (announce) {
+				SourceCreated (src);
+			}
 
-		return src;
+			return src;
+		} catch (...) {
+		}
 
 	}
 
@@ -339,22 +345,27 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 	} else if (type == DataType::MIDI) {
                 // XXX writable flags should belong to MidiSource too
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
-		assert (src->writable ());
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
 
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+			assert (src->writable ());
+
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 
-		// no analysis data - this is a new file
+			// no analysis data - this is a new file
 
-		if (announce) {
-			SourceCreated (src);
+			if (announce) {
+				SourceCreated (src);
+			}
+
+			return src;
+
+		} catch (...) {
 		}
-		return src;
-
 	}
 
 	return boost::shared_ptr<Source> ();
@@ -455,4 +466,3 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 
 	return boost::shared_ptr<Source>();
 }
-
