@@ -388,46 +388,54 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
         DEBUG_TRACE (DEBUG::CC121, "encoder handler");
 
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
 	/* Extract absolute value*/
 	float adj = static_cast<float>(tb->value & ~0x40);
-
 	/* Get direction (negative values start at 0x40)*/
 	float sign = (tb->value & 0x40) ? -1.0 : 1.0;
+
+	/* Get amount of change (encoder clicks) * (change per click)
+	 * Create an exponential curve
+	 */
+	float curve = sign * powf (adj, (1.f + 10.f) / 10.f);
+	adj = curve * (31.f / 1000.f);
+
 	switch(tb->controller_number) {
 	case 0x10:
 	  /* pan */
-	  DEBUG_TRACE (DEBUG::CC121, "PAN encoder");
-	  if (_current_stripable) {
-	    /* Get amount of change (encoder clicks) * (change per click)*/
-	    /*Create an exponential curve*/
-	    float curve = sign * powf (adj, (1.f + 10.f) / 10.f);
-	    adj = curve * (31.f / 1000.f);
-	    ardour_pan_azimuth (adj);
-	  }
+	  if (r) { set_controllable (r->pan_azimuth_control(), adj); }
 	  break;
 	case 0x20:
 	  /* EQ 1 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(0), adj); }
 	  break;
 	case 0x21:
 	  /* EQ 2 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(1), adj); }
 	  break;
 	case 0x22:
 	  /* EQ 3 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(2), adj); }
 	  break;
 	case 0x23:
 	  /* EQ 4 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(3), adj); }
 	  break;
 	case 0x30:
 	  /* EQ 1 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(0), adj); }
 	  break;
 	case 0x31:
 	  /* EQ 2 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(1), adj); }
 	  break;
 	case 0x32:
 	  /* EQ 3 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(2), adj); }
 	  break;
 	case 0x33:
 	  /* EQ 4 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(3), adj); }
 	  break;
 	case 0x3C:
 	  /* AI */
@@ -450,15 +458,19 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  break;
 	case 0x40:
 	  /* EQ 1 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(0), adj); }
 	  break;
 	case 0x41:
 	  /* EQ 2 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(1), adj); }
 	  break;
 	case 0x42:
 	  /* EQ 3 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(2), adj); }
 	  break;
 	case 0x43:
 	  /* EQ 4 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(3), adj); }
 	  break;
 	case 0x50:
 	  /* Value */

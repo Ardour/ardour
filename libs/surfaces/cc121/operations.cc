@@ -246,92 +246,17 @@ CC121::use_monitor ()
 }
 
 void
-CC121::ardour_pan_azimuth (float delta)
+CC121::set_controllable (boost::shared_ptr<AutomationControl> ac, float delta)
 {
-	if (!_current_stripable) {
+	if (!ac || delta == 0) {
 		return;
 	}
-
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
-
-	if (!r) {
-		return;
-	}
-
-	boost::shared_ptr<Pannable> pannable = r->pannable ();
-
-	if (!pannable) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> azimuth = pannable->pan_azimuth_control;
-
-	if (!azimuth) {
-		return;
-	}
-
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta)), Controllable::NoGroup);
+	ac->start_touch (ac->session().transport_sample());
+	double v = ac->internal_to_interface (ac->get_value());
+	v = std::max (0.0, std::min (1.0, v + delta));
+	ac->set_value (ac->interface_to_internal(v), PBD::Controllable::NoGroup);
 }
 
-
-void
-CC121::ardour_pan_width(float delta)
-{
-	if (!_current_stripable) {
-		return;
-	}
-
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
-
-	if (!r) {
-		return;
-	}
-
-	boost::shared_ptr<Pannable> pannable = r->pannable ();
-
-	if (!pannable) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> width = pannable->pan_width_control;
-
-	if (!width) {
-		return;
-	}
-
-	width->set_value (width->interface_to_internal (width->internal_to_interface (width->get_value()) + (delta)), Controllable::NoGroup);
-}
-
-void
-CC121::mixbus_pan (float delta)
-{
-#ifdef MIXBUS
-	if (!_current_stripable) {
-		return;
-	}
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
-
-	if (!r) {
-		return;
-	}
-
-
-	const uint32_t port_channel_post_pan = 2; // gtk2_ardour/mixbus_ports.h
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = r->ch_post();
-
-	if (!plug) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> azimuth = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_pan)));
-
-	if (!azimuth) {
-		return;
-	}
-
-	azimuth->set_value (azimuth->interface_to_internal (azimuth->internal_to_interface (azimuth->get_value()) + (delta)), Controllable::NoGroup);
-#endif
-}
 
 void
 CC121::punch ()

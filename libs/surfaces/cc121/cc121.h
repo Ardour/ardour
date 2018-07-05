@@ -329,9 +329,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void jog ();
 	void rec_enable ();
 
-	void ardour_pan_azimuth (float);
-	void ardour_pan_width (float);
-	void mixbus_pan (float);
+	void set_controllable (boost::shared_ptr<ARDOUR::AutomationControl>, float);
 
 	void punch ();
 };
