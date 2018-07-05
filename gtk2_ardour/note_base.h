@@ -103,15 +103,7 @@ public:
 
 	static void set_colors ();
 
-	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
-		if (selected) {
-			return _selected_mod_col;
-		} else if (vel < 64) {
-			return UINT_INTERPOLATE(_min_col, _mid_col, (vel / (double)63.0));
-		} else {
-			return UINT_INTERPOLATE(_mid_col, _max_col, ((vel - 64) / (double)63.0));
-		}
-	}
+	static uint32_t meter_style_fill_color(uint8_t vel, bool selected);
 
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {

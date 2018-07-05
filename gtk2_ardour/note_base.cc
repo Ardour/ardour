@@ -330,3 +330,21 @@ NoteBase::big_enough_to_trim () const
 	return (x1() - x0()) > 10;
 }
 
+
+uint32_t
+NoteBase::meter_style_fill_color(uint8_t vel, bool selected)
+{
+	if (vel < 32) {
+		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color0"), UIConfiguration::instance().color ("midi meter color1"), (vel / 32.0));
+	} else if (vel < 64) {
+		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color2"), UIConfiguration::instance().color ("midi meter color3"), ((vel-32) / 32.0));
+	} else if (vel < 100) {
+		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color4"), UIConfiguration::instance().color ("midi meter color5"), ((vel-64) / 32.0));
+	} else if (vel < 112) {
+		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color6"), UIConfiguration::instance().color ("midi meter color7"), ((vel-100) / 36.0));
+	} else {
+		return  UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color8"), UIConfiguration::instance().color ("midi meter color9"), ((vel-112) / 17.0));
+	}
+}
+
+
