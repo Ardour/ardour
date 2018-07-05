@@ -367,6 +367,26 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 	   printf("%X ", buf[i]);
 	   } printf("\n"); */
 
+	switch (buf[0]) {
+	case 0xf1:
+	case 0xf2:
+	case 0xf3:
+	case 0xf4:
+	case 0xf5:
+	case 0xf6:
+	case 0xf8:
+	case 0xf9:
+	case 0xfa:
+	case 0xfb:
+	case 0xfc:
+	case 0xfd:
+	case 0xfe:
+	case 0xff:
+		/* System Real Time or System Common event: not valid in SMF
+		 */
+		return;
+	}
+
 	if (!midi_event_is_valid(buf, size)) {
 		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;
 		return;
