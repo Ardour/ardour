@@ -62,7 +62,7 @@ next_chunk(smf_t *smf)
 	assert(smf->file_buffer_length > 0);
 
 	if (smf->next_chunk_offset + sizeof(struct chunk_header_struct) >= smf->file_buffer_length) {
-		g_critical("SMF warning: no more chunks left.");
+		g_warning("SMF warning: no more chunks left.");
 		return (NULL);
 	}
 
@@ -71,7 +71,7 @@ next_chunk(smf_t *smf)
 	chunk = (struct chunk_header_struct *)next_chunk_ptr;
 
 	if (!isalpha(chunk->id[0]) || !isalpha(chunk->id[1]) || !isalpha(chunk->id[2]) || !isalpha(chunk->id[3])) {
-		g_critical("SMF error: chunk signature contains at least one non-alphanumeric byte.");
+		g_warning("SMF error: chunk signature contains at least one non-alphanumeric byte.");
 		return (NULL);
 	}
 
@@ -82,7 +82,7 @@ next_chunk(smf_t *smf)
 	smf->next_chunk_offset += sizeof(struct chunk_header_struct) + ntohl(chunk->length);
 
 	if (smf->next_chunk_offset > smf->file_buffer_length) {
-		g_critical("SMF error: malformed chunk; truncated file?");
+		g_warning("SMF error: malformed chunk; truncated file?");
 	}
 
 	return (chunk);
@@ -117,7 +117,7 @@ parse_mthd_header(smf_t *smf)
 	 * get useful error messages.
 	 */
 	if (smf->file_buffer_length < 6) {
-		g_critical("SMF error: file is too short, it cannot be a MIDI file.");
+		g_warning ("SMF error: file is too short, it cannot be a MIDI file.");
 
 		return (-1);
 	}
@@ -125,7 +125,7 @@ parse_mthd_header(smf_t *smf)
 	tmp_mthd = (struct chunk_header_struct*)smf->file_buffer;
 
 	if (!chunk_signature_matches(tmp_mthd, "MThd")) {
-		g_critical("SMF error: MThd signature not found, is that a MIDI file?");
+		g_warning("SMF error: MThd signature not found, is that a MIDI file?");
 
 		return (-2);
 	}
@@ -139,7 +139,7 @@ parse_mthd_header(smf_t *smf)
 
 	len = ntohl(mthd->length);
 	if (len != 6) {
-		g_critical("SMF error: MThd chunk length %d, must be 6.", len);
+		g_warning("SMF error: MThd chunk length %d, must be 6.", len);
 
 		return (-4);
 	}
@@ -166,18 +166,18 @@ parse_mthd_chunk(smf_t *smf)
 
 	smf->format = ntohs(mthd->format);
 	if (smf->format < 0 || smf->format > 2) {
-		g_critical("SMF error: bad MThd format field value: %d, valid values are 0-2, inclusive.", smf->format);
+		g_warning("SMF error: bad MThd format field value: %d, valid values are 0-2, inclusive.", smf->format);
 		return (-1);
 	}
 
 	if (smf->format == 2) {
-		g_critical("SMF file uses format #2, no support for that yet.");
+		g_warning("SMF file uses format #2, no support for that yet.");
 		return (-2);
 	}
 
 	smf->expected_number_of_tracks = ntohs(mthd->number_of_tracks);
 	if (smf->expected_number_of_tracks <= 0) {
-		g_critical("SMF error: bad number of tracks: %d, must be greater than zero.", smf->expected_number_of_tracks);
+		g_warning("SMF error: bad number of tracks: %d, must be greater than zero.", smf->expected_number_of_tracks);
 		return (-3);
 	}
 
@@ -196,7 +196,7 @@ parse_mthd_chunk(smf_t *smf)
 	}
 
 	if (smf->ppqn == 0) {
-		g_critical("SMF file uses FPS timing instead of PPQN, no support for that yet.");
+		g_warning("SMF file uses FPS timing instead of PPQN, no support for that yet.");
 		return (-4);
 	}
 
@@ -218,12 +218,12 @@ smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *
 
 	for (;; ++i) {
 		if (c >= buf + buffer_length) {
-			g_critical("End of buffer in extract_vlq().");
+			g_warning("End of buffer in extract_vlq().");
 			return (-1);
 		}
 
 		if (i == 4 && (val & 0xfe000000)) {
-			g_critical("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
+			g_warning("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
 			return (-2);
 		}
 
@@ -240,7 +240,7 @@ smf_extract_vlq(const unsigned char *buf, const size_t buffer_length, uint32_t *
 	*len = c - buf + 1;
 
 	if (*len > 5) {
-		g_critical("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
+		g_warning("SMF error: Variable Length Quantities longer than four bytes are not supported yet.");
 		return (-2);
 	}
 
@@ -294,7 +294,7 @@ expected_sysex_length(const unsigned char status, const unsigned char *second_by
 #endif
 
 	if (buffer_length < 3) {
-		g_critical("SMF error: end of buffer in expected_sysex_length().");
+		g_warning("SMF error: end of buffer in expected_sysex_length().");
 		return (-1);
 	}
 
@@ -334,7 +334,7 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 	/* Is this a metamessage? */
 	if (status == 0xFF) {
 		if (buffer_length < 2) {
-			g_critical("SMF error: end of buffer in expected_message_length().");
+			g_warning("SMF error: end of buffer in expected_message_length().");
 			return (-1);
 		}
 
@@ -377,7 +377,7 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 				return (1);
 
 			default:
-				g_critical("SMF error: unknown 0xFx-type status byte '0x%x'.", status);
+				g_warning("SMF error: unknown 0xFx-type status byte '0x%x'.", status);
 				return (-2);
 		}
 	}
@@ -398,7 +398,7 @@ expected_message_length(unsigned char status, const unsigned char *second_byte, 
 			return (2);
 
 		default:
-			g_critical("SMF error: unknown status byte '0x%x'.", status);
+			g_warning("SMF error: unknown status byte '0x%x'.", status);
 			return (-3);
 	}
 }
@@ -415,7 +415,7 @@ extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_ev
 	status = *buf;
 
 	if (!(is_sysex_byte(status))) {
-		g_critical("Corrupt sysex status byte in extract_sysex_event().");
+		g_warning("Corrupt sysex status byte in extract_sysex_event().");
 		return (-6);
 	}
 
@@ -429,14 +429,14 @@ extract_sysex_event(const unsigned char *buf, const size_t buffer_length, smf_ev
 	c += vlq_length;
 
 	if (vlq_length + (size_t)message_length >= buffer_length) {
-		g_critical("End of buffer in extract_sysex_event().");
+		g_warning("End of buffer in extract_sysex_event().");
 		return (-5);
 	}
 
 	event->midi_buffer_length = message_length;
 	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
-		g_critical("Cannot allocate memory in extract_sysex_event(): %s", strerror(errno));
+		g_warning("Cannot allocate memory in extract_sysex_event(): %s", strerror(errno));
 		return (-4);
 	}
 
@@ -461,7 +461,7 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 	status = *buf;
 
 	if (!(is_escape_byte(status))) {
-		g_critical("Corrupt escape status byte in extract_escaped_event().");
+		g_warning("Corrupt escape status byte in extract_escaped_event().");
 		return (-6);
 	}
 
@@ -475,21 +475,21 @@ extract_escaped_event(const unsigned char *buf, const size_t buffer_length, smf_
 	c += vlq_length;
 
 	if (vlq_length + (size_t)message_length >= buffer_length) {
-		g_critical("End of buffer in extract_escaped_event().");
+		g_warning("End of buffer in extract_escaped_event().");
 		return (-5);
 	}
 
 	event->midi_buffer_length = message_length;
 	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
-		g_critical("Cannot allocate memory in extract_escaped_event(): %s", strerror(errno));
+		g_warning("Cannot allocate memory in extract_escaped_event(): %s", strerror(errno));
 		return (-4);
 	}
 
 	memcpy(event->midi_buffer, c, message_length);
 
 	if (smf_event_is_valid(event)) {
-		g_critical("Escaped event is invalid.");
+		g_warning("Escaped event is invalid.");
 		return (-1);
 	}
 
@@ -528,7 +528,7 @@ extract_midi_event(const unsigned char *buf, const size_t buffer_length, smf_eve
 	}
 
 	if (!is_status_byte(status)) {
-		g_critical("SMF error: bad status byte (MSB is zero).");
+		g_warning("SMF error: bad status byte (MSB is zero).");
 		return (-1);
 	}
 
@@ -545,14 +545,14 @@ extract_midi_event(const unsigned char *buf, const size_t buffer_length, smf_eve
 		return (-3);
 
 	if ((size_t)message_length > buffer_length - (c - buf) + 1) {
-		g_critical("End of buffer in extract_midi_event().");
+		g_warning("End of buffer in extract_midi_event().");
 		return (-5);
 	}
 
 	event->midi_buffer_length = message_length;
 	event->midi_buffer = (uint8_t*)malloc(event->midi_buffer_length);
 	if (event->midi_buffer == NULL) {
-		g_critical("Cannot allocate memory in extract_midi_event(): %s", strerror(errno));
+		g_warning("Cannot allocate memory in extract_midi_event(): %s", strerror(errno));
 		return (-4);
 	}
 
@@ -641,14 +641,14 @@ make_string(const unsigned char *buf, const size_t buffer_length, uint32_t len)
 	assert(len > 0);
 
 	if (len > buffer_length) {
-		g_critical("End of buffer in make_string().");
+		g_warning("End of buffer in make_string().");
 
 		len = buffer_length;
 	}
 
 	str = (char*)malloc(len + 1);
 	if (str == NULL) {
-		g_critical("Cannot allocate memory in make_string().");
+		g_warning("Cannot allocate memory in make_string().");
 		return (NULL);
 	}
 
@@ -700,7 +700,7 @@ smf_event_extract_text(const smf_event_t *event)
 	smf_extract_vlq((const unsigned char*)(void *)&(event->midi_buffer[2]), event->midi_buffer_length - 2, &string_length, &length_length);
 
 	if (string_length <= 0) {
-		g_critical("smf_event_extract_text: truncated MIDI message.");
+		g_warning("smf_event_extract_text: truncated MIDI message.");
 		return (NULL);
 	}
 
@@ -793,7 +793,7 @@ smf_event_is_valid(const smf_event_t *event)
 	assert(event->midi_buffer_length >= 1);
 
 	if (!is_status_byte(event->midi_buffer[0])) {
-		g_critical("First byte of MIDI message is not a valid status byte.");
+		g_warning("First byte of MIDI message is not a valid status byte.");
 
 		return (0);
 	}
@@ -859,40 +859,40 @@ load_file_into_buffer(void **file_buffer, size_t *file_buffer_length, FILE* stre
 	long offset;
 
 	if (stream == NULL) {
-		g_critical("Cannot open input file: %s", strerror(errno));
+		g_warning("Cannot open input file: %s", strerror(errno));
 
 		return (-1);
 	}
 
 	if (fseek(stream, 0, SEEK_END)) {
-		g_critical("fseek(3) failed: %s", strerror(errno));
+		g_warning("fseek(3) failed: %s", strerror(errno));
 
 		return (-2);
 	}
 
 	offset = ftell(stream);
 	if (offset < 0) {
-		g_critical("ftell(3) failed: %s", strerror(errno));
+		g_warning("ftell(3) failed: %s", strerror(errno));
 
 		return (-3);
 	}
 	*file_buffer_length = (size_t)offset;
 
 	if (fseek(stream, 0, SEEK_SET)) {
-		g_critical("fseek(3) failed: %s", strerror(errno));
+		g_warning("fseek(3) failed: %s", strerror(errno));
 
 		return (-4);
 	}
 
 	*file_buffer = malloc(*file_buffer_length);
 	if (*file_buffer == NULL) {
-		g_critical("malloc(3) failed: %s", strerror(errno));
+		g_warning("malloc(3) failed: %s", strerror(errno));
 
 		return (-5);
 	}
 
 	if (fread(*file_buffer, 1, *file_buffer_length, stream) != *file_buffer_length) {
-		g_critical("fread(3) failed: %s", strerror(errno));
+		g_warning("fread(3) failed: %s", strerror(errno));
 		free (*file_buffer);
 		*file_buffer = NULL;
 		return (-6);
