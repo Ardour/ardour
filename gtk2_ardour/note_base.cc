@@ -48,9 +48,6 @@ bool     NoteBase::_color_init = false;
 uint32_t NoteBase::_selected_mod_col = 0;
 uint32_t NoteBase::_selected_outline_col = 0;
 uint32_t NoteBase::_selected_col = 0;
-uint32_t NoteBase::_min_col = 0;
-uint32_t NoteBase::_mid_col = 0;
-uint32_t NoteBase::_max_col = 0;
 
 void
 NoteBase::set_colors ()
@@ -58,9 +55,6 @@ NoteBase::set_colors ()
 	_selected_mod_col = UIConfiguration::instance().color_mod ("midi note selected", "midi note");
 	_selected_outline_col = UIConfiguration::instance().color ("midi note selected outline");
 	_selected_col = UIConfiguration::instance().color ("midi note selected");
-	_min_col = UIConfiguration::instance().color_mod ("midi note min", "midi note");
-	_mid_col = UIConfiguration::instance().color_mod ("midi note mid", "midi note");
-	_max_col = UIConfiguration::instance().color_mod ("midi note max", "midi note");
 }
 
 NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)

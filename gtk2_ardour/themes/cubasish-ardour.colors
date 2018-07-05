@@ -277,9 +277,6 @@
     <ColorAlias name="midi meter color8" alias="color 56"/>
     <ColorAlias name="midi meter color9" alias="meter color3"/>
     <ColorAlias name="midi note inactive channel" alias="color 4"/>
-    <ColorAlias name="midi note max" alias="color 8"/>
-    <ColorAlias name="midi note mid" alias="color 91"/>
-    <ColorAlias name="midi note min" alias="color 49"/>
     <ColorAlias name="midi note selected" alias="color 29"/>
     <ColorAlias name="midi note selected outline" alias="color 67"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>

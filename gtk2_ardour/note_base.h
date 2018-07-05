@@ -143,9 +143,6 @@ private:
 	static uint32_t _selected_mod_col;
 	static uint32_t _selected_outline_col;
 	static uint32_t _selected_col;
-	static uint32_t _min_col;
-	static uint32_t _mid_col;
-	static uint32_t _max_col;
 	static bool _color_init;
 };
 
