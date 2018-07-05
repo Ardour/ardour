@@ -115,6 +115,12 @@
     <Color name="meter color7" value="0xff8700ff"/>
     <Color name="meter color8" value="0xff0000ff"/>
     <Color name="meter color9" value="0xff0000ff"/>
+    <Color name="midi color0" value="0x1e7727ff"/>
+    <Color name="midi color1" value="0x52af25ff"/>
+    <Color name="midi color2" value="0x85e524ff"/>
+    <Color name="midi color3" value="0xcbba0fff"/>
+    <Color name="midi color4" value="0xe2ab09ff"/>
+    <Color name="midi color5" value="0xff9900ff"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="color 1"/>
@@ -266,16 +272,16 @@
     <ColorAlias name="midi frame base" alias="color 81"/>
     <ColorAlias name="midi input button: fill active" alias="color 63"/>
     <ColorAlias name="midi input button: led active" alias="color 4"/>
-    <ColorAlias name="midi meter color0" alias="color 52"/>
-    <ColorAlias name="midi meter color1" alias="color 53"/>
-    <ColorAlias name="midi meter color2" alias="color 53"/>
-    <ColorAlias name="midi meter color3" alias="color 54"/>
-    <ColorAlias name="midi meter color4" alias="color 54"/>
-    <ColorAlias name="midi meter color5" alias="color 55"/>
-    <ColorAlias name="midi meter color6" alias="color 55"/>
-    <ColorAlias name="midi meter color7" alias="color 56"/>
-    <ColorAlias name="midi meter color8" alias="color 56"/>
-    <ColorAlias name="midi meter color9" alias="color 17"/>
+    <ColorAlias name="midi meter color0" alias="midi color0"/>
+    <ColorAlias name="midi meter color1" alias="midi color1"/>
+    <ColorAlias name="midi meter color2" alias="midi color1"/>
+    <ColorAlias name="midi meter color3" alias="midi color2"/>
+    <ColorAlias name="midi meter color4" alias="midi color2"/>
+    <ColorAlias name="midi meter color5" alias="midi color3"/>
+    <ColorAlias name="midi meter color6" alias="midi color3"/>
+    <ColorAlias name="midi meter color7" alias="midi color4"/>
+    <ColorAlias name="midi meter color8" alias="midi color4"/>
+    <ColorAlias name="midi meter color9" alias="midi color5"/>
     <ColorAlias name="midi note inactive channel" alias="color 4"/>
     <ColorAlias name="midi note selected outline" alias="color 67"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>

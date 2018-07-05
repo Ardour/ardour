@@ -119,6 +119,12 @@
 		<Color name="meter color7" value="0x418cb1ff"/>
 		<Color name="meter color8" value="0x418cb1ff"/>
 		<Color name="meter color9" value="0x418cb1ff"/>
+		<Color name="midi color0" value="0x1e7727ff"/>
+		<Color name="midi color1" value="0x52af25ff"/>
+		<Color name="midi color2" value="0x85e524ff"/>
+		<Color name="midi color3" value="0xcbba0fff"/>
+		<Color name="midi color4" value="0xe2ab09ff"/>
+		<Color name="midi color5" value="0xff9900ff"/>
 	</Colors>
 	<ColorAliases>
 		<ColorAlias name="active crossfade" alias="color 105"/>
@@ -271,16 +277,16 @@
 		<ColorAlias name="midi frame base" alias="color 27"/>
 		<ColorAlias name="midi input button: fill active" alias="color 1"/>
 		<ColorAlias name="midi input button: led active" alias="color 1"/>
-		<ColorAlias name="midi meter color0" alias="meter color0"/>
-		<ColorAlias name="midi meter color1" alias="meter color1"/>
-		<ColorAlias name="midi meter color2" alias="meter color2"/>
-		<ColorAlias name="midi meter color3" alias="meter color3"/>
-		<ColorAlias name="midi meter color4" alias="meter color4"/>
-		<ColorAlias name="midi meter color5" alias="meter color5"/>
-		<ColorAlias name="midi meter color6" alias="meter color6"/>
-		<ColorAlias name="midi meter color7" alias="meter color7"/>
-		<ColorAlias name="midi meter color8" alias="meter color8"/>
-		<ColorAlias name="midi meter color9" alias="meter color9"/>
+		<ColorAlias name="midi meter color0" alias="midi color0"/>
+		<ColorAlias name="midi meter color1" alias="midi color1"/>
+		<ColorAlias name="midi meter color2" alias="midi color1"/>
+		<ColorAlias name="midi meter color3" alias="midi color2"/>
+		<ColorAlias name="midi meter color4" alias="midi color2"/>
+		<ColorAlias name="midi meter color5" alias="midi color3"/>
+		<ColorAlias name="midi meter color6" alias="midi color3"/>
+		<ColorAlias name="midi meter color7" alias="midi color4"/>
+		<ColorAlias name="midi meter color8" alias="midi color4"/>
+		<ColorAlias name="midi meter color9" alias="midi color5"/>
 		<ColorAlias name="midi note inactive channel" alias="color 4"/>
 		<ColorAlias name="midi note selected outline" alias="color 105"/>
 		<ColorAlias name="midi note velocity text" alias="color 2"/>
@@ -495,7 +501,7 @@
 		<Modifier name="gain line inactive" modifier="= alpha:0.782113"/>
 		<Modifier name="ghost track base" modifier="= alpha:0.640782"/>
 		<Modifier name="ghost track midi fill" modifier="= alpha:0.3"/>
-	    <Modifier name="grid line" modifier="= alpha:1.0"/>
+		<Modifier name="grid line" modifier="= alpha:1.0"/>
 		<Modifier name="inactive crossfade" modifier="= alpha:0.4666"/>
 		<Modifier name="loop rectangle" modifier="= alpha:0.3"/>
 		<Modifier name="marker bar" modifier="= alpha:0.5"/>
