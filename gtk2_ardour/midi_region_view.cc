@@ -2935,9 +2935,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 											    ArdourCanvas::Rect (note->x0(), note->y0(), note->x0(), note->y1()));
 
 			// calculate the colors: get the color settings
-			uint32_t fill_color = UINT_RGBA_CHANGE_A(
-				UIConfiguration::instance().color ("midi note selected"),
-				128);
+			uint32_t fill_color = NoteBase::meter_style_fill_color (note->note()->velocity(), true);
 
 			// make the resize preview notes more transparent and bright
 			fill_color = UINT_INTERPOLATE(fill_color, 0xFFFFFF40, 0.5);
@@ -2949,7 +2947,7 @@ MidiRegionView::begin_resizing (bool /*at_front*/)
 				0.85));
 
 			resize_rect->set_outline_color (NoteBase::calculate_outline (
-								UIConfiguration::instance().color ("midi note selected")));
+								UIConfiguration::instance().color ("midi note selected outline")));
 
 			resize_data->resize_rect = resize_rect;
 			_resize_data.push_back(resize_data);

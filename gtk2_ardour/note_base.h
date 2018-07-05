@@ -24,6 +24,7 @@
 
 #include "temporal/beats.h"
 #include "canvas/types.h"
+#include "gtkmm2ext/colors.h"
 
 #include "rgb_macros.h"
 #include "ui_config.h"
@@ -103,12 +104,12 @@ public:
 
 	static void set_colors ();
 
-	static uint32_t meter_style_fill_color(uint8_t vel, bool selected);
+	static Gtkmm2ext::Color meter_style_fill_color(uint8_t vel, bool selected);
 
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
 		if (selected) {
-			return _selected_outline_col;
+			return _selected_col;
 		} else {
 			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 		}
@@ -140,9 +141,7 @@ protected:
 private:
 	bool event_handler (GdkEvent *);
 
-	static uint32_t _selected_mod_col;
-	static uint32_t _selected_outline_col;
-	static uint32_t _selected_col;
+	static Gtkmm2ext::Color _selected_col;
 	static bool _color_init;
 };
 

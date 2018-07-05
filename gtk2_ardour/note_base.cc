@@ -44,17 +44,13 @@ const uint32_t NoteBase::midi_channel_colors[16] = {
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
-bool     NoteBase::_color_init = false;
-uint32_t NoteBase::_selected_mod_col = 0;
-uint32_t NoteBase::_selected_outline_col = 0;
-uint32_t NoteBase::_selected_col = 0;
+bool             NoteBase::_color_init = false;
+Gtkmm2ext::Color NoteBase::_selected_col = 0;
 
 void
 NoteBase::set_colors ()
 {
-	_selected_mod_col = UIConfiguration::instance().color_mod ("midi note selected", "midi note");
-	_selected_outline_col = UIConfiguration::instance().color ("midi note selected outline");
-	_selected_col = UIConfiguration::instance().color ("midi note selected");
+	_selected_col = UIConfiguration::instance().color ("midi note selected outline");
 }
 
 NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)
@@ -325,20 +321,18 @@ NoteBase::big_enough_to_trim () const
 }
 
 
-uint32_t
+Gtkmm2ext::Color
 NoteBase::meter_style_fill_color(uint8_t vel, bool /* selected */)
 {
 	if (vel < 32) {
-		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color0"), UIConfiguration::instance().color ("midi meter color1"), (vel / 32.0));
+		return UINT_INTERPOLATE(UIConfiguration::instance().color_mod ("midi meter color0", "midi note"), UIConfiguration::instance().color_mod ("midi meter color1", "midi note"), (vel / 32.0));
 	} else if (vel < 64) {
-		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color2"), UIConfiguration::instance().color ("midi meter color3"), ((vel-32) / 32.0));
+		return UINT_INTERPOLATE(UIConfiguration::instance().color_mod ("midi meter color2", "midi note"), UIConfiguration::instance().color_mod ("midi meter color3", "midi note"), ((vel-32) / 32.0));
 	} else if (vel < 100) {
-		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color4"), UIConfiguration::instance().color ("midi meter color5"), ((vel-64) / 36.0));
+		return UINT_INTERPOLATE(UIConfiguration::instance().color_mod ("midi meter color4", "midi note"), UIConfiguration::instance().color_mod ("midi meter color5", "midi note"), ((vel-64) / 36.0));
 	} else if (vel < 112) {
-		return UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color6"), UIConfiguration::instance().color ("midi meter color7"), ((vel-100) / 12.0));
+		return UINT_INTERPOLATE(UIConfiguration::instance().color_mod ("midi meter color6", "midi note"), UIConfiguration::instance().color_mod ("midi meter color7", "midi note"), ((vel-100) / 12.0));
 	} else {
-		return  UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color8"), UIConfiguration::instance().color ("midi meter color9"), ((vel-112) / 17.0));
+		return  UINT_INTERPOLATE(UIConfiguration::instance().color_mod ("midi meter color8", "midi note"), UIConfiguration::instance().color_mod ("midi meter color9", "midi note"), ((vel-112) / 17.0));
 	}
 }
-
-
