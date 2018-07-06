@@ -835,8 +835,8 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		ret = touch_detect (path, types, argv, argc, msg);
 
 	} else
-	if (strstr (path, X_("/collect"))) {
-		ret = collect (path, types, argv, argc, msg);
+	if (strstr (path, X_("/spill"))) {
+		ret = spill (path, types, argv, argc, msg);
 
 	} else
 	if (len >= 17 && !strcmp (&path[len-15], X_("/#current_value"))) {
@@ -3942,12 +3942,12 @@ OSC::fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl)
 }
 
 int
-OSC::collect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
+OSC::spill (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg)
 {
 	/*
-	 * collect should have the form of:
-	 * /select/collect (may have i or f keypress/release)
-	 * /strip/collect i (may have keypress and i may be inline)
+	 * spill should have the form of:
+	 * /select/spill (may have i or f keypress/release)
+	 * /strip/spill i (may have keypress and i may be inline)
 	 */
 	if (!session || argc > 1) return -1;
 

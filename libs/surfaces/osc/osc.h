@@ -327,7 +327,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int touch_detect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int fake_touch (boost::shared_ptr<ARDOUR::AutomationControl> ctrl);
 
-	int collect (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
+	int spill (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 
 	int route_get_sends (lo_message msg);
 	int route_get_receives(lo_message msg);
