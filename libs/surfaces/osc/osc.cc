@@ -1406,6 +1406,7 @@ OSC::_custom_mode (uint32_t state, lo_address addr)
 		sur->custom_mode = set->custom_mode;
 		sur->custom_strips = set->custom_strips;
 	}
+	sur->temp_mode = TempOff;
 	if (state > 0){
 		if (sur->custom_strips.size () == 0) {
 			PBD::warning << "No custom strips set to enable" << endmsg;
@@ -1431,6 +1432,7 @@ OSC::_custom_mode (uint32_t state, lo_address addr)
 	if (ls) {
 		set->custom_mode = sur->custom_mode;
 		set->strips = sur->strips;
+		set->temp_mode = sur->temp_mode;
 	}
 	return _set_bank (1, addr);
 }
