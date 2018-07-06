@@ -824,6 +824,7 @@ OSC::catchall (const char *path, const char* types, lo_arg **argv, int argc, lo_
 		sur->custom_strips = set->custom_strips;
 		sur->temp_mode = set->temp_mode;
 		sur->temp_strips = set->temp_strips;
+		sur->temp_master = set->temp_master;
 	}
 
 	if (strstr (path, X_("/automation"))) {
@@ -1653,6 +1654,7 @@ OSC::link_strip_types (uint32_t linkset, uint32_t striptypes)
 	}
 	ls = &link_sets[linkset];
 	ls->strip_types = striptypes;
+	ls->temp_mode = TempOff;
 	for (uint32_t dv = 1; dv < ls->urls.size(); dv++) {
 		OSCSurface *su;
 
@@ -2249,6 +2251,7 @@ OSC::strip_feedback (OSCSurface* sur, bool new_bank_size)
 		sur->custom_strips = set->custom_strips;
 		sur->temp_mode = set->temp_mode;
 		sur->temp_strips = set->temp_strips;
+		sur->temp_master = set->temp_master;
 	}
 	if (!sur->temp_mode) {
 		sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, sur->custom_mode, sur->custom_strips);
@@ -2830,15 +2833,6 @@ OSC::set_temp_mode (lo_address addr)
 					}
 					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 					sur->nstrips = sur->temp_strips.size();
-					LinkSet *set;
-					uint32_t ls = sur->linkset;
-					if (ls) {
-						set = &(link_sets[ls]);
-						set->temp_mode = GroupOnly;
-						set->temp_strips.clear ();
-						set->temp_strips = sur->temp_strips;
-						set->strips = sur->strips;
-					}
 					ret = 0;
 				}
 			}
@@ -2857,15 +2851,6 @@ OSC::set_temp_mode (lo_address addr)
 				sur->temp_strips.push_back(s);
 				sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 				sur->nstrips = sur->temp_strips.size();
-				LinkSet *set;
-				uint32_t ls = sur->linkset;
-				if (ls) {
-					set = &(link_sets[ls]);
-					set->temp_mode = VCAOnly;
-					set->temp_strips.clear ();
-					set->temp_strips = sur->temp_strips;
-					set->strips = sur->strips;
-				}
 				ret = 0;
 			}
 		} else if (sur->temp_mode == BusOnly) {
@@ -2887,15 +2872,6 @@ OSC::set_temp_mode (lo_address addr)
 					sur->temp_strips.push_back(s);
 					sur->strips = get_sorted_stripables(sur->strip_types, sur->cue, 1, sur->temp_strips);
 					sur->nstrips = sur->temp_strips.size();
-					LinkSet *set;
-					uint32_t ls = sur->linkset;
-					if (ls) {
-						set = &(link_sets[ls]);
-						set->temp_mode = BusOnly;
-						set->temp_strips.clear ();
-						set->temp_strips = sur->temp_strips;
-						set->strips = sur->strips;
-					}
 					ret = 0;
 				}
 			}
@@ -2903,6 +2879,16 @@ OSC::set_temp_mode (lo_address addr)
 			sur->temp_mode = TempOff;
 			ret = 0;
 		}
+	}
+	LinkSet *set;
+	uint32_t ls = sur->linkset;
+	if (ls) {
+		set = &(link_sets[ls]);
+		set->temp_mode = sur->temp_mode;
+		set->temp_strips.clear ();
+		set->temp_strips = sur->temp_strips;
+		set->temp_master = sur->temp_master;
+		set->strips = sur->strips;
 	}
 	if (ret) {
 		sur->temp_mode = TempOff;
