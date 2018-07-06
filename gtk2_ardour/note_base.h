@@ -142,6 +142,8 @@ private:
 	bool event_handler (GdkEvent *);
 
 	static Gtkmm2ext::Color _selected_col;
+	static Gtkmm2ext::SVAModifier color_modifier;
+	static Gtkmm2ext::Color velocity_color_table[128];
 	static bool _color_init;
 };
 
