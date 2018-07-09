@@ -156,7 +156,7 @@ protected:
 		/** Ringbuffer for data to be played back.
 		 * written to in the butler thread, read from in the process thread.
 		 */
-		PBD::RingBufferNPT<Sample>* buf;
+		PBD::RingBufferNPT<Sample>* rbuf;
 
 		/** A ringbuffer for data to be recorded back, written to in the
 		 * process thread, read from in the butler thread.
