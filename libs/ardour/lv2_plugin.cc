@@ -51,6 +51,7 @@
 
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
+#include "ardour/directory_names.h"
 #include "ardour/debug.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
@@ -1380,13 +1381,20 @@ LV2Plugin::add_state(XMLNode* root) const
 		unsigned int saved_state = _state_version;;
 		g_mkdir_with_parents(new_dir.c_str(), 0744);
 
+		std::string xternal_dir = _session.externals_dir ();
+
+		if (!_plugin_state_dir.empty()) {
+			xternal_dir = Glib::build_filename (_plugin_state_dir, externals_dir_name);
+			g_mkdir_with_parents(xternal_dir.c_str(), 0744);
+		}
+
 		LilvState* state = lilv_state_new_from_instance(
 			_impl->plugin,
 			_impl->instance,
 			_uri_map.urid_map(),
 			scratch_dir().c_str(),
 			file_dir().c_str(),
-			_session.externals_dir().c_str(),
+			xternal_dir.c_str(),
 			new_dir.c_str(),
 			NULL,
 			const_cast<LV2Plugin*>(this),
@@ -1416,6 +1424,7 @@ LV2Plugin::add_state(XMLNode* root) const
 			} else {
 				// template save (dedicated state-dir)
 				lilv_state_free(state);
+				g_rmdir (xternal_dir.c_str()); // try remove unused dir
 				--_state_version;
 			}
 		} else {
