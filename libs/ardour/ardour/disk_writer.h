@@ -135,7 +135,7 @@ protected:
 
 	struct WriterChannelInfo : public DiskIOProcessor::ChannelInfo {
 		WriterChannelInfo (samplecnt_t buffer_size)
-			: DiskIOProcessor::ChannelInfo::ChannelInfo (buffer_size)
+			: DiskIOProcessor::ChannelInfo (buffer_size)
 		{
 			resize (buffer_size);
 		}

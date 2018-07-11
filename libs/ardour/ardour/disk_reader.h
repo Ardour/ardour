@@ -108,7 +108,7 @@ protected:
 
 	struct ReaderChannelInfo : public DiskIOProcessor::ChannelInfo {
 		ReaderChannelInfo (samplecnt_t buffer_size)
-			: DiskIOProcessor::ChannelInfo::ChannelInfo (buffer_size)
+			: DiskIOProcessor::ChannelInfo (buffer_size)
 		{
 			resize (buffer_size);
 		}
