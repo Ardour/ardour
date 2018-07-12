@@ -45,24 +45,20 @@ static const double encoder_divider = 24.0;
 void
 CC121::input_monitor ()
 {
-	if (_current_stripable) {
+	if (_current_stripable && _current_stripable->monitoring_control()) {
 	  MonitorChoice choice = _current_stripable->monitoring_control()->monitoring_choice ();
 	  switch(choice) {
 	  case MonitorAuto:
 	    _current_stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::NoGroup);
-	    get_button(InputMonitor).set_led_state (_output_port, true);
 	    break;
 	  case MonitorInput:
 	    _current_stripable->monitoring_control()->set_value (MonitorDisk, PBD::Controllable::NoGroup);
-	    get_button(InputMonitor).set_led_state (_output_port, false);
 	    break;
 	  case MonitorDisk:
 	    _current_stripable->monitoring_control()->set_value (MonitorCue, PBD::Controllable::NoGroup);
-	    get_button(InputMonitor).set_led_state (_output_port, false);
 	    break;
 	  case MonitorCue:
-	    _current_stripable->monitoring_control()->set_value (MonitorInput, PBD::Controllable::NoGroup);
-	    get_button(InputMonitor).set_led_state (_output_port, true);
+	    _current_stripable->monitoring_control()->set_value (MonitorAuto, PBD::Controllable::NoGroup);
 	    break;
 	  default:
 	    break;
