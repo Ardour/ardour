@@ -431,7 +431,7 @@ namespace ARDOUR {
 		MonitorAuto = 0,
 		MonitorInput = 0x1,
 		MonitorDisk = 0x2,
-		MonitorCue = 0x4,
+		MonitorCue = 0x3,
 	};
 
 	enum MonitorState {
