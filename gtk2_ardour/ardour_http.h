@@ -92,10 +92,6 @@ class HttpGet {
 char* http_get (const char* url, int* status, bool with_error_logging);
 std::string http_get (const std::string& url, bool with_error_logging);
 
-/* For use from Lua scripts */
-
-static char* http_get_unlogged (const char* url, int* status) { return http_get (url, status, false); }
-static std::string http_get_unlogged (const std::string& url) { return http_get (url, false); }
 
 
 } // namespace

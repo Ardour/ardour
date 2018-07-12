@@ -363,6 +363,8 @@ const char *luasignalstr[] = {
 }; // namespace
 
 
+static std::string http_get_unlogged (const std::string& url) { return ArdourCurl::http_get (url, false); }
+
 /** special cases for Ardour's Mixer UI */
 namespace LuaMixer {
 
@@ -744,7 +746,7 @@ LuaInstance::register_classes (lua_State* L)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("ArdourUI")
 
-		.addFunction ("http_get", (std::string (*)(const std::string&))&ArdourCurl::http_get_unlogged)
+		.addFunction ("http_get", &http_get_unlogged)
 
 		.addFunction ("processor_selection", &LuaMixer::processor_selection)
 
