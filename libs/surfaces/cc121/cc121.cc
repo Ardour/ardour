@@ -48,6 +48,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/monitor_control.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
@@ -1075,6 +1076,7 @@ CC121::set_current_stripable (boost::shared_ptr<Stripable> r)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
 			t->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable, this), this);
+			t->monitoring_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_monitoring, this), this);
 		}
 
 		boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
@@ -1181,6 +1183,23 @@ CC121::map_recenable ()
 	} else {
 		get_button (Rec).set_led_state (_output_port, false);
 	}
+	map_monitoring ();
+}
+
+void
+CC121::map_monitoring ()
+{
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+	if (t) {
+	  MonitorState state = t->monitoring_control()->monitoring_state ();
+		if (state == MonitoringInput || state == MonitoringCue) {
+	    get_button(InputMonitor).set_led_state (_output_port, true);
+		} else {
+	    get_button(InputMonitor).set_led_state (_output_port, false);
+		}
+	} else {
+		get_button(InputMonitor).set_led_state (_output_port, false);
+	}
 }
 
 void
@@ -1233,6 +1252,7 @@ CC121::map_stripable_state ()
 		map_recenable ();
 		map_gain ();
 		map_auto ();
+		map_monitoring ();
 
 		if (_current_stripable == session->monitor_out()) {
 			map_cut ();

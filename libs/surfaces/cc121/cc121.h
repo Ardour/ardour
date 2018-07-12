@@ -309,6 +309,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void map_gain ();
 	void map_cut ();
 	void map_auto ();
+	void map_monitoring ();
 
 	/* operations (defined in operations.cc) */
 
