@@ -307,6 +307,13 @@ EditorSummary::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle
 void
 EditorSummary::render_region (RegionView* r, cairo_t* cr, double y) const
 {
+	/*NOTE:  you can optimize this operation by coalescing adjacent regions into a single line stroke.
+	 * In a session with a single track ~1,000 regions, this reduced render time from 14ms to 11 ms.
+	 * However, you lose a lot of visual information.  The current method preserves a sense of separation between regions.
+	 * The current method shows the current selection (red regions), which needs to be preserved if this is optimized.
+	 * I think it's not worth it for now,  but we might choose to revisit this someday.
+	 */ 
+
 	uint32_t const c = r->get_fill_color ();
 	cairo_set_source_rgb (cr, UINT_RGBA_R (c) / 255.0, UINT_RGBA_G (c) / 255.0, UINT_RGBA_B (c) / 255.0);
 
