@@ -19,14 +19,17 @@
 
 
 #include <glib.h>
-#include "pbd/gstdio_compat.h"
-
 #include <glibmm.h>
 #include <glibmm/datetime.h>
 
 #include <gtkmm/liststore.h>
 
+#include "pbd/file_utils.h"
+#include "pbd/gstdio_compat.h"
+#include "pbd/i18n.h"
+
 #include "ardour/filename_extensions.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
@@ -36,7 +39,6 @@
 
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
-#include "pbd/i18n.h"
 #include "utils.h"
 
 using namespace std;
@@ -48,18 +50,35 @@ using namespace ARDOUR_UI_UTILS;
 EditorSnapshots::EditorSnapshots (Editor* e)
 	: EditorComponent (e)
 {
-	_model = ListStore::create (_columns);
-	_display.set_model (_model);
-	_display.append_column (X_("snapshot"), _columns.visible_name);
-	_display.append_column (X_("lastmod"), _columns.time_formatted);
-	_display.set_size_request (75, -1);
-	_display.set_headers_visible (false);
-	_display.set_reorderable (false);
-	_scroller.add (_display);
-	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	_snap_model = ListStore::create (_columns);
+	_snap_display.set_model (_snap_model);
+	_snap_display.append_column (_("Snapshot (click to load)"), _columns.visible_name);
+	_snap_display.append_column (_("Modifed Date"), _columns.time_formatted);
+	_snap_display.set_size_request (75, -1);
+	_snap_display.set_headers_visible (true);
+	_snap_display.set_reorderable (false);
+	_snap_scroller.add (_snap_display);
+	_snap_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorSnapshots::selection_changed));
-	_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorSnapshots::button_press), false);
+	_snap_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorSnapshots::selection_changed));
+	_snap_display.signal_button_press_event().connect (sigc::mem_fun (*this, &EditorSnapshots::button_press), false);
+	
+	_back_model = ListStore::create (_columns);
+	_back_display.set_model (_back_model);
+	_back_display.append_column (_("Auto-Backup (click to load)"), _columns.visible_name);
+	_back_display.append_column (_("Last Modified"), _columns.time_formatted);
+	_back_display.set_size_request (75, -1);
+	_back_display.set_headers_visible (true);
+	_back_display.set_reorderable (false);
+	_back_scroller.add (_back_display);
+	_back_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+
+	_back_display.get_selection()->signal_changed().connect (sigc::mem_fun(*this, &EditorSnapshots::backup_selection_changed));
+	
+	_pane.add(_snap_scroller);
+if(Profile->get_mixbus()) {
+	_pane.add(_back_scroller);
+}
 }
 
 void
@@ -75,9 +94,9 @@ EditorSnapshots::set_session (Session* s)
 void
 EditorSnapshots::selection_changed ()
 {
-	if (_display.get_selection()->count_selected_rows() > 0) {
+	if (_snap_display.get_selection()->count_selected_rows() > 0) {
 
-		TreeModel::iterator i = _display.get_selection()->get_selected();
+		TreeModel::iterator i = _snap_display.get_selection()->get_selected();
 
 		std::string snap_name = (*i)[_columns.real_name];
 
@@ -89,9 +108,9 @@ EditorSnapshots::selection_changed ()
 			return;
 		}
 
-		_display.set_sensitive (false);
+		_snap_display.set_sensitive (false);
 		ARDOUR_UI::instance()->load_session (_session->path(), string (snap_name));
-		_display.set_sensitive (true);
+		_snap_display.set_sensitive (true);
 	}
 }
 
@@ -105,8 +124,8 @@ EditorSnapshots::button_press (GdkEventButton* ev)
 		Gtk::TreeViewColumn* col;
 		int cx;
 		int cy;
-		_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
-		Gtk::TreeModel::iterator iter = _model->get_iter (path);
+		_snap_display.get_path_at_pos ((int) ev->x, (int) ev->y, path, col, cx, cy);
+		Gtk::TreeModel::iterator iter = _snap_model->get_iter (path);
 		if (iter) {
 			Gtk::TreeModel::Row row = *iter;
 			popup_context_menu (ev->button, ev->time, row[_columns.real_name]);
@@ -188,44 +207,110 @@ EditorSnapshots::redisplay ()
 		return;
 	}
 
-	vector<std::string> state_file_paths;
-
-	get_state_files_in_directory (_session->session_directory().root_path(),
-	                              state_file_paths);
-
-	if (state_file_paths.empty()) {
-		return;
-	}
-
-	vector<string> state_file_names (get_file_names_no_extension(state_file_paths));
-
-	_model->clear ();
-
-	for (vector<string>::iterator i = state_file_names.begin(); i != state_file_names.end(); ++i)
+	//fill the snapshots pane
 	{
-		string statename = (*i);
-		TreeModel::Row row = *(_model->append());
+		vector<std::string> state_file_paths;
 
-		/* this lingers on in case we ever want to change the visible
-		   name of the snapshot.
-		*/
+		get_state_files_in_directory (_session->session_directory().root_path(),
+									  state_file_paths);
 
-		string display_name;
-		display_name = statename;
-
-		if (statename == _session->snap_name()) {
-			_display.get_selection()->select(row);
+		if (state_file_paths.empty()) {
+			return;
 		}
 
-		std::string s = Glib::build_filename (_session->path(), statename + ARDOUR::statefile_suffix);
+		vector<string> state_file_names (get_file_names_no_extension(state_file_paths));
 
-		GStatBuf gsb;
-		g_stat (s.c_str(), &gsb);
-		Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
+		_snap_model->clear ();
 
-		row[_columns.visible_name] = display_name;
-		row[_columns.real_name] = statename;
-		row[_columns.time_formatted] = gdt.format ("%F %H:%M");
+		for (vector<string>::iterator i = state_file_names.begin(); i != state_file_names.end(); ++i)
+		{
+			string statename = (*i);
+			TreeModel::Row row = *(_snap_model->append());
+
+			/* this lingers on in case we ever want to change the visible
+			   name of the snapshot.
+			*/
+
+			string display_name;
+			display_name = statename;
+
+			if (statename == _session->snap_name()) {
+				_snap_display.get_selection()->select(row);
+			}
+
+			std::string s = Glib::build_filename (_session->path(), statename + ARDOUR::statefile_suffix);
+
+			GStatBuf gsb;
+			g_stat (s.c_str(), &gsb);
+			Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
+
+			row[_columns.visible_name] = display_name;
+			row[_columns.real_name] = statename;
+			row[_columns.time_formatted] = gdt.format ("%F %H:%M");
+		}
+	}
+	
+	//fill the backup pane
+	{
+		vector<std::string> state_file_paths;
+
+		get_state_files_in_directory (_session->session_directory().backup_path(),
+									  state_file_paths);
+
+		if (state_file_paths.empty()) {
+			return;
+		}
+
+		vector<string> state_file_names (get_file_names_no_extension(state_file_paths));
+
+		_back_model->clear ();
+
+		for (vector<string>::iterator i = state_file_names.begin(); i != state_file_names.end(); ++i)
+		{
+			string statename = (*i);
+			TreeModel::Row row = *(_back_model->append());
+
+			/* this lingers on in case we ever want to change the visible
+			   name of the snapshot.
+			*/
+
+			string display_name;
+			display_name = statename;
+
+			std::string s = Glib::build_filename (_session->path(), statename + ARDOUR::statefile_suffix);
+
+			GStatBuf gsb;
+			g_stat (s.c_str(), &gsb);
+			Glib::DateTime gdt(Glib::DateTime::create_now_local (gsb.st_mtime));
+
+			row[_columns.visible_name] = display_name;
+			row[_columns.real_name] = statename;
+			row[_columns.time_formatted] = gdt.format ("%F %H:%M");
+		}
+	}
+	
+}
+
+/** A new backup has been selected.
+ */
+void
+EditorSnapshots::backup_selection_changed ()
+{
+	if (_back_display.get_selection()->count_selected_rows() > 0) {
+
+		TreeModel::iterator i = _back_display.get_selection()->get_selected();
+
+		std::string back_name = (*i)[_columns.real_name];
+
+		//copy the backup file to the session root folder, so we can open it
+		std::string back_path = _session->session_directory().backup_path() + G_DIR_SEPARATOR + back_name + ARDOUR::statefile_suffix;
+		std::string copy_path = _session->session_directory().root_path() + G_DIR_SEPARATOR + back_name + ARDOUR::statefile_suffix;
+		PBD::copy_file (back_path, copy_path);
+		
+		//now open the copy
+		_snap_display.set_sensitive (false);
+		ARDOUR_UI::instance()->load_session (_session->path(), string (back_name));
+		_snap_display.set_sensitive (true);
 	}
 }
 
