@@ -749,6 +749,8 @@ Session::remove_state (string snapshot_name)
 		error << string_compose(_("Could not remove session file at path \"%1\" (%2)"),
 				xml_path, g_strerror (errno)) << endmsg;
 	}
+
+	StateSaved (snapshot_name); /* EMIT SIGNAL */
 }
 
 /** @param snapshot_name Name to save under, without .ardour / .pending prefix */
@@ -871,6 +873,32 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 			}
 			return -1;
 		}
+	}
+
+	//Mixbus auto-backup mechanism
+	if(Profile->get_mixbus()) {
+		if (pending) {  //"pending" save means it's a backup, or some other non-user-initiated save;  a good time to make a backup
+			// make a serialized safety backup
+			// (will make one periodically but only one per hour is left on disk)
+			// these backup files go into a separated folder
+			char timebuf[128];
+			time_t n;
+			struct tm local_time;
+			time (&n);
+			localtime_r (&n, &local_time);
+			strftime (timebuf, sizeof(timebuf), "%y-%m-%d.%H", &local_time);
+			std::string save_path(session_directory().backup_path());
+			save_path += G_DIR_SEPARATOR;
+			save_path += legalize_for_path(_current_snapshot_name);
+			save_path += "-";
+			save_path += timebuf;
+			save_path += statefile_suffix;
+			if ( !tree.write (save_path) )
+					error << string_compose(_("Could not save backup file at path \"%1\" (%2)"),
+							save_path, g_strerror (errno)) << endmsg;
+		}
+
+		StateSaved (snapshot_name); /* EMIT SIGNAL */
 	}
 
 	if (!pending && !for_archive) {

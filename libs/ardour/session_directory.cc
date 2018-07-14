@@ -245,6 +245,12 @@ SessionDirectory::export_path () const
 	return Glib::build_filename (m_root_path, export_dir_name);
 }
 
+const std::string
+SessionDirectory::backup_path () const
+{
+	return Glib::build_filename (m_root_path, backup_dir_name);
+}
+
 const vector<std::string>
 SessionDirectory::sub_directories () const
 {
@@ -256,6 +262,7 @@ SessionDirectory::sub_directories () const
 	tmp_paths.push_back (peak_path ());
 	tmp_paths.push_back (dead_path ());
 	tmp_paths.push_back (export_path ());
+	tmp_paths.push_back (backup_path ());
 
 	return tmp_paths;
 }
