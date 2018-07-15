@@ -53,7 +53,7 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 	_snap_model = ListStore::create (_columns);
 	_snap_display.set_model (_snap_model);
 	_snap_display.append_column (_("Snapshot (click to load)"), _columns.visible_name);
-	_snap_display.append_column (_("Modifed Date"), _columns.time_formatted);
+	_snap_display.append_column (_("Modified Date"), _columns.time_formatted);
 	_snap_display.set_size_request (75, -1);
 	_snap_display.set_headers_visible (true);
 	_snap_display.set_reorderable (false);
@@ -66,7 +66,7 @@ EditorSnapshots::EditorSnapshots (Editor* e)
 	_back_model = ListStore::create (_columns);
 	_back_display.set_model (_back_model);
 	_back_display.append_column (_("Auto-Backup (click to load)"), _columns.visible_name);
-	_back_display.append_column (_("Last Modified"), _columns.time_formatted);
+	_back_display.append_column (_("Modified Date"), _columns.time_formatted);
 	_back_display.set_size_request (75, -1);
 	_back_display.set_headers_visible (true);
 	_back_display.set_reorderable (false);
