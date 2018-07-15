@@ -115,12 +115,12 @@
     <Color name="meter color7" value="0xff8700ff"/>
     <Color name="meter color8" value="0xff0000ff"/>
     <Color name="meter color9" value="0xff0000ff"/>
-    <Color name="midi color0" value="0x1e7727ff"/>
-    <Color name="midi color1" value="0x52af25ff"/>
-    <Color name="midi color2" value="0x85e524ff"/>
-    <Color name="midi color3" value="0xcbba0fff"/>
-    <Color name="midi color4" value="0xe2ab09ff"/>
-    <Color name="midi color5" value="0xff9900ff"/>
+    <Color name="midi color0" value="0x7f4b47ff"/>
+    <Color name="midi color1" value="0x694a89ff"/>
+    <Color name="midi color2" value="0x855ce9ff"/>
+    <Color name="midi color3" value="0x507af3ff"/>
+    <Color name="midi color4" value="0x1d94feff"/>
+    <Color name="midi color5" value="0x00ffffff"/>
   </Colors>
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="color 1"/>
@@ -283,7 +283,7 @@
     <ColorAlias name="midi meter color8" alias="midi color4"/>
     <ColorAlias name="midi meter color9" alias="midi color5"/>
     <ColorAlias name="midi note inactive channel" alias="color 4"/>
-    <ColorAlias name="midi note selected outline" alias="color 67"/>
+    <ColorAlias name="midi note selected outline" alias="color 17"/>
     <ColorAlias name="midi note velocity text" alias="color 32"/>
     <ColorAlias name="midi patch change fill" alias="color 60"/>
     <ColorAlias name="midi patch change outline" alias="color 26"/>
