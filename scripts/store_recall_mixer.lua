@@ -11,6 +11,19 @@ function factory() return function()
 	local invalidate = {}
 	local path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua")
 
+	function get_processor_by_name(track, name)
+		local i = 0
+		local proc = track:nth_processor(i)
+			repeat
+				if ( proc:display_name() == name ) then
+					return proc
+				else
+					i = i + 1
+				end
+				proc = track:nth_processor(i)
+			until proc:isnil()
+		end
+
 	function new_plugin(name)
 		for x = 0, 6 do
 			plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
@@ -104,7 +117,7 @@ function factory() return function()
 				on = on + 1
 			end
 
-			route_str = "instance = {route_id = " .. rid .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
+			route_str = "instance = {route_id = " .. rid .. ", route_name = " .. r:name() .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
 			file = io.open(path, "a")
 			file:write(route_str, "\r\n")
 			file:close()
@@ -191,7 +204,7 @@ function factory() return function()
 				on = on + 1
 			end
 
-			route_str = "instance = {route_id = " .. rid .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
+			route_str = "instance = {route_id = " .. rid .. ", route_name = '" .. r:name() .. "', gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
 			file = io.open(path, "a")
 			file:write(route_str, "\r\n")
 			file:close()
@@ -265,9 +278,11 @@ function factory() return function()
 				local order = instance["order"]
 				local cache = instance["cache"]
 				local group = instance["group"]
+				local name  = instance["route_name"]
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
 
 				local rt = Session:route_by_id(r_id)
+				if rt:isnil() then rt = Session:route_by_name(name) end
 				if rt:isnil() then goto nextline end
 
 				local cur_group_id = route_groupid_interrogate(rt)
@@ -276,12 +291,22 @@ function factory() return function()
 					if g then g:remove(rt) end
 				end
 
+				well_known = {'PRE', 'Trim', 'EQ', 'Comp', 'Fader', 'POST'}
+
 				for k, v in pairs(order) do
 					local proc = Session:processor_by_id(PBD.ID(v))
 					if proc:isnil() then
 						for id, name in pairs(cache) do
 							if v == id then
 								proc = new_plugin(name)
+								for _, control in pairs(well_known) do
+									if name == control then
+										proc = get_processor_by_name(rt, control)
+										invalidate[v] = proc:to_stateful():id():to_s()
+										goto nextproc
+									end
+								end
+								if not(proc) then goto nextproc end
 								if not(proc:isnil()) then
 									rt:add_processor_by_index(proc, 0, nil, true)
 									invalidate[v] = proc:to_stateful():id():to_s()
@@ -289,7 +314,8 @@ function factory() return function()
 							end
 						end
 					end
-					if not(proc:isnil()) then old_order:push_back(proc) end
+					::nextproc::
+					if proc and not(proc:isnil()) then old_order:push_back(proc) end
 				end
 
 				if muted  then rt:mute_control():set_value(1, 1) else rt:mute_control():set_value(0, 1) end
