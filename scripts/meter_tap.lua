@@ -17,33 +17,34 @@ function factory () return function ()
 	}
 
 	local rv = LuaDialog.Dialog("Change all Meter Taps:", dialog_options):run()
-
-	meter_point = rv['select']
-	if rv['select-tracks'] then
-		local sel = Editor:get_selection ()
-		for route in sel.tracks:routelist():iter() do
-			if not(route:to_track():isnil()) then
-				if rv['rec-tracks'] then
-					if route:rec_enable_control():get_value() == 1.0 then
+	if rv then
+		meter_point = rv['select']
+		if rv['select-tracks'] then
+			local sel = Editor:get_selection ()
+			for route in sel.tracks:routelist():iter() do
+				if not(route:to_track():isnil()) then
+					if rv['rec-tracks'] then
+						if route:rec_enable_control():get_value() == 1.0 then
+							route:to_track():set_meter_point(meter_point, false)
+						end
+					else
 						route:to_track():set_meter_point(meter_point, false)
 					end
-				else
-					route:to_track():set_meter_point(meter_point, false)
 				end
 			end
-		end
-	else
-		for route in Session:get_routes():iter() do
-			if not(route:to_track():isnil()) then
-				if rv['rec-tracks'] then
-					if route:rec_enable_control():get_value() == 1.0 then
+		else
+			for route in Session:get_routes():iter() do
+				if not(route:to_track():isnil()) then
+					if rv['rec-tracks'] then
+						if route:rec_enable_control():get_value() == 1.0 then
+							route:to_track():set_meter_point(meter_point, false)
+						end
+					else
 						route:to_track():set_meter_point(meter_point, false)
 					end
-				else
-					route:to_track():set_meter_point(meter_point, false)
 				end
 			end
 		end
 	end
-	
+
 end end
