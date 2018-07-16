@@ -764,7 +764,7 @@ Editor::trigger_script_by_name (const std::string script_name)
 
 			LuaState lua;
 			lua.Print.connect (&_lua_print);  //ToDo
-			lua.sandbox (true);
+			lua.sandbox (false);
 			lua_State* L = lua.getState();
 			LuaInstance::register_classes (L);
 			LuaBindings::set_session (L, _session);
