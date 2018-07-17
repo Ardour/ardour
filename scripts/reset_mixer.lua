@@ -82,4 +82,5 @@ function factory() return function()
 		end
 	end
 	::end_script::
+	collectgarbage()
 end end

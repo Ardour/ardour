@@ -403,5 +403,5 @@ function factory() return function()
 			end
 		end
 	end
-
+collectgarbage()
 end end

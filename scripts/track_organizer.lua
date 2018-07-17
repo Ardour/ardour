@@ -101,6 +101,6 @@ function factory () return function ()
            end
        end
    end
-
 	::script_end::
+	collectgarbage()
 end end
