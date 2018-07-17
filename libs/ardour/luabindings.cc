@@ -48,6 +48,7 @@
 #include "ardour/file_source.h"
 #include "ardour/fluid_synth.h"
 #include "ardour/interthread_info.h"
+#include "ardour/ltc_file_reader.h"
 #include "ardour/lua_api.h"
 #include "ardour/luabindings.h"
 #include "ardour/luaproc.h"
@@ -2385,6 +2386,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_type", &DSP::Generator::set_type)
 		.endClass ()
 
+		.beginClass <ARDOUR::LTCReader> ("LTCReader")
+		.addConstructor <void (*) (int, LTC_TV_STANDARD)> ()
+		.addFunction ("write", &ARDOUR::LTCReader::write)
+		.addRefFunction ("read", &ARDOUR::LTCReader::read)
+		.endClass ()
+
 		/* DSP enums */
 		.beginNamespace ("BiquadType")
 		.addConst ("LowPass", ARDOUR::DSP::Biquad::LowPass)
@@ -2402,6 +2409,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("UniformWhiteNoise", ARDOUR::DSP::Generator::UniformWhiteNoise)
 		.addConst ("GaussianWhiteNoise", ARDOUR::DSP::Generator::GaussianWhiteNoise)
 		.addConst ("PinkNoise", ARDOUR::DSP::Generator::PinkNoise)
+		.endNamespace ()
+
+		.beginNamespace ("LTC_TV_STANDARD")
+		.addConst ("LTC_TV_525_60", LTC_TV_525_60)
+		.addConst ("LTC_TV_625_50", LTC_TV_625_50)
+		.addConst ("LTC_TV_1125_60", LTC_TV_1125_60)
+		.addConst ("LTC_TV_FILM_24", LTC_TV_FILM_24)
 		.endNamespace ()
 
 		.beginClass <DSP::DspShm> ("DspShm")
