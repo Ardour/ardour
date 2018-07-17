@@ -29,6 +29,22 @@
 
 namespace ARDOUR {
 
+class LIBARDOUR_API LTCReader
+{
+public:
+	LTCReader (int expected_apv, LTC_TV_STANDARD tv_standard = LTC_TV_FILM_24);
+	~LTCReader ();
+
+	void write (float const*, samplecnt_t n_samples, samplepos_t pos = -1);
+	void raw_write (ltcsnd_sample_t*, size_t, ltc_off_t);
+
+	bool read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
+
+private:
+	LTCDecoder*  _decoder;
+	samplecnt_t  _position;
+};
+
 class LIBARDOUR_API LTCFileReader
 {
 public:
@@ -60,9 +76,8 @@ private:
 	SNDFILE* _sndfile;
 	SF_INFO  _info;
 
-	LTCDecoder*  decoder;
-	float*      _interleaved_audio_buffer;
-	uint32_t    _frames_decoded;
+	LTCReader*   _reader;
+	float*       _interleaved_audio_buffer;
 	samplecnt_t  _samples_read;
 
 };

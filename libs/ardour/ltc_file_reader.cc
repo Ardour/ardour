@@ -42,13 +42,80 @@ using std::string;
 
 #define BUFFER_SIZE 1024 // audio chunk size
 
+LTCReader::LTCReader (int expected_apv, LTC_TV_STANDARD tv_standard)
+	: _position (0)
+{
+	_decoder = ltc_decoder_create (expected_apv, 8); // must be able to hold frmes for BUFFER_SIZE
+}
+
+LTCReader::~LTCReader ()
+{
+	ltc_decoder_free (_decoder);
+}
+
+void
+LTCReader::write (float const* data, samplecnt_t n_samples, samplepos_t pos)
+{
+	ltc_off_t off = _position;
+	if (pos < 0) {
+		off = _position;
+		_position += n_samples;
+	}
+
+	samplecnt_t remain = n_samples;
+	while (remain > 0) {
+		ltcsnd_sample_t sound[BUFFER_SIZE];
+		int c = std::min (remain, (samplecnt_t)BUFFER_SIZE);
+		for (int i = 0; i < c; ++i) {
+			sound[i] = 128 + (*data++) * 127.0;
+		}
+		ltc_decoder_write (_decoder, sound, c, off);
+		off += c;
+		remain -= c;
+	}
+}
+
+void
+LTCReader::raw_write (ltcsnd_sample_t* buf, size_t size, ltc_off_t off)
+{
+	ltc_decoder_write (_decoder, buf, size, off);
+}
+
+bool
+LTCReader::read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff)
+{
+	LTCFrameExt ltc_frame;
+	bool rv = 0 != ltc_decoder_read (_decoder, &ltc_frame);
+	if (rv) {
+		SMPTETimecode stime;
+		ltc_frame_to_time (&stime, &ltc_frame.ltc, /*use_date*/ 0);
+		hh   = stime.hours;
+		mm = stime.mins;
+		ss = stime.secs;
+		ff  = stime.frame;
+
+#if 0 // DEBUG
+			printf("LTC %02d:%02d:%02d:%02d @%9lld -> %9lld -> %fsec\n",
+					stime.hours,
+					stime.mins,
+					stime.secs,
+					stime.frame,
+					frame.off_start,
+					sample,
+					tc_sec);
+#endif
+	}
+	return rv;
+}
+
+
 LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STANDARD tv_standard)
 	: _path (path)
 	, _expected_fps (expected_fps)
 	, _ltc_tv_standard (tv_standard)
 	, _sndfile (0)
+	, _reader (0)
 	, _interleaved_audio_buffer (0)
-	, _frames_decoded (0)
 	, _samples_read (0)
 {
 	memset (&_info, 0, sizeof (_info));
@@ -59,7 +126,6 @@ LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STAN
 	}
 
 	const int apv = rintf (_info.samplerate / _expected_fps);
-	decoder = ltc_decoder_create (apv, 8); // must be able to hold frmes for BUFFER_SIZE
 
 #if 0 // TODO allow to auto-detect
 	if (expected_fps == 25.0) {
@@ -72,12 +138,13 @@ LTCFileReader::LTCFileReader (std::string path, double expected_fps, LTC_TV_STAN
 		_ltc_tv_standard = LTC_TV_FILM_24;
 	}
 #endif
+	_reader = new LTCReader (apv, _ltc_tv_standard);
 }
 
 LTCFileReader::~LTCFileReader ()
 {
 	close ();
-	ltc_decoder_free (decoder);
+	delete _reader;
 	free (_interleaved_audio_buffer);
 }
 
@@ -147,21 +214,10 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 			sound [i]= 128 + _interleaved_audio_buffer[channels * i + channel] * 127;
 		}
 
-		ltc_decoder_write (decoder, sound, n, _samples_read);
+		_reader->raw_write (sound, n, _samples_read);
+		Timecode::Time timecode (_expected_fps);
 
-		while (ltc_decoder_read (decoder, &frame)) {
-			SMPTETimecode stime;
-			++_frames_decoded;
-
-			ltc_frame_to_time (&stime, &frame.ltc, /*use_date*/ 0);
-
-			// convert Timecode to samples @ audio-file rate
-			Timecode::Time timecode (_expected_fps);
-			timecode.hours   = stime.hours;
-			timecode.minutes = stime.mins;
-			timecode.seconds = stime.secs;
-			timecode.frames  = stime.frame;
-
+		while (_reader->read (timecode.hours, timecode.minutes, timecode.seconds, timecode.frames)) {
 			int64_t sample = 0;
 			Timecode::timecode_to_sample (
 					timecode, sample, false, false,
@@ -177,17 +233,6 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 			double fp_sec = frame.off_start / (double) _info.samplerate;
 			double tc_sec = sample / (double) _info.samplerate;
 			rv.push_back (LTCMap (fp_sec, tc_sec));
-
-#if 0 // DEBUG
-			printf("LTC %02d:%02d:%02d:%02d @%9lld -> %9lld -> %fsec\n",
-					stime.hours,
-					stime.mins,
-					stime.secs,
-					stime.frame,
-					frame.off_start,
-					sample,
-					tc_sec);
-#endif
 		}
 
 		if (n > 0) {
@@ -197,7 +242,6 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 		if (max_frames > 0 && rv.size () >= max_frames) {
 			break;
 		}
-
 	}
 
 	return rv;
