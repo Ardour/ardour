@@ -70,6 +70,7 @@ AutomationController::AutomationController(boost::shared_ptr<AutomationControl> 
 	, _controllable(ac)
 	, _adjustment(adj)
 	, _ignore_change(false)
+	, _grabbed(false)
 {
 	if (ac->toggled()) {
 		ArdourButton* but = manage(new ArdourButton());
@@ -165,6 +166,13 @@ AutomationController::display_effective_value ()
 {
 	double const interface_value = _controllable->internal_to_interface(_controllable->get_value());
 
+	if (_grabbed) {
+		/* we cannot use _controllable->touching() here
+		 * because that's only set in Write or Touch mode.
+		 * Besides ctrl-surfaces may also set touching()
+		 */
+		return;
+	}
 	if (_adjustment->get_value () != interface_value) {
 		_ignore_change = true;
 		_adjustment->set_value (interface_value);
@@ -197,6 +205,7 @@ AutomationController::value_adjusted ()
 void
 AutomationController::start_touch()
 {
+	_grabbed = true;
 	_controllable->start_touch (_controllable->session().transport_sample());
 }
 
@@ -204,6 +213,10 @@ void
 AutomationController::end_touch ()
 {
 	_controllable->stop_touch (_controllable->session().transport_sample());
+	if (_grabbed) {
+		_grabbed = false;
+		display_effective_value ();
+	}
 }
 
 bool

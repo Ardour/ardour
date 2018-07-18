@@ -102,6 +102,7 @@ private:
 	sigc::connection                             _screen_update_connection;
 	PBD::ScopedConnectionList                    _changed_connections;
 	bool                                         _ignore_change;
+	bool                                         _grabbed;
 };
 
 
