@@ -207,9 +207,9 @@ ParameterDescriptor::update_steps()
 			largestep = (powf (delta, std::max (0.5f, 10.f / (float)rangesteps)) - 1.f) * lower;
 		} else if (integer_step) {
 			smallstep = step = 1.0;
-			largestep = std::max(1.f, rintf (delta / (rangesteps - 1)));
+			largestep = std::max(1.f, rintf (delta / (rangesteps - 1.f)));
 		} else {
-			step = smallstep = delta / (rangesteps - 1);
+			step = smallstep = delta / (rangesteps - 1.f);
 			largestep = std::min ((delta / 4.0f), 10.f * smallstep); // XXX
 		}
 	} else {
@@ -387,7 +387,7 @@ ParameterDescriptor::from_interface (float val) const
 				val = floor (lower + val * (1.f + upper - lower));
 			} else if (rangesteps > 1) {
 				/* similar to above, but for float controls */
-				val = floor (val * (rangesteps - 1.f)) / (rangesteps - 1.f); // XXX
+				val = round (val * (rangesteps - 1.f)) / (rangesteps - 1.f); // XXX
 				val = val * (upper - lower) + lower;
 			} else {
 				val = val * (upper - lower) + lower;
