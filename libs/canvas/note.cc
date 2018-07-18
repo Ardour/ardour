@@ -78,8 +78,8 @@ Note::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		self.y1  = self.y0 + center + 2;
 		self.y0  = self.y0 + center - 1;
 		const double width = (self.x1 - self.x0) - (2 * outline_width());
-		self.x0  = self.x0 + outline_width()+1;
-		self.x1  = self.x0 + ((width-2) * _velocity);
+		self.x0  = self.x0 + outline_width();
+		self.x1  = self.x0 + (width * _velocity);
 
 		const Rect draw = self.intersection (area);
 
