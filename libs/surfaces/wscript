@@ -43,6 +43,7 @@ def configure(conf):
     autowaf.configure(conf)
 
     autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
+    autowaf.check_pkg(conf, 'openav_ctlra', uselib_store='OAV_CTRLA', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 
@@ -50,6 +51,12 @@ def configure(conf):
         children += [ 'push2' ]
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
+
+    if conf.is_defined('HAVE_USB') and conf.is_defined('HAVE_OAV_CTRLA'):
+        children += [ 'mappa' ]
+        conf.define('BUILD_MAPPA', 1)
+    else:
+        print ('You are missing the openAV ctrla/mappa to compile MAPPA support')
     
     if conf.is_defined('HAVE_HIDAPI') and Options.options.maschine:
         children += [ 'maschine2' ]
@@ -96,6 +103,8 @@ def build(bld):
         bld.recurse('push2')
     if bld.is_defined('BUILD_MASCHINE'):
         bld.recurse('maschine2')
+    if bld.is_defined('BUILD_MAPPA'):
+        bld.recurse('mappa')
 
 def shutdown():
     autowaf.shutdown()

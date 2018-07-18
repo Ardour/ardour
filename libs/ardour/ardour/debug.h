@@ -83,6 +83,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits DiskIO;
 		LIBARDOUR_API extern DebugBits FaderPort;
 		LIBARDOUR_API extern DebugBits FaderPort8;
+		LIBARDOUR_API extern DebugBits Mappa;
 		LIBARDOUR_API extern DebugBits CC121;
 		LIBARDOUR_API extern DebugBits VCA;
 		LIBARDOUR_API extern DebugBits Push2;

@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    autowaf.configure(conf)
+
+def build(bld):
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source = '''
+            oav_mappa.cc
+            mappa_interface.cc
+    '''
+    obj.export_includes = ['.']
+    obj.defines      = [ 'PACKAGE="ardour_mappa"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.includes     = [ '.', './mappa']
+    obj.name         = 'libardour_mappa'
+    obj.target       = 'ardour_mappa'
+    obj.uselib       = 'USB OAV_CTRLA'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+def shutdown():
+    autowaf.shutdown()
