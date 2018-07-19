@@ -1404,10 +1404,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		{
 			//enable the Edit button when a row is selected for editing
 			TreeModel::Row row = *(_view.get_selection()->get_selected());
-			if (row && row[_model.enabled])
-				edit_button->set_sensitive (true);
-			else
+			if (row && row[_model.enabled]) {
+				ControlProtocolInfo* cpi = row[_model.protocol_info];
+				edit_button->set_sensitive (cpi && cpi->protocol && cpi->protocol->has_editor ());
+			} else {
 				edit_button->set_sensitive (false);
+			}
 		}
 
 		void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
