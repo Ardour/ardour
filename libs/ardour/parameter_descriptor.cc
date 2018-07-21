@@ -200,25 +200,34 @@ ParameterDescriptor::update_steps()
 		largestep = position_to_gain (dB_coeff_step(upper));
 		step      = position_to_gain (largestep / 10.0);
 		smallstep = step;
+	} else if (logarithmic) {
+		/* ignore logscale rangesteps. {small|large}steps are used with the spinbox.
+		 * gtk-spinbox shows the internal (not interface) value and up/down
+		 * arrows linearly increase.
+		 * The AutomationController uses internal_to_interface():
+		 *   ui-step [0..1] -> log (1 + largestep / lower) / log (upper / lower)
+		 * so we use a step that's a multiple of "lower" for the interface step:
+		 *   log (1 + x) / log (upper / lower)
+		 */
+		smallstep = step = lower / 11;
+		largestep = lower / 3;
+		/* NOTE: the actual value does use rangesteps via
+		 * logscale_to_position_with_steps(), position_to_logscale_with_steps()
+		 * when it is converted.
+		 */
 	} else if (rangesteps > 1) {
 		const float delta = upper - lower;
-		if (logarithmic) {
-			smallstep = step = (powf (delta, 1.f  / (float)rangesteps) - 1.f) * lower;
-			largestep = (powf (delta, std::max (0.5f, 10.f / (float)rangesteps)) - 1.f) * lower;
-		} else if (integer_step) {
+		if (integer_step) {
 			smallstep = step = 1.0;
 			largestep = std::max(1.f, rintf (delta / (rangesteps - 1.f)));
 		} else {
 			step = smallstep = delta / (rangesteps - 1.f);
-			largestep = std::min ((delta / 4.0f), 10.f * smallstep); // XXX
+			largestep = std::min ((delta / 4.0f), 10.f * smallstep);
 		}
 	} else {
 		const float delta = upper - lower;
 		/* 30 steps between min/max (300 for fine-grained) */
-		if (logarithmic) {
-			smallstep = step = (powf (delta, 1.f / 300.f) - 1.f) * lower;
-			largestep = (powf (delta, 1.f / 30.f) - 1.f) * lower;
-		} else if (integer_step) {
+		if (integer_step) {
 			smallstep = step = 1.0;
 			largestep = std::max(1.f, rintf (delta / 30.f));
 		} else {
