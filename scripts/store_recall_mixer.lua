@@ -3,7 +3,8 @@ ardour {
 	name = "Mixer Store",
 	author = "Ardour Lua Taskforce",
 	description = [[Stores the current Mixer state as a file that can be read and recalled arbitrarily.
-	Supports: processor settings, grouping, mute, solo, gain, trim, pan and processor ordering, plus re-adding certain deleted plugins.]]
+	Supports: processor settings, grouping, mute, solo, gain, trim, pan and processor ordering,
+	plus re-adding certain deleted plugins.]]
 }
 
 function factory() return function()
@@ -62,12 +63,16 @@ function factory() return function()
 		file:close()
 	end
 
-	function mark_selected_tracks()
+	function mark_tracks(selected)
 		empty_last_store()
 
 		local sel = Editor:get_selection ()
 		local groups_to_write = {}
 		local i = 0
+
+		local tracks = Session:get_routes()
+
+		if selected then tracks = sel.tracks:routelist() end
 
 		for r in sel.tracks:routelist():iter() do
 			local group = route_group_interrogate(r)
@@ -89,7 +94,7 @@ function factory() return function()
 			end
 		end
 
-		for r in sel.tracks:routelist():iter() do
+		for r in tracks:iter() do
 			if r:is_monitor () or r:is_auditioner () then goto nextroute end -- skip special routes
 
 			local order = ARDOUR.ProcessorList()
@@ -118,93 +123,6 @@ function factory() return function()
 			end
 
 			route_str = "instance = {route_id = " .. rid .. ", route_name = " .. r:name() .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
-			file = io.open(path, "a")
-			file:write(route_str, "\r\n")
-			file:close()
-
-			local i = 0
-			while true do
-				local params = {}
-				local proc_str, params_str = "", ""
-				local proc = r:nth_plugin (i)
-				if proc:isnil () then break end
-				local active = proc:active()
-				local id = proc:to_stateful():id():to_s()
-				local plug = proc:to_insert ():plugin (0)
-				local n = 0 -- count control-ports
-				for j = 0, plug:parameter_count () - 1 do -- iterate over all plugin parameters
-					if plug:parameter_is_control (j) then
-						local label = plug:parameter_label (j)
-						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
-							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
-							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
-							--print(r:name(), "->", proc:display_name(), label, val)
-							params[n] = val
-						end
-						n = n + 1
-					end
-				end
-				i = i + 1
-				for k, v in pairs(params) do
-					params_str = params_str .. "[".. k .."] = " .. v .. ","
-				end
-				proc_str = "instance = {plugin_id = " .. id .. ", parameters = {" .. params_str .. "}, active = " .. tostring(active) .. "}"
-				file = io.open(path, "a")
-				file:write(proc_str, "\r\n")
-				file:close()
-			end
-			::nextroute::
-		end
-	end
-
-	function mark_all_tracks()
-		empty_last_store()
-
-		local i = 0
-		for g in Session:route_groups():iter() do --@ToDo: Color, and other bools
-			local g_route_str, group_str = "", ""
-			group_str = "instance = {group_id = " .. g:to_stateful():id():to_s() .. ", name = " .. "\"" .. g:name() .. "\"" .. ", routes = {"
-			for t in g:route_list():iter() do
-				g_route_str = g_route_str .."[".. i .."] = " .. t:to_stateful():id():to_s() .. ","
-				i = i + 1
-			end
-			group_str = group_str .. g_route_str .. "}}"
-			if not(group_str == "") then --sometimes there are no groups in the session
-				file = io.open(path, "a")
-				file:write(group_str, "\r\n")
-				file:close()
-			end
-		end
-
-		for r in Session:get_routes():iter() do
-			if r:is_monitor () or r:is_auditioner () then goto nextroute end -- skip special routes
-
-			local order = ARDOUR.ProcessorList()
-			local x = 0
-			repeat
-				local proc = r:nth_processor(x)
-				if not proc:isnil() then
-					order:push_back(proc)
-				end
-				x = x + 1
-			until proc:isnil()
-
-			local route_str, proc_order_str, cache_str = "", "", ""
-			local rid = r:to_stateful():id():to_s()
-			local pan = r:pan_azimuth_control()
-			if pan:isnil() then pan = false else pan = pan:get_value() end --sometimes a route doesn't have pan, like the master.
-
-			local on = 0
-			for p in order:iter() do
-				local pid = p:to_stateful():id():to_s()
-				if not(string.find(p:display_name(), "latcomp")) then
-					proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
-					cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
-				end
-				on = on + 1
-			end
-
-			route_str = "instance = {route_id = " .. rid .. ", route_name = '" .. r:name() .. "', gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
 			file = io.open(path, "a")
 			file:write(route_str, "\r\n")
 			file:close()
@@ -387,11 +305,7 @@ function factory() return function()
 			if srv then
 				empty_last_store() --ensures that params.lua will exist for the recall dialog
 				path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", srv["filename"] .. ".lua")
-				if srv['selected'] then
-					mark_selected_tracks()
-				else
-					mark_all_tracks()
-				end
+				mark_tracks(srv['selected'])
 			end
 		end
 
