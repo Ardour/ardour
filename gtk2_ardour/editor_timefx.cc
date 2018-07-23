@@ -208,7 +208,31 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		}
 	}
 
-	switch (rb_current_opt) {
+	int rb_mode = rb_current_opt;
+
+	if (pitching /*&& rb_current_opt == 6*/) {
+		/* The timefx dialog does not show the "stretch_opts_selector"
+		 * when pitch-shifting.  So the most recently used option from
+		 * "Time Stretch" would be used (if any). That may even be
+		 * "resample without preserving pitch", which would be invalid.
+		 *
+		 * TODO: also show stretch_opts_selector when pitching (except the option
+		 * to not preserve pitch) and use separate  rb_current_opt when pitching.
+		 *
+		 * Actually overhaul this the dialog and processing opts below and use rubberband's
+		 * "Crispness" levels:
+		 *   -c 0   equivalent to --no-transients --no-lamination --window-long
+		 *   -c 1   equivalent to --detector-soft --no-lamination --window-long (for piano)
+		 *   -c 2   equivalent to --no-transients --no-lamination
+		 *   -c 3   equivalent to --no-transients
+		 *   -c 4   equivalent to --bl-transients
+		 *   -c 5   default processing options
+		 *   -c 6   equivalent to --no-lamination --window-short (may be good for drums)
+		 */
+		rb_mode = 4;
+	}
+
+	switch (rb_mode) {
 		case 0:
 			transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
 			break;
