@@ -208,13 +208,6 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		}
 	}
 
-#ifndef NDEBUG
-	printf("TIME-FX: time: %f pitch: %f mode: %d\n",
-			current_timefx->request.time_fraction,
-			current_timefx->request.pitch_fraction,
-			rb_current_opt);
-#endif
-
 	switch (rb_current_opt) {
 		case 0:
 			transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
