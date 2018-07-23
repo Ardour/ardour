@@ -235,7 +235,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 			transients = NoTransients;
 			precise = true;
 			preserve_formants = false;
-			current_timefx->request.pitch_fraction = 1/val;
+			current_timefx->request.pitch_fraction = 1.0 / current_timefx->request.time_fraction;
 			shortwin = true;
 			// peaklock = false;
 			break;
