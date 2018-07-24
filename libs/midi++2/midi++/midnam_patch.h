@@ -117,7 +117,7 @@ typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
 class LIBMIDIPP_API PatchBank
 {
 public:
-	PatchBank (uint16_t n = 0, std::string a_name = std::string()) : _name(a_name), _number (n) {};
+	PatchBank (uint16_t n = UINT16_MAX, std::string a_name = std::string()) : _name(a_name), _number (n) {};
 	virtual ~PatchBank() { }
 
 	const std::string& name() const          { return _name; }
