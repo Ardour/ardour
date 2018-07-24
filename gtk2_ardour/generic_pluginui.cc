@@ -732,7 +732,6 @@ GenericPluginUI::midi_refill_patches ()
 				for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
 					const std::string pgm = (*j)->name ();
 					MIDI::Name::PatchPrimaryKey const& key = (*j)->patch_primary_key ();
-					assert ((*i)->number () == key.bank());
 					const uint32_t bp = (key.bank() << 7) | key.program();
 					midi_pgmsel[chn]->AddMenuElem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
 					pgm_names[bp] = pgm;

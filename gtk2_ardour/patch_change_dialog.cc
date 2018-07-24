@@ -116,9 +116,10 @@ PatchChangeDialog::PatchChangeDialog (
 	t->attach (_bank_lsb, 1, 2, r, r + 1);
 	++r;
 
+	assert (patch.bank() != UINT16_MAX);
+
 	_bank_msb.set_value ((patch.bank() >> 7));
 	_bank_msb.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
-
 	_bank_lsb.set_value ((patch.bank() & 127));
 	_bank_lsb.signal_changed().connect (sigc::mem_fun (*this, &PatchChangeDialog::bank_changed));
 
@@ -270,10 +271,12 @@ PatchChangeDialog::bank_combo_changed ()
 	fill_patch_combo ();
 	set_active_patch_combo ();
 
-	_ignore_signals = true;
-	_bank_msb.set_value (_current_patch_bank->number() >> 7);
-	_bank_lsb.set_value (_current_patch_bank->number() & 127);
-	_ignore_signals = false;
+	if (_current_patch_bank->number() != UINT16_MAX) {
+		_ignore_signals = true;
+		_bank_msb.set_value (_current_patch_bank->number() >> 7);
+		_bank_lsb.set_value (_current_patch_bank->number() & 127);
+		_ignore_signals = false;
+	}
 }
 
 /** Fill the contents of the patch combo */
@@ -345,6 +348,8 @@ PatchChangeDialog::patch_combo_changed ()
 		if (n == _patch_combo.get_active_text ()) {
 			_ignore_signals = true;
 			_program.set_value ((*j)->program_number() + 1);
+			_bank_msb.set_value ((*j)->bank_number() >> 7);
+			_bank_lsb.set_value ((*j)->bank_number() & 127);
 			_ignore_signals = false;
 			break;
 		}

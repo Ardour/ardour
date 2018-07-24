@@ -238,6 +238,9 @@ PatchChangeWidget::refill_banks ()
 	if (cns) {
 		for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
 			std::string n = (*i)->name ();
+			if ((*i)->number () == UINT16_MAX) {
+				continue;
+			}
 			_bank_select.AddMenuElem (MenuElemNoMnemonic (n, sigc::bind (sigc::mem_fun (*this, &PatchChangeWidget::select_bank), (*i)->number ())));
 			if ((*i)->number () == b) {
 				_current_patch_bank = *i;
