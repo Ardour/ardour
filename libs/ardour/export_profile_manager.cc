@@ -865,6 +865,8 @@ ExportProfileManager::get_warnings ()
 
 	/*** Check files ***/
 
+	bool folder_ok = true;
+
 	if (channel_config_state) {
 		FormatStateList::const_iterator format_it;
 		FilenameStateList::const_iterator filename_it;
@@ -872,7 +874,16 @@ ExportProfileManager::get_warnings ()
 		     format_it != formats.end() && filename_it != filenames.end();
 		     ++format_it, ++filename_it) {
 			check_config (warnings, timespan_state, channel_config_state, *format_it, *filename_it);
+
+			if (!Glib::file_test ((*filename_it)->filename->get_folder(), Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
+				folder_ok = false;
+			}
+
 		}
+	}
+
+	if (!folder_ok) {
+		warnings->errors.push_back (_("Destination folder does not exist."));
 	}
 
 	return warnings;
