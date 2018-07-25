@@ -131,7 +131,7 @@ ExportFilename::set_state (const XMLNode & node)
 		}
 	}
 
-	if (folder.empty()) {
+	if (folder.empty() || !Glib::file_test (folder, FileTest (FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 		folder = session.session_directory().export_path();
 	}
 
