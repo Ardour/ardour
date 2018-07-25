@@ -124,6 +124,8 @@ class LIBARDOUR_API ExportHandler : public ExportElementFactory, public sigc::tr
 	bool soundcloud_open_page;
 	bool soundcloud_downloadable;
 
+	void reset ();
+
   private:
 
 	void handle_duplicate_format_extensions();

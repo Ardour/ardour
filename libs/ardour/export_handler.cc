@@ -465,6 +465,13 @@ ExportHandler::finish_timespan ()
 	start_timespan ();
 }
 
+void
+ExportHandler::reset ()
+{
+	config_map.clear ();
+	graph_builder->reset ();
+}
+
 /*** CD Marker stuff ***/
 
 struct LocationSortByStart {
