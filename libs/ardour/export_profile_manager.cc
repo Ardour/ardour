@@ -149,6 +149,7 @@ ExportProfileManager::prepare_for_export ()
 	FormatStateList::const_iterator format_it;
 	FilenameStateList::const_iterator filename_it;
 
+	handler->reset ();
 	// For each timespan
 	for (TimespanList::iterator ts_it = ts_list->begin(); ts_it != ts_list->end(); ++ts_it) {
 		// ..., each format-filename pair
