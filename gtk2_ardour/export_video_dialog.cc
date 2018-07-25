@@ -771,6 +771,7 @@ ExportVideoDialog::launch_export ()
 
 	/* do sound export */
 	fmp->set_soundcloud_upload(false);
+	_session->get_export_handler()->reset ();
 	_session->get_export_handler()->add_export_config (tsp, ccp, fmp, fnp, b);
 	_session->get_export_handler()->do_export();
 	status = _session->get_export_status ();
