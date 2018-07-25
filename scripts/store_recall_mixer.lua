@@ -12,6 +12,20 @@ function factory() return function()
 	local invalidate = {}
 	local path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua")
 
+	function mismatch_dialog(mismatch_str, checkbox_str)
+		--string.format("Track didn't match ID: %d, but did match track in session: %s", 999, 'track')
+		local dialog = {
+			{ type = "label", colspan = 5, title = mismatch_str },
+			{ type = "checkbox", col=1, colspan = 1, key = "use", default = true, title = checkbox_str },
+		}
+		local mismatch_return = LuaDialog.Dialog("", dialog):run()
+		if mismatch_return then
+			return mismatch_return['use']
+		else
+			return false
+		end
+	end
+
 	function get_processor_by_name(track, name)
 		local i = 0
 		local proc = track:nth_processor(i)
@@ -64,7 +78,45 @@ function factory() return function()
 	end
 
 	function mark_tracks(selected)
+
 		empty_last_store()
+
+		local route_string = [[instance = {
+			 route_id = %d,
+			 route_name = '%s',
+			 gain_control = %f,
+			 trim_control = %f,
+			 pan_control = %s,
+			 muted = %s,
+			 soloed = %s,
+			 order = {%s},
+			 cache = {%s},
+			 group = %s
+		}]]
+
+		local group_string = [[instance = {
+			 group_id = %s,
+			 name = '%s',
+			 routes = {%s},
+		}]]
+
+		local processor_string = [[instance = {
+			 plugin_id = %d,
+			 display_name = '%s',
+			 owned_by_route_name = '%s',
+			 owned_by_route_id = %d,
+			 parameters = {%s},
+			 active = %s,
+		}]]
+
+		local group_route_string = " [%d] = %s,"
+		local proc_order_string  = " [%d] = %d,"
+		local proc_cache_string  = " [%d] = '%s',"
+		local params_string      = " [%d] = %f,"
+
+		local route_string     = string.gsub(route_string, "[\n\t]", "")
+		local group_string     = string.gsub(group_string, "[\n\t]", "")
+		local processor_string = string.gsub(processor_string, "[\n\t]", "")
 
 		local sel = Editor:get_selection ()
 		local groups_to_write = {}
@@ -74,24 +126,37 @@ function factory() return function()
 
 		if selected then tracks = sel.tracks:routelist() end
 
-		for r in sel.tracks:routelist():iter() do
+		for r in tracks:iter() do
 			local group = route_group_interrogate(r)
-			if group then groups_to_write[#groups_to_write + 1] = group end
+			if group then
+				local already_there = false
+				for _, v in pairs(groups_to_write) do
+					if group == v then
+						already_there = true
+					end
+				end
+				if not(already_there) then
+					groups_to_write[#groups_to_write + 1] = group
+				end
+			end
 		end
 
-		for k, g in pairs(groups_to_write) do
-			local g_route_str, group_str = "", ""
-			group_str = "instance = {group_id = " .. g:to_stateful():id():to_s() .. ", name = " .. "\"" .. g:name() .. "\"" .. ", routes = {"
+		for _, g in pairs(groups_to_write) do
+			local tmp_str = ""
 			for t in g:route_list():iter() do
-				g_route_str = g_route_str .."[".. i .."] = " .. t:to_stateful():id():to_s() .. ","
+				tmp_str = tmp_str .. string.format(group_route_string, i, t:to_stateful():id():to_s())
 				i = i + 1
 			end
-			group_str = group_str .. g_route_str .. "}}"
-			if not(group_str == "") then --sometimes there are no groups in the session
-				file = io.open(path, "a")
-				file:write(group_str, "\r\n")
-				file:close()
-			end
+			local group_str = string.format(
+				group_string,
+				g:to_stateful():id():to_s(),
+				g:name(),
+				tmp_str
+			)
+
+			file = io.open(path, "a")
+			file:write(group_str, "\r\n")
+			file:close()
 		end
 
 		for r in tracks:iter() do
@@ -107,30 +172,42 @@ function factory() return function()
 				x = x + 1
 			until proc:isnil()
 
-			local route_str, proc_order_str, cache_str = "", "", ""
 			local rid = r:to_stateful():id():to_s()
 			local pan = r:pan_azimuth_control()
 			if pan:isnil() then pan = false else pan = pan:get_value() end --sometimes a route doesn't have pan, like the master.
 
-			local on = 0
+			local order_nmbr = 0
+			local tmp_order_str, tmp_cache_str = "", ""
 			for p in order:iter() do
 				local pid = p:to_stateful():id():to_s()
 				if not(string.find(p:display_name(), "latcomp")) then
-					proc_order_str = proc_order_str .. "[" .. on .. "] = " .. pid ..","
-					cache_str = cache_str .. "[" .. pid .. "] = " .. "\"" .. p:display_name() .. "\"" ..","
+					tmp_order_str = tmp_order_str .. string.format(proc_order_string, order_nmbr, pid)
+					tmp_cache_str = tmp_cache_str .. string.format(proc_cache_string, pid, p:display_name())
 				end
-				on = on + 1
+				order_nmbr = order_nmbr + 1
 			end
 
-			route_str = "instance = {route_id = " .. rid .. ", route_name = " .. r:name() .. ", gain_control = " .. r:gain_control():get_value() .. ", trim_control = " .. r:trim_control():get_value() .. ", pan_control = " .. tostring(pan) .. ", muted = " .. tostring(r:muted()) .. ", soloed = " .. tostring(r:soloed()) .. ", order = {" .. proc_order_str .."}, cache = {" .. cache_str .. "}, group = " .. tostring(route_groupid_interrogate(r))  .. "}"
+			local route_str = string.format(
+					route_string,
+					rid,
+					r:name(),
+					r:gain_control():get_value(),
+					r:trim_control():get_value(),
+					tostring(pan),
+					r:muted(),
+					r:soloed(),
+					tmp_order_str,
+					tmp_cache_str,
+					route_groupid_interrogate(r)
+				)
+
 			file = io.open(path, "a")
-			file:write(route_str, "\r\n")
+			file:write(route_str, "\n")
 			file:close()
 
 			local i = 0
 			while true do
 				local params = {}
-				local proc_str, params_str = "", ""
 				local proc = r:nth_plugin (i)
 				if proc:isnil () then break end
 				local active = proc:active()
@@ -150,45 +227,81 @@ function factory() return function()
 					end
 				end
 				i = i + 1
+
+				local tmp_params_str = ""
 				for k, v in pairs(params) do
-					params_str = params_str .. "[".. k .."] = " .. v .. ","
+					tmp_params_str = tmp_params_str .. string.format(params_string, k, v)
 				end
-				proc_str = "instance = {plugin_id = " .. id .. ", parameters = {" .. params_str .. "}, active = " .. tostring(active) .. "}"
+
+				local proc_str = string.format(
+						processor_string,
+						id,
+						proc:display_name(),
+						r:name(),
+						r:to_stateful():id():to_s(),
+						tmp_params_str,
+						active
+					)
 				file = io.open(path, "a")
-				file:write(proc_str, "\r\n")
+				file:write(proc_str, "\n")
 				file:close()
 			end
 			::nextroute::
 		end
 	end
 
-	function recall()
+	function recall(debug, dry_run)
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
+
+		local i = 0
 		for l in file:lines() do
-			--print(l)
+			--print(i, l)
+
+			local exec_line = dry_run["dothis-"..i]
+			local skip_line = false
+			if not(exec_line == nil) and not(exec_line) then
+				skip_line = true
+			end
 
 			local plugin, route, group = false, false, false
 			local f = load(l)
-			f ()
+
+			if debug then
+				print(i, string.sub(l, 0, 29), f)
+			end
+
+			if f then f() end
 
 			if instance["route_id"]  then route = true end
 			if instance["plugin_id"] then plugin = true end
 			if instance["group_id"]  then group = true end
 
 			if group then
+				if skip_line then goto nextline end
+
 				local g_id   = instance["group_id"]
 				local routes = instance["routes"]
 				local name   = instance["name"]
 				local group  = group_by_id(g_id)
-				if not(group) then group = Session:new_route_group(name) end
-				for k, v in pairs(routes) do
-					local rt = Session:route_by_id(PBD.ID(v))
-					if not(rt:isnil()) then group:add(rt) end
+				if not(group) then
+					--local mis_str = string.format("Couldn't find group by ID: %s", g_id)
+					--local chk_str = string.format("Create group and use?")
+					--local continue = mismatch_dialog(mis_str, chk_str)
+
+					--if continue then
+					local group = Session:new_route_group(name)
+					for _, v in pairs(routes) do
+						local rt = Session:route_by_id(PBD.ID(v))
+						if rt:isnil() then rt = Session:route_by_name(name) end
+						if not(rt:isnil()) then group:add(rt) end
+					end
+					--end
 				end
 			end
 
 			if route then
+				if skip_line then goto nextline end
 
 				local old_order = ARDOUR.ProcessorList()
 				local r_id = PBD.ID(instance["route_id"])
@@ -245,6 +358,8 @@ function factory() return function()
 			end
 
 			if plugin then
+				if skip_line then goto nextline end
+
 				local enable = {}
 				local params = instance["parameters"]
 				local p_id   = instance["plugin_id"]
@@ -273,8 +388,85 @@ function factory() return function()
 				end
 				if act then proc:activate() else proc:deactivate() end
 			end
+
 			::nextline::
+			i = i + 1
+
 		end
+	end
+
+	function dry_run(debug)
+		--returns a dialog-able table of
+		--everything we do (logically)
+		--in the recall function
+
+		local i = 0
+		local dry_table = {{type = "label", key =  "col-1-title" , col = 1, colspan = 1, title = 'Do this?'}}
+		local file = io.open(path, "r")
+		assert(file, "File not found!")
+
+		for l in file:lines() do
+			local do_plugin, do_route, do_group = false, false, false
+			local f = load(l)
+
+			if debug then
+				print(i, string.sub(l, 0, 29), f)
+			end
+
+			if f then f() end
+
+			if instance["route_id"]  then do_route = true end
+			if instance["plugin_id"] then do_plugin = true end
+			if instance["group_id"]  then do_group = true end
+
+			if do_group then
+				local group_id   = instance["group_id"]
+				local group_name = instance["name"]
+				local dlg_title  = ""
+
+				local group_ptr  = group_by_id(group_id)
+
+				if not(group_ptr) then
+					new_group = Session:new_route_group(group_name)
+					dlg_title = string.format("Group: %s-> (will be created) %s", group_name, new_group:name())
+				else
+					dlg_title = string.format("Group ID Match: %s.", group_ptr:name())
+				end
+				table.insert(dry_table, {
+					type = "label", key =  "group-"..i , col = 0, colspan = 1, title = dlg_title
+				})
+				table.insert(dry_table, {
+					type = "checkbox", col=1, colspan = 1, key = "dothis-"..i, default = true, title = "line:"..i
+				})
+			end
+
+			if do_route then
+				local route_id   = instance["route_id"]
+				local route_name = instance["route_name"]
+				local dlg_title = ""
+
+				local route_ptr = Session:route_by_id(PBD.ID(route_id))
+
+				if route_ptr:isnil() then
+					route_ptr = Session:route_by_name(route_name)
+					if not(route_ptr:isnil()) then
+						dlg_title = string.format("Route: %s-> (found by name) %s", route_name, route_ptr:name())
+					else
+						dlg_title = string.format("Route: %s-> (cannot find matching ID or name) ????", route_name)
+					end
+				else
+					dlg_title = string.format("Route Found by ID: %s", route_ptr:name())
+				end
+				table.insert(dry_table, {
+					type = "label", key =  "route-"..i , col = 0, colspan = 1, title = dlg_title
+				})
+				table.insert(dry_table, {
+					type = "checkbox", col=1, colspan = 1, key = "dothis-"..i, default = true, title = "line:"..i
+				})
+			end
+			i = i + 1
+		end
+		return dry_table
 	end
 
 	local dialog_options = {
@@ -313,7 +505,9 @@ function factory() return function()
 			local rrv = LuaDialog.Dialog("Mixer Store:", recall_options):run()
 			if rrv then
 				if rrv['file'] ~= path then path = rrv['file'] end
-				recall()
+				--recall(true)
+				local dry_return = LuaDialog.Dialog("Dry Run Info:", dry_run(true)):run()
+				recall(true, dry_return)
 			end
 		end
 	end
