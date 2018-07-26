@@ -100,7 +100,9 @@ SMF::test(const std::string& path)
 	if (!test_smf) {
 		return false;
 	}
-	smf_delete(test_smf);
+	if (test_smf) {
+		smf_delete(test_smf);
+	}
 	return true;
 }
 
