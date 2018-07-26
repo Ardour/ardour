@@ -2512,6 +2512,22 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
 		     ));
 
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "grid-follows-internal",
+		     _("Grid switches to alternate selection for Internal Edit tools"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_grid_follows_internal),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_grid_follows_internal)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "rulers-follow-grid",
+		     _("Rulers automatically change to follow the Grid mode selection"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rulers_follow_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rulers_follow_grid)
+		     ));
+
 	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When \"Snap\" is enabled, snap to:")));
 
 

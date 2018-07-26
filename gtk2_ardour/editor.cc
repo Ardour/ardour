@@ -2216,7 +2216,7 @@ Editor::set_grid_to (GridType gt)
 
 	unsigned int grid_ind = (unsigned int)gt;
 
-	if (internal_editing()) {
+	if (internal_editing() && UIConfiguration::instance().get_grid_follows_internal()) {
 		internal_grid_type = gt;
 	} else {
 		pre_internal_grid_type = gt;
@@ -2236,43 +2236,48 @@ Editor::set_grid_to (GridType gt)
 	}
 
 	/* show appropriate rulers for this grid setting.
-	 * TODO: perhaps make this optional.
-	 * Currently this is 'required' because the RULER calculates the grid_marks which will be used by grid_lines
 	 */
 	if (grid_musical()) {
 		ruler_tempo_action->set_active(true);
 		ruler_meter_action->set_active(true);
-
 		ruler_bbt_action->set_active(true);
-		ruler_timecode_action->set_active(false);
-		ruler_minsec_action->set_active(false);
-		ruler_samples_action->set_active(false);
+
+		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
+			ruler_timecode_action->set_active(false);
+			ruler_minsec_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
 	} else if (_grid_type == GridTypeTimecode) {
-		ruler_tempo_action->set_active(false);
-		ruler_meter_action->set_active(false);
-
-		ruler_bbt_action->set_active(false);
 		ruler_timecode_action->set_active(true);
-		ruler_minsec_action->set_active(false);
-		ruler_samples_action->set_active(false);
+
+		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_minsec_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
 	} else if (_grid_type == GridTypeMinSec) {
-		ruler_tempo_action->set_active(false);
-		ruler_meter_action->set_active(false);
-
-		ruler_bbt_action->set_active(false);
-		ruler_timecode_action->set_active(false);
 		ruler_minsec_action->set_active(true);
-		ruler_samples_action->set_active(false);
+
+		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_timecode_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
 	} else if (_grid_type == GridTypeCDFrame) {
-		ruler_tempo_action->set_active(false);
-		ruler_meter_action->set_active(false);
-
-		ruler_bbt_action->set_active(false);
-		ruler_timecode_action->set_active(false);
+		ruler_cd_marker_action->set_active(true);
 		ruler_minsec_action->set_active(true);
 
-		ruler_cd_marker_action->set_active(true);
-		ruler_samples_action->set_active(false);
+		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_timecode_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
 	}
 
 	instant_save ();
