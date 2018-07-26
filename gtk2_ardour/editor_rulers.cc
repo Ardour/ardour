@@ -1004,7 +1004,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case GridTypeBeatDiv6:
-		bbt_beat_subdivision = 6;
+		bbt_beat_subdivision = 3;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case GridTypeBeatDiv7:
@@ -1012,39 +1012,39 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case GridTypeBeatDiv8:
-		bbt_beat_subdivision = 8;
+		bbt_beat_subdivision = 4;
 		bbt_accent_modulo = 2;
 		break;
 	case GridTypeBeatDiv10:
-		bbt_beat_subdivision = 10;
+		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 2; // XXX YIKES
 		break;
 	case GridTypeBeatDiv12:
-		bbt_beat_subdivision = 12;
+		bbt_beat_subdivision = 3;
 		bbt_accent_modulo = 3;
 		break;
 	case GridTypeBeatDiv14:
-		bbt_beat_subdivision = 14;
+		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 3; // XXX YIKES!
 		break;
 	case GridTypeBeatDiv16:
-		bbt_beat_subdivision = 16;
+		bbt_beat_subdivision = 4;
 		bbt_accent_modulo = 4;
 		break;
 	case GridTypeBeatDiv20:
-		bbt_beat_subdivision = 20;
+		bbt_beat_subdivision = 5;
 		bbt_accent_modulo = 5;
 		break;
 	case GridTypeBeatDiv24:
-		bbt_beat_subdivision = 24;
+		bbt_beat_subdivision = 6;
 		bbt_accent_modulo = 6;
 		break;
 	case GridTypeBeatDiv28:
-		bbt_beat_subdivision = 28;
+		bbt_beat_subdivision = 7;
 		bbt_accent_modulo = 7;
 		break;
 	case GridTypeBeatDiv32:
-		bbt_beat_subdivision = 32;
+		bbt_beat_subdivision = 4;
 		bbt_accent_modulo = 8;
 		break;
 	case GridTypeBar:
@@ -1078,35 +1078,37 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 	if (_grid_type == GridTypeBar) {
 		beat_density = fmax (beat_density, 16.01);
 	} else if (_grid_type == GridTypeBeat) {
-		beat_density = fmax (beat_density, 4.001);
+		beat_density = fmax (beat_density, 4.01);
+	}  else if (_grid_type == GridTypeBeatDiv2) {
+		beat_density = fmax (beat_density, 2.01);
 	}  else if (_grid_type == GridTypeBeatDiv4) {
-		beat_density = fmax (beat_density, 2.001);
-	} else if (_grid_type == GridTypeBeatDiv8) {
 		beat_density = fmax (beat_density, 1.001);
+	} else if (_grid_type == GridTypeBeatDiv8) {
+		beat_density = fmax (beat_density, 0.501);
 	} else if (_grid_type == GridTypeBeatDiv16) {
 		beat_density = fmax (beat_density, 0.2501);
 	} else if (_grid_type == GridTypeBeatDiv32) {
 		beat_density = fmax (beat_density, 0.12501);
 	}
 
-	if (beat_density > 8192) {
+	if (beat_density > 2048) {
 		bbt_ruler_scale = bbt_show_many;
-	} else if (beat_density > 1024) {
-		bbt_ruler_scale = bbt_show_64;
 	} else if (beat_density > 512) {
+		bbt_ruler_scale = bbt_show_64;
+	} else if (beat_density > 256) {
 		bbt_ruler_scale = bbt_show_16;
-	} else if (beat_density > 128) {
+	} else if (beat_density > 64) {
 		bbt_ruler_scale = bbt_show_4;
 	} else if (beat_density > 16) {
 		bbt_ruler_scale = bbt_show_1;
 	} else if (beat_density > 4) {
-		bbt_ruler_scale =  bbt_show_beats;
+		bbt_ruler_scale =  bbt_show_quarters;
+	} else  if (beat_density > 2) {
+		bbt_ruler_scale =  bbt_show_eighths;
 	} else  if (beat_density > 1) {
-		bbt_ruler_scale =  bbt_show_ticks;
-	} else  if (beat_density > 0.25) {
-		bbt_ruler_scale =  bbt_show_ticks_detail;
+		bbt_ruler_scale =  bbt_show_sixteenths;
 	} else {
-		bbt_ruler_scale =  bbt_show_ticks_super_detail;
+		bbt_ruler_scale =  bbt_show_thirtyseconds;
 	}
 }
 
@@ -1151,7 +1153,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	switch (bbt_ruler_scale) {
 
-	case bbt_show_beats:
+	case bbt_show_quarters:
 
 		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = beats + 2;
@@ -1186,7 +1188,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 		}
 		break;
 
-	case bbt_show_ticks:
+	case bbt_show_eighths:
 
 		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
@@ -1257,7 +1259,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	  break;
 
-	case bbt_show_ticks_detail:
+	case bbt_show_sixteenths:
 
 		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;
@@ -1333,7 +1335,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, gdouble l
 
 	  break;
 
-	case bbt_show_ticks_super_detail:
+	case bbt_show_thirtyseconds:
 
 		beats = distance (grid.begin(), grid.end());
 		bbt_nmarks = (beats + 2) * bbt_beat_subdivision;

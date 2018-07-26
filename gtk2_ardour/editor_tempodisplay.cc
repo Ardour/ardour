@@ -326,10 +326,10 @@ Editor::compute_current_bbt_points (std::vector<TempoMap::BBTPoint>& grid, sampl
 	const double lower_beat = floor (max (0.0, _session->tempo_map().beat_at_sample (leftmost))) - 1.0;
 	switch (bbt_ruler_scale) {
 
-	case bbt_show_beats:
-	case bbt_show_ticks:
-	case bbt_show_ticks_detail:
-	case bbt_show_ticks_super_detail:
+	case bbt_show_quarters:
+	case bbt_show_eighths:
+	case bbt_show_sixteenths:
+	case bbt_show_thirtyseconds:
 		_session->tempo_map().get_grid (grid, max (_session->tempo_map().sample_at_beat (lower_beat), (samplepos_t) 0), rightmost);
 		break;
 

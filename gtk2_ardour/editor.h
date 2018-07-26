@@ -959,10 +959,10 @@ private:
 		bbt_show_16,
 		bbt_show_4,
 		bbt_show_1,
-		bbt_show_beats,
-		bbt_show_ticks,
-		bbt_show_ticks_detail,
-		bbt_show_ticks_super_detail
+		bbt_show_quarters,
+		bbt_show_eighths,
+		bbt_show_sixteenths,
+		bbt_show_thirtyseconds
 	};
 
 	BBTRulerScale bbt_ruler_scale;
