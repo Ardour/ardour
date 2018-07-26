@@ -245,8 +245,18 @@ namespace ARDOUR {
 	};
 
 	enum SnapPref {
-		SnapToAny    = 0,   ///< Snaps to the closest of ( snap prefs, grid quantization )
-		SnapToGrid   = 1,   ///< Prefer snapping to the closest grid quantization, if a Grid selection is enabled
+		SnapToAny_Visual    = 0, /**< Snap to the editor's visual snap
+		                          * (incoprorating snap prefs and the current zoom scaling)
+		                          * this defines the behavior for visual mouse drags, for example */
+
+		SnapToGrid_Scaled   = 1, /**< Snap to the selected grid quantization with visual scaling.
+		                          * Ignores other snap preferences (markers, regions, etc)
+		                          * this defines the behavior for nudging the playhead to next/prev grid, for example */
+
+		SnapToGrid_Unscaled = 2, /**< Snap to the selected grid quantization.
+		                          * If one is selected, and ignore any visual scaling
+		                          * this is the behavior for automated processes like "snap regions to grid"
+		                          * but note that midi quantization uses its own mechanism, not the grid */
 	};
 
 	class AnyTime {
