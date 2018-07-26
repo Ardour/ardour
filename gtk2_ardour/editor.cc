@@ -2283,7 +2283,9 @@ Editor::set_grid_to (GridType gt)
 		grid_type_selector.set_text (str);
 	}
 
-	show_rulers_for_grid ();
+	if (UIConfiguration::instance().get_show_grids_ruler()) {
+		show_rulers_for_grid ();
+	}
 
 	instant_save ();
 
