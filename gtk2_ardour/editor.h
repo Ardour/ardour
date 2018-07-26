@@ -915,10 +915,9 @@ private:
 	bool ruler_label_button_release (GdkEventButton*);
 	void store_ruler_visibility ();
 	void restore_ruler_visibility ();
+	void show_rulers_for_grid ();
 
-
-
-		enum MinsecRulerScale {
+	enum MinsecRulerScale {
 		minsec_show_msecs,
 		minsec_show_seconds,
 		minsec_show_minutes,
@@ -1236,7 +1235,7 @@ private:
 	void toggle_mute ();
 	void toggle_region_lock_style ();
 
-	void play_solo_selection( bool restart );
+	void play_solo_selection (bool restart);
 
 	enum LayerOperation {
 		Raise,
@@ -2187,25 +2186,25 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	ARDOUR::MusicSample snap_to_minsec (  ARDOUR::MusicSample start,
-	                       				  ARDOUR::RoundMode   direction,
-	                       				  ARDOUR::SnapPref    gpref);
+	ARDOUR::MusicSample snap_to_minsec (ARDOUR::MusicSample start,
+	                                    ARDOUR::RoundMode   direction,
+	                                    ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_cd_frames (  ARDOUR::MusicSample start,
-	                       				     ARDOUR::RoundMode   direction,
-	                       				     ARDOUR::SnapPref    gpref );
+	ARDOUR::MusicSample snap_to_cd_frames (ARDOUR::MusicSample start,
+	                                       ARDOUR::RoundMode   direction,
+	                                       ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_bbt (   ARDOUR::MusicSample start,
-	                       				ARDOUR::RoundMode   direction,
-	                       				ARDOUR::SnapPref    gpref );
+	ARDOUR::MusicSample snap_to_bbt (ARDOUR::MusicSample start,
+	                                 ARDOUR::RoundMode   direction,
+	                                 ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_timecode (  ARDOUR::MusicSample start,
-	                       				    ARDOUR::RoundMode   direction,
-	                       				    ARDOUR::SnapPref    gpref );
+	ARDOUR::MusicSample snap_to_timecode (ARDOUR::MusicSample start,
+	                                      ARDOUR::RoundMode   direction,
+	                                      ARDOUR::SnapPref    gpref);
 
-	ARDOUR::MusicSample snap_to_grid (      ARDOUR::MusicSample start,
-	                       				    ARDOUR::RoundMode   direction,
-	                       				    ARDOUR::SnapPref    gpref );
+	ARDOUR::MusicSample snap_to_grid (ARDOUR::MusicSample start,
+	                                  ARDOUR::RoundMode   direction,
+	                                  ARDOUR::SnapPref    gpref);
 
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,

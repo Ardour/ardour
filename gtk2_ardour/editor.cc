@@ -2208,6 +2208,54 @@ Editor::snap_mode() const
 }
 
 void
+Editor::show_rulers_for_grid ()
+{
+	/* show appropriate rulers for this grid setting. */
+	if (grid_musical()) {
+		ruler_tempo_action->set_active(true);
+		ruler_meter_action->set_active(true);
+		ruler_bbt_action->set_active(true);
+
+		if (UIConfiguration::instance().get_rulers_follow_grid()) {
+			ruler_timecode_action->set_active(false);
+			ruler_minsec_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
+	} else if (_grid_type == GridTypeTimecode) {
+		ruler_timecode_action->set_active(true);
+
+		if (UIConfiguration::instance().get_rulers_follow_grid()) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_minsec_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
+	} else if (_grid_type == GridTypeMinSec) {
+		ruler_minsec_action->set_active(true);
+
+		if (UIConfiguration::instance().get_rulers_follow_grid()) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_timecode_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
+	} else if (_grid_type == GridTypeCDFrame) {
+		ruler_cd_marker_action->set_active(true);
+		ruler_minsec_action->set_active(true);
+
+		if (UIConfiguration::instance().get_rulers_follow_grid()) {
+			ruler_tempo_action->set_active(false);
+			ruler_meter_action->set_active(false);
+			ruler_bbt_action->set_active(false);
+			ruler_timecode_action->set_active(false);
+			ruler_samples_action->set_active(false);
+		}
+	}
+}
+
+void
 Editor::set_grid_to (GridType gt)
 {
 	if (_grid_type == gt) { // already set
@@ -2235,50 +2283,7 @@ Editor::set_grid_to (GridType gt)
 		grid_type_selector.set_text (str);
 	}
 
-	/* show appropriate rulers for this grid setting.
-	 */
-	if (grid_musical()) {
-		ruler_tempo_action->set_active(true);
-		ruler_meter_action->set_active(true);
-		ruler_bbt_action->set_active(true);
-
-		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
-			ruler_timecode_action->set_active(false);
-			ruler_minsec_action->set_active(false);
-			ruler_samples_action->set_active(false);
-		}
-	} else if (_grid_type == GridTypeTimecode) {
-		ruler_timecode_action->set_active(true);
-
-		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
-			ruler_tempo_action->set_active(false);
-			ruler_meter_action->set_active(false);
-			ruler_bbt_action->set_active(false);
-			ruler_minsec_action->set_active(false);
-			ruler_samples_action->set_active(false);
-		}
-	} else if (_grid_type == GridTypeMinSec) {
-		ruler_minsec_action->set_active(true);
-
-		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
-			ruler_tempo_action->set_active(false);
-			ruler_meter_action->set_active(false);
-			ruler_bbt_action->set_active(false);
-			ruler_timecode_action->set_active(false);
-			ruler_samples_action->set_active(false);
-		}
-	} else if (_grid_type == GridTypeCDFrame) {
-		ruler_cd_marker_action->set_active(true);
-		ruler_minsec_action->set_active(true);
-
-		if ( UIConfiguration::instance().get_rulers_follow_grid() ) {
-			ruler_tempo_action->set_active(false);
-			ruler_meter_action->set_active(false);
-			ruler_bbt_action->set_active(false);
-			ruler_timecode_action->set_active(false);
-			ruler_samples_action->set_active(false);
-		}
-	}
+	show_rulers_for_grid ();
 
 	instant_save ();
 
@@ -2740,13 +2745,13 @@ check_best_snap (samplepos_t presnap, samplepos_t &test, samplepos_t &dist, samp
 }
 
 MusicSample
-Editor::snap_to_timecode ( MusicSample presnap, RoundMode direction, SnapPref gpref )
+Editor::snap_to_timecode (MusicSample presnap, RoundMode direction, SnapPref gpref)
 {
 	samplepos_t start = presnap.sample;
 	const samplepos_t one_timecode_second = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame());
 	samplepos_t one_timecode_minute = (samplepos_t)(rint(_session->timecode_frames_per_second()) * _session->samples_per_timecode_frame() * 60);
 
-	TimecodeRulerScale scale = ( gpref != SnapToGrid_Unscaled ) ? timecode_ruler_scale : timecode_show_samples;
+	TimecodeRulerScale scale = (gpref != SnapToGrid_Unscaled) ? timecode_ruler_scale : timecode_show_samples;
 
 	switch (scale) {
 	case timecode_show_bits:
@@ -2814,7 +2819,7 @@ Editor::snap_to_timecode ( MusicSample presnap, RoundMode direction, SnapPref gp
 }
 
 MusicSample
-Editor::snap_to_minsec ( MusicSample presnap, RoundMode direction, SnapPref gpref )
+Editor::snap_to_minsec (MusicSample presnap, RoundMode direction, SnapPref gpref)
 {
 	MusicSample ret(presnap);
 	
@@ -2822,7 +2827,7 @@ Editor::snap_to_minsec ( MusicSample presnap, RoundMode direction, SnapPref gpre
 	const samplepos_t one_minute = one_second * 60;
 	const samplepos_t one_hour = one_minute * 60;
 
-	MinsecRulerScale scale = ( gpref != SnapToGrid_Unscaled ) ? minsec_ruler_scale : minsec_show_seconds;
+	MinsecRulerScale scale = (gpref != SnapToGrid_Unscaled) ? minsec_ruler_scale : minsec_show_seconds;
 
 	switch (scale) {
 		case minsec_show_msecs:
@@ -2864,10 +2869,10 @@ Editor::snap_to_minsec ( MusicSample presnap, RoundMode direction, SnapPref gpre
 }
 
 MusicSample
-Editor::snap_to_cd_frames ( MusicSample presnap, RoundMode direction, SnapPref gpref )
+Editor::snap_to_cd_frames (MusicSample presnap, RoundMode direction, SnapPref gpref)
 {
-	if ( (gpref != SnapToGrid_Unscaled) && (minsec_ruler_scale != minsec_show_msecs) ) {
-		return snap_to_minsec( presnap, direction, gpref );
+	if ((gpref != SnapToGrid_Unscaled) && (minsec_ruler_scale != minsec_show_msecs)) {
+		return snap_to_minsec (presnap, direction, gpref);
 	}	
 	
 	const samplepos_t one_second = _session->sample_rate();
@@ -2887,11 +2892,11 @@ Editor::snap_to_cd_frames ( MusicSample presnap, RoundMode direction, SnapPref g
 }
 
 MusicSample
-Editor::snap_to_bbt ( MusicSample presnap, RoundMode direction, SnapPref gpref )
+Editor::snap_to_bbt (MusicSample presnap, RoundMode direction, SnapPref gpref)
 {
 	MusicSample ret(presnap);
 	
-	if ( gpref != SnapToGrid_Unscaled ) {  //use the visual grid lines which are limited by the zoom scale that the user selected
+	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
 
 		int divisor = 2;
 		switch (_grid_type) {
@@ -2945,11 +2950,11 @@ Editor::snap_to_bbt ( MusicSample presnap, RoundMode direction, SnapPref gpref )
 }
 
 ARDOUR::MusicSample
-Editor::snap_to_grid (  MusicSample presnap, RoundMode direction, SnapPref gpref  )
+Editor::snap_to_grid (MusicSample presnap, RoundMode direction, SnapPref gpref)
 {
 	MusicSample ret(presnap);
 	
-	if ( grid_musical() ) {
+	if (grid_musical()) {
 		ret = snap_to_bbt (presnap, direction, gpref);
 	}
 	
@@ -3013,7 +3018,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	samplepos_t best = max_samplepos; // this records the best snap-result we've found so far
 
 	/* check snap-to-marker */
-	if ( (pref == SnapToAny_Visual) && UIConfiguration::instance().get_snap_to_marks()) {
+	if ((pref == SnapToAny_Visual) && UIConfiguration::instance().get_snap_to_marks()) {
 		test = snap_to_marker (presnap, direction);
 		check_best_snap(presnap, test, dist, best);
 	}
@@ -3052,7 +3057,7 @@ Editor::snap_to_internal (MusicSample& start, RoundMode direction, SnapPref pref
 	/* check Grid */
 	if (UIConfiguration::instance().get_snap_to_grid() && (_grid_type != GridTypeNone)) {
 		MusicSample pre(presnap, 0);
-		MusicSample post = snap_to_grid ( pre, direction, pref);
+		MusicSample post = snap_to_grid (pre, direction, pref);
 		check_best_snap(presnap, post.sample, dist, best);
 	}
 
