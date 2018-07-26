@@ -948,12 +948,12 @@ RegionView::snap_sample_to_sample (sampleoffset_t x, bool ensure_snap) const
 
 	/* try a snap in either direction */
 	MusicSample sample (session_sample, 0);
-	editor.snap_to (sample, RoundNearest, SnapToAny, false, ensure_snap);
+	editor.snap_to (sample, RoundNearest, SnapToAny_Visual, ensure_snap);
 
 	/* if we went off the beginning of the region, snap forwards */
 	if (sample.sample < _region->position ()) {
 		sample.sample = session_sample;
-		editor.snap_to (sample, RoundUpAlways, SnapToAny, false, ensure_snap);
+		editor.snap_to (sample, RoundUpAlways, SnapToAny_Visual, ensure_snap);
 	}
 
 	/* back to region relative, keeping the relevant divisor */

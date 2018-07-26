@@ -7151,7 +7151,7 @@ Editor::snap_regions_to_grid ()
 		(*r)->region()->clear_changes ();
 
 		MusicSample start ((*r)->region()->first_sample (), 0);
-		snap_to (start, RoundNearest, SnapToGrid);
+		snap_to (start, RoundNearest, SnapToGrid_Unscaled, true);
 		(*r)->region()->set_position (start.sample, start.division);
 		_session->add_command(new StatefulDiffCommand ((*r)->region()));
 	}
@@ -7369,7 +7369,7 @@ Editor::playhead_forward_to_grid ()
 		
 		if (pos.sample < max_samplepos - 1) {
 			pos.sample += 2;
-			snap_to_internal (pos, RoundUpAlways, SnapToGrid, false, true);
+			snap_to_internal (pos, RoundUpAlways, SnapToGrid_Scaled, true);
 			_session->request_locate (pos.sample);
 		}
 	}
@@ -7402,14 +7402,14 @@ Editor::playhead_backward_to_grid ()
 		
 		if (pos.sample > 2) {
 			pos.sample -= 2;
-			snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
+			snap_to_internal (pos, RoundDownAlways, SnapToGrid_Scaled, true);
 		}
 
 		//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 		//also see:  jump_backward_to_mark
 		if (_session->transport_rolling()) {
 			if ((playhead_cursor->current_sample() - pos.sample) < _session->sample_rate()/2) {
-				snap_to_internal (pos, RoundDownAlways, SnapToGrid, false, true);
+				snap_to_internal (pos, RoundDownAlways, SnapToGrid_Scaled, true);
 			}
 		}
 

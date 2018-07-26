@@ -3515,7 +3515,7 @@ MidiRegionView::nudge_notes (bool forward, bool fine)
 			next_pos.sample -= 1;
 		}
 
-		trackview.editor().snap_to (next_pos, (forward ? RoundUpAlways : RoundDownAlways), SnapToGrid, false);
+		trackview.editor().snap_to (next_pos, (forward ? RoundUpAlways : RoundDownAlways), SnapToGrid_Unscaled, false);
 		const samplecnt_t distance = ref_point - next_pos.sample;
 		delta = region_samples_to_region_beats (fabs ((double)distance));
 	}

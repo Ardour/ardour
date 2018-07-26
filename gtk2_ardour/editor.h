@@ -454,15 +454,13 @@ public:
 
 	void snap_to (ARDOUR::MusicSample& first,
 	              ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	              ARDOUR::SnapPref    pref = ARDOUR::SnapToAny,
-	              bool                for_mark  = false,
+	              ARDOUR::SnapPref    pref = ARDOUR::SnapToAny_Visual,
 	              bool                ensure_snap = false);
 
 	void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                            GdkEvent const *    ev,
 	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                            ARDOUR::SnapPref    pref = ARDOUR::SnapToAny,
-	                            bool                for_mark  = false);
+	                            ARDOUR::SnapPref    pref = ARDOUR::SnapToAny_Visual);
 
 	void set_snapped_cursor_position (samplepos_t pos);
 
@@ -2189,18 +2187,33 @@ private:
 	void select_next_stripable (bool routes_only = true);
 	void select_prev_stripable (bool routes_only = true);
 
-	samplepos_t snap_to_grid (      std::vector<ArdourCanvas::Ruler::Mark>  marks, 
-                                    samplepos_t                             presnap,
-                                    ARDOUR::RoundMode                       direction = ARDOUR::RoundNearest);
+	ARDOUR::MusicSample snap_to_minsec (  ARDOUR::MusicSample start,
+	                       				  ARDOUR::RoundMode   direction,
+	                       				  ARDOUR::SnapPref    gpref);
+
+	ARDOUR::MusicSample snap_to_cd_frames (  ARDOUR::MusicSample start,
+	                       				     ARDOUR::RoundMode   direction,
+	                       				     ARDOUR::SnapPref    gpref );
+
+	ARDOUR::MusicSample snap_to_bbt (   ARDOUR::MusicSample start,
+	                       				ARDOUR::RoundMode   direction,
+	                       				ARDOUR::SnapPref    gpref );
+
+	ARDOUR::MusicSample snap_to_timecode (  ARDOUR::MusicSample start,
+	                       				    ARDOUR::RoundMode   direction,
+	                       				    ARDOUR::SnapPref    gpref );
+
+	ARDOUR::MusicSample snap_to_grid (      ARDOUR::MusicSample start,
+	                       				    ARDOUR::RoundMode   direction,
+	                       				    ARDOUR::SnapPref    gpref );
 
 	void snap_to_internal (ARDOUR::MusicSample& first,
 	                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                       ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny,
-	                       bool                for_mark  = false,
+	                       ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
 	                       bool                ensure_snap = false);
 
-	samplepos_t marker_snap_to_internal (samplepos_t        presnap,
-	                                       ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
+	samplepos_t snap_to_marker (samplepos_t        presnap,
+	                            ARDOUR::RoundMode   direction = ARDOUR::RoundNearest);
 
 	RhythmFerret* rhythm_ferret;
 

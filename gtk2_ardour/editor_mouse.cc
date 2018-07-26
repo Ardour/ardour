@@ -317,10 +317,10 @@ Editor::mouse_mode_toggled (MouseMode m)
 	/* Switch snap type/mode if we're moving to/from an internal tool.  Note
 	   this must toggle the actions and not call set_snap_*() directly,
 	   otherwise things get out of sync and the combo box stops working. */
-	if (!UIConfiguration::instance().get_grid_follows_internal()) {
+ 	if (!UIConfiguration::instance().get_grid_follows_internal()) {
 		grid_type_action(pre_internal_grid_type)->set_active(true);
 		snap_mode_action(pre_internal_snap_mode)->set_active(true);
-	} else if (!was_internal && internal_editing()) {
+ 	} else if (!was_internal && internal_editing()) {
 		grid_type_action(internal_grid_type)->set_active(true);
 		snap_mode_action(internal_snap_mode)->set_active(true);
 	} else if (was_internal && !internal_editing()) {
@@ -1599,7 +1599,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MarkerBarItem:
 			if (!_dragging_playhead) {
-				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToGrid_Scaled);
 				mouse_add_new_marker (where.sample);
 			}
 			return true;
@@ -1607,7 +1607,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case CdMarkerBarItem:
 			if (!_dragging_playhead) {
 				/* if we get here then a dragged range wasn't done */
-				snap_to_with_modifier (where, event, RoundNearest, SnapToAny, true);
+				snap_to_with_modifier (where, event, RoundNearest, SnapToGrid_Scaled);
 				mouse_add_new_marker (where.sample, true);
 			}
 			return true;
