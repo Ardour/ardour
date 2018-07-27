@@ -58,6 +58,12 @@ function factory() return function()
 		end
 	end
 
+	function group_by_name(name)
+		for g in Session:route_groups():iter() do
+			if g:name() == name then return g end
+		end
+	end
+
 	function route_groupid_interrogate(t)
 		local group = false
 		for g in Session:route_groups():iter() do
@@ -95,7 +101,8 @@ function factory() return function()
 			 soloed = %s,
 			 order = {%s},
 			 cache = {%s},
-			 group = %s
+			 group = %s,
+			 group_name = '%s'
 		}]]
 
 		local group_string = [[instance = {
@@ -177,6 +184,8 @@ function factory() return function()
 				x = x + 1
 			until proc:isnil()
 
+			local route_group = route_group_interrogate(r)
+			if route_group then route_group = route_group:name() else route_group = "" end
 			local rid = r:to_stateful():id():to_s()
 			local pan = r:pan_azimuth_control()
 			if pan:isnil() then pan = false else pan = pan:get_value() end --sometimes a route doesn't have pan, like the master.
@@ -203,7 +212,8 @@ function factory() return function()
 					r:soloed(),
 					tmp_order_str,
 					tmp_cache_str,
-					route_groupid_interrogate(r)
+					route_groupid_interrogate(r),
+					route_group
 				)
 
 			file = io.open(path, "a")
@@ -310,6 +320,7 @@ function factory() return function()
 				local order = instance["order"]
 				local cache = instance["cache"]
 				local group = instance["group"]
+				local group_name = instance["group_name"]
 				local name  = instance["route_name"]
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
 
@@ -327,6 +338,9 @@ function factory() return function()
 					local g = group_by_id(cur_group_id)
 					if g then g:remove(rt) end
 				end
+
+				local rt_group = group_by_name(group_name)
+				if rt_group then rt_group:add(rt) end
 
 				well_known = {'PRE', 'Trim', 'EQ', 'Comp', 'Fader', 'POST'}
 
