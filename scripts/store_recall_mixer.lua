@@ -2,9 +2,13 @@ ardour {
 	["type"] = "EditorAction",
 	name = "Mixer Store",
 	author = "Ardour Lua Taskforce",
-	description = [[Stores the current Mixer state as a file that can be read and recalled arbitrarily.
-	Supports: processor settings, grouping, mute, solo, gain, trim, pan and processor ordering,
-	plus re-adding certain deleted plugins.]]
+	description = [[
+	Stores the current Mixer state as a file
+	that can be read and recalled arbitrarily.
+	Supports: processor settings, grouping,
+	mute, solo, gain, trim, pan and processor ordering,
+	plus re-adding certain deleted plugins.
+	]]
 }
 
 function factory() return function()
@@ -30,7 +34,7 @@ function factory() return function()
 		local i = 0
 		local proc = track:nth_processor(i)
 			repeat
-				if ( proc:display_name() == name ) then
+				if(proc:display_name() == name) then
 					return proc
 				else
 					i = i + 1
@@ -41,7 +45,7 @@ function factory() return function()
 
 	function new_plugin(name)
 		for x = 0, 6 do
-			plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
+			local plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
 			if not(plugin:isnil()) then return plugin end
 		end
 	end
@@ -114,6 +118,7 @@ function factory() return function()
 		local proc_cache_string  = " [%d] = '%s',"
 		local params_string      = " [%d] = %f,"
 
+		--ensure easy-to-read formatting doesn't make it through
 		local route_string     = string.gsub(route_string, "[\n\t]", "")
 		local group_string     = string.gsub(group_string, "[\n\t]", "")
 		local processor_string = string.gsub(processor_string, "[\n\t]", "")
@@ -285,25 +290,21 @@ function factory() return function()
 				local name   = instance["name"]
 				local group  = group_by_id(g_id)
 				if not(group) then
-					--local mis_str = string.format("Couldn't find group by ID: %s", g_id)
-					--local chk_str = string.format("Create group and use?")
-					--local continue = mismatch_dialog(mis_str, chk_str)
-
-					--if continue then
 					local group = Session:new_route_group(name)
 					for _, v in pairs(routes) do
 						local rt = Session:route_by_id(PBD.ID(v))
 						if rt:isnil() then rt = Session:route_by_name(name) end
 						if not(rt:isnil()) then group:add(rt) end
 					end
-					--end
 				end
 			end
 
 			if route then
-				if skip_line then goto nextline end
+				local substitution = tonumber(dry_run["destination-"..i])
+				if skip_line or (substitution == 0) then goto nextline end
 
 				local old_order = ARDOUR.ProcessorList()
+				local route_id = instance["route_id"]
 				local r_id = PBD.ID(instance["route_id"])
 				local muted, soloed = instance["muted"], instance["soloed"]
 				local order = instance["order"]
@@ -311,6 +312,11 @@ function factory() return function()
 				local group = instance["group"]
 				local name  = instance["route_name"]
 				local gc, tc, pc = instance["gain_control"], instance["trim_control"], instance["pan_control"]
+
+				if not(substitution == instance["route_id"]) then
+					print('SUBSTITUTION FOR: ', name, substitution, Session:route_by_id(PBD.ID(substitution)):name())
+					r_id = PBD.ID(substitution)
+				end
 
 				local rt = Session:route_by_id(r_id)
 				if rt:isnil() then rt = Session:route_by_name(name) end
@@ -399,9 +405,18 @@ function factory() return function()
 		--returns a dialog-able table of
 		--everything we do (logically)
 		--in the recall function
+		local route_values = {['----'] = "0"}
+		for r in Session:get_routes():iter() do
+			route_values[r:name()] =  r:to_stateful():id():to_s()
+		end
 
 		local i = 0
-		local dry_table = {{type = "label", key =  "col-1-title" , col = 1, colspan = 1, title = 'Do this?'}}
+		local dry_table = {
+			{type = "label", align = "left", key =  "col-0-title" , col = 0, colspan = 1, title = 'Source Settings:'},
+			{type = "label", align = "left", key =  "col-0-title" , col = 1, colspan = 1, title = 'Actions:'},
+			{type = "label", align = "left", key =  "col-2-title" , col = 2, colspan = 1, title = 'Destination:'},
+			{type = "label", align = "left", key =  "col-2-title" , col = 3, colspan = 1, title = 'Do this?'},
+		}
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
 
@@ -422,21 +437,26 @@ function factory() return function()
 			if do_group then
 				local group_id   = instance["group_id"]
 				local group_name = instance["name"]
-				local dlg_title  = ""
+				local dlg_title, action_title  = "", ""
 
 				local group_ptr  = group_by_id(group_id)
 
 				if not(group_ptr) then
 					new_group = Session:new_route_group(group_name)
-					dlg_title = string.format("Group: %s-> (will be created) %s", group_name, new_group:name())
+					dlg_title = string.format("Cannot Find: (Group) %s.", group_name, new_group:name())
+					action_title = "will create and use settings"
 				else
-					dlg_title = string.format("Group ID Match: %s.", group_ptr:name())
+					dlg_title = string.format("Found by ID: (Group) %s.", group_ptr:name())
+					action_title = "will use group settings"
 				end
 				table.insert(dry_table, {
-					type = "label", key =  "group-"..i , col = 0, colspan = 1, title = dlg_title
+					type = "label", align = "left", key =  "group-"..i , col = 0, colspan = 1, title = dlg_title
 				})
 				table.insert(dry_table, {
-					type = "checkbox", col=1, colspan = 1, key = "dothis-"..i, default = true, title = "line:"..i
+					type = "label", align = "left", key =  "group-"..i , col = 1, colspan = 1, title = action_title
+				})
+				table.insert(dry_table, {
+					type = "checkbox", col=3, colspan = 1, key = "dothis-"..i, default = true, title = "line:"..i
 				})
 			end
 
@@ -450,18 +470,28 @@ function factory() return function()
 				if route_ptr:isnil() then
 					route_ptr = Session:route_by_name(route_name)
 					if not(route_ptr:isnil()) then
-						dlg_title = string.format("Route: %s-> (found by name) %s", route_name, route_ptr:name())
+						dlg_title = string.format("Found by Name: (Rotue) %s", route_ptr:name())
+						action_title = "will use route settings"
 					else
-						dlg_title = string.format("Route: %s-> (cannot find matching ID or name) ????", route_name)
+						dlg_title = string.format("Cannot Find: (Route) %s", route_name)
+						action_title = "will be ignored"
 					end
 				else
-					dlg_title = string.format("Route Found by ID: %s", route_ptr:name())
+					dlg_title = string.format("Found by ID: (Route) %s", route_ptr:name())
+					action_title = "will use route settings"
 				end
+				if route_ptr:isnil() then name = route_name else name = route_ptr:name() end
 				table.insert(dry_table, {
-					type = "label", key =  "route-"..i , col = 0, colspan = 1, title = dlg_title
+					type = "label", align = "left", key = "route-"..i , col = 0, colspan = 1, title = dlg_title
 				})
 				table.insert(dry_table, {
-					type = "checkbox", col=1, colspan = 1, key = "dothis-"..i, default = true, title = "line:"..i
+					type = "label", align = "left", key = "action-"..i , col = 1, colspan = 1, title = action_title
+				})
+				table.insert(dry_table, {
+					type = "dropdown", align = "left", key = "destination-"..i, col = 2, colspan = 1, title = "", values = route_values, default = name or "----"
+				})
+				table.insert(dry_table, {
+					type = "checkbox", col=3, colspan = 1, key = "dothis-"..i, default = true, title = "line"..i
 				})
 			end
 			i = i + 1
@@ -506,8 +536,8 @@ function factory() return function()
 			if rrv then
 				if rrv['file'] ~= path then path = rrv['file'] end
 				--recall(true)
-				local dry_return = LuaDialog.Dialog("Dry Run Info:", dry_run(true)):run()
-				recall(true, dry_return)
+				local dry_return = LuaDialog.Dialog("Mixer Store:", dry_run(true)):run()
+				if dry_return then recall(true, dry_return) end
 			end
 		end
 	end
