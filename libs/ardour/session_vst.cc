@@ -492,8 +492,9 @@ intptr_t Session::vst_callback (
 	case audioMasterUpdateDisplay:
 		SHOW_CALLBACK ("audioMasterUpdateDisplay");
 		// something has changed, update 'multi-fx' display
-		if (effect) {
-			effect->dispatcher(effect, effEditIdle, 0, 0, NULL, 0.0f);
+		/* TODO: consider emitting  ParameterChangedExternally() for each ctrl input */
+		if (session) {
+			session->set_dirty ();
 		}
 		return 0;
 
