@@ -1740,6 +1740,10 @@ Session::use_sync_source (Slave* new_slave)
 {
 	/* Runs in process() context */
 
+	if (!_slave && !new_slave) {
+		return;
+	}
+
 	bool non_rt_required = false;
 
 	/* XXX this deletion is problematic because we're in RT context */
