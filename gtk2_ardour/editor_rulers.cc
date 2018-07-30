@@ -307,7 +307,6 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
 
 	_session->add_extra_xml (*node);
-	_session->set_dirty ();
 }
 
 void
