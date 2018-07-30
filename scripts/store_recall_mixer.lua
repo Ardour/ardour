@@ -268,6 +268,7 @@ function factory() return function()
 	function recall(debug, dry_run)
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
+		local bypass_routes = {}
 
 		local i = 0
 		for l in file:lines() do
@@ -311,7 +312,10 @@ function factory() return function()
 
 			if route then
 				local substitution = tonumber(dry_run["destination-"..i])
-				if skip_line or (substitution == 0) then goto nextline end
+				if skip_line or (substitution == 0) then
+					bypass_routes[#bypass_routes + 1] = instance["route_id"]
+					goto nextline
+				end
 
 				local old_order = ARDOUR.ProcessorList()
 				local route_id = instance["route_id"]
@@ -326,6 +330,8 @@ function factory() return function()
 
 				if not(substitution == instance["route_id"]) then
 					print('SUBSTITUTION FOR: ', name, substitution, Session:route_by_id(PBD.ID(substitution)):name())
+					--bypass_routes[#bypass_routes + 1] = route_id
+					was_subbed = true
 					r_id = PBD.ID(substitution)
 				end
 
@@ -345,7 +351,10 @@ function factory() return function()
 				well_known = {'PRE', 'Trim', 'EQ', 'Comp', 'Fader', 'POST'}
 
 				for k, v in pairs(order) do
-					local proc = Session:processor_by_id(PBD.ID(v))
+					local proc = Session:processor_by_id(PBD.ID(1))
+					if not(was_subbed) then
+						proc = Session:processor_by_id(PBD.ID(v))
+					end
 					if proc:isnil() then
 						for id, name in pairs(cache) do
 							if v == id then
@@ -368,17 +377,24 @@ function factory() return function()
 					::nextproc::
 					if proc and not(proc:isnil()) then old_order:push_back(proc) end
 				end
-
+				rt:reorder_processors(old_order, nil)
 				if muted  then rt:mute_control():set_value(1, 1) else rt:mute_control():set_value(0, 1) end
 				if soloed then rt:solo_control():set_value(1, 1) else rt:solo_control():set_value(0, 1) end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
 				if pc ~= false then rt:pan_azimuth_control():set_value(pc, 1) end
-				rt:reorder_processors(old_order, nil)
 			end
 
 			if plugin then
 				if skip_line then goto nextline end
+
+				--if the plugin is owned by a route
+				--we decided not to use, skip it
+				for _, v in pairs(bypass_routes) do
+					if instance["owned_by_route_id"] == v then
+						goto nextline
+					end
+				end
 
 				local enable = {}
 				local params = instance["parameters"]
