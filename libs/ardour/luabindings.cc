@@ -46,6 +46,7 @@
 #include "ardour/disk_writer.h"
 #include "ardour/dsp_filter.h"
 #include "ardour/file_source.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/fluid_synth.h"
 #include "ardour/interthread_info.h"
 #include "ardour/ltc_file_reader.h"
@@ -2050,6 +2051,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("NameAfterDriver", ARDOUR::TracksAutoNamingRule(NameAfterDriver))
 		.endNamespace ()
 
+		.endNamespace (); // end ARDOUR
+
+	luabridge::getGlobalNamespace (L)
+		.beginNamespace ("ARDOUR")
+		.addFunction ("user_config_directory", &ARDOUR::user_config_directory)
+		.addFunction ("user_cache_directory", &ARDOUR::user_cache_directory)
 		.endNamespace (); // end ARDOUR
 
 	luabridge::getGlobalNamespace (L)
