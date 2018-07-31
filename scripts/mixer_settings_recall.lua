@@ -30,6 +30,19 @@ function factory () return function ()
 		end return ok, err
 	end
 
+	function whoami()
+		if not pcall(function() local first_check = Session:get_mixbus(0) end) then
+			return "Ardour"
+		else
+			local second_check = Session:get_mixbus(11)
+			if second_check:isnil() then
+				return "Mixbus"
+			else
+				return "32C"
+			end
+		end
+	end
+
 	function isdir(path)
 		return exists(path.."/")
 	end
@@ -351,7 +364,7 @@ function factory () return function ()
 
 	local recall_options = {
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
-		{ type = "file",  col=0, colspan=10, align="left", key = "file", title = "Select a Settings File:",  path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua") },
+		{ type = "file",  col=0, colspan=15, align="left", key = "file", title = "Select a Settings File:",  path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua") },
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
 	}
 
@@ -362,7 +375,7 @@ function factory () return function ()
 	else
 		if gvld['recall-dir'] == 1 then
 			local global_ok = isdir(global_path)
-			local global_default_path = ARDOUR.LuaAPI.build_filename(global_path, 'factory_default.lua')
+			local global_default_path = ARDOUR.LuaAPI.build_filename(global_path, string.format("FactoryDefault-%s.lua", whoami()))
 			print(global_default_path)
 			if global_ok then
 				recall_options[2]['path'] = global_default_path

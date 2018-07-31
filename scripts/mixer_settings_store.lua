@@ -30,6 +30,19 @@ function factory () return function ()
 		end return ok, err
 	end
 
+	function whoami()
+		if not pcall(function() local first_check = Session:get_mixbus(0) end) then
+			return "Ardour"
+		else
+			local second_check = Session:get_mixbus(11)
+			if second_check:isnil() then
+				return "Mixbus"
+			else
+				return "32C"
+			end
+		end
+	end
+
 	function isdir(path)
 		return exists(path.."/")
 	end
@@ -40,7 +53,7 @@ function factory () return function ()
 		if not(isdir(global_path)) then
 			global_ok, _, _ = os.execute('mkdir '.. global_path)
 			if global_ok == 0 then
-				local default_file = ARDOUR.LuaAPI.build_filename(global_path, 'factory_default.lua')
+				local default_file = ARDOUR.LuaAPI.build_filename(global_path, 'FactoryDefault-'..whoami()..'.lua')
 				local file = io.open(default_file, "w")
 				file:write("")
 				file:close()
@@ -327,13 +340,13 @@ function factory () return function ()
 
 		local filename = rv['filename']
 		if rv['store-dir'] == 1 then
-			local store_path = ARDOUR.LuaAPI.build_filename(global_path, filename .. '.lua')
+			local store_path = ARDOUR.LuaAPI.build_filename(global_path, string.format("%s-%s.lua", filename, whoami()))
 			local selected = rv['selected']
 			mark_tracks(selected, store_path)
 		end
 
 		if rv['store-dir'] == 2 then
-			local store_path = ARDOUR.LuaAPI.build_filename(local_path, filename .. '.lua')
+			local store_path = ARDOUR.LuaAPI.build_filename(local_path, string.format("%s-%s.lua", filename, whoami()))
 			print(store_path)
 			local selected = rv['selected']
 			mark_tracks(selected, store_path)
