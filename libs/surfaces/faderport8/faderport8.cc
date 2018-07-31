@@ -89,6 +89,8 @@ debug_2byte_msg (std::string const& msg, int b0, int b1)
 FaderPort8::FaderPort8 (Session& s)
 #ifdef FADERPORT16
 	: ControlProtocol (s, _("PreSonus FaderPort16"))
+#elif defined FADERPORT2
+	: ControlProtocol (s, _("PreSonus FaderPort2"))
 #else
 	: ControlProtocol (s, _("PreSonus FaderPort8"))
 #endif
@@ -107,6 +109,7 @@ FaderPort8::FaderPort8 (Session& s)
 	, gui (0)
 	, _link_enabled (false)
 	, _link_locked (false)
+	, _chan_locked (false)
 	, _clock_mode (1)
 	, _scribble_mode (2)
 	, _two_line_text (false)
@@ -118,6 +121,9 @@ FaderPort8::FaderPort8 (Session& s)
 #ifdef FADERPORT16
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort16 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort16 Send", true);
+#elif defined FADERPORT2
+	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort2 Recv", true);
+	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort2 Send", true);
 #else
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort8 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort8 Send", true);
@@ -131,10 +137,13 @@ FaderPort8::FaderPort8 (Session& s)
 
 #ifdef FADERPORT16
 	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Receive)"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Send) "), false));
+	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort16 (Send)"), false));
+#elif defined FADERPORT2
+	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort2 (Receive)"), true));
+	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort2 (Send)"), false));
 #else
 	_input_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Receive)"), true));
-	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Send) "), false));
+	_output_bundle.reset (new ARDOUR::Bundle (_("FaderPort8 (Send)"), false));
 #endif
 
 	_input_bundle->add_channel (
@@ -309,7 +318,7 @@ FaderPort8::close ()
 	DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::close\n");
 	stop_midi_handling ();
 	session_connections.drop_connections ();
-	automation_state_connections.drop_connections ();
+	route_state_connections.drop_connections ();
 	assigned_stripable_connections.drop_connections ();
 	_assigned_strips.clear ();
 	drop_ctrl_connections ();
@@ -588,7 +597,15 @@ FaderPort8::controller_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		encoder_navigate (tb->value & dir_mask ? true : false, tb->value & step_mask);
 	}
 	if (tb->controller_number == 0x10) {
+#ifdef FADERPORT2
+		if (_ctrls.nav_mode() == NavPan) {
+			encoder_parameter (tb->value & dir_mask ? true : false, tb->value & step_mask);
+		} else {
+			encoder_navigate (tb->value & dir_mask ? true : false, tb->value & step_mask);
+		}
+#else
 		encoder_parameter (tb->value & dir_mask ? true : false, tb->value & step_mask);
+#endif
 	}
 }
 
@@ -973,6 +990,16 @@ FaderPort8::assign_stripables (bool select_only)
 	if (!select_only) {
 		set_periodic_display_mode (FP8Strip::Stripables);
 	}
+
+#ifdef FADERPORT2
+	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	if (s) {
+		_ctrls.strip(0).set_stripable (s, _ctrls.fader_mode() == ModePan);
+	} else {
+		_ctrls.strip(0).unset_controllables ( FP8Strip::CTRL_ALL );
+	}
+	return;
+#endif
 
 	int n_strips = strips.size();
 	int channel_off = get_channel_off (_ctrls.mix_mode ());
@@ -1752,7 +1779,7 @@ FaderPort8::notify_fader_mode_changed ()
 			break;
 	}
 	assign_strips ();
-	notify_automation_mode_changed ();
+	notify_route_state_changed ();
 }
 
 void
@@ -1828,6 +1855,20 @@ FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, co
 	}
 }
 
+#ifdef FADERPORT2
+void
+FaderPort8::stripable_selection_changed ()
+{
+	if (!_device_active || _chan_locked) {
+		return;
+	}
+	route_state_connections.drop_connections ();
+	assign_stripables (false);
+	subscribe_to_strip_signals ();
+}
+
+#else
+
 void
 FaderPort8::stripable_selection_changed ()
 {
@@ -1837,7 +1878,7 @@ FaderPort8::stripable_selection_changed ()
 		 */
 		return;
 	}
-	automation_state_connections.drop_connections();
+	route_state_connections.drop_connections();
 
 	switch (_ctrls.fader_mode ()) {
 		case ModePlugins:
@@ -1869,21 +1910,34 @@ FaderPort8::stripable_selection_changed ()
 		_ctrls.strip(id).select_button ().set_blinking (sel && s == first_selected_stripable ());
 	}
 
-	/* track automation-mode of primary selection */
+	subscribe_to_strip_signals ();
+}
+#endif
+
+void
+FaderPort8::subscribe_to_strip_signals ()
+{
+	/* keep track of automation-mode of primary selection, shared buttons */
 	boost::shared_ptr<Stripable> s = first_selected_stripable();
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac;
 		ac = s->gain_control();
 		if (ac && ac->alist()) {
-			ac->alist()->automation_state_changed.connect (automation_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_automation_mode_changed, this), this);
+			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
 		}
 		ac = s->pan_azimuth_control();
 		if (ac && ac->alist()) {
-			ac->alist()->automation_state_changed.connect (automation_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_automation_mode_changed, this), this);
+			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
 		}
+#ifdef FADERPORT2
+		ac = s->rec_enable_control();
+		if (ac) {
+			ac->Changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
+		}
+#endif
 	}
 	/* set lights */
-	notify_automation_mode_changed ();
+	notify_route_state_changed ();
 }
 
 
@@ -1968,6 +2022,12 @@ FaderPort8::select_prev_next (bool next)
 void
 FaderPort8::bank (bool down, bool page)
 {
+#ifdef FADERPORT2
+	// XXX this should preferably be in actions.cc
+	AccessAction ("Editor", down ? "select-prev-stripable" : "select-next-stripable");
+	return;
+#endif
+
 	int dt = page ? N_STRIPS : 1;
 	if (down) {
 		dt *= -1;

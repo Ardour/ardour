@@ -61,7 +61,11 @@ bool FP8ButtonInterface::force_change = false;
 
 FP8Controls::FP8Controls (FP8Base& b)
 	: _fadermode (ModeTrack)
+#ifdef FADERPORT2
+	, _navmode (NavScroll)
+#else
 	, _navmode (NavMaster)
+#endif
 	, _mixmode (MixAll)
 	, _display_timecode (false)
 {
@@ -72,6 +76,38 @@ FP8Controls::FP8Controls (FP8Base& b)
 	NEWBUTTON (0x5e, BtnPlay, false);
 	NEWBUTTON (0x5f, BtnRecord, false);
 
+#ifdef FADERPORT2
+
+	NEWSHIFTBUTTON (0x4a, BtnARead, BtnAOff, true);
+	NEWSHIFTBUTTON (0x4b, BtnAWrite, BtnATrim, true);
+	NEWSHIFTBUTTON (0x4d, BtnATouch, BtnALatch, true);
+
+	NEWSHIFTBUTTON (0x2e, BtnPrev, BtnUndo, false);
+	NEWSHIFTBUTTON (0x2f, BtnNext, BtnRedo, false);
+
+	NEWSHIFTBUTTON (0x2a, BtnPan, BtnFlip, true);  //TODO: Flip Pan knob to fader ...?
+
+	NEWSHIFTBUTTON (0x36, BtnChannel, BtnChanLock, true);
+
+	NEWSHIFTBUTTON (0x38, BtnScroll,  BtnZoom, true);
+
+	NEWSHIFTBUTTON (0x3a, BtnMaster,  BtnF1, false);
+	NEWSHIFTBUTTON (0x3b, BtnClick,   BtnF2, false);
+	NEWSHIFTBUTTON (0x3c, BtnSection, BtnF3, false);
+	NEWSHIFTBUTTON (0x3d, BtnMarker,  BtnF4, false);
+
+	//these buttons do not exist in FP2, but they need to exist in the ctrlmap:
+	NEWBUTTON (0x71, BtnBank, false);
+	NEWBUTTON (0x72, BtnF5, false);
+	NEWBUTTON (0x73, BtnF6, false);
+	NEWBUTTON (0x74, BtnF7, false);
+	NEWBUTTON (0x75, BtnF8, false);
+	NEWBUTTON (0x76, BtnUser1, false);
+	NEWBUTTON (0x77, BtnUser2, false);
+	NEWBUTTON (0x78, BtnUser3, false);
+	NEWBUTTON (0x79, BtnSave, false);
+
+#else
 	NEWSHIFTBUTTON (0x4a, BtnARead, BtnUser3, true);
 	NEWSHIFTBUTTON (0x4b, BtnAWrite, BtnUser2, true);
 	NEWSHIFTBUTTON (0x4c, BtnATrim, BtnRedo, true);
@@ -91,10 +127,12 @@ FP8Controls::FP8Controls (FP8Base& b)
 	NEWSHIFTBUTTON (0x3c, BtnSection, BtnF7, false);
 	NEWSHIFTBUTTON (0x3d, BtnMarker,  BtnF8, false);
 
+	NEWBUTTON (0x2a, BtnPan, false);
+#endif
+
 	NEWSHIFTBUTTON (0x28, BtnTrack, BtnTimecode, false);
 	NEWBUTTON (0x2b, BtnPlugins, false);
 	NEWBUTTON (0x29, BtnSend, false);
-	NEWBUTTON (0x2a, BtnPan, false);
 
 	NEWSHIFTBUTTON (0x00, BtnArm, BtnArmAll, false);
 	NEWBUTTON (0x01, BtnSoloClear, false);
@@ -131,6 +169,9 @@ FP8Controls::FP8Controls (FP8Base& b)
 	BindNav (BtnMaster,  NavMaster);
 	BindNav (BtnSection, NavSection);
 	BindNav (BtnMarker,  NavMarker);
+#ifdef FADERPORT2
+	BindNav (BtnPan,     NavPan);
+#endif
 
 #define BindFader(BTN, MODE)\
 	button (BTN).released.connect_same_thread (button_connections, boost::bind (&FP8Controls::set_fader_mode, this, MODE))
@@ -138,7 +179,9 @@ FP8Controls::FP8Controls (FP8Base& b)
 	BindFader (BtnTrack,   ModeTrack);
 	BindFader (BtnPlugins, ModePlugins);
 	BindFader (BtnSend,    ModeSend);
+#ifndef FADERPORT2
 	BindFader (BtnPan,     ModePan);
+#endif
 
 
 #define BindMix(BTN, MODE)\
@@ -260,6 +303,14 @@ FP8Controls::initialize ()
 	button (BtnMFX).set_color (0x0000ffff);
 	button (BtnMUser).set_color (0x0000ffff);
 
+#ifdef FADERPORT2
+	/* encoder mode-switches are orange, to match the Master switch physical color */
+	button (BtnLink).set_color (0x000000ff);
+	button (BtnChannel).set_color (0x0000ffff);
+	button (BtnScroll).set_color (0x0000ffff);
+	button (BtnPan).set_color (0xffffffff);
+#endif
+
 	for (uint8_t id = 0; id < N_STRIPS; ++id) {
 		chanstrip[id]->initialize ();
 	}
@@ -268,7 +319,11 @@ FP8Controls::initialize ()
 	all_lights_off ();
 
 	/* default modes */
+#ifdef FADERPORT2
+	button (BtnScroll).set_active (true);
+#else
 	button (BtnMaster).set_active (true);
+#endif
 	button (BtnTrack).set_active (true);
 	button (BtnMAll).set_active (true);
 	button (BtnTimecode).set_active (_display_timecode);
@@ -357,6 +412,9 @@ FP8Controls::set_nav_mode (NavigationMode m)
 	button (BtnMaster).set_active (m == NavMaster);
 	button (BtnSection).set_active (m == NavSection);
 	button (BtnMarker).set_active (m == NavMarker);
+#ifdef FADERPORT2
+	button (BtnPan).set_active (m == NavPan);
+#endif
 	_navmode = m;
 }
 

@@ -112,6 +112,10 @@ public:
 		BtnLink,
 		BtnLock,
 
+		/* FP2 only */
+		BtnChanLock,
+		BtnFlip
+
 	};
 
 	typedef std::map <ButtonId, std::string> UserButtonMap;
@@ -126,9 +130,15 @@ public:
 	PBD::Signal0<void> FaderModeChanged;
 	PBD::Signal0<void> MixModeChanged;
 
+#ifdef FADERPORT2
+	FP8Types::FaderMode fader_mode () const { return FP8Types::ModeTrack; }
+	FP8Types::MixMode mix_mode () const { return FP8Types::MixUser; }
+#else
 	FP8Types::FaderMode fader_mode () const { return _fadermode; }
-	FP8Types::NavigationMode nav_mode () const { return _navmode; }
 	FP8Types::MixMode mix_mode () const { return _mixmode; }
+#endif
+
+	FP8Types::NavigationMode nav_mode () const { return _navmode; }
 	bool display_timecode () const { return _display_timecode; }
 
 	FP8ButtonInterface& button (ButtonId id);

@@ -47,5 +47,18 @@ def build(bld):
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source       = list(fp8_16_sources)
+    obj.source      += [ 'faderport2_interface.cc' ]
+    obj.defines      = [ 'PACKAGE="ardour_faderport8"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'FADERPORT2' ]
+    obj.includes     = [ '.' ]
+    obj.name         = 'libardour_faderport2'
+    obj.target       = 'ardour_faderport2'
+    obj.uselib       = 'GTKMM GTK GDK XML'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
 def shutdown():
     autowaf.shutdown()

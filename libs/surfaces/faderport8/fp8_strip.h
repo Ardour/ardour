@@ -30,6 +30,8 @@
 
 #ifdef FADERPORT16
 # define N_STRIPS 16
+#elif defined FADERPORT2
+# define N_STRIPS 1
 #else
 # define N_STRIPS 8
 #endif

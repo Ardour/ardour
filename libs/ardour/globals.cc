@@ -578,6 +578,8 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	reserved_io_names[_("Mackie")] = false;
 	reserved_io_names[_("FaderPort Recv")] = false;
 	reserved_io_names[_("FaderPort Send")] = false;
+	reserved_io_names[_("FaderPort2 Recv")] = false;
+	reserved_io_names[_("FaderPort2 Send")] = false;
 	reserved_io_names[_("FaderPort8 Recv")] = false;
 	reserved_io_names[_("FaderPort8 Send")] = false;
 	reserved_io_names[_("FaderPort16 Recv")] = false;

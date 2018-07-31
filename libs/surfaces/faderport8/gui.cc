@@ -95,6 +95,8 @@ FP8GUI::FP8GUI (FaderPort8& p)
 	std::string data_file_path;
 #ifdef FADERPORT16
 	string name = "faderport16-small.png";
+#elif defined FADERPORT2
+	string name = ""; // TODO
 #else
 	string name = "faderport8-small.png";
 #endif

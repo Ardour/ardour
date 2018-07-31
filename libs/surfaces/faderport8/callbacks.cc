@@ -63,13 +63,13 @@ FaderPort8::send_session_state ()
 	notify_mute_changed ();
 	notify_parameter_changed ("clicking");
 
-	notify_automation_mode_changed (); // XXX (stip specific, see below)
+	notify_route_state_changed (); // XXX (stip specific, see below)
 }
 
 // TODO: AutomationState display of plugin & send automation
 // TODO: link/lock control AS.
 void
-FaderPort8::notify_automation_mode_changed ()
+FaderPort8::notify_route_state_changed ()
 {
 	boost::shared_ptr<Stripable> s = first_selected_stripable();
 	boost::shared_ptr<AutomationControl> ac;
@@ -92,6 +92,9 @@ FaderPort8::notify_automation_mode_changed ()
 		_ctrls.button (FP8Controls::BtnATouch).set_active (false);
 		_ctrls.button (FP8Controls::BtnARead).set_active (false);
 		_ctrls.button (FP8Controls::BtnAWrite).set_active (false);
+#ifdef FADERPORT2
+		_ctrls.button (FP8Controls::BtnArm).set_active (false);
+#endif
 		return;
 	}
 
@@ -101,6 +104,12 @@ FaderPort8::notify_automation_mode_changed ()
 	_ctrls.button (FP8Controls::BtnARead).set_active (as == Play);
 	_ctrls.button (FP8Controls::BtnAWrite).set_active (as == Write);
 	_ctrls.button (FP8Controls::BtnALatch).set_active (as == Latch);
+
+#ifdef FADERPORT2
+	/* handle the Faderport's track-arm button */
+	ac = s->rec_enable_control ();
+	_ctrls.button (FP8Controls::BtnArm).set_active (ac ? ac->get_value() : false);
+#endif
 }
 
 void

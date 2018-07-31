@@ -23,6 +23,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/session_configuration.h"
+#include "ardour/track.h"
 #include "ardour/types.h"
 
 #include "gtkmm2ext/actions.h"
@@ -38,6 +39,9 @@ using namespace ArdourSurface::FP_NAMESPACE::FP8Types;
 
 #define BindMethod(ID, CB) \
 	_ctrls.button (FP8Controls::ID).released.connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this));
+
+#define BindMethod2(ID, ACT, CB) \
+	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this));
 
 #define BindFunction(ID, ACT, CB, ...) \
 	_ctrls.button (FP8Controls::ID). ACT .connect_same_thread (button_connections, boost::bind (&FaderPort8:: CB, this, __VA_ARGS__));
@@ -57,11 +61,11 @@ _ctrls.button (ID).released.connect_same_thread (button_connections, boost::bind
 void
 FaderPort8::setup_actions ()
 {
-	BindMethod (BtnPlay, button_play);
-	BindMethod (BtnStop, button_stop);
-	BindMethod (BtnLoop, button_loop);
-	BindMethod (BtnRecord, button_record);
-	BindMethod (BtnClick, button_metronom);
+	BindMethod2 (BtnPlay, pressed, button_play);
+	BindMethod2 (BtnStop, pressed, button_stop);
+	BindMethod2 (BtnLoop, pressed, button_loop);
+	BindMethod2 (BtnRecord, pressed, button_record);
+	BindMethod2 (BtnClick, pressed, button_metronom);
 	BindAction (BtnRedo, "Editor", "redo");
 
 	BindAction (BtnSave, "Common", "Save");
@@ -93,7 +97,11 @@ FaderPort8::setup_actions ()
 	BindFunction (BtnALatch, released, button_automation, ARDOUR::Latch);
 
 	_ctrls.button (FP8Controls::BtnEncoder).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_encoder, this));
+#ifdef FADERPORT2
+	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_encoder, this));
+#else
 	_ctrls.button (FP8Controls::BtnParam).pressed.connect_same_thread (button_connections, boost::bind (&FaderPort8::button_parameter, this));
+#endif
 
 
 	BindMethod (BtnBypass, button_bypass);
@@ -104,6 +112,9 @@ FaderPort8::setup_actions ()
 
 	BindMethod (BtnLink, button_link);
 	BindMethod (BtnLock, button_lock);
+
+	BindMethod (BtnChanLock, button_chanlock);  //FP2 only
+	BindMethod (BtnFlip, button_flip);   //FP2 only
 
 	// user-specific
 	for (FP8Controls::UserButtonMap::const_iterator i = _ctrls.user_buttons ().begin ();
@@ -179,6 +190,20 @@ FaderPort8::button_open ()
 		AccessAction ("Common", "addExistingAudioFiles");
 	}
 }
+
+void
+FaderPort8::button_chanlock ()
+{
+	_chan_locked = !_chan_locked;
+
+	_ctrls.button (FP8Controls::BtnChannel).set_blinking (_chan_locked);
+}
+
+void
+FaderPort8::button_flip ()
+{
+}
+
 void
 FaderPort8::button_lock ()
 {
@@ -218,7 +243,7 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 	switch (fadermode) {
 		case ModePlugins:
 #if 0 // Plugin Control Automation Mode
-			for ( std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
+			for (std::list <ProcessorCtrl>::iterator i = _proc_params.begin(); i != _proc_params.end(); ++i) {
 				((*i).ac)->set_automation_state (as);
 			}
 #endif
@@ -450,11 +475,21 @@ FaderPort8::handle_encoder_link (int steps)
 void
 FaderPort8::button_arm (bool press)
 {
+#ifdef FADERPORT2
+	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	if (press && s) {
+		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(s);
+		if (t) {
+			t->rec_enable_control()->set_value (!t->rec_enable_control()->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
+#else
 	FaderMode fadermode = _ctrls.fader_mode ();
 	if (fadermode == ModeTrack || fadermode == ModePan) {
 		_ctrls.button (FP8Controls::BtnArm).set_active (press);
 		ARMButtonChange (press); /* EMIT SIGNAL */
 	}
+#endif
 }
 
 void
@@ -466,6 +501,7 @@ FaderPort8::button_prev_next (bool next)
 			break;
 		case NavMaster:
 		case NavScroll:
+		case NavPan:
 			bank (!next, false);
 			break;
 		case NavBank:
@@ -532,6 +568,8 @@ FaderPort8::button_encoder ()
 					ac->set_value (ac->normal(), PBD::Controllable::NoGroup);
 				}
 			}
+			break;
+		case NavPan:
 			break;
 		case NavSection:
 			// TODO nudge
@@ -619,6 +657,9 @@ FaderPort8::encoder_navigate (bool neg, int steps)
 			} else {
 				AccessAction ("Common", "nudge-playhead-forward");
 			}
+			break;
+		case NavPan:
+			abort(); /*NOTREACHED*/
 			break;
 	}
 }

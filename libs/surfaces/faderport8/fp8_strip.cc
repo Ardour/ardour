@@ -733,8 +733,10 @@ void
 FP8Strip::periodic ()
 {
 	periodic_update_fader ();
+#ifndef FADERPORT2
 	periodic_update_meter ();
 	if (_displaymode != PluginSelect && _displaymode != PluginParam) {
 		periodic_update_timecode (_base.clock_mode ());
 	}
+#endif
 }

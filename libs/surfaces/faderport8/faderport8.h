@@ -201,9 +201,10 @@ private:
 	void notify_pi_property_changed (const PBD::PropertyChange&);
 	void notify_stripable_property_changed (boost::weak_ptr<ARDOUR::Stripable>, const PBD::PropertyChange&);
 	void stripable_selection_changed ();
+	void subscribe_to_strip_signals ();
 
 	PBD::ScopedConnection selection_connection;
-	PBD::ScopedConnectionList automation_state_connections;
+	PBD::ScopedConnectionList route_state_connections;
 	PBD::ScopedConnectionList modechange_connections;
 	/* **************************************************************************/
 	struct ProcessorCtrl {
@@ -265,7 +266,7 @@ private:
 	void notify_history_changed ();
 	void notify_solo_changed ();
 	void notify_mute_changed ();
-	void notify_automation_mode_changed ();
+	void notify_route_state_changed ();
 	void notify_plugin_active_changed ();
 
 	/* actions */
@@ -289,6 +290,9 @@ private:
 	void button_automation (ARDOUR::AutoState);
 	void button_prev_next (bool);
 	void button_action (const std::string& group, const std::string& item);
+
+	void button_chanlock (); /* FP2 only */
+	void button_flip (); /* FP2 only */
 
 	void button_encoder ();
 	void button_parameter ();
@@ -316,6 +320,8 @@ private:
 	boost::weak_ptr<PBD::Controllable> _link_control;
 	bool _link_enabled;
 	bool _link_locked; // can only be true if _link_enabled
+
+	bool _chan_locked; /* FP2 only */
 
 	/* user prefs */
 	uint32_t _clock_mode;

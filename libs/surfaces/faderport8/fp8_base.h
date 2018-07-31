@@ -25,9 +25,11 @@
 #include "pbd/signals.h"
 
 #ifdef FADERPORT16
-#define FP_NAMESPACE FP16
+# define FP_NAMESPACE FP16
+#elif defined FADERPORT2
+# define FP_NAMESPACE FP2
 #else
-#define FP_NAMESPACE FP8
+# define FP_NAMESPACE FP8
 #endif
 
 namespace ArdourSurface { namespace FP_NAMESPACE {
@@ -157,7 +159,8 @@ namespace FP8Types {
 		NavBank,
 		NavMaster,
 		NavSection,
-		NavMarker
+		NavMarker,
+		NavPan /* FP2 only */
 	};
 
 	enum MixMode {
