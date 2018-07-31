@@ -115,6 +115,10 @@ public:
 
 #ifdef MIXBUS
 	bool is_channelstrip () const;
+	bool is_nonbypassable () const;
+#else
+	bool is_channelstrip () const { return false; }
+	bool is_nonbypassable () const { return false; }
 #endif
 
 	void set_input_map (uint32_t, ChanMapping);

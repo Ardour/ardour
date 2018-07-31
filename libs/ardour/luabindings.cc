@@ -1462,6 +1462,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("type", &PluginInsert::type)
 		.addFunction ("signal_latency", &PluginInsert::signal_latency)
 		.addFunction ("get_count", &PluginInsert::get_count)
+		.addFunction ("is_channelstrip", &PluginInsert::is_channelstrip)
+		.addFunction ("is_nonbypassable", &PluginInsert::is_channelstrip)
 		.endClass ()
 
 		.deriveWSPtrClass <ReadOnlyControl, PBD::StatefulDestructible> ("ReadOnlyControl")
