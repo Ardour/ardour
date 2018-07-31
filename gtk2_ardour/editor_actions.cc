@@ -758,12 +758,14 @@ Editor::trigger_script_by_name (const std::string script_name)
 			script_path = (*s)->path;
 
 			if (!Glib::file_test (script_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+#ifndef NDEBUG
 				cerr << "Lua Script action: path to " << script_path << " does not appear to be valid" << endl;
+#endif
 				return;
 			}
 
 			LuaState lua;
-			lua.Print.connect (&_lua_print);  //ToDo
+			lua.Print.connect (&_lua_print);
 			lua.sandbox (false);
 			lua_State* L = lua.getState();
 			LuaInstance::register_classes (L);
@@ -773,9 +775,6 @@ Editor::trigger_script_by_name (const std::string script_name)
 			lua.do_command ("function ardour () end");
 			lua.do_file (script_path);
 			luabridge::LuaRef args (luabridge::newTable (L));
-
-			//ToDo:  args?
-			//	args["how_many"]   = count;
 
 			try {
 				luabridge::LuaRef fn = luabridge::getGlobal (L, "factory");
@@ -787,12 +786,12 @@ Editor::trigger_script_by_name (const std::string script_name)
 			} catch (...) {
 				cerr << "Lua script failed: " << script_path << endl;
 			}
-				
-			continue;  //script found; we're done
+			return;
 		}
 	}
-
+#ifndef NDEBUG
 	cerr << "Lua script was not found: " << script_name << endl;
+#endif
 }
 
 void
