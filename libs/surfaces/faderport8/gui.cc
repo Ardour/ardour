@@ -179,6 +179,7 @@ FP8GUI::FP8GUI (FaderPort8& p)
 
 	row += 4;
 
+#ifndef FADERPORT2
 	hsep = manage(new Gtk::HSeparator);
 	table.attach (*hsep, 0, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 6);
 	row++;
@@ -200,6 +201,7 @@ FP8GUI::FP8GUI (FaderPort8& p)
 
 	table.attach (auto_pluginui_cb, 4, 8, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	row++;
+#endif
 
 	/* update the port connection combos */
 	update_port_combos ();

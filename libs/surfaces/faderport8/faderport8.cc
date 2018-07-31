@@ -757,9 +757,11 @@ FaderPort8::get_state ()
 	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
 	node.add_child_nocopy (*child);
 
+#ifndef FADERPORT2
 	node.set_property (X_("clock-mode"), _clock_mode);
 	node.set_property (X_("scribble-mode"), _scribble_mode);
 	node.set_property (X_("two-line-text"), _two_line_text);
+#endif
 
 	for (UserActionMap::const_iterator i = _user_action_map.begin (); i != _user_action_map.end (); ++i) {
 		if (i->second.empty()) {

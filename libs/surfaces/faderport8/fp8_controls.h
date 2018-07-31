@@ -56,7 +56,9 @@ public:
 		BtnUser2,
 		BtnUser3,
 
+#ifndef FADERPORT2
 		BtnFootswitch,
+#endif
 
 		// Pan/Param encoder press
 		BtnParam,
@@ -77,6 +79,9 @@ public:
 
 		BtnF1, BtnF2, BtnF3, BtnF4,
 		BtnF5, BtnF6, BtnF7, BtnF8,
+#ifdef FADERPORT2
+		BtnFootswitch,
+#endif
 
 		// FaderMode
 		BtnTrack,

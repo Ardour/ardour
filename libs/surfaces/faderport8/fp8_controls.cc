@@ -213,6 +213,13 @@ FP8Controls::FP8Controls (FP8Base& b)
 	_user_enum_to_str[ID]  = #ID; \
 	_user_buttons[ID]      = NAME;
 
+#ifdef FADERPORT2
+	REGISTER_ENUM (BtnF1        , "F1");
+	REGISTER_ENUM (BtnF2        , "F2");
+	REGISTER_ENUM (BtnF3        , "F3");
+	REGISTER_ENUM (BtnF4        , "F4");
+	REGISTER_ENUM (BtnFootswitch, "Footswitch");
+#else
 	REGISTER_ENUM (BtnFootswitch, "Footswitch");
 	REGISTER_ENUM (BtnUser1     , "User 1");
 	REGISTER_ENUM (BtnUser2     , "User 2");
@@ -225,6 +232,8 @@ FP8Controls::FP8Controls (FP8Base& b)
 	REGISTER_ENUM (BtnF6        , "F6");
 	REGISTER_ENUM (BtnF7        , "F7");
 	REGISTER_ENUM (BtnF8        , "F8");
+#endif
+
 #undef REGISTER_ENUM
 }
 
