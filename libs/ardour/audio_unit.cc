@@ -1329,8 +1329,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 	// preferred setting (provided by plugin_insert)
 	const int32_t preferred_out = out.n_audio ();
-	bool found = false;
-	bool exact_match = false;
 
 	/* kAudioUnitProperty_SupportedNumChannels
 	 * https://developer.apple.com/library/mac/documentation/MusicAudio/Conceptual/AudioUnitProgrammingGuide/TheAudioUnit/TheAudioUnit.html#//apple_ref/doc/uid/TP40003278-CH12-SW20
@@ -1358,28 +1356,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 	 *    Up to four input channels and up to eight output channels
 	 */
 
-	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
-
-		int32_t possible_in = i->first;
-		int32_t possible_out = i->second;
-
-		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
-			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
-						possible_in, possible_out,
-						in, out));
-
-			// exact match
-			_output_configs.insert (preferred_out);
-			exact_match = true;
-			found = true;
-			break;
-		}
-	}
-
-	/* now allow potentially "imprecise" matches */
 	int32_t audio_out = -1;
 	float penalty = 9999;
 	int32_t used_possible_in = 0;
+	bool found = false;
 #if defined (__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wtautological-compare"
@@ -1415,12 +1395,28 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 		DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tpossible in %1 possible out %2\n", possible_in, possible_out));
 
+		/* exact match */
+		if ((possible_in == audio_in) && (possible_out == preferred_out)) {
+			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
+						possible_in, possible_out,
+						in, out));
+			_output_configs.insert (preferred_out);
+			used_possible_in = possible_in;
+			audio_out = preferred_out;
+			/* Set penalty so low that this output configuration
+			 * will trump any other one */
+			penalty = -1
+			found = true;
+			break;
+		}
+
 		if (possible_out == 0) {
 			warning << string_compose (_("AU %1 has zero outputs - configuration ignored"), name()) << endmsg;
 			/* XXX surely this is just a send? (e.g. AUNetSend) */
 			continue;
 		}
 
+		/* now allow potentially "output-imprecise" matches */
 		if (possible_in == 0) {
 			/* no inputs, generators & instruments */
 			if (possible_out == -1) {
@@ -1559,18 +1555,13 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 		return false;
 	}
 
-	if (exact_match) {
-		out.set (DataType::MIDI, 0); // currently always zero
-		out.set (DataType::AUDIO, preferred_out);
-	} else {
-		if (used_possible_in < -2 && audio_in == 0) {
-			// input-port count cannot be zero, use as many ports
-			// as outputs, but at most abs(possible_in)
-			audio_input_cnt = max (1, min (audio_out, -used_possible_in));
-		}
-		out.set (DataType::MIDI, 0); /// XXX
-		out.set (DataType::AUDIO, audio_out);
+	if (used_possible_in < -2 && audio_in == 0) {
+		// input-port count cannot be zero, use as many ports
+		// as outputs, but at most abs(possible_in)
+		audio_input_cnt = max (1, min (audio_out, -used_possible_in));
 	}
+	out.set (DataType::MIDI, 0); /// XXX currently always zero
+	out.set (DataType::AUDIO, audio_out);
 	DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: in %1 out %2\n", in, out));
 
 #if defined (__clang__)
