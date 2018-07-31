@@ -1538,7 +1538,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			int32_t possible_out = i->second;
 
 			assert (possible_in > 0); // all other cases will have been matched above
-			assert (possible_out !=0 || possible_in !=0); // already handled above
 
 			imprecise->set (DataType::AUDIO, possible_in);
 			if (possible_out == -1 || possible_out == -2) {
