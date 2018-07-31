@@ -96,7 +96,7 @@ FP8GUI::FP8GUI (FaderPort8& p)
 #ifdef FADERPORT16
 	string name = "faderport16-small.png";
 #elif defined FADERPORT2
-	string name = ""; // TODO
+	string name = "faderport2018-small.png";
 #else
 	string name = "faderport8-small.png";
 #endif
@@ -166,7 +166,12 @@ FP8GUI::FP8GUI (FaderPort8& p)
 		align->add (*user_combo);
 		table.attach (*align, 3 * action_col + 1, 3 * action_col + 2, row + action_row, row + action_row + 1, AttachOptions(FILL|EXPAND), AttachOptions (0));
 
-		if (++action_row == 4) {
+#ifdef FADERPORT2
+		if (++action_row == 2)
+#else
+		if (++action_row == 4)
+#endif
+		{
 			action_row = 0;
 			++action_col;
 		}
