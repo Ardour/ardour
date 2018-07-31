@@ -1365,19 +1365,28 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 # pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
-#define FOUNDCFG(nch) {                            \
-  float p = fabsf ((float)(nch) - preferred_out);  \
-  _output_configs.insert (nch);                    \
-  if ((nch) > preferred_out) { p *= 1.1; }         \
+#define FOUNDCFG_IMPRECISE(in, out) {              \
+  float p = fabsf ((float)(out) - preferred_out);  \
+  if (in != audio_in) {                            \
+    p += 1000;                                     \
+  }                                                \
+  _output_configs.insert (out);                    \
+  if ((out) > preferred_out) { p *= 1.1; }         \
   if (p < penalty) {                               \
     used_possible_in = possible_in;                \
-    audio_out = (nch);                             \
+    audio_out = (out);                             \
+    if (imprecise) {                               \
+      imprecise->set (DataType::AUDIO, (in));      \
+    }                                              \
     penalty = p;                                   \
     found = true;                                  \
     variable_inputs = possible_in < 0;             \
     variable_outputs = possible_out < 0;           \
   }                                                \
 }
+
+#define FOUNDCFG(out)                              \
+  FOUNDCFG_IMPRECISE(audio_in, out)
 
 #define ANYTHINGGOES                               \
   _output_configs.insert (0);
@@ -1387,6 +1396,10 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
     _output_configs.insert (n);                    \
   }                                                \
 }
+
+	if (imprecise) {
+		*imprecise = in;
+	}
 
 	for (vector<pair<int,int> >::iterator i = io_configs.begin(); i != io_configs.end(); ++i) {
 
@@ -1458,12 +1471,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 		if (possible_in < -2 || possible_in > 0) {
 			/* specified number, exact or up to */
-			if (possible_in < -2 && audio_in > -possible_in && imprecise) {
-				// hide inputs ports
-				// XXX: this is really *input* imprecise and should have
-				// been part of the second pass below
-				imprecise->set (DataType::AUDIO, -possible_in);
-			}
 			if (possible_in < -2 && audio_in > -possible_in && !imprecise) {
 				/* request is too large */
 			} else if (possible_in > 0 && audio_in != possible_in) {
@@ -1482,6 +1489,14 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 				/* exact number of outputs */
 				FOUNDCFG (possible_out);
 			}
+			if (possible_in < -2 && audio_in > -possible_in && imprecise) {
+				// hide inputs ports
+				// XXX: this is really *input* imprecise and should have
+				// been part of the second pass below. Also, this change
+				// should only be applied when really selecting a corresponding
+				// configuration.
+				imprecise->set (DataType::AUDIO, -possible_in);
+			}
 		}
 
 	}
@@ -1494,15 +1509,14 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 
 			assert (possible_in > 0); // all other cases will have been matched above
 
-			imprecise->set (DataType::AUDIO, possible_in);
 			if (possible_out == -1 || possible_out == -2) {
-				FOUNDCFG (2);
+				FOUNDCFG_IMPRECISE (possible_in, 2);
 			} else if (possible_out < -2) {
 				/* explicitly variable number of outputs, pick maximum */
-				FOUNDCFG (min (-possible_out, preferred_out));
+				FOUNDCFG_IMPRECISE (possible_in, min (-possible_out, preferred_out));
 			} else {
 				/* exact number of outputs */
-				FOUNDCFG (possible_out);
+				FOUNDCFG_IMPRECISE (possible_in, possible_out);
 			}
 			// ideally we'll also find the closest, best matching
 			// input configuration with minimal output penalty...
