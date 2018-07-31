@@ -113,8 +113,10 @@ FaderPort8::setup_actions ()
 	BindMethod (BtnLink, button_link);
 	BindMethod (BtnLock, button_lock);
 
-	BindMethod (BtnChanLock, button_chanlock);  //FP2 only
-	BindMethod (BtnFlip, button_flip);   //FP2 only
+#ifdef FADERPORT2
+	BindMethod (BtnChanLock, button_chanlock);
+	BindMethod (BtnFlip, button_flip);
+#endif
 
 	// user-specific
 	for (FP8Controls::UserButtonMap::const_iterator i = _ctrls.user_buttons ().begin ();
