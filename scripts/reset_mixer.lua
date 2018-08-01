@@ -13,6 +13,7 @@ function factory() return function()
 		{ type = "checkbox", key = "mute",  default = true,  title = "Mute" },
 		{ type = "checkbox", key = "trim",  default = true,  title = "Trim + Phase" },
 		{ type = "checkbox", key = "plug",  default = true,  title = "Plug-ins" },
+		{ type = "checkbox", key = "sends", default = true,  title = "Sends and inserts" },
 		{ type = "checkbox", key = "dest",  default = false, title = "Remove plug-ins instead of bypassing?" },
 		{ type = "label", colspan="3", title = "" },
 		{ type = "label", colspan="3", title = "Note that this is a script which can be user-edited to match your needs." },
@@ -44,26 +45,21 @@ function factory() return function()
 			local proc = t:nth_processor (i)
 			local queue = {}
 
-			local protected = {
-			"recorder", "latcomp-", "player",
-			"Polarity", "Trim", "Fader",
-			"meter-", "main outs", "Monitor",
-			}
-
 			repeat
-				local name = proc:display_name()
-				--check if processor is foreign to us
-				protected_proc = false
-				for _, v in pairs(protected) do
-					if string.find(name, v) then
-						--processor is not foreign to us
-						protected_proc = true
+
+				if not(proc:to_ioprocessor():isnil()) then
+					--check if processor is a send or insert
+					if proc:to_ioprocessor():display_to_user() then
+						queue[#queue + 1] = proc
 					end
 				end
 
-				if not(protected_proc) and proc:display_to_user() then
-					print(name)
-					queue[#queue + 1] = proc
+				if not(proc:to_insert():isnil()) then
+					--check if processor is foreign to us
+					if not(proc:to_insert():is_channelstrip()) and proc:display_to_user() and not(proc:to_insert():is_nonbypassable()) then
+						--if it is, queue it for later
+						queue[#queue + 1] = proc
+					end
 				end
 
 				i = i + 1
@@ -71,7 +67,17 @@ function factory() return function()
 			until proc:isnil()
 
 			for p = 1, #queue do
+				if pref['sends'] then
+					if not(queue[p]:to_ioprocessor():isnil()) then
+						if not(pref["dest"]) then
+							queue[p]:deactivate()
+						else
+							t:remove_processor(queue[p], nil, true)
+						end
+					end
+				end
 				if pref['plug'] then
+					print(queue[p]:display_name())
 					if not(pref["dest"]) then
 						queue[p]:deactivate()
 					else
