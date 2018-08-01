@@ -313,13 +313,13 @@ function factory () return function ()
 	end
 
 	local store_options = {
-		{ type = "label",    col=0, colspan=1, align="right", title = "Settings name:" },
+		{ type = "label",    col=0, colspan=1, align="right", title = "Name:" },
 		{ type = "entry",    col=1, colspan=1, align="left" , key = "filename", default = Session:name(), title=""},
-		{ type = "label",    col=0, colspan=1, align="right", title = "Store Settings:" },
+		{ type = "label",    col=0, colspan=1, align="right", title = "Location:" },
 		{
 			type = "radio",  col=1, colspan=3, align="left", key = "store-dir", title = "", values =
 			{
-				['Global (accessible from any session)'] = 1, ['Locally (this session only)'] = 2
+				['Global (accessible from any session)'] = 1, ['Local (this session only)'] = 2
 			},
 			default = 'Locally (this session only)'
 		},
