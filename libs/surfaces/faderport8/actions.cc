@@ -499,8 +499,10 @@ FaderPort8::button_prev_next (bool next)
 {
 	switch (_ctrls.nav_mode()) {
 		case NavChannel:
+#ifndef FADERPORT2
 			select_prev_next (next);
 			break;
+#endif
 		case NavMaster:
 		case NavScroll:
 		case NavPan:
