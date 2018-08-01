@@ -1381,11 +1381,11 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 }
 
 #define FOUNDCFG_IMPRECISE(in, out) {              \
-  float p = fabsf ((float)(out) - preferred_out);  \
-  if (in != audio_in) {                            \
-    p += 1000;                                     \
-  }                                                \
-  if ((out) > preferred_out) { p *= 1.1; }         \
+  const float p =                                  \
+      fabsf ((float)(out) - preferred_out) *       \
+          (((out) > preferred_out) ? 1.1 : 1)      \
+      + fabsf ((float)(in) - audio_in) *           \
+          (((in) > audio_in) ? 275 : 250);         \
   FOUNDCFG_PENALTY(in, out, p);                    \
 }
 
@@ -1483,8 +1483,6 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 				 * Really imprecise only if desired_in != audio_in */
 				FOUNDCFG_IMPRECISE (desired_in, possible_out);
 			}
-			// ideally we'll also find the closest, best matching
-			// input configuration with minimal output penalty...
 		}
 
 	}
