@@ -275,10 +275,9 @@ function factory () return function ()
 
 		local i = 0
 		local dry_table = {
-			{type = "label", align="left", key="col-0-title", col=0, colspan=1, title = 'Source'},
-			{type = "label", align="left", key="col-2-title", col=1, colspan=1, title = 'Destination:'},
-			--{type = "label", align="left", key="col-0-title", col=1, colspan=1, title = 'Actions:'},
-			--{type = "label", align="left", key="col-2-title", col=3, colspan=1, title = 'Do this?'},
+			{type = "label", align="right", key="col-0-title", col=0, colspan=1, title = 'Settings:'},
+			{type = "label", align="right", key="col-1-title", col=1, colspan=1, title = 'Source:'},
+			{type = "label", align="left", key="col-2-title", col=2, colspan=1, title = 'Destination:'},
 		}
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
@@ -306,14 +305,17 @@ function factory () return function ()
 
 				if not(group_ptr) then
 					new_group = Session:new_route_group(group_name)
-					dlg_title = string.format("(Group) %s.", group_name, new_group:name())
+					dlg_title = string.format("%s.", group_name, new_group:name())
 					--action_title = "will create and use settings"
 				else
-					dlg_title = string.format("(Group) %s.", group_ptr:name())
+					dlg_title = string.format("%s.", group_ptr:name())
 					--action_title = "will use group settings"
 				end
 				table.insert(dry_table, {
-					type = "label", align = "left", key =  "group-"..i , col = 0, colspan = 1, title = dlg_title
+					type = "label", align="right", key =  "type-"..i , col = 0, colspan = 1, title = "(Group)"
+				})
+				table.insert(dry_table, {
+					type = "label", align="right", key =  "group-"..i , col = 1, colspan = 1, title = dlg_title
 				})
 			end
 
@@ -327,22 +329,25 @@ function factory () return function ()
 				if route_ptr:isnil() then
 					route_ptr = Session:route_by_name(route_name)
 					if not(route_ptr:isnil()) then
-						dlg_title = string.format("(Strip) %s", route_ptr:name())
+						dlg_title = string.format("%s", route_ptr:name())
 						--action_title = "will use route settings"
 					else
-						dlg_title = string.format("Strip) %s", route_name)
+						dlg_title = string.format("%s", route_name)
 						--action_title = "will be ignored"
 					end
 				else
-					dlg_title = string.format("(Strip) %s", route_ptr:name())
+					dlg_title = string.format("%s", route_ptr:name())
 					--action_title = "will use route settings"
 				end
 				if route_ptr:isnil() then name = route_name else name = route_ptr:name() end
 				table.insert(dry_table, {
-					type = "label", align = "left", key = "route-"..i , col = 0, colspan = 1, title = dlg_title
+					type = "label",    align="right", key = "type-"..i , col = 0, colspan = 1, title = "(Strip)"
 				})
 				table.insert(dry_table, {
-					type = "dropdown", align = "left", key = "destination-"..i, col = 1, colspan = 1, title = "", values = route_values, default = name or "----"
+					type = "label",    align="right", key = "route-"..i , col = 1, colspan = 1, title = dlg_title
+				})
+				table.insert(dry_table, {
+					type = "dropdown", align="left", key = "destination-"..i, col = 2, colspan = 1, title = "", values = route_values, default = name or "----"
 				})
 			end
 			i = i + 1
@@ -389,8 +394,7 @@ function factory () return function ()
 				end
 			else
 				LuaDialog.Message ("Recall Mixer Settings:",
-					global_path .. [[does not exist!
-					Please run Store Mixer Settings first.]],
+					global_path .. ' does not exist!\nPlease run Store Mixer Settings first.',
 					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 			end
 		end
@@ -411,8 +415,7 @@ function factory () return function ()
 				end
 			else
 				LuaDialog.Message ("Recall Mixer Settings:",
-					local_path .. [[does not exist!
-					Please run Store Mixer Settings first.]],
+					local_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
 					LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 			end
 		end

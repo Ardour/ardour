@@ -313,19 +313,19 @@ function factory () return function ()
 	end
 
 	local store_options = {
-		{ type = "label",    col=0, colspan=1, align="left", title = "Settings name:" },
-		{ type = "entry",    col=1, colspan=1, align="right" , key = "filename", default = Session:name(), title=""},
-		{ type = "label",    col=0, colspan=1, align="left", title = "Selected Tracks Only:" },
-		{ type = "checkbox", col=1, colspan=1, align="right",  key = "selected", default = false, title = ""},
-		{ type = "hseparator", title="", col=0, colspan = 3},
-		{ type = "label",    col=0, colspan=1, align="left", title = "Store Settings:" },
+		{ type = "label",    col=0, colspan=1, align="right", title = "Settings name:" },
+		{ type = "entry",    col=1, colspan=1, align="left" , key = "filename", default = Session:name(), title=""},
+		{ type = "label",    col=0, colspan=1, align="right", title = "Store Settings:" },
 		{
-			type = "radio",  col=1, colspan=3, align="right", key = "store-dir", title = "", values =
+			type = "radio",  col=1, colspan=3, align="left", key = "store-dir", title = "", values =
 			{
 				['Global (accessible from any session)'] = 1, ['Locally (this session only)'] = 2
 			},
 			default = 'Locally (this session only)'
 		},
+		{ type = "hseparator", title="", col=0, colspan = 3},
+		{ type = "label",    col=0, colspan=1, align="right", title = "Selected Tracks Only:" },
+		{ type = "checkbox", col=1, colspan=1, align="left",  key = "selected", default = false, title = ""},
 		--{ type = "label", col=0, colspan=2, align="left", title = ''},
 		--{ type = "label", col=0, colspan=2, align="left", title = "Global Path: " .. global_path},
 		--{ type = "label", col=0, colspan=2, align="left", title = "Local Path: "  .. local_path},
