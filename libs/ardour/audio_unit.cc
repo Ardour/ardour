@@ -1365,13 +1365,8 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 # pragma clang diagnostic ignored "-Wtautological-compare"
 #endif
 
-#define FOUNDCFG_IMPRECISE(in, out) {              \
-  float p = fabsf ((float)(out) - preferred_out);  \
-  if (in != audio_in) {                            \
-    p += 1000;                                     \
-  }                                                \
+#define FOUNDCFG_PENALTY(in, out, p) {             \
   _output_configs.insert (out);                    \
-  if ((out) > preferred_out) { p *= 1.1; }         \
   if (p < penalty) {                               \
     used_possible_in = possible_in;                \
     audio_out = (out);                             \
@@ -1383,6 +1378,15 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
     variable_inputs = possible_in < 0;             \
     variable_outputs = possible_out < 0;           \
   }                                                \
+}
+
+#define FOUNDCFG_IMPRECISE(in, out) {              \
+  float p = fabsf ((float)(out) - preferred_out);  \
+  if (in != audio_in) {                            \
+    p += 1000;                                     \
+  }                                                \
+  if ((out) > preferred_out) { p *= 1.1; }         \
+  FOUNDCFG_PENALTY(in, out, p);                    \
 }
 
 #define FOUNDCFG(out)                              \
@@ -1413,13 +1417,9 @@ AUPlugin::can_support_io_configuration (const ChanCount& in, ChanCount& out, Cha
 			DEBUG_TRACE (DEBUG::AudioUnits, string_compose ("\tCHOSEN: %1 in %2 out to match in %3 out %4\n",
 						possible_in, possible_out,
 						in, out));
-			_output_configs.insert (preferred_out);
-			used_possible_in = possible_in;
-			audio_out = preferred_out;
 			/* Set penalty so low that this output configuration
 			 * will trump any other one */
-			penalty = -1
-			found = true;
+			FOUNDCFG_PENALTY(audio_in, preferred_out, -1);
 			break;
 		}
 
