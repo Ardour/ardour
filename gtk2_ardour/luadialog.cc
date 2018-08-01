@@ -524,14 +524,8 @@ public:
 			switch (a) {
 				case Gtk::FILE_CHOOSER_ACTION_OPEN:
 				case Gtk::FILE_CHOOSER_ACTION_SAVE:
-					if (Glib::file_test (path, Glib::FILE_TEST_IS_REGULAR|Glib::FILE_TEST_EXISTS)) {
-						_fc.set_filename (path);
-					}
-					break;
 				case Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER:
-					if (Glib::file_test (path, Glib::FILE_TEST_IS_DIR|Glib::FILE_TEST_EXISTS)) {
-						_fc.set_filename (path);
-					}
+					_fc.set_filename (path);
 					break;
 				case Gtk::FILE_CHOOSER_ACTION_CREATE_FOLDER:
 					break;
