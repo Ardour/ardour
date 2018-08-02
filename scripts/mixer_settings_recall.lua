@@ -180,7 +180,7 @@ function factory () return function ()
 				if rt_group then rt_group:add(rt) end
 
 				well_known = {'PRE', 'Trim', 'EQ', 'Comp', 'Fader', 'POST'}
-
+				protected_instrument = false
 				for k, v in pairs(order) do
 					local proc = Session:processor_by_id(PBD.ID(1))
 					if not(was_subbed) then
@@ -207,6 +207,14 @@ function factory () return function ()
 					end
 					::nextproc::
 					if proc and not(proc:isnil()) then old_order:push_back(proc) end
+					if not(old_order:empty()) and not(protected_instrument) then
+						if not(rt:to_track():to_midi_track():isnil()) then
+							if not(rt:the_instrument():isnil()) then
+								protected_instrument = true
+								old_order:push_back(rt:the_instrument())
+							end
+						end
+					end
 				end
 				rt:reorder_processors(old_order, nil)
 				if muted  then rt:mute_control():set_value(1, 1) else rt:mute_control():set_value(0, 1) end
