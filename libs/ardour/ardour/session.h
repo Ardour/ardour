@@ -284,6 +284,8 @@ public:
 
 	boost::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 
+	RouteList get_routelist (bool mixer_order = false) const;
+
 	CoreSelection& selection () { return *_selection; }
 
 	/* because the set of Stripables consists of objects managed

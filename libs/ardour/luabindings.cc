@@ -2234,6 +2234,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_routes", &Session::get_routes)
 		.addFunction ("get_tracks", &Session::get_tracks)
 		.addFunction ("get_stripables", (StripableList (Session::*)() const)&Session::get_stripables)
+		.addFunction ("get_routelist", &Session::get_routelist)
+
 		.addFunction ("name", &Session::name)
 		.addFunction ("path", &Session::path)
 		.addFunction ("record_status", &Session::record_status)

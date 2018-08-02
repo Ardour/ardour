@@ -4313,6 +4313,16 @@ Session::get_stripables () const
 	return rv;
 }
 
+RouteList
+Session::get_routelist (bool mixer_order) const
+{
+	boost::shared_ptr<RouteList> r = routes.reader ();
+	RouteList rv;
+	rv.insert (rv.end(), r->begin(), r->end());
+	rv.sort (Stripable::Sorter (mixer_order));
+	return rv;
+}
+
 boost::shared_ptr<RouteList>
 Session::get_routes_with_internal_returns() const
 {
