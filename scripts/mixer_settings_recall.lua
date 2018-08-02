@@ -379,7 +379,7 @@ function factory () return function ()
 				recall_options[2]['path'] = global_default_path
 				local rv = LuaDialog.Dialog("Recall Mixer Settings:", recall_options):run()
 				if not(rv) then return end
-				local dry_return = LuaDialog.Dialog("Mixer Recall:", dry_run(false, rv['file'])):run()
+				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
 				if dry_return then
 					recall(false, rv['file'], dry_return)
 				else
@@ -400,7 +400,7 @@ function factory () return function ()
 				recall_options[2]['path'] = local_default_path
 				local rv = LuaDialog.Dialog("Recall Mixer Settings:", recall_options):run()
 				if not(rv) then return end
-				local dry_return = LuaDialog.Dialog("Mixer Recall:", dry_run(false, rv['file'])):run()
+				local dry_return = LuaDialog.Dialog("Recall Mixer Settings:", dry_run(false, rv['file'])):run()
 				if dry_return then
 					recall(true, rv['file'], dry_return)
 				else
