@@ -89,7 +89,10 @@ public:
 
 private:
 	Dialog (Dialog const&); // prevent copy construction
+	void table_size_alloc (Gtk::Allocation&);
+
 	ArdourDialog _ad;
+	Gtk::ScrolledWindow _scroller;
 	typedef std::vector<LuaDialogWidget*> DialogWidgets;
 	DialogWidgets _widgets;
 	std::string _title;

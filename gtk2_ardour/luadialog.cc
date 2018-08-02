@@ -710,7 +710,14 @@ Dialog::Dialog (std::string const& title, luabridge::LuaRef lr)
 	Gtk::Table* table = Gtk::manage (new Gtk::Table ());
 	table->set_col_spacings (20);
 	table->set_row_spacings (8);
-	_ad.get_vbox ()->pack_start (*table);
+	table->signal_size_allocate ().connect (sigc::mem_fun (this, &Dialog::table_size_alloc));
+
+	_scroller.set_shadow_type(Gtk::SHADOW_NONE);
+	_scroller.set_border_width(0);
+	_scroller.add (*table);
+	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_NEVER);
+
+	_ad.get_vbox ()->pack_start (_scroller);
 
 	int row = 0;
 	int last_end = -1;
@@ -770,4 +777,14 @@ Dialog::run (lua_State *L)
 	}
 	luabridge::push (L, rv);
 	return 1;
+}
+
+void
+Dialog::table_size_alloc (Gtk::Allocation& allocation)
+{
+	/* XXX: consider using 0.75 * screen-height instead of 512 */
+	if (allocation.get_height () > 512) {
+		_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		_ad.set_size_request (-1, 512);
+	}
 }
