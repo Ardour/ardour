@@ -47,19 +47,6 @@ function factory () return function ()
 		return exists(path.."/")
 	end
 
-	function fetch_valid_settings_file(directory, fallback)
-		local i, t, popen = 0, {}, io.popen
-		local pfile = popen('ls "'..directory..'"')
-		for filename in pfile:lines() do
-			i = i + 1
-			if string.find(filename, ".lua") then
-				return filename
-			end
-		end
-		pfile:close()
-		return fallback
-	end
-
 	function get_processor_by_name(track, name)
 		local i = 0
 		local proc = track:nth_processor(i)
@@ -379,7 +366,7 @@ function factory () return function ()
 
 	local recall_options = {
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
-		{ type = "file",  col=0, colspan=15, align="left", key = "file", title = "Select a Settings File:",  path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua") },
+		{ type = "file",  col=0, colspan=15, align="left", key = "file", title = "Select a Settings File",  path = ARDOUR.LuaAPI.build_filename(Session:path(), "export", "params.lua") },
 		{ type = "label", col=0, colspan=10, align="left", title = "" },
 	}
 
@@ -390,7 +377,7 @@ function factory () return function ()
 	else
 		if gvld['recall-dir'] == 1 then
 			local global_ok = isdir(global_path)
-			local global_default_path = ARDOUR.LuaAPI.build_filename(global_path, fetch_valid_settings_file(global_path, string.format("FactoryDefault-%s.lua", whoami())))
+			local global_default_path = ARDOUR.LuaAPI.build_filename(global_path, string.format("FactoryDefault-%s.lua", whoami()))
 			print(global_default_path)
 			if global_ok then
 				recall_options[2]['path'] = global_default_path
@@ -411,7 +398,7 @@ function factory () return function ()
 
 		if gvld['recall-dir'] == 2 then
 			local local_ok = isdir(local_path)
-			local local_default_path = ARDOUR.LuaAPI.build_filename(local_path, fetch_valid_settings_file(local_path))
+			local local_default_path = ARDOUR.LuaAPI.build_filename(local_path, 'asdf')
 			print(local_default_path)
 			if local_ok then
 				recall_options[2]['path'] = local_default_path

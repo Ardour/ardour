@@ -53,10 +53,6 @@ function factory () return function ()
 		if not(isdir(global_path)) then
 			global_ok, _, _ = os.execute('mkdir '.. global_path)
 			if global_ok == 0 then
-				local default_file = ARDOUR.LuaAPI.build_filename(global_path, 'FactoryDefault-'..whoami()..'.lua')
-				local file = io.open(default_file, "w")
-				file:write("")
-				file:close()
 				global_ok = true
 			end
 		else
@@ -65,10 +61,6 @@ function factory () return function ()
 		if not(isdir(local_path)) then
 			local_ok, _, _ = os.execute('mkdir '.. local_path)
 			if local_ok == 0 then
-				local stub_file = ARDOUR.LuaAPI.build_filename(local_path, 'stub')
-				local file = io.open(stub_file, "w")
-				file:write("")
-				file:close()
 				local_ok = true
 			end
 		else
