@@ -15,9 +15,6 @@ function factory() return function()
 		{ type = "checkbox", key = "plug",  default = true,  title = "Plug-ins" },
 		{ type = "checkbox", key = "sends", default = true,  title = "Sends and inserts" },
 		{ type = "checkbox", key = "dest",  default = false, title = "Remove plug-ins instead of bypassing?" },
-		{ type = "label", colspan="3", title = "" },
-		{ type = "label", colspan="3", title = "Note that this is a script which can be user-edited to match your needs." },
-		{ type = "label", colspan="3", title = "" },
 	}
 
 	local pref = LuaDialog.Dialog("Reset Mixer", dlg):run()

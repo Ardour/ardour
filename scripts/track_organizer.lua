@@ -63,12 +63,6 @@ function factory () return function ()
        }) --color
    end
 
-   table.insert(dialog_options, {
-      { type = "label", colspan="3", title = "" },
-      { type = "label", colspan="3", title = "Note that this is a script which can be user-edited to match your needs." },
-      { type = "label", colspan="3", title = "" },
-   })
-
    --run dialog_options
    local rv = LuaDialog.Dialog("Track Organizer", dialog_options):run()
    if not(rv) then goto script_end end
