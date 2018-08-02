@@ -174,7 +174,7 @@ function factory () return function ()
 		local groups_to_write = {}
 		local i = 0
 
-		local tracks = Session:get_routes()
+		local tracks = Session:get_stripables()
 
 		if selected then tracks = sel.tracks:routelist() end
 
@@ -212,10 +212,9 @@ function factory () return function ()
 		end
 
 		for r in tracks:iter() do
-			if r:is_monitor () or r:is_auditioner () then goto nextroute end -- skip special routes
-
-			print(r:name(), r:presentation_info_ptr():order())
-
+			if r:is_monitor () or r:is_auditioner () or not(r:to_vca():isnil()) then goto nextroute end -- skip special routes
+			r = r:to_route()
+			if r:isnil() then goto nextroute end
 			local order = ARDOUR.ProcessorList()
 			local x = 0
 			repeat
