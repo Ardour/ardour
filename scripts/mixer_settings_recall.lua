@@ -107,16 +107,14 @@ function factory () return function ()
 		for l in file:lines() do
 			--print(i, l)
 
-			local exec_line = dry_run["dothis-"..i]
+			local create_groups = dry_run["create_groups"]
 			local skip_line = false
-			if not(exec_line == nil) and not(exec_line) then
-				skip_line = true
-			end
 
 			local plugin, route, group = false, false, false
 			local f = load(l)
 
 			if debug then
+				--print('create_groups ' .. tostring(create_groups))
 				print(i, string.sub(l, 0, 29), f)
 			end
 
@@ -127,25 +125,25 @@ function factory () return function ()
 			if instance["group_id"]  then group = true end
 
 			if group then
-				if skip_line then goto nextline end
-
 				local g_id   = instance["group_id"]
 				local routes = instance["routes"]
 				local name   = instance["name"]
 				local group  = group_by_id(g_id)
 				if not(group) then
-					local group = Session:new_route_group(name)
-					for _, v in pairs(routes) do
-						local rt = Session:route_by_id(PBD.ID(v))
-						if rt:isnil() then rt = Session:route_by_name(name) end
-						if not(rt:isnil()) then group:add(rt) end
+					if create_groups then
+						local group = Session:new_route_group(name)
+						for _, v in pairs(routes) do
+							local rt = Session:route_by_id(PBD.ID(v))
+							if rt:isnil() then rt = Session:route_by_name(name) end
+							if not(rt:isnil()) then group:add(rt) end
+						end
 					end
 				end
 			end
 
 			if route then
 				local substitution = tonumber(dry_run["destination-"..i])
-				if skip_line or (substitution == 0) then
+				if substitution == 0 then
 					bypass_routes[#bypass_routes + 1] = instance["route_id"]
 					goto nextline
 				end
@@ -219,8 +217,6 @@ function factory () return function ()
 			end
 
 			if plugin then
-				if skip_line then goto nextline end
-
 				--if the plugin is owned by a route
 				--we decided not to use, skip it
 				for _, v in pairs(bypass_routes) do
@@ -280,7 +276,7 @@ function factory () return function ()
 		}
 		local file = io.open(path, "r")
 		assert(file, "File not found!")
-
+		pad = 0
 		for l in file:lines() do
 			local do_plugin, do_route, do_group = false, false, false
 			local f = load(l)
@@ -303,19 +299,16 @@ function factory () return function ()
 				local group_ptr  = group_by_id(group_id)
 
 				if not(group_ptr) then
-					new_group = Session:new_route_group(group_name)
-					dlg_title = string.format("(Group) %s.", group_name, new_group:name())
+					dlg_title = string.format("(Group) %s.", group_name)
 					--action_title = "will create and use settings"
 				else
 					dlg_title = string.format("(Group) %s.", group_ptr:name())
 					--action_title = "will use group settings"
 				end
 				table.insert(dry_table, {
-					type = "label", align="right", key =  "type-"..i , col = 0, colspan = 1, title = ""
+					order=pad, type = "label", align="right", key =  "group-"..i , col = 0, colspan = 1, title = dlg_title
 				})
-				table.insert(dry_table, {
-					type = "label", align="right", key =  "group-"..i , col = 1, colspan = 1, title = dlg_title
-				})
+				pad = pad + 1
 			end
 
 			if do_route then
@@ -341,14 +334,17 @@ function factory () return function ()
 				if route_ptr:isnil() then name = route_name else name = route_ptr:name() end
 
 				table.insert(dry_table, {
-					type = "label",    align="right", key = "route-"..i , col = 1, colspan = 1, title = dlg_title
+					order=instance['pi_order']+pad, type = "label",    align="right", key = "route-"..i , col = 0, colspan = 1, title = dlg_title
 				})
 				table.insert(dry_table, {
-					type = "dropdown", align="left", key = "destination-"..i, col = 2, colspan = 1, title = "", values = route_values, default = name or "----"
+					type = "dropdown", align="left", key = "destination-"..i, col = 1, colspan = 1, title = "", values = route_values, default = name or "----"
 				})
 			end
 			i = i + 1
 		end
+		table.insert(dry_table, {
+			type = "checkbox", col=0, colspan=2, align="left",  key = "create_groups", default = true, title = "Create Groups if necessary?"
+		})
 		return dry_table
 	end
 
@@ -406,7 +402,7 @@ function factory () return function ()
 				if not(rv) then return end
 				local dry_return = LuaDialog.Dialog("Mixer Store:", dry_run(false, rv['file'])):run()
 				if dry_return then
-					recall(false, rv['file'], dry_return)
+					recall(true, rv['file'], dry_return)
 				else
 					return
 				end

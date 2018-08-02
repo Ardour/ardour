@@ -141,7 +141,8 @@ function factory () return function ()
 			 order = {%s},
 			 cache = {%s},
 			 group = %s,
-			 group_name = '%s'
+			 group_name = '%s',
+			 pi_order = %d
 		}]]
 
 		local group_string = [[instance = {
@@ -213,6 +214,8 @@ function factory () return function ()
 		for r in tracks:iter() do
 			if r:is_monitor () or r:is_auditioner () then goto nextroute end -- skip special routes
 
+			print(r:name(), r:presentation_info_ptr():order())
+
 			local order = ARDOUR.ProcessorList()
 			local x = 0
 			repeat
@@ -252,7 +255,8 @@ function factory () return function ()
 					tmp_order_str,
 					tmp_cache_str,
 					route_groupid_interrogate(r),
-					route_group
+					route_group,
+					r:presentation_info_ptr():order()
 				)
 
 			file = io.open(path, "a")
