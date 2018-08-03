@@ -820,11 +820,11 @@ msgstr ""
 
 #: ardour_ui.cc:322 mixer_ui.cc:2210 mixer_ui.cc:2216
 msgid "Window|Mixer"
-msgstr "Finestra|Mixer"
+msgstr "Mixer"
 
 #: ardour_ui.cc:323
 msgid "Window|Preferences"
-msgstr ""
+msgstr "Preferenze"
 
 #: ardour_ui.cc:330
 msgid "Your configuration files were copied. You can now restart %1."
@@ -1180,7 +1180,7 @@ msgstr "Disco: <span foreground=\"%s\">%02dh:%02dm:%02ds</span>"
 #: ardour_ui.cc:1707
 #, c-format
 msgid "Timecode|TC: <span foreground=\"%s\">%s</span>"
-msgstr "Timecode|TC: <span foreground=\"%s\">%s</span>"
+msgstr "TC: <span foreground=\"%s\">%s</span>"
 
 #: ardour_ui.cc:1789
 msgid ""
@@ -2251,7 +2251,7 @@ msgstr ""
 
 #: ardour_ui_ed.cc:309 meterbridge.cc:214 meterbridge.cc:220
 msgid "Window|Meterbridge"
-msgstr "Finestra|Meterbridge"
+msgstr "Meterbridge"
 
 #: ardour_ui_ed.cc:311 midi_tracer.cc:45
 msgid "MIDI Tracer"
@@ -2263,7 +2263,7 @@ msgstr "Chat"
 
 #: ardour_ui_ed.cc:316
 msgid "Help|Manual"
-msgstr "Aiuto|Manuale"
+msgstr "Manuale"
 
 #: ardour_ui_ed.cc:317
 msgid "Manual|Reference"
@@ -2736,7 +2736,7 @@ msgstr "Nascondi traccia"
 #: automation_time_axis.cc:556 gain_meter.cc:230 generic_pluginui.cc:590
 #: generic_pluginui.cc:934 panner_ui.cc:151
 msgid "Automation|Manual"
-msgstr "Automazione|Manuale"
+msgstr "Manuale"
 
 #: automation_time_axis.cc:312 automation_time_axis.cc:373
 #: automation_time_axis.cc:561 editor.cc:2033 editor.cc:2111
@@ -3631,11 +3631,11 @@ msgstr ""
 
 #: editor.cc:3571 editor_actions.cc:335
 msgid "Command|Undo"
-msgstr "Comando|Annulla"
+msgstr "Annulla"
 
 #: editor.cc:3573
 msgid "Command|Undo (%1)"
-msgstr "Comando|Annulla (%1)"
+msgstr "Annulla (%1)"
 
 #: editor.cc:3580 editor_actions.cc:337 editor_actions.cc:338
 #: editor_actions.cc:339
@@ -6319,7 +6319,7 @@ msgstr ""
 
 #: editor_regions.cc:167
 msgid "Region position glued to Bars|Beats time?"
-msgstr "Posizione della regione incollata a battiti|battute?"
+msgstr "battute?"
 
 #: editor_regions.cc:168
 msgid "Region muted?"
@@ -10911,7 +10911,7 @@ msgstr "Questa impostazione avrà effetto quando %1 verrà riavviato."
 
 #: rc_option_editor.cc:1895
 msgid "Options|Undo"
-msgstr "Opzioni|Undo"
+msgstr "Undo"
 
 #: rc_option_editor.cc:1902
 msgid "Verify removal of last capture"
@@ -11778,7 +11778,7 @@ msgstr ""
 #: rc_option_editor.cc:3129 rc_option_editor.cc:3144 rc_option_editor.cc:3153
 #: rc_option_editor.cc:3161
 msgid "Preferences|GUI"
-msgstr "Preferenze|GUI"
+msgstr "GUI"
 
 #: rc_option_editor.cc:3045
 msgid "Possibly improve slow graphical performance (requires restart)"
@@ -12993,7 +12993,7 @@ msgstr "DJ Mixer"
 
 #: session_metadata_dialog.cc:778
 msgid "Metadata|Mixer"
-msgstr "Metadati|Mixer"
+msgstr "Mixer"
 
 #: session_metadata_dialog.cc:786
 msgid "School"
@@ -15448,25 +15448,25 @@ msgstr ""
 #~ msgstr "Inserisci regione dal catalogo delle regioni"
 
 #~ msgid "group|G"
-#~ msgstr "gruppo|G"
+#~ msgstr "G"
 
 #~ msgid "relative|Rel"
-#~ msgstr "relativo|Rel"
+#~ msgstr "Rel"
 
 #~ msgid "mute|M"
-#~ msgstr "muto|M"
+#~ msgstr "M"
 
 #~ msgid "solo|S"
-#~ msgstr "solo|S"
+#~ msgstr "S"
 
 #~ msgid "monitoring|Mon"
-#~ msgstr "monitoraggio|Mon"
+#~ msgstr "Mon"
 
 #~ msgid "selection|Sel"
-#~ msgstr "selezione|Sel"
+#~ msgstr "Sel"
 
 #~ msgid "active|A"
-#~ msgstr "attivo|A"
+#~ msgstr "A"
 
 #~ msgid "File Exists!"
 #~ msgstr "Il file esiste!"
