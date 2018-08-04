@@ -3407,7 +3407,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI Ports"),
 		    new BoolOption (
-			    "get-midi-input-follows-selection",
+			    "midi-input-follows-selection",
 			    _("MIDI input follows MIDI track selection"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
