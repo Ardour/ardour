@@ -123,7 +123,7 @@ public:
 	bool active() const { return _active; }
 	void set_active (bool yn, void *);
 
-	static std::string ensure_track_or_route_name(std::string, Session &);
+	std::string ensure_track_or_route_name (std::string) const;
 
 	std::string comment() { return _comment; }
 	void set_comment (std::string str, void *src);

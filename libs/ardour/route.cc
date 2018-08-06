@@ -272,14 +272,14 @@ Route::~Route ()
 }
 
 string
-Route::ensure_track_or_route_name(string name, Session &session)
+Route::ensure_track_or_route_name (string newname) const
 {
-	string newname = name;
-
-	while (!session.io_name_is_legal (newname)) {
+	while (!_session.io_name_is_legal (newname)) {
 		newname = bump_name_once (newname, ' ');
+		if (newname == name()) {
+			break;
+		}
 	}
-
 	return newname;
 }
 
@@ -4212,10 +4212,15 @@ Route::set_name (const string& str)
 		return true;
 	}
 
-	string name = Route::ensure_track_or_route_name (str, _session);
-	SessionObject::set_name (name);
+	string newname = Route::ensure_track_or_route_name (str);
 
-	bool ret = (_input->set_name(name) && _output->set_name(name));
+	if (newname == name()) {
+		return true;
+	}
+
+	SessionObject::set_name (newname);
+
+	bool ret = (_input->set_name(newname) && _output->set_name(newname));
 
 	if (ret) {
 		/* rename the main outs. Leave other IO processors
@@ -4225,7 +4230,7 @@ Route::set_name (const string& str)
 		 */
 
 		if (_main_outs) {
-			if (_main_outs->set_name (name)) {
+			if (_main_outs->set_name (newname)) {
 				/* XXX returning false here is stupid because
 				   we already changed the route name.
 				*/
