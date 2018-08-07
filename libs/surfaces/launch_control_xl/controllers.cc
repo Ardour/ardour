@@ -270,7 +270,7 @@ LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle
 		b = nn_note_button_map.find (middle + n);
 	}
 
-	TrackButton* button;
+	TrackButton* button = 0;
 
 	if (b != nn_note_button_map.end()) {
 		button = static_cast<TrackButton*>(b->second);
