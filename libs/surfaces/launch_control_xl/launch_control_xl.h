@@ -156,6 +156,7 @@ public:
 	struct LED {
 		LED(uint8_t i, LEDColor c, LaunchControlXL& l) : _index(i), _color(c), _flag(LEDFlag::Normal), lcxl(&l)  {}
 		LED(uint8_t i, LEDColor c, LEDFlag f, LaunchControlXL& lcxl) : _index(i), _color(c), _flag(f) {}
+		virtual ~LED() {}
 
 		LEDColor color() const { return _color; }
 		LEDFlag flag() const { return _flag; }
