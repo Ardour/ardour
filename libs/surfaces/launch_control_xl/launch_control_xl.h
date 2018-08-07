@@ -154,7 +154,7 @@ public:
 	};
 
 	struct LED {
-		LED(uint8_t i, LEDColor c, LaunchControlXL& l) : _index(i), _color(c), _flag(LEDFlag::Normal), lcxl(&l)  {}
+		LED(uint8_t i, LEDColor c, LaunchControlXL& l) : _index(i), _color(c), _flag(Normal), lcxl(&l)  {}
 		LED(uint8_t i, LEDColor c, LEDFlag f, LaunchControlXL& lcxl) : _index(i), _color(c), _flag(f) {}
 		virtual ~LED() {}
 
@@ -454,9 +454,9 @@ private:
 	void button_device();
 	void button_device_long_press();
 	void button_track_mode(TrackMode state);
-	void button_mute() { button_track_mode(TrackMode::TrackMute); }
-	void button_solo() { button_track_mode(TrackMode::TrackSolo); }
-	void button_record() { button_track_mode(TrackMode::TrackRecord); }
+	void button_mute() { button_track_mode(TrackMute); }
+	void button_solo() { button_track_mode(TrackSolo); }
+	void button_record() { button_track_mode(TrackRecord); }
 	void button_select_up();
 	void button_select_down();
 	void button_select_left();
