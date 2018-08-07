@@ -27,6 +27,7 @@ children = [
         'generic_midi',
         'mackie',
         'us2400',
+        'launch_control_xl',
 ]
 
 def options(opt):
@@ -50,7 +51,7 @@ def configure(conf):
         children += [ 'push2' ]
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
-    
+
     if conf.is_defined('HAVE_HIDAPI') and Options.options.maschine:
         children += [ 'maschine2' ]
         conf.define('BUILD_MASCHINE', 1)
@@ -85,6 +86,7 @@ def build(bld):
     bld.recurse('cc121')
     bld.recurse('mackie')
     bld.recurse('us2400')
+    bld.recurse('launch_control_xl')
 
     if bld.is_defined ('HAVE_LO'):
         bld.recurse('osc')
