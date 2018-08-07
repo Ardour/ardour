@@ -353,7 +353,8 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		copy_recurse (old_name, new_name);
 
-		/* presets */
+		/* plugin status */
+		g_mkdir_with_parents (Glib::build_filename (new_dir, plugin_metadata_dir_name).c_str(), 0755);
 
 		old_name = Glib::build_filename (old_dir, X_("plugin_statuses")); /* until 6.0 */
 		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
