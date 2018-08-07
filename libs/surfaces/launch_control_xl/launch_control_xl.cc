@@ -490,7 +490,7 @@ LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::Eve
 	// DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 
 	CCControllerButtonMap::iterator b = cc_controller_button_map.find (ev->controller_number);
- 	CCFaderMap::iterator f = cc_fader_map.find (ev->controller_number);
+	CCFaderMap::iterator f = cc_fader_map.find (ev->controller_number);
 	CCKnobMap::iterator k = cc_knob_map.find (ev->controller_number);
 
 	if (b != cc_controller_button_map.end()) {
@@ -524,9 +524,9 @@ LaunchControlXL::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventT
 	 NNNoteButtonMap::iterator b = nn_note_button_map.find (ev->controller_number);
 
 	 if (b != nn_note_button_map.end()) {
- 		Button* button = b->second;
- 		handle_button_message(button, ev);
- 	}
+		Button* button = b->second;
+		handle_button_message(button, ev);
+	}
 }
 
 void LaunchControlXL::handle_midi_note_off_message(MIDI::Parser & parser, MIDI::EventTwoBytes *ev, MIDI::channel_t chan)
