@@ -268,7 +268,7 @@ public:
 
 	struct SelectButton : public ControllerButton, public LED {
 		SelectButton(ButtonID id, uint8_t cn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
-			: ControllerButton(id, cn, press), LED(index, LEDColor::RedFull, l) {}
+			: ControllerButton(id, cn, press), LED(index, RedFull, l) {}
 
 		MidiByteArray state_msg(bool light) const;
 	};
@@ -276,20 +276,20 @@ public:
 	struct TrackStateButton : public NoteButton, public LED {
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
 			: NoteButton(id, nn, press)
-			, LED(index, LEDColor::Yellow, l) {}
+			, LED(index, Yellow, l) {}
 
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
 				void (LaunchControlXL::*release)(),
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release)
-			, LED(index, LEDColor::Yellow, l) {}
+			, LED(index, Yellow, l) {}
 
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
 				void (LaunchControlXL::*release)(),
 				void (LaunchControlXL::*release_long)(),
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release, release_long)
-			, LED(index, LEDColor::Yellow, l) {}
+			, LED(index, Yellow, l) {}
 
 		MidiByteArray state_msg(bool light) const;
 	};
