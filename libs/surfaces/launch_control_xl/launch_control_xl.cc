@@ -116,6 +116,8 @@ LaunchControlXL::~LaunchControlXL ()
 	/* do this before stopping the event loop, so that we don't get any notifications */
 	port_reg_connection.disconnect ();
 	port_connection.disconnect ();
+	session_connections.drop_connections ();
+	stripable_connections.drop_connections ();
 
 	stop_using_device ();
 	ports_release ();
