@@ -103,8 +103,8 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	/* Launch Control XL ports might already be there */
 	port_registration_handler ();
 
-	session->RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
-	session->vca_manager().VCAAdded.connect (session_connections, invalidator (*this), boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
+	session->RouteAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
+	session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 
 	switch_bank (bank_start);
 }
@@ -854,12 +854,12 @@ LaunchControlXL::switch_bank (uint32_t base)
 		if (stripable[n]) {
 			/* stripable goes away? refill the bank, starting at the same point */
 
-			stripable[n]->DropReferences.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchControlXL::switch_bank, this, bank_start), lcxl);
-			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchControlXL::stripable_property_change, this, _1, n), lcxl);
-			stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchControlXL::solo_changed, this, n), lcxl);
-			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchControlXL::mute_changed, this, n), lcxl);
+			stripable[n]->DropReferences.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::switch_bank, this, bank_start), lcxl);
+			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripable_property_change, this, _1, n), lcxl);
+			stripable[n]->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_changed, this, n), lcxl);
+			stripable[n]->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::mute_changed, this, n), lcxl);
 			if (stripable[n]->rec_enable_control()) {
-				stripable[n]->rec_enable_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&LaunchControlXL::rec_changed, this, n), lcxl);
+				stripable[n]->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::rec_changed, this, n), lcxl);
 			}
 
 
