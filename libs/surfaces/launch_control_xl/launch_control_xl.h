@@ -329,7 +329,7 @@ public:
 	static bool probe();
 	static void *request_factory(uint32_t);
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle>> bundles();
+	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles();
 
 	bool has_editor() const { return true; }
 	void *get_gui() const;
