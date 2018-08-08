@@ -50,7 +50,8 @@ const char* Session::vst_can_do_strings[] = {
 	X_("receiveVstMidiEvent"),
 	X_("supportShell"),
 	X_("shellCategory"),
-	X_("shellCategorycurID")
+	X_("shellCategorycurID"),
+	X_("sizeWindow")
 };
 const int Session::vst_can_do_string_count = sizeof (vst_can_do_strings) / sizeof (char*);
 
@@ -346,7 +347,7 @@ intptr_t Session::vst_callback (
 				plug->VSTSizeWindow (); /* EMIT SIGNAL */
 			}
 		}
-		return 0;
+		return 1;
 
 	case audioMasterGetSampleRate:
 		SHOW_CALLBACK ("audioMasterGetSampleRate");
