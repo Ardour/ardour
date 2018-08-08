@@ -133,6 +133,15 @@ public:
 	void load_bindings ();
 	Gtkmm2ext::Bindings*  bindings;
 
+	void showhide_vcas (bool on) {
+		if (on) { vca_vpacker.show(); } else { vca_vpacker.hide(); }
+	}
+#ifdef MIXBUS
+	void showhide_mixbusses (bool on) {
+		if (on) { mb_vpacker.show(); } else { mb_vpacker.hide(); }
+	}
+#endif
+
 protected:
 	void set_axis_targets_for_operation ();
 	ARDOUR::AutomationControlSet selected_gaincontrols ();

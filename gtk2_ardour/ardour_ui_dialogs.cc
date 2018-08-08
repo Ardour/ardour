@@ -977,3 +977,27 @@ ARDOUR_UI::toggle_monitor_section_visibility ()
 			mixer->show_monitor_section (tact->get_active());
 	}
 }
+
+void
+ARDOUR_UI::toggle_vca_pane ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		mixer->showhide_vcas (tact->get_active());
+	}
+}
+
+#ifdef MIXBUS
+void
+ARDOUR_UI::toggle_mixbus_pane ()
+{
+	Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleMixbusPane");
+
+	if (act) {
+		Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+		mixer->showhide_mixbusses (tact->get_active());
+	}
+}
+#endif

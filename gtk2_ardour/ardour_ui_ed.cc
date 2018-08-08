@@ -372,6 +372,16 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = global_actions.register_toggle_action (common_actions, X_("ToggleVCAPane"), _("Toggle VCA Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_vca_pane));
+	ActionManager::session_sensitive_actions.push_back (act);
+	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
+
+#ifdef MIXBUS
+	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixbusPane"), _("Toggle Mixbus Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixbus_pane));
+	ActionManager::session_sensitive_actions.push_back (act);
+	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
+#endif
+
 	act = global_actions.register_toggle_action (common_actions, X_("ToggleMonitorSection"), _("Toggle Monitor Section Visibility"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_monitor_section_visibility));
 	act->set_sensitive (false);
 
