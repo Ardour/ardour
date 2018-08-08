@@ -437,7 +437,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterGetVendorString");
 		// fills <ptr> with a string identifying the vendor (max 64 char)
 		strcpy ((char*) ptr, "Linux Audio Systems");
-		return 0;
+		return 1;
 
 	case audioMasterGetProductString:
 		SHOW_CALLBACK ("audioMasterGetProductString");
