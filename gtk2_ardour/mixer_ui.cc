@@ -1513,11 +1513,17 @@ Mixer_UI::redisplay_track_list ()
 	if (n_masters == 0) {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::remove_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
 		vca_vpacker.hide ();
+		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
+		if (act) {
+			act->set_sensitive (false);
+		}
+
 	} else {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
 
 		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
 		if (act) {
+			act->set_sensitive (true);
 			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 			showhide_vcas (tact->get_active());
 		} else {
