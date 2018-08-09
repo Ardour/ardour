@@ -153,6 +153,14 @@ Mixer_UI::Mixer_UI ()
 	strip_packer.pack_end (scroller_base, true, true);
 	strip_packer.pack_end (add_button, false, false);
 
+#ifdef MIXBUS
+	/* create a drop-shadow at the end of the mixer strips */
+	mb_shadow.set_size_request( 4, -1 );
+	mb_shadow.set_name("EditorWindow");
+	mb_shadow.show();
+	strip_packer.pack_end (mb_shadow, false, false);
+#endif
+
 	_group_tabs = new MixerGroupTabs (this);
 	VBox* b = manage (new VBox);
 	b->set_spacing (0);
@@ -2269,6 +2277,11 @@ Mixer_UI::scroll_left ()
 		if (i->get_widget() == & add_button) {
 			continue;
 		}
+#ifdef MIXBUS
+		if (i->get_widget() == &mb_shadow) {
+			continue;
+		}
+#endif
 		lm += i->get_widget()->get_width ();
 		if (lm >= lp) {
 			lm -= i->get_widget()->get_width ();
@@ -2296,6 +2309,11 @@ Mixer_UI::scroll_right ()
 		if (i->get_widget() == & add_button) {
 			continue;
 		}
+#ifdef MIXBUS
+		if (i->get_widget() == &mb_shadow) {
+			continue;
+		}
+#endif
 		lm += i->get_widget()->get_width ();
 		if (lm > lp + 1) {
 			break;
