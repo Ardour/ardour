@@ -251,9 +251,9 @@ void
 LaunchControlXL::init_buttons (bool startup)
 {
 	reset(template_number());
-	
+
 	if (startup) {
-		button_track_mode(track_mode());
+		switch_bank(bank_start);
 	}
 }
 
@@ -866,7 +866,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 
 			button_track_focus(n);
-			update_track_control_led(n);
+			button_track_mode(track_mode());
 		}
 	}
 }
