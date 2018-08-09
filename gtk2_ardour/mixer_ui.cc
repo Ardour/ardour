@@ -1515,7 +1515,14 @@ Mixer_UI::redisplay_track_list ()
 		vca_vpacker.hide ();
 	} else {
 		UIConfiguration::instance().set_mixer_strip_visibility (VisibilityGroup::add_element (UIConfiguration::instance().get_mixer_strip_visibility(), X_("VCA")));
-		vca_vpacker.show ();
+
+		Glib::RefPtr<Action> act = ActionManager::get_action ("Common", "ToggleVCAPane");
+		if (act) {
+			Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+			showhide_vcas (tact->get_active());
+		} else {
+			vca_vpacker.show ();
+		}
 	}
 
 	_group_tabs->set_dirty ();
