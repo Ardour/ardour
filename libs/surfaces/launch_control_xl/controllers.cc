@@ -366,7 +366,7 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 						b->set_color(RedLow);
 					}
 				} else {
-
+					b->set_color(Off);
 				}
 				break;
 
