@@ -265,8 +265,7 @@ LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle
 	NNNoteButtonMap::iterator b;
 	if ( n < 4)	{
 	 	b = nn_note_button_map.find (first + n);
-	}
-	else {
+	} else {
 		b = nn_note_button_map.find (middle + n - 4);
 	}
 
@@ -295,8 +294,7 @@ LaunchControlXL::button_track_focus(uint8_t n)
 
 	if ( stripable[n]->is_selected() ) {
 		b->set_color(AmberFull);
-	}
-	else {
+	} else {
 		b->set_color(AmberLow);
 	}
 	write (b->state_msg());
@@ -343,8 +341,7 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 			case TrackMute:
 				if (ac->get_value()) {
 					b->set_color(AmberFull);
-				}
-				else {
+				} else {
 					b->set_color(AmberLow);
 				}
 				break;
@@ -353,12 +350,10 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 				if (ac && stripable[n] != master ) {
 					if (ac->get_value()) {
 						b->set_color(GreenFull);
-					}
-					else {
+					} else {
 						b->set_color(GreenLow);
 					}
-				}
-				else {
+				} else {
 					b->set_color(Off);
 				}
 				break;
@@ -367,12 +362,10 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 				if (ac) {
 					if (ac->get_value()) {
 						b->set_color(RedFull);
-					}
-					else {
+					} else {
 						b->set_color(RedLow);
 					}
-				}
-				else {
+				} else {
 
 				}
 				break;

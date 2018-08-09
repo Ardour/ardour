@@ -408,8 +408,7 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
 			NoteButton*	nb = id_note_button_map[*x];
 			if (cb != 0) {
 				cb->timeout_connection.disconnect();
-			}
-			else if (nb != 0) {
+			} else if (nb != 0) {
 					nb->timeout_connection.disconnect();
 			}
     }
@@ -417,8 +416,7 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
     buttons_down.insert(button->id());
     DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("button pressed: %1\n", LaunchControlXL::button_name_by_id(button->id())));
     start_press_timeout(button, button->id());
-  }
-  else {
+  } else {
     DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("button depressed: %1\n", LaunchControlXL::button_name_by_id(button->id())));
     buttons_down.erase(button->id());
     button->timeout_connection.disconnect();
@@ -429,12 +427,10 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
   if (c == consumed.end()) {
     if (ev->value == 0) {
       (this->*button->release_method)();
-    }
-    else {
+    } else {
       (this->*button->press_method)();
     }
-  }
-  else {
+  } else {
     DEBUG_TRACE(DEBUG::LaunchControlXL, "button was consumed, ignored\n");
     consumed.erase(c);
   }
@@ -452,11 +448,9 @@ LaunchControlXL::handle_knob_message (Knob* knob)
 
 	if (knob->id() < 8) { // sendA
 		ac = stripable[chan]->trim_control();
-	}
-	else if (knob->id() >= 8 && knob->id() < 16) { // sendB
+	} else if (knob->id() >= 8 && knob->id() < 16) { // sendB
 		ac = stripable[chan]->pan_width_control();
-	}
-	else if (knob->id() >= 16 && knob->id() < 24) { // pan
+	} else if (knob->id() >= 16 && knob->id() < 24) { // pan
 		ac = stripable[chan]->pan_azimuth_control();
 	}
 
@@ -496,14 +490,12 @@ LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::Eve
 	if (b != cc_controller_button_map.end()) {
 		Button* button = b->second;
 		handle_button_message(button, ev);
-	}
-	else if (f != cc_fader_map.end()) {
+	} else if (f != cc_fader_map.end()) {
 		Fader* fader = f->second;
 		fader->set_value(ev->value);
 		handle_fader_message(fader);
 
-	}
-	else if (k != cc_knob_map.end()) {
+	} else if (k != cc_knob_map.end()) {
 		Knob* knob = k->second;
 		knob->set_value(ev->value);
 		handle_knob_message(knob);
