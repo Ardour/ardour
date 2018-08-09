@@ -695,6 +695,9 @@ MidiRegionView::motion (GdkEventMotion* ev)
 bool
 MidiRegionView::scroll (GdkEventScroll* ev)
 {
+	if (trackview.editor().drags()->active()) {
+		return false;
+	}
 	if (_selection.empty()) {
 		return false;
 	}
