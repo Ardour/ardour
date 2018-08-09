@@ -149,7 +149,6 @@ LaunchControlXL::begin_using_device ()
 
 	connect_session_signals ();
 
-
 	init_buttons (true);
 
 	in_use = true;
@@ -251,6 +250,8 @@ LaunchControlXL::bundles ()
 void
 LaunchControlXL::init_buttons (bool startup)
 {
+	reset(template_number());
+	
 	if (startup) {
 		button_track_mode(track_mode());
 	}
@@ -286,6 +287,13 @@ LaunchControlXL::do_request (LaunchControlRequest * req)
 	}
 }
 
+void
+LaunchControlXL::reset(uint8_t chan)
+{
+	MidiByteArray msg (3, 176 + chan, 0, 0); // turn off all leds, reset buffer settings and duty cycle
+
+	write(msg);
+}
 int
 LaunchControlXL::set_active (bool yn)
 {

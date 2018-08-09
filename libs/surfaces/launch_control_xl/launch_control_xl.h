@@ -351,6 +351,7 @@ public:
 	static std::string fader_name_by_id(FaderID);
 
 	void write(const MidiByteArray &);
+	void reset(uint8_t chan);
 
 	TrackMode track_mode() const { return _track_mode; }
 	void set_track_mode(TrackMode mode);
