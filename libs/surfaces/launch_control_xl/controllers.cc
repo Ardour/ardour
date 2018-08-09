@@ -282,23 +282,23 @@ LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle
 void
 LaunchControlXL::button_track_focus(uint8_t n)
 {
-	if (!stripable[n]) {
-		return;
-	}
-
 	TrackButton* b = focus_button_by_number(n);
 
-	if (b == 0) {
+	if (!b) {
 		return;
 	}
 
-	if ( stripable[n]->is_selected() ) {
-		b->set_color(AmberFull);
+	if (stripable[n]) {
+		if ( stripable[n]->is_selected() ) {
+			b->set_color(AmberFull);
+		} else {
+			b->set_color(AmberLow);
+		}
 	} else {
-		b->set_color(AmberLow);
+		b->set_color(Off);
 	}
-	write (b->state_msg());
 
+	write (b->state_msg());
 }
 
 boost::shared_ptr<AutomationControl>
@@ -330,12 +330,12 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 {
 	TrackButton* b = control_button_by_number(n);
 
-	if (!stripable[n] || !b) {
+	if (!b) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
-
+	if (stripable[n]) {
+		boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 
 		switch(track_mode()) {
 			case TrackMute:
@@ -345,7 +345,6 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 					b->set_color(AmberLow);
 				}
 				break;
-
 			case TrackSolo:
 				if (ac && stripable[n] != master ) {
 					if (ac->get_value()) {
@@ -357,7 +356,6 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 					b->set_color(Off);
 				}
 				break;
-
 			case TrackRecord:
 				if (ac) {
 					if (ac->get_value()) {
@@ -373,9 +371,11 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 			default:
 			break;
 		}
-		if (ac) {
-			write (b->state_msg());
-		}
+	} else {
+		b->set_color(Off);
+	}
+
+	write (b->state_msg());
 }
 
 void

@@ -863,11 +863,9 @@ LaunchControlXL::switch_bank (uint32_t base)
 			if (stripable[n]->rec_enable_control()) {
 				stripable[n]->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::rec_changed, this, n), lcxl);
 			}
-
-
-			button_track_focus(n);
-			button_track_mode(track_mode());
 		}
+		button_track_focus(n);
+		button_track_mode(track_mode());
 	}
 }
 
