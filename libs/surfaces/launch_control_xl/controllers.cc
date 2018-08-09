@@ -263,11 +263,11 @@ LaunchControlXL::TrackButton*
 LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle)
 {
 	NNNoteButtonMap::iterator b;
-	if ( n < 5)	{
+	if ( n < 4)	{
 	 	b = nn_note_button_map.find (first + n);
 	}
 	else {
-		b = nn_note_button_map.find (middle + n - 5);
+		b = nn_note_button_map.find (middle + n - 4);
 	}
 
 	TrackButton* button = 0;
