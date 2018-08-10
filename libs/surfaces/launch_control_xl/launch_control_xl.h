@@ -429,6 +429,8 @@ private:
 	void handle_fader_message(Fader* fader);
 	void handle_knob_message(Knob* knob);
 
+	bool check_pick_up(Controller* controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
+
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_off_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
