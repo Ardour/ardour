@@ -2106,17 +2106,17 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 
 	update_join_object_range_location (event->motion.y);
 
-	/* snapped_cursor stuff (the snapped_cursor shows where an operation is going to occur) */
-	bool ignored;
-	MusicSample where (0, 0);
-	if (mouse_sample (where.sample, ignored)) {
-		snap_to_with_modifier (where, event);
-		set_snapped_cursor_position (where.sample);
-	}
-
-	/* drags might also change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor */
 	if (_drags->active ()) {
+		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 	 	return _drags->motion_handler (event, from_autoscroll);
+	} else {
+		//the snapped_cursor shows where an operation (like Split) is going to occur
+		bool ignored;
+		MusicSample where (0, 0);
+		if (mouse_sample (where.sample, ignored)) {
+			snap_to_with_modifier (where, event);
+			set_snapped_cursor_position (where.sample);
+		}
 	}
 
 	return false;
