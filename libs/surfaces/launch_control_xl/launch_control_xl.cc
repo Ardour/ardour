@@ -444,6 +444,13 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
   }
 }
 
+bool
+LaunchControlXL::check_pick_up(Controller* controller, boost::shared_ptr<AutomationControl> ac)
+{
+	/* returns false until the controller value matches with the current setting of the stripable's ac */
+	return ( abs( controller->value() / 127.0 -  ac->internal_to_interface(ac->get_value()) ) < 0.007875 );
+}
+
 void
 LaunchControlXL::handle_knob_message (Knob* knob)
 {
@@ -462,7 +469,7 @@ LaunchControlXL::handle_knob_message (Knob* knob)
 		ac = stripable[chan]->pan_azimuth_control();
 	}
 
-	if (ac) {
+	if (ac && check_pick_up(knob, ac)) {
 		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
 	}
 }
@@ -476,7 +483,7 @@ LaunchControlXL::handle_fader_message (Fader* fader)
 	}
 
 	boost::shared_ptr<AutomationControl> ac = stripable[fader->id()]->gain_control();
-	if (ac) {
+	if (ac && check_pick_up(fader, ac)) {
 		ac->set_value ( ac->interface_to_internal( fader->value() / 127.0), PBD::Controllable::UseGroup );
 	}
 }
