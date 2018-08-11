@@ -830,11 +830,6 @@ LaunchControlXL::switch_bank (uint32_t base)
 	SelectButton* sl = static_cast<SelectButton*>(id_controller_button_map[SelectLeft]);
 	SelectButton* sr = static_cast<SelectButton*>(id_controller_button_map[SelectRight]);
 
-	if (sl && sr) {
-		write(sl->state_msg( (base) ));
-		write(sr->state_msg( !(base) ));
-	}
-
 	/* work backwards so we can tell if we should actually switch banks */
 
 	boost::shared_ptr<Stripable> s[8];
@@ -845,6 +840,11 @@ LaunchControlXL::switch_bank (uint32_t base)
 		if (s[n] != stripable[n]) {
 			different++;
 		}
+	}
+
+	if (sl && sr) {
+		write(sl->state_msg( (base) ));
+		write(sr->state_msg( (s[1] != 0) ));
 	}
 
 	if (!s[0]) {
