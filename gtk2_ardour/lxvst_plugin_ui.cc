@@ -17,11 +17,13 @@
 
 */
 
+
 #include "gtkmm2ext/gui_thread.h"
 #include "ardour/lxvst_plugin.h"
 #include "ardour/linux_vst_support.h"
 #include "lxvst_plugin_ui.h"
-#include <gdk/gdkx.h>
+
+#include <gdk/gdkx.h> /* must come later than glibmm/object.h */
 
 #define LXVST_H_FIDDLE 40
 
@@ -93,9 +95,58 @@ LXVSTPluginUI::package (Gtk::Window& win)
 }
 
 void
-LXVSTPluginUI::forward_key_event (GdkEventKey*)
+LXVSTPluginUI::forward_key_event (GdkEventKey* gdk_key)
 {
-	std::cerr << "LXVSTPluginUI : keypress forwarding to linuxVSTs unsupported" << std::endl;
+	if (!_vst->state()->gtk_window_parent) {
+		return;
+	}
+
+	Glib::RefPtr<Gdk::Window> gdk_window = ((Gtk::Window*) _vst->state()->gtk_window_parent)->get_window();
+
+	if (!gdk_window) {
+		return;
+	}
+
+	XEvent xev;
+	int mask;
+
+	switch (gdk_key->type) {
+	case GDK_KEY_PRESS:
+		xev.xany.type = KeyPress;
+		mask = KeyPressMask;
+		break;
+	case GDK_KEY_RELEASE:
+		xev.xany.type = KeyPress;
+		mask = KeyReleaseMask;
+		break;
+	default:
+		return;
+	}
+
+	/* XXX relies on GDK using X11 definitions for these fields */
+
+	xev.xkey.state = gdk_key->state;
+	xev.xkey.keycode = gdk_key->hardware_keycode; /* see gdk/x11/gdkevents-x11.c:translate_key_event() */
+
+	xev.xkey.x = 0;
+	xev.xkey.y = 0;
+	xev.xkey.x_root = 0;
+	xev.xkey.y_root = 0;
+	xev.xkey.root = gdk_x11_get_default_root_xwindow();
+	xev.xkey.window = _vst->state()->xid;
+	xev.xkey.subwindow = None;
+	xev.xkey.time = gdk_key->time;
+
+	xev.xany.serial = 0; /* we don't have one */
+	xev.xany.send_event = true; /* pretend we are using XSendEvent */
+	xev.xany.display = GDK_WINDOW_XDISPLAY (gdk_window->gobj());
+	xev.xany.window = _vst->state()->xid;
+
+	if (!_vst->state()->eventProc) {
+		XSendEvent (xev.xany.display, xev.xany.window, TRUE, mask, &xev);
+	} else {
+		_vst->state()->eventProc (&xev);
+	}
 }
 
 int
