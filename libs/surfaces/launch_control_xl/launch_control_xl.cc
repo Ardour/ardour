@@ -835,10 +835,6 @@ LaunchControlXL::switch_bank (uint32_t base)
 		write(sr->state_msg( !(base) ));
 	}
 
-
-
-	stripable_connections.drop_connections ();
-
 	/* work backwards so we can tell if we should actually switch banks */
 
 	boost::shared_ptr<Stripable> s[8];
@@ -853,11 +849,10 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 	if (!s[0]) {
 		/* not even the first stripable exists, do nothing */
-		for (int n = 0; n < 7; ++n) {
-			stripable[n].reset ();
-		}
 		return;
 	}
+
+	stripable_connections.drop_connections ();
 
 	for (int n = 0; n < 7; ++n) {
 		stripable[n] = s[n];
