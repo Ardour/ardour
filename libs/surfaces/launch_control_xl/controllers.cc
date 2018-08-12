@@ -451,6 +451,36 @@ LaunchControlXL::button_device_long_press()
 
 }
 
+void
+LaunchControlXL::button_mute()
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		access_action ("Editor/track-mute-toggle");
+	} else {
+		button_track_mode(TrackMute);
+	}
+}
+
+void
+LaunchControlXL::button_solo()
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		access_action ("Editor/track-solo-toggle");
+	} else {
+		button_track_mode(TrackSolo);
+	}
+}
+
+void
+LaunchControlXL::button_record()
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		access_action ("Editor/track-record-enable-toggle");
+	} else {
+		button_track_mode(TrackRecord);
+	}
+}
+
 bool
 LaunchControlXL::button_long_press_timeout (ButtonID id, Button* button)
 {
