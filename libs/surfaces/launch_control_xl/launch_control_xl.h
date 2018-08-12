@@ -456,7 +456,7 @@ private:
 	void button_device_long_press();
 	void button_track_mode(TrackMode state);
 	void button_mute() { button_track_mode(TrackMute); }
-	void button_solo() { button_track_mode(TrackSolo); }
+	void button_solo();
 	void button_record() { button_track_mode(TrackRecord); }
 	void button_select_up();
 	void button_select_down();

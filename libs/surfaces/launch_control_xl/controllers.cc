@@ -451,6 +451,16 @@ LaunchControlXL::button_device_long_press()
 
 }
 
+void
+LaunchControlXL::button_solo()
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		cancel_all_solo ();
+	} else {
+		button_track_mode(TrackSolo);
+	}
+}
+
 bool
 LaunchControlXL::button_long_press_timeout (ButtonID id, Button* button)
 {
