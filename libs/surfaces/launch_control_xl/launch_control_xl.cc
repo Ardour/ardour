@@ -461,12 +461,24 @@ LaunchControlXL::handle_knob_message (Knob* knob)
 
 	boost::shared_ptr<AutomationControl> ac;
 
-	if (knob->id() < 8) { // sendA
-		ac = stripable[chan]->trim_control();
-	} else if (knob->id() >= 8 && knob->id() < 16) { // sendB
-		ac = stripable[chan]->pan_width_control();
-	} else if (knob->id() >= 16 && knob->id() < 24) { // pan
-		ac = stripable[chan]->pan_azimuth_control();
+	if (knob->id() < 8) { // sendA knob
+		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+			ac = stripable[chan]->trim_control();
+		} else {
+			ac = stripable[chan]->send_level_controllable (0);
+		}
+	} else if (knob->id() >= 8 && knob->id() < 16) { // sendB knob
+		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+			/* something */
+		} else {
+			ac = stripable[chan]->send_level_controllable (1);
+		}
+	} else if (knob->id() >= 16 && knob->id() < 24) { // pan knob
+		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+			ac = stripable[chan]->pan_width_control();
+		} else {
+			ac = stripable[chan]->pan_azimuth_control();
+		}
 	}
 
 	if (ac && check_pick_up(knob, ac)) {
