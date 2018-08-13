@@ -2939,6 +2939,7 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 		}
 	}
 	else if (boost::dynamic_pointer_cast<BeatBox> (p)) {
+		cerr << "Have UI for beatbox\n";
 		have_ui = true;
 	}
 
@@ -3010,7 +3011,7 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
-	boost::shared_ptr<BeatBox> bb = boost::dynamic_pointer_cast<BeatBopx> (processor);
+	boost::shared_ptr<BeatBox> bb = boost::dynamic_pointer_cast<BeatBox> (processor);
 	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
 
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
@@ -3774,11 +3775,11 @@ ProcessorBox::processor_can_be_edited (boost::shared_ptr<Processor> processor)
 		return false;
 	}
 
-	if (
-		boost::dynamic_pointer_cast<Send> (processor) ||
-		boost::dynamic_pointer_cast<Return> (processor) ||
-		boost::dynamic_pointer_cast<PluginInsert> (processor) ||
-		boost::dynamic_pointer_cast<PortInsert> (processor)
+	if (boost::dynamic_pointer_cast<Send> (processor) ||
+	    boost::dynamic_pointer_cast<Return> (processor) ||
+	    boost::dynamic_pointer_cast<PluginInsert> (processor) ||
+	    boost::dynamic_pointer_cast<PortInsert> (processor) ||
+	    boost::dynamic_pointer_cast<BeatBox> (processor)
 		) {
 		return true;
 	}
