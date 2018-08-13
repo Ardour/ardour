@@ -260,7 +260,7 @@ LaunchControlXL::fader_name_by_id (FaderID id)
 }
 
 LaunchControlXL::TrackButton*
-LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle)
+LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 {
 	NNNoteButtonMap::iterator b;
 	if ( n < 4)	{
@@ -282,7 +282,7 @@ LaunchControlXL::track_button_by_number(uint8_t n, uint8_t first, uint8_t middle
 void
 LaunchControlXL::button_track_focus(uint8_t n)
 {
-	TrackButton* b = focus_button_by_number(n);
+	TrackButton* b = focus_button_by_collumn(n);
 
 	if (!b) {
 		return;
@@ -328,7 +328,7 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 void
 LaunchControlXL::update_track_control_led(uint8_t n)
 {
-	TrackButton* b = control_button_by_number(n);
+	TrackButton* b = control_button_by_collumn(n);
 
 	if (!b) {
 		return;
