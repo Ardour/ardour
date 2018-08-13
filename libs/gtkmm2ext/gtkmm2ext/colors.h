@@ -115,8 +115,8 @@ struct LIBGTKMM2EXT_API HSV
 	double distance (const HSV& other) const;
 	HSV delta (const HSV& other) const;
 
-	HSV darker (double factor = 1.3) const { return shade (factor); }
-	HSV lighter (double factor = 0.7) const { return shade (factor); }
+	HSV darker (double factor = 1.3) const;
+	HSV lighter (double factor = 0.7) const;
 
 	HSV shade (double factor) const;
 	HSV mix (const HSV& other, double amt) const;
