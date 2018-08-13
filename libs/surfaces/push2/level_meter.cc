@@ -59,9 +59,9 @@ LevelMeter::LevelMeter (Push2& p, Item* parent, int len, Meter::Orientation o)
 	Config->ParameterChanged.connect (_parameter_connection, invalidator(*this), boost::bind (&LevelMeter::parameter_changed, this, _1), &p2);
 
 	if (_meter_orientation == Meter::Vertical) {
-		meter_packer = new HBox (this);
+		meter_packer = new HBox (_canvas);
 	} else {
-		meter_packer = new VBox (this);
+		meter_packer = new VBox (_canvas);
 	}
 
 	meter_packer->set_collapse_on_hide (true);
