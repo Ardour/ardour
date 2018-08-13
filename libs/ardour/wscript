@@ -46,6 +46,7 @@ libardour_sources = [
         'automation_control.cc',
         'automation_list.cc',
         'automation_watch.cc',
+        'beatbox.cc',
         'beats_samples_converter.cc',
         'broadcast_info.cc',
         'buffer.cc',

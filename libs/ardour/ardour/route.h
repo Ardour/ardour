@@ -70,6 +70,7 @@ class PatchChangeGridDialog;
 namespace ARDOUR {
 
 class Amp;
+class BeatBox;
 class DelayLine;
 class Delivery;
 class DiskReader;
@@ -638,6 +639,7 @@ protected:
 	boost::shared_ptr<Pannable>         _pannable;
 	boost::shared_ptr<DiskReader>       _disk_reader;
 	boost::shared_ptr<DiskWriter>       _disk_writer;
+	boost::shared_ptr<BeatBox>       _beatbox;
 
 	boost::shared_ptr<MonitorControl>   _monitoring_control;
 
