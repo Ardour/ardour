@@ -4171,6 +4171,8 @@ Editor::get_grid_beat_divisions(samplepos_t position)
 	case GridTypeBeatDiv4:   return 4;
 	case GridTypeBeatDiv3:   return 3;
 	case GridTypeBeatDiv2:   return 2;
+	case GridTypeBeat:       return 1;
+	case GridTypeBar:        return 1;
 
 	case GridTypeNone:       return 0;
 	case GridTypeTimecode:   return 0;
