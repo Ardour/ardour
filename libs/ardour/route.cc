@@ -52,6 +52,7 @@
 #include "ardour/audio_track.h"
 #include "ardour/audio_port.h"
 #include "ardour/audioengine.h"
+#include "ardour/beatbox.h"
 #include "ardour/boost_debug.h"
 #include "ardour/buffer.h"
 #include "ardour/buffer_set.h"
@@ -3075,6 +3076,9 @@ Route::set_processor_state (const XMLNode& node, int version)
 			assert (is_master ());
 			_volume->set_state (**niter, version);
 			new_order.push_back (_volume);
+		} else if (prop->value() == "beatbox" && _beatbox) {
+			_beatbox->set_state (**niter, Stateful::current_state_version);
+			new_order.push_back (_beatbox);
 		} else if (prop->value() == "meter") {
 			_meter->set_state (**niter, version);
 			new_order.push_back (_meter);
@@ -5002,6 +5006,12 @@ Route::setup_invisible_processors ()
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		boost::shared_ptr<Send> auxsnd = boost::dynamic_pointer_cast<Send> ((*i));
+
+		/* XXX temporary hack while we decide on visibility */
+		if (boost::dynamic_pointer_cast<BeatBox> (*i)) {
+			continue;
+		}
+
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
 		}
@@ -5109,6 +5119,14 @@ Route::setup_invisible_processors ()
 		assert (!_trim->display_to_user ());
 		new_processors.push_front (_trim);
 		trim = new_processors.begin();
+	}
+
+	/* BEATBOX (for MIDI) */
+
+	if (_beatbox) {
+		ProcessorList::iterator insert_pos = trim;
+		++insert_pos;
+		new_processors.insert (insert_pos, _beatbox);
 	}
 
 	/* INTERNAL RETURN */
