@@ -56,6 +56,7 @@
 #include "ardour/amp.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioengine.h"
+#include "ardour/beatbox.h"
 #include "ardour/internal_return.h"
 #include "ardour/internal_send.h"
 #include "ardour/luaproc.h"
@@ -2937,6 +2938,9 @@ ProcessorBox::maybe_add_processor_to_ui_list (boost::weak_ptr<Processor> w)
 			have_ui = true;
 		}
 	}
+	else if (boost::dynamic_pointer_cast<BeatBox> (p)) {
+		have_ui = true;
+	}
 
 	if (!have_ui) {
 		return;
@@ -3006,11 +3010,25 @@ ProcessorBox::add_processor_to_display (boost::weak_ptr<Processor> p)
 
 	boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
 	boost::shared_ptr<PortInsert> ext = boost::dynamic_pointer_cast<PortInsert> (processor);
+	boost::shared_ptr<BeatBox> bb = boost::dynamic_pointer_cast<BeatBopx> (processor);
 	boost::shared_ptr<UnknownProcessor> stub = boost::dynamic_pointer_cast<UnknownProcessor> (processor);
 
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
-	if (!send && !plugin_insert && !ext && !stub) {
+
+	if (!send && !plugin_insert && !ext && !stub && !bb) {
 		e->set_selectable(false);
+	}
+
+	bool mark_send_visible = false;
+	if (send && _parent_strip) {
+		/* show controls of new sends by default */
+		GUIObjectState& st = _parent_strip->gui_object_state ();
+		XMLNode* strip = st.get_or_add_node (_parent_strip->state_id ());
+		assert (strip);
+		/* check if state exists, if not it must be a new send */
+		if (!st.get_node(strip, e->state_id())) {
+			mark_send_visible = true;
+		}
 	}
 
 	/* Set up this entry's state from the GUIObjectState */
@@ -3590,6 +3608,8 @@ ProcessorBox::paste_processor_state (const XMLNodeList& nlist, boost::shared_ptr
 				}
 
 				p.reset (pi);
+			} else if (type->value() == "beatbox") {
+				/* XXX do something */
 			} else {
 				/* XXX its a bit limiting to assume that everything else
 				   is a plugin.
@@ -3786,6 +3806,7 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 	boost::shared_ptr<Return> retrn;
 	boost::shared_ptr<PluginInsert> plugin_insert;
 	boost::shared_ptr<PortInsert> port_insert;
+	boost::shared_ptr<BeatBox> beatbox;
 	Window* gidget = 0;
 
 	/* This method may or may not return a Window, but if it does not it
@@ -3890,6 +3911,20 @@ ProcessorBox::get_editor_window (boost::shared_ptr<Processor> processor, bool us
 		}
 
 		gidget = io_selector;
+
+	} else if ((beatbox = boost::dynamic_pointer_cast<BeatBox> (processor)) != 0) {
+
+		Window* w = get_processor_ui (beatbox);
+		BBGUI* bbg = 0;
+
+		if (!w) {
+			bbg = new BBGUI (beatbox);
+			set_processor_ui (beatbox, bbg);
+		} else {
+			bbg = dynamic_cast<BBGUI*> (w);
+		}
+
+		gidget = bbg;
 	}
 
 	return gidget;
