@@ -812,6 +812,7 @@ LaunchControlXL::stripable_property_change (PropertyChange const& what_changed, 
 		}
 		if (which < 8) {
 			update_track_focus_led ((uint8_t) which);
+			update_knob_led((uint8_t) which);
 		}
 	}
 }
@@ -876,6 +877,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 		}
 		update_track_focus_led(n);
 		button_track_mode(track_mode());
+		update_knob_led(n);
 	}
 }
 

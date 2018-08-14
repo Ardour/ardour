@@ -38,15 +38,15 @@ LaunchControlXL::build_maps ()
 
 	Knob* knob;
 
-	#define MAKE_KNOB(i,cc, index, color) \
-		knob = new Knob ((i), (cc), (index), (color), (*this)); \
+	#define MAKE_KNOB(i,cc, index) \
+		knob = new Knob ((i), (cc), (index), (*this)); \
 		cc_knob_map.insert (std::make_pair (knob->controller_number(), knob)); \
 		id_knob_map.insert (std::make_pair (knob->id(), knob))
 
 		for (uint8_t n = 0; n < 8; ++n) {
-			MAKE_KNOB (static_cast<KnobID>(n), (n + 13), n, RedFull);
-			MAKE_KNOB (static_cast<KnobID>(n + 8), (n + 29), (n + 8), GreenFull);
-			MAKE_KNOB (static_cast<KnobID>(n + 16), (n + 49), (n + 16), Yellow);
+			MAKE_KNOB (static_cast<KnobID>(n), (n + 13), n);
+			MAKE_KNOB (static_cast<KnobID>(n + 8), (n + 29), (n + 8));
+			MAKE_KNOB (static_cast<KnobID>(n + 16), (n + 49), (n + 16));
 		}
 
 	/* Faders */
@@ -86,22 +86,22 @@ LaunchControlXL::build_maps ()
 			id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 
 
-	MAKE_TRACK_BUTTON_PRESS(Focus1, 41, 24, GreenFull, &LaunchControlXL::button_track_focus_1);
-	MAKE_TRACK_BUTTON_PRESS(Focus2, 42, 25, GreenFull, &LaunchControlXL::button_track_focus_2);
-	MAKE_TRACK_BUTTON_PRESS(Focus3, 43, 26, GreenFull, &LaunchControlXL::button_track_focus_3);
-	MAKE_TRACK_BUTTON_PRESS(Focus4, 44, 27, GreenFull, &LaunchControlXL::button_track_focus_4);
-	MAKE_TRACK_BUTTON_PRESS(Focus5, 57, 28, GreenFull, &LaunchControlXL::button_track_focus_5);
-	MAKE_TRACK_BUTTON_PRESS(Focus6, 58, 29, GreenFull, &LaunchControlXL::button_track_focus_6);
-	MAKE_TRACK_BUTTON_PRESS(Focus7, 59, 30, GreenFull, &LaunchControlXL::button_track_focus_7);
-	MAKE_TRACK_BUTTON_PRESS(Focus8, 60, 31, GreenFull, &LaunchControlXL::button_track_focus_8);
-	MAKE_TRACK_BUTTON_PRESS(Control1, 73, 32, Yellow, &LaunchControlXL::button_track_control_1);
-	MAKE_TRACK_BUTTON_PRESS(Control2, 74, 33, Yellow, &LaunchControlXL::button_track_control_2);
-	MAKE_TRACK_BUTTON_PRESS(Control3, 75, 34, Yellow, &LaunchControlXL::button_track_control_3);
-	MAKE_TRACK_BUTTON_PRESS(Control4, 76, 35, Yellow, &LaunchControlXL::button_track_control_4);
-	MAKE_TRACK_BUTTON_PRESS(Control5, 89, 36, Yellow, &LaunchControlXL::button_track_control_5);
-	MAKE_TRACK_BUTTON_PRESS(Control6, 90, 37, Yellow, &LaunchControlXL::button_track_control_6);
-	MAKE_TRACK_BUTTON_PRESS(Control7, 91, 38, Yellow, &LaunchControlXL::button_track_control_7);
-	MAKE_TRACK_BUTTON_PRESS(Control8, 92, 39, Yellow, &LaunchControlXL::button_track_control_8);
+	MAKE_TRACK_BUTTON_PRESS(Focus1, 41, 24, YellowLow, &LaunchControlXL::button_track_focus_1);
+	MAKE_TRACK_BUTTON_PRESS(Focus2, 42, 25, YellowLow, &LaunchControlXL::button_track_focus_2);
+	MAKE_TRACK_BUTTON_PRESS(Focus3, 43, 26, YellowLow, &LaunchControlXL::button_track_focus_3);
+	MAKE_TRACK_BUTTON_PRESS(Focus4, 44, 27, YellowLow, &LaunchControlXL::button_track_focus_4);
+	MAKE_TRACK_BUTTON_PRESS(Focus5, 57, 28, YellowLow, &LaunchControlXL::button_track_focus_5);
+	MAKE_TRACK_BUTTON_PRESS(Focus6, 58, 29, YellowLow, &LaunchControlXL::button_track_focus_6);
+	MAKE_TRACK_BUTTON_PRESS(Focus7, 59, 30, YellowLow, &LaunchControlXL::button_track_focus_7);
+	MAKE_TRACK_BUTTON_PRESS(Focus8, 60, 31, YellowLow, &LaunchControlXL::button_track_focus_8);
+	MAKE_TRACK_BUTTON_PRESS(Control1, 73, 32, AmberLow, &LaunchControlXL::button_track_control_1);
+	MAKE_TRACK_BUTTON_PRESS(Control2, 74, 33, AmberLow, &LaunchControlXL::button_track_control_2);
+	MAKE_TRACK_BUTTON_PRESS(Control3, 75, 34, AmberLow, &LaunchControlXL::button_track_control_3);
+	MAKE_TRACK_BUTTON_PRESS(Control4, 76, 35, AmberLow, &LaunchControlXL::button_track_control_4);
+	MAKE_TRACK_BUTTON_PRESS(Control5, 89, 36, AmberLow, &LaunchControlXL::button_track_control_5);
+	MAKE_TRACK_BUTTON_PRESS(Control6, 90, 37, AmberLow, &LaunchControlXL::button_track_control_6);
+	MAKE_TRACK_BUTTON_PRESS(Control7, 91, 38, AmberLow, &LaunchControlXL::button_track_control_7);
+	MAKE_TRACK_BUTTON_PRESS(Control8, 92, 39, AmberLow, &LaunchControlXL::button_track_control_8);
 
 	MAKE_SELECT_BUTTON_PRESS(SelectUp, 104, 44, &LaunchControlXL::button_select_up);
 	MAKE_SELECT_BUTTON_PRESS(SelectDown, 105, 45, &LaunchControlXL::button_select_down);
@@ -291,7 +291,7 @@ LaunchControlXL::update_track_focus_led(uint8_t n)
 
 	if (stripable[n]) {
 		if ( stripable[n]->is_selected() ) {
-			b->set_color(AmberFull);
+			b->set_color(YellowFull);
 		} else {
 			b->set_color(AmberLow);
 		}
@@ -347,6 +347,73 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 		return ac;
 }
 
+LaunchControlXL::Knob**
+LaunchControlXL::knobs_by_collumn(uint8_t col, Knob** knob_col)
+{
+	for (uint8_t n = 0; n < 3; ++n) {
+		knob_col[n] = id_knob_map.find(static_cast<KnobID>(col+n*8))->second;
+	}
+
+	return knob_col;
+}
+
+void
+LaunchControlXL::update_knob_led(uint8_t n)
+{
+	LEDColor color;
+
+	uint32_t absolute_strip_num = (n + bank_start) % 8;
+
+	switch (absolute_strip_num) {
+		case 0:
+		case 4:
+			if (stripable[n] && stripable[n]->is_selected()) {
+				color = RedFull;
+			} else {
+				color = RedLow;
+			}
+			break;
+
+		case 1:
+		case 5:
+			if (stripable[n] && stripable[n]->is_selected()) {
+				color = YellowFull;
+			} else {
+				color = YellowLow;
+			}
+			break;
+
+		case 2:
+		case 6:
+			if (stripable[n] && stripable[n]->is_selected()) {
+				color = GreenFull;
+			} else {
+				color = GreenLow;
+			}
+			break;
+
+		case 3:
+		case 7:
+			if (stripable[n] && stripable[n]->is_selected()) {
+				color = AmberFull;
+			} else {
+				color = AmberLow;
+			}
+	}
+
+	Knob* knobs_col[3];
+	knobs_by_collumn(n, knobs_col);
+
+	for  (uint8_t s = 0; s < 3; ++s)
+	{
+		if (stripable[n]) {
+			knobs_col[s]->set_color(color);
+		} else {
+			knobs_col[s]->set_color(Off);
+		}
+		write (knobs_col[s]->state_msg());
+	}
+}
 
 void
 LaunchControlXL::update_track_control_led(uint8_t n)
@@ -363,7 +430,7 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 		switch(track_mode()) {
 			case TrackMute:
 				if (ac->get_value()) {
-					b->set_color(AmberFull);
+					b->set_color(YellowFull);
 				} else {
 					b->set_color(AmberLow);
 				}

@@ -138,7 +138,7 @@ public:
 
 	enum LEDFlag { Normal = 0xC, Blink = 0x8, DoubleBuffering = 0x0 };
 
-	enum LEDColor { Off=0, RedLow = 1, RedFull = 3, GreenLow = 16, GreenFull = 48, Yellow = 50, AmberLow = 17, AmberFull = 51};
+	enum LEDColor { Off=0, RedLow = 1, RedFull = 3, GreenLow = 16, GreenFull = 48, YellowLow = 34, YellowFull = 51, AmberLow = 18, AmberFull = 35};
 
 
 	struct Controller {
@@ -277,20 +277,20 @@ public:
 	struct TrackStateButton : public NoteButton, public LED {
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
 			: NoteButton(id, nn, press)
-			, LED(index, Yellow, l) {}
+			, LED(index, YellowLow, l) {}
 
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
 				void (LaunchControlXL::*release)(),
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release)
-			, LED(index, Yellow, l) {}
+			, LED(index, YellowLow, l) {}
 
 		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
 				void (LaunchControlXL::*release)(),
 				void (LaunchControlXL::*release_long)(),
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release, release_long)
-			, LED(index, Yellow, l) {}
+			, LED(index, YellowLow, l) {}
 
 		MidiByteArray state_msg(bool light) const;
 	};
@@ -308,9 +308,9 @@ public:
 	};
 
 	struct Knob : public Controller, public MultiColorLED {
-		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor color, LaunchControlXL& l)
+		Knob(KnobID id, uint8_t cn, uint8_t index, LaunchControlXL& l)
 			: Controller(cn, 64)
-			, MultiColorLED(index, color, l)
+			, MultiColorLED(index, Off, l)
 			, _id(id) {} // knob 50/50 value
 
 		KnobID id() const { return _id; }
@@ -446,6 +446,10 @@ private:
 	void notify_loop_state_changed();
 	void notify_parameter_changed(std::string);
 
+	/* Knob methods */
+
+	Knob** knobs_by_collumn(uint8_t col, Knob** knob_col);
+	void update_knob_led(uint8_t n);
 
 	/* Button methods */
 
