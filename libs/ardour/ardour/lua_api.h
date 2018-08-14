@@ -188,6 +188,10 @@ namespace ARDOUR { namespace LuaAPI {
 	int color_to_rgba (lua_State *lua);
 
 	/**
+	 */
+	std::string ascii_dtostr (const double d);
+
+	/**
 	 * Creates a filename from a series of elements using the correct separator for filenames.
 	 *
 	 * No attempt is made to force the resulting filename to be an absolute path.

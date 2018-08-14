@@ -527,6 +527,14 @@ ARDOUR::LuaAPI::hsla_to_rgba (lua_State *L)
 	return 4;
 }
 
+std::string
+ARDOUR::LuaAPI::ascii_dtostr (const double d)
+{
+	gchar buf[G_ASCII_DTOSTR_BUF_SIZE];
+	g_ascii_dtostr (buf, sizeof(buf), d);
+	return std::string (buf);
+}
+
 int
 ARDOUR::LuaAPI::color_to_rgba (lua_State *L)
 {
