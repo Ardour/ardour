@@ -133,8 +133,8 @@ function factory () return function ()
 		local route_string = [[instance = {
 			 route_id = %d,
 			 route_name = '%s',
-			 gain_control = %f,
-			 trim_control = %f,
+			 gain_control = %s,
+			 trim_control = %s,
 			 pan_control = %s,
 			 muted = %s,
 			 soloed = %s,
@@ -163,7 +163,7 @@ function factory () return function ()
 		local group_route_string = " [%d] = %s,"
 		local proc_order_string  = " [%d] = %d,"
 		local proc_cache_string  = " [%d] = '%s',"
-		local params_string      = " [%d] = %f,"
+		local params_string      = " [%d] = %s,"
 
 		--ensure easy-to-read formatting doesn't make it through
 		local route_string     = string.gsub(route_string, "[\n\t]", "")
@@ -246,8 +246,8 @@ function factory () return function ()
 					route_string,
 					rid,
 					r:name(),
-					r:gain_control():get_value(),
-					r:trim_control():get_value(),
+					ARDOUR.LuaAPI.ascii_dtostr(r:gain_control():get_value()),
+					ARDOUR.LuaAPI.ascii_dtostr(r:trim_control():get_value()),
 					tostring(pan),
 					r:muted(),
 					r:soloed(),
@@ -287,7 +287,7 @@ function factory () return function ()
 
 				local tmp_params_str = ""
 				for k, v in pairs(params) do
-					tmp_params_str = tmp_params_str .. string.format(params_string, k, v)
+					tmp_params_str = tmp_params_str .. string.format(params_string, k, ARDOUR.LuaAPI.ascii_dtostr(v))
 				end
 
 				local proc_str = string.format(
