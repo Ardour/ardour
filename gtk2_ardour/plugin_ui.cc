@@ -309,7 +309,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 		cairo_stroke (cr);
 
 		if (xd1 - xd0 > 2) {
-			const double ym = .5 + floor (y0 + h / 2);
+			const double ym = .5 + floor ((double)(y0 + h / 2));
 			const int h4 = h / 4;
 
 			cairo_set_line_width (cr, 1);
