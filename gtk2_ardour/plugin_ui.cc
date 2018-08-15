@@ -138,13 +138,13 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
 	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 999.123), 0, 0);
 
-	attach (*manage (new Gtk::Label (_("Min:"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Minimum:"), ALIGN_RIGHT, ALIGN_CENTER)),
 			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Max:"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Maximum:"), ALIGN_RIGHT, ALIGN_CENTER)),
 			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Avg:"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Average:"), ALIGN_RIGHT, ALIGN_CENTER)),
 			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Dev:"), ALIGN_RIGHT, ALIGN_CENTER)),
+	attach (*manage (new Gtk::Label (_("Std.Dev:"), ALIGN_RIGHT, ALIGN_CENTER)),
 			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 4, 0);
 
 	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK);
