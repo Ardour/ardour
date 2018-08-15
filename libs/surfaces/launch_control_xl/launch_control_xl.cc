@@ -811,7 +811,7 @@ LaunchControlXL::stripable_property_change (PropertyChange const& what_changed, 
 			return;
 		}
 		if (which < 8) {
-			button_track_focus( (uint8_t)which );
+			button_track_focus((uint8_t)which);
 		}
 	}
 
@@ -843,8 +843,8 @@ LaunchControlXL::switch_bank (uint32_t base)
 	}
 
 	if (sl && sr) {
-		write(sl->state_msg( (base) ));
-		write(sr->state_msg( (s[1] != 0) ));
+		write(sl->state_msg((base)));
+		write(sr->state_msg((s[1] != 0)));
 	}
 
 	if (!s[0]) {
