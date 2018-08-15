@@ -197,6 +197,7 @@ public:
 	bool load_preset (Plugin::PresetRecord);
 
 	bool get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev) const;
+	void clear_stats ();
 
 	/** A control that manipulates a plugin parameter (control port). */
 	struct PluginControl : public AutomationControl
@@ -399,6 +400,7 @@ private:
 	void preset_load_set_value (uint32_t, float);
 
 	PBD::TimingStats _timing_stats;
+	volatile gint _stat_reset;
 };
 
 } // namespace ARDOUR

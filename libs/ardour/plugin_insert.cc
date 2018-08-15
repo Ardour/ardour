@@ -83,6 +83,7 @@ PluginInsert::PluginInsert (Session& s, boost::shared_ptr<Plugin> plug)
 	, _maps_from_state (false)
 	, _latency_changed (false)
 	, _bypass_port (UINT32_MAX)
+	, _stat_reset (0)
 {
 	/* the first is the master */
 
@@ -1208,6 +1209,10 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		// collect sidechain input for complete cycle (!)
 		// TODO we need delaylines here for latency compensation
 		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
+	}
+
+	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
+		_timing_stats.reset ();
 	}
 
 	if (_pending_active) {
@@ -3144,6 +3149,12 @@ PluginInsert::get_stats (uint64_t& min, uint64_t& max, double& avg, double& dev)
 	 * TimingStats::update, TimingStats::reset.
 	 */
 	return _timing_stats.get_stats (min, max, avg, dev);
+}
+
+void
+PluginInsert::clear_stats ()
+{
+	g_atomic_int_set (&_stat_reset, 1);
 }
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
