@@ -104,6 +104,9 @@ public:
 private:
 	void update_cpu_label ();
 	bool draw_bar (GdkEventExpose*);
+	void clear_stats () {
+		_insert->clear_stats ();
+	}
 
 	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
 	sigc::connection update_cpu_label_connection;
@@ -113,6 +116,7 @@ private:
 	Gtk::Label _lbl_avg;
 	Gtk::Label _lbl_dev;
 
+	ArdourWidgets::ArdourButton _reset_button;
 	Gtk::DrawingArea _darea;
 
 	uint64_t _min, _max;
@@ -126,8 +130,11 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 	, _lbl_max ("", ALIGN_RIGHT, ALIGN_CENTER)
 	, _lbl_avg ("", ALIGN_RIGHT, ALIGN_CENTER)
 	, _lbl_dev ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _reset_button (_("Reset"))
 	, _valid (false)
 {
+	_reset_button.set_name ("generic button");
+	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginLoadStatsGui::clear_stats));
 	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
 	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 999.123), 0, 0);
 
@@ -149,6 +156,8 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 			2, 3, 0, 4, Gtk::FILL, Gtk::FILL, 4, 0);
 
 	attach (_darea, 3, 4, 0, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 4);
+
+	attach (_reset_button, 4, 5, 2, 4, Gtk::FILL, Gtk::SHRINK);
 }
 
 void
@@ -174,8 +183,8 @@ bool
 PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 {
 	Gtk::Allocation a = _darea.get_allocation ();
-	double const width = a.get_width ();
-	double const height = a.get_height ();
+	const int width = a.get_width ();
+	const int height = a.get_height ();
 	cairo_t* cr = gdk_cairo_create (_darea.get_window ()->gobj ());
 	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
 	cairo_clip (cr);
@@ -187,25 +196,33 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 	cairo_rectangle (cr, 0, 0, width, height);
 	cairo_fill (cr);
 
-	int border = height / 7;
+	int border = (height / 7) | 1;
 
 	int x0 = 2;
 	int y0 = border;
 	int x1 = width - border;
-	int y1 = height - 3 * border;
+	int y1 = (height - 3 * border) & ~1;
 
 	const int w = x1 - x0;
 	const int h = y1 - y0;
 	const double cycle_ms = 1000. * _insert->session().get_block_size() / (double)_insert->session().nominal_sample_rate();
 
+	const double base_mult = std::max (1.0, cycle_ms / 2.0);
+	const double log_base = log1p (base_mult);
+
 #if 0 // Linear
 # define DEFLECT(T) ( (T) * w * 8. / (9. * cycle_ms) )
 #else
-# define DEFLECT(T) ( log1p((T) * 9. / cycle_ms) * w * 8. / (9 * log (10)) )
+# define DEFLECT(T) ( log1p((T) * base_mult / cycle_ms) * w * 8. / (9 * log_base) )
 #endif
 
 	cairo_save (cr);
 	rounded_rectangle (cr, x0, y0, w, h, 7);
+
+	cairo_set_source_rgba (cr, .0, .0, .0, 1);
+	cairo_set_line_width (cr, 1);
+	cairo_stroke_preserve (cr);
+
 	if (_valid) {
 		cairo_pattern_t *pat = cairo_pattern_create_linear (x0, 0.0, w, 0.0);
 		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .7);
@@ -221,6 +238,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 		cairo_fill_preserve (cr);
 	}
 
+
 	cairo_clip (cr);
 
 	if (_valid) {
@@ -228,7 +246,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 		double xmax = DEFLECT(_max / 1000.);
 
 		rounded_rectangle (cr, x0 + xmin, y0, xmax - xmin, h, 7);
-		cairo_set_source_rgba (cr, .8, .8, .9, .4);
+		cairo_set_source_rgba (cr, .8, .8, .9, .5);
 		cairo_fill (cr);
 	}
 
@@ -244,7 +262,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 #if 0 // Linear
 		double v = cycle_ms * i / 8.;
 #else
-		double v = (exp (i * log (10) / 8) - 1) * cycle_ms / 9.;
+		double v = (exp (i * log_base / 8) - 1) * cycle_ms / base_mult;
 #endif
 		double decimal = v > 10 ? 10 : 100;
 		layout->set_text (string_compose ("%1", rint (decimal * v) / decimal));
@@ -291,17 +309,20 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 		cairo_stroke (cr);
 
 		if (xd1 - xd0 > 2) {
+			const double ym = .5 + floor (y0 + h / 2);
+			const int h4 = h / 4;
+
 			cairo_set_line_width (cr, 1);
 			cairo_set_source_rgba (cr, 0, 0, 0, 1.);
-			cairo_move_to (cr, floor (x0 + xd0), .5 + y0 + h / 2);
-			cairo_line_to (cr, ceil (x0 + xd1), .5 + y0 + h / 2);
+			cairo_move_to (cr, floor (x0 + xd0), ym);
+			cairo_line_to (cr, ceil (x0 + xd1),  ym);
 			cairo_stroke (cr);
 
-			cairo_move_to (cr, floor (x0 + xd0) - .5, y0 + h / 4);
-			cairo_line_to (cr, floor (x0 + xd0) - .5, y0 + h * 3 / 4);
+			cairo_move_to (cr, floor (x0 + xd0) - .5, ym - h4);
+			cairo_line_to (cr, floor (x0 + xd0) - .5, ym + h4);
 			cairo_stroke (cr);
-			cairo_move_to (cr, ceil (x0 + xd1) - .5, y0 + h / 4);
-			cairo_line_to (cr, ceil (x0 + xd1) - .5, y0 + h * 3 / 4);
+			cairo_move_to (cr, ceil (x0 + xd1) - .5, ym - h4);
+			cairo_line_to (cr, ceil (x0 + xd1) - .5, ym + h4);
 			cairo_stroke (cr);
 		}
 		cairo_restore (cr);
