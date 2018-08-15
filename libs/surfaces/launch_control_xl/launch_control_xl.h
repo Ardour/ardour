@@ -469,16 +469,17 @@ private:
 	void button_track_control(uint8_t n);
 
 	boost::shared_ptr<ARDOUR::AutomationControl> get_ac_by_state(uint8_t n);
+	void update_track_focus_led(uint8_t n);
 	void update_track_control_led(uint8_t n);
 
-	void button_track_focus_1() { ControlProtocol::ToggleStripableSelection (stripable[0]); }
-	void button_track_focus_2() { ControlProtocol::ToggleStripableSelection (stripable[1]); }
-	void button_track_focus_3() { ControlProtocol::ToggleStripableSelection (stripable[2]); }
-	void button_track_focus_4() { ControlProtocol::ToggleStripableSelection (stripable[3]); }
-	void button_track_focus_5() { ControlProtocol::ToggleStripableSelection (stripable[4]); }
-	void button_track_focus_6() { ControlProtocol::ToggleStripableSelection (stripable[5]); }
-	void button_track_focus_7() { ControlProtocol::ToggleStripableSelection (stripable[6]); }
-	void button_track_focus_8() { ControlProtocol::ToggleStripableSelection (stripable[7]); }
+	void button_track_focus_1() { button_track_focus(0); }
+	void button_track_focus_2() { button_track_focus(1); }
+	void button_track_focus_3() { button_track_focus(2); }
+	void button_track_focus_4() { button_track_focus(3); }
+	void button_track_focus_5() { button_track_focus(4); }
+	void button_track_focus_6() { button_track_focus(5); }
+	void button_track_focus_7() { button_track_focus(6); }
+	void button_track_focus_8() { button_track_focus(7); }
 
 	void button_track_control_1() { button_track_control(0); }
 	void button_track_control_2() { button_track_control(1); }
