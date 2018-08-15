@@ -224,11 +224,7 @@ PluginSelector::PluginSelector (PluginManager& mgr)
 	_fil_channel_combo.append_text_item (_("Stereo Audio I/O"));
 	_fil_channel_combo.append_text_item (_("MIDI I/O (only)"));
 	_fil_channel_combo.append_text_item (_("Show All I/O"));
-#ifdef MIXBUS
-	_fil_channel_combo.set_text (_("Audio I/O"));
-#else
 	_fil_channel_combo.set_text (_("Show All I/O"));
-#endif
 
 	VBox* filter_vbox = manage (new VBox);
 	filter_vbox->pack_start (*_fil_effects_radio,     false, false);
