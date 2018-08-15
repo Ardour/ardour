@@ -11,9 +11,6 @@
 
 #include "midi++/parser.h"
 
-#include "temporal/time.h"
-#include "temporal/bbt_time.h"
-
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
