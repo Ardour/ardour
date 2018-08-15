@@ -221,7 +221,7 @@ function factory () return function ()
 				if soloed then rt:solo_control():set_value(1, 1) else rt:solo_control():set_value(0, 1) end
 				rt:gain_control():set_value(gc, 1)
 				rt:trim_control():set_value(tc, 1)
-				if pc ~= false then rt:pan_azimuth_control():set_value(pc, 1) end
+				if pc ~= false and not(r:is_master()) then rt:pan_azimuth_control():set_value(pc, 1) end
 			end
 
 			if plugin then
