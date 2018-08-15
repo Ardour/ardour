@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "dsp",
 	name        = "LTC Reader",
 	category    = "Utility",
-	author      = "Ardour team",
+	author      = "Ardour Team",
 	license     = "MIT",
 	description = [[Linear Timecode Decoder with mixer strip inline display]]
 }
