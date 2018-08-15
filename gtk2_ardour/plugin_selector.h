@@ -82,7 +82,6 @@ private:
 	/* combobox filters */
 	ArdourWidgets::ArdourDropdown _fil_type_combo;
 	ArdourWidgets::ArdourDropdown _fil_creator_combo;
-	ArdourWidgets::ArdourDropdown _fil_channel_combo;
 
 	PluginInterestedObject* interested_object;
 
