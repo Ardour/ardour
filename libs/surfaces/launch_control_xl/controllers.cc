@@ -305,6 +305,12 @@ LaunchControlXL::update_track_focus_led(uint8_t n)
 void
 LaunchControlXL::button_track_focus(uint8_t n)
 {
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
+		stripable[n]->solo_isolate_control()->set_value (!stripable[n]->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		return;
+	}
+
 	if (stripable[n]) {
 		if ( stripable[n]->is_selected() ) {
 			 ControlProtocol::RemoveStripableFromSelection (stripable[n]);
