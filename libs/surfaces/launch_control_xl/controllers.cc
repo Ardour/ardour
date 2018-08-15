@@ -410,9 +410,9 @@ LaunchControlXL::button_track_mode(TrackMode state)
 		TrackStateButton* solo = static_cast<TrackStateButton*>(id_note_button_map[Solo]);
 		TrackStateButton* record = static_cast<TrackStateButton*>(id_note_button_map[Record]);
 
-		write(mute->state_msg( (state == TrackMute) ));
-		write(solo->state_msg( (state == TrackSolo) ));
-		write(record->state_msg( (state == TrackRecord) ));
+		write(mute->state_msg((state == TrackMute)));
+		write(solo->state_msg((state == TrackSolo)));
+		write(record->state_msg((state == TrackRecord)));
 }
 
 void
