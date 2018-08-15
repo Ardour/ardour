@@ -32,6 +32,7 @@
 
 #include "gtkmm/widget.h"
 #include "gtkmm/box.h"
+#include "gtkmm/separator.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/doi.h"
@@ -83,6 +84,237 @@ using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+
+
+class PluginLoadStatsGui : public Gtk::Table
+{
+public:
+	PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert>);
+
+	void start_updating () {
+		update_cpu_label ();
+		update_cpu_label_connection = Timers::second_connect (sigc::mem_fun(*this, &PluginLoadStatsGui::update_cpu_label));
+	}
+
+	void stop_updating () {
+		_valid = false;
+		update_cpu_label_connection.disconnect ();
+	}
+
+private:
+	void update_cpu_label ();
+	bool draw_bar (GdkEventExpose*);
+
+	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
+	sigc::connection update_cpu_label_connection;
+
+	Gtk::Label _lbl_min;
+	Gtk::Label _lbl_max;
+	Gtk::Label _lbl_avg;
+	Gtk::Label _lbl_dev;
+
+	Gtk::DrawingArea _darea;
+
+	uint64_t _min, _max;
+	double   _avg, _dev;
+	bool     _valid;
+};
+
+PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> insert)
+	: _insert (insert)
+	, _lbl_min ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_max ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_avg ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_dev ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _valid (false)
+{
+	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
+	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 999.123), 0, 0);
+
+	attach (*manage (new Gtk::Label (_("Min:"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 4, 0);
+	attach (*manage (new Gtk::Label (_("Max:"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 4, 0);
+	attach (*manage (new Gtk::Label (_("Avg:"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 4, 0);
+	attach (*manage (new Gtk::Label (_("Dev:"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 4, 0);
+
+	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK);
+	attach (_lbl_max, 1, 2, 1, 2, Gtk::FILL, Gtk::SHRINK);
+	attach (_lbl_avg, 1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	attach (_lbl_dev, 1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
+
+	attach (*manage (new Gtk::VSeparator ()),
+			2, 3, 0, 4, Gtk::FILL, Gtk::FILL, 4, 0);
+
+	attach (_darea, 3, 4, 0, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 4);
+}
+
+void
+PluginLoadStatsGui::update_cpu_label()
+{
+	if (_insert->get_stats (_min, _max, _avg, _dev)) {
+		_valid = true;
+		_lbl_min.set_text (string_compose (_("%1 [ms]"), rint (_min / 10.) / 100.));
+		_lbl_max.set_text (string_compose (_("%1 [ms]"), rint (_max / 10.) / 100.));
+		_lbl_avg.set_text (string_compose (_("%1 [ms]"), rint (_avg) / 1000.));
+		_lbl_dev.set_text (string_compose (_("%1 [ms]"), rint (_dev) / 1000.));
+	} else {
+		_valid = false;
+		_lbl_min.set_text ("-");
+		_lbl_max.set_text ("-");
+		_lbl_avg.set_text ("-");
+		_lbl_dev.set_text ("-");
+	}
+	_darea.queue_draw ();
+}
+
+bool
+PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
+{
+	Gtk::Allocation a = _darea.get_allocation ();
+	double const width = a.get_width ();
+	double const height = a.get_height ();
+	cairo_t* cr = gdk_cairo_create (_darea.get_window ()->gobj ());
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
+
+	Gdk::Color const bg = get_style ()->get_bg (STATE_NORMAL);
+	Gdk::Color const fg = get_style ()->get_fg (STATE_NORMAL);
+
+	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	int border = height / 7;
+
+	int x0 = 2;
+	int y0 = border;
+	int x1 = width - border;
+	int y1 = height - 3 * border;
+
+	const int w = x1 - x0;
+	const int h = y1 - y0;
+	const double cycle_ms = 1000. * _insert->session().get_block_size() / (double)_insert->session().nominal_sample_rate();
+
+#if 0 // Linear
+# define DEFLECT(T) ( (T) * w * 8. / (9. * cycle_ms) )
+#else
+# define DEFLECT(T) ( log1p((T) * 9. / cycle_ms) * w * 8. / (9 * log (10)) )
+#endif
+
+	cairo_save (cr);
+	rounded_rectangle (cr, x0, y0, w, h, 7);
+	if (_valid) {
+		cairo_pattern_t *pat = cairo_pattern_create_linear (x0, 0.0, w, 0.0);
+		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 6.  / 9.,  0,  1, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 6.5 / 9., .8, .8, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 7.5 / 9., .8, .8, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 8.  / 9.,  1,  0, 0, .7);
+		cairo_set_source (cr, pat);
+		cairo_pattern_destroy (pat);
+		cairo_fill_preserve (cr);
+	} else {
+		cairo_set_source_rgba (cr, .4, .3, .1, .5);
+		cairo_fill_preserve (cr);
+	}
+
+	cairo_clip (cr);
+
+	if (_valid) {
+		double xmin = DEFLECT(_min / 1000.);
+		double xmax = DEFLECT(_max / 1000.);
+
+		rounded_rectangle (cr, x0 + xmin, y0, xmax - xmin, h, 7);
+		cairo_set_source_rgba (cr, .8, .8, .9, .4);
+		cairo_fill (cr);
+	}
+
+	cairo_restore (cr);
+
+	Glib::RefPtr<Pango::Layout> layout;
+	layout = Pango::Layout::create (get_pango_context ());
+
+	cairo_set_line_width (cr, 1);
+
+	for (int i = 1; i < 9; ++i) {
+		int text_width, text_height;
+#if 0 // Linear
+		double v = cycle_ms * i / 8.;
+#else
+		double v = (exp (i * log (10) / 8) - 1) * cycle_ms / 9.;
+#endif
+		double decimal = v > 10 ? 10 : 100;
+		layout->set_text (string_compose ("%1", rint (decimal * v) / decimal));
+		layout->get_pixel_size (text_width, text_height);
+
+		const int dx = w * i / 9.; // == DEFLECT (v)
+
+		cairo_move_to (cr, x0 + dx - .5, y0);
+		cairo_line_to (cr, x0 + dx - .5, y1);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, x0 + dx - .5 * text_width, y1 + 1);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
+	{
+		int text_width, text_height;
+		layout->set_text ("0");
+		cairo_move_to (cr, x0 + 1, y1 + 1);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		pango_cairo_show_layout (cr, layout->gobj ());
+
+		layout->set_text (_("[ms]"));
+		layout->get_pixel_size (text_width, text_height);
+		cairo_move_to (cr, x0 + w - text_width - 1, y1 + 1);
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
+	if (_valid) {
+		cairo_save (cr);
+		rounded_rectangle (cr, x0, y0, w, h, 7);
+		cairo_clip (cr);
+
+		double xavg = DEFLECT(_avg / 1000.);
+		double xd0 = DEFLECT((_avg - _dev) / 1000.);
+		double xd1 = DEFLECT((_avg + _dev) / 1000.);
+
+		cairo_set_line_width (cr, 3);
+		cairo_set_source_rgba (cr, .0, .1, .0, 1.);
+		cairo_move_to (cr, x0 + xavg - 1.5, y0);
+		cairo_line_to (cr, x0 + xavg - 1.5, y1);
+		cairo_stroke (cr);
+
+		if (xd1 - xd0 > 2) {
+			cairo_set_line_width (cr, 1);
+			cairo_set_source_rgba (cr, 0, 0, 0, 1.);
+			cairo_move_to (cr, floor (x0 + xd0), .5 + y0 + h / 2);
+			cairo_line_to (cr, ceil (x0 + xd1), .5 + y0 + h / 2);
+			cairo_stroke (cr);
+
+			cairo_move_to (cr, floor (x0 + xd0) - .5, y0 + h / 4);
+			cairo_line_to (cr, floor (x0 + xd0) - .5, y0 + h * 3 / 4);
+			cairo_stroke (cr);
+			cairo_move_to (cr, ceil (x0 + xd1) - .5, y0 + h / 4);
+			cairo_line_to (cr, ceil (x0 + xd1) - .5, y0 + h * 3 / 4);
+			cairo_stroke (cr);
+		}
+		cairo_restore (cr);
+	}
+#undef DEFLECT
+
+	cairo_destroy (cr);
+	return true;
+}
+
+
+/* --- */
+
 
 PluginUIWindow::PluginUIWindow (
 	boost::shared_ptr<PluginInsert> insert,
@@ -465,6 +697,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, latency_gui (0)
 	, latency_dialog (0)
 	, eqgui (0)
+	, stats_gui (0)
 {
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -540,6 +773,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 PlugUIBase::~PlugUIBase()
 {
 	delete eqgui;
+	delete stats_gui;
 	delete latency_gui;
 }
 
@@ -779,10 +1013,8 @@ PlugUIBase::toggle_description()
 			wr.height -= child_height;
 			toplevel->resize (wr.width, wr.height);
 		}
-
 	}
 }
-
 
 void
 PlugUIBase::toggle_plugin_analysis()
@@ -819,40 +1051,24 @@ PlugUIBase::toggle_plugin_analysis()
 }
 
 void
-PlugUIBase::update_cpu_label()
-{
-	uint64_t min, max;
-	double avg, dev;
-	string t;
-	if (insert->get_stats (min, max, avg, dev)) {
-		t = string_compose (_("Timing min: %1 [ms] max: %2 [ms]\navg: %3 [ms] std.dev: %4"),
-				rint (min / 100.) / 10.,
-				rint (max / 100.) / 10.,
-				rint (avg) / 1000.,
-				rint (dev) / 1000.);
-	} else {
-		t = _("No data available");
-	}
-	cpuload_label.set_text (t);
-}
-
-void
 PlugUIBase::toggle_cpuload_display()
 {
 	if (cpuload_expander.get_expanded() && !cpuload_expander.get_child()) {
-		update_cpu_label ();
-		cpuload_label.set_line_wrap(true);
-		cpuload_label.set_line_wrap_mode(Pango::WRAP_WORD);
-		update_cpu_label_connection = Timers::second_connect (sigc::mem_fun(*this, &PlugUIBase::update_cpu_label));
-
-		cpuload_expander.add(cpuload_label);
+		if (stats_gui == 0) {
+			stats_gui = new PluginLoadStatsGui (insert);
+		}
+		cpuload_expander.add (*stats_gui);
 		cpuload_expander.show_all();
+		stats_gui->start_updating ();
 	}
 
 	if (!cpuload_expander.get_expanded()) {
-		update_cpu_label_connection.disconnect ();
 		const int child_height = cpuload_expander.get_child ()->get_height ();
+
+		stats_gui->hide ();
+		stats_gui->stop_updating ();
 		cpuload_expander.remove();
+
 		Gtk::Window *toplevel = (Gtk::Window*) cpuload_expander.get_ancestor (GTK_TYPE_WINDOW);
 
 		if (toplevel) {

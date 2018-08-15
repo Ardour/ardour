@@ -78,6 +78,7 @@ namespace ArdourWidgets {
 class LatencyGUI;
 class ArdourWindow;
 class PluginEqGui;
+class PluginLoadStatsGui;
 class VSTPluginUI;
 
 class PlugUIBase : public virtual sigc::trackable, public PBD::ScopedConnectionList
@@ -151,17 +152,13 @@ protected:
 	ArdourWidgets::ArdourButton automation_touch_all_button;
 	/** a button which sets all controls' automation setting to Latch */
 	ArdourWidgets::ArdourButton automation_latch_all_button;
-	/**  */
-	Gtk::Label cpuload_label;
 
 	void set_latency_label ();
-	void update_cpu_label ();
-	sigc::connection update_cpu_label_connection;
-
 	LatencyGUI* latency_gui;
 	ArdourWindow* latency_dialog;
 
 	PluginEqGui* eqgui;
+	PluginLoadStatsGui* stats_gui;
 
 	Gtk::Image* focus_out_image;
 	Gtk::Image* focus_in_image;
