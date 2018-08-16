@@ -450,8 +450,8 @@ private:
 	/* Button methods */
 
 	TrackButton* track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
-	TrackButton* focus_button_by_collumn(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
-	TrackButton* control_button_by_collumn(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
+	TrackButton* focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
+	TrackButton* control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
 
 
 	void button_device();
