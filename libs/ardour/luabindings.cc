@@ -1777,6 +1777,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("LV2", ARDOUR::PluginType(LV2))
 		.addConst ("Windows_VST", ARDOUR::PluginType(Windows_VST))
 		.addConst ("LXVST", ARDOUR::PluginType(LXVST))
+		.addConst ("MacVST", ARDOUR::PluginType(MacVST))
 		.addConst ("Lua", ARDOUR::PluginType(Lua))
 		.endNamespace ()
 
