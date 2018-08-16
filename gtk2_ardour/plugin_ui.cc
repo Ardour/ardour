@@ -136,21 +136,21 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 	_reset_button.set_name ("generic button");
 	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginLoadStatsGui::clear_stats));
 	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
-	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 999.123), 0, 0);
+	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 99.123), 0, 0);
 
-	attach (*manage (new Gtk::Label (_("Minimum:"), ALIGN_RIGHT, ALIGN_CENTER)),
-			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Maximum:"), ALIGN_RIGHT, ALIGN_CENTER)),
-			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Average:"), ALIGN_RIGHT, ALIGN_CENTER)),
-			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 4, 0);
-	attach (*manage (new Gtk::Label (_("Std.Dev:"), ALIGN_RIGHT, ALIGN_CENTER)),
-			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 4, 0);
+	attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Maximum"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Average"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Std.Dev"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 0);
 
-	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK);
-	attach (_lbl_max, 1, 2, 1, 2, Gtk::FILL, Gtk::SHRINK);
-	attach (_lbl_avg, 1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK);
-	attach (_lbl_dev, 1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK);
+	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_max, 1, 2, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_avg, 1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_dev, 1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 0);
 
 	attach (*manage (new Gtk::VSeparator ()),
 			2, 3, 0, 4, Gtk::FILL, Gtk::FILL, 4, 0);
@@ -168,6 +168,7 @@ PluginLoadStatsGui::update_cpu_label()
 		_lbl_min.set_text (string_compose (_("%1 [ms]"), rint (_min / 10.) / 100.));
 		_lbl_max.set_text (string_compose (_("%1 [ms]"), rint (_max / 10.) / 100.));
 		_lbl_avg.set_text (string_compose (_("%1 [ms]"), rint (_avg) / 1000.));
+		_lbl_dev.set_text (string_compose (_("%1 [ms]"), rint (_dev) / 1000.));
 		_lbl_dev.set_text (string_compose (_("%1 [ms]"), rint (_dev) / 1000.));
 	} else {
 		_valid = false;
@@ -200,7 +201,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 
 	int x0 = 2;
 	int y0 = border;
-	int x1 = width - border;
+	int x1 = width - 2;
 	int y1 = (height - 3 * border) & ~1;
 
 	const int w = x1 - x0;
@@ -294,21 +295,34 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 	}
 
 	if (_valid) {
-		cairo_save (cr);
-		rounded_rectangle (cr, x0, y0, w, h, 7);
-		cairo_clip (cr);
-
-		double xavg = DEFLECT(_avg / 1000.);
+		double xavg = round (DEFLECT(_avg / 1000.));
 		double xd0 = DEFLECT((_avg - _dev) / 1000.);
 		double xd1 = DEFLECT((_avg + _dev) / 1000.);
 
-		cairo_set_line_width (cr, 3);
-		cairo_set_source_rgba (cr, .0, .1, .0, 1.);
-		cairo_move_to (cr, x0 + xavg - 1.5, y0);
-		cairo_line_to (cr, x0 + xavg - 1.5, y1);
+		cairo_move_to (cr, x0 + xavg - .5, y0 - 1);
+		cairo_rel_line_to (cr, -5, -5);
+		cairo_rel_line_to (cr, 10, 0);
+		cairo_close_path (cr);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		cairo_fill (cr);
+
+		cairo_save (cr);
+
+		rounded_rectangle (cr, x0, y0, w, h, 7);
+		cairo_clip (cr);
+
+		const double dashes[] = { 1, 2 };
+		cairo_set_dash (cr, dashes, 2, 0);
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+		cairo_set_line_width (cr, 1);
+		cairo_move_to (cr, x0 + xavg - .5, y0 - .5);
+		cairo_line_to (cr, x0 + xavg - .5, y1 + .5);
+		cairo_set_source_rgba (cr, .0, .0, .0, 1.);
 		cairo_stroke (cr);
+		cairo_set_dash (cr, 0, 0, 0);
 
 		if (xd1 - xd0 > 2) {
+			cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 			const double ym = .5 + floor ((double)(y0 + h / 2));
 			const int h4 = h / 4;
 
