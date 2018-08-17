@@ -277,7 +277,7 @@ function factory () return function ()
 					if plug:parameter_is_control (j) then
 						local label = plug:parameter_label (j)
 						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
-							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
+							--local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
 							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
 							print(r:name(), "->", proc:display_name(), label, val)
 							params[n] = val
