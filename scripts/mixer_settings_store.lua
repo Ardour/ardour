@@ -82,13 +82,6 @@ function factory () return function ()
 			until proc:isnil()
 		end
 
-	function new_plugin(name)
-		for x = 0, 6 do
-			local plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
-			if not(plugin:isnil()) then return plugin end
-		end
-	end
-
 	function group_by_id(id)
 		local id  = tonumber(id)
 		for g in Session:route_groups():iter() do
@@ -122,6 +115,7 @@ function factory () return function ()
 
 	function empty_last_store(path)  --empty current file from last run
 		local file = io.open(path, "w")
+		--file:write(string.format("instance = { whoami = '%s' }", whoami())
 		file:write("")
 		file:close()
 	end
@@ -153,6 +147,7 @@ function factory () return function ()
 
 		local processor_string = [[instance = {
 			 plugin_id = %d,
+			 type = %d,
 			 display_name = '%s',
 			 owned_by_route_name = '%s',
 			 owned_by_route_id = %d,
@@ -162,7 +157,7 @@ function factory () return function ()
 
 		local group_route_string = " [%d] = %s,"
 		local proc_order_string  = " [%d] = %d,"
-		local proc_cache_string  = " [%d] = '%s',"
+		local proc_cache_string  = " [%d] = {'%s', %d},"
 		local params_string      = " [%d] = %s,"
 
 		--ensure easy-to-read formatting doesn't make it through
@@ -225,6 +220,7 @@ function factory () return function ()
 				x = x + 1
 			until proc:isnil()
 
+
 			local route_group = route_group_interrogate(r)
 			if route_group then route_group = route_group:name() else route_group = "" end
 			local rid = r:to_stateful():id():to_s()
@@ -234,10 +230,15 @@ function factory () return function ()
 			local order_nmbr = 0
 			local tmp_order_str, tmp_cache_str = "", ""
 			for p in order:iter() do
+				if not(p:to_insert():isnil()) then
+					type = p:to_insert():plugin(0):get_info().type
+				else
+					type = 99
+				end
 				local pid = p:to_stateful():id():to_s()
 				if not(string.find(p:display_name(), "latcomp")) then
 					tmp_order_str = tmp_order_str .. string.format(proc_order_string, order_nmbr, pid)
-					tmp_cache_str = tmp_cache_str .. string.format(proc_cache_string, pid, p:display_name())
+					tmp_cache_str = tmp_cache_str .. string.format(proc_cache_string, pid, p:display_name(), type)
 				end
 				order_nmbr = order_nmbr + 1
 			end
@@ -270,6 +271,7 @@ function factory () return function ()
 				local active = proc:active()
 				local id = proc:to_stateful():id():to_s()
 				local plug = proc:to_insert ():plugin (0)
+				local type = proc:to_insert():plugin(0):get_info().type
 				local n = 0 -- count control-ports
 				for j = 0, plug:parameter_count () - 1 do -- iterate over all plugin parameters
 					if plug:parameter_is_control (j) then
@@ -277,7 +279,7 @@ function factory () return function ()
 						if plug:parameter_is_input (j) and label ~= "hidden" and label:sub (1,1) ~= "#" then
 							local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
 							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
-							--print(r:name(), "->", proc:display_name(), label, val)
+							print(r:name(), "->", proc:display_name(), label, val)
 							params[n] = val
 						end
 						n = n + 1
@@ -293,6 +295,7 @@ function factory () return function ()
 				local proc_str = string.format(
 						processor_string,
 						id,
+						type,
 						proc:display_name(),
 						r:name(),
 						r:to_stateful():id():to_s(),

@@ -60,11 +60,9 @@ function factory () return function ()
 			until proc:isnil()
 		end
 
-	function new_plugin(name)
-		for x = 0, 6 do
-			local plugin = ARDOUR.LuaAPI.new_plugin(Session, name, x, "")
-			if not(plugin:isnil()) then return plugin end
-		end
+	function new_plugin(name, type)
+		local plugin = ARDOUR.LuaAPI.new_plugin(Session, name, type, "")
+		if not(plugin:isnil()) then return plugin end
 	end
 
 	function group_by_id(id)
@@ -187,9 +185,11 @@ function factory () return function ()
 						proc = Session:processor_by_id(PBD.ID(v))
 					end
 					if proc:isnil() then
-						for id, name in pairs(cache) do
+						for id, sub_tbl in pairs(cache) do
+							local name = sub_tbl[1]
+							local type = sub_tbl[2]
 							if v == id then
-								proc = new_plugin(name)
+								proc = new_plugin(name, type)
 								for _, control in pairs(well_known) do
 									if name == control then
 										proc = get_processor_by_name(rt, control)
@@ -253,6 +253,7 @@ function factory () return function ()
 					if string.find(label, "Assign") or string.find(label, "Enable") then --@ToDo: Check Plugin type == LADSPA or VST?
 						enable[k] = v --queue any assignments/enables for after the initial parameter recalling to duck the 'in-on-change' feature
 					end
+					print(string.format("%s (Port: %s) -> %s", label, k, v))
 					ARDOUR.LuaAPI.set_processor_param(proc, k, v)
 				end
 
