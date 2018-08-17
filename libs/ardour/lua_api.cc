@@ -113,6 +113,9 @@ ARDOUR::LuaAPI::list_plugins ()
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.windows_vst_plugin_info ().begin (), manager.windows_vst_plugin_info ().end ());
 #endif
+#ifdef MACVST_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.mac_vst_plugin_info ().begin (), manager.mac_vst_plugin_info ().end ());
+#endif
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lxvst_plugin_info ().begin (), manager.lxvst_plugin_info ().end ());
 #endif
@@ -136,6 +139,9 @@ ARDOUR::LuaAPI::new_plugin_info (const string& name, ARDOUR::PluginType type)
 	all_plugs.insert (all_plugs.end (), manager.lua_plugin_info ().begin (), manager.lua_plugin_info ().end ());
 #ifdef WINDOWS_VST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.windows_vst_plugin_info ().begin (), manager.windows_vst_plugin_info ().end ());
+#endif
+#ifdef MACVST_SUPPORT
+	all_plugs.insert (all_plugs.end (), manager.mac_vst_plugin_info ().begin (), manager.mac_vst_plugin_info ().end ());
 #endif
 #ifdef LXVST_SUPPORT
 	all_plugs.insert (all_plugs.end (), manager.lxvst_plugin_info ().begin (), manager.lxvst_plugin_info ().end ());
