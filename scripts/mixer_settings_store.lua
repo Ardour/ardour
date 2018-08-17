@@ -280,7 +280,7 @@ function factory () return function ()
 							--local _, _, pd = ARDOUR.LuaAPI.plugin_automation(proc, n)
 							local val = ARDOUR.LuaAPI.get_processor_param(proc, j, true)
 							print(r:name(), "->", proc:display_name(), label, val)
-							params[n] = val
+							params[j] = val
 						end
 						n = n + 1
 					end
