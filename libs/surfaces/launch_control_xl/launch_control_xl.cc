@@ -119,6 +119,7 @@ LaunchControlXL::~LaunchControlXL ()
 	ports_release ();
 
 	stop_event_loop ();
+	tear_down_gui ();
 }
 
 
