@@ -22,6 +22,7 @@
 #include "ardour/mute_control.h"
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
+#include "ardour/solo_isolate_control.h"
 
 #include "launch_control_xl.h"
 
@@ -280,9 +281,9 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 }
 
 void
-LaunchControlXL::button_track_focus(uint8_t n)
+LaunchControlXL::update_track_focus_led(uint8_t n)
 {
-	TrackButton* b = focus_button_by_collumn(n);
+	TrackButton* b = focus_button_by_column(n);
 
 	if (!b) {
 		return;
@@ -300,6 +301,28 @@ LaunchControlXL::button_track_focus(uint8_t n)
 
 	write (b->state_msg());
 }
+
+void
+LaunchControlXL::button_track_focus(uint8_t n)
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
+		stripable[n]->solo_isolate_control()->set_value (!stripable[n]->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		return;
+	}
+
+	if (stripable[n]) {
+		if ( stripable[n]->is_selected() ) {
+			 ControlProtocol::RemoveStripableFromSelection (stripable[n]);
+		} else {
+			ControlProtocol::AddStripableToSelection (stripable[n]);
+		}
+	} else {
+		return;
+	}
+}
+
+
 
 boost::shared_ptr<AutomationControl>
 LaunchControlXL::get_ac_by_state(uint8_t n) {
@@ -328,7 +351,7 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 void
 LaunchControlXL::update_track_control_led(uint8_t n)
 {
-	TrackButton* b = control_button_by_collumn(n);
+	TrackButton* b = control_button_by_column(n);
 
 	if (!b) {
 		return;

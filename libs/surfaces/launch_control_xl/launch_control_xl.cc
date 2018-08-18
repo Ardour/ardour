@@ -811,10 +811,9 @@ LaunchControlXL::stripable_property_change (PropertyChange const& what_changed, 
 			return;
 		}
 		if (which < 8) {
-			button_track_focus((uint8_t)which);
+			update_track_focus_led ((uint8_t) which);
 		}
 	}
-
 }
 
 void
@@ -875,7 +874,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 				stripable[n]->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::rec_changed, this, n), lcxl);
 			}
 		}
-		button_track_focus(n);
+		update_track_focus_led(n);
 		button_track_mode(track_mode());
 	}
 }

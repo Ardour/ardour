@@ -450,8 +450,8 @@ private:
 	/* Button methods */
 
 	TrackButton* track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
-	TrackButton* focus_button_by_collumn(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
-	TrackButton* control_button_by_collumn(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
+	TrackButton* focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
+	TrackButton* control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
 
 
 	void button_device();
@@ -469,16 +469,17 @@ private:
 	void button_track_control(uint8_t n);
 
 	boost::shared_ptr<ARDOUR::AutomationControl> get_ac_by_state(uint8_t n);
+	void update_track_focus_led(uint8_t n);
 	void update_track_control_led(uint8_t n);
 
-	void button_track_focus_1() { ControlProtocol::ToggleStripableSelection (stripable[0]); }
-	void button_track_focus_2() { ControlProtocol::ToggleStripableSelection (stripable[1]); }
-	void button_track_focus_3() { ControlProtocol::ToggleStripableSelection (stripable[2]); }
-	void button_track_focus_4() { ControlProtocol::ToggleStripableSelection (stripable[3]); }
-	void button_track_focus_5() { ControlProtocol::ToggleStripableSelection (stripable[4]); }
-	void button_track_focus_6() { ControlProtocol::ToggleStripableSelection (stripable[5]); }
-	void button_track_focus_7() { ControlProtocol::ToggleStripableSelection (stripable[6]); }
-	void button_track_focus_8() { ControlProtocol::ToggleStripableSelection (stripable[7]); }
+	void button_track_focus_1() { button_track_focus(0); }
+	void button_track_focus_2() { button_track_focus(1); }
+	void button_track_focus_3() { button_track_focus(2); }
+	void button_track_focus_4() { button_track_focus(3); }
+	void button_track_focus_5() { button_track_focus(4); }
+	void button_track_focus_6() { button_track_focus(5); }
+	void button_track_focus_7() { button_track_focus(6); }
+	void button_track_focus_8() { button_track_focus(7); }
 
 	void button_track_control_1() { button_track_control(0); }
 	void button_track_control_2() { button_track_control(1); }
