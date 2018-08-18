@@ -335,6 +335,8 @@ public:
 	void *get_gui() const;
 	void tear_down_gui();
 
+	bool use_fader8master = false;
+
 	int set_active(bool yn);
 	XMLNode &get_state();
 	int set_state(const XMLNode &node, int version);
@@ -352,6 +354,7 @@ public:
 
 	void write(const MidiByteArray &);
 	void reset(uint8_t chan);
+	void set_fader8master (bool yn);
 
 	TrackMode track_mode() const { return _track_mode; }
 	void set_track_mode(TrackMode mode);
