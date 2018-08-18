@@ -81,9 +81,6 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
-	/* the master bus will always be on the last channel on the lcxl */
-	stripable[7] = master;
-
 
 	run_event_loop ();
 
@@ -104,6 +101,8 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 
 	switch_bank (bank_start);
+
+	set_fader8master(use_fader8master);
 }
 
 LaunchControlXL::~LaunchControlXL ()
@@ -834,8 +833,15 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 	boost::shared_ptr<Stripable> s[8];
 	uint32_t different = 0;
+	int stripable_counter;
 
-	for (int n = 0; n < 7; ++n) {
+	if (LaunchControlXL::use_fader8master) {
+		stripable_counter = 7;
+	} else {
+		stripable_counter = 8;
+	}
+
+	for (int n = 0; n < stripable_counter; ++n) {
 		s[n] = session->get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
 		if (s[n] != stripable[n]) {
 			different++;
@@ -854,7 +860,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 	stripable_connections.drop_connections ();
 
-	for (int n = 0; n < 7; ++n) {
+	for (int n = 0; n < stripable_counter; ++n) {
 		stripable[n] = s[n];
 	}
 
@@ -907,4 +913,13 @@ void LaunchControlXL::set_track_mode (TrackMode mode) {
 	default:
 		break;
 	}
+}
+
+void
+LaunchControlXL::set_fader8master (bool yn)
+{
+	if (yn) {
+		stripable[7] = master;
+	}
+	switch_bank(bank_start);
 }

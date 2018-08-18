@@ -32,6 +32,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/debug.h"
 
 #include "launch_control_xl.h"
 #include "gui.h"
@@ -101,6 +102,7 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	}
 
 	Gtk::Label* l;
+	Gtk::Alignment* align;
 	int row = 0;
 
 	input_combo.pack_start (midi_port_columns.short_name);
@@ -121,6 +123,20 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table.attach (output_combo, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	row++;
+
+	/* User Settings */
+
+	fader8master_button.signal_clicked().connect (sigc::mem_fun (*this, &LCXLGUI::toggle_fader8master));
+
+	l = manage (new Gtk::Label (_("Fader 8 Master")));
+	l->set_alignment (1.0, 0.5);
+	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
+	align = manage (new Alignment);
+	align->set (0.0, 0.5);
+	align->add (fader8master_button);
+	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0),0,0);
+	fader8master_button.set_active(lcxl.use_fader8master);
 	row++;
 
 	hpacker.pack_start (table, true, true);
@@ -265,4 +281,13 @@ LCXLGUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 			lcxl.output_port()->connect (new_port);
 		}
 	}
+}
+
+void
+LCXLGUI::toggle_fader8master ()
+{
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master WAS: %1\n", lcxl.use_fader8master));
+	lcxl.use_fader8master = !(lcxl.use_fader8master);
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master IS: %1\n", lcxl.use_fader8master));
+	lcxl.set_fader8master(lcxl.use_fader8master);
 }
