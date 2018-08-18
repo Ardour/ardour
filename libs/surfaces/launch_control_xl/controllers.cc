@@ -76,14 +76,18 @@ LaunchControlXL::build_maps ()
 		controller_button = new SelectButton ((i), (cc), (index), (p), (*this)); \
 		cc_controller_button_map.insert (std::make_pair (controller_button->controller_number(), controller_button)); \
 		id_controller_button_map.insert (std::make_pair (controller_button->id(), controller_button))
+	#define MAKE_SELECT_BUTTON_PRESS_RELEASE_LONG(i,cc,index,p,r,l) \
+		controller_button = new SelectButton ((i), (cc), (index), (p), (r), (l), (*this)); \
+		cc_controller_button_map.insert (std::make_pair (controller_button->controller_number(), controller_button)); \
+		id_controller_button_map.insert (std::make_pair (controller_button->id(), controller_button))
 	#define MAKE_TRACK_STATE_BUTTON_PRESS(i,nn,index,p) \
 		note_button = new TrackStateButton ((i), (nn), (index), (p), (*this)); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
-		#define MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(i,nn,index, p,r,l) \
-			note_button = new TrackStateButton ((i), (nn), (index), (p), (r), (l), (*this)); \
-			nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
-			id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
+	#define MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(i,nn,index,p,r,l) \
+		note_button = new TrackStateButton ((i), (nn), (index), (p), (r), (l), (*this)); \
+		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
+		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 
 
 	MAKE_TRACK_BUTTON_PRESS(Focus1, 41, 24, YellowLow, &LaunchControlXL::button_track_focus_1);
@@ -105,10 +109,10 @@ LaunchControlXL::build_maps ()
 
 	MAKE_SELECT_BUTTON_PRESS(SelectUp, 104, 44, &LaunchControlXL::button_select_up);
 	MAKE_SELECT_BUTTON_PRESS(SelectDown, 105, 45, &LaunchControlXL::button_select_down);
-	MAKE_SELECT_BUTTON_PRESS(SelectLeft, 106, 46, &LaunchControlXL::button_select_left);
-	MAKE_SELECT_BUTTON_PRESS(SelectRight, 107, 47, &LaunchControlXL::button_select_right);
+	MAKE_SELECT_BUTTON_PRESS_RELEASE_LONG(SelectLeft, 106, 46, &LaunchControlXL::relax, &LaunchControlXL::button_select_left, &LaunchControlXL::button_select_left_long_press);
+	MAKE_SELECT_BUTTON_PRESS_RELEASE_LONG(SelectRight, 107, 47, &LaunchControlXL::relax, &LaunchControlXL::button_select_right, &LaunchControlXL::button_select_right_long_press);
 
-	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Device, 105, 40, &LaunchControlXL::relax, &LaunchControlXL::button_device, &LaunchControlXL::button_device_long_press);;
+	MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(Device, 105, 40, &LaunchControlXL::relax, &LaunchControlXL::button_device, &LaunchControlXL::button_device_long_press);
 	MAKE_TRACK_STATE_BUTTON_PRESS(Mute, 106, 41, &LaunchControlXL::button_mute);
 	MAKE_TRACK_STATE_BUTTON_PRESS(Solo, 107, 42, &LaunchControlXL::button_solo);
 	MAKE_TRACK_STATE_BUTTON_PRESS(Record, 108, 43, &LaunchControlXL::button_record);
@@ -515,6 +519,18 @@ void
 LaunchControlXL::button_select_right()
 {
 	switch_bank (max (0, bank_start + 1));
+}
+
+void
+LaunchControlXL::button_select_left_long_press()
+{
+	switch_bank (0);
+}
+
+void
+LaunchControlXL::button_select_right_long_press()
+{
+	switch_bank (session->get_stripables().size() - 3);
 }
 
 void
