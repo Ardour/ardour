@@ -443,7 +443,7 @@ Region::set_name (const std::string& str)
 void
 Region::set_selected_for_solo(bool yn)
 {
-	if ( _soloSelected != yn) {
+	if (_soloSelected != yn) {
 
 		boost::shared_ptr<Playlist> pl (playlist());
 		if (pl){
@@ -1812,7 +1812,7 @@ Region::transients (AnalysisFeatureList& afl)
 	if (!_user_transients.empty ()) {
 		++cnt;
 	}
-	if (cnt > 1 ) {
+	if (cnt > 1) {
 		afl.sort ();
 		// remove exact duplicates
 		TransientDetector::cleanup_transients (afl, _session.sample_rate(), 0);
