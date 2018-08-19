@@ -526,13 +526,13 @@ LaunchControlXL::button_track_mode(TrackMode state)
 void
 LaunchControlXL::button_select_left()
 {
-	switch_bank (max (0, bank_start - 1));
+	switch_bank (max (0, bank_start - (7 + (LaunchControlXL::use_fader8master))));
 }
 
 void
 LaunchControlXL::button_select_right()
 {
-	switch_bank (max (0, bank_start + 1));
+	switch_bank (max (0, bank_start + 7 + (LaunchControlXL::use_fader8master)));
 }
 
 void

@@ -852,7 +852,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 	boost::shared_ptr<Stripable> s[8];
 	uint32_t different = 0;
-	int stripable_counter;
+	uint8_t stripable_counter;
 
 	if (LaunchControlXL::use_fader8master) {
 		stripable_counter = 7;
@@ -867,14 +867,15 @@ LaunchControlXL::switch_bank (uint32_t base)
 		}
 	}
 
-	if (sl && sr) {
-		write(sl->state_msg((base)));
-		write(sr->state_msg((s[1] != 0)));
-	}
-
 	if (!s[0]) {
 		/* not even the first stripable exists, do nothing */
 		return;
+	}
+
+	if (sl && sr) {
+		boost::shared_ptr<Stripable> next_base = session->get_remote_nth_stripable (base+8, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
+		write(sl->state_msg((base)));
+		write(sr->state_msg((next_base != 0)));
 	}
 
 	stripable_connections.drop_connections ();
