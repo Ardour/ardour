@@ -368,41 +368,47 @@ LaunchControlXL::update_knob_led(uint8_t n)
 
 	uint32_t absolute_strip_num = (n + bank_start) % 8;
 
-	switch (absolute_strip_num) {
-		case 0:
-		case 4:
-			if (stripable[n] && stripable[n]->is_selected()) {
-				color = RedFull;
-			} else {
-				color = RedLow;
-			}
-			break;
+	if (stripable[n]) {
+		switch (absolute_strip_num) {
+			case 0:
+			case 4:
+				if (stripable[n]->is_selected()) {
+					color = RedFull;
+				} else {
+					color = RedLow;
+				}
+				break;
 
-		case 1:
-		case 5:
-			if (stripable[n] && stripable[n]->is_selected()) {
-				color = YellowFull;
-			} else {
-				color = YellowLow;
-			}
-			break;
+			case 1:
+			case 5:
+				if (stripable[n]->is_selected()) {
+					color = YellowFull;
+				} else {
+					color = YellowLow;
+				}
+				break;
 
-		case 2:
-		case 6:
-			if (stripable[n] && stripable[n]->is_selected()) {
-				color = GreenFull;
-			} else {
-				color = GreenLow;
-			}
-			break;
+			case 2:
+			case 6:
+				if (stripable[n]->is_selected()) {
+					color = GreenFull;
+				} else {
+					color = GreenLow;
+				}
+				break;
 
-		case 3:
-		case 7:
-			if (stripable[n] && stripable[n]->is_selected()) {
-				color = AmberFull;
-			} else {
-				color = AmberLow;
-			}
+			case 3:
+			case 7:
+				if (stripable[n]->is_master()) {
+					color = RedFull;
+				} else {
+					if (stripable[n]->is_selected()) {
+						color = AmberFull;
+					} else {
+						color = AmberLow;
+					}
+				}
+		}
 	}
 
 	Knob* knobs_col[3];
@@ -440,7 +446,7 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 				}
 				break;
 			case TrackSolo:
-				if (ac && stripable[n] != master ) {
+				if (ac && !(stripable[n]->is_master())) {
 					if (ac->get_value()) {
 						b->set_color(GreenFull);
 					} else {
