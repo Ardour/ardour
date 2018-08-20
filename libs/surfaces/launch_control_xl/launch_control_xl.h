@@ -464,7 +464,7 @@ private:
 
 	/* Knob methods */
 
-	Knob** knobs_by_collumn(uint8_t col, Knob** knob_col);
+	Knob** knobs_by_column(uint8_t col, Knob** knob_col);
 	void update_knob_led(uint8_t n);
 
 	/* Button methods */

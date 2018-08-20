@@ -352,7 +352,7 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 }
 
 LaunchControlXL::Knob**
-LaunchControlXL::knobs_by_collumn(uint8_t col, Knob** knob_col)
+LaunchControlXL::knobs_by_column(uint8_t col, Knob** knob_col)
 {
 	for (uint8_t n = 0; n < 3; ++n) {
 		knob_col[n] = id_knob_map.find(static_cast<KnobID>(col+n*8))->second;
@@ -406,7 +406,7 @@ LaunchControlXL::update_knob_led(uint8_t n)
 	}
 
 	Knob* knobs_col[3];
-	knobs_by_collumn(n, knobs_col);
+	knobs_by_column(n, knobs_col);
 
 	for  (uint8_t s = 0; s < 3; ++s)
 	{
