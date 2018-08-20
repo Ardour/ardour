@@ -485,6 +485,20 @@ LaunchControlXL::button_track_control(uint8_t n) {
 	if (!stripable[n]) {
 		return;
 	}
+
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
+#ifdef MIXBUS
+		if (stripable[n] != master) {
+			DEBUG_TRACE (DEBUG::LaunchControlXL, "MIXBUS Master Assign\n");
+			stripable[n]->master_send_enable_controllable()->set_value (!stripable[n]->master_send_enable_controllable()->get_value(), PBD::Controllable::UseGroup);
+		}
+#else
+		/* something useful for Ardour */
+#endif
+		return;
+	}
+
 	boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 
 	if (ac) {
