@@ -127,8 +127,6 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 
 	/* User Settings */
 
-	fader8master_button.signal_clicked().connect (sigc::mem_fun (*this, &LCXLGUI::toggle_fader8master));
-
 	l = manage (new Gtk::Label (_("Fader 8 Master")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -137,6 +135,7 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	align->add (fader8master_button);
 	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0),0,0);
 	fader8master_button.set_active(lcxl.use_fader8master);
+	fader8master_button.signal_toggled().connect (sigc::mem_fun (*this, &LCXLGUI::toggle_fader8master));
 	row++;
 
 	hpacker.pack_start (table, true, true);

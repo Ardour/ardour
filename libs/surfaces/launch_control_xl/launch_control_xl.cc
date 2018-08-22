@@ -101,8 +101,6 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	session->vca_manager().VCAAdded.connect (session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripables_added, this), lcxl);
 
 	switch_bank (bank_start);
-
-	set_fader8master(use_fader8master);
 }
 
 LaunchControlXL::~LaunchControlXL ()
@@ -149,6 +147,9 @@ LaunchControlXL::begin_using_device ()
 	init_buttons (true);
 
 	in_use = true;
+
+	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("use_fader8master inital value  '%1'\n", use_fader8master));
+	set_fader8master(use_fader8master);
 
 	return 0;
 }
@@ -646,6 +647,10 @@ LaunchControlXL::get_state()
 	child->add_child_nocopy (_async_out->get_state());
 	node.add_child_nocopy (*child);
 
+	child = new XMLNode (X_("Configuration"));
+	child->set_property ("fader8master", LaunchControlXL::use_fader8master);
+	node.add_child_nocopy (*child);
+
 	return node;
 }
 
@@ -674,6 +679,11 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 		if (portnode) {
 			_async_out->set_state (*portnode, version);
 		}
+	}
+
+	if ((child = node.child (X_("Configuration"))) !=0) {
+		/* this should propably become a for-loop at some point */
+		child->get_property ("fader8master", use_fader8master);
 	}
 
 	return retval;
