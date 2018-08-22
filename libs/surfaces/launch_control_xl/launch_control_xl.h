@@ -225,12 +225,6 @@ public:
 				void (LaunchControlXL::*release)())
 			: Button(id, press, release), _controller_number(cn) {}
 
-		ControllerButton(ButtonID id, uint8_t cn,
-				void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)(),
-				void (LaunchControlXL::*release_long)())
-			: Button(id, press, release, release_long), _controller_number(cn) {}
-
 
 		uint8_t controller_number() const { return _controller_number; }
 
@@ -276,13 +270,6 @@ public:
 	struct SelectButton : public ControllerButton, public LED {
 		SelectButton(ButtonID id, uint8_t cn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
 			: ControllerButton(id, cn, press), LED(index, RedFull, l) {}
-
-		SelectButton(ButtonID id, uint8_t cn, uint8_t index,
-			void (LaunchControlXL::*press)(),
-			void (LaunchControlXL::*release)(),
-			void (LaunchControlXL::*release_long)(),
-			LaunchControlXL& l)
-			: ControllerButton(id, cn, press, release, release_long), LED(index, RedFull, l) {}
 
 		MidiByteArray state_msg(bool light) const;
 	};
@@ -484,8 +471,6 @@ private:
 	void button_select_down();
 	void button_select_left();
 	void button_select_right();
-	void button_select_left_long_press();
-	void button_select_right_long_press();
 
 	void button_track_focus(uint8_t n);
 	void button_track_control(uint8_t n);
