@@ -112,7 +112,8 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 		}
 	}
 
-	/* no previous, wrap around ... find first usable stripable from the back
+	/* no next/previous, wrap around ... find first usable stripable from
+	 * the appropriate end.
 	*/
 
 	for (IterTypeCore s = (stripables.*begin_method)(); s != (stripables.*end_method)(); ++s) {
