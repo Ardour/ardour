@@ -51,7 +51,7 @@ CoreSelection::~CoreSelection ()
 {
 }
 
-template<typename IterTypeForward, typename IterTypeCore>
+template<typename IterTypeCore>
 void
 CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
                                           IterTypeCore (StripableList::*begin_method)(),
@@ -65,7 +65,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 		session.get_stripables (stripables);
 		stripables.sort (ARDOUR::Stripable::Sorter (mixer_order));
 
-		for (IterTypeForward s = (stripables.*begin_method)(); s != (stripables.*end_method)(); ++s) {
+		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
 			if (select_stripable_and_maybe_group (*s, true, routes_only, 0)) {
 				break;
 			}

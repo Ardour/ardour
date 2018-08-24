@@ -116,7 +116,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
 	void send_selection_change ();
 
-	template<typename IterTypeForward, typename IterTypeCore>
+	template<typename IterTypeCore>
 		void select_adjacent_stripable (bool mixer_order, bool routes_only,
 		                                IterTypeCore (StripableList::*begin_method)(),
 		                                IterTypeCore (StripableList::*end_method)());
