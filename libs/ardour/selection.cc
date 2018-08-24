@@ -122,7 +122,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 
 		/* monitor is never selectable anywhere. for now, anyway */
 
-		if ((!routes_only || r) && !(*s)->is_monitor()) {
+		if (!routes_only || r) {
 			if (select_stripable_and_maybe_group (*s, true, routes_only, 0)) {
 				return;
 			}
@@ -154,6 +154,12 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 	 */
 
 	if (s->is_hidden()) {
+		return false;
+	}
+
+	/* monitor is never selectable */
+
+	if (s->is_monitor()) {
 		return false;
 	}
 
