@@ -63,7 +63,7 @@
 (gtk_accel_path "<Actions>/Editor/set-region-sync-position" "u")
 (gtk_accel_path "<Actions>/Editor/insert-region-from-region-list" "i")
 (gtk_accel_path "<Actions>/Editor/addExistingAudioFiles" "<@PRIMARY@>i")
-(gtk_accel_path "<Actions>/Editor/invert-selection" "<@TERTIARY@>i")
+(gtk_accel_path "<Actions>/Common/invert-selection" "<@TERTIARY@>i")
 (gtk_accel_path "<Actions>/Main/Open" "<@PRIMARY@>o")
 (gtk_accel_path "<Actions>/Main/Recent" "<@PRIMARY@><@TERTIARY@>o")
 (gtk_accel_path "<Actions>/Editor/naturalize-region" "<@LEVEL4@>o")

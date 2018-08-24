@@ -342,6 +342,13 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (common_actions, "alt-finish-range", _("Finish Range"), sigc::bind (sigc::mem_fun(editor, &PublicEditor::keyboard_selection_finish), false, Editing::EDIT_IGNORE_NONE));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = global_actions.register_action (common_actions, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun(editor, &PublicEditor::select_all_tracks));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "deselect-all", _("Deselect All"), sigc::mem_fun(editor, &PublicEditor::deselect_all));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (common_actions, "invert-selection", _("Invert Selection"), sigc::mem_fun(editor, &PublicEditor::invert_selection));
+	ActionManager::session_sensitive_actions.push_back (act);
+
 	/* These "change" actions are not intended to be used inside menus, but
 	   are for the tab/window control buttons, which have somewhat odd
 	   semantics.

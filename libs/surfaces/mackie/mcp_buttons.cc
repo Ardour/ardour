@@ -588,7 +588,7 @@ MackieControlProtocol::enter_press (Button &)
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Transport/ToggleFollowEdits");
 	} else {
-		access_action ("Editor/select-all-tracks");
+		access_action ("Common/select-all-tracks");
 	}
 	return none;
 }

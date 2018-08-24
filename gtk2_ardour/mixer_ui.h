@@ -115,7 +115,6 @@ public:
 	void deselect_all_strip_processors();
 	void delete_processors();
 	void select_none ();
-	void select_all_tracks ();
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);

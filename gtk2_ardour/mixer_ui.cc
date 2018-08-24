@@ -640,12 +640,6 @@ Mixer_UI::deselect_all_strip_processors ()
 }
 
 void
-Mixer_UI::select_all_tracks ()
-{
-	PublicEditor::instance().select_all_tracks ();
-}
-
-void
 Mixer_UI::select_none ()
 {
 	_selection.clear_routes();
@@ -3082,7 +3076,6 @@ Mixer_UI::register_actions ()
 	myactions.register_action (group, "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::toggle_processors));
 	myactions.register_action (group, "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &Mixer_UI::ab_plugins));
 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
-	myactions.register_action (group, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun (*this, &Mixer_UI::select_all_tracks));
 
 	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
 	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));

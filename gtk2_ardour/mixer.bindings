@@ -4,7 +4,6 @@
    <Binding key="m" action="Mixer/mute" group="Operations on the selected strip(s)"/>
    <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active" group="Operations on the selected strip(s)"/>
    <Binding key="r" action="Mixer/recenable" group="Operations on the selected strip(s)"/>
-   <Binding key="Primary-t" action="Mixer/select-all-tracks" group="Operations on the selected strip(s)"/>
    <Binding key="0" action="Mixer/unity-gain" group="Operations on the selected strip(s)"/>
    <Binding key="Up" action="Mixer/increment-gain" group="Operations on the selected strip(s)"/>
    <Binding key="Down" action="Mixer/decrement-gain" group="Operations on the selected strip(s)"/>
