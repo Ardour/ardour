@@ -307,7 +307,10 @@ LaunchControlXL::button_track_focus(uint8_t n)
 {
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
-		stripable[n]->solo_isolate_control()->set_value (!stripable[n]->solo_isolate_control()->get_value(), PBD::Controllable::UseGroup);
+		if (stripable[n]->solo_isolate_control()) {
+			bool solo_isolate_active = stripable[n]->solo_isolate_control()->get_value();
+			stripable[n]->solo_isolate_control()->set_value (!solo_isolate_active, PBD::Controllable::UseGroup);
+		}
 		return;
 	}
 
@@ -483,6 +486,72 @@ LaunchControlXL::solo_mute_rec_changed(uint32_t n) {
 }
 
 void
+LaunchControlXL::solo_iso_changed(uint32_t n)
+{
+	if (!stripable[n]) {
+		return;
+	} else {
+		solo_iso_led_bank();
+	}
+}
+
+void
+LaunchControlXL::solo_iso_led_bank ()
+{
+	int stripable_counter = get_amount_of_tracks();
+
+	if (!(buttons_down.find(Device) != buttons_down.end())) {
+		return;
+	} else {
+		for (int y = 0; y < stripable_counter; ++y) {
+			TrackButton* b = focus_button_by_column(y);
+
+			if (stripable[y]->solo_isolate_control()->get_value()) {
+				b->set_color(RedFull);
+			} else {
+				b->set_color(Off);
+			}
+			write (b->state_msg());
+		}
+		LaunchControlXL::set_refresh_leds_flag(true);
+	}
+}
+
+#ifdef MIXBUS
+void
+LaunchControlXL::master_send_changed(uint32_t n)
+{
+	if (!stripable[n]) {
+		return;
+	} else {
+		master_send_led_bank();
+	}
+
+}
+
+void
+LaunchControlXL::master_send_led_bank ()
+{
+	if (!(buttons_down.find(Device) != buttons_down.end())) {
+		return;
+	} else {
+		int stripable_counter = LaunchControlXL::get_amount_of_tracks();
+
+		for (int n = 0; n < stripable_counter; ++n) {
+			TrackButton* b = control_button_by_column(n);
+			if (stripable[n]->master_send_enable_controllable()->get_value()) {
+				b->set_color(GreenFull);
+			} else {
+				b->set_color(Off);
+			}
+			write (b->state_msg());
+		}
+		LaunchControlXL::set_refresh_leds_flag(true);
+	}
+}
+# endif
+
+void
 LaunchControlXL::button_track_control(uint8_t n) {
 	if (!stripable[n]) {
 		return;
@@ -491,10 +560,13 @@ LaunchControlXL::button_track_control(uint8_t n) {
 	if (buttons_down.find(Device) != buttons_down.end()) {
 		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
 #ifdef MIXBUS
-		if (stripable[n] != master) {
+		if (stripable[n]->master_send_enable_controllable()) {
+			bool master_send_active = stripable[n]->master_send_enable_controllable()->get_value();
+
 			DEBUG_TRACE (DEBUG::LaunchControlXL, "MIXBUS Master Assign\n");
-			stripable[n]->master_send_enable_controllable()->set_value (!stripable[n]->master_send_enable_controllable()->get_value(), PBD::Controllable::UseGroup);
+			stripable[n]->master_send_enable_controllable()->set_value (!master_send_active, PBD::Controllable::UseGroup);
 		}
+
 #else
 		/* something useful for Ardour */
 #endif
@@ -528,13 +600,13 @@ LaunchControlXL::button_track_mode(TrackMode state)
 void
 LaunchControlXL::button_select_left()
 {
-	switch_bank (max (0, bank_start - (7 + (fader8master() ? 1 : 0))));
+	switch_bank (max (0, bank_start - (7 + (fader8master() ? 0 : 1))));
 }
 
 void
 LaunchControlXL::button_select_right()
 {
-	switch_bank (max (0, bank_start + 7 + (fader8master() ? 1 : 0)));
+	switch_bank (max (0, bank_start + 7 + (fader8master() ? 0 : 1)));
 }
 
 void
@@ -558,7 +630,10 @@ LaunchControlXL::button_device()
 void
 LaunchControlXL::button_device_long_press()
 {
-
+	solo_iso_led_bank();
+#ifdef MIXBUS
+	master_send_led_bank();
+#endif
 }
 
 void

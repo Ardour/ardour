@@ -336,6 +336,8 @@ public:
 	void *get_gui() const;
 	void tear_down_gui();
 
+	int get_amount_of_tracks();
+
 	int set_active(bool yn);
 	XMLNode &get_state();
 	int set_state(const XMLNode &node, int version);
@@ -357,6 +359,9 @@ public:
 	void set_fader8master (bool yn);
 	bool fader8master () const { return _fader8master; }
 
+	void set_refresh_leds_flag (bool yn);
+	bool refresh_leds_flag () const { return _refresh_leds_flag; }
+
 	TrackMode track_mode() const { return _track_mode; }
 	void set_track_mode(TrackMode mode);
 
@@ -368,6 +373,7 @@ private:
 	uint8_t _template_number;
 
 	bool _fader8master;
+	bool _refresh_leds_flag;
 
 	void do_request(LaunchControlRequest *);
 
@@ -514,6 +520,12 @@ private:
 
 	void solo_changed (uint32_t n) { solo_mute_rec_changed(n); }
 	void mute_changed (uint32_t n) { solo_mute_rec_changed(n); }
+	void solo_iso_changed (uint32_t n);
+	void solo_iso_led_bank ();
+#ifdef MIXBUS
+	void master_send_changed (uint32_t n);
+	void master_send_led_bank ();
+#endif
 	void rec_changed (uint32_t n) { solo_mute_rec_changed(n); }
 	void solo_mute_rec_changed (uint32_t n);
 

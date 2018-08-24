@@ -37,6 +37,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
+#include "ardour/solo_isolate_control.h"
 #include "ardour/tempo.h"
 #include "ardour/types_convert.h"
 #include "ardour/vca_manager.h"
@@ -70,6 +71,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	, _track_mode(TrackMute)
 	, _template_number(8) // default template (factory 1)
 	, _fader8master (false)
+	, _refresh_leds_flag (false)
 	, bank_start (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
@@ -427,6 +429,9 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
     DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("button depressed: %1\n", LaunchControlXL::button_name_by_id(button->id())));
     buttons_down.erase(button->id());
     button->timeout_connection.disconnect();
+    if (button ==  id_note_button_map[Device] && refresh_leds_flag()) {
+	    switch_bank (bank_start);
+    }
   }
 
 	set<ButtonID>::iterator c = consumed.find(button->id());
@@ -853,13 +858,9 @@ LaunchControlXL::switch_bank (uint32_t base)
 
 	boost::shared_ptr<Stripable> s[8];
 	uint32_t different = 0;
-	uint8_t stripable_counter;
 
-	if (fader8master ()) {
-		stripable_counter = 7;
-	} else {
-		stripable_counter = 8;
-	}
+
+	int stripable_counter = get_amount_of_tracks();
 
 	for (int n = 0; n < stripable_counter; ++n) {
 		s[n] = session->get_remote_nth_stripable (base+n, PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::VCA));
@@ -898,6 +899,12 @@ LaunchControlXL::switch_bank (uint32_t base)
 			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripable_property_change, this, _1, n), lcxl);
 			stripable[n]->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_changed, this, n), lcxl);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::mute_changed, this, n), lcxl);
+			stripable[n]->solo_isolate_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_iso_changed, this,n ), lcxl);
+#ifdef MIXBUS
+			if (stripable[n]->master_send_enable_controllable()) {
+				stripable[n]->master_send_enable_controllable()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::master_send_changed, this,n ), lcxl);
+			}
+#endif
 			if (stripable[n]->rec_enable_control()) {
 				stripable[n]->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::rec_changed, this, n), lcxl);
 			}
@@ -942,6 +949,29 @@ LaunchControlXL::set_fader8master (bool yn)
 	_fader8master = yn;
 	if (_fader8master) {
 		stripable[7] = master;
+		bank_start -= 1;  
+	} else {
+		bank_start += 1;
 	}
+
 	switch_bank (bank_start);
+}
+
+int
+LaunchControlXL::get_amount_of_tracks ()
+{
+	int no_of_tracks;
+	if (fader8master ()) {
+		no_of_tracks = 7;
+        } else {
+                no_of_tracks = 8;
+	}
+
+	return no_of_tracks;
+}
+
+void
+LaunchControlXL::set_refresh_leds_flag (bool yn)
+{
+	_refresh_leds_flag = yn;
 }
