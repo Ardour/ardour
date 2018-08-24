@@ -116,6 +116,9 @@ public:
 	void delete_processors();
 	void select_none ();
 
+	void select_next_strip ();
+	void select_prev_strip ();
+
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
 	void show_spill (boost::shared_ptr<ARDOUR::Stripable>);

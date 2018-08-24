@@ -18,5 +18,7 @@
    <Binding key="Primary-a" action="Mixer/select-all-processors" group="Processor operations on the selected strip(s)"/>
    <Binding key="slash" action="Mixer/ab-plugins" group="Processor operations on the selected strip(s)"/>
    <Binding key="Secondary-m" action="Mixer/show-editor" group="Window Visibility"/>
+   <Binding key="Secondary-Down" action="Mixer/select-next-stripable" group="Window Visibility"/>
+   <Binding key="Secondary-Up" action="Mixer/select-prev-stripable" group="Window Visibility"/>
   </Press>
  </Bindings>

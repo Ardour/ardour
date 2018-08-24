@@ -375,6 +375,16 @@ Mixer_UI::~Mixer_UI ()
 	delete track_menu;
 }
 
+struct MixerStripSorter {
+	bool operator() (const MixerStrip* ms_a, const MixerStrip* ms_b)
+	{
+		boost::shared_ptr<ARDOUR::Stripable> const& a = ms_a->stripable ();
+		boost::shared_ptr<ARDOUR::Stripable> const& b = ms_b->stripable ();
+		return ARDOUR::Stripable::Sorter(true)(a, b);
+	}
+};
+
+
 void
 Mixer_UI::escape ()
 {
@@ -646,6 +656,62 @@ Mixer_UI::select_none ()
 	deselect_all_strip_processors();
 }
 
+ void
+Mixer_UI::select_next_strip ()
+{
+	deselect_all_strip_processors();
+	strips.sort (MixerStripSorter());
+
+	if (_selection.empty()) {
+		_selection.set (strips.front());
+		return;
+	}
+
+	bool select_me = false;
+
+	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
+
+		if (select_me) {
+			_selection.set (*i);
+			return;
+		}
+
+		if ((*i)->selected()) {
+			select_me = true;
+		}
+	}
+
+	_selection.set (strips.front());
+}
+
+void
+Mixer_UI::select_prev_strip ()
+{
+	deselect_all_strip_processors();
+	strips.sort (MixerStripSorter());
+
+	if (_selection.empty()) {
+		_selection.set (strips.back());
+		return;
+	}
+
+	bool select_me = false;
+
+	for (list<MixerStrip*>::reverse_iterator i = strips.rbegin(); i != strips.rend(); ++i) {
+
+		if (select_me) {
+			_selection.set (*i);
+			return;
+		}
+
+		if ((*i)->selected()) {
+			select_me = true;
+		}
+	}
+
+	_selection.set (strips.back());
+}
+
 void
 Mixer_UI::delete_processors ()
 {
@@ -905,15 +971,6 @@ Mixer_UI::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 
 	return 0;
 }
-
-struct MixerStripSorter {
-	bool operator() (const MixerStrip* ms_a, const MixerStrip* ms_b)
-	{
-		boost::shared_ptr<ARDOUR::Stripable> const& a = ms_a->stripable ();
-		boost::shared_ptr<ARDOUR::Stripable> const& b = ms_b->stripable ();
-		return ARDOUR::Stripable::Sorter(true)(a, b);
-	}
-};
 
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
@@ -3076,6 +3133,9 @@ Mixer_UI::register_actions ()
 	myactions.register_action (group, "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::toggle_processors));
 	myactions.register_action (group, "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &Mixer_UI::ab_plugins));
 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
+
+	myactions.register_action (group, "select-next-stripable", _("Select Next Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_next_strip));
+	myactions.register_action (group, "select-prev-stripable", _("Scroll Previous Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_prev_strip));
 
 	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
 	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));
