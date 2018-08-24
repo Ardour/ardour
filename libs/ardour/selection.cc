@@ -120,6 +120,8 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 
 		r = boost::dynamic_pointer_cast<Route> (*s);
 
+		/* monitor is never selectable anywhere. for now, anyway */
+
 		if ((!routes_only || r) && !(*s)->is_monitor()) {
 			if (select_stripable_and_maybe_group (*s, true, routes_only, 0)) {
 				return;
@@ -142,10 +144,14 @@ CoreSelection::select_prev_stripable (bool mixer_order, bool routes_only)
 
 
 bool
-CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup* group)
+CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
 {
 	boost::shared_ptr<Route> r;
 	StripableList sl;
+
+	/* no selection of hidden stripables (though they can be selected and
+	 * then hidden
+	 */
 
 	if (s->is_hidden()) {
 		return false;
@@ -153,13 +159,17 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 
 	if ((r = boost::dynamic_pointer_cast<Route> (s))) {
 
+		/* no selection of inactive routes, though they can be selected
+		 * and made inactive.
+		 */
+
 		if (!r->active()) {
 			return false;
 		}
 
 		if (with_group) {
 
-			if (!group || !r->route_group() || r->route_group() != group) {
+			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
 
 				if (r->route_group() && r->route_group()->is_select()) {
 					boost::shared_ptr<RouteList> rl = r->route_group()->route_list ();
