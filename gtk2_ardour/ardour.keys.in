@@ -232,11 +232,13 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/step-tracks-up|Up|scroll up (step)
 @trans|Transport/TransitionToRoll|<@TERTIARY@>Up|transition to roll
 @select|Editor/select-prev-route|<@SECONDARY@>Up|select previous track/bus
+@select|Editor/select-prev-stripable|<@SECONDARY@><@TERTIARY@>Up|select previous strip
 @vis|Editor/move-selected-tracks-up|<@PRIMARY@>Up|move selected tracks up
 
 @vis|Editor/step-tracks-down|Down|scroll down (step)
 @trans|Transport/TransitionToReverse|<@TERTIARY@>Down|transition to reverse
 @select|Editor/select-next-route|<@SECONDARY@>Down|select next track/bus
+@select|Editor/select-next-stripable|<@SECONDARY@><@TERTIARY@>Down|select next strip
 @vis|Editor/move-selected-tracks-down|<@PRIMARY@>Down|move selected tracks down
 
 @movp|Common/playhead-backward-to-grid|Left|to previous grid point
