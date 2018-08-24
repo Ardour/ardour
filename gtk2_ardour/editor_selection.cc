@@ -1159,7 +1159,7 @@ void
 Editor::track_selection_changed ()
 {
 	/* reset paste count, so the plaste location doesn't get incremented
-	 * if we want to paste in the same place, but different track. */ 
+	 * if we want to paste in the same place, but different track. */
 	paste_count = 0;
 
 	if ( _session->solo_selection_active() )
@@ -1713,7 +1713,6 @@ Editor::invert_selection_in_track ()
 void
 Editor::invert_selection ()
 {
-	list<Selectable *> touched;
 
 	if (internal_editing()) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
@@ -1725,16 +1724,35 @@ Editor::invert_selection ()
 		return;
 	}
 
-	for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
-		if ((*iter)->hidden()) {
-			continue;
-		}
-		(*iter)->get_inverted_selectables (*selection, touched);
-	}
+	if (!selection->tracks.empty()) {
 
-	begin_reversible_selection_op (X_("Invert Selection"));
-	selection->set (touched);
-	commit_reversible_selection_op ();
+		TrackViewList inverted;
+
+		for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+			if (!(*iter)->selected()) {
+				inverted.push_back (*iter);
+			}
+		}
+
+		begin_reversible_selection_op (X_("Invert Track Selection"));
+		selection->set (inverted);
+		commit_reversible_selection_op ();
+
+	} else {
+
+		list<Selectable *> touched;
+
+		for (TrackViewList::iterator iter = track_views.begin(); iter != track_views.end(); ++iter) {
+			if ((*iter)->hidden()) {
+				continue;
+			}
+			(*iter)->get_inverted_selectables (*selection, touched);
+		}
+
+		begin_reversible_selection_op (X_("Invert ObjectSelection"));
+		selection->set (touched);
+		commit_reversible_selection_op ();
+	}
 }
 
 /** @param start Start time in session samples.
