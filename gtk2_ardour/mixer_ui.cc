@@ -656,60 +656,18 @@ Mixer_UI::select_none ()
 	deselect_all_strip_processors();
 }
 
- void
+void
 Mixer_UI::select_next_strip ()
 {
 	deselect_all_strip_processors();
-	strips.sort (MixerStripSorter());
-
-	if (_selection.empty()) {
-		_selection.set (strips.front());
-		return;
-	}
-
-	bool select_me = false;
-
-	for (list<MixerStrip*>::iterator i = strips.begin(); i != strips.end(); ++i) {
-
-		if (select_me) {
-			_selection.set (*i);
-			return;
-		}
-
-		if ((*i)->selected()) {
-			select_me = true;
-		}
-	}
-
-	_selection.set (strips.front());
+	_session->selection().select_next_stripable (true, false);
 }
 
 void
 Mixer_UI::select_prev_strip ()
 {
 	deselect_all_strip_processors();
-	strips.sort (MixerStripSorter());
-
-	if (_selection.empty()) {
-		_selection.set (strips.back());
-		return;
-	}
-
-	bool select_me = false;
-
-	for (list<MixerStrip*>::reverse_iterator i = strips.rbegin(); i != strips.rend(); ++i) {
-
-		if (select_me) {
-			_selection.set (*i);
-			return;
-		}
-
-		if ((*i)->selected()) {
-			select_me = true;
-		}
-	}
-
-	_selection.set (strips.back());
+	_session->selection().select_prev_stripable (true, false);
 }
 
 void

@@ -58,6 +58,7 @@
 #include "ardour/legatize.h"
 #include "ardour/region_factory.h"
 #include "ardour/reverse.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/strip_silence.h"
@@ -753,7 +754,7 @@ Editor::build_region_boundary_cache ()
 	if (ARDOUR_UI::instance()->video_timeline) {
 		region_boundary_cache.push_back (ARDOUR_UI::instance()->video_timeline->get_video_start_offset());
 	}
-	
+
 	std::pair<samplepos_t, samplepos_t> ext = session_gui_extents (false);
 	samplepos_t session_end = ext.second;
 
@@ -6422,79 +6423,13 @@ Editor::split_region ()
 void
 Editor::select_next_stripable (bool routes_only)
 {
-	if (selection->tracks.empty()) {
-		selection->set (track_views.front());
-		return;
-	}
-
-	TimeAxisView* current = selection->tracks.front();
-
-	bool valid;
-	do {
-		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
-
-			if (*i == current) {
-				++i;
-				if (i != track_views.end()) {
-					current = (*i);
-				} else {
-					current = (*(track_views.begin()));
-					//selection->set (*(track_views.begin()));
-				}
-				break;
-			}
-		}
-
-		if (routes_only) {
-			RouteUI* rui = dynamic_cast<RouteUI *>(current);
-			valid = rui && rui->route()->active();
-		} else {
-			valid = 0 != current->stripable ().get();
-		}
-
-	} while (current->hidden() || !valid);
-
-	selection->set (current);
-
-	ensure_time_axis_view_is_visible (*current, false);
+	_session->selection().select_next_stripable (false, routes_only);
 }
 
 void
 Editor::select_prev_stripable (bool routes_only)
 {
-	if (selection->tracks.empty()) {
-		selection->set (track_views.front());
-		return;
-	}
-
-	TimeAxisView* current = selection->tracks.front();
-
-	bool valid;
-	do {
-		for (TrackViewList::reverse_iterator i = track_views.rbegin(); i != track_views.rend(); ++i) {
-
-			if (*i == current) {
-				++i;
-				if (i != track_views.rend()) {
-					current = (*i);
-				} else {
-					current = *(track_views.rbegin());
-				}
-				break;
-			}
-		}
-		if (routes_only) {
-			RouteUI* rui = dynamic_cast<RouteUI *>(current);
-			valid = rui && rui->route()->active();
-		} else {
-			valid = 0 != current->stripable ().get();
-		}
-
-	} while (current->hidden() || !valid);
-
-	selection->set (current);
-
-	ensure_time_axis_view_is_visible (*current, false);
+	_session->selection().select_prev_stripable (false, routes_only);
 }
 
 void
@@ -7366,7 +7301,7 @@ Editor::playhead_forward_to_grid ()
 			_session->request_locate (0);
 		}
 	} else {
-		
+
 		if (pos.sample < max_samplepos - 1) {
 			pos.sample += 2;
 			snap_to_internal (pos, RoundUpAlways, SnapToGrid_Scaled, true);
@@ -7374,7 +7309,7 @@ Editor::playhead_forward_to_grid ()
 		}
 	}
 
-	
+
 	/* keep PH visible in window */
 	if (pos.sample > (_leftmost_sample + current_page_samples() *0.9)) {
 		reset_x_origin (pos.sample - (current_page_samples()*0.9));
@@ -7399,7 +7334,7 @@ Editor::playhead_backward_to_grid ()
 			_session->request_locate (0);
 		}
 	} else {
-		
+
 		if (pos.sample > 2) {
 			pos.sample -= 2;
 			snap_to_internal (pos, RoundDownAlways, SnapToGrid_Scaled, true);
@@ -7415,7 +7350,7 @@ Editor::playhead_backward_to_grid ()
 
 		_session->request_locate (pos.sample, _session->transport_rolling());
 	}
-	
+
 	/* keep PH visible in window */
 	if (pos.sample < (_leftmost_sample + current_page_samples() *0.1)) {
 		reset_x_origin (pos.sample - (current_page_samples()*0.1));
