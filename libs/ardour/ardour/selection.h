@@ -30,10 +30,12 @@
 #include "pbd/i18n.h"
 
 #include "ardour/presentation_info.h"
+#include "ardour/types.h"
 
 namespace ARDOUR {
 
 class AutomationControl;
+class RouteGroup;
 class Session;
 class Stripable;
 class VCAManager;
@@ -48,6 +50,12 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	void add (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
 	void remove (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
 	void set (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
+	void set (StripableList&);
+
+	void select_next_stripable (bool mixer_order, bool routes_only);
+	void select_prev_stripable (bool mixer_order, bool routes_only);
+	bool select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup*);
+
 	void clear_stripables();
 
 	bool selected (boost::shared_ptr<const Stripable>) const;
@@ -107,6 +115,11 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	SelectedStripables _stripables;
 
 	void send_selection_change ();
+
+	template<typename IterTypeForward, typename IterTypeCore>
+		void select_adjacent_stripable (bool mixer_order, bool routes_only,
+		                                IterTypeCore (StripableList::*begin_method)(),
+		                                IterTypeCore (StripableList::*end_method)());
 };
 
 } // namespace ARDOUR
