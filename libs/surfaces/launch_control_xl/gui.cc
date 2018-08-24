@@ -134,7 +134,7 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	align->set (0.0, 0.5);
 	align->add (fader8master_button);
 	table.attach (*align, 1, 2, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0),0,0);
-	fader8master_button.set_active(lcxl.use_fader8master);
+	fader8master_button.set_active (lcxl.fader8master());
 	fader8master_button.signal_toggled().connect (sigc::mem_fun (*this, &LCXLGUI::toggle_fader8master));
 	row++;
 
@@ -285,8 +285,7 @@ LCXLGUI::active_port_changed (Gtk::ComboBox* combo, bool for_input)
 void
 LCXLGUI::toggle_fader8master ()
 {
-	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master WAS: %1\n", lcxl.use_fader8master));
-	lcxl.use_fader8master = !(lcxl.use_fader8master);
-	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master IS: %1\n", lcxl.use_fader8master));
-	lcxl.set_fader8master(lcxl.use_fader8master);
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master WAS: %1\n", lcxl.fader8master()));
+	lcxl.set_fader8master (!lcxl.fader8master());
+	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master IS: %1\n", lcxl.fader8master()));
 }

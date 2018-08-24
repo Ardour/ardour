@@ -63,7 +63,8 @@ class LCXLGUI;
 class LaunchControlMenu;
 
 class LaunchControlXL : public ARDOUR::ControlProtocol,
-                        public AbstractUI<LaunchControlRequest> {
+                        public AbstractUI<LaunchControlRequest>
+{
 public:
 	enum TrackMode {
 		TrackMute,
@@ -335,8 +336,6 @@ public:
 	void *get_gui() const;
 	void tear_down_gui();
 
-	bool use_fader8master = false;
-
 	int set_active(bool yn);
 	XMLNode &get_state();
 	int set_state(const XMLNode &node, int version);
@@ -354,7 +353,9 @@ public:
 
 	void write(const MidiByteArray &);
 	void reset(uint8_t chan);
+
 	void set_fader8master (bool yn);
+	bool fader8master () const { return _fader8master; }
 
 	TrackMode track_mode() const { return _track_mode; }
 	void set_track_mode(TrackMode mode);
@@ -365,6 +366,8 @@ private:
 	bool in_use;
 	TrackMode _track_mode;
 	uint8_t _template_number;
+
+	bool _fader8master;
 
 	void do_request(LaunchControlRequest *);
 
@@ -538,7 +541,7 @@ private:
 	void stripable_selection_changed();
 
 	bool in_range_select;
-												};
+};
 
 
 } // namespace ArdourSurface

@@ -69,6 +69,7 @@ LaunchControlXL::LaunchControlXL (ARDOUR::Session& s)
 	, in_use (false)
 	, _track_mode(TrackMute)
 	, _template_number(8) // default template (factory 1)
+	, _fader8master (false)
 	, bank_start (0)
 	, connection_state (ConnectionState (0))
 	, gui (0)
@@ -148,8 +149,8 @@ LaunchControlXL::begin_using_device ()
 
 	in_use = true;
 
-	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("use_fader8master inital value  '%1'\n", use_fader8master));
-	set_fader8master(use_fader8master);
+	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("fader8master inital value  '%1'\n", fader8master()));
+	set_fader8master (fader8master());
 
 	return 0;
 }
@@ -656,7 +657,7 @@ LaunchControlXL::get_state()
 	node.add_child_nocopy (*child);
 
 	child = new XMLNode (X_("Configuration"));
-	child->set_property ("fader8master", LaunchControlXL::use_fader8master);
+	child->set_property ("fader8master", fader8master());
 	node.add_child_nocopy (*child);
 
 	return node;
@@ -691,7 +692,7 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 
 	if ((child = node.child (X_("Configuration"))) !=0) {
 		/* this should propably become a for-loop at some point */
-		child->get_property ("fader8master", use_fader8master);
+		child->get_property ("fader8master", _fader8master);
 	}
 
 	return retval;
@@ -854,7 +855,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 	uint32_t different = 0;
 	uint8_t stripable_counter;
 
-	if (LaunchControlXL::use_fader8master) {
+	if (fader8master ()) {
 		stripable_counter = 7;
 	} else {
 		stripable_counter = 8;
@@ -938,8 +939,9 @@ void LaunchControlXL::set_track_mode (TrackMode mode) {
 void
 LaunchControlXL::set_fader8master (bool yn)
 {
-	if (yn) {
+	_fader8master = yn;
+	if (_fader8master) {
 		stripable[7] = master;
 	}
-	switch_bank(bank_start);
+	switch_bank (bank_start);
 }
