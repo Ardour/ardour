@@ -899,7 +899,9 @@ LaunchControlXL::switch_bank (uint32_t base)
 			stripable[n]->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::stripable_property_change, this, _1, n), lcxl);
 			stripable[n]->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_changed, this, n), lcxl);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::mute_changed, this, n), lcxl);
-			stripable[n]->solo_isolate_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_iso_changed, this,n ), lcxl);
+			if (stripable[n]->solo_isolate_control()) {	/*VCAs are stripables without isolate solo */
+				stripable[n]->solo_isolate_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::solo_iso_changed, this,n ), lcxl);
+			}
 #ifdef MIXBUS
 			if (stripable[n]->master_send_enable_controllable()) {
 				stripable[n]->master_send_enable_controllable()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::master_send_changed, this,n ), lcxl);

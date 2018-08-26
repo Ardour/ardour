@@ -503,15 +503,16 @@ LaunchControlXL::solo_iso_led_bank ()
 	if (!(buttons_down.find(Device) != buttons_down.end())) {
 		return;
 	} else {
-		for (int y = 0; y < stripable_counter; ++y) {
-			TrackButton* b = focus_button_by_column(y);
-
-			if (stripable[y]->solo_isolate_control()->get_value()) {
-				b->set_color(RedFull);
-			} else {
-				b->set_color(Off);
+		for (int n = 0; n < stripable_counter; ++n) {
+			TrackButton* b = focus_button_by_column(n);
+			if (stripable[n] && stripable[n]->solo_isolate_control()) {
+				if (stripable[n]->solo_isolate_control()->get_value()) {
+					b->set_color(RedFull);
+				} else {
+					b->set_color(Off);
+				}
+				write (b->state_msg());
 			}
-			write (b->state_msg());
 		}
 		LaunchControlXL::set_refresh_leds_flag(true);
 	}
@@ -539,10 +540,12 @@ LaunchControlXL::master_send_led_bank ()
 
 		for (int n = 0; n < stripable_counter; ++n) {
 			TrackButton* b = control_button_by_column(n);
-			if (stripable[n]->master_send_enable_controllable()->get_value()) {
-				b->set_color(GreenFull);
-			} else {
-				b->set_color(Off);
+			if (stripable[n] && stripable[n]->master_send_enable_controllable()) {
+				if (stripable[n]->master_send_enable_controllable()->get_value()) {
+					b->set_color(GreenFull);
+				} else {
+					b->set_color(Off);
+				}
 			}
 			write (b->state_msg());
 		}
