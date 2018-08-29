@@ -1907,7 +1907,7 @@ AlsaAudioBackend::main_process_thread ()
 	uint64_t clock1;
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
-	const int bailout = 2 * _samplerate / _samples_per_period;
+	const int bailout = 5 * _samplerate / _samples_per_period;
 
 	manager.registration_callback();
 	manager.graph_order_callback();
