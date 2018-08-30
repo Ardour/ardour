@@ -1160,7 +1160,7 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 void
 Push2::port_registration_handler ()
 {
-	if (!_async_in && !_async_out) {
+	if (!_async_in || !_async_out) {
 		/* ports not registered yet */
 		return;
 	}
