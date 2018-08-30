@@ -706,7 +706,7 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 void
 LaunchControlXL::port_registration_handler ()
 {
-	if (!_async_in && !_async_out) {
+	if (!_async_in || !_async_out) {
 		/* ports not registered yet */
 		return;
 	}
