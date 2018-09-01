@@ -106,6 +106,7 @@ Mixer_UI::Mixer_UI ()
 	, _monitor_section (0)
 	, _plugin_selector (0)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
+	, _spill_scroll_position (0)
 	, ignore_reorder (false)
 	, _in_group_rebuild_or_clear (false)
 	, _route_deletion_in_progress (false)
@@ -1450,6 +1451,9 @@ Mixer_UI::redisplay_track_list ()
 	if (ss) {
 		boost::shared_ptr<VCA> sv = boost::dynamic_pointer_cast<VCA> (ss);
 		if (sv) {
+			if (_spill_scroll_position <= 0 && scroller.get_hscrollbar()) {
+				_spill_scroll_position = scroller.get_hscrollbar()->get_adjustment()->get_value();
+			}
 			spill_redisplay (sv);
 			return;
 		}
@@ -1541,6 +1545,13 @@ Mixer_UI::redisplay_track_list ()
 	}
 
 	_group_tabs->set_dirty ();
+
+	if (_spill_scroll_position > 0 && scroller.get_hscrollbar()) {
+		Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), _spill_scroll_position)));
+	}
+	_spill_scroll_position = 0;
+
 }
 
 void

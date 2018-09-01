@@ -348,6 +348,7 @@ private:
 	bool vca_button_release_event (GdkEventButton*, VCAMasterStrip*);
 
 	Width _strip_width;
+	double _spill_scroll_position;
 
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
