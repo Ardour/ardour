@@ -365,7 +365,7 @@ Push2::strip_buttons_off ()
 	                             Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8, };
 
 	for (size_t n = 0; n < sizeof (strip_buttons) / sizeof (strip_buttons[0]); ++n) {
-		Button* b = id_button_map[strip_buttons[n]];
+		boost::shared_ptr<Button> b = id_button_map[strip_buttons[n]];
 
 		b->set_color (LED::Black);
 		b->set_state (LED::OneShot24th);
@@ -387,7 +387,7 @@ Push2::init_buttons (bool startup)
 	};
 
 	for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
-		Button* b = id_button_map[buttons[n]];
+		boost::shared_ptr<Button> b = id_button_map[buttons[n]];
 
 		if (startup) {
 			b->set_color (LED::White);
@@ -407,7 +407,7 @@ Push2::init_buttons (bool startup)
 		                           Accent, Note, Session,  };
 
 		for (size_t n = 0; n < sizeof (off_buttons) / sizeof (off_buttons[0]); ++n) {
-			Button* b = id_button_map[off_buttons[n]];
+			boost::shared_ptr<Button> b = id_button_map[off_buttons[n]];
 
 			b->set_color (LED::Black);
 			b->set_state (LED::OneShot24th);
@@ -417,7 +417,7 @@ Push2::init_buttons (bool startup)
 
 	if (!startup) {
 		for (NNPadMap::iterator pi = nn_pad_map.begin(); pi != nn_pad_map.end(); ++pi) {
-			Pad* pad = pi->second;
+			boost::shared_ptr<Pad> pad = pi->second;
 
 			pad->set_color (LED::Black);
 			pad->set_state (LED::OneShot24th);
@@ -629,18 +629,18 @@ Push2::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
 		for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
-			Button* bb = id_button_map[*x];
+			boost::shared_ptr<Button> bb = id_button_map[*x];
 			bb->timeout_connection.disconnect ();
 		}
 	}
 
 	if (b != cc_button_map.end()) {
 
-		Button* button = b->second;
+		boost::shared_ptr<Button> button = b->second;
 
 		if (ev->value) {
 			buttons_down.insert (button->id);
-			start_press_timeout (*button, button->id);
+			start_press_timeout (button, button->id);
 		} else {
 			buttons_down.erase (button->id);
 			button->timeout_connection.disconnect ();
@@ -781,7 +781,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 		return;
 	}
 
-	const Pad * const pad_pressed = pm->second;
+	boost::shared_ptr<const Pad> pad_pressed = pm->second;
 
 	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
 
@@ -790,7 +790,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 	}
 
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
-		Pad* pad = pi->second;
+		boost::shared_ptr<Pad> pad = pi->second;
 
 		pad->set_color (contrast_color);
 		pad->set_state (LED::OneShot24th);
@@ -819,7 +819,7 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 		return;
 	}
 
-	const Pad * const pad_pressed = pm->second;
+	boost::shared_ptr<const Pad> const pad_pressed = pm->second;
 
 	pair<FNPadMap::iterator,FNPadMap::iterator> pads_with_note = fn_pad_map.equal_range (pad_pressed->filtered);
 
@@ -828,7 +828,7 @@ Push2::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 	}
 
 	for (FNPadMap::iterator pi = pads_with_note.first; pi != pads_with_note.second; ++pi) {
-		Pad* pad = pi->second;
+		boost::shared_ptr<Pad> pad = pi->second;
 
 		if (pad->do_when_pressed == Pad::FlashOn) {
 			pad->set_color (LED::Black);
@@ -908,7 +908,7 @@ Push2::notify_record_state_changed ()
 void
 Push2::notify_transport_state_changed ()
 {
-	Button* b = id_button_map[Play];
+	boost::shared_ptr<Button> b = id_button_map[Play];
 
 	if (session->transport_rolling()) {
 		b->set_state (LED::OneShot24th);
@@ -916,7 +916,7 @@ Push2::notify_transport_state_changed ()
 	} else {
 
 		/* disable any blink on FixedLength from pending edit range op */
-		Button* fl = id_button_map[FixedLength];
+		boost::shared_ptr<Button> fl = id_button_map[FixedLength];
 
 		fl->set_color (LED::Black);
 		fl->set_state (LED::NoTransition);
@@ -1091,7 +1091,7 @@ Push2::start_shift ()
 {
 	cerr << "start shift\n";
 	_modifier_state = ModifierState (_modifier_state | ModShift);
-	Button* b = id_button_map[Shift];
+	boost::shared_ptr<Button> b = id_button_map[Shift];
 	b->set_color (LED::White);
 	b->set_state (LED::Blinking16th);
 	write (b->state_msg());
@@ -1103,7 +1103,7 @@ Push2::end_shift ()
 	if (_modifier_state & ModShift) {
 		cerr << "end shift\n";
 		_modifier_state = ModifierState (_modifier_state & ~(ModShift));
-		Button* b = id_button_map[Shift];
+		boost::shared_ptr<Button> b = id_button_map[Shift];
 		b->timeout_connection.disconnect ();
 		b->set_color (LED::White);
 		b->set_state (LED::OneShot24th);
@@ -1133,7 +1133,7 @@ Push2::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 				NNPadMap::const_iterator nni = nn_pad_map.find (n);
 
 				if (nni != nn_pad_map.end()) {
-					Pad const * pad = nni->second;
+					boost::shared_ptr<const Pad> pad = nni->second;
 					/* shift for output to the shadow port */
 					if (pad->filtered >= 0) {
 						(*ev).set_note (pad->filtered + (octave_shift*12));
@@ -1368,7 +1368,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 			for (int col = 0; col < 8; ++col) {
 				int index = 36 + (row*8) + col;
-				Pad* pad = nn_pad_map[index];
+				boost::shared_ptr<Pad> pad = nn_pad_map[index];
 				int notenum;
 				if (notei != mode_vector.end()) {
 
@@ -1406,7 +1406,7 @@ Push2::set_pad_scale (int root, int octave, MusicalMode::Type mode, bool inkey)
 
 		for (note = 36; note < 100; ++note) {
 
-			Pad* pad = nn_pad_map[note];
+			boost::shared_ptr<Pad> pad = nn_pad_map[note];
 
 			/* Chromatic: all pads play, half-tone steps. Light
 			 * those in the scale, and highlight root notes
@@ -1487,7 +1487,7 @@ Push2::set_percussive_mode (bool yn)
 		for (int col = 0; col < 4; ++col) {
 
 			int index = 36 + (row*8) + col;
-			Pad* pad = nn_pad_map[index];
+			boost::shared_ptr<Pad> pad = nn_pad_map[index];
 
 			pad->filtered = drum_note;
 			drum_note++;
@@ -1499,7 +1499,7 @@ Push2::set_percussive_mode (bool yn)
 		for (int col = 4; col < 8; ++col) {
 
 			int index = 36 + (row*8) + col;
-			Pad* pad = nn_pad_map[index];
+			boost::shared_ptr<Pad> pad = nn_pad_map[index];
 
 			pad->filtered = drum_note;
 			drum_note++;
@@ -1581,7 +1581,7 @@ Push2::stripable_selection_changed ()
 	tml->set_stripable (first_selected_stripable());
 }
 
-Push2::Button*
+boost::shared_ptr<Push2::Button>
 Push2::button_by_id (ButtonID bid)
 {
 	return id_button_map[bid];
