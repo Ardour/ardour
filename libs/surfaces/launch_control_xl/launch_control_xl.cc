@@ -408,13 +408,13 @@ LaunchControlXL::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t
 
 
 void
-LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
+LaunchControlXL::handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes* ev)
 {
   if (ev->value) {
     /* any press cancels any pending long press timeouts */
     for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
-      ControllerButton* cb = id_controller_button_map[*x];
-			NoteButton*	nb = id_note_button_map[*x];
+	    boost::shared_ptr<ControllerButton> cb = id_controller_button_map[*x];
+	    boost::shared_ptr<NoteButton>	nb = id_note_button_map[*x];
 			if (cb != 0) {
 				cb->timeout_connection.disconnect();
 			} else if (nb != 0) {
@@ -449,14 +449,14 @@ LaunchControlXL::handle_button_message(Button* button, MIDI::EventTwoBytes* ev)
 }
 
 bool
-LaunchControlXL::check_pick_up(Controller* controller, boost::shared_ptr<AutomationControl> ac)
+LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<AutomationControl> ac)
 {
 	/* returns false until the controller value matches with the current setting of the stripable's ac */
 	return ( abs( controller->value() / 127.0 -  ac->internal_to_interface(ac->get_value()) ) < 0.007875 );
 }
 
 void
-LaunchControlXL::handle_knob_message (Knob* knob)
+LaunchControlXL::handle_knob_message (boost::shared_ptr<Knob> knob)
 {
 	uint8_t chan = knob->id() % 8; // get the strip channel number
 	if (!stripable[chan]) {
@@ -499,7 +499,7 @@ LaunchControlXL::handle_knob_message (Knob* knob)
 }
 
 void
-LaunchControlXL::handle_fader_message (Fader* fader)
+LaunchControlXL::handle_fader_message (boost::shared_ptr<Fader> fader)
 {
 
 	if (!stripable[fader->id()]) {
@@ -527,15 +527,15 @@ LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::Eve
 	CCKnobMap::iterator k = cc_knob_map.find (ev->controller_number);
 
 	if (b != cc_controller_button_map.end()) {
-		Button* button = b->second;
+		boost::shared_ptr<Button> button = b->second;
 		handle_button_message(button, ev);
 	} else if (f != cc_fader_map.end()) {
-		Fader* fader = f->second;
+		boost::shared_ptr<Fader> fader = f->second;
 		fader->set_value(ev->value);
 		handle_fader_message(fader);
 
 	} else if (k != cc_knob_map.end()) {
-		Knob* knob = k->second;
+		boost::shared_ptr<Knob> knob = k->second;
 		knob->set_value(ev->value);
 		handle_knob_message(knob);
 	}
@@ -555,7 +555,7 @@ LaunchControlXL::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventT
 	 NNNoteButtonMap::iterator b = nn_note_button_map.find (ev->controller_number);
 
 	 if (b != nn_note_button_map.end()) {
-		Button* button = b->second;
+		 boost::shared_ptr<Button> button = b->second;
 		handle_button_message(button, ev);
 	}
 }
@@ -851,8 +851,8 @@ LaunchControlXL::switch_template (uint8_t t)
 void
 LaunchControlXL::switch_bank (uint32_t base)
 {
-	SelectButton* sl = static_cast<SelectButton*>(id_controller_button_map[SelectLeft]);
-	SelectButton* sr = static_cast<SelectButton*>(id_controller_button_map[SelectRight]);
+	boost::shared_ptr<SelectButton> sl = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
+	boost::shared_ptr<SelectButton> sr = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
 
 	/* work backwards so we can tell if we should actually switch banks */
 

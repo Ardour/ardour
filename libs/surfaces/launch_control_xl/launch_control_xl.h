@@ -387,38 +387,38 @@ private:
 	void relax() {}
 
 	/* map of NoteButtons by NoteNumber */
-	typedef std::map<int, NoteButton *> NNNoteButtonMap;
+	typedef std::map<int, boost::shared_ptr<NoteButton> > NNNoteButtonMap;
 	NNNoteButtonMap nn_note_button_map;
 	/* map of NoteButtons by ButtonID */
-	typedef std::map<ButtonID, NoteButton *> IDNoteButtonMap;
+	typedef std::map<ButtonID, boost::shared_ptr<NoteButton> > IDNoteButtonMap;
 	IDNoteButtonMap id_note_button_map;
 	/* map of ControllerNoteButtons by CC */
-	typedef std::map<int, ControllerButton *> CCControllerButtonMap;
+	typedef std::map<int, boost::shared_ptr<ControllerButton> > CCControllerButtonMap;
 	CCControllerButtonMap cc_controller_button_map;
 	/* map of ControllerButtons by ButtonID */
-	typedef std::map<ButtonID, ControllerButton *> IDControllerButtonMap;
+	typedef std::map<ButtonID, boost::shared_ptr<ControllerButton> > IDControllerButtonMap;
 	IDControllerButtonMap id_controller_button_map;
 
 
 	/* map of Fader by CC */
-	typedef std::map<int, Fader *> CCFaderMap;
+	typedef std::map<int, boost::shared_ptr<Fader> > CCFaderMap;
 	CCFaderMap cc_fader_map;
 	/* map of Fader by FaderID */
-	typedef std::map<FaderID, Fader *> IDFaderMap;
+	typedef std::map<FaderID, boost::shared_ptr<Fader> > IDFaderMap;
 	IDFaderMap id_fader_map;
 
 	/* map of Knob by CC */
-	typedef std::map<int, Knob *> CCKnobMap;
+	typedef std::map<int, boost::shared_ptr<Knob> > CCKnobMap;
 	CCKnobMap cc_knob_map;
 	/* map of Knob by KnobID */
-	typedef std::map<KnobID, Knob *> IDKnobMap;
+	typedef std::map<KnobID, boost::shared_ptr<Knob> > IDKnobMap;
 	IDKnobMap id_knob_map;
 
 	std::set<ButtonID> buttons_down;
 	std::set<ButtonID> consumed;
 
-	bool button_long_press_timeout(ButtonID id, Button *button);
-	void start_press_timeout(Button *, ButtonID);
+	bool button_long_press_timeout(ButtonID id, boost::shared_ptr<Button> button);
+	void start_press_timeout(boost::shared_ptr<Button> , ButtonID);
 
 	void init_buttons(bool startup);
 
@@ -437,11 +437,11 @@ private:
 	boost::shared_ptr<ARDOUR::Port> _async_out;
 
 	void connect_to_parser();
-	void handle_button_message(Button* button, MIDI::EventTwoBytes *);
-	void handle_fader_message(Fader* fader);
-	void handle_knob_message(Knob* knob);
+	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
+	void handle_fader_message(boost::shared_ptr<Fader> fader);
+	void handle_knob_message(boost::shared_ptr<Knob> knob);
 
-	bool check_pick_up(Controller* controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
+	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
 
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
@@ -460,14 +460,14 @@ private:
 
 	/* Knob methods */
 
-	Knob** knobs_by_column(uint8_t col, Knob** knob_col);
+	boost::shared_ptr<Knob>* knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col);
 	void update_knob_led(uint8_t n);
 
 	/* Button methods */
 
-	TrackButton* track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
-	TrackButton* focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
-	TrackButton* control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
+	boost::shared_ptr<TrackButton> track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
+	boost::shared_ptr<TrackButton> focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
+	boost::shared_ptr<TrackButton> control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
 
 
 	void button_device();

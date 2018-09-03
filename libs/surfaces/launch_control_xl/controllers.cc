@@ -36,10 +36,10 @@ LaunchControlXL::build_maps ()
 {
 	/* Knobs */
 
-	Knob* knob;
+	boost::shared_ptr<Knob> knob;
 
 	#define MAKE_KNOB(i,cc, index) \
-		knob = new Knob ((i), (cc), (index), (*this)); \
+		knob.reset (new Knob ((i), (cc), (index), (*this))); \
 		cc_knob_map.insert (std::make_pair (knob->controller_number(), knob)); \
 		id_knob_map.insert (std::make_pair (knob->id(), knob))
 
@@ -51,10 +51,10 @@ LaunchControlXL::build_maps ()
 
 	/* Faders */
 
-	Fader* fader;
+	boost::shared_ptr<Fader> fader;
 
 	#define MAKE_FADER(i,cc) \
-		fader = new Fader ((i), (cc)); \
+		fader.reset (new Fader ((i), (cc))); \
 		cc_fader_map.insert (std::make_pair (fader->controller_number(), fader)); \
 		id_fader_map.insert (std::make_pair (fader->id(), fader))
 
@@ -64,24 +64,24 @@ LaunchControlXL::build_maps ()
 
 	/* Buttons */
 
-	ControllerButton *controller_button;
-	NoteButton *note_button;
+	boost::shared_ptr<ControllerButton> controller_button;
+	boost::shared_ptr<NoteButton> note_button;
 
 
 	#define MAKE_TRACK_BUTTON_PRESS(i,nn,index,color,p) \
-		note_button = new TrackButton ((i), (nn), (index), (color), (p), (*this)); \
+		note_button.reset (new TrackButton ((i), (nn), (index), (color), (p), (*this))); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 	#define MAKE_SELECT_BUTTON_PRESS(i,cc,index,p) \
-		controller_button = new SelectButton ((i), (cc), (index), (p), (*this)); \
+		controller_button.reset (new SelectButton ((i), (cc), (index), (p), (*this))); \
 		cc_controller_button_map.insert (std::make_pair (controller_button->controller_number(), controller_button)); \
 		id_controller_button_map.insert (std::make_pair (controller_button->id(), controller_button))
 	#define MAKE_TRACK_STATE_BUTTON_PRESS(i,nn,index,p) \
-		note_button = new TrackStateButton ((i), (nn), (index), (p), (*this)); \
+		note_button.reset (new TrackStateButton ((i), (nn), (index), (p), (*this))); \
 		nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 		id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 		#define MAKE_TRACK_STATE_BUTTON_PRESS_RELEASE_LONG(i,nn,index, p,r,l) \
-			note_button = new TrackStateButton ((i), (nn), (index), (p), (r), (l), (*this)); \
+			note_button.reset (new TrackStateButton ((i), (nn), (index), (p), (r), (l), (*this))); \
 			nn_note_button_map.insert (std::make_pair (note_button->note_number(), note_button)); \
 			id_note_button_map.insert (std::make_pair (note_button->id(), note_button))
 
@@ -260,7 +260,7 @@ LaunchControlXL::fader_name_by_id (FaderID id)
 	return "???";
 }
 
-LaunchControlXL::TrackButton*
+boost::shared_ptr<LaunchControlXL::TrackButton>
 LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 {
 	NNNoteButtonMap::iterator b;
@@ -270,10 +270,10 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 		b = nn_note_button_map.find (middle + n - 4);
 	}
 
-	TrackButton* button = 0;
+	boost::shared_ptr<TrackButton> button = 0;
 
 	if (b != nn_note_button_map.end()) {
-		button = static_cast<TrackButton*>(b->second);
+		button = boost::dynamic_pointer_cast<TrackButton> (b->second);
 	}
 
 	return button;
@@ -283,7 +283,7 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 void
 LaunchControlXL::update_track_focus_led(uint8_t n)
 {
-	TrackButton* b = focus_button_by_column(n);
+	boost::shared_ptr<TrackButton> b = focus_button_by_column(n);
 
 	if (!b) {
 		return;
@@ -350,8 +350,8 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 		return ac;
 }
 
-LaunchControlXL::Knob**
-LaunchControlXL::knobs_by_column(uint8_t col, Knob** knob_col)
+boost::shared_ptr<LaunchControlXL::Knob>*
+LaunchControlXL::knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col)
 {
 	for (uint8_t n = 0; n < 3; ++n) {
 		knob_col[n] = id_knob_map.find(static_cast<KnobID>(col+n*8))->second;
@@ -410,7 +410,7 @@ LaunchControlXL::update_knob_led(uint8_t n)
 		}
 	}
 
-	Knob* knobs_col[3];
+	boost::shared_ptr<Knob> knobs_col[3];
 	knobs_by_column(n, knobs_col);
 
 	for  (uint8_t s = 0; s < 3; ++s)
@@ -427,7 +427,7 @@ LaunchControlXL::update_knob_led(uint8_t n)
 void
 LaunchControlXL::update_track_control_led(uint8_t n)
 {
-	TrackButton* b = control_button_by_column(n);
+	boost::shared_ptr<TrackButton> b = control_button_by_column(n);
 
 	if (!b) {
 		return;
@@ -504,7 +504,7 @@ LaunchControlXL::solo_iso_led_bank ()
 		return;
 	} else {
 		for (int n = 0; n < stripable_counter; ++n) {
-			TrackButton* b = focus_button_by_column(n);
+			boost::shared_ptr<TrackButton> b = focus_button_by_column(n);
 			if (stripable[n] && stripable[n]->solo_isolate_control()) {
 				if (stripable[n]->solo_isolate_control()->get_value()) {
 					b->set_color(RedFull);
@@ -539,7 +539,7 @@ LaunchControlXL::master_send_led_bank ()
 		int stripable_counter = LaunchControlXL::get_amount_of_tracks();
 
 		for (int n = 0; n < stripable_counter; ++n) {
-			TrackButton* b = control_button_by_column(n);
+			boost::shared_ptr<TrackButton> b = control_button_by_column(n);
 			if (stripable[n] && stripable[n]->master_send_enable_controllable()) {
 				if (stripable[n]->master_send_enable_controllable()->get_value()) {
 					b->set_color(GreenFull);
@@ -591,9 +591,9 @@ LaunchControlXL::button_track_mode(TrackMode state)
 			update_track_control_led(n);
 		}
 
-		TrackStateButton* mute = static_cast<TrackStateButton*>(id_note_button_map[Mute]);
-		TrackStateButton* solo = static_cast<TrackStateButton*>(id_note_button_map[Solo]);
-		TrackStateButton* record = static_cast<TrackStateButton*>(id_note_button_map[Record]);
+		boost::shared_ptr<TrackStateButton> mute = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Mute]);
+		boost::shared_ptr<TrackStateButton> solo = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Solo]);
+		boost::shared_ptr<TrackStateButton> record = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Record]);
 
 		write(mute->state_msg((state == TrackMute)));
 		write(solo->state_msg((state == TrackSolo)));
@@ -670,7 +670,7 @@ LaunchControlXL::button_record()
 }
 
 bool
-LaunchControlXL::button_long_press_timeout (ButtonID id, Button* button)
+LaunchControlXL::button_long_press_timeout (ButtonID id, boost::shared_ptr<Button> button)
 {
 	if (buttons_down.find (id) != buttons_down.end()) {
 		DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("long press timeout for %1, invoking method\n", id));
@@ -690,7 +690,7 @@ LaunchControlXL::button_long_press_timeout (ButtonID id, Button* button)
 
 
 void
-LaunchControlXL::start_press_timeout (Button* button, ButtonID id)
+LaunchControlXL::start_press_timeout (boost::shared_ptr<Button> button, ButtonID id)
 {
 	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (500); // milliseconds
 	button->timeout_connection = timeout->connect (sigc::bind (sigc::mem_fun (*this, &LaunchControlXL::button_long_press_timeout), id, button));
