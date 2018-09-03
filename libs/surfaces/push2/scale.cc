@@ -47,7 +47,6 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
 	, last_vpot (-1)
 	, vpot_delta_cnt (0)
-	, root_button (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
