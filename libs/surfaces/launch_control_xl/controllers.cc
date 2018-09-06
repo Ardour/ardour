@@ -271,10 +271,10 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 	}
 
 	if (b != nn_note_button_map.end()) {
-		return (b->second);
+		return boost::dynamic_pointer_cast<TrackButton> (b->second);
 	}
 
-	return boost::shared_ptr<LaunchControlXL::TrackButton>();
+	return boost::shared_ptr<TrackButton>();
 }
 
 void
