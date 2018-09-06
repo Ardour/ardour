@@ -270,14 +270,11 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 		b = nn_note_button_map.find (middle + n - 4);
 	}
 
-	boost::shared_ptr<TrackButton> button = 0;
-
 	if (b != nn_note_button_map.end()) {
-		button = boost::dynamic_pointer_cast<TrackButton> (b->second);
+		return (b->second);
 	}
 
-	return button;
-
+	return boost::shared_ptr<LaunchControlXL::TrackButton>();
 }
 
 void
@@ -324,8 +321,6 @@ LaunchControlXL::button_track_focus(uint8_t n)
 		return;
 	}
 }
-
-
 
 boost::shared_ptr<AutomationControl>
 LaunchControlXL::get_ac_by_state(uint8_t n) {
