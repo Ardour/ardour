@@ -458,63 +458,6 @@ LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::
 }
 
 void
-LaunchControlXL::handle_knob_message (boost::shared_ptr<Knob> knob)
-{
-	uint8_t chan = knob->id() % 8; // get the strip channel number
-	if (!stripable[chan]) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> ac;
-
-	if (knob->id() < 8) { // sendA knob
-		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
-			ac = stripable[chan]->trim_control();
-		} else {
-			ac = stripable[chan]->send_level_controllable (0);
-		}
-	} else if (knob->id() >= 8 && knob->id() < 16) { // sendB knob
-		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
-#ifdef MIXBUS
-			ac = stripable[chan]->filter_freq_controllable (true);
-#else
-			/* something */
-#endif
-		} else {
-			ac = stripable[chan]->send_level_controllable (1);
-		}
-	} else if (knob->id() >= 16 && knob->id() < 24) { // pan knob
-		if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
-#ifdef MIXBUS
-			ac = stripable[chan]->comp_threshold_controllable();
-#else
-			ac = stripable[chan]->pan_width_control();
-#endif
-		} else {
-			ac = stripable[chan]->pan_azimuth_control();
-		}
-	}
-
-	if (ac && check_pick_up(knob, ac)) {
-		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
-	}
-}
-
-void
-LaunchControlXL::handle_fader_message (boost::shared_ptr<Fader> fader)
-{
-
-	if (!stripable[fader->id()]) {
-		return;
-	}
-
-	boost::shared_ptr<AutomationControl> ac = stripable[fader->id()]->gain_control();
-	if (ac && check_pick_up(fader, ac)) {
-		ac->set_value ( ac->interface_to_internal( fader->value() / 127.0), PBD::Controllable::UseGroup );
-	}
-}
-
-void
 LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev, MIDI::channel_t chan)
 {
 	_template_number = (int)chan;
@@ -534,12 +477,11 @@ LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::Eve
 	} else if (f != cc_fader_map.end()) {
 		boost::shared_ptr<Fader> fader = f->second;
 		fader->set_value(ev->value);
-		handle_fader_message(fader);
-
+		(this->*fader->action_method)();
 	} else if (k != cc_knob_map.end()) {
 		boost::shared_ptr<Knob> knob = k->second;
 		knob->set_value(ev->value);
-		handle_knob_message(knob);
+		(this->*knob->action_method)();
 	}
 }
 

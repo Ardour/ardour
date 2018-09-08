@@ -143,7 +143,10 @@ public:
 
 
 	struct Controller {
-		Controller(uint8_t cn,  uint8_t val = 0) : _controller_number(cn), _value(val)  {}
+		Controller(uint8_t cn,  uint8_t val, void (LaunchControlXL::*action)())
+		: _controller_number(cn)
+		, _value(val)
+		, action_method(action) {}
 
 		uint8_t  controller_number() const { return _controller_number; }
 		uint8_t value() const { return _value; }
@@ -152,6 +155,9 @@ public:
 		protected:
 		uint8_t _controller_number;
 		uint8_t _value;
+
+		public:
+		void (LaunchControlXL::*action_method)();
 	};
 
 	struct LED {
@@ -297,8 +303,8 @@ public:
 	};
 
 	struct Fader : public Controller {
-		Fader(FaderID id, uint8_t cn)
-			: Controller(cn, 0), _id(id) {} // minimal value
+		Fader(FaderID id, uint8_t cn, void (LaunchControlXL::*action)())
+			: Controller(cn, 0, action), _id(id) {} // minimal value
 
 		FaderID id() const { return _id; }
 
@@ -309,8 +315,8 @@ public:
 	};
 
 	struct Knob : public Controller, public MultiColorLED {
-		Knob(KnobID id, uint8_t cn, uint8_t index, LaunchControlXL& l)
-			: Controller(cn, 64)
+		Knob(KnobID id, uint8_t cn, uint8_t index, void (LaunchControlXL::*action)(), LaunchControlXL &l)
+			: Controller(cn, 64, action)
 			, MultiColorLED(index, Off, l)
 			, _id(id) {} // knob 50/50 value
 
@@ -438,8 +444,6 @@ private:
 
 	void connect_to_parser();
 	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
-	void handle_fader_message(boost::shared_ptr<Fader> fader);
-	void handle_knob_message(boost::shared_ptr<Knob> knob);
 
 	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac);
 
@@ -462,6 +466,51 @@ private:
 
 	boost::shared_ptr<Knob>* knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col);
 	void update_knob_led(uint8_t n);
+
+	void knob_sendA(uint8_t n);
+	void knob_sendB(uint8_t n);
+	void knob_pan(uint8_t n);
+
+
+	void knob_sendA1() { knob_sendA(0); }
+	void knob_sendA2() { knob_sendA(1); }
+	void knob_sendA3() { knob_sendA(2); }
+	void knob_sendA4() { knob_sendA(3); }
+	void knob_sendA5() { knob_sendA(4); }
+	void knob_sendA6() { knob_sendA(5); }
+	void knob_sendA7() { knob_sendA(6); }
+	void knob_sendA8() { knob_sendA(7); }
+
+	void knob_sendB1() { knob_sendB(0); }
+	void knob_sendB2() { knob_sendB(1); }
+	void knob_sendB3() { knob_sendB(2); }
+	void knob_sendB4() { knob_sendB(3); }
+	void knob_sendB5() { knob_sendB(4); }
+	void knob_sendB6() { knob_sendB(5); }
+	void knob_sendB7() { knob_sendB(6); }
+	void knob_sendB8() { knob_sendB(7); }
+
+	void knob_pan1() { knob_pan(0); }
+	void knob_pan2() { knob_pan(1); }
+	void knob_pan3() { knob_pan(2); }
+	void knob_pan4() { knob_pan(3); }
+	void knob_pan5() { knob_pan(4); }
+	void knob_pan6() { knob_pan(5); }
+	void knob_pan7() { knob_pan(6); }
+	void knob_pan8() { knob_pan(7); }
+
+	/* Fader methods */
+
+	void fader(uint8_t n);
+
+	void fader_1() { fader(0); }
+	void fader_2() { fader(1); }
+	void fader_3() { fader(2); }
+	void fader_4() { fader(3); }
+	void fader_5() { fader(4); }
+	void fader_6() { fader(5); }
+	void fader_7() { fader(6); }
+	void fader_8() { fader(7); }
 
 	/* Button methods */
 

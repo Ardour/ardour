@@ -38,29 +38,56 @@ LaunchControlXL::build_maps ()
 
 	boost::shared_ptr<Knob> knob;
 
-	#define MAKE_KNOB(i,cc, index) \
-		knob.reset (new Knob ((i), (cc), (index), (*this))); \
+	#define MAKE_KNOB(i,cc,index,a) \
+		knob.reset (new Knob ((i), (cc), (index), (a), (*this))); \
 		cc_knob_map.insert (std::make_pair (knob->controller_number(), knob)); \
 		id_knob_map.insert (std::make_pair (knob->id(), knob))
 
-		for (uint8_t n = 0; n < 8; ++n) {
-			MAKE_KNOB (static_cast<KnobID>(n), (n + 13), n);
-			MAKE_KNOB (static_cast<KnobID>(n + 8), (n + 29), (n + 8));
-			MAKE_KNOB (static_cast<KnobID>(n + 16), (n + 49), (n + 16));
-		}
+	MAKE_KNOB (SendA1, 13, 0, &LaunchControlXL::knob_sendA1);
+	MAKE_KNOB (SendA2, 14, 1, &LaunchControlXL::knob_sendA2);
+	MAKE_KNOB (SendA3, 15, 2, &LaunchControlXL::knob_sendA3);
+	MAKE_KNOB (SendA4, 16, 3, &LaunchControlXL::knob_sendA4);
+	MAKE_KNOB (SendA5, 17, 4, &LaunchControlXL::knob_sendA5);
+	MAKE_KNOB (SendA6, 18, 5, &LaunchControlXL::knob_sendA6);
+	MAKE_KNOB (SendA7, 19, 6, &LaunchControlXL::knob_sendA7);
+	MAKE_KNOB (SendA8, 20, 7, &LaunchControlXL::knob_sendA8);
+
+	MAKE_KNOB (SendB1, 29, 8, &LaunchControlXL::knob_sendB1);
+	MAKE_KNOB (SendB2, 30, 9, &LaunchControlXL::knob_sendB2);
+	MAKE_KNOB (SendB3, 31, 10, &LaunchControlXL::knob_sendB3);
+	MAKE_KNOB (SendB4, 32, 11, &LaunchControlXL::knob_sendB4);
+	MAKE_KNOB (SendB5, 33, 12, &LaunchControlXL::knob_sendB5);
+	MAKE_KNOB (SendB6, 34, 13, &LaunchControlXL::knob_sendB6);
+	MAKE_KNOB (SendB7, 35, 14, &LaunchControlXL::knob_sendB7);
+	MAKE_KNOB (SendB8, 36, 15, &LaunchControlXL::knob_sendB8);
+
+	MAKE_KNOB (Pan1, 49, 16, &LaunchControlXL::knob_pan1);
+	MAKE_KNOB (Pan2, 50, 17, &LaunchControlXL::knob_pan2);
+	MAKE_KNOB (Pan3, 51, 18, &LaunchControlXL::knob_pan3);
+	MAKE_KNOB (Pan4, 52, 19, &LaunchControlXL::knob_pan4);
+	MAKE_KNOB (Pan5, 53, 20, &LaunchControlXL::knob_pan5);
+	MAKE_KNOB (Pan6, 54, 21, &LaunchControlXL::knob_pan6);
+	MAKE_KNOB (Pan7, 55, 22, &LaunchControlXL::knob_pan7);
+	MAKE_KNOB (Pan8, 56, 23, &LaunchControlXL::knob_pan8);
 
 	/* Faders */
 
 	boost::shared_ptr<Fader> fader;
 
-	#define MAKE_FADER(i,cc) \
-		fader.reset (new Fader ((i), (cc))); \
+	#define MAKE_FADER(i,cc,a) \
+		fader.reset (new Fader ((i), (cc), (a))); \
 		cc_fader_map.insert (std::make_pair (fader->controller_number(), fader)); \
 		id_fader_map.insert (std::make_pair (fader->id(), fader))
 
-		for (uint8_t n = 0; n < 8; ++n) {
-			MAKE_FADER (static_cast<FaderID>(n), (n + 77) );
-		}
+	MAKE_FADER (Fader1, 77, &LaunchControlXL::fader_1);
+	MAKE_FADER (Fader2, 78, &LaunchControlXL::fader_2);
+	MAKE_FADER (Fader3, 79, &LaunchControlXL::fader_3);
+	MAKE_FADER (Fader4, 80, &LaunchControlXL::fader_4);
+	MAKE_FADER (Fader5, 81, &LaunchControlXL::fader_5);
+	MAKE_FADER (Fader6, 82, &LaunchControlXL::fader_6);
+	MAKE_FADER (Fader7, 83, &LaunchControlXL::fader_7);
+	MAKE_FADER (Fader8, 84, &LaunchControlXL::fader_8);
+
 
 	/* Buttons */
 
@@ -299,29 +326,6 @@ LaunchControlXL::update_track_focus_led(uint8_t n)
 	write (b->state_msg());
 }
 
-void
-LaunchControlXL::button_track_focus(uint8_t n)
-{
-	if (buttons_down.find(Device) != buttons_down.end()) {
-		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
-		if (stripable[n]->solo_isolate_control()) {
-			bool solo_isolate_active = stripable[n]->solo_isolate_control()->get_value();
-			stripable[n]->solo_isolate_control()->set_value (!solo_isolate_active, PBD::Controllable::UseGroup);
-		}
-		return;
-	}
-
-	if (stripable[n]) {
-		if ( stripable[n]->is_selected() ) {
-			 ControlProtocol::RemoveStripableFromSelection (stripable[n]);
-		} else {
-			ControlProtocol::AddStripableToSelection (stripable[n]);
-		}
-	} else {
-		return;
-	}
-}
-
 boost::shared_ptr<AutomationControl>
 LaunchControlXL::get_ac_by_state(uint8_t n) {
 		boost::shared_ptr<AutomationControl> ac;
@@ -548,6 +552,154 @@ LaunchControlXL::master_send_led_bank ()
 	}
 }
 # endif
+
+void
+LaunchControlXL::fader(uint8_t n)
+{
+	if (!stripable[n]) {
+		return;
+	}
+
+	boost::shared_ptr<Fader> fader = 0;
+	IDFaderMap::iterator f = id_fader_map.find(static_cast<FaderID>(n));
+
+	if (f != id_fader_map.end()) {
+		fader = f->second;
+	}
+
+	if (!fader) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac = stripable[fader->id()]->gain_control();
+	if (ac && check_pick_up(fader, ac)) {
+		ac->set_value ( ac->interface_to_internal( fader->value() / 127.0), PBD::Controllable::UseGroup );
+	}
+}
+
+void
+LaunchControlXL::knob_sendA(uint8_t n)
+{
+	if (!stripable[n]) {
+		return;
+	}
+
+	boost::shared_ptr<Knob> knob = 0;
+	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n));
+
+	if (k != id_knob_map.end()) {
+		knob = k->second;
+	}
+
+	if (!knob) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac;
+
+	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+		ac = stripable[n]->trim_control();
+	} else {
+		ac = stripable[n]->send_level_controllable (0);
+	}
+
+	if (ac && check_pick_up(knob, ac)) {
+		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	}
+}
+
+void
+LaunchControlXL::knob_sendB(uint8_t n)
+{
+	if (!stripable[n]) {
+		return;
+	}
+
+	boost::shared_ptr<Knob> knob = 0;
+	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 8));
+
+	if (k != id_knob_map.end()) {
+		knob = k->second;
+	}
+
+	if (!knob) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac;
+
+	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+	#ifdef MIXBUS
+		ac = stripable[n]->filter_freq_controllable (true);
+	#else
+		/* something */
+	#endif
+	} else {
+		ac = stripable[n]->send_level_controllable (1);
+	}
+
+	if (ac && check_pick_up(knob, ac)) {
+		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	}
+}
+
+void
+LaunchControlXL::knob_pan(uint8_t n)
+{
+	if (!stripable[n]) {
+		return;
+	}
+
+	boost::shared_ptr<Knob> knob = 0;
+	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 16));
+
+	if (k != id_knob_map.end()) {
+		knob = k->second;
+	}
+
+	if (!knob) {
+		return;
+	}
+
+	boost::shared_ptr<AutomationControl> ac;
+
+	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
+	#ifdef MIXBUS
+		ac = stripable[n]->comp_threshold_controllable();
+	#else
+		ac = stripable[n]->pan_width_control();
+	#endif
+	} else {
+		ac = stripable[n]->pan_azimuth_control();
+	}
+
+	if (ac && check_pick_up(knob, ac)) {
+		ac->set_value ( ac->interface_to_internal( knob->value() / 127.0), PBD::Controllable::UseGroup );
+	}
+}
+
+void
+LaunchControlXL::button_track_focus(uint8_t n)
+{
+	if (buttons_down.find(Device) != buttons_down.end()) {
+		DEBUG_TRACE (DEBUG::LaunchControlXL, "DEVICE BUTTON HOLD\n");
+		if (stripable[n]->solo_isolate_control()) {
+			bool solo_isolate_active = stripable[n]->solo_isolate_control()->get_value();
+			stripable[n]->solo_isolate_control()->set_value (!solo_isolate_active, PBD::Controllable::UseGroup);
+		}
+		return;
+	}
+
+	if (stripable[n]) {
+		if ( stripable[n]->is_selected() ) {
+			 ControlProtocol::RemoveStripableFromSelection (stripable[n]);
+		} else {
+			ControlProtocol::AddStripableToSelection (stripable[n]);
+		}
+	} else {
+		return;
+	}
+}
 
 void
 LaunchControlXL::button_track_control(uint8_t n) {
