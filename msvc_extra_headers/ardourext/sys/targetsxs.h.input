@@ -16,11 +16,19 @@
 /* Comment out the above line to build Mixbus without VST support */
 #endif
 
+#ifndef PROGRAM_NAME
+#ifdef  MIXBUS
+#define PROGRAM_NAME "Mixbus"
+#else
+#define PROGRAM_NAME "Ardour"
+#endif
+#endif
+
 #ifndef CURRENT_SESSION_FILE_VERSION
 #ifdef  MIXBUS
 #define CURRENT_SESSION_FILE_VERSION 5990
 #else
-#define CURRENT_SESSION_FILE_VERSION 5990
+#define CURRENT_SESSION_FILE_VERSION 3002
 #endif
 #endif
 

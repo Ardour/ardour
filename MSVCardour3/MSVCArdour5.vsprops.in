@@ -2,7 +2,7 @@
 <VisualStudioPropertySheet
 	ProjectType="Visual C++"
 	Version="8.00"
-	Name="MSVCMixbus3"
+	Name="MSVCMixbus5"
 	>
 	<UserMacro
 		Name="GlibApiVersion"
@@ -130,6 +130,6 @@
 	/>
 	<UserMacro
 		Name="LibardourFolder"
-		Value="ardour3"
+		Value="ardour5"
 	/>
 </VisualStudioPropertySheet>

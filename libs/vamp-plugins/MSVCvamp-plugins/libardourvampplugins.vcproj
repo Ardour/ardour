@@ -19,7 +19,7 @@
 			OutputDirectory="$(ProjectDir)\$(ConfigurationName)\bin"
 			IntermediateDirectory="$(ProjectDir)\$(ConfigurationName)\obj\$(ProjectName)"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus3.vsprops"
+			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus5.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
@@ -98,7 +98,7 @@
 			OutputDirectory="$(ProjectDir)\$(ConfigurationName)\bin"
 			IntermediateDirectory="$(ProjectDir)\$(ConfigurationName)\obj\$(ProjectName)"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus3.vsprops"
+			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus5.vsprops"
 			CharacterSet="2"
 			WholeProgramOptimization="1"
 			>
@@ -179,7 +179,7 @@
 			OutputDirectory="$(ProjectDir)\$(ConfigurationName)\bin"
 			IntermediateDirectory="$(ProjectDir)\$(ConfigurationName)\obj\$(ProjectName)"
 			ConfigurationType="2"
-			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus3.vsprops"
+			InheritedPropertySheets="..\..\..\MSVCMixbus3\MSVCMixbus5.vsprops"
 			CharacterSet="2"
 			>
 			<Tool
