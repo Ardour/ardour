@@ -6368,6 +6368,21 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			ret = 0;
 		}
 	}
+	else if (!strncmp (path, X_("/cue/new_aux"), 12)) {
+		// Create new Aux bus
+		string name = "";
+		string dest = "";
+		if (argc == 2 && types[0] == 's' && types[1] == 's') {
+			name = &argv[0]->s;
+			dest = &argv[1]->s;
+			ret = cue_new_aux (name, dest, msg);
+		} else if (argc == 1 && types[0] == 's') {
+			name = &argv[0]->s;
+			ret = cue_new_aux (name, dest, msg);
+		} else {
+			PBD::warning << "OSC: new_aux has wrong number or type of parameters." << endmsg;
+		}
+	}
 	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
 		// switch to next Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
@@ -6462,6 +6477,33 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	}
 
 	return ret;
+}
+
+int
+OSC::cue_new_aux (string name, string dest, lo_message msg)
+{
+	// create a new bus named name - monitor
+	RouteList list;
+	boost::shared_ptr<Stripable> aux;
+	name = string_compose ("%1 - monitor", name);
+	list = session->new_audio_route (1, 1, 0, 1, name, PresentationInfo::AudioBus, (uint32_t) -1);
+	aux = *(list.begin());
+	if (aux) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
+		r->output()->disconnect (this);
+		if (dest.size()) {
+			if (atoi( dest.c_str())) {
+				dest = string_compose ("system:playback_%1", dest);
+			}
+			PortSet& ports = r->output()->ports ();
+			r->output ()->connect (*(ports.begin()), dest, this);
+		}
+		aux->presentation_info().set_hidden (true);
+
+		cue_set ((uint32_t) -1, msg);
+		return 0;
+	}
+	return -1;
 }
 
 int
