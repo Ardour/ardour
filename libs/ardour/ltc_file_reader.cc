@@ -81,31 +81,21 @@ LTCReader::raw_write (ltcsnd_sample_t* buf, size_t size, ltc_off_t off)
 	ltc_decoder_write (_decoder, buf, size, off);
 }
 
-bool
+samplepos_t
 LTCReader::read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff)
 {
 	LTCFrameExt ltc_frame;
-	bool rv = 0 != ltc_decoder_read (_decoder, &ltc_frame);
-	if (rv) {
-		SMPTETimecode stime;
-		ltc_frame_to_time (&stime, &ltc_frame.ltc, /*use_date*/ 0);
-		hh   = stime.hours;
-		mm = stime.mins;
-		ss = stime.secs;
-		ff  = stime.frame;
-
-#if 0 // DEBUG
-			printf("LTC %02d:%02d:%02d:%02d @%9lld -> %9lld -> %fsec\n",
-					stime.hours,
-					stime.mins,
-					stime.secs,
-					stime.frame,
-					frame.off_start,
-					sample,
-					tc_sec);
-#endif
+	if (0 == ltc_decoder_read (_decoder, &ltc_frame)) {
+		return -1;
 	}
-	return rv;
+
+	SMPTETimecode stime;
+	ltc_frame_to_time (&stime, &ltc_frame.ltc, /*use_date*/ 0);
+	hh   = stime.hours;
+	mm = stime.mins;
+	ss = stime.secs;
+	ff  = stime.frame;
+	return ltc_frame.off_start;
 }
 
 
@@ -195,7 +185,6 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 {
 	std::vector<LTCFileReader::LTCMap> rv;
 	ltcsnd_sample_t sound[BUFFER_SIZE];
-	LTCFrameExt frame;
 
 	const uint32_t channels = _info.channels;
 	if (channel >= channels) {
@@ -209,7 +198,7 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 			break;
 		}
 
-		// convert audio to 8bit unsigned
+		/* convert audio to 8bit unsigned */
 		for (int64_t i = 0; i < n; ++i) {
 			sound [i]= 128 + _interleaved_audio_buffer[channels * i + channel] * 127;
 		}
@@ -217,7 +206,9 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 		_reader->raw_write (sound, n, _samples_read);
 		Timecode::Time timecode (_expected_fps);
 
-		while (_reader->read (timecode.hours, timecode.minutes, timecode.seconds, timecode.frames)) {
+		samplepos_t off_start;
+
+		while ((off_start = _reader->read (timecode.hours, timecode.minutes, timecode.seconds, timecode.frames)) >= 0) {
 			int64_t sample = 0;
 			Timecode::timecode_to_sample (
 					timecode, sample, false, false,
@@ -230,7 +221,7 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 					_ltc_tv_standard);
 
 			// convert to seconds (session can use session-rate)
-			double fp_sec = frame.off_start / (double) _info.samplerate;
+			double fp_sec = off_start / (double) _info.samplerate;
 			double tc_sec = sample / (double) _info.samplerate;
 			rv.push_back (LTCMap (fp_sec, tc_sec));
 		}
