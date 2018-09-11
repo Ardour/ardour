@@ -215,12 +215,12 @@ LTCFileReader::read_ltc (uint32_t channel, uint32_t max_frames)
 					_info.samplerate,
 					0, 0, 0);
 
-			// align LTC frame relative to video-frame
-			sample -= ltc_frame_alignment (
+			/* align LTC frame relative to video-frame */
+			off_start += ltc_frame_alignment (
 					_info.samplerate / _expected_fps,
 					_ltc_tv_standard);
 
-			// convert to seconds (session can use session-rate)
+			/* convert to seconds (session can use session-rate) */
 			double fp_sec = off_start / (double) _info.samplerate;
 			double tc_sec = sample / (double) _info.samplerate;
 			rv.push_back (LTCMap (fp_sec, tc_sec));
