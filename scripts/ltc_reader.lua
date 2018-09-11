@@ -22,14 +22,14 @@ function dsp_run (ins, outs, n_samples)
 	if ins[1] ~= outs[1] then
 		ARDOUR.DSP.copy_vector (outs[1]:offset (0), ins[1]:offset (0), n_samples)
 	end
-	ltc_reader:write (ins[1]:offset (0), n_samples, -1)
+	ltc_reader:write (ins[1]:offset (0), n_samples, 0)
 	timeout = timeout + n_samples
 	local to_ui = self:shmem():to_int(0):array()
 	local rv
 	repeat
 		local tc
-		rv, tc =  ltc_reader:read (0, 0, 0, 0)
-		if rv then
+		rv, tc = ltc_reader:read (0, 0, 0, 0)
+		if rv >= 0 then
 			timeout = 0
 			self:shmem():atomic_set_int (0, 1)
 			self:shmem():atomic_set_int (1, tc[1])
@@ -38,7 +38,7 @@ function dsp_run (ins, outs, n_samples)
 			self:shmem():atomic_set_int (4, tc[4])
 			self:queue_draw ()
 		end
-	until not rv
+	until rv < 0
 	if timeout > samplerate then
 		if 0 ~= self:shmem():atomic_get_int (0) then
 			self:shmem():atomic_set_int (0, 0)
