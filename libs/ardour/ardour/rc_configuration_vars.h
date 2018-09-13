@@ -212,7 +212,7 @@ CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture",
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
-CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false)
+CONFIG_VARIABLE (RegionEquivalence, region_equivalence, "region-equivalence", Enclosed)
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)

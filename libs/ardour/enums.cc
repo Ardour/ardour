@@ -127,6 +127,7 @@ setup_enum_writer ()
 	MidiModel::NoteDiffCommand::Property _MidiModel_NoteDiffCommand_Property;
 	MidiModel::SysExDiffCommand::Property _MidiModel_SysExDiffCommand_Property;
 	MidiModel::PatchChangeDiffCommand::Property _MidiModel_PatchChangeDiffCommand_Property;
+	RegionEquivalence _RegionEquivalence;
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
 	Session::PostTransportWork _Session_PostTransportWork;
@@ -684,6 +685,11 @@ setup_enum_writer ()
 	REGISTER_ENUM(MidiPortControl);
 	REGISTER_ENUM(MidiPortSelection);
 	REGISTER_BITS(_MidiPortFlags);
+
+	REGISTER_ENUM(Exact);
+	REGISTER_ENUM(Enclosed);
+	REGISTER_ENUM(Overlap);
+	REGISTER(_RegionEquivalence);
 
 	REGISTER_ENUM(Linear);
 	REGISTER_ENUM(Logarithmic);

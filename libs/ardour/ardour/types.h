@@ -605,6 +605,12 @@ namespace ARDOUR {
 	class Bundle;
 	typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
 
+	enum RegionEquivalence {
+		Exact,
+		Enclosed,
+		Overlap
+	};
+
 	enum WaveformScale {
 		Linear,
 		Logarithmic

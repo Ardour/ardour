@@ -839,18 +839,28 @@ Playlist::remove_region_internal (boost::shared_ptr<Region> region)
 void
 Playlist::get_equivalent_regions (boost::shared_ptr<Region> other, vector<boost::shared_ptr<Region> >& results)
 {
-	if (Config->get_use_overlap_equivalency()) {
-		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-			if ((*i)->overlap_equivalent (other)) {
-				results.push_back (*i);
-			}
-		}
-	} else {
-		for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
-			if ((*i)->equivalent (other)) {
-				results.push_back (*i);
-			}
-		}
+	switch (Config->get_region_equivalence()) {
+		 case Exact:
+			 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+				 if ((*i)->exact_equivalent (other)) {
+					 results.push_back (*i);
+				 }
+			 }
+			 break;
+		 case Enclosed:
+			 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+				 if ((*i)->enclosed_equivalent (other)) {
+					 results.push_back (*i);
+				 }
+			 }
+			 break;
+		 case Overlap:
+			 for (RegionList::iterator i = regions.begin(); i != regions.end(); ++i) {
+				 if ((*i)->overlap_equivalent (other)) {
+					 results.push_back (*i);
+				 }
+			 }
+			 break;
 	}
 }
 

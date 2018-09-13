@@ -2138,7 +2138,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
-	BoolComboOption* bco;
 
 	if (hwcpus > 1) {
 		add_option (_("General"), new OptionEditorHeading (_("DSP CPU Utilization")));
@@ -2444,16 +2443,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), fadeshape);
 
-	bco = new BoolComboOption (
-		     "use-overlap-equivalency",
-		     _("Regions in edit groups are edited together"),
-		     _("whenever they overlap in time"),
-		     _("only if they have identical length and position"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
+	ComboOption<RegionEquivalence> *eqv = new ComboOption<RegionEquivalence> (
+		     "region-equivalence",
+		     _("Regions in active edit groups are edited together"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_equivalence),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_equivalence)
 		     );
 
-	add_option (_("Editor"), bco);
+	eqv->add (Overlap, _("whenever they overlap in time"));
+	eqv->add (Enclosed, _("if either encloses the other"));
+	eqv->add (Exact, _("only if they have identical length, position and origin"));
+
+	add_option (_("Editor"), eqv);
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",

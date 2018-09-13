@@ -1478,7 +1478,14 @@ Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::equivalent (boost::shared_ptr<const Region> other) const
+Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
+{
+	return (first_sample() >= other->first_sample() && last_sample() <= other->last_sample()) ||
+	       (first_sample() <= other->first_sample() && last_sample() >= other->last_sample()) ;
+}
+
+bool
+Region::exact_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&
 		_position == other->_position &&
