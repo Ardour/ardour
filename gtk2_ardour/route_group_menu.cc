@@ -88,7 +88,7 @@ RouteGroupMenu::build (WeakRouteList const & s)
 	RadioMenuItem::Group group;
 	items.push_back (RadioMenuElem (group, _("No Group")));
 	RadioMenuItem* i = static_cast<RadioMenuItem *> (&items.back ());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), (RouteGroup *) 0));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), i, (RouteGroup *) 0));
 
 	if (groups.size() == 1 && *groups.begin() == 0) {
 		i->set_active ();
@@ -116,7 +116,7 @@ RouteGroupMenu::add_item (RouteGroup* rg, std::set<RouteGroup*> const & groups, 
 
 	items.push_back (RadioMenuElem (*group, rg->name()));
 	RadioMenuItem* i = static_cast<RadioMenuItem*> (&items.back ());
-	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), rg));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteGroupMenu::set_group), i, rg));
 
 	if (groups.size() == 1 && *groups.begin() == rg) {
 		/* there's only one active group, and it's this one */
@@ -131,9 +131,12 @@ RouteGroupMenu::add_item (RouteGroup* rg, std::set<RouteGroup*> const & groups, 
  *  @param Group, or 0 for none.
  */
 void
-RouteGroupMenu::set_group (RouteGroup* g)
+RouteGroupMenu::set_group (Gtk::RadioMenuItem* e, RouteGroup* g)
 {
 	if (_inhibit_group_selected) {
+		return;
+	}
+	if (e && !e->get_active()) {
 		return;
 	}
 
@@ -173,7 +176,7 @@ RouteGroupMenu::new_group_dialog_finished (int r, RouteGroupDialog* d)
 {
 	if (r == RESPONSE_OK) {
 		_session->add_route_group (d->group());
-		set_group (d->group());
+		set_group (0, d->group());
 	} else {
 		delete d->group ();
 	}
