@@ -36,6 +36,7 @@
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
@@ -66,12 +67,14 @@ RCConfiguration::RCConfiguration ()
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 	_control_protocol_state (0)
+      , _transport_master_state (0)
 {
 }
 
 RCConfiguration::~RCConfiguration ()
 {
 	delete _control_protocol_state;
+	delete _transport_master_state;
 }
 
 int
@@ -186,6 +189,7 @@ RCConfiguration::get_state ()
 	}
 
 	root->add_child_nocopy (ControlProtocolManager::instance().get_state());
+	root->add_child_nocopy (TransportMasterManager::instance().get_state());
 
 	return *root;
 }
@@ -233,6 +237,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 			SessionMetadata::Metadata()->set_state (*node, version);
 		} else if (node->name() == ControlProtocolManager::state_node_name) {
 			_control_protocol_state = new XMLNode (*node);
+		} else if (node->name() == TransportMasterManager::state_node_name) {
+			_transport_master_state = new XMLNode (*node);
 		}
 	}
 

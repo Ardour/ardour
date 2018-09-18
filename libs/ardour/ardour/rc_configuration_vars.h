@@ -45,6 +45,11 @@ CONFIG_VARIABLE (bool, strict_io, "strict-io", true)
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
 
+/* Transport Masters (all) */
+
+CONFIG_VARIABLE (bool, transport_masters_just_roll_when_sync_lost, "transport-masters-just-roll-when-sync-lost", false)
+CONFIG_VARIABLE (bool, midi_clock_sets_tempo, "midi-clock-sets-tempo", true)
+
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
@@ -63,14 +68,10 @@ CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selecti
 
 /* Timecode and related */
 
+CONFIG_VARIABLE (bool, run_all_transport_masters_always, "run-all-transport-masters-always", true)
+CONFIG_VARIABLE (bool, use_session_timecode_format, "use-session-timecode-format", true)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
-#ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
-#else
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", false)
-#endif
-CONFIG_VARIABLE (bool, timecode_source_2997, "timecode-source-2997", false)
 #ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
 #else

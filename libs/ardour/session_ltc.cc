@@ -25,7 +25,7 @@
 #include "ardour/debug.h"
 #include "ardour/io.h"
 #include "ardour/session.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
 
 #include "pbd/i18n.h"
 
@@ -68,7 +68,7 @@ Session::ltc_tx_initialize()
 	ltc_enc_tcformat = config.get_timecode_format();
 
 	ltc_tx_parse_offset();
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_sample_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("LTC TX init sr: %1 fps: %2\n", nominal_sample_rate(), timecode_to_frames_per_second(ltc_enc_tcformat)));
 	ltc_encoder = ltc_encoder_create(nominal_sample_rate(),
 			timecode_to_frames_per_second(ltc_enc_tcformat),
 			TV_STANDARD(ltc_enc_tcformat), 0);
@@ -93,7 +93,7 @@ Session::ltc_tx_initialize()
 void
 Session::ltc_tx_cleanup()
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC TX cleanup\n");
+	DEBUG_TRACE (DEBUG::TXLTC, "cleanup\n");
 	ltc_tx_connections.drop_connections ();
 	free(ltc_enc_buf);
 	ltc_enc_buf = NULL;
@@ -104,7 +104,7 @@ Session::ltc_tx_cleanup()
 void
 Session::ltc_tx_resync_latency()
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC TX resync latency\n");
+	DEBUG_TRACE (DEBUG::TXLTC, "resync latency\n");
 	if (!deletion_in_progress()) {
 		boost::shared_ptr<Port> ltcport = ltc_output_port();
 		if (ltcport) {
@@ -116,7 +116,7 @@ Session::ltc_tx_resync_latency()
 void
 Session::ltc_tx_reset()
 {
-	DEBUG_TRACE (DEBUG::LTC, "LTC TX reset\n");
+	DEBUG_TRACE (DEBUG::TXLTC, "reset\n");
 	assert (ltc_encoder);
 	ltc_enc_pos = -9999; // force re-start
 	ltc_buf_len = 0;
@@ -203,7 +203,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	/* range from libltc (38..218) || - 128.0  -> (-90..90) */
 	const float ltcvol = Config->get_ltc_output_volume()/(90.0); // pow(10, db/20.0)/(90.0);
 
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_sample, end_sample, nframes, ltc_out_latency.max));
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("LTC TX %1 to %2 / %3 | lat: %4\n", start_sample, end_sample, nframes, ltc_out_latency.max));
 
 	/* all systems go. Now here's the plan:
 	 *
@@ -222,7 +222,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	// (1) check fps
 	TimecodeFormat cur_timecode = config.get_timecode_format();
 	if (cur_timecode != ltc_enc_tcformat) {
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_sample_rate(), timecode_to_frames_per_second(cur_timecode)));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("1: TC format mismatch - reinit sr: %1 fps: %2\n", nominal_sample_rate(), timecode_to_frames_per_second(cur_timecode)));
 		if (ltc_encoder_reinit(ltc_encoder, nominal_sample_rate(),
 					timecode_to_frames_per_second(cur_timecode),
 					TV_STANDARD(cur_timecode), 0
@@ -295,7 +295,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	}
 
 	if (SIGNUM(new_ltc_speed) != SIGNUM (ltc_speed)) {
-		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport changed direction\n");
+		DEBUG_TRACE (DEBUG::TXLTC, "transport changed direction\n");
 		ltc_tx_reset();
 	}
 
@@ -315,13 +315,13 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		 * end_sample is calculated from 'samples_moved' which includes the interpolation.
 		 * so we're good.
 		 */
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed, new_ltc_speed));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: speed change old: %1 cur: %2 tgt: %3 ctd: %4\n", ltc_speed, current_speed, target_speed, fabs(current_speed) - target_speed, new_ltc_speed));
 		speed_changed = true;
 		ltc_encoder_set_filter(ltc_encoder, LTC_RISE_TIME(new_ltc_speed));
 	}
 
 	if (end_sample == start_sample || fabs(current_speed) < 0.1 ) {
-		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport is not rolling or absolute-speed < 0.1\n");
+		DEBUG_TRACE (DEBUG::TXLTC, "transport is not rolling or absolute-speed < 0.1\n");
 		/* keep repeating current sample
 		 *
 		 * an LTC generator must be able to continue generating LTC when Ardours transport is in stop
@@ -336,19 +336,19 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			return;
 		}
 		if (start_sample != ltc_prev_cycle) {
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: no-roll seek from %1 to %2 (%3)\n", ltc_prev_cycle, start_sample, cycle_start_sample));
+			DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: no-roll seek from %1 to %2 (%3)\n", ltc_prev_cycle, start_sample, cycle_start_sample));
 			ltc_tx_reset();
 		}
 	}
 
 	if (fabs(new_ltc_speed) > 10.0) {
-		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: speed is out of bounds.\n");
+		DEBUG_TRACE (DEBUG::TXLTC, "speed is out of bounds.\n");
 		ltc_tx_reset();
 		return;
 	}
 
 	if (ltc_speed == 0 && new_ltc_speed != 0) {
-		DEBUG_TRACE (DEBUG::LTC, "LTC TX2: transport started rolling - reset\n");
+		DEBUG_TRACE (DEBUG::TXLTC, "transport started rolling - reset\n");
 		ltc_tx_reset();
 	}
 
@@ -374,21 +374,21 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		double oldbuflen = (double)(ltc_buf_len - ltc_buf_off);
 		double newbuflen = (double)(ltc_buf_len - ltc_buf_off) * fabs(ltc_speed / new_ltc_speed);
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: bufOld %1 bufNew %2 | diff %3\n",
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: bufOld %1 bufNew %2 | diff %3\n",
 					(ltc_buf_len - ltc_buf_off), newbuflen, newbuflen - oldbuflen
 					));
 
 		double bufrspdiff = rint(newbuflen - oldbuflen);
 
 		if (abs(bufrspdiff) > newbuflen || abs(bufrspdiff) > oldbuflen) {
-			DEBUG_TRACE (DEBUG::LTC, "LTC TX2: resampling buffer would destroy information.\n");
+			DEBUG_TRACE (DEBUG::TXLTC, "resampling buffer would destroy information.\n");
 			ltc_tx_reset();
 			poff = 0;
 		} else if (bufrspdiff != 0 && newbuflen > oldbuflen) {
 			int incnt = 0;
 			double samples_to_insert = ceil(newbuflen - oldbuflen);
 			double avg_distance = newbuflen / samples_to_insert;
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: resample buffer insert: %1\n", samples_to_insert));
+			DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: resample buffer insert: %1\n", samples_to_insert));
 
 			for (int rp = ltc_buf_off; rp < ltc_buf_len - 1; ++rp) {
 				const int ro = rp - ltc_buf_off;
@@ -402,7 +402,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			}
 		} else if (bufrspdiff != 0 && newbuflen < oldbuflen) {
 			double samples_to_remove = ceil(oldbuflen - newbuflen);
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: resample buffer - remove: %1\n", samples_to_remove));
+			DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: resample buffer - remove: %1\n", samples_to_remove));
 			if (oldbuflen <= samples_to_remove) {
 				ltc_buf_off = ltc_buf_len= 0;
 			} else {
@@ -424,7 +424,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 
 	ltc_prev_cycle = start_sample;
 	ltc_speed = new_ltc_speed;
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX2: transport speed %1.\n", ltc_speed));
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("2: transport speed %1.\n", ltc_speed));
 
 	// (3) bit/sample alignment
 	Timecode::Time tc_start;
@@ -451,7 +451,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	if (current_speed == 0) {
 		soff = 0;
 	}
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX3: A3cycle: %1 = A3tc: %2 +off: %3\n",
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("3: A3cycle: %1 = A3tc: %2 +off: %3\n",
 				cycle_start_sample, tc_sample_start, soff));
 
 
@@ -470,8 +470,8 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	 */
 	double maxdiff;
 
-	if (config.get_external_sync() && slave()) {
-		maxdiff = slave()->resolution();
+	if (transport_master_is_external()) {
+		maxdiff = transport_master()->resolution();
 	} else {
 		maxdiff = ceil(fabs(ltc_speed))*2.0;
 		if (nominal_sample_rate() != sample_rate()) {
@@ -482,10 +482,10 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc: %1 + %2 - %3 || buf-bytes: %4 enc-byte: %5\n",
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("4: enc: %1 + %2 - %3 || buf-bytes: %4 enc-byte: %5\n",
 				ltc_enc_pos, ltc_enc_cnt, poff, (ltc_buf_len - ltc_buf_off), poff, ltc_enc_byte));
 
-	DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: enc-pos: %1  | d: %2\n",
+	DEBUG_TRACE (DEBUG::TXLTC, string_compose("4: enc-pos: %1  | d: %2\n",
 				ltc_enc_pos + ltc_enc_cnt - poff,
 				rint(ltc_enc_pos + ltc_enc_cnt - poff) - cycle_start_sample
 				));
@@ -515,7 +515,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		ltc_encoder_set_frame(ltc_encoder, &ltcframe);
 
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX4: now: %1 trs: %2 toff %3\n", cycle_start_sample, tc_sample_start, soff));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("4: now: %1 trs: %2 toff %3\n", cycle_start_sample, tc_sample_start, soff));
 
 		int32_t cyc_off;
 		if (soff < 0 || soff >= fptcf) {
@@ -546,7 +546,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			}
 		}
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart encoder: soff %1 byte %2 cycoff %3\n",
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("5 restart encoder: soff %1 byte %2 cycoff %3\n",
 					soff, ltc_enc_byte, cyc_off));
 
 		if ( (ltc_speed < 0 && ltc_enc_byte !=9 ) || (ltc_speed >= 0 && ltc_enc_byte !=0 ) ) {
@@ -565,14 +565,14 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 
 		ltc_enc_pos = tc_sample_start % wrap24h;
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX5 restart @ %1 + %2 - %3 |  byte %4\n",
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("5 restart @ %1 + %2 - %3 |  byte %4\n",
 					ltc_enc_pos, ltc_enc_cnt, cyc_off, ltc_enc_byte));
 	}
 	else if (ltc_speed != 0 && (fptcf / ltc_speed / 80) > 3 ) {
 		/* reduce (low freq) jitter.
 		 * The granularity of the LTC encoder speed is 1 byte =
 		 * (samples-per-timecode-sample / 10) audio-samples.
-		 * Thus, tiny speed changes [as produced by some slaves]
+		 * Thus, tiny speed changes [as produced by some transport masters]
 		 * may not have any effect in the cycle when they occur,
 		 * but they will add up over time.
 		 *
@@ -593,7 +593,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 	// (6) encode and output
 	while (1) {
 #ifdef LTC_GEN_TXDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.1 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.1 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
 		// (6a) send remaining buffer
 		while ((ltc_buf_off < ltc_buf_len) && (txf < nframes)) {
@@ -602,11 +602,11 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			out[txf++] = val;
 		}
 #ifdef LTC_GEN_TXDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.2 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.2 @%1  [ %2 / %3 ]\n", txf, ltc_buf_off, ltc_buf_len));
 #endif
 
 		if (txf >= nframes) {
-			DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX7 enc: %1 [ %2 / %3 ] byte: %4 spd %5 fpp %6 || nf: %7\n",
+			DEBUG_TRACE (DEBUG::TXLTC, string_compose("7 enc: %1 [ %2 / %3 ] byte: %4 spd %5 fpp %6 || nf: %7\n",
 						ltc_enc_pos, ltc_buf_off, ltc_buf_len, ltc_enc_byte, ltc_speed, nframes, txf));
 			break;
 		}
@@ -635,7 +635,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			memset(&ltc_enc_buf[ltc_buf_len], 127, enc_samples * sizeof(ltcsnd_sample_t));
 		} else {
 			if (ltc_encoder_encode_byte(ltc_encoder, ltc_enc_byte, (ltc_speed==0)?1.0:(1.0/ltc_speed))) {
-				DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoder error byte %1\n", ltc_enc_byte));
+				DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.3 encoder error byte %1\n", ltc_enc_byte));
 				ltc_encoder_buffer_flush(ltc_encoder);
 				ltc_tx_reset();
 				return;
@@ -644,10 +644,10 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		}
 
 #ifdef LTC_GEN_FRAMEDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.3 encoded %1 bytes for LTC-byte %2 at spd %3\n", enc_samples, ltc_enc_byte, ltc_speed));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.3 encoded %1 bytes for LTC-byte %2 at spd %3\n", enc_samples, ltc_enc_byte, ltc_speed));
 #endif
 		if (enc_samples <=0) {
-			DEBUG_TRACE (DEBUG::LTC, "LTC TX6.3 encoder empty buffer.\n");
+			DEBUG_TRACE (DEBUG::TXLTC, "6.3 encoder empty buffer.\n");
 			ltc_encoder_buffer_flush(ltc_encoder);
 			ltc_tx_reset();
 			return;
@@ -677,7 +677,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 			}
 		}
 #ifdef LTC_GEN_FRAMEDBUG
-		DEBUG_TRACE (DEBUG::LTC, string_compose("LTC TX6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
+		DEBUG_TRACE (DEBUG::TXLTC, string_compose("6.4 enc-pos: %1 + %2 [ %4 / %5 ] spd %6\n", ltc_enc_pos, ltc_enc_cnt, ltc_buf_off, ltc_buf_len, ltc_speed));
 #endif
 	}
 

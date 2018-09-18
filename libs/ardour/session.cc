@@ -99,14 +99,13 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
-#include "ardour/slave.h"
 #include "ardour/smf_source.h"
-#include "ardour/slave.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
+#include "ardour/transport_master.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
@@ -185,7 +184,6 @@ Session::Session (AudioEngine &eng,
 	, _seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_end_is_free (true)
-	, _slave (0)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
@@ -195,7 +193,6 @@ Session::Session (AudioEngine &eng,
 	, _signalled_varispeed (0)
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
-	, _last_slave_transport_sample (0)
 	, _requested_return_sample (-1)
 	, current_block_size (0)
 	, _worst_output_latency (0)
@@ -211,13 +208,8 @@ Session::Session (AudioEngine &eng,
 	, _was_seamless (Config->get_seamless_loop ())
 	, _under_nsm_control (false)
 	, _xrun_count (0)
-	, delta_accumulator_cnt (0)
-	, average_slave_delta (1800) // !!! why 1800 ???
-	, average_dir (0)
-	, have_first_delta_accumulator (false)
-	, _slave_state (Stopped)
-	, _mtc_active (false)
-	, _ltc_active (false)
+	, transport_master_tracking_state (Stopped)
+	, master_wait_end (0)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)
@@ -656,8 +648,6 @@ Session::destroy ()
 	{
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ltc_tx_cleanup();
-		delete _slave;
-		_slave = 0;
 	}
 
 	/* disconnect from any and all signals that we are connected to */
@@ -671,7 +661,6 @@ Session::destroy ()
 
 	/* remove I/O objects before unsetting the engine session */
 	_click_io.reset ();
-	_ltc_input.reset ();
 	_ltc_output.reset ();
 
 	ControlProtocolManager::instance().drop_protocols ();
@@ -686,12 +675,6 @@ Session::destroy ()
 #ifdef USE_TRACKS_CODE_FEATURES
 	EngineStateController::instance()->remove_session();
 #endif
-
-	/* drop slave, if any. We don't use use_sync_source (0) because
-	 * there's no reason to do all the other stuff that may happen
-	 * when calling that method.
-	 */
-	delete _slave;
 
 	/* deregister all ports - there will be no process or any other
 	 * callbacks from the engine any more.
@@ -891,20 +874,7 @@ Session::setup_ltc ()
 {
 	XMLNode* child = 0;
 
-	_ltc_input.reset (new IO (*this, X_("LTC In"), IO::Input));
 	_ltc_output.reset (new IO (*this, X_("LTC Out"), IO::Output));
-
-	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC In"))) != 0) {
-		_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
-	} else {
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
-			// TODO use auto-connect thread somehow (needs a route currently)
-			// see note in Session::auto_connect_thread_run() why process lock is needed.
-			reconnect_ltc_input ();
-		}
-	}
 
 	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
 		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
@@ -921,7 +891,6 @@ Session::setup_ltc ()
 	 * IO style of NAME/TYPE-{in,out}N
 	 */
 
-	_ltc_input->nth (0)->set_name (X_("LTC-in"));
 	_ltc_output->nth (0)->set_name (X_("LTC-out"));
 }
 
@@ -3001,40 +2970,6 @@ Session::reconnect_midi_scene_ports(bool inputs)
             }
         }
     }
-}
-
-void
-Session::reconnect_mtc_ports ()
-{
-	boost::shared_ptr<MidiPort> mtc_in_ptr = _midi_ports->mtc_input_port();
-
-	if (!mtc_in_ptr) {
-		return;
-	}
-
-	mtc_in_ptr->disconnect_all ();
-
-	std::vector<EngineStateController::MidiPortState> midi_port_states;
-	EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-
-	std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-
-	for (; state_iter != midi_port_states.end(); ++state_iter) {
-		if (state_iter->available && state_iter->mtc_in) {
-			mtc_in_ptr->connect (state_iter->name);
-		}
-	}
-
-	if (!_midi_ports->mtc_input_port ()->connected () &&
-	    config.get_external_sync () &&
-	    (Config->get_sync_source () == MTC) ) {
-		config.set_external_sync (false);
-	}
-
-	if ( ARDOUR::Profile->get_trx () ) {
-		// Tracks need this signal to update timecode_source_dropdown
-		MtcOrLtcInputPortChanged (); //emit signal
-	}
 }
 
 void
@@ -7043,36 +6978,9 @@ Session::operation_in_progress (GQuark op) const
 }
 
 boost::shared_ptr<Port>
-Session::ltc_input_port () const
-{
-	assert (_ltc_input);
-	return _ltc_input->nth (0);
-}
-
-boost::shared_ptr<Port>
 Session::ltc_output_port () const
 {
 	return _ltc_output ? _ltc_output->nth (0) : boost::shared_ptr<Port> ();
-}
-
-void
-Session::reconnect_ltc_input ()
-{
-	if (_ltc_input) {
-
-		string src = Config->get_ltc_source_port();
-
-		_ltc_input->disconnect (this);
-
-		if (src != _("None") && !src.empty())  {
-			_ltc_input->nth (0)->connect (src);
-		}
-
-		if ( ARDOUR::Profile->get_trx () ) {
-			// Tracks need this signal to update timecode_source_dropdown
-			MtcOrLtcInputPortChanged (); //emit signal
-		}
-	}
 }
 
 void

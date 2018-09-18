@@ -38,6 +38,7 @@
 #include "ardour/source.h"
 #include "ardour/tempo.h"
 #include "ardour/track.h"
+#include "ardour/transport_master.h"
 #include "ardour/types.h"
 
 using namespace std;
@@ -131,7 +132,6 @@ setup_enum_writer ()
 	WaveformScale _WaveformScale;
 	WaveformShape _WaveformShape;
 	Session::PostTransportWork _Session_PostTransportWork;
-	Session::SlaveState _Session_SlaveState;
 	MTC_Status _MIDI_MTC_Status;
 	Evoral::OverlapType _OverlapType;
 	BufferingPreset _BufferingPreset;
@@ -139,7 +139,7 @@ setup_enum_writer ()
 	PresentationInfo::Flag _PresentationInfo_Flag;
 	MusicalMode::Type mode;
 	MidiPortFlags _MidiPortFlags;
-	
+
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_ENUM(e) i.push_back (e); s.push_back (#e)
@@ -420,7 +420,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, RangeStop);
 	REGISTER_CLASS_ENUM (SessionEvent, RangeLocate);
 	REGISTER_CLASS_ENUM (SessionEvent, Overwrite);
-	REGISTER_CLASS_ENUM (SessionEvent, SetSyncSource);
 	REGISTER_CLASS_ENUM (SessionEvent, Audition);
 	REGISTER_CLASS_ENUM (SessionEvent, SetPlayAudioRange);
 	REGISTER_CLASS_ENUM (SessionEvent, CancelPlayAudioRange);
@@ -429,6 +428,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, AdjustCaptureBuffering);
 	REGISTER_CLASS_ENUM (SessionEvent, SetTimecodeTransmission);
 	REGISTER_CLASS_ENUM (SessionEvent, Skip);
+	REGISTER_CLASS_ENUM (SessionEvent, SetTransportMaster);
 	REGISTER_CLASS_ENUM (SessionEvent, StopOnce);
 	REGISTER_CLASS_ENUM (SessionEvent, AutoLoop);
 	REGISTER (_SessionEvent_Type);
@@ -438,11 +438,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (SessionEvent, Replace);
 	REGISTER_CLASS_ENUM (SessionEvent, Clear);
 	REGISTER (_SessionEvent_Action);
-
-	REGISTER_CLASS_ENUM (Session, Stopped);
-	REGISTER_CLASS_ENUM (Session, Waiting);
-	REGISTER_CLASS_ENUM (Session, Running);
-	REGISTER (_Session_SlaveState);
 
 	REGISTER_ENUM (MTC_Stopped);
 	REGISTER_ENUM (MTC_Forward);
@@ -455,7 +450,6 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Session, PostTransportRoll);
 	REGISTER_CLASS_ENUM (Session, PostTransportAbort);
 	REGISTER_CLASS_ENUM (Session, PostTransportOverWrite);
-	REGISTER_CLASS_ENUM (Session, PostTransportSpeed);
 	REGISTER_CLASS_ENUM (Session, PostTransportAudition);
 	REGISTER_CLASS_ENUM (Session, PostTransportReverse);
 	REGISTER_CLASS_ENUM (Session, PostTransportInputChange);

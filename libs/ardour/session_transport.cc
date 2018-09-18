@@ -47,7 +47,8 @@
 #include "ardour/profile.h"
 #include "ardour/scene_changer.h"
 #include "ardour/session.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/tempo.h"
 #include "ardour/operations.h"
 #include "ardour/vca.h"
@@ -78,33 +79,34 @@ Session::add_post_transport_work (PostTransportWork ptw)
 	error << "Could not set post transport work! Crazy thread madness, call the programmers" << endmsg;
 }
 
-void
-Session::request_sync_source (Slave* new_slave)
+bool
+Session::should_ignore_transport_request (TransportRequestSource src, TransportRequestType type) const
 {
-	SessionEvent* ev = new SessionEvent (SessionEvent::SetSyncSource, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
-	bool seamless;
-
-	seamless = Config->get_seamless_loop ();
-
-	if (dynamic_cast<Engine_Slave*>(new_slave)) {
-		/* JACK cannot support seamless looping at present */
-		Config->set_seamless_loop (false);
-	} else {
-		/* reset to whatever the value was before we last switched slaves */
-		Config->set_seamless_loop (_was_seamless);
+	if (config.get_external_sync()) {
+		if (TransportMasterManager::instance().current()->allow_request (src, type)) {
+			return false;
+		} else {
+			return true;
+		}
 	}
+	return false;
+}
 
-	/* save value of seamless from before the switch */
-	_was_seamless = seamless;
-
-	ev->slave = new_slave;
-	DEBUG_TRACE (DEBUG::Slave, "sent request for new slave\n");
+void
+Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
+{
+	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportMaster, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
+	ev->transport_master = tm;
+	DEBUG_TRACE (DEBUG::Slave, "sent request for new transport master\n");
 	queue_event (ev);
 }
 
 void
-Session::request_transport_speed (double speed, bool as_default)
+Session::request_transport_speed (double speed, bool as_default, TransportRequestSource origin)
 {
+	if (should_ignore_transport_request (origin, TR_Speed)) {
+		return;
+	}
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, 0, speed);
 	ev->third_yes_or_no = as_default; // as_default
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport speed = %1 as default = %2\n", speed, as_default));
@@ -116,8 +118,12 @@ Session::request_transport_speed (double speed, bool as_default)
  *  be used by callers who are varying transport speed but don't ever want to stop it.
  */
 void
-Session::request_transport_speed_nonzero (double speed, bool as_default)
+Session::request_transport_speed_nonzero (double speed, bool as_default, TransportRequestSource origin)
 {
+	if (should_ignore_transport_request (origin, TransportRequestType (TR_Speed|TR_Start))) {
+		return;
+	}
+
 	if (speed == 0) {
 		speed = DBL_EPSILON;
 	}
@@ -126,16 +132,24 @@ Session::request_transport_speed_nonzero (double speed, bool as_default)
 }
 
 void
-Session::request_stop (bool abort, bool clear_state)
+Session::request_stop (bool abort, bool clear_state, TransportRequestSource origin)
 {
+	if (should_ignore_transport_request (origin, TR_Stop)) {
+		return;
+	}
+
 	SessionEvent* ev = new SessionEvent (SessionEvent::SetTransportSpeed, SessionEvent::Add, SessionEvent::Immediate, audible_sample(), 0.0, abort, clear_state);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request transport stop, audible %3 transport %4 abort = %1, clear state = %2\n", abort, clear_state, audible_sample(), _transport_sample));
 	queue_event (ev);
 }
 
 void
-Session::request_locate (samplepos_t target_sample, bool with_roll)
+Session::request_locate (samplepos_t target_sample, bool with_roll, TransportRequestSource origin)
 {
+	if (should_ignore_transport_request (origin, TR_Locate)) {
+		return;
+	}
+
 	SessionEvent *ev = new SessionEvent (with_roll ? SessionEvent::LocateRoll : SessionEvent::Locate, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, false);
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1\n", target_sample));
 	queue_event (ev);
@@ -190,7 +204,7 @@ Session::request_count_in_record ()
 void
 Session::request_play_loop (bool yn, bool change_transport_roll)
 {
-	if (_slave && yn) {
+	if (transport_master_is_external() && yn) {
 		// don't attempt to loop when not using Internal Transport
 		// see also gtk2_ardour/ardour_ui_options.cc parameter_changed()
 		return;
@@ -287,22 +301,22 @@ Session::solo_selection ( StripableList &list, bool new_state  )
 		_soloSelection = list;
 	else
 		_soloSelection.clear();
-	
+
 	boost::shared_ptr<RouteList> rl = get_routes();
- 
+
 	for (ARDOUR::RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 
 		if ( !(*i)->is_track() ) {
 			continue;
 		}
-		
+
 		boost::shared_ptr<Stripable> s (*i);
 
 		bool found = (std::find(list.begin(), list.end(), s) != list.end());
 		if ( new_state && found ) {
-			
+
 			solo_list->push_back (s->solo_control());
-			
+
 			//must invalidate playlists on selected tracks, so only selected regions get heard
 			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (*i);
 			if (track) {
@@ -369,7 +383,7 @@ Session::realtime_stop (bool abort, bool clear_state)
 	if ( solo_selection_active() ) {
 		solo_selection ( _soloSelection, false );
 	}
-	
+
 	/* if we're going to clear loop state, then force disabling record BUT only if we're not doing latched rec-enable */
 	disable_record (true, (!Config->get_latched_record_enable() && clear_state));
 
@@ -487,10 +501,6 @@ Session::butler_transport_work ()
 		}
 	}
 
-	if (ptw & PostTransportSpeed) {
-		non_realtime_set_speed ();
-	}
-
 	if (ptw & PostTransportReverse) {
 
 		clear_clicks();
@@ -544,18 +554,6 @@ Session::butler_transport_work ()
 	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 trw = %3\n"), g_get_monotonic_time() - before, _transport_sample, _butler->transport_work_requested()));
-}
-
-void
-Session::non_realtime_set_speed ()
-{
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr) {
-			tr->non_realtime_speed_change ();
-		}
-	}
 }
 
 void
@@ -926,7 +924,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		// need to queue this in the next RT cycle
 		_send_timecode_update = true;
 
-		if (!dynamic_cast<MTC_Slave*>(_slave)) {
+		if (transport_master()->type() == MTC) {
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdStop));
 
 			/* This (::non_realtime_stop()) gets called by main
@@ -947,7 +945,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished)
 		 *
 		 * save state only if there's no slave or if it's not yet locked.
 		 */
-		if (!_slave || !_slave->locked()) {
+		if (!transport_master_is_external() || !transport_master()->locked()) {
 			DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: requests save\n"));
 			SaveSessionRequested (_current_snapshot_name);
 			saved = true;
@@ -1122,7 +1120,7 @@ Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flus
 		double sp;
 		samplepos_t pos;
 
-		_slave->speed_and_position (sp, pos);
+		transport_master()->speed_and_position (sp, pos, 0);
 
 		if (target_sample != pos) {
 
@@ -1167,6 +1165,8 @@ Session::micro_locate (samplecnt_t distance)
 			return -1;
 		}
 	}
+
+	DEBUG_TRACE (DEBUG::Transport, string_compose ("micro-locate by %1\n", distance));
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
@@ -1611,7 +1611,7 @@ Session::start_transport ()
 	if (!_engine.freewheeling()) {
 		Timecode::Time time;
 		timecode_time_subframes (_transport_sample, time);
-		if (!dynamic_cast<MTC_Slave*>(_slave)) {
+		if (transport_master()->type() == MTC) {
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdDeferredPlay));
 		}
 
@@ -1719,164 +1719,6 @@ Session::reset_rf_scale (samplecnt_t motion)
 	if (motion != 0) {
 		set_dirty();
 	}
-}
-
-void
-Session::mtc_status_changed (bool yn)
-{
-	g_atomic_int_set (&_mtc_active, yn);
-	MTCSyncStateChanged( yn );
-}
-
-void
-Session::ltc_status_changed (bool yn)
-{
-	g_atomic_int_set (&_ltc_active, yn);
-	LTCSyncStateChanged( yn );
-}
-
-void
-Session::use_sync_source (Slave* new_slave)
-{
-	/* Runs in process() context */
-
-	if (!_slave && !new_slave) {
-		return;
-	}
-
-	bool non_rt_required = false;
-
-	/* XXX this deletion is problematic because we're in RT context */
-
-	delete _slave;
-	_slave = new_slave;
-
-
-	/* slave change, reset any DiskIO block on disk output because it is no
-	   longer valid with a new slave.
-	*/
-	DiskReader::set_no_disk_output (false);
-
-	MTC_Slave* mtc_slave = dynamic_cast<MTC_Slave*>(_slave);
-	if (mtc_slave) {
-		mtc_slave->ActiveChanged.connect_same_thread (mtc_status_connection, boost::bind (&Session::mtc_status_changed, this, _1));
-		MTCSyncStateChanged(mtc_slave->locked() );
-	} else {
-		if (g_atomic_int_get (&_mtc_active) ){
-			g_atomic_int_set (&_mtc_active, 0);
-			MTCSyncStateChanged( false );
-		}
-		mtc_status_connection.disconnect ();
-	}
-
-	LTC_Slave* ltc_slave = dynamic_cast<LTC_Slave*> (_slave);
-	if (ltc_slave) {
-		ltc_slave->ActiveChanged.connect_same_thread (ltc_status_connection, boost::bind (&Session::ltc_status_changed, this, _1));
-		LTCSyncStateChanged (ltc_slave->locked() );
-	} else {
-		if (g_atomic_int_get (&_ltc_active) ){
-			g_atomic_int_set (&_ltc_active, 0);
-			LTCSyncStateChanged( false );
-		}
-		ltc_status_connection.disconnect ();
-	}
-
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", _slave));
-
-	// need to queue this for next process() cycle
-	_send_timecode_update = true;
-
-	boost::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-		if (tr && !tr->is_private_route()) {
-			tr->set_slaved (_slave != 0);
-		}
-	}
-
-	if (non_rt_required) {
-		add_post_transport_work (PostTransportSpeed);
-		_butler->schedule_transport_work ();
-	}
-
-	set_dirty();
-}
-
-void
-Session::drop_sync_source ()
-{
-	request_sync_source (0);
-}
-
-void
-Session::switch_to_sync_source (SyncSource src)
-{
-	Slave* new_slave;
-
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("Setting up sync source %1\n", enum_2_string (src)));
-
-	switch (src) {
-	case MTC:
-		if (_slave && dynamic_cast<MTC_Slave*>(_slave)) {
-			return;
-		}
-
-		try {
-			new_slave = new MTC_Slave (*this, *_midi_ports->mtc_input_port());
-		}
-
-		catch (failed_constructor& err) {
-			return;
-		}
-		break;
-
-	case LTC:
-		if (_slave && dynamic_cast<LTC_Slave*>(_slave)) {
-			return;
-		}
-
-		try {
-			new_slave = new LTC_Slave (*this);
-		}
-
-		catch (failed_constructor& err) {
-			return;
-		}
-
-		break;
-
-	case MIDIClock:
-		if (_slave && dynamic_cast<MIDIClock_Slave*>(_slave)) {
-			return;
-		}
-
-		try {
-			new_slave = new MIDIClock_Slave (*this, *_midi_ports->midi_clock_input_port(), 24);
-		}
-
-		catch (failed_constructor& err) {
-			return;
-		}
-		break;
-
-	case Engine:
-		if (_slave && dynamic_cast<Engine_Slave*>(_slave)) {
-			return;
-		}
-
-		if (config.get_video_pullup() != 0.0f) {
-			return;
-		}
-
-		new_slave = new Engine_Slave (*AudioEngine::instance());
-		break;
-
-	default:
-		new_slave = 0;
-		break;
-	};
-
-	request_sync_source (new_slave);
 }
 
 void
@@ -2111,4 +1953,92 @@ bool
 Session::timecode_transmission_suspended () const
 {
 	return g_atomic_int_get (&_suspend_timecode_transmission) == 1;
+}
+
+boost::shared_ptr<TransportMaster>
+Session::transport_master() const
+{
+	return TransportMasterManager::instance().current();
+}
+
+bool
+Session::transport_master_is_external () const
+{
+	return config.get_external_sync();
+}
+
+void
+Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_nframes)
+{
+	/* Runs in process() context */
+
+	boost::shared_ptr<TransportMaster> master = TransportMasterManager::instance().current();
+
+	/* save value of seamless from before the switch */
+	_was_seamless = Config->get_seamless_loop ();
+
+	if (type == Engine) {
+		/* JACK cannot support seamless looping at present */
+		Config->set_seamless_loop (false);
+	} else {
+		/* reset to whatever the value was before we last switched slaves */
+		Config->set_seamless_loop (_was_seamless);
+	}
+
+	if (master->can_loop()) {
+		request_play_loop (false);
+	} else if (master->has_loop()) {
+		request_play_loop (true);
+	}
+
+	/* slave change, reset any DiskIO block on disk output because it is no
+	   longer valid with a new slave.
+	*/
+
+	DiskReader::set_no_disk_output (false);
+
+#if 0
+	we should not be treating specific transport masters as special cases because there maybe > 1 of a particular type
+
+	boost::shared_ptr<MTC_TransportMaster> mtc_master = boost::dynamic_pointer_cast<MTC_TransportMaster> (master);
+
+	if (mtc_master) {
+		mtc_master->ActiveChanged.connect_same_thread (mtc_status_connection, boost::bind (&Session::mtc_status_changed, this, _1));
+		MTCSyncStateChanged(mtc_master->locked() );
+	} else {
+		if (g_atomic_int_compare_and_exchange (&_mtc_active, 1, 0)) {
+			MTCSyncStateChanged( false );
+		}
+		mtc_status_connection.disconnect ();
+	}
+
+	boost::shared_ptr<LTC_TransportMaster> ltc_master = boost::dynamic_pointer_cast<LTC_TransportMaster> (master);
+
+	if (ltc_master) {
+		ltc_master->ActiveChanged.connect_same_thread (ltc_status_connection, boost::bind (&Session::ltc_status_changed, this, _1));
+		LTCSyncStateChanged (ltc_master->locked() );
+	} else {
+		if (g_atomic_int_compare_and_exchange (&_ltc_active, 1, 0)) {
+			LTCSyncStateChanged( false );
+		}
+		ltc_status_connection.disconnect ();
+	}
+#endif
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("set new slave to %1\n", master));
+
+	// need to queue this for next process() cycle
+	_send_timecode_update = true;
+
+	boost::shared_ptr<RouteList> rl = routes.reader();
+	const bool externally_slaved = transport_master_is_external();
+
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (tr && !tr->is_private_route()) {
+			tr->set_slaved (externally_slaved);
+		}
+	}
+
+	set_dirty();
 }

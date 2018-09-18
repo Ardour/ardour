@@ -136,7 +136,7 @@ Parser::~Parser ()
 }
 
 void
-Parser::trace_event (Parser &, MIDI::byte *msg, size_t len)
+Parser::trace_event (Parser &, MIDI::byte *msg, size_t len, samplecnt_t /*when*/)
 {
 	eventType type;
 	ostream *o;
@@ -313,7 +313,7 @@ Parser::trace (bool onoff, ostream *o, const string &prefix)
 	if (onoff) {
 		trace_stream = o;
 		trace_prefix = prefix;
-		any.connect_same_thread (trace_connection, boost::bind (&Parser::trace_event, this, _1, _2, _3));
+		any.connect_same_thread (trace_connection, boost::bind (&Parser::trace_event, this, _1, _2, _3, _4));
 	} else {
 		trace_prefix = "";
 		trace_stream = 0;
@@ -440,7 +440,7 @@ Parser::scanner (unsigned char inbyte)
 					}
 				}
 				if (!_offline) {
-					any (*this, msgbuf, msgindex);
+					any (*this, msgbuf, msgindex, _timestamp);
 				}
 			}
 		}
@@ -572,7 +572,7 @@ Parser::realtime_msg(unsigned char inbyte)
 		break;
 	}
 
-	any (*this, &inbyte, 1);
+	any (*this, &inbyte, 1, _timestamp);
 }
 
 
@@ -661,7 +661,7 @@ Parser::system_msg (unsigned char inbyte)
 
 	// all these messages will be sent via any()
 	// when they are complete.
-	// any (*this, &inbyte, 1);
+	// any (*this, &inbyte, 1, _timestamp);
 }
 
 void
@@ -764,7 +764,7 @@ Parser::signal (MIDI::byte *msg, size_t len)
 		break;
 	}
 
-	any (*this, msg, len);
+	any (*this, msg, len, _timestamp);
 }
 
 bool

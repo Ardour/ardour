@@ -123,7 +123,10 @@ public:
 	virtual void realtime_locate () {}
 
 	bool physically_connected () const;
-	bool externally_connected () const;
+	uint32_t externally_connected () const { return _externally_connected; }
+
+	void increment_external_connections() { _externally_connected++; }
+	void decrement_external_connections() { if (_externally_connected) _externally_connected--; }
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
 	static PBD::Signal2<void,boost::shared_ptr<Port>,boost::shared_ptr<Port> > PostDisconnect;
@@ -170,6 +173,7 @@ private:
 	std::string _name;  ///< port short name
 	PortFlags   _flags; ///< flags
 	bool        _last_monitor;
+	uint32_t    _externally_connected;
 
 	/** ports that we are connected to, kept so that we can
 	    reconnect to the backend when required

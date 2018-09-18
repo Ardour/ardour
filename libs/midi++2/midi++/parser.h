@@ -42,6 +42,7 @@ typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
 typedef PBD::Signal3<void,Parser &, uint16_t, int>   RPNSignal;
 typedef PBD::Signal3<void,Parser &, uint16_t, float> RPNValueSignal;
 typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
+typedef PBD::Signal4<void,Parser &, byte *, size_t, samplecnt_t> AnySignal;
 
 class LIBMIDIPP_API Parser {
  public:
@@ -86,7 +87,7 @@ class LIBMIDIPP_API Parser {
 	Signal                mtc;
 	Signal                raw_preparse;
 	Signal                raw_postparse;
-	Signal                any;
+	AnySignal             any;
 	Signal                sysex;
 	Signal                mmc;
 	Signal                position;
@@ -147,7 +148,7 @@ class LIBMIDIPP_API Parser {
 
 	std::ostream *trace_stream;
 	std::string trace_prefix;
-	void trace_event (Parser &p, byte *msg, size_t len);
+	void trace_event (Parser &p, byte *msg, size_t len, samplecnt_t);
 	PBD::ScopedConnection trace_connection;
 
 	size_t message_counter[256];

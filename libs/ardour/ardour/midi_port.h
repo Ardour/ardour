@@ -24,6 +24,7 @@
 #include "midi++/parser.h"
 
 #include "ardour/port.h"
+#include "ardour/midi_buffer.h"
 
 namespace ARDOUR {
 
@@ -51,19 +52,20 @@ class LIBARDOUR_API MidiPort : public Port {
 	bool input_active() const { return _input_active; }
 	void set_input_active (bool yn);
 
-	Buffer& get_buffer (pframes_t nframes);
+	Buffer& get_buffer (pframes_t nframes) {
+		return get_midi_buffer (nframes);
+	}
 
 	MidiBuffer& get_midi_buffer (pframes_t nframes);
 
-	void set_always_parse (bool yn);
-	void set_trace_on (bool yn);
+	void set_trace (MIDI::Parser* trace_parser);
 
 	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
 	void set_inbound_filter (MidiFilter);
 	int add_shadow_port (std::string const &, MidiFilter);
 	boost::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
 
-	MIDI::Parser& self_parser() { return _self_parser; }
+	void read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t nframes, MIDI::Parser& parser, samplepos_t now);
 
   protected:
 	friend class PortManager;
@@ -72,29 +74,17 @@ class LIBARDOUR_API MidiPort : public Port {
 
   private:
 	MidiBuffer* _buffer;
-	bool        _has_been_mixed_down;
 	bool        _resolve_required;
 	bool        _input_active;
-	bool        _always_parse;
-	bool        _trace_on;
 	MidiFilter   inbound_midi_filter;
 	boost::shared_ptr<MidiPort> _shadow_port;
 	MidiFilter   shadow_midi_filter;
-
-	/* Naming this is tricky. AsyncMIDIPort inherits (for now, aug 2013) from
-	 * both MIDI::Port, which has _parser, and this (ARDOUR::MidiPort). We
-	 * need parsing support in this object, independently of what the
-	 * MIDI::Port/AsyncMIDIPort stuff does. Rather than risk errors coming
-	 * from not explicitly naming which _parser we want, we will call this
-	 * _self_parser for now.
-	 *
-	 * Ultimately, MIDI::Port should probably go away or be fully integrated
-	 * into this object, somehow.
-	 */
-
-	MIDI::Parser _self_parser;
-
+	MIDI::Parser* _trace_parser;
+	bool  _data_fetched_for_cycle;
+	
 	void resolve_notes (void* buffer, samplepos_t when);
+	void pull_input (pframes_t nframes, bool adjust_speed);
+	void parse_input (pframes_t nframes, MIDI::Parser& parser);
 };
 
 } // namespace ARDOUR

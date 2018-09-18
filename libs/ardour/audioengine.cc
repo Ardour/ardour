@@ -55,6 +55,7 @@
 #include "ardour/process_thread.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
+#include "ardour/transport_master_manager.h"
 
 #include "pbd/i18n.h"
 
@@ -77,7 +78,7 @@ AudioEngine::AudioEngine ()
 	, _freewheeling (false)
 	, monitor_check_interval (INT32_MAX)
 	, last_monitor_check (0)
-	, _processed_samples (0)
+	, _processed_samples (-1)
 	, m_meter_thread (0)
 	, _main_thread (0)
 	, _mtdm (0)
@@ -197,6 +198,11 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	/// The number of samples that will have been processed when we've finished
 	pframes_t next_processed_samples;
+
+	if (_processed_samples < 0) {
+		_processed_samples = sample_time();
+		cerr << "IIIIINIT PS to " << _processed_samples << endl;
+	}
 
 	/* handle wrap around of total samples counter */
 
@@ -346,6 +352,14 @@ AudioEngine::process_callback (pframes_t nframes)
 		return 0;
 	}
 
+	TransportMasterManager& tmm (TransportMasterManager::instance());
+
+	/* make sure the TMM is up to date about the current session */
+
+	if (_session != tmm.session()) {
+		tmm.set_session (_session);
+	}
+
 	if (_session == 0) {
 
 		if (!_freewheeling) {
@@ -358,16 +372,9 @@ AudioEngine::process_callback (pframes_t nframes)
 	}
 
 	if (!_freewheeling || Freewheel.empty()) {
-		// TODO: Run a list of slaves here
-		// - multiple TC slaves (how_many_dsp_threads() in parallel)
-		//   (note this can be multiple slaves of each type. e.g.
-		//    3 LTC slaves on different ports, 2 MTC..)
-		// - GUI can display all slaves, user picks one.
-		// - active "slave" is a session property.
-		// - here we ask the session about the active slave
-		//   and get playback speed (for this cycle) here.
-		// - Internal Transport is-a Slave too (!)
-		Port::set_speed_ratio (_session->engine_speed ()); // HACK
+		const double engine_speed = tmm.pre_process_transport_masters (nframes, sample_time_at_cycle_start());
+		Port::set_speed_ratio (engine_speed);
+		DEBUG_TRACE (DEBUG::Slave, string_compose ("transport master (current=%1) gives speed %2 (ports using %3)\n", tmm.current() ? tmm.current()->name() : string("[]"), engine_speed, Port::speed_ratio()));
 	}
 
 	/* tell all relevant objects that we're starting a new cycle */
