@@ -6360,6 +6360,16 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			}
 		}
 	}
+	else if (!strncmp (path, X_("/cue/connect_aux"), 16)) {
+		// Create new Aux bus
+		string dest = "";
+		if (argc == 1 && types[0] == 's') {
+			dest = &argv[0]->s;
+			ret = cue_connect_aux (dest, msg);
+		} else {
+			PBD::warning << "OSC: connect_aux has wrong number or type of parameters." << endmsg;
+		}
+	}
 	else if (!strncmp (path, X_("/cue/connect"), 12)) {
 		// Connect to default Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
@@ -6501,9 +6511,36 @@ OSC::cue_new_aux (string name, string dest, lo_message msg)
 		aux->presentation_info().set_hidden (true);
 
 		cue_set ((uint32_t) -1, msg);
+		session->set_dirty();
 		return 0;
 	}
 	return -1;
+}
+
+int
+OSC::cue_connect_aux (std::string dest, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	int ret = 1;
+	if (sur->cue) {
+		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (get_strip (sur->aux, get_address(msg)));
+		if (rt) {
+			if (dest.size()) {
+				rt->output()->disconnect (this);
+				if (atoi( dest.c_str())) {
+					dest = string_compose ("system:playback_%1", dest);
+				}
+				PortSet& ports = rt->output()->ports ();
+				rt->output ()->connect (*(ports.begin()), dest, this);
+				session->set_dirty();
+				ret = 0;
+			}
+		}
+	}
+	if (ret) {
+		PBD::warning << "OSC: cannot connect, no Aux bus chosen." << endmsg;
+	}
+	return ret;
 }
 
 int
