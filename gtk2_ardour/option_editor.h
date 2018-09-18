@@ -558,6 +558,21 @@ private:
 	sigc::slot<bool, ARDOUR::gain_t> _set;
 };
 
+class WidgetOption : public Option
+{
+  public:
+	WidgetOption (std::string const & i, std::string const & n, Gtk::Widget& w);
+
+	void add_to_page (OptionEditorPage*);
+	void parameter_changed (std::string const &) {}
+	void set_state_from_config () {}
+
+	Gtk::Widget& tip_widget() { return *_widget; }
+
+  private:
+	Gtk::Widget* _widget;
+};
+
 class ClockOption : public Option
 {
 public:

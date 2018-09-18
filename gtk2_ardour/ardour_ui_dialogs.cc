@@ -72,6 +72,7 @@
 #include "sfdb_ui.h"
 #include "time_info_box.h"
 #include "timers.h"
+#include "transport_masters_dialog.h"
 
 #include "pbd/i18n.h"
 
@@ -127,6 +128,8 @@ ARDOUR_UI::set_session (Session *s)
 	big_clock->set_session (s);
 	video_timeline->set_session (s);
 	lua_script_window->set_session (s);
+	transport_masters_dialog->set_session (s);
+	rc_option_editor->set_session (s);
 
 	/* sensitize menu bar options that are now valid */
 

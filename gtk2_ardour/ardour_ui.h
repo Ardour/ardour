@@ -101,6 +101,7 @@
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#include "transport_masters_dialog.h"
 #else
 class About;
 class AddRouteDialog;
@@ -119,6 +120,7 @@ class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
+class TransportMastersDialog;
 #endif
 
 class VideoTimeLine;
@@ -680,6 +682,7 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
+	WM::Proxy<TransportMastersDialog> transport_masters_dialog;
 
 	/* Windows/Dialogs that require a creator method */
 

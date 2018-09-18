@@ -436,9 +436,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
 			program->add_bundle (ltc);
 		} else {
-			boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
-			ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
-			program->add_bundle (ltc);
+			// XXX TRANSPORTMASTERS
+			//boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
+			// ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
+			// program->add_bundle (ltc);
 		}
 	}
 
@@ -470,12 +471,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		AudioEngine* ae = AudioEngine::instance();
 
 		if (inputs) {
-			sync->add_channel (
-				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
-				);
-			sync->add_channel (
-				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
-				);
+			// XXX TRANSPORTMASTER
+			// sync->add_channel (
+			// _("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
+			// );
+			// sync->add_channel (
+			// _("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
+			//);
 			sync->add_channel (
 				_("MMC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_input_port()->name())
 				);

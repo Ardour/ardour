@@ -68,7 +68,7 @@ when the pull up/down setting is non-zero."));
 		 * This is a UI limitation, imposed by audio-clock and
 		 * status displays which combine RC-config & session-properties.
 		 *
-		 * Notficy RCOptionEditor by emitting a signal if the active
+		 * Notify RCOptionEditor by emitting a signal if the active
 		 * status changed:
 		 */
 		Config->ParameterChanged("sync-source");
@@ -349,6 +349,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
 
+		/* session parameter */
+
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
@@ -357,17 +359,25 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
-			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
-			if (_session && _session->locations()->auto_loop_location()) {
-				// disable looping with external sync.
-				// This is not necessary because session-transport ignores the loop-state,
-				// but makes it clear to the user that it's disabled.
-				_session->request_play_loop (false, false);
-			}
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
+		}
+
+	} else if (p == "sync-source") {
+
+		/* app parameter (RC config) */
+
+		if (_session) {
+			if (!_session->config.get_external_sync()) {
+				sync_button.set_text (S_("SyncSource|Int."));
+			} else {
+				sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
+			}
+		} else {
+			/* changing sync source without a session is unlikely/impossible , except during startup */
+			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
 		}
 
 	} else if (p == "follow-edits") {
@@ -598,4 +608,3 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 	}
 
 }
-

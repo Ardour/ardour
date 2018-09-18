@@ -34,7 +34,7 @@
 #include "ardour/profile.h"
 #include "ardour/lmath.h"
 #include "ardour/session.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
@@ -938,20 +938,21 @@ AudioClock::set_slave_info ()
 		return;
 	}
 
-	SyncSource sync_src = Config->get_sync_source();
+	const SyncSource sync_src = Config->get_sync_source();
 
-	if (_session->config.get_external_sync()) {
-		Slave* slave = _session->slave();
+	if (_session->transport_master_is_external()) {
 
-		switch (sync_src) {
+		boost::shared_ptr<TransportMaster> tm = _session->transport_master();
+
+		switch (tm->type()) {
 		case Engine:
-			_left_btn.set_text (sync_source_to_string (sync_src, true), true);
+			_left_btn.set_text (tm->name(), true);
 			_right_btn.set_text ("", true);
 			break;
 		case MIDIClock:
-			if (slave) {
-				_left_btn.set_text (sync_source_to_string (sync_src, true), true);
-				_right_btn.set_text (slave->approximate_current_delta (), true);
+			if (tm) {
+				_left_btn.set_text (sync_source_to_string (tm->type(), true), true);
+				_right_btn.set_text (tm->delta_string (), true);
 			} else {
 				_left_btn.set_text (_("--pending--"), true);
 				_right_btn.set_text ("", true);
@@ -959,17 +960,17 @@ AudioClock::set_slave_info ()
 			break;
 		case LTC:
 		case MTC:
-			if (slave) {
+			if (tm) {
 				bool matching;
-				TimecodeSlave* tcslave;
-				if ((tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
-					matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
+				boost::shared_ptr<TimecodeTransportMaster> tcmaster;
+				if ((tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
+					matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 					_left_btn.set_text (string_compose ("%1<span face=\"monospace\" foreground=\"%3\">%2</span>",
-								sync_source_to_string(sync_src, true)[0],
-								dynamic_cast<TimecodeSlave*>(slave)->approximate_current_position (),
-								matching ? "#66ff66" : "#ff3333"
+					                                    sync_source_to_string(tm->type(), true)[0],
+					                                    tcmaster->position_string (),
+					                                    matching ? "#66ff66" : "#ff3333"
 								), true);
-					_right_btn.set_text (slave->approximate_current_delta (), true);
+					_right_btn.set_text (tm->delta_string (), true);
 				}
 			} else {
 				_left_btn.set_text (_("--pending--"), true);
@@ -978,8 +979,7 @@ AudioClock::set_slave_info ()
 			break;
 		}
 	} else {
-		_left_btn.set_text (string_compose ("%1/%2",
-					_("INT"), sync_source_to_string(sync_src, true)), true);
+		_left_btn.set_text (string_compose ("%1/%2", _("INT"), sync_source_to_string (sync_src, true)), true);
 		_right_btn.set_text ("", true);
 	}
 }

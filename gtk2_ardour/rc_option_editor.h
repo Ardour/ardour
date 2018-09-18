@@ -24,6 +24,7 @@
 
 #include "option_editor.h"
 #include "visibility_group.h"
+#include "transport_masters_dialog.h"
 
 /** @file rc_option_editor.h
  *  @brief Editing of options which are obtained from and written back to one of the .rc files.
@@ -39,7 +40,7 @@ class RCOptionEditor : public OptionEditorContainer, public ARDOUR::SessionHandl
 public:
 	RCOptionEditor ();
 
-	void populate_sync_options ();
+	void set_session (ARDOUR::Session*);
 
 	Gtk::Window* use_own_window (bool and_fill_it);
 	XMLNode& get_state ();
@@ -53,13 +54,12 @@ private:
 	VisibilityGroup _mixer_strip_visibility;
 	ComboOption<ARDOUR::SyncSource>* _sync_source;
 	BoolOption* _sync_framerate;
-	BoolOption* _sync_genlock;
-	BoolOption* _sync_source_2997;
 	ComboStringOption* _ltc_port;
 	HSliderOption* _ltc_volume_slider;
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
 	BoolOption* _plugin_prefer_inline;
+	TransportMastersWidget _transport_masters_widget;
 
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;

@@ -608,6 +608,20 @@ ClockOption::set_session (Session* s)
 
 /*--------------------------*/
 
+WidgetOption::WidgetOption (string const & i, string const & n, Gtk::Widget& w)
+	: Option (i, n)
+	, _widget (&w)
+{
+}
+
+void
+WidgetOption::add_to_page (OptionEditorPage* p)
+{
+	add_widget_to_page (p, _widget);
+}
+
+/*--------------------------*/
+
 OptionEditorPage::OptionEditorPage ()
 	: table (1, 3)
 {

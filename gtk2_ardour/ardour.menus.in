@@ -556,6 +556,7 @@
 #endif
       <menuitem action='toggle-big-clock'/>
       <menuitem action='toggle-big-transport'/>
+      <menuitem action='toggle-transport-masters'/>
 #if 0
       <menuitem action='toggle-speaker-config'/>
 #endif

@@ -46,6 +46,7 @@ MidiTracer::MidiTracer ()
 	, line_count_adjustment (200, 1, 2000, 1, 10)
 	, line_count_spinner (line_count_adjustment)
 	, line_count_label (_("Line history: "))
+	, _last_receipt (0)
 	, autoscroll (true)
 	, show_hex (true)
 	, show_delta_time (false)
@@ -59,9 +60,6 @@ MidiTracer::MidiTracer ()
 {
 	ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect
 		(_manager_connection, invalidator (*this), boost::bind (&MidiTracer::ports_changed, this), gui_context());
-
-	_last_receipt.tv_sec = 0;
-	_last_receipt.tv_usec = 0;
 
 	VBox* vbox = manage (new VBox);
 	vbox->set_spacing (4);
@@ -121,7 +119,6 @@ MidiTracer::MidiTracer ()
 	port_changed ();
 }
 
-
 MidiTracer::~MidiTracer()
 {
 }
@@ -178,13 +175,13 @@ MidiTracer::port_changed ()
 		boost::shared_ptr<ARDOUR::MidiPort> mp = boost::dynamic_pointer_cast<ARDOUR::MidiPort> (p);
 
 		if (mp) {
-			mp->self_parser().any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
-			mp->set_trace_on (true);
+			my_parser.any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
+			mp->set_trace (&my_parser);
 			traced_port = mp;
 		}
 
 	} else {
-		async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3));
+		async->parser()->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 	}
 }
 
@@ -194,40 +191,33 @@ MidiTracer::disconnect ()
 	_parser_connection.disconnect ();
 
 	if (traced_port) {
-		traced_port->set_trace_on (false);
+		traced_port->set_trace (0);
 		traced_port.reset ();
 	}
 }
 
 void
-MidiTracer::tracer (Parser&, byte* msg, size_t len)
+MidiTracer::tracer (Parser&, byte* msg, size_t len, samplecnt_t now)
 {
 	stringstream ss;
-	struct timeval tv;
 	char* buf;
-	struct tm now;
 	size_t bufsize;
 	size_t s;
 
-	gettimeofday (&tv, 0);
+	std::cerr << "tracer msg " << len << " bytes, first = " << hex << (int) msg[0] << dec << std::endl;
 
 	buf = (char *) buffer_pool.alloc ();
 	bufsize = buffer_size;
 
-	if (_last_receipt.tv_sec != 0 && show_delta_time) {
-		struct timeval delta;
-		timersub (&tv, &_last_receipt, &delta);
-		s = snprintf (buf, bufsize, "+%02" PRId64 ":%06" PRId64, (int64_t) delta.tv_sec, (int64_t) delta.tv_usec);
+	if (_last_receipt != 0 && show_delta_time) {
+		s = snprintf (buf, bufsize, "+%12ld", now - _last_receipt);
 		bufsize -= s;
 	} else {
-		localtime_r ((const time_t*)&tv.tv_sec, &now);
-		s = strftime (buf, bufsize, "%H:%M:%S", &now);
-		bufsize -= s;
-		s += snprintf (&buf[s], bufsize, ".%06" PRId64, (int64_t) tv.tv_usec);
+		s = snprintf (buf, bufsize, "%12ld", now);
 		bufsize -= s;
 	}
 
-	_last_receipt = tv;
+	_last_receipt = now;
 
 	switch ((eventType) msg[0]&0xf0) {
 	case off:
