@@ -213,10 +213,10 @@ TransportMastersWidget::Row::build_request_options ()
 	MenuList& items (request_option_menu->items());
 
 	items.push_back (CheckMenuElem (_("Accept speed-changing commands (start/stop)")));
-	CheckMenuItem* i = dynamic_cast<CheckMenuItem *> (&items.back ());
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Speed);
 	items.push_back (CheckMenuElem (_("Accept locate commands")));
-	i = dynamic_cast<CheckMenuItem *> (&items.back ());
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Locate);
 }
 
