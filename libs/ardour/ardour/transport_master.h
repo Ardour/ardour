@@ -22,7 +22,6 @@
 
 #include <vector>
 
-#include <boost/atomic.hpp>
 #include <boost/optional.hpp>
 
 #include <glibmm/threads.h>
