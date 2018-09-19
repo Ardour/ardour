@@ -97,7 +97,7 @@ std::string
 Engine_TransportMaster::position_string () const
 {
 	if (_session) {
-		return to_string (_session->audible_sample());
+		return PBD::to_string (_session->audible_sample());
 	}
 
 	return std::string();
