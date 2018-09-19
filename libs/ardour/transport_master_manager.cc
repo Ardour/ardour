@@ -39,7 +39,6 @@ TransportMasterManager* TransportMasterManager::_instance = 0;
 TransportMasterManager::TransportMasterManager()
 	: _master_speed (0)
 	, _master_position (0)
-	, _current_master (0)
 	, _session (0)
 	, _master_invalid_this_cycle (false)
 	, master_dll_initstate (0)
