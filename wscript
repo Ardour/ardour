@@ -147,25 +147,35 @@ clang_darwin_dict['cxx-strict'] = [ '-ansi', '-Wnon-virtual-dtor', '-Woverloaded
 clang_darwin_dict['full-optimization'] = [ '-O3', '-ffast-math']
 compiler_flags_dictionaries['clang-darwin'] = clang_darwin_dict;
 
-def fetch_git_revision ():
-    cmd = "git describe HEAD | sed 's/^[A-Za-z0-9]*+//'"
-    output = subprocess.Popen(cmd, shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
-    rev = output[0].decode ('utf-8')
-    return rev
+def fetch_git_revision_date ():
+    cmd = ["git", "describe", "HEAD"]
+    output = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    rev = re.sub(r"^[A-Za-z0-9]*\+", "", output[0].decode('utf-8'))
 
-def fetch_tarball_revision ():
+    cmd = ["git", "log", "-1", "--pretty=format:%ci", "HEAD"]
+    output = subprocess.Popen(cmd, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+    date = output[0].decode('utf-8').split(None, 2)[0]
+
+    return rev, date
+
+def fetch_tarball_revision_date():
     if not os.path.exists ('libs/ardour/revision.cc'):
         print ('This tarball was not created correctly - it is missing libs/ardour/revision.cc')
         sys.exit (1)
     with open('libs/ardour/revision.cc', 'rb') as f:
         content = f.readlines()
         remove_punctuation_map = dict((ord(char), None) for char in '";')
-        return content[1].decode('utf-8').strip().split(' ')[7].translate (remove_punctuation_map)
+
+        raw_line_tokens = content[1].decode('utf-8').strip().split(' ')
+        rev = raw_line_tokens[7].translate(remove_punctuation_map)
+        date = raw_line_tokens[12].translate(remove_punctuation_map)
+
+        return rev, date
 
 if os.path.isdir (os.path.join(os.getcwd(), '.git')):
-    rev = fetch_git_revision ()
+    rev, rev_date = fetch_git_revision_date()
 else:
-    rev = fetch_tarball_revision ()
+    rev, rev_date = fetch_tarball_revision_date()
 
 #
 # rev is now of the form MAJOR.MINOR[-rcX]-rev-commit
@@ -282,7 +292,7 @@ def fetch_gcc_version (CC):
 def create_stored_revision():
     rev = ""
     if os.path.exists('.git'):
-        rev = fetch_git_revision();
+        rev, rev_date = fetch_git_revision_date();
         print("Git version: " + rev + "\n")
     elif os.path.exists('libs/ardour/revision.cc'):
         print("Using packaged revision")
@@ -293,12 +303,15 @@ def create_stored_revision():
 
     try:
         #
-        # if you change the format of this, be sure to fix fetch_tarball_revision() above
-        # so that  it still works.
+        # if you change the format of this, be sure to fix fetch_tarball_revision_date()
+        # above so that  it still works.
         #
         text =  '#include "ardour/revision.h"\n'
-        text += 'namespace ARDOUR { const char* revision = \"%s\"; }\n' % rev
-        print('Writing revision info to libs/ardour/revision.cc using ' + rev)
+        text += (
+            'namespace ARDOUR { const char* revision = \"%s\"; '
+            'const char* date = \"%s\"; }\n'
+        ) % (rev, rev_date)
+        print('Writing revision info to libs/ardour/revision.cc using ' + rev + ', ' + rev_date)
         o = open('libs/ardour/revision.cc', 'w')
         o.write(text)
         o.close()
@@ -1331,6 +1344,8 @@ const char* const ardour_config_info = "\\n\\
 
 def build(bld):
     create_stored_revision()
+
+    bld.env['DATE'] = rev_date
 
     # add directories that contain only headers, to workaround an issue with waf
 

@@ -5,7 +5,7 @@
   <project_license>GPL-2.0+</project_license>
   <name>Ardour</name>
   <releases>
-    <release version="@VERSION@" />
+    <release version="@VERSION@" date="@DATE@" />
   </releases>
   <summary>Digital Audio Workstation</summary>
   <description>
