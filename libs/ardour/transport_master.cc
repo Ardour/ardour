@@ -19,6 +19,7 @@
 
 #include <vector>
 
+#include "pbd/debug.h"
 #include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
@@ -26,24 +27,51 @@
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
+#include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
+namespace ARDOUR {
+	namespace Properties {
+		PBD::PropertyDescriptor<bool> fr2997;
+		PBD::PropertyDescriptor<bool> sclock_synced;
+		PBD::PropertyDescriptor<bool> collect;
+		PBD::PropertyDescriptor<bool> connected;
+		PBD::PropertyDescriptor<TransportRequestType> allowed_transport_requests;
+	}
+}
+
 using namespace ARDOUR;
+using namespace PBD;
+
+void
+TransportMaster::make_property_quarks ()
+{
+	Properties::fr2997.property_id = g_quark_from_static_string (X_("fr2997"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for fr2997 = %1\n", Properties::fr2997.property_id));
+	Properties::sclock_synced.property_id = g_quark_from_static_string (X_("sclock_synced"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sclock_synced = %1\n", Properties::sclock_synced.property_id));
+	Properties::collect.property_id = g_quark_from_static_string (X_("collect"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for collect = %1\n", Properties::collect.property_id));
+	Properties::connected.property_id = g_quark_from_static_string (X_("connected"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for connected = %1\n", Properties::connected.property_id));
+}
 
 const std::string TransportMaster::state_node_name = X_("TransportMaster");
 
-
 TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 	: _type (t)
-	, _name (name)
+	, _name (Properties::name, name)
 	, _session (0)
-	, _connected (false)
 	, _current_delta (0)
-	, _collect (true)
 	, _pending_collect (true)
-	, _request_mask (TransportRequestType (0))
-	, _sclock_synced (false)
+	, _request_mask (Properties::allowed_transport_requests, TransportRequestType (0))
+	, _locked (Properties::locked, false)
+	, _sclock_synced (Properties::sclock_synced, false)
+	, _collect (Properties::collect, true)
+	, _connected (Properties::connected, false)
 {
+	register_properties ();
+
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect_same_thread (port_connection, boost::bind (&TransportMaster::connection_handler, this, _1, _2, _3, _4, _5));
 	ARDOUR::AudioEngine::instance()->Running.connect_same_thread (backend_connection, boost::bind (&TransportMaster::check_backend, this));
 }
@@ -51,6 +79,31 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 TransportMaster::~TransportMaster()
 {
 	delete _session;
+}
+
+void
+TransportMaster::register_properties ()
+{
+	_xml_node_name = state_node_name;
+
+	add_property (_name);
+	add_property (_locked);
+	add_property (_collect);
+	add_property (_sclock_synced);
+	add_property (_request_mask);
+
+	/* we omit _connected since it is derived from port state, and merely
+	 * used for signalling
+	 */
+}
+
+void
+TransportMaster::set_name (std::string const & str)
+{
+	if (_name != str) {
+		_name = str;
+		PropertyChange (Properties::name);
+	}
 }
 
 bool
@@ -66,11 +119,18 @@ TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string 
 
 		/* it's about us */
 
+		/* XXX technically .. if the user makes an N->1 connection to
+		 * this transport master's port, this simple minded logic is
+		 * not sufficient. But the user shouldn't do that ...
+		 */
+
 		if (yn) {
 			_connected = true;
 		} else {
 			_connected = false;
 		}
+
+		PropertyChanged (Properties::connected);
 
 		return true;
 	}
@@ -97,8 +157,8 @@ TransportMaster::check_collect()
 				}
 			}
 		}
-		std::cerr << name() << " pc = " << _pending_collect << " c = " << _collect << std::endl;
 		_collect = _pending_collect;
+		PropertyChanged (Properties::collect);
 	}
 
 	return _collect;
@@ -113,7 +173,10 @@ TransportMaster::set_collect (bool yn)
 void
 TransportMaster::set_sample_clock_synced (bool yn)
 {
-	_sclock_synced = yn;
+	if (yn != _sclock_synced) {
+		_sclock_synced = yn;
+		PropertyChanged (Properties::sclock_synced);
+	}
 }
 
 void
@@ -125,20 +188,9 @@ TransportMaster::set_session (Session* s)
 int
 TransportMaster::set_state (XMLNode const & node, int /* version */)
 {
-	if (!node.get_property (X_("collect"), _collect)) {
-		_collect = false;
-	}
+	PropertyChange what_changed;
 
-	if (!node.get_property (X_("clock-synced"), _sclock_synced)) {
-		_sclock_synced = false;
-	}
-
-	TimecodeTransportMaster* ttm = dynamic_cast<TimecodeTransportMaster*> (this);
-	if (ttm) {
-		bool val;
-		node.get_property (X_("fr2997"), val);
-		ttm->set_fr2997 (val);
-	}
+	what_changed = set_values (node);
 
 	XMLNode* pnode = node.child (X_("Port"));
 
@@ -157,6 +209,8 @@ TransportMaster::set_state (XMLNode const & node, int /* version */)
 		}
 	}
 
+	PropertyChanged (what_changed);
+
 	return 0;
 }
 
@@ -165,14 +219,8 @@ TransportMaster::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	node->set_property (X_("type"), _type);
-	node->set_property (X_("name"), _name);
-	node->set_property (X_("collect"), _collect);
-	node->set_property (X_("clock-synced"), _sclock_synced);
 
-	TimecodeTransportMaster* ttm = dynamic_cast<TimecodeTransportMaster*> (this);
-	if (ttm) {
-		node->set_property (X_("fr2997"), ttm->fr2997());
-	}
+	add_properties (*node);
 
 	if (_port) {
 		std::vector<std::string> connections;
@@ -271,11 +319,31 @@ TransportMaster::allow_request (TransportRequestSource src, TransportRequestType
 void
 TransportMaster::set_request_mask (TransportRequestType t)
 {
-	_request_mask = t;
+	if (_request_mask != t) {
+		_request_mask = t;
+		PropertyChanged (Properties::allowed_transport_requests);
+	}
+}
+
+TimecodeTransportMaster::TimecodeTransportMaster (std::string const & name, SyncSource type)
+	: TransportMaster (type, name)
+	, _fr2997 (Properties::fr2997, false)
+{
+	register_properties ();
+}
+
+void
+TimecodeTransportMaster::register_properties ()
+{
+	TransportMaster::register_properties ();
+	add_property (_fr2997);
 }
 
 void
 TimecodeTransportMaster::set_fr2997 (bool yn)
 {
-	_fr2997 = yn;
+	if (yn != _fr2997) {
+		_fr2997 = yn;
+		PropertyChanged (Properties::fr2997);
+	}
 }

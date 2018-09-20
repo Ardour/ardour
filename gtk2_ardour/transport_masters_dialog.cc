@@ -153,7 +153,6 @@ TransportMastersWidget::rebuild ()
 		}
 
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
-		ARDOUR::AudioEngine::instance()->PortRegisteredOrUnregistered.connect (*r, invalidator (*this), boost::bind (&TransportMastersWidget::Row::connection_handler, r), gui_context());
 
 		r->collect_button.set_active (r->tm->collect());
 
@@ -218,11 +217,6 @@ TransportMastersWidget::Row::build_request_options ()
 	items.push_back (CheckMenuElem (_("Accept locate commands")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back ());
 	i->set_active (tm->request_mask() & TR_Locate);
-}
-
-void
-TransportMastersWidget::Row::connection_handler ()
-{
 }
 
 Glib::RefPtr<Gtk::ListStore>

@@ -28,15 +28,18 @@
 
 #include <ltc.h>
 
+#include "pbd/properties.h"
 #include "pbd/signals.h"
+#include "pbd/stateful.h"
 
 #include "temporal/time.h"
 
 #include "ardour/libardour_visibility.h"
+#include "ardour/region.h" /* for Properties::locked */
 #include "ardour/types.h"
+
 #include "midi++/parser.h"
 #include "midi++/types.h"
-
 
 /* used for delta_string(): */
 #define PLUSMINUS(A) ( ((A)<0) ? "-" : (((A)>0) ? "+" : "\u00B1") )
@@ -52,6 +55,13 @@ class MidiPort;
 class AudioPort;
 class Port;
 
+namespace Properties {
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> fr2997;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> collect;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> connected;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> sclock_synced;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<ARDOUR::TransportRequestType> allowed_transport_requests;
+};
 
 /**
  * @class TransportMaster
@@ -62,7 +72,7 @@ class Port;
  * Ardour (GUI, control surfaces, OSC, etc.)
  *
  */
-class LIBARDOUR_API TransportMaster {
+class LIBARDOUR_API TransportMaster : public PBD::Stateful {
   public:
 
 	TransportMaster (SyncSource t, std::string const & name);
@@ -218,6 +228,7 @@ class LIBARDOUR_API TransportMaster {
 	XMLNode& get_state();
 
 	static const std::string state_node_name;
+	static void make_property_quarks ();
 
 	virtual void set_session (Session*);
 
@@ -240,14 +251,15 @@ class LIBARDOUR_API TransportMaster {
 	void set_request_mask (TransportRequestType);
   protected:
 	SyncSource      _type;
-	std::string     _name;
+	PBD::Property<std::string>   _name;
 	Session*        _session;
-	bool            _connected;
 	sampleoffset_t  _current_delta;
-	bool            _collect;
 	bool            _pending_collect;
-	TransportRequestType _request_mask; /* lists transport requests still accepted when we're in control */
-	bool            _sclock_synced;
+	PBD::Property<TransportRequestType> _request_mask; /* lists transport requests still accepted when we're in control */
+	PBD::Property<bool> _locked;
+	PBD::Property<bool> _sclock_synced;
+	PBD::Property<bool> _collect;
+	PBD::Property<bool> _connected;
 
 	/* DLL - chase incoming data */
 
@@ -265,6 +277,8 @@ class LIBARDOUR_API TransportMaster {
 	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 
 	PBD::ScopedConnection backend_connection;
+
+	virtual void register_properties ();
 };
 
 struct LIBARDOUR_API SafeTime {
@@ -300,7 +314,7 @@ class LIBARDOUR_API TransportMasterViaMIDI {
 
 class LIBARDOUR_API TimecodeTransportMaster : public TransportMaster {
   public:
-	TimecodeTransportMaster (std::string const & name, SyncSource type) : TransportMaster (type, name) {}
+	TimecodeTransportMaster (std::string const & name, SyncSource type);
 
 	virtual Timecode::TimecodeFormat apparent_timecode_format() const = 0;
 	samplepos_t        timecode_offset;
@@ -309,9 +323,11 @@ class LIBARDOUR_API TimecodeTransportMaster : public TransportMaster {
 	bool fr2997() const { return _fr2997; }
 	void set_fr2997 (bool);
 
-  private:
-	bool               _fr2997;
+  protected:
+	void register_properties ();
 
+  private:
+	PBD::Property<bool> _fr2997;
 };
 
 class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public TransportMasterViaMIDI {

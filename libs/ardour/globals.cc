@@ -460,6 +460,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
         Playlist::make_property_quarks ();
         AudioPlaylist::make_property_quarks ();
         PresentationInfo::make_property_quarks ();
+        TransportMaster::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose

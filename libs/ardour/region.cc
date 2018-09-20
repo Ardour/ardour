@@ -187,7 +187,7 @@ Region::register_properties ()
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
-  , _video_locked (Properties::video_locked, false) \
+	, _video_locked (Properties::video_locked, false) \
 	, _automatic (Properties::automatic, false) \
 	, _whole_file (Properties::whole_file, false) \
 	, _import (Properties::import, false) \
