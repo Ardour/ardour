@@ -54,6 +54,8 @@ TransportMaster::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for collect = %1\n", Properties::collect.property_id));
 	Properties::connected.property_id = g_quark_from_static_string (X_("connected"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for connected = %1\n", Properties::connected.property_id));
+	Properties::allowed_transport_requests.property_id = g_quark_from_static_string (X_("allowed_transport_requests"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for allowed_transport_requests = %1\n", Properties::allowed_transport_requests.property_id));
 }
 
 const std::string TransportMaster::state_node_name = X_("TransportMaster");
