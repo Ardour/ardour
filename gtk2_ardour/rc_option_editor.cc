@@ -139,7 +139,7 @@ public:
 		if (_rc_config->get_click_sound ().empty() &&
 		    _rc_config->get_click_emphasis_sound().empty()) {
 			_use_default_click_check_button.set_active (true);
-			_use_emphasis_on_click_check_button.set_active (true);
+			_use_emphasis_on_click_check_button.set_active (_rc_config->get_use_click_emphasis ());
 
 		} else {
 			_use_default_click_check_button.set_active (false);
