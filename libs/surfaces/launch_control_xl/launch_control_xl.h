@@ -137,13 +137,26 @@ public:
 		Pan8
 	};
 
-	enum LEDFlag { Normal = 0xC, Blink = 0x8, DoubleBuffering = 0x0 };
+	enum DeviceStatus {
+		dev_nonexistant = 0,
+		dev_inactive,
+		dev_active
+	};
 
+	enum LEDFlag { Normal = 0xC, Blink = 0x8, DoubleBuffering = 0x0 };
 	enum LEDColor { Off=0, RedLow = 1, RedFull = 3, GreenLow = 16, GreenFull = 48, YellowLow = 34, YellowFull = 51, AmberLow = 18, AmberFull = 35};
 
 
+#ifdef MIXBUS
+	enum CompParam {
+		CompMakeup,
+		CompMode,
+		CompSpeed
+	};
+#endif
+
 	struct Controller {
-		Controller(uint8_t cn,  uint8_t val, void (LaunchControlXL::*action)())
+		Controller(uint8_t cn,  uint8_t val, boost::function<void ()> action)
 		: _controller_number(cn)
 		, _value(val)
 		, action_method(action) {}
@@ -157,7 +170,7 @@ public:
 		uint8_t _value;
 
 		public:
-		void (LaunchControlXL::*action_method)();
+		boost::function<void ()> action_method;
 	};
 
 	struct LED {
@@ -189,31 +202,20 @@ public:
 	};
 
 	struct Button {
-		Button(ButtonID id)
-			: press_method(&LaunchControlXL::relax)
-			, release_method(&LaunchControlXL::relax)
-			, long_press_method(&LaunchControlXL::relax), _id(id) {}
-
-		Button(ButtonID id, void (LaunchControlXL::*press)())
+		Button(ButtonID id, boost::function<void ()> press, boost::function<void ()> release,
+				boost::function<void ()> long_press)
 			: press_method(press)
-			, release_method(&LaunchControlXL::relax)
-			, long_press_method(&LaunchControlXL::relax), _id(id) {}
-
-		Button(ButtonID id, void (LaunchControlXL::*press)(), void (LaunchControlXL::*release)())
-			: press_method(press), release_method(release)
-			, long_press_method(&LaunchControlXL::relax), _id(id) {}
-
-		Button(ButtonID id, void (LaunchControlXL::*press)(), void (LaunchControlXL::*release)(), void (LaunchControlXL::*long_press)())
-			: press_method(press), release_method(release)
-			, long_press_method(long_press), _id(id) {}
+			, release_method(release)
+			, long_press_method(long_press),
+			_id(id) {}
 
 		virtual ~Button() {}
 
 		ButtonID id() const { return _id; }
 
-		void (LaunchControlXL::*press_method)();
-		void (LaunchControlXL::*release_method)();
-		void (LaunchControlXL::*long_press_method)();
+		boost::function<void ()> press_method;
+		boost::function<void ()> release_method;
+		boost::function<void ()> long_press_method;
 
 		sigc::connection timeout_connection;
 
@@ -222,15 +224,12 @@ public:
 	};
 
 	struct ControllerButton : public Button {
-
 		ControllerButton(ButtonID id, uint8_t cn,
-				void (LaunchControlXL::*press)())
-			: Button(id, press), _controller_number(cn) {}
+				boost::function<void ()> press,
+				boost::function<void ()> release,
+				boost::function<void ()> long_release)
+			: Button(id, press, release, long_release), _controller_number(cn) {}
 
-		ControllerButton(ButtonID id, uint8_t cn,
-				void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)())
-			: Button(id, press, release), _controller_number(cn) {}
 
 
 		uint8_t controller_number() const { return _controller_number; }
@@ -240,18 +239,10 @@ public:
 	};
 
 	struct NoteButton : public Button {
-
-		NoteButton(ButtonID id, uint8_t cn, void (LaunchControlXL::*press)())
-			: Button(id, press), _note_number(cn) {}
-
 		NoteButton(ButtonID id, uint8_t cn,
-				void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)())
-			: Button(id, press, release), _note_number(cn) {}
-		NoteButton(ButtonID id, uint8_t cn,
-				void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)(),
-				void (LaunchControlXL::*release_long)())
+				boost::function<void ()> press,
+				boost::function<void ()> release,
+				boost::function<void ()> release_long)
 			: Button(id, press, release, release_long), _note_number(cn) {}
 
 		uint8_t note_number() const { return _note_number; }
@@ -261,40 +252,52 @@ public:
 	};
 
 	struct TrackButton : public NoteButton, public MultiColorLED {
-		TrackButton(ButtonID id, uint8_t nn, uint8_t index, LEDColor color,
-				void (LaunchControlXL::*press)(), LaunchControlXL& l)
-			: NoteButton(id, nn, press), MultiColorLED(index, color, l) {}
-
-		TrackButton(ButtonID id, uint8_t nn, uint8_t index, LEDColor color,
-				void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)(),
+		TrackButton(ButtonID id, uint8_t nn, uint8_t index, LEDColor c_on, LEDColor c_off,
+				boost::function<void ()> press,
+				boost::function<void ()> release,
+				boost::function<void ()> release_long,
+				boost::function<uint8_t ()> check,
 				LaunchControlXL& l)
-			: NoteButton(id, nn, press, release), MultiColorLED(index, color, l) {}
+			: NoteButton(id, nn, press, release, release_long)
+			, MultiColorLED(index, Off, l)
+			, check_method(check)
+			, _color_enabled (c_on)
+			, _color_disabled (c_off) {}
+
+
+
+
+		LEDColor color_enabled() const { return _color_enabled; }
+		LEDColor color_disabled() const { return _color_disabled; }
+		void set_color_enabled (LEDColor c_on) { _color_enabled = c_on; }
+		void set_color_disabled (LEDColor c_off) { _color_disabled = c_off; }
+		boost::function<uint8_t ()> check_method;
+
 
 		MidiByteArray state_msg(bool light = true) const;
+
+		private:
+		LEDColor _color_enabled;
+		LEDColor _color_disabled;
 	};
 
 	struct SelectButton : public ControllerButton, public LED {
-		SelectButton(ButtonID id, uint8_t cn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
-			: ControllerButton(id, cn, press), LED(index, RedFull, l) {}
+		SelectButton(ButtonID id, uint8_t cn, uint8_t index,
+				boost::function<void ()> press,
+				boost::function<void ()> release,
+				boost::function<void ()> long_release,
+				LaunchControlXL& l)
+			: ControllerButton(id, cn, press, release, long_release), LED(index, RedFull, l) {}
+
 
 		MidiByteArray state_msg(bool light) const;
 	};
 
 	struct TrackStateButton : public NoteButton, public LED {
-		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(), LaunchControlXL& l)
-			: NoteButton(id, nn, press)
-			, LED(index, YellowLow, l) {}
-
-		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)(),
-				LaunchControlXL& l)
-			: NoteButton(id, nn, press, release)
-			, LED(index, YellowLow, l) {}
-
-		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index, void (LaunchControlXL::*press)(),
-				void (LaunchControlXL::*release)(),
-				void (LaunchControlXL::*release_long)(),
+		TrackStateButton(ButtonID id, uint8_t nn, uint8_t index,
+				boost::function<void ()> press,
+				boost::function<void ()> release,
+				boost::function<void ()> release_long,
 				LaunchControlXL& l)
 			: NoteButton(id, nn, press, release, release_long)
 			, LED(index, YellowLow, l) {}
@@ -303,7 +306,7 @@ public:
 	};
 
 	struct Fader : public Controller {
-		Fader(FaderID id, uint8_t cn, void (LaunchControlXL::*action)())
+		Fader(FaderID id, uint8_t cn, boost::function<void ()> action)
 			: Controller(cn, 0, action), _id(id) {} // minimal value
 
 		FaderID id() const { return _id; }
@@ -315,17 +318,36 @@ public:
 	};
 
 	struct Knob : public Controller, public MultiColorLED {
-		Knob(KnobID id, uint8_t cn, uint8_t index, void (LaunchControlXL::*action)(), LaunchControlXL &l)
+		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, boost::function<void ()> action,
+			LaunchControlXL &l)
 			: Controller(cn, 64, action)
 			, MultiColorLED(index, Off, l)
-			, _id(id) {} // knob 50/50 value
+			, _id(id)
+			, _color_enabled (c_on)
+			, _color_disabled (c_off) {} // knob 50/50 value
+
+		Knob(KnobID id, uint8_t cn, uint8_t index, LEDColor c_on, LEDColor c_off, boost::function<void ()> action,
+			boost::function<uint8_t ()> check, LaunchControlXL &l)
+			: Controller(cn, 64, action)
+			, MultiColorLED(index, Off, l)
+			, check_method(check)
+			, _id(id)
+			, _color_enabled (c_on)
+			, _color_disabled (c_off) {} // knob 50/50 value
+
+
 
 		KnobID id() const { return _id; }
+		LEDColor color_enabled() const { return _color_enabled; }
+		LEDColor color_disabled() const { return _color_disabled; }
+		boost::function<uint8_t ()> check_method;
 
 		MidiByteArray state_msg(bool light = true) const;
 
 		private:
 		KnobID _id;
+		LEDColor _color_enabled;
+		LEDColor _color_disabled;
 	};
 
 public:
@@ -368,10 +390,21 @@ public:
 	void set_refresh_leds_flag (bool yn);
 	bool refresh_leds_flag () const { return _refresh_leds_flag; }
 
+	void set_device_mode (bool yn);
+	bool device_mode () const { return _device_mode; }
+
+#ifdef MIXBUS32C
+	void store_fss_type();
+	bool fss_is_mixbus() const { return _fss_is_mixbus; }
+#endif
 	TrackMode track_mode() const { return _track_mode; }
 	void set_track_mode(TrackMode mode);
 
 	uint8_t template_number() const { return _template_number; }
+
+	void set_send_bank (int offset);
+	void send_bank_switch(bool up);
+	int send_bank_base () const { return _send_bank_base; }
 
 private:
 	bool in_use;
@@ -379,7 +412,13 @@ private:
 	uint8_t _template_number;
 
 	bool _fader8master;
+	bool _device_mode;
+#ifdef MIXBUS32C
+	bool _fss_is_mixbus;
+#endif
 	bool _refresh_leds_flag;
+
+	int _send_bank_base;
 
 	void do_request(LaunchControlRequest *);
 
@@ -426,9 +465,18 @@ private:
 	bool button_long_press_timeout(ButtonID id, boost::shared_ptr<Button> button);
 	void start_press_timeout(boost::shared_ptr<Button> , ButtonID);
 
+	void init_buttons();
 	void init_buttons(bool startup);
+	void init_buttons (ButtonID buttons[], uint8_t i);
+	void init_knobs();
+	void init_knobs(KnobID knobs[], uint8_t i);
+	void init_knobs_and_buttons();
+
+	void init_device_mode();
+	void init_dm_callbacks();
 
 	void switch_template(uint8_t t);
+	void filter_stripables (ARDOUR::StripableList& strips) const;
 
 	void build_maps();
 
@@ -463,57 +511,63 @@ private:
 	void notify_parameter_changed(std::string);
 
 	/* Knob methods */
-
+	boost::shared_ptr<Knob> knob_by_id(KnobID id);
 	boost::shared_ptr<Knob>* knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col);
-	void update_knob_led(uint8_t n);
+	void update_knob_led_by_strip(uint8_t n);
+	void update_knob_led_by_id(uint8_t id, LEDColor color);
 
 	void knob_sendA(uint8_t n);
 	void knob_sendB(uint8_t n);
 	void knob_pan(uint8_t n);
 
+	uint8_t dm_check_dummy(DeviceStatus ds);
 
-	void knob_sendA1() { knob_sendA(0); }
-	void knob_sendA2() { knob_sendA(1); }
-	void knob_sendA3() { knob_sendA(2); }
-	void knob_sendA4() { knob_sendA(3); }
-	void knob_sendA5() { knob_sendA(4); }
-	void knob_sendA6() { knob_sendA(5); }
-	void knob_sendA7() { knob_sendA(6); }
-	void knob_sendA8() { knob_sendA(7); }
+	void dm_fader(FaderID id);
+	uint8_t dm_check_pan_azi ();
+	void dm_pan_azi(KnobID k);
+	uint8_t dm_check_pan_width();
+	void dm_pan_width (KnobID k);
+	uint8_t dm_check_trim ();
+	void dm_trim(KnobID k);
+	uint8_t dm_mute_enabled();
+	void dm_mute_switch();
+	uint8_t dm_solo_enabled();
+	void dm_solo_switch();
+	uint8_t dm_recenable_enabled();
+	void dm_recenable_switch();
+	void dm_select_prev_strip();
+	void dm_select_next_strip();
 
-	void knob_sendB1() { knob_sendB(0); }
-	void knob_sendB2() { knob_sendB(1); }
-	void knob_sendB3() { knob_sendB(2); }
-	void knob_sendB4() { knob_sendB(3); }
-	void knob_sendB5() { knob_sendB(4); }
-	void knob_sendB6() { knob_sendB(5); }
-	void knob_sendB7() { knob_sendB(6); }
-	void knob_sendB8() { knob_sendB(7); }
-
-	void knob_pan1() { knob_pan(0); }
-	void knob_pan2() { knob_pan(1); }
-	void knob_pan3() { knob_pan(2); }
-	void knob_pan4() { knob_pan(3); }
-	void knob_pan5() { knob_pan(4); }
-	void knob_pan6() { knob_pan(5); }
-	void knob_pan7() { knob_pan(6); }
-	void knob_pan8() { knob_pan(7); }
+#ifdef MIXBUS
+	void dm_mb_eq_switch();
+	void dm_mb_eq (KnobID k, bool gain, uint8_t band);
+	uint8_t dm_mb_eq_freq_enabled();
+	uint8_t dm_mb_eq_gain_enabled(uint8_t band);
+	void dm_mb_eq_shape_switch(uint8_t band);
+	uint8_t dm_mb_eq_shape_enabled(uint8_t band);
+	uint8_t dm_mb_flt_enabled();
+	void dm_mb_flt_frq (KnobID k, bool hpf);
+	void dm_mb_flt_switch();
+	void dm_mb_send_enabled(KnobID k);
+	uint8_t dm_mb_check_send_knob(KnobID k);
+	uint8_t dm_mb_check_send_button(uint8_t s);
+	void dm_mb_sends (KnobID k);
+	void dm_mb_send_switch (ButtonID b);
+	uint8_t dm_mb_comp_enabled();
+	void dm_mb_comp_switch();
+	void dm_mb_comp (KnobID k, CompParam c);
+	void dm_mb_comp_thresh (FaderID id);
+	uint8_t dm_mb_has_tapedrive();
+	void dm_mb_tapedrive (KnobID k);
+	uint8_t dm_mb_master_assign_enabled();
+	void dm_mb_master_assign_switch();
+#endif
 
 	/* Fader methods */
-
 	void fader(uint8_t n);
 
-	void fader_1() { fader(0); }
-	void fader_2() { fader(1); }
-	void fader_3() { fader(2); }
-	void fader_4() { fader(3); }
-	void fader_5() { fader(4); }
-	void fader_6() { fader(5); }
-	void fader_7() { fader(6); }
-	void fader_8() { fader(7); }
 
 	/* Button methods */
-
 	boost::shared_ptr<TrackButton> track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
 	boost::shared_ptr<TrackButton> focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
 	boost::shared_ptr<TrackButton> control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
@@ -523,7 +577,9 @@ private:
 	void button_device_long_press();
 	void button_track_mode(TrackMode state);
 	void button_mute();
+	void button_mute_long_press();
 	void button_solo();
+	void button_solo_long_press();
 	void button_record();
 	void button_select_up();
 	void button_select_down();
@@ -531,29 +587,15 @@ private:
 	void button_select_right();
 
 	void button_track_focus(uint8_t n);
-	void button_track_control(uint8_t n);
+	void button_press_track_control(uint8_t n);
+	void button_release_track_control(uint8_t n);
 
 	boost::shared_ptr<ARDOUR::AutomationControl> get_ac_by_state(uint8_t n);
 	void update_track_focus_led(uint8_t n);
 	void update_track_control_led(uint8_t n);
 
-	void button_track_focus_1() { button_track_focus(0); }
-	void button_track_focus_2() { button_track_focus(1); }
-	void button_track_focus_3() { button_track_focus(2); }
-	void button_track_focus_4() { button_track_focus(3); }
-	void button_track_focus_5() { button_track_focus(4); }
-	void button_track_focus_6() { button_track_focus(5); }
-	void button_track_focus_7() { button_track_focus(6); }
-	void button_track_focus_8() { button_track_focus(7); }
-
-	void button_track_control_1() { button_track_control(0); }
-	void button_track_control_2() { button_track_control(1); }
-	void button_track_control_3() { button_track_control(2); }
-	void button_track_control_4() { button_track_control(3); }
-	void button_track_control_5() { button_track_control(4); }
-	void button_track_control_6() { button_track_control(5); }
-	void button_track_control_7() { button_track_control(6); }
-	void button_track_control_8() { button_track_control(7); }
+	void send_bank_switch_0() { send_bank_switch(0); }
+	void send_bank_switch_1() { send_bank_switch(1); }
 
 	/* stripables */
 
@@ -569,13 +611,14 @@ private:
 
 	void solo_changed (uint32_t n) { solo_mute_rec_changed(n); }
 	void mute_changed (uint32_t n) { solo_mute_rec_changed(n); }
+	void rec_changed (uint32_t n) { solo_mute_rec_changed(n); }
 	void solo_iso_changed (uint32_t n);
 	void solo_iso_led_bank ();
 #ifdef MIXBUS
 	void master_send_changed (uint32_t n);
 	void master_send_led_bank ();
 #endif
-	void rec_changed (uint32_t n) { solo_mute_rec_changed(n); }
+
 	void solo_mute_rec_changed (uint32_t n);
 
 	/* special Stripable */
