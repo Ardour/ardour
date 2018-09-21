@@ -2280,7 +2280,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 
 	add_option (_("General/Translation"), new OptionEditorHeading (_("Internationalization")));
 

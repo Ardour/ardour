@@ -67,7 +67,7 @@ fixup_bundle_environment (int /*argc*/, char* argv[], string & localedir)
 	}
 #endif
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
 	} else {

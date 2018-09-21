@@ -311,7 +311,7 @@ int main (int argc, char *argv[])
 	fftwf_make_planner_thread_safe ();
 #endif
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	/* initialize C locale to user preference */
 	if (ARDOUR::translations_are_enabled ()) {
 		setlocale (LC_ALL, "");
@@ -327,7 +327,7 @@ int main (int argc, char *argv[])
 	windows_vst_gui_init (&argc, &argv);
 #endif
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	cerr << "bind txt domain [" << PACKAGE << "] to " << localedir << endl;
 
 	(void) bindtextdomain (PACKAGE, localedir.c_str());
