@@ -105,7 +105,7 @@ TransportMaster::set_name (std::string const & str)
 {
 	if (_name != str) {
 		_name = str;
-		PropertyChange (Properties::name);
+		PropertyChanged (Properties::name);
 	}
 }
 
