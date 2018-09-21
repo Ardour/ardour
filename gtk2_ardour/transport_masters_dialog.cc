@@ -18,7 +18,6 @@
 */
 
 #include "pbd/enumwriter.h"
-#include "pbd/i18n.h"
 
 #include "temporal/time.h"
 
@@ -34,6 +33,8 @@
 
 #include "ardour_ui.h"
 #include "transport_masters_dialog.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

@@ -21,8 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include "pbd/i18n.h"
-
 #include <map>
 #include <cerrno>
 #include <sstream>
@@ -72,6 +70,8 @@
 #include "ui_config.h"
 
 #include "sfdb_freesound_mootcher.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;

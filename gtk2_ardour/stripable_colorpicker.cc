@@ -17,12 +17,13 @@
  */
 
 #include "pbd/compose.h"
-#include "pbd/i18n.h"
 
 #include "public_editor.h"
 #include "stripable_colorpicker.h"
 #include "ui_config.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;

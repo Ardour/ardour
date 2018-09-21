@@ -21,7 +21,6 @@
 #include <sigc++/bind.h>
 
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -33,6 +32,8 @@
 #include "mixer_ui.h"
 #include "route_processor_selection.h"
 #include "route_ui.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

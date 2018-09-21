@@ -23,10 +23,11 @@
 #include <gtkmm/label.h>
 #include <gtkmm/stock.h>
 
-#include "pbd/i18n.h"
 #include "ardour/session.h"
 
 #include "save_template_dialog.h"
+
+#include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace ARDOUR;
