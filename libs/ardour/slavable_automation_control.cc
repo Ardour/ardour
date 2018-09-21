@@ -23,7 +23,6 @@
 #include "pbd/error.h"
 #include "pbd/memento_command.h"
 #include "pbd/types_convert.h"
-#include "pbd/i18n.h"
 
 #include "evoral/Curve.hpp"
 
@@ -31,6 +30,8 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/slavable_automation_control.h"
 #include "ardour/session.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

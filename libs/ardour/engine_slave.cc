@@ -20,12 +20,12 @@
 #include <iostream>
 #include <cerrno>
 
-#include "pbd/i18n.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/audio_backend.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;

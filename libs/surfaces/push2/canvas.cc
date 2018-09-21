@@ -25,13 +25,14 @@
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
-#include "pbd/i18n.h"
 
 #include "ardour/debug.h"
 
 #include "canvas.h"
 #include "layout.h"
 #include "push2.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

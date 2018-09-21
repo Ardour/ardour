@@ -16,13 +16,13 @@
  * Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "pbd/i18n.h"
-
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
+
+#include "pbd/i18n.h"
 
 #if __cplusplus > 199711L
 #define local_signbit(x) std::signbit (x)

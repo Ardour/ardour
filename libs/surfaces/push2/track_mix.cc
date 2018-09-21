@@ -24,7 +24,6 @@
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/search_path.h"
 #include "pbd/enumwriter.h"
 
@@ -65,6 +64,8 @@
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

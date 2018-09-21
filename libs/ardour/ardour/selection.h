@@ -27,7 +27,6 @@
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/stateful.h"
-#include "pbd/i18n.h"
 
 #include "ardour/presentation_info.h"
 #include "ardour/types.h"

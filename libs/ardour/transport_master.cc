@@ -20,7 +20,6 @@
 #include <vector>
 
 #include "pbd/debug.h"
-#include "pbd/i18n.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/midi_port.h"
@@ -29,6 +28,8 @@
 #include "ardour/transport_master_manager.h"
 #include "ardour/types_convert.h"
 #include "ardour/utils.h"
+
+#include "pbd/i18n.h"
 
 namespace ARDOUR {
 	namespace Properties {

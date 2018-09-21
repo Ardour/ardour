@@ -21,13 +21,14 @@
 #include "pbd/compose.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/search_path.h"
 
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 
 #include "splash.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

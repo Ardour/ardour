@@ -37,7 +37,6 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"

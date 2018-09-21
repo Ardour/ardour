@@ -15,9 +15,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#include "pbd/i18n.h"
-
 #include "gtkmm2ext/gui_thread.h"
 
 #include "gtkmm2ext/colors.h"
@@ -28,6 +25,8 @@
 #include "menu.h"
 #include "push2.h"
 #include "scale.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect
