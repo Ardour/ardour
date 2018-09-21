@@ -669,9 +669,6 @@ int main() { return 0; }''',
         ('-D__STDC_LIMIT_MACROS', '-D__STDC_FORMAT_MACROS',
          '-DCANVAS_COMPATIBILITY', '-DCANVAS_DEBUG'))
 
-    if opt.nls:
-        compiler_flags.append('-DENABLE_NLS')
-
     # use sparingly, prefer runtime profile
     if Options.options.program_name.lower() == "mixbus":
         compiler_flags.append ('-DMIXBUS')
@@ -1173,6 +1170,9 @@ int main () { return 0; }
     if opts.nls:
         conf.define('ENABLE_NLS', 1)
         conf.env['ENABLE_NLS'] = True
+    else:
+        conf.define('ENABLE_NLS', 0)
+        conf.env['ENABLE_NLS'] = False
     if opts.build_tests:
         conf.env['BUILD_TESTS'] = True
         conf.env['RUN_TESTS'] = opts.run_tests
