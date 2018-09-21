@@ -706,7 +706,7 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 void
 LaunchControlXL::port_registration_handler ()
 {
-	if (!_async_in || !_async_out) {
+	if (!_async_in || !_async_out || !_input_port || !_output_port) {
 		/* ports not registered yet */
 		return;
 	}
@@ -748,7 +748,7 @@ bool
 LaunchControlXL::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	DEBUG_TRACE (DEBUG::LaunchControlXL, "LaunchControlXL::connection_handler start\n");
-	if (!_input_port || !_output_port) {
+	if (!_async_in || !_async_out) {
 		return false;
 	}
 
