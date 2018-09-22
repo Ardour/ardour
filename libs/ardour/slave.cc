@@ -72,3 +72,4 @@ SlaveSessionProxy::sample_time() const
 	return session.engine().sample_time();
 }
 
+} // namespace ARDOUR
