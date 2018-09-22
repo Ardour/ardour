@@ -152,7 +152,9 @@ LaunchControlXL::begin_using_device ()
 	in_use = true;
 
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("fader8master inital value  '%1'\n", fader8master()));
-	set_fader8master (fader8master());
+	if (fader8master()) {
+		set_fader8master (fader8master());
+	}
 
 	return 0;
 }
@@ -951,9 +953,13 @@ LaunchControlXL::set_fader8master (bool yn)
 	_fader8master = yn;
 	if (_fader8master) {
 		stripable[7] = master;
-		bank_start -= 1;  
+		if (bank_start > 0) {
+			bank_start -= 1;
+		}
 	} else {
-		bank_start += 1;
+		if (bank_start > 0) {
+			bank_start += 1;
+		}
 	}
 
 	switch_bank (bank_start);
