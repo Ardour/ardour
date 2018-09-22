@@ -1284,10 +1284,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\slave.cc"
-				>
-			</File>
-			<File
 				RelativePath="..\smf_source.cc"
 				>
 			</File>
@@ -1385,6 +1381,14 @@
 			</File>
 			<File
 				RelativePath="..\transient_detector.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\transport_master.cc"
+				>
+			</File>
+			<File
+				RelativePath="..\transport_master_manager.cc"
 				>
 			</File>
 			<File
@@ -2491,6 +2495,14 @@
 			</File>
 			<File
 				RelativePath="..\ardour\transient_detector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transport_master.h"
+				>
+			</File>
+			<File
+				RelativePath="..\ardour\transport_master_manager.h"
 				>
 			</File>
 			<File
