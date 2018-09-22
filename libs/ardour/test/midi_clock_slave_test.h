@@ -22,7 +22,7 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include "ardour/tempo.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
 
 namespace ARDOUR {
 
