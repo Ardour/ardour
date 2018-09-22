@@ -1084,7 +1084,7 @@ Session::follow_transport_master (pframes_t nframes)
 
 	if (transport_master_tracking_state == Running) {
 
-		if (!actively_recording() && delta > tmm.current()->resolution()) {
+		if (!actively_recording() && fabs (delta) > tmm.current()->resolution()) {
 			DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2\n", delta, tmm.current()->resolution()));
 			if (micro_locate (-delta) != 0) {
 				DEBUG_TRACE (DEBUG::Slave, "micro-locate didn't work, set no disk output true\n");
