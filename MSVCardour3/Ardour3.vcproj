@@ -1260,6 +1260,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\transport_masters_dialog.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\transpose_dialog.cc"
 				>
 			</File>
@@ -2363,6 +2367,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\transport_control_ui.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\transport_masters_dialog.h"
 				>
 			</File>
 			<File
