@@ -114,7 +114,7 @@ MIDIClock_TransportMaster::speed_and_position (double& speed, samplepos_t& pos, 
 }
 
 void
-MIDIClock_TransportMaster::pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
 {
 	/* Read and parse incoming MIDI */
 

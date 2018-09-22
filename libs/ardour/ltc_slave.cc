@@ -510,7 +510,7 @@ LTC_TransportMaster::speed_and_position (double& speed, samplepos_t& pos, sample
 }
 
 void
-LTC_TransportMaster::pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
+LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, boost::optional<samplepos_t> session_pos)
 {
 	Sample* in = (Sample*) AudioEngine::instance()->port_engine().get_buffer (_port->port_handle(), nframes);
 	sampleoffset_t skip = now - (monotonic_cnt + nframes);
