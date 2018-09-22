@@ -72,16 +72,3 @@ SlaveSessionProxy::sample_time() const
 	return session.engine().sample_time();
 }
 
-void
-SlaveSessionProxy::request_locate(samplepos_t sample, bool with_roll)
-{
-	session.request_locate(sample, with_roll);
-}
-
-void
-SlaveSessionProxy::request_transport_speed(double speed)
-{
-	session.request_transport_speed(speed);
-}
-
-} // namespace ARDOUR
