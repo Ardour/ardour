@@ -438,7 +438,6 @@ TransportMastersWindow::TransportMastersWindow ()
 void
 TransportMastersWindow::on_realize ()
 {
-	std::cerr << "TMD realized!\n";
 	ArdourWindow::on_realize ();
 	/* (try to) ensure that resizing is possible and the window can be moved (and closed) */
 	get_window()->set_decorations (Gdk::DECOR_BORDER | Gdk::DECOR_RESIZEH | Gdk::DECOR_TITLE | Gdk::DECOR_MENU);
