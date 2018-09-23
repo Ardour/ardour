@@ -460,7 +460,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	const XMLNode* ui_xml = Config->extra_xml (X_("UI"));
 
 	if (ui_xml) {
-		std::cerr << "\n\n\nHAVE UI XML, set dialogs\n\n\n";
 		key_editor.set_state (*ui_xml, 0);
 		session_option_editor.set_state (*ui_xml, 0);
 		speaker_config_window.set_state (*ui_xml, 0);
