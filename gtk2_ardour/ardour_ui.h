@@ -120,7 +120,7 @@ class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
-class TransportMastersDialog;
+class TransportMastersWindow;
 #endif
 
 class VideoTimeLine;
@@ -682,7 +682,7 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
-	WM::Proxy<TransportMastersDialog> transport_masters_dialog;
+	WM::Proxy<TransportMastersWindow> transport_masters_window;
 
 	/* Windows/Dialogs that require a creator method */
 
