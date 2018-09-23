@@ -88,7 +88,12 @@ TransportMastersWidget::~TransportMastersWidget ()
 void
 TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_master, boost::shared_ptr<TransportMaster> new_master)
 {
-	cerr << "master changed to " << new_master << endl;
+	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
+		if ((*r)->tm == new_master) {
+			(*r)->use_button.set_active (true);
+			break; /* there can only be one */
+		}
+	}
 }
 
 void
@@ -146,21 +151,36 @@ TransportMastersWidget::rebuild ()
 		table.attach (r->port_combo, 8, 9, n, n+1);
 		table.attach (r->request_options, 9, 10, n, n+1);
 
-		if (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm)) {
+		boost::shared_ptr<TimecodeTransportMaster> ttm (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
+
+		if (ttm) {
 			table.attach (r->sclock_synced_button, 10, 11, n, n+1);
-			r->sclock_synced_button.set_active (r->tm->sample_clock_synced());
-			r->sclock_synced_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::sync_button_toggled));
-			table.attach (r->fps_299730_button, 11, 12, n, n+1);
+			table.attach (r->fr2997_button, 11, 12, n, n+1);
+			r->fr2997_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::fr2997_button_toggled));
 		}
 
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
-
-		r->collect_button.set_active (r->tm->collect());
-
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
 		r->collect_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::collect_button_toggled));
 		r->request_options.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::request_option_press), false);
 
+		if (ttm) {
+			r->sclock_synced_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::sync_button_toggled));
+		}
+
+		r->tm->PropertyChanged.connect (r->property_change_connection, invalidator (*this), boost::bind (&TransportMastersWidget::Row::prop_change, r, _1), gui_context());
+
+		PropertyChange all_change;
+		all_change.add (Properties::locked);
+		all_change.add (Properties::collect);
+		all_change.add (Properties::connected);
+
+		if (ttm) {
+			all_change.add (Properties::fr2997);
+			all_change.add (Properties::sclock_synced);
+		}
+
+		r->prop_change (all_change);
 	}
 }
 
@@ -171,11 +191,44 @@ TransportMastersWidget::Row::Row ()
 }
 
 void
+TransportMastersWidget::Row::prop_change (PropertyChange what_changed)
+{
+	if (what_changed.contains (Properties::locked)) {
+	}
+
+	if (what_changed.contains (Properties::fr2997)) {
+		fr2997_button.set_active (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->fr2997());
+	}
+
+	if (what_changed.contains (Properties::sclock_synced)) {
+		sclock_synced_button.set_active (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->sample_clock_synced());
+	}
+
+	if (what_changed.contains (Properties::collect)) {
+		collect_button.set_active (tm->collect());
+	}
+
+	if (what_changed.contains (Properties::connected)) {
+		populate_port_combo ();
+	}
+
+	if (what_changed.contains (Properties::name)) {
+		label.set_text (tm->name());
+	}
+}
+
+void
 TransportMastersWidget::Row::use_button_toggled ()
 {
 	if (use_button.get_active()) {
 		Config->set_sync_source (tm->type());
 	}
+}
+
+void
+TransportMastersWidget::Row::fr2997_button_toggled ()
+{
+	boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)->set_fr2997 (fr2997_button.get_active());
 }
 
 void
@@ -375,16 +428,27 @@ TransportMastersWidget::on_unmap ()
 	Gtk::VBox::on_unmap ();
 }
 
-TransportMastersDialog::TransportMastersDialog ()
-	: ArdourDialog (_("Transport Masters"))
+TransportMastersWindow::TransportMastersWindow ()
+	: ArdourWindow (_("Transport Masters"))
 {
-	get_vbox()->pack_start (w);
+	add (w);
 	w.show ();
 }
 
 void
-TransportMastersDialog::set_session (ARDOUR::Session* s)
+TransportMastersWindow::on_realize ()
 {
-	ArdourDialog::set_session (s);
+	std::cerr << "TMD realized!\n";
+	ArdourWindow::on_realize ();
+	/* (try to) ensure that resizing is possible and the window can be moved (and closed) */
+	get_window()->set_decorations (Gdk::DECOR_BORDER | Gdk::DECOR_RESIZEH | Gdk::DECOR_TITLE | Gdk::DECOR_MENU);
+}
+
+
+
+void
+TransportMastersWindow::set_session (ARDOUR::Session* s)
+{
+	ArdourWindow::set_session (s);
 	w.set_session (s);
 }

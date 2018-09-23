@@ -29,7 +29,7 @@
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
 
-#include "ardour_dialog.h"
+#include "ardour_window.h"
 
 namespace Gtk {
 	class Menu;
@@ -64,7 +64,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::RadioButton use_button;
 		Gtk::ComboBoxText port_combo;
 		Gtk::CheckButton sclock_synced_button;
-		Gtk::CheckButton fps_299730_button;
+		Gtk::CheckButton fr2997_button;
 		Gtk::Button request_options;
 		Gtk::Menu* request_option_menu;
 
@@ -93,10 +93,13 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void use_button_toggled ();
 		void collect_button_toggled ();
 		void sync_button_toggled ();
+		void fr2997_button_toggled ();
 		void port_choice_changed ();
 		void connection_handler ();
 		bool request_option_press (GdkEventButton*);
+		void prop_change (PBD::PropertyChange);
 
+		PBD::ScopedConnection property_change_connection;
 		bool ignore_active_change;
 	};
 
@@ -114,12 +117,15 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 };
 
-class TransportMastersDialog : public ArdourDialog
+class TransportMastersWindow : public ArdourWindow
 {
   public:
-	TransportMastersDialog ();
+	TransportMastersWindow ();
 
 	void set_session (ARDOUR::Session*);
+
+  protected:
+	void on_realize ();
 
   private:
 	TransportMastersWidget w;
