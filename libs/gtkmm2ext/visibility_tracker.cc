@@ -29,7 +29,6 @@ VisibilityTracker::VisibilityTracker (Gtk::Window& win)
 	: _window (win)
 	, _visibility (GDK_VISIBILITY_FULLY_OBSCURED)
 {
-	std::cerr << " vis tracker for " << _window.get_title() << " created\n";
 	_window.add_events (Gdk::VISIBILITY_NOTIFY_MASK);
 	_window.signal_visibility_notify_event().connect (sigc::mem_fun (*this, &VisibilityTracker::handle_visibility_notify_event));
 }
@@ -43,9 +42,7 @@ VisibilityTracker::set_use_window_manager_visibility (bool yn)
 bool
 VisibilityTracker::handle_visibility_notify_event (GdkEventVisibility* ev)
 {
-	std::cerr << _window.get_title() << " VISIBILITY CHANGE " << " from " << _visibility;
 	_visibility = ev->state;
-	std::cerr << " to " << _visibility << std::endl;
 	return false;
 }
 
@@ -83,10 +80,8 @@ bool
 VisibilityTracker::partially_visible () const
 {
 	if (_use_window_manager_visibility) {
-		std::cerr << _window.get_title() << " pvis from vis = " << _visibility << " mapped " << _window.is_mapped() << std::endl;
 		return _window.is_mapped() && ((_visibility == GDK_VISIBILITY_PARTIAL) || (_visibility == GDK_VISIBILITY_UNOBSCURED));
 	} else {
-		std::cerr << _window.get_title() << " pvis from mapped " << _window.is_mapped() << std::endl;
 		return _window.is_mapped();
 	}
 }
