@@ -170,7 +170,16 @@ TransportMaster::check_collect()
 void
 TransportMaster::set_collect (bool yn)
 {
-	_pending_collect = yn;
+	/* theoretical race condition */
+
+	if (_connected) {
+		_pending_collect = yn;
+	} else {
+		if (_collect != yn) {
+			_pending_collect = _collect = yn;
+			PropertyChanged (Properties::collect);
+		}
+	}
 }
 
 void
