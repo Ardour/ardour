@@ -54,7 +54,7 @@ ArdourWindow::ArdourWindow (Gtk::Window& parent, string title)
 
 ArdourWindow::~ArdourWindow ()
 {
-	WM::Manager::instance().remove (proxy);
+	// WM::Manager::instance().remove (proxy);
 }
 
 bool
@@ -141,8 +141,5 @@ ArdourWindow::init ()
 	}
 
 	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourWindow::hide));
-
-	proxy = new WM::ProxyTemporary (get_title(), this);
-	WM::Manager::instance().register_window (proxy);
 }
 
