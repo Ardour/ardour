@@ -218,7 +218,7 @@ void
 MackieControlProtocol::next_track()
 {
 	Sorted sorted = get_sorted_stripables();
-	if (_current_initial_bank + n_strips() < sorted.size()) {
+	if (_current_initial_bank + 1 < sorted.size()) {
 		switch_banks (_current_initial_bank + 1);
 	}
 }
