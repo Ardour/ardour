@@ -1138,7 +1138,7 @@ Surface::update_view_mode_display (bool with_helpful_text)
 	if (id >= 0) {
 
 		for (vector<int>::iterator i = view_mode_buttons.begin(); i != view_mode_buttons.end(); ++i) {
-			map<int,Control*>::iterator x = controls_by_device_independent_id.find (id);
+			map<int,Control*>::iterator x = controls_by_device_independent_id.find (*i);
 
 			if (x != controls_by_device_independent_id.end()) {
 				Button* button = dynamic_cast<Button*> (x->second);
