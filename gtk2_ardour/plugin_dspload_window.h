@@ -24,6 +24,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 
+#include "widgets/ardour_button.h"
 #include "pbd/signals.h"
 
 #include "ardour_window.h"
@@ -51,10 +52,13 @@ protected:
 private:
 	void refill_processors ();
 	void drop_references ();
+	void clear_all_stats ();
 	void add_processor_to_display (boost::weak_ptr<ARDOUR::Processor>, std::string const&);
+	void clear_processor_stats (boost::weak_ptr<ARDOUR::Processor>);
 
 	Gtk::ScrolledWindow _scroller;
 	Gtk::VBox _box;
+	ArdourWidgets::ArdourButton _reset_button;
 
 	PBD::ScopedConnectionList _processor_connections;
 	PBD::ScopedConnectionList _route_connections;

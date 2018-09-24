@@ -32,11 +32,15 @@ using namespace ARDOUR;
 
 PluginDSPLoadWindow::PluginDSPLoadWindow ()
 	: ArdourWindow (_("Plugin DSP Load"))
+	, _reset_button (_("Reset All Stats"))
 {
 	_scroller.set_border_width (0);
 	_scroller.set_shadow_type (Gtk::SHADOW_NONE);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	_scroller.add (_box);
+
+	_reset_button.set_name ("generic button");
+	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginDSPLoadWindow::clear_all_stats));
 
 	add (_scroller);
 	_box.show ();
@@ -84,13 +88,24 @@ PluginDSPLoadWindow::on_hide ()
 }
 
 void
+PluginDSPLoadWindow::clear_all_stats ()
+{
+	RouteList routes = _session->get_routelist ();
+	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->foreach_processor (sigc::mem_fun (*this, &PluginDSPLoadWindow::clear_processor_stats));
+	}
+}
+
+void
 PluginDSPLoadWindow::drop_references ()
 {
 	std::list<Gtk::Widget*> children = _box.get_children ();
 	for (std::list<Gtk::Widget*>::iterator child = children.begin(); child != children.end(); ++child) {
 		(*child)->hide ();
 		_box.remove (**child);
-		delete *child;
+		if (*child != &_reset_button) {
+			delete *child;
+		}
 	}
 }
 
@@ -115,6 +130,9 @@ PluginDSPLoadWindow::refill_processors ()
 	if (_box.get_children().size() == 0) {
 		_box.add (*Gtk::manage (new Gtk::Label (_("No Plugins"))));
 		_box.show_all ();
+	} else if (_box.get_children().size() > 1) {
+		_box.pack_start (_reset_button, Gtk::PACK_SHRINK, 2);
+		_reset_button.show ();
 	}
 }
 
@@ -136,4 +154,14 @@ PluginDSPLoadWindow::add_processor_to_display (boost::weak_ptr<Processor> w, std
 
 	plsg->start_updating ();
 	frame->show_all ();
+}
+
+void
+PluginDSPLoadWindow::clear_processor_stats (boost::weak_ptr<Processor> w)
+{
+	boost::shared_ptr<Processor> p = w.lock ();
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	if (pi) {
+		pi->clear_stats ();
+	}
 }
