@@ -23,6 +23,7 @@
 #include <vector>
 
 #include <boost/optional.hpp>
+#include <boost/atomic.hpp>
 
 #include <glibmm/threads.h>
 
@@ -282,18 +283,43 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 };
 
 struct LIBARDOUR_API SafeTime {
-	volatile int guard1;
+	boost::atomic<int> guard1;
 	samplepos_t   position;
 	samplepos_t   timestamp;
 	double       speed;
-	volatile int guard2;
+	boost::atomic<int> guard2;
 
 	SafeTime() {
-		guard1 = 0;
+		guard1.store (0);
 		position = 0;
 		timestamp = 0;
 		speed = 0;
-		guard2 = 0;
+		guard2.store (0);
+	}
+
+	SafeTime (SafeTime const & other)
+		: guard1 (other.guard1.load (boost::memory_order_acquire))
+		, position (other.position)
+		, timestamp (other.timestamp)
+		, speed (other.speed)
+		, guard2 (other.guard2.load (boost::memory_order_acquire))
+	{}
+
+	SafeTime& operator= (SafeTime const & other) {
+		guard1 = other.guard1.load (boost::memory_order_acquire);
+		position = other.position;
+		timestamp = other.timestamp;
+		speed = other.speed;
+		guard2 = other.guard2.load (boost::memory_order_acquire);
+		return *this;
+	}
+
+	void update (samplepos_t p, samplepos_t t, double s) {
+		guard1.fetch_add (1, boost::memory_order_acquire);
+		position = p;
+		timestamp = t;
+		speed = s;
+		guard2.fetch_add (1, boost::memory_order_acquire);
 	}
 };
 

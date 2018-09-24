@@ -273,7 +273,7 @@ MTC_TransportMaster::read_current (SafeTime *st) const
 		*st = current;
 		tries++;
 
-	} while (st->guard1 != st->guard2);
+	} while (st->guard1.load (boost::memory_order_acquire) != st->guard2.load (boost::memory_order_acquire));
 }
 
 void
@@ -312,11 +312,7 @@ MTC_TransportMaster::update_mtc_qtr (Parser& p, int which_qtr, samplepos_t now)
 		mtc_speed = (t1 - t0) / qtr_d;
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = now;
-		current.speed = mtc_speed;
-		current.guard2++;
+		current.update (mtc_frame, now, mtc_speed);
 
 		last_inbound_frame = now;
 	}
@@ -499,10 +495,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 				init_mtc_dll(mtc_frame, qtr);
 				mtc_frame_dll = mtc_frame;
 			}
-			current.guard1++;
-			current.position = mtc_frame;
-			current.timestamp = now;
-			current.guard2++;
+			current.update (mtc_frame, now, current.speed);
 			reset_window (mtc_frame);
 		}
 	}
@@ -525,28 +518,15 @@ MTC_TransportMaster::update_mtc_status (MIDI::MTC_Status status)
 
 	switch (status) {
 	case MTC_Stopped:
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
-
+		current.update (mtc_frame, 0, 0);
 		break;
 
 	case MTC_Forward:
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
+		current.update (mtc_frame, 0, 0);
 		break;
 
 	case MTC_Backward:
-		current.guard1++;
-		current.position = mtc_frame;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
+		current.update (mtc_frame, 0, 0);
 		break;
 	}
 	busy_guard2++;
