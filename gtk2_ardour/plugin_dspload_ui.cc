@@ -41,6 +41,7 @@ PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> 
 	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginLoadStatsGui::clear_stats));
 	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
 	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 99.123), 0, 0);
+	_darea.set_size_request (360, 32); // TODO  max (320, 360 * UIConfiguration::instance().get_ui_scale ())
 
 	attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_RIGHT, ALIGN_CENTER)),
 			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);

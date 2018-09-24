@@ -96,6 +96,7 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
+#include "plugin_dspload_window.h"
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
@@ -120,6 +121,7 @@ class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
+class PluginDSPLoadWindow;
 class TransportMastersWindow;
 #endif
 
@@ -682,6 +684,7 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
+	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
 	WM::Proxy<TransportMastersWindow> transport_masters_window;
 
 	/* Windows/Dialogs that require a creator method */
