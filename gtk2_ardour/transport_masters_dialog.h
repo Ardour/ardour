@@ -58,6 +58,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::Label type;
 		Gtk::Label format;
 		Gtk::Label current;
+		Gtk::Label last;
 		Gtk::Label timestamp;
 		Gtk::Label delta;
 		Gtk::CheckButton collect_button;
@@ -107,7 +108,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	Gtk::RadioButtonGroup use_button_group;
 	Gtk::Table table;
-	Gtk::Label col_title[12];
+	Gtk::Label col_title[13];
 
 	sigc::connection update_connection;
 	PBD::ScopedConnection current_connection;

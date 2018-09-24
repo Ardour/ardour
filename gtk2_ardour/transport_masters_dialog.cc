@@ -44,32 +44,36 @@ using namespace PBD;
 using namespace ArdourWidgets;
 
 TransportMastersWidget::TransportMastersWidget ()
-	: table (4, 9)
+	: table (4, 13)
 {
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
 
-	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
-	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
-	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));
-	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format")));
-	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Current")));
-	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Timestamp")));
-	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Delta")));
-	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Collect")));
-	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use")));
-	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Data Source")));
-	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Accept")));
-	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock Synced")));
-	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/30")));
+	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use")));
+	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
+	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));
+	col_title[3].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Format/\nBPM")));
+	col_title[4].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Current")));
+	col_title[5].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Last")));
+	col_title[6].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Timestamp")));
+	col_title[7].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Delta")));
+	col_title[8].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Collect")));
+	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Data Source")));
+	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));
+	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
+	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/30")));
 
-	set_tooltip (col_title[11], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
-	                             "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
-	                             "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
-	                             "Drop-sample timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
-	                             "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
-	                             "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
+#if 0
+	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
+	                              "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
+	                              "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
+	                              "Drop-sample timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
+	                              "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
+	                              "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 		             ));
 
+	set_tooltip (col_title[11], string_compose (_("<b>When enabled</b> the external timecode source is assumed to be sample-clock synced to the audio interface\n"
+	                                              "being used by %1."), PROGRAM_NAME));
+#endif
 
 	table.set_spacings (6);
 
@@ -108,20 +112,11 @@ TransportMastersWidget::rebuild ()
 	}
 
 	rows.clear ();
-	table.resize (masters.size()+1, 12);
+	table.resize (masters.size()+1, 13);
 
-	table.attach (col_title[0], 0, 1, 0, 1);
-	table.attach (col_title[1], 1, 2, 0, 1);
-	table.attach (col_title[2], 2, 3, 0, 1);
-	table.attach (col_title[3], 3, 4, 0, 1);
-	table.attach (col_title[4], 4, 5, 0, 1);
-	table.attach (col_title[5], 5, 6, 0, 1);
-	table.attach (col_title[6], 6, 7, 0, 1);
-	table.attach (col_title[7], 7, 8, 0, 1);
-	table.attach (col_title[8], 8, 9, 0, 1);
-	table.attach (col_title[9], 9, 10, 0, 1);
-	table.attach (col_title[10], 10, 11, 0, 1);
-	table.attach (col_title[11], 11, 12, 0, 1);
+	for (size_t col = 0; col < sizeof (col_title) / sizeof (col_title[0]); ++col) {
+		table.attach (col_title[col], col, col+1, 0, 1);
+	}
 
 	uint32_t n = 1;
 
@@ -140,22 +135,25 @@ TransportMastersWidget::rebuild ()
 			r->use_button.set_active (true);
 		}
 
-		table.attach (r->type, 0, 1, n, n+1);
-		table.attach (r->label, 1, 2, n, n+1);
-		table.attach (r->format, 2, 3, n, n+1);
-		table.attach (r->current, 3, 4, n, n+1);
-		table.attach (r->timestamp, 4, 5, n, n+1);
-		table.attach (r->delta, 5, 6, n, n+1);
-		table.attach (r->collect_button, 6, 7, n, n+1);
-		table.attach (r->use_button, 7, 8, n, n+1);
-		table.attach (r->port_combo, 8, 9, n, n+1);
-		table.attach (r->request_options, 9, 10, n, n+1);
+		int col = 0;
+
+		table.attach (r->use_button, col, col+1, n, n+1); ++col;
+		table.attach (r->type, col, col+1, n, n+1); ++col;
+		table.attach (r->label, col, col+1, n, n+1); ++col;
+		table.attach (r->format, col, col+1, n, n+1); ++col;
+		table.attach (r->current, col, col+1, n, n+1); ++col;
+		table.attach (r->last, col, col+1, n, n+1); ++col;
+		table.attach (r->timestamp, col, col+1, n, n+1); ++col;
+		table.attach (r->delta, col, col+1, n, n+1); ++col;
+		table.attach (r->collect_button, col, col+1, n, n+1); ++col;
+		table.attach (r->port_combo, col, col+1, n, n+1); ++col;
+		table.attach (r->request_options, col, col+1, n, n+1); ++col;
 
 		boost::shared_ptr<TimecodeTransportMaster> ttm (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
 
 		if (ttm) {
-			table.attach (r->sclock_synced_button, 10, 11, n, n+1);
-			table.attach (r->fr2997_button, 11, 12, n, n+1);
+			table.attach (r->sclock_synced_button, col, col+1, n, n+1); ++col;
+			table.attach (r->fr2997_button, col, col+1, n, n+1); ++col;
 			r->fr2997_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::fr2997_button_toggled));
 		}
 
@@ -400,8 +398,6 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 		}
 	}
-
-	populate_port_combo ();
 }
 
 void
