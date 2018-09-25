@@ -260,6 +260,8 @@ VSTPlugin::add_state (XMLNode* root) const
 		chunk_node->add_content (data);
 		g_free (data);
 
+		chunk_node->set_property ("program", (int) _plugin->dispatcher (_plugin, effGetProgram, 0, 0, NULL, 0));
+
 		root->add_child_nocopy (*chunk_node);
 
 	} else {
@@ -286,6 +288,11 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 	XMLNode* child;
 
 	if ((child = find_named_node (node, X_("chunk"))) != 0) {
+
+		int pgm = -1;
+		if (child->get_property (X_("program"), pgm)) {
+			_plugin->dispatcher (_plugin, effSetProgram, 0, pgm, NULL, 0);
+		};
 
 		XMLPropertyList::const_iterator i;
 		XMLNodeList::const_iterator n;
