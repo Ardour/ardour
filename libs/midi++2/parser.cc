@@ -749,7 +749,7 @@ Parser::signal (MIDI::byte *msg, size_t len)
 		break;
 
 	case MIDI::position:
-		position (*this, msg, len);
+		position (*this, msg, len, _timestamp);
 		break;
 
 	case MIDI::song:

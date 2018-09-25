@@ -35,7 +35,7 @@ class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
 typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
-typedef PBD::Signal2<void,Parser&,samplecnt_t>        TimestampedSignal;
+typedef PBD::Signal2<void,Parser&,samplecnt_t>       TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
@@ -90,7 +90,7 @@ class LIBMIDIPP_API Parser {
 	AnySignal             any;
 	Signal                sysex;
 	Signal                mmc;
-	Signal                position;
+	AnySignal             position;
 	Signal                song;
 
 	ZeroByteSignal        all_notes_off;
