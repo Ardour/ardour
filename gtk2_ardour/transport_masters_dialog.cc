@@ -372,6 +372,8 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	samplepos_t pos;
 	double speed;
+	samplepos_t last;
+	samplepos_t when;
 	stringstream ss;
 	Time t;
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
@@ -379,7 +381,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	if (s) {
 
-		if (tm->speed_and_position (speed, pos, now)) {
+		if (tm->speed_and_position (speed, pos, last, when, now)) {
 
 			sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
 
