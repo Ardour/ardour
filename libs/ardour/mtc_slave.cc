@@ -32,8 +32,6 @@
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
 
-#include <glibmm/timer.h>
-
 #include "pbd/i18n.h"
 
 using namespace std;
@@ -257,23 +255,6 @@ MTC_TransportMaster::handle_locate (const MIDI::byte* mmc_tc)
 	mtc[0] = mmc_tc[3];
 
 	update_mtc_time (mtc, true, 0);
-}
-
-void
-MTC_TransportMaster::read_current (SafeTime *st) const
-{
-	int tries = 0;
-
-	do {
-		if (tries == 10) {
-			error << _("MTC Slave: atomic read of current time failed, sleeping!") << endmsg;
-			Glib::usleep (20);
-			tries = 0;
-		}
-		*st = current;
-		tries++;
-
-	} while (st->guard1.load (boost::memory_order_acquire) != st->guard2.load (boost::memory_order_acquire));
 }
 
 void
@@ -579,7 +560,7 @@ MTC_TransportMaster::speed_and_position (double& speed, samplepos_t& pos, sample
 		return false;
 	}
 
-	read_current (&last);
+	current.safe_read (last);
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("speed&pos: timestamp %1 speed %2 dir %4 now %5 last-in %6\n",
 						 last.timestamp,
@@ -634,7 +615,7 @@ std::string
 MTC_TransportMaster::position_string() const
 {
 	SafeTime last;
-	read_current (&last);
+	current.safe_read (last);
 	if (last.timestamp == 0 || reset_pending) {
 		return " --:--:--:--";
 	}
@@ -650,7 +631,7 @@ MTC_TransportMaster::delta_string () const
 {
 	char delta[80];
 	SafeTime last;
-	read_current (&last);
+	current.safe_read (last);
 
 	delta[0] = '\0';
 

@@ -26,9 +26,11 @@
 #include <boost/atomic.hpp>
 
 #include <glibmm/threads.h>
+#include <glibmm/timer.h>
 
 #include <ltc.h>
 
+#include "pbd/i18n.h"
 #include "pbd/properties.h"
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
@@ -305,21 +307,31 @@ struct LIBARDOUR_API SafeTime {
 		, guard2 (other.guard2.load (boost::memory_order_acquire))
 	{}
 
-	SafeTime& operator= (SafeTime const & other) {
-		guard1 = other.guard1.load (boost::memory_order_acquire);
-		position = other.position;
-		timestamp = other.timestamp;
-		speed = other.speed;
-		guard2 = other.guard2.load (boost::memory_order_acquire);
-		return *this;
-	}
-
 	void update (samplepos_t p, samplepos_t t, double s) {
 		guard1.fetch_add (1, boost::memory_order_acquire);
 		position = p;
 		timestamp = t;
 		speed = s;
 		guard2.fetch_add (1, boost::memory_order_acquire);
+	}
+
+	void safe_read (SafeTime& dst) const {
+		int tries = 0;
+
+		do {
+			if (tries == 10) {
+				std::cerr << X_("SafeTime: atomic read of current time failed, sleeping!") << std::endl;
+				Glib::usleep (20);
+				tries = 0;
+			}
+			dst.guard1.store (guard1.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.position = position;
+			dst.timestamp = timestamp;
+			dst.speed = speed;
+			dst.guard2.store (guard2.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			tries++;
+
+		} while (dst.guard1.load (boost::memory_order_seq_cst) != dst.guard2.load (boost::memory_order_seq_cst));
 	}
 };
 
