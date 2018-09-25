@@ -76,7 +76,7 @@ Engine_TransportMaster::pre_process (pframes_t, samplepos_t, boost::optional<sam
 }
 
 bool
-Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, samplepos_t /* now */)
+Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, samplepos_t& lp, samplepos_t & when, samplepos_t now)
 {
 	boost::shared_ptr<AudioBackend> backend = engine.current_backend();
 
@@ -87,6 +87,9 @@ Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, s
 	if (backend && backend->speed_and_position (sp, position)) {
 		return true;
 	}
+
+	lp = now;
+	when = now;
 
 	_current_delta = 0;
 

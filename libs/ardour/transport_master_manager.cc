@@ -175,8 +175,9 @@ TransportMasterManager::pre_process_transport_masters (pframes_t nframes, sample
 	}
 
 	double engine_speed;
+	samplepos_t ignore1, ignore2;
 
-	if (!_current_master->speed_and_position (_master_speed, _master_position, now)) {
+	if (!_current_master->speed_and_position (_master_speed, _master_position, ignore1, ignore2, now)) {
 		return 1.0;
 	}
 

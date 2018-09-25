@@ -1119,8 +1119,9 @@ Session::start_locate (samplepos_t target_sample, bool with_roll, bool with_flus
 
 		double sp;
 		samplepos_t pos;
+		samplepos_t ignore1, ignore2;
 
-		transport_master()->speed_and_position (sp, pos, 0);
+		transport_master()->speed_and_position (sp, pos, ignore1, ignore2, 0);
 
 		if (target_sample != pos) {
 

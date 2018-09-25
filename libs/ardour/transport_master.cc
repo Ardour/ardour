@@ -22,6 +22,7 @@
 #include "pbd/debug.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/debug.h"
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
@@ -82,6 +83,59 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 TransportMaster::~TransportMaster()
 {
 	delete _session;
+}
+
+bool
+TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_t& lp, samplepos_t& when, samplepos_t now)
+{
+	if (!_collect) {
+		return false;
+	}
+
+	SafeTime last;
+	current.safe_read (last);
+
+	if (last.timestamp == 0) {
+		return false;
+	}
+
+	if (last.timestamp && now > last.timestamp && now - last.timestamp > labs (seekahead_distance())) {
+		/* no timecode for two cycles - conclude that it's stopped */
+
+		if (!Config->get_transport_masters_just_roll_when_sync_lost()) {
+			speed = 0;
+			pos = last.position;
+			lp = last.position;
+			when = last.timestamp;
+			_current_delta = 0;
+			// queue_reset (false);
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 not seen for 2 samples - reset pending, pos = %2\n", name(), pos));
+			return false;
+		}
+	}
+
+	lp = last.position;
+	when = last.timestamp;
+	speed = last.speed;
+	pos   = last.position + (now - last.timestamp) * last.speed;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1: speed_and_position tme: %2 pos: %3 spd: %4\n", name(), last.timestamp, last.position, last.speed));
+
+	lp = last.position;
+	when = last.timestamp;
+	speed = last.speed;
+
+	/* provide a .1% deadzone to lock the speed */
+	if (fabs (speed - 1.0) <= 0.001) {
+		speed = 1.0;
+	}
+
+	pos = last.position + (now - last.timestamp) * speed;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 sync spd: %2 pos: %3 | last-pos: %4 | elapsed: %5\n",
+	                                           name(), speed, pos, last.position, (now - last.timestamp)));
+
+	return true;
 }
 
 void

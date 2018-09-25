@@ -132,6 +132,8 @@ MTC_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now, boos
 {
 	/* Read and parse incoming MIDI */
 
+	maybe_reset ();
+
 	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
 	if (session_pos) {
@@ -222,18 +224,9 @@ MTC_TransportMaster::reset (bool with_position)
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC_TransportMaster reset %1\n", with_position?"with position":"without position"));
 
 	if (with_position) {
-		last_inbound_frame = 0;
-		current.guard1++;
-		current.position = 0;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
+		current.update (0, 0, 0);
 	} else {
-		last_inbound_frame = 0;
-		current.guard1++;
-		current.timestamp = 0;
-		current.speed = 0;
-		current.guard2++;
+		current.update (current.position, 0, 0);
 	}
 	first_mtc_timestamp = 0;
 	window_begin = 0;
@@ -294,8 +287,6 @@ MTC_TransportMaster::update_mtc_qtr (Parser& p, int which_qtr, samplepos_t now)
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
 		current.update (mtc_frame, now, mtc_speed);
-
-		last_inbound_frame = now;
 	}
 
 	maybe_reset ();
@@ -481,9 +472,6 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 		}
 	}
 
-	if (now) {
-		last_inbound_frame = now;
-	}
 	busy_guard2++;
 }
 
@@ -547,62 +535,6 @@ MTC_TransportMaster::reset_window (samplepos_t root)
 	}
 
 	DEBUG_TRACE (DEBUG::MTC, string_compose ("reset MTC window @ %3, now %1 .. %2\n", window_begin, window_end, root));
-}
-
-/* main entry point from session_process.cc
-xo * in process callback context */
-bool
-MTC_TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_t now)
-{
-	SafeTime last;
-
-	if (!_collect) {
-		return false;
-	}
-
-	current.safe_read (last);
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("speed&pos: timestamp %1 speed %2 dir %4 now %5 last-in %6\n",
-						 last.timestamp,
-						 last.speed,
-						 transport_direction,
-						 now,
-						 last_inbound_frame));
-
-	if (last.timestamp == 0) {
-		return false;
-	}
-
-	if (last_inbound_frame && now > last_inbound_frame && now - last_inbound_frame > labs(seekahead_distance())) {
-		/* no timecode for two cycles - conclude that it's stopped */
-
-		if (!Config->get_transport_masters_just_roll_when_sync_lost()) {
-			speed = 0;
-			pos = last.position;
-			_current_delta = 0;
-			queue_reset (false);
-			DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC not seen for 2 samples - reset pending, pos = %1\n", pos));
-			return false;
-		}
-	}
-
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTC::speed_and_position mtc-tme: %1 mtc-pos: %2 mtc-spd: %3\n", last.timestamp, last.position, last.speed));
-
-	speed = last.speed;
-
-	/* provide a .1% deadzone to lock the speed */
-	if (fabs (speed - 1.0) <= 0.001) {
-		speed = 1.0;
-	}
-
-	pos =  last.position;
-	pos += (now - last.timestamp) * speed;
-
-	DEBUG_TRACE (DEBUG::MTC, string_compose ("MTCsync spd: %1 pos: %2 | last-pos: %3 | elapsed: %4\n",
-	                                         speed, pos, last.position, (now - last.timestamp)));
-
-	return true;
 }
 
 Timecode::TimecodeFormat

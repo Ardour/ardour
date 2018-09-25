@@ -66,6 +66,80 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<ARDOUR::TransportRequestType> allowed_transport_requests;
 };
 
+struct LIBARDOUR_API SafeTime {
+
+	/* This object uses memory fences to provide psuedo-atomic updating of
+	 * non-atomic data. If after reading guard1 and guard2 with correct
+	 * memory fencing they have the same value, then we know that the other
+	 * members are all internally consistent.
+	 *
+	 * Traditionally, one might do this with a mutex, but this object
+	 * provides lock-free write update. The reader might block while
+	 * waiting for consistency, but this is extraordinarily unlikely. In
+	 * this sense, the design is similar to a spinlock.
+	 *
+	 * any update starts by incrementing guard1, with a memory fence to
+	 * ensure no reordering of this w.r.t later operations.
+	 *
+	 * then we update the "non-atomic" data members.
+	 *
+	 * then we update guard2, with another memory fence to prevent
+	 * reordering.
+	 *
+	 * ergo, if guard1 == guard2, the update of the non-atomic members is
+	 * complete and the values stored there are consistent.
+	 */
+
+	boost::atomic<int> guard1;
+	samplepos_t        position;
+	samplepos_t        timestamp;
+	double             speed;
+	boost::atomic<int> guard2;
+
+	SafeTime() {
+		guard1.store (0);
+		position = 0;
+		timestamp = 0;
+		speed = 0;
+		guard2.store (0);
+	}
+
+	void reset () {
+		guard1.store (0);
+		position = 0;
+		timestamp  = 0;
+		speed = 0;
+		guard2.store (0);
+	}
+
+	void update (samplepos_t p, samplepos_t t, double s) {
+		guard1.fetch_add (1, boost::memory_order_acquire);
+		position = p;
+		timestamp = t;
+		speed = s;
+		guard2.fetch_add (1, boost::memory_order_acquire);
+	}
+
+	void safe_read (SafeTime& dst) const {
+		int tries = 0;
+
+		do {
+			if (tries == 10) {
+				std::cerr << X_("SafeTime: atomic read of current time failed, sleeping!") << std::endl;
+				Glib::usleep (20);
+				tries = 0;
+			}
+			dst.guard1.store (guard1.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			dst.position = position;
+			dst.timestamp = timestamp;
+			dst.speed = speed;
+			dst.guard2.store (guard2.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
+			tries++;
+
+		} while (dst.guard1.load (boost::memory_order_seq_cst) != dst.guard2.load (boost::memory_order_seq_cst));
+	}
+};
+
 /**
  * @class TransportMaster
  *
@@ -138,7 +212,7 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	 * @param position - The transport position requested
 	 * @return - The return value is currently ignored (see Session::follow_slave)
 	 */
-	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t now) = 0;
+	virtual bool speed_and_position (double& speed, samplepos_t& position, samplepos_t & lp, samplepos_t & when, samplepos_t now);
 
 	/**
 	 * reports to ARDOUR whether the TransportMaster is currently synced to its external
@@ -252,6 +326,9 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	TransportRequestType request_mask() const { return _request_mask; }
 	void set_request_mask (TransportRequestType);
+
+	void get_current (double&, samplepos_t&, samplepos_t);
+
   protected:
 	SyncSource      _type;
 	PBD::Property<std::string>   _name;
@@ -263,6 +340,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	PBD::Property<bool> _sclock_synced;
 	PBD::Property<bool> _collect;
 	PBD::Property<bool> _connected;
+
+	SafeTime current;
 
 	/* DLL - chase incoming data */
 
@@ -282,57 +361,6 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	PBD::ScopedConnection backend_connection;
 
 	virtual void register_properties ();
-};
-
-struct LIBARDOUR_API SafeTime {
-	boost::atomic<int> guard1;
-	samplepos_t   position;
-	samplepos_t   timestamp;
-	double       speed;
-	boost::atomic<int> guard2;
-
-	SafeTime() {
-		guard1.store (0);
-		position = 0;
-		timestamp = 0;
-		speed = 0;
-		guard2.store (0);
-	}
-
-	SafeTime (SafeTime const & other)
-		: guard1 (other.guard1.load (boost::memory_order_acquire))
-		, position (other.position)
-		, timestamp (other.timestamp)
-		, speed (other.speed)
-		, guard2 (other.guard2.load (boost::memory_order_acquire))
-	{}
-
-	void update (samplepos_t p, samplepos_t t, double s) {
-		guard1.fetch_add (1, boost::memory_order_acquire);
-		position = p;
-		timestamp = t;
-		speed = s;
-		guard2.fetch_add (1, boost::memory_order_acquire);
-	}
-
-	void safe_read (SafeTime& dst) const {
-		int tries = 0;
-
-		do {
-			if (tries == 10) {
-				std::cerr << X_("SafeTime: atomic read of current time failed, sleeping!") << std::endl;
-				Glib::usleep (20);
-				tries = 0;
-			}
-			dst.guard1.store (guard1.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
-			dst.position = position;
-			dst.timestamp = timestamp;
-			dst.speed = speed;
-			dst.guard2.store (guard2.load (boost::memory_order_seq_cst), boost::memory_order_seq_cst);
-			tries++;
-
-		} while (dst.guard1.load (boost::memory_order_seq_cst) != dst.guard2.load (boost::memory_order_seq_cst));
-	}
 };
 
 /** a helper class for any TransportMaster that receives its input via a MIDI
@@ -377,8 +405,6 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
-	bool speed_and_position (double&, samplepos_t&, samplepos_t);
-
 	bool locked() const;
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
@@ -399,7 +425,6 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 
 	static const int sample_tolerance;
 
-	SafeTime       current;
 	samplepos_t    mtc_frame;               /* current time */
 	double         mtc_frame_dll;
 	samplepos_t    last_inbound_frame;      /* when we got it; audio clocked */
@@ -430,7 +455,6 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 	void update_mtc_qtr (MIDI::Parser&, int, samplepos_t);
 	void update_mtc_time (const MIDI::byte *, bool, samplepos_t);
 	void update_mtc_status (MIDI::MTC_Status);
-	void read_current (SafeTime *) const;
 	void reset_window (samplepos_t);
 	bool outside_window (samplepos_t) const;
 	void init_mtc_dll(samplepos_t, double);
@@ -446,7 +470,6 @@ public:
 	void set_session (Session*);
 
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
-	bool speed_and_position (double&, samplepos_t&, samplepos_t);
 
 	bool locked() const;
 	bool ok() const;
@@ -482,10 +505,7 @@ public:
 	LTCFrameExt    prev_sample;
 	bool           fps_detected;
 
-	samplecnt_t     monotonic_cnt;
-	samplecnt_t     last_timestamp;
-	samplecnt_t     last_ltc_sample;
-	double          ltc_speed;
+	samplecnt_t    monotonic_cnt;
 	int            delayedlocked;
 
 	int            ltc_detect_fps_cnt;
@@ -513,7 +533,6 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>);
 
 	void rebind (MidiPort&);
-	bool speed_and_position (double&, samplepos_t&, samplepos_t);
 
 	bool locked() const;
 	bool ok() const;
@@ -558,13 +577,12 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	void start (MIDI::Parser& parser, samplepos_t timestamp);
 	void contineu (MIDI::Parser& parser, samplepos_t timestamp);
 	void stop (MIDI::Parser& parser, samplepos_t timestamp);
-	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size);
+	void position (MIDI::Parser& parser, MIDI::byte* message, size_t size, samplepos_t timestamp);
 	// we can't use continue because it is a C++ keyword
 	void calculate_one_ppqn_in_samples_at(samplepos_t time);
 	samplepos_t calculate_song_position(uint16_t song_position_in_sixteenth_notes);
 	void calculate_filter_coefficients (double qpm);
 	void update_midi_clock (MIDI::Parser& parser, samplepos_t timestamp);
-	void read_current (SafeTime *) const;
 };
 
 class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
@@ -574,7 +592,7 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 	~Engine_TransportMaster  ();
 
 	void pre_process (pframes_t nframes, samplepos_t now,  boost::optional<samplepos_t>);
-	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t);
+	bool speed_and_position (double& speed, samplepos_t& pos, samplepos_t &, samplepos_t &, samplepos_t);
 
 	bool starting() const { return _starting; }
 	bool locked() const;

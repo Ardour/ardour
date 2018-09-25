@@ -53,8 +53,6 @@ LTC_TransportMaster::LTC_TransportMaster (std::string const & name)
 	, samples_per_ltc_frame (0)
 	, fps_detected (false)
 	, monotonic_cnt (0)
-	, last_timestamp (0)
-	, last_ltc_sample (0)
 	, delayedlocked (10)
 	, ltc_detect_fps_cnt (0)
 	, ltc_detect_fps_max (0)
@@ -185,11 +183,10 @@ LTC_TransportMaster::reset (bool with_ts)
 {
 	DEBUG_TRACE (DEBUG::LTC, "LTC reset()\n");
 	if (with_ts) {
-		last_timestamp = 0;
+		current.update (current.position, 0, current.speed);
 		_current_delta = 0;
 	}
 	transport_direction = 0;
-	ltc_speed = 0;
 	sync_lock_broken = false;
 	monotonic_cnt = 0;
 }
@@ -460,53 +457,30 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		 */
 
 		samplepos_t cur_timestamp = sample.off_end + 1;
+		double ltc_speed = current.speed;
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC S: %1 LS: %2  N: %3 L: %4\n", ltc_sample, last_ltc_sample, cur_timestamp, last_timestamp));
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC S: %1 LS: %2  N: %3 L: %4\n", ltc_sample, current.position, cur_timestamp, current.timestamp));
 
-		if (cur_timestamp <= last_timestamp || last_timestamp == 0) {
-			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", ltc_speed));
+		if (cur_timestamp <= current.timestamp || current.timestamp == 0) {
+			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", current.speed));
 		} else {
-			ltc_speed = double (ltc_sample - last_ltc_sample) / double (cur_timestamp - last_timestamp);
+			ltc_speed = double (ltc_sample - current.position) / double (cur_timestamp - current.timestamp);
+
+			/* provide a .1% deadzone to lock the speed */
+			if (fabs (ltc_speed - 1.0) <= 0.001) {
+				ltc_speed = 1.0;
+			}
+
+			if (fabs (ltc_speed) > 10.0) {
+				ltc_speed = 0;
+			}
+
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1\n", ltc_speed));
 		}
 
-		if (fabs (ltc_speed) > 10.0) {
-			ltc_speed = 0;
-		}
-
-		last_timestamp = cur_timestamp;
-		last_ltc_sample = ltc_sample;
+		current.update (ltc_sample, cur_timestamp, ltc_speed);
 
 	} /* end foreach decoded LTC sample */
-}
-
-bool
-LTC_TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_t now)
-{
-	if (!_collect || last_timestamp == 0) {
-		return false;
-	}
-
-	/* XXX these are not atomics and maybe modified in a thread other other than the one
-	   that is executing this.
-	*/
-
-	speed = ltc_speed;
-
-	/* provide a .1% deadzone to lock the speed */
-	if (fabs (speed - 1.0) <= 0.001) {
-		speed = 1.0;
-	}
-
-	if (speed != 0 && delayedlocked == 0 && fabs(speed) != 1.0) {
-		sync_lock_broken = true;
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed not locked %1 based on %2\n", speed, ltc_speed));
-	}
-
-	pos =  last_ltc_sample;
-	pos += (now - last_timestamp) * speed;
-
-	return true;
 }
 
 void
@@ -517,14 +491,14 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 	monotonic_cnt = now;
 
 	DEBUG_TRACE (DEBUG::LTC, string_compose ("pre-process - TID:%1 | latency: %2 | skip %3 | session ? %4| last %5 | dir %6 | sp %7\n",
-	                                         pthread_name(), ltc_slave_latency.max, skip, (_session ? 'y' : 'n'), last_timestamp, transport_direction, ltc_speed));
+	                                         pthread_name(), ltc_slave_latency.max, skip, (_session ? 'y' : 'n'), current.timestamp, transport_direction, current.speed));
 
-	if (last_timestamp == 0) {
+	if (current.timestamp == 0) {
 		if (delayedlocked < 10) {
 			++delayedlocked;
 		}
 
-	} else if (ltc_speed != 0) {
+	} else if (current.speed != 0) {
 
 	}
 
@@ -555,11 +529,11 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 
 	process_ltc (now);
 
-	if (last_timestamp == 0) {
+	if (current.timestamp == 0) {
 		DEBUG_TRACE (DEBUG::LTC, "last timestamp == 0\n");
 		return;
-	} else if (ltc_speed != 0) {
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("speed non-zero (%1)\n", ltc_speed));
+	} else if (current.speed != 0) {
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("speed non-zero (%1)\n", current.speed));
 		if (delayedlocked > 1) {
 			delayedlocked--;
 		} else if (_current_delta == 0) {
@@ -567,7 +541,7 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 		}
 	}
 
-	if (abs (now - last_timestamp) > FLYWHEEL_TIMEOUT) {
+	if (abs (now - current.timestamp) > FLYWHEEL_TIMEOUT) {
 		DEBUG_TRACE (DEBUG::LTC, "flywheel timeout\n");
 		reset();
 		/* don't change position from last known */
@@ -575,8 +549,13 @@ LTC_TransportMaster::pre_process (ARDOUR::pframes_t nframes, samplepos_t now, bo
 		return;
 	}
 
+	if (!sync_lock_broken && current.speed != 0 && delayedlocked == 0 && fabs(current.speed) != 1.0) {
+		sync_lock_broken = true;
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed not locked based on %1\n", current.speed));
+	}
+
 	if (session_pos) {
-		const samplepos_t current_pos = last_ltc_sample + ((now - last_timestamp) * ltc_speed);
+		const samplepos_t current_pos = current.position + ((now - current.timestamp) * current.speed);
 		_current_delta = current_pos - *session_pos;
 	} else {
 		_current_delta = 0;
@@ -606,7 +585,7 @@ LTC_TransportMaster::apparent_timecode_format () const
 std::string
 LTC_TransportMaster::position_string() const
 {
-	if (!_collect || last_timestamp == 0) {
+	if (!_collect || current.timestamp == 0) {
 		return " --:--:--:--";
 	}
 	return Timecode::timecode_format_time(timecode);
@@ -617,9 +596,9 @@ LTC_TransportMaster::delta_string() const
 {
 	char delta[80];
 
-	if (!_collect || last_timestamp == 0) {
+	if (!_collect || current.timestamp == 0) {
 		snprintf (delta, sizeof(delta), "\u2012\u2012\u2012\u2012");
-	} else if ((monotonic_cnt - last_timestamp) > 2 * samples_per_ltc_frame) {
+	} else if ((monotonic_cnt - current.timestamp) > 2 * samples_per_ltc_frame) {
 		snprintf (delta, sizeof(delta), "%s", _("flywheel"));
 	} else {
 		snprintf (delta, sizeof(delta), "\u0394<span foreground=\"%s\" face=\"monospace\" >%s%s%lld</span>sm",
