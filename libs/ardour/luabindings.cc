@@ -1466,6 +1466,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("get_count", &PluginInsert::get_count)
 		.addFunction ("is_channelstrip", &PluginInsert::is_channelstrip)
 		.addFunction ("is_nonbypassable", &PluginInsert::is_nonbypassable)
+		.addFunction ("clear_stats", &PluginInsert::clear_stats)
+		.addRefFunction ("get_stats", &PluginInsert::get_stats)
 		.endClass ()
 
 		.deriveWSPtrClass <ReadOnlyControl, PBD::StatefulDestructible> ("ReadOnlyControl")
