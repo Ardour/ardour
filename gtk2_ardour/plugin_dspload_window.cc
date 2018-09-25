@@ -62,6 +62,8 @@ PluginDSPLoadWindow::set_session (Session* s)
 	ArdourWindow::set_session (s);
 	if (!s) {
 		drop_references ();
+	} else if (is_visible ()) {
+		refill_processors ();
 	}
 }
 
@@ -107,12 +109,18 @@ PluginDSPLoadWindow::drop_references ()
 			delete *child;
 		}
 	}
+	_route_connections.drop_connections ();
+	_processor_connections.drop_connections ();
 }
 
 void
 PluginDSPLoadWindow::refill_processors ()
 {
 	drop_references ();
+	if (!_session || _session->deletion_in_progress()) {
+		/* may be called from session d'tor, removing monitor-section w/plugin */
+		return;
+	}
 	RouteList routes = _session->get_routelist ();
 	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 
