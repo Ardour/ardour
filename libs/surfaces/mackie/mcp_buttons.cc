@@ -120,7 +120,7 @@ MackieControlProtocol::left_press (Button &)
 LedState
 MackieControlProtocol::left_release (Button &)
 {
-	return none;
+	return off;
 }
 
 LedState
@@ -144,13 +144,13 @@ MackieControlProtocol::right_press (Button &)
 		(void) switch_banks (new_initial);
 	}
 
-	return none;
+	return on;
 }
 
 LedState
 MackieControlProtocol::right_release (Button &)
 {
-	return none;
+	return off;
 }
 
 LedState
