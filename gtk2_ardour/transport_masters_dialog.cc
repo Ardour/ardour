@@ -18,6 +18,7 @@
 */
 
 #include "pbd/enumwriter.h"
+#include "pbd/i18n.h"
 
 #include "temporal/time.h"
 
@@ -32,9 +33,9 @@
 #include "gtkmm2ext/gui_thread.h"
 
 #include "ardour_ui.h"
+#include "floating_text_entry.h"
 #include "transport_masters_dialog.h"
 
-#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;
@@ -62,7 +63,6 @@ TransportMastersWidget::TransportMastersWidget ()
 	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
 	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/30")));
 
-#if 0
 	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
 	                              "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
 	                              "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
@@ -73,7 +73,6 @@ TransportMastersWidget::TransportMastersWidget ()
 
 	set_tooltip (col_title[11], string_compose (_("<b>When enabled</b> the external timecode source is assumed to be sample-clock synced to the audio interface\n"
 	                                              "being used by %1."), PROGRAM_NAME));
-#endif
 
 	table.set_spacings (6);
 
@@ -137,9 +136,11 @@ TransportMastersWidget::rebuild ()
 
 		int col = 0;
 
+		r->label_box.add (r->label);
+
 		table.attach (r->use_button, col, col+1, n, n+1); ++col;
+		table.attach (r->label_box, col, col+1, n, n+1); ++col;
 		table.attach (r->type, col, col+1, n, n+1); ++col;
-		table.attach (r->label, col, col+1, n, n+1); ++col;
 		table.attach (r->format, col, col+1, n, n+1); ++col;
 		table.attach (r->current, col, col+1, n, n+1); ++col;
 		table.attach (r->last, col, col+1, n, n+1); ++col;
@@ -157,6 +158,8 @@ TransportMastersWidget::rebuild ()
 			r->fr2997_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::fr2997_button_toggled));
 		}
 
+		r->label_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+		r->label_box.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::name_press));
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
 		r->collect_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::collect_button_toggled));
@@ -184,8 +187,33 @@ TransportMastersWidget::rebuild ()
 
 TransportMastersWidget::Row::Row ()
 	: request_option_menu (0)
+	, name_editor (0)
 	, ignore_active_change (false)
 {
+}
+
+bool
+TransportMastersWidget::Row::name_press (GdkEventButton* ev)
+{
+	if (ev->type == GDK_2BUTTON_PRESS && ev->button == 1) {
+		Gtk::Window* toplevel = dynamic_cast<Gtk::Window*> (label.get_toplevel());
+		if (!toplevel) {
+			return false;
+		}
+		name_editor = new FloatingTextEntry (toplevel, tm->name());
+		name_editor->use_text.connect (sigc::mem_fun (*this, &TransportMastersWidget::Row::name_edited));
+		name_editor->show ();
+		return true;
+	}
+	return false;
+}
+
+void
+TransportMastersWidget::Row::name_edited (string str, int ignored)
+{
+	tm->set_name (str);
+	/* floating text entry deletes itself */
+	name_editor = 0;
 }
 
 void

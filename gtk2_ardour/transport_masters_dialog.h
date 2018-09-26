@@ -24,6 +24,7 @@
 #include <string>
 
 #include <gtkmm/button.h>
+#include <gtkmm/eventbox.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
@@ -38,6 +39,8 @@ namespace Gtk {
 namespace ARDOUR {
 	class TransportMaster;
 }
+
+class FloatingTextEntry;
 
 class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
@@ -54,6 +57,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
   private:
 
 	struct Row : sigc::trackable, PBD::ScopedConnectionList {
+		Gtk::EventBox label_box;
 		Gtk::Label label;
 		Gtk::Label type;
 		Gtk::Label format;
@@ -68,6 +72,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::CheckButton fr2997_button;
 		Gtk::Button request_options;
 		Gtk::Menu* request_option_menu;
+		FloatingTextEntry* name_editor;
 
 		void build_request_options();
 
@@ -99,6 +104,9 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void connection_handler ();
 		bool request_option_press (GdkEventButton*);
 		void prop_change (PBD::PropertyChange);
+
+		bool name_press (GdkEventButton*);
+		void name_edited (std::string, int);
 
 		PBD::ScopedConnection property_change_connection;
 		bool ignore_active_change;
