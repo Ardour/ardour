@@ -73,6 +73,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::Button request_options;
 		Gtk::Menu* request_option_menu;
 		FloatingTextEntry* name_editor;
+		samplepos_t save_when;
 
 		void build_request_options();
 

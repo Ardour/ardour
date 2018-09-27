@@ -188,6 +188,7 @@ TransportMastersWidget::rebuild ()
 TransportMastersWidget::Row::Row ()
 	: request_option_menu (0)
 	, name_editor (0)
+	, save_when (0)
 	, ignore_active_change (false)
 {
 }
@@ -400,38 +401,57 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	samplepos_t pos;
 	double speed;
-	samplepos_t last;
+	samplepos_t most_recent;
 	samplepos_t when;
 	stringstream ss;
 	Time t;
+	Time l;
 	boost::shared_ptr<TimecodeTransportMaster> ttm;
 	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
 
 	if (s) {
 
-		if (tm->speed_and_position (speed, pos, last, when, now)) {
+		if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
 
 			sample_to_timecode (pos, t, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
+			sample_to_timecode (most_recent, l, false, false, 25, false, AudioEngine::instance()->sample_rate(), 100, false, 0);
 
 			if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
 				format.set_text (timecode_format_name (ttm->apparent_timecode_format()));
+				last.set_text (Timecode::timecode_format_time (l));
 			} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 				char buf[8];
 				snprintf (buf, sizeof (buf), "%.1f", mtm->bpm());
 				format.set_text (buf);
+				last.set_text ("");
 			} else {
 				format.set_text ("");
+				last.set_text ("");
 			}
 			current.set_text (Timecode::timecode_format_time (t));
 			timestamp.set_markup (tm->position_string());
 			delta.set_markup (tm->delta_string ());
 
+			char gap[32];
+			snprintf (gap, sizeof (gap), "%.3fs", (when - now) / (float) AudioEngine::instance()->sample_rate());
+			timestamp.set_text (gap);
+			save_when = when;
+
+		} else {
+
+			if (save_when) {
+				char gap[32];
+
+				snprintf (gap, sizeof (gap), "%.3fs", (save_when - now) / (float) AudioEngine::instance()->sample_rate());
+				timestamp.set_text (gap);
+				save_when = when;
+			}
 		}
 	}
 }
 
 void
-TransportMastersWidget::update (samplepos_t audible)
+	TransportMastersWidget::update (samplepos_t /* audible */)
 {
 	samplepos_t now = AudioEngine::instance()->sample_time ();
 
