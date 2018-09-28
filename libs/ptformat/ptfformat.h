@@ -147,7 +147,7 @@ public:
 	int64_t targetrate;
 	uint8_t version;
 	uint8_t *product;
-
+	std::string path;
 
 	unsigned char c0;
 	unsigned char c1;
@@ -163,6 +163,7 @@ private:
 	bool parse_version();
 	uint8_t gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative);
 	void setrates(void);
+	void cleanup(void);
 	void parse5header(void);
 	void parse7header(void);
 	void parse8header(void);

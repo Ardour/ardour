@@ -76,13 +76,27 @@ hexdump(uint8_t *data, int len)
 	}
 }
 
-PTFFormat::PTFFormat() : version(0), product(NULL) {
+PTFFormat::PTFFormat() : version(0), product(NULL), ptfunxored(NULL) {
 }
 
 PTFFormat::~PTFFormat() {
+	cleanup();
+}
+
+void
+PTFFormat::cleanup(void) {
 	if (ptfunxored) {
 		free(ptfunxored);
+		ptfunxored = NULL;
 	}
+	audiofiles.clear();
+	regions.clear();
+	midiregions.clear();
+	compounds.clear();
+	tracks.clear();
+	miditracks.clear();
+	version = 0;
+	product = NULL;
 }
 
 int64_t
@@ -236,7 +250,10 @@ PTFFormat::unxor(std::string path) {
 			-1           could not parse pt session
 */
 int
-PTFFormat::load(std::string path, int64_t targetsr) {
+PTFFormat::load(std::string ptf, int64_t targetsr) {
+	cleanup();
+	path = ptf;
+
 	if (unxor(path))
 		return -1;
 
