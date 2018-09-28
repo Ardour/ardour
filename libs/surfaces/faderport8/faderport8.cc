@@ -1304,6 +1304,7 @@ FaderPort8::build_well_known_processor_ctrls (boost::shared_ptr<Stripable> s, bo
 	} else {
 		PUSH_BACK_NON_NULL ("Comp In", s->comp_enable_controllable ());
 		PUSH_BACK_NON_NULL ("Threshold", s->comp_threshold_controllable ());
+		PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
 		PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
 		PUSH_BACK_NON_NULL ("Mode", s->comp_mode_controllable ());
 	}
