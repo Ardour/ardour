@@ -734,6 +734,12 @@ Editor::build_region_boundary_cache ()
 		return;
 	}
 
+	/* if no snap boundaries were set,  just bail out here with an empty region cache */
+	if ( interesting_points.empty() ) {
+		_region_boundary_cache_dirty = false;
+		return;
+	};
+
 	TimeAxisView *ontrack = 0;
 	TrackViewList tlist;
 
