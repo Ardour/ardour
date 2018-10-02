@@ -497,10 +497,6 @@ intptr_t Session::vst_callback (
 		if (session) {
 			session->set_dirty ();
 		}
-		/* allow plugin UI to update */
-#ifdef WINDOWS_VST_SUPPORT
-		fst_audio_master_idle();
-#endif
 		return 0;
 
 	case audioMasterBeginEdit:
