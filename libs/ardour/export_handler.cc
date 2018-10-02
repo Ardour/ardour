@@ -227,7 +227,16 @@ ExportHandler::handle_duplicate_format_extensions()
 
 	ExtCountMap counts;
 	for (ConfigMap::iterator it = timespan_bounds.first; it != timespan_bounds.second; ++it) {
-		counts[it->second.format->extension()]++;
+		if (it->second.filename->include_channel_config && it->second.channel_config) {
+			/* stem-export has multiple files in the same timestamp, but a different channel_config for each.
+			 * However channel_config is only set in ExportGraphBuilder::Encoder::init_writer()
+			 * so we cannot yet use   it->second.filename->get_path(it->second.format).
+			 * We have to explicily check uniqueness of "channel-config + extension" here:
+			 */
+			counts[it->second.channel_config->name() + it->second.format->extension()]++;
+		} else {
+			counts[it->second.format->extension()]++;
+		}
 	}
 
 	bool duplicates_found = false;
