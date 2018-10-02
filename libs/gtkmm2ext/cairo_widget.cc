@@ -34,6 +34,7 @@
 static const char* has_cairo_widget_background_info = "has_cairo_widget_background_info";
 
 bool CairoWidget::_flat_buttons = false;
+bool CairoWidget::_boxy_buttons = false;
 bool CairoWidget::_widget_prelight = true;
 
 sigc::slot<void,Gtk::Widget*> CairoWidget::focus_handler;
@@ -541,6 +542,13 @@ CairoWidget::set_flat_buttons (bool yn)
 {
 	_flat_buttons = yn;
 }
+
+void
+CairoWidget::set_boxy_buttons (bool yn)
+{
+	_boxy_buttons = yn;
+}
+
 
 void
 CairoWidget::set_widget_prelight (bool yn)
