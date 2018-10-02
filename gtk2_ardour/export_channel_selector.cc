@@ -739,7 +739,11 @@ TrackExportChannelSelector::update_config()
 		}
 
 		if (state) {
-			state->config->set_name (route->name());
+			if (_session->config.get_track_name_number() && route->track_number() > 0) {
+				state->config->set_name (string_compose ("%1-%2", route->track_number(), route->name()));
+			} else {
+				state->config->set_name (route->name());
+			}
 		}
 
 	}
