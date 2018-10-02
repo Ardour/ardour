@@ -3880,6 +3880,13 @@ RCOptionEditor::RCOptionEditor ()
 				));
 
 	add_option (_("Appearance/Theme"), new BoolOption (
+				"boxy-buttons",
+				_("Draw \"boxy\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_boxy_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_boxy_buttons)
+				));
+
+	add_option (_("Appearance/Theme"), new BoolOption (
 				"meter-style-led",
 				_("LED meter style"),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_style_led),
