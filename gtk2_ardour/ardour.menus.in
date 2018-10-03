@@ -146,7 +146,6 @@
       </menu>
 
       <separator/>
-      <menuitem action='ToggleTimeMaster'/>
       <menuitem action='TogglePunch'/>
       <menuitem action='TogglePunchIn'/>
       <menuitem action='TogglePunchOut'/>
