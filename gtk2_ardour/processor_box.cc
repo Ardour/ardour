@@ -2025,9 +2025,15 @@ ProcessorBox::build_possible_aux_menu ()
 	MenuList& items = menu->items();
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		if (!_route->internal_send_for (*r) && *r != _route) {
-			items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
+			/* don't allow sending to master or monitor or to self */
+			continue;
 		}
+		if (_route->internal_send_for (*r)) {
+			/* aux-send to target already exists */
+			continue;
+		}
+		items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
 	}
 
 	return menu;
