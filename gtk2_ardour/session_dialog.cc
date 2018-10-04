@@ -564,6 +564,15 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 	return true;
 }
 
+struct LuaScriptListSorter
+{
+	bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
+		printf ("-- CMD %s <> %s = %d\n", a->name.c_str(), b->name.c_str(), ARDOUR::cmp_nocase_utf8 (a->name, b->name));
+		return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
+	}
+};
+
+
 void
 SessionDialog::populate_session_templates ()
 {
@@ -573,23 +582,21 @@ SessionDialog::populate_session_templates ()
 
 	template_model->clear ();
 
-	/* Add Lua Scripts dedicated to session-setup */
-	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
-	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
-		TreeModel::Row row = *(template_model->append ());
-		row[session_template_columns.name] = (*s)->name;
-		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
-		row[session_template_columns.description] = (*s)->description;
-		row[session_template_columns.modified_with_short] = _("{Factory Template}");
-		row[session_template_columns.modified_with_long] = _("{Factory Template}");
-	}
+	/* Get Lua Scripts dedicated to session-setup */
+	LuaScriptList scripts (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
 
 	/* Add Lua Action Scripts which can also be used for session-setup */
 	LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
 	for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
-		if (!((*s)->subtype & LuaScriptInfo::SessionSetup)) {
-			continue;
+		if ((*s)->subtype & LuaScriptInfo::SessionSetup) {
+			scripts.push_back (*s);
 		}
+	}
+
+	LuaScriptListSorter cmp;
+	std::sort (scripts.begin(), scripts.end(), cmp);
+
+	for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
 		TreeModel::Row row = *(template_model->append ());
 		row[session_template_columns.name] = (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
@@ -597,7 +604,6 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.modified_with_short] = _("{Factory Template}");
 		row[session_template_columns.modified_with_long] = _("{Factory Template}");
 	}
-
 
 	//Add any "template sessions" found in the user's preferences folder
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
