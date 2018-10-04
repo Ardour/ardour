@@ -3229,22 +3229,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Sync"), _sync_framerate);
 
-	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Reader")));
-
-	_ltc_port = new ComboStringOption (
-		"ltc-source-port",
-		_("LTC incoming port"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
-		);
-
-	vector<string> physical_inputs;
-	physical_inputs.push_back (_("None"));
-	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
-	_ltc_port->set_popdown_strings (physical_inputs);
-
-	add_option (_("Sync/LTC"), _ltc_port);
-
 	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
 	add_option (_("Sync/LTC"),

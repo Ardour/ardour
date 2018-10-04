@@ -77,7 +77,6 @@ CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
 #else
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", Engine)
 #endif
-CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
 CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
