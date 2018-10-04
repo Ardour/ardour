@@ -27,6 +27,7 @@
 
 #include "LuaBridge/LuaBridge.h"
 
+#include "ardour_ui.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
 #include "script_selector.h"
@@ -203,7 +204,7 @@ void
 LuaScriptManager::setup_actions ()
 {
 	LuaInstance *li = LuaInstance::instance();
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 		std::string name;
 		TreeModel::Row r = *_a_store->append ();
 		r[_a_model.id] = i;

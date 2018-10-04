@@ -470,7 +470,7 @@ Editor::register_actions ()
 
 	myactions.register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
 
-	for (int i = 1; i <= 9; ++i) {
+	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
 		string const a = string_compose (X_("script-action-%1"), i);
 		string const n = string_compose (_("Unset #%1"), i);
 		act = myactions.register_action (editor_actions, a.c_str(), n.c_str(), sigc::bind (sigc::mem_fun (*this, &Editor::trigger_script), i - 1));

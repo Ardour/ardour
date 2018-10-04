@@ -1290,7 +1290,7 @@ LuaInstance::session_going_away ()
 	point_one_second_connection.disconnect ();
 
 	(*_lua_clear)();
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 		ActionChanged (i, ""); /* EMIT SIGNAL */
 	}
 	SessionHandlePtr::session_going_away ();
@@ -1322,7 +1322,7 @@ LuaInstance::set_state (const XMLNode& node)
 			} catch (luabridge::LuaException const& e) {
 				cerr << "LuaException:" << e.what () << endl;
 			} catch (...) { }
-			for (int i = 0; i < 9; ++i) {
+			for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 				std::string name;
 				if (lua_action_name (i, name)) {
 					ActionChanged (i, name); /* EMIT SIGNAL */
@@ -1580,7 +1580,7 @@ std::vector<std::string>
 LuaInstance::lua_action_names ()
 {
 	std::vector<std::string> rv;
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 		std::string name;
 		if (lua_action_name (i, name)) {
 			rv.push_back (name);

@@ -292,7 +292,7 @@ ARDOUR_UI::setup_windows ()
 
 	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_action_script_btn));
 
-	for (int i = 0; i < 9; ++i) {
+	for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
 		Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
 		assert (act);

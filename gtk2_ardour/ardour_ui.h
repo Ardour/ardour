@@ -165,6 +165,8 @@ namespace ArdourWidgets {
 	class Tabbable;
 }
 
+#define MAX_LUA_ACTION_SCRIPTS 12
+
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
 public:
@@ -511,7 +513,7 @@ private:
 	ArdourWidgets::ArdourButton feedback_alert_button;
 	ArdourWidgets::ArdourButton error_alert_button;
 
-	ArdourWidgets::ArdourButton action_script_call_btn[10];
+	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_SCRIPTS];
 	Gtk::Table action_script_table;
 
 	Gtk::VBox alert_box;
