@@ -287,6 +287,8 @@ MTC_TransportMaster::update_mtc_qtr (Parser& p, int which_qtr, samplepos_t now)
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("qtr sample DLL t0:%1 t1:%2 err:%3 spd:%4 ddt:%5\n", t0, t1, e, mtc_speed, e2 - qtr_d));
 
 		current.update (mtc_frame, now, mtc_speed);
+
+		last_inbound_frame = now;
 	}
 
 	maybe_reset ();
