@@ -983,23 +983,6 @@ Editor::set_selected_regionview_from_map_event (GdkEventAny* /*ev*/, StreamView*
 	return true;
 }
 
-struct SelectionOrderSorter {
-	bool operator() (TimeAxisView const * const a, TimeAxisView const * const b) const  {
-		boost::shared_ptr<Stripable> sa = a->stripable ();
-		boost::shared_ptr<Stripable> sb = b->stripable ();
-		if (!sa && !sb) {
-			return a < b;
-		}
-		if (!sa) {
-			return false;
-		}
-		if (!sb) {
-			return true;
-		}
-		return sa->presentation_info().selection_cnt() < sb->presentation_info().selection_cnt();
-	}
-};
-
 void
 Editor::presentation_info_changed (PropertyChange const & what_changed)
 {
