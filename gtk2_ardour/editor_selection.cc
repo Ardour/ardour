@@ -1571,8 +1571,20 @@ Editor::region_selection_changed ()
 		}
 	}
 
-	if ( _session->solo_selection_active() )
+	if (_session->solo_selection_active()) {
 		play_solo_selection(false);
+	}
+
+	/* set nudge button color */
+	if (! get_regions_from_selection_and_entered().empty()) {
+		/* nudge regions */
+		nudge_forward_button.set_name ("nudge button");
+		nudge_backward_button.set_name ("nudge button");
+	} else {
+		/* nudge marker or playhead */
+		nudge_forward_button.set_name ("generic button");
+		nudge_backward_button.set_name ("generic button");
+	}
 }
 
 void
