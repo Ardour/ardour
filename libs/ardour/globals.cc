@@ -599,7 +599,7 @@ ARDOUR::init_post_engine ()
 	XMLNode* node;
 
 	if ((node = Config->control_protocol_state()) != 0) {
-		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);
+		ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
 	}
 
 	if ((node = Config->transport_master_state()) != 0) {

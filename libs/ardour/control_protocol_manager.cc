@@ -452,7 +452,7 @@ ControlProtocolManager::cpi_by_name (string name)
 }
 
 int
-ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
+ControlProtocolManager::set_state (const XMLNode& node, int session_specific_state /* here: not version */)
 {
 	XMLNodeList clist;
 	XMLNodeConstIterator citer;
@@ -483,6 +483,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 				if (active) {
 					delete cpi->state;
 					cpi->state = new XMLNode (**citer);
+					cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
 					if (_session) {
 						instantiate (*cpi);
 					} else {
@@ -492,6 +493,7 @@ ControlProtocolManager::set_state (const XMLNode& node, int /*version*/)
 					if (!cpi->state) {
 						cpi->state = new XMLNode (**citer);
 						cpi->state->set_property (X_("active"), false);
+						cpi->state->set_property (X_("session-state"), session_specific_state ? true : false);
 					}
 					cpi->requested = false;
 					if (_session) {

@@ -1729,7 +1729,7 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	if ((child = find_named_node (node, ControlProtocolManager::state_node_name)) != 0) {
-		ControlProtocolManager::instance().set_state (*child, version);
+		ControlProtocolManager::instance().set_state (*child, 1 /* here: session-specific state */);
 	}
 
 	if ((child = find_named_node (node, "Script"))) {
