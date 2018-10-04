@@ -345,7 +345,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			}
 
 			if ((speed > 0) && (start_sample != playback_sample)) {
-				cerr << owner()->name() << " playback not aligned, jump ahead " << (start_sample - playback_sample) << endl;
+				stringstream str;
+				str << owner()->name() << " playback @ " << start_sample << " not aligned with " << playback_sample << " jump ahead " << (start_sample - playback_sample) << endl;
+				cerr << str.str();
 
 				if (can_internal_playback_seek (start_sample - playback_sample)) {
 					internal_playback_seek (start_sample - playback_sample);

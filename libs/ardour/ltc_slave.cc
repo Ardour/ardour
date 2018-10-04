@@ -143,6 +143,16 @@ LTC_TransportMaster::parameter_changed (std::string const & p)
 }
 
 ARDOUR::samplecnt_t
+LTC_TransportMaster::update_interval() const
+{
+	if (timecode.rate) {
+		return AudioEngine::instance()->sample_rate() / timecode.rate;
+	}
+
+	return AudioEngine::instance()->sample_rate(); /* useless but what other answer is there? */
+}
+
+ARDOUR::samplecnt_t
 LTC_TransportMaster::resolution () const
 {
 	return (samplecnt_t) (ENGINE->sample_rate() / 1000);
@@ -459,7 +469,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		samplepos_t cur_timestamp = sample.off_end + 1;
 		double ltc_speed = current.speed;
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC S: %1 LS: %2  N: %3 L: %4\n", ltc_sample, current.position, cur_timestamp, current.timestamp));
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC S: %1 LS: %2  N: %3 L: %4 span %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, sample.off_start, sample.off_end));
 
 		if (cur_timestamp <= current.timestamp || current.timestamp == 0) {
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", current.speed));
@@ -477,7 +487,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: %1\n", ltc_speed));
 		}
-
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("update current to %1 %2 %3\n", ltc_sample, cur_timestamp, ltc_speed));
 		current.update (ltc_sample, cur_timestamp, ltc_speed);
 
 	} /* end foreach decoded LTC sample */

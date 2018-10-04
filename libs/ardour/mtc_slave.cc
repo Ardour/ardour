@@ -165,6 +165,16 @@ MTC_TransportMaster::parameter_changed (std::string const & p)
 }
 
 ARDOUR::samplecnt_t
+MTC_TransportMaster::update_interval() const
+{
+	if (timecode.rate) {
+		return AudioEngine::instance()->sample_rate() / timecode.rate;
+	}
+
+	return AudioEngine::instance()->sample_rate(); /* useless but what other answer is there? */
+}
+
+ARDOUR::samplecnt_t
 MTC_TransportMaster::resolution () const
 {
 	return (samplecnt_t) quarter_frame_duration * 4.0;

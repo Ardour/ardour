@@ -376,6 +376,16 @@ MIDIClock_TransportMaster::starting() const
 }
 
 ARDOUR::samplecnt_t
+MIDIClock_TransportMaster::update_interval() const
+{
+	if (one_ppqn_in_samples) {
+		return resolution ();
+	}
+
+	return AudioEngine::instance()->sample_rate() / 120 / 4; /* pure guesswork */
+}
+
+ARDOUR::samplecnt_t
 MIDIClock_TransportMaster::resolution() const
 {
 	// one beat

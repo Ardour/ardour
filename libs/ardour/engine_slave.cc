@@ -125,3 +125,10 @@ Engine_TransportMaster::allow_request (TransportRequestSource src, TransportRequ
 
 	return true;
 }
+
+samplecnt_t
+Engine_TransportMaster::update_interval () const
+{
+	return AudioEngine::instance()->samples_per_cycle();
+}
+

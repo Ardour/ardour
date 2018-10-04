@@ -99,7 +99,7 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 		return false;
 	}
 
-	if (last.timestamp && now > last.timestamp && now - last.timestamp > labs (seekahead_distance())) {
+	if (last.timestamp && now > last.timestamp && now - last.timestamp > (2.0 * update_interval())) {
 		/* no timecode for two cycles - conclude that it's stopped */
 
 		if (!Config->get_transport_masters_just_roll_when_sync_lost()) {
@@ -109,7 +109,7 @@ TransportMaster::speed_and_position (double& speed, samplepos_t& pos, samplepos_
 			when = last.timestamp;
 			_current_delta = 0;
 			// queue_reset (false);
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 not seen for 2 samples - reset pending, pos = %2\n", name(), pos));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("%1 not seen since %2 vs %3 (%4) with seekahead = %5 reset pending, pos = %6\n", name(), last.timestamp, now, (now - last.timestamp), update_interval(), pos));
 			return false;
 		}
 	}

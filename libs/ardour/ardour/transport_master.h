@@ -245,6 +245,14 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	virtual samplecnt_t resolution() const = 0;
 
 	/**
+	 * @return - the expected update interval for the data source used by
+	 * this transport master. Even if the data is effectively continuous,
+	 * this number indicates how long it is between changes to the known
+	 * position of the master.
+	 */
+	virtual samplecnt_t update_interval() const = 0;
+
+	/**
 	 * @return - when returning true, ARDOUR will wait for seekahead_distance() before transport
 	 * starts rolling
 	 */
@@ -409,6 +417,7 @@ class LIBARDOUR_API MTC_TransportMaster : public TimecodeTransportMaster, public
 	bool ok() const;
 	void handle_locate (const MIDI::byte*);
 
+	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
 	samplecnt_t seekahead_distance() const;
@@ -474,6 +483,7 @@ public:
 	bool locked() const;
 	bool ok() const;
 
+	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
 	samplecnt_t seekahead_distance () const { return 0; }
@@ -538,6 +548,7 @@ class LIBARDOUR_API MIDIClock_TransportMaster : public TransportMaster, public T
 	bool ok() const;
 	bool starting() const;
 
+	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const;
 	bool requires_seekahead () const { return false; }
 	void init ();
@@ -597,6 +608,7 @@ class LIBARDOUR_API Engine_TransportMaster : public TransportMaster
 	bool starting() const { return _starting; }
 	bool locked() const;
 	bool ok() const;
+	samplecnt_t update_interval () const;
 	samplecnt_t resolution () const { return 1; }
 	bool requires_seekahead () const { return false; }
 	bool sample_clock_synced() const { return true; }
