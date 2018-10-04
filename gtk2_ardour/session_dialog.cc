@@ -567,7 +567,6 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 struct LuaScriptListSorter
 {
 	bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
-		printf ("-- CMD %s <> %s = %d\n", a->name.c_str(), b->name.c_str(), ARDOUR::cmp_nocase_utf8 (a->name, b->name));
 		return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
 	}
 };
