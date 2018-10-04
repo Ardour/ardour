@@ -16,6 +16,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#include <gtkmm/stock.h>
 
 #include "pbd/enumwriter.h"
 #include "pbd/i18n.h"
@@ -46,8 +47,10 @@ using namespace ArdourWidgets;
 
 TransportMastersWidget::TransportMastersWidget ()
 	: table (4, 13)
+	, add_button (_("Add a new Transport Master"))
 {
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
+	pack_start (add_button, FALSE, FALSE);
 
 	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use")));
 	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
@@ -62,6 +65,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));
 	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
 	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/30")));
+	col_title[13].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Remove")));
 
 	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
 	                              "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
@@ -111,7 +115,7 @@ TransportMastersWidget::rebuild ()
 	}
 
 	rows.clear ();
-	table.resize (masters.size()+1, 13);
+	table.resize (masters.size()+1, 14);
 
 	for (size_t col = 0; col < sizeof (col_title) / sizeof (col_title[0]); ++col) {
 		table.attach (col_title[col], col, col+1, 0, 1);
@@ -156,6 +160,14 @@ TransportMastersWidget::rebuild ()
 			table.attach (r->sclock_synced_button, col, col+1, n, n+1); ++col;
 			table.attach (r->fr2997_button, col, col+1, n, n+1); ++col;
 			r->fr2997_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::fr2997_button_toggled));
+		} else {
+			col += 2;
+		}
+
+		if (r->tm->removeable()) {
+			table.attach (r->remove_button, col, col+1, n, n+1); ++col;
+		} else {
+			col++;
 		}
 
 		r->label_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
@@ -164,6 +176,7 @@ TransportMastersWidget::rebuild ()
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
 		r->collect_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::collect_button_toggled));
 		r->request_options.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::request_option_press), false);
+		r->remove_button.signal_clicked().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::remove_clicked));
 
 		if (ttm) {
 			r->sclock_synced_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::sync_button_toggled));
@@ -187,6 +200,7 @@ TransportMastersWidget::rebuild ()
 
 TransportMastersWidget::Row::Row ()
 	: request_option_menu (0)
+	, remove_button (X_("x"))
 	, name_editor (0)
 	, save_when (0)
 	, ignore_active_change (false)
@@ -207,6 +221,11 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 		return true;
 	}
 	return false;
+}
+
+void
+TransportMastersWidget::Row::remove_clicked ()
+{
 }
 
 void

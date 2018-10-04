@@ -72,6 +72,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		Gtk::CheckButton fr2997_button;
 		Gtk::Button request_options;
 		Gtk::Menu* request_option_menu;
+		Gtk::Button remove_button;
 		FloatingTextEntry* name_editor;
 		samplepos_t save_when;
 
@@ -105,6 +106,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void connection_handler ();
 		bool request_option_press (GdkEventButton*);
 		void prop_change (PBD::PropertyChange);
+		void remove_clicked ();
 
 		bool name_press (GdkEventButton*);
 		void name_edited (std::string, int);
@@ -117,7 +119,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	Gtk::RadioButtonGroup use_button_group;
 	Gtk::Table table;
-	Gtk::Label col_title[13];
+	Gtk::Label col_title[14];
+	Gtk::Button add_button;
 
 	sigc::connection update_connection;
 	PBD::ScopedConnection current_connection;
