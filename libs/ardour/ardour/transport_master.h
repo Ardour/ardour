@@ -155,7 +155,7 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	TransportMaster (SyncSource t, std::string const & name);
 	virtual ~TransportMaster();
 
-	static boost::shared_ptr<TransportMaster> factory (SyncSource, std::string const &);
+	static boost::shared_ptr<TransportMaster> factory (SyncSource, std::string const &, bool removeable);
 	static boost::shared_ptr<TransportMaster> factory (XMLNode const &);
 
 	virtual void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>) = 0;
@@ -337,12 +337,20 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 
 	void get_current (double&, samplepos_t&, samplepos_t);
 
+	/* this is set at construction, and not changeable later, so it is not
+	 * a property
+	 */
+
+	bool removeable () const { return _removeable; }
+	void set_removeable (bool yn) { _removeable = yn; }
+
   protected:
 	SyncSource      _type;
 	PBD::Property<std::string>   _name;
 	Session*        _session;
 	sampleoffset_t  _current_delta;
 	bool            _pending_collect;
+	bool            _removeable;
 	PBD::Property<TransportRequestType> _request_mask; /* lists transport requests still accepted when we're in control */
 	PBD::Property<bool> _locked;
 	PBD::Property<bool> _sclock_synced;

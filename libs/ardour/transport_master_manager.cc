@@ -57,10 +57,10 @@ TransportMasterManager::init ()
 		/* setup default transport masters. Most people will never need any
 		   others
 		*/
-		add (Engine, X_("JACK Transport"));
-		add (MTC, X_("MTC"));
-		add (LTC, X_("LTC"));
-		add (MIDIClock, X_("MIDI Clock"));
+		add (Engine, X_("JACK Transport"), false);
+		add (MTC, X_("MTC"), false);
+		add (LTC, X_("LTC"), false);
+		add (MIDIClock, X_("MIDI Clock"), false);
 	} catch (...) {
 		return -1;
 	}
@@ -306,14 +306,16 @@ TransportMasterManager::init_transport_master_dll (double speed, samplepos_t pos
 }
 
 int
-TransportMasterManager::add (SyncSource type, std::string const & name)
+TransportMasterManager::add (SyncSource type, std::string const & name, bool removeable)
 {
 	int ret = 0;
 	boost::shared_ptr<TransportMaster> tm;
 
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("adding new transport master, type %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
+
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
-		tm = TransportMaster::factory (type, name);
+		tm = TransportMaster::factory (type, name, removeable);
 		ret = add_locked (tm);
 	}
 
@@ -353,6 +355,9 @@ TransportMasterManager::remove (std::string const & name)
 
 		for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->name() == name) {
+				if (!tm->removeable()) {
+					return -1;
+				}
 				tm = *t;
 				_transport_masters.erase (t);
 				ret = 0;

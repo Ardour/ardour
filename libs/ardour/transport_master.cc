@@ -68,6 +68,7 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 	, _session (0)
 	, _current_delta (0)
 	, _pending_collect (true)
+	, _removeable (false)
 	, _request_mask (Properties::allowed_transport_requests, TransportRequestType (0))
 	, _locked (Properties::locked, false)
 	, _sclock_synced (Properties::sclock_synced, false)
@@ -285,6 +286,7 @@ TransportMaster::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 	node->set_property (X_("type"), _type);
+	node->set_property (X_("removeable"), _removeable);
 
 	add_properties (*node);
 
@@ -329,6 +331,7 @@ TransportMaster::factory (XMLNode const & node)
 
 	SyncSource type;
 	std::string name;
+	bool removeable;
 
 	if (!node.get_property (X_("type"), type)) {
 		return boost::shared_ptr<TransportMaster>();
@@ -338,28 +341,49 @@ TransportMaster::factory (XMLNode const & node)
 		return boost::shared_ptr<TransportMaster>();
 	}
 
-	return factory (type, name);
+	if (!node.get_property (X_("removeable"), removeable)) {
+		/* development versions of 6.0 didn't have this property for a
+		   while. Any TM listed in XML at that time was non-removeable
+		*/
+		removeable = false;
+	}
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("xml-construct %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
+
+	return factory (type, name, removeable);
 }
 
 boost::shared_ptr<TransportMaster>
-TransportMaster::factory (SyncSource type, std::string const& name)
+TransportMaster::factory (SyncSource type, std::string const& name, bool removeable)
 {
 	/* XXX need to count existing sources of a given type */
 
+	boost::shared_ptr<TransportMaster> tm;
+
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("factory-construct %1 name %2 removeable %3\n", enum_2_string (type), name, removeable));
+
 	switch (type) {
 	case MTC:
-		return boost::shared_ptr<TransportMaster> (new MTC_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new MTC_TransportMaster (sync_source_to_string (type)));
+		break;
 	case LTC:
-		return boost::shared_ptr<TransportMaster> (new LTC_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new LTC_TransportMaster (sync_source_to_string (type)));
+		break;
 	case MIDIClock:
-		return boost::shared_ptr<TransportMaster> (new MIDIClock_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new MIDIClock_TransportMaster (sync_source_to_string (type)));
+		break;
 	case Engine:
-		return boost::shared_ptr<TransportMaster> (new Engine_TransportMaster (*AudioEngine::instance()));
+		tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
+		break;
 	default:
 		break;
 	}
 
-	return boost::shared_ptr<TransportMaster>();
+	if (tm) {
+		tm->set_removeable (removeable);
+	}
+
+	return tm;
 }
 
 boost::shared_ptr<Port>

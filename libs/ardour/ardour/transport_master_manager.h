@@ -41,7 +41,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 	typedef std::list<boost::shared_ptr<TransportMaster> > TransportMasters;
 
-	int add (SyncSource type, std::string const & name);
+	int add (SyncSource type, std::string const & name, bool removeable = true);
 	int remove (std::string const & name);
 	void clear ();
 
