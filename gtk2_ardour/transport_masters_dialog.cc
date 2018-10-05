@@ -139,16 +139,12 @@ TransportMastersWidget::rebuild ()
 
 	uint32_t n = 1;
 
-	cerr << "There are " << masters.size() << endl;
-
 	Gtk::RadioButtonGroup use_button_group;
 
 	for (TransportMasterManager::TransportMasters::const_iterator m = masters.begin(); m != masters.end(); ++m, ++n) {
 
 		Row* r = new Row (*this);
 		rows.push_back (r);
-
-		cerr << "Rows now holds " << rows.size() << endl;
 
 		r->tm = *m;
 		r->label.set_text ((*m)->name());
