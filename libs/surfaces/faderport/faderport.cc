@@ -181,7 +181,11 @@ FaderPort::FaderPort (Session& s)
 	get_button (Loop).set_action (boost::bind (&BasicUI::add_marker, this, string()), true, ShiftDown);
 
 	get_button (Punch).set_action (boost::bind (&BasicUI::prev_marker, this), true, ShiftDown);
+#ifdef MIXBUS
+	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ShiftDown);
+#else
 	get_button (User).set_action (boost::bind (&BasicUI::next_marker, this), true, ButtonState(ShiftDown|UserDown));
+#endif
 
 	get_button (Mute).set_action (boost::bind (&FaderPort::mute, this), true);
 	get_button (Solo).set_action (boost::bind (&FaderPort::solo, this), true);
@@ -361,12 +365,14 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	case Rewind:
 		bs = RewindDown;
 		break;
+#ifndef MIXBUS
 	case User:
 		bs = UserDown;
 		if (tb->value) {
 			start_press_timeout (button, id);
 		}
 		break;
+#endif
 	case FaderTouch:
 		fader_is_touched = tb->value;
 		if (_current_stripable) {
@@ -472,6 +478,7 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		}
 	}
 
+#ifndef MIXBUS
 	/* if the user button was pressed, mark it as consumed so that its
 	 * release action has no effect.
 	 */
@@ -479,6 +486,7 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 	if (!Profile->get_mixbus() && (button_state & UserDown)) {
 		consumed.insert (User);
 	}
+#endif
 }
 
 void
@@ -972,6 +980,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
+#ifndef MIXBUS
 			if (id == User) {
 				/* if the binding is for the User button, we
 				   need to store the button state as it will be
@@ -979,6 +988,7 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 				*/
 				bs = FaderPort::ButtonState (bs|UserDown);
 			}
+#endif
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 to action %2 on release + %3%4%5\n", id, name, bs));
 			todo.action_name = name;
 			on_release[bs] = todo;
