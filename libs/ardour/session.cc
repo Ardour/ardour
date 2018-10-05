@@ -1955,7 +1955,10 @@ Session::location_removed (Location *location)
 {
 	if (location->is_auto_loop()) {
 		set_auto_loop_location (0);
-		set_track_loop (false);
+		if (!play_loop) {
+			set_track_loop (false);
+		}
+		unset_play_loop ();
 	}
 
 	if (location->is_auto_punch()) {

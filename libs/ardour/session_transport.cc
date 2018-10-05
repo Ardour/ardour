@@ -1000,6 +1000,7 @@ Session::unset_play_loop ()
 			add_post_transport_work (PostTransportLocate);
 			_butler->schedule_transport_work ();
 		}
+		TransportStateChange (); /* EMIT SIGNAL */
 	}
 }
 
