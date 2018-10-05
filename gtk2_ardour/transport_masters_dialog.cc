@@ -473,11 +473,17 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 				last.set_text ("");
 			}
 			current.set_text (Timecode::timecode_format_time (t));
-			timestamp.set_markup (tm->position_string());
 			delta.set_markup (tm->delta_string ());
 
 			char gap[32];
-			snprintf (gap, sizeof (gap), "%.3fs", (when - now) / (float) AudioEngine::instance()->sample_rate());
+			const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
+			if (abs (seconds) < 1.0) {
+				snprintf (gap, sizeof (gap), "%.3fs", seconds);
+			} else if (abs (seconds) < 4.0) {
+				snprintf (gap, sizeof (gap), "%ds", (int) floor (seconds));
+			} else {
+				snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
+			}
 			timestamp.set_text (gap);
 			save_when = when;
 
@@ -486,10 +492,19 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 			if (save_when) {
 				char gap[32];
 
-				snprintf (gap, sizeof (gap), "%.3fs", (save_when - now) / (float) AudioEngine::instance()->sample_rate());
+				const float seconds = (when - now) / (float) AudioEngine::instance()->sample_rate();
+				if (abs (seconds) < 1.0) {
+					snprintf (gap, sizeof (gap), "%.3fs", seconds);
+				} else if (abs (seconds) < 4.0) {
+					snprintf (gap, sizeof (gap), "%ds", (int) floor (seconds));
+				} else {
+					snprintf (gap, sizeof (gap), "%s", _(">4s ago"));
+				}
 				timestamp.set_text (gap);
 				save_when = when;
 			}
+			delta.set_text ("");
+			current.set_text ("");
 		}
 	}
 }
