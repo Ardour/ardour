@@ -359,7 +359,7 @@ TransportMasterManager::remove (std::string const & name)
 
 		for (TransportMasters::iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
 			if ((*t)->name() == name) {
-				if (!tm->removeable()) {
+				if (!(*t)->removeable()) {
 					return -1;
 				}
 				tm = *t;

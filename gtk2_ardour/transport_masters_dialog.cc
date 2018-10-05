@@ -83,6 +83,8 @@ TransportMastersWidget::TransportMastersWidget ()
 	table.set_spacings (6);
 
 	TransportMasterManager::instance().CurrentChanged.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::current_changed, this, _1, _2), gui_context());
+	TransportMasterManager::instance().Added.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
+	TransportMasterManager::instance().Removed.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 
 	rebuild ();
 }
@@ -114,9 +116,7 @@ TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_
 void
 TransportMastersWidget::add_master ()
 {
-	if (!TransportMasterManager::instance().add (LTC, "new ltc")) {
-		rebuild ();
-	}
+	TransportMasterManager::instance().add (LTC, "new ltc");
 }
 
 void
@@ -247,6 +247,7 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 void
 TransportMastersWidget::Row::remove_clicked ()
 {
+	TransportMasterManager::instance().remove (tm->name());
 }
 
 void
