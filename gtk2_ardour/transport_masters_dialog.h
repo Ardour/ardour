@@ -49,6 +49,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	~TransportMastersWidget ();
 
 	void update (ARDOUR::samplepos_t);
+	void set_transport_master (boost::shared_ptr<ARDOUR::TransportMaster>);
 
   protected:
 	void on_map ();
@@ -57,6 +58,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
   private:
 
 	struct Row : sigc::trackable, PBD::ScopedConnectionList {
+		TransportMastersWidget& parent;
 		Gtk::EventBox label_box;
 		Gtk::Label label;
 		Gtk::Label type;
@@ -82,7 +84,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 		void update (ARDOUR::Session*, ARDOUR::samplepos_t);
 
-		Row ();
+		Row (TransportMastersWidget& parent);
 
 		struct PortColumns : public Gtk::TreeModel::ColumnRecord {
 			PortColumns() {
@@ -117,7 +119,6 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	std::vector<Row*> rows;
 
-	Gtk::RadioButtonGroup use_button_group;
 	Gtk::Table table;
 	Gtk::Label col_title[14];
 	Gtk::Button add_button;
@@ -127,7 +128,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void rebuild ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
-
+	void add_master ();
 };
 
 class TransportMastersWindow : public ArdourWindow

@@ -52,7 +52,6 @@ private:
 	BoolOption* _solo_control_is_listen_control;
 	ComboOption<ARDOUR::ListenPosition>* _listen_position;
 	VisibilityGroup _mixer_strip_visibility;
-	ComboOption<ARDOUR::SyncSource>* _sync_source;
 	BoolOption* _sync_framerate;
 	ComboStringOption* _ltc_port;
 	HSliderOption* _ltc_volume_slider;

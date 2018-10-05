@@ -52,6 +52,8 @@ TransportMastersWidget::TransportMastersWidget ()
 	pack_start (table, PACK_EXPAND_WIDGET, 12);
 	pack_start (add_button, FALSE, FALSE);
 
+	add_button.signal_clicked ().connect (sigc::mem_fun (*this, &TransportMastersWidget::add_master));
+
 	col_title[0].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Use")));
 	col_title[1].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Name")));
 	col_title[2].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Type")));
@@ -64,7 +66,7 @@ TransportMastersWidget::TransportMastersWidget ()
 	col_title[9].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Data Source")));
 	col_title[10].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Active\nCommands")));
 	col_title[11].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Clock\nSynced")));
-	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/30")));
+	col_title[12].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("29.97/\n30")));
 	col_title[13].set_markup (string_compose ("<span weight=\"bold\">%1</span>", _("Remove")));
 
 	set_tooltip (col_title[12], _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
@@ -93,6 +95,12 @@ TransportMastersWidget::~TransportMastersWidget ()
 }
 
 void
+TransportMastersWidget::set_transport_master (boost::shared_ptr<TransportMaster> tm)
+{
+	_session->request_sync_source (tm);
+}
+
+void
 TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_master, boost::shared_ptr<TransportMaster> new_master)
 {
 	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
@@ -100,6 +108,14 @@ TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_
 			(*r)->use_button.set_active (true);
 			break; /* there can only be one */
 		}
+	}
+}
+
+void
+TransportMastersWidget::add_master ()
+{
+	if (!TransportMasterManager::instance().add (LTC, "new ltc")) {
+		rebuild ();
 	}
 }
 
@@ -123,10 +139,16 @@ TransportMastersWidget::rebuild ()
 
 	uint32_t n = 1;
 
+	cerr << "There are " << masters.size() << endl;
+
+	Gtk::RadioButtonGroup use_button_group;
+
 	for (TransportMasterManager::TransportMasters::const_iterator m = masters.begin(); m != masters.end(); ++m, ++n) {
 
-		Row* r = new Row;
+		Row* r = new Row (*this);
 		rows.push_back (r);
+
+		cerr << "Rows now holds " << rows.size() << endl;
 
 		r->tm = *m;
 		r->label.set_text ((*m)->name());
@@ -170,7 +192,9 @@ TransportMastersWidget::rebuild ()
 			col++;
 		}
 
-		r->label_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+		table.show_all ();
+
+		// r->label_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 		r->label_box.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::name_press));
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
@@ -198,8 +222,9 @@ TransportMastersWidget::rebuild ()
 	}
 }
 
-TransportMastersWidget::Row::Row ()
-	: request_option_menu (0)
+TransportMastersWidget::Row::Row (TransportMastersWidget& p)
+	: parent (p)
+	, request_option_menu (0)
 	, remove_button (X_("x"))
 	, name_editor (0)
 	, save_when (0)
@@ -267,7 +292,7 @@ void
 TransportMastersWidget::Row::use_button_toggled ()
 {
 	if (use_button.get_active()) {
-		Config->set_sync_source (tm->type());
+		parent.set_transport_master (tm);
 	}
 }
 

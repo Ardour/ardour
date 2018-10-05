@@ -18,6 +18,7 @@
 */
 
 #include "ardour/session.h"
+#include "ardour/transport_master_manager.h"
 
 #include "gui_thread.h"
 #include "session_option_editor.h"
@@ -414,7 +415,7 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 {
 	OptionEditor::parameter_changed (p);
 	if (p == "external-sync") {
-		if (Config->get_sync_source() == Engine) {
+		if (TransportMasterManager::instance().current()->type() == Engine) {
 			_vpu->set_sensitive(!_session_config->get_external_sync());
 		} else {
 			_vpu->set_sensitive(true);

@@ -63,6 +63,7 @@
 #include "ardour/session_playlists.h"
 #include "ardour/strip_silence.h"
 #include "ardour/transient_detector.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/transpose.h"
 #include "ardour/vca_manager.h"
 
@@ -2595,7 +2596,7 @@ Editor::transition_to_rolling (bool fwd)
 	}
 
 	if (_session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
 		default:

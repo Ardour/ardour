@@ -27,6 +27,7 @@
 
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
+#include "ardour/transport_master_manager.h"
 
 #include "gtkmm2ext/utils.h"
 #include "waveview/wave_view.h"
@@ -50,14 +51,10 @@ void
 ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
-		if (_session->config.get_video_pullup() != 0.0f) {
-			if (Config->get_sync_source() == Engine) {
-				MessageDialog msg (
-					_("It is not possible to use JACK as the the sync source\n\
-when the pull up/down setting is non-zero."));
-				msg.run ();
-				return;
-			}
+		if (_session->config.get_video_pullup() != 0.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
+			MessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
+			msg.run ();
+			return;
 		}
 
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
@@ -373,11 +370,11 @@ ARDOUR_UI::parameter_changed (std::string p)
 			if (!_session->config.get_external_sync()) {
 				sync_button.set_text (S_("SyncSource|Int."));
 			} else {
-				sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
+				sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 			}
 		} else {
 			/* changing sync source without a session is unlikely/impossible , except during startup */
-			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
+			sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 		}
 
 	} else if (p == "follow-edits") {
@@ -595,7 +592,7 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 		act->set_sensitive (true);
 	} else {
 		/* can't sync to JACK if video pullup != 0.0 */
-		if (Config->get_sync_source() == Engine) {
+		if (TransportMasterManager::instance().current()->type() == Engine) {
 			act->set_sensitive (false);
 		} else {
 			act->set_sensitive (true);

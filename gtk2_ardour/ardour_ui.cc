@@ -2304,9 +2304,8 @@ ARDOUR_UI::transport_roll ()
 		return;
 	}
 
-#if 0
 	if (_session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
 		default:
@@ -2314,7 +2313,6 @@ ARDOUR_UI::transport_roll ()
 			return;
 		}
 	}
-#endif
 
 	bool rolling = _session->transport_rolling();
 
@@ -2368,7 +2366,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	}
 
 	if (_session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
 		default:
