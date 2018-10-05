@@ -340,6 +340,10 @@ TransportMasterManager::add_locked (boost::shared_ptr<TransportMaster> tm)
 		}
 	}
 
+	if (_session) {
+		tm->set_session (_session);
+	}
+
 	_transport_masters.push_back (tm);
 	return 0;
 }

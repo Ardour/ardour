@@ -26,6 +26,7 @@
 #include "ardour/io.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
+#include "ardour/transport_master_manager.h"
 
 #include "pbd/i18n.h"
 
@@ -183,7 +184,7 @@ Session::ltc_tx_send_time_code_for_cycle (samplepos_t start_sample, samplepos_t 
 		return;
 	}
 
-	SyncSource sync_src = Config->get_sync_source();
+	SyncSource sync_src = TransportMasterManager::instance().current()->type();
 	if (engine().freewheeling() || !Config->get_send_ltc()
 	    /* TODO
 	     * decide which time-sources we can generated LTC from.

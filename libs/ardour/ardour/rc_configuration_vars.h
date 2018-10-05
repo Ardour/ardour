@@ -74,8 +74,6 @@ CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
 #ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
-#else
-CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", Engine)
 #endif
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)

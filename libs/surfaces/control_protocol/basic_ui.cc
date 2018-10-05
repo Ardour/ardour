@@ -210,7 +210,7 @@ BasicUI::transport_play (bool from_last_start)
 
 #if 0
 	if (session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current().type()) {
 		case Engine:
 			break;
 		default:

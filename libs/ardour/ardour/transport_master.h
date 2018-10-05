@@ -344,6 +344,8 @@ class LIBARDOUR_API TransportMaster : public PBD::Stateful {
 	bool removeable () const { return _removeable; }
 	void set_removeable (bool yn) { _removeable = yn; }
 
+	std::string display_name (bool sh/*ort*/ = true) const;
+
   protected:
 	SyncSource      _type;
 	PBD::Property<std::string>   _name;

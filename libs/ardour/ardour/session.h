@@ -718,7 +718,7 @@ public:
 	static PBD::Signal1<void, samplepos_t> EndTimeChanged;
 
 	void   request_sync_source (boost::shared_ptr<TransportMaster>);
-	bool   synced_to_engine() const { return config.get_external_sync() && Config->get_sync_source() == Engine; }
+	bool   synced_to_engine() const;
 
 	double engine_speed() const { return _engine_speed; }
 	double actual_speed() const {

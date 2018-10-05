@@ -75,9 +75,6 @@ LIBARDOUR_API bool path_is_paired (std::string path, std::string& pair_base);
 
 LIBARDOUR_API void compute_equal_power_fades (ARDOUR::samplecnt_t nframes, float* in, float* out);
 
-LIBARDOUR_API const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
-LIBARDOUR_API ARDOUR::SyncSource string_to_sync_source (std::string str);
-
 LIBARDOUR_API const char* edit_mode_to_string (ARDOUR::EditMode);
 LIBARDOUR_API ARDOUR::EditMode string_to_edit_mode (std::string);
 

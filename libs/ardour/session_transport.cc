@@ -92,6 +92,11 @@ Session::should_ignore_transport_request (TransportRequestSource src, TransportR
 	return false;
 }
 
+bool
+Session::synced_to_engine() const {
+	return config.get_external_sync() && TransportMasterManager::instance().current()->type() == Engine;
+}
+
 void
 Session::request_sync_source (boost::shared_ptr<TransportMaster> tm)
 {

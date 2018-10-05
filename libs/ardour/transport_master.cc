@@ -364,13 +364,13 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 
 	switch (type) {
 	case MTC:
-		tm.reset (new MTC_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new MTC_TransportMaster (name));
 		break;
 	case LTC:
-		tm.reset (new LTC_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new LTC_TransportMaster (name));
 		break;
 	case MIDIClock:
-		tm.reset (new MIDIClock_TransportMaster (sync_source_to_string (type)));
+		tm.reset (new MIDIClock_TransportMaster (name));
 		break;
 	case Engine:
 		tm.reset (new Engine_TransportMaster (*AudioEngine::instance()));
@@ -384,6 +384,52 @@ TransportMaster::factory (SyncSource type, std::string const& name, bool removea
 	}
 
 	return tm;
+}
+
+/** @param sh Return a short version of the string */
+std::string
+TransportMaster::display_name (bool sh) const
+{
+
+	switch (_type) {
+	case Engine:
+		/* no other backends offer sync for now ... deal with this if we
+		 * ever have to.
+		 */
+		return S_("SyncSource|JACK");
+
+	case MTC:
+		if (sh) {
+			if (name().length() <= 4) {
+				return name();
+			}
+			return S_("SyncSource|MTC");
+		} else {
+			return name();
+		}
+
+	case MIDIClock:
+		if (sh) {
+			if (name().length() <= 4) {
+				return name();
+			}
+			return S_("SyncSource|M-Clk");
+		} else {
+			return name();
+		}
+
+	case LTC:
+		if (sh) {
+			if (name().length() <= 4) {
+				return name();
+			}
+			return S_("SyncSource|LTC");
+		} else {
+			return name();
+		}
+	}
+	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
+	return S_("SyncSource|JACK");
 }
 
 boost::shared_ptr<Port>
@@ -437,3 +483,4 @@ TimecodeTransportMaster::set_fr2997 (bool yn)
 		PropertyChanged (Properties::fr2997);
 	}
 }
+

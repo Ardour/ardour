@@ -4098,7 +4098,7 @@ Session::config_changed (std::string p, bool ours)
 		first_file_data_format_reset = false;
 
 	} else if (p == "external-sync") {
-		request_sync_source (TransportMasterManager::instance().master_by_type (Config->get_sync_source()));
+		request_sync_source (TransportMasterManager::instance().current());
 	}  else if (p == "denormal-model") {
 		setup_fpu ();
 	} else if (p == "history-depth") {
