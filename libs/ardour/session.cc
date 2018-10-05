@@ -1953,24 +1953,24 @@ Session::location_added (Location *location)
 void
 Session::location_removed (Location *location)
 {
-        if (location->is_auto_loop()) {
-	        set_auto_loop_location (0);
-	        set_track_loop (false);
-        }
+	if (location->is_auto_loop()) {
+		set_auto_loop_location (0);
+		set_track_loop (false);
+	}
 
-        if (location->is_auto_punch()) {
-                set_auto_punch_location (0);
-        }
+	if (location->is_auto_punch()) {
+		set_auto_punch_location (0);
+	}
 
-        if (location->is_session_range()) {
-                /* this is never supposed to happen */
-                error << _("programming error: session range removed!") << endl;
-        }
+	if (location->is_session_range()) {
+		/* this is never supposed to happen */
+		error << _("programming error: session range removed!") << endl;
+	}
 
-        if (location->is_skip()) {
+	if (location->is_skip()) {
 
-                update_skips (location, false);
-        }
+		update_skips (location, false);
+	}
 
 	set_dirty ();
 }
