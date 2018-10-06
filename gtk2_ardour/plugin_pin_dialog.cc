@@ -1740,12 +1740,6 @@ PluginPinWidget::sc_input_release (GdkEventButton *ev)
 	return false;
 }
 
-struct RouteCompareByName {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
-		return a->name ().compare (b->name ()) < 0;
-	}
-};
-
 bool
 PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
 {
@@ -1776,7 +1770,7 @@ PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 
 		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
-		copy.sort (RouteCompareByName ());
+		copy.sort (Stripable::Sorter(true));
 		uint32_t added = 0;
 		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {
 			added += maybe_add_route_to_input_menu (*i, p->type (), wp);
