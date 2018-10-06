@@ -131,7 +131,7 @@ PluginDSPLoadWindow::refill_processors ()
 				);
 
 		(*i)->DropReferences.connect (
-				_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::drop_references, this), gui_context()
+				_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
 				);
 	}
 
@@ -152,7 +152,7 @@ PluginDSPLoadWindow::add_processor_to_display (boost::weak_ptr<Processor> w, std
 	if (!pi) {
 		return;
 	}
-	p->DropReferences.connect (_processor_connections, MISSING_INVALIDATOR, boost::bind (&PluginDSPLoadWindow::drop_references, this), gui_context());
+	p->DropReferences.connect (_processor_connections, MISSING_INVALIDATOR, boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context());
 	PluginLoadStatsGui* plsg = new PluginLoadStatsGui (pi);
 	
 	std::string name = route_name + " - " + pi->name();
