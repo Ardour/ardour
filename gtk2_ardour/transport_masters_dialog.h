@@ -126,8 +126,6 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void prop_change (PBD::PropertyChange);
 		void remove_clicked ();
 
-		static gboolean _idle_remove (gpointer arg);
-
 		bool name_press (GdkEventButton*);
 		void name_edited (std::string, int);
 
@@ -149,6 +147,9 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void rebuild ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
 	void add_master ();
+
+  public:
+	bool idle_remove (Row*);
 };
 
 class TransportMastersWindow : public ArdourWindow

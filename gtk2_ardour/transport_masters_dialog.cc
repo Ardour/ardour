@@ -213,7 +213,6 @@ TransportMastersWidget::rebuild ()
 
 		table.show_all ();
 
-		// r->label_box.set_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 		r->label_box.signal_button_press_event().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::name_press));
 		r->port_combo.signal_changed().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::port_choice_changed));
 		r->use_button.signal_toggled().connect (sigc::mem_fun (*r, &TransportMastersWidget::Row::use_button_toggled));
@@ -267,13 +266,11 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 	return false;
 }
 
-gboolean
-TransportMastersWidget::Row::_idle_remove (gpointer arg)
+bool
+TransportMastersWidget::idle_remove (TransportMastersWidget::Row* row)
 {
-	TransportMastersWidget::Row* row = (TransportMastersWidget::Row*) arg;
 	TransportMasterManager::instance().remove (row->tm->name());
-
-	return FALSE; /* do not call again */
+	return false;
 }
 
 void
@@ -282,7 +279,7 @@ TransportMastersWidget::Row::remove_clicked ()
 	/* have to do this via an idle callback, because it will destroy the
 	   widget from which this callback was initiated.
 	*/
-	g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_remove, this, NULL);
+	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun (parent, &TransportMastersWidget::idle_remove), this));
 }
 
 void
