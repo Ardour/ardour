@@ -315,6 +315,14 @@ TransportMasterManager::add (SyncSource type, std::string const & name, bool rem
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
+
+		for (TransportMasters::const_iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
+			if ((*t)->name() == name) {
+				error << string_compose (_("There is already a transport master named \"%1\" - not duplicated"), name) << endmsg;
+				return -1;
+			}
+		}
+
 		tm = TransportMaster::factory (type, name, removeable);
 		ret = add_locked (tm);
 	}
@@ -333,12 +341,6 @@ TransportMasterManager::add_locked (boost::shared_ptr<TransportMaster> tm)
 		return -1;
 	}
 
-	for (TransportMasters::const_iterator t = _transport_masters.begin(); t != _transport_masters.end(); ++t) {
-		if ((*t)->name() == tm->name()) {
-			error << string_compose (_("There is already a transport master named \"%1\" - not duplicated"), tm->name()) << endmsg;
-			return -1;
-		}
-	}
 
 	if (_session) {
 		tm->set_session (_session);
