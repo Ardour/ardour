@@ -134,7 +134,12 @@ TransportMastersWidget::add_master ()
 		}
 	}
 
-	TransportMasterManager::instance().add (d.get_type(), name);
+	d.hide ();
+
+	if (TransportMasterManager::instance().add (d.get_type(), name)) {
+		MessageDialog msg (_("New transport master not added - check error log for details"));
+		msg.run ();
+	}
 }
 
 void
