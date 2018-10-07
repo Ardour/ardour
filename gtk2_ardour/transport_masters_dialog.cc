@@ -256,10 +256,22 @@ TransportMastersWidget::Row::name_press (GdkEventButton* ev)
 	return false;
 }
 
+gboolean
+TransportMastersWidget::Row::_idle_remove (gpointer arg)
+{
+	TransportMastersWidget::Row* row = (TransportMastersWidget::Row*) arg;
+	TransportMasterManager::instance().remove (row->tm->name());
+
+	return FALSE; /* do not call again */
+}
+
 void
 TransportMastersWidget::Row::remove_clicked ()
 {
-	TransportMasterManager::instance().remove (tm->name());
+	/* have to do this via an idle callback, because it will destroy the
+	   widget from which this callback was initiated.
+	*/
+	g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_remove, this, NULL);
 }
 
 void
@@ -519,7 +531,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 }
 
 void
-	TransportMastersWidget::update (samplepos_t /* audible */)
+TransportMastersWidget::update (samplepos_t /* audible */)
 {
 	samplepos_t now = AudioEngine::instance()->sample_time ();
 

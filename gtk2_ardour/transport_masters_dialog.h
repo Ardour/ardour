@@ -126,6 +126,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 		void prop_change (PBD::PropertyChange);
 		void remove_clicked ();
 
+		static gboolean _idle_remove (gpointer arg);
+
 		bool name_press (GdkEventButton*);
 		void name_edited (std::string, int);
 
