@@ -28,6 +28,7 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
+#include <gtkmm/entry.h>
 #include <gtkmm/treestore.h>
 
 #include "ardour_window.h"
@@ -56,6 +57,21 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	void on_unmap ();
 
   private:
+
+	struct AddTransportMasterDialog : public ArdourDialog {
+	  public:
+		AddTransportMasterDialog ();
+		std::string get_name () const;
+		ARDOUR::SyncSource get_type () const;
+
+	  private:
+		Gtk::Label name_label;
+		Gtk::Label type_label;
+		Gtk::HBox name_hbox;
+		Gtk::HBox type_hbox;
+		Gtk::Entry name_entry;
+		Gtk::ComboBoxText type_combo;
+	};
 
 	struct Row : sigc::trackable, PBD::ScopedConnectionList {
 		TransportMastersWidget& parent;
@@ -125,6 +141,8 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	sigc::connection update_connection;
 	PBD::ScopedConnection current_connection;
+	PBD::ScopedConnection add_connection;
+	PBD::ScopedConnection remove_connection;
 
 	void rebuild ();
 	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);

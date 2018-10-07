@@ -83,8 +83,8 @@ TransportMastersWidget::TransportMastersWidget ()
 	table.set_spacings (6);
 
 	TransportMasterManager::instance().CurrentChanged.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::current_changed, this, _1, _2), gui_context());
-	TransportMasterManager::instance().Added.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
-	TransportMasterManager::instance().Removed.connect (current_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
+	TransportMasterManager::instance().Added.connect (add_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
+	TransportMasterManager::instance().Removed.connect (remove_connection, invalidator (*this), boost::bind (&TransportMastersWidget::rebuild, this), gui_context());
 
 	rebuild ();
 }
@@ -116,7 +116,19 @@ TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_
 void
 TransportMastersWidget::add_master ()
 {
-	TransportMasterManager::instance().add (LTC, "new ltc");
+	AddTransportMasterDialog d;
+
+	d.present ();
+	int r = d.run ();
+
+	switch (r) {
+	case RESPONSE_ACCEPT:
+		break;
+	default:
+		return;
+	}
+
+	TransportMasterManager::instance().add (d.get_type(), d.get_name());
 }
 
 void
@@ -552,4 +564,60 @@ TransportMastersWindow::set_session (ARDOUR::Session* s)
 {
 	ArdourWindow::set_session (s);
 	w.set_session (s);
+}
+
+TransportMastersWidget::AddTransportMasterDialog::AddTransportMasterDialog ()
+	: ArdourDialog (_("Add Transport Master"), true, false)
+	, name_label (_("Name"))
+	, type_label (_("Type"))
+{
+	name_hbox.set_spacing (6);
+	name_hbox.pack_start (name_label, false, false);
+	name_hbox.pack_start (name_entry, true, true);
+
+	type_hbox.set_spacing (6);
+	type_hbox.pack_start (type_label, false, false);
+	type_hbox.pack_start (type_combo, true, true);
+
+	vector<string> s;
+
+	s.push_back (X_("MTC"));
+	s.push_back (X_("LTC"));
+	s.push_back (X_("MIDI Clock"));
+
+	set_popdown_strings (type_combo, s);
+	type_combo.set_active_text (X_("LTC"));
+
+	get_vbox()->pack_start (name_hbox, false, false);
+	get_vbox()->pack_start (type_hbox, false, false);
+
+	add_button (_("Cancel"), RESPONSE_CANCEL);
+	add_button (_("Add"), RESPONSE_ACCEPT);
+
+	name_entry.show ();
+	type_combo.show ();
+	name_label.show ();
+	type_label.show ();
+	name_hbox.show ();
+	type_hbox.show ();
+}
+
+string
+TransportMastersWidget::AddTransportMasterDialog::get_name () const
+{
+	return name_entry.get_text ();
+}
+
+SyncSource
+TransportMastersWidget::AddTransportMasterDialog::get_type() const
+{
+	string t = type_combo.get_active_text ();
+
+	if (t == X_("MTC")) {
+		return MTC;
+	} else if (t == X_("MIDI Clock")) {
+		return MIDIClock;
+	}
+
+	return LTC;
 }
