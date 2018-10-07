@@ -83,7 +83,6 @@ TransportMaster::TransportMaster (SyncSource t, std::string const & name)
 
 TransportMaster::~TransportMaster()
 {
-	delete _session;
 }
 
 bool
