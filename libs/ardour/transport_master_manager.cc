@@ -370,11 +370,11 @@ TransportMasterManager::remove (std::string const & name)
 		}
 	}
 
-	if (ret == 0 && tm) {
+	if (ret == 0) {
 		Removed (tm);
 	}
 
-	return -1;
+	return ret;
 }
 
 int
