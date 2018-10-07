@@ -119,16 +119,22 @@ TransportMastersWidget::add_master ()
 	AddTransportMasterDialog d;
 
 	d.present ();
-	int r = d.run ();
+	string name;
 
-	switch (r) {
-	case RESPONSE_ACCEPT:
-		break;
-	default:
-		return;
+	while (name.empty()) {
+
+		int r = d.run ();
+
+		switch (r) {
+		case RESPONSE_ACCEPT:
+			name = d.get_name();
+			break;
+		default:
+			return;
+		}
 	}
 
-	TransportMasterManager::instance().add (d.get_type(), d.get_name());
+	TransportMasterManager::instance().add (d.get_type(), name);
 }
 
 void
@@ -612,6 +618,8 @@ TransportMastersWidget::AddTransportMasterDialog::AddTransportMasterDialog ()
 	type_label.show ();
 	name_hbox.show ();
 	type_hbox.show ();
+
+	name_entry.signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &Gtk::Dialog::response), Gtk::RESPONSE_ACCEPT));
 }
 
 string
