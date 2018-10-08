@@ -734,6 +734,7 @@ public:
 
 	TempoMap&       tempo_map()       { return *_tempo_map; }
 	const TempoMap& tempo_map() const { return *_tempo_map; }
+	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }
 	void            reset_xrun_count () {_xrun_count = 0; }

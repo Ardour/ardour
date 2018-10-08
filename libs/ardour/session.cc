@@ -7276,3 +7276,16 @@ Session::cancel_all_solo ()
 	set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, Controllable::NoGroup);
 	clear_all_solo_state (routes.reader());
 }
+
+void
+Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
+{
+	if (_tempo_map->n_tempos() == 1) {
+		TempoSection& ts (_tempo_map->tempo_section_at_sample (0));
+		if (fabs (ts.note_types_per_minute() - bpm) > (0.01 * ts.note_types_per_minute())) {
+			const Tempo tempo (bpm, 4.0, bpm);
+			std::cerr << "new tempo " << bpm << " old " << ts.note_types_per_minute() << std::endl;
+			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
+		}
+	}
+}
