@@ -687,6 +687,10 @@ void
 Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
 	static const double degrees = M_PI / 180.0;
+	if (r < 1) {
+		cairo_rectangle (cr, x, y, w, h);
+		return;
+	}
 
 	cairo_new_sub_path (cr);
 	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
