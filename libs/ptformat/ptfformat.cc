@@ -1273,6 +1273,28 @@ PTFFormat::parseaudio(void) {
 	std::reverse(actualwavs.begin(), actualwavs.end());
 	//resort(audiofiles);
 	//resort(actualwavs);
+
+	// Jump to end of wav file list
+	if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\xff\xff\xff\xff", 4))
+		return;
+
+	// Loop through all the sources
+	for (vector<wav_t>::iterator w = audiofiles.begin(); w != audiofiles.end(); ++w) {
+		// Jump to start of source metadata for this source
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x07", 2))
+			return;
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x02", 2))
+			return;
+		k++;
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x02", 2))
+			return;
+
+		w->length = 0;
+		w->length |= (uint32_t)(ptfunxored[k-22]) << 24;
+		w->length |= (uint32_t)(ptfunxored[k-23]) << 16;
+		w->length |= (uint32_t)(ptfunxored[k-24]) << 8;
+		w->length |= (uint32_t)(ptfunxored[k-25]);
+	}
 }
 
 void
