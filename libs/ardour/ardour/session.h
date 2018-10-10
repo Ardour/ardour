@@ -41,6 +41,7 @@
 #include <glibmm/threads.h>
 
 #include <ltc.h>
+#include <ptfformat.h>
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
@@ -301,6 +302,8 @@ public:
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (samplepos_t const) const;
+
+	boost::shared_ptr<AudioTrack> get_nth_audio_track (int nth) const;
 
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }
@@ -1197,6 +1200,9 @@ public:
 	double compute_speed_from_master (pframes_t nframes);
 	bool   transport_master_is_external() const;
 	boost::shared_ptr<TransportMaster> transport_master() const;
+
+	void import_pt (PTFFormat& ptf, ImportStatus& status);
+	bool import_sndfile_as_region (std::string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status);
 
 protected:
 	friend class AudioEngine;

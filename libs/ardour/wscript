@@ -103,6 +103,7 @@ libardour_sources = [
         'iec1ppmdsp.cc',
         'iec2ppmdsp.cc',
         'import.cc',
+        'import_pt.cc',
         'instrument_info.cc',
         'internal_return.cc',
         'internal_send.cc',
@@ -399,6 +400,7 @@ def build(bld):
                         'libaudiographer',
                         'libtemporal',
                         'liblua',
+                        'libptformat',
                         'zita-resampler',
                         ]
     if bld.env['build_target'] != 'mingw':

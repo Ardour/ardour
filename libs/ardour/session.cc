@@ -6460,6 +6460,25 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 	}
 }
 
+boost::shared_ptr<AudioTrack>
+Session::get_nth_audio_track (int nth) const
+{
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	rl->sort (Stripable::Sorter ());
+
+	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		if (!boost::dynamic_pointer_cast<AudioTrack> (*r)) {
+			continue;
+		}
+
+		if (--nth > 0) {
+			continue;
+		}
+		return boost::dynamic_pointer_cast<AudioTrack> (*r);
+	}
+	return boost::shared_ptr<AudioTrack> ();
+}
+
 boost::shared_ptr<RouteList>
 Session::get_tracks () const
 {
