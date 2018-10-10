@@ -157,7 +157,6 @@ public:
 	~LocationUI ();
 
 	void set_session (ARDOUR::Session *);
-	void set_clock_mode (AudioClock::Mode);
 
 	void add_new_location();
 	void add_new_range();
@@ -216,6 +215,8 @@ private:
 	bool _mode_set;
 
 	std::string _state_node_name;
+
+	void set_clock_mode_from_primary ();
 };
 
 class LocationUIWindow : public ArdourWindow

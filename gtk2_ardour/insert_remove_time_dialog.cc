@@ -61,14 +61,14 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	time_label->set_alignment (1, 0.5);
 	table->attach (*time_label, 0, 1, 0, 1, FILL | EXPAND);
 	position_clock.set_session (_session);
-	position_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	position_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	table->attach (position_clock, 1, 2, 0, 1);
 
 	time_label = manage (new Label (remove ? _("Time to remove:") : _("Time to insert:")));
 	time_label->set_alignment (1, 0.5);
 	table->attach (*time_label, 0, 1, 1, 2, FILL | EXPAND);
 	duration_clock.set_session (_session);
-	duration_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	duration_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	table->attach (duration_clock, 1, 2, 1, 2);
 
 	//if a Range is selected, assume the user wants to insert/remove the length of the range

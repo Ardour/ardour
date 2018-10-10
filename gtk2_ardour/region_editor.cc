@@ -65,6 +65,8 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	set_session (s);
 
 	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
+	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &RegionEditor::set_clock_mode_from_primary));
+
 	_clock_group->add (position_clock);
 	_clock_group->add (end_clock);
 	_clock_group->add (length_clock);
@@ -200,6 +202,12 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 RegionEditor::~RegionEditor ()
 {
 	delete _clock_group;
+}
+
+void
+RegionEditor::set_clock_mode_from_primary ()
+{
+	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
 }
 
 void

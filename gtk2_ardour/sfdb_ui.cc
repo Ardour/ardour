@@ -199,7 +199,7 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
 	table.attach (tempomap_value, 1, 2, 6, 7, FILL, FILL);
 
-	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	length_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	timecode_clock.set_mode (AudioClock::Timecode);
 
 	main_box.pack_start (table, false, false);
