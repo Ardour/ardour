@@ -61,6 +61,8 @@
 #include "selection_memento.h"
 #include "tempo_curve.h"
 
+#include <ptfformat.h>
+
 namespace Gtkmm2ext {
 	class Bindings;
 }
@@ -1346,18 +1348,6 @@ private:
 
 	void insert_region_list_selection (float times);
 
-	/* PT import */
-	void external_pt_dialog ();
-	typedef struct ptflookup {
-		uint16_t index1;
-		uint16_t index2;
-		PBD::ID  id;
-
-		bool operator ==(const struct ptflookup& other) {
-			return (this->index1 == other.index1);
-		}
-	} ptflookup_t;
-
 	/* import & embed */
 
 	void add_external_audio_action (Editing::ImportMode);
@@ -1426,6 +1416,13 @@ private:
 	/* import & embed */
 	void external_audio_dialog ();
 	void session_import_dialog ();
+
+	/* PT import specific */
+	void external_pt_dialog ();
+	ARDOUR::ImportStatus import_pt_status;
+	static void *_import_pt_thread (void *);
+	void* import_pt_thread ();
+	PTFFormat import_ptf;
 
 	/* import specific info */
 
