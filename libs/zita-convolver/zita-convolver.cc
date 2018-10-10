@@ -25,18 +25,7 @@
 
 #include "zita-convolver/zita-convolver.h"
 
-
-int zita_convolver_major_version (void)
-{
-    return ZITA_CONVOLVER_MAJOR_VERSION;
-}
-
-
-int zita_convolver_minor_version (void)
-{
-    return ZITA_CONVOLVER_MINOR_VERSION;
-}
-
+using namespace ArdourZita;
 
 float Convproc::_mac_cost = 1.0f;
 float Convproc::_fft_cost = 5.0f;

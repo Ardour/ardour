@@ -26,16 +26,9 @@
 #include <stdint.h>
 #include <fftw3.h>
 
+#include "zita-convolver/zconvolver_visibility.h"
 
-#define ZITA_CONVOLVER_MAJOR_VERSION 4
-#define ZITA_CONVOLVER_MINOR_VERSION 0
-
-
-extern int zita_convolver_major_version (void);
-extern int zita_convolver_minor_version (void);
-
-
-// ----------------------------------------------------------------------------
+namespace ArdourZita {
 
 
 #ifdef ZCSEMA_IS_IMPLEMENTED
@@ -47,7 +40,7 @@ extern int zita_convolver_minor_version (void);
 
 #include <semaphore.h>
 
-class ZCsema
+class LIBZCONVOLVER_API ZCsema
 {
 public:
 
@@ -80,7 +73,7 @@ private:
 // and if it compiles it may or may not work correctly. Blame APPLE
 // for not following POSIX standards.
 
-class ZCsema
+class LIBZCONVOLVER_API ZCsema
 {
 public:
 
@@ -154,7 +147,7 @@ private:
 // ----------------------------------------------------------------------------
 
 
-class Inpnode   
+class LIBZCONVOLVER_API Inpnode   
 {
 private:
 
@@ -172,7 +165,7 @@ private:
 };
 
 
-class Macnode  
+class LIBZCONVOLVER_API Macnode  
 {
 private:
 
@@ -191,7 +184,7 @@ private:
 };
 
 
-class Outnode   
+class LIBZCONVOLVER_API Outnode   
 {
 private:
 
@@ -207,7 +200,7 @@ private:
 };
 
 
-class Converror
+class LIBZCONVOLVER_API Converror
 {
 public:
 
@@ -226,7 +219,7 @@ private:
 };
 
 
-class Convlevel
+class LIBZCONVOLVER_API Convlevel
 {
 private:
 
@@ -329,7 +322,7 @@ private:
 // ----------------------------------------------------------------------------
 
 
-class Convproc
+class LIBZCONVOLVER_API Convproc
 {
 public:
 
@@ -468,6 +461,7 @@ private:
 
 // ----------------------------------------------------------------------------
 
+} /* end namespace */
 
 #endif
 
