@@ -236,6 +236,7 @@ children = [
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/zita-resampler',
+        'libs/zita-convolver',
         # core ardour libraries
         'libs/pbd',
         'libs/midi++2',
