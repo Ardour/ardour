@@ -110,6 +110,7 @@ class JACKAudioBackend : public AudioBackend {
     int join_process_threads ();
     bool in_process_thread ();
     uint32_t process_thread_count ();
+		int client_real_time_priority ();
 
     void transport_start ();
     void transport_stop ();
