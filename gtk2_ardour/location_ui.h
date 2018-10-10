@@ -215,8 +215,6 @@ private:
 	bool _mode_set;
 
 	std::string _state_node_name;
-
-	void set_clock_mode_from_primary ();
 };
 
 class LocationUIWindow : public ArdourWindow

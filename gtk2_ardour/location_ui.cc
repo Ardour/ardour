@@ -761,8 +761,6 @@ LocationUI::LocationUI (std::string state_node_name)
 
 	_clock_group = new ClockGroup;
 
-	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &LocationUI::set_clock_mode_from_primary));
-
 	VBox* vbox = manage (new VBox);
 
 	Table* table = manage (new Table (2, 2));
@@ -1103,13 +1101,6 @@ LocationUI::refresh_location_list ()
 	if (_session) {
 		_session->locations()->apply (*this, &LocationUI::map_locations);
 	}
-}
-
-void
-LocationUI::set_clock_mode_from_primary ()
-{
-	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
-	_mode_set = true;
 }
 
 void
