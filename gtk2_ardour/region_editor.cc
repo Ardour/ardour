@@ -64,7 +64,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 {
 	set_session (s);
 
-	_clock_group->set_clock_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	_clock_group->add (position_clock);
 	_clock_group->add (end_clock);
 	_clock_group->add (length_clock);
