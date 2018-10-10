@@ -37,16 +37,10 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    if conf.is_defined('USE_EXTERNAL_LIBS'):
-        autowaf.check_pkg(conf, 'zita-resampler', uselib_store='LIBZRESAMPLER', atleast_version=ZRESAMPLER_LIB_VERSION, mandatory=True)
-    else:
-        conf.load ('compiler_cxx')
-        autowaf.configure(conf)
+    conf.load ('compiler_cxx')
+    autowaf.configure(conf)
 
 def build(bld):
-    if bld.is_defined('USE_EXTERNAL_LIBS'):
-        return
-
     obj = bld.stlib(features = 'cxx cxxstlib', source = zresampler_sources)
     obj.cxxflags        = [ '-fPIC', '-O3', '-ffast-math' ]
     obj.export_includes = ['.']
@@ -59,4 +53,3 @@ def build(bld):
 
 def shutdown():
     autowaf.shutdown()
-
