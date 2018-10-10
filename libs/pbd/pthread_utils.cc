@@ -209,41 +209,8 @@ pthread_cancel_one (pthread_t thread)
 }
 
 int
-pbd_realtime_pthread_create (
-		const int policy, int priority, const size_t stacksize,
-		pthread_t *thread,
-		void *(*start_routine) (void *),
-		void *arg)
+pbd_absolute_rt_priority (int policy, int priority)
 {
-	int rv;
-
-	pthread_attr_t attr;
-	struct sched_param parm;
-
-	const int p_min = sched_get_priority_min (policy);
-	const int p_max = sched_get_priority_max (policy);
-	priority += p_max;
-	if (priority > p_max) priority = p_max;
-	if (priority < p_min) priority = p_min;
-	parm.sched_priority = priority;
-
-	pthread_attr_init (&attr);
-	pthread_attr_setschedpolicy (&attr, policy);
-	pthread_attr_setschedparam (&attr, &parm);
-	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
-	pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
-	pthread_attr_setstacksize (&attr, stacksize);
-	rv = pthread_create (thread, &attr, start_routine, arg);
-	pthread_attr_destroy (&attr);
-	return rv;
-}
-
-int
-pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
-{
-	struct sched_param param;
-	memset (&param, 0, sizeof (param));
-
 	/* POSIX requires a spread of at least 32 steps between min..max */
 	const int p_min = sched_get_priority_min (policy); // Linux: 1
 	const int p_max = sched_get_priority_max (policy); // Linux: 99
@@ -262,7 +229,41 @@ pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
 	}
 	if (priority > p_max) priority = p_max;
 	if (priority < p_min) priority = p_min;
-	param.sched_priority = priority;
+	return priority;
+}
+
+
+
+int
+pbd_realtime_pthread_create (
+		const int policy, int priority, const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg)
+{
+	int rv;
+
+	pthread_attr_t attr;
+	struct sched_param parm;
+
+	parm.sched_priority = pbd_absolute_rt_priority (policy, priority);
+
+	pthread_attr_init (&attr);
+	pthread_attr_setschedpolicy (&attr, policy);
+	pthread_attr_setschedparam (&attr, &parm);
+	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
+	pthread_attr_setstacksize (&attr, stacksize);
+	rv = pthread_create (thread, &attr, start_routine, arg);
+	pthread_attr_destroy (&attr);
+	return rv;
+}
+int
+pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
+{
+	struct sched_param param;
+	memset (&param, 0, sizeof (param));
+	param.sched_priority = pbd_absolute_rt_priority (policy, priority);
 
 	return pthread_setschedparam (thread, SCHED_FIFO, &param);
 }
