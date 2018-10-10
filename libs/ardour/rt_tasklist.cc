@@ -87,7 +87,7 @@ RTTaskList::reset_thread_list ()
 		size_t stacksize = 100000;
 		if (!AudioEngine::instance()->is_realtime ()
 		    ||
-		    pbd_realtime_pthread_create (PBD_SCHED_FIFO, -22, stacksize, &thread_id, _thread_run, this)) {
+		    pbd_realtime_pthread_create (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority(), stacksize, &thread_id, _thread_run, this)) {
 			pthread_attr_t attr;
 			pthread_attr_init (&attr);
 			pthread_attr_setstacksize (&attr, stacksize);
