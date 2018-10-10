@@ -204,6 +204,7 @@ gtk2_ardour_sources = [
         'processor_selection.cc',
         'patch_change_dialog.cc',
         'progress_reporter.cc',
+        'pt_import_selector.cc',
         'public_editor.cc',
         'quantize_dialog.cc',
         'rc_option_editor.cc',
