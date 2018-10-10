@@ -5772,13 +5772,15 @@ boost::shared_ptr<AutomationControl>
 Route::master_send_enable_controllable () const
 {
 #ifdef  MIXBUS
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	if (is_master() || is_monitor() || is_auditioner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = mixbus() ? ch_pre () : ch_post();
 	if (!plug) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-# undef MIXBUS_PORTS_H
-# include "../../gtk2_ardour/mixbus_ports.h"
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_mstr_assign)));
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, mixbus() ? 3 : 19)));
 #else
 	return boost::shared_ptr<AutomationControl>();
 #endif
