@@ -184,23 +184,23 @@ load_sf2 (AFluidSynth* self, const char* fn)
 	}
 
 	int chn;
-	fluid_preset_t preset;
-	sfont->iteration_start (sfont);
+	fluid_preset_t *preset;
+	fluid_sfont_iteration_start (sfont);
 	pthread_mutex_lock (&self->bp_lock);
-	for (chn = 0; sfont->iteration_next (sfont, &preset); ++chn) {
+	for (chn = 0; (preset = fluid_sfont_iteration_next (sfont)); ++chn) {
 		if (chn < 16) {
 			fluid_synth_program_select (self->synth, chn, synth_id,
-					preset.get_banknum (&preset), preset.get_num (&preset));
+					fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
 		}
 #ifndef LV2_EXTENDED
 		else { break ; }
 #else
-		self->presets[preset.get_banknum (&preset)].push_back (
+		self->presets[fluid_preset_get_banknum (preset)].push_back (
 				BankProgram (
-					preset.get_name (&preset),
-					preset.get_banknum (&preset),
-					preset.get_num (&preset)));
-#endif
+					fluid_preset_get_name (preset),
+					fluid_preset_get_banknum (preset),
+					fluid_preset_get_num (preset)));
+#endif // LV2_EXTENDED
 	}
 	pthread_mutex_unlock (&self->bp_lock);
 
@@ -681,9 +681,9 @@ work_response (LV2_Handle  instance,
 		}
 
 		for (int chn = 0; chn < 16; ++chn) {
-			unsigned int sfid = 0;
-			unsigned int bank = 0;
-			unsigned int program = -1;
+			int sfid = 0;
+			int bank = 0;
+			int program = -1;
 			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
 				self->program_state[chn].bank = bank;
 				self->program_state[chn].program = program;
