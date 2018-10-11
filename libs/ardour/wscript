@@ -58,6 +58,7 @@ libardour_sources = [
         'config_text.cc',
         'control_group.cc',
         'control_protocol_manager.cc',
+        'convolver.cc',
         'cycle_timer.cc',
         'data_type.cc',
         'default_click.cc',
@@ -402,6 +403,7 @@ def build(bld):
                         'liblua',
                         'libptformat',
                         'zita-resampler',
+                        'zita-convolver',
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
