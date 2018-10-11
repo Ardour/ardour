@@ -410,7 +410,9 @@ Convlevel::Convlevel (void)
 	, _npar (0)
 	, _parsize (0)
 	, _options (0)
+#ifndef PTW32_VERSION
 	, _pthr (0)
+#endif
 	, _inp_list (0)
 	, _out_list (0)
 	, _plan_r2c (0)
@@ -592,7 +594,9 @@ Convlevel::start (int abspri, int policy)
 	pthread_attr_t     attr;
 	struct sched_param parm;
 
+#ifndef PTW32_VERSION
 	_pthr = 0;
+#endif
 	min   = sched_get_priority_min (policy);
 	max   = sched_get_priority_max (policy);
 	abspri += _prio;
@@ -677,7 +681,9 @@ Convlevel::main (void)
 		_trig.wait ();
 		if (_stat == ST_TERM) {
 			_stat = ST_IDLE;
+#ifndef PTW32_VERSION
 			_pthr = 0;
+#endif
 			return;
 		}
 		process (false);

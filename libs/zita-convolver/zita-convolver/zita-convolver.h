@@ -33,7 +33,7 @@ namespace ArdourZita {
 #undef ZCSEMA_IS_IMPLEMENTED
 #endif
 
-#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__)
+#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined (_WIN32)
 
 #include <semaphore.h>
 
