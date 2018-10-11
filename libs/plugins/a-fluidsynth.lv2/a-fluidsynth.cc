@@ -184,6 +184,7 @@ load_sf2 (AFluidSynth* self, const char* fn)
 	}
 
 	int chn;
+#if FLUIDSYNTH_VERSION_MAJOR < 2
 	fluid_preset_t preset;
 	sfont->iteration_start (sfont);
 	pthread_mutex_lock (&self->bp_lock);
@@ -192,15 +193,33 @@ load_sf2 (AFluidSynth* self, const char* fn)
 			fluid_synth_program_select (self->synth, chn, synth_id,
 					preset.get_banknum (&preset), preset.get_num (&preset));
 		}
+#else
+	fluid_preset_t *preset;
+	fluid_sfont_iteration_start (sfont);
+	pthread_mutex_lock (&self->bp_lock);
+	for (chn = 0; (preset = fluid_sfont_iteration_next (sfont)); ++chn) {
+		if (chn < 16) {
+			fluid_synth_program_select (self->synth, chn, synth_id,
+					fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
+		}
+#endif // FLUIDSYNTH_VERSION_MAJOR < 2
 #ifndef LV2_EXTENDED
 		else { break ; }
 #else
+#if FLUIDSYNTH_VERSION_MAJOR < 2
 		self->presets[preset.get_banknum (&preset)].push_back (
 				BankProgram (
 					preset.get_name (&preset),
 					preset.get_banknum (&preset),
 					preset.get_num (&preset)));
-#endif
+#else
+		self->presets[fluid_preset_get_banknum (preset)].push_back (
+				BankProgram (
+					fluid_preset_get_name (preset),
+					fluid_preset_get_banknum (preset),
+					fluid_preset_get_num (preset)));
+#endif // FLUIDSYNTH_VERSION_MAJOR < 2
+#endif // LV2_EXTENDED
 	}
 	pthread_mutex_unlock (&self->bp_lock);
 
@@ -681,9 +700,15 @@ work_response (LV2_Handle  instance,
 		}
 
 		for (int chn = 0; chn < 16; ++chn) {
+#if FLUIDSYNTH_VERSION_MAJOR < 2
 			unsigned int sfid = 0;
 			unsigned int bank = 0;
 			unsigned int program = -1;
+#else
+			int sfid = 0;
+			int bank = 0;
+			int program = -1;
+#endif
 			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
 				self->program_state[chn].bank = bank;
 				self->program_state[chn].program = program;
