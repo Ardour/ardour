@@ -56,7 +56,6 @@ public:
         void mark_immutable_except_write();
 	void mark_nonremovable ();
 
-	const std::string&   take_id ()        const { return _take_id; }
 	bool                 within_session () const { return _within_session; }
 	uint16_t             channel()         const { return _channel; }
 	float                gain()            const { return _gain; }
@@ -110,7 +109,6 @@ public:
 	void set_within_session_from_path (const std::string&);
 
 	std::string _path;
-	std::string _take_id;
 	bool        _file_is_new;
 	uint16_t    _channel;
 	bool        _within_session;

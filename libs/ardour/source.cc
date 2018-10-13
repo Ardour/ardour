@@ -102,6 +102,7 @@ Source::get_state ()
 	XMLNode *node = new XMLNode ("Source");
 
 	node->set_property ("name", name());
+	node->set_property ("take-id", take_id());
 	node->set_property ("type", _type);
 	node->set_property (X_("flags"), _flags);
 	node->set_property ("id", id());
@@ -136,6 +137,10 @@ Source::set_state (const XMLNode& node, int version)
 
 	if (!node.get_property (X_("flags"), _flags)) {
 		_flags = Flag (0);
+	}
+	
+	if (!node.get_property (X_("take-id"), _take_id)) {
+		_take_id = "";
 	}
 
 	/* old style, from the period when we had DestructiveFileSource */
