@@ -612,6 +612,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\import_pt.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\instrument_info.cc"
 				>
 			</File>
