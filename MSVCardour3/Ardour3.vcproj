@@ -1016,6 +1016,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\gtk2_ardour\pt_import_selector.cc"
+				>
+			</File>
+			<File
 				RelativePath="..\gtk2_ardour\public_editor.cc"
 				>
 			</File>
@@ -2099,6 +2103,10 @@
 			</File>
 			<File
 				RelativePath="..\gtk2_ardour\progress_reporter.h"
+				>
+			</File>
+			<File
+				RelativePath="..\gtk2_ardour\pt_import_selector.h"
 				>
 			</File>
 			<File
