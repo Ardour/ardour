@@ -6393,6 +6393,16 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			PBD::warning << "OSC: new_aux has wrong number or type of parameters." << endmsg;
 		}
 	}
+	else if (!strncmp (path, X_("/cue/new_send"), 13)) {
+		// Create new send to aux
+		string rt_name = "";
+		if (argc == 1 && types[0] == 's') {
+			rt_name = &argv[0]->s;
+			ret = cue_new_send (rt_name, msg);
+		} else {
+			PBD::warning << "OSC: new_send has wrong number or type of parameters." << endmsg;
+		}
+	}
 	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
 		// switch to next Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
@@ -6515,6 +6525,38 @@ OSC::cue_new_aux (string name, string dest, lo_message msg)
 		return 0;
 	}
 	return -1;
+}
+
+int
+OSC::cue_new_send (string rt_name, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	if (sur->cue) {
+		boost::shared_ptr<Route> aux = boost::dynamic_pointer_cast<Route> (get_strip (sur->aux, get_address(msg)));
+		if (aux) {
+			boost::shared_ptr<Route> rt_send = session->route_by_name (rt_name);
+			if (rt_send && (aux != rt_send)) {
+				// make sure there isn't one already
+				bool s_only = true;
+				if (!rt_send->feeds (aux, &s_only)) {
+					// create send
+					boost::shared_ptr<Processor> loc = rt_send->before_processor_for_placement (PreFader);
+					rt_send->add_aux_send (aux, loc);
+					session->dirty ();
+					return 0;
+				} else {
+					PBD::warning << "OSC: new_send - duplicate send, ignored." << endmsg;
+				}
+			} else {
+				PBD::warning << "OSC: new_send - route doesn't exist or is aux." << endmsg;
+			}
+		} else {
+			PBD::warning << "OSC: new_send - No Aux to send to." << endmsg;
+		}
+	} else {
+		PBD::warning << "OSC: new_send - monitoring not set, select aux first." << endmsg;
+	}
+	return 1;
 }
 
 int
