@@ -48,7 +48,7 @@
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
 
-#include <ptfformat.h>
+#include <ptformat/ptfformat.h>
 
 #include "pbd/i18n.h"
 

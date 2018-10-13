@@ -41,7 +41,7 @@
 #include <glibmm/threads.h>
 
 #include <ltc.h>
-#include <ptfformat.h>
+#include <ptformat/ptfformat.h>
 
 #include "pbd/error.h"
 #include "pbd/event_loop.h"
