@@ -28,7 +28,7 @@
 
 #include <glib/gstdio.h>
 
-#include "ptfformat.h"
+#include "ptformat/ptfformat.h"
 
 #if 0
 #define verbose_printf(...) printf(__VA_ARGS__)
