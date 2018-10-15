@@ -56,6 +56,7 @@ class OSCCueObserver
 	std::string path;
 	ArdourSurface::OSC::OSCSurface* sur;
 	float _last_meter;
+	float _last_signal;
 	std::vector<uint32_t> gain_timeout;
 	bool tick_enable;
 	std::vector<float> _last_gain;
