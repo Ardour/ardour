@@ -61,7 +61,7 @@ def build(bld):
         'src/fluid_settings.c',
         'src/fluid_sys.c'
         ],
-        cflags = [ '-fPIC', '-fvisibility=hidden' ],
+        cflags = [ bld.env['compiler_flags_dict']['pic'], '-fvisibility=hidden' ],
         includes = ['.', 'src/' ],
                target = 'libfluidsynth',
                use    = 'libfluidsynth_includes',

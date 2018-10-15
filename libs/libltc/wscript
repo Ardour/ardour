@@ -43,7 +43,7 @@ def build(bld):
          )
 
     bld.stlib (source = ['ltc.c', 'timecode.c', 'encoder.c', 'decoder.c'],
-               cflags = [ '-fPIC' ],
+               cflags = [ bld.env['compiler_flags_dict']['pic'] ],
                includes = ['.'],
                target = 'libltc',
                use    = 'libltc_includes'

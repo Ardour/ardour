@@ -83,8 +83,8 @@ def build(bld):
     libsmf.use          = [ 'libtemporal' ]
     libsmf.install_path = None
     if bld.env['build_target'] != 'mingw':
-        libsmf.cxxflags     = [ '-fPIC' ]
-        libsmf.cflags       = [ '-fPIC' ]
+        libsmf.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
+        libsmf.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
 
     lib_source = '''
             src/Control.cpp
@@ -106,8 +106,8 @@ def build(bld):
         obj.defines      = [ 'LIBEVORAL_DLL_EXPORTS' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=lib_source)
-        obj.cxxflags     = [ '-fPIC' ]
-        obj.cflags       = [ '-fPIC' ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.']

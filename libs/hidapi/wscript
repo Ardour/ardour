@@ -57,7 +57,7 @@ def build(bld):
         obj.linkflags      = [ '-lsetupapi', '-mwindows' ]
         obj.uselib         = 'SETUPAPI'
     else:
-        obj.cflags        += [ '-fPIC' ]
+        obj.cflags        += [ bld.env['compiler_flags_dict']['pic'] ]
         if sys.platform == 'darwin':
             obj.source     = 'mac/hid.c'
             obj.framework  = [ 'IOKit', 'CoreFoundation' ]

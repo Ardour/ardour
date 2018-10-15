@@ -24,7 +24,7 @@ def build(bld):
         obj.defines      = [ 'LIBCONTROLCP_DLL_EXPORTS' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=controlcp_sources)
-        obj.cxxflags     = [ '-fPIC' ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.', './control_protocol' ]

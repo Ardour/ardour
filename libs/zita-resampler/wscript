@@ -42,7 +42,7 @@ def configure(conf):
 
 def build(bld):
     obj = bld.stlib(features = 'cxx cxxstlib', source = zresampler_sources)
-    obj.cxxflags        = [ '-fPIC', '-O3', '-ffast-math' ]
+    obj.cxxflags        = [ bld.env['compiler_flags_dict']['pic'], '-O3', '-ffast-math' ]
     obj.export_includes = ['.']
     obj.includes        = ['.']
     obj.name            = 'zita-resampler'
