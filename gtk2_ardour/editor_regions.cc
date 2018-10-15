@@ -345,6 +345,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 	TreeModel::Row row;
 	Gdk::Color c;
 	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
+	TreeModel::iterator iter;
 
 	if (!_show_automatic_regions && region->automatic()) {
 		return;
@@ -352,7 +353,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 
 	if (region->hidden()) {
 
-		TreeModel::iterator iter = _model->get_iter ("0");
+		iter = _model->get_iter ("0");
 		TreeModel::Row parent;
 
 		if (!iter) {
@@ -372,7 +373,8 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			}
 		}
 
-		row = *(_model->append (parent.children()));
+		iter = _model->append (parent.children());
+		row = *iter;
 
 	} else if (region->whole_file()) {
 
@@ -387,7 +389,8 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			}
 		}
 
-		row = *(_model->append());
+		iter = _model->append();
+		row = *iter;
 
 		if (missing_source) {
 			// c.set_rgb(65535,0,0);     // FIXME: error color from style
@@ -440,7 +443,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			}
 		}
 
-		region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference>(region, TreeRowReference(_model, TreePath (row))) );
+		region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator>(region, iter));
 		parent_regions_sources_map.insert(pair<string, Gtk::TreeModel::RowReference>(region->source_string(), TreeRowReference(_model, TreePath (row))) );
 
 		return;
@@ -449,7 +452,7 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		// find parent node, add as new child
 		TreeModel::iterator i;
 
-		boost::unordered_map<string, Gtk::TreeModel::RowReference>::iterator it;
+		RegionSourceMap::iterator it;
 
 		it = parent_regions_sources_map.find (region->source_string());
 
@@ -471,18 +474,19 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 			}
 			*/
 
-			row = *(_model->insert (subrows.end()));
+			iter = _model->insert (subrows.end());
+			row = *iter;
 
 		} else {
-			row = *(_model->append());
+			iter = _model->append();
+			row = *iter;
 		}
 
 		row[_columns.property_toggles_visible] = true;
 	}
 
 	row[_columns.region] = region;
-
-	region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference>(region, TreeRowReference(_model, TreePath (row))) );
+	region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>,Gtk::TreeModel::iterator> (region,iter));
 	PropertyChange pc;
 	populate_row(region, (*row), pc);
 }
@@ -564,7 +568,7 @@ EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange
 
 		if (it != region_row_map.end()){
 
-			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+			TreeModel::iterator j = it->second;
 			boost::shared_ptr<Region> c = (*j)[_columns.region];
 
 			if (c == r) {
@@ -638,7 +642,7 @@ EditorRegions::set_selected (RegionSelection& regions)
 		it = region_row_map.find (r);
 
 		if (it != region_row_map.end()){
-			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+			TreeModel::iterator j = it->second;
 			_display.get_selection()->select(*j);
 		}
 	}
@@ -661,7 +665,6 @@ EditorRegions::redisplay ()
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
-
 
 	region_row_map.clear();
 	parent_regions_sources_map.clear();
@@ -708,7 +711,7 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 
 	if (it != region_row_map.end()){
 		PropertyChange c;
-		TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
+		TreeModel::iterator j = it->second;
 		populate_row(region, (*j), c);
 	}
 }
@@ -724,7 +727,7 @@ EditorRegions::update_all_rows ()
 
 	for (i = region_row_map.begin(); i != region_row_map.end(); ++i) {
 
-		TreeModel::iterator j = _model->get_iter ((*i).second.get_path());
+		TreeModel::iterator j = i->second;
 
 		boost::shared_ptr<Region> region = (*j)[_columns.region];
 
