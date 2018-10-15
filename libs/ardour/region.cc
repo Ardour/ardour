@@ -221,7 +221,7 @@ Region::register_properties ()
 	, _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
-  , _video_locked (Properties::video_locked, other->_video_locked) \
+	, _video_locked (Properties::video_locked, other->_video_locked) \
 	, _automatic (Properties::automatic, other->_automatic)	\
 	, _whole_file (Properties::whole_file, other->_whole_file) \
 	, _import (Properties::import, other->_import)		\
