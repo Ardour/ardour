@@ -26,7 +26,7 @@
 #include "pbd/i18n.h"
 #include "pbd/file_utils.h"
 
-#include <ptformat/ptfformat.h>
+#include "ptformat/ptfformat.h"
 
 #include "ardour/session_handle.h"
 #include "pt_import_selector.h"
