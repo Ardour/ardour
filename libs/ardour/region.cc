@@ -24,8 +24,10 @@
 #include <sstream>
 
 #include <glibmm/threads.h>
-#include "pbd/xml++.h"
+
+#include "pbd/i18n.h"
 #include "pbd/types_convert.h"
+#include "pbd/xml++.h"
 
 #include "ardour/debug.h"
 #include "ardour/filter.h"
@@ -39,8 +41,6 @@
 #include "ardour/tempo.h"
 #include "ardour/transient_detector.h"
 #include "ardour/types_convert.h"
-
-#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
