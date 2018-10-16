@@ -5378,6 +5378,17 @@ Session::create_midi_source_by_stealing_name (boost::shared_ptr<Track> track)
 			DataType::MIDI, *this, path, false, sample_rate()));
 }
 
+bool
+Session::playlist_is_active (boost::shared_ptr<Playlist> playlist)
+{
+	Glib::Threads::Mutex::Lock lm (playlists->lock);
+	for (SessionPlaylists::List::iterator i = playlists->playlists.begin(); i != playlists->playlists.end(); i++) {
+		if ( (*i) == playlist ) {
+			return true;
+		}
+	}
+	return false;
+}
 
 void
 Session::add_playlist (boost::shared_ptr<Playlist> playlist, bool unused)
