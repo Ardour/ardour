@@ -1767,7 +1767,9 @@ public:
 			f ( (*i).second );
 		}
 	}
-
+	
+	bool playlist_is_active( boost::shared_ptr<Playlist>);
+	
 private:
 	void reset_write_sources (bool mark_write_complete, bool force = false);
 	SourceMap sources;

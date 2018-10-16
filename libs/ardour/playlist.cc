@@ -601,6 +601,7 @@ Playlist::flush_notifications (bool from_undo)
 		crossfade_ranges.push_back ((*s)->range ());
 		remove_dependents (*s);
 		RegionRemoved (boost::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
+		Region::RegionPropertyChanged(*s, Properties::hidden);
 	}
 
 	for (s = pending_adds.begin(); s != pending_adds.end(); ++s) {

@@ -629,6 +629,18 @@ RegionFactory::new_region_name (string old)
 	return old;
 }
 
+boost::shared_ptr<Region>
+RegionFactory::get_whole_region_for_source (boost::shared_ptr<Source> s)
+{
+	Glib::Threads::Mutex::Lock lm (region_map_lock);
+
+	for (RegionMap::const_iterator i = region_map.begin(); i != region_map.end(); ++i) {
+		if (i->second->uses_source (s) && i->second->whole_file()) {
+			return (i->second);
+		}
+	}
+}
+
 void
 RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
 {
