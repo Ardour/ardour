@@ -86,6 +86,8 @@ public:
 	/** create a region with specified sources @param srcs and XML state */
 	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
+	static boost::shared_ptr<Region> get_whole_region_for_source (boost::shared_ptr<ARDOUR::Source>);
+	
 	static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >& );
 	static void remove_regions_using_source (boost::shared_ptr<Source>);
 
