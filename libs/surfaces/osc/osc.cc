@@ -6403,6 +6403,12 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 			PBD::warning << "OSC: new_send has wrong number or type of parameters." << endmsg;
 		}
 	}
+	else if (!strncmp (path, X_("/cue/hide_aux"), 13)) {
+		// hide our Aux bus
+		if (argc) {
+			ret = cue_hide (value, msg);
+		}
+	}
 	else if (!strncmp (path, X_("/cue/next_aux"), 13)) {
 		// switch to next Aux bus
 		if ((!argc) || argv[0]->f || argv[0]->i) {
@@ -6560,6 +6566,26 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 		}
 	} else {
 		PBD::warning << "OSC: new_send - monitoring not set, select aux first." << endmsg;
+	}
+	return 1;
+}
+
+int
+OSC::cue_hide (float state, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg), true);
+	if (sur->cue) {
+		boost::shared_ptr<Route> aux = boost::dynamic_pointer_cast<Route> (get_strip (sur->aux, get_address(msg)));
+		if (aux) {
+			if (aux->is_hidden () != (bool) state) {
+				aux->presentation_info().set_hidden ((bool) state);
+			}
+			return 0;
+		} else {
+			PBD::warning << "OSC: hide_aux - No Aux found." << endmsg;
+		}
+	} else {
+		PBD::warning << "OSC: hide_aux - monitoring not set, select aux first." << endmsg;
 	}
 	return 1;
 }
