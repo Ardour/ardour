@@ -100,6 +100,7 @@ OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, S
 	send_gain_message (0, _strip->gain_control(), true);
 
 	send_init ();
+	hidden_changed ();
 
 	tick_enable = true;
 	tick ();
@@ -204,6 +205,9 @@ OSCCueObserver::send_restart ()
 void
 OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t id)
 {
+	if (_hidden != _strip->is_hidden ()) {
+		hidden_changed ();
+	}
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 	    return;
 	}
@@ -215,6 +219,20 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 		_osc.text_message_with_id (X_("/cue/send/name"), id, sends[id - 1]->name(), true, addr);
 	} else {
 		_osc.text_message (X_("/cue/name"), _strip->name(), addr);
+	}
+}
+
+void
+OSCCueObserver::hidden_changed ()
+{
+	_hidden = _strip->is_hidden ();
+	for (uint32_t i = 0; i < sends.size(); i++) {
+		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (sends[i]);
+		boost::shared_ptr<Send> send = r->internal_send_for (boost::dynamic_pointer_cast<Route> (_strip));
+		if (_hidden == send->display_to_user ()) {
+			send->set_display_to_user (!_hidden);
+			r->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		}
 	}
 }
 

@@ -101,6 +101,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	_send_delay.reset (new DelayLine (_session, "Send-" + name()));
 	_thru_delay.reset (new DelayLine (_session, "Thru-" + name()));
 
+	_display_to_user = true;
+
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
 	}
@@ -452,6 +454,8 @@ Send::display_to_user () const
 	if (_role == Listen) {
 		/* don't make the monitor/control/listen send visible */
 		return false;
+	} else if (_role == Aux) {
+		return _display_to_user;
 	}
 
 	return true;

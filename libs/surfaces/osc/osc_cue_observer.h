@@ -57,11 +57,13 @@ class OSCCueObserver
 	ArdourSurface::OSC::OSCSurface* sur;
 	float _last_meter;
 	float _last_signal;
+	bool _hidden;
 	std::vector<uint32_t> gain_timeout;
 	bool tick_enable;
 	std::vector<float> _last_gain;
 
 	void name_changed (const PBD::PropertyChange& what_changed, uint32_t id);
+	void hidden_changed (void);
 	void send_change_message (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable, bool force);
 	void send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);

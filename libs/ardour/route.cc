@@ -4662,7 +4662,11 @@ Route::setup_invisible_processors ()
 	/* find visible processors */
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Send> auxsnd = boost::dynamic_pointer_cast<Send> ((*i));
 		if ((*i)->display_to_user ()) {
+			new_processors.push_back (*i);
+		}
+		else if (auxsnd && auxsnd->is_aux ()) {
 			new_processors.push_back (*i);
 		}
 	}
@@ -5642,7 +5646,7 @@ Route::send_pan_azi_controllable (uint32_t n) const
 		}
 	}
 #endif
-	
+
 	return boost::shared_ptr<AutomationControl>();
 }
 

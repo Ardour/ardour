@@ -43,6 +43,7 @@ public:
 	uint32_t bit_slot() const { return _bitslot; }
 
 	bool display_to_user() const;
+	bool is_aux () const { return _role == Aux; }
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
