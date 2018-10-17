@@ -76,6 +76,7 @@ private:
 	void send_from_going_away ();
 	void send_to_going_away ();
 	void send_to_property_changed (const PBD::PropertyChange&);
+	void send_to_pi_change (const PBD::PropertyChange&);
 	int  connect_when_legal ();
 	void init_gain ();
 	int  use_target (boost::shared_ptr<Route>);

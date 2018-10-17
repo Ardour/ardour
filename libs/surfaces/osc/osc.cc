@@ -6549,10 +6549,6 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 					boost::shared_ptr<Processor> loc = rt_send->before_processor_for_placement (PreFader);
 					rt_send->add_aux_send (aux, loc);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
-					if (snd->gain_control() && aux->is_hidden ()) {
-						snd->set_display_to_user (false);
-						rt_send->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-					}
 					session->dirty ();
 					return 0;
 				} else {
