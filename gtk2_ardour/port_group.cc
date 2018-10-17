@@ -573,12 +573,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 				if (t != DataType::NIL) {
 
-					if (port_has_prefix (p, X_("system:")) ||
-					    port_has_prefix (p, X_("alsa_pcm:")) ||
-					    port_has_prefix (p, X_("alsa_midi:"))) {
-						extra_system[t].push_back (p);
+					PortFlags flags (AudioEngine::instance()->port_engine().get_port_flags (ph));
 
-					} else if (port_has_prefix (p, lpnc)) {
+					if (port_has_prefix (p, lpnc)) {
 
 						/* we own this port (named after the program) */
 
@@ -591,6 +588,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 						}
 
 						extra_program[t].push_back (p);
+
+					} else if (flags & IsPhysical) {
+
+						extra_system[t].push_back (p);
+
 					} else {
 						extra_other[t].push_back (p);
 					}
