@@ -124,6 +124,12 @@ JACKAudioBackend::get_port_name (PortHandle port) const
 	return jack_port_name ((jack_port_t*) port);
 }
 
+PortFlags
+JACKAudioBackend::get_port_flags (PortHandle port) const
+{
+	return PortFlags (jack_port_flags ((jack_port_t*) port));
+}
+
 int
 JACKAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {

@@ -1223,9 +1223,19 @@ PortAudioBackend::get_port_name (PortEngine::PortHandle port) const
 {
 	if (!valid_port (port)) {
 		DEBUG_PORTS("get_port_name: Invalid Port(s)\n");
-		return std::string ();
+		return PortFlags (0);
 	}
 	return static_cast<PamPort*>(port)->name ();
+}
+
+PortFlags
+PortAudioBackend::get_port_flags (PortEngine::PortHandle port) const
+{
+	if (!valid_port (port)) {
+		DEBUG_PORTS("get_port_flags: Invalid Port(s)\n");
+		return std::string ();
+	}
+	return static_cast<PamPort*>(port)->flags ();
 }
 
 int

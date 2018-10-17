@@ -328,6 +328,7 @@ class DummyAudioBackend : public AudioBackend {
 
 		int         set_port_name (PortHandle, const std::string&);
 		std::string get_port_name (PortHandle) const;
+		PortFlags get_port_flags (PortHandle) const;
 		PortHandle  get_port_by_name (const std::string&) const;
 
 		int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;

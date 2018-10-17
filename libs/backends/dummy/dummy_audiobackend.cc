@@ -678,6 +678,16 @@ DummyAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<DummyPort*>(port)->name ();
 }
 
+PortFlags
+DummyAudioBackend::get_port_flags (PortEngine::PortHandle port) const
+{
+	if (!valid_port (port)) {
+		PBD::error << _("DummyBackend::get_port_flags: Invalid Port(s)") << endmsg;
+		return PortFlags (0);
+	}
+	return static_cast<DummyPort*>(port)->flags ();
+}
+
 int
 DummyAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
