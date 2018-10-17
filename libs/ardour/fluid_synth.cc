@@ -71,6 +71,7 @@ FluidSynth::load_sf2 (const std::string& fn)
 	}
 
 	size_t count;
+#if FLUIDSYNTH_VERSION_MAJOR < 2
 	fluid_preset_t preset;
 
 	sfont->iteration_start (sfont);
@@ -83,7 +84,20 @@ FluidSynth::load_sf2 (const std::string& fn)
 					preset.get_banknum (&preset),
 					preset.get_num (&preset)));
 	}
+#else
+	fluid_preset_t* preset;
 
+	fluid_sfont_iteration_start (sfont);
+	for (count = 0; (preset = fluid_sfont_iteration_next (sfont)) != 0; ++count) {
+		if (count < 16) {
+			fluid_synth_program_select (_synth, count, _synth_id, fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
+		}
+		_presets.push_back (BankProgram (
+					fluid_preset_get_name (preset),
+					fluid_preset_get_banknum (preset),
+					fluid_preset_get_num (preset)));
+	}
+#endif
 	if (count == 0) {
 		return false;
 	}
