@@ -3,16 +3,16 @@
  * Copyright (C) 2003  Peter Hanappe and others.
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA
@@ -22,9 +22,7 @@
 #ifndef _FLUID_PHASE_H
 #define _FLUID_PHASE_H
 
-#if HAVE_CONFIG_H
 #include "config.h"
-#endif
 
 /*
  *  phase
@@ -47,7 +45,7 @@
 * It is a 64 bit number. The higher 32 bits contain the 'index' (number of
 * the current sample), the lower 32 bits the fractional part.
 */
-typedef unsigned long long fluid_phase_t;
+typedef uint64_t fluid_phase_t;
 
 /* Purpose:
  * Set a to b.
@@ -56,26 +54,26 @@ typedef unsigned long long fluid_phase_t;
  */
 #define fluid_phase_set(a,b) a=b;
 
-#define fluid_phase_set_int(a, b)    ((a) = ((unsigned long long)(b)) << 32)
+#define fluid_phase_set_int(a, b)    ((a) = ((uint64_t)(b)) << 32)
 
 /* Purpose:
  * Sets the phase a to a phase increment given in b.
  * For example, assume b is 0.9. After setting a to it, adding a to
  * the playing pointer will advance it by 0.9 samples. */
 #define fluid_phase_set_float(a, b) \
-  (a) = (((unsigned long long)(b)) << 32) \
-  | (uint32) (((double)(b) - (int)(b)) * (double)FLUID_FRACT_MAX)
+  (a) = (((uint64_t)(b)) << 32) \
+  | (uint32_t) (((double)(b) - (int)(b)) * (double)FLUID_FRACT_MAX)
 
 /* create a fluid_phase_t from an index and a fraction value */
 #define fluid_phase_from_index_fract(index, fract) \
-  ((((unsigned long long)(index)) << 32) + (fract))
+  ((((uint64_t)(index)) << 32) + (fract))
 
 /* Purpose:
  * Return the index and the fractional part, respectively. */
 #define fluid_phase_index(_x) \
   ((unsigned int)((_x) >> 32))
 #define fluid_phase_fract(_x) \
-  ((uint32)((_x) & 0xFFFFFFFF))
+  ((uint32_t)((_x) & 0xFFFFFFFF))
 
 /* Get the phase index with fractional rounding */
 #define fluid_phase_index_round(_x) \
@@ -108,7 +106,7 @@ typedef unsigned long long fluid_phase_t;
 /* Purpose:
  * Subtract b samples from a.
  */
-#define fluid_phase_sub_int(a, b)  ((a) -= (unsigned long long)(b) << 32)
+#define fluid_phase_sub_int(a, b)  ((a) -= (uint64_t)(b) << 32)
 
 /* Purpose:
  * Creates the expression a.index++. */

@@ -18,22 +18,17 @@
  * 02110-1301, USA
  */
 
-#include "fluid_adsr_env.h"
 
-DECLARE_FLUID_RVOICE_FUNCTION(fluid_adsr_env_set_data)
-{
-    fluid_adsr_env_t *env = obj;
-    fluid_adsr_env_section_t section = param[0].i;
-    unsigned int count = param[1].i;
-    fluid_real_t coeff = param[2].real;
-    fluid_real_t increment = param[3].real;
-    fluid_real_t min = param[4].real;
-    fluid_real_t max = param[5].real;
+#ifndef _FLUID_SAMPLECACHE_H
+#define _FLUID_SAMPLECACHE_H
 
-    env->data[section].count = count;
-    env->data[section].coeff = coeff;
-    env->data[section].increment = increment;
-    env->data[section].min = min;
-    env->data[section].max = max;
-}
+#include "fluid_sfont.h"
+#include "fluid_sffile.h"
 
+int fluid_samplecache_load(SFData *sf,
+                           unsigned int sample_start, unsigned int sample_end, int sample_type,
+                           int try_mlock, short **data, char **data24);
+
+int fluid_samplecache_unload(const short *sample_data);
+
+#endif /* _FLUID_SAMPLECACHE_H */

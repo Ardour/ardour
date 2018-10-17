@@ -15,7 +15,7 @@ extern "C" {
 
 
 FLUIDSYNTH_API void fluid_version(int *major, int *minor, int *micro);
-FLUIDSYNTH_API char* fluid_version_str(void);
+FLUIDSYNTH_API const char* fluid_version_str(void);
 
 
 #include "types.h"

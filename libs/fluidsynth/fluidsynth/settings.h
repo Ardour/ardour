@@ -3,16 +3,16 @@
  * Copyright (C) 2003  Peter Hanappe and others.
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA
@@ -78,35 +78,6 @@ extern "C" {
  */
 #define FLUID_HINT_TOGGLED         0x4
 
-/**
- * Hint FLUID_HINT_SAMPLE_RATE indicates that any bounds specified
- * should be interpreted as multiples of the sample rate. For
- * instance, a frequency range from 0Hz to the Nyquist frequency (half
- * the sample rate) could be requested by this hint in conjunction
- * with LowerBound = 0 and UpperBound = 0.5. Hosts that support bounds
- * at all must support this hint to retain meaning.
- */
-#define FLUID_HINT_SAMPLE_RATE     0x8
-
-/**
- * Hint FLUID_HINT_LOGARITHMIC indicates that it is likely that the
- * user will find it more intuitive to view values using a logarithmic
- * scale. This is particularly useful for frequencies and gains.
- */
-#define FLUID_HINT_LOGARITHMIC     0x10
-
-/**
- * Hint FLUID_HINT_INTEGER indicates that a user interface would
- * probably wish to provide a stepped control taking only integer
- * values.
- * @deprecated
- *
- * As there is an integer setting type, this hint is not used.
- */
-#define FLUID_HINT_INTEGER         0x20
-
-
-#define FLUID_HINT_FILENAME        0x01         /**< String setting is a file name */
 #define FLUID_HINT_OPTIONLIST      0x02         /**< Setting is a list of string options */
 
 
@@ -117,70 +88,68 @@ extern "C" {
  * set of values. The type of each setting can be retrieved using the
  * function fluid_settings_get_type()
  */
-enum fluid_types_enum {
-  FLUID_NO_TYPE = -1, /**< Undefined type */
-  FLUID_NUM_TYPE,     /**< Numeric (double) */
-  FLUID_INT_TYPE,     /**< Integer */
-  FLUID_STR_TYPE,     /**< String */
-  FLUID_SET_TYPE      /**< Set of values */
+enum fluid_types_enum
+{
+    FLUID_NO_TYPE = -1, /**< Undefined type */
+    FLUID_NUM_TYPE,     /**< Numeric (double) */
+    FLUID_INT_TYPE,     /**< Integer */
+    FLUID_STR_TYPE,     /**< String */
+    FLUID_SET_TYPE      /**< Set of values */
 };
 
 
-FLUIDSYNTH_API fluid_settings_t* new_fluid_settings(void);
-FLUIDSYNTH_API void delete_fluid_settings(fluid_settings_t* settings);
+FLUIDSYNTH_API fluid_settings_t *new_fluid_settings(void);
+FLUIDSYNTH_API void delete_fluid_settings(fluid_settings_t *settings);
 
 FLUIDSYNTH_API
-int fluid_settings_get_type(fluid_settings_t* settings, const char *name);
+int fluid_settings_get_type(fluid_settings_t *settings, const char *name);
 
 FLUIDSYNTH_API
-int fluid_settings_get_hints(fluid_settings_t* settings, const char *name);
+int fluid_settings_get_hints(fluid_settings_t *settings, const char *name, int *val);
 
 FLUIDSYNTH_API
-int fluid_settings_is_realtime(fluid_settings_t* settings, const char *name);
+int fluid_settings_is_realtime(fluid_settings_t *settings, const char *name);
 
 FLUIDSYNTH_API
-int fluid_settings_setstr(fluid_settings_t* settings, const char *name, const char *str);
+int fluid_settings_setstr(fluid_settings_t *settings, const char *name, const char *str);
 
 FLUIDSYNTH_API
-int fluid_settings_copystr(fluid_settings_t* settings, const char *name, char *str, int len);
+int fluid_settings_copystr(fluid_settings_t *settings, const char *name, char *str, int len);
 
 FLUIDSYNTH_API
-int fluid_settings_dupstr(fluid_settings_t* settings, const char *name, char** str);
+int fluid_settings_dupstr(fluid_settings_t *settings, const char *name, char **str);
 
 FLUIDSYNTH_API
-int fluid_settings_getstr(fluid_settings_t* settings, const char *name, char** str);
+int fluid_settings_getstr_default(fluid_settings_t *settings, const char *name, char **def);
 
 FLUIDSYNTH_API
-char* fluid_settings_getstr_default(fluid_settings_t* settings, const char *name);
+int fluid_settings_str_equal(fluid_settings_t *settings, const char *name, const char *value);
 
 FLUIDSYNTH_API
-int fluid_settings_str_equal(fluid_settings_t* settings, const char *name, const char *value);
+int fluid_settings_setnum(fluid_settings_t *settings, const char *name, double val);
 
 FLUIDSYNTH_API
-int fluid_settings_setnum(fluid_settings_t* settings, const char *name, double val);
+int fluid_settings_getnum(fluid_settings_t *settings, const char *name, double *val);
 
 FLUIDSYNTH_API
-int fluid_settings_getnum(fluid_settings_t* settings, const char *name, double* val);
+int fluid_settings_getnum_default(fluid_settings_t *settings, const char *name, double *val);
 
 FLUIDSYNTH_API
-double fluid_settings_getnum_default(fluid_settings_t* settings, const char *name);
+int fluid_settings_getnum_range(fluid_settings_t *settings, const char *name,
+                                double *min, double *max);
 
 FLUIDSYNTH_API
-void fluid_settings_getnum_range(fluid_settings_t* settings, const char *name,
-				double* min, double* max);
+int fluid_settings_setint(fluid_settings_t *settings, const char *name, int val);
 
 FLUIDSYNTH_API
-int fluid_settings_setint(fluid_settings_t* settings, const char *name, int val);
+int fluid_settings_getint(fluid_settings_t *settings, const char *name, int *val);
 
 FLUIDSYNTH_API
-int fluid_settings_getint(fluid_settings_t* settings, const char *name, int* val);
+int fluid_settings_getint_default(fluid_settings_t *settings, const char *name, int *val);
 
 FLUIDSYNTH_API
-int fluid_settings_getint_default(fluid_settings_t* settings, const char *name);
-
-FLUIDSYNTH_API
-void fluid_settings_getint_range(fluid_settings_t* settings, const char *name,
-				int* min, int* max);
+int fluid_settings_getint_range(fluid_settings_t *settings, const char *name,
+                                int *min, int *max);
 
 /**
  * Callback function type used with fluid_settings_foreach_option()
@@ -188,17 +157,17 @@ void fluid_settings_getint_range(fluid_settings_t* settings, const char *name,
  * @param name Setting name
  * @param option A string option for this setting (iterates through the list)
  */
-typedef void (*fluid_settings_foreach_option_t)(void *data, char *name, char *option);
+typedef void (*fluid_settings_foreach_option_t)(void *data, const char *name, const char *option);
 
 FLUIDSYNTH_API
-void fluid_settings_foreach_option(fluid_settings_t* settings,
-				  const char* name, void* data,
-				  fluid_settings_foreach_option_t func);
+void fluid_settings_foreach_option(fluid_settings_t *settings,
+                                   const char *name, void *data,
+                                   fluid_settings_foreach_option_t func);
 FLUIDSYNTH_API
-int fluid_settings_option_count (fluid_settings_t* settings, const char* name);
-FLUIDSYNTH_API char *fluid_settings_option_concat (fluid_settings_t* settings,
-                                                   const char* name,
-                                                   const char* separator);
+int fluid_settings_option_count(fluid_settings_t *settings, const char *name);
+FLUIDSYNTH_API char *fluid_settings_option_concat(fluid_settings_t *settings,
+        const char *name,
+        const char *separator);
 
 /**
  * Callback function type used with fluid_settings_foreach()
@@ -206,11 +175,11 @@ FLUIDSYNTH_API char *fluid_settings_option_concat (fluid_settings_t* settings,
  * @param name Setting name
  * @param type Setting type (#fluid_types_enum)
  */
-typedef void (*fluid_settings_foreach_t)(void *data, char *name, int type);
+typedef void (*fluid_settings_foreach_t)(void *data, const char *name, int type);
 
 FLUIDSYNTH_API
-void fluid_settings_foreach(fluid_settings_t* settings, void* data,
-			   fluid_settings_foreach_t func);
+void fluid_settings_foreach(fluid_settings_t *settings, void *data,
+                            fluid_settings_foreach_t func);
 
 #ifdef __cplusplus
 }
