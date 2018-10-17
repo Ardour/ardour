@@ -3316,7 +3316,7 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Inbound MMC device ID"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 128, 1, 10
+		     0, 127, 1, 10
 		     ));
 
 	add_option (_("Sync/MIDI"),
@@ -3325,7 +3325,7 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Outbound MMC device ID"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
-		     0, 128, 1, 10
+		     0, 127, 1, 10
 		     ));
 
 
