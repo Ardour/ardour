@@ -968,7 +968,13 @@ AudioEngine::stop (bool for_latency)
 		pl.release ();
 	}
 
-	if (_session && _running && stop_engine &&
+	const bool was_running_will_stop = (_running && stop_engine);
+
+	if (was_running_will_stop) {
+		_running = false;
+	}
+
+	if (_session && was_running_will_stop &&
 	    (_session->state_of_the_state() & Session::Loading) == 0 &&
 	    (_session->state_of_the_state() & Session::Deletion) == 0) {
 		// it's not a halt, but should be handled the same way:
@@ -976,8 +982,7 @@ AudioEngine::stop (bool for_latency)
 		_session->engine_halted ();
 	}
 
-	if (stop_engine && _running) {
-		_running = false;
+	if (was_running_will_stop) {
 		if (!for_latency) {
 			_started_for_latency = false;
 		} else if (!_started_for_latency) {
