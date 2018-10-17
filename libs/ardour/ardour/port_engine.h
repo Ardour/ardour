@@ -121,7 +121,7 @@ public:
 	virtual std::string get_port_name (PortHandle) const = 0;
 
 	/** Return the flags of the port referred to by @param port. If the port
-	 * does not exist, return an empty string.
+	 * does not exist, return PortFlags (0)
 	 */
 	virtual PortFlags get_port_flags (PortHandle) const = 0;
 
