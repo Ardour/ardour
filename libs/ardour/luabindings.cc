@@ -40,6 +40,7 @@
 #include "ardour/buffer_set.h"
 #include "ardour/beats_samples_converter.h"
 #include "ardour/chan_mapping.h"
+#include "ardour/convolver.h"
 #include "ardour/dB.h"
 #include "ardour/delayline.h"
 #include "ardour/disk_reader.h"
@@ -2409,6 +2410,16 @@ LuaBindings::common (lua_State* L)
 		.addRefFunction ("read", &ARDOUR::LTCReader::read)
 		.endClass ()
 
+		.beginClass <DSP::Convolver> ("Convolver")
+		.addConstructor <void (*) (Session&, std::string const&, DSP::Convolver::IRChannelConfig, uint32_t)> ()
+		.addFunction ("run", &ARDOUR::DSP::Convolver::run)
+		.addFunction ("run_stereo", &ARDOUR::DSP::Convolver::run_stereo)
+		.addFunction ("latency", &ARDOUR::DSP::Convolver::latency)
+		.addFunction ("n_inputs", &ARDOUR::DSP::Convolver::n_inputs)
+		.addFunction ("n_outputs", &ARDOUR::DSP::Convolver::n_outputs)
+		.addFunction ("ready", &ARDOUR::DSP::Convolver::ready)
+		.endClass ()
+
 		/* DSP enums */
 		.beginNamespace ("BiquadType")
 		.addConst ("LowPass", ARDOUR::DSP::Biquad::LowPass)
@@ -2433,6 +2444,12 @@ LuaBindings::common (lua_State* L)
 		.addConst ("LTC_TV_625_50", LTC_TV_625_50)
 		.addConst ("LTC_TV_1125_60", LTC_TV_1125_60)
 		.addConst ("LTC_TV_FILM_24", LTC_TV_FILM_24)
+		.endNamespace ()
+
+		.beginNamespace ("IRChannelConfig")
+		.addConst ("Mono", DSP::Convolver::Mono)
+		.addConst ("MonoToStereo", DSP::Convolver::MonoToStereo)
+		.addConst ("Stereo", DSP::Convolver::Stereo)
 		.endNamespace ()
 
 		.beginClass <DSP::DspShm> ("DspShm")
