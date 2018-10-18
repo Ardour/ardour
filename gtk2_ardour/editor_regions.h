@@ -165,7 +165,8 @@ private:
 	void populate_row_source (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 
 	void update_row (boost::shared_ptr<ARDOUR::Region>);
-	void update_all_rows ();
+
+	void clock_format_changed ();
 
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint

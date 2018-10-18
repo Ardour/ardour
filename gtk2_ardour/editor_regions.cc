@@ -1,5 +1,5 @@
 /*
-    Copyright (C) 2000-2005 Paul Davis
+    Copyright (C) 2000-2018 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -268,10 +268,7 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.signal_enter_notify_event().connect (sigc::mem_fun (*this, &EditorRegions::enter_notify), false);
 	_display.signal_leave_notify_event().connect (sigc::mem_fun (*this, &EditorRegions::leave_notify), false);
 
-	// _display.signal_popup_menu().connect (sigc::bind (sigc::mem_fun (*this, &Editor::show__display_context_menu), 1, 0));
-
-	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
-	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
+	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::clock_format_changed));
 
 	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context());
 	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context());
@@ -534,11 +531,19 @@ EditorRegions::update_row (boost::shared_ptr<Region> region)
 }
 
 void
-EditorRegions::update_all_rows ()
+EditorRegions::clock_format_changed ()
 {
 	if (!_session) {
 		return;
 	}
+
+	PropertyChange change;
+	change.add (ARDOUR::Properties::start);
+	change.add (ARDOUR::Properties::length);
+	change.add (ARDOUR::Properties::position);
+	change.add (ARDOUR::Properties::sync_position);
+	change.add (ARDOUR::Properties::fade_in);
+	change.add (ARDOUR::Properties::fade_out);
 
 	RegionRowMap::iterator i;
 
@@ -548,8 +553,7 @@ EditorRegions::update_all_rows ()
 
 		boost::shared_ptr<Region> region = (*j)[_columns.region];
 
-		PropertyChange c;
-		populate_row(region, (*j), c);
+		populate_row(region, (*j), change);
 	}
 }
 
@@ -625,8 +629,8 @@ EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 void
 EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row, PBD::PropertyChange const &what_changed)
 {
-	//the grid is most interested in the regions that are *visible* in the editor.  this is a perfect place to flag changes to the grid cache
-	//maybe update the grid here
+	//the grid is most interested in the regions that are *visible* in the editor.
+	//this is a convenient place to flag changes to the grid cache, on a visible region
 	PropertyChange grid_interests;
 	grid_interests.add (ARDOUR::Properties::position);
 	grid_interests.add (ARDOUR::Properties::length);
@@ -635,19 +639,14 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 		_editor->mark_region_boundary_cache_dirty();
 	}
 
-	//note: do this in populate_row
-	{
-		Gdk::Color c;
-		bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
-		if (missing_source) {
-			// c.set_rgb(65535,0,0);     // FIXME: error color from style
-			set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
-		} else {
-			set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
-		}
-
-		row[_columns.color_] = c;
+	Gdk::Color c;
+	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
+	if (missing_source) {
+		set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
+	} else {
+		set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
 	}
+	row[_columns.color_] = c;
 	
 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
 
