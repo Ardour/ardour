@@ -116,7 +116,7 @@ private:
 	void add_source (boost::shared_ptr<ARDOUR::Source>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);
 
-	void update_all_rows ();
+	void clock_format_changed ();
 
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
