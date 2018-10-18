@@ -601,7 +601,7 @@ void
 LaunchControlXL::update_knob_led_by_id (uint8_t id, LEDColor color)
 {
 
-	boost::shared_ptr<Knob> knob = 0;
+	boost::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(id));
 
 	if (k != id_knob_map.end()) {
@@ -761,7 +761,7 @@ LaunchControlXL::fader(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Fader> fader = 0;
+	boost::shared_ptr<Fader> fader;
 	IDFaderMap::iterator f = id_fader_map.find(static_cast<FaderID>(n));
 
 	if (f != id_fader_map.end()) {
@@ -785,7 +785,7 @@ LaunchControlXL::knob_sendA(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob = 0;
+	boost::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n));
 
 	if (k != id_knob_map.end()) {
@@ -816,7 +816,7 @@ LaunchControlXL::knob_sendB(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob = 0;
+	boost::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 8));
 
 	if (k != id_knob_map.end()) {
@@ -851,7 +851,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob = 0;
+	boost::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 16));
 
 	if (k != id_knob_map.end()) {

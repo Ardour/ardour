@@ -1064,7 +1064,7 @@ LaunchControlXL::switch_bank (uint32_t base)
 	boost::shared_ptr<SelectButton> sr = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
 
 	boost::shared_ptr<Stripable> s[8];
-	boost::shared_ptr<Stripable> next_base = 0;
+	boost::shared_ptr<Stripable> next_base;
 	uint32_t stripable_counter = get_amount_of_tracks();
 	uint32_t skip = base;
 	uint32_t n = 0;
