@@ -2697,15 +2697,6 @@ RCOptionEditor::RCOptionEditor ()
 					sigc::mem_fun (*_rc_config, &RCConfiguration::get_link_send_and_route_panner),
 					sigc::mem_fun (*_rc_config, &RCConfiguration::set_link_send_and_route_panner)
 					));
-
-	add_option (_("Mixer"), new OptionEditorHeading (_("Send Controls")));
-	add_option (_("Mixer"),
-			new BoolOption (
-				"hiding-aux-hides-connected-sends",
-				_("When Aux Bus is hidden the sends in the prosessor box that feed it will be hidden"),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::get_hiding_aux_hides_connected_sends),
-				sigc::mem_fun (*_rc_config, &RCConfiguration::set_hiding_aux_hides_connected_sends)
-				));
 	}
 
 	/* Signal Flow */

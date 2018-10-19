@@ -63,7 +63,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 {
 	if (pannable) {
 		bool is_send = false;
-		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		if (r & (Delivery::Send|Delivery::Aux|Delivery::Personal)) is_send = true;
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
@@ -87,7 +87,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 {
 	if (pannable) {
 		bool is_send = false;
-		if (r & (Delivery::Send|Delivery::Aux)) is_send = true;
+		if (r & (Delivery::Send|Delivery::Aux|Delivery::Personal)) is_send = true;
 		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, is_send));
 	}
 
@@ -556,6 +556,7 @@ Delivery::target_gain ()
 		case Send:
 		case Insert:
 		case Aux:
+		case Personal:
 			if (_pre_fader) {
 				mp = MuteMaster::PreFader;
 			} else {

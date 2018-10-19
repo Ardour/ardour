@@ -112,9 +112,6 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 	_send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
 	_send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
 	_send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
-	boost::shared_ptr<Stripable> st_to = boost::dynamic_pointer_cast<Stripable> (_send_to);
-	st_to->presentation_info().PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_pi_change, this, _1));
-	send_to_pi_change (Properties::hidden);
 
 	return 0;
 }
@@ -426,20 +423,6 @@ InternalSend::send_to_property_changed (const PropertyChange& what_changed)
 {
 	if (what_changed.contains (Properties::name)) {
 		set_name (_send_to->name ());
-	}
-}
-
-void
-InternalSend::send_to_pi_change (const PBD::PropertyChange& what_changed)
-{
-	if (what_changed.contains (Properties::hidden)) {
-		boost::shared_ptr<Stripable> st_to = boost::dynamic_pointer_cast<Stripable> (_send_to);
-		if (Config->get_hiding_aux_hides_connected_sends()) {
-			set_display_to_user (!st_to->is_hidden ());
-		} else {
-			set_display_to_user (true);
-		}
-		_send_from->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	}
 }
 

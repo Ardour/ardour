@@ -6546,8 +6546,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 				bool s_only = true;
 				if (!rt_send->feeds (aux, &s_only)) {
 					// create send
-					boost::shared_ptr<Processor> loc = rt_send->before_processor_for_placement (PreFader);
-					rt_send->add_aux_send (aux, loc);
+					rt_send->add_personal_send (aux);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
 					session->dirty ();
 					return 0;

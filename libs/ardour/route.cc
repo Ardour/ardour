@@ -3192,6 +3192,44 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 	return 0;
 }
 
+int
+Route::add_personal_send (boost::shared_ptr<Route> route)
+{
+	assert (route != _session.monitor_out ());
+	boost::shared_ptr<Processor> before = before_processor_for_placement (PreFader);
+
+	{
+		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+
+		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
+
+			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend> (*x);
+
+			if (d && d->target_route() == route) {
+				/* already listening via the specified IO: do nothing */
+				return 0;
+			}
+		}
+	}
+
+	try {
+
+		boost::shared_ptr<InternalSend> listener;
+
+		{
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Personal));
+		}
+
+		add_processor (listener, before);
+
+	} catch (failed_constructor& err) {
+		return -1;
+	}
+
+	return 0;
+}
+
 void
 Route::remove_aux_or_listen (boost::shared_ptr<Route> route)
 {
@@ -4656,6 +4694,7 @@ Route::setup_invisible_processors ()
 	 */
 
 	ProcessorList new_processors;
+	ProcessorList personal_sends;
 	ProcessorList::iterator dr;
 	ProcessorList::iterator dw;
 
@@ -4666,8 +4705,8 @@ Route::setup_invisible_processors ()
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
 		}
-		else if (auxsnd && auxsnd->is_aux ()) {
-			new_processors.push_back (*i);
+		else if (auxsnd && auxsnd->is_personal ()) {
+			personal_sends.push_back (*i);
 		}
 	}
 
@@ -4718,6 +4757,12 @@ Route::setup_invisible_processors ()
 			++meter_point;
 		}
 		new_processors.insert (meter_point, _meter);
+	}
+
+	/* Personal Sends */
+
+	for (ProcessorList::iterator i = personal_sends.begin(); i != personal_sends.end(); ++i) {
+		new_processors.insert (amp, (*i));
 	}
 
 	/* MONITOR SEND */

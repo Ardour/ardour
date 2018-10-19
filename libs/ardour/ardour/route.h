@@ -412,6 +412,7 @@ public:
 	PBD::Signal1<void,void*> SelectedChanged;
 
 	int add_aux_send (boost::shared_ptr<Route>, boost::shared_ptr<Processor>);
+	int add_personal_send (boost::shared_ptr<Route>);
 	void remove_aux_or_listen (boost::shared_ptr<Route>);
 
 	/**
