@@ -54,10 +54,12 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
 	, _lua_dsp (0)
+	, _lua_latency (0)
 	, _script (script)
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
 	, _designated_bypass_port (UINT32_MAX)
+	, _signal_latency (0)
 	, _control_data (0)
 	, _shadow_data (0)
 	, _configured (false)
@@ -85,11 +87,13 @@ LuaProc::LuaProc (const LuaProc &other)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
 	, _lua_dsp (0)
+	, _lua_latency (0)
 	, _script (other.script ())
 	, _origin (other._origin)
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
 	, _designated_bypass_port (UINT32_MAX)
+	, _signal_latency (0)
 	, _control_data (0)
 	, _shadow_data (0)
 	, _configured (false)
@@ -125,6 +129,7 @@ LuaProc::~LuaProc () {
 #endif
 	lua.do_command ("collectgarbage();");
 	delete (_lua_dsp);
+	delete (_lua_latency);
 	delete [] _control_data;
 	delete [] _shadow_data;
 }
@@ -234,6 +239,11 @@ LuaProc::load_script ()
 	}
 	else {
 		assert (0);
+	}
+
+	luabridge::LuaRef lua_dsp_latency = luabridge::getGlobal (L, "dsp_latency");
+	if (lua_dsp_latency.type () == LUA_TFUNCTION) {
+		_lua_latency = new luabridge::LuaRef (lua_dsp_latency);
 	}
 
 	// initialize the DSP if needed
@@ -735,6 +745,11 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				}
 			}
 		}
+
+		if (_lua_latency) {
+			_signal_latency = (*_lua_latency)();
+		}
+
 	} catch (luabridge::LuaException const& e) {
 		PBD::error << "LuaException: " << e.what () << "\n";
 #ifndef NDEBUG

@@ -85,7 +85,7 @@ public:
 	void cleanup () { }
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
-	samplecnt_t  signal_latency() const { return 0; }
+	samplecnt_t signal_latency() const { return _signal_latency; }
 
 	int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
@@ -148,6 +148,7 @@ private:
 #endif
 	LuaState lua;
 	luabridge::LuaRef * _lua_dsp;
+	luabridge::LuaRef * _lua_latency;
 	std::string _script;
 	std::string _origin;
 	std::string _docs;
@@ -176,6 +177,8 @@ private:
 	std::map<int, std::string> _param_doc;
 	uint32_t _designated_bypass_port;
 
+	samplecnt_t _signal_latency;
+
 	float* _control_data;
 	float* _shadow_data;
 
@@ -191,6 +194,7 @@ private:
 
 	bool _has_midi_input;
 	bool _has_midi_output;
+
 
 #ifdef WITH_LUAPROC_STATS
 	int64_t _stats_avg[2];
