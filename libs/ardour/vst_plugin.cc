@@ -540,21 +540,27 @@ VSTPlugin::do_save_preset (string name)
 	sha1_result_hash (&s, hash);
 
 	string const uri = string_compose (X_("VST:%1:x%2"), unique_id (), hash);
+	string const str_ver = std::to_string (version ());
+	string const num_params = std::to_string (parameter_count ());
 
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
-
 		p = new XMLNode (X_("ChunkPreset"));
-		p->set_property (X_("uri"), uri);
-		p->set_property (X_("label"), name);
+	} else {
+		p = new XMLNode (X_("Preset"));
+	}
+
+	p->set_property (X_("uri"), uri);
+	p->set_property (X_("version"), str_ver);
+	p->set_property (X_("label"), name);
+	p->set_property (X_("numParams"), num_params);
+
+	if (_plugin->flags & 32) {
+
 		gchar* data = get_chunk (true);
 		p->add_content (string (data));
 		g_free (data);
 
 	} else {
-
-		p = new XMLNode (X_("Preset"));
-		p->set_property (X_("uri"), uri);
-		p->set_property (X_("label"), name);
 
 		for (uint32_t i = 0; i < parameter_count(); ++i) {
 			if (parameter_is_input (i)) {
@@ -759,6 +765,12 @@ const char *
 VSTPlugin::label () const
 {
 	return _handle->name;
+}
+
+int32_t
+VSTPlugin::version () const
+{
+	return _plugin->version;
 }
 
 uint32_t
