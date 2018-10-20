@@ -780,6 +780,7 @@ public:
 	int destroy_sources (std::list<boost::shared_ptr<Source> >);
 
 	int remove_last_capture ();
+	void get_last_capture_sources (std::list<boost::shared_ptr<Source> >&);
 
 	/** handlers should return 0 for "everything OK", and any other value for
 	 * "cannot setup audioengine".
