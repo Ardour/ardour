@@ -4824,6 +4824,25 @@ Session::remove_last_capture ()
 	return 0;
 }
 
+void
+Session::get_last_capture_sources (std::list<boost::shared_ptr<Source> >& srcs)
+{
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		if (!tr) {
+			continue;
+		}
+
+		list<boost::shared_ptr<Source> >& l = tr->last_capture_sources();
+
+		if (!l.empty()) {
+			srcs.insert (srcs.end(), l.begin(), l.end());
+			l.clear ();
+		}
+	}
+}
+
 /* Source Management */
 
 void
