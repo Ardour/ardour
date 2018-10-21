@@ -17,9 +17,8 @@
 //
 // ----------------------------------------------------------------------------
 
-#ifndef _ZITA_CONVOLVER_H
-#define _ZITA_CONVOLVER_H
-
+#ifndef ARDOUR_ZITA_CONVOLVER_H
+#define ARDOUR_ZITA_CONVOLVER_H
 
 #include <fftw3.h>
 #include <pthread.h>
@@ -33,7 +32,11 @@ namespace ArdourZita {
 #undef ZCSEMA_IS_IMPLEMENTED
 #endif
 
-#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined (_WIN32)
+/* Note:
+ * - __MINGW32__ is also defined for 64bit builds
+ * - mingw, x-compile uses PTW32's implementation of semaphores, we should prefer defined(PTW32_VERSION)
+ */
+#if defined(__linux__) || defined(__GNU__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined (__MINGW32__)
 
 #include <semaphore.h>
 
@@ -80,7 +83,7 @@ private:
 #define ZCSEMA_IS_IMPLEMENTED
 #endif
 
-#ifdef __APPLE__
+#if defined (__APPLE__) || defined (_MSC_VER)
 
 // NOTE:  ***** I DO NOT REPEAT NOT PROVIDE SUPPORT FOR OSX *****
 //
@@ -103,8 +106,10 @@ public:
 		pthread_cond_destroy (&_cond);
 	}
 
+#ifndef _MSC_VER /* remove for MSVC build */
 	ZCsema (const ZCsema&);            // disabled
 	ZCsema& operator= (const ZCsema&); // disabled
+#endif
 
 	int init (int s, int v)
 	{

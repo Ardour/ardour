@@ -22,6 +22,10 @@
 #include <string.h>
 #include <unistd.h>
 
+#if _MSC_VER
+#include <windows.h> // Needed for 'Sleep()'
+#endif
+
 #include "zita-convolver/zita-convolver.h"
 
 using namespace ArdourZita;
@@ -352,7 +356,11 @@ Convproc::cleanup (void)
 	uint32_t k;
 
 	while (!check_stop ()) {
+#if _MSC_VER
+		Sleep (100);
+#else
 		usleep (100000);
+#endif
 	}
 	for (k = 0; k < _ninp; k++) {
 		delete[] _inpbuff[k];
@@ -403,7 +411,9 @@ Convproc::print (FILE* F)
 		_convlev[k]->print (F);
 }
 
+#ifdef ENABLE_VECTOR_MODE
 typedef float FV4 __attribute__ ((vector_size (16)));
+#endif
 
 Convlevel::Convlevel (void)
 	: _stat (ST_IDLE)
