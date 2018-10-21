@@ -49,6 +49,7 @@ public:
 	void deactivate ();
 
 	int set_block_size (pframes_t);
+	bool requires_fixed_sized_buffers () const;
 	bool inplace_broken() const { return true; }
 	float default_value (uint32_t port);
 	float get_parameter (uint32_t port) const;

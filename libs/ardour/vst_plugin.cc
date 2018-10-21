@@ -139,6 +139,31 @@ VSTPlugin::set_block_size (pframes_t nframes)
 	return 0;
 }
 
+bool
+VSTPlugin::requires_fixed_sized_buffers () const
+{
+	/* This controls if Ardour will split the plugin's run()
+	 * on automation events in order to pass sample-accurate automation
+	 * via standard control-ports.
+	 *
+	 * When returning true Ardour will *not* sub-divide the process-cycle.
+	 * Automation events that happen between cycle-start and cycle-end will be
+	 * ignored (ctrl values are interpolated to cycle-start).
+	 *
+	 * Note: This does not guarantee a fixed block-size.
+	 * e.g The process cycle may be split when looping, also
+	 * the period-size may change any time: see set_block_size()
+	 */
+	if (get_info()->n_inputs.n_midi() > 0) {
+		/* we don't yet implement midi buffer offsets (for split cycles).
+		 * Also session_vst callbacls uses _session.transport_sample() directly
+		 * (for BBT) which is not offset for plugin cycle split.
+		 */
+		return true;
+	}
+	return false;
+}
+
 float
 VSTPlugin::default_value (uint32_t which)
 {
@@ -709,6 +734,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		VstEvents* v = 0;
 		bool valid = false;
 		const uint32_t buf_index_in = in_map.get(DataType::MIDI, 0, &valid);
+		/* TODO: apply offset to MIDI buffer and trim at nframes */
 		if (valid) {
 			v = bufs.get_vst_midi (buf_index_in);
 		}
@@ -716,7 +742,8 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		const uint32_t buf_index_out = out_map.get(DataType::MIDI, 0, &valid);
 		if (valid) {
 			_midi_out_buf = &bufs.get_midi(buf_index_out);
-			_midi_out_buf->silence(0, 0);
+			/* TODO: apply offset to MIDI buffer and trim at nframes */
+			_midi_out_buf->silence(nframes, offset);
 		} else {
 			_midi_out_buf = 0;
 		}
