@@ -58,10 +58,8 @@ Rectangle::Rectangle (Item* parent, Rect const & rect)
 void
 Rectangle::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	/* In general, a Rectangle will have a _position of (0,0) within its
-	   parent, and its extent is actually defined by _rect. But in the
-	   unusual case that _position is set to something other than (0,0),
-	   we should take that into account when rendering.
+	/* Note that item_to_window() already takes _position into account (as
+	   part of item_to_canvas()
 	*/
 
 	Rect self (item_to_window (_rect, false));
