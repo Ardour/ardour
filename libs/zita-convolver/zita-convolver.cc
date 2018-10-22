@@ -22,8 +22,8 @@
 #include <string.h>
 #include <unistd.h>
 
-#if _MSC_VER
-#include <windows.h> // Needed for 'Sleep()'
+#ifdef _MSC_VER
+#include <windows.h>  // Needed for MSVC 'Sleep()'
 #endif
 
 #include "zita-convolver/zita-convolver.h"
@@ -356,7 +356,7 @@ Convproc::cleanup (void)
 	uint32_t k;
 
 	while (!check_stop ()) {
-#if _MSC_VER
+#ifdef _MSC_VER
 		Sleep (100);
 #else
 		usleep (100000);

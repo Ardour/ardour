@@ -34,6 +34,8 @@
 using namespace ARDOUR::DSP;
 using namespace ArdourZita;
 
+using ARDOUR::Session;
+
 Convolver::Convolver (Session& session, std::string const& path, IRChannelConfig irc, uint32_t pre_delay)
 	: SessionHandleRef (session)
 	, _irc (irc)
