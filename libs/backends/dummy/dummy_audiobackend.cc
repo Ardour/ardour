@@ -1664,13 +1664,13 @@ void DummyPort::setup_random_number_generator ()
 #ifdef PLATFORM_WINDOWS
 	LARGE_INTEGER Count;
 	if (QueryPerformanceCounter (&Count)) {
-		_rseed = Count.QuadPart % UINT_MAX;
+		_rseed = Count.QuadPart;
 	} else
 #endif
 	{
-	_rseed = g_get_monotonic_time() % UINT_MAX;
+	_rseed = g_get_monotonic_time();
 	}
-	_rseed = (_rseed + (uint64_t)this) % UINT_MAX;
+	_rseed = (_rseed + (uint64_t)this) % INT_MAX;
 	if (_rseed == 0) _rseed = 1;
 }
 
