@@ -300,11 +300,27 @@
 				>
 			</File>
 			<File
+				RelativePath="..\src\fluid_samplecache.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\fluid_settings.c"
 				>
 			</File>
 			<File
+				RelativePath="..\src\fluid_sffile.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\fluid_sfont.c"
+				>
+			</File>
+			<File
 				RelativePath="..\src\fluid_synth.c"
+				>
+			</File>
+			<File
+				RelativePath="..\src\fluid_synth_monopoly.c"
 				>
 			</File>
 			<File
@@ -331,6 +347,18 @@
 			</File>
 			<File
 				RelativePath="..\fluidsynth\event.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\fluid_event.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\fluid_samplecache.h"
+				>
+			</File>
+			<File
+				RelativePath="..\src\fluid_sffile.h"
 				>
 			</File>
 			<File
