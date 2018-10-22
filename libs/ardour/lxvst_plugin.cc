@@ -125,11 +125,11 @@ LXVSTPluginInfo::get_presets (bool user_only) const
 		int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, NULL, 0);
 
 		for (int i = 0; i < plugin->numPrograms; ++i) {
-			Plugin::PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id, i), "", false);
+			Plugin::PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id, std::setw(4), std::setfill('0'), i), "", false);
 			if (vst_version >= 2) {
 				char buf[256];
 				if (plugin->dispatcher (plugin, 29, i, 0, buf, 0) == 1) {
-					r.label = buf;
+					r.label = string_compose (_("%1 - %2"), i, buf);
 				} else {
 					r.label = string_compose (_("Preset %1"), i);
 				}

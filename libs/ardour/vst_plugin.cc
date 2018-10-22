@@ -840,7 +840,8 @@ VSTPlugin::find_presets ()
 
 	int const vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, NULL, 0);
 	for (int i = 0; i < _plugin->numPrograms; ++i) {
-		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), i), "", false);
+
+		PresetRecord r (string_compose (X_("VST:%1:%2"), unique_id (), std::setw(4), std::setfill('0'), i), "", false);
 
 		if (vst_version >= 2) {
 			char buf[256];
