@@ -1948,7 +1948,7 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Separate"), mem_fun(*this, &Editor::separate_region_from_selection)));
-	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), sigc::mem_fun(*this, &Editor::new_region_from_selection)));
+//	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), sigc::mem_fun(*this, &Editor::new_region_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
@@ -1968,8 +1968,8 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, false)));
 	edit_items.push_back (MenuElem (_("Consolidate Range with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), true, true)));
-	edit_items.push_back (MenuElem (_("Bounce Range to Region List"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, false)));
-	edit_items.push_back (MenuElem (_("Bounce Range to Region List with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
+	edit_items.push_back (MenuElem (_("Bounce Range to Source List"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, false)));
+	edit_items.push_back (MenuElem (_("Bounce Range to Source List with Processing"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), false, true)));
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
 	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
 		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*(ARDOUR_UI::instance()), &ARDOUR_UI::export_video), true)));
@@ -4276,6 +4276,13 @@ Editor::audio_region_selection_covers (samplepos_t where)
 
 	return false;
 }
+
+void
+Editor::cleanup_regions ()
+{
+	_regions->remove_unused_regions();
+}
+
 
 void
 Editor::prepare_for_cleanup ()

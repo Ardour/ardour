@@ -78,8 +78,8 @@ private:
 			add (name);
 			add (tags);
 			add (start);
-			add (end);
 			add (length);
+			add (end);
 			add (sync);
 			add (fadein);
 			add (fadeout);
