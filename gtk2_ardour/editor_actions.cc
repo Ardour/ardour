@@ -680,7 +680,7 @@ Editor::register_actions ()
 
 	/* the next two are duplicate items with different names for use in two different contexts */
 
-	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Region List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
+	act = reg_sens (editor_actions, X_("addExternalAudioToRegionList"), _("Import to Source List..."), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportAsRegion));
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (editor_actions, X_("importFromSession"), _("Import from Session"), sigc::mem_fun(*this, &Editor::session_import_dialog));
@@ -1559,7 +1559,7 @@ Editor::register_region_actions ()
 
 	/* PART 2: actions that are not related to the selection, but for which the edit point type and location is important */
 
-	register_region_action (_region_actions, RegionActionTarget (ListSelection), "insert-region-from-region-list", _("Insert Region from Region List"), sigc::bind (sigc::mem_fun (*this, &Editor::insert_region_list_selection), 1));
+//	register_region_action (_region_actions, RegionActionTarget (ListSelection), "insert-region-from-region-list", _("Insert Region from Region List"), sigc::bind (sigc::mem_fun (*this, &Editor::insert_region_list_selection), 1));
 
 	/* PART 3: actions that operate on the selection and also require the edit point location */
 

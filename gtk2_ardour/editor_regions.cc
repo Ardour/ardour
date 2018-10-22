@@ -75,6 +75,8 @@ struct ColumnInfo {
 	const char* tooltip;
 };
 
+//#define SHOW_REGION_EXTRAS
+
 EditorRegions::EditorRegions (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
@@ -148,15 +150,18 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.append_column (*col_name);
 	_display.append_column (*col_tags);
 	_display.append_column (*col_start);
+	_display.append_column (*col_length);
 	_display.append_column (*col_locked);
 	_display.append_column (*col_glued);
 	_display.append_column (*col_muted);
 	_display.append_column (*col_opaque);
+		
+#ifdef SHOW_REGION_EXTRAS
 	_display.append_column (*col_end);
-	_display.append_column (*col_length);
-	_display.append_column (*col_sync);
+ 	_display.append_column (*col_sync);
 	_display.append_column (*col_fadein);
 	_display.append_column (*col_fadeout);
+#endif
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
@@ -165,15 +170,17 @@ EditorRegions::EditorRegions (Editor* e)
 		{ 0,  0,  ALIGN_LEFT,    _("Region"),    _("Region name, with number of channels in []'s") },
 		{ 1,  1,  ALIGN_LEFT,    _("Tags"),      _("Tags") },
 		{ 2, 15,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
-		{ 3, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
-		{ 4, -1,  ALIGN_CENTER, S_("Gain|G"),    _("Region position glued to Bars|Beats time?") },
-		{ 5, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
-		{ 6, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
-		{ 7, -1,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
-		{ 8, -1,  ALIGN_RIGHT,  _("Length"),    _("Length of the region") },
+		{ 3, -1,  ALIGN_RIGHT,   _("Length"),    _("Length of the region") },
+		{ 4, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
+		{ 5, -1,  ALIGN_CENTER, S_("Gain|G"),    _("Region position glued to Bars|Beats time?") },
+		{ 6, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
+		{ 7, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
+#ifdef SHOW_REGION_EXTRAS
+ 		{ 8, -1,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
 		{ 9, -1,  ALIGN_RIGHT,  _("Sync"),      _("Position of region sync point, relative to start of the region") },
 		{ 10,-1,  ALIGN_RIGHT,  _("Fade In"),   _("Length of region fade-in (units: secondary clock), () if disabled") },
 		{ 11,-1,  ALIGN_RIGHT,  _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
+#endif
 		{ -1,-1,  ALIGN_CENTER, 0, 0 }
 	};
 
@@ -232,19 +239,22 @@ EditorRegions::EditorRegions (Editor* e)
 	region_tags_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRegions::tag_edit));
 	region_tags_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorRegions::tag_editing_started));
 
-	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (3));
+	/* checkbox cells */
+	int check_start_col = 4;
+
+	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (check_start_col++));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
 
-	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (4));
+	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (check_start_col++));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
 
-	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (5));
+	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (check_start_col++));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
 
-	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (6));
+	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (check_start_col));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
 
@@ -751,6 +761,10 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 void
 EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
+#ifndef SHOW_REGION_EXTRAS
+	return;
+#endif
+
 	if (region->last_sample() >= region->first_sample()) {
 		char buf[16];
 		format_position (region->last_sample(), buf, sizeof (buf));
@@ -773,6 +787,9 @@ EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeMode
 void
 EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
+#ifndef SHOW_REGION_EXTRAS
+	return;
+#endif
 	if (region->sync_position() == region->position()) {
 		row[_columns.sync] = _("Start");
 	} else if (region->sync_position() == (region->last_sample())) {
@@ -787,6 +804,9 @@ EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::R
 void
 EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel::Row const &row, boost::shared_ptr<AudioRegion> audioregion)
 {
+#ifndef SHOW_REGION_EXTRAS
+	return;
+#endif
 	if (!audioregion) {
 		row[_columns.fadein] = "";
 	} else {
@@ -799,6 +819,9 @@ EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel
 void
 EditorRegions::populate_row_fade_out (boost::shared_ptr<Region> region, TreeModel::Row const &row, boost::shared_ptr<AudioRegion> audioregion)
 {
+#ifndef SHOW_REGION_EXTRAS
+	return;
+#endif
 	if (!audioregion) {
 		row[_columns.fadeout] = "";
 	} else {
@@ -861,17 +884,9 @@ EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel:
 void
 EditorRegions::show_context_menu (int button, int time)
 {
-	if (_menu == 0) {
-		_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/RegionListMenu"));
-	}
-
-	if (_display.get_selection()->count_selected_rows() > 0) {
-		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, true);
-	} else {
-		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, false);
-	}
-
-	_menu->popup (button, time);
+	using namespace Gtk::Menu_Helpers;
+	Gtk::Menu* menu = dynamic_cast<Menu*> (ActionManager::get_widget (X_("/PopupRegionMenu")));
+	menu->popup (button, time);
 }
 
 bool
