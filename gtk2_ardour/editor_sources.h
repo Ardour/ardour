@@ -44,6 +44,8 @@ public:
 	}
 
 	void clear ();
+	
+	void remove_selected_sources ();
 
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 

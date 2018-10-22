@@ -316,6 +316,7 @@ public:
 	virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
 	virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
 	virtual void select_topmost_track () = 0;
+	virtual void cleanup_regions () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
 	virtual void reset_x_origin (samplepos_t sample) = 0;

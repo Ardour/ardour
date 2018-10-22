@@ -163,7 +163,7 @@ EditorSources::EditorSources (Editor* e)
 	nat_col->set_alignment (ALIGN_RIGHT);
 	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (2));
 	if (renderer) {
-		renderer->property_xalign() = ( ALIGN_RIGHT );
+		renderer->property_xalign() = ( 1.0 );
 	}
 
 	//the PATH field should expand when the pane is opened wider
@@ -420,7 +420,6 @@ EditorSources::source_changed (boost::shared_ptr<ARDOUR::Source> source)
 void
 EditorSources::selection_changed ()
 {
-//	_editor->_region_selection_change_updates_region_list = false;
 
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
@@ -453,7 +452,6 @@ EditorSources::selection_changed ()
 		_editor->get_selection().clear_regions ();
 	}
 
-//	_editor->_region_selection_change_updates_region_list = true;
 }
 
 void
@@ -542,9 +540,71 @@ EditorSources::show_context_menu (int button, int time)
 
 }
 
+void
+EditorSources::remove_selected_sources ()
+{
+	vector<string> choices;
+	string prompt;
+
+	prompt  = _("Do you really want to destroy the selected source files?"
+				"\nAll regions using the files will be deleted.");
+
+	choices.push_back (_("No, do nothing."));
+	choices.push_back (_("Only destroy the regions, not the sources. (may be undone)"));
+	choices.push_back (_("Yes, destroy them. (cannot be undone!"));
+
+	Choice prompter (_("Destroy selected Sources"), prompt, choices);
+
+	int opt = prompter.run ();
+
+	if ( opt >= 1) {
+		if (_display.get_selection()->count_selected_rows() > 0) {
+
+			TreeIter iter;
+			TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
+
+			_editor->get_selection().clear_regions ();
+
+			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
+
+				if ((iter = _model->get_iter (*i))) {
+
+					boost::shared_ptr<ARDOUR::Source> source = (*iter)[_columns.source];
+					if (source) {
+
+						set<boost::shared_ptr<Region> > regions;
+						RegionFactory::get_regions_using_source ( source, regions );
+
+						for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++ ) {
+							_change_connection.block (true);
+							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
+							_change_connection.block (false);
+		
+						}
+					}
+				}
+
+			}
+		}
+		_editor->remove_selected_regions();
+
+		if ( opt == 2 ) { //TODO:  actually delete some sources?	
+		}
+	}
+
+}
+
+
 bool
 EditorSources::key_press (GdkEventKey* ev)
 {
+	switch (ev->keyval) {
+	case GDK_Delete:
+	case GDK_BackSpace:
+		/* remove_selected_sources(); */
+		return true; //for now, just "eat" this, so Delete doesn't get propogated into the canvas, based on Source selections
+	}
+		
 	return false;
 }
 
