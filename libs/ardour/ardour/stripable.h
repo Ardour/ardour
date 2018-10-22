@@ -74,6 +74,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	bool is_private_route() const { return is_auditioner(); }
 	bool is_master() const { return _presentation_info.flags() & PresentationInfo::MasterOut; }
 	bool is_monitor() const { return _presentation_info.flags() & PresentationInfo::MonitorOut; }
+	bool is_listenbus() const { return _presentation_info.flags() & PresentationInfo::ListenBus; }
 
 	int set_state (XMLNode const&, int);
 

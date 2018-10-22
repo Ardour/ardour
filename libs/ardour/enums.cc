@@ -734,6 +734,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (PresentationInfo, Auditioner);
 	REGISTER_CLASS_ENUM (PresentationInfo, Hidden);
 	REGISTER_CLASS_ENUM (PresentationInfo, OrderSet);
+	REGISTER_CLASS_ENUM (PresentationInfo, ListenBus);
 	REGISTER_BITS (_PresentationInfo_Flag);
 
 	REGISTER_CLASS_ENUM (MusicalMode,Dorian);
