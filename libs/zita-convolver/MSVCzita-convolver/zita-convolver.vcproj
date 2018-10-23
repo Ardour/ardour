@@ -59,7 +59,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVCE2.lib"
+				AdditionalDependencies="pthreadVCE2.lib libfftw3f-3.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32D.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;msvcrt.lib;dsound.lib"
@@ -139,7 +139,7 @@
 			/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="pthreadVCE2.lib"
+				AdditionalDependencies="pthreadVCE2.lib libfftw3f-3.lib"
 				OutputFile="$(OutDir)\$(DllPrefix)$(ProjectName)32.dll"
 				AdditionalLibraryDirectories="F:\pthread-win32\Pre-built.2\lib"
 				IgnoreDefaultLibraryNames="libboost_regex-vc80-mt-gd-1_40.lib;dsound.lib"
