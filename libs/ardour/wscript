@@ -249,6 +249,7 @@ libardour_sources = [
         'speakers.cc',
         'srcfilesource.cc',
         'stripable.cc',
+        'step_sequencer.cc',
         'strip_silence.cc',
         'system_exec.cc',
         'revision.cc',

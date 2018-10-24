@@ -33,6 +33,7 @@
 #include "ardour/midi_buffer.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
+#include "ardour/step_sequencer.h"
 
 using std::cerr;
 using std::endl;
@@ -43,6 +44,7 @@ MultiAllocSingleReleasePool BeatBox::Event::pool (X_("beatbox events"), sizeof (
 
 BeatBox::BeatBox (Session& s)
 	: Processor (s, _("BeatBox"))
+	, _sequencer (0)
 	, _start_requested (false)
 	, _running (false)
 	, _measures (2)
@@ -61,10 +63,12 @@ BeatBox::BeatBox (Session& s)
 	, remove_queue (64)
 {
 	_display_to_user = true;
+	_sequencer = new StepSequencer (1, 32);
 }
 
 BeatBox::~BeatBox ()
 {
+	delete _sequencer;
 }
 
 void

@@ -39,6 +39,7 @@ namespace ARDOUR {
 
 class Source;
 class SMFSource;
+class StepSequencer;
 
 typedef uint64_t superclock_t;
 
@@ -50,6 +51,8 @@ class BeatBox : public ARDOUR::Processor {
   public:
 	BeatBox (ARDOUR::Session& s);
 	~BeatBox ();
+
+	StepSequencer& sequencer() const { return *_sequencer; }
 
 	void run (BufferSet& /*bufs*/, samplepos_t /*start_frame*/, samplepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
 	void silence (samplecnt_t nframes, samplepos_t start_frame);
@@ -82,6 +85,7 @@ class BeatBox : public ARDOUR::Processor {
 	bool fill_source (boost::shared_ptr<Source>);
 
   private:
+	StepSequencer* _sequencer;
 	bool _start_requested;
 	bool _running;
 	int   _measures;
