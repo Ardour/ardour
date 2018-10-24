@@ -99,6 +99,7 @@ class BeatBox : public ARDOUR::Processor {
 
 	int _sample_rate;
 	superclock_t whole_note_superclocks;
+	superclock_t tick_superclocks;
 	superclock_t beat_superclocks;
 	superclock_t measure_superclocks;
 	int _quantize_divisor;

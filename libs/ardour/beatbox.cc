@@ -29,6 +29,7 @@
 
 #include "evoral/midi_events.h"
 
+#include "ardour/audioengine.h"
 #include "ardour/beatbox.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/session.h"
@@ -55,6 +56,7 @@ BeatBox::BeatBox (Session& s)
 	, superclock_cnt (0)
 	, last_start (0)
 	, whole_note_superclocks (0)
+	, tick_superclocks (0)
 	, beat_superclocks (0)
 	, measure_superclocks (0)
 	, _quantize_divisor (4)
@@ -76,7 +78,10 @@ BeatBox::compute_tempo_clocks ()
 {
 	whole_note_superclocks = (superclock_ticks_per_second * 60) / (_tempo / _meter_beat_type);
 	beat_superclocks = whole_note_superclocks / _meter_beat_type;
+	tick_superclocks = beat_superclocks / Timecode::BBT_Time::ticks_per_beat;
 	measure_superclocks = beat_superclocks * _meter_beats;
+
+	_sequencer->set_tempo (_tempo, AudioEngine::instance()->sample_rate());
 }
 
 void
@@ -160,13 +165,17 @@ BeatBox::run (BufferSet& bufs, samplepos_t /*start_frame*/, samplepos_t /*end_fr
 	process_start %= loop_length;
 	process_end   %= loop_length;
 
+	Timecode::BBT_Time start = last_time;
+
 	last_time.bars = (process_end / measure_superclocks);
 	last_time.beats = ((process_end - (last_time.bars * measure_superclocks)) / beat_superclocks);
-	last_time.ticks = 0; /* XXX fix me */
+	last_time.ticks = (process_end - (last_time.bars * measure_superclocks) - (last_time.beats * beat_superclocks)) / tick_superclocks;
 
 	/* change to 1-base */
 	last_time.bars++;
 	last_time.beats++;
+
+	std::cerr << "run " << process_start << " .. " << process_end << " => " << start << " .. " << last_time << endl;
 
 	bool two_pass_required;
 	superclock_t offset = 0;
@@ -322,6 +331,8 @@ BeatBox::run (BufferSet& bufs, samplepos_t /*start_frame*/, samplepos_t /*end_fr
 
 	/* Output */
 
+#if 0
+
 	for (Events::iterator ee = _current_events.begin(); ee != _current_events.end(); ) {
 		Event* e = (*ee);
 		if ((e->once <= 1) && e->size && (e->time >= process_start && e->time < process_end)) {
@@ -358,6 +369,9 @@ BeatBox::run (BufferSet& bufs, samplepos_t /*start_frame*/, samplepos_t /*end_fr
 			ee = n;
 		}
 	}
+#endif
+
+	_sequencer->run (buf, start, last_time);
 
 	superclock_cnt += superclocks;
 
