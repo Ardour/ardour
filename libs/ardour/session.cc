@@ -5639,6 +5639,7 @@ Session::graph_reordered ()
 	/* force all diskstreams to update their capture offset values to
 	 * reflect any changes in latencies within the graph.
 	 */
+	Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 	update_route_latency (false, true);
 }
 

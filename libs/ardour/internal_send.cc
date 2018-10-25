@@ -250,6 +250,8 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 	_amp->setup_gain_automation (start_sample, end_sample, nframes);
 	_amp->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
+	set_delay_extra (_delay_control->get_value ());
+
 	_send_delay->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */

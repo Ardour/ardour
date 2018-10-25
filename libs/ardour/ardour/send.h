@@ -48,6 +48,7 @@ public:
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
 	boost::shared_ptr<GainControl> gain_control() const { return _gain_control; }
+	boost::shared_ptr<AutomationControl> delay_control() const { return _delay_control; }
 
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
@@ -72,6 +73,10 @@ public:
 	samplecnt_t get_delay_out () const { return _delay_out; }
 	samplecnt_t signal_latency () const;
 
+	/* custom user-set delay */
+	samplecnt_t get_delay_extra () const { return _delay_extra; }
+	void set_delay_extra (samplecnt_t);
+
 	static PBD::Signal0<void> ChangedLatency;
 
 	void activate ();
@@ -87,6 +92,7 @@ protected:
 
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;
+	boost::shared_ptr<AutomationControl> _delay_control;
 	boost::shared_ptr<Amp> _amp;
 	boost::shared_ptr<PeakMeter> _meter;
 	boost::shared_ptr<DelayLine> _send_delay;
@@ -107,6 +113,7 @@ private:
 
 	samplecnt_t _delay_in;
 	samplecnt_t _delay_out;
+	samplecnt_t _delay_extra;
 	bool       _remove_on_disconnect;
 };
 

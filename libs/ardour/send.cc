@@ -82,6 +82,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	, _metering (false)
 	, _delay_in (0)
 	, _delay_out (0)
+	, _delay_extra (0)
 	, _remove_on_disconnect (false)
 {
 	if (_role == Listen) {
@@ -96,6 +97,15 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation)));
 	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(GainAutomation), gl));
 	add_control (_gain_control);
+
+	ParameterDescriptor dd;
+	dd.normal = 0;
+	dd.lower = 0;
+	dd.upper = _session.nominal_sample_rate () / 10; // max: 100ms
+
+	boost::shared_ptr<AutomationList> dl (new AutomationList (Evoral::Parameter (PluginAutomation)));
+	_delay_control = boost::shared_ptr<AutomationControl> (new AutomationControl (_session, Evoral::Parameter(PluginAutomation), dd, dl, "Delay"));
+	add_control (_delay_control);
 
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
@@ -168,10 +178,10 @@ Send::update_delaylines ()
 	bool changed;
 	if (_delay_out > _delay_in) {
 		changed = _thru_delay->set_delay(_delay_out - _delay_in);
-		_send_delay->set_delay(0);
+		_send_delay->set_delay(_delay_extra);
 	} else {
 		changed = _thru_delay->set_delay(0);
-		_send_delay->set_delay(_delay_in - _delay_out);
+		_send_delay->set_delay(_delay_extra + _delay_in - _delay_out);
 	}
 
 	if (changed) {
@@ -212,6 +222,17 @@ Send::set_delay_out (samplecnt_t delay)
 }
 
 void
+Send::set_delay_extra (samplecnt_t delay)
+{
+	if (_delay_extra == delay) {
+		return;
+	}
+	_delay_extra = delay;
+	printf ("SET EXTRA DELAT %d\n", _delay_extra);
+	update_delaylines ();
+}
+
+void
 Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
@@ -239,6 +260,8 @@ Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, do
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
 	_amp->setup_gain_automation (start_sample, end_sample, nframes);
 	_amp->run (sendbufs, start_sample, end_sample, speed, nframes, true);
+
+	set_delay_extra (_delay_control->get_value ());
 
 	_send_delay->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 

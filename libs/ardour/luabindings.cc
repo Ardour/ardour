@@ -1398,6 +1398,8 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <Send, Delivery> ("Send")
 		.addFunction ("get_delay_in", &Send::get_delay_in)
 		.addFunction ("get_delay_out", &Send::get_delay_out)
+		.addFunction ("get_delay_extra", &Send::get_delay_extra)
+		.addFunction ("set_delay_extra", &Send::set_delay_extra)
 		.endClass ()
 
 		.deriveWSPtrClass <InternalSend, Send> ("InternalSend")
