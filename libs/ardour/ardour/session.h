@@ -1540,6 +1540,8 @@ private:
 		ChanCount output_offset;
 	};
 
+	Glib::Threads::Mutex  _update_latency_lock;
+
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
 	Glib::Threads::Mutex  _auto_connect_queue_lock;
 	AutoConnectQueue _auto_connect_queue;

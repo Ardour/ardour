@@ -6944,6 +6944,17 @@ Session::update_latency_compensation (bool force_whole_graph)
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
+	/* this lock is not usually contended, but under certain conditions,
+	 * update_latency_compensation may be called concurrently.
+	 * e.g. drag/drop copy a latent plugin while rolling.
+	 * GUI thread (via route_processors_changed) and
+	 * auto_connect_thread_run may race.
+	 */
+	Glib::Threads::Mutex::Lock lx (_update_latency_lock, Glib::Threads::TRY_LOCK);
+	if (!lx.locked()) {
+		/* no need to do this twice */
+		return;
+	}
 
 	bool some_track_latency_changed = update_route_latency (false, false);
 
