@@ -960,6 +960,7 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 			break;
 		case 0:
 			level_meter->set_meter_type (type);
+			break;
 		default:
 			if (what == _strip_type) {
 				level_meter->set_meter_type (type);

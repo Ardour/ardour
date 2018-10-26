@@ -2684,7 +2684,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				// no break
+				/* fall through */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;
@@ -2880,7 +2880,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				// no break
+				/* fall through */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;

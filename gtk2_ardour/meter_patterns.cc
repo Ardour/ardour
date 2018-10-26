@@ -515,7 +515,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(  3, 1.0));
 					points.insert (std::pair<float,float>(  4, 0.5));
 					points.insert (std::pair<float,float>(  5, 0.5));
-					// no break
+					/* fall through */
 				case MeterPeak0dB:
 					points.insert (std::pair<float,float>(-60, 0.5));
 					points.insert (std::pair<float,float>(-50, 1.0));
@@ -750,11 +750,13 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>( -5.0f, "+15"));
 					points.insert (std::pair<float,string>(  0.0f, "+20"));
 					break;
-				default:
 				case MeterPeak:
+					/* fall through */
 				case MeterKrms:
+					/* fall through */
+				default:
 					points.insert (std::pair<float,string>(  3.0f, "+3"));
-					// no break
+					/* fall through */
 				case MeterPeak0dB:
 					points.insert (std::pair<float,string>(-50.0f, "-50"));
 					points.insert (std::pair<float,string>(-40.0f, "-40"));
@@ -890,6 +892,7 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 						points.insert (std::pair<float,string>( 72, "72"));
 						points.insert (std::pair<float,string>(112, "112"));
 						points.insert (std::pair<float,string>(127, "127"));
+						break;
 					case 4:
 						/* labels that don't overlay with 0dBFS*/
 						points.insert (std::pair<float,string>(  0, "0"));
