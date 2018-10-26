@@ -1258,7 +1258,7 @@ LuaPluginInfo::load (Session& session)
 
 	try {
 		script = Glib::file_get_contents (path);
-	} catch (Glib::FileError err) {
+	} catch (Glib::FileError const& err) {
 		return PluginPtr ();
 	}
 

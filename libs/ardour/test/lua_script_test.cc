@@ -32,7 +32,7 @@ LuaScriptTest::session_script_test ()
 
 		try {
 			script = Glib::file_get_contents (spi->path);
-		} catch (Glib::FileError e) {
+		} catch (Glib::FileError const& e) {
 			CPPUNIT_FAIL ("Cannot read script file");
 			continue;
 		}

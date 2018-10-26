@@ -1114,7 +1114,7 @@ Gtkmm2ext::add_volume_shortcuts (Gtk::FileChooser& c)
 			}
 		}
 	}
-	catch (Glib::FileError& e) {
+	catch (Glib::FileError const& e) {
 		std::cerr << "listing /Volumnes failed: " << e.what() << std::endl;
 	}
 #endif
