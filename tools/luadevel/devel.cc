@@ -154,7 +154,8 @@ class LuaTableRef {
 							}
 							// invalid userdata -- fall through
 						}
-						// no break
+
+						/* fall through */
 					case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
 					case LUA_TTABLE: // no nested tables, sorry.
 					case LUA_TNIL: // fallthrough
