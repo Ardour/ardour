@@ -55,7 +55,7 @@ AudioPlaylistImportHandler::AudioPlaylistImportHandler (XMLTree const & source, 
 		if ( !type || type->value() == "audio" ) {
 			try {
 				elements.push_back (ElementPtr ( new AudioPlaylistImporter (source, session, *this, **it)));
-			} catch (failed_constructor err) {
+			} catch (failed_constructor const&) {
 				set_dirty();
 			}
 		}

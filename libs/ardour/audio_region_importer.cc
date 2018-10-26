@@ -62,7 +62,7 @@ AudioRegionImportHandler::create_regions_from_children (XMLNode const & node, El
 		if (!(*it)->name().compare ("Region") && (!type || type->value() == "audio") ) {
 			try {
 				list.push_back (ElementPtr ( new AudioRegionImporter (source, session, *this, **it)));
-			} catch (failed_constructor err) {
+			} catch (failed_constructor const&) {
 				set_dirty();
 			}
 		}
