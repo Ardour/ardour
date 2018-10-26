@@ -1126,7 +1126,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("combine", &Playlist::combine)
 		.addFunction ("uncombine", &Playlist::uncombine)
 		.addFunction ("split_region", &Playlist::split_region)
-		.addFunction ("split", (void (Playlist::*)(samplepos_t))&Playlist::split)
+		//.addFunction ("split", &Playlist::split) // XXX needs MusicSample
 		.addFunction ("cut", (boost::shared_ptr<Playlist> (Playlist::*)(std::list<AudioRange>&, bool))&Playlist::cut)
 #if 0
 		.addFunction ("copy", &Playlist::copy)
@@ -2478,7 +2478,7 @@ LuaBindings::dsp (lua_State* L)
 		.addFunction ("silence", &AudioBuffer::silence)
 		.addFunction ("apply_gain", &AudioBuffer::apply_gain)
 		.addFunction ("check_silence", &AudioBuffer::check_silence)
-		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, samplecnt_t, samplecnt_t, samplecnt_t))&AudioBuffer::check_silence)
+		.addFunction ("read_from", (void (AudioBuffer::*)(const Sample*, samplecnt_t, samplecnt_t, samplecnt_t))&AudioBuffer::read_from)
 		.endClass()
 
 		.beginClass <MidiBuffer> ("MidiBuffer")
