@@ -206,10 +206,12 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 		return false;
 	}
 	std::ostringstream n;
-	if (n_audio > 0 || n_midi > 0) {
-		n << "Sidechain " << Session::next_name_id ();
-	} else {
+	if (n_audio == 0 && n_midi == 0) {
 		n << "TO BE RESET FROM XML";
+	} else if (owner()) {
+		n << "SC " << owner()->name() << "/" << name() << " " << Session::next_name_id ();
+	} else {
+		n << "tobeRenamed";
 	}
 	SideChain *sc = new SideChain (_session, n.str ());
 	_sidechain = boost::shared_ptr<SideChain> (sc);
@@ -235,6 +237,25 @@ PluginInsert::del_sidechain ()
 	_sc_capture_latency = 0;
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return true;
+}
+
+void
+PluginInsert::update_sidechain_name ()
+{
+	if (!_sidechain) {
+		return;
+	}
+
+	std::ostringstream n;
+
+	n << "SC ";
+	if (owner()) {
+		n << owner()->name() << "/";
+	}
+
+	n << name() << " " << Session::next_name_id ();
+
+	_sidechain->set_name (n.str());
 }
 
 void

@@ -170,6 +170,7 @@ public:
 	bool set_preset_out (const ChanCount&);
 	bool add_sidechain  (uint32_t n_audio = 1, uint32_t n_midi = 0);
 	bool del_sidechain ();
+	void update_sidechain_name ();
 	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
 	// end C++ class slavery!
 

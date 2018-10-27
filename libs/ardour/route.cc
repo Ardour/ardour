@@ -849,6 +849,11 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		processor->activate ();
 	}
 
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	if (pi) {
+		pi->update_sidechain_name ();
+	}
+
 	return 0;
 }
 
@@ -4268,6 +4273,14 @@ Route::set_name (const string& str)
 	}
 
 	SessionObject::set_name (newname);
+
+	for (uint32_t n = 0 ; ; ++n) {
+		boost::shared_ptr<PluginInsert> pi = boost::static_pointer_cast<PluginInsert> (nth_plugin (n));
+		if (!pi) {
+			break;
+		}
+		pi->update_sidechain_name ();
+	}
 
 	bool ret = (_input->set_name(newname) && _output->set_name(newname));
 
