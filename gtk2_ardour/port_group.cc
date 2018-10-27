@@ -30,9 +30,11 @@
 #include "ardour/io_processor.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/sidechain.h"
 #include "ardour/user_bundle.h"
 
 #include "control_protocol/control_protocol.h"
@@ -337,6 +339,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> sidechain (new PortGroup (string_compose (_("%1 Sidechains"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
 	boost::shared_ptr<PortGroup> program (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
@@ -396,6 +399,25 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					g->add_bundle ((*j)->bundle(), *j, tv->color ());
 				} else {
 					g->add_bundle ((*j)->bundle(), *j);
+				}
+			}
+		}
+
+		/* When on input side, let's look for sidechains in the route's plugins
+		   to display them right next to their route */
+		for (uint32_t n = 0; inputs; ++n) {
+			boost::shared_ptr<Processor> p = (i->route)->nth_plugin (n);
+			if (!p) {
+				break;
+			}
+			boost::shared_ptr<SideChain> sc = boost::static_pointer_cast<PluginInsert> (p)->sidechain ();
+
+			if (sc) {
+				boost::shared_ptr<IO> io = sc->input();
+				if (tv) {
+					sidechain->add_bundle (io->bundle(), io, tv->color ());
+				} else {
+					sidechain->add_bundle (io->bundle(), io);
 				}
 			}
 		}
@@ -528,6 +550,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
 			    !track->has_port(p) &&
+			    !sidechain->has_port(p) &&
 			    !program->has_port(p) &&
 			    !other->has_port(p)) {
 
@@ -646,6 +669,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	add_group_if_not_empty (other);
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
+	add_group_if_not_empty (sidechain);
 	add_group_if_not_empty (program);
 	add_group_if_not_empty (system);
 
