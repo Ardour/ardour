@@ -2033,6 +2033,7 @@ PluginPinDialog::add_processor (boost::weak_ptr<Processor> p)
 #endif
 	if (pi) {
 		ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
+		ppw.back()->set_session (_session);
 		vbox->pack_start (*ppw.back());
 	} else {
 		HBox* hbox = manage (new HBox ());
