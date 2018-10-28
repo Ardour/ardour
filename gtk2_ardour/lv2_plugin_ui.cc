@@ -100,6 +100,9 @@ LV2PluginUI::touch(void*    controller,
 	if (port_index >= me->_controllables.size()) {
 		return;
 	}
+	if (!me->_lv2->parameter_is_control(port_index) || !me->_lv2->parameter_is_input(port_index)) {
+		return;
+	}
 
 	ControllableRef control = me->_controllables[port_index];
 	if (grabbed) {
