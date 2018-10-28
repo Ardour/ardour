@@ -711,6 +711,11 @@ Menu *
 ProcessorEntry::build_controls_menu ()
 {
 	using namespace Menu_Helpers;
+
+	if (!_plugin_display && _controls.empty ()) {
+		return NULL;
+	}
+
 	Menu* menu = manage (new Menu);
 	MenuList& items = menu->items ();
 
@@ -719,6 +724,11 @@ ProcessorEntry::build_controls_menu ()
 		Gtk::CheckMenuItem* c = dynamic_cast<Gtk::CheckMenuItem*> (&items.back ());
 		c->set_active (_plugin_display->is_visible ());
 		c->signal_toggled().connect (sigc::mem_fun (*this, &ProcessorEntry::toggle_inline_display_visibility));
+	}
+
+	if (_controls.empty ()) {
+		return menu;
+	} else {
 		items.push_back (SeparatorElem ());
 	}
 
@@ -730,9 +740,7 @@ ProcessorEntry::build_controls_menu ()
 		MenuElem (_("Hide All Controls"), sigc::mem_fun (*this, &ProcessorEntry::hide_all_controls))
 		);
 
-	if (!_controls.empty ()) {
-		items.push_back (SeparatorElem ());
-	}
+	items.push_back (SeparatorElem ());
 
 	for (list<Control*>::iterator i = _controls.begin(); i != _controls.end(); ++i) {
 		items.push_back (CheckMenuElemNoMnemonic ((*i)->name ()));
