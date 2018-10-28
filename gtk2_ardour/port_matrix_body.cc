@@ -43,7 +43,7 @@ PortMatrixBody::PortMatrixBody (PortMatrix* p)
 	  _ignore_component_size_changed (false)
 {
 	_column_labels = new PortMatrixColumnLabels (p, this);
-	_row_labels = new PortMatrixRowLabels (p, this);
+	_row_labels = new PortMatrixRowLabels (p, this, *_column_labels);
 	_grid = new PortMatrixGrid (p, this);
 
 	_components.push_back (_column_labels);
