@@ -223,6 +223,10 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 
 			std::string label = _processor->describe_parameter (*i);
 
+			if (label == X_("hidden")) {
+				continue;
+			}
+
 			if (boost::dynamic_pointer_cast<Send> (_processor)) {
 				label = _("Send");
 			} else if (boost::dynamic_pointer_cast<Return> (_processor)) {
