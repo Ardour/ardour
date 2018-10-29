@@ -22,6 +22,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/separator.h>
 #include <gtkmm/table.h>
 
@@ -302,6 +303,16 @@ PluginPinWidget::idle_update ()
 {
 	plugin_reconfigured ();
 	return false;
+}
+
+void
+PluginPinWidget::error_message_dialog (std::string const& msg) const
+{
+	assert (_session);
+	Gtk::MessageDialog d (
+			_session->actively_recording () ? _("Cannot perform operation while actively recording.") : msg
+			, false, Gtk::MESSAGE_WARNING, Gtk::BUTTONS_OK, true);
+	d.run();
 }
 
 
@@ -1555,14 +1566,15 @@ PluginPinWidget::handle_disconnect (const CtrlElem &e, bool no_signal)
 void
 PluginPinWidget::toggle_sidechain ()
 {
-	if (_session && _session->actively_recording ()) { return; }
-	_route ()->add_remove_sidechain (_pi, !_pi->has_sidechain ());
+	if (!_route ()->add_remove_sidechain (_pi, !_pi->has_sidechain ())) {
+		error_message_dialog (_("Failed to toggle sidechain."));
+	}
 }
 
 void
 PluginPinWidget::connect_sidechain ()
 {
-	if (!_session) { return; }
+	assert (_session);
 
 	if (_sidechain_selector == 0) {
 		_sidechain_selector = new IOSelectorWindow (_session, _pi->sidechain_input ());
@@ -1578,10 +1590,14 @@ PluginPinWidget::connect_sidechain ()
 void
 PluginPinWidget::reset_configuration ()
 {
+	bool rv;
 	if (_set_config.get_active ()) {
-		_route ()->reset_plugin_insert (_pi);
+		rv = _route ()->reset_plugin_insert (_pi);
 	} else {
-		_route ()->customize_plugin_insert (_pi, _n_plugins, _out, _sinks);
+		rv = _route ()->customize_plugin_insert (_pi, _n_plugins, _out, _sinks);
+	}
+	if (!rv) {
+		error_message_dialog (_("Failed to reset plugin configuration."));
 	}
 }
 
@@ -1594,47 +1610,56 @@ PluginPinWidget::reset_mapping ()
 void
 PluginPinWidget::select_output_preset (uint32_t n_audio)
 {
-	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out (DataType::AUDIO, n_audio);
-	_route ()->plugin_preset_output (_pi, out);
+	if (!_route ()->plugin_preset_output (_pi, out)) {
+		error_message_dialog (_("Failed to change channel preset."));
+	}
 }
 
 void
 PluginPinWidget::add_remove_plugin_clicked (bool add)
 {
-	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
 	ChanCount sinks = _sinks;
 	assert (add || _n_plugins > 0);
-	_route ()->customize_plugin_insert (_pi, _n_plugins + (add ? 1 : -1), out, sinks);
+	if (!_route ()->customize_plugin_insert (_pi, _n_plugins + (add ? 1 : -1), out, sinks)) {
+		error_message_dialog (_("Failed to change instance count"));
+	}
 }
 
 void
 PluginPinWidget::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 {
-	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
 	ChanCount sinks = _sinks;
 	assert (add || out.get (dt) > 0);
 	out.set (dt, out.get (dt) + (add ? 1 : -1));
-	_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks);
+	if (!_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks)) {
+		error_message_dialog (_("Failed to alter plugin output configuration."));
+	}
 }
 
 void
 PluginPinWidget::add_remove_inpin_clicked (bool add, ARDOUR::DataType dt)
 {
-	if (_session && _session->actively_recording ()) { return; }
 	ChanCount out = _out;
 	ChanCount sinks = _sinks;
 	assert (add || sinks.get (dt) > 0);
 	sinks.set (dt, sinks.get (dt) + (add ? 1 : -1));
-	_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks);
+	if (!_route ()->customize_plugin_insert (_pi, _n_plugins, out, sinks)) {
+		error_message_dialog (_("Failed to alter plugin input configuration."));
+	}
 }
 
 void
 PluginPinWidget::add_sidechain_port (DataType dt)
 {
-	if (_session && _session->actively_recording ()) { return; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return;
+	}
+
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io) {
 		return;
@@ -1648,7 +1673,11 @@ PluginPinWidget::add_sidechain_port (DataType dt)
 void
 PluginPinWidget::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
-	if (_session && _session->actively_recording ()) { return; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return;
+	}
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io || !p) {
@@ -1660,7 +1689,12 @@ PluginPinWidget::remove_port (boost::weak_ptr<ARDOUR::Port> wp)
 void
 PluginPinWidget::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 {
-	if (_session && _session->actively_recording ()) { return; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::Port> p = wp.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
 	if (!io || !p) {
@@ -1672,7 +1706,12 @@ PluginPinWidget::disconnect_port (boost::weak_ptr<ARDOUR::Port> wp)
 void
 PluginPinWidget::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_ptr<ARDOUR::Port> wp1)
 {
-	if (_session && _session->actively_recording ()) { return; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return;
+	}
+
 	boost::shared_ptr<ARDOUR::Port> p0 = wp0.lock ();
 	boost::shared_ptr<ARDOUR::Port> p1 = wp1.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
@@ -1688,11 +1727,16 @@ PluginPinWidget::connect_port (boost::weak_ptr<ARDOUR::Port> wp0, boost::weak_pt
 void
 PluginPinWidget::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_ptr<ARDOUR::Route> wr)
 {
-	if (_session && _session->actively_recording ()) { return; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return;
+	}
+
 	boost::shared_ptr<Port> p = wp.lock ();
 	boost::shared_ptr<Route> r = wr.lock ();
 	boost::shared_ptr<IO> io = _pi->sidechain_input ();
-	if (!p || !r || !io || !_session) {
+	if (!p || !r || !io) {
 		return;
 	}
 
@@ -1733,7 +1777,12 @@ PluginPinWidget::add_send_from (boost::weak_ptr<ARDOUR::Port> wp, boost::weak_pt
 bool
 PluginPinWidget::sc_input_release (GdkEventButton *ev)
 {
-	if (_session && _session->actively_recording ()) { return false; }
+	assert (_session);
+	if (_session->actively_recording ()) {
+		error_message_dialog (/* unused */ "");
+		return false;
+	}
+
 	if (ev->button == 3) {
 		connect_sidechain ();
 	}
@@ -1744,8 +1793,11 @@ bool
 PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Port> wp)
 {
 	using namespace Menu_Helpers;
-	if (!_session || _session->actively_recording ()) { return false; }
-	if (!_session->engine ().connected ()) { return false; }
+	assert (_session);
+	if (_session->actively_recording () || !_session->engine ().connected ()) {
+		error_message_dialog (_("Port Connections are only available with active Audio/MIDI system."));
+		return false;
+	}
 
 	if (ev->button == 1) {
 		MenuList& citems = input_menu.items ();
