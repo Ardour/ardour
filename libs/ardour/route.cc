@@ -2168,6 +2168,10 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 bool
 Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
+
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -2230,6 +2234,10 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 bool
 Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
+
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -2276,6 +2284,9 @@ Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 bool
 Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
