@@ -620,6 +620,7 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/eq_freq"), "if", sel_eq_freq);
 		REGISTER_CALLBACK (serv, X_("/select/eq_q"), "if", sel_eq_q);
 		REGISTER_CALLBACK (serv, X_("/select/eq_shape"), "if", sel_eq_shape);
+		REGISTER_CALLBACK (serv, X_("/select/add_personal_send"), "s", sel_new_personal_send);
 
 		/* These commands require the route index in addition to the arg; TouchOSC (et al) can't use these  */
 		REGISTER_CALLBACK (serv, X_("/strip/mute"), "ii", route_mute);
@@ -4274,6 +4275,67 @@ OSC::sel_comment (char *newcomment, lo_message msg) {
 }
 
 int
+OSC::sel_new_personal_send (char *listener, lo_message msg)
+{
+	OSCSurface *sur = get_surface(get_address (msg));
+	boost::shared_ptr<Stripable> s;
+	s = sur->select;
+	boost::shared_ptr<Route> rt = boost::shared_ptr<Route> ();
+	if (s) {
+		rt = boost::dynamic_pointer_cast<Route> (s);
+		if (!rt) {
+			PBD::warning << "OSC: can not send from VCAs." << endmsg;
+			return -1;
+		}
+	}
+	/* if a listenbus called listener exists use it
+	 * other wise create create it. Then create a personal send from
+	 * this route to that bus.
+	 */
+	string listenbus = listener;
+	string listen_name = listenbus;
+	if (listenbus.find ("- monitor") == string::npos) {
+		listen_name = string_compose ("%1 - monitor", listenbus);
+	}
+	boost::shared_ptr<Route> lsn_rt = session->route_by_name (listen_name);
+	if (!lsn_rt) {
+		// doesn't exist but check if raw name does and is listenbus
+		boost::shared_ptr<Route> raw_rt = session->route_by_name (listenbus);
+		if (raw_rt && raw_rt->is_listenbus()) {
+			lsn_rt = raw_rt;
+		} else {
+			// create the listenbus
+			RouteList list = session->new_audio_route (2, 2, 0, 1, listen_name, PresentationInfo::ListenBus, (uint32_t) -1);
+			lsn_rt = *(list.begin());
+			lsn_rt->presentation_info().set_hidden (true);
+			session->set_dirty();
+		}
+	}
+	if (lsn_rt) {
+		//boost::shared_ptr<Route> rt_send = ;
+		if (rt && (lsn_rt != rt)) {
+			// make sure there isn't one already
+			bool s_only = true;
+			if (!rt->feeds (lsn_rt, &s_only)) {
+				// create send
+				rt->add_personal_send (lsn_rt);
+				//boost::shared_ptr<Send> snd = rt->internal_send_for (aux);
+				session->dirty ();
+				return 0;
+			} else {
+				PBD::warning << "OSC: new_send - duplicate send, ignored." << endmsg;
+			}
+		} else {
+			PBD::warning << "OSC: new_send - can't send to self." << endmsg;
+		}
+	} else {
+		PBD::warning << "OSC: new_send - no ListenBus to send to." << endmsg;
+	}
+
+	return -1;
+}
+
+int
 OSC::strip_group (int ssid, char *group, lo_message msg) {
 	if (!session) {
 		return -1;
@@ -6287,31 +6349,21 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 				sorted.push_back (s);
 			} else if (types[4] && boost::dynamic_pointer_cast<VCA>(s)) {
 				sorted.push_back (s);
+			} else  if (types[7] && s->is_listenbus()) {
+				sorted.push_back (s);
 			} else
 #ifdef MIXBUS
 			if (types[2] && Profile->get_mixbus() && s->mixbus()) {
 				sorted.push_back (s);
 			} else
-			if (types[7] && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
-				if (Profile->get_mixbus() && !s->mixbus()) {
-					sorted.push_back (s);
-				}
-			} else
 #endif
-			if ((types[2] || types[3] || types[7]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+			if ((types[2] || types[3]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					// note some older sessions will show midibuses as busses
-					if (r->direct_feeds_according_to_reality (session->master_out())) {
-						// this is a bus
-						if (types[2]) {
-							sorted.push_back (s);
-						}
-					} else {
-						// this is an Aux out
-						if (types[7]) {
-							sorted.push_back (s);
-						}
+					// this is a bus
+					if (types[2]) {
+						sorted.push_back (s);
 					}
 				} else if (types[3]) {
 						sorted.push_back (s);
@@ -6381,14 +6433,21 @@ OSC::cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo
 	else if (!strncmp (path, X_("/cue/new_aux"), 12)) {
 		// Create new Aux bus
 		string name = "";
-		string dest = "";
-		if (argc == 2 && types[0] == 's' && types[1] == 's') {
+		string dest_1 = "";
+		string dest_2 = "";
+		if (argc == 3 && types[0] == 's' && types[1] == 's' && types[2] == 's') {
 			name = &argv[0]->s;
-			dest = &argv[1]->s;
-			ret = cue_new_aux (name, dest, msg);
+			dest_1 = &argv[1]->s;
+			dest_2 = &argv[2]->s;
+			ret = cue_new_aux (name, dest_1, dest_2, msg);
+		} else if (argc == 2 && types[0] == 's' && types[1] == 's') {
+			name = &argv[0]->s;
+			dest_1 = &argv[1]->s;
+			dest_2 = dest_1;
+			ret = cue_new_aux (name, dest_1, dest_2, msg);
 		} else if (argc == 1 && types[0] == 's') {
 			name = &argv[0]->s;
-			ret = cue_new_aux (name, dest, msg);
+			ret = cue_new_aux (name, dest_1, dest_2, msg);
 		} else {
 			PBD::warning << "OSC: new_aux has wrong number or type of parameters." << endmsg;
 		}
@@ -6471,7 +6530,10 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 	s->strips = get_sorted_stripables(s->strip_types, s->cue, false, s->custom_strips);
 
 	s->nstrips = s->strips.size();
-
+	if (!s->nstrips) {
+		surface_destroy (s);
+		return 0;
+	}
 	if (aux < 1) {
 		aux = 1;
 	} else if (aux > s->nstrips) {
@@ -6506,23 +6568,28 @@ OSC::_cue_set (uint32_t aux, lo_address addr)
 }
 
 int
-OSC::cue_new_aux (string name, string dest, lo_message msg)
+OSC::cue_new_aux (string name, string dest_1, string dest_2, lo_message msg)
 {
 	// create a new bus named name - monitor
 	RouteList list;
 	boost::shared_ptr<Stripable> aux;
 	name = string_compose ("%1 - monitor", name);
-	list = session->new_audio_route (1, 1, 0, 1, name, PresentationInfo::AudioBus, (uint32_t) -1);
+	list = session->new_audio_route (2, 2, 0, 1, name, PresentationInfo::ListenBus, (uint32_t) -1);
 	aux = *(list.begin());
 	if (aux) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
-		r->output()->disconnect (this);
-		if (dest.size()) {
-			if (atoi( dest.c_str())) {
-				dest = string_compose ("system:playback_%1", dest);
+		if (dest_1.size()) {
+			if (atoi( dest_1.c_str())) {
+				dest_1 = string_compose ("system:playback_%1", dest_1);
+			}
+			if (atoi( dest_2.c_str())) {
+				dest_2 = string_compose ("system:playback_%1", dest_2);
 			}
 			PortSet& ports = r->output()->ports ();
-			r->output ()->connect (*(ports.begin()), dest, this);
+			PortSet::iterator i = ports.begin();
+			++i;
+			r->output ()->connect (*(ports.begin()), dest_1, this);
+			r->output ()->connect (*(i), dest_2, this);
 		}
 		aux->presentation_info().set_hidden (true);
 
@@ -6857,23 +6924,14 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 	StripableList stripables;
 
 	session->get_stripables (stripables);
-
-	// Look for stripables that have a send to aux
-	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-
-		boost::shared_ptr<Stripable> s = *it;
-		// we only want routes
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (s);
-		if (r) {
-			r->processors_changed.connect  (*this, MISSING_INVALIDATOR, boost::bind (&OSC::recalcbanks, this), this);
-			boost::shared_ptr<Send> snd = r->internal_send_for (boost::dynamic_pointer_cast<Route> (aux));
-			if (snd) { // test for send to aux
-				sorted.push_back (s);
-				s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::cue_set, this, id, msg), this);
-			}
+	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
+	Route::FedBy fed_by = aux_rt->fed_by();
+	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
+		if (i->sends_only) {
+			boost::shared_ptr<Stripable> s (i->r.lock());
+			sorted.push_back (s);
+			s->DropReferences.connect (*this, MISSING_INVALIDATOR, boost::bind (&OSC::cue_set, this, id, msg), this);
 		}
-
-
 	}
 	sort (sorted.begin(), sorted.end(), StripableByPresentationOrder());
 
