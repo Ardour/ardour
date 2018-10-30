@@ -957,6 +957,11 @@ AddRouteDialog::refill_channel_setups ()
 		}
 	}
 
+	if (!selected_default && ! trk_template_model->children().empty()) {
+		TreeModel::Children rows = trk_template_model->children();
+		trk_template_chooser.get_selection()->select(rows[0]);
+	}
+
 	std::vector<ARDOUR::TemplateInfo> route_templates;
 	ARDOUR::find_route_templates (route_templates);
 
