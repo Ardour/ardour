@@ -218,6 +218,8 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 		_processor->PropertyChanged.connect (name_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_property_changed, this, _1), gui_context());
 		_processor->ConfigurationChanged.connect (config_connection, invalidator (*this), boost::bind (&ProcessorEntry::processor_configuration_changed, this, _1, _2), gui_context());
 
+		const uint32_t limit_inline_controls = UIConfiguration::instance().get_max_inline_controls ();
+
 		set<Evoral::Parameter> p = _processor->what_can_be_automated ();
 		for (set<Evoral::Parameter>::iterator i = p.begin(); i != p.end(); ++i) {
 
@@ -240,6 +242,10 @@ ProcessorEntry::ProcessorEntry (ProcessorBox* parent, boost::shared_ptr<Processo
 			if (boost::dynamic_pointer_cast<Amp> (_processor) == 0) {
 				/* Add non-Amp (Fader & Trim) controls to the processor box */
 				_vbox.pack_start (c->box);
+			}
+
+			if (limit_inline_controls > 0 && _controls.size() >= limit_inline_controls) {
+				break;
 			}
 		}
 

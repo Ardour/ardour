@@ -3805,6 +3805,19 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
+	ComboOption<uint32_t>* mic = new ComboOption<uint32_t> (
+		     "max-inline-controls",
+		     _("Limit inline-mixer-strip controls per plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_inline_controls),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_inline_controls)
+		     );
+	mic->add (0, _("Unlimited"));
+	mic->add (16,  _("16 parameters"));
+	mic->add (32,  _("32 parameters"));
+	mic->add (64,  _("64 parameters"));
+	mic->add (128, _("128 parameters"));
+	add_option (_("Appearance/Mixer"), mic);
+
 	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
 
 	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
