@@ -434,6 +434,8 @@ PluginInsert::create_automatable_parameters ()
 	boost::shared_ptr<Plugin> plugin = _plugins.front();
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
+	const uint32_t limit_automatables = Config->get_limit_n_automatables ();
+
 	for (uint32_t i = 0; i < plugin->parameter_count(); ++i) {
 		if (!plugin->parameter_is_control (i)) {
 			continue;
@@ -452,7 +454,7 @@ PluginInsert::create_automatable_parameters ()
 
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
-		if (!automatable) {
+		if (!automatable || (limit_automatables > 0 && i > limit_automatables)) {
 			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
 		}
 		add_control (c);
