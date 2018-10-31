@@ -450,9 +450,6 @@ PluginInsert::create_automatable_parameters ()
 
 		const bool automatable = a.find(param) != a.end();
 
-		if (automatable) {
-			can_automate (param);
-		}
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable) {
