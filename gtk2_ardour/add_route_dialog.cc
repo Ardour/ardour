@@ -139,10 +139,8 @@ Use the settings, below, to create new Audio Tracks.\n \
 You may select:\n \
 * The number of buses to add.\n \
 * A Name for the track(s).\n \
-* An Instrument plugin (or select \"None\" to drive an external device)\n \
 * A Group which will be assigned to the track(s).\n \
 * Pin Connections mode. (see tooltip for details).\n \
-* Normal (non-destructive) or Tape (destructive) recording mode.\n \
 \n \
 The track will be added in the location specified by \"Position\".\n \
 ")
@@ -169,7 +167,7 @@ The track will be added in the location specified by \"Position\".\n \
 Use the settings, below, to create 1 or more VCA Master(s).\n \
 \n\n \
 You may select:\n \
-* The number of buses to add.\n \
+* The number of VCAs to add.\n \
 * A name for the new VCAs.  \"%n\" will be replaced by an index number for each VCA.\n \
 ")
 		));
