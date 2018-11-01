@@ -170,3 +170,115 @@ VSTPluginUI::configure_handler (GdkEventConfigure*)
 
 	return false;
 }
+
+bool
+VSTPluginUI::dispatch_effeditkey (GdkEventKey* gdk_key)
+{
+	int effopcode;
+	switch (gdk_key->type) {
+		case GDK_KEY_PRESS:
+			effopcode = 59; // effEditKeyDown
+			break;
+		case GDK_KEY_RELEASE:
+			effopcode = 60; // effEditKeyUp
+			break;
+		default:
+			return false;
+	}
+
+	/* see https://github.com/DISTRHO/DPF/blob/master/distrho/src/DistrhoPluginVST.cpp */
+	int special_key = 0;
+	int ascii_key = 0;
+
+	switch (gdk_key->keyval) {
+		case GDK_BackSpace:
+			special_key = 1;
+			break;
+		case GDK_Tab:
+		case GDK_KP_Tab:
+			special_key = 2;
+			break;
+		case GDK_Return:
+		case GDK_KP_Enter:
+			special_key = 4;
+			break;
+		case GDK_Escape:
+			special_key = 6;
+			break;
+		case GDK_KP_Space:
+			special_key = 7;
+			break;
+
+		case GDK_End:
+		case GDK_KP_End:
+			special_key = 9;
+			break;
+		case GDK_Home:
+		case GDK_KP_Home:
+			special_key = 10;
+			break;
+		case GDK_Left:
+			special_key = 11;
+			break;
+		case GDK_Up:
+			special_key = 12;
+			break;
+		case GDK_Right:
+			special_key = 13;
+			break;
+		case GDK_Down:
+			special_key = 14;
+			break;
+		case GDK_Page_Up:
+		case GDK_KP_Page_Up:
+			special_key = 15;
+			break;
+		case GDK_Page_Down:
+		case GDK_KP_Page_Down:
+			special_key = 16;
+		case GDK_Insert:
+			special_key = 21;
+			break;
+		case GDK_Delete:
+		case GDK_KP_Delete:
+			special_key = 22;
+			break;
+
+		case GDK_Shift_L:
+		case GDK_Shift_R:
+			special_key = 54;
+			break;
+		case GDK_Control_L:
+		case GDK_Control_R:
+			special_key = 55;
+			break;
+		case GDK_Alt_L:
+		case GDK_Alt_R:
+			special_key = 56;
+			break;
+
+		case GDK_F1:  special_key = 40; break;
+		case GDK_F2:  special_key = 41; break;
+		case GDK_F3:  special_key = 42; break;
+		case GDK_F4:  special_key = 43; break;
+		case GDK_F5:  special_key = 44; break;
+		case GDK_F6:  special_key = 45; break;
+		case GDK_F7:  special_key = 46; break;
+		case GDK_F8:  special_key = 47; break;
+		case GDK_F9:  special_key = 48; break;
+		case GDK_F10: special_key = 49; break;
+		case GDK_F11: special_key = 50; break;
+		case GDK_F12: special_key = 51; break;
+
+		default:
+			ascii_key = gdk_key->keyval;
+			break;
+	}
+
+	if (special_key > 0 || ascii_key > 0) {
+		VSTState* vstfx = _vst->state();
+		/* expect non-zero return if key was handled */
+		return 0 != vstfx->plugin->dispatcher (vstfx->plugin, effopcode, (int)ascii_key, (intptr_t)special_key, NULL, 0);
+	}
+	return false;
+}
