@@ -39,7 +39,7 @@ public:
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 
-	int  set_state(const XMLNode&, int version);
+	int set_state(const XMLNode&, int version);
 
 protected:
 	XMLNode& state ();

@@ -2763,10 +2763,16 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		// sidechain is a Processor (IO)
 		if ((*i)->name () ==  Processor::state_node_name) {
 			if (!_sidechain) {
-				add_sidechain (0);
+				if (regenerate_xml_or_string_ids ()) {
+					add_sidechain_from_xml (**i, version);
+				} else {
+					add_sidechain (0);
+				}
 			}
 			if (!regenerate_xml_or_string_ids ()) {
 				_sidechain->set_state (**i, version);
+			} else {
+				update_sidechain_name ();
 			}
 		}
 	}
@@ -3094,6 +3100,42 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 #endif
 
 	_plugins.push_back (plugin);
+}
+
+void
+PluginInsert::add_sidechain_from_xml (const XMLNode& node, int version)
+{
+	if (version < 3000) {
+		return;
+	}
+
+	XMLNodeList nlist = node.children();
+
+	if (nlist.size() == 0) {
+		return;
+	}
+
+	uint32_t audio = 0;
+	uint32_t midi = 0;
+
+	XMLNodeConstIterator it = nlist.front()->children().begin();
+	for ( ; it != nlist.front()->children().end(); ++ it) {
+		if ((*it)->name() == "Port") {
+			DataType type(DataType::NIL);
+			(*it)->get_property ("type", type);
+			if (type == DataType::AUDIO) {
+				++audio;
+			} else if (type == DataType::MIDI) {
+				++midi;
+			}
+		}
+	}
+
+	ChanCount in_cc = ChanCount();
+	in_cc.set (DataType::AUDIO, audio);
+	in_cc.set (DataType::MIDI, midi);
+
+	add_sidechain (audio, midi);
 }
 
 bool

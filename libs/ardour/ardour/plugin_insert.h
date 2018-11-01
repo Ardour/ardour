@@ -388,6 +388,8 @@ private:
 	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
 	void add_plugin (boost::shared_ptr<Plugin>);
 
+	void add_sidechain_from_xml (const XMLNode& node, int version);
+
 	void start_touch (uint32_t param_id);
 	void end_touch (uint32_t param_id);
 
