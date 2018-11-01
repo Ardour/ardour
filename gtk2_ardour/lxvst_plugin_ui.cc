@@ -141,10 +141,10 @@ LXVSTPluginUI::forward_key_event (GdkEventKey* gdk_key)
 	xev.xany.send_event = true; /* pretend we are using XSendEvent */
 	xev.xany.display = GDK_WINDOW_XDISPLAY (gdk_window->gobj());
 
-	if (!_vst->state()->eventProc) {
-		XSendEvent (xev.xany.display, xev.xany.window, TRUE, mask, &xev);
-	} else {
+	if (_vst->state()->eventProc) {
 		_vst->state()->eventProc (&xev);
+	} else if (!dispatch_effeditkey (gdk_key)) {
+		XSendEvent (xev.xany.display, xev.xany.window, TRUE, mask, &xev);
 	}
 }
 
