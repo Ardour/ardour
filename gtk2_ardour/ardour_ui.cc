@@ -2120,6 +2120,32 @@ ARDOUR_UI::session_add_audio_route (
 }
 
 void
+ARDOUR_UI::session_add_listen_bus (uint32_t how_many, string const & name_template)
+{
+	RouteList routes;
+
+	assert (_session);
+
+	try {
+		routes = _session->new_audio_route (2, 2, 0, how_many, name_template, PresentationInfo::ListenBus, -1);
+
+		if (routes.size() != how_many) {
+			error << string_compose (P_("could not create %1 new listen bus", "could not create %1 new listen busses", how_many), how_many)
+			      << endmsg;
+		}
+	}
+
+	catch (...) {
+		display_insufficient_ports_message ();
+		return;
+	}
+
+	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->set_strict_io (true);
+	}
+}
+
+void
 ARDOUR_UI::display_insufficient_ports_message ()
 {
 	MessageDialog msg (_main_window,
@@ -4397,6 +4423,9 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		break;
 	case AddRouteDialog::VCAMaster:
 		_session->vca_manager().create_vca (count, name_template);
+		break;
+	case AddRouteDialog::ListenBus:
+		session_add_listen_bus (count, name_template);
 		break;
 	}
 }

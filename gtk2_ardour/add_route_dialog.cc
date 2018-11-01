@@ -134,15 +134,15 @@ The track will be added in the location specified by \"Position\".\n \
 		));
 		builtin_types.push_back (
 			std::pair<string,string>(_("Audio Busses"),  _(" \
-Use the settings, below, to create new Audio Tracks.\n \
+Use the settings, below, to create new Audio Busses.\n \
 \n\n \
 You may select:\n \
-* The number of buses to add.\n \
-* A Name for the track(s).\n \
-* A Group which will be assigned to the track(s).\n \
+* The number of busses to add.\n \
+* A Name for the busses.\n \
+* A Group which will be assigned to the Busses.\n \
 * Pin Connections mode. (see tooltip for details).\n \
 \n \
-The track will be added in the location specified by \"Position\".\n \
+The Busses will be added in the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
@@ -150,16 +150,16 @@ The track will be added in the location specified by \"Position\".\n \
 Use the settings, below, to create new MIDI Busses.\n \
 \n \
 MIDI Busses can combine the output of multiple tracks. \n \
-MIDI Buses are sometimes used to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.  \
+MIDI Busses are sometimes used to host a single \"heavy\" instrument plugin which is fed from multiple MIDI tracks.  \
 \n\n \
 You may select:\n \
-* The number of buses to add.\n \
-* A Name for the track(s).\n \
+* The number of busses to add.\n \
+* A Name for the busses.\n \
 * An Instrument plugin (or select \"None\" to drive an external device)\n \
-* A Group which will be assigned to the track(s).\n \
+* A Group which will be assigned to the busses.\n \
 * Pin Connections mode. (see tooltip for details).\n \
 \n \
-The track will be added in the location specified by \"Position\".\n \
+The busses will be added in the location specified by \"Position\".\n \
 ")
 		));
 		builtin_types.push_back (
@@ -169,6 +169,17 @@ Use the settings, below, to create 1 or more VCA Master(s).\n \
 You may select:\n \
 * The number of VCAs to add.\n \
 * A name for the new VCAs.  \"%n\" will be replaced by an index number for each VCA.\n \
+")
+		));
+		builtin_types.push_back (
+			std::pair<string,string>(_("Listen Busses"),   _(" \
+Use the settings, below, to create new Listen Busses.\n \
+Listen Busses are used as master outputs for monitor channels which are fed by\n \
+hidden monitor sends.\n \
+\n\n \
+You may select:\n \
+* The number of Listen Busses to add.\n \
+* A name for the new Listen Busses.\n \
 ")
 		));
 	}
@@ -569,6 +580,8 @@ AddRouteDialog::type_wanted()
 		return AudioTrack;
 	} else if (str == _("VCA Masters")) {
 		return VCAMaster;
+	} else if (str == _("Listen Busses")) {
+		return ListenBus;
 	} else {
 		assert (0);
 		return AudioTrack;
@@ -595,6 +608,9 @@ AddRouteDialog::maybe_update_name_template_entry ()
 	case AudioBus:
 	case MidiBus:
 		name_template_entry.set_text (_("Bus"));
+		break;
+	case ListenBus:
+		name_template_entry.set_text (_("Listener"));
 		break;
 	case VCAMaster:
 		name_template_entry.set_text (VCA::default_name_template());
@@ -741,6 +757,27 @@ AddRouteDialog::track_type_chosen ()
 		insert_at_combo.set_sensitive (true);
 
 		break;
+	case ListenBus:
+
+		configuration_label.set_sensitive (false);
+		channel_combo.set_sensitive (false);
+
+		mode_label.set_sensitive (false);
+		mode_combo.set_sensitive (false);
+
+		instrument_label.set_sensitive (false);
+		instrument_combo.set_sensitive (false);
+
+		group_label.set_sensitive (false);
+		route_group_combo.set_sensitive (false);
+
+		strict_io_label.set_sensitive (false);
+		strict_io_combo.set_sensitive (false);
+
+		insert_label.set_sensitive (false);
+		insert_at_combo.set_sensitive (false);
+
+		break;
 	}
 
 	maybe_update_name_template_entry ();
@@ -840,6 +877,12 @@ AddRouteDialog::channels ()
 		ret.set (DataType::AUDIO, channel_count ());
 		ret.set (DataType::MIDI, 1);
 		break;
+
+	case ListenBus:
+		ret.set (DataType::AUDIO, 2);
+		ret.set (DataType::MIDI, 0);
+		break;
+
 	default:
 		break;
 	}
