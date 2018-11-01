@@ -530,17 +530,13 @@ bool vstfx_midi_input (VSTState* vstfx)
 {
 	AEffect* plugin = vstfx->plugin;
 
-	int const vst_version = plugin->dispatcher (plugin, effGetVstVersion, 0, 0, 0, 0.0f);
+	/* should we send it VST events (i.e. MIDI) */
 
-	if (vst_version >= 2) {
-		/* should we send it VST events (i.e. MIDI) */
-
-		if ((plugin->flags & effFlagsIsSynth)
-				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)
-				|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvents"), 0.0f) > 0)
-				) {
-			return true;
-		}
+	if ((plugin->flags & effFlagsIsSynth)
+			|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstEvents"), 0.0f) > 0)
+			|| (plugin->dispatcher (plugin, effCanDo, 0, 0, const_cast<char*> ("receiveVstMidiEvents"), 0.0f) > 0)
+		 ) {
+		return true;
 	}
 
 	return false;
