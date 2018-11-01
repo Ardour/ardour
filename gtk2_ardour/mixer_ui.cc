@@ -231,7 +231,6 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
-	favorite_plugins_display.set_tooltip_column (0);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginFavoritePtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.add_drop_targets (target_list);
@@ -240,6 +239,9 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.signal_drop.connect (sigc::mem_fun (*this, &Mixer_UI::plugin_drop));
 	favorite_plugins_display.signal_row_expanded().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
 	favorite_plugins_display.signal_row_collapsed().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		favorite_plugins_display.set_tooltip_column (0);
+	}
 	favorite_plugins_model->signal_row_has_child_toggled().connect (sigc::mem_fun (*this, &Mixer_UI::sync_treeview_favorite_ui_state));
 
 	favorite_plugins_scroller.add (favorite_plugins_display);

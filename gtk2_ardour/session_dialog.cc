@@ -722,11 +722,13 @@ SessionDialog::setup_new_session_page ()
 #ifdef MIXBUS
 	template_chooser.append_column (_("Modified With"), session_template_columns.modified_with_short);
 #endif
-	template_chooser.set_tooltip_column(4); // modified_with_long
 	template_chooser.set_headers_visible (true);
 	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
 	template_chooser.set_sensitive (true);
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		template_chooser.set_tooltip_column(4); // modified_with_long
+	}
 
 	session_new_vbox.pack_start (*template_hbox, true, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
@@ -952,7 +954,9 @@ SessionDialog::redisplay_recent_sessions ()
 		row[recent_session_columns.time_formatted] = gdt.format ("%F %H:%M");
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
+	}
 	recent_session_display.set_model (recent_session_model);
 
 	// custom sort

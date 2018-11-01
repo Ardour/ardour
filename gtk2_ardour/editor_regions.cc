@@ -187,8 +187,10 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
 
-	/* show path as the row tooltip */
-	_display.set_tooltip_column (14); /* path */
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		/* show path as the row tooltip */
+		_display.set_tooltip_column (14); /* path */
+	}
 
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
