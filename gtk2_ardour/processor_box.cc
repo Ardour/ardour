@@ -2034,7 +2034,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor ()) {
+	if (_route->is_monitor () || _route->is_listenbus ()) {
 		return 0;
 	}
 
