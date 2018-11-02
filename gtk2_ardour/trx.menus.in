@@ -24,7 +24,7 @@
         <menuitem action='goto-mark-8'/>
         <menuitem action='goto-mark-9'/>
 -->
-  
+
   <menubar name='Main' action='MainMenu'>
     <menu name='Session' action='Session'>
       <menuitem action='New'/>
@@ -44,7 +44,7 @@
         <menuitem action='CleanupUnused'/>
         <menuitem action='FlushWastebasket'/>
       </menu>
-#ifdef GTKOSX      
+#ifdef GTKOSX
       <menuitem action='toggle-about'/>
       <menuitem action='toggle-rc-options-editor'/>
 #endif
@@ -86,12 +86,12 @@
       <menuitem action='editor-cut'/>
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
-      <separator/>       
-      <menu action="SelectMenu">	   
+      <separator/>
+      <menu action="SelectMenu">
         <menuitem action='select-all'/>
         <menuitem action='deselect-all'/>
         <menuitem action='invert-selection'/>
-      </menu>	   
+      </menu>
       <separator/>
       <menuitem action='editor-delete'/>
       <menuitem action='editor-crop'/>
@@ -101,10 +101,10 @@
       <separator/>
       <menuitem action='toggle-rc-options-editor'/>
 #endif
-    </menu>         
+    </menu>
 
     <menu action='TrackMenu'>
-      <menuitem action='AddTrackBus'/>	
+      <menuitem action='AddTrackBus'/>
       <menuitem action="move-selected-tracks-up"/>
       <menuitem action="move-selected-tracks-down"/>
     </menu>
@@ -173,6 +173,8 @@
     <menuitem action='newinsert'/>
     <menuitem action='newsend'/>
     <menuitem action='newaux'/>
+    <menuitem action='newlisten'/>
+    <menuitem action='removelisten'/>
     <separator/>
     <menuitem action='controls'/>
     <menuitem action='send_options'/>
@@ -229,7 +231,7 @@
     <separator/>
     <menuitem action='addExternalAudioToRegionList'/>
     <separator/>
-    <menuitem action='removeUnusedRegions'/>    
+    <menuitem action='removeUnusedRegions'/>
   </popup>
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu'>
@@ -243,7 +245,7 @@
       <menuitem action='toggle-opaque-region'/>
       <menuitem action='toggle-region-mute'/>
       <menuitem action='pitch-shift-region'/>
-      <menuitem action='reverse-region'/>    
+      <menuitem action='reverse-region'/>
       <menuitem action='close-region-gaps'/>
       <menuitem action='place-transient' />
       <menuitem action='show-rhythm-ferret'/>
@@ -295,7 +297,7 @@
     <menu action='RegionMenuGain'>
       <menuitem action='normalize-region'/>
       <menuitem action='boost-region-gain'/>
-      <menuitem action='cut-region-gain'/>      		   
+      <menuitem action='cut-region-gain'/>
       <menuitem action='reset-region-gain-envelopes'/>
       <menuitem action='toggle-region-gain-envelope-active'/>
     </menu>
@@ -315,7 +317,7 @@
     <menuitem action='analyze-region'/>
     <separator/>
     <menuitem action='remove-region'/>
-    
+
   </popup>
 
 </ui>

@@ -2047,11 +2047,86 @@ ProcessorBox::build_possible_aux_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
+		if ((*r)->is_listenbus ()) {
+			continue;
+		}
 		if (_route->internal_send_for (*r)) {
 			/* aux-send to target already exists */
 			continue;
 		}
 		items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+	}
+
+	return menu;
+}
+
+Gtk::Menu*
+ProcessorBox::build_possible_listener_menu ()
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes_with_internal_returns();
+
+	if (rl->empty()) {
+		/* No aux sends if there are no busses */
+		return 0;
+	}
+
+	if (_route->is_monitor () || _route->is_listenbus ()) {
+		return 0;
+	}
+
+	using namespace Menu_Helpers;
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items();
+
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
+			/* don't allow sending to master or monitor or to self */
+			continue;
+		}
+		if (!(*r)->is_listenbus ()) {
+			continue;
+		}
+		if (_route->internal_send_for (*r)) {
+			/* aux-send to target already exists */
+			continue;
+		}
+		items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_choose_aux), boost::weak_ptr<Route>(*r))));
+	}
+
+	return menu;
+}
+
+Gtk::Menu*
+ProcessorBox::build_possible_remove_listener_menu ()
+{
+	boost::shared_ptr<RouteList> rl = _session->get_routes_with_internal_returns();
+
+	if (rl->empty()) {
+		/* No aux sends if there are no busses */
+		return 0;
+	}
+
+	if (_route->is_monitor () || _route->is_listenbus ()) {
+		return 0;
+	}
+
+	using namespace Menu_Helpers;
+	Menu* menu = manage (new Menu);
+	MenuList& items = menu->items();
+
+	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
+		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
+			/* don't allow sending to master or monitor or to self */
+			continue;
+		}
+		if (!(*r)->is_listenbus ()) {
+			continue;
+		}
+		if (!_route->internal_send_for (*r)) {
+			/* aux-send to target already exists */
+			continue;
+		}
+		items.push_back (MenuElemNoMnemonic ((*r)->name(), sigc::bind (sigc::ptr_fun (ProcessorBox::rb_remove_aux), boost::weak_ptr<Route>(*r))));
 	}
 
 	return menu;
@@ -2089,8 +2164,36 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor ());
-	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor ());
+	Gtk::MenuItem* listen_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/newlisten"));
+
+	if (listen_menu_item) {
+		Menu* m = build_possible_listener_menu();
+		if (m && !m->items().empty()) {
+			listen_menu_item->set_submenu (*m);
+			listen_menu_item->set_sensitive (true);
+		} else {
+			/* stupid gtkmm: we need to pass a null reference here */
+			gtk_menu_item_set_submenu (listen_menu_item->gobj(), 0);
+			listen_menu_item->set_sensitive (false);
+		}
+	}
+
+	Gtk::MenuItem* remove_listen_menu_item = dynamic_cast<Gtk::MenuItem*>(ActionManager::get_widget("/ProcessorMenu/removelisten"));
+
+	if (remove_listen_menu_item) {
+		Menu* m = build_possible_remove_listener_menu();
+		if (m && !m->items().empty()) {
+			remove_listen_menu_item->set_submenu (*m);
+			remove_listen_menu_item->set_sensitive (true);
+		} else {
+			/* stupid gtkmm: we need to pass a null reference here */
+			gtk_menu_item_set_submenu (remove_listen_menu_item->gobj(), 0);
+			remove_listen_menu_item->set_sensitive (false);
+		}
+	}
+
+	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
 
 	ProcessorEntry* single_selection = 0;
 	if (processor_display.selection().size() == 1) {
@@ -2615,7 +2718,29 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 		return;
 	}
 
-	_session->add_internal_send (target, _placement, _route);
+	if (target->is_listenbus ()) {
+		_route->add_personal_send (target);
+	} else {
+		_session->add_internal_send (target, _placement, _route);
+	}
+}
+
+void
+ProcessorBox::remove_aux (boost::weak_ptr<Route> wr)
+{
+	if (!_route) {
+		return;
+	}
+
+	boost::shared_ptr<Route> target = wr.lock();
+
+	if (!target) {
+		return;
+	}
+	boost::shared_ptr<Send>  send = _route->internal_send_for (target);
+	boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
+	_route->remove_processor (proc);
+
 }
 
 void
@@ -3654,6 +3779,8 @@ ProcessorBox::register_actions ()
 	ActionManager::engine_sensitive_actions.push_back (act);
 
 	myactions.register_action (processor_box_actions, X_("newaux"), _("New Aux Send ..."));
+	myactions.register_action (processor_box_actions, X_("newlisten"), _("New Monitor Send ..."));
+	myactions.register_action (processor_box_actions, X_("removelisten"), _("Remove Monitor Send ..."));
 
 	myactions.register_action (processor_box_actions, X_("controls"), _("Controls"));
 	myactions.register_action (processor_box_actions, X_("send_options"), _("Send Options"));
@@ -3795,6 +3922,16 @@ ProcessorBox::rb_choose_aux (boost::weak_ptr<Route> wr)
 	}
 
 	_current_processor_box->choose_aux (wr);
+}
+
+void
+ProcessorBox::rb_remove_aux (boost::weak_ptr<Route> wr)
+{
+	if (_current_processor_box == 0) {
+		return;
+	}
+
+	_current_processor_box->remove_aux (wr);
 }
 
 void

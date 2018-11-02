@@ -511,8 +511,11 @@ private:
 	Gtk::Menu * build_processor_menu ();
 	void show_processor_menu (int);
 	Gtk::Menu* build_possible_aux_menu();
+	Gtk::Menu* build_possible_listener_menu();
+	Gtk::Menu* build_possible_remove_listener_menu();
 
 	void choose_aux (boost::weak_ptr<ARDOUR::Route>);
+	void remove_aux (boost::weak_ptr<ARDOUR::Route>);
 	void choose_send ();
 	void send_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
 	void return_io_finished (IOSelector::Result, boost::weak_ptr<ARDOUR::Processor>, IOSelectorWindow*);
@@ -581,6 +584,7 @@ private:
 	static ProcessorBox* _current_processor_box;
 
 	static void rb_choose_aux (boost::weak_ptr<ARDOUR::Route>);
+	static void rb_remove_aux (boost::weak_ptr<ARDOUR::Route>);
 	static void rb_choose_plugin ();
 	static void rb_choose_insert ();
 	static void rb_choose_send ();
