@@ -95,6 +95,7 @@ class BeatBox : public ARDOUR::Processor {
 	int   _meter_beat_type;
 	superclock_t  superclock_cnt;
 	superclock_t  last_start;
+	superclock_t  last_end;
 	Timecode::BBT_Time last_time;
 
 	int _sample_rate;

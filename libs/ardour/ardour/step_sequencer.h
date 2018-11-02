@@ -25,7 +25,7 @@
 #include <glibmm/threads.h>
 
 #include "temporal/types.h"
-#include "temporal/bbt_time.h"
+#include "temporal/beats.h"
 
 #include "ardour/mode.h"
 #include "ardour/types.h"
@@ -33,9 +33,13 @@
 namespace ARDOUR {
 
 class MidiBuffer;
-
+class MidiStateTracker;
 class StepSequencer;
 class StepSequence;
+class TempoMap;
+
+typedef std::pair<Temporal::Beats,samplepos_t> BeatPosition;
+typedef std::vector<BeatPosition> BeatPositions;
 
 class Step {
   public:
@@ -44,10 +48,10 @@ class Step {
 		RelativePitch
 	};
 
-	Step (StepSequence&, Timecode::BBT_Time const & nominal_on);
+	Step (StepSequence&, Temporal::Beats const & beat);
 	~Step ();
 
-	void set_note (double note, double velocity = 0.5, double duration = 0.9, int n = 0);
+	void set_note (double note, double velocity = 0.5, int32_t duration = 1, int n = 0);
 	void set_chord (size_t note_cnt, double* notes);
 	void set_parameter (int number, double value, int n = 0);
 
@@ -56,11 +60,10 @@ class Step {
 
 	double note (size_t n = 0) const { return _notes[n].number; }
 	double velocity (size_t n = 0) const { return _notes[n].velocity; }
-	Timecode::BBT_Time beat_duration (size_t n = 0) const;
-	double duration (size_t n = 0) const { return _notes[n].duration; }
+	int32_t duration (size_t n = 0) const { return _notes[n].duration; }
 
-	void set_offset (Timecode::BBT_Time const &, size_t n = 0);
-	Timecode::BBT_Time offset (size_t n = 0) const { return _notes[n].offset; }
+	void set_offset (Temporal::Beats const &, size_t n = 0);
+	Temporal::Beats offset (size_t n = 0) const { return _notes[n].offset; }
 
 	int parameter (size_t n = 0) const { return _parameters[n].parameter; }
 	int parameter_value (size_t n = 0) const { return _parameters[n].value; }
@@ -71,16 +74,22 @@ class Step {
 	void set_repeat (size_t r);
 	size_t repeat() const { return _repeat; }
 
-	void set_nominal_on (Timecode::BBT_Time const &);
-	bool run (MidiBuffer& buf, Timecode::BBT_Time const & start, Timecode::BBT_Time const & end, samplecnt_t beat_samples);
+	void set_beat (Temporal::Beats const & beat);
+	Temporal::Beats beat () const { return _nominal_beat; }
+
+	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
 
 	bool skipped() const { return _skipped; }
 	void set_skipped (bool);
 
+	void set_timeline_offset (Temporal::Beats const &, Temporal::Beats const &);
+
   private:
 	StepSequence&      _sequence;
 	bool               _enabled;
-	Timecode::BBT_Time _nominal_on;
+	Temporal::Beats     timeline_offset;
+	Temporal::Beats    _nominal_beat;
+	Temporal::Beats    _scheduled_beat;
 	bool               _skipped;
 	Mode               _mode;
 
@@ -95,14 +104,13 @@ class Step {
 			double interval; /* semitones */
 		};
 		double velocity;
-		double duration;
-		Timecode::BBT_Time offset;
+		int32_t duration;
+		Temporal::Beats offset;
 		bool on;
-		Timecode::BBT_Time off_at;
+		Temporal::Beats off_at;
 
-		Note () : number (-1), on (false) {}
-		Note (double n, double v, double d, Timecode::BBT_Time o)
-			: number (n), velocity (v), duration (d), offset (o), on (false) {}
+		Note () : number (-1), velocity (0.5), duration (1), on (false) {}
+		Note (double n, double v, double d, Temporal::Beats const & o) : number (n), velocity (v), duration (d), offset (o), on (false) {}
 	};
 
 	static const int _notes_per_step = 5;
@@ -112,9 +120,11 @@ class Step {
 	ParameterValue _parameters[_parameters_per_step];
 	size_t _repeat;
 
-	void check_note (size_t n, MidiBuffer& buf, Timecode::BBT_Time const & start, Timecode::BBT_Time const & end, ARDOUR::samplecnt_t beat_samples);
-	void check_parameter (size_t n, MidiBuffer& buf, Timecode::BBT_Time const & start, Timecode::BBT_Time const & end, ARDOUR::samplecnt_t beat_samples);
+	void check_note (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t, MidiStateTracker&);
+	void check_parameter (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t);
 
+
+	StepSequencer& sequencer() const;
 };
 
 class StepSequence
@@ -127,14 +137,20 @@ class StepSequence
 		rd_random = 3
 	};
 
-	StepSequence (size_t numsteps, StepSequencer &myseq);
+	StepSequence (StepSequencer &myseq, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
 	~StepSequence ();
+
+	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
+
+	Temporal::Beats bar_size() const { return _bar_size; }
 
 	double root() const { return _root; }
 	void set_root (double n);
 
 	int channel() const { return _channel; }
 	void set_channel (int);
+
+	Temporal::Beats wrap (Temporal::Beats const &) const;
 
 	MusicalMode mode() const { return _mode; }
 	void set_mode (MusicalMode m);
@@ -146,13 +162,14 @@ class StepSequence
 	void set_end_step (size_t);
 	void set_start_and_end_step (size_t, size_t);
 
-	void set_beat_divisor (size_t);
-	size_t beat_divisor () const { return _beat_divisor; }
+	void set_step_size (Temporal::Beats const &);
+	Temporal::Beats step_size () const { return _step_size; }
 
 	void reset ();
 
-	void set_tempo (double quarters_per_minute, int sr);
-	bool run (MidiBuffer& buf, Timecode::BBT_Time const & start, Timecode::BBT_Time const & end);
+	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
+
+	StepSequencer& sequencer() const { return _sequencer; }
 
   private:
 	StepSequencer& _sequencer;
@@ -160,63 +177,52 @@ class StepSequence
 	typedef std::vector<Step*> Steps;
 
 	Steps       _steps;
-	size_t      _start;
-	size_t      _end;
+	size_t      _start;   /* step count */
+	size_t      _end;     /* step count */
+	int         _channel; /* MIDI channel */
+
+	Temporal::Beats _step_size;
+	Temporal::Beats _bar_size;
+	Temporal::Beats end_beat;
+
 	double      _root;
 	MusicalMode _mode;
-	size_t      _beat_divisor;
-	int         _channel;
-	samplecnt_t _beat_samples;
 };
 
 class StepSequencer {
   public:
-	enum State {
-		Running,
-		Halted,
-		Paused,
-	};
-
-	StepSequencer (size_t nseqs, size_t nsteps);
+	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
 	~StepSequencer ();
+
+	Temporal::Beats duration() const;
+
+	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
+
+	Temporal::Beats step_size () const { return _step_size; }
+	void set_step_size (Temporal::Beats const &);
 
 	void set_start_step (size_t);
 	void set_end_step (size_t);
 	void set_start_and_end_step (size_t, size_t);
 
-	bool running() const { return _state == Running; }
-	bool halted() const { return _state == Halted; }
-	bool paused() const { return _state == Paused; }
-
-	void start ();
-	void halt ();        /* stop everything, reset */
-	void play ();
-	void pause ();
-	void toggle_pause ();
 	void sync ();        /* return all rows to start step */
 	void reset ();       /* return entire state to default */
 
-	double tempo() const; /* quarters per minute, not beats per minute */
-	void set_tempo (double, int sr);
+	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
 
-	bool run (MidiBuffer& buf, Timecode::BBT_Time const & start, Timecode::BBT_Time const & end);
+	TempoMap& tempo_map() const { return _tempo_map; }
 
   private:
 	Glib::Threads::Mutex       _sequence_lock;
-	Glib::Threads::Mutex       _state_lock;
 
 	typedef std::vector<StepSequence*> StepSequences;
 
 	StepSequences  _sequences;
-	State          _state;
 
-	Timecode::BBT_Time _target_start;
-	Timecode::BBT_Time _target_end;
-	double        _target_tempo;
-
-	Timecode::BBT_Time _start;
-	Timecode::BBT_Time _end;
-	double        _tempo;
+	TempoMap&       _tempo_map;
+	Temporal::Beats _step_size;
+	int32_t         _start;
+	int32_t         _end;
 };
 
 } /* namespace */
