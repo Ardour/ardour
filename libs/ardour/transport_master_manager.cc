@@ -51,7 +51,7 @@ TransportMasterManager::~TransportMasterManager ()
 }
 
 int
-TransportMasterManager::init ()
+TransportMasterManager::set_default_configuration ()
 {
 	try {
 		/* setup default transport masters. Most people will never need any

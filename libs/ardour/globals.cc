@@ -608,7 +608,7 @@ ARDOUR::init_post_engine ()
 			/* XXX now what? */
 		}
 	} else {
-		if (TransportMasterManager::instance().init ()) {
+		if (TransportMasterManager::instance().set_default_configuration ()) {
 			error << _("Cannot initialize transport master manager") << endmsg;
 			/* XXX now what? */
 		}
