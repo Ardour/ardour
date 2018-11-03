@@ -522,7 +522,9 @@ TransportMasterManager::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 
-	node->set_property (X_("current"), _current_master->name());
+	if (_current_master) {
+		node->set_property (X_("current"), _current_master->name());
+	}
 
 	Glib::Threads::RWLock::ReaderLock lm (lock);
 
