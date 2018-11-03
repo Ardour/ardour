@@ -882,29 +882,20 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 
 		uint32_t n = 0;
 
-		for (Controls::iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
+		for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
 
-			boost::shared_ptr<AutomationControl> c
-				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
-
-			if (c->list() && c->automation_playback()) {
+			/* boost::dynamic_pointer_cast<> has significant overhead, since we know that
+			 * all controls are AutomationControl and their lists - if any - are AutomationList,
+			 * we can use static_cast<>. This yields a speedup of 2.8/4.6 over to the
+			 * previous code (measuerd with VeeSeeVSTRack 10k parameters, optimized build) */
+			AutomationControl& c = static_cast<AutomationControl&> (*(li->second));
+			boost::shared_ptr<const Evoral::ControlList> clist (c.list());
+			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
 				bool valid;
-
-				const float val = c->list()->rt_safe_eval (start, valid);
-
+				const float val = c.list()->rt_safe_eval (start, valid);
 				if (valid) {
-					/* This is the ONLY place where we are
-					 *  allowed to call
-					 *  AutomationControl::set_value_unchecked(). We
-					 *  know that the control is in
-					 *  automation playback mode, so no
-					 *  check on writable() is required
-					 *  (which must be done in AutomationControl::set_value()
-					 *
-					 */
-					c->set_value_unchecked(val);
+					c.set_value_unchecked(val);
 				}
-
 			}
 		}
 	}
