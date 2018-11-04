@@ -216,7 +216,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	samplecnt_t input_offset;
 	samplecnt_t *cb_offsets;
 	BufferSet* input_buffers;
-	ChanMapping * input_map;
+	ChanMapping const * input_map;
 	samplecnt_t samples_processed;
 	uint32_t   audio_input_cnt;
 
