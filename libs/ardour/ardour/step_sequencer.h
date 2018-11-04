@@ -85,6 +85,8 @@ class Step {
 	void set_timeline_offset (Temporal::Beats const &, Temporal::Beats const &);
 
   private:
+	friend class StepSequence; /* HACK */
+
 	StepSequence&      _sequence;
 	bool               _enabled;
 	Temporal::Beats     timeline_offset;
@@ -141,6 +143,8 @@ class StepSequence
 	~StepSequence ();
 
 	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
+
+	void adjust_step_pitch (int step, int amt);
 
 	Temporal::Beats bar_size() const { return _bar_size; }
 
@@ -211,6 +215,9 @@ class StepSequencer {
 	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
 
 	TempoMap& tempo_map() const { return _tempo_map; }
+
+	/* editing */
+	void adjust_step_pitch (int seq, int step, int amt);
 
   private:
 	Glib::Threads::Mutex       _sequence_lock;
