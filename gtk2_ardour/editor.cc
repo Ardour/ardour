@@ -2578,7 +2578,7 @@ Editor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	return LuaInstance::instance()->set_state(node);
+	return 0;
 }
 
 XMLNode&
@@ -2646,8 +2646,6 @@ Editor::get_state ()
 
 	node->set_property ("nudge-clock-value", nudge_clock->current_duration());
 
-	node->add_child_nocopy (LuaInstance::instance()->get_action_state());
-	node->add_child_nocopy (LuaInstance::instance()->get_hook_state());
 	node->add_child_nocopy (_locations->get_state ());
 
 	return *node;
