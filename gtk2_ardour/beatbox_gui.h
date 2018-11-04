@@ -26,13 +26,16 @@
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/togglebutton.h>
 #include <gtkmm/button.h>
+#include <gtkmm/scrollbar.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/box.h>
 #include <gtkmm/notebook.h>
 
 #include "gtkmm2ext/colors.h"
 
+#include "canvas/box.h"
 #include "canvas/canvas.h"
+#include "canvas/rectangle.h"
 
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
@@ -41,8 +44,8 @@
 namespace ArdourCanvas {
 class Grid;
 class Item;
-class Rectangle;
 class StepButton;
+class Polygon;
 class Text;
 class VBox;
 class Widget;
@@ -51,6 +54,23 @@ class Widget;
 namespace ARDOUR {
 class BeatBox;
 }
+
+class SequencerGrid : public ArdourCanvas::Rectangle {
+  public:
+	SequencerGrid (ArdourCanvas::Canvas*);
+	SequencerGrid (ArdourCanvas::Item*);
+
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+};
+
+class SequencerStepIndicator : public ArdourCanvas::Rectangle {
+  public:
+	SequencerStepIndicator (ArdourCanvas::Item *, int n);
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+  private:
+	ArdourCanvas::Polygon* poly;
+	ArdourCanvas::Text*    text;
+};
 
 class BBGUI : public ArdourDialog {
   public:
@@ -62,163 +82,48 @@ class BBGUI : public ArdourDialog {
 	void on_unmap ();
 
   private:
-	friend class SwitchRow;
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
 
-	ArdourCanvas::GtkCanvas switch_canvas;
-	ArdourCanvas::GtkCanvas pad_canvas;
-	ArdourCanvas::GtkCanvas roll_canvas;
+	Gtk::Adjustment horizontal_adjustment;
+	Gtk::Adjustment vertical_adjustment;
 
-	ArdourCanvas::Grid* pad_grid;
+	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
+	ArdourCanvas::GtkCanvas* _canvas;
+	ArdourCanvas::ScrollGroup* v_scroll_group;
+	ArdourCanvas::Container* no_scroll_group;
 
-	ArdourWidgets::ArdourButton step_sequencer_tab_button;
-	ArdourWidgets::ArdourButton pad_tab_button;
-	ArdourWidgets::ArdourButton roll_tab_button;
+	SequencerGrid* _sequencer;
+	ArdourCanvas::Rectangle* step_indicator_bg;
+	ArdourCanvas::Container* step_indicator_box;
 
-	sigc::connection timer_connection;
-
-	struct Pad {
-		Pad (ArdourCanvas::Canvas* canvas, int x, int y, int note, std::string const & txt);
-		void set_color (Gtkmm2ext::Color);
-
-		ArdourCanvas::StepButton* button;
-
-		static int pad_width;
-		static int pad_height;
-		static int pad_spacing;
-
-		int row() const  { return _row; }
-		int col() const  { return _col; }
-		int note() const { return _note; }
-		int velocity() const;
-
-           private:
-		int _row;
-		int _col;
-		int _note;
-		std::string _label;
-	};
-
-	typedef std::vector<Pad*> Pads;
-	Pads pads;
-	int pad_rows;
-	int pad_cols;
-
-
-	struct Switch {
-		Switch (ArdourCanvas::Canvas*, int x, int y, int note, Gtkmm2ext::Color, std::string const & txt);
-		void set_color (Gtkmm2ext::Color);
-
-		bool is_on () const { return _on; }
-		bool is_off () const { return !_on; }
-		bool is_flashed() const { return _flashed; }
-
-		void on ();
-		void off ();
-		void flash_on ();
-		void flash_off ();
-
-		ArdourCanvas::StepButton* button;
-
-		static int switch_width;
-		static int switch_height;
-		static int switch_spacing;
-
-		int row() const  { return _row; }
-		int col() const  { return _col; }
-		int note() const { return _note; }
-           private:
-		int _row;
-		int _col;
-		int _note;
-		std::string _label;
-		Gtkmm2ext::HSV hsv;
-		bool _on;
-		bool _flashed;
-	};
-
-	typedef std::vector<Switch*> Switches;
-
-	struct SwitchRow {
-		BBGUI& owner;
-		int row;
-		int note;
-		ArdourCanvas::Grid* switch_grid;
-		Switches switches;
-		ArdourWidgets::ArdourButton* clear_row_button;
-		ArdourWidgets::ArdourDropdown* row_note_button;
-		ArdourCanvas::Widget* clear_row_item;
-		ArdourCanvas::Widget* row_note_item;
-
-		SwitchRow (BBGUI&, ArdourCanvas::Item*, int row, int cols);
-		~SwitchRow ();
-
-		void set_note (int note_number);
-		void update (int current_row);
-
-            private:
-		void resize (int cols);
-		void drop_switches ();
-		bool switch_event (GdkEvent*, int col);
-		std::string print_midi_note (int note);
-	};
-
-	typedef std::vector<SwitchRow*> SwitchRows;
-
-	ArdourCanvas::VBox* switch_vbox;
-
-	SwitchRows switch_rows;
-	int switch_cols;
-
-	ArdourCanvas::Item* add_row_button;
-
-	void size_switches (int cols, int rows);
-
-	Gtk::Notebook tabs;
+	ArdourWidgets::ArdourButton start_button;
+	void toggle_play ();
 
 	ArdourWidgets::ArdourButton export_as_region_button;
 	void export_as_region ();
 
-	Gtk::RadioButtonGroup quantize_group;
-	Gtk::RadioButton quantize_off;
-	Gtk::RadioButton quantize_32nd;
-	Gtk::RadioButton quantize_16th;
-	Gtk::RadioButton quantize_8th;
-	Gtk::RadioButton quantize_quarter;
-	Gtk::RadioButton quantize_half;
-	Gtk::RadioButton quantize_whole;
-
-	Gtk::ToggleButton play_button;
 	Gtk::Button clear_button;
-
-	Gtk::Adjustment tempo_adjustment;
-	Gtk::SpinButton tempo_spinner;
-
-	Gtk::VBox quantize_button_box;
 	Gtk::HBox misc_button_box;
+	Gtk::HBox canvas_hbox;
+	Gtk::VScrollbar vscrollbar;
 
-
-	void set_quantize (int divisor);
-	void toggle_play ();
 	void clear ();
-	void tempo_changed ();
-
-	void setup_switch_canvas ();
-	void setup_pad_canvas ();
-	void setup_roll_canvas ();
-
-	void size_pads (int cols, int rows);
-
-	void switch_tabs (Gtk::Widget*);
-	void pads_off ();
-	void switches_off ();
 	void update ();
-	void update_pads ();
-	void update_steps ();
-	void update_roll ();
+	void update_sequencer ();
 
-	bool pad_event (GdkEvent*, int col, int row);
+	sigc::connection timer_connection;
 
+	bool grid_event (GdkEvent*);
+	bool grid_motion_event (GdkEventMotion*);
+	bool grid_button_press_event (GdkEventButton*);
+	bool grid_button_release_event (GdkEventButton*);
+	bool grid_scroll_event (GdkEventScroll*);
+
+	std::pair<int,int> grab_step;
+	std::pair<double,double> grab_at;
+	void set_grab_step (double x, double y);
+
+	void adjust_step_pitch (int seq, int step, int amt);
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */

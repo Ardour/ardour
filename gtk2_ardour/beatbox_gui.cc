@@ -27,6 +27,7 @@
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
+#include "ardour/step_sequencer.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
 #include "ardour/utils.h"
@@ -35,6 +36,8 @@
 #include "canvas/grid.h"
 #include "canvas/box.h"
 #include "canvas/rectangle.h"
+#include "canvas/polygon.h"
+#include "canvas/scroll_group.h"
 #include "canvas/step_button.h"
 #include "canvas/text.h"
 #include "canvas/widget.h"
@@ -43,81 +46,76 @@
 
 #include "beatbox_gui.h"
 #include "timers.h"
+#include "ui_config.h"
 
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
+using namespace ArdourCanvas;
 
 using std::cerr;
 using std::endl;
 
+const int _nsteps = 32;
+const int _nrows = 8;
+const double _step_dimen = 25;
+const double _width = _step_dimen * _nsteps;
+const double _height = _step_dimen * _nrows;
+
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
 	, bbox (bb)
-	, step_sequencer_tab_button (_("Steps"))
-	, pad_tab_button (_("Pads"))
-	, roll_tab_button (_("Roll"))
-	, export_as_region_button (_(">Region"))
-	, quantize_off (quantize_group, "None")
-	, quantize_32nd (quantize_group, "ThirtySecond")
-	, quantize_16th (quantize_group, "Sixteenth")
-	, quantize_8th (quantize_group, "Eighth")
-	, quantize_quarter (quantize_group, "Quarter")
-	, quantize_half (quantize_group, "Half")
-	, quantize_whole (quantize_group, "Whole")
-	, play_button ("Run")
+	, horizontal_adjustment (0.0, 0.0, 800.0)
+	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, clear_button ("Clear")
-	, tempo_adjustment (bb->tempo(), 1, 300, 1, 10)
-	, tempo_spinner (tempo_adjustment)
+	, vscrollbar (vertical_adjustment)
+
 {
+	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
+	_canvas_viewport->set_size_request (_width, _height + _step_dimen);
+	_canvas = _canvas_viewport->canvas();
+
+	_canvas->set_background_color (UIConfiguration::instance().color ("gtk_bright_color"));
+	_canvas->use_nsglview ();
+
+	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
+
+	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
+
+	step_indicator_bg = new ArdourCanvas::Rectangle (step_indicator_box);
+	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
+	step_indicator_bg->set_fill_color (UIConfiguration::instance().color ("gtk_lightest"));
+	step_indicator_bg->set_outline (false);
+
+	for (int n = 0; n < _nsteps; ++n) {
+		SequencerStepIndicator* ssi = new SequencerStepIndicator (step_indicator_box, n+1);
+		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
+		ssi->set_position (Duple (n * _step_dimen, 0.0));
+		ssi->set_fill_color (random());
+	}
+
+	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
+	_canvas->add_scroller (*v_scroll_group);
+
+	_sequencer = new SequencerGrid (v_scroll_group);
+	_sequencer->set_position (Duple (0, _step_dimen));
+	_sequencer->set_fill_color (UIConfiguration::instance().color ("gtk_contrasting_indicator"));
+	_sequencer->Event.connect (sigc::mem_fun (*this, &BBGUI::grid_event));
+
 	srandom (time(0));
-	setup_pad_canvas ();
-	setup_switch_canvas ();
-	setup_roll_canvas ();
 
-	tabs.append_page (switch_canvas);
-	tabs.append_page (pad_canvas);
-	tabs.append_page (roll_canvas);
-	tabs.set_show_tabs (false);
-	tabs.set_show_border (false);
-
-	quantize_off.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 0));
-	quantize_32nd.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 32));
-	quantize_16th.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 16));
-	quantize_8th.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 8));
-	quantize_quarter.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 4));
-	quantize_half.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 2));
-	quantize_whole.signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::set_quantize), 1));
-
-	quantize_button_box.pack_start (quantize_off);
-	quantize_button_box.pack_start (quantize_32nd);
-	quantize_button_box.pack_start (quantize_16th);
-	quantize_button_box.pack_start (quantize_8th);
-	quantize_button_box.pack_start (quantize_quarter);
-	quantize_button_box.pack_start (quantize_half);
-	quantize_button_box.pack_start (quantize_whole);
-
-	play_button.signal_toggled().connect (sigc::mem_fun (*this, &BBGUI::toggle_play));
 	clear_button.signal_clicked().connect (sigc::mem_fun (*this, &BBGUI::clear));
 
-	misc_button_box.pack_start (play_button);
 	misc_button_box.pack_start (clear_button);
-	misc_button_box.pack_start (step_sequencer_tab_button);
-	misc_button_box.pack_start (pad_tab_button);
-	misc_button_box.pack_start (roll_tab_button);
 
-	step_sequencer_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &switch_canvas));
-	pad_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &pad_canvas));
-	roll_tab_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::switch_tabs), &roll_canvas));
-
-	tempo_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &BBGUI::tempo_changed));
-
-	misc_button_box.pack_start (tempo_spinner);
+	canvas_hbox.pack_start (*_canvas_viewport, true, true);
+	canvas_hbox.pack_start (vscrollbar, false, false);
 
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (misc_button_box, false, false);
-	get_vbox()->pack_start (tabs, false, false);
-	get_vbox()->pack_start (quantize_button_box, true, true);
+	get_vbox()->pack_start (canvas_hbox, true, true);
 
+	start_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::toggle_play));
+	get_action_area()->pack_end (start_button);
 
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
 	get_action_area()->pack_end (export_as_region_button);
@@ -127,41 +125,117 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 BBGUI::~BBGUI ()
 {
-	for (SwitchRows::iterator s = switch_rows.begin(); s != switch_rows.end(); ++s) {
-		delete *s;
+}
+
+bool
+BBGUI::grid_event (GdkEvent* ev)
+{
+	bool ret = false;
+
+	cerr << "grid event, type: " << event_type_string (ev->type);
+	switch (ev->type) {
+	case GDK_MOTION_NOTIFY:
+		ret = grid_motion_event (&ev->motion);
+		cerr << ' ' << ev->motion.x << ',' << ev->motion.y << " state " << show_gdk_event_state (ev->motion.state);
+		break;
+	case GDK_BUTTON_PRESS:
+		cerr << ' ' << ev->button.x << ',' << ev->button.y << " state " << show_gdk_event_state (ev->button.state);
+		ret = grid_button_press_event (&ev->button);
+		break;
+	case GDK_BUTTON_RELEASE:
+		cerr << ' ' << ev->button.x << ',' << ev->button.y << " state " << show_gdk_event_state (ev->button.state);
+		ret = grid_button_release_event (&ev->button);
+		break;
+	case GDK_SCROLL:
+		ret = grid_scroll_event (&ev->scroll);
+	default:
+		break;
+	}
+	cerr << endl;
+
+	return ret;
+}
+
+
+bool
+BBGUI::grid_motion_event (GdkEventMotion* ev)
+{
+	return true;
+}
+
+bool
+BBGUI::grid_button_press_event (GdkEventButton* ev)
+{
+	set_grab_step (ev->x, ev->y);
+	grab_at = std::make_pair (ev->x, ev->y);
+	return true;
+}
+
+bool
+BBGUI::grid_button_release_event (GdkEventButton* ev)
+{
+	return true;
+}
+
+bool
+BBGUI::grid_scroll_event (GdkEventScroll* ev)
+{
+	int step = ev->x / _step_dimen;
+	int seq = ev->y / _step_dimen;
+	int amt = 0;
+
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		amt = 1;
+		break;
+	case GDK_SCROLL_LEFT:
+		amt = -1;
+		break;
+	case GDK_SCROLL_RIGHT:
+		amt = 1;
+		break;
+	case GDK_SCROLL_DOWN:
+		amt = -1;
+		break;
 	}
 
-	switch_rows.clear ();
+	adjust_step_pitch (seq, step, amt);
+
+	return true;
+}
+
+void
+BBGUI::set_grab_step (double x, double y)
+{
+	int step = x / _step_dimen;
+	int seq = y / _step_dimen;
+
+	grab_step = std::make_pair (seq, step);
+}
+
+
+void
+BBGUI::adjust_step_pitch (int seq, int step, int amt)
+{
+	bbox->sequencer().adjust_step_pitch (seq, step, amt);
 }
 
 void
 BBGUI::update ()
 {
-	switch (tabs.get_current_page()) {
-	case 0:
-		update_steps ();
-		break;
-	case 1:
-		update_pads ();
-		break;
-	case 2:
-		update_roll ();
-		break;
-	default:
-		return;
-	}
+	update_sequencer ();
 }
 
 void
-BBGUI::update_steps ()
+BBGUI::update_sequencer ()
 {
 	Timecode::BBT_Time bbt;
 
 	if (!bbox->running()) {
-		switches_off ();
+		/* do something */
 		return;
 	}
-
+#if 0
 	bbt = bbox->get_last_time ();
 
 	int current_switch_column = (bbt.bars - 1) * bbox->meter_beats ();
@@ -169,52 +243,6 @@ BBGUI::update_steps ()
 
 	for (SwitchRows::iterator sr = switch_rows.begin(); sr != switch_rows.end(); ++sr) {
 		(*sr)->update (current_switch_column);
-	}
-}
-
-void
-BBGUI::update_roll ()
-{
-}
-
-void
-BBGUI::update_pads ()
-{
-	Timecode::BBT_Time bbt;
-
-	if (!bbox->running()) {
-		pads_off ();
-		return;
-	}
-
-	bbt = bbox->get_last_time ();
-
-	int current_pad_column = (bbt.bars - 1) * bbox->meter_beats ();
-	current_pad_column += bbt.beats - 1;
-
-	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
-		if ((*p)->col() == current_pad_column) {
-			(*p)->button->set_highlight (true);
-		} else {
-			(*p)->button->set_highlight (false);
-		}
-	}
-}
-
-void
-BBGUI::pads_off ()
-{
-	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
-		(*p)->button->set_highlight (false);
-	}
-}
-
-void
-BBGUI::switches_off ()
-{
-#if 0
-	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
-		(*s)->off ();
 	}
 #endif
 }
@@ -232,235 +260,8 @@ BBGUI::on_unmap ()
 	timer_connection.disconnect ();
 	ArdourDialog::on_unmap ();
 }
-void
-BBGUI::switch_tabs (Gtk::Widget* w)
-{
-	tabs.set_current_page (tabs.page_num (*w));
-}
 
-int BBGUI::Pad::pad_width = 80;
-int BBGUI::Pad::pad_height = 80;
-int BBGUI::Pad::pad_spacing = 6;
-
-BBGUI::Pad::Pad (ArdourCanvas::Canvas* canvas, int row, int col, int note, std::string const& txt)
-	: button (new ArdourCanvas::StepButton (canvas, pad_width, pad_height, 0))
-	, _row (row)
-	, _col (col)
-	, _note (note)
-	, _label (txt)
-{
-}
-
-int
-BBGUI::Pad::velocity () const
-{
-	return button->value();
-}
-
-//static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
-
-void
-BBGUI::setup_pad_canvas ()
-{
-	pad_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.32, 0.47, 0.89, 1.0));
-	pad_grid = new ArdourCanvas::Grid (&pad_canvas);
-	pad_canvas.root()->add (pad_grid);
-
-	size_pads (8, 8);
-}
-
-void
-BBGUI::size_pads (int cols, int rows)
-{
-	/* XXX 8 x 8 grid */
-
-	for (Pads::iterator p = pads.begin(); p != pads.end(); ++p) {
-		delete *p;
-	}
-
-	pads.clear ();
-
-	pad_rows = rows;
-	pad_cols = cols;
-
-	Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0, 0, 1.0);
-
-	for (int row = 0; row < pad_rows; ++row) {
-
-		int note = random() % 128;
-
-		for (int col = 0; col < pad_cols; ++col) {
-			Pad* p = new Pad (&pad_canvas, row, col, note, string_compose ("%1", note));
-			/* This is the "off" color */
-			pad_grid->place (p->button, col, row, 1, 1);
-			p->button->set_color (c);
-			p->button->Event.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::pad_event), col, row));
-			pads.push_back (p);
-		}
-	}
-}
-
-bool
-BBGUI::pad_event (GdkEvent* ev, int col, int row)
-{
-	Pad* p = pads[row*pad_cols + col];
-	Timecode::BBT_Time at;
-
-	at.bars = col / bbox->meter_beats();
-	at.beats = col % bbox->meter_beats();
-	at.ticks = 0;
-
-	at.bars++;
-	at.beats++;
-
-	if (ev->type == GDK_BUTTON_PRESS) {
-		/* XXX on/off should be done by model changes */
-		if (p->button->value()) {
-			bbox->remove_note (pads[row * pad_cols + col]->note(), at);
-			p->button->set_value (0);
-		} else {
-			bbox->add_note (pads[row * pad_cols + col]->note(), 127, at);
-			p->button->set_value (64);
-			return true;
-		}
-	}
-
-	return false;
-}
-
-void
-BBGUI::setup_switch_canvas ()
-{
-	switch_canvas.set_background_color (Gtkmm2ext::rgba_to_color (0.1, 0.09, 0.12, 1.0));
-	switch_vbox = new ArdourCanvas::VBox (&switch_canvas);
-	switch_vbox->name = "swvbox";
-
-	size_switches (8, 8);
-
-	switch_canvas.root()->add (switch_vbox);
-}
-
-int BBGUI::Switch::switch_width = 50;
-int BBGUI::Switch::switch_height = 50;
-
-BBGUI::Switch::Switch (ArdourCanvas::Canvas* canvas, int row, int col, int note, Gtkmm2ext::Color c, std::string const& txt)
-	: button (new ArdourCanvas::StepButton (canvas, switch_width, switch_height, c))
-	, _row (row)
-	, _col (col)
-	, _note (note)
-	, _label (txt)
-	, _on (false)
-	, _flashed (false)
-{
-}
-
-//static std::string show_color (Gtkmm2ext::Color c) { double r, g, b, a; color_to_rgba (c, r, g, b, a); return string_compose ("%1:%2:%3:%4", r, g, b, a); }
-
-BBGUI::SwitchRow::SwitchRow (BBGUI& bbg, ArdourCanvas::Item* parent, int r, int cols)
-	: owner (bbg)
-	, row (r)
-	, clear_row_button (new ArdourWidgets::ArdourButton ("C"))
-	, row_note_button (new ArdourWidgets::ArdourDropdown)
-	, clear_row_item (new ArdourCanvas::Widget (parent->canvas(), *clear_row_button))
-	, row_note_item (new ArdourCanvas::Widget (parent->canvas(), *row_note_button))
-{
-	/* populate note dropdown */
-	for (int n = 0; n < 127; ++n) {
-		row_note_button->AddMenuElem (Gtk::Menu_Helpers::MenuElem (print_midi_note (n), sigc::bind (sigc::mem_fun (*this, &BBGUI::SwitchRow::set_note), n)));
-	}
-
-#define COMBO_TRIANGLE_WIDTH 25 // ArdourButton _diameter (11) + 2 * arrow-padding (2*2) + 2 * text-padding (2*5)
-	set_size_request_to_display_given_text (*row_note_button, "G#-1\n127", COMBO_TRIANGLE_WIDTH, 2);
-	note = 130; /* invalid value to force change in set_note() */
-	set_note (r + 64);
-
-	switch_grid = new ArdourCanvas::Grid (parent->canvas());
-	switch_grid->name = string_compose ("Grid for row %1", r);
-	//switch_grid->set_border_width (0);
-	//switch_grid->set_col_spacing (0);
-
-	row_note_item->name = string_compose ("row note for %1", r);
-	switch_grid->place (row_note_item, 0, r, 2, 1);
-
-	resize (cols);
-
-	parent->add (switch_grid);
-}
-
-std::string
-BBGUI::SwitchRow::print_midi_note (int n)
-{
-	return string_compose ("%1\n%2", ParameterDescriptor::midi_note_name (n), n+1);
-}
-
-void
-BBGUI::SwitchRow::resize (int cols)
-{
-	const Gtkmm2ext::Color c = Gtkmm2ext::rgba_to_color (0.525, 0.1, 0.0, 1.0);
-
-	switch_grid->remove (clear_row_item);
-
-	Switches::size_type n = switches.size();
-
-	while (n > (Switches::size_type) cols) {
-		Switch* s = switches.back ();
-		switch_grid->remove (s->button);
-		delete s;
-		switches.pop_back ();
-		--n;
-	}
-
-	while (n < (Switches::size_type) cols) {
-		Switch* s = new Switch (switch_grid->canvas(), row, n, note, c, string_compose ("%1", note));
-		s->button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SwitchRow::switch_event), n));
-		s->button->name = string_compose ("switch %1,%2", n, row);
-		switch_grid->place (s->button, 2 + n, row, 1, 1);
-		switches.push_back (s);
-		++n;
-	}
-
-	clear_row_item->name = string_compose ("clear for %1", row);
-	switch_grid->place (clear_row_item, 2 + cols, row, 1, 1);
-}
-
-BBGUI::SwitchRow::~SwitchRow()
-{
-	drop_switches ();
-}
-
-void
-BBGUI::SwitchRow::drop_switches ()
-{
-	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
-		delete *s;
-	}
-
-	switches.clear ();
-}
-
-void
-BBGUI::SwitchRow::update (int current_col)
-{
-	for (Switches::iterator s = switches.begin(); s != switches.end(); ++s) {
-		if ((*s)->col() == current_col) {
-			(*s)->button->set_highlight (true);
-		} else {
-			(*s)->button->set_highlight (false);
-		}
-	}
-}
-
-void
-BBGUI::size_switches (int cols, int rows)
-{
-	switch_cols = cols;
-
-	for (int row = 0; row < rows; ++row) {
-		SwitchRow*sr = new SwitchRow (*this, switch_vbox, row, cols);
-		switch_rows.push_back (sr);
-	}
-}
-
+#if 0
 bool
 BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 {
@@ -503,45 +304,7 @@ BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 
 	return false;
 }
-
-void
-BBGUI::SwitchRow::set_note (int n)
-{
-	if (n < 0) {
-		n = 0;
-	} else if (n > 127) {
-		n = 127;
-	}
-
-	if (note == n) {
-		return;
-	}
-
-	int old_note = note;
-
-	note = n;
-
-	owner.bbox->edit_note_number (old_note, note);
-	row_note_button->set_text (print_midi_note (note));
-}
-
-void
-BBGUI::setup_roll_canvas ()
-{
-}
-
-void
-BBGUI::tempo_changed ()
-{
-	float t = tempo_adjustment.get_value();
-	bbox->set_tempo (t);
-}
-
-void
-BBGUI::set_quantize (int divisor)
-{
-	bbox->set_quantize (divisor);
-}
+#endif
 
 void
 BBGUI::clear ()
@@ -550,7 +313,7 @@ BBGUI::clear ()
 }
 
 void
-BBGUI::toggle_play ()
+BBGUI::toggle_play()
 {
 	if (bbox->running()) {
 		bbox->stop ();
@@ -598,4 +361,101 @@ BBGUI::export_as_region ()
 	plist.add (ARDOUR::Properties::external, false);
 
 	boost::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
+}
+
+SequencerGrid::SequencerGrid (Canvas *c)
+	: Rectangle (c)
+{
+	set (Rect (0, 0, _width, _height));
+}
+
+SequencerGrid::SequencerGrid (Item *p)
+	: Rectangle (p)
+{
+	set (Rect (0, 0, _width, _height));
+}
+
+void
+SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rect self (item_to_window (get(), false));
+	const Rect draw = self.intersection (area);
+
+	if (!draw) {
+		return;
+	}
+
+	setup_fill_context (context);
+	context->rectangle (draw.x0, draw.y0, draw.width(), draw.height());
+	context->fill ();
+
+	context->set_line_width (1.0);
+
+	/* horizontal lines */
+
+	Gtkmm2ext::set_source_rgba (context, 0x000000ff);
+
+	for (int n = 0; n < _nrows; ++n) {
+		double x = 0;
+		double y = n * _step_dimen;
+		Duple start = Duple (x, y).translate (_position).translate (Duple (0.5, 0.5));
+
+		context->move_to (start.x, start.y);
+		context->line_to (start.x + _width, start.y);
+		context->stroke ();
+	}
+
+	/* vertical */
+
+	for (int n = 0; n < _nsteps; ++n) {
+		double x = n * _step_dimen;
+		double y = 0;
+		Duple start = Duple (x, y).translate (_position).translate (Duple (0.5, 0.5));
+
+		context->move_to (start.x, start.y);
+		context->line_to (start.x, start.y + _height);
+		context->stroke ();
+	}
+
+	/* vertical bars for velocity */
+
+	Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance().color ("gtk_somewhat_bright_indicator"));
+
+	for (int r = 0; r < _nrows; ++r) {
+		for (int c = 0; c < _nsteps; ++c) {
+			const double velocity = random() % 127 / 127.0;
+			const double height = (_step_dimen - 2) * velocity;
+			context->rectangle ((c * _step_dimen) + 1, ((r + 2) * _step_dimen) - height, _step_dimen - 2, height);
+			context->fill ();
+		}
+	}
+}
+
+SequencerStepIndicator::SequencerStepIndicator (Item *p, int n)
+	: Rectangle (p)
+{
+	set_fill (false);
+	set_outline (false);
+
+	text = new Text (this);
+	text->set (string_compose ("%1", n));
+	text->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+	text->set_position (Duple ((_step_dimen/2.0) - (text->width()/2.0), 5.0));
+
+	poly = new Polygon (this);
+	Points points;
+	points.push_back (Duple (0.0, 0.0));
+	points.push_back (Duple (_step_dimen, 0.0));
+	points.push_back (Duple (_step_dimen, _step_dimen/2.0));
+	points.push_back (Duple (_step_dimen/2.0, _step_dimen));
+	points.push_back (Duple (0.0, _step_dimen/2.0));
+	poly->set (points);
+	poly->set_fill_color (Gtkmm2ext::color_at_alpha (random(), 0.4));
+}
+
+void
+SequencerStepIndicator::render  (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	Rectangle::render (area, context);
+	render_children (area, context);
 }
