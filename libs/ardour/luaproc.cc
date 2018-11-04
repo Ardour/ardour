@@ -614,7 +614,7 @@ LuaProc::configure_io (ChanCount in, ChanCount out)
 int
 LuaProc::connect_and_run (BufferSet& bufs,
 		samplepos_t start, samplepos_t end, double speed,
-		ChanMapping in, ChanMapping out,
+		ChanMapping const& in, ChanMapping const& out,
 		pframes_t nframes, samplecnt_t offset)
 {
 	if (!_lua_dsp) {

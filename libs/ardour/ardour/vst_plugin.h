@@ -74,7 +74,7 @@ public:
 
 	int connect_and_run (BufferSet&,
 			samplepos_t start, samplepos_t end, double speed,
-			ChanMapping in, ChanMapping out,
+			ChanMapping const& in, ChanMapping const& out,
 			pframes_t nframes, samplecnt_t offset
 			);
 

@@ -115,7 +115,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
-			ChanMapping in, ChanMapping out,
+			ChanMapping const& in, ChanMapping const& out,
 			pframes_t nframes, samplecnt_t offset);
 
 	virtual std::set<Evoral::Parameter> automatable() const = 0;

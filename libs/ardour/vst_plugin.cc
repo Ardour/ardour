@@ -671,7 +671,7 @@ VSTPlugin::automatable () const
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
 		samplepos_t start, samplepos_t end, double speed,
-		ChanMapping in_map, ChanMapping out_map,
+		ChanMapping const& in_map, ChanMapping const& out_map,
 		pframes_t nframes, samplecnt_t offset)
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);

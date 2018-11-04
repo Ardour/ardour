@@ -2568,7 +2568,7 @@ write_position(LV2_Atom_Forge*     forge,
 int
 LV2Plugin::connect_and_run(BufferSet& bufs,
 		samplepos_t start, samplepos_t end, double speed,
-		ChanMapping in_map, ChanMapping out_map,
+		ChanMapping const& in_map, ChanMapping const& out_map,
 		pframes_t nframes, samplecnt_t offset)
 {
 	DEBUG_TRACE(DEBUG::LV2, string_compose("%1 run %2 offset %3\n", name(), nframes, offset));
