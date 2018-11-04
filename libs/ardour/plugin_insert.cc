@@ -860,11 +860,11 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				continue;
 			}
 			bool valid;
-			uint32_t first_idx = in_map[0].get (*t, 0, &valid);
+			uint32_t first_idx = in_map.at(0).get (*t, 0, &valid);
 			assert (valid && first_idx == 0); // check_inplace ensures this
 			/* copy the first stream's buffer contents to the others */
 			for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
-				uint32_t idx = in_map[0].get (*t, i, &valid);
+				uint32_t idx = in_map.at(0).get (*t, i, &valid);
 				if (valid) {
 					assert (idx == 0);
 					bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, offset, offset);
@@ -950,7 +950,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
 					bool valid;
-					uint32_t out_idx = out_map[pc].get (*t, out, &valid);
+					uint32_t out_idx = out_map.at(pc).get (*t, out, &valid);
 					if (valid) {
 						used_outputs.set (*t, out_idx, 1); // mark as used
 					}
@@ -982,14 +982,14 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 
 			ARDOUR::ChanMapping i_in_map (natural_input_streams());
-			ARDOUR::ChanMapping i_out_map (out_map[pc]);
+			ARDOUR::ChanMapping i_out_map (out_map.at(pc));
 			ARDOUR::ChanCount mapped;
 
 			/* map inputs sequentially */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
 					bool valid;
-					uint32_t in_idx = in_map[pc].get (*t, in, &valid);
+					uint32_t in_idx = in_map.at(pc).get (*t, in, &valid);
 					uint32_t m = mapped.get (*t);
 					if (valid) {
 						inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
@@ -1035,7 +1035,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		/* in-place processing */
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			if ((*i)->connect_and_run(bufs, start, end, speed, in_map[pc], out_map[pc], nframes, offset)) {
+			if ((*i)->connect_and_run(bufs, start, end, speed, in_map.at(pc), out_map.at(pc), nframes, offset)) {
 				deactivate ();
 			}
 		}
