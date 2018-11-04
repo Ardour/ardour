@@ -168,8 +168,8 @@ private:
 
 	SessionTemplateColumns session_template_columns;
 
-    Glib::RefPtr<Gtk::TreeStore>  template_model;
-    Gtk::TreeView                 template_chooser;
+	Glib::RefPtr<Gtk::TreeStore>  template_model;
+	Gtk::TreeView                 template_chooser;
 	Gtk::ScrolledWindow           template_scroller;
 
 	void template_row_selected ();
