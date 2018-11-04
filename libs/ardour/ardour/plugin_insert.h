@@ -367,7 +367,24 @@ private:
 	/** details of the match currently being used */
 	Match _match;
 
-	typedef std::map <uint32_t, ARDOUR::ChanMapping> PinMappings;
+	/* ordered map [plugin instance ID] => ARDOUR::ChanMapping
+	 * TODO: consider replacing with boost::flat_map<> or std::vector<>.
+	 */
+	class PinMappings : public std::map <uint32_t, ARDOUR::ChanMapping> {
+		public:
+			/* this emulates C++11's  std::map::at()
+			 * return mapping for given plugin instance */
+			inline ARDOUR::ChanMapping const& p (const uint32_t i) const {
+#ifndef NDEBUG
+				const_iterator x = find (i);
+				assert (x != end ());
+				return x->second;
+#else
+				return find(i)->second;
+#endif
+			}
+	};
+
 	PinMappings _in_map;
 	PinMappings _out_map;
 	ChanMapping _thru_map; // out-idx <=  in-idx
