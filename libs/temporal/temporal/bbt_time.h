@@ -56,7 +56,7 @@ struct LIBTEMPORAL_API BBT_Time
 
 	bool operator<= (const BBT_Time& other) const {
 		return bars < other.bars ||
-			(bars <= other.bars && beats <= other.beats) ||
+			(bars <= other.bars && beats < other.beats) ||
 			(bars <= other.bars && beats <= other.beats && ticks <= other.ticks);
 	}
 
