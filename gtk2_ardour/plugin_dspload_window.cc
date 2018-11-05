@@ -121,6 +121,11 @@ PluginDSPLoadWindow::refill_processors ()
 		/* may be called from session d'tor, removing monitor-section w/plugin */
 		return;
 	}
+
+	_session->RouteAdded.connect (
+			_route_connections, invalidator (*this), boost::bind (&PluginDSPLoadWindow::refill_processors, this), gui_context()
+			);
+
 	RouteList routes = _session->get_routelist ();
 	for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
 
