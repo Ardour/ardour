@@ -110,6 +110,7 @@ class Step {
 		Temporal::Beats offset;
 		bool on;
 		Temporal::Beats off_at;
+		MIDI::byte off_msg[3];
 
 		Note () : number (-1), velocity (0.5), duration (1), on (false) {}
 		Note (double n, double v, double d, Temporal::Beats const & o) : number (n), velocity (v), duration (d), offset (o), on (false) {}
@@ -145,6 +146,7 @@ class StepSequence
 	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
 
 	void adjust_step_pitch (int step, int amt);
+	void adjust_step_velocity (int step, int amt);
 
 	Temporal::Beats bar_size() const { return _bar_size; }
 
@@ -218,6 +220,7 @@ class StepSequencer {
 
 	/* editing */
 	void adjust_step_pitch (int seq, int step, int amt);
+	void adjust_step_velocity (int seq, int step, int amt);
 
   private:
 	Glib::Threads::Mutex       _sequence_lock;

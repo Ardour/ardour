@@ -65,7 +65,7 @@ BeatBox::BeatBox (Session& s)
 	, remove_queue (64)
 {
 	_display_to_user = true;
-	_sequencer = new StepSequencer (s.tempo_map(), 1, 8, Temporal::Beats (1, 0), Temporal::Beats (4, 0));
+	_sequencer = new StepSequencer (s.tempo_map(), 1, 8, Temporal::Beats (0, Temporal::Beats::PPQN/4), Temporal::Beats (4, 0));
 }
 
 BeatBox::~BeatBox ()

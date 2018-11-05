@@ -27,7 +27,7 @@
 using namespace ARDOUR;
 using namespace std;
 
-static int notenum = 60;
+static int notenum = 35;
 
 Step::Step (StepSequence &s, Temporal::Beats const & b)
 	: _sequence (s)
@@ -43,7 +43,7 @@ Step::Step (StepSequence &s, Temporal::Beats const & b)
 	}
 
 	/* XXX HACK XXXX */
-	_notes[0].number = notenum++;
+	_notes[0].number = notenum;
 
 	for (size_t n = 0; n < _parameters_per_step; ++n) {
 		_parameters[n].parameter = -1;
@@ -137,6 +137,30 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 {
 	Note& note (_notes[n]);
 
+	/* could be a note off message to be delivered before any note on
+	 * message (and the note number may differ from the current value.
+	 * Deliver it now, if appropriate.
+	 */
+
+	if (note.on) {
+
+		samplepos_t off_samples = sequencer().tempo_map().sample_at_beat (note.off_at.to_double());
+
+		if (off_samples >= start_sample && off_samples < end_sample) {
+
+			buf.write (off_samples - start_sample, Evoral::MIDI_EVENT, 3, note.off_msg);
+			tracker.remove (note.off_msg[1], _sequence.channel());
+
+			/* record keeping */
+
+			note.on = false;
+			note.off_at = Temporal::Beats();
+		}
+
+		/* XXX we should possibly queue these note offs */
+
+	}
+
 	if (note.number < 0) {
 		/* note not set .. ignore */
 		return;
@@ -177,6 +201,10 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 
 			mbuf[2] = (uint8_t) floor (note.velocity * 127.0);
 
+			note.off_msg[0] = 0x80 | _sequence.channel();
+			note.off_msg[1] = mbuf[1];
+			note.off_msg[2] = mbuf[2];
+
 			/* Put it into the MIDI buffer */
 			buf.write (on_samples - start_sample, Evoral::MIDI_EVENT, 3, mbuf);
 			tracker.add (mbuf[1], _sequence.channel());
@@ -197,31 +225,20 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 		}
 	}
 
+	/* if the buffer size is large and the step size or note length is very
+	 * small, the note off could be within the same ::run() cycle as the
+	 * note on. So check again to see if we should deliver it in this same
+	 * ::run() cycle.
+	 */
+
 	if (note.on) {
 
 		samplepos_t off_samples = sequencer().tempo_map().sample_at_beat (note.off_at.to_double());
 
 		if (off_samples >= start_sample && off_samples < end_sample) {
 
-			uint8_t mbuf[3];
-
-			/* prepare 3 MIDI bytes for note off */
-
-			mbuf[0] = 0x80 | _sequence.channel();
-
-			switch (_mode) {
-			case AbsolutePitch:
-				mbuf[1] = note.number;
-				break;
-			case RelativePitch:
-				mbuf[1] = _sequence.root() + note.interval;
-				break;
-			}
-
-			mbuf[2] = note.velocity;
-
-			buf.write (off_samples - start_sample, Evoral::MIDI_EVENT, 3, mbuf);
-			tracker.remove (mbuf[1], _sequence.channel());
+			buf.write (off_samples - start_sample, Evoral::MIDI_EVENT, 3, note.off_msg);
+			tracker.remove (note.off_msg[1], _sequence.channel());
 
 			/* record keeping */
 
@@ -324,14 +341,36 @@ StepSequence::adjust_step_pitch (int step, int amt)
 		return;
 	}
 
-	_steps[step]->_notes[0].number += amt;
+	Step::Note& note (_steps[step]->_notes[0]);
 
-	if (_steps[step]->_notes[0].number > 127.0) {
-		_steps[step]->_notes[0].number = 127.0;
+	note.number += amt;
+
+	if (note.number > 127.0) {
+		note.number = 127.0;
 	}
 
-	if (_steps[step]->_notes[0].number < 0.0) {
-		_steps[step]->_notes[0].number = 0.0;
+	if (note.number < 0.0) {
+		note.number = 0.0;
+	}
+}
+
+void
+StepSequence::adjust_step_velocity (int step, int amt)
+{
+	if (step >= _steps.size()) {
+		return;
+	}
+
+	Step::Note& note (_steps[step]->_notes[0]);
+
+	note.velocity += (1.0/128.0) * amt;
+
+	if (note.velocity > 127.0) {
+		note.velocity = 127.0;
+	}
+
+	if (note.velocity < 0.0) {
+		note.velocity = 0.0;
 	}
 }
 
@@ -405,4 +444,10 @@ void
 StepSequencer::adjust_step_pitch (int seq, int step, int amt)
 {
 	_sequences.front()->adjust_step_pitch (step, amt);
+}
+
+void
+StepSequencer::adjust_step_velocity (int seq, int step, int amt)
+{
+	_sequences.front()->adjust_step_velocity (step, amt);
 }
