@@ -147,6 +147,7 @@ BBGUI::grid_event (GdkEvent* ev)
 		ret = grid_button_release_event (&ev->button);
 		break;
 	case GDK_SCROLL:
+		cerr << ' ' << ev->scroll.direction << show_gdk_event_state (ev->scroll.state);
 		ret = grid_scroll_event (&ev->scroll);
 	default:
 		break;
@@ -199,7 +200,13 @@ BBGUI::grid_scroll_event (GdkEventScroll* ev)
 		break;
 	}
 
-	adjust_step_pitch (seq, step, amt);
+	if (ev->state & GDK_MOD1_MASK) {
+		cerr << "adjust pitch by " << amt << endl;
+		adjust_step_pitch (seq, step, amt);
+	} else {
+		cerr << "adjust velocity by " << amt << endl;
+		adjust_step_velocity (seq, step, amt);
+	}
 
 	return true;
 }
@@ -218,6 +225,12 @@ void
 BBGUI::adjust_step_pitch (int seq, int step, int amt)
 {
 	bbox->sequencer().adjust_step_pitch (seq, step, amt);
+}
+
+void
+BBGUI::adjust_step_velocity (int seq, int step, int amt)
+{
+	bbox->sequencer().adjust_step_velocity (seq, step, amt);
 }
 
 void

@@ -124,6 +124,7 @@ class BBGUI : public ArdourDialog {
 	void set_grab_step (double x, double y);
 
 	void adjust_step_pitch (int seq, int step, int amt);
+	void adjust_step_velocity (int seq, int step, int amt);
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */
