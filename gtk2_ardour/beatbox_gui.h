@@ -41,6 +41,10 @@
 #include "widgets/ardour_dropdown.h"
 #include "ardour_dialog.h"
 
+namespace PBD {
+class PropertyChange;
+}
+
 namespace ArdourCanvas {
 class Grid;
 class Item;
@@ -53,14 +57,50 @@ class Widget;
 
 namespace ARDOUR {
 class BeatBox;
+class Step;
+class StepSequencer;
 }
+
+class BBGUI;
+
+class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
+   public:
+	StepView (BBGUI&, ARDOUR::Step&, ArdourCanvas::Item*);
+
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	bool on_event (GdkEvent*);
+
+   private:
+	ARDOUR::Step& _step;
+	BBGUI& bbgui;
+
+	std::pair<double,double> grab_at;
+
+	bool motion_event (GdkEventMotion*);
+	bool button_press_event (GdkEventButton*);
+	bool button_release_event (GdkEventButton*);
+	bool scroll_event (GdkEventScroll*);
+
+	void adjust_step_pitch (int amt);
+	void adjust_step_velocity (int amt);
+
+	void step_changed (PBD::PropertyChange const &);
+	PBD::ScopedConnection step_connection;
+};
 
 class SequencerGrid : public ArdourCanvas::Rectangle {
   public:
-	SequencerGrid (ArdourCanvas::Canvas*);
-	SequencerGrid (ArdourCanvas::Item*);
+	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Item* parent);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+
+  private:
+	ARDOUR::StepSequencer& _sequencer;
+	std::vector<StepView*> step_views;
+	double _width;
+	double _height;
+
+	void sequencer_changed (PBD::PropertyChange const &);
 };
 
 class SequencerStepIndicator : public ArdourCanvas::Rectangle {
@@ -77,12 +117,17 @@ class BBGUI : public ArdourDialog {
 	BBGUI (boost::shared_ptr<ARDOUR::BeatBox> bb);
 	~BBGUI ();
 
+	double width() const { return _width; }
+	double height() const { return _height; }
+
   protected:
 	void on_map ();
 	void on_unmap ();
 
   private:
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
+	double _width;
+	double _height;
 
 	Gtk::Adjustment horizontal_adjustment;
 	Gtk::Adjustment vertical_adjustment;
@@ -113,18 +158,7 @@ class BBGUI : public ArdourDialog {
 
 	sigc::connection timer_connection;
 
-	bool grid_event (GdkEvent*);
-	bool grid_motion_event (GdkEventMotion*);
-	bool grid_button_press_event (GdkEventButton*);
-	bool grid_button_release_event (GdkEventButton*);
-	bool grid_scroll_event (GdkEventScroll*);
-
-	std::pair<int,int> grab_step;
-	std::pair<double,double> grab_at;
-	void set_grab_step (double x, double y);
-
-	void adjust_step_pitch (int seq, int step, int amt);
-	void adjust_step_velocity (int seq, int step, int amt);
+	void sequencer_changed (PBD::PropertyChange const &);
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */

@@ -42,12 +42,14 @@
 #include "canvas/text.h"
 #include "canvas/widget.h"
 
+#include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
 
 #include "beatbox_gui.h"
 #include "timers.h"
 #include "ui_config.h"
 
+using namespace PBD;
 using namespace ARDOUR;
 using namespace Gtkmm2ext;
 using namespace ArdourCanvas;
@@ -58,8 +60,6 @@ using std::endl;
 const int _nsteps = 32;
 const int _nrows = 8;
 const double _step_dimen = 25;
-const double _width = _step_dimen * _nsteps;
-const double _height = _step_dimen * _nrows;
 
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
@@ -71,7 +71,6 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 {
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
-	_canvas_viewport->set_size_request (_width, _height + _step_dimen);
 	_canvas = _canvas_viewport->canvas();
 
 	_canvas->set_background_color (UIConfiguration::instance().color ("gtk_bright_color"));
@@ -82,24 +81,15 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
 
 	step_indicator_bg = new ArdourCanvas::Rectangle (step_indicator_box);
-	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
 	step_indicator_bg->set_fill_color (UIConfiguration::instance().color ("gtk_lightest"));
 	step_indicator_bg->set_outline (false);
-
-	for (int n = 0; n < _nsteps; ++n) {
-		SequencerStepIndicator* ssi = new SequencerStepIndicator (step_indicator_box, n+1);
-		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
-		ssi->set_position (Duple (n * _step_dimen, 0.0));
-		ssi->set_fill_color (random());
-	}
 
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
 
-	_sequencer = new SequencerGrid (v_scroll_group);
+	_sequencer = new SequencerGrid (bbox->sequencer(), v_scroll_group);
 	_sequencer->set_position (Duple (0, _step_dimen));
 	_sequencer->set_fill_color (UIConfiguration::instance().color ("gtk_contrasting_indicator"));
-	_sequencer->Event.connect (sigc::mem_fun (*this, &BBGUI::grid_event));
 
 	srandom (time(0));
 
@@ -120,117 +110,14 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
 	get_action_area()->pack_end (export_as_region_button);
 
+	PropertyChange pc;
+	sequencer_changed (pc);
+
 	show_all ();
 }
 
 BBGUI::~BBGUI ()
 {
-}
-
-bool
-BBGUI::grid_event (GdkEvent* ev)
-{
-	bool ret = false;
-
-	cerr << "grid event, type: " << event_type_string (ev->type);
-	switch (ev->type) {
-	case GDK_MOTION_NOTIFY:
-		ret = grid_motion_event (&ev->motion);
-		cerr << ' ' << ev->motion.x << ',' << ev->motion.y << " state " << show_gdk_event_state (ev->motion.state);
-		break;
-	case GDK_BUTTON_PRESS:
-		cerr << ' ' << ev->button.x << ',' << ev->button.y << " state " << show_gdk_event_state (ev->button.state);
-		ret = grid_button_press_event (&ev->button);
-		break;
-	case GDK_BUTTON_RELEASE:
-		cerr << ' ' << ev->button.x << ',' << ev->button.y << " state " << show_gdk_event_state (ev->button.state);
-		ret = grid_button_release_event (&ev->button);
-		break;
-	case GDK_SCROLL:
-		cerr << ' ' << ev->scroll.direction << show_gdk_event_state (ev->scroll.state);
-		ret = grid_scroll_event (&ev->scroll);
-	default:
-		break;
-	}
-	cerr << endl;
-
-	return ret;
-}
-
-
-bool
-BBGUI::grid_motion_event (GdkEventMotion* ev)
-{
-	return true;
-}
-
-bool
-BBGUI::grid_button_press_event (GdkEventButton* ev)
-{
-	set_grab_step (ev->x, ev->y);
-	grab_at = std::make_pair (ev->x, ev->y);
-	return true;
-}
-
-bool
-BBGUI::grid_button_release_event (GdkEventButton* ev)
-{
-	return true;
-}
-
-bool
-BBGUI::grid_scroll_event (GdkEventScroll* ev)
-{
-	int step = ev->x / _step_dimen;
-	int seq = ev->y / _step_dimen;
-	int amt = 0;
-
-	switch (ev->direction) {
-	case GDK_SCROLL_UP:
-		amt = 1;
-		break;
-	case GDK_SCROLL_LEFT:
-		amt = -1;
-		break;
-	case GDK_SCROLL_RIGHT:
-		amt = 1;
-		break;
-	case GDK_SCROLL_DOWN:
-		amt = -1;
-		break;
-	}
-
-	if (ev->state & GDK_MOD1_MASK) {
-		cerr << "adjust pitch by " << amt << endl;
-		adjust_step_pitch (seq, step, amt);
-	} else {
-		cerr << "adjust velocity by " << amt << endl;
-		adjust_step_velocity (seq, step, amt);
-	}
-
-	return true;
-}
-
-void
-BBGUI::set_grab_step (double x, double y)
-{
-	int step = x / _step_dimen;
-	int seq = y / _step_dimen;
-
-	grab_step = std::make_pair (seq, step);
-}
-
-
-void
-BBGUI::adjust_step_pitch (int seq, int step, int amt)
-{
-	bbox->sequencer().adjust_step_pitch (seq, step, amt);
-}
-
-void
-BBGUI::adjust_step_velocity (int seq, int step, int amt)
-{
-	bbox->sequencer().adjust_step_velocity (seq, step, amt);
 }
 
 void
@@ -376,15 +263,65 @@ BBGUI::export_as_region ()
 	boost::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
 }
 
-SequencerGrid::SequencerGrid (Canvas *c)
-	: Rectangle (c)
+void
+BBGUI::sequencer_changed (PropertyChange const &)
 {
-	set (Rect (0, 0, _width, _height));
+	const size_t nsteps = bbox->sequencer().nsteps();
+	const size_t nsequences = bbox->sequencer().nsequences();
+
+	_width = _step_dimen * nsteps;
+	_height = _step_dimen * nsequences;
+
+	/* height is 1 step_dimen larger to accomodate the "step indicator"
+	 * line at the top
+	 */
+
+	_canvas_viewport->set_size_request (_width, _height + _step_dimen);
+
+	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
+	step_indicator_box->clear (true); /* delete all existing step indicators */
+
+	/* indicator row */
+
+	for (size_t n = 0; n < nsteps; ++n) {
+		SequencerStepIndicator* ssi = new SequencerStepIndicator (step_indicator_box, n+1);
+		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
+		ssi->set_position (Duple (n * _step_dimen, 0.0));
+		ssi->set_fill_color (random());
+	}
+
+	/* step views, one per step per sequence */
+
+	for (size_t s = 0; s < nsequences; ++s) {
+		for (size_t n = 0; n < nsteps; ++n) {
+			StepView* sv = new StepView (*this, bbox->sequencer().sequence (s).step (n), v_scroll_group);
+			//sv->set (Rect (n * _step_dimen + 1, (s+1) * _step_dimen + 1, (n+1) * _step_dimen - 1, (s+2) * _step_dimen - 1));
+			sv->set_position (Duple (n * _step_dimen, (s+1) * _step_dimen));
+			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
+			cerr << "step rect @ " << sv->get() << endl;
+		}
+	}
 }
 
-SequencerGrid::SequencerGrid (Item *p)
-	: Rectangle (p)
+/**/
+
+SequencerGrid::SequencerGrid (StepSequencer& s, Item *parent)
+	: Rectangle (parent)
+	, _sequencer (s)
 {
+	PropertyChange pc;
+
+	sequencer_changed (pc);
+}
+
+void
+SequencerGrid::sequencer_changed (PropertyChange const &)
+{
+	const size_t nsteps = _sequencer.nsteps();
+
+	_width = _step_dimen * nsteps;
+	_height = _step_dimen * _sequencer.nsequences ();
+
 	set (Rect (0, 0, _width, _height));
 }
 
@@ -432,8 +369,6 @@ SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	/* vertical bars for velocity */
 
-	Gtkmm2ext::set_source_rgba (context, UIConfiguration::instance().color ("gtk_somewhat_bright_indicator"));
-
 	for (int r = 0; r < _nrows; ++r) {
 		for (int c = 0; c < _nsteps; ++c) {
 			const double velocity = random() % 127 / 127.0;
@@ -451,7 +386,11 @@ SequencerStepIndicator::SequencerStepIndicator (Item *p, int n)
 	set_outline (false);
 
 	text = new Text (this);
-	text->set (string_compose ("%1", n));
+	if (n == 7) {
+		text->set ("\u21a9");
+	} else {
+		text->set (string_compose ("%1", n));
+	}
 	text->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 	text->set_position (Duple ((_step_dimen/2.0) - (text->width()/2.0), 5.0));
 
@@ -471,4 +410,123 @@ SequencerStepIndicator::render  (Rect const & area, Cairo::RefPtr<Cairo::Context
 {
 	Rectangle::render (area, context);
 	render_children (area, context);
+}
+
+StepView::StepView (BBGUI& bb, Step& s, ArdourCanvas::Item* parent)
+	: ArdourCanvas::Rectangle (parent)
+	, _step (s)
+	, bbgui (bb)
+{
+	set_fill_color (UIConfiguration::instance().color ("gtk_bright_indicator"));
+
+	Event.connect (sigc::mem_fun (*this, &StepView::on_event));
+	_step.PropertyChanged.connect (step_connection, invalidator (*this), boost::bind (&StepView::step_changed, this, _1), gui_context());
+}
+
+void
+StepView::step_changed (PropertyChange const &)
+{
+	cerr << "Redraw for step @ " << _step.beat() << endl;
+	redraw ();
+}
+
+void
+StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
+{
+	const double height = (_step_dimen - 2) * _step.velocity();
+	cerr << _step.beat() << " From V = " << _step.velocity() << " h  = " << height << " area = " << area;
+	Rect r (1, height, _step_dimen - 2, _step_dimen - height);
+	r = item_to_window (r);
+	cerr << " draw " << r << endl;
+	context->rectangle (r.x1, r.y1, r.width(), r.height());
+	context->fill ();
+}
+
+bool
+StepView::on_event (GdkEvent *ev)
+{
+	bool ret = false;
+
+	switch (ev->type) {
+	case GDK_MOTION_NOTIFY:
+		ret = motion_event (&ev->motion);
+		break;
+	case GDK_BUTTON_PRESS:
+		ret = button_press_event (&ev->button);
+		break;
+	case GDK_BUTTON_RELEASE:
+		ret = button_release_event (&ev->button);
+		break;
+	case GDK_SCROLL:
+		ret = scroll_event (&ev->scroll);
+	default:
+		break;
+	}
+
+	return ret;
+}
+
+
+bool
+StepView::motion_event (GdkEventMotion* ev)
+{
+	return true;
+}
+
+bool
+StepView::button_press_event (GdkEventButton* ev)
+{
+	grab_at = std::make_pair (ev->x, ev->y);
+	return true;
+}
+
+bool
+StepView::button_release_event (GdkEventButton* ev)
+{
+	return true;
+}
+
+bool
+StepView::scroll_event (GdkEventScroll* ev)
+{
+	int step = ev->x / _step_dimen;
+	int seq = ev->y / _step_dimen;
+	int amt = 0;
+
+	switch (ev->direction) {
+	case GDK_SCROLL_UP:
+		amt = 1;
+		break;
+	case GDK_SCROLL_LEFT:
+		amt = -1;
+		break;
+	case GDK_SCROLL_RIGHT:
+		amt = 1;
+		break;
+	case GDK_SCROLL_DOWN:
+		amt = -1;
+		break;
+	}
+
+	if (ev->state & GDK_MOD1_MASK) {
+		cerr << "adjust pitch by " << amt << endl;
+		adjust_step_pitch (amt);
+	} else {
+		cerr << "adjust velocity by " << amt << endl;
+		adjust_step_velocity (amt);
+	}
+
+	return true;
+}
+
+void
+StepView::adjust_step_pitch (int amt)
+{
+	_step.adjust_pitch (amt);
+}
+
+void
+StepView::adjust_step_velocity (int amt)
+{
+	_step.adjust_velocity (amt);
 }
