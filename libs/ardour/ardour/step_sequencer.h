@@ -24,6 +24,8 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/stateful.h"
+
 #include "temporal/types.h"
 #include "temporal/beats.h"
 
@@ -41,7 +43,7 @@ class TempoMap;
 typedef std::pair<Temporal::Beats,samplepos_t> BeatPosition;
 typedef std::vector<BeatPosition> BeatPositions;
 
-class Step {
+class Step : public PBD::Stateful {
   public:
 	enum Mode {
 		AbsolutePitch,
@@ -54,6 +56,9 @@ class Step {
 	void set_note (double note, double velocity = 0.5, int32_t duration = 1, int n = 0);
 	void set_chord (size_t note_cnt, double* notes);
 	void set_parameter (int number, double value, int n = 0);
+
+	void adjust_velocity (int amt);
+	void adjust_pitch (int amt);
 
 	Mode mode() const { return _mode; }
 	void set_mode (Mode m);
@@ -83,6 +88,9 @@ class Step {
 	void set_skipped (bool);
 
 	void set_timeline_offset (Temporal::Beats const &, Temporal::Beats const &);
+
+	XMLNode& get_state();
+	int set_state (XMLNode const &, int);
 
   private:
 	friend class StepSequence; /* HACK */
@@ -143,10 +151,11 @@ class StepSequence
 	StepSequence (StepSequencer &myseq, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
 	~StepSequence ();
 
-	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
+	size_t nsteps() const { return _steps.size(); }
 
-	void adjust_step_pitch (int step, int amt);
-	void adjust_step_velocity (int step, int amt);
+	Step& step (size_t n) const;
+
+	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
 
 	Temporal::Beats bar_size() const { return _bar_size; }
 
@@ -179,7 +188,7 @@ class StepSequence
 
   private:
 	StepSequencer& _sequencer;
-	Glib::Threads::Mutex _step_lock;
+	mutable Glib::Threads::Mutex _step_lock;
 	typedef std::vector<Step*> Steps;
 
 	Steps       _steps;
@@ -200,6 +209,11 @@ class StepSequencer {
 	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
 	~StepSequencer ();
 
+	size_t nsteps() const { return _sequences.front()->nsteps(); }
+	size_t nsequences() const { return _sequences.size(); }
+
+	StepSequence& sequence (size_t n) const;
+
 	Temporal::Beats duration() const;
 
 	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
@@ -218,12 +232,8 @@ class StepSequencer {
 
 	TempoMap& tempo_map() const { return _tempo_map; }
 
-	/* editing */
-	void adjust_step_pitch (int seq, int step, int amt);
-	void adjust_step_velocity (int seq, int step, int amt);
-
   private:
-	Glib::Threads::Mutex       _sequence_lock;
+	mutable Glib::Threads::Mutex       _sequence_lock;
 
 	typedef std::vector<StepSequence*> StepSequences;
 

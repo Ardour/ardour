@@ -18,12 +18,15 @@
 
 #include <cassert>
 
+#include "pbd/i18n.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/step_sequencer.h"
 #include "ardour/tempo.h"
 
+using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
@@ -98,6 +101,44 @@ void
 Step::set_enabled (bool yn)
 {
 	_enabled = yn;
+}
+
+void
+Step::adjust_pitch (int amt)
+{
+	Step::Note& note (_notes[0]);
+
+	note.number += amt;
+
+	if (note.number > 127.0) {
+		note.number = 127.0;
+	}
+
+	if (note.number < 0.0) {
+		note.number = 0.0;
+	}
+
+	PropertyChange pc;
+	PropertyChanged (pc);
+}
+
+void
+Step::adjust_velocity (int amt)
+{
+	Step::Note& note (_notes[0]);
+
+	note.velocity += (1.0/128.0) * amt;
+
+	if (note.velocity > 127.0) {
+		note.velocity = 127.0;
+	}
+
+	if (note.velocity < 0.0) {
+		note.velocity = 0.0;
+	}
+
+	PropertyChange pc;
+	PropertyChanged (pc);
 }
 
 bool
@@ -266,6 +307,18 @@ Step::set_timeline_offset (Temporal::Beats const & start, Temporal::Beats const 
 	}
 }
 
+XMLNode&
+Step::get_state ()
+{
+	return *new XMLNode (X_("Step"));
+}
+
+int
+Step::set_state (XMLNode const &, int)
+{
+	return 0;
+}
+
 /**/
 
 StepSequence::StepSequence (StepSequencer& s, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size)
@@ -334,44 +387,11 @@ StepSequence::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samp
 	return true;
 }
 
-void
-StepSequence::adjust_step_pitch (int step, int amt)
+Step&
+StepSequence::step (size_t n) const
 {
-	if (step >= _steps.size()) {
-		return;
-	}
-
-	Step::Note& note (_steps[step]->_notes[0]);
-
-	note.number += amt;
-
-	if (note.number > 127.0) {
-		note.number = 127.0;
-	}
-
-	if (note.number < 0.0) {
-		note.number = 0.0;
-	}
-}
-
-void
-StepSequence::adjust_step_velocity (int step, int amt)
-{
-	if (step >= _steps.size()) {
-		return;
-	}
-
-	Step::Note& note (_steps[step]->_notes[0]);
-
-	note.velocity += (1.0/128.0) * amt;
-
-	if (note.velocity > 127.0) {
-		note.velocity = 127.0;
-	}
-
-	if (note.velocity < 0.0) {
-		note.velocity = 0.0;
-	}
+	assert (n < _steps.size());
+	return *_steps[n];
 }
 
 /**/
@@ -440,14 +460,9 @@ StepSequencer::startup (Temporal::Beats const & start, Temporal::Beats const & o
 
 }
 
-void
-StepSequencer::adjust_step_pitch (int seq, int step, int amt)
+StepSequence&
+StepSequencer::sequence (size_t n) const
 {
-	_sequences.front()->adjust_step_pitch (step, amt);
-}
-
-void
-StepSequencer::adjust_step_velocity (int seq, int step, int amt)
-{
-	_sequences.front()->adjust_step_velocity (step, amt);
+	assert (n < _sequences.size());
+	return *_sequences[n];
 }
