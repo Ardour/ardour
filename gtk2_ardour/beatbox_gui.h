@@ -63,18 +63,20 @@ class Step;
 class StepSequencer;
 }
 
-class BBGUI;
+class SequencerGrid;
 
 class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
    public:
-	StepView (BBGUI&, ARDOUR::Step&, ArdourCanvas::Item*);
+	StepView (SequencerGrid&, ARDOUR::Step&, ArdourCanvas::Item*);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	bool on_event (GdkEvent*);
 
+	void view_mode_changed ();
+
    private:
 	ARDOUR::Step& _step;
-	BBGUI& bbgui;
+	SequencerGrid& _seq;
 	ArdourCanvas::Text* text;
 
 	std::pair<double,double> grab_at;
@@ -86,6 +88,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	void adjust_step_pitch (int amt);
 	void adjust_step_velocity (int amt);
+	void adjust_step_octave (int amt);
 
 	void step_changed (PBD::PropertyChange const &);
 	PBD::ScopedConnection step_connection;
@@ -93,19 +96,33 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	void make_text ();
 };
 
-class SequencerGrid : public ArdourCanvas::Rectangle {
+class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
+	enum Mode {
+		Velocity,
+		Pitch,
+		Octave,
+		Group,
+	};
+
 	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Item* parent);
+
+	Mode mode() const { return _mode; }
+	void set_mode (Mode m);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 
   private:
 	ARDOUR::StepSequencer& _sequencer;
-	std::vector<StepView*> step_views;
+	typedef std::vector<StepView*> StepViews;
+	StepViews _step_views;
 	double _width;
 	double _height;
+	Mode   _mode;
 
 	void sequencer_changed (PBD::PropertyChange const &);
+
+	PBD::ScopedConnection sequencer_connection;
 };
 
 class SequencerStepIndicator : public ArdourCanvas::Rectangle {
@@ -119,21 +136,11 @@ class SequencerStepIndicator : public ArdourCanvas::Rectangle {
 
 class BBGUI : public ArdourDialog {
   public:
-	enum Mode {
-		Velocity,
-		Pitch,
-		Octave,
-		Group,
-	};
-
 	BBGUI (boost::shared_ptr<ARDOUR::BeatBox> bb);
 	~BBGUI ();
 
 	double width() const { return _width; }
 	double height() const { return _height; }
-
-	Mode mode() const { return _mode; }
-	void set_mode (Mode m);
 
   protected:
 	void on_map ();
@@ -141,7 +148,6 @@ class BBGUI : public ArdourDialog {
 
   private:
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
-	Mode _mode;
 	double _width;
 	double _height;
 
@@ -180,7 +186,9 @@ class BBGUI : public ArdourDialog {
 	ArdourWidgets::ArdourButton mode_octave_button;
 	ArdourWidgets::ArdourButton mode_group_button;
 
-	void mode_clicked (Mode);
+	void mode_clicked (SequencerGrid::Mode);
+
+	PBD::ScopedConnection sequencer_connection;
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */

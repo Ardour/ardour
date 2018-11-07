@@ -64,7 +64,6 @@ const double _step_dimen = 25;
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
 	, bbox (bb)
-	, _mode (Velocity)
 	, horizontal_adjustment (0.0, 0.0, 800.0)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, vscrollbar (vertical_adjustment)
@@ -105,10 +104,10 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	mode_box.pack_start (mode_octave_button);
 	mode_box.pack_start (mode_group_button);
 
-	mode_velocity_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Velocity));
-	mode_pitch_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Pitch));
-	mode_octave_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Octave));
-	mode_group_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Group));
+	mode_velocity_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Velocity));
+	mode_pitch_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Pitch));
+	mode_octave_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Octave));
+	mode_group_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Group));
 
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (mode_box, false, false);
@@ -120,8 +119,13 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
 	get_action_area()->pack_end (export_as_region_button);
 
-	PropertyChange pc;
-	sequencer_changed (pc);
+	bbox->sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&BBGUI::sequencer_changed, this, _1), gui_context());
+
+	{
+		/* trigger initial draw */
+		PropertyChange pc;
+		sequencer_changed (pc);
+	}
 
 	show_all ();
 }
@@ -131,9 +135,10 @@ BBGUI::~BBGUI ()
 }
 
 void
-BBGUI::mode_clicked (Mode m)
+BBGUI::mode_clicked (SequencerGrid::Mode m)
 {
-	set_mode (m);
+	cerr << "Set mode to " << m << endl;
+	_sequencer->set_mode (m);
 }
 
 void
@@ -280,13 +285,6 @@ BBGUI::export_as_region ()
 }
 
 void
-BBGUI::set_mode (BBGUI::Mode m)
-{
-	_mode = m;
-	_sequencer->redraw ();
-}
-
-void
 BBGUI::sequencer_changed (PropertyChange const &)
 {
 	const size_t nsteps = bbox->sequencer().nsteps();
@@ -312,18 +310,6 @@ BBGUI::sequencer_changed (PropertyChange const &)
 		ssi->set_position (Duple (n * _step_dimen, 0.0));
 		ssi->set_fill_color (random());
 	}
-
-	/* step views, one per step per sequence */
-
-	for (size_t s = 0; s < nsequences; ++s) {
-		for (size_t n = 0; n < nsteps; ++n) {
-			StepView* sv = new StepView (*this, bbox->sequencer().sequence (s).step (n), v_scroll_group);
-			//sv->set (Rect (n * _step_dimen + 1, (s+1) * _step_dimen + 1, (n+1) * _step_dimen - 1, (s+2) * _step_dimen - 1));
-			sv->set_position (Duple (n * _step_dimen, (s+1) * _step_dimen));
-			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
-			cerr << "step rect @ " << sv->get() << endl;
-		}
-	}
 }
 
 /**/
@@ -331,21 +317,53 @@ BBGUI::sequencer_changed (PropertyChange const &)
 SequencerGrid::SequencerGrid (StepSequencer& s, Item *parent)
 	: Rectangle (parent)
 	, _sequencer (s)
+	, _mode (Velocity)
 {
-	PropertyChange pc;
+	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
-	sequencer_changed (pc);
+	{
+		/* trigger initial draw */
+		PropertyChange pc;
+		sequencer_changed (pc);
+	}
 }
 
 void
 SequencerGrid::sequencer_changed (PropertyChange const &)
 {
 	const size_t nsteps = _sequencer.nsteps();
+	const size_t nsequences = _sequencer.nsequences();
 
 	_width = _step_dimen * nsteps;
-	_height = _step_dimen * _sequencer.nsequences ();
+	_height = _step_dimen * nsequences;
 
 	set (Rect (0, 0, _width, _height));
+
+	/* step views, one per step per sequence */
+
+	clear (true);
+	_step_views.clear ();
+
+	for (size_t s = 0; s < nsequences; ++s) {
+		for (size_t n = 0; n < nsteps; ++n) {
+			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), Item::parent());
+			sv->set_position (Duple (n * _step_dimen, (s+1) * _step_dimen));
+			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
+			_step_views.push_back (sv);
+		}
+	}
+}
+
+void
+SequencerGrid::set_mode (Mode m)
+{
+	_mode = m;
+
+	for (StepViews::iterator s = _step_views.begin(); s != _step_views.end(); ++s) {
+		(*s)->view_mode_changed ();
+	}
+
+	redraw ();
 }
 
 void
@@ -426,15 +444,16 @@ SequencerStepIndicator::render  (Rect const & area, Cairo::RefPtr<Cairo::Context
 	render_children (area, context);
 }
 
-StepView::StepView (BBGUI& bb, Step& s, ArdourCanvas::Item* parent)
+StepView::StepView (SequencerGrid& sg, Step& s, ArdourCanvas::Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 	, _step (s)
-	, bbgui (bb)
+	, _seq (sg)
 	, text (new Text (this))
 {
-	set_fill_color (UIConfiguration::instance().color ("gtk_bright_indicator"));
+	set_fill_color (UIConfiguration::instance().color ("selection"));
 
 	text->set_fill_color (contrasting_text_color (fill_color()));
+	text->set_font_description (UIConfiguration::instance ().get_SmallFont ());
 	text->hide ();
 
 	Event.connect (sigc::mem_fun (*this, &StepView::on_event));
@@ -442,33 +461,58 @@ StepView::StepView (BBGUI& bb, Step& s, ArdourCanvas::Item* parent)
 }
 
 void
+StepView::view_mode_changed ()
+{
+	cerr << "view mode changed\n";
+
+	if (_seq.mode() == SequencerGrid::Octave) {
+		cerr << "octave\n";
+
+		text->show ();
+		if (_step.octave_shift() >= 0) {
+			text->set (string_compose ("+%1", _step.octave_shift()));
+		} else {
+			text->set (string_compose ("%1", _step.octave_shift()));
+		}
+
+		const double w = text->width();
+		const double h = text->height();
+
+		cerr << "put octave text " << text->text() << " dimen " << w << " x " << h << " @ " << Duple (_step_dimen/2 - (w/2), _step_dimen/2 - (h/2)) << endl;
+
+		text->set_position (Duple (_step_dimen/2 - (w/2), _step_dimen/2 - (h/2)));
+
+	} else if (_seq.mode() == SequencerGrid::Group) {
+		text->show ();
+	} else {
+		text->hide ();
+	}
+}
+
+void
 StepView::step_changed (PropertyChange const &)
 {
-	cerr << "Redraw for step @ " << _step.beat() << endl;
 	redraw ();
 }
 
 void
 StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (text) {
-		text->hide ();
-	}
-
-	if (bbgui.mode() == BBGUI::Velocity) {
+	if (_seq.mode() == SequencerGrid::Velocity) {
 		const double height = (_step_dimen - 4) * _step.velocity();
 		const Duple origin = item_to_window (Duple (0, 0));
 		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 		context->fill ();
-	} else if (bbgui.mode() == BBGUI::Pitch) {
+	} else if (_seq.mode() == SequencerGrid::Pitch) {
 		const double height = (_step_dimen - 4) * (_step.note() / 128.0);
 		const Duple origin = item_to_window (Duple (0, 0));
 		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 		context->fill ();
-	} else if (bbgui.mode() == BBGUI::Octave) {
-		text->set (string_compose ("%1", _step.octave_shift()));
-		text->show ();
 	}
+
+	/* now deal with any children (e.g. text) */
+
+	render_children (area, context);
 }
 
 bool
@@ -535,12 +579,15 @@ StepView::scroll_event (GdkEventScroll* ev)
 		break;
 	}
 
-	if ((ev->state & GDK_MOD1_MASK) || bbgui.mode() == BBGUI::Pitch) {
+	if ((ev->state & GDK_MOD1_MASK) || _seq.mode() == SequencerGrid::Pitch) {
 		cerr << "adjust pitch by " << amt << endl;
 		adjust_step_pitch (amt);
-	} else if (bbgui.mode() == BBGUI::Velocity) {
+	} else if (_seq.mode() == SequencerGrid::Velocity) {
 		cerr << "adjust velocity by " << amt << endl;
 		adjust_step_velocity (amt);
+	} else if (_seq.mode() == SequencerGrid::Octave) {
+		adjust_step_octave (amt);
+	} else if (_seq.mode() == SequencerGrid::Group) {
 	}
 
 	return true;
@@ -556,4 +603,10 @@ void
 StepView::adjust_step_velocity (int amt)
 {
 	_step.adjust_velocity (amt);
+}
+
+void
+StepView::adjust_step_octave (int amt)
+{
+	_step.adjust_octave (amt);
 }
