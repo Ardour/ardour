@@ -38,6 +38,8 @@ Step::Step (StepSequence &s, Temporal::Beats const & b)
 	, _nominal_beat (b)
 	, _skipped (false)
 	, _mode (AbsolutePitch)
+	, _octave_shift (0)
+	, _duration (1.0)
 {
 	std::cerr << "step @ " << b << std::endl;
 
@@ -76,12 +78,11 @@ Step::set_beat (Temporal::Beats const & b)
 }
 
 void
-Step::set_note (double note, double velocity, int32_t duration, int n)
+Step::set_note (double note, double velocity, int n)
 {
 	assert (n < _notes_per_step);
 	_notes[n].number = note;
 	_notes[n].velocity = velocity;
-	_notes[n].duration = duration;
 }
 
 void
@@ -135,6 +136,22 @@ Step::adjust_velocity (int amt)
 
 	if (note.velocity < 0.0) {
 		note.velocity = 0.0;
+	}
+
+	PropertyChange pc;
+	PropertyChanged (pc);
+}
+
+void
+Step::adjust_octave (int amt)
+{
+	/* this is applied to all notes at once */
+
+	_octave_shift += amt;
+	if (_octave_shift > 4) {
+		_octave_shift = 4;
+	} else if (_octave_shift < -4) {
+		_octave_shift = -4;
 	}
 
 	PropertyChange pc;
@@ -240,6 +257,18 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 				break;
 			}
 
+			if (_octave_shift) {
+
+				const int t = mbuf[1] + (12 * _octave_shift);
+
+				if (t > 127 || t < 0) {
+					/* Out of range */
+					return;
+				}
+
+				mbuf[1] = t;
+			}
+
 			mbuf[2] = (uint8_t) floor (note.velocity * 127.0);
 
 			note.off_msg[0] = 0x80 | _sequence.channel();
@@ -258,10 +287,10 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 
 			note.off_at = note_on_time;
 
-			if (note.duration == 1) {
+			if (_duration == 1.0) {
 				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() - 1);
 			} else {
-				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() / note.duration);
+				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() * _duration);
 			}
 		}
 	}
@@ -392,6 +421,19 @@ StepSequence::step (size_t n) const
 	return *_steps[n];
 }
 
+
+XMLNode&
+StepSequence::get_state()
+{
+	return *new XMLNode (X_("StepSequence"));
+}
+
+int
+StepSequence::set_state (XMLNode const &, int)
+{
+	return 0;
+}
+
 /**/
 
 StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size)
@@ -463,4 +505,16 @@ StepSequencer::sequence (size_t n) const
 {
 	assert (n < _sequences.size());
 	return *_sequences[n];
+}
+
+XMLNode&
+StepSequencer::get_state()
+{
+	return *new XMLNode (X_("StepSequencer"));
+}
+
+int
+StepSequencer::set_state (XMLNode const &, int)
+{
+	return 0;
 }

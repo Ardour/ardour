@@ -53,19 +53,22 @@ class Step : public PBD::Stateful {
 	Step (StepSequence&, Temporal::Beats const & beat);
 	~Step ();
 
-	void set_note (double note, double velocity = 0.5, int32_t duration = 1, int n = 0);
+	void set_note (double note, double velocity = 0.5, int n = 0);
 	void set_chord (size_t note_cnt, double* notes);
 	void set_parameter (int number, double value, int n = 0);
 
 	void adjust_velocity (int amt);
 	void adjust_pitch (int amt);
+	void adjust_octave (int amt);
 
 	Mode mode() const { return _mode; }
 	void set_mode (Mode m);
 
 	double note (size_t n = 0) const { return _notes[n].number; }
 	double velocity (size_t n = 0) const { return _notes[n].velocity; }
-	int32_t duration (size_t n = 0) const { return _notes[n].duration; }
+
+	double duration () const { return _duration; }
+	void set_duration (double duration);
 
 	void set_offset (Temporal::Beats const &, size_t n = 0);
 	Temporal::Beats offset (size_t n = 0) const { return _notes[n].offset; }
@@ -105,7 +108,8 @@ class Step : public PBD::Stateful {
 	bool               _skipped;
 	Mode               _mode;
 	int                _octave_shift;
-
+	double             _duration;
+	
 	struct ParameterValue {
 		int parameter;
 		double value;
@@ -117,14 +121,13 @@ class Step : public PBD::Stateful {
 			double interval; /* semitones */
 		};
 		double velocity;
-		int32_t duration;
 		Temporal::Beats offset;
 		bool on;
 		Temporal::Beats off_at;
 		MIDI::byte off_msg[3];
 
-		Note () : number (-1), velocity (0.5), duration (1), on (false) {}
-		Note (double n, double v, double d, Temporal::Beats const & o) : number (n), velocity (v), duration (d), offset (o), on (false) {}
+		Note () : number (-1), velocity (0.5), on (false) {}
+		Note (double n, double v,Temporal::Beats const & o) : number (n), velocity (v), offset (o), on (false) {}
 	};
 
 	static const int _notes_per_step = 5;
@@ -137,11 +140,10 @@ class Step : public PBD::Stateful {
 	void check_note (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t, MidiStateTracker&);
 	void check_parameter (size_t n, MidiBuffer& buf, bool, samplepos_t, samplepos_t);
 
-
 	StepSequencer& sequencer() const;
 };
 
-class StepSequence
+class StepSequence : public PBD::Stateful
 {
   public:
 	enum Direction {
@@ -189,6 +191,9 @@ class StepSequence
 
 	StepSequencer& sequencer() const { return _sequencer; }
 
+	XMLNode& get_state();
+	int set_state (XMLNode const &, int);
+
   private:
 	StepSequencer& _sequencer;
 	mutable Glib::Threads::Mutex _step_lock;
@@ -207,7 +212,8 @@ class StepSequence
 	MusicalMode _mode;
 };
 
-class StepSequencer {
+class StepSequencer : public PBD::Stateful
+{
   public:
 	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
 	~StepSequencer ();
@@ -234,6 +240,9 @@ class StepSequencer {
 	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
 
 	TempoMap& tempo_map() const { return _tempo_map; }
+
+	XMLNode& get_state();
+	int set_state (XMLNode const &, int);
 
   private:
 	mutable Glib::Threads::Mutex       _sequence_lock;
