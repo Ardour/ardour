@@ -59,6 +59,7 @@ class Step : public PBD::Stateful {
 
 	void adjust_velocity (int amt);
 	void adjust_pitch (int amt);
+	void adjust_duration (double amt);
 	void adjust_octave (int amt);
 
 	Mode mode() const { return _mode; }

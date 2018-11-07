@@ -105,6 +105,23 @@ Step::set_enabled (bool yn)
 }
 
 void
+Step::adjust_duration (double amt)
+{
+	const double new_dur = _duration + amt;
+
+	if (new_dur > 1.0) {
+		_duration = 1.0;
+	} else if (new_dur < 1.0/64.0) {
+		_duration = 0.0;
+	} else {
+		_duration = new_dur;
+	}
+
+	PropertyChange pc;
+	PropertyChanged (pc);
+}
+
+void
 Step::adjust_pitch (int amt)
 {
 	Step::Note& note (_notes[0]);
