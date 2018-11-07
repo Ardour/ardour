@@ -120,9 +120,9 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 {
 	int fmt = 0;
 
-        init_sndfile ();
+	init_sndfile ();
 
-        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
 	_file_is_new = true;
