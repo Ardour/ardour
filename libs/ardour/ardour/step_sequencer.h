@@ -87,7 +87,10 @@ class Step : public PBD::Stateful {
 	bool skipped() const { return _skipped; }
 	void set_skipped (bool);
 
-	void set_timeline_offset (Temporal::Beats const &, Temporal::Beats const &);
+	void reschedule (Temporal::Beats const &, Temporal::Beats const &);
+
+	int octave_shift() const { return _octave_shift; }
+	void set_octave_shift (int);
 
 	XMLNode& get_state();
 	int set_state (XMLNode const &, int);
@@ -97,11 +100,11 @@ class Step : public PBD::Stateful {
 
 	StepSequence&      _sequence;
 	bool               _enabled;
-	Temporal::Beats     timeline_offset;
 	Temporal::Beats    _nominal_beat;
 	Temporal::Beats    _scheduled_beat;
 	bool               _skipped;
 	Mode               _mode;
+	int                _octave_shift;
 
 	struct ParameterValue {
 		int parameter;

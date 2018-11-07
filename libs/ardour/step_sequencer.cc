@@ -129,8 +129,8 @@ Step::adjust_velocity (int amt)
 
 	note.velocity += (1.0/128.0) * amt;
 
-	if (note.velocity > 127.0) {
-		note.velocity = 127.0;
+	if (note.velocity > 1.0) {
+		note.velocity = 1.0;
 	}
 
 	if (note.velocity < 0.0) {
@@ -290,10 +290,8 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 }
 
 void
-Step::set_timeline_offset (Temporal::Beats const & start, Temporal::Beats const & offset)
+Step::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 {
-	timeline_offset = offset;
-
 	if (_nominal_beat < offset) {
 		_scheduled_beat = start + _nominal_beat + sequencer().duration(); /* schedule into the next loop iteration */
 	} else {
@@ -352,7 +350,7 @@ void
 StepSequence::startup (Temporal::Beats const & start, Temporal::Beats const & offset)
 {
 	for (Steps::iterator i = _steps.begin(); i != _steps.end(); ++i) {
-		(*i)->set_timeline_offset (start, offset);
+		(*i)->reschedule (start, offset);
 	}
 }
 
