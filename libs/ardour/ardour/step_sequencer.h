@@ -22,6 +22,8 @@
 #include <vector>
 #include <unistd.h>
 
+#include <boost/rational.hpp>
+
 #include <glibmm/threads.h>
 
 #include "pbd/stateful.h"
@@ -50,6 +52,8 @@ class Step : public PBD::Stateful {
 		RelativePitch
 	};
 
+	typedef boost::rational<int> DurationRatio;
+
 	Step (StepSequence&, Temporal::Beats const & beat);
 	~Step ();
 
@@ -59,7 +63,7 @@ class Step : public PBD::Stateful {
 
 	void adjust_velocity (int amt);
 	void adjust_pitch (int amt);
-	void adjust_duration (double amt);
+	void adjust_duration (DurationRatio const & amt);
 	void adjust_octave (int amt);
 
 	Mode mode() const { return _mode; }
@@ -68,8 +72,8 @@ class Step : public PBD::Stateful {
 	double note (size_t n = 0) const { return _notes[n].number; }
 	double velocity (size_t n = 0) const { return _notes[n].velocity; }
 
-	double duration () const { return _duration; }
-	void set_duration (double duration);
+	DurationRatio duration () const { return _duration; }
+	void set_duration (DurationRatio const &);
 
 	void set_offset (Temporal::Beats const &, size_t n = 0);
 	Temporal::Beats offset (size_t n = 0) const { return _notes[n].offset; }
@@ -109,8 +113,8 @@ class Step : public PBD::Stateful {
 	bool               _skipped;
 	Mode               _mode;
 	int                _octave_shift;
-	double             _duration;
-	
+	DurationRatio      _duration;
+
 	struct ParameterValue {
 		int parameter;
 		double value;

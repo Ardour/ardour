@@ -39,7 +39,7 @@ Step::Step (StepSequence &s, Temporal::Beats const & b)
 	, _skipped (false)
 	, _mode (AbsolutePitch)
 	, _octave_shift (0)
-	, _duration (1.0)
+	, _duration (1)
 {
 	std::cerr << "step @ " << b << std::endl;
 
@@ -105,16 +105,20 @@ Step::set_enabled (bool yn)
 }
 
 void
-Step::adjust_duration (double amt)
+Step::adjust_duration (DurationRatio const & amt)
 {
-	const double new_dur = _duration + amt;
+	set_duration (_duration + amt);
+}
 
-	if (new_dur > 1.0) {
-		_duration = 1.0;
-	} else if (new_dur < 1.0/64.0) {
-		_duration = 0.0;
+void
+Step::set_duration (DurationRatio const & dur)
+{
+	if (dur > 1.0) {
+		_duration = DurationRatio (1);
+	} else if (dur < DurationRatio()) {
+		_duration = DurationRatio ();
 	} else {
-		_duration = new_dur;
+		_duration = dur;
 	}
 
 	PropertyChange pc;
@@ -236,6 +240,11 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 
 	}
 
+	if (_duration == DurationRatio ()) {
+		/* no duration, so no new notes on */
+		return;
+	}
+
 	if (note.number < 0) {
 		/* note not set .. ignore */
 		return;
@@ -304,10 +313,10 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 
 			note.off_at = note_on_time;
 
-			if (_duration == 1.0) {
+			if (_duration == DurationRatio (1)) {
 				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() - 1);
 			} else {
-				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() * _duration);
+				note.off_at += Temporal::Beats (0, (_sequence.step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
 			}
 		}
 	}
