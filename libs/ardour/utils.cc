@@ -568,6 +568,8 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
                 return ".aif";
         case iXML:
                 return ".ixml";
+        case FLAC:
+                return ".flac";
         case RF64:
         case RF64_WAV:
         case MBWF:

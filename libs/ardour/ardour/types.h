@@ -543,6 +543,7 @@ enum HeaderFormat {
 	RF64,
 	RF64_WAV,
 	MBWF,
+	FLAC,
 };
 
 struct PeakData {

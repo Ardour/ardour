@@ -1947,6 +1947,7 @@ LuaBindings::common (lua_State* L)
 		.addConst ("RF64", ARDOUR::HeaderFormat(RF64))
 		.addConst ("RF64_WAV", ARDOUR::HeaderFormat(RF64_WAV))
 		.addConst ("MBWF", ARDOUR::HeaderFormat(MBWF))
+		.addConst ("FLAC", ARDOUR::HeaderFormat(FLAC))
 		.endNamespace ()
 
 		.beginNamespace ("InsertMergePolicy")
