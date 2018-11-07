@@ -637,7 +637,7 @@ OSC_GUI::factory_reset ()
 	send_page_entry.set_text ("0");
 	cp.set_plugin_size (0);
 	plugin_page_entry.set_text ("0");
-	cp.set_defaultstrip (159);
+	cp.set_defaultstrip (31);
 	cp.set_defaultfeedback (0);
 	reshow_values ();
 	cp.set_gainmode (0);

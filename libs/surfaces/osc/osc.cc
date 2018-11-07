@@ -102,7 +102,7 @@ OSC::OSC (Session& s, uint32_t port)
 	, address_only (true)
 	, remote_port ("8000")
 	, default_banksize (0)
-	, default_strip (159)
+	, default_strip (31)
 	, default_feedback (0)
 	, default_gainmode (0)
 	, default_send_size (0)
@@ -2863,7 +2863,7 @@ OSC::set_temp_mode (lo_address addr)
 					// this is a bus, but not master, monitor or audition
 					sur->temp_strips.clear();
 					StripableList stripables;
-					session->get_stripables (stripables);
+					session->get_stripables (stripables, PresentationInfo::AllStripables);
 					for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 						boost::shared_ptr<Stripable> st = *it;
 						boost::shared_ptr<Route> ri = boost::dynamic_pointer_cast<Route> (st);
@@ -6296,7 +6296,7 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 	StripableList custom_list;
 
 	// fetch all stripables
-	session->get_stripables (stripables);
+	session->get_stripables (stripables, PresentationInfo::AllStripables);
 	if (custom) {
 		uint32_t nstps = my_list.size ();
 		// check each custom strip to see if it still exists
@@ -6923,7 +6923,7 @@ OSC::cue_get_sorted_stripables(boost::shared_ptr<Stripable> aux, uint32_t id, lo
 	// fetch all stripables
 	StripableList stripables;
 
-	session->get_stripables (stripables);
+	session->get_stripables (stripables, PresentationInfo::MixerStripables);
 	boost::shared_ptr<Route> aux_rt = boost::dynamic_pointer_cast<Route> (aux);
 	Route::FedBy fed_by = aux_rt->fed_by();
 	for (Route::FedBy::iterator i = fed_by.begin(); i != fed_by.end(); ++i) {
