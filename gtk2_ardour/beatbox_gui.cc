@@ -512,7 +512,8 @@ StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 		context->fill ();
 	} else if (_seq.mode() == SequencerGrid::Duration) {
-		const double height = (_step_dimen - 4) * (_step.duration());
+		const Step::DurationRatio d (_step.duration());
+		const double height = ((_step_dimen - 4.0) * d.numerator()) / d.denominator();
 		const Duple origin = item_to_window (Duple (0, 0));
 		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 		context->fill ();
@@ -594,8 +595,8 @@ StepView::scroll_event (GdkEventScroll* ev)
 		cerr << "adjust velocity by " << amt << endl;
 		adjust_step_velocity (amt);
 	} else if (_seq.mode() == SequencerGrid::Duration) {
-		cerr << "adjust velocity by " << amt << endl;
-		adjust_step_duration (amt/32.0); /* adjust by 1/32 of the sequencer step size */
+		cerr << "adjust duration by " << Step::DurationRatio (amt, 32) << endl;
+		adjust_step_duration (Step::DurationRatio (amt, 32)); /* adjust by 1/32 of the sequencer step size */
 	} else if (_seq.mode() == SequencerGrid::Octave) {
 		adjust_step_octave (amt);
 	} else if (_seq.mode() == SequencerGrid::Group) {
@@ -623,7 +624,7 @@ StepView::adjust_step_octave (int amt)
 }
 
 void
-StepView::adjust_step_duration (double amt)
+StepView::adjust_step_duration (Step::DurationRatio const & amt)
 {
 	_step.adjust_duration (amt);
 }

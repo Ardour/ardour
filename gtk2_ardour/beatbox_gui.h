@@ -39,6 +39,8 @@
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 
+#include "ardour/step_sequencer.h"
+
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "ardour_dialog.h"
@@ -59,8 +61,6 @@ class Widget;
 
 namespace ARDOUR {
 class BeatBox;
-class Step;
-class StepSequencer;
 }
 
 class SequencerGrid;
@@ -88,7 +88,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	void adjust_step_pitch (int amt);
 	void adjust_step_velocity (int amt);
-	void adjust_step_duration (double);
+	void adjust_step_duration (ARDOUR::Step::DurationRatio const &);
 	void adjust_step_octave (int amt);
 
 	void step_changed (PBD::PropertyChange const &);
