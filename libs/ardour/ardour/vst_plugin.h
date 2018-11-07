@@ -32,6 +32,8 @@ typedef struct _VSTState VSTState;
 
 #include "ardour/vestige/vestige.h"
 
+struct _VSTInfo;
+
 namespace ARDOUR {
 
 class PluginInsert;
@@ -132,6 +134,15 @@ protected:
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
 	bool       _eff_bypassed;
+};
+
+class LIBARDOUR_API VSTPluginInfo : public PluginInfo
+{
+public:
+	VSTPluginInfo (_VSTInfo*);
+	bool is_instrument () const;
+protected:
+	bool _is_instrument;
 };
 
 }

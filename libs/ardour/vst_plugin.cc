@@ -27,10 +27,10 @@
 #include "pbd/floating.h"
 #include "pbd/locale_guard.h"
 
+#include "ardour/vst_types.h"
 #include "ardour/vst_plugin.h"
 #include "ardour/vestige/vestige.h"
 #include "ardour/session.h"
-#include "ardour/vst_types.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/audio_buffer.h"
 
@@ -923,3 +923,31 @@ VSTPlugin::presets_file () const
 	return string("vst-") + unique_id ();
 }
 
+
+VSTPluginInfo::VSTPluginInfo (VSTInfo* nfo)
+{
+
+	char buf[32];
+	snprintf (buf, sizeof (buf), "%d", nfo->UniqueID);
+	unique_id = buf;
+
+	index = 0;
+
+	name = nfo->name;
+	creator = nfo->creator;
+	n_inputs.set_audio  (nfo->numInputs);
+	n_outputs.set_audio (nfo->numOutputs);
+	n_inputs.set_midi  ((nfo->wantMidi & 1) ? 1 : 0);
+	n_outputs.set_midi ((nfo->wantMidi & 2) ? 1 : 0);
+
+	_is_instrument = nfo->isInstrument;
+}
+
+bool
+VSTPluginInfo::is_instrument () const
+{
+	if (_is_instrument) {
+		return true;
+	}
+	return PluginInfo::is_instrument ();
+}

@@ -40,10 +40,10 @@ public:
 	std::string state_node_name () const { return "windows-vst"; }
 };
 
-class LIBARDOUR_API WindowsVSTPluginInfo : public PluginInfo
+class LIBARDOUR_API WindowsVSTPluginInfo : public VSTPluginInfo
 {
 public:
-	WindowsVSTPluginInfo ();
+	WindowsVSTPluginInfo (_VSTInfo*);
 	~WindowsVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);

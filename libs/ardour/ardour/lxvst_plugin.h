@@ -40,10 +40,10 @@ class LIBARDOUR_API LXVSTPlugin : public VSTPlugin
 	std::string state_node_name () const { return "lxvst"; }
 };
 
-class LIBARDOUR_API LXVSTPluginInfo : public PluginInfo
+class LIBARDOUR_API LXVSTPluginInfo : public VSTPluginInfo
 {
   public:
-	LXVSTPluginInfo ();
+	LXVSTPluginInfo (_VSTInfo*);
 	~LXVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);

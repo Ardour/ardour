@@ -168,8 +168,8 @@ LXVSTPluginInfo::get_presets (bool user_only) const
 	return p;
 }
 
-LXVSTPluginInfo::LXVSTPluginInfo()
+LXVSTPluginInfo::LXVSTPluginInfo (_VSTInfo* nfo) : VSTPluginInfo (nfo)
 {
-       type = ARDOUR::LXVST;
+	type = ARDOUR::LXVST;
 }
 
