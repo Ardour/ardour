@@ -33,6 +33,8 @@
 
 #include "gtkmm2ext/colors.h"
 
+#include "widgets/ardour_button.h"
+
 #include "canvas/box.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
@@ -73,6 +75,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
    private:
 	ARDOUR::Step& _step;
 	BBGUI& bbgui;
+	ArdourCanvas::Text* text;
 
 	std::pair<double,double> grab_at;
 
@@ -86,6 +89,8 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	void step_changed (PBD::PropertyChange const &);
 	PBD::ScopedConnection step_connection;
+
+	void make_text ();
 };
 
 class SequencerGrid : public ArdourCanvas::Rectangle {
@@ -114,11 +119,21 @@ class SequencerStepIndicator : public ArdourCanvas::Rectangle {
 
 class BBGUI : public ArdourDialog {
   public:
+	enum Mode {
+		Velocity,
+		Pitch,
+		Octave,
+		Group,
+	};
+
 	BBGUI (boost::shared_ptr<ARDOUR::BeatBox> bb);
 	~BBGUI ();
 
 	double width() const { return _width; }
 	double height() const { return _height; }
+
+	Mode mode() const { return _mode; }
+	void set_mode (Mode m);
 
   protected:
 	void on_map ();
@@ -126,6 +141,7 @@ class BBGUI : public ArdourDialog {
 
   private:
 	boost::shared_ptr<ARDOUR::BeatBox> bbox;
+	Mode _mode;
 	double _width;
 	double _height;
 
@@ -147,8 +163,6 @@ class BBGUI : public ArdourDialog {
 	ArdourWidgets::ArdourButton export_as_region_button;
 	void export_as_region ();
 
-	Gtk::Button clear_button;
-	Gtk::HBox misc_button_box;
 	Gtk::HBox canvas_hbox;
 	Gtk::VScrollbar vscrollbar;
 
@@ -159,6 +173,14 @@ class BBGUI : public ArdourDialog {
 	sigc::connection timer_connection;
 
 	void sequencer_changed (PBD::PropertyChange const &);
+
+	Gtk::HBox mode_box;
+	ArdourWidgets::ArdourButton mode_velocity_button;
+	ArdourWidgets:: ArdourButton mode_pitch_button;
+	ArdourWidgets::ArdourButton mode_octave_button;
+	ArdourWidgets::ArdourButton mode_group_button;
+
+	void mode_clicked (Mode);
 };
 
 #endif /* __gtk2_ardour_beatbox_gui_h__ */

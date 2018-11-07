@@ -64,10 +64,14 @@ const double _step_dimen = 25;
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
 	, bbox (bb)
+	, _mode (Velocity)
 	, horizontal_adjustment (0.0, 0.0, 800.0)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
-	, clear_button ("Clear")
 	, vscrollbar (vertical_adjustment)
+	, mode_velocity_button (_("Velocity"))
+	, mode_pitch_button (_("Pitch"))
+	, mode_octave_button (_("Octave"))
+	, mode_group_button (_("Group"))
 
 {
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
@@ -93,15 +97,21 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 	srandom (time(0));
 
-	clear_button.signal_clicked().connect (sigc::mem_fun (*this, &BBGUI::clear));
-
-	misc_button_box.pack_start (clear_button);
-
 	canvas_hbox.pack_start (*_canvas_viewport, true, true);
 	canvas_hbox.pack_start (vscrollbar, false, false);
 
+	mode_box.pack_start (mode_velocity_button);
+	mode_box.pack_start (mode_pitch_button);
+	mode_box.pack_start (mode_octave_button);
+	mode_box.pack_start (mode_group_button);
+
+	mode_velocity_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Velocity));
+	mode_pitch_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Pitch));
+	mode_octave_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Octave));
+	mode_group_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), Group));
+
 	get_vbox()->set_spacing (12);
-	get_vbox()->pack_start (misc_button_box, false, false);
+	get_vbox()->pack_start (mode_box, false, false);
 	get_vbox()->pack_start (canvas_hbox, true, true);
 
 	start_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::toggle_play));
@@ -118,6 +128,12 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 BBGUI::~BBGUI ()
 {
+}
+
+void
+BBGUI::mode_clicked (Mode m)
+{
+	set_mode (m);
 }
 
 void
@@ -264,6 +280,13 @@ BBGUI::export_as_region ()
 }
 
 void
+BBGUI::set_mode (BBGUI::Mode m)
+{
+	_mode = m;
+	_sequencer->redraw ();
+}
+
+void
 BBGUI::sequencer_changed (PropertyChange const &)
 {
 	const size_t nsteps = bbox->sequencer().nsteps();
@@ -367,16 +390,7 @@ SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 		context->stroke ();
 	}
 
-	/* vertical bars for velocity */
-
-	for (int r = 0; r < _nrows; ++r) {
-		for (int c = 0; c < _nsteps; ++c) {
-			const double velocity = random() % 127 / 127.0;
-			const double height = (_step_dimen - 2) * velocity;
-			context->rectangle ((c * _step_dimen) + 1, ((r + 2) * _step_dimen) - height, _step_dimen - 2, height);
-			context->fill ();
-		}
-	}
+	render_children (area, context);
 }
 
 SequencerStepIndicator::SequencerStepIndicator (Item *p, int n)
@@ -416,8 +430,12 @@ StepView::StepView (BBGUI& bb, Step& s, ArdourCanvas::Item* parent)
 	: ArdourCanvas::Rectangle (parent)
 	, _step (s)
 	, bbgui (bb)
+	, text (new Text (this))
 {
 	set_fill_color (UIConfiguration::instance().color ("gtk_bright_indicator"));
+
+	text->set_fill_color (contrasting_text_color (fill_color()));
+	text->hide ();
 
 	Event.connect (sigc::mem_fun (*this, &StepView::on_event));
 	_step.PropertyChanged.connect (step_connection, invalidator (*this), boost::bind (&StepView::step_changed, this, _1), gui_context());
@@ -433,13 +451,24 @@ StepView::step_changed (PropertyChange const &)
 void
 StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	const double height = (_step_dimen - 2) * _step.velocity();
-	cerr << _step.beat() << " From V = " << _step.velocity() << " h  = " << height << " area = " << area;
-	Rect r (1, height, _step_dimen - 2, _step_dimen - height);
-	r = item_to_window (r);
-	cerr << " draw " << r << endl;
-	context->rectangle (r.x1, r.y1, r.width(), r.height());
-	context->fill ();
+	if (text) {
+		text->hide ();
+	}
+
+	if (bbgui.mode() == BBGUI::Velocity) {
+		const double height = (_step_dimen - 4) * _step.velocity();
+		const Duple origin = item_to_window (Duple (0, 0));
+		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+		context->fill ();
+	} else if (bbgui.mode() == BBGUI::Pitch) {
+		const double height = (_step_dimen - 4) * (_step.note() / 128.0);
+		const Duple origin = item_to_window (Duple (0, 0));
+		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+		context->fill ();
+	} else if (bbgui.mode() == BBGUI::Octave) {
+		text->set (string_compose ("%1", _step.octave_shift()));
+		text->show ();
+	}
 }
 
 bool
@@ -489,8 +518,6 @@ StepView::button_release_event (GdkEventButton* ev)
 bool
 StepView::scroll_event (GdkEventScroll* ev)
 {
-	int step = ev->x / _step_dimen;
-	int seq = ev->y / _step_dimen;
 	int amt = 0;
 
 	switch (ev->direction) {
@@ -508,10 +535,10 @@ StepView::scroll_event (GdkEventScroll* ev)
 		break;
 	}
 
-	if (ev->state & GDK_MOD1_MASK) {
+	if ((ev->state & GDK_MOD1_MASK) || bbgui.mode() == BBGUI::Pitch) {
 		cerr << "adjust pitch by " << amt << endl;
 		adjust_step_pitch (amt);
-	} else {
+	} else if (bbgui.mode() == BBGUI::Velocity) {
 		cerr << "adjust velocity by " << amt << endl;
 		adjust_step_velocity (amt);
 	}
