@@ -4235,30 +4235,41 @@ Session::cancel_all_mute ()
 }
 
 void
-Session::get_stripables (StripableList& sl) const
+Session::get_stripables (StripableList& sl, PresentationInfo::Flag fl) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	sl.insert (sl.end(), r->begin(), r->end());
+	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
+		if ((*it)->presentation_info ().flags () & fl) {
+			sl.push_back (*it);
+		}
+	}
 
-	VCAList v = _vca_manager->vcas ();
-	sl.insert (sl.end(), v.begin(), v.end());
+	if (fl & PresentationInfo::VCA) {
+		VCAList v = _vca_manager->vcas ();
+		sl.insert (sl.end(), v.begin(), v.end());
+	}
 }
 
 StripableList
 Session::get_stripables () const
 {
+	PresentationInfo::Flag fl = PresentationInfo::AllStripables;
 	StripableList rv;
-	Session::get_stripables (rv);
+	Session::get_stripables (rv, fl);
 	rv.sort (Stripable::Sorter ());
 	return rv;
 }
 
 RouteList
-Session::get_routelist (bool mixer_order) const
+Session::get_routelist (bool mixer_order, PresentationInfo::Flag fl) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	RouteList rv;
-	rv.insert (rv.end(), r->begin(), r->end());
+	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
+		if ((*it)->presentation_info ().flags () & fl) {
+			rv.push_back (*it);
+		}
+	}
 	rv.sort (Stripable::Sorter (mixer_order));
 	return rv;
 }

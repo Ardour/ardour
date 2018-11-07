@@ -112,11 +112,13 @@ PresentationInfo::send_static_change (const PropertyChange& what_changed)
 }
 
 const PresentationInfo::order_t PresentationInfo::max_order = UINT32_MAX;
-const PresentationInfo::Flag PresentationInfo::Bus = PresentationInfo::Flag (PresentationInfo::AudioBus|PresentationInfo::MidiBus|PresentationInfo::ListenBus);
+const PresentationInfo::Flag PresentationInfo::Bus = PresentationInfo::Flag (PresentationInfo::AudioBus|PresentationInfo::MidiBus);
 const PresentationInfo::Flag PresentationInfo::Track = PresentationInfo::Flag (PresentationInfo::AudioTrack|PresentationInfo::MidiTrack);
 const PresentationInfo::Flag PresentationInfo::Route = PresentationInfo::Flag (PresentationInfo::Bus|PresentationInfo::Track);
-const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut);
+const PresentationInfo::Flag PresentationInfo::AllRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut|PresentationInfo::ListenBus);
+const PresentationInfo::Flag PresentationInfo::MixerRoutes = PresentationInfo::Flag (PresentationInfo::Route|PresentationInfo::MasterOut|PresentationInfo::MonitorOut);
 const PresentationInfo::Flag PresentationInfo::AllStripables = PresentationInfo::Flag (PresentationInfo::AllRoutes|PresentationInfo::VCA);
+const PresentationInfo::Flag PresentationInfo::MixerStripables = PresentationInfo::Flag (PresentationInfo::MixerRoutes|PresentationInfo::VCA);
 
 void
 PresentationInfo::make_property_quarks ()

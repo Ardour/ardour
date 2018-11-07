@@ -287,7 +287,7 @@ public:
 
 	boost::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 
-	RouteList get_routelist (bool mixer_order = false) const;
+	RouteList get_routelist (bool mixer_order = false, PresentationInfo::Flag fl = PresentationInfo::MixerRoutes) const;
 
 	CoreSelection& selection () { return *_selection; }
 
@@ -298,7 +298,7 @@ public:
 	 * with get_routes()
 	 */
 
-	void get_stripables (StripableList&) const;
+	void get_stripables (StripableList&, PresentationInfo::Flag fl = PresentationInfo::MixerStripables) const;
 	StripableList get_stripables () const;
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;

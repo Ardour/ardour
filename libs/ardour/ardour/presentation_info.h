@@ -127,7 +127,9 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
+	static const Flag MixerStripables; /* mask to use for any route or VCA (but not auditioner or Listenbus) */
 	static const Flag AllRoutes; /* mask to use for any route include master+monitor, but not auditioner */
+	static const Flag MixerRoutes; /* mask to use for any route include master+monitor, but not auditioner or ListenBus*/
 	static const Flag Route;     /* mask for any route (bus or track */
 	static const Flag Track;     /* mask to use for any track */
 	static const Flag Bus;       /* mask to use for any bus */
