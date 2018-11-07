@@ -1602,18 +1602,7 @@ void
 Mixer_UI::initial_track_display ()
 {
 	StripableList sl;
-
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-		sl.push_back (*r);
-	}
-
-	VCAList vcas = _session->vca_manager().vcas();
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
-	}
+	_session->get_stripables (sl);
 
 	sl.sort (PresentationInfoMixerSorter());
 

@@ -1820,8 +1820,7 @@ PluginPinWidget::sc_input_press (GdkEventButton *ev, boost::weak_ptr<ARDOUR::Por
 		}
 #endif
 
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		RouteList copy = *routes;
+		RouteList copy = _session->get_routelist ();
 		copy.sort (Stripable::Sorter(true));
 		uint32_t added = 0;
 		for (ARDOUR::RouteList::const_iterator i = copy.begin (); i != copy.end (); ++i) {

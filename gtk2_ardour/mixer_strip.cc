@@ -910,8 +910,7 @@ MixerStrip::output_press (GdkEventButton *ev)
 		}
 
 		/* then other routes inputs */
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		RouteList copy = *routes;
+		RouteList copy = _session->get_routelist ();
 		copy.sort (RouteCompareByName ());
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
 			maybe_add_bundle_to_output_menu ((*i)->input()->bundle(), current, intended_type);

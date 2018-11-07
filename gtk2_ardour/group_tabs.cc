@@ -564,11 +564,10 @@ GroupTabs::get_rec_enabled ()
 RouteList
 GroupTabs::get_soloed ()
 {
-	boost::shared_ptr<RouteList> rl = _session->get_routes ();
-
+	RouteList rl = _session->get_routelist ();
 	RouteList soloed;
 
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	for (RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
 		if (!(*i)->is_master() && (*i)->soloed()) {
 			soloed.push_back (*i);
 		}
@@ -695,16 +694,16 @@ GroupTabs::collect (RouteGroup* g)
 	int const N = group_routes->size ();
 
 	RouteList::iterator i = group_routes->begin ();
-	boost::shared_ptr<RouteList> routes = _session->get_routes ();
-	routes->sort (Stripable::Sorter());
-	RouteList::const_iterator j = routes->begin ();
+	RouteList routes = _session->get_routelist ();
+	routes.sort (Stripable::Sorter());
+	RouteList::const_iterator j = routes.begin ();
 
 	int diff = 0;
 	int coll = -1;
 
 	PresentationInfo::ChangeSuspender cs;
 
-	while (i != group_routes->end() && j != routes->end()) {
+	while (i != group_routes->end() && j != routes.end()) {
 
 		PresentationInfo::order_t const k = (*j)->presentation_info ().order();
 
