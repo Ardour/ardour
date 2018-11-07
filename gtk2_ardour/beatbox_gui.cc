@@ -71,26 +71,15 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	, mode_pitch_button (_("Pitch"))
 	, mode_octave_button (_("Octave"))
 	, mode_group_button (_("Group"))
+	, mode_duration_button (_("Gate"))
 
 {
 	_canvas_viewport = new GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 	_canvas = _canvas_viewport->canvas();
-
 	_canvas->set_background_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	_canvas->use_nsglview ();
 
-	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
-
-	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
-
-	step_indicator_bg = new ArdourCanvas::Rectangle (step_indicator_box);
-	step_indicator_bg->set_fill_color (UIConfiguration::instance().color ("gtk_lightest"));
-	step_indicator_bg->set_outline (false);
-
-	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
-	_canvas->add_scroller (*v_scroll_group);
-
-	_sequencer = new SequencerGrid (bbox->sequencer(), v_scroll_group);
+	_sequencer = new SequencerGrid (bbox->sequencer(), _canvas);
 	_sequencer->set_position (Duple (0, _step_dimen));
 	_sequencer->set_fill_color (UIConfiguration::instance().color ("gtk_contrasting_indicator"));
 
@@ -101,6 +90,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 	mode_box.pack_start (mode_velocity_button);
 	mode_box.pack_start (mode_pitch_button);
+	mode_box.pack_start (mode_duration_button);
 	mode_box.pack_start (mode_octave_button);
 	mode_box.pack_start (mode_group_button);
 
@@ -108,6 +98,7 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	mode_pitch_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Pitch));
 	mode_octave_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Octave));
 	mode_group_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Group));
+	mode_duration_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Duration));
 
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (mode_box, false, false);
@@ -298,27 +289,26 @@ BBGUI::sequencer_changed (PropertyChange const &)
 	 */
 
 	_canvas_viewport->set_size_request (_width, _height + _step_dimen);
-
-	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
-	step_indicator_box->clear (true); /* delete all existing step indicators */
-
-	/* indicator row */
-
-	for (size_t n = 0; n < nsteps; ++n) {
-		SequencerStepIndicator* ssi = new SequencerStepIndicator (step_indicator_box, n+1);
-		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
-		ssi->set_position (Duple (n * _step_dimen, 0.0));
-		ssi->set_fill_color (random());
-	}
 }
 
 /**/
 
-SequencerGrid::SequencerGrid (StepSequencer& s, Item *parent)
-	: Rectangle (parent)
+SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
+	: Rectangle (c)
 	, _sequencer (s)
 	, _mode (Velocity)
 {
+	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
+	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
+
+	step_indicator_bg = new ArdourCanvas::Rectangle (step_indicator_box);
+	step_indicator_bg->set_fill_color (UIConfiguration::instance().color ("gtk_lightest"));
+	step_indicator_bg->set_outline (false);
+
+	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
+	_canvas->add_scroller (*v_scroll_group);
+	v_scroll_group->add (this);
+
 	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
 	{
@@ -339,6 +329,17 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 
 	set (Rect (0, 0, _width, _height));
 
+	step_indicator_bg->set (Rect (0, 0, _width, _step_dimen));
+	step_indicator_box->clear (true); /* delete all existing step indicators */
+
+	/* indicator row */
+
+	for (size_t n = 0; n < nsteps; ++n) {
+		SequencerStepIndicator* ssi = new SequencerStepIndicator (step_indicator_box, n+1);
+		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
+		ssi->set_position (Duple (n * _step_dimen, 0.0));
+		ssi->set_fill_color (random());
+	}
 	/* step views, one per step per sequence */
 
 	clear (true);
@@ -346,7 +347,8 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 
 	for (size_t s = 0; s < nsequences; ++s) {
 		for (size_t n = 0; n < nsteps; ++n) {
-			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), Item::parent());
+			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), v_scroll_group);
+			/* sequence row is 1-row down ... because of the step indicator row */
 			sv->set_position (Duple (n * _step_dimen, (s+1) * _step_dimen));
 			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
 			_step_views.push_back (sv);
@@ -483,6 +485,7 @@ StepView::view_mode_changed ()
 		text->set_position (Duple (_step_dimen/2 - (w/2), _step_dimen/2 - (h/2)));
 
 	} else if (_seq.mode() == SequencerGrid::Group) {
+		text->set (std::string());
 		text->show ();
 	} else {
 		text->hide ();
@@ -505,6 +508,11 @@ StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 		context->fill ();
 	} else if (_seq.mode() == SequencerGrid::Pitch) {
 		const double height = (_step_dimen - 4) * (_step.note() / 128.0);
+		const Duple origin = item_to_window (Duple (0, 0));
+		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+		context->fill ();
+	} else if (_seq.mode() == SequencerGrid::Duration) {
+		const double height = (_step_dimen - 4) * (_step.duration());
 		const Duple origin = item_to_window (Duple (0, 0));
 		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
 		context->fill ();
@@ -585,6 +593,9 @@ StepView::scroll_event (GdkEventScroll* ev)
 	} else if (_seq.mode() == SequencerGrid::Velocity) {
 		cerr << "adjust velocity by " << amt << endl;
 		adjust_step_velocity (amt);
+	} else if (_seq.mode() == SequencerGrid::Duration) {
+		cerr << "adjust velocity by " << amt << endl;
+		adjust_step_duration (amt/32.0); /* adjust by 1/32 of the sequencer step size */
 	} else if (_seq.mode() == SequencerGrid::Octave) {
 		adjust_step_octave (amt);
 	} else if (_seq.mode() == SequencerGrid::Group) {
@@ -609,4 +620,10 @@ void
 StepView::adjust_step_octave (int amt)
 {
 	_step.adjust_octave (amt);
+}
+
+void
+StepView::adjust_step_duration (double amt)
+{
+	_step.adjust_duration (amt);
 }

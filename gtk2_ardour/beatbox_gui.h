@@ -88,6 +88,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	void adjust_step_pitch (int amt);
 	void adjust_step_velocity (int amt);
+	void adjust_step_duration (double);
 	void adjust_step_octave (int amt);
 
 	void step_changed (PBD::PropertyChange const &);
@@ -101,11 +102,12 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	enum Mode {
 		Velocity,
 		Pitch,
+		Duration,
 		Octave,
 		Group,
 	};
 
-	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Item* parent);
+	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Canvas*);
 
 	Mode mode() const { return _mode; }
 	void set_mode (Mode m);
@@ -119,6 +121,10 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	double _width;
 	double _height;
 	Mode   _mode;
+	ArdourCanvas::ScrollGroup* v_scroll_group;
+	ArdourCanvas::Container* no_scroll_group;
+	ArdourCanvas::Rectangle* step_indicator_bg;
+	ArdourCanvas::Container* step_indicator_box;
 
 	void sequencer_changed (PBD::PropertyChange const &);
 
@@ -156,12 +162,8 @@ class BBGUI : public ArdourDialog {
 
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
-	ArdourCanvas::ScrollGroup* v_scroll_group;
-	ArdourCanvas::Container* no_scroll_group;
 
 	SequencerGrid* _sequencer;
-	ArdourCanvas::Rectangle* step_indicator_bg;
-	ArdourCanvas::Container* step_indicator_box;
 
 	ArdourWidgets::ArdourButton start_button;
 	void toggle_play ();
@@ -185,6 +187,7 @@ class BBGUI : public ArdourDialog {
 	ArdourWidgets:: ArdourButton mode_pitch_button;
 	ArdourWidgets::ArdourButton mode_octave_button;
 	ArdourWidgets::ArdourButton mode_group_button;
+	ArdourWidgets::ArdourButton mode_duration_button;
 
 	void mode_clicked (SequencerGrid::Mode);
 
