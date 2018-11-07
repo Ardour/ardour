@@ -179,18 +179,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Media"), new OptionEditorHeading (_("Audio File Format")));
 
-	ComboOption<SampleFormat>* sf = new ComboOption<SampleFormat> (
+	_sf = new ComboOption<SampleFormat> (
 		"native-file-data-format",
 		_("Sample format"),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::get_native_file_data_format),
 		sigc::mem_fun (*_session_config, &SessionConfiguration::set_native_file_data_format)
 		);
-
-	sf->add (FormatFloat, _("32-bit floating point"));
-	sf->add (FormatInt24, _("24-bit integer"));
-	sf->add (FormatInt16, _("16-bit integer"));
-
-	add_option (_("Media"), sf);
+	add_option (_("Media"), _sf);
+	/* refill available sample-formats, depening on file-format */
+	parameter_changed ("native-file-header-format");
 
 	ComboOption<HeaderFormat>* hf = new ComboOption<HeaderFormat> (
 		"native-file-header-format",
@@ -210,6 +207,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 #ifdef HAVE_RF64_RIFF
 	hf->add (RF64_WAV, _("RF64 (WAV compatible)"));
 #endif
+	hf->add (FLAC, _("FLAC"));
 
 	add_option (_("Media"), hf);
 
@@ -410,6 +408,13 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	set_current_page (_("Timecode"));
 }
 
+SessionOptionEditor::~SessionOptionEditor ()
+{
+	delete _vpu;
+	delete _sf;
+	delete _take_name;
+}
+
 void
 SessionOptionEditor::parameter_changed (std::string const & p)
 {
@@ -428,6 +433,25 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 	}
 	else if (p == "track-name-take") {
 		_take_name->set_sensitive(_session_config->get_track_name_take());
+	}
+	else if (p == "native-file-header-format") {
+		bool need_refill = true;
+		_sf->clear ();
+		if (_session_config->get_native_file_header_format() == FLAC) {
+			_sf->add (FormatInt24, _("24-bit integer"));
+			_sf->add (FormatInt16, _("16-bit integer"));
+			if (_session_config->get_native_file_data_format() == FormatFloat) {
+				_session_config->set_native_file_data_format (FormatInt24);
+				need_refill = false;
+			}
+		} else {
+			_sf->add (FormatFloat, _("32-bit floating point"));
+			_sf->add (FormatInt24, _("24-bit integer"));
+			_sf->add (FormatInt16, _("16-bit integer"));
+		}
+		if (need_refill) {
+			parameter_changed ("native-file-data-format");
+		}
 	}
 }
 

@@ -1661,6 +1661,9 @@ ARDOUR_UI::update_format ()
 	case MBWF:
 		s << _("MBWF");
 		break;
+	case FLAC:
+		s << _("FLAC");
+		break;
 	}
 
 	s << " ";
