@@ -79,7 +79,6 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	SequencerGrid& _seq;
 	ArdourCanvas::Text* text;
 	bool grabbed;
-	bool grab_motion;
 
 	std::pair<double,double> grab_at;
 	std::pair<double,double> last_motion;
@@ -97,7 +96,43 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	void step_changed (PBD::PropertyChange const &);
 	PBD::ScopedConnection step_connection;
 
-	void make_text ();
+	void set_octave_text ();
+	void set_group_text ();
+
+	static Gtkmm2ext::Color on_fill_color;
+	static Gtkmm2ext::Color off_fill_color;
+};
+
+class SequencerStepIndicator : public ArdourCanvas::Rectangle {
+  public:
+	SequencerStepIndicator (SequencerGrid&, ArdourCanvas::Item *, size_t n);
+	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	bool on_event (GdkEvent*);
+
+	void set_current (bool);
+
+  private:
+	SequencerGrid& grid;
+	size_t number;
+	ArdourCanvas::Polygon* poly;
+	ArdourCanvas::Text*    text;
+
+	std::pair<double,double> grab_at;
+	std::pair<double,double> last_motion;
+
+	static int dragging;
+
+	bool motion_event (GdkEventMotion*);
+	bool button_press_event (GdkEventButton*);
+	bool button_release_event (GdkEventButton*);
+	bool scroll_event (GdkEventScroll*);
+
+	void set_text ();
+
+	static Gtkmm2ext::Color current_color;
+	static Gtkmm2ext::Color other_color;
+	static Gtkmm2ext::Color current_text_color;
+	static Gtkmm2ext::Color other_text_color;
 };
 
 class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
@@ -112,15 +147,20 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	SequencerGrid (ARDOUR::StepSequencer&, ArdourCanvas::Canvas*);
 
+	ARDOUR::StepSequencer& sequencer() const { return _sequencer; }
+
 	Mode mode() const { return _mode; }
 	void set_mode (Mode m);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
+	void update ();
 
   private:
 	ARDOUR::StepSequencer& _sequencer;
 	typedef std::vector<StepView*> StepViews;
-	StepViews _step_views;
+	StepViews step_views;
+	typedef std::vector<SequencerStepIndicator*> StepIndicators;
+	StepIndicators step_indicators;
 	double _width;
 	double _height;
 	Mode   _mode;
@@ -132,15 +172,6 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	void sequencer_changed (PBD::PropertyChange const &);
 
 	PBD::ScopedConnection sequencer_connection;
-};
-
-class SequencerStepIndicator : public ArdourCanvas::Rectangle {
-  public:
-	SequencerStepIndicator (ArdourCanvas::Item *, int n);
-	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
-  private:
-	ArdourCanvas::Polygon* poly;
-	ArdourCanvas::Text*    text;
 };
 
 class BBGUI : public ArdourDialog {
