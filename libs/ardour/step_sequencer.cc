@@ -314,6 +314,10 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 			note.off_at = note_on_time;
 
 			if (_duration == DurationRatio (1)) {
+				/* use 1 tick less than the sequence step size
+				 * just to get non-simultaneous on/off events at
+				 * step boundaries.
+				*/
 				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() - 1);
 			} else {
 				note.off_at += Temporal::Beats (0, (_sequence.step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
@@ -353,7 +357,10 @@ Step::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 		_scheduled_beat = start + _nominal_beat; /* schedule into the current loop iteration */
 	}
 
-	/* MIDI state tracker will deal with any stuck notes */
+	/* MIDI state tracker will deal with any stuck notes, so here we just
+	 * update our records to note that all notes are not currently
+	 * sounding.
+	 */
 	for (size_t n = 0; n < _notes_per_step; ++n) {
 		_notes[n].on = false;
 		_notes[n].off_at = Temporal::Beats();
