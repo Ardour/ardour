@@ -6349,15 +6349,17 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 				sorted.push_back (s);
 			} else if (types[4] && boost::dynamic_pointer_cast<VCA>(s)) {
 				sorted.push_back (s);
-			} else  if (types[7] && s->is_listenbus()) {
-				sorted.push_back (s);
+			} else  if (s->is_listenbus()) {
+				if (types[7]) {
+					sorted.push_back (s);
+				}
 			} else
 #ifdef MIXBUS
 			if (types[2] && Profile->get_mixbus() && s->mixbus()) {
 				sorted.push_back (s);
 			} else
 #endif
-			if ((types[2] || types[3]) && boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
+			if (boost::dynamic_pointer_cast<Route>(s) && !boost::dynamic_pointer_cast<Track>(s)) {
 				boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					// note some older sessions will show midibuses as busses
