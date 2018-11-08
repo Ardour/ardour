@@ -86,6 +86,19 @@ Step::set_note (double note, double velocity, int n)
 }
 
 void
+Step::set_velocity (double velocity, size_t n)
+{
+	assert (n < _notes_per_step);
+
+	if (_notes[n].velocity != velocity) {
+		_notes[n].velocity = velocity;
+
+		PropertyChange pc;
+		PropertyChanged (pc);
+	}
+}
+
+void
 Step::set_chord (size_t note_cnt, double* notes)
 {
 }

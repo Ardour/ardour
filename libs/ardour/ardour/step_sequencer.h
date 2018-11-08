@@ -71,6 +71,7 @@ class Step : public PBD::Stateful {
 
 	double note (size_t n = 0) const { return _notes[n].number; }
 	double velocity (size_t n = 0) const { return _notes[n].velocity; }
+	void set_velocity (double, size_t n = 0);
 
 	DurationRatio duration () const { return _duration; }
 	void set_duration (DurationRatio const &);
@@ -131,7 +132,7 @@ class Step : public PBD::Stateful {
 		Temporal::Beats off_at;
 		MIDI::byte off_msg[3];
 
-		Note () : number (-1), velocity (0.5), on (false) {}
+		Note () : number (-1), velocity (0.0), on (false) {}
 		Note (double n, double v,Temporal::Beats const & o) : number (n), velocity (v), offset (o), on (false) {}
 	};
 
