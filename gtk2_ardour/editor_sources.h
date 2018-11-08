@@ -60,8 +60,6 @@ public:
 		_display.get_selection()->unselect_all ();
 	}
 
-	void remove_unused_regions ();
-
 	XMLNode& get_state () const;
 	void set_state (const XMLNode &);
 
@@ -124,13 +122,11 @@ private:
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
 
-	Glib::RefPtr<Gtk::Action> remove_unused_regions_action () const;  //TODO: what is the equivalent?
-
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::Frame _frame;
 
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Source> > _display;  //TODO .. try changing this to region
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Source> > _display;
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
 
