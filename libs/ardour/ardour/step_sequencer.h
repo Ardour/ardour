@@ -54,7 +54,7 @@ class Step : public PBD::Stateful {
 
 	typedef boost::rational<int> DurationRatio;
 
-	Step (StepSequence&, Temporal::Beats const & beat);
+	Step (StepSequence&, Temporal::Beats const & beat, int notenum);
 	~Step ();
 
 	void set_note (double note, double velocity = 0.5, int n = 0);
@@ -159,7 +159,7 @@ class StepSequence : public PBD::Stateful
 		rd_random = 3
 	};
 
-	StepSequence (StepSequencer &myseq, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
+	StepSequence (StepSequencer &myseq, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum);
 	~StepSequence ();
 
 	size_t nsteps() const { return _steps.size(); }
@@ -183,6 +183,9 @@ class StepSequence : public PBD::Stateful
 
 	void shift_left (size_t n = 1);
 	void shift_right (size_t n = 1);
+
+	size_t start_step() const { return _start; }
+	size_t end_step() const { return _end; }
 
 	void set_start_step (size_t);
 	void set_end_step (size_t);
@@ -221,11 +224,13 @@ class StepSequence : public PBD::Stateful
 class StepSequencer : public PBD::Stateful
 {
   public:
-	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size);
+	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum);
 	~StepSequencer ();
 
 	size_t nsteps() const { return _sequences.front()->nsteps(); }
 	size_t nsequences() const { return _sequences.size(); }
+
+	int last_step() const;
 
 	StepSequence& sequence (size_t n) const;
 
@@ -261,6 +266,8 @@ class StepSequencer : public PBD::Stateful
 	Temporal::Beats _step_size;
 	int32_t         _start;
 	int32_t         _end;
+	Temporal::Beats _last_start;
+	int             _last_step;
 };
 
 } /* namespace */

@@ -103,6 +103,9 @@ Text::height () const
 void
 Text::_redraw () const
 {
+	/* XXX we should try to remove this assertion someday. Nothing wrong
+	   with empty text.
+	*/
 	assert (!_text.empty());
 	assert (_canvas);
 	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();

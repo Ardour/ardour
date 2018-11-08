@@ -63,8 +63,6 @@ class BeatBox : public ARDOUR::Processor {
 	void stop ();
 	void clear ();
 
-	Timecode::BBT_Time get_last_time () const;
-
 	void add_note (int number, int velocity, Timecode::BBT_Time at);
 	void remove_note (int number, Timecode::BBT_Time at);
 	void edit_note_number (int old_number, int new_number);
@@ -93,10 +91,8 @@ class BeatBox : public ARDOUR::Processor {
 	float _tempo_request;
 	int   _meter_beats;
 	int   _meter_beat_type;
-	superclock_t  superclock_cnt;
-	superclock_t  last_start;
-	superclock_t  last_end;
-	Timecode::BBT_Time last_time;
+	samplepos_t  last_start;
+	samplepos_t  last_end;
 
 	int _sample_rate;
 	superclock_t whole_note_superclocks;

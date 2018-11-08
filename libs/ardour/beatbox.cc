@@ -53,7 +53,6 @@ BeatBox::BeatBox (Session& s)
 	, _tempo (-1.0)
 	, _meter_beats (-1)
 	, _meter_beat_type (-1)
-	, superclock_cnt (0)
 	, last_start (0)
 	, whole_note_superclocks (0)
 	, tick_superclocks (0)
@@ -65,7 +64,7 @@ BeatBox::BeatBox (Session& s)
 	, remove_queue (64)
 {
 	_display_to_user = true;
-	_sequencer = new StepSequencer (s.tempo_map(), 1, 8, Temporal::Beats (0, Temporal::Beats::PPQN/4), Temporal::Beats (4, 0));
+	_sequencer = new StepSequencer (s.tempo_map(), 12, 32, Temporal::Beats (0, Temporal::Beats::PPQN/8), Temporal::Beats (4, 0), 40);
 }
 
 BeatBox::~BeatBox ()
@@ -189,13 +188,6 @@ BeatBox::state()
 	node.set_property ("type", "beatbox");
 
 	return node;
-}
-
-Timecode::BBT_Time
-BeatBox::get_last_time() const
-{
-	/* need mutex */
-	return last_time;
 }
 
 void

@@ -30,9 +30,7 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-static int notenum = 35;
-
-Step::Step (StepSequence &s, Temporal::Beats const & b)
+Step::Step (StepSequence &s, Temporal::Beats const & b, int base_note)
 	: _sequence (s)
 	, _enabled (true)
 	, _nominal_beat (b)
@@ -41,14 +39,12 @@ Step::Step (StepSequence &s, Temporal::Beats const & b)
 	, _octave_shift (0)
 	, _duration (1)
 {
-	std::cerr << "step @ " << b << std::endl;
+	_notes[0].number = base_note;
 
-	for (size_t n = 0; n < _notes_per_step; ++n) {
+	for (size_t n = 1; n < _notes_per_step; ++n) {
 		_notes[n].number = -1;
 	}
 
-	/* XXX HACK XXXX */
-	_notes[0].number = notenum;
 
 	for (size_t n = 0; n < _parameters_per_step; ++n) {
 		_parameters[n].parameter = -1;
@@ -96,6 +92,25 @@ Step::set_velocity (double velocity, size_t n)
 		PropertyChange pc;
 		PropertyChanged (pc);
 	}
+}
+
+void
+Step::set_octave_shift (int s)
+{
+	if (s > 4) {
+		s = 4;
+	} else if (s < -4) {
+		s = -4;
+	}
+
+	if (s == _octave_shift) {
+		return;
+	}
+
+	_octave_shift = s;
+
+	PropertyChange pc;
+	PropertyChanged (pc);
 }
 
 void
@@ -179,17 +194,7 @@ Step::adjust_velocity (int amt)
 void
 Step::adjust_octave (int amt)
 {
-	/* this is applied to all notes at once */
-
-	_octave_shift += amt;
-	if (_octave_shift > 4) {
-		_octave_shift = 4;
-	} else if (_octave_shift < -4) {
-		_octave_shift = -4;
-	}
-
-	PropertyChange pc;
-	PropertyChanged (pc);
+	set_octave_shift (_octave_shift + amt);
 }
 
 bool
@@ -394,20 +399,20 @@ Step::set_state (XMLNode const &, int)
 
 /**/
 
-StepSequence::StepSequence (StepSequencer& s, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size)
+StepSequence::StepSequence (StepSequencer& s, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int r)
 	: _sequencer (s)
 	, _start (0)
-	, _end (nsteps)
+	, _end (nsteps - 1)
 	, _channel (0)
 	, _step_size (step_size)
 	, _bar_size (bar_size)
-	, _root (64)
+	, _root (r)
 	, _mode (MusicalMode::IonianMajor)
 {
 	Temporal::Beats beats;
 
 	for (size_t s = 0; s < nsteps; ++s) {
-		_steps.push_back (new Step (*this, beats));
+		_steps.push_back (new Step (*this, beats, _root));
 		beats += step_size;
 	}
 
@@ -482,14 +487,16 @@ StepSequence::set_state (XMLNode const &, int)
 
 /**/
 
-StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size)
+StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum)
 	: _tempo_map (tmap)
 	, _step_size (step_size)
 	, _start (0)
 	, _end (nsteps)
+	, _last_step (0)
 {
 	for (size_t n = 0; n < nseqs; ++n) {
-		_sequences.push_back (new StepSequence (*this, nsteps, step_size, bar_size));
+		_sequences.push_back (new StepSequence (*this, nsteps, step_size, bar_size, notenum));
+		notenum++;
 	}
 }
 
@@ -509,7 +516,18 @@ StepSequencer::run (MidiBuffer& buf, bool running, samplepos_t start_sample, sam
 		(*s)->run (buf, running, start_sample, end_sample, tracker);
 	}
 
+	const Temporal::Beats terminal_beat = Temporal::Beats (_tempo_map.beat_at_sample (end_sample - 1));
+	const size_t dur_ticks = duration().to_ticks();
+	const size_t step_ticks = _step_size.to_ticks();
+	_last_step = ((terminal_beat - _last_start).to_ticks() % dur_ticks) / step_ticks;
+
 	return true;
+}
+
+int
+StepSequencer::last_step () const
+{
+	return _last_step;
 }
 
 void
@@ -537,6 +555,7 @@ StepSequencer::duration() const
 void
 StepSequencer::startup (Temporal::Beats const & start, Temporal::Beats const & offset)
 {
+	_last_start = start;
 	{
 		Glib::Threads::Mutex::Lock lm1 (_sequence_lock);
 		for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
