@@ -866,7 +866,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 #ifdef MIXBUS
-		ac = stripable[n]->comp_threshold_controllable();
+		ac = stripable[n]->filter_freq_controllable(true);
 #else
 		ac = stripable[n]->pan_width_control();
 #endif
@@ -1095,6 +1095,10 @@ LaunchControlXL::dm_check_dummy (DeviceStatus ds)
 
 void
 LaunchControlXL::dm_fader (FaderID id) {
+
+	if (!first_selected_stripable()) {
+		return;
+	}
 
 	boost::shared_ptr<AutomationControl> ac;
 	boost::shared_ptr<Fader> fader;
