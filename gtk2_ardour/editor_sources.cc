@@ -375,34 +375,6 @@ EditorSources::add_source (boost::shared_ptr<ARDOUR::Source> source)
 	populate_row (row, source);
 }
 
-
-void
-EditorSources::remove_unused_regions ()
-{
-/*	vector<string> choices;
-	string prompt;
-
-	if (!_session) {
-		return;
-	}
-
-	prompt = _("Do you really want to remove unused regions?"
-	           "\n(This is destructive and cannot be undone)");
-
-	choices.push_back (_("No, do nothing."));
-	choices.push_back (_("Yes, remove."));
-
-	ArdourWidgets::Choice prompter (_("Remove unused regions"), prompt, choices);
-
-	if (prompter.run () == 1) {
-		_no_redisplay = true;
-		_session->cleanup_regions ();
-		_no_redisplay = false;
-		redisplay ();
-	}
-*/
-}
-
 void
 EditorSources::source_changed (boost::shared_ptr<ARDOUR::Source> source)
 {
@@ -546,18 +518,22 @@ EditorSources::remove_selected_sources ()
 	vector<string> choices;
 	string prompt;
 
-	prompt  = _("Do you really want to destroy the selected source files?"
-				"\nAll regions using the files will be deleted.");
+	prompt  = _("Do you want to remove the selected Sources?"
+				"\nThis operation cannot be undone."
+				"\nThe source files will not actually be deleted until you execute Session->Cleanup.");
 
 	choices.push_back (_("No, do nothing."));
-	choices.push_back (_("Only destroy the regions, not the sources. (may be undone)"));
-	choices.push_back (_("Yes, destroy them. (cannot be undone!"));
+	choices.push_back (_("Only remove the Regions that use these Sources."));
+	choices.push_back (_("Yes, remove the Regions and Sources (cannot be undone!"));
 
-	Choice prompter (_("Destroy selected Sources"), prompt, choices);
+	Choice prompter (_("Remove selected Sources"), prompt, choices);
 
 	int opt = prompter.run ();
 
 	if ( opt >= 1) {
+		
+		std::list<boost::weak_ptr<ARDOUR::Source> > to_be_removed;
+		
 		if (_display.get_selection()->count_selected_rows() > 0) {
 
 			TreeIter iter;
@@ -579,16 +555,21 @@ EditorSources::remove_selected_sources ()
 							_change_connection.block (true);
 							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 							_change_connection.block (false);
-
 						}
+						
+						to_be_removed.push_back(source);
 					}
 				}
 
 			}
-		}
-		_editor->remove_selected_regions();
 
-		if ( opt == 2 ) { //TODO:  actually delete some sources?
+			_editor->remove_selected_regions();  //this operation is undo-able
+
+			if (opt==2) {	
+				for (std::list<boost::weak_ptr<ARDOUR::Source> >::iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i) {
+						_session->remove_source(*i);  //this operation is (currently) not undo-able
+				}
+			}
 		}
 	}
 
@@ -601,8 +582,8 @@ EditorSources::key_press (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Delete:
 	case GDK_BackSpace:
-		/* remove_selected_sources(); */
-		return true; //for now, just "eat" this, so Delete doesn't get propogated into the canvas, based on Source selections
+		remove_selected_sources();
+		return true; 
 	}
 
 	return false;
@@ -729,10 +710,4 @@ EditorSources::set_state (const XMLNode & node)
 {
 	bool changed = false;
 
-}
-
-RefPtr<Action>
-EditorSources::remove_unused_regions_action () const
-{
-	return ActionManager::get_action (X_("SourcesList"), X_("removeUnusedRegions"));
 }
