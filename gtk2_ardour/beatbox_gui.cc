@@ -59,7 +59,7 @@ using std::endl;
 
 const int _nsteps = 32;
 const int _nrows = 8;
-const double _step_dimen = 25;
+const double _step_dimen = 32;
 
 BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
@@ -557,10 +557,7 @@ StepView::motion_event (GdkEventMotion* ev)
 		return false;
 	}
 
-	const double xdelta = ev->x - last_motion.first;
-	const double ydelta = last_motion.second - ev->y;
-	//const double distance = sqrt (xdelta * xdelta + ydelta * ydelta);
-	const double distance = ydelta;
+	const double distance = last_motion.second - ev->y;
 
 	if ((ev->state & GDK_MOD1_MASK) || _seq.mode() == SequencerGrid::Pitch) {
 		cerr << "adjust pitch by " << distance << endl;
@@ -577,7 +574,6 @@ StepView::motion_event (GdkEventMotion* ev)
 	}
 
 	last_motion = std::make_pair (ev->x, ev->y);
-
 	return true;
 }
 
@@ -588,14 +584,34 @@ StepView::button_press_event (GdkEventButton* ev)
 	last_motion = grab_at;
 	grab ();
 	grabbed = true;
+
 	return true;
 }
 
 bool
 StepView::button_release_event (GdkEventButton* ev)
 {
-	ungrab ();
-	grabbed = false;
+	if (grabbed) {
+		ungrab ();
+		grabbed = false;
+
+		if (fabs (last_motion.second - grab_at.second) < 4) {
+			/* just a click */
+
+			cerr << "just a click! " << last_motion.first << " grab at " << grab_at.first << endl;
+
+			if (_seq.mode() == SequencerGrid::Velocity) {
+				_step.set_velocity (1.0);
+			} else if (_seq.mode() == SequencerGrid::Octave) {
+				if (ev->button == 1) {
+					adjust_step_octave (1);
+				} else if (ev->button == 3) {
+					adjust_step_octave (-1);
+				}
+			}
+		}
+	}
+
 	return true;
 }
 

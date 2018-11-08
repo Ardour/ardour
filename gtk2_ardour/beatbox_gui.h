@@ -79,6 +79,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	SequencerGrid& _seq;
 	ArdourCanvas::Text* text;
 	bool grabbed;
+	bool grab_motion;
 
 	std::pair<double,double> grab_at;
 	std::pair<double,double> last_motion;
