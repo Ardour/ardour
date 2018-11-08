@@ -895,6 +895,7 @@ LaunchControlXL::stripable_selection_changed ()
 #endif
 		init_knobs_and_buttons();
 		init_dm_callbacks();
+		set_send_bank(0);
 	}
 }
 
@@ -1056,8 +1057,6 @@ LaunchControlXL::switch_bank (uint32_t base)
 	StripableList strips;
 	filter_stripables (strips);
 	
-	set_send_bank(0);
-
 	set_send_bank(0);
 
 	boost::shared_ptr<SelectButton> sl = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
