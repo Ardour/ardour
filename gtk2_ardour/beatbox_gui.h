@@ -78,8 +78,10 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	ARDOUR::Step& _step;
 	SequencerGrid& _seq;
 	ArdourCanvas::Text* text;
+	bool grabbed;
 
 	std::pair<double,double> grab_at;
+	std::pair<double,double> last_motion;
 
 	bool motion_event (GdkEventMotion*);
 	bool button_press_event (GdkEventButton*);

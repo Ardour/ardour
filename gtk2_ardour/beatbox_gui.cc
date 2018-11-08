@@ -451,6 +451,7 @@ StepView::StepView (SequencerGrid& sg, Step& s, ArdourCanvas::Item* parent)
 	, _step (s)
 	, _seq (sg)
 	, text (new Text (this))
+	, grabbed (false)
 {
 	set_fill_color (UIConfiguration::instance().color ("selection"));
 
@@ -552,6 +553,31 @@ StepView::on_event (GdkEvent *ev)
 bool
 StepView::motion_event (GdkEventMotion* ev)
 {
+	if (!grabbed) {
+		return false;
+	}
+
+	const double xdelta = ev->x - last_motion.first;
+	const double ydelta = last_motion.second - ev->y;
+	//const double distance = sqrt (xdelta * xdelta + ydelta * ydelta);
+	const double distance = ydelta;
+
+	if ((ev->state & GDK_MOD1_MASK) || _seq.mode() == SequencerGrid::Pitch) {
+		cerr << "adjust pitch by " << distance << endl;
+		adjust_step_pitch (distance);
+	} else if (_seq.mode() == SequencerGrid::Velocity) {
+		cerr << "adjust velocity by " << distance << endl;
+		adjust_step_velocity (distance);
+	} else if (_seq.mode() == SequencerGrid::Duration) {
+		cerr << "adjust duration by " << Step::DurationRatio (distance, 32) << endl;
+		adjust_step_duration (Step::DurationRatio (distance, 32)); /* adjust by 1/32 of the sequencer step size */
+	} else if (_seq.mode() == SequencerGrid::Octave) {
+		adjust_step_octave (distance);
+	} else if (_seq.mode() == SequencerGrid::Group) {
+	}
+
+	last_motion = std::make_pair (ev->x, ev->y);
+
 	return true;
 }
 
@@ -559,12 +585,17 @@ bool
 StepView::button_press_event (GdkEventButton* ev)
 {
 	grab_at = std::make_pair (ev->x, ev->y);
+	last_motion = grab_at;
+	grab ();
+	grabbed = true;
 	return true;
 }
 
 bool
 StepView::button_release_event (GdkEventButton* ev)
 {
+	ungrab ();
+	grabbed = false;
 	return true;
 }
 
