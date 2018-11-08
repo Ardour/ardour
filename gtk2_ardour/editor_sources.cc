@@ -95,7 +95,7 @@ EditorSources::EditorSources (Editor* e)
 
 	/* column widths */
 	int bbt_width, date_width, height;
-	
+
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
 	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
 
@@ -259,11 +259,11 @@ void
 EditorSources::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
-	
+
 	if (s) {
 		//get all existing sources
 		s->foreach_source (sigc::mem_fun (*this, &EditorSources::add_source));
-	
+
 		//register to get new sources that are recorded/imported
 		s->SourceAdded.connect (source_added_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::add_source, this, _1), gui_context());
 		s->SourceRemoved.connect (source_removed_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::remove_source, this, _1), gui_context());
@@ -271,7 +271,7 @@ EditorSources::set_session (ARDOUR::Session* s)
 		//register for source property changes ( some things like take_id aren't immediately available at construction )
 		ARDOUR::Source::SourcePropertyChanged.connect (source_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorSources::source_changed, this, _1), gui_context());
 	} else {
-		clear();	
+		clear();
 	}
 }
 
@@ -297,7 +297,7 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 	if (!source) {
 		return;
 	}
-	
+
 	string str;
 	Gdk::Color c;
 
@@ -442,7 +442,7 @@ EditorSources::selection_changed ()
 						_change_connection.block (true);
 						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 						_change_connection.block (false);
-	
+
 					}
 				}
 			}
@@ -579,7 +579,7 @@ EditorSources::remove_selected_sources ()
 							_change_connection.block (true);
 							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 							_change_connection.block (false);
-		
+
 						}
 					}
 				}
@@ -588,7 +588,7 @@ EditorSources::remove_selected_sources ()
 		}
 		_editor->remove_selected_regions();
 
-		if ( opt == 2 ) { //TODO:  actually delete some sources?	
+		if ( opt == 2 ) { //TODO:  actually delete some sources?
 		}
 	}
 
@@ -604,7 +604,7 @@ EditorSources::key_press (GdkEventKey* ev)
 		/* remove_selected_sources(); */
 		return true; //for now, just "eat" this, so Delete doesn't get propogated into the canvas, based on Source selections
 	}
-		
+
 	return false;
 }
 

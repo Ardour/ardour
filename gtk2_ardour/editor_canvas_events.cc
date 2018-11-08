@@ -1115,7 +1115,6 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::canvas_drop_zone_event (GdkEvent* event)
 {
-printf("canvas_drop_zone_event\n");
 	GdkEventScroll scroll;
 	ArdourCanvas::Duple winpos;
 
