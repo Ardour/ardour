@@ -2100,9 +2100,6 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_menu->set_name ("ArdourContextMenu");
 
 	select_items.push_back (MenuElem (_("Select All in Track"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_in_track), Selection::Set)));
-	select_items.push_back (MenuElem (_("Select All Objects"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_objects), Selection::Set)));
-	select_items.push_back (MenuElem (_("Invert Selection in Track"), sigc::mem_fun(*this, &Editor::invert_selection_in_track)));
-	select_items.push_back (MenuElem (_("Invert Selection"), sigc::mem_fun(*this, &Editor::invert_selection)));
 	select_items.push_back (SeparatorElem());
 	select_items.push_back (MenuElem (_("Select All After Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), true, true)));
 	select_items.push_back (MenuElem (_("Select All Before Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_edit), false, true)));
@@ -2110,28 +2107,6 @@ Editor::add_bus_context_items (Menu_Helpers::MenuList& edit_items)
 	select_items.push_back (MenuElem (_("Select All Before Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::select_all_selectables_using_cursor), playhead_cursor, false)));
 
 	edit_items.push_back (MenuElem (_("Select"), *select_menu));
-
-	/* Cut-n-Paste */
-
-	Menu *cutnpaste_menu = manage (new Menu);
-	MenuList& cutnpaste_items = cutnpaste_menu->items();
-	cutnpaste_menu->set_name ("ArdourContextMenu");
-
-	cutnpaste_items.push_back (MenuElem (_("Cut"), sigc::mem_fun(*this, &Editor::cut)));
-	cutnpaste_items.push_back (MenuElem (_("Copy"), sigc::mem_fun(*this, &Editor::copy)));
-	cutnpaste_items.push_back (MenuElem (_("Paste"), sigc::bind (sigc::mem_fun(*this, &Editor::paste), 1.0f, true)));
-
-	Menu *nudge_menu = manage (new Menu());
-	MenuList& nudge_items = nudge_menu->items();
-	nudge_menu->set_name ("ArdourContextMenu");
-
-	edit_items.push_back (SeparatorElem());
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Later"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, true))));
-	nudge_items.push_back (MenuElem (_("Nudge Entire Track Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), false, false))));
-	nudge_items.push_back (MenuElem (_("Nudge Track After Edit Point Earlier"), (sigc::bind (sigc::mem_fun(*this, &Editor::nudge_track), true, false))));
-
-	edit_items.push_back (MenuElem (_("Nudge"), *nudge_menu));
 }
 
 GridType
