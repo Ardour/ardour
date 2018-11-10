@@ -58,25 +58,6 @@ class BeatBox : public ARDOUR::Processor {
 	void silence (samplecnt_t nframes, samplepos_t start_frame);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
-	bool running() const { return _running || _start_requested; }
-	void start ();
-	void stop ();
-	void clear ();
-
-	void add_note (int number, int velocity, Timecode::BBT_Time at);
-	void remove_note (int number, Timecode::BBT_Time at);
-	void edit_note_number (int old_number, int new_number);
-
-	void set_measure_count (int measures);
-	void set_meter (int beats, int beat_type);
-	void set_tempo (float bpm);
-
-	void set_quantize (int divisor);
-
-	float tempo() const { return _tempo; }
-	int meter_beats() const { return _meter_beats; }
-	int meter_beat_type() const { return _meter_beat_type; }
-
 	XMLNode& state();
 	XMLNode& get_state(void);
 
@@ -84,62 +65,8 @@ class BeatBox : public ARDOUR::Processor {
 
   private:
 	StepSequencer* _sequencer;
-	bool _start_requested;
-	bool _running;
-	int   _measures;
-	float _tempo;
-	float _tempo_request;
-	int   _meter_beats;
-	int   _meter_beat_type;
-	samplepos_t  last_start;
-	samplepos_t  last_end;
 
-	int _sample_rate;
-	superclock_t whole_note_superclocks;
-	superclock_t tick_superclocks;
-	superclock_t beat_superclocks;
-	superclock_t measure_superclocks;
-	int _quantize_divisor;
-	bool clear_pending;
 	ARDOUR::MidiStateTracker inbound_tracker;
-	ARDOUR::MidiStateTracker outbound_tracker;
-
-	struct Event {
-		superclock_t  time;
-		superclock_t  whole_note_superclocks;
-		size_t        size;
-		unsigned char buf[24];
-		int           once;
-
-		Event () : time (0), size (0), once (0) {}
-		Event (superclock_t t, size_t sz, unsigned char* b) : time (t), size (sz), once (0) { memcpy (buf, b, std::min (sizeof (buf), sz)); }
-		Event (Event const & other) : time (other.time), size (other.size), once (0) { memcpy (buf, other.buf, other.size); }
-
-		static MultiAllocSingleReleasePool pool;
-
-		void *operator new (size_t) {
-			return pool.alloc ();
-		}
-
-		void operator delete (void* ptr, size_t /* size */) {
-			pool.release (ptr);
-		}
-	};
-
-	struct EventComparator {
-		bool operator () (Event const * a, Event const * b) const;
-	};
-
-	typedef std::vector<Event*> IncompleteNotes;
-	IncompleteNotes _incomplete_notes;
-
-	typedef std::set<Event*,EventComparator> Events;
-	Events _current_events;
-
-	void compute_tempo_clocks ();
-
-	PBD::RingBuffer<Event*> add_queue;
-	PBD::RingBuffer<Event*> remove_queue;
 
 	bool fill_midi_source (boost::shared_ptr<SMFSource>);
 

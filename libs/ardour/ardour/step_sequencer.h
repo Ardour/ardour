@@ -22,16 +22,20 @@
 #include <vector>
 #include <unistd.h>
 
+#include <boost/atomic.hpp>
 #include <boost/rational.hpp>
 
 #include <glibmm/threads.h>
 
+#include "pbd/pool.h"
+#include "pbd/ringbuffer.h"
 #include "pbd/stateful.h"
 
 #include "temporal/types.h"
 #include "temporal/beats.h"
 
 #include "ardour/mode.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -54,7 +58,7 @@ class Step : public PBD::Stateful {
 
 	typedef boost::rational<int> DurationRatio;
 
-	Step (StepSequence&, Temporal::Beats const & beat, int notenum);
+	Step (StepSequence&, size_t n, Temporal::Beats const & beat, int notenum);
 	~Step ();
 
 	void set_note (double note, double velocity = 0.5, int n = 0);
@@ -108,6 +112,7 @@ class Step : public PBD::Stateful {
 	friend class StepSequence; /* HACK */
 
 	StepSequence&      _sequence;
+	size_t              index;
 	bool               _enabled;
 	Temporal::Beats    _nominal_beat;
 	Temporal::Beats    _scheduled_beat;
@@ -168,8 +173,6 @@ class StepSequence : public PBD::Stateful
 
 	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
 
-	Temporal::Beats bar_size() const { return _bar_size; }
-
 	double root() const { return _root; }
 	void set_root (double n);
 
@@ -184,17 +187,9 @@ class StepSequence : public PBD::Stateful
 	void shift_left (size_t n = 1);
 	void shift_right (size_t n = 1);
 
-	size_t start_step() const { return _start; }
-	size_t end_step() const { return _end; }
-
-	void set_start_step (size_t);
-	void set_end_step (size_t);
-	void set_start_and_end_step (size_t, size_t);
-
-	void set_step_size (Temporal::Beats const &);
-	Temporal::Beats step_size () const { return _step_size; }
-
 	void reset ();
+	void reschedule (Temporal::Beats const &, Temporal::Beats const &);
+	void schedule (Temporal::Beats const &);
 
 	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
 
@@ -209,14 +204,7 @@ class StepSequence : public PBD::Stateful
 	typedef std::vector<Step*> Steps;
 
 	Steps       _steps;
-	size_t      _start;   /* step count */
-	size_t      _end;     /* step count */
 	int         _channel; /* MIDI channel */
-
-	Temporal::Beats _step_size;
-	Temporal::Beats _bar_size;
-	Temporal::Beats end_beat;
-
 	double      _root;
 	MusicalMode _mode;
 };
@@ -227,7 +215,8 @@ class StepSequencer : public PBD::Stateful
 	StepSequencer (TempoMap&, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum);
 	~StepSequencer ();
 
-	size_t nsteps() const { return _sequences.front()->nsteps(); }
+	size_t step_capacity() const { return _step_capacity; }
+	size_t nsteps() const { return _end_step - _start_step; }
 	size_t nsequences() const { return _sequences.size(); }
 
 	int last_step() const;
@@ -236,19 +225,19 @@ class StepSequencer : public PBD::Stateful
 
 	Temporal::Beats duration() const;
 
-	void startup (Temporal::Beats const & start, Temporal::Beats const & offset);
-
 	Temporal::Beats step_size () const { return _step_size; }
 	void set_step_size (Temporal::Beats const &);
 
 	void set_start_step (size_t);
 	void set_end_step (size_t);
-	void set_start_and_end_step (size_t, size_t);
+
+	size_t start_step() const { return _start_step; }
+	size_t end_step() const { return _end_step; }
 
 	void sync ();        /* return all rows to start step */
 	void reset ();       /* return entire state to default */
 
-	bool run (MidiBuffer& buf, bool running, samplepos_t, samplepos_t, MidiStateTracker&);
+	bool run (MidiBuffer& buf, samplepos_t, samplepos_t, double, pframes_t, bool);
 
 	TempoMap& tempo_map() const { return _tempo_map; }
 
@@ -257,17 +246,56 @@ class StepSequencer : public PBD::Stateful
 
   private:
 	mutable Glib::Threads::Mutex       _sequence_lock;
+	TempoMap&       _tempo_map;
 
 	typedef std::vector<StepSequence*> StepSequences;
-
 	StepSequences  _sequences;
 
-	TempoMap&       _tempo_map;
+	Temporal::Beats _last_startup; /* last time we started running */
+	size_t          _last_step;  /* last step that we executed */
 	Temporal::Beats _step_size;
-	int32_t         _start;
-	int32_t         _end;
-	Temporal::Beats _last_start;
-	int             _last_step;
+	size_t          _start_step;
+	size_t          _end_step;
+	samplepos_t     last_start;
+	samplepos_t     last_end;   /* end sample time of last run() call */
+	bool            _running;
+	size_t          _step_capacity;
+
+	ARDOUR::MidiStateTracker outbound_tracker;
+
+	struct Request {
+
+		/* bitwise types, so we can combine multiple in one
+		 */
+
+		enum Type {
+			SetStartStep = 0x1,
+			SetEndStep = 0x2,
+			SetNSequences = 0x4,
+			SetStepSize = 0x8,
+		};
+
+		Type type;
+
+		Temporal::Beats step_size;
+		size_t          nsequences;
+		size_t          start_step;
+		size_t          end_step;
+
+		static MultiAllocSingleReleasePool pool;
+
+		void *operator new (size_t) {
+			return pool.alloc ();
+		}
+
+		void operator delete (void* ptr, size_t /* size */) {
+			pool.release (ptr);
+		}
+	};
+
+	PBD::RingBuffer<Request*> requests;
+	bool check_requests ();
+	Temporal::Beats reschedule (samplepos_t);
 };
 
 } /* namespace */

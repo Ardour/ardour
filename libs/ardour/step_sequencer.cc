@@ -30,8 +30,9 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace std;
 
-Step::Step (StepSequence &s, Temporal::Beats const & b, int base_note)
+Step::Step (StepSequence &s, size_t n, Temporal::Beats const & b, int base_note)
 	: _sequence (s)
+	, index (n)
 	, _enabled (true)
 	, _nominal_beat (b)
 	, _skipped (false)
@@ -336,9 +337,9 @@ Step::check_note (size_t n, MidiBuffer& buf, bool running, samplepos_t start_sam
 				 * just to get non-simultaneous on/off events at
 				 * step boundaries.
 				*/
-				note.off_at += Temporal::Beats (0, _sequence.step_size().to_ticks() - 1);
+				note.off_at += Temporal::Beats (0, sequencer().step_size().to_ticks() - 1);
 			} else {
-				note.off_at += Temporal::Beats (0, (_sequence.step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
+				note.off_at += Temporal::Beats (0, (sequencer().step_size().to_ticks() * _duration.numerator()) / _duration.denominator());
 			}
 		}
 	}
@@ -401,22 +402,19 @@ Step::set_state (XMLNode const &, int)
 
 StepSequence::StepSequence (StepSequencer& s, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int r)
 	: _sequencer (s)
-	, _start (0)
-	, _end (nsteps - 1)
 	, _channel (0)
-	, _step_size (step_size)
-	, _bar_size (bar_size)
 	, _root (r)
 	, _mode (MusicalMode::IonianMajor)
 {
 	Temporal::Beats beats;
 
 	for (size_t s = 0; s < nsteps; ++s) {
-		_steps.push_back (new Step (*this, beats, _root));
-		beats += step_size;
+		/* beats is wrong but we will correct in ::schedule */
+		_steps.push_back (new Step (*this, s, beats, _root));
 	}
 
-	end_beat = beats;
+	/* schedule them all from zero for now */
+	schedule (beats);
 }
 
 StepSequence::~StepSequence ()
@@ -427,16 +425,29 @@ StepSequence::~StepSequence ()
 }
 
 void
-StepSequence::startup (Temporal::Beats const & start, Temporal::Beats const & offset)
+StepSequence::schedule (Temporal::Beats const & start)
 {
-	for (Steps::iterator i = _steps.begin(); i != _steps.end(); ++i) {
-		(*i)->reschedule (start, offset);
+	Temporal::Beats beats (start);
+	const size_t s = _sequencer.start_step();
+	const size_t e = _sequencer.end_step();
+
+	for (size_t n = s; n < e; ++n) {
+		_steps[n]->set_beat (beats);
+		cerr << "beat " << n << " @ " << beats << ' ';
+		beats += _sequencer.step_size();
 	}
+	cerr << endl;
 }
 
 void
-StepSequence::reset ()
+StepSequence::reschedule (Temporal::Beats const & start, Temporal::Beats const & offset)
 {
+	const size_t s = _sequencer.start_step();
+	const size_t e = _sequencer.end_step();
+
+	for (size_t n = s; n < e; ++n) {
+		_steps[n]->reschedule (start, offset);
+	}
 }
 
 void
@@ -445,23 +456,32 @@ StepSequence::set_channel (int c)
 	_channel = c;
 }
 
-Temporal::Beats
-StepSequence::wrap (Temporal::Beats const & b) const
-{
-	if (b < end_beat) {
-		return b;
-	}
-
-	return b - end_beat;
-}
-
-
 bool
 StepSequence::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker& tracker)
 {
-	for (Steps::iterator s = _steps.begin(); s != _steps.end(); ++s) {
-		(*s)->run (buf, running, start_sample, end_sample, tracker);
+	const size_t s = _sequencer.start_step();
+	const size_t e = _sequencer.end_step();
+	const size_t t = _steps.size();
+	size_t n = 0;
+
+	/* steps before the start step .. may still have pending off's or ... */
+
+	while (n < s) {
+		_steps[n++]->run (buf, false, start_sample, end_sample, tracker);
 	}
+
+	/* currently in use steps */
+
+	while (n < e) {
+		_steps[n++]->run (buf, running, start_sample, end_sample, tracker);
+	}
+
+	/* steps after the end step .. may still have pending off's or ... */
+
+	while (n < t) {
+		_steps[n++]->run (buf, false, start_sample, end_sample, tracker);
+	}
+
 	return true;
 }
 
@@ -487,12 +507,19 @@ StepSequence::set_state (XMLNode const &, int)
 
 /**/
 
+MultiAllocSingleReleasePool StepSequencer::Request::pool (X_("step sequencer requests"), sizeof (StepSequencer::Request), 64);
+
 StepSequencer::StepSequencer (TempoMap& tmap, size_t nseqs, size_t nsteps, Temporal::Beats const & step_size, Temporal::Beats const & bar_size, int notenum)
 	: _tempo_map (tmap)
-	, _step_size (step_size)
-	, _start (0)
-	, _end (nsteps)
 	, _last_step (0)
+	, _step_size (step_size)
+	, _start_step (0)
+	, _end_step (nsteps)
+	, last_start (0)
+	, last_end (0)
+	, _running (false)
+	, _step_capacity (nsteps)
+	, requests (64)
 {
 	for (size_t n = 0; n < nseqs; ++n) {
 		_sequences.push_back (new StepSequence (*this, nsteps, step_size, bar_size, notenum));
@@ -507,19 +534,82 @@ StepSequencer::~StepSequencer ()
 	}
 }
 
+Temporal::Beats
+StepSequencer::reschedule (samplepos_t start_sample)
+{
+	cerr << "SEQ reschedule\n";
+
+	/* compute the beat position of this first "while-moving
+	 * run() call as an offset into the sequencer's current loop
+	 * length.
+	 */
+
+	const Temporal::Beats start_beat (_tempo_map.beat_at_sample (start_sample));
+	const int32_t tick_duration = duration().to_ticks();
+
+	const Temporal::Beats closest_previous_loop_start = Temporal::Beats::ticks ((start_beat.to_ticks() / tick_duration) * tick_duration);
+	const Temporal::Beats offset = Temporal::Beats::ticks ((start_beat.to_ticks() % tick_duration));
+
+	for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
+		(*s)->reschedule (closest_previous_loop_start, offset);
+	}
+
+	return closest_previous_loop_start;
+}
+
 bool
-StepSequencer::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t end_sample, MidiStateTracker& tracker)
+StepSequencer::run (MidiBuffer& buf, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t, bool)
 {
 	Glib::Threads::Mutex::Lock lm (_sequence_lock);
 
+	bool resolve = false;
+	bool need_reschedule = check_requests ();
+
+	if (speed == 0) {
+		if (_running) {
+			resolve = true;
+			_running = false;
+		}
+	}
+
+	if (speed != 0)  {
+
+		if (!_running || (last_end != start_sample)) {
+
+			if (last_end != start_sample) {
+				/* non-linear motion, need to resolve notes */
+				resolve = true;
+			}
+
+			_last_startup = reschedule (start_sample);
+			last_start = start_sample;
+			need_reschedule = false;
+			_running = true;
+		}
+	}
+
+
+	if (need_reschedule) {
+		reschedule (start_sample);
+		need_reschedule = false;
+	}
+
 	for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
-		(*s)->run (buf, running, start_sample, end_sample, tracker);
+		(*s)->run (buf, _running, start_sample, end_sample, outbound_tracker);
 	}
 
 	const Temporal::Beats terminal_beat = Temporal::Beats (_tempo_map.beat_at_sample (end_sample - 1));
 	const size_t dur_ticks = duration().to_ticks();
 	const size_t step_ticks = _step_size.to_ticks();
-	_last_step = ((terminal_beat - _last_start).to_ticks() % dur_ticks) / step_ticks;
+
+	_last_step = _start_step + (((terminal_beat - _last_startup).to_ticks() % dur_ticks) / step_ticks);
+
+	if (resolve) {
+		outbound_tracker.resolve_notes (buf, 0);
+	}
+
+	last_start = start_sample;
+	last_end = end_sample;
 
 	return true;
 }
@@ -549,20 +639,12 @@ StepSequencer::reset ()
 Temporal::Beats
 StepSequencer::duration() const
 {
-	return _step_size * (_end - _start) ;
+	return _step_size * (_end_step - _start_step) ;
 }
 
 void
-StepSequencer::startup (Temporal::Beats const & start, Temporal::Beats const & offset)
+StepSequence::reset ()
 {
-	_last_start = start;
-	{
-		Glib::Threads::Mutex::Lock lm1 (_sequence_lock);
-		for (StepSequences::iterator s = _sequences.begin(); s != _sequences.end(); ++s) {
-			(*s)->startup (start, offset);
-		}
-	}
-
 }
 
 StepSequence&
@@ -570,6 +652,24 @@ StepSequencer::sequence (size_t n) const
 {
 	assert (n < _sequences.size());
 	return *_sequences[n];
+}
+
+void
+StepSequencer::set_start_step (size_t n)
+{
+	Request* r = new Request;
+	r->type = Request::SetStartStep;
+	r->start_step = n;
+	requests.write (&r, 1);
+}
+
+void
+StepSequencer::set_end_step (size_t n)
+{
+	Request* r = new Request;
+	r->type = Request::SetEndStep;
+	r->end_step = n;
+	requests.write (&r, 1);
 }
 
 XMLNode&
@@ -582,4 +682,55 @@ int
 StepSequencer::set_state (XMLNode const &, int)
 {
 	return 0;
+}
+
+bool
+StepSequencer::check_requests ()
+{
+	Request* req;
+	bool changed = false;
+	bool reschedule = false;
+
+	while (requests.read (&req, 1)) {
+
+		if (req->type & Request::SetStartStep) {
+			if (req->start_step != _start_step) {
+				if (req->start_step < _end_step) {
+					_start_step = req->start_step;
+					reschedule = true;
+					changed = true;
+				}
+			}
+		}
+
+		if (req->type & Request::SetEndStep) {
+			if (req->end_step != _end_step) {
+				if (req->end_step > _start_step) {
+					_end_step = req->end_step;
+					reschedule = true;
+					changed = true;
+				}
+			}
+		}
+
+		if (req->type & Request::SetNSequences) {
+			// XXXX
+		}
+		if (req->type & Request::SetStepSize) {
+			if (_step_size != req->step_size) {
+				_step_size = req->step_size;
+				reschedule = true;
+				changed = true;
+			}
+		}
+	}
+
+	delete req;
+
+	if (changed) {
+		PropertyChange pc;
+		PropertyChanged (pc);
+	}
+
+	return reschedule;
 }

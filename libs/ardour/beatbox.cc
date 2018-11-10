@@ -42,26 +42,9 @@ using std::endl;
 
 using namespace ARDOUR;
 
-MultiAllocSingleReleasePool BeatBox::Event::pool (X_("beatbox events"), sizeof (Event), 2048);
-
 BeatBox::BeatBox (Session& s)
 	: Processor (s, _("BeatBox"))
 	, _sequencer (0)
-	, _start_requested (false)
-	, _running (false)
-	, _measures (2)
-	, _tempo (-1.0)
-	, _meter_beats (-1)
-	, _meter_beat_type (-1)
-	, last_start (0)
-	, whole_note_superclocks (0)
-	, tick_superclocks (0)
-	, beat_superclocks (0)
-	, measure_superclocks (0)
-	, _quantize_divisor (4)
-	, clear_pending (false)
-	, add_queue (64)
-	, remove_queue (64)
 {
 	_display_to_user = true;
 	_sequencer = new StepSequencer (s.tempo_map(), 12, 32, Temporal::Beats (0, Temporal::Beats::PPQN/8), Temporal::Beats (4, 0), 40);
@@ -73,100 +56,19 @@ BeatBox::~BeatBox ()
 }
 
 void
-BeatBox::start ()
-{
-	/* we can start */
-
-	_start_requested = true;
-}
-
-void
-BeatBox::stop ()
-{
-	_start_requested = false;
-}
-
-void
 BeatBox::silence (samplecnt_t, samplepos_t)
 {
 	/* do nothing, we have no inputs or outputs */
 }
 
 void
-BeatBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nsamples, bool /*result_required*/)
+BeatBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nsamples, bool result_required)
 {
 	if (bufs.count().n_midi() == 0) {
 		return;
 	}
 
-	bool resolve = false;
-
-	if (speed == 0) {
-		if (_running) {
-			resolve = true;
-			_running = false;
-		}
-	}
-
-	if (speed != 0)  {
-
-		if (!_running || (last_end != start_sample)) {
-
-			if (last_end != start_sample) {
-				resolve = true;
-			}
-
-			/* compute the beat position of this first "while-moving
-			 * run() call as an offset into the sequencer's current loop
-			 * length.
-			 */
-
-			TempoMap& tmap (_session.tempo_map());
-
-			const Temporal::Beats start_beat (tmap.beat_at_sample (start_sample));
-			const int32_t tick_duration = _sequencer->duration().to_ticks();
-
-
-
-			Temporal::Beats closest_previous_loop_start = Temporal::Beats::ticks ((start_beat.to_ticks() / tick_duration) * tick_duration);
-			Temporal::Beats offset = Temporal::Beats::ticks ((start_beat.to_ticks() % tick_duration));
-			_sequencer->startup (closest_previous_loop_start, offset);
-			last_start = start_sample;
-			_running = true;
-
-		}
-	}
-
-	if (resolve) {
-		outbound_tracker.resolve_notes (bufs.get_midi(0), 0);
-	}
-
-	_sequencer->run (bufs.get_midi (0), _running, start_sample, end_sample, outbound_tracker);
-	last_end = end_sample;
-}
-
-void
-BeatBox::set_quantize (int divisor)
-{
-	_quantize_divisor = divisor;
-}
-
-void
-BeatBox::clear ()
-{
-	clear_pending = true;
-}
-
-bool
-BeatBox::EventComparator::operator() (Event const * a, Event const *b) const
-{
-	if (a->time == b->time) {
-		if (a->buf[0] == b->buf[0]) {
-			return a < b;
-		}
-		return !ARDOUR::MidiBuffer::second_simultaneous_midi_byte_is_first (a->buf[0], b->buf[0]);
-	}
-	return a->time < b->time;
+	_sequencer->run (bufs.get_midi (0), start_sample, end_sample, speed, nsamples, result_required);
 }
 
 bool
@@ -190,68 +92,6 @@ BeatBox::state()
 	return node;
 }
 
-void
-BeatBox::edit_note_number (int old_number, int new_number)
-{
-	for (Events::iterator e = _current_events.begin(); e != _current_events.end(); ++e) {
-		if (((*e)->buf[0] & 0xf0) == MIDI_CMD_NOTE_OFF || ((*e)->buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
-			if ((*e)->buf[1] == old_number) {
-				(*e)->buf[1] = new_number;
-			}
-		}
-	}
-}
-
-void
-BeatBox::remove_note (int note, Timecode::BBT_Time at)
-{
-}
-
-void
-BeatBox::add_note (int note, int velocity, Timecode::BBT_Time at)
-{
-	Event* on = new Event; // pool allocated, thread safe
-
-	if (!on) {
-		cerr << "No more events for injection, grow pool\n";
-		return;
-	}
-	/* convert to zero-base */
-	at.bars--;
-	at.beats--;
-
-	/* clamp to current loop configuration */
-	at.bars %= _measures;
-	at.beats %= _meter_beats;
-
-	on->time = (measure_superclocks * at.bars) + (beat_superclocks * at.beats);
-	on->size = 3;
-	on->buf[0] = MIDI_CMD_NOTE_ON | (0 & 0xf);
-	on->buf[1] = note;
-	on->buf[2] = velocity;
-
-	Event* off = new Event; // pool allocated, thread safe
-
-	if (!off) {
-		cerr << "No more events for injection, grow pool\n";
-		return;
-	}
-
-	if (_quantize_divisor != 0) {
-		off->time = on->time + (beat_superclocks / _quantize_divisor);
-	} else {
-		/* 1/4 second note .. totally arbitrary */
-		off->time = on->time + (_session.sample_rate() / 4);
-	}
-	off->size = 3;
-	off->buf[0] = MIDI_CMD_NOTE_OFF | (0 & 0xf);
-	off->buf[1] = note;
-	off->buf[2] = 0;
-
-	add_queue.write (&on, 1);
-	add_queue.write (&off, 1);
-}
-
 bool
 BeatBox::fill_source (boost::shared_ptr<Source> src)
 {
@@ -267,6 +107,7 @@ BeatBox::fill_source (boost::shared_ptr<Source> src)
 bool
 BeatBox::fill_midi_source (boost::shared_ptr<SMFSource> src)
 {
+#if 0
 	Temporal::Beats smf_beats;
 
 	if (_current_events.empty()) {
@@ -295,6 +136,6 @@ BeatBox::fill_midi_source (boost::shared_ptr<SMFSource> src)
 	} catch (...) {
 		cerr << "Exception during beatbox write to SMF... " << endl;
 	}
-
+#endif
 	return false;
 }
