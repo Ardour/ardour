@@ -103,7 +103,7 @@ class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
 	static Gtkmm2ext::Color off_fill_color;
 };
 
-class SequencerStepIndicator : public ArdourCanvas::Rectangle {
+class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trackable {
   public:
 	SequencerStepIndicator (SequencerGrid&, ArdourCanvas::Item *, size_t n);
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
@@ -116,23 +116,24 @@ class SequencerStepIndicator : public ArdourCanvas::Rectangle {
 	size_t number;
 	ArdourCanvas::Polygon* poly;
 	ArdourCanvas::Text*    text;
-
-	std::pair<double,double> grab_at;
-	std::pair<double,double> last_motion;
+	bool being_dragged;
 
 	static int dragging;
 
 	bool motion_event (GdkEventMotion*);
 	bool button_press_event (GdkEventButton*);
 	bool button_release_event (GdkEventButton*);
-	bool scroll_event (GdkEventScroll*);
 
 	void set_text ();
+
+	void sequencer_changed (PBD::PropertyChange const &);
+	PBD::ScopedConnection sequencer_connection;
 
 	static Gtkmm2ext::Color current_color;
 	static Gtkmm2ext::Color other_color;
 	static Gtkmm2ext::Color current_text_color;
 	static Gtkmm2ext::Color other_text_color;
+	static Gtkmm2ext::Color bright_outline_color;
 };
 
 class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
@@ -168,6 +169,11 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	ArdourCanvas::Container* no_scroll_group;
 	ArdourCanvas::Rectangle* step_indicator_bg;
 	ArdourCanvas::Container* step_indicator_box;
+
+	ArdourCanvas::Rectangle* velocity_mode_button;
+	ArdourCanvas::Rectangle* pitch_mode_button;
+	ArdourCanvas::Rectangle* octave_mode_button;
+	ArdourCanvas::Rectangle* gate_mode_button;
 
 	void sequencer_changed (PBD::PropertyChange const &);
 

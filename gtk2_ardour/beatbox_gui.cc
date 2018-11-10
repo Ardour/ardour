@@ -81,31 +81,13 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 	_canvas->use_nsglview ();
 
 	_sequencer = new SequencerGrid (bbox->sequencer(), _canvas);
-	_sequencer->set_position (Duple (0, _step_dimen));
-
-	srandom (time(0));
 
 	canvas_hbox.pack_start (*_canvas_viewport, true, true);
 	canvas_hbox.pack_start (vscrollbar, false, false);
 
-	mode_box.pack_start (mode_velocity_button);
-	mode_box.pack_start (mode_pitch_button);
-	mode_box.pack_start (mode_duration_button);
-	mode_box.pack_start (mode_octave_button);
-	mode_box.pack_start (mode_group_button);
-
-	mode_velocity_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Velocity));
-	mode_pitch_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Pitch));
-	mode_octave_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Octave));
-	mode_group_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Group));
-	mode_duration_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &BBGUI::mode_clicked), SequencerGrid::Duration));
-
 	get_vbox()->set_spacing (12);
 	get_vbox()->pack_start (mode_box, false, false);
 	get_vbox()->pack_start (canvas_hbox, true, true);
-
-	start_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::toggle_play));
-	get_action_area()->pack_end (start_button);
 
 	export_as_region_button.signal_clicked.connect (sigc::mem_fun (*this, &BBGUI::export_as_region));
 	get_action_area()->pack_end (export_as_region_button);
@@ -128,7 +110,6 @@ BBGUI::~BBGUI ()
 void
 BBGUI::mode_clicked (SequencerGrid::Mode m)
 {
-	cerr << "Set mode to " << m << endl;
 	_sequencer->set_mode (m);
 }
 
@@ -200,17 +181,6 @@ BBGUI::SwitchRow::switch_event (GdkEvent* ev, int col)
 void
 BBGUI::clear ()
 {
-	bbox->clear ();
-}
-
-void
-BBGUI::toggle_play()
-{
-	if (bbox->running()) {
-		bbox->stop ();
-	} else {
-		bbox->start ();
-	}
 }
 
 void
@@ -257,7 +227,7 @@ BBGUI::export_as_region ()
 void
 BBGUI::sequencer_changed (PropertyChange const &)
 {
-	const size_t nsteps = bbox->sequencer().nsteps();
+	const size_t nsteps = bbox->sequencer().step_capacity ();
 	const size_t nsequences = bbox->sequencer().nsequences();
 
 	_width = _step_dimen * nsteps;
@@ -267,7 +237,7 @@ BBGUI::sequencer_changed (PropertyChange const &)
 	 * line at the top
 	 */
 
-	_canvas_viewport->set_size_request (_width, _height + _step_dimen);
+	_canvas_viewport->set_size_request (250.0 + _width, _height + _step_dimen);
 }
 
 /**/
@@ -280,9 +250,13 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
 	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
 
+	step_indicator_box->set_position (Duple (250.0, 0.0));
+
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
 	v_scroll_group->add (this);
+
+	set_position (Duple (250, _step_dimen));
 
 	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
@@ -318,13 +292,11 @@ SequencerGrid::update ()
 void
 SequencerGrid::sequencer_changed (PropertyChange const &)
 {
-	const size_t nsteps = _sequencer.nsteps();
+	const size_t nsteps = _sequencer.step_capacity ();
 	const size_t nsequences = _sequencer.nsequences();
 
 	_width = _step_dimen * nsteps;
 	_height = _step_dimen * nsequences;
-
-	set (Rect (0, 0, _width, _height));
 
 	step_indicator_box->clear (true); /* delete all existing step indicators */
 	step_indicators.clear ();
@@ -353,8 +325,9 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 		for (size_t n = 0; n < nsteps; ++n) {
 			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), v_scroll_group);
 			/* sequence row is 1-row down ... because of the step indicator row */
-			sv->set_position (Duple (n * _step_dimen, (s+1) * _step_dimen));
+			sv->set_position (Duple (250.0 + (n * _step_dimen), (s+1) * _step_dimen));
 			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
+			step_views.push_back (sv);
 			step_views.push_back (sv);
 		}
 	}
@@ -421,18 +394,21 @@ Gtkmm2ext::Color SequencerStepIndicator::other_color = Gtkmm2ext::Color (0);
 Gtkmm2ext::Color SequencerStepIndicator::current_color = Gtkmm2ext::Color (0);
 Gtkmm2ext::Color SequencerStepIndicator::other_text_color = Gtkmm2ext::Color (0);
 Gtkmm2ext::Color SequencerStepIndicator::current_text_color = Gtkmm2ext::Color (0);
+Gtkmm2ext::Color SequencerStepIndicator::bright_outline_color = Gtkmm2ext::Color (0);
 int SequencerStepIndicator::dragging = 0;
 
 SequencerStepIndicator::SequencerStepIndicator (SequencerGrid& s, Item *p, size_t n)
 	: Rectangle (p)
 	, grid (s)
 	, number (n)
+	, being_dragged (false)
 {
 	if (current_color == 0) { /* zero alpha? not set */
 		other_color = UIConfiguration::instance().color ("gtk_bases");
 		current_color = UIConfiguration::instance().color ("gtk_bright_color");
 		other_text_color = contrasting_text_color (other_color);
 		current_text_color = contrasting_text_color (current_color);
+		bright_outline_color = UIConfiguration::instance().color ("gtk_bright_indicator");
 	}
 
 	set_fill (false);
@@ -440,35 +416,42 @@ SequencerStepIndicator::SequencerStepIndicator (SequencerGrid& s, Item *p, size_
 
 	poly = new Polygon (this);
 	Points points;
-	points.push_back (Duple (0.0, 0.0));
-	points.push_back (Duple (_step_dimen, 0.0));
-	points.push_back (Duple (_step_dimen, _step_dimen/2.0));
-	points.push_back (Duple (_step_dimen/2.0, _step_dimen));
-	points.push_back (Duple (0.0, _step_dimen/2.0));
+	/* half pixel shifts are to get a clean single pixel outline */
+	points.push_back (Duple (0.5, 0.5));
+	points.push_back (Duple (_step_dimen - 0.5, 0.5));
+	points.push_back (Duple (_step_dimen - 0.5, (_step_dimen - 1.0)/2.0));
+	points.push_back (Duple ((_step_dimen - 1.0)/2.0, _step_dimen - 0.5));
+	points.push_back (Duple (0.5, (_step_dimen - 1.0)/2.0));
 	poly->set (points);
 	poly->set_fill_color (current_color);
+	poly->set_outline_color (other_color);
 	poly->set_ignore_events (true);
 
 	text = new Text (this);
 
 	set_text ();
 
-	text->set_font_description (UIConfiguration::instance ().get_SmallFont ());
+	text->set_font_description (UIConfiguration::instance ().get_NormalFont ());
 	text->set_position (Duple ((_step_dimen/2.0) - (text->width()/2.0), 5.0));
 	text->set_color (other_text_color);
 	text->set_ignore_events (true);
 
 	Event.connect (sigc::mem_fun (*this, &SequencerStepIndicator::on_event));
+	grid.sequencer().PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerStepIndicator::sequencer_changed, this, _1), gui_context());
+}
+
+void
+SequencerStepIndicator::sequencer_changed (PropertyChange const &)
+{
+	set_text ();
 }
 
 void
 SequencerStepIndicator::set_text ()
 {
-	StepSequence& sequence = grid.sequencer().sequence (number / grid.sequencer().nsteps());
-
-	if (number == sequence.end_step()) {
+	if (number == grid.sequencer().end_step() - 1) {
 		text->set ("\u21a9");
-	} else if (number == sequence.start_step()) {
+	} else if (number == grid.sequencer().start_step()) {
 		text->set ("\u21aa");
 	} else {
 		text->set (string_compose ("%1", number+1));
@@ -484,22 +467,25 @@ SequencerStepIndicator::on_event (GdkEvent* ev)
 	case GDK_ENTER_NOTIFY:
 		switch (dragging) {
 		case 1: /* end */
-			text->set ("\u21a9");
-			poly->set_outline_color (current_color);
+			poly->set_outline_color (bright_outline_color);
+			poly->set_fill_color (current_color);
+			being_dragged = true;
 			break;
 		case -1:
-			text->set ("\u21aa");
-			poly->set_outline_color (current_color);
+			poly->set_outline_color (bright_outline_color);
+			poly->set_fill_color (current_color);
+			being_dragged = true;
 			break;
 		default:
-			text->set (string_compose ("%1", number+1));
 			poly->set_outline_color (other_color);
+			poly->set_fill_color (other_color);
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
 		if (dragging) {
-			text->set (string_compose ("%1", number+1));
 			poly->set_outline_color (other_color);
+			poly->set_fill_color (other_color);
+			being_dragged = false;
 		}
 		break;
 	case GDK_MOTION_NOTIFY:
@@ -511,8 +497,6 @@ SequencerStepIndicator::on_event (GdkEvent* ev)
 	case GDK_BUTTON_RELEASE:
 		ret = button_release_event (&ev->button);
 		break;
-	case GDK_SCROLL:
-		ret = scroll_event (&ev->scroll);
 	default:
 		break;
 	}
@@ -523,20 +507,15 @@ SequencerStepIndicator::on_event (GdkEvent* ev)
 bool
 SequencerStepIndicator::motion_event (GdkEventMotion* ev)
 {
-	//const double distance = last_motion.second - ev->y;
-
-	last_motion = std::make_pair (ev->x, ev->y);
 	return true;
 }
 
 bool
 SequencerStepIndicator::button_press_event (GdkEventButton* ev)
 {
-	StepSequence& sequence = grid.sequencer().sequence (number / grid.sequencer().nsteps());
-
-	if (number == sequence.end_step()) {
+	if (number == grid.sequencer().end_step() - 1) {
 		dragging = 1;
-	} else if (number == sequence.start_step()) {
+	} else if (number == grid.sequencer().start_step()) {
 		dragging = -1;
 	}
 
@@ -546,37 +525,30 @@ SequencerStepIndicator::button_press_event (GdkEventButton* ev)
 bool
 SequencerStepIndicator::button_release_event (GdkEventButton* ev)
 {
-	dragging = 0;
-	return true;
-}
-
-bool
-SequencerStepIndicator::scroll_event (GdkEventScroll* ev)
-{
-	int amt = 0;
-
-	switch (ev->direction) {
-	case GDK_SCROLL_UP:
-		amt = 1;
+	switch (dragging) {
+	case 1:
+		grid.sequencer().set_end_step (number+1);
 		break;
-	case GDK_SCROLL_LEFT:
-		amt = -1;
+	case -1:
+		grid.sequencer().set_start_step (number);
 		break;
-	case GDK_SCROLL_RIGHT:
-		amt = 1;
-		break;
-	case GDK_SCROLL_DOWN:
-		amt = -1;
+	default:
 		break;
 	}
 
+	dragging = 0;
+	being_dragged = false;
+
 	return true;
 }
-
 
 void
 SequencerStepIndicator::set_current (bool yn)
 {
+	if (being_dragged) {
+		return;
+	}
+
 	if (yn) {
 		poly->set_fill_color (current_color);
 		text->set_color (current_text_color);
@@ -623,19 +595,19 @@ StepView::StepView (SequencerGrid& sg, Step& s, ArdourCanvas::Item* parent)
 void
 StepView::view_mode_changed ()
 {
+	/* this should leave the text to the last text-displaying mode */
+
 	if (_seq.mode() == SequencerGrid::Octave) {
 		set_octave_text ();
 	} else if (_seq.mode() == SequencerGrid::Group) {
 		set_group_text ();
-	} else {
-		text->hide ();
 	}
 }
 
 void
 StepView::set_group_text ()
 {
-	text->hide ();
+	text->set ("-");
 }
 
 void
@@ -680,24 +652,30 @@ StepView::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>
 	Rectangle::render (area, context);
 
 	if (_seq.mode() == SequencerGrid::Velocity) {
-		const double height = (_step_dimen - 4) * _step.velocity();
-		const Duple origin = item_to_window (Duple (0, 0));
-		set_source_rgba (context, outline_color());
-		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
-		context->fill ();
+		if (_step.velocity()) {
+			const double height = (_step_dimen - 4) * _step.velocity();
+			const Duple origin = item_to_window (Duple (0, 0));
+			set_source_rgba (context, outline_color());
+			context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+			context->fill ();
+		}
 	} else if (_seq.mode() == SequencerGrid::Pitch) {
-		const double height = (_step_dimen - 4) * (_step.note() / 128.0);
-		const Duple origin = item_to_window (Duple (0, 0));
-		set_source_rgba (context, outline_color());
-		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
-		context->fill ();
+		if (_step.velocity()) {
+			const double height = (_step_dimen - 4) * (_step.note() / 128.0);
+			const Duple origin = item_to_window (Duple (0, 0));
+			set_source_rgba (context, outline_color());
+			context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+			context->fill ();
+		}
 	} else if (_seq.mode() == SequencerGrid::Duration) {
-		const Step::DurationRatio d (_step.duration());
-		const double height = ((_step_dimen - 4.0) * d.numerator()) / d.denominator();
-		const Duple origin = item_to_window (Duple (0, 0));
-		set_source_rgba (context, outline_color());
-		context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
-		context->fill ();
+		if (_step.velocity()) {
+			const Step::DurationRatio d (_step.duration());
+			const double height = ((_step_dimen - 4.0) * d.numerator()) / d.denominator();
+			const Duple origin = item_to_window (Duple (0, 0));
+			set_source_rgba (context, outline_color());
+			context->rectangle (origin.x + 2, origin.y + (_step_dimen - height - 2), _step_dimen - 4, height);
+			context->fill ();
+		}
 	}
 
 	/* now deal with any children (e.g. text) */
@@ -775,14 +753,20 @@ StepView::button_release_event (GdkEventButton* ev)
 		if (fabs (last_motion.second - grab_at.second) < 4) {
 			/* just a click */
 
-			if (_seq.mode() == SequencerGrid::Velocity) {
+			/* in all modes except octave, turn step on if it is off */
+
+			if (_seq.mode() == SequencerGrid::Octave) {
+				if (_step.velocity()) {
+					_step.set_octave_shift (0);
+				} else {
+					_step.set_velocity (0.8);
+				}
+			} else {
 				if (_step.velocity()) {
 					_step.set_velocity (0.0);
 				} else {
-					_step.set_velocity (0.9);
+					_step.set_velocity (0.8);
 				}
-			} else if (_seq.mode() == SequencerGrid::Octave) {
-				_step.set_octave_shift (0);
 			}
 		}
 	}
@@ -811,14 +795,12 @@ StepView::scroll_event (GdkEventScroll* ev)
 	}
 
 	if ((ev->state & GDK_MOD1_MASK) || _seq.mode() == SequencerGrid::Pitch) {
-		cerr << "adjust pitch by " << amt << endl;
 		adjust_step_pitch (amt);
 	} else if (_seq.mode() == SequencerGrid::Velocity) {
-		cerr << "adjust velocity by " << amt << endl;
 		adjust_step_velocity (amt);
 	} else if (_seq.mode() == SequencerGrid::Duration) {
-		cerr << "adjust duration by " << Step::DurationRatio (amt, 32) << endl;
-		adjust_step_duration (Step::DurationRatio (amt, 32)); /* adjust by 1/32 of the sequencer step size */
+		/* adjust by 1/32 of the sequencer step size */
+		adjust_step_duration (Step::DurationRatio (amt, 32));
 	} else if (_seq.mode() == SequencerGrid::Octave) {
 		adjust_step_octave (amt);
 	} else if (_seq.mode() == SequencerGrid::Group) {
