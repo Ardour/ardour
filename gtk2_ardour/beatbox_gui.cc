@@ -249,14 +249,51 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 {
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
 	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
-
-	step_indicator_box->set_position (Duple (250.0, 0.0));
+	step_indicator_box->set_position (Duple (250.0, 70.0));
 
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
 	v_scroll_group->add (this);
 
-	set_position (Duple (250, _step_dimen));
+	ArdourCanvas::Text* label;
+
+	velocity_mode_button = new Rectangle (no_scroll_group);
+	velocity_mode_button->set (Rect (250.0 + 10, 10, 250.0 + 110, 60));
+	velocity_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+	label = new Text (velocity_mode_button);
+	label->set_font_description (UIConfiguration::instance().get_NormalFont());
+	label->set_position (Duple (30, 30));
+	label->set (_("Vel"));
+	//label->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
+
+	pitch_mode_button = new Rectangle (no_scroll_group);
+	pitch_mode_button->set (Rect (250.0 + 110, 10, 250.0 + 210, 60));
+	pitch_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+	label = new Text (pitch_mode_button);
+	label->set_font_description (UIConfiguration::instance().get_NormalFont());
+	label->set_position (Duple (30, 30));
+	label->set (_("Pitch"));
+	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+
+	gate_mode_button = new Rectangle (no_scroll_group);
+	gate_mode_button->set (Rect (250.0 + 220, 10, 250.0 + 330, 60));
+	gate_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+	label = new Text (gate_mode_button);
+	label->set_font_description (UIConfiguration::instance().get_NormalFont());
+	label->set_position (Duple (30, 30));
+	label->set (_("Gate"));
+	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+
+	octave_mode_button = new Rectangle (no_scroll_group);
+	octave_mode_button->set (Rect (250.0 + 330, 10, 250.0 + 440, 60));
+	octave_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+	label = new Text (octave_mode_button);
+	label->set_font_description (UIConfiguration::instance().get_NormalFont());
+	label->set_position (Duple (30, 30));
+	label->set (_("Oct"));
+	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+
+	set_position (Duple (250, _step_dimen + 70.0));
 
 	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
@@ -310,8 +347,8 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 
 	for (size_t n = 0; n < nsteps; ++n) {
 		SequencerStepIndicator* ssi = new SequencerStepIndicator (*this, step_indicator_box, n);
-		ssi->set (Rect (n * _step_dimen, 0, (n+1) * _step_dimen, _step_dimen));
-		ssi->set_position (Duple (n * _step_dimen, 0.0));
+		ssi->set_position (Duple (n * _step_dimen, 0));
+		ssi->set (Rect (0, 0, _step_dimen, _step_dimen));
 		ssi->set_fill_color (random());
 		step_indicators.push_back (ssi);
 	}
@@ -325,7 +362,7 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 		for (size_t n = 0; n < nsteps; ++n) {
 			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), v_scroll_group);
 			/* sequence row is 1-row down ... because of the step indicator row */
-			sv->set_position (Duple (250.0 + (n * _step_dimen), (s+1) * _step_dimen));
+			sv->set_position (Duple (250.0 + (n * _step_dimen), 70.0 + (s+1) * _step_dimen));
 			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
 			step_views.push_back (sv);
 			step_views.push_back (sv);
