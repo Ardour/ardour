@@ -258,40 +258,44 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	ArdourCanvas::Text* label;
 
 	velocity_mode_button = new Rectangle (no_scroll_group);
-	velocity_mode_button->set (Rect (250.0 + 10, 10, 250.0 + 110, 60));
+	velocity_mode_button->set_position (Duple (250.0 + 10, 10));
+	velocity_mode_button->set (Rect (0, 0, 110, 60));
 	velocity_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	label = new Text (velocity_mode_button);
 	label->set_font_description (UIConfiguration::instance().get_NormalFont());
 	label->set_position (Duple (30, 30));
 	label->set (_("Vel"));
-	//label->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
+	label->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
 
 	pitch_mode_button = new Rectangle (no_scroll_group);
-	pitch_mode_button->set (Rect (250.0 + 110, 10, 250.0 + 210, 60));
+	pitch_mode_button->set_position (Duple (250.0 + 110, 10));
+	pitch_mode_button->set (Rect (0, 0, 110, 60));
 	pitch_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	label = new Text (pitch_mode_button);
 	label->set_font_description (UIConfiguration::instance().get_NormalFont());
 	label->set_position (Duple (30, 30));
 	label->set (_("Pitch"));
-	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
 
 	gate_mode_button = new Rectangle (no_scroll_group);
-	gate_mode_button->set (Rect (250.0 + 220, 10, 250.0 + 330, 60));
+	gate_mode_button->set_position (Duple (250.0 + 220, 10));
+	gate_mode_button->set (Rect (0, 0, 110, 60));
 	gate_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	label = new Text (gate_mode_button);
 	label->set_font_description (UIConfiguration::instance().get_NormalFont());
 	label->set_position (Duple (30, 30));
 	label->set (_("Gate"));
-	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
 
 	octave_mode_button = new Rectangle (no_scroll_group);
-	octave_mode_button->set (Rect (250.0 + 330, 10, 250.0 + 440, 60));
+	octave_mode_button->set_position (Duple (250.0 + 330, 10));
+	octave_mode_button->set (Rect (0, 0, 110, 60));
 	octave_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
 	label = new Text (octave_mode_button);
 	label->set_font_description (UIConfiguration::instance().get_NormalFont());
 	label->set_position (Duple (30, 30));
 	label->set (_("Oct"));
-	//label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
 
 	set_position (Duple (250, _step_dimen + 70.0));
 
