@@ -5940,7 +5940,7 @@ Editor::super_rapid_screen_update ()
 		_last_update_time = 0;
 	}
 
-	if (!_session->transport_rolling ()) {
+	if (!_session->transport_rolling () || _session->is_auditioning ()) {
 		/* Do not interpolate the playhead position; just set it */
 		_last_update_time = 0;
 	}
