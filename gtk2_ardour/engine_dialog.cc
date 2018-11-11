@@ -1874,7 +1874,7 @@ EngineControl::maybe_display_saved_state ()
 		DEBUG_ECONTROL ("Restoring saved state");
 		PBD::Unwinder<uint32_t> protect_ignore_changes (ignore_changes, ignore_changes + 1);
 
-		if (!_desired_sample_rate) {
+		if (0 == _desired_sample_rate && sample_rate_combo.get_sensitive ()) {
 			sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 		}
 		set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
@@ -2199,7 +2199,7 @@ EngineControl::set_current_state (const State& state)
 	device_combo.set_active_text (state->device);
 	input_device_combo.set_active_text (state->input_device);
 	output_device_combo.set_active_text (state->output_device);
-	if (!_desired_sample_rate) {
+	if (0 == _desired_sample_rate && sample_rate_combo.get_sensitive ()) {
 		sample_rate_combo.set_active_text (rate_as_string (state->sample_rate));
 	}
 	set_active_text_if_present (buffer_size_combo, bufsize_as_string (state->buffer_size));
