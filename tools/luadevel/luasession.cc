@@ -398,6 +398,19 @@ static void setup_lua ()
 	AudioEngine::instance ()->stop ();
 }
 
+static int
+incomplete (lua_State* L, int status) {
+	if (status == LUA_ERRSYNTAX) {
+		size_t lmsg;
+		const char *msg = lua_tolstring (L, -1, &lmsg);
+		if (lmsg >= 5 && strcmp(msg + lmsg - 5, "<eof>") == 0) {
+			lua_pop(L, 1);
+			return 1;
+		}
+	}
+	return 0;
+}
+
 int main (int argc, char **argv)
 {
 	init ();
@@ -406,6 +419,7 @@ int main (int argc, char **argv)
 	using_history ();
 	std::string histfile = Glib::build_filename (user_config_directory(), "/luahist");
 
+	rl_bind_key ('\t', rl_insert); // disable completion
 	read_history (histfile.c_str());
 
 	char *line = NULL;
@@ -421,8 +435,30 @@ int main (int argc, char **argv)
 			continue;
 		}
 
+		do {
+			LuaState lt;
+			lua_State* L = lt.getState ();
+			int status = luaL_loadbuffer (L, line, strlen(line), "=stdin");
+			if (!incomplete (L, status)) {
+				break;
+			}
+			char *l2 = readline (">> ");
+			if (!l2) {
+				break;
+			}
+			if (strlen (l2) == 0) {
+				continue;
+			}
+			line = (char*) realloc ((void*)line, (strlen(line) + strlen (l2) + 2) * sizeof(char));
+			strcat (line, "\n");
+			strcat (line, l2);
+			free (l2);
+		} while (1);
+
 		if (lua->do_command (line)) {
-			// error
+			/* error */
+			free (line); line = NULL;
+			continue;
 		}
 
 		add_history (line);
