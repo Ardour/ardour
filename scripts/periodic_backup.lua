@@ -14,6 +14,7 @@ end
 -- create callback function
 function factory ()
 	local _last_snapshot_time = 0 -- persistent variable
+	local _snapshot_interval = 60 * 15 -- 15 minutes
 
 	-- callback function which invoked when signal is emitted, every 100ms
 	return function (signal, ref, ...)
@@ -26,7 +27,15 @@ function factory ()
 		end
 
 		-- every 15 mins
-		if (now > _last_snapshot_time + 60 * 15) then
+		if (now > _last_snapshot_time + _snapshot_interval) then
+
+			-- don't save while recording, may interfere with recording
+			if Session:actively_recording() then
+				-- queue 30 sec after rec-stop
+				_last_snapshot_time = now - _snapshot_interval + 30
+				return
+			end
+
 			_last_snapshot_time = now
 			-- format date-time (avoid colon)
 			local snapshot_name = os.date ("%Y-%m-%d %H.%M.%S", now)
