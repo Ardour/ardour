@@ -64,19 +64,11 @@ Return::~Return ()
 }
 
 XMLNode&
-Return::get_state(void)
+Return::state()
 {
-	return state (true);
-}
-
-XMLNode&
-Return::state(bool full)
-{
-	XMLNode& node = IOProcessor::state(full);
-	char buf[32];
-	node.add_property ("type", "return");
-	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
-	node.add_property ("bitslot", buf);
+	XMLNode& node = IOProcessor::state ();
+	node.set_property ("type", "return");
+	node.set_property ("bitslot", _bitslot);
 
 	return node;
 }
@@ -86,7 +78,6 @@ Return::set_state (const XMLNode& node, int version)
 {
 	XMLNodeList nlist = node.children();
 	XMLNodeIterator niter;
-	XMLProperty const * prop;
 	const XMLNode* insert_node = &node;
 
 	/* Return has regular IO automation (gain, pan) */
@@ -102,12 +93,13 @@ Return::set_state (const XMLNode& node, int version)
 	IOProcessor::set_state (*insert_node, version);
 
 	if (!node.property ("ignore-bitslot")) {
-		if ((prop = node.property ("bitslot")) == 0) {
-			_bitslot = _session.next_return_id();
-		} else {
+		uint32_t bitslot;
+		if (node.get_property ("bitslot", bitslot)) {
 			_session.unmark_return_id (_bitslot);
-			sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+			_bitslot = bitslot;
 			_session.mark_return_id (_bitslot);
+		} else {
+			_bitslot = _session.next_return_id();
 		}
 	}
 
@@ -115,7 +107,7 @@ Return::set_state (const XMLNode& node, int version)
 }
 
 void
-Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+Return::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if ((!_active && !_pending_active) || _input->n_ports() == ChanCount::ZERO) {
 		return;
@@ -126,14 +118,14 @@ Return::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, doub
 
 	// Can't automate gain for sends or returns yet because we need different buffers
 	// so that we don't overwrite the main automation data for the route amp
-	// _amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (bufs, start_frame, end_frame, speed, nframes, true);
+	// _amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	if (_metering) {
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (bufs, start_frame, end_frame, speed, nframes, true);
+			_meter->run (bufs, start_sample, end_sample, speed, nframes, true);
 		}
 	}
 

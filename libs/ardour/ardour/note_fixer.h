@@ -24,16 +24,18 @@
 
 #include <boost/utility.hpp>
 
+#include "temporal/beats.h"
+
+#include "evoral/Note.hpp"
+
 #include "ardour/midi_model.h"
 #include "ardour/types.h"
-#include "evoral/Beats.hpp"
-#include "evoral/Note.hpp"
 
 namespace Evoral { template<typename Time> class EventSink; }
 
 namespace ARDOUR {
 
-class BeatsFramesConverter;
+class BeatsSamplesConverter;
 class MidiStateTracker;
 class TempoMap;
 
@@ -46,7 +48,7 @@ class TempoMap;
 class NoteFixer : public boost::noncopyable
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> Note;
+	typedef Evoral::Note<Temporal::Beats> Note;
 
 	~NoteFixer();
 
@@ -65,8 +67,8 @@ public:
 	 */
 	void prepare(TempoMap&                          tempo_map,
 	             const MidiModel::NoteDiffCommand*  cmd,
-	             framepos_t                         origin,
-	             framepos_t                         pos,
+	             samplepos_t                         origin,
+	             samplepos_t                         pos,
 	             std::set< boost::weak_ptr<Note> >& active_notes);
 
 	/** Emit any pending edit compensation events.
@@ -76,21 +78,21 @@ public:
 	 * the read block immediately following any calls to prepare().
 	 * @param tracker Tracker to update with emitted events.
 	 */
-	void emit(Evoral::EventSink<framepos_t>& dst,
-	          framepos_t                     pos,
+	void emit(Evoral::EventSink<samplepos_t>& dst,
+	          samplepos_t                     pos,
 	          MidiStateTracker&              tracker);
 
 private:
-	typedef Evoral::Event<framepos_t> Event;
+	typedef Evoral::Event<samplepos_t> Event;
 	typedef std::list<Event*>         Events;
 
-	/** Copy a beats event to a frames event with the given time stamp. */
-	Event* copy_event(framepos_t time, const Evoral::Event<Evoral::Beats>& ev);
+	/** Copy a beats event to a samples event with the given time stamp. */
+	Event* copy_event(samplepos_t time, const Evoral::Event<Temporal::Beats>& ev);
 
 	/** Return true iff `note` is active at `pos`. */
-	bool note_is_active(const BeatsFramesConverter& converter,
+	bool note_is_active(const BeatsSamplesConverter& converter,
 	                    boost::shared_ptr<Note>     note,
-	                    framepos_t                  pos);
+	                    samplepos_t                  pos);
 
 	Events _events;
 };

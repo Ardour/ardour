@@ -21,12 +21,22 @@ function factory () return function ()
 			-- phase invert the 1st channel
 			t:phase_control():set_phase_invert (1, true)
 
-			-- solo the track  -- and only the track, 
-			-- not other tracks grouped with it.
-			t:solo_control():set_value (1, PBD.GroupControlDisposition.NoGroup)
+			-- solo the track -- and only the track, not other tracks grouped with it.
+			--
+			-- Note that changing solo/mute needs to propagate implicit solo/mute.
+			-- These changes have to be done atomically, so that all
+			-- related solo/mute change simultaneously at the same time.
+			-- This can only be done from realtime-context, so we need to queue a session-rt
+			-- event using the session realtime-event dispatch mechanism:
+			Session:set_control (t:solo_control(), 1, PBD.GroupControlDisposition.NoGroup)
 
-			-- unmute the track
-			t:mute_control():set_value (0, PBD.GroupControlDisposition.NoGroup)
+			-- unmute the track, this also examplifies how one could use lists to modify
+			-- multiple controllables at the same time (they should be of the same
+			-- paramater type - e.g. mute_control() of multiple tracks, they'll all
+			-- change simultaneously in rt-context)
+			local ctrls = ARDOUR.ControlListPtr ()
+			ctrls:push_back (t:mute_control()) -- we could add more controls to change via push_back
+			Session:set_controls (ctrls, 0, PBD.GroupControlDisposition.NoGroup)
 
 			-- add a track comment
 			t:set_comment ("This is a Drum Track", nil)

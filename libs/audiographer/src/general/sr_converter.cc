@@ -34,10 +34,10 @@ using boost::str;
 SampleRateConverter::SampleRateConverter (uint32_t channels)
   : active (false)
   , channels (channels)
-  , max_frames_in(0)
+  , max_samples_in(0)
   , leftover_data (0)
-  , leftover_frames (0)
-  , max_leftover_frames (0)
+  , leftover_samples (0)
+  , max_leftover_samples (0)
   , data_out (0)
   , data_out_size (0)
   , src_state (0)
@@ -46,7 +46,7 @@ SampleRateConverter::SampleRateConverter (uint32_t channels)
 }
 
 void
-SampleRateConverter::init (framecnt_t in_rate, framecnt_t out_rate, int quality)
+SampleRateConverter::init (samplecnt_t in_rate, samplecnt_t out_rate, int quality)
 {
 	reset();
 
@@ -72,31 +72,31 @@ SampleRateConverter::~SampleRateConverter ()
 	reset();
 }
 
-framecnt_t
-SampleRateConverter::allocate_buffers (framecnt_t max_frames)
+samplecnt_t
+SampleRateConverter::allocate_buffers (samplecnt_t max_samples)
 {
-	if (!active) { return max_frames; }
+	if (!active) { return max_samples; }
 
-	framecnt_t max_frames_out = (framecnt_t) ceil (max_frames * src_data.src_ratio);
-	max_frames_out -= max_frames_out % channels;
+	samplecnt_t max_samples_out = (samplecnt_t) ceil (max_samples * src_data.src_ratio);
+	max_samples_out -= max_samples_out % channels;
 
-	if (data_out_size < max_frames_out) {
+	if (data_out_size < max_samples_out) {
 
 		delete[] data_out;
-		data_out = new float[max_frames_out];
+		data_out = new float[max_samples_out];
 		src_data.data_out = data_out;
 
-		max_leftover_frames = 4 * max_frames;
-		leftover_data = (float *) realloc (leftover_data, max_leftover_frames * sizeof (float));
+		max_leftover_samples = 4 * max_samples;
+		leftover_data = (float *) realloc (leftover_data, max_leftover_samples * sizeof (float));
 		if (throw_level (ThrowObject) && !leftover_data) {
 			throw Exception (*this, "A memory allocation error occurred");
 		}
 
-		max_frames_in = max_frames;
-		data_out_size = max_frames_out;
+		max_samples_in = max_samples;
+		data_out_size = max_samples_out;
 	}
 
-	return max_frames_out;
+	return max_samples_out;
 }
 
 void
@@ -109,13 +109,13 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		return;
 	}
 
-	framecnt_t frames = c.frames();
+	samplecnt_t samples = c.samples();
 	float * in = const_cast<float *> (c.data()); // TODO check if this is safe!
 
-	if (throw_level (ThrowProcess) && frames > max_frames_in) {
+	if (throw_level (ThrowProcess) && samples > max_samples_in) {
 		throw Exception (*this, str (format (
-			"process() called with too many frames, %1% instead of %2%")
-			% frames % max_frames_in));
+			"process() called with too many samples, %1% instead of %2%")
+			% samples % max_samples_in));
 	}
 
 	int err;
@@ -125,7 +125,7 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		src_data.output_frames = data_out_size / channels;
 		src_data.data_out = data_out;
 
-		if (leftover_frames > 0) {
+		if (leftover_samples > 0) {
 
 			/* input data will be in leftover_data rather than data_in */
 
@@ -135,8 +135,8 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 
 				/* first time, append new data from data_in into the leftover_data buffer */
 
-				TypeUtils<float>::copy (in, &leftover_data [leftover_frames * channels], frames);
-				src_data.input_frames = frames / channels + leftover_frames;
+				TypeUtils<float>::copy (in, &leftover_data [leftover_samples * channels], samples);
+				src_data.input_frames = samples / channels + leftover_samples;
 			} else {
 
 				/* otherwise, just use whatever is still left in leftover_data; the contents
@@ -144,12 +144,12 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 					below)
 				*/
 
-				src_data.input_frames = leftover_frames;
+				src_data.input_frames = leftover_samples;
 			}
 
 		} else {
 			src_data.data_in = in;
-			src_data.input_frames = frames / channels;
+			src_data.input_frames = samples / channels;
 		}
 
 		first_time = false;
@@ -168,18 +168,18 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 			% src_strerror (err)));
 		}
 
-		leftover_frames = src_data.input_frames - src_data.input_frames_used;
+		leftover_samples = src_data.input_frames - src_data.input_frames_used;
 
-		if (leftover_frames > 0) {
-			if (throw_level (ThrowProcess) && leftover_frames > max_leftover_frames) {
-				throw Exception(*this, "leftover frames overflowed");
+		if (leftover_samples > 0) {
+			if (throw_level (ThrowProcess) && leftover_samples > max_leftover_samples) {
+				throw Exception(*this, "leftover samples overflowed");
 			}
 			TypeUtils<float>::move (&src_data.data_in[src_data.input_frames_used * channels],
-			                        leftover_data, leftover_frames * channels);
+			                        leftover_data, leftover_samples * channels);
 		}
 
 		ProcessContext<float> c_out (c, data_out, src_data.output_frames_gen * channels);
-		if (!src_data.end_of_input || leftover_frames) {
+		if (!src_data.end_of_input || leftover_samples) {
 			c_out.remove_flag (ProcessContext<float>::EndOfInput);
 		}
 		output (c_out);
@@ -187,16 +187,16 @@ SampleRateConverter::process (ProcessContext<float> const & c)
 		if (debug_level (DebugProcess)) {
 			debug_stream() <<
 				"src_data.output_frames_gen: " << src_data.output_frames_gen <<
-				", leftover_frames: " << leftover_frames << std::endl;
+				", leftover_samples: " << leftover_samples << std::endl;
 		}
 
-		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_frames) {
+		if (throw_level (ThrowProcess) && src_data.output_frames_gen == 0 && leftover_samples) {
 			throw Exception (*this, boost::str (boost::format
-				("No output frames generated with %1% leftover frames")
-				% leftover_frames));
+				("No output samples generated with %1% leftover samples")
+				% leftover_samples));
 		}
 
-	} while (leftover_frames > frames);
+	} while (leftover_samples > samples);
 
 	// src_data.end_of_input has to be checked to prevent infinite recursion
 	if (!src_data.end_of_input && c.has_flag(ProcessContext<float>::EndOfInput)) {
@@ -224,15 +224,15 @@ void SampleRateConverter::set_end_of_input (ProcessContext<float> const & c)
 void SampleRateConverter::reset ()
 {
 	active = false;
-	max_frames_in = 0;
+	max_samples_in = 0;
 	src_data.end_of_input = false;
 
 	if (src_state) {
 		src_delete (src_state);
 	}
 
-	leftover_frames = 0;
-	max_leftover_frames = 0;
+	leftover_samples = 0;
+	max_leftover_samples = 0;
 	if (leftover_data) {
 		free (leftover_data);
 	}

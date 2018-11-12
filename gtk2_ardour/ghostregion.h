@@ -24,7 +24,7 @@
 #include <boost/unordered_map.hpp>
 #include "pbd/signals.h"
 
-namespace ArdourCanvas {
+namespace ArdourWaveView {
 	class WaveView;
 }
 
@@ -76,19 +76,20 @@ public:
 	void set_height();
 	void set_colors();
 
-	std::vector<ArdourCanvas::WaveView*> waves;
+	std::vector<ArdourWaveView::WaveView*> waves;
 };
 
 class MidiGhostRegion : public GhostRegion {
 public:
-	class GhostEvent : public sigc::trackable {
-	  public:
-	    GhostEvent(::NoteBase *, ArdourCanvas::Container *);
-	    virtual ~GhostEvent ();
+	class GhostEvent : public sigc::trackable
+	{
+	public:
+		GhostEvent(::NoteBase *, ArdourCanvas::Container *);
+		virtual ~GhostEvent ();
 
-	    NoteBase* event;
-	    ArdourCanvas::Item* item;
-	    bool is_hit;
+		NoteBase* event;
+		ArdourCanvas::Item* item;
+		bool is_hit;
 	};
 
 	MidiGhostRegion(MidiRegionView& rv,
@@ -121,12 +122,12 @@ public:
 
 private:
 	ArdourCanvas::Container* _note_group;
-	ArdourCanvas::Color _outline;
+	Gtkmm2ext::Color _outline;
 	ArdourCanvas::Rectangle* _tmp_rect;
 	ArdourCanvas::Polygon* _tmp_poly;
 
 	MidiRegionView& parent_mrv;
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 	MidiGhostRegion::GhostEvent* find_event (boost::shared_ptr<NoteType>);
 
 	typedef boost::unordered_map<boost::shared_ptr<NoteType>, MidiGhostRegion::GhostEvent* > EventList;

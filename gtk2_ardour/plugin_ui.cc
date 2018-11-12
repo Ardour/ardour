@@ -30,15 +30,16 @@
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
-#include <gtkmm/widget.h>
-#include <gtkmm/box.h>
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/barcontroller.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/application.h>
+#include "gtkmm/widget.h"
+#include "gtkmm/box.h"
+#include "gtkmm/separator.h"
+
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/application.h"
+
+#include "widgets/tooltips.h"
+#include "widgets/fastmeter.h"
 
 #include "ardour/session.h"
 #include "ardour/plugin.h"
@@ -63,7 +64,6 @@
 
 #include "ardour_window.h"
 #include "ardour_ui.h"
-#include "prompter.h"
 #include "plugin_ui.h"
 #include "utils.h"
 #include "gui_thread.h"
@@ -72,17 +72,284 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "plugin_eq_gui.h"
+#include "timers.h"
 #include "new_plugin_preset_dialog.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
+
+
+class PluginLoadStatsGui : public Gtk::Table
+{
+public:
+	PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert>);
+
+	void start_updating () {
+		update_cpu_label ();
+		update_cpu_label_connection = Timers::second_connect (sigc::mem_fun(*this, &PluginLoadStatsGui::update_cpu_label));
+	}
+
+	void stop_updating () {
+		_valid = false;
+		update_cpu_label_connection.disconnect ();
+	}
+
+private:
+	void update_cpu_label ();
+	bool draw_bar (GdkEventExpose*);
+	void clear_stats () {
+		_insert->clear_stats ();
+	}
+
+	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
+	sigc::connection update_cpu_label_connection;
+
+	Gtk::Label _lbl_min;
+	Gtk::Label _lbl_max;
+	Gtk::Label _lbl_avg;
+	Gtk::Label _lbl_dev;
+
+	ArdourWidgets::ArdourButton _reset_button;
+	Gtk::DrawingArea _darea;
+
+	uint64_t _min, _max;
+	double   _avg, _dev;
+	bool     _valid;
+};
+
+PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PluginInsert> insert)
+	: _insert (insert)
+	, _lbl_min ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_max ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_avg ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _lbl_dev ("", ALIGN_RIGHT, ALIGN_CENTER)
+	, _reset_button (_("Reset"))
+	, _valid (false)
+{
+	_reset_button.set_name ("generic button");
+	_reset_button.signal_clicked.connect (sigc::mem_fun (*this, &PluginLoadStatsGui::clear_stats));
+	_darea.signal_expose_event ().connect (sigc::mem_fun (*this, &PluginLoadStatsGui::draw_bar));
+	set_size_request_to_display_given_text (_lbl_dev, string_compose (_("%1 [ms]"), 99.123), 0, 0);
+
+	attach (*manage (new Gtk::Label (_("Minimum"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Maximum"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Average"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (*manage (new Gtk::Label (_("Std.Dev"), ALIGN_RIGHT, ALIGN_CENTER)),
+			0, 1, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 0);
+
+	attach (_lbl_min, 1, 2, 0, 1, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_max, 1, 2, 1, 2, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_avg, 1, 2, 2, 3, Gtk::FILL, Gtk::SHRINK, 2, 0);
+	attach (_lbl_dev, 1, 2, 3, 4, Gtk::FILL, Gtk::SHRINK, 2, 0);
+
+	attach (*manage (new Gtk::VSeparator ()),
+			2, 3, 0, 4, Gtk::FILL, Gtk::FILL, 4, 0);
+
+	attach (_darea, 3, 4, 0, 4, Gtk::FILL|Gtk::EXPAND, Gtk::FILL, 4, 4);
+
+	attach (_reset_button, 4, 5, 2, 4, Gtk::FILL, Gtk::SHRINK);
+}
+
+void
+PluginLoadStatsGui::update_cpu_label()
+{
+	if (_insert->get_stats (_min, _max, _avg, _dev)) {
+		_valid = true;
+		_lbl_min.set_text (string_compose (_("%1 [ms]"), rint (_min / 10.) / 100.));
+		_lbl_max.set_text (string_compose (_("%1 [ms]"), rint (_max / 10.) / 100.));
+		_lbl_avg.set_text (string_compose (_("%1 [ms]"), rint (_avg) / 1000.));
+		_lbl_dev.set_text (string_compose (_("%1 [ms]"), rint (_dev) / 1000.));
+		_lbl_dev.set_text (string_compose (_("%1 [ms]"), rint (_dev) / 1000.));
+	} else {
+		_valid = false;
+		_lbl_min.set_text ("-");
+		_lbl_max.set_text ("-");
+		_lbl_avg.set_text ("-");
+		_lbl_dev.set_text ("-");
+	}
+	_darea.queue_draw ();
+}
+
+bool
+PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
+{
+	Gtk::Allocation a = _darea.get_allocation ();
+	const int width = a.get_width ();
+	const int height = a.get_height ();
+	cairo_t* cr = gdk_cairo_create (_darea.get_window ()->gobj ());
+	cairo_rectangle (cr, ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+	cairo_clip (cr);
+
+	Gdk::Color const bg = get_style ()->get_bg (STATE_NORMAL);
+	Gdk::Color const fg = get_style ()->get_fg (STATE_NORMAL);
+
+	cairo_set_source_rgb (cr, bg.get_red_p (), bg.get_green_p (), bg.get_blue_p ());
+	cairo_rectangle (cr, 0, 0, width, height);
+	cairo_fill (cr);
+
+	int border = (height / 7) | 1;
+
+	int x0 = 2;
+	int y0 = border;
+	int x1 = width - 2;
+	int y1 = (height - 3 * border) & ~1;
+
+	const int w = x1 - x0;
+	const int h = y1 - y0;
+	const double cycle_ms = 1000. * _insert->session().get_block_size() / (double)_insert->session().nominal_sample_rate();
+
+	const double base_mult = std::max (1.0, cycle_ms / 2.0);
+	const double log_base = log1p (base_mult);
+
+#if 0 // Linear
+# define DEFLECT(T) ( (T) * w * 8. / (9. * cycle_ms) )
+#else
+# define DEFLECT(T) ( log1p((T) * base_mult / cycle_ms) * w * 8. / (9 * log_base) )
+#endif
+
+	cairo_save (cr);
+	rounded_rectangle (cr, x0, y0, w, h, 7);
+
+	cairo_set_source_rgba (cr, .0, .0, .0, 1);
+	cairo_set_line_width (cr, 1);
+	cairo_stroke_preserve (cr);
+
+	if (_valid) {
+		cairo_pattern_t *pat = cairo_pattern_create_linear (x0, 0.0, w, 0.0);
+		cairo_pattern_add_color_stop_rgba (pat, 0,         0,  1, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 6.  / 9.,  0,  1, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 6.5 / 9., .8, .8, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 7.5 / 9., .8, .8, 0, .7);
+		cairo_pattern_add_color_stop_rgba (pat, 8.  / 9.,  1,  0, 0, .7);
+		cairo_set_source (cr, pat);
+		cairo_pattern_destroy (pat);
+		cairo_fill_preserve (cr);
+	} else {
+		cairo_set_source_rgba (cr, .4, .3, .1, .5);
+		cairo_fill_preserve (cr);
+	}
+
+
+	cairo_clip (cr);
+
+	if (_valid) {
+		double xmin = DEFLECT(_min / 1000.);
+		double xmax = DEFLECT(_max / 1000.);
+
+		rounded_rectangle (cr, x0 + xmin, y0, xmax - xmin, h, 7);
+		cairo_set_source_rgba (cr, .8, .8, .9, .5);
+		cairo_fill (cr);
+	}
+
+	cairo_restore (cr);
+
+	Glib::RefPtr<Pango::Layout> layout;
+	layout = Pango::Layout::create (get_pango_context ());
+
+	cairo_set_line_width (cr, 1);
+
+	for (int i = 1; i < 9; ++i) {
+		int text_width, text_height;
+#if 0 // Linear
+		double v = cycle_ms * i / 8.;
+#else
+		double v = (exp (i * log_base / 8) - 1) * cycle_ms / base_mult;
+#endif
+		double decimal = v > 10 ? 10 : 100;
+		layout->set_text (string_compose ("%1", rint (decimal * v) / decimal));
+		layout->get_pixel_size (text_width, text_height);
+
+		const int dx = w * i / 9.; // == DEFLECT (v)
+
+		cairo_move_to (cr, x0 + dx - .5, y0);
+		cairo_line_to (cr, x0 + dx - .5, y1);
+		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
+		cairo_stroke (cr);
+
+		cairo_move_to (cr, x0 + dx - .5 * text_width, y1 + 1);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
+	{
+		int text_width, text_height;
+		layout->set_text ("0");
+		cairo_move_to (cr, x0 + 1, y1 + 1);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		pango_cairo_show_layout (cr, layout->gobj ());
+
+		layout->set_text (_("[ms]"));
+		layout->get_pixel_size (text_width, text_height);
+		cairo_move_to (cr, x0 + w - text_width - 1, y1 + 1);
+		pango_cairo_show_layout (cr, layout->gobj ());
+	}
+
+	if (_valid) {
+		double xavg = round (DEFLECT(_avg / 1000.));
+		double xd0 = DEFLECT((_avg - _dev) / 1000.);
+		double xd1 = DEFLECT((_avg + _dev) / 1000.);
+
+		cairo_move_to (cr, x0 + xavg - .5, y0 - 1);
+		cairo_rel_line_to (cr, -5, -5);
+		cairo_rel_line_to (cr, 10, 0);
+		cairo_close_path (cr);
+		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
+		cairo_fill (cr);
+
+		cairo_save (cr);
+
+		rounded_rectangle (cr, x0, y0, w, h, 7);
+		cairo_clip (cr);
+
+		const double dashes[] = { 1, 2 };
+		cairo_set_dash (cr, dashes, 2, 0);
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+		cairo_set_line_width (cr, 1);
+		cairo_move_to (cr, x0 + xavg - .5, y0 - .5);
+		cairo_line_to (cr, x0 + xavg - .5, y1 + .5);
+		cairo_set_source_rgba (cr, .0, .0, .0, 1.);
+		cairo_stroke (cr);
+		cairo_set_dash (cr, 0, 0, 0);
+
+		if (xd1 - xd0 > 2) {
+			cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
+			const double ym = .5 + floor ((double)(y0 + h / 2));
+			const int h4 = h / 4;
+
+			cairo_set_line_width (cr, 1);
+			cairo_set_source_rgba (cr, 0, 0, 0, 1.);
+			cairo_move_to (cr, floor (x0 + xd0), ym);
+			cairo_line_to (cr, ceil (x0 + xd1),  ym);
+			cairo_stroke (cr);
+
+			cairo_move_to (cr, floor (x0 + xd0) - .5, ym - h4);
+			cairo_line_to (cr, floor (x0 + xd0) - .5, ym + h4);
+			cairo_stroke (cr);
+			cairo_move_to (cr, ceil (x0 + xd1) - .5, ym - h4);
+			cairo_line_to (cr, ceil (x0 + xd1) - .5, ym + h4);
+			cairo_stroke (cr);
+		}
+		cairo_restore (cr);
+	}
+#undef DEFLECT
+
+	cairo_destroy (cr);
+	return true;
+}
+
+
+/* --- */
+
 
 PluginUIWindow::PluginUIWindow (
 	boost::shared_ptr<PluginInsert> insert,
@@ -92,8 +359,8 @@ PluginUIWindow::PluginUIWindow (
 	, was_visible (false)
 	, _keyboard_focused (false)
 #ifdef AUDIOUNIT_SUPPORT
-        , pre_deactivate_x (-1)
-        , pre_deactivate_y (-1)
+	, pre_deactivate_x (-1)
+	, pre_deactivate_y (-1)
 #endif
 
 {
@@ -188,9 +455,9 @@ PluginUIWindow::on_show ()
 
 	if (_pluginui) {
 #if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
-                if (pre_deactivate_x >= 0) {
-                        move (pre_deactivate_x, pre_deactivate_y);
-                }
+		if (pre_deactivate_x >= 0) {
+			move (pre_deactivate_x, pre_deactivate_y);
+		}
 #endif
 
 		if (_pluginui->on_window_show (_title)) {
@@ -203,7 +470,7 @@ void
 PluginUIWindow::on_hide ()
 {
 #if defined (HAVE_AUDIOUNITS) && defined(__APPLE__)
-        get_position (pre_deactivate_x, pre_deactivate_y);
+	get_position (pre_deactivate_x, pre_deactivate_y);
 #endif
 
 	Window::on_hide ();
@@ -342,15 +609,15 @@ PluginUIWindow::app_activated (bool)
 		if (yn) {
 			if (was_visible) {
 				_pluginui->activate ();
-                                if (pre_deactivate_x >= 0) {
-                                        move (pre_deactivate_x, pre_deactivate_y);
-                                }
+				if (pre_deactivate_x >= 0) {
+					move (pre_deactivate_x, pre_deactivate_y);
+				}
 				present ();
 				was_visible = true;
 			}
 		} else {
 			was_visible = is_visible();
-                        get_position (pre_deactivate_x, pre_deactivate_y);
+			get_position (pre_deactivate_x, pre_deactivate_y);
 			hide ();
 			_pluginui->deactivate ();
 		}
@@ -430,12 +697,12 @@ PluginUIWindow::on_key_release_event (GdkEventKey *event)
 			if (_pluginui->non_gtk_gui()) {
 				_pluginui->forward_key_event (event);
 			}
-			return true;
 		}
-		return false;
 	} else {
-		return true;
+		gtk_window_propagate_key_event (GTK_WINDOW(gobj()), event);
 	}
+	/* don't forward releases */
+	return true;
 }
 
 void
@@ -461,9 +728,11 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	, pin_management_button (_("Pinout"))
 	, description_expander (_("Description"))
 	, plugin_analysis_expander (_("Plugin analysis"))
+	, cpuload_expander (_("CPU Profile"))
 	, latency_gui (0)
 	, latency_dialog (0)
 	, eqgui (0)
+	, stats_gui (0)
 {
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -521,6 +790,9 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 	plugin_analysis_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_plugin_analysis));
 	plugin_analysis_expander.set_expanded(false);
 
+	cpuload_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &PlugUIBase::toggle_cpuload_display));
+	cpuload_expander.set_expanded(false);
+
 	insert->DropReferences.connect (death_connection, invalidator (*this), boost::bind (&PlugUIBase::plugin_going_away, this), gui_context());
 
 	plugin->PresetAdded.connect (*this, invalidator (*this), boost::bind (&PlugUIBase::preset_added_or_removed, this), gui_context ());
@@ -536,6 +808,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PluginInsert> pi)
 PlugUIBase::~PlugUIBase()
 {
 	delete eqgui;
+	delete stats_gui;
 	delete latency_gui;
 }
 
@@ -550,8 +823,8 @@ PlugUIBase::plugin_going_away ()
 void
 PlugUIBase::set_latency_label ()
 {
-	framecnt_t const l = insert->effective_latency ();
-	framecnt_t const sr = insert->session().frame_rate ();
+	samplecnt_t const l = insert->effective_latency ();
+	samplecnt_t const sr = insert->session().sample_rate ();
 
 	string t;
 
@@ -568,7 +841,7 @@ void
 PlugUIBase::latency_button_clicked ()
 {
 	if (!latency_gui) {
-		latency_gui = new LatencyGUI (*(insert.get()), insert->session().frame_rate(), insert->session().get_block_size());
+		latency_gui = new LatencyGUI (*(insert.get()), insert->session().sample_rate(), insert->session().get_block_size());
 		latency_dialog = new ArdourWindow (_("Edit Latency"));
 		/* use both keep-above and transient for to try cover as many
 		   different WM's as possible.
@@ -775,10 +1048,8 @@ PlugUIBase::toggle_description()
 			wr.height -= child_height;
 			toplevel->resize (wr.width, wr.height);
 		}
-
 	}
 }
-
 
 void
 PlugUIBase::toggle_plugin_analysis()
@@ -812,6 +1083,37 @@ PlugUIBase::toggle_plugin_analysis()
 			toplevel->resize (wr.width, wr.height);
 		}
 	}
+}
+
+void
+PlugUIBase::toggle_cpuload_display()
+{
+	if (cpuload_expander.get_expanded() && !cpuload_expander.get_child()) {
+		if (stats_gui == 0) {
+			stats_gui = new PluginLoadStatsGui (insert);
+		}
+		cpuload_expander.add (*stats_gui);
+		cpuload_expander.show_all();
+		stats_gui->start_updating ();
+	}
+
+	if (!cpuload_expander.get_expanded()) {
+		const int child_height = cpuload_expander.get_child ()->get_height ();
+
+		stats_gui->hide ();
+		stats_gui->stop_updating ();
+		cpuload_expander.remove();
+
+		Gtk::Window *toplevel = (Gtk::Window*) cpuload_expander.get_ancestor (GTK_TYPE_WINDOW);
+
+		if (toplevel) {
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
+		}
+	}
+
 }
 
 void

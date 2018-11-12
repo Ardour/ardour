@@ -22,9 +22,12 @@ out = 'build'
 children = [
         'control_protocol',
         'faderport',
+        'faderport8',
         'cc121',
         'generic_midi',
         'mackie',
+        'us2400',
+        'launch_control_xl',
 ]
 
 def options(opt):
@@ -48,7 +51,11 @@ def configure(conf):
         children += [ 'push2' ]
     else:
         print ('You are missing the libusb-1.0 development package needed to compile Push2 support')
-    
+
+    if conf.is_defined('HAVE_HIDAPI') and Options.options.maschine:
+        children += [ 'maschine2' ]
+        conf.define('BUILD_MASCHINE', 1)
+
     if autowaf.check_pkg (conf, 'liblo', mandatory=False, uselib_store="LO", atleast_version="0.24"):
         children += [ 'osc' ]
 
@@ -75,8 +82,11 @@ def build(bld):
     bld.recurse('control_protocol')
     bld.recurse('generic_midi')
     bld.recurse('faderport')
+    bld.recurse('faderport8')
     bld.recurse('cc121')
     bld.recurse('mackie')
+    bld.recurse('us2400')
+    bld.recurse('launch_control_xl')
 
     if bld.is_defined ('HAVE_LO'):
         bld.recurse('osc')
@@ -86,6 +96,8 @@ def build(bld):
         bld.recurse('tranzport')
     if bld.is_defined('HAVE_USB'):
         bld.recurse('push2')
+    if bld.is_defined('BUILD_MASCHINE'):
+        bld.recurse('maschine2')
 
 def shutdown():
     autowaf.shutdown()

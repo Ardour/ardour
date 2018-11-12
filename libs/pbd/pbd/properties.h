@@ -21,10 +21,8 @@
 #define __pbd_properties_h__
 
 #include <string>
-#include <sstream>
 #include <list>
 #include <set>
-#include <iostream>
 
 #include "pbd/libpbd_visibility.h"
 #include "pbd/xml++.h"
@@ -32,6 +30,7 @@
 #include "pbd/property_list.h"
 #include "pbd/enumwriter.h"
 #include "pbd/stateful.h"
+#include "pbd/string_convert.h"
 
 namespace PBD {
 
@@ -117,7 +116,7 @@ public:
 	}
 
 	void get_value (XMLNode & node) const {
-                node.add_property (property_name(), to_string (_current));
+		node.set_property (property_name (), _current);
 	}
 
 
@@ -140,8 +139,8 @@ public:
 
 	void get_changes_as_xml (XMLNode* history_node) const {
 		XMLNode* node = history_node->add_child (property_name());
-                node->add_property ("from", to_string (_old));
-                node->add_property ("to", to_string (_current));
+		node->set_property ("from", _old);
+		node->set_property ("to", _current);
 	}
 
 	void get_changes_as_properties (PropertyList& changes, Command *) const {
@@ -265,17 +264,11 @@ private:
 	 * other than C or POSIX locales.
 	 */
 	virtual std::string to_string (T const& v) const {
-		std::stringstream s;
-		s.precision (12); // in case its floating point
-		s << v;
-		return s.str ();
+		return PBD::to_string (v);
 	}
 
 	virtual T from_string (std::string const& s) const {
-		std::stringstream t (s);
-		T                 v;
-		t >> v;
-		return v;
+		return PBD::string_to<T>(s);
 	}
 
 };

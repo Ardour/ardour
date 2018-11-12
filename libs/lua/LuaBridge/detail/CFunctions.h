@@ -378,7 +378,6 @@ struct CFunc
     }
   };
 
-
   template <class T, class R>
   struct CastClass
   {
@@ -458,6 +457,24 @@ struct CFunc
       }
       Stack <bool>::push (L, rv);
       return 1;
+    }
+  };
+
+  template <class T>
+  struct ClassEqualCheck<boost::shared_ptr<T> >
+  {
+    static int f (lua_State* L)
+    {
+      return PtrEqualCheck<T>::f (L);
+    }
+  };
+
+  template <class T>
+  struct ClassEqualCheck<boost::weak_ptr<T> >
+  {
+    static int f (lua_State* L)
+    {
+      return WPtrEqualCheck<T>::f (L);
     }
   };
 
@@ -1150,7 +1167,7 @@ struct CFunc
 
   // generate an iterator
   template <class T, class C>
-  static int listIterHelper (lua_State *L, C * const t)
+  static int listIterHelper (lua_State *L, C const * const t)
   {
     if (!t) { return luaL_error (L, "invalid pointer to std::list<>/std::vector"); }
     typedef typename C::const_iterator IterType;
@@ -1163,7 +1180,7 @@ struct CFunc
   template <class T, class C>
   static int listIter (lua_State *L)
   {
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     return listIterHelper<T, C> (L, t);
   }
 
@@ -1267,7 +1284,7 @@ struct CFunc
   static int mapIter (lua_State *L)
   {
     typedef std::map<K, V> C;
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::map"); }
     typedef typename C::const_iterator IterType;
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->begin());
@@ -1314,10 +1331,9 @@ struct CFunc
   // generate std::set from table keys ( table[member] = true )
   // http://www.lua.org/pil/11.5.html
 
-  template <class T>
+  template <class T, class C>
   static int tableToSet (lua_State *L)
   {
-    typedef std::set<T> C;
     C * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
     if (!lua_istable (L, -1)) { return luaL_error (L, "argument is not a table"); }
@@ -1341,10 +1357,9 @@ struct CFunc
 
   // iterate over a std::set, explicit "true" value.
   // compare to http://www.lua.org/pil/11.5.html
-  template <class T>
+  template <class T, class C>
   static int setIterIter (lua_State *L)
   {
-    typedef std::set<T> C;
     typedef typename C::const_iterator IterType;
     IterType * const end = static_cast <IterType * const> (lua_touserdata (L, lua_upvalueindex (2)));
     IterType * const iter = static_cast <IterType * const> (lua_touserdata (L, lua_upvalueindex (1)));
@@ -1360,24 +1375,22 @@ struct CFunc
   }
 
   // generate iterator
-  template <class T>
+  template <class T, class C>
   static int setIter (lua_State *L)
   {
-    typedef std::set<T> C;
-    C * const t = Userdata::get <C> (L, 1, false);
+    C const * const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
     typedef typename C::const_iterator IterType;
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->begin());
     new (lua_newuserdata (L, sizeof (IterType*))) IterType (t->end());
-    lua_pushcclosure (L, setIterIter<T>, 2);
+    lua_pushcclosure (L, setIterIter<T, C>, 2);
     return 1;
   }
 
   // generate table from std::set
-  template <class T>
+  template <class T, class C>
   static int setToTable (lua_State *L)
   {
-    typedef std::set<T> C;
     C const* const t = Userdata::get <C> (L, 1, true);
     if (!t) { return luaL_error (L, "invalid pointer to std::set"); }
 

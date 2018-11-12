@@ -22,7 +22,13 @@
 
 #include <string>
 
-#include <gtkmm.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/spinbutton.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -33,7 +39,7 @@
  */
 class VideoServerDialog : public ArdourDialog
 {
-  public:
+public:
 	VideoServerDialog (ARDOUR::Session*);
 	~VideoServerDialog ();
 
@@ -44,7 +50,7 @@ class VideoServerDialog : public ArdourDialog
 	int get_cachesize () { return cachesize_spinner.get_value_as_int();}
 	bool show_again () { return showagain_checkbox.get_active();}
 
-  private:
+private:
 	void on_show ();
 	void open_path_dialog ();
 	void open_docroot_dialog ();

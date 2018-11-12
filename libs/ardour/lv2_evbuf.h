@@ -142,7 +142,7 @@ lv2_evbuf_next(LV2_Evbuf_Iterator iter);
 */
 bool
 lv2_evbuf_get(LV2_Evbuf_Iterator iter,
-              uint32_t*          frames,
+              uint32_t*          samples,
               uint32_t*          subframes,
               uint32_t*          type,
               uint32_t*          size,
@@ -157,7 +157,7 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 */
 bool
 lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
-                uint32_t            frames,
+                uint32_t            samples,
                 uint32_t            subframes,
                 uint32_t            type,
                 uint32_t            size,

@@ -141,15 +141,15 @@ IOSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 				return;
 			}
 
-                        if (s) {
+			if (s) {
 				if (!f->connected_to (*j)) {
 					_io->connect (f, *j, 0);
 				}
-                        } else {
+			} else {
 				if (f->connected_to (*j)) {
 					_io->disconnect (f, *j, 0);
 				}
-                        }
+			}
 		}
 	}
 }

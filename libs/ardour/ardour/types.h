@@ -23,6 +23,7 @@
 #include <istream>
 #include <vector>
 #include <map>
+#include <set>
 #include <boost/shared_ptr.hpp>
 #include <sys/types.h>
 #include <stdint.h>
@@ -30,8 +31,9 @@
 
 #include <inttypes.h>
 
-#include "timecode/bbt_time.h"
-#include "timecode/time.h"
+#include "temporal/bbt_time.h"
+#include "temporal/time.h"
+#include "temporal/types.h"
 
 #include "pbd/id.h"
 
@@ -41,6 +43,9 @@
 #include "ardour/plugin_types.h"
 
 #include <map>
+
+using Temporal::max_samplepos;
+using Temporal::max_samplecnt;
 
 #if __GNUC__ < 3
 typedef int intptr_t;
@@ -55,6 +60,7 @@ namespace ARDOUR {
 	class Stripable;
 	class VCA;
 	class AutomationControl;
+	class SlavableAutomationControl;
 
 	typedef float    Sample;
 	typedef float    pan_t;
@@ -63,27 +69,15 @@ namespace ARDOUR {
 	typedef uint64_t microseconds_t;
 	typedef uint32_t pframes_t;
 
-	/* Any position measured in audio frames.
-	   Assumed to be non-negative but not enforced.
-	*/
-	typedef int64_t framepos_t;
+	/* rebind Temporal position types into ARDOUR namespace */
+	typedef Temporal::samplecnt_t samplecnt_t;
+	typedef Temporal::samplepos_t samplepos_t;
+	typedef Temporal::sampleoffset_t sampleoffset_t;
 
-	/* Any distance from a given framepos_t.
-	   Maybe positive or negative.
-	*/
-	typedef int64_t frameoffset_t;
-
-	/* Any count of audio frames.
-	   Assumed to be positive but not enforced.
-	*/
-	typedef int64_t framecnt_t;
-
-	static const framepos_t max_framepos = INT64_MAX;
-	static const framecnt_t max_framecnt = INT64_MAX;
 	static const layer_t    max_layer    = UINT32_MAX;
 
 	// a set of (time) intervals: first of pair is the offset of the start within the region, second is the offset of the end
-	typedef std::list<std::pair<frameoffset_t, frameoffset_t> > AudioIntervalResult;
+	typedef std::list<std::pair<sampleoffset_t, sampleoffset_t> > AudioIntervalResult;
 	// associate a set of intervals with regions (e.g. for silence detection)
 	typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
@@ -156,39 +150,26 @@ namespace ARDOUR {
 		TrimAutomation,
 		PhaseAutomation,
 		MonitoringAutomation,
-		EQGain,
-		EQFrequency,
-		EQQ,
-		EQShape,
-		EQHPF,
-		EQEnable,
-		CompThreshold,
-		CompSpeed,
-		CompMode,
-		CompMakeup,
-		CompRedux,
-		CompEnable,
 		BusSendLevel,
 		BusSendEnable,
+
+		/* used only by Controllable Descriptor to access send parameters */
+
+		SendLevelAutomation,
+		SendEnableAutomation,
+		SendAzimuthAutomation,
 	};
 
 	enum AutoState {
-		Off = 0x0,
-		Write = 0x1,
-		Touch = 0x2,
-		Play = 0x4
+		Off   = 0x00,
+		Write = 0x01,
+		Touch = 0x02,
+		Play  = 0x04,
+		Latch = 0x08
 	};
 
 	std::string auto_state_to_string (AutoState);
 	AutoState string_to_auto_state (std::string);
-
-	enum AutoStyle {
-		Absolute = 0x1,
-		Trim = 0x2
-	};
-
-	std::string auto_style_to_string (AutoStyle);
-	AutoStyle string_to_auto_style (std::string);
 
 	enum AlignStyle {
 		CaptureTime,
@@ -207,6 +188,12 @@ namespace ARDOUR {
 		MeterPostFader,
 		MeterOutput,
 		MeterCustom
+	};
+
+	enum DiskIOPoint {
+		DiskIOPreFader,  /* after the trim control, but before other processors */
+		DiskIOPostFader, /* before the main outs, after other processors */
+		DiskIOCustom,   /* up to the user. Caveat Emptor! */
 	};
 
 	enum MeterType {
@@ -249,12 +236,6 @@ namespace ARDOUR {
 		TrackColor
 	};
 
-	enum LocaleMode {
-		SET_LC_ALL,
-		SET_LC_MESSAGES,
-		SET_LC_MESSAGES_AND_LC_NUMERIC
-	};
-
 	enum RoundMode {
 		RoundDownMaybe  = -2,  ///< Round down only if necessary
 		RoundDownAlways = -1,  ///< Always round down, even if on a division
@@ -263,12 +244,27 @@ namespace ARDOUR {
 		RoundUpMaybe    = 2    ///< Round up only if necessary
 	};
 
+	enum SnapPref {
+		SnapToAny_Visual    = 0, /**< Snap to the editor's visual snap
+		                          * (incoprorating snap prefs and the current zoom scaling)
+		                          * this defines the behavior for visual mouse drags, for example */
+
+		SnapToGrid_Scaled   = 1, /**< Snap to the selected grid quantization with visual scaling.
+		                          * Ignores other snap preferences (markers, regions, etc)
+		                          * this defines the behavior for nudging the playhead to next/prev grid, for example */
+
+		SnapToGrid_Unscaled = 2, /**< Snap to the selected grid quantization.
+		                          * If one is selected, and ignore any visual scaling
+		                          * this is the behavior for automated processes like "snap regions to grid"
+		                          * but note that midi quantization uses its own mechanism, not the grid */
+	};
+
 	class AnyTime {
 	public:
 		enum Type {
 			Timecode,
 			BBT,
-			Frames,
+			Samples,
 			Seconds
 		};
 
@@ -278,11 +274,11 @@ namespace ARDOUR {
 		Timecode::BBT_Time bbt;
 
 		union {
-			framecnt_t     frames;
+			samplecnt_t     samples;
 			double         seconds;
 		};
 
-		AnyTime() { type = Frames; frames = 0; }
+		AnyTime() { type = Samples; samples = 0; }
 
 		bool operator== (AnyTime const & other) const {
 			if (type != other.type) { return false; }
@@ -292,8 +288,8 @@ namespace ARDOUR {
 				return timecode == other.timecode;
 			  case BBT:
 				return bbt == other.bbt;
-			  case Frames:
-				return frames == other.frames;
+			  case Samples:
+				return samples == other.samples;
 			  case Seconds:
 				return seconds == other.seconds;
 			}
@@ -308,8 +304,8 @@ namespace ARDOUR {
 				       timecode.seconds != 0 || timecode.frames != 0;
 			  case BBT:
 				return bbt.bars != 0 || bbt.beats != 0 || bbt.ticks != 0;
-			  case Frames:
-				return frames != 0;
+			  case Samples:
+				return samples != 0;
 			  case Seconds:
 				return seconds != 0;
 			}
@@ -319,38 +315,38 @@ namespace ARDOUR {
 		}
 	};
 
-	/* used for translating audio frames to an exact musical position using a note divisor.
-	   an exact musical position almost never falls exactly on an audio frame, but for sub-sample
-	   musical accuracy we need to derive exact musical locations from a frame position
-	   the division follows TempoMap::exact_beat_at_frame().
+	/* used for translating audio samples to an exact musical position using a note divisor.
+	   an exact musical position almost never falls exactly on an audio sample, but for sub-sample
+	   musical accuracy we need to derive exact musical locations from a sample position
+	   the division follows TempoMap::exact_beat_at_sample().
 	   division
-	   -1       musical location is the bar closest to frame
-	    0       musical location is the musical position of the frame
-	    1       musical location is the BBT beat closest to frame
-	    n       musical location is the quarter-note division n closest to frame
+	   -1       musical location is the bar closest to sample
+	    0       musical location is the musical position of the sample
+	    1       musical location is the BBT beat closest to sample
+	    n       musical location is the quarter-note division n closest to sample
 	*/
-	struct MusicFrame {
-		framepos_t frame;
+	struct MusicSample {
+		samplepos_t sample;
 		int32_t    division;
 
-		MusicFrame (framepos_t f, int32_t d) : frame (f), division (d) {}
+		MusicSample (samplepos_t f, int32_t d) : sample (f), division (d) {}
 
-		void set (framepos_t f, int32_t d) {frame = f; division = d; }
+		void set (samplepos_t f, int32_t d) {sample = f; division = d; }
 
-		MusicFrame operator- (MusicFrame other) { return MusicFrame (frame - other.frame, 0); }
+		MusicSample operator- (MusicSample other) { return MusicSample (sample - other.sample, 0); }
 	};
 
 	/* XXX: slightly unfortunate that there is this and Evoral::Range<>,
 	   but this has a uint32_t id which Evoral::Range<> does not.
 	*/
 	struct AudioRange {
-		framepos_t start;
-		framepos_t end;
+		samplepos_t start;
+		samplepos_t end;
 		uint32_t id;
 
-		AudioRange (framepos_t s, framepos_t e, uint32_t i) : start (s), end (e) , id (i) {}
+		AudioRange (samplepos_t s, samplepos_t e, uint32_t i) : start (s), end (e) , id (i) {}
 
-		framecnt_t length() const { return end - start + 1; }
+		samplecnt_t length() const { return end - start + 1; }
 
 		bool operator== (const AudioRange& other) const {
 			return start == other.start && end == other.end && id == other.id;
@@ -360,7 +356,7 @@ namespace ARDOUR {
 			return start == other.start && end == other.end;
 		}
 
-		Evoral::OverlapType coverage (framepos_t s, framepos_t e) const {
+		Evoral::OverlapType coverage (samplepos_t s, samplepos_t e) const {
 			return Evoral::coverage (start, end, s, e);
 		}
 	};
@@ -445,13 +441,14 @@ namespace ARDOUR {
 		MonitorAuto = 0,
 		MonitorInput = 0x1,
 		MonitorDisk = 0x2,
-		MonitorCue = 0x4,
+		MonitorCue = 0x3,
 	};
 
 	enum MonitorState {
 		MonitoringSilence = 0x1,
 		MonitoringInput = 0x2,
 		MonitoringDisk = 0x4,
+		MonitoringCue = 0x6,
 	};
 
 	enum MeterState {
@@ -487,6 +484,12 @@ namespace ARDOUR {
 		AFLFromAfterProcessors
 	};
 
+	enum ClockDeltaMode {
+		NoDelta,
+		DeltaEditPoint,
+		DeltaOriginMarker
+	};
+
 	enum DenormalModel {
 		DenormalNone,
 		DenormalFTZ,
@@ -510,10 +513,10 @@ namespace ARDOUR {
 		AutoConnectMaster = 0x2
 	};
 
-    enum TracksAutoNamingRule {
-        UseDefaultNames = 0x1,
-        NameAfterDriver = 0x2
-    };
+	enum TracksAutoNamingRule {
+		UseDefaultNames = 0x1,
+		NameAfterDriver = 0x2
+	};
 
 	enum SampleFormat {
 		FormatFloat = 0,
@@ -587,13 +590,15 @@ namespace ARDOUR {
 		SrcFastest
 	};
 
-	typedef std::list<framepos_t> AnalysisFeatureList;
+	typedef std::list<samplepos_t> AnalysisFeatureList;
 
 	typedef std::list<boost::shared_ptr<Route> > RouteList;
 	typedef std::list<boost::shared_ptr<Stripable> > StripableList;
 	typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
 	typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
 	typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
+	typedef std::list<boost::shared_ptr<SlavableAutomationControl> > SlavableControlList;
+	typedef std::set <boost::shared_ptr<AutomationControl> > AutomationControlSet;
 
 	typedef std::list<boost::shared_ptr<VCA> > VCAList;
 
@@ -647,11 +652,7 @@ namespace ARDOUR {
 	};
 
 	struct BusProfile {
-		AutoConnectOption input_ac;      /* override the RC config for input auto-connection */
-		AutoConnectOption output_ac;     /* override the RC config for output auto-connection */
-		uint32_t master_out_channels;    /* how many channels for the master bus */
-		uint32_t requested_physical_in;  /* now many of the available physical inputs to consider usable */
-		uint32_t requested_physical_out; /* now many of the available physical inputs to consider usable */
+		uint32_t master_out_channels; /* how many channels for the master bus, 0: no master bus */
 	};
 
 	enum FadeShape {
@@ -730,108 +731,17 @@ namespace ARDOUR {
 		SMFTempoUse,
 	};
 
+	struct CaptureInfo {
+		samplepos_t start;
+		samplecnt_t samples;
+	};
+
+	typedef std::vector<CaptureInfo*> CaptureInfos;
+
 } // namespace ARDOUR
-
-
-/* these cover types declared above in this header. See enums.cc
-   for the definitions.
-*/
-std::istream& operator>>(std::istream& o, ARDOUR::SampleFormat& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::HeaderFormat& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::AutoConnectOption& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::TracksAutoNamingRule& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::EditMode& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::MonitorModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::MonitorChoice& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::PFLPosition& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::AFLPosition& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::ListenPosition& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::LayerModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::InsertMergePolicy& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::SyncSource& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::ShuttleBehaviour& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::ShuttleUnits& sf);
-std::istream& operator>>(std::istream& o, Timecode::TimecodeFormat& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::DenormalModel& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::PositionLockStyle& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::FadeShape& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::RegionSelectionAfterSplit& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::BufferingPreset& var);
-std::istream& operator>>(std::istream& o, ARDOUR::AutoReturnTarget& sf);
-std::istream& operator>>(std::istream& o, ARDOUR::MeterType& sf);
-
-std::ostream& operator<<(std::ostream& o, const ARDOUR::SampleFormat& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::HeaderFormat& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoConnectOption& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::TracksAutoNamingRule& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::EditMode& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::MonitorChoice& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PFLPosition& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::AFLPosition& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ListenPosition& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::LayerModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::InsertMergePolicy& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::SyncSource& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleBehaviour& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::ShuttleUnits& sf);
-std::ostream& operator<<(std::ostream& o, const Timecode::TimecodeFormat& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::DenormalModel& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PositionLockStyle& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::FadeShape& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::RegionSelectionAfterSplit& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::BufferingPreset& var);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::AutoReturnTarget& sf);
-std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterType& sf);
-
-/* because these operators work on types which can be used when making
-   a UI_CONFIG_VARIABLE (in gtk2_ardour) we need them to be exported.
-*/
-LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformScale& sf);
-LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::WaveformShape& sf);
-LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::VUMeterStandard& sf);
-LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::MeterLineUp& sf);
-LIBARDOUR_API std::istream& operator>>(std::istream& o, ARDOUR::LocaleMode& sf);
-
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformScale& sf);
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::WaveformShape& sf);
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::VUMeterStandard& sf);
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::MeterLineUp& sf);
-LIBARDOUR_API std::ostream& operator<<(std::ostream& o, const ARDOUR::LocaleMode& sf);
-
-
-static inline ARDOUR::framepos_t
-session_frame_to_track_frame (ARDOUR::framepos_t session_frame, double speed)
-{
-	long double result = (long double) session_frame * (long double) speed;
-
-	if (result >= (long double) ARDOUR::max_framepos) {
-		return ARDOUR::max_framepos;
-	} else if (result <= (long double) (ARDOUR::max_framepos) * (ARDOUR::framepos_t)(-1)) {
-		return (ARDOUR::max_framepos * (ARDOUR::framepos_t)(-1));
-	} else {
-		return result;
-	}
-}
-
-static inline ARDOUR::framepos_t
-track_frame_to_session_frame (ARDOUR::framepos_t track_frame, double speed)
-{
-	/* NB - do we need a check for speed == 0 ??? */
-	long double result = (long double) track_frame / (long double) speed;
-
-	if (result >= (long double) ARDOUR::max_framepos) {
-		return ARDOUR::max_framepos;
-	} else if (result <= (long double) (ARDOUR::max_framepos) * (ARDOUR::framepos_t)(-1)) {
-		return (ARDOUR::max_framepos * (ARDOUR::framepos_t)(-1));
-	} else {
-		return result;
-	}
-}
 
 /* for now, break the rules and use "using" to make this "global" */
 
-using ARDOUR::framepos_t;
-
+using ARDOUR::samplepos_t;
 
 #endif /* __ardour_types_h__ */

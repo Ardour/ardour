@@ -35,13 +35,13 @@ class LIBAUDIOGRAPHER_API SampleFormatConverter
 	~SampleFormatConverter ();
 
 	/** Initialize and allocate buffers for processing.
-	  * \param max_frames maximum number of frames that is allowed to be used in calls to \a process()
+	  * \param max_samples maximum number of samples that is allowed to be used in calls to \a process()
 	  * \param type dither type from \a DitherType
 	  * \param data_width data with in bits
 	  * \note If the non-const version of process() is used with floats,
 	  *       there is no need to call this function.
 	  */
-	void init (framecnt_t max_frames, int type, int data_width);
+	void init (samplecnt_t max_samples, int type, int data_width);
 
 	/// Set whether or not clipping to [-1.0, 1.0] should occur when TOut = float. Clipping is off by default
 	void set_clip_floats (bool yn) { clip_floats = yn; }
@@ -54,12 +54,12 @@ class LIBAUDIOGRAPHER_API SampleFormatConverter
 
   private:
 	void reset();
-	void init_common (framecnt_t max_frames); // not-template-specialized part of init
-	void check_frame_and_channel_count (framecnt_t frames, ChannelCount channels_);
+	void init_common (samplecnt_t max_samples); // not-template-specialized part of init
+	void check_sample_and_channel_count (samplecnt_t samples, ChannelCount channels_);
 
 	ChannelCount channels;
 	GDither      dither;
-	framecnt_t   data_out_size;
+	samplecnt_t   data_out_size;
 	TOut *       data_out;
 
 	bool         clip_floats;

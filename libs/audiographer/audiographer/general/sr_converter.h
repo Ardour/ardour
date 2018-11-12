@@ -26,10 +26,10 @@ class LIBAUDIOGRAPHER_API SampleRateConverter
 	~SampleRateConverter ();
 
 	/// Init converter \n Not RT safe
-	void init (framecnt_t in_rate, framecnt_t out_rate, int quality = 0);
+	void init (samplecnt_t in_rate, samplecnt_t out_rate, int quality = 0);
 
-	/// Returns max amount of frames that will be output \n RT safe
-	framecnt_t allocate_buffers (framecnt_t max_frames);
+	/// Returns max amount of samples that will be output \n RT safe
+	samplecnt_t allocate_buffers (samplecnt_t max_samples);
 
 	/** Does sample rate conversion.
 	  * Note that outpt size may vary a lot.
@@ -47,14 +47,14 @@ class LIBAUDIOGRAPHER_API SampleRateConverter
 
 	bool           active;
 	uint32_t       channels;
-	framecnt_t     max_frames_in;
+	samplecnt_t     max_samples_in;
 
 	float *        leftover_data;
-	framecnt_t     leftover_frames;
-	framecnt_t     max_leftover_frames;
+	samplecnt_t     leftover_samples;
+	samplecnt_t     max_leftover_samples;
 
 	float *        data_out;
-	framecnt_t     data_out_size;
+	samplecnt_t     data_out_size;
 
 	SRC_DATA       src_data;
 	SRC_STATE*     src_state;

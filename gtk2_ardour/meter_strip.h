@@ -21,31 +21,33 @@
 #define __ardour_meter_strip__
 
 #include <vector>
-
 #include <cmath>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/drawingarea.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/separator.h>
 
 #include "pbd/stateful.h"
 
 #include "ardour/types.h"
 #include "ardour/ardour.h"
-#include "route_ui.h"
-#include "ardour_button.h"
+
+#include "widgets/ardour_button.h"
 
 #include "level_meter.h"
+#include "route_ui.h"
 
 namespace ARDOUR {
 	class Route;
 	class RouteGroup;
 	class Session;
 }
-namespace Gtk {
-	class Window;
-	class Style;
-}
 
 class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 {
-  public:
+public:
 	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
 	MeterStrip (int, ARDOUR::MeterType);
 	~MeterStrip ();
@@ -79,7 +81,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 
 	bool selected() const { return false; }
 
-  protected:
+protected:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList meter_route_connections;
 	PBD::ScopedConnectionList level_meter_connection;
@@ -99,7 +101,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	std::string state_id() const;
 	void set_button_names ();
 
-  private:
+private:
 	Gtk::VBox mtr_vbox;
 	Gtk::VBox nfo_vbox;
 	Gtk::EventBox mtr_container;
@@ -108,8 +110,8 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	Gtk::HBox spacer;
 	Gtk::HBox namebx;
 	Gtk::VBox namenumberbx;
-	ArdourButton name_label;
-	ArdourButton number_label;
+	ArdourWidgets::ArdourButton name_label;
+	ArdourWidgets::ArdourButton number_label;
 	Gtk::DrawingArea meter_metric_area;
 	Gtk::DrawingArea meter_ticks1_area;
 	Gtk::DrawingArea meter_ticks2_area;
@@ -124,7 +126,7 @@ class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 	Gtk::Alignment peak_align;
 	Gtk::HBox peakbx;
 	Gtk::VBox btnbox;
-	ArdourButton peak_display;
+	ArdourWidgets::ArdourButton peak_display;
 
 	std::vector<ARDOUR::DataType> _types;
 	ARDOUR::MeterType metric_type;

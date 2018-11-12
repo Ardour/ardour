@@ -44,11 +44,11 @@ ExportStatus::init ()
 	total_timespans = 0;
 	timespan = 0;
 
-	total_frames = 0;
-	processed_frames = 0;
+	total_samples = 0;
+	processed_samples = 0;
 
-	total_frames_current_timespan = 0;
-	processed_frames_current_timespan = 0;
+	total_samples_current_timespan = 0;
+	processed_samples_current_timespan = 0;
 
 	total_postprocessing_cycles = 0;
 	current_postprocessing_cycle = 0;

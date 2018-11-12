@@ -18,9 +18,12 @@
 
 */
 
-#include "export_preset_selector.h"
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/export_preset.h"
+
+#include "export_preset_selector.h"
 
 #include "pbd/i18n.h"
 

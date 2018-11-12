@@ -22,7 +22,9 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/route.h"
 
-#include "ardour_dropdown.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+
 #include "ardour_dialog.h"
 
 class PluginSetupDialog : public ArdourDialog
@@ -46,9 +48,9 @@ private:
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
 
-	ArdourDropdown _out_presets;
-	ArdourButton _keep_mapping;
-	ArdourButton _fan_out;
+	ArdourWidgets::ArdourDropdown _out_presets;
+	ArdourWidgets::ArdourButton _keep_mapping;
+	ArdourWidgets::ArdourButton _fan_out;
 	ARDOUR::ChanCount _cur_inputs;
 	ARDOUR::ChanCount _cur_outputs;
 };

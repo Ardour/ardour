@@ -45,6 +45,8 @@ private:
 	Gtk::ComboBoxText portmode_combo;
 	Gtk::SpinButton port_entry;
 	Gtk::SpinButton bank_entry;
+	Gtk::SpinButton send_page_entry;
+	Gtk::SpinButton plugin_page_entry;
 	Gtk::ComboBoxText gainmode_combo;
 	Gtk::ComboBoxText preset_combo;
 	std::vector<std::string> preset_options;
@@ -55,6 +57,8 @@ private:
 	uint32_t sesn_portmode;
 	std::string sesn_port;
 	uint32_t sesn_bank;
+	uint32_t sesn_send;
+	uint32_t sesn_plugin;
 	uint32_t sesn_strips;
 	uint32_t sesn_feedback;
 	uint32_t sesn_gainmode;
@@ -69,7 +73,10 @@ private:
 	void factory_reset ();
 	void reshow_values ();
 	void port_changed ();
+	bool port_focus_out (GdkEventFocus*);
 	void bank_changed ();
+	void send_page_changed ();
+	void plugin_page_changed ();
 	void strips_changed ();
 	void feedback_changed ();
 	void preset_changed ();
@@ -87,6 +94,7 @@ private:
 	Gtk::CheckButton monitor_type;
 	Gtk::CheckButton selected_tracks;
 	Gtk::CheckButton hidden_tracks;
+	Gtk::CheckButton usegroups;
 	int stvalue;
 	// feedback calculator
 	uint32_t def_feedback;
@@ -106,6 +114,7 @@ private:
 	Gtk::CheckButton hp_min_sec;
 	Gtk::CheckButton hp_gui;
 	Gtk::CheckButton select_fb;
+	Gtk::CheckButton use_osc10;
 	int fbvalue;
 	void set_bitsets ();
 
@@ -121,7 +130,6 @@ OSC::get_gui () const
 	if (!gui) {
 		const_cast<OSC*>(this)->build_gui ();
 	}
-	//static_cast<Gtk::VBox*>(gui)->show_all();
 	static_cast<Gtk::Notebook*>(gui)->show_all();
 	return gui;
 }

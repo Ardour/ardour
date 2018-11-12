@@ -165,7 +165,7 @@ Pannerbalance::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 	if (fabsf ((delta = (pos[which] - desired_pos[which]))) > 0.002) { // about 1 degree of arc
 
 		/* we've moving the pan by an appreciable amount, so we must
-			 interpolate over 64 frames or nframes, whichever is smaller */
+			 interpolate over 64 samples or nframes, whichever is smaller */
 
 		pframes_t const limit = min ((pframes_t) 64, nframes);
 		pframes_t n;
@@ -213,7 +213,7 @@ Pannerbalance::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gai
 
 void
 Pannerbalance::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-                                         framepos_t start, framepos_t end, pframes_t nframes,
+                                         samplepos_t start, samplepos_t end, pframes_t nframes,
                                          pan_t** buffers, uint32_t which)
 {
 	assert (obufs.count().n_audio() == 2);
@@ -270,9 +270,9 @@ Pannerbalance::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speaker
 Pannerbalance::get_state ()
 {
 	XMLNode& root (Panner::get_state ());
-	root.add_property (X_("uri"), _descriptor.panner_uri);
+	root.set_property (X_("uri"), _descriptor.panner_uri);
 	/* this is needed to allow new sessions to load with old Ardour: */
-	root.add_property (X_("type"), _descriptor.name);
+	root.set_property (X_("type"), _descriptor.name);
 	return root;
 }
 

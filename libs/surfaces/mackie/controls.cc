@@ -104,10 +104,10 @@ Control::start_touch (double when)
 }
 
 void
-Control::stop_touch (bool mark, double when)
+Control::stop_touch (double when)
 {
 	if (normal_ac) {
-		return normal_ac->stop_touch (mark, when);
+		return normal_ac->stop_touch (when);
 	}
 }
 

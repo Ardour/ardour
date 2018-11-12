@@ -22,6 +22,7 @@
 #include <sigc++/signal.h>
 
 #include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/audioregion.h"
 #include "ardour/export_channel_configuration.h"
@@ -401,7 +402,7 @@ ExportDialog::progress_timeout ()
 	case ExportStatus::Exporting:
 		status_text = string_compose (_("Exporting '%3' (timespan %1 of %2)"),
 		                              status->timespan, status->total_timespans, status->timespan_name);
-		progress = ((float) status->processed_frames_current_timespan) / status->total_frames_current_timespan;
+		progress = ((float) status->processed_samples_current_timespan) / status->total_samples_current_timespan;
 		break;
 	case ExportStatus::Normalizing:
 		status_text = string_compose (_("Normalizing '%3' (timespan %1 of %2)"),

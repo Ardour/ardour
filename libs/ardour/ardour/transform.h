@@ -50,8 +50,8 @@ namespace ARDOUR {
  */
 class LIBARDOUR_API Transform : public MidiOperator {
 public:
-	typedef Evoral::Sequence<Evoral::Beats>::NotePtr     NotePtr;
-	typedef Evoral::Sequence<Evoral::Beats>::Notes       Notes;
+	typedef Evoral::Sequence<Temporal::Beats>::NotePtr     NotePtr;
+	typedef Evoral::Sequence<Temporal::Beats>::Notes       Notes;
 	typedef ARDOUR::MidiModel::NoteDiffCommand::Property Property;
 
 	/** Context while iterating over notes during transformation. */
@@ -132,7 +132,7 @@ public:
 	Transform(const Program& prog);
 
 	Command* operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
-	                    Evoral::Beats                        position,
+	                    Temporal::Beats                      position,
 	                    std::vector<Notes>&                  seqs);
 
 	std::string name() const { return std::string ("transform"); }

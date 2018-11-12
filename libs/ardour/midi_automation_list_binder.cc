@@ -35,17 +35,18 @@ MidiAutomationListBinder::MidiAutomationListBinder (boost::shared_ptr<MidiSource
 MidiAutomationListBinder::MidiAutomationListBinder (XMLNode* node, Session::SourceMap const & sources)
 	: _parameter (0, 0, 0)
 {
-	XMLProperty const * source = node->property ("source-id");
-	assert (source);
+	std::string id_str;
+	std::string parameter_str;
+	if (!node->get_property ("source-id", id_str) ||
+	    !node->get_property ("parameter", parameter_str)) {
+		assert (false);
+	}
 
-	XMLProperty const * parameter = node->property ("parameter");
-	assert (parameter);
-
-	Session::SourceMap::const_iterator i = sources.find (PBD::ID (source->value()));
+	Session::SourceMap::const_iterator i = sources.find (PBD::ID (id_str));
 	assert (i != sources.end());
 	_source = boost::dynamic_pointer_cast<MidiSource> (i->second);
 
-	_parameter = EventTypeMap::instance().from_symbol (parameter->value());
+	_parameter = EventTypeMap::instance().from_symbol (parameter_str);
 }
 
 AutomationList*
@@ -63,6 +64,6 @@ MidiAutomationListBinder::get () const
 void
 MidiAutomationListBinder::add_state (XMLNode* node)
 {
-	node->add_property ("source-id", _source->id().to_s());
-	node->add_property ("parameter", EventTypeMap::instance().to_symbol (_parameter));
+	node->set_property ("source-id", _source->id().to_s());
+	node->set_property ("parameter", EventTypeMap::instance().to_symbol (_parameter));
 }

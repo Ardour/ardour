@@ -23,6 +23,7 @@
 #include "pbd/basename.h"
 
 #include "ardour/filesystem_paths.h"
+#include "ardour/revision.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -91,7 +92,7 @@ ArdourKeyboard::find_bindings_files (map<string,string>& files)
 void
 ArdourKeyboard::setup_keybindings ()
 {
-	using namespace ARDOUR_COMMAND_LINE;
+	string keybindings_path = ARDOUR_COMMAND_LINE::keybindings_path;
 	string default_bindings = string_compose ("%1%2", UIConfiguration::instance().get_default_bindings(), Keyboard::binding_filename_suffix);
 	vector<string> strs;
 
@@ -102,6 +103,14 @@ ArdourKeyboard::setup_keybindings ()
 	/* set up the per-user bindings path */
 
 	string lowercase_program_name = downcase (string(PROGRAM_NAME));
+
+	/* extract and append minor vesion */
+	std::string rev (revision);
+	std::size_t pos = rev.find_first_of("-");
+	if (pos != string::npos && pos > 0) {
+		lowercase_program_name += "-";
+		lowercase_program_name += rev.substr (0, pos);
+	}
 
 	user_keybindings_path = Glib::build_filename (user_config_directory(), lowercase_program_name + binding_filename_suffix);
 
@@ -159,8 +168,6 @@ ArdourKeyboard::setup_keybindings ()
 		keybindings_path = default_bindings;
 	}
 
-	cerr << "KP is " << keybindings_path << endl;
-
 	while (true) {
 
 		if (!Glib::path_is_absolute (keybindings_path)) {
@@ -207,8 +214,6 @@ ArdourKeyboard::setup_keybindings ()
 		}
 	}
 
-	info << string_compose (_("Loading keybindings from %1"), keybindings_path) << endmsg;
-
 	load_keybindings (keybindings_path);
 
 	/* catch changes made via some GTK mechanism */
@@ -221,22 +226,14 @@ XMLNode&
 ArdourKeyboard::get_state (void)
 {
 	XMLNode* node = &Keyboard::get_state ();
-	char buf[32];
 
-	snprintf (buf, sizeof (buf), "%d", constraint_mod);
-	node->add_property ("constraint-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_contents_mod);
-	node->add_property ("trim-contents-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_overlap_mod);
-	node->add_property ("trim-overlap-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", trim_anchored_mod);
-	node->add_property ("trim-anchored-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", fine_adjust_mod);
-	node->add_property ("fine-adjust-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", push_points_mod);
-	node->add_property ("push-points-modifier", buf);
-	snprintf (buf, sizeof (buf), "%d", note_size_relative_mod);
-	node->add_property ("note-size-relative-modifier", buf);
+	node->set_property ("constraint-modifier", constraint_mod);
+	node->set_property ("trim-contents-modifier", trim_contents_mod);
+	node->set_property ("trim-overlap-modifier", trim_overlap_mod);
+	node->set_property ("trim-anchored-modifier", trim_anchored_mod);
+	node->set_property ("fine-adjust-modifier", fine_adjust_mod);
+	node->set_property ("push-points-modifier", push_points_mod);
+	node->set_property ("note-size-relative-modifier", note_size_relative_mod);
 
 	return *node;
 }
@@ -244,35 +241,13 @@ ArdourKeyboard::get_state (void)
 int
 ArdourKeyboard::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("constraint-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &constraint_mod);
-	}
-
-	if ((prop = node.property ("trim-contents-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_contents_mod);
-	}
-
-	if ((prop = node.property ("trim-overlap-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_overlap_mod);
-	}
-
-	if ((prop = node.property ("trim-anchored-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &trim_anchored_mod);
-	}
-
-	if ((prop = node.property ("fine-adjust-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &fine_adjust_mod);
-	}
-
-	if ((prop = node.property ("push-points-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &push_points_mod);
-	}
-
-	if ((prop = node.property ("note-size-relative-modifier")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &note_size_relative_mod);
-	}
+	node.get_property ("constraint-modifier", constraint_mod);
+	node.get_property ("trim-contents-modifier", trim_contents_mod);
+	node.get_property ("trim-overlap-modifier", trim_overlap_mod);
+	node.get_property ("trim-anchored-modifier", trim_anchored_mod);
+	node.get_property ("fine-adjust-modifier", fine_adjust_mod);
+	node.get_property ("push-points-modifier", push_points_mod);
+	node.get_property ("note-size-relative-modifier", note_size_relative_mod);
 
 	return Keyboard::set_state (node, version);
 }

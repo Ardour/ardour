@@ -407,13 +407,11 @@ TonalChangeDetect::FeatureSet TonalChangeDetect::getRemainingFeatures()
     ChangeDetectionFunction df(dfc);
     ChangeDistance d = df.process(m_TCSGram);
 	
-	
-	
-    for (int i = 0; i < d.size(); i++)
+    for (int i = 0; i < int(d.size()); i++)
     {
         double dCurrent = d[i];
         double dPrevious = d[i > 0 ? i - 1 : i];
-        double dNext = d[i < d.size()-1 ? i + 1 : i];
+        double dNext = d[i < int(d.size())-1 ? i + 1 : i];
 		
         Feature feature;
         feature.label = "";

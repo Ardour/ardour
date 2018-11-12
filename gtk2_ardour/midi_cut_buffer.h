@@ -19,7 +19,7 @@
 #ifndef __gtk_ardour_midi_cut_buffer_h__
 #define __gtk_ardour_midi_cut_buffer_h__
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 #include "ardour/automatable_sequence.h"
 
@@ -27,10 +27,10 @@ namespace ARDOUR {
 	class Session;
 }
 
-class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::Beats>
+class MidiCutBuffer : public ARDOUR::AutomatableSequence<Temporal::Beats>
 {
-  public:
-	typedef Evoral::Beats TimeType;
+public:
+	typedef Temporal::Beats TimeType;
 
 	MidiCutBuffer (ARDOUR::Session*);
 	~MidiCutBuffer();
@@ -40,7 +40,7 @@ class MidiCutBuffer : public ARDOUR::AutomatableSequence<Evoral::Beats>
 
 	void set (const Evoral::Sequence<TimeType>::Notes&);
 
-  private:
+private:
 	TimeType _origin;
 };
 

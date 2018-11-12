@@ -41,18 +41,18 @@ SampleFormatConverter<TOut>::SampleFormatConverter (ChannelCount channels) :
 
 template <>
 void
-SampleFormatConverter<float>::init (framecnt_t max_frames, int /* type */, int data_width)
+SampleFormatConverter<float>::init (samplecnt_t max_samples, int /* type */, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width != 32) {
 		throw Exception (*this, "Unsupported data width");
 	}
-	init_common (max_frames);
+	init_common (max_samples);
 	dither = gdither_new (GDitherNone, channels, GDitherFloat, data_width);
 }
 
 template <>
 void
-SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_width)
+SampleFormatConverter<int32_t>::init (samplecnt_t max_samples, int type, int data_width)
 {
 	if(throw_level (ThrowObject) && data_width > 32) {
 		throw Exception (*this, "Trying to use SampleFormatConverter<int32_t> with a data width > 32");
@@ -62,47 +62,47 @@ SampleFormatConverter<int32_t>::init (framecnt_t max_frames, int type, int data_
 	// And since floats only have 24 bits of data, we are fine with this.
 	data_width = std::min(data_width, 24);
 
-	init_common (max_frames);
+	init_common (max_samples);
 	dither = gdither_new ((GDitherType) type, channels, GDither32bit, data_width);
 }
 
 template <>
 void
-SampleFormatConverter<int16_t>::init (framecnt_t max_frames, int type, int data_width)
+SampleFormatConverter<int16_t>::init (samplecnt_t max_samples, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width > 16) {
 		throw Exception (*this, boost::str(boost::format
 		    ("Data width (%1%) too large for int16_t")
 		    % data_width));
 	}
-	init_common (max_frames);
+	init_common (max_samples);
 	dither = gdither_new ((GDitherType) type, channels, GDither16bit, data_width);
 }
 
 template <>
 void
-SampleFormatConverter<uint8_t>::init (framecnt_t max_frames, int type, int data_width)
+SampleFormatConverter<uint8_t>::init (samplecnt_t max_samples, int type, int data_width)
 {
 	if (throw_level (ThrowObject) && data_width > 8) {
 		throw Exception (*this, boost::str(boost::format
 		    ("Data width (%1%) too large for uint8_t")
 		    % data_width));
 	}
-	init_common (max_frames);
+	init_common (max_samples);
 	dither = gdither_new ((GDitherType) type, channels, GDither8bit, data_width);
 }
 
 template <typename TOut>
 void
-SampleFormatConverter<TOut>::init_common (framecnt_t max_frames)
+SampleFormatConverter<TOut>::init_common (samplecnt_t max_samples)
 {
 	reset();
-	if (max_frames  > data_out_size) {
+	if (max_samples  > data_out_size) {
 
 		delete[] data_out;
 
-		data_out = new TOut[max_frames];
-		data_out_size = max_frames;
+		data_out = new TOut[max_samples];
+		data_out_size = max_samples;
 	}
 }
 
@@ -135,12 +135,12 @@ SampleFormatConverter<TOut>::process (ProcessContext<float> const & c_in)
 {
 	float const * const data = c_in.data();
 
-	check_frame_and_channel_count (c_in.frames (), c_in.channels ());
+	check_sample_and_channel_count (c_in.samples (), c_in.channels ());
 
 	/* Do conversion */
 
 	for (uint32_t chn = 0; chn < c_in.channels(); ++chn) {
-		gdither_runf (dither, chn, c_in.frames_per_channel (), data, data_out);
+		gdither_runf (dither, chn, c_in.samples_per_channel (), data, data_out);
 	}
 
 	/* Write forward */
@@ -162,11 +162,11 @@ template<>
 void
 SampleFormatConverter<float>::process (ProcessContext<float> & c_in)
 {
-	framecnt_t frames = c_in.frames();
+	samplecnt_t samples = c_in.samples();
 	float * data = c_in.data();
 
 	if (clip_floats) {
-		for (framecnt_t x = 0; x < frames; ++x) {
+		for (samplecnt_t x = 0; x < samples; ++x) {
 			if (data[x] > 1.0f) {
 				data[x] = 1.0f;
 			} else if (data[x] < -1.0f) {
@@ -184,8 +184,8 @@ void
 SampleFormatConverter<float>::process (ProcessContext<float> const & c_in)
 {
 	// Make copy of data and pass it to non-const version
-	check_frame_and_channel_count (c_in.frames(), c_in.channels());
-	TypeUtils<float>::copy (c_in.data(), data_out, c_in.frames());
+	check_sample_and_channel_count (c_in.samples(), c_in.channels());
+	TypeUtils<float>::copy (c_in.data(), data_out, c_in.samples());
 
 	ProcessContext<float> c (c_in, data_out);
 	process (c);
@@ -193,7 +193,7 @@ SampleFormatConverter<float>::process (ProcessContext<float> const & c_in)
 
 template<typename TOut>
 void
-SampleFormatConverter<TOut>::check_frame_and_channel_count (framecnt_t frames, ChannelCount channels_)
+SampleFormatConverter<TOut>::check_sample_and_channel_count (samplecnt_t samples, ChannelCount channels_)
 {
 	if (throw_level (ThrowStrict) && channels_ != channels) {
 		throw Exception (*this, boost::str (boost::format
@@ -201,10 +201,10 @@ SampleFormatConverter<TOut>::check_frame_and_channel_count (framecnt_t frames, C
 			% channels_ % channels));
 	}
 
-	if (throw_level (ThrowProcess) && frames  > data_out_size) {
+	if (throw_level (ThrowProcess) && samples  > data_out_size) {
 		throw Exception (*this, boost::str (boost::format
-			("Too many frames given to process(), %1% instad of %2%")
-			% frames % data_out_size));
+			("Too many samples given to process(), %1% instead of %2%")
+			% samples % data_out_size));
 	}
 }
 

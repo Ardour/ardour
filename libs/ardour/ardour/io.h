@@ -30,6 +30,7 @@
 #include "pbd/undo.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
@@ -66,7 +67,7 @@ class UserBundle;
  */
 class LIBARDOUR_API IO : public SessionObject, public Latent
 {
-  public:
+public:
 	static const std::string state_node_name;
 
 	enum Direction {
@@ -91,12 +92,12 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	void set_pretty_name (const std::string& str);
 	std::string pretty_name () const { return _pretty_name_prefix; }
 
-	virtual void silence (framecnt_t);
-	void increment_port_buffer_offset (pframes_t offset);
+	virtual void silence (samplecnt_t);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
 	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool exclusive, void *);
+	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool, bool, void *);
 	int disconnect_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
 
 	BundleList bundles_connected ();
@@ -113,8 +114,14 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	bool connected () const;
 	bool physically_connected () const;
 
-	framecnt_t signal_latency () const { return 0; }
-	framecnt_t latency () const;
+	samplecnt_t signal_latency () const { return 0; }
+
+	samplecnt_t latency () const;
+	samplecnt_t public_latency () const;
+	samplecnt_t connected_latency (bool for_playback) const;
+
+	void set_private_port_latencies (samplecnt_t value, bool playback);
+	void set_public_port_latencies (samplecnt_t value, bool playback) const;
 
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
@@ -142,8 +149,8 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	 */
 	PBD::Signal2<void, IOChange, void *> changed;
 
-	virtual XMLNode& state (bool full);
 	XMLNode& get_state (void);
+
 	int set_state (const XMLNode&, int version);
 	int set_state_2X (const XMLNode&, int, bool);
 	static void prepare_for_reset (XMLNode&, const std::string&);
@@ -194,24 +201,23 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 	/* three utility functions - this just seems to be simplest place to put them */
 
 	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset);
-	void process_input (boost::shared_ptr<Processor>, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes);
-	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset);
+	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecnt_t offset);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 
 	int set_ports (const std::string& str);
 
-  private:
-	mutable Glib::Threads::Mutex io_lock;
+protected:
+	virtual XMLNode& state ();
 
-  protected:
 	PortSet   _ports;
 	Direction _direction;
 	DataType _default_type;
 	bool     _active;
 	bool     _sendish;
 
-  private:
+private:
+	mutable Glib::Threads::Mutex io_lock;
 	int connecting_became_legal ();
 	PBD::ScopedConnection connection_legal_c;
 
@@ -223,14 +229,10 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 		PBD::ScopedConnection changed;
 	};
 
-	std::vector<UserBundleInfo*> _bundles_connected; ///< user bundles connected to our ports
-
 	static int parse_io_string (const std::string&, std::vector<std::string>& chns);
 	static int parse_gain_string (const std::string&, std::vector<std::string>& chns);
 
 	int ensure_ports (ChanCount, bool clear, void *src);
-
-	void check_bundles_connected ();
 
 	void bundle_changed (Bundle::Change);
 
@@ -257,5 +259,9 @@ class LIBARDOUR_API IO : public SessionObject, public Latent
 };
 
 } // namespace ARDOUR
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT (ARDOUR::IO::Direction)
+}
 
 #endif /*__ardour_io_h__ */

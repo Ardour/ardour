@@ -25,11 +25,11 @@ class SndfileReader
 	SndfileReader (SndfileReader const & other) : SndfileHandle (other) {}
 	using SndfileHandle::operator=;
 
-	/** Read data into buffer in \a context, only the data is modified (not frame count)
+	/** Read data into buffer in \a context, only the data is modified (not sample count)
 	 *  Note that the data read is output to the outputs, as well as read into the context
-	 *  \return number of frames read
+	 *  \return number of samples read
 	 */
-	framecnt_t read (ProcessContext<T> & context)
+	samplecnt_t read (ProcessContext<T> & context)
 	{
 		if (throw_level (ThrowStrict) && context.channels() != channels() ) {
 			throw Exception (*this, boost::str (boost::format
@@ -37,14 +37,14 @@ class SndfileReader
 				% context.channels() % channels()));
 		}
 
-		framecnt_t const frames_read = SndfileHandle::read (context.data(), context.frames());
-		ProcessContext<T> c_out = context.beginning (frames_read);
+		samplecnt_t const samples_read = SndfileHandle::read (context.data(), context.samples());
+		ProcessContext<T> c_out = context.beginning (samples_read);
 
-		if (frames_read < context.frames()) {
+		if (samples_read < context.samples()) {
 			c_out.set_flag (ProcessContext<T>::EndOfInput);
 		}
 		this->output (c_out);
-		return frames_read;
+		return samples_read;
 	}
 
   protected:

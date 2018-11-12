@@ -28,7 +28,7 @@ public:
 	  * non-const ProcessContexts are given to \a process() .
 	  * \n Not RT safe
 	  */
-	void alloc_buffer(framecnt_t frames);
+	void alloc_buffer(samplecnt_t samples);
 
 	/// Process a const ProcessContext \see alloc_buffer() \n RT safe
 	void process (ProcessContext<float> const & c);
@@ -42,7 +42,7 @@ private:
 	float     gain;
 
 	float *   buffer;
-	framecnt_t buffer_size;
+	samplecnt_t buffer_size;
 };
 
 

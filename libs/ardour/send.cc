@@ -26,6 +26,7 @@
 #include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/debug.h"
+#include "ardour/delayline.h"
 #include "ardour/gain_control.h"
 #include "ardour/io.h"
 #include "ardour/meter.h"
@@ -44,6 +45,8 @@ class Pannable;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
+
+PBD::Signal0<void> Send::ChangedLatency;
 
 string
 Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_bitslot)
@@ -95,7 +98,8 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 	_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
 	_meter.reset (new PeakMeter (_session, name()));
 
-	_delayline.reset (new DelayLine (_session, name()));
+	_send_delay.reset (new DelayLine (_session, "Send-" + name()));
+	_thru_delay.reset (new DelayLine (_session, "Thru-" + name()));
 
 	if (panner_shell()) {
 		panner_shell()->Changed.connect_same_thread (*this, boost::bind (&Send::panshell_changed, this));
@@ -107,7 +111,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 Send::~Send ()
 {
-        _session.unmark_send_id (_bitslot);
+	_session.unmark_send_id (_bitslot);
 }
 
 void
@@ -129,37 +133,84 @@ Send::deactivate ()
 	Processor::deactivate ();
 }
 
-void
-Send::set_delay_in(framecnt_t delay)
+samplecnt_t
+Send::signal_latency () const
 {
-	if (!_delayline) return;
+	if (!_pending_active) {
+		 return 0;
+	}
+	if (_user_latency) {
+		return _user_latency;
+	}
+	if (_delay_out > _delay_in) {
+		return _delay_out - _delay_in;
+	}
+	return 0;
+}
+
+void
+Send::update_delaylines ()
+{
+	if (_role == Listen) {
+		/* Don't align monitor-listen (just yet).
+		 * They're present on each route, may change positions
+		 * and could potentially signficiantly increase worst-case
+		 * Latency: In PFL mode all tracks/busses would additionally be
+		 * aligned at PFL position.
+		 *
+		 * We should only align active monitor-sends when at least one is active.
+		 */
+		return;
+	}
+
+	bool changed;
+	if (_delay_out > _delay_in) {
+		changed = _thru_delay->set_delay(_delay_out - _delay_in);
+		_send_delay->set_delay(0);
+	} else {
+		changed = _thru_delay->set_delay(0);
+		_send_delay->set_delay(_delay_in - _delay_out);
+	}
+
+	if (changed) {
+		// TODO -- ideally postpone for effective no-op changes
+		// (in case both  _delay_out and _delay_in are changed by the
+		// same amount in a single latency-update cycle).
+		ChangedLatency (); /* EMIT SIGNAL */
+	}
+}
+
+void
+Send::set_delay_in (samplecnt_t delay)
+{
 	if (_delay_in == delay) {
 		return;
 	}
 	_delay_in = delay;
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
-			string_compose ("Send::set_delay_in(%1) + %2 = %3\n",
-				delay, _delay_out, _delay_out + _delay_in));
-	_delayline.get()->set_delay(_delay_out + _delay_in);
+			string_compose ("Send::set_delay_in %1: (%2) - %3 = %4\n",
+				name (), _delay_in, _delay_out, _delay_in - _delay_out));
+
+	update_delaylines ();
 }
 
 void
-Send::set_delay_out(framecnt_t delay)
+Send::set_delay_out (samplecnt_t delay)
 {
-	if (!_delayline) return;
 	if (_delay_out == delay) {
 		return;
 	}
 	_delay_out = delay;
 	DEBUG_TRACE (DEBUG::LatencyCompensation,
-			string_compose ("Send::set_delay_out(%1) + %2 = %3\n",
-				delay, _delay_in, _delay_out + _delay_in));
-	_delayline.get()->set_delay(_delay_out + _delay_in);
+			string_compose ("Send::set_delay_out %1: %2 - (%3) = %4\n",
+				name (), _delay_in, _delay_out, _delay_in - _delay_out));
+
+	update_delaylines ();
 }
 
 void
-Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool)
+Send::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (_output->n_ports() == ChanCount::ZERO) {
 		_meter->reset ();
@@ -184,14 +235,14 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double
 	/* gain control */
 
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_frame, end_frame, nframes);
-	_amp->run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	_amp->setup_gain_automation (start_sample, end_sample, nframes);
+	_amp->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
-	_delayline->run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	_send_delay->run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* deliver to outputs */
 
-	Delivery::run (sendbufs, start_frame, end_frame, speed, nframes, true);
+	Delivery::run (sendbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
 
@@ -199,35 +250,29 @@ Send::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double
 		if (_amp->gain_control()->get_value() == 0) {
 			_meter->reset();
 		} else {
-			_meter->run (*_output_buffers, start_frame, end_frame, speed, nframes, true);
+			_meter->run (*_output_buffers, start_sample, end_sample, speed, nframes, true);
 		}
 	}
+
+	_thru_delay->run (bufs, start_sample, end_sample, speed, nframes, true);
 
 	/* _active was set to _pending_active by Delivery::run() */
 }
 
 XMLNode&
-Send::get_state(void)
+Send::state ()
 {
-	return state (true);
-}
+	XMLNode& node = Delivery::state ();
 
-XMLNode&
-Send::state (bool full)
-{
-	XMLNode& node = Delivery::state(full);
-	char buf[32];
-
-	node.add_property ("type", "send");
-	snprintf (buf, sizeof (buf), "%" PRIu32, _bitslot);
+	node.set_property ("type", "send");
 
 	if (_role != Listen) {
-		node.add_property ("bitslot", buf);
+		node.set_property ("bitslot", _bitslot);
 	}
 
-	node.add_property("selfdestruct", _remove_on_disconnect ? "yes" : "no");
+	node.set_property ("selfdestruct", _remove_on_disconnect);
 
-	node.add_child_nocopy (_amp->state (full));
+	node.add_child_nocopy (_amp->get_state ());
 
 	return node;
 }
@@ -261,11 +306,11 @@ Send::set_state (const XMLNode& node, int version)
 		} else {
 			if (_role == Delivery::Aux) {
 				_session.unmark_aux_send_id (_bitslot);
-				sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_aux_send_id (_bitslot);
 			} else if (_role == Delivery::Send) {
 				_session.unmark_send_id (_bitslot);
-				sscanf (prop->value().c_str(), "%" PRIu32, &_bitslot);
+				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_send_id (_bitslot);
 			} else {
 				// bitslot doesn't matter but make it zero anyway
@@ -274,9 +319,7 @@ Send::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if ((prop = node.property (X_("selfdestruct"))) != 0) {
-		_remove_on_disconnect = string_is_affirmative (prop->value());
-	}
+	node.get_property (X_("selfdestruct"), _remove_on_disconnect);
 
 	XMLNodeList nlist = node.children();
 	for (XMLNodeIterator i = nlist.begin(); i != nlist.end(); ++i) {
@@ -284,6 +327,9 @@ Send::set_state (const XMLNode& node, int version)
 			_amp->set_state (**i, version);
 		}
 	}
+
+	_send_delay->set_name ("Send-" + name());
+	_thru_delay->set_name ("Thru-" + name());
 
 	return 0;
 }
@@ -350,8 +396,11 @@ Send::configure_io (ChanCount in, ChanCount out)
 		return false;
 	}
 
-	if (_delayline && !_delayline->configure_io(in, out)) {
-		cerr << "send delayline config failed\n";
+	if (!_thru_delay->configure_io (in, out)) {
+		return false;
+	}
+
+	if (!_send_delay->configure_io (ChanCount (DataType::AUDIO, pan_outs()), ChanCount (DataType::AUDIO, pan_outs()))) {
 		return false;
 	}
 
@@ -401,17 +450,11 @@ Send::display_to_user () const
 	/* we ignore Deliver::_display_to_user */
 
 	if (_role == Listen) {
-                /* don't make the monitor/control/listen send visible */
+		/* don't make the monitor/control/listen send visible */
 		return false;
 	}
 
 	return true;
-}
-
-string
-Send::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	return _amp->value_as_string (ac);
 }
 
 void

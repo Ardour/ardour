@@ -24,7 +24,6 @@
 
 #include "canvas/xfade_curve.h"
 #include "canvas/interpolated_curve.h"
-#include "canvas/utils.h"
 
 using namespace ArdourCanvas;
 using std::min;
@@ -250,10 +249,10 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	Cairo::Path *path_in = get_path(draw, context, _in);
 	Cairo::Path *path_out = get_path(draw, context, _out);
 
-	Color outline_shaded = _outline_color;
+	Gtkmm2ext::Color outline_shaded = _outline_color;
 	outline_shaded = 0.5 * (outline_shaded & 0xff) + (outline_shaded & ~0xff);
 
-	Color fill_shaded = _fill_color;
+	Gtkmm2ext::Color fill_shaded = _fill_color;
 	fill_shaded = 0.5 * (fill_shaded & 0xff) + (fill_shaded & ~0xff);
 
 #define IS_START (_xfadeposition == Start)
@@ -262,7 +261,7 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	context->begin_new_path ();
 	context->append_path (IS_START ? *path_in : *path_out);
 	close_path(draw, context, IS_START ?_in : _out, false);
-	set_source_rgba (context, _fill_color);
+	Gtkmm2ext::set_source_rgba (context, _fill_color);
 	context->fill ();
 
 	if (show_background_fade) {
@@ -276,7 +275,7 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 		context->begin_new_path ();
 		context->append_path (IS_START ? *path_out: *path_in);
 		close_path(draw, context, IS_START ? _out : _in, true);
-		set_source_rgba (context, fill_shaded);
+		Gtkmm2ext::set_source_rgba (context, fill_shaded);
 		context->set_fill_rule (Cairo::FILL_RULE_WINDING);
 		context->fill ();
 		context->restore ();
@@ -285,7 +284,7 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 	/* draw lines over fills */
 	/* fade in line */
 	if (IS_START || show_background_fade) {
-		set_source_rgba (context, IS_START ? _outline_color : outline_shaded);
+		Gtkmm2ext::set_source_rgba (context, IS_START ? _outline_color : outline_shaded);
 		context->set_line_width (IS_START ? 1.0 : .5);
 
 		context->begin_new_path ();
@@ -295,7 +294,7 @@ XFadeCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) co
 
 	/* fade out line */
 	if (!IS_START || show_background_fade) {
-		set_source_rgba (context, IS_START ? outline_shaded :_outline_color);
+		Gtkmm2ext::set_source_rgba (context, IS_START ? outline_shaded :_outline_color);
 		context->set_line_width (IS_START ? .5 : 1.0);
 
 		context->begin_new_path ();

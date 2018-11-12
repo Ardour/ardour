@@ -28,29 +28,30 @@ namespace ARDOUR {
 
 class LIBARDOUR_API CapturingProcessor : public Processor
 {
-  public:
-	CapturingProcessor (Session & session, framecnt_t latency);
+public:
+	CapturingProcessor (Session & session, samplecnt_t latency);
 	~CapturingProcessor();
 
-  public: // main interface
+public: // main interface
 	BufferSet const & get_capture_buffers() const { return capture_buffers; }
 
-  public: // Processor overrides
+public: // Processor overrides
 	bool display_to_user() const { return false; }
 	int set_block_size (pframes_t nframes);
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool result_required);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
-	virtual XMLNode& state (bool);
 
-  private:
+protected:
+	XMLNode& state ();
 
+private:
 	void realloc_buffers();
 
-	framecnt_t block_size;
+	samplecnt_t block_size;
 	BufferSet capture_buffers;
 	FixedDelay _delaybuffers;
-	framecnt_t _latency;
+	samplecnt_t _latency;
 };
 
 } // namespace ARDOUR

@@ -40,6 +40,7 @@
 namespace ARDOUR {
 
 class AutomationList;
+class DoubleBeatsSamplesConverter;
 
 /** A SharedStatefulProperty for AutomationLists */
 class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
@@ -65,9 +66,9 @@ private:
  * It includes session-specifics (such as automation state), control logic (e.g. touch, signals)
  * and acts as proxy to the underlying ControlList which holds the actual data.
  */
-class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Evoral::ControlList
+class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::StatefulDestructible
 {
-  public:
+public:
 	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc);
 	AutomationList (const Evoral::Parameter& id);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
@@ -81,20 +82,17 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	AutomationList& operator= (const AutomationList&);
 
 	void thaw ();
+	bool paste (const ControlList&, double, DoubleBeatsSamplesConverter const&);
 
 	void set_automation_state (AutoState);
-	AutoState automation_state() const { return _state; }
+	AutoState automation_state() const;
 	PBD::Signal1<void, AutoState> automation_state_changed;
 
-	void set_automation_style (AutoStyle m);
-	AutoStyle automation_style() const { return _style; }
-	PBD::Signal0<void> automation_style_changed;
-
 	bool automation_playback() const {
-		return (_state & Play) || ((_state & Touch) && !touching());
+		return (_state & Play) || ((_state & (Touch | Latch)) && !touching());
 	}
 	bool automation_write () const {
-		return ((_state & Write) || ((_state & Touch) && touching()));
+		return ((_state & Write) || ((_state & (Touch | Latch)) && touching()));
 	}
 
 	PBD::Signal0<void> StateChanged;
@@ -105,15 +103,13 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 	void write_pass_finished (double when, double thinning_factor=0.0);
 
 	void start_touch (double when);
-	void stop_touch (bool mark, double when);
+	void stop_touch (double when);
 	bool touching() const { return g_atomic_int_get (const_cast<gint*>(&_touching)); }
 	bool writing() const { return _state == Write; }
-	bool touch_enabled() const { return _state == Touch; }
+	bool touch_enabled() const { return _state & (Touch | Latch); }
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode &, int version);
-	XMLNode& state (bool full);
-	XMLNode& serialize_events ();
 
 	Command* memento_command (XMLNode* before, XMLNode* after);
 
@@ -121,15 +117,23 @@ class LIBARDOUR_API AutomationList : public PBD::StatefulDestructible, public Ev
 
 	XMLNode* before () { XMLNode* rv = _before; _before = 0; return rv; }
 	void clear_history ();
-  private:
+	void snapshot_history (bool need_lock);
+
+	ControlList::InterpolationStyle default_interpolation () const;
+
+private:
 	void create_curve_if_necessary ();
 	int deserialize_events (const XMLNode&);
+
+	XMLNode& state (bool save_auto_state, bool need_lock);
+	XMLNode& serialize_events (bool need_lock);
 
 	void maybe_signal_changed ();
 
 	AutoState    _state;
-	AutoStyle    _style;
 	gint         _touching;
+
+	PBD::ScopedConnection _writepass_connection;
 
 	bool operator== (const AutomationList&) const { /* not called */ abort(); return false; }
 	XMLNode* _before; //used for undo of touch start/stop pairs.

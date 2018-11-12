@@ -29,12 +29,14 @@
 #include "pbd/replace_all.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/control_protocol_manager.h"
-#include "ardour/diskstream.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session_metadata.h"
+#include "ardour/types_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -172,7 +174,6 @@ XMLNode&
 RCConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -193,7 +194,6 @@ XMLNode&
 RCConfiguration::get_variables ()
 {
 	XMLNode* node;
-	LocaleGuard lg;
 
 	node = new XMLNode ("Config");
 
@@ -220,7 +220,6 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 	XMLNodeList nlist = root.children();
 	XMLNodeConstIterator niter;
 	XMLNode *node;
-	LocaleGuard lg;
 
 	Stateful::save_extra_xml (root);
 
@@ -237,8 +236,8 @@ RCConfiguration::set_state (const XMLNode& root, int version)
 		}
 	}
 
-	Diskstream::set_disk_read_chunk_frames (minimum_disk_read_bytes.get() / sizeof (Sample));
-	Diskstream::set_disk_write_chunk_frames (minimum_disk_write_bytes.get() / sizeof (Sample));
+	DiskReader::set_chunk_samples (minimum_disk_read_bytes.get() / sizeof (Sample));
+	DiskWriter::set_chunk_samples (minimum_disk_write_bytes.get() / sizeof (Sample));
 
 	return 0;
 }

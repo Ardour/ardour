@@ -20,7 +20,7 @@
 #ifndef __midipp_mmc_h_h__
 #define __midipp_mmc_h_h__
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "pbd/signals.h"
 #include "pbd/ringbuffer.h"
@@ -178,7 +178,7 @@ class LIBMIDIPP_API MachineControl
 
 	/* The second argument points to a byte array containing
 	   the locate target value in MMC Standard Time Code
-	   format (5 bytes, roughly: hrs/mins/secs/frames/subframes)
+	   format (5 bytes, roughly: hrs/mins/secs/samples/subframes)
 	*/
 
 	PBD::Signal2<void,MachineControl &, const byte *> Locate;

@@ -730,16 +730,16 @@ Bindings::save (XMLNode& root)
 		}
 
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("key"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("key"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		presses->add_child_nocopy (*child);
 	}
 
 	for (MouseButtonBindingMap::iterator k = button_press_bindings.begin(); k != button_press_bindings.end(); ++k) {
 		XMLNode* child;
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("button"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("button"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		presses->add_child_nocopy (*child);
 	}
 
@@ -753,16 +753,16 @@ Bindings::save (XMLNode& root)
 		}
 
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("key"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("key"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		releases->add_child_nocopy (*child);
 	}
 
 	for (MouseButtonBindingMap::iterator k = button_release_bindings.begin(); k != button_release_bindings.end(); ++k) {
 		XMLNode* child;
 		child = new XMLNode (X_("Binding"));
-		child->add_property (X_("button"), k->first.name());
-		child->add_property (X_("action"), k->second.action_name);
+		child->set_property (X_("button"), k->first.name());
+		child->set_property (X_("action"), k->second.action_name);
 		releases->add_child_nocopy (*child);
 	}
 
@@ -781,12 +781,13 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "<html>\n<head>\n<title>";
 	ostr << PROGRAM_NAME;
 	ostr << "</title>\n";
+	ostr << "<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\" />\n";
 
 	ostr << "</head>\n<body>\n";
 
 	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
 	ostr << "<tr>\n\n";
-	
+
 	/* first column: separate by group */
 	ostr << "<td>\n\n";
 	for (list<Bindings*>::const_iterator b = bindings.begin(); b != bindings.end(); ++b) {
@@ -802,6 +803,41 @@ Bindings::save_all_bindings_as_html (ostream& ostr)
 	ostr << "</td>\n\n";
 
 
+	ostr << "</tr>\n\n";
+	ostr << "</tbody></table>\n\n";
+
+	ostr << "</br></br>\n\n";
+	ostr << "<table border=\"2\" cellpadding=\"6\"><tbody>\n\n";
+	ostr << "<tr>\n\n";
+	ostr << "<td>\n\n";
+	ostr << "<h2><u> Partial List of Available Actions { => with current shortcut, where applicable } </u></h2>\n\n";
+	{
+		vector<string> paths;
+		vector<string> labels;
+		vector<string> tooltips;
+		vector<string> keys;
+		vector<Glib::RefPtr<Gtk::Action> > actions;
+
+		Gtkmm2ext::ActionMap::get_all_actions (paths, labels, tooltips, keys, actions);
+
+		vector<string>::iterator k;
+		vector<string>::iterator p;
+		vector<string>::iterator l;
+
+		for (p = paths.begin(), k = keys.begin(), l = labels.begin(); p != paths.end(); ++k, ++p, ++l) {
+
+			string print_path = *p;
+			/* strip <Actions>/ from the start */
+			print_path = print_path.substr (10);
+
+			if ((*k).empty()) {
+				ostr << print_path  << " ( " << *l << " ) "  << "</br>" << endl;
+			} else {
+				ostr << print_path << " ( " << *l << " ) " << " => " << *k << "</br>" << endl;
+			}
+		}
+	}
+	ostr << "</td>\n\n";
 	ostr << "</tr>\n\n";
 	ostr << "</tbody></table>\n\n";
 
@@ -826,7 +862,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 		GroupMap group_map;
 
 		for (KeybindingMap::const_iterator k = press_bindings.begin(); k != press_bindings.end(); ++k) {
-			
+
 			if (k->first.name().empty()) {
 				continue;
 			}
@@ -848,13 +884,13 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 			}
 		}
 
-		
+
 		for (GroupMap::const_iterator gm = group_map.begin(); gm != group_map.end(); ++gm) {
 
 			if (categorize) {
 				ostr << "<h3>" << gm->first << "</h3>\n";
 			}
-			
+
 			for (vector<KeybindingMap::const_iterator>::const_iterator k = gm->second.begin(); k != gm->second.end(); ++k) {
 
 				if ((*k)->first.name().empty()) {
@@ -903,7 +939,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 						key_name.replace (pos, strlen (targets[n]), replacements[n]);
 					}
 				}
-				
+
 				key_name.append(" ");
 
 				while (key_name.length()<28)
@@ -915,7 +951,7 @@ Bindings::save_as_html (ostream& ostr, bool categorize) const
 			ostr << "\n\n";
 
 		}
-		
+
 		ostr << "\n";
 	}
 }
@@ -1153,6 +1189,13 @@ ActionMap::find_action (const string& name)
 RefPtr<ActionGroup>
 ActionMap::create_action_group (const string& name)
 {
+	Glib::ListHandle<Glib::RefPtr<ActionGroup> > agl =  ActionManager::ui_manager->get_action_groups ();
+	for (Glib::ListHandle<Glib::RefPtr<ActionGroup> >::iterator i = agl.begin (); i != agl.end (); ++i) {
+		if ((*i)->get_name () == name) {
+			return *i;
+		}
+	}
+
 	RefPtr<ActionGroup> g = ActionGroup::create (name);
 
 	/* this is one of the places where our own Action management code

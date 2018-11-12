@@ -19,13 +19,13 @@ class InterleaverTest : public CppUnit::TestFixture
 	void setUp()
 	{
 		channels = 3;
-		frames = 128;
-		random_data = TestUtils::init_random_data (frames, 1.0);
+		samples = 128;
+		random_data = TestUtils::init_random_data (samples, 1.0);
 
 		interleaver.reset (new Interleaver<float>());
 		sink.reset (new VectorSink<float>());
 
-		interleaver->init (channels, frames);
+		interleaver->init (channels, samples);
 	}
 
 	void tearDown()
@@ -36,59 +36,59 @@ class InterleaverTest : public CppUnit::TestFixture
 	void testUninitialized()
 	{
 		interleaver.reset (new Interleaver<float>());
-		ProcessContext<float> c (random_data, frames, 1);
+		ProcessContext<float> c (random_data, samples, 1);
 		CPPUNIT_ASSERT_THROW (interleaver->input(0)->process (c), Exception);
 	}
 
 	void testInvalidInputIndex()
 	{
-		ProcessContext<float> c (random_data, frames, 1);
+		ProcessContext<float> c (random_data, samples, 1);
 		CPPUNIT_ASSERT_THROW (interleaver->input (3)->process (c), Exception);
 	}
 
 	void testInvalidInputSize()
 	{
-		ProcessContext<float> c (random_data, frames + 1, 1);
+		ProcessContext<float> c (random_data, samples + 1, 1);
 		CPPUNIT_ASSERT_THROW (interleaver->input (0)->process (c), Exception);
 
-		interleaver->input (0)->process (c.beginning (frames));
-		interleaver->input (1)->process (c.beginning (frames));
-		CPPUNIT_ASSERT_THROW (interleaver->input (2)->process (c.beginning (frames - 1)), Exception);
+		interleaver->input (0)->process (c.beginning (samples));
+		interleaver->input (1)->process (c.beginning (samples));
+		CPPUNIT_ASSERT_THROW (interleaver->input (2)->process (c.beginning (samples - 1)), Exception);
 
-		interleaver->input (0)->process (c.beginning (frames - 1));
-		interleaver->input (1)->process (c.beginning (frames - 1));
-		CPPUNIT_ASSERT_THROW (interleaver->input (2)->process (c.beginning (frames)), Exception);
+		interleaver->input (0)->process (c.beginning (samples - 1));
+		interleaver->input (1)->process (c.beginning (samples - 1));
+		CPPUNIT_ASSERT_THROW (interleaver->input (2)->process (c.beginning (samples)), Exception);
 	}
 
 	void testOutputSize()
 	{
 		interleaver->add_output (sink);
 
-		ProcessContext<float> c (random_data, frames, 1);
+		ProcessContext<float> c (random_data, samples, 1);
 		interleaver->input (0)->process (c);
 		interleaver->input (1)->process (c);
 		interleaver->input (2)->process (c);
 
-		framecnt_t expected_frames = frames * channels;
-		framecnt_t generated_frames = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		samplecnt_t expected_samples = samples * channels;
+		samplecnt_t generated_samples = sink->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 
-		framecnt_t less_frames = frames / 2;
-		interleaver->input (0)->process (c.beginning (less_frames));
-		interleaver->input (1)->process (c.beginning (less_frames));
-		interleaver->input (2)->process (c.beginning (less_frames));
+		samplecnt_t less_samples = samples / 2;
+		interleaver->input (0)->process (c.beginning (less_samples));
+		interleaver->input (1)->process (c.beginning (less_samples));
+		interleaver->input (2)->process (c.beginning (less_samples));
 
-		expected_frames = less_frames * channels;
-		generated_frames = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		expected_samples = less_samples * channels;
+		generated_samples = sink->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 	}
 
 	void testZeroInput()
 	{
 		interleaver->add_output (sink);
 
-		// input zero frames to all inputs
-		ProcessContext<float> c (random_data, frames, 1);
+		// input zero samples to all inputs
+		ProcessContext<float> c (random_data, samples, 1);
 		interleaver->input (0)->process (c.beginning (0));
 		interleaver->input (1)->process (c.beginning (0));
 		interleaver->input (2)->process (c.beginning (0));
@@ -100,15 +100,15 @@ class InterleaverTest : public CppUnit::TestFixture
 		interleaver->input (1)->process (c);
 		interleaver->input (2)->process (c);
 
-		framecnt_t expected_frames = frames * channels;
-		framecnt_t generated_frames = sink->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		samplecnt_t expected_samples = samples * channels;
+		samplecnt_t generated_samples = sink->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 	}
 
 	void testChannelSync()
 	{
 		interleaver->add_output (sink);
-		ProcessContext<float> c (random_data, frames, 1);
+		ProcessContext<float> c (random_data, samples, 1);
 		interleaver->input (0)->process (c);
 		CPPUNIT_ASSERT_THROW (interleaver->input (0)->process (c), Exception);
 	}
@@ -119,9 +119,9 @@ class InterleaverTest : public CppUnit::TestFixture
 
 	boost::shared_ptr<VectorSink<float> > sink;
 
-	framecnt_t channels;
+	samplecnt_t channels;
 	float * random_data;
-	framecnt_t frames;
+	samplecnt_t samples;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (InterleaverTest);

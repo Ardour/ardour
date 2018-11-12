@@ -28,7 +28,6 @@ namespace ARDOUR
 {
 
 class InterThreadInfo;
-class MidiDiskstream;
 class MidiPlaylist;
 class RouteGroup;
 class SMFSource;
@@ -42,36 +41,26 @@ public:
 
 	int init ();
 
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler);
-
-	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
-	void non_realtime_locate (framepos_t);
-
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream>);
+	void non_realtime_locate (samplepos_t);
 
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
-
-	DataType data_type () const {
-		return DataType::MIDI;
-	}
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
 	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t                   start,
-	                                        framepos_t                   end,
+	boost::shared_ptr<Region> bounce_range (samplepos_t                   start,
+	                                        samplepos_t                   end,
 	                                        InterThreadInfo&             iti,
 	                                        boost::shared_ptr<Processor> endpoint,
 	                                        bool                         include_endpoint);
 
 	int export_stuff (BufferSet&                   bufs,
-	                  framepos_t                   start_frame,
-	                  framecnt_t                   end_frame,
+	                  samplepos_t                   start_sample,
+	                  samplecnt_t                   end_sample,
 	                  boost::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
 	                  bool                         for_export,
@@ -108,7 +97,7 @@ public:
 
 	bool step_editing() const { return _step_editing; }
 	void set_step_editing (bool yn);
-	MidiRingBuffer<framepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
+	MidiRingBuffer<samplepos_t>& step_edit_ring_buffer() { return _step_edit_ring_buffer; }
 
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
@@ -128,53 +117,56 @@ public:
 	MidiChannelFilter& playback_filter() { return _playback_filter; }
 	MidiChannelFilter& capture_filter()  { return _capture_filter; }
 
+	virtual void filter_input (BufferSet& bufs);
+
 	boost::shared_ptr<MidiPlaylist> midi_playlist ();
 
 	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
 	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	MonitorState monitoring_state () const;
+	MonitorState get_auto_monitoring_state () const;
+
+	MidiBuffer const& immediate_event_buffer () const { return _immediate_event_buffer; }
 
 	void set_input_active (bool);
 	bool input_active () const;
 	PBD::Signal0<void> InputActiveChanged;
 
 protected:
-	XMLNode& state (bool full);
+
+	XMLNode& state (bool save_template);
 
 	void act_on_mute ();
 	void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
+	void snapshot_out_of_band_data (samplecnt_t nframes);
+	void write_out_of_band_data (BufferSet& bufs, samplecnt_t /* nframes */) const;
+
+
 private:
-	MidiRingBuffer<framepos_t> _immediate_events;
-	MidiRingBuffer<framepos_t> _step_edit_ring_buffer;
-	NoteMode                   _note_mode;
-	bool                       _step_editing;
-	bool                       _input_active;
-	MidiChannelFilter          _playback_filter;
-	MidiChannelFilter          _capture_filter;
-
-	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-
-	boost::shared_ptr<MidiDiskstream> midi_diskstream () const;
-
-	void write_out_of_band_data (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, framecnt_t nframes);
+	MidiRingBuffer<samplepos_t> _immediate_events;
+	MidiBuffer                  _immediate_event_buffer;
+	MidiRingBuffer<samplepos_t> _step_edit_ring_buffer;
+	NoteMode                    _note_mode;
+	bool                        _step_editing;
+	bool                        _input_active;
+	MidiChannelFilter           _playback_filter;
+	MidiChannelFilter           _capture_filter;
 
 	void set_state_part_two ();
 	void set_state_part_three ();
 
-
-	int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, bool state_changing);
-	void push_midi_input_to_step_edit_ringbuffer (framecnt_t nframes);
-
-	void diskstream_data_recorded (boost::weak_ptr<MidiSource>);
-	PBD::ScopedConnection _diskstream_data_recorded_connection;
+	int no_roll_unlocked (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool state_changing);
+	void push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes);
 
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
 
+	void data_recorded (boost::weak_ptr<MidiSource> src);
+
 	/** Update automation controls to reflect any changes in buffers. */
-	void update_controls (const BufferSet& bufs);
+	void update_controls (BufferSet const& bufs);
 	void restore_controls ();
 };
 

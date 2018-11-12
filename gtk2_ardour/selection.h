@@ -65,7 +65,7 @@ namespace Evoral {
 
 class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	enum SelectionType {
 		Object = 0x1,
 		Range = 0x2
@@ -90,10 +90,11 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	/** only used when this class is used as a cut buffer */
 	MidiNoteSelection    midi_notes;
 
-	Selection (PublicEditor const * e);
+	Selection (PublicEditor const * e, bool manage_libardour_selection);
 
 	// Selection& operator= (const Selection& other);
 
+	sigc::signal<void> TracksChanged;
 	sigc::signal<void> RegionsChanged;
 	sigc::signal<void> TimeChanged;
 	sigc::signal<void> LinesChanged;
@@ -113,10 +114,10 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void dump_region_layers();
 
-	bool selected (TimeAxisView*);
-	bool selected (RegionView*);
-	bool selected (ArdourMarker*);
-	bool selected (ControlPoint*);
+	bool selected (TimeAxisView*) const;
+	bool selected (RegionView*) const;
+	bool selected (ArdourMarker*) const;
+	bool selected (ControlPoint*) const;
 
 	void set (std::list<Selectable*> const &);
 	void add (std::list<Selectable*> const &);
@@ -128,8 +129,8 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void set (RegionView*, bool also_clear_tracks = true);
 	void set (MidiRegionView*);
 	void set (std::vector<RegionView*>&);
-	long set (framepos_t, framepos_t);
-	void set_preserving_all_ranges (framepos_t, framepos_t);
+	long set (samplepos_t, samplepos_t);
+	void set_preserving_all_ranges (samplepos_t, samplepos_t);
 	void set (boost::shared_ptr<Evoral::ControlList>);
 	void set (boost::shared_ptr<ARDOUR::Playlist>);
 	void set (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -144,7 +145,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void toggle (MidiRegionView*);
 	void toggle (MidiCutBuffer*);
 	void toggle (std::vector<RegionView*>&);
-	long toggle (framepos_t, framepos_t);
+	long toggle (samplepos_t, samplepos_t);
 	void toggle (ARDOUR::AutomationList*);
 	void toggle (boost::shared_ptr<ARDOUR::Playlist>);
 	void toggle (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -159,7 +160,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void add (MidiRegionView*);
 	void add (MidiCutBuffer*);
 	void add (std::vector<RegionView*>&);
-	long add (framepos_t, framepos_t);
+	long add (samplepos_t, samplepos_t);
 	void add (boost::shared_ptr<Evoral::ControlList>);
 	void add (boost::shared_ptr<ARDOUR::Playlist>);
 	void add (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -176,7 +177,7 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 	void remove (MidiRegionView*);
 	void remove (MidiCutBuffer*);
 	void remove (uint32_t selection_id);
-	void remove (framepos_t, framepos_t);
+	void remove (samplepos_t, samplepos_t);
 	void remove (boost::shared_ptr<ARDOUR::AutomationList>);
 	void remove (boost::shared_ptr<ARDOUR::Playlist>);
 	void remove (const std::list<boost::shared_ptr<ARDOUR::Playlist> >&);
@@ -186,19 +187,19 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	void remove_regions (TimeAxisView *);
 
-        void move_time (framecnt_t);
+	void move_time (samplecnt_t);
 
-	void replace (uint32_t time_index, framepos_t start, framepos_t end);
+	void replace (uint32_t time_index, samplepos_t start, samplepos_t end);
 
-/*
- * A note about items in an editing Selection:
- * At a high level, selections can include Tracks, Objects, or Time Ranges
- * Range and Object selections are mutually exclusive.
- * Selecting a Range will deselect all Objects, and vice versa.
- * This is done to avoid confusion over what will happen in an operation such as Delete
- * Tracks are somewhat orthogonal b/c editing operations don't apply to tracks.
- * The Track selection isn't affected when ranges or objects are added.
- */
+	/*
+	 * A note about items in an editing Selection:
+	 * At a high level, selections can include Tracks, Objects, or Time Ranges
+	 * Range and Object selections are mutually exclusive.
+	 * Selecting a Range will deselect all Objects, and vice versa.
+	 * This is done to avoid confusion over what will happen in an operation such as Delete
+	 * Tracks are somewhat orthogonal b/c editing operations don't apply to tracks.
+	 * The Track selection isn't affected when ranges or objects are added.
+	 */
 
 	void clear_all() { clear_time(); clear_tracks(); clear_objects(); }
 
@@ -225,9 +226,14 @@ class Selection : public sigc::trackable, public PBD::ScopedConnectionList
 
 	std::list<std::pair<PBD::ID const, std::list<Evoral::event_id_t> > > pending_midi_note_selection;
 
-  private:
+	void core_selection_changed (PBD::PropertyChange const & pc);
+
+private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;
+	bool     manage_libardour_selection;
+
+	TrackViewList add_grouped_tracks (TrackViewList const & t);
 };
 
 bool operator==(const Selection& a, const Selection& b);

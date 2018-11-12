@@ -507,19 +507,19 @@ SimilarityPlugin::initialise(size_t channels, size_t stepSize, size_t blockSize)
 void
 SimilarityPlugin::reset()
 {
-    for (int i = 0; i < m_values.size(); ++i) {
+    for (int i = 0; i < int(m_values.size()); ++i) {
         m_values[i].clear();
     }
 
-    for (int i = 0; i < m_rhythmValues.size(); ++i) {
+    for (int i = 0; i < int(m_rhythmValues.size()); ++i) {
         m_rhythmValues[i].clear();
     }
 
-    for (int i = 0; i < m_lastNonEmptyFrame.size(); ++i) {
+    for (int i = 0; i < int(m_lastNonEmptyFrame.size()); ++i) {
         m_lastNonEmptyFrame[i] = -1;
     }
 
-    for (int i = 0; i < m_emptyFrameCount.size(); ++i) {
+    for (int i = 0; i < int(m_emptyFrameCount.size()); ++i) {
         m_emptyFrameCount[i] = 0;
     }
 
@@ -544,7 +544,7 @@ SimilarityPlugin::process(const float *const *inputBuffers, Vamp::RealTime /* ti
 
     bool someRhythmFrameNeeded = false;
 
-    for (size_t c = 0; c < m_channels; ++c) {
+    for (int c = 0; c < m_channels; ++c) {
 
         bool empty = true;
 
@@ -557,7 +557,7 @@ SimilarityPlugin::process(const float *const *inputBuffers, Vamp::RealTime /* ti
         if (empty) {
             if (needRhythm() && ((m_frameNo % 2) == 0)) {
                 for (int i = 0; i < m_fftSize / m_rhythmClipFrameSize; ++i) {
-                    if (m_rhythmValues[c].size() < m_rhythmClipFrames) {
+                    if (int(m_rhythmValues[c].size()) < m_rhythmClipFrames) {
                         FeatureColumn mf(m_rhythmColumnSize);
                         for (int i = 0; i < m_rhythmColumnSize; ++i) {
                             mf[i] = 0.0;
@@ -609,7 +609,7 @@ SimilarityPlugin::process(const float *const *inputBuffers, Vamp::RealTime /* ti
 
                 bool needRhythmFrame = true;
 
-                if (m_rhythmValues[c].size() >= m_rhythmClipFrames) {
+                if (int(m_rhythmValues[c].size()) >= m_rhythmClipFrames) {
 
                     needRhythmFrame = false;
 
@@ -681,7 +681,9 @@ SimilarityPlugin::calculateTimbral(FeatureSet &returnFeatures)
 
             int sz = m_lastNonEmptyFrame[i] - m_emptyFrameCount[i];
             if (sz < 0) sz = 0;
-            if (sz >= m_values[i].size()) sz = m_values[i].size()-1;
+            if (sz >= int(m_values[i].size())) {
+                sz = int(m_values[i].size())-1;
+            }
 
             count = 0;
             for (int k = 0; k < sz; ++k) {
@@ -803,7 +805,7 @@ SimilarityPlugin::calculateRhythmic(FeatureSet &returnFeatures)
 
     FeatureMatrixSet bsinput(m_channels);
     for (int i = 0; i < m_channels; ++i) {
-        for (int j = 0; j < m_rhythmValues[i].size(); ++j) {
+        for (int j = 0; j < int(m_rhythmValues[i].size()); ++j) {
             bsinput[i].push_back(m_rhythmValues[i][j]);
         }
     }
@@ -834,7 +836,7 @@ SimilarityPlugin::calculateRhythmic(FeatureSet &returnFeatures)
         feature.label = labelBuffer;
 
         feature.values.clear();
-        for (int j = 0; j < bs[i].size(); ++j) {
+        for (int j = 0; j < int(bs[i].size()); ++j) {
             feature.values.push_back(bs[i][j]);
         }
 

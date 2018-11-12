@@ -25,7 +25,6 @@
 #include "canvas/ruler.h"
 #include "canvas/types.h"
 #include "canvas/debug.h"
-#include "canvas/utils.h"
 #include "canvas/canvas.h"
 
 using namespace std;
@@ -199,12 +198,12 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 		cr->set_line_width (1.0);
 
-		set_source_rgba (cr, _divider_color_top);
+		Gtkmm2ext::set_source_rgba (cr, _divider_color_top);
 		cr->move_to (self.x0, self.y0 + _divide_height-1.0+0.5);
 		cr->line_to (self.x1, self.y0 + _divide_height-1.0+0.5);
 		cr->stroke ();
 
-		set_source_rgba (cr, _divider_color_bottom);
+		Gtkmm2ext::set_source_rgba (cr, _divider_color_bottom);
 		cr->move_to (self.x0, self.y0 + _divide_height+0.5);
 		cr->line_to (self.x1, self.y0 + _divide_height+0.5);
 		cr->stroke ();
@@ -222,7 +221,7 @@ Ruler::set_divide_height (double h)
 }
 
 void
-Ruler::set_divide_colors (Color t, Color b)
+Ruler::set_divide_colors (Gtkmm2ext::Color t, Gtkmm2ext::Color b)
 {
         _divider_color_bottom = b;
         _divider_color_top = t;

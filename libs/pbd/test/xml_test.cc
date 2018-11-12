@@ -181,7 +181,7 @@ create_child_nodes (XMLNode& parent_node, std::vector<NodeOptions>::iterator beg
 		}
 
 		for (uint32_t prop_count = 0; prop_count < options.node_property_count; ++prop_count) {
-			new_node->add_property (properties[prop_count].first.c_str (), properties[prop_count].second);
+			new_node->set_property (properties[prop_count].first.c_str (), properties[prop_count].second);
 		}
 
 		if (!options.node_content.empty()) {

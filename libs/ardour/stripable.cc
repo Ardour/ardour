@@ -21,12 +21,14 @@
 
 #include "pbd/compose.h"
 #include "pbd/convert.h"
+#include "pbd/i18n.h"
+
 
 #include "ardour/debug.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/session.h"
+#include "ardour/selection.h"
 #include "ardour/stripable.h"
-
-#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -34,8 +36,17 @@ using std::string;
 
 Stripable::Stripable (Session& s, string const & name, PresentationInfo const & pi)
 	: SessionObject (s, name)
+	, Automatable (s)
 	, _presentation_info (pi)
+	, _active_color_picker (0)
 {
+}
+
+Stripable::~Stripable ()
+{
+	if (!_session.deletion_in_progress ()) {
+		_session.selection().remove_stripable_by_id (id());
+	}
 }
 
 void
@@ -93,7 +104,7 @@ Stripable::set_state (XMLNode const& node, int version)
 
 		}
 
-		if (!_presentation_info.special()) {
+		if (!_presentation_info.special(false)) {
 			if ((prop = node.property (X_("order-key"))) != 0) {
 				_presentation_info.set_order (atol (prop->value()));
 			}
@@ -101,4 +112,75 @@ Stripable::set_state (XMLNode const& node, int version)
 	}
 
 	return 0;
+}
+
+bool
+Stripable::is_selected() const
+{
+	try {
+		boost::shared_ptr<const Stripable> s (shared_from_this());
+	} catch (...) {
+		std::cerr << "cannot shared-from-this for " << this << std::endl;
+		abort ();
+	}
+	return _session.selection().selected (shared_from_this());
+}
+
+bool
+Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b)
+{
+	if (a->presentation_info().flags () == b->presentation_info().flags ()) {
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+
+	int cmp_a = 0;
+	int cmp_b = 0;
+
+	if (a->is_auditioner ()) { cmp_a = -2; }
+	if (b->is_auditioner ()) { cmp_b = -2; }
+	if (a->is_monitor ())    { cmp_a = -1; }
+	if (b->is_monitor ())    { cmp_b = -1; }
+
+	/* ARDOUR-Editor: [Track|Bus|Master] (0) < VCA (3)
+	 * ARDOUR-Mixer : [Track|Bus] (0) < VCA (3) < Master (4)
+	 *
+	 * Mixbus-Editor: [Track|Bus] (0) < Mixbus (1) < VCA (3) < Master (4)
+	 * Mixbus-Mixer : [Track|Bus] (0) < Mixbus (1) < Master (2) < VCA (3)
+	 */
+
+	if (a->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+		cmp_a = 3;
+	}
+#ifdef MIXBUS
+	else if (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+		cmp_a = _mixer_order ? 2 : 4;
+	}
+	else if ((a->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || a->mixbus()) {
+		cmp_a = 1;
+	}
+#endif
+	else if (_mixer_order && (a->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+		cmp_a = 4;
+	}
+
+
+	if (b->presentation_info().flags () & ARDOUR::PresentationInfo::VCA) {
+		cmp_b = 3;
+	}
+#ifdef MIXBUS
+	else if (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut) {
+		cmp_b = _mixer_order ? 2 : 4;
+	}
+	else if ((b->presentation_info().flags () & ARDOUR::PresentationInfo::Mixbus) || b->mixbus()) {
+		cmp_b = 1;
+	}
+#endif
+	else if (_mixer_order && (b->presentation_info().flags () & ARDOUR::PresentationInfo::MasterOut)) {
+		cmp_b = 4;
+	}
+
+	if (cmp_a == cmp_b) {
+		return a->presentation_info().order() < b->presentation_info().order();
+	}
+	return cmp_a < cmp_b;
 }

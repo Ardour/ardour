@@ -22,7 +22,9 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "temporal/beats.h"
 #include "canvas/types.h"
+#include "gtkmm2ext/colors.h"
 
 #include "rgb_macros.h"
 #include "ui_config.h"
@@ -52,8 +54,8 @@ namespace ArdourCanvas {
  */
 class NoteBase : public sigc::trackable
 {
-  public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+public:
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 
 	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
@@ -102,22 +104,12 @@ class NoteBase : public sigc::trackable
 
 	static void set_colors ();
 
-	inline static uint32_t meter_style_fill_color(uint8_t vel, bool selected) {
-		if (selected) {
-			return _selected_mod_col;
-		} else if (vel < 64) {
-			return UINT_INTERPOLATE(_min_col, _mid_col,
-				(vel / (double)63.0));
-		} else {
-			return UINT_INTERPOLATE(_mid_col, _max_col,
-				((vel-64) / (double)63.0));
-		}
-	}
+	static Gtkmm2ext::Color meter_style_fill_color(uint8_t vel, bool selected);
 
 	/// calculate outline colors from fill colors of notes
 	inline static uint32_t calculate_outline(uint32_t color, bool selected=false) {
 		if (selected) {
-			return _selected_outline_col;
+			return _selected_col;
 		} else {
 			return UINT_INTERPOLATE(color, 0x000000ff, 0.5);
 		}
@@ -149,12 +141,9 @@ protected:
 private:
 	bool event_handler (GdkEvent *);
 
-	static uint32_t _selected_mod_col;
-	static uint32_t _selected_outline_col;
-	static uint32_t _selected_col;
-	static uint32_t _min_col;
-	static uint32_t _mid_col;
-	static uint32_t _max_col;
+	static Gtkmm2ext::Color _selected_col;
+	static Gtkmm2ext::SVAModifier color_modifier;
+	static Gtkmm2ext::Color velocity_color_table[128];
 	static bool _color_init;
 };
 

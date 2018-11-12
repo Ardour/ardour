@@ -24,7 +24,6 @@
 #include <gtkmm/window.h>
 #include <pangomm/layout.h>
 
-#include "pbd/controllable.h"
 #include "pbd/compose.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -37,7 +36,7 @@
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "stereo_panner.h"
 #include "stereo_panner_editor.h"
@@ -675,7 +674,7 @@ StereoPanner::set_colors ()
 {
 	colors[Normal].fill = UIConfiguration::instance().color_mod ("stereo panner fill", "panner fill");
 	// colors[Normal].outline = UIConfiguration::instance().color ("stereo panner outline");
-	colors[Normal].outline = ArdourCanvas::HSV (colors[Normal].fill).outline().color ();
+	colors[Normal].outline = Gtkmm2ext::HSV (colors[Normal].fill).outline().color ();
 	colors[Normal].text = UIConfiguration::instance().color ("stereo panner text");
 	colors[Normal].background = UIConfiguration::instance().color ("stereo panner bg");
 	colors[Normal].rule = UIConfiguration::instance().color ("stereo panner rule");

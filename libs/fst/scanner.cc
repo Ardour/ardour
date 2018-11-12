@@ -3,6 +3,12 @@
 #include <string.h>
 #include <vector>
 
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
+#include <utime.h>
+#endif
+
 #include <glib.h>
 
 #include "pbd/pbd.h"

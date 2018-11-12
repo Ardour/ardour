@@ -20,12 +20,11 @@
 #include <cmath>
 #include <errno.h>
 
+#include <gtkmm/stock.h>
+
 #include "fix_carbon.h"
 
 #include "pbd/gstdio_compat.h"
-
-#include "gtkmm2ext/cell_renderer_color_selector.h"
-#include "gtkmm2ext/utils.h"
 
 #include "pbd/compose.h"
 #include "pbd/file_utils.h"
@@ -34,12 +33,15 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/profile.h"
 
+#include "gtkmm2ext/cell_renderer_color_selector.h"
+#include "gtkmm2ext/utils.h"
+
 #include "canvas/container.h"
 #include "canvas/rectangle.h"
 #include "canvas/scroll_group.h"
-#include "canvas/wave_view.h"
 
-#include "ardour_button.h"
+#include "waveview/wave_view.h"
+
 #include "ardour_dialog.h"
 #include "color_theme_manager.h"
 #include "rgb_macros.h"
@@ -52,6 +54,7 @@ using namespace std;
 using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
+using namespace Gtkmm2ext;
 using namespace ARDOUR_UI_UTILS;
 
 ColorThemeManager::ColorThemeManager ()
@@ -272,8 +275,8 @@ ColorThemeManager::palette_canvas_allocated (Gtk::Allocation& alloc, ArdourCanva
 
 struct NamedColor {
 	string name;
-	ArdourCanvas::HSV    color;
-	NamedColor (string s, ArdourCanvas::HSV c) : name (s), color (c) {}
+	Gtkmm2ext::HSV    color;
+	NamedColor (string s, Gtkmm2ext::HSV c) : name (s), color (c) {}
 };
 
 struct SortByHue {
@@ -377,7 +380,7 @@ ColorThemeManager::edit_palette_color (std::string name)
 	using namespace ArdourCanvas;
 	double r,g, b, a;
 	UIConfiguration* uic (&UIConfiguration::instance());
-	ArdourCanvas::Color c = uic->color (name);
+	Gtkmm2ext::Color c = uic->color (name);
 	Gdk::Color gdkcolor;
 
 	color_to_rgba (c, r, g, b, a);

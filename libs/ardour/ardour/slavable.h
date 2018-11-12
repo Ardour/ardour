@@ -30,6 +30,7 @@
 
 #include "evoral/Parameter.hpp"
 
+#include "ardour/types.h"
 #include "ardour/libardour_visibility.h"
 
 class XMLNode;
@@ -39,33 +40,44 @@ namespace ARDOUR {
 class VCA;
 class VCAManager;
 class AutomationControl;
+class SlavableAutomationControl;
 
 class LIBARDOUR_API Slavable
 {
-    public:
+public:
 	Slavable ();
 	virtual ~Slavable() {}
 
 	XMLNode& get_state () const;
 	int set_state (XMLNode const&, int);
 
-	void assign (boost::shared_ptr<VCA>, bool loading);
+	virtual void assign (boost::shared_ptr<VCA>);
 	void unassign (boost::shared_ptr<VCA>);
 
 	PBD::Signal2<void,boost::shared_ptr<VCA>,bool> AssignmentChange;
 
-	virtual boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) = 0;
+	virtual boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter&) = 0;
 
 	static std::string xml_node_name;
 
 	/* signal sent VCAManager once assignment is possible */
 	static PBD::Signal1<void,VCAManager*> Assign;
 
-    protected:
-	virtual int assign_controls (boost::shared_ptr<VCA>, bool loading);
-	virtual int unassign_controls (boost::shared_ptr<VCA>);
+	std::vector<boost::shared_ptr<VCA> > masters (VCAManager*) const;
 
-    private:
+	/** recursively test for master assignment to given VCA */
+	bool assigned_to (VCAManager*, boost::shared_ptr<VCA>) const;
+
+protected:
+	virtual SlavableControlList slavables () const = 0;
+
+private:
+	bool assign_controls (boost::shared_ptr<VCA>);
+	void unassign_controls (boost::shared_ptr<VCA>);
+
+	bool assign_control (boost::shared_ptr<VCA>, boost::shared_ptr<SlavableAutomationControl>);
+	void unassign_control (boost::shared_ptr<VCA>, boost::shared_ptr<SlavableAutomationControl>);
+
 	mutable Glib::Threads::RWLock master_lock;
 	std::set<uint32_t> _masters;
 	PBD::ScopedConnection assign_connection;
@@ -73,7 +85,6 @@ class LIBARDOUR_API Slavable
 
 	int do_assign (VCAManager* s);
 	void weak_unassign (boost::weak_ptr<VCA>);
-
 };
 
 } // namespace ARDOUR

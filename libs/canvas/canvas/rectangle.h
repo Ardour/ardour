@@ -87,10 +87,6 @@ public:
 	void set_outline_what (What);
 	void set_outline_all () { set_outline_what (ArdourCanvas::Rectangle::ALL); }
 
-  protected:
-	void render_self (Rect const &, Cairo::RefPtr<Cairo::Context>, Rect) const;
-	Rect get_self_for_render () const;
-
   private:
 	/** Our rectangle; note that x0 may not always be less than x1
 	 *  and likewise with y0 and y1.

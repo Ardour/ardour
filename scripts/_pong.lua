@@ -138,7 +138,7 @@ function dsp_run (ins, outs, n_samples)
 	for c = 1,#outs do
 		-- check if output and input buffers for this channel are identical
 		-- http://manual.ardour.org/lua-scripting/class_reference/#C:FloatArray
-		if not ins[c]:sameinstance (outs[c]) then
+		if ins[c] ~= outs[c] then
 			-- fast (accelerated) copy
 			-- http://manual.ardour.org/lua-scripting/class_reference/#ARDOUR:DSP
 			ARDOUR.DSP.copy_vector (outs[c], ins[c], n_samples)

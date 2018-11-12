@@ -41,7 +41,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 	void set_path (const std::string& p);
 
 	float sample_rate() const;
-	int update_header (framepos_t when, struct tm&, time_t);
+	int update_header (samplepos_t when, struct tm&, time_t);
 
     uint32_t channel_count () const { return n_channels; }
 
@@ -55,8 +55,8 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 
   protected:
 	void close ();
-	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
-	framecnt_t write_unlocked (Sample *, framecnt_t) { return 0; }
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
+	samplecnt_t write_unlocked (Sample *, samplecnt_t) { return 0; }
 
   private:
 #ifdef COREAUDIO105
@@ -67,7 +67,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
 	uint16_t n_channels;
 
 	void init_cafile ();
-	int safe_read (Sample*, framepos_t start, framecnt_t cnt, AudioBufferList&) const;
+	int safe_read (Sample*, samplepos_t start, samplecnt_t cnt, AudioBufferList&) const;
 };
 
 }; /* namespace ARDOUR */

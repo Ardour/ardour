@@ -1,0 +1,43 @@
+import waflib.Logs as Logs, waflib.Utils as Utils
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(ctx):
+        pass
+
+def configure(ctx):
+        pass
+
+def build(bld):
+	obj = bld (features = 'cxx c cxxprogram')
+	obj.install_path = None
+	obj.source    = [ 'bb.cc', 'gui.cc', 'misc.cc' ]
+	obj.target    = 'bb'
+	obj.includes  = ['.', '../libs']
+	obj.ldflags   = ['-no-undefined']
+	obj.use       = [ 'libardour', 'libevoral', ]
+	obj.uselib    = ' JACK GTKMM '
+
+        wrapper_subst_dict = {
+            'INSTALL_PREFIX' : bld.env['PREFIX'],
+            'LIBDIR'         : os.path.normpath(bld.env['DLLDIR']),
+            'DATADIR'        : os.path.normpath(bld.env['DATADIR']),
+            'CONFDIR'        : os.path.normpath(bld.env['CONFDIR']),
+            'LIBS'           : 'build/libs',
+            'VERSION'        : str (bld.env['VERSION']),
+            'EXECUTABLE'     : 'build/tools/bb/bb'
+        }
+
+        def set_subst_dict(obj, dict):
+                for i in dict:
+                        setattr(obj, i, dict[i])
+
+        obj              = bld (features = 'subst')
+        obj.source       = '../../gtk2_ardour/ardev_common.sh.in'
+        obj.target       = 'bbdev_common_waf.sh'
+        obj.chmod        = Utils.O755
+        obj.dict         = wrapper_subst_dict
+        set_subst_dict(obj, wrapper_subst_dict)

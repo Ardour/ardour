@@ -20,7 +20,7 @@
 #ifndef __gtkardour_port_insert_ui_h__
 #define __gtkardour_port_insert_ui_h__
 
-#include "gtkmm2ext/stateful_button.h"
+#include "widgets/stateful_button.h"
 #include "ardour_dialog.h"
 #include "io_selector.h"
 
@@ -30,26 +30,26 @@ namespace ARDOUR {
 
 class PortInsertUI : public Gtk::VBox
 {
-  public:
+public:
 	PortInsertUI (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::PortInsert>);
 
 	void redisplay ();
 	void finished (IOSelector::Result);
 
-  private:
-        boost::shared_ptr<ARDOUR::PortInsert> _pi;
+private:
+	boost::shared_ptr<ARDOUR::PortInsert> _pi;
 
-        Gtk::Notebook notebook;
-	Gtkmm2ext::StatefulToggleButton latency_button;
+	Gtk::Notebook notebook;
+	ArdourWidgets::StatefulToggleButton latency_button;
 	IOSelector input_selector;
 	IOSelector output_selector;
-        Gtk::Label latency_display;
-        Gtk::HBox  latency_hbox;
-        sigc::connection latency_timeout;
+	Gtk::Label latency_display;
+	Gtk::HBox  latency_hbox;
+	sigc::connection latency_timeout;
 
-        bool check_latency_measurement ();
-        void latency_button_toggled ();
-        void update_latency_display ();
+	bool check_latency_measurement ();
+	void latency_button_toggled ();
+	void update_latency_display ();
 };
 
 class PortInsertWindow : public ArdourDialog

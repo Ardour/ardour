@@ -21,7 +21,7 @@ function factory ()
 			local mb = midiport:get_midi_buffer (n_samples) -- get the midi-data buffers
 			local events = mb:table () -- copy event list into lua table
 			for _,e in pairs (events) do -- iterate over all events in the midi-buffer
-				if bit32.band (e:buffer():array()[1], 0xf0) == 0x90 then -- note on
+				if (e:buffer():array()[1] & 0xf0) == 0x90 then -- note on
 					Session:maybe_enable_record (true) -- global record-enable from rt-context
 					-- maybe-enable may fail if there are no tracks or step-entry is active
 					-- roll transport if record-enable suceeded:

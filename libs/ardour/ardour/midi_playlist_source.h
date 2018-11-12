@@ -37,16 +37,16 @@ public:
 	virtual ~MidiPlaylistSource ();
 
 	bool empty() const;
-	framecnt_t length (framepos_t) const;
+	samplecnt_t length (samplepos_t) const;
 
-	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
-	framecnt_t write_unlocked (Sample *src, framecnt_t cnt);
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
+	samplecnt_t write_unlocked (Sample *src, samplecnt_t cnt);
 
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
-	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Evoral::Beats>& ev);
-	void append_event_frames(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<framepos_t>& ev, framepos_t source_start);
+	void append_event_beats(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<Temporal::Beats>& ev);
+	void append_event_samples(const Glib::Threads::Mutex::Lock& lock, const Evoral::Event<samplepos_t>& ev, samplepos_t source_start);
 	void load_model(const Glib::Threads::Mutex::Lock& lock, bool force_reload=false);
 	void destroy_model(const Glib::Threads::Mutex::Lock& lock);
 
@@ -54,29 +54,29 @@ protected:
 	friend class SourceFactory;
 
 	MidiPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist>, uint32_t chn,
-	                    frameoffset_t begin, framecnt_t len, Source::Flag flags);
+	                    sampleoffset_t begin, samplecnt_t len, Source::Flag flags);
 	MidiPlaylistSource (Session&, const XMLNode&);
 
 
 	void flush_midi(const Lock& lock);
 
-	framecnt_t read_unlocked (const Lock&                    lock,
-	                          Evoral::EventSink<framepos_t>& dst,
-	                          framepos_t                     position,
-	                          framepos_t                     start,
-	                          framecnt_t                     cnt,
-	                          Evoral::Range<framepos_t>*     loop_range,
+	samplecnt_t read_unlocked (const Lock&                    lock,
+	                          Evoral::EventSink<samplepos_t>& dst,
+	                          samplepos_t                     position,
+	                          samplepos_t                     start,
+	                          samplecnt_t                     cnt,
+	                          Evoral::Range<samplepos_t>*     loop_range,
 	                          MidiStateTracker*              tracker,
 	                          MidiChannelFilter*             filter) const;
 
-	framecnt_t write_unlocked (const Lock&                 lock,
-	                           MidiRingBuffer<framepos_t>& dst,
-	                           framepos_t                  position,
-	                           framecnt_t                  cnt);
+	samplecnt_t write_unlocked (const Lock&                 lock,
+	                           MidiRingBuffer<samplepos_t>& dst,
+	                           samplepos_t                  position,
+	                           samplecnt_t                  cnt);
 
 private:
 	int set_state (const XMLNode&, int version, bool with_descendants);
-	framecnt_t _length;
+	samplecnt_t _length;
 };
 
 } /* namespace */

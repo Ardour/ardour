@@ -286,7 +286,7 @@ XMLNode::operator= (const XMLNode& from)
 	const XMLPropertyList& props = from.properties ();
 
 	for (XMLPropertyConstIterator prop_iter = props.begin (); prop_iter != props.end (); ++prop_iter) {
-		add_property ((*prop_iter)->name ().c_str (), (*prop_iter)->value ());
+		set_property ((*prop_iter)->name ().c_str (), (*prop_iter)->value ());
 	}
 
 	const XMLNodeList& nodes = from.children ();
@@ -466,10 +466,16 @@ std::string
 XMLNode::attribute_value()
 {
 	XMLNodeList children = this->children();
-	assert(!_is_content);
-	assert(children.size() == 1);
+	if (_is_content)
+		throw XMLException("XMLNode: attribute_value failed (is_content) for requested node: " + name());
+
+	if (children.size() != 1)
+		throw XMLException("XMLNode: attribute_value failed (children.size != 1) for requested node: " + name());
+
 	XMLNode* child = *(children.begin());
-	assert(child->is_content());
+	if (!child->is_content())
+		throw XMLException("XMLNode: attribute_value failed (!child->is_content()) for requested node: " + name());
+
 	return child->content();
 }
 
@@ -551,8 +557,8 @@ XMLNode::has_property_with_value (const string& name, const string& value) const
 	return false;
 }
 
-XMLProperty*
-XMLNode::add_property(const char* name, const string& value)
+bool
+XMLNode::set_property(const char* name, const string& value)
 {
 	XMLPropertyIterator iter = _proplist.begin();
 
@@ -575,19 +581,16 @@ XMLNode::add_property(const char* name, const string& value)
 	return new_property;
 }
 
-XMLProperty*
-XMLNode::add_property(const char* n, const char* v)
+bool
+XMLNode::get_property(const char* name, std::string& value) const
 {
-	string vs(v);
-	return add_property(n, vs);
-}
+	XMLProperty const* const prop = property (name);
+	if (!prop)
+		return false;
 
-XMLProperty*
-XMLNode::add_property(const char* name, const long value)
-{
-	char str[64];
-	snprintf(str, sizeof(str), "%ld", value);
-	return add_property(name, str);
+	value = prop->value ();
+
+	return true;
 }
 
 void
@@ -661,16 +664,26 @@ XMLNode::remove_nodes_and_delete(const string& propname, const string& val)
 	}
 }
 
+void
+XMLNode::remove_node_and_delete(const string& n, const string& propname,
+ const string& val)
+{
+	for (XMLNodeIterator i = _children.begin(); i != _children.end(); ++i) {
+		if ((*i)->name() == n) {
+			XMLProperty const * prop = (*i)->property (propname);
+			if (prop && prop->value() == val) {
+				delete *i;
+				_children.erase (i);
+				break;
+			}
+		}
+	}
+}
+
 XMLProperty::XMLProperty(const string& n, const string& v)
 	: _name(n)
 	, _value(v)
 {
-	// Normalize property name (replace '_' with '-' as old session are inconsistent)
-	for (size_t i = 0; i < _name.length(); ++i) {
-		if (_name[i] == '_') {
-			_name[i] = '-';
-		}
-	}
 }
 
 XMLProperty::~XMLProperty()
@@ -696,7 +709,7 @@ readnode(xmlNodePtr node)
 		if (attr->children) {
 			content = (char*)attr->children->content;
 		}
-		tmp->add_property((const char*)attr->name, content);
+		tmp->set_property((const char*)attr->name, content);
 	}
 
 	if (node->content) {

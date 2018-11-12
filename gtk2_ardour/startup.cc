@@ -119,20 +119,8 @@ ArdourStartup::~ArdourStartup ()
 bool
 ArdourStartup::required ()
 {
-	/* look for a "been here before" file for this version or earlier
-	 * versions
-	 */
-
-	const int current_version = atoi (PROGRAM_VERSION);
-
-	for (int v = current_version; v != 0; --v) {
-		if (Glib::file_test (ARDOUR::been_here_before_path (v), Glib::FILE_TEST_EXISTS)) {
-			if (v != current_version) {
-				/* older version exists, create the current one */
-				PBD::ScopedFileDescriptor fout (g_open (been_here_before_path (current_version).c_str(), O_CREAT|O_TRUNC|O_RDWR, 0666));
-			}
-			return false;
-		}
+	if (Glib::file_test (ARDOUR::been_here_before_path (), Glib::FILE_TEST_EXISTS)) {
+		return false;
 	}
 
 	return true;
@@ -265,6 +253,9 @@ Please choose whichever one is right for your setup.\n\n\
 	monitoring_page_index = append_page (mon_vbox);
 	set_page_title (mon_vbox, _("Monitoring Choices"));
 	set_page_header_image (mon_vbox, icon_pixbuf);
+
+	monitor_via_hardware_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
+	monitor_via_ardour_button.signal_toggled().connect (sigc::mem_fun (*this, &ArdourStartup::config_changed));
 
 	/* user could just click on "Forward" if default
 	 * choice is correct.

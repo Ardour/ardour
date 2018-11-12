@@ -20,9 +20,12 @@
 #include <cmath>
 
 #include <gtkmm/listviewtext.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/memento_command.h"
 #include "pbd/stateful_diff_command.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour/region.h"
 #include "ardour/session.h"
@@ -34,7 +37,6 @@
 #include "gui_thread.h"
 #include "region_editor.h"
 #include "public_editor.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
@@ -42,34 +44,33 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
-using namespace ARDOUR_UI_UTILS;
 
 RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	: ArdourDialog (_("Region"))
-        , _table (9, 2)
-        , _table_row (0)
-        , _region (r)
-        , name_label (_("Name:"))
-        , audition_button (_("Audition"))
-        , _clock_group (new ClockGroup)
-        , position_clock (X_("regionposition"), true, "", true, false)
-        , end_clock (X_("regionend"), true, "", true, false)
-        , length_clock (X_("regionlength"), true, "", true, false, true)
-        , sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
-        , sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
-          /* XXX cannot file start yet */
-        , start_clock (X_("regionstart"), true, "", false, false)
-        , _sources (1)
+	, _table (9, 2)
+	, _table_row (0)
+	, _region (r)
+	, name_label (_("Name:"))
+	, audition_button (_("Audition"))
+	, _clock_group (new ClockGroup)
+	, position_clock (X_("regionposition"), true, "", true, false)
+	, end_clock (X_("regionend"), true, "", true, false)
+	, length_clock (X_("regionlength"), true, "", true, false, true)
+	, sync_offset_relative_clock (X_("regionsyncoffsetrelative"), true, "", true, false)
+	, sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
+	  /* XXX cannot file start yet */
+	, start_clock (X_("regionstart"), true, "", false, false)
+	, _sources (1)
 {
 	set_session (s);
 
-        _clock_group->set_clock_mode (ARDOUR_UI::instance()->secondary_clock->mode());
-        _clock_group->add (position_clock);
-        _clock_group->add (end_clock);
-        _clock_group->add (length_clock);
-        _clock_group->add (sync_offset_relative_clock);
-        _clock_group->add (sync_offset_absolute_clock);
-        _clock_group->add (start_clock);
+	_clock_group->set_clock_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	_clock_group->add (position_clock);
+	_clock_group->add (end_clock);
+	_clock_group->add (length_clock);
+	_clock_group->add (sync_offset_relative_clock);
+	_clock_group->add (sync_offset_absolute_clock);
+	_clock_group->add (start_clock);
 
 	position_clock.set_session (_session);
 	end_clock.set_session (_session);
@@ -78,7 +79,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 	sync_offset_absolute_clock.set_session (_session);
 	start_clock.set_session (_session);
 
-	set_tooltip (audition_button, _("audition this region"));
+	ArdourWidgets::set_tooltip (audition_button, _("audition this region"));
 
 	audition_button.unset_flags (Gtk::CAN_FOCUS);
 
@@ -198,7 +199,7 @@ RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
 
 RegionEditor::~RegionEditor ()
 {
-        delete _clock_group;
+	delete _clock_group;
 }
 
 void
@@ -299,7 +300,7 @@ RegionEditor::end_clock_changed ()
 		PublicEditor::instance().begin_reversible_command (_("change region end position"));
 		in_command = true;
 
-                _region->clear_changes ();
+		_region->clear_changes ();
 		_region->trim_end (end_clock.current_time());
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
@@ -314,7 +315,7 @@ RegionEditor::end_clock_changed ()
 void
 RegionEditor::length_clock_changed ()
 {
-	framecnt_t frames = length_clock.current_time();
+	samplecnt_t samples = length_clock.current_time();
 	bool in_command = false;
 	boost::shared_ptr<Playlist> pl = _region->playlist();
 
@@ -323,7 +324,7 @@ RegionEditor::length_clock_changed ()
 		in_command = true;
 
 		_region->clear_changes ();
-		_region->trim_end (_region->position() + frames - 1);
+		_region->trim_end (_region->position() + samples - 1);
 		_session->add_command(new StatefulDiffCommand (_region));
 	}
 
@@ -369,7 +370,7 @@ RegionEditor::bounds_changed (const PropertyChange& what_changed)
 
 	if (what_changed.contains (ARDOUR::Properties::sync_position) || what_changed.contains (ARDOUR::Properties::position)) {
 		int dir;
-		frameoffset_t off = _region->sync_offset (dir);
+		sampleoffset_t off = _region->sync_offset (dir);
 		if (dir == -1) {
 			off = -off;
 		}
@@ -415,7 +416,7 @@ RegionEditor::sync_offset_absolute_clock_changed ()
 {
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
-        _region->clear_changes ();
+	_region->clear_changes ();
 	_region->set_sync_position (sync_offset_absolute_clock.current_time());
 	_session->add_command (new StatefulDiffCommand (_region));
 
@@ -427,7 +428,7 @@ RegionEditor::sync_offset_relative_clock_changed ()
 {
 	PublicEditor::instance().begin_reversible_command (_("change region sync point"));
 
-        _region->clear_changes ();
+	_region->clear_changes ();
 	_region->set_sync_position (sync_offset_relative_clock.current_time() + _region->position ());
 	_session->add_command (new StatefulDiffCommand (_region));
 

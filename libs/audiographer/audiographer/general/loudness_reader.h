@@ -32,7 +32,7 @@ namespace AudioGrapher
 class LIBAUDIOGRAPHER_API LoudnessReader : public ListedSource<float>, public Sink<float>
 {
   public:
-	LoudnessReader (float sample_rate, unsigned int channels, framecnt_t bufsize);
+	LoudnessReader (float sample_rate, unsigned int channels, samplecnt_t bufsize);
 	~LoudnessReader ();
 
 	void reset ();
@@ -52,8 +52,8 @@ class LIBAUDIOGRAPHER_API LoudnessReader : public ListedSource<float>, public Si
 
 	float        _sample_rate;
 	unsigned int _channels;
-	framecnt_t   _bufsize;
-	framecnt_t   _pos;
+	samplecnt_t   _bufsize;
+	samplecnt_t   _pos;
 	float*       _bufs[2];
 };
 

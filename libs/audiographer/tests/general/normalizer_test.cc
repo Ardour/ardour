@@ -14,7 +14,7 @@ class NormalizerTest : public CppUnit::TestFixture
   public:
 	void setUp()
 	{
-		frames = 1024;
+		samples = 1024;
 	}
 
 	void tearDown()
@@ -25,23 +25,23 @@ class NormalizerTest : public CppUnit::TestFixture
 	void testConstAmplify()
 	{
 		float target = 0.0;
-		random_data = TestUtils::init_random_data(frames, 0.5);
+		random_data = TestUtils::init_random_data(samples, 0.5);
 
 		normalizer.reset (new Normalizer(target));
 		peak_reader.reset (new PeakReader());
 		sink.reset (new VectorSink<float>());
 
-		ProcessContext<float> const c (random_data, frames, 1);
+		ProcessContext<float> const c (random_data, samples, 1);
 		peak_reader->process (c);
 
 		float peak = peak_reader->get_peak();
-		normalizer->alloc_buffer (frames);
+		normalizer->alloc_buffer (samples);
 		normalizer->set_peak (peak);
 		normalizer->add_output (sink);
 		normalizer->process (c);
 
 		peak_reader->reset();
-		ConstProcessContext<float> normalized (sink->get_array(), frames, 1);
+		ConstProcessContext<float> normalized (sink->get_array(), samples, 1);
 		peak_reader->process (normalized);
 
 		peak = peak_reader->get_peak();
@@ -54,7 +54,7 @@ class NormalizerTest : public CppUnit::TestFixture
 	boost::shared_ptr<VectorSink<float> > sink;
 
 	float * random_data;
-	framecnt_t frames;
+	samplecnt_t samples;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (NormalizerTest);

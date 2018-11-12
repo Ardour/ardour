@@ -24,6 +24,7 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/strsplit.h"
+#include "pbd/types_convert.h"
 #include "pbd/debug.h"
 
 #include "ardour/amp.h"
@@ -108,6 +109,8 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, _rec_enable_group (new ControlGroup (RecEnableAutomation))
 	, _gain_group (new GainControlGroup ())
 	, _monitoring_group (new ControlGroup (MonitoringAutomation))
+	, _rgba (0)
+	, _used_to_share_gain (false)
 {
 	_xml_node_name = X_("RouteGroup");
 
@@ -155,6 +158,10 @@ RouteGroup::~RouteGroup ()
 int
 RouteGroup::add (boost::shared_ptr<Route> r)
 {
+	if (r->is_master()) {
+		return 0;
+	}
+
 	if (find (routes->begin(), routes->end(), r) != routes->end()) {
 		return 0;
 	}
@@ -180,7 +187,7 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	boost::shared_ptr<VCA> vca (group_master.lock());
 
 	if (vca) {
-		r->assign  (vca, false);
+		r->assign (vca);
 	}
 
 	_session.set_dirty ();
@@ -229,15 +236,34 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 	return -1;
 }
 
+void
+RouteGroup::set_rgba (uint32_t color) {
+	_rgba = color;
+
+	PBD::PropertyChange change;
+	change.add (Properties::color);
+	PropertyChanged (change);
+
+	if (!is_color ()) {
+		return;
+	}
+
+	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+		(*i)->presentation_info().PropertyChanged (Properties::color);
+	}
+}
 
 XMLNode&
 RouteGroup::get_state ()
 {
 	XMLNode *node = new XMLNode ("RouteGroup");
 
-	char buf[64];
-	id().print (buf, sizeof (buf));
-	node->add_property ("id", buf);
+	node->set_property ("id", id());
+	node->set_property ("rgba", _rgba);
+	node->set_property ("used-to-share-gain", _used_to_share_gain);
+	if (_subgroup_bus) {
+		node->set_property ("subgroup-bus", _subgroup_bus->id ());
+	}
 
 	add_properties (*node);
 
@@ -248,7 +274,7 @@ RouteGroup::get_state ()
 			str << (*i)->id () << ' ';
 		}
 
-		node->add_property ("routes", str.str());
+		node->set_property ("routes", str.str());
 	}
 
 	return *node;
@@ -261,13 +287,14 @@ RouteGroup::set_state (const XMLNode& node, int version)
 		return set_state_2X (node, version);
 	}
 
-	XMLProperty const * prop;
-
 	set_id (node);
 	set_values (node);
+	node.get_property ("rgba", _rgba);
+	node.get_property ("used-to-share-gain", _used_to_share_gain);
 
-	if ((prop = node.property ("routes")) != 0) {
-		stringstream str (prop->value());
+	std::string routes;
+	if (node.get_property ("routes", routes)) {
+		stringstream str (routes);
 		vector<string> ids;
 		split (str.str(), ids, ' ');
 
@@ -278,6 +305,14 @@ RouteGroup::set_state (const XMLNode& node, int version)
 			if (r) {
 				add (r);
 			}
+		}
+	}
+
+	PBD::ID subgroup_id (0);
+	if (node.get_property ("subgroup-bus", subgroup_id)) {
+		boost::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
+		if (r) {
+			_subgroup_bus = r;
 		}
 	}
 
@@ -327,9 +362,6 @@ void
 RouteGroup::set_gain (bool yn)
 {
 	if (is_gain() == yn) {
-		return;
-	}
-	if (has_control_master()) {
 		return;
 	}
 
@@ -528,16 +560,16 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 		return;
 	}
 
-	subgroup_bus = rl.front();
-	subgroup_bus->set_name (_name);
+	_subgroup_bus = rl.front();
+	_subgroup_bus->set_name (_name);
 
 	if (aux) {
 
-		_session.add_internal_sends (subgroup_bus, placement, routes);
+		_session.add_internal_sends (_subgroup_bus, placement, routes);
 
 	} else {
 
-		boost::shared_ptr<Bundle> bundle = subgroup_bus->input()->bundle ();
+		boost::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
@@ -549,7 +581,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 void
 RouteGroup::destroy_subgroup ()
 {
-	if (!subgroup_bus) {
+	if (!_subgroup_bus) {
 		return;
 	}
 
@@ -558,14 +590,14 @@ RouteGroup::destroy_subgroup ()
 		/* XXX find a new bundle to connect to */
 	}
 
-	_session.remove_route (subgroup_bus);
-	subgroup_bus.reset ();
+	_session.remove_route (_subgroup_bus);
+	_subgroup_bus.reset ();
 }
 
 bool
 RouteGroup::has_subgroup() const
 {
-	return subgroup_bus != 0;
+	return _subgroup_bus != 0;
 }
 
 bool
@@ -604,6 +636,7 @@ RouteGroup::push_to_groups ()
 		_gain_group->set_active (false);
 		_solo_group->set_active (false);
 		_mute_group->set_active (false);
+
 		_rec_enable_group->set_active (false);
 		_monitoring_group->set_active (false);
 	}
@@ -623,11 +656,14 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 	}
 
 	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-		(*r)->assign (master, false);
+		(*r)->assign (master);
 	}
 
 	group_master = master;
 	_group_master_number = master->number();
+
+	_used_to_share_gain = is_gain ();
+	set_gain (false);
 }
 
 void
@@ -649,6 +685,8 @@ RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
 
 	group_master.reset ();
 	_group_master_number = -1;
+
+	set_gain (_used_to_share_gain);
 }
 
 bool

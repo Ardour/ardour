@@ -22,17 +22,16 @@
 
 #include "pbd/debug.h"
 #include "pbd/compose.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/windows_timer_utils.h"
 #include "pbd/windows_mmcss.h"
 
-#include "rt_thread.h"
 #include "midi_util.h"
 
 #include "debug.h"
 
 // remove dup with input_device
 static const uint32_t MIDI_BUFFER_SIZE = 32768;
-static const uint32_t MAX_MIDI_MSG_SIZE = 256; // fix this for sysex
 static const uint32_t MAX_QUEUE_SIZE = 4096;
 
 namespace ARDOUR {
@@ -46,7 +45,7 @@ WinMMEMidiOutputDevice::WinMMEMidiOutputDevice (int index)
 	, m_enabled(false)
 	, m_thread_running(false)
 	, m_thread_quit(false)
-	, m_midi_buffer(new RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
+	, m_midi_buffer(new PBD::RingBuffer<uint8_t>(MIDI_BUFFER_SIZE))
 {
 	DEBUG_MIDI (string_compose ("Creating midi output device index: %1\n", index));
 
@@ -231,7 +230,7 @@ WinMMEMidiOutputDevice::start_midi_output_thread ()
 	size_t stacksize = 100000;
 
 	// TODO Use native threads
-	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -21, stacksize,
 				&m_output_thread_handle, midi_output_thread, this)) {
 		return false;
 	}
@@ -361,7 +360,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 		DEBUG_MIDI ("WinMMEMidiOut: output thread woken by semaphore\n");
 
 		MidiEventHeader h (0, 0);
-		uint8_t data[MAX_MIDI_MSG_SIZE];
+		uint8_t data[MaxWinMidiEventSize];
 
 		const uint32_t read_space = m_midi_buffer->read_space ();
 
@@ -375,7 +374,7 @@ WinMMEMidiOutputDevice::midi_output_thread ()
 			}
 			assert (read_space >= h.size);
 
-			if (h.size > MAX_MIDI_MSG_SIZE) {
+			if (h.size > MaxWinMidiEventSize) {
 				m_midi_buffer->increment_read_idx (h.size);
 				DEBUG_MIDI ("WinMMEMidiOut: MIDI event too large!\n");
 				continue;

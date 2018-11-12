@@ -26,12 +26,13 @@
 
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
-#include "ardour/audio_diskstream.h"
 #include "ardour/audio_track.h"
 #include "ardour/audioplaylist.h"
 #include "ardour/boost_debug.h"
 #include "ardour/buffer_set.h"
 #include "ardour/delivery.h"
+#include "ardour/disk_reader.h"
+#include "ardour/disk_writer.h"
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
 #include "ardour/playlist_factory.h"
@@ -42,6 +43,7 @@
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/source.h"
+#include "ardour/types_convert.h"
 #include "ardour/utils.h"
 
 #include "pbd/i18n.h"
@@ -62,154 +64,77 @@ AudioTrack::~AudioTrack ()
 	}
 }
 
-boost::shared_ptr<Diskstream>
-AudioTrack::create_diskstream ()
+MonitorState
+AudioTrack::get_auto_monitoring_state () const
 {
-	AudioDiskstream::Flag dflags = AudioDiskstream::Flag (AudioDiskstream::Recordable);
+	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	   I don't think it's ever going to be too pretty too look at.
+	*/
 
-	if (_mode == Destructive && !Profile->get_trx()) {
-		dflags = AudioDiskstream::Flag (dflags | AudioDiskstream::Destructive);
-	} else if (_mode == NonLayered){
-		dflags = AudioDiskstream::Flag(dflags | AudioDiskstream::NonLayered);
-	}
+	bool const roll = _session.transport_rolling ();
+	bool const track_rec = _disk_writer->record_enabled ();
+	bool const auto_input = _session.config.get_auto_input ();
+	bool const software_monitor = Config->get_monitoring_model() == SoftwareMonitoring;
+	bool const tape_machine_mode = Config->get_tape_machine_mode ();
+	bool session_rec;
 
-	return boost::shared_ptr<AudioDiskstream> (new AudioDiskstream (_session, name(), dflags));
-}
+	/* I suspect that just use actively_recording() is good enough all the
+	 * time, but just to keep the semantics the same as they were before
+	 * sept 26th 2012, we differentiate between the cases where punch is
+	 * enabled and those where it is not.
+	 *
+	 * rg: sept 30 2017: Above is not the case: punch-in/out location is
+	 * global session playhead position.
+	 * When this method is called from process_output_buffers() we need
+	 * to use delay-compensated route's process-position.
+	 *
+	 * NB. Disk reader/writer may also be offset by a same amount of time.
+	 *
+	 * Also keep in mind that _session.transport_rolling() is false during
+	 * pre-roll but the disk already produces output.
+	 *
+	 * TODO: FIXME
+	 */
 
-void
-AudioTrack::set_diskstream (boost::shared_ptr<Diskstream> ds)
-{
-	Track::set_diskstream (ds);
-
-	_diskstream->set_track (this);
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	if (Profile->get_trx()) {
-		_diskstream->set_destructive (false);
+	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+		session_rec = _session.actively_recording ();
 	} else {
-		_diskstream->set_destructive (_mode == Destructive);
+		session_rec = _session.get_record_enabled();
 	}
-	_diskstream->set_non_layered (_mode == NonLayered);
-#endif
 
-	if (audio_diskstream()->deprecated_io_node) {
+	if (track_rec) {
 
-		if (!IO::connecting_legal) {
-			IO::ConnectingLegal.connect_same_thread (*this, boost::bind (&AudioTrack::deprecated_use_diskstream_connections, this));
+		if (!session_rec && roll && auto_input) {
+			return MonitoringDisk;
 		} else {
-			deprecated_use_diskstream_connections ();
-		}
-	}
-
-	_diskstream->set_record_enabled (false);
-	_diskstream->request_input_monitoring (false);
-
-	DiskstreamChanged (); /* EMIT SIGNAL */
-}
-
-boost::shared_ptr<AudioDiskstream>
-AudioTrack::audio_diskstream() const
-{
-	return boost::dynamic_pointer_cast<AudioDiskstream>(_diskstream);
-}
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-int
-AudioTrack::set_mode (TrackMode m)
-{
-	if (m != _mode) {
-
-		if (!Profile->get_trx() && _diskstream->set_destructive (m == Destructive)) {
-			return -1;
+			return software_monitor ? MonitoringInput : MonitoringSilence;
 		}
 
-		_diskstream->set_non_layered (m == NonLayered);
-		_mode = m;
+	} else {
 
-		TrackModeChanged (); /* EMIT SIGNAL */
-	}
+		if (tape_machine_mode) {
 
-	return 0;
-}
+			return MonitoringDisk;
 
-bool
-AudioTrack::can_use_mode (TrackMode m, bool& bounce_required)
-{
-	switch (m) {
-	case NonLayered:
-	case Normal:
-		bounce_required = false;
-		return true;
-
-	case Destructive:
-		if (Profile->get_trx()) {
-			return false;
 		} else {
-			return _diskstream->can_become_destructive (bounce_required);
-		}
-		break;
 
-	default:
-		return false;
-	}
-}
-#endif
-
-int
-AudioTrack::deprecated_use_diskstream_connections ()
-{
-	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-
-	if (diskstream->deprecated_io_node == 0) {
-		return 0;
-	}
-
-	XMLProperty const * prop;
-	XMLNode& node (*diskstream->deprecated_io_node);
-
-	/* don't do this more than once. */
-
-	diskstream->deprecated_io_node = 0;
-
-	if ((prop = node.property ("gain")) != 0) {
-		_amp->gain_control()->set_value (atof (prop->value().c_str()), PBD::Controllable::NoGroup);
-	}
-
-	if ((prop = node.property ("input-connection")) != 0) {
-		boost::shared_ptr<Bundle> c = _session.bundle_by_name (prop->value());
-
-		if (c == 0) {
-			error << string_compose(_("Unknown bundle \"%1\" listed for input of %2"), prop->value(), _name) << endmsg;
-
-			if ((c = _session.bundle_by_name (_("in 1"))) == 0) {
-				error << _("No input bundles available as a replacement")
-			        << endmsg;
-				return -1;
+			if (!roll && auto_input) { 
+				return software_monitor ? MonitoringInput : MonitoringSilence;
 			} else {
-				info << string_compose (_("Bundle %1 was not available - \"in 1\" used instead"), prop->value())
-			       << endmsg;
+				return MonitoringDisk;
 			}
-		}
 
-		_input->connect_ports_to_bundle (c, true, this);
-
-	} else if ((prop = node.property ("inputs")) != 0) {
-		if (_input->set_ports (prop->value())) {
-			error << string_compose(_("improper input channel list in XML node (%1)"), prop->value()) << endmsg;
-			return -1;
 		}
 	}
 
-	return 0;
+	abort(); /* NOTREACHED */
+	return MonitoringSilence;
 }
 
 int
 AudioTrack::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
-	if ((prop = node.property (X_("mode"))) != 0) {
-		_mode = TrackMode (string_2_enum (prop->value(), _mode));
-	} else {
+	if (!node.get_property (X_("mode"), _mode)) {
 		_mode = Normal;
 	}
 
@@ -237,23 +162,21 @@ AudioTrack::set_state (const XMLNode& node, int version)
 }
 
 XMLNode&
-AudioTrack::state (bool full_state)
+AudioTrack::state (bool save_template)
 {
-	XMLNode& root (Track::state(full_state));
+	XMLNode& root (Track::state (save_template));
 	XMLNode* freeze_node;
-	char buf[64];
 
 	if (_freeze_record.playlist) {
 		XMLNode* inode;
 
 		freeze_node = new XMLNode (X_("freeze-info"));
-		freeze_node->add_property ("playlist", _freeze_record.playlist->name());
-		freeze_node->add_property ("state", enum_2_string (_freeze_record.state));
+		freeze_node->set_property ("playlist", _freeze_record.playlist->name());
+		freeze_node->set_property ("state", _freeze_record.state);
 
 		for (vector<FreezeRecordProcessorInfo*>::iterator i = _freeze_record.processor_info.begin(); i != _freeze_record.processor_info.end(); ++i) {
 			inode = new XMLNode (X_("processor"));
-			(*i)->id.print (buf, sizeof (buf));
-			inode->add_property (X_("id"), buf);
+			inode->set_property (X_ ("id"), (*i)->id.to_s ());
 			inode->add_child_copy ((*i)->state);
 
 			freeze_node->add_child_nocopy (*inode);
@@ -262,7 +185,7 @@ AudioTrack::state (bool full_state)
 		root.add_child_nocopy (*freeze_node);
 	}
 
-	root.add_property (X_("mode"), enum_2_string (_mode));
+	root.set_property (X_("mode"), _mode);
 
 	return root;
 }
@@ -272,7 +195,6 @@ AudioTrack::set_state_part_two ()
 {
 	XMLNode* fnode;
 	XMLProperty const * prop;
-	LocaleGuard lg;
 
 	/* This is called after all session state has been restored but before
 	   have been made ports and connections are established.
@@ -303,9 +225,7 @@ AudioTrack::set_state_part_two ()
 			}
 		}
 
-		if ((prop = fnode->property (X_("state"))) != 0) {
-			_freeze_record.state = FreezeState (string_2_enum (prop->value(), _freeze_record.state));
-		}
+		fnode->get_property (X_("state"), _freeze_record.state);
 
 		XMLNodeConstIterator citer;
 		XMLNodeList clist = fnode->children();
@@ -327,99 +247,20 @@ AudioTrack::set_state_part_two ()
 	}
 }
 
-/** @param need_butler to be set to true if this track now needs the butler, otherwise it can be left alone
- *  or set to false.
- */
 int
-AudioTrack::roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick, bool& need_butler)
-{
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock, Glib::Threads::TRY_LOCK);
-
-	if (!lm.locked()) {
-		boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-		framecnt_t playback_distance = diskstream->calculate_playback_distance(nframes);
-		if (can_internal_playback_seek(::llabs(playback_distance))) {
-			/* TODO should declick */
-			internal_playback_seek(playback_distance);
-		}
-		return 0;
-	}
-
-	framepos_t transport_frame;
-	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
-
-	if (n_outputs().n_total() == 0 && _processors.empty()) {
-		return 0;
-	}
-
-	if (!_active) {
-		silence (nframes);
-		if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
-			_meter->reset();
-		}
-		return 0;
-	}
-
-	transport_frame = _session.transport_frame();
-
-	int dret;
-	framecnt_t playback_distance;
-
-	if ((nframes = check_initial_delay (nframes, transport_frame)) == 0) {
-
-		/* need to do this so that the diskstream sets its
-		   playback distance to zero, thus causing diskstream::commit
-		   to do nothing.
-		*/
-
-		BufferSet bufs; /* empty set, no matter - nothing will happen */
-
-		dret = diskstream->process (bufs, transport_frame, 0, playback_distance, false);
-		need_butler = diskstream->commit (playback_distance);
-		return dret;
-	}
-
-	_silent = false;
-	_amp->apply_gain_automation(false);
-
-	BufferSet& bufs = _session.get_route_buffers (n_process_buffers ());
-
-	fill_buffers_with_input (bufs, _input, nframes);
-
-	if (_meter_point == MeterInput && ((_monitoring_control->monitoring_choice() & MonitorInput) || _diskstream->record_enabled())) {
-		_meter->run (bufs, start_frame, end_frame, 1.0 /*speed()*/, nframes, true);
-	}
-
-	if ((dret = diskstream->process (bufs, transport_frame, nframes, playback_distance, (monitoring_state() == MonitoringDisk))) != 0) {
-		need_butler = diskstream->commit (playback_distance);
-		silence (nframes);
-		return dret;
-	}
-
-	process_output_buffers (bufs, start_frame, end_frame, nframes, declick, (!diskstream->record_enabled() && _session.transport_rolling()));
-
-	flush_processor_buffers_locked (nframes);
-
-	need_butler = diskstream->commit (playback_distance);
-
-	return 0;
-}
-
-int
-AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nframes,
+AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
 	boost::scoped_array<Sample> mix_buffer (new Sample[nframes]);
-	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
 	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
 
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist());
+	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(playlist());
 
 	assert(apl);
 	assert(buffers.count().n_audio() >= 1);
-	assert ((framecnt_t) buffers.get_audio(0).capacity() >= nframes);
+	assert ((samplecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
 	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), start, nframes) != nframes) {
 		return -1;
@@ -430,7 +271,7 @@ AudioTrack::export_stuff (BufferSet& buffers, framepos_t start, framecnt_t nfram
 	BufferSet::audio_iterator bi = buffers.audio_begin();
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
-		if (n < diskstream->n_channels().n_audio()) {
+		if (n < _disk_reader->output_streams().n_audio()) {
 			if (apl->read (bi->data(), mix_buffer.get(), gain_buffer.get(), start, nframes, n) != nframes) {
 				return -1;
 			}
@@ -506,11 +347,11 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 boost::shared_ptr<Region>
 AudioTrack::bounce (InterThreadInfo& itt)
 {
-	return bounce_range (_session.current_start_frame(), _session.current_end_frame(), itt, main_outs(), false);
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false);
 }
 
 boost::shared_ptr<Region>
-AudioTrack::bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
+AudioTrack::bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint)
 {
 	vector<boost::shared_ptr<Source> > srcs;
@@ -525,9 +366,8 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	boost::shared_ptr<Playlist> new_playlist;
 	string dir;
 	string region_name;
-	boost::shared_ptr<AudioDiskstream> diskstream = audio_diskstream();
 
-	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(diskstream->playlist())) == 0) {
+	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(playlist())) == 0) {
 		return;
 	}
 
@@ -557,7 +397,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 	boost::shared_ptr<Region> res;
 
-	if ((res = _session.write_one_track (*this, _session.current_start_frame(), _session.current_end_frame(),
+	if ((res = _session.write_one_track (*this, _session.current_start_sample(), _session.current_end_sample(),
 					true, srcs, itt, main_outs(), false, false, true)) == 0) {
 		return;
 	}
@@ -608,12 +448,12 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
 	new_playlist->set_orig_track_id (id());
-	new_playlist->add_region (region, _session.current_start_frame());
+	new_playlist->add_region (region, _session.current_start_sample());
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
-	diskstream->use_playlist (boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
-	diskstream->set_record_enabled (false);
+	use_playlist (DataType::AUDIO, boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
+	_disk_writer->set_record_enabled (false);
 
 	_freeze_record.playlist->use(); // prevent deletion
 
@@ -633,7 +473,7 @@ AudioTrack::unfreeze ()
 {
 	if (_freeze_record.playlist) {
 		_freeze_record.playlist->release();
-		audio_diskstream()->use_playlist (_freeze_record.playlist);
+		use_playlist (DataType::AUDIO, _freeze_record.playlist);
 
 		{
 			Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc
@@ -658,13 +498,6 @@ AudioTrack::unfreeze ()
 boost::shared_ptr<AudioFileSource>
 AudioTrack::write_source (uint32_t n)
 {
-	boost::shared_ptr<AudioDiskstream> ds = boost::dynamic_pointer_cast<AudioDiskstream> (_diskstream);
-	assert (ds);
-	return ds->write_source (n);
-}
-
-boost::shared_ptr<Diskstream>
-AudioTrack::diskstream_factory (XMLNode const & node)
-{
-	return boost::shared_ptr<Diskstream> (new AudioDiskstream (_session, node));
+	assert (_disk_writer);
+	return _disk_writer->audio_write_source (n);
 }

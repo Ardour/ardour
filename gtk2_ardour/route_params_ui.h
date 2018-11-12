@@ -36,11 +36,11 @@
 
 #include "ardour/ardour.h"
 
-#include <gtkmm2ext/pane.h>
+#include <widgets/pane.h>
 
 #include "ardour_window.h"
 #include "processor_box.h"
-#include "route_processor_selection.h"
+#include "processor_selection.h"
 #include "latency_gui.h"
 
 namespace ARDOUR {
@@ -58,7 +58,7 @@ class IOSelector;
 
 class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 {
-  public:
+public:
 	RouteParams_UI ();
 	~RouteParams_UI();
 
@@ -66,27 +66,27 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	void session_going_away ();
 	PluginSelector* plugin_selector() { return _plugin_selector; }
 
-  private:
+private:
 	Gtk::VBox                list_vpacker;
 	Gtk::ScrolledWindow      route_select_scroller;
 
 	Gtk::Notebook            notebook;
-	Gtk::Frame		 input_frame;
-	Gtk::Frame		 output_frame;
-	Gtkmm2ext::HPane	 redir_hpane;
+	Gtk::Frame               input_frame;
+	Gtk::Frame               output_frame;
+	ArdourWidgets::HPane     redir_hpane;
 
-	Gtk::Frame		 route_select_frame;
+	Gtk::Frame               route_select_frame;
 
 	Gtk::HBox                route_hpacker;
 	Gtk::VBox                route_vpacker;
 
 	ProcessorBox*            insert_box;
 
-	Gtkmm2ext::HPane	 list_hpane;
+	ArdourWidgets::HPane     list_hpane;
 
-	Gtkmm2ext::HPane	 right_hpane;
+	ArdourWidgets::HPane     right_hpane;
 
-	Gtk::Frame		 route_param_frame;
+	Gtk::Frame               route_param_frame;
 
 	Gtk::VBox                choice_vpacker;
 
@@ -113,7 +113,7 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	IOSelector     * _output_iosel;
 
 	PluginSelector    *_plugin_selector;
-	RouteProcessorSelection  _rr_selection;
+	ProcessorSelection  _p_selection;
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnection _route_processors_connection;
@@ -160,8 +160,8 @@ class RouteParams_UI : public ArdourWindow, public PBD::ScopedConnectionList
 	void route_selected();
 	//void route_unselected (gint row, gint col, GdkEvent *ev);
 
-	void setup_io_frames();
-	void cleanup_io_frames();
+	void setup_io_samples();
+	void cleanup_io_samples();
 	void cleanup_view(bool stopupdate = true);
 	void cleanup_latency_frame ();
 	void setup_latency_frame ();

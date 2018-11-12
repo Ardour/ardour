@@ -47,7 +47,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	ControlProtocol (Session&, std::string name);
 	virtual ~ControlProtocol();
 
-	std::string name() const { return _name; }
+	virtual std::string name() const { return _name; }
 
         virtual int set_active (bool yn);
         bool active() const { return _active; }
@@ -56,6 +56,8 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	virtual bool get_feedback () const { return false; }
 
 	virtual void midi_connectivity_established () {}
+
+	virtual void stripable_selection_changed () = 0;
 
 	PBD::Signal0<void> ActiveChanged;
 
@@ -84,13 +86,6 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ToggleStripableSelection;
 	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > RemoveStripableFromSelection;
 	static PBD::Signal0<void>          ClearStripableSelection;
-
-	/* signals that one UI (e.g. the GUI) can emit to get all other UI's to
-	   respond. Typically this will always be GUI->"others" - the GUI pays
-	   no attention to these signals.
-	*/
-
-	static PBD::Signal1<void,StripableNotificationListPtr> StripableSelectionChanged;
 
 	static boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable ();
 	static void set_first_selected_stripable (boost::shared_ptr<ARDOUR::Stripable>);
@@ -146,6 +141,7 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 
         static const std::string state_node_name;
         static StripableNotificationList const & last_selected() { return _last_selected; }
+        static void notify_stripable_selection_changed (StripableNotificationListPtr);
 
   protected:
 	std::vector<boost::shared_ptr<ARDOUR::Route> > route_table;
@@ -158,14 +154,12 @@ class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::Scope
 	LIBCONTROLCP_LOCAL ControlProtocol (const ControlProtocol&); /* noncopyable */
         bool _active;
 
-
         static Glib::Threads::Mutex special_stripable_mutex;
         static boost::weak_ptr<ARDOUR::Stripable> _leftmost_mixer_stripable;
         static boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
         static StripableNotificationList _last_selected;
-        static void stripable_selection_changed (StripableNotificationListPtr);
-        static bool selection_connected;
         static PBD::ScopedConnection selection_connection;
+        static bool selection_connected;
 };
 
 extern "C" {

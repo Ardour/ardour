@@ -30,11 +30,11 @@ class Editor;
 
 class RulerDialog : public ArdourDialog
 {
-  public:
+public:
 	RulerDialog ();
 	~RulerDialog ();
 
-  private:
+private:
 	Gtk::CheckButton samples_button;
 	Gtk::CheckButton timecode_button;
 	Gtk::CheckButton minsec_button;
@@ -48,7 +48,6 @@ class RulerDialog : public ArdourDialog
 	Gtk::CheckButton video_button;
 
 	void connect_action (Gtk::CheckButton& button, std::string const &action_name_part);
-	void on_response (int);
 };
 
 #endif /* __gtk_ardour_add_route_dialog_h__ */

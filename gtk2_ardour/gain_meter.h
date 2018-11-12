@@ -23,14 +23,16 @@
 #include <vector>
 #include <map>
 
-#include <gtkmm/box.h>
 #include <gtkmm/adjustment.h>
-#include <gtkmm/frame.h>
-#include <gtkmm/eventbox.h>
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/table.h>
 #include <gtkmm/drawingarea.h>
-#include <gdkmm/colormap.h>
+#include <gtkmm/eventbox.h>
+#include <gtkmm/frame.h>
+#include <gtkmm/table.h>
+
+//#include <gdkmm/colormap.h>
 
 #include "pbd/signals.h"
 
@@ -38,11 +40,9 @@
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
-
-#include "gtkmm2ext/click_box.h"
-#include "gtkmm2ext/focus_entry.h"
-#include "gtkmm2ext/slider_controller.h"
+#include "widgets/ardour_button.h"
+#include "widgets/focus_entry.h"
+#include "widgets/slider_controller.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -57,9 +57,7 @@ namespace ARDOUR {
 	class Amp;
 	class Automatable;
 }
-namespace Gtkmm2ext {
-	class FastMeter;
-}
+
 namespace Gtk {
 	class Menu;
 }
@@ -72,12 +70,12 @@ enum MeterPointChangeTarget {
 
 class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 {
-  public:
-        GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
+public:
+	GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           boost::shared_ptr<ARDOUR::Amp> amp,
 	                           boost::shared_ptr<ARDOUR::GainControl> control);
 
@@ -97,7 +95,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	boost::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	Gtkmm2ext::SliderController& get_gain_slider() const { return *gain_slider; }
+	ArdourWidgets::SliderController& get_gain_slider() const { return *gain_slider; }
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.
@@ -108,15 +106,12 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	static std::string short_astate_string (ARDOUR::AutoState);
 	static std::string _astate_string (ARDOUR::AutoState, bool);
 
-	static std::string astyle_string (ARDOUR::AutoStyle);
-	static std::string short_astyle_string (ARDOUR::AutoStyle);
-	static std::string _astyle_string (ARDOUR::AutoStyle, bool);
-
-  protected:
+protected:
 
 	friend class MixerStrip;
 	friend class MeterStrip;
 	friend class RouteTimeAxisView;
+	friend class VCAMasterStrip;
 	boost::shared_ptr<ARDOUR::Route> _route;
 	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
 	boost::shared_ptr<ARDOUR::Amp> _amp;
@@ -127,25 +122,22 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool ignore_toggle;
 	bool next_release_selects;
 
-	Gtkmm2ext::SliderController *gain_slider;
-	Gtk::Adjustment              gain_adjustment;
-	Gtkmm2ext::FocusEntry        gain_display;
-	Gtkmm2ext::FocusEntry        peak_display;
-//	Gtk::Button                  peak_display;
-	Gtk::DrawingArea             meter_metric_area;
-	Gtk::DrawingArea             meter_ticks1_area;
-	Gtk::DrawingArea             meter_ticks2_area;
-	LevelMeterHBox              *level_meter;
+	ArdourWidgets::SliderController* gain_slider;
+	Gtk::Adjustment                  gain_adjustment;
+	ArdourWidgets::FocusEntry        gain_display;
+	ArdourWidgets::FocusEntry        peak_display;
+	Gtk::DrawingArea                 meter_metric_area;
+	Gtk::DrawingArea                 meter_ticks1_area;
+	Gtk::DrawingArea                 meter_ticks2_area;
+	LevelMeterHBox*                  level_meter;
 
 	sigc::connection gain_watching;
 
-	ArdourButton gain_automation_style_button;
-	ArdourButton gain_automation_state_button;
+	ArdourWidgets::ArdourButton gain_automation_state_button;
 
 	Gtk::Menu gain_astate_menu;
-	Gtk::Menu gain_astyle_menu;
 
-	ArdourButton meter_point_button;
+	ArdourWidgets::ArdourButton meter_point_button;
 
 	Gtk::Menu meter_point_menu;
 
@@ -153,13 +145,10 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 	bool gain_astate_propagate;
 	static sigc::signal<void, ARDOUR::AutoState> ChangeGainAutomationState;
 
-	gint gain_automation_style_button_event (GdkEventButton *);
 	gint gain_automation_state_button_event (GdkEventButton *);
-	gint pan_automation_style_button_event (GdkEventButton *);
 	gint pan_automation_state_button_event (GdkEventButton *);
 
 	void gain_automation_state_changed();
-	void gain_automation_style_changed();
 
 	void setup_gain_adjustment ();
 	Width _width;
@@ -180,6 +169,7 @@ class GainMeterBase : virtual public sigc::trackable, ARDOUR::SessionHandlePtr
 
 	gint meter_button_press (GdkEventButton*, uint32_t);
 
+	bool peak_button_press (GdkEventButton*);
 	bool peak_button_release (GdkEventButton*);
 	bool gain_key_press (GdkEventKey*);
 
@@ -221,9 +211,9 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
 	virtual ~GainMeter ();
 
 	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-				   boost::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           boost::shared_ptr<ARDOUR::Amp> amp,
-				   boost::shared_ptr<ARDOUR::GainControl> control);
+	                           boost::shared_ptr<ARDOUR::GainControl> control);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

@@ -40,6 +40,7 @@ class PluginPinWindowProxy;
 
 namespace ARDOUR {
 
+class Location;
 class Session;
 class Route;
 
@@ -52,7 +53,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	Processor(Session&, const std::string& name);
 	Processor (const Processor& other);
 
-	virtual ~Processor() { }
+	virtual ~Processor();
 
 	virtual std::string display_name() const { return SessionObject::name(); }
 
@@ -68,7 +69,19 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	bool get_next_ab_is_active () const { return _next_ab_is_active; }
 	void set_next_ab_is_active (bool yn) { _next_ab_is_active = yn; }
 
-	virtual framecnt_t signal_latency() const { return 0; }
+	virtual samplecnt_t signal_latency() const { return 0; }
+
+	virtual void set_input_latency (samplecnt_t cnt) { _input_latency = cnt; }
+	samplecnt_t input_latency () const               { return _input_latency; }
+
+	virtual void set_output_latency (samplecnt_t cnt) { _output_latency = cnt; }
+	samplecnt_t output_latency () const               { return _output_latency; }
+
+	virtual void set_capture_offset (samplecnt_t cnt) { _capture_offset = cnt; }
+	samplecnt_t capture_offset () const               { return _capture_offset; }
+
+	virtual void set_playback_offset (samplecnt_t cnt) { _playback_offset = cnt; }
+	samplecnt_t playback_offset () const               { return _playback_offset; }
 
 	virtual int set_block_size (pframes_t /*nframes*/) { return 0; }
 	virtual bool requires_fixed_sized_buffers() const { return false; }
@@ -76,8 +89,8 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	/** @param result_required true if, on return from this method, @a bufs is required to contain valid data;
 	 *  if false, the method need not bother writing to @a bufs if it doesn't want to.
 	 */
-	virtual void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
-	virtual void silence (framecnt_t /*nframes*/, framepos_t /*start_frame*/) {}
+	virtual void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/) {}
+	virtual void silence (samplecnt_t nframes, samplepos_t start_sample) { automation_run (start_sample, nframes); }
 
 	virtual void activate ()   { _pending_active = true; ActiveChanged(); }
 	virtual void deactivate () { _pending_active = false; ActiveChanged(); }
@@ -96,6 +109,8 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	virtual void realtime_handle_transport_stopped () {}
 	virtual void realtime_locate () {}
 
+	virtual void set_loop (Location *loc) { _loop_location = loc; }
+
 	/* most processors won't care about this, but plugins that
 	   receive MIDI or similar data from an input source that
 	   may suddenly go "quiet" because of monitoring changes
@@ -108,8 +123,7 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	   smoothly.
 	 */
 
-	virtual XMLNode& state (bool full);
-	XMLNode& get_state (void);
+	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
 	virtual void set_pre_fader (bool);
@@ -118,8 +132,12 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	PBD::Signal0<void>                     BypassableChanged;
 	PBD::Signal2<void,ChanCount,ChanCount> ConfigurationChanged;
 
-	void  set_ui (void*);
-	void* get_ui () const { return _ui_pointer; }
+	/* cross-thread signals.
+	 * This allows control-surfaces to show/hide a plugin GUI.
+	 */
+	PBD::Signal0<void> ToggleUI;
+	PBD::Signal0<void> ShowUI;
+	PBD::Signal0<void> HideUI;
 
 	ProcessorWindowProxy * window_proxy () const { return _window_proxy; }
 	void set_window_proxy (ProcessorWindowProxy* wp) { _window_proxy = wp; }
@@ -131,7 +149,10 @@ class LIBARDOUR_API Processor : public SessionObject, public Automatable, public
 	SessionObject* owner() const;
 
 protected:
+	virtual XMLNode& state ();
 	virtual int set_state_2X (const XMLNode&, int version);
+
+	bool map_loop_range (samplepos_t& start, samplepos_t& end) const;
 
 	int       _pending_active;
 	bool      _active;
@@ -145,6 +166,13 @@ protected:
 	ProcessorWindowProxy *_window_proxy;
 	PluginPinWindowProxy *_pinmgr_proxy;
 	SessionObject* _owner;
+	// relative to route
+	samplecnt_t _input_latency;
+	samplecnt_t _output_latency;
+	// absolute alignment to session i/o
+	samplecnt_t _capture_offset;
+	samplecnt_t _playback_offset;
+	Location*   _loop_location;
 };
 
 } // namespace ARDOUR

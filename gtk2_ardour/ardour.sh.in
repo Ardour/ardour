@@ -51,7 +51,7 @@ export ARDOUR_DLL_PATH=@LIBDIR@
 # NSM needs a path to this script
 #
 
-export ARDOUR_SELF="$0"
+export ARDOUR_SELF=$(basename "$0")
 
 #
 # VAMP has its own lookup path

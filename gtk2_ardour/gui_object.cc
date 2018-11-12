@@ -46,7 +46,7 @@ GUIObjectState::get_or_add_node (XMLNode* parent, const string& id)
 	XMLNode* child = get_node (parent, id);
 	if (!child) {
 		child = new XMLNode (X_("Object"));
-		child->add_property (X_("id"), id);
+		child->set_property (X_("id"), id);
 		parent->add_child_nocopy (*child);
 	}
 	return child;
@@ -69,7 +69,7 @@ GUIObjectState::get_or_add_node (const string& id)
 	}
 	//assert (get_node (&_state, id) == 0); // XXX performance penalty due to get_node()
 	XMLNode* child = new XMLNode (X_("Object"));
-	child->add_property (X_("id"), id);
+	child->set_property (X_("id"), id);
 	_state.add_child_nocopy (*child);
 	object_map[id] = child;
 	return child;

@@ -38,8 +38,17 @@ class LIBPBD_API FileArchive
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
 
-		int create (const std::string& srcdir);
-		int create (const std::map <std::string, std::string>& filemap);
+		/* these are mapped to libarchive's lzmaz
+		 * compression level 0..9
+		 */
+		enum CompressionLevel {
+			CompressNone = -1,
+			CompressFast = 0,
+			CompressGood = 6
+		};
+
+		int create (const std::string& srcdir, CompressionLevel compression_level = CompressGood);
+		int create (const std::map <std::string, std::string>& filemap, CompressionLevel compression_level = CompressGood);
 
 		PBD::Signal2<void, size_t, size_t> progress; // TODO
 

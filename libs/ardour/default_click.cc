@@ -2279,7 +2279,7 @@ const Sample Session::default_click_emphasis[] = {
 
 };
 
-const framecnt_t Session::default_click_emphasis_length = sizeof (default_click_emphasis) / sizeof (default_click_emphasis[0]);
+const samplecnt_t Session::default_click_emphasis_length = sizeof (default_click_emphasis) / sizeof (default_click_emphasis[0]);
 
 const Sample Session::default_click[] = {
 
@@ -4595,4 +4595,4 @@ const Sample Session::default_click[] = {
 
 };
 
-const framecnt_t Session::default_click_length = sizeof (default_click) / sizeof (default_click[0]);
+const samplecnt_t Session::default_click_length = sizeof (default_click) / sizeof (default_click[0]);

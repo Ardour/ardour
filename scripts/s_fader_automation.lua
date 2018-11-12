@@ -1,8 +1,8 @@
 ardour { ["type"] = "Snippet", name = "Fader Automation" }
 
 function factory () return function ()
-	local playhead = Session:transport_frame ()
-	local samplerate = Session:nominal_frame_rate ()
+	local playhead = Session:transport_sample ()
+	local samplerate = Session:nominal_sample_rate ()
 
 	-- get selected tracks
 	rl = Editor:get_selection ().tracks:routelist ()
@@ -15,35 +15,30 @@ function factory () return function ()
 	for r in rl:iter () do
 		local ac = r:amp ():gain_control () -- ARDOUR:AutomationControl
 		local al = ac:alist () -- ARDOUR:AutomationList (state, high-level)
-		local cl = al:list ()  -- Evoral:ControlList (actual events)
-
-		if cl:isnil () then
-			goto out
-		end
 
 		-- set automation state to "Touch"
 		ac:set_automation_state (ARDOUR.AutoState.Touch)
 
 		-- query the value at the playhead position
-		local g = cl:eval (playhead)
+		local g = al:eval (playhead)
 
 		-- get state for undo
 		local before = al:get_state ()
 
 		-- delete all events after the playhead...
-		cl:truncate_end (playhead)
+		al:truncate_end (playhead)
 
 		-- ...and generate some new ones.
 		for i=0,50 do
 			-- use a sqrt fade-out (the shape is recognizable, and otherwise
 			-- not be possible to achieve with existing ardour fade shapes)
-			cl:add (playhead + i * samplerate / 50,
+			al:add (playhead + i * samplerate / 50,
 			        g * (1 - math.sqrt (i / 50)),
 			        false, true)
 		end
 
 		-- remove dense events
-		cl:thin (20)
+		al:thin (20)
 
 		-- save undo
 		local after = al:get_state ()

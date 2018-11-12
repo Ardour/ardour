@@ -67,8 +67,8 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	void restore_settings_mask (int i)  { _restore_settings_mask = i;}
 	int restore_settings_mask () const { return _restore_settings_mask;}
 
-	void set_offset (ARDOUR::frameoffset_t);
-	void manual_seek (ARDOUR::framepos_t, bool, ARDOUR::frameoffset_t);
+	void set_offset (ARDOUR::sampleoffset_t);
+	void manual_seek (ARDOUR::samplepos_t, bool, ARDOUR::sampleoffset_t);
 	void srsupdate ();
 	void querystate ();
 	bool synced_by_manual_seeks() { return sync_by_manual_seek; }
@@ -98,8 +98,8 @@ class VideoMonitor : public sigc::trackable , public ARDOUR::SessionHandlePtr, p
 	XJSettings xjadeo_settings;
 
 	void xjadeo_sync_setup ();
-	ARDOUR::framepos_t manually_seeked_frame;
-	ARDOUR::frameoffset_t video_offset;
+	ARDOUR::samplepos_t manually_seeked_frame;
+	ARDOUR::sampleoffset_t video_offset;
 	bool sync_by_manual_seek;
 	sigc::connection clock_connection;
 	sigc::connection state_connection;

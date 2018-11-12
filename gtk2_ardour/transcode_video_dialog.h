@@ -22,7 +22,15 @@
 
 #include <string>
 
-#include <gtkmm.h>
+#include <gtkmm/adjustment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/label.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/progressbar.h>
+#include <gtkmm/spinbutton.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -41,7 +49,7 @@ enum VtlTranscodeOption {
  */
 class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
-  public:
+public:
 	TranscodeVideoDialog (ARDOUR::Session*, std::string);
 	~TranscodeVideoDialog ();
 
@@ -50,7 +58,11 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	VtlTranscodeOption import_option ();
 	bool detect_ltc () { return ltc_detect.get_active (); }
 
-  private:
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
+private:
 	void on_show ();
 	void open_browse_dialog ();
 	void abort_clicked ();
@@ -62,7 +74,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 	void update_bitrate ();
 	void launch_audioonly ();
 	void launch_transcode ();
-  void launch_extract ();
+	void launch_extract ();
 	void dialog_progress_mode ();
 	bool aborted;
 	bool pending_audio_extract;
@@ -72,7 +84,7 @@ class TranscodeVideoDialog : public ArdourDialog , public PBD::ScopedConnectionL
 
 	PBD::Signal0<void> StartNextStage;
 	void finished ();
-	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void update_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 
 	TranscodeFfmpeg *transcoder;
 

@@ -36,7 +36,7 @@ class TimeAxisView;
  */
 class RegionSelection : public std::list<RegionView*>
 {
-  public:
+public:
 	RegionSelection();
 	RegionSelection (const RegionSelection&);
 
@@ -47,15 +47,16 @@ class RegionSelection : public std::list<RegionView*>
 	void sort_by_position_and_track ();
 
 	bool contains (RegionView*) const;
+	bool contains (boost::shared_ptr<ARDOUR::Region>) const;
 	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
 
-	framepos_t start () const;
+	samplepos_t start () const;
 
 	/* "end" collides with list<>::end */
 
-	framepos_t end_frame () const;
+	samplepos_t end_sample () const;
 
 	const std::list<RegionView *>& by_layer() const { return _bylayer; }
 	void  by_position (std::list<RegionView*>&) const;
@@ -68,7 +69,7 @@ class RegionSelection : public std::list<RegionView*>
 
 	ARDOUR::RegionList regionlist () const;
 
-  private:
+private:
 	void remove_it (RegionView*);
 
 	void add_to_layer (RegionView *);

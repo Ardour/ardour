@@ -46,8 +46,8 @@ class SceneChanger : public SessionHandleRef
         SceneChanger (Session& s) : SessionHandleRef (s) {}
         virtual ~SceneChanger () {};
 
-	virtual void run (framepos_t start, framepos_t end) = 0;
-	virtual void locate (framepos_t where) = 0;
+	virtual void run (samplepos_t start, samplepos_t end) = 0;
+	virtual void locate (samplepos_t where) = 0;
 };
 
 } /* namespace */

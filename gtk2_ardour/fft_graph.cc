@@ -420,8 +420,6 @@ FFTGraph::draw_scales (cairo_t* cr)
 void
 FFTGraph::redraw ()
 {
-	Glib::Threads::Mutex::Lock lm  (_a_window->track_list_lock);
-
 	assert (_surface);
 	cairo_t* cr = cairo_create (_surface);
 
@@ -432,6 +430,8 @@ FFTGraph::redraw ()
 		queue_draw ();
 		return;
 	}
+
+	Glib::Threads::Mutex::Lock lm  (_a_window->track_list_lock);
 
 	if (!_a_window->track_list_ready) {
 		cairo_destroy (cr);
@@ -651,7 +651,7 @@ FFTGraph::on_size_allocate (Gtk::Allocation & alloc)
 void
 FFTGraph::update_size ()
 {
-	framecnt_t SR = PublicEditor::instance ().session ()->nominal_frame_rate ();
+	samplecnt_t SR = PublicEditor::instance ().session ()->nominal_sample_rate ();
 	_fft_start = SR / (double)_dataSize;
 	_fft_end = .5 * SR;
 	_fft_log_base = logf (.5 * _dataSize);

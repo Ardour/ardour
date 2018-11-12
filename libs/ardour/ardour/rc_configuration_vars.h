@@ -50,7 +50,7 @@ CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming",
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
 CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)
-CONFIG_VARIABLE (bool, send_mmc, "send-mmc", true)
+CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
 CONFIG_VARIABLE (bool, send_midi_clock, "send-midi-clock", false)
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
@@ -58,7 +58,7 @@ CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)
 CONFIG_VARIABLE (int32_t, mmc_send_device_id, "mmc-send-device-id", 0)
 CONFIG_VARIABLE (int32_t, initial_program_change, "initial-program-change", -1)
 CONFIG_VARIABLE (bool, first_midi_bank_is_zero, "display-first-midi-bank-as-zero", false)
-CONFIG_VARIABLE (int32_t, inter_scene_gap_frames, "inter-scene-gap-frames", 1)
+CONFIG_VARIABLE (int32_t, inter_scene_gap_samples, "inter-scene-gap-samples", 1)
 CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selection", 1)
 
 /* Timecode and related */
@@ -89,8 +89,8 @@ CONFIG_VARIABLE (bool, use_tranzport,  "use-tranzport", false)
 
 /* disk operations */
 
-CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::Diskstream::default_disk_read_chunk_frames() * sizeof (ARDOUR::Sample))
-CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::Diskstream::default_disk_write_chunk_frames() * sizeof (ARDOUR::Sample))
+	CONFIG_VARIABLE (uint32_t, minimum_disk_read_bytes,  "minimum-disk-read-bytes", ARDOUR::DiskReader::default_chunk_samples() * sizeof (ARDOUR::Sample))
+CONFIG_VARIABLE (uint32_t, minimum_disk_write_bytes,  "minimum-disk-write-bytes", ARDOUR::DiskWriter::default_chunk_samples() * sizeof (ARDOUR::Sample))
 CONFIG_VARIABLE (float, midi_readahead,  "midi-readahead", 1.0)
 CONFIG_VARIABLE (BufferingPreset, buffering_preset, "buffering-preset", Medium)
 CONFIG_VARIABLE (float, audio_capture_buffer_seconds, "capture-buffer-seconds", 5.0)
@@ -142,11 +142,12 @@ CONFIG_VARIABLE (std::string, monitor_bus_preferred_bundle, "monitor-bus-preferr
 CONFIG_VARIABLE (bool, quieten_at_speed, "quieten-at-speed", true)
 
 CONFIG_VARIABLE (bool, link_send_and_route_panner, "link-send-and-route-panner", true)
-CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "https://community.ardour.org/node/7596")
+CONFIG_VARIABLE (std::string, midi_audition_synth_uri, "midi-audition-synth-uri", "@default@")
 
 /* click */
 
 CONFIG_VARIABLE (bool, clicking, "clicking", false)
+CONFIG_VARIABLE (bool, click_record_only, "click-record-only", false)
 CONFIG_VARIABLE (std::string, click_sound, "click-sound", "")
 CONFIG_VARIABLE (std::string, click_emphasis_sound, "click-emphasis-sound", "")
 CONFIG_VARIABLE (gain_t, click_gain, "click-gain", 1.0)
@@ -169,8 +170,8 @@ CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", true)
 #else
 CONFIG_VARIABLE (bool, loop_is_mode, "loop-is-mode", false)
 #endif
-CONFIG_VARIABLE (framecnt_t, preroll, "preroll", 0)
-CONFIG_VARIABLE (framecnt_t, postroll, "postroll", 0)
+CONFIG_VARIABLE (samplecnt_t, preroll, "preroll", 0)
+CONFIG_VARIABLE (samplecnt_t, postroll, "postroll", 0)
 CONFIG_VARIABLE (float, rf_speed, "rf-speed", 2.0f)
 CONFIG_VARIABLE (float, shuttle_speed_factor, "shuttle-speed-factor", 1.0f) // used for MMC shuttle
 CONFIG_VARIABLE (float, shuttle_speed_threshold, "shuttle-speed-threshold", 5.0f) // used for MMC shuttle
@@ -229,7 +230,7 @@ CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (uint32_t, max_recent_templates, "max-recent-templates", 10)
 CONFIG_VARIABLE (double, automation_thinning_factor, "automation-thinning-factor", 20.0)
 CONFIG_VARIABLE (std::string, freesound_download_dir, "freesound-download-dir", Glib::get_home_dir() + "/Freesound/snd")
-CONFIG_VARIABLE (framecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
+CONFIG_VARIABLE (samplecnt_t, range_location_minimum, "range-location-minimum", 128) /* samples */
 CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 
 /* plugin related */
@@ -240,8 +241,8 @@ CONFIG_VARIABLE (bool, use_windows_vst, "use-windows-vst", true)
 CONFIG_VARIABLE (bool, use_lxvst, "use-lxvst", true)
 CONFIG_VARIABLE (bool, use_macvst, "use-macvst", true)
 CONFIG_VARIABLE (bool, discover_vst_on_start, "discover-vst-on-start", false)
-CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", true)
-CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 600) /* deciseconds, per plugin, <= 0 no timeout */
+CONFIG_VARIABLE (bool, verbose_plugin_scan, "verbose-plugin-scan", false)
+CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 1200) /* deciseconds, per plugin, <= 0 no timeout */
 CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)

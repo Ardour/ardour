@@ -23,13 +23,14 @@
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
 
-#include "gtkmm2ext/bindable_button.h"
-#include "gtkmm2ext/tearoff.h"
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/utils.h"
 
 #include <gtkmm/menu.h>
 #include <gtkmm/menuitem.h>
+
+#include "widgets/tearoff.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -46,13 +47,13 @@
 #include "monitor_section.h"
 #include "public_editor.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -88,6 +89,7 @@ MonitorSection::MonitorSection (Session* s)
 	, solo_mute_override_button (ArdourButton::led_default_elements)
 	, toggle_processorbox_button (ArdourButton::default_elements)
 	, _inhibit_solo_model_update (false)
+	, _rr_selection ()
 	, _ui_initialized (false)
 {
 
@@ -439,9 +441,9 @@ MonitorSection::MonitorSection (Session* s)
 	vpacker.pack_start (master_packer,        false, false, PX_SCALE(10));
 	vpacker.pack_end   (*out_packer,          false, false,
 #ifdef MIXBUS
-			scrollbar_height - 2 /* no outer frame */
+			scrollbar_height - 2 /* no outer sample */
 #else
-			scrollbar_height + 2 /* frame borders */
+			scrollbar_height + 2 /* sample borders */
 #endif
 			);
 
@@ -1178,6 +1180,10 @@ MonitorSection::map_state ()
 void
 MonitorSection::do_blink (bool onoff)
 {
+	if (!UIConfiguration::instance().get_blink_alert_indicators ()) {
+		onoff = true;
+	}
+
 	solo_blink (onoff);
 	audition_blink (onoff);
 }

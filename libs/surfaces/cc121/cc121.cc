@@ -44,11 +44,11 @@
 #include "ardour/audioengine.h"
 #include "ardour/amp.h"
 #include "ardour/bundle.h"
-#include "ardour/controllable_descriptor.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/monitor_control.h"
 #include "ardour/monitor_processor.h"
 #include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
@@ -114,8 +114,6 @@ CC121::CC121 (Session& s)
 		session->engine().make_port_name_non_relative (outp->name())
 		);
 
-
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&CC121::gui_track_selection_changed, this, _1), this);
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&CC121::connection_handler, this, _1, _2, _3, _4, _5), this);
@@ -270,19 +268,12 @@ CC121::stop ()
 void
 CC121::thread_init ()
 {
-	struct sched_param rtparam;
-
 	pthread_set_name (event_loop_name().c_str());
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
-		// do we care? not particularly.
-	}
+	set_thread_priority ();
 }
 
 void
@@ -318,7 +309,7 @@ CC121::button_press_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-			  framepos_t now = session->engine().sample_time();
+			  samplepos_t now = session->engine().sample_time();
 			  gain->start_touch (now);
 			}
 		}
@@ -365,8 +356,8 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  if (_current_stripable) {
 	    boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 	    if (gain) {
-	      framepos_t now = session->engine().sample_time();
-	      gain->stop_touch (true, now);
+	      samplepos_t now = session->engine().sample_time();
+	      gain->stop_touch (now);
 	    }
 	  }
 	  break;
@@ -398,46 +389,54 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
         DEBUG_TRACE (DEBUG::CC121, "encoder handler");
 
+	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
 	/* Extract absolute value*/
 	float adj = static_cast<float>(tb->value & ~0x40);
-
 	/* Get direction (negative values start at 0x40)*/
 	float sign = (tb->value & 0x40) ? -1.0 : 1.0;
+
+	/* Get amount of change (encoder clicks) * (change per click)
+	 * Create an exponential curve
+	 */
+	float curve = sign * powf (adj, (1.f + 10.f) / 10.f);
+	adj = curve * (31.f / 1000.f);
+
 	switch(tb->controller_number) {
 	case 0x10:
 	  /* pan */
-	  DEBUG_TRACE (DEBUG::CC121, "PAN encoder");
-	  if (_current_stripable) {
-	    /* Get amount of change (encoder clicks) * (change per click)*/
-	    /*Create an exponential curve*/
-	    float curve = sign * powf (adj, (1.f + 10.f) / 10.f);
-	    adj = curve * (31.f / 1000.f);
-	    ardour_pan_azimuth (adj);
-	  }
+	  if (r) { set_controllable (r->pan_azimuth_control(), adj); }
 	  break;
 	case 0x20:
 	  /* EQ 1 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(0), adj); }
 	  break;
 	case 0x21:
 	  /* EQ 2 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(1), adj); }
 	  break;
 	case 0x22:
 	  /* EQ 3 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(2), adj); }
 	  break;
 	case 0x23:
 	  /* EQ 4 Q */
+	  if (r) { set_controllable (r->eq_q_controllable(3), adj); }
 	  break;
 	case 0x30:
 	  /* EQ 1 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(0), adj); }
 	  break;
 	case 0x31:
 	  /* EQ 2 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(1), adj); }
 	  break;
 	case 0x32:
 	  /* EQ 3 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(2), adj); }
 	  break;
 	case 0x33:
 	  /* EQ 4 Frequency */
+	  if (r) { set_controllable (r->eq_freq_controllable(3), adj); }
 	  break;
 	case 0x3C:
 	  /* AI */
@@ -460,15 +459,19 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  break;
 	case 0x40:
 	  /* EQ 1 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(0), adj); }
 	  break;
 	case 0x41:
 	  /* EQ 2 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(1), adj); }
 	  break;
 	case 0x42:
 	  /* EQ 3 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(2), adj); }
 	  break;
 	case 0x43:
 	  /* EQ 4 Gain */
+	  if (r) { set_controllable (r->eq_gain_controllable(3), adj); }
 	  break;
 	case 0x50:
 	  /* Value */
@@ -703,7 +706,7 @@ CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::Asyn
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::CC121, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		framepos_t now = session->engine().sample_time();
+		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -778,13 +781,12 @@ CC121::set_state (const XMLNode& node, int version)
 
 	for (XMLNodeList::const_iterator n = node.children().begin(); n != node.children().end(); ++n) {
 		if ((*n)->name() == X_("Button")) {
-			XMLProperty const * prop = (*n)->property (X_("id"));
-			if (!prop) {
+			int32_t xid;
+			if (!node.get_property ("id", xid)) {
 				continue;
 			}
-			int xid = atoi (prop->value());
 			ButtonMap::iterator b = buttons.find (ButtonID (xid));
-			if (b == buttons.end()) {
+			if (b == buttons.end ()) {
 				continue;
 			}
 			b->second.set_state (**n);
@@ -979,13 +981,8 @@ CC121::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, bool onoff)
 int
 CC121::Button::set_state (XMLNode const& node)
 {
-	const XMLProperty* prop = node.property ("id");
-	if (!prop) {
-		return -1;
-	}
-
-	int xid = atoi (prop->value());
-	if (xid != id) {
+	int32_t xid;
+	if (node.get_property ("id", xid) && xid != id) {
 		return -1;
 	}
 
@@ -995,16 +992,17 @@ CC121::Button::set_state (XMLNode const& node)
 	state_pairs.push_back (make_pair (string ("plain"), ButtonState (0)));
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
-		string propname;
+		string prop_name;
+		string prop_value;
 
-		propname = sp->first + X_("-press");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), true, sp->second);
+		prop_name = sp->first + X_("-press");
+		if (node.get_property (prop_name.c_str(), prop_value)) {
+			set_action (prop_value, true, sp->second);
 		}
 
-		propname = sp->first + X_("-release");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), false, sp->second);
+		prop_name = sp->first + X_("-release");
+		if (node.get_property (prop_name.c_str(), prop_value)) {
+			set_action (prop_value, false, sp->second);
 		}
 	}
 
@@ -1015,10 +1013,8 @@ XMLNode&
 CC121::Button::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Button"));
-	char buf[16];
-	snprintf (buf, sizeof (buf), "%d", id);
 
-	node->add_property (X_("id"), buf);
+	node->set_property (X_("id"), (int32_t)id);
 
 	ToDoMap::const_iterator x;
 	ToDo null;
@@ -1032,13 +1028,13 @@ CC121::Button::get_state () const
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
 		if ((x = on_press.find (sp->second)) != on_press.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
 			}
 		}
 
 		if ((x = on_release.find (sp->second)) != on_release.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
 			}
 		}
 	}
@@ -1047,15 +1043,9 @@ CC121::Button::get_state () const
 }
 
 void
-CC121::gui_track_selection_changed (StripableNotificationListPtr stripables)
+CC121::stripable_selection_changed ()
 {
-	boost::shared_ptr<Stripable> r;
-
-	if (!stripables->empty()) {
-		r = stripables->front().lock();
-	}
-
-	set_current_stripable (r);
+	set_current_stripable (first_selected_stripable());
 }
 
 void
@@ -1086,6 +1076,7 @@ CC121::set_current_stripable (boost::shared_ptr<Stripable> r)
 		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
 			t->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable, this), this);
+			t->monitoring_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_monitoring, this), this);
 		}
 
 		boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
@@ -1192,6 +1183,23 @@ CC121::map_recenable ()
 	} else {
 		get_button (Rec).set_led_state (_output_port, false);
 	}
+	map_monitoring ();
+}
+
+void
+CC121::map_monitoring ()
+{
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+	if (t) {
+	  MonitorState state = t->monitoring_control()->monitoring_state ();
+		if (state == MonitoringInput || state == MonitoringCue) {
+	    get_button(InputMonitor).set_led_state (_output_port, true);
+		} else {
+	    get_button(InputMonitor).set_led_state (_output_port, false);
+		}
+	} else {
+		get_button(InputMonitor).set_led_state (_output_port, false);
+	}
 }
 
 void
@@ -1244,6 +1252,7 @@ CC121::map_stripable_state ()
 		map_recenable ();
 		map_gain ();
 		map_auto ();
+		map_monitoring ();
 
 		if (_current_stripable == session->monitor_out()) {
 			map_cut ();

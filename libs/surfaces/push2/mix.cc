@@ -28,8 +28,9 @@
 #include "pbd/enumwriter.h"
 
 #include "midi++/parser.h"
-#include "timecode/time.h"
-#include "timecode/bbt_time.h"
+
+#include "temporal/time.h"
+#include "temporal/bbt_time.h"
 
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
@@ -43,7 +44,7 @@
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/line.h"
 #include "canvas/rectangle.h"
 #include "canvas/text.h"
@@ -68,6 +69,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 using namespace ArdourCanvas;
 
 MixLayout::MixLayout (Push2& p, Session & s, std::string const & name)
@@ -400,7 +402,7 @@ MixLayout::button_solo ()
 	if (s) {
 		boost::shared_ptr<AutomationControl> ac = s->solo_control();
 		if (ac) {
-			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+			session.set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
 		}
 	}
 }
@@ -434,9 +436,9 @@ MixLayout::strip_vpot_touch (int n, bool touching)
 		boost::shared_ptr<AutomationControl> ac = stripable[n]->gain_control();
 		if (ac) {
 			if (touching) {
-				ac->start_touch (session.audible_frame());
+				ac->start_touch (session.audible_sample());
 			} else {
-				ac->stop_touch (true, session.audible_frame());
+				ac->stop_touch (session.audible_sample());
 			}
 		}
 	}
@@ -448,7 +450,7 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 	if (what_changed.contains (Properties::color)) {
 		lower_backgrounds[which]->set_fill_color (stripable[which]->presentation_info().color());
 
-		if (stripable[which]->presentation_info().selected()) {
+		if (stripable[which]->is_selected()) {
 			lower_text[which]->set_fill_color (contrasting_text_color (stripable[which]->presentation_info().color()));
 			/* might not be a MIDI track, in which case this will
 			   do nothing
@@ -467,7 +469,7 @@ MixLayout::stripable_property_change (PropertyChange const& what_changed, uint32
 			return;
 		}
 
-		if (stripable[which]->presentation_info().selected()) {
+		if (stripable[which]->is_selected()) {
 			show_selection (which);
 		} else {
 			hide_selection (which);
@@ -481,7 +483,7 @@ MixLayout::show_selection (uint32_t n)
 {
 	lower_backgrounds[n]->show ();
 	lower_backgrounds[n]->set_fill_color (stripable[n]->presentation_info().color());
-	lower_text[n]->set_color (ArdourCanvas::contrasting_text_color (lower_backgrounds[n]->fill_color()));
+	lower_text[n]->set_color (contrasting_text_color (lower_backgrounds[n]->fill_color()));
 }
 
 void
@@ -581,7 +583,7 @@ MixLayout::switch_bank (uint32_t base)
 			stripable[n]->solo_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::solo_changed, this, n), &p2);
 			stripable[n]->mute_control()->Changed.connect (stripable_connections, invalidator (*this), boost::bind (&MixLayout::mute_changed, this, n), &p2);
 
-			if (stripable[n]->presentation_info().selected()) {
+			if (stripable[n]->is_selected()) {
 				show_selection (n);
 			} else {
 				hide_selection (n);
@@ -671,7 +673,7 @@ MixLayout::button_select_release ()
 
 	for (int n = 0; n < 8; ++n) {
 		if (stripable[n]) {
-			if (stripable[n]->presentation_info().selected()) {
+			if (stripable[n]->is_selected()) {
 					selected = n;
 					break;
 			}

@@ -32,5 +32,7 @@ const char* const temp_suffix = X_(".tmp");
 const char* const history_suffix = X_(".history");
 const char* const export_preset_suffix = X_(".preset");
 const char* const export_format_suffix = X_(".format");
+const char* const session_archive_suffix = X_(".ardour-session-archive");
+const char* const template_archive_suffix = X_(".ardour-template-archive");
 
 }

@@ -103,57 +103,57 @@ class LIBARDOUR_API AudioRegion : public Region
 	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out.val (); }
 	boost::shared_ptr<AutomationList> envelope() { return _envelope.val (); }
 
-	Evoral::Range<framepos_t> body_range () const;
+	Evoral::Range<samplepos_t> body_range () const;
 
-	virtual framecnt_t read_peaks (PeakData *buf, framecnt_t npeaks,
-			framecnt_t offset, framecnt_t cnt,
-			uint32_t chan_n=0, double frames_per_pixel = 1.0) const;
+	virtual samplecnt_t read_peaks (PeakData *buf, samplecnt_t npeaks,
+			samplecnt_t offset, samplecnt_t cnt,
+			uint32_t chan_n=0, double samples_per_pixel = 1.0) const;
 
 	/* Readable interface */
 
-	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const;
-	virtual framecnt_t readable_length() const { return length(); }
+	virtual samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;
+	virtual samplecnt_t readable_length() const { return length(); }
 
-	virtual framecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-				    framepos_t position,
-				    framecnt_t cnt,
+	virtual samplecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+				    samplepos_t position,
+				    samplecnt_t cnt,
 				    uint32_t   chan_n = 0) const;
 
-	virtual framecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-					   framepos_t position, framecnt_t cnt, uint32_t chan_n=0) const;
+	virtual samplecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
+					   samplepos_t position, samplecnt_t cnt, uint32_t chan_n=0) const;
 
-	virtual framecnt_t read_raw_internal (Sample*, framepos_t, framecnt_t, int channel) const;
+	virtual samplecnt_t read_raw_internal (Sample*, samplepos_t, samplecnt_t, int channel) const;
 
 	XMLNode& state ();
 	XMLNode& get_basic_state ();
 	int set_state (const XMLNode&, int version);
 
-	void fade_range (framepos_t, framepos_t);
+	void fade_range (samplepos_t, samplepos_t);
 
 	bool fade_in_is_default () const;
 	bool fade_out_is_default () const;
 
 	void set_fade_in_active (bool yn);
 	void set_fade_in_shape (FadeShape);
-	void set_fade_in_length (framecnt_t);
-	void set_fade_in (FadeShape, framecnt_t);
+	void set_fade_in_length (samplecnt_t);
+	void set_fade_in (FadeShape, samplecnt_t);
 	void set_fade_in (boost::shared_ptr<AutomationList>);
 
 	void set_fade_out_active (bool yn);
 	void set_fade_out_shape (FadeShape);
-	void set_fade_out_length (framecnt_t);
-	void set_fade_out (FadeShape, framecnt_t);
+	void set_fade_out_length (samplecnt_t);
+	void set_fade_out (FadeShape, samplecnt_t);
 	void set_fade_out (boost::shared_ptr<AutomationList>);
 
 	void set_default_fade_in ();
 	void set_default_fade_out ();
 
-	framecnt_t verify_xfade_bounds (framecnt_t, bool start);
+	samplecnt_t verify_xfade_bounds (samplecnt_t, bool start);
 
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
-	int separate_by_channel (ARDOUR::Session&, std::vector<boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (std::vector<boost::shared_ptr<Region> >&) const;
 
 	/* automation */
 
@@ -174,14 +174,14 @@ class LIBARDOUR_API AudioRegion : public Region
 	void resume_fade_in ();
 	void resume_fade_out ();
 
-	void add_transient (framepos_t where);
-	void remove_transient (framepos_t where);
+	void add_transient (samplepos_t where);
+	void remove_transient (samplepos_t where);
 	void clear_transients ();
 	void set_onsets (AnalysisFeatureList&);
 	void get_transients (AnalysisFeatureList&);
-	void update_transient (framepos_t old_position, framepos_t new_position);
+	void update_transient (samplepos_t old_position, samplepos_t new_position);
 
-	AudioIntervalResult find_silence (Sample, framecnt_t, framecnt_t, InterThreadInfo&) const;
+	AudioIntervalResult find_silence (Sample, samplecnt_t, samplecnt_t, InterThreadInfo&) const;
 
   private:
 	friend class RegionFactory;
@@ -189,7 +189,7 @@ class LIBARDOUR_API AudioRegion : public Region
 	AudioRegion (boost::shared_ptr<AudioSource>);
 	AudioRegion (const SourceList &);
 	AudioRegion (boost::shared_ptr<const AudioRegion>);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, ARDOUR::MusicFrame offset);
+	AudioRegion (boost::shared_ptr<const AudioRegion>, ARDOUR::MusicSample offset);
 	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&);
 	AudioRegion (SourceList &);
 
@@ -216,7 +216,7 @@ class LIBARDOUR_API AudioRegion : public Region
 	void recompute_gain_at_end ();
 	void recompute_gain_at_start ();
 
-	framecnt_t read_from_sources (SourceList const &, framecnt_t, Sample *, framepos_t, framecnt_t, uint32_t) const;
+	samplecnt_t read_from_sources (SourceList const &, samplecnt_t, Sample *, samplepos_t, samplecnt_t, uint32_t) const;
 
 	void recompute_at_start ();
 	void recompute_at_end ();
@@ -244,7 +244,7 @@ class LIBARDOUR_API AudioRegion : public Region
   protected:
 	/* default constructor for derived (compound) types */
 
-	AudioRegion (Session& s, framepos_t, framecnt_t, std::string name);
+	AudioRegion (Session& s, samplepos_t, samplecnt_t, std::string name);
 
 	int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 };

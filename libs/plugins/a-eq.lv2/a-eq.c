@@ -270,7 +270,7 @@ activate(LV2_Handle instance)
 static void linear_svf_set_peq(struct linear_svf *self, float gdb, float sample_rate, float cutoff, float bandwidth)
 {
 	double f0 = (double)cutoff;
-	double q = (double)pow(2.0, 1.0 / bandwidth) / (pow(2.0, bandwidth) - 1.0);
+	double q = (double)pow(2.0, 0.5 * bandwidth) / (pow(2.0, bandwidth) - 1.0);
 	double sr = (double)sample_rate;
 	double A = pow(10.0, gdb/40.0);
 
@@ -393,23 +393,17 @@ run(LV2_Handle instance, uint32_t n_samples)
 			if (!is_eq(aeq->v_f0[i], *aeq->f0[i], 0.1)) {
 				aeq->v_f0[i] += tau * (*aeq->f0[i] - aeq->v_f0[i]);
 				changed = true;
-			} else {
-				aeq->v_f0[i] = *aeq->f0[i];
 			}
 
 			if (*aeq->filtog[i] <= 0 || *aeq->enable <= 0) {
 				if (!is_eq(aeq->v_g[i], 0.f, 0.05)) {
 					aeq->v_g[i] += tau * (0.0 - aeq->v_g[i]);
 					changed = true;
-				} else {
-					aeq->v_g[i] = 0.0;
 				}
 			} else {
 				if (!is_eq(aeq->v_g[i], *aeq->g[i], 0.05)) {
 					aeq->v_g[i] += tau * (*aeq->g[i] - aeq->v_g[i]);
 					changed = true;
-				} else {
-					aeq->v_g[i] = *aeq->g[i];
 				}
 			}
 
@@ -417,8 +411,6 @@ run(LV2_Handle instance, uint32_t n_samples)
 				if (!is_eq(aeq->v_bw[i], *aeq->bw[i], 0.001)) {
 					aeq->v_bw[i] += tau * (*aeq->bw[i] - aeq->v_bw[i]);
 					changed = true;
-				} else {
-					aeq->v_bw[i] = *aeq->bw[i];
 				}
 			}
 

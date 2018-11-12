@@ -18,7 +18,8 @@
 
 */
 
-#include "session_import_dialog.h"
+#include <gtkmm/messagedialog.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/failed_constructor.h"
 
@@ -29,10 +30,12 @@
 #include "ardour/location_importer.h"
 #include "ardour/tempo_map_importer.h"
 
-#include <gtkmm2ext/utils.h>
+#include "gtkmm2ext/utils.h"
+#include "widgets/prompter.h"
 
 #include "gui_thread.h"
-#include "prompter.h"
+#include "session_import_dialog.h"
+
 #include "pbd/i18n.h"
 
 using namespace std;
@@ -108,9 +111,9 @@ SessionImportDialog::load_session (const string& filename)
 {
 	if (_session) {
 		if (tree.read (filename)) {
-                        error << string_compose (_("Cannot load XML for session from %1"), filename) << endmsg;
-                        return;
-                }
+			error << string_compose (_("Cannot load XML for session from %1"), filename) << endmsg;
+			return;
+		}
 		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
 		boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
 
@@ -282,7 +285,7 @@ SessionImportDialog::end_dialog ()
 std::pair<bool, string>
 SessionImportDialog::open_rename_dialog (string text, string name)
 {
-	ArdourPrompter prompter(true);
+	ArdourWidgets::Prompter prompter(true);
 	string new_name;
 
 	prompter.set_name ("Prompter");

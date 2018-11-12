@@ -2544,6 +2544,12 @@ fluid_synth_process(fluid_synth_t* synth, int len, int nin, float** in,
     int i;
     left = FLUID_ARRAY(float*, nout/2);
     right = FLUID_ARRAY(float*, nout/2);
+    if ((left == NULL) || (right == NULL)) {
+      FLUID_LOG(FLUID_ERR, "Out of memory.");
+      FLUID_FREE(left);
+      FLUID_FREE(right);
+      return FLUID_FAILED;
+    }
     for(i=0; i<nout/2; i++) {
       left[i] = out[2*i];
       right[i] = out[2*i+1];

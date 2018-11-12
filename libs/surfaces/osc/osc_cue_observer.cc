@@ -19,6 +19,8 @@
 
 #include "boost/lambda/lambda.hpp"
 
+#include "pbd/control_math.h"
+
 #include "ardour/track.h"
 #include "ardour/dB.h"
 #include "ardour/meter.h"
@@ -33,44 +35,72 @@ using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
 
-OSCCueObserver::OSCCueObserver (boost::shared_ptr<Stripable> s, std::vector<boost::shared_ptr<ARDOUR::Stripable> >& snds, lo_address a)
-	: sends (snds)
-	, _strip (s)
+OSCCueObserver::OSCCueObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su)
+	:  _osc (o)
+	,sur (su)
 	, tick_enable (false)
 {
-	std::cout << "entered observer\n";
-	addr = lo_address_new (lo_address_get_hostname(a) , lo_address_get_port(a));
+	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
+	uint32_t sid = sur->aux - 1;
+	if (sid >= sur->strips.size ()) {
+		sid = 0;
+	}
 
-	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
-	name_changed (ARDOUR::Properties::name, 0);
-
-	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
-	send_change_message ("/cue/mute", 0, _strip->mute_control());
-
-	gain_timeout.push_back (0);
-	std::cout << "observer past gain timeout for aux\n";
-	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control()), OSC::instance());
-	send_gain_message (0, _strip->gain_control());
-
-	send_init ();
-	std::cout << "observer past send init\n";
-
-	tick_enable = true;
-	tick ();
+	_strip = sur->strips[sid];
+	sends = sur->sends;
+	refresh_strip (_strip, sends, true);
 }
 
 OSCCueObserver::~OSCCueObserver ()
 {
+	tick_enable = false;
+	clear_observer ();
+	lo_address_free (addr);
+}
+
+void
+OSCCueObserver::clear_observer ()
+{
+	tick_enable = false;
 
 	strip_connections.drop_connections ();
-	send_end ();
+	_strip = boost::shared_ptr<ARDOUR::Stripable> ();
+	send_end (0);
 	// all strip buttons should be off and faders 0 and etc.
-	text_with_id ("/cue/name", 0, " ");
-	clear_strip ("/cue/mute", 0);
-	clear_strip ("/cue/fader", 0);
-	clear_strip ("/cue/signal", 0);
+	_osc.text_message_with_id (X_("/cue/name"), 0, " ", true, addr);
+	_osc.float_message (X_("/cue/mute"), 0, addr);
+	_osc.float_message (X_("/cue/fader"), 0, addr);
+	_osc.float_message (X_("/cue/signal"), 0, addr);
 
-	lo_address_free (addr);
+}
+
+void
+OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force)
+{
+	tick_enable = false;
+
+	strip_connections.drop_connections ();
+
+	send_end (new_sends.size ());
+	_strip = new_strip;
+	_strip->DropReferences.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::clear_observer, this), OSC::instance());
+	sends = new_sends;
+
+	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, 0), OSC::instance());
+	name_changed (ARDOUR::Properties::name, 0);
+
+	_strip->mute_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_change_message, this, X_("/cue/mute"), 0, _strip->mute_control()), OSC::instance());
+	send_change_message (X_("/cue/mute"), 0, _strip->mute_control());
+
+	gain_timeout.push_back (0);
+	_last_gain.push_back (-1.0);
+	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, 0, _strip->gain_control(), false), OSC::instance());
+	send_gain_message (0, _strip->gain_control(), true);
+
+	send_init ();
+
+	tick_enable = true;
+	tick ();
 }
 
 void
@@ -87,17 +117,13 @@ OSCCueObserver::tick ()
 	}
 	if (now_meter < -120) now_meter = -193;
 	if (_last_meter != now_meter) {
-		string path = "/cue/signal";
-		lo_message msg = lo_message_new ();
 		float signal;
 		if (now_meter < -40) {
 			signal = 0;
 		} else {
 			signal = 1;
 		}
-		lo_message_add_float (msg, signal);
-		lo_send_message (addr, path.c_str(), msg);
-		lo_message_free (msg);
+		_osc.float_message (X_("/cue/signal"), signal, addr);
 	}
 	_last_meter = now_meter;
 
@@ -132,34 +158,40 @@ OSCCueObserver::send_init()
 
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
-				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control()), OSC::instance());
-				send_gain_message (i + 1, send->gain_control());
+				_last_gain.push_back (-1.0);
+				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control(), false), OSC::instance());
+				send_gain_message (i + 1, send->gain_control(), true);
 			}
 			
 			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
-				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send_enable"), i + 1, proc->enabled()), OSC::instance());
-				send_enabled_message (X_("/cue/send/enable"), i + 1, proc->enabled());
+				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc), OSC::instance());
+				send_enabled_message (X_("/cue/send/enable"), i + 1, proc);
 		}
 	}
 
 }
 
 void
-OSCCueObserver::send_end ()
+OSCCueObserver::send_end (uint32_t new_size)
 {
 	send_connections.drop_connections ();
-	for (uint32_t i = 1; i <= sends.size(); i++) {
-		clear_strip (string_compose ("/cue/send/fader/%1", i), 0);
-		clear_strip (string_compose ("/cue/send/enable/%1", i), 0);
-		text_with_id ("/cue/send/name", i, " ");
+	if (new_size < sends.size()) {
+		for (uint32_t i = new_size + 1; i <= sends.size(); i++) {
+			_osc.float_message (string_compose (X_("/cue/send/fader/%1"), i), 0, addr);
+			_osc.float_message (string_compose (X_("/cue/send/enable/%1"), i), 0, addr);
+			_osc.text_message_with_id (X_("/cue/send/name"), i, " ", true, addr);
+		}
 	}
+	gain_timeout.clear ();
+	_last_gain.clear ();
+	sends.clear ();
 }
 
 void
 OSCCueObserver::send_restart ()
 {
 	tick_enable = false;
-	send_end();
+	send_end(sends.size());
 	send_init();
 	tick_enable = true;
 }
@@ -175,85 +207,47 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 		return;
 	}
 	if (id) {
-		text_with_id ("/cue/send/name", id, sends[id - 1]->name());
+		_osc.text_message_with_id (X_("/cue/send/name"), id, sends[id - 1]->name(), true, addr);
 	} else {
-		text_with_id ("/cue/name", 0, _strip->name());
+		_osc.text_message (X_("/cue/name"), _strip->name(), addr);
 	}
 }
 
 void
 OSCCueObserver::send_change_message (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
 {
-	lo_message msg = lo_message_new ();
-
 	if (id) {
 		path = string_compose("%1/%2", path, id);
 	}
 	float val = controllable->get_value();
-	lo_message_add_float (msg, (float) controllable->internal_to_interface (val));
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
+	_osc.float_message (path, (float) controllable->internal_to_interface (val), addr);
 }
 
 void
-OSCCueObserver::text_with_id (string path, uint32_t id, string val)
+OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable, bool force)
 {
-	lo_message msg = lo_message_new ();
+	if (_last_gain[id] != controllable->get_value()) {
+		_last_gain[id] = controllable->get_value();
+	} else {
+		return;
+	}
 	if (id) {
-		path = string_compose("%1/%2", path, id);
+		_osc.text_message_with_id (X_("/cue/send/name"), id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), true, addr);
+		_osc.float_message_with_id (X_("/cue/send/fader"), id, controllable->internal_to_interface (controllable->get_value()), true, addr);
+	} else {
+		_osc.text_message (X_("/cue/name"), string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())), addr);
+		_osc.float_message (X_("/cue/fader"), controllable->internal_to_interface (controllable->get_value()), addr);
 	}
 
-	lo_message_add_string (msg, val.c_str());
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-}
-
-void
-OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable)
-{
-	string path = "/cue";
-	if (id) {
-		path = "/cue/send";
-	}
-
-	text_with_id (string_compose ("%1/name", path), id, string_compose ("%1%2%3", std::fixed, std::setprecision(2), accurate_coefficient_to_dB (controllable->get_value())));
-	path = string_compose ("%1/fader", path);
-	if (id) {
-		path = string_compose ("%1/%2", path, id);
-	}
-	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, gain_to_slider_position (controllable->get_value()));
 	gain_timeout[id] = 8;
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
 }
 
 void
-OSCCueObserver::send_enabled_message (std::string path, uint32_t id, bool enabled)
+OSCCueObserver::send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc)
 {
-	lo_message msg = lo_message_new ();
-
 	if (id) {
-		path = string_compose("%1/%2", path, id);
+		_osc.float_message_with_id (path, id, (float) proc->enabled(), true, addr);
+	} else {
+		_osc.float_message (path, (float) proc->enabled(), addr);
 	}
-	lo_message_add_float (msg, (float) enabled);
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-	
 }
-
-void
-OSCCueObserver::clear_strip (string path, float val)
-{
-	lo_message msg = lo_message_new ();
-	lo_message_add_float (msg, val);
-
-	lo_send_message (addr, path.c_str(), msg);
-	lo_message_free (msg);
-
-}
-

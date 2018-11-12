@@ -100,8 +100,8 @@ class JACKAudioBackend : public AudioBackend {
 
     float dsp_load() const;
 
-    framepos_t sample_time ();
-    framepos_t sample_time_at_cycle_start ();
+    samplepos_t sample_time ();
+    samplepos_t sample_time_at_cycle_start ();
     pframes_t samples_since_cycle_start ();
 
     size_t raw_buffer_size (DataType t);
@@ -113,9 +113,9 @@ class JACKAudioBackend : public AudioBackend {
 
     void transport_start ();
     void transport_stop ();
-    void transport_locate (framepos_t /*pos*/);
+    void transport_locate (samplepos_t /*pos*/);
     TransportState transport_state () const;
-    framepos_t transport_frame() const;
+    samplepos_t transport_sample() const;
 
     int set_time_master (bool /*yn*/);
     bool get_sync_offset (pframes_t& /*offset*/) const;
@@ -145,6 +145,7 @@ class JACKAudioBackend : public AudioBackend {
     bool  connected (PortHandle, bool process_callback_safe);
     bool  connected_to (PortHandle, const std::string&, bool process_callback_safe);
     bool  physically_connected (PortHandle, bool process_callback_safe);
+    bool  externally_connected (PortHandle, bool process_callback_safe);
     int   get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
     int   connect (PortHandle, const std::string&);
 
@@ -175,7 +176,7 @@ class JACKAudioBackend : public AudioBackend {
 	return true;
     }
 
-    int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
+    int      midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
     int      midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size);
     uint32_t get_midi_event_count (void* port_buffer);
     void     midi_clear (void* port_buffer);
@@ -207,7 +208,7 @@ class JACKAudioBackend : public AudioBackend {
 
     /* transport sync */
 
-    bool speed_and_position (double& sp, framepos_t& pos);
+    bool speed_and_position (double& sp, samplepos_t& pos);
 
   private:
     boost::shared_ptr<JackConnection>  _jack_connection;

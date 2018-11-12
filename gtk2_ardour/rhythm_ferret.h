@@ -40,11 +40,12 @@ namespace ARDOUR {
 class Editor;
 class RegionView;
 
-class RhythmFerret : public ArdourDialog {
-  public:
+class RhythmFerret : public ArdourDialog
+{
+public:
 	/* order of these enums must match the _analyse_mode_strings
-	   in rhythm_ferret.cc
-	*/
+	 * in rhythm_ferret.cc
+	 */
 	enum AnalysisMode {
 		PercussionOnset,
 		NoteOnset
@@ -59,11 +60,12 @@ class RhythmFerret : public ArdourDialog {
 	RhythmFerret (Editor&);
 
 	void set_session (ARDOUR::Session*);
+	void on_response (int);
 
-  protected:
+protected:
 	void on_hide ();
 
-  private:
+private:
 	Editor& editor;
 
 	Gtk::ComboBoxText operation_selector;
@@ -113,8 +115,8 @@ class RhythmFerret : public ArdourDialog {
 	int get_note_onset_function ();
 
 	void run_analysis ();
-	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, ARDOUR::frameoffset_t offset, ARDOUR::AnalysisFeatureList& results);
-	int run_note_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, ARDOUR::frameoffset_t offset, ARDOUR::AnalysisFeatureList& results);
+	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
+	int run_note_onset_analysis (boost::shared_ptr<ARDOUR::Readable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
 
 	void do_action ();
 	void do_split_action ();

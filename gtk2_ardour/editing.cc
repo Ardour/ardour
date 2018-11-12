@@ -27,7 +27,7 @@ using namespace std;
 
 // This involves some cpp magic. --taybin
 
-#define SNAPTYPE(a) /*empty*/
+#define GRIDTYPE(a) /*empty*/
 #define SNAPMODE(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
@@ -37,24 +37,24 @@ using namespace std;
 
 namespace Editing {
 
-// SNAPTYPE
-#undef SNAPTYPE
-#define SNAPTYPE(s) if (!strcmp(type, #s)) {return s;}
-SnapType
-str2snaptype (const string & str) {
+// GRIDTYPE
+#undef GRIDTYPE
+#define GRIDTYPE(s) if (!strcmp(type, #s)) {return s;}
+GridType
+str2gridtype (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
-	return SnapToBar;
+	return GridTypeBar;
 }
 
-#undef SNAPTYPE
-#define SNAPTYPE(s) N_(#s),
-const char *snaptypestrs[] = {
+#undef GRIDTYPE
+#define GRIDTYPE(s) N_(#s),
+const char *gridtypestrs[] = {
 	#include "editing_syms.h"
 	0
 };
-#undef SNAPTYPE
-#define SNAPTYPE(a) /*empty*/
+#undef GRIDTYPE
+#define GRIDTYPE(a) /*empty*/
 
 // SNAPMODE
 #undef SNAPMODE
@@ -63,7 +63,7 @@ SnapMode
 str2snapmode (const string & str) {
 	const char* type = str.c_str();
 	#include "editing_syms.h"
-	return SnapNormal;
+	return SnapMagnetic;
 }
 
 #undef SNAPMODE

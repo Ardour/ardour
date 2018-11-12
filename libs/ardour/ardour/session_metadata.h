@@ -46,6 +46,8 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	~SessionMetadata ();
 
 	/*** Accessing ***/
+	std::string description () const;
+
 	std::string comment () const;
 	std::string copyright () const;
 	std::string isrc () const;
@@ -88,6 +90,7 @@ class LIBARDOUR_API SessionMetadata : public PBD::StatefulDestructible
 	std::string country () const;
 
 	/*** Editing ***/
+	void set_description (const std::string &);
 	void set_comment (const std::string &);
 	void set_copyright (const std::string &);
 	void set_isrc (const std::string &);

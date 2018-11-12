@@ -84,6 +84,8 @@
 #include "midi++/port.h"
 #include "midi++/mmc.h"
 
+#include "LuaBridge/LuaBridge.h"
+
 #include "ardour/analyser.h"
 #include "ardour/audio_library.h"
 #include "ardour/audio_backend.h"
@@ -351,10 +353,20 @@ copy_configuration_files (string const & old_dir, string const & new_dir, int ol
 
 		copy_recurse (old_name, new_name);
 
-		/* presets */
+		/* plugin status */
+		g_mkdir_with_parents (Glib::build_filename (new_dir, plugin_metadata_dir_name).c_str(), 0755);
 
-		old_name = Glib::build_filename (old_dir, X_("plugin_statuses"));
-		new_name = Glib::build_filename (new_dir, X_("plugin_statuses"));
+		old_name = Glib::build_filename (old_dir, X_("plugin_statuses")); /* until 6.0 */
+		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
+		copy_file (old_name, new_name); /* can fail silently */
+
+		old_name = Glib::build_filename (old_dir, plugin_metadata_dir_name, X_("plugin_statuses"));
+		copy_file (old_name, new_name);
+
+		/* plugin tags */
+
+		old_name = Glib::build_filename (old_dir, plugin_metadata_dir_name, X_("plugin_tags"));
+		new_name = Glib::build_filename (new_dir, plugin_metadata_dir_name, X_("plugin_tags"));
 
 		copy_file (old_name, new_name);
 
@@ -422,6 +434,12 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 	if (libardour_initialized) {
 		return true;
 	}
+
+#ifndef NDEBUG
+	if (getenv("LUA_METATABLES")) {
+		luabridge::Security::setHideMetatables (false);
+	}
+#endif
 
 	if (!PBD::init()) return false;
 
@@ -553,9 +571,20 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	reserved_io_names[_("Monitor")] = true;
 	reserved_io_names[_("Master")] = true;
+	reserved_io_names["auditioner"] = true; // auditioner.cc  Track (s, "auditioner",...)
+
+	/* pure I/O */
+	reserved_io_names[X_("Click")] = false; // session.cc ClickIO (*this, X_("Click")
 	reserved_io_names[_("Control")] = false;
-	reserved_io_names[_("Click")] = false;
 	reserved_io_names[_("Mackie")] = false;
+	reserved_io_names[_("FaderPort Recv")] = false;
+	reserved_io_names[_("FaderPort Send")] = false;
+	reserved_io_names[_("FaderPort2 Recv")] = false;
+	reserved_io_names[_("FaderPort2 Send")] = false;
+	reserved_io_names[_("FaderPort8 Recv")] = false;
+	reserved_io_names[_("FaderPort8 Send")] = false;
+	reserved_io_names[_("FaderPort16 Recv")] = false;
+	reserved_io_names[_("FaderPort16 Send")] = false;
 
 	libardour_initialized = true;
 
@@ -582,13 +611,13 @@ ARDOUR::cleanup ()
 		return;
 	}
 
+	delete &ControlProtocolManager::instance();
 	ARDOUR::AudioEngine::destroy ();
 
 	delete Library;
 #ifdef HAVE_LRDF
 	lrdf_cleanup ();
 #endif
-	delete &ControlProtocolManager::instance();
 #ifdef WINDOWS_VST_SUPPORT
 	fst_exit ();
 #endif

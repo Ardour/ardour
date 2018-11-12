@@ -50,7 +50,7 @@ namespace PBD {
  *
  */
 class LIBPBD_API Controllable : public PBD::StatefulDestructible {
-  public:
+public:
 	enum Flag {
 		Toggle = 0x1,
 		GainLike = 0x2,
@@ -95,13 +95,13 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	/** Get and Set `internal' value
 	 *
 	 * All derived classes must implement this.
-         *
-         * Basic derived classes will ignore @param group_override,
-         * but more sophisticated children, notably those that
-         * proxy the value setting logic via an object that is aware of group
-         * relationships between this control and others, will find it useful.
-         */
-        virtual void set_value (double, GroupControlDisposition group_override) = 0;
+	 *
+	 * Basic derived classes will ignore @param group_override,
+	 * but more sophisticated children, notably those that
+	 * proxy the value setting logic via an object that is aware of group
+	 * relationships between this control and others, will find it useful.
+	 */
+	virtual void set_value (double, GroupControlDisposition group_override) = 0;
 	virtual double get_value (void) const = 0;
 
 	/** This is used when saving state. By default it just calls
@@ -114,16 +114,11 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	/** Conversions between `internal', 'interface', and 'user' values */
 	virtual double internal_to_interface (double i) const {return  (i-lower())/(upper() - lower());}  //by default, the interface range is just a linear interpolation between lower and upper values
 	virtual double interface_to_internal (double i) const {return lower() + i*(upper() - lower());}
-	virtual double internal_to_user (double i) const {return i;}  //by default the internal value is the same as the user value
-	virtual double user_to_internal (double i) const {return i;}  //by default the internal value is the same as the user value
 
 	/** Get and Set `interface' value  (typically, fraction of knob travel) */
 	virtual float get_interface() const { return (internal_to_interface(get_value())); }
 	virtual void set_interface (float fraction) { fraction = min( max(0.0f, fraction), 1.0f);  set_value(interface_to_internal(fraction), NoGroup); }
 
-	/** Get and Set `user' value  ( dB or milliseconds, etc.  This MIGHT be the same as the internal value, but in a few cases it is not ) */
-	virtual float get_user() const { return (internal_to_user(get_value())); }
-	virtual void set_user (float user_v) { set_value(user_to_internal(user_v), NoGroup); }
 	virtual std::string get_user_string() const { return std::string(); }
 
 	PBD::Signal0<void> LearningFinished;
@@ -135,31 +130,41 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 
 	static PBD::Signal1<void,Controllable*> Destroyed;
 
+	static PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > GUIFocusChanged;
+
 	PBD::Signal2<void,bool,PBD::Controllable::GroupControlDisposition> Changed;
 
 	int set_state (const XMLNode&, int version);
-	XMLNode& get_state ();
+	virtual XMLNode& get_state ();
 
 	std::string name()      const { return _name; }
 
 	bool touching () const { return _touching; }
-	void set_touching (bool yn) { _touching = yn; }
+	PBD::Signal0<void> TouchChanged;
 
 	bool is_toggle() const { return _flags & Toggle; }
 	bool is_gain_like() const { return _flags & GainLike; }
 
-        virtual double lower() const { return 0.0; }
-        virtual double upper() const { return 1.0; }
-        virtual double normal() const { return 0.0; }  //the default value
+	virtual double lower() const { return 0.0; }
+	virtual double upper() const { return 1.0; }
+	virtual double normal() const { return 0.0; }  //the default value
 
 	Flag flags() const { return _flags; }
 	void set_flags (Flag f);
 
 	static Controllable* by_id (const PBD::ID&);
 	static Controllable* by_name (const std::string&);
-        static const std::string xml_node_name;
+	static const std::string xml_node_name;
 
-  private:
+protected:
+	void set_touching (bool yn) {
+		if (_touching == yn) { return; }
+		_touching = yn;
+		TouchChanged (); /* EMIT SIGNAL */
+	}
+
+private:
+
 	std::string _name;
 	std::string _units;
 	Flag        _flags;
@@ -169,17 +174,16 @@ class LIBPBD_API Controllable : public PBD::StatefulDestructible {
 	static void remove (Controllable*);
 
 	typedef std::set<PBD::Controllable*> Controllables;
-        static Glib::Threads::RWLock registry_lock;
+	static Glib::Threads::RWLock registry_lock;
 	static Controllables registry;
 };
 
 /* a utility class for the occasions when you need but do not have
-   a Controllable
-*/
-
+ * a Controllable
+ */
 class LIBPBD_API IgnorableControllable : public Controllable
 {
-  public:
+public:
 	IgnorableControllable () : PBD::Controllable ("ignoreMe") {}
 	~IgnorableControllable () {}
 

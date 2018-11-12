@@ -48,7 +48,7 @@ public:
 	void set_session (ARDOUR::Session *);
 
 	/** @param g Route group, or 0.
-         *  @return Menu to be popped up on right-click over the given route group.
+	 *  @return Menu to be popped up on right-click over the given route group.
 	 */
 	Gtk::Menu* get_menu (ARDOUR::RouteGroup* g, bool tabArea = false);
 
@@ -70,7 +70,7 @@ protected:
 	};
 
 private:
-	static void emit_gui_changed_for_members (ARDOUR::RouteGroup *);
+	static void emit_gui_changed_for_members (boost::shared_ptr<ARDOUR::RouteList>);
 
 	/** Compute all the tabs for this widget.
 	 *  @return Tabs.
@@ -81,7 +81,7 @@ private:
 	 *  @param cr Cairo context.
 	 *  @param t Tab.
 	 */
-	virtual void draw_tab (cairo_t* cr, Tab const & t) const = 0;
+	virtual void draw_tab (cairo_t* cr, Tab const & t) = 0;
 
 	/** @param x x coordinate
 	 *  @param y y coordinate
@@ -110,12 +110,12 @@ private:
 	void set_activation (ARDOUR::RouteGroup *, bool);
 	void edit_group (ARDOUR::RouteGroup *);
 	void subgroup (ARDOUR::RouteGroup *, bool, ARDOUR::Placement);
-        void un_subgroup (ARDOUR::RouteGroup *);
+	void un_subgroup (ARDOUR::RouteGroup *);
 	void activate_all ();
 	void disable_all ();
 	void remove_group (ARDOUR::RouteGroup *);
 
-	void render (cairo_t *, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition *);
 	bool on_button_press_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
@@ -128,10 +128,11 @@ private:
 	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
 
 	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master) const;
+	void unassign_group_to_master (uint32_t which, ARDOUR::RouteGroup*) const;
 	void assign_selection_to_master (uint32_t which);
 	void assign_recenabled_to_master (uint32_t which);
 	void assign_soloed_to_master (uint32_t which);
-	void assign_some_to_master (uint32_t which, ARDOUR::RouteList);
+	void assign_some_to_master (uint32_t which, ARDOUR::RouteList, std::string vcaname = "");
 
 	ARDOUR::RouteList get_soloed ();
 	ARDOUR::RouteList get_rec_enabled ();

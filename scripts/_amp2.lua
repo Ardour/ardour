@@ -41,7 +41,7 @@ function dsp_runmap (bufs, in_map, out_map, n_samples, offset)
 
 		local bi = bufs:get_audio(ib)
 		local bo = bufs:get_audio(ob)
-		assert (bi:sameinstance(bo))
+		assert (bi == bo)
 
 		local a = bufs:get_audio(ib):data(offset):array() -- get a reference (pointer to array)
 		for s = 1,n_samples do

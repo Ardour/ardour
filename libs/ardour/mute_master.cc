@@ -1,5 +1,4 @@
 /*
-
     Copyright (C) 2009 Paul Davis
 
     This program is free software; you can redistribute it and/or modify
@@ -20,13 +19,17 @@
 
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/types.h"
 #include "ardour/mute_master.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::MuteMaster::MutePoint);
+}
 
 using namespace ARDOUR;
 using namespace std;
@@ -40,9 +43,9 @@ MuteMaster::MuteMaster (Session& s, Muteable& m, const std::string&)
 	: SessionHandleRef (s)
 	, _muteable (&m)
 	, _mute_point (MutePoint (0))
-        , _muted_by_self (false)
-        , _soloed_by_self (false)
-        , _soloed_by_others (false)
+	, _muted_by_self (false)
+	, _soloed_by_self (false)
+	, _soloed_by_others (false)
 	, _muted_by_masters (0)
 {
 
@@ -84,72 +87,66 @@ MuteMaster::unmute_at (MutePoint mp)
 gain_t
 MuteMaster::mute_gain_at (MutePoint mp) const
 {
-        gain_t gain;
+	gain_t gain;
 
-        if (Config->get_solo_mute_override()) {
-                if (_soloed_by_self) {
-                        gain = GAIN_COEFF_UNITY;
-                } else if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
-                        gain = GAIN_COEFF_ZERO;
-                } else {
-	                if (!_soloed_by_others && muted_by_others_soloing_at (mp)) {
-                                gain = Config->get_solo_mute_gain ();
-                        } else {
-                                gain = GAIN_COEFF_UNITY;
-                        }
-                }
-        } else {
-	        if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
-                        gain = GAIN_COEFF_ZERO;
-                } else if (_soloed_by_self || _soloed_by_others) {
-                        gain = GAIN_COEFF_UNITY;
-                } else {
-                        if (muted_by_others_soloing_at (mp)) {
-                                gain = Config->get_solo_mute_gain ();
-                        } else {
-                                gain = GAIN_COEFF_UNITY;
-                        }
-                }
-        }
+	if (Config->get_solo_mute_override()) {
+		if (_soloed_by_self) {
+			gain = GAIN_COEFF_UNITY;
+		} else if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
+			gain = GAIN_COEFF_ZERO;
+		} else {
+			if (!_soloed_by_others && muted_by_others_soloing_at (mp)) {
+				gain = Config->get_solo_mute_gain ();
+			} else {
+				gain = GAIN_COEFF_UNITY;
+			}
+		}
+	} else {
+		if (muted_by_self_at (mp) || muted_by_masters_at (mp)) {
+			gain = GAIN_COEFF_ZERO;
+		} else if (_soloed_by_self || _soloed_by_others) {
+			gain = GAIN_COEFF_UNITY;
+		} else {
+			if (muted_by_others_soloing_at (mp)) {
+				gain = Config->get_solo_mute_gain ();
+			} else {
+				gain = GAIN_COEFF_UNITY;
+			}
+		}
+	}
 
-        return gain;
+	return gain;
 }
 
 void
 MuteMaster::set_mute_points (const std::string& mute_point)
 {
-        MutePoint old = _mute_point;
+	MutePoint old = _mute_point;
 
 	_mute_point = (MutePoint) string_2_enum (mute_point, _mute_point);
 
-        if (old != _mute_point) {
-                MutePointChanged(); /* EMIT SIGNAL */
-        }
+	if (old != _mute_point) {
+		MutePointChanged(); /* EMIT SIGNAL */
+	}
 }
 
 void
 MuteMaster::set_mute_points (MutePoint mp)
 {
-        if (_mute_point != mp) {
-                _mute_point = mp;
-                MutePointChanged (); /* EMIT SIGNAL */
-        }
+	if (_mute_point != mp) {
+		_mute_point = mp;
+		MutePointChanged (); /* EMIT SIGNAL */
+	}
 }
 
 int
 MuteMaster::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * prop;
+	node.get_property ("mute-point", _mute_point);
 
-	if ((prop = node.property ("mute-point")) != 0) {
-		_mute_point = (MutePoint) string_2_enum (prop->value(), _mute_point);
+	if (!node.get_property ("muted", _muted_by_self)) {
+		_muted_by_self = (_mute_point != MutePoint (0));
 	}
-
-	if ((prop = node.property ("muted")) != 0) {
-		_muted_by_self = PBD::string_is_affirmative (prop->value());
-	} else {
-                _muted_by_self = (_mute_point != MutePoint (0));
-        }
 
 	return 0;
 }
@@ -158,8 +155,8 @@ XMLNode&
 MuteMaster::get_state()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	node->add_property ("mute-point", enum_2_string (_mute_point));
-	node->add_property ("muted", (_muted_by_self ? X_("yes") : X_("no")));
+	node->set_property ("mute-point", _mute_point);
+	node->set_property ("muted", _muted_by_self);
 	return *node;
 }
 

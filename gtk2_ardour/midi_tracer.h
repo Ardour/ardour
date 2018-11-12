@@ -45,11 +45,11 @@ namespace ARDOUR {
 
 class MidiTracer : public ArdourWindow
 {
-  public:
+public:
 	MidiTracer ();
 	~MidiTracer();
 
-  private:
+private:
 	Gtk::TextView text;
 	Gtk::ScrolledWindow scroller;
 	Gtk::Adjustment line_count_adjustment;
@@ -68,7 +68,7 @@ class MidiTracer : public ArdourWindow
 	 */
 	volatile gint _update_queued;
 
-	RingBuffer<char *> fifo;
+	PBD::RingBuffer<char *> fifo;
 	Pool buffer_pool;
 	static const size_t buffer_size = 256;
 

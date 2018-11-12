@@ -170,9 +170,6 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 		add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		add_button (Stock::NEW, RESPONSE_OK);
 		set_default_response (RESPONSE_OK);
-	} else {
-		add_button (Stock::CLOSE, RESPONSE_CLOSE);
-		set_default_response (RESPONSE_CLOSE);
 	}
 
 	show_all_children ();

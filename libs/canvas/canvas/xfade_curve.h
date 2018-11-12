@@ -48,13 +48,13 @@ public:
 	void set_points_per_segment (uint32_t n);
 	void set_inout (Points const & in, Points const & out);
 
-	void set_outline_color (Color c) {
+	void set_outline_color (Gtkmm2ext::Color c) {
 		begin_visual_change ();
 		_outline_color = c;
 		end_visual_change ();
 	};
 
-	void set_fill_color (Color c) {
+	void set_fill_color (Gtkmm2ext::Color c) {
 		begin_visual_change ();
 		_fill_color = c;
 		end_visual_change ();
@@ -76,9 +76,9 @@ private:
 	CanvasCurve _in;
 	CanvasCurve _out;
 
-	XFadePosition _xfadeposition;
-	Color _outline_color;
-	Color _fill_color;
+	XFadePosition    _xfadeposition;
+	Gtkmm2ext::Color _outline_color;
+	Gtkmm2ext::Color _fill_color;
 
 	bool show_background_fade;
 

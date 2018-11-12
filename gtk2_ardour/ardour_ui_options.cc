@@ -25,12 +25,11 @@
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
-#include <gtkmm2ext/utils.h>
-
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
-#include "canvas/wave_view.h"
+#include "gtkmm2ext/utils.h"
+#include "waveview/wave_view.h"
 
 #include "audio_clock.h"
 #include "ardour_ui.h"
@@ -45,6 +44,7 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace PBD;
+using namespace ArdourWidgets;
 
 void
 ARDOUR_UI::toggle_external_sync()
@@ -369,7 +369,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
 		}
-		set_loop_sensitivity ();
 
 	} else if (p == "follow-edits") {
 
@@ -435,8 +434,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 
 	} else if (p == "show-track-meters") {
 		if (editor) editor->toggle_meter_updating();
-	} else if (p == "primary-clock-delta-edit-cursor") {
-		if (UIConfiguration::instance().get_primary_clock_delta_edit_cursor()) {
+	} else if (p == "primary-clock-delta-mode") {
+		if (UIConfiguration::instance().get_primary_clock_delta_mode() != NoDelta) {
 			primary_clock->set_is_duration (true);
 			primary_clock->set_editable (false);
 			primary_clock->set_widget_name ("transport delta");
@@ -445,8 +444,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 			primary_clock->set_editable (true);
 			primary_clock->set_widget_name ("transport");
 		}
-	} else if (p == "secondary-clock-delta-edit-cursor") {
-		if (UIConfiguration::instance().get_secondary_clock_delta_edit_cursor()) {
+	} else if (p == "secondary-clock-delta-mode") {
+		if (UIConfiguration::instance().get_secondary_clock_delta_mode() != NoDelta) {
 			secondary_clock->set_is_duration (true);
 			secondary_clock->set_editable (false);
 			secondary_clock->set_widget_name ("secondary delta");
@@ -468,8 +467,12 @@ ARDOUR_UI::parameter_changed (std::string p)
 			Gtkmm2ext::disable_tooltips ();
 		}
 	} else if (p == "waveform-gradient-depth") {
-		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
+		ArdourWaveView::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "show-mini-timeline") {
+		repack_transport_hbox ();
+	} else if (p == "show-dsp-load-info") {
+		repack_transport_hbox ();
+	} else if (p == "show-disk-space-info") {
 		repack_transport_hbox ();
 	} else if (p == "show-toolbar-recpunch") {
 		repack_transport_hbox ();
@@ -482,17 +485,17 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "show-secondary-clock") {
 		update_clock_visibility ();
 	} else if (p == "waveform-scale") {
-		ArdourCanvas::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
+		ArdourWaveView::WaveView::set_global_logscaled (UIConfiguration::instance().get_waveform_scale() == Logarithmic);
 	} else if (p == "widget-prelight") {
 		CairoWidget::set_widget_prelight (UIConfiguration::instance().get_widget_prelight());
 	} else if (p == "waveform-shape") {
-		ArdourCanvas::WaveView::set_global_shape (UIConfiguration::instance().get_waveform_shape() == Rectified
-				? ArdourCanvas::WaveView::Rectified : ArdourCanvas::WaveView::Normal);
+		ArdourWaveView::WaveView::set_global_shape (UIConfiguration::instance().get_waveform_shape() == Rectified
+				? ArdourWaveView::WaveView::Rectified : ArdourWaveView::WaveView::Normal);
 	} else if (p == "show-waveform-clipping") {
-		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
+		ArdourWaveView::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
 	} else if (p == "waveform-cache-size") {
 		/* GUI option has units of megabytes; image cache uses units of bytes */
-		ArdourCanvas::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
+		ArdourWaveView::WaveView::set_image_cache_size (UIConfiguration::instance().get_waveform_cache_size() * 1048576);
 	} else if (p == "use-wm-visibility") {
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
 	} else if (p == "action-table-columns") {
@@ -507,10 +510,6 @@ ARDOUR_UI::parameter_changed (std::string p)
 		}
 	} else if (p == "layered-record-mode") {
 		layered_button.set_active (_session->config.get_layered_record_mode ());
-	} else if (p == "show-waveform-clipping") {
-		ArdourCanvas::WaveView::set_global_show_waveform_clipping (UIConfiguration::instance().get_show_waveform_clipping());
-	} else if (p == "waveform-gradient-depth") {
-		ArdourCanvas::WaveView::set_global_gradient_depth (UIConfiguration::instance().get_waveform_gradient_depth());
 	} else if (p == "flat-buttons") {
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {
@@ -518,12 +517,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
 		}
-	} else if (p == "click-gain") {
-		float gain_db = accurate_coefficient_to_dB (Config->get_click_gain());
-		char tmp[32];
-		snprintf(tmp, 31, "%+.1f", gain_db);
-		set_tip (click_button, string_compose (_("Enable/Disable metronome\n\nRight-click to access preferences\nMouse-wheel to modify level\nSignal Level: %1 dBFS"), tmp));
+	} else if ( (p == "snap-to-region-sync") || (p == "snap-to-region-start") || (p == "snap-to-region-end") ) {
+		if (editor) editor->mark_region_boundary_cache_dirty();
 	}
+
 }
 
 void
@@ -555,8 +552,8 @@ ARDOUR_UI::reset_main_clocks ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::reset_main_clocks)
 
 	if (_session) {
-		primary_clock->set (_session->audible_frame(), true);
-		secondary_clock->set (_session->audible_frame(), true);
+		primary_clock->set (_session->audible_sample(), true);
+		secondary_clock->set (_session->audible_sample(), true);
 	} else {
 		primary_clock->set (0, true);
 		secondary_clock->set (0, true);

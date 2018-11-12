@@ -104,7 +104,7 @@ class LIBARDOUR_API PortManager
 	void remove_all_ports ();
 	void clear_pending_port_deletions ();
 	virtual void add_pending_port_deletion (Port*) = 0;
-	RingBuffer<Port*>& port_deletions_pending () { return _port_deletions_pending; }
+	PBD::RingBuffer<Port*>& port_deletions_pending () { return _port_deletions_pending; }
 
 	/* per-Port monitoring */
 
@@ -172,7 +172,7 @@ class LIBARDOUR_API PortManager
 	boost::shared_ptr<AudioBackend> _backend;
 	SerializedRCUManager<Ports> ports;
 	bool _port_remove_in_progress;
-	RingBuffer<Port*> _port_deletions_pending;
+	PBD::RingBuffer<Port*> _port_deletions_pending;
 
 	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
 	void port_registration_failure (const std::string& portname);
@@ -181,7 +181,6 @@ class LIBARDOUR_API PortManager
 	 */
 	boost::shared_ptr<Ports> _cycle_ports;
 
-	void fade_out (gain_t, gain_t, pframes_t);
 	void silence (pframes_t nframes, Session *s = 0);
 	void silence_outputs (pframes_t nframes);
 	void check_monitoring ();
@@ -189,14 +188,16 @@ class LIBARDOUR_API PortManager
 	 * This MUST be called before any reading/writing for this cycle.
 	 * Realtime safe.
 	 */
-	void cycle_start (pframes_t nframes);
+	void cycle_start (pframes_t nframes, Session* s = 0);
 
 	/** Signal the end of an audio cycle.
 	 * This signifies that the cycle began with @ref cycle_start has ended.
 	 * This MUST be called at the end of each cycle.
 	 * Realtime safe.
 	 */
-	void cycle_end (pframes_t nframes);
+	void cycle_end (pframes_t nframes, Session* s = 0);
+
+	void cycle_end_fade_out (gain_t, gain_t, pframes_t, Session* s = 0);
 
 	typedef std::map<std::string,MidiPortInformation> MidiPortInfo;
 

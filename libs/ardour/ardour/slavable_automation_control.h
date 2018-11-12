@@ -27,7 +27,7 @@ namespace ARDOUR {
 
 class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 {
-    public:
+public:
 	SlavableAutomationControl(ARDOUR::Session&,
 	                          const Evoral::Parameter&                  parameter,
 	                          const ParameterDescriptor&                desc,
@@ -36,26 +36,38 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	                          PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
-	~SlavableAutomationControl ();
+	virtual ~SlavableAutomationControl ();
 
 	double get_value () const;
 
-	void add_master (boost::shared_ptr<AutomationControl>, bool loading);
+	void add_master (boost::shared_ptr<AutomationControl>);
 	void remove_master (boost::shared_ptr<AutomationControl>);
 	void clear_masters ();
 	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
+
+	virtual void automation_run (samplepos_t start, pframes_t nframes);
+
 	double get_masters_value () const {
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 		return get_masters_value_locked ();
+	}
+
+	/* factor out get_masters_value() */
+	double reduce_by_masters (double val, bool ignore_automation_state = false) const {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return reduce_by_masters_locked (val, ignore_automation_state);
+	}
+
+	bool get_masters_curve (samplepos_t s, samplepos_t e, float* v, samplecnt_t l) const {
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return get_masters_curve_locked (s, e, v, l);
 	}
 
 	/* for toggled/boolean controls, returns a count of the number of
 	   masters currently enabled. For other controls, returns zero.
 	*/
 	int32_t   get_boolean_masters () const;
-
-	std::vector<PBD::ID> masters () const;
 
 	PBD::Signal0<void> MasterStatusChange;
 
@@ -64,16 +76,34 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 	int set_state (XMLNode const&, int);
 	XMLNode& get_state();
 
-    protected:
+	bool find_next_event (double n, double e, Evoral::ControlEvent& ev) const
+	{
+		Glib::Threads::RWLock::ReaderLock lm (master_lock);
+		return find_next_event_locked (n, e, ev);
+	}
+
+	bool find_next_event_locked (double now, double end, Evoral::ControlEvent& next_event) const;
+
+protected:
 
 	class MasterRecord {
-          public:
-		MasterRecord (boost::shared_ptr<AutomationControl> gc, double r)
+	public:
+		MasterRecord (boost::weak_ptr<AutomationControl> gc, double vc, double vm)
 			: _master (gc)
-			, _ratio (r)
+			, _yn (false)
+			, _val_ctrl (vc)
+			, _val_master (vm)
 		{}
 
-		boost::shared_ptr<AutomationControl> master() const { return _master; }
+		boost::shared_ptr<AutomationControl> master() const { assert(_master.lock()); return _master.lock(); }
+
+		double val_ctrl () const { return _val_ctrl; }
+		double val_master () const { return _val_master; }
+
+		double val_master_inv () const { return _val_master == 0 ? 0 : 1.0 / _val_master; }
+		double master_ratio () const { return _val_master == 0 ? 0 : master()->get_value() / _val_master; }
+
+		int set_state (XMLNode const&, int);
 
 		/* for boolean/toggled controls, we store a boolean value to
 		 * indicate if this master returned true/false (1.0/0.0) from
@@ -83,37 +113,39 @@ class LIBARDOUR_API SlavableAutomationControl : public AutomationControl
 		bool yn() const { return _yn; }
 		void set_yn (bool yn) { _yn = yn; }
 
-		/* for non-boolean/non-toggled controls, we store a ratio that
-		 * connects the value of the master with the value of this
-		 * slave. See comments in the source for more details on how
-		 * this is computed and used.
-		 */
+		PBD::ScopedConnection changed_connection;
+		PBD::ScopedConnection dropped_connection;
 
-		double ratio () const { return _ratio; }
-		void reset_ratio (double r) { _ratio = r; }
+  private:
+		boost::weak_ptr<AutomationControl> _master;
+		/* holds most recently seen master value for boolean/toggle controls */
+		bool   _yn;
 
-		PBD::ScopedConnection connection;
-
-         private:
-		boost::shared_ptr<AutomationControl> _master;
-		union {
-			double _ratio;
-			bool   _yn;
-		};
+		/* values at time of assignment */
+		double _val_ctrl;
+		double _val_master;
 	};
 
 	mutable Glib::Threads::RWLock master_lock;
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
-	PBD::ScopedConnectionList masters_connections;
 
 	void   master_going_away (boost::weak_ptr<AutomationControl>);
 	double get_value_locked() const;
-	void   actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
+	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
 	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
 
-	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::shared_ptr<AutomationControl>);
-	virtual void   recompute_masters_ratios (double val) { /* do nothing by default */}
+	virtual bool get_masters_curve_locked (samplepos_t, samplepos_t, float*, samplecnt_t) const;
+	bool masters_curve_multiply (samplepos_t, samplepos_t, float*, samplecnt_t) const;
+
+	virtual double reduce_by_masters_locked (double val, bool) const;
+	virtual double scale_automation_callback (double val, double ratio) const;
+
+	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
+	virtual bool boolean_automation_run_locked (samplepos_t start, pframes_t len);
+	bool boolean_automation_run (samplepos_t start, pframes_t len);
+
+	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::weak_ptr<AutomationControl>);
 	virtual double get_masters_value_locked () const;
 	virtual void   pre_remove_master (boost::shared_ptr<AutomationControl>) {}
 	virtual void   post_add_master (boost::shared_ptr<AutomationControl>) {}

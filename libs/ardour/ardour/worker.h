@@ -102,16 +102,16 @@ private:
 	   @param rb the ringbuffer to check
 	   @return true if the message is complete, false otherwise
 	*/
-	bool verify_message_completeness(RingBuffer<uint8_t>* rb);
+	bool verify_message_completeness(PBD::RingBuffer<uint8_t>* rb);
 
-	Workee*                _workee;
-	RingBuffer<uint8_t>*   _requests;
-	RingBuffer<uint8_t>*   _responses;
-	uint8_t*               _response;
-	PBD::Semaphore         _sem;
-	Glib::Threads::Thread* _thread;
-	bool                   _exit;
-	bool                   _synchronous;
+	Workee*                   _workee;
+	PBD::RingBuffer<uint8_t>* _requests;
+	PBD::RingBuffer<uint8_t>* _responses;
+	uint8_t*                  _response;
+	PBD::Semaphore            _sem;
+	Glib::Threads::Thread*    _thread;
+	bool                      _exit;
+	bool                      _synchronous;
 };
 
 } // namespace ARDOUR

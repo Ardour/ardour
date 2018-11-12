@@ -59,13 +59,13 @@ MidiPort::~MidiPort()
 void
 MidiPort::cycle_start (pframes_t nframes)
 {
-	framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+	samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
 	Port::cycle_start (nframes);
 
 	_buffer->clear ();
 
-	if (sends_output ()) {
+	if (sends_output () && _port_handle) {
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
 	}
 
@@ -129,28 +129,47 @@ MidiPort::get_midi_buffer (pframes_t nframes)
 
 				pframes_t timestamp;
 				size_t size;
-				uint8_t* buf;
+				uint8_t const* buf;
 
 				port_engine.midi_event_get (timestamp, size, &buf, buffer, i);
 
 				if (buf[0] == 0xfe) {
 					/* throw away active sensing */
 					continue;
-				} else if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
-					/* normalize note on with velocity 0 to proper note off */
-					buf[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
-					buf[2] = 0x40;  /* default velocity */
 				}
 
-				/* check that the event is in the acceptable time range */
+				timestamp = floor (timestamp * _speed_ratio);
 
-				if ((timestamp >= (_global_port_buffer_offset + _port_buffer_offset)) &&
-				    (timestamp < (_global_port_buffer_offset + _port_buffer_offset + nframes))) {
-					_buffer->push_back (timestamp, size, buf);
-				} else {
+				/* check that the event is in the acceptable time range */
+				if ((timestamp <  (_global_port_buffer_offset)) ||
+				    (timestamp >= (_global_port_buffer_offset + nframes))) {
+					// XXX this is normal after a split cycles:
+					// The engine buffer contains the data for the complete cycle, but
+					// only the part after _global_port_buffer_offset is needed.
+#ifndef NDEBUG
 					cerr << "Dropping incoming MIDI at time " << timestamp << "; offset="
-					     << _global_port_buffer_offset << " limit="
-					     << (_global_port_buffer_offset + _port_buffer_offset + nframes) << "\n";
+						<< _global_port_buffer_offset << " limit="
+						<< (_global_port_buffer_offset + nframes)
+						<< " = (" << _global_port_buffer_offset
+						<< " + " << nframes
+						<< ")\n";
+#endif
+					continue;
+				}
+
+				/* adjust timestamp to match current cycle */
+				timestamp -= _global_port_buffer_offset;
+				assert (timestamp < nframes);
+
+				if ((buf[0] & 0xF0) == 0x90 && buf[2] == 0) {
+					/* normalize note on with velocity 0 to proper note off */
+					uint8_t ev[3];
+					ev[0] = 0x80 | (buf[0] & 0x0F);  /* note off */
+					ev[1] = buf[1];
+					ev[2] = 0x40;  /* default velocity */
+					_buffer->push_back (timestamp, size, ev);
+				} else {
+					_buffer->push_back (timestamp, size, buf);
 				}
 			}
 
@@ -187,19 +206,20 @@ MidiPort::resolve_notes (void* port_buffer, MidiBuffer::TimeType when)
 	for (uint8_t channel = 0; channel <= 0xF; channel++) {
 
 		uint8_t ev[3] = { ((uint8_t) (MIDI_CMD_CONTROL | channel)), MIDI_CTL_SUSTAIN, 0 };
+		pframes_t tme = floor (when / _speed_ratio);
 
 		/* we need to send all notes off AND turn the
 		 * sustain/damper pedal off to handle synths
 		 * that prioritize sustain over AllNotesOff
 		 */
 
-		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, tme, ev, 3) != 0) {
 			cerr << "failed to deliver sustain-zero on channel " << (int)channel << " on port " << name() << endl;
 		}
 
 		ev[1] = MIDI_CTL_ALL_NOTES_OFF;
 
-		if (port_engine.midi_event_put (port_buffer, when, ev, 3) != 0) {
+		if (port_engine.midi_event_put (port_buffer, tme, ev, 3) != 0) {
 			cerr << "failed to deliver ALL NOTES OFF on channel " << (int)channel << " on port " << name() << endl;
 		}
 	}
@@ -235,7 +255,7 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			if (sends_output() && _trace_on) {
 				uint8_t const * const buf = ev.buffer();
-				const framepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
 				_self_parser.set_timestamp (now + ev.time());
 
@@ -247,15 +267,15 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 
 
-			// event times are in frames, relative to cycle start
+			// event times are in samples, relative to cycle start
 
 #ifndef NDEBUG
 			if (DEBUG_ENABLED (DEBUG::MidiIO)) {
 				const Session* s = AudioEngine::instance()->session();
-				const framepos_t now = (s ? s->transport_frame() : 0);
+				const samplepos_t now = (s ? s->transport_sample() : 0);
 				DEBUG_STR_DECL(a);
-				DEBUG_STR_APPEND(a, string_compose ("MidiPort %8 %1 pop event    @ %2 (global %4, within %5 gpbo %6 pbo %7 sz %3 ", _buffer, ev.time(), ev.size(),
-				                                    now + ev.time(), nframes, _global_port_buffer_offset, _port_buffer_offset, name()));
+				DEBUG_STR_APPEND(a, string_compose ("MidiPort %7 %1 pop event    @ %2 (global %4, within %5 gpbo %6 sz %3 ", _buffer, ev.time(), ev.size(),
+				                                    now + ev.time(), nframes, _global_port_buffer_offset, name()));
 				for (size_t i=0; i < ev.size(); ++i) {
 					DEBUG_STR_APPEND(a,hex);
 					DEBUG_STR_APPEND(a,"0x");
@@ -267,17 +287,18 @@ MidiPort::flush_buffers (pframes_t nframes)
 			}
 #endif
 
-			assert (ev.time() < (nframes + _global_port_buffer_offset + _port_buffer_offset));
+			assert (ev.time() < (nframes + _global_port_buffer_offset));
 
-			if (ev.time() >= _global_port_buffer_offset + _port_buffer_offset) {
-				if (port_engine.midi_event_put (port_buffer, (pframes_t) ev.time(), ev.buffer(), ev.size()) != 0) {
-					cerr << "write failed, drop flushed note off on the floor, time "
-					     << ev.time() << " > " << _global_port_buffer_offset + _port_buffer_offset << endl;
+			if (ev.time() >= _global_port_buffer_offset) {
+				pframes_t tme = floor (ev.time() / _speed_ratio);
+				if (port_engine.midi_event_put (port_buffer, tme, ev.buffer(), ev.size()) != 0) {
+					cerr << "write failed, dropped event, time "
+					     << ev.time()
+							 << " > " << _global_port_buffer_offset << endl;
 				}
 			} else {
 				cerr << "drop flushed event on the floor, time " << ev.time()
-				     << " too early for " << _global_port_buffer_offset
-				     << " + " << _port_buffer_offset;
+				     << " too early for " << _global_port_buffer_offset;
 				for (size_t xx = 0; xx < ev.size(); ++xx) {
 					cerr << ' ' << hex << (int) ev.buffer()[xx];
 				}

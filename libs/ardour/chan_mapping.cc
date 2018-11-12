@@ -21,6 +21,7 @@
 
 #include <stdint.h>
 #include <iostream>
+#include "ardour/types_convert.h"
 #include "ardour/chan_mapping.h"
 
 #include "pbd/i18n.h"
@@ -33,10 +34,6 @@ namespace ARDOUR {
 
 ChanMapping::ChanMapping(ChanCount identity)
 {
-	if (identity == ChanCount::INFINITE) {
-		return;
-	}
-
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		for (size_t i = 0; i < identity.get(*t); ++i) {
 			set(*t, i, i);
@@ -59,10 +56,13 @@ ChanMapping::ChanMapping (const XMLNode& node)
 	XMLNodeConstIterator iter = node.children().begin();
 	for ( ; iter != node.children().end(); ++iter) {
 		if ((*iter)->name() == X_(state_node_name)) {
-			const string& type_str  = (*iter)->property("type")->value();
-			const string& from_str = (*iter)->property("from")->value();
-			const string& to_str = (*iter)->property("to")->value();
-			set(DataType(type_str), atol (from_str.c_str()), atol (to_str.c_str()));
+			DataType type(DataType::NIL);
+			uint32_t from;
+			uint32_t to;
+			(*iter)->get_property("type", type);
+			(*iter)->get_property("from", from);
+			(*iter)->get_property("to", to);
+			set(type, from, to);
 		}
 	}
 }
@@ -160,9 +160,9 @@ ChanMapping::state(const std::string& name) const
 	for (Mappings::const_iterator tm = mp.begin(); tm != mp.end(); ++tm) {
 		for (TypeMapping::const_iterator i = tm->second.begin(); i != tm->second.end(); ++i) {
 			XMLNode* n = new XMLNode(X_(state_node_name));
-			n->add_property("type", tm->first.to_string());
-			n->add_property("from", i->first);
-			n->add_property("to", i->second);
+			n->set_property("type", tm->first.to_string());
+			n->set_property("from", i->first);
+			n->set_property("to", i->second);
 			node->add_child_nocopy(*n);
 		}
 	}

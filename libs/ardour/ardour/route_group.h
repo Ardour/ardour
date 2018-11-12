@@ -67,7 +67,7 @@ class Session;
  */
 class LIBARDOUR_API RouteGroup : public SessionObject
 {
-  public:
+public:
 	static void make_property_quarks();
 
 	RouteGroup (Session& s, const std::string &n);
@@ -76,7 +76,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool is_active () const { return _active.val(); }
 	bool is_relative () const { return _relative.val(); }
 	bool is_hidden () const { return _hidden.val(); }
-	bool is_gain () const { return _gain.val() && _group_master_number.val() <= 0; }
+	bool is_gain () const { return _gain.val(); }
 	bool is_mute () const { return _mute.val(); }
 	bool is_solo () const { return _solo.val(); }
 	bool is_recenable () const { return _recenable.val(); }
@@ -85,6 +85,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool is_color () const { return _color.val(); }
 	bool is_monitoring() const { return _monitoring.val(); }
 	int32_t group_master_number() const { return _group_master_number.val(); }
+	boost::weak_ptr<Route> subgroup_bus() const { return _subgroup_bus; }
 
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
@@ -130,7 +131,7 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 		changed();
 	}
 
-        bool has_subgroup() const;
+	bool has_subgroup() const;
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
@@ -150,9 +151,18 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 	bool has_control_master() const;
 	bool slaved () const;
 
-  private:
+	uint32_t rgba () const { return _rgba; }
+
+	/** set route-group color and notify UI about change */
+	void set_rgba (uint32_t);
+
+	/* directly set color only, used to convert old 5.x gui-object-state
+	 * to libardour color */
+	void migrate_rgba (uint32_t color) { _rgba = color; }
+
+private:
 	boost::shared_ptr<RouteList> routes;
-	boost::shared_ptr<Route> subgroup_bus;
+	boost::shared_ptr<Route> _subgroup_bus;
 	boost::weak_ptr<VCA> group_master;
 
 	PBD::Property<bool> _relative;
@@ -179,6 +189,9 @@ class LIBARDOUR_API RouteGroup : public SessionObject
 
 	void post_set (PBD::PropertyChange const &);
 	void push_to_groups ();
+
+	uint32_t _rgba;
+	bool _used_to_share_gain;
 };
 
 } /* namespace */

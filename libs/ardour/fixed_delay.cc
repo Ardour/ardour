@@ -84,20 +84,21 @@ FixedDelay::flush()
 }
 
 void
-FixedDelay::configure (const ChanCount& count, framecnt_t max_delay, bool shrink)
+FixedDelay::configure (const ChanCount& count, samplecnt_t max_delay, bool shrink)
 {
 	if (shrink) {
 		if (max_delay == _max_delay && count == _count) {
 			return;
 		}
 		_max_delay = max_delay;
-	} else if (max_delay <= _max_delay || count <= _count) {
+	} else if (max_delay <= _max_delay && count <= _count) {
 		return;
+	} else {
 		_max_delay = std::max (_max_delay, max_delay);
 	}
 
 	// max possible (with all engines and during export)
-	static const framecnt_t max_block_length = 8192;
+	static const samplecnt_t max_block_length = 8192;
 	_buf_size = _max_delay + max_block_length;
 	for (DataType::iterator i = DataType::begin (); i != DataType::end (); ++i) {
 		ensure_buffers (*i, count.get (*i), _buf_size);
@@ -105,7 +106,7 @@ FixedDelay::configure (const ChanCount& count, framecnt_t max_delay, bool shrink
 }
 
 void
-FixedDelay::set (const ChanCount& count, framecnt_t delay)
+FixedDelay::set (const ChanCount& count, samplecnt_t delay)
 {
 	configure (count, delay, false);
 	if (_delay != delay) {
@@ -118,11 +119,11 @@ void
 FixedDelay::delay (
 		ARDOUR::DataType dt, uint32_t id,
 		Buffer& out, const Buffer& in,
-		pframes_t n_frames,
-		framecnt_t dst_offset, framecnt_t src_offset)
+		pframes_t n_samples,
+		samplecnt_t dst_offset, samplecnt_t src_offset)
 {
 	if (_delay == 0) {
-		out.read_from (in, n_frames, dst_offset, src_offset);
+		out.read_from (in, n_samples, dst_offset, src_offset);
 		return;
 	}
 
@@ -130,25 +131,25 @@ FixedDelay::delay (
 	assert (id < _buffers[dt].size ());
 	DelayBuffer *db = _buffers[dt][id];
 
-	if (db->pos + n_frames > _buf_size) {
+	if (db->pos + n_samples > _buf_size) {
 		uint32_t w0 = _buf_size - db->pos;
-		uint32_t w1 = db->pos + n_frames - _buf_size;
+		uint32_t w1 = db->pos + n_samples - _buf_size;
 		db->buf->read_from (in, w0, db->pos, src_offset);
 		db->buf->read_from (in, w1, 0, src_offset + w0);
 	} else {
-		db->buf->read_from (in, n_frames, db->pos, src_offset);
+		db->buf->read_from (in, n_samples, db->pos, src_offset);
 	}
 
 	uint32_t rp = (db->pos + _buf_size - _delay) % _buf_size;
 
-	if (rp + n_frames > _buf_size) {
+	if (rp + n_samples > _buf_size) {
 		uint32_t r0 = _buf_size - rp;
-		uint32_t r1 = rp + n_frames - _buf_size;
+		uint32_t r1 = rp + n_samples - _buf_size;
 		out.read_from (*db->buf, r0, dst_offset, rp);
 		out.read_from (*db->buf, r1, dst_offset + r0, 0);
 	} else {
-		out.read_from (*db->buf, n_frames, dst_offset, rp);
+		out.read_from (*db->buf, n_samples, dst_offset, rp);
 	}
 
-	db->pos = (db->pos + n_frames) % _buf_size;
+	db->pos = (db->pos + n_samples) % _buf_size;
 }

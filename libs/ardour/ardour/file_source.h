@@ -80,6 +80,7 @@ public:
         bool is_stub () const;
 
 	const std::string& origin() const { return _origin; }
+	void set_origin (std::string const& o) { _origin = o; }
 
 	virtual void set_path (const std::string&);
 	void replace_file (const std::string&);

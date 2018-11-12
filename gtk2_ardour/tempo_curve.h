@@ -11,6 +11,7 @@
 
 #include "canvas/types.h"
 #include "canvas/framed_curve.h"
+#include "canvas/text.h"
 
 namespace ARDOUR {
 	class TempoSection;
@@ -19,8 +20,8 @@ class PublicEditor;
 
 class TempoCurve : public sigc::trackable
 {
-  public:
-	TempoCurve (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, ARDOUR::TempoSection& temp, framepos_t frame, bool handle_events);
+public:
+	TempoCurve (PublicEditor& editor, ArdourCanvas::Container &, guint32 rgba, ARDOUR::TempoSection& temp, samplepos_t sample, bool handle_events);
 	~TempoCurve ();
 
 	static PBD::Signal1<void,TempoCurve*> CatchDeletion;
@@ -30,9 +31,9 @@ class TempoCurve : public sigc::trackable
 	ArdourCanvas::Item& the_item() const;
 	void canvas_height_set (double);
 
-	void set_position (framepos_t lower, framepos_t upper);
+	void set_position (samplepos_t lower, samplepos_t upper);
 	void set_color_rgba (uint32_t rgba);
-	framepos_t position() const { return frame_position; }
+	samplepos_t position() const { return sample_position; }
 
 	ArdourCanvas::Container * get_parent() { return _parent; }
 	void reparent (ArdourCanvas::Container & parent);
@@ -54,8 +55,8 @@ protected:
 	ArdourCanvas::FramedCurve* _curve;
 
 	double        unit_position;
-	framepos_t    frame_position;
-	framepos_t    _end_frame;
+	samplepos_t    sample_position;
+	samplepos_t    _end_sample;
 	bool         _shown;
 	double       _canvas_height;
 	uint32_t     _color;
@@ -68,6 +69,8 @@ private:
 	TempoCurve (TempoCurve const &);
 	TempoCurve & operator= (TempoCurve const &);
 	ARDOUR::TempoSection& _tempo;
+	ArdourCanvas::Text *_start_text;
+	ArdourCanvas::Text *_end_text;
 
 };
 #endif /* __gtk_ardour_tempo_curve_h__ */

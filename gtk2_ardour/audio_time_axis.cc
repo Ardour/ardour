@@ -32,16 +32,15 @@
 #include "pbd/memento_command.h"
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/selector.h"
-#include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
 
 #include "ardour/event_type_map.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
 
-#include "ardour_button.h"
 #include "audio_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
@@ -49,7 +48,6 @@
 #include "automation_time_axis.h"
 #include "keyboard.h"
 #include "playlist_selector.h"
-#include "prompter.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
 #include "audio_streamview.h"
@@ -59,6 +57,7 @@
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
@@ -116,7 +115,7 @@ AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 
 	if (_route->panner_shell()) {
 		_route->panner_shell()->Changed.connect (*this, invalidator (*this),
-                                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
+		                                         boost::bind (&AudioTimeAxisView::ensure_pan_views, this, false), gui_context());
 	}
 
 	/* map current state of the route */
@@ -207,8 +206,8 @@ AudioTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool
 		create_trim_automation_child (param, show);
 
 	} else if (param.type() == PanWidthAutomation ||
-                   param.type() == PanElevationAutomation ||
-                   param.type() == PanAzimuthAutomation) {
+	           param.type() == PanElevationAutomation ||
+	           param.type() == PanAzimuthAutomation) {
 
 		ensure_pan_views (show);
 

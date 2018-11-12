@@ -17,6 +17,10 @@
 
 */
 
+#ifndef __windows_vst_plugin_ui_h__
+#define __windows_vst_plugin_ui_h__
+
+#include "pbd/signals.h"
 #include "vst_plugin_ui.h"
 
 class WindowsVSTPluginUI : public VSTPluginUI
@@ -34,6 +38,10 @@ public:
 
 private:
 
+	void resize_callback ();
 	int get_XID ();
+	void top_box_allocated (Gtk::Allocation&);
 
+	PBD::ScopedConnection _resize_connection;
 };
+#endif

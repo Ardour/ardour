@@ -21,8 +21,8 @@
 #include <fcntl.h>
 #include <map>
 
-#include "timecode/time.h"
-#include "timecode/bbt_time.h"
+#include "temporal/time.h"
+#include "temporal/bbt_time.h"
 
 #include "pbd/error.h"
 

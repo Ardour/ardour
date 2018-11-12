@@ -18,7 +18,6 @@
 */
 
 #include "canvas/line_set.h"
-#include "canvas/utils.h"
 
 using namespace std;
 using namespace ArdourCanvas;
@@ -108,7 +107,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		Rect intersection (isect);
 
-		set_source_rgba (context, i->color);
+		Gtkmm2ext::set_source_rgba (context, i->color);
 		context->set_line_width (i->width);
 
 		/* Not 100% sure that the computation of the invariant
@@ -131,7 +130,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
-LineSet::add (Coord y, Distance width, Color color)
+LineSet::add (Coord y, Distance width, Gtkmm2ext::Color color)
 {
 	begin_change ();
 

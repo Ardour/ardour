@@ -36,7 +36,7 @@ namespace ARDOUR {
 }
 
 namespace GTKArdour {
-        class FFT;
+	class FFT;
 }
 
 class PluginEqGui : public Gtk::Table
@@ -100,8 +100,8 @@ private:
 	float _log_coeff;
 	float _log_max;
 
-	ARDOUR::framecnt_t _buffer_size;
-	ARDOUR::framecnt_t _signal_buffer_size;
+	ARDOUR::samplecnt_t _buffer_size;
+	ARDOUR::samplecnt_t _signal_buffer_size;
 
 	// buffers
 	ARDOUR::BufferSet _bufferset;
@@ -113,9 +113,9 @@ private:
 	float _analysis_height;
 
 	// My objects
-        GTKArdour::FFT *_impulse_fft;
-        GTKArdour::FFT *_signal_input_fft;
-        GTKArdour::FFT *_signal_output_fft;
+	GTKArdour::FFT *_impulse_fft;
+	GTKArdour::FFT *_signal_input_fft;
+	GTKArdour::FFT *_signal_output_fft;
 	boost::shared_ptr<ARDOUR::Plugin> _plugin;
 	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
 
@@ -142,6 +142,7 @@ private:
 	Gtk::ComboBox *dBScaleCombo;
 	Glib::RefPtr<Gtk::ListStore> dBScaleModel;
 
+	Gtk::CheckButton *_signal_button;
 	Gtk::CheckButton *_phase_button;
 
 	// signals and connections

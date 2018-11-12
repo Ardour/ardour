@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OSCPreset>
+  <Name value="Basic TouchOSC"/>
+  <PortMode value="1"/>
+  <Remote-Port value="8000"/>
+  <Bank-Size value="0"/>
+  <Send-Size value="0"/>
+  <Plugin-Size value="0"/>
+  <Strip-Types value="159"/>
+  <Feedback value="4"/>
+  <Gain-Mode value="1"/>
+</OSCPreset>

@@ -1,4 +1,4 @@
-[ -z $TOP ] && "ardev_common.sh: TOP var must be set" && exit 1
+[ -z $TOP ] && echo "ardev_common.sh: TOP var must be set" >&2 && exit 1
 
 #export G_DEBUG=fatal_criticals
 
@@ -13,7 +13,7 @@ export GTK2_RC_FILES=/nonexistent
 # can find all the components.
 #
 
-export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/faderport:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie:$libs/surfaces/wiimote:$libs/surfaces/push2
+export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/faderport8:$libs/surfaces/faderport:$libs/surfaces/generic_midi:$libs/surfaces/tranzport:$libs/surfaces/powermate:$libs/surfaces/mackie:$libs/surfaces/us2400:$libs/surfaces/wiimote:$libs/surfaces/push2:$libs/surfaces/maschine2:$libs/surfaces/cc121:$libs/surfaces/launch_control_xl
 export ARDOUR_PANNER_PATH=$libs/panners
 export ARDOUR_DATA_PATH=$TOP:$TOP/build:$TOP/gtk2_ardour:$TOP/build/gtk2_ardour:.
 export ARDOUR_MIDIMAPS_PATH=$TOP/midi_maps:.
@@ -36,7 +36,7 @@ export ARDOUR_DLL_PATH=$libs
 export GTK_PATH=~/.ardour3:$libs/clearlooks-newer
 export VAMP_PATH=$libs/vamp-plugins${VAMP_PATH:+:$VAMP_PATH}
 
-export LD_LIBRARY_PATH=$libs/ptformat:$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/gnomecanvas:$libs/libsndfile:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/timecode:$libs/libltc:$libs/canvas:$libs/ardouralsautil${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=$libs/ptformat:$libs/qm-dsp:$libs/vamp-sdk:$libs/surfaces:$libs/surfaces/control_protocol:$libs/ardour:$libs/midi++2:$libs/pbd:$libs/rubberband:$libs/soundtouch:$libs/gtkmm2ext:$libs/widgets:$libs/appleutility:$libs/taglib:$libs/evoral:$libs/evoral/src/libsmf:$libs/audiographer:$libs/temporal:$libs/libltc:$libs/canvas:$libs/waveview:$libs/ardouralsautil${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 # DYLD_LIBRARY_PATH is for darwin.
 export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH

@@ -31,13 +31,8 @@ gtk2_ardour_sources = [
         'add_route_dialog.cc',
         'ambiguous_file_dialog.cc',
         'analysis_window.cc',
-        'ardour_button.cc',
         'ardour_dialog.cc',
-        'ardour_display.cc',
-        'ardour_dropdown.cc',
         'ardour_http.cc',
-        'ardour_knob.cc',
-        'ardour_spinner.cc',
         'ardour_ui.cc',
         'ardour_ui2.cc',
         'ardour_ui_dependents.cc',
@@ -58,8 +53,8 @@ gtk2_ardour_sources = [
         'automation_time_axis.cc',
         'axis_view.cc',
         'big_clock_window.cc',
+        'big_transport_window.cc',
         'bundle_manager.cc',
-        'button_joiner.cc',
         'clock_group.cc',
         'color_theme_manager.cc',
         'configinfo.cc',
@@ -122,6 +117,7 @@ gtk2_ardour_sources = [
         'group_tabs.cc',
         'gtk_pianokeyboard.c',
         'gui_object.cc',
+        'idleometer.cc',
         'insert_remove_time_dialog.cc',
         'instrument_selector.cc',
         'interthread_progress_window.cc',
@@ -134,6 +130,7 @@ gtk2_ardour_sources = [
         'level_meter.cc',
         'location_ui.cc',
         'lua_script_manager.cc',
+        'luadialog.cc',
         'luainstance.cc',
         'luawindow.cc',
         'main.cc',
@@ -182,9 +179,11 @@ gtk2_ardour_sources = [
         'panner_interface.cc',
         'panner_ui.cc',
         'patch_change.cc',
+        'patch_change_widget.cc',
         'piano_roll_header.cc',
         'pingback.cc',
         'playlist_selector.cc',
+        'plugin_display.cc',
         'plugin_eq_gui.cc',
         'plugin_pin_dialog.cc',
         'plugin_setup_dialog.cc',
@@ -200,9 +199,9 @@ gtk2_ardour_sources = [
         'port_matrix_labels.cc',
         'port_matrix_row_labels.cc',
         'processor_box.cc',
+        'processor_selection.cc',
         'patch_change_dialog.cc',
         'progress_reporter.cc',
-        'prompter.cc',
         'public_editor.cc',
         'quantize_dialog.cc',
         'rc_option_editor.cc',
@@ -221,6 +220,7 @@ gtk2_ardour_sources = [
         'route_ui.cc',
         'ruler_dialog.cc',
         'save_as_dialog.cc',
+        'save_template_dialog.cc',
         'search_path_option.cc',
         'script_selector.cc',
         'selection.cc',
@@ -243,21 +243,25 @@ gtk2_ardour_sources = [
         'stereo_panner_editor.cc',
         'streamview.cc',
         'strip_silence_dialog.cc',
+        'stripable_colorpicker.cc',
+        'stripable_time_axis.cc',
         'sys_ex.cc',
         'tape_region_view.cc',
+        'template_dialog.cc',
         'tempo_curve.cc',
         'tempo_dialog.cc',
-        'tempo_lines.cc',
+        'grid_lines.cc',
         'time_axis_view.cc',
         'time_axis_view_item.cc',
         'time_fx_dialog.cc',
         'time_info_box.cc',
         'time_selection.cc',
         'timers.cc',
-        'tooltips.cc',
         'track_selection.cc',
         'track_view_list.cc',
         'transform_dialog.cc',
+        'transport_control.cc',
+        'transport_control_ui.cc',
         'transpose_dialog.cc',
         'ui_config.cc',
         'utils.cc',
@@ -320,9 +324,39 @@ def enoify (major, minor):
         elif minor == 5:
             return "\\n\\\"The Plateaux of Mirror\\\""
         elif minor == 6:
-            return "\\n\\\"Possible Musics\\\""
+            return "\\n\\\"Possible Musics\\\"" # 1980 Collaborative
         elif minor == 7:
-            return "\\n\\\"My Life in the Bush of Ghosts\\\""
+            return "\\n\\\"My Life in the Bush of Ghosts\\\"" # 1981
+        elif minor == 8:
+            return "\\n\\\"Music for Airplay\\\"" # 1981 Compilation
+        elif minor == 9:
+            return "\\n\\\"On Land\\\"" # 1982
+        elif minor == 10:  # 6.0 ??
+            return "\\n\\\"Atmospheres and Soundtracks\\\"" # 1983
+        elif minor == 11:
+            return "\\n\\\"More Music for Films\\\"" # 1983
+        elif minor == 12:
+            return "\\n\\\"Working Backwards\\\"" # 1984 Compilation
+    elif major == 6:
+        if minor == 0:
+            return "\\n\\\"The Pearl\\\"" # 1984 Collaborative
+        elif minor == 1:
+            return "\\n\\\"Begegnungen\\\"" # 1984 Compilation
+        ### From now on, no more compilations, names are not suitable
+        elif minor == 2:
+            return "\\n\\\"Thursday Afternoon\\\"" # 1985
+        elif minor == 3:
+            return "\\n\\\"Music for Films III\\\"" # 1988 Collaborative
+        elif minor == 4:
+            return "\\n\\\"Wrong Way Up\\\"" # 1990 Collaborative
+        elif minor == 5:
+            return "\\n\\\"Nerve Net\\\"" # 1992
+        elif minor == 6:
+            return "\\n\\\"The Shutov Assembly\\\"" # 1992
+        elif minor == 7:
+            return "\\n\\\"Neroli\\\"" # 1993
+        elif minor == 8:
+            return "\\n\\\"Headcandy\\\"" # 1994
     return "\\\"\\\""
 
 def options(opt):
@@ -465,10 +499,12 @@ def build(bld):
                 'libpbd',
                 'libardour',
                 'libardour_cp',
-                'libtimecode',
+                'libtemporal',
                 'libmidipp',
                 'libgtkmm2ext',
                 'libcanvas',
+                'libwaveview',
+                'libwidgets',
                 'libptformat',
                 ]
         obj.defines = [
@@ -490,36 +526,36 @@ def build(bld):
             obj.defines += [ 'LXVST_SUPPORT' ]
             obj.use += [ 'X11' ]
 
-    # Tool to test libcanvas
-    if re.search ("linux", sys.platform) != None and bld.env['CANVASTESTUI']:
-        obj = bld (features = 'cxx c cxxprogram')
-        obj.install_path = None
-        obj.source    = list(gtk2_ardour_sources)
-        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
-        obj.target    = 'canvas_test'
-        obj.includes  = ['.', '../libs']
-        obj.ldflags   = ['-no-undefined']
-        obj.use       = [
-                'libpbd',
-                'libardour',
-                'libardour_cp',
-                'libtimecode',
-                'libmidipp',
-                'libgtkmm2ext',
-                'libcanvas',
-                'libptformat',
-                ]
-        obj.defines = [
-                'NOMAIN',
-                'PACKAGE="' + I18N_PACKAGE + '"',
-                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
-                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
-                'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
-                ]
-        obj.linkflags = ''
-        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
-        # obj.source += [ 'canvas_test.cc', ]
-        obj.source += [ 'toolbar_test.cc', 'enums.cc']
+#    # Tool to test libcanvas
+#    if re.search ("linux", sys.platform) != None and bld.env['CANVASTESTUI']:
+#        obj = bld (features = 'cxx c cxxprogram')
+#        obj.install_path = None
+#        obj.source    = list(gtk2_ardour_sources)
+#        obj.source    = [ 'ardour_button.cc', 'ui_config.cc', 'tooltips.cc' ]
+#        obj.target    = 'canvas_test'
+#        obj.includes  = ['.', '../libs']
+#        obj.ldflags   = ['-no-undefined']
+#        obj.use       = [
+#                'libpbd',
+#                'libardour',
+#                'libardour_cp',
+#                'libtemporal',
+#                'libmidipp',
+#                'libgtkmm2ext',
+#                'libcanvas',
+#                'libptformat',
+#                ]
+#        obj.defines = [
+#                'NOMAIN',
+#                'PACKAGE="' + I18N_PACKAGE + '"',
+#                'DATA_DIR="' + os.path.normpath(bld.env['DATADIR']) + '"',
+#                'CONFIG_DIR="' + os.path.normpath(bld.env['SYSCONFDIR']) + '"',
+#                'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
+#                ]
+#        obj.linkflags = ''
+#        obj.uselib    = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML '
+#        # obj.source += [ 'canvas_test.cc', ]
+#        obj.source += [ 'toolbar_test.cc', 'enums.cc']
 
 
     if bld.is_defined('WINDOWS_VST_SUPPORT') and bld.env['build_target'] != 'mingw':
@@ -535,11 +571,13 @@ def build(bld):
                              'libmidipp',
                              'libardour',
                              'libardour_cp',
-                             'libtimecode',
+                             'libtemporal',
                              'libmidipp',
                              'libgtk2_ardour',
                              'libgtkmm2ext',
                              'libcanvas',
+                             'libwaveview',
+                             'libwidgets',
                              'libptformat',
                              ]
         obj.target = 'ardour-' + str (bld.env['VERSION']) + '-vst.exe.so'
@@ -581,10 +619,12 @@ def build(bld):
     obj.use      = [ 'libpbd',
                      'libardour',
                      'libardour_cp',
-                     'libtimecode',
+                     'libtemporal',
                      'libmidipp',
                      'libgtkmm2ext',
                      'libcanvas',
+                     'libwaveview',
+                     'libwidgets',
                      'libptformat',
                      ]
 
@@ -714,21 +754,19 @@ def build(bld):
                 'HUGER' : '36',
                 'MASSIVE' : '60',
         }
-
-        # There is no acceptable monospace font available on older versions of OS X
-        # and no API on those versions to load TTF files that will work with
-        # GTK/fontconfig/pango.
-        #
-        # In addition, the ArdourMono font gets clipped for some reason on OS X
-        #
-        # Moreover, Lucida Grande just seems to work even though it is not monospace
-        # so just use it.
-        #
-        font_names = {
-            'MONOSPACE' : 'Monaco',
-            'CLOCKFONT' : 'Lucida Grande',
-        }
-    else: # Linux/X11 fonts
+        if bld.env['build_target'] in ['panther', 'tiger', 'leopard'] or (Options.options.ppc and bld.env['build_target'] == 'snowleopard'):
+            # CTFontManagerRegisterFontsForURL for ArdourMono is 10.6 or newer
+            # "Lucida Grande" is not mono-spaced, but works for most cases, except big-clock-window
+            font_names = {
+                    'MONOSPACE' : 'Monaco',
+                    'CLOCKFONT' : 'Lucida Grande',
+                    }
+        else:
+            font_names = {
+                    'MONOSPACE' : 'Monaco',
+                    'CLOCKFONT' : 'ArdourMono',
+                    }
+    else: # Linux/X11 & Windows fonts
         basefont = '' # unspecified - use system defaults
         font_sizes = {
                 'SMALLER' : '6',
@@ -840,7 +878,7 @@ def build(bld):
 
     # NATIVE ARDOUR BINDING FILES
     # explicitly state the use of perl here so that it works on windows too
-    # 
+    #
     a_rule = 'perl ../tools/fmt-bindings --platform="%s" --winkey="%s" --accelmap ${SRC[0].abspath()} >${TGT}' % (sys.platform, bld.env['WINDOWS_KEY'] )
     for b in [ 'ardour' ] :
         obj = bld(
@@ -849,7 +887,7 @@ def build(bld):
             rule = a_rule
             )
         obj.install_path = bld.env['CONFDIR']
-        
+
     # Icons/Images
     bld.install_files(os.path.join (bld.env['DATADIR'], 'icons'), bld.path.ant_glob('icons/*.png'))
     bld.install_files(bld.env['DATADIR'], 'ArdourMono.ttf')

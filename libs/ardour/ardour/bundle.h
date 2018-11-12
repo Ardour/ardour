@@ -73,6 +73,7 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 
 	/** @return Number of channels that this Bundle has */
 	ChanCount nchannels () const;
+	uint32_t n_total () const; /* shortcut for nchannels().n_total() */
 
 	/** @param Channel index.
 	 *  @return Ports associated with this channel.
@@ -96,9 +97,12 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 	void remove_channel (uint32_t);
 	void remove_channels ();
 	void add_channels_from_bundle (boost::shared_ptr<Bundle>);
-	void connect (boost::shared_ptr<Bundle>, AudioEngine &);
+	void connect (boost::shared_ptr<Bundle>, AudioEngine &,
+	              bool allow_partial = false);
 	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
-	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &);
+	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &,
+	                   DataType type = DataType::NIL,
+	                   bool exclusive = false);
 	bool connected_to_anything (AudioEngine &);
 	bool has_same_ports (boost::shared_ptr<Bundle>) const;
 	uint32_t type_channel_to_overall (DataType, uint32_t) const;

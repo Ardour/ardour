@@ -16,7 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/label.h>
+
 #include "ardour/luascripting.h"
 
 #include "ardour_dialog.h"
@@ -31,11 +34,14 @@ private:
 	void setup_list ();
 	void refresh ();
 	void script_combo_changed ();
-
+	bool script_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i);
+	
 	Gtk::Button* _add;
 	Gtk::ComboBoxText _script_combo;
 
+	Gtk::Label  _type_label;
 	Gtk::Label  _type;
+	Gtk::Label  _author_label;
 	Gtk::Label  _author;
 	Gtk::Label  _description;
 
@@ -60,9 +66,11 @@ class ScriptParameterDialog : public ArdourDialog
 public:
 	ScriptParameterDialog (std::string title, const ARDOUR::LuaScriptInfoPtr&, const std::vector<std::string>&, ARDOUR::LuaScriptParamList&);
 	std::string name () { return _name_entry.get_text (); }
+	bool need_interation () const;
 
 private:
 	void update_sensitivity ();
+	bool parameters_ok () const;
 	void active_changed (int, Gtk::CheckButton*, Gtk::Entry*);
 	void value_changed (int, Gtk::Entry*);
 

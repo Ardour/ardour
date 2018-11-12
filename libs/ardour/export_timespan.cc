@@ -23,12 +23,12 @@
 namespace ARDOUR
 {
 
-ExportTimespan::ExportTimespan (ExportStatusPtr status, framecnt_t frame_rate) :
+ExportTimespan::ExportTimespan (ExportStatusPtr status, samplecnt_t sample_rate) :
 	status (status),
-	start_frame (0),
-	end_frame (0),
+	start_sample (0),
+	end_sample (0),
 	position (0),
-	frame_rate (frame_rate),
+	sample_rate (sample_rate),
 	_realtime (false)
 {
 
@@ -39,11 +39,11 @@ ExportTimespan::~ExportTimespan ()
 }
 
 void
-ExportTimespan::set_range (framepos_t start, framepos_t end)
+ExportTimespan::set_range (samplepos_t start, samplepos_t end)
 {
-	start_frame = start;
-	position = start_frame;
-	end_frame = end;
+	start_sample = start;
+	position = start_sample;
+	end_sample = end;
 }
 
 } // namespace ARDOUR

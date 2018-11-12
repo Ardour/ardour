@@ -30,14 +30,15 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/keyboard.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/rgb_macros.h>
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/rgb_macros.h"
+
+#include "widgets/tooltips.h"
 
 #include "gui_thread.h"
 #include "ardour_window.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -48,6 +49,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
@@ -142,7 +144,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
 	level_meter->clear_meters();
-	level_meter->set_type (_route->meter_type());
+	level_meter->set_meter_type (_route->meter_type());
 	level_meter->setup_meters (220, meter_width, 6);
 	level_meter->ButtonPress.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::level_meter_button_press, this, _1));
 	level_meter->MeterTypeChanged.connect_same_thread (level_meter_connection, boost::bind (&MeterStrip::meter_type_changed, this, _1));
@@ -182,8 +184,8 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	name_label.set_layout_ellipsize_width(48 * PANGO_SCALE);
 	name_label.set_size_request(PX_SCALE(18, 18), PX_SCALE(50, 50));
 	name_label.set_alignment(-1.0, .5);
-	set_tooltip (name_label, _route->name());
-	set_tooltip (*level_meter, _route->name());
+	set_tooltip (name_label, Gtkmm2ext::markup_escape_text (_route->name()));
+	set_tooltip (*level_meter, Gtkmm2ext::markup_escape_text (_route->name()));
 
 	number_label.set_corner_radius(2);
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
@@ -486,7 +488,7 @@ MeterStrip::set_tick_bar (int m)
 	} else {
 		n = meter_ticks1_area.get_name();
 		if (n.substr(0,3) == "Bar") {
-			meter_ticks1_area.set_name(n.substr(3,-1));
+			meter_ticks1_area.set_name (n.substr (3));
 		}
 	}
 	if (_tick_bar & 2) {
@@ -497,7 +499,7 @@ MeterStrip::set_tick_bar (int m)
 	} else {
 		n = meter_ticks2_area.get_name();
 		if (n.substr(0,3) == "Bar") {
-			meter_ticks2_area.set_name(n.substr(3,-1));
+			meter_ticks2_area.set_name (n.substr (3));
 		}
 	}
 }
@@ -804,7 +806,7 @@ MeterStrip::name_changed () {
 			number_label.set_text("-");
 			number_label.hide();
 		} else {
-			number_label.set_text (PBD::to_string (track_number, std::dec));
+			number_label.set_text (PBD::to_string (track_number));
 			number_label.show();
 		}
 		const int tnh = 4 + std::max(2u, _session->track_number_decimals()) * 8; // TODO 8 = max_width_of_digit_0_to_9()
@@ -927,7 +929,7 @@ MeterStrip::set_meter_type (MeterType type)
 	if (_suspend_menu_callbacks) return;
 	if (_route->meter_type() == type) return;
 
-	level_meter->set_type (type);
+	level_meter->set_meter_type (type);
 }
 
 void
@@ -953,14 +955,14 @@ MeterStrip::set_meter_type_multi (int what, RouteGroup* group, MeterType type)
 	switch (what) {
 		case -1:
 			if (_route && group == _route->route_group()) {
-				level_meter->set_type (type);
+				level_meter->set_meter_type (type);
 			}
 			break;
 		case 0:
-			level_meter->set_type (type);
+			level_meter->set_meter_type (type);
 		default:
 			if (what == _strip_type) {
-				level_meter->set_type (type);
+				level_meter->set_meter_type (type);
 			}
 			break;
 	}

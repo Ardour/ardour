@@ -356,7 +356,7 @@ VBAPanner::distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_co
 
 void
 VBAPanner::distribute_one_automated (AudioBuffer& /*src*/, BufferSet& /*obufs*/,
-                                     framepos_t /*start*/, framepos_t /*end*/,
+                                     samplepos_t /*start*/, samplepos_t /*end*/,
 				     pframes_t /*nframes*/, pan_t** /*buffers*/, uint32_t /*which*/)
 {
 	/* XXX to be implemented */
@@ -366,9 +366,9 @@ XMLNode&
 VBAPanner::get_state ()
 {
 	XMLNode& node (Panner::get_state());
-	node.add_property (X_("uri"), _descriptor.panner_uri);
+	node.set_property (X_("uri"), _descriptor.panner_uri);
 	/* this is needed to allow new sessions to load with old Ardour: */
-	node.add_property (X_("type"), _descriptor.name);
+	node.set_property (X_("type"), _descriptor.name);
 	return node;
 }
 

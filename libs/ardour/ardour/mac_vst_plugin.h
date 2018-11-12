@@ -22,7 +22,7 @@
 
 #include "ardour/vst_plugin.h"
 
-struct LIBARDOUR_API _VSTHandle;
+struct _VSTHandle;
 typedef struct _VSTHandle VSTHandle;
 
 namespace ARDOUR {
@@ -38,6 +38,8 @@ public:
 	~MacVSTPlugin ();
 
 	std::string state_node_name () const { return "mac-vst"; }
+protected:
+	void open_plugin ();
 };
 
 class LIBARDOUR_API MacVSTPluginInfo : public PluginInfo

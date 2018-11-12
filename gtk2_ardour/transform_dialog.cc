@@ -173,8 +173,8 @@ set_spinner_for(Gtk::SpinButton&                     spinner,
 		spinner.set_digits(2);
 		break;
 	case MidiModel::NoteDiffCommand::Channel:
-		spinner.get_adjustment()->set_lower(0);
-		spinner.get_adjustment()->set_upper(15);
+		spinner.get_adjustment()->set_lower(1);
+		spinner.get_adjustment()->set_upper(16);
 		spinner.get_adjustment()->set_step_increment(1);
 		spinner.get_adjustment()->set_page_increment(10);
 		spinner.set_digits(0);
@@ -228,6 +228,18 @@ TransformDialog::ValueChooser::source_changed()
 	}
 }
 
+double
+TransformDialog::ValueChooser::get_value () const
+{
+		return value_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+}
+
+double
+TransformDialog::ValueChooser::get_max () const
+{
+		return max_spinner.get_value() + ((target_property == MidiModel::NoteDiffCommand::Channel) ? -1. : 0.);
+}
+
 void
 TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 {
@@ -237,8 +249,8 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 	if (source == Transform::Value::RANDOM) {
 		/* Special case: a RANDOM value is always 0..1, so here we produce some
 		   code to produce a random number in a range: "rand value *". */
-		const double a     = value_spinner.get_value();
-		const double b     = max_spinner.get_value();
+		const double a     = get_value();
+		const double b     = get_max();
 		const double min   = std::min(a, b);
 		const double max   = std::max(a, b);
 		const double range = max - min;
@@ -254,8 +266,8 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 		/* Special case: hijack NOWHERE for ramps (see above).  The language
 		   knows nothing of ramps, we generate code to calculate the
 		   appropriate value here. */
-		const double first = value_spinner.get_value();
-		const double last  = max_spinner.get_value();
+		const double first = get_value();
+		const double last  = get_max();
 		const double rise  = last - first;
 
 		// "index rise * n_notes 1 - / first +" (index * rise / (n_notes - 1) + first)
@@ -280,7 +292,7 @@ TransformDialog::ValueChooser::get(std::list<Operation>& ops)
 	} else if (val.source == Transform::Value::LITERAL) {
 		val.value = Variant(
 			MidiModel::NoteDiffCommand::value_type(target_property),
-			value_spinner.get_value());
+			get_value());
 	}
 	ops.push_back(Operation(Operation::PUSH, val));
 }

@@ -25,20 +25,20 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 	/// Constructs an interleaver \n RT safe
 	Interleaver()
 	  : channels (0)
-	  , max_frames (0)
+	  , max_samples (0)
 	  , buffer (0)
 	{}
 
 	~Interleaver() { reset(); }
 
 	/// Inits the interleaver. Must be called before using. \n Not RT safe
-	void init (unsigned int num_channels, framecnt_t max_frames_per_channel)
+	void init (unsigned int num_channels, samplecnt_t max_samples_per_channel)
 	{
 		reset();
 		channels = num_channels;
-		max_frames = max_frames_per_channel;
+		max_samples = max_samples_per_channel;
 
-		buffer = new T[channels * max_frames];
+		buffer = new T[channels * max_samples];
 
 		for (unsigned int i = 0; i < channels; ++i) {
 			inputs.push_back (InputPtr (new Input (*this, i)));
@@ -63,27 +63,27 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 	{
 	  public:
 		Input (Interleaver & parent, unsigned int channel)
-		  : frames_written (0), parent (parent), channel (channel) {}
+		  : samples_written (0), parent (parent), channel (channel) {}
 
 		void process (ProcessContext<T> const & c)
 		{
 			if (parent.throw_level (ThrowProcess) && c.channels() > 1) {
 				throw Exception (*this, "Data input has more than on channel");
 			}
-			if (parent.throw_level (ThrowStrict) && frames_written) {
+			if (parent.throw_level (ThrowStrict) && samples_written) {
 				throw Exception (*this, "Input channels out of sync");
 			}
-			frames_written = c.frames();
+			samples_written = c.samples();
 			parent.write_channel (c, channel);
 		}
 
 		using Sink<T>::process;
 
-		framecnt_t frames() { return frames_written; }
-		void reset() { frames_written = 0; }
+		samplecnt_t samples() { return samples_written; }
+		void reset() { samples_written = 0; }
 
 	  private:
-		framecnt_t frames_written;
+		samplecnt_t samples_written;
 		Interleaver & parent;
 		unsigned int channel;
 	};
@@ -94,7 +94,7 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 		delete [] buffer;
 		buffer = 0;
 		channels = 0;
-		max_frames = 0;
+		max_samples = 0;
 	}
 
 	void reset_channels ()
@@ -107,44 +107,44 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 
 	void write_channel (ProcessContext<T> const & c, unsigned int channel)
 	{
-		if (throw_level (ThrowProcess) && c.frames() > max_frames) {
+		if (throw_level (ThrowProcess) && c.samples() > max_samples) {
 			reset_channels();
-			throw Exception (*this, "Too many frames given to an input");
+			throw Exception (*this, "Too many samples given to an input");
 		}
 
-		for (unsigned int i = 0; i < c.frames(); ++i) {
+		for (unsigned int i = 0; i < c.samples(); ++i) {
 			buffer[channel + (channels * i)] = c.data()[i];
 		}
 
-		framecnt_t const ready_frames = ready_to_output();
-		if (ready_frames) {
-			ProcessContext<T> c_out (c, buffer, ready_frames, channels);
+		samplecnt_t const ready_samples = ready_to_output();
+		if (ready_samples) {
+			ProcessContext<T> c_out (c, buffer, ready_samples, channels);
 			ListedSource<T>::output (c_out);
 			reset_channels ();
 		}
 	}
 
-	framecnt_t ready_to_output()
+	samplecnt_t ready_to_output()
 	{
-		framecnt_t ready_frames = inputs[0]->frames();
-		if (!ready_frames) { return 0; }
+		samplecnt_t ready_samples = inputs[0]->samples();
+		if (!ready_samples) { return 0; }
 
 		for (unsigned int i = 1; i < channels; ++i) {
-			framecnt_t const frames = inputs[i]->frames();
-			if (!frames) { return 0; }
-			if (throw_level (ThrowProcess) && frames != ready_frames) {
-				init (channels, max_frames);
-				throw Exception (*this, "Frames count out of sync");
+			samplecnt_t const samples = inputs[i]->samples();
+			if (!samples) { return 0; }
+			if (throw_level (ThrowProcess) && samples != ready_samples) {
+				init (channels, max_samples);
+				throw Exception (*this, "Samples count out of sync");
 			}
 		}
-		return ready_frames * channels;
+		return ready_samples * channels;
 	}
 
 	typedef boost::shared_ptr<Input> InputPtr;
 	std::vector<InputPtr> inputs;
 
 	unsigned int channels;
-	framecnt_t max_frames;
+	samplecnt_t max_samples;
 	T * buffer;
 };
 

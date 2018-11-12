@@ -30,6 +30,8 @@
 #include "ardour/control_group.h"
 #include "ardour/event_type_map.h"
 #include "ardour/session.h"
+#include "ardour/selection.h"
+#include "ardour/value_as_string.h"
 
 #include "pbd/i18n.h"
 
@@ -54,17 +56,33 @@ AutomationControl::AutomationControl(ARDOUR::Session&                          s
 
 	: Controllable (name.empty() ? EventTypeMap::instance().to_symbol(parameter) : name, flags)
 	, Evoral::Control(parameter, desc, list)
-	, _session(session)
+	, SessionHandleRef (session)
 	, _desc(desc)
+	, _no_session(false)
 {
 	if (_desc.toggled) {
 		set_flags (Controllable::Toggle);
+	}
+	boost::shared_ptr<AutomationList> al = alist();
+	if (al) {
+		al->StateChanged.connect_same_thread (_state_changed_connection, boost::bind (&Session::set_dirty, &_session));
 	}
 }
 
 AutomationControl::~AutomationControl ()
 {
+	if (!_no_session && !_session.deletion_in_progress ()) {
+		_session.selection().remove_control_by_id (id());
+		DropReferences (); /* EMIT SIGNAL */
+	}
+}
+
+void
+AutomationControl::session_going_away ()
+{
+	SessionHandleRef::session_going_away ();
 	DropReferences (); /* EMIT SIGNAL */
+	_no_session = true;
 }
 
 bool
@@ -81,8 +99,15 @@ AutomationControl::writable() const
 double
 AutomationControl::get_value() const
 {
-	bool from_list = _list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback();
-	return Control::get_double (from_list, _session.transport_frame());
+	bool from_list = alist() && alist()->automation_playback();
+	return Control::get_double (from_list, _session.transport_sample());
+}
+
+double
+AutomationControl::get_save_value() const
+{
+	/* save user-value, not incl masters */
+	return Control::get_double ();
 }
 
 void
@@ -122,6 +147,37 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 }
 
+ControlList
+AutomationControl::grouped_controls () const
+{
+	if (_group && _group->use_me (PBD::Controllable::UseGroup)) {
+		return _group->controls ();
+	} else {
+		return ControlList ();
+	}
+}
+
+void
+AutomationControl::automation_run (samplepos_t start, pframes_t nframes)
+{
+	if (!automation_playback ()) {
+		return;
+	}
+
+	assert (_list);
+	bool valid = false;
+	double val = _list->rt_safe_eval (start, valid);
+	if (!valid) {
+		return;
+	}
+	if (toggled ()) {
+		const double thresh = .5 * (_desc.upper - _desc.lower);
+		set_value_unchecked (val >= thresh ? _desc.upper : _desc.lower);
+	} else {
+		set_value_unchecked (val);
+	}
+}
+
 /** Set the value and do the right thing based on automation state
  *  (e.g. record if necessary, etc.)
  *  @param value `user' value
@@ -129,10 +185,9 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 void
 AutomationControl::actually_set_value (double value, PBD::Controllable::GroupControlDisposition gcd)
 {
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (_list);
-	const framepos_t pos = _session.transport_frame();
+	boost::shared_ptr<AutomationList> al = alist ();
+	const samplepos_t pos = _session.transport_sample();
 	bool to_list;
-	double old_value;
 
 	/* We cannot use ::get_value() here since that is virtual, and intended
 	   to return a scalar value that in some way reflects the state of the
@@ -149,34 +204,28 @@ AutomationControl::actually_set_value (double value, PBD::Controllable::GroupCon
 	   anything has changed) is the one derived from the automation event
 	   list.
 	*/
+	float old_value = Control::user_double();
 
-	if (!al) {
-		to_list = false;
-		old_value = Control::user_double();
+	if (al && al->automation_write ()) {
+		to_list = true;
 	} else {
-		if (al->automation_write ()) {
-			to_list = true;
-			old_value = Control::user_double ();
-		} else if (al->automation_playback()) {
-			to_list = false;
-			old_value = al->eval (pos);
-		} else {
-			to_list = false;
-			old_value = Control::user_double ();
-		}
+		to_list = false;
 	}
 
 	Control::set_double (value, pos, to_list);
 
-	if (old_value != value) {
-		// AutomationType at = (AutomationType) _parameter.type();
-		// std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
-		// << " (was " << old_value << ") @ " << this << std::endl;
+	if (old_value != (float)value) {
+#if 0
+		AutomationType at = (AutomationType) _parameter.type();
+		std::cerr << "++++ Changed (" << enum_2_string (at) << ", " << enum_2_string (gcd) << ") = " << value
+		<< " (was " << old_value << ") @ " << this << std::endl;
+#endif
 
 		Changed (true, gcd);
-		_session.set_dirty ();
+		if (!al || !al->automation_playback ()) {
+			_session.set_dirty ();
+		}
 	}
-
 }
 
 void
@@ -192,21 +241,22 @@ AutomationControl::set_automation_state (AutoState as)
 	if (flags() & NotAutomatable) {
 		return;
 	}
-	if (_list && as != alist()->automation_state()) {
+	if (alist() && as != alist()->automation_state()) {
 
 		const double val = get_value ();
 
 		alist()->set_automation_state (as);
 		if (_desc.toggled) {
+			Changed (false, Controllable::NoGroup); // notify slaves, update boolean masters
 			return;  // No watch for boolean automation
 		}
 
 		if (as == Write) {
 			AutomationWatch::instance().add_automation_watch (shared_from_this());
-		} else if (as == Touch) {
+		} else if (as & (Touch | Latch)) {
 			if (alist()->empty()) {
-				Control::set_double (val, _session.current_start_frame (), true);
-				Control::set_double (val, _session.current_end_frame (), true);
+				Control::set_double (val, _session.current_start_sample (), true);
+				Control::set_double (val, _session.current_end_sample (), true);
 				Changed (true, Controllable::NoGroup);
 			}
 			if (!touching()) {
@@ -221,51 +271,51 @@ AutomationControl::set_automation_state (AutoState as)
 			}
 		} else {
 			AutomationWatch::instance().remove_automation_watch (shared_from_this());
+			Changed (false, Controllable::NoGroup);
 		}
 	}
 }
 
 void
-AutomationControl::set_automation_style (AutoStyle as)
+AutomationControl::start_touch (double when)
 {
-	if (!_list) return;
-	alist()->set_automation_style (as);
-}
-
-void
-AutomationControl::start_touch(double when)
-{
-	if (!_list) {
+	if (!_list || touching ()) {
 		return;
 	}
 
-	if (!touching()) {
-
-		if (alist()->automation_state() == Touch) {
-			/* subtle. aligns the user value with the playback */
-			set_value (get_value (), Controllable::NoGroup);
-			alist()->start_touch (when);
-			if (!_desc.toggled) {
-				AutomationWatch::instance().add_automation_watch (shared_from_this());
-			}
+	if (alist()->automation_state() & (Touch | Latch)) {
+		/* subtle. aligns the user value with the playback and
+		 * use take actual value (incl masters).
+		 *
+		 * Touch + hold writes inverse curve of master-automation
+		 * using AutomationWatch::timer ()
+		 */
+		AutomationControl::actually_set_value (get_value (), Controllable::NoGroup);
+		alist()->start_touch (when);
+		if (!_desc.toggled) {
+			AutomationWatch::instance().add_automation_watch (shared_from_this());
 		}
 		set_touching (true);
 	}
 }
 
 void
-AutomationControl::stop_touch(bool mark, double when)
+AutomationControl::stop_touch (double when)
 {
-	if (!_list) return;
-	if (touching()) {
-		set_touching (false);
+	if (!_list || !touching ()) {
+		return;
+	}
 
-		if (alist()->automation_state() == Touch) {
-			alist()->stop_touch (mark, when);
-			if (!_desc.toggled) {
-				AutomationWatch::instance().remove_automation_watch (shared_from_this());
+	if (alist()->automation_state() == Latch && _session.transport_rolling ()) {
+		return;
+	}
 
-			}
+	set_touching (false);
+
+	if (alist()->automation_state() & (Touch | Latch)) {
+		alist()->stop_touch (when);
+		if (!_desc.toggled) {
+			AutomationWatch::instance().remove_automation_watch (shared_from_this());
 		}
 	}
 }
@@ -274,60 +324,41 @@ void
 AutomationControl::commit_transaction (bool did_write)
 {
 	if (did_write) {
-		if (alist ()->before ()) {
+		XMLNode* before = alist ()->before ();
+		if (before) {
 			_session.begin_reversible_command (string_compose (_("record %1 automation"), name ()));
-			_session.commit_reversible_command (new MementoCommand<AutomationList> (*alist ().get (), alist ()->before (), &alist ()->get_state ()));
+			_session.commit_reversible_command (alist ()->memento_command (before, &alist ()->get_state ()));
 		}
 	} else {
 		alist ()->clear_history ();
 	}
 }
 
+/* take control-value and return UI range [0..1] */
 double
 AutomationControl::internal_to_interface (double val) const
 {
-	if (_desc.integer_step) {
-		// both upper and lower are inclusive.
-		val =  (val - lower()) / (1 + upper() - lower());
-	} else {
-		val =  (val - lower()) / (upper() - lower());
-	}
-
-	if (_desc.logarithmic) {
-		if (val > 0) {
-			val = pow (val, 1./2.0);
-		} else {
-			val = 0;
-		}
-	}
-
-	return val;
+	// XXX maybe optimize. _desc.from_interface() has
+	// a switch-statement depending on AutomationType.
+	return _desc.to_interface (val);
 }
 
+/* map GUI range [0..1] to control-value */
 double
 AutomationControl::interface_to_internal (double val) const
 {
 	if (!isfinite_local (val)) {
+		assert (0);
 		val = 0;
 	}
-	if (_desc.logarithmic) {
-		if (val <= 0) {
-			val = 0;
-		} else {
-			val = pow (val, 2.0);
-		}
-	}
+	// XXX maybe optimize. see above.
+	return _desc.from_interface (val);
+}
 
-	if (_desc.integer_step) {
-		val =  lower() + val * (1 + upper() - lower());
-	} else {
-		val =  lower() + val * (upper() - lower());
-	}
-
-	if (val < lower()) val = lower();
-	if (val > upper()) val = upper();
-
-	return val;
+std::string
+AutomationControl::get_user_string () const
+{
+	return ARDOUR::value_as_string (_desc, get_value());
 }
 
 void

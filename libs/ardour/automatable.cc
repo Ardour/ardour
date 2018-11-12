@@ -48,6 +48,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+/* used for templates (previously: !full_state) */
+bool Automatable::skip_saving_automation = false;
+
 const string Automatable::xml_node_name = X_("Automation");
 
 Automatable::Automatable(Session& session)
@@ -57,6 +60,7 @@ Automatable::Automatable(Session& session)
 
 Automatable::Automatable (const Automatable& other)
         : ControlSet (other)
+        , Slavable ()
         , _a_session (other._a_session)
 {
         Glib::Threads::Mutex::Lock lm (other._control_lock);
@@ -69,12 +73,9 @@ Automatable::Automatable (const Automatable& other)
 
 Automatable::~Automatable ()
 {
-	{
-		Glib::Threads::Mutex::Lock lm (_control_lock);
-
-		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
-			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
-		}
+	Glib::Threads::Mutex::Lock lm (_control_lock);
+	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+		boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 	}
 }
 
@@ -317,34 +318,6 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 }
 
 void
-Automatable::set_parameter_automation_style (Evoral::Parameter param, AutoStyle s)
-{
-	Glib::Threads::Mutex::Lock lm (control_lock());
-
-	boost::shared_ptr<AutomationControl> c = automation_control(param, true);
-
-	if (c && (s != c->automation_style())) {
-		c->set_automation_style (s);
-		_a_session.set_dirty ();
-	}
-}
-
-AutoStyle
-Automatable::get_parameter_automation_style (Evoral::Parameter param)
-{
-	Glib::Threads::Mutex::Lock lm (control_lock());
-
-	boost::shared_ptr<Evoral::Control> c = control(param);
-	boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
-
-	if (c) {
-		return l->automation_style();
-	} else {
-		return Absolute; // whatever
-	}
-}
-
-void
 Automatable::protect_automation ()
 {
 	typedef set<Evoral::Parameter> ParameterSet;
@@ -359,6 +332,8 @@ Automatable::protect_automation ()
 		case Write:
 			l->set_automation_state (Off);
 			break;
+		case Latch:
+			// no break
 		case Touch:
 			l->set_automation_state (Play);
 			break;
@@ -369,25 +344,53 @@ Automatable::protect_automation ()
 }
 
 void
-Automatable::transport_located (framepos_t now)
+Automatable::non_realtime_locate (samplepos_t now)
 {
+	bool rolling = _a_session.transport_rolling ();
+
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 
 		boost::shared_ptr<AutomationControl> c
 				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
 		if (c) {
-                        boost::shared_ptr<AutomationList> l
+			boost::shared_ptr<AutomationList> l
 				= boost::dynamic_pointer_cast<AutomationList>(c->list());
 
-			if (l) {
-				l->start_write_pass (now);
+			if (!l) {
+				continue;
+			}
+
+			bool am_touching = c->touching ();
+			if (rolling && am_touching) {
+			/* when locating while rolling, and writing automation,
+			 * start a new write pass.
+			 * compare to compare to non_realtime_transport_stop()
+			 */
+				const bool list_did_write = !l->in_new_write_pass ();
+				c->stop_touch (-1); // time is irrelevant
+				l->stop_touch (-1);
+				c->commit_transaction (list_did_write);
+				l->write_pass_finished (now, Config->get_automation_thinning_factor ());
+
+				if (l->automation_state () == Write) {
+					l->set_automation_state (Touch);
+				}
+				if (l->automation_playback ()) {
+					c->set_value_unchecked (c->list ()->eval (now));
+				}
+			}
+
+			l->start_write_pass (now);
+
+			if (rolling && am_touching) {
+				c->start_touch (now);
 			}
 		}
 	}
 }
 
 void
-Automatable::transport_stopped (framepos_t now)
+Automatable::non_realtime_transport_stop (samplepos_t now, bool /*flush_processors*/)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 		boost::shared_ptr<AutomationControl> c =
@@ -410,7 +413,8 @@ Automatable::transport_stopped (framepos_t now)
 		*/
 		const bool list_did_write = !l->in_new_write_pass ();
 
-		l->stop_touch (true, now);
+		c->stop_touch (now);
+		l->stop_touch (now);
 
 		c->commit_transaction (list_did_write);
 
@@ -423,6 +427,19 @@ Automatable::transport_stopped (framepos_t now)
 		if (l->automation_playback ()) {
 			c->set_value_unchecked (c->list ()->eval (now));
 		}
+	}
+}
+
+void
+Automatable::automation_run (samplepos_t start, pframes_t nframes)
+{
+	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
+		boost::shared_ptr<AutomationControl> c =
+			boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		if (!c) {
+			continue;
+		}
+		c->automation_run (start, nframes);
 	}
 }
 
@@ -509,6 +526,21 @@ Automatable::control_factory(const Evoral::Parameter& param)
 }
 
 boost::shared_ptr<AutomationControl>
+Automatable::automation_control (PBD::ID const & id) const
+{
+	Controls::const_iterator li;
+
+	for (li = _controls.begin(); li != _controls.end(); ++li) {
+		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (li->second);
+		if (ac && (ac->id() == id)) {
+			return ac;
+		}
+	}
+
+	return boost::shared_ptr<AutomationControl>();
+}
+
+boost::shared_ptr<AutomationControl>
 Automatable::automation_control (const Evoral::Parameter& id, bool create)
 {
 	return boost::dynamic_pointer_cast<AutomationControl>(Evoral::ControlSet::control(id, create));
@@ -527,12 +559,6 @@ Automatable::clear_controls ()
 	ControlSet::clear_controls ();
 }
 
-string
-Automatable::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
-{
-	return ARDOUR::value_as_string(ac->desc(), ac->get_value());
-}
-
 bool
 Automatable::find_next_event (double now, double end, Evoral::ControlEvent& next_event, bool only_active) const
 {
@@ -546,6 +572,13 @@ Automatable::find_next_event (double now, double end, Evoral::ControlEvent& next
 
 		if (only_active && (!c || !c->automation_playback())) {
 			continue;
+		}
+
+		boost::shared_ptr<SlavableAutomationControl> sc
+			= boost::dynamic_pointer_cast<SlavableAutomationControl>(li->second);
+
+		if (sc) {
+			sc->find_next_event (now, end, next_event);
 		}
 
 		Evoral::ControlList::const_iterator i;

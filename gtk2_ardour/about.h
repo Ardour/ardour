@@ -28,11 +28,11 @@ class ConfigInfoDialog;
 
 class About : public Gtk::AboutDialog, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 	About ();
 	~About ();
 
-  private:
+private:
 	ConfigInfoDialog* config_info;
 	void show_config_info ();
 

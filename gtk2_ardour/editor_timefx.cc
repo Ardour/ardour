@@ -105,7 +105,7 @@ Editor::time_stretch (RegionSelection& regions, float fraction)
 		stretch.run (*i);
 
 		playlist->replace_region (regions.front()->region(), stretch.results[0],
-					  regions.front()->region()->position());
+		                          regions.front()->region()->position());
 		midi_playlists_affected.insert (playlist);
 	}
 
@@ -150,9 +150,9 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		return 0;
 	}
 
-	const framecnt_t oldlen = (framecnt_t) (regions.front()->length());
-	const framecnt_t newlen = (framecnt_t) (regions.front()->length() * val);
-	const framecnt_t pos = regions.front()->position ();
+	const samplecnt_t oldlen = (samplecnt_t) (regions.front()->length());
+	const samplecnt_t newlen = (samplecnt_t) (regions.front()->length() * val);
+	const samplecnt_t pos = regions.front()->position ();
 
 	delete current_timefx;
 	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, pos);
@@ -208,7 +208,31 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 		}
 	}
 
-	switch (rb_current_opt) {
+	int rb_mode = rb_current_opt;
+
+	if (pitching /*&& rb_current_opt == 6*/) {
+		/* The timefx dialog does not show the "stretch_opts_selector"
+		 * when pitch-shifting.  So the most recently used option from
+		 * "Time Stretch" would be used (if any). That may even be
+		 * "resample without preserving pitch", which would be invalid.
+		 *
+		 * TODO: also show stretch_opts_selector when pitching (except the option
+		 * to not preserve pitch) and use separate  rb_current_opt when pitching.
+		 *
+		 * Actually overhaul this the dialog and processing opts below and use rubberband's
+		 * "Crispness" levels:
+		 *   -c 0   equivalent to --no-transients --no-lamination --window-long
+		 *   -c 1   equivalent to --detector-soft --no-lamination --window-long (for piano)
+		 *   -c 2   equivalent to --no-transients --no-lamination
+		 *   -c 3   equivalent to --no-transients
+		 *   -c 4   equivalent to --bl-transients
+		 *   -c 5   default processing options
+		 *   -c 6   equivalent to --no-lamination --window-short (may be good for drums)
+		 */
+		rb_mode = 4;
+	}
+
+	switch (rb_mode) {
 		case 0:
 			transients = NoTransients; peaklock = false; longwin = true; shortwin = false;
 			break;
@@ -228,7 +252,7 @@ Editor::time_fx (RegionList& regions, float val, bool pitching)
 			transients = NoTransients;
 			precise = true;
 			preserve_formants = false;
-			current_timefx->request.pitch_fraction = 1/val;
+			current_timefx->request.pitch_fraction = 1.0 / current_timefx->request.time_fraction;
 			shortwin = true;
 			// peaklock = false;
 			break;
@@ -378,16 +402,16 @@ Editor::timefx_thread (void *arg)
 
 	tsd->editor.do_timefx ();
 
-        /* GACK! HACK! sleep for a bit so that our request buffer for the GUI
-           event loop doesn't die before any changes we made are processed
-           by the GUI ...
-        */
+	/* GACK! HACK! sleep for a bit so that our request buffer for the GUI
+	   event loop doesn't die before any changes we made are processed
+	   by the GUI ...
+	*/
 
 #ifdef PLATFORM_WINDOWS
 	Glib::usleep(2 * G_USEC_PER_SEC);
 #else
-        struct timespec t = { 2, 0 };
-        nanosleep (&t, 0);
+	struct timespec t = { 2, 0 };
+	nanosleep (&t, 0);
 #endif
 	return 0;
 }

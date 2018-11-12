@@ -33,20 +33,19 @@
 #include <gtkmm/label.h>
 #include <gtkmm/sizegroup.h>
 
-#include <gtkmm2ext/focus_entry.h>
-
 #include "pbd/stateful.h"
 #include "pbd/signals.h"
+
+#include "evoral/Parameter.hpp"
 
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 #include "ardour/region.h"
 
-#include "evoral/Parameter.hpp"
-
 #include "canvas/line.h"
 
-#include "prompter.h"
+#include "widgets/focus_entry.h"
+
 #include "axis_view.h"
 #include "enums.h"
 #include "editing.h"
@@ -171,7 +170,7 @@ class TimeAxisView : public virtual AxisView
 	virtual void show_selection (TimeSelection&);
 	virtual void hide_selection ();
 	virtual void reshow_selection (TimeSelection&);
-	virtual void show_timestretch (framepos_t start, framepos_t end, int layers, int layer);
+	virtual void show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer);
 	virtual void hide_timestretch ();
 
 	/* editing operations */
@@ -179,27 +178,27 @@ class TimeAxisView : public virtual AxisView
 	virtual void cut_copy_clear (Selection&, Editing::CutCopyOp) {}
 
 	/** Paste a selection.
-	 *  @param pos Position to paste to (session frames).
+	 *  @param pos Position to paste to (session samples).
 	 *  @param selection Selection to paste.
 	 *  @param ctx Paste context.
 	 */
-	virtual bool paste (ARDOUR::framepos_t pos,
+	virtual bool paste (ARDOUR::samplepos_t pos,
 	                    const Selection&   selection,
 	                    PasteContext&      ctx,
 			    const int32_t sub_num) { return false; }
 
 	virtual void set_selected_regionviews (RegionSelection&) {}
-	virtual void set_selected_points (PointSelection&) {}
+	virtual void set_selected_points (PointSelection&);
 
 	virtual void fade_range (TimeSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (framepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
+	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (samplepos_t /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
 		return boost::shared_ptr<ARDOUR::Region> ();
 	}
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
 
-	virtual void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&, bool within = false);
+	virtual void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&, bool within = false);
 	virtual void get_inverted_selectables (Selection&, std::list<Selectable *>& results);
 
 	void add_ghost (RegionView*);
@@ -217,7 +216,7 @@ class TimeAxisView : public virtual AxisView
 	virtual StreamView* view () const { return 0; }
 
 	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
-	Children get_child_list ();
+	Children get_child_list () const;
 
 	static uint32_t preset_height (Height);
 
@@ -258,6 +257,7 @@ class TimeAxisView : public virtual AxisView
 
 	void begin_name_edit ();
 	void end_name_edit (std::string, int);
+	virtual std::string name () const { return name_label.get_text (); }
 
 	/* derived classes can override these */
 
@@ -290,6 +290,7 @@ class TimeAxisView : public virtual AxisView
 
 	Children children;
 	bool is_child (TimeAxisView*);
+	virtual bool propagate_time_selection () const { return false; }
 
 	virtual void remove_child (boost::shared_ptr<TimeAxisView>);
 	void add_child (boost::shared_ptr<TimeAxisView>);

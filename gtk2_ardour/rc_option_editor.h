@@ -20,7 +20,7 @@
 #ifndef __gtk_ardour_rc_option_editor_h__
 #define __gtk_ardour_rc_option_editor_h__
 
-#include "gtkmm2ext/tabbable.h"
+#include "widgets/tabbable.h"
 
 #include "option_editor.h"
 #include "visibility_group.h"
@@ -34,7 +34,7 @@
  */
 
 /** Editor for options which are obtained from and written back to one of the .rc files. */
-class RCOptionEditor : public OptionEditorContainer, public ARDOUR::SessionHandlePtr, public Gtkmm2ext::Tabbable
+class RCOptionEditor : public OptionEditorContainer, public ARDOUR::SessionHandlePtr, public ArdourWidgets::Tabbable
 {
 public:
 	RCOptionEditor ();
@@ -60,7 +60,6 @@ private:
 	Gtk::Adjustment* _ltc_volume_adjustment;
 	BoolOption* _ltc_send_continuously;
 	BoolOption* _plugin_prefer_inline;
-	ComboOption<ARDOUR::LocaleMode>* _l10n;
 
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;

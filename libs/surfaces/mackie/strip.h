@@ -86,6 +86,8 @@ public:
 
 	void notify_metering_state_changed();
 
+	void update_selection_state ();
+
 	void block_screen_display_for (uint32_t msecs);
 	void block_vpot_mode_display_for (uint32_t msecs);
 
@@ -144,7 +146,7 @@ private:
 	void return_to_vpot_mode_display ();
 	void next_pot_mode ();
 
-	void do_parameter_display (ARDOUR::AutomationType, float val);
+	void do_parameter_display (ARDOUR::ParameterDescriptor const&, float val, bool screen_hold = false);
 	void select_event (Button&, ButtonState);
 	void vselect_event (Button&, ButtonState);
 	void fader_touch_event (Button&, ButtonState);
@@ -158,13 +160,13 @@ private:
 
 	bool is_midi_track () const;
 
-	void notify_eq_change (ARDOUR::AutomationType, uint32_t band, bool force);
+	void notify_eq_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force);
 	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
-	void notify_dyn_change (ARDOUR::AutomationType, bool force, bool propagate_mode_change);
+	void notify_dyn_change (boost::weak_ptr<ARDOUR::AutomationControl>, bool force, bool propagate_mode_change);
 	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
-	void notify_send_level_change (ARDOUR::AutomationType, uint32_t band, bool force);
+	void notify_send_level_change (uint32_t band, bool force);
 	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Stripable>);
 
 	void notify_trackview_change (ARDOUR::AutomationType, uint32_t band, bool force);

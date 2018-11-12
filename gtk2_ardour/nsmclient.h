@@ -23,90 +23,88 @@
 
 namespace NSM
 {
+class Client
+{
+private:
 
-    class Client
-    {
+	const char *nsm_url;
 
-    private:
+	lo_server _server;
+	lo_server_thread _st;
+	lo_address nsm_addr;
 
-        const char *nsm_url;
+	bool nsm_is_active;
+	char *_nsm_client_id;
+	char *_session_manager_name;
+	char *_nsm_client_path;
 
-        lo_server _server;
-        lo_server_thread _st;
-        lo_address nsm_addr;
+public:
 
-        bool nsm_is_active;
-        char *_nsm_client_id;
-        char *_session_manager_name;
-        char *_nsm_client_path;
+	enum
+	{
+		ERR_OK               = 0,
+		ERR_GENERAL          = -1,
+		ERR_INCOMPATIBLE_API = -2,
+		ERR_BLACKLISTED      = -3,
+		ERR_LAUNCH_FAILED    = -4,
+		ERR_NO_SUCH_FILE     = -5,
+		ERR_NO_SESSION_OPEN  = -6,
+		ERR_UNSAVED_CHANGES  = -7,
+		ERR_NOT_NOW          = -8
+	};
 
-    public:
+	Client ();
+	virtual ~Client ();
 
-        enum
-        {
-            ERR_OK = 0,
-            ERR_GENERAL    = -1,
-            ERR_INCOMPATIBLE_API = -2,
-            ERR_BLACKLISTED      = -3,
-            ERR_LAUNCH_FAILED    = -4,
-            ERR_NO_SUCH_FILE     = -5,
-            ERR_NO_SESSION_OPEN  = -6,
-            ERR_UNSAVED_CHANGES  = -7,
-            ERR_NOT_NOW          = -8
-        };
+	bool is_active (void) { return nsm_is_active; }
 
-        Client ( );
-        virtual ~Client ( );
+	const char *session_manager_name (void) { return _session_manager_name; }
+	const char *client_id (void) { return _nsm_client_id; }
+	const char *client_path (void) { return _nsm_client_path; }
 
-        bool is_active ( void ) { return nsm_is_active; }
+	/* Client->Server methods */
+	void is_dirty (void);
+	void is_clean (void);
+	void progress (float f);
+	void message (int priority, const char *msg);
+	void announce (const char *appliction_name, const char *capabilities, const char *process_name);
 
-        const char *session_manager_name ( void ) { return _session_manager_name; }
-        const char *client_id ( void ) { return _nsm_client_id; }
-        const char *client_path ( void ) { return _nsm_client_path; }
+	void broadcast (lo_message msg);
 
-        /* Client->Server methods */
-        void is_dirty ( void );
-        void is_clean ( void );
-        void progress ( float f );
-        void message( int priority, const char *msg );
-        void announce ( const char *appliction_name, const char *capabilities, const char *process_name );
+	/* init without threading */
+	int init (const char *nsm_url);
+	/* init with threading */
+	int init_thread (const char *nsm_url);
 
-        void broadcast ( lo_message msg );
+	/* call this periodically to check for new messages */
+	void check (int timeout = 0);
 
-        /* init without threading */
-        int init ( const char *nsm_url );
-        /* init with threading */
-        int init_thread ( const char *nsm_url );
+	/* or call these to start and stop a thread (must do your own locking in handler!) */
+	void start (void);
+	void stop (void);
 
-        /* call this periodically to check for new messages */
-        void check ( int timeout = 0 );
+protected:
 
-        /* or call these to start and stop a thread (must do your own locking in handler!) */
-        void start ( void );
-        void stop ( void );
+	/* Server->Client methods */
+	virtual int command_open (const char *name, const char *display_name, const char *client_id, char **out_msg) = 0;
+	virtual int command_save (char **out_msg) = 0;
 
-    protected:
+	virtual void command_active (bool) {}
 
-        /* Server->Client methods */
-        virtual int command_open ( const char *name, const char *display_name, const char *client_id, char **out_msg ) = 0;
-        virtual int command_save ( char **out_msg ) = 0;
+	virtual void command_session_is_loaded (void) {}
 
-        virtual void command_active ( bool ) { }
+	/* invoked when an unrecognized message is received. Should return 0 if you handled it, -1 otherwise. */
+	virtual int command_broadcast (const char *, lo_message) { return -1; }
 
-        virtual void command_session_is_loaded ( void ) { }
+private:
 
-        /* invoked when an unrecognized message is received. Should return 0 if you handled it, -1 otherwise. */
-        virtual int command_broadcast ( const char *, lo_message ) { return -1; }
+	/* osc handlers */
+	static int osc_open (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
+	static int osc_save (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
+	static int osc_announce_reply (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
+	static int osc_error (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
+	static int osc_session_is_loaded (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
+	static int osc_broadcast (const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data);
 
-    private:
-
-        /* osc handlers */
-        static int osc_open ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-        static int osc_save ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-        static int osc_announce_reply ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-        static int osc_error ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-        static int osc_session_is_loaded ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-        static int osc_broadcast ( const char *path, const char *types, lo_arg **argv, int argc, lo_message msg, void *user_data );
-
-    };
+};
 };

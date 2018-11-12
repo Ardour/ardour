@@ -21,8 +21,6 @@
 #include "pbd/demangle.h"
 #include "pbd/convert.h"
 
-#include "ardour/utils.h"
-
 #include "canvas/canvas.h"
 #include "canvas/debug.h"
 #include "canvas/item.h"
@@ -828,6 +826,43 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 	}
 
 	--render_depth;
+}
+
+void
+Item::prepare_for_render_children (Rect const & area) const
+{
+	if (_items.empty()) {
+		return;
+	}
+
+	ensure_lut ();
+	std::vector<Item*> items = _lut->get (area);
+
+	for (std::vector<Item*>::const_iterator i = items.begin(); i != items.end(); ++i) {
+
+		if (!(*i)->visible ()) {
+			continue;
+		}
+
+		Rect item_bbox = (*i)->bounding_box ();
+
+		if (!item_bbox) {
+			continue;
+		}
+
+		Rect item = (*i)->item_to_window (item_bbox, false);
+		Rect d = item.intersection (area);
+
+		if (d) {
+			Rect draw = d;
+			if (draw.width() && draw.height()) {
+				(*i)->prepare_for_render (area);
+			}
+
+		} else {
+			// Item does not intersect with visible canvas area
+		}
+	}
 }
 
 void

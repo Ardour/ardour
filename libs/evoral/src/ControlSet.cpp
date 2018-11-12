@@ -103,3 +103,11 @@ ControlSet::clear_controls ()
 }
 
 } // namespace Evoral
+
+/* No good place for this so just put it here */
+
+std::ostream&
+std::operator<< (std::ostream & str, Evoral::Parameter const & p)
+{
+	return str << p.type() << '-' << p.id() << '-' << (int) p.channel();
+}

@@ -21,15 +21,15 @@
 
 #include <gtkmm/drawingarea.h>
 
-#include "gtkmm2ext/binding_proxy.h"
-#include "gtkmm2ext/cairo_widget.h"
-
 #include "pbd/controllable.h"
 
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
-#include "ardour_button.h"
+#include "gtkmm2ext/cairo_widget.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/binding_proxy.h"
 
 namespace Gtk {
 	class Menu;
@@ -60,7 +60,7 @@ public:
 	boost::shared_ptr<ShuttleControllable> controllable() const { return _controllable; }
 	void set_colors ();
 
-	ArdourButton* info_button () { return &_info_button; }
+	ArdourWidgets::ArdourButton* info_button () { return &_info_button; }
 
 protected:
 	bool _hovering;
@@ -75,16 +75,14 @@ protected:
 	cairo_pattern_t* shine_pattern;
 	ARDOUR::microseconds_t last_shuttle_request;
 	PBD::ScopedConnection parameter_connection;
-	ArdourButton _info_button;
-	Gtk::Menu*        shuttle_unit_menu;
-	Gtk::Menu*        shuttle_style_menu;
-	Gtk::Menu*        shuttle_context_menu;
-	BindingProxy      binding_proxy;
+	ArdourWidgets::ArdourButton _info_button;
+	Gtk::Menu*                  shuttle_unit_menu;
+	Gtk::Menu*                  shuttle_style_menu;
+	Gtk::Menu*                  shuttle_context_menu;
+	ArdourWidgets::BindingProxy binding_proxy;
 	float bg_r, bg_g, bg_b;
 	void build_shuttle_context_menu ();
-	void show_shuttle_context_menu ();
 	void shuttle_style_changed();
-	void shuttle_unit_clicked ();
 	void set_shuttle_max_speed (float);
 	void reset_speed ();
 
@@ -95,7 +93,7 @@ protected:
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_motion_notify_event(GdkEventMotion*);
 
-	void render (cairo_t *, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 
 	void on_size_allocate (Gtk::Allocation&);
 	bool on_query_tooltip (int, int, bool, const Glib::RefPtr<Gtk::Tooltip>&);

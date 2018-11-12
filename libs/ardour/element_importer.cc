@@ -23,7 +23,7 @@
 #include <sstream>
 #include <iomanip>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
@@ -41,13 +41,7 @@ ElementImporter::ElementImporter (XMLTree const & source, ARDOUR::Session & sess
   _queued (false),
   _broken (false)
 {
-	// Get samplerate
-	XMLProperty const * prop;
-	prop = source.root()->property ("sample-rate");
-	if (prop) {
-		std::istringstream iss (prop->value());
-		iss >> sample_rate;
-	}
+	source.root()->get_property ("sample-rate", sample_rate);
 }
 
 ElementImporter::~ElementImporter ()
@@ -95,19 +89,19 @@ ElementImporter::timecode_to_string(Timecode::Time & time) const
 	return oss.str();
 }
 
-framecnt_t
-ElementImporter::rate_convert_samples (framecnt_t samples) const
+samplecnt_t
+ElementImporter::rate_convert_samples (samplecnt_t samples) const
 {
-	if (sample_rate == session.frame_rate()) {
+	if (sample_rate == session.sample_rate()) {
 		return samples;
 	}
 
 	// +0.5 for proper rounding
-	return static_cast<framecnt_t> (samples * (static_cast<double> (session.nominal_frame_rate()) / sample_rate) + 0.5);
+	return static_cast<samplecnt_t> (samples * (static_cast<double> (session.nominal_sample_rate()) / sample_rate) + 0.5);
 }
 
 string
 ElementImporter::rate_convert_samples (string const & samples) const
 {
-	return to_string (rate_convert_samples (atoi (samples)), std::dec);
+	return to_string (rate_convert_samples (string_to<uint32_t>(samples)));
 }

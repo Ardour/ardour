@@ -30,7 +30,7 @@ typedef struct _VSTHandle VSTHandle;
 struct _VSTState;
 typedef struct _VSTState VSTState;
 
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 
 namespace ARDOUR {
 
@@ -40,6 +40,7 @@ class PluginInsert;
 class LIBARDOUR_API VSTPlugin : public Plugin
 {
 public:
+	friend class Session;
 	VSTPlugin (AudioEngine &, Session &, VSTHandle *);
 	VSTPlugin (const VSTPlugin& other);
 	virtual ~VSTPlugin ();
@@ -57,20 +58,23 @@ public:
 	bool load_preset (PresetRecord);
 	int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
 	std::string describe_parameter (Evoral::Parameter);
-	framecnt_t signal_latency() const;
+	samplecnt_t signal_latency() const;
 	std::set<Evoral::Parameter> automatable() const;
 
 	PBD::Signal0<void> LoadPresetProgram;
+	PBD::Signal0<void> VSTSizeWindow;
 
 	bool parameter_is_audio (uint32_t) const { return false; }
 	bool parameter_is_control (uint32_t) const { return true; }
 	bool parameter_is_input (uint32_t) const { return true; }
 	bool parameter_is_output (uint32_t) const { return false; }
 
+	uint32_t designated_bypass_port ();
+
 	int connect_and_run (BufferSet&,
-			framepos_t start, framepos_t end, double speed,
+			samplepos_t start, samplepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset
+			pframes_t nframes, samplecnt_t offset
 			);
 
 	std::string unique_id () const;
@@ -94,12 +98,14 @@ public:
 	PluginInsert* plugin_insert () const { return _pi; }
 	uint32_t plugin_number () const { return _num; }
 	VstTimeInfo* timeinfo () { return &_timeInfo; }
-	framepos_t transport_frame () const { return _transport_frame; }
+	samplepos_t transport_sample () const { return _transport_sample; }
 	float transport_speed () const { return _transport_speed; }
 
 
 protected:
-	void set_plugin (AEffect *);
+	void parameter_changed_externally (uint32_t which, float val);
+	virtual void open_plugin ();
+	void init_plugin ();
 	gchar* get_chunk (bool) const;
 	int set_chunk (gchar const *, bool);
 	void add_state (XMLNode *) const;
@@ -120,9 +126,10 @@ protected:
 	MidiBuffer* _midi_out_buf;
 	VstTimeInfo _timeInfo;
 
-	framepos_t _transport_frame;
+	samplepos_t _transport_sample;
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
+	bool       _eff_bypassed;
 };
 
 }

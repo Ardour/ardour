@@ -26,7 +26,6 @@
 namespace ARDOUR {
 
 class Session;
-class AudioDiskstream;
 class AudioPlaylist;
 class RouteGroup;
 class AudioFileSource;
@@ -37,29 +36,16 @@ class LIBARDOUR_API AudioTrack : public Track
 	AudioTrack (Session&, std::string name, TrackMode m = Normal);
 	~AudioTrack ();
 
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	int set_mode (TrackMode m);
-	bool can_use_mode (TrackMode m, bool& bounce_required);
-#endif
-
-	int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	          int declick, bool& need_butler);
-
-	boost::shared_ptr<Diskstream> create_diskstream ();
-	void set_diskstream (boost::shared_ptr<Diskstream>);
-
-	DataType data_type () const {
-		return DataType::AUDIO;
-	}
+	MonitorState get_auto_monitoring_state () const;
 
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
 	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
 	boost::shared_ptr<Region> bounce (InterThreadInfo&);
-	boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo&,
+	boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
 						boost::shared_ptr<Processor> endpoint, bool include_endpoint);
-	int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 			  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze);
 
 	int set_state (const XMLNode&, int version);
@@ -67,13 +53,9 @@ class LIBARDOUR_API AudioTrack : public Track
 	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
-	boost::shared_ptr<AudioDiskstream> audio_diskstream () const;
-	XMLNode& state (bool full);
+	XMLNode& state (bool save_template);
 
   private:
-
-	boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &);
-
 	int  deprecated_use_diskstream_connections ();
 	void set_state_part_two ();
 	void set_state_part_three ();

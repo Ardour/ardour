@@ -29,9 +29,19 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/cellrenderercombo.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/spinbutton.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
 
 namespace ARDOUR {
 	class Session;
@@ -48,14 +58,14 @@ class XMLNode;
 
 class ExportChannelSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-  protected:
+protected:
 	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
 	typedef std::list<ChannelConfigPtr> ChannelConfigList;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
 
 	ProfileManagerPtr manager;
 
-  public:
+public:
 	ExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager)
 		: SessionHandlePtr (session)
 		, manager (manager)
@@ -70,15 +80,14 @@ class ExportChannelSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 class PortExportChannelSelector : public ExportChannelSelector
 {
-
-  public:
+public:
 
 	PortExportChannelSelector (ARDOUR::Session * session, ProfileManagerPtr manager);
 	~PortExportChannelSelector ();
 
 	void sync_with_manager ();
 
-  private:
+private:
 
 	void fill_route_list ();
 	void update_channel_count ();
@@ -101,12 +110,12 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 	class RouteCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 
 		struct Channel;
 
 		RouteCols () : n_channels (0)
-			{ add (selected); add (name); add (io); add (port_list_col); }
+		{ add (selected); add (name); add (io); add (port_list_col); }
 
 		void add_channels (uint32_t chans);
 		uint32_t n_channels;
@@ -129,7 +138,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 		/* Channel struct, that represents the selected port and its name */
 
 		struct Channel {
-		  public:
+		public:
 			Channel (RouteCols & cols) { cols.add (port); cols.add (label); }
 
 			Gtk::TreeModelColumn<boost::weak_ptr<ARDOUR::AudioPort> > port;
@@ -146,7 +155,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 		class PortCols : public Gtk::TreeModel::ColumnRecord
 		{
-		  public:
+		public:
 			PortCols () { add(selected); add(port); add(label); }
 
 			Gtk::TreeModelColumn<bool> selected;  // not used ATM
@@ -158,8 +167,9 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 	/* Channels view */
 
-	class ChannelTreeView : public Gtk::TreeView {
-	  public:
+	class ChannelTreeView : public Gtk::TreeView
+	{
+	public:
 
 		ChannelTreeView (uint32_t max_channels);
 		void set_config (ChannelConfigPtr c);
@@ -172,7 +182,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 		sigc::signal<void> CriticalSelectionChanged;
 
-	  private:
+	private:
 
 		ChannelConfigPtr config;
 		void update_config ();
@@ -199,7 +209,7 @@ class PortExportChannelSelector : public ExportChannelSelector
 
 class RegionExportChannelSelector : public ExportChannelSelector
 {
-  public:
+public:
 	RegionExportChannelSelector (ARDOUR::Session * session,
 	                             ProfileManagerPtr manager,
 	                             ARDOUR::AudioRegion const & region,
@@ -207,7 +217,7 @@ class RegionExportChannelSelector : public ExportChannelSelector
 
 	virtual void sync_with_manager ();
 
-  private:
+private:
 
 	void handle_selection ();
 

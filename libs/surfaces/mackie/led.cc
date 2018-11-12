@@ -35,6 +35,7 @@ Led::factory (Surface& surface, int id, const char* name, Group& group)
 {
 	Led* l = new Led (id, name, group);
 	surface.leds[id] = l;
+	l->is_qcon = surface.get_qcon_flag(); // get qcon flag from surface
 	surface.controls.push_back (l);
 	group.add (*l);
 	return l;
@@ -55,8 +56,17 @@ Led::set_state (LedState new_state)
 		msg = 0x00;
 		break;
 	case LedState::flashing:
-		msg = 0x01;
+		
+		if( !is_qcon ) { // Standard mackie surfaces supports flashing LEDs
+			msg = 0x01; 
+			break;
+		} else {
+			msg = 0x7f; // For qcon set LED to ON state - qcon don't support LED flashing. 
+			break;
+		}
+
 		break;
+
 	case LedState::none:
 		return MidiByteArray ();
 	}

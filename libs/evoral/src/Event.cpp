@@ -18,8 +18,8 @@
 
 #include <glib.h>
 
+#include "temporal/beats.h"
 #include "evoral/Event.hpp"
-#include "evoral/Beats.hpp"
 
 namespace Evoral {
 
@@ -162,7 +162,7 @@ Event<Timestamp>::set (const uint8_t* buf, uint32_t size, Timestamp t)
 
 #endif // EVORAL_EVENT_ALLOC
 
-template class Event<Evoral::Beats>;
+template class Event<Temporal::Beats>;
 template class Event<double>;
 template class Event<int64_t>;
 

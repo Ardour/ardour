@@ -30,7 +30,7 @@ struct SilenceTester<float> {
 };
 
 
-/// Removes and adds silent frames to beginning and/or end of stream
+/// Removes and adds silent samples to beginning and/or end of stream
 template<typename T = DefaultSampleType>
 class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
   : public ListedSource<T>
@@ -41,7 +41,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
   public:
 
 	/// Constructor, \see reset() \n Not RT safe
-	SilenceTrimmer(framecnt_t silence_buffer_size_ = 1024, float thresh_dB = -INFINITY)
+	SilenceTrimmer(samplecnt_t silence_buffer_size_ = 1024, float thresh_dB = -INFINITY)
 	  : silence_buffer_size (0)
 	  , silence_buffer (0)
 	  , tester (thresh_dB)
@@ -60,7 +60,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 	  * This also defines the maximum length of output process context
 	  * which can be output during long intermediate silence.
 	  */
-	void reset (framecnt_t silence_buffer_size_ = 1024)
+	void reset (samplecnt_t silence_buffer_size_ = 1024)
 	{
 		if (throw_level (ThrowObject) && silence_buffer_size_ == 0) {
 			throw Exception (*this,
@@ -78,34 +78,34 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		processing_finished = false;
 		trim_beginning = false;
 		trim_end = false;
-		silence_frames = 0;
+		silence_samples = 0;
 		max_output_frames = 0;
 		add_to_beginning = 0;
 		add_to_end = 0;
 	}
 
-	/** Tells that \a frames_per_channel frames of silence per channel should be added to beginning
+	/** Tells that \a samples_per_channel samples of silence per channel should be added to beginning
 	  * Needs to be called before starting processing.
 	  * \n RT safe
 	  */
-	void add_silence_to_beginning (framecnt_t frames_per_channel)
+	void add_silence_to_beginning (samplecnt_t samples_per_channel)
 	{
 		if (throw_level (ThrowObject) && processed_data) {
 			throw Exception(*this, "Tried to add silence to beginning after processing started");
 		}
-		add_to_beginning = frames_per_channel;
+		add_to_beginning = samples_per_channel;
 	}
 
-	/** Tells that \a frames_per_channel frames of silence per channel should be added to end
+	/** Tells that \a samples_per_channel samples of silence per channel should be added to end
 	  * Needs to be called before end is reached.
 	  * \n RT safe
 	  */
-	void add_silence_to_end (framecnt_t frames_per_channel)
+	void add_silence_to_end (samplecnt_t samples_per_channel)
 	{
 		if (throw_level (ThrowObject) && processed_data) {
 			throw Exception(*this, "Tried to add silence to end after processing started");
 		}
-		add_to_end = frames_per_channel;
+		add_to_end = samples_per_channel;
 	}
 
 	/** Tells whether ot nor silence should be trimmed from the beginning
@@ -166,17 +166,17 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		 * may lend itself for some inspiration.
 		 */
 
-		framecnt_t output_start_index = 0;
-		framecnt_t output_sample_count = c.frames();
+		samplecnt_t output_start_index = 0;
+		samplecnt_t output_sample_count = c.samples();
 
 		if (!processed_data) {
 			if (trim_beginning) {
-				framecnt_t first_non_silent_frame_index = 0;
-				if (find_first_non_silent_frame (c, first_non_silent_frame_index)) {
+				samplecnt_t first_non_silent_sample_index = 0;
+				if (find_first_non_silent_sample (c, first_non_silent_sample_index)) {
 					// output from start of non-silent data until end of buffer
 					// output_sample_count may also be altered in trim end
-					output_start_index = first_non_silent_frame_index;
-					output_sample_count = c.frames() - first_non_silent_frame_index;
+					output_start_index = first_non_silent_sample_index;
+					output_sample_count = c.samples() - first_non_silent_sample_index;
 					processed_data = true;
 				} else {
 					// keep entering this block until non-silence is found to trim
@@ -189,35 +189,35 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 			// This block won't be called again so add silence to beginning
 			if (processed_data && add_to_beginning) {
 				add_to_beginning *= c.channels ();
-				output_silence_frames (c, add_to_beginning);
+				output_silence_samples (c, add_to_beginning);
 			}
 		}
 
 		if (processed_data) {
 			if (trim_end) {
-				framecnt_t first_non_silent_frame_index = 0;
-				if (find_first_non_silent_frame (c, first_non_silent_frame_index)) {
+				samplecnt_t first_non_silent_sample_index = 0;
+				if (find_first_non_silent_sample (c, first_non_silent_sample_index)) {
 					// context buffer contains non-silent data, flush any intermediate silence
-					output_silence_frames (c, silence_frames);
+					output_silence_samples (c, silence_samples);
 
-					framecnt_t silent_frame_index = 0;
-					find_last_silent_frame_reverse (c, silent_frame_index);
+					samplecnt_t silent_sample_index = 0;
+					find_last_silent_sample_reverse (c, silent_sample_index);
 
 					// Count of samples at end of block that are "silent", may be zero.
-					framecnt_t silent_end_samples = c.frames () - silent_frame_index;
-					framecnt_t samples_before_silence = c.frames() - silent_end_samples;
+					samplecnt_t silent_end_samples = c.samples () - silent_sample_index;
+					samplecnt_t samples_before_silence = c.samples() - silent_end_samples;
 
-					assert (samples_before_silence + silent_end_samples == c.frames ());
+					assert (samples_before_silence + silent_end_samples == c.samples ());
 
 					// output_start_index may be non-zero if start trim occurred above
 					output_sample_count = samples_before_silence - output_start_index;
 
 					// keep track of any silent samples not output
-					silence_frames = silent_end_samples;
+					silence_samples = silent_end_samples;
 
 				} else {
 					// whole context buffer is silent output nothing
-					silence_frames += c.frames ();
+					silence_samples += c.samples ();
 					output_sample_count = 0;
 				}
 			}
@@ -230,7 +230,7 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 		// Finally, if in last process call, add silence to end
 		if (processing_finished && processed_data && add_to_end) {
 			add_to_end *= c.channels();
-			output_silence_frames (c, add_to_end);
+			output_silence_samples (c, add_to_end);
 		}
 
 		if (processing_finished) {
@@ -250,13 +250,13 @@ class /*LIBAUDIOGRAPHER_API*/ SilenceTrimmer
 
 private:
 
-	bool find_first_non_silent_frame (ProcessContext<T> const & c, framecnt_t & result_frame)
+	bool find_first_non_silent_sample (ProcessContext<T> const & c, samplecnt_t & result_sample)
 	{
-		for (framecnt_t i = 0; i < c.frames(); ++i) {
+		for (samplecnt_t i = 0; i < c.samples(); ++i) {
 			if (!tester.is_silent (c.data()[i])) {
-				result_frame = i;
+				result_sample = i;
 				// Round down to nearest interleaved "frame" beginning
-				result_frame -= result_frame % c.channels();
+				result_sample -= result_sample % c.channels();
 				return true;
 			}
 		}
@@ -264,43 +264,43 @@ private:
 	}
 
 	/**
-	 * Reverse find the last silent frame index. If the last sample in the
+	 * Reverse find the last silent sample index. If the last sample in the
 	 * buffer is non-silent the index will be one past the end of the buffer and
-	 * equal to c.frames(). e.g silent_end_samples = c.frames() - result_frame
+	 * equal to c.samples(). e.g silent_end_samples = c.samples() - result_sample
 	 *
-	 * @return true if result_frame index is valid, false if there were only
+	 * @return true if result_sample index is valid, false if there were only
 	 * silent samples in the context buffer
 	 */
-	bool find_last_silent_frame_reverse (ProcessContext<T> const & c, framecnt_t & result_frame)
+	bool find_last_silent_sample_reverse (ProcessContext<T> const & c, samplecnt_t & result_sample)
 	{
-		framecnt_t last_sample_index = c.frames() - 1;
+		samplecnt_t last_sample_index = c.samples() - 1;
 
-		for (framecnt_t i = last_sample_index; i >= 0; --i) {
+		for (samplecnt_t i = last_sample_index; i >= 0; --i) {
 			if (!tester.is_silent (c.data()[i])) {
-				result_frame = i;
+				result_sample = i;
 				// Round down to nearest interleaved "frame" beginning
-				result_frame -= result_frame % c.channels();
-				// Round up to return the "last" silent interleaved frame
-				result_frame += c.channels();
+				result_sample -= result_sample % c.channels();
+				// Round up to return the "last" silent interleaved sample
+				result_sample += c.channels();
 				return true;
 			}
 		}
 		return false;
 	}
 
-	void output_silence_frames (ProcessContext<T> const & c, framecnt_t & total_frames)
+	void output_silence_samples (ProcessContext<T> const & c, samplecnt_t & total_samples)
 	{
 		assert (!c.has_flag (ProcessContext<T>::EndOfInput));
 
-		while (total_frames > 0) {
-			framecnt_t frames = std::min (silence_buffer_size, total_frames);
+		while (total_samples > 0) {
+			samplecnt_t samples = std::min (silence_buffer_size, total_samples);
 			if (max_output_frames) {
-				frames = std::min (frames, max_output_frames);
+				samples = std::min (samples, max_output_frames);
 			}
-			frames -= frames % c.channels();
+			samples -= samples % c.channels();
 
-			total_frames -= frames;
-			ConstProcessContext<T> c_out (c, silence_buffer, frames);
+			total_samples -= samples;
+			ConstProcessContext<T> c_out (c, silence_buffer, samples);
 			ListedSource<T>::output (c_out);
 		}
 	}
@@ -311,13 +311,13 @@ private:
 	bool       trim_beginning;
 	bool       trim_end;
 
-	framecnt_t silence_frames;
-	framecnt_t max_output_frames;
+	samplecnt_t silence_samples;
+	samplecnt_t max_output_frames;
 
-	framecnt_t add_to_beginning;
-	framecnt_t add_to_end;
+	samplecnt_t add_to_beginning;
+	samplecnt_t add_to_end;
 
-	framecnt_t silence_buffer_size;
+	samplecnt_t silence_buffer_size;
 	T *        silence_buffer;
 
 	SilenceTester<T> tester;

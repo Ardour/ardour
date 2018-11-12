@@ -22,11 +22,13 @@
 #define __ardour_export_channel_h__
 
 #include <set>
+#include <list>
 
 #include <boost/scoped_array.hpp>
 #include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
+#include "pbd/ringbuffer.h"
 
 #include "ardour/buffer_set.h"
 #include "ardour/export_pointers.h"
@@ -46,9 +48,9 @@ class LIBARDOUR_API ExportChannel : public boost::less_than_comparable<ExportCha
 
 	virtual ~ExportChannel () {}
 
-	virtual void set_max_buffer_size(framecnt_t) { }
+	virtual void set_max_buffer_size(samplecnt_t) { }
 
-	virtual void read (Sample const *& data, framecnt_t frames) const = 0;
+	virtual void read (Sample const *& data, samplecnt_t samples) const = 0;
 	virtual bool empty () const = 0;
 
 	/// Adds state to node passed
@@ -68,9 +70,11 @@ class LIBARDOUR_API PortExportChannel : public ExportChannel
 	typedef std::set<boost::weak_ptr<AudioPort> > PortSet;
 
 	PortExportChannel ();
-	void set_max_buffer_size(framecnt_t frames);
+	~PortExportChannel ();
 
-	void read (Sample const *& data, framecnt_t frames) const;
+	void set_max_buffer_size(samplecnt_t samples);
+
+	void read (Sample const *& data, samplecnt_t samples) const;
 	bool empty () const { return ports.empty(); }
 
 	void get_state (XMLNode * node) const;
@@ -83,8 +87,9 @@ class LIBARDOUR_API PortExportChannel : public ExportChannel
 
   private:
 	PortSet ports;
-	boost::scoped_array<Sample> buffer;
-	framecnt_t buffer_size;
+	samplecnt_t                 _buffer_size;
+	boost::scoped_array<Sample> _buffer;
+	std::list <boost::shared_ptr<PBD::RingBuffer<Sample> > >  _delaylines;
 };
 
 
@@ -103,23 +108,23 @@ class LIBARDOUR_API RegionExportChannelFactory
 	~RegionExportChannelFactory ();
 
 	ExportChannelPtr create (uint32_t channel);
-	void read (uint32_t channel, Sample const *& data, framecnt_t frames_to_read);
+	void read (uint32_t channel, Sample const *& data, samplecnt_t samples_to_read);
 
   private:
 
-	int new_cycle_started (framecnt_t) { buffers_up_to_date = false; return 0; }
-	void update_buffers (framecnt_t frames);
+	int new_cycle_started (samplecnt_t) { buffers_up_to_date = false; return 0; }
+	void update_buffers (samplecnt_t samples);
 
 	AudioRegion const & region;
 	AudioTrack & track;
 	Type type;
 
-	framecnt_t frames_per_cycle;
+	samplecnt_t samples_per_cycle;
 	size_t n_channels;
 	BufferSet buffers;
 	bool buffers_up_to_date;
-	framecnt_t region_start;
-	framecnt_t position;
+	samplecnt_t region_start;
+	samplecnt_t position;
 
 	boost::scoped_array<Sample> mixdown_buffer;
 	boost::scoped_array<Sample> gain_buffer;
@@ -133,7 +138,7 @@ class LIBARDOUR_API RegionExportChannel : public ExportChannel
 	friend class RegionExportChannelFactory;
 
   public:
-	void read (Sample const *& data, framecnt_t frames_to_read) const { factory.read (channel, data, frames_to_read); }
+	void read (Sample const *& data, samplecnt_t samples_to_read) const { factory.read (channel, data, samples_to_read); }
 	void get_state (XMLNode * /*node*/) const {};
 	void set_state (XMLNode * /*node*/, Session & /*session*/) {};
 	bool empty () const { return false; }
@@ -164,9 +169,9 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
         static void create_from_route(std::list<ExportChannelPtr> & result, boost::shared_ptr<Route> route);
 
   public: // ExportChannel interface
-	void set_max_buffer_size(framecnt_t frames);
+	void set_max_buffer_size(samplecnt_t samples);
 
-	void read (Sample const *& data, framecnt_t frames) const;
+	void read (Sample const *& data, samplecnt_t samples) const;
 	bool empty () const { return false; }
 
 	void get_state (XMLNode * node) const;

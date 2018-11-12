@@ -43,11 +43,50 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 		HZ,         ///< Frequency in Hertz
 	};
 
-	static std::string midi_note_name (uint8_t);
+	static std::string midi_note_name (uint8_t, bool translate=true);
+
+	/** Dual of midi_note_name, convert a note name into its midi note number. */
+	typedef std::map<std::string, uint8_t> NameNumMap;
+	static std::string normalize_note_name(const std::string& name);
+	static NameNumMap build_midi_name2num();
+	static uint8_t midi_note_num (const std::string& name);
 
 	ParameterDescriptor(const Evoral::Parameter& parameter);
 
 	ParameterDescriptor();
+
+	/** control-value to normalized [0..1] range
+	 *
+	 * Convert given AutomationType from lower/upper range to [0..1]
+	 * interface value, using settings from Evoral::ParameterDescriptor.
+	 *
+	 * default for AutomationControl::internal_to_interface ();
+	 */
+	float to_interface (float) const;
+
+	/** normalized [0..1] to control-value range
+	 *
+	 * Convert [0..1] to the control's range of this AutomationType
+	 * using settings from Evoral::ParameterDescriptor.
+	 *
+	 * default for AutomationControl::interface_to_internal ();
+	 */
+	float from_interface (float) const;
+
+	bool  is_linear () const;
+	float compute_delta (float from, float to) const;
+	float apply_delta (float value, float delta) const;
+
+	/* find the closest scale-point, return the internal value of
+	 * the prev/next scale-point (no wrap-around)
+	 *
+	 * If the given parameter is not en enum, the given val is returned.
+	 *
+	 * @param val internal (not interface) value
+	 * @param prev if true, step to prev scale-point, otherwise next
+	 * @return internal value, suitable for set_value()
+	 */
+	float step_enum (float val, bool prev) const;
 
 	/** Set step, smallstep, and largestep, based on current description. */
 	void update_steps();
@@ -63,10 +102,7 @@ struct LIBARDOUR_API ParameterDescriptor : public Evoral::ParameterDescriptor
 	float                          smallstep;
 	float                          largestep;
 	bool                           integer_step;
-	bool                           logarithmic;
 	bool                           sr_dependent;
-	bool                           min_unbound;
-	bool                           max_unbound;
 	bool                           enumeration;
 };
 

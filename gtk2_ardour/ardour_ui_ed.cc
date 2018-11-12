@@ -33,14 +33,15 @@
 #include <gtkmm/accelmap.h>
 #include <gtk/gtk.h>
 
-#include "gtkmm2ext/cairo_packer.h"
-#include "gtkmm2ext/tearoff.h"
-#include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/window_title.h"
-
 #include "pbd/file_utils.h"
 #include "pbd/fpu.h"
 #include "pbd/convert.h"
+
+#include "gtkmm2ext/cairo_packer.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
+
+#include "widgets/tearoff.h"
 
 #include "ardour_ui.h"
 #include "public_editor.h"
@@ -177,7 +178,7 @@ ARDOUR_UI::install_actions ()
 	                                      sigc::mem_fun(*this, &ARDOUR_UI::start_duplicate_routes));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
-	ActionManager::track_selection_sensitive_actions.push_back (act);
+	ActionManager::route_selection_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("cancel-solo"), _("Cancel Solo"), sigc::mem_fun(*this, &ARDOUR_UI::cancel_solo));
 	ActionManager::session_sensitive_actions.push_back (act);
@@ -186,19 +187,11 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (main_actions, X_("Scripting"), S_("Session|Scripting"));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = global_actions.register_action (main_actions, X_("AddLuaScript"), _("Add Lua Script..."),
-	              sigc::mem_fun (*this, &ARDOUR_UI::add_lua_script));
-	ActionManager::session_sensitive_actions.push_back (act);
-
-	act = global_actions.register_action (main_actions, X_("RemoveLuaScript"), _("Remove Lua Script"),
-	              sigc::mem_fun (*this, &ARDOUR_UI::remove_lua_script));
-	ActionManager::session_sensitive_actions.push_back (act);
-
 	act = global_actions.register_action (main_actions, X_("OpenVideo"), _("Open Video..."),
-					      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
+	                                      sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::add_video), (Gtk::Window*) 0));
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (main_actions, X_("CloseVideo"), _("Remove Video"),
-					      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
+	                                      sigc::mem_fun (*this, &ARDOUR_UI::remove_video));
 	act->set_sensitive (false);
 	act = global_actions.register_action (main_actions, X_("ExportVideo"), _("Export to Video File..."),
 	                                      hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::export_video), false)));
@@ -228,6 +221,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::write_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("SaveTemplate"), _("Save Template..."),  sigc::mem_fun(*this, &ARDOUR_UI::save_template));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (main_actions, X_("ManageTemplates"), _("Templates"), sigc::mem_fun(*this, &ARDOUR_UI::manage_templates));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (main_actions, X_("Metadata"), _("Metadata"));
@@ -267,8 +263,6 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("Quit"), _("Quit"), (hide_return (sigc::mem_fun(*this, &ARDOUR_UI::finish))));
 	global_actions.register_action (common_actions, X_("Hide"), _("Hide"), sigc::mem_fun (*this, &ARDOUR_UI::hide_application));
 
-	global_actions.register_action (common_actions, X_("show-editor"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
-	global_actions.register_action (common_actions, X_("show-mixer"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 	global_actions.register_action (common_actions, X_("menu-show-preferences"), _("Preferences"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 
@@ -283,6 +277,9 @@ ARDOUR_UI::install_actions ()
 	global_actions.register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
 	global_actions.register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
 	global_actions.register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
+
+	Glib::RefPtr<Gtk::ActionGroup> window_actions = ARDOUR_UI::instance()->global_actions.create_action_group (X_("Window"));
+	global_actions.register_action (window_actions, X_("show-mixer"), _("Show Mixer"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
 
 	/* these actions are all currently implemented by the Editor, but need
 	 * to be accessible from anywhere as actions.
@@ -374,6 +371,16 @@ ARDOUR_UI::install_actions ()
 
 	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixerList"), _("Toggle Mixer List"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixer_list));
 	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = global_actions.register_toggle_action (common_actions, X_("ToggleVCAPane"), _("Toggle VCA Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_vca_pane));
+	ActionManager::session_sensitive_actions.push_back (act);
+	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
+
+#ifdef MIXBUS
+	act = global_actions.register_toggle_action (common_actions, X_("ToggleMixbusPane"), _("Toggle Mixbus Pane"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_mixbus_pane));
+	ActionManager::session_sensitive_actions.push_back (act);
+	Glib::RefPtr<ToggleAction>::cast_dynamic(act)->set_active (true);
+#endif
 
 	act = global_actions.register_toggle_action (common_actions, X_("ToggleMonitorSection"), _("Toggle Monitor Section Visibility"), sigc::mem_fun (*this, &ARDOUR_UI::toggle_monitor_section_visibility));
 	act->set_sensitive (false);
@@ -469,8 +476,16 @@ ARDOUR_UI::install_actions ()
 	act = global_actions.register_action (transport_actions, X_("PlayPreroll"), _("Play w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_play_preroll));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::transport_sensitive_actions.push_back (act);
+	act = global_actions.register_action (transport_actions, X_("solo-selection"), _("Solo Selection"), sigc::bind (sigc::mem_fun(*editor, &PublicEditor::play_solo_selection), true));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
+
 
 	act = global_actions.register_action (transport_actions, X_("RecordPreroll"), _("Record w/Preroll"), sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_preroll));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::write_sensitive_actions.push_back (act);
+
+	act = global_actions.register_action (transport_actions, X_("RecordCountIn"), _("Record w/Count-In"), sigc::mem_fun(*this, &ARDOUR_UI::transport_rec_count_in));
 	ActionManager::session_sensitive_actions.push_back (act);
 	ActionManager::write_sensitive_actions.push_back (act);
 
@@ -567,7 +582,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("primary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Frames, false));
+	act = global_actions.register_action (transport_actions, X_("primary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Seconds, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (transport_actions, X_("primary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(primary_clock, &AudioClock::set_mode), AudioClock::Samples, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-timecode"), _("Timecode"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Timecode, false));
@@ -576,7 +593,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::session_sensitive_actions.push_back (act);
 	act = global_actions.register_action (transport_actions, X_("secondary-clock-minsec"), _("Minutes & Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::MinSec, false));
 	ActionManager::session_sensitive_actions.push_back (act);
-	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Frames, false));
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-seconds"), _("Seconds"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Seconds, false));
+	ActionManager::session_sensitive_actions.push_back (act);
+	act = global_actions.register_action (transport_actions, X_("secondary-clock-samples"), _("Samples"), sigc::bind (sigc::mem_fun(secondary_clock, &AudioClock::set_mode), AudioClock::Samples, false));
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = global_actions.register_toggle_action (transport_actions, X_("SessionMonitorIn"), _("All Input"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_session_monitoring_in));
@@ -648,7 +667,9 @@ ARDOUR_UI::install_actions ()
 	/* MIDI */
 
 	Glib::RefPtr<ActionGroup> midi_actions = global_actions.create_action_group (X_("MIDI"));
-	global_actions.register_action (midi_actions, X_("panic"), _("Panic (Send MIDI all-notes-off)"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
+	act = global_actions.register_action (midi_actions, X_("panic"), _("Panic (Send MIDI all-notes-off)"), sigc::mem_fun(*this, &ARDOUR_UI::midi_panic));
+	ActionManager::session_sensitive_actions.push_back (act);
+	ActionManager::transport_sensitive_actions.push_back (act);
 }
 
 void
@@ -658,72 +679,55 @@ ARDOUR_UI::build_menu_bar ()
 	menu_bar->set_name ("MainMenuBar");
 
 	EventBox* ev = manage (new EventBox);
+	ev->set_name ("MainMenuBar");
 	ev->show ();
-	CairoHPacker* hbox = manage (new CairoHPacker);
-	hbox->set_name (X_("StatusBarBox"));
+
+	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
-	hbox->set_border_width (3);
-
-	VBox* vbox = manage (new VBox);
-	vbox->pack_start (*hbox, true, false);
-	vbox->show();
-
-	ev->add (*vbox);
+	hbox->set_border_width (2);
+	ev->add (*hbox);
 
 	wall_clock_label.set_name ("WallClock");
 	wall_clock_label.set_use_markup ();
-	disk_space_label.set_name ("WallClock");
-	disk_space_label.set_use_markup ();
 	timecode_format_label.set_name ("WallClock");
 	timecode_format_label.set_use_markup ();
-	cpu_load_label.set_name ("CPULoad");
-	cpu_load_label.set_use_markup ();
-	xrun_label.set_name ("XrunLabel");
-	xrun_label.set_use_markup ();
 	peak_thread_work_label.set_name ("PeakThreadWork");
 	peak_thread_work_label.set_use_markup ();
-	buffer_load_label.set_name ("BufferLoad");
-	buffer_load_label.set_use_markup ();
 	sample_rate_label.set_name ("SampleRate");
 	sample_rate_label.set_use_markup ();
 	format_label.set_name ("Format");
 	format_label.set_use_markup ();
 
-#ifndef TOP_MENUBAR
-	menu_hbox.pack_start (*menu_bar, false, false);
-#else
+#ifdef __APPLE__
 	use_menubar_as_top_menubar ();
+#else
+	menu_hbox.pack_start (*menu_bar, false, false);
 #endif
 
 	hbox->pack_end (error_alert_button, false, false, 2);
-
-	hbox->pack_end (wall_clock_label, false, false, 2);
+	hbox->pack_end (dsp_load_label, false, false, 4);
 	hbox->pack_end (disk_space_label, false, false, 4);
-	hbox->pack_end (xrun_label, false, false, 4);
-	hbox->pack_end (peak_thread_work_label, false, false, 4);
-	hbox->pack_end (cpu_load_label, false, false, 4);
-	hbox->pack_end (buffer_load_label, false, false, 4);
 	hbox->pack_end (sample_rate_label, false, false, 4);
 	hbox->pack_end (timecode_format_label, false, false, 4);
 	hbox->pack_end (format_label, false, false, 4);
+	hbox->pack_end (peak_thread_work_label, false, false, 4);
+	hbox->pack_end (wall_clock_label, false, false, 2);
 
-	menu_hbox.pack_end (*ev, false, false, 2);
+	menu_hbox.pack_end (*ev, true, true, 2);
 
 	menu_bar_base.set_name ("MainMenuBar");
 	menu_bar_base.add (menu_hbox);
 
 #ifndef __APPLE__
 	// OSX provides its own wallclock, thank you very much
-	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), true);
+	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), false);
 #endif
-	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
-	_status_bar_visibility.add (&cpu_load_label,        X_("DSP"),       _("DSP"), true);
-	_status_bar_visibility.add (&xrun_label,            X_("XRun"),      _("X-run"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
-	_status_bar_visibility.add (&buffer_load_label,     X_("Buffers"),   _("Buffers"), true);
+	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
+	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
-	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), true);
-	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), true);
+	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
+	_status_bar_visibility.add (&dsp_load_label,        X_("DSP"),       _("DSP"), true);
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 	ev->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
@@ -735,8 +739,8 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 	Gtk::Widget* widget;
 	Application* app = Application::instance ();
 
-        /* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
-         */
+	/* the addresses ("/ui/Main...") used below are based on the menu definitions in the menus file
+	*/
 
 	/* Quit will be taken care of separately */
 
@@ -752,11 +756,11 @@ ARDOUR_UI::use_menubar_as_top_menubar ()
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Session/toggle-about"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-        }
+	}
 
 	if ((widget = ActionManager::get_widget ("/ui/Main/Edit/menu-show-preferences"))) {
 		app->add_app_menu_item (group, dynamic_cast<MenuItem*>(widget));
-        }
+	}
 
 	app->set_menu_bar (*menu_bar);
 }
@@ -772,12 +776,11 @@ ARDOUR_UI::save_ardour_state ()
 	   a different lifetime model from add_instant_xml().
 	*/
 
-	LocaleGuard lg; // one guard to rule them all
 	XMLNode* node = new XMLNode (keyboard->get_state());
 	Config->add_extra_xml (*node);
 
 	XMLNode* window_node = new XMLNode (X_("UI"));
-	window_node->add_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
+	window_node->set_property (_status_bar_visibility.get_state_name().c_str(), _status_bar_visibility.get_state_value ());
 
 	/* main window */
 
@@ -786,10 +789,10 @@ ARDOUR_UI::save_ardour_state ()
 	_main_window.get_size (mw, mh);
 
 	XMLNode main_window_node (X_("Main"));
-	main_window_node.add_property (X_("x"), PBD::to_string (mx, std::dec));
-	main_window_node.add_property (X_("y"), PBD::to_string (my, std::dec));
-	main_window_node.add_property (X_("w"), PBD::to_string (mw, std::dec));
-	main_window_node.add_property (X_("h"), PBD::to_string (mh, std::dec));
+	main_window_node.set_property (X_("x"), mx);
+	main_window_node.set_property (X_("y"), my);
+	main_window_node.set_property (X_("w"), mw);
+	main_window_node.set_property (X_("h"), mh);
 
 	string current_tab;
 	int current_page_number = _tabs.get_current_page ();
@@ -801,7 +804,7 @@ ARDOUR_UI::save_ardour_state ()
 		current_tab = "preferences";
 	}
 
-	main_window_node.add_property (X_("current-tab"), current_tab);
+	main_window_node.set_property (X_("current-tab"), current_tab);
 
 	/* Windows */
 
@@ -826,6 +829,8 @@ ARDOUR_UI::save_ardour_state ()
 	Config->add_extra_xml (audio_midi_setup->get_state());
 
 	Config->save_state();
+
+	mixer->save_plugin_order_file();
 
 	UIConfiguration::instance().save_state ();
 
@@ -860,9 +865,6 @@ ARDOUR_UI::save_ardour_state ()
 void
 ARDOUR_UI::resize_text_widgets ()
 {
-	set_size_request_to_display_given_text (cpu_load_label, "DSP: 100.0%", 2, 2);
-	set_size_request_to_display_given_text (buffer_load_label, "Buffers: p:100% c:100%", 2, 2);
-	set_size_request_to_display_given_text (xrun_label, "X: 9999", 2, 2);
 }
 
 void
@@ -882,7 +884,7 @@ ARDOUR_UI::xrun_button_release (GdkEventButton* ev)
 
 	if (_session) {
 		_session->reset_xrun_count ();
-		update_xrun_count ();
+		update_cpu_load ();
 	}
 	return true;
 }

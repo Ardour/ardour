@@ -36,6 +36,7 @@
 #include "ardour/automation_list.h"
 #include "ardour/control_group_member.h"
 #include "ardour/parameter_descriptor.h"
+#include "ardour/session_handle.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -52,8 +53,9 @@ class LIBARDOUR_API AutomationControl
 	, public Evoral::Control
 	, public boost::enable_shared_from_this<AutomationControl>
 	, public ControlGroupMember
+	, public SessionHandleRef
 {
-    public:
+public:
 	AutomationControl(ARDOUR::Session&,
 	                  const Evoral::Parameter&                  parameter,
 	                  const ParameterDescriptor&                desc,
@@ -62,7 +64,7 @@ class LIBARDOUR_API AutomationControl
 	                  PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
-	~AutomationControl ();
+	virtual ~AutomationControl ();
 
 	boost::shared_ptr<AutomationList> alist() const {
 		return boost::dynamic_pointer_cast<AutomationList>(_list);
@@ -82,18 +84,14 @@ class LIBARDOUR_API AutomationControl
 		return alist() ? alist()->automation_state() : Off;
 	}
 
-	inline AutoStyle automation_style() const {
-		return alist() ? alist()->automation_style() : Absolute;
-	}
-
 	void set_automation_state(AutoState as);
-	void set_automation_style(AutoStyle as);
 	void start_touch(double when);
-	void stop_touch(bool mark, double when);
+	void stop_touch(double when);
 
-	/* inherited from PBD::Controllable.
-	 */
-	double get_value () const;
+	/* inherited from PBD::Controllable. */
+	virtual double get_value () const;
+	virtual double get_save_value () const;
+
 	/* inherited from PBD::Controllable.
 	 * Derived classes MUST call ::writable() to verify
 	 * that writing to the parameter is legal at that time.
@@ -108,6 +106,8 @@ class LIBARDOUR_API AutomationControl
 		actually_set_value (val, PBD::Controllable::NoGroup);
 	}
 
+	virtual void automation_run (samplepos_t start, pframes_t nframes);
+
 	double lower()   const { return _desc.lower; }
 	double upper()   const { return _desc.upper; }
 	double normal()  const { return _desc.normal; }
@@ -116,13 +116,16 @@ class LIBARDOUR_API AutomationControl
 	double internal_to_interface (double i) const;
 	double interface_to_internal (double i) const;
 
+	virtual std::string get_user_string() const;
+
 	const ParameterDescriptor& desc() const { return _desc; }
 
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
-  protected:
-	ARDOUR::Session& _session;
+	ControlList grouped_controls () const;
+
+protected:
 	boost::shared_ptr<ControlGroup> _group;
 
 	const ParameterDescriptor _desc;
@@ -145,13 +148,17 @@ class LIBARDOUR_API AutomationControl
 	/* this will be invoked in turn on behalf of the group or the control by itself */
 	virtual void do_pre_realtime_queue_stuff (double new_value) {}
 
-  private:
+	void session_going_away ();
+
+private:
 	/* I am unclear on why we have to make ControlGroup a friend in order
 	   to get access to the ::set_group() method when it is already
 	   declared to be a friend in ControlGroupMember. Oh well.
 	*/
 	friend class ControlGroup;
 	void set_group (boost::shared_ptr<ControlGroup>);
+	PBD::ScopedConnection _state_changed_connection;
+	bool _no_session;
 };
 
 

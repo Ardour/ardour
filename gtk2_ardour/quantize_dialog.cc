@@ -33,25 +33,35 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 
 static const gchar *_grid_strings[] = {
-	N_("main grid"),
-	N_("Beats/128"),
-	N_("Beats/64"),
-	N_("Beats/32"),
-	N_("Beats/28"),
-	N_("Beats/24"),
-	N_("Beats/20"),
-	N_("Beats/16"),
-	N_("Beats/14"),
-	N_("Beats/12"),
-	N_("Beats/10"),
-	N_("Beats/8"),
-	N_("Beats/7"),
-	N_("Beats/6"),
-	N_("Beats/5"),
-	N_("Beats/4"),
-	N_("Beats/3"),
-	N_("Beats/2"),
-	N_("Beats"),
+	N_("Main Grid"),
+	N_("1/4 Note"),
+	N_("1/8 Note"),
+	N_("1/16 Note"),
+	N_("1/32 Note"),
+	N_("1/64 Note"),
+	N_("1/128 Note"),
+	
+	N_("1/3 (8th triplet)"),
+	N_("1/6 (16th triplet)"),
+	N_("1/12 (32nd triplet)"),
+
+	N_("1/5 (8th quintuplet)"),
+	N_("1/10 (16th quintuplet)"),
+	N_("1/20 (32nd quintuplet)"),
+
+	N_("1/7 (8th septuplet)"),
+	N_("1/14 (16th septuplet)"),
+	N_("1/28 (32nd septuplet)"),
+
+	0
+};
+
+static const int _grid_beats[] = {
+	0,
+	1, 2, 4, 8, 16, 32,
+	3, 6, 12,
+	5, 10, 20,
+	7, 14, 28,
 	0
 };
 
@@ -131,34 +141,33 @@ QuantizeDialog::start_grid_size () const
 double
 QuantizeDialog::end_grid_size () const
 {
-	return grid_size_to_musical_time (start_grid_combo.get_active_text ());
+	return grid_size_to_musical_time (end_grid_combo.get_active_text ());
 }
 
 double
 QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 {
-	if (txt == "main grid") {
+	if ( txt == _grid_strings[0] ) {  //"Main Grid"
 		bool success;
 
-		Evoral::Beats b = editor.get_grid_type_as_beats (success, 0);
+		Temporal::Beats b = editor.get_grid_type_as_beats (success, 0);
 		if (!success) {
 			return 1.0;
 		}
 		return b.to_double();
 	}
 
-	string::size_type slash;
 
-	if ((slash = txt.find ('/')) != string::npos) {
-		if (slash < txt.length() - 1) {
-			double divisor = PBD::atof (txt.substr (slash+1));
-			if (divisor != 0.0) {
-				return 1.0/divisor;
-			}
+	double divisor = 1.0;
+	for (size_t i = 1; i < grid_strings.size(); ++i) {
+		if (txt == grid_strings[i]) {
+			assert (_grid_beats[i] != 0);
+			divisor = 1.0 / _grid_beats[i];
+			break;
 		}
 	}
 
-	return 1.0;
+	return divisor;
 }
 
 float

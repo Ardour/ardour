@@ -104,7 +104,7 @@ private:
 	MIDIPortRef     * _output_ports;
 	CoreMIDIQueue   * _input_queue;
 
-	RingBuffer<uint8_t> ** _rb;
+	PBD::RingBuffer<uint8_t> ** _rb;
 
 	uint32_t          _n_midi_in;
 	uint32_t          _n_midi_out;

@@ -64,17 +64,15 @@ class LIBARDOUR_API IOProcessor : public Processor
 	void set_input (boost::shared_ptr<IO>);
 	void set_output (boost::shared_ptr<IO>);
 
-	void silence (framecnt_t nframes, framepos_t start_frame);
+	void silence (samplecnt_t nframes, samplepos_t start_sample);
 	void disconnect ();
-
-	void increment_port_buffer_offset (pframes_t);
 
 	virtual bool feeds (boost::shared_ptr<Route> other) const;
 
 	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	PBD::Signal2<void,IOProcessor*,uint32_t> AutomationChanged;
 
-	XMLNode& state (bool full_state);
+	XMLNode& state ();
 	int set_state (const XMLNode&, int version);
 
 	static void prepare_for_reset (XMLNode& state, const std::string& name);

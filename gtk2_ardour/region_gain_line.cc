@@ -51,7 +51,6 @@ AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& 
 
 	group->raise_to_top ();
 	group->set_y_position (2);
-	set_uses_gain_mapping (true);
 	terminal_points_can_slide = false;
 }
 
@@ -60,7 +59,7 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 {
 	AutomationLine::start_drag_single (cp, x, fraction);
 
-        // XXX Stateful need to capture automation curve data
+	// XXX Stateful need to capture automation curve data
 
 	if (!rv.audio_region()->envelope_active()) {
 		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
@@ -76,7 +75,7 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	XMLNode &before = alist->get_state();
 
 	if (!rv.audio_region()->envelope_active()) {
-                rv.audio_region()->clear_changes ();
+		rv.audio_region()->clear_changes ();
 		rv.audio_region()->set_envelope_active(true);
 		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
 	}

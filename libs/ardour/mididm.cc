@@ -21,7 +21,7 @@
 
 using namespace ARDOUR;
 
-MIDIDM::MIDIDM (framecnt_t sample_rate)
+MIDIDM::MIDIDM (samplecnt_t sample_rate)
   : _sample_rate (sample_rate)
   , _monotonic_cnt (sample_rate)
   , _last_signal_tme (0)
@@ -37,7 +37,7 @@ MIDIDM::MIDIDM (framecnt_t sample_rate)
 }
 
 int64_t
-MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
+MIDIDM::parse_mclk (uint8_t const * const buf, pframes_t timestamp) const
 {
 	/* calculate time difference */
 #define MODCLK (16384)  // 1<<(2*7)
@@ -52,7 +52,7 @@ MIDIDM::parse_mclk (uint8_t* buf, pframes_t timestamp) const
 }
 
 int64_t
-MIDIDM::parse_mtc (uint8_t* buf, pframes_t timestamp) const
+MIDIDM::parse_mtc (uint8_t const * const buf, pframes_t timestamp) const
 {
 #define MODTC (2097152)  // 1<<(3*7)
 	const int64_t tc = (_monotonic_cnt + timestamp) & 0x001FFFFF;
@@ -78,7 +78,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	obuf[1] = (_monotonic_cnt)      & 0x7f;
 	obuf[2] = (_monotonic_cnt >> 7) & 0x7f;
 	pe.midi_event_put (midi_out, 0, obuf, 3);
-#else // sysex MTC frame
+#else // sysex MTC sample
 	uint8_t obuf[10];
 	obuf[0] = 0xf0;
 	obuf[1] = 0x7f;
@@ -101,7 +101,7 @@ int MIDIDM::process (pframes_t nframes, PortEngine &pe, void *midi_in, void *mid
 	for (pframes_t n = 0; n < nevents; ++n) {
 		pframes_t timestamp;
 		size_t size;
-		uint8_t* buf;
+		uint8_t const* buf;
 		int64_t tdiff;
 		pe.midi_event_get (timestamp, size, &buf, midi_in, n);
 

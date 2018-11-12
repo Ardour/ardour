@@ -63,7 +63,7 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	, _layers (1)
 	, _layer_display (Overlaid)
 	, height (tv.height)
-	, last_rec_data_frame(0)
+	, last_rec_data_sample(0)
 {
 	CANVAS_DEBUG_NAME (_canvas_group, string_compose ("SV canvas group %1", _trackview.name()));
 
@@ -77,7 +77,6 @@ StreamView::StreamView (RouteTimeAxisView& tv, ArdourCanvas::Container* canvas_g
 	canvas_rect->Event.connect (sigc::bind (sigc::mem_fun (_trackview.editor(), &PublicEditor::canvas_stream_view_event), canvas_rect, &_trackview));
 
 	if (_trackview.is_track()) {
-		_trackview.track()->DiskstreamChanged.connect (*this, invalidator (*this), boost::bind (&StreamView::diskstream_changed, this), gui_context());
 		_trackview.track()->rec_enable_control()->Changed.connect (*this, invalidator (*this), boost::bind (&StreamView::rec_enable_changed, this), gui_context());
 
 		_trackview.session()->TransportStateChange.connect (*this, invalidator (*this), boost::bind (&StreamView::transport_changed, this), gui_context());
@@ -159,7 +158,7 @@ StreamView::set_samples_per_pixel (double fpp)
 		recbox.rectangle->set_x1 (xend);
 	}
 
-	update_coverage_frames ();
+	update_coverage_samples ();
 
 	return 0;
 }
@@ -297,7 +296,7 @@ StreamView::playlist_layered (boost::weak_ptr<Track> wtr)
 	if (_layer_display == Stacked) {
 		update_contents_height ();
 		/* tricky. playlist_changed() does this as well, and its really inefficient. */
-		update_coverage_frames ();
+		update_coverage_samples ();
 	} else {
 		/* layering has probably been modified. reflect this in the canvas. */
 		layer_regions();
@@ -325,14 +324,14 @@ StreamView::playlist_switched (boost::weak_ptr<Track> wtr)
 	/* update layers count and the y positions and heights of our regions */
 	_layers = tr->playlist()->top_layer() + 1;
 	update_contents_height ();
-	update_coverage_frames ();
+	update_coverage_samples ();
 
 	/* catch changes */
 
 	tr->playlist()->LayeringChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::playlist_layered, this, boost::weak_ptr<Track> (tr)), gui_context());
 	tr->playlist()->RegionAdded.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::add_region_view, this, _1), gui_context());
 	tr->playlist()->RegionRemoved.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::remove_region_view, this, _1), gui_context());
-	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_frames, this), gui_context());
+	tr->playlist()->ContentsChanged.connect (playlist_connections, invalidator (*this), boost::bind (&StreamView::update_coverage_samples, this), gui_context());
 }
 
 
@@ -410,9 +409,9 @@ StreamView::transport_looped()
 }
 
 void
-StreamView::create_rec_box(framepos_t frame_pos, double width)
+StreamView::create_rec_box(samplepos_t sample_pos, double width)
 {
-	const double   xstart     = _trackview.editor().sample_to_pixel(frame_pos);
+	const double   xstart     = _trackview.editor().sample_to_pixel(sample_pos);
 	const double   xend       = xstart + width;
 	const uint32_t fill_color = UIConfiguration::instance().color_mod("recording rect", "recording_rect");
 
@@ -433,7 +432,7 @@ StreamView::create_rec_box(framepos_t frame_pos, double width)
 	if (rec_rects.empty()) {
 		recbox.start = _trackview.session()->record_location ();
 	} else {
-		recbox.start = _trackview.session()->transport_frame ();
+		recbox.start = _trackview.session()->transport_sample ();
 	}
 
 	rec_rects.push_back (recbox);
@@ -451,7 +450,7 @@ StreamView::update_rec_box ()
 	if (rec_active && rec_rects.size() > 0) {
 		/* only update the last box */
 		RecBoxInfo & rect = rec_rects.back();
-		framepos_t const at = _trackview.track()->current_capture_end ();
+		samplepos_t const at = _trackview.track()->current_capture_end ();
 		double xstart;
 		double xend;
 
@@ -545,14 +544,14 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 }
 
 /** Get selectable things within a given range.
- *  @param start Start time in session frames.
- *  @param end End time in session frames.
+ *  @param start Start time in session samples.
+ *  @param end End time in session samples.
  *  @param top Top y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param bot Bottom y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param result Filled in with selectable things.
  */
 void
-StreamView::get_selectables (framepos_t start, framepos_t end, double top, double bottom, list<Selectable*>& results, bool within)
+StreamView::get_selectables (samplepos_t start, samplepos_t end, double top, double bottom, list<Selectable*>& results, bool within)
 {
 	if (_trackview.editor().internal_editing()) {
 		return;  // Don't select regions with an internal tool
@@ -677,19 +676,19 @@ StreamView::set_layer_display (LayerDisplay d)
 	}
 
 	update_contents_height ();
-	update_coverage_frames ();
+	update_coverage_samples ();
 }
 
 void
-StreamView::update_coverage_frames ()
+StreamView::update_coverage_samples ()
 {
 	for (RegionViewList::iterator i = region_views.begin (); i != region_views.end (); ++i) {
-		(*i)->update_coverage_frames (_layer_display);
+		(*i)->update_coverage_samples (_layer_display);
 	}
 }
 
 void
-StreamView::check_record_layers (boost::shared_ptr<Region> region, framepos_t to)
+StreamView::check_record_layers (boost::shared_ptr<Region> region, samplepos_t to)
 {
 	if (_new_rec_layer_time < to) {
 		/* The region being recorded has overlapped the start of a top-layered region, so
@@ -699,7 +698,7 @@ StreamView::check_record_layers (boost::shared_ptr<Region> region, framepos_t to
 		*/
 
 		/* Stop this happening again */
-		_new_rec_layer_time = max_framepos;
+		_new_rec_layer_time = max_samplepos;
 
 		/* Make space in the view for the new layer */
 		++_layers;
@@ -722,6 +721,6 @@ StreamView::setup_new_rec_layer_time (boost::shared_ptr<Region> region)
 	if (_layer_display == Stacked) {
 		_new_rec_layer_time = _trackview.track()->playlist()->find_next_top_layer_position (region->start());
 	} else {
-		_new_rec_layer_time = max_framepos;
+		_new_rec_layer_time = max_samplepos;
 	}
 }

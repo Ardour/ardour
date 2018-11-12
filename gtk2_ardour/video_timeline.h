@@ -74,11 +74,13 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void toggle_offset_locked ();
 	bool is_offset_locked () { return video_offset_lock; }
 
+	ARDOUR::sampleoffset_t get_video_start_offset() { return video_start_offset; }
+
 	void open_video_monitor ();
 	void close_video_monitor ();
 	void control_video_monitor (int, int);
 	void terminated_video_monitor ();
-	void manual_seek_video_monitor (framepos_t pos);
+	void manual_seek_video_monitor (samplepos_t pos);
 
 	void parameter_changed (std::string const & p);
 	void set_video_server_url (std::string);
@@ -94,10 +96,10 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void close_session ();
 	void sync_session_state (); /* video-monitor does not actively report window/pos changes, query it */
 	float get_apv(); /* audio samples per video frame; */
-	ARDOUR::framecnt_t get_duration () { return video_duration;}
-	ARDOUR::frameoffset_t get_offset () { return video_offset;}
-	ARDOUR::frameoffset_t quantify_frames_to_apv (ARDOUR::frameoffset_t offset) { return rint(offset/get_apv())*get_apv(); }
-	void set_offset (ARDOUR::frameoffset_t offset) { video_offset = quantify_frames_to_apv(offset); } // this function does not update video_offset_p, call save_undo() to finalize changes to this! - this fn is currently only used from editor_drag.cc
+	ARDOUR::samplecnt_t    get_duration () { return video_duration;}
+	ARDOUR::sampleoffset_t get_offset ()   { return video_offset;}
+	ARDOUR::sampleoffset_t quantify_samples_to_apv (ARDOUR::sampleoffset_t offset) { return rint(offset/get_apv())*get_apv(); }
+	void set_offset (ARDOUR::sampleoffset_t offset) { video_offset = quantify_samples_to_apv(offset); } // this function does not update video_offset_p, call save_undo() to finalize changes to this! - this fn is currently only used from editor_drag.cc
 
 	protected:
 
@@ -110,10 +112,10 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 	void find_harvid ();
 
 
-	ARDOUR::frameoffset_t video_start_offset; /**< unit: audio-samples - video-file */
-	ARDOUR::frameoffset_t video_offset; /**< unit: audio-samples - session */
-	ARDOUR::frameoffset_t video_offset_p; /**< used for undo from editor_drag.cc */
-	framepos_t video_duration;     /**< unit: audio-samples */
+	ARDOUR::sampleoffset_t video_start_offset; /**< unit: audio-samples - video-file */
+	ARDOUR::sampleoffset_t video_offset; /**< unit: audio-samples - session */
+	ARDOUR::sampleoffset_t video_offset_p; /**< used for undo from editor_drag.cc */
+	samplepos_t video_duration;     /**< unit: audio-samples */
 	std::string video_filename;
 	bool        local_file;
 	double      video_aspect_ratio;
@@ -131,9 +133,10 @@ class VideoTimeLine : public sigc::trackable, public ARDOUR::SessionHandlePtr, p
 
 	typedef std::list<VideoImageFrame*> VideoFrames;
 	VideoFrames video_frames;
-	VideoImageFrame *get_video_frame (framepos_t vfn, int cut=0, int rightend = -1);
-	bool        flush_frames;
-	void        remove_frames ();
+	VideoImageFrame* get_video_frame (samplepos_t vfn, int cut=0, int rightend = -1);
+
+	void remove_frames ();
+	bool _flush_frames;
 
 	std::string translated_filename ();
 

@@ -66,7 +66,7 @@ public:
 	                ArdourCanvas::Item&                                parent,
 	                boost::shared_ptr<ARDOUR::AutomationList>          al,
 	                const ARDOUR::ParameterDescriptor&                 desc,
-	                Evoral::TimeConverter<double, ARDOUR::framepos_t>* converter = 0);
+	                Evoral::TimeConverter<double, ARDOUR::samplepos_t>* converter = 0);
 
 	virtual ~AutomationLine ();
 
@@ -76,7 +76,7 @@ public:
 	void set_fill (bool f) { _fill = f; } // owner needs to call set_height
 
 	void set_selected_points (PointSelection const &);
-	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*>&);
+	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
 	virtual void remove_point (ControlPoint&);
@@ -86,7 +86,7 @@ public:
 	virtual void start_drag_single (ControlPoint*, double, float);
 	virtual void start_drag_line (uint32_t, uint32_t, float);
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-	virtual std::pair<double, float> drag_motion (double, float, bool, bool with_push, uint32_t& final_index);
+	virtual std::pair<float, float> drag_motion (double, float, bool, bool with_push, uint32_t& final_index);
 	virtual void end_drag (bool with_push, uint32_t final_index);
 
 	ControlPoint* nth (uint32_t);
@@ -106,8 +106,8 @@ public:
 
 	void hide ();
 	void set_height (guint32);
-	void set_uses_gain_mapping (bool yn);
-	bool get_uses_gain_mapping () const { return _uses_gain_mapping; }
+
+	bool get_uses_gain_mapping () const;
 
 	TimeAxisView& trackview;
 
@@ -118,12 +118,15 @@ public:
 	virtual std::string get_verbose_cursor_string (double) const;
 	std::string get_verbose_cursor_relative_string (double, double) const;
 	std::string fraction_to_string (double) const;
-	std::string fraction_to_relative_string (double, double) const;
+	std::string delta_to_string (double) const;
 	double string_to_fraction (std::string const &) const;
 	void   view_to_model_coord (double& x, double& y) const;
 	void   view_to_model_coord_y (double &) const;
 	void   model_to_view_coord (double& x, double& y) const;
 	void   model_to_view_coord_y (double &) const;
+
+	double compute_delta (double from, double to) const;
+	void   apply_delta (double& val, double delta) const;
 
 	void set_list(boost::shared_ptr<ARDOUR::AutomationList> list);
 	boost::shared_ptr<ARDOUR::AutomationList> the_list() const { return alist; }
@@ -142,37 +145,36 @@ public:
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
-	const Evoral::TimeConverter<double, ARDOUR::framepos_t>& time_converter () const {
+	const Evoral::TimeConverter<double, ARDOUR::samplepos_t>& time_converter () const {
 		return *_time_converter;
 	}
 
-	std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> get_point_x_range () const;
+	std::pair<ARDOUR::samplepos_t, ARDOUR::samplepos_t> get_point_x_range () const;
 
-	void set_maximum_time (ARDOUR::framecnt_t);
-	ARDOUR::framecnt_t maximum_time () const {
+	void set_maximum_time (ARDOUR::samplecnt_t);
+	ARDOUR::samplecnt_t maximum_time () const {
 		return _maximum_time;
 	}
 
-	void set_offset (ARDOUR::framecnt_t);
-	ARDOUR::framecnt_t offset () { return _offset; }
-	void set_width (ARDOUR::framecnt_t);
+	void set_offset (ARDOUR::samplecnt_t);
+	ARDOUR::samplecnt_t offset () { return _offset; }
+	void set_width (ARDOUR::samplecnt_t);
 
-	framepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
+	samplepos_t session_position (ARDOUR::AutomationList::const_iterator) const;
 
 protected:
 
 	std::string    _name;
-	guint32   _height;
-	uint32_t  _line_color;
+	guint32        _height;
+	uint32_t       _line_color;
 
 	boost::shared_ptr<ARDOUR::AutomationList> alist;
-	Evoral::TimeConverter<double, ARDOUR::framepos_t>* _time_converter;
+	Evoral::TimeConverter<double, ARDOUR::samplepos_t>* _time_converter;
 	/** true if _time_converter belongs to us (ie we should delete it on destruction) */
 	bool _our_time_converter;
 
 	VisibleAspects _visible;
 
-	bool    _uses_gain_mapping;
 	bool    terminal_points_can_slide;
 	bool    update_pending;
 	bool    have_timeout;
@@ -181,8 +183,8 @@ protected:
 	/** true if we did a push at any point during the current drag */
 	bool    did_push;
 
-	ArdourCanvas::Item&        _parent_group;
-	ArdourCanvas::Container*       group;
+	ArdourCanvas::Item&         _parent_group;
+	ArdourCanvas::Container*    group;
 	ArdourCanvas::PolyLine*     line; /* line */
 	ArdourCanvas::Points        line_points; /* coordinates for canvas line */
 	std::vector<ControlPoint*>  control_points; /* visible control points */
@@ -191,7 +193,7 @@ protected:
 public:
 		ContiguousControlPoints (AutomationLine& al);
 		double clamp_dx (double dx);
-		void move (double dx, double dy);
+		void move (double dx, double dvalue);
 		void compute_x_bounds (PublicEditor& e);
 private:
 		AutomationLine& line;
@@ -223,7 +225,7 @@ private:
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
 	 */
-	ARDOUR::framecnt_t _offset;
+	ARDOUR::samplecnt_t _offset;
 
 	bool is_stepped() const;
 	void update_visibility ();
@@ -236,7 +238,7 @@ private:
 	PBD::ScopedConnectionList _list_connections;
 
 	/** maximum time that a point on this line can be at, relative to the position of its region or start of its track */
-	ARDOUR::framecnt_t _maximum_time;
+	ARDOUR::samplecnt_t _maximum_time;
 
 	bool _fill;
 

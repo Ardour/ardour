@@ -50,7 +50,7 @@ class Selection;
 
 class AudioStreamView : public StreamView
 {
-  public:
+public:
 	AudioStreamView (AudioTimeAxisView&);
 
 	int     set_amplitude_above_axis (gdouble app);
@@ -64,10 +64,10 @@ class AudioStreamView : public StreamView
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 	void set_selected_points (PointSelection&);
 
-  private:
+private:
 	void setup_rec_box ();
-	void rec_peak_range_ready (framepos_t start, ARDOUR::framecnt_t cnt, boost::weak_ptr<ARDOUR::Source> src);
-	void update_rec_regions (ARDOUR::framepos_t, ARDOUR::framecnt_t);
+	void rec_peak_range_ready (samplepos_t start, ARDOUR::samplecnt_t cnt, boost::weak_ptr<ARDOUR::Source> src);
+	void update_rec_regions (ARDOUR::samplepos_t, ARDOUR::samplecnt_t);
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_waves, bool recording = false);
 	void remove_audio_region_view (boost::shared_ptr<ARDOUR::AudioRegion> );

@@ -19,7 +19,7 @@ test -f gtk2_ardour/wscript || exit 1
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
-: ${HARRISONDSPURL=http://www.harrisonconsoles.com/plugins/releases/public}
+: ${HARRISONDSPURL=https://www.harrisonconsoles.com/plugins/releases/public}
 
 # see also wscript, video_tool_paths.cc, bundle_env_mingw.cc
 # registry keys based on this are used there
@@ -27,7 +27,7 @@ PROGRAM_NAME=Ardour
 PROGRAM_KEY=Ardour
 PROGRAM_VERSION=${major_version}
 
-PRODUCT_NAME=ardour
+PRODUCT_NAME=Ardour
 PRODUCT_VERSION=${major_version}
 
 WITH_HARRISON_LV2=1 ;
@@ -43,14 +43,14 @@ while [ $# -gt 0 ] ; do
 			WITH_X42_LV2=1 ;
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
-			PRODUCT_NAME=mixbus
+			PRODUCT_NAME=Mixbus
 			MANUAL_NAME="mixbus${major_version}-live-manual"
 			shift ;;
 		--mixbus32c)
 			MIXBUS=1
 			WITH_HARRISON_LV2=1 ;
 			WITH_X42_LV2=1 ;
-			PRODUCT_NAME=mixbus32c
+			PRODUCT_NAME=Mixbus32C
 			PROGRAM_KEY=Mixbus32C
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
 			PROGRAM_VERSION=""
@@ -135,8 +135,10 @@ cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
 cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
 cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
 cp build/libs/ardour/ardour-*.dll $DESTDIR/bin/
-cp build/libs/timecode/timecode.dll $DESTDIR/bin/
+cp build/libs/temporal/temporal-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
+cp build/libs/widgets/widgets-*.dll $DESTDIR/bin/
+cp build/libs/waveview/waveview-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
 cp build/libs/audiographer/audiographer-*.dll $DESTDIR/bin/
@@ -190,7 +192,7 @@ cp -r $PREFIX/etc/${LOWERCASE_DIRNAME}/* $DESTDIR/share/${LOWERCASE_DIRNAME}/
 
 cp COPYING $DESTDIR/share/
 cp gtk2_ardour/icons/${PRODUCT_ICON} $DESTDIR/share/
-cp gtk2_ardour/icons/ardour_bug.ico $DESTDIR/share/
+cp gtk2_ardour/icons/ArdourBug.ico $DESTDIR/share/
 
 # replace default cursor with square version (sans hotspot file)
 cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
@@ -269,7 +271,7 @@ if test x$WITH_X42_LV2 != x ; then
 
 	echo "Adding x42 Plugins"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums; do
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
@@ -445,7 +447,7 @@ EOF
 
 if test -f "$DESTDIR/debug.bat"; then
 	cat >> $NSISFILE << EOF
-  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ardour_bug.ico" 0
+  CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\${PROGRAM_NAME}${PROGRAM_VERSION} GDB.lnk" "\$INSTDIR\\debug.bat" "" "\$INSTDIR\\share\\ArdourBug.ico" 0
 EOF
 fi
 
@@ -542,7 +544,7 @@ Function .onInit
   \${If} \${AtMostWinXP}
     SectionSetFlags \${SecWASAPI} \${SF_RO}
   \${Else}
-    SectionSetFlags \${SecWASAPI} \${SF_SELECTED}
+    SectionSetFlags \${SecWASAPI} 0
   \${EndIf}
 
 FunctionEnd

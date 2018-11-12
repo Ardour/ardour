@@ -18,8 +18,10 @@
 
 */
 
+#include "pbd/convert.h"
 #include "pbd/error.h"
 
+#include "ardour/control_protocol_manager.h"
 #include "ardour/gain_control.h"
 #include "ardour/session.h"
 #include "ardour/record_enable_control.h"
@@ -55,14 +57,12 @@ PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::Toggle
 PBD::Signal1<void,boost::shared_ptr<ARDOUR::Stripable> > ControlProtocol::RemoveStripableFromSelection;
 PBD::Signal0<void>          ControlProtocol::ClearStripableSelection;
 
-PBD::Signal1<void,StripableNotificationListPtr> ControlProtocol::StripableSelectionChanged;
-
 Glib::Threads::Mutex ControlProtocol::special_stripable_mutex;
 boost::weak_ptr<Stripable> ControlProtocol::_first_selected_stripable;
 boost::weak_ptr<Stripable> ControlProtocol::_leftmost_mixer_stripable;
 StripableNotificationList ControlProtocol::_last_selected;
-bool ControlProtocol::selection_connected = false;
 PBD::ScopedConnection ControlProtocol::selection_connection;
+bool ControlProtocol::selection_connected = false;
 
 const std::string ControlProtocol::state_node_name ("Protocol");
 
@@ -73,8 +73,7 @@ ControlProtocol::ControlProtocol (Session& s, string str)
 {
 	if (!selection_connected) {
 		/* this is all static, connect it only once (and early), for all ControlProtocols */
-
-		StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::stripable_selection_changed, _1));
+		ControlProtocolManager::StripableSelectionChanged.connect_same_thread (selection_connection, boost::bind (&ControlProtocol::notify_stripable_selection_changed, _1));
 		selection_connected = true;
 	}
 }
@@ -295,7 +294,8 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 	boost::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
-		r->solo_control()->set_value (yn ? 1.0 : 0.0, Controllable::UseGroup);
+		r->solo_control()->set_value (yn ? 1.0 : 0.0, Controllable::UseGroup); // XXX does not propagate
+		//_session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup); // << correct way, needs a session ptr
 	}
 }
 
@@ -326,8 +326,8 @@ ControlProtocol::get_state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
 
-	node->add_property ("name", _name);
-	node->add_property ("feedback", get_feedback() ? "yes" : "no");
+	node->set_property ("name", _name);
+	node->set_property ("feedback", get_feedback());
 
 	return *node;
 }
@@ -335,10 +335,9 @@ ControlProtocol::get_state ()
 int
 ControlProtocol::set_state (XMLNode const & node, int /* version */)
 {
-	const XMLProperty* prop;
-
-	if ((prop = node.property ("feedback")) != 0) {
-		set_feedback (string_is_affirmative (prop->value()));
+	bool feedback;
+	if (node.get_property ("feedback", feedback)) {
+		set_feedback (feedback);
 	}
 
 	return 0;
@@ -373,7 +372,7 @@ ControlProtocol::set_first_selected_stripable (boost::shared_ptr<Stripable> s)
 }
 
 void
-ControlProtocol::stripable_selection_changed (StripableNotificationListPtr sp)
+ControlProtocol::notify_stripable_selection_changed (StripableNotificationListPtr sp)
 {
 	bool had_selection = !_last_selected.empty();
 

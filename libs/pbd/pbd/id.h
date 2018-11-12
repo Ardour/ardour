@@ -35,6 +35,7 @@ class LIBPBD_API ID {
 	ID ();
 	ID (std::string);
 	ID (const ID&);
+	ID (uint64_t);
 
 	void reset ();
 
@@ -47,6 +48,9 @@ class LIBPBD_API ID {
 	}
 
 	bool operator== (const std::string&) const;
+	bool operator== (uint64_t n) const {
+		return _id == n;
+	}
 
 	ID& operator= (std::string);
 	ID& operator= (const ID&);
@@ -55,8 +59,7 @@ class LIBPBD_API ID {
 		return _id < other._id;
 	}
 
-	void print (char* buf, uint32_t bufsize) const;
-        std::string to_s() const;
+	std::string to_s () const;
 
 	static uint64_t counter() { return _counter; }
 	static void init_counter (uint64_t val) { _counter = val; }
@@ -64,7 +67,7 @@ class LIBPBD_API ID {
 
   private:
 	uint64_t _id;
-	int string_assign (std::string);
+	bool string_assign (std::string);
 
 	static Glib::Threads::Mutex* counter_lock;
 	static uint64_t _counter;

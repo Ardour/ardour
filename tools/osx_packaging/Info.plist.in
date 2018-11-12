@@ -34,6 +34,8 @@
 	<string>6.0</string>
 	<key>CFBundleName</key>
 	<string>@BUNDLENAME@</string>
+	<key>CFBundleDisplayName</key>
+	<string>@BUNDLENAME@</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersions</key>

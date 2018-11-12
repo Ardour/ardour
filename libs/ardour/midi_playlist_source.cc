@@ -54,7 +54,7 @@ on other ways to approach this issue.
 ********************************************************************************/
 
 MidiPlaylistSource::MidiPlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<MidiPlaylist> p,
-					uint32_t /*chn*/, frameoffset_t begin, framecnt_t len, Source::Flag flags)
+					uint32_t /*chn*/, sampleoffset_t begin, samplecnt_t len, Source::Flag flags)
 	: Source (s, DataType::MIDI, name)
 	, MidiSource (s, name, flags)
 	, PlaylistSource (s, orig, name, p, DataType::MIDI, begin, len, flags)
@@ -114,20 +114,20 @@ MidiPlaylistSource::set_state (const XMLNode& node, int version, bool with_desce
 	return 0;
 }
 
-framecnt_t
-MidiPlaylistSource::length (framepos_t)  const
+samplecnt_t
+MidiPlaylistSource::length (samplepos_t)  const
 {
-	pair<framepos_t,framepos_t> extent = _playlist->get_extent();
+	pair<samplepos_t,samplepos_t> extent = _playlist->get_extent();
 	return extent.second - extent.first;
 }
 
-framecnt_t
+samplecnt_t
 MidiPlaylistSource::read_unlocked (const Lock& lock,
-				   Evoral::EventSink<framepos_t>& dst,
-				   framepos_t /*position*/,
-				   framepos_t start,
-                                   framecnt_t cnt,
-                                   Evoral::Range<framepos_t>* loop_range,
+				   Evoral::EventSink<samplepos_t>& dst,
+				   samplepos_t /*position*/,
+				   samplepos_t start,
+                                   samplecnt_t cnt,
+                                   Evoral::Range<samplepos_t>* loop_range,
 				   MidiStateTracker*,
 				   MidiChannelFilter*) const
 {
@@ -140,11 +140,11 @@ MidiPlaylistSource::read_unlocked (const Lock& lock,
 	return mp->read (dst, start, cnt, loop_range);
 }
 
-framecnt_t
+samplecnt_t
 MidiPlaylistSource::write_unlocked (const Lock&,
-                                    MidiRingBuffer<framepos_t>&,
-                                    framepos_t,
-                                    framecnt_t)
+                                    MidiRingBuffer<samplepos_t>&,
+                                    samplepos_t,
+                                    samplecnt_t)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::write_unlocked() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
@@ -152,16 +152,16 @@ MidiPlaylistSource::write_unlocked (const Lock&,
 }
 
 void
-MidiPlaylistSource::append_event_beats(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<Evoral::Beats>& /*ev*/)
+MidiPlaylistSource::append_event_beats(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<Temporal::Beats>& /*ev*/)
 {
 	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_beats() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
 }
 
 void
-MidiPlaylistSource::append_event_frames(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<framepos_t>& /* ev */, framepos_t /*source_start*/)
+MidiPlaylistSource::append_event_samples(const Glib::Threads::Mutex::Lock& /*lock*/, const Evoral::Event<samplepos_t>& /* ev */, samplepos_t /*source_start*/)
 {
-	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_frames() called - should be impossible") << endmsg;
+	fatal << string_compose (_("programming error: %1"), "MidiPlaylistSource::append_event_samples() called - should be impossible") << endmsg;
 	abort(); /*NOTREACHED*/
 }
 

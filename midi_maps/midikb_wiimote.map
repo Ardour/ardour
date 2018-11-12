@@ -10,11 +10,11 @@
 <!-- B + right -->
 <Binding channel="1" note="18" action="Editor/playhead-to-next-region-boundary"/>
 <!-- B + up -->
-<Binding channel="1" note="19" action="Editor/jump-forward-to-mark"/>
+<Binding channel="1" note="19" action="Common/jump-forward-to-mark"/>
 <!-- B + down -->
-<Binding channel="1" note="20" action="Editor/jump-backward-to-mark"/>
+<Binding channel="1" note="20" action="Common/jump-backward-to-mark"/>
 <!-- B + home -->
-<Binding channel="1" note="21" action="Editor/add-location-from-playhead"/>
+<Binding channel="1" note="21" action="Common/add-location-from-playhead"/>
 <!-- B + minus -->
 <Binding channel="1" note="22" action="Transport/GotoStart"/>
 <!-- B + plus -->
@@ -27,9 +27,9 @@
 <!-- A -->
 <Binding channel="1" note="32" action="Transport/ToggleRoll"/>
 <!-- left -->
-<Binding channel="1" note="33" action="Editor/nudge-playhead-backward"/>
+<Binding channel="1" note="33" action="Common/nudge-playhead-backward"/>
 <!-- right -->
-<Binding channel="1" note="34" action="Editor/nudge-playhead-forward"/>
+<Binding channel="1" note="34" action="Common/nudge-playhead-forward"/>
 <!-- up -->
 <Binding channel="1" note="35" action="Editor/select-prev-route"/>
 <!-- down -->

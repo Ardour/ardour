@@ -21,10 +21,11 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include "pbd/enum_convert.h"
+
 #include "ardour/interthread_info.h"
 #include "ardour/recordable.h"
 #include "ardour/route.h"
-#include "ardour/public_diskstream.h"
 
 namespace ARDOUR {
 
@@ -33,20 +34,22 @@ class Playlist;
 class RouteGroup;
 class Source;
 class Region;
-class Diskstream;
+class DiskReader;
+class DiskWriter;
 class IO;
-class MonitorControl;
 class RecordEnableControl;
 class RecordSafeControl;
 
 /** A track is an route (bus) with a recordable diskstream and
- * related objects relevant to tracking, playback and editing.
+ * related objects relevant to recording, playback and editing.
  *
- * Specifically a track has regions and playlist objects.
+ * Specifically a track has a playlist object that describes material
+ * to be played from disk, and modifies that object during recording and
+ * editing.
  */
-class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskstream
+class LIBARDOUR_API Track : public Route, public Recordable
 {
-  public:
+public:
 	Track (Session&, std::string name, PresentationInfo::Flag f = PresentationInfo::Flag (0), TrackMode m = Normal, DataType default_type = DataType::AUDIO);
 	virtual ~Track ();
 
@@ -56,37 +59,15 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	void resync_track_name ();
 
 	TrackMode mode () const { return _mode; }
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	virtual int set_mode (TrackMode /*m*/) { return false; }
-	virtual bool can_use_mode (TrackMode /*m*/, bool& /*bounce_required*/) { return false; }
-	PBD::Signal0<void> TrackModeChanged;
-#endif
 
-	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
-
-	MonitorState monitoring_state () const;
 	MeterState metering_state () const;
 
-	virtual int no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                     bool state_changing);
+	bool set_processor_state (XMLNode const & node, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	int silent_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                 bool& need_butler);
-
-	virtual int roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                  int declick, bool& need_butler) = 0;
-
-	bool needs_butler() const { return _needs_butler; }
-
-	virtual DataType data_type () const = 0;
+	bool needs_butler () const { return _needs_butler; }
+	bool declick_in_progress () const;
 
 	bool can_record();
-
-	void use_new_diskstream ();
-	virtual boost::shared_ptr<Diskstream> create_diskstream() = 0;
-	virtual void set_diskstream (boost::shared_ptr<Diskstream>);
-
-	void set_latency_compensation (framecnt_t);
 
 	enum FreezeState {
 		NoFreeze,
@@ -124,13 +105,11 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	 * @param include_endpoint include the given processor in the bounced audio.
 	 * @return a new audio region (or nil in case of error)
 	 */
-	virtual boost::shared_ptr<Region> bounce_range (framepos_t start, framepos_t end, InterThreadInfo& itt,
+	virtual boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 							boost::shared_ptr<Processor> endpoint, bool include_endpoint) = 0;
-	virtual int export_stuff (BufferSet& bufs, framepos_t start_frame, framecnt_t nframes,
+	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 				  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) = 0;
 
-	XMLNode&    get_state();
-	XMLNode&    get_template();
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
@@ -141,17 +120,15 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	bool can_be_record_enabled ();
 	bool can_be_record_safe ();
 
-	bool using_diskstream_id (PBD::ID) const;
+	void use_captured_sources (SourceList&, CaptureInfos const &);
 
 	void set_block_size (pframes_t);
 
-	/* PublicDiskstream interface */
 	boost::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
 	bool destructive () const;
 	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
-	void set_capture_offset ();
 	std::string steal_write_source_name ();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;
@@ -159,53 +136,49 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	int do_refill ();
 	int do_flush (RunContext, bool force = false);
 	void set_pending_overwrite (bool);
-	int seek (framepos_t, bool complete_refill = false);
-	bool hidden () const;
-	int can_internal_playback_seek (framecnt_t);
-	int internal_playback_seek (framecnt_t);
-	void non_realtime_input_change ();
-	void non_realtime_locate (framepos_t);
-	void non_realtime_set_speed ();
+	int seek (samplepos_t, bool complete_refill = false);
+	int can_internal_playback_seek (samplecnt_t);
+	int internal_playback_seek (samplecnt_t);
+	void non_realtime_locate (samplepos_t);
+	void non_realtime_speed_change ();
 	int overwrite_existing_buffers ();
-	framecnt_t get_captured_frames (uint32_t n = 0) const;
-	int set_loop (Location *);
-	void transport_looped (framepos_t);
-	bool realtime_set_speed (double, bool);
+	samplecnt_t get_captured_samples (uint32_t n = 0) const;
+	void transport_looped (samplepos_t);
 	void transport_stopped_wallclock (struct tm &, time_t, bool);
 	bool pending_overwrite () const;
-	double speed () const;
-	void prepare_to_stop (framepos_t, framepos_t);
 	void set_slaved (bool);
 	ChanCount n_channels ();
-	framepos_t get_capture_start_frame (uint32_t n = 0) const;
+	samplepos_t get_capture_start_sample (uint32_t n = 0) const;
 	AlignStyle alignment_style () const;
 	AlignChoice alignment_choice () const;
-	framepos_t current_capture_start () const;
-	framepos_t current_capture_end () const;
-	void playlist_modified ();
-	int use_playlist (boost::shared_ptr<Playlist>);
+	samplepos_t current_capture_start () const;
+	samplepos_t current_capture_end () const;
 	void set_align_style (AlignStyle, bool force=false);
 	void set_align_choice (AlignChoice, bool force=false);
+	void playlist_modified ();
+	int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	int find_and_use_playlist (DataType, PBD::ID const &);
 	int use_copy_playlist ();
-	int use_new_playlist ();
+	int use_new_playlist (DataType);
+	int use_default_new_playlist () {
+		return use_new_playlist (data_type());
+	}
 	void adjust_playback_buffering ();
 	void adjust_capture_buffering ();
 
-	PBD::Signal0<void> DiskstreamChanged;
 	PBD::Signal0<void> FreezeChange;
-	/* Emitted when our diskstream is set to use a different playlist */
 	PBD::Signal0<void> PlaylistChanged;
 	PBD::Signal0<void> SpeedChanged;
 	PBD::Signal0<void> AlignmentStyleChanged;
 
-  protected:
-	XMLNode& state (bool full);
+protected:
+	XMLNode& state (bool save_template);
 
-	boost::shared_ptr<Diskstream> _diskstream;
+	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
+
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
 	bool          _needs_butler;
-	boost::shared_ptr<MonitorControl> _monitoring_control;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
@@ -232,11 +205,9 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 
 	virtual void set_state_part_two () = 0;
 
-	FreezeRecord          _freeze_record;
-	XMLNode*              pending_state;
-	bool                  _destructive;
-
-	void maybe_declick (BufferSet&, framecnt_t, int);
+	FreezeRecord _freeze_record;
+	XMLNode*      pending_state;
+	bool         _destructive;
 
 	boost::shared_ptr<AutomationControl> _record_enable_control;
 	boost::shared_ptr<AutomationControl> _record_safe_control;
@@ -244,21 +215,25 @@ class LIBARDOUR_API Track : public Route, public Recordable, public PublicDiskst
 	virtual void record_enable_changed (bool, PBD::Controllable::GroupControlDisposition);
 	virtual void record_safe_changed (bool, PBD::Controllable::GroupControlDisposition);
 
-	framecnt_t check_initial_delay (framecnt_t nframes, framepos_t&);
 	virtual void monitoring_changed (bool, PBD::Controllable::GroupControlDisposition);
 
+	AlignChoice _alignment_choice;
+	void set_align_choice_from_io ();
+	void input_changed ();
+
+	void use_captured_audio_sources (SourceList&, CaptureInfos const &);
+	void use_captured_midi_sources (SourceList&, CaptureInfos const &);
+
 private:
-
-	virtual boost::shared_ptr<Diskstream> diskstream_factory (XMLNode const &) = 0;
-
-	void diskstream_playlist_changed ();
-	void diskstream_speed_changed ();
-	void diskstream_alignment_style_changed ();
 	void parameter_changed (std::string const & p);
 
 	std::string _diskstream_name;
 };
 
 }; /* namespace ARDOUR*/
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Track::FreezeState);
+}
 
 #endif /* __ardour_track_h__ */

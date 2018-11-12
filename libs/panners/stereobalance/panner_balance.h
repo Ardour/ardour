@@ -74,7 +74,7 @@ class Pannerbalance : public Panner
 	private:
 	void distribute_one (AudioBuffer& srcbuf, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes, uint32_t which);
 	void distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
-			framepos_t start, framepos_t end, pframes_t nframes,
+			samplepos_t start, samplepos_t end, pframes_t nframes,
 			pan_t** buffers, uint32_t which);
 };
 

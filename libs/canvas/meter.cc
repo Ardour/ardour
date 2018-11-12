@@ -31,9 +31,8 @@
 #include <gtkmm2ext/rgb_macros.h>
 
 #include "canvas/canvas.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/meter.h"
-#include "canvas/utils.h"
 
 using namespace Glib;
 using namespace std;

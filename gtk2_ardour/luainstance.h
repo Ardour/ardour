@@ -3,6 +3,8 @@
 
 #include <bitset>
 
+#include <cairo.h>
+
 #include "pbd/id.h"
 #include "pbd/signals.h"
 #include "pbd/xml++.h"
@@ -68,6 +70,9 @@ private:
 
 	template <typename T, typename C1, typename C2> void connect_2 (enum LuaSignal::LuaSignal, T, PBD::Signal2<void, C1, C2>*);
 	template <typename T, typename C1, typename C2> void proxy_2 (enum LuaSignal::LuaSignal, T, C1, C2);
+
+	template <typename T, typename C1, typename C2, typename C3> void connect_3 (enum LuaSignal::LuaSignal, T, PBD::Signal3<void, C1, C2, C3>*);
+	template <typename T, typename C1, typename C2, typename C3> void proxy_3 (enum LuaSignal::LuaSignal, T, C1, C2, C3);
 };
 
 typedef boost::shared_ptr<LuaCallback> LuaCallbackPtr;
@@ -85,6 +90,9 @@ public:
 	static void register_classes (lua_State* L);
 	static void register_hooks (lua_State* L);
 	static void bind_cairo (lua_State* L);
+	static void bind_dialog (lua_State* L);
+
+	static void render_action_icon (cairo_t* cr, int w, int h, uint32_t c, void* i);
 
 	void set_session (ARDOUR::Session* s);
 
@@ -96,12 +104,14 @@ public:
 
 	/* actions */
 	void call_action (const int);
+	void render_icon (int i, cairo_t*, int, int, uint32_t);
 
 	bool set_lua_action (const int, const std::string&, const std::string&, const ARDOUR::LuaScriptParamList&);
 	bool remove_lua_action (const int);
 	bool lua_action_name (const int, std::string&);
 	std::vector<std::string> lua_action_names ();
 	bool lua_action (const int, std::string&, std::string&, ARDOUR::LuaScriptParamList&);
+	bool lua_action_has_icon (const int);
 	sigc::signal<void,int,std::string> ActionChanged;
 
 	/* callbacks */
@@ -114,6 +124,7 @@ public:
 	sigc::signal<void,PBD::ID,std::string,ActionHook> SlotChanged;
 
 	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
+	static PBD::Signal0<void> SetSession; // emitted when a session is loaded
 
 private:
 	LuaInstance();
@@ -125,6 +136,7 @@ private:
 	LuaState lua;
 
 	luabridge::LuaRef * _lua_call_action;
+	luabridge::LuaRef * _lua_render_icon;
 	luabridge::LuaRef * _lua_add_action;
 	luabridge::LuaRef * _lua_del_action;
 	luabridge::LuaRef * _lua_get_action;

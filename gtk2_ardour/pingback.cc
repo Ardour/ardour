@@ -172,7 +172,7 @@ _pingback (void *arg)
 
 #endif /* PLATFORM_WINDOWS */
 
-	return_str = h.get (url);
+	return_str = h.get (url, false);
 
 	if (!return_str.empty ()) {
 		if ( return_str.length() > 140 ) { // like a tweet :)
@@ -191,7 +191,9 @@ _pingback (void *arg)
 			}
 		}
 	} else {
-		std::cerr << "curl failed: " << h.error () << std::endl;
+#ifndef NDEBUG
+		std::cerr << "pingback: " << h.error () << std::endl;
+#endif
 	}
 
 	delete cm;

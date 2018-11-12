@@ -80,6 +80,7 @@ def build(bld):
     libsmf.name         = 'libsmf'
     libsmf.target       = 'smf'
     libsmf.uselib       = 'GLIB'
+    libsmf.use          = [ 'libtemporal' ]
     libsmf.install_path = None
     if bld.env['build_target'] != 'mingw':
         libsmf.cxxflags     = [ '-fPIC' ]
@@ -96,7 +97,6 @@ def build(bld):
             src/Sequence.cpp
             src/TimeConverter.cpp
             src/debug.cpp
-            src/types.cpp
     '''
 
     # Library

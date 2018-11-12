@@ -19,7 +19,12 @@
 #ifndef _gtk2_ardour_lua_script_manager_h_
 #define _gtk2_ardour_lua_script_manager_h_
 
-#include <gtkmm.h>
+#include <gtkmm/button.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
+
 #include "ardour/luascripting.h"
 
 #include "ardour_window.h"
@@ -29,6 +34,7 @@ class LuaScriptManager : public ArdourWindow
 {
 public:
 	LuaScriptManager ();
+	void set_session (ARDOUR::Session *);
 
 protected:
 	void session_going_away();
@@ -101,6 +107,33 @@ private:
 
 	Gtk::Button _c_add_button;
 	Gtk::Button _c_del_button;
+
+	/* Session scripts */
+	void setup_session_scripts ();
+	void session_script_selection_changed ();
+
+	void add_sess_btn_clicked ();
+	void del_sess_btn_clicked ();
+
+	class LuaSessionScriptModelColumns : public Gtk::TreeModelColumnRecord
+	{
+		public:
+			LuaSessionScriptModelColumns ()
+			{
+				add (name);
+			}
+
+			Gtk::TreeModelColumn<std::string> name;
+	};
+
+	Glib::RefPtr<Gtk::ListStore> _s_store;
+	LuaCallbackScriptModelColumns _s_model;
+	Gtk::TreeView _s_view;
+
+	Gtk::Button _s_add_button;
+	Gtk::Button _s_del_button;
+
+	PBD::ScopedConnection _session_script_connection;
 };
 
 #endif /* _gtk2_ardour_lua_script_manager_h_ */

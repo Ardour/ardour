@@ -262,7 +262,7 @@ Arrow::setup_polygon (int which)
  *  @param color New color.
  */
 void
-Arrow::set_color (Color color)
+Arrow::set_color (Gtkmm2ext::Color color)
 {
 	_line->set_outline_color (color);
 	for (int i = 0; i < 2; ++i) {

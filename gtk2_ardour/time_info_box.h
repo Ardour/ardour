@@ -26,16 +26,14 @@
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 
-#include "gtkmm2ext/cairo_packer.h"
-
 #include "ardour/ardour.h"
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
+#include "gtkmm2ext/cairo_packer.h"
 
 namespace ARDOUR {
 	class Session;
-        class Location;
+	class Location;
 }
 
 class AudioClock;
@@ -43,7 +41,7 @@ class AudioClock;
 class TimeInfoBox : public CairoHPacker, public ARDOUR::SessionHandlePtr
 {
 public:
-	TimeInfoBox (bool with_punch);
+	TimeInfoBox (std::string state_node_name, bool with_punch);
 	~TimeInfoBox ();
 
 	void set_session (ARDOUR::Session*);
@@ -72,13 +70,13 @@ private:
 	PBD::ScopedConnectionList region_property_connections;
 
 	void selection_changed ();
+	void region_selection_changed ();
 
 	void sync_selection_mode (AudioClock*);
 	void sync_punch_mode (AudioClock*);
 
 	bool clock_button_release_event (GdkEventButton* ev, AudioClock* src);
 	void track_mouse_mode ();
-	void region_property_change (boost::shared_ptr<ARDOUR::Region> r, const PBD::PropertyChange& what_changed);
 };
 
 #endif /* __time_info_box_h__ */

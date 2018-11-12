@@ -222,17 +222,17 @@ url_decode (string const & url)
 
 #if 0
 string
-length2string (const int32_t frames, const float sample_rate)
+length2string (const int32_t samples, const float sample_rate)
 {
-    int32_t secs = (int32_t) (frames / sample_rate);
+    int32_t secs = (int32_t) (samples / sample_rate);
     int32_t hrs =  secs / 3600;
     secs -= (hrs * 3600);
     int32_t mins = secs / 60;
     secs -= (mins * 60);
 
     int32_t total_secs = (hrs * 3600) + (mins * 60) + secs;
-    int32_t frames_remaining = (int) floor (frames - (total_secs * sample_rate));
-    float fractional_secs = (float) frames_remaining / sample_rate;
+    int32_t samples_remaining = (int) floor (samples - (total_secs * sample_rate));
+    float fractional_secs = (float) samples_remaining / sample_rate;
 
     char duration_str[32];
     sprintf (duration_str, "%02" PRIi32 ":%02" PRIi32 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
@@ -242,17 +242,17 @@ length2string (const int32_t frames, const float sample_rate)
 #endif
 
 string
-length2string (const int64_t frames, const double sample_rate)
+length2string (const int64_t samples, const double sample_rate)
 {
-	int64_t secs = (int64_t) floor (frames / sample_rate);
+	int64_t secs = (int64_t) floor (samples / sample_rate);
 	int64_t hrs =  secs / 3600LL;
 	secs -= (hrs * 3600LL);
 	int64_t mins = secs / 60LL;
 	secs -= (mins * 60LL);
 
 	int64_t total_secs = (hrs * 3600LL) + (mins * 60LL) + secs;
-	int64_t frames_remaining = (int64_t) floor (frames - (total_secs * sample_rate));
-	float fractional_secs = (float) frames_remaining / sample_rate;
+	int64_t samples_remaining = (int64_t) floor (samples - (total_secs * sample_rate));
+	float fractional_secs = (float) samples_remaining / sample_rate;
 
 	char duration_str[64];
 	sprintf (duration_str, "%02" PRIi64 ":%02" PRIi64 ":%05.2f", hrs, mins, (float) secs + fractional_secs);
@@ -276,26 +276,6 @@ strings_equal_ignore_case (const string& a, const string& b)
 		return std::equal (a.begin(), a.end(), b.begin(), chars_equal_ignore_case);
 	}
 	return false;
-}
-
-bool
-string_is_affirmative (const std::string& str)
-{
-	/* to be used only with XML data - not intended to handle user input */
-
-	if (str.empty ()) {
-		return false;
-	}
-
-	/* the use of g_ascii_strncasecmp() is solely to get around issues with
-	 * charsets posed by trying to use C++ for the same
-	 * comparison. switching a std::string to its lower- or upper-case
-	 * version has several issues, but handled by default
-	 * in the way we desire when doing it in C.
-	 */
-
-	return str == "1" || str == "y" || str == "Y" || (!g_ascii_strncasecmp(str.c_str(), "yes", str.length())) ||
-		(!g_ascii_strncasecmp(str.c_str(), "true", str.length()));
 }
 
 /** A wrapper for dgettext that takes a msgid of the form Context|Text.

@@ -22,12 +22,16 @@
 #include <boost/shared_ptr.hpp>
 
 #include <gtkmm/box.h>
+#include <gtkmm/colorselection.h>
 #include <gtkmm/menuitem.h>
+#include <gtkmm/messagedialog.h>
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
+
 #include "axis_view.h"
 #include "control_slave_ui.h"
 #include "gain_meter.h"
+#include "stripable_colorpicker.h"
 
 namespace ARDOUR {
 	class GainControl;
@@ -38,7 +42,7 @@ class FloatingTextEntry;
 
 class VCAMasterStrip : public AxisView, public Gtk::EventBox
 {
-      public:
+public:
 	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
 	~VCAMasterStrip ();
 
@@ -55,26 +59,25 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
-     private:
+private:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
 	GainMeter    gain_meter;
 
-	Gtk::Frame   global_frame;
-	Gtk::VBox    global_vpacker;
-	Gtk::HBox    top_padding;
-	Gtk::HBox    bottom_padding;
-	Gtk::HBox    solo_mute_box;
-	ArdourButton width_button;
-	ArdourButton color_button;
-	ArdourButton hide_button;
-	ArdourButton number_label;
-	ArdourButton solo_button;
-	ArdourButton mute_button;
-	Gtk::Menu*   context_menu;
-	Gtk::MessageDialog* delete_dialog;
-	ArdourButton vertical_button;
-	ControlSlaveUI control_slave_ui;
-	PBD::ScopedConnectionList vca_connections;
+	Gtk::Frame                  global_frame;
+	Gtk::VBox                   global_vpacker;
+	Gtk::HBox                   bottom_padding;
+	Gtk::HBox                   solo_mute_box;
+	ArdourWidgets::ArdourButton width_button;
+	ArdourWidgets::ArdourButton color_button;
+	ArdourWidgets::ArdourButton hide_button;
+	ArdourWidgets::ArdourButton number_label;
+	ArdourWidgets::ArdourButton solo_button;
+	ArdourWidgets::ArdourButton mute_button;
+	Gtk::Menu*                  context_menu;
+	Gtk::MessageDialog*         delete_dialog;
+	ArdourWidgets::ArdourButton vertical_button;
+	ControlSlaveUI              control_slave_ui;
+	PBD::ScopedConnectionList   vca_connections;
 
 	void spill ();
 	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
@@ -107,7 +110,7 @@ class VCAMasterStrip : public AxisView, public Gtk::EventBox
 	void update_bottom_padding ();
 
 	void start_color_edit ();
-	void finish_color_edit (int, Gtk::ColorSelectionDialog*);
+	StripableColorDialog _color_picker;
 };
 
 

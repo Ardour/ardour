@@ -134,7 +134,7 @@ SourceFactory::setup_peakfile (boost::shared_ptr<Source> s, bool async)
 }
 
 boost::shared_ptr<Source>
-SourceFactory::createSilent (Session& s, const XMLNode& node, framecnt_t nframes, float sr)
+SourceFactory::createSilent (Session& s, const XMLNode& node, samplecnt_t nframes, float sr)
 {
 	Source* src = new SilentFileSource (s, node, nframes, sr);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
@@ -220,15 +220,18 @@ SourceFactory::create (Session& s, const XMLNode& node, bool defer_peaks)
 			}
 		}
 	} else if (type == DataType::MIDI) {
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, node));
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
-		src->check_for_analysis_data_on_disk ();
-		SourceCreated (src);
-		return src;
+			src->check_for_analysis_data_on_disk ();
+			SourceCreated (src);
+			return src;
+		} catch (...) {
+		}
 	}
 
 	return boost::shared_ptr<Source>();
@@ -289,18 +292,21 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 	} else if (type == DataType::MIDI) {
 
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, path));
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 
-		if (announce) {
-			SourceCreated (src);
-		}
+			if (announce) {
+				SourceCreated (src);
+			}
 
-		return src;
+			return src;
+		} catch (...) {
+		}
 
 	}
 
@@ -309,7 +315,7 @@ SourceFactory::createExternal (DataType type, Session& s, const string& path,
 
 boost::shared_ptr<Source>
 SourceFactory::createWritable (DataType type, Session& s, const std::string& path,
-			       bool destructive, framecnt_t rate, bool announce, bool defer_peaks)
+			       bool destructive, samplecnt_t rate, bool announce, bool defer_peaks)
 {
 	/* this might throw failed_constructor(), which is OK */
 
@@ -339,22 +345,27 @@ SourceFactory::createWritable (DataType type, Session& s, const std::string& pat
 
 	} else if (type == DataType::MIDI) {
                 // XXX writable flags should belong to MidiSource too
-		boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
-		assert (src->writable ());
+		try {
+			boost::shared_ptr<SMFSource> src (new SMFSource (s, path, SndFileSource::default_writable_flags));
 
-		Source::Lock lock(src->mutex());
-		src->load_model (lock, true);
+			assert (src->writable ());
+
+			Source::Lock lock(src->mutex());
+			src->load_model (lock, true);
 #ifdef BOOST_SP_ENABLE_DEBUG_HOOKS
-		// boost_debug_shared_ptr_mark_interesting (src, "Source");
+			// boost_debug_shared_ptr_mark_interesting (src, "Source");
 #endif
 
-		// no analysis data - this is a new file
+			// no analysis data - this is a new file
 
-		if (announce) {
-			SourceCreated (src);
+			if (announce) {
+				SourceCreated (src);
+			}
+
+			return src;
+
+		} catch (...) {
 		}
-		return src;
-
 	}
 
 	return boost::shared_ptr<Source> ();
@@ -395,7 +406,7 @@ SourceFactory::createForRecovery (DataType type, Session& s, const std::string& 
 
 boost::shared_ptr<Source>
 SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
-				   uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks)
+				   uint32_t chn, sampleoffset_t start, samplecnt_t len, bool copy, bool defer_peaks)
 {
 	if (type == DataType::AUDIO) {
 		try {
@@ -455,4 +466,3 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, boost::shared_ptr<
 
 	return boost::shared_ptr<Source>();
 }
-

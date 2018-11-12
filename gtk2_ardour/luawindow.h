@@ -24,6 +24,7 @@
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/label.h>
+#include <gtkmm/textview.h>
 #include <gtkmm/window.h>
 
 #include "pbd/signals.h"
@@ -38,8 +39,8 @@
 
 #include "lua/luastate.h"
 
-#include "ardour_button.h"
-#include "ardour_dropdown.h"
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
 
 class LuaWindow :
 	public Gtk::Window,
@@ -47,12 +48,13 @@ class LuaWindow :
 	public ARDOUR::SessionHandlePtr,
 	public Gtkmm2ext::VisibilityTracker
 {
-  public:
+public:
 	static LuaWindow* instance();
 	~LuaWindow();
 
 	void show_window ();
 	bool hide_window (GdkEventAny *ev);
+	void edit_script (const std::string&, const std::string&);
 
 	void set_session (ARDOUR::Session* s);
 
@@ -65,7 +67,8 @@ class LuaWindow :
 		Buffer_Scratch    = 0x10,
 	} BufferFlags;
 
-	class ScriptBuffer {
+	class ScriptBuffer
+	{
 	public:
 		ScriptBuffer (const std::string&);
 		ScriptBuffer (ARDOUR::LuaScriptInfoPtr);
@@ -81,7 +84,7 @@ class LuaWindow :
 		ARDOUR::LuaScriptInfo::ScriptType type;
 	};
 
-  private:
+private:
 	LuaWindow ();
 	static LuaWindow* _instance;
 
@@ -98,14 +101,14 @@ class LuaWindow :
 	Gtk::TextView outtext;
 	Gtk::ScrolledWindow scrollout;
 
-	ArdourButton _btn_run;
-	ArdourButton _btn_clear;
-	ArdourButton _btn_open;
-	ArdourButton _btn_save;
-	ArdourButton _btn_delete;
-	ArdourButton _btn_revert;
+	ArdourWidgets::ArdourButton _btn_run;
+	ArdourWidgets::ArdourButton _btn_clear;
+	ArdourWidgets::ArdourButton _btn_open;
+	ArdourWidgets::ArdourButton _btn_save;
+	ArdourWidgets::ArdourButton _btn_delete;
+	ArdourWidgets::ArdourButton _btn_revert;
 
-	ArdourDropdown script_select;
+	ArdourWidgets::ArdourDropdown script_select;
 
 	typedef boost::shared_ptr<ScriptBuffer> ScriptBufferPtr;
 	typedef std::vector<ScriptBufferPtr> ScriptBufferList;

@@ -70,7 +70,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	const char * maker () const { return _info->creator.c_str(); }
 	uint32_t parameter_count () const;
 	float default_value (uint32_t port);
-	framecnt_t signal_latency() const;
+	samplecnt_t signal_latency() const;
 	void set_parameter (uint32_t which, float val);
 	float get_parameter (uint32_t which) const;
 
@@ -84,9 +84,9 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int set_block_size (pframes_t nframes);
 
 	int connect_and_run (BufferSet& bufs,
-			framepos_t start, framepos_t end, double speed,
+			samplepos_t start, samplepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset);
+			pframes_t nframes, samplecnt_t offset);
 	std::set<Evoral::Parameter> automatable() const;
 	std::string describe_parameter (Evoral::Parameter);
 	IOPortDescription describe_io_port (DataType dt, bool input, uint32_t id) const;
@@ -123,7 +123,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	OSStatus render_callback(AudioUnitRenderActionFlags *ioActionFlags,
 	                         const AudioTimeStamp       *inTimeStamp,
 	                         UInt32                      inBusNumber,
-	                         UInt32                      inNumberFrames,
+	                         UInt32                      inNumberSamples,
 	                         AudioBufferList*            ioData);
 
 	/* "host" callbacks */
@@ -170,7 +170,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	int32_t input_channels;
 	int32_t output_channels;
 	std::vector<std::pair<int,int> > io_configs;
-	framecnt_t _last_nframes;
+	samplecnt_t _last_nframes;
 	mutable volatile guint _current_latency;
 	bool _requires_fixed_size_buffers;
 	AudioBufferList* buffers;
@@ -213,11 +213,11 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	typedef std::map<uint32_t, uint32_t> ParameterMap;
 	ParameterMap parameter_map;
 	uint32_t   input_maxbuf;
-	framecnt_t input_offset;
-	framecnt_t *cb_offsets;
+	samplecnt_t input_offset;
+	samplecnt_t *cb_offsets;
 	BufferSet* input_buffers;
 	ChanMapping * input_map;
-	framecnt_t frames_processed;
+	samplecnt_t samples_processed;
 	uint32_t   audio_input_cnt;
 
 	std::vector<AUParameterDescriptor> descriptors;
@@ -227,7 +227,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	void discover_factory_presets ();
 
-	framepos_t transport_frame;
+	samplepos_t transport_sample;
 	float      transport_speed;
 	float      last_transport_speed;
 
@@ -251,10 +251,13 @@ class LIBARDOUR_API AUPluginInfo : public PluginInfo {
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 
 	bool needs_midi_input () const;
-	bool is_effect () const;
 	bool is_effect_without_midi_input () const;
 	bool is_effect_with_midi_input () const;
+
+	/* note: AU's have an explicit way to prompt for instrument/fx category */
+	bool is_effect () const;
 	bool is_instrument () const;
+	bool is_utility () const;
 
 	AUPluginCachedInfo cache;
 

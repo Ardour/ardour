@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="M-Audio Axiom AIR Mini 32">
+  <!-- 01-29-2018 Shawn Doherty-->
+  <!-- Ardour Midi Map Template-->
+
+<!--	Values are decimal
+
+	Knob Control: Channel 1 Controller change event
+	01: 1
+	02: 2
+	03: 3
+	04: 4
+	05: 5
+	06: 6
+	07: 7
+	08: 8
+
+	Transport Control: Channel 1 Control change event
+
+	Stop: 16
+	Play: 17
+	Record: 18
+	
+	Directional Control: Channel 1 Control change event
+
+	Up: 19
+	Down: 20
+	Right: 21
+	Left: 22
+	Center: 23
+	
+	Trigger Pads: Channel 1 Note event
+	
+	Bank1
+	1: 36
+	2: 37
+	3: 38
+	4: 39
+	5: 40
+	6: 41
+	7: 42
+	8: 43
+	
+	Bank2
+	9: 44
+	10: 45
+	11: 46
+	12: 47
+	13: 48
+	14: 49
+	15: 50
+	16: 51
+
+-->
+
+  <!-- Knob, mapped to gain faders -->
+  <Binding channel="1" ctl="1" uri="/bus/gain master"/>
+  <Binding channel="1" ctl="2" uri="/route/gain 1"/>
+  <Binding channel="1" ctl="3" uri="/route/gain 2"/>
+  <Binding channel="1" ctl="4" uri="/route/gain 3"/>
+  <Binding channel="1" ctl="5" uri="/route/gain 4"/>
+  <Binding channel="1" ctl="6" uri="/route/gain 5"/>
+  <Binding channel="1" ctl="7" uri="/route/gain 6"/>
+  <Binding channel="1" ctl="8" uri="/route/gain 7"/>
+
+  <!-- Transport controls -->
+  <Binding channel="1" ctl="16" function="transport-stop"/>
+  <Binding channel="1" ctl="17" function="transport-roll"/>
+  <Binding channel="1" ctl="18" function="toggle-rec-enable"/>
+  
+  <!-- Directional Controls -->
+  <Binding channel="1" ctl="19" function="transport-start"/>
+  <Binding channel="1" ctl="20" function="transport-end"/>
+  <Binding channel="1" ctl="21" function="Transport-Forward"/>
+  <Binding channel="1" ctl="22" function="Transport/Rewind"/>
+  <Binding channel="1" ctl="23" function="loop-toggle"/>  
+
+</ArdourMIDIBindings>

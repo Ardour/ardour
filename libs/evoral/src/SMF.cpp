@@ -97,10 +97,13 @@ SMF::test(const std::string& path)
 	smf_t* test_smf = smf_load(f);
 	fclose(f);
 
-	const bool success = (test_smf != NULL);
-	smf_delete(test_smf);
-
-	return success;
+	if (!test_smf) {
+		return false;
+	}
+	if (test_smf) {
+		smf_delete(test_smf);
+	}
+	return true;
 }
 
 /** Attempt to open the SMF file for reading and/or writing.
@@ -326,6 +329,7 @@ SMF::read_event(uint32_t* delta_t, uint32_t* size, uint8_t** buf, event_id_t* no
 		if (*size < (unsigned)event_size) {
 			*buf = (uint8_t*)realloc(*buf, event_size);
 		}
+		assert (*buf);
 		memcpy(*buf, event->midi_buffer, size_t(event_size));
 		*size = event_size;
 		if (((*buf)[0] & 0xF0) == 0x90 && (*buf)[2] == 0) {
@@ -364,6 +368,26 @@ SMF::append_event_delta(uint32_t delta_t, uint32_t size, const uint8_t* buf, eve
 	   for (size_t i = 0; i < size; ++i) {
 	   printf("%X ", buf[i]);
 	   } printf("\n"); */
+
+	switch (buf[0]) {
+	case 0xf1:
+	case 0xf2:
+	case 0xf3:
+	case 0xf4:
+	case 0xf5:
+	case 0xf6:
+	case 0xf8:
+	case 0xf9:
+	case 0xfa:
+	case 0xfb:
+	case 0xfc:
+	case 0xfd:
+	case 0xfe:
+	case 0xff:
+		/* System Real Time or System Common event: not valid in SMF
+		 */
+		return;
+	}
 
 	if (!midi_event_is_valid(buf, size)) {
 		cerr << "WARNING: SMF ignoring illegal MIDI event" << endl;

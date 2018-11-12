@@ -34,10 +34,9 @@
 #include "ardour/chan_count.h"
 #include "ardour/session_handle.h"
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/focus_entry.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/fastmeter.h>
+#include "widgets/fastmeter.h"
+#include "widgets/focus_entry.h"
+#include "widgets/slider_controller.h"
 
 #include "enums.h"
 
@@ -51,9 +50,9 @@ namespace Gtk {
 
 class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::trackable
 {
-  public:
+public:
 	LevelMeterBase (ARDOUR::Session*, PBD::EventLoop::InvalidationRecord* ir,
-			Gtkmm2ext::FastMeter::Orientation o = Gtkmm2ext::FastMeter::Vertical);
+			ArdourWidgets::FastMeter::Orientation o = ArdourWidgets::FastMeter::Vertical);
 	virtual ~LevelMeterBase ();
 
 	virtual void set_meter (ARDOUR::PeakMeter* meter);
@@ -67,39 +66,39 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	void setup_meters (int len=0, int width=3, int thin=2);
 	void set_max_audio_meter_count (uint32_t cnt = 0);
 
-	void set_type (ARDOUR::MeterType);
-	ARDOUR::MeterType get_type () { return meter_type; }
+	void set_meter_type (ARDOUR::MeterType);
+	ARDOUR::MeterType meter_type () { return _meter_type; }
 
 	/** Emitted in the GUI thread when a button is pressed over the meter */
 	PBD::Signal1<bool, GdkEventButton *> ButtonPress;
 	PBD::Signal1<bool, GdkEventButton *> ButtonRelease;
 	PBD::Signal1<void, ARDOUR::MeterType> MeterTypeChanged;
 
-	protected:
+protected:
 	virtual void mtr_pack(Gtk::Widget &w) = 0;
 	virtual void mtr_remove(Gtk::Widget &w) = 0;
 
-  private:
+private:
 	PBD::EventLoop::InvalidationRecord* parent_invalidator;
 	ARDOUR::PeakMeter* _meter;
-	Gtkmm2ext::FastMeter::Orientation _meter_orientation;
+	ArdourWidgets::FastMeter::Orientation _meter_orientation;
 
 	Width _width;
 
 	struct MeterInfo {
-	    Gtkmm2ext::FastMeter *meter;
-	    gint16                width;
-		int                   length;
-	    bool                  packed;
-	    float                 max_peak;
+		ArdourWidgets::FastMeter* meter;
+		gint16                    width;
+		int                       length;
+		bool                      packed;
+		float                     max_peak;
 
-	    MeterInfo() {
-		    meter = 0;
-		    width = 0;
-                    length = 0;
-		    packed = false;
-		    max_peak = -INFINITY;
-	    }
+		MeterInfo() {
+			meter = 0;
+			width = 0;
+			length = 0;
+			packed = false;
+			max_peak = -INFINITY;
+		}
 	};
 
 	guint16                regular_meter_width;
@@ -107,7 +106,7 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 	guint16                thin_meter_width;
 	std::vector<MeterInfo> meters;
 	float                  max_peak;
-	ARDOUR::MeterType      meter_type;
+	ARDOUR::MeterType      _meter_type;
 	ARDOUR::MeterType      visible_meter_type;
 	uint32_t               midi_count;
 	uint32_t               meter_count;
@@ -131,22 +130,22 @@ class LevelMeterBase : public ARDOUR::SessionHandlePtr, virtual public sigc::tra
 
 class LevelMeterHBox : public LevelMeterBase, public Gtk::HBox
 {
-  public:
+public:
 	LevelMeterHBox (ARDOUR::Session*);
 	~LevelMeterHBox();
 
-	protected:
+protected:
 	void mtr_pack(Gtk::Widget &w);
 	void mtr_remove(Gtk::Widget &w);
 };
 
 class LevelMeterVBox : public LevelMeterBase, public Gtk::VBox
 {
-  public:
+public:
 	LevelMeterVBox (ARDOUR::Session*);
 	~LevelMeterVBox();
 
-	protected:
+protected:
 	void mtr_pack(Gtk::Widget &w);
 	void mtr_remove(Gtk::Widget &w);
 };

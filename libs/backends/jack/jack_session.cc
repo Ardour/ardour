@@ -114,14 +114,14 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 {
 	Timecode::BBT_Time bbt;
 	TempoMap& tempo_map (_session->tempo_map());
-	framepos_t tf = _session->transport_frame ();
+	samplepos_t tf = _session->transport_sample ();
 
 	/* BBT info */
 
 	TempoMetric metric (tempo_map.metric_at (tf));
 
 	try {
-		bbt = tempo_map.bbt_at_frame (tf);
+		bbt = tempo_map.bbt_at_sample (tf);
 
 		pos->bar = bbt.bars;
 		pos->beat = bbt.beats;
@@ -142,7 +142,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 
 #ifdef HAVE_JACK_VIDEO_SUPPORT
 	//poke audio video ratio so Ardour can track Video Sync
-	pos->audio_frames_per_video_frame = _session->frame_rate() / _session->timecode_frames_per_second();
+	pos->audio_frames_per_video_frame = _session->sample_rate() / _session->timecode_frames_per_second();
 	pos->valid = jack_position_bits_t (pos->valid | JackAudioVideoRatio);
 #endif
 

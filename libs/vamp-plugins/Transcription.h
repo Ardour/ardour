@@ -1,7 +1,7 @@
 /* -*- c-basic-offset: 4 indent-tabs-mode: nil -*-  vi:set ts=8 sts=4 sw=4: */
 
 #ifndef _TRANSCRIPTION_PLUGIN_H_
-#define _TRSNSCRIPTION_PLUGIN_H_
+#define _TRANSCRIPTION_PLUGIN_H_
 
 #include <vamp-sdk/Plugin.h>
 
@@ -33,11 +33,11 @@ public:
     FeatureSet getRemainingFeatures();
 
 protected:
-    size_t m_stepSize;
-    size_t m_blockSize;
+    int m_stepSize;
+    int m_blockSize;
     double * m_SoundIn;
-    size_t m_SampleN;
-    size_t m_AllocN;
+    int m_SampleN;
+    int m_AllocN;
     bool m_Excess;
     Vamp::RealTime m_Base;
 /*

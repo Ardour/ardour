@@ -42,7 +42,9 @@ bool
 PBD::open_uri (const char* uri)
 {
 #ifdef PLATFORM_WINDOWS
-	ShellExecute(NULL, "open", uri, NULL, NULL, SW_SHOWNORMAL);
+	gunichar2* wuri = g_utf8_to_utf16 (uri, -1, NULL, NULL, NULL);
+	ShellExecuteW(NULL, L"open", (LPCWSTR)wuri, NULL, NULL, SW_SHOWNORMAL);
+	g_free (wuri);
 	return true;
 #elif __APPLE__
 	return cocoa_open_url (uri);

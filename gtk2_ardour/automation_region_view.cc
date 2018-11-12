@@ -122,8 +122,8 @@ AutomationRegionView::get_fill_color() const
 void
 AutomationRegionView::mouse_mode_changed ()
 {
-	// Adjust frame colour (become more transparent for internal tools)
-	set_frame_color();
+	// Adjust sample colour (become more transparent for internal tools)
+	set_sample_color();
 }
 
 bool
@@ -137,6 +137,7 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	if (trackview.editor().internal_editing() &&
 	    ev->type == GDK_BUTTON_RELEASE &&
+	    ev->button.button == 1 &&
 	    e.current_mouse_mode() == Editing::MouseDraw &&
 	    !e.drags()->active()) {
 
@@ -159,11 +160,11 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 	return RegionView::canvas_group_event (ev);
 }
 
-/** @param when Position in frames, where 0 is the start of the region.
+/** @param when Position in samples, where 0 is the start of the region.
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double y, bool with_guard_points)
+AutomationRegionView::add_automation_event (GdkEvent *, samplepos_t when, double y, bool with_guard_points)
 {
 	if (!_line) {
 		boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
@@ -181,9 +182,9 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 	const double h = trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2;
 	y = 1.0 - (y / h);
 
-	/* snap frame */
+	/* snap sample */
 
-	when = snap_frame_to_frame (when - _region->start ()).frame + _region->start ();
+	when = snap_sample_to_sample (when - _region->start ()).sample + _region->start ();
 
 	/* map using line */
 
@@ -205,11 +206,13 @@ AutomationRegionView::add_automation_event (GdkEvent *, framepos_t when, double 
 }
 
 bool
-AutomationRegionView::paste (framepos_t                                      pos,
+AutomationRegionView::paste (samplepos_t                                      pos,
                              unsigned                                        paste_count,
                              float                                           times,
                              boost::shared_ptr<const ARDOUR::AutomationList> slist)
 {
+	using namespace ARDOUR;
+
 	AutomationTimeAxisView* const             view    = automation_view();
 	boost::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
 
@@ -218,15 +221,24 @@ AutomationRegionView::paste (framepos_t                                      pos
 		return false;
 	}
 
-	/* add multi-paste offset if applicable */
-	pos += view->editor().get_paste_offset(
-		pos, paste_count, _source_relative_time_converter.to(slist->length()));
+	AutomationType src_type = (AutomationType)slist->parameter().type ();
+	double len = slist->length();
 
-	const double model_pos = _source_relative_time_converter.from(
+	/* add multi-paste offset if applicable */
+	if (parameter_is_midi (src_type)) {
+		// convert length to samples (incl tempo-ramps)
+		len = DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos).to (len * paste_count);
+		pos += view->editor ().get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
+	} else {
+		pos += view->editor ().get_paste_offset (pos, paste_count, len);
+	}
+
+	/* convert sample-position to model's unit and position */
+	const double model_pos = _source_relative_time_converter.from (
 		pos - _source_relative_time_converter.origin_b());
 
 	XMLNode& before = my_list->get_state();
-	my_list->paste(*slist, model_pos, times);
+	my_list->paste(*slist, model_pos, DoubleBeatsSamplesConverter (view->session()->tempo_map(), pos));
 	view->session()->add_command(
 		new MementoCommand<ARDOUR::AutomationList>(_line->memento_command_binder(), &before, &my_list->get_state()));
 
@@ -244,7 +256,7 @@ AutomationRegionView::set_height (double h)
 }
 
 bool
-AutomationRegionView::set_position (framepos_t pos, void* src, double* ignored)
+AutomationRegionView::set_position (samplepos_t pos, void* src, double* ignored)
 {
 	if (_line) {
 		_line->set_maximum_time (_region->length ());

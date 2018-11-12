@@ -26,8 +26,12 @@
 
 #include "fix_carbon.h"
 
+#include <gtkmm/stock.h>
+
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/cell_renderer_color_selector.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour/route_group.h"
 #include "ardour/route.h"
@@ -41,11 +45,9 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "marker.h"
-#include "prompter.h"
 #include "route_group_dialog.h"
 #include "route_time_axis.h"
 #include "time_axis_view.h"
-#include "tooltips.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -53,14 +55,15 @@
 using namespace std;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using Gtkmm2ext::Keyboard;
 
 struct ColumnInfo {
-    int         index;
-    const char* label;
-    const char* tooltip;
+	int         index;
+	const char* label;
+	const char* tooltip;
 };
 
 EditorRouteGroups::EditorRouteGroups (Editor* e)

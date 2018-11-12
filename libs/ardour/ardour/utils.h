@@ -73,83 +73,13 @@ LIBARDOUR_API int cmp_nocase_utf8 (const std::string& s1, const std::string& s2)
 LIBARDOUR_API std::string region_name_from_path (std::string path, bool strip_channels, bool add_channel_suffix = false, uint32_t total = 0, uint32_t this_one = 0);
 LIBARDOUR_API bool path_is_paired (std::string path, std::string& pair_base);
 
-LIBARDOUR_API void compute_equal_power_fades (ARDOUR::framecnt_t nframes, float* in, float* out);
+LIBARDOUR_API void compute_equal_power_fades (ARDOUR::samplecnt_t nframes, float* in, float* out);
 
 LIBARDOUR_API const char* sync_source_to_string (ARDOUR::SyncSource src, bool sh = false);
 LIBARDOUR_API ARDOUR::SyncSource string_to_sync_source (std::string str);
 
 LIBARDOUR_API const char* edit_mode_to_string (ARDOUR::EditMode);
 LIBARDOUR_API ARDOUR::EditMode string_to_edit_mode (std::string);
-
-#undef  OLD_GAIN_MATH
-#define OLD_GAIN_MATH
-
-static inline double
-gain_to_slider_position (ARDOUR::gain_t g)
-{
-	if (g == 0) return 0;
-
-#ifndef OLD_GAIN_MATH
-	/* Power Law With Exponential Cutoff 2D, fit to data from TC Spectra
-	   console (image of fader gradations
-
-	   y = C * x(-T) * exp(-x/K)
-
-	   C =  8.2857630370864188E-01
-	   T = -5.1526743785019269E-01
-	   K =  7.8990885960495589E+00
-
-	 */
-
-	return 8.2857630370864188E-01 * pow(g,5.1526743785019269E-01) * exp (-g/7.8990885960495589E+00);
-#else
-	return pow((6.0*log(g)/log(2.0)+192.0)/198.0, 8.0);
-#endif
-}
-
-static inline ARDOUR::gain_t
-slider_position_to_gain (double pos)
-{
-	if (pos == 0.0) {
-		return 0.0;
-	}
-
-#ifndef OLD_GAIN_MATH
-	/* 5th order polynomial function fit to data from a TC Spectra console
-	   fader (image of fader gradations).
-
-	   y = a + bx1 + cx2 + dx3 + fx4 + gx5
-
-	   a = -1.1945480381045521E-02
-	   b =  1.5809476525537265E+00
-	   c = -1.5850710838966151E+01
-	   d =  6.1643128605961991E+01
-	   f = -8.5525246160607693E+01
-	   g =  4.1312725896188283E+01
-
-	*/
-
-	double p = pos;
-	double g = -1.1945480381045521E-02;
-
-	g +=  1.5809476525537265E+00 * pos;
-	pos *= p;
-	g += -1.5850710838966151E+01 * pos;
-	pos *= p;
-	g += 6.1643128605961991E+01 * pos;
-	pos *= p;
-	g += -8.5525246160607693E+01 * pos;
-	pos *= p;
-	g += 4.1312725896188283E+01 * pos;
-
-	return g;
-#else
-	/* XXX Marcus writes: this doesn't seem right to me. but i don't have a better answer ... */
-	if (pos == 0.0) return 0;
-	return pow (2.0,(sqrt(sqrt(sqrt(pos)))*198.0-192.0)/6.0);
-#endif
-}
-#undef OLD_GAIN_MATH
 
 LIBARDOUR_API double gain_to_slider_position_with_max (double g, double max_gain = 2.0);
 LIBARDOUR_API double slider_position_to_gain_with_max (double g, double max_gain = 2.0);
@@ -176,8 +106,11 @@ LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& di
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
+LIBARDOUR_API std::string compute_sha1_of_file (std::string path);
+
 template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Stripable::*get_control)() const) {
 	boost::shared_ptr<ControlList> cl (new ControlList);
+	if (!rl) { return cl; }
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
 		boost::shared_ptr<AutomationControl> ac = ((*r).get()->*get_control)();
 		if (ac) {

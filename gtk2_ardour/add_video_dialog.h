@@ -26,7 +26,18 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/cellrendererpixbuf.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/filechooserwidget.h>
+#include <gtkmm/image.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scale.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -40,7 +51,7 @@ enum VtlImportOption {
 
 class AddVideoDialog : public ArdourDialog
 {
-  public:
+public:
 	AddVideoDialog (ARDOUR::Session*);
 	~AddVideoDialog ();
 
@@ -49,7 +60,7 @@ class AddVideoDialog : public ArdourDialog
 	bool launch_xjadeo ();
 	bool auto_set_session_fps ();
 
-  private:
+private:
 	void on_show ();
 	bool page_switch();
 	void set_action_ok(bool yn);
@@ -87,7 +98,7 @@ class AddVideoDialog : public ArdourDialog
 	/* Harvid Browser related */
 	class HarvidColumns : public Gtk::TreeModel::ColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<std::string> id;
 		Gtk::TreeModelColumn<std::string> uri;
 		Gtk::TreeModelColumn<std::string> filename;

@@ -16,6 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#ifndef NDEBUG
+#include <iostream>
+#include <iomanip>
+#endif
+
 #include <stdlib.h>
 #include <string.h>
 #include <cstdio>
@@ -337,7 +342,7 @@ FileArchive::do_extract (struct archive* a)
 
 
 int
-FileArchive::create (const std::string& srcdir)
+FileArchive::create (const std::string& srcdir, CompressionLevel compression_level)
 {
 	if (_req.is_remote ()) {
 		return -1;
@@ -357,11 +362,11 @@ FileArchive::create (const std::string& srcdir)
 		filemap[*f] = f->substr (p_len);
 	}
 
-	return create (filemap);
+	return create (filemap, compression_level);
 }
 
 int
-FileArchive::create (const std::map<std::string, std::string>& filemap)
+FileArchive::create (const std::map<std::string, std::string>& filemap, CompressionLevel compression_level)
 {
 	struct archive *a;
 	struct archive_entry *entry;
@@ -385,9 +390,20 @@ FileArchive::create (const std::map<std::string, std::string>& filemap)
 
 	a = archive_write_new ();
 	archive_write_set_format_pax_restricted (a);
-	archive_write_add_filter_lzma (a);
+
+	if (compression_level != CompressNone) {
+		archive_write_add_filter_lzma (a);
+		char buf[48];
+		sprintf (buf, "lzma:compression-level=%u,lzma:threads=0", (uint32_t) compression_level);
+		archive_write_set_options (a, buf);
+	}
+
 	archive_write_open_filename (a, _req.url);
 	entry = archive_entry_new ();
+
+#ifndef NDEBUG
+	  const int64_t archive_start_time = g_get_monotonic_time();
+#endif
 
 	for (std::map<std::string, std::string>::const_iterator f = filemap.begin (); f != filemap.end (); ++f) {
 		char buf[8192];
@@ -432,6 +448,11 @@ FileArchive::create (const std::map<std::string, std::string>& filemap)
 	archive_entry_free (entry);
 	archive_write_close (a);
 	archive_write_free (a);
+
+#ifndef NDEBUG
+	const int64_t elapsed_time_us = g_get_monotonic_time() - archive_start_time;
+	std::cerr << "archived in " << std::fixed << std::setprecision (2) << elapsed_time_us / 1000000. << " sec\n";
+#endif
 
 	return 0;
 }

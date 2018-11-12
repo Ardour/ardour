@@ -71,12 +71,7 @@ SoloSafeControl::set_state (XMLNode const & node, int version)
 		return -1;
 	}
 
-	XMLProperty const * prop;
-
-	if ((prop = node.property ("solo-safe")) != 0) {
-		_solo_safe = string_is_affirmative (prop->value());
-	}
-
+	node.get_property ("solo-safe", _solo_safe);
 	return 0;
 }
 
@@ -84,6 +79,6 @@ XMLNode&
 SoloSafeControl::get_state ()
 {
 	XMLNode& node (SlavableAutomationControl::get_state());
-	node.add_property (X_("solo-safe"), _solo_safe ? X_("yes") : X_("no"));
+	node.set_property (X_("solo-safe"), _solo_safe);
 	return node;
 }

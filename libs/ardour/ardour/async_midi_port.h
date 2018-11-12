@@ -55,7 +55,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 		void cycle_end (pframes_t nframes);
 
 		/* called from non-RT context */
-		void parse (framecnt_t timestamp);
+		void parse (samplecnt_t timestamp);
 		int write (const MIDI::byte *msg, size_t msglen, MIDI::timestamp_t timestamp);
 		int read (MIDI::byte *buf, size_t bufsize);
 		/* waits for output to be cleared */
@@ -72,7 +72,7 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 
 		/* Not selectable; use ios() */
 		int selectable() const { return -1; }
-		void set_timer (boost::function<framecnt_t (void)>&);
+		void set_timer (boost::function<samplecnt_t (void)>&);
 
 		static void set_process_thread (pthread_t);
 		static pthread_t get_process_thread () { return _process_thread; }
@@ -83,8 +83,8 @@ class LIBARDOUR_API AsyncMIDIPort : public ARDOUR::MidiPort, public MIDI::Port {
 		MIDI::timestamp_t       _last_write_timestamp;
 		bool                    _flush_at_cycle_start;
 		bool                    have_timer;
-		boost::function<framecnt_t (void)> timer;
-		RingBuffer< Evoral::Event<double> > output_fifo;
+		boost::function<samplecnt_t (void)> timer;
+		PBD::RingBuffer< Evoral::Event<double> > output_fifo;
 		EventRingBuffer<MIDI::timestamp_t> input_fifo;
 		Glib::Threads::Mutex output_fifo_lock;
 		CrossThreadChannel _xthread;

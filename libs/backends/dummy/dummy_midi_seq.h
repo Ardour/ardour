@@ -780,7 +780,7 @@ static const MIDISequence s7[] = { // channel1, nonsense
 };
 
 static const MIDISequence s8[] = { // sysex
-	{ 0.00, 10, {0xf0, 0x7f, 0x7f, 0x01, 0x01, /*hour + tc */ 0x20, /*min*/ 0x00, /*sec*/ 0x00, /*frame*/ 0x00, 0xf7} },  // 25fps, 00:00:00:00
+	{ 0.00, 10, {0xf0, 0x7f, 0x7f, 0x01, 0x01, /*hour + tc */ 0x20, /*min*/ 0x00, /*sec*/ 0x00, /*sample*/ 0x00, 0xf7} },  // 25fps, 00:00:00:00
 	// quarter frames spacing (in samples) at 25fps: SR / (25 * 4)
 	// DummyMidiPort::setup_generator uses 120bpm ie (SR / 2)
 	// hence the spacing is: SR / (25 * 4) / (SR / 2) = 0.2

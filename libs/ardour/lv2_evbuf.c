@@ -183,13 +183,13 @@ lv2_evbuf_next(LV2_Evbuf_Iterator iter)
 
 bool
 lv2_evbuf_get(LV2_Evbuf_Iterator iter,
-              uint32_t*          frames,
+              uint32_t*          samples,
               uint32_t*          subframes,
               uint32_t*          type,
               uint32_t*          size,
               uint8_t**          data)
 {
-	*frames = *subframes = *type = *size = 0;
+	*samples = *subframes = *type = *size = 0;
 	*data = NULL;
 
 	if (!lv2_evbuf_is_valid(iter)) {
@@ -204,7 +204,7 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 	case LV2_EVBUF_EVENT:
 		ebuf = &iter.evbuf->buf.event;
 		ev = (LV2_Event*)((uintptr_t)((char*)ebuf->data + iter.offset));
-		*frames    = ev->frames;
+		*samples    = ev->frames;
 		*subframes = ev->subframes;
 		*type      = ev->type;
 		*size      = ev->size;
@@ -215,7 +215,7 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 		aev = (LV2_Atom_Event*)((uintptr_t)(
 			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, aseq)
 			+ iter.offset));
-		*frames    = aev->time.frames;
+		*samples    = aev->time.frames;
 		*subframes = 0;
 		*type      = aev->body.type;
 		*size      = aev->body.size;
@@ -228,7 +228,7 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 
 bool
 lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
-                uint32_t            frames,
+                uint32_t            samples,
                 uint32_t            subframes,
                 uint32_t            type,
                 uint32_t            size,
@@ -246,7 +246,7 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
 		}
 
 		ev = (LV2_Event*)((uintptr_t)(ebuf->data + iter->offset));
-		ev->frames    = frames;
+		ev->frames    = samples;
 		ev->subframes = subframes;
 		ev->type      = type;
 		ev->size      = size;
@@ -267,7 +267,7 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
 		aev = (LV2_Atom_Event*)((uintptr_t)(
 			(char*)LV2_ATOM_CONTENTS(LV2_Atom_Sequence, aseq)
 			+ iter->offset));
-		aev->time.frames = frames;
+		aev->time.frames = samples;
 		aev->body.type   = type;
 		aev->body.size   = size;
 		memcpy(LV2_ATOM_BODY(&aev->body), data, size);

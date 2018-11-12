@@ -27,31 +27,40 @@
 #include <string>
 #include <vector>
 
+#include <gtkmm/separator.h>
+
 #include "pbd/stl_delete.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 #include "pbd/failed_constructor.h"
 
-#include <gtkmm2ext/click_box.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/barcontroller.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/slider_controller.h>
+#include "evoral/midi_events.h"
+#include "evoral/PatchChange.hpp"
 
+#include "midi++/midnam_patch.h"
+
+#include "ardour/midi_patch_manager.h"
+#include "ardour/midi_track.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/session.h"
 #include "ardour/value_as_string.h"
 
-#include "prompter.h"
+#include "gtkmm2ext/menu_elems.h"
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/doi.h"
+
+#include "widgets/ardour_knob.h"
+#include "widgets/fastmeter.h"
+#include "widgets/slider_controller.h"
+#include "widgets/tooltips.h"
+
 #include "plugin_ui.h"
+#include "plugin_display.h"
 #include "gui_thread.h"
 #include "automation_controller.h"
-#include "ardour_knob.h"
 #include "gain_meter.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -60,6 +69,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 
@@ -67,6 +77,11 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	: PlugUIBase (pi)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
+	, _plugin_pianokeyboard_expander (_("MIDI Keyboard"))
+	, _piano (0)
+	, _pianomm (0)
+	, _piano_velocity (*manage (new Adjustment (100, 1, 127, 1, 16)))
+	, _piano_channel (*manage (new Adjustment (0, 1, 16, 1, 1)))
 {
 	set_name ("PluginEditor");
 	set_border_width (10);
@@ -77,9 +92,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	HBox* constraint_hbox = manage (new HBox);
 	HBox* smaller_hbox = manage (new HBox);
-	HBox* automation_hbox = manage (new HBox);
 	smaller_hbox->set_spacing (4);
-	automation_hbox->set_spacing (6);
 	Label* combo_label = manage (new Label (_("<span size=\"large\">Presets</span>")));
 	combo_label->set_use_markup (true);
 
@@ -93,7 +106,9 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	smaller_hbox->pack_start (add_button, false, false);
 	smaller_hbox->pack_start (save_button, false, false);
 	smaller_hbox->pack_start (delete_button, false, false);
-	smaller_hbox->pack_start (reset_button, false, false, 4);
+	if (pi->controls().size() > 0) {
+		smaller_hbox->pack_start (reset_button, false, false, 4);
+	}
 	smaller_hbox->pack_start (bypass_button, false, true, 4);
 
 	automation_manual_all_button.set_text(_("Manual"));
@@ -104,28 +119,64 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 	automation_write_all_button.set_name (X_("generic button"));
 	automation_touch_all_button.set_text(_("Touch"));
 	automation_touch_all_button.set_name (X_("generic button"));
-
-	Label* l = manage (new Label (_("All Automation")));
-	l->set_alignment (1.0, 0.5);
-	automation_hbox->pack_start (*l, true, true);
-	automation_hbox->pack_start (automation_manual_all_button, false, false);
-	automation_hbox->pack_start (automation_play_all_button, false, false);
-	automation_hbox->pack_start (automation_write_all_button, false, false);
-	automation_hbox->pack_start (automation_touch_all_button, false, false);
+	automation_latch_all_button.set_text(_("Touch"));
+	automation_latch_all_button.set_name (X_("generic button"));
 
 	constraint_hbox->set_spacing (5);
 	constraint_hbox->set_homogeneous (false);
 
 	VBox* v1_box = manage (new VBox);
 	VBox* v2_box = manage (new VBox);
-	pack_end (plugin_analysis_expander, false, false);
+	if (pi->is_instrument ()) {
+		_piano = (PianoKeyboard*)piano_keyboard_new();
+		_pianomm = Glib::wrap((GtkWidget*)_piano);
+		_pianomm->set_flags(Gtk::CAN_FOCUS);
+		_pianomm->add_events(Gdk::KEY_PRESS_MASK|Gdk::KEY_RELEASE_MASK);
+
+		g_signal_connect (G_OBJECT (_piano), "note-on", G_CALLBACK (GenericPluginUI::_note_on_event_handler), this);
+		g_signal_connect (G_OBJECT (_piano), "note-off", G_CALLBACK (GenericPluginUI::_note_off_event_handler), this);
+
+		HBox* box = manage (new HBox);
+		box->pack_start (*manage (new Label (_("Channel:"))), false, false);
+		box->pack_start (_piano_channel, false, false);
+		box->pack_start (*manage (new Label (_("Velocity:"))), false, false);
+		box->pack_start (_piano_velocity, false, false);
+
+		Box* box2 = manage (new HBox ());
+		box2->pack_start (*box, true, false);
+
+		_pianobox.set_spacing (4);
+		_pianobox.pack_start (*box2, true, true);
+		_pianobox.pack_start (*_pianomm, true, true);
+
+		_plugin_pianokeyboard_expander.set_expanded(false);
+		_plugin_pianokeyboard_expander.property_expanded().signal_changed().connect( sigc::mem_fun(*this, &GenericPluginUI::toggle_pianokeyboard));
+
+		pack_end (_plugin_pianokeyboard_expander, false, false);
+	} else {
+		pack_end (plugin_analysis_expander, false, false);
+	}
+
+	pack_end (cpuload_expander, false, false);
+
 	if (!plugin->get_docs().empty()) {
 		pack_end (description_expander, false, false);
 	}
 
 	v1_box->set_spacing (6);
 	v1_box->pack_start (*smaller_hbox, false, true);
-	v1_box->pack_start (*automation_hbox, false, true);
+	if (pi->controls().size() > 0) {
+		HBox* automation_hbox = manage (new HBox);
+		automation_hbox->set_spacing (6);
+		Label* l = manage (new Label (_("All Automation")));
+		l->set_alignment (1.0, 0.5);
+		automation_hbox->pack_start (*l, true, true);
+		automation_hbox->pack_start (automation_manual_all_button, false, false);
+		automation_hbox->pack_start (automation_play_all_button, false, false);
+		automation_hbox->pack_start (automation_write_all_button, false, false);
+		automation_hbox->pack_start (automation_touch_all_button, false, false);
+		v1_box->pack_start (*automation_hbox, false, true);
+	}
 	v2_box->pack_start (focus_button, false, true);
 
 	main_contents.pack_start (settings_box, false, false);
@@ -135,29 +186,31 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 
 	main_contents.pack_start (*constraint_hbox, false, false);
 
-	if (is_scrollable) {
-		Gtk::ScrolledWindow *scroller = manage (new Gtk::ScrolledWindow());
-		scroller->set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
-		scroller->set_name ("PluginEditor");
-		scroller->add (hpacker);
-		main_contents.pack_start (*scroller, true, true);
-	} else {
-		main_contents.pack_start (hpacker, false, false);
-	}
-
 	pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(pi)), gui_context());
 
 	bypass_button.set_active (!pi->enabled());
 
+	/* ScrolledWindow will wrap hpacker in a Viewport */
+	scroller.add (hpacker);
+	Viewport* view = static_cast<Viewport*>(scroller.get_child());
+	view->set_shadow_type(Gtk::SHADOW_NONE);
+
+	main_contents.pack_start (scroller, true, true);
+
 	prefheight = 0;
 	build ();
 
-	/* Listen for property changes that are not notified normally because
-	 * AutomationControl has only support for numeric values currently.
-	 * The only case is Variant::PATH for now */
-	plugin->PropertyChanged.connect(*this, invalidator(*this),
-	                                boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
-	                                gui_context());
+	if (insert->plugin()->has_midnam() && insert->plugin()->knows_bank_patch()) {
+		build_midi_table ();
+	}
+
+	if (is_scrollable) {
+		scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+		scroller.set_name ("PluginEditor");
+	} else {
+		scroller.signal_size_request().connect (sigc::mem_fun(*this, &GenericPluginUI::scroller_size_request));
+		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
+	}
 
 	main_contents.show ();
 }
@@ -167,6 +220,45 @@ GenericPluginUI::~GenericPluginUI ()
 	if (output_controls.size() > 0) {
 		screen_update_connection.disconnect();
 	}
+	delete _pianomm;
+}
+
+void
+GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
+{
+	GtkRequisition request = hpacker.size_request();
+
+	Glib::RefPtr<Gdk::Window> window (get_window());
+	Glib::RefPtr<Gdk::Screen> screen;
+
+	if (window) {
+		screen = get_screen();
+	}
+
+	if (!screen) {
+		a->width = request.width;
+		return;
+	}
+
+	Gdk::Rectangle monitor;
+	const int monitor_num = screen->get_monitor_at_window (window);
+	screen->get_monitor_geometry (
+			(monitor_num < 0) ? 0 : monitor_num,
+			monitor);
+
+	const int maximum_width = monitor.get_width() * 0.9;
+
+	if (request.width > maximum_width) {
+		for (vector<ControlUI*>::const_iterator cuip = input_controls.begin();
+		                                        cuip != input_controls.end();
+		                                        ++cuip) {
+			if (!(*cuip)->short_autostate)
+				set_short_autostate(*cuip, true);
+		}
+		request = hpacker.size_request();
+	}
+
+	a->width = min(request.width, maximum_width);
 }
 
 // Some functions for calculating the 'similarity' of two plugin
@@ -301,6 +393,14 @@ GenericPluginUI::build ()
 		control_uis.push_back(cui);
 	}
 	if (!descs.empty()) {
+		/* Listen for property changes that are not notified normally because
+		 * AutomationControl has only support for numeric values currently.
+		 * The only case is Variant::PATH for now */
+		plugin->PropertyChanged.connect(*this, invalidator(*this),
+				boost::bind(&GenericPluginUI::path_property_changed, this, _1, _2),
+				gui_context());
+
+		/* and query current property value */
 		plugin->announce_property_values();
 	}
 
@@ -316,6 +416,7 @@ GenericPluginUI::build ()
 	automation_play_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Play));
 	automation_write_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Write));
 	automation_touch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Touch));
+	automation_latch_all_button.signal_clicked.connect(sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::set_all_automation), ARDOUR::Latch));
 
 	/* XXX This is a workaround for AutomationControl not knowing about preset loads */
 	plugin->PresetLoaded.connect (*this, invalidator (*this), boost::bind (&GenericPluginUI::update_input_displays, this), gui_context ());
@@ -358,10 +459,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	button_table->set_homogeneous (false);
 	button_table->set_row_spacings (2);
 	button_table->set_col_spacings (2);
+	button_table->set_border_width (5);
+
 	output_table->set_homogeneous (true);
 	output_table->set_row_spacings (2);
 	output_table->set_col_spacings (2);
-	button_table->set_border_width (5);
 	output_table->set_border_width (5);
 
 
@@ -400,7 +502,7 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 			                     FILL|EXPAND, FILL);
 			button_row++;
 
-		} else if (cui->controller || cui->clickbox || cui->combo) {
+		} else if (cui->controller || cui->combo) {
 			// Get all of the controls into a list, so that
 			// we can lay them out a bit more nicely later.
 			cui_controls_list.push_back(cui);
@@ -525,6 +627,11 @@ GenericPluginUI::automatic_layout (const std::vector<ControlUI*>& control_uis)
 	} else {
 		delete output_table;
 	}
+
+	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
+		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
+		hpacker.pack_end (*pd, true, true);
+	}
 	show_all();
 
 }
@@ -542,13 +649,155 @@ GenericPluginUI::custom_layout (const std::vector<ControlUI*>& control_uis)
 		layout->attach (*cui, cui->x0, cui->x1, cui->y0, cui->y1, FILL, SHRINK, 2, 2);
 	}
 	hpacker.pack_start (*layout, true, true);
+
+	if (plugin->has_inline_display () && plugin->inline_display_in_gui ()) {
+		PluginDisplay* pd = manage (new PluginDisplay (plugin, 300));
+		hpacker.pack_end (*pd, true, true);
+	}
+}
+
+void
+GenericPluginUI::build_midi_table ()
+{
+	Gtk::Table* pgm_table = manage (new Gtk::Table (8, 5));
+
+	pgm_table->set_homogeneous (false);
+	pgm_table->set_row_spacings (2);
+	pgm_table->set_col_spacings (2);
+	pgm_table->set_border_width (5);
+	pgm_table->set_col_spacing (2, 10);
+
+	Frame* frame = manage (new Frame);
+	frame->set_name ("BaseFrame");
+	if (dynamic_cast<MidiTrack*> (insert->owner())) {
+		frame->set_label (_("MIDI Programs (sent to track)"));
+	} else {
+		frame->set_label (_("MIDI Programs (volatile)"));
+	}
+	frame->add (*pgm_table);
+	hpacker.pack_start (*frame, false, false);
+
+	for (uint8_t chn = 0; chn < 16; ++chn) {
+		int col = 3 * (chn / 8);
+		int row = chn % 8;
+		ArdourDropdown* cui = manage (new ArdourWidgets::ArdourDropdown ());
+		cui->set_sizing_text ("Stereo Grand Piano");
+		cui->set_text_ellipsize (Pango::ELLIPSIZE_END);
+		cui->set_layout_ellipsize_width (PANGO_SCALE * 112 * UIConfiguration::instance ().get_ui_scale ());
+		midi_pgmsel.push_back (cui);
+		pgm_table->attach (*manage (new Label (string_compose ("C%1:", (int)(chn + 1)), ALIGN_RIGHT)), col, col + 1, row, row+1, FILL, SHRINK);
+		pgm_table->attach (*cui, col + 1, col + 2, row, row+1, SHRINK, SHRINK);
+	}
+
+	insert->plugin ()->read_midnam();
+
+	midi_refill_patches ();
+
+	insert->plugin()->BankPatchChange.connect (
+			midi_connections, invalidator (*this),
+			boost::bind (&GenericPluginUI::midi_bank_patch_change, this, _1),
+			gui_context());
+
+	insert->plugin()->UpdatedMidnam.connect (
+			midi_connections, invalidator (*this),
+			boost::bind (&GenericPluginUI::midi_refill_patches, this),
+			gui_context());
+}
+
+void
+GenericPluginUI::midi_refill_patches ()
+{
+	assert (midi_pgmsel.size() == 16);
+
+	pgm_names.clear ();
+
+	const std::string model = insert->plugin ()->midnam_model ();
+	std::string mode;
+	const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (model);
+	if (device_modes.size() > 0) {
+		mode = device_modes.front();
+	}
+
+	for (uint8_t chn = 0; chn < 16; ++chn) {
+		midi_pgmsel[chn]->clear_items ();
+		boost::shared_ptr<MIDI::Name::ChannelNameSet> cns =
+			MIDI::Name::MidiPatchManager::instance().find_channel_name_set (model, mode, chn);
+
+		if (cns) {
+			using namespace Menu_Helpers;
+			using namespace Gtkmm2ext;
+
+			for (MIDI::Name::ChannelNameSet::PatchBanks::const_iterator i = cns->patch_banks().begin(); i != cns->patch_banks().end(); ++i) {
+				const MIDI::Name::PatchNameList& patches = (*i)->patch_name_list ();
+				for (MIDI::Name::PatchNameList::const_iterator j = patches.begin(); j != patches.end(); ++j) {
+					const std::string pgm = (*j)->name ();
+					MIDI::Name::PatchPrimaryKey const& key = (*j)->patch_primary_key ();
+					const uint32_t bp = (key.bank() << 7) | key.program();
+					midi_pgmsel[chn]->AddMenuElem (MenuElemNoMnemonic (pgm, sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midi_bank_patch_select), chn, bp)));
+					pgm_names[bp] = pgm;
+				}
+			}
+		}
+
+		midi_bank_patch_change (chn);
+	}
+}
+
+void
+GenericPluginUI::midi_bank_patch_change (uint8_t chn)
+{
+	assert (chn < 16 && midi_pgmsel.size() == 16);
+	uint32_t bankpgm = insert->plugin()->bank_patch (chn);
+	if (bankpgm == UINT32_MAX) {
+		midi_pgmsel[chn]->set_text (_("--Unset--"));
+	} else {
+		int bank = bankpgm >> 7;
+		int pgm = bankpgm & 127;
+		if (pgm_names.find (bankpgm) != pgm_names.end ()) {
+			midi_pgmsel[chn]->set_text (pgm_names[bankpgm]);
+		} else {
+			midi_pgmsel[chn]->set_text (string_compose ("Bank %1,%2 Pgm %3",
+						(bank >> 7) + 1, (bank & 127) + 1, pgm +1));
+		}
+	}
+}
+
+void
+GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
+{
+	int bank = bankpgm >> 7;
+	int pgm = bankpgm & 127;
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	if (mt) {
+		/* send to track */
+		boost::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
+		boost::shared_ptr<AutomationControl> bank_lsb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
+		boost::shared_ptr<AutomationControl> program = mt->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
+
+		bank_msb->set_value (bank >> 7, PBD::Controllable::NoGroup);
+		bank_lsb->set_value (bank & 127, PBD::Controllable::NoGroup);
+		program->set_value (pgm, PBD::Controllable::NoGroup);
+	} else {
+		uint8_t event[3];
+		event[0] = (MIDI_CMD_CONTROL | chn);
+		event[1] = 0x00;
+		event[2] = bank >> 7;
+		insert->write_immediate_event (3, event);
+
+		event[1] = 0x20;
+		event[2] = bank & 127;
+		insert->write_immediate_event (3, event);
+
+		event[0] = (MIDI_CMD_PGM_CHANGE | chn);
+		event[1] = pgm;
+		insert->write_immediate_event (2, event);
+	}
 }
 
 GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 	: param(p)
 	, automate_button (X_("")) // force creation of a label
 	, combo (0)
-	, clickbox (0)
 	, file_button (0)
 	, spin_box (0)
 	, display (0)
@@ -559,13 +808,6 @@ GenericPluginUI::ControlUI::ControlUI (const Evoral::Parameter& p)
 {
 	automate_button.set_name ("plugin automation state button");
 	set_tooltip (automate_button, _("Automation control"));
-
-	/* XXX translators: use a string here that will be at least as long
-	   as the longest automation label (see ::automation_state_changed()
-	   below). be sure to include a descender.
-	*/
-
-	automate_button.set_sizing_text(_("Mgnual"));
 
 	ignore_change = false;
 	update_pending = false;
@@ -583,6 +825,21 @@ GenericPluginUI::ControlUI::~ControlUI()
 }
 
 void
+GenericPluginUI::set_short_autostate (ControlUI* cui, bool value)
+{
+	cui->short_autostate = value;
+	if (value) {
+		cui->automate_button.set_sizing_text("M");
+	} else {
+		/* XXX translators: use a string here that will be at least as long
+		   as the longest automation label (see ::automation_state_changed()
+		   below). be sure to include a descender. */
+		cui->automate_button.set_sizing_text(_("Mgnual"));
+	}
+	automation_state_changed(cui);
+}
+
+void
 GenericPluginUI::automation_state_changed (ControlUI* cui)
 {
 	/* update button label */
@@ -594,13 +851,13 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 
 	cui->automate_button.set_active((state != ARDOUR::Off));
 
-	if (cui->knobtable) {
+	if (cui->short_autostate) {
 		cui->automate_button.set_text (
 				GainMeterBase::astate_string (state));
 		return;
 	}
 
-	switch (state & (ARDOUR::Off|Play|Touch|Write)) {
+	switch (state & (ARDOUR::Off|Play|Touch|Write|Latch)) {
 	case ARDOUR::Off:
 		cui->automate_button.set_text (S_("Automation|Manual"));
 		break;
@@ -612,6 +869,9 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 		break;
 	case Touch:
 		cui->automate_button.set_text (_("Touch"));
+		break;
+	case Latch:
+		cui->automate_button.set_text (_("Latch"));
 		break;
 	default:
 		cui->automate_button.set_text (_("???"));
@@ -665,6 +925,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 	control_ui->label.set_alignment (0.0, 0.5);
 	control_ui->label.set_name ("PluginParameterLabel");
 	control_ui->set_spacing (5);
+	set_short_autostate(control_ui, false);
 
 	if (is_input) {
 
@@ -730,6 +991,8 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 						           i->second)));
 			}
 
+			control_ui->combo->set_controllable (mcontrol);
+
 			update_control_display(control_ui);
 
 		} else {
@@ -740,7 +1003,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			 * destructor, and manage() reports object hierarchy
 			 * ambiguity.
 			 */
-			control_ui->controller = AutomationController::create(insert, mcontrol->parameter(), desc, mcontrol, use_knob);
+			control_ui->controller = AutomationController::create(mcontrol->parameter(), desc, mcontrol, use_knob);
 
 			/* Control UI's don't need the rapid timer workaround */
 			control_ui->controller->stop_updating ();
@@ -751,15 +1014,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 
 			Adjustment* adj = control_ui->controller->adjustment();
 
-			if (desc.integer_step && !desc.toggled) {
-				control_ui->clickbox = new ClickBox (adj, "PluginUIClickBox", true);
-				Gtkmm2ext::set_size_request_to_display_given_text (*control_ui->clickbox, "g9999999", 2, 2);
-				if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
-					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::midinote_printer), control_ui));
-				} else {
-					control_ui->clickbox->set_printer (sigc::bind (sigc::mem_fun (*this, &GenericPluginUI::integer_printer), control_ui));
-				}
-			} else if (desc.toggled) {
+			if (desc.toggled) {
 				ArdourButton* but = dynamic_cast<ArdourButton*> (control_ui->controller->widget());
 				assert(but);
 				but->set_tweaks(ArdourButton::Square);
@@ -770,10 +1025,15 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			} else {
 				control_ui->controller->set_size_request (200, -1);
 				control_ui->controller->set_name (X_("ProcessorControlSlider"));
+				if (desc.integer_step) {
+					AutomationBarController* abc = dynamic_cast <AutomationBarController*> (control_ui->controller->widget ());
+					assert (abc);
+					abc->set_digits (0);
+				}
 			}
 
 			if (!desc.integer_step && !desc.toggled && use_knob) {
-				control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj, insert));
+				control_ui->spin_box = manage (new ArdourSpinner (mcontrol, adj));
 			}
 
 			adj->set_value (mcontrol->internal_to_interface(value));
@@ -781,7 +1041,7 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 		if (use_knob) {
-			control_ui->automate_button.set_sizing_text("M");
+			set_short_autostate(control_ui, true);
 
 			control_ui->label.set_alignment (0.5, 0.5);
 			control_ui->knobtable = manage (new Table());
@@ -790,14 +1050,9 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			if (control_ui->combo) {
 				control_ui->knobtable->attach (control_ui->label, 0, 1, 0, 1);
 				control_ui->knobtable->attach (*control_ui->combo, 0, 1, 1, 2);
-			} else if (control_ui->clickbox) {
-				control_ui->knobtable->attach (*control_ui->clickbox, 0, 2, 0, 1);
-				control_ui->knobtable->attach (control_ui->label, 0, 1, 1, 2, FILL, SHRINK);
-				control_ui->knobtable->attach (control_ui->automate_button, 1, 2, 1, 2, SHRINK, SHRINK, 2, 0);
 			} else if (control_ui->spin_box) {
 				ArdourKnob* knob = dynamic_cast<ArdourKnob*>(control_ui->controller->widget ());
 				knob->set_tooltip_prefix (desc.label + ": ");
-				knob->set_printer (insert);
 				Alignment *align = manage (new Alignment (.5, .5, 0, 0));
 				align->add (*control_ui->controller);
 				control_ui->knobtable->attach (*align, 0, 1, 0, 1, EXPAND, SHRINK, 1, 2);
@@ -820,8 +1075,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 			control_ui->pack_start (control_ui->label, true, true);
 			if (control_ui->combo) {
 				control_ui->pack_start(*control_ui->combo, false, true);
-			} else if (control_ui->clickbox) {
-				control_ui->pack_start (*control_ui->clickbox, false, false);
 			} else if (control_ui->spin_box) {
 				control_ui->pack_start (*control_ui->spin_box, false, false);
 				control_ui->pack_start (*control_ui->controller, false, false);
@@ -879,7 +1132,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		control_ui->vbox = manage (new VBox);
 		control_ui->vbox->set_spacing(3);
 
-		if (desc.integer_step || desc.enumeration) {
+		if (desc.unit == ParameterDescriptor::MIDI_NOTE) {
+			control_ui->vbox->pack_end (*control_ui->display, false, false);
+			control_ui->vbox->pack_end (control_ui->label, false, false);
+		} else if (desc.integer_step || desc.enumeration) {
 			control_ui->vbox->pack_end (*control_ui->display, false, false);
 			control_ui->vbox->pack_end (control_ui->label, false, false);
 		} else {
@@ -899,12 +1155,6 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 					UIConfiguration::instance().color ("meter background bottom"),
 					UIConfiguration::instance().color ("meter background top")
 					);
-
-			info->min_unbound = desc.min_unbound;
-			info->max_unbound = desc.max_unbound;
-
-			info->min = desc.lower;
-			info->max = desc.upper;
 
 			control_ui->label.set_angle(90);
 
@@ -974,6 +1224,8 @@ GenericPluginUI::astate_button_event (GdkEventButton* ev, ControlUI* cui)
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Write, cui)));
 	items.push_back (MenuElem (_("Touch"),
 				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Touch, cui)));
+	items.push_back (MenuElem (_("Latch"),
+				   sigc::bind (sigc::mem_fun(*this, &GenericPluginUI::set_automation_state), (AutoState) Latch, cui)));
 
 	anchored_menu_popup(automation_menu, &cui->automate_button, cui->automate_button.get_text(),
 	                    1, ev->time);
@@ -1086,30 +1338,14 @@ GenericPluginUI::output_update ()
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
-		snprintf (buf, sizeof(buf), "%.2f", val);
+		boost::shared_ptr<ReadOnlyControl> c = insert->control_output ((*i)->parameter().id());
+		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
+		size_t len = str.copy(buf, 31);
+		buf[len] = '\0';
 		(*i)->display_label->set_text (buf);
 
-		/* autoscaling for the meter */
 		if ((*i)->meterinfo && (*i)->meterinfo->packed) {
-
-			if (val < (*i)->meterinfo->min) {
-				if ((*i)->meterinfo->min_unbound)
-					(*i)->meterinfo->min = val;
-				else
-					val = (*i)->meterinfo->min;
-			}
-
-			if (val > (*i)->meterinfo->max) {
-				if ((*i)->meterinfo->max_unbound)
-					(*i)->meterinfo->max = val;
-				else
-					val = (*i)->meterinfo->max;
-			}
-
-			if ((*i)->meterinfo->max > (*i)->meterinfo->min ) {
-				float lval = (val - (*i)->meterinfo->min) / ((*i)->meterinfo->max - (*i)->meterinfo->min) ;
-				(*i)->meterinfo->meter->set (lval );
-			}
+			(*i)->meterinfo->meter->set (c->desc().to_interface (val));
 		}
 	}
 }
@@ -1129,5 +1365,71 @@ GenericPluginUI::path_property_changed (uint32_t key, const Variant& value)
 		c->second->set_filename(value.get_path());
 	} else {
 		std::cerr << "warning: property change for property with no control" << std::endl;
+	}
+}
+
+void
+GenericPluginUI::toggle_pianokeyboard ()
+{
+	if (_plugin_pianokeyboard_expander.get_expanded()) {
+		_plugin_pianokeyboard_expander.add (_pianobox);
+		_pianobox.show_all ();
+	} else {
+		const int child_height = _plugin_pianokeyboard_expander.get_child ()->get_height ();
+		_plugin_pianokeyboard_expander.get_child ()->hide ();
+		_plugin_pianokeyboard_expander.remove ();
+
+		Gtk::Window *toplevel = (Gtk::Window*) _plugin_pianokeyboard_expander.get_ancestor (GTK_TYPE_WINDOW);
+		if (toplevel) {
+			Gtk::Requisition wr;
+			toplevel->get_size (wr.width, wr.height);
+			wr.height -= child_height;
+			toplevel->resize (wr.width, wr.height);
+		}
+	}
+}
+
+void
+GenericPluginUI::_note_on_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((GenericPluginUI*)arg)->note_on_event_handler(note);
+}
+
+void
+GenericPluginUI::_note_off_event_handler(GtkWidget*, int note, gpointer arg)
+{
+	((GenericPluginUI*)arg)->note_off_event_handler(note);
+}
+
+void
+GenericPluginUI::note_on_event_handler (int note)
+{
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	_pianomm->grab_focus ();
+	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_ON | channel);
+	event[1] = note;
+	event[2] = _piano_velocity.get_value_as_int ();
+	if (mt) {
+		mt->write_immediate_event (3, event);
+	} else {
+		insert->write_immediate_event (3, event);
+	}
+}
+
+void
+GenericPluginUI::note_off_event_handler (int note)
+{
+	MidiTrack* mt = dynamic_cast<MidiTrack*> (insert->owner());
+	uint8_t channel = _piano_channel.get_value_as_int () - 1;
+	uint8_t event[3];
+	event[0] = (MIDI_CMD_NOTE_OFF | channel);
+	event[1] = note;
+	event[2] = 0;
+	if (mt) {
+		mt->write_immediate_event (3, event);
+	} else {
+		insert->write_immediate_event (3, event);
 	}
 }

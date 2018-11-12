@@ -34,9 +34,11 @@
 #include "pbd/md5.h"
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/pane.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
+
+#include "widgets/pane.h"
+#include "widgets/tooltips.h"
 
 #include "ardour/filesystem_paths.h"
 #include "ardour/luabindings.h"
@@ -47,14 +49,13 @@
 #include "luainstance.h"
 #include "luawindow.h"
 #include "public_editor.h"
-#include "tooltips.h"
 #include "utils.h"
+#include "ui_config.h"
 #include "utils_videotl.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Glib;
@@ -108,6 +109,16 @@ LuaWindow::LuaWindow ()
 	update_title ();
 	set_wmclass (X_("ardour_mixer"), PROGRAM_NAME);
 
+#ifdef __APPLE__
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+#else
+	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+#endif
+
 	script_select.disable_scrolling ();
 
 	set_border_width (0);
@@ -156,14 +167,15 @@ LuaWindow::LuaWindow ()
 	vbox->pack_start (*scrollin, true, true, 0);
 	vbox->pack_start (*hbox, false, false, 2);
 
-	Gtkmm2ext::VPane *vpane = manage (new Gtkmm2ext::VPane ());
+	ArdourWidgets::VPane *vpane = manage (new ArdourWidgets::VPane ());
 	vpane->add (*vbox);
 	vpane->add (scrollout);
+	vpane->set_divider (0, 0.75);
 
 	vpane->show_all ();
 	add (*vpane);
 	set_size_request (640, 480); // XXX
-	ARDOUR_UI_UTILS::set_tooltip (script_select, _("Select Editor Buffer"));
+	ArdourWidgets::set_tooltip (script_select, _("Select Editor Buffer"));
 
 	setup_buffers ();
 	LuaScripting::instance().scripts_changed.connect (*this, invalidator (*this), boost::bind (&LuaWindow::refresh_scriptlist, this), gui_context());
@@ -189,7 +201,7 @@ LuaWindow::hide_window (GdkEventAny *ev)
 {
 	if (!_visible) return 0;
 	_visible = false;
-	return just_hide_it (ev, static_cast<Gtk::Window *>(this));
+	return ARDOUR_UI_UTILS::just_hide_it (ev, static_cast<Gtk::Window *>(this));
 }
 
 void LuaWindow::reinit_lua ()
@@ -198,6 +210,7 @@ void LuaWindow::reinit_lua ()
 	delete lua;
 	lua = new LuaState();
 	lua->Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
+	lua->sandbox (false);
 
 	lua_State* L = lua->getState();
 	LuaInstance::register_classes (L);
@@ -284,6 +297,12 @@ LuaWindow::run_script ()
 			}
 		} catch (luabridge::LuaException const& e) {
 			append_text (string_compose (_("LuaException: %1"), e.what()));
+		} catch (Glib::Exception const& e) {
+			append_text (string_compose (_("Glib Exception: %1"), e.what()));
+		} catch (std::exception const& e) {
+			append_text (string_compose (_("C++ Exception: %1"), e.what()));
+		} catch (...) {
+			append_text (string_compose (_("C++ Exception: %1"), "..."));
 		}
 	} else {
 		// script with factory method
@@ -302,6 +321,12 @@ LuaWindow::run_script ()
 			lua->do_command ("factory = nil;");
 		} catch (luabridge::LuaException const& e) {
 			append_text (string_compose (_("LuaException: %1"), e.what()));
+		} catch (Glib::Exception const& e) {
+			append_text (string_compose (_("Glib Exception: %1"), e.what()));
+		} catch (std::exception const& e) {
+			append_text (string_compose (_("C++ Exception: %1"), e.what()));
+		} catch (...) {
+			append_text (string_compose (_("C++ Exception: %1"), "..."));
 		}
 	}
 }
@@ -320,6 +345,17 @@ LuaWindow::clear_output ()
 {
 	Glib::RefPtr<Gtk::TextBuffer> tb (outtext.get_buffer());
 	tb->set_text ("");
+}
+
+void
+LuaWindow::edit_script (const std::string& name, const std::string& script)
+{
+	ScriptBuffer* sb = new LuaWindow::ScriptBuffer (name);
+	sb->script = script;
+	script_buffers.push_back (ScriptBufferPtr (sb));
+	script_selection_changed (script_buffers.back ());
+	refresh_scriptlist ();
+	show_window ();
 }
 
 void
@@ -381,7 +417,7 @@ LuaWindow::import_script ()
 	// TODO convert a few URL (eg. pastebin) to raw.
 #if 0
 	char *url = "http://pastebin.com/raw/3UMkZ6nV";
-	char *rv = ArdourCurl::http_get (url, 0);
+	char *rv = ArdourCurl::http_get (url, 0. true);
 	if (rv) {
 		new_script ();
 		Glib::RefPtr<Gtk::TextBuffer> tb (entry.get_buffer());
@@ -439,7 +475,7 @@ LuaWindow::save_script ()
 			update_gui_state (); // XXX here?
 			append_text (X_("> ") + string_compose (_("Saved as %1"), sb.path));
 			return; // OK
-		} catch (Glib::FileError e) {
+		} catch (Glib::FileError const& e) {
 			msg = string_compose (_("Error saving file: %1"), e.what());
 			goto errorout;
 		}
@@ -458,11 +494,12 @@ LuaWindow::save_script ()
 
 	// 5) construct filename -- TODO ask user for name, ask to replace file.
 	do {
+		char tme[80];
 		char buf[80];
 		time_t t = time(0);
 		struct tm * timeinfo = localtime (&t);
-		strftime (buf, sizeof(buf), "%s%d", timeinfo);
-		sprintf (buf, "%s%ld", buf, random ()); // is this valid?
+		strftime (tme, sizeof(tme), "%s", timeinfo);
+		snprintf (buf, sizeof(buf), "%s%ld", tme, random ());
 		MD5 md5;
 		std::string fn = md5.digestString (buf);
 
@@ -490,7 +527,7 @@ LuaWindow::save_script ()
 		LuaScripting::instance().refresh (true);
 		append_text (X_("> ") + string_compose (_("Saved as %1"), path));
 		return; // OK
-	} catch (Glib::FileError e) {
+	} catch (Glib::FileError const& e) {
 		msg = string_compose (_("Error saving file: %1"), e.what());
 		goto errorout;
 	}
@@ -717,7 +754,7 @@ LuaWindow::ScriptBuffer::load ()
 		script = Glib::file_get_contents (path);
 		flags |= Buffer_Valid;
 		flags &= BufferFlags(~Buffer_Dirty);
-	} catch (Glib::FileError e) {
+	} catch (Glib::FileError const& e) {
 		return false;
 	}
 	return true;

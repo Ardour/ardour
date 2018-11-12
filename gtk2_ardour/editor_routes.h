@@ -20,6 +20,11 @@
 #ifndef __ardour_gtk_editor_route_h__
 #define __ardour_gtk_editor_route_h__
 
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+
 #include "pbd/signals.h"
 #include "gtkmm2ext/widget_state.h"
 
@@ -65,6 +70,7 @@ public:
 	void hide_all_tracks (bool);
 	void clear ();
 	void sync_presentation_info_from_treeview ();
+	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 
 private:
 	void initial_display ();
@@ -77,9 +83,7 @@ private:
 	void on_tv_solo_isolate_toggled (std::string const &);
 	void on_tv_solo_safe_toggled (std::string const &);
 	void build_menu ();
-	void show_menu ();
 	void presentation_info_changed (PBD::PropertyChange const &);
-	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);
 	void row_deleted (Gtk::TreeModel::Path const &);
 	void visible_changed (std::string const &);
 	void active_changed (std::string const &);
@@ -110,10 +114,6 @@ private:
 
 	int plugin_setup (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
-	void display_drag_data_received (
-		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
-		);
-
 	bool selection_filter (Glib::RefPtr<Gtk::TreeModel> const &, Gtk::TreeModel::Path const &, bool);
 	void name_edit (std::string const &, std::string const &);
 	void solo_changed_so_update_mute ();
@@ -127,6 +127,7 @@ private:
 			add (mute_state);
 			add (solo_state);
 			add (solo_visible);
+			add (solo_lock_iso_visible);
 			add (solo_isolate_state);
 			add (solo_safe_state);
 			add (is_track);
@@ -135,6 +136,7 @@ private:
 			add (name_editable);
 			add (is_input_active);
 			add (is_midi);
+			add (no_vca);
 			add (active);
 		}
 
@@ -146,6 +148,7 @@ private:
 		Gtk::TreeModelColumn<uint32_t>       solo_state;
 		/** true if the solo buttons are visible for this route, otherwise false */
 		Gtk::TreeModelColumn<bool>           solo_visible;
+		Gtk::TreeModelColumn<bool>           solo_lock_iso_visible;
 		Gtk::TreeModelColumn<uint32_t>       solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>       solo_safe_state;
 		Gtk::TreeModelColumn<bool>           is_track;
@@ -154,11 +157,12 @@ private:
 		Gtk::TreeModelColumn<bool>           name_editable;
 		Gtk::TreeModelColumn<bool>           is_input_active;
 		Gtk::TreeModelColumn<bool>           is_midi;
+		Gtk::TreeModelColumn<bool>           no_vca; // activatable
 		Gtk::TreeModelColumn<bool>           active;
 	};
 
 	Gtk::ScrolledWindow _scroller;
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Route> > _display;
+	Gtk::TreeView _display;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	ModelColumns _columns;
 	int _name_column;
@@ -176,7 +180,6 @@ private:
 
 	Gtk::Menu* _menu;
 	Gtk::Widget* old_focus;
-	uint32_t selection_countdown;
 	Gtk::CellEditable* name_editable;
 
 	bool key_press (GdkEventKey* ev);

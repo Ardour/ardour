@@ -21,9 +21,9 @@
 #include <glibmm.h>
 
 #include "alsa_midi.h"
-#include "rt_thread.h"
 
 #include "pbd/error.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -50,7 +50,7 @@ AlsaMidiIO::AlsaMidiIO ()
 	// worst case here is  8192 SPP and 8KSPS for which we'd need
 	// 4000 bytes sans MidiEventHeader.
 	// since we're not always in sync, let's use 4096.
-	_rb = new RingBuffer<uint8_t>(4096 + 4096 * sizeof(MidiEventHeader));
+	_rb = new PBD::RingBuffer<uint8_t>(4096 + 4096 * sizeof(MidiEventHeader));
 }
 
 AlsaMidiIO::~AlsaMidiIO ()
@@ -72,7 +72,7 @@ static void * pthread_process (void *arg)
 int
 AlsaMidiIO::start ()
 {
-	if (_realtime_pthread_create (SCHED_FIFO, -21, 100000,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -21, 100000,
 				&_main_thread, pthread_process, this))
 	{
 		if (pthread_create (&_main_thread, NULL, pthread_process, this)) {
@@ -178,7 +178,7 @@ AlsaMidiIn::recv_event (pframes_t &time, uint8_t *data, size_t &size)
 		return 0;
 	}
 
-	RingBuffer<uint8_t>::rw_vector vector;
+	PBD::RingBuffer<uint8_t>::rw_vector vector;
 	_rb->get_read_vector(&vector);
 	if (vector.len[0] >= sizeof(MidiEventHeader)) {
 		memcpy((uint8_t*)&h, vector.buf[0], sizeof(MidiEventHeader));
@@ -186,7 +186,7 @@ AlsaMidiIn::recv_event (pframes_t &time, uint8_t *data, size_t &size)
 		if (vector.len[0] > 0) {
 			memcpy ((uint8_t*)&h, vector.buf[0], vector.len[0]);
 		}
-		assert(vector.buf[1] || vector.len[0] == sizeof(MidiEventHeader));
+		assert(vector.buf[1]);
 		memcpy (((uint8_t*)&h) + vector.len[0], vector.buf[1], sizeof(MidiEventHeader) - vector.len[0]);
 	}
 

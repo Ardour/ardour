@@ -22,6 +22,7 @@
 #include <float.h>
 #include <math.h>
 #include <stdint.h>
+#include <stdlib.h>
 
 #include <iostream>
 #include <limits>
@@ -33,62 +34,114 @@ namespace Evoral {
 /** Musical time in beats. */
 class /*LIBEVORAL_API*/ Beats {
 public:
-	LIBEVORAL_API static const double PPQN;
+	LIBEVORAL_API static const int32_t PPQN = 1920;
 
-	Beats() : _time(0.0) {}
+	Beats() : _beats(0), _ticks(0) {}
+
+	/** Normalize so ticks is within PPQN. */
+	void normalize() {
+		// First, fix negative ticks with positive beats
+		if (_beats >= 0) {
+			while (_ticks < 0) {
+				--_beats;
+				_ticks += PPQN;
+			}
+		}
+
+		// Work with positive beats and ticks to normalize
+		const int32_t sign  = _beats < 0 ? -1 : 1;
+		int32_t       beats = abs(_beats);
+		int32_t       ticks = abs(_ticks);
+
+		// Fix ticks greater than 1 beat
+		while (ticks >= PPQN) {
+			++beats;
+			ticks -= PPQN;
+		}
+
+		// Set fields with appropriate sign
+		_beats = sign * beats;
+		_ticks = sign * ticks;
+	}
+
+	/** Create from a precise BT time. */
+	explicit Beats(int32_t b, int32_t t) : _beats(b), _ticks(t) {
+		normalize();
+	}
 
 	/** Create from a real number of beats. */
-	explicit Beats(double time) : _time(time) {}
+	explicit Beats(double time) {
+		double       whole;
+		const double frac = modf(time, &whole);
+
+		_beats = whole;
+		_ticks = frac * PPQN;
+	}
 
 	/** Create from an integer number of beats. */
 	static Beats beats(int32_t beats) {
-		return Beats((double)beats);
+		return Beats(beats, 0);
 	}
 
 	/** Create from ticks at the standard PPQN. */
-	static Beats ticks(uint32_t ticks) {
-		return Beats(ticks / PPQN);
+	static Beats ticks(int32_t ticks) {
+		return Beats(0, ticks);
 	}
 
 	/** Create from ticks at a given rate.
 	 *
 	 * Note this can also be used to create from frames by setting ppqn to the
-	 * number of samples per beat.
+	 * number of samples per beat.  Note the resulting Beats will, like all
+	 * others, have the default PPQN, so this is a potentially lossy
+	 * conversion.
 	 */
-	static Beats ticks_at_rate(uint64_t ticks, uint32_t ppqn) {
-		return Beats((double)ticks / (double)ppqn);
+	static Beats ticks_at_rate(int64_t ticks, uint32_t ppqn) {
+		return Beats(ticks / ppqn, (ticks % ppqn) * PPQN / ppqn);
 	}
 
-	Beats& operator=(const Beats& other) {
-		_time = other._time;
+	Beats& operator=(double time) {
+		double       whole;
+		const double frac = modf(time, &whole);
+
+		_beats = whole;
+		_ticks = frac * PPQN;
 		return *this;
 	}
 
+	Beats& operator=(const Beats& other) {
+		_beats = other._beats;
+		_ticks = other._ticks;
+		return *this;
+	}
+
+	Beats round_to_beat() const {
+		return (_ticks >= (PPQN/2)) ? Beats (_beats + 1, 0) : Beats (_beats, 0);
+	}
+
 	Beats round_up_to_beat() const {
-		return Evoral::Beats(ceil(_time));
+		return (_ticks == 0) ? *this : Beats(_beats + 1, 0);
 	}
 
 	Beats round_down_to_beat() const {
-		return Evoral::Beats(floor(_time));
+		return Beats(_beats, 0);
 	}
 
 	Beats snap_to(const Evoral::Beats& snap) const {
-		return Beats(ceil(_time / snap._time) * snap._time);
+		const double snap_time = snap.to_double();
+		return Beats(ceil(to_double() / snap_time) * snap_time);
 	}
 
 	inline bool operator==(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - b._time) <= (1.0 / PPQN);
+		return _beats == b._beats && _ticks == b._ticks;
 	}
 
 	inline bool operator==(double t) const {
 		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - t) <= (1.0 / PPQN);
+		return fabs(to_double() - t) <= (1.0 / PPQN);
 	}
 
 	inline bool operator==(int beats) const {
-		/* Acceptable tolerance is 1 tick. */
-		return fabs(_time - beats) <= (1.0 / PPQN);
+		return _beats == beats;
 	}
 
 	inline bool operator!=(const Beats& b) const {
@@ -96,37 +149,28 @@ public:
 	}
 
 	inline bool operator<(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time < b._time;
-		}
+		return _beats < b._beats || (_beats == b._beats && _ticks < b._ticks);
 	}
 
 	inline bool operator<=(const Beats& b) const {
-		return operator==(b) || operator<(b);
+		return _beats < b._beats || (_beats == b._beats && _ticks <= b._ticks);
 	}
 
 	inline bool operator>(const Beats& b) const {
-		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b._time) <= (1.0 / PPQN)) {
-			return false;  /* Effectively identical. */
-		} else {
-			return _time > b._time;
-		}
+		return _beats > b._beats || (_beats == b._beats && _ticks > b._ticks);
 	}
 
 	inline bool operator>=(const Beats& b) const {
-		return operator==(b) || operator>(b);
+		return _beats > b._beats || (_beats == b._beats && _ticks >= b._ticks);
 	}
 
 	inline bool operator<(double b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b) <= (1.0 / PPQN)) {
+		const double time = to_double();
+		if (fabs(time - b) <= (1.0 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
-			return _time < b;
+			return time < b;
 		}
 	}
 
@@ -136,10 +180,11 @@ public:
 
 	inline bool operator>(double b) const {
 		/* Acceptable tolerance is 1 tick. */
-		if (fabs(_time - b) <= (1.0 / PPQN)) {
+		const double time = to_double();
+		if (fabs(time - b) <= (1.0 / PPQN)) {
 			return false;  /* Effectively identical. */
 		} else {
-			return _time > b;
+			return time > b;
 		}
 	}
 
@@ -148,59 +193,82 @@ public:
 	}
 
 	Beats operator+(const Beats& b) const {
-		return Beats(_time + b._time);
+		return Beats(_beats + b._beats, _ticks + b._ticks);
 	}
 
 	Beats operator-(const Beats& b) const {
-		return Beats(_time - b._time);
+		return Beats(_beats - b._beats, _ticks - b._ticks);
 	}
 
 	Beats operator+(double d) const {
-		return Beats(_time + d);
+		return Beats(to_double() + d);
 	}
 
 	Beats operator-(double d) const {
-		return Beats(_time - d);
+		return Beats(to_double() - d);
+	}
+
+	Beats operator+(int b) const {
+		return Beats (_beats + b, _ticks);
+	}
+
+	Beats operator-(int b) const {
+		return Beats (_beats - b, _ticks);
+	}
+
+	Beats& operator+=(int b) {
+		_beats += b;
+		return *this;
+	}
+
+	Beats& operator-=(int b) {
+		_beats -= b;
+		return *this;
 	}
 
 	Beats operator-() const {
-		return Beats(-_time);
+		return Beats(-_beats, -_ticks);
 	}
 
 	template<typename Number>
 	Beats operator*(Number factor) const {
-		return Beats(_time * factor);
+		return Beats(_beats * factor, _ticks * factor);
+	}
+
+	template<typename Number>
+	Beats operator/(Number factor) const {
+		return ticks ((_beats * PPQN + _ticks) / factor);
 	}
 
 	Beats& operator+=(const Beats& b) {
-		_time += b._time;
+		_beats += b._beats;
+		_ticks += b._ticks;
+		normalize();
 		return *this;
 	}
 
 	Beats& operator-=(const Beats& b) {
-		_time -= b._time;
+		_beats -= b._beats;
+		_ticks -= b._ticks;
+		normalize();
 		return *this;
 	}
 
-	double   to_double()              const { return _time; }
-	uint64_t to_ticks()               const { return lrint(_time * PPQN); }
-	uint64_t to_ticks(uint32_t ppqn)  const { return lrint(_time * ppqn); }
+	double  to_double()              const { return (double)_beats + (_ticks / (double)PPQN); }
+	int64_t to_ticks()               const { return (int64_t)_beats * PPQN + _ticks; }
+	int64_t to_ticks(uint32_t ppqn)  const { return (int64_t)_beats * ppqn + (_ticks * ppqn / PPQN); }
 
-	uint32_t get_beats() const { return floor(_time); }
-	uint32_t get_ticks() const { return (uint32_t)lrint(fmod(_time, 1.0) * PPQN); }
+	int32_t get_beats() const { return _beats; }
+	int32_t get_ticks() const { return _ticks; }
 
-	bool operator!() const { return _time == 0; }
+	bool operator!() const { return _beats == 0 && _ticks == 0; }
 
-	static Beats min()  { return Beats(DBL_MIN); }
-	static Beats max()  { return Beats(DBL_MAX); }
-	static Beats tick() { return Beats(1.0 / PPQN); }
+	static Beats tick() { return Beats(0, 1); }
 
 private:
-	double _time;
+	int32_t _beats;
+	int32_t _ticks;
 };
-
-extern LIBEVORAL_API const Beats MaxBeats;
-extern LIBEVORAL_API const Beats MinBeats;
 
 /*
   TIL, several horrible hours later, that sometimes the compiler looks in the
@@ -215,7 +283,7 @@ extern LIBEVORAL_API const Beats MinBeats;
 inline std::ostream&
 operator<<(std::ostream& os, const Beats& t)
 {
-	os << t.to_double();
+	os << t.get_beats() << '.' << t.get_ticks();
 	return os;
 }
 
@@ -239,8 +307,19 @@ namespace PBD {
 namespace std {
 	template<>
 	struct numeric_limits<Evoral::Beats> {
-		static Evoral::Beats min() { return Evoral::Beats::min(); }
-		static Evoral::Beats max() { return Evoral::Beats::max(); }
+		static Evoral::Beats lowest() {
+			return Evoral::Beats(std::numeric_limits<int32_t>::min(),
+			                     std::numeric_limits<int32_t>::min());
+		}
+
+		/* We don't define min() since this has different behaviour for integral and floating point types,
+		   but Beats is used as both.  Better to avoid providing a min at all
+		   than a confusing one. */
+
+		static Evoral::Beats max() {
+			return Evoral::Beats(std::numeric_limits<int32_t>::max(),
+			                     std::numeric_limits<int32_t>::max());
+		}
 	};
 }
 

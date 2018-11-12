@@ -70,7 +70,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * specified as element-number in \ref get_audio().
 		 * @return \c true if the transcoder process was successfully started.
 		 */
-		bool extract_audio (std::string outfile, ARDOUR::framecnt_t samplerate, unsigned int stream=0);
+		bool extract_audio (std::string outfile, ARDOUR::samplecnt_t samplerate, unsigned int stream=0);
 		/** transcode video and mux audio files into a new video-file.
 		 * @param outfile full-path of output file to create (existing files are overwritten)
 		 * @param inf_a filename of input audio-file
@@ -100,7 +100,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		 * during \ref encode \ref transcode and \ref extract_audio
 		 * The parameters are current and last video-frame.
 		 */
-		PBD::Signal2<void, ARDOUR::framecnt_t, ARDOUR::framecnt_t> Progress;
+		PBD::Signal2<void, ARDOUR::samplecnt_t, ARDOUR::samplecnt_t> Progress;
 		/** signal emitted when the transcoder process terminates. */
 		PBD::Signal0<void> Finished;
 
@@ -108,7 +108,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		double get_aspect () { return m_aspect; }
 		int    get_width() { return m_width; }
 		int    get_height() { return m_height; }
-		ARDOUR::framecnt_t get_duration() { return m_duration; }
+		ARDOUR::samplecnt_t get_duration() { return m_duration; }
 		std::string  get_codec() { return m_codec; }
 
 		FFAudioStreams get_audio() { return m_audio; }
@@ -116,7 +116,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		/** override file duration used with the \ref Progress signal.
 		 * @param d duration in video-frames = length_in_seconds * get_fps()
 		 */
-		void set_duration(ARDOUR::framecnt_t d) { m_duration = d; }
+		void set_duration(ARDOUR::samplecnt_t d) { m_duration = d; }
 
 		/* offset, lead-in/out are in seconds */
 		void set_avoffset(double av_offset) { m_avoffset = av_offset; }
@@ -136,7 +136,7 @@ class TranscodeFfmpeg : public sigc::trackable
 		double m_fps;
 		double m_aspect;
 		std::string m_sar;
-		ARDOUR::framecnt_t m_duration;
+		ARDOUR::samplecnt_t m_duration;
 		int m_width;
 		int m_height;
 		std::string m_codec;

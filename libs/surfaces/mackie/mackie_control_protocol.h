@@ -140,7 +140,6 @@ class MackieControlProtocol
 	bool is_midi_track (boost::shared_ptr<ARDOUR::Stripable>) const;
 	bool is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
 	boost::shared_ptr<ARDOUR::Stripable> first_selected_stripable () const;
-	void update_selected (boost::shared_ptr<ARDOUR::Stripable>, bool selected);
 
 	void check_fader_automation_state ();
 	void update_fader_automation_state ();
@@ -220,7 +219,7 @@ class MackieControlProtocol
 	void update_global_led (int id, Mackie::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
-	framepos_t transport_frame() const;
+	samplepos_t transport_sample() const;
 
 	int modifier_state() const { return _modifier_state; }
 	int main_modifier_state() const { return _modifier_state & MAIN_MODIFIER_MASK; }
@@ -270,8 +269,8 @@ class MackieControlProtocol
 	// also called from poll_automation to update timecode display
 	void update_timecode_display();
 
-	std::string format_bbt_timecode (ARDOUR::framepos_t now_frame);
-	std::string format_timecode_timecode (ARDOUR::framepos_t now_frame);
+	std::string format_bbt_timecode (ARDOUR::samplepos_t now_sample);
+	std::string format_timecode_timecode (ARDOUR::samplepos_t now_sample);
 
 	void do_request (MackieControlUIRequest*);
 	int stop ();
@@ -314,7 +313,7 @@ class MackieControlProtocol
 	Mackie::Timer            _frm_left_last;
 	// last written timecode string
 	std::string              _timecode_last;
-	framepos_t				 _frame_last;
+	samplepos_t				 _sample_last;
 	// Which timecode are we displaying? BBT or Timecode
 	ARDOUR::AnyTime::Type    _timecode_type;
 	// Bundle to represent our input ports
@@ -360,13 +359,12 @@ class MackieControlProtocol
 	void clear_surfaces ();
 	void force_special_stripable_to_strip (boost::shared_ptr<ARDOUR::Stripable> r, uint32_t surface, uint32_t strip_number);
 	void build_button_map ();
-	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr, bool save_list);
-	void _gui_track_selection_changed (ARDOUR::StripableNotificationList*, bool save_list, bool gui_did_change);
+	void stripable_selection_changed ();
 	int ipmidi_restart ();
         void initialize ();
         int set_device_info (const std::string& device_name);
 	void update_configuration_state ();
-
+	
 	/* MIDI port connection management */
 
 	PBD::ScopedConnection port_connection;
@@ -443,22 +441,22 @@ class MackieControlProtocol
 	Mackie::LedState flip_release (Mackie::Button &);
 	Mackie::LedState name_value_press (Mackie::Button &);
 	Mackie::LedState name_value_release (Mackie::Button &);
-	Mackie::LedState F1_press (Mackie::Button &);
-	Mackie::LedState F1_release (Mackie::Button &);
-	Mackie::LedState F2_press (Mackie::Button &);
-	Mackie::LedState F2_release (Mackie::Button &);
-	Mackie::LedState F3_press (Mackie::Button &);
-	Mackie::LedState F3_release (Mackie::Button &);
-	Mackie::LedState F4_press (Mackie::Button &);
-	Mackie::LedState F4_release (Mackie::Button &);
-	Mackie::LedState F5_press (Mackie::Button &);
-	Mackie::LedState F5_release (Mackie::Button &);
-	Mackie::LedState F6_press (Mackie::Button &);
-	Mackie::LedState F6_release (Mackie::Button &);
-	Mackie::LedState F7_press (Mackie::Button &);
-	Mackie::LedState F7_release (Mackie::Button &);
-	Mackie::LedState F8_press (Mackie::Button &);
-	Mackie::LedState F8_release (Mackie::Button &);
+//	Mackie::LedState F1_press (Mackie::Button &);
+//	Mackie::LedState F1_release (Mackie::Button &);
+//	Mackie::LedState F2_press (Mackie::Button &);
+//	Mackie::LedState F2_release (Mackie::Button &);
+//	Mackie::LedState F3_press (Mackie::Button &);
+//	Mackie::LedState F3_release (Mackie::Button &);
+//	Mackie::LedState F4_press (Mackie::Button &);
+//	Mackie::LedState F4_release (Mackie::Button &);
+//	Mackie::LedState F5_press (Mackie::Button &);
+//	Mackie::LedState F5_release (Mackie::Button &);
+//	Mackie::LedState F6_press (Mackie::Button &);
+//	Mackie::LedState F6_release (Mackie::Button &);
+//	Mackie::LedState F7_press (Mackie::Button &);
+//	Mackie::LedState F7_release (Mackie::Button &);
+//	Mackie::LedState F8_press (Mackie::Button &);
+//	Mackie::LedState F8_release (Mackie::Button &);
 	Mackie::LedState touch_press (Mackie::Button &);
 	Mackie::LedState touch_release (Mackie::Button &);
 	Mackie::LedState enter_press (Mackie::Button &);

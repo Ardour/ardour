@@ -33,13 +33,16 @@
 #include "ardour/session.h"
 #include "ardour/profile.h"
 
-#include "gtkmm2ext/choice.h"
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/choice.h"
+#include "widgets/tooltips.h"
 
 #include "audio_clock.h"
 #include "editor.h"
 #include "editing.h"
+#include "editing_convert.h"
 #include "keyboard.h"
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -49,13 +52,13 @@
 #include "editor_regions.h"
 #include "editor_drag.h"
 #include "main_clock.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
@@ -64,9 +67,9 @@ using namespace Editing;
 using Gtkmm2ext::Keyboard;
 
 struct ColumnInfo {
-    int         index;
-    const char* label;
-    const char* tooltip;
+	int         index;
+	const char* label;
+	const char* tooltip;
 };
 
 EditorRegions::EditorRegions (Editor* e)
@@ -494,13 +497,13 @@ EditorRegions::remove_unused_regions ()
 		return;
 	}
 
-	prompt  = _("Do you really want to remove unused regions?"
-		    "\n(This is destructive and cannot be undone)");
+	prompt = _("Do you really want to remove unused regions?"
+	           "\n(This is destructive and cannot be undone)");
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Yes, remove."));
 
-	Gtkmm2ext::Choice prompter (_("Remove unused regions"), prompt, choices);
+	ArdourWidgets::Choice prompter (_("Remove unused regions"), prompt, choices);
 
 	if (prompter.run () == 1) {
 		_no_redisplay = true;
@@ -513,6 +516,15 @@ EditorRegions::remove_unused_regions ()
 void
 EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
+	//maybe update the grid here
+	PropertyChange grid_interests;
+	grid_interests.add (ARDOUR::Properties::position);
+	grid_interests.add (ARDOUR::Properties::length);
+	grid_interests.add (ARDOUR::Properties::sync_position);
+	if (what_changed.contains (grid_interests)) {
+		_editor->mark_region_boundary_cache_dirty();
+	}
+
 	PropertyChange our_interests;
 
 	our_interests.add (ARDOUR::Properties::name);
@@ -724,7 +736,7 @@ EditorRegions::update_all_rows ()
 }
 
 void
-EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool onoff)
+EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool onoff)
 {
 	Timecode::BBT_Time bbt;
 	Timecode::Time timecode;
@@ -737,7 +749,7 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 
 	switch (ARDOUR_UI::instance()->secondary_clock->mode ()) {
 	case AudioClock::BBT:
-		bbt = _session->tempo_map().bbt_at_frame (pos);
+		bbt = _session->tempo_map().bbt_at_sample (pos);
 		if (onoff) {
 			snprintf (buf, bufsize, "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 		} else {
@@ -746,17 +758,17 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 		break;
 
 	case AudioClock::MinSec:
-		framepos_t left;
+		samplepos_t left;
 		int hrs;
 		int mins;
 		float secs;
 
 		left = pos;
-		hrs = (int) floor (left / (_session->frame_rate() * 60.0f * 60.0f));
-		left -= (framecnt_t) floor (hrs * _session->frame_rate() * 60.0f * 60.0f);
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framecnt_t) floor (mins * _session->frame_rate() * 60.0f);
-		secs = left / (float) _session->frame_rate();
+		hrs = (int) floor (left / (_session->sample_rate() * 60.0f * 60.0f));
+		left -= (samplecnt_t) floor (hrs * _session->sample_rate() * 60.0f * 60.0f);
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplecnt_t) floor (mins * _session->sample_rate() * 60.0f);
+		secs = left / (float) _session->sample_rate();
 		if (onoff) {
 			snprintf (buf, bufsize, "%02d:%02d:%06.3f", hrs, mins, secs);
 		} else {
@@ -764,7 +776,15 @@ EditorRegions::format_position (framepos_t pos, char* buf, size_t bufsize, bool 
 		}
 		break;
 
-	case AudioClock::Frames:
+	case AudioClock::Seconds:
+		if (onoff) {
+			snprintf (buf, bufsize, "%.1f", pos / (float)_session->sample_rate());
+		} else {
+			snprintf (buf, bufsize, "(%.1f)", pos / (float)_session->sample_rate());
+		}
+		break;
+
+	case AudioClock::Samples:
 		if (onoff) {
 			snprintf (buf, bufsize, "%" PRId64, pos);
 		} else {
@@ -837,27 +857,27 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 #if 0
 	if (audioRegion && fades_in_seconds) {
 
-		framepos_t left;
+		samplepos_t left;
 		int mins;
 		int millisecs;
 
 		left = audioRegion->fade_in()->back()->when;
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
+		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
 
-		if (audioRegion->fade_in()->back()->when >= _session->frame_rate()) {
+		if (audioRegion->fade_in()->back()->when >= _session->sample_rate()) {
 			sprintf (fadein_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadein_str, "%01dmS", millisecs);
 		}
 
 		left = audioRegion->fade_out()->back()->when;
-		mins = (int) floor (left / (_session->frame_rate() * 60.0f));
-		left -= (framepos_t) floor (mins * _session->frame_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->frame_rate());
+		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
+		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
+		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
 
-		if (audioRegion->fade_out()->back()->when >= _session->frame_rate()) {
+		if (audioRegion->fade_out()->back()->when >= _session->sample_rate()) {
 			sprintf (fadeout_str, "%01dM %01dmS", mins, millisecs);
 		} else {
 			sprintf (fadeout_str, "%01dmS", millisecs);
@@ -880,7 +900,7 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 
 	if (ARDOUR_UI::instance()->secondary_clock->mode () == AudioClock::BBT) {
 		TempoMap& map (_session->tempo_map());
-		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_frame (region->last_frame()) - map.beat_at_frame (region->first_frame()));
+		Timecode::BBT_Time bbt = map.bbt_at_beat (map.beat_at_sample (region->last_sample()) - map.beat_at_sample (region->first_sample()));
 		snprintf (buf, sizeof (buf), "%03d|%02d|%04d" , bbt.bars, bbt.beats, bbt.ticks);
 	} else {
 		format_position (region->length(), buf, sizeof (buf));
@@ -896,9 +916,9 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 		row[_columns.end] = "";
 	} else if (used > 1) {
 		row[_columns.end] = _("Mult.");
-	} else if (region->last_frame() >= region->first_frame()) {
+	} else if (region->last_sample() >= region->first_sample()) {
 		char buf[16];
-		format_position (region->last_frame(), buf, sizeof (buf));
+		format_position (region->last_sample(), buf, sizeof (buf));
 		row[_columns.end] = buf;
 	} else {
 		row[_columns.end] = "empty";
@@ -929,7 +949,7 @@ EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::R
 	} else {
 		if (region->sync_position() == region->position()) {
 			row[_columns.sync] = _("Start");
-		} else if (region->sync_position() == (region->last_frame())) {
+		} else if (region->sync_position() == (region->last_sample())) {
 			row[_columns.sync] = _("End");
 		} else {
 			char buf[16];
@@ -1030,7 +1050,7 @@ EditorRegions::populate_row_name (boost::shared_ptr<Region> region, TreeModel::R
 void
 EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-        if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
+	if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
 		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (region->source()->name());
 	} else {
 		row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source()->name());
@@ -1055,10 +1075,10 @@ EditorRegions::set_full (bool f)
 {
 	if (f) {
 		_display.expand_all ();
-                expanded = true;
+		expanded = true;
 	} else {
 		_display.collapse_all ();
-                expanded = false;
+		expanded = false;
 	}
 }
 
@@ -1302,9 +1322,9 @@ EditorRegions::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl
 
 void
 EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
-				   int x, int y,
-				   const SelectionData& data,
-				   guint info, guint time)
+                                   int x, int y,
+                                   const SelectionData& data,
+                                   guint info, guint time)
 {
 	vector<string> paths;
 
@@ -1316,7 +1336,7 @@ EditorRegions::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 
 	if (_editor->convert_drop_to_paths (paths, context, x, y, data, info, time) == 0) {
-		framepos_t pos = 0;
+		samplepos_t pos = 0;
 		bool copy = ((context->get_actions() & (Gdk::ACTION_COPY | Gdk::ACTION_LINK | Gdk::ACTION_MOVE)) == Gdk::ACTION_COPY);
 
 		if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
@@ -1529,13 +1549,13 @@ EditorRegions::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("RegionList"));
 
-	node->add_property (X_("sort-type"), enum_2_string (_sort_type));
+	node->set_property (X_("sort-type"), _sort_type);
 
 	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
 	bool const ascending = RefPtr<RadioAction>::cast_dynamic(act)->get_active ();
-	node->add_property (X_("sort-ascending"), ascending ? "yes" : "no");
-	node->add_property (X_("show-all"), toggle_full_action()->get_active() ? "yes" : "no");
-	node->add_property (X_("show-automatic-regions"), _show_automatic_regions ? "yes" : "no");
+	node->set_property (X_("sort-ascending"), ascending);
+	node->set_property (X_("show-all"), toggle_full_action()->get_active());
+	node->set_property (X_("show-automatic-regions"), _show_automatic_regions);
 
 	return *node;
 }
@@ -1549,10 +1569,8 @@ EditorRegions::set_state (const XMLNode & node)
 		return;
 	}
 
-	XMLProperty const * p = node.property (X_("sort-type"));
-
-	if (p) {
-		Editing::RegionListSortType const t = static_cast<Editing::RegionListSortType> (string_2_enum (p->value(), _sort_type));
+	Editing::RegionListSortType t;
+	if (node.get_property (X_("sort-type"), t)) {
 
 		if (_sort_type != t) {
 			changed = true;
@@ -1563,10 +1581,8 @@ EditorRegions::set_state (const XMLNode & node)
 		ract->set_active ();
 	}
 
-	p = node.property (X_("sort-ascending"));
-
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
+	bool yn;
+	if (node.get_property (X_("sort-ascending"), yn)) {
 		SortType old_sort_type;
 		int old_sort_column;
 
@@ -1588,10 +1604,7 @@ EditorRegions::set_state (const XMLNode & node)
 		RefPtr<RadioAction>::cast_dynamic(act)->set_active ();
 	}
 
-	p = node.property (X_("show-all"));
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
-
+	if (node.get_property (X_("show-all"), yn)) {
 		if (expanded != yn) {
 			changed = true;
 		}
@@ -1600,10 +1613,7 @@ EditorRegions::set_state (const XMLNode & node)
 		toggle_full_action()->set_active (yn);
 	}
 
-	p = node.property (X_("show-automatic-regions"));
-	if (p) {
-		bool const yn = string_is_affirmative (p->value ());
-
+	if (node.get_property (X_("show-automatic-regions"), yn)) {
 		if (yn != _show_automatic_regions) {
 			_show_automatic_regions = yn;
 			toggle_show_auto_regions_action()->set_active (yn);

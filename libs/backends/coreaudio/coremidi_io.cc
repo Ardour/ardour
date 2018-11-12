@@ -82,7 +82,7 @@ static void midiInputCallback(const MIDIPacketList *list, void *procRef, void *s
 #endif
 		return;
 	}
-	RingBuffer<uint8_t> * rb  = static_cast<RingBuffer < uint8_t > *> (srcRef);
+	PBD::RingBuffer<uint8_t> * rb  = static_cast<PBD::RingBuffer < uint8_t > *> (srcRef);
 	if (!rb) {
 #ifndef NDEBUG
 		if (_debug_mode & 4) {
@@ -321,10 +321,10 @@ CoreMidiIo::send_events (uint32_t port, double timescale, const void *b)
 	MIDIPacket *cur = MIDIPacketListInit(mpl);
 
 	for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-		assert((*mit)->size() < 256);
+		assert(mit->size() < 256);
 		cur = MIDIPacketListAdd(mpl, sizeof(bytes), cur,
-				AudioConvertNanosToHostTime(ts + (*mit)->timestamp() / timescale),
-				(*mit)->size(), (*mit)->data());
+				AudioConvertNanosToHostTime(ts + mit->timestamp() / timescale),
+				mit->size(), mit->data());
 		if (!cur) {
 #ifndef DEBUG
 			printf("CoreMidi: Packet list overflow, dropped events\n");
@@ -450,7 +450,7 @@ CoreMidiIo::discover()
 		_input_ports = (MIDIPortRef *) malloc (srcCount * sizeof(MIDIPortRef));
 		_input_endpoints = (MIDIEndpointRef*) malloc (srcCount * sizeof(MIDIEndpointRef));
 		_input_queue = (CoreMIDIQueue*) calloc (srcCount, sizeof(CoreMIDIQueue));
-		_rb = (RingBuffer<uint8_t> **) malloc (srcCount * sizeof(RingBuffer<uint8_t>*));
+		_rb = (PBD::RingBuffer<uint8_t> **) malloc (srcCount * sizeof(PBD::RingBuffer<uint8_t>*));
 	}
 	if (dstCount > 0) {
 		_output_ports = (MIDIPortRef *) malloc (dstCount * sizeof(MIDIPortRef));
@@ -473,7 +473,7 @@ CoreMidiIo::discover()
 			fprintf(stderr, "Cannot create Midi Output\n");
 			continue;
 		}
-		_rb[_n_midi_in] = new RingBuffer<uint8_t>(32768);
+		_rb[_n_midi_in] = new PBD::RingBuffer<uint8_t>(32768);
 		_input_queue[_n_midi_in] = CoreMIDIQueue();
 		MIDIPortConnectSource(_input_ports[_n_midi_in], src, (void*) _rb[_n_midi_in]);
 		CFRelease(port_name);

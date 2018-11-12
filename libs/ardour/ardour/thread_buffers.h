@@ -45,11 +45,12 @@ public:
 	gain_t*    gain_automation_buffer;
 	gain_t*    trim_automation_buffer;
 	gain_t*    send_gain_automation_buffer;
+	gain_t*    scratch_automation_buffer;
 	pan_t**    pan_automation_buffer;
 	uint32_t   npan_buffers;
 
 private:
-	void allocate_pan_automation_buffers (framecnt_t nframes, uint32_t howmany, bool force);
+	void allocate_pan_automation_buffers (samplecnt_t nframes, uint32_t howmany, bool force);
 };
 
 } // namespace

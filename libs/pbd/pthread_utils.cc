@@ -207,3 +207,96 @@ pthread_cancel_one (pthread_t thread)
 	pthread_cancel (thread);
 	pthread_mutex_unlock (&thread_map_lock);
 }
+
+int
+pbd_realtime_pthread_create (
+		const int policy, int priority, const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg)
+{
+	int rv;
+
+	pthread_attr_t attr;
+	struct sched_param parm;
+
+	const int p_min = sched_get_priority_min (policy);
+	const int p_max = sched_get_priority_max (policy);
+	priority += p_max;
+	if (priority > p_max) priority = p_max;
+	if (priority < p_min) priority = p_min;
+	parm.sched_priority = priority;
+
+	pthread_attr_init (&attr);
+	pthread_attr_setschedpolicy (&attr, policy);
+	pthread_attr_setschedparam (&attr, &parm);
+	pthread_attr_setscope (&attr, PTHREAD_SCOPE_SYSTEM);
+	pthread_attr_setinheritsched (&attr, PTHREAD_EXPLICIT_SCHED);
+	pthread_attr_setstacksize (&attr, stacksize);
+	rv = pthread_create (thread, &attr, start_routine, arg);
+	pthread_attr_destroy (&attr);
+	return rv;
+}
+
+int
+pbd_set_thread_priority (pthread_t thread, const int policy, int priority)
+{
+	struct sched_param param;
+	memset (&param, 0, sizeof (param));
+
+	/* POSIX requires a spread of at least 32 steps between min..max */
+	const int p_min = sched_get_priority_min (policy); // Linux: 1
+	const int p_max = sched_get_priority_max (policy); // Linux: 99
+
+	if (priority == 0) {
+		/* use default. XXX this should be relative to audio (JACK) thread,
+		 * internal backends use -20 (Audio), -21 (MIDI), -22 (compuation)
+		 */
+		priority = 7; // BaseUI backwards compat.
+	}
+
+	if (priority > 0) {
+		priority += p_min;
+	} else {
+		priority += p_max;
+	}
+	if (priority > p_max) priority = p_max;
+	if (priority < p_min) priority = p_min;
+	param.sched_priority = priority;
+
+	return pthread_setschedparam (thread, SCHED_FIFO, &param);
+}
+
+bool
+pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns)
+{
+#ifdef _APPLE_
+	thread_time_constraint_policy_data_t policy;
+#ifndef NDEBUG
+	mach_msg_type_number_t msgt = 4;
+	boolean_t dflt = false;
+	kern_return_t rv = thread_policy_get (pthread_mach_thread_np (_main_thread),
+			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
+			&msgt, &dflt);
+	printf ("Mach Thread(%p) %d %d %d %d DFLT %d OK: %d\n", _main_thread, policy.period, policy.computation, policy.constraint, policy.preemptible, dflt, rv == KERN_SUCCESS);
+#endif
+
+	mach_timebase_info_data_t timebase_info;
+	mach_timebase_info(&timebase_info);
+	const double period_clk = period_ns * (double)timebase_info.denom / (double)timebase_info.numer;
+
+	policy.period = period_clk;
+	policy.computation = period_clk * .9;
+	policy.constraint = period_clk * .95;
+	policy.preemptible = true;
+	kern_return_t res = thread_policy_set (pthread_mach_thread_np (thread_id),
+			THREAD_TIME_CONSTRAINT_POLICY, (thread_policy_t) &policy,
+			THREAD_TIME_CONSTRAINT_POLICY_COUNT);
+
+#ifndef NDEBUG
+	printf ("Mach Thread(%p) %d %d %d %d OK: %d\n", thread_id, policy.period, policy.computation, policy.constraint, policy.preemptible, res == KERN_SUCCESS);
+#endif
+	return res != KERN_SUCCESS;
+#endif
+	return false; // OK
+}

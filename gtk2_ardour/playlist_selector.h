@@ -26,7 +26,7 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/button.h>
 #include <gtkmm/treeview.h>
-#include <gtkmm2ext/selector.h>
+#include <gtkmm/treestore.h>
 
 #include "ardour_dialog.h"
 #include "ardour/session_handle.h"
@@ -41,16 +41,16 @@ class RouteUI;
 
 class PlaylistSelector : public ArdourDialog
 {
-  public:
+public:
 	PlaylistSelector ();
 	~PlaylistSelector ();
 
 	void show_for (RouteUI*);
 
-  protected:
+protected:
 	bool on_unmap_event (GdkEventAny*);
 
-  private:
+private:
 	typedef std::map<PBD::ID,std::list<boost::shared_ptr<ARDOUR::Playlist> >*> TrackPlaylistMap;
 
 	Gtk::ScrolledWindow scroller;
@@ -64,13 +64,14 @@ class PlaylistSelector : public ArdourDialog
 	void close_button_click ();
 	void selection_changed ();
 
-	struct ModelColumns : public Gtk::TreeModel::ColumnRecord {
-	    ModelColumns () {
-		    add (text);
-		    add (playlist);
-	    }
-	    Gtk::TreeModelColumn<std::string> text;
-	    Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Playlist> >   playlist;
+	struct ModelColumns : public Gtk::TreeModel::ColumnRecord
+	{
+		ModelColumns () {
+			add (text);
+			add (playlist);
+		}
+		Gtk::TreeModelColumn<std::string> text;
+		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Playlist> >   playlist;
 	};
 
 	ModelColumns columns;

@@ -38,7 +38,7 @@ class Session;
 class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 {
   public:
-	LadspaPlugin (std::string module_path, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, framecnt_t sample_rate);
+	LadspaPlugin (std::string module_path, ARDOUR::AudioEngine&, ARDOUR::Session&, uint32_t index, samplecnt_t sample_rate);
 	LadspaPlugin (const LadspaPlugin &);
 	~LadspaPlugin ();
 
@@ -50,7 +50,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	const char* maker() const           { return _descriptor->Maker; }
 	uint32_t    parameter_count() const { return _descriptor->PortCount; }
 	float       default_value (uint32_t port) { return _default_value (port); }
-	framecnt_t  signal_latency() const;
+	samplecnt_t  signal_latency() const;
 	void        set_parameter (uint32_t port, float val);
 	float       get_parameter (uint32_t port) const;
 	int         get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const;
@@ -83,9 +83,9 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
 
 	int connect_and_run (BufferSet& bufs,
-			framepos_t start, framepos_t end, double speed,
+			samplepos_t start, samplepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset);
+			pframes_t nframes, samplecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
 	std::string state_node_name() const { return "ladspa"; }
@@ -125,7 +125,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	Glib::Module*            _module;
 	const LADSPA_Descriptor* _descriptor;
 	LADSPA_Handle            _handle;
-	framecnt_t               _sample_rate;
+	samplecnt_t               _sample_rate;
 	LADSPA_Data*             _control_data;
 	LADSPA_Data*             _shadow_data;
 	LADSPA_Data*             _latency_control_port;
@@ -134,7 +134,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 
 	void find_presets ();
 
-	void init (std::string module_path, uint32_t index, framecnt_t rate);
+	void init (std::string module_path, uint32_t index, samplecnt_t rate);
 	void run_in_place (pframes_t nsamples);
 	void latency_compute_run ();
 	int set_state_2X (const XMLNode&, int version);
@@ -150,6 +150,13 @@ class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
   public:
 	LadspaPluginInfo ();
 	~LadspaPluginInfo () { };
+
+	bool is_instrument () const { return false; } /* ladspa's are never instruments */
+#ifdef MIXBUS
+	/* for mixbus, relegate ladspa's to the Utils folder. */
+	bool is_effect () const { return false; }
+	bool is_utility () const { return true; }
+#endif
 
 	PluginPtr load (Session& session);
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;

@@ -30,10 +30,12 @@
 #include <glib.h>
 #include <glib/gstdio.h>
 
-#include <gtkmm/stock.h>
-#include <gtkmm/label.h>
 #include <gtkmm/accelkey.h>
 #include <gtkmm/accelmap.h>
+#include <gtkmm/label.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/treemodelsort.h>
 #include <gtkmm/uimanager.h>
 
 #include "gtkmm2ext/bindings.h"

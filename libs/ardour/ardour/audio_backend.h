@@ -629,11 +629,11 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
     virtual TransportState transport_state () const { return TransportStopped; }
     /** Attempt to locate the transport to @param pos
      */
-    virtual void transport_locate (framepos_t /*pos*/) {}
+    virtual void transport_locate (samplepos_t /*pos*/) {}
     /** Return the current transport location, in samples measured
      * from the origin (defined by the transport time master)
      */
-    virtual framepos_t transport_frame() const { return 0; }
+    virtual samplepos_t transport_sample() const { return 0; }
 
     /** If @param yn is true, become the time master for any inter-application transport
      * timebase, otherwise cease to be the time master for the same.
@@ -661,12 +661,12 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      *
      * Can be called from any thread.
      */
-    virtual framepos_t sample_time () = 0;
+    virtual samplepos_t sample_time () = 0;
 
     /** Return the time according to the sample clock in use when the most
      * recent buffer process cycle began. Can be called from any thread.
      */
-    virtual framepos_t sample_time_at_cycle_start () = 0;
+    virtual samplepos_t sample_time_at_cycle_start () = 0;
 
     /** Return the time since the current buffer process cycle started,
      * in samples, according to the sample clock in use.
@@ -730,7 +730,7 @@ class LIBARDOUR_API AudioBackend : public PortEngine {
      * handled by Ardour itself (LTC and MTC are both handled by Ardour).
      * The canonical example is JACK Transport.
      */
-     virtual bool speed_and_position (double& speed, framepos_t& position) {
+     virtual bool speed_and_position (double& speed, samplepos_t& position) {
 	     speed = 0.0;
 	     position = 0;
 	     return false;

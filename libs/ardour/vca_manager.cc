@@ -17,11 +17,12 @@
 
 */
 
-#include "pbd/convert.h"
 #include "pbd/error.h"
 #include "pbd/replace_all.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/boost_debug.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/slavable.h"
 #include "ardour/vca.h"
@@ -50,11 +51,24 @@ VCAManager::~VCAManager ()
 void
 VCAManager::clear ()
 {
-	Mutex::Lock lm (lock);
-	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
-		(*i)->DropReferences ();
+	bool send = false;
+	{
+		Mutex::Lock lm (lock);
+		for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+			if ((*i)->is_selected ()) {
+				_session.selection().remove_stripable_by_id ((*i)->id());
+				send = true;
+			}
+			(*i)->DropReferences ();
+		}
+		_vcas.clear ();
 	}
-	_vcas.clear ();
+
+	if (send && !_session.deletion_in_progress ()) {
+		PropertyChange pc;
+		pc.add (Properties::selected);
+		PresentationInfo::Change (pc);
+	}
 }
 
 VCAList
@@ -64,10 +78,12 @@ VCAManager::vcas () const
 	return _vcas;
 }
 
-int
+VCAList
 VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 {
 	VCAList vcal;
+
+	uint32_t n_stripables = _session.nstripables ();
 
 	{
 		Mutex::Lock lm (lock);
@@ -78,7 +94,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			string name = name_template;
 
 			if (name.find ("%n")) {
-				string sn = PBD::to_string (num, std::dec);
+				string sn = PBD::to_string (num);
 				replace_all (name, "%n", sn);
 			}
 
@@ -86,6 +102,7 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 			BOOST_MARK_VCA (vca);
 
 			vca->init ();
+			vca->set_presentation_order (n + n_stripables);
 
 			_vcas.push_back (vca);
 			vcal.push_back (vca);
@@ -96,9 +113,8 @@ VCAManager::create_vca (uint32_t howmany, std::string const & name_template)
 
 	_session.set_dirty ();
 
-	return 0;
+	return vcal;
 }
-
 
 void
 VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
@@ -112,6 +128,12 @@ VCAManager::remove_vca (boost::shared_ptr<VCA> vca)
 
 	vca->DropReferences ();
 
+	if (vca->is_selected () && !_session.deletion_in_progress ()) {
+		_session.selection().remove_stripable_by_id (vca->id());
+		PropertyChange pc;
+		pc.add (Properties::selected);
+		PresentationInfo::Change (pc);
+	}
 	_session.set_dirty ();
 }
 
@@ -122,6 +144,20 @@ VCAManager::vca_by_number (int32_t n) const
 
 	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
 		if ((*i)->number() == n) {
+			return *i;
+		}
+	}
+
+	return boost::shared_ptr<VCA>();
+}
+
+boost::shared_ptr<VCA>
+VCAManager::vca_by_name (std::string const& name) const
+{
+	Mutex::Lock lm (lock);
+
+	for (VCAList::const_iterator i = _vcas.begin(); i != _vcas.end(); ++i) {
+		if ((*i)->name() == name || (*i)->full_name() == name) {
 			return *i;
 		}
 	}

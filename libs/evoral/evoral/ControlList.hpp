@@ -113,15 +113,14 @@ public:
 	}
 	bool empty() const { return _events.empty(); }
 
-	void reset_default (double val) {
-		_default_value = val;
-	}
-
 	void clear ();
 	void x_scale (double factor);
 	bool extend_to (double);
 	void slide (iterator before, double distance);
 	void shift (double before, double distance);
+
+	void y_transform (boost::function<double(double)> callback);
+	void list_merge (ControlList const& other, boost::function<double(double, double)> callback);
 
 	/** add automation events
 	 * @param when absolute time in samples
@@ -172,15 +171,7 @@ public:
 	 */
 	void clear (double start, double end);
 
-	bool paste (const ControlList&, double position, float times);
-
-	void set_yrange (double min, double max) {
-		_min_yval = min;
-		_max_yval = max;
-	}
-
-	double get_max_y() const { return _max_yval; }
-	double get_min_y() const { return _min_yval; }
+	bool paste (const ControlList&, double position);
 
 	/** truncate the event list after the given time
 	 * @param last_coordinate last event to include
@@ -215,7 +206,7 @@ public:
 	 * @param where absolute time in samples
 	 * @returns parameter value
 	 */
-	double eval (double where) {
+	double eval (double where) const {
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 		return unlocked_eval (where);
 	}
@@ -225,7 +216,7 @@ public:
 	 * @param ok boolean reference if returned value is valid
 	 * @returns parameter value
 	 */
-	double rt_safe_eval (double where, bool& ok) {
+	double rt_safe_eval (double where, bool& ok) const {
 
 		Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
 
@@ -255,7 +246,6 @@ public:
 	};
 
 	const EventList& events() const { return _events; }
-	double default_value() const { return _default_value; }
 
 	// FIXME: const violations for Curve
 	Glib::Threads::RWLock& lock()       const { return _lock; }
@@ -285,7 +275,9 @@ public:
 	enum InterpolationStyle {
 		Discrete,
 		Linear,
-		Curved
+		Curved, // spline, used for x-fades
+		Logarithmic,
+		Exponential // fader, gain
 	};
 
 	/** query interpolation style of the automation data
@@ -293,10 +285,18 @@ public:
 	 */
 	InterpolationStyle interpolation() const { return _interpolation; }
 
-	/** set the interpolation style of the automation data
+	/** query default interpolation for parameter-descriptor */
+	virtual InterpolationStyle default_interpolation() const;
+
+	/** set the interpolation style of the automation data.
+	 *
+	 * This will fail when asking for Logarithmic scale and min,max crosses 0
+	 * or Exponential scale with min != 0.
+	 *
 	 * @param is interpolation style
+	 * @returns true if style change was successful
 	 */
-	void set_interpolation (InterpolationStyle is);
+	bool set_interpolation (InterpolationStyle is);
 
 	virtual bool touching() const { return false; }
 	virtual bool writing() const { return false; }
@@ -307,6 +307,7 @@ public:
 	bool in_write_pass () const;
 	bool in_new_write_pass () { return new_write_pass; }
 
+	PBD::Signal0<void> WritePassStarted;
 	/** Emitted when mark_dirty() is called on this object */
 	mutable PBD::Signal0<void> Dirty;
 	/** Emitted when our interpolation style changes */
@@ -345,21 +346,22 @@ protected:
 	EventList             _events;
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
-	double                _min_yval;
-	double                _max_yval;
-	double                _default_value;
 	bool                  _sort_pending;
 
 	Curve* _curve;
 
-  private:
-    iterator   most_recent_insert_iterator;
-    double     insert_position;
-    bool       new_write_pass;
-    bool       did_write_during_pass;
-    bool       _in_write_pass;
-    void unlocked_invalidate_insert_iterator ();
-    void add_guard_point (double when);
+private:
+	iterator   most_recent_insert_iterator;
+	double     insert_position;
+	bool       new_write_pass;
+	bool       did_write_during_pass;
+	bool       _in_write_pass;
+
+	void unlocked_remove_duplicates ();
+	void unlocked_invalidate_insert_iterator ();
+	void add_guard_point (double when, double offset);
+
+	bool is_sorted () const;
 };
 
 } // namespace Evoral

@@ -20,7 +20,7 @@
 
 #include <gtkmm/menu.h>
 
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 
 #include "ardour/session.h"
 #include "ardour/stripable.h"
@@ -31,23 +31,24 @@
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/utils.h"
 
-#include "ardour_button.h"
 #include "control_slave_ui.h"
 #include "gui_thread.h"
 
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
+using namespace ArdourWidgets;
 using namespace Gtk;
 using std::string;
 
 ControlSlaveUI::ControlSlaveUI (Session* s)
 	: SessionHandlePtr (s)
 	, initial_button (ArdourButton::default_elements)
+	, context_menu (0)
 {
 	set_no_show_all (true);
 
-	Gtkmm2ext::UI::instance()->set_tip (*this, _("Control Masters"));
+	Gtkmm2ext::UI::instance()->set_tip (*this, _("VCA Assign"));
 
 	initial_button.set_no_show_all (true);
 	initial_button.set_name (X_("vca assign"));
@@ -57,6 +58,11 @@ ControlSlaveUI::ControlSlaveUI (Session* s)
 	initial_button.signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::vca_button_release), 0), false);
 
 	pack_start (initial_button, true, true);
+}
+
+ControlSlaveUI::~ControlSlaveUI ()
+{
+	delete context_menu;
 }
 
 void
@@ -105,6 +111,7 @@ ControlSlaveUI::update_vca_display ()
 
 	if (!any) {
 		pack_start (initial_button, true, true);
+		initial_button.show ();
 	}
 
 	show ();
@@ -128,7 +135,7 @@ ControlSlaveUI::vca_menu_toggle (Gtk::CheckMenuItem* menuitem, uint32_t n)
 	if (!menuitem->get_active()) {
 		sl->unassign (vca);
 	} else {
-		sl->assign (vca, false);
+		sl->assign (vca);
 	}
 }
 
@@ -177,27 +184,23 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 		return true;
 	}
 
-	Menu* menu = new Menu;
-	MenuList& items = menu->items();
+	delete context_menu;
+	context_menu = new Menu;
+	MenuList& items = context_menu->items();
 	bool slaved = false;
 
 	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 
-		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
-		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
-
-		if (gcs == gcm) {
-			/* asked to slave to self. not ok */
-			continue;
-		}
-
-		if (gcm->slaved_to (gcs)) {
-			/* master is already slaved to slave */
+		if (stripable->assigned_to (_session->vca_manager_ptr (), *v)) {
+			/* master(stripable) is directly or indirectly controlled by slave (v) */
 			continue;
 		}
 
 		items.push_back (CheckMenuElem ((*v)->name()));
 		Gtk::CheckMenuItem* item = dynamic_cast<Gtk::CheckMenuItem*> (&items.back());
+
+		boost::shared_ptr<GainControl> gcs = stripable->gain_control();
+		boost::shared_ptr<GainControl> gcm = (*v)->gain_control();
 
 		if (gcs->slaved_to (gcm)) {
 			item->set_active (true);
@@ -212,7 +215,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 	}
 
 	if (!items.empty()) {
-		menu->popup (1, ev->time);
+		context_menu->popup (1, ev->time);
 	}
 
 	return true;
@@ -227,7 +230,7 @@ ControlSlaveUI::add_vca_button (boost::shared_ptr<VCA> vca)
 	vca_button->set_name (X_("vca assign"));
 	vca_button->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_button->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &ControlSlaveUI::specific_vca_button_release), vca->number()), false);
-	vca_button->set_text (PBD::to_string (vca->number(), std::dec));
+	vca_button->set_text (PBD::to_string (vca->number()));
 	vca_button->set_fixed_colors (vca->presentation_info().color(), vca->presentation_info().color ());
 
 	vca->presentation_info().PropertyChanged.connect (master_connections, invalidator (*this), boost::bind (&ControlSlaveUI::master_property_changed, this, _1), gui_context());

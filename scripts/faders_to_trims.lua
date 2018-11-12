@@ -19,6 +19,16 @@ function factory (params)
 		for t in Session:get_tracks():iter() do
 			
 			fader_value = t:gain_control():get_value()
+			if fader_value == 1 then
+				goto skip
+			end
+			if t:gain_control():automation_state() ~= ARDOUR.AutoState.Off then
+				goto skip
+			end
+
+			-- TODO: skip MIDI tracks without or with a post-fader synth
+			-- (fader is MIDI-velocity)
+
 			v = math.log(fader_value, 10)
 			trim_gain = 20*v
 			fader_pos = 0
@@ -52,6 +62,8 @@ function factory (params)
 
 			--zero the fader gain
 			t:gain_control():set_value(1, PBD.GroupControlDisposition.NoGroup)
+
+			::skip::
 
 		end --foreach track
 

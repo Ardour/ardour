@@ -125,6 +125,7 @@ typedef struct {
 	LV2_URID patch_Set;
 	LV2_URID patch_property;
 	LV2_URID patch_value;
+	LV2_URID state_Changed;
 	LV2_URID afs_sf2file;
 
 	/* lv2 extensions */
@@ -132,10 +133,11 @@ typedef struct {
 	LV2_Log_Logger       logger;
   LV2_Worker_Schedule* schedule;
 	LV2_Atom_Forge       forge;
-	LV2_Atom_Forge_Frame frame;
+	LV2_Atom_Forge_Frame sample;
 
 #ifdef LV2_EXTENDED
 	LV2_Midnam*          midnam;
+	LV2_BankPatch*       bankpatch;
 	BPMap                presets;
 #endif
 	pthread_mutex_t      bp_lock;
@@ -144,14 +146,13 @@ typedef struct {
 	bool panic;
 	bool initialized;
 	bool inform_ui;
+	bool send_bankpgm;
 
 	char current_sf2_file_path[1024];
 	char queue_sf2_file_path[1024];
 	bool reinit_in_progress; // set in run, cleared in work_response
 	bool queue_reinit; // set in restore, cleared in work_response
 
-	uint8_t last_bank_lsb;
-	uint8_t last_bank_msb;
 	BankProgram program_state[16];
 
 	fluid_midi_event_t* fmidi_event;
@@ -207,14 +208,6 @@ load_sf2 (AFluidSynth* self, const char* fn)
 		return false;
 	}
 
-	for (chn = 0; chn < 16; ++chn) {
-		if (self->program_state[chn].program < 0) {
-			continue;
-		}
-		fluid_synth_program_select (self->synth, chn, synth_id,
-				self->program_state[chn].bank, self->program_state[chn].program);
-	}
-
 	return true;
 }
 
@@ -250,15 +243,15 @@ inform_ui (AFluidSynth* self)
 		return;
 	}
 
-	LV2_Atom_Forge_Frame frame;
+	LV2_Atom_Forge_Frame sample;
 	lv2_atom_forge_frame_time (&self->forge, 0);
-	x_forge_object (&self->forge, &frame, 1, self->patch_Set);
+	x_forge_object (&self->forge, &sample, 1, self->patch_Set);
 	lv2_atom_forge_property_head (&self->forge, self->patch_property, 0);
 	lv2_atom_forge_urid (&self->forge, self->afs_sf2file);
 	lv2_atom_forge_property_head (&self->forge, self->patch_value, 0);
 	lv2_atom_forge_path (&self->forge, self->current_sf2_file_path, strlen (self->current_sf2_file_path));
 
-	lv2_atom_forge_pop (&self->forge, &frame);
+	lv2_atom_forge_pop (&self->forge, &sample);
 }
 
 static float
@@ -297,6 +290,8 @@ instantiate (const LV2_Descriptor*     descriptor,
 #ifdef LV2_EXTENDED
 		} else if (!strcmp (features[i]->URI, LV2_MIDNAM__update)) {
 			self->midnam = (LV2_Midnam*)features[i]->data;
+		} else if (!strcmp (features[i]->URI, LV2_BANKPATCH__notify)) {
+			self->bankpatch = (LV2_BankPatch*)features[i]->data;
 #endif
 		}
 	}
@@ -360,6 +355,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 #endif
 	self->panic = false;
 	self->inform_ui = false;
+	self->send_bankpgm = true;
 	self->initialized = false;
 	self->reinit_in_progress = false;
 	self->queue_reinit = false;
@@ -379,6 +375,7 @@ instantiate (const LV2_Descriptor*     descriptor,
 	self->patch_Set          = map->map (map->handle, LV2_PATCH__Set);
 	self->patch_property     = map->map (map->handle, LV2_PATCH__property);
 	self->patch_value        = map->map (map->handle, LV2_PATCH__value);
+	self->state_Changed      = map->map (map->handle, "http://lv2plug.in/ns/ext/state#StateChanged");
 	self->afs_sf2file        = map->map (map->handle, AFS_URN ":sf2file");
 
 	return (LV2_Handle)self;
@@ -424,7 +421,7 @@ run (LV2_Handle instance, uint32_t n_samples)
 
 	const uint32_t capacity = self->notify->atom.size;
 	lv2_atom_forge_set_buffer (&self->forge, (uint8_t*)self->notify, capacity);
-	lv2_atom_forge_sequence_head (&self->forge, &self->frame, 0);
+	lv2_atom_forge_sequence_head (&self->forge, &self->sample, 0);
 
 	if (!self->initialized || self->reinit_in_progress) {
 		memset (self->p_ports[FS_PORT_OUT_L], 0, n_samples * sizeof (float));
@@ -533,15 +530,29 @@ run (LV2_Handle instance, uint32_t n_samples)
 					fluid_midi_event_set_value (self->fmidi_event, data[2]);
 				}
 				if (0xb0 /* CC */ == fluid_midi_event_get_type (self->fmidi_event)) {
-					if (data[1] == 0x00) { self->last_bank_msb = data[2]; }
-					if (data[1] == 0x20) { self->last_bank_lsb = data[2]; }
+					int chn = fluid_midi_event_get_channel (self->fmidi_event);
+					assert (chn >= 0 && chn < 16);
+					if (data[1] == 0x00) {
+						self->program_state[chn].bank &= 0x7f;
+						self->program_state[chn].bank |= (data[2] &0x7f) << 7;
+					}
+					if (data[1] == 0x20) {
+						self->program_state[chn].bank &= 0x3F80;
+						self->program_state[chn].bank |= data[2] & 0x7f;
+					}
 				}
 			}
 			if (ev->body.size == 2 && 0xc0 /* Pgm */ == fluid_midi_event_get_type (self->fmidi_event)) {
 				int chn = fluid_midi_event_get_channel (self->fmidi_event);
 				assert (chn >= 0 && chn < 16);
-				self->program_state[chn].bank = (self->last_bank_msb << 7) | self->last_bank_lsb;
 				self->program_state[chn].program = data[1];
+#ifdef LV2_EXTENDED
+				if (self->bankpatch) {
+					self->bankpatch->notify (self->bankpatch->handle, chn,
+							self->program_state[chn].bank,
+							self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+				}
+#endif
 			}
 
 			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
@@ -557,11 +568,31 @@ run (LV2_Handle instance, uint32_t n_samples)
 	/* inform the GUI */
 	if (self->inform_ui) {
 		self->inform_ui = false;
+
+		/* emit stateChanged */
+		LV2_Atom_Forge_Frame sample;
+		lv2_atom_forge_frame_time(&self->forge, 0);
+		x_forge_object(&self->forge, &sample, 1, self->state_Changed);
+		lv2_atom_forge_pop(&self->forge, &sample);
+
+		/* send .sf2 filename */
 		inform_ui (self);
+
 #ifdef LV2_EXTENDED
-    self->midnam->update (self->midnam->handle);
+		self->midnam->update (self->midnam->handle);
 #endif
 	}
+
+#ifdef LV2_EXTENDED
+	if (self->send_bankpgm && self->bankpatch) {
+		self->send_bankpgm = false;
+		for (uint8_t chn = 0; chn < 16; ++chn) {
+			self->bankpatch->notify (self->bankpatch->handle, chn,
+					self->program_state[chn].bank,
+					self->program_state[chn].program < 0 ? 255 : self->program_state[chn].program);
+		}
+	}
+#endif
 
 	if (n_samples > offset && self->initialized && !self->reinit_in_progress) {
 		fluid_synth_write_float (
@@ -629,12 +660,43 @@ work_response (LV2_Handle  instance,
 
 	if (self->initialized) {
 		strcpy (self->current_sf2_file_path, self->queue_sf2_file_path);
+
+		for (int chn = 0; chn < 16; ++chn) {
+			if (self->program_state[chn].program < 0) {
+				continue;
+			}
+			/* cannot direcly call fluid_channel_set_bank_msb/fluid_channel_set_bank_lsb, use CCs */
+			fluid_midi_event_set_type (self->fmidi_event, 0xb0 /* CC */);
+			fluid_midi_event_set_channel (self->fmidi_event, chn);
+
+			fluid_midi_event_set_control (self->fmidi_event, 0x00); // BANK_SELECT_MSB
+			fluid_midi_event_set_value (self->fmidi_event, (self->program_state[chn].bank >> 7) & 0x7f);
+			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
+
+			fluid_midi_event_set_control (self->fmidi_event, 0x20); // BANK_SELECT_LSB
+			fluid_midi_event_set_value (self->fmidi_event, self->program_state[chn].bank & 0x7f);
+			fluid_synth_handle_midi_event (self->synth, self->fmidi_event);
+
+			fluid_synth_program_change (self->synth, chn, self->program_state[chn].program);
+		}
+
+		for (int chn = 0; chn < 16; ++chn) {
+			unsigned int sfid = 0;
+			unsigned int bank = 0;
+			unsigned int program = -1;
+			if (FLUID_OK == fluid_synth_get_program (self->synth, chn, &sfid, &bank, &program)) {
+				self->program_state[chn].bank = bank;
+				self->program_state[chn].program = program;
+			}
+		}
+
 	} else {
 		self->current_sf2_file_path[0] = 0;
 	}
 
 	self->reinit_in_progress = false;
 	self->inform_ui = true;
+	self->send_bankpgm = true;
 	self->queue_reinit = false;
 	return LV2_WORKER_SUCCESS;
 }

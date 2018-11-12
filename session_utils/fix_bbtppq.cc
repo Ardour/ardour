@@ -69,8 +69,8 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 
 	for (Evoral::Sequence<MidiModel::TimeType>::const_iterator i = bbt_source->model()->begin(MidiModel::TimeType(), true); i != bbt_source->model()->end(); ++i) {
 		const double new_time = map.quarter_note_at_beat ((*i).time().to_double() + map.beat_at_quarter_note (session_offset * 4.0)) - (session_offset * 4.0);
-		Evoral::Event<Evoral::Beats> new_ev (*i, true);
-		new_ev.set_time (Evoral::Beats (new_time));
+		Evoral::Event<Temporal::Beats> new_ev (*i, true);
+		new_ev.set_time (Temporal::Beats (new_time));
 		source->append_event_beats (source_lock, new_ev);
 	}
 
@@ -119,7 +119,7 @@ ensure_per_region_source (Session* session, boost::shared_ptr<MidiRegion> region
 	} else {
 		newsrc = boost::dynamic_pointer_cast<MidiSource>(
 			SourceFactory::createWritable(DataType::MIDI, *session,
-						      newsrc_path, false, session->frame_rate()));
+						      newsrc_path, false, session->sample_rate()));
 
 		if (!newsrc) {
 			cout << UTILNAME << ":" << endl
@@ -174,7 +174,7 @@ ensure_per_source_source (Session* session, boost::shared_ptr<MidiRegion> region
 
 		newsrc = boost::dynamic_pointer_cast<MidiSource>(
 			SourceFactory::createWritable(DataType::MIDI, *session,
-						      newsrc_path, false, session->frame_rate()));
+						      newsrc_path, false, session->sample_rate()));
 		if (!newsrc) {
 			cout << UTILNAME << ":" << endl
 			     <<" An error occurred creating writeable source " << newsrc_path << " exiting." << endl;
@@ -211,8 +211,8 @@ reset_start (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to start and start_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_start (tmap.frame_at_quarter_note (region->quarter_note()) - tmap.frame_at_quarter_note (region->quarter_note() - new_start_qn) + 1);
-	region->set_start (tmap.frame_at_quarter_note (region->quarter_note()) - tmap.frame_at_quarter_note (region->quarter_note() - new_start_qn));
+	region->set_start (tmap.sample_at_quarter_note (region->quarter_note()) - tmap.sample_at_quarter_note (region->quarter_note() - new_start_qn) + 1);
+	region->set_start (tmap.sample_at_quarter_note (region->quarter_note()) - tmap.sample_at_quarter_note (region->quarter_note() - new_start_qn));
 	region->set_position_lock_style (old_pls);
 
 }
@@ -228,8 +228,8 @@ reset_length (Session* session, boost::shared_ptr<MidiRegion> region)
 	/* force a change to length and length_beats */
 	PositionLockStyle old_pls = region->position_lock_style();
 	region->set_position_lock_style (AudioTime);
-	region->set_length (tmap.frame_at_quarter_note (region->quarter_note() + new_length_qn) + 1 - region->position(), 0);
-	region->set_length (tmap.frame_at_quarter_note (region->quarter_note() + new_length_qn)- region->position(), 0);
+	region->set_length (tmap.sample_at_quarter_note (region->quarter_note() + new_length_qn) + 1 - region->position(), 0);
+	region->set_length (tmap.sample_at_quarter_note (region->quarter_note() + new_length_qn)- region->position(), 0);
 	region->set_position_lock_style (old_pls);
 }
 

@@ -35,7 +35,7 @@
 
 using namespace PBD;
 
-size_t
+static size_t
 WriteMemoryCallback(void *ptr, size_t size, size_t nmemb, void *data)
 {
 	register int realsize = (int)(size * nmemb);
@@ -120,7 +120,7 @@ SoundcloudUploader::Get_Auth_Token( std::string username, std::string password )
 	// perform online request
 	CURLcode res = curl_easy_perform(curl_handle);
 	if (res != 0) {
-		DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("curl error %1 (%2)", res, curl_easy_strerror(res) ) );
+		DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("curl error %1 (%2)\n", res, curl_easy_strerror(res) ) );
 		return "";
 	}
 
@@ -148,7 +148,7 @@ int
 SoundcloudUploader::progress_callback(void *caller, double dltotal, double dlnow, double ultotal, double ulnow)
 {
 	SoundcloudUploader *scu = (SoundcloudUploader *) caller;
-	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("%1: uploaded %2 of %3", scu->title, ulnow, ultotal) );
+	DEBUG_TRACE (DEBUG::Soundcloud, string_compose ("%1: uploaded %2 of %3\n", scu->title, ulnow, ultotal) );
 	scu->caller->SoundcloudProgress(ultotal, ulnow, scu->title); /* EMIT SIGNAL */
 	return 0;
 }
@@ -304,19 +304,19 @@ SoundcloudUploader::Upload(std::string file_path, std::string title, std::string
 		XMLNode *root = doc.root();
 
 		if (!root) {
-			DEBUG_TRACE (DEBUG::Soundcloud, "no root XML node!");
+			DEBUG_TRACE (DEBUG::Soundcloud, "no root XML node!\n");
 			return "";
 		}
 
 		XMLNode *url_node = root->child("permalink-url");
 		if (!url_node) {
-			DEBUG_TRACE (DEBUG::Soundcloud, "no child node \"permalink-url\" found!");
+			DEBUG_TRACE (DEBUG::Soundcloud, "no child node \"permalink-url\" found!\n");
 			return "";
 		}
 
 		XMLNode *text_node = url_node->child("text");
 		if (!text_node) {
-			DEBUG_TRACE (DEBUG::Soundcloud, "no text node found!");
+			DEBUG_TRACE (DEBUG::Soundcloud, "no text node found!\n");
 			return "";
 		}
 
@@ -338,8 +338,6 @@ SoundcloudUploader:: ~SoundcloudUploader()
 void
 SoundcloudUploader::setcUrlOptions()
 {
-	// basic init for curl
-	curl_global_init(CURL_GLOBAL_ALL);
 	// some servers don't like requests that are made without a user-agent field, so we provide one
 	curl_easy_setopt(curl_handle, CURLOPT_USERAGENT, "libcurl-agent/1.0");
 	// setup curl error buffer

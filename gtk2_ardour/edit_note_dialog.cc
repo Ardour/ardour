@@ -104,7 +104,10 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 
 	_length_clock.set_session (_region_view->get_time_axis_view().session ());
 	_length_clock.set_mode (AudioClock::BBT);
-	_length_clock.set (_region_view->region_relative_time_converter().to ((*_events.begin())->note()->length ()), true);
+	_length_clock.set (
+		_region_view->region_relative_time_converter().to ((*_events.begin())->note()->end_time ()) + _region_view->region()->position(),
+		true,
+		_region_view->region_relative_time_converter().to ((*_events.begin())->note()->time ()) + _region_view->region()->position());
 
 	/* Set up `set all notes...' buttons' sensitivity */
 
@@ -117,8 +120,8 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	int test_channel = (*_events.begin())->note()->channel ();
 	int test_pitch = (*_events.begin())->note()->note ();
 	int test_velocity = (*_events.begin())->note()->velocity ();
-	Evoral::Beats test_time = (*_events.begin())->note()->time ();
-	Evoral::Beats test_length = (*_events.begin())->note()->length ();
+	Temporal::Beats test_time = (*_events.begin())->note()->time ();
+	Temporal::Beats test_length = (*_events.begin())->note()->length ();
 
 	for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
 		if ((*i)->note()->channel() != test_channel) {
@@ -153,7 +156,7 @@ void
 EditNoteDialog::done (int r)
 {
 	if (r != RESPONSE_ACCEPT) {
-                return;
+		return;
 	}
 
 	/* These calls mean that if a value is entered using the keyboard
@@ -194,8 +197,8 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	Evoral::Beats const t = _region_view->source_relative_time_converter().from
-		(_time_clock.current_time() - (_region_view->region()->position() - _region_view->region()->start()));
+	samplecnt_t const region_samples = _time_clock.current_time() - (_region_view->region()->position() - _region_view->region()->start());
+	Temporal::Beats const t = _region_view->source_relative_time_converter().from (region_samples);
 
 	if (!_time_all.get_sensitive() || _time_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -206,10 +209,10 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	Evoral::Beats const d = _region_view->region_relative_time_converter().from (_length_clock.current_duration ());
-
 	if (!_length_all.get_sensitive() || _length_all.get_active ()) {
 		for (set<NoteBase*>::iterator i = _events.begin(); i != _events.end(); ++i) {
+			samplepos_t const note_end_sample = region_samples + _length_clock.current_duration (_time_clock.current_time());
+			Temporal::Beats const d = _region_view->source_relative_time_converter().from (note_end_sample) - (*i)->note()->time();
 			if (d != (*i)->note()->length()) {
 				_region_view->change_note_length (*i, d);
 				had_change = true;

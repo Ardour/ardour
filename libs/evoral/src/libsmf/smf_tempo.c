@@ -61,7 +61,7 @@ new_tempo(smf_t *smf, size_t pulses)
 
 	tempo = (smf_tempo_t*)malloc(sizeof(smf_tempo_t));
 	if (tempo == NULL) {
-		g_critical("Cannot allocate smf_tempo_t.");
+		g_warning("Cannot allocate smf_tempo_t.");
 		return (NULL);
 	}
 
@@ -135,7 +135,7 @@ maybe_add_to_tempo_map(smf_event_t *event)
 	if (event->midi_buffer[1] == 0x51) {
 		int ntempo = (event->midi_buffer[3] << 16) + (event->midi_buffer[4] << 8) + event->midi_buffer[5];
 		if (ntempo <= 0) {
-			g_critical("Ignoring invalid tempo change.");
+			g_warning("Ignoring invalid tempo change.");
 			return;
 		}
 
@@ -147,7 +147,7 @@ maybe_add_to_tempo_map(smf_event_t *event)
 		int numerator, denominator, clocks_per_click, notes_per_note;
 
 		if (event->midi_buffer_length < 7) {
-			g_critical("Time Signature event seems truncated.");
+			g_warning("Time Signature event seems truncated.");
 			return;
 		}
 
@@ -368,7 +368,7 @@ smf_fini_tempo(smf_t *smf)
  *
  * Remove any existing tempos and add default one.
  *
- * \bug This will abort (by calling g_error) if new_tempo() (memory allocation there) fails.
+ * \bug This will abort (by calling g_warning) if new_tempo() (memory allocation there) fails.
  */
 void
 smf_init_tempo(smf_t *smf)
@@ -379,7 +379,7 @@ smf_init_tempo(smf_t *smf)
 
 	tempo = new_tempo(smf, 0);
 	if (tempo == NULL) {
-		g_error("tempo_init failed, sorry.");
+		g_warning("tempo_init failed, sorry.");
 	}
 }
 
@@ -413,7 +413,7 @@ smf_track_add_event_delta_pulses(smf_track_t *track, smf_event_t *event, uint32_
 	assert(track->smf != NULL);
 
 	if (!smf_event_is_valid(event)) {
-		g_critical("Added event is invalid");
+		g_warning("Added event is invalid");
 	}
 
 	smf_track_add_event_pulses(track, event, last_event_pulses(track) + delta);

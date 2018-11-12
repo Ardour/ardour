@@ -22,7 +22,6 @@
 #include <list>
 #include <string>
 #include <vector>
-//#include <glibmm/miscutils.h>
 
 #include <errno.h>
 
@@ -59,8 +58,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	int n = 0; // table row
 	Table* table = manage (new Table);
 	Label* label;
-	Button* button;
-	table->set_row_spacings (10);
+	table->set_row_spacings (16);
 	table->set_col_spacings (6);
 	table->set_border_width (12);
 	get_session ();
@@ -80,15 +78,15 @@ OSC_GUI::OSC_GUI (OSC& p)
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (portmode_combo, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	std::vector<std::string> portmode_options;
-	portmode_options.push_back (_("Auto"));
-	portmode_options.push_back (_("Manual"));
+	portmode_options.push_back (_("Auto - Reply to Originating Port"));
+	portmode_options.push_back (_("Manual - Specify Below"));
 
 	set_popdown_strings (portmode_combo, portmode_options);
 	portmode_combo.set_active ((int)cp.get_portmode());
 	++n;
 
 	// port entry box
-	label = manage (new Gtk::Label(_("Manual Port:")));
+	label = manage (new Gtk::Label(_("Reply Manual Port:")));
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (port_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
@@ -111,14 +109,38 @@ OSC_GUI::OSC_GUI (OSC& p)
 
 	++n;
 
+	// default send page setting
+	label = manage (new Gtk::Label(_("Send Page Size:")));
+	label->set_alignment(1, .5);
+	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (send_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	send_page_entry.set_range (0, 0xffff);
+	send_page_entry.set_increments (1, 8);
+	send_page_entry.set_value (cp.get_send_size());
+
+	++n;
+
+	// default plugin page setting
+	label = manage (new Gtk::Label(_("Plugin Page Size:")));
+	label->set_alignment(1, .5);
+	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	table->attach (plugin_page_entry, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	plugin_page_entry.set_range (0, 0xffff);
+	plugin_page_entry.set_increments (1, 8);
+	plugin_page_entry.set_value (cp.get_send_size());
+
+	++n;
+
 	// Gain Mode
 	label = manage (new Gtk::Label(_("Gain Mode:")));
 	label->set_alignment(1, .5);
 	table->attach (*label, 0, 1, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	table->attach (gainmode_combo, 1, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	std::vector<std::string> gainmode_options;
-	gainmode_options.push_back (_("dB"));
-	gainmode_options.push_back (_("Position"));
+	gainmode_options.push_back (_("/strip/gain (dB)"));
+	gainmode_options.push_back (_("/strip/fader (Position) and dB in control name"));
+	gainmode_options.push_back (_("/strip/fader (Position) and /strip/gain (dB)"));
+	gainmode_options.push_back (_("/strip/fader (Position)"));
 
 	set_popdown_strings (gainmode_combo, gainmode_options);
 	gainmode_combo.set_active ((int)cp.get_gainmode());
@@ -134,6 +156,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	debug_options.push_back (_("Off"));
 	debug_options.push_back (_("Log invalid messages"));
 	debug_options.push_back (_("Log all messages"));
+	debug_options.push_back (_("Print surface information to Log window"));
 
 	set_popdown_strings (debug_combo, debug_options);
 	debug_combo.set_active ((int)cp.get_debug_mode());
@@ -160,19 +183,17 @@ OSC_GUI::OSC_GUI (OSC& p)
 	preset_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::preset_changed));
 	++n;
 
-	// refresh button
-	button = manage (new Gtk::Button(_("Clear OSC Devices")));
-	table->attach (*button, 0, 2, n, n+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 10);
-
 	table->show_all ();
 	append_page (*table, _("OSC Setup"));
 
 	debug_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::debug_changed));
 	portmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::portmode_changed));
 	gainmode_combo.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::gainmode_changed));
-	button->signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::clear_device));
-	port_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
-	bank_entry.signal_activate().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
+	port_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::port_changed));
+	port_entry.signal_focus_out_event().connect (sigc::mem_fun (*this, &OSC_GUI::port_focus_out));
+	bank_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::bank_changed));
+	send_page_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::send_page_changed));
+	plugin_page_entry.signal_changed().connect (sigc::mem_fun (*this, &OSC_GUI::plugin_page_changed));
 
 	// Strip Types Calculate Page
 	int stn = 0; // table row
@@ -206,7 +227,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (midi_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
-	label = manage (new Gtk::Label(_("Audio Buses:")));
+	label = manage (new Gtk::Label(_("Audio Busses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (audio_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
@@ -218,7 +239,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	sttable->attach (audio_auxes, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
-	label = manage (new Gtk::Label(_("Midi Buses:")));
+	label = manage (new Gtk::Label(_("Midi Busses:")));
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (midi_buses, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
@@ -252,6 +273,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	label->set_alignment(1, .5);
 	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
 	sttable->attach (hidden_tracks, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++stn;
+
+	label = manage (new Gtk::Label(_("Use Groups:")));
+	label->set_alignment(1, .5);
+	sttable->attach (*label, 0, 1, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	sttable->attach (usegroups, 1, 2, stn, stn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++stn;
 
 
@@ -363,6 +390,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (select_fb, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++fn;
 
+	label = manage (new Gtk::Label(_("Use /reply instead of #reply:")));
+	label->set_alignment(1, .5);
+	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (use_osc10, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++fn;
+
 	fbtable->show_all ();
 	append_page (*fbtable, _("Default Feedback"));
 	// set strips and feedback from loaded default values
@@ -378,6 +411,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	monitor_type.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	selected_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	hidden_tracks.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	usegroups.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	strip_buttons_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	strip_control_button.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	ssid_as_path.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
@@ -392,6 +426,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	hp_min_sec.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	hp_gui.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	select_fb.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	use_osc10.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	preset_busy = false;
 
 }
@@ -463,6 +498,10 @@ OSC_GUI::debug_changed ()
 	else if (str == _("Log all messages")) {
 		cp.set_debug_mode (OSC::All);
 	}
+	else if (str == _("Print surface information to Log window")) {
+		cp.get_surfaces ();
+		debug_combo.set_active ((int)cp.get_debug_mode());
+	}
 	else {
 		std::cerr << "Invalid OSC Debug Mode\n";
 		assert (0);
@@ -472,18 +511,12 @@ OSC_GUI::debug_changed ()
 void
 OSC_GUI::portmode_changed ()
 {
-	std::string str = portmode_combo.get_active_text ();
-	if (str == _("Auto")) {
-		cp.set_portmode (0);
-		port_entry.set_sensitive (false);
-	}
-	else if (str == _("Manual")) {
-		cp.set_portmode (1);
+	int pm = portmode_combo.get_active_row_number ();
+	cp.set_portmode (pm);
+	if (pm) {
 		port_entry.set_sensitive (true);
-	}
-	else {
-		std::cerr << "Invalid OSC Port Mode\n";
-		assert (0);
+	} else {
+		port_entry.set_sensitive (false);
 	}
 	save_user ();
 }
@@ -492,19 +525,55 @@ void
 OSC_GUI::port_changed ()
 {
 	std::string str = port_entry.get_text ();
-	if (port_entry.get_value() == 3819) {
-		str = "8000";
-		port_entry.set_value (8000);
+	int prt = atoi (str.c_str());
+	if (prt == 3819 || prt < 1024) {
+		// indicate non-valid text
+		port_entry.set_progress_fraction (1.0);
+	} else {
+		port_entry.set_progress_fraction (0.0);
+		cp.set_remote_port (string_compose ("%1", prt));
+		save_user ();
 	}
-	cp.set_remote_port (str);
-	save_user ();
+}
+
+bool
+OSC_GUI::port_focus_out (GdkEventFocus* )
+{
+	std::string str = port_entry.get_text ();
+	int prt = atoi (str.c_str());
+	if (prt == 3819 || prt < 1024) {
+		port_entry.set_text(cp.get_remote_port().c_str());
+		port_entry.set_progress_fraction (0.0);
+	}
+	return false;
 }
 
 void
 OSC_GUI::bank_changed ()
 {
-	uint32_t bsize = bank_entry.get_value ();
+	uint32_t bsize = atoi(bank_entry.get_text ());
+	bank_entry.set_text (string_compose ("%1", bsize));
 	cp.set_banksize (bsize);
+	save_user ();
+
+}
+
+void
+OSC_GUI::send_page_changed ()
+{
+	uint32_t ssize = atoi (send_page_entry.get_text ());
+	send_page_entry.set_text (string_compose ("%1", ssize));
+	cp.set_send_size (ssize);
+	save_user ();
+
+}
+
+void
+OSC_GUI::plugin_page_changed ()
+{
+	uint32_t psize = atoi (plugin_page_entry.get_text ());
+	plugin_page_entry.set_text (string_compose ("%1", psize));
+	cp.set_plugin_size (psize);
 	save_user ();
 
 }
@@ -513,11 +582,17 @@ void
 OSC_GUI::gainmode_changed ()
 {
 	std::string str = gainmode_combo.get_active_text ();
-	if (str == _("dB")) {
+	if (str == _("/strip/gain (dB)")) {
 		cp.set_gainmode (0);
 	}
-	else if (str == _("Position")) {
+	else if (str == _("/strip/fader (Position) and dB in control name")) {
 		cp.set_gainmode (1);
+	}
+	else if (str == _("/strip/fader (Position) and /strip/gain (dB)")) {
+		cp.set_gainmode (2);
+	}
+	else if (str == _("/strip/fader (Position)")) {
+		cp.set_gainmode (3);
 	}
 	else {
 		std::cerr << "Invalid OSC Gain Mode\n";
@@ -549,6 +624,7 @@ OSC_GUI::preset_changed ()
 	else {
 		load_preset (str);
 	}
+	cp.clear_devices ();
 	preset_busy = false;
 }
 
@@ -556,16 +632,20 @@ void
 OSC_GUI::factory_reset ()
 {
 	cp.set_banksize (0);
-	bank_entry.set_value (0);
+	bank_entry.set_text ("0");
+	cp.set_send_size (0);
+	send_page_entry.set_text ("0");
+	cp.set_plugin_size (0);
+	plugin_page_entry.set_text ("0");
 	cp.set_defaultstrip (159);
 	cp.set_defaultfeedback (0);
 	reshow_values ();
 	cp.set_gainmode (0);
 	gainmode_combo.set_active (0);
-	cp.set_portmode (0);
-	portmode_combo.set_active (0);
+	cp.set_portmode (1);
+	portmode_combo.set_active (1);
 	cp.set_remote_port ("8000");
-	port_entry.set_value (8000);
+	port_entry.set_text ("8000");
 	cp.clear_devices ();
 	cp.gui_changed ();
 }
@@ -584,6 +664,7 @@ OSC_GUI::reshow_values ()
 	audio_auxes.set_active(def_strip & 128);
 	selected_tracks.set_active(def_strip & 256);
 	hidden_tracks.set_active(def_strip & 512);
+	usegroups.set_active(def_strip & 1024);
 	def_feedback = cp.get_defaultfeedback();
 	strip_buttons_button.set_active(def_feedback & 1);
 	strip_control_button.set_active(def_feedback & 2);
@@ -599,6 +680,7 @@ OSC_GUI::reshow_values ()
 	hp_min_sec.set_active (def_feedback & 2048);
 	//hp_gui.set_active (false); // we don't have this yet (Mixbus wants)
 	select_fb.set_active(def_feedback & 8192);
+	use_osc10.set_active(def_feedback & 16384);
 
 	calculate_strip_types ();
 	calculate_feedback ();
@@ -650,6 +732,9 @@ OSC_GUI::calculate_feedback ()
 	if (select_fb.get_active()) {
 		fbvalue += 8192;
 	}
+	if (use_osc10.get_active()) {
+		fbvalue += 16384;
+	}
 
 	current_feedback.set_text(string_compose("%1", fbvalue));
 }
@@ -687,6 +772,9 @@ OSC_GUI::calculate_strip_types ()
 	}
 	if (hidden_tracks.get_active()) {
 		stvalue += 512;
+	}
+	if (usegroups.get_active()) {
+		stvalue += 1024;
 	}
 
 	current_strip_types.set_text(string_compose("%1", stvalue));
@@ -764,7 +852,7 @@ OSC_GUI::save_user ()
 	std::string fullpath = user_preset_directory();
 
 	if (g_mkdir_with_parents (fullpath.c_str(), 0755) < 0) {
-		error << string_compose(_("Session: cannot create user MCP profile folder \"%1\" (%2)"), fullpath, strerror (errno)) << endmsg;
+		error << string_compose(_("Session: cannot create user OSC profile folder \"%1\" (%2)"), fullpath, strerror (errno)) << endmsg;
 		return;
 	}
 
@@ -773,41 +861,50 @@ OSC_GUI::save_user ()
 	XMLNode* node = new XMLNode ("OSCPreset");
 	XMLNode* child = new XMLNode ("Name");
 
-	child->add_property ("value", "User");
+	child->set_property ("value", "User");
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("PortMode");
-	child->add_property ("value", cp.get_portmode());
+	child->set_property ("value", cp.get_portmode());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Remote-Port");
-	child->add_property ("value", cp.get_remote_port());
+	child->set_property ("value", cp.get_remote_port());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Bank-Size");
-	child->add_property ("value", cp.get_banksize());
+	child->set_property ("value", cp.get_banksize());
+	node->add_child_nocopy (*child);
+
+	child = new XMLNode ("Send-Size");
+	child->set_property ("value", cp.get_send_size());
+	node->add_child_nocopy (*child);
+
+	child = new XMLNode ("Plugin-Size");
+	child->set_property ("value", cp.get_plugin_size());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Strip-Types");
-	child->add_property ("value", cp.get_defaultstrip());
+	child->set_property ("value", cp.get_defaultstrip());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Feedback");
-	child->add_property ("value", cp.get_defaultfeedback());
+	child->set_property ("value", cp.get_defaultfeedback());
 	node->add_child_nocopy (*child);
 
 	child = new XMLNode ("Gain-Mode");
-	child->add_property ("value", cp.get_gainmode());
+	child->set_property ("value", cp.get_gainmode());
 	node->add_child_nocopy (*child);
 
 	XMLTree tree;
 	tree.set_root (node);
 
 	if (!tree.write (fullpath)) {
-		error << string_compose ("MCP profile not saved to %1", fullpath) << endmsg;
+		error << string_compose ("OSC profile not saved to %1", fullpath) << endmsg;
 	}
 	preset_combo.set_active (2);
 	cp.gui_changed();
+	clear_device ();
 
 }
 
@@ -857,10 +954,24 @@ OSC_GUI::load_preset (std::string preset)
 		}
 		if ((child = root->child ("Bank-Size")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_banksize (sesn_bank);
-			bank_entry.set_value (sesn_bank);
+			bank_entry.set_text (string_compose("%1", sesn_bank));
 		} else {
 			cp.set_banksize (atoi (prop->value().c_str()));
-			bank_entry.set_value (atoi (prop->value().c_str()));
+			bank_entry.set_text (prop->value().c_str());
+		}
+		if ((child = root->child ("Send-Size")) == 0 || (prop = child->property ("value")) == 0) {
+			cp.set_send_size (sesn_send);
+			send_page_entry.set_text (string_compose("%1", sesn_send));
+		} else {
+			cp.set_send_size (atoi (prop->value().c_str()));
+			send_page_entry.set_text (prop->value().c_str());
+		}
+		if ((child = root->child ("Plugin-Size")) == 0 || (prop = child->property ("value")) == 0) {
+			cp.set_plugin_size (sesn_plugin);
+			plugin_page_entry.set_text (string_compose("%1", sesn_plugin));
+		} else {
+			cp.set_plugin_size (atoi (prop->value().c_str()));
+			plugin_page_entry.set_text (prop->value().c_str());
 		}
 		if ((child = root->child ("Strip-Types")) == 0 || (prop = child->property ("value")) == 0) {
 			cp.set_defaultstrip (sesn_strips);
@@ -882,6 +993,7 @@ OSC_GUI::load_preset (std::string preset)
 			gainmode_combo.set_active (atoi (prop->value().c_str()));
 		}
 		cp.gui_changed();
+		clear_device ();
 
 	}
 }
@@ -892,6 +1004,8 @@ OSC_GUI::get_session ()
 	sesn_portmode = cp.get_portmode ();
 	sesn_port = cp.get_remote_port ();
 	sesn_bank = cp.get_banksize ();
+	sesn_send = cp.get_send_size ();
+	sesn_plugin = cp.get_plugin_size ();
 	sesn_strips = cp.get_defaultstrip ();
 	sesn_feedback = cp.get_defaultfeedback ();
 	sesn_gainmode = cp.get_gainmode ();
@@ -905,7 +1019,11 @@ OSC_GUI::restore_sesn_values ()
 	cp.set_remote_port (sesn_port);
 	port_entry.set_text (sesn_port);
 	cp.set_banksize (sesn_bank);
-	bank_entry.set_value (sesn_bank);
+	bank_entry.set_text (string_compose ("%1", sesn_bank));
+	cp.set_send_size (sesn_send);
+	send_page_entry.set_text (string_compose ("%1", sesn_send));
+	cp.set_plugin_size (sesn_plugin);
+	plugin_page_entry.set_text (string_compose ("%1", sesn_plugin));
 	cp.set_defaultstrip (sesn_strips);
 	cp.set_defaultfeedback (sesn_feedback);
 	reshow_values ();

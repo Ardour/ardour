@@ -33,17 +33,17 @@ namespace ARDOUR {
 
 
 /** Buffer containing 8-bit unsigned char (MIDI) data. */
-class LIBARDOUR_API MidiBuffer : public Buffer, public Evoral::EventSink<framepos_t>
+class LIBARDOUR_API MidiBuffer : public Buffer, public Evoral::EventSink<samplepos_t>
 {
 public:
-	typedef framepos_t TimeType;
+	typedef samplepos_t TimeType;
 
 	MidiBuffer(size_t capacity);
 	~MidiBuffer();
 
-	void silence (framecnt_t nframes, framecnt_t offset = 0);
-	void read_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0);
-	void merge_from (const Buffer& src, framecnt_t nframes, frameoffset_t dst_offset = 0, frameoffset_t src_offset = 0);
+	void silence (samplecnt_t nframes, samplecnt_t offset = 0);
+	void read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0);
+	void merge_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0);
 
 	void copy(const MidiBuffer& copy);
 	void copy(MidiBuffer const * const);
@@ -67,7 +67,7 @@ public:
 		class iterator_base
 	{
 	public:
-		iterator_base<BufferType, EventType>(BufferType& b, framecnt_t o)
+		iterator_base<BufferType, EventType>(BufferType& b, samplecnt_t o)
 			: buffer(&b), offset(o) {}
 
 		iterator_base<BufferType, EventType>(const iterator_base<BufferType,EventType>& o)

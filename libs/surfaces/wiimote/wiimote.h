@@ -55,6 +55,8 @@ public:
 
 	void wiimote_callback (int mesg_count, union cwiid_mesg mesg[]);
 
+	void stripable_selection_changed () {}
+
 protected:
 	void do_request (WiimoteControlUIRequest*);
 	int start ();

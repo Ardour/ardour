@@ -20,7 +20,7 @@
 
 #include "gtkmm2ext/gui_thread.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/rectangle.h"
 #include "canvas/text.h"
 
@@ -38,6 +38,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 using namespace ArdourCanvas;
 
 static double unselected_root_alpha = 0.5;

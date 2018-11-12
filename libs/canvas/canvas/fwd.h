@@ -22,18 +22,17 @@
 #define __canvas_canvas_fwd_h__
 
 namespace ArdourCanvas {
-	class WaveView;
 	class Line;
-        class LineSet;
+	class LineSet;
 	class Rectangle;
-        class Ruler;
+	class Ruler;
 	class Polygon;
 	class PolyLine;
 	class GtkCanvas;
 	class GtkCanvasViewport;
 	class Text;
 	class Curve;
-        class ScrollGroup;
+	class ScrollGroup;
 }
 
 #endif /* __canvas_canvas_fwd_h__ */

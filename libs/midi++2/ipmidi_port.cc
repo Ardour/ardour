@@ -319,7 +319,7 @@ IPMIDIPort::read (MIDI::byte* /*buf*/, size_t /*bufsize*/)
 }
 
 void
-IPMIDIPort::parse (framecnt_t timestamp)
+IPMIDIPort::parse (samplecnt_t timestamp)
 {
 	/* input was detected on the socket, so go get it and hand it to the
 	 * parser. This will emit appropriate signals that will be handled

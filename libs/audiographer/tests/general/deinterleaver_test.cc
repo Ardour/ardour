@@ -18,9 +18,9 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	void setUp()
 	{
 		channels = 3;
-		frames_per_channel = 128;
-		total_frames = channels * frames_per_channel;
-		random_data = TestUtils::init_random_data (total_frames, 1.0);
+		samples_per_channel = 128;
+		total_samples = channels * samples_per_channel;
+		random_data = TestUtils::init_random_data (total_samples, 1.0);
 
 		deinterleaver.reset (new DeInterleaver<float>());
 		sink_a.reset (new VectorSink<float>());
@@ -41,74 +41,74 @@ class DeInterleaverTest : public CppUnit::TestFixture
 
 	void testInvalidOutputIndex()
 	{
-		deinterleaver->init (3, frames_per_channel);
+		deinterleaver->init (3, samples_per_channel);
 		CPPUNIT_ASSERT_THROW (deinterleaver->output(3)->add_output (sink_a), Exception);
 	}
 
 	void testInvalidInputSize()
 	{
-		deinterleaver->init (channels, frames_per_channel);
+		deinterleaver->init (channels, samples_per_channel);
 
-		ProcessContext<float> c (random_data, 2 * total_frames, channels);
+		ProcessContext<float> c (random_data, 2 * total_samples, channels);
 
-		// Too many, frames % channels == 0
-		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames + channels)), Exception);
+		// Too many, samples % channels == 0
+		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_samples + channels)), Exception);
 
-		// Too many, frames % channels != 0
-		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames + 1)), Exception);
+		// Too many, samples % channels != 0
+		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_samples + 1)), Exception);
 
-		// Too few, frames % channels != 0
-		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_frames - 1)), Exception);
+		// Too few, samples % channels != 0
+		CPPUNIT_ASSERT_THROW (deinterleaver->process (c.beginning (total_samples - 1)), Exception);
 	}
 
-	void assert_outputs (framecnt_t expected_frames)
+	void assert_outputs (samplecnt_t expected_samples)
 	{
-		framecnt_t generated_frames = 0;
+		samplecnt_t generated_samples = 0;
 
-		generated_frames = sink_a->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		generated_samples = sink_a->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 
-		generated_frames = sink_b->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		generated_samples = sink_b->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 
-		generated_frames = sink_c->get_data().size();
-		CPPUNIT_ASSERT_EQUAL (expected_frames, generated_frames);
+		generated_samples = sink_c->get_data().size();
+		CPPUNIT_ASSERT_EQUAL (expected_samples, generated_samples);
 	}
 
 	void testOutputSize()
 	{
-		deinterleaver->init (channels, frames_per_channel);
+		deinterleaver->init (channels, samples_per_channel);
 
 		deinterleaver->output (0)->add_output (sink_a);
 		deinterleaver->output (1)->add_output (sink_b);
 		deinterleaver->output (2)->add_output (sink_c);
 
-		// Test maximum frame input
-		ProcessContext<float> c (random_data, total_frames, channels);
+		// Test maximum sample input
+		ProcessContext<float> c (random_data, total_samples, channels);
 		deinterleaver->process (c);
-		assert_outputs (frames_per_channel);
+		assert_outputs (samples_per_channel);
 
-		// Now with less frames
-		framecnt_t const less_frames = frames_per_channel / 4;
-		deinterleaver->process (c.beginning (less_frames * channels));
-		assert_outputs (less_frames);
+		// Now with less samples
+		samplecnt_t const less_samples = samples_per_channel / 4;
+		deinterleaver->process (c.beginning (less_samples * channels));
+		assert_outputs (less_samples);
 	}
 
 	void testZeroInput()
 	{
-		deinterleaver->init (channels, frames_per_channel);
+		deinterleaver->init (channels, samples_per_channel);
 
 		deinterleaver->output (0)->add_output (sink_a);
 		deinterleaver->output (1)->add_output (sink_b);
 		deinterleaver->output (2)->add_output (sink_c);
 
-		// Input zero frames
-		ProcessContext<float> c (random_data, total_frames, channels);
+		// Input zero samples
+		ProcessContext<float> c (random_data, total_samples, channels);
 		deinterleaver->process (c.beginning (0));
 
 		// ...and now test regular input
 		deinterleaver->process (c);
-		assert_outputs (frames_per_channel);
+		assert_outputs (samples_per_channel);
 	}
 
 
@@ -120,8 +120,8 @@ class DeInterleaverTest : public CppUnit::TestFixture
 	boost::shared_ptr<VectorSink<float> > sink_c;
 
 	float * random_data;
-	framecnt_t frames_per_channel;
-	framecnt_t total_frames;
+	samplecnt_t samples_per_channel;
+	samplecnt_t total_samples;
 	unsigned int channels;
 };
 

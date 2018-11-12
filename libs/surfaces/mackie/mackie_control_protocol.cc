@@ -111,7 +111,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"))
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
-	, _frame_last (0)
+	, _sample_last (0)
 	, _timecode_type (ARDOUR::AnyTime::BBT)
 	, _gui (0)
 	, _scrub_mode (false)
@@ -184,19 +184,12 @@ MackieControlProtocol::~MackieControlProtocol()
 void
 MackieControlProtocol::thread_init ()
 {
-	struct sched_param rtparam;
-
 	pthread_set_name (event_loop_name().c_str());
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
-		// do we care? not particularly.
-	}
+	set_thread_priority ();
 }
 
 void
@@ -335,7 +328,7 @@ MackieControlProtocol::get_sorted_stripables()
 			}
 			break;
 		case Selected: // For example: a group (this is USER)
-			if (s->presentation_info().selected() && !s->presentation_info().hidden()) {
+			if (s->is_selected() && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -466,13 +459,25 @@ MackieControlProtocol::set_active (bool yn)
 		/* set up periodic task for timecode display and metering and automation
 		 */
 
-		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+		// set different refresh time for qcon and standard mackie MCU
+
+		int iTimeCodeRefreshTime = 100; // default value for mackie MCU (100ms)
+		int iStripDisplayRefreshTime = 10; // default value for Mackie MCU (10ms)
+
+		if(_device_info.is_qcon()){
+			// set faster timecode display refresh speed (55ms)
+			iTimeCodeRefreshTime = 55;
+			// set slower refresh time on qcon than on mackie (15ms)
+			iStripDisplayRefreshTime = 15;
+		}
+
+		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (iTimeCodeRefreshTime); // milliseconds
 		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::periodic));
 		periodic_timeout->attach (main_loop()->get_context());
 
 		/* periodic task used to update strip displays */
 
-		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (10); // milliseconds
+		Glib::RefPtr<Glib::TimeoutSource> redisplay_timeout = Glib::TimeoutSource::create (iStripDisplayRefreshTime); // milliseconds
 		redisplay_connection = redisplay_timeout->connect (sigc::mem_fun (*this, &MackieControlProtocol::redisplay));
 		redisplay_timeout->attach (main_loop()->get_context());
 
@@ -975,7 +980,7 @@ MackieControlProtocol::update_configuration_state ()
 	}
 
 	XMLNode* devnode = new XMLNode (X_("Configuration"));
-	devnode->add_property (X_("name"), _device_info.name());
+	devnode->set_property (X_("name"), _device_info.name());
 
 	configuration_state->remove_nodes_and_delete (X_("name"), _device_info.name());
 	configuration_state->add_child_nocopy (*devnode);
@@ -995,18 +1000,15 @@ MackieControlProtocol::get_state()
 	XMLNode& node (ControlProtocol::get_state());
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::get_state init\n");
-	char buf[16];
 
 	// add current bank
-	snprintf (buf, sizeof (buf), "%d", _current_initial_bank);
-	node.add_property (X_("bank"), buf);
+	node.set_property (X_("bank"), _current_initial_bank);
 
 	// ipMIDI base port (possibly not used)
-	snprintf (buf, sizeof (buf), "%d", _ipmidi_base);
-	node.add_property (X_("ipmidi-base"), buf);
+	node.set_property (X_("ipmidi-base"), _ipmidi_base);
 
-	node.add_property (X_("device-profile"), _device_profile.name());
-	node.add_property (X_("device-name"), _device_info.name());
+	node.set_property (X_("device-profile"), _device_profile.name());
+	node.set_property (X_("device-name"), _device_info.name());
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1032,29 +1034,27 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("MackieControlProtocol::set_state: active %1\n", active()));
 
-	int retval = 0;
-	const XMLProperty* prop;
-	uint32_t bank = 0;
-
 	if (ControlProtocol::set_state (node, version)) {
 		return -1;
 	}
 
-	if ((prop = node.property (X_("ipmidi-base"))) != 0) {
-		set_ipmidi_base (atoi (prop->value()));
+	uint16_t ipmidi_base;
+	if (node.get_property (X_("ipmidi-base"), ipmidi_base)) {
+		set_ipmidi_base (ipmidi_base);
 	}
 
+	uint32_t bank = 0;
 	// fetch current bank
-	if ((prop = node.property (X_("bank"))) != 0) {
-		bank = atoi (prop->value());
+	node.get_property (X_("bank"), bank);
+
+	std::string device_name;
+	if (node.get_property (X_("device-name"), device_name)) {
+		set_device_info (device_name);
 	}
 
-	if ((prop = node.property (X_("device-name"))) != 0) {
-		set_device_info (prop->value());
-	}
-
-	if ((prop = node.property (X_("device-profile"))) != 0) {
-		if (prop->value().empty()) {
+	std::string device_profile_name;
+	if (node.get_property (X_("device-profile"), device_profile_name)) {
+		if (device_profile_name.empty()) {
 			string default_profile_name;
 
 			/* start by looking for a user-edited profile for the current device name */
@@ -1084,8 +1084,8 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 			set_profile (default_profile_name);
 
 		} else {
-			if (profile_exists (prop->value())) {
-				set_profile (prop->value());
+			if (profile_exists (device_profile_name)) {
+				set_profile (device_profile_name);
 			} else {
 				set_profile (DeviceProfile::default_profile_name);
 			}
@@ -1106,15 +1106,15 @@ MackieControlProtocol::set_state (const XMLNode & node, int version)
 
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::set_state done\n");
 
-	return retval;
+	return 0;
 }
 
 string
-MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
+MackieControlProtocol::format_bbt_timecode (samplepos_t now_sample)
 {
 	Timecode::BBT_Time bbt_time;
 
-	session->bbt_time (now_frame, bbt_time);
+	session->bbt_time (now_sample, bbt_time);
 
 	// The Mackie protocol spec is built around a BBT time display of
 	//
@@ -1137,14 +1137,14 @@ MackieControlProtocol::format_bbt_timecode (framepos_t now_frame)
 }
 
 string
-MackieControlProtocol::format_timecode_timecode (framepos_t now_frame)
+MackieControlProtocol::format_timecode_timecode (samplepos_t now_sample)
 {
 	Timecode::Time timecode;
-	session->timecode_time (now_frame, timecode);
+	session->timecode_time (now_sample, timecode);
 
 	// According to the Logic docs
 	// digits: 888/88/88/888
-	// Timecode mode: Hours/Minutes/Seconds/Frames
+	// Timecode mode: Hours/Minutes/Seconds/Samples
 	ostringstream os;
 	os << setw(2) << setfill('0') << timecode.hours;
 	os << ' ';
@@ -1171,23 +1171,23 @@ MackieControlProtocol::update_timecode_display()
 		return;
 	}
 
-	// do assignment here so current_frame is fixed
-	framepos_t current_frame = session->transport_frame();
+	// do assignment here so current_sample is fixed
+	samplepos_t current_sample = session->transport_sample();
 	string timecode;
 	// For large jumps in play head possition do full reset
-	int moved = (current_frame - _frame_last) / session->frame_rate ();
+	int moved = (current_sample - _sample_last) / session->sample_rate ();
 	if (moved) {
 		DEBUG_TRACE (DEBUG::MackieControl, "Timecode reset\n");
 		_timecode_last = string (10, ' ');
 	}
-	_frame_last = current_frame;
+	_sample_last = current_sample;
 
 	switch (_timecode_type) {
 	case ARDOUR::AnyTime::BBT:
-		timecode = format_bbt_timecode (current_frame);
+		timecode = format_bbt_timecode (current_sample);
 		break;
 	case ARDOUR::AnyTime::Timecode:
-		timecode = format_timecode_timecode (current_frame);
+		timecode = format_timecode_timecode (current_sample);
 		break;
 	default:
 		return;
@@ -1394,8 +1394,21 @@ MackieControlProtocol::notify_record_state_changed ()
 				ls = on;
 				break;
 			case Session::Enabled:
-				DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
-				ls = flashing;
+				
+				if(_device_info.is_qcon()){
+					// For qcon the rec button is two state only (on/off)
+					DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED on (QCon)\n");
+					ls = on;
+					break;
+
+				}
+				else{
+					// For standard Mackie MCU the record LED is flashing
+					DEBUG_TRACE (DEBUG::MackieControl, "record state changed to enabled, LED flashing\n");
+					ls = flashing;
+					break;
+				}
+
 				break;
 			}
 
@@ -1469,14 +1482,14 @@ MackieControlProtocol::build_button_map ()
 	DEFINE_BUTTON_HANDLER (Button::View, &MackieControlProtocol::view_press, &MackieControlProtocol::view_release);
 	DEFINE_BUTTON_HANDLER (Button::NameValue, &MackieControlProtocol::name_value_press, &MackieControlProtocol::name_value_release);
 	DEFINE_BUTTON_HANDLER (Button::TimecodeBeats, &MackieControlProtocol::timecode_beats_press, &MackieControlProtocol::timecode_beats_release);
-	DEFINE_BUTTON_HANDLER (Button::F1, &MackieControlProtocol::F1_press, &MackieControlProtocol::F1_release);
-	DEFINE_BUTTON_HANDLER (Button::F2, &MackieControlProtocol::F2_press, &MackieControlProtocol::F2_release);
-	DEFINE_BUTTON_HANDLER (Button::F3, &MackieControlProtocol::F3_press, &MackieControlProtocol::F3_release);
-	DEFINE_BUTTON_HANDLER (Button::F4, &MackieControlProtocol::F4_press, &MackieControlProtocol::F4_release);
-	DEFINE_BUTTON_HANDLER (Button::F5, &MackieControlProtocol::F5_press, &MackieControlProtocol::F5_release);
-	DEFINE_BUTTON_HANDLER (Button::F6, &MackieControlProtocol::F6_press, &MackieControlProtocol::F6_release);
-	DEFINE_BUTTON_HANDLER (Button::F7, &MackieControlProtocol::F7_press, &MackieControlProtocol::F7_release);
-	DEFINE_BUTTON_HANDLER (Button::F8, &MackieControlProtocol::F8_press, &MackieControlProtocol::F8_release);
+//	DEFINE_BUTTON_HANDLER (Button::F1, &MackieControlProtocol::F1_press, &MackieControlProtocol::F1_release);
+//	DEFINE_BUTTON_HANDLER (Button::F2, &MackieControlProtocol::F2_press, &MackieControlProtocol::F2_release);
+//	DEFINE_BUTTON_HANDLER (Button::F3, &MackieControlProtocol::F3_press, &MackieControlProtocol::F3_release);
+//	DEFINE_BUTTON_HANDLER (Button::F4, &MackieControlProtocol::F4_press, &MackieControlProtocol::F4_release);
+//	DEFINE_BUTTON_HANDLER (Button::F5, &MackieControlProtocol::F5_press, &MackieControlProtocol::F5_release);
+//	DEFINE_BUTTON_HANDLER (Button::F6, &MackieControlProtocol::F6_press, &MackieControlProtocol::F6_release);
+//	DEFINE_BUTTON_HANDLER (Button::F7, &MackieControlProtocol::F7_press, &MackieControlProtocol::F7_release);
+//	DEFINE_BUTTON_HANDLER (Button::F8, &MackieControlProtocol::F8_press, &MackieControlProtocol::F8_release);
 	DEFINE_BUTTON_HANDLER (Button::MidiTracks, &MackieControlProtocol::miditracks_press, &MackieControlProtocol::miditracks_release);
 	DEFINE_BUTTON_HANDLER (Button::Inputs, &MackieControlProtocol::inputs_press, &MackieControlProtocol::inputs_release);
 	DEFINE_BUTTON_HANDLER (Button::AudioTracks, &MackieControlProtocol::audiotracks_press, &MackieControlProtocol::audiotracks_release);
@@ -1554,10 +1567,12 @@ MackieControlProtocol::handle_button_event (Surface& surface, Button& button, Bu
 			   occur either.
 			*/
 			if (bs == press) {
+				update_led (surface, button, on);
 				DEBUG_TRACE (DEBUG::MackieControl, string_compose ("executing action %1\n", action));
 				access_action (action);
+			} else {
+				update_led (surface, button, off);
 			}
-
 			return;
 
 		} else {
@@ -1651,7 +1666,7 @@ MackieControlProtocol::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 		}
 
 		// DEBUG_TRACE (DEBUG::MackieControl, string_compose ("data available on %1\n", port->name()));
-		framepos_t now = session->engine().sample_time();
+		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -2004,10 +2019,10 @@ MackieControlProtocol::update_fader_automation_state ()
 	}
 }
 
-framepos_t
-MackieControlProtocol::transport_frame() const
+samplepos_t
+MackieControlProtocol::transport_sample() const
 {
-	return session->transport_frame();
+	return session->transport_sample();
 }
 
 void
@@ -2043,7 +2058,7 @@ MackieControlProtocol::select_range (uint32_t pressed)
 		return;
 	}
 
-	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->presentation_info().selected()) {
+	if (stripables.size() == 1 && ControlProtocol::last_selected().size() == 1 && stripables.front()->is_selected()) {
 		/* cancel selection for one and only selected stripable */
 		ToggleStripableSelection (stripables.front());
 	} else {
@@ -2372,10 +2387,15 @@ MackieControlProtocol::is_mapped (boost::shared_ptr<Stripable> r) const
 }
 
 void
-MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool became_selected)
+MackieControlProtocol::stripable_selection_changed ()
 {
-	if (became_selected) {
+	//this function is called after the stripable selection is "stable", so this is the place to check surface selection state
+	for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
+		(*si)->update_strip_selection ();
+	}
 
+	boost::shared_ptr<Stripable> s = first_selected_stripable ();
+	if (s) {
 		check_fader_automation_state ();
 
 		/* It is possible that first_selected_route() may return null if we
@@ -2385,7 +2405,7 @@ MackieControlProtocol::update_selected (boost::shared_ptr<Stripable> s, bool bec
 		 * set_subview_mode() will fail, and we will reset to None.
 		 */
 
-		if (set_subview_mode (_subview_mode, first_selected_stripable())) {
+		if (set_subview_mode (_subview_mode, s)) {
 			set_subview_mode (None, boost::shared_ptr<Stripable>());
 		}
 

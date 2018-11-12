@@ -24,7 +24,7 @@ def build(bld):
     obj.includes = ['.']
     obj.name     = 'dummy_audiobackend'
     obj.target   = 'dummy_audiobackend'
-    obj.use      = 'libardour libpbd'
+    obj.use      = 'libardour libpbd libltc'
     obj.uselib   = 'GLIBMM XML'
     obj.install_path  = os.path.join(bld.env['LIBDIR'], 'backends')
     obj.defines = ['PACKAGE="' + I18N_PACKAGE + '"',

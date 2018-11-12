@@ -33,6 +33,7 @@
 #include "ardour/cycles.h"
 #include "ardour/latent.h"
 #include "ardour/libardour_visibility.h"
+#include "ardour/midi_ring_buffer.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/parameter_descriptor.h"
 #include "ardour/types.h"
@@ -103,6 +104,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 
 	virtual int get_parameter_descriptor (uint32_t which, ParameterDescriptor&) const = 0;
 	virtual uint32_t nth_parameter (uint32_t which, bool& ok) const = 0;
+	virtual std::string parameter_label (uint32_t which) const;
 	virtual void activate () = 0;
 	virtual void deactivate () = 0;
 	virtual void flush () { deactivate(); activate(); }
@@ -112,9 +114,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool inplace_broken() const { return false; }
 
 	virtual int connect_and_run (BufferSet& bufs,
-			framepos_t start, framepos_t end, double speed,
+			samplepos_t start, samplepos_t end, double speed,
 			ChanMapping in, ChanMapping out,
-			pframes_t nframes, framecnt_t offset);
+			pframes_t nframes, samplecnt_t offset);
 
 	virtual std::set<Evoral::Parameter> automatable() const = 0;
 	virtual std::string describe_parameter (Evoral::Parameter) = 0;
@@ -158,6 +160,8 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 		return boost::shared_ptr<ScalePoints>();
 	}
 
+	bool write_immediate_event (size_t size, const uint8_t* buf);
+
 	void realtime_handle_transport_stopped ();
 	void realtime_locate ();
 	void monitoring_changed ();
@@ -170,6 +174,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	} Display_Image_Surface;
 
 	virtual bool has_inline_display () { return false; }
+	virtual bool inline_display_in_gui () { return false; }
 	virtual Display_Image_Surface* render_inline_display (uint32_t, uint32_t) { return NULL; }
 	PBD::Signal0<void> QueueDraw;
 
@@ -177,6 +182,11 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	virtual bool read_midnam () { return false; }
 	virtual std::string midnam_model () { return ""; }
 	PBD::Signal0<void> UpdateMidnam;
+	PBD::Signal0<void> UpdatedMidnam;
+
+	virtual bool knows_bank_patch () { return false; }
+	virtual uint32_t bank_patch (uint8_t chn) { return UINT32_MAX; }
+	PBD::Signal1<void, uint8_t> BankPatchChange;
 
 	struct PresetRecord {
 	    PresetRecord () : valid (false) {}
@@ -239,7 +249,7 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	}
 
 	/** the max possible latency a plugin will have */
-	virtual framecnt_t max_latency () const { return 0; } // TODO = 0, require implementation
+	virtual samplecnt_t max_latency () const { return 0; } // TODO = 0, require implementation
 
 	/** Emitted when a preset is added or removed, respectively */
 	PBD::Signal0<void> PresetAdded;
@@ -255,6 +265,9 @@ class LIBARDOUR_API Plugin : public PBD::StatefulDestructible, public Latent
 	 *  changed the settings with respect to any loaded preset.
 	 */
 	PBD::Signal0<void> PresetDirty;
+
+	/** Emitted for preset-load to set a control-port */
+	PBD::Signal2<void, uint32_t, float> PresetPortSetValue;
 
 	virtual bool has_editor () const = 0;
 
@@ -330,7 +343,7 @@ protected:
 	/* Called when a parameter of the plugin is changed outside of this
 	 * host's control (typical via a plugin's own GUI/editor)
 	 */
-	void parameter_changed_externally (uint32_t which, float val);
+	virtual void parameter_changed_externally (uint32_t which, float val);
 
 	/* should be overridden by plugin API specific derived types to
 	 * actually implement changing the parameter. The derived type should
@@ -369,6 +382,8 @@ private:
 	bool _parameter_changed_since_last_preset;
 
 	PBD::ScopedConnection _preset_connection;
+
+	MidiRingBuffer<samplepos_t> _immediate_events;
 
 	void resolve_midi ();
 };
@@ -410,9 +425,16 @@ class LIBARDOUR_API PluginInfo {
 	std::string unique_id;
 
 	virtual PluginPtr load (Session& session) = 0;
-	virtual bool is_instrument() const;
+
+	/* NOTE: it is possible for a plugin to be an effect AND an instrument.
+	 * override these funcs as necessary to support that.
+	 */
+	virtual bool is_effect () const;
+	virtual bool is_instrument () const;
+	virtual bool is_utility () const;  //this includes things like "generators" and "midi filters"
+	virtual bool is_analyzer () const;
+
 	virtual bool needs_midi_input() const;
-	virtual bool in_category (const std::string &) const { return false; }
 
 	virtual std::vector<Plugin::PresetRecord> get_presets (bool user_only) const = 0;
 

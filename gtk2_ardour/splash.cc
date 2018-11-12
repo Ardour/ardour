@@ -21,6 +21,7 @@
 
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/ardour.h"
 #include "ardour/filesystem_paths.h"
@@ -54,7 +55,7 @@ Splash::Splash ()
 	rc.add_subdirectory_to_paths ("resources");
 
 	if (!find_file (rc, PROGRAM_NAME "-splash.png", splash_file)) {
-                cerr << "Cannot find splash screen image file\n";
+		cerr << "Cannot find splash screen image file\n";
 		throw failed_constructor();
 	}
 
@@ -63,7 +64,7 @@ Splash::Splash ()
 	}
 
 	catch (...) {
-                cerr << "Cannot construct splash screen image\n";
+		cerr << "Cannot construct splash screen image\n";
 		throw failed_constructor();
 	}
 
@@ -91,14 +92,17 @@ Splash::Splash ()
 	set_type_hint(Gdk::WINDOW_TYPE_HINT_SPLASHSCREEN);
 	the_splash = this;
 
-        expose_done = false;
-        expose_is_the_one = false;
+	expose_done = false;
+	expose_is_the_one = false;
 
 	ARDOUR::BootMessage.connect (msg_connection, invalidator (*this), boost::bind (&Splash::boot_message, this, _1), gui_context());
 }
 
 Splash::~Splash ()
 {
+	idle_connection.disconnect ();
+	expose_done = true;
+	hide ();
 	the_splash = 0;
 }
 
@@ -106,20 +110,20 @@ void
 Splash::pop_back_for (Gtk::Window& win)
 {
 #if defined  __APPLE__ || defined PLATFORM_WINDOWS
-        /* April 2013: window layering on OS X is a bit different to X Window. at present,
-           the "restack()" functionality in GDK will only operate on windows in the same
-           "level" (e.g. two normal top level windows, or two utility windows) and will not
-           work across them. The splashscreen is on its own "StatusWindowLevel" so restacking
-           is not going to work.
-
-           So for OS X, we just hide ourselves.
-
-           Oct 2014: The Windows situation is similar, although it should be possible
-           to play tricks with gdk's set_type_hint() or directly hack things using
-           SetWindowLong() and UpdateLayeredWindow()
-        */
-        (void) win;
-        hide();
+	/* April 2013: window layering on OS X is a bit different to X Window. at present,
+	 * the "restack()" functionality in GDK will only operate on windows in the same
+	 * "level" (e.g. two normal top level windows, or two utility windows) and will not
+	 * work across them. The splashscreen is on its own "StatusWindowLevel" so restacking
+	 * is not going to work.
+	 *
+	 * So for OS X, we just hide ourselves.
+	 *
+	 * Oct 2014: The Windows situation is similar, although it should be possible
+	 * to play tricks with gdk's set_type_hint() or directly hack things using
+	 * SetWindowLong() and UpdateLayeredWindow()
+	 */
+	(void) win;
+	hide();
 #else
 	set_keep_above (false);
 	get_window()->restack (win.get_window(), false);
@@ -129,12 +133,19 @@ Splash::pop_back_for (Gtk::Window& win)
 void
 Splash::pop_front ()
 {
-
+	if (get_window()) {
 #if defined  __APPLE__ || defined PLATFORM_WINDOWS
-        if (get_window()) {
-                show ();
-        }
+		show ();
+#else
+		gdk_window_restack(get_window()->gobj(), NULL, true);
 #endif
+	}
+}
+
+void
+Splash::hide ()
+{
+	Gtk::Window::hide();
 }
 
 void
@@ -150,9 +161,9 @@ Splash::on_button_release_event (GdkEventButton* ev)
 {
 	RefPtr<Gdk::Window> window = get_window();
 
-        if (!window || ev->window != window->gobj()) {
-                return false;
-        }
+	if (!window || ev->window != window->gobj()) {
+		return false;
+	}
 
 	hide ();
 	return true;
@@ -183,8 +194,9 @@ Splash::expose (GdkEventExpose* ev)
 	 */
 
 	if (expose_is_the_one) {
-		Glib::signal_idle().connect (sigc::mem_fun (this, &Splash::idle_after_expose),
-					     GDK_PRIORITY_REDRAW+2);
+		idle_connection = Glib::signal_idle().connect (
+				sigc::mem_fun (this, &Splash::idle_after_expose),
+				GDK_PRIORITY_REDRAW+2);
 	}
 
 	return true;
@@ -199,7 +211,7 @@ Splash::boot_message (std::string msg)
 bool
 Splash::idle_after_expose ()
 {
-        expose_done = true;
+	expose_done = true;
 	return false;
 }
 
@@ -217,7 +229,7 @@ Splash::display ()
 	present ();
 
 	if (!was_mapped) {
-		while (!expose_done) {
+		while (!expose_done && gtk_events_pending()) {
 			gtk_main_iteration ();
 		}
 		gdk_display_flush (gdk_display_get_default());
@@ -231,18 +243,19 @@ Splash::message (const string& msg)
 	str += Gtkmm2ext::markup_escape_text (msg);
 	str += "</b>";
 
-        show ();
+	show ();
 
 	layout->set_markup (str);
 	Glib::RefPtr<Gdk::Window> win = darea.get_window();
 
 	if (win) {
-                expose_done = false;
-
 		if (win->is_visible ()) {
 			win->invalidate_rect (Gdk::Rectangle (0, darea.get_height() - 30, darea.get_width(), 30), true);
 		} else {
 			darea.queue_draw ();
+		}
+		if (expose_done) {
+			ARDOUR::GUIIdle ();
 		}
 	}
 }

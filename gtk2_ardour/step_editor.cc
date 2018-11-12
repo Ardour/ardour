@@ -41,7 +41,7 @@ StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTim
 	step_edit_insert_position = 0;
 	_step_edit_triplet_countdown = 0;
 	_step_edit_within_chord = 0;
-	_step_edit_chord_duration = Evoral::Beats();
+	_step_edit_chord_duration = Temporal::Beats();
 	step_edit_region_view = 0;
 
 	_track->PlaylistChanged.connect (*this, invalidator (*this),
@@ -60,11 +60,11 @@ StepEditor::start_step_editing ()
 {
 	_step_edit_triplet_countdown = 0;
 	_step_edit_within_chord = 0;
-	_step_edit_chord_duration = Evoral::Beats();
+	_step_edit_chord_duration = Temporal::Beats();
 	step_edit_region.reset ();
 	step_edit_region_view = 0;
 	last_added_pitch = -1;
-	last_added_end = Evoral::Beats();
+	last_added_end = Temporal::Beats();
 
 	resync_step_edit_position ();
 	prepare_step_edit_region ();
@@ -115,11 +115,11 @@ StepEditor::prepare_step_edit_region ()
 
 	} else {
 
-		const Meter& m = _mtv.session()->tempo_map().meter_at_frame (step_edit_insert_position);
-		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_frame (step_edit_insert_position));
+		const Meter& m = _mtv.session()->tempo_map().meter_at_sample (step_edit_insert_position);
+		double baf = max (0.0, _mtv.session()->tempo_map().beat_at_sample (step_edit_insert_position));
 		double next_bar_in_beats =  baf + m.divisions_per_bar();
-		framecnt_t next_bar_pos = _mtv.session()->tempo_map().frame_at_beat (next_bar_in_beats);
-		framecnt_t len = next_bar_pos - step_edit_insert_position;
+		samplecnt_t next_bar_pos = _mtv.session()->tempo_map().sample_at_beat (next_bar_in_beats);
+		samplecnt_t len = next_bar_pos - step_edit_insert_position;
 
 		step_edit_region = _mtv.add_region (step_edit_insert_position, len, true);
 
@@ -135,16 +135,16 @@ StepEditor::reset_step_edit_beat_pos ()
 	assert (step_edit_region);
 	assert (step_edit_region_view);
 
-	framecnt_t frames_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
+	samplecnt_t samples_from_start = _editor.get_preferred_edit_position() - step_edit_region->position();
 
-	if (frames_from_start < 0) {
+	if (samples_from_start < 0) {
 		/* this can happen with snap enabled, and the edit point == Playhead. we snap the
 		   position of the new region, and it can end up after the edit point.
 		*/
-		frames_from_start = 0;
+		samples_from_start = 0;
 	}
 
-	step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (frames_from_start);
+	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (samples_from_start);
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -179,14 +179,14 @@ StepEditor::stop_step_editing ()
 void
 StepEditor::check_step_edit ()
 {
-	MidiRingBuffer<framepos_t>& incoming (_track->step_edit_ring_buffer());
+	MidiRingBuffer<samplepos_t>& incoming (_track->step_edit_ring_buffer());
 	uint8_t* buf;
 	uint32_t bufsize = 32;
 
 	buf = new uint8_t[bufsize];
 
 	while (incoming.read_space()) {
-		framepos_t time;
+		samplepos_t time;
 		Evoral::EventType type;
 		uint32_t size;
 
@@ -201,9 +201,10 @@ StepEditor::check_step_edit ()
 		incoming.read_contents (size, buf);
 
 		if ((buf[0] & 0xf0) == MIDI_CMD_NOTE_ON) {
-			step_add_note (buf[0] & 0xf, buf[1], buf[2], Evoral::Beats());
+			step_add_note (buf[0] & 0xf, buf[1], buf[2], Temporal::Beats());
 		}
 	}
+	delete [] buf;
 }
 
 int
@@ -219,7 +220,7 @@ StepEditor::step_add_program_change (uint8_t /*channel*/, uint8_t /*program*/)
 }
 
 void
-StepEditor::step_edit_sustain (Evoral::Beats beats)
+StepEditor::step_edit_sustain (Temporal::Beats beats)
 {
 	if (step_edit_region_view) {
 		step_edit_region_view->step_sustain (beats);
@@ -227,26 +228,26 @@ StepEditor::step_edit_sustain (Evoral::Beats beats)
 }
 
 void
-StepEditor::move_step_edit_beat_pos (Evoral::Beats beats)
+StepEditor::move_step_edit_beat_pos (Temporal::Beats beats)
 {
 	if (!step_edit_region_view) {
 		return;
 	}
 	if (beats > 0.0) {
 		step_edit_beat_pos = min (step_edit_beat_pos + beats,
-		                          step_edit_region_view->region_frames_to_region_beats (step_edit_region->length()));
+		                          step_edit_region_view->region_samples_to_region_beats (step_edit_region->length()));
 	} else if (beats < 0.0) {
 		if (-beats < step_edit_beat_pos) {
 			step_edit_beat_pos += beats; // its negative, remember
 		} else {
-			step_edit_beat_pos = Evoral::Beats();
+			step_edit_beat_pos = Temporal::Beats();
 		}
 	}
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
 int
-StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evoral::Beats beat_duration)
+StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Temporal::Beats beat_duration)
 {
 	/* do these things in case undo removed the step edit region
 	 */
@@ -283,14 +284,14 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 
 	/* make sure its visible on the horizontal axis */
 
-	framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos + beat_duration);
+	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos + beat_duration);
 
 	if (fpos >= (_editor.leftmost_sample() + _editor.current_page_samples())) {
 		_editor.reset_x_origin (fpos - (_editor.current_page_samples()/4));
 	}
 
-	Evoral::Beats at = step_edit_beat_pos;
-	Evoral::Beats len = beat_duration;
+	Temporal::Beats at = step_edit_beat_pos;
+	Temporal::Beats len = beat_duration;
 
 	if ((last_added_pitch >= 0) && (pitch == last_added_pitch) && (last_added_end == step_edit_beat_pos)) {
 
@@ -298,8 +299,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 		   up by 1 tick from where the last note ended
 		*/
 
-		at  += Evoral::Beats::ticks(1);
-		len -= Evoral::Beats::ticks(1);
+		at  += Temporal::Beats::ticks(1);
+		len -= Temporal::Beats::ticks(1);
 	}
 
 	step_edit_region_view->step_add_note (channel, pitch, velocity, at, len);
@@ -319,7 +320,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 		step_edit_beat_pos += beat_duration;
 		step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 	} else {
-		step_edit_beat_pos += Evoral::Beats::ticks(1); // tiny, but no longer overlapping
+		step_edit_beat_pos += Temporal::Beats::ticks(1); // tiny, but no longer overlapping
 		_step_edit_chord_duration = max (_step_edit_chord_duration, beat_duration);
 	}
 
@@ -329,7 +330,7 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Evo
 }
 
 void
-StepEditor::set_step_edit_cursor_width (Evoral::Beats beats)
+StepEditor::set_step_edit_cursor_width (Temporal::Beats beats)
 {
 	if (step_edit_region_view) {
 		step_edit_region_view->set_step_edit_cursor_width (beats);
@@ -375,7 +376,7 @@ StepEditor::step_edit_toggle_chord ()
 }
 
 void
-StepEditor::step_edit_rest (Evoral::Beats beats)
+StepEditor::step_edit_rest (Temporal::Beats beats)
 {
 	bool success;
 
@@ -409,9 +410,9 @@ StepEditor::step_edit_bar_sync ()
 		return;
 	}
 
-	framepos_t fpos = step_edit_region_view->region_beats_to_absolute_frames (step_edit_beat_pos);
-	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).frame;
-	step_edit_beat_pos = step_edit_region_view->region_frames_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
+	samplepos_t fpos = step_edit_region_view->region_beats_to_absolute_samples (step_edit_beat_pos);
+	fpos = _session->tempo_map().round_to_bar (fpos, RoundUpAlways).sample;
+	step_edit_beat_pos = step_edit_region_view->region_samples_to_region_beats (fpos - step_edit_region->position()).round_up_to_beat();
 	step_edit_region_view->move_step_edit_cursor (step_edit_beat_pos);
 }
 
@@ -437,7 +438,7 @@ StepEditor::region_removed (boost::weak_ptr<Region> wr)
 		step_edit_region.reset();
 		step_edit_region_view = 0;
 		// force a recompute of the insert position
-		step_edit_beat_pos = Evoral::Beats(-1);
+		step_edit_beat_pos = Temporal::Beats(-1);
 	}
 }
 

@@ -372,10 +372,17 @@ fluid_midi_file_read_track(fluid_midi_file *mf, fluid_player_t *player, int num)
             }
 
             /* Skip remaining track data, if any */
-            if (mf->trackpos < mf->tracklen)
-                fluid_midi_file_skip(mf, mf->tracklen - mf->trackpos);
+            if (mf->trackpos < mf->tracklen) {
+                if (fluid_midi_file_skip(mf, mf->tracklen - mf->trackpos) != FLUID_OK) {
+                    delete_fluid_track(track);
+                    return FLUID_FAILED;
+                }
+            }
 
-            fluid_player_add_track(player, track);
+            if (fluid_player_add_track(player, track) != FLUID_OK) {
+                delete_fluid_track(track);
+                return FLUID_FAILED;
+            }
 
         } else {
             found_track = 0;

@@ -22,7 +22,13 @@
 
 #include <string>
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/progressbar.h>
 
 #include "ardour/types.h"
 #include "ardour/template_utils.h"
@@ -40,7 +46,7 @@
  */
 class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 {
-  public:
+public:
 	ExportVideoDialog ();
 	~ExportVideoDialog ();
 
@@ -51,7 +57,11 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	XMLNode& get_state ();
 	void set_state (const XMLNode &);
 
-  private:
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
+private:
 	TimeSelection export_range;
 
 	void on_show ();
@@ -78,7 +88,7 @@ class ExportVideoDialog : public ArdourDialog , public PBD::ScopedConnectionList
 	bool _normalize;
 
 	void finished ();
-	void update_progress (ARDOUR::framecnt_t, ARDOUR::framecnt_t);
+	void update_progress (ARDOUR::samplecnt_t, ARDOUR::samplecnt_t);
 
 	boost::shared_ptr<ARDOUR::ExportStatus> status;
 	sigc::connection audio_progress_connection;

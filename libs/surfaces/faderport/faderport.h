@@ -34,7 +34,6 @@
 
 namespace PBD {
 	class Controllable;
-	class ControllableDescriptor;
 }
 
 #include <midi++/types.h>
@@ -232,7 +231,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 		std::string get_action (bool press, FaderPort::ButtonState bs = ButtonState (0));
 
 		void set_led_state (boost::shared_ptr<MIDI::Port>, bool onoff);
-		void invoke (ButtonState bs, bool press);
+		bool invoke (ButtonState bs, bool press);
 		bool uses_flash () const { return flash; }
 		void set_flash (bool yn) { flash = yn; }
 
@@ -298,7 +297,7 @@ class FaderPort : public ARDOUR::ControlProtocol, public AbstractUI<FaderPortReq
 	void drop_current_stripable ();
 	void use_master ();
 	void use_monitor ();
-	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr);
+	void stripable_selection_changed ();
 	PBD::ScopedConnection selection_connection;
 	PBD::ScopedConnectionList stripable_connections;
 

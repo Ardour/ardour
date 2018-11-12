@@ -32,8 +32,11 @@
 #include "ardour/session_handle.h"
 
 #include "gui_object.h"
-#include "prompter.h"
 #include "selectable.h"
+
+namespace PBD {
+	class Controllable;
+}
 
 namespace ARDOUR {
 	class Session;
@@ -48,27 +51,43 @@ namespace ARDOUR {
  */
 class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR::SessionHandlePtr, public virtual Selectable
 {
-  public:
-	ARDOUR::Session* session() const { return _session; }
-
+public:
 	virtual std::string name() const = 0;
 	virtual Gdk::Color color() const = 0;
 
 	sigc::signal<void> Hiding;
 
 	virtual boost::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
+	virtual boost::shared_ptr<ARDOUR::AutomationControl> control() const { return boost::shared_ptr<ARDOUR::AutomationControl>(); }
 
 	virtual std::string state_id() const = 0;
 	/* for now, we always return properties in string form.
-	 */
+	*/
 	std::string gui_property (const std::string& property_name) const;
 
-	template<typename T> void set_gui_property (const std::string& property_name, const T& value) {
-		std::stringstream s;
-		s << value;
-		property_hashtable.erase(property_name);
-		property_hashtable.emplace(property_name, s.str());
-		gui_object_state().set_property<T> (state_id(), property_name, value);
+	bool get_gui_property (const std::string& property_name, std::string& value) const;
+
+	template <typename T>
+		bool get_gui_property (const std::string& property_name, T& value) const
+		{
+			std::string str = gui_property (property_name);
+
+			if (!str.empty ()) {
+				return PBD::string_to<T>(str, value);
+			}
+			return false;
+		}
+
+	void set_gui_property (const std::string& property_name, const std::string& value);
+
+	void set_gui_property (const std::string& property_name, const char* value) {
+		set_gui_property (property_name, std::string(value));
+	}
+
+	template <typename T>
+	void set_gui_property (const std::string& property_name, const T& value)
+	{
+		set_gui_property (property_name, PBD::to_string(value));
 	}
 
 	void cleanup_gui_properties () {
@@ -92,7 +111,7 @@ class AxisView : public virtual PBD::ScopedConnectionList, public virtual ARDOUR
 	 */
 	static Gdk::Color unique_random_color();
 
-  protected:
+protected:
 	AxisView ();
 	virtual ~AxisView();
 

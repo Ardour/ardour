@@ -363,7 +363,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -400,7 +400,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -442,7 +442,7 @@ private:
 
       if (Security::hideMetatables ())
       {
-        lua_pushnil (L);
+        lua_pushboolean (L, false);
         rawsetfield (L, -2, "__metatable");
       }
     }
@@ -579,10 +579,14 @@ private:
         createConstTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createClassTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createStaticTable (name);
 
@@ -626,10 +630,14 @@ private:
       createConstTable (name);
       lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
       rawsetfield (L, -2, "__gc");
+      lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+      rawsetfield (L, -2, "__eq");
 
       createClassTable (name);
       lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
       rawsetfield (L, -2, "__gc");
+      lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+      rawsetfield (L, -2, "__eq");
 
       createStaticTable (name);
 
@@ -976,6 +984,8 @@ private:
       DATADOC ("Ext C Function", name, fp)
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
       return *this;
     }
@@ -1078,7 +1088,6 @@ private:
 
     Class <T>& addEqualCheck ()
     {
-      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
       rawsetfield (L, -3, "sameinstance");
@@ -1122,8 +1131,6 @@ private:
           std::string(""), "int (*)(lua_State*)")
       PRINTDOC ("Ext C Function", _name << "set_table",
           std::string(""), "int (*)(lua_State*)")
-      PRINTDOC("Member Function", _name << "sameinstance",
-          std::string("bool"), std::string("bool (*)(" + type_name <T>() + "*)"))
       PRINTDOC("Member Function", _name << "offset",
           std::string(type_name <T>() + "*"), std::string(type_name <T>() + "* (*)(unsigned int)"))
 
@@ -1154,15 +1161,25 @@ private:
         lua_setfield(L, -2, "__index");
         lua_pushcclosure (L, CFunc::array_newindex<T>, 0);
         lua_setfield(L, -2, "__newindex");
+        if (Security::hideMetatables ())
+        {
+          lua_pushboolean (L, false);
+          rawsetfield (L, -2, "__metatable");
+        }
         lua_pop (L, 1);
+
 
         createConstTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createClassTable (name);
         lua_pushcfunction (L, &CFunc::gcMetaMethod <T>);
         rawsetfield (L, -2, "__gc");
+        lua_pushcclosure (L, &CFunc::ClassEqualCheck <T>::f, 0);
+        rawsetfield (L, -2, "__eq");
 
         createStaticTable (name);
 
@@ -1289,7 +1306,7 @@ private:
 
     WSPtrClass <T>& addNilPtrConstructor ()
     {
-      FUNDOC ("Weak/Shared Pointer Constructor", "", MemFn)
+      FUNDOC ("Weak/Shared Pointer NIL Constructor", "", void (*) ())
       set_shared_class ();
       lua_pushcclosure (L,
           &shared. template ctorNilPtrPlacementProxy <boost::shared_ptr<T> >, 0);
@@ -1311,11 +1328,15 @@ private:
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
 
       set_weak_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
       rawsetfield (L, -3, name); // class table
 
       return *this;
@@ -1354,7 +1375,6 @@ private:
 
     WSPtrClass <T>& addEqualCheck ()
     {
-      PRINTDOC("Member Function", _name << "sameinstance", std::string("bool"), std::string("void (*)(" + type_name <T>() + ")"))
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
@@ -1518,6 +1538,12 @@ private:
       lua_pushcfunction (L, &tostringMetaMethod);
       rawsetfield (L, -2, "__tostring");
 #endif
+      if (Security::hideMetatables ())
+      {
+        lua_pushboolean (L, false);
+        rawsetfield (L, -2, "__metatable");
+      }
+
     }
   }
 
@@ -1816,9 +1842,8 @@ public:
       .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
-      .addExtCFunction ("add", &CFunc::tableToSet<T>)
-      .addExtCFunction ("iter", &CFunc::setIter<T>)
-      .addExtCFunction ("table", &CFunc::setToTable<T>);
+      .addExtCFunction ("iter", &CFunc::setIter<T, LT>)
+      .addExtCFunction ("table", &CFunc::setToTable<T, LT>);
   }
 
   template <unsigned int T>
@@ -1847,6 +1872,8 @@ public:
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
       .addFunction ("reverse", &LT::reverse)
+      .addFunction ("front", static_cast<const T& (LT::*)() const>(&LT::front))
+      .addFunction ("back", static_cast<const T& (LT::*)() const>(&LT::back))
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
   }
@@ -1862,7 +1889,34 @@ public:
   }
 
   template <class T>
-  Class<std::vector<T> > beginStdVector (char const* name)
+  Class<std::list<T*> > beginConstStdCPtrList (char const* name)
+  {
+    typedef T* TP;
+    typedef std::list<TP> LT;
+    return beginClass<LT> (name)
+      .addVoidConstructor ()
+      .addFunction ("empty", &LT::empty)
+      .addFunction ("size", &LT::size)
+      .addFunction ("reverse", &LT::reverse)
+      .addFunction ("front", static_cast<const TP& (LT::*)() const>(&LT::front))
+      .addFunction ("back", static_cast<const TP& (LT::*)() const>(&LT::back))
+      .addExtCFunction ("iter", &CFunc::listIter<T*, LT>)
+      .addExtCFunction ("table", &CFunc::listToTable<T*, LT>);
+  }
+
+  template <class T>
+  Class<std::list<T*> > beginStdCPtrList (char const* name)
+  {
+    typedef T* TP;
+    typedef std::list<TP> LT;
+    return beginConstStdCPtrList<T> (name)
+      .addFunction ("unique", (void (LT::*)())&LT::unique)
+      .addFunction ("push_back", (void (LT::*)(const TP&))&LT::push_back);
+  }
+
+
+  template <class T>
+  Class<std::vector<T> > beginConstStdVector (char const* name)
   {
     typedef std::vector<T> LT;
     typedef typename std::vector<T>::reference T_REF;
@@ -1872,12 +1926,22 @@ public:
       .addVoidConstructor ()
       .addFunction ("empty", &LT::empty)
       .addFunction ("size", &LT::size)
-      .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
-      .addExtCFunction ("add", &CFunc::tableToList<T, LT>)
       .addExtCFunction ("iter", &CFunc::listIter<T, LT>)
       .addExtCFunction ("table", &CFunc::listToTable<T, LT>);
   }
+
+  template <class T>
+  Class<std::vector<T> > beginStdVector (char const* name)
+  {
+    typedef std::vector<T> LT;
+    return beginConstStdVector<T> (name)
+      .addVoidConstructor ()
+      .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
+      .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
+  }
+
+
 
   //----------------------------------------------------------------------------
 

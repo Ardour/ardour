@@ -31,13 +31,14 @@
 #include "canvas/item.h"
 #include "canvas/rectangle.h"
 
+#include "widgets/prompter.h"
+
 #include "editor.h"
 #include "marker.h"
 #include "selection.h"
 #include "editing.h"
 #include "gui_thread.h"
 #include "actions.h"
-#include "prompter.h"
 #include "editor_drag.h"
 
 #include "pbd/i18n.h"
@@ -164,6 +165,7 @@ Editor::add_new_location_internal (Location* location)
 	}
 
 	location->name_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
+	location->position_lock_style_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	location->FlagsChanged.connect (*this, invalidator (*this), boost::bind (&Editor::location_flags_changed, this, location), gui_context());
 
 	pair<Location*,LocationMarkers*> newpair;
@@ -204,7 +206,12 @@ Editor::location_changed (Location *location)
 		return;
 	}
 
-	lam->set_name (location->name ());
+	if (location->position_lock_style() == MusicTime) {
+		lam->set_name ("\u266B" + location->name ()); // BEAMED EIGHTH NOTES
+	} else {
+		lam->set_name (location->name ());
+	}
+
 	lam->set_position (location->start(), location->end());
 
 	if (location->is_auto_loop()) {
@@ -590,8 +597,8 @@ Editor::LocationMarkers::set_name (const string& str)
 }
 
 void
-Editor::LocationMarkers::set_position (framepos_t startf,
-				       framepos_t endf)
+Editor::LocationMarkers::set_position (samplepos_t startf,
+				       samplepos_t endf)
 {
 	start->set_position (startf);
 	if (end) {
@@ -636,7 +643,7 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
+Editor::mouse_add_new_marker (samplepos_t where, bool is_cd)
 {
 	string markername;
 	int flags = (is_cd ? Location::IsCDMarker|Location::IsMark : Location::IsMark);
@@ -667,7 +674,7 @@ Editor::mouse_add_new_marker (framepos_t where, bool is_cd)
 }
 
 void
-Editor::mouse_add_new_loop (framepos_t where)
+Editor::mouse_add_new_loop (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -677,13 +684,13 @@ Editor::mouse_add_new_loop (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	set_loop_range (where, end,  _("set loop range"));
 }
 
 void
-Editor::mouse_add_new_punch (framepos_t where)
+Editor::mouse_add_new_punch (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -693,13 +700,13 @@ Editor::mouse_add_new_punch (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	set_punch_range (where, end,  _("set punch range"));
 }
 
 void
-Editor::mouse_add_new_range (framepos_t where)
+Editor::mouse_add_new_range (samplepos_t where)
 {
 	if (!_session) {
 		return;
@@ -709,7 +716,7 @@ Editor::mouse_add_new_range (framepos_t where)
 	   it's reasonably easy to manipulate after creation.
 	*/
 
-	framepos_t const end = where + current_page_samples() / 8;
+	samplepos_t const end = where + current_page_samples() / 8;
 
 	string name;
 	_session->locations()->next_available_name (name, _("range"));
@@ -741,7 +748,7 @@ Editor::remove_marker (ArdourCanvas::Item& item, GdkEvent*)
 	Location* loc = find_location_from_marker (marker, is_start);
 
 	if (_session && loc) {
-	  	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
+		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_marker), loc));
 	}
 }
 
@@ -892,6 +899,7 @@ Editor::build_marker_menu (Location* loc)
 	using namespace Menu_Helpers;
 
 	marker_menu = new Menu;
+
 	MenuList& items = marker_menu->items();
 	marker_menu->set_name ("ArdourContextMenu");
 
@@ -903,6 +911,7 @@ Editor::build_marker_menu (Location* loc)
 
 	items.push_back (MenuElem (_("Create Range to Next Marker"), sigc::mem_fun(*this, &Editor::marker_menu_range_to_next)));
 
+	items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
 	items.push_back (MenuElem (_("Hide"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 	items.push_back (MenuElem (_("Rename..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
 
@@ -931,7 +940,8 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 
 	bool const loop_or_punch_or_session = loop_or_punch || session;
 
-	Menu *markerMenu = new Menu;
+	Menu* markerMenu = new Menu;
+
 	if (loop_or_punch_or_session) {
 		transport_marker_menu = markerMenu;
 	} else {
@@ -961,6 +971,7 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_range)));
 	items.push_back (SeparatorElem());
 
+	items.push_back (MenuElem (_("Promote to Time Origin"), sigc::mem_fun(*this, &Editor::marker_menu_set_origin)));
 	if (!loop_or_punch_or_session) {
 		items.push_back (MenuElem (_("Hide Range"), sigc::mem_fun(*this, &Editor::marker_menu_hide)));
 		items.push_back (MenuElem (_("Rename Range..."), sigc::mem_fun(*this, &Editor::marker_menu_rename)));
@@ -985,20 +996,36 @@ Editor::build_tempo_marker_menu (TempoMarker* loc, bool can_remove)
 	using namespace Menu_Helpers;
 
 	tempo_marker_menu = new Menu;
+
 	MenuList& items = tempo_marker_menu->items();
 	tempo_marker_menu->set_name ("ArdourContextMenu");
 
-	if (loc->tempo().type() == TempoSection::Constant) {
-		items.push_back (MenuElem (_("Make Ramped"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
-	} else {
-		items.push_back (MenuElem (_("Make Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	if (!loc->tempo().initial()) {
+		if (loc->tempo().clamped()) {
+			items.push_back (MenuElem (_("Don't Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+		} else {
+			items.push_back (MenuElem (_("Continue"), sigc::mem_fun(*this, &Editor::toggle_tempo_clamped)));
+		}
+	}
+
+	if (loc->tempo().type() == TempoSection::Ramp) {
+		items.push_back (MenuElem (_("Set Constant"), sigc::mem_fun(*this, &Editor::toggle_tempo_type)));
+	}
+
+	TempoSection* next_ts = _session->tempo_map().next_tempo_section (&loc->tempo());
+	if (next_ts && next_ts->note_types_per_minute() != loc->tempo().end_note_types_per_minute()) {
+		items.push_back (MenuElem (_("Ramp to Next"), sigc::mem_fun(*this, &Editor::ramp_to_next_tempo)));
 	}
 
 	if (loc->tempo().position_lock_style() == AudioTime && can_remove) {
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Lock to Music"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	} else if (can_remove) {
+		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Lock to Audio"), sigc::mem_fun(*this, &Editor::toggle_marker_lock_style)));
 	}
+
+	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Edit..."), sigc::mem_fun(*this, &Editor::marker_menu_edit)));
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
@@ -1011,6 +1038,7 @@ Editor::build_meter_marker_menu (MeterMarker* loc, bool can_remove)
 	using namespace Menu_Helpers;
 
 	meter_marker_menu = new Menu;
+
 	MenuList& items = meter_marker_menu->items();
 	meter_marker_menu->set_name ("ArdourContextMenu");
 
@@ -1032,6 +1060,7 @@ Editor::build_new_transport_marker_menu ()
 	using namespace Menu_Helpers;
 
 	new_transport_marker_menu = new Menu;
+
 	MenuList& items = new_transport_marker_menu->items();
 	new_transport_marker_menu->set_name ("ArdourContextMenu");
 
@@ -1060,6 +1089,24 @@ Editor::marker_menu_hide ()
 }
 
 void
+Editor::marker_menu_set_origin ()
+{
+	ArdourMarker* marker;
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Location* l;
+	bool is_start;
+
+	if ((l = find_location_from_marker (marker, is_start)) != 0) {
+		_session->locations()->set_clock_origin (l, this);
+	}
+}
+
+void
 Editor::marker_menu_select_using_range ()
 {
 	ArdourMarker* marker;
@@ -1073,7 +1120,7 @@ Editor::marker_menu_select_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        set_selection_from_range (*l);
+		set_selection_from_range (*l);
 	}
 }
 
@@ -1091,7 +1138,7 @@ Editor::marker_menu_select_all_selectables_using_range ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set, false);
+		select_all_within (l->start(), l->end() - 1, 0,  DBL_MAX, track_views, Selection::Set, false);
 	}
 
 }
@@ -1110,7 +1157,7 @@ Editor::marker_menu_separate_regions_using_location ()
 	bool is_start;
 
 	if (((l = find_location_from_marker (marker, is_start)) != 0) && (l->end() > l->start())) {
-	        separate_regions_using_location (*l);
+		separate_regions_using_location (*l);
 	}
 
 }
@@ -1193,11 +1240,11 @@ Editor::marker_menu_range_to_next ()
 		return;
 	}
 
-	framepos_t start;
-	framepos_t end;
+	samplepos_t start;
+	samplepos_t end;
 	_session->locations()->marks_either_side (marker->position(), start, end);
 
-	if (end != max_framepos) {
+	if (end != max_samplepos) {
 		string range_name = l->name();
 		range_name += "-range";
 
@@ -1223,13 +1270,13 @@ Editor::marker_menu_set_from_playhead ()
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
 
 		if (l->is_mark()) {
-			l->set_start (_session->audible_frame (), false, true, divisions);
+			l->set_start (_session->audible_sample (), false, true, divisions);
 		}
 		else {
 			if (is_start) {
-				l->set_start (_session->audible_frame (), false, true, divisions);
+				l->set_start (_session->audible_sample (), false, true, divisions);
 			} else {
-				l->set_end (_session->audible_frame (), false, true, divisions);
+				l->set_end (_session->audible_sample (), false, true, divisions);
 			}
 		}
 	}
@@ -1257,9 +1304,9 @@ Editor::marker_menu_set_from_selection (bool /*force_regions*/)
 		} else {
 
 			if (!selection->time.empty()) {
-				l->set (selection->time.start(), selection->time.end_frame());
+				l->set (selection->time.start(), selection->time.end_sample());
 			} else if (!selection->regions.empty()) {
-				l->set (selection->regions.start(), selection->regions.end_frame());
+				l->set (selection->regions.start(), selection->regions.end_sample());
 			}
 		}
 	}
@@ -1305,14 +1352,11 @@ Editor::marker_menu_loop_range ()
 	bool is_start;
 
 	if ((l = find_location_from_marker (marker, is_start)) != 0) {
-		Location* l2;
-		if ((l2 = transport_loop_location()) != 0) {
-			l2->set (l->start(), l->end());
-
-			// enable looping, reposition and start rolling
-			_session->request_locate (l2->start(), true);
-			_session->request_play_loop(true);
+		if (l != transport_loop_location()) {
+			set_loop_range (l->start(), l->end(), _("loop range from marker"));
 		}
+		_session->request_locate (l->start(), true);
+		_session->request_play_loop (true);
 	}
 }
 
@@ -1329,18 +1373,18 @@ Editor::marker_menu_zoom_to_range ()
 		return;
 	}
 
-	framecnt_t const extra = l->length() * 0.05;
-	framepos_t a = l->start ();
+	samplecnt_t const extra = l->length() * 0.05;
+	samplepos_t a = l->start ();
 	if (a >= extra) {
 		a -= extra;
 	}
 
-	framepos_t b = l->end ();
-	if (b < (max_framepos - extra)) {
+	samplepos_t b = l->end ();
+	if (b < (max_samplepos - extra)) {
 		b += extra;
 	}
 
-	temporal_zoom_by_frame (a, b);
+	temporal_zoom_by_sample (a, b);
 }
 
 void
@@ -1402,7 +1446,7 @@ Editor::toggle_marker_lock_style ()
 		const Timecode::BBT_Time bbt (msp->bbt());
 		const PositionLockStyle pls = (msp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
 
-		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->frame(), pls);
+		_session->tempo_map().replace_meter (*msp, meter, bbt, msp->sample(), pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
@@ -1410,23 +1454,22 @@ Editor::toggle_marker_lock_style ()
 	} else if (tm) {
 		TempoSection* tsp = &tm->tempo();
 
-		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
-		const framepos_t frame = tsp->frame();
-		const TempoSection::Type type = tsp->type();
+		const samplepos_t sample = tsp->sample();
 		const PositionLockStyle pls = (tsp->position_lock_style() == AudioTime) ? MusicTime : AudioTime;
+		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), tsp->end_note_types_per_minute());
 
 		begin_reversible_command (_("change tempo lock style"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, type, pls);
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
 	}
 }
-
+/* actally just resets the ts to constant using initial tempo */
 void
 Editor::toggle_tempo_type ()
 {
@@ -1439,18 +1482,74 @@ Editor::toggle_tempo_type ()
 
 		const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type());
 		const double pulse = tsp->pulse();
-		const framepos_t frame = tsp->frame();
-		const TempoSection::Type type = (tsp->type() == TempoSection::Ramp) ? TempoSection::Constant : TempoSection::Ramp;
+		const samplepos_t sample = tsp->sample();
 		const PositionLockStyle pls = tsp->position_lock_style();
 
-		begin_reversible_command (_("change tempo type"));
+		begin_reversible_command (_("set tempo to constant"));
 		XMLNode &before = _session->tempo_map().get_state();
 
-		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, frame, type, pls);
+		_session->tempo_map().replace_tempo (*tsp, tempo, pulse, sample, pls);
 
 		XMLNode &after = _session->tempo_map().get_state();
 		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
 		commit_reversible_command ();
+	}
+}
+/* clamped locks the previous section end tempo to the start tempo */
+void
+Editor::toggle_tempo_clamped ()
+{
+	TempoMarker* tm;
+	MeterMarker* mm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (tm) {
+		begin_reversible_command (_("Clamp Tempo"));
+		XMLNode &before = _session->tempo_map().get_state();
+
+		TempoSection* tsp = &tm->tempo();
+		TempoSection* prev = _session->tempo_map().previous_tempo_section (tsp);
+
+		if (prev) {
+			/* set to the end tempo of the previous section */
+			Tempo new_tempo (prev->end_note_types_per_minute(), prev->note_type(), tsp->end_note_types_per_minute());
+			_session->tempo_map().gui_change_tempo (tsp, new_tempo);
+		}
+
+		tsp->set_clamped (!tsp->clamped());
+
+		XMLNode &after = _session->tempo_map().get_state();
+		_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+		commit_reversible_command ();
+	}
+}
+
+void
+Editor::ramp_to_next_tempo ()
+{
+	TempoMarker* tm;
+	MeterMarker* mm;
+	dynamic_cast_marker_object (marker_menu_item->get_data ("marker"), &mm, &tm);
+
+	if (tm) {
+		TempoMap& tmap (_session->tempo_map());
+		TempoSection* tsp = &tm->tempo();
+		TempoSection* next_ts = tmap.next_tempo_section (&tm->tempo());
+		if (next_ts) {
+			const Tempo tempo (tsp->note_types_per_minute(), tsp->note_type(), next_ts->note_types_per_minute());
+			const double pulse = tsp->pulse();
+			const samplepos_t sample = tsp->sample();
+			const PositionLockStyle pls = tsp->position_lock_style();
+
+			begin_reversible_command (_("ramp to next tempo"));
+			XMLNode &before = _session->tempo_map().get_state();
+
+			tmap.replace_tempo (*tsp, tempo, pulse, sample, pls);
+
+			XMLNode &after = _session->tempo_map().get_state();
+			_session->add_command(new MementoCommand<TempoMap>(_session->tempo_map(), &before, &after));
+			commit_reversible_command ();
+		}
 	}
 }
 
@@ -1502,13 +1601,15 @@ Editor::rename_marker(ArdourMarker *marker)
 
 	loc = find_location_from_marker (marker, is_start);
 
-	if (!loc)
-	       return;
-
-	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range())
+	if (!loc) {
 		return;
+	}
 
-	ArdourPrompter dialog (true);
+	if (loc == transport_loop_location() || loc == transport_punch_location() || loc->is_session_range()) {
+		return;
+	}
+
+	ArdourWidgets::Prompter dialog (true);
 	string txt;
 
 	dialog.set_prompt (_("New Name:"));
@@ -1615,7 +1716,7 @@ Editor::update_punch_range_view ()
 		if (_session->config.get_punch_out()) {
 			pixel_end = sample_to_pixel (tpl->end());
 		} else {
-			pixel_end = sample_to_pixel (max_framepos);
+			pixel_end = sample_to_pixel (max_samplepos);
 		}
 
 		transport_punch_range_rect->set_x0 (pixel_start);
@@ -1624,7 +1725,7 @@ Editor::update_punch_range_view ()
 
 	} else {
 
-	        transport_punch_range_rect->hide();
+		transport_punch_range_rect->hide();
 	}
 }
 
@@ -1645,9 +1746,9 @@ Editor::marker_selection_changed ()
 }
 
 struct SortLocationsByPosition {
-    bool operator() (Location* a, Location* b) {
-	    return a->start() < b->start();
-    }
+	bool operator() (Location* a, Location* b) {
+		return a->start() < b->start();
+	}
 };
 
 void

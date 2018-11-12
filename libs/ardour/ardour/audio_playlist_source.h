@@ -41,8 +41,8 @@ public:
 	uint32_t   n_channels() const;
 	bool clamped_at_unity () const { return false; }
 
-	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
-	framecnt_t write_unlocked (Sample *src, framecnt_t cnt);
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
+	samplecnt_t write_unlocked (Sample *src, samplecnt_t cnt);
 
 	float sample_rate () const;
 	int setup_peakfile ();
@@ -57,7 +57,7 @@ protected:
 	friend class SourceFactory;
 
 	AudioPlaylistSource (Session&, const PBD::ID& orig, const std::string& name, boost::shared_ptr<AudioPlaylist>, uint32_t chn,
-	                     frameoffset_t begin, framecnt_t len, Source::Flag flags);
+	                     sampleoffset_t begin, samplecnt_t len, Source::Flag flags);
 	AudioPlaylistSource (Session&, const XMLNode&);
 
 

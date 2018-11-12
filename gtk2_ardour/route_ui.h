@@ -26,6 +26,7 @@
 #include "pbd/signals.h"
 
 #include <gtkmm/textview.h>
+#include <gtkmm/colorselection.h>
 
 #include "gtkmm2ext/widget_state.h"
 
@@ -40,6 +41,7 @@
 
 #include "axis_view.h"
 #include "selectable.h"
+#include "stripable_colorpicker.h"
 #include "window_manager.h"
 
 namespace ARDOUR {
@@ -53,30 +55,36 @@ namespace Gtk {
 	class Widget;
 }
 
-class ArdourButton;
+namespace ArdourWidgets {
+	class ArdourButton;
+	class Prompter;
+}
+
 class ArdourWindow;
 class IOSelectorWindow;
 class ControlSlaveUI;
+class PatchChangeGridDialog;
+class SaveTemplateDialog;
 
 class RoutePinWindowProxy : public WM::ProxyBase
 {
-  public:
+public:
 	RoutePinWindowProxy (std::string const &, boost::shared_ptr<ARDOUR::Route>);
 	~RoutePinWindowProxy();
 
 	Gtk::Window* get (bool create = false);
 	ARDOUR::SessionHandlePtr* session_handle();
 
-  private:
+private:
 	boost::weak_ptr<ARDOUR::Route> _route;
 
 	void route_going_away ();
 	PBD::ScopedConnection going_away_connection;
 };
 
-class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual Selectable, public virtual sigc::trackable
+class RouteUI : public virtual Selectable, public virtual ARDOUR::SessionHandlePtr, public virtual PBD::ScopedConnectionList, public virtual sigc::trackable
 {
-  public:
+public:
 	RouteUI (ARDOUR::Session*);
 
 	virtual ~RouteUI();
@@ -102,11 +110,11 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 
 	boost::shared_ptr<ARDOUR::Route> _route;
 
-	void request_redraw ();
-
 	virtual void set_color (uint32_t c);
 	Gdk::Color route_color () const;
 	void choose_color ();
+
+	void select_midi_patch ();
 
 	bool ignore_toggle;
 	bool wait_for_release;
@@ -114,17 +122,17 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	bool multiple_solo_change;
 
 	Gtk::HBox _invert_button_box;
-	ArdourButton* mute_button;
-	ArdourButton* solo_button;
-	ArdourButton* rec_enable_button; /* audio tracks */
-	ArdourButton* show_sends_button; /* busses */
-	ArdourButton* monitor_input_button;
-	ArdourButton* monitor_disk_button;
+	ArdourWidgets::ArdourButton* mute_button;
+	ArdourWidgets::ArdourButton* solo_button;
+	ArdourWidgets::ArdourButton* rec_enable_button; /* audio tracks */
+	ArdourWidgets::ArdourButton* show_sends_button; /* busses */
+	ArdourWidgets::ArdourButton* monitor_input_button;
+	ArdourWidgets::ArdourButton* monitor_disk_button;
 
 	Glib::RefPtr<Gdk::Pixbuf> solo_safe_pixbuf;
 
-	ArdourButton* solo_safe_led;
-	ArdourButton* solo_isolated_led;
+	ArdourWidgets::ArdourButton* solo_safe_led;
+	ArdourWidgets::ArdourButton* solo_isolated_led;
 
 
 	Gtk::Label monitor_input_button_label;
@@ -159,11 +167,6 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 
 	void edit_input_configuration ();
 	void edit_output_configuration ();
-
-	void step_gain_up ();
-	void step_gain_down ();
-	void page_gain_up ();
-	void page_gain_down ();
 
 	void build_sends_menu ();
 	void set_sends_gain_from_track ();
@@ -244,7 +247,7 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	virtual void map_frozen ();
 
 	void adjust_latency ();
-	bool process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir);
+	void save_as_template_dialog_response (int response, SaveTemplateDialog* d);
 	void save_as_template ();
 
 	static Gtkmm2ext::ActiveState solo_active_state (boost::shared_ptr<ARDOUR::Stripable>);
@@ -268,7 +271,9 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 	void comment_edited ();
 	bool ignore_comment_edit;
 
-   protected:
+	void set_disk_io_point (ARDOUR::DiskIOPoint);
+
+protected:
 
 	ArdourWindow*  comment_window;
 	Gtk::TextView* comment_area;
@@ -299,25 +304,29 @@ class RouteUI : public virtual ARDOUR::SessionHandlePtr, public virtual PBD::Sco
 
 	bool mark_hidden (bool yn);
 
-  private:
+	PatchChangeGridDialog* patch_change_dialog () const;
+
+private:
 	void parameter_changed (std::string const&);
 	void relabel_solo_button ();
 	void track_mode_changed ();
+	void delete_patch_change_dialog ();
 
 	std::string route_state_id () const;
 
-  protected:
+protected:
 	struct SoloMuteRelease {
-	    SoloMuteRelease (bool was_active)
-	    : active (was_active)
-	    , exclusive (false) {}
+		SoloMuteRelease (bool was_active)
+			: active (was_active)
+			, exclusive (false)
+		{}
 
-	    boost::shared_ptr<ARDOUR::RouteList> routes;
-	    boost::shared_ptr<ARDOUR::RouteList> routes_on;
-	    boost::shared_ptr<ARDOUR::RouteList> routes_off;
-	    boost::shared_ptr<ARDOUR::Route> route;
-	    bool active;
-	    bool exclusive;
+		boost::shared_ptr<ARDOUR::RouteList> routes;
+		boost::shared_ptr<ARDOUR::RouteList> routes_on;
+		boost::shared_ptr<ARDOUR::RouteList> routes_off;
+		boost::shared_ptr<ARDOUR::Route> route;
+		bool active;
+		bool exclusive;
 	};
 
 	SoloMuteRelease* _solo_release;
@@ -333,8 +342,10 @@ private:
 	bool invert_release (GdkEventButton *, uint32_t i);
 
 	int _i_am_the_modifier;
-	std::vector<ArdourButton*> _invert_buttons;
+	std::vector<ArdourWidgets::ArdourButton*> _invert_buttons;
 	Gtk::Menu* _invert_menu;
+
+	StripableColorDialog _color_picker;
 
 	static void set_showing_sends_to (boost::shared_ptr<ARDOUR::Route>);
 	static boost::weak_ptr<ARDOUR::Route> _showing_sends_to;

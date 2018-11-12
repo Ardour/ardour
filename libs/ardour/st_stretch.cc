@@ -47,7 +47,7 @@ STStretch::STStretch (Session& s, TimeFXRequest& req)
 
 	percentage = -tsr.time_fraction;
 
-	st.setSampleRate (s.frame_rate());
+	st.setSampleRate (s.sample_rate());
 	st.setChannels (1);
 	st.setTempoChange (percentage);
 	st.setPitchSemiTones (0);
@@ -66,10 +66,10 @@ int
 STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 {
 	SourceList nsrcs;
-	framecnt_t total_frames;
-	framecnt_t done;
+	samplecnt_t total_samples;
+	samplecnt_t done;
 	int ret = -1;
-	const framecnt_t bufsize = 16384;
+	const samplecnt_t bufsize = 16384;
 	gain_t *gain_buffer = 0;
 	Sample *buffer = 0;
 	char suffix[32];
@@ -81,7 +81,7 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(a_region);
 
-	total_frames = region->length() * region->n_channels();
+	total_samples = region->length() * region->n_channels();
 	done = 0;
 
 	/* the name doesn't need to be super-precise, but allow for 2 fractional
@@ -107,13 +107,13 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 			boost::shared_ptr<AudioSource> asrc
 				= boost::dynamic_pointer_cast<AudioSource>(nsrcs[i]);
 
-			framepos_t pos = 0;
-			framecnt_t this_read = 0;
+			samplepos_t pos = 0;
+			samplecnt_t this_read = 0;
 
 			st.clear();
 
 			while (!tsr.cancel && pos < region->length()) {
-				framecnt_t this_time;
+				samplecnt_t this_time;
 
 				this_time = min (bufsize, region->length() - pos);
 
@@ -130,7 +130,7 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 				pos += this_read;
 				done += this_read;
 
-				progress->set_progress ((float) done / total_frames);
+				progress->set_progress ((float) done / total_samples);
 
 				st.putSamples (buffer, this_read);
 
@@ -176,18 +176,18 @@ STStretch::run (boost::shared_ptr<Region> a_region, Progress* progress)
 	/* now reset ancestral data for each new region */
 
 	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin(); x != results.end(); ++x) {
-		framepos_t astart = (*x)->ancestral_start();
-		framepos_t alength = (*x)->ancestral_length();
-		framepos_t start;
-		framecnt_t length;
+		samplepos_t astart = (*x)->ancestral_start();
+		samplepos_t alength = (*x)->ancestral_length();
+		samplepos_t start;
+		samplecnt_t length;
 
 		// note: tsr.fraction is a percentage of original length. 100 = no change,
 		// 50 is half as long, 200 is twice as long, etc.
 
 		float stretch = (*x)->stretch() * (tsr.time_fraction/100.0);
 
-		start = (framepos_t) floor (astart + ((astart - (*x)->start()) / stretch));
-		length = (framecnt_t) floor (alength / stretch);
+		start = (samplepos_t) floor (astart + ((astart - (*x)->start()) / stretch));
+		length = (samplecnt_t) floor (alength / stretch);
 
 		(*x)->set_ancestral_data (start, length, stretch, (*x)->shift());
 	}

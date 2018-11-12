@@ -77,8 +77,8 @@ LuaState::collect_garbage () {
 }
 
 void
-LuaState::collect_garbage_step () {
-	lua_gc (L, LUA_GCSTEP, 0);
+LuaState::collect_garbage_step (int debt) {
+	lua_gc (L, LUA_GCSTEP, debt);
 }
 
 void
@@ -87,6 +87,15 @@ LuaState::tweak_rt_gc () {
 	lua_gc (L, LUA_GCSETPAUSE, 100);
 	lua_gc (L, LUA_GCSETSTEPMUL, 100);
 }
+
+void
+LuaState::sandbox (bool rt_safe) {
+	do_command ("dofile = nil require = nil dofile = nil package = nil debug = nil os.exit = nil os.setlocale = nil rawget = nil rawset = nil coroutine = nil module = nil");
+	if (rt_safe) {
+		do_command ("os = nil io = nil loadfile = nil");
+	}
+}
+
 
 void
 LuaState::print (std::string text) {

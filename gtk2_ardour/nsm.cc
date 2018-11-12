@@ -33,12 +33,12 @@ NSM_Client::NSM_Client()
 int
 NSM_Client::command_save(char **out_msg)
 {
-    (void) out_msg;
+	(void) out_msg;
 
-    ARDOUR_UI::instance()->save_state();
-    int r = ERR_OK;
+	ARDOUR_UI::instance()->save_state();
+	int r = ERR_OK;
 
-    return r;
+	return r;
 }
 
 int
@@ -47,13 +47,13 @@ NSM_Client::command_open(const char* name,
                          const char* client_id,
                          char** /*out_msg*/)
 {
-    int r = ERR_OK;
+	int r = ERR_OK;
 
-    ARDOUR_COMMAND_LINE::session_name = name;
-    ARDOUR_COMMAND_LINE::backend_client_name = client_id;
+	ARDOUR_COMMAND_LINE::session_name = name;
+	ARDOUR_COMMAND_LINE::backend_client_name = client_id;
 
-    if (ARDOUR_UI::instance()->get_session_parameters(true, false, "")) {
-        return ERR_GENERAL;
-    }
-    return r;
+	if (ARDOUR_UI::instance()->get_session_parameters(true, false, "")) {
+		return ERR_GENERAL;
+	}
+	return r;
 }

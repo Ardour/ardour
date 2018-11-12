@@ -41,20 +41,20 @@ public:
 	void compute_bounding_box () const;
 	void render (Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 
-        bool covers (Duple const &) const;
+	bool covers (Duple const &) const;
 
 	void set_extent (Distance);
 	Distance extent() const { return _extent; }
 
-	void add (Coord, Distance, Color);
+	void add (Coord, Distance, Gtkmm2ext::Color);
 	void clear ();
 
 	struct Line {
-		Line (Coord p, Distance width_, Color color_) : pos (p), width (width_), color (color_) {}
+		Line (Coord p, Distance width_, Gtkmm2ext::Color color_) : pos (p), width (width_), color (color_) {}
 
 		Coord pos;
 		Distance width;
-		Color color;
+		Gtkmm2ext::Color color;
 	};
 
 private:

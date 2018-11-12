@@ -18,11 +18,11 @@ fi
 # generate ../doc/luadoc.json.gz
 $DIR/../gtk2_ardour/arluadoc
 
-if test -f $AMANUAL/_manual/25_lua-scripting/02_class_reference.html; then
-	php $DIR/fmt-luadoc.php -m > $AMANUAL/_manual/25_lua-scripting/02_class_reference.html
-	ls -l $AMANUAL/_manual/25_lua-scripting/02_class_reference.html
+if test -f $AMANUAL/include/class-reference.html; then
+	php $DIR/fmt-luadoc.php -m > $AMANUAL/include/class-reference.html
+	ls -l $AMANUAL/include/class-reference.html
 	cd $AMANUAL/
-	./build.rb
+	./build.py
 else
 	php $DIR/fmt-luadoc.php > /tmp/luadoc.html
 	ls -l /tmp/luadoc.html

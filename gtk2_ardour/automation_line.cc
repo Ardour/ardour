@@ -70,7 +70,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Editing;
 
-/** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session frames.
+/** @param converter A TimeConverter whose origin_b is the start time of the AutomationList in session samples.
  *  This will not be deleted by AutomationLine.
  */
 AutomationLine::AutomationLine (const string&                              name,
@@ -78,14 +78,14 @@ AutomationLine::AutomationLine (const string&                              name,
                                 ArdourCanvas::Item&                        parent,
                                 boost::shared_ptr<AutomationList>          al,
                                 const ParameterDescriptor&                 desc,
-                                Evoral::TimeConverter<double, framepos_t>* converter)
+                                Evoral::TimeConverter<double, samplepos_t>* converter)
 	: trackview (tv)
 	, _name (name)
 	, alist (al)
-	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, framepos_t>)
+	, _time_converter (converter ? converter : new Evoral::IdentityConverter<double, samplepos_t>)
 	, _parent_group (parent)
 	, _offset (0)
-	, _maximum_time (max_framepos)
+	, _maximum_time (max_samplepos)
 	, _fill (false)
 	, _desc (desc)
 {
@@ -99,7 +99,6 @@ AutomationLine::AutomationLine (const string&                              name,
 
 	update_pending = false;
 	have_timeout = false;
-	_uses_gain_mapping = false;
 	no_draw = false;
 	_is_boolean = false;
 	terminal_points_can_slide = true;
@@ -117,12 +116,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	line->Event.connect (sigc::mem_fun (*this, &AutomationLine::event_handler));
 
 	trackview.session()->register_with_memento_command_factory(alist->id(), this);
-
-	if (alist->parameter().type() == GainAutomation ||
-	    alist->parameter().type() == TrimAutomation ||
-	    alist->parameter().type() == EnvelopeAutomation) {
-		set_uses_gain_mapping (true);
-	}
 
 	interpolation_changed (alist->interpolation ());
 
@@ -194,7 +187,19 @@ AutomationLine::update_visibility ()
 			}
 		}
 	}
+}
 
+bool
+AutomationLine::get_uses_gain_mapping () const
+{
+	switch (_desc.type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case TrimAutomation:
+			return true;
+		default:
+			return false;
+	}
 }
 
 void
@@ -245,18 +250,9 @@ AutomationLine::set_line_color (uint32_t color)
 	_line_color = color;
 	line->set_outline_color (color);
 
-	ArdourCanvas::SVAModifier mod = UIConfiguration::instance().modifier ("automation line fill");
+	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier ("automation line fill");
 
 	line->set_fill_color ((color & 0xffffff00) + mod.a()*255);
-}
-
-void
-AutomationLine::set_uses_gain_mapping (bool yn)
-{
-	if (yn != _uses_gain_mapping) {
-		_uses_gain_mapping = yn;
-		reset ();
-	}
 }
 
 ControlPoint*
@@ -342,37 +338,15 @@ AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp)
 string
 AutomationLine::get_verbose_cursor_string (double fraction) const
 {
-	std::string s = fraction_to_string (fraction);
-	if (_uses_gain_mapping) {
-		s += " dB";
-	}
-
-	return s;
+	return fraction_to_string (fraction);
 }
 
 string
-AutomationLine::get_verbose_cursor_relative_string (double original, double fraction) const
+AutomationLine::get_verbose_cursor_relative_string (double fraction, double delta) const
 {
 	std::string s = fraction_to_string (fraction);
-	if (_uses_gain_mapping) {
-		s += " dB";
-	}
-
-	std::string d = fraction_to_relative_string (original, fraction);
-
-	if (!d.empty()) {
-
-		s += " (\u0394";
-		s += d;
-
-		if (_uses_gain_mapping) {
-			s += " dB";
-		}
-
-		s += ')';
-	}
-
-	return s;
+	std::string d = delta_to_string (delta);
+	return s + " (" + d + ")";
 }
 
 /**
@@ -382,62 +356,18 @@ AutomationLine::get_verbose_cursor_relative_string (double original, double frac
 string
 AutomationLine::fraction_to_string (double fraction) const
 {
-	if (_uses_gain_mapping) {
-		char buf[32];
-		if (_desc.type == GainAutomation || _desc.type == EnvelopeAutomation || _desc.lower == 0) {
-			if (fraction == 0.0) {
-				snprintf (buf, sizeof (buf), "-inf");
-			} else {
-				snprintf (buf, sizeof (buf), "%.1f", accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, _desc.upper)));
-			}
-		} else {
-			const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-			const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-			snprintf (buf, sizeof (buf), "%.1f", lower_db + fraction * range_db);
-		}
-		return buf;
-	} else {
-		view_to_model_coord_y (fraction);
-		return ARDOUR::value_as_string (_desc, fraction);
-	}
-
-	return ""; /*NOTREACHED*/
+	view_to_model_coord_y (fraction);
+	return ARDOUR::value_as_string (_desc, fraction);
 }
 
-/**
- *  @param original an old y-axis fraction
- *  @param fraction the new y fraction
- *  @return string representation of the difference between original and fraction, using dB if appropriate.
- */
 string
-AutomationLine::fraction_to_relative_string (double original, double fraction) const
+AutomationLine::delta_to_string (double delta) const
 {
-	char buf[32];
-
-	if (original == fraction) {
-		return "0";
-	}
-
-	if (_uses_gain_mapping) {
-		if (original == 0.0) {
-			/* there is no sensible representation of a relative
-			   change from -inf dB, so return an empty string.
-			*/
-			return "";
-		} else if (fraction == 0.0) {
-			snprintf (buf, sizeof (buf), "-inf");
-		} else {
-			double old_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (original, Config->get_max_gain()));
-			double new_db = accurate_coefficient_to_dB (slider_position_to_gain_with_max (fraction, Config->get_max_gain()));
-			snprintf (buf, sizeof (buf), "%.1f", new_db - old_db);
-		}
+	if (!get_uses_gain_mapping () && _desc.logarithmic) {
+		return "x " + ARDOUR::value_as_string (_desc, delta);
 	} else {
-		view_to_model_coord_y (original);
-		view_to_model_coord_y (fraction);
-		return ARDOUR::value_as_string (_desc, fraction - original);
+		return "\u0394 " + ARDOUR::value_as_string (_desc, delta);
 	}
-
-	return buf;
 }
 
 /**
@@ -447,20 +377,23 @@ AutomationLine::fraction_to_relative_string (double original, double fraction) c
 double
 AutomationLine::string_to_fraction (string const & s) const
 {
-	if (s == "-inf") {
-		return 0;
-	}
-
 	double v;
 	sscanf (s.c_str(), "%lf", &v);
 
-	if (_uses_gain_mapping) {
-		v = gain_to_slider_position_with_max (dB_to_coefficient (v), Config->get_max_gain());
-	} else {
-		double dummy = 0.0;
-		model_to_view_coord (dummy, v);
+	switch (_desc.type) {
+		case GainAutomation:
+		case EnvelopeAutomation:
+		case TrimAutomation:
+			if (s == "-inf") { /* translation */
+				v = 0;
+			} else {
+				v = dB_to_coefficient (v);
+			}
+			break;
+		default:
+			break;
 	}
-
+	model_to_view_coord_y (v);
 	return v;
 }
 
@@ -555,9 +488,9 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		if (front()->view_index() > 0) {
 			before_x = line.nth (front()->view_index() - 1)->get_x();
 
-			const framepos_t pos = e.pixel_to_sample(before_x);
-			const Meter& meter = map.meter_at_frame (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
+			const samplepos_t pos = e.pixel_to_sample(before_x);
+			const Meter& meter = map.meter_at_sample (pos);
+			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()) );
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -571,9 +504,9 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		if (back()->view_index() < (line.npoints() - 1)) {
 			after_x = line.nth (back()->view_index() + 1)->get_x();
 
-			const framepos_t pos = e.pixel_to_sample(after_x);
-			const Meter& meter = map.meter_at_frame (pos);
-			const framecnt_t len = ceil (meter.frames_per_bar (map.tempo_at_frame (pos), e.session()->frame_rate())
+			const samplepos_t pos = e.pixel_to_sample(after_x);
+			const Meter& meter = map.meter_at_sample (pos);
+			const samplecnt_t len = ceil (meter.samples_per_bar (map.tempo_at_sample (pos), e.session()->sample_rate())
 					/ (Timecode::BBT_Time::ticks_per_beat * meter.divisions_per_bar()));
 			const double one_tick_in_pixels = e.sample_to_pixel_unrounded (len);
 
@@ -610,10 +543,17 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 }
 
 void
-AutomationLine::ContiguousControlPoints::move (double dx, double dy)
+AutomationLine::ContiguousControlPoints::move (double dx, double dvalue)
 {
 	for (std::list<ControlPoint*>::iterator i = begin(); i != end(); ++i) {
-		(*i)->move_to ((*i)->get_x() + dx, (*i)->get_y() - line.height() * dy, ControlPoint::Full);
+		// compute y-axis delta
+		double view_y = 1.0 - (*i)->get_y() / line.height();
+		line.view_to_model_coord_y (view_y);
+		line.apply_delta (view_y, dvalue);
+		line.model_to_view_coord_y (view_y);
+		view_y = (1.0 - view_y) * line.height();
+
+		(*i)->move_to ((*i)->get_x() + dx, view_y, ControlPoint::Full);
 		line.reset_line_coords (**i);
 	}
 }
@@ -642,11 +582,11 @@ AutomationLine::start_drag_common (double x, float fraction)
  *  @param fraction New y fraction.
  *  @return x position and y fraction that were actually used (once clamped).
  */
-pair<double, float>
+pair<float, float>
 AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
-		return pair<double,float> (x,fraction);
+		return pair<double,float> (fraction, _desc.is_linear () ? 0 : 1);
 	}
 
 	double dx = ignore_x ? 0 : (x - _drag_x);
@@ -703,24 +643,42 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 	}
 
+	/* compute deflection */
+	double delta_value;
+	{
+		double value0 = _last_drag_fraction;
+		double value1 = _last_drag_fraction + dy;
+		view_to_model_coord_y (value0);
+		view_to_model_coord_y (value1);
+		delta_value = compute_delta (value0, value1);
+	}
+
+	/* special case -inf */
+	if (delta_value == 0 && dy > 0 && !_desc.is_linear ()) {
+		assert (_desc.lower == 0);
+		delta_value = 1.0;
+	}
+
 	/* clamp y */
 	for (list<ControlPoint*>::iterator i = _drag_points.begin(); i != _drag_points.end(); ++i) {
-		double const y = ((_height - (*i)->get_y()) / _height) + dy;
-		if (y < 0) {
-			dy -= y;
+		double vy = 1.0 - (*i)->get_y() / _height;
+		view_to_model_coord_y (vy);
+		const double orig = vy;
+		apply_delta (vy, delta_value);
+		if (vy < _desc.lower) {
+			delta_value = compute_delta (orig, _desc.lower);
 		}
-		if (y > 1) {
-			dy -= (y - 1);
+		if (vy > _desc.upper) {
+			delta_value = compute_delta (orig, _desc.upper);
 		}
 	}
 
 	if (dx || dy) {
-
 		/* and now move each section */
-
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->move (dx, dy);
+			(*ccp)->move (dx, delta_value);
 		}
+
 		if (with_push) {
 			final_index = contiguous_points.back()->back()->view_index () + 1;
 			ControlPoint* p;
@@ -732,20 +690,32 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			}
 		}
 
-		/* update actual line coordinates (will queue a redraw)
-		 */
+		/* update actual line coordinates (will queue a redraw) */
 
 		if (line_points.size() > 1) {
 			line->set_steps (line_points, is_stepped());
 		}
 	}
+
+	/* calculate effective delta */
+	ControlPoint* cp = _drag_points.front();
+	double vy = 1.0 - cp->get_y() / (double)_height;
+	view_to_model_coord_y (vy);
+	float val = (*(cp->model ()))->value;
+	float effective_delta = _desc.compute_delta (val, vy);
+	/* special case recovery from -inf */
+	if (val == 0 && effective_delta == 0 && vy > 0) {
+		assert (!_desc.is_linear ());
+		effective_delta = HUGE_VAL; // +Infinity
+	}
+
 	double const result_frac = _last_drag_fraction + dy;
 	_drag_distance += dx;
 	_drag_x += dx;
 	_last_drag_fraction = result_frac;
 	did_push = with_push;
 
-	return pair<double, float> (_drag_x + dx, result_frac);
+	return pair<float, float> (result_frac, effective_delta);
 }
 
 /** Should be called to indicate the end of a drag */
@@ -796,7 +766,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	*/
 
 	double view_x = cp.get_x();
-	double view_y = 1.0 - (cp.get_y() / _height);
+	double view_y = 1.0 - cp.get_y() / (double)_height;
 
 	/* if xval has not changed, set it directly from the model to avoid rounding errors */
 
@@ -902,14 +872,14 @@ AutomationLine::remove_point (ControlPoint& cp)
 }
 
 /** Get selectable points within an area.
- *  @param start Start position in session frames.
- *  @param end End position in session frames.
+ *  @param start Start position in session samples.
+ *  @param end End position in session samples.
  *  @param bot Bottom y range, as a fraction of line height, where 0 is the bottom of the line.
  *  @param top Top y range, as a fraction of line height, where 0 is the bottom of the line.
  *  @param result Filled in with selectable things; in this case, ControlPoints.
  */
 void
-AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
+AutomationLine::get_selectables (samplepos_t start, samplepos_t end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
 	double const bot_track = (1 - topfrac) * trackview.current_height ();
@@ -919,12 +889,12 @@ AutomationLine::get_selectables (framepos_t start, framepos_t end, double botfra
 		double const model_when = (*(*i)->model())->when;
 
 		/* model_when is relative to the start of the source, so we just need to add on the origin_b here
-		   (as it is the session frame position of the start of the source)
+		   (as it is the session sample position of the start of the source)
 		*/
 
-		framepos_t const session_frames_when = _time_converter->to (model_when) + _time_converter->origin_b ();
+		samplepos_t const session_samples_when = _time_converter->to (model_when) + _time_converter->origin_b ();
 
-		if (session_frames_when >= start && session_frames_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
+		if (session_samples_when >= start && session_samples_when <= end && (*i)->get_y() >= bot_track && (*i)->get_y() <= top_track) {
 			results.push_back (*i);
 		}
 	}
@@ -1018,7 +988,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 			continue;
 		}
 
-		if (tx >= max_framepos || tx < 0 || tx >= _maximum_time) {
+		if (tx >= max_samplepos || tx < 0 || tx >= _maximum_time) {
 			continue;
 		}
 
@@ -1086,14 +1056,21 @@ AutomationLine::reset ()
 		return;
 	}
 
+	/* TODO: abort any drags in progress, e.g. draging points while writing automation
+	 * (the control-point model, used by AutomationLine::drag_motion, will be invalid).
+	 *
+	 * Note: reset() may also be called from an aborted drag (LineDrag::aborted)
+	 * maybe abort in list_changed(), interpolation_changed() and ... ?
+	 * XXX
+	 */
+
 	alist->apply_to_points (*this, &AutomationLine::reset_callback);
 }
 
 void
 AutomationLine::queue_reset ()
 {
-	/* this must be called from the GUI thread
-	 */
+	/* this must be called from the GUI thread */
 
 	if (trackview.editor().session()->transport_rolling() && alist->automation_write()) {
 		/* automation write pass ... defer to a timeout */
@@ -1198,65 +1175,67 @@ AutomationLine::view_to_model_coord (double& x, double& y) const
 void
 AutomationLine::view_to_model_coord_y (double& y) const
 {
-	/* TODO: This should be more generic (use ParameterDescriptor)
-	 * or better yet:  Controllable -> set_interface();
-	 */
-
-	if (   alist->parameter().type() == GainAutomation
-	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
-		y = slider_position_to_gain_with_max (y, _desc.upper);
-		y = max ((double)_desc.lower, y);
-		y = min ((double)_desc.upper, y);
-	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
-		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-		y = max (0.0, y);
-		y = min (1.0, y);
-		y = dB_to_coefficient (lower_db + y * range_db);
-	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation) {
-		y = 1.0 - y;
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
-	} else if (alist->parameter().type() == PanWidthAutomation) {
-		y = 2.0 * y - 1.0;
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
-	} else {
-		y = y * (double)(alist->get_max_y() - alist->get_min_y()) + alist->get_min_y();
-		if (_desc.integer_step) {
-			y = round(y);
-		} else if (_desc.toggled) {
-			y = (y > 0.5) ? 1.0 : 0.0;
+	if (alist->default_interpolation () != alist->interpolation()) {
+		switch (alist->interpolation()) {
+			case AutomationList::Discrete:
+				/* toggles and MIDI only -- see is_stepped() */
+				assert (alist->default_interpolation () == AutomationList::Linear);
+				break;
+			case AutomationList::Linear:
+				y = y * (_desc.upper - _desc.lower) + _desc.lower;
+				return;
+			default:
+				/* types that default to linear, can't be use
+				 * Logarithmic or Exponential interpolation.
+				 * "Curved" is invalid for automation (only x-fads)
+				 */
+				assert (0);
+				break;
 		}
-		y = max ((double) _desc.lower, y);
-		y = min ((double) _desc.upper, y);
 	}
+	y = _desc.from_interface (y);
+}
+
+double
+AutomationLine::compute_delta (double from, double to) const
+{
+	return _desc.compute_delta (from, to);
+}
+
+void
+AutomationLine::apply_delta (double& val, double delta) const
+{
+	if (val == 0 && !_desc.is_linear () && delta >= 1.0) {
+		/* recover from -inf */
+		val = 1.0 / _height;
+		view_to_model_coord_y (val);
+		return;
+	}
+	val = _desc.apply_delta (val, delta);
 }
 
 void
 AutomationLine::model_to_view_coord_y (double& y) const
 {
-	/* TODO: This should be more generic (use ParameterDescriptor) */
-	if (   alist->parameter().type() == GainAutomation
-	    || alist->parameter().type() == EnvelopeAutomation
-	    || (_desc.logarithmic && _desc.lower == 0. && _desc.upper > _desc.lower)) {
-		y = gain_to_slider_position_with_max (y, _desc.upper);
-	} else if (alist->parameter().type() == TrimAutomation
-	           || (_desc.logarithmic && _desc.lower * _desc.upper > 0 && _desc.upper > _desc.lower)) {
-		const double lower_db = accurate_coefficient_to_dB (_desc.lower);
-		const double range_db = accurate_coefficient_to_dB (_desc.upper) - lower_db;
-		y = (accurate_coefficient_to_dB (y) - lower_db) / range_db;
-	} else if (alist->parameter().type() == PanAzimuthAutomation ||
-	           alist->parameter().type() == PanElevationAutomation) {
-		y = 1.0 - y;
-	} else if (alist->parameter().type() == PanWidthAutomation) {
-		y = .5 + y * .5;
-	} else {
-		y = (y - alist->get_min_y()) / (double)(alist->get_max_y() - alist->get_min_y());
+	if (alist->default_interpolation () != alist->interpolation()) {
+		switch (alist->interpolation()) {
+			case AutomationList::Discrete:
+				/* toggles and MIDI only -- see is_stepped */
+				assert (alist->default_interpolation () == AutomationList::Linear);
+				break;
+			case AutomationList::Linear:
+				y = (y - _desc.lower) / (_desc.upper - _desc.lower);
+				return;
+			default:
+				/* types that default to linear, can't be use
+				 * Logarithmic or Exponential interpolation.
+				 * "Curved" is invalid for automation (only x-fads)
+				 */
+				assert (0);
+				break;
+		}
 	}
+	y = _desc.to_interface (y);
 }
 
 void
@@ -1271,6 +1250,7 @@ void
 AutomationLine::interpolation_changed (AutomationList::InterpolationStyle style)
 {
 	if (line_points.size() > 1) {
+		reset ();
 		line->set_steps(line_points, is_stepped());
 	}
 }
@@ -1343,7 +1323,7 @@ AutomationLine::memento_command_binder ()
  *  to the start of the track or region that it is on.
  */
 void
-AutomationLine::set_maximum_time (framecnt_t t)
+AutomationLine::set_maximum_time (samplecnt_t t)
 {
 	if (_maximum_time == t) {
 		return;
@@ -1354,11 +1334,11 @@ AutomationLine::set_maximum_time (framecnt_t t)
 }
 
 
-/** @return min and max x positions of points that are in the list, in session frames */
-pair<framepos_t, framepos_t>
+/** @return min and max x positions of points that are in the list, in session samples */
+pair<samplepos_t, samplepos_t>
 AutomationLine::get_point_x_range () const
 {
-	pair<framepos_t, framepos_t> r (max_framepos, 0);
+	pair<samplepos_t, samplepos_t> r (max_samplepos, 0);
 
 	for (AutomationList::const_iterator i = the_list()->begin(); i != the_list()->end(); ++i) {
 		r.first = min (r.first, session_position (i));
@@ -1368,14 +1348,14 @@ AutomationLine::get_point_x_range () const
 	return r;
 }
 
-framepos_t
+samplepos_t
 AutomationLine::session_position (AutomationList::const_iterator p) const
 {
 	return _time_converter->to ((*p)->when) + _offset + _time_converter->origin_b ();
 }
 
 void
-AutomationLine::set_offset (framepos_t off)
+AutomationLine::set_offset (samplepos_t off)
 {
 	if (_offset == off) {
 		return;

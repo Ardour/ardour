@@ -1,0 +1,1 @@
+SUBSYSTEM=="usb", ATTR{idVendor}=="2982", ATTR{idProduct}=="1967", MODE="0666", GROUP="audio"

@@ -59,7 +59,7 @@ UnknownProcessor::~UnknownProcessor () {
 }
 
 XMLNode &
-UnknownProcessor::state (bool)
+UnknownProcessor::state ()
 {
 	return *(new XMLNode (_state));
 }
@@ -111,7 +111,7 @@ UnknownProcessor::can_support_io_configuration (const ChanCount &in, ChanCount &
 }
 
 void
-UnknownProcessor::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t nframes, bool)
+UnknownProcessor::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!have_ioconfig) {
 		return;

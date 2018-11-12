@@ -49,9 +49,7 @@ public:
 
 	template<typename T> void set_property (const std::string& id, const std::string& prop_name, const T& val) {
 		XMLNode* child = get_or_add_node (id);
-		std::stringstream s;
-		s << val;
-		child->add_property (prop_name.c_str(), s.str());
+		child->set_property (prop_name.c_str(), val);
 	}
 
 	/** Remove node with provided id.

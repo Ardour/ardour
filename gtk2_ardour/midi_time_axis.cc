@@ -25,6 +25,9 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/separator.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/error.h"
 #include "pbd/ffs.h"
 #include "pbd/stl_delete.h"
@@ -35,9 +38,9 @@
 #include "pbd/stateful_diff_command.h"
 
 #include "gtkmm2ext/gtk_ui.h"
-#include "gtkmm2ext/selector.h"
-#include "gtkmm2ext/bindable_button.h"
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour/event_type_map.h"
 #include "ardour/midi_patch_manager.h"
@@ -61,7 +64,6 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 
-#include "ardour_button.h"
 #include "automation_line.h"
 #include "automation_time_axis.h"
 #include "editor.h"
@@ -74,17 +76,17 @@
 #include "midi_streamview.h"
 #include "midi_region_view.h"
 #include "midi_time_axis.h"
+#include "patch_change_dialog.h"
+#include "patch_change_widget.h"
 #include "piano_roll_header.h"
 #include "playlist_selector.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
 #include "point_selection.h"
-#include "prompter.h"
 #include "region_view.h"
 #include "rgb_macros.h"
 #include "selection.h"
 #include "step_editor.h"
-#include "tooltips.h"
 #include "utils.h"
 #include "note_base.h"
 
@@ -93,7 +95,6 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -153,7 +154,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	*/
 	RouteTimeAxisView::set_route (rt);
 
-	_view->apply_color (gdk_color_to_rgba (color()), StreamView::RegionColor);
+	_view->apply_color (ARDOUR_UI_UTILS::gdk_color_to_rgba (color()), StreamView::RegionColor);
 
 	subplugin_menu.set_name ("ArdourContextMenu");
 
@@ -190,10 +191,6 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 	ensure_pan_views (false);
 	update_control_names();
 	processors_changed (RouteProcessorChange ());
-
-	_route->processors_changed.connect (*this, invalidator (*this),
-	                                    boost::bind (&MidiTimeAxisView::processors_changed, this, _1),
-	                                    gui_context());
 
 	if (is_track()) {
 		_piano_roll_header->SetNoteSelection.connect (
@@ -260,8 +257,8 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 		}
 	}
 
-	set_tooltip (_midnam_model_selector, _("External MIDI Device"));
-	set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
+	ArdourWidgets::set_tooltip (_midnam_model_selector, _("External MIDI Device"));
+	ArdourWidgets::set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
 
 	_midi_controls_box.pack_start (_midnam_model_selector, false, false, 2);
 	_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);
@@ -313,7 +310,7 @@ MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
 			*i, route_id, has_parameter, parameter);
 		if (p && route_id == _route->id () && has_parameter) {
 			const std::string& visible = gui_object_state().get_string (*i, X_("visible"));
-			create_automation_child (parameter, string_is_affirmative (visible));
+			create_automation_child (parameter, string_to<bool> (visible));
 		}
 	}
 }
@@ -387,11 +384,6 @@ MidiTimeAxisView::setup_midnam_patches ()
 }
 
 void
-MidiTimeAxisView::drop_instrument_ref ()
-{
-	midnam_connection.drop_connections ();
-}
-void
 MidiTimeAxisView::start_scroomer_update ()
 {
 	_note_range_changed_connection.disconnect();
@@ -412,17 +404,8 @@ MidiTimeAxisView::update_patch_selector ()
 
 	bool pluginprovided = false;
 	if (_route) {
-		boost::shared_ptr<Processor> the_instrument (_route->the_instrument());
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(the_instrument);
+		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
 		if (pi && pi->plugin ()->has_midnam ()) {
-			midnam_connection.drop_connections ();
-			the_instrument->DropReferences.connect (midnam_connection, invalidator (*this),
-					boost::bind (&MidiTimeAxisView::drop_instrument_ref, this),
-					gui_context());
-			pi->plugin()->UpdateMidnam.connect (midnam_connection, invalidator (*this),
-					boost::bind (&Plugin::read_midnam, pi->plugin ()),
-					gui_context());
-
 			pluginprovided = true;
 			std::string model_name = pi->plugin ()->midnam_model ();
 			if (gui_property (X_("midnam-model-name")) != model_name) {
@@ -439,6 +422,7 @@ MidiTimeAxisView::update_patch_selector ()
 		_midnam_custom_device_mode_selector.show ();
 	}
 }
+
 
 void
 MidiTimeAxisView::model_changed(const std::string& model)
@@ -481,6 +465,10 @@ MidiTimeAxisView::model_changed(const std::string& model)
 	delete controller_menu;
 	controller_menu = 0;
 	build_automation_action_menu(false);
+
+	if (patch_change_dialog ()) {
+		patch_change_dialog ()->refresh ();
+	}
 }
 
 void
@@ -556,10 +544,11 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
 	items.push_back (MenuElem (_("Note Mode"), *build_note_mode_menu()));
-	items.push_back (MenuElem (_("Channel Selector"),
+	items.push_back (MenuElem (_("Channel Selector..."),
 				   sigc::mem_fun(*this, &MidiTimeAxisView::toggle_channel_selector)));
 
-	items.push_back (MenuElem (_("Select Patch"), *build_patch_menu()));
+	items.push_back (MenuElem (_("Patch Selector..."),
+				sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 
 	color_mode_menu = build_color_mode_menu();
 	if (color_mode_menu) {
@@ -1076,110 +1065,6 @@ MidiTimeAxisView::build_color_mode_menu()
 	return mode_menu;
 }
 
-Gtk::Menu*
-MidiTimeAxisView::build_patch_menu()
-{
-	using namespace MIDI::Name;
-	using namespace Menu_Helpers;
-
-	boost::shared_ptr<MasterDeviceNames> device_names = get_device_names();
-	const std::string device_mode = gui_property (X_("midnam-custom-device-mode"));
-
-	Menu* pc_menu = manage (new Menu);
-	MenuList& pc_items = pc_menu->items();
-
-	for (uint32_t chn = 0; chn < 16; ++chn) {
-		boost::shared_ptr<ChannelNameSet> channel_name_set = device_names->channel_name_set_by_channel (device_mode, chn);
-		// see also PatchChange::initialize_popup_menus
-		if (!channel_name_set) {
-			continue;
-		}
-		const ChannelNameSet::PatchBanks& patch_banks = channel_name_set->patch_banks();
-		if (patch_banks.size () == 0) {
-			continue;
-		}
-
-		Gtk::Menu& chan_menu = *manage(new Gtk::Menu());
-
-		if (patch_banks.size() > 1) {
-
-			for (ChannelNameSet::PatchBanks::const_iterator bank = patch_banks.begin();
-					bank != patch_banks.end();
-					++bank) {
-				Glib::RefPtr<Glib::Regex> underscores = Glib::Regex::create("_");
-				std::string replacement(" ");
-
-				Gtk::Menu& patch_bank_menu = *manage(new Gtk::Menu());
-
-				const PatchNameList& patches = (*bank)->patch_name_list();
-				Gtk::Menu::MenuList& patch_menus = patch_bank_menu.items();
-
-				for (PatchNameList::const_iterator patch = patches.begin();
-						patch != patches.end();
-						++patch) {
-					std::string name = underscores->replace((*patch)->name().c_str(), -1, 0, replacement);
-
-					patch_menus.push_back(
-							Gtk::Menu_Helpers::MenuElem(
-								name,
-								sigc::bind(
-									sigc::mem_fun(*this, &MidiTimeAxisView::on_patch_menu_selected),
-									chn, (*patch)->patch_primary_key())) );
-				}
-
-
-				std::string name = underscores->replace((*bank)->name().c_str(), -1, 0, replacement);
-
-				chan_menu.items().push_back(
-						Gtk::Menu_Helpers::MenuElem(
-							name,
-							patch_bank_menu) );
-			}
-		} else {
-			/* only one patch bank, so make it the initial menu */
-
-			const PatchNameList& patches = patch_banks.front()->patch_name_list();
-
-			for (PatchNameList::const_iterator patch = patches.begin();
-					patch != patches.end();
-					++patch) {
-				std::string name = (*patch)->name();
-				boost::replace_all (name, "_", " ");
-
-				chan_menu.items().push_back (
-						Gtk::Menu_Helpers::MenuElem (
-							name,
-							sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::on_patch_menu_selected),
-								chn, (*patch)->patch_primary_key())));
-			}
-		}
-
-		pc_items.push_back(
-				Gtk::Menu_Helpers::MenuElem(
-					string_compose (_("Channel %1"), chn + 1),
-					chan_menu));
-	}
-	return pc_menu;
-}
-
-void
-MidiTimeAxisView::on_patch_menu_selected (int chn, const MIDI::Name::PatchPrimaryKey& key)
-{
-	if (!_route) {
-		return;
-	}
-	boost::shared_ptr<AutomationControl> bank_msb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
-	boost::shared_ptr<AutomationControl> bank_lsb = _route->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
-	boost::shared_ptr<AutomationControl> program = _route->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
-
-	if (!bank_msb || ! bank_lsb || !program) {
-		return;
-	}
-	bank_msb->set_value ((key.bank() >> 7) & 0x7f, Controllable::NoGroup);
-	bank_lsb->set_value (key.bank() & 0x7f, Controllable::NoGroup);
-	program->set_value (key.program(), Controllable::NoGroup);
-}
-
 void
 MidiTimeAxisView::set_note_mode(NoteMode mode, bool apply_to_selection)
 {
@@ -1397,6 +1282,10 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		}
 
 		add_automation_child (param, track, show);
+		if (selected ()) {
+			reshow_selection (_editor.get_selection().time);
+		}
+
 		break;
 
 	case PanWidthAutomation:
@@ -1529,7 +1418,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >& selection)
+MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >& selection)
 {
 	_view->foreach_regionview (
 		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
@@ -1560,14 +1449,14 @@ MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t not
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > > &selection)
+MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection)
 {
-	Evoral::Sequence<Evoral::Beats>::Notes selected;
+	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	dynamic_cast<MidiRegionView*>(rv)->selection_as_notelist (selected, false);
 
-	std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > notes;
+	std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > notes;
 
-	Evoral::Sequence<Evoral::Beats>::Notes::iterator sel_it;
+	Evoral::Sequence<Temporal::Beats>::Notes::iterator sel_it;
 	for (sel_it = selected.begin(); sel_it != selected.end(); ++sel_it) {
 		notes.insert (*sel_it);
 	}
@@ -1646,10 +1535,10 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 }
 
 boost::shared_ptr<MidiRegion>
-MidiTimeAxisView::add_region (framepos_t f, framecnt_t length, bool commit)
+MidiTimeAxisView::add_region (samplepos_t f, samplecnt_t length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
-	MusicFrame pos (f, 0);
+	MusicSample pos (f, 0);
 
 	if (commit) {
 		real_editor->begin_reversible_command (Operations::create_region);
@@ -1667,8 +1556,8 @@ MidiTimeAxisView::add_region (framepos_t f, framecnt_t length, bool commit)
 
 	boost::shared_ptr<Region> region = (RegionFactory::create (src, plist));
 	/* sets beat position */
-	region->set_position (pos.frame, pos.division);
-	playlist()->add_region (region, pos.frame, 1.0, false, pos.division);
+	region->set_position (pos.sample, pos.division);
+	playlist()->add_region (region, pos.sample, 1.0, false, pos.division);
 	_session->add_command (new StatefulDiffCommand (playlist()));
 
 	if (commit) {
@@ -1743,7 +1632,7 @@ MidiTimeAxisView::contents_height_changed ()
 }
 
 bool
-MidiTimeAxisView::paste (framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
+MidiTimeAxisView::paste (samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num)
 {
 	if (!_editor.internal_editing()) {
 		// Non-internal paste, paste regions like any other route

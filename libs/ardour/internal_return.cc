@@ -32,7 +32,7 @@ InternalReturn::InternalReturn (Session& s)
 }
 
 void
-InternalReturn::run (BufferSet& bufs, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t nframes, bool)
+InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!_active && !_pending_active) {
 		return;
@@ -65,19 +65,24 @@ InternalReturn::remove_send (InternalSend* send)
 	_sends.remove (send);
 }
 
-XMLNode&
-InternalReturn::state (bool full)
+void
+InternalReturn::set_playback_offset (samplecnt_t cnt)
 {
-	XMLNode& node (Return::state (full));
-	/* override type */
-	node.add_property("type", "intreturn");
-	return node;
+	Processor::set_playback_offset (cnt);
+
+	Glib::Threads::Mutex::Lock lm (_sends_mutex); // TODO reader lock
+	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
+		(*i)->set_delay_out (cnt);
+	}
 }
 
 XMLNode&
-InternalReturn::get_state()
+InternalReturn::state ()
 {
-	return state (true);
+	XMLNode& node (Return::state ());
+	/* override type */
+	node.set_property("type", "intreturn");
+	return node;
 }
 
 bool

@@ -42,7 +42,7 @@ protected:
 	boost::shared_ptr<ARDOUR::AudioPlaylist> _audio_playlist;
 	boost::shared_ptr<ARDOUR::Source> _source;
 	/** 16 regions, of length 100, each referencing a source which is 4096
-	 *  frames of a staircase waveform.
+	 *  samples of a staircase waveform.
 	 */
 	boost::shared_ptr<ARDOUR::Region> _r[16];
 	/** AudioRegion downcasts of _r[] */

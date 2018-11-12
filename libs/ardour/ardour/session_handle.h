@@ -47,6 +47,7 @@ class LIBARDOUR_API SessionHandlePtr
 	virtual ~SessionHandlePtr () {}
 
 	virtual void set_session (ARDOUR::Session *);
+	virtual ARDOUR::Session* session() const { return _session; }
 
   protected:
 	ARDOUR::Session*          _session;

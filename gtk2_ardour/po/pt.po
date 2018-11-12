@@ -1,11 +1,11 @@
 # Ardour Brazilian Portuguese translation file
 # Copyright (C) 2003-2004 Paul Davis
 # This file is distributed under the same license as the Ardour package.
-# Authors: Alexander Franca <alexander@nautae.eti.br>
-#          Chris Ross <chris.ross@tebibyte.org>
-#          Leandro Marco <leandromarco@gmail.com>
-#          Marcelo Teles <mteles84@gmail.com>
 #
+# Alexander Franca <alexander@nautae.eti.br>
+# Chris Ross <chris.ross@tebibyte.org>
+# Leandro Marco <leandromarco@gmail.com>
+# Marcelo Teles <mteles84@gmail.com>
 msgid ""
 msgstr ""
 "Project-Id-Version: ardour 0.688.4\n"

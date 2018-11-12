@@ -27,6 +27,7 @@ JPFUN(1, int,            set_graph_order_callback, (jack_client_t *c, JackGraphO
 JPFUN(1, int,            set_xrun_callback, (jack_client_t *c, JackXRunCallback g, void *a), (c,g,a), -1)
 JPFUN(1, int,            set_latency_callback, (jack_client_t *c, JackLatencyCallback g, void *a), (c,g,a), -1)
 JVFUN(1,                 set_error_function, (void (*f)(const char *)), (f),)
+JVFUN(1,                 set_info_function, (void (*f)(const char *)), (f),)
 
 JCFUN(1, int,            activate, -1)
 JCFUN(1, int,            deactivate, -1)
@@ -56,6 +57,7 @@ JPFUN(1, int,            port_monitoring_input, (jack_port_t *p), (p), 0)
 JPFUN(1, const char*,    port_name, (const jack_port_t *p), (p), NULL)
 JPFUN(1, const char*,    port_short_name, (const jack_port_t *p), (p), NULL)
 JPFUN(1, int,            port_flags, (const jack_port_t *p), (p), 0)
+JPFUN(1, int,            port_is_mine, (const jack_client_t *c, const jack_port_t *p), (c,p), 0)
 JPFUN(1, const char**,   get_ports,(jack_client_t *c, const char *p, const char *t, unsigned long f), (c,p,t,f), NULL)
 JPFUN(1, int,            port_name_size, (void), (), 0)
 JPFUN(1, int,            port_type_size, (void), (), 0)
@@ -111,6 +113,9 @@ JPFUN(1, size_t,         ringbuffer_write_space, (const jack_ringbuffer_t *rb), 
 JPFUN(1, size_t,         ringbuffer_read, (jack_ringbuffer_t *rb, char *d, size_t c), (rb,d,c), 0)
 JPFUN(1, size_t,         ringbuffer_write, (jack_ringbuffer_t *rb, const char *s, size_t c), (rb,s,c), 0)
 JPFUN(0, int,            ringbuffer_mlock, (jack_ringbuffer_t *rb), (rb), 0)
+JVFUN(0,                 ringbuffer_get_read_vector, (const jack_ringbuffer_t *rb, jack_ringbuffer_data_t *v), (rb,v), if (v) {v->buf=NULL; v->len=0;} )
+JVFUN(0,                 ringbuffer_get_write_vector, (const jack_ringbuffer_t *rb, jack_ringbuffer_data_t *v), (rb,v), if (v) {v->buf=NULL; v->len=0;} )
+JPFUN(0, size_t,         ringbuffer_peek, (jack_ringbuffer_t *rb, char *d, size_t c), (rb,d,c), 0)
 
 /* <jack/thread.h> */
 JCFUN(0, int,            client_real_time_priority, 0)

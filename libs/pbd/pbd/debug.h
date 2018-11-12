@@ -59,6 +59,7 @@ namespace PBD {
 		LIBPBD_API extern DebugBits Timing;
 		LIBPBD_API extern DebugBits Threads;
 		LIBPBD_API extern DebugBits Locale;
+		LIBPBD_API extern DebugBits StringConvert;
 
 		/* See notes in ../debug.cc on why these are defined here */
 

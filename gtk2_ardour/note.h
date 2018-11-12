@@ -27,12 +27,13 @@
 
 namespace ArdourCanvas {
 	class Container;
+	class Note;
 }
 
 class Note : public NoteBase
 {
 public:
-	typedef Evoral::Note<Evoral::Beats> NoteType;
+	typedef Evoral::Note<Temporal::Beats> NoteType;
 
 	Note (MidiRegionView&                   region,
 	      ArdourCanvas::Item*               parent,
@@ -63,10 +64,11 @@ public:
 
 	void set_ignore_events (bool);
 
+	void set_velocity (double);
 	void move_event (double dx, double dy);
 
 private:
-	ArdourCanvas::Rectangle* _rectangle;
+	ArdourCanvas::Note* _note;
 };
 
 #endif /* __gtk_ardour_note_h__ */

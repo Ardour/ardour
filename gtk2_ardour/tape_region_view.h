@@ -26,15 +26,15 @@
 
 class TapeAudioRegionView : public AudioRegionView
 {
-  public:
+public:
 	TapeAudioRegionView (ArdourCanvas::Container *,
-			     RouteTimeAxisView&,
-			     boost::shared_ptr<ARDOUR::AudioRegion>,
-			     double initial_samples_per_pixel,
-			     uint32_t base_color);
+	                     RouteTimeAxisView&,
+	                     boost::shared_ptr<ARDOUR::AudioRegion>,
+	                     double initial_samples_per_pixel,
+	                     uint32_t base_color);
 	~TapeAudioRegionView ();
 
-  protected:
+protected:
 	void init (bool wait_for_waves);
 
 	void update (uint32_t n);

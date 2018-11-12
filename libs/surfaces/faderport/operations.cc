@@ -41,7 +41,7 @@ static const double encoder_divider = 24.0;
 void
 FaderPort::left ()
 {
-	access_action ("Editor/select-prev-route");
+	access_action ("Editor/select-prev-stripable");
 
 	//ToDo:  bank by 8?
 	//if ( (button_state & ShiftDown) == ShiftDown )
@@ -51,7 +51,7 @@ FaderPort::left ()
 void
 FaderPort::right ()
 {
-	access_action ("Editor/select-next-route");
+	access_action ("Editor/select-next-stripable");
 
 	//ToDo:  bank by 8?
 	//if ( (button_state & ShiftDown) == ShiftDown )
@@ -140,7 +140,7 @@ FaderPort::solo ()
 		return;
 	}
 
-	_current_stripable->solo_control()->set_value (!_current_stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->solo_control(), !_current_stripable->solo_control()->self_soloed(), PBD::Controllable::UseGroup);
 }
 
 void

@@ -58,8 +58,8 @@ class Push2Menu : public ArdourCanvas::Container
 
 	void set_layout (int cols, int rows);
 	void set_font_description (Pango::FontDescription);
-	void set_text_color (ArdourCanvas::Color);
-	void set_active_color (ArdourCanvas::Color);
+	void set_text_color (Gtkmm2ext::Color);
+	void set_active_color (Gtkmm2ext::Color);
 
 	bool can_scroll_left() const { return first >= nrows; }
 	bool can_scroll_right() const { return last < displays.size() - 1; }
@@ -86,9 +86,9 @@ class Push2Menu : public ArdourCanvas::Container
 	uint32_t last;
 	uint32_t _active;
 
-	ArdourCanvas::Color text_color;
-	ArdourCanvas::Color active_color;
-	ArdourCanvas::Color contrast_color;
+	Gtkmm2ext::Color text_color;
+	Gtkmm2ext::Color active_color;
+	Gtkmm2ext::Color contrast_color;
 	Pango::FontDescription font_description;
 
 	inline int active_row () const { return _active % nrows; }

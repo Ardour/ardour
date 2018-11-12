@@ -25,6 +25,7 @@ int main (int argc, char **argv)
 	printf ("{\"version\" :  \"%s\"},\n\n", ARDOUR::revision);
 #endif
 	LuaInstance::register_classes (L);
+	LuaInstance::register_hooks (L);
 	ARDOUR::LuaBindings::dsp (L);
 #ifdef LUADOCOUT
 	printf ("}\n");

@@ -76,10 +76,15 @@ Session::schedule_curve_reallocation ()
 }
 
 void
-Session::request_overwrite_buffer (Track* t)
+Session::request_overwrite_buffer (boost::shared_ptr<Route> r)
 {
+	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (r);
+	if (!t) {
+		return;
+	}
+
 	SessionEvent *ev = new SessionEvent (SessionEvent::Overwrite, SessionEvent::Add, SessionEvent::Immediate, 0, 0, 0.0);
-	ev->set_ptr (t);
+	ev->set_ptr (t.get());
 	queue_event (ev);
 }
 

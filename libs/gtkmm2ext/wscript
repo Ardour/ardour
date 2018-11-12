@@ -25,45 +25,23 @@ I18N_PACKAGE = 'gtkmm2ext3'
 gtkmm2ext_sources = [
         'actions.cc',
         'application.cc',
-        'ardour_icon.cc',
-        'auto_spin.cc',
-        'barcontroller.cc',
-        'binding_proxy.cc',
-        'bindable_button.cc',
         'bindings.cc',
-        'cairocell.cc',
-        'cairo_icon.cc',
         'cairo_packer.cc',
         'cairo_widget.cc',
         'cell_renderer_color_selector.cc',
         'cell_renderer_pixbuf_multi.cc',
         'cell_renderer_pixbuf_toggle.cc',
-        'choice.cc',
-        'click_box.cc',
+        'colors.cc',
+        'colorspace.cc',
         'cursors.cc',
         'debug.cc',
         'dndtreeview.cc',
         'emscale.cc',
-        'focus_entry.cc',
-        'grouped_buttons.cc',
         'gtk_ui.cc',
         'gtkapplication.c',
-        'idle_adjustment.cc',
         'keyboard.cc',
-        'pane.cc',
-        'paths_dialog.cc',
+        'menu_elems.cc',
         'persistent_tooltip.cc',
-        'pixfader.cc',
-        'pixscroller.cc',
-        'popup.cc',
-        'prompter.cc',
-        'scroomer.cc',
-        'searchbar.cc',
-        'selector.cc',
-        'slider_controller.cc',
-        'stateful_button.cc',
-        'tabbable.cc',
-        'tearoff.cc',
         'textviewer.cc',
         'treeutils.cc',
         'utils.cc',
@@ -91,10 +69,6 @@ def configure(conf):
 def build(bld):
     # operate on copy to avoid adding sources twice
     sources = list(gtkmm2ext_sources)
-    if bld.is_tracks_build():
-        sources += [ 'waves_fastmeter.cc', 'fader.cc' ]
-    else:
-        sources += [ 'fastmeter.cc' ]
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
         obj              = bld.shlib(features = 'c cxx cshlib cxxshlib', source=sources)
@@ -110,7 +84,7 @@ def build(bld):
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
     obj.uselib       = 'GTKMM GTK XML'
-    obj.use          = [ 'libpbd', 'libardour' ]
+    obj.use          = [ 'libpbd' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines     += [
@@ -118,7 +92,7 @@ def build(bld):
                     'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
     if sys.platform == 'darwin':
-        obj.source += ['gtkapplication_quartz.mm']
+        obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
     else:
         obj.source += ['gtkapplication_x11.c']
 

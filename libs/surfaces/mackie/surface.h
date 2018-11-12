@@ -90,6 +90,8 @@ public:
 
 	void map_stripables (const std::vector<boost::shared_ptr<ARDOUR::Stripable> >&);
 
+	void update_strip_selection ();
+
 	const MidiByteArray& sysex_hdr() const;
 
 	void periodic (ARDOUR::microseconds_t now_usecs);
@@ -174,6 +176,8 @@ public:
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int version);
 
+	bool get_qcon_flag() { return is_qcon; }
+
   private:
 	MackieControlProtocol& _mcp;
 	SurfacePort*           _port;
@@ -203,6 +207,9 @@ public:
 	};
 
 	int connection_state;
+
+	// QCon Flag
+	bool is_qcon;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
 

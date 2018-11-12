@@ -26,7 +26,7 @@
 
 // This involves some cpp magic. --taybin
 
-#define SNAPTYPE(a) /*empty*/
+#define GRIDTYPE(a) /*empty*/
 #define SNAPMODE(a) /*empty*/
 #define REGIONLISTSORTTYPE(a) /*empty*/
 #define MOUSEMODE(a) /*empty*/
@@ -43,19 +43,19 @@
 
 namespace Editing {
 
-// SNAPTYPE
-#undef SNAPTYPE
-#define SNAPTYPE(a) a,
-enum SnapType {
+// GRIDTYPE
+#undef GRIDTYPE
+#define GRIDTYPE(a) a,
+enum GridType {
 	#include "editing_syms.h"
 };
 
-extern const char *snaptypestrs[];
-inline const char* enum2str(SnapType m) {return snaptypestrs[m];}
-SnapType str2snaptype(const std::string &);
+extern const char *gridtypestrs[];
+inline const char* enum2str(GridType m) {return gridtypestrs[m];}
+GridType str2gridtype(const std::string &);
 
-#undef SNAPTYPE
-#define SNAPTYPE(a) /*empty*/
+#undef GRIDTYPE
+#define GRIDTYPE(a) /*empty*/
 
 // SNAPMODE
 #undef SNAPMODE
@@ -219,6 +219,13 @@ enum ZoomAxis {
 	Vertical,
 	Horizontal,
 	Both
+};
+
+enum RegionActionTarget {
+	SelectedRegions = 0x1,
+	EnteredRegions = 0x2,
+	EditPointRegions = 0x4,
+	ListSelection = 0x8
 };
 
 } // namespace Editing

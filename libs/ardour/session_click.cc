@@ -40,7 +40,7 @@ using namespace PBD;
 Pool Click::pool ("click", sizeof (Click), 1024);
 
 void
-Session::add_click (framepos_t pos, bool emphasis)
+Session::add_click (samplepos_t pos, bool emphasis)
 {
 	if (emphasis) {
 		if (click_emphasis_data && Config->get_use_click_emphasis () == true) {
@@ -54,34 +54,44 @@ Session::add_click (framepos_t pos, bool emphasis)
 }
 
 void
-Session::click (framepos_t start, framecnt_t nframes)
+Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 {
-	vector<TempoMap::BBTPoint> points;
-	framecnt_t click_distance;
+	vector<TempoMap::BBTPoint> points; // TODO use mempool allocator
 
 	if (_click_io == 0) {
 		return;
 	}
 
+	/* transport_frame is audible-frame (what you hear,
+	 * incl output latency). So internally we're ahead,
+	 * we need to prepare frames that the user will hear
+	 * in "output latency's" worth of time.
+	 */
+	samplecnt_t offset = _click_io->connected_latency (true);
+
 	Glib::Threads::RWLock::WriterLock clickm (click_lock, Glib::Threads::TRY_LOCK);
 
-	/* how far have we moved since the last time the clicks got cleared
-	 */
+	/* how far have we moved since the last time the clicks got cleared */
+	const samplecnt_t click_distance = cycle_start + offset - _clicks_cleared;
 
-	click_distance = start - _clicks_cleared;
-
-	if (!clickm.locked() || !_clicking || click_data == 0 || ((click_distance + nframes) < _worst_track_latency)) {
+	if (!clickm.locked() || !_clicking || click_data == 0 || ((click_distance + nframes) < 0)) {
 		_click_io->silence (nframes);
 		return;
 	}
 
-	start -= _worst_track_latency;
-	/* start could be negative at this point */
-	const framepos_t end = start + nframes;
-	/* correct start, potentially */
-	start = max (start, (framepos_t) 0);
+	if (_click_rec_only && !actively_recording()) {
+		return;
+	}
 
-	_tempo_map->get_grid (points, start, end);
+	/* range to check for clicks */
+	samplepos_t start = cycle_start + offset;
+	const samplepos_t end = start + nframes;
+	/* correct start, potentially */
+	start = max (start, (samplepos_t) 0);
+
+	if (end > start) {
+		_tempo_map->get_grid (points, start, end);
+	}
 
 	if (distance (points.begin(), points.end()) == 0) {
 		goto run_clicks;
@@ -90,11 +100,11 @@ Session::click (framepos_t start, framecnt_t nframes)
 	for (vector<TempoMap::BBTPoint>::iterator i = points.begin(); i != points.end(); ++i) {
 		switch ((*i).beat) {
 		case 1:
-			add_click ((*i).frame, true);
+			add_click ((*i).sample, true);
 			break;
 		default:
-			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??
-				add_click ((*i).frame, false);
+			if (click_emphasis_data == 0 || (Config->get_use_click_emphasis () == false) || (click_emphasis_data && (*i).beat != 1)) { // XXX why is this check needed ??  (*i).beat !=1 must be true here
+				add_click ((*i).sample, false);
 			}
 			break;
 		}
@@ -102,13 +112,16 @@ Session::click (framepos_t start, framecnt_t nframes)
 
   run_clicks:
 	clickm.release ();
-	run_click (start, nframes);
+	run_click (cycle_start, nframes);
 }
 
 void
-Session::run_click (framepos_t start, framepos_t nframes)
+Session::run_click (samplepos_t start, samplepos_t nframes)
 {
 	Glib::Threads::RWLock::ReaderLock clickm (click_lock, Glib::Threads::TRY_LOCK);
+
+	/* align to output */
+	start += _click_io->connected_latency (true);
 
 	if (!clickm.locked() || click_data == 0) {
 		_click_io->silence (nframes);
@@ -122,8 +135,8 @@ Session::run_click (framepos_t start, framepos_t nframes)
 
 	for (list<Click*>::iterator i = clicks.begin(); i != clicks.end(); ) {
 
-		framecnt_t copy;
-		framecnt_t internal_offset;
+		samplecnt_t copy;
+		samplecnt_t internal_offset;
 		Click *clk;
 
 		clk = *i;
@@ -160,7 +173,7 @@ Session::run_click (framepos_t start, framepos_t nframes)
 }
 
 void
-Session::setup_click_sounds (Sample** data, Sample const * default_data, framecnt_t* length, framecnt_t default_length, string const & path)
+Session::setup_click_sounds (Sample** data, Sample const * default_data, samplecnt_t* length, samplecnt_t default_length, string const & path)
 {
 	if (*data != default_data) {
 		delete[] *data;
@@ -255,5 +268,5 @@ Session::clear_clicks ()
 	}
 
 	clicks.clear ();
-	_clicks_cleared = _transport_frame;
+	_clicks_cleared = _transport_sample;
 }

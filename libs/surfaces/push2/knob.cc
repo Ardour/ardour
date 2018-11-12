@@ -28,7 +28,7 @@
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/text.h"
 
 #include "knob.h"
@@ -75,7 +75,7 @@ Push2Knob::~Push2Knob ()
 }
 
 void
-Push2Knob::set_text_color (Color c)
+Push2Knob::set_text_color (Gtkmm2ext::Color c)
 {
 	text->set_color (c);
 }
@@ -145,8 +145,8 @@ Push2Knob::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 		double red_start, green_start, blue_start, astart;
 		double red_end, green_end, blue_end, aend;
 
-		ArdourCanvas::color_to_rgba (arc_start_color, red_start, green_start, blue_start, astart);
-		ArdourCanvas::color_to_rgba (arc_end_color, red_end, green_end, blue_end, aend);
+		Gtkmm2ext::color_to_rgba (arc_start_color, red_start, green_start, blue_start, astart);
+		Gtkmm2ext::color_to_rgba (arc_end_color, red_end, green_end, blue_end, aend);
 
 		//vary the arc color over the travel of the knob
 		float intensity = fabsf (_val - zero) / std::max(zero, (1.f - zero));

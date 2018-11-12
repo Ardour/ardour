@@ -19,22 +19,22 @@ have to wait for the export.
 
 function factory (unused_params) return function ()
 
-	fr = Session:frame_rate()
-	chaps = {}
+	local fr = Session:sample_rate()
+	local chaps = {}
 
 	for l in Session:locations():list():iter() do
-		name = l:name()
+		local name = l:name()
 		if not l:is_mark() or string.find(name, "^xrun%d*$") then
 			goto next end
 
-		t = l:start()
-		h = math.floor(t / (3600*fr))
-		r = t - (h*3600*fr)
-		m = math.floor(r / (60*fr))
+		local t = l:start()
+		local h = math.floor(t / (3600*fr))
+		local r = t - (h*3600*fr)
+		local m = math.floor(r / (60*fr))
 		r = r - m*60*fr
-		s = math.floor(r / fr)
+		local s = math.floor(r / fr)
 		r = r - s*fr
-		ms = math.floor(r*1000/fr)
+		local ms = math.floor(r*1000/fr)
 		table.insert(chaps, string.format("%02d:%02d:%02d.%03d %s\n", h, m, s, ms, name))
 		::next::
 	end
@@ -52,4 +52,27 @@ function factory (unused_params) return function ()
 	file:close()
 
 	::out::
+end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local mh = height - 3.5;
+	local m3 = width / 3;
+	local m6 = width / 6;
+
+	ctx:set_line_width (.5)
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+
+	ctx:move_to (width / 2 - m6, 2)
+	ctx:rel_line_to (m3, 0)
+	ctx:rel_line_to (0, mh * 0.4)
+	ctx:rel_line_to (-m6, mh * 0.6)
+	ctx:rel_line_to (-m6, -mh * 0.6)
+	ctx:close_path ()
+	ctx:stroke ()
+
+	local txt = Cairo.PangoLayout (ctx, "ArdourMono ".. math.ceil(math.min (width, height) * .5) .. "px")
+	txt:set_text ("MP4")
+	local tw, th = txt:get_pixel_size ()
+	ctx:move_to (.5 * (width - tw), .5 * (height - th))
+	txt:show_in_cairo_context (ctx)
 end end

@@ -26,6 +26,8 @@
 
 #include <glibmm/threads.h>
 
+#include "pbd/control_math.h"
+
 #include "evoral/Curve.hpp"
 #include "evoral/ControlList.hpp"
 
@@ -42,7 +44,7 @@ Curve::Curve (const ControlList& cl)
 }
 
 void
-Curve::solve ()
+Curve::solve () const
 {
 	uint32_t npoints;
 
@@ -169,7 +171,7 @@ Curve::solve ()
 }
 
 bool
-Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock(), Glib::Threads::TRY_LOCK);
 
@@ -182,14 +184,14 @@ Curve::rt_safe_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 void
-Curve::get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	Glib::Threads::RWLock::ReaderLock lm(_list.lock());
 	_get_vector (x0, x1, vec, veclen);
 }
 
 void
-Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
+Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen) const
 {
 	double rx, lx, hx, max_x, min_x;
 	int32_t i;
@@ -203,7 +205,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 	if ((npoints = _list.events().size()) == 0) {
 		/* no events in list, so just fill the entire array with the default value */
 		for (int32_t i = 0; i < veclen; ++i) {
-			vec[i] = _list.default_value();
+			vec[i] = _list.descriptor().normal;
 		}
 		return;
 	}
@@ -282,31 +284,66 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 
 	if (npoints == 2) {
 
-		/* linear interpolation between 2 points */
-
-		/* XXX: this numerator / denominator stuff is pretty grim, but it's the only
-		   way I could get the maths to be accurate; doing everything with pure doubles
-		   gives ~1e-17 errors in the vec[i] computation.
-		*/
-
-		/* gradient of the line */
-		double const m_num = _list.events().back()->value - _list.events().front()->value;
-		double const m_den = _list.events().back()->when - _list.events().front()->when;
-
-		/* y intercept of the line */
-		double const c = double (_list.events().back()->value) - (m_num * _list.events().back()->when / m_den);
+		const double lpos = _list.events().front()->when;
+		const double lval = _list.events().front()->value;
+		const double upos = _list.events().back()->when;
+		const double uval = _list.events().back()->value;
 
 		/* dx that we are using */
-		double dx_num = 0;
-		double dx_den = 1;
 		if (veclen > 1) {
-			dx_num = hx - lx;
-			dx_den = veclen - 1;
-			for (int i = 0; i < veclen; ++i) {
-				vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
+			const double dx_num = hx - lx;
+			const double dx_den = veclen - 1;
+			const double lower = _list.descriptor().lower;
+			const double upper = _list.descriptor().upper;
+
+			/* gradient of the line */
+			const double m_num = uval - lval;
+			const double m_den = upos - lpos;
+			/* y intercept of the line */
+			const double c = uval - (m_num * upos / m_den);
+
+			switch (_list.interpolation()) {
+				case ControlList::Logarithmic:
+					for (int i = 0; i < veclen; ++i) {
+						const double fraction = (lx - lpos + i * dx_num / dx_den) / m_den;
+						vec[i] = interpolate_logarithmic (lval, uval, fraction, lower, upper);
+					}
+					break;
+				case ControlList::Exponential:
+					for (int i = 0; i < veclen; ++i) {
+						const double fraction = (lx - lpos + i * dx_num / dx_den) / m_den;
+						vec[i] = interpolate_gain (lval, uval, fraction, upper);
+					}
+					break;
+				case ControlList::Discrete:
+					// any discrete vector curves somewhere?
+					assert (0);
+				case ControlList::Curved:
+					// fallthrough, no 2 point spline
+				default: // Linear:
+					for (int i = 0; i < veclen; ++i) {
+						vec[i] = (lx * (m_num / m_den) + m_num * i * dx_num / (m_den * dx_den)) + c;
+					}
+					break;
 			}
 		} else {
-			vec[0] = lx * (m_num / m_den) + c;
+			double fraction = (lx - lpos) / (upos - lpos);
+			switch (_list.interpolation()) {
+				case ControlList::Logarithmic:
+					vec[0] = interpolate_logarithmic (lval, uval, fraction, _list.descriptor().lower, _list.descriptor().upper);
+					break;
+				case ControlList::Exponential:
+					vec[0] = interpolate_gain (lval, uval, fraction, _list.descriptor().upper);
+					break;
+				case ControlList::Discrete:
+					// any discrete vector curves somewhere?
+					assert (0);
+				case ControlList::Curved:
+					// fallthrough, no 2 point spline
+				default: // Linear:
+					vec[0] = interpolate_linear (lval, uval, fraction);
+					break;
+			}
 		}
 
 		return;
@@ -329,7 +366,7 @@ Curve::_get_vector (double x0, double x1, float *vec, int32_t veclen)
 }
 
 double
-Curve::multipoint_eval (double x)
+Curve::multipoint_eval (double x) const
 {
 	pair<ControlList::EventList::const_iterator,ControlList::EventList::const_iterator> range;
 
@@ -388,12 +425,22 @@ Curve::multipoint_eval (double x)
 		double tdelta = x - before->when;
 		double trange = after->when - before->when;
 
-		if (_list.interpolation() == ControlList::Curved && after->coeff) {
-				ControlEvent* ev = after;
-				double x2 = x * x;
-				return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
-		} else {
-			return before->value + (vdelta * (tdelta / trange));
+		switch (_list.interpolation()) {
+			case ControlList::Discrete:
+				return before->value;
+			case ControlList::Logarithmic:
+				return interpolate_logarithmic (before->value, after->value, tdelta / trange, _list.descriptor().lower, _list.descriptor().upper);
+			case ControlList::Exponential:
+				return interpolate_gain (before->value, after->value, tdelta / trange, _list.descriptor().upper);
+			case ControlList::Curved:
+				if (after->coeff) {
+					ControlEvent* ev = after;
+					double x2 = x * x;
+					return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
+				}
+				// no break, fallthru
+			default: // Linear
+				return before->value + (vdelta * (tdelta / trange));
 		}
 	}
 

@@ -63,7 +63,7 @@ VideoImageFrame::VideoImageFrame (PublicEditor& ed, ArdourCanvas::Container& par
 	image = new ArdourCanvas::Image (_parent, Cairo::FORMAT_ARGB32, clip_width, clip_height);
 
 	img = image->get_image();
-	fill_frame(0, 0, 0);
+	fill_frame (0, 0, 0);
 	draw_line();
 	draw_x();
 	image->put_image(img);
@@ -80,7 +80,7 @@ VideoImageFrame::~VideoImageFrame ()
 }
 
 void
-VideoImageFrame::set_position (framepos_t sample)
+VideoImageFrame::set_position (samplepos_t sample)
 {
 	double new_unit_position = editor.sample_to_pixel (sample);
 	image->move (ArdourCanvas::Duple (new_unit_position - unit_position, 0.0));
@@ -100,7 +100,7 @@ VideoImageFrame::exposeimg () {
 }
 
 void
-VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
+VideoImageFrame::set_videoframe (samplepos_t videoframenumber, int re)
 {
 	if (video_frame_number == videoframenumber && rightend == re) return;
 
@@ -108,7 +108,7 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 	rightend = re;
 
 	img = image->get_image();
-	fill_frame(0, 0, 0);
+	fill_frame (0, 0, 0);
 	draw_x();
 	draw_line();
 	cut_rightend();
@@ -116,7 +116,7 @@ VideoImageFrame::set_videoframe (framepos_t videoframenumber, int re)
 	exposeimg();
 
 	/* request video-frame from decoder in background thread */
-	http_get(video_frame_number);
+	http_get (video_frame_number);
 }
 
 void
@@ -210,7 +210,7 @@ http_get_thread (void *arg) {
 	int timeout = 1000; // * 5ms -> 5sec
 	char *res = NULL;
 	do {
-		res = ArdourCurl::http_get (url, &status);
+		res = ArdourCurl::http_get (url, &status, false);
 		if (status == 503) Glib::usleep(5000); // try-again
 	} while (status == 503 && --timeout > 0);
 
@@ -234,7 +234,7 @@ VideoImageFrame::http_download_done (char *data){
 	if (!data) {
 		/* Image request failed (HTTP error or timeout) */
 		img = image->get_image();
-		fill_frame(128, 0, 0);
+		fill_frame (128, 0, 0);
 		draw_x();
 		cut_rightend();
 		draw_line();
@@ -261,7 +261,7 @@ VideoImageFrame::http_download_done (char *data){
 
 
 void
-VideoImageFrame::http_get(framepos_t fn) {
+VideoImageFrame::http_get (samplepos_t fn) {
 	if (pthread_mutex_trylock(&request_lock)) {
 		pthread_mutex_lock(&queue_lock);
 		queued_request=true;
@@ -284,7 +284,7 @@ VideoImageFrame::http_get(framepos_t fn) {
 }
 
 void
-VideoImageFrame::http_get_again(framepos_t /*fn*/) {
+VideoImageFrame::http_get_again(samplepos_t /*fn*/) {
 	pthread_mutex_lock(&queue_lock);
 	queued_request=false;
 	req_video_frame_number=want_video_frame_number;

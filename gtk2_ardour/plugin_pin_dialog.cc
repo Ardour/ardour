@@ -19,14 +19,19 @@
 
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm/table.h>
+#include <gtkmm/box.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/label.h>
+#include <gtkmm/separator.h>
+#include <gtkmm/table.h>
 
 #include "pbd/replace_all.h"
 
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/menu_elems.h"
+
+#include "widgets/tooltips.h"
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -36,11 +41,11 @@
 #include "ardour/profile.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
+#include "ardour/value_as_string.h"
 
 #include "plugin_pin_dialog.h"
 #include "gui_thread.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -50,6 +55,7 @@ using namespace PBD;
 using namespace std;
 using namespace Gtk;
 using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	: _set_config (_("Manual Config"), ArdourButton::led_default_elements)
@@ -189,7 +195,7 @@ PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	tl->pack_start (*manage (new Label ("")), true, true); // invisible separator
 	tl->pack_start (*manage (new HSeparator ()), false, false, 4);
 	_out_presets.disable_scrolling ();
-	ARDOUR_UI_UTILS::set_tooltip (_out_presets, _("Output Presets"));
+	ArdourWidgets::set_tooltip (_out_presets, _("Output Presets"));
 	tl->pack_start (_out_presets, false, false);
 
 	/* right side */
@@ -564,7 +570,7 @@ uint32_t
 PluginPinWidget::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool can_remove)
 {
 	std::string lbl;
-	std::string tip = p->name ();
+	std::string tip = Gtkmm2ext::markup_escape_text (p->name ());
 	std::vector<std::string> cns;
 	bool single_source = true;
 	p->get_connections (cns);
@@ -600,7 +606,7 @@ PluginPinWidget::add_port_to_table (boost::shared_ptr<Port> p, uint32_t r, bool 
 	ArdourButton *pb = manage (new ArdourButton (lbl));
 	pb->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 	pb->set_layout_ellipsize_width (108 * PANGO_SCALE);
-	ARDOUR_UI_UTILS::set_tooltip (*pb, tip);
+	ArdourWidgets::set_tooltip (*pb, tip);
 	_sidechain_tbl->attach (*pb, 0, 1, r, r +1 , EXPAND|FILL, SHRINK);
 
 	pb->signal_button_press_event ().connect (sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::sc_input_press), boost::weak_ptr<Port> (p)), false);
@@ -1821,7 +1827,7 @@ PluginPinWidget::maybe_add_route_to_input_menu (boost::shared_ptr<Route> r, Data
 	/* we're going to create the new send pre-fader, so check the route amp's data type.  */
 	const ChanCount& rc (r->amp ()->input_streams ());
 	if (!already_present && rc.get (dt) > 0) {
-		citems.push_back (MenuElem (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_send_from), wp, boost::weak_ptr<Route> (r))));
+		citems.push_back (MenuElemNoMnemonic (r->name (), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::add_send_from), wp, boost::weak_ptr<Route> (r))));
 		++added;
 	}
 	return added;
@@ -1863,23 +1869,11 @@ PluginPinWidget::Control::Control (boost::shared_ptr<AutomationControl> c, strin
 	_slider.show ();
 
 	const ARDOUR::ParameterDescriptor& desc = c->desc ();
-	double const lo = c->internal_to_interface (desc.lower);
-	double const up = c->internal_to_interface (desc.upper);
-	double const normal = c->internal_to_interface (desc.normal);
-	double smallstep = desc.smallstep;
-	double largestep = desc.largestep;
-
-	if (smallstep == 0.0) {
-		smallstep = up / 1000.;
-	} else {
-		smallstep = c->internal_to_interface (desc.lower + smallstep);
-	}
-
-	if (largestep == 0.0) {
-		largestep = up / 40.;
-	} else {
-		largestep = c->internal_to_interface (desc.lower + largestep);
-	}
+	double const lo        = c->internal_to_interface (desc.lower);
+	double const up        = c->internal_to_interface (desc.upper);
+	double const normal    = c->internal_to_interface (desc.normal);
+	double const smallstep = c->internal_to_interface (desc.lower + desc.smallstep);
+	double const largestep = c->internal_to_interface (desc.lower + desc.largestep);
 
 	_adjustment.set_lower (lo);
 	_adjustment.set_upper (up);
@@ -1914,10 +1908,8 @@ PluginPinWidget::Control::set_tooltip ()
 	if (!c) {
 		return;
 	}
-	char tmp[256];
-	snprintf (tmp, sizeof (tmp), "%s: %.2f", _name.c_str (), c->internal_to_user (c->get_value ()));
-
-	string sm = Gtkmm2ext::markup_escape_text (tmp);
+	std::string tt = _name + ": " + ARDOUR::value_as_string (c->desc(), c->get_value ());
+	string sm = Gtkmm2ext::markup_escape_text (tt);
 	_slider_persistant_tooltip.set_tip (sm);
 }
 

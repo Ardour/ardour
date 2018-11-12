@@ -73,7 +73,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	SourceList nsrcs;
 	int ret = -1;
-	const framecnt_t bufsize = 256;
+	const samplecnt_t bufsize = 256;
 	gain_t* gain_buffer = 0;
 	Sample** buffers = 0;
 	char suffix[32];
@@ -94,11 +94,11 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	   1. The region has not been stretched before.
 
-	   In this case, we just want to read region->length() frames
+	   In this case, we just want to read region->length() samples
 	   from region->start().
 
 	   We will create a new region of region->length() *
-	   tsr.time_fraction frames.  The new region will have its
+	   tsr.time_fraction samples.  The new region will have its
 	   start set to 0 (because it has a new audio file that begins
 	   at the start of the stretched area) and its ancestral_start
 	   set to region->start() (so that we know where to begin
@@ -106,25 +106,25 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	   2. The region has been stretched before.
 
-	   The region starts at region->start() frames into its
+	   The region starts at region->start() samples into its
 	   (possibly previously stretched) source file.  But we don't
 	   want to read from its source file; we want to read from the
 	   file it was originally stretched from.
 
 	   The region's source begins at region->ancestral_start()
-	   frames into its master source file.  Thus, we need to start
+	   samples into its master source file.  Thus, we need to start
 	   reading at region->ancestral_start() + (region->start() /
-	   region->stretch()) frames into the master source.  This
+	   region->stretch()) samples into the master source.  This
 	   value will also become the ancestral_start for the new
 	   region.
 
 	   We cannot use region->ancestral_length() to establish how
-	   many frames to read, because it won't be up to date if the
+	   many samples to read, because it won't be up to date if the
 	   region has been trimmed since it was last stretched.  We
-	   must read region->length() / region->stretch() frames and
+	   must read region->length() / region->stretch() samples and
 	   stretch them by tsr.time_fraction * region->stretch(), for
 	   a new region of region->length() * tsr.time_fraction
-	   frames.
+	   samples.
 
 	   Case 1 is of course a special case of 2, where
 	   region->ancestral_start() == 0 and region->stretch() == 1.
@@ -135,7 +135,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	   region->start().  This calculation is used regardless of
 	   whether we are reading from a master or
 	   previously-stretched region.  In order to read from a point
-	   n frames into the master source, we need to provide n -
+	   n samples into the master source, we need to provide n -
 	   region->start() + region->position() as our position
 	   argument to master_read_at().
 
@@ -147,16 +147,16 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	double stretch = region->stretch() * tsr.time_fraction;
 	double shift = region->shift() * tsr.pitch_fraction;
 
-	framecnt_t read_start = region->ancestral_start() +
-		framecnt_t(region->start() / (double)region->stretch());
+	samplecnt_t read_start = region->ancestral_start() +
+		samplecnt_t(region->start() / (double)region->stretch());
 
-	framecnt_t read_duration =
-		framecnt_t(region->length() / (double)region->stretch());
+	samplecnt_t read_duration =
+		samplecnt_t(region->length() / (double)region->stretch());
 
 	uint32_t channels = region->n_channels();
 
 	RubberBandStretcher stretcher
-		(session.frame_rate(), channels,
+		(session.sample_rate(), channels,
 		 (RubberBandStretcher::Options) tsr.opts, stretch, shift);
 
 	progress->set_progress (0);
@@ -181,9 +181,9 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	/* create new sources */
 
-	framepos_t pos   = 0;
-	framecnt_t avail = 0;
-	framecnt_t done  = 0;
+	samplepos_t pos   = 0;
+	samplecnt_t avail = 0;
+	samplecnt_t done  = 0;
 
 	if (make_new_sources (region, nsrcs, suffix)) {
 		goto out;
@@ -205,14 +205,14 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	try {
 		while (pos < read_duration && !tsr.cancel) {
 
-			framecnt_t this_read = 0;
+			samplecnt_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
-				framepos_t this_time;
+				samplepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
-				framepos_t this_position;
+				samplepos_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
 
@@ -245,14 +245,14 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 		while (pos < read_duration && !tsr.cancel) {
 
-			framecnt_t this_read = 0;
+			samplecnt_t this_read = 0;
 
 			for (uint32_t i = 0; i < channels; ++i) {
 
-				framepos_t this_time;
+				samplepos_t this_time;
 				this_time = min(bufsize, read_duration - pos);
 
-				framepos_t this_position;
+				samplepos_t this_position;
 				this_position = read_start + pos -
 					region->start() + region->position();
 
@@ -279,7 +279,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 			stretcher.process(buffers, this_read, pos == read_duration);
 
-			framecnt_t avail = 0;
+			samplecnt_t avail = 0;
 
 			while ((avail = stretcher.available()) > 0) {
 
@@ -304,7 +304,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 		while ((avail = stretcher.available()) >= 0) {
 
-			framecnt_t this_read = min (bufsize, avail);
+			samplecnt_t this_read = min (bufsize, avail);
 
 			stretcher.retrieve(buffers, this_read);
 

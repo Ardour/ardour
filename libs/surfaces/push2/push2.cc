@@ -28,8 +28,9 @@
 #include "pbd/enumwriter.h"
 
 #include "midi++/parser.h"
-#include "timecode/time.h"
-#include "timecode/bbt_time.h"
+
+#include "temporal/time.h"
+#include "temporal/bbt_time.h"
 
 #include "ardour/amp.h"
 #include "ardour/async_midi_port.h"
@@ -40,11 +41,12 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/types_convert.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 
 #include "canvas.h"
 #include "gui.h"
@@ -67,6 +69,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace Gtkmm2ext;
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
@@ -106,8 +109,6 @@ Push2::Push2 (ARDOUR::Session& s)
 	/* master cannot be removed, so no need to connect to going-away signal */
 	master = session->master_out ();
 
-	ControlProtocol::StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&Push2::stripable_selection_change, this, _1), this);
-
 	/* allocate graphics layouts, even though we're not using them yet */
 
 	_canvas = new Push2Canvas (*this, 960, 160);
@@ -137,7 +138,6 @@ Push2::~Push2 ()
 	DEBUG_TRACE (DEBUG::Push2, "push2 control surface object being destroyed\n");
 
 	/* do this before stopping the event loop, so that we don't get any notifications */
-	selection_connection.disconnect ();
 	port_reg_connection.disconnect ();
 	port_connection.disconnect ();
 
@@ -182,7 +182,7 @@ Push2::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "begin using device\n");
 
-	/* set up periodic task used to push a frame buffer to the
+	/* set up periodic task used to push a sample buffer to the
 	 * device (25fps). The device can handle 60fps, but we don't
 	 * need that frame rate.
 	 */
@@ -199,10 +199,7 @@ Push2::begin_using_device ()
 	splash ();
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
-	{
-		StripableNotificationListPtr sp (new StripableNotificationList (ControlProtocol::last_selected()));
-		stripable_selection_change (sp);
-	}
+	stripable_selection_changed ();
 
 	request_pressure_mode ();
 
@@ -298,8 +295,11 @@ Push2::ports_release ()
 	asp = dynamic_cast<AsyncMIDIPort*> (_output_port);
 	asp->drain (10000, 500000);
 
-	AudioEngine::instance()->unregister_port (_async_in);
-	AudioEngine::instance()->unregister_port (_async_out);
+	{
+		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		AudioEngine::instance()->unregister_port (_async_in);
+		AudioEngine::instance()->unregister_port (_async_out);
+	}
 
 	_async_in.reset ((ARDOUR::Port*) 0);
 	_async_out.reset ((ARDOUR::Port*) 0);
@@ -561,7 +561,7 @@ Push2::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("data available on %1\n", port->name()));
 		if (in_use) {
-			framepos_t now = AudioEngine::instance()->sample_time();
+			samplepos_t now = AudioEngine::instance()->sample_time();
 			port->parse (now);
 		}
 	}
@@ -850,19 +850,12 @@ Push2::handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t pb)
 void
 Push2::thread_init ()
 {
-	struct sched_param rtparam;
-
 	pthread_set_name (event_loop_name().c_str());
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
-		// do we care? not particularly.
-	}
+	set_thread_priority ();
 }
 
 void
@@ -994,10 +987,10 @@ Push2::get_state()
 	child->add_child_nocopy (_async_out->get_state());
 	node.add_child_nocopy (*child);
 
-	node.add_property (X_("root"), to_string (_scale_root, std::dec));
-	node.add_property (X_("root_octave"), to_string (_root_octave, std::dec));
-	node.add_property (X_("in_key"), _in_key ? X_("yes") : X_("no"));
-	node.add_property (X_("mode"), enum_2_string (_mode));
+	node.set_property (X_("root"), _scale_root);
+	node.set_property (X_("root-octave"), _root_octave);
+	node.set_property (X_("in-key"), _in_key);
+	node.set_property (X_("mode"), _mode);
 
 	return node;
 }
@@ -1029,23 +1022,10 @@ Push2::set_state (const XMLNode & node, int version)
 		}
 	}
 
-	XMLProperty const* prop;
-
-	if ((prop = node.property (X_("root"))) != 0) {
-		_scale_root = atoi (prop->value());
-	}
-
-	if ((prop = node.property (X_("root_octave"))) != 0) {
-		_root_octave = atoi (prop->value());
-	}
-
-	if ((prop = node.property (X_("in_key"))) != 0) {
-		_in_key = string_is_affirmative (prop->value());
-	}
-
-	if ((prop = node.property (X_("mode"))) != 0) {
-		_mode = (MusicalMode::Type) string_2_enum (prop->value(), _mode);
-	}
+	node.get_property (X_("root"), _scale_root);
+	node.get_property (X_("root-octave"), _root_octave);
+	node.get_property (X_("in-key"), _in_key);
+	node.get_property (X_("mode"), _mode);
 
 	return retval;
 }
@@ -1097,9 +1077,9 @@ Push2::other_vpot_touch (int n, bool touching)
 			boost::shared_ptr<AutomationControl> ac = master->gain_control();
 			if (ac) {
 				if (touching) {
-					ac->start_touch (session->audible_frame());
+					ac->start_touch (session->audible_sample());
 				} else {
-					ac->stop_touch (true, session->audible_frame());
+					ac->stop_touch (session->audible_sample());
 				}
 			}
 		}
@@ -1314,7 +1294,7 @@ Push2::update_selection_color ()
 	}
 
 	selection_color = get_color_index (current_midi_track->presentation_info().color());
-	contrast_color = get_color_index (ArdourCanvas::HSV (current_midi_track->presentation_info().color()).opposite().color());
+	contrast_color = get_color_index (Gtkmm2ext::HSV (current_midi_track->presentation_info().color()).opposite().color());
 
 	reset_pad_colors ();
 }
@@ -1537,15 +1517,16 @@ Push2::current_layout () const
 }
 
 void
-Push2::stripable_selection_change (StripableNotificationListPtr selected)
+Push2::stripable_selection_changed ()
 {
 	boost::shared_ptr<MidiPort> pad_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 	boost::shared_ptr<MidiTrack> current_midi_track = current_pad_target.lock();
 	boost::shared_ptr<MidiTrack> new_pad_target;
+	StripableNotificationList const & selected (last_selected());
 
 	/* See if there's a MIDI track selected */
 
-	for (StripableNotificationList::iterator si = selected->begin(); si != selected->end(); ++si) {
+	for (StripableNotificationList::const_iterator si = selected.begin(); si != selected.end(); ++si) {
 
 		new_pad_target = boost::dynamic_pointer_cast<MidiTrack> ((*si).lock());
 
@@ -1586,7 +1567,7 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 		new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 		current_pad_target = new_pad_target;
 		selection_color = get_color_index (new_pad_target->presentation_info().color());
-		contrast_color = get_color_index (ArdourCanvas::HSV (new_pad_target->presentation_info().color()).opposite().color());
+		contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
 	} else {
 		current_pad_target.reset ();
 		selection_color = LED::Green;
@@ -1594,6 +1575,10 @@ Push2::stripable_selection_change (StripableNotificationListPtr selected)
 	}
 
 	reset_pad_colors ();
+
+	TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (track_mix_layout);
+	assert (tml);
+	tml->set_stripable (first_selected_stripable());
 }
 
 Push2::Button*
@@ -1603,7 +1588,7 @@ Push2::button_by_id (ButtonID bid)
 }
 
 uint8_t
-Push2::get_color_index (ArdourCanvas::Color rgba)
+Push2::get_color_index (Color rgba)
 {
 	ColorMap::iterator i = color_map.find (rgba);
 
@@ -1613,7 +1598,7 @@ Push2::get_color_index (ArdourCanvas::Color rgba)
 
 	double dr, dg, db, da;
 	int r, g, b;
-	ArdourCanvas::color_to_rgba (rgba, dr, dg, db, da);
+	color_to_rgba (rgba, dr, dg, db, da);
 	int w = 126; /* not sure where/when we should get this value */
 
 
@@ -1688,26 +1673,26 @@ Push2::build_color_map ()
 void
 Push2::fill_color_table ()
 {
-	colors.insert (make_pair (DarkBackground, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
-	colors.insert (make_pair (LightBackground, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	colors.insert (make_pair (DarkBackground, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
+	colors.insert (make_pair (LightBackground, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (ParameterName, ArdourCanvas::rgba_to_color (0.98, 0.98, 0.98, 1)));
+	colors.insert (make_pair (ParameterName, Gtkmm2ext::rgba_to_color (0.98, 0.98, 0.98, 1)));
 
-	colors.insert (make_pair (KnobArcBackground, ArdourCanvas::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
-	colors.insert (make_pair (KnobArcStart, ArdourCanvas::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
-	colors.insert (make_pair (KnobArcEnd, ArdourCanvas::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
+	colors.insert (make_pair (KnobArcBackground, Gtkmm2ext::rgba_to_color (0.3, 0.3, 0.3, 1.0)));
+	colors.insert (make_pair (KnobArcStart, Gtkmm2ext::rgba_to_color (1.0, 0.0, 0.0, 1.0)));
+	colors.insert (make_pair (KnobArcEnd, Gtkmm2ext::rgba_to_color (0.0, 1.0, 0.0, 1.0)));
 
-	colors.insert (make_pair (KnobLineShadow, ArdourCanvas::rgba_to_color  (0, 0, 0, 0.3)));
-	colors.insert (make_pair (KnobLine, ArdourCanvas::rgba_to_color (1, 1, 1, 1)));
+	colors.insert (make_pair (KnobLineShadow, Gtkmm2ext::rgba_to_color  (0, 0, 0, 0.3)));
+	colors.insert (make_pair (KnobLine, Gtkmm2ext::rgba_to_color (1, 1, 1, 1)));
 
-	colors.insert (make_pair (KnobForeground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobBackground, ArdourCanvas::rgba_to_color (0.2, 0.2, 0.2, 1)));
-	colors.insert (make_pair (KnobShadow, ArdourCanvas::rgba_to_color (0, 0, 0, 0.1)));
-	colors.insert (make_pair (KnobBorder, ArdourCanvas::rgba_to_color (0, 0, 0, 1)));
+	colors.insert (make_pair (KnobForeground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	colors.insert (make_pair (KnobBackground, Gtkmm2ext::rgba_to_color (0.2, 0.2, 0.2, 1)));
+	colors.insert (make_pair (KnobShadow, Gtkmm2ext::rgba_to_color (0, 0, 0, 0.1)));
+	colors.insert (make_pair (KnobBorder, Gtkmm2ext::rgba_to_color (0, 0, 0, 1)));
 
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 Push2::get_color (ColorName name)
 {
 	Colors::iterator c = colors.find (name);

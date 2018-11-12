@@ -59,7 +59,7 @@ public:
 	void configure_io (ChanCount in, ChanCount out);
 
 	/// The fundamental Panner function
-	void run (BufferSet& src, BufferSet& dest, framepos_t start_frame, framepos_t end_frames, pframes_t nframes);
+	void run (BufferSet& src, BufferSet& dest, samplepos_t start_sample, samplepos_t end_samples, pframes_t nframes);
 
 	XMLNode& get_state ();
 	int      set_state (const XMLNode&, int version);

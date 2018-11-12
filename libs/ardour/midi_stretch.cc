@@ -108,14 +108,14 @@ MidiStretch::run (boost::shared_ptr<Region> r, Progress*)
 		new_model->append(ev, Evoral::next_event_id());
 	}
 
-	new_model->end_write (Evoral::Sequence<Evoral::Beats>::DeleteStuckNotes);
+	new_model->end_write (Evoral::Sequence<Temporal::Beats>::DeleteStuckNotes);
 	new_model->set_edited (true);
 
 	new_src->copy_interpolation_from (src);
 
 	const int ret = finish (region, nsrcs, new_name);
 	/* non-musical */
-	results[0]->set_length((framecnt_t) floor (r->length() * _request.time_fraction), 0);
+	results[0]->set_length((samplecnt_t) floor (r->length() * _request.time_fraction), 0);
 
 	return ret;
 }

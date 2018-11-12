@@ -37,7 +37,7 @@ namespace ARDOUR {
  */
 template<typename T>
 size_t
-MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, framecnt_t offset, bool stop_on_overflow_in_dst)
+MidiRingBuffer<T>::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, samplecnt_t offset, bool stop_on_overflow_in_dst)
 {
 	if (this->read_space() == 0) {
 		return 0;
@@ -129,7 +129,7 @@ MidiRingBuffer<T>::read (MidiBuffer& dst, framepos_t start, framepos_t end, fram
 
 template<typename T>
 size_t
-MidiRingBuffer<T>::skip_to(framepos_t start)
+MidiRingBuffer<T>::skip_to(samplepos_t start)
 {
 	if (this->read_space() == 0) {
 		return 0;
@@ -194,7 +194,7 @@ MidiRingBuffer<T>::skip_to(framepos_t start)
 
 template<typename T>
 void
-MidiRingBuffer<T>::flush (framepos_t /*start*/, framepos_t end)
+MidiRingBuffer<T>::flush (samplepos_t /*start*/, samplepos_t end)
 {
 	const size_t prefix_size = sizeof(T) + sizeof(Evoral::EventType) + sizeof(uint32_t);
 
@@ -309,18 +309,18 @@ MidiRingBuffer<T>::reset_tracker ()
 
 template<typename T>
 void
-MidiRingBuffer<T>::resolve_tracker (MidiBuffer& dst, framepos_t t)
+MidiRingBuffer<T>::resolve_tracker (MidiBuffer& dst, samplepos_t t)
 {
 	_tracker.resolve_notes (dst, t);
 }
 
 template<typename T>
 void
-MidiRingBuffer<T>::resolve_tracker (Evoral::EventSink<framepos_t>& dst, framepos_t t)
+MidiRingBuffer<T>::resolve_tracker (Evoral::EventSink<samplepos_t>& dst, samplepos_t t)
 {
 	_tracker.resolve_notes(dst, t);
 }
 
-template class MidiRingBuffer<framepos_t>;
+template class MidiRingBuffer<samplepos_t>;
 
 }  // namespace ARDOUR

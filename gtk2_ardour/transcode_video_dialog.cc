@@ -29,6 +29,9 @@
 
 #include <sigc++/bind.h>
 
+#include <gtkmm/filechooserdialog.h>
+#include <gtkmm/stock.h>
+
 #include "pbd/gstdio_compat.h"
 
 #include "pbd/error.h"
@@ -274,6 +277,7 @@ TranscodeVideoDialog::TranscodeVideoDialog (Session* s, std::string infile)
 	get_vbox()->pack_start (*vbox, false, false);
 
 	progress_box = manage (new VBox);
+	progress_box->set_spacing(6);
 	progress_box->pack_start (progress_label, false, false);
 	progress_box->pack_start (pbar, false, false);
 	progress_box->pack_start (abort_button, false, false);
@@ -317,7 +321,7 @@ TranscodeVideoDialog::abort_clicked ()
 }
 
 void
-TranscodeVideoDialog::update_progress (framecnt_t c, framecnt_t a)
+TranscodeVideoDialog::update_progress (samplecnt_t c, samplecnt_t a)
 {
 	if (a == 0 || c > a) {
 		pbar.set_pulse_step(.5);
@@ -373,7 +377,7 @@ TranscodeVideoDialog::launch_extract ()
 	audio_stream = audio_combo.get_active_row_number() -1;
 	progress_label.set_text (_("Extracting Audio.."));
 
-	if (!transcoder->extract_audio(audiofile, _session->nominal_frame_rate(), audio_stream)) {
+	if (!transcoder->extract_audio(audiofile, _session->nominal_sample_rate(), audio_stream)) {
 		ARDOUR_UI::instance()->popup_error(_("Audio Extraction Failed."));
 		audiofile="";
 		Gtk::Dialog::response(RESPONSE_CANCEL);

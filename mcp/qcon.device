@@ -1,5 +1,5 @@
 <MackieProtocolDevice>
-  <Name value="Qcon"/>
+  <Name value="iCON QCon Pro"/>
   <Strips value="8"/>
   <Extenders value="0"/>
   <MasterPosition value="0"/>
@@ -12,4 +12,5 @@
   <LogicControlButtons value="yes"/>
   <usesIPMIDI value="no"/>
   <NoHandShake value="yes"/>
+  <IsQCon value="yes"/>
 </MackieProtocolDevice>

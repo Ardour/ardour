@@ -20,7 +20,7 @@
 #include <algorithm>
 
 #include "pbd/enumwriter.h"
-#include "pbd/convert.h"
+#include "pbd/enum_convert.h"
 
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -35,6 +35,10 @@
 #include "ardour/session.h"
 
 #include "pbd/i18n.h"
+
+namespace PBD {
+	DEFINE_ENUM_CONVERT(ARDOUR::Delivery::Role);
+}
 
 namespace ARDOUR { class Panner; }
 
@@ -229,7 +233,7 @@ Delivery::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double /*speed*/, pframes_t nframes, bool result_required)
+Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double /*speed*/, pframes_t nframes, bool result_required)
 {
 	assert (_output);
 
@@ -262,7 +266,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 	if (tgain != _current_gain) {
 		/* target gain has changed */
 
-		_current_gain = Amp::apply_gain (bufs, _session.nominal_frame_rate(), nframes, _current_gain, tgain);
+		_current_gain = Amp::apply_gain (bufs, _session.nominal_sample_rate(), nframes, _current_gain, tgain);
 
 	} else if (tgain < GAIN_COEFF_SMALL) {
 
@@ -295,7 +299,7 @@ Delivery::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, do
 
 		// Use the panner to distribute audio to output port buffers
 
-		_panshell->run (bufs, output_buffers(), start_frame, end_frame, nframes);
+		_panshell->run (bufs, output_buffers(), start_sample, end_sample, nframes);
 
 		// non-audio data will not have been delivered by the panner
 
@@ -351,19 +355,19 @@ out:
 }
 
 XMLNode&
-Delivery::state (bool full_state)
+Delivery::state ()
 {
-	XMLNode& node (IOProcessor::state (full_state));
+	XMLNode& node (IOProcessor::state ());
 
 	if (_role & Main) {
-		node.add_property("type", "main-outs");
+		node.set_property("type", "main-outs");
 	} else if (_role & Listen) {
-		node.add_property("type", "listen");
+		node.set_property("type", "listen");
 	} else {
-		node.add_property("type", "delivery");
+		node.set_property("type", "delivery");
 	}
 
-	node.add_property("role", enum_2_string(_role));
+	node.set_property("role", _role);
 
 	if (_panshell) {
 		node.add_child_nocopy (_panshell->get_state ());
@@ -378,14 +382,11 @@ Delivery::state (bool full_state)
 int
 Delivery::set_state (const XMLNode& node, int version)
 {
-	XMLProperty const * prop;
-
 	if (IOProcessor::set_state (node, version)) {
 		return -1;
 	}
 
-	if ((prop = node.property ("role")) != 0) {
-		_role = Role (string_2_enum (prop->value(), _role));
+	if (node.get_property ("role", _role)) {
 		// std::cerr << this << ' ' << _name << " set role to " << enum_2_string (_role) << std::endl;
 	} else {
 		// std::cerr << this << ' ' << _name << " NO ROLE INFO\n";
@@ -481,7 +482,7 @@ Delivery::reset_panners ()
 }
 
 void
-Delivery::flush_buffers (framecnt_t nframes)
+Delivery::flush_buffers (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
@@ -497,33 +498,33 @@ Delivery::flush_buffers (framecnt_t nframes)
 }
 
 void
-Delivery::transport_stopped (framepos_t now)
+Delivery::non_realtime_transport_stop (samplepos_t now, bool flush)
 {
-        Processor::transport_stopped (now);
+	Processor::non_realtime_transport_stop (now, flush);
 
 	if (_panshell) {
-		_panshell->pannable()->transport_stopped (now);
+		_panshell->pannable()->non_realtime_transport_stop (now, flush);
 	}
 
-        if (_output) {
-                PortSet& ports (_output->ports());
+	if (_output) {
+		PortSet& ports (_output->ports());
 
-                for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        i->transport_stopped ();
-                }
-        }
+		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+			i->transport_stopped ();
+		}
+	}
 }
 
 void
 Delivery::realtime_locate ()
 {
 	if (_output) {
-                PortSet& ports (_output->ports());
+		PortSet& ports (_output->ports());
 
-                for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-                        i->realtime_locate ();
-                }
-        }
+		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
+			i->realtime_locate ();
+		}
+	}
 }
 
 gain_t
@@ -543,38 +544,37 @@ Delivery::target_gain ()
 		return GAIN_COEFF_ZERO;
 	}
 
-        MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
+	MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
 
-        switch (_role) {
-        case Main:
-                mp = MuteMaster::Main;
-                break;
-        case Listen:
-                mp = MuteMaster::Listen;
-                break;
-        case Send:
-        case Insert:
-        case Aux:
-		if (_pre_fader) {
-			mp = MuteMaster::PreFader;
-		} else {
-			mp = MuteMaster::PostFader;
-		}
-                break;
-        }
+	switch (_role) {
+		case Main:
+			mp = MuteMaster::Main;
+			break;
+		case Listen:
+			mp = MuteMaster::Listen;
+			break;
+		case Send:
+		case Insert:
+		case Aux:
+			if (_pre_fader) {
+				mp = MuteMaster::PreFader;
+			} else {
+				mp = MuteMaster::PostFader;
+			}
+			break;
+	}
 
-        gain_t desired_gain = _mute_master->mute_gain_at (mp);
+	gain_t desired_gain = _mute_master->mute_gain_at (mp);
 
-        if (_role == Listen && _session.monitor_out() && !_session.listening()) {
+	if (_role == Listen && _session.monitor_out() && !_session.listening()) {
 
-                /* nobody is soloed, and this delivery is a listen-send to the
-                   control/monitor/listen bus, we should be silent since
-                   it gets its signal from the master out.
-                */
+		/* nobody is soloed, and this delivery is a listen-send to the
+		 * control/monitor/listen bus, we should be silent since
+		 * it gets its signal from the master out.
+		 */
 
-                desired_gain = GAIN_COEFF_ZERO;
-
-        }
+		desired_gain = GAIN_COEFF_ZERO;
+	}
 
 	return desired_gain;
 }

@@ -23,9 +23,10 @@
 #include <iostream>
 
 #include "pbd/error.h"
-#include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 #include "pbd/compose.h"
+#include "pbd/stacktrace.h"
+#include "pbd/types_convert.h"
+#include "pbd/xml++.h"
 
 #include "midi++/types.h" // Added by JE - 06-01-2009. All instances of 'byte' changed to 'MIDI::byte' (for clarification)
 #include "midi++/port.h"
@@ -33,9 +34,7 @@
 
 #include "ardour/async_midi_port.h"
 #include "ardour/automation_control.h"
-#include "ardour/controllable_descriptor.h"
 #include "ardour/midi_ui.h"
-#include "ardour/utils.h"
 #include "ardour/debug.h"
 
 #include "midicontrollable.h"
@@ -49,14 +48,15 @@ using namespace ARDOUR;
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, bool m)
 	: _surface (s)
 	, controllable (0)
-	, _descriptor (0)
 	, _parser (p)
 	, _momentary (m)
 {
 	_learned = false; /* from URI */
+	_ctltype = Ctl_Momentary;
 	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
+	last_incoming = 256; // any out of band value
 	last_controllable_value = 0.0f;
 	control_type = none;
 	control_rpn = -1;
@@ -67,13 +67,13 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 
 MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, Controllable& c, bool m)
 	: _surface (s)
-	, _descriptor (0)
 	, _parser (p)
 	, _momentary (m)
 {
 	set_controllable (&c);
 
 	_learned = true; /* from controllable */
+	_ctltype = Ctl_Momentary;
 	_encoder = No_enc;
 	setting = false;
 	last_value = 0; // got a better idea ?
@@ -88,17 +88,13 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 MIDIControllable::~MIDIControllable ()
 {
 	drop_external_control ();
-	delete _descriptor;
-	_descriptor = 0;
 }
 
 int
 MIDIControllable::init (const std::string& s)
 {
 	_current_uri = s;
-	delete _descriptor;
-	_descriptor = new ControllableDescriptor;
-	return _descriptor->set (s);
+	return 0;
 }
 
 void
@@ -140,6 +136,8 @@ MIDIControllable::set_controllable (Controllable* c)
 		last_controllable_value = 0.0f; // is there a better value?
 	}
 
+	last_incoming = 256;
+
 	if (controllable) {
 		controllable->Destroyed.connect (controllable_death_connection, MISSING_INVALIDATOR,
 						 boost::bind (&MIDIControllable::drop_controllable, this, _1),
@@ -174,7 +172,7 @@ int
 MIDIControllable::control_to_midi (float val)
 {
 	if (controllable->is_gain_like()) {
-		return gain_to_slider_position (val) * max_value_for_type ();
+		return controllable->internal_to_interface (val) * max_value_for_type ();
 	}
 
 	float control_min = controllable->lower ();
@@ -248,11 +246,11 @@ MIDIControllable::midi_sense_note_off (Parser &p, EventTwoBytes *tb)
 int
 MIDIControllable::lookup_controllable()
 {
-	if (!_descriptor) {
+	if (_current_uri.empty()) {
 		return -1;
 	}
 
-	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (*_descriptor);
+	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
 
 	if (!c) {
 		return -1;
@@ -377,25 +375,41 @@ MIDIControllable::midi_sense_controller (Parser &, EventTwoBytes *msg)
 			}
 		} else {
 
-			/* toggle control: make the toggle flip only if the
-			 * incoming control value exceeds 0.5 (0x40), so that
-			 * the typical button which sends "CC N=0x7f" on press
-			 * and "CC N=0x0" on release can be used to drive
-			 * toggles on press.
-			 *
-			 * No other arrangement really makes sense for a toggle
-			 * controllable. Acting on the press+release makes the
-			 * action momentary, which is almost never
-			 * desirable. If the physical button only sends a
-			 * message on press (or release), then it will be
-			 * expected to send a controller value >= 0.5
-			 * (0x40). It is hard to imagine why anyone would make
-			 * a MIDI controller button that sent 0x0 when pressed.
-			 */
-
-			if (msg->value >= 0x40) {
-				controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
-				DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+			switch (get_ctltype()) {
+			case Ctl_Dial:
+				/* toggle value whenever direction of knob motion changes */
+				if (last_incoming > 127) {
+					/* relax ... first incoming message */
+				} else {
+					if (msg->value > last_incoming) {
+						controllable->set_value (1.0, Controllable::UseGroup);
+					} else {
+						controllable->set_value (0.0, Controllable::UseGroup);
+					}
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("dial Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+				}
+				last_incoming = msg->value;
+				break;
+			case Ctl_Momentary:
+				/* toggle it if over 64, otherwise leave it alone. This behaviour that works with buttons which send a value > 64 each
+				 * time they are pressed.
+				 */
+				if (msg->value >= 0x40) {
+					controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("toggle Midi CC %1 value 1  %2\n", (int) msg->controller_number, current_uri()));
+				}
+				break;
+			case Ctl_Toggle:
+				/* toggle if value is over 64, otherwise turn it off. This is behaviour designed for buttons which send a value > 64 when pressed,
+				   maintain state (i.e. they know they were pressed) and then send zero the next time.
+				*/
+				if (msg->value >= 0x40) {
+					controllable->set_value (controllable->get_value() >= 0.5 ? 0.0 : 1.0, Controllable::UseGroup);
+				} else {
+					controllable->set_value (0.0, Controllable::NoGroup);
+					DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Midi CC %1 value 0  %2\n", (int) msg->controller_number, current_uri()));
+					break;
+				}
 			}
 		}
 
@@ -719,25 +733,24 @@ MIDIControllable::write_feedback (MIDI::byte* buf, int32_t& bufsize, bool /*forc
 int
 MIDIControllable::set_state (const XMLNode& node, int /*version*/)
 {
-	const XMLProperty* prop;
 	int xx;
 
-	if ((prop = node.property ("event")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
+	std::string str;
+	if (node.get_property ("event", str)) {
+		sscanf (str.c_str(), "0x%x", &xx);
 		control_type = (MIDI::eventType) xx;
 	} else {
 		return -1;
 	}
 
-	if ((prop = node.property ("channel")) != 0) {
-		sscanf (prop->value().c_str(), "%d", &xx);
-		control_channel = (MIDI::channel_t) xx;
+	if (node.get_property ("channel", xx)) {
+		control_channel = xx;
 	} else {
 		return -1;
 	}
 
-	if ((prop = node.property ("additional")) != 0) {
-		sscanf (prop->value().c_str(), "0x%x", &xx);
+	if (node.get_property ("additional", str)) {
+		sscanf (str.c_str(), "0x%x", &xx);
 		control_additional = (MIDI::byte) xx;
 	} else {
 		return -1;
@@ -756,18 +769,17 @@ MIDIControllable::get_state ()
 	XMLNode* node = new XMLNode ("MIDIControllable");
 
 	if (_current_uri.empty()) {
-                node->add_property ("id", controllable->id().to_s());
+		node->set_property ("id", controllable->id ());
 	} else {
-		node->add_property ("uri", _current_uri);
-        }
+		node->set_property ("uri", _current_uri);
+	}
 
 	if (controllable) {
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_type);
-		node->add_property ("event", buf);
-		snprintf (buf, sizeof(buf), "%d", (int) control_channel);
-		node->add_property ("channel", buf);
+		node->set_property ("event", (const char *)buf);
+		node->set_property ("channel", (int16_t)control_channel);
 		snprintf (buf, sizeof(buf), "0x%x", (int) control_additional);
-		node->add_property ("additional", buf);
+		node->set_property ("additional", (const char *)buf);
 	}
 
 	return *node;

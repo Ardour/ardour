@@ -27,26 +27,24 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/gui_thread.h"
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/rgb_macros.h"
 
-#include "canvas/utils.h"
-#include "canvas/colors.h"
+#include "widgets/tooltips.h"
 
 #include "actions.h"
 #include "rgb_macros.h"
 #include "shuttle_control.h"
-#include "tooltips.h"
 
 #include "pbd/i18n.h"
 
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using std::min;
 using std::max;
 
@@ -156,7 +154,7 @@ ShuttleControl::on_size_allocate (Gtk::Allocation& alloc)
 void
 ShuttleControl::map_transport_state ()
 {
-	float speed = _session->transport_speed ();
+	float speed = _session->actual_speed ();
 
 	if ( (fabsf( speed - last_speed_displayed) < 0.005f) // dead-zone
 	     && !( speed == 1.f && last_speed_displayed != 1.f)
@@ -256,16 +254,6 @@ ShuttleControl::build_shuttle_context_menu ()
 }
 
 void
-ShuttleControl::show_shuttle_context_menu ()
-{
-	if (shuttle_context_menu == 0) {
-		build_shuttle_context_menu ();
-	}
-
-	shuttle_context_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
 ShuttleControl::reset_speed ()
 {
 	if (_session->transport_rolling()) {
@@ -295,7 +283,10 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		show_shuttle_context_menu ();
+		if (shuttle_context_menu == 0) {
+			build_shuttle_context_menu ();
+		}
+		shuttle_context_menu->popup (ev->button, ev->time);
 		return true;
 	}
 
@@ -308,7 +299,7 @@ ShuttleControl::on_button_press_event (GdkEventButton* ev)
 		} else {
 			add_modal_grab ();
 			shuttle_grabbed = true;
-			shuttle_speed_on_grab = _session->transport_speed ();
+			shuttle_speed_on_grab = _session->actual_speed ();
 			requested_speed = shuttle_speed_on_grab;
 			mouse_shuttle (ev->x, true);
 			gdk_pointer_grab(ev->window,false,
@@ -577,8 +568,9 @@ ShuttleControl::set_colors ()
 }
 
 void
-ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
+ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	// center slider line
 	float yc = get_height() / 2;
 	float lw = 3;
@@ -598,7 +590,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	char buf[32];
 
 	if (_session) {
-		speed = _session->transport_speed ();
+		speed = _session->actual_speed ();
 		acutal_speed = speed;
 		if (shuttle_grabbed) {
 			speed = requested_speed;
@@ -617,7 +609,7 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 	rounded_rectangle (cr, x + 1, 1, marker_size - 2, get_height() - 2, 3.5);
 	if (_flat_buttons) {
 		uint32_t col = UIConfiguration::instance().color ("shuttle");
-		ArdourCanvas::set_source_rgba (cr, col);
+		Gtkmm2ext::set_source_rgba (cr, col);
 	} else {
 		cairo_set_source (cr, pattern);
 	}
@@ -668,15 +660,6 @@ ShuttleControl::render (cairo_t* cr, cairo_rectangle_t*)
 }
 
 void
-ShuttleControl::shuttle_unit_clicked ()
-{
-	if (shuttle_unit_menu == 0) {
-		shuttle_unit_menu = dynamic_cast<Menu*> (ActionManager::get_widget ("/ShuttleUnitPopup"));
-	}
-	shuttle_unit_menu->popup (1, gtk_get_current_event_time());
-}
-
-void
 ShuttleControl::set_shuttle_style (ShuttleBehaviour s)
 {
 	Config->set_shuttle_behaviour (s);
@@ -716,7 +699,7 @@ ShuttleControl::parameter_changed (std::string p)
 			 */
 			if (_session) {
 				if (_session->transport_rolling()) {
-					if (_session->transport_speed() == 1.0) {
+					if (_session->actual_speed() == 1.0) {
 						queue_draw ();
 					} else {
 						/* reset current speed and

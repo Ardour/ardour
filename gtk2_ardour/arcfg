@@ -1,4 +1,0 @@
-#!/bin/sh
-TOP=`dirname "$0"`/..
-. $TOP/build/gtk2_ardour/ardev_common_waf.sh
-exec $TOP/build/cfgtool/cfgtool "$@"

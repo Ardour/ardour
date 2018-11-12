@@ -60,11 +60,6 @@ RulerDialog::~RulerDialog ()
 {
 }
 
-void
-RulerDialog::on_response (int)
-{
-	hide ();
-}
 
 void
 RulerDialog::connect_action (Gtk::CheckButton& button, std::string const &action_name_part)

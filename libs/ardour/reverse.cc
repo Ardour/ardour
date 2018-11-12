@@ -43,11 +43,11 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
-	framecnt_t blocksize = 256 * 1024;
+	samplecnt_t blocksize = 256 * 1024;
 	Sample* buf = 0;
-	framepos_t fpos;
-	framepos_t fstart;
-	framecnt_t to_read;
+	samplepos_t fpos;
+	samplepos_t fstart;
+	samplecnt_t to_read;
 	int ret = -1;
 
 	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(r);
@@ -87,7 +87,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 			/* swap memory order */
 
-			for (framecnt_t i = 0; i < to_read/2; ++i) {
+			for (samplecnt_t i = 0; i < to_read/2; ++i) {
 				swap (buf[i],buf[to_read-1-i]);
 			}
 

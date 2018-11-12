@@ -37,7 +37,7 @@ using namespace ARDOUR_UI_UTILS;
 ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 	: Dialog (title, modal, use_seperator)
 	, proxy (0)
-        , _splash_pushed (false)
+	, _splash_pushed (false)
 {
 	init ();
 	set_position (Gtk::WIN_POS_MOUSE);
@@ -45,7 +45,7 @@ ArdourDialog::ArdourDialog (string title, bool modal, bool use_seperator)
 
 ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool use_seperator)
 	: Dialog (title, parent, modal, use_seperator)
-        , _splash_pushed (false)
+	, _splash_pushed (false)
 {
 	init ();
 	set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
@@ -53,15 +53,42 @@ ArdourDialog::ArdourDialog (Gtk::Window& parent, string title, bool modal, bool 
 
 ArdourDialog::~ArdourDialog ()
 {
-        if (_splash_pushed) {
-                Splash* spl = Splash::instance();
+	pop_splash ();
+	Keyboard::the_keyboard().focus_out_window (0, this);
+	WM::Manager::instance().remove (proxy);
+}
 
-                if (spl) {
-                        spl->pop_front();
-                }
-        }
-        Keyboard::the_keyboard().focus_out_window (0, this);
-        WM::Manager::instance().remove (proxy);
+void
+ArdourDialog::on_response (int response_id)
+{
+	pop_splash ();
+	hide ();
+	ARDOUR::GUIIdle ();
+	Gtk::Dialog::on_response (response_id);
+}
+
+void
+ArdourDialog::close_self ()
+{
+	/* Don't call Idle, don't pop splash.
+	 * This is used at exit and session-close and invoked
+	 * via close_all_dialogs.
+	 */
+	hide ();
+	Gtk::Dialog::on_response (RESPONSE_CANCEL);
+}
+
+void
+ArdourDialog::pop_splash ()
+{
+	if (_splash_pushed) {
+		Splash* spl = Splash::instance();
+
+		if (spl) {
+			spl->pop_front();
+		}
+		_splash_pushed = false;
+	}
 }
 
 bool
@@ -98,7 +125,7 @@ ArdourDialog::on_show ()
 
 	if (spl && spl->is_visible()) {
 		spl->pop_back_for (*this);
-                _splash_pushed = true;
+		_splash_pushed = true;
 	}
 }
 
@@ -122,7 +149,7 @@ ArdourDialog::init ()
 		set_transient_for (*parent);
 	}
 
-	ARDOUR_UI::CloseAllDialogs.connect (sigc::bind (sigc::mem_fun (*this, &ArdourDialog::response), RESPONSE_CANCEL));
+	ARDOUR_UI::CloseAllDialogs.connect (sigc::mem_fun (*this, &ArdourDialog::close_self)); /* send a RESPONSE_CANCEL to self */
 
 	proxy = new WM::ProxyTemporary (get_title(), this);
 	WM::Manager::instance().register_window (proxy);

@@ -115,9 +115,9 @@ CoreAudioSource::close ()
 }
 
 int
-CoreAudioSource::safe_read (Sample* dst, framepos_t start, framecnt_t cnt, AudioBufferList& abl) const
+CoreAudioSource::safe_read (Sample* dst, samplepos_t start, samplecnt_t cnt, AudioBufferList& abl) const
 {
-	framecnt_t nread = 0;
+	samplecnt_t nread = 0;
 
 	while (nread < cnt) {
 
@@ -160,10 +160,10 @@ CoreAudioSource::safe_read (Sample* dst, framepos_t start, framecnt_t cnt, Audio
 }
 
 
-framecnt_t
-CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
+samplecnt_t
+CoreAudioSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const
 {
-	framecnt_t file_cnt;
+	samplecnt_t file_cnt;
 	AudioBufferList abl;
 
 	abl.mNumberBuffers = 1;
@@ -189,7 +189,7 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) c
 	}
 
 	if (file_cnt != cnt) {
-		frameoffset_t delta = cnt - file_cnt;
+		sampleoffset_t delta = cnt - file_cnt;
 		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
@@ -213,7 +213,7 @@ CoreAudioSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) c
 
 	/* stride through the interleaved data */
 
-	for (framecnt_t n = 0; n < file_cnt; ++n) {
+	for (samplecnt_t n = 0; n < file_cnt; ++n) {
 		dst[n] = *ptr;
 		ptr += n_channels;
 	}
@@ -237,7 +237,7 @@ CoreAudioSource::sample_rate() const
 }
 
 int
-CoreAudioSource::update_header (framepos_t, struct tm&, time_t)
+CoreAudioSource::update_header (samplepos_t, struct tm&, time_t)
 {
 	return 0;
 }

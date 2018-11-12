@@ -29,6 +29,7 @@
 
 #include "pbd/debug.h"
 #include "pbd/stateful.h"
+#include "pbd/types_convert.h"
 #include "pbd/property_list.h"
 #include "pbd/properties.h"
 #include "pbd/destructible.h"
@@ -382,7 +383,6 @@ Stateful::clear_owned_changes ()
 bool
 Stateful::set_id (const XMLNode& node)
 {
-	const XMLProperty* prop;
 	bool* regen = _regenerate_xml_or_string_ids.get();
 
 	if (regen && *regen) {
@@ -390,8 +390,7 @@ Stateful::set_id (const XMLNode& node)
 		return true;
 	}
 
-	if ((prop = node.property ("id")) != 0) {
-		_id = prop->value ();
+	if (node.get_property ("id", _id)) {
 		return true;
 	}
 

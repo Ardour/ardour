@@ -45,21 +45,19 @@ class Pannable;
  */
 class LIBARDOUR_API PortInsert : public IOProcessor
 {
-  public:
+public:
 	PortInsert (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster> mm);
 	~PortInsert ();
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
 	int set_state (const XMLNode&, int version);
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
-	void flush_buffers (framecnt_t nframes) {
+	void flush_buffers (samplecnt_t nframes) {
 		_out->flush_buffers (nframes);
 	}
 
-	framecnt_t signal_latency () const;
+	samplecnt_t signal_latency () const;
 
 	bool set_name (const std::string& name);
 
@@ -77,12 +75,14 @@ class LIBARDOUR_API PortInsert : public IOProcessor
 	void stop_latency_detection ();
 
 	MTDM* mtdm () const { return _mtdm; }
-	void set_measured_latency (framecnt_t);
-	framecnt_t latency () const;
+	void set_measured_latency (samplecnt_t);
+	samplecnt_t latency () const;
 
 	static std::string name_and_id_new_insert (Session&, uint32_t&);
 
-  private:
+protected:
+	XMLNode& state ();
+private:
 	/* disallow copy construction */
 	PortInsert (const PortInsert&);
 
@@ -91,8 +91,8 @@ class LIBARDOUR_API PortInsert : public IOProcessor
 	uint32_t   _bitslot;
 	MTDM*      _mtdm;
 	bool       _latency_detect;
-	framecnt_t _latency_flush_frames;
-	framecnt_t _measured_latency;
+	samplecnt_t _latency_flush_samples;
+	samplecnt_t _measured_latency;
 };
 
 } // namespace ARDOUR

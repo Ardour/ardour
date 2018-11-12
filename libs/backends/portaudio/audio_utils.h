@@ -25,12 +25,12 @@ inline
 void
 deinterleave_audio_data(const float* interleaved_input,
                         float* output,
-                        uint32_t frame_count,
+                        uint32_t sample_count,
                         uint32_t channel,
                         uint32_t channel_count)
 {
 	const float* ptr = interleaved_input + channel;
-	while (frame_count-- > 0) {
+	while (sample_count-- > 0) {
 		*output++ = *ptr;
 		ptr += channel_count;
 	}
@@ -40,12 +40,12 @@ inline
 void
 interleave_audio_data(float* input,
                       float* interleaved_output,
-                      uint32_t frame_count,
+                      uint32_t sample_count,
                       uint32_t channel,
                       uint32_t channel_count)
 {
 	float* ptr = interleaved_output + channel;
-	while (frame_count-- > 0) {
+	while (sample_count-- > 0) {
 		*ptr = *input++;
 		ptr += channel_count;
 	}

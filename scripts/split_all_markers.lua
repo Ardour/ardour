@@ -40,7 +40,7 @@ function factory (params) return function ()
 			if l:is_mark() then
 				-- get all regions on the given track's playlist (may be stacked)
 				for reg in playlist:regions_at (l:start ()):iter () do
-					playlist:split_region (reg, l:start (), 0)
+					playlist:split_region (reg, ARDOUR.MusicFrame (l:start(), 0))
 					-- the above operation will invalidate the playlist's region list:
 					-- split creates 2 new regions.
 					--
@@ -67,4 +67,56 @@ function factory (params) return function ()
 		Session:abort_reversible_command ()
 	end
 
+end end
+
+
+-- render an icon for the toolbar action-button
+-- this is genrally square width == height.
+-- The background is set according to the theme (leave transparent when drawing).
+-- A foreground color is passed as parameter 'fg'
+--
+-- ctx is-a http://manual.ardour.org/lua-scripting/class_reference/#Cairo:Context
+-- 2D vector graphics http://cairographics.org/
+function icon (params) return function (ctx, width, height, fg)
+	local mh = height - 3.5;
+	local m3 = width / 3;
+	local m6 = width / 6;
+
+	ctx:set_line_width (.5)
+
+	-- compare to gtk2_ardour/marker.cc "Marker"
+	ctx:set_source_rgba (.8, .8, .2, 1.0)
+	ctx:move_to (width / 2 - m6, 2)
+	ctx:rel_line_to (m3, 0)
+	ctx:rel_line_to (0, mh * 0.4)
+	ctx:rel_line_to (-m6, mh * 0.6)
+	ctx:rel_line_to (-m6, -mh * 0.6)
+	ctx:close_path ()
+	ctx:fill_preserve ()
+	ctx:set_source_rgba (.0, .0, .0, 1.0)
+	ctx:stroke ()
+
+	-- draw an arrow  <--|--> on top, using the foreground color
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+	ctx:set_line_width (1)
+
+	ctx:move_to (width * .5, height * .4)
+	ctx:line_to (width * .5, height * .6)
+	ctx:stroke ()
+
+	ctx:move_to (2, height * .5)
+	ctx:line_to (width - 2, height * .5)
+	ctx:stroke ()
+
+	ctx:move_to (width - 2, height * .5)
+	ctx:rel_line_to (-m6, -m6)
+	ctx:rel_line_to (0, m3)
+	ctx:close_path ()
+	ctx:fill ()
+
+	ctx:move_to (2, height * .5)
+	ctx:rel_line_to (m6, -m6)
+	ctx:rel_line_to (0, m3)
+	ctx:close_path ()
+	ctx:fill ()
 end end

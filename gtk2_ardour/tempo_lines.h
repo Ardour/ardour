@@ -19,20 +19,22 @@
 #ifndef __ardour_tempo_lines_h__
 #define __ardour_tempo_lines_h__
 
+#include "ardour/beats_samples_converter.h"
 #include "ardour/tempo.h"
 
 #include "canvas/line_set.h"
 
 class TempoLines {
 public:
-	TempoLines (ArdourCanvas::Container* group, double screen_height);
+	TempoLines (ArdourCanvas::Container* group, double screen_height, ARDOUR::BeatsSamplesConverter* bfc);
+	~TempoLines ();
 
-	void tempo_map_changed();
+	void tempo_map_changed(samplepos_t new_origin);
 
 	void draw (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 		   unsigned                                              divisions,
-	           ARDOUR::framecnt_t                                    leftmost_frame,
-	           ARDOUR::framecnt_t                                    frame_rate);
+	           ARDOUR::samplecnt_t                                    leftmost_sample,
+	           ARDOUR::samplecnt_t                                    sample_rate);
 
 	void show();
 	void hide();
@@ -40,10 +42,11 @@ public:
 private:
 	void draw_ticks (std::vector<ARDOUR::TempoMap::BBTPoint>& grid,
 			 unsigned                                              divisions,
-	                 ARDOUR::framecnt_t                                    leftmost_frame,
-	                 ARDOUR::framecnt_t                                    frame_rate);
+	                 ARDOUR::samplecnt_t                                    leftmost_sample,
+	                 ARDOUR::samplecnt_t                                    sample_rate);
 
 	ArdourCanvas::LineSet lines;
+	ARDOUR::BeatsSamplesConverter* _bfc;
 };
 
 #endif /* __ardour_tempo_lines_h__ */

@@ -26,18 +26,18 @@
 
 class LED : public CairoWidget
 {
-  public:
+public:
 	LED ();
 	virtual ~LED ();
 
 	void set_diameter (float);
 
-  protected:
-	void render (cairo_t *, cairo_rectangle_t*);
+protected:
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void on_size_request (Gtk::Requisition* req);
 	void on_realize ();
 
-  private:
+private:
 	float _diameter;
 	float _red;
 	float _green;

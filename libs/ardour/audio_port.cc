@@ -18,6 +18,7 @@
 
 #include <cassert>
 
+#include "pbd/malign.h"
 #include "pbd/stacktrace.h"
 
 #include "ardour/audio_buffer.h"
@@ -36,10 +37,14 @@ AudioPort::AudioPort (const std::string& name, PortFlags flags)
 	, _buffer (new AudioBuffer (0))
 {
 	assert (name.find_first_of (':') == string::npos);
+	cache_aligned_malloc ((void**) &_data, sizeof (Sample) * 8192);
+	_src.setup (_resampler_quality);
+	_src.set_rrfilt (10);
 }
 
 AudioPort::~AudioPort ()
 {
+	cache_aligned_free (_data);
 	delete _buffer;
 }
 
@@ -47,23 +52,61 @@ void
 AudioPort::cycle_start (pframes_t nframes)
 {
 	/* caller must hold process lock */
-
-        Port::cycle_start (nframes);
+	Port::cycle_start (nframes);
 
 	if (sends_output()) {
 		_buffer->prepare ();
+	} else if (!externally_connected ()) {
+		/* ardour internal port, just silence input, don't resample */
+		// TODO reset resampler only once
+		_src.reset ();
+		memset (_data, 0, _cycle_nframes * sizeof (float));
+	} else {
+		_src.inp_data  = (float*)port_engine.get_buffer (_port_handle, nframes);
+		_src.inp_count = nframes;
+		_src.out_count = _cycle_nframes;
+		_src.set_rratio (_cycle_nframes / (double)nframes);
+		_src.out_data  = _data;
+		_src.process ();
+		while (_src.out_count > 0) {
+			*_src.out_data =  _src.out_data[-1];
+			++_src.out_data;
+			--_src.out_count;
+		}
 	}
 }
 
 void
 AudioPort::cycle_end (pframes_t nframes)
 {
-        if (sends_output() && !_buffer->written()) {
-	        if (!_buffer->data (0)) {
-		        get_audio_buffer (nframes);
-	        }
-	        if (_buffer->capacity() >= nframes) {
-		        _buffer->silence (nframes);
+	if (sends_output() && !_buffer->written() && _port_handle) {
+		if (!_buffer->data (0)) {
+			get_audio_buffer (nframes);
+		}
+		if (_buffer->capacity() >= nframes) {
+			_buffer->silence (nframes);
+		}
+	}
+
+	if (sends_output() && _port_handle) {
+
+		if (!externally_connected ()) {
+			/* ardour internal port, data goes nowhere, skip resampling */
+			// TODO reset resampler only once
+			_src.reset ();
+			return;
+		}
+
+		_src.inp_count = _cycle_nframes;
+		_src.out_count = nframes;
+		_src.set_rratio (nframes / (double)_cycle_nframes);
+		_src.inp_data  = _data;
+		_src.out_data  = (float*)port_engine.get_buffer (_port_handle, nframes);
+		_src.process ();
+		while (_src.out_count > 0) {
+			*_src.out_data =  _src.out_data[-1];
+			++_src.out_data;
+			--_src.out_count;
 		}
 	}
 }
@@ -77,8 +120,13 @@ AudioBuffer&
 AudioPort::get_audio_buffer (pframes_t nframes)
 {
 	/* caller must hold process lock */
-	_buffer->set_data ((Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes) +
-			   _global_port_buffer_offset + _port_buffer_offset, nframes);
+	assert (_port_handle);
+	if (!externally_connected ()) {
+		_buffer->set_data ((Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes) +
+				_global_port_buffer_offset, nframes);
+	} else {
+		_buffer->set_data (&_data[_global_port_buffer_offset], nframes);
+	}
 	return *_buffer;
 }
 
@@ -86,9 +134,6 @@ Sample*
 AudioPort::engine_get_whole_audio_buffer ()
 {
 	/* caller must hold process lock */
+	assert (_port_handle);
 	return (Sample *) port_engine.get_buffer (_port_handle, _cycle_nframes);
 }
-
-
-
-

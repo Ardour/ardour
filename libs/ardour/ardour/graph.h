@@ -57,27 +57,17 @@ class LIBARDOUR_API Graph : public SessionHandleRef
 public:
 	Graph (Session & session);
 
-	void prep();
 	void trigger (GraphNode * n);
 	void rechain (boost::shared_ptr<RouteList>, GraphEdges const &);
 
 	void dump (int chain);
-	void process();
 	void dec_ref();
-	void restart_cycle();
 
-	bool run_one();
 	void helper_thread();
-	void main_thread();
 
-	int silent_process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                           bool& need_butler);
+	int process_routes (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
 
-	int process_routes (pframes_t nframes, framepos_t start_frame, framepos_t end_frame, int declick,
-	                    bool& need_butler);
-
-	int routes_no_roll (pframes_t nframes, framepos_t start_frame, framepos_t end_frame,
-	                    bool non_rt_pending, int declick);
+	int routes_no_roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending );
 
 	void process_one_route (Route * route);
 
@@ -93,6 +83,10 @@ private:
 
 	void reset_thread_list ();
 	void drop_threads ();
+	void restart_cycle();
+	bool run_one();
+	void main_thread();
+	void prep();
 
 	node_list_t _nodes_rt[2];
 
@@ -106,7 +100,6 @@ private:
 	/** Signalled to start a run of the graph for a process callback */
 	PBD::Semaphore _callback_start_sem;
 	PBD::Semaphore _callback_done_sem;
-	PBD::Semaphore _cleanup_sem;
 
 	/** The number of processing threads that are asleep */
 	volatile gint _execution_tokens;
@@ -126,13 +119,11 @@ private:
 
 	// parameter caches.
 	pframes_t  _process_nframes;
-	framepos_t _process_start_frame;
-	framepos_t _process_end_frame;
+	samplepos_t _process_start_sample;
+	samplepos_t _process_end_sample;
 	bool	   _process_can_record;
 	bool	   _process_non_rt_pending;
-	int        _process_declick;
 
-	bool _process_silent;
 	bool _process_noroll;
 	int  _process_retval;
 	bool _process_need_butler;

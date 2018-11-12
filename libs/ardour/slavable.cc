@@ -53,11 +53,37 @@ Slavable::get_state () const
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 		child = new XMLNode (X_("Master"));
-		child->add_property (X_("number"), to_string (*i, std::dec));
+		child->set_property (X_("number"), *i);
 		node->add_child_nocopy (*child);
 	}
 
 	return *node;
+}
+
+std::vector<boost::shared_ptr<VCA> >
+Slavable::masters (VCAManager* manager) const
+{
+	std::vector<boost::shared_ptr<VCA> > rv;
+	Glib::Threads::RWLock::ReaderLock lm (master_lock);
+	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
+		rv.push_back (manager->vca_by_number (*i));
+	}
+	return rv;
+}
+
+bool
+Slavable::assigned_to (VCAManager* manager, boost::shared_ptr<VCA> mst) const
+{
+	if (mst.get () == this) {
+		return true;
+	}
+	std::vector<boost::shared_ptr<VCA> > ml = mst->masters (manager);
+	for (std::vector<boost::shared_ptr<VCA> >::const_iterator i = ml.begin (); i != ml.end(); ++i) {
+		if (assigned_to (manager, *i)) {
+			return true;
+		}
+	}
+	return false;
 }
 
 int
@@ -72,9 +98,8 @@ Slavable::set_state (XMLNode const& node, int version)
 
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Master")) {
-			XMLProperty const* prop = (*i)->property (X_("number"));
-			if (prop) {
-				uint32_t n = atoi (prop->value());
+			uint32_t n;
+			if ((*i)->get_property (X_("number"), n)) {
 				_masters.insert (n);
 			}
 		}
@@ -82,18 +107,6 @@ Slavable::set_state (XMLNode const& node, int version)
 
 	return 0;
 }
-
-
-/* Gain, solo & mute are currently the only controls that are
- * automatically slaved to the master's own equivalent controls.
- */
-
-static AutomationType auto_slave_types[] = {
-	GainAutomation,
-	SoloAutomation,
-	MuteAutomation,
-	NullAutomation
-};
 
 int
 Slavable::do_assign (VCAManager* manager)
@@ -118,18 +131,12 @@ Slavable::do_assign (VCAManager* manager)
 	if (!vcas.empty()) {
 
 		for (std::vector<boost::shared_ptr<VCA> >::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			assign (*v, true);
+			assign (*v);
 		}
 
-		for (uint32_t n = 0; auto_slave_types[n] != NullAutomation; ++n) {
-
-			boost::shared_ptr<SlavableAutomationControl> slave;
-
-			slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (auto_slave_types[n]));
-
-			if (slave) {
-				slave->use_saved_master_ratios ();
-			}
+		SlavableControlList scl = slavables ();
+		for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+				(*i)->use_saved_master_ratios ();
 		}
 	}
 
@@ -139,12 +146,12 @@ Slavable::do_assign (VCAManager* manager)
 }
 
 void
-Slavable::assign (boost::shared_ptr<VCA> v, bool loading)
+Slavable::assign (boost::shared_ptr<VCA> v)
 {
 	assert (v);
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
-		if (assign_controls (v, loading) == 0) {
+		if (assign_controls (v)) {
 			_masters.insert (v->number());
 		}
 
@@ -176,7 +183,7 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
 
-		(void) unassign_controls (v);
+		unassign_controls (v);
 		if (v) {
 			_masters.erase (v->number());
 		} else {
@@ -186,47 +193,49 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 	AssignmentChange (v, false);
 }
 
-int
-Slavable::assign_controls (boost::shared_ptr<VCA> vca, bool loading)
+bool
+Slavable::assign_controls (boost::shared_ptr<VCA> vca)
 {
-	boost::shared_ptr<SlavableAutomationControl> slave;
-	boost::shared_ptr<AutomationControl> master;
-
-	for (uint32_t n = 0; auto_slave_types[n] != NullAutomation; ++n) {
-
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (auto_slave_types[n]));
-		master = vca->automation_control (auto_slave_types[n]);
-
-		if (slave && master) {
-			slave->add_master (master, loading);
-		}
+	bool rv = false;
+	SlavableControlList scl = slavables ();
+	for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+		rv |= assign_control (vca, *i);
 	}
-
-	return 0;
+	return rv;
 }
 
-int
+void
 Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
 {
-	boost::shared_ptr<SlavableAutomationControl> slave;
+	SlavableControlList scl = slavables ();
+	for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+		unassign_control (vca, *i);
+	}
+}
+
+bool
+Slavable::assign_control (boost::shared_ptr<VCA> vca, boost::shared_ptr<SlavableAutomationControl> slave)
+{
 	boost::shared_ptr<AutomationControl> master;
+	master = vca->automation_control (slave->parameter());
+	if (!master) {
+		return false;
+	}
+	slave->add_master (master);
+	return true;
+}
 
-	for (uint32_t n = 0; auto_slave_types[n] != NullAutomation; ++n) {
-
-		slave = boost::dynamic_pointer_cast<SlavableAutomationControl> (automation_control (auto_slave_types[n]));
-
-		if (!vca) {
-			/* unassign from all */
-			if (slave) {
-				slave->clear_masters ();
-			}
-		} else {
-			master = vca->automation_control (auto_slave_types[n]);
-			if (slave && master) {
-				slave->remove_master (master);
-			}
+void
+Slavable::unassign_control (boost::shared_ptr<VCA> vca, boost::shared_ptr<SlavableAutomationControl> slave)
+{
+	if (!vca) {
+		/* unassign from all */
+		slave->clear_masters ();
+	} else {
+		boost::shared_ptr<AutomationControl> master;
+		master = vca->automation_control (slave->parameter());
+		if (master) {
+			slave->remove_master (master);
 		}
 	}
-
-	return 0;
 }

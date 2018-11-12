@@ -35,7 +35,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 
 	/* Constructor to be called for new in-session files */
 	SndFileSource (Session&, const std::string& path, const std::string& origin,
-	               SampleFormat samp_format, HeaderFormat hdr_format, framecnt_t rate,
+	               SampleFormat samp_format, HeaderFormat hdr_format, samplecnt_t rate,
 	               Flag flags = SndFileSource::default_writable_flags);
 
 	/* Constructor to be called for recovering files being used for
@@ -56,27 +56,23 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	~SndFileSource ();
 
 	float sample_rate () const;
-	int update_header (framepos_t when, struct tm&, time_t);
+	int update_header (samplepos_t when, struct tm&, time_t);
 	int flush_header ();
 	void flush ();
 
-	framepos_t natural_position () const;
+	samplepos_t natural_position () const;
 
-	framepos_t last_capture_start_frame() const;
-	void mark_capture_start (framepos_t);
+	samplepos_t last_capture_start_sample() const;
+	void mark_capture_start (samplepos_t);
 	void mark_capture_end ();
 	void clear_capture_marks();
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-	bool set_destructive (bool yn);
-#endif
 
 	bool one_of_several_channels () const;
     uint32_t channel_count () const { return _info.channels; }
 
 	bool clamped_at_unity () const;
 
-	static void setup_standard_crossfades (Session const &, framecnt_t sample_rate);
+	static void setup_standard_crossfades (Session const &, samplecnt_t sample_rate);
 	static const Source::Flag default_writable_flags;
 
 	static int get_soundfile_info (const std::string& path, SoundFileInfo& _info, std::string& error_msg);
@@ -87,9 +83,9 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void set_path (const std::string& p);
 	void set_header_timeline_position ();
 
-	framecnt_t read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const;
-	framecnt_t write_unlocked (Sample *dst, framecnt_t cnt);
-	framecnt_t write_float (Sample* data, framepos_t pos, framecnt_t cnt);
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
+	samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt);
+	samplecnt_t write_float (Sample* data, samplepos_t pos, samplecnt_t cnt);
 
   private:
 	SNDFILE* _sndfile;
@@ -98,25 +94,25 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 
 	void init_sndfile ();
 	int open();
-	int setup_broadcast_info (framepos_t when, struct tm&, time_t);
+	int setup_broadcast_info (samplepos_t when, struct tm&, time_t);
 	void file_closed ();
 
 	/* destructive */
 
-	static framecnt_t xfade_frames;
+	static samplecnt_t xfade_samples;
 	static gain_t* out_coefficient;
 	static gain_t* in_coefficient;
 
 	bool          _capture_start;
 	bool          _capture_end;
-	framepos_t     capture_start_frame;
-	framepos_t     file_pos; // unit is frames
+	samplepos_t     capture_start_sample;
+	samplepos_t     file_pos; // unit is samples
 	Sample*        xfade_buf;
 
-	framecnt_t crossfade (Sample* data, framecnt_t cnt, int dir);
-	void set_timeline_position (framepos_t);
-	framecnt_t destructive_write_unlocked (Sample *dst, framecnt_t cnt);
-	framecnt_t nondestructive_write_unlocked (Sample *dst, framecnt_t cnt);
+	samplecnt_t crossfade (Sample* data, samplecnt_t cnt, int dir);
+	void set_timeline_position (samplepos_t);
+	samplecnt_t destructive_write_unlocked (Sample *dst, samplecnt_t cnt);
+	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	void handle_header_position_change ();
 	PBD::ScopedConnection header_position_connection;
 };

@@ -74,4 +74,16 @@ Semaphore::wait ()
 	return (result == WAIT_OBJECT_0);
 }
 
+int
+Semaphore::reset ()
+{
+	int rv = -1;
+	DWORD result;
+	do {
+		++rv;
+		result = WaitForSingleObject(_sem, 0);
+	} while (result == WAIT_OBJECT_0);
+	return rv;
+}
+
 #endif

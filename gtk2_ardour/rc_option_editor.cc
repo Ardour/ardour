@@ -33,11 +33,9 @@
 #include <gtkmm/stock.h>
 #include <gtkmm/scale.h>
 
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/slider_controller.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/paths_dialog.h>
-#include <gtkmm2ext/window_title.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "pbd/fpu.h"
 #include "pbd/cpus.h"
@@ -53,7 +51,10 @@
 #include "ardour/plugin_manager.h"
 #include "control_protocol/control_protocol.h"
 
-#include "canvas/wave_view.h"
+#include "waveview/wave_view.h"
+
+#include "widgets/paths_dialog.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
@@ -65,7 +66,6 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
-#include "tooltips.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -75,6 +75,7 @@ using namespace Gtkmm2ext;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 
 class ClickOptions : public OptionEditorMiniPage
 {
@@ -86,32 +87,38 @@ public:
 	{
 		// TODO get rid of GTK -> use OptionEditor Widgets
 		Table* t = &table;
+		Label* l;
+		int row = 0;
 
-		Label* l = manage (left_aligned_label (_("Emphasis on first beat")));
+		l = manage (left_aligned_label (_("Emphasis on first beat")));
 		_use_emphasis_on_click_check_button.add (*l);
-		t->attach (_use_emphasis_on_click_check_button, 1, 3, 0, 1, FILL);
+		t->attach (_use_emphasis_on_click_check_button, 1, 3, row, row + 1, FILL);
 		_use_emphasis_on_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_emphasis_on_click_toggled));
+		++row;
 
 		l = manage (left_aligned_label (_("Use built-in default sounds")));
 		_use_default_click_check_button.add (*l);
-		t->attach (_use_default_click_check_button, 1, 3, 1, 2, FILL);
+		t->attach (_use_default_click_check_button, 1, 3, row, row + 1, FILL);
 		_use_default_click_check_button.signal_toggled().connect (
 		    sigc::mem_fun (*this, &ClickOptions::use_default_click_toggled));
+		++row;
 
 		l = manage (left_aligned_label (_("Audio file:")));
-		t->attach (*l, 1, 2, 2, 3, FILL);
-		t->attach (_click_path_entry, 2, 3, 2, 3, FILL);
+		t->attach (*l, 1, 2, row, row + 1, FILL);
+		t->attach (_click_path_entry, 2, 3, row, row + 1, FILL);
 		_click_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_browse_clicked));
-		t->attach (_click_browse_button, 3, 4, 2, 3, FILL);
+		t->attach (_click_browse_button, 3, 4, row, row + 1, FILL);
+		++row;
 
 		l = manage (left_aligned_label (_("Emphasis audio file:")));
-		t->attach (*l, 1, 2, 3, 4, FILL);
-		t->attach (_click_emphasis_path_entry, 2, 3, 3, 4, FILL);
+		t->attach (*l, 1, 2, row, row + 1, FILL);
+		t->attach (_click_emphasis_path_entry, 2, 3, row, row + 1, FILL);
 		_click_emphasis_browse_button.signal_clicked ().connect (
 		    sigc::mem_fun (*this, &ClickOptions::click_emphasis_browse_clicked));
-		t->attach (_click_emphasis_browse_button, 3, 4, 3, 4, FILL);
+		t->attach (_click_emphasis_browse_button, 3, 4, row, row + 1, FILL);
+		++row;
 
 		_click_fader = new FaderOption (
 				"click-gain",
@@ -1191,7 +1198,7 @@ private:
 	{
 		UIConfiguration::instance().set_waveform_clip_level (_clip_level_adjustment.get_value());
 		/* XXX: should be triggered from the parameter changed signal */
-		ArdourCanvas::WaveView::set_clip_level (_clip_level_adjustment.get_value());
+		ArdourWaveView::WaveView::set_clip_level (_clip_level_adjustment.get_value());
 	}
 
 	Adjustment _clip_level_adjustment;
@@ -1368,7 +1375,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 				if (!(*i)->mandatory) {
 					TreeModel::Row r = *_store->append ();
 					r[_model.name] = (*i)->name;
-					r[_model.enabled] = ((*i)->protocol || (*i)->requested);
+					r[_model.enabled] = 0 != (*i)->protocol;
 					r[_model.protocol_info] = *i;
 				}
 			}
@@ -1385,8 +1392,9 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 
 				if ((*x)[_model.protocol_info] == cpi) {
 					_ignore_view_change++;
-					(*x)[_model.enabled] = (cpi->protocol || cpi->requested);
+					(*x)[_model.enabled] = 0 != cpi->protocol;
 					_ignore_view_change--;
+					selection_changed (); // update sensitivity
 					break;
 				}
 			}
@@ -1396,10 +1404,12 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 		{
 			//enable the Edit button when a row is selected for editing
 			TreeModel::Row row = *(_view.get_selection()->get_selected());
-			if (row && row[_model.enabled])
-				edit_button->set_sensitive (true);
-			else
+			if (row && row[_model.enabled]) {
+				ControlProtocolInfo* cpi = row[_model.protocol_info];
+				edit_button->set_sensitive (cpi && cpi->protocol && cpi->protocol->has_editor ());
+			} else {
 				edit_button->set_sensitive (false);
+			}
 		}
 
 		void view_changed (TreeModel::Path const &, TreeModel::iterator const & i)
@@ -1462,7 +1472,7 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			 * tear_down_gui() hides an deletes the Window if it exists.
 			 */
 			ArdourWindow* win = new ArdourWindow (*((Gtk::Window*) _view.get_toplevel()), title.get_string());
-			win->set_title ("Control Protocol Options");
+			win->set_title (_("Control Protocol Settings"));
 			win->add (*box);
 			box->show ();
 			win->present ();
@@ -1529,7 +1539,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			t->attach (_video_advanced_setup_button, 1, 4, n, n + 1, FILL);
 			_video_advanced_setup_button.signal_toggled().connect (sigc::mem_fun (*this, &VideoTimelineOptions::video_advanced_setup_toggled));
 			Gtkmm2ext::UI::instance()->set_tip (_video_advanced_setup_button,
-					_("<b>When enabled</b> you can speficify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
+					_("<b>When enabled</b> you can specify a custom video-server URL and docroot. - Do not enable this option unless you know what you are doing."));
 			++n;
 
 			Label* l = manage (new Label (_("Video Server URL:")));
@@ -1545,7 +1555,7 @@ class VideoTimelineOptions : public OptionEditorMiniPage
 			t->attach (*l, 1, 2, n, n + 1, FILL);
 			t->attach (_video_server_docroot_entry, 2, 4, n, n + 1);
 			Gtkmm2ext::UI::instance()->set_tip (_video_server_docroot_entry,
-					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unvailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
+					_("Local path to the video-server document-root. Only files below this directory will be accessible by the video-server. If the server run on a remote host, it should point to a network mounted folder of the server's docroot or be left empty if it is unavailable. It is used for the local video-monitor and file-browsing when opening/adding a video file."));
 			++n;
 
 			l = manage (new Label (""));
@@ -2114,7 +2124,11 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 
 RCOptionEditor::RCOptionEditor ()
 	: OptionEditorContainer (Config, string_compose (_("%1 Preferences"), PROGRAM_NAME))
-	, Tabbable (*this, _("Preferences")) /* pack self-as-vbox into tabbable */
+	, Tabbable (*this, _("Preferences")
+#ifdef MIXBUS
+			, false // detached by default (first start, no instant.xml)
+#endif
+			) /* pack self-as-vbox into tabbable */
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 {
@@ -2286,19 +2300,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("General/Translation"), bo);
 
-	_l10n = new ComboOption<ARDOUR::LocaleMode> (
-		"locale-mode",
-		_("Localization"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_locale_mode),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_locale_mode)
-		);
-
-	_l10n->add (ARDOUR::SET_LC_ALL, _("Set complete locale"));
-	_l10n->add (ARDOUR::SET_LC_MESSAGES, _("Enable only message translation"));
-	_l10n->add (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC, _("Translate messages and format numeric format"));
-	_l10n->set_note (_("This setting is provided for plugin compatibility. e.g. some plugins on some systems expect the decimal point to be a dot."));
-
-	add_option (_("General/Translation"), _l10n);
 	parameter_changed ("enable-translation");
 #endif // ENABLE_NLS
 
@@ -2306,14 +2307,6 @@ RCOptionEditor::RCOptionEditor ()
 	/* EDITOR */
 
 	add_option (_("Editor"), new OptionEditorHeading (_("General")));
-
-	add_option (_("Editor"),
-	     new BoolOption (
-		     "rubberbanding-snaps-to-grid",
-		     _("Snap rubberband to grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
-		     ));
 
 	bo = new BoolOption (
 		     "name-new-markers",
@@ -2332,6 +2325,33 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead)
 		     ));
+
+	ComboOption<float>* dps = new ComboOption<float> (
+		     "draggable-playhead-speed",
+		     _("Playhead dragging speed (%)"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_draggable_playhead_speed),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_draggable_playhead_speed)
+		     );
+	dps->add (0.05, _("5%"));
+	dps->add (0.1, _("10%"));
+	dps->add (0.25, _("25%"));
+	dps->add (0.5, _("50%"));
+	dps->add (1.0, _("100%"));
+	add_option (_("Editor"), dps);
+
+	ComboOption<float>* eet = new ComboOption<float> (
+		     "extra-ui-extents-time",
+		     _("Limit zooming & summary view to X minutes beyond session extents"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_extra_ui_extents_time),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_extra_ui_extents_time)
+		     );
+	eet->add (1, _("1 minute"));
+	eet->add (2, _("2 minutes"));
+	eet->add (20, _("20 minutes"));
+	eet->add (60, _("1 hour"));
+	eet->add (60*2, _("2 hours"));
+	eet->add (60*24, _("24 hours"));
+	add_option (_("Editor"), eet);
 
 	if (!Profile->get_mixbus()) {
 
@@ -2396,6 +2416,16 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_automation_follows_regions)
 		     ));
 
+	bo = new BoolOption (
+		     "new-automation-points-on-lane",
+		     _("Ignore Y-axis click position when adding new automation-points"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_new_automation_points_on_lane),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_new_automation_points_on_lane)
+		     );
+	add_option (_("Editor"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> The new points drawn in any automation lane will be placed on the existing line, regardless of mouse y-axis position."));
+
 	ComboOption<FadeShape>* fadeshape = new ComboOption<FadeShape> (
 			"default-fade-shape",
 			_("Default fade shape"),
@@ -2453,6 +2483,93 @@ RCOptionEditor::RCOptionEditor ()
 	rsas->add(ExistingNewlyCreatedBoth, _("existing selection and newly-created regions"));
 
 	add_option (_("Editor"), rsas);
+
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("General Snap options:")));
+
+	add_option (_("Editor/Snap"),
+		    new SpinOption<uint32_t> (
+			    "snap-threshold",
+			    _("Snap Threshold (pixels)"),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_threshold),
+			    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_threshold),
+			    10, 200,
+			    1, 10
+			    ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "show-snapped-cursor",
+		     _("Show \"snapped cursor\""),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_snapped_cursor),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_snapped_cursor)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "rubberbanding-snaps-to-grid",
+		     _("Snap rubberband selection to grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rubberbanding_snaps_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rubberbanding_snaps_to_grid)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "grid-follows-internal",
+		     _("Grid switches to alternate selection for Internal Edit tools"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_grid_follows_internal),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_grid_follows_internal)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "rulers-follow-grid",
+		     _("Rulers automatically change to follow the Grid mode selection"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_rulers_follow_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rulers_follow_grid)
+		     ));
+
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When \"Snap\" is enabled, snap to:")));
+
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-marks",
+		     _("Markers"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_marks),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_marks)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-sync",
+		     _("Region Sync Points"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_sync),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_sync)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-start",
+		     _("Region Starts"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_start),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_start)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-region-end",
+		     _("Region Ends"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_end),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_end)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
+		     "snap-to-grid",
+		     _("Grid"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_grid),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_grid)
+		     ));
 
 	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
@@ -2657,7 +2774,7 @@ RCOptionEditor::RCOptionEditor ()
 
 		bo = new BoolOption (
 				"strict-io",
-				_("Use 'Strict-I/O' for new tracks or Busses"),
+				_("Use 'Strict-I/O' for new tracks or busses"),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::get_strict_io),
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_strict_io)
 				);
@@ -2808,6 +2925,20 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Metronome"), new OptionEditorHeading (_("Metronome")));
 	add_option (_("Metronome"), new ClickOptions (_rc_config));
+	add_option (_("Metronome"), new OptionEditorHeading (_("Options")));
+
+	bo = new BoolOption (
+			"click-record-only",
+			_("Enable metronome only while recording"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_click_record_only),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_click_record_only)
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			string_compose (_("<b>When enabled</b> the metronome will remain silent if %1 is <b>not recording</b>."), PROGRAM_NAME));
+	add_option (_("Metronome"), bo);
+	add_option (_("Metronome"), new OptionEditorBlank ());
+
 
 	/* Meters */
 
@@ -2890,6 +3021,24 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (S_("Preferences|Metering"), mvu);
 
+	HSliderOption *mpks = new HSliderOption("meter-peak",
+			_("Peak indicator threshold [dBFS]"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
+			-10, 0, .1, .1
+			);
+
+	Gtkmm2ext::UI::instance()->set_tip (
+			mpks->tip_widget(),
+			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
+
+	add_option (S_("Preferences|Metering"), mpks);
+
+	OptionEditorHeading* default_meter_head = new OptionEditorHeading (_("Default Meter Types"));
+	default_meter_head->set_note (_("These settings apply to newly created tracks and busses. For the Master bus, this will be when a new session is created."));
+
+	add_option (S_("Preferences|Metering"), default_meter_head);
+
 	ComboOption<MeterType>* mtm = new ComboOption<MeterType> (
 		"meter-type-master",
 		_("Default Meter Type for Master Bus"),
@@ -2910,7 +3059,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterType>* mtb = new ComboOption<MeterType> (
 		"meter-type-bus",
-		_("Default Meter Type for Busses"),
+		_("Default meter type for busses"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_bus),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
 		);
@@ -2927,7 +3076,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	ComboOption<MeterType>* mtt = new ComboOption<MeterType> (
 		"meter-type-track",
-		_("Default Meter Type for Tracks"),
+		_("Default meter type for tracks"),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::get_meter_type_track),
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_track)
 		);
@@ -2935,19 +3084,6 @@ RCOptionEditor::RCOptionEditor ()
 	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
 
 	add_option (S_("Preferences|Metering"), mtt);
-
-	HSliderOption *mpks = new HSliderOption("meter-peak",
-			_("Peak threshold [dBFS]"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_meter_peak),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_meter_peak),
-			-10, 0, .1, .1
-			);
-
-	Gtkmm2ext::UI::instance()->set_tip (
-			mpks->tip_widget(),
-			_("Specify the audio signal level in dBFS at and above which the meter-peak indicator will flash red."));
-
-	add_option (S_("Preferences|Metering"), mpks);
 
 	add_option (S_("Preferences|Metering"), new OptionEditorHeading (_("Post Export Analysis")));
 
@@ -3002,7 +3138,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_quieten_at_speed)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			_("<b>When enabled</b> rhis will reduce the unpleasant increase in perceived volume "
+			_("<b>When enabled</b> this will reduce the unpleasant increase in perceived volume "
 				"that occurs when fast-forwarding or rewinding through some kinds of audio"));
 	add_option (_("Transport"), bo);
 
@@ -3076,7 +3212,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* SYNC */
 
-	add_option (_("Sync"), new OptionEditorHeading (_("External Syncronization")));
+	add_option (_("Sync"), new OptionEditorHeading (_("External Synchronization")));
 
 	_sync_source = new ComboOption<SyncSource> (
 		"sync-source",
@@ -3134,8 +3270,8 @@ RCOptionEditor::RCOptionEditor ()
 		(_sync_source_2997->tip_widget(),
 		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
 			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
-			 "drop-frame timecode has an accumulated error of -86ms over a 24-hour period.\n"
-			 "Drop-frame timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
+			 "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
+			 "Drop-sample timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
 			 "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
 			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
 			 ));
@@ -3271,7 +3407,7 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("MIDI Ports"),
 		    new BoolOption (
-			    "get-midi-input-follows-selection",
+			    "midi-input-follows-selection",
 			    _("MIDI input follows MIDI track selection"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_input_follows_selection),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_input_follows_selection)
@@ -3553,6 +3689,14 @@ RCOptionEditor::RCOptionEditor ()
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_rec_arm)
 				));
 
+	add_option (_("Appearance"),
+			new BoolOption (
+				"blink-alert-indicators",
+				_("Blink Alert Indicators"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_blink_alert_indicators),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_alert_indicators)
+				));
+
 
 #ifndef __APPLE__
 	/* font scaling does nothing with GDK/Quartz */
@@ -3665,6 +3809,23 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_never_display_periodic_midi)
 		     ));
 
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-bars-for-velocity",
+		            _("Show velocity horizontally inside notes"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_bars_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_bars_for_velocity)
+		            ));
+
+	add_option (_("Appearance/Editor"),
+	            new BoolOption (
+		            "use-note-color-for-velocity",
+		            _("Use colors to show note velocity"),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
+		            ));
+
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
 	/* The names of these controls must be the same as those given in MixerStrip
@@ -3690,7 +3851,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",
-		     _("Use narrow strips in the mixer by default"),
+		     _("Use narrow strips in the mixer for new strips by default"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_narrow_ms),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
@@ -3751,21 +3912,13 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Appearance/Toolbar"),
 			new ColumVisibilityOption (
-				"action-table-columns", _("Lua Action Script Button Visibility"), 4,
+				"action-table-columns", _("Display Action-Buttons"), 4,
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_action_table_columns),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_action_table_columns)
 				)
 			);
 	add_option (_("Appearance/Toolbar"), new OptionEditorBlank ());
 
-
-	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
-
-	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary\n\
-with each version of your OS, and the preferences that you've set in your OS.\n\n\
-You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
-These settings will only take effect after %1 is restarted.\n\
-	"), PROGRAM_NAME));
 
 	/* and now the theme manager */
 
@@ -3824,6 +3977,14 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
 
 	/* Quirks */
+
+	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));
+
+	quirks_head->set_note (string_compose (_("Rules for closing, minimizing, maximizing, and stay-on-top can vary \
+with each version of your OS, and the preferences that you've set in your OS.\n\n\
+You can adjust the options, below, to change how %1's windows and dialogs behave.\n\n\
+These settings will only take effect after %1 is restarted.\n\
+	"), PROGRAM_NAME));
 
 	add_option (_("Appearance/Quirks"), quirks_head);
 
@@ -3935,10 +4096,6 @@ RCOptionEditor::parameter_changed (string const & p)
 #if (defined LV2_SUPPORT && defined LV2_EXTENDED)
 		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
 #endif
-#ifdef ENABLE_NLS
-	} else if (p == "enable-translation") {
-		_l10n->set_sensitive (ARDOUR::translations_are_enabled ());
-#endif
 	}
 }
 
@@ -3964,7 +4121,7 @@ void RCOptionEditor::clear_au_blacklist () {
 
 void RCOptionEditor::edit_lxvst_path () {
 	Glib::RefPtr<Gdk::Window> win = get_parent_window ();
-	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+	PathsDialog *pd = new PathsDialog (
 		*current_toplevel(), _("Set Linux VST Search Path"),
 		_rc_config->get_plugin_path_lxvst(),
 		PluginManager::instance().get_default_lxvst_path()
@@ -3973,12 +4130,20 @@ void RCOptionEditor::edit_lxvst_path () {
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
 		_rc_config->set_plugin_path_lxvst(pd->get_serialized_paths());
+
+		MessageDialog msg (_("Re-scan Plugins now?"),
+				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
+		msg.set_default_response (Gtk::RESPONSE_YES);
+		if (msg.run() == Gtk::RESPONSE_YES) {
+			msg.hide ();
+			plugin_scan_refresh ();
+		}
 	}
 	delete pd;
 }
 
 void RCOptionEditor::edit_vst_path () {
-	Gtkmm2ext::PathsDialog *pd = new Gtkmm2ext::PathsDialog (
+	PathsDialog *pd = new PathsDialog (
 		*current_toplevel(), _("Set Windows VST Search Path"),
 		_rc_config->get_plugin_path_vst(),
 		PluginManager::instance().get_default_windows_vst_path()
@@ -3987,6 +4152,13 @@ void RCOptionEditor::edit_vst_path () {
 	pd->hide();
 	if (r == RESPONSE_ACCEPT) {
 		_rc_config->set_plugin_path_vst(pd->get_serialized_paths());
+		MessageDialog msg (_("Re-scan Plugins now?"),
+				false /*no markup*/, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true /*modal*/);
+		msg.set_default_response (Gtk::RESPONSE_YES);
+		if (msg.run() == Gtk::RESPONSE_YES) {
+			msg.hide ();
+			plugin_scan_refresh ();
+		}
 	}
 	delete pd;
 }

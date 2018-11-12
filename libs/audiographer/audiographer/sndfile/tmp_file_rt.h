@@ -17,7 +17,7 @@
 namespace AudioGrapher
 {
 
-	static const framecnt_t rb_chunksize = 8192; // samples
+	static const samplecnt_t rb_chunksize = 8192; // samples
 
 /** A temporary file deleted after this class is destructed
  * with realtime safe background thread writer.
@@ -29,7 +29,7 @@ class TmpFileRt
   public:
 
 	/// \a filename_template must match the requirements for mkstemp, i.e. end in "XXXXXX"
-	TmpFileRt (char * filename_template, int format, ChannelCount channels, framecnt_t samplerate)
+	TmpFileRt (char * filename_template, int format, ChannelCount channels, samplecnt_t samplerate)
 		: SndfileHandle (g_mkstemp(filename_template), true, SndfileBase::ReadWrite, format, channels, samplerate)
 		, filename (filename_template)
   , _chunksize (rb_chunksize * channels)
@@ -65,13 +65,13 @@ class TmpFileRt
 				% c.channels() % SndfileHandle::channels()));
 		}
 
-		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < c.frames()) {
+		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < c.samples()) {
 			throw Exception (*this, boost::str (boost::format
 				("Could not write data to ringbuffer/output file (%1%)")
 				% SndfileHandle::strError()));
 		}
 
-		_rb.write (c.data(), c.frames());
+		_rb.write (c.data(), c.samples());
 
 		if (c.has_flag(ProcessContext<T>::EndOfInput)) {
 			_capture = false;
@@ -93,11 +93,11 @@ class TmpFileRt
 		pthread_mutex_lock (&_disk_thread_lock);
 
 		while (_capture) {
-			if ((framecnt_t)_rb.read_space () >= _chunksize) {
+			if ((samplecnt_t)_rb.read_space () >= _chunksize) {
 				_rb.read (framebuf, _chunksize);
-				framecnt_t const written = SndfileBase::write (framebuf, _chunksize);
+				samplecnt_t const written = SndfileBase::write (framebuf, _chunksize);
 				assert (written == _chunksize);
-				SndfileWriter<T>::frames_written += written;
+				SndfileWriter<T>::samples_written += written;
 			}
 			if (!_capture) {
 				break;
@@ -107,10 +107,10 @@ class TmpFileRt
 
 		// flush ringbuffer
 		while (_rb.read_space () > 0) {
-			size_t remain = std::min ((framecnt_t)_rb.read_space (), _chunksize);
+			size_t remain = std::min ((samplecnt_t)_rb.read_space (), _chunksize);
 			_rb.read (framebuf, remain);
-			framecnt_t const written = SndfileBase::write (framebuf, remain);
-			SndfileWriter<T>::frames_written += written;
+			samplecnt_t const written = SndfileBase::write (framebuf, remain);
+			SndfileWriter<T>::samples_written += written;
 		}
 
 		SndfileWriter<T>::writeSync();
@@ -123,8 +123,8 @@ class TmpFileRt
 	std::string filename;
 
 	bool _capture;
-	framecnt_t _chunksize;
-	RingBuffer<T> _rb;
+	samplecnt_t _chunksize;
+	PBD::RingBuffer<T> _rb;
 
 	pthread_mutex_t _disk_thread_lock;
 	pthread_cond_t  _data_ready;
@@ -148,7 +148,7 @@ class TmpFileRt
 
 	void init()
 	{
-		SndfileWriter<T>::frames_written = 0;
+		SndfileWriter<T>::samples_written = 0;
 		_capture = true;
 		SndfileWriter<T>::add_supported_flag (ProcessContext<T>::EndOfInput);
 		pthread_mutex_init (&_disk_thread_lock, 0);

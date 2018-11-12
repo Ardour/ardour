@@ -68,7 +68,7 @@ public:
 		bool valid () { return g_atomic_int_get (&_valid) == 1; }
 
 		void ref ()    { g_atomic_int_inc (&_ref); }
-		void unref ()  { g_atomic_int_dec_and_test (&_ref); }
+		void unref ()  { (void) g_atomic_int_dec_and_test (&_ref); }
 		bool in_use () { return g_atomic_int_get (&_ref) > 0; }
 		int  use_count () { return g_atomic_int_get (&_ref); }
 	};

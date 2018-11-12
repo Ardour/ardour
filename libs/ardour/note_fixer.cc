@@ -19,7 +19,7 @@
 
 #include "evoral/EventList.hpp"
 
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/note_fixer.h"
 #include "ardour/tempo.h"
@@ -42,13 +42,13 @@ NoteFixer::clear()
 void
 NoteFixer::prepare(TempoMap&                          tempo_map,
                    const MidiModel::NoteDiffCommand*  cmd,
-                   const framepos_t                   origin,
-                   const framepos_t                   pos,
+                   const samplepos_t                   origin,
+                   const samplepos_t                   pos,
                    std::set< boost::weak_ptr<Note> >& active_notes)
 {
 	typedef MidiModel::NoteDiffCommand Command;
 
-	BeatsFramesConverter converter(tempo_map, origin);
+	BeatsSamplesConverter converter(tempo_map, origin);
 
 	for (Command::NoteList::const_iterator i = cmd->removed_notes().begin();
 	     i != cmd->removed_notes().end(); ++i) {
@@ -113,8 +113,8 @@ NoteFixer::prepare(TempoMap&                          tempo_map,
 }
 
 void
-NoteFixer::emit(Evoral::EventSink<framepos_t>& dst,
-                framepos_t                     pos,
+NoteFixer::emit(Evoral::EventSink<samplepos_t>& dst,
+                samplepos_t                     pos,
                 MidiStateTracker&              tracker)
 {
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -126,18 +126,18 @@ NoteFixer::emit(Evoral::EventSink<framepos_t>& dst,
 }
 
 NoteFixer::Event*
-NoteFixer::copy_event(framepos_t time, const Evoral::Event<Evoral::Beats>& ev)
+NoteFixer::copy_event(samplepos_t time, const Evoral::Event<Temporal::Beats>& ev)
 {
 	return new Event(ev.event_type(), time, ev.size(), ev.buffer());
 }
 
 bool
-NoteFixer::note_is_active(const BeatsFramesConverter& converter,
+NoteFixer::note_is_active(const BeatsSamplesConverter& converter,
                           boost::shared_ptr<Note>     note,
-                          framepos_t                  pos)
+                          samplepos_t                  pos)
 {
-	const framepos_t start_time = converter.to(note->time());
-	const framepos_t end_time   = converter.to(note->end_time());
+	const samplepos_t start_time = converter.to(note->time());
+	const samplepos_t end_time   = converter.to(note->end_time());
 
 	return (start_time < pos && end_time >= pos);
 }

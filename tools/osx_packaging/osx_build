@@ -66,7 +66,7 @@ while [ $# -gt 0 ] ; do
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
-		APPNAME=Mixbus32C-${major_version} ;
+		APPNAME=Mixbus32C ;
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
 	--public)
@@ -134,19 +134,18 @@ Resources=$APPROOT/Resources
 Shared=$Resources
 Etc=$Resources
 Locale=$Resources/locale
-#
-# Bundled Plugins live in a top level folder
-# 
-Plugins=$APPROOT/Plugins
+
 Surfaces=$Frameworks/surfaces
 Panners=$Frameworks/panners
 Backends=$Frameworks/backends
 MidiMaps=$Shared/midi_maps
+PluginMetadata=$Shared/plugin_metadata
 ExportFormats=$Shared/export
 Templates=$Shared/templates
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
 MackieControl=$Shared/mcp
+OSC=$Shared/osc
 Themes=$Shared/themes
 
 if [ x$PRINT_SYSDEPS != x ] ; then
@@ -154,7 +153,7 @@ if [ x$PRINT_SYSDEPS != x ] ; then
 # print system dependencies
 #
 
-for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Plugins/*.so ; do
+for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -173,16 +172,15 @@ echo "Building new app directory structure ..."
 
 mkdir -p $APPROOT/MacOS
 mkdir -p $APPROOT/Resources
-mkdir -p $Plugins
 mkdir -p $Surfaces
 mkdir -p $Panners
 mkdir -p $Backends
 mkdir -p $MidiMaps
 mkdir -p $ExportFormats
-mkdir -p $Templates
 mkdir -p $Frameworks/modules
 mkdir -p $Etc
 mkdir -p $MackieControl
+mkdir -p $OSC
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $Themes
@@ -347,12 +345,11 @@ for f in $BUILD_ROOT/../export/*.preset $BUILD_ROOT/../export/*.format ; do
     cp "$f" $ExportFormats ; 
 done
 
-# Session and Route templates
-#for f in $BUILD_ROOT/../templates/* ; do 
-#    if [ -d "$f" ] ; then
-#        cp -r "$f" $Templates ; 
-#    fi
-#done
+#Session templates
+cp -av $BUILD_ROOT/../templates $Templates
+
+# PluginMetadata
+cp -av $BUILD_ROOT/../plugin_metadata $PluginMetadata
 
 # MidiMaps
 # got to be careful with names here
@@ -380,6 +377,12 @@ done
 # got to be careful with names here
 for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
+done
+
+# OSC data
+# got to be careful with names here
+for x in $BUILD_ROOT/../osc/*.preset ; do
+    cp "$x" $OSC
 done
 
 # VAMP plugins that we use
@@ -418,6 +421,12 @@ for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; d
 	HAVE_SESSION_UTILS=true
 done
 
+# dynamically loaded NSS/SSL libs
+nsslibs="libsoftokn3.dylib libnsspem.dylib libnssckbi.dylib libfreebl3.dylib libnssdbm3.dylib libplds4.dylib"
+for nsslib in $nsslibs; do
+	cp $GTKSTACK_ROOT/lib/$nsslib $Frameworks/ || true
+done
+
 # TODO check if this is still needed, even when building on 10.5
 if file $BUILD_ROOT/gtk2_ardour/ardour-$release_version | grep -q ppc; then
 STDCPP='|libstdc\+\+'
@@ -427,7 +436,7 @@ fi
 
 while [ true ] ; do 
     missing=false
-    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $Plugins/*.so ; do 
+    for file in $APPROOT/MacOS/* $Frameworks/* $Frameworks/modules/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib ; do
 	if ! file $file | grep -qs Mach-O ; then
 	    continue
 	fi
@@ -473,7 +482,6 @@ cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
 mkdir ${Resources}/icons
 mkdir ${Resources}/resources
 cp ../../system_config $Resources/system_config
-cp ../../instant.xml $Resources/instant.xml
 cp ../../gtk2_ardour/icons/*.png ${Resources}/icons/
 cp -r ../../gtk2_ardour/icons/cursor_* ${Resources}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
@@ -710,7 +718,7 @@ if test x$WITH_X42_LV2 != x ; then
 	echo "bundling x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums; do
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/osx/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/osx/${proj}-lv2-osx-${X42_VERSION}.zip \
@@ -832,7 +840,16 @@ osascript << EOF
       close
       open
       update without registering applications
-      delay 5
+      delay 3
+      set position of item "${APPDIR}" of container window to {90, 100}
+      set position of item "Applications" of container window to {310, 100}
+      ${MIXBUSPOS}
+      ${HARVIDPOS}
+      ${XJADEOPOS}
+      close
+      open
+      update without registering applications
+      delay 3
       eject
     end tell
   end tell

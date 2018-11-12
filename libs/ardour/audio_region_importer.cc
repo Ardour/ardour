@@ -127,7 +127,7 @@ AudioRegionImporter::~AudioRegionImporter ()
 string
 AudioRegionImporter::get_info () const
 {
-	framecnt_t length, position;
+	samplecnt_t length, position;
 	Timecode::Time length_time, position_time;
 	std::ostringstream oss;
 

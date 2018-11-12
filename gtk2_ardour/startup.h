@@ -44,18 +44,19 @@
 
 class EngineControl;
 
-class ArdourStartup : public Gtk::Assistant {
-  public:
-         ArdourStartup ();
+class ArdourStartup : public Gtk::Assistant
+{
+public:
+	ArdourStartup ();
 	~ArdourStartup ();
 
-        static bool required ();
+	static bool required ();
 
 	gint response () const {
 		return  _response;
 	}
 
-  private:
+private:
 	gint _response;
 	bool config_modified;
 	bool new_user;
@@ -76,7 +77,7 @@ class ArdourStartup : public Gtk::Assistant {
 	bool splash_expose (GdkEventExpose* ev);
 
 	void setup_first_time_config_page ();
-        void config_changed ();
+	void config_changed ();
 
 	/* first page */
 	Gtk::FileChooserButton* default_dir_chooser;

@@ -32,6 +32,7 @@
 #define LV2_INLINEDISPLAY_PREFIX LV2_INLINEDISPLAY_URI "#"
 #define LV2_INLINEDISPLAY__interface LV2_INLINEDISPLAY_PREFIX "interface"
 #define LV2_INLINEDISPLAY__queue_draw LV2_INLINEDISPLAY_PREFIX "queue_draw"
+#define LV2_INLINEDISPLAY__in_gui LV2_INLINEDISPLAY_PREFIX "in_gui"
 
 /** Opaque handle for LV2_Inline_Display::queue_draw() */
 typedef void* LV2_Inline_Display_Handle;
@@ -223,6 +224,31 @@ typedef struct {
 	 */
 	void (*free)(char*);
 } LV2_Midnam_Interface;
+
+/**
+   @}
+*/
+
+/**
+   @defgroup bankpatch
+
+   @{
+*/
+
+
+#define LV2_BANKPATCH_URI "http://ardour.org/lv2/bankpatch"
+#define LV2_BANKPATCH_PREFIX LV2_BANKPATCH_URI "#"
+#define LV2_BANKPATCH__notify LV2_BANKPATCH_PREFIX "notify"
+
+typedef void* LV2_BankPatch_Handle;
+
+/** a LV2 Feature provided by the Host to the plugin */
+typedef struct {
+	/** Opaque host data */
+	LV2_BankPatch_Handle handle;
+	/** Info from plugin's run(), notify host that bank/program changed */
+	void (*notify)(LV2_BankPatch_Handle handle, uint8_t channel, uint32_t bank, uint8_t pgm);
+} LV2_BankPatch;
 
 /**
    @}

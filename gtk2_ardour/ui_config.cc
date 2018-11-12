@@ -41,7 +41,6 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
-#include "pbd/locale_guard.h"
 #include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
@@ -49,6 +48,7 @@
 #include "ardour/search_paths.h"
 #include "ardour/revision.h"
 #include "ardour/utils.h"
+#include "ardour/types_convert.h"
 
 #include "gtkmm2ext/rgb_macros.h"
 #include "gtkmm2ext/gtk_ui.h"
@@ -60,7 +60,7 @@
 using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
-using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 
 static const char* ui_config_file_name = "ui_config";
 static const char* default_ui_config_file_name = "default_ui_config";
@@ -72,6 +72,7 @@ UIConfiguration&
 UIConfiguration::instance ()
 {
 	static UIConfiguration s_instance;
+	_instance = &s_instance;
 	return s_instance;
 }
 
@@ -136,24 +137,23 @@ UIConfiguration::parameter_changed (string param)
 void
 UIConfiguration::reset_gtk_theme ()
 {
-	LocaleGuard lg;
-	stringstream ss;
-
-	ss << "gtk_color_scheme = \"" << hex;
+	std::string color_scheme_string("gtk_color_scheme = \"");
 
 	for (ColorAliases::iterator g = color_aliases.begin(); g != color_aliases.end(); ++g) {
 
 		if (g->first.find ("gtk_") == 0) {
 			const string gtk_name = g->first.substr (4);
-			ss << gtk_name << ":#" << std::setw (6) << setfill ('0') << (color (g->second) >> 8) << ';';
+			Gtkmm2ext::Color a_color = color (g->second);
+
+			color_scheme_string += gtk_name + ":#" + color_to_hex_string_no_alpha (a_color) + ';';
 		}
 	}
 
-	ss << '"' << dec << endl;
+	color_scheme_string += '"';
 
 	/* reset GTK color scheme */
 
-	Gtk::Settings::get_default()->property_gtk_color_scheme() = ss.str();
+	Gtk::Settings::get_default()->property_gtk_color_scheme() = color_scheme_string;
 }
 
 void
@@ -219,7 +219,7 @@ UIConfiguration::post_gui_init ()
 int
 UIConfiguration::load_defaults ()
 {
-        std::string rcfile;
+	std::string rcfile;
 	int ret = -1;
 
 	if (find_file (ardour_config_search_path(), default_ui_config_file_name, rcfile) ) {
@@ -241,7 +241,6 @@ UIConfiguration::load_defaults ()
 	} else {
 		warning << string_compose (_("Could not find default UI configuration file %1"), default_ui_config_file_name) << endmsg;
 	}
-
 
 	if (ret == 0) {
 		/* reload color theme */
@@ -362,17 +361,14 @@ int
 UIConfiguration::store_color_theme ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
 	XMLNode* parent = new XMLNode (X_("Colors"));
 	for (Colors::const_iterator i = colors.begin(); i != colors.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("Color"));
-		node->add_property (X_("name"), i->first);
-		stringstream ss;
-		ss << "0x" << setw (8) << setfill ('0') << hex << i->second;
-		node->add_property (X_("value"), ss.str());
+		node->set_property (X_("name"), i->first);
+		node->set_property (X_("value"), color_to_hex_string (i->second));
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -380,8 +376,8 @@ UIConfiguration::store_color_theme ()
 	parent = new XMLNode (X_("ColorAliases"));
 	for (ColorAliases::const_iterator i = color_aliases.begin(); i != color_aliases.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("ColorAlias"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("alias"), i->second);
+		node->set_property (X_("name"), i->first);
+		node->set_property (X_("alias"), i->second);
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -389,8 +385,8 @@ UIConfiguration::store_color_theme ()
 	parent = new XMLNode (X_("Modifiers"));
 	for (Modifiers::const_iterator i = modifiers.begin(); i != modifiers.end(); ++i) {
 		XMLNode* node = new XMLNode (X_("Modifier"));
-		node->add_property (X_("name"), i->first);
-		node->add_property (X_("modifier"), i->second.to_string());
+		node->set_property (X_("name"), i->first);
+		node->set_property (X_("modifier"), i->second.to_string());
 		parent->add_child_nocopy (*node);
 	}
 	root->add_child_nocopy (*parent);
@@ -411,7 +407,6 @@ UIConfiguration::store_color_theme ()
 int
 UIConfiguration::load_state ()
 {
-	LocaleGuard lg; // a single guard for all 3 configs
 	bool found = false;
 
 	std::string rcfile;
@@ -501,7 +496,6 @@ XMLNode&
 UIConfiguration::get_state ()
 {
 	XMLNode* root;
-	LocaleGuard lg;
 
 	root = new XMLNode("Ardour");
 
@@ -519,7 +513,6 @@ XMLNode&
 UIConfiguration::get_variables (std::string which_node)
 {
 	XMLNode* node;
-	LocaleGuard lg;
 
 	node = new XMLNode (which_node);
 
@@ -538,7 +531,6 @@ UIConfiguration::get_variables (std::string which_node)
 int
 UIConfiguration::set_state (const XMLNode& root, int /*version*/)
 {
-	LocaleGuard lg;
 	/* this can load a generic UI configuration file or a colors file */
 
 	if (root.name() != "Ardour") {
@@ -625,7 +617,7 @@ UIConfiguration::load_colors (XMLNode const & node)
 		color = child->property (X_("value"));
 
 		if (name && color) {
-			ArdourCanvas::Color c;
+			Gtkmm2ext::Color c;
 			c = strtoul (color->value().c_str(), 0, 16);
 			/* insert or replace color name definition */
 			colors[name->value()] =  c;
@@ -636,7 +628,6 @@ UIConfiguration::load_colors (XMLNode const & node)
 void
 UIConfiguration::load_modifiers (XMLNode const & node)
 {
-	PBD::LocaleGuard lg;
 	XMLNodeList const nlist = node.children();
 	XMLNodeConstIterator niter;
 	XMLProperty const *name;
@@ -670,7 +661,7 @@ UIConfiguration::set_variables (const XMLNode& node)
 #undef  CANVAS_FONT_VARIABLE
 }
 
-ArdourCanvas::SVAModifier
+Gtkmm2ext::SVAModifier
 UIConfiguration::modifier (string const & name) const
 {
 	Modifiers::const_iterator m = modifiers.find (name);
@@ -680,19 +671,19 @@ UIConfiguration::modifier (string const & name) const
 	return SVAModifier ();
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 UIConfiguration::color_mod (std::string const & colorname, std::string const & modifiername) const
 {
 	return HSV (color (colorname)).mod (modifier (modifiername)).color ();
 }
 
-ArdourCanvas::Color
-UIConfiguration::color_mod (const ArdourCanvas::Color& color, std::string const & modifiername) const
+Gtkmm2ext::Color
+UIConfiguration::color_mod (const Gtkmm2ext::Color& color, std::string const & modifiername) const
 {
 	return HSV (color).mod (modifier (modifiername)).color ();
 }
 
-ArdourCanvas::Color
+Gtkmm2ext::Color
 UIConfiguration::color (const std::string& name, bool* failed) const
 {
 	ColorAliases::const_iterator e = color_aliases.find (name);
@@ -740,7 +731,7 @@ UIConfiguration::quantized (Color c) const
 }
 
 void
-UIConfiguration::set_color (string const& name, ArdourCanvas::Color color)
+UIConfiguration::set_color (string const& name, Gtkmm2ext::Color color)
 {
 	Colors::iterator i = colors.find (name);
 	if (i == colors.end()) {
@@ -794,7 +785,32 @@ UIConfiguration::load_rc_file (bool themechange, bool allow_own)
 		return;
 	}
 
-	info << "Loading ui configuration file " << rc_file_path << endmsg;
+	info << string_compose (_("Loading ui configuration file %1"), rc_file_path) << endmsg;
 
 	Gtkmm2ext::UI::instance()->load_rcfile (rc_file_path, themechange);
+}
+
+std::string
+UIConfiguration::color_to_hex_string (Gtkmm2ext::Color c)
+{
+	char buf[16];
+	int retval = g_snprintf (buf, sizeof(buf), "%08x", c);
+
+	if (retval < 0 || retval >= (int)sizeof(buf)) {
+		assert(false);
+	}
+	return buf;
+}
+
+std::string
+UIConfiguration::color_to_hex_string_no_alpha (Gtkmm2ext::Color c)
+{
+	c >>= 8; // shift/remove alpha
+	char buf[16];
+	int retval = g_snprintf (buf, sizeof(buf), "%06x", c);
+
+	if (retval < 0 || retval >= (int)sizeof(buf)) {
+		assert(false);
+	}
+	return buf;
 }

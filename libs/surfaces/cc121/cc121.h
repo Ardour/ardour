@@ -37,7 +37,6 @@
 
 namespace PBD {
 	class Controllable;
-	class ControllableDescriptor;
 }
 
 #include <midi++/types.h>
@@ -298,7 +297,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void drop_current_stripable ();
 	void use_master ();
 	void use_monitor ();
-	void gui_track_selection_changed (ARDOUR::StripableNotificationListPtr);
+	void stripable_selection_changed ();
 	PBD::ScopedConnection selection_connection;
 	PBD::ScopedConnectionList stripable_connections;
 
@@ -310,6 +309,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void map_gain ();
 	void map_cut ();
 	void map_auto ();
+	void map_monitoring ();
 
 	/* operations (defined in operations.cc) */
 
@@ -330,9 +330,7 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	void jog ();
 	void rec_enable ();
 
-	void ardour_pan_azimuth (float);
-	void ardour_pan_width (float);
-	void mixbus_pan (float);
+	void set_controllable (boost::shared_ptr<ARDOUR::AutomationControl>, float);
 
 	void punch ();
 };

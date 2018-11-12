@@ -64,11 +64,12 @@ private:
 	void calculate_time_width ();
 	void calculate_time_spacing ();
 	void update_minitimeline ();
-	void draw_dots (cairo_t*, int left, int right, int y, ArdourCanvas::Color);
+	void draw_dots (cairo_t*, int left, int right, int y, Gtkmm2ext::Color);
 	int  draw_mark (cairo_t*, int x0, int x1, const std::string&, bool& prelight);
+	int  draw_edge (cairo_t*, int x0, int x1, bool left, const std::string&, bool& prelight);
 
-	void render (cairo_t*, cairo_rectangle_t*);
-	void format_time (framepos_t when);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
+	void format_time (samplepos_t when);
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
@@ -77,23 +78,22 @@ private:
 	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void build_minitl_context_menu ();
-	void show_minitl_context_menu ();
-	void set_span (ARDOUR::framecnt_t);
+	void set_span (ARDOUR::samplecnt_t);
 
 	Glib::RefPtr<Pango::Layout> _layout;
 	sigc::connection super_rapid_connection;
 	PBD::ScopedConnectionList marker_connection;
 	PBD::ScopedConnectionList session_connection;
 
-	framepos_t _last_update_frame;
+	samplepos_t _last_update_sample;
 	AudioClock::Mode _clock_mode;
 	int _time_width;
 	int _time_height;
 
 	int _n_labels;
 	double _px_per_sample;
-	ARDOUR::framecnt_t _time_granularity;
-	ARDOUR::framecnt_t _time_span_samples;
+	ARDOUR::samplecnt_t _time_granularity;
+	ARDOUR::samplecnt_t _time_span_samples;
 	int _marker_height;
 
 	int _pointer_x;
@@ -101,12 +101,14 @@ private:
 
 	Gtk::Menu* _minitl_context_menu;
 
+	uint32_t _phead_color;
+
 	struct JumpRange {
-		JumpRange (int l, int r, framepos_t t, bool p = false)
+		JumpRange (int l, int r, samplepos_t t, bool p = false)
 			: left (l), right (r), to (t), prelight (p) {}
 		int left;
 		int right;
-		framepos_t to;
+		samplepos_t to;
 		bool prelight;
 	};
 

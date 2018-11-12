@@ -1,0 +1,56 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options
+import os
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+# Version of this package (even if built as a child)
+MAJOR = '0'
+MINOR = '0'
+MICRO = '0'
+TEMPORAL_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+TEMPORAL_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'temporal'
+VERSION = TEMPORAL_VERSION
+I18N_PACKAGE = 'libtemporal'
+
+temporal_sources = [ 'time.cc', 'bbt_time.cc' ]
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    conf.load('compiler_cxx')
+    autowaf.configure(conf)
+
+def build(bld):
+    # Library
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj = bld.shlib(features = 'cxx cxxshlib', source=temporal_sources)
+        obj.defines      = [ 'LIBTEMPORAL_DLL_EXPORTS=1' ]
+    else:
+        obj = bld.stlib(features = 'cxx cxxstlib', source=temporal_sources)
+        obj.cxxflags     = [ '-fPIC' ]
+        obj.cflags       = [ '-fPIC' ]
+        obj.defines      = [ ]
+
+    obj.export_includes = ['.']
+    obj.includes     = ['.']
+    obj.name         = 'libtemporal'
+    obj.target       = 'temporal'
+    obj.vnum         = TEMPORAL_LIB_VERSION
+    obj.install_path = bld.env['LIBDIR']
+    obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+
+def shutdown():
+    autowaf.shutdown()

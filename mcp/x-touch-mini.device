@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="Behringer X-Touch Mini"/>
+  <DeviceType value="MCU"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="no"/>
+  <TwoCharacterDisplay value="no"/>
+  <Extenders value="0"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="no"/>
+  <TouchSenseFaders value="no"/>
+  <HasMeters value="no"/>
+</MackieProtocolDevice>

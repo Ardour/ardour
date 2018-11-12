@@ -12,8 +12,8 @@ class TmpFileTest : public CppUnit::TestFixture
   public:
 	void setUp()
 	{
-		frames = 128;
-		random_data = TestUtils::init_random_data(frames);
+		samples = 128;
+		random_data = TestUtils::init_random_data(samples);
 	}
 
 	void tearDown()
@@ -25,22 +25,22 @@ class TmpFileTest : public CppUnit::TestFixture
 	{
 		uint32_t channels = 2;
 		file.reset (new TmpFileSync<float>(SF_FORMAT_WAV | SF_FORMAT_FLOAT, channels, 44100));
-		AllocatingProcessContext<float> c (random_data, frames, channels);
+		AllocatingProcessContext<float> c (random_data, samples, channels);
 		c.set_flag (ProcessContext<float>::EndOfInput);
 		file->process (c);
 
-		TypeUtils<float>::zero_fill (c.data (), c.frames());
+		TypeUtils<float>::zero_fill (c.data (), c.samples());
 
 		file->seek (0, SEEK_SET);
 		file->read (c);
-		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, c.data(), c.frames()));
+		CPPUNIT_ASSERT (TestUtils::array_equals (random_data, c.data(), c.samples()));
 	}
 
   private:
 	boost::shared_ptr<TmpFileSync<float> > file;
 
 	float * random_data;
-	framecnt_t frames;
+	samplecnt_t samples;
 };
 
 CPPUNIT_TEST_SUITE_REGISTRATION (TmpFileTest);

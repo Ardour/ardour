@@ -38,6 +38,8 @@
 #include "coreaudio_pcmio.h"
 #include "coremidi_io.h"
 
+#define MaxCoreMidiEventSize 256 // matches CoreMidi's MIDIPacket (https://developer.apple.com/documentation/coremidi/midipacket)
+
 namespace ARDOUR {
 
 class CoreAudioBackend;
@@ -46,19 +48,17 @@ class CoreMidiEvent {
   public:
 	CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size);
 	CoreMidiEvent (const CoreMidiEvent& other);
-	~CoreMidiEvent ();
 	size_t size () const { return _size; };
 	pframes_t timestamp () const { return _timestamp; };
-	const unsigned char* const_data () const { return _data; };
-	unsigned char* data () { return _data; };
+	const uint8_t* data () const { return _data; };
 	bool operator< (const CoreMidiEvent &other) const { return timestamp () < other.timestamp (); };
   private:
 	size_t _size;
 	pframes_t _timestamp;
-	uint8_t *_data;
+	uint8_t _data[MaxCoreMidiEventSize];
 };
 
-typedef std::vector<boost::shared_ptr<CoreMidiEvent> > CoreMidiBuffer;
+typedef std::vector<CoreMidiEvent> CoreMidiBuffer;
 
 class CoreBackendPort {
   protected:
@@ -96,17 +96,9 @@ class CoreBackendPort {
 		return for_playback ? _playback_latency_range : _capture_latency_range;
 	}
 
-	void set_latency_range (const LatencyRange &latency_range, bool for_playback)
-	{
-		if (for_playback)
-		{
-			_playback_latency_range = latency_range;
-		}
-		else
-		{
-			_capture_latency_range = latency_range;
-		}
-	}
+	void set_latency_range (const LatencyRange &latency_range, bool for_playback);
+
+	void update_connected_latency (bool for_playback);
 
   private:
 	CoreAudioBackend &_osx_backend;
@@ -309,8 +301,8 @@ class CoreAudioBackend : public AudioBackend {
 	size_t raw_buffer_size (DataType t);
 
 	/* Process time */
-	framepos_t sample_time ();
-	framepos_t sample_time_at_cycle_start ();
+	samplepos_t sample_time ();
+	samplepos_t sample_time_at_cycle_start ();
 	pframes_t samples_since_cycle_start ();
 
 	int create_process_thread (boost::function<void()> func);
@@ -352,7 +344,7 @@ class CoreAudioBackend : public AudioBackend {
 	int  get_connections (PortHandle, std::vector<std::string>&, bool process_callback_safe);
 
 	/* MIDI */
-	int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t** buf, void* port_buffer, uint32_t event_index);
+	int midi_event_get (pframes_t& timestamp, size_t& size, uint8_t const** buf, void* port_buffer, uint32_t event_index);
 	int midi_event_put (void* port_buffer, pframes_t timestamp, const uint8_t* buffer, size_t size) {
 		return _midi_event_put (port_buffer, timestamp, buffer, size);
 	}
@@ -462,6 +454,7 @@ class CoreAudioBackend : public AudioBackend {
 	PortHandle add_port (const std::string& shortname, ARDOUR::DataType, ARDOUR::PortFlags);
 	int register_system_audio_ports ();
 	void unregister_ports (bool system_only = false);
+	void update_system_port_latecies ();
 
 	std::vector<CoreBackendPort *> _system_inputs;
 	std::vector<CoreBackendPort *> _system_outputs;
@@ -492,6 +485,7 @@ class CoreAudioBackend : public AudioBackend {
 
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
+	pthread_mutex_t _port_registration_mutex;
 	bool _port_change_flag;
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {

@@ -31,7 +31,7 @@ Legatize::~Legatize ()
 
 Command*
 Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
-                     Evoral::Beats                        position,
+                     Temporal::Beats                      position,
                      std::vector<Legatize::Notes>&        seqs)
 {
 	MidiModel::NoteDiffCommand* cmd = new MidiModel::NoteDiffCommand(model, name ());
@@ -43,10 +43,10 @@ Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
 				break;
 			}
 
-			const Evoral::Beats new_end = (*next)->time() - Evoral::Beats::tick();
+			const Temporal::Beats new_end = (*next)->time() - Temporal::Beats::tick();
 			if ((*i)->end_time() > new_end ||
 			    (!_shrink_only && (*i)->end_time() < new_end)) {
-				const Evoral::Beats new_length(new_end - (*i)->time());
+				const Temporal::Beats new_length(new_end - (*i)->time());
 				cmd->change((*i), MidiModel::NoteDiffCommand::Length, new_length);
 			}
 

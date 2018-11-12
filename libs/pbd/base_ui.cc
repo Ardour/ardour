@@ -28,6 +28,9 @@
 #include <cerrno>
 #include <cstring>
 
+#include <pthread.h>
+#include <sched.h>
+
 #include "pbd/base_ui.h"
 #include "pbd/debug.h"
 #include "pbd/pthread_utils.h"
@@ -74,6 +77,12 @@ BaseUI::new_request_type ()
 	rt_bit <<= 1;
 
 	return rt;
+}
+
+int
+BaseUI::set_thread_priority (const int policy, int priority) const
+{
+	return pbd_set_thread_priority (pthread_self(), policy, priority);
 }
 
 void

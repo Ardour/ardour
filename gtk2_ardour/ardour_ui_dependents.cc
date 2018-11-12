@@ -37,9 +37,11 @@
 #include "ardour_ui.h"
 #include "public_editor.h"
 #include "meterbridge.h"
+#include "luainstance.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
 #include "keyboard.h"
+#include "keyeditor.h"
 #include "splash.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
@@ -130,7 +132,7 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 gint
 ARDOUR_UI::exit_on_main_window_close (GdkEventAny * /*ev*/)
 {
-#ifdef TOP_MENUBAR
+#ifdef __APPLE__
 	/* just hide the window, and return - the top menu stays up */
 	editor->hide ();
 	return TRUE;
@@ -151,7 +153,7 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 	using namespace std;
 	Gtk::Notebook* nb = 0;
 	Gtk::Window* win = 0;
-	Gtkmm2ext::Tabbable* tabbable = 0;
+	ArdourWidgets::Tabbable* tabbable = 0;
 
 
 	if (w == GTK_WIDGET(editor->contents().gobj())) {
@@ -217,10 +219,10 @@ ARDOUR_UI::main_window_delete_event (GdkEventAny* ev)
 
 static GtkNotebook*
 tab_window_root_drop (GtkNotebook* src,
-		      GtkWidget* w,
-		      gint x,
-		      gint y,
-		      gpointer user_data)
+                      GtkWidget* w,
+                      gint x,
+                      gint y,
+                      gpointer user_data)
 {
 	return ARDOUR_UI::instance()->tab_window_root_drop (src, w, x, y, user_data);
 }
@@ -269,39 +271,26 @@ ARDOUR_UI::setup_windows ()
 	mixer->add_to_notebook (_tabs, _("Mixer"));
 	editor->add_to_notebook (_tabs, _("Editor"));
 
-	time_info_box = new TimeInfoBox (false);
+	time_info_box = new TimeInfoBox ("ToolbarTimeInfo", false);
 	/* all other dialogs are created conditionally */
 
 	we_have_dependents ();
 
-#ifdef TOP_MENUBAR
-	EventBox* status_bar_event_box = manage (new EventBox);
-
-	status_bar_event_box->add (status_bar_label);
-	status_bar_event_box->add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	status_bar_label.set_size_request (300, -1);
-
-	status_bar_label.show ();
-	status_bar_event_box->show ();
-
-	status_bar_event_box->signal_button_press_event().connect (mem_fun (*this, &ARDOUR_UI::status_bar_button_press));
-
-	status_bar_hpacker.pack_start (*status_bar_event_box, true, true, 6);
-	status_bar_hpacker.pack_start (menu_bar_base, false, false, 2);
-#else
 	top_packer.pack_start (menu_bar_base, false, false);
-#endif
 
 	main_vpacker.pack_start (top_packer, false, false);
 
-	/* now add the transport frame to the top of main window */
+	ArdourWidgets::ArdourDropShadow *spacer = manage (new (ArdourWidgets::ArdourDropShadow));
+	spacer->set_size_request( -1, 4 );
+	spacer->show();
 
+	/* now add the transport sample to the top of main window */
+
+	main_vpacker.pack_start ( *spacer, false, false);
 	main_vpacker.pack_start (transport_frame, false, false);
 	main_vpacker.pack_start (_tabs, true, true);
 
-#ifdef TOP_MENUBAR
-	main_vpacker.pack_start (status_bar_hpacker, false, false);
-#endif
+	LuaInstance::instance()->ActionChanged.connect (sigc::mem_fun (*this, &ARDOUR_UI::update_action_script_btn));
 
 	for (int i = 0; i < 9; ++i) {
 		std::string const a = string_compose (X_("script-action-%1"), i + 1);
@@ -309,6 +298,7 @@ ARDOUR_UI::setup_windows ()
 		assert (act);
 		action_script_call_btn[i].set_text (string_compose ("%1", i+1));
 		action_script_call_btn[i].set_related_action (act);
+		action_script_call_btn[i].signal_button_press_event().connect (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::bind_lua_action_script), i), false);
 		if (act->get_sensitive ()) {
 			action_script_call_btn[i].set_visual_state (Gtkmm2ext::VisualState (action_script_call_btn[i].visual_state() & ~Gtkmm2ext::Insensitive));
 		} else {
@@ -397,4 +387,44 @@ ARDOUR_UI::setup_windows ()
 	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
 
 	return 0;
+}
+
+bool
+ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
+{
+	if (ev->button != 3) {
+		return false;
+	}
+	LuaInstance *li = LuaInstance::instance();
+	if (Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::TertiaryModifier)) {
+		li->remove_lua_action (i);
+	} else {
+		li->interactive_add (LuaScriptInfo::EditorAction, i);
+	}
+	return true;
+}
+
+void
+ARDOUR_UI::update_action_script_btn (int i, const std::string& n)
+{
+	if (LuaInstance::instance()->lua_action_has_icon (i)) {
+		uintptr_t ii = i;
+		action_script_call_btn[i].set_icon (&LuaInstance::render_action_icon, (void*)ii);
+	} else {
+		action_script_call_btn[i].set_icon (0, 0);
+	}
+
+	std::string const a = string_compose (X_("script-action-%1"), i + 1);
+	Glib::RefPtr<Action> act = ActionManager::get_action(X_("Editor"), a.c_str());
+	assert (act);
+	if (n.empty ()) {
+		act->set_label (string_compose (_("Unset #%1"), i + 1));
+		act->set_tooltip (_("No action bound\nRight-click to assign"));
+		act->set_sensitive (false);
+	} else {
+		act->set_label (n);
+		act->set_tooltip (string_compose (_("%1\n\nClick to run\nRight-click to re-assign\nShift+right-click to unassign"), n));
+		act->set_sensitive (true);
+	}
+	KeyEditor::UpdateBindings ();
 }

@@ -57,7 +57,7 @@ class LIBMIDIPP_API Port {
 	/** Write a message to port.
 	 * @param msg Raw MIDI message to send
 	 * @param msglen Size of @a msg
-	 * @param timestamp Time stamp in frames of this message (relative to cycle start)
+	 * @param timestamp Time stamp in samples of this message (relative to cycle start)
 	 * @return number of bytes successfully written
 	 */
 	virtual int write (const byte *msg, size_t msglen, timestamp_t timestamp) = 0;
@@ -85,7 +85,7 @@ class LIBMIDIPP_API Port {
 		return !(write (msg, len, timestamp) == (int) len);
 	}
 
-	virtual void parse (framecnt_t timestamp) = 0;
+	virtual void parse (samplecnt_t timestamp) = 0;
 
 	bool clock (timestamp_t timestamp);
 

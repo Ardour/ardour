@@ -20,13 +20,7 @@
 #include <map>
 #include <boost/algorithm/string.hpp>
 
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/choice.h>
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/bindable_button.h>
-#include <gtkmm2ext/barcontroller.h>
-#include <gtkmm2ext/gtk_ui.h>
-#include <gtkmm2ext/utils.h>
+#include <gtkmm/stock.h>
 
 #include "pbd/memento_command.h"
 #include "pbd/stacktrace.h"
@@ -53,7 +47,15 @@
 #include "ardour/session.h"
 #include "ardour/template_utils.h"
 
-#include "ardour_button.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
+
+#include "widgets/ardour_button.h"
+#include "widgets/binding_proxy.h"
+#include "widgets/prompter.h"
+
 #include "ardour_dialog.h"
 #include "ardour_ui.h"
 #include "automation_time_axis.h"
@@ -64,21 +66,23 @@
 #include "keyboard.h"
 #include "latency_gui.h"
 #include "mixer_strip.h"
+#include "patch_change_widget.h"
 #include "plugin_pin_dialog.h"
-#include "prompter.h"
 #include "rgb_macros.h"
 #include "route_time_axis.h"
 #include "route_ui.h"
+#include "save_template_dialog.h"
 #include "timers.h"
 #include "ui_config.h"
 #include "utils.h"
 
-
 #include "pbd/i18n.h"
+
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace std;
 
@@ -117,6 +121,8 @@ RouteUI::~RouteUI()
 	if (_route) {
 		ARDOUR_UI::instance()->gui_object_state->remove_node (route_state_id());
 	}
+
+	delete_patch_change_dialog ();
 
 	_route.reset (); /* drop reference to route, so that it can be cleaned up */
 	route_connections.drop_connections ();
@@ -243,6 +249,9 @@ RouteUI::reset ()
 	delete mute_menu;
 	mute_menu = 0;
 
+	delete_patch_change_dialog ();
+	_color_picker.reset ();
+
 	denormal_menu_item = 0;
 }
 
@@ -258,6 +267,41 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 	reset ();
 
 	_route = rp;
+
+	if ( !_route->presentation_info().color_set() ) {
+		/* deal with older 4.x color, which was stored in the GUI object state */
+
+		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));
+
+		if (!p.empty()) {
+
+			/* old v4.x or earlier session. Use this information */
+
+			int red, green, blue;
+			char colon;
+
+			stringstream ss (p);
+
+			/* old color format version was:
+
+			   16bit value for red:16 bit value for green:16 bit value for blue
+
+			   decode to rgb ..
+			*/
+
+			ss >> red;
+			ss >> colon;
+			ss >> green;
+			ss >> colon;
+			ss >> blue;
+
+			red >>= 2;
+			green >>= 2;
+			blue >>= 2;
+
+			_route->presentation_info().set_color (RGBA_TO_UINT (red, green, blue, 255));
+		}
+	}
 
 	if (set_color_from_route()) {
 		set_color (gdk_color_to_rgba (AxisView::unique_random_color ()));
@@ -289,9 +333,6 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 
 	if (is_track()) {
 		track()->FreezeChange.connect (*this, invalidator (*this), boost::bind (&RouteUI::map_frozen, this), gui_context());
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-		track()->TrackModeChanged.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::track_mode_changed, this), gui_context());
-#endif
 		track_mode_changed();
 	}
 
@@ -310,10 +351,10 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 		rec_enable_button->show();
 		rec_enable_button->set_controllable (t->rec_enable_control());
 
-                if (is_midi_track()) {
-                        midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
-                                                                    boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
-                }
+		if (is_midi_track()) {
+			midi_track()->StepEditStatusChange.connect (route_connections, invalidator (*this),
+					boost::bind (&RouteUI::step_edit_changed, this, _1), gui_context());
+		}
 
 	}
 
@@ -363,9 +404,9 @@ RouteUI::set_route (boost::shared_ptr<Route> rp)
 void
 RouteUI::polarity_changed ()
 {
-        if (!_route) {
-                return;
-        }
+	if (!_route) {
+		return;
+	}
 
 	set_invert_button_state ();
 }
@@ -378,7 +419,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	multiple_mute_change = false;
@@ -457,6 +498,8 @@ RouteUI::mute_press (GdkEventButton* ev)
 						_mute_release->routes = rl;
 					}
 
+					boost::shared_ptr<MuteControl> mc = _route->mute_control();
+					mc->start_touch (_session->audible_sample ());
 					_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
 				}
 
@@ -471,7 +514,9 @@ RouteUI::mute_press (GdkEventButton* ev)
 					_mute_release->routes = rl;
 				}
 
-				_route->mute_control()->set_value (!_route->muted_by_self(), Controllable::UseGroup);
+				boost::shared_ptr<MuteControl> mc = _route->mute_control();
+				mc->start_touch (_session->audible_sample ());
+				mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
 			}
 		}
 	}
@@ -487,6 +532,8 @@ RouteUI::mute_release (GdkEventButton* /*ev*/)
 		delete _mute_release;
 		_mute_release = 0;
 	}
+
+	_route->mute_control()->stop_touch (_session->audible_sample ());
 
 	return false;
 }
@@ -547,7 +594,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	multiple_solo_change = false;
@@ -586,14 +633,21 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier))) {
 
-				// Primary-Secondary-click: exclusively solo this track
+				/* Primary-Secondary-click: exclusively solo this track */
 
 				if (_solo_release) {
 					_solo_release->exclusive = true;
 
-					boost::shared_ptr<RouteList> routes = _session->get_routes();
+					_solo_release->routes_on.reset (new RouteList);
+					_solo_release->routes_off.reset (new RouteList);
 
-					for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+					boost::shared_ptr<RouteList> routes = _session->get_routes();
+					for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+#ifdef MIXBUS
+						if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
+							continue;
+						}
+#endif
 						if ((*i)->soloed ()) {
 							_solo_release->routes_on->push_back (*i);
 						} else {
@@ -601,6 +655,20 @@ RouteUI::solo_press(GdkEventButton* ev)
 						}
 					}
 				}
+
+				boost::shared_ptr<RouteList> rl (new RouteList);
+				boost::shared_ptr<RouteList> routes = _session->get_routes();
+				for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+#ifdef MIXBUS
+					if ((0 == _route->mixbus()) != (0 == (*i)->mixbus ())) {
+						continue;
+					}
+#endif
+					if ((*i)->soloed ()) {
+						rl->push_back (*i);
+					}
+				}
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), false, Controllable::UseGroup);
 
 				if (Config->get_solo_control_is_listen_control()) {
 					/* ??? we need a just_one_listen() method */
@@ -680,9 +748,9 @@ bool
 RouteUI::solo_release (GdkEventButton* /*ev*/)
 {
 	if (_solo_release) {
-
 		if (_solo_release->exclusive) {
-
+			_session->set_controls (route_list_to_control_list (_solo_release->routes_off, &Stripable::solo_control), 0.0, Controllable::NoGroup);
+			_session->set_controls (route_list_to_control_list (_solo_release->routes_on, &Stripable::solo_control), 1.0, Controllable::NoGroup);
 		} else {
 			_session->set_controls (route_list_to_control_list (_solo_release->routes, &Stripable::solo_control), _solo_release->active ? 1.0 : 0.0, Controllable::UseGroup);
 		}
@@ -702,11 +770,11 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if ( BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev) )
 		return false;
 
 	if (!_session->engine().connected()) {
-	        MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
+		MessageDialog msg (_("Not connected to AudioEngine - cannot engage record"));
 		msg.run ();
 		return false;
 	}
@@ -838,35 +906,26 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	MonitorChoice mc;
 	boost::shared_ptr<RouteList> rl;
 
-	/* XXX for now, monitoring choices are orthogonal. cue monitoring
-	   will follow in 3.X but requires mixing the input and playback (disk)
-	   signal together, which requires yet more buffers.
-	*/
-
 	if (t->monitoring_control()->monitoring_choice() & monitor_choice) {
 		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() & ~monitor_choice);
 	} else {
-		/* this line will change when the options are non-orthogonal */
-		// mc = MonitorChoice (t->monitoring_choice() | monitor_choice);
-		mc = monitor_choice;
+		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() | monitor_choice);
 	}
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+		/* Primary-Tertiary-click applies change to all routes */
 		rl = _session->get_routes ();
-
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
 	} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		if (_route->route_group() && _route->route_group()->is_monitoring()) {
-			rl = _route->route_group()->route_list();
-		} else {
-			rl.reset (new RouteList);
-			rl->push_back (route());
-		}
+		/* Primary-click overrides group */
+		rl.reset (new RouteList);
+		rl->push_back (route());
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
 	} else {
 		rl.reset (new RouteList);
 		rl->push_back (route());
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 	}
-
-	_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 
 	return false;
 }
@@ -1278,11 +1337,11 @@ RouteUI::mute_active_state (Session*, boost::shared_ptr<Stripable> s)
 void
 RouteUI::update_mute_display ()
 {
-        if (!_route) {
-                return;
-        }
+	if (!_route) {
+		return;
+	}
 
-        mute_button->set_active_state (mute_active_state (_session, _route));
+	mute_button->set_active_state (mute_active_state (_session, _route));
 }
 
 
@@ -1314,31 +1373,31 @@ RouteUI::blink_rec_display (bool blinkOn)
 	}
 
 	if (track()->rec_enable_control()->get_value()) {
-                switch (_session->record_status ()) {
-                case Session::Recording:
-                        rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
-                        break;
+		switch (_session->record_status ()) {
+			case Session::Recording:
+				rec_enable_button->set_active_state (Gtkmm2ext::ExplicitActive);
+				break;
 
-                case Session::Disabled:
-                case Session::Enabled:
-	                if (UIConfiguration::instance().get_blink_rec_arm()) {
-	                        rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
-	                } else {
-	                        rec_enable_button->set_active_state ( ImplicitActive );
-	                }
-                        break;
-                }
+			case Session::Disabled:
+			case Session::Enabled:
+				if (UIConfiguration::instance().get_blink_rec_arm()) {
+					rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
+				} else {
+					rec_enable_button->set_active_state ( ImplicitActive );
+				}
+				break;
+		}
 
-                if (step_edit_item) {
-                        step_edit_item->set_sensitive (false);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_sensitive (false);
+		}
 
 	} else {
 		rec_enable_button->unset_active_state ();
 
-                if (step_edit_item) {
-                        step_edit_item->set_sensitive (true);
-                }
+		if (step_edit_item) {
+			step_edit_item->set_sensitive (true);
+		}
 	}
 
 	check_rec_enable_sensitivity ();
@@ -1358,19 +1417,15 @@ RouteUI::build_solo_menu (void)
 	check->set_active (_route->solo_isolate_control()->solo_isolated());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_isolated), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+	solo_isolated_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
 
 	check = new Gtk::CheckMenuItem(_("Solo Safe"));
 	check->set_active (_route->solo_safe_control()->solo_safe());
 	check->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_solo_safe), check));
 	items.push_back (CheckMenuElem(*check));
-        solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
+	solo_safe_check = dynamic_cast<Gtk::CheckMenuItem*>(&items.back());
 	check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
-
 }
 
 void
@@ -1406,9 +1461,6 @@ RouteUI::build_mute_menu(void)
 	main_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::Main, main_mute_check));
 	items.push_back (CheckMenuElem(*main_mute_check));
 	main_mute_check->show_all();
-
-	//items.push_back (SeparatorElem());
-	// items.push_back (MenuElem (_("MIDI Bind"), sigc::mem_fun (*mute_button, &BindableToggleButton::midi_learn)));
 
 	_route->mute_points_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::muting_change, this), gui_context());
 }
@@ -1542,14 +1594,14 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 void
 RouteUI::toggle_solo_isolated (Gtk::CheckMenuItem* check)
 {
-        bool view = check->get_active();
-        bool model = _route->solo_isolate_control()->solo_isolated();
+	bool view = check->get_active();
+	bool model = _route->solo_isolate_control()->solo_isolated();
 
-        /* called AFTER the view has changed */
+	/* called AFTER the view has changed */
 
-        if (model != view) {
-	        _route->solo_isolate_control()->set_value (view ? 1.0 : 0.0, Controllable::UseGroup);
-        }
+	if (model != view) {
+		_route->solo_isolate_control()->set_value (view ? 1.0 : 0.0, Controllable::UseGroup);
+	}
 }
 
 void
@@ -1558,18 +1610,44 @@ RouteUI::toggle_solo_safe (Gtk::CheckMenuItem* check)
 	_route->solo_safe_control()->set_value (check->get_active() ? 1.0 : 0.0, Controllable::UseGroup);
 }
 
-/** Ask the user to choose a colour, and then apply that color to my route
- */
+void
+RouteUI::delete_patch_change_dialog ()
+{
+	if (!_route) {
+		return;
+	}
+	delete _route->patch_selector_dialog ();
+	_route->set_patch_selector_dialog (0);
+}
+
+PatchChangeGridDialog*
+RouteUI::patch_change_dialog () const
+{
+	return _route->patch_selector_dialog ();
+}
+
+void
+RouteUI::select_midi_patch ()
+{
+	if (patch_change_dialog ()) {
+		patch_change_dialog()->present ();
+		return;
+	}
+
+	/* note: RouteTimeAxisView is resoponsible to updating
+	 * the Dialog (PatchChangeGridDialog::refresh())
+	 * when the midnam model changes.
+	 */
+	PatchChangeGridDialog* d = new PatchChangeGridDialog (_route);
+	_route->set_patch_selector_dialog (d);
+	d->present ();
+}
+
+/** Ask the user to choose a colour, and then apply that color to my route */
 void
 RouteUI::choose_color ()
 {
-	bool picked;
-	Gdk::Color c (gdk_color_from_rgba (_route->presentation_info().color()));
-	Gdk::Color const color = Gtkmm2ext::UI::instance()->get_color (_("Color Selection"), picked, &c);
-
-	if (picked) {
-		set_color (gdk_color_to_rgba (color));
-	}
+	_color_picker.popup (_route);
 }
 
 /** Set the route's own color.  This may not be used for display if
@@ -1620,7 +1698,7 @@ RouteUI::verify_new_route_name (const std::string& name)
 void
 RouteUI::route_rename ()
 {
-	ArdourPrompter name_prompter (true);
+	ArdourWidgets::Prompter name_prompter (true);
 	string result;
 	bool done = false;
 
@@ -1842,67 +1920,47 @@ RouteUI::map_frozen ()
 void
 RouteUI::adjust_latency ()
 {
-	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
+	LatencyDialog dialog (_route->name() + _(" latency"), *(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 }
 
-bool
-RouteUI::process_save_template_prompter (ArdourPrompter& prompter, const std::string& dir)
+
+void
+RouteUI::save_as_template_dialog_response (int response, SaveTemplateDialog* d)
 {
-	std::string path;
-	std::string safe_name;
-	std::string name;
+	if (response == RESPONSE_ACCEPT) {
+		const string name = d->get_template_name ();
+		const string desc = d->get_description ();
+		const string path = Glib::build_filename(ARDOUR::user_route_template_directory (), name + ARDOUR::template_suffix);
 
-	prompter.get_result (name, true);
+		if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) { /* file already exists. */
+			bool overwrite = overwrite_file_dialog (*d,
+								_("Confirm Template Overwrite"),
+								_("A template already exists with that name. Do you want to overwrite it?"));
 
-	safe_name = legalize_for_path (name);
-	safe_name += template_suffix;
-
-	path = Glib::build_filename (dir, safe_name);
-
-	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
-		bool overwrite = overwrite_file_dialog (prompter,
-		                                        _("Confirm Template Overwrite"),
-							_("A template already exists with that name. Do you want to overwrite it?"));
-
-		if (!overwrite) {
-			return false;
+			if (!overwrite) {
+				d->show ();
+				return;
+			}
 		}
+		_route->save_as_template (path, name, desc);
 	}
 
-	_route->save_as_template (path, name);
-
-	return true;
+	delete d;
 }
 
 void
 RouteUI::save_as_template ()
 {
-	std::string dir;
-
-	dir = ARDOUR::user_route_template_directory ();
+	const std::string dir = ARDOUR::user_route_template_directory ();
 
 	if (g_mkdir_with_parents (dir.c_str(), 0755)) {
 		error << string_compose (_("Cannot create route template directory %1"), dir) << endmsg;
 		return;
 	}
 
-	ArdourPrompter prompter (true); // modal
-
-	prompter.set_title (_("Save As Template"));
-	prompter.set_prompt (_("Template name:"));
-	prompter.add_button (Gtk::Stock::SAVE, Gtk::RESPONSE_ACCEPT);
-
-	bool finished = false;
-	while (!finished) {
-		switch (prompter.run()) {
-		case RESPONSE_ACCEPT:
-			finished = process_save_template_prompter (prompter, dir);
-			break;
-		default:
-			finished = true;
-			break;
-		}
-	}
+	SaveTemplateDialog* d = new SaveTemplateDialog (_route->name(), _route->comment());
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::save_as_template_dialog_response), d));
+	d->show ();
 }
 
 void
@@ -1954,30 +2012,6 @@ RouteUI::parameter_changed (string const & p)
 			RouteUI::blink_rec_display(false);
 		}
 	}
-}
-
-void
-RouteUI::step_gain_up ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.1), Controllable::UseGroup);
-}
-
-void
-RouteUI::page_gain_up ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) + 0.5), Controllable::UseGroup);
-}
-
-void
-RouteUI::step_gain_down ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.1), Controllable::UseGroup);
-}
-
-void
-RouteUI::page_gain_down ()
-{
-	_route->gain_control()->set_value (dB_to_coefficient (accurate_coefficient_to_dB (_route->gain_control()->get_value()) - 0.5), Controllable::UseGroup);
 }
 
 void
@@ -2121,16 +2155,8 @@ RouteUI::invert_menu_toggled (uint32_t c)
 void
 RouteUI::set_invert_sensitive (bool yn)
 {
-        for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
-                (*b)->set_sensitive (yn);
-        }
-}
-
-void
-RouteUI::request_redraw ()
-{
-	if (_route) {
-		_route->gui_changed ("track_height", (void *) 0); /* EMIT_SIGNAL */
+	for (vector<ArdourButton*>::iterator b = _invert_buttons.begin(); b != _invert_buttons.end(); ++b) {
+		(*b)->set_sensitive (yn);
 	}
 }
 
@@ -2162,9 +2188,8 @@ RouteUI::track_mode_changed (void)
 }
 
 /** @return the color that this route should use; it maybe its own,
-    or it maybe that of its route group.
-*/
-
+ *  or it maybe that of its route group.
+ */
 Gdk::Color
 RouteUI::route_color () const
 {
@@ -2175,40 +2200,6 @@ RouteUI::route_color () const
 	if (g && g->is_color()) {
 		set_color_from_rgba (c, GroupTabs::group_color (g));
 	} else {
-
-		/* deal with older 4.x color, which was stored in the GUI object state */
-
-		string p = ARDOUR_UI::instance()->gui_object_state->get_string (route_state_id(), X_("color"));
-
-		if (!p.empty()) {
-
-			/* old v4.x or earlier session. Use this information */
-
-			int red, green, blue;
-			char colon;
-
-			stringstream ss (p);
-
-			/* old color format version was:
-
-			   16bit value for red:16 bit value for green:16 bit value for blue
-
-			   decode to rgb ..
-			*/
-
-			ss >> red;
-			ss >> colon;
-			ss >> green;
-			ss >> colon;
-			ss >> blue;
-
-			red >>= 2;
-			green >>= 2;
-			blue >>= 2;
-
-			_route->presentation_info().set_color (RGBA_TO_UINT (red, green, blue, 255));
-		}
-
 		set_color_from_rgba (c, _route->presentation_info().color());
 	}
 
@@ -2436,3 +2427,10 @@ RouteUI::stripable () const
 	return _route;
 }
 
+void
+RouteUI::set_disk_io_point (DiskIOPoint diop)
+{
+	if (_route && is_track()) {
+		track()->set_disk_io_point (diop);
+	}
+}

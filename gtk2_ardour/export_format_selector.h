@@ -22,9 +22,14 @@
 #define __export_format_selector_h__
 
 #include <string>
-#include <gtkmm.h>
 #include <sigc++/signal.h>
 #include <boost/shared_ptr.hpp>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"
@@ -34,16 +39,14 @@ namespace ARDOUR {
 	class ExportProfileManager;
 }
 
-///
 class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-
-  private:
+private:
 
 	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
 	typedef std::list<FormatPtr> FormatList;
 
-  public:
+public:
 
 	ExportFormatSelector ();
 	~ExportFormatSelector ();
@@ -59,7 +62,7 @@ class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  private:
+private:
 
 	void select_format (FormatPtr f);
 	void add_new_format ();
@@ -74,7 +77,7 @@ class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 
 	struct FormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<FormatPtr>      format;
 		Gtk::TreeModelColumn<std::string>  label;
 

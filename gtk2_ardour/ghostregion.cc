@@ -17,14 +17,16 @@
 
 */
 
+#include "evoral/Note.hpp"
+
 #include "ardour/parameter_descriptor.h"
 
-#include "evoral/Note.hpp"
 #include "canvas/container.h"
 #include "canvas/polygon.h"
 #include "canvas/rectangle.h"
-#include "canvas/wave_view.h"
 #include "canvas/debug.h"
+
+#include "waveview/wave_view.h"
 
 #include "automation_time_axis.h"
 #include "ghostregion.h"
@@ -39,8 +41,8 @@
 
 using namespace std;
 using namespace Editing;
-using namespace ArdourCanvas;
 using namespace ARDOUR;
+using ArdourCanvas::Duple;
 
 GhostRegion::GhostRegion(RegionView& rv,
                          ArdourCanvas::Container* parent,
@@ -126,7 +128,7 @@ AudioGhostRegion::AudioGhostRegion(RegionView& rv,
 void
 AudioGhostRegion::set_samples_per_pixel (double fpp)
 {
-	for (vector<WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
+	for (vector<ArdourWaveView::WaveView*>::iterator i = waves.begin(); i != waves.end(); ++i) {
 		(*i)->set_samples_per_pixel (fpp);
 	}
 }
@@ -134,7 +136,7 @@ AudioGhostRegion::set_samples_per_pixel (double fpp)
 void
 AudioGhostRegion::set_height ()
 {
-	vector<WaveView*>::iterator i;
+	vector<ArdourWaveView::WaveView*>::iterator i;
 	uint32_t n;
 
 	GhostRegion::set_height();
@@ -323,7 +325,7 @@ MidiGhostRegion::update_contents_height ()
 			_tmp_rect->set (ArdourCanvas::Rect (_tmp_rect->x0(), y, _tmp_rect->x1(), y + h));
 		} else {
 			_tmp_poly = static_cast<ArdourCanvas::Polygon*>(it->second->item);
-			Duple position = _tmp_poly->position();
+			ArdourCanvas::Duple position = _tmp_poly->position();
 			position.y = y;
 			_tmp_poly->set_position(position);
 			_tmp_poly->set(Hit::points(h));

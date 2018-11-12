@@ -195,7 +195,7 @@ NagScreen::offer_to_donate ()
 {
 	/* we don't care if it fails */
 
-        PBD::open_uri (Config->get_donate_url());
+	PBD::open_uri (Config->get_donate_url());
 }
 
 void

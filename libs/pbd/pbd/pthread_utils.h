@@ -54,9 +54,31 @@ LIBPBD_API void pthread_kill_all (int signum);
 LIBPBD_API const char* pthread_name ();
 LIBPBD_API void pthread_set_name (const char* name);
 
+LIBPBD_API int pbd_realtime_pthread_create (
+		const int policy, int priority, const size_t stacksize,
+		pthread_t *thread,
+		void *(*start_routine) (void *),
+		void *arg);
+
+LIBPBD_API int  pbd_set_thread_priority (pthread_t, const int policy, int priority);
+LIBPBD_API bool pbd_mach_set_realtime_policy (pthread_t thread_id, double period_ns);
+
 namespace PBD {
 	LIBPBD_API extern void notify_event_loops_about_thread_creation (pthread_t, const std::string&, int requests = 256);
 	LIBPBD_API extern PBD::Signal3<void,pthread_t,std::string,uint32_t> ThreadCreatedWithRequestSize;
 }
 
+/* pthread-w32 does not support realtime scheduling
+ * (well, windows, doesn't..) and only supports SetThreadPriority()
+ *
+ * pthread_setschedparam() returns ENOTSUP if the policy is not SCHED_OTHER.
+ *
+ * however, pthread_create() with attributes, ignores the policy and
+ * only sets the priority (when PTHREAD_EXPLICIT_SCHED is used).
+ */
+#ifdef PLATFORM_WINDOWS
+#define PBD_SCHED_FIFO SCHED_OTHER
+#else
+#define PBD_SCHED_FIFO SCHED_FIFO
+#endif
 #endif /* __pbd_pthread_utils__ */

@@ -66,7 +66,7 @@ class LIBMIDIPP_API IPMIDIPort : public Port {
 
     int write (const byte *msg, size_t msglen, timestamp_t timestamp);
     int read (byte *buf, size_t bufsize);
-    void parse (framecnt_t timestamp);
+    void parse (samplecnt_t timestamp);
     int selectable () const;
 
     static const int lowest_ipmidi_port_default = 21928;

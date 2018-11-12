@@ -73,17 +73,17 @@ function dsp_run (ins, outs, n_samples)
 
 		local d = b["data"] -- get midi-event
 		-- we ignore the midi channel
-		if (#d == 3 and bit32.band (d[1], 240) == 144) then -- note on
+		if (#d == 3 and (d[1] & 240) == 144) then -- note on
 			local n = 1 + d[2];
 			active_notes[n] = active_notes[n] or {}
 			active_notes[n]["tvel"] = d[3]
 		end
-		if (#d == 3 and bit32.band (d[1], 240) == 128) then -- note off
+		if (#d == 3 and (d[1] & 240) == 128) then -- note off
 			local n = 1 + d[2];
 			active_notes[n] = active_notes[n] or {}
 			active_notes[n]["tvel"] = 0
 		end
-		if (#d == 3 and bit32.band (d[1], 240) == 176) then -- CC
+		if (#d == 3 and (d[1] & 240) == 176) then -- CC
 			if (d[2] == 120 or d[2] == 123) then -- panic
 				active_notes = {}
 			end

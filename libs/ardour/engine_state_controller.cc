@@ -557,7 +557,7 @@ EngineStateController::_validate_current_device_state ()
 	// check if session desired sample rate (if it's set) could be used with this device
 	if (_session != 0) {
 
-		if ( !set_new_sample_rate_in_controller (_session->nominal_frame_rate ())) {
+		if ( !set_new_sample_rate_in_controller (_session->nominal_sample_rate ())) {
 			if ( !set_new_sample_rate_in_controller (backend->default_sample_rate ()) ) {
 				if (!set_new_sample_rate_in_controller (sample_rates.front ()) ) {
 					return false;
@@ -708,14 +708,14 @@ EngineStateController::enumerate_devices (std::vector<AudioBackend::DeviceStatus
 }
 
 
-framecnt_t
+samplecnt_t
 EngineStateController::get_current_sample_rate () const
 {
 	return _current_state->sample_rate;
 }
 
 
-framecnt_t
+samplecnt_t
 EngineStateController::get_default_sample_rate () const
 {
 	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
@@ -870,7 +870,7 @@ EngineStateController::set_new_device_as_current (const std::string& device_name
 
 
 bool
-EngineStateController::set_new_sample_rate_in_controller (framecnt_t sample_rate)
+EngineStateController::set_new_sample_rate_in_controller (samplecnt_t sample_rate)
 {
 	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
 	assert (backend);
@@ -1424,7 +1424,7 @@ EngineStateController::_on_session_loaded ()
 	// _session->reconnect_ltc_input ();
 	// _session->reconnect_ltc_output ();
 
-	framecnt_t desired_sample_rate = _session->nominal_frame_rate ();
+	samplecnt_t desired_sample_rate = _session->nominal_sample_rate ();
 	if ( desired_sample_rate > 0 && set_new_sample_rate_in_controller (desired_sample_rate))
 	{
 		push_current_state_to_backend (false);
@@ -1434,15 +1434,15 @@ EngineStateController::_on_session_loaded ()
 
 
 void
-EngineStateController::_on_sample_rate_change (framecnt_t new_sample_rate)
+EngineStateController::_on_sample_rate_change (samplecnt_t new_sample_rate)
 {
 	if (_current_state->sample_rate != new_sample_rate) {
 
 		// if sample rate has been changed
-		framecnt_t sample_rate_to_set = new_sample_rate;
+		samplecnt_t sample_rate_to_set = new_sample_rate;
 		if (AudioEngine::instance ()->session ()) {
 			// and we have current session we should restore it back to the one tracks uses
-			sample_rate_to_set = AudioEngine::instance ()->session ()->frame_rate ();
+			sample_rate_to_set = AudioEngine::instance ()->session ()->sample_rate ();
 		}
 
 		if ( !set_new_sample_rate_in_controller (sample_rate_to_set)) {

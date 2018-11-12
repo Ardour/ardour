@@ -255,7 +255,7 @@ FramedCurve::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) c
 				break;
 			case Inside:
 				context->stroke_preserve ();
-				/* close the frame, possibly using the last _point's x rather than samples[right].x */
+				/* close the sample, possibly using the last _point's x rather than samples[right].x */
 				window_space = item_to_window (Duple (last_sample.x, draw.height()));
 				context->line_to (window_space.x, window_space.y);
 				window_space = item_to_window (Duple (first_sample.x, draw.height()));

@@ -26,11 +26,11 @@
 
 class MidiChannelDialog : public ArdourDialog
 {
-  public:
+public:
 	MidiChannelDialog (uint8_t active_channel = 0);
 	uint8_t active_channel() const;
 
-  private:
+private:
 	SingleMidiChannelSelector selector;
 };
 

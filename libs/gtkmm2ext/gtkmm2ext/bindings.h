@@ -213,6 +213,7 @@ class LIBGTKMM2EXT_API Bindings {
 	                      std::vector<Glib::RefPtr<Gtk::Action> >& actions);
 
 	/* all bindings currently in existence, as grouped into Bindings */
+	static void reset_bindings () { bindings.clear (); }
 	static std::list<Bindings*> bindings;
 	static Bindings* get_bindings (std::string const& name, ActionMap&);
 	static void associate_all ();

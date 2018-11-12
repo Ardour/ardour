@@ -31,15 +31,16 @@
 #include <limits.h>
 
 #include <gtkmm/box.h>
+#include <gtkmm/scrolledwindow.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/gstdio_compat.h"
 #include <glibmm/fileutils.h>
 
-#include "pbd/convert.h"
 #include "pbd/tokenizer.h"
 #include "pbd/enumwriter.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/string_convert.h"
 #include "pbd/xml++.h"
 
 #include <gtkmm2ext/utils.h>
@@ -62,7 +63,6 @@
 #include "ardour_ui.h"
 #include "editing.h"
 #include "gui_thread.h"
-#include "prompter.h"
 #include "sfdb_ui.h"
 #include "editing.h"
 #include "gain_meter.h"
@@ -143,7 +143,9 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	  main_box (false, 6),
 	  autoplay_btn (_("Auto-play")),
 	  seek_slider(0,1000,1),
-	  _seeking(false)
+	  _seeking(false),
+	  _src_quality (SrcBest),
+	  _import_position (ImportAtTimestamp)
 
 {
 	set_name (X_("SoundFileBox"));
@@ -235,6 +237,9 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	play_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::audition));
 	stop_btn.signal_clicked().connect (sigc::mem_fun (*this, &SoundFileBox::stop_audition));
 
+	update_autoplay ();
+	autoplay_btn.signal_toggled().connect(sigc::mem_fun (*this, &SoundFileBox::autoplay_toggled));
+
 	stop_btn.set_sensitive (false);
 
 	channels_value.set_alignment (0.0f, 0.5f);
@@ -270,7 +275,7 @@ SoundFileBox::audition_active(bool active) {
 }
 
 void
-SoundFileBox::audition_progress(ARDOUR::framecnt_t pos, ARDOUR::framecnt_t len) {
+SoundFileBox::audition_progress(ARDOUR::samplecnt_t pos, ARDOUR::samplecnt_t len) {
 	if (!_seeking) {
 		seek_slider.set_value( 1000.0 * pos / len);
 		seek_slider.set_sensitive (true);
@@ -325,12 +330,12 @@ SoundFileBox::setup_labels (const string& filename)
 
 		if (ms) {
 			if (ms->is_type0()) {
-				channels_value.set_text (to_string(ms->channels().size(), std::dec));
+				channels_value.set_text (to_string<uint32_t>(ms->channels().size()));
 			} else {
 				if (ms->num_tracks() > 1) {
-					channels_value.set_text (to_string(ms->num_tracks(), std::dec) + _("(Tracks)"));
+					channels_value.set_text (to_string(ms->num_tracks()) + _("(Tracks)"));
 				} else {
-					channels_value.set_text (to_string(ms->num_tracks(), std::dec));
+					channels_value.set_text (to_string(ms->num_tracks()));
 				}
 			}
 			length_clock.set (ms->length(ms->timeline_position()));
@@ -390,9 +395,9 @@ SoundFileBox::setup_labels (const string& filename)
 		n = n.substr (8);
 	}
 	format_text.set_text (n);
-	channels_value.set_text (to_string (sf_info.channels, std::dec));
+	channels_value.set_text (to_string (sf_info.channels));
 
-	if (_session && sf_info.samplerate != _session->frame_rate()) {
+	if (_session && sf_info.samplerate != _session->sample_rate()) {
 		samplerate.set_markup (string_compose ("<b>%1</b>", _("Sample rate:")));
 		samplerate_value.set_markup (string_compose (X_("<b>%1 Hz</b>"), sf_info.samplerate));
 		samplerate_value.set_name ("NewSessionSR1Label");
@@ -404,7 +409,7 @@ SoundFileBox::setup_labels (const string& filename)
 		samplerate.set_name ("NewSessionSR2Label");
 	}
 
-	framecnt_t const nfr = _session ? _session->nominal_frame_rate() : 25;
+	samplecnt_t const nfr = _session ? _session->nominal_sample_rate() : 25;
 	double src_coef = (double) nfr / sf_info.samplerate;
 
 	length_clock.set (sf_info.length * src_coef + 0.5, true);
@@ -429,6 +434,22 @@ SoundFileBox::setup_labels (const string& filename)
 	}
 
 	return true;
+}
+
+void
+SoundFileBox::update_autoplay ()
+{
+	const bool config_autoplay = UIConfiguration::instance().get_autoplay_files();
+
+	if (autoplay_btn.get_active() != config_autoplay) {
+		autoplay_btn.set_active (config_autoplay);
+	}
+}
+
+void
+SoundFileBox::autoplay_toggled()
+{
+	UIConfiguration::instance().set_autoplay_files(autoplay_btn.get_active());
 }
 
 bool
@@ -495,7 +516,7 @@ SoundFileBox::audition ()
 					SourceFactory::createExternal (DataType::AUDIO, *_session,
 											 path, n,
 											 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
-				if (afs->sample_rate() != _session->nominal_frame_rate()) {
+				if (afs->sample_rate() != _session->nominal_sample_rate()) {
 					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, _src_quality));
 					srclist.push_back(sfs);
 				} else {
@@ -528,16 +549,16 @@ SoundFileBox::audition ()
 		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
 
-	frameoffset_t audition_position = 0;
+	sampleoffset_t audition_position = 0;
 	switch(_import_position) {
 		case ImportAtTimestamp:
 			audition_position = 0;
 			break;
 		case ImportAtPlayhead:
-			audition_position = _session->transport_frame();
+			audition_position = _session->transport_sample();
 			break;
 		case ImportAtStart:
-			audition_position = _session->current_start_frame();
+			audition_position = _session->current_start_sample();
 			break;
 		case ImportAtEditPoint:
 			audition_position = PublicEditor::instance().get_preferred_edit_position ();
@@ -604,7 +625,6 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	, _status (0)
 	, _done (false)
 	, import_button (_("Import"))
-	, close_button (Stock::CLOSE)
 	, gm (0)
 {
 
@@ -780,14 +800,11 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	Gtk::HButtonBox* button_box = manage (new HButtonBox);
 
 	button_box->set_layout (BUTTONBOX_END);
-	button_box->pack_start (close_button, false, false);
-	close_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_CLOSE));
 
 	button_box->pack_start (import_button, false, false);
 	import_button.signal_clicked().connect (sigc::bind (sigc::mem_fun (*this, &SoundFileBrowser::do_something), RESPONSE_OK));
 
 	Gtkmm2ext::UI::instance()->set_tip (import_button, _("Press to import selected files"));
-	Gtkmm2ext::UI::instance()->set_tip (close_button, _("Press to close this window without importing any files"));
 
 	vpacker.pack_end (*button_box, false, false);
 
@@ -821,6 +838,12 @@ SoundFileBrowser::set_action_sensitive (bool yn)
 	import_button.set_sensitive (yn);
 }
 
+bool
+SoundFileBrowser::get_action_sensitive () const
+{
+	return import_button.get_sensitive ();
+}
+
 void
 SoundFileBrowser::do_something (int action)
 {
@@ -835,6 +858,22 @@ SoundFileBrowser::on_show ()
 	start_metering ();
 }
 
+bool
+SoundFileBrowser::on_key_press_event (GdkEventKey* ev)
+{
+	if (ev->keyval == GDK_Escape) {
+		do_something (RESPONSE_CLOSE);
+		return true;
+	}
+	if (ev->keyval == GDK_space && ev->type == GDK_KEY_PRESS) {
+		if (get_action_sensitive()) {
+			preview.audition();
+			return true;
+		}
+	}
+	return ArdourWindow::on_key_press_event (ev);
+}
+
 void
 SoundFileBrowser::clear_selection ()
 {
@@ -845,7 +884,7 @@ SoundFileBrowser::clear_selection ()
 void
 SoundFileBrowser::chooser_file_activated ()
 {
-	preview.audition ();
+	do_something (RESPONSE_OK);
 }
 
 void
@@ -1597,7 +1636,7 @@ bool
 SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& src_needed, bool& multichannel)
 {
 	SoundFileInfo info;
-	framepos_t sz = 0;
+	samplepos_t sz = 0;
 	bool err = false;
 	string errmsg;
 
@@ -1619,7 +1658,7 @@ SoundFileOmega::check_info (const vector<string>& paths, bool& same_size, bool& 
 				}
 			}
 
-			if (info.samplerate != _session->frame_rate()) {
+			if (info.samplerate != _session->sample_rate()) {
 				src_needed = true;
 			}
 
@@ -2027,7 +2066,7 @@ SoundFileOmega::do_something (int action)
 	ImportMode mode = get_mode ();
 	ImportDisposition chns = get_channel_disposition ();
 	PluginInfoPtr instrument = instrument_combo.selected_instrument();
-	framepos_t where;
+	samplepos_t where;
 	MidiTrackNameSource mts = get_midi_track_name_source ();
 	MidiTempoMapDisposition mtd = (get_use_smf_tempo_map () ? SMFTempoUse : SMFTempoIgnore);
 
@@ -2039,10 +2078,10 @@ SoundFileOmega::do_something (int action)
 		where = -1;
 		break;
 	case ImportAtPlayhead:
-		where = _session->transport_frame();
+		where = _session->transport_sample();
 		break;
 	case ImportAtStart:
-		where = _session->current_start_frame();
+		where = _session->current_start_sample();
 		break;
 	}
 

@@ -12,7 +12,7 @@ function factory () return function ()
 	--
 	-- here: the "Queen Mary Note Onset Detector" Vamp plugin (which comes with Ardour)
 	-- http://vamp-plugins.org/plugin-doc/qm-vamp-plugins.html#qm-onsetdetector
-	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:qm-onsetdetector", Session:nominal_frame_rate())
+	local vamp = ARDOUR.LuaAPI.Vamp("libardourvampplugins:qm-onsetdetector", Session:nominal_sample_rate())
 
 	-- prepare table to hold results
 	local onsets = {}

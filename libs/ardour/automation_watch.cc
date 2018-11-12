@@ -22,6 +22,7 @@
 #include <glibmm/timer.h>
 
 #include "pbd/compose.h"
+#include "pbd/pthread_utils.h"
 
 #include "ardour/automation_control.h"
 #include "ardour/automation_watch.h"
@@ -60,6 +61,7 @@ AutomationWatch::~AutomationWatch ()
 
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	automation_watches.clear ();
+	automation_connections.clear ();
 }
 
 void
@@ -67,7 +69,11 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation, astate = %2\n", ac->name(), enum_2_string (ac->automation_state())));
-	automation_watches.insert (ac);
+	std::pair<AutomationWatches::iterator, bool> r = automation_watches.insert (ac);
+
+	if (!r.second) {
+		return;
+	}
 
 	/* if an automation control is added here while the transport is
 	 * rolling, make sure that it knows that there is a write pass going
@@ -76,9 +82,9 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 
 	if (_session && _session->transport_rolling() && ac->alist()->automation_write()) {
 		DEBUG_TRACE (DEBUG::Automation, string_compose ("\ttransport is rolling @ %1, audible = %2so enter write pass\n",
-								_session->transport_speed(), _session->audible_frame()));
+								_session->transport_speed(), _session->audible_sample()));
 		/* add a guard point since we are already moving */
-		ac->list()->set_in_write_pass (true, true, _session->audible_frame());
+		ac->list()->set_in_write_pass (true, true, _session->audible_sample());
 	}
 
 	/* we can't store shared_ptr<Destructible> in connections because it
@@ -87,7 +93,7 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 	 */
 
 	boost::weak_ptr<AutomationControl> wac (ac);
-	ac->DropReferences.connect_same_thread (*this, boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
+	ac->DropReferences.connect_same_thread (automation_connections[ac], boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
 }
 
 void
@@ -108,11 +114,12 @@ AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> a
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
 	automation_watches.erase (ac);
+	automation_connections.erase (ac);
 	ac->list()->set_in_write_pass (false);
 }
 
 void
-AutomationWatch::transport_stop_automation_watches (framepos_t when)
+AutomationWatch::transport_stop_automation_watches (samplepos_t when)
 {
 	DEBUG_TRACE (DEBUG::Automation, "clear all automation watches\n");
 
@@ -128,10 +135,11 @@ AutomationWatch::transport_stop_automation_watches (framepos_t when)
 		*/
 
 		automation_watches.clear ();
+		automation_connections.clear ();
 	}
 
 	for (AutomationWatches::iterator i = tmp.begin(); i != tmp.end(); ++i) {
-		(*i)->stop_touch (true, when);
+		(*i)->stop_touch (when);
 	}
 }
 
@@ -145,11 +153,16 @@ AutomationWatch::timer ()
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 
-		framepos_t time = _session->audible_frame ();
+		samplepos_t time = _session->audible_sample ();
 		if (time > _last_time) {  //we only write automation in the forward direction; this fixes automation-recording in a loop
 			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 				if ((*aw)->alist()->automation_write()) {
-					(*aw)->list()->add (time, (*aw)->user_double(), true);
+					double val = (*aw)->user_double();
+					boost::shared_ptr<SlavableAutomationControl> sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (*aw);
+					if (sc) {
+						val = sc->reduce_by_masters (val, true);
+					}
+					(*aw)->list()->add (time, val, true);
 				}
 			}
 		} else if (time != _last_time) {  //transport stopped or reversed.  stop the automation pass and start a new one (for bonus points, someday store the previous pass in an undo record)
@@ -173,6 +186,7 @@ AutomationWatch::timer ()
 void
 AutomationWatch::thread ()
 {
+	pbd_set_thread_priority (pthread_self(), PBD_SCHED_FIFO, -25);
 	while (_run_thread) {
 		Glib::usleep ((gulong) floor (Config->get_automation_interval_msecs() * 1000));
 		timer ();
@@ -209,7 +223,7 @@ AutomationWatch::transport_state_change ()
 
 	bool rolling = _session->transport_rolling();
 
-	_last_time = _session->audible_frame ();
+	_last_time = _session->audible_sample ();
 
 	{
 		Glib::Threads::Mutex::Lock lm (automation_watch_lock);

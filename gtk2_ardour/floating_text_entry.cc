@@ -28,39 +28,33 @@
 #include "pbd/i18n.h"
 
 FloatingTextEntry::FloatingTextEntry (Gtk::Window* parent, const std::string& initial_contents)
-	: Gtk::Window (Gtk::WINDOW_POPUP)
-        , entry_changed (false)
-	, by_popup_menu (false)
+	: Gtk::Window ()
+	, entry_changed (false)
 {
 	//set_name (X_("FloatingTextEntry"));
 	set_position (Gtk::WIN_POS_MOUSE);
 	set_border_width (0);
+	set_type_hint(Gdk::WINDOW_TYPE_HINT_POPUP_MENU);
+	set_resizable (false);
 
 	if (!initial_contents.empty()) {
 		entry.set_text (initial_contents);
 	}
 
 	entry.show ();
-	entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed));
-	entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated));
-	entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press), false);
-	entry.signal_key_release_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_release), false);
-	entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press));
-	entry.signal_populate_popup().connect (sigc::mem_fun (*this, &FloatingTextEntry::populate_popup));
+	_connections.push_back (entry.signal_changed().connect (sigc::mem_fun (*this, &FloatingTextEntry::changed)));
+	_connections.push_back (entry.signal_activate().connect (sigc::mem_fun (*this, &FloatingTextEntry::activated)));
+	_connections.push_back (entry.signal_key_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_press), false));
+	_connections.push_back (entry.signal_key_release_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::key_release), false));
+	_connections.push_back (entry.signal_button_press_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::button_press)));
 
 	entry.select_region (0, -1);
 
 	if (parent) {
-		parent->signal_focus_out_event().connect (sigc::mem_fun (*this, &FloatingTextEntry::entry_focus_out));
+		set_transient_for (*parent);
 	}
 
 	add (entry);
-}
-
-void
-FloatingTextEntry::populate_popup (Gtk::Menu *)
-{
-	by_popup_menu = true;
 }
 
 void
@@ -74,23 +68,20 @@ FloatingTextEntry::on_realize ()
 {
 	Gtk::Window::on_realize ();
 	get_window()->set_decorations (Gdk::WMDecoration (0));
+	set_keep_above (true);
 	entry.add_modal_grab ();
 }
 
 bool
 FloatingTextEntry::entry_focus_out (GdkEventFocus* ev)
 {
-	if (by_popup_menu) {
-		by_popup_menu = false;
-		return false;
-	}
-
 	entry.remove_modal_grab ();
 	if (entry_changed) {
-		use_text (entry.get_text (), 0);
+		disconect_signals ();
+		use_text (entry.get_text (), 0); /* EMIT SIGNAL */
 	}
 
-	delete_when_idle ( this);
+	idle_delete_self ();
 	return false;
 }
 
@@ -108,10 +99,11 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 	Glib::signal_idle().connect (sigc::bind_return (sigc::bind (sigc::ptr_fun (gtk_main_do_event), gdk_event_copy ((GdkEvent*) ev)), false));
 
 	if (entry_changed) {
-		use_text (entry.get_text (), 0);
+		disconect_signals ();
+		use_text (entry.get_text (), 0); /* EMIT SIGNAL */
 	}
 
-	delete_when_idle ( this);
+	idle_delete_self ();
 
 	return false;
 }
@@ -119,8 +111,9 @@ FloatingTextEntry::button_press (GdkEventButton* ev)
 void
 FloatingTextEntry::activated ()
 {
+	disconect_signals ();
 	use_text (entry.get_text(), 0); // EMIT SIGNAL
-	delete_when_idle (this);
+	idle_delete_self ();
 }
 
 bool
@@ -143,7 +136,7 @@ FloatingTextEntry::key_release (GdkEventKey* ev)
 	switch (ev->keyval) {
 	case GDK_Escape:
 		/* cancel edit */
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 
 	case GDK_ISO_Left_Tab:
@@ -151,13 +144,15 @@ FloatingTextEntry::key_release (GdkEventKey* ev)
 		 * generates a different ev->keyval, rather than setting
 		 * ev->state.
 		 */
+		disconect_signals ();
 		use_text (entry.get_text(), -1); // EMIT SIGNAL, move to prev
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 
 	case GDK_Tab:
+		disconect_signals ();
 		use_text (entry.get_text(), 1); // EMIT SIGNAL, move to next
-		delete_when_idle (this);
+		idle_delete_self ();
 		return true;
 	default:
 		break;
@@ -173,10 +168,41 @@ FloatingTextEntry::on_hide ()
 	entry.remove_modal_grab ();
 
 	/* No hide button is shown (no decoration on the window),
-	   so being hidden is equivalent to the Escape key or any other
-	   method of cancelling the edit.
-	*/
-
-	delete_when_idle (this);
+	 * so being hidden is equivalent to the Escape key or any other
+	 * method of cancelling the edit.
+	 *
+	 * This is also used during disconect_signals() before calling
+	 * use_text (). see note below.
+	 *
+	 * If signals are already disconnected, idle-delete must be
+	 * in progress already.
+	 */
+	if (!_connections.empty ()) {
+		idle_delete_self ();
+	}
 	Gtk::Window::on_hide ();
+}
+
+void
+FloatingTextEntry::disconect_signals ()
+{
+	for (std::list<sigc::connection>::iterator i = _connections.begin(); i != _connections.end(); ++i) {
+		i->disconnect ();
+	}
+	 _connections.clear ();
+	/* the entry is floating on-top, emitting use_text()
+	 * may result in another dialog being shown (cannot rename track)
+	 * which would
+	 *  - be stacked below the floating text entry
+	 *  - return focus to the entry when closedA
+	 * so we hide the entry here.
+	 */
+	hide ();
+}
+
+void
+FloatingTextEntry::idle_delete_self ()
+{
+	disconect_signals ();
+	delete_when_idle (this);
 }

@@ -85,8 +85,6 @@ class TrackMixLayout : public Push2Layout
 	void stripable_property_change (PBD::PropertyChange const& what_changed);
 	void simple_control_change (boost::shared_ptr<ARDOUR::AutomationControl> ac, Push2::ButtonID bid);
 
-	PBD::ScopedConnection selection_connection;
-	void selection_changed ();
 	void show_state ();
 
 	void drop_stripable ();

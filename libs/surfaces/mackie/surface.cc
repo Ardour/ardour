@@ -84,6 +84,15 @@ static MidiByteArray mackie_sysex_hdr  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
 // the device type
 static MidiByteArray mackie_sysex_hdr_xt  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x15);
 
+//QCON
+// The MCU sysex header for QCon Control surface
+static MidiByteArray mackie_sysex_hdr_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14); 
+
+// The MCU sysex header for QCon Control - extender 
+// The extender differs from Mackie by 4th bit - it's same like for main control surface (for display)
+static MidiByteArray mackie_sysex_hdr_xt_qcon  (5, MIDI::sysex, 0x0, 0x0, 0x66, 0x14);
+
+
 static MidiByteArray empty_midi_byte_array;
 
 Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, uint32_t number, surface_type_t stype)
@@ -97,6 +106,7 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 	, _master_fader (0)
 	, _last_master_gain_written (-0.0f)
 	, connection_state (0)
+	, is_qcon (false)
 	, input_source (0)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::Surface init\n");
@@ -105,6 +115,13 @@ Surface::Surface (MackieControlProtocol& mcp, const std::string& device_name, ui
 		_port = new SurfacePort (*this);
 	} catch (...) {
 		throw failed_constructor ();
+	}
+
+	//Store Qcon flag
+	if( mcp.device_info().is_qcon() ) {
+		is_qcon = true;
+	} else {
+		is_qcon = false;
 	}
 
 	/* only the first Surface object has global controls */
@@ -248,7 +265,7 @@ XMLNode&
 Surface::get_state()
 {
 	XMLNode* node = new XMLNode (X_("Surface"));
-	node->add_property (X_("name"), _name);
+	node->set_property (X_("name"), _name);
 	node->add_child_nocopy (_port->get_state());
 	return *node;
 }
@@ -262,12 +279,10 @@ Surface::set_state (const XMLNode& node, int version)
 	XMLNode* mynode = 0;
 
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
-		XMLProperty const* prop = (*c)->property (X_("name"));
-		if (prop) {
-			if (prop->value() == _name) {
-				mynode = *c;
-				break;
-			}
+		std::string name;
+		if ((*c)->get_property (X_("name"), name) && name == _name) {
+			mynode = *c;
+			break;
 		}
 	}
 
@@ -289,8 +304,18 @@ const MidiByteArray&
 Surface::sysex_hdr() const
 {
 	switch  (_stype) {
-	case mcu: return mackie_sysex_hdr;
-	case ext: return mackie_sysex_hdr_xt;
+	case mcu: 
+		if (_mcp.device_info().is_qcon()) {
+			return mackie_sysex_hdr_qcon;
+		} else {
+			return mackie_sysex_hdr;
+		}
+	case ext:
+		if(_mcp.device_info().is_qcon()) {		
+			return mackie_sysex_hdr_xt_qcon;
+		} else {
+			return mackie_sysex_hdr_xt;
+		}
 	}
 	cout << "SurfacePort::sysex_hdr _port_type not known" << endl;
 	return mackie_sysex_hdr;
@@ -684,9 +709,18 @@ Surface::handle_midi_sysex (MIDI::Parser &, MIDI::byte * raw_bytes, size_t count
 	 */
 
 	if (_stype == mcu) {
-		mackie_sysex_hdr[4] = bytes[4];
+		if (_mcp.device_info().is_qcon()) {
+			mackie_sysex_hdr_qcon[4] = bytes[4];
+		} else {
+			mackie_sysex_hdr[4] = bytes[4]; 
+		}
+		
 	} else {
-		mackie_sysex_hdr_xt[4] = bytes[4];
+		if (_mcp.device_info().is_qcon()) {
+			mackie_sysex_hdr_xt_qcon[4] = bytes[4];
+		} else {
+			mackie_sysex_hdr_xt[4] = bytes[4];
+		}
 	}
 
 	switch (bytes[5]) {
@@ -941,6 +975,15 @@ Surface::write (const MidiByteArray& data)
 }
 
 void
+Surface::update_strip_selection ()
+{
+	Strips::iterator s = strips.begin();
+	for ( ; s != strips.end(); ++s) {
+		(*s)->update_selection_state();
+	}
+}
+
+void
 Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables)
 {
 	vector<boost::shared_ptr<Stripable> >::const_iterator r;
@@ -1009,6 +1052,8 @@ Surface::show_two_char_display (unsigned int value, const std::string & /*dots*/
 void
 Surface::display_timecode (const std::string & timecode, const std::string & last_timecode)
 {
+	//TODO: Fix for Qcon to correct timecode value if is over 1000 bars
+
 	if (!_active || !_mcp.device_info().has_timecode_display()) {
 		return;
 	}
@@ -1253,18 +1298,20 @@ Surface::set_touch_sensitivity (int sensitivity)
 
 	/* sensitivity already clamped by caller */
 
-	if (_port) {
-		MidiByteArray msg;
+	if( !is_qcon ) { // Qcon doesn't support fader sensitivity
+		if (_port) {
+			MidiByteArray msg;
 
-		msg << sysex_hdr ();
-		msg << 0x0e;
-		msg << 0xff; /* overwritten for each fader below */
-		msg << (sensitivity & 0x7f);
-		msg << MIDI::eox;
+			msg << sysex_hdr ();
+			msg << 0x0e;
+			msg << 0xff; /* overwritten for each fader below */
+			msg << (sensitivity & 0x7f);
+			msg << MIDI::eox;
 
-		for (int fader = 0; fader < 9; ++fader) {
-			msg[6] = fader;
-			_port->write (msg);
+			for (int fader = 0; fader < 9; ++fader) {
+				msg[6] = fader;
+				_port->write (msg);
+			}
 		}
 	}
 }

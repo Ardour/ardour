@@ -1,17 +1,23 @@
 /*
-    Copyright (C) 2015  Damien Zammit
-
-    This program is free software; you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation; either version 3 of the License, or
-    (at your option) any later version.
-
-    This program is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
-
-*/
+ * libptformat - a library to read ProTools sessions
+ *
+ * Copyright (C) 2015  Damien Zammit
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU Lesser General Public
+ * License as published by the Free Software Foundation; either
+ * version 2.1 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ *
+ */
 #ifndef PTFFORMAT_H
 #define PTFFORMAT_H
 
@@ -28,9 +34,14 @@ public:
 	~PTFFormat();
 
 	/* Return values:	0            success
-				-1           could not open file as ptf
+				-1           could not parse pt session
 	*/
 	int load(std::string path, int64_t targetsr);
+
+	/* Return values:	0            success
+				-1           could not decrypt pt session
+	*/
+	int unxor(std::string path);
 
 	struct wav_t {
 		std::string filename;
@@ -51,6 +62,13 @@ public:
 
 	};
 
+	struct midi_ev_t {
+		uint64_t pos;
+		uint64_t length;
+		uint8_t note;
+		uint8_t velocity;
+	};
+
 	typedef struct region {
 		std::string name;
 		uint16_t    index;
@@ -58,11 +76,26 @@ public:
 		int64_t     sampleoffset;
 		int64_t     length;
 		wav_t       wave;
+		std::vector<midi_ev_t> midi;
 
 		bool operator ==(const struct region& other) {
 			return (this->index == other.index);
 		}
+
+		bool operator <(const struct region& other) const {
+			return (strcasecmp(this->name.c_str(),
+					other.name.c_str()) < 0);
+		}
 	} region_t;
+
+	typedef struct compound {
+		uint16_t curr_index;
+		uint16_t unknown1;
+		uint16_t level;
+		uint16_t ontopof_index;
+		uint16_t next_index;
+		std::string name;
+	} compound_t;
 
 	typedef struct track {
 		std::string name;
@@ -77,7 +110,10 @@ public:
 
 	std::vector<wav_t> audiofiles;
 	std::vector<region_t> regions;
+	std::vector<region_t> midiregions;
+	std::vector<compound_t> compounds;
 	std::vector<track_t> tracks;
+	std::vector<track_t> miditracks;
 
 	static bool regionexistsin(std::vector<region_t> reg, uint16_t index) {
 		std::vector<region_t>::iterator begin = reg.begin();
@@ -85,7 +121,8 @@ public:
 		std::vector<region_t>::iterator found;
 
 		wav_t w = { std::string(""), 0, 0, 0 };
-		region_t r = { std::string(""), index, 0, 0, 0, w };
+		std::vector<midi_ev_t> m;
+		region_t r = { std::string(""), index, 0, 0, 0, w, m};
 
 		if ((found = std::find(begin, finish, r)) != finish) {
 			return true;
@@ -109,6 +146,8 @@ public:
 	int64_t sessionrate;
 	int64_t targetrate;
 	uint8_t version;
+	uint8_t *product;
+
 
 	unsigned char c0;
 	unsigned char c1;
@@ -116,10 +155,13 @@ public:
 	uint64_t len;
 
 private:
+	bool jumpback(uint32_t *currpos, unsigned char *buf, const uint32_t maxoffset, const unsigned char *needle, const uint32_t needlelen);
+	bool jumpto(uint32_t *currpos, unsigned char *buf, const uint32_t maxoffset, const unsigned char *needle, const uint32_t needlelen);
 	bool foundin(std::string haystack, std::string needle);
+	int64_t foundat(unsigned char *haystack, uint64_t n, const char *needle);
 	int parse(void);
-	void unxor10(void);
-	void unxor_ptx_to_ptf(void);
+	bool parse_version();
+	uint8_t gen_xor_delta(uint8_t xor_value, uint8_t mul, bool negative);
 	void setrates(void);
 	void parse5header(void);
 	void parse7header(void);
@@ -128,16 +170,17 @@ private:
 	void parse10header(void);
 	void parserest5(void);
 	void parserest89(void);
-	void parserest10(void);
+	void parserest12(void);
 	void parseaudio5(void);
 	void parseaudio(void);
+	void parsemidi(void);
+	void parsemidi12(void);
 	void resort(std::vector<wav_t>& ws);
-	uint8_t mostfrequent(uint32_t start, uint32_t stop);
+	void resort(std::vector<region_t>& rs);
+	void filter(std::vector<region_t>& rs);
 	std::vector<wav_t> actualwavs;
 	float ratefactor;
 	std::string extension;
-	unsigned char key10a;
-	unsigned char key10b;
 };
 
 

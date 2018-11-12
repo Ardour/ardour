@@ -1,4 +1,4 @@
-/* This file is part of Evoral.
+/*
  * Copyright (C) 2008 David Robillard <http://drobilla.net>
  * Copyright (C) 2000-2008 Paul Davis
  *
@@ -17,6 +17,9 @@
  */
 
 #include <stdint.h>
+
+#include "temporal/beats.h"
+#include "temporal/types.h"
 
 #include "evoral/TimeConverter.hpp"
 #include "evoral/types.hpp"
@@ -43,8 +46,8 @@ IdentityConverter<A,B>::from(B b) const
 	return static_cast<A>(b);
 }
 
-template class IdentityConverter<double, framepos_t>;
-template class TimeConverter<double, framepos_t>;
-template class TimeConverter<Evoral::Beats, framepos_t>;
+template class IdentityConverter<double, Temporal::samplepos_t>;
+template class TimeConverter<double, Temporal::samplepos_t>;
+template class TimeConverter<Temporal::Beats, Temporal::samplepos_t>;
 
 } // namespace Evoral

@@ -70,7 +70,7 @@ def build(bld):
     obj.name         = 'libmidipp'
     obj.target       = 'midipp'
     obj.uselib       = 'GLIBMM SIGCPP XML OSX'
-    obj.use          = 'libpbd libevoral libtimecode'
+    obj.use          = 'libpbd libevoral libtemporal'
     obj.vnum         = LIBMIDIPP_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
 

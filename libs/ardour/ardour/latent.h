@@ -30,10 +30,10 @@ class LIBARDOUR_API Latent {
 	Latent() : _user_latency (0) {}
 	virtual ~Latent() {}
 
-	virtual framecnt_t signal_latency() const = 0;
-	framecnt_t user_latency () const { return _user_latency; }
+	virtual samplecnt_t signal_latency() const = 0;
+	samplecnt_t user_latency () const { return _user_latency; }
 
-	framecnt_t effective_latency() const {
+	samplecnt_t effective_latency() const {
 		if (_user_latency) {
 			return _user_latency;
 		} else {
@@ -41,10 +41,10 @@ class LIBARDOUR_API Latent {
 		}
 	}
 
-	virtual void set_user_latency (framecnt_t val) { _user_latency = val; }
+	virtual void set_user_latency (samplecnt_t val) { _user_latency = val; }
 
   protected:
-	framecnt_t           _user_latency;
+	samplecnt_t           _user_latency;
 };
 
 }

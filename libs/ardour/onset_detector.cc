@@ -69,7 +69,7 @@ OnsetDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 				(*out) << (*f).timestamp.toString() << endl;
 			}
 
-			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (framecnt_t) floor(sample_rate)));
+			current_results->push_back (RealTime::realTime2Frame ((*f).timestamp, (samplecnt_t) floor(sample_rate)));
 		}
 	}
 
@@ -123,7 +123,7 @@ OnsetDetector::cleanup_onsets (AnalysisFeatureList& t, float sr, float gap_msecs
 
 	AnalysisFeatureList::iterator i = t.begin();
 	AnalysisFeatureList::iterator f, b;
-	const framecnt_t gap_frames = (framecnt_t) floor (gap_msecs * (sr / 1000.0));
+	const samplecnt_t gap_samples = (samplecnt_t) floor (gap_msecs * (sr / 1000.0));
 
 	while (i != t.end()) {
 
@@ -135,7 +135,7 @@ OnsetDetector::cleanup_onsets (AnalysisFeatureList& t, float sr, float gap_msecs
 
 		// move f until we find a new value that is far enough away
 
-		while ((f != t.end()) && (((*f) - (*i)) < gap_frames)) {
+		while ((f != t.end()) && (((*f) - (*i)) < gap_samples)) {
 			++f;
 		}
 

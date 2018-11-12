@@ -24,7 +24,7 @@
 #include "evoral/Note.hpp"
 #endif
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 
 namespace Evoral {
 
@@ -57,8 +57,6 @@ Note<Time>::Note(const Note<Time>& copy)
 	: _on_event(copy._on_event, true)
 	, _off_event(copy._off_event, true)
 {
-	set_id (copy.id());
-
 	assert(_on_event.buffer());
 	assert(_off_event.buffer());
 	/*
@@ -92,7 +90,7 @@ Note<Time>::set_id (event_id_t id)
 	_off_event.set_id (id);
 }
 
-template class Note<Evoral::Beats>;
+template class Note<Temporal::Beats>;
 
 } // namespace Evoral
 

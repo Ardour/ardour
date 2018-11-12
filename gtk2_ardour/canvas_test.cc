@@ -22,7 +22,7 @@
 #include "canvas/types.h"
 #include "canvas/canvas.h"
 #include "canvas/container.h"
-#include "canvas/colors.h"
+#include "gtkmm2ext/colors.h"
 #include "canvas/debug.h"
 #include "canvas/grid.h"
 #include "canvas/scroll_group.h"

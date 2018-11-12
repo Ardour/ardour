@@ -32,6 +32,7 @@
 #include "ardour/butler.h"
 #include "ardour/cycle_timer.h"
 #include "ardour/debug.h"
+#include "ardour/disk_reader.h"
 #include "ardour/graph.h"
 #include "ardour/port.h"
 #include "ardour/process_thread.h"
@@ -40,6 +41,8 @@
 #include "ardour/slave.h"
 #include "ardour/ticker.h"
 #include "ardour/types.h"
+#include "ardour/vca.h"
+#include "ardour/vca_manager.h"
 
 #include "midi++/mmc.h"
 
@@ -50,13 +53,13 @@ using namespace PBD;
 using namespace std;
 
 /** Called by the audio engine when there is work to be done with JACK.
- * @param nframes Number of frames to process.
+ * @param nframes Number of samples to process.
  */
 
 void
 Session::process (pframes_t nframes)
 {
-	framepos_t transport_at_start = _transport_frame;
+	samplepos_t transport_at_start = _transport_sample;
 
 	_silent = false;
 
@@ -100,7 +103,7 @@ Session::process (pframes_t nframes)
 
 	_engine.main_thread()->drop_buffers ();
 
-	/* deliver MIDI clock. Note that we need to use the transport frame
+	/* deliver MIDI clock. Note that we need to use the transport sample
 	 * position at the start of process(), not the value at the end of
 	 * it. We may already have ticked() because of a transport state
 	 * change, for example.
@@ -131,20 +134,24 @@ Session::no_roll (pframes_t nframes)
 {
 	PT_TIMING_CHECK (4);
 
-	framepos_t end_frame = _transport_frame + nframes; // FIXME: varispeed + no_roll ??
+	samplepos_t end_sample = _transport_sample + nframes; // FIXME: varispeed + no_roll ??
 	int ret = 0;
-	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
 		_click_io->silence (nframes);
 	}
 
-	ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
+	ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
+
+	VCAList v = _vca_manager->vcas ();
+	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+		(*i)->automation_run (_transport_sample, nframes);
+	}
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
-		_process_graph->routes_no_roll( nframes, _transport_frame, end_frame, non_realtime_work_pending(), declick);
+		_process_graph->routes_no_roll( nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
 		PT_TIMING_CHECK (10);
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -153,9 +160,7 @@ Session::no_roll (pframes_t nframes)
 				continue;
 			}
 
-			(*i)->set_pending_declick (declick);
-
-			if ((*i)->no_roll (nframes, _transport_frame, end_frame, non_realtime_work_pending())) {
+			if ((*i)->no_roll (nframes, _transport_sample, end_sample, non_realtime_work_pending())) {
 				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
 				ret = -1;
 				break;
@@ -174,15 +179,21 @@ Session::no_roll (pframes_t nframes)
 int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
-	int declick = (config.get_use_transport_fades() ? get_transport_declick_required() : false);
 	boost::shared_ptr<RouteList> r = routes.reader ();
 
-	const framepos_t start_frame = _transport_frame;
-	const framepos_t end_frame = _transport_frame + floor (nframes * _transport_speed);
+	const samplepos_t start_sample = _transport_sample;
+	const samplepos_t end_sample = _transport_sample + floor (nframes * _transport_speed);
+
+	VCAList v = _vca_manager->vcas ();
+	for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
+		(*i)->automation_run (start_sample, nframes);
+	}
+
+	_global_locate_pending = locate_pending ();
 
 	if (_process_graph) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
-		if (_process_graph->process_routes (nframes, start_frame, end_frame, declick, need_butler) < 0) {
+		if (_process_graph->process_routes (nframes, start_sample, end_sample, need_butler) < 0) {
 			stop_transport ();
 			return -1;
 		}
@@ -196,54 +207,15 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 				continue;
 			}
 
-			(*i)->set_pending_declick (declick);
-
 			bool b = false;
 
-			if ((ret = (*i)->roll (nframes, start_frame, end_frame, declick, b)) < 0) {
+			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
 				stop_transport ();
 				return -1;
 			}
 
 			if (b) {
-				need_butler = true;
-			}
-		}
-	}
-
-	return 0;
-}
-
-/** @param need_butler to be set to true by this method if it needs the butler,
- *  otherwise it must be left alone.
- */
-int
-Session::silent_process_routes (pframes_t nframes, bool& need_butler)
-{
-	boost::shared_ptr<RouteList> r = routes.reader ();
-
-	const framepos_t start_frame = _transport_frame;
-	const framepos_t end_frame = _transport_frame + lrintf(nframes * _transport_speed);
-
-	if (_process_graph) {
-		_process_graph->silent_process_routes (nframes, start_frame, end_frame, need_butler);
-	} else {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-
-			int ret;
-
-			if ((*i)->is_auditioner()) {
-				continue;
-			}
-
-			bool b = false;
-
-			if ((ret = (*i)->silent_roll (nframes, start_frame, end_frame, b)) < 0) {
-				stop_transport ();
-				return -1;
-			}
-
-			if (b) {
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 rolled and needs butler\n", (*i)->name()));
 				need_butler = true;
 			}
 		}
@@ -263,7 +235,7 @@ Session::get_track_statistics ()
 
 		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 
-		if (!tr || tr->hidden()) {
+		if (!tr || tr->is_private_route()) {
 			continue;
 		}
 
@@ -287,9 +259,9 @@ Session::process_with_events (pframes_t nframes)
 
 	SessionEvent*  ev;
 	pframes_t      this_nframes;
-	framepos_t     end_frame;
+	samplepos_t     end_sample;
 	bool           session_needs_butler = false;
-	framecnt_t     frames_moved;
+	samplecnt_t     samples_moved;
 
 	/* make sure the auditioner is silent */
 
@@ -314,18 +286,63 @@ Session::process_with_events (pframes_t nframes)
 		process_event (ev);
 	}
 
-	/* count in */
+	/* only count-in when going to roll at speed 1.0 */
 	if (_transport_speed != 1.0 && _count_in_samples > 0) {
 		_count_in_samples = 0;
 	}
+	if (_transport_speed == 0.0) {
+		_remaining_latency_preroll = 0;
+	}
 
-	if (_count_in_samples > 0) {
-		framecnt_t ns = std::min ((framecnt_t)nframes, _count_in_samples);
+	assert (_count_in_samples == 0 || _remaining_latency_preroll == 0 || _count_in_samples == _remaining_latency_preroll);
 
-		no_roll (ns);
-		run_click (_transport_frame - _count_in_samples, ns);
+	while (_count_in_samples > 0 || _remaining_latency_preroll > 0) {
+		samplecnt_t ns;
 
-		_count_in_samples -= ns;
+		if (_remaining_latency_preroll > 0) {
+			ns = std::min ((samplecnt_t)nframes, _remaining_latency_preroll);
+		} else {
+			ns = std::min ((samplecnt_t)nframes, _count_in_samples);
+		}
+
+		boost::shared_ptr<RouteList> r = routes.reader ();
+		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+			samplecnt_t route_offset = (*i)->playback_latency ();
+			if (_remaining_latency_preroll > route_offset + ns) {
+				/* route will no-roll for complete pre-roll cycle */
+				continue;
+			}
+			if (_remaining_latency_preroll > route_offset) {
+				/* route may need partial no-roll and partial roll from
+				* (_transport_sample - _remaining_latency_preroll) ..  +ns.
+				* shorten and split the cycle.
+				*/
+				ns = std::min (ns, (_remaining_latency_preroll - route_offset));
+			}
+		}
+
+		if (_count_in_samples > 0) {
+			run_click (_transport_sample - _count_in_samples, ns);
+			assert (_count_in_samples >= ns);
+			_count_in_samples -= ns;
+		}
+
+		if (_remaining_latency_preroll > 0) {
+			if (_count_in_samples == 0) {
+				click (_transport_sample - _remaining_latency_preroll, ns);
+			}
+			if (process_routes (ns, session_needs_butler)) {
+				fail_roll (ns);
+			}
+		} else {
+			no_roll (ns);
+		}
+
+		if (_remaining_latency_preroll > 0) {
+			assert (_remaining_latency_preroll >= ns);
+			_remaining_latency_preroll -= ns;
+		}
+
 		nframes -= ns;
 
 		/* process events.. */
@@ -334,7 +351,7 @@ Session::process_with_events (pframes_t nframes)
 			Events::iterator the_next_one = next_event;
 			++the_next_one;
 
-			while (this_event && this_event->action_frame == _transport_frame) {
+			while (this_event && this_event->action_sample == _transport_sample) {
 				process_event (this_event);
 				if (the_next_one == events.end()) {
 					this_event = 0;
@@ -345,8 +362,6 @@ Session::process_with_events (pframes_t nframes)
 			}
 			set_next_event ();
 		}
-
-		check_declick_out ();
 
 		if (nframes == 0) {
 			return;
@@ -372,7 +387,7 @@ Session::process_with_events (pframes_t nframes)
 			_send_timecode_update = true;
 		}
 
-		if (Config->get_send_mtc() && !_send_qf_mtc && _pframes_since_last_mtc > (frame_rate () / 4)) {
+		if (Config->get_send_mtc() && !_send_qf_mtc && _pframes_since_last_mtc > (sample_rate () / 4)) {
 			/* we're sending MTC, but we're not sending QF MTC at the moment, and it's been
 			   a quarter of a second since we sent anything at all, so send a full MTC update
 			   this cycle.
@@ -390,7 +405,7 @@ Session::process_with_events (pframes_t nframes)
 	 * and prepare for rolling)
 	 */
 	if (_send_timecode_update) {
-		send_full_time_code (_transport_frame, nframes);
+		send_full_time_code (_transport_sample, nframes);
 	}
 
 	if (!process_can_proceed()) {
@@ -410,15 +425,11 @@ Session::process_with_events (pframes_t nframes)
 		}
 	}
 
-	if (_transport_speed == 1.0) {
-		frames_moved = (framecnt_t) nframes;
-	} else {
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
-		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
-	}
+	assert (_transport_speed == 0 || _transport_speed == 1.0 || _transport_speed == -1.0);
 
-	end_frame = _transport_frame + frames_moved;
+	samples_moved = (samplecnt_t) nframes * _transport_speed;
+
+	end_sample = _transport_sample + samples_moved;
 
 	{
 		SessionEvent* this_event;
@@ -441,12 +452,12 @@ Session::process_with_events (pframes_t nframes)
 		}
 
 		if (!_exporting && !timecode_transmission_suspended()) {
-			send_midi_time_code_for_cycle (_transport_frame, end_frame, nframes);
+			send_midi_time_code_for_cycle (_transport_sample, end_sample, nframes);
 		}
 
-		ltc_tx_send_time_code_for_cycle (_transport_frame, end_frame, _target_transport_speed, _transport_speed, nframes);
+		ltc_tx_send_time_code_for_cycle (_transport_sample, end_sample, _target_transport_speed, _transport_speed, nframes);
 
-		framepos_t stop_limit = compute_stop_limit ();
+		samplepos_t stop_limit = compute_stop_limit ();
 
 		if (maybe_stop (stop_limit)) {
 			no_roll (nframes);
@@ -464,20 +475,20 @@ Session::process_with_events (pframes_t nframes)
 		while (nframes) {
 
 			this_nframes = nframes; /* real (jack) time relative */
-			frames_moved = (framecnt_t) floor (_transport_speed * nframes); /* transport relative */
+			samples_moved = (samplecnt_t) floor (_transport_speed * nframes); /* transport relative */
 
 			/* running an event, position transport precisely to its time */
-			if (this_event && this_event->action_frame <= end_frame && this_event->action_frame >= _transport_frame) {
+			if (this_event && this_event->action_sample <= end_sample && this_event->action_sample >= _transport_sample) {
 				/* this isn't quite right for reverse play */
-				frames_moved = (framecnt_t) (this_event->action_frame - _transport_frame);
-				this_nframes = abs (floor(frames_moved / _transport_speed));
+				samples_moved = (samplecnt_t) (this_event->action_sample - _transport_sample);
+				this_nframes = abs (floor(samples_moved / _transport_speed));
 			}
 
 			try_run_lua (this_nframes);
 
 			if (this_nframes) {
 
-				click (_transport_frame, this_nframes);
+				click (_transport_sample, this_nframes);
 
 				if (process_routes (this_nframes, session_needs_butler)) {
 					fail_roll (nframes);
@@ -488,14 +499,13 @@ Session::process_with_events (pframes_t nframes)
 
 				nframes -= this_nframes;
 
-				if (frames_moved < 0) {
-					decrement_transport_position (-frames_moved);
-				} else {
-					increment_transport_position (frames_moved);
+				if (samples_moved < 0) {
+					decrement_transport_position (-samples_moved);
+				} else if (samples_moved) {
+					increment_transport_position (samples_moved);
 				}
 
 				maybe_stop (stop_limit);
-				check_declick_out ();
 			}
 
 			if (nframes > 0) {
@@ -504,7 +514,7 @@ Session::process_with_events (pframes_t nframes)
 
 			/* now handle this event and all others scheduled for the same time */
 
-			while (this_event && this_event->action_frame == _transport_frame) {
+			while (this_event && this_event->action_sample == _transport_sample) {
 				process_event (this_event);
 
 				if (the_next_one == events.end()) {
@@ -523,7 +533,7 @@ Session::process_with_events (pframes_t nframes)
 			}
 
 			/* this is necessary to handle the case of seamless looping */
-			end_frame = _transport_frame + floor (nframes * _transport_speed);
+			end_sample = _transport_sample + floor (nframes * _transport_speed);
 		}
 
 		set_next_event ();
@@ -531,6 +541,7 @@ Session::process_with_events (pframes_t nframes)
 	} /* implicit release of route lock */
 
 	if (session_needs_butler) {
+		DEBUG_TRACE (DEBUG::Butler, "p-with-events: session needs butler, call it\n");
 		_butler->summon ();
 	}
 }
@@ -542,6 +553,7 @@ Session::reset_slave_state ()
 	delta_accumulator_cnt = 0;
 	have_first_delta_accumulator = false;
 	_slave_state = Stopped;
+	DiskReader::set_no_disk_output (false);
 }
 
 bool
@@ -560,8 +572,8 @@ bool
 Session::follow_slave (pframes_t nframes)
 {
 	double slave_speed;
-	framepos_t slave_transport_frame;
-	framecnt_t this_delta;
+	samplepos_t slave_transport_sample;
+	samplecnt_t this_delta;
 	int dir;
 
 	if (!_slave->ok()) {
@@ -570,20 +582,20 @@ Session::follow_slave (pframes_t nframes)
 		goto noroll;
 	}
 
-	_slave->speed_and_position (slave_speed, slave_transport_frame);
+	_slave->speed_and_position (slave_speed, slave_transport_sample);
 
-	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave position %1 speed %2\n", slave_transport_frame, slave_speed));
+	DEBUG_TRACE (DEBUG::Slave, string_compose ("Slave position %1 speed %2\n", slave_transport_sample, slave_speed));
 
 	if (!_slave->locked()) {
 		DEBUG_TRACE (DEBUG::Slave, "slave not locked\n");
 		goto noroll;
 	}
 
-	if (slave_transport_frame > _transport_frame) {
-		this_delta = slave_transport_frame - _transport_frame;
+	if (slave_transport_sample > _transport_sample) {
+		this_delta = slave_transport_sample - _transport_sample;
 		dir = 1;
 	} else {
-		this_delta = _transport_frame - slave_transport_frame;
+		this_delta = _transport_sample - slave_transport_sample;
 		dir = -1;
 	}
 
@@ -611,19 +623,19 @@ Session::follow_slave (pframes_t nframes)
 		*/
 
 		if (_slave_state == Running) {
-			calculate_moving_average_of_slave_delta(dir, this_delta);
+			calculate_moving_average_of_slave_delta(dir, abs(this_delta));
 		}
 	}
 
-	track_slave_state (slave_speed, slave_transport_frame, this_delta);
+	track_slave_state (slave_speed, slave_transport_sample, this_delta);
 
 	DEBUG_TRACE (DEBUG::Slave, string_compose ("slave state %1 @ %2 speed %3 cur delta %4 avg delta %5\n",
-						   _slave_state, slave_transport_frame, slave_speed, this_delta, average_slave_delta));
+						   _slave_state, slave_transport_sample, slave_speed, this_delta, average_slave_delta));
 
 
-	if (_slave_state == Running && !_slave->is_always_synced() &&
-			!(Config->get_timecode_source_is_synced() && (dynamic_cast<TimecodeSlave*>(_slave)) != 0)
-			) {
+	if (_slave_state == Running && !_slave->is_always_synced() && !(Config->get_timecode_source_is_synced() && (dynamic_cast<TimecodeSlave*>(_slave)) != 0)) {
+
+		/* may need to varispeed to sync with slave */
 
 		if (_transport_speed != 0.0f) {
 
@@ -647,8 +659,8 @@ Session::follow_slave (pframes_t nframes)
 									   (int) (dir * this_delta),
 									   slave_speed,
 									   _transport_speed,
-									   _transport_frame,
-									   slave_transport_frame,
+									   _transport_sample,
+									   slave_transport_sample,
 									   average_slave_delta));
 			}
 #endif
@@ -657,31 +669,41 @@ Session::follow_slave (pframes_t nframes)
 				set_transport_speed (slave_speed, 0, false, false);
 				//std::cout << "set speed = " << slave_speed << "\n";
 			} else {
-				float adjusted_speed = slave_speed + (1.5 * (delta /  float(_current_frame_rate)));
+				float adjusted_speed = slave_speed + (1.5 * (delta /  float(_current_sample_rate)));
 				request_transport_speed (adjusted_speed);
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("adjust using %1 towards %2 ratio %3 current %4 slave @ %5\n",
 									   delta, adjusted_speed, adjusted_speed/slave_speed, _transport_speed,
 									   slave_speed));
 			}
 
-#if 1
-			if (!actively_recording() && (framecnt_t) abs(average_slave_delta) > _slave->resolution()) {
-				cerr << "average slave delta greater than slave resolution (" << _slave->resolution() << "), going to silent motion\n";
-				goto silent_motion;
+			if (!actively_recording() && (samplecnt_t) average_slave_delta > _slave->resolution()) {
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("average slave delta %1 greater than slave resolution %2 => no disk output\n", average_slave_delta, _slave->resolution()));
+				/* run routes as normal, but no disk output */
+				DiskReader::set_no_disk_output (true);
+				return true;
 			}
-#endif
+
+			if (!have_first_delta_accumulator) {
+				DEBUG_TRACE (DEBUG::Slave, "waiting for first slave delta accumulator to be ready, no disk output\n");
+				/* run routes as normal, but no disk output */
+				DiskReader::set_no_disk_output (true);
+				return true;
+			}
 		}
 	}
 
 
-	if (_slave_state == Running && !non_realtime_work_pending()) {
+	if (!have_first_delta_accumulator) {
+		DEBUG_TRACE (DEBUG::Slave, "still waiting to compute slave delta, no disk output\n");
+		DiskReader::set_no_disk_output (true);
+	} else {
+		DiskReader::set_no_disk_output (false);
+	}
+
+	if ((_slave_state == Running) && (0 == (post_transport_work () & ~PostTransportSpeed))) {
 		/* speed is set, we're locked, and good to go */
 		return true;
 	}
-
-  silent_motion:
-	DEBUG_TRACE (DEBUG::Slave, "silent motion\n")
-	follow_slave_silently (nframes, slave_speed);
 
   noroll:
 	/* don't move at all */
@@ -691,15 +713,15 @@ Session::follow_slave (pframes_t nframes)
 }
 
 void
-Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta)
+Session::calculate_moving_average_of_slave_delta (int dir, samplecnt_t this_delta)
 {
 	if (delta_accumulator_cnt >= delta_accumulator_size) {
 		have_first_delta_accumulator = true;
 		delta_accumulator_cnt = 0;
 	}
 
-	if (delta_accumulator_cnt != 0 || this_delta < _current_frame_rate) {
-		delta_accumulator[delta_accumulator_cnt++] = (framecnt_t) dir *  (framecnt_t) this_delta;
+	if (delta_accumulator_cnt != 0 || this_delta < _current_sample_rate) {
+		delta_accumulator[delta_accumulator_cnt++] = (samplecnt_t) dir *  (samplecnt_t) this_delta;
 	}
 
 	if (have_first_delta_accumulator) {
@@ -710,7 +732,7 @@ Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta
 		average_slave_delta /= (int32_t) delta_accumulator_size;
 		if (average_slave_delta < 0L) {
 			average_dir = -1;
-			average_slave_delta = abs(average_slave_delta);
+			average_slave_delta = average_slave_delta;
 		} else {
 			average_dir = 1;
 		}
@@ -718,7 +740,7 @@ Session::calculate_moving_average_of_slave_delta (int dir, framecnt_t this_delta
 }
 
 void
-Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame, framecnt_t /*this_delta*/)
+Session::track_slave_state (float slave_speed, samplepos_t slave_transport_sample, samplecnt_t /*this_delta*/)
 {
 	if (slave_speed != 0.0f) {
 
@@ -727,7 +749,7 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 		switch (_slave_state) {
 		case Stopped:
 			if (_slave->requires_seekahead()) {
-				slave_wait_end = slave_transport_frame + _slave->seekahead_distance ();
+				slave_wait_end = slave_transport_sample + _slave->seekahead_distance ();
 				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, but running, requires seekahead to %1\n", slave_wait_end));
 				/* we can call locate() here because we are in process context */
 				locate (slave_wait_end, false, false);
@@ -735,21 +757,21 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 			} else {
 
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped -> running at %1\n", slave_transport_frame));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped -> running at %1\n", slave_transport_sample));
 
 				memset (delta_accumulator, 0, sizeof (int32_t) * delta_accumulator_size);
 				average_slave_delta = 0L;
 
 				Location* al = _locations->auto_loop_location();
 
-				if (al && play_loop && (slave_transport_frame < al->start() || slave_transport_frame > al->end())) {
+				if (al && play_loop && (slave_transport_sample < al->start() || slave_transport_sample > al->end())) {
 					// cancel looping
 					request_play_loop(false);
 				}
 
-				if (slave_transport_frame != _transport_frame) {
-					DEBUG_TRACE (DEBUG::Slave, string_compose ("require locate to run. eng: %1 -> sl: %2\n", _transport_frame, slave_transport_frame));
-					locate (slave_transport_frame, false, false);
+				if (slave_transport_sample != _transport_sample) {
+					DEBUG_TRACE (DEBUG::Slave, string_compose ("require locate to run. eng: %1 -> sl: %2\n", _transport_sample, slave_transport_sample));
+					locate (slave_transport_sample, false, false);
 				}
 				_slave_state = Running;
 			}
@@ -762,11 +784,11 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 		if (_slave_state == Waiting) {
 
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_frame));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave waiting at %1\n", slave_transport_sample));
 
-			if (slave_transport_frame >= slave_wait_end) {
+			if (slave_transport_sample >= slave_wait_end) {
 
-				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave start at %1 vs %2\n", slave_transport_frame, _transport_frame));
+				DEBUG_TRACE (DEBUG::Slave, string_compose ("slave start at %1 vs %2\n", slave_transport_sample, _transport_sample));
 
 				_slave_state = Running;
 
@@ -776,12 +798,12 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 
 
 				bool ok = true;
-				framecnt_t frame_delta = slave_transport_frame - _transport_frame;
+				samplecnt_t sample_delta = slave_transport_sample - _transport_sample;
 
 				boost::shared_ptr<RouteList> rl = routes.reader();
 				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 					boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
-					if (tr && !tr->can_internal_playback_seek (frame_delta)) {
+					if (tr && !tr->can_internal_playback_seek (sample_delta)) {
 						ok = false;
 						break;
 					}
@@ -791,10 +813,10 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 					for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 						boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
 						if (tr) {
-							tr->internal_playback_seek (frame_delta);
+							tr->internal_playback_seek (sample_delta);
 						}
 					}
-					_transport_frame += frame_delta;
+					_transport_sample += sample_delta;
 
 				} else {
 					cerr << "cannot micro-seek\n";
@@ -813,13 +835,13 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 		/* slave has stopped */
 
 		if (_transport_speed != 0.0f) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 frame %2 tf %3\n", slave_speed, slave_transport_frame, _transport_frame));
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stops transport: %1 sample %2 tf %3\n", slave_speed, slave_transport_sample, _transport_sample));
 			stop_transport ();
 		}
 
-		if (slave_transport_frame != _transport_frame) {
-			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, move to %1\n", slave_transport_frame));
-			force_locate (slave_transport_frame, false);
+		if (slave_transport_sample != _transport_sample) {
+			DEBUG_TRACE (DEBUG::Slave, string_compose ("slave stopped, move to %1\n", slave_transport_sample));
+			force_locate (slave_transport_sample, false);
 		}
 
 		reset_slave_state();
@@ -827,42 +849,10 @@ Session::track_slave_state (float slave_speed, framepos_t slave_transport_frame,
 }
 
 void
-Session::follow_slave_silently (pframes_t nframes, float slave_speed)
-{
-	if (slave_speed && _transport_speed) {
-
-		/* something isn't right, but we should move with the master
-		   for now.
-		*/
-
-		bool need_butler = false;
-
-		silent_process_routes (nframes, need_butler);
-
-		get_track_statistics ();
-
-		if (need_butler) {
-			_butler->summon ();
-		}
-
-		int32_t frames_moved = (int32_t) floor (_transport_speed * nframes);
-
-		if (frames_moved < 0) {
-			decrement_transport_position (-frames_moved);
-		} else {
-			increment_transport_position (frames_moved);
-		}
-
-		framepos_t const stop_limit = compute_stop_limit ();
-		maybe_stop (stop_limit);
-	}
-}
-
-void
 Session::process_without_events (pframes_t nframes)
 {
 	bool session_needs_butler = false;
-	framecnt_t frames_moved;
+	samplecnt_t samples_moved;
 
 	if (!process_can_proceed()) {
 		_silent = true;
@@ -871,34 +861,29 @@ Session::process_without_events (pframes_t nframes)
 
 	if (!_exporting && _slave) {
 		if (!follow_slave (nframes)) {
-			ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame, 0, 0 , nframes);
+			ltc_tx_send_time_code_for_cycle (_transport_sample, _transport_sample, 0, 0 , nframes);
 			return;
 		}
 	}
 
 	if (_transport_speed == 0) {
-		fail_roll (nframes);
+		no_roll (nframes);
 		return;
 	}
 
-	if (_transport_speed == 1.0) {
-		frames_moved = (framecnt_t) nframes;
-	} else {
-		interpolation.set_target_speed (_target_transport_speed);
-		interpolation.set_speed (_transport_speed);
-		frames_moved = (framecnt_t) interpolation.interpolate (0, nframes, 0, 0);
-	}
+	assert (_transport_speed == 1.f || _transport_speed == -1.f);
+	samples_moved = (samplecnt_t) nframes * _transport_speed;
 
 	if (!_exporting && !timecode_transmission_suspended()) {
-		send_midi_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, nframes);
+		send_midi_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, nframes);
 	}
 
-	ltc_tx_send_time_code_for_cycle (_transport_frame, _transport_frame + frames_moved, _target_transport_speed, _transport_speed, nframes);
+	ltc_tx_send_time_code_for_cycle (_transport_sample, _transport_sample + samples_moved, _target_transport_speed, _transport_speed, nframes);
 
-	framepos_t const stop_limit = compute_stop_limit ();
+	samplepos_t const stop_limit = compute_stop_limit ();
 
 	if (maybe_stop (stop_limit)) {
-		fail_roll (nframes);
+		no_roll (nframes);
 		return;
 	}
 
@@ -906,7 +891,7 @@ Session::process_without_events (pframes_t nframes)
 		return;
 	}
 
-	click (_transport_frame, nframes);
+	click (_transport_sample, nframes);
 
 	if (process_routes (nframes, session_needs_butler)) {
 		fail_roll (nframes);
@@ -915,22 +900,22 @@ Session::process_without_events (pframes_t nframes)
 
 	get_track_statistics ();
 
-	if (frames_moved < 0) {
-		decrement_transport_position (-frames_moved);
-	} else {
-		increment_transport_position (frames_moved);
+	if (samples_moved < 0) {
+		decrement_transport_position (-samples_moved);
+	} else if (samples_moved) {
+		increment_transport_position (samples_moved);
 	}
 
 	maybe_stop (stop_limit);
-	check_declick_out ();
 
 	if (session_needs_butler) {
+		DEBUG_TRACE (DEBUG::Butler, "p-without-events: session needs butler, call it\n");
 		_butler->summon ();
 	}
 }
 
 /** Process callback used when the auditioner is active.
- * @param nframes number of frames to process.
+ * @param nframes number of samples to process.
  */
 void
 Session::process_audition (pframes_t nframes)
@@ -947,13 +932,14 @@ Session::process_audition (pframes_t nframes)
 	/* run the auditioner, and if it says we need butler service, ask for it */
 
 	if (auditioner->play_audition (nframes) > 0) {
+		DEBUG_TRACE (DEBUG::Butler, "auditioner needs butler, call it\n");
 		_butler->summon ();
 	}
 
 	/* if using a monitor section, run it because otherwise we don't hear anything */
 
 	if (_monitor_out && auditioner->needs_monitor()) {
-		_monitor_out->monitor_run (_transport_frame, _transport_frame + nframes, nframes, false);
+		_monitor_out->monitor_run (_transport_sample, _transport_sample + nframes, nframes);
 	}
 
 	/* handle pending events */
@@ -1033,6 +1019,7 @@ Session::queue_event (SessionEvent* ev)
 	} else if (_state_of_the_state & Loading) {
 		merge_event (ev);
 	} else {
+		Glib::Threads::Mutex::Lock lm (rb_write_lock);
 		pending_events.write (&ev, 1);
 	}
 }
@@ -1049,12 +1036,12 @@ Session::set_next_event ()
 		next_event = events.begin();
 	}
 
-	if ((*next_event)->action_frame > _transport_frame) {
+	if ((*next_event)->action_sample > _transport_sample) {
 		next_event = events.begin();
 	}
 
 	for (; next_event != events.end(); ++next_event) {
-		if ((*next_event)->action_frame >= _transport_frame) {
+		if ((*next_event)->action_sample >= _transport_sample) {
 			break;
 		}
 	}
@@ -1083,7 +1070,7 @@ Session::process_event (SessionEvent* ev)
 		}
 	}
 
-	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Processing event: %1 @ %2\n", enum_2_string (ev->type), _transport_frame));
+	DEBUG_TRACE (DEBUG::SessionEvents, string_compose ("Processing event: %1 @ %2\n", enum_2_string (ev->type), _transport_sample));
 
 	switch (ev->type) {
 	case SessionEvent::SetLoop:
@@ -1095,30 +1082,19 @@ Session::process_event (SessionEvent* ev)
 			/* roll after locate, do not flush, set "with loop"
 			   true only if we are seamless looping
 			*/
-			start_locate (ev->target_frame, true, false, Config->get_seamless_loop());
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case SessionEvent::AutoLoopDeclick:
-		if (play_loop) {
-			/* Request a declick fade-out and a fade-in; the fade-out will happen
-			   at the end of the loop, and the fade-in at the start.
-			*/
-			transport_sub_state |= (PendingLoopDeclickOut | PendingLoopDeclickIn);
+			start_locate (ev->target_sample, true, false, Config->get_seamless_loop());
 		}
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::Locate:
-		if (ev->yes_or_no) {
+		if (ev->yes_or_no) { /* force locate */
 			/* args: do not roll after locate, do flush, not with loop */
-			locate (ev->target_frame, false, true, false);
+			locate (ev->target_sample, false, true, false);
 		} else {
 			/* args: do not roll after locate, do flush, not with loop */
-			start_locate (ev->target_frame, false, true, false);
+			start_locate (ev->target_sample, false, true, false);
 		}
 		_send_timecode_update = true;
 		break;
@@ -1126,17 +1102,17 @@ Session::process_event (SessionEvent* ev)
 	case SessionEvent::LocateRoll:
 		if (ev->yes_or_no) {
 			/* args: roll after locate, do flush, not with loop */
-			locate (ev->target_frame, true, true, false);
+			locate (ev->target_sample, true, true, false);
 		} else {
 			/* args: roll after locate, do flush, not with loop */
-			start_locate (ev->target_frame, true, true, false);
+			start_locate (ev->target_sample, true, true, false);
 		}
 		_send_timecode_update = true;
 		break;
 
 	case SessionEvent::Skip:
 		if (Config->get_skip_playback()) {
-			start_locate (ev->target_frame, true, true, false);
+			start_locate (ev->target_sample, true, true, false);
 			_send_timecode_update = true;
 		}
 		remove = false;
@@ -1145,18 +1121,18 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::LocateRollLocate:
 		// locate is handled by ::request_roll_at_and_return()
-		_requested_return_frame = ev->target_frame;
-		request_locate (ev->target2_frame, true);
+		_requested_return_sample = ev->target_sample;
+		request_locate (ev->target2_sample, true);
 		break;
 
 
 	case SessionEvent::SetTransportSpeed:
-		set_transport_speed (ev->speed, ev->target_frame, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
+		set_transport_speed (ev->speed, ev->target_sample, ev->yes_or_no, ev->second_yes_or_no, ev->third_yes_or_no);
 		break;
 
 	case SessionEvent::PunchIn:
-		// cerr << "PunchIN at " << transport_frame() << endl;
-		if (config.get_punch_in() && record_status() == Enabled && !preroll_record_punch_enabled()) {
+		// cerr << "PunchIN at " << transport_sample() << endl;
+		if (config.get_punch_in() && record_status() == Enabled) {
 			enable_record ();
 		}
 		remove = false;
@@ -1164,17 +1140,9 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::PunchOut:
-		// cerr << "PunchOUT at " << transport_frame() << endl;
-		if (config.get_punch_out() && !preroll_record_punch_enabled()) {
+		// cerr << "PunchOUT at " << transport_sample() << endl;
+		if (config.get_punch_out()) {
 			step_back_from_record ();
-		}
-		remove = false;
-		del = false;
-		break;
-
-	case SessionEvent::RecordStart:
-		if (preroll_record_punch_enabled() && record_status() == Enabled) {
-			enable_record ();
 		}
 		remove = false;
 		del = false;
@@ -1199,17 +1167,13 @@ Session::process_event (SessionEvent* ev)
 
 	case SessionEvent::RangeLocate:
 		/* args: roll after locate, do flush, not with loop */
-		start_locate (ev->target_frame, true, true, false);
+		start_locate (ev->target_sample, true, true, false);
 		remove = false;
 		del = false;
 		break;
 
 	case SessionEvent::Overwrite:
 		overwrite_some_buffers (static_cast<Track*>(ev->ptr));
-		break;
-
-	case SessionEvent::SetTrackSpeed:
-		set_track_speed (static_cast<Track*> (ev->ptr), ev->speed);
 		break;
 
 	case SessionEvent::SetSyncSource:
@@ -1221,11 +1185,6 @@ Session::process_event (SessionEvent* ev)
 		set_audition (ev->region);
 		// drop reference to region
 		ev->region.reset ();
-		break;
-
-	case SessionEvent::InputConfigurationChange:
-		add_post_transport_work (PostTransportInputChange);
-		_butler->schedule_transport_work ();
 		break;
 
 	case SessionEvent::SetPlayAudioRange:
@@ -1268,19 +1227,15 @@ Session::process_event (SessionEvent* ev)
 	}
 }
 
-framepos_t
+samplepos_t
 Session::compute_stop_limit () const
 {
 	if (!Config->get_stop_at_session_end ()) {
-		return max_framepos;
+		return max_samplepos;
 	}
 
 	if (_slave) {
-		return max_framepos;
-	}
-
-	if (preroll_record_punch_enabled ()) {
-		return max_framepos;
+		return max_samplepos;
 	}
 
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
@@ -1288,16 +1243,16 @@ Session::compute_stop_limit () const
 
 	if (actively_recording ()) {
 		/* permanently recording */
-		return max_framepos;
+		return max_samplepos;
 	} else if (punching_in && !punching_out) {
 		/* punching in but never out */
-		return max_framepos;
-	} else if (punching_in && punching_out && _locations->auto_punch_location()->end() > current_end_frame()) {
+		return max_samplepos;
+	} else if (punching_in && punching_out && _locations->auto_punch_location()->end() > current_end_sample()) {
 		/* punching in and punching out after session end */
-		return max_framepos;
+		return max_samplepos;
 	}
 
-	return current_end_frame ();
+	return current_end_sample ();
 }
 
 

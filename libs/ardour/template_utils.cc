@@ -22,7 +22,6 @@
 
 #include <glibmm.h>
 
-#include "pbd/basename.h"
 #include "pbd/file_utils.h"
 #include "pbd/stl_delete.h"
 #include "pbd/xml++.h"
@@ -33,6 +32,8 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/search_paths.h"
 #include "ardour/io.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;
@@ -95,17 +96,38 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 	for (vector<string>::iterator i = templates.begin(); i != templates.end(); ++i) {
 		string file = session_template_dir_to_file (*i);
 
+		TemplateInfo rti;
+		rti.name = Glib::path_get_basename (*i);
+		rti.path = *i;
+
 		if (read_xml) {
+
 			XMLTree tree;
 			if (!tree.read (file.c_str())) {
+				cerr << "Failed to parse Route-template XML file: " << file;
 				continue;
 			}
+
+			XMLNode* root = tree.root();
+			
+			rti.modified_with = _("(unknown)");
+			try {
+				XMLNode *pv = root->child("ProgramVersion");
+				string modified_with;
+				if (pv != 0) {
+					pv->get_property (X_("modified-with"), modified_with);
+				}
+				rti.modified_with = modified_with;
+			} catch (XMLException &e) {}
+
+			rti.description = _("No Description");
+			try {
+				XMLNode *desc = root->child("description");
+				if (desc != 0) {
+					rti.description = desc->attribute_value();
+				}
+			} catch (XMLException &e) {}
 		}
-
-		TemplateInfo rti;
-
-		rti.name = basename_nosuffix (*i);
-		rti.path = *i;
 
 		template_names.push_back (rti);
 	}
@@ -128,12 +150,31 @@ find_route_templates (vector<TemplateInfo>& template_names)
 		XMLTree tree;
 
 		if (!tree.read (fullpath.c_str())) {
+			cerr << "Failed to parse Route-template XML file: " << fullpath;
 			continue;
 		}
 
 		XMLNode* root = tree.root();
 
 		TemplateInfo rti;
+
+		rti.modified_with = _("(unknown)");
+		try {
+			XMLNode *pv = root->child("ProgramVersion");
+			string modified_with;
+			if (pv != 0) {
+				pv->get_property (X_("modified-with"), modified_with);
+			}
+			rti.modified_with = modified_with;
+		} catch (XMLException &e) {}
+
+		rti.description = _("No Description");
+		try {
+			XMLNode *desc = root->child("description");
+			if (desc != 0) {
+				rti.description = desc->attribute_value();
+			}
+		} catch (XMLException &e) {}
 
 		rti.name = IO::name_from_state (*root->children().front());
 		rti.path = fullpath;

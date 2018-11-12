@@ -277,7 +277,7 @@ style "time_info_box"
 
 style "status_bar_box"
 {
-        bg[NORMAL] = @darkest
+        bg[NORMAL] = @background
 }
 
 style "very_small_text"
@@ -375,6 +375,11 @@ style "marker_text" = "small text"
 {
 }
 
+style "text_on_bg" = "medium_text"
+{
+	base[NORMAL] = @background
+}
+
 style "midi_tracer_textview" = "medium_monospace_text"
 {
 
@@ -406,6 +411,12 @@ style "base_frame"
 {
 	fg[NORMAL] = @background
 	bg[NORMAL] = @background
+}
+
+style "text_highlight_frame"
+{
+	fg[NORMAL] = shade (0.4, @texts)
+	bg[NORMAL] = shade (0.4, @texts)
 }
 
 style "transport_frame"
@@ -1096,6 +1107,7 @@ widget "*zoomrange clock" style:highest "medium_text"
 widget "*timecodeoffset clock" style:highest "medium_text"
 
 widget "*BaseFrame" style:highest "base_frame"
+widget "*TextHighlightFrame" style:highest "text_highlight_frame"
 widget "*TransportFrame" style:highest "transport_frame"
 widget "*TransportFrame*" style:highest  "transport_frame"
 widget "*EditorWindow*" style:highest  "editor_window"
@@ -1152,6 +1164,7 @@ widget "*MidiTrackControlsBaseSelected" style:highest "track_header_selected"
 widget "*BusControlsBaseSelected" style:highest "track_header_selected"
 widget "*AutomationTrackControlsBase" style:highest "automation_track_header"
 widget "*AutomationTrackControlsBaseSelected" style:highest "track_header_selected"
+widget "*ControlMasterBaseSelected" style:highest "track_header_selected"
 widget "*PluginParameterLabel" style:highest "medium_text"
 widget "*ParameterValueDisplay" style:highest "medium_bold_entry"
 widget "*PluginUIClickBox*" style:highest "medium_bold_entry"
@@ -1206,6 +1219,7 @@ widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*ProcessorList*" style:highest "processor_list"
 widget "*PortMatrixLabel*" style:highest "small_text"
+widget "*MainMenuBar" style:highest "status_bar_box"
 widget "*midi device" style:highest "midi_device"
 widget "*MidiTracerTextView" style:highest "midi_tracer_textview"
 widget "*meterbridge label" style:highest "meterbridge_label"
@@ -1227,4 +1241,4 @@ widget "*ooltip*" style:highest "tooltip"
 widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
-
+widget "*TextOnBackground" style:highest "text_on_bg"

@@ -33,7 +33,7 @@ class IOSelector;
 
 class ReturnUI : public Gtk::HBox
 {
-  public:
+public:
 	ReturnUI (Gtk::Window *,boost::shared_ptr<ARDOUR::Return>, ARDOUR::Session*);
 	~ReturnUI();
 
@@ -44,7 +44,7 @@ class ReturnUI : public Gtk::HBox
 
 	boost::shared_ptr<ARDOUR::Return>& retrn() { return _return; }
 
-  private:
+private:
 	boost::shared_ptr<ARDOUR::Return> _return;
 	GainMeter                         _gpm;
 	Gtk::VBox                         _vbox;

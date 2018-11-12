@@ -33,7 +33,7 @@ namespace MIDI {
 	typedef uint32_t       timestamp_t;
 
 	/** XXX: dupes from libardour */
-	typedef int64_t  framecnt_t;
+	typedef int64_t  samplecnt_t;
 	typedef uint32_t pframes_t;
 
 	enum eventType {

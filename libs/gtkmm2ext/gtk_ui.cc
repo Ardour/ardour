@@ -38,7 +38,6 @@
 #include "gtkmm2ext/bindings.h"
 #include "gtkmm2ext/gtk_ui.h"
 #include "gtkmm2ext/textviewer.h"
-#include "gtkmm2ext/popup.h"
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/window_title.h"
 #include "gtkmm2ext/actions.h"
@@ -55,7 +54,6 @@ using namespace PBD;
 using std::map;
 
 UI*   UI::theGtkUI = 0;
-float UI::ui_scale = 1.0;
 
 BaseUI::RequestType Gtkmm2ext::NullMessage = BaseUI::new_request_type();
 BaseUI::RequestType Gtkmm2ext::ErrorMessage = BaseUI::new_request_type();
@@ -485,7 +483,14 @@ UI::do_request (UIRequest* req)
 
 	} else if (req->type == SetTip) {
 
-		gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
+		gchar* old = gtk_widget_get_tooltip_markup (req->widget->gobj());
+		if (
+				(old && req->msg && strcmp (old, req->msg))
+				||
+				((old == NULL) != (req->msg == NULL || req->msg[0] == '\0'))
+			 ) {
+			gtk_widget_set_tooltip_markup (req->widget->gobj(), req->msg);
+		}
 
 	} else {
 
@@ -550,8 +555,6 @@ UI::receive (Transmitter::Channel chn, const char *str)
 	}
 }
 
-#define OLD_STYLE_ERRORS 1
-
 void
 UI::process_error_message (Transmitter::Channel chn, const char *str)
 {
@@ -561,9 +564,6 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 	const char *prefix;
 	size_t prefix_len;
 	bool fatal_received = false;
-#ifndef OLD_STYLE_ERRORS
-	PopUp* popup = new PopUp (WIN_POS_CENTER, 0, true);
-#endif
 
 	switch (chn) {
 	case Transmitter::Fatal:
@@ -574,44 +574,22 @@ UI::process_error_message (Transmitter::Channel chn, const char *str)
 		fatal_received = true;
 		break;
 	case Transmitter::Error:
-#if OLD_STYLE_ERRORS
 		prefix = "[ERROR]: ";
 		ptag = error_ptag;
 		mtag = error_mtag;
 		prefix_len = 9;
-#else
-		popup->set_name ("ErrorMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
 		break;
 	case Transmitter::Info:
-#if OLD_STYLE_ERRORS
 		prefix = "[INFO]: ";
 		ptag = info_ptag;
 		mtag = info_mtag;
 		prefix_len = 8;
-#else
-		popup->set_name ("InfoMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
-
 		break;
 	case Transmitter::Warning:
-#if OLD_STYLE_ERRORS
 		prefix = "[WARNING]: ";
 		ptag = warning_ptag;
 		mtag = warning_mtag;
 		prefix_len = 11;
-#else
-		popup->set_name ("WarningMessage");
-		popup->set_text (str);
-		popup->touch ();
-		return;
-#endif
 		break;
 	default:
 		/* no choice but to use text/console output here */
@@ -754,42 +732,6 @@ UI::just_hide_it (GdkEventAny* /*ev*/, Window *win)
 {
 	win->hide ();
 	return true;
-}
-
-Gdk::Color
-UI::get_color (const string& prompt, bool& picked, const Gdk::Color* initial)
-{
-	Gdk::Color color;
-
-	ColorSelectionDialog color_dialog (prompt);
-
-	color_dialog.set_modal (true);
-	color_dialog.get_cancel_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), false));
-	color_dialog.get_ok_button()->signal_clicked().connect (bind (mem_fun (*this, &UI::color_selection_done), true));
-	color_dialog.signal_delete_event().connect (mem_fun (*this, &UI::color_selection_deleted));
-
-	if (initial) {
-		color_dialog.get_colorsel()->set_current_color (*initial);
-	}
-
-	color_dialog.show_all ();
-	color_picked = false;
-	picked = false;
-
-	Main::run();
-
-	color_dialog.hide_all ();
-
-	if (color_picked) {
-		Gdk::Color f_rgba = color_dialog.get_colorsel()->get_current_color ();
-		color.set_red(f_rgba.get_red());
-		color.set_green(f_rgba.get_green());
-		color.set_blue(f_rgba.get_blue());
-
-		picked = true;
-	}
-
-	return color;
 }
 
 void

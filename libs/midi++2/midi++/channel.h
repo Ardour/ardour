@@ -165,7 +165,7 @@ class LIBMIDIPP_API Channel : public PBD::ScopedConnectionList {
 	RPNList rpns;
 	RPNList nrpns;
 
-	void reset (timestamp_t timestamp, framecnt_t nframes, bool notes_off = true);
+	void reset (timestamp_t timestamp, samplecnt_t nframes, bool notes_off = true);
 
 	void process_note_off (Parser &, EventTwoBytes *);
 	void process_note_on (Parser &, EventTwoBytes *);

@@ -65,7 +65,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	, _plugin_insert(pluginInsert)
 {
 	_signal_analysis_running = false;
-	_samplerate = ARDOUR_UI::instance()->the_session()->frame_rate();
+	_samplerate = ARDOUR_UI::instance()->the_session()->sample_rate();
 
 	_log_coeff = (1.0 - 2.0 * (1000.0/(_samplerate/2.0))) / powf(1000.0/(_samplerate/2.0), 2.0);
 	_log_max = log10f(1 + _log_coeff);
@@ -121,6 +121,10 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	dBSelectBin->add( *manage(dBScaleCombo));
 
 	// Phase checkbutton
+	_signal_button = new Gtk::CheckButton (_("Plot live signal"));
+	_signal_button->set_active(true);
+
+	// Phase checkbutton
 	_phase_button = new Gtk::CheckButton (_("Show phase"));
 	_phase_button->set_active(true);
 	_phase_button->signal_toggled().connect( sigc::mem_fun(*this, &PluginEqGui::redraw_scales));
@@ -131,10 +135,11 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	_pointer_info->set_name("PluginAnalysisInfoLabel");
 
 	// populate table
-	attach( *manage(_analysis_area), 1, 4, 1, 2);
-	attach( *manage(dBSelectBin),    1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	attach( *manage(_phase_button),  2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	attach( *manage(_pointer_info),  3, 4, 2, 3, Gtk::FILL, Gtk::SHRINK);
+	attach (*manage(_analysis_area), 0, 4, 0, 1);
+	attach (*manage(dBSelectBin),    0, 1, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_signal_button), 1, 2, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_phase_button),  2, 3, 1, 2, Gtk::SHRINK, Gtk::SHRINK);
+	attach (*manage(_pointer_info),  3, 4, 1, 2, Gtk::FILL,   Gtk::SHRINK);
 }
 
 PluginEqGui::~PluginEqGui()
@@ -164,6 +169,7 @@ PluginEqGui::start_listening ()
 
 	_plugin->activate();
 	set_buffer_size(4096, 16384);
+	_plugin->set_block_size (_buffer_size);
 	// Connect the realtime signal collection callback
 	_plugin_insert->AnalysisDataGathered.connect (analysis_connection, invalidator (*this), boost::bind (&PluginEqGui::signal_collect_callback, this, _1, _2), gui_context());
 }
@@ -364,9 +370,8 @@ PluginEqGui::run_impulse_analysis()
 	// map output buffers after input buffers (no inplace for VST)
 	out_map.offset_to (DataType::AUDIO, inputs);
 
-	_plugin->set_block_size (_buffer_size);
 	_plugin->connect_and_run(_bufferset, 0, _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
-	framecnt_t f = _plugin->signal_latency ();
+	samplecnt_t f = _plugin->signal_latency ();
 	// Adding user_latency() could be interesting
 
 	// Gather all output, taking latency into account.
@@ -387,9 +392,9 @@ PluginEqGui::run_impulse_analysis()
 		}
 	} else {
 		//int C = 0;
-		//std::cerr << (++C) << ": latency is " << f << " frames, doing split processing.." << std::endl;
-		framecnt_t target_offset = 0;
-		framecnt_t frames_left = _buffer_size; // refaktoroi
+		//std::cerr << (++C) << ": latency is " << f << " samples, doing split processing.." << std::endl;
+		samplecnt_t target_offset = 0;
+		samplecnt_t samples_left = _buffer_size; // refaktoroi
 		do {
 			if (f >= _buffer_size) {
 				//std::cerr << (++C) << ": f (=" << f << ") is larger than buffer_size, still trying to reach the actual output" << std::endl;
@@ -399,11 +404,11 @@ PluginEqGui::run_impulse_analysis()
 				// this buffer contains either the first, last or a whole bu the output of the impulse
 				// first part: offset is 0, so we copy to the start of _collect_bufferset
 				//             we start at output offset "f"
-				//             .. and copy "buffer size" - "f" - "offset" frames
+				//             .. and copy "buffer size" - "f" - "offset" samples
 
-				framecnt_t length = _buffer_size - f - target_offset;
+				samplecnt_t length = _buffer_size - f - target_offset;
 
-				//std::cerr << (++C) << ": copying " << length << " frames to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
+				//std::cerr << (++C) << ": copying " << length << " samples to _collect_bufferset.get_audio(i)+" << target_offset << " from bufferset at offset " << f << std::endl;
 				for (uint32_t i = 0; i < outputs; ++i) {
 					memcpy(_collect_bufferset.get_audio(i).data(target_offset),
 							_bufferset.get_audio(inputs + i).data() + f,
@@ -411,10 +416,10 @@ PluginEqGui::run_impulse_analysis()
 				}
 
 				target_offset += length;
-				frames_left   -= length;
+				samples_left   -= length;
 				f = 0;
 			}
-			if (frames_left > 0) {
+			if (samples_left > 0) {
 				// Silence the buffers
 				for (uint32_t i = 0; i < inputs; ++i) {
 					ARDOUR::AudioBuffer &buf = _bufferset.get_audio(i);
@@ -424,7 +429,7 @@ PluginEqGui::run_impulse_analysis()
 
 				_plugin->connect_and_run (_bufferset, target_offset, target_offset + _buffer_size, 1.0, in_map, out_map, _buffer_size, 0);
 			}
-		} while ( frames_left > 0);
+		} while ( samples_left > 0);
 
 	}
 
@@ -535,8 +540,9 @@ PluginEqGui::redraw_analysis_area()
 	}
 	plot_impulse_amplitude(_analysis_area, cr);
 
-	// TODO: make this optional
-	plot_signal_amplitude_difference(_analysis_area, cr);
+	if (_signal_button->get_active()) {
+		plot_signal_amplitude_difference(_analysis_area, cr);
+	}
 
 	cairo_destroy(cr);
 }
@@ -758,7 +764,7 @@ PluginEqGui::plot_impulse_amplitude(Gtk::Widget *w, cairo_t *cr)
 	// float width  = w->get_width();
 	float height = w->get_height();
 
-        cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
+	cairo_set_source_rgb(cr, 1.0, 1.0, 1.0);
 	cairo_set_line_width (cr, 2.5);
 
 	for (uint32_t i = 0; i < _impulse_fft->bins()-1; i++) {

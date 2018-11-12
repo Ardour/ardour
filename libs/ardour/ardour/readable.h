@@ -30,8 +30,8 @@ class LIBARDOUR_API Readable {
 	Readable () {}
 	virtual ~Readable() {}
 
-	virtual framecnt_t read (Sample*, framepos_t pos, framecnt_t cnt, int channel) const = 0;
-	virtual framecnt_t readable_length() const = 0;
+	virtual samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const = 0;
+	virtual samplecnt_t readable_length() const = 0;
 	virtual uint32_t  n_channels () const = 0;
 };
 

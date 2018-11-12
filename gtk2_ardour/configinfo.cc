@@ -17,7 +17,8 @@
 
 */
 
-#include <gtkmm.h>
+#include <gtkmm/box.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/ardour.h"
 

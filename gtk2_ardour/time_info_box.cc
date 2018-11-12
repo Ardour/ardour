@@ -20,21 +20,20 @@
 #include <algorithm>
 #include "pbd/compose.h"
 
-#include "gtkmm2ext/cairocell.h"
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/utils.h"
-#include "gtkmm2ext/stateful_button.h"
 #include "gtkmm2ext/actions.h"
 
 #include "ardour/location.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
 
-#include "time_info_box.h"
 #include "audio_clock.h"
-#include "editor.h"
-#include "control_point.h"
 #include "automation_line.h"
+#include "control_point.h"
+#include "editor.h"
+#include "region_view.h"
+#include "time_info_box.h"
 
 #include "pbd/i18n.h"
 
@@ -43,7 +42,7 @@ using namespace ARDOUR;
 using std::min;
 using std::max;
 
-TimeInfoBox::TimeInfoBox (bool with_punch)
+TimeInfoBox::TimeInfoBox (std::string state_node_name, bool with_punch)
 	: table (3, 3)
 	, punch_start (0)
 	, punch_end (0)
@@ -53,9 +52,15 @@ TimeInfoBox::TimeInfoBox (bool with_punch)
 {
 	set_name (X_("TimeInfoBox"));
 
-	selection_start = new AudioClock ("selection-start", false, "selection", false, false, false, false);
-	selection_end = new AudioClock ("selection-end", false, "selection", false, false, false, false);
-	selection_length = new AudioClock ("selection-length", false, "selection", false, false, true, false);
+	selection_start = new AudioClock (
+			string_compose ("%1-selection-start", state_node_name),
+			false, "selection", false, false, false, false);
+	selection_end = new AudioClock (
+			string_compose ("%1-selection-end", state_node_name),
+			false, "selection", false, false, false, false);
+	selection_length = new AudioClock (
+			string_compose ("%1-selection-length", state_node_name),
+			false, "selection", false, false, true, false);
 
 	selection_title.set_text (_("Selection"));
 
@@ -98,8 +103,12 @@ TimeInfoBox::TimeInfoBox (bool with_punch)
 	table.attach (*selection_length, 1, 2, 3, 4);
 
 	if (with_punch_clock) {
-		punch_start = new AudioClock ("punch-start", false, "punch", false, false, false, false);
-		punch_end = new AudioClock ("punch-end", false, "punch", false, false, false, false);
+		punch_start = new AudioClock (
+				string_compose ("%1-punch-start", state_node_name),
+				false, "punch", false, false, false, false);
+		punch_end = new AudioClock (
+				string_compose ("%1-punch-end", state_node_name),
+				false, "punch", false, false, false, false);
 		punch_title.set_text (_("Punch"));
 
 		punch_title.set_name ("TimeInfoSelectionTitle");
@@ -128,7 +137,6 @@ TimeInfoBox::TimeInfoBox (bool with_punch)
 	Editor::instance().get_selection().TimeChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 	Editor::instance().get_selection().RegionsChanged.connect (sigc::mem_fun (*this, &TimeInfoBox::selection_changed));
 
-	Region::RegionPropertyChanged.connect (region_property_connections, invalidator (*this), boost::bind (&TimeInfoBox::region_property_change, this, _1, _2), gui_context());
 	Editor::instance().MouseModeChanged.connect (editor_connections, invalidator(*this), boost::bind (&TimeInfoBox::track_mouse_mode, this), gui_context());
 }
 
@@ -146,33 +154,6 @@ void
 TimeInfoBox::track_mouse_mode ()
 {
 	selection_changed ();
-}
-
-void
-TimeInfoBox::region_property_change (boost::shared_ptr<ARDOUR::Region> /* r */, const PBD::PropertyChange& what_changed)
-{
-	Selection& selection (Editor::instance().get_selection());
-
-	if (selection.regions.empty()) {
-		return;
-	}
-
-	PBD::PropertyChange our_interests;
-
-	our_interests.add (ARDOUR::Properties::position);
-	our_interests.add (ARDOUR::Properties::length);
-	our_interests.add (ARDOUR::Properties::start);
-
-	if (!what_changed.contains (our_interests)) {
-		return;
-	}
-
-	/* TODO: check if RegionSelection includes the given region.
-	 * This is not straight foward because RegionSelection is done by
-	 * RegionView (not Region itself).
-	 */
-
-	//selection_changed ();
 }
 
 bool
@@ -250,10 +231,27 @@ TimeInfoBox::set_session (Session* s)
 }
 
 void
+TimeInfoBox::region_selection_changed ()
+{
+	samplepos_t s, e;
+	Selection& selection (Editor::instance().get_selection());
+	s = selection.regions.start();
+	e = selection.regions.end_sample();
+	selection_start->set_off (false);
+	selection_end->set_off (false);
+	selection_length->set_off (false);
+	selection_start->set (s);
+	selection_end->set (e);
+	selection_length->set (e, false, s);
+}
+
+void
 TimeInfoBox::selection_changed ()
 {
-	framepos_t s, e;
+	samplepos_t s, e;
 	Selection& selection (Editor::instance().get_selection());
+
+	region_property_connections.drop_connections();
 
 	switch (Editor::instance().current_mouse_mode()) {
 
@@ -276,18 +274,18 @@ TimeInfoBox::selection_changed ()
 					selection_end->set_off (false);
 					selection_length->set_off (false);
 					selection_start->set (selection.time.start());
-					selection_end->set (selection.time.end_frame());
-					selection_length->set (selection.time.length());
+					selection_end->set (selection.time.end_sample());
+					selection_length->set (selection.time.end_sample(), false, selection.time.start());
 				} else {
 					selection_start->set_off (true);
 					selection_end->set_off (true);
 					selection_length->set_off (true);
 				}
 			} else {
-				s = max_framepos;
+				s = max_samplepos;
 				e = 0;
 				for (PointSelection::iterator i = selection.points.begin(); i != selection.points.end(); ++i) {
-					framepos_t const p = (*i)->line().session_position ((*i)->model ());
+					samplepos_t const p = (*i)->line().session_position ((*i)->model ());
 					s = min (s, p);
 					e = max (e, p);
 				}
@@ -296,17 +294,22 @@ TimeInfoBox::selection_changed ()
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_length->set (e, false, s);
 			}
 		} else {
-			s = selection.regions.start();
-			e = selection.regions.end_frame();
-			selection_start->set_off (false);
-			selection_end->set_off (false);
-			selection_length->set_off (false);
-			selection_start->set (s);
-			selection_end->set (e);
-			selection_length->set (e - s + 1);
+			/* this is more efficient than tracking changes per region in large selections */
+			std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+			for (RegionSelection::iterator s = selection.regions.begin(); s != selection.regions.end(); ++s) {
+				boost::shared_ptr<Playlist> pl = (*s)->region()->playlist();
+				if (pl) {
+					playlists.insert (pl);
+				}
+			}
+			for (std::set<boost::shared_ptr<ARDOUR::Playlist> >::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
+				(*ps)->ContentsChanged.connect (region_property_connections, invalidator (*this),
+								boost::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
+			}
+			region_selection_changed ();
 		}
 		break;
 
@@ -318,13 +321,13 @@ TimeInfoBox::selection_changed ()
 			if (tact && tact->get_active() &&  !selection.regions.empty()) {
 				/* show selected regions */
 				s = selection.regions.start();
-				e = selection.regions.end_frame();
+				e = selection.regions.end_sample();
 				selection_start->set_off (false);
 				selection_end->set_off (false);
 				selection_length->set_off (false);
 				selection_start->set (s);
 				selection_end->set (e);
-				selection_length->set (e - s + 1);
+				selection_length->set (e, false, s);
 			} else {
 				selection_start->set_off (true);
 				selection_end->set_off (true);
@@ -335,8 +338,8 @@ TimeInfoBox::selection_changed ()
 			selection_end->set_off (false);
 			selection_length->set_off (false);
 			selection_start->set (selection.time.start());
-			selection_end->set (selection.time.end_frame());
-			selection_length->set (selection.time.length());
+			selection_end->set (selection.time.end_sample());
+			selection_length->set (selection.time.end_sample(), false, selection.time.start());
 		}
 		break;
 

@@ -29,7 +29,7 @@
 #include "ardour/types.h"
 #include "ardour/presentation_info.h"
 
-#include "timecode/time.h"
+#include "temporal/time.h"
 
 #include "control_protocol/visibility.h"
 
@@ -55,7 +55,7 @@ class LIBCONTROLCP_API BasicUI {
 	/* transport control */
 
 	void loop_toggle ();
-	void loop_location (framepos_t start, framepos_t end);
+	void loop_location (samplepos_t start, samplepos_t end);
 	void access_action ( std::string action_path );
 	static PBD::Signal2<void,std::string,std::string> AccessAction;
 	void goto_zero ();
@@ -71,8 +71,8 @@ class LIBCONTROLCP_API BasicUI {
 	void jump_by_seconds( double sec );
 	void jump_by_bars(double bars);
 
-	ARDOUR::framepos_t transport_frame ();
-	void locate (ARDOUR::framepos_t frame, bool play = false);
+	ARDOUR::samplepos_t transport_sample ();
+	void locate (ARDOUR::samplepos_t sample, bool play = false);
 	bool locating ();
 	bool locked ();
 
@@ -142,11 +142,11 @@ class LIBCONTROLCP_API BasicUI {
 
 	void goto_nth_marker (int n);
 
-	ARDOUR::framecnt_t timecode_frames_per_hour ();
+	ARDOUR::samplecnt_t timecode_frames_per_hour ();
 
-	void timecode_time (framepos_t where, Timecode::Time&);
-	void timecode_to_sample (Timecode::Time& timecode, framepos_t & sample, bool use_offset, bool use_subframes) const;
-	void sample_to_timecode (framepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
+	void timecode_time (samplepos_t where, Timecode::Time&);
+	void timecode_to_sample (Timecode::Time& timecode, samplepos_t & sample, bool use_offset, bool use_subframes) const;
+	void sample_to_timecode (samplepos_t sample, Timecode::Time& timecode, bool use_offset, bool use_subframes) const;
 
   protected:
 	BasicUI ();

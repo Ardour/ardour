@@ -24,7 +24,7 @@
 #include "evoral/midi_util.h"
 #include "evoral/Note.hpp"
 
-#include "ardour/beats_frames_converter.h"
+#include "ardour/beats_samples_converter.h"
 #include "ardour/midi_model.h"
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
@@ -292,7 +292,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 						if (note->time() + fdelta >= 0) {
 							cmd->change (note, prop, note->time() + fdelta);
 						} else {
-							cmd->change (note, prop, Evoral::Beats());
+							cmd->change (note, prop, Temporal::Beats());
 						}
 						break;
 					case MidiModel::NoteDiffCommand::Velocity:
@@ -300,10 +300,10 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 						break;
 					case MidiModel::NoteDiffCommand::Length:
 						if (note->length().to_double() + fdelta >=
-						    Evoral::Beats::tick().to_double()) {
+						    Temporal::Beats::tick().to_double()) {
 							cmd->change (note, prop, note->length() + fdelta);
 						} else {
-							cmd->change (note, prop, Evoral::Beats::tick());
+							cmd->change (note, prop, Temporal::Beats::tick());
 						}
 						break;
 					case MidiModel::NoteDiffCommand::Channel:
@@ -335,7 +335,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 					if (note->time() + fdelta >= 0) {
 						cmd->change (note, prop, note->time() + fdelta);
 					} else {
-						cmd->change (note, prop, Evoral::Beats());
+						cmd->change (note, prop, Temporal::Beats());
 					}
 					break;
 				case MidiModel::NoteDiffCommand::Velocity:
@@ -343,10 +343,10 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 					break;
 				case MidiModel::NoteDiffCommand::Length:
 					if (note->length() + fdelta >=
-					    Evoral::Beats::tick().to_double()) {
+					    Temporal::Beats::tick().to_double()) {
 						cmd->change (note, prop, note->length() + fdelta);
 					} else {
-						cmd->change (note, prop, Evoral::Beats::tick());
+						cmd->change (note, prop, Temporal::Beats::tick());
 					}
 					break;
 				case MidiModel::NoteDiffCommand::Channel:
@@ -612,6 +612,13 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		}
 		break;
 	case 3: // name
+		ival = ParameterDescriptor::midi_note_num (text);
+		if (ival < 128) {
+			idelta = ival - note->note();
+			prop = MidiModel::NoteDiffCommand::NoteNumber;
+			opname = _("change note number");
+			apply = true;
+		}
 		break;
 	case 4: // velocity
 		if (sscanf (text.c_str(), "%d", &ival) == 1 && ival != note->velocity()) {
@@ -752,7 +759,7 @@ MidiListEditor::redisplay_model ()
 
 	if (_session) {
 
-		BeatsFramesConverter conv (_session->tempo_map(), region->position());
+		BeatsSamplesConverter conv (_session->tempo_map(), region->position());
 		MidiModel::Notes notes = region->midi_source(0)->model()->notes();
 		TreeModel::Row row;
 		stringstream ss;
@@ -764,14 +771,14 @@ MidiListEditor::redisplay_model ()
 			row[columns.note] = (*i)->note();
 			row[columns.velocity] = (*i)->velocity();
 
-			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_frame (region->position() + conv.to ((*i)->time())));
+			Timecode::BBT_Time bbt (_session->tempo_map().bbt_at_sample (region->position() + conv.to ((*i)->time())));
 
 			ss.str ("");
 			ss << bbt;
 			row[columns.start] = ss.str();
 
 			bbt.bars = 0;
-			const Evoral::Beats dur = (*i)->end_time() - (*i)->time();
+			const Temporal::Beats dur = (*i)->end_time() - (*i)->time();
 			bbt.beats = dur.get_beats ();
 			bbt.ticks = dur.get_ticks ();
 

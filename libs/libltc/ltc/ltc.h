@@ -63,16 +63,16 @@ extern "C" {
 
 #ifndef DOXYGEN_IGNORE
 /* libltc version */
-#define LIBLTC_VERSION "1.1.4"
+#define LIBLTC_VERSION "1.3.0"
 #define LIBLTC_VERSION_MAJOR  1
-#define LIBLTC_VERSION_MINOR  1
-#define LIBLTC_VERSION_MICRO  4
+#define LIBLTC_VERSION_MINOR  3
+#define LIBLTC_VERSION_MICRO  0
 
 /* interface revision number
  * http://www.gnu.org/software/libtool/manual/html_node/Updating-version-info.html
  */
 #define LIBLTC_CUR 11
-#define LIBLTC_REV  3
+#define LIBLTC_REV  5
 #define LIBLTC_AGE  0
 #endif /* end DOXYGEN_IGNORE */
 
@@ -277,7 +277,7 @@ typedef struct LTCFrame LTCFrame;
 /**
  * Extended LTC frame - includes audio-sample position offsets, volume, etc
  *
- * Note: For TV systems, the sample in the LTC audio data stream where the LTC Frame starts is not neccesarily at the same time
+ * Note: For TV systems, the sample in the LTC audio data stream where the LTC Frame starts is not necessarily at the same time
  * as the video-frame which is described by the LTC Frame.
  *
  * \ref off_start denotes the time of the first transition of bit 0 in the LTC frame.
@@ -674,7 +674,7 @@ int ltc_encoder_set_bufsize(LTCEncoder *e, double sample_rate, double fps);
  * typically LTC is sent at 0dBu ; in EBU callibrated systems that
  * corresponds to -18dBFS. - by default libltc creates -3dBFS
  *
- * since libltc generated 8bit audio-data, the minium dBFS
+ * since libltc generated 8bit audio-data, the minimum dBFS
  * is about -42dB which corresponds to 1 bit.
  *
  * 0dB corresponds to a signal range of 127

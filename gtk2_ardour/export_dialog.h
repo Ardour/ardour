@@ -21,8 +21,14 @@
 #ifndef __export_dialog_h__
 #define __export_dialog_h__
 
-#include <boost/scoped_ptr.hpp>
 #include <string>
+#include <boost/scoped_ptr.hpp>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/progressbar.h>
 
 #include "ardour/export_profile_manager.h"
 
@@ -34,8 +40,6 @@
 #include "ardour_dialog.h"
 #include "soundcloud_export_selector.h"
 
-#include <gtkmm.h>
-
 namespace ARDOUR {
 	class ExportStatus;
 	class ExportHandler;
@@ -46,8 +50,7 @@ class ExportChannelSelector;
 
 class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 {
-
-  public:
+public:
 
 	ExportDialog (PublicEditor & editor, std::string title, ARDOUR::ExportProfileManager::ExportType type);
 	~ExportDialog ();
@@ -62,7 +65,11 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 		RESPONSE_CANCEL
 	};
 
-  protected:
+protected:
+
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
 
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
@@ -90,7 +97,7 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 	/*** GUI components ***/
 	Gtk::Notebook export_notebook;
 
-  private:
+private:
 
 	void init ();
 
@@ -120,12 +127,12 @@ class ExportDialog : public ArdourDialog, public PBD::ScopedConnectionList
 
 	Gtk::HBox           warn_hbox;
 	Gtk::Label          warn_label;
-	std::string       warn_string;
+	std::string         warn_string;
 
 	Gtk::HBox           list_files_hbox;
 	Gtk::Label          list_files_label;
 	Gtk::Button         list_files_button;
-	std::string       list_files_string;
+	std::string         list_files_string;
 
 	void add_error (std::string const & text);
 	void add_warning (std::string const & text);

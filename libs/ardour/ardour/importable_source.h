@@ -31,13 +31,13 @@ public:
 	ImportableSource () {}
 	virtual ~ImportableSource() {}
 
-	virtual framecnt_t read (Sample* buffer, framecnt_t nframes) = 0;
+	virtual samplecnt_t read (Sample* buffer, samplecnt_t nframes) = 0;
 	virtual float      ratio() const { return 1.0f; }
 	virtual uint32_t   channels() const = 0;
-	virtual framecnt_t length() const = 0;
-	virtual framecnt_t samplerate() const = 0;
-	virtual void       seek (framepos_t pos) = 0;
-	virtual framepos_t natural_position() const = 0;
+	virtual samplecnt_t length() const = 0;
+	virtual samplecnt_t samplerate() const = 0;
+	virtual void       seek (samplepos_t pos) = 0;
+	virtual samplepos_t natural_position() const = 0;
 
 	virtual bool clamped_at_unity () const = 0;
 };

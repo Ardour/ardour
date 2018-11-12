@@ -66,9 +66,6 @@ public:
 		return (float) _value;
 	}
 
-	double internal_to_user (double i) const { return accurate_coefficient_to_dB (i);}
-	double user_to_internal (double u) const { return dB_to_coefficient(u) ;}
-
 	std::string get_user_string () const
 	{
 		char theBuf[32]; sprintf( theBuf, "%3.1f dB", accurate_coefficient_to_dB (get_value()));
@@ -127,9 +124,9 @@ public:
 
 	bool display_to_user() const;
 
-	void run (BufferSet& /*bufs*/, framepos_t /*start_frame*/, framepos_t /*end_frame*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
+	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t /*nframes*/, bool /*result_required*/);
 
-	XMLNode& state (bool full);
+	XMLNode& state ();
 	int set_state (const XMLNode&, int /* version */);
 
 	bool configure_io (ChanCount in, ChanCount out);

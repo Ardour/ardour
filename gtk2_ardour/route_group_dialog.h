@@ -23,9 +23,9 @@
 #include <gtkmm/dialog.h>
 #include <gtkmm/entry.h>
 #include <gtkmm/checkbutton.h>
-#include <gtkmm/colorbutton.h>
 
 #include "ardour_dialog.h"
+#include "stripable_colorpicker.h"
 
 class RouteGroupDialog : public ArdourDialog
 {
@@ -51,7 +51,7 @@ private:
 	Gtk::CheckButton _route_active;
 	Gtk::CheckButton _share_color;
 	Gtk::CheckButton _share_monitoring;
-	Gtk::ColorButton _color;
+	ArdourColorButton _color;
 
 	void gain_toggled ();
 	void update ();

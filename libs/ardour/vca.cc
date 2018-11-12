@@ -70,7 +70,6 @@ VCA::get_next_vca_number ()
 VCA::VCA (Session& s, int32_t num, const string& name)
 	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
-	, Automatable (s)
 	, _number (num)
 	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
 {
@@ -93,6 +92,12 @@ VCA::~VCA ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("delete VCA %1\n", number()));
 	{
+		Glib::Threads::Mutex::Lock lm (_control_lock);
+		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+		}
+	}
+	{
 		Glib::Threads::Mutex::Lock lm (number_lock);
 		if (_number == next_number - 1) {
 			/* this was the "last" VCA added, so rewind the next number so
@@ -114,8 +119,8 @@ XMLNode&
 VCA::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	node->add_property (X_("name"), _name);
-	node->add_property (X_("number"), _number);
+	node->set_property (X_("name"), name());
+	node->set_property (X_("number"), _number);
 
 	node->add_child_nocopy (_presentation_info.get_state());
 
@@ -132,39 +137,36 @@ VCA::get_state ()
 int
 VCA::set_state (XMLNode const& node, int version)
 {
-	XMLProperty const* prop;
-
 	Stripable::set_state (node, version);
 
-	if ((prop = node.property ("name")) != 0) {
-		set_name (prop->value());
+	std::string str;
+	if (node.get_property ("name", str)) {
+		set_name (str);
 	}
 
-	if ((prop = node.property ("number")) != 0) {
-		_number = atoi (prop->value());
-	}
+	node.get_property ("number", _number);
 
 	XMLNodeList const &children (node.children());
 	for (XMLNodeList::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == Controllable::xml_node_name) {
 
-			XMLProperty* prop = (*i)->property ("name");
-
-			if (!prop) {
+			if (!(*i)->get_property ("name", str)) {
 				continue;
 			}
 
-			if (prop->value() == _gain_control->name()) {
+			if (str == _gain_control->name()) {
 				_gain_control->set_state (**i, version);
 			}
-			if (prop->value() == _solo_control->name()) {
+			if (str == _solo_control->name()) {
 				_solo_control->set_state (**i, version);
 			}
-			if (prop->value() == _mute_control->name()) {
+			if (str == _mute_control->name()) {
 				_mute_control->set_state (**i, version);
 			}
 		} else if ((*i)->name() == Slavable::xml_node_name) {
 			Slavable::set_state (**i, version);
+		} else if ((*i)->name() == Automatable::xml_node_name) {
+			set_automation_xml_state (**i, Evoral::Parameter(NullAutomation));
 		}
 	}
 
@@ -204,4 +206,25 @@ VCA::slaved_to (boost::shared_ptr<VCA> vca) const
 	/* just test one particular control, not all of them */
 
 	return _gain_control->slaved_to (vca->gain_control());
+}
+
+void
+VCA::assign (boost::shared_ptr<VCA> v)
+{
+	/* prevent recursive assignments */
+	if (assigned_to (_session.vca_manager_ptr (), v)) {
+		warning << _("Master assignment inored to prevent recursion") << endmsg;
+		return;
+	}
+	Slavable::assign (v);
+}
+
+SlavableControlList
+VCA::slavables () const
+{
+	SlavableControlList rv;
+	rv.push_back (_gain_control);
+	rv.push_back (_mute_control);
+	rv.push_back (_solo_control);
+	return rv;
 }

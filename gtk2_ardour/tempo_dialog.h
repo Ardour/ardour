@@ -38,17 +38,18 @@
 class TempoDialog : public ArdourDialog
 {
 public:
-	TempoDialog (ARDOUR::TempoMap&, framepos_t, const std::string & action);
+	TempoDialog (ARDOUR::TempoMap&, samplepos_t, const std::string & action);
 	TempoDialog (ARDOUR::TempoMap&, ARDOUR::TempoSection&, const std::string & action);
 
 	double get_bpm ();
+	double get_end_bpm ();
 	double get_note_type ();
 	bool   get_bbt_time (Timecode::BBT_Time&);
 	ARDOUR::TempoSection::Type get_tempo_type ();
 	ARDOUR::PositionLockStyle get_lock_style ();
 
 private:
-	void init (const Timecode::BBT_Time& start, double bpm , double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
+	void init (const Timecode::BBT_Time& start, double bpm, double end_bpm, double note_type, ARDOUR::TempoSection::Type type, bool movable, ARDOUR::PositionLockStyle style);
 	bool is_user_input_valid() const;
 	void bpm_changed ();
 	bool bpm_button_press (GdkEventButton* );
@@ -57,8 +58,11 @@ private:
 	void pulse_change ();
 	void tempo_type_change ();
 	void lock_style_change ();
-	bool tap_tempo_button_press (GdkEventButton* );
+	bool tap_tempo_key_press (GdkEventKey*);
+	bool tap_tempo_button_press (GdkEventButton*);
 	bool tap_tempo_focus_out (GdkEventFocus* );
+
+	void tap_tempo ();
 
 	typedef std::map<std::string,float> NoteTypes;
 	NoteTypes note_types;
@@ -81,6 +85,9 @@ private:
 	Gtk::ComboBoxText pulse_selector;
 	Gtk::Adjustment   bpm_adjustment;
 	Gtk::SpinButton   bpm_spinner;
+	Gtk::Adjustment   end_bpm_adjustment;
+	Gtk::SpinButton   end_bpm_spinner;
+	Gtk::Label   _end_bpm_label;
 	Gtk::Entry   when_bar_entry;
 	Gtk::Entry   when_beat_entry;
 	Gtk::Label   when_bar_label;
@@ -95,7 +102,7 @@ class MeterDialog : public ArdourDialog
 {
 public:
 
-	MeterDialog (ARDOUR::TempoMap&, framepos_t, const std::string & action);
+	MeterDialog (ARDOUR::TempoMap&, samplepos_t, const std::string & action);
 	MeterDialog (ARDOUR::TempoMap&, ARDOUR::MeterSection&, const std::string & action);
 
 	double get_bpb ();

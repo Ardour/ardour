@@ -27,11 +27,11 @@ namespace ARDOUR {
 
 class LIBARDOUR_API SilentFileSource : public AudioFileSource {
 public:
-	int update_header (framepos_t /*when*/, struct tm&, time_t) { return 0; }
+	int update_header (samplepos_t /*when*/, struct tm&, time_t) { return 0; }
 	int flush_header () { return 0; }
 	float sample_rate () const { return _sample_rate; }
 
-	void set_length (framecnt_t len) { _length = len; }
+	void set_length (samplecnt_t len) { _length = len; }
 	void flush () {}
 
 	bool destructive() const { return false; }
@@ -43,7 +43,7 @@ protected:
 	void close() {}
 	friend class SourceFactory;
 
-	SilentFileSource (Session& s, const XMLNode& x, framecnt_t len, float srate)
+	SilentFileSource (Session& s, const XMLNode& x, samplecnt_t len, float srate)
 		: Source (s, x)
 		, AudioFileSource (s, x, false)
 		, _sample_rate(srate)
@@ -51,17 +51,17 @@ protected:
 		_length = len;
 	}
 
-	framecnt_t read_unlocked (Sample *dst, framepos_t /*start*/, framecnt_t cnt) const {
+	samplecnt_t read_unlocked (Sample *dst, samplepos_t /*start*/, samplecnt_t cnt) const {
 		memset (dst, 0, sizeof (Sample) * cnt);
 		return cnt;
 	}
 
-	framecnt_t write_unlocked (Sample */*dst*/, framecnt_t /*cnt*/) { return 0; }
+	samplecnt_t write_unlocked (Sample */*dst*/, samplecnt_t /*cnt*/) { return 0; }
 
 	void set_header_timeline_position () {}
 
-	int read_peaks_with_fpp (PeakData *peaks, framecnt_t npeaks, framepos_t /*start*/, framecnt_t /*cnt*/,
-				 double /*frames_per_pixel*/, framecnt_t /*fpp*/) const {
+	int read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t /*start*/, samplecnt_t /*cnt*/,
+				 double /*samples_per_pixel*/, samplecnt_t /*fpp*/) const {
 		memset (peaks, 0, sizeof (PeakData) * npeaks);
 		return 0;
 	}

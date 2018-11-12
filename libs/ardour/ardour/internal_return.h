@@ -31,20 +31,22 @@ class InternalSend;
 
 class LIBARDOUR_API InternalReturn : public Return
 {
-  public:
+public:
 	InternalReturn (Session&);
 
-	XMLNode& state (bool full);
-	XMLNode& get_state ();
-
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 	bool configure_io (ChanCount, ChanCount);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
 	void add_send (InternalSend *);
 	void remove_send (InternalSend *);
 
-  private:
+	void set_playback_offset (samplecnt_t cnt);
+
+protected:
+	XMLNode& state ();
+
+private:
 	/** sends that we are receiving data from */
 	std::list<InternalSend*> _sends;
 	/** mutex to protect _sends */

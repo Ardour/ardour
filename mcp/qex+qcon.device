@@ -1,0 +1,16 @@
+<MackieProtocolDevice>
+  <Name value="iCON QCon Pro and QCon Expander on Left"/>
+  <Strips value="8"/>
+  <Extenders value="1"/>
+  <MasterPosition value="2"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="no"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <LogicControlButtons value="yes"/>
+  <usesIPMIDI value="no"/>
+  <NoHandShake value="yes"/>
+  <IsQCon value="yes"/>
+</MackieProtocolDevice>

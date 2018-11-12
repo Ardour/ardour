@@ -51,7 +51,7 @@ using std::string;
 
 gain_t* SndFileSource::out_coefficient = 0;
 gain_t* SndFileSource::in_coefficient = 0;
-framecnt_t SndFileSource::xfade_frames = 64;
+samplecnt_t SndFileSource::xfade_samples = 64;
 const Source::Flag SndFileSource::default_writable_flags = Source::Flag (
 		Source::Writable |
 		Source::Removable |
@@ -108,7 +108,7 @@ SndFileSource::SndFileSource (Session& s, const string& path, int chn, Flag flag
     not open existing ones.
 */
 SndFileSource::SndFileSource (Session& s, const string& path, const string& origin,
-                              SampleFormat sfmt, HeaderFormat hf, framecnt_t rate, Flag flags)
+                              SampleFormat sfmt, HeaderFormat hf, samplecnt_t rate, Flag flags)
 	: Source(s, DataType::AUDIO, path, flags)
 	, AudioFileSource (s, path, origin, flags, sfmt, hf)
 	, _sndfile (0)
@@ -250,12 +250,12 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 
 	assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 
-	_channel = other.channel ();
+	_channel = 0;
 	init_sndfile ();
 
 	_file_is_new = true;
 
-	_info.channels = other.n_channels();
+	_info.channels = 1;
 	_info.samplerate = other.sample_rate ();
 	_info.format = SF_FORMAT_FLAC | (use16bits ? SF_FORMAT_PCM_16 : SF_FORMAT_PCM_24);
 
@@ -276,17 +276,32 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 		throw failed_constructor();
 	}
 
+#if 0
+	/* setting flac compression quality above the default does not produce a significant size
+	 * improvement (not for large raw recordings anyway, the_CLA tests 2017-10-02, >> 250MB files,
+	 * ~1% smaller), but does have a significant encoding speed penalty.
+	 *
+	 * We still may expose this as option someday though, perhaps for opposite reason: "fast encoding"
+	 */
+	double flac_quality = 1; // libsndfile uses range 0..1 (mapped to flac 0..8), default is (5/8)
+	if (sf_command (_sndfile, SFC_SET_COMPRESSION_LEVEL, &flac_quality, sizeof (double)) != SF_TRUE) {
+		char errbuf[256];
+		sf_error_str (_sndfile, errbuf, sizeof (errbuf) - 1);
+		error << string_compose (_("Cannot set flac compression level: %1"), errbuf) << endmsg;
+	}
+#endif
+
 	Sample buf[8192];
-	framecnt_t off = 0;
+	samplecnt_t off = 0;
 	float peak = 0;
 	float norm = 1.f;
 
 	/* normalize before converting to fixed point, calc gain factor */
-	framecnt_t len = other.read (buf, off, 8192, /*channel*/0);
+	samplecnt_t len = other.read (buf, off, 8192, other.channel ());
 	while (len > 0) {
 		peak = compute_peak (buf, len, peak);
 		off += len;
-		len = other.read (buf, off, 8192, /*channel*/0);
+		len = other.read (buf, off, 8192, other.channel ());
 		if (progress) {
 			progress->set_progress (0.5f * (float) off / other.readable_length ());
 		}
@@ -299,16 +314,16 @@ SndFileSource::SndFileSource (Session& s, const AudioFileSource& other, const st
 
 	/* copy file */
 	off = 0;
-	len = other.read (buf, off, 8192, /*channel*/0);
+	len = other.read (buf, off, 8192, other.channel ());
 	while (len > 0) {
 		if (norm != 1.f) {
-			for (framecnt_t i = 0; i < len; ++i) {
+			for (samplecnt_t i = 0; i < len; ++i) {
 				buf[i] *= norm;
 			}
 		}
 		write (buf, len);
 		off += len;
-		len = other.read (buf, off, 8192, /*channel*/0);
+		len = other.read (buf, off, 8192, other.channel ());
 		if (progress) {
 			progress->set_progress (0.5f + 0.5f * (float) off / other.readable_length ());
 		}
@@ -325,7 +340,7 @@ SndFileSource::init_sndfile ()
 	memset (&_info, 0, sizeof(_info));
 
 	if (destructive()) {
-		xfade_buf = new Sample[xfade_frames];
+		xfade_buf = new Sample[xfade_samples];
 		_timeline_position = header_position_offset;
 	}
 
@@ -486,15 +501,15 @@ SndFileSource::sample_rate () const
 	return _info.samplerate;
 }
 
-framecnt_t
-SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) const
+samplecnt_t
+SndFileSource::read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const
 {
 	assert (cnt >= 0);
 
-	framecnt_t nread;
+	samplecnt_t nread;
 	float *ptr;
-	framecnt_t real_cnt;
-	framepos_t file_cnt;
+	samplecnt_t real_cnt;
+	samplepos_t file_cnt;
 
         if (writable() && !_sndfile) {
                 /* file has not been opened yet - nothing written to it */
@@ -529,7 +544,7 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 	assert (file_cnt >= 0);
 
 	if (file_cnt != cnt) {
-		framepos_t delta = cnt - file_cnt;
+		samplepos_t delta = cnt - file_cnt;
 		memset (dst+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
@@ -538,19 +553,19 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 		if (sf_seek (_sndfile, (sf_count_t) start, SEEK_SET|SFM_READ) != (sf_count_t) start) {
 			char errbuf[256];
 			sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-			error << string_compose(_("SndFileSource: could not seek to frame %1 within %2 (%3)"), start, _name.val().substr (1), errbuf) << endmsg;
+			error << string_compose(_("SndFileSource: could not seek to sample %1 within %2 (%3)"), start, _name.val().substr (1), errbuf) << endmsg;
 			return 0;
 		}
 
 		if (_info.channels == 1) {
-			framecnt_t ret = sf_read_float (_sndfile, dst, file_cnt);
+			samplecnt_t ret = sf_read_float (_sndfile, dst, file_cnt);
 			if (ret != file_cnt) {
 				char errbuf[256];
 				sf_error_str (0, errbuf, sizeof (errbuf) - 1);
 				error << string_compose(_("SndFileSource: @ %1 could not read %2 within %3 (%4) (len = %5, ret was %6)"), start, file_cnt, _name.val().substr (1), errbuf, _length, ret) << endl;
 			}
 			if (_gain != 1.f) {
-				for (framecnt_t i = 0; i < ret; ++i) {
+				for (samplecnt_t i = 0; i < ret; ++i) {
 					dst[i] *= _gain;
 				}
 			}
@@ -569,12 +584,12 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 	/* stride through the interleaved data */
 
 	if (_gain != 1.f) {
-		for (framecnt_t n = 0; n < nread; ++n) {
+		for (samplecnt_t n = 0; n < nread; ++n) {
 			dst[n] = *ptr * _gain;
 			ptr += _info.channels;
 		}
 	} else {
-		for (framecnt_t n = 0; n < nread; ++n) {
+		for (samplecnt_t n = 0; n < nread; ++n) {
 			dst[n] = *ptr;
 			ptr += _info.channels;
 		}
@@ -583,8 +598,8 @@ SndFileSource::read_unlocked (Sample *dst, framepos_t start, framecnt_t cnt) con
 	return nread;
 }
 
-framecnt_t
-SndFileSource::write_unlocked (Sample *data, framecnt_t cnt)
+samplecnt_t
+SndFileSource::write_unlocked (Sample *data, samplecnt_t cnt)
 {
         if (open()) {
                 return 0; // failure
@@ -597,8 +612,8 @@ SndFileSource::write_unlocked (Sample *data, framecnt_t cnt)
 	}
 }
 
-framecnt_t
-SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
+samplecnt_t
+SndFileSource::nondestructive_write_unlocked (Sample *data, samplecnt_t cnt)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
@@ -611,23 +626,23 @@ SndFileSource::nondestructive_write_unlocked (Sample *data, framecnt_t cnt)
 		return 0;
 	}
 
-	framepos_t frame_pos = _length;
+	samplepos_t sample_pos = _length;
 
-	if (write_float (data, frame_pos, cnt) != cnt) {
+	if (write_float (data, sample_pos, cnt) != cnt) {
 		return 0;
 	}
 
 	update_length (_length + cnt);
 
 	if (_build_peakfiles) {
-		compute_and_write_peaks (data, frame_pos, cnt, true, true);
+		compute_and_write_peaks (data, sample_pos, cnt, true, true);
 	}
 
 	return cnt;
 }
 
-framecnt_t
-SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
+samplecnt_t
+SndFileSource::destructive_write_unlocked (Sample* data, samplecnt_t cnt)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to write a non-writable audio file source (%1)"), _path) << endmsg;
@@ -644,11 +659,11 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 		_capture_end = false;
 
 		/* move to the correct location place */
-		file_pos = capture_start_frame - _timeline_position;
+		file_pos = capture_start_sample - _timeline_position;
 
 		// split cnt in half
-		framecnt_t subcnt = cnt / 2;
-		framecnt_t ofilepos = file_pos;
+		samplecnt_t subcnt = cnt / 2;
+		samplecnt_t ofilepos = file_pos;
 
 		// fade in
 		if (crossfade (data, subcnt, 1) != subcnt) {
@@ -676,7 +691,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 		_capture_end = false;
 
 		/* move to the correct location place */
-		file_pos = capture_start_frame - _timeline_position;
+		file_pos = capture_start_sample - _timeline_position;
 
 		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
@@ -716,7 +731,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, framecnt_t cnt)
 }
 
 int
-SndFileSource::update_header (framepos_t when, struct tm& now, time_t tnow)
+SndFileSource::update_header (samplepos_t when, struct tm& now, time_t tnow)
 {
 	set_timeline_position (when);
 
@@ -765,7 +780,7 @@ SndFileSource::flush ()
 }
 
 int
-SndFileSource::setup_broadcast_info (framepos_t /*when*/, struct tm& now, time_t /*tnow*/)
+SndFileSource::setup_broadcast_info (samplepos_t /*when*/, struct tm& now, time_t /*tnow*/)
 {
 	if (!writable()) {
 		warning << string_compose (_("attempt to store broadcast info in a non-writable audio file source (%1)"), _path) << endmsg;
@@ -811,16 +826,16 @@ SndFileSource::set_header_timeline_position ()
 	}
 }
 
-framecnt_t
-SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
+samplecnt_t
+SndFileSource::write_float (Sample* data, samplepos_t sample_pos, samplecnt_t cnt)
 {
 	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
-		assert (_length == frame_pos);
+		assert (_length == sample_pos);
 	}
-	else if (_sndfile == 0 || sf_seek (_sndfile, frame_pos, SEEK_SET|SFM_WRITE) < 0) {
+	else if (_sndfile == 0 || sf_seek (_sndfile, sample_pos, SEEK_SET|SFM_WRITE) < 0) {
 		char errbuf[256];
 		sf_error_str (0, errbuf, sizeof (errbuf) - 1);
-		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3)"), _path, frame_pos, errbuf) << endmsg;
+		error << string_compose (_("%1: cannot seek to %2 (libsndfile error: %3)"), _path, sample_pos, errbuf) << endmsg;
 		return 0;
 	}
 
@@ -831,32 +846,11 @@ SndFileSource::write_float (Sample* data, framepos_t frame_pos, framecnt_t cnt)
 	return cnt;
 }
 
-framepos_t
+samplepos_t
 SndFileSource::natural_position() const
 {
 	return _timeline_position;
 }
-
-#ifdef XXX_OLD_DESTRUCTIVE_API_XXX
-bool
-SndFileSource::set_destructive (bool yn)
-{
-	if (yn) {
-		_flags = Flag (_flags | Writable | Destructive);
-		if (!xfade_buf) {
-			xfade_buf = new Sample[xfade_frames];
-		}
-		clear_capture_marks ();
-		_timeline_position = header_position_offset;
-	} else {
-		_flags = Flag (_flags & ~Destructive);
-		_timeline_position = 0;
-		/* leave xfade buf alone in case we need it again later */
-	}
-
-	return true;
-}
-#endif
 
 void
 SndFileSource::clear_capture_marks ()
@@ -865,16 +859,16 @@ SndFileSource::clear_capture_marks ()
 	_capture_end = false;
 }
 
-/** @param pos Capture start position in session frames */
+/** @param pos Capture start position in session samples */
 void
-SndFileSource::mark_capture_start (framepos_t pos)
+SndFileSource::mark_capture_start (samplepos_t pos)
 {
 	if (destructive()) {
 		if (pos < _timeline_position) {
 			_capture_start = false;
 		} else {
 			_capture_start = true;
-			capture_start_frame = pos;
+			capture_start_sample = pos;
 		}
 	}
 }
@@ -887,15 +881,15 @@ SndFileSource::mark_capture_end()
 	}
 }
 
-framecnt_t
-SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
+samplecnt_t
+SndFileSource::crossfade (Sample* data, samplecnt_t cnt, int fade_in)
 {
-	framecnt_t xfade = min (xfade_frames, cnt);
-	framecnt_t nofade = cnt - xfade;
+	samplecnt_t xfade = min (xfade_samples, cnt);
+	samplecnt_t nofade = cnt - xfade;
 	Sample* fade_data = 0;
-	framepos_t fade_position = 0; // in frames
+	samplepos_t fade_position = 0; // in samples
 	ssize_t retval;
-	framecnt_t file_cnt;
+	samplecnt_t file_cnt;
 
 	if (fade_in) {
 		fade_position = file_pos;
@@ -939,7 +933,7 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 	}
 
 	if (file_cnt != xfade) {
-		framecnt_t delta = xfade - file_cnt;
+		samplecnt_t delta = xfade - file_cnt;
 		memset (xfade_buf+file_cnt, 0, sizeof (Sample) * delta);
 	}
 
@@ -950,9 +944,9 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 		}
 	}
 
-	if (xfade == xfade_frames) {
+	if (xfade == xfade_samples) {
 
-		framecnt_t n;
+		samplecnt_t n;
 
 		/* use the standard xfade curve */
 
@@ -974,7 +968,7 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 			}
 		}
 
-	} else if (xfade < xfade_frames) {
+	} else if (xfade < xfade_samples) {
 
 		std::vector<gain_t> in(xfade);
 		std::vector<gain_t> out(xfade);
@@ -983,7 +977,7 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 
 		compute_equal_power_fades (xfade, &in[0], &out[0]);
 
-		for (framecnt_t n = 0; n < xfade; ++n) {
+		for (samplecnt_t n = 0; n < xfade; ++n) {
 			xfade_buf[n] = (xfade_buf[n] * out[n]) + (fade_data[n] * in[n]);
 		}
 
@@ -1010,11 +1004,11 @@ SndFileSource::crossfade (Sample* data, framecnt_t cnt, int fade_in)
 	return cnt;
 }
 
-framepos_t
-SndFileSource::last_capture_start_frame () const
+samplepos_t
+SndFileSource::last_capture_start_sample () const
 {
 	if (destructive()) {
-		return capture_start_frame;
+		return capture_start_sample;
 	} else {
 		return 0;
 	}
@@ -1035,25 +1029,25 @@ SndFileSource::handle_header_position_change ()
 }
 
 void
-SndFileSource::setup_standard_crossfades (Session const & s, framecnt_t rate)
+SndFileSource::setup_standard_crossfades (Session const & s, samplecnt_t rate)
 {
 	/* This static method is assumed to have been called by the Session
 	   before any DFS's are created.
 	*/
 
-	xfade_frames = (framecnt_t) floor ((s.config.get_destructive_xfade_msecs () / 1000.0) * rate);
+	xfade_samples = (samplecnt_t) floor ((s.config.get_destructive_xfade_msecs () / 1000.0) * rate);
 
 	delete [] out_coefficient;
 	delete [] in_coefficient;
 
-	out_coefficient = new gain_t[xfade_frames];
-	in_coefficient = new gain_t[xfade_frames];
+	out_coefficient = new gain_t[xfade_samples];
+	in_coefficient = new gain_t[xfade_samples];
 
-	compute_equal_power_fades (xfade_frames, in_coefficient, out_coefficient);
+	compute_equal_power_fades (xfade_samples, in_coefficient, out_coefficient);
 }
 
 void
-SndFileSource::set_timeline_position (framepos_t pos)
+SndFileSource::set_timeline_position (samplepos_t pos)
 {
 	// destructive track timeline postion does not change
 	// except at instantion or when header_position_offset

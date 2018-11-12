@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Arturia KeyLab 49">
+<!-- Works with device's factory settings. Transport control is available through MMC. -->
+
+  <DeviceInfo bank-size="8"/>
+
+<!-- Gain controls. Faders are mapped to faders. -->
+  <Binding channel="1" ctl="73" uri="/route/gain B1"/>
+  <Binding channel="1" ctl="75" uri="/route/gain B2"/>
+  <Binding channel="1" ctl="79" uri="/route/gain B3"/>
+  <Binding channel="1" ctl="72" uri="/route/gain B4"/>
+  <Binding channel="1" ctl="80" uri="/route/gain B5"/>
+  <Binding channel="1" ctl="81" uri="/route/gain B6"/>
+  <Binding channel="1" ctl="82" uri="/route/gain B7"/>
+  <Binding channel="1" ctl="83" uri="/route/gain B8"/>
+  <Binding channel="1" ctl="85" uri="/bus/gain master"/>
+
+<!-- Pan controls. All encoders except the 2 on the right are mapped to pan direction. -->
+  <Binding channel="1" enc-b="74" uri="/route/pandirection B1"/>
+  <Binding channel="1" enc-b="71" uri="/route/pandirection B2"/>
+  <Binding channel="1" enc-b="76" uri="/route/pandirection B3"/>
+  <Binding channel="1" enc-b="77" uri="/route/pandirection B4"/>
+  <Binding channel="1" enc-b="18" uri="/route/pandirection B5"/>
+  <Binding channel="1" enc-b="19" uri="/route/pandirection B6"/>
+  <Binding channel="1" enc-b="16" uri="/route/pandirection B7"/>
+  <Binding channel="1" enc-b="17" uri="/route/pandirection B8"/>
+
+<!-- Pan width. Upper right encoder is mapped to the pan width of the selected track -->
+  <Binding channel="1" enc-b="93" uri="/route/panwidth S1"/>
+
+<!-- Switches -->
+<!-- Switches 1-8 are mapped to solo toggles.  -->
+
+  <Binding channel="1" ctl="22" uri="/route/solo B1"/>
+  <Binding channel="1" ctl="23" uri="/route/solo B2"/>
+  <Binding channel="1" ctl="24" uri="/route/solo B3"/>
+  <Binding channel="1" ctl="25" uri="/route/solo B4"/>
+  <Binding channel="1" ctl="26" uri="/route/solo B5"/>
+  <Binding channel="1" ctl="27" uri="/route/solo B6"/>
+  <Binding channel="1" ctl="28" uri="/route/solo B7"/>
+  <Binding channel="1" ctl="29" uri="/route/solo B8"/>
+
+<!-- Switches 9 and 10 are mapped to bank changes. -->
+
+  <Binding channel="1" ctl="31" function="next-bank"/>
+  <Binding channel="1" ctl="30" function="prev-bank"/>
+
+<!-- "Sound" and "Multi" buttons are mapped to show editor or mixer. -->
+
+  <Binding channel="1" ctl="118" action="Common/show-editor"/>
+  <Binding channel="1" ctl="119" action="Common/show-mixer"/>
+
+<!-- Volume knob is mapped to selected track's gain. -->
+
+  <Binding channel="1" enc-b="7" uri="route/gain S1"/>
+
+<!-- Loop switch. -->
+
+  <Binding msg="b0 37 7f" action="Transport/Loop"/>
+  <Binding msg="b0 37 00" action="Transport/Loop"/>
+
+</ArdourMIDIBindings>

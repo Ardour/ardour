@@ -30,10 +30,6 @@
 
 #include "ardour/types.h"
 
-namespace ARDOUR {
-	class ControllableDescriptor;
-}
-
 namespace MIDI {
 	class Channel;
 	class Parser;
@@ -59,6 +55,12 @@ class MIDIControllable : public PBD::Stateful
 	uint32_t rid() const { return _rid; }
 	std::string what() const { return _what; }
 
+	enum CtlType {
+		Ctl_Momentary,
+		Ctl_Toggle,
+		Ctl_Dial,
+	};
+
 	enum Encoder {
 		No_enc,
 		Enc_R,
@@ -80,6 +82,9 @@ class MIDIControllable : public PBD::Stateful
 
 	bool learned() const { return _learned; }
 
+	CtlType get_ctltype() const { return _ctltype; }
+	void set_ctltype (CtlType val) { _ctltype = val; }
+
 	Encoder get_encoder() const { return _encoder; }
 	void set_encoder (Encoder val) { _encoder = val; }
 
@@ -87,8 +92,6 @@ class MIDIControllable : public PBD::Stateful
 	PBD::Controllable* get_controllable() const { return controllable; }
 	void set_controllable (PBD::Controllable*);
 	const std::string& current_uri() const { return _current_uri; }
-
-	ARDOUR::ControllableDescriptor& descriptor() const { return *_descriptor; }
 
 	std::string control_description() const { return _control_description; }
 
@@ -113,15 +116,16 @@ class MIDIControllable : public PBD::Stateful
 
 	GenericMidiControlProtocol* _surface;
 	PBD::Controllable* controllable;
-	ARDOUR::ControllableDescriptor* _descriptor;
 	std::string     _current_uri;
         MIDI::Parser&   _parser;
 	bool             setting;
 	int              last_value;
+	int              last_incoming;
 	float            last_controllable_value;
 	bool            _momentary;
 	bool            _is_gain_controller;
 	bool            _learned;
+	CtlType         _ctltype;
 	Encoder			_encoder;
 	int              midi_msg_id;      /* controller ID or note number */
 	PBD::ScopedConnection midi_sense_connection[2];

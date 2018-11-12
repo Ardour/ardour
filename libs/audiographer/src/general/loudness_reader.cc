@@ -21,7 +21,7 @@
 
 using namespace AudioGrapher;
 
-LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, framecnt_t bufsize)
+LoudnessReader::LoudnessReader (float sample_rate, unsigned int channels, samplecnt_t bufsize)
 	: _ebur_plugin (0)
 	, _dbtp_plugin (0)
 	, _sample_rate (sample_rate)
@@ -91,17 +91,17 @@ LoudnessReader::reset ()
 void
 LoudnessReader::process (ProcessContext<float> const & ctx)
 {
-	const framecnt_t n_samples = ctx.frames () / ctx.channels ();
+	const samplecnt_t n_samples = ctx.samples () / ctx.channels ();
 	assert (ctx.channels () == _channels);
-	assert (ctx.frames () % ctx.channels () == 0);
+	assert (ctx.samples () % ctx.channels () == 0);
 	assert (n_samples <= _bufsize);
-	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, ctx.frames (), n_samples, ctx.channels ());
+	//printf ("PROC %p @%ld F: %ld, S: %ld C:%d\n", this, _pos, ctx.samples (), n_samples, ctx.channels ());
 
 	unsigned processed_channels = 0;
 	if (_ebur_plugin) {
 		assert (_channels <= 2);
 		processed_channels = _channels;
-		framecnt_t s;
+		samplecnt_t s;
 		float const * d = ctx.data ();
 		for (s = 0; s < n_samples; ++s) {
 			for (unsigned int c = 0; c < _channels; ++c, ++d) {
@@ -126,7 +126,7 @@ LoudnessReader::process (ProcessContext<float> const & ctx)
 		if (!_dbtp_plugin[c]) {
 			continue;
 		}
-		framecnt_t s;
+		samplecnt_t s;
 		float const * const d = ctx.data ();
 		for (s = 0; s < n_samples; ++s) {
 			_bufs[0][s] = d[s * _channels + c];

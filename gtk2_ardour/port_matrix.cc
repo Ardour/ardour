@@ -483,12 +483,12 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 						);
 
 					if (bc[dim].bundle->nchannels().n_total() > 1) {
-                                                for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
-                                                        if (should_show (bc[dim].bundle->channel_type(i))) {
-                                                                add_remove_option (sub, w, i);
-                                                        }
-                                                }
-                                        }
+						for (uint32_t i = 0; i < bc[dim].bundle->nchannels().n_total(); ++i) {
+							if (should_show (bc[dim].bundle->channel_type(i))) {
+								add_remove_option (sub, w, i);
+							}
+						}
+					}
 				}
 			}
 

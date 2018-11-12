@@ -20,7 +20,8 @@
 #include <gtkmm.h>
 #include <gtk/gtk.h>
 #include <gtk/gtksocket.h>
-#include <fst.h>
+#include "gtkmm2ext/gui_thread.h"
+#include "fst.h"
 #include "ardour/plugin_insert.h"
 #include "ardour/windows_vst_plugin.h"
 
@@ -64,12 +65,48 @@ WindowsVSTPluginUI::~WindowsVSTPluginUI ()
 	// and then our PluginUIWindow does the rest
 }
 
+void
+WindowsVSTPluginUI::top_box_allocated (Gtk::Allocation& a)
+{
+	int h = a.get_height() + 12; // 2 * 6px spacing
+	if (_vst->state()->voffset != h) {
+#ifndef NDEBUG
+		printf("WindowsVSTPluginUI:: update voffset to %d px\n", h);
+#endif
+		_vst->state()->voffset = h;
+		resize_callback ();
+	}
+}
+
+void
+WindowsVSTPluginUI::resize_callback ()
+{
+	void* gtk_parent_window = _vst->state()->gtk_window_parent;
+	if (gtk_parent_window) {
+		int width  = _vst->state()->width + _vst->state()->hoffset;
+		int height = _vst->state()->height + _vst->state()->voffset;
+#ifndef NDEBUG
+		printf ("WindowsVSTPluginUI::resize_callback %d x %d\n", width, height);
+#endif
+		set_size_request (width, height);
+		((Gtk::Window*) gtk_parent_window)->set_size_request (width, height);
+		((Gtk::Window*) gtk_parent_window)->resize (width, height);
+		fst_move_window_into_view (_vst->state ());
+	}
+}
+
 int
 WindowsVSTPluginUI::package (Gtk::Window& win)
 {
+#ifndef NDEBUG
+	printf ("WindowsVSTPluginUI::package\n");
+#endif
 	VSTPluginUI::package (win);
+	_vst->state()->gtk_window_parent = (void*) (&win);
 
-	fst_move_window_into_view (_vst->state ());
+	_vst->VSTSizeWindow.connect (_resize_connection, invalidator (*this), boost::bind (&WindowsVSTPluginUI::resize_callback, this), gui_context());
+
+	resize_callback ();
 
 	return 0;
 }

@@ -55,7 +55,7 @@ class Selection;
 
 class MidiStreamView : public StreamView
 {
-  public:
+public:
 	MidiStreamView (MidiTimeAxisView&);
 	~MidiStreamView ();
 
@@ -78,45 +78,48 @@ class MidiStreamView : public StreamView
 	void update_note_range(uint8_t note_num);
 
 	void set_layer_display (LayerDisplay);
-//	bool can_change_layer_display() const { return false; }  //revert this change for now.  Although stacked view is weirdly implemented wrt the "scroomer", it is still necessary to be able to manage layered regions.
+	//bool can_change_layer_display() const { return false; } // revert this change for now.  Although stacked view is weirdly implemented wrt the "scroomer", it is still necessary to be able to manage layered regions.
 	void redisplay_track ();
 
-	inline double contents_height() const
-	{ return (child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2); }
+	inline double contents_height() const {
+		return (child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
+	}
 
-	inline double note_to_y(uint8_t note) const
-		{ return contents_height()
-			- (note + 1 - lowest_note()) * note_height() + 1; }
+	inline double note_to_y(uint8_t note) const {
+		return contents_height() - (note + 1 - lowest_note()) * note_height() + 1;
+	}
 
 	uint8_t y_to_note(double y) const;
 
-	inline double note_height() const
-		{ return contents_height() / (double)contents_note_range(); }
+	inline double note_height() const {
+		return contents_height() / (double)contents_note_range();
+	}
 
-	inline uint8_t contents_note_range() const
-		{ return highest_note() - lowest_note() + 1; }
+	inline uint8_t contents_note_range() const {
+		return highest_note() - lowest_note() + 1;
+	}
 
 	sigc::signal<void> NoteRangeChanged;
 
 	RegionView* create_region_view (boost::shared_ptr<ARDOUR::Region>, bool, bool);
 
-	bool paste (ARDOUR::framepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num);
+	bool paste (ARDOUR::samplepos_t pos, const Selection& selection, PasteContext& ctx, const int32_t sub_num);
 
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool to_region_views);
 
 	void suspend_updates ();
 	void resume_updates ();
 
-  protected:
+protected:
 	void setup_rec_box ();
 	void update_rec_box ();
 
-  private:
+private:
 
 	RegionView* add_region_view_internal (
-		boost::shared_ptr<ARDOUR::Region>,
-		bool wait_for_waves,
-		bool recording = false);
+			boost::shared_ptr<ARDOUR::Region>,
+			bool wait_for_waves,
+			bool recording = false);
 
 	void display_region(MidiRegionView* region_view, bool load_model);
 	void display_track (boost::shared_ptr<ARDOUR::Track> tr);

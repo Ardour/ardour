@@ -78,8 +78,8 @@ PBD::stacktrace (std::ostream& out, int levels)
 
 extern "C" {
     __declspec(dllimport) USHORT WINAPI CaptureStackBackTrace (
-                                 ULONG  FramesToSkip,
-                                 ULONG  FramesToCapture,
+                                 ULONG  SamplesToSkip,
+                                 ULONG  SamplesToCapture,
                                  PVOID  *BackTrace,
                                  PULONG BackTraceHash
 	                      );
@@ -93,7 +93,7 @@ PBD::stacktrace( std::ostream& out, int)
 	const size_t levels = 62; // does not support more then 62 levels of stacktrace
 	unsigned int   i;
 	void         * stack[ levels ];
-	unsigned short frames;
+	unsigned short samples;
 	SYMBOL_INFO  * symbol;
 	HANDLE         process;
 
@@ -102,18 +102,18 @@ PBD::stacktrace( std::ostream& out, int)
 
 	SymInitialize( process, NULL, TRUE );
 
-	frames               = CaptureStackBackTrace( 0, levels, stack, NULL );
+	samples               = CaptureStackBackTrace( 0, levels, stack, NULL );
 
-	out << "+++++Backtrace frames: " <<  frames << std::endl;
+	out << "+++++Backtrace samples: " <<  samples << std::endl;
 
 	symbol               = ( SYMBOL_INFO * )calloc( sizeof( SYMBOL_INFO ) + 256 * sizeof( char ), 1 );
 	symbol->MaxNameLen   = 255;
 	symbol->SizeOfStruct = sizeof( SYMBOL_INFO );
 
-	for( i = 0; i < frames; i++ )
+	for( i = 0; i < samples; i++ )
 	{
 		SymFromAddr( process, ( DWORD64 )( stack[ i ] ), 0, symbol );
-		out << string_compose( "%1: %2 - %3\n", frames - i - 1, symbol->Name, symbol->Address );
+		out << string_compose( "%1: %2 - %3\n", samples - i - 1, symbol->Name, symbol->Address );
 	}
 
 	out.flush();

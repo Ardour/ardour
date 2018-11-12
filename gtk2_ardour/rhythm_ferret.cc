@@ -173,6 +173,12 @@ RhythmFerret::RhythmFerret (Editor& e)
 }
 
 void
+RhythmFerret::on_response (int response_id)
+{
+	Gtk::Dialog::on_response (response_id);
+}
+
+void
 RhythmFerret::analysis_mode_changed ()
 {
 	bool const perc = get_analysis_mode() == PercussionOnset;
@@ -251,10 +257,10 @@ RhythmFerret::run_analysis ()
 }
 
 int
-RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, frameoffset_t /*offset*/, AnalysisFeatureList& results)
+RhythmFerret::run_percussion_onset_analysis (boost::shared_ptr<Readable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
 {
 	try {
-		TransientDetector t (_session->frame_rate());
+		TransientDetector t (_session->sample_rate());
 
 		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
@@ -306,10 +312,10 @@ RhythmFerret::get_note_onset_function ()
 }
 
 int
-RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, frameoffset_t /*offset*/, AnalysisFeatureList& results)
+RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, sampleoffset_t /*offset*/, AnalysisFeatureList& results)
 {
 	try {
-		OnsetDetector t (_session->frame_rate());
+		OnsetDetector t (_session->sample_rate());
 
 		for (uint32_t i = 0; i < readable->n_channels(); ++i) {
 
@@ -341,7 +347,7 @@ RhythmFerret::run_note_onset_analysis (boost::shared_ptr<Readable> readable, fra
 	}
 
 	if (!results.empty()) {
-		OnsetDetector::cleanup_onsets (results, _session->frame_rate(), trigger_gap_adjustment.get_value());
+		OnsetDetector::cleanup_onsets (results, _session->sample_rate(), trigger_gap_adjustment.get_value());
 	}
 
 	return 0;

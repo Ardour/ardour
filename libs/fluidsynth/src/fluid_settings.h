@@ -37,7 +37,7 @@ typedef int (*fluid_int_update_t)(void* data, const char* name, int value);
 
 /** returns 0 if the value has been registered correctly, non-zero
     otherwise */
-int fluid_settings_register_str(fluid_settings_t* settings, char* name, char* def, int hints,
+int fluid_settings_register_str(fluid_settings_t* settings, const char* name, const char* def, int hints,
 			       fluid_str_update_t fun, void* data);
 
 /** returns 0 if the value has been registered correctly, non-zero

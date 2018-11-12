@@ -221,10 +221,6 @@ static Session * _create_session (string dir, string state, uint32_t rate) // th
 	// TODO add option/bindings for this
 	BusProfile bus_profile;
 	bus_profile.master_out_channels = 2;
-	bus_profile.input_ac = AutoConnectPhysical;
-	bus_profile.output_ac = AutoConnectMaster;
-	bus_profile.requested_physical_in = 0; // use all available
-	bus_profile.requested_physical_out = 0; // use all available
 
 	AudioEngine* engine = AudioEngine::instance ();
 	Session* session = new Session (*engine, dir, state, &bus_profile);

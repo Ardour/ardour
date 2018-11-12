@@ -44,23 +44,19 @@ const uint32_t NoteBase::midi_channel_colors[16] = {
 	  0x832dd3ff,  0xa92dd3ff,  0xd32dbfff,  0xd32d67ff
 	};
 
-bool     NoteBase::_color_init = false;
-uint32_t NoteBase::_selected_mod_col = 0;
-uint32_t NoteBase::_selected_outline_col = 0;
-uint32_t NoteBase::_selected_col = 0;
-uint32_t NoteBase::_min_col = 0;
-uint32_t NoteBase::_mid_col = 0;
-uint32_t NoteBase::_max_col = 0;
+bool             NoteBase::_color_init = false;
+Gtkmm2ext::Color NoteBase::_selected_col = 0;
+Gtkmm2ext::SVAModifier NoteBase::color_modifier;
+Gtkmm2ext::Color NoteBase::velocity_color_table[128];
 
 void
 NoteBase::set_colors ()
 {
-	_selected_mod_col = UIConfiguration::instance().color_mod ("midi note selected", "midi note");
-	_selected_outline_col = UIConfiguration::instance().color ("midi note selected outline");
-	_selected_col = UIConfiguration::instance().color ("midi note selected");
-	_min_col = UIConfiguration::instance().color_mod ("midi note min", "midi note");
-	_mid_col = UIConfiguration::instance().color_mod ("midi note mid", "midi note");
-	_max_col = UIConfiguration::instance().color_mod ("midi note max", "midi note");
+	for (uint8_t i = 0; i < 128; ++i) {
+		velocity_color_table[i] = 0; /* out of bounds because zero alpha makes no sense  */
+	}
+	_selected_col = UIConfiguration::instance().color ("midi note selected outline");
+	color_modifier = UIConfiguration::instance().modifier ("midi note");
 }
 
 NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)
@@ -142,7 +138,7 @@ NoteBase::on_channel_selection_change(uint16_t selection)
 {
 	// make note change its color if its channel is not marked active
 	if ( (selection & (1 << _note->channel())) == 0 ) {
-		const ArdourCanvas::Color inactive_ch = UIConfiguration::instance().color ("midi note inactive channel");
+		const Gtkmm2ext::Color inactive_ch = UIConfiguration::instance().color ("midi note inactive channel");
 		set_fill_color(inactive_ch);
 		set_outline_color(calculate_outline(inactive_ch, _selected));
 	} else {
@@ -201,7 +197,13 @@ NoteBase::base_color()
 		                          _selected_col, 0.5);
 
 	default:
-		return meter_style_fill_color(_note->velocity(), selected());
+		if (UIConfiguration::instance().get_use_note_color_for_velocity()) {
+			return meter_style_fill_color(_note->velocity(), selected());
+		} else {
+			const uint32_t region_color = _region.midi_stream_view()->get_region_color();
+			return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
+			                         0.5);
+		}
 	};
 
 	return 0;
@@ -321,6 +323,42 @@ NoteBase::mouse_near_ends () const
 bool
 NoteBase::big_enough_to_trim () const
 {
-        return (x1() - x0()) > 10;
+	return (x1() - x0()) > 10;
+}
+
+
+Gtkmm2ext::Color
+NoteBase::meter_style_fill_color(uint8_t vel, bool /* selected */)
+{
+	/* note that because vel is uint8_t, we don't need bounds checking for
+	   the color lookup table.
+	*/
+
+	if (velocity_color_table[vel] == 0) {
+
+		Gtkmm2ext::Color col;
+
+		if (vel < 32) {
+			col = UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color0"), UIConfiguration::instance().color ("midi meter color1"), (vel / 32.0));
+			col = Gtkmm2ext::change_alpha (col, color_modifier.a());
+		} else if (vel < 64) {
+			col = UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color2"), UIConfiguration::instance().color ("midi meter color3"), ((vel-32) / 32.0));
+			col = Gtkmm2ext::change_alpha (col, color_modifier.a());
+		} else if (vel < 100) {
+			col = UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color4"), UIConfiguration::instance().color ("midi meter color5"), ((vel-64) / 36.0));
+			col = Gtkmm2ext::change_alpha (col, color_modifier.a());
+		} else if (vel < 112) {
+			col = UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color6"), UIConfiguration::instance().color ("midi meter color7"), ((vel-100) / 12.0));
+			col = Gtkmm2ext::change_alpha (col, color_modifier.a());
+		} else {
+			col =  UINT_INTERPOLATE(UIConfiguration::instance().color ("midi meter color8"), UIConfiguration::instance().color ("midi meter color9"), ((vel-112) / 17.0));
+			col = Gtkmm2ext::change_alpha (col, color_modifier.a());
+		}
+
+		velocity_color_table[vel] = col;
+		return col;
+	}
+
+	return velocity_color_table[vel];
 }
 

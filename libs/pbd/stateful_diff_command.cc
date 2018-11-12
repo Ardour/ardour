@@ -18,6 +18,7 @@
 */
 
 #include "pbd/stateful_diff_command.h"
+#include "pbd/types_convert.h"
 #include "pbd/property_list.h"
 #include "pbd/demangle.h"
 #include "pbd/i18n.h"
@@ -105,8 +106,8 @@ StatefulDiffCommand::get_state ()
 
 	XMLNode* node = new XMLNode (X_("StatefulDiffCommand"));
 
-	node->add_property ("obj-id", s->id().to_s());
-	node->add_property ("type-name", demangled_name (*s.get()));
+	node->set_property ("obj-id", s->id());
+	node->set_property ("type-name", demangled_name (*s.get()));
 
         XMLNode* changes = new XMLNode (X_("Changes"));
 

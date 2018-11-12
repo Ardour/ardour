@@ -20,12 +20,10 @@
 #ifndef __libpbd_configuration_variable_h__
 #define __libpbd_configuration_variable_h__
 
-#include <iostream>
-#include <sstream>
 #include <string>
 
 #include "pbd/xml++.h"
-#include "pbd/convert.h"
+#include "pbd/string_convert.h"
 #include "pbd/libpbd_visibility.h"
 
 namespace PBD {
@@ -63,9 +61,7 @@ class /*LIBPBD_API*/ ConfigVariable : public ConfigVariableBase
 	}
 
 	std::string get_as_string () const {
-		std::ostringstream ss;
-		ss << value;
-		return ss.str ();
+		return to_string<T>(value);
 	}
 
 	virtual bool set (T val) {
@@ -79,19 +75,13 @@ class /*LIBPBD_API*/ ConfigVariable : public ConfigVariableBase
 	}
 
 	virtual void set_from_string (std::string const & s) {
-		std::stringstream ss;
-		ss << s;
-		ss >> value;
+		value = string_to<T>(s);
 	}
 
   protected:
 	virtual T get_for_save() { return value; }
 	T value;
 };
-
-/** Specialisation of ConfigVariable to deal with float (-inf etc) */
-template<> LIBPBD_API void
-ConfigVariable<float>::set_from_string (std::string const & s);
 
 /** Specialisation of ConfigVariable for std::string to cope with whitespace properly */
 template<>
@@ -129,43 +119,6 @@ class /*LIBPBD_API*/ ConfigVariable<std::string> : public ConfigVariableBase
 	std::string value;
 };
 
-template<>
-class /*LIBPBD_API*/ ConfigVariable<bool> : public ConfigVariableBase
-{
-  public:
-
-	ConfigVariable (std::string str) : ConfigVariableBase (str), value (false) {}
-	ConfigVariable (std::string str, bool val) : ConfigVariableBase (str), value (val) {}
-
-	bool get() const {
-		return value;
-	}
-
-	std::string get_as_string () const {
-		std::ostringstream ss;
-		ss << value;
-		return ss.str ();
-	}
-
-	virtual bool set (bool val) {
-		if (val == value) {
-			miss ();
-			return false;
-		}
-		value = val;
-		notify ();
-		return true;
-	}
-
-	void set_from_string (std::string const & s) {
-		value = PBD::string_is_affirmative (s);
-	}
-
-  protected:
-	virtual bool get_for_save() { return value; }
-	bool value;
-};
-
 template<class T>
 class /*LIBPBD_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 {
@@ -182,11 +135,7 @@ class /*LIBPBD_API*/ ConfigVariableWithMutation : public ConfigVariable<T>
 	}
 
 	void set_from_string (std::string const & s) {
-		T v;
-		std::stringstream ss;
-		ss << s;
-		ss >> v;
-		set (v);
+		set (string_to<T>(s));
 	}
 
   protected:

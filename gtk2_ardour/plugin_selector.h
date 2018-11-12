@@ -20,17 +20,28 @@
 #ifndef __ardour_plugin_selector_h__
 #define __ardour_plugin_selector_h__
 
-#include <gtkmm/dialog.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/comboboxtext.h>
+#include <gtkmm/entry.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/notebook.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
+
+#include "widgets/ardour_button.h"
+#include "widgets/ardour_dropdown.h"
+
 #include "gtkmm2ext/dndtreeview.h"
-#include <gtkmm2ext/selector.h>
 
 #include "ardour/plugin.h"
+#include "ardour/plugin_manager.h"
 #include "ardour/session_handle.h"
-#include "plugin_interest.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
+
+#include "plugin_interest.h"
 #include "ardour_dialog.h"
 
 namespace ARDOUR {
@@ -40,7 +51,7 @@ namespace ARDOUR {
 
 class PluginSelector : public ArdourDialog
 {
-  public:
+public:
 	PluginSelector (ARDOUR::PluginManager&);
 	~PluginSelector ();
 
@@ -53,49 +64,67 @@ class PluginSelector : public ArdourDialog
 	Gtk::Menu* plugin_menu ();
 	void show_manager ();
 
-  private:
+private:
+
+	//search
+	ArdourWidgets::ArdourButton* _search_name_checkbox;
+	ArdourWidgets::ArdourButton* _search_tags_checkbox;
+	ArdourWidgets::ArdourButton* _search_ignore_checkbox;
+
+	//radio-button filters
+	Gtk::RadioButton *_fil_effects_radio;
+	Gtk::RadioButton *_fil_instruments_radio;
+	Gtk::RadioButton *_fil_utils_radio;
+	Gtk::RadioButton *_fil_favorites_radio;
+	Gtk::RadioButton *_fil_hidden_radio;
+	Gtk::RadioButton *_fil_all_radio;
+
+	/* combobox filters */
+	ArdourWidgets::ArdourDropdown _fil_type_combo;
+	ArdourWidgets::ArdourDropdown _fil_creator_combo;
+
 	PluginInterestedObject* interested_object;
 
 	Gtk::ScrolledWindow scroller;   // Available plugins
 	Gtk::ScrolledWindow ascroller;  // Added plugins
 
-	Gtk::ComboBoxText filter_mode;
-	Gtk::Entry filter_entry;
-	Gtk::Button filter_button;
+	Gtk::Entry search_entry;
+	Gtk::Button search_clear_button;
 
-	ArdourButton fil_hidden_button;
-	ArdourButton fil_instruments_button;
-	ArdourButton fil_analysis_button;
-	ArdourButton fil_utils_button;
+	Gtk::Entry *tag_entry;
+	Gtk::Button* tag_reset_button;
+	void tag_reset_button_clicked ();
 
-	void filter_button_clicked ();
-	void filter_entry_changed ();
-	void filter_mode_changed ();
+	void set_sensitive_widgets();
+
+	void search_clear_button_clicked ();
+	void search_entry_changed ();
+
+	void tag_entry_changed ();
+	sigc::connection tag_entry_connection;
+
+	void tags_changed ( ARDOUR::PluginType t, std::string unique_id, std::string tag);
 
 	struct PluginColumns : public Gtk::TreeModel::ColumnRecord {
 		PluginColumns () {
 			add (favorite);
 			add (hidden);
 			add (name);
-			add (type_name);
-			add (category);
+			add (tags);
 			add (creator);
-			add (audio_ins);
-			add (audio_outs);
-			add (midi_ins);
-			add (midi_outs);
+			add (type_name);
+			add (audio_io);
+			add (midi_io);
 			add (plugin);
 		}
 		Gtk::TreeModelColumn<bool> favorite;
 		Gtk::TreeModelColumn<bool> hidden;
 		Gtk::TreeModelColumn<std::string> name;
 		Gtk::TreeModelColumn<std::string> type_name;
-		Gtk::TreeModelColumn<std::string> category;
 		Gtk::TreeModelColumn<std::string> creator;
-		Gtk::TreeModelColumn<std::string> audio_ins;
-		Gtk::TreeModelColumn<std::string> audio_outs;
-		Gtk::TreeModelColumn<std::string> midi_ins;
-		Gtk::TreeModelColumn<std::string> midi_outs;
+		Gtk::TreeModelColumn<std::string> tags;
+		Gtk::TreeModelColumn<std::string> audio_io;
+		Gtk::TreeModelColumn<std::string> midi_io;
 		Gtk::TreeModelColumn<ARDOUR::PluginInfoPtr> plugin;
 	};
 	PluginColumns plugin_columns;
@@ -138,12 +167,8 @@ class PluginSelector : public ArdourDialog
 	void btn_apply_clicked();
 	ARDOUR::PluginPtr load_plugin (ARDOUR::PluginInfoPtr);
 	bool show_this_plugin (const ARDOUR::PluginInfoPtr&, const std::string&);
-	void setup_filter_string (std::string&);
 
-	bool fil_hidden_button_release (GdkEventButton*);
-	bool fil_instruments_button_release (GdkEventButton*);
-	bool fil_analysis_button_release (GdkEventButton*);
-	bool fil_utils_button_release (GdkEventButton*);
+	void setup_search_string (std::string&);
 
 	void favorite_changed (const std::string& path);
 	void hidden_changed (const std::string& path);
@@ -151,16 +176,19 @@ class PluginSelector : public ArdourDialog
 
 	void plugin_chosen_from_menu (const ARDOUR::PluginInfoPtr&);
 
+	void plugin_status_changed ( ARDOUR::PluginType t, std::string unique_id, ARDOUR::PluginManager::PluginStatusType s );
+
 	Gtk::Menu* create_favs_menu (ARDOUR::PluginInfoList&);
 	Gtk::Menu* create_by_creator_menu (ARDOUR::PluginInfoList&);
-	Gtk::Menu* create_by_category_menu (ARDOUR::PluginInfoList&);
+	Gtk::Menu* create_by_tags_menu (ARDOUR::PluginInfoList&);
 	void build_plugin_menu ();
 	PBD::ScopedConnectionList plugin_list_changed_connection;
 
-	bool _show_hidden;
-	Gtkmm2ext::ActiveState _show_instruments;
-	Gtkmm2ext::ActiveState _show_analysers;
-	Gtkmm2ext::ActiveState _show_utils;
+	bool _need_tag_save;
+	bool _need_status_save;
+	bool _need_menu_rebuild;
+
+	bool _inhibit_refill;
 };
 
 #endif // __ardour_plugin_selector_h__

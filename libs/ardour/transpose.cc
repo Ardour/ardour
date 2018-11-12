@@ -27,7 +27,7 @@ Transpose::Transpose(int semitones)
 
 Command*
 Transpose::operator()(boost::shared_ptr<MidiModel> model,
-                      Evoral::Beats                position,
+                      Temporal::Beats              position,
                       std::vector<Notes>&          seqs)
 {
 	typedef MidiModel::NoteDiffCommand Command;

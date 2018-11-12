@@ -45,12 +45,12 @@ AnalysisWindow::AnalysisWindow()
 	: source_selection_label       (_("Signal source"))
 	, source_selection_ranges_rb   (_("Selected ranges"))
 	, source_selection_regions_rb  (_("Selected regions"))
-	, show_minmax_button	 (_("Show frequency power range"))
-	, show_normalized_button (_("Fit dB range"))
-	, show_proportional_button (_("Proportional Spectrum, -18dB"))
-	, fft_graph (16384)
+	, show_minmax_button           (_("Show frequency power range"))
+	, show_normalized_button       (_("Fit dB range"))
+	, show_proportional_button     (_("Proportional Spectrum, -18dB"))
+	, fft_graph                    (16384)
 {
-	set_name(_("FFT analysis window"));
+	set_name  (_("FFT analysis window"));
 	set_title (_("Spectral Analysis"));
 
 	track_list_ready = false;
@@ -260,7 +260,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 
 					int n;
 					for (int channel = 0; channel < n_inputs; channel++) {
-						framecnt_t x = 0;
+						samplecnt_t x = 0;
 
 						while (x < j->length()) {
 							// TODO: What about stereo+ channels? composite all to one, I guess
@@ -313,8 +313,8 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 				int n;
 				for (unsigned int channel = 0; channel < arv->region()->n_channels(); channel++) {
 
-					framecnt_t x = 0;
-					framecnt_t length = arv->region()->length();
+					samplecnt_t x = 0;
+					samplecnt_t length = arv->region()->length();
 
 					while (x < length) {
 						// TODO: What about stereo+ channels? composite all to one, I guess

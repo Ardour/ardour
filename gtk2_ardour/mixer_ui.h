@@ -26,10 +26,12 @@
 #include <gtkmm/scrolledwindow.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/label.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/button.h>
 #include <gtkmm/frame.h>
 #include <gtkmm/menu.h>
 #include <gtkmm/treeview.h>
+#include <gtkmm/treestore.h>
 #include <gtkmm/liststore.h>
 
 #include "pbd/stateful.h"
@@ -43,10 +45,12 @@
 
 #include <gtkmm2ext/bindings.h>
 #include "gtkmm2ext/dndtreeview.h"
-#include <gtkmm2ext/pane.h>
-#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/treeutils.h"
 
+#include "widgets/pane.h"
+#include "widgets/tabbable.h"
+
+#include "axis_provider.h"
 #include "enums.h"
 #include "route_processor_selection.h"
 
@@ -76,9 +80,9 @@ protected:
 	virtual bool row_drop_possible_vfunc (const Gtk::TreeModel::Path&, const Gtk::SelectionData&) const;
 };
 
-class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr
+class Mixer_UI : public ArdourWidgets::Tabbable, public PBD::ScopedConnectionList, public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
-  public:
+public:
 	static Mixer_UI* instance();
 	~Mixer_UI();
 
@@ -95,6 +99,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	XMLNode& get_state ();
 	int set_state (const XMLNode&, int /* version */);
 
+	void save_plugin_order_file ();
+
 	void show_mixer_list (bool yn);
 	void show_monitor_section (bool);
 
@@ -108,10 +114,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void deselect_all_strip_processors();
 	void delete_processors();
-	void select_strip (MixerStrip&, bool add=false);
 	void select_none ();
-
-	bool window_not_visible () const;
+	void select_all_tracks ();
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
@@ -121,15 +125,28 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	sigc::signal1<void,boost::shared_ptr<ARDOUR::Stripable> > show_spill_change;
 
 	RouteProcessorSelection& selection() { return _selection; }
+
+	void show_editor_window () const;
+
 	void register_actions ();
 
-        void load_bindings ();
-        Gtkmm2ext::Bindings*  bindings;
+	void load_bindings ();
+	Gtkmm2ext::Bindings*  bindings;
 
-  protected:
+	void showhide_vcas (bool on) {
+		if (on) { vca_vpacker.show(); } else { vca_vpacker.hide(); }
+	}
+#ifdef MIXBUS
+	void showhide_mixbusses (bool on) {
+		if (on) { mb_vpacker.show(); } else { mb_vpacker.hide(); }
+	}
+#endif
+
+protected:
 	void set_axis_targets_for_operation ();
+	ARDOUR::AutomationControlSet selected_gaincontrols ();
 
-  private:
+private:
 	Mixer_UI ();
 	static Mixer_UI*     _instance;
 	Gtk::VBox            _content;
@@ -141,7 +158,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::VBox             mixer_scroller_vpacker;
 	Gtk::VBox             list_vpacker;
 	Gtk::Label            group_display_button_label;
-	Gtk::Button           group_display_button;
 	Gtk::ScrolledWindow   track_display_scroller;
 	Gtk::ScrolledWindow   group_display_scroller;
 	Gtk::ScrolledWindow   favorite_plugins_scroller;
@@ -149,9 +165,11 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::Frame            track_display_frame;
 	Gtk::Frame            group_display_frame;
 	Gtk::Frame            favorite_plugins_frame;
-	Gtkmm2ext::VPane      rhs_pane1;
-	Gtkmm2ext::VPane      rhs_pane2;
-	Gtkmm2ext::HPane      inner_pane;
+	Gtk::VBox             favorite_plugins_vbox;
+	Gtk::ComboBoxText     favorite_plugins_tag_combo;
+	ArdourWidgets::VPane  rhs_pane1;
+	ArdourWidgets::VPane  rhs_pane2;
+	ArdourWidgets::HPane  inner_pane;
 	Gtk::HBox             strip_packer;
 	Gtk::ScrolledWindow   vca_scroller;
 	Gtk::HBox             vca_hpacker;
@@ -160,7 +178,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	Gtk::Label            vca_label;
 	Gtk::EventBox         vca_scroller_base;
 	Gtk::HBox             out_packer;
-	Gtkmm2ext::HPane      list_hpane;
+	ArdourWidgets::HPane  list_hpane;
+	Gtk::Button           add_button; // should really be an ArdourButton
+	Gtk::Button           add_vca_button;
 
 	MixerGroupTabs* _group_tabs;
 
@@ -187,18 +207,9 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
 	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
-	AxisView* axis_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
 
-	void hide_all_strips (bool with_select);
-	void unselect_all_strips();
-	void select_all_strips ();
-	void unselect_all_audiotrack_strips ();
-	void select_all_audiotrack_strips ();
-	void unselect_all_audiobus_strips ();
-	void select_all_audiobus_strips ();
-
-	void strip_select_op (bool audiotrack, bool select);
-	void select_strip_op (MixerStrip*, bool select);
+	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	gint start_updating ();
 	gint stop_updating ();
@@ -238,7 +249,6 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	ARDOUR::PluginPresetPtr selected_plugin ();
 
 	void initial_track_display ();
-	void show_track_list_menu ();
 
 	void set_all_strips_visibility (bool yn);
 	void set_all_audio_midi_visibility (int, bool);
@@ -333,6 +343,7 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	void group_display_selection_changed ();
 
 	bool strip_button_release_event (GdkEventButton*, MixerStrip*);
+	bool vca_button_release_event (GdkEventButton*, VCAMasterStrip*);
 
 	Width _strip_width;
 
@@ -352,8 +363,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 	static const int32_t default_height = 765;
 
 	/** true if we are rebuilding the route group list, or clearing
-	    it during a session teardown.
-	*/
+	 * it during a session teardown.
+	 */
 	bool _in_group_rebuild_or_clear;
 	bool _route_deletion_in_progress;
 
@@ -369,7 +380,14 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	void store_current_favorite_order();
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
+
+	void plugin_list_changed ();
+
 	void refill_favorite_plugins ();
+	void refill_tag_combo ();
+
+	void tag_combo_changed ();
+
 	void sync_treeview_from_favorite_order ();
 	void sync_treeview_favorite_ui_state (const Gtk::TreeModel::Path&, const Gtk::TreeModel::iterator&);
 	void save_favorite_ui_state (const Gtk::TreeModel::iterator& iter, const Gtk::TreeModel::Path& path);
@@ -379,6 +397,8 @@ class Mixer_UI : public Gtkmm2ext::Tabbable, public PBD::ScopedConnectionList, p
 
 	// true if mixer list is visible
 	bool _show_mixer_list;
+
+	bool _strip_selection_change_without_scroll;
 
 	mutable boost::weak_ptr<ARDOUR::Stripable> spilled_strip;
 

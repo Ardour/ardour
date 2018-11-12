@@ -72,7 +72,7 @@ TransientDetector::use_features (Plugin::FeatureSet& features, ostream* out)
 				(*out) << (*f).timestamp.toString() << endl;
 			}
 
-			current_results->push_back (RealTime::realTime2Frame (f->timestamp, (framecnt_t) floor(sample_rate)));
+			current_results->push_back (RealTime::realTime2Frame (f->timestamp, (samplecnt_t) floor(sample_rate)));
 		}
 	}
 
@@ -111,7 +111,7 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 
 	AnalysisFeatureList::iterator i = t.begin();
 	AnalysisFeatureList::iterator f, b;
-	const framecnt_t gap_frames = (framecnt_t) floor (gap_msecs * (sr / 1000.0));
+	const samplecnt_t gap_samples = (samplecnt_t) floor (gap_msecs * (sr / 1000.0));
 
 	while (i != t.end()) {
 
@@ -123,7 +123,7 @@ TransientDetector::cleanup_transients (AnalysisFeatureList& t, float sr, float g
 
 		// move f until we find a new value that is far enough away
 
-		while ((f != t.end()) && gap_frames > 0 && (((*f) - (*i)) < gap_frames)) {
+		while ((f != t.end()) && gap_samples > 0 && (((*f) - (*i)) < gap_samples)) {
 			++f;
 		}
 
@@ -150,7 +150,7 @@ TransientDetector::update_positions (Readable* src, uint32_t channel, AnalysisFe
 	while (i != positions.end()) {
 
 		/* read from source */
-		framecnt_t const to_read = buff_size;
+		samplecnt_t const to_read = buff_size;
 
 		if (src->read (data, (*i) - buff_size, to_read, channel) != to_read) {
 			break;

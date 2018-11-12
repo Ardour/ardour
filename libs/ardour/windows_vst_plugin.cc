@@ -39,9 +39,10 @@ WindowsVSTPlugin::WindowsVSTPlugin (AudioEngine& e, Session& session, VSTHandle*
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	open_plugin ();
 	Session::vst_current_loading_id = 0;
 
-	set_plugin (_state->plugin);
+	init_plugin ();
 }
 
 WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
@@ -53,17 +54,15 @@ WindowsVSTPlugin::WindowsVSTPlugin (const WindowsVSTPlugin &other)
 	if ((_state = fst_instantiate (_handle, Session::vst_callback, this)) == 0) {
 		throw failed_constructor();
 	}
+	open_plugin ();
 	Session::vst_current_loading_id = 0;
 
-	_plugin = _state->plugin;
-
 	XMLNode* root = new XMLNode (other.state_node_name ());
-	LocaleGuard lg;
 	other.add_state (root);
 	set_state (*root, Stateful::loading_state_version);
 	delete root;
 
-	set_plugin (_state->plugin);
+	init_plugin ();
 }
 
 WindowsVSTPlugin::~WindowsVSTPlugin ()

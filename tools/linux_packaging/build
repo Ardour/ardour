@@ -186,12 +186,14 @@ Backends=$APPLIB/backends
 
 Themes=$Shared/themes
 Templates=$Shared/templates
+PluginMetadata=$Shared/plugin_metadata
 ExportFormats=$Shared/export
 Locale=$Shared/locale
 MidiMaps=$Shared/midi_maps
 PatchFiles=$Shared/patchfiles
 LuaScripts=$Shared/scripts
 MackieControl=$Shared/mcp
+OSC=$Shared/osc
 
 if [ x$PRINT_SYSDEPS != x ] ; then
 #
@@ -226,10 +228,10 @@ mkdir -p $MidiMaps
 mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $MackieControl
+mkdir -p $OSC
 mkdir -p $ExportFormats
 mkdir -p $Panners
 mkdir -p $Backends
-mkdir -p $Templates
 mkdir -p $Shared/doc
 
 # maybe set variables
@@ -251,7 +253,7 @@ fi
 # jack in the places where it might be
 #
 
-echo export 'PATH=/usr/local/bin:/opt/bin:$PATH' >> $ENVIRONMENT
+echo export 'PATH="/usr/local/bin:/opt/bin:$PATH"' >> $ENVIRONMENT
 
 # create startup helper script
 if test -d $BUILD_ROOT/vst; then
@@ -390,12 +392,17 @@ for x in $BUILD_ROOT/../mcp/*.device $BUILD_ROOT/../mcp/*.profile ; do
     cp "$x" $MackieControl
 done
 
-# Templates
-#for f in $BUILD_ROOT/../templates/* ; do
-#    if [ -d "$f" ] ; then
-#	echo Template: $f ; cp -r "$f" $Templates ;
-#    fi
-#done
+# OSC data
+# got to be careful with names here
+for x in $BUILD_ROOT/../osc/*.preset ; do
+    cp "$x" $OSC
+done
+
+#Session templates
+cp -av $BUILD_ROOT/../templates $Templates
+
+# PluginMetadata
+cp -av $BUILD_ROOT/../plugin_metadata $PluginMetadata
 
 # ExportFormats
 # got to be careful with names here
@@ -484,7 +491,7 @@ EOF
 fi
 
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/vamp-sdk:$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/rubberband:$OURLIBDIR/soundtouch:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/sigc++2:$OURLIBDIR/glibmm2:$OURLIBDIR/gtkmm2/atk:$OURLIBDIR/gtkmm2/pango:$OURLIBDIR/gtkmm2/gdk:$OURLIBDIR/gtkmm2/gtk:$OURLIBDIR/canvas:$OURLIBDIR/libsndfile:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/timecode:$OURLIBDIR/taglib:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$BUILD_ROOT/gtk2_ardour
+OURLIBS=$OURLIBDIR/surfaces/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/glibmm2:$OURLIBDIR/canvas:$OURLIBDIR/widgets:$OURLIBDIR/waveview:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/temporal:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$BUILD_ROOT/gtk2_ardour
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
@@ -519,7 +526,7 @@ while [ true ] ; do
 		checkIdx=$(($checkIdx + 1))
 
 		# ignore suil/qt wrappers - the plugin will pull in QT4.
-		if echo $file | grep -qs 'libsuil_.*qt4' ; then continue; fi
+		if echo $file | grep -qs 'libsuil_.*qt[45]' ; then continue; fi
 
 		# do not include libjack, nor libwine
 		deps=`LD_LIBRARY_PATH=$OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} ldd $file | grep -v libwine.so | awk '{print $3}'`
@@ -621,7 +628,6 @@ cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Etc
 mkdir ${Shared}/icons
 mkdir ${Shared}/resources
 cp ../../system_config $Etc/system_config
-cp ../../instant.xml $Shared/instant.xml
 cp ../../gtk2_ardour/icons/*.png ${Shared}/icons
 cp -r ../../gtk2_ardour/icons/cursor_* ${Shared}/icons/
 cp ../../gtk2_ardour/ArdourMono.ttf $Shared
@@ -719,7 +725,7 @@ if test x$WITH_X42_LV2 != x ; then
 
 	echo "Adding x42 Plugins"
 
-	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums; do
+	for proj in x42-meters x42-midifilter x42-midimap x42-stereoroute x42-eq setBfree x42-avldrums x42-whirl; do
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/linux/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip \

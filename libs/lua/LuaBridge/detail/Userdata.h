@@ -783,6 +783,22 @@ struct Stack <T const* const>
   }
 };
 
+// const references to class-instance pointers
+// e.g.   std::list<T*>::push_back ( const T* & )
+template <class T>
+struct Stack <T* const&>
+{
+  static inline void push (lua_State* L, T* const& p)
+  {
+    UserdataPtr::push (L, p);
+  }
+
+  static inline T* get (lua_State* L, int index)
+  {
+    return Userdata::get <T> (L, index, true);
+  }
+};
+
 // reference
 template <class T>
 struct Stack <T&>

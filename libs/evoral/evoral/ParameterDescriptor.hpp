@@ -29,12 +29,16 @@ struct ParameterDescriptor
 		, lower(0.0)
 		, upper(1.0)
 		, toggled(false)
+		, logarithmic(false)
+		, rangesteps (0)
 	{}
 
-	float normal;   ///< Default value
-	float lower;    ///< Minimum value (in Hz, for frequencies)
-	float upper;    ///< Maximum value (in Hz, for frequencies)
-	bool  toggled;  ///< True iff parameter is boolean
+	float normal;      ///< Default value
+	float lower;       ///< Minimum value (in Hz, for frequencies)
+	float upper;       ///< Maximum value (in Hz, for frequencies)
+	bool  toggled;     ///< True iff parameter is boolean
+	bool  logarithmic; ///< True for log-scale parameters
+	unsigned int rangesteps; ///< number of steps, [min,max] (inclusive). <= 1 means continuous. == 2 only min, max. For integer controls this is usually (1 + max - min)
 };
 
 } // namespace Evoral

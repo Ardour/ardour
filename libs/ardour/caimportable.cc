@@ -55,12 +55,12 @@ CAImportableSource::~CAImportableSource ()
 {
 }
 
-framecnt_t
-CAImportableSource::read (Sample* buffer, framecnt_t nframes)
+samplecnt_t
+CAImportableSource::read (Sample* buffer, samplecnt_t nframes)
 {
-	framecnt_t nread = 0;
+	samplecnt_t nread = 0;
 	AudioBufferList abl;
-	framecnt_t per_channel;
+	samplecnt_t per_channel;
 	bool at_end = false;
 
 	abl.mNumberBuffers = 1;
@@ -104,13 +104,13 @@ CAImportableSource::channels () const
 	return af.GetFileDataFormat().NumberChannels();
 }
 
-framecnt_t
+samplecnt_t
 CAImportableSource::length () const
 {
 	return af.GetNumberFrames();
 }
 
-framecnt_t
+samplecnt_t
 CAImportableSource::samplerate () const
 {
 	CAStreamBasicDescription client_asbd;
@@ -126,7 +126,7 @@ CAImportableSource::samplerate () const
 }
 
 void
-CAImportableSource::seek (framepos_t pos)
+CAImportableSource::seek (samplepos_t pos)
 {
 	try {
 		af.Seek (pos);

@@ -31,6 +31,8 @@
 #include <fftw3.h>
 #endif
 
+#include <curl/curl.h>
+
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
 #include "pbd/textreceiver.h"
@@ -48,8 +50,9 @@
 #include "ardour/filesystem_paths.h"
 
 #include <gtkmm/main.h>
+#include <gtkmm/stock.h>
+
 #include <gtkmm2ext/application.h>
-#include <gtkmm2ext/popup.h>
 #include <gtkmm2ext/utils.h>
 
 #include "ardour_ui.h"
@@ -67,6 +70,10 @@
 
 #ifdef WAF_BUILD
 #include "gtk2ardour-version.h"
+#endif
+
+#ifdef LXVST_SUPPORT
+#include <gdk/gdkx.h>
 #endif
 
 using namespace std;
@@ -130,7 +137,7 @@ static void ardour_g_log (const gchar *log_domain, GLogLevelFlags log_level, con
 static gboolean
 tell_about_backend_death (void* /* ignored */)
 {
-	if (AudioEngine::instance()->processed_frames() == 0) {
+	if (AudioEngine::instance()->processed_samples() == 0) {
 		/* died during startup */
 		MessageDialog msg (string_compose (_("The audio backend (%1) has failed, or terminated"), AudioEngine::instance()->current_backend_name()), false);
 		msg.set_position (Gtk::WIN_POS_CENTER);
@@ -283,6 +290,11 @@ int main (int argc, char *argv[])
 {
 	ARDOUR::check_for_old_configuration_files();
 
+	/* global init is not thread safe.*/
+	if (curl_global_init (CURL_GLOBAL_DEFAULT)) {
+		cerr << "curl_global_init() failed. The web is gone. We're all doomed." << endl;
+	}
+
 	fixup_bundle_environment (argc, argv, localedir);
 
 	load_custom_fonts(); /* needs to happen before any gtk and pango init calls */
@@ -291,29 +303,18 @@ int main (int argc, char *argv[])
 		Glib::thread_init();
 	}
 
+#ifdef LXVST_SUPPORT
+	XInitThreads ();
+#endif
+
 #ifdef HAVE_FFTW35F
 	fftwf_make_planner_thread_safe ();
 #endif
 
 #ifdef ENABLE_NLS
-	/* initialize C and C++ locales to user preference */
-	char* l_msg = NULL;
-	char* l_num = NULL;
+	/* initialize C locale to user preference */
 	if (ARDOUR::translations_are_enabled ()) {
 		setlocale (LC_ALL, "");
-		try {
-			std::locale::global (std::locale (setlocale (LC_ALL, 0)));
-		} catch (...) {
-			std::cerr << "Cannot set C++ locale\n";
-		}
-#ifndef COMPILER_MSVC
-		// LC_MESSAGES isn't a supported locale setting when building
-		// with MSVC (in fact, I doubt if it's valid for Windows at all)
-		l_msg = setlocale (LC_MESSAGES, NULL);
-#endif
-		l_num = setlocale (LC_NUMERIC, NULL);
-		if (l_msg) { l_msg = strdup (l_msg); }
-		if (l_num) { l_num = strdup (l_num); }
 	}
 #endif
 
@@ -372,7 +373,7 @@ int main (int argc, char *argv[])
 	}
 
 	if (no_splash) {
-		cerr << _("Copyright (C) 1999-2015 Paul Davis") << endl
+		cerr << _("Copyright (C) 1999-2018 Paul Davis") << endl
 		     << _("Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, Robin Gareus") << endl
 		     << endl
 		     << string_compose (_("%1 comes with ABSOLUTELY NO WARRANTY"), PROGRAM_NAME) << endl
@@ -384,31 +385,17 @@ int main (int argc, char *argv[])
 
 	if (!ARDOUR::init (ARDOUR_COMMAND_LINE::use_vst, ARDOUR_COMMAND_LINE::try_hw_optimization, localedir.c_str())) {
 		error << string_compose (_("could not initialize %1."), PROGRAM_NAME) << endmsg;
+		Gtk::Main main (argc, argv);
+		Gtk::MessageDialog msg (string_compose (_("Could not initialize %1 (likely due to corrupt config files).\n"
+		                                          "Run %1 from a commandline for more information."), PROGRAM_NAME),
+		                        false, Gtk::MESSAGE_ERROR , Gtk::BUTTONS_OK, true);
+		msg.run ();
 		exit (1);
 	}
 
 	if (curvetest_file) {
 		return curvetest (curvetest_file);
 	}
-
-#ifdef ENABLE_NLS
-	ARDOUR::LocaleMode locale_mode = UIConfiguration::instance().get_locale_mode ();
-	if (l_msg && l_num && locale_mode != ARDOUR::SET_LC_ALL) {
-		try {
-			std::locale cpp_locale (std::locale::classic ());
-			cpp_locale = std::locale (cpp_locale, l_msg, std::locale::messages);
-			if (ARDOUR::SET_LC_MESSAGES_AND_LC_NUMERIC == locale_mode) {
-				cpp_locale = std::locale (cpp_locale, l_num, std::locale::numeric);
-			}
-			std::locale::global (cpp_locale);
-		} catch (...) {
-			std::cerr << "Cannot override C++ locale\n";
-		}
-		info << "LC_ALL: " << setlocale (LC_ALL, NULL) << endmsg;
-	}
-	free (l_msg);
-	free (l_num);
-#endif
 
 #ifndef PLATFORM_WINDOWS
 	if (::signal (SIGPIPE, sigpipe_handler)) {

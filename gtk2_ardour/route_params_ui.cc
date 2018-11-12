@@ -21,8 +21,7 @@
 #include <inttypes.h>
 
 #include <glibmm/threads.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/window_title.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/audioengine.h"
 #include "ardour/audio_track.h"
@@ -34,6 +33,9 @@
 #include "ardour/route.h"
 #include "ardour/send.h"
 #include "ardour/internal_send.h"
+
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/window_title.h"
 
 #include "ardour_ui.h"
 #include "gui_thread.h"
@@ -56,9 +58,9 @@ using namespace Gtk;
 using namespace Gtkmm2ext;
 
 RouteParams_UI::RouteParams_UI ()
-	: ArdourWindow (_("Tracks and Busses")),
-	  latency_apply_button (Stock::APPLY),
-	  track_menu(0)
+	: ArdourWindow (_("Tracks and Busses"))
+	, latency_apply_button (Stock::APPLY)
+	, track_menu(0)
 {
 	insert_box = 0;
 	_input_iosel = 0;
@@ -117,7 +119,6 @@ RouteParams_UI::RouteParams_UI ()
 	// changeable area
 	route_param_frame.set_name("RouteParamsBaseFrame");
 	route_param_frame.set_shadow_type (Gtk::SHADOW_IN);
-
 
 	route_hpacker.pack_start (notebook, true, true);
 
@@ -235,7 +236,7 @@ RouteParams_UI::setup_processor_boxes()
 		cleanup_processor_boxes();
 
 		// construct new redirect boxes
-		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _rr_selection, 0);
+		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _p_selection, 0);
 		insert_box->set_route (_route);
 
 		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
@@ -268,7 +269,7 @@ RouteParams_UI::refresh_latency ()
 		latency_widget->refresh();
 
 		char buf[128];
-		snprintf (buf, sizeof (buf), _("Playback delay: %" PRId64 " samples"), _route->initial_delay());
+		snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency ());
 		delay_label.set_text (buf);
 	}
 }
@@ -293,10 +294,10 @@ RouteParams_UI::cleanup_latency_frame ()
 void
 RouteParams_UI::setup_latency_frame ()
 {
-	latency_widget = new LatencyGUI (*(_route->output()), _session->frame_rate(), AudioEngine::instance()->samples_per_cycle());
+	latency_widget = new LatencyGUI (*(_route->output()), _session->sample_rate(), AudioEngine::instance()->samples_per_cycle());
 
 	char buf[128];
-	snprintf (buf, sizeof (buf), _("Playback delay: %" PRId64 " samples"), _route->initial_delay());
+	snprintf (buf, sizeof (buf), _("Latency: %" PRId64 " samples"), _route->signal_latency());
 	delay_label.set_text (buf);
 
 	latency_packer.pack_start (*latency_widget, false, false);
@@ -304,17 +305,16 @@ RouteParams_UI::setup_latency_frame ()
 	latency_packer.pack_start (delay_label);
 
 	latency_click_connection = latency_apply_button.signal_clicked().connect (sigc::mem_fun (*latency_widget, &LatencyGUI::finish));
-	_route->signal_latency_changed.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
-	_route->initial_delay_changed.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
+	_route->signal_latency_updated.connect (latency_connections, invalidator (*this), boost::bind (&RouteParams_UI::refresh_latency, this), gui_context());
 
 	latency_frame.add (latency_packer);
 	latency_frame.show_all ();
 }
 
 void
-RouteParams_UI::setup_io_frames()
+RouteParams_UI::setup_io_samples()
 {
-	cleanup_io_frames();
+	cleanup_io_samples();
 
 	// input
 	_input_iosel = new IOSelector (this, _session, _route->input());
@@ -330,7 +330,7 @@ RouteParams_UI::setup_io_frames()
 }
 
 void
-RouteParams_UI::cleanup_io_frames()
+RouteParams_UI::cleanup_io_samples()
 {
 	if (_input_iosel) {
 		_input_iosel->Finished (IOSelector::Cancelled);
@@ -389,7 +389,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 	}
 
 	if (route == _route) {
-		cleanup_io_frames();
+		cleanup_io_samples();
 		cleanup_view();
 		cleanup_processor_boxes();
 
@@ -427,7 +427,7 @@ RouteParams_UI::session_going_away ()
 
 	route_display_model->clear();
 
-	cleanup_io_frames();
+	cleanup_io_samples();
 	cleanup_view();
 	cleanup_processor_boxes();
 	cleanup_latency_frame ();
@@ -457,7 +457,7 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 			cleanup_processor_boxes();
 			cleanup_view();
-			cleanup_io_frames();
+			cleanup_io_samples();
 			cleanup_latency_frame ();
 		}
 
@@ -465,7 +465,7 @@ RouteParams_UI::route_selected()
 		_route = route;
 		//update_routeinfo (route);
 
-		setup_io_frames();
+		setup_io_samples();
 		setup_processor_boxes();
 		setup_latency_frame ();
 
@@ -481,7 +481,7 @@ RouteParams_UI::route_selected()
 			_route_processors_connection.disconnect ();
 
 			// remove from view
-			cleanup_io_frames();
+			cleanup_io_samples();
 			cleanup_view();
 			cleanup_processor_boxes();
 			cleanup_latency_frame ();

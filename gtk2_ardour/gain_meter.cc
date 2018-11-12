@@ -19,6 +19,12 @@
 
 #include <limits.h>
 
+#include <pangomm.h>
+
+#include <gtkmm/alignment.h>
+#include <gdkmm/color.h>
+#include <gtkmm/style.h>
+
 #include "ardour/amp.h"
 #include "ardour/logmeter.h"
 #include "ardour/route_group.h"
@@ -26,12 +32,11 @@
 #include "ardour/dB.h"
 #include "ardour/utils.h"
 
-#include <pangomm.h>
-#include <gtkmm/style.h>
-#include <gdkmm/color.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/fastmeter.h>
-#include <gtkmm2ext/gtk_ui.h>
+#include "gtkmm2ext/utils.h"
+#include "gtkmm2ext/gtk_ui.h"
+
+#include "widgets/tooltips.h"
+
 #include "pbd/fastlog.h"
 #include "pbd/stacktrace.h"
 
@@ -42,7 +47,6 @@
 #include "utils.h"
 #include "meter_patterns.h"
 #include "timers.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "ardour/session.h"
@@ -55,7 +59,7 @@
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtkmm2ext;
 using namespace Gtk;
@@ -90,7 +94,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	                   1.0,  // upper
 	                   dB_coeff_step(Config->get_max_gain()) / 10.0,  // step increment
 	                   dB_coeff_step(Config->get_max_gain()))  // page increment
-	, gain_automation_style_button ("")
 	, gain_automation_state_button ("")
 	, meter_point_button (_("pre"))
 	, gain_astate_propagate (false)
@@ -110,8 +113,10 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 
 	if (horizontal) {
 		gain_slider = manage (new HSliderController (&gain_adjustment, boost::shared_ptr<PBD::Controllable>(), fader_length, fader_girth));
+		gain_slider->set_tweaks (ArdourFader::Tweaks(ArdourFader::NoButtonForward | ArdourFader::NoVerticalScroll));
 	} else {
 		gain_slider = manage (new VSliderController (&gain_adjustment, boost::shared_ptr<PBD::Controllable>(), fader_length, fader_girth));
+		gain_slider->set_tweaks (ArdourFader::NoButtonForward);
 	}
 
 	level_meter = new LevelMeterHBox(_session);
@@ -120,7 +125,6 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_metric_area.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeterBase::level_meter_button_press));
 	meter_metric_area.add_events (Gdk::BUTTON_PRESS_MASK);
 
-	gain_slider->set_tweaks (PixFader::Tweaks(PixFader::NoButtonForward | PixFader::NoVerticalScroll));
 	gain_slider->StartGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_start_touch));
 	gain_slider->StopGesture.connect (sigc::mem_fun (*this, &GainMeter::amp_stop_touch));
 	gain_slider->set_name ("GainFader");
@@ -147,24 +151,16 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	peak_display.unset_flags (Gtk::CAN_FOCUS);
 	peak_display.set_editable (false);
 
-	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
-	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_automation_state_button.set_size_request(15, 15);
-	gain_automation_style_button.set_size_request(15, 15);
-
-	gain_astyle_menu.items().push_back (MenuElem (_("Trim")));
-	gain_astyle_menu.items().push_back (MenuElem (_("Abs")));
 
 	gain_astate_menu.set_name ("ArdourContextMenu");
 	gain_astate_menu.set_reserve_toggle_size(false);
-	gain_astyle_menu.set_name ("ArdourContextMenu");
 
 	meter_point_button.set_name ("mixer strip button");
 
@@ -196,6 +192,7 @@ GainMeterBase::GainMeterBase (Session* s, bool horizontal, int fader_length, int
 	meter_point_button.signal_button_press_event().connect (sigc::mem_fun (*this, &GainMeter::meter_press), false);
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun(*this, &GainMeterBase::fader_moved));
+	peak_display.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_press), false);
 	peak_display.signal_button_release_event().connect (sigc::mem_fun(*this, &GainMeterBase::peak_button_release), false);
 	gain_display.signal_key_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_key_press), false);
 
@@ -266,13 +263,13 @@ GainMeterBase::set_controls (boost::shared_ptr<Route> r,
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Write)));
 		gain_astate_menu.items().push_back (MenuElem (_("Touch"),
 							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Touch)));
+		gain_astate_menu.items().push_back (MenuElem (_("Latch"),
+							      sigc::bind (sigc::mem_fun (*this, &GainMeterBase::set_gain_astate), (AutoState) ARDOUR::Latch)));
 
-		connections.push_back (gain_automation_style_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_style_button_event), false));
 		connections.push_back (gain_automation_state_button.signal_button_press_event().connect (sigc::mem_fun(*this, &GainMeterBase::gain_automation_state_button_event), false));
 		connections.push_back (ChangeGainAutomationState.connect (sigc::mem_fun(*this, &GainMeterBase::set_gain_astate)));
 
 		_control->alist()->automation_state_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_state_changed, this), gui_context());
-		_control->alist()->automation_style_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::gain_automation_style_changed, this), gui_context());
 
 		gain_automation_state_changed ();
 	}
@@ -298,7 +295,12 @@ GainMeterBase::set_gain_astate (AutoState as)
 		ChangeGainAutomationState (as);
 		return;
 	}
-	_amp->set_parameter_automation_state (Evoral::Parameter (GainAutomation), as);
+	if (_amp) {
+		_amp->set_parameter_automation_state (Evoral::Parameter (GainAutomation), as);
+	} else if (_control) {
+		_control->set_automation_state (as);
+		_session->set_dirty ();
+	}
 }
 
 void
@@ -320,7 +322,7 @@ GainMeterBase::setup_gain_adjustment ()
 		gain_adjustment.set_upper (GAIN_COEFF_UNITY);
 		gain_adjustment.set_step_increment (dB_coeff_step(Config->get_max_gain()) / 10.0);
 		gain_adjustment.set_page_increment (dB_coeff_step(Config->get_max_gain()));
-		gain_slider->set_default_value (gain_to_slider_position (GAIN_COEFF_UNITY));
+		gain_slider->set_default_value (gain_to_slider_position_with_max (GAIN_COEFF_UNITY, Config->get_max_gain()));
 	} else {
 		_data_type = DataType::MIDI;
 		gain_adjustment.set_lower (0.0);
@@ -384,7 +386,7 @@ GainMeterBase::setup_meters (int len)
 void
 GainMeterBase::set_type (MeterType t)
 {
-	level_meter->set_type(t);
+	level_meter->set_meter_type(t);
 }
 
 void
@@ -418,11 +420,17 @@ GainMeter::set_type (MeterType t)
 bool
 GainMeterBase::gain_key_press (GdkEventKey* ev)
 {
-	if (key_is_legal_for_numeric_entry (ev->keyval)) {
+	if (ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (ev->keyval)) {
 		/* drop through to normal handling */
 		return false;
 	}
 	/* illegal key for gain entry */
+	return true;
+}
+
+bool
+GainMeterBase::peak_button_press (GdkEventButton* ev)
+{
 	return true;
 }
 
@@ -581,7 +589,14 @@ GainMeterBase::fader_moved ()
 			value = gain_adjustment.get_value();
 		}
 
-		_control->set_value (value, Controllable::UseGroup);
+		// XXX hack allow to override group
+		// (this breaks group'ed  shift+click reset)
+		if (Keyboard::the_keyboard().key_is_down (GDK_Shift_R)
+				|| Keyboard::the_keyboard().key_is_down (GDK_Shift_L)) {
+			_control->set_value (value, Controllable::InverseGroup);
+		} else {
+			_control->set_value (value, Controllable::UseGroup);
+		}
 	}
 
 	show_gain ();
@@ -614,7 +629,8 @@ GainMeterBase::effective_gain_display ()
 void
 GainMeterBase::gain_changed ()
 {
-	Gtkmm2ext::UI::instance()->call_slot (invalidator (*this), boost::bind (&GainMeterBase::effective_gain_display, this));
+	ENSURE_GUI_THREAD (*this, &GainMeterBase::gain_automation_state_changed);
+	effective_gain_display ();
 }
 
 void
@@ -638,7 +654,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_control->alist()->automation_state() & Play);
-	static_cast<Gtkmm2ext::SliderController*>(gain_slider)->set_sensitive (x);
+	static_cast<ArdourWidgets::SliderController*>(gain_slider)->set_sensitive (x);
 }
 
 gint
@@ -718,13 +734,14 @@ GainMeterBase::meter_point_clicked (MeterPoint mp)
 void
 GainMeterBase::amp_start_touch ()
 {
-	_control->start_touch (_control->session().transport_frame());
+	_control->start_touch (_control->session().transport_sample());
 }
 
 void
 GainMeterBase::amp_stop_touch ()
 {
-	_control->stop_touch (false, _control->session().transport_frame());
+	_control->stop_touch (_control->session().transport_sample());
+	effective_gain_display ();
 }
 
 gint
@@ -748,22 +765,6 @@ GainMeterBase::gain_automation_state_button_event (GdkEventButton *ev)
 	return TRUE;
 }
 
-gint
-GainMeterBase::gain_automation_style_button_event (GdkEventButton *ev)
-{
-	if (ev->type == GDK_BUTTON_RELEASE) {
-		return TRUE;
-	}
-
-	switch (ev->button) {
-	case 1:
-		gain_astyle_menu.popup (1, ev->time);
-		break;
-	default:
-		break;
-	}
-	return TRUE;
-}
 
 string
 GainMeterBase::astate_string (AutoState state)
@@ -784,57 +785,23 @@ GainMeterBase::_astate_string (AutoState state, bool shrt)
 
 	switch (state) {
 	case ARDOUR::Off:
-		sstr = (shrt ? "M" : _("M"));
+		sstr = (shrt ? "M" : S_("Manual|M"));
 		break;
 	case Play:
-		sstr = (shrt ? "P" : _("P"));
+		sstr = (shrt ? "P" : S_("Play|P"));
 		break;
 	case Touch:
-		sstr = (shrt ? "T" : _("T"));
+		sstr = (shrt ? "T" : S_("Trim|T"));
+		break;
+	case Latch:
+		sstr = (shrt ? "L" : S_("Latch|L"));
 		break;
 	case Write:
-		sstr = (shrt ? "W" : _("W"));
+		sstr = (shrt ? "W" : S_("Write|W"));
 		break;
 	}
 
 	return sstr;
-}
-
-string
-GainMeterBase::astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, false);
-}
-
-string
-GainMeterBase::short_astyle_string (AutoStyle style)
-{
-	return _astyle_string (style, true);
-}
-
-string
-GainMeterBase::_astyle_string (AutoStyle style, bool shrt)
-{
-	if (style & Trim) {
-		return _("Trim");
-	} else {
-	        /* XXX it might different in different languages */
-
-		return (shrt ? _("Abs") : _("Abs"));
-	}
-}
-
-void
-GainMeterBase::gain_automation_style_changed ()
-{
-	switch (_width) {
-	case Wide:
-		gain_automation_style_button.set_text (astyle_string(_control->alist()->automation_style()));
-		break;
-	case Narrow:
-		gain_automation_style_button.set_text  (short_astyle_string(_control->alist()->automation_style()));
-		break;
-	}
 }
 
 void
@@ -862,14 +829,6 @@ GainMeterBase::gain_automation_state_changed ()
 	update_gain_sensitive ();
 
 	gain_watching.disconnect();
-
-	if (automation_watch_required) {
-		/* start watching automation so that things move */
-		gain_watching = Timers::rapid_connect (sigc::mem_fun (*this, &GainMeterBase::effective_gain_display));
-	} else {
-		/* update once to get the correct value shown as we re-enter off/manual mode */
-		effective_gain_display();
-	}
 }
 
 const ChanCount
@@ -948,17 +907,13 @@ GainMeter::GainMeter (Session* s, int fader_length)
 	meter_metric_area.set_name ("AudioTrackMetrics");
 	meter_metric_area.set_size_request(PX_SCALE(24, 24), -1);
 
-	gain_automation_style_button.set_name ("mixer strip button");
 	gain_automation_state_button.set_name ("mixer strip button");
 
 	set_tooltip (gain_automation_state_button, _("Fader automation mode"));
-	set_tooltip (gain_automation_style_button, _("Fader automation type"));
 
-	gain_automation_style_button.unset_flags (Gtk::CAN_FOCUS);
 	gain_automation_state_button.unset_flags (Gtk::CAN_FOCUS);
 
 	gain_automation_state_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
-	gain_automation_style_button.set_size_request (PX_SCALE(12, 15), PX_SCALE(12, 15));
 
 	fader_vbox.set_spacing (0);
 	fader_vbox.pack_start (*gain_slider, true, true);

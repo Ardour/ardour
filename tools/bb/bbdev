@@ -1,0 +1,5 @@
+#!/bin/sh
+TOP=`dirname "$0"`/../..
+. $TOP/build/tools/bb/bbdev_common_waf.sh
+export UBUNTU_MENUPROXY=""
+exec $TOP/$EXECUTABLE "$@"

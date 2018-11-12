@@ -22,6 +22,8 @@
 #include "libpbd-config.h"
 #endif
 
+#include <stdlib.h>
+
 #ifdef __linux__
 #include <unistd.h>
 #elif defined(__APPLE__) || defined(__FreeBSD__)
@@ -41,24 +43,30 @@
 uint32_t
 hardware_concurrency()
 {
+	if (getenv("CONCURRENCY")) {
+		int c = atoi (getenv("CONCURRENCY"));
+		if (c > 0) {
+			return c;
+		}
+	}
 #if defined(PTW32_VERSION) || defined(__hpux)
-        return pthread_num_processors_np();
+	return pthread_num_processors_np();
 #elif defined(__APPLE__)
-        int count;
-        size_t size=sizeof(count);
-        return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
+	int count;
+	size_t size=sizeof(count);
+	return sysctlbyname("hw.physicalcpu",&count,&size,NULL,0)?0:count;
 #elif defined(__FreeBSD__)
-        int count;
-        size_t size=sizeof(count);
-        return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
+	int count;
+	size_t size=sizeof(count);
+	return sysctlbyname("hw.ncpu",&count,&size,NULL,0)?0:count;
 #elif defined(HAVE_UNISTD) && defined(_SC_NPROCESSORS_ONLN)
-        int const count=sysconf(_SC_NPROCESSORS_ONLN);
-        return (count>0)?count:0;
+	int const count=sysconf(_SC_NPROCESSORS_ONLN);
+	return (count>0)?count:0;
 #elif defined(PLATFORM_WINDOWS)
-		SYSTEM_INFO sys_info;
-		GetSystemInfo( &sys_info );
-		return sys_info.dwNumberOfProcessors;
+	SYSTEM_INFO sys_info;
+	GetSystemInfo( &sys_info );
+	return sys_info.dwNumberOfProcessors;
 #else
-        return 0;
+	return 0;
 #endif
 }

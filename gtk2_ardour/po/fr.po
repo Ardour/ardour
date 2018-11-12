@@ -9805,7 +9805,7 @@ msgstr ""
 
 #: opts.cc:64
 msgid "  -h, --help                  Print this message\n"
-msgstr " -h, --help                       Affiche ce message\n"
+msgstr "  -h, --help                  Affiche ce message\n"
 
 #: opts.cc:65
 msgid ""
@@ -9852,19 +9852,19 @@ msgstr ""
 #: opts.cc:71
 msgid "  -n, --no-splash             Do not show splash screen\n"
 msgstr ""
-"  -n, --no-splash                Ne pas afficher l'écran de démarrage\n"
+"  -n, --no-splash             Ne pas afficher l'écran de démarrage\n"
 
 #: opts.cc:72
 msgid "  -m, --menus file            Use \"file\" to define menus\n"
 msgstr ""
-"  -m, --menus fichier              Utiliser « fichier » pour définir les "
+"  -m, --menus fichier         Utiliser « fichier » pour définir les "
 "menus\n"
 
 #: opts.cc:73
 msgid ""
 "  -N, --new session-name      Create a new session from the command line\n"
 msgstr ""
-"  -N, --new nomsession             Créer une nouvelle session depuis la "
+"  -N, --new nomsession        Créer une nouvelle session depuis la "
 "ligne de commande\n"
 
 #: opts.cc:74
@@ -9893,7 +9893,7 @@ msgid ""
 "  -E, --save <file>           Load the specified session, save it to <file> "
 "and then quit\n"
 msgstr ""
-"  -E, --save <fichier>           Charger la session, la sauvegarder dans "
+"  -E, --save <fichier>        Charger la session, la sauvegarder dans "
 "« fichier » puis quitter\n"
 
 #: opts.cc:81
@@ -12098,7 +12098,7 @@ msgstr ""
 #: rc_option_editor.cc:3173
 #, fuzzy
 msgid "Silence plugins when the transport is stopped"
-msgstr "Greffons silencieux à l'arrêt"
+msgstr "Faire taire les greffons lorsque le transport s'arrête"
 
 #: rc_option_editor.cc:3179
 msgid ""
@@ -12107,6 +12107,12 @@ msgid ""
 "\n"
 "This mostly affects plugins with a \"tail\" like Reverbs."
 msgstr ""
+"<b>Si actif</b>, les greffons seront réinitialisés lorsque le transport "
+"s'arrête. Lorsque l'option est désactivée, les greffons seront laissés en "
+"l'état lorsque le transport s'arrête.\n"
+"\n"
+"Les greffons concernés sont principalement ceux avec une \"queue\" comme "
+"les réverbérations."
 
 #: rc_option_editor.cc:3183
 msgid "Make new plugins active"

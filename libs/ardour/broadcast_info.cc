@@ -92,6 +92,24 @@ BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 	std::ostringstream serial_number;
 	serial_number << PROGRAM_NAME << revision;
 
+	std::string country = SessionMetadata::Metadata()->country().substr (0, 2).c_str(); // ISO 3166-1 2 digits
+	if (country.empty ()) {
+		/* "ZZ" is reserved and may be user-assigned.
+		 * EBU Tech 3279 chapter 4.2.4 recommends "ZZ" for unregistered organizations
+		 */
+		country = "ZZ";
+	}
+
+	/* https://tech.ebu.ch/docs/tech/tech3279.pdf */
+	std::string organization = SessionMetadata::Metadata()->organization().substr (0, 3).c_str(); // EBU assigned Organisation code
+	if (organization.empty ()) {
+		organization = "---";
+	}
+
+	// TODO sanitize to allowed char set: tech3279.pdf chapter 1.6
+	// allowed: A-Z 0-9 <space> .,-()/=
+	// possible, but not recommended: !"%&*;<>
+
 	/* https://tech.ebu.ch/docs/r/r099.pdf
 	 * CC Country code: (2 characters) based on the ISO 3166-1 standard
 	 * OOO Organisation code: (3 characters) based on the EBU facility codes, Tech 3279
@@ -99,14 +117,13 @@ BroadcastInfo::set_originator_ref_from_session (Session const & /*session*/)
 	 * HHMMSS OriginationTime (6 characters,) from the <OriginationTime> field of the BWF.
 	 * RRRRRRRRR Random Number (9 characters 0-9) Generated locally by the recorder using some reasonably random algorithm.
 	 */
-	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%9d",
-		  SessionMetadata::Metadata()->country().substr (0, 2).c_str(),
-		  SessionMetadata::Metadata()->organization().substr (0, 3).c_str(),
-		  serial_number.str().substr (0, 12).c_str(),
-		  _time.tm_hour,
-		  _time.tm_min,
-		  _time.tm_sec,
-		  random_code);
+	snprintf_bounded_null_filled (info->originator_reference, sizeof (info->originator_reference), "%2s%3s%12s%02d%02d%02d%09d",
+			country.c_str (), organization.c_str(),
+			serial_number.str().substr (0, 12).c_str(),
+			_time.tm_hour,
+			_time.tm_min,
+			_time.tm_sec,
+			random_code);
 
 }
 

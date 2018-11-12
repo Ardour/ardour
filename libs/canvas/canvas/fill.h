@@ -38,10 +38,10 @@ public:
 	Fill (Item& self);
 	virtual ~Fill() {}
 
-	virtual void set_fill_color (Color);
+	virtual void set_fill_color (Gtkmm2ext::Color);
 	virtual void set_fill (bool);
 
-	Color fill_color () const {
+	Gtkmm2ext::Color fill_color () const {
 		return _fill_color;
 	}
 
@@ -49,23 +49,23 @@ public:
 		return _fill;
 	}
 
-        typedef std::vector<std::pair<double,Color> > StopList;
+	typedef std::vector<std::pair<double,Gtkmm2ext::Color> > StopList;
 
-        void set_gradient (StopList const & stops, bool is_vertical);
+	void set_gradient (StopList const & stops, bool is_vertical);
 
-        void set_pattern (Cairo::RefPtr<Cairo::Pattern>);
+	void set_pattern (Cairo::RefPtr<Cairo::Pattern>);
 
 protected:
 	void setup_fill_context (Cairo::RefPtr<Cairo::Context>) const;
-        void setup_gradient_context (Cairo::RefPtr<Cairo::Context>, Rect const &, Duple const &) const;
+	void setup_gradient_context (Cairo::RefPtr<Cairo::Context>, Rect const &, Duple const &) const;
 
-       	Item& _self;
-	Color _fill_color;
+	Item& _self;
+	Gtkmm2ext::Color _fill_color;
 	bool _fill;
 	bool _transparent;
-        StopList _stops;
-        bool _vertical_gradient;
-        Cairo::RefPtr<Cairo::Pattern> _pattern;
+	StopList _stops;
+	bool _vertical_gradient;
+	Cairo::RefPtr<Cairo::Pattern> _pattern;
 
 };
 

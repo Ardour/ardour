@@ -106,26 +106,26 @@ ArdourWindow::init ()
 	set_border_width (10);
 	add_events (Gdk::FOCUS_CHANGE_MASK);
 
-        /* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but
-           they should be considered part of the same "window level" as a dialog. This
-           works on X11 in that: 
+	/* ArdourWindows are not dialogs (they have no "OK" or "Close" button) but
+	   they should be considered part of the same "window level" as a dialog. This
+	   works on X11 in that:
 
-           (a) there are no window "levels"
-           (b) they will float above normal windows without any particular effort
+	   (a) there are no window "levels"
+	   (b) they will float above normal windows without any particular effort
 	   (c) present()-ing them will make a utility float over a dialog or
-               vice versa.
+	       vice versa.
 
-           Some X11 Window managers (e.g. KDE) get this wrong, and so we allow the user
-           to select what type of window hint is used.
+	   Some X11 Window managers (e.g. KDE) get this wrong, and so we allow the user
+	   to select what type of window hint is used.
 
-           GTK+ on OS X uses different levels for DIALOG and UTILITY, and Cocoa has a bug/design
-           issue that it will not transfer keyboard focus across levels when hiding a window.
-           So on OS X, we use DIALOG for all ArdourWindows to ensure that keyboard focus
-           will return to the main window(s) when this window is hidden.
-        */
+	   GTK+ on OS X uses different levels for DIALOG and UTILITY, and Cocoa has a bug/design
+	   issue that it will not transfer keyboard focus across levels when hiding a window.
+	   So on OS X, we use DIALOG for all ArdourWindows to ensure that keyboard focus
+	   will return to the main window(s) when this window is hidden.
+	*/
 
 #ifdef __APPLE__
-        set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
 #else
 	if (UIConfiguration::instance().get_all_floating_windows_are_dialogs()) {
 		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);

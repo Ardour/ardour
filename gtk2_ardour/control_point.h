@@ -43,7 +43,7 @@ namespace ArdourCanvas {
 
 class ControlPoint : public Selectable
 {
-  public:
+public:
 	ControlPoint (AutomationLine& al);
 	ControlPoint (const ControlPoint&, bool dummy_arg_to_force_special_copy_constructor);
 	virtual ~ControlPoint ();
@@ -82,7 +82,7 @@ class ControlPoint : public Selectable
 
 	static PBD::Signal1<void, ControlPoint *> CatchDeletion;
 
-  private:
+private:
 	ArdourCanvas::Rectangle*        _item;
 	AutomationLine&                  _line;
 	ARDOUR::AutomationList::iterator _model;

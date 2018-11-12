@@ -26,6 +26,7 @@ namespace ARDOUR_COMMAND_LINE {
 
 extern std::string session_name;
 extern bool   show_key_actions;
+extern bool   show_actions;
 extern bool   no_splash;
 extern bool   just_version;
 extern std::string backend_client_name;

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 2017-4-13 Nathan Stewart: Map file creation                     -->
+<ArdourMIDIBindings version="1.0.0" name="Alesis QX25">
+
+  <Binding channel="1" ctl="114" function="transport-stop"/>
+  <Binding channel="1" ctl="115" function="transport-roll"/>
+
+  <Binding channel="1" ctl="116" function="toggle-rec-enable"/>
+
+  <Binding channel="1" ctl="117" function="transport-end"/>
+  <Binding channel="1" ctl="118" function="transport-start"/>
+  <Binding channel="1" ctl="119" function="loop-toggle"/>
+  
+  <!-- bind the foot controller to toggle transport -->
+  <!--Binding channel="1" ctl="64" action="Transport/ToggleRoll"/ -->
+
+</ArdourMIDIBindings>

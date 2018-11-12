@@ -23,15 +23,14 @@
 #include <vector>
 #include <string>
 
-#include <gtkmm/dialog.h>
+#include <gtkmm/adjustment.h>
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>
-#include <gtkmm/adjustment.h>
+#include <gtkmm/comboboxtext.h>
 
-#include <gtkmm2ext/barcontroller.h>
 #include "pbd/controllable.h"
-
 #include "ardour/types.h"
+#include "widgets/barcontroller.h"
 
 #include "ardour_dialog.h"
 
@@ -41,12 +40,13 @@ namespace ARDOUR {
 
 class LatencyGUI;
 
-class LatencyBarController : public Gtkmm2ext::BarController
+class LatencyBarController : public ArdourWidgets::BarController
 {
 public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
 		: BarController (adj, boost::shared_ptr<PBD::IgnorableControllable> (new PBD::IgnorableControllable ())),
-		  _latency_gui (g) {}
+		                 _latency_gui (g)
+	{}
 
 private:
 	LatencyGUI* _latency_gui;
@@ -56,19 +56,19 @@ private:
 
 class LatencyGUI : public Gtk::VBox
 {
-  public:
-	LatencyGUI (ARDOUR::Latent&, framepos_t sample_rate, framepos_t period_size);
+public:
+	LatencyGUI (ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
 	~LatencyGUI() { }
 
 	void finish ();
 	void reset ();
 	void refresh ();
 
-  private:
+private:
 	ARDOUR::Latent& _latent;
-	framepos_t initial_value;
-	framepos_t sample_rate;
-	framepos_t period_size;
+	samplepos_t initial_value;
+	samplepos_t sample_rate;
+	samplepos_t period_size;
 	boost::shared_ptr<PBD::IgnorableControllable> ignored;
 
 	Gtk::Adjustment adjustment;
@@ -91,7 +91,7 @@ class LatencyGUI : public Gtk::VBox
 class LatencyDialog : public ArdourDialog
 {
   public:
-	LatencyDialog (const std::string& title, ARDOUR::Latent&, framepos_t sample_rate, framepos_t period_size);
+	LatencyDialog (const std::string& title, ARDOUR::Latent&, samplepos_t sample_rate, samplepos_t period_size);
 	~LatencyDialog() {}
 
   private:

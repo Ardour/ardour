@@ -35,7 +35,7 @@ class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
 typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
-typedef PBD::Signal2<void,Parser&,framecnt_t>        TimestampedSignal;
+typedef PBD::Signal2<void,Parser&,samplecnt_t>        TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
@@ -53,8 +53,8 @@ class LIBMIDIPP_API Parser {
 	   therefore be set before every byte passed into ::scanner().
 	*/
 
-	framecnt_t get_timestamp() const { return _timestamp; }
-	void set_timestamp (const framecnt_t timestamp) { _timestamp = timestamp; }
+	samplecnt_t get_timestamp() const { return _timestamp; }
+	void set_timestamp (const samplecnt_t timestamp) { _timestamp = timestamp; }
 
 	/* signals that anyone can connect to */
 
@@ -131,8 +131,8 @@ class LIBMIDIPP_API Parser {
 	const byte *mtc_current() const { return _mtc_time; }
 	bool        mtc_locked() const  { return _mtc_locked; }
 
-	PBD::Signal3<void, Parser &, int, framecnt_t>      mtc_qtr;
-	PBD::Signal3<void, const byte *, bool, framecnt_t> mtc_time;
+	PBD::Signal3<void, Parser &, int, samplecnt_t>      mtc_qtr;
+	PBD::Signal3<void, const byte *, bool, samplecnt_t> mtc_time;
 	PBD::Signal1<void, MTC_Status>                     mtc_status;
 	PBD::Signal0<bool>                                 mtc_skipped;
 
@@ -172,13 +172,13 @@ class LIBMIDIPP_API Parser {
 	int   expected_mtc_quarter_frame_code;
 	byte _mtc_time[5];
 	byte _qtr_mtc_time[5];
-	unsigned long consecutive_qtr_frame_cnt;
+	unsigned long consecutive_qtr_sample_cnt;
 	MTC_FPS _mtc_fps;
 	MTC_Status _mtc_running;
 	bool       _mtc_locked;
-	byte last_qtr_frame;
+	byte last_qtr_sample;
 
-	framecnt_t _timestamp;
+	samplecnt_t _timestamp;
 
 	ParseState pre_variable_state;
 	MIDI::eventType pre_variable_msgtype;

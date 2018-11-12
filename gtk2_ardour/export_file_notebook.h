@@ -22,7 +22,13 @@
 #define __export_file_notebook_h__
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+
+#include <gtkmm/alignment.h>
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
 
 #include "ardour/export_profile_manager.h"
 #include "ardour/session_handle.h"
@@ -33,7 +39,7 @@
 
 class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 {
-  public:
+public:
 
 	ExportFileNotebook ();
 
@@ -45,7 +51,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  private:
+private:
 
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
@@ -70,8 +76,9 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 	uint32_t     last_visible_page;
 	uint32_t     page_counter;
 
-	class FilePage : public Gtk::VBox {
-	  public:
+	class FilePage : public Gtk::VBox
+	{
+	public:
 		FilePage (ARDOUR::Session * s, ManagerPtr profile_manager, ExportFileNotebook * parent, uint32_t number,
 		          ARDOUR::ExportProfileManager::FormatStatePtr format_state,
 		          ARDOUR::ExportProfileManager::FilenameStatePtr filename_state);
@@ -93,7 +100,7 @@ class ExportFileNotebook : public Gtk::Notebook, public ARDOUR::SessionHandlePtr
 
 		sigc::signal<void> CriticalSelectionChanged;
 
-	  private:
+	private:
 		void save_format_to_manager (FormatPtr format);
 		void update_tab_label ();
 		void critical_selection_changed ();

@@ -31,11 +31,11 @@
 #include <glibmm.h>
 
 #include "portaudio_backend.h"
-#include "rt_thread.h"
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/pthread_utils.h"
 #include "pbd/windows_timer_utils.h"
 #include "pbd/windows_mmcss.h"
 
@@ -92,6 +92,8 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	pthread_mutex_init (&_port_callback_mutex, 0);
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init (&_freewheel_signal, 0);
+
+	_port_connection_queue.reserve (128);
 
 	_pcmio = new PortAudioIO ();
 	_midiio = new WinMMEMidiIO ();
@@ -579,6 +581,8 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	/* reset internal state */
+	assert (_run == false);
+	_run = false;
 	_dsp_load = 0;
 	_freewheeling = false;
 	_freewheel = false;
@@ -639,7 +643,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	_measure_latency = for_latency_measurement;
 
-	_run = true;
 	_port_change_flag = false;
 
 	if (_midi_driver_option == winmme_driver_name) {
@@ -657,7 +660,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (register_system_midi_ports () != 0) {
 		DEBUG_PORTS("Failed to register system midi ports.\n")
-		_run = false;
 		return PortRegistrationError;
 	}
 
@@ -665,7 +667,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (register_system_audio_ports()) {
 		DEBUG_PORTS("Failed to register system audio ports.\n");
-		_run = false;
 		return PortRegistrationError;
 	}
 
@@ -674,12 +675,12 @@ PortAudioBackend::_start (bool for_latency_measurement)
 
 	if (engine.reestablish_ports ()) {
 		DEBUG_PORTS("Could not re-establish ports.\n");
-		_run = false;
 		return PortReconnectError;
 	}
 
-	engine.reconnect_ports ();
 	_run = true;
+
+	engine.reconnect_ports ();
 	_port_change_flag = false;
 
 	if (_use_blocking_api) {
@@ -697,6 +698,16 @@ PortAudioBackend::_start (bool for_latency_measurement)
 			stop();
 			return ProcessThreadStartError;
 		}
+
+		/* wait for backend to become active */
+		int timeout = 5000;
+		while (!_active && --timeout > 0) { Glib::usleep (1000); }
+
+		if (timeout == 0 || !_active) {
+			PBD::error << _("PortAudio:: failed to start device.") << endmsg;
+			stop ();
+			return ProcessThreadStartError;
+		}
 	}
 
 	return NoError;
@@ -705,7 +716,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 int
 PortAudioBackend::portaudio_callback(const void* input,
                                      void* output,
-                                     unsigned long frame_count,
+                                     unsigned long sample_count,
                                      const PaStreamCallbackTimeInfo* time_info,
                                      PaStreamCallbackFlags status_flags,
                                      void* user_data)
@@ -714,7 +725,7 @@ PortAudioBackend::portaudio_callback(const void* input,
 
 	if (!pa_backend->process_callback((const float*)input,
 	                                  (float*)output,
-	                                  frame_count,
+	                                  sample_count,
 	                                  time_info,
 	                                  status_flags)) {
 		return paAbort;
@@ -726,7 +737,7 @@ PortAudioBackend::portaudio_callback(const void* input,
 bool
 PortAudioBackend::process_callback(const float* input,
                                    float* output,
-                                   uint32_t frame_count,
+                                   uint32_t sample_count,
                                    const PaStreamCallbackTimeInfo* timeInfo,
                                    PaStreamCallbackFlags statusFlags)
 {
@@ -756,7 +767,7 @@ PortAudioBackend::process_callback(const float* input,
 	}
 
 	if (!_run || _freewheel) {
-		memset(output, 0, frame_count * sizeof(float) * _system_outputs.size());
+		memset(output, 0, sample_count * sizeof(float) * _system_outputs.size());
 		return true;
 	}
 
@@ -776,7 +787,7 @@ PortAudioBackend::process_callback(const float* input,
 bool
 PortAudioBackend::start_blocking_process_thread ()
 {
-	if (_realtime_pthread_create (SCHED_FIFO, -20, 100000,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -20, 100000,
 				&_main_blocking_thread, blocking_thread_func, this))
 	{
 		if (pthread_create (&_main_blocking_thread, NULL, blocking_thread_func, this))
@@ -993,13 +1004,13 @@ PortAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 PortAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 PortAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;
@@ -1104,7 +1115,7 @@ PortAudioBackend::create_process_thread (boost::function<void()> func)
 
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
-	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -22, stacksize,
 				&thread_id, portaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);
@@ -1489,6 +1500,24 @@ PortAudioBackend::unregister_ports (bool system_only)
 	}
 }
 
+void
+PortAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<PamPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<PamPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<PamPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+}
+
 int
 PortAudioBackend::connect (const std::string& src, const std::string& dst)
 {
@@ -1610,7 +1639,7 @@ PortAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 int
 PortAudioBackend::midi_event_get (
 		pframes_t& timestamp,
-		size_t& size, uint8_t** buf, void* port_buffer,
+		size_t& size, uint8_t const** buf, void* port_buffer,
 		uint32_t event_index)
 {
 	if (!buf || !port_buffer) return -1;
@@ -1618,11 +1647,11 @@ PortAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	PortMidiEvent * const event = source[event_index].get ();
+	PortMidiEvent const& event = source[event_index];
 
-	timestamp = event->timestamp ();
-	size = event->size ();
-	*buf = event->data ();
+	timestamp = event.timestamp ();
+	size = event.size ();
+	*buf = event.data ();
 	return 0;
 }
 
@@ -1634,13 +1663,15 @@ PortAudioBackend::midi_event_put (
 {
 	if (!buffer || !port_buffer) return -1;
 	PortMidiBuffer& dst = * static_cast<PortMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
+#ifndef NDEBUG
+	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		DEBUG_MIDI (string_compose ("PortMidiBuffer: unordered event: %1 > %2\n",
-		                            (pframes_t)dst.back ()->timestamp (),
+		                            (pframes_t)dst.back ().timestamp (),
 		                            timestamp));
 	}
-	dst.push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (timestamp, buffer, size)));
+#endif
+	dst.push_back (PortMidiEvent (timestamp, buffer, size));
 	return 0;
 }
 
@@ -1816,7 +1847,9 @@ PortAudioBackend::n_physical_inputs () const
 void*
 PortAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	if (!port || !valid_port (port)) return NULL;
+	assert (port);
+	assert (valid_port (port));
+	if (!port || !valid_port (port)) return NULL; // XXX remove me
 	return static_cast<PamPort*>(port)->get_buffer (nframes);
 }
 
@@ -2036,7 +2069,7 @@ PortAudioBackend::process_incoming_midi ()
 		mbuf->clear();
 		uint64_t timestamp;
 		pframes_t sample_offset;
-		uint8_t data[256];
+		uint8_t data[MaxWinMidiEventSize];
 		size_t size = sizeof(data);
 		while (_midiio->dequeue_input_event(i,
 		                                    _cycle_timer.get_start(),
@@ -2077,14 +2110,14 @@ PortAudioBackend::process_outgoing_midi ()
 		for (PortMidiBuffer::const_iterator mit = src->begin(); mit != src->end();
 		     ++mit) {
 			uint64_t timestamp =
-			    _cycle_timer.timestamp_from_sample_offset((*mit)->timestamp());
+			    _cycle_timer.timestamp_from_sample_offset(mit->timestamp());
 			DEBUG_MIDI(string_compose("Queuing outgoing MIDI data for device: "
 			                          "%1 sample_offset: %2 timestamp: %3, size: %4\n",
 			                          _midiio->get_outputs()[i]->name(),
-			                          (*mit)->timestamp(),
+			                          mit->timestamp(),
 			                          timestamp,
-			                          (*mit)->size()));
-			_midiio->enqueue_output_event(i, timestamp, (*mit)->data(), (*mit)->size());
+			                          mit->size()));
+			_midiio->enqueue_output_event(i, timestamp, mit->data(), mit->size());
 		}
 	}
 }
@@ -2117,6 +2150,7 @@ PortAudioBackend::process_port_connection_changes ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
+		update_system_port_latecies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}
@@ -2307,6 +2341,36 @@ bool PamPort::is_physically_connected () const
 	return false;
 }
 
+void
+PamPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+PamPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	for (std::vector<PamPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
+}
+
 /******************************************************************************/
 
 PortAudioPort::PortAudioPort (PortAudioBackend &b, const std::string& name, PortFlags flags)
@@ -2352,13 +2416,16 @@ PortMidiPort::PortMidiPort (PortAudioBackend &b, const std::string& name, PortFl
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
+
+	_buffer[0].reserve (256);
+	_buffer[1].reserve (256);
 }
 
 PortMidiPort::~PortMidiPort () { }
 
 struct MidiEventSorter {
-	bool operator() (const boost::shared_ptr<PortMidiEvent>& a, const boost::shared_ptr<PortMidiEvent>& b) {
-		return *a < *b;
+	bool operator() (PortMidiEvent const& a, PortMidiEvent const& b) {
+		return a < b;
 	}
 };
 
@@ -2371,10 +2438,10 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 				++i) {
 			const PortMidiBuffer * src = static_cast<const PortMidiPort*>(*i)->const_buffer ();
 			for (PortMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
-				(_buffer[_bufperiod]).push_back (boost::shared_ptr<PortMidiEvent>(new PortMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
-		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
+		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
 	return &(_buffer[_bufperiod]);
 }
@@ -2382,10 +2449,8 @@ void* PortMidiPort::get_buffer (pframes_t /* nframes */)
 PortMidiEvent::PortMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
 	, _timestamp (timestamp)
-	, _data (0)
 {
-	if (size > 0) {
-		_data = (uint8_t*) malloc (size);
+	if (size > 0 && size < MaxWinMidiEventSize) {
 		memcpy (_data, data, size);
 	}
 }
@@ -2393,14 +2458,9 @@ PortMidiEvent::PortMidiEvent (const pframes_t timestamp, const uint8_t* data, si
 PortMidiEvent::PortMidiEvent (const PortMidiEvent& other)
 	: _size (other.size ())
 	, _timestamp (other.timestamp ())
-	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
-		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+	if (other._size > 0) {
+		assert (other._size < MaxWinMidiEventSize);
+		memcpy (_data, other._data, other._size);
 	}
-};
-
-PortMidiEvent::~PortMidiEvent () {
-	free (_data);
 };

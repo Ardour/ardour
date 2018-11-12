@@ -22,11 +22,8 @@
 #include "pbd/compose.h"
 #include "pbd/convert.h"
 
-#include "ardour/utils.h"
-
 #include "canvas/item.h"
 #include "canvas/outline.h"
-#include "canvas/utils.h"
 #include "canvas/debug.h"
 
 using namespace ArdourCanvas;
@@ -40,7 +37,7 @@ Outline::Outline (Item& self)
 }
 
 void
-Outline::set_outline_color (Color color)
+Outline::set_outline_color (Gtkmm2ext::Color color)
 {
 	if (color != _outline_color) {
 		_self.begin_visual_change ();
@@ -74,7 +71,7 @@ Outline::set_outline (bool outline)
 void
 Outline::setup_outline_context (Cairo::RefPtr<Cairo::Context> context) const
 {
-	set_source_rgba (context, _outline_color);
+	Gtkmm2ext::set_source_rgba (context, _outline_color);
 	context->set_line_width (_outline_width);
 }
 

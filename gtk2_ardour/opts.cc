@@ -39,6 +39,7 @@ string ARDOUR_COMMAND_LINE::session_name = "";
 string ARDOUR_COMMAND_LINE::backend_client_name = "ardour";
 string ARDOUR_COMMAND_LINE::backend_session_uuid;
 bool  ARDOUR_COMMAND_LINE::show_key_actions = false;
+bool  ARDOUR_COMMAND_LINE::show_actions = false;
 bool ARDOUR_COMMAND_LINE::no_splash = false;
 bool ARDOUR_COMMAND_LINE::just_version = false;
 bool ARDOUR_COMMAND_LINE::use_vst = true;
@@ -67,7 +68,8 @@ print_help (const char *execname)
 		<< "\n\n"
 		<< _("Options:\n")
 		<< _("  -a, --no-announcements      Do not contact website for announcements\n")
-		<< _("  -b, --bindings              Print all possible keyboard binding names\n")
+		<< _("  -A, --actions               Print all possible menu action names\n")
+		<< _("  -b, --bindings              Display all current key bindings\n")
 		<< _("  -B, --bypass-plugins        Bypass all plugins in an existing session\n")
 		<< _("  -c, --name <name>           Use a specific backend client name, default is ardour\n")
 #ifndef NDEBUG
@@ -86,9 +88,9 @@ print_help (const char *execname)
 		<< _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
 		<< _("  -P, --no-connect-ports      Do not connect any ports at startup\n")
 		<< _("  -S, --sync                  Draw the GUI synchronously\n")
-		<< _("  -T, --template <name>       Draw the GUI synchronously\n")
+		<< _("  -T, --template <name>       Use given template for new session\n")
 		<< _("  -U, --uuid <uuid>           Set (jack) backend UUID\n")
-		<< _("  -v, --version               Use session template\n")
+		<< _("  -v, --version               Print version and exit\n")
 #ifdef WINDOWS_VST_SUPPORT
 		<< _("  -V, --novst                 Disable WindowsVST support\n")
 #endif
@@ -103,7 +105,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "abBc:C:dD:hHk:E:m:N:nOp:PST:U:vV";
+	const char *optstring = "aAbBc:C:dD:hHk:E:m:N:nOp:PST:U:vV";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
@@ -116,6 +118,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "version", 0, 0, 'v' },
 		{ "help", 0, 0, 'h' },
 		{ "no-announcements", 0, 0, 'a' },
+		{ "actions", 0, 0, 'A' },
 		{ "bindings", 0, 0, 'b' },
 		{ "bypass-plugins", 0, 0, 'B' },
 		{ "disable-plugins", 0, 0, 'd' },
@@ -164,6 +167,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			break;
 		case 'a':
 			check_announcements = false;
+			break;
+
+		case 'A':
+			show_actions = true;
 			break;
 
 		case 'b':

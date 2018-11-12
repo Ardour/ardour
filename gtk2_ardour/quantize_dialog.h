@@ -40,7 +40,7 @@ class PublicEditor;
 
 class QuantizeDialog : public ArdourDialog
 {
-  public:
+public:
 	QuantizeDialog (PublicEditor&);
 	~QuantizeDialog ();
 
@@ -52,7 +52,7 @@ class QuantizeDialog : public ArdourDialog
 	float  threshold () const;
 	float  swing () const;
 
-  private:
+private:
 	PublicEditor& editor;
 
 	Gtk::ComboBoxText start_grid_combo;

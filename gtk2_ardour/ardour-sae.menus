@@ -10,6 +10,7 @@
            <menuitem action='Save'/>
            <menuitem action='Snapshot'/>
            <menuitem action='SaveTemplate'/>
+           <menuitem action='ManageTemplates'/>
            <separator/>
 
 	   <menu name='Files' action='Files'>
@@ -56,11 +57,11 @@
                <menuitem action='TransitionToRoll'/>
                <menuitem action='TransitionToReverse'/>
 	       <separator/>
-              
+
 	       <menuitem action='set-playhead'/>
 
 	       <menu action="MovePlayHeadMenu">
- 	           
+
                    <menuitem action='playhead-to-edit'/>
   	           <menuitem action='center-playhead'/>
 	           <separator/>
@@ -122,7 +123,7 @@
                <menuitem action='editor-cut'/>
                <menuitem action='editor-copy'/>
                <menuitem action='editor-paste'/>
-               <separator/>       
+               <separator/>
                <menuitem action='editor-delete'/>
 	       <menuitem action='split-region'/>
 	       <menu action="SeparateMenu">
@@ -132,7 +133,7 @@
 		    <separator/>
 		    <menuitem action='split-region-at-transients'/>
                </menu>
-               <separator/>       
+               <separator/>
 	       <menuitem action='duplicate-region'/>
 	       <menuitem action='multi-duplicate-region'/>
 	       <menuitem action='region-fill-track'/>
@@ -165,7 +166,7 @@
 	           <menuitem action='toggle-selected-region-fades'/>
                    <menuitem action='toggle-region-fades'/>
                </menu>
-	       <menu action="SelectMenu">	   
+	       <menu action="SelectMenu">
 	           <menuitem action='select-all'/>
 		   <menuitem action='deselect-all'/>
 		   <menuitem action='invert-selection'/>
@@ -178,12 +179,12 @@
 		   <separator/>
 		   <menuitem action='select-next-route'/>
 		   <menuitem action='select-prev-route'/>
-	       </menu>	   
+	       </menu>
         </menu>
 
         <menu action='TrackMenu'>
 		<menuitem action='remove-track'/>
-	        <menuitem action='AddTrackBus'/>	
+	        <menuitem action='AddTrackBus'/>
 	        <menuitem action="move-selected-tracks-up"/>
 	        <menuitem action="move-selected-tracks-down"/>
 	        <menu action='TrackHeightMenu'>
@@ -198,7 +199,7 @@
 		      <menuitem action='linear-waveforms'/>
 		      <menuitem action='logarithmic-waveforms'/>
 		</menu>
-		<menuitem action='toggle-track-active'/>	
+		<menuitem action='toggle-track-active'/>
 	</menu>
 
 	<menu action='RegionMenu'>
@@ -212,17 +213,17 @@
 	      <menuitem action='set-region-sync-position'/>
 	      <menuitem action='remove-region-sync'/>
               <menuitem action='toggle-region-mute'/>
-	      <separator/>       
-              <menuitem action='reverse-region'/>    
+	      <separator/>
+              <menuitem action='reverse-region'/>
 	      <menuitem action='split-multichannel-region'/>
 	      <menuitem action='normalize-region'/>
 	      <menuitem action='boost-region-gain'/>
-	      <menuitem action='cut-region-gain'/>      		   
+	      <menuitem action='cut-region-gain'/>
 	      <menuitem action='pitch-shift-region'/>
 	      <separator/>
 	      <menuitem action='toggle-selected-region-fades'/>
 	      <menuitem action='toggle-region-fades'/>
-        </menu>         
+        </menu>
 
         <menu name='View' action = 'View'>
 	       <menuitem action='ToggleMaximalEditor'/>
@@ -271,7 +272,7 @@
         </menu>
 
 	<menu action="WindowMenu">
-	  
+
 	      <menuitem action='toggle-editor-mixer-on-top'/>
 	      <menuitem action='ToggleLocations'/>
 	      <menuitem action='ToggleKeyEditor'/>
@@ -401,6 +402,6 @@
                <menuitem action='SortBySourceFilesystem'/>
          </menu>
          <separator/>
-         <menuitem action='addExternalAudioToRegionList'/>	       
+         <menuitem action='addExternalAudioToRegionList'/>
      </popup>
 </ui>

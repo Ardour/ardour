@@ -23,23 +23,27 @@
 #include <string>
 #include <list>
 
+#include <boost/smart_ptr/scoped_ptr.hpp>
+
+#include <gtkmm/separator.h>
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
 #include "pbd/stacktrace.h"
 #include "pbd/unwind.h"
 
-#include <gtkmm2ext/doi.h>
-#include <gtkmm2ext/utils.h>
-#include <gtkmm2ext/selector.h>
+#include "ardour/profile.h"
+
+#include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/doi.h"
+#include "gtkmm2ext/utils.h"
 
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 #include "canvas/utils.h"
-#include "canvas/colors.h"
 
-#include "ardour/profile.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_dialog.h"
 #include "floating_text_entry.h"
@@ -55,7 +59,6 @@
 #include "streamview.h"
 #include "editor_drag.h"
 #include "editor.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -64,10 +67,10 @@ using namespace std;
 using namespace Gtk;
 using namespace Gdk;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
 using namespace PBD;
 using namespace Editing;
 using namespace ArdourCanvas;
+using namespace ArdourWidgets;
 using Gtkmm2ext::Keyboard;
 
 #define TOP_LEVEL_WIDGET controls_ebox
@@ -128,7 +131,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	_canvas_separator = new ArdourCanvas::Line(_canvas_display);
 	CANVAS_DEBUG_NAME (_canvas_separator, "separator for TAV");
 	_canvas_separator->set (ArdourCanvas::Duple(0.0, 0.0), ArdourCanvas::Duple(ArdourCanvas::COORD_MAX, 0.0));
-	_canvas_separator->set_outline_color(ArdourCanvas::rgba_to_color (0, 0, 0, 1.0));
+	_canvas_separator->set_outline_color(Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
 	_canvas_separator->set_outline_width(1.0);
 	_canvas_separator->hide();
 
@@ -148,10 +151,9 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 	set_tooltip (name_label, _("Track/Bus name (double click to edit)"));
 
 	{
-		std::auto_ptr<Gtk::Entry> an_entry (new Gtkmm2ext::FocusEntry);
+		boost::scoped_ptr<Gtk::Entry> an_entry (new FocusEntry);
 		an_entry->set_name (X_("TrackNameEditor"));
-		Gtk::Requisition req;
-		an_entry->size_request (req);
+		Gtk::Requisition req = an_entry->size_request ();
 
 		name_label.set_size_request (-1, req.height);
 		name_label.set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
@@ -590,9 +592,7 @@ TimeAxisView::set_height (uint32_t h, TrackHeightMode m)
 	TOP_LEVEL_WIDGET.property_height_request () = h;
 	height = h;
 
-	char buf[32];
-	snprintf (buf, sizeof (buf), "%u", height);
-	set_gui_property ("height", buf);
+	set_gui_property ("height", height);
 
 	for (list<GhostRegion*>::iterator i = ghosts.begin(); i != ghosts.end(); ++i) {
 		(*i)->set_height ();
@@ -620,7 +620,7 @@ TimeAxisView::begin_name_edit ()
 	}
 
 	Gtk::Window* toplevel = (Gtk::Window*) control_parent->get_toplevel();
-	FloatingTextEntry* fte = new FloatingTextEntry (toplevel, name_label.get_text ());
+	FloatingTextEntry* fte = new FloatingTextEntry (toplevel, name ());
 
 	fte->set_name ("TrackNameEditor");
 	fte->use_text.connect (sigc::mem_fun (*this, &TimeAxisView::end_name_edit));
@@ -631,12 +631,12 @@ TimeAxisView::begin_name_edit ()
 	 */
 
 	int x, y;
-        int wx, wy;
+	int wx, wy;
 
-        name_label.translate_coordinates (*toplevel, 0, 0, x, y);
-        toplevel->get_window()->get_origin (wx, wy);
+	name_label.translate_coordinates (*toplevel, 0, 0, x, y);
+	toplevel->get_window()->get_origin (wx, wy);
 
-        fte->move (wx + x, wy + y);
+	fte->move (wx + x, wy + y);
 	fte->present ();
 }
 
@@ -771,19 +771,9 @@ TimeAxisView::set_selected (bool yn)
 		time_axis_vbox.set_name (controls_base_unselected_name);
 
 		hide_selection ();
-
-		/* children will be set for the yn=true case. but when deselecting
-		   the editor only has a list of top-level trackviews, so we
-		   have to do this here.
-		*/
-
-		for (Children::iterator i = children.begin(); i != children.end(); ++i) {
-			(*i)->set_selected (false);
-		}
 	}
 
 	time_axis_frame.show();
-
 }
 
 void
@@ -808,7 +798,7 @@ TimeAxisView::set_samples_per_pixel (double fpp)
 }
 
 void
-TimeAxisView::show_timestretch (framepos_t start, framepos_t end, int layers, int layer)
+TimeAxisView::show_timestretch (samplepos_t start, samplepos_t end, int layers, int layer)
 {
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
 		(*i)->show_timestretch (start, end, layers, layer);
@@ -829,10 +819,14 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	double x1;
 	double x2;
 	double y2;
-	SelectionRect *rect;	time_axis_frame.show();
+	SelectionRect *rect;
 
+	time_axis_frame.show();
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->selected () && !(*i)->propagate_time_selection ()) {
+			continue;
+		}
 		(*i)->show_selection (ts);
 	}
 
@@ -851,8 +845,8 @@ TimeAxisView::show_selection (TimeSelection& ts)
 	selection_group->raise_to_top();
 
 	for (list<AudioRange>::iterator i = ts.begin(); i != ts.end(); ++i) {
-		framepos_t start, end;
-		framecnt_t cnt;
+		samplepos_t start, end;
+		samplecnt_t cnt;
 
 		start = (*i).start;
 		end = (*i).end;
@@ -890,6 +884,9 @@ TimeAxisView::reshow_selection (TimeSelection& ts)
 	show_selection (ts);
 
 	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->selected () && !(*i)->propagate_time_selection ()) {
+			continue;
+		}
 		(*i)->show_selection (ts);
 	}
 }
@@ -1022,22 +1019,38 @@ TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
 }
 
 /** Get selectable things within a given range.
- *  @param start Start time in session frames.
- *  @param end End time in session frames.
+ *  @param start Start time in session samples.
+ *  @param end End time in session samples.
  *  @param top Top y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param bot Bottom y range, in trackview coordinates (ie 0 is the top of the track view)
  *  @param result Filled in with selectable things.
  */
 void
-TimeAxisView::get_selectables (framepos_t /*start*/, framepos_t /*end*/, double /*top*/, double /*bot*/, list<Selectable*>& /*result*/, bool /*within*/)
+TimeAxisView::get_selectables (samplepos_t start, samplepos_t end, double top, double bot, list<Selectable*>& results, bool within)
 {
-	return;
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->get_selectables (start, end, top, bot, results, within);
+		}
+	}
 }
 
 void
-TimeAxisView::get_inverted_selectables (Selection& /*sel*/, list<Selectable*>& /*result*/)
+TimeAxisView::set_selected_points (PointSelection& points)
 {
-	return;
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		(*i)->set_selected_points (points);
+	}
+}
+
+void
+TimeAxisView::get_inverted_selectables (Selection& sel, list<Selectable*>& results)
+{
+	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+		if (!(*i)->hidden()) {
+			(*i)->get_inverted_selectables (sel, results);
+		}
+	}
 }
 
 void
@@ -1109,8 +1122,8 @@ TimeAxisView::compute_heights ()
 	Gtk::Table one_row_table (1, 1);
 	ArdourButton* test_button = manage (new ArdourButton);
 	const int border_width = 2;
-	const int frame_height = 2;
-	extra_height = (2 * border_width) + frame_height;
+	const int sample_height = 2;
+	extra_height = (2 * border_width) + sample_height;
 
 	window.add (one_row_table);
 	test_button->set_name ("mute button");
@@ -1267,11 +1280,11 @@ TimeAxisView::preset_height (Height h)
 
 /** @return Child time axis views that are not hidden */
 TimeAxisView::Children
-TimeAxisView::get_child_list ()
+TimeAxisView::get_child_list () const
 {
 	Children c;
 
-	for (Children::iterator i = children.begin(); i != children.end(); ++i) {
+	for (Children::const_iterator i = children.begin(); i != children.end(); ++i) {
 		if (!(*i)->hidden()) {
 			c.push_back(*i);
 		}
@@ -1307,10 +1320,9 @@ TimeAxisView::reset_visual_state ()
 {
 	/* this method is not required to trigger a global redraw */
 
-	string str = gui_property ("height");
-
-	if (!str.empty()) {
-		set_height (atoi (str));
+	uint32_t height;
+	if (get_gui_property ("height", height)) {
+		set_height (height);
 	} else {
 		set_height (preset_height (HeightNormal));
 	}

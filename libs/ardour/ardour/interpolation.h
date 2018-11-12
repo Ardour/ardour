@@ -40,7 +40,7 @@ protected:
 
 public:
 	Interpolation ()  { _speed = 1.0; _target_speed = 1.0; }
-	~Interpolation () { phase.clear(); }
+	virtual ~Interpolation() {}
 
 	void set_speed (double new_speed)          { _speed = new_speed; _target_speed = new_speed; }
 	void set_target_speed (double new_speed)   { _target_speed = new_speed; }
@@ -48,31 +48,31 @@ public:
 	double target_speed()          const { return _target_speed; }
 	double speed()                 const { return _speed; }
 
-	void add_channel_to (int /*input_buffer_size*/, int /*output_buffer_size*/) { phase.push_back (0.0); }
-	void remove_channel_from () { phase.pop_back (); }
+	void add_channel ()    { phase.push_back (0.0); }
+	void remove_channel () { phase.pop_back (); }
 
-	void reset () {
+	virtual void reset () {
 		for (size_t i = 0; i < phase.size(); i++) {
 			phase[i] = 0.0;
 		}
 	}
 };
 
-class LIBARDOUR_API LinearInterpolation : public Interpolation {
-public:
-	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
-};
-
 class LIBARDOUR_API CubicInterpolation : public Interpolation {
-public:
-	framecnt_t interpolate (int channel, framecnt_t nframes, Sample* input, Sample* output);
-};
+  public:
+	CubicInterpolation ();
+	samplecnt_t interpolate (int channel, samplecnt_t input_samples, Sample* input, samplecnt_t & output_samples, Sample* output);
+	samplecnt_t distance (samplecnt_t nframes);
+	void reset ();
 
-class BufferSet;
+  private:
+	Sample z[4];
+	char   valid_z_bits;
 
-class LIBARDOUR_API CubicMidiInterpolation : public Interpolation {
-public:
-	framecnt_t distance (framecnt_t nframes, bool roll = true);
+	bool is_valid (int n) const { return valid_z_bits & (1<<n); }
+	bool invalid (int n) const  { return !is_valid (n); }
+	void validate (int n)       { valid_z_bits |= (1<<n); }
+	void invalidate (int n)     { valid_z_bits &= (1<<n); }
 };
 
 } // namespace ARDOUR

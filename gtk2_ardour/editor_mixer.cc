@@ -39,6 +39,7 @@
 #include "editor.h"
 #include "editor_route_groups.h"
 #include "editor_regions.h"
+#include "enums_convert.h"
 #include "gui_thread.h"
 #include "midi_time_axis.h"
 #include "mixer_strip.h"
@@ -145,7 +146,7 @@ Editor::show_editor_mixer (bool yn)
 
 		if (current_mixer_strip && current_mixer_strip->get_parent() == 0) {
 			global_hpacker.pack_start (*current_mixer_strip, Gtk::PACK_SHRINK );
- 			global_hpacker.reorder_child (*current_mixer_strip, 0);
+			global_hpacker.reorder_child (*current_mixer_strip, 0);
 			current_mixer_strip->show ();
 		}
 
@@ -202,36 +203,26 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	// if this is an automation track, then we shold the mixer strip should
 	// show the parent
 
-	boost::shared_ptr<ARDOUR::Route> route;
+	boost::shared_ptr<ARDOUR::Stripable> stripable;
 	AutomationTimeAxisView* atv;
 
 	if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
-
 		AudioTimeAxisView *parent = dynamic_cast<AudioTimeAxisView*>(view.get_parent());
-
 		if (parent) {
-			route = parent->route ();
+			stripable = parent->stripable ();
 		}
-
 	} else {
-
-		AudioTimeAxisView* at = dynamic_cast<AudioTimeAxisView*> (&view);
-
-		if (at) {
-			route = at->route();
-		} else {
-			MidiTimeAxisView* mt = dynamic_cast<MidiTimeAxisView*> (&view);
-			if (mt) {
-				route = mt->route();
-			}
+		StripableTimeAxisView* stav = dynamic_cast<StripableTimeAxisView*> (&view);
+		if (stav) {
+			stripable = stav->stripable();
 		}
 	}
 
 	/* Typically this is set by changing the TAV selection but if for any
-	   reason we decide to show a different strip for some reason, make
-	   sure that control surfaces can find it.
-	*/
-	ARDOUR::ControlProtocol::set_first_selected_stripable (route);
+	 * reason we decide to show a different strip for some reason, make
+	 * sure that control surfaces can find it.
+	 */
+	ARDOUR::ControlProtocol::set_first_selected_stripable (stripable);
 
 	Glib::RefPtr<Gtk::Action> act = ActionManager::get_action (X_("Editor"), X_("show-editor-mixer"));
 
@@ -247,6 +238,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		create_editor_mixer ();
 	}
 
+	boost::shared_ptr<ARDOUR::Route> route = boost::dynamic_pointer_cast<ARDOUR::Route> (stripable);
 	if (current_mixer_strip->route() == route) {
 		return;
 	}
@@ -271,7 +263,7 @@ void
 Editor::maybe_add_mixer_strip_width (XMLNode& node)
 {
 	if (current_mixer_strip) {
-		node.add_property ("mixer-width", enum_2_string (editor_mixer_strip_width));
+		node.set_property ("mixer-width", editor_mixer_strip_width);
 	}
 }
 
@@ -284,4 +276,3 @@ Editor::mixer_strip_width_changed ()
 
 	editor_mixer_strip_width = current_mixer_strip->get_width_enum ();
 }
-

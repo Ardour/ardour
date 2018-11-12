@@ -25,16 +25,21 @@
 #include <string>
 #include <boost/utility.hpp>
 #include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/signals.h"
 
+#include "ardour/automatable.h"
 #include "ardour/presentation_info.h"
 #include "ardour/session_object.h"
 #include "ardour/libardour_visibility.h"
 
+class StripableColorDialog;
+
 namespace ARDOUR {
 
 class AutomationControl;
+class ReadOnlyControl;
 class GainControl;
 class PeakMeter;
 class SoloControl;
@@ -53,23 +58,27 @@ class RecordSafeControl;
  * and behaviour of the object.
  */
 
-class LIBARDOUR_API Stripable : public SessionObject {
-   public:
+class LIBARDOUR_API Stripable : public SessionObject,
+                                public Automatable,
+                                public boost::enable_shared_from_this<Stripable>
+{
+  public:
 	Stripable (Session& session, std::string const & name, PresentationInfo const &);
-	virtual ~Stripable () {}
+	virtual ~Stripable ();
 
 	/* XXX
 	   midi on/off
 	 */
 
 	bool is_auditioner() const { return _presentation_info.flags() & PresentationInfo::Auditioner; }
+	bool is_private_route() const { return is_auditioner(); }
 	bool is_master() const { return _presentation_info.flags() & PresentationInfo::MasterOut; }
 	bool is_monitor() const { return _presentation_info.flags() & PresentationInfo::MonitorOut; }
 
 	int set_state (XMLNode const&, int);
 
 	bool is_hidden() const { return _presentation_info.flags() & PresentationInfo::Hidden; }
-	bool is_selected() const { return _presentation_info.flags() & PresentationInfo::Selected; }
+	bool is_selected() const;
 
 	PresentationInfo const & presentation_info () const { return _presentation_info; }
 	PresentationInfo& presentation_info () { return _presentation_info; }
@@ -79,10 +88,11 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	void  set_presentation_order (PresentationInfo::order_t);
 
-	struct PresentationOrderSorter {
-		bool operator() (boost::shared_ptr<Stripable> a, boost::shared_ptr<Stripable> b) {
-			return a->presentation_info().order() < b->presentation_info().order();
-		}
+	struct LIBARDOUR_API Sorter
+	{
+		bool _mixer_order; // master is last
+		Sorter (bool mixer_order = false) : _mixer_order (mixer_order) {}
+		bool operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b);
 	};
 
 	/* gui's call this for their own purposes. */
@@ -111,6 +121,9 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> rec_enable_control() const { return boost::shared_ptr<AutomationControl>(); }
 	virtual boost::shared_ptr<AutomationControl> rec_safe_control() const { return boost::shared_ptr<AutomationControl>(); }
 
+	virtual bool slaved_to (boost::shared_ptr<VCA>) const = 0;
+	virtual bool slaved () const = 0;
+
 	/* "well-known" controls for panning. Any or all of these may return
 	 * null.
 	 */
@@ -126,13 +139,18 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	 * return of a null ptr (or an empty string for eq_band_name()).
 	 */
 	virtual uint32_t eq_band_cnt () const = 0;
+	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const = 0;
 	virtual boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const = 0;
-	virtual boost::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
-	virtual boost::shared_ptr<AutomationControl> eq_hpf_controllable () const = 0;
+
+	virtual boost::shared_ptr<AutomationControl> filter_freq_controllable (bool hp /* false for LPF*/) const = 0;
+	virtual boost::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
+	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
+
+	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
@@ -142,7 +160,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	virtual boost::shared_ptr<AutomationControl> comp_speed_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_mode_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_makeup_controllable () const = 0;
-	virtual boost::shared_ptr<AutomationControl> comp_redux_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const = 0;
 
 	/* @param mode must be supplied by the comp_mode_controllable(). All other values
 	 * result in undefined behaviour
@@ -164,6 +182,7 @@ class LIBARDOUR_API Stripable : public SessionObject {
 	 */
 	virtual boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const = 0;
 	virtual boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const = 0;
+	virtual boost::shared_ptr<AutomationControl> send_pan_azi_controllable (uint32_t n) const = 0;
 
 	/* for the same value of @param n, this returns the name of the send
 	 * associated with the pair of controllables returned by the above two methods.
@@ -182,8 +201,13 @@ class LIBARDOUR_API Stripable : public SessionObject {
 
 	virtual boost::shared_ptr<MonitorProcessor> monitor_control() const = 0;
 
+	StripableColorDialog* active_color_picker() const { return _active_color_picker; }
+	void set_active_color_picker (StripableColorDialog* d) { _active_color_picker = d; }
+
   protected:
 	PresentationInfo _presentation_info;
+	private:
+	StripableColorDialog* _active_color_picker;
 };
 
 }

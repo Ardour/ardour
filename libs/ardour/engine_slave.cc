@@ -31,7 +31,7 @@ Engine_Slave::Engine_Slave (AudioEngine& e)
 	: engine (e)
 {
 	double x;
-	framepos_t p;
+	samplepos_t p;
 	/* call this to initialize things */
 	speed_and_position (x, p);
 }
@@ -53,7 +53,7 @@ Engine_Slave::ok() const
 }
 
 bool
-Engine_Slave::speed_and_position (double& sp, framepos_t& position)
+Engine_Slave::speed_and_position (double& sp, samplepos_t& position)
 {
 	boost::shared_ptr<AudioBackend> backend = engine.current_backend();
 

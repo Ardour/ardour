@@ -8,7 +8,7 @@ import subprocess
 import sys
 
 # default state file version for this build
-CURRENT_SESSION_FILE_VERSION = 3002
+CURRENT_SESSION_FILE_VERSION = 5990
 
 I18N_PACKAGE = 'ardour'
 
@@ -25,7 +25,6 @@ libardour_sources = [
         'async_midi_port.cc',
         'audio_backend.cc',
         'audio_buffer.cc',
-        'audio_diskstream.cc',
         'audio_library.cc',
         'audio_playlist.cc',
         'audio_playlist_importer.cc',
@@ -46,7 +45,7 @@ libardour_sources = [
         'automation_control.cc',
         'automation_list.cc',
         'automation_watch.cc',
-        'beats_frames_converter.cc',
+        'beats_samples_converter.cc',
         'broadcast_info.cc',
         'buffer.cc',
         'buffer_manager.cc',
@@ -57,7 +56,6 @@ libardour_sources = [
         'chan_count.cc',
         'chan_mapping.cc',
         'config_text.cc',
-        'controllable_descriptor.cc',
         'control_group.cc',
         'control_protocol_manager.cc',
         'cycle_timer.cc',
@@ -67,7 +65,9 @@ libardour_sources = [
         'delayline.cc',
         'delivery.cc',
         'directory_names.cc',
-        'diskstream.cc',
+        'disk_io.cc',
+        'disk_reader.cc',
+        'disk_writer.cc',
         'dsp_filter.cc',
         'ebur128_analysis.cc',
         'element_import_handler.cc',
@@ -125,7 +125,6 @@ libardour_sources = [
         'midi_buffer.cc',
         'midi_channel_filter.cc',
         'midi_clock_slave.cc',
-        'midi_diskstream.cc',
         'midi_model.cc',
         'midi_patch_manager.cc',
         'midi_playlist.cc',
@@ -168,6 +167,7 @@ libardour_sources = [
         'plugin.cc',
         'plugin_insert.cc',
         'plugin_manager.cc',
+        'polarity_processor.cc',
         'port.cc',
         'port_insert.cc',
         'port_manager.cc',
@@ -178,6 +178,8 @@ libardour_sources = [
         'progress.cc',
         'quantize.cc',
         'rc_configuration.cc',
+        'readonly_control.cc',
+        'raw_midi_parser.cc',
         'recent_sessions.cc',
         'record_enable_control.cc',
         'record_safe_control.cc',
@@ -191,8 +193,10 @@ libardour_sources = [
         'route_group.cc',
         'route_group_member.cc',
         'rb_effect.cc',
+        'rt_tasklist.cc',
         'scene_change.cc',
         'search_paths.cc',
+        'selection.cc',
         'send.cc',
         'session.cc',
         'session_butler.cc',
@@ -392,8 +396,9 @@ def build(bld):
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
                         'libaudiographer',
-                        'libtimecode',
+                        'libtemporal',
                         'liblua',
+                        'zita-resampler',
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
@@ -476,7 +481,7 @@ def build(bld):
                 source   = avx_sources,
                 cxxflags = avx_cxxflags,
                 includes = [ '.' ],
-                use = [ 'libtimecode', 'libpbd', 'libevoral', 'liblua' ],
+                use = [ 'libtemporal', 'libpbd', 'libevoral', 'liblua' ],
                 uselib = [ 'GLIBMM', 'XML' ],
                 target   = 'sse_avx_functions')
 
@@ -518,12 +523,11 @@ def build(bld):
             create_ardour_test_program(bld, obj.includes, 'automation_list_property_test', 'test_automation_list_property', ['test/automation_list_property_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'bbt', 'test_bbt', ['test/bbt_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'tempo', 'test_tempo', ['test/tempo_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'interpolation', 'test_interpolation', ['test/interpolation_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'lua_script', 'test_lua_script', ['test/lua_script_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'midi_clock_slave', 'test_midi_clock_slave', ['test/midi_clock_slave_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'resampled_source', 'test_resampled_source', ['test/resampled_source_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'framewalk_to_beats', 'test_framewalk_to_beats', ['test/framewalk_to_beats_test.cc'])
-            create_ardour_test_program(bld, obj.includes, 'framepos_plus_beats', 'test_framepos_plus_beats', ['test/framepos_plus_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'samplewalk_to_beats', 'test_samplewalk_to_beats', ['test/samplewalk_to_beats_test.cc'])
+            create_ardour_test_program(bld, obj.includes, 'samplepos_plus_beats', 'test_samplepos_plus_beats', ['test/samplepos_plus_beats_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_equivalent_regions', 'test_playlist_equivalent_regions', ['test/playlist_equivalent_regions_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'playlist_layering', 'test_playlist_layering', ['test/playlist_layering_test.cc'])
             create_ardour_test_program(bld, obj.includes, 'plugins_test', 'test_plugins', ['test/plugins_test.cc'])
@@ -540,12 +544,11 @@ def build(bld):
             test/bbt_test.cc
             test/dsp_load_calculator_test.cc
             test/tempo_test.cc
-            test/interpolation_test.cc
             test/lua_script_test.cc
             test/midi_clock_slave_test.cc
             test/resampled_source_test.cc
-            test/framewalk_to_beats_test.cc
-            test/framepos_plus_beats_test.cc
+            test/samplewalk_to_beats_test.cc
+            test/samplepos_plus_beats_test.cc
             test/playlist_equivalent_regions_test.cc
             test/playlist_layering_test.cc
             test/plugins_test.cc

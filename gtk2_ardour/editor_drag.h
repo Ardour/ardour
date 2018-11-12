@@ -88,7 +88,7 @@ public:
 	bool end_grab (GdkEvent *);
 	bool have_item (ArdourCanvas::Item *) const;
 
-        void mark_double_click ();
+	void mark_double_click ();
 
 	/** @return true if an end drag or abort is in progress */
 	bool ending () const {
@@ -109,9 +109,9 @@ public:
 		return _current_pointer_y;
 	}
 
-	/** @return current pointer frame */
-	ARDOUR::framepos_t current_pointer_frame () const {
-		return _current_pointer_frame;
+	/** @return current pointer sample */
+	ARDOUR::samplepos_t current_pointer_sample () const {
+		return _current_pointer_sample;
 	}
 
 private:
@@ -120,7 +120,7 @@ private:
 	bool _ending; ///< true if end_grab or abort is in progress, otherwise false
 	double _current_pointer_x; ///< canvas-coordinate space x of the current pointer
 	double _current_pointer_y; ///< canvas-coordinate space y of the current pointer
-	ARDOUR::framepos_t _current_pointer_frame; ///< frame that the pointer is now at
+	ARDOUR::samplepos_t _current_pointer_sample; ///< sample that the pointer is now at
 	bool _old_follow_playhead; ///< state of Editor::follow_playhead() before the drags started
 };
 
@@ -128,7 +128,7 @@ private:
 class Drag
 {
 public:
-        Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
+	Drag (Editor *, ArdourCanvas::Item *, bool trackview_only = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -144,11 +144,11 @@ public:
 	bool motion_handler (GdkEvent*, bool);
 	void abort ();
 
-	ARDOUR::MusicFrame adjusted_frame (ARDOUR::framepos_t, GdkEvent const *, bool snap = true) const;
-	ARDOUR::framepos_t adjusted_current_frame (GdkEvent const *, bool snap = true) const;
+	ARDOUR::MusicSample adjusted_sample (ARDOUR::samplepos_t, GdkEvent const *, bool snap = true) const;
+	ARDOUR::samplepos_t adjusted_current_sample (GdkEvent const *, bool snap = true) const;
 
-        bool was_double_click() const { return _was_double_click; }
-        void set_double_click (bool yn) { _was_double_click = yn; }
+	bool was_double_click() const { return _was_double_click; }
+	void set_double_click (bool yn) { _was_double_click = yn; }
 
 	/** Called to start a grab of an item.
 	 *  @param e Event that caused the grab to start.
@@ -183,8 +183,8 @@ public:
 		return true;
 	}
 
-	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (1, 1);
 	}
 
@@ -206,9 +206,9 @@ public:
 		return _initially_vertical;
 	}
 
-	/** Set up the _pointer_frame_offset */
-	virtual void setup_pointer_frame_offset () {
-		_pointer_frame_offset = 0;
+	/** Set up the _pointer_sample_offset */
+	virtual void setup_pointer_sample_offset () {
+		_pointer_sample_offset = 0;
 	}
 
 protected:
@@ -221,12 +221,12 @@ protected:
 		return _grab_y;
 	}
 
-	ARDOUR::framepos_t raw_grab_frame () const {
-		return _raw_grab_frame;
+	ARDOUR::samplepos_t raw_grab_sample () const {
+		return _raw_grab_sample;
 	}
 
-	ARDOUR::framepos_t grab_frame () const {
-		return _grab_frame;
+	ARDOUR::samplepos_t grab_sample () const {
+		return _grab_sample;
 	}
 
 	double last_pointer_x () const {
@@ -237,30 +237,30 @@ protected:
 		return _last_pointer_y;
 	}
 
-	ARDOUR::framepos_t last_pointer_frame () const {
-		return _last_pointer_frame;
+	ARDOUR::samplepos_t last_pointer_sample () const {
+		return _last_pointer_sample;
 	}
 
-	ARDOUR::frameoffset_t snap_delta (guint const) const;
+	ARDOUR::sampleoffset_t snap_delta (guint const) const;
 	double  snap_delta_music (guint const) const;
 
 	double current_pointer_x () const;
 	double current_pointer_y () const;
 
 	/* sets snap delta from unsnapped pos */
-	void setup_snap_delta (ARDOUR::MusicFrame pos);
+	void setup_snap_delta (ARDOUR::MusicSample pos);
 
 	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
-	void show_verbose_cursor_time (framepos_t);
-	void show_verbose_cursor_duration (framepos_t, framepos_t, double xoffset = 0);
+	void show_verbose_cursor_time (samplepos_t);
+	void show_verbose_cursor_duration (samplepos_t, samplepos_t, double xoffset = 0);
 	void show_verbose_cursor_text (std::string const &);
 
 	Editor* _editor; ///< our editor
 	DragManager* _drags;
 	ArdourCanvas::Item* _item; ///< our item
 	/** Offset from the mouse's position for the drag to the start of the thing that is being dragged */
-	ARDOUR::framecnt_t _pointer_frame_offset;
+	ARDOUR::samplecnt_t _pointer_sample_offset;
 	bool _x_constrained; ///< true if x motion is constrained, otherwise false
 	bool _y_constrained; ///< true if y motion is constrained, otherwise false
 	bool _was_rolling; ///< true if the session was rolling before the drag started, otherwise false
@@ -270,19 +270,19 @@ private:
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
 	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
-        bool _was_double_click; ///< true if drag initiated by a double click event
+	bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
 	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
-	ARDOUR::framepos_t _raw_grab_frame; ///< unsnapped frame that the mouse was at when start_grab was called, or 0
-	ARDOUR::framepos_t _grab_frame; ///< adjusted_frame that the mouse was at when start_grab was called, or 0
-	ARDOUR::framepos_t _last_pointer_frame; ///< adjusted_frame the last time a motion occurred
+	ARDOUR::samplepos_t _raw_grab_sample; ///< unsnapped sample that the mouse was at when start_grab was called, or 0
+	ARDOUR::samplepos_t _grab_sample; ///< adjusted_sample that the mouse was at when start_grab was called, or 0
+	ARDOUR::samplepos_t _last_pointer_sample; ///< adjusted_sample the last time a motion occurred
 
 	/* difference between some key position's snapped and unsnapped
-	 *  framepos. used for relative snap.
+	 *  samplepos. used for relative snap.
 	 */
-	framepos_t _snap_delta;
+	samplepos_t _snap_delta;
 	double     _snap_delta_music;
 	CursorContext::Handle _cursor_ctx; ///< cursor change context
 	bool _constraint_pressed; ///< if the keyboard indicated constraint modifier was pressed on start_grab()
@@ -307,9 +307,9 @@ public:
 	*/
 	double layer;
 	double initial_y; ///< the initial y position of the view before any reparenting
-	framepos_t initial_position; ///< initial position of the region
-	framepos_t initial_end; ///< initial end position of the region
-	framepos_t anchored_fade_length; ///< fade_length when anchored during drag
+	samplepos_t initial_position; ///< initial position of the region
+	samplepos_t initial_end; ///< initial end position of the region
+	samplepos_t anchored_fade_length; ///< fade_length when anchored during drag
 	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
 	TimeAxisView* initial_time_axis_view;
 };
@@ -364,12 +364,12 @@ public:
 
 protected:
 
-	double compute_x_delta (GdkEvent const *, ARDOUR::MusicFrame *);
+	double compute_x_delta (GdkEvent const *, ARDOUR::MusicSample *);
 	virtual bool y_movement_allowed (int, double, int skip_invisible = 0) const;
 
 	bool _brushing;
 	bool _ignore_video_lock;
-	ARDOUR::MusicFrame _last_position; ///< last position of the thing being dragged
+	ARDOUR::MusicSample _last_position; ///< last position of the thing being dragged
 	double _total_x_delta;
 	int _last_pointer_time_axis_view;
 	double _last_pointer_layer;
@@ -397,11 +397,11 @@ public:
 		return true;
 	}
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 protected:
 	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
@@ -411,14 +411,14 @@ private:
 	void finished_no_copy (
 		bool const,
 		bool const,
-		ARDOUR::MusicFrame,
+		ARDOUR::MusicSample,
 		int32_t const ev_state
 		);
 
 	void finished_copy (
 		bool const,
 		bool const,
-		ARDOUR::MusicFrame,
+		ARDOUR::MusicSample,
 		int32_t const ev_state
 		);
 
@@ -426,7 +426,7 @@ private:
 		boost::shared_ptr<ARDOUR::Region>,
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
-		ARDOUR::MusicFrame,
+		ARDOUR::MusicSample,
 		double quarter_note,
 		PlaylistSet&,
 		bool for_music = false
@@ -450,7 +450,7 @@ private:
 class RegionInsertDrag : public RegionMotionDrag
 {
 public:
-	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, ARDOUR::framepos_t);
+	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, ARDOUR::samplepos_t);
 
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
@@ -488,21 +488,21 @@ protected:
 private:
 	TimeAxisView *prev_tav;		// where regions were most recently dragged from
 	TimeAxisView *orig_tav;		// where drag started
-	ARDOUR::framecnt_t prev_amount;
-	ARDOUR::framepos_t prev_position;
-	ARDOUR::framecnt_t selection_length;
+	ARDOUR::samplecnt_t prev_amount;
+	ARDOUR::samplepos_t prev_position;
+	ARDOUR::samplecnt_t selection_length;
 	bool allow_moves_across_tracks; // only if all selected regions are on one track
 	ARDOUR::RegionList *exclude;
-	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::framepos_t where, const RegionSelection &exclude, bool drag_in_progress);
-	void remove_unselected_from_views (ARDOUR::framecnt_t amount, bool move_regions);
+	void add_all_after_to_views (TimeAxisView *tav, ARDOUR::samplepos_t where, const RegionSelection &exclude, bool drag_in_progress);
+	void remove_unselected_from_views (ARDOUR::samplecnt_t amount, bool move_regions);
 
 };
 
 /** "Drag" to cut a region (action only on button release) */
 class RegionCutDrag : public Drag
 {
-    public:
-	RegionCutDrag (Editor*, ArdourCanvas::Item*, framepos_t);
+public:
+	RegionCutDrag (Editor*, ArdourCanvas::Item*, samplepos_t);
 	~RegionCutDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -510,8 +510,7 @@ class RegionCutDrag : public Drag
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
 
-    private:
-	EditorCursor* line;
+private:
 };
 
 /** Drags to create regions */
@@ -551,7 +550,7 @@ private:
 /** Drags to move MIDI notes */
 class NoteDrag : public Drag
 {
-  public:
+public:
 	NoteDrag (Editor*, ArdourCanvas::Item*);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -559,8 +558,8 @@ class NoteDrag : public Drag
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	void setup_pointer_frame_offset ();
-  private:
+	void setup_pointer_sample_offset ();
+private:
 
 	double total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
@@ -596,16 +595,16 @@ public:
 
 private:
 	double y_to_region (double) const;
-	ARDOUR::framecnt_t grid_frames (framepos_t) const;
+	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
 	MidiRegionView* _region_view;
 	ArdourCanvas::Rectangle* _drag_rect;
-	framepos_t _note[2];
+	samplepos_t _note[2];
 };
 
 class HitCreateDrag : public Drag
@@ -629,16 +628,16 @@ public:
 
 private:
 	double y_to_region (double) const;
-	ARDOUR::framecnt_t grid_frames (framepos_t) const;
+	ARDOUR::samplecnt_t grid_samples (samplepos_t) const;
 
-	/** @return minimum number of frames (in x) and pixels (in y) that should be considered a movement */
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	/** @return minimum number of samples (in x) and pixels (in y) that should be considered a movement */
+	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (0, 0);
 	}
 
 	MidiRegionView* _region_view;
-	framepos_t      _last_pos;
-	double          _last_y;
+	samplepos_t      _last_pos;
+	double          _y;
 
 };
 
@@ -656,7 +655,7 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	MidiRegionView* _region_view;
@@ -671,7 +670,7 @@ public:
 	AVDraggingView (RegionView *);
 
 	RegionView* view; ///< the view
-	framepos_t initial_position; ///< initial position of the region
+	samplepos_t initial_position; ///< initial position of the region
 };
 
 /** Drag of video offset */
@@ -698,8 +697,8 @@ protected:
 	std::list<AVDraggingView> _views; ///< information about all audio that are being dragged along
 
 private:
-	ARDOUR::frameoffset_t _startdrag_video_offset;
-	ARDOUR::frameoffset_t _max_backwards_drag;
+	ARDOUR::sampleoffset_t _startdrag_video_offset;
+	ARDOUR::sampleoffset_t _max_backwards_drag;
 	bool _stuck;
 };
 
@@ -724,7 +723,7 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 
@@ -753,14 +752,14 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	MeterMarker* _marker;
 	ARDOUR::MeterSection* _real_section;
 
 	bool _copy;
-	Editing::SnapType _old_snap_type;
+	Editing::GridType _old_grid_type;
 	Editing::SnapMode _old_snap_mode;
 	XMLNode* before_state;
 };
@@ -784,7 +783,7 @@ public:
 		return true;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	TempoMarker* _marker;
@@ -792,8 +791,9 @@ private:
 
 	bool _copy;
 	bool _movable;
-	double _grab_bpm;
-	XMLNode* before_state;
+	ARDOUR::Tempo _grab_bpm;
+	double _grab_qn;
+	XMLNode* _before_state;
 };
 
 /** BBT Ruler drag */
@@ -815,12 +815,72 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	double _grab_qn;
 	ARDOUR::TempoSection* _tempo;
-	XMLNode* before_state;
+	XMLNode* _before_state;
+	bool     _drag_valid;
+};
+
+/** tempo curve twist drag */
+class TempoTwistDrag : public Drag
+{
+public:
+	TempoTwistDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return true;
+	}
+
+	void setup_pointer_sample_offset ();
+
+private:
+	double _grab_qn;
+	ARDOUR::Tempo  _grab_tempo;
+	ARDOUR::TempoSection* _tempo;
+	ARDOUR::TempoSection* _next_tempo;
+	bool _drag_valid;
+	XMLNode* _before_state;
+};
+
+
+/** tempo curve twist drag */
+class TempoEndDrag : public Drag
+{
+public:
+	TempoEndDrag (Editor *, ArdourCanvas::Item *);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return true;
+	}
+
+	void setup_pointer_sample_offset ();
+
+private:
+	double _grab_qn;
+	ARDOUR::TempoSection* _tempo;
+	XMLNode* _before_state;
+	bool _drag_valid;
 };
 
 /** Drag of the playhead cursor */
@@ -843,11 +903,17 @@ public:
 	}
 
 private:
-	void fake_locate (framepos_t);
+	void fake_locate (samplepos_t);
 
-        EditorCursor& _cursor;
+	EditorCursor& _cursor;
 	bool _stop; ///< true to stop the transport on starting the drag, otherwise false
-	double _grab_zoom; ///< editor frames per unit when our grab started
+	double _grab_zoom; ///< editor samples per unit when our grab started
+
+	//used for zooming
+	int _last_mx;
+	int _last_my;
+	int _last_dx;
+	int _last_y_delta;
 };
 
 /** Region fade-in drag */
@@ -865,7 +931,7 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 };
 
 /** Region fade-out drag */
@@ -883,14 +949,14 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 };
 
 /** Marker drag */
 class MarkerDrag : public Drag
 {
 public:
-        MarkerDrag (Editor *, ArdourCanvas::Item *);
+	MarkerDrag (Editor *, ArdourCanvas::Item *);
 	~MarkerDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -906,23 +972,23 @@ public:
 		return false;
 	}
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	void update_item (ARDOUR::Location *);
 
 	ArdourMarker* _marker; ///< marker being dragged
 	bool _selection_changed;
-        struct CopiedLocationMarkerInfo {
-	    ARDOUR::Location* location;
-	    std::vector<ArdourMarker*> markers;
-	    bool    move_both;
-	    CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
+	struct CopiedLocationMarkerInfo {
+		ARDOUR::Location* location;
+		std::vector<ArdourMarker*> markers;
+		bool    move_both;
+		CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
 	};
 
-        typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
-        CopiedLocationInfo _copied_locations;
- 	ArdourCanvas::Points _points;
+	typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
+	CopiedLocationInfo _copied_locations;
+	ArdourCanvas::Points _points;
 };
 
 /** Control point drag */
@@ -945,7 +1011,7 @@ private:
 	double _fixed_grab_y;
 	double _cumulative_x_drag;
 	double _cumulative_y_drag;
-        bool     _pushing;
+	bool     _pushing;
         uint32_t _final_index;
 	static double _zero_gain_fraction;
 };
@@ -1005,7 +1071,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (8, 1);
 	}
 
@@ -1013,13 +1079,13 @@ public:
 
 	/** Select some things within a rectangle.
 	 *  @param button_state The button state from the GdkEvent.
-	 *  @param x1 The left-hand side of the rectangle in session frames.
-	 *  @param x2 The right-hand side of the rectangle in session frames.
+	 *  @param x1 The left-hand side of the rectangle in session samples.
+	 *  @param x2 The right-hand side of the rectangle in session samples.
 	 *  @param y1 The top of the rectangle in trackview coordinates.
 	 *  @param y2 The bottom of the rectangle in trackview coordinates.
 	 *  @param drag_in_progress true if the drag is currently happening.
 	 */
-	virtual void select_things (int button_state, framepos_t x1, framepos_t x2, double y1, double y2, bool drag_in_progress) = 0;
+	virtual void select_things (int button_state, samplepos_t x1, samplepos_t x2, double y1, double y2, bool drag_in_progress) = 0;
 
 	virtual void deselect_things () = 0;
 
@@ -1033,7 +1099,7 @@ class EditorRubberbandSelectDrag : public RubberbandSelectDrag
 public:
 	EditorRubberbandSelectDrag (Editor *, ArdourCanvas::Item *);
 
-	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void select_things (int, samplepos_t, samplepos_t, double, double, bool);
 	void deselect_things ();
 };
 
@@ -1043,7 +1109,7 @@ class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 public:
 	MidiRubberbandSelectDrag (Editor *, MidiRegionView *);
 
-	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void select_things (int, samplepos_t, samplepos_t, double, double, bool);
 	void deselect_things ();
 
 private:
@@ -1056,7 +1122,7 @@ class MidiVerticalSelectDrag : public RubberbandSelectDrag
 public:
 	MidiVerticalSelectDrag (Editor *, MidiRegionView *);
 
-	void select_things (int, framepos_t, framepos_t, double, double, bool);
+	void select_things (int, samplepos_t, samplepos_t, double, double, bool);
 	void deselect_things ();
 
 private:
@@ -1106,15 +1172,15 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	void setup_pointer_frame_offset ();
+	void setup_pointer_sample_offset ();
 
 private:
 	Operation _operation;
 	bool _add;
 	TrackSelection _track_selection_at_start;
 	bool _time_selection_at_start;
-        framepos_t start_at_start;
-        framepos_t end_at_start;
+	samplepos_t start_at_start;
+	samplepos_t end_at_start;
 };
 
 /** Range marker drag */
@@ -1163,7 +1229,7 @@ public:
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
 
-	std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
@@ -1200,9 +1266,9 @@ private:
 	struct Line {
 		boost::shared_ptr<AutomationLine> line; ///< the line
 		std::list<ControlPoint*> points; ///< points to drag on the line
-		std::pair<ARDOUR::framepos_t, ARDOUR::framepos_t> range; ///< the range of all points on the line, in session frames
+		std::pair<ARDOUR::samplepos_t, ARDOUR::samplepos_t> range; ///< the range of all points on the line, in session samples
 		XMLNode* state; ///< the XML state node before the drag
-      	        double original_fraction; ///< initial y-fraction before the drag
+		double original_fraction; ///< initial y-fraction before the drag
 	};
 
 	std::list<Line> _lines;
@@ -1215,7 +1281,7 @@ private:
  */
 class CrossfadeEdgeDrag : public Drag
 {
-  public:
+public:
 	CrossfadeEdgeDrag (Editor*, AudioRegionView*, ArdourCanvas::Item*, bool start);
 
 	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
@@ -1227,29 +1293,13 @@ class CrossfadeEdgeDrag : public Drag
 		return false;
 	}
 
-	virtual std::pair<ARDOUR::framecnt_t, int> move_threshold () const {
+	virtual std::pair<ARDOUR::samplecnt_t, int> move_threshold () const {
 		return std::make_pair (4, 4);
 	}
 
-  private:
+private:
 	AudioRegionView* arv;
 	bool start;
-};
-
-class RulerZoomDrag : public Drag
-{
-public:
-	RulerZoomDrag (Editor*, ArdourCanvas::Item*);
-
-	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent*, bool);
-	void aborted (bool);
-
-	virtual bool allow_vertical_autoscroll () const {
-		return false;
-	}
-
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

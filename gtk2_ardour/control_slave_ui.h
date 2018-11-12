@@ -31,7 +31,7 @@
 
 #include "ardour/session_handle.h"
 
-#include "ardour_button.h"
+#include "widgets/ardour_button.h"
 
 namespace ARDOUR {
 	class VCA;
@@ -41,15 +41,16 @@ namespace ARDOUR {
 
 class ControlSlaveUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
-   public:
+public:
 	ControlSlaveUI (ARDOUR::Session*);
+	~ControlSlaveUI ();
 	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
 
-   private:
+private:
 	boost::shared_ptr<ARDOUR::Stripable> stripable;
-	PBD::ScopedConnectionList connections;
-	PBD::ScopedConnectionList master_connections;
-	ArdourButton  initial_button;
+	PBD::ScopedConnectionList   connections;
+	PBD::ScopedConnectionList   master_connections;
+	ArdourWidgets::ArdourButton initial_button;
 
 	void master_property_changed (PBD::PropertyChange const &);
 	void update_vca_display ();
@@ -59,6 +60,8 @@ class ControlSlaveUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 	bool vca_button_release (GdkEventButton* ev, uint32_t n);
 	void add_vca_button (boost::shared_ptr<ARDOUR::VCA>);
 	void unassign_all ();
+
+	Gtk::Menu* context_menu;
 };
 
 #endif /* __gtk2_ardour_control_slave_ui_h__ */

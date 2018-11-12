@@ -39,7 +39,6 @@
 #include "ardour/audioengine.h"
 #include "ardour/amp.h"
 #include "ardour/bundle.h"
-#include "ardour/controllable_descriptor.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/midi_port.h"
@@ -107,9 +106,6 @@ FaderPort::FaderPort (Session& s)
 		ARDOUR::DataType::MIDI,
 		session->engine().make_port_name_non_relative (outp->name())
 		);
-
-
-	StripableSelectionChanged.connect (selection_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::gui_track_selection_changed, this, _1), this);
 
 	/* Catch port connections and disconnections */
 	ARDOUR::AudioEngine::instance()->PortConnectedOrDisconnected.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&FaderPort::connection_handler, this, _1, _2, _3, _4, _5), this);
@@ -203,6 +199,7 @@ FaderPort::~FaderPort ()
 
 	if (_input_port) {
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
+		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
 	}
@@ -210,6 +207,7 @@ FaderPort::~FaderPort ()
 	if (_output_port) {
 		_output_port->drain (10000,  250000); /* check every 10 msecs, wait up to 1/4 second for the port to drain */
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("unregistering output port %1\n", boost::shared_ptr<ARDOUR::Port>(_output_port)->name()));
+		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
@@ -287,19 +285,12 @@ FaderPort::stop ()
 void
 FaderPort::thread_init ()
 {
-	struct sched_param rtparam;
-
 	pthread_set_name (event_loop_name().c_str());
 
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), event_loop_name(), 2048);
 	ARDOUR::SessionEvent::create_per_thread_pool (event_loop_name(), 128);
 
-	memset (&rtparam, 0, sizeof (rtparam));
-	rtparam.sched_priority = 9; /* XXX should be relative to audio (JACK) thread */
-
-	if (pthread_setschedparam (pthread_self(), SCHED_FIFO, &rtparam) != 0) {
-		// do we care? not particularly.
-	}
+	set_thread_priority ();
 }
 
 void
@@ -322,15 +313,15 @@ bool
 FaderPort::button_long_press_timeout (ButtonID id)
 {
 	if (buttons_down.find (id) != buttons_down.end()) {
-		get_button (id).invoke (ButtonState (LongPress|button_state), false);
+		if (get_button (id).invoke (ButtonState (LongPress|button_state), false)) {
+			/* whichever button this was, we've used it ... don't invoke the
+			   release action.
+			*/
+			consumed.insert (id);
+		}
 	} else {
 		/* release happened and somehow we were not cancelled */
 	}
-
-	/* whichever button this was, we've used it ... don't invoke the
-	   release action.
-	*/
-	consumed.insert (id);
 
 	return false; /* don't get called again */
 }
@@ -372,17 +363,20 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 		break;
 	case User:
 		bs = UserDown;
+		if (tb->value) {
+			start_press_timeout (button, id);
+		}
 		break;
 	case FaderTouch:
 		fader_is_touched = tb->value;
 		if (_current_stripable) {
 			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
-				framepos_t now = session->engine().sample_time();
+				samplepos_t now = session->engine().sample_time();
 				if (tb->value) {
 					gain->start_touch (now);
 				} else {
-					gain->stop_touch (true, now);
+					gain->stop_touch (now);
 				}
 			}
 		}
@@ -406,7 +400,7 @@ FaderPort::button_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	set<ButtonID>::iterator c = consumed.find (id);
 
 	if (c == consumed.end()) {
-		button.invoke (button_state, tb->value ? true : false);
+		(void) button.invoke (button_state, tb->value ? true : false);
 	} else {
 		DEBUG_TRACE (DEBUG::FaderPort, "button was consumed, ignored\n");
 		consumed.erase (c);
@@ -462,9 +456,9 @@ FaderPort::encoder_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
 			boost::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();
 			if (trim) {
-				float val = trim->get_user();  //for gain elements, the "user" value is in dB
-				val += delta;
-				trim->set_user(val);
+				float val = accurate_coefficient_to_dB (trim->get_value());
+				val += delta * .5f; // use 1/2 dB Steps -20..+20
+				trim->set_value (dB_to_coefficient (val), Controllable::UseGroup);
 			}
 		} else if (width_modifier && ((button_state & width_modifier) == width_modifier)) {
 			ardour_pan_width (delta);
@@ -769,7 +763,7 @@ FaderPort::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::As
 
 		port->clear ();
 		DEBUG_TRACE (DEBUG::FaderPort, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
-		framepos_t now = session->engine().sample_time();
+		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
 
@@ -835,11 +829,10 @@ FaderPort::set_state (const XMLNode& node, int version)
 
 	for (XMLNodeList::const_iterator n = node.children().begin(); n != node.children().end(); ++n) {
 		if ((*n)->name() == X_("Button")) {
-			XMLProperty const * prop = (*n)->property (X_("id"));
-			if (!prop) {
+			int32_t xid;
+			if (!(*n)->get_property (X_("id"), xid)) {
 				continue;
 			}
-			int xid = atoi (prop->value());
 			ButtonMap::iterator b = buttons.find (ButtonID (xid));
 			if (b == buttons.end()) {
 				continue;
@@ -924,7 +917,7 @@ FaderPort::connected ()
 	_output_port->write (buf, 6, 0);
 }
 
-void
+bool 
 FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 {
 	DEBUG_TRACE (DEBUG::FaderPort, string_compose ("invoke button %1 for %2 state %3%4%5\n", id, (press ? "press":"release"), hex, bs, dec));
@@ -934,12 +927,12 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 	if (press) {
 		if ((x = on_press.find (bs)) == on_press.end()) {
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no press action for button %1 state %2 @ %3 in %4\n", id, bs, this, &on_press));
-			return;
+			return false;
 		}
 	} else {
 		if ((x = on_release.find (bs)) == on_release.end()) {
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("no release action for button %1 state %2 @%3 in %4\n", id, bs, this, &on_release));
-			return;
+			return false;
 		}
 	}
 
@@ -947,13 +940,17 @@ FaderPort::Button::invoke (FaderPort::ButtonState bs, bool press)
 	case NamedAction:
 		if (!x->second.action_name.empty()) {
 			fp.access_action (x->second.action_name);
+			return true;
 		}
 		break;
 	case InternalFunction:
 		if (x->second.function) {
 			x->second.function ();
+			return true;
 		}
 	}
+
+	return false;
 }
 
 void
@@ -975,6 +972,13 @@ FaderPort::Button::set_action (string const& name, bool when_pressed, FaderPort:
 		if (name.empty()) {
 			on_release.erase (bs);
 		} else {
+			if (id == User) {
+				/* if the binding is for the User button, we
+				   need to store the button state as it will be
+				   seen on button release, which will include UserDown.
+				*/
+				bs = FaderPort::ButtonState (bs|UserDown);
+			}
 			DEBUG_TRACE (DEBUG::FaderPort, string_compose ("set button %1 to action %2 on release + %3%4%5\n", id, name, bs));
 			todo.action_name = name;
 			on_release[bs] = todo;
@@ -1041,13 +1045,8 @@ FaderPort::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, bool onoff
 int
 FaderPort::Button::set_state (XMLNode const& node)
 {
-	const XMLProperty* prop = node.property ("id");
-	if (!prop) {
-		return -1;
-	}
-
-	int xid = atoi (prop->value());
-	if (xid != id) {
+	int32_t xid;
+	if (!node.get_property ("id", xid) || xid != id) {
 		return -1;
 	}
 
@@ -1059,16 +1058,16 @@ FaderPort::Button::set_state (XMLNode const& node)
 	state_pairs.push_back (make_pair (string ("long"), LongPress));
 
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
-		string propname;
 
-		propname = sp->first + X_("-press");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), true, sp->second);
+		string propname = sp->first + X_("-press");
+		string value;
+		if (node.get_property (propname.c_str(), value)) {
+			set_action (value, true, sp->second);
 		}
 
 		propname = sp->first + X_("-release");
-		if ((prop = node.property (propname)) != 0) {
-			set_action (prop->value(), false, sp->second);
+		if (node.get_property (propname.c_str(), value)) {
+			set_action (value, false, sp->second);
 		}
 	}
 
@@ -1079,10 +1078,8 @@ XMLNode&
 FaderPort::Button::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Button"));
-	char buf[16];
-	snprintf (buf, sizeof (buf), "%d", id);
 
-	node->add_property (X_("id"), buf);
+	node->set_property (X_("id"), to_string<int32_t>(id));
 
 	ToDoMap::const_iterator x;
 	ToDo null;
@@ -1098,13 +1095,13 @@ FaderPort::Button::get_state () const
 	for (vector<state_pair_t>::const_iterator sp = state_pairs.begin(); sp != state_pairs.end(); ++sp) {
 		if ((x = on_press.find (sp->second)) != on_press.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-press")).c_str(), x->second.action_name);
 			}
 		}
 
 		if ((x = on_release.find (sp->second)) != on_release.end()) {
 			if (x->second.type == NamedAction) {
-				node->add_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
+				node->set_property (string (sp->first + X_("-release")).c_str(), x->second.action_name);
 			}
 		}
 	}
@@ -1113,15 +1110,9 @@ FaderPort::Button::get_state () const
 }
 
 void
-FaderPort::gui_track_selection_changed (StripableNotificationListPtr stripables)
+FaderPort::stripable_selection_changed ()
 {
-	boost::shared_ptr<Stripable> r;
-
-	if (!stripables->empty()) {
-		r = stripables->front().lock();
-	}
-
-	set_current_stripable (r);
+	set_current_stripable (ControlProtocol::first_selected_stripable());
 }
 
 void

@@ -26,7 +26,7 @@
 #include "audio_clock.h"
 
 namespace ARDOUR {
-	class BeatsFramesConverter;
+	class BeatsSamplesConverter;
 	class Session;
 	class InstrumentInfo;
 }
@@ -41,15 +41,19 @@ class PatchChangeDialog : public ArdourDialog
 {
 public:
 	PatchChangeDialog (
-		const ARDOUR::BeatsFramesConverter *,
+		const ARDOUR::BeatsSamplesConverter *,
 		ARDOUR::Session *,
-		Evoral::PatchChange<Evoral::Beats> const &,
+		Evoral::PatchChange<Temporal::Beats> const &,
 		ARDOUR::InstrumentInfo&,
 		const Gtk::BuiltinStockID &,
-		bool allow_delete = false
+		bool allow_delete = false,
+		bool modal = true
 		);
 
-	Evoral::PatchChange<Evoral::Beats> patch () const;
+	Evoral::PatchChange<Temporal::Beats> patch () const;
+
+protected:
+	void on_response (int);
 
 private:
 	void fill_bank_combo ();
@@ -62,18 +66,22 @@ private:
 	void bank_changed ();
 	void program_changed ();
 
-	const ARDOUR::BeatsFramesConverter* _time_converter;
-        ARDOUR::InstrumentInfo& _info;
+	int get_14bit_bank () const;
+
+	const ARDOUR::BeatsSamplesConverter* _time_converter;
+	ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
 	Gtk::SpinButton _channel;
 	Gtk::SpinButton _program;
-	Gtk::SpinButton _bank;
+	Gtk::SpinButton _bank_msb;
+	Gtk::SpinButton _bank_lsb;
 	Gtk::ComboBoxText _bank_combo;
 	Gtk::ComboBoxText _patch_combo;
 
 	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
 	bool _ignore_signals;
+	bool _keep_open;
 
-        void instrument_info_changed ();
-        PBD::ScopedConnection _info_changed_connection;
+	void instrument_info_changed ();
+	PBD::ScopedConnection _info_changed_connection;
 };

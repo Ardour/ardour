@@ -20,8 +20,10 @@
 #ifndef __ardour_vca_time_axis_h__
 #define __ardour_vca_time_axis_h__
 
-#include "ardour_button.h"
-#include "time_axis_view.h"
+#include "widgets/ardour_button.h"
+
+#include "stripable_colorpicker.h"
+#include "stripable_time_axis.h"
 #include "gain_meter.h"
 
 namespace ArdourCanvas {
@@ -33,9 +35,9 @@ namespace ARDOUR {
 	class VCA;
 }
 
-class VCATimeAxisView : public TimeAxisView
+class VCATimeAxisView : public StripableTimeAxisView
 {
-  public:
+public:
 	VCATimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~VCATimeAxisView ();
 
@@ -51,19 +53,33 @@ class VCATimeAxisView : public TimeAxisView
 
 	void set_height (uint32_t h, TrackHeightMode m = OnlySelf);
 
-	bool selectable() const { return false; }
 	bool marked_for_display () const;
 	bool set_marked_for_display (bool);
 
- protected:
+protected:
 	boost::shared_ptr<ARDOUR::VCA> _vca;
-	ArdourButton  solo_button;
-	ArdourButton  mute_button;
-	ArdourButton  spill_button;
-	ArdourButton  drop_button;
-	ArdourButton  number_label;
-	GainMeterBase gain_meter;
-	PBD::ScopedConnectionList vca_connections;
+	ArdourWidgets::ArdourButton    solo_button;
+	ArdourWidgets::ArdourButton    mute_button;
+	ArdourWidgets::ArdourButton    automation_button;
+	ArdourWidgets::ArdourButton    drop_button;
+	ArdourWidgets::ArdourButton    number_label;
+	GainMeterBase                  gain_meter;
+	PBD::ScopedConnectionList      vca_connections;
+
+	void create_gain_automation_child (const Evoral::Parameter &, bool);
+	void create_trim_automation_child (const Evoral::Parameter &, bool) {}
+	void create_mute_automation_child (const Evoral::Parameter &, bool);
+
+	virtual void show_all_automation (bool apply_to_selection = false);
+	virtual void show_existing_automation (bool apply_to_selection = false);
+	virtual void hide_all_automation (bool apply_to_selection = false);
+
+	void create_automation_child (const Evoral::Parameter& param, bool show);
+	virtual void build_automation_action_menu (bool);
+	void         build_display_menu ();
+	Gtk::Menu* automation_action_menu;
+
+	bool name_entry_changed (std::string const&);
 
 	void parameter_changed (std::string const& p);
 	void vca_property_changed (PBD::PropertyChange const&);
@@ -74,9 +90,15 @@ class VCATimeAxisView : public TimeAxisView
 	void update_track_number_visibility ();
 	bool solo_release (GdkEventButton*);
 	bool mute_release (GdkEventButton*);
-	bool spill_release (GdkEventButton*);
+	bool automation_click (GdkEventButton*);
 	bool drop_release (GdkEventButton*);
 	void self_delete ();
+
+	void drop_all_slaves ();
+	void choose_color ();
+
+private:
+	StripableColorDialog _color_picker;
 };
 
-#endif /* __ardour_route_time_axis_h__ */
+#endif /* __ardour_vca_time_axis_h__ */

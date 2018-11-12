@@ -28,7 +28,7 @@
 #include "pbd/locale_guard.h"
 
 #include "ardour/vst_plugin.h"
-#include "ardour/vestige/aeffectx.h"
+#include "ardour/vestige/vestige.h"
 #include "ardour/session.h"
 #include "ardour/vst_types.h"
 #include "ardour/filesystem_paths.h"
@@ -47,8 +47,9 @@ VSTPlugin::VSTPlugin (AudioEngine& engine, Session& session, VSTHandle* handle)
 	, _plugin (0)
 	, _pi (0)
 	, _num (0)
-	, _transport_frame (0)
+	, _transport_sample (0)
 	, _transport_speed (0.f)
+	, _eff_bypassed (false)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -61,9 +62,10 @@ VSTPlugin::VSTPlugin (const VSTPlugin& other)
 	, _pi (other._pi)
 	, _num (other._num)
 	, _midi_out_buf (other._midi_out_buf)
-	, _transport_frame (0)
+	, _transport_sample (0)
 	, _transport_speed (0.f)
 	, _parameter_defaults (other._parameter_defaults)
+	, _eff_bypassed (other._eff_bypassed)
 {
 	memset (&_timeInfo, 0, sizeof(_timeInfo));
 }
@@ -74,15 +76,46 @@ VSTPlugin::~VSTPlugin ()
 }
 
 void
-VSTPlugin::set_plugin (AEffect* e)
+VSTPlugin::open_plugin ()
 {
-	_plugin = e;
-	_plugin->user = this;
+	_plugin = _state->plugin;
+	assert (_plugin->ptr1 == this); // should have been set by {mac_vst|fst|lxvst}_instantiate
+	_plugin->ptr1 = this;
+	_state->plugin->dispatcher (_plugin, effOpen, 0, 0, 0, 0);
+	_state->vst_version = _plugin->dispatcher (_plugin, effGetVstVersion, 0, 0, 0, 0);
+}
 
+void
+VSTPlugin::init_plugin ()
+{
 	/* set rate and blocksize */
-
-	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.frame_rate());
+	_plugin->dispatcher (_plugin, effSetSampleRate, 0, 0, NULL, (float) _session.sample_rate());
 	_plugin->dispatcher (_plugin, effSetBlockSize, 0, _session.get_block_size(), NULL, 0.0f);
+}
+
+
+uint32_t
+VSTPlugin::designated_bypass_port ()
+{
+	if (_plugin->dispatcher (_plugin, effCanDo, 0, 0, const_cast<char*> ("bypass"), 0.0f) != 0) {
+#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also plugin_insert.cc
+		return UINT32_MAX - 1; // emulate a port
+#else
+		/* check if plugin actually supports it,
+		 * e.g. u-he Presswerk  CanDo "bypass"  but calling effSetBypass is a NO-OP.
+		 * (presumably the plugin-author thinks hard-bypassing is a bad idea,
+		 * particularly since the plugin itself provides a bypass-port)
+		 */
+		intptr_t value = 0; // not bypassed
+		if (0 != _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0)) {
+			cerr << "Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
+			return UINT32_MAX - 1; // emulate a port
+		} else {
+			cerr << "Do *not* Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
+		}
+#endif
+	}
+	return UINT32_MAX;
 }
 
 void
@@ -115,12 +148,32 @@ VSTPlugin::default_value (uint32_t which)
 float
 VSTPlugin::get_parameter (uint32_t which) const
 {
+	if (which == UINT32_MAX - 1) {
+		// ardour uses enable-semantics: 1: enabled, 0: bypassed
+		return _eff_bypassed ? 0.f : 1.f;
+	}
 	return _plugin->getParameter (_plugin, which);
 }
 
 void
 VSTPlugin::set_parameter (uint32_t which, float newval)
 {
+	if (which == UINT32_MAX - 1) {
+		// ardour uses enable-semantics: 1: enabled, 0: bypassed
+		intptr_t value = (newval <= 0.f) ? 1 : 0;
+		cerr << "effSetBypass " << value << endl; // XXX DEBUG
+		int rv = _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0);
+		if (0 != rv) {
+			_eff_bypassed = (value == 1);
+		} else {
+			cerr << "effSetBypass failed rv=" << rv << endl; // XXX DEBUG
+#ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
+			// emit signal.. hard un/bypass from here?!
+#endif
+		}
+		return;
+	}
+
 	float oldval = get_parameter (which);
 
 	if (PBD::floateq (oldval, newval, 1)) {
@@ -136,6 +189,14 @@ VSTPlugin::set_parameter (uint32_t which, float newval)
 		Plugin::set_parameter (which, newval);
 	}
 }
+
+void
+VSTPlugin::parameter_changed_externally (uint32_t which, float value )
+{
+	ParameterChangedExternally (which, value); /* EMIT SIGNAL */
+	Plugin::set_parameter (which, value);
+}
+
 
 uint32_t
 VSTPlugin::nth_parameter (uint32_t n, bool& ok) const
@@ -207,10 +268,8 @@ VSTPlugin::add_state (XMLNode* root) const
 
 		for (int32_t n = 0; n < _plugin->numParams; ++n) {
 			char index[64];
-			char val[32];
 			snprintf (index, sizeof (index), "param-%d", n);
-			snprintf (val, sizeof (val), "%.12g", _plugin->getParameter (_plugin, n));
-			parameters->add_property (index, val);
+			parameters->set_property (index, _plugin->getParameter (_plugin, n));
 		}
 
 		root->add_child_nocopy (*parameters);
@@ -222,11 +281,6 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 {
 	LocaleGuard lg;
 	int ret = -1;
-
-	if (node.name() != state_node_name()) {
-		error << _("Bad node sent to VSTPlugin::set_state") << endmsg;
-		return 0;
-	}
 
 #ifndef NO_PLUGIN_STATE
 	XMLNode* child;
@@ -251,12 +305,11 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 
 		for (i = child->properties().begin(); i != child->properties().end(); ++i) {
 			int32_t param;
-			float val;
 
 			sscanf ((*i)->name().c_str(), "param-%d", &param);
-			sscanf ((*i)->value().c_str(), "%f", &val);
+			float value = string_to<float>((*i)->value());
 
-			_plugin->setParameter (_plugin, param, val);
+			_plugin->setParameter (_plugin, param, value);
 		}
 
 		ret = 0;
@@ -268,15 +321,12 @@ VSTPlugin::set_state (const XMLNode& node, int version)
 	return ret;
 }
 
-
 int
 VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) const
 {
 	VstParameterProperties prop;
 
 	memset (&prop, 0, sizeof (VstParameterProperties));
-	desc.min_unbound = false;
-	desc.max_unbound = false;
 	prop.flags = 0;
 
 	if (_plugin->dispatcher (_plugin, effGetParameterProperties, which, 0, &prop, 0)) {
@@ -292,25 +342,22 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 			desc.upper = 1.0;
 		}
 
-		if (prop.flags & kVstParameterUsesIntStep) {
+		const float range = desc.upper - desc.lower;
 
+		if (prop.flags & kVstParameterUsesIntStep && prop.stepInteger < range) {
 			desc.step = prop.stepInteger;
 			desc.smallstep = prop.stepInteger;
 			desc.largestep = prop.stepInteger;
-
-		} else if (prop.flags & kVstParameterUsesFloatStep) {
-
+			desc.integer_step = true;
+			desc.rangesteps = 1 + ceilf (range / desc.step);
+		} else if (prop.flags & kVstParameterUsesFloatStep && prop.stepFloat < range) {
 			desc.step = prop.stepFloat;
 			desc.smallstep = prop.smallStepFloat;
 			desc.largestep = prop.largeStepFloat;
-
+			desc.rangesteps = 1 + ceilf (range / desc.step);
 		} else {
-
-			float range = desc.upper - desc.lower;
-
-			desc.step = range / 100.0f;
-			desc.smallstep = desc.step / 2.0f;
-			desc.largestep = desc.step * 10.0f;
+			desc.smallstep = desc.step = range / 300.0f;
+			desc.largestep =  range / 30.0f;
 		}
 
 		if (strlen(prop.label) == 0) {
@@ -318,35 +365,35 @@ VSTPlugin::get_parameter_descriptor (uint32_t which, ParameterDescriptor& desc) 
 		}
 
 		desc.toggled = prop.flags & kVstParameterIsSwitch;
-		desc.logarithmic = false;
-		desc.sr_dependent = false;
 		desc.label = Glib::locale_to_utf8 (prop.label);
 
 	} else {
 
 		/* old style */
 
-		char label[64];
+		char label[VestigeMaxLabelLen];
 		/* some VST plugins expect this buffer to be zero-filled */
 		memset (label, 0, sizeof (label));
 
 		_plugin->dispatcher (_plugin, effGetParamName, which, 0, label, 0);
 
 		desc.label = Glib::locale_to_utf8 (label);
-		desc.integer_step = false;
 		desc.lower = 0.0f;
 		desc.upper = 1.0f;
-		desc.step = 0.01f;
-		desc.smallstep = 0.005f;
-		desc.largestep = 0.1f;
-		desc.toggled = false;
-		desc.logarithmic = false;
-		desc.sr_dependent = false;
+		desc.smallstep = desc.step = 1.f / 300.f;
+		desc.largestep = 1.f / 30.f;
 	}
 
-	desc.normal = get_parameter (which);
+	/* TODO we should really call
+	 *   desc.update_steps ()
+	 * instead of manually assigning steps. Yet, VST prop is (again)
+	 * the odd one out compared to other plugin formats.
+	 */
+
 	if (_parameter_defaults.find (which) == _parameter_defaults.end ()) {
-		_parameter_defaults[which] = desc.normal;
+		_parameter_defaults[which] = get_parameter (which);
+	} else {
+		desc.normal = _parameter_defaults[which];
 	}
 
 	return 0;
@@ -406,11 +453,10 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	XMLNode* root = t->root ();
 
 	for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
-		XMLProperty const * label = (*i)->property (X_("label"));
+		std::string label;
+		(*i)->get_property (X_("label"), label);
 
-		assert (label);
-
-		if (label->value() != r.label) {
+		if (label != r.label) {
 			continue;
 		}
 
@@ -441,13 +487,17 @@ VSTPlugin::load_user_preset (PresetRecord r)
 
 			for (XMLNodeList::const_iterator j = (*i)->children().begin(); j != (*i)->children().end(); ++j) {
 				if ((*j)->name() == X_("Parameter")) {
-						XMLProperty const * index = (*j)->property (X_("index"));
-						XMLProperty const * value = (*j)->property (X_("value"));
+					uint32_t index;
+					float value;
 
-						assert (index);
-						assert (value);
+					if (!(*j)->get_property (X_("index"), index) ||
+					    !(*j)->get_property (X_("value"), value)) {
+					  // flag error and continue?
+						assert (false);
+					}
 
-						set_parameter (atoi (index->value().c_str()), atof (value->value().c_str ()));
+					set_parameter (index, value);
+					PresetPortSetValue (index, value); /* EMIT SIGNAL */
 				}
 			}
 			return true;
@@ -487,8 +537,8 @@ VSTPlugin::do_save_preset (string name)
 	if (_plugin->flags & 32 /* effFlagsProgramsChunks */) {
 
 		p = new XMLNode (X_("ChunkPreset"));
-		p->add_property (X_("uri"), uri);
-		p->add_property (X_("label"), name);
+		p->set_property (X_("uri"), uri);
+		p->set_property (X_("label"), name);
 		gchar* data = get_chunk (true);
 		p->add_content (string (data));
 		g_free (data);
@@ -496,14 +546,14 @@ VSTPlugin::do_save_preset (string name)
 	} else {
 
 		p = new XMLNode (X_("Preset"));
-		p->add_property (X_("uri"), uri);
-		p->add_property (X_("label"), name);
+		p->set_property (X_("uri"), uri);
+		p->set_property (X_("label"), name);
 
 		for (uint32_t i = 0; i < parameter_count(); ++i) {
 			if (parameter_is_input (i)) {
 				XMLNode* c = new XMLNode (X_("Parameter"));
-				c->add_property (X_("index"), string_compose ("%1", i));
-				c->add_property (X_("value"), string_compose ("%1", get_parameter (i)));
+				c->set_property (X_("index"), i);
+				c->set_property (X_("value"), get_parameter (i));
 				p->add_child_nocopy (*c);
 			}
 		}
@@ -537,7 +587,12 @@ VSTPlugin::do_remove_preset (string name)
 string
 VSTPlugin::describe_parameter (Evoral::Parameter param)
 {
-	char name[64];
+	char name[VestigeMaxLabelLen];
+	if (param.id() == UINT32_MAX - 1) {
+		strcpy (name, _("Plugin Enable"));
+		return name;
+	}
+
 	memset (name, 0, sizeof (name));
 
 	/* some VST plugins expect this buffer to be zero-filled */
@@ -551,7 +606,7 @@ VSTPlugin::describe_parameter (Evoral::Parameter param)
 	return name;
 }
 
-framecnt_t
+samplecnt_t
 VSTPlugin::signal_latency () const
 {
 	if (_user_latency) {
@@ -579,9 +634,9 @@ VSTPlugin::automatable () const
 
 int
 VSTPlugin::connect_and_run (BufferSet& bufs,
-		framepos_t start, framepos_t end, double speed,
+		samplepos_t start, samplepos_t end, double speed,
 		ChanMapping in_map, ChanMapping out_map,
-		pframes_t nframes, framecnt_t offset)
+		pframes_t nframes, samplecnt_t offset)
 {
 	Plugin::connect_and_run(bufs, start, end, speed, in_map, out_map, nframes, offset);
 
@@ -595,7 +650,7 @@ VSTPlugin::connect_and_run (BufferSet& bufs,
 		return 0;
 	}
 
-	_transport_frame = start;
+	_transport_sample = start;
 	_transport_speed = speed;
 
 	ChanCount bufs_count;
@@ -764,14 +819,14 @@ VSTPlugin::find_presets ()
 	if (t) {
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {
+			std::string uri;
+			std::string label;
 
-			XMLProperty const * uri = (*i)->property (X_("uri"));
-			XMLProperty const * label = (*i)->property (X_("label"));
+			if (!(*i)->get_property (X_("uri"), uri) || !(*i)->get_property (X_("label"), label)) {
+				assert(false);
+			}
 
-			assert (uri);
-			assert (label);
-
-			PresetRecord r (uri->value(), label->value(), true);
+			PresetRecord r (uri, label, true);
 			_presets.insert (make_pair (r.uri, r));
 		}
 	}
@@ -820,6 +875,6 @@ VSTPlugin::first_user_preset_index () const
 string
 VSTPlugin::presets_file () const
 {
-	return string_compose ("vst-%1", unique_id ());
+	return string("vst-") + unique_id ();
 }
 

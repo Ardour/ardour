@@ -31,6 +31,8 @@
 #include "pbd/replace_all.h"
 #include "pbd/unknown_type.h"
 #include "pbd/enumwriter.h"
+#include "pbd/locale_guard.h"
+#include "pbd/types_convert.h"
 
 #include "ardour/audioengine.h"
 #include "ardour/buffer.h"
@@ -41,6 +43,7 @@
 #include "ardour/profile.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
+#include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
 
 #include "pbd/i18n.h"
@@ -128,70 +131,16 @@ IO::disconnect_check (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
 }
 
 void
-IO::increment_port_buffer_offset (pframes_t offset)
-{
-	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-        if (_direction == Output) {
-                for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-                        i->increment_port_buffer_offset (offset);
-                }
-        }
-}
-
-void
-IO::silence (framecnt_t nframes)
+IO::silence (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
-		i->get_buffer(nframes).silence (nframes);
-	}
-}
-
-/** Set _bundles_connected to those bundles that are connected such that every
- *  port on every bundle channel x is connected to port x in _ports.
- */
-void
-IO::check_bundles_connected ()
-{
-	std::vector<UserBundleInfo*> new_list;
-
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-
-		uint32_t const N = (*i)->bundle->nchannels().n_total();
-
-		if (_ports.num_ports() < N) {
-			continue;
-		}
-
-		bool ok = true;
-
-		for (uint32_t j = 0; j < N; ++j) {
-			/* Every port on bundle channel j must be connected to our input j */
-			Bundle::PortList const pl = (*i)->bundle->channel_ports (j);
-			for (uint32_t k = 0; k < pl.size(); ++k) {
-				if (_ports.port(j)->connected_to (pl[k]) == false) {
-					ok = false;
-					break;
-				}
-			}
-
-			if (ok == false) {
-				break;
-			}
-		}
-
-		if (ok) {
-			new_list.push_back (*i);
-		} else {
-			delete *i;
+		if (i->port_handle ()) {
+			i->get_buffer(nframes).silence (nframes);
 		}
 	}
-
-	_bundles_connected = new_list;
 }
-
 
 int
 IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
@@ -200,26 +149,24 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 		return 0;
 	}
 
-        {
-                Glib::Threads::Mutex::Lock lm (io_lock);
+	{
+		Glib::Threads::Mutex::Lock lm (io_lock);
 
-                /* check that our_port is really one of ours */
+		/* check that our_port is really one of ours */
 
-                if ( ! _ports.contains(our_port)) {
-                        return -1;
-                }
+		if ( ! _ports.contains(our_port)) {
+			return -1;
+		}
 
-                /* disconnect it from the source */
+		/* disconnect it from the source */
 
-                if (our_port->disconnect (other_port)) {
-                        error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
-                        return -1;
-                }
+		if (our_port->disconnect (other_port)) {
+			error << string_compose(_("IO: cannot disconnect port %1 from %2"), our_port->name(), other_port) << endmsg;
+			return -1;
+		}
+	}
 
-                check_bundles_connected ();
-        }
-
-        changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
+	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
 
 	_session.set_dirty ();
 
@@ -283,7 +230,6 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 				}
 
 				_session.engine().unregister_port (port);
-				check_bundles_connected ();
 			}
 		}
 
@@ -390,8 +336,6 @@ IO::disconnect (void* src)
 		for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
 			i->disconnect_all ();
 		}
-
-		check_bundles_connected ();
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -477,7 +421,6 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	}
 
 	if (changed) {
-		check_bundles_connected ();
 		PortCountChanged (n_ports()); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
@@ -543,33 +486,23 @@ IO::ensure_io (ChanCount count, bool clear, void* src)
 XMLNode&
 IO::get_state ()
 {
-	return state (true);
+	return state ();
 }
 
 XMLNode&
-IO::state (bool /*full_state*/)
+IO::state ()
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	char buf[64];
-	string str;
 	int n;
-	LocaleGuard lg;
 	Glib::Threads::Mutex::Lock lm (io_lock);
 
-	node->add_property("name", _name);
-	id().print (buf, sizeof (buf));
-	node->add_property("id", buf);
-	node->add_property ("direction", enum_2_string (_direction));
-	node->add_property ("default-type", _default_type.to_string());
+	node->set_property ("name", name());
+	node->set_property ("id", id ());
+	node->set_property ("direction", _direction);
+	node->set_property ("default-type", _default_type);
 
 	if (!_pretty_name_prefix.empty ()) {
-		node->add_property("pretty-name", _pretty_name_prefix);
-	}
-
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		XMLNode* n = new XMLNode ("Bundle");
-		n->add_property ("name", (*i)->bundle->name ());
-		node->add_child_nocopy (*n);
+		node->set_property("pretty-name", _pretty_name_prefix);
 	}
 
 	for (PortSet::iterator i = _ports.begin(); i != _ports.end(); ++i) {
@@ -577,8 +510,8 @@ IO::state (bool /*full_state*/)
 		vector<string> connections;
 
 		XMLNode* pnode = new XMLNode (X_("Port"));
-		pnode->add_property (X_("type"), i->type().to_string());
-		pnode->add_property (X_("name"), i->name());
+		pnode->set_property (X_("type"), i->type());
+		pnode->set_property (X_("name"), i->name());
 
 		if (i->get_connections (connections)) {
 			vector<string>::const_iterator ci;
@@ -595,7 +528,7 @@ IO::state (bool /*full_state*/)
 
 				XMLNode* cnode = new XMLNode (X_("Connection"));
 
-				cnode->add_property (X_("other"), _session.engine().make_port_name_relative (*ci));
+				cnode->set_property (X_("other"), _session.engine().make_port_name_relative (*ci));
 				pnode->add_child_nocopy (*cnode);
 			}
 		}
@@ -603,8 +536,7 @@ IO::state (bool /*full_state*/)
 		node->add_child_nocopy (*pnode);
 	}
 
-	snprintf (buf, sizeof (buf), "%" PRId64, _user_latency);
-	node->add_property (X_("user-latency"), buf);
+	node->set_property (X_("user-latency"), _user_latency);
 
 	return *node;
 }
@@ -618,10 +550,6 @@ IO::set_state (const XMLNode& node, int version)
 	 */
 	assert (version >= 3000);
 
-	XMLProperty const * prop;
-	XMLNodeConstIterator iter;
-	LocaleGuard lg;
-
 	/* force use of non-localized representation of decimal point,
 	   since we use it a lot in XML files and so forth.
 	*/
@@ -631,28 +559,27 @@ IO::set_state (const XMLNode& node, int version)
 		return -1;
 	}
 
-	if ((prop = node.property ("name")) != 0) {
-		set_name (prop->value());
+	bool ignore_name = node.property ("ignore-name");
+	std::string name;
+	if (node.get_property ("name", name) && !ignore_name) {
+		set_name (name);
 	}
 
-	if ((prop = node.property (X_("default-type"))) != 0) {
-		_default_type = DataType(prop->value());
+	if (node.get_property (X_("default-type"), _default_type)) {
 		assert(_default_type != DataType::NIL);
 	}
 
 	set_id (node);
 
-	if ((prop = node.property ("direction")) != 0) {
-		_direction = (Direction) string_2_enum (prop->value(), _direction);
-	}
+	node.get_property ("direction", _direction);
 
 	if (create_ports (node, version)) {
 		return -1;
 	}
 
 	// after create_ports, updates names
-	if ((prop = node.property ("pretty-name")) != 0) {
-		set_pretty_name (prop->value());
+	if (node.get_property ("pretty-name", name)) {
+		set_pretty_name (name);
 	}
 
 	if (connecting_legal) {
@@ -670,9 +597,7 @@ IO::set_state (const XMLNode& node, int version)
 		ConnectingLegal.connect_same_thread (connection_legal_c, boost::bind (&IO::connecting_became_legal, this));
 	}
 
-	if ((prop = node.property ("user-latency")) != 0) {
-		_user_latency = atoi (prop->value ());
-	}
+	node.get_property ("user-latency", _user_latency);
 
 	return 0;
 }
@@ -737,10 +662,10 @@ IO::connecting_became_legal ()
 
 	connection_legal_c.disconnect ();
 
-    // it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
-    if (!Profile->get_trx() ) {
-        ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
-    }
+	// it's not required for TracksLive, as long as TracksLive's session does all the connections when it's being loaded
+	if (!Profile->get_trx() ) {
+		ret = make_connections (*pending_state_node, pending_state_node_version, pending_state_node_in);
+	}
 
 	delete pending_state_node;
 	pending_state_node = 0;
@@ -762,6 +687,7 @@ IO::find_possible_bundle (const string &desired_name)
 		string possible_name;
 		bool stereo = false;
 		string::size_type last_non_digit_pos;
+		std::string bundle_number_str;
 
 		error << string_compose(_("Unknown bundle \"%1\" listed for %2 of %3"), desired_name, bundle_type_name, _name)
 		      << endmsg;
@@ -772,9 +698,8 @@ IO::find_possible_bundle (const string &desired_name)
 		last_non_digit_pos = desired_name.find_last_not_of(digits);
 
 		if (last_non_digit_pos != string::npos) {
-			stringstream s;
-			s << desired_name.substr(last_non_digit_pos);
-			s >> bundle_number;
+			bundle_number_str = desired_name.substr(last_non_digit_pos);
+			bundle_number = string_to<int32_t>(bundle_number_str);
 		}
 
 		// see if it's a stereo connection e.g. "in 3+4"
@@ -786,9 +711,8 @@ IO::find_possible_bundle (const string &desired_name)
 
 			if (left_last_non_digit_pos != string::npos) {
 				int left_bundle_number = 0;
-				stringstream s;
-				s << desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
-				s >> left_bundle_number;
+				bundle_number_str = desired_name.substr(left_last_non_digit_pos, last_non_digit_pos-1);
+				left_bundle_number = string_to<int32_t>(bundle_number_str);
 
 				if (left_bundle_number > 0 && left_bundle_number + 1 == bundle_number) {
 					bundle_number--;
@@ -813,14 +737,11 @@ IO::find_possible_bundle (const string &desired_name)
 			if (bundle_number & mask) {
 				bundle_number &= ~mask;
 
-				stringstream s;
-				s << default_name << " " << bundle_number + 1;
+				std::string possible_name = default_name + " " + to_string(bundle_number + 1);
 
 				if (stereo) {
-					s << "+" << bundle_number + 2;
+					possible_name += "+" + to_string(bundle_number + 2);
 				}
-
-				possible_name = s.str();
 
 				if ((c = _session.bundle_by_name (possible_name)) != 0) {
 					break;
@@ -993,7 +914,7 @@ IO::make_connections (const XMLNode& node, int version, bool in)
 					}
 
 					if (prop) {
-                                                connect (p, prop->value(), this);
+						connect (p, prop->value(), this);
 					}
 				}
 			}
@@ -1007,7 +928,7 @@ void
 IO::prepare_for_reset (XMLNode& node, const std::string& name)
 {
 	/* reset name */
-	node.add_property ("name", name);
+	node.set_property ("name", name);
 
 	/* now find connections and reset the name of the port
 	   in one so that when we re-use it it will match
@@ -1283,34 +1204,113 @@ IO::apply_pretty_name ()
 	}
 }
 
-framecnt_t
+void
+IO::set_private_port_latencies (samplecnt_t value, bool playback)
+{
+	LatencyRange lat;
+	lat.min = lat.max = value;
+	for (PortSet::iterator i = _ports.begin (); i != _ports.end(); ++i) {
+		 i->set_private_latency_range (lat, playback);
+	}
+}
+
+void
+IO::set_public_port_latencies (samplecnt_t value, bool playback) const
+{
+	LatencyRange lat;
+	lat.min = lat.max = value;
+	for (PortSet::const_iterator i = _ports.begin (); i != _ports.end(); ++i) {
+		 i->set_public_latency_range (lat, playback);
+	}
+}
+
+samplecnt_t
 IO::latency () const
 {
-	framecnt_t max_latency;
-	framecnt_t latency;
-
-	max_latency = 0;
+	samplecnt_t max_latency = 0;
 
 	/* io lock not taken - must be protected by other means */
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		samplecnt_t latency;
 		if ((latency = i->private_latency_range (_direction == Output).max) > max_latency) {
-                        DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
-                                                                     name(),
-                                                                     ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
-                                                                     latency));
+			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                             name(),
+			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                             latency));
 			max_latency = latency;
 		}
 	}
 
-        DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
-                                                     name(), _ports.num_ports(), max_latency,
-                                                     ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 latency from %2 ports = %3\n",
+	                                             name(), _ports.num_ports(), max_latency,
+	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	return max_latency;
+}
+
+samplecnt_t
+IO::public_latency () const
+{
+	samplecnt_t max_latency = 0;
+
+	/* io lock not taken - must be protected by other means */
+
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		samplecnt_t latency;
+		if ((latency = i->public_latency_range (_direction == Output).max) > max_latency) {
+			DEBUG_TRACE (DEBUG::Latency, string_compose ("port %1 has %2 latency of %3 - use\n",
+			                                             name(),
+			                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE"),
+			                                             latency));
+			max_latency = latency;
+		}
+	}
+
+	DEBUG_TRACE (DEBUG::Latency, string_compose ("%1: max %4 public latency from %2 ports = %3\n",
+	                                             name(), _ports.num_ports(), max_latency,
+	                                             ((_direction == Output) ? "PLAYBACK" : "CAPTURE")));
+	return max_latency;
+}
+
+samplecnt_t
+IO::connected_latency (bool for_playback) const
+{
+	/* io lock not taken - must be protected by other means */
+	samplecnt_t max_latency = 0;
+	bool connected = false;
+
+	/* if output is not connected to anything, use private latency */
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		if (i->connected()) {
+			connected = true;
+			max_latency = 0;
+			break;
+		}
+		samplecnt_t latency;
+		if ((latency = i->private_latency_range (for_playback).max) > max_latency) {
+			max_latency = latency;
+		}
+	}
+	if (connected) {
+		for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+			LatencyRange lr;
+			i->get_connected_latency_range (lr, for_playback);
+			if (lr.max > max_latency) {
+				max_latency = lr.max;
+			}
+		}
+	}
 	return max_latency;
 }
 
 int
-IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src)
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src) {
+	return connect_ports_to_bundle(c, exclusive, false, src);
+}
+
+int
+IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive,
+                             bool allow_partial, void* src)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -1323,24 +1323,8 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* 
 			}
 		}
 
-		c->connect (_bundle, _session.engine());
+		c->connect (_bundle, _session.engine(), allow_partial);
 
-		/* If this is a UserBundle, make a note of what we've done */
-
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			/* See if we already know about this one */
-			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
-				++i;
-			}
-
-			if (i == _bundles_connected.end()) {
-				/* We don't, so make a note */
-				_bundles_connected.push_back (new UserBundleInfo (this, ub));
-			}
-		}
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -1359,19 +1343,6 @@ IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
 
 		/* If this is a UserBundle, make a note of what we've done */
 
-		boost::shared_ptr<UserBundle> ub = boost::dynamic_pointer_cast<UserBundle> (c);
-		if (ub) {
-
-			std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin();
-			while (i != _bundles_connected.end() && (*i)->bundle != ub) {
-				++i;
-			}
-
-			if (i != _bundles_connected.end()) {
-				delete *i;
-				_bundles_connected.erase (i);
-			}
-		}
 	}
 
 	changed (IOChange (IOChange::ConnectionsChanged), src); /* EMIT SIGNAL */
@@ -1508,11 +1479,10 @@ IO::midi(uint32_t n) const
 /**
  *  Setup a bundle that describe our inputs or outputs. Also creates the bundle if necessary.
  */
-
 void
 IO::setup_bundle ()
 {
-        char buf[32];
+	char buf[32];
 
 	if (!_bundle) {
 		_bundle.reset (new Bundle (_direction == Input));
@@ -1527,7 +1497,7 @@ IO::setup_bundle ()
 	} else {
 		snprintf(buf, sizeof (buf), _("%s out"), _name.val().c_str());
 	}
-        _bundle->set_name (buf);
+	_bundle->set_name (buf);
 
 	int c = 0;
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
@@ -1549,11 +1519,6 @@ BundleList
 IO::bundles_connected ()
 {
 	BundleList bundles;
-
-	/* User bundles */
-	for (std::vector<UserBundleInfo*>::iterator i = _bundles_connected.begin(); i != _bundles_connected.end(); ++i) {
-		bundles.push_back ((*i)->bundle);
-	}
 
 	/* Session bundles */
 	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
@@ -1633,13 +1598,13 @@ IO::name_from_state (const XMLNode& node)
 void
 IO::set_name_in_state (XMLNode& node, const string& new_name)
 {
-	node.add_property (X_("name"), new_name);
+	node.set_property (X_("name"), new_name);
 	XMLNodeList children = node.children ();
 	for (XMLNodeIterator i = children.begin(); i != children.end(); ++i) {
 		if ((*i)->name() == X_("Port")) {
 			string const old_name = (*i)->property(X_("name"))->value();
 			string const old_name_second_part = old_name.substr (old_name.find_first_of ("/") + 1);
-			(*i)->add_property (X_("name"), string_compose ("%1/%2", new_name, old_name_second_part));
+			(*i)->set_property (X_("name"), string_compose ("%1/%2", new_name, old_name_second_part));
 		}
 	}
 }
@@ -1647,22 +1612,22 @@ IO::set_name_in_state (XMLNode& node, const string& new_name)
 bool
 IO::connected () const
 {
-        /* do we have any connections at all? */
+	/* do we have any connections at all? */
 
-        for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
-                if (p->connected()) {
-                        return true;
-                }
-        }
+	for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
+		if (p->connected()) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool
 IO::connected_to (boost::shared_ptr<const IO> other) const
 {
 	if (!other) {
-                return connected ();
+		return connected ();
 	}
 
 	assert (_direction != other->direction());
@@ -1696,25 +1661,6 @@ IO::connected_to (const string& str) const
 	return false;
 }
 
-/** Call a processor's ::run() method, giving it our buffers
- *  Caller must hold process lock.
- */
-void
-IO::process_input (boost::shared_ptr<Processor> proc, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes)
-{
-	/* don't read the data into new buffers - just use the port buffers directly */
-
-	if (n_ports().n_total() == 0) {
-		/* We have no ports, so nothing to process */
-		return;
-	}
-
-	_buffers.get_backend_port_addresses (_ports, nframes);
-	if (proc) {
-		proc->run (_buffers, start_frame, end_frame, speed, nframes, true);
-	}
-}
-
 void
 IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 {
@@ -1744,7 +1690,7 @@ IO::collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset)
 }
 
 void
-IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, framecnt_t offset)
+IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecnt_t offset)
 {
 	PortSet::iterator o = _ports.begin(type);
 	BufferSet::iterator i = bufs.begin(type);
@@ -1790,12 +1736,12 @@ bool
 IO::physically_connected () const
 {
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
-                if (i->physically_connected()) {
-                        return true;
-                }
-        }
+		if (i->physically_connected()) {
+			return true;
+		}
+	}
 
-        return false;
+	return false;
 }
 
 bool

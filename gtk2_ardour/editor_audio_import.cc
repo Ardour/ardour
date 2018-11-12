@@ -31,7 +31,7 @@
 #include "pbd/shortpath.h"
 #include "pbd/stateful_diff_command.h"
 
-#include <gtkmm2ext/choice.h>
+#include "widgets/choice.h"
 
 #include "ardour/audio_track.h"
 #include "ardour/audiofilesource.h"
@@ -263,7 +263,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 }
 
 void
-Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
+Editor::import_smf_tempo_map (Evoral::SMF const & smf, samplepos_t pos)
 {
 	if (!_session) {
 		return;
@@ -275,7 +275,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 		return;
 	}
 
-	const framecnt_t sample_rate = _session->frame_rate ();
+	const samplecnt_t sample_rate = _session->sample_rate ();
 	TempoMap new_map (sample_rate);
 	Meter last_meter (4.0, 4.0);
 	bool have_initial_meter = false;
@@ -285,27 +285,27 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, framepos_t pos)
 		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
 		assert (t);
 
-		Tempo tempo (t->tempo(), 4.0);
+		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
 		Meter meter (t->numerator, t->denominator);
 		Timecode::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
-			new_map.add_tempo (tempo, (t->time_pulses/smf.ppqn()) / 4.0, 0, TempoSection::Constant, MusicTime);
+			new_map.add_tempo (tempo, t->time_pulses/ (double)smf.ppqn() / 4.0, 0, MusicTime);
 			if (!(meter == last_meter)) {
-				bbt = new_map.bbt_at_quarter_note ((t->time_pulses/smf.ppqn()));
-				new_map.add_meter (meter, t->time_pulses, bbt, 0, MusicTime);
+				bbt = new_map.bbt_at_quarter_note (t->time_pulses/(double)smf.ppqn());
+				new_map.add_meter (meter, bbt, 0, MusicTime);
 			}
 
 		} else {
-			new_map.replace_meter (new_map.meter_section_at_frame (0), meter, bbt, pos, AudioTime);
-			new_map.replace_tempo (new_map.tempo_section_at_frame (0), tempo, 0.0, pos, TempoSection::Constant, AudioTime);
+			new_map.replace_meter (new_map.meter_section_at_sample (0), meter, bbt, pos, AudioTime);
+			new_map.replace_tempo (new_map.tempo_section_at_sample (0), tempo, 0.0, pos, AudioTime);
 			have_initial_meter = true;
 
 		}
 
 		last_meter = meter;
 
-		cerr << "@ " << t->time_pulses/smf.ppqn() << " ("
+		cerr << "@ " << t->time_pulses/(double)smf.ppqn() << " ("
 		     << t->time_seconds << ") Add T " << tempo << " M " << meter << endl;
 	}
 
@@ -322,7 +322,7 @@ Editor::do_import (vector<string>        paths,
                    SrcQuality            quality,
                    MidiTrackNameSource   midi_track_name_source,
                    MidiTempoMapDisposition smf_tempo_disposition,
-                   framepos_t&           pos,
+                   samplepos_t&           pos,
                    ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
@@ -461,7 +461,7 @@ Editor::do_import (vector<string>        paths,
 }
 
 void
-Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, framepos_t& pos, ARDOUR::PluginInfoPtr instrument)
+Editor::do_embed (vector<string> paths, ImportDisposition import_as, ImportMode mode, samplepos_t& pos, ARDOUR::PluginInfoPtr instrument)
 {
 	boost::shared_ptr<Track> track;
 	bool check_sample_rate = true;
@@ -547,7 +547,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          ImportDisposition         disposition,
                          ImportMode                mode,
                          SrcQuality                quality,
-                         framepos_t&               pos,
+                         samplepos_t&               pos,
                          int                       target_regions,
                          int                       target_tracks,
                          boost::shared_ptr<Track>& track,
@@ -617,7 +617,7 @@ Editor::embed_sndfiles (vector<string>            paths,
                         bool&                     check_sample_rate,
                         ImportDisposition         disposition,
                         ImportMode                mode,
-                        framepos_t&               pos,
+                        samplepos_t&               pos,
                         int                       target_regions,
                         int                       target_tracks,
                         boost::shared_ptr<Track>& track,
@@ -629,7 +629,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 	SoundFileInfo finfo;
 
 	CursorContext::Handle cursor_ctx = CursorContext::create(*this, _cursors->wait);
-        gdk_flush ();
+	gdk_flush ();
 
 	for (vector<string>::iterator p = paths.begin(); p != paths.end(); ++p) {
 
@@ -643,7 +643,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 			return -3;
 		}
 
-		if (check_sample_rate  && (finfo.samplerate != (int) _session->frame_rate())) {
+		if (check_sample_rate  && (finfo.samplerate != (int) _session->sample_rate())) {
 			vector<string> choices;
 
 			if (multifile) {
@@ -651,7 +651,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Don't embed it"));
 				choices.push_back (_("Embed all without questions"));
 
-				Gtkmm2ext::Choice rate_choice (
+				ArdourWidgets::Choice rate_choice (
 					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"),
 							short_path (path, 40)),
@@ -677,7 +677,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 				choices.push_back (_("Cancel"));
 				choices.push_back (_("Embed it anyway"));
 
-				Gtkmm2ext::Choice rate_choice (
+				ArdourWidgets::Choice rate_choice (
 					_("Sample rate"),
 					string_compose (_("%1\nThis audiofile's sample rate doesn't match the session sample rate!"), path),
 					choices, false
@@ -739,7 +739,7 @@ Editor::embed_sndfiles (vector<string>            paths,
 int
 Editor::add_sources (vector<string>            paths,
                      SourceList&               sources,
-                     framepos_t&               pos,
+                     samplepos_t&               pos,
                      ImportDisposition         disposition,
                      ImportMode                mode,
                      int                       target_regions,
@@ -857,12 +857,12 @@ Editor::add_sources (vector<string>            paths,
 
 			/* Fudge region length to ensure it is non-zero; make it 1 beat at 120bpm
 			   for want of a better idea.  It can't be too small, otherwise if this
-			   is a MIDI region the conversion from frames -> beats -> frames will
+			   is a MIDI region the conversion from samples -> beats -> samples will
 			   round it back down to 0 again.
 			*/
-			framecnt_t len = (*x)->length (pos);
+			samplecnt_t len = (*x)->length (pos);
 			if (len == 0) {
-				len = (60.0 / 120.0) * _session->frame_rate ();
+				len = (60.0 / 120.0) * _session->sample_rate ();
 			}
 
 			plist.add (ARDOUR::Properties::start, 0);
@@ -899,7 +899,7 @@ Editor::add_sources (vector<string>            paths,
 	}
 
 	int n = 0;
-	framepos_t rlen = 0;
+	samplepos_t rlen = 0;
 
 	begin_reversible_command (Operations::insert_file);
 
@@ -913,33 +913,33 @@ Editor::add_sources (vector<string>            paths,
 		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
 
 		if (use_timestamp) {
-                        if (ar) {
+			if (ar) {
 
-                                /* get timestamp for this region */
+				/* get timestamp for this region */
 
-                                const boost::shared_ptr<Source> s (ar->sources().front());
-                                const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+				const boost::shared_ptr<Source> s (ar->sources().front());
+				const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
 
-                                assert (as);
+				assert (as);
 
-                                if (as->natural_position() != 0) {
-                                        pos = as->natural_position();
-                                } else if (target_tracks == 1) {
-                                        /* hmm, no timestamp available, put it after the previous region
-                                         */
-                                        if (n == 0) {
-                                                pos = get_preferred_edit_position ();
-                                        } else {
-                                                pos += rlen;
-                                        }
-                                } else {
-                                        pos = get_preferred_edit_position ();
-                                }
-                        } else {
-                                /* should really get first position in MIDI file, but for now, use edit position*/
-                                pos = get_preferred_edit_position ();
-                        }
-                }
+				if (as->natural_position() != 0) {
+					pos = as->natural_position();
+				} else if (target_tracks == 1) {
+					/* hmm, no timestamp available, put it after the previous region
+					 */
+					if (n == 0) {
+						pos = get_preferred_edit_position ();
+					} else {
+						pos += rlen;
+					}
+				} else {
+					pos = get_preferred_edit_position ();
+				}
+			} else {
+				/* should really get first position in MIDI file, but for now, use edit position*/
+				pos = get_preferred_edit_position ();
+			}
+		}
 
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], instrument);
 
@@ -970,7 +970,7 @@ int
 Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
                                      uint32_t                  in_chans,
                                      uint32_t                  out_chans,
-                                     framepos_t&               pos,
+                                     samplepos_t&               pos,
                                      ImportMode                mode,
                                      boost::shared_ptr<Track>& existing_track,
                                      const string&             new_track_name,
@@ -1029,7 +1029,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			} else if (mr) {
 				list<boost::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
-					                          ChanCount (DataType::MIDI, 1),
+						                  ChanCount (DataType::MIDI, 1),
 					                          Config->get_strict_io () || Profile->get_mixbus (),
 					                          instrument, (Plugin::PresetRecord*) 0,
 					                          (RouteGroup*) 0,

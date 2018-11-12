@@ -44,7 +44,7 @@ class LIBARDOUR_API SourceFactory {
 
 	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
 	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node,
-	                                               framecnt_t nframes, float sample_rate);
+	                                               samplecnt_t nframes, float sample_rate);
 
 	static boost::shared_ptr<Source> createExternal
 		(DataType type, Session&,
@@ -54,7 +54,7 @@ class LIBARDOUR_API SourceFactory {
 	static boost::shared_ptr<Source> createWritable
 		(DataType type, Session&,
 		 const std::string& path,
-		 bool destructive, framecnt_t rate, bool announce = true, bool async = false);
+		 bool destructive, samplecnt_t rate, bool announce = true, bool async = false);
 
 
 	static boost::shared_ptr<Source> createForRecovery
@@ -62,7 +62,7 @@ class LIBARDOUR_API SourceFactory {
 
 	static boost::shared_ptr<Source> createFromPlaylist
 		(DataType type, Session& s, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name,
-		 uint32_t chn, frameoffset_t start, framecnt_t len, bool copy, bool defer_peaks);
+		 uint32_t chn, sampleoffset_t start, samplecnt_t len, bool copy, bool defer_peaks);
 
         static Glib::Threads::Cond                       PeaksToBuild;
         static Glib::Threads::Mutex                      peak_building_lock;

@@ -330,7 +330,7 @@ ChromagramPlugin::getOutputDescriptors() const
 
 ChromagramPlugin::FeatureSet
 ChromagramPlugin::process(const float *const *inputBuffers,
-                          Vamp::RealTime timestamp)
+                          Vamp::RealTime )
 {
     if (!m_chromagram) {
 	cerr << "ERROR: ChromagramPlugin::process: "
@@ -371,7 +371,7 @@ ChromagramPlugin::process(const float *const *inputBuffers,
 
     Feature feature;
     feature.hasTimestamp = false;
-    for (size_t i = 0; i < m_config.BPO; ++i) {
+    for (int i = 0; i < m_config.BPO; ++i) {
         double value = output[i];
 /*
         if (printThis) {
@@ -402,7 +402,7 @@ ChromagramPlugin::getRemainingFeatures()
     feature.hasTimestamp = true;
     feature.timestamp = Vamp::RealTime::zeroTime;
   
-    for (size_t i = 0; i < m_config.BPO; ++i) {
+    for (int i = 0; i < m_config.BPO; ++i) {
         double v = m_binsums[i];
         if (m_count > 0) v /= m_count;
         feature.values.push_back(v);

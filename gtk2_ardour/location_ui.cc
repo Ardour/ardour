@@ -24,24 +24,24 @@
 
 #include "ardour/session.h"
 #include "pbd/memento_command.h"
+#include "widgets/tooltips.h"
 
 #include "ardour_ui.h"
 #include "clock_group.h"
+#include "enums_convert.h"
 #include "main_clock.h"
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "location_ui.h"
-#include "prompter.h"
 #include "utils.h"
 #include "public_editor.h"
-#include "tooltips.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-using namespace ARDOUR_UI_UTILS;
+using namespace ArdourWidgets;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
@@ -284,7 +284,7 @@ LocationEditRow::set_location (Location *loc)
 		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
 
-		if (location->start() == _session->current_start_frame()) {
+		if (location->start() == _session->current_start_sample()) {
 			cd_check_button.set_sensitive (false);
 		} else {
 			cd_check_button.set_sensitive (true);
@@ -418,10 +418,10 @@ LocationEditRow::to_playhead_button_pressed (LocationPart part)
 
 	switch (part) {
 		case LocStart:
-			location->set_start (_session->transport_frame (), false, true, divisions);
+			location->set_start (_session->transport_sample (), false, true, divisions);
 			break;
 		case LocEnd:
-			location->set_end (_session->transport_frame (), false, true,divisions);
+			location->set_end (_session->transport_sample (), false, true,divisions);
 			if (location->is_session_range()) {
 				_session->set_end_is_free (false);
 			}
@@ -524,7 +524,7 @@ LocationEditRow::cd_toggled ()
 	//}
 
 	if (cd_check_button.get_active()) {
-		if (location->start() <= _session->current_start_frame()) {
+		if (location->start() <= _session->current_start_sample()) {
 			error << _("You cannot put a CD marker at the start of the session") << endmsg;
 			cd_check_button.set_active (false);
 			return;
@@ -646,7 +646,7 @@ LocationEditRow::start_changed ()
 
 	start_clock.set (location->start());
 
-	if (location->start() == _session->current_start_frame()) {
+	if (location->start() == _session->current_start_sample()) {
 		cd_check_button.set_sensitive (false);
 	} else {
 		cd_check_button.set_sensitive (true);
@@ -750,9 +750,12 @@ LocationEditRow::set_clock_editable_status ()
 
 /*------------------------------------------------------------------------*/
 
-LocationUI::LocationUI ()
+LocationUI::LocationUI (std::string state_node_name)
 	: add_location_button (_("New Marker"))
 	, add_range_button (_("New Range"))
+	, _mode (AudioClock::Samples)
+	, _mode_set (false)
+	, _state_node_name (state_node_name)
 {
 	i_am_the_modifier = 0;
 
@@ -1044,7 +1047,7 @@ LocationUI::add_new_location()
 	string markername;
 
 	if (_session) {
-		framepos_t where = _session->audible_frame();
+		samplepos_t where = _session->audible_sample();
 		_session->locations()->next_available_name(markername,"mark");
 		Location *location = new Location (*_session, where, where, markername, Location::IsMark);
 		if (UIConfiguration::instance().get_name_new_markers()) {
@@ -1066,7 +1069,7 @@ LocationUI::add_new_range()
 	string rangename;
 
 	if (_session) {
-		framepos_t where = _session->audible_frame();
+		samplepos_t where = _session->audible_sample();
 		_session->locations()->next_available_name(rangename,"unnamed");
 		Location *location = new Location (*_session, where, where, rangename, Location::IsRangeMarker);
 		PublicEditor::instance().begin_reversible_command (_("add range marker"));
@@ -1111,6 +1114,8 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
+	} else {
+		_mode_set = false;
 	}
 
 	loop_edit_row.set_session (s);
@@ -1137,31 +1142,53 @@ LocationUI::session_going_away()
 	punch_edit_row.set_session (0);
 	punch_edit_row.set_location (0);
 
+	_mode_set = false;
+
 	SessionHandlePtr::session_going_away ();
 }
 
 XMLNode &
 LocationUI::get_state () const
 {
-	XMLNode* node = new XMLNode (X_("LocationUI"));
-	node->add_property (X_("clock-mode"), enum_2_string (_clock_group->clock_mode ()));
+	XMLNode* node = new XMLNode (_state_node_name);
+	node->set_property (X_("clock-mode"), _clock_group->clock_mode ());
 	return *node;
 }
 
-AudioClock::Mode
-LocationUI::clock_mode_from_session_instant_xml () const
+int
+LocationUI::set_state (const XMLNode& node)
 {
-	XMLNode* node = _session->instant_xml (X_("LocationUI"));
-	if (!node) {
-		return AudioClock::Frames;
+	if (node.name() != _state_node_name) {
+		return -1;
 	}
 
-	XMLProperty const * p = node->property (X_("clock-mode"));
-	if (!p) {
+	if (!node.get_property (X_("clock-mode"), _mode)) {
+		return -1;
+	}
+
+	_mode_set = true;
+	_clock_group->set_clock_mode (_mode);
+	return 0;
+}
+
+AudioClock::Mode
+LocationUI::clock_mode_from_session_instant_xml ()
+{
+	if (_mode_set) {
+		return _mode;
+	}
+
+	XMLNode* node = _session->instant_xml (_state_node_name);
+	if (!node) {
 		return ARDOUR_UI::instance()->secondary_clock->mode();
 	}
 
-	return (AudioClock::Mode) string_2_enum (p->value (), AudioClock::Mode);
+	if (!node->get_property (X_("clock-mode"), _mode)) {
+		return ARDOUR_UI::instance()->secondary_clock->mode();
+	}
+
+	_mode_set = true;
+	return _mode;
 }
 
 

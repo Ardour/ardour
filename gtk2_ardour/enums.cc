@@ -19,7 +19,7 @@
 
 #include "pbd/enumwriter.h"
 
-#include "gtkmm2ext/ardour_icon.h"
+#include "widgets/ardour_icon.h"
 
 #include "audio_clock.h"
 #include "editing.h"
@@ -30,7 +30,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace Editing;
-using namespace Gtkmm2ext;
+using namespace ArdourWidgets;
 
 void
 setup_gtk_ardour_enums ()
@@ -45,7 +45,7 @@ setup_gtk_ardour_enums ()
 	EditPoint edit_point;
 	LayerDisplay layer_display;
 	RegionListSortType region_list_sort_type;
-	SnapType snap_type;
+	GridType grid_type;
 	SnapMode snap_mode;
 	ZoomFocus zoom_focus;
 	ItemType item_type;
@@ -59,7 +59,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AudioClock, Timecode);
 	REGISTER_CLASS_ENUM (AudioClock, BBT);
 	REGISTER_CLASS_ENUM (AudioClock, MinSec);
-	REGISTER_CLASS_ENUM (AudioClock, Frames);
+	REGISTER_CLASS_ENUM (AudioClock, Seconds);
+	REGISTER_CLASS_ENUM (AudioClock, Samples);
 	REGISTER (clock_mode);
 
 	REGISTER_ENUM (Wide);
@@ -93,37 +94,28 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (ByTimestamp);
 	REGISTER (region_list_sort_type);
 
-	REGISTER_ENUM (SnapToCDFrame);
-	REGISTER_ENUM (SnapToTimecodeFrame);
-	REGISTER_ENUM (SnapToTimecodeSeconds);
-	REGISTER_ENUM (SnapToTimecodeMinutes);
-	REGISTER_ENUM (SnapToSeconds);
-	REGISTER_ENUM (SnapToMinutes);
-	REGISTER_ENUM (SnapToBeatDiv128);
-	REGISTER_ENUM (SnapToBeatDiv64);
-	REGISTER_ENUM (SnapToBeatDiv32);
-	REGISTER_ENUM (SnapToBeatDiv28);
-	REGISTER_ENUM (SnapToBeatDiv24);
-	REGISTER_ENUM (SnapToBeatDiv20);
-	REGISTER_ENUM (SnapToBeatDiv16);
-	REGISTER_ENUM (SnapToBeatDiv14);
-	REGISTER_ENUM (SnapToBeatDiv12);
-	REGISTER_ENUM (SnapToBeatDiv10);
-	REGISTER_ENUM (SnapToBeatDiv8);
-	REGISTER_ENUM (SnapToBeatDiv7);
-	REGISTER_ENUM (SnapToBeatDiv6);
-	REGISTER_ENUM (SnapToBeatDiv5);
-	REGISTER_ENUM (SnapToBeatDiv4);
-	REGISTER_ENUM (SnapToBeatDiv3);
-	REGISTER_ENUM (SnapToBeatDiv2);
-	REGISTER_ENUM (SnapToBeat);
-	REGISTER_ENUM (SnapToBar);
-	REGISTER_ENUM (SnapToMark);
-	REGISTER_ENUM (SnapToRegionStart);
-	REGISTER_ENUM (SnapToRegionEnd);
-	REGISTER_ENUM (SnapToRegionSync);
-	REGISTER_ENUM (SnapToRegionBoundary);
-	REGISTER (snap_type);
+	REGISTER_ENUM (GridTypeNone);
+	REGISTER_ENUM (GridTypeBar);
+	REGISTER_ENUM (GridTypeBeat);
+	REGISTER_ENUM (GridTypeBeatDiv2);
+	REGISTER_ENUM (GridTypeBeatDiv4);
+	REGISTER_ENUM (GridTypeBeatDiv8);
+	REGISTER_ENUM (GridTypeBeatDiv16);
+	REGISTER_ENUM (GridTypeBeatDiv32);
+	REGISTER_ENUM (GridTypeBeatDiv3);
+	REGISTER_ENUM (GridTypeBeatDiv6);
+	REGISTER_ENUM (GridTypeBeatDiv12);
+	REGISTER_ENUM (GridTypeBeatDiv24);
+	REGISTER_ENUM (GridTypeBeatDiv5);
+	REGISTER_ENUM (GridTypeBeatDiv10);
+	REGISTER_ENUM (GridTypeBeatDiv20);
+	REGISTER_ENUM (GridTypeBeatDiv7);
+	REGISTER_ENUM (GridTypeBeatDiv14);
+	REGISTER_ENUM (GridTypeBeatDiv28);
+	REGISTER_ENUM (GridTypeTimecode);
+	REGISTER_ENUM (GridTypeMinSec);
+	REGISTER_ENUM (GridTypeCDFrame);
+	REGISTER (grid_type);
 
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);
@@ -168,8 +160,8 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (FadeOutHandleItem);
 	REGISTER_ENUM (NoteItem);
 	REGISTER_ENUM (FeatureLineItem);
-        REGISTER_ENUM (LeftFrameHandle);
-        REGISTER_ENUM (RightFrameHandle);
+	REGISTER_ENUM (LeftFrameHandle);
+	REGISTER_ENUM (RightFrameHandle);
 	REGISTER_ENUM (StartCrossFadeItem);
 	REGISTER_ENUM (EndCrossFadeItem);
 	REGISTER_ENUM (CrossfadeViewItem);

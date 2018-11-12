@@ -1,9 +1,10 @@
 #ifndef _ardour_gtk_simpple_progress_dialog_h_
 #define _ardour_gtk_simpple_progress_dialog_h_
 
-#include <gtkmm/messagedialog.h>
 #include <gtkmm/button.h>
+#include <gtkmm/messagedialog.h>
 #include <gtkmm/progressbar.h>
+#include <gtkmm/stock.h>
 
 #include "ardour/types.h"
 
@@ -25,7 +26,7 @@ public:
 		get_vbox()->pack_start (*cancel_button, PACK_SHRINK);
 	}
 
-	void update_progress (framecnt_t c, framecnt_t t) {
+	void update_progress (samplecnt_t c, samplecnt_t t) {
 		pbar->set_fraction ((float) c / (float) t);
 		// see also ARDOUR_UI::gui_idle_handler();
 		int timeout = 30;

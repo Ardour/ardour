@@ -50,14 +50,34 @@ public:
 	Automatable(Session&);
 	Automatable (const Automatable& other);
 
-        virtual ~Automatable();
+	virtual ~Automatable();
+
+	static bool skip_saving_automation; // to be used only by session-state
 
 	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
+
+	boost::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;
+	/* derived classes need to provide some way to search their own child
+	   automatable's for a control. normally, we'd just make the method
+	   above virtual, and let them override it. But that wouldn't
+	   differentiate the "check children" and "just your own" cases.
+
+	   We could theoretically just overload the above method with an extra
+	   "bool recurse = default", but the rules of name hiding for C++ mean
+	   that making a method virtual will hide other overloaded versions of
+	   the same name. This means that virtual automation_control (PBD::ID
+	   const &) would hide automation_control (Evoral::Parameter const &
+	   id).
+
+	   So, skip around all that with a different name.
+	*/
+	virtual boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const {
+		return automation_control (id);
+	}
 
 	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
 		return automation_control (id, false);
 	}
-
 	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id, bool create_if_missing);
 	boost::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
 
@@ -65,17 +85,15 @@ public:
 	virtual bool find_next_event (double start, double end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
-        virtual void transport_located (framepos_t now);
-	virtual void transport_stopped (framepos_t now);
+	virtual void non_realtime_locate (samplepos_t now);
+	virtual void non_realtime_transport_stop (samplepos_t now, bool flush);
+
+	virtual void automation_run (samplepos_t, pframes_t);
 
 	virtual std::string describe_parameter(Evoral::Parameter param);
-	virtual std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
 
 	AutoState get_parameter_automation_state (Evoral::Parameter param);
 	virtual void set_parameter_automation_state (Evoral::Parameter param, AutoState);
-
-	AutoStyle get_parameter_automation_style (Evoral::Parameter param);
-	void set_parameter_automation_style (Evoral::Parameter param, AutoStyle);
 
 	void protect_automation ();
 
@@ -89,7 +107,7 @@ public:
 
 	PBD::Signal0<void> AutomationStateChanged;
 
-  protected:
+protected:
 	Session& _a_session;
 
 	void can_automate(Evoral::Parameter);
@@ -101,7 +119,9 @@ public:
 
 	std::set<Evoral::Parameter> _can_automate_list;
 
-	framepos_t _last_automation_snapshot;
+	samplepos_t _last_automation_snapshot;
+
+	SlavableControlList slavables () const { return SlavableControlList(); }
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals

@@ -42,7 +42,7 @@ public:
 
 	uint32_t bit_slot() const { return _bitslot; }
 
-	void run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double speed, pframes_t nframes, bool);
+	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }
@@ -51,8 +51,6 @@ public:
 	bool metering() const { return _metering; }
 	void set_metering (bool yn) { _metering = yn; }
 
-	XMLNode& state(bool full);
-	XMLNode& get_state(void);
 	int      set_state(const XMLNode&, int version);
 
 	uint32_t pans_required() const { return _configured_input.n_audio(); }
@@ -63,7 +61,9 @@ public:
 	static uint32_t how_many_returns();
 	static std::string name_and_id_new_return (Session&, uint32_t&);
 
-  protected:
+protected:
+	XMLNode& state();
+
 	bool _metering;
 	boost::shared_ptr<GainControl> _gain_control;
 	boost::shared_ptr<Amp> _amp;

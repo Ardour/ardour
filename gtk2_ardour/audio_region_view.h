@@ -29,8 +29,9 @@
 #include "ardour/audioregion.h"
 
 #include "canvas/fwd.h"
-#include "canvas/wave_view.h"
 #include "canvas/xfade_curve.h"
+
+#include "waveview/wave_view.h"
 
 #include "region_view.h"
 #include "time_axis_view_item.h"
@@ -50,20 +51,20 @@ class RouteTimeAxisView;
 
 class AudioRegionView : public RegionView
 {
-  public:
+public:
 	AudioRegionView (ArdourCanvas::Container *,
-			 RouteTimeAxisView&,
-			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double initial_samples_per_pixel,
-			 uint32_t base_color);
+	                 RouteTimeAxisView&,
+	                 boost::shared_ptr<ARDOUR::AudioRegion>,
+	                 double initial_samples_per_pixel,
+	                 uint32_t base_color);
 
 	AudioRegionView (ArdourCanvas::Container *,
-			 RouteTimeAxisView&,
-			 boost::shared_ptr<ARDOUR::AudioRegion>,
-			 double samples_per_pixel,
-			 uint32_t base_color,
-			 bool recording,
-			 TimeAxisViewItem::Visibility);
+	                 RouteTimeAxisView&,
+	                 boost::shared_ptr<ARDOUR::AudioRegion>,
+	                 double samples_per_pixel,
+	                 uint32_t base_color,
+	                 bool recording,
+	                 TimeAxisViewItem::Visibility);
 
 	AudioRegionView (const AudioRegionView& other, boost::shared_ptr<ARDOUR::AudioRegion>);
 
@@ -86,7 +87,7 @@ class AudioRegionView : public RegionView
 
 	void update_envelope_visibility ();
 
-        void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
+	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
 	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
 
 	boost::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
@@ -96,14 +97,14 @@ class AudioRegionView : public RegionView
 
 	GhostRegion* add_ghost (TimeAxisView&);
 
-	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
-	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, framecnt_t, bool drag_active = false);
+	void reset_fade_in_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, samplecnt_t, bool drag_active = false);
+	void reset_fade_out_shape_width (boost::shared_ptr<ARDOUR::AudioRegion> ar, samplecnt_t, bool drag_active = false);
 
-	framepos_t get_fade_in_shape_width ();
-	framepos_t get_fade_out_shape_width ();
+	samplepos_t get_fade_in_shape_width ();
+	samplepos_t get_fade_out_shape_width ();
 
 	void set_fade_visibility (bool);
-	void update_coverage_frames (LayerDisplay);
+	void update_coverage_samples (LayerDisplay);
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
@@ -118,8 +119,8 @@ class AudioRegionView : public RegionView
 	void drag_start ();
 	void drag_end ();
 
-        void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double);
-        void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, framecnt_t, ArdourCanvas::Points&, double, double, double);
+	void redraw_start_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, samplecnt_t, ArdourCanvas::Points&, double, double);
+	void redraw_end_xfade_to (boost::shared_ptr<ARDOUR::AudioRegion>, samplecnt_t, ArdourCanvas::Points&, double, double, double);
 	void redraw_start_xfade ();
 	void redraw_end_xfade ();
 
@@ -138,12 +139,12 @@ class AudioRegionView : public RegionView
 		return _end_xfade_visible;
 	}
 
-  protected:
+protected:
 
 	/* this constructor allows derived types
-	   to specify their visibility requirements
-	   to the TimeAxisViewItem parent class
-	*/
+	 * to specify their visibility requirements
+	 * to the TimeAxisViewItem parent class
+	 */
 
 	enum Flags {
 		WaveformVisible = 0x4,
@@ -151,10 +152,10 @@ class AudioRegionView : public RegionView
 		WaveformLogScaled = 0x10,
 	};
 
-	std::vector<ArdourCanvas::WaveView *> waves;
-	std::vector<ArdourCanvas::WaveView *> tmp_waves; ///< see ::create_waves()
+	std::vector<ArdourWaveView::WaveView *> waves;
+	std::vector<ArdourWaveView::WaveView *> tmp_waves; ///< see ::create_waves()
 
-	std::list<std::pair<framepos_t, ArdourCanvas::Line*> > feature_lines;
+	std::list<std::pair<samplepos_t, ArdourCanvas::Line*> > feature_lines;
 
 	ArdourCanvas::Polygon*          sync_mark; ///< polgyon for sync position
 	ArdourCanvas::Rectangle*        fade_in_handle; ///< fade in handle, or 0
@@ -194,9 +195,9 @@ class AudioRegionView : public RegionView
 	void peaks_ready_handler (uint32_t);
 
 	void set_colors ();
-        void set_waveform_colors ();
+	void set_waveform_colors ();
 	void reset_width_dependent_items (double pixel_width);
-	void set_frame_color ();
+	void set_sample_color ();
 
 	void color_handler ();
 
@@ -209,7 +210,7 @@ private:
 
 	void parameter_changed (std::string const &);
 	void setup_waveform_visibility ();
-	void set_some_waveform_colors (std::vector<ArdourCanvas::WaveView*>& waves_to_color);
+	void set_some_waveform_colors (std::vector<ArdourWaveView::WaveView*>& waves_to_color);
 
 	/** A ScopedConnection for each PeaksReady callback (one per channel).  Each member
 	 *  may be 0 if no connection exists.

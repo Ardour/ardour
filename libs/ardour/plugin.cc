@@ -87,19 +87,15 @@ PluginInfo::needs_midi_input () const
 	return (n_inputs.n_midi() != 0);
 }
 
-bool
-PluginInfo::is_instrument () const
-{
-	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
-}
-
 Plugin::Plugin (AudioEngine& e, Session& s)
 	: _engine (e)
 	, _session (s)
 	, _cycles (0)
+	, _owner (0)
 	, _have_presets (false)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
+	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
@@ -111,9 +107,11 @@ Plugin::Plugin (const Plugin& other)
 	, _session (other._session)
 	, _info (other._info)
 	, _cycles (0)
+	, _owner (other._owner)
 	, _have_presets (false)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
+	, _immediate_events(6096) // FIXME: size?
 {
 	_pending_stop_events.ensure_buffers (DataType::MIDI, 1, 4096);
 }
@@ -343,16 +341,28 @@ Plugin::preset_by_uri (const string& uri)
 	}
 }
 
+bool
+Plugin::write_immediate_event (size_t size, const uint8_t* buf)
+{
+	if (!Evoral::midi_event_is_valid (buf, size)) {
+		return false;
+	}
+	return (_immediate_events.write (0, Evoral::MIDI_EVENT, size, buf) == size);
+}
+
 int
 Plugin::connect_and_run (BufferSet& bufs,
-		framepos_t /*start*/, framepos_t /*end*/, double /*speed*/,
+		samplepos_t /*start*/, samplepos_t /*end*/, double /*speed*/,
 		ChanMapping /*in_map*/, ChanMapping /*out_map*/,
-		pframes_t /* nframes */, framecnt_t /*offset*/)
+		pframes_t nframes, samplecnt_t /*offset*/)
 {
 	if (bufs.count().n_midi() > 0) {
 
-		/* Track notes that we are sending to the plugin */
+		if (_immediate_events.read_space() && nframes > 0) {
+			_immediate_events.read (bufs.get_midi (0), 0, 1, nframes - 1, true);
+		}
 
+		/* Track notes that we are sending to the plugin */
 		const MidiBuffer& b = bufs.get_midi (0);
 
 		_tracker.track (b.begin(), b.end());
@@ -450,7 +460,6 @@ void
 Plugin::set_parameter (uint32_t /* which */, float /* value */)
 {
 	_parameter_changed_since_last_preset = true;
-	_session.set_dirty ();
 	PresetDirty (); /* EMIT SIGNAL */
 }
 
@@ -466,21 +475,9 @@ Plugin::parameter_changed_externally (uint32_t which, float /* value */)
 int
 Plugin::set_state (const XMLNode& node, int /*version*/)
 {
-	XMLProperty const * p = node.property (X_("last-preset-uri"));
-	if (p) {
-		_last_preset.uri = p->value ();
-	}
-
-	p = node.property (X_("last-preset-label"));
-	if (p) {
-		_last_preset.label = p->value ();
-	}
-
-	p = node.property (X_("parameter-changed-since-last-preset"));
-	if (p) {
-		_parameter_changed_since_last_preset = string_is_affirmative (p->value ());
-	}
-
+	node.get_property (X_("last-preset-uri"), _last_preset.uri);
+	node.get_property (X_("last-preset-label"), _last_preset.label);
+	node.get_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
 	return 0;
 }
 
@@ -488,11 +485,10 @@ XMLNode &
 Plugin::get_state ()
 {
 	XMLNode* root = new XMLNode (state_node_name ());
-	LocaleGuard lg;
 
-	root->add_property (X_("last-preset-uri"), _last_preset.uri);
-	root->add_property (X_("last-preset-label"), _last_preset.label);
-	root->add_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset ? X_("yes") : X_("no"));
+	root->set_property (X_("last-preset-uri"), _last_preset.uri);
+	root->set_property (X_("last-preset-label"), _last_preset.label);
+	root->set_property (X_("parameter-changed-since-last-preset"), _parameter_changed_since_last_preset);
 
 #ifndef NO_PLUGIN_STATE
 	add_state (root);
@@ -514,4 +510,43 @@ Plugin::set_info (PluginInfoPtr info)
 	_info = info;
 }
 
+std::string
+Plugin::parameter_label (uint32_t which) const
+{
+	if (which >= parameter_count ()) {
+		return "";
+	}
+	ParameterDescriptor pd;
+	get_parameter_descriptor (which, pd);
+	return pd.label;
+}
 
+bool
+PluginInfo::is_effect () const
+{
+	return (!is_instrument () && !is_utility ()  && !is_analyzer ());
+}
+
+bool
+PluginInfo::is_instrument () const
+{
+	if (category == "Instrument") {
+		return true;
+	}
+
+	// second check: if we have  midi input and audio output, we're likely an instrument
+	return (n_inputs.n_midi() != 0) && (n_outputs.n_audio() > 0) && (n_inputs.n_audio() == 0);
+}
+
+bool
+PluginInfo::is_utility () const
+{
+	/* XXX beware of translations, e.g. LV2 categories */
+	return (category == "Utility" || category == "MIDI" || category == "Generator");
+}
+
+bool
+PluginInfo::is_analyzer () const
+{
+	return (category == "Analyser" || category == "Anaylsis" || category == "Analyzer");
+}

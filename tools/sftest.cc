@@ -252,7 +252,7 @@ main (int argc, char* argv[])
 		cout << " all used " << (direct ? "without" : "with") << " OS buffer cache";
 #endif
 		cout << endl;
-		cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " frames, synced ? " << (with_sync ? "yes" : "no") << endl;
+		cout << "Format is " << suffix << ' ' << channels << " channel" << (channels > 1 ? "s" : "") << " written in chunks of " << block_size << " samples, synced ? " << (with_sync ? "yes" : "no") << endl;
 	}
 
 	data = new float[block_size*channels];
@@ -286,7 +286,7 @@ main (int argc, char* argv[])
 		min_bandwidth = min (min_bandwidth, bandwidth);
 
 		if (!quiet) {
-			cout << "BW @ " << written << " frames (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
+			cout << "BW @ " << written << " samples (" << ds.str() << " minutes) = " << (bandwidth/1048576.0) <<  " MB/sec " << bandwidth / data_rate << " x faster than necessary " << endl;
 		}
 	}
 

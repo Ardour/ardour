@@ -21,14 +21,17 @@
 #include <sys/mman.h>
 #include <sys/time.h>
 
+#include <mach/thread_policy.h>
+#include <mach/thread_act.h>
+
 #include <glibmm.h>
 
 #include "coreaudio_backend.h"
-#include "rt_thread.h"
 
 #include "pbd/compose.h"
 #include "pbd/error.h"
 #include "pbd/file_utils.h"
+#include "pbd/pthread_utils.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/port_manager.h"
 #include "pbd/i18n.h"
@@ -107,9 +110,12 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 {
 	_instance_name = s_instance_name;
 	pthread_mutex_init (&_port_callback_mutex, 0);
+	pthread_mutex_init (&_port_registration_mutex, 0);
 	pthread_mutex_init (&_process_callback_mutex, 0);
 	pthread_mutex_init (&_freewheel_mutex, 0);
 	pthread_cond_init  (&_freewheel_signal, 0);
+
+	_port_connection_queue.reserve (128);
 
 	_pcmio = new CoreAudioPCM ();
 	_midiio = new CoreMidiIo ();
@@ -123,6 +129,7 @@ CoreAudioBackend::~CoreAudioBackend ()
 	delete _pcmio; _pcmio = 0;
 	delete _midiio; _midiio = 0;
 	pthread_mutex_destroy (&_port_callback_mutex);
+	pthread_mutex_destroy (&_port_registration_mutex);
 	pthread_mutex_destroy (&_process_callback_mutex);
 	pthread_mutex_destroy (&_freewheel_mutex);
 	pthread_cond_destroy  (&_freewheel_signal);
@@ -327,7 +334,13 @@ CoreAudioBackend::set_buffer_size (uint32_t bs)
 	}
 	_samples_per_period = bs;
 	_pcmio->set_samples_per_period(bs);
-	engine.buffer_size_change (bs);
+	if (_run) {
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
+	}
+	for (std::vector<pthread_t>::const_iterator i = _threads.begin (); i != _threads.end (); ++i) {
+		pbd_mach_set_realtime_policy (*i, 1e9 * _samples_per_period / _samplerate);
+	}
+	//engine.buffer_size_change (bs);
 	return 0;
 }
 
@@ -603,11 +616,6 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		PBD::info << _("CoreAudioBackend: adjusted input channel count to match device.") << endmsg;
 	}
 
-	if (_pcmio->samples_per_period() != _samples_per_period) {
-		_samples_per_period = _pcmio->samples_per_period();
-		PBD::warning << _("CoreAudioBackend: samples per period does not match.") << endmsg;
-	}
-
 	if (_pcmio->sample_rate() != _samplerate) {
 		_samplerate = _pcmio->sample_rate();
 		engine.sample_rate_change (_samplerate);
@@ -750,13 +758,13 @@ CoreAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 CoreAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 CoreAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;
@@ -825,7 +833,7 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 
 	ThreadData* td = new ThreadData (this, func, stacksize);
 
-	if (_realtime_pthread_create (SCHED_FIFO, -21, stacksize,
+	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, -22, stacksize,
 	                              &thread_id, coreaudio_process_thread, td)) {
 		pthread_attr_init (&attr);
 		pthread_attr_setstacksize (&attr, stacksize);
@@ -836,6 +844,10 @@ CoreAudioBackend::create_process_thread (boost::function<void()> func)
 		}
 		PBD::warning << _("AudioEngine: process thread failed to acquire realtime permissions.") << endmsg;
 		pthread_attr_destroy (&attr);
+	}
+
+	if (pbd_mach_set_realtime_policy (thread_id, 1e9 * _samples_per_period / _samplerate)) {
+		PBD::warning << _("AudioEngine: process thread failed to set mach realtime policy.") << endmsg;
 	}
 
 	_threads.push_back (thread_id);
@@ -928,8 +940,10 @@ CoreAudioBackend::set_port_name (PortEngine::PortHandle port, const std::string&
 	}
 
 	CoreBackendPort* p = static_cast<CoreBackendPort*>(port);
+	pthread_mutex_lock (&_port_registration_mutex);
 	_portmap.erase (p->name());
 	_portmap.insert (make_pair (newname, p));
+	pthread_mutex_unlock (&_port_registration_mutex);
 	return p->set_name (newname);
 }
 
@@ -1056,8 +1070,10 @@ CoreAudioBackend::add_port (
 		return 0;
 	}
 
+	pthread_mutex_lock (&_port_registration_mutex);
 	_ports.insert (port);
 	_portmap.insert (make_pair (name, port));
+	pthread_mutex_unlock (&_port_registration_mutex);
 
 	return port;
 }
@@ -1075,8 +1091,10 @@ CoreAudioBackend::unregister_port (PortEngine::PortHandle port_handle)
 		return;
 	}
 	disconnect_all(port_handle);
+	pthread_mutex_lock (&_port_registration_mutex);
 	_portmap.erase (port->name());
 	_ports.erase (i);
+	pthread_mutex_unlock (&_port_registration_mutex);
 	delete port;
 }
 
@@ -1122,6 +1140,24 @@ CoreAudioBackend::register_system_audio_ports()
 		_system_outputs.push_back(cp);
 	}
 	return 0;
+}
+
+void
+CoreAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
 }
 
 void
@@ -1371,7 +1407,7 @@ CoreAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std:
 int
 CoreAudioBackend::midi_event_get (
 	pframes_t& timestamp,
-	size_t& size, uint8_t** buf, void* port_buffer,
+	size_t& size, uint8_t const** buf, void* port_buffer,
 	uint32_t event_index)
 {
 	if (!buf || !port_buffer) return -1;
@@ -1379,11 +1415,11 @@ CoreAudioBackend::midi_event_get (
 	if (event_index >= source.size ()) {
 		return -1;
 	}
-	CoreMidiEvent * const event = source[event_index].get ();
+	CoreMidiEvent const& event = source[event_index];
 
-	timestamp = event->timestamp ();
-	size = event->size ();
-	*buf = event->data ();
+	timestamp = event.timestamp ();
+	size = event.size ();
+	*buf = event.data ();
 	return 0;
 }
 
@@ -1394,15 +1430,18 @@ CoreAudioBackend::_midi_event_put (
 	const uint8_t* buffer, size_t size)
 {
 	if (!buffer || !port_buffer) return -1;
+	if (size >= MaxCoreMidiEventSize) {
+		return -1;
+	}
 	CoreMidiBuffer& dst = * static_cast<CoreMidiBuffer*>(port_buffer);
-	if (dst.size () && (pframes_t)dst.back ()->timestamp () > timestamp) {
 #ifndef NDEBUG
+	if (dst.size () && (pframes_t)dst.back ().timestamp () > timestamp) {
 		// nevermind, ::get_buffer() sorts events
 		fprintf (stderr, "CoreMidiBuffer: unordered event: %d > %d\n",
-		         (pframes_t)dst.back ()->timestamp (), timestamp);
-#endif
+		         (pframes_t)dst.back ().timestamp (), timestamp);
 	}
-	dst.push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (timestamp, buffer, size)));
+#endif
+	dst.push_back (CoreMidiEvent (timestamp, buffer, size));
 	return 0;
 }
 
@@ -1569,7 +1608,9 @@ CoreAudioBackend::n_physical_inputs () const
 void*
 CoreAudioBackend::get_buffer (PortEngine::PortHandle port, pframes_t nframes)
 {
-	if (!port || !valid_port (port)) return NULL;
+	assert (port);
+	assert (valid_port (port));
+	if (!port || !valid_port (port)) return NULL; // XXX remove me
 	return static_cast<CoreBackendPort*>(port)->get_buffer (nframes);
 }
 
@@ -1601,6 +1642,7 @@ CoreAudioBackend::pre_process ()
 		manager.graph_order_callback();
 	}
 	if (connections_changed || ports_changed) {
+		update_system_port_latecies ();
 		engine.latency_callback(false);
 		engine.latency_callback(true);
 	}
@@ -1671,6 +1713,7 @@ CoreAudioBackend::freewheel_thread ()
 			AudioEngine::thread_init_callback (this);
 			_midiio->set_enabled(false);
 			reset_midi_parsers ();
+			pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
 		}
 
 		// process port updates first in every cycle.
@@ -1736,6 +1779,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 		_reinit_thread_callback = false;
 		_main_thread = pthread_self();
 		AudioEngine::thread_init_callback (this);
+		pbd_mach_set_realtime_policy (_main_thread, 1e9 * _samples_per_period / _samplerate);
 	}
 
 	if (pthread_mutex_trylock (&_process_callback_mutex)) {
@@ -1762,7 +1806,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 			continue;
 		}
 		uint64_t time_ns;
-		uint8_t data[128]; // matches CoreMidi's MIDIPacket
+		uint8_t data[MaxCoreMidiEventSize];
 		size_t size = sizeof(data);
 
 		port->clear_events ();
@@ -1805,15 +1849,10 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* queue outgoing midi */
 	i = 0;
 	for (std::vector<CoreBackendPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
-#if 0 // something's still b0rked with CoreMidiIo::send_events()
-		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
-		_midiio->send_events (i, nominal_time, (void*)src);
-#else // works..
 		const CoreMidiBuffer *src = static_cast<const CoreMidiPort*>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-			_midiio->send_event (i, (*mit)->timestamp() / nominal_time, (*mit)->data(), (*mit)->size());
+			_midiio->send_event (i, mit->timestamp (), mit->data (), mit->size ());
 		}
-#endif
 	}
 
 	/* write back audio */
@@ -2041,7 +2080,6 @@ void CoreBackendPort::_disconnect (CoreBackendPort *port, bool callback)
 	}
 }
 
-
 void CoreBackendPort::disconnect_all ()
 {
 	while (!_connections.empty ()) {
@@ -2066,6 +2104,37 @@ bool CoreBackendPort::is_physically_connected () const
 		}
 	}
 	return false;
+}
+
+void
+CoreBackendPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::set<CoreBackendPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+CoreBackendPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	const std::set<CoreBackendPort *>& cp = get_connections ();
+	for (std::set<CoreBackendPort*>::const_iterator it = cp.begin (); it != cp.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
 }
 
 /******************************************************************************/
@@ -2119,13 +2188,16 @@ CoreMidiPort::CoreMidiPort (CoreAudioBackend &b, const std::string& name, PortFl
 {
 	_buffer[0].clear ();
 	_buffer[1].clear ();
+
+	_buffer[0].reserve (256);
+	_buffer[1].reserve (256);
 }
 
 CoreMidiPort::~CoreMidiPort () { }
 
 struct MidiEventSorter {
-	bool operator() (const boost::shared_ptr<CoreMidiEvent>& a, const boost::shared_ptr<CoreMidiEvent>& b) {
-		return *a < *b;
+	bool operator() (CoreMidiEvent const& a, CoreMidiEvent const& b) {
+		return a < b;
 	}
 };
 
@@ -2139,10 +2211,10 @@ void* CoreMidiPort::get_buffer (pframes_t /* nframes */)
 		     ++i) {
 			const CoreMidiBuffer * src = static_cast<const CoreMidiPort*>(*i)->const_buffer ();
 			for (CoreMidiBuffer::const_iterator it = src->begin (); it != src->end (); ++it) {
-				(_buffer[_bufperiod]).push_back (boost::shared_ptr<CoreMidiEvent>(new CoreMidiEvent (**it)));
+				(_buffer[_bufperiod]).push_back (*it);
 			}
 		}
-		std::sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
+		std::stable_sort ((_buffer[_bufperiod]).begin (), (_buffer[_bufperiod]).end (), MidiEventSorter());
 	}
 
 	return &(_buffer[_bufperiod]);
@@ -2308,10 +2380,8 @@ CoreMidiPort::process_byte(const uint64_t time, const uint8_t byte)
 CoreMidiEvent::CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, size_t size)
 	: _size (size)
 	, _timestamp (timestamp)
-	, _data (0)
 {
-	if (size > 0) {
-		_data = (uint8_t*) malloc (size);
+	if (size > 0 && size < MaxCoreMidiEventSize) {
 		memcpy (_data, data, size);
 	}
 }
@@ -2319,14 +2389,9 @@ CoreMidiEvent::CoreMidiEvent (const pframes_t timestamp, const uint8_t* data, si
 CoreMidiEvent::CoreMidiEvent (const CoreMidiEvent& other)
 	: _size (other.size ())
 	, _timestamp (other.timestamp ())
-	, _data (0)
 {
-	if (other.size () && other.const_data ()) {
-		_data = (uint8_t*) malloc (other.size ());
-		memcpy (_data, other.const_data (), other.size ());
+	if (other._size > 0) {
+		assert (other._size < MaxCoreMidiEventSize);
+		memcpy (_data, other._data, other._size);
 	}
-};
-
-CoreMidiEvent::~CoreMidiEvent () {
-	free (_data);
 };

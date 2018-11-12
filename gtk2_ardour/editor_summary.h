@@ -49,17 +49,10 @@ private:
 
 	enum Position {
 		LEFT,
-		LEFT_TOP,
-		TOP,
-		RIGHT_TOP,
 		RIGHT,
-		RIGHT_BOTTOM,
 		BOTTOM,
-		LEFT_BOTTOM,
 		INSIDE,
-		BELOW_OR_ABOVE,
-		TO_LEFT_OR_RIGHT,
-		OTHERWISE_OUTSIDE
+		TO_LEFT_OR_RIGHT
 	};
 
 	void on_size_request (Gtk::Requisition *);
@@ -67,52 +60,58 @@ private:
 	bool on_button_release_event (GdkEventButton *);
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_scroll_event (GdkEventScroll *);
-        bool on_key_press_event (GdkEventKey*);
-        bool on_key_release_event (GdkEventKey*);
-        bool on_enter_notify_event (GdkEventCrossing*);
-        bool on_leave_notify_event (GdkEventCrossing*);
+	bool on_key_press_event (GdkEventKey*);
+	bool on_key_release_event (GdkEventKey*);
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+
+	void reset_to_extents ();
 
 	void centre_on_click (GdkEventButton *);
-	void render (cairo_t *, cairo_rectangle_t*);
+	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
 	void render_region (RegionView*, cairo_t*, double) const;
-	void get_editor (std::pair<double, double> *, std::pair<double, double> *) const;
-	void set_editor (double, double);
-	void set_editor (std::pair<double, double>, double);
-	void set_editor (std::pair<double, double>, std::pair<double, double>);
+	void get_editor (std::pair<double, double>* x, std::pair<double, double>* y = NULL) const;
+	void set_editor (double);
+	void set_editor (std::pair<double, double>);
 	void set_editor_x (double);
 	void set_editor_x (std::pair<double, double>);
-	void set_editor_y (double);
-	void set_editor_y (std::pair<double, double>);
-	void playhead_position_changed (framepos_t);
-	double summary_y_to_editor (double) const;
+	void playhead_position_changed (samplepos_t);
 	double editor_y_to_summary (double) const;
 	Position get_position (double, double) const;
 	void set_cursor (Position);
 	void route_gui_changed (PBD::PropertyChange const&);
 	bool suspending_editor_updates () const;
-	double playhead_frame_to_position (framepos_t) const;
-        framepos_t position_to_playhead_frame_to_position (double pos) const;
-	void set_overlays_dirty (int, int, int, int);
+	double playhead_sample_to_position (samplepos_t) const;
+	samplepos_t position_to_playhead_sample_to_position (double pos) const;
+	void set_overlays_dirty_rect (int, int, int, int);
 
-	framepos_t _start; ///< start frame of the overview
-	framepos_t _end; ///< end frame of the overview
+	void summary_zoom_step (  int steps );
 
-	/** fraction of the session length by which the overview size should extend past the start and end markers */
-	double _overhang_fraction;
+	samplepos_t _start; ///< start sample of the overview
+	samplepos_t _end; ///< end sample of the overview
 
-	double _x_scale; ///< pixels per frame for the x axis of the pixmap
+	samplepos_t _leftmost; ///< the earliest sample we ever viewed
+	samplepos_t _rightmost; ///< the latest sample we ever viewed
+
+	double _x_scale; ///< pixels per sample for the x axis of the pixmap
 	double _track_height;
 	double _last_playhead;
 
 	std::pair<double, double> _start_editor_x;
-	std::pair<double, double> _start_editor_y;
 	double _start_mouse_x;
 	double _start_mouse_y;
 
 	Position _start_position;
 
 	bool _move_dragging;
-	bool _moved;
+
+	//used for zooming
+	int _last_mx;
+	int _last_my;
+	int _last_dx;
+	int _last_dy;
+	int _last_y_delta;
+
 	std::pair<double, double> _view_rectangle_x;
 	std::pair<double, double> _view_rectangle_y;
 
@@ -120,8 +119,8 @@ private:
 	std::pair<double, double> _pending_editor_y;
 	bool _pending_editor_changed;
 
-	bool _zoom_dragging;
-	Position _zoom_position;
+	bool _zoom_trim_dragging;
+	Position _zoom_trim_position;
 
 	bool _old_follow_playhead;
 	cairo_surface_t* _image;

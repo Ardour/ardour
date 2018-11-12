@@ -60,6 +60,7 @@
 #include "ardour/mac_vst_support.h"
 #include "ardour/mac_vst_plugin.h"
 #include "pbd/basename.h"
+#include "pbd/pathexpand.h"
 #include <cstring>
 #endif //MACVST_SUPPORT
 
@@ -68,9 +69,12 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
-#include "pbd/whitespace.h"
+#include "pbd/convert.h"
 #include "pbd/file_utils.h"
+#include "pbd/tokenizer.h"
+#include "pbd/whitespace.h"
 
+#include "ardour/directory_names.h"
 #include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 #include "ardour/ladspa.h"
@@ -169,6 +173,8 @@ PluginManager::PluginManager ()
 #endif
 
 	load_statuses ();
+
+	load_tags ();
 
 	if ((s = getenv ("LADSPA_RDF_PATH"))){
 		lrdf_path = s;
@@ -503,6 +509,7 @@ PluginManager::lua_refresh ()
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
 		LuaPluginInfoPtr lpi (new LuaPluginInfo(*s));
 		_lua_plugin_info->push_back (lpi);
+		set_tags (lpi->type, lpi->unique_id, lpi->category, lpi->name, FromPlug);
 	}
 }
 
@@ -671,23 +678,40 @@ PluginManager::ladspa_discover (string path)
 		PluginInfoPtr info(new LadspaPluginInfo);
 		info->name = descriptor->Name;
 		info->category = get_ladspa_category(descriptor->UniqueID);
-		info->creator = descriptor->Maker;
 		info->path = path;
 		info->index = i;
 		info->n_inputs = ChanCount();
 		info->n_outputs = ChanCount();
 		info->type = ARDOUR::LADSPA;
 
+		string::size_type pos = 0;
+		string creator = descriptor->Maker;
+		/* stupid LADSPA creator strings */
+#ifdef PLATFORM_WINDOWS
+		while (pos < creator.length() && creator[pos] > -2 && creator[pos] < 256 && (isalnum (creator[pos]) || isspace (creator[pos]) || creator[pos] == '.')) ++pos;
+#else
+		while (pos < creator.length() && (isalnum (creator[pos]) || isspace (creator[pos]) || creator[pos] == '.')) ++pos;
+#endif
+
+		/* If there were too few characters to create a
+		 * meaningful name, mark this creator as 'Unknown'
+		 */
+		if (creator.length() < 2 || pos < 3) {
+			info->creator = "Unknown";
+		} else{
+			info->creator = creator.substr (0, pos);
+		}
+
 		char buf[32];
 		snprintf (buf, sizeof (buf), "%lu", descriptor->UniqueID);
 		info->unique_id = buf;
 
 		for (uint32_t n=0; n < descriptor->PortCount; ++n) {
-			if ( LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n]) ) {
-				if ( LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n]) ) {
+			if (LADSPA_IS_PORT_AUDIO (descriptor->PortDescriptors[n])) {
+				if (LADSPA_IS_PORT_INPUT (descriptor->PortDescriptors[n])) {
 					info->n_inputs.set_audio(info->n_inputs.n_audio() + 1);
 				}
-				else if ( LADSPA_IS_PORT_OUTPUT (descriptor->PortDescriptors[n]) ) {
+				else if (LADSPA_IS_PORT_OUTPUT (descriptor->PortDescriptors[n])) {
 					info->n_outputs.set_audio(info->n_outputs.n_audio() + 1);
 				}
 			}
@@ -709,6 +733,7 @@ PluginManager::ladspa_discover (string path)
 
 		if(!found){
 		    _ladspa_plugin_info->push_back (info);
+			set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 		}
 
 		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("Found LADSPA plugin, name: %1, Inputs: %2, Outputs: %3\n", info->name, info->n_inputs, info->n_outputs));
@@ -793,6 +818,10 @@ PluginManager::lv2_refresh ()
 	DEBUG_TRACE (DEBUG::PluginManager, "LV2: refresh\n");
 	delete _lv2_plugin_info;
 	_lv2_plugin_info = LV2PluginInfo::discover();
+
+	for (PluginInfoList::iterator i = _lv2_plugin_info->begin(); i != _lv2_plugin_info->end(); ++i) {
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
+	}
 }
 #endif
 
@@ -813,6 +842,10 @@ PluginManager::au_refresh (bool cache_only)
 	// successful scan re-enabled automatic discovery if it was set
 	Config->set_discover_audio_units (discover_at_start);
 	Config->save_state();
+
+	for (PluginInfoList::iterator i = _au_plugin_info->begin(); i != _au_plugin_info->end(); ++i) {
+		set_tags ((*i)->type, (*i)->unique_id, (*i)->category, (*i)->name, FromPlug);
+	}
 }
 
 #endif
@@ -982,7 +1015,7 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "VST";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -991,6 +1024,9 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::Windows_VST;
+
+		/* if we don't have any tags for this plugin, make some up. */
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 
 		// TODO: check dup-IDs (lxvst AND windows vst)
 		bool duplicate = false;
@@ -1034,11 +1070,8 @@ PluginManager::mac_vst_refresh (bool cache_only)
 	mac_vst_discover_from_path ("~/Library/Audio/Plug-Ins/VST:/Library/Audio/Plug-Ins/VST", cache_only);
 }
 
-static bool mac_vst_filter (const string& str, void *)
+static bool mac_vst_filter (const string& str)
 {
-	if (!Glib::file_test (str, Glib::FILE_TEST_IS_DIR)) {
-		return false;
-	}
 	string plist = Glib::build_filename (str, "Contents", "Info.plist");
 	if (!Glib::file_test (plist, Glib::FILE_TEST_IS_REGULAR)) {
 		return false;
@@ -1049,20 +1082,43 @@ static bool mac_vst_filter (const string& str, void *)
 int
 PluginManager::mac_vst_discover_from_path (string path, bool cache_only)
 {
-	vector<string> plugin_objects;
-	vector<string>::iterator x;
-
 	if (Session::get_disable_all_loaded_plugins ()) {
 		info << _("Disabled MacVST scan (safe mode)") << endmsg;
 		return -1;
 	}
 
-	find_paths_matching_filter (plugin_objects, path, mac_vst_filter, 0, true, true, true);
+	Searchpath paths (path);
+	/* customized version of run_functor_for_paths() */
+	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
+		string expanded_path = path_expand (*i);
+		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
+		try {
+			Glib::Dir dir(expanded_path);
+			for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
+				string fullpath = Glib::build_filename (expanded_path, *di);
 
-	for (x = plugin_objects.begin(); x != plugin_objects.end (); ++x) {
-		ARDOUR::PluginScanMessage(_("MacVST"), *x, !cache_only && !cancelled());
-		mac_vst_discover (*x, cache_only || cancelled());
+				/* we're only interested in bundles */
+				if (!Glib::file_test (fullpath, Glib::FILE_TEST_IS_DIR)) {
+					continue;
+				}
+
+				if (mac_vst_filter (fullpath)) {
+					ARDOUR::PluginScanMessage(_("MacVST"), fullpath, !cache_only && !cancelled());
+					mac_vst_discover (fullpath, cache_only || cancelled());
+					continue;
+				}
+
+				/* don't descend into AU bundles in the VST dir */
+				if (fullpath[0] == '.' || (fullpath.length() > 10 && strings_equal_ignore_case (".component", fullpath.substr(fullpath.length() - 10)))) {
+					continue;
+				}
+
+				/* recurse */
+				mac_vst_discover_from_path (fullpath, cache_only);
+			}
+		} catch (Glib::FileError& err) { }
 	}
+
 	return 0;
 }
 
@@ -1099,7 +1155,7 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "MacVST";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1108,6 +1164,9 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::MacVST;
+
+		/* if we don't have any tags for this plugin, make some up. */
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 
 		bool duplicate = false;
 		if (!_mac_vst_plugin_info->empty()) {
@@ -1218,7 +1277,7 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 
 		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
 		info->unique_id = buf;
-		info->category = "linuxVSTs";
+		info->category = finfo->Category;
 		info->path = path;
 		info->creator = finfo->creator;
 		info->index = 0;
@@ -1228,12 +1287,14 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
 		info->type = ARDOUR::LXVST;
 
-					/* Make sure we don't find the same plugin in more than one place along
-			 the LXVST_PATH We can't use a simple 'find' because the path is included
-			 in the PluginInfo, and that is the one thing we can be sure MUST be
-			 different if a duplicate instance is found.  So we just compare the type
-			 and unique ID (which for some VSTs isn't actually unique...)
-		*/
+		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
+
+		/* Make sure we don't find the same plugin in more than one place along
+		 * the LXVST_PATH We can't use a simple 'find' because the path is included
+		 * in the PluginInfo, and that is the one thing we can be sure MUST be
+		 * different if a duplicate instance is found.  So we just compare the type
+		 * and unique ID (which for some VSTs isn't actually unique...)
+		 */
 
 		// TODO: check dup-IDs with windowsVST, too
 		bool duplicate = false;
@@ -1265,7 +1326,7 @@ PluginManager::get_status (const PluginInfoPtr& pi) const
 {
 	PluginStatus ps (pi->type, pi->unique_id);
 	PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), ps);
-	if (i ==  statuses.end() ) {
+	if (i ==  statuses.end()) {
 		return Normal;
 	} else {
 		return i->status;
@@ -1275,7 +1336,7 @@ PluginManager::get_status (const PluginInfoPtr& pi) const
 void
 PluginManager::save_statuses ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_statuses");
 	stringstream ofs;
 
 	for (PluginStatusList::iterator i = statuses.begin(); i != statuses.end(); ++i) {
@@ -1318,17 +1379,18 @@ PluginManager::save_statuses ()
 		}
 
 		ofs << ' ';
+
 		ofs << (*i).unique_id;;
 		ofs << endl;
 	}
 	g_file_set_contents (path.c_str(), ofs.str().c_str(), -1, NULL);
-	PluginStatusesChanged (); /* EMIT SIGNAL */
 }
 
 void
 PluginManager::load_statuses ()
 {
-	std::string path = Glib::build_filename (user_config_directory(), "plugin_statuses");
+	std::string path;
+	find_file (plugin_metadata_search_path(), "plugin_statuses", path);  //note: if no user folder is found, this will find the resources path
 	gchar *fbuf = NULL;
 	if (!g_file_get_contents (path.c_str(), &fbuf, NULL, NULL))  {
 		return;
@@ -1409,12 +1471,290 @@ PluginManager::set_status (PluginType t, string id, PluginStatusType status)
 	PluginStatus ps (t, id, status);
 	statuses.erase (ps);
 
-	if (status == Normal) {
-		return;
+	if (status != Normal) {
+		statuses.insert (ps);
 	}
 
-	statuses.insert (ps);
+	PluginStatusChanged (t, id, status); /* EMIT SIGNAL */
 }
+
+PluginType
+PluginManager::to_generic_vst (const PluginType t)
+{
+	switch (t) {
+		case Windows_VST:
+		case LXVST:
+		case MacVST:
+			return LXVST;
+		default:
+			break;
+	}
+	return t;
+}
+
+struct SortByTag {
+	bool operator() (std::string a, std::string b) {
+		return a.compare (b) < 0;
+	}
+};
+
+vector<std::string>
+PluginManager::get_tags (const PluginInfoPtr& pi) const
+{
+	vector<std::string> tags;
+
+	PluginTag ps (to_generic_vst(pi->type), pi->unique_id, "", "", FromPlug);
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i != ptags.end ()) {
+		PBD::tokenize (i->tags, string(" "), std::back_inserter (tags), true);
+		SortByTag sorter;
+		sort (tags.begin(), tags.end(), sorter);
+	}
+	return tags;
+}
+
+std::string
+PluginManager::get_tags_as_string (PluginInfoPtr const& pi) const
+{
+	std::string ret;
+
+	vector<std::string> tags = get_tags(pi);
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		if (t != tags.begin ()) {
+			ret.append(" ");
+		}
+		ret.append(*t);
+	}
+
+	return ret;
+}
+
+std::string
+PluginManager::user_plugin_metadata_dir () const
+{
+	std::string dir = Glib::build_filename (user_config_directory(), plugin_metadata_dir_name);
+	g_mkdir_with_parents (dir.c_str(), 0744);
+	return dir;
+}
+
+bool
+PluginManager::load_plugin_order_file (XMLNode &n) const
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
+
+	info << string_compose (_("Loading plugin order file %1"), path) << endmsg;
+	if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+		return false;
+	}
+
+	XMLTree tree;
+	if (tree.read (path)) {
+		n = *(tree.root());
+		return true;
+	} else {
+		error << string_compose (_("Cannot parse Plugin Order info from %1"), path) << endmsg;
+		return false;
+	}
+}
+
+
+void
+PluginManager::save_plugin_order_file (XMLNode &elem) const
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_order");
+
+	info << string_compose (_("Saving plugin order file %1"), path) << endmsg;
+
+	XMLTree tree;
+	tree.set_root (&elem);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Order info to %1"), path) << endmsg;
+	}
+	tree.set_root (0);  //note: must disconnect the elem from XMLTree, or it will try to delete memory it didn't allocate
+}
+
+
+void
+PluginManager::save_tags ()
+{
+	std::string path = Glib::build_filename (user_plugin_metadata_dir(), "plugin_tags");
+	XMLNode* root = new XMLNode (X_("PluginTags"));
+
+	for (PluginTagList::iterator i = ptags.begin(); i != ptags.end(); ++i) {
+		if ( (*i).tagtype == FromFactoryFile || (*i).tagtype == FromUserFile ) {
+			/* user file should contain only plugins that are (a) newly user-tagged or (b) previously unknown */
+			continue;
+		}
+		XMLNode* node = new XMLNode (X_("Plugin"));
+		node->set_property (X_("type"), to_generic_vst ((*i).type));
+		node->set_property (X_("id"), (*i).unique_id);
+		node->set_property (X_("tags"), (*i).tags);
+		node->set_property (X_("name"), (*i).name);
+		if ( (*i).tagtype >= FromUserFile ) {
+			node->set_property (X_("user-set"), "1");
+		}
+		root->add_child_nocopy (*node);
+	}
+
+	XMLTree tree;
+	tree.set_root (root);
+	if (!tree.write (path)) {
+		error << string_compose (_("Could not save Plugin Tags info to %1"), path) << endmsg;
+	}
+}
+
+void
+PluginManager::load_tags ()
+{
+	vector<std::string> tmp;
+	find_files_matching_pattern (tmp, plugin_metadata_search_path (), "plugin_tags");
+
+	for (vector<std::string>::const_reverse_iterator p = tmp.rbegin ();
+			p != (vector<std::string>::const_reverse_iterator)tmp.rend(); ++p) {
+		std::string path = *p;
+		info << string_compose (_("Loading plugin meta data file %1"), path) << endmsg;
+		if (!Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
+			return;
+		}
+
+		XMLTree tree;
+		if (!tree.read (path)) {
+			error << string_compose (_("Cannot parse plugin tag info from %1"), path) << endmsg;
+			return;
+		}
+
+		for (XMLNodeConstIterator i = tree.root()->children().begin(); i != tree.root()->children().end(); ++i) {
+			PluginType type;
+			string id;
+			string tags;
+			string name;
+			bool user_set;
+			if (!(*i)->get_property (X_("type"), type) ||
+					!(*i)->get_property (X_("id"), id) ||
+					!(*i)->get_property (X_("tags"), tags) ||
+					!(*i)->get_property (X_("name"), name)) {
+			}
+			if (!(*i)->get_property (X_("user-set"), user_set)) {
+				user_set = false;
+			}
+			strip_whitespace_edges (tags);
+			set_tags (type, id, tags, name, user_set ? FromUserFile : FromFactoryFile );
+		}
+	}
+}
+
+void
+PluginManager::set_tags (PluginType t, string id, string tag, std::string name, TagType ttype )
+{
+	string sanitized = sanitize_tag (tag);
+
+	PluginTag ps (to_generic_vst (t), id, sanitized, name, ttype );
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i == ptags.end()) {
+		ptags.insert (ps);
+	} else if ( (uint32_t) ttype >=  (uint32_t) (*i).tagtype ) {  // only overwrite if we are more important than the existing. Gui > UserFile > FactoryFile > Plugin
+		ptags.erase (ps);
+		ptags.insert (ps);
+	}
+	if ( ttype == FromGui ) {
+		PluginTagChanged (t, id, sanitized); /* EMIT SIGNAL */
+	}
+}
+
+void
+PluginManager::reset_tags (PluginInfoPtr const& pi)
+{
+	PluginTag ps (pi->type, pi->unique_id, pi->category, pi->name, FromPlug);
+
+	PluginTagList::const_iterator i = find (ptags.begin(), ptags.end(), ps);
+	if (i != ptags.end()) {
+		ptags.erase (ps);
+		ptags.insert (ps);
+	}
+}
+
+std::string
+PluginManager::sanitize_tag (const std::string to_sanitize) const
+{
+	if (to_sanitize.empty ()) {
+		return "";
+	}
+	string sanitized = to_sanitize;
+	vector<string> tags;
+	if (!PBD::tokenize (sanitized, string(" ,\n"), std::back_inserter (tags), true)) {
+#ifndef NDEBUG
+		cerr << _("PluginManager::sanitize_tag could not tokenize string: ") << sanitized << endmsg;
+#endif
+		return "";
+	}
+
+	/* convert tokens to lower-case, space-separated list */
+	sanitized = "";
+	for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+		if (t != tags.begin ()) {
+			sanitized.append(" ");
+		}
+		sanitized.append (downcase (*t));
+	}
+
+	return sanitized;
+}
+
+std::vector<std::string>
+PluginManager::get_all_tags (TagFilter tag_filter) const
+{
+	std::vector<std::string> ret;
+
+	PluginTagList::const_iterator pt;
+	for (pt = ptags.begin(); pt != ptags.end(); ++pt) {
+		if ((*pt).tags.empty ()) {
+			continue;
+		}
+
+		/* if favorites_only then we need to check the info ptr and maybe skip */
+		if (tag_filter == OnlyFavorites) {
+			PluginStatus stat ((*pt).type, (*pt).unique_id);
+			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && (i->status == Favorite)) {
+				/* it's a favorite! */
+			} else {
+				continue;
+			}
+		}
+		if (tag_filter == NoHidden) {
+			PluginStatus stat ((*pt).type, (*pt).unique_id);
+			PluginStatusList::const_iterator i =  find (statuses.begin(), statuses.end(), stat);
+			if ((i != statuses.end()) && (i->status == Hidden)) {
+				continue;
+			}
+		}
+
+		/* parse each plugin's tag string into separate tags */
+		vector<string> tags;
+		if (!PBD::tokenize ((*pt).tags, string(" "), std::back_inserter (tags), true)) {
+#ifndef NDEBUG
+			cerr << _("PluginManager: Could not tokenize string: ") << (*pt).tags << endmsg;
+#endif
+			continue;
+		}
+
+		/* maybe add the tags we've found */
+		for (vector<string>::iterator t = tags.begin(); t != tags.end(); ++t) {
+			/* if this tag isn't already in the list, add it */
+			vector<string>::iterator i =  find (ret.begin(), ret.end(), *t);
+			if (i == ret.end()) {
+				ret.push_back (*t);
+			}
+		}
+	}
+
+	/* sort in alphabetical order */
+	SortByTag sorter;
+	sort (ret.begin(), ret.end(), sorter);
+
+	return ret;
+}
+
 
 const ARDOUR::PluginInfoList&
 PluginManager::windows_vst_plugin_info ()

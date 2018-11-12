@@ -21,7 +21,7 @@
 
 template<class AutomatedObject>
 struct AutomationEvent {
-    uint32_t frame;
+    uint32_t sample;
     AutomatedObject *object;
     void (AutomatedObject::*function) (void *);
     void *arg;

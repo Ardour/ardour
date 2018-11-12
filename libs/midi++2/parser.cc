@@ -346,6 +346,13 @@ Parser::scanner (unsigned char inbyte)
 		return;
 	}
 
+	/* ditto for system reset, except do even less */
+
+	if (inbyte == 0xff) {
+		message_counter[inbyte]++;
+		return;
+	}
+
 	/* If necessary, allocate larger message buffer. */
 
 	if (msgindex >= msglen) {
@@ -793,4 +800,3 @@ Parser::set_offline (bool yn)
 		state = NEEDSTATUS;
 	}
 }
-

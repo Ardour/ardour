@@ -37,11 +37,11 @@ public:
 	Outline (Item& self);
 	virtual ~Outline() {}
 
-	Color outline_color () const {
+	Gtkmm2ext::Color outline_color () const {
 		return _outline_color;
 	}
 
-	virtual void set_outline_color (Color);
+	virtual void set_outline_color (Gtkmm2ext::Color);
 
 	Distance outline_width () const {
 		return _outline_width;
@@ -59,10 +59,10 @@ protected:
 
 	void setup_outline_context (Cairo::RefPtr<Cairo::Context>) const;
 
-	Item&    _self;
-	Color    _outline_color;
-	Distance _outline_width;
-	bool     _outline;
+	Item&            _self;
+	Gtkmm2ext::Color _outline_color;
+	Distance         _outline_width;
+	bool             _outline;
 };
 
 }

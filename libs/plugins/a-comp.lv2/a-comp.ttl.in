@@ -10,11 +10,19 @@
 	foaf:name "Ardour Team" ;
 	foaf:homepage <http://ardour.org/> .
 
+unit:db-display
+	a unit:Unit ;
+	rdfs:label "decibels" ;
+	rdfs:label "dB" ;
+	unit:render "%4.1f" ;
+	unit:symbol "dB" .
+
 <urn:ardour:a-comp>
     a lv2:Plugin, doap:Project, lv2:CompressorPlugin ;
 
     lv2:optionalFeature <http://lv2plug.in/ns/lv2core#hardRTCapable> ;
-		lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#queue_draw> ;
+    lv2:optionalFeature <http://harrisonconsoles.com/lv2/inlinedisplay#in_gui> ;
 
     lv2:port [
         a lv2:InputPort, lv2:ControlPort ;
@@ -89,21 +97,31 @@
         lv2:default 0.000000 ;
         lv2:minimum 0.000000 ;
         lv2:maximum 45.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db-display ;
     ] ,
     [
         a lv2:OutputPort, lv2:ControlPort ;
         lv2:index 7 ;
+        lv2:name "Input Level" ;
+        lv2:symbol "inlevel" ;
+        lv2:default -45.000000 ;
+        lv2:minimum -45.000000 ;
+        lv2:maximum 0.000000 ;
+        unit:unit unit:db-display ;
+    ] ,
+    [
+        a lv2:OutputPort, lv2:ControlPort ;
+        lv2:index 8 ;
         lv2:name "Output Level" ;
         lv2:symbol "outlevel" ;
         lv2:default -45.000000 ;
         lv2:minimum -45.000000 ;
         lv2:maximum 0.000000 ;
-        unit:unit unit:db ;
+        unit:unit unit:db-display ;
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 8 ;
+        lv2:index 9 ;
         lv2:name "Sidechain" ;
         lv2:symbol "sidech" ;
         lv2:default 0.000000 ;
@@ -113,7 +131,7 @@
     ] ,
     [
         a lv2:InputPort, lv2:ControlPort ;
-        lv2:index 9 ;
+        lv2:index 10 ;
         lv2:name "Enable" ;
         lv2:symbol "enable" ;
         lv2:default 1 ;
@@ -121,24 +139,34 @@
         lv2:maximum 1 ;
         lv2:portProperty lv2:integer, lv2:toggled ;
         lv2:designation lv2:enabled;
+    ] ,
+    [
+        a lv2:InputPort, lv2:ControlPort ;
+        lv2:index 11 ;
+        lv2:name "Full inline display" ;
+        lv2:symbol "full_inline_display" ;
+        lv2:default 0 ;
+        lv2:minimum 0 ;
+        lv2:maximum 1 ;
+        lv2:portProperty lv2:integer, lv2:toggled ;
     ];
 
     lv2:port [
         a lv2:InputPort, lv2:AudioPort ;
-        lv2:index 10 ;
+        lv2:index 12 ;
         lv2:symbol "lv2_audio_in_1" ;
         lv2:name "Audio Input 1" ;
     ] ,
     [
         a lv2:InputPort, lv2:AudioPort ;
-        lv2:index 11 ;
+        lv2:index 13 ;
         lv2:symbol "lv2_sidechain_in" ;
         lv2:name "Sidechain Input" ;
         lv2:portProperty lv2:isSideChain ;
     ],
     [
         a lv2:OutputPort, lv2:AudioPort ;
-        lv2:index 12 ;
+        lv2:index 14 ;
         lv2:symbol "lv2_audio_out_1" ;
         lv2:name "Audio Output 1" ;
     ] ;

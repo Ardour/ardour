@@ -72,11 +72,11 @@ class LIBARDOUR_API ExportStatus {
 	volatile uint32_t       timespan;
 	std::string             timespan_name;
 
-	volatile framecnt_t     total_frames;
-	volatile framecnt_t     processed_frames;
+	volatile samplecnt_t     total_samples;
+	volatile samplecnt_t     processed_samples;
 
-	volatile framecnt_t     total_frames_current_timespan;
-	volatile framecnt_t     processed_frames_current_timespan;
+	volatile samplecnt_t     total_samples_current_timespan;
+	volatile samplecnt_t     processed_samples_current_timespan;
 
 	volatile uint32_t       total_postprocessing_cycles;
 	volatile uint32_t       current_postprocessing_cycle;

@@ -151,6 +151,7 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 	void connection_handler ();
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
+	bool _ignore_profile_changed;
 	bool ignore_active_change;
 	void active_port_changed (Gtk::ComboBox* combo, boost::weak_ptr<Mackie::Surface> ws, bool for_input);
 };

@@ -29,9 +29,17 @@
 #undef interface
 #endif
 
-#include <gtkmm.h>
 #include <boost/shared_ptr.hpp>
 
+#include <gtkmm/box.h>
+#include <gtkmm/checkbutton.h>
+#include <gtkmm/combobox.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/scrolledwindow.h>
+#include <gtkmm/treemodel.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour/types.h"
 #include "ardour/session_handle.h"
@@ -44,12 +52,12 @@ namespace ARDOUR {
 }
 
 using ARDOUR::CDMarkerFormat;
-using ARDOUR::framecnt_t;
+using ARDOUR::samplecnt_t;
 
 /// Timespan Selector base
 class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
-  protected:
+protected:
 	typedef std::list<ARDOUR::Location *> LocationList;
 	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
@@ -58,7 +66,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	typedef boost::shared_ptr<TimespanList> TimespanListPtr;
 	typedef ARDOUR::ExportProfileManager::TimespanStatePtr TimespanStatePtr;
 
-  public:
+public:
 
 	ExportTimespanSelector (ARDOUR::Session * session, ProfileManagerPtr manager, bool multi);
 
@@ -69,7 +77,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  protected:
+protected:
 
 	ProfileManagerPtr manager;
 	TimespanStatePtr  state;
@@ -86,9 +94,9 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	std::string construct_label (ARDOUR::Location const * location) const;
 	std::string construct_length (ARDOUR::Location const * location) const;
-	std::string bbt_str (framepos_t frames) const;
-	std::string timecode_str (framecnt_t frames) const;
-	std::string ms_str (framecnt_t frames) const;
+	std::string bbt_str (samplepos_t samples) const;
+	std::string timecode_str (samplecnt_t samples) const;
+	std::string ms_str (samplecnt_t samples) const;
 
 	void update_range_name (std::string const & path, std::string const & new_text);
 
@@ -107,7 +115,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct TimeFormatCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<TimeFormat>      format;
 		Gtk::TreeModelColumn<std::string>   label;
 
@@ -121,7 +129,7 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	struct RangeCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<ARDOUR::Location *>  location;
 		Gtk::TreeModelColumn<std::string>       label;
 		Gtk::TreeModelColumn<bool>              selected;
@@ -142,12 +150,12 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 /// Allows selecting multiple timespans
 class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 {
-  public:
+public:
 	ExportTimespanSelectorMultiple (ARDOUR::Session * session, ProfileManagerPtr manager);
 
 	void allow_realtime_export (bool);
 
-  private:
+private:
 
 	virtual void fill_range_list ();
 
@@ -159,12 +167,12 @@ class ExportTimespanSelectorMultiple : public ExportTimespanSelector
 /// Displays one timespan
 class ExportTimespanSelectorSingle : public ExportTimespanSelector
 {
-  public:
+public:
 	ExportTimespanSelectorSingle (ARDOUR::Session * session, ProfileManagerPtr manager, std::string range_id);
 
 	void allow_realtime_export (bool);
 
-  private:
+private:
 
 	virtual void fill_range_list ();
 	void update_timespans ();

@@ -27,6 +27,8 @@
 #define ACOMP_URI		"urn:ardour:a-comp"
 #define ACOMP_STEREO_URI	"urn:ardour:a-comp#stereo"
 
+#define RESET_PEAK_AFTER_SECONDS 3
+
 #ifndef M_PI
 #  define M_PI 3.14159265358979323846
 #endif
@@ -38,6 +40,10 @@
 #define isfinite_local isfinite
 #endif
 
+#ifndef FLT_EPSILON
+#  define FLT_EPSILON 1.192093e-07
+#endif
+
 typedef enum {
 	ACOMP_ATTACK = 0,
 	ACOMP_RELEASE,
@@ -47,9 +53,12 @@ typedef enum {
 	ACOMP_MAKEUP,
 
 	ACOMP_GAINR,
+	ACOMP_INLEVEL,
 	ACOMP_OUTLEVEL,
+
 	ACOMP_SIDECHAIN,
 	ACOMP_ENABLE,
+	ACOMP_FULL_INLINEDISP,
 
 	ACOMP_A0,
 	ACOMP_A1,
@@ -68,8 +77,11 @@ typedef struct {
 
 	float* gainr;
 	float* outlevel;
+	float* inlevel;
+
 	float* sidechain;
 	float* enable;
+	float* full_inline_display;
 
 	float* input0;
 	float* input1;
@@ -77,13 +89,11 @@ typedef struct {
 	float* output0;
 	float* output1;
 
+	uint32_t n_channels;
+
 	float srate;
-	float old_yl;
-	float old_y1;
-	float old_yg;
 
 	float makeup_gain;
-	float tau;
 
 #ifdef LV2_EXTENDED
 	LV2_Inline_Display_Image_Surface surf;
@@ -99,9 +109,16 @@ typedef struct {
 	float v_knee;
 	float v_ratio;
 	float v_thresdb;
-	float v_lvl;
+	float v_gainr;
+	float v_makeup;
 	float v_lvl_in;
 	float v_lvl_out;
+	float v_state_x;
+
+	bool v_full_inline_display;
+
+	float v_peakdb;
+	uint32_t peakdb_samples;
 #endif
 } AComp;
 
@@ -113,6 +130,15 @@ instantiate(const LV2_Descriptor* descriptor,
 {
 	AComp* acomp = (AComp*)calloc(1, sizeof(AComp));
 
+	if (!strcmp (descriptor->URI, ACOMP_URI)) {
+		acomp->n_channels = 1;
+	} else if (!strcmp (descriptor->URI, ACOMP_STEREO_URI)) {
+		acomp->n_channels = 2;
+	} else {
+		free (acomp);
+		return NULL;
+	}
+
 	for (int i=0; features[i]; ++i) {
 #ifdef LV2_EXTENDED
 		if (!strcmp(features[i]->URI, LV2_INLINEDISPLAY__queue_draw)) {
@@ -122,15 +148,14 @@ instantiate(const LV2_Descriptor* descriptor,
 	}
 
 	acomp->srate = rate;
-	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
-	acomp->tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
+	acomp->makeup_gain = 1.f;
 #ifdef LV2_EXTENDED
 	acomp->need_expose = true;
+	acomp->v_lvl_out = -70.f;
 #endif
 
 	return (LV2_Handle)acomp;
 }
-
 
 static void
 connect_port(LV2_Handle instance,
@@ -164,11 +189,17 @@ connect_port(LV2_Handle instance,
 		case ACOMP_OUTLEVEL:
 			acomp->outlevel = (float*)data;
 			break;
+		case ACOMP_INLEVEL:
+			acomp->inlevel = (float*)data;
+			break;
 		case ACOMP_SIDECHAIN:
 			acomp->sidechain = (float*)data;
 			break;
 		case ACOMP_ENABLE:
 			acomp->enable = (float*)data;
+			break;
+		case ACOMP_FULL_INLINEDISP:
+			acomp->full_inline_display = (float*)data;
 			break;
 		default:
 			break;
@@ -252,45 +283,55 @@ activate(LV2_Handle instance)
 	AComp* acomp = (AComp*)instance;
 
 	*(acomp->gainr) = 0.0f;
-	*(acomp->outlevel) = -45.0f;
-	acomp->old_yl=acomp->old_y1=acomp->old_yg=0.f;
+	*(acomp->outlevel) = -70.0f;
+	*(acomp->inlevel) = -160.f;
+
+#ifdef LV2_EXTENDED
+	acomp->v_peakdb = -160.f;
+	acomp->peakdb_samples = 0;
+#endif
 }
 
 static void
-run_mono(LV2_Handle instance, uint32_t n_samples)
+run(LV2_Handle instance, uint32_t n_samples)
 {
 	AComp* acomp = (AComp*)instance;
 
-	const float* const input = acomp->input0;
+	const float* const ins[2] = { acomp->input0, acomp->input1 };
 	const float* const sc = acomp->sc;
-	float* const output = acomp->output0;
+	float* const outs[2] = { acomp->output0, acomp->output1 };
 
 	float srate = acomp->srate;
 	float width = (6.f * *(acomp->knee)) + 0.01;
-	float cdb=0.f;
 	float attack_coeff = exp(-1000.f/(*(acomp->attack) * srate));
 	float release_coeff = exp(-1000.f/(*(acomp->release) * srate));
 
-	float max = 0.f;
-	float lgaininp = 0.f;
+	float max_out = 0.f;
 	float Lgain = 1.f;
-	float Lxg, Lxl, Lyg, Lyl, Ly1;
+	float Lxg, Lyg;
+	float current_gainr;
+	float old_gainr = *acomp->gainr;
+
 	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
 	uint32_t i;
 	float ingain;
-	float in0;
 	float sc0;
+	float maxabs;
+
+	uint32_t n_channels = acomp->n_channels;
 
 	float ratio = *acomp->ratio;
 	float thresdb = *acomp->thresdb;
-	float makeup_target = from_dB(*acomp->makeup);
+	float makeup = *acomp->makeup;
+	float makeup_target = from_dB(makeup);
 	float makeup_gain = acomp->makeup_gain;
 
-	const const float tau = acomp->tau;
+	const float tau = (1.0 - exp (-2.f * M_PI * 25.f / acomp->srate));
 
 	if (*acomp->enable <= 0) {
 		ratio = 1.f;
 		thresdb = 0.f;
+		makeup = 0.f;
 		makeup_target = 1.f;
 	}
 
@@ -309,19 +350,35 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 		acomp->v_thresdb = thresdb;
 		acomp->need_expose = true;
 	}
+
+	if (acomp->v_makeup != makeup) {
+		acomp->v_makeup = makeup;
+		acomp->need_expose = true;
+	}
+
+	bool full_inline = *acomp->full_inline_display > 0.5;
+	if (full_inline != acomp->v_full_inline_display) {
+		acomp->v_full_inline_display = full_inline;
+		acomp->need_expose = true;
+	}
 #endif
 
-	float in_peak = 0;
+	float in_peak_db = -160.f;
+	float max_gainr = 0.f;
 
 	for (i = 0; i < n_samples; i++) {
-		in0 = input[i];
+		maxabs = 0.f;
+		for (uint32_t c=0; c<n_channels; ++c) {
+			maxabs = fmaxf(fabsf(ins[c][i]), maxabs);
+		}
 		sc0 = sc[i];
-		ingain = usesidechain ? fabs(sc0) : fabs(in0);
-		in_peak = fmaxf (in_peak, ingain);
+		ingain = usesidechain ? fabs(sc0) : maxabs;
 		Lyg = 0.f;
 		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
 		Lxg = sanitize_denormal(Lxg);
-
+		if (Lxg > in_peak_db) {
+			in_peak_db = Lxg;
+		}
 
 		if (2.f*(Lxg-thresdb) < -width) {
 			Lyg = Lxg;
@@ -332,186 +389,82 @@ run_mono(LV2_Handle instance, uint32_t n_samples)
 			Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
 		}
 
-		Lxl = Lxg - Lyg;
+		current_gainr = Lxg - Lyg;
 
-		acomp->old_y1 = sanitize_denormal(acomp->old_y1);
-		acomp->old_yl = sanitize_denormal(acomp->old_yl);
-		Ly1 = fmaxf(Lxl, release_coeff * acomp->old_y1+(1.f-release_coeff)*Lxl);
-		Lyl = attack_coeff * acomp->old_yl+(1.f-attack_coeff)*Ly1;
-		Ly1 = sanitize_denormal(Ly1);
-		Lyl = sanitize_denormal(Lyl);
-
-		cdb = -Lyl;
-		Lgain = from_dB(cdb);
-
-		*(acomp->gainr) = Lyl;
-
-		lgaininp = in0 * Lgain;
-
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
-		output[i] = lgaininp * makeup_gain;
-
-		max = (fabsf(output[i]) > max) ? fabsf(output[i]) : sanitize_denormal(max);
-
-		// TODO re-use local variables on stack
-		// store values back to acomp at the end of the inner-loop
-		acomp->old_yl = Lyl;
-		acomp->old_y1 = Ly1;
-		acomp->old_yg = Lyg;
-	}
-
-	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
-	acomp->makeup_gain = makeup_gain;
-
-#ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
-	if (!isfinite_local (acomp->v_lvl)) {
-		acomp->v_lvl = 0.f;
-	}
-	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
-		acomp->need_expose = true;
-		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
-	}
-	if (acomp->need_expose && acomp->queue_draw) {
-		acomp->need_expose = false;
-		acomp->queue_draw->queue_draw (acomp->queue_draw->handle);
-	}
-#endif
-}
-
-static void
-run_stereo(LV2_Handle instance, uint32_t n_samples)
-{
-	AComp* acomp = (AComp*)instance;
-
-	const float* const input0 = acomp->input0;
-	const float* const input1 = acomp->input1;
-	const float* const sc = acomp->sc;
-	float* const output0 = acomp->output0;
-	float* const output1 = acomp->output1;
-
-	float srate = acomp->srate;
-	float width = (6.f * *(acomp->knee)) + 0.01;
-	float cdb=0.f;
-	float attack_coeff = exp(-1000.f/(*(acomp->attack) * srate));
-	float release_coeff = exp(-1000.f/(*(acomp->release) * srate));
-
-	float max = 0.f;
-	float lgaininp = 0.f;
-	float rgaininp = 0.f;
-	float Lgain = 1.f;
-	float Lxg, Lxl, Lyg, Lyl, Ly1;
-	int usesidechain = (*(acomp->sidechain) <= 0.f) ? 0 : 1;
-	uint32_t i;
-	float ingain;
-	float in0;
-	float in1;
-	float sc0;
-	float maxabslr;
-
-	float ratio = *acomp->ratio;
-	float thresdb = *acomp->thresdb;
-	float makeup_target = from_dB(*acomp->makeup);
-	float makeup_gain = acomp->makeup_gain;
-
-	const const float tau = acomp->tau;
-
-	if (*acomp->enable <= 0) {
-		ratio = 1.f;
-		thresdb = 0.f;
-		makeup_target = 1.f;
-	}
-
-#ifdef LV2_EXTENDED
-	if (acomp->v_knee != *acomp->knee) {
-		acomp->v_knee = *acomp->knee;
-		acomp->need_expose = true;
-	}
-
-	if (acomp->v_ratio != ratio) {
-		acomp->v_ratio = ratio;
-		acomp->need_expose = true;
-	}
-
-	if (acomp->v_thresdb != thresdb) {
-		acomp->v_thresdb = thresdb;
-		acomp->need_expose = true;
-	}
-#endif
-
-	float in_peak = 0;
-
-	for (i = 0; i < n_samples; i++) {
-		in0 = input0[i];
-		in1 = input1[i];
-		sc0 = sc[i];
-		maxabslr = fmaxf(fabs(in0), fabs(in1));
-		ingain = usesidechain ? fabs(sc0) : maxabslr;
-		in_peak = fmaxf (in_peak, ingain);
-		Lyg = 0.f;
-		Lxg = (ingain==0.f) ? -160.f : to_dB(ingain);
-		Lxg = sanitize_denormal(Lxg);
-
-
-		if (2.f*(Lxg-thresdb) < -width) {
-			Lyg = Lxg;
-		} else if (2.f*(Lxg-thresdb) > width) {
-			Lyg = thresdb + (Lxg-thresdb)/ratio;
-			Lyg = sanitize_denormal(Lyg);
-		} else {
-			Lyg = Lxg + (1.f/ratio-1.f)*(Lxg-thresdb+width/2.f)*(Lxg-thresdb+width/2.f)/(2.f*width);
+		if (current_gainr < old_gainr) {
+			current_gainr = release_coeff*old_gainr + (1.f-release_coeff)*current_gainr;
+		} else if (current_gainr > old_gainr) {
+			current_gainr = attack_coeff*old_gainr + (1.f-attack_coeff)*current_gainr;
 		}
 
-		Lxl = Lxg - Lyg;
+		current_gainr = sanitize_denormal(current_gainr);
 
-		acomp->old_y1 = sanitize_denormal(acomp->old_y1);
-		acomp->old_yl = sanitize_denormal(acomp->old_yl);
-		Ly1 = fmaxf(Lxl, release_coeff * acomp->old_y1+(1.f-release_coeff)*Lxl);
-		Lyl = attack_coeff * acomp->old_yl+(1.f-attack_coeff)*Ly1;
-		Ly1 = sanitize_denormal(Ly1);
-		Lyl = sanitize_denormal(Lyl);
+		Lgain = from_dB(-current_gainr);
 
-		cdb = -Lyl;
-		Lgain = from_dB(cdb);
+		old_gainr = current_gainr;
 
-		*(acomp->gainr) = Lyl;
+		*(acomp->gainr) = current_gainr;
+		if (current_gainr > max_gainr) {
+			max_gainr = current_gainr;
+		}
 
-		lgaininp = in0 * Lgain;
-		rgaininp = in1 * Lgain;
+		makeup_gain += tau * (makeup_target - makeup_gain);
 
-		makeup_gain += tau * (makeup_target - makeup_gain) + 1e-12;
-
-		output0[i] = lgaininp * makeup_gain;
-		output1[i] = rgaininp * makeup_gain;
-
-		max = (fmaxf(fabs(output0[i]), fabs(output1[i])) > max) ? fmaxf(fabs(output0[i]), fabs(output1[i])) : sanitize_denormal(max);
-
-		// TODO re-use local variables on stack
-		// store values back to acomp at the end of the inner-loop
-		acomp->old_yl = Lyl;
-		acomp->old_y1 = Ly1;
-		acomp->old_yg = Lyg;
+		for (uint32_t c=0; c<n_channels; ++c) {
+			float out = ins[c][i] * Lgain * makeup_gain;
+			outs[c][i] = out;
+			out = fabsf (out);
+			if (out > max_out) {
+				max_out = out;
+				sanitize_denormal(max_out);
+			}
+		}
 	}
 
-	*(acomp->outlevel) = (max < 0.0056f) ? -45.f : to_dB(max);
+	if (fabsf(tau * (makeup_gain - makeup_target)) < FLT_EPSILON*makeup_gain) {
+		makeup_gain = makeup_target;
+	}
+
+	*(acomp->outlevel) = (max_out < 0.0056f) ? -70.f : to_dB(max_out);
+	*(acomp->inlevel) = in_peak_db;
 	acomp->makeup_gain = makeup_gain;
 
 #ifdef LV2_EXTENDED
-	acomp->v_lvl += .1 * (in_peak - acomp->v_lvl) + 1e-12;  // crude LPF TODO use n_samples/rate TC
-	if (!isfinite_local (acomp->v_lvl)) {
-		acomp->v_lvl = 0.f;
+	acomp->v_gainr = max_gainr;
+
+	if (in_peak_db > acomp->v_peakdb) {
+		acomp->v_peakdb = in_peak_db;
+		acomp->peakdb_samples = 0;
+	} else {
+		acomp->peakdb_samples += n_samples;
+		if ((float)acomp->peakdb_samples/acomp->srate > RESET_PEAK_AFTER_SECONDS) {
+			acomp->v_peakdb = in_peak_db;
+			acomp->peakdb_samples = 0;
+			acomp->need_expose = true;
+		}
 	}
-	const float v_lvl_in = (acomp->v_lvl < 0.001f) ? -60.f : to_dB(acomp->v_lvl);
-	const float v_lvl_out = (max < 0.001f) ? -60.f : to_dB(max);
-	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= 1 || fabsf (acomp->v_lvl_in - v_lvl_in) >= 1) {
-		// >= 1dB difference
+
+	const float v_lvl_in = in_peak_db;
+	const float v_lvl_out = *acomp->outlevel;
+
+	float state_x;
+
+	const float knee_lim_gr = (1.f - 1.f/ratio) * width/2.f;
+
+	if (acomp->v_gainr > knee_lim_gr) {
+		state_x = acomp->v_gainr / (1.f - 1.f/ratio) + thresdb;
+	} else {
+		state_x = sqrt ( (2.f*width*acomp->v_gainr) / (1.f-1.f/ratio) ) + thresdb - width/2.f;
+	}
+
+	if (fabsf (acomp->v_lvl_out - v_lvl_out) >= .1f ||
+	    fabsf (acomp->v_lvl_in - v_lvl_in) >= .1f ||
+	    fabsf (acomp->v_state_x - state_x) >= .1f ) {
+		// >= 0.1dB difference
 		acomp->need_expose = true;
 		acomp->v_lvl_in = v_lvl_in;
-		acomp->v_lvl_out = v_lvl_out - to_dB(makeup_gain);
+		acomp->v_lvl_out = v_lvl_out;
+		acomp->v_state_x = state_x;
 	}
 	if (acomp->need_expose && acomp->queue_draw) {
 		acomp->need_expose = false;
@@ -546,10 +499,11 @@ cleanup(LV2_Handle instance)
 
 #ifdef LV2_EXTENDED
 static float
-comp_curve (AComp* self, float xg) {
+comp_curve (const AComp* self, float xg) {
 	const float knee = self->v_knee;
 	const float ratio = self->v_ratio;
 	const float thresdb = self->v_thresdb;
+	const float makeup = self->v_makeup;
 
 	const float width = 6.f * knee + 0.01f;
 	float yg = 0.f;
@@ -561,14 +515,108 @@ comp_curve (AComp* self, float xg) {
 	} else {
 		yg = xg + (1.f / ratio - 1.f ) * (xg - thresdb + width / 2.f) * (xg - thresdb + width / 2.f) / (2.f * width);
 	}
+
+	yg += makeup;
+
 	return yg;
+}
+
+
+#include "dynamic_display.c"
+
+static void
+render_inline_full (cairo_t* cr, const AComp* self)
+{
+	const float w = self->w;
+	const float h = self->h;
+
+	const float makeup_thres = self->v_thresdb + self->v_makeup;
+
+	draw_grid (cr, w,h);
+
+	if (self->v_thresdb < 0) {
+		const float y = -.5 + floorf (h * ((makeup_thres - 10.f) / -70.f));
+		cairo_move_to (cr, 0, y);
+		cairo_line_to (cr, w, y);
+		cairo_stroke (cr);
+	}
+
+	draw_GR_bar (cr, w,h, self->v_gainr);
+
+	// draw state
+	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
+
+	const float state_x = w * (1.f - (10.f-self->v_state_x)/70.f);
+	const float state_y = h * (comp_curve (self, self->v_state_x) - 10.f) / -70.f;
+
+	cairo_arc (cr, state_x, state_y, 3.f, 0.f, 2.f*M_PI);
+	cairo_fill (cr);
+
+	// draw curve
+	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
+	cairo_move_to (cr, 0, h);
+
+	for (uint32_t x = 0; x < w; ++x) {
+		// plot -60..+10  dB
+		const float x_db = 70.f * (-1.f + x / (float)w) + 10.f;
+		const float y_db = comp_curve (self, x_db) - 10.f;
+		const float y = h * (y_db / -70.f);
+		cairo_line_to (cr, x, y);
+	}
+	cairo_stroke_preserve (cr);
+
+	cairo_line_to (cr, w, h);
+	cairo_close_path (cr);
+	cairo_clip (cr);
+
+	// draw signal level & reduction/gradient
+	const float top = comp_curve (self, 0) - 10.f;
+	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, h);
+	if (top > makeup_thres - 10.f) {
+		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0.8, 0.1, 0.1, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, top / -70.f, 0.8, 0.1, 0.1, 0.5);
+	}
+	if (self->v_knee > 0) {
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres -10.f) / -70.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - self->v_knee - 10.f) / -70.f), 0.5, 0.5, 0.5, 0.5);
+	} else {
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - 10.f)/ -70.f), 0.7, 0.7, 0.2, 0.5);
+		cairo_pattern_add_color_stop_rgba (pat, ((makeup_thres - 10.01f) / -70.f), 0.5, 0.5, 0.5, 0.5);
+	}
+	cairo_pattern_add_color_stop_rgba (pat, 1.0, 0.5, 0.5, 0.5, 0.5);
+
+	// maybe cut off at x-position?
+	const float x = w * (self->v_lvl_in + 60) / 70.f;
+	const float y = x + h*self->v_makeup;
+	cairo_rectangle (cr, 0, h - y, x, y);
+	if (self->v_ratio > 1.0) {
+		cairo_set_source (cr, pat);
+	} else {
+		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
+	}
+	cairo_fill (cr);
+
+	cairo_pattern_destroy (pat); // TODO cache pattern
+}
+
+static void
+render_inline_only_bars (cairo_t* cr, const AComp* self)
+{
+	draw_inline_bars (cr, self->w, self->h,
+			  self->v_thresdb, self->v_ratio,
+			  self->v_peakdb, self->v_gainr,
+			  self->v_lvl_in, self->v_lvl_out);
 }
 
 static LV2_Inline_Display_Image_Surface *
 render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 {
 	AComp* self = (AComp*)instance;
+
 	uint32_t h = MIN (w, max_h);
+	if (w < 200 && !self->v_full_inline_display) {
+		h = MIN (40, max_h);
+	}
 
 	if (!self->display || self->w != w || self->h != h) {
 		if (self->display) cairo_surface_destroy(self->display);
@@ -579,96 +627,14 @@ render_inline (LV2_Handle instance, uint32_t w, uint32_t max_h)
 
 	cairo_t* cr = cairo_create (self->display);
 
-	// clear background
-	cairo_rectangle (cr, 0, 0, w, h);
-	cairo_set_source_rgba (cr, .2, .2, .2, 1.0);
-	cairo_fill (cr);
-
-	cairo_set_line_width(cr, 1.0);
-
-	// draw grid 10dB steps
-	const double dash1[] = {1, 2};
-	const double dash2[] = {1, 3};
-	cairo_save (cr);
-	cairo_set_line_cap(cr, CAIRO_LINE_CAP_ROUND);
-	cairo_set_dash(cr, dash2, 2, 2);
-	cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-
-	for (uint32_t d = 1; d < 6; ++d) {
-		const float x = -.5 + floorf (w * (d * 10.f / 60.f));
-		const float y = -.5 + floorf (h * (d * 10.f / 60.f));
-
-		cairo_move_to (cr, x, 0);
-		cairo_line_to (cr, x, h);
-		cairo_stroke (cr);
-
-		cairo_move_to (cr, 0, y);
-		cairo_line_to (cr, w, y);
-		cairo_stroke (cr);
-	}
-	if (self->v_thresdb < 0) {
-		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 1.0);
-		const float y = -.5 + floorf (h * (self->v_thresdb / -60.f));
-		cairo_set_dash(cr, dash1, 2, 2);
-		cairo_move_to (cr, 0, y);
-		cairo_line_to (cr, w, y);
-		cairo_stroke (cr);
-		cairo_move_to (cr, 0, h);
-		cairo_line_to (cr, w, 0);
-		cairo_stroke (cr);
-	}
-	cairo_restore (cr);
-
-
-	// draw curve
-	cairo_set_source_rgba (cr, .8, .8, .8, 1.0);
-	cairo_move_to (cr, 0, h);
-
-	for (uint32_t x = 0; x < w; ++x) {
-		// plot -60..0  dB
-		const float x_db = 60.f * (-1.f + x / (float)w);
-		const float y_db = comp_curve (self, x_db);
-		const float y = h * (y_db / -60.f);
-		cairo_line_to (cr, x, y);
-	}
-	cairo_stroke_preserve (cr);
-
-	cairo_line_to (cr, w, h);
-	cairo_close_path (cr);
-	cairo_clip (cr);
-
-	// draw signal level & reduction/gradient
-	const float top = comp_curve (self, 0);
-	cairo_pattern_t* pat = cairo_pattern_create_linear (0.0, 0.0, 0.0, h);
-	if (top > self->v_thresdb) {
-		cairo_pattern_add_color_stop_rgba (pat, 0.0, 0.8, 0.1, 0.1, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, top / -60.f, 0.8, 0.1, 0.1, 0.5);
-	}
-	if (self->v_knee > 0) {
-		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - self->v_knee) / -60.f), 0.5, 0.5, 0.5, 0.5);
+	if (w >= 200 || self->v_full_inline_display) {
+		render_inline_full (cr, self);
 	} else {
-		cairo_pattern_add_color_stop_rgba (pat, (self->v_thresdb / -60.f), 0.7, 0.7, 0.2, 0.5);
-		cairo_pattern_add_color_stop_rgba (pat, ((self->v_thresdb - .01) / -60.f), 0.5, 0.5, 0.5, 0.5);
+		render_inline_only_bars (cr, self);
 	}
-	cairo_pattern_add_color_stop_rgba (pat, 1.0, 0.5, 0.5, 0.5, 0.5);
 
-	// maybe cut off at x-position?
-	const float x = w * (self->v_lvl_in + 60) / 60.f;
-	//const float y = h * (self->v_lvl_out + 60) / 60.f;
-	cairo_rectangle (cr, 0, h - x, x, h);
-	if (self->v_ratio > 1.0) {
-		cairo_set_source (cr, pat);
-	} else {
-		cairo_set_source_rgba (cr, 0.5, 0.5, 0.5, 0.5);
-	}
-	cairo_fill (cr);
-
-	cairo_pattern_destroy (pat); // TODO cache pattern
-
-
-	// create RGBA surface
 	cairo_destroy (cr);
+
 	cairo_surface_flush (self->display);
 	self->surf.width = cairo_image_surface_get_width (self->display);
 	self->surf.height = cairo_image_surface_get_height (self->display);
@@ -696,7 +662,7 @@ static const LV2_Descriptor descriptor_mono = {
 	instantiate,
 	connect_mono,
 	activate,
-	run_mono,
+	run,
 	deactivate,
 	cleanup,
 	extension_data
@@ -707,7 +673,7 @@ static const LV2_Descriptor descriptor_stereo = {
 	instantiate,
 	connect_stereo,
 	activate,
-	run_stereo,
+	run,
 	deactivate,
 	cleanup,
 	extension_data

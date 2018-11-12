@@ -22,14 +22,19 @@
 #define __export_preset_selector_h__
 
 #include <sigc++/signal.h>
-#include <gtkmm.h>
+
+#include <gtkmm/box.h>
+#include <gtkmm/button.h>
+#include <gtkmm/comboboxentry.h>
+#include <gtkmm/label.h>
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
 
 #include "ardour/export_profile_manager.h"
 
 class ExportPresetSelector : public Gtk::HBox
 {
-
-  public:
+public:
 
 	ExportPresetSelector ();
 
@@ -37,7 +42,7 @@ class ExportPresetSelector : public Gtk::HBox
 
 	sigc::signal<void> CriticalSelectionChanged;
 
-  private:
+private:
 
 	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef ARDOUR::ExportPresetPtr PresetPtr;
@@ -54,7 +59,7 @@ class ExportPresetSelector : public Gtk::HBox
 
 	struct PresetCols : public Gtk::TreeModelColumnRecord
 	{
-	  public:
+	public:
 		Gtk::TreeModelColumn<PresetPtr>      preset;
 		Gtk::TreeModelColumn<std::string>  label;
 

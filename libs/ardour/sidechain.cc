@@ -45,10 +45,10 @@ SideChain::~SideChain ()
 }
 
 XMLNode&
-SideChain::state (bool full)
+SideChain::state ()
 {
-	XMLNode& node = IOProcessor::state (full);
-	node.add_property ("type", "sidechain");
+	XMLNode& node = IOProcessor::state ();
+	node.set_property ("type", "sidechain");
 	return node;
 }
 
@@ -61,7 +61,7 @@ SideChain::set_state (const XMLNode& node, int version)
 }
 
 void
-SideChain::run (BufferSet& bufs, framepos_t start_frame, framepos_t end_frame, double /*speed*/, pframes_t nframes, bool)
+SideChain::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double /*speed*/, pframes_t nframes, bool)
 {
 	if (_input->n_ports () == ChanCount::ZERO) {
 		// inplace pass-through

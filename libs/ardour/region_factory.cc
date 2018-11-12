@@ -46,7 +46,7 @@ std::map<std::string, PBD::ID>                RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations           RegionFactory::_compound_associations;
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
+RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bool fork)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> ar;
@@ -54,11 +54,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 
 	if ((ar = boost::dynamic_pointer_cast<const AudioRegion>(region)) != 0) {
 
-		ret = boost::shared_ptr<Region> (new AudioRegion (ar, MusicFrame (0, 0)));
+		ret = boost::shared_ptr<Region> (new AudioRegion (ar, MusicSample (0, 0)));
 
 	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion>(region)) != 0) {
 
-		if (mr->session().config.get_midi_copy_is_fork()) {
+		if (mr->session().config.get_midi_copy_is_fork() || fork) {
 			/* What we really want to do here is what Editor::fork_region()
 			   does via Session::create_midi_source_by_stealing_name(), but we
 			   don't have a Track.  We'll just live with the skipped number,
@@ -71,7 +71,7 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce)
 			source->set_ancestor_name(mr->sources().front()->name());
 			ret = mr->clone(source);
 		} else {
-			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicFrame (0, 0)));
+			ret = boost::shared_ptr<Region> (new MidiRegion (mr, MusicSample (0, 0)));
 		}
 
 	} else {
@@ -142,7 +142,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 }
 
 boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, MusicFrame offset, const PropertyList& plist, bool announce)
+RegionFactory::create (boost::shared_ptr<Region> region, MusicSample offset, const PropertyList& plist, bool announce)
 {
 	boost::shared_ptr<Region> ret;
 	boost::shared_ptr<const AudioRegion> other_a;

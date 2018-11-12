@@ -19,14 +19,19 @@
 #ifndef __gtk_ardour_option_editor_h__
 #define __gtk_ardour_option_editor_h__
 
-#include <gtkmm/notebook.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/comboboxtext.h>
+#include <gtkmm/filechooserbutton.h>
+#include <gtkmm/label.h>
+#include <gtkmm/notebook.h>
+#include <gtkmm/scale.h>
 #include <gtkmm/spinbutton.h>
 #include <gtkmm/table.h>
+#include <gtkmm/treestore.h>
+#include <gtkmm/treeview.h>
 #include <gtkmm/window.h>
 
-#include "gtkmm2ext/slider_controller.h"
+#include "widgets/slider_controller.h"
 
 #include "ardour_window.h"
 #include "audio_clock.h"
@@ -544,7 +549,7 @@ private:
 	bool on_key_press (GdkEventKey* ev);
 
 	Gtk::Adjustment _db_adjustment;
-	Gtkmm2ext::HSliderController* _db_slider;
+	ArdourWidgets::HSliderController* _db_slider;
 	Gtk::Entry _db_display;
 	Gtk::Label _label;
 	Gtk::HBox _box;

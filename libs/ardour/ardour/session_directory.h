@@ -108,6 +108,12 @@ public:
 	const std::string export_path () const;
 
 	/**
+	 * @return The absolute path to the directory that backup
+	 * session files are stored.
+	 */
+	const std::string backup_path () const;
+
+	/**
 	 * @return true if session directory and all the required
 	 * subdirectories exist.
 	 */

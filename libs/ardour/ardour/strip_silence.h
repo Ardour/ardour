@@ -25,13 +25,13 @@ namespace ARDOUR {
 class LIBARDOUR_API StripSilence : public Filter
 {
   public:
-	StripSilence (Session &, const AudioIntervalMap&, framecnt_t fade_length);
+	StripSilence (Session &, const AudioIntervalMap&, samplecnt_t fade_length);
 
 	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
 	const AudioIntervalMap& _smap;
-	framecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
+	samplecnt_t _fade_length; ///< fade in/out to use on trimmed regions, in samples
 };
 
 }

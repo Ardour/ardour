@@ -21,7 +21,8 @@
 #include "pbd/enumwriter.h"
 #include "pbd/xml++.h"
 #include "pbd/error.h"
-#include "pbd/locale_guard.h"
+#include "pbd/types_convert.h"
+#include "pbd/string_convert.h"
 
 #include "pbd/i18n.h"
 
@@ -33,6 +34,7 @@ PBD::Signal1<bool,Controllable*> Controllable::StartLearning;
 PBD::Signal1<void,Controllable*> Controllable::StopLearning;
 PBD::Signal3<void,Controllable*,int,int> Controllable::CreateBinding;
 PBD::Signal1<void,Controllable*> Controllable::DeleteBinding;
+PBD::Signal1<void, boost::weak_ptr<PBD::Controllable> > Controllable::GUIFocusChanged;
 
 Glib::Threads::RWLock Controllable::registry_lock;
 Controllable::Controllables Controllable::registry;
@@ -107,8 +109,6 @@ XMLNode&
 Controllable::get_state ()
 {
 	XMLNode* node = new XMLNode (xml_node_name);
-	LocaleGuard lg;
-	char buf[64];
 
 	/* Waves' "Pressure3" has a parameter called "µ-iness"
 	 * which causes a  parser error : Input is not proper UTF-8, indicate encoding !
@@ -119,13 +119,10 @@ Controllable::get_state ()
 	// this is not reloaded from XML, but it must be present because it is
 	// used to find and identify XML nodes by various Controllable-derived objects
 
-	node->add_property (X_("name"), _name);
-
-	id().print (buf, sizeof (buf));
-	node->add_property (X_("id"), buf);
-	node->add_property (X_("flags"), enum_2_string (_flags));
-	snprintf (buf, sizeof (buf), "%2.12f", get_save_value());
-        node->add_property (X_("value"), buf);
+	node->set_property (X_("name"), _name);
+	node->set_property (X_("id"), id());
+	node->set_property (X_("flags"), _flags);
+	node->set_property (X_("value"), get_save_value());
 
 	if (_extra_xml) {
 		node->add_child_copy (*_extra_xml);
@@ -137,26 +134,19 @@ Controllable::get_state ()
 int
 Controllable::set_state (const XMLNode& node, int /*version*/)
 {
-	LocaleGuard lg;
-	const XMLProperty* prop;
-
 	Stateful::save_extra_xml (node);
 
 	set_id (node);
 
-	if ((prop = node.property (X_("flags"))) != 0) {
-		_flags = (Flag) string_2_enum (prop->value(), _flags);
+	if (node.get_property (X_("flags"), _flags)) {
+		_flags = Flag(_flags | (_flags & Controllable::RealTime));
 	}
 
-	if ((prop = node.property (X_("value"))) != 0) {
-		float val;
-
-		if (sscanf (prop->value().c_str(), "%f", &val) == 1) {
+	float val;
+	if (node.get_property (X_("value"), val)) {
 			set_value (val, NoGroup);
-		}
-        }
-
-        return 0;
+	}
+	return 0;
 }
 
 void

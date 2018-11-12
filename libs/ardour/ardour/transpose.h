@@ -28,13 +28,13 @@ namespace ARDOUR {
 
 class LIBARDOUR_API Transpose : public MidiOperator {
 public:
-	typedef Evoral::Sequence<Evoral::Beats>::NotePtr     NotePtr;
-	typedef Evoral::Sequence<Evoral::Beats>::Notes       Notes;
+	typedef Evoral::Sequence<Temporal::Beats>::NotePtr     NotePtr;
+	typedef Evoral::Sequence<Temporal::Beats>::Notes       Notes;
 
 	Transpose (int semitones);
 
 	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel> model,
-	                     Evoral::Beats                        position,
+	                     Temporal::Beats                      position,
 	                     std::vector<Notes>&                  seqs);
 
 	std::string name () const { return std::string ("transpose"); }

@@ -25,8 +25,15 @@
 #include <cassert>
 
 #include <sys/types.h>
-#include <fcntl.h>
+
+#ifdef COMPILER_MSVC
+#include <sys/utime.h>
+#else
 #include <unistd.h>
+#include <utime.h>
+#endif
+
+#include <fcntl.h>
 #include <errno.h>
 
 #include <stdlib.h>
@@ -259,14 +266,14 @@ read_string (FILE *fp)
 		return 0;
 	}
 
-	if (strlen (buf) < MAX_STRING_LEN) {
-		if (strlen (buf)) {
-			buf[strlen (buf)-1] = 0;
-		}
+	if (strlen (buf)) {
+		/* strip lash char here: '\n',
+		 * since VST-params cannot be longer than 127 chars.
+		 */
+		buf[strlen (buf)-1] = 0;
 		return strdup (buf);
-	} else {
-		return 0;
 	}
+	return 0;
 }
 
 /** Read an integer value from a line in fp into n,
@@ -307,7 +314,7 @@ vstfx_load_info_block (FILE* fp, VSTInfo *info)
 
 	// TODO read isInstrument -- effFlagsIsSynth
 	info->isInstrument = info->numInputs == 0 && info->numOutputs > 0 && 1 == (info->wantMidi & 1);
-	if (!strcmp (info->Category, "Synth")) {
+	if (!strcmp (info->Category, "Instrument")) {
 		info->isInstrument = true;
 	}
 
@@ -649,10 +656,10 @@ vstfx_parse_vst_state (VSTState* vstfx)
 	switch (plugin->dispatcher (plugin, effGetPlugCategory, 0, 0, 0, 0))
 	{
 		case kPlugCategEffect:         info->Category = strdup ("Effect"); break;
-		case kPlugCategSynth:          info->Category = strdup ("Synth"); break;
-		case kPlugCategAnalysis:       info->Category = strdup ("Anaylsis"); break;
+		case kPlugCategSynth:          info->Category = strdup ("Instrument"); break;
+		case kPlugCategAnalysis:       info->Category = strdup ("Analyser"); break;
 		case kPlugCategMastering:      info->Category = strdup ("Mastering"); break;
-		case kPlugCategSpacializer:    info->Category = strdup ("Spacializer"); break;
+		case kPlugCategSpacializer:    info->Category = strdup ("Spatial"); break;
 		case kPlugCategRoomFx:         info->Category = strdup ("RoomFx"); break;
 		case kPlugSurroundFx:          info->Category = strdup ("SurroundFx"); break;
 		case kPlugCategRestoration:    info->Category = strdup ("Restoration"); break;
@@ -682,8 +689,8 @@ vstfx_parse_vst_state (VSTState* vstfx)
 #endif
 
 	for (int i = 0; i < info->numParams; ++i) {
-		char name[64];
-		char label[64];
+		char name[VestigeMaxLabelLen];
+		char label[VestigeMaxLabelLen];
 
 		/* Not all plugins give parameters labels as well as names */
 
@@ -1078,6 +1085,19 @@ vstfx_get_info (const char* dllpath, enum ARDOUR::PluginType type, enum VSTScanM
 	} else {
 		vstfx_write_info_file (infofile, infos);
 		fclose (infofile);
+
+		/* In some cases the .dll may have a modification time in the future,
+		 * (e.g. unzip a VST plugin: .zip files don't include timezones)
+		 */
+		string const fsipath = vstfx_infofile_path (dllpath);
+		GStatBuf dllstat;
+		GStatBuf fsistat;
+		if (g_stat (dllpath, &dllstat) == 0 && g_stat (fsipath.c_str (), &fsistat) == 0) {
+			struct utimbuf utb;
+			utb.actime = fsistat.st_atime;
+			utb.modtime = std::max (dllstat.st_mtime, fsistat.st_mtime);
+			g_utime (fsipath.c_str (), &utb);
+		}
 	}
 	return infos;
 }

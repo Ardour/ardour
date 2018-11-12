@@ -87,6 +87,16 @@ bool RegionSelection::contains (RegionView* rv) const
 	return find (begin(), end(), rv) != end();
 }
 
+bool RegionSelection::contains (boost::shared_ptr<ARDOUR::Region> region) const
+{
+	for (const_iterator r = begin (); r != end (); ++r) {
+		if ((*r)->region () == region) {
+			return true;
+		}
+	}
+	return false;
+}
+
 /** Add a region to the selection.
  *  @param rv Region to add.
  *  @return false if we already had the region or if it cannot be added,
@@ -95,13 +105,13 @@ bool RegionSelection::contains (RegionView* rv) const
 bool
 RegionSelection::add (RegionView* rv)
 {
-        if (!rv->region()->playlist()) {
-                /* not attached to a playlist - selection not allowed.
-                   This happens if the user tries to select a region
-                   during a capture pass.
-                */
-                return false;
-        }
+	if (!rv->region()->playlist()) {
+		/* not attached to a playlist - selection not allowed.
+		   This happens if the user tries to select a region
+		   during a capture pass.
+		*/
+		return false;
+	}
 
 	if (contains (rv)) {
 		/* we already have it */
@@ -170,9 +180,9 @@ RegionSelection::add_to_layer (RegionView * rv)
 }
 
 struct RegionSortByTime {
-    bool operator() (const RegionView* a, const RegionView* b) const {
-	    return a->region()->position() < b->region()->position();
-    }
+	bool operator() (const RegionView* a, const RegionView* b) const {
+		return a->region()->position() < b->region()->position();
+	}
 };
 
 
@@ -195,16 +205,16 @@ RegionSelection::by_position (list<RegionView*>& foo) const
 }
 
 struct RegionSortByTrack {
-    bool operator() (const RegionView* a, const RegionView* b) const {
+	bool operator() (const RegionView* a, const RegionView* b) const {
 
-	    /* really, track and position */
+		/* really, track and position */
 
-	    if (a->get_time_axis_view().order() == b->get_time_axis_view().order()) {
-		    return a->region()->position() < b->region()->position();
-	    } else {
-		    return a->get_time_axis_view().order() < b->get_time_axis_view().order();
-	    }
-    }
+		if (a->get_time_axis_view().order() == b->get_time_axis_view().order()) {
+			return a->region()->position() < b->region()->position();
+		} else {
+			return a->get_time_axis_view().order() < b->get_time_axis_view().order();
+		}
+	}
 };
 
 
@@ -251,27 +261,27 @@ RegionSelection::involves (const TimeAxisView& tv) const
 	return false;
 }
 
-framepos_t
+samplepos_t
 RegionSelection::start () const
 {
-	framepos_t s = max_framepos;
+	samplepos_t s = max_samplepos;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
 		s = min (s, (*i)->region()->position ());
 	}
 
-	if (s == max_framepos) {
+	if (s == max_samplepos) {
 		return 0;
 	}
 
 	return s;
 }
 
-framepos_t
-RegionSelection::end_frame () const
+samplepos_t
+RegionSelection::end_sample () const
 {
-	framepos_t e = 0;
+	samplepos_t e = 0;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
-		e = max (e, (*i)->region()->last_frame ());
+		e = max (e, (*i)->region()->last_sample ());
 	}
 
 	return e;

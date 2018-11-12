@@ -86,9 +86,8 @@ GroupTabs::set_session (Session* s)
 void
 GroupTabs::on_size_request (Gtk::Requisition *req)
 {
-	/* Use a dummy, small width and the actual height that we want */
-	req->width = 16;
-	req->height = 16;
+	req->width = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
+	req->height = std::max (16.f, rintf (16.f * UIConfiguration::instance().get_ui_scale()));
 }
 
 bool
@@ -144,10 +143,10 @@ GroupTabs::on_button_press_event (GdkEventButton* ev)
 
 		RouteGroup* g = t ? t->group : 0;
 
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
-			/* edit */
-			RouteGroupDialog d (g, false);
-			d.present ();
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier) && g) {
+			remove_group (g);
+		} else if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier) && g) {
+			edit_group (g);
 		} else {
 			Menu* m = get_menu (g, true);
 			if (m) {
@@ -213,7 +212,15 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 				run_new_group_dialog (&routes, false);
 			} else {
 				boost::shared_ptr<RouteList> r = _session->get_routes ();
-				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+				/* First add new ones, then remove old ones.
+				 * We cannot allow the group to become temporarily empty, because
+				 * Session::route_removed_from_route_group() will delete empty groups.
+				 */
+				for (RouteList::const_iterator i = routes.begin(); i != routes.end(); ++i) {
+					/* RouteGroup::add () ignores routes already present in the set */
+					_dragging->group->add (*i);
+				}
+				for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 
 					bool const was_in_tab = find (
 						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
@@ -223,10 +230,9 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 
 					if (was_in_tab && !now_in_tab) {
 						_dragging->group->remove (*i);
-					} else if (!was_in_tab && now_in_tab) {
-						_dragging->group->add (*i);
 					}
 				}
+
 			}
 		}
 
@@ -241,8 +247,9 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 }
 
 void
-GroupTabs::render (cairo_t* cr, cairo_rectangle_t*)
+GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 {
+	cairo_t* cr = ctx->cobj();
 	if (_dragging == 0) {
 		_tabs = compute_tabs ();
 	}
@@ -306,7 +313,7 @@ GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 	using namespace Menu_Helpers;
 	Menu *new_from;
 
-	new_from = new Menu;
+	new_from = manage (new Menu);
 	{
 		MenuList& f = new_from->items ();
 		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), false)));
@@ -315,7 +322,7 @@ GroupTabs::add_new_from_items (Menu_Helpers::MenuList& items)
 	}
 	items.push_back (MenuElem (_("Create New Group From..."), *new_from));
 
-	new_from = new Menu;
+	new_from = manage (new Menu);
 	{
 		MenuList& f = new_from->items ();
 		f.push_back (MenuElem (_("Selection..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_from_selection), true)));
@@ -355,15 +362,18 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 		items.push_back (SeparatorElem());
 
-		vca_menu = new Menu;
-		MenuList& f (vca_menu->items());
-		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
+		if (g->has_control_master()) {
+			items.push_back (MenuElem (_("Drop Group from VCA..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::unassign_group_to_master), g->group_master_number(), g)));
+		} else {
+			vca_menu = manage (new Menu);
+			MenuList& f (vca_menu->items());
+			f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), 0, g, true)));
 
-		for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
-			f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
+			for (VCAList::const_iterator v = vcas.begin(); v != vcas.end(); ++v) {
+				f.push_back (MenuElem ((*v)->name().empty() ? string_compose ("VCA %1", (*v)->number()) : (*v)->name(), sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_group_to_master), (*v)->number(), g, true)));
+			}
+			items.push_back (MenuElem (_("Assign Group to VCA..."), *vca_menu));
 		}
-		items.push_back (MenuElem (_("Assign Group to Control Master..."), *vca_menu));
-
 
 		items.push_back (SeparatorElem());
 
@@ -389,7 +399,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 	items.push_back (SeparatorElem());
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_selection_to_master), 0)));
@@ -398,9 +408,9 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 	}
 
-	items.push_back (MenuElem (_("Assign Selection to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Selection to VCA..."), *vca_menu));
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_recenabled_to_master), 0)));
@@ -409,9 +419,9 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 
 	}
-	items.push_back (MenuElem (_("Assign Record Enabled to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Record Enabled to VCA..."), *vca_menu));
 
-	vca_menu = new Menu;
+	vca_menu = manage (new Menu);
 	{
 		MenuList& f (vca_menu->items());
 		f.push_back (MenuElem ("New", sigc::bind (sigc::mem_fun (*this, &GroupTabs::assign_soloed_to_master), 0)));
@@ -420,7 +430,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		}
 
 	}
-	items.push_back (MenuElem (_("Assign Soloed to Control Master..."), *vca_menu));
+	items.push_back (MenuElem (_("Assign Soloed to VCA..."), *vca_menu));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Enable All Groups"), sigc::mem_fun(*this, &GroupTabs::activate_all)));
@@ -439,13 +449,13 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 	boost::shared_ptr<VCA> master;
 
 	if (which == 0) {
-		if (_session->vca_manager().create_vca (1)) {
+		if (_session->vca_manager().create_vca (1).empty ()) {
 			/* error */
 			return;
 		}
 
-		/* VCAs use 1-based counting. Get most recently created VCA... */
-		which = _session->vca_manager().n_vcas();
+		/* Get most recently created VCA... */
+		which = _session->vca_manager().vcas().back()->number();
 	}
 
 	master = _session->vca_manager().vca_by_number (which);
@@ -466,22 +476,44 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 }
 
 void
-GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
+GroupTabs::unassign_group_to_master (uint32_t which, RouteGroup* group) const
+{
+	if (!_session || !group) {
+		return;
+	}
+
+	boost::shared_ptr<VCA> master = _session->vca_manager().vca_by_number (which);
+
+	if (!master) {
+		/* should never happen; if it does, basically something deeply
+		   odd happened, no reason to tell user because there's no
+		   sensible explanation.
+		*/
+		return;
+	}
+
+	group->unassign_master (master);
+}
+
+void
+GroupTabs::assign_some_to_master (uint32_t which, RouteList rl, std::string vcaname)
 {
 	if (!_session) {
 		return;
 	}
 
 	boost::shared_ptr<VCA> master;
+	bool set_name = false;
 
 	if (which == 0) {
-		if (_session->vca_manager().create_vca (1)) {
+		if (_session->vca_manager().create_vca (1).empty ()) {
 			/* error */
 			return;
 		}
+		set_name = true;
 
-		/* VCAs use 1-based counting. Get most recently created VCA... */
-		which = _session->vca_manager().n_vcas();
+		/* Get most recently created VCA... */
+		which = _session->vca_manager().vcas().back()->number();
 	}
 
 	master = _session->vca_manager().vca_by_number (which);
@@ -500,7 +532,10 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl)
 	}
 
 	for (RouteList::iterator r = rl.begin(); r != rl.end(); ++r) {
-		(*r)->assign (master, false);
+		(*r)->assign (master);
+	}
+	if (set_name && !vcaname.empty()) {
+		master->set_name (vcaname);
 	}
 }
 
@@ -545,7 +580,7 @@ GroupTabs::get_soloed ()
 void
 GroupTabs::assign_selection_to_master (uint32_t which)
 {
-	assign_some_to_master (which, selected_routes ());
+	assign_some_to_master (which, selected_routes (), _("Selection"));
 }
 
 void
@@ -656,12 +691,12 @@ void
 GroupTabs::collect (RouteGroup* g)
 {
 	boost::shared_ptr<RouteList> group_routes = g->route_list ();
-	group_routes->sort (Stripable::PresentationOrderSorter());
+	group_routes->sort (Stripable::Sorter());
 	int const N = group_routes->size ();
 
 	RouteList::iterator i = group_routes->begin ();
 	boost::shared_ptr<RouteList> routes = _session->get_routes ();
-	routes->sort (Stripable::PresentationOrderSorter());
+	routes->sort (Stripable::Sorter());
 	RouteList::const_iterator j = routes->begin ();
 
 	int diff = 0;
@@ -722,14 +757,10 @@ GroupTabs::set_activation (RouteGroup* g, bool a)
 void
 GroupTabs::remove_group (RouteGroup* g)
 {
-	RouteList rl (*(g->route_list().get()));
+	boost::shared_ptr<RouteList> rl (g->route_list ());
 	_session->remove_route_group (*g);
 
-	PresentationInfo::ChangeSuspender cs;
-
-	for (RouteList::iterator i = rl.begin(); i != rl.end(); ++i) {
-		(*i)->presentation_info().PropertyChanged (Properties::color);
-	}
+	emit_gui_changed_for_members (rl);
 }
 
 /** Set the color of the tab of a route group */
@@ -737,42 +768,8 @@ void
 GroupTabs::set_group_color (RouteGroup* group, uint32_t color)
 {
 	assert (group);
-	uint32_t r, g, b, a;
-
-	UINT_TO_RGBA (color, &r, &g, &b, &a);
-
-	/* Hack to disallow black route groups; force a dark grey instead */
-	const uint32_t dark_gray = 25;
-
-	if (r < dark_gray && g < dark_gray && b < dark_gray) {
-		r = dark_gray;
-		g = dark_gray;
-		b = dark_gray;
-	}
-
-	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
-
-	char buf[64];
-
-	/* for historical reasons the colors must be stored as 16 bit color
-	 * values. Ugh.
-	 */
-
-	snprintf (buf, sizeof (buf), "%d:%d:%d", (r<<8), (g<<8), (b<<8));
-	gui_state.set_property (group_gui_id (group), "color", buf);
-
-	/* the group color change notification */
-
-	PBD::PropertyChange change;
-	change.add (Properties::color);
-	group->PropertyChanged (change);
-
-	/* This is a bit of a hack, but this might change
-	   our route's effective color, so emit gui_changed
-	   for our routes.
-	*/
-
-	emit_gui_changed_for_members (group);
+	PresentationInfo::ChangeSuspender cs;
+	group->set_rgba (color);
 }
 
 /** @return the ID string to use for the GUI state of a route group */
@@ -793,6 +790,14 @@ GroupTabs::group_color (RouteGroup* group)
 {
 	assert (group);
 
+	/* prefer libardour color, if set */
+	uint32_t rgba = group->rgba ();
+	if (rgba != 0) {
+		return rgba;
+	}
+
+	/* backwards compatibility, load old color */
+
 	GUIObjectState& gui_state = *ARDOUR_UI::instance()->gui_object_state;
 	string const gui_id = group_gui_id (group);
 	bool empty;
@@ -807,14 +812,16 @@ GroupTabs::group_color (RouteGroup* group)
 
 	int r, g, b;
 
-	/* for historical reasons, colors are stored as 16 bit values.
-	 */
+	/* for historical reasons, colors are stored as 16 bit values.  */
 
 	sscanf (color.c_str(), "%d:%d:%d", &r, &g, &b);
 
 	r /= 256;
 	g /= 256;
 	b /= 256;
+
+	group->migrate_rgba (RGBA_TO_UINT (r, g, b, 255));
+	gui_state.remove_node (gui_id);
 
 	return RGBA_TO_UINT (r, g, b, 255);
 }
@@ -827,7 +834,7 @@ GroupTabs::route_group_property_changed (RouteGroup* rg)
 	   for our routes.
 	*/
 
-	emit_gui_changed_for_members (rg);
+	emit_gui_changed_for_members (rg->route_list ());
 
 	set_dirty ();
 }
@@ -863,11 +870,11 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 }
 
 void
-GroupTabs::emit_gui_changed_for_members (RouteGroup* rg)
+GroupTabs::emit_gui_changed_for_members (boost::shared_ptr<RouteList> rl)
 {
 	PresentationInfo::ChangeSuspender cs;
 
-	for (RouteList::iterator i = rg->route_list()->begin(); i != rg->route_list()->end(); ++i) {
+	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		(*i)->presentation_info().PropertyChanged (Properties::color);
 	}
 }

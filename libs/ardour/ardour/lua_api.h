@@ -28,6 +28,7 @@
 
 #include "ardour/libardour_visibility.h"
 
+#include "ardour/midi_model.h"
 #include "ardour/processor.h"
 #include "ardour/session.h"
 
@@ -63,6 +64,10 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns Processor object (may be nil)
 	 */
 	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
+
+	/** return a PluginInfoList (all plugin)
+	 */
+	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
 
 	/** search a Plugin
 	 *
@@ -165,6 +170,26 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
 	 */
 	int hsla_to_rgba (lua_State *lua);
+
+	/**
+	 * A convenience function to expand RGBA parameters from an integer
+	 *
+	 * convert a Canvas::Color (uint32_t 0xRRGGBBAA) into
+	 * double RGBA values which can be passed as parameters to
+	 * Cairo::Context::set_source_rgba
+	 *
+	 * Example:
+	 * @code
+	 * local r, g, b, a = ARDOUR.LuaAPI.color_to_rgba (0x88aa44ff)
+	 * cairo_ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (0x11336699)
+	 * @endcode
+	 * @returns 4 parameters: red, green, blue, alpha (in range 0..1)
+	 */
+	int color_to_rgba (lua_State *lua);
+
+	/**
+	 */
+	std::string ascii_dtostr (const double d);
 
 	/**
 	 * Creates a filename from a series of elements using the correct separator for filenames.
@@ -275,14 +300,17 @@ namespace ARDOUR { namespace LuaAPI {
 		private:
 			::Vamp::Plugin* _plugin;
 			float           _sample_rate;
-			framecnt_t      _bufsize;
-			framecnt_t      _stepsize;
+			samplecnt_t      _bufsize;
+			samplecnt_t      _stepsize;
 			bool            _initialized;
 
 	};
 
-	boost::shared_ptr<Evoral::Note<Evoral::Beats> >
-		new_noteptr (uint8_t, Evoral::Beats, Evoral::Beats, uint8_t, uint8_t);
+	boost::shared_ptr<Evoral::Note<Temporal::Beats> >
+		new_noteptr (uint8_t, Temporal::Beats, Temporal::Beats, uint8_t, uint8_t);
+
+	std::list<boost::shared_ptr< Evoral::Note<Temporal::Beats> > >
+		note_list (boost::shared_ptr<ARDOUR::MidiModel>);
 
 } } /* namespace */
 

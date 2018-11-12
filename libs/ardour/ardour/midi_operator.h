@@ -23,7 +23,7 @@
 #include <vector>
 #include <string>
 
-#include "evoral/Beats.hpp"
+#include "temporal/beats.h"
 #include "evoral/Sequence.hpp"
 
 class Command;
@@ -38,8 +38,8 @@ class LIBARDOUR_API MidiOperator {
 	virtual ~MidiOperator() {}
 
 	virtual Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
-	                             Evoral::Beats,
-	                             std::vector<Evoral::Sequence<Evoral::Beats>::Notes>&) = 0;
+	                             Temporal::Beats,
+	                             std::vector<Evoral::Sequence<Temporal::Beats>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };
 

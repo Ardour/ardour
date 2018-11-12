@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Korg nanoKONTROL Studio">
+
+<!-- 2017-03-09 Robert Schneider (robert.schneider@aramar.de) -->
+<!-- Put the following lines into a text file and issue
+
+		cat <your-text-file> | base64 -d > Korg-nano-Studio-Ardour.nktrl_st_set
+		
+	You can then load the scene set with your Korg Kontrol Editor.
+	The scene set is configured to use the global MIDI channel on all scenes.
+	If you want to change the MIDI channel, you only have to change it in the bindings
+	here and in the Global configuration of your device.
+	
+MTQ4MlNjblMgAJALAAAAAAAA//8FAAAAMAIAAP////8xNDgyU2NuRCAAMAIAAAAAAAD//wEAAAAw
+AgAA/////0FyZG91cjEgICAgIAH///8QAA0Af////xAADgB/////EAAPAH////8QABAAf////xAA
+EQB/////EAASAH////8QABMAf////xAAFAB/////EAACAH////8QAAMAf////xAABAB/////EAAF
+AH////8QAAYAf////xAACAB/////EAAJAH////8QAAwAf////xAAHQB/AP//EAAeAH8A//8QAB8A
+fwD//xAAIQB/AP//EAAiAH8A//8QACMAfwD//xAAJAB/AP//EAAlAH8A//8QABUAfwD//xAAFgB/
+AP//EAAXAH8A//8QABgAfwD//xAAGQB/AP//EAAaAH8A//8QABsAfwD//xAAHAB/AP//EAAmAH8A
+//8QACcAfwD//xAAKAB/AP//EAApAH8A//8QACoAfwD//xAAKwB/AP//EAAsAH8A//8QAC0AfwD/
+/xAALgB/AP//EAAvAH8A//8QADAAfwD//xAAMQB/AP//EAAyAH8A//8QADMAfwD//xAANAB/AP//
+EAA1AH8A//8QAFAAfwD//xAAPwB/AP//EABRAH8A//8QADoAfwD//xAAOwB/AP//EAA2AH8A//8Q
+AD4AfwD//xAANwB/AP//EAA4AH8A//8QADkAfwD//xAAPAB/AP//EAA9AH8A////////////////
+////////AAAAUlNVVgB/////////////////////////////////////////////////////MTQ4
+MlNjbkQgADACAAAAAAAA//8BAAAAMAIAAP////9BcmRvdXIyICAgICAB////EAANAH////8QAA4A
+f////xAADwB/////EAAQAH////8QABEAf////xAAEgB/////EAATAH////8QABQAf////xAAAgB/
+////EAADAH////8QAAQAf////xAABQB/////EAAGAH////8QAAgAf////xAACQB/////EAAMAH//
+//8QAB0AfwD//xAAHgB/AP//EAAfAH8A//8QACEAfwD//xAAIgB/AP//EAAjAH8A//8QACQAfwD/
+/xAAJQB/AP//EAAVAH8A//8QABYAfwD//xAAFwB/AP//EAAYAH8A//8QABkAfwD//xAAGgB/AP//
+EAAbAH8A//8QABwAfwD//xAAJgB/AP//EAAnAH8A//8QACgAfwD//xAAKQB/AP//EAAqAH8A//8Q
+ACsAfwD//xAALAB/AP//EAAtAH8A//8QAC4AfwD//xAALwB/AP//EAAwAH8A//8QADEAfwD//xAA
+MgB/AP//EAAzAH8A//8QADQAfwD//xAANQB/AP//EABQAH8A//8QAD8AfwD//xAAUQB/AP//EAA6
+AH8A//8QADsAfwD//xAANgB/AP//EAA+AH8A//8QADcAfwD//xAAOAB/AP//EAA5AH8A//8QADwA
+fwD//xAAPQB/AP///////////////////////wAEAlJTVVYAf///////////////////////////
+/////////////////////////zE0ODJTY25EIAAwAgAAAAAAAP//AQAAADACAAD/////QXJkb3Vy
+MyAgICAgAf///xAADQB/////EAAOAH////8QAA8Af////xAAEAB/////EAARAH////8QABIAf///
+/xAAEwB/////EAAUAH////8QAAIAf////xAAAwB/////EAAEAH////8QAAUAf////xAABgB/////
+EAAIAH////8QAAkAf////xAADAB/////EAAdAH8A//8QAB4AfwD//xAAHwB/AP//EAAhAH8A//8Q
+ACIAfwD//xAAIwB/AP//EAAkAH8A//8QACUAfwD//xAAFQB/AP//EAAWAH8A//8QABcAfwD//xAA
+GAB/AP//EAAZAH8A//8QABoAfwD//xAAGwB/AP//EAAcAH8A//8QACYAfwD//xAAJwB/AP//EAAo
+AH8A//8QACkAfwD//xAAKgB/AP//EAArAH8A//8QACwAfwD//xAALQB/AP//EAAuAH8A//8QAC8A
+fwD//xAAMAB/AP//EAAxAH8A//8QADIAfwD//xAAMwB/AP//EAA0AH8A//8QADUAfwD//xAAUAB/
+AP//EAA/AH8A//8QAFEAfwD//xAAOgB/AP//EAA7AH8A//8QADYAfwD//xAAPgB/AP//EAA3AH8A
+//8QADgAfwD//xAAOQB/AP//EAA8AH8A//8QAD0AfwD///////////////////////8ABAJSU1VW
+AH////////////////////////////////////////////////////8xNDgyU2NuRCAAMAIAAAAA
+AAD//wEAAAAwAgAA/////0FyZG91cjQgICAgIAH///8QAA0Af////xAADgB/////EAAPAH////8Q
+ABAAf////xAAEQB/////EAASAH////8QABMAf////xAAFAB/////EAACAH////8QAAMAf////xAA
+BAB/////EAAFAH////8QAAYAf////xAACAB/////EAAJAH////8QAAwAf////xAAHQB/AP//EAAe
+AH8A//8QAB8AfwD//xAAIQB/AP//EAAiAH8A//8QACMAfwD//xAAJAB/AP//EAAlAH8A//8QABUA
+fwD//xAAFgB/AP//EAAXAH8A//8QABgAfwD//xAAGQB/AP//EAAaAH8A//8QABsAfwD//xAAHAB/
+AP//EAAmAH8A//8QACcAfwD//xAAKAB/AP//EAApAH8A//8QACoAfwD//xAAKwB/AP//EAAsAH8A
+//8QAC0AfwD//xAALgB/AP//EAAvAH8A//8QADAAfwD//xAAMQB/AP//EAAyAH8A//8QADMAfwD/
+/xAANAB/AP//EAA1AH8A//8QAFAAfwD//xAAPwB/AP//EABRAH8A//8QADoAfwD//xAAOwB/AP//
+EAA2AH8A//8QAD4AfwD//xAANwB/AP//EAA4AH8A//8QADkAfwD//xAAPAB/AP//EAA9AH8A////
+////////////////////AAQCUlNVVgB/////////////////////////////////////////////
+////////MTQ4MlNjbkQgADACAAAAAAAA//8BAAAAMAIAAP////9BcmRvdXI1ICAgICAB////EAAN
+AH////8QAA4Af////xAADwB/////EAAQAH////8QABEAf////xAAEgB/////EAATAH////8QABQA
+f////xAAAgB/////EAADAH////8QAAQAf////xAABQB/////EAAGAH////8QAAgAf////xAACQB/
+////EAAMAH////8QAB0AfwD//xAAHgB/AP//EAAfAH8A//8QACEAfwD//xAAIgB/AP//EAAjAH8A
+//8QACQAfwD//xAAJQB/AP//EAAVAH8A//8QABYAfwD//xAAFwB/AP//EAAYAH8A//8QABkAfwD/
+/xAAGgB/AP//EAAbAH8A//8QABwAfwD//xAAJgB/AP//EAAnAH8A//8QACgAfwD//xAAKQB/AP//
+EAAqAH8A//8QACsAfwD//xAALAB/AP//EAAtAH8A//8QAC4AfwD//xAALwB/AP//EAAwAH8A//8Q
+ADEAfwD//xAAMgB/AP//EAAzAH8A//8QADQAfwD//xAANQB/AP//EABQAH8A//8QAD8AfwD//xAA
+UQB/AP//EAA6AH8A//8QADsAfwD//xAANgB/AP//EAA+AH8A//8QADcAfwD//xAAOAB/AP//EAA5
+AH8A//8QADwAfwD//xAAPQB/AP///////////////////////wAEAlJTVVYAf///////////////
+/////////////////////////////////////w==
+
+ -->
+
+	<DeviceInfo bank-size="6" motorized="no" threshold="15"/>
+
+<!-- Transport Controls -->
+
+	<Binding channel="1" ctl="54" action="Transport/Loop"/>						<!-- Cycle = Start loop -->
+	<Binding channel="1" ctl="55" action="Common/toggle-location-at-playhead"/>	<!-- Set = Set/Unset marker -->		
+	<Binding channel="1" ctl="56" action="Common/jump-backward-to-mark"/> 		<!-- < = Previous marker -->
+	<Binding channel="1" ctl="57" action="Common/jump-forward-to-mark"/> 		<!-- > = Next marker -->
+
+	<Binding channel="1" ctl="58" action="Transport/Rewind"/>					<!-- << = Rewind -->
+	<Binding channel="1" ctl="59" action="Transport/Forward"/>					<!-- >> = Forward -->	
+	<Binding channel="1" ctl="60" action="Editor/select-prev-route"/>			<!-- < = Select next track/route -->
+	<Binding channel="1" ctl="61" action="Editor/select-next-route"/>			<!-- > = Select previous track/route -->
+
+	<Binding channel="1" ctl="62" action="Transport/ToggleRollForgetCapture"/>	<!-- |< = Stop and forget capture -->
+	<Binding channel="1" ctl="63" function="transport-stop"/>					<!-- [] = Stop -->
+	<Binding channel="1" ctl="80" function="transport-roll"/>					<!-- > = Toggle Roll -->
+	<Binding channel="1" ctl="81" function="toggle-rec-enable"/>				<!-- * = Toggle record enable -->
+	
+	<Binding channel="1" msg="B0 53 01" action="Common/playhead-forward-to-grid" />		<!-- Jog wheel forwards playhead one grid -->
+	<Binding channel="1" msg="B0 55 01" action="Common/playhead-backward-to-grid" />	<!-- Jog wheel backwards playhead one grid -->
+
+<!-- The "Scene" button toggles between five banks. It implements this by   -->
+<!-- sending a bank assignment # corresponding to the current Korg "Scene"  -->
+<!-- Downside is you are limited to 5 banks total (30 tracks.)              -->
+                                 
+<!-- Also, in order for this map to work you must have identical maps       -->
+<!-- assigned to each of the 5 scenes on the nano device.                   -->
+<!-- If you used the above scene set data, you're taken care of.			-->
+
+<Binding sysex="F0 42 40 00 01 37 02 00 00 4F 00 F7" function="set-bank" argument="0"/>
+<Binding sysex="F0 42 40 00 01 37 02 00 00 4F 01 F7" function="set-bank" argument="1"/>
+<Binding sysex="F0 42 40 00 01 37 02 00 00 4F 02 F7" function="set-bank" argument="2"/>
+<Binding sysex="F0 42 40 00 01 37 02 00 00 4F 03 F7" function="set-bank" argument="3"/>
+<Binding sysex="F0 42 40 00 01 37 02 00 00 4F 04 F7" function="set-bank" argument="4"/>
+
+<!-- Strip 1 - Master:                                                      -->
+<!-- Mute assigned to Mute							                        -->
+<!-- Solo assigned to transport-start			                            -->
+<!-- Rec assigned to transport-end											-->
+<!-- Select unassigned														-->
+<!-- Rotary encoder assigned to Master Pan Width (easy to audition in mono!)-->
+<!-- Fader assigned to Master Gain 											-->
+	<Binding channel="1" ctl="21" uri="/bus/mute master"/>
+	<Binding channel="1" ctl="29" function="transport-start"/>
+	<Binding channel="1" ctl="38" function="transport-end"/>	
+	<Binding channel="1" ctl="46" action="Transport/RecordCountIn"/>
+	<Binding channel="1" ctl="13" uri="/bus/panwidth master"/>
+	<Binding channel="1" ctl="2" uri="/bus/gain master"/>
+
+<!-- Strip 2 : Selected track -->
+<!-- Mute assigned to Mute							                        -->
+<!-- Solo assigned to Solo						                            -->
+<!-- Rec assigned to toggle record enable									-->
+<!-- Select assigned to Mixer unity-gain									-->
+<!-- Rotary encoder assigned to pan direction								-->
+<!-- Fader assigned to gain		 											-->
+	<Binding channel="1" ctl="22" uri="/route/mute S1"/>
+	<Binding channel="1" ctl="30" uri="/route/solo S1"/>
+	<Binding channel="1" ctl="39" uri="/route/recenable S1"/>
+	<Binding channel="1" ctl="47" action="Mixer/unity-gain"/>
+	<Binding channel="1" ctl="14" uri="/route/pandirection S1"/>
+	<Binding channel="1" ctl="3" uri="/route/gain S1"/>
+
+<!-- Strips 3-8:                                                            -->
+<!-- Mute assigned to Mute							                        -->
+<!-- Solo assigned to Solo						                            -->
+<!-- Rec assigned to toggle record enable									-->
+<!-- Select assigned to balance												-->
+<!-- Rotary encoder assigned to pan direction								-->
+<!-- Fader assigned to gain		 											-->
+
+<!-- Strip 3 -->
+	<Binding channel="1" ctl="23" uri="/route/mute B1"/>
+	<Binding channel="1" ctl="31" uri="/route/solo B1"/>
+	<Binding channel="1" ctl="40" uri="/route/recenable B1"/>
+	<Binding channel="1" ctl="48" uri=""/>
+	<Binding channel="1" ctl="15" uri="/route/pandirection B1"/>
+	<Binding channel="1" ctl="4" uri="/route/gain B1"/>
+
+<!-- Strip 4 -->
+	<Binding channel="1" ctl="24" uri="/route/mute B2"/>
+	<Binding channel="1" ctl="33" uri="/route/solo B2"/>
+	<Binding channel="1" ctl="41" uri="/route/recenable B2"/>
+	<Binding channel="1" ctl="49" uri=""/>
+	<Binding channel="1" ctl="16" uri="/route/pandirection B2"/>
+	<Binding channel="1" ctl="5" uri="/route/gain B2"/>
+
+<!-- Strip 5 -->
+	<Binding channel="1" ctl="25" uri="/route/mute B3"/>
+	<Binding channel="1" ctl="34" uri="/route/solo B3"/>
+	<Binding channel="1" ctl="42" uri="/route/recenable B3"/>
+	<Binding channel="1" ctl="50" uri=""/>
+	<Binding channel="1" ctl="17" uri="/route/pandirection B3"/>
+	<Binding channel="1" ctl="6" uri="/route/gain B3"/>
+
+<!-- Strip 6 -->
+	<Binding channel="1" ctl="26" uri="/route/mute B4"/>
+	<Binding channel="1" ctl="35" uri="/route/solo B4"/>
+	<Binding channel="1" ctl="43" uri="/route/recenable B4"/>
+	<Binding channel="1" ctl="51" uri=""/>
+	<Binding channel="1" ctl="18" uri="/route/pandirection B4"/>
+	<Binding channel="1" ctl="8" uri="/route/gain B4"/>
+
+<!-- Strip 7 (bank strip #5) -->
+	<Binding channel="1" ctl="27" uri="/route/mute B5"/>
+	<Binding channel="1" ctl="36" uri="/route/solo B5"/>
+	<Binding channel="1" ctl="44" uri="/route/recenable B5"/>
+	<Binding channel="1" ctl="52" uri=""/>
+	<Binding channel="1" ctl="19" uri="/route/pandirection B5"/>
+	<Binding channel="1" ctl="9" uri="/route/gain B5"/>
+
+<!-- Strip 8 (bank strip #6) -->
+	<Binding channel="1" ctl="28" uri="/route/mute B6"/>
+	<Binding channel="1" ctl="37" uri="/route/solo B6"/>
+	<Binding channel="1" ctl="45" uri="/route/recenable B6"/>
+	<Binding channel="1" ctl="53" uri=""/>
+	<Binding channel="1" ctl="20" uri="/route/pandirection B6"/>
+	<Binding channel="1" ctl="12" uri="/route/gain B6"/>
+</ArdourMIDIBindings>

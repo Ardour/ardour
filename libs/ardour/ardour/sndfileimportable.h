@@ -33,12 +33,12 @@ class LIBARDOUR_API SndFileImportableSource : public ImportableSource {
 	SndFileImportableSource (const std::string& path);
 	virtual ~SndFileImportableSource();
 
-	framecnt_t read (Sample* buffer, framecnt_t nframes);
+	samplecnt_t read (Sample* buffer, samplecnt_t nframes);
 	uint32_t   channels() const;
-	framecnt_t length() const;
-	framecnt_t samplerate() const;
-	void       seek (framepos_t pos);
-	framepos_t natural_position() const;
+	samplecnt_t length() const;
+	samplecnt_t samplerate() const;
+	void       seek (samplepos_t pos);
+	samplepos_t natural_position() const;
 	bool       clamped_at_unity () const;
 
    protected:
@@ -46,7 +46,7 @@ class LIBARDOUR_API SndFileImportableSource : public ImportableSource {
 	boost::shared_ptr<SNDFILE> in;
 
 	/* these are int64_t so as to be independent of whatever
-	   types Ardour may use for framepos_t, framecnt_t etc.
+	   types Ardour may use for samplepos_t, samplecnt_t etc.
 	*/
 
 	int64_t timecode;

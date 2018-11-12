@@ -48,9 +48,9 @@ namespace ARDOUR {
 
 class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 {
-  public:
+public:
 	LV2PluginUI (boost::shared_ptr<ARDOUR::PluginInsert>,
-	             boost::shared_ptr<ARDOUR::LV2Plugin>);
+			boost::shared_ptr<ARDOUR::LV2Plugin>);
 	~LV2PluginUI ();
 
 	gint get_preferred_height ();
@@ -63,7 +63,7 @@ class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 	int package (Gtk::Window&);
 	void grab_focus ();
 
-  private:
+private:
 
 	void control_changed (uint32_t);
 

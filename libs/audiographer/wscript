@@ -85,7 +85,7 @@ def build(bld):
     audiographer.name           = 'libaudiographer'
     audiographer.target         = 'audiographer'
     audiographer.export_includes = ['.', './src']
-    audiographer.includes       = ['.', './src','../ardour','../timecode','../evoral']
+    audiographer.includes       = ['.', './src','../ardour','../temporal','../evoral']
     audiographer.uselib         = 'GLIB GLIBMM GTHREAD SAMPLERATE SNDFILE FFTW3F VAMPSDK VAMPHOSTSDK XML'
     audiographer.use            = 'libpbd'
     audiographer.vnum           = AUDIOGRAPHER_LIB_VERSION

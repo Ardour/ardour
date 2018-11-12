@@ -33,6 +33,7 @@
 #include <glibmm/timer.h>
 
 #include "ardour/linux_vst_support.h"
+#include "ardour/vst_plugin.h"
 
 #include <X11/X.h>
 #include <X11/Xlib.h>
@@ -189,31 +190,37 @@ dispatch_x_events (XEvent* event, VSTState* vstfx)
 			int width = event->xconfigure.width;
 			int height = event->xconfigure.height;
 
-			/*If we get a config notify on the parent window XID then we need to see
-			if the size has been changed - some plugins re-size their UI window e.g.
-			when opening a preset manager (you might think that should be spawned as a new window...) */
-
-			/*if the size has changed, we flag this so that in lxvst_pluginui.cc we can make the
-			change to the GTK parent window in ardour, from its UI thread*/
+			/* If we get a config notify on the parent window XID then we need to see
+			 * if the size has been changed - some plugins re-size their UI window e.g.
+			 * when opening a preset manager.
+			 *
+			 * if the size has changed, we flag this so that in lxvst_pluginui.cc
+			 * we can make the change to the GTK parent window in ardour, from its UI thread */
 
 			if (window == (Window) (vstfx->linux_window)) {
-				if (width != vstfx->width || height!=vstfx->height) {
+#ifndef NDEBUG
+				printf("dispatch_x_events: ConfigureNotify cfg:(%d %d) plugin:(%d %d)\n",
+						width, height,
+						vstfx->width, vstfx->height
+						);
+#endif
+				if (width != vstfx->width || height != vstfx->height) {
 					vstfx->width = width;
 					vstfx->height = height;
-					vstfx->want_resize = 1;
+					ARDOUR::VSTPlugin* plug = (ARDOUR::VSTPlugin *)(vstfx->plugin->ptr1);
+					plug->VSTSizeWindow (); /* EMIT SIGNAL */
+				}
 
-					/*QUIRK : Loomer plugins not only resize the UI but throw it into some random
-					position at the same time. We need to re-position the window at the origin of
-					the parent window*/
+				/* QUIRK : Loomer plugins not only resize the UI but throw it into some random
+				 * position at the same time. We need to re-position the window at the origin of
+				 * the parent window*/
 
-					if (vstfx->linux_plugin_ui_window) {
-						XMoveWindow (LXVST_XDisplay, vstfx->linux_plugin_ui_window, 0, 0);
-					}
+				if (vstfx->linux_plugin_ui_window) {
+					XMoveWindow (LXVST_XDisplay, vstfx->linux_plugin_ui_window, 0, 0);
 				}
 			}
 
 			break;
-
 		}
 
 		/*Reparent Notify - when the plugin UI is reparented into
@@ -453,7 +460,33 @@ again:
 		}
 	}
 
-	/*Drop out to here if we set gui_quit to 1 */
+	if (LXVST_XDisplay) {
+		XCloseDisplay(LXVST_XDisplay);
+		LXVST_XDisplay = 0;
+	}
+
+	/* some plugin UIs (looking at you, u-he^abique), do set thread-keys
+	 * and free, but not unset them.
+	 *
+	 * This leads to a double-free in __nptl_deallocate_tsd
+	 * nptl/pthread_create.c:175  __pthread_keys[idx].destr (data);
+	 * when the event-loop thread is joined.
+	 *
+	 * This workaround is dedicated to all the plugin-UI-devs
+	 * who think their UI owns the complete process memory-space.
+	 *
+	 * NB. ardour itself does not use thread-keys for the
+	 * VST event-loop thread, and anyway, this thread is joined
+	 * only when ardour exit()s. If this would result in a leak,
+	 * nobody will care.
+	 */
+	if (!getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
+		for (pthread_key_t i = 0; i < PTHREAD_KEYS_MAX; ++i) {
+			if (pthread_getspecific (i)) {
+				pthread_setspecific (i, NULL);
+			}
+		}
+	}
 
 	return NULL;
 }
@@ -512,6 +545,7 @@ int vstfx_init (void* ptr)
 		vstfx_error ("** ERROR ** VSTFX: Failed starting GUI event thread");
 
 		XCloseDisplay(LXVST_XDisplay);
+		LXVST_XDisplay = 0;
 		gui_quit = 1;
 
 		return -1;
@@ -532,9 +566,6 @@ void vstfx_exit()
 	/*We need to pthread_join the gui_thread here so
 	we know when it has stopped*/
 
-	// BEWARE: some Plugin GUIs can crash if the thread local storage is free()d
-	// after the shared library containing the destructor is already dl-closed.
-	// (e.g u-he LXVST GUI, crash in __nptl_deallocate_tsd) :(
 	pthread_join(LXVST_gui_event_thread, NULL);
 	pthread_mutex_destroy (&plugin_mutex);
 }

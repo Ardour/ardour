@@ -58,9 +58,9 @@ public:
 
 #ifdef WITH_ASIO
 	bool get_asio_buffer_properties (int device_id,
-	                                 long& min_size_frames,
-	                                 long& max_size_frames,
-	                                 long& preferred_size_frames,
+	                                 long& min_size_samples,
+	                                 long& max_size_samples,
+	                                 long& preferred_size_samples,
 	                                 long& granularity);
 
 	bool get_asio_buffer_sizes(int device_id,

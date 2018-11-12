@@ -27,6 +27,8 @@
 #define isnan_local std::isnan
 #endif
 
+#define GUARD_POINT_DELTA 64
+
 #include <cassert>
 #include <cmath>
 #include <iostream>
@@ -38,6 +40,7 @@
 #include "evoral/TypeMap.hpp"
 #include "evoral/types.hpp"
 
+#include "pbd/control_math.h"
 #include "pbd/compose.h"
 #include "pbd/debug.h"
 
@@ -54,14 +57,11 @@ inline bool event_time_less_than (ControlEvent* a, ControlEvent* b)
 ControlList::ControlList (const Parameter& id, const ParameterDescriptor& desc)
 	: _parameter(id)
 	, _desc(desc)
+	, _interpolation (default_interpolation ())
 	, _curve(0)
 {
-	_interpolation = desc.toggled ? Discrete : Linear;
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = desc.lower;
-	_max_yval = desc.upper;
-	_default_value = desc.normal;
 	_lookup_cache.left = -1;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
@@ -83,9 +83,6 @@ ControlList::ControlList (const ControlList& other)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = other._min_yval;
-	_max_yval = other._max_yval;
-	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
@@ -96,9 +93,8 @@ ControlList::ControlList (const ControlList& other)
 	insert_position = -1;
 	most_recent_insert_iterator = _events.end();
 
+	// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 	copy_events (other);
-
-	mark_dirty ();
 }
 
 ControlList::ControlList (const ControlList& other, double start, double end)
@@ -109,9 +105,6 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 {
 	_frozen = 0;
 	_changed_when_thawed = false;
-	_min_yval = other._min_yval;
-	_max_yval = other._max_yval;
-	_default_value = other._default_value;
 	_lookup_cache.range.first = _events.end();
 	_lookup_cache.range.second = _events.end();
 	_search_cache.first = _events.end();
@@ -122,10 +115,11 @@ ControlList::ControlList (const ControlList& other, double start, double end)
 	boost::shared_ptr<ControlList> section = const_cast<ControlList*>(&other)->copy (start, end);
 
 	if (!section->empty()) {
+		// XXX copy_events() emits Dirty, but this is just assignment copy/construction
 		copy_events (*(section.get()));
 	}
 
-	new_write_pass = false;
+	new_write_pass = true;
 	_in_write_pass = false;
 	did_write_during_pass = false;
 	insert_position = -1;
@@ -160,13 +154,20 @@ ControlList&
 ControlList::operator= (const ControlList& other)
 {
 	if (this != &other) {
+		/* list should be frozen before assignment */
+		assert (_frozen > 0);
+		_changed_when_thawed = false;
+		_sort_pending = false;
 
-		_min_yval = other._min_yval;
-		_max_yval = other._max_yval;
+		insert_position = other.insert_position;
+		new_write_pass = true;
+		_in_write_pass = false;
+		did_write_during_pass = false;
+		insert_position = -1;
 
-
+		_parameter = other._parameter;
+		_desc = other._desc;
 		_interpolation = other._interpolation;
-		_default_value = other._default_value;
 
 		copy_events (other);
 	}
@@ -183,6 +184,7 @@ ControlList::copy_events (const ControlList& other)
 			delete (*x);
 		}
 		_events.clear ();
+		Glib::Threads::RWLock::ReaderLock olm (other._lock);
 		for (const_iterator i = other.begin(); i != other.end(); ++i) {
 			_events.push_back (new ControlEvent ((*i)->when, (*i)->value));
 		}
@@ -203,6 +205,17 @@ ControlList::destroy_curve()
 {
 	delete _curve;
 	_curve = NULL;
+}
+
+ControlList::InterpolationStyle
+ControlList::default_interpolation () const
+{
+	if (_desc.toggled) {
+		return Discrete;
+	} else if (_desc.logarithmic) {
+		return Logarithmic;
+	}
+	return Linear;
 }
 
 void
@@ -251,6 +264,66 @@ ControlList::extend_to (double when)
 }
 
 void
+ControlList::y_transform (boost::function<double(double)> callback)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			(*i)->value = callback ((*i)->value);
+		}
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
+void
+ControlList::list_merge (ControlList const& other, boost::function<double(double, double)> callback)
+{
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		EventList nel;
+		/* First scale existing events, copy into a new list.
+		 * The original list is needed later to interpolate
+		 * for new events only present in the master list.
+		 */
+		for (iterator i = _events.begin(); i != _events.end(); ++i) {
+			float val = callback ((*i)->value, other.eval ((*i)->when));
+			nel.push_back (new ControlEvent ((*i)->when , val));
+		}
+		/* Now add events which are only present in the master-list. */
+		const EventList& evl (other.events());
+		for (const_iterator i = evl.begin(); i != evl.end(); ++i) {
+			bool found = false;
+			// TODO: optimize, remember last matching iterator (lists are sorted)
+			for (iterator j = _events.begin(); j != _events.end(); ++j) {
+				if ((*i)->when == (*j)->when) {
+					found = true;
+					break;
+				}
+			}
+			/* skip events that have already been merge in the first pass */
+			if (found) {
+				continue;
+			}
+			float val = callback (unlocked_eval ((*i)->when), (*i)->value);
+			nel.push_back (new ControlEvent ((*i)->when, val));
+		}
+		nel.sort (event_time_less_than);
+
+		for (EventList::iterator x = _events.begin(); x != _events.end(); ++x) {
+			delete (*x);
+		}
+		_events.clear ();
+		_events = nel;
+
+		unlocked_remove_duplicates ();
+		unlocked_invalidate_insert_iterator ();
+		mark_dirty ();
+	}
+	maybe_signal_changed ();
+}
+
+void
 ControlList::_x_scale (double factor)
 {
 	for (iterator i = _events.begin(); i != _events.end(); ++i) {
@@ -272,6 +345,8 @@ ControlList::thin (double thinning_factor)
 	if (thinning_factor == 0.0 || _desc.toggled) {
 		return;
 	}
+
+	assert (is_sorted ());
 
 	bool changed = false;
 
@@ -341,6 +416,9 @@ ControlList::fast_simple_add (double when, double value)
 	_events.insert (_events.end(), new ControlEvent (when, value));
 
 	mark_dirty ();
+	if (_frozen) {
+		_sort_pending = true;
+	}
 }
 
 void
@@ -357,14 +435,30 @@ ControlList::unlocked_invalidate_insert_iterator ()
 }
 
 void
+ControlList::unlocked_remove_duplicates ()
+{
+	if (_events.size() < 2) {
+		return;
+	}
+	iterator i = _events.begin();
+	iterator prev = i++;
+	while (i != _events.end()) {
+		if ((*prev)->when == (*i)->when && (*prev)->value == (*i)->value) {
+			i = _events.erase (i);
+		} else {
+			++prev;
+			++i;
+		}
+	}
+}
+
+void
 ControlList::start_write_pass (double when)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 
 	DEBUG_TRACE (DEBUG::ControlList, string_compose ("%1: setup write pass @ %2\n", this, when));
 
-	new_write_pass = true;
-	did_write_during_pass = false;
 	insert_position = when;
 
 	/* leave the insert iterator invalid, so that we will do the lookup
@@ -373,6 +467,20 @@ ControlList::start_write_pass (double when)
 	*/
 
 	unlocked_invalidate_insert_iterator ();
+
+	/* except if we're already in an active write-pass.
+	 *
+	 * invalid iterator == end() the iterator is set to the correct
+	 * position in ControlList::add IFF (_in_write_pass && new_write_pass)
+	 */
+	if (_in_write_pass && !new_write_pass) {
+#if 1
+		add_guard_point (when, 0); // also sets most_recent_insert_iterator
+#else
+		const ControlEvent cp (when, 0.0);
+		most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+#endif
+	}
 }
 
 void
@@ -396,17 +504,49 @@ ControlList::set_in_write_pass (bool yn, bool add_point, double when)
 	_in_write_pass = yn;
 
 	if (yn && add_point) {
-		add_guard_point (when);
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		add_guard_point (when, 0);
 	}
 }
 
 void
-ControlList::add_guard_point (double when)
+ControlList::add_guard_point (double when, double offset)
 {
+	// caller needs to hold writer-lock
+	if (offset < 0 && when < offset) {
+		return;
+	}
+	assert (offset <= 0);
+
+	if (offset != 0) {
+		/* check if there are points between when + offset .. when */
+		ControlEvent cp (when + offset, 0.0);
+		iterator s;
+		iterator e;
+		if ((s = lower_bound (_events.begin(), _events.end(), &cp, time_comparator)) != _events.end()) {
+			cp.when = when;
+			e = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+			if (s != e) {
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 add_guard_point, none added, found event between %2 and %3\n", this, when - offset, when));
+				return;
+			}
+		}
+	}
+
+	/* don't do this again till the next write pass,
+	 * unless we're not in a write-pass (transport stopped)
+	 */
+	if (_in_write_pass && new_write_pass) {
+		WritePassStarted (); /* EMIT SIGNAL w/WriteLock */
+		new_write_pass = false;
+	}
+
+	when += offset;
+
 	ControlEvent cp (when, 0.0);
 	most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-	double eval_value = unlocked_eval (insert_position);
+	double eval_value = unlocked_eval (when);
 
 	if (most_recent_insert_iterator == _events.end()) {
 
@@ -432,8 +572,7 @@ ControlList::add_guard_point (double when)
 		++most_recent_insert_iterator;
 	} else {
 
-		/* insert a new control event at the right spot
-		 */
+		/* insert a new control event at the right spot */
 
 		DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 insert eval-value %2 just before iterator @ %3\n",
 								 this, eval_value, (*most_recent_insert_iterator)->when));
@@ -447,10 +586,6 @@ ControlList::add_guard_point (double when)
 
 		++most_recent_insert_iterator;
 	}
-
-	/* don't do this again till the next write pass */
-
-	new_write_pass = false;
 }
 
 bool
@@ -462,50 +597,49 @@ ControlList::in_write_pass () const
 bool
 ControlList::editor_add (double when, double value, bool with_guard)
 {
-	/* this is for making changes from a graphical line editor
-	*/
+	/* this is for making changes from a graphical line editor */
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-	ControlEvent cp (when, 0.0f);
-	iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+		ControlEvent cp (when, 0.0f);
+		iterator i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 
-	if (i != _events.end () && (*i)->when == when) {
-		return false;
-	}
-
-	if (_events.empty()) {
-
-		/* as long as the point we're adding is not at zero,
-		 * add an "anchor" point there.
-		 */
-
-		if (when >= 1) {
-			_events.insert (_events.end(), new ControlEvent (0, value));
-			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
+		if (i != _events.end () && (*i)->when == when) {
+			return false;
 		}
-	}
 
-	insert_position = when;
-	if (with_guard) {
-		if (when > 64) {
-			add_guard_point (when - 64);
+		/* clamp new value to allowed range */
+		value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
+
+		if (_events.empty()) {
+
+			/* as long as the point we're adding is not at zero,
+			 * add an "anchor" point there.
+			 */
+
+			if (when >= 1) {
+				_events.insert (_events.end(), new ControlEvent (0, value));
+				DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
+			}
 		}
-		maybe_add_insert_guard (when);
+
+		insert_position = when;
+		if (with_guard) {
+			add_guard_point (when, -GUARD_POINT_DELTA);
+			maybe_add_insert_guard (when);
+			i = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
+		}
+
+		iterator result;
+		DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
+		result = _events.insert (i, new ControlEvent (when, value));
+
+		if (i == result) {
+			return false;
+		}
+
+		mark_dirty ();
 	}
-
-	/* clamp new value to allowed range */
-
-	value = max (_min_yval, value);
-	value = min (_max_yval, value);
-
-	iterator result;
-	DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
-	result = _events.insert (i, new ControlEvent (when, value));
-
-	if (i == result) {
-		return false;
-	}
-
-	mark_dirty ();
 	maybe_signal_changed ();
 
 	return true;
@@ -514,17 +648,18 @@ ControlList::editor_add (double when, double value, bool with_guard)
 void
 ControlList::maybe_add_insert_guard (double when)
 {
+	// caller needs to hold writer-lock
 	if (most_recent_insert_iterator != _events.end()) {
-		if ((*most_recent_insert_iterator)->when - when > 64) {
+		if ((*most_recent_insert_iterator)->when - when > GUARD_POINT_DELTA) {
 			/* Next control point is some distance from where our new point is
 			   going to go, so add a new point to avoid changing the shape of
 			   the line too much.  The insert iterator needs to point to the
 			   new control point so that our insert will happen correctly. */
-			most_recent_insert_iterator = _events.insert (
-				most_recent_insert_iterator,
-				new ControlEvent (when + 64, (*most_recent_insert_iterator)->value));
+			most_recent_insert_iterator = _events.insert ( most_recent_insert_iterator,
+					new ControlEvent (when + GUARD_POINT_DELTA, (*most_recent_insert_iterator)->value));
+
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added insert guard point @ %2 = %3\n",
-			                                                 this, when + 64,
+			                                                 this, when + GUARD_POINT_DELTA,
 			                                                 (*most_recent_insert_iterator)->value));
 		}
 	}
@@ -534,6 +669,7 @@ ControlList::maybe_add_insert_guard (double when)
 bool
 ControlList::maybe_insert_straight_line (double when, double value)
 {
+	// caller needs to hold writer-lock
 	if (_events.empty()) {
 		return false;
 	}
@@ -562,6 +698,7 @@ ControlList::maybe_insert_straight_line (double when, double value)
 ControlList::iterator
 ControlList::erase_from_iterator_to (iterator iter, double when)
 {
+	// caller needs to hold writer-lock
 	while (iter != _events.end()) {
 		if ((*iter)->when < when) {
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 erase existing @ %2\n", this, (*iter)->when));
@@ -576,12 +713,14 @@ ControlList::erase_from_iterator_to (iterator iter, double when)
 	return iter;
 }
 
+/* this is for making changes from some kind of user interface or
+ * control surface (GUI, MIDI, OSC etc)
+ */
 void
 ControlList::add (double when, double value, bool with_guards, bool with_initial)
 {
-	/* this is for making changes from some kind of user interface or
-	   control surface (GUI, MIDI, OSC etc)
-	*/
+	/* clamp new value to allowed range */
+	value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
 
 	DEBUG_TRACE (DEBUG::ControlList,
 	             string_compose ("@%1 add %2 at %3 guards = %4 write pass = %5 (new? %6) at end? %7\n",
@@ -604,7 +743,7 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 
 				} else {
 					_events.insert (_events.end(), new ControlEvent (0, value));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _default_value));
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added default value %2 at zero\n", this, _desc.normal));
 				}
 			}
 		}
@@ -614,13 +753,14 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 			/* first write in a write pass: add guard point if requested */
 
 			if (with_guards) {
-				add_guard_point (insert_position);
+				add_guard_point (insert_position, 0);
 				did_write_during_pass = true;
 			} else {
 				/* not adding a guard, but we need to set iterator appropriately */
 				const ControlEvent cp (when, 0.0);
 				most_recent_insert_iterator = lower_bound (_events.begin(), _events.end(), &cp, time_comparator);
 			}
+			WritePassStarted (); /* EMIT SIGNAL w/WriteLock */
 			new_write_pass = false;
 
 		} else if (_in_write_pass &&
@@ -633,9 +773,11 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				++most_recent_insert_iterator;
 			}
 
-			most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
 			if (with_guards) {
+				most_recent_insert_iterator = erase_from_iterator_to (most_recent_insert_iterator, when + GUARD_POINT_DELTA);
 				maybe_add_insert_guard (when);
+			} else {
+				most_recent_insert_iterator = erase_from_iterator_to(most_recent_insert_iterator, when);
 			}
 
 		} else if (!_in_write_pass) {
@@ -701,20 +843,19 @@ ControlList::add (double when, double value, bool with_guards, bool with_initial
 				}
 
 				if (have_point1 && have_point2) {
+					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 no change: move existing at %3 to %2\n", this, when, (*most_recent_insert_iterator)->when));
 					(*most_recent_insert_iterator)->when = when;
 					done = true;
 				} else {
 					++most_recent_insert_iterator;
 				}
 			}
-			//done = maybe_insert_straight_line (when, value) || done;
-			/* if the transport is stopped, add guard points (?) */
-			if (!done && !_in_write_pass && when > 64) {
-				add_guard_point (when - 64);
-				maybe_add_insert_guard (when);
-			}
 
-			if (with_guards) {
+			/* if the transport is stopped, add guard points */
+			if (!done && !_in_write_pass) {
+				add_guard_point (when, -GUARD_POINT_DELTA);
+				maybe_add_insert_guard (when);
+			} else if (with_guards) {
 				maybe_add_insert_guard (when);
 			}
 
@@ -866,9 +1007,12 @@ void
 ControlList::modify (iterator iter, double when, double val)
 {
 	/* note: we assume higher level logic is in place to avoid this
-	   reordering the time-order of control events in the list. ie. all
-	   points after *iter are later than when.
-	*/
+	 * reordering the time-order of control events in the list. ie. all
+	 * points after *iter are later than when.
+	 */
+
+	/* catch possible float/double rounding errors from higher levels */
+	val = std::min ((double)_desc.upper, std::max ((double)_desc.lower, val));
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -881,6 +1025,7 @@ ControlList::modify (iterator iter, double when, double val)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;
@@ -945,6 +1090,7 @@ ControlList::thaw ()
 
 		if (_sort_pending) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 			_sort_pending = false;
 		}
@@ -1026,8 +1172,8 @@ ControlList::truncate_end (double last_coordinate)
 			/* shortening end */
 
 			last_val = unlocked_eval (last_coordinate);
-			last_val = max ((double) _min_yval, last_val);
-			last_val = min ((double) _max_yval, last_val);
+			last_val = max ((double) _desc.lower, last_val);
+			last_val = min ((double) _desc.upper, last_val);
 
 			i = _events.rbegin();
 
@@ -1128,8 +1274,8 @@ ControlList::truncate_start (double overall_length)
 
 			first_legal_coordinate = _events.back()->when - overall_length;
 			first_legal_value = unlocked_eval (first_legal_coordinate);
-			first_legal_value = max (_min_yval, first_legal_value);
-			first_legal_value = min (_max_yval, first_legal_value);
+			first_legal_value = max ((double)_desc.lower, first_legal_value);
+			first_legal_value = min ((double)_desc.upper, first_legal_value);
 
 			/* remove all events earlier than the new "front" */
 
@@ -1189,7 +1335,7 @@ ControlList::unlocked_eval (double x) const
 
 	switch (npoints) {
 	case 0:
-		return _default_value;
+		return _desc.normal;
 
 	case 1:
 		return _events.front()->value;
@@ -1206,13 +1352,21 @@ ControlList::unlocked_eval (double x) const
 		upos = _events.back()->when;
 		uval = _events.back()->value;
 
-		if (_interpolation == Discrete) {
-			return lval;
-		}
-
-		/* linear interpolation between the two points */
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
-		return lval + (fraction * (uval - lval));
+
+		switch (_interpolation) {
+			case Discrete:
+				return lval;
+			case Logarithmic:
+				return interpolate_logarithmic (lval, uval, fraction, _desc.lower, _desc.upper);
+			case Exponential:
+				return interpolate_gain (lval, uval, fraction, _desc.upper);
+			case Curved:
+				/* only used x-fade curves, never direct eval */
+				assert (0);
+			default: // Linear
+				return interpolate_linear (lval, uval, fraction);
+		}
 
 	default:
 		if (x >= _events.back()->when) {
@@ -1225,7 +1379,7 @@ ControlList::unlocked_eval (double x) const
 	}
 
 	abort(); /*NOTREACHED*/ /* stupid gcc */
-	return _default_value;
+	return _desc.normal;
 }
 
 double
@@ -1288,13 +1442,24 @@ ControlList::multipoint_eval (double x) const
 		upos = (*range.second)->when;
 		uval = (*range.second)->value;
 
-		/* linear interpolation betweeen the two points
-		   on either side of x
-		*/
-
 		fraction = (double) (x - lpos) / (double) (upos - lpos);
-		return lval + (fraction * (uval - lval));
 
+		switch (_interpolation) {
+			case Logarithmic:
+				return interpolate_logarithmic (lval, uval, fraction, _desc.lower, _desc.upper);
+			case Exponential:
+				return interpolate_gain (lval, uval, fraction, _desc.upper);
+			case Discrete:
+				/* should not reach here */
+				assert (0);
+			case Curved:
+				/* only used x-fade curves, never direct eval */
+				assert (0);
+			default: // Linear
+				return interpolate_linear (lval, uval, fraction);
+				break;
+		}
+		assert (0);
 	}
 
 	/* x is a control point in the data */
@@ -1652,7 +1817,7 @@ ControlList::clear (double start, double end)
 
 /** @param pos Position in model coordinates */
 bool
-ControlList::paste (const ControlList& alist, double pos, float /*times*/)
+ControlList::paste (const ControlList& alist, double pos)
 {
 	if (alist._events.empty()) {
 		return false;
@@ -1685,6 +1850,8 @@ ControlList::paste (const ControlList& alist, double pos, float /*times*/)
 				if (_desc.toggled) {
 					value = (value < 0.5) ? 0.0 : 1.0;
 				}
+				/* catch possible rounding errors */
+				value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, value));
 			}
 			_events.insert (where, new ControlEvent((*i)->when + pos, value));
 			end = (*i)->when + pos;
@@ -1765,6 +1932,7 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 
 		if (!_frozen) {
 			_events.sort (event_time_less_than);
+			unlocked_remove_duplicates ();
 			unlocked_invalidate_insert_iterator ();
 		} else {
 			_sort_pending = true;
@@ -1777,15 +1945,30 @@ ControlList::move_ranges (const list< RangeMove<double> >& movements)
 	return true;
 }
 
-void
+bool
 ControlList::set_interpolation (InterpolationStyle s)
 {
 	if (_interpolation == s) {
-		return;
+		return true;
+	}
+
+	switch (s) {
+		case Logarithmic:
+			if (_desc.lower * _desc.upper <= 0 || _desc.upper <= _desc.lower) {
+				return false;
+			}
+			break;
+		case Exponential:
+			if (_desc.lower != 0 || _desc.upper <= _desc.lower) {
+				return false;
+			}
+		default:
+			break;
 	}
 
 	_interpolation = s;
 	InterpolationChanged (s); /* EMIT SIGNAL */
+	return true;
 }
 
 bool
@@ -1810,10 +1993,28 @@ ControlList::operator!= (ControlList const & other) const
 	return (
 		_parameter != other._parameter ||
 		_interpolation != other._interpolation ||
-		_min_yval != other._min_yval ||
-		_max_yval != other._max_yval ||
-		_default_value != other._default_value
+		_desc.lower != other._desc.lower ||
+		_desc.upper != other._desc.upper ||
+		_desc.normal != other._desc.normal
 		);
+}
+
+bool
+ControlList::is_sorted () const
+{
+	Glib::Threads::RWLock::ReaderLock lm (_lock);
+	if (_events.size () == 0) {
+		return true;
+	}
+	const_iterator i = _events.begin();
+	const_iterator n = i;
+	while (++n != _events.end ()) {
+		if (event_time_less_than(*n,*i)) {
+			return false;
+		}
+		++i;
+	}
+	return true;
 }
 
 void

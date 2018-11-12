@@ -21,7 +21,7 @@
 #define __gtk_ardour_stereo_panner_h__
 
 #include "pbd/signals.h"
-#include "gtkmm2ext/binding_proxy.h"
+#include "widgets/binding_proxy.h"
 #include "panner_interface.h"
 
 namespace ARDOUR {
@@ -38,7 +38,7 @@ namespace ARDOUR {
 
 class StereoPanner : public PannerInterface
 {
-  public:
+public:
 	StereoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
 	~StereoPanner ();
 
@@ -50,7 +50,7 @@ class StereoPanner : public PannerInterface
 	sigc::signal<void> StartWidthGesture;
 	sigc::signal<void> StopWidthGesture;
 
-  protected:
+protected:
 	bool on_expose_event (GdkEventExpose*);
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);
@@ -58,7 +58,12 @@ class StereoPanner : public PannerInterface
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_key_press_event (GdkEventKey*);
 
-  private:
+	boost::weak_ptr<PBD::Controllable> proxy_controllable () const
+	{
+		return boost::weak_ptr<PBD::Controllable> (position_binder.get_controllable());
+	}
+
+private:
 	PannerEditor* editor ();
 	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 
@@ -74,8 +79,8 @@ class StereoPanner : public PannerInterface
 	double accumulated_delta;
 	bool detented;
 
-	BindingProxy position_binder;
-	BindingProxy width_binder;
+	ArdourWidgets::BindingProxy position_binder;
+	ArdourWidgets::BindingProxy width_binder;
 
 	void set_tooltip ();
 

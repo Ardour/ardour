@@ -47,10 +47,12 @@
 #include <glibmm/fileutils.h>
 
 #include "pbd/cpus.h"
+#include "pbd/control_math.h"
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 #include "pbd/xml++.h"
 #include "pbd/basename.h"
+#include "pbd/scoped_file_descriptor.h"
 #include "pbd/strsplit.h"
 #include "pbd/replace_all.h"
 
@@ -381,7 +383,7 @@ ARDOUR::CFStringRefToStdString(CFStringRef stringRef)
 #endif // __APPLE__
 
 void
-ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
+ARDOUR::compute_equal_power_fades (samplecnt_t nframes, float* in, float* out)
 {
 	double step;
 
@@ -389,7 +391,7 @@ ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
 
 	in[0] = 0.0f;
 
-	for (framecnt_t i = 1; i < nframes - 1; ++i) {
+	for (samplecnt_t i = 1; i < nframes - 1; ++i) {
 		in[i] = in[i-1] + step;
 	}
 
@@ -398,7 +400,7 @@ ARDOUR::compute_equal_power_fades (framecnt_t nframes, float* in, float* out)
 	const float pan_law_attenuation = -3.0f;
 	const float scale = 2.0f - 4.0f * powf (10.0f,pan_law_attenuation/20.0f);
 
-	for (framecnt_t n = 0; n < nframes; ++n) {
+	for (samplecnt_t n = 0; n < nframes; ++n) {
 		float inVal = in[n];
 		float outVal = 1 - inVal;
 		out[n] = outVal * (scale * outVal + 1.0f - scale);
@@ -559,6 +561,8 @@ ARDOUR::string_to_auto_state (std::string str)
 		return Write;
 	} else if (str == X_("Touch")) {
 		return Touch;
+	} else if (str == X_("Latch")) {
+		return Latch;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState string: ", str) << endmsg;
@@ -583,42 +587,13 @@ ARDOUR::auto_state_to_string (AutoState as)
 		break;
 	case Touch:
 		return X_("Touch");
+		break;
+	case Latch:
+		return X_("Latch");
+		break;
 	}
 
 	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoState type: ", as) << endmsg;
-	abort(); /*NOTREACHED*/
-	return "";
-}
-
-AutoStyle
-ARDOUR::string_to_auto_style (std::string str)
-{
-	if (str == X_("Absolute")) {
-		return Absolute;
-	} else if (str == X_("Trim")) {
-		return Trim;
-	}
-
-	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle string: ", str) << endmsg;
-	abort(); /*NOTREACHED*/
-	return Trim;
-}
-
-string
-ARDOUR::auto_style_to_string (AutoStyle as)
-{
-	/* to be used only for XML serialization, no i18n done */
-
-	switch (as) {
-	case Absolute:
-		return X_("Absolute");
-		break;
-	case Trim:
-		return X_("Trim");
-		break;
-	}
-
-	fatal << string_compose (_("programming error: %1 %2"), "illegal AutoStyle type: ", as) << endmsg;
 	abort(); /*NOTREACHED*/
 	return "";
 }
@@ -742,13 +717,36 @@ ARDOUR::how_many_dsp_threads ()
 double
 ARDOUR::gain_to_slider_position_with_max (double g, double max_gain)
 {
-        return gain_to_slider_position (g * 2.0/max_gain);
+	return gain_to_position (g * 2.0 / max_gain);
 }
 
 double
 ARDOUR::slider_position_to_gain_with_max (double g, double max_gain)
 {
-	return slider_position_to_gain (g * max_gain/2.0);
+	return position_to_gain (g) * max_gain / 2.0;
+}
+
+#include "sha1.c"
+
+std::string
+ARDOUR::compute_sha1_of_file (std::string path)
+{
+	PBD::ScopedFileDescriptor fd (g_open (path.c_str(), O_RDONLY, 0444));
+	if (fd < 0) {
+		return std::string ();
+	}
+	char buf[4096];
+	ssize_t n_read;
+	char hash[41];
+	Sha1Digest s;
+	sha1_init (&s);
+
+	while ((n_read = ::read(fd, buf, sizeof(buf))) > 0) {
+		sha1_write (&s, (const uint8_t*) buf, n_read);
+	}
+
+	sha1_result_hash (&s, hash);
+	return std::string (hash);
 }
 
 extern "C" {

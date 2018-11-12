@@ -33,6 +33,7 @@
 #include "dummy_midi_seq.h"
 
 #include "pbd/error.h"
+#include "pbd/compose.h"
 #include "ardour/port_manager.h"
 #include "pbd/i18n.h"
 
@@ -127,6 +128,7 @@ DummyAudioBackend::enumerate_devices () const
 		_device_status.push_back (DeviceStatus (_("Sine Sweep Swell"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep"), true));
 		_device_status.push_back (DeviceStatus (_("Square Sweep Swell"), true));
+		_device_status.push_back (DeviceStatus (_("LTC"), true));
 		_device_status.push_back (DeviceStatus (_("Loopback"), true));
 	}
 	return _device_status;
@@ -182,7 +184,7 @@ DummyAudioBackend::available_output_channel_count (const std::string&) const
 bool
 DummyAudioBackend::can_change_sample_rate_when_running () const
 {
-	return true;
+	return false;
 }
 
 bool
@@ -455,8 +457,6 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	engine.sample_rate_change (_samplerate);
 	engine.buffer_size_change (_samples_per_period);
 
-	_dsp_load_calc.set_max_time (_samplerate, _samples_per_period);
-
 	if (engine.reestablish_ports ()) {
 		PBD::error << _("DummyAudioBackend: Could not re-establish ports.") << endmsg;
 		stop ();
@@ -524,13 +524,13 @@ DummyAudioBackend::raw_buffer_size (DataType t)
 }
 
 /* Process time */
-framepos_t
+samplepos_t
 DummyAudioBackend::sample_time ()
 {
 	return _processed_samples;
 }
 
-framepos_t
+samplepos_t
 DummyAudioBackend::sample_time_at_cycle_start ()
 {
 	return _processed_samples;
@@ -638,7 +638,7 @@ DummyAudioBackend::my_name () const
 bool
 DummyAudioBackend::available () const
 {
-	return true;
+	return _running;
 }
 
 uint32_t
@@ -849,6 +849,8 @@ DummyAudioBackend::register_system_ports()
 		gt = DummyAudioPort::SquareSweep;
 	} else if (_device == _("Square Sweep Swell")) {
 		gt = DummyAudioPort::SquareSweepSwell;
+	} else if (_device == _("LTC")) {
+		gt = DummyAudioPort::LTC;
 	} else if (_device == _("Loopback")) {
 		gt = DummyAudioPort::Loopback;
 	} else if (_device == _("Demolition")) {
@@ -951,6 +953,24 @@ DummyAudioBackend::unregister_ports (bool system_only)
 			delete port;
 			_ports.erase (cur);
 		}
+	}
+}
+
+void
+DummyAudioBackend::update_system_port_latecies ()
+{
+	for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<DummyAudioPort*>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
+		(*it)->update_connected_latency (false);
+	}
+
+	for (std::vector<DummyMidiPort*>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		(*it)->update_connected_latency (true);
+	}
+	for (std::vector<DummyMidiPort*>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		(*it)->update_connected_latency (false);
 	}
 }
 
@@ -1080,7 +1100,7 @@ DummyAudioBackend::get_connections (PortEngine::PortHandle port, std::vector<std
 int
 DummyAudioBackend::midi_event_get (
 		pframes_t& timestamp,
-		size_t& size, uint8_t** buf, void* port_buffer,
+		size_t& size, uint8_t const** buf, void* port_buffer,
 		uint32_t event_index)
 {
 	assert (buf && port_buffer);
@@ -1303,6 +1323,7 @@ DummyAudioBackend::main_process_thread ()
 	int64_t clock1;
 	clock1 = -1;
 	while (_running) {
+		const size_t samples_per_period = _samples_per_period;
 
 		if (_freewheeling != _freewheel) {
 			_freewheel = _freewheeling;
@@ -1317,17 +1338,17 @@ DummyAudioBackend::main_process_thread ()
 			(*it)->next_period();
 		}
 
-		if (engine.process_callback (_samples_per_period)) {
+		if (engine.process_callback (samples_per_period)) {
 			return 0;
 		}
-		_processed_samples += _samples_per_period;
+		_processed_samples += samples_per_period;
 
 		if (_device == _("Loopback") && _midi_mode != MidiToAudio) {
 			int opn = 0;
 			int opc = _system_outputs.size();
 			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
 				DummyAudioPort* op = _system_outputs[(opn % opc)];
-				(*it)->fill_wavetable ((const float*)op->get_buffer (_samples_per_period), _samples_per_period);
+				(*it)->fill_wavetable ((const float*)op->get_buffer (samples_per_period), samples_per_period);
 			}
 		}
 
@@ -1346,11 +1367,12 @@ DummyAudioBackend::main_process_thread ()
 			for (std::vector<DummyAudioPort*>::const_iterator it = _system_inputs.begin (); it != _system_inputs.end (); ++it, ++opn) {
 				DummyMidiPort* op = _system_midi_out[(opn % opc)];
 				op->get_buffer(0); // mix-down
-				(*it)->midi_to_wavetable (op->const_buffer(), _samples_per_period);
+				(*it)->midi_to_wavetable (op->const_buffer(), samples_per_period);
 			}
 		}
 
 		if (!_freewheel) {
+			_dsp_load_calc.set_max_time (_samplerate, samples_per_period);
 			_dsp_load_calc.set_start_timestamp_us (clock1);
 			_dsp_load_calc.set_stop_timestamp_us (_x_get_monotonic_usec());
 			_dsp_load = _dsp_load_calc.get_dsp_load_unbound ();
@@ -1396,6 +1418,7 @@ DummyAudioBackend::main_process_thread ()
 			manager.graph_order_callback();
 		}
 		if (connections_changed || ports_changed) {
+			update_system_port_latecies ();
 			engine.latency_callback(false);
 			engine.latency_callback(true);
 		}
@@ -1596,6 +1619,36 @@ bool DummyPort::is_physically_connected () const
 	return false;
 }
 
+void
+DummyPort::set_latency_range (const LatencyRange &latency_range, bool for_playback)
+{
+	if (for_playback) {
+		_playback_latency_range = latency_range;
+	} else {
+		_capture_latency_range = latency_range;
+	}
+
+	for (std::set<DummyPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		if ((*it)->is_physical ()) {
+			(*it)->update_connected_latency (is_input ());
+		}
+	}
+}
+
+void
+DummyPort::update_connected_latency (bool for_playback)
+{
+	LatencyRange lr;
+	lr.min = lr.max = 0;
+	for (std::set<DummyPort*>::const_iterator it = _connections.begin (); it != _connections.end (); ++it) {
+		LatencyRange l;
+		l = (*it)->latency_range (for_playback);
+		lr.min = std::max (lr.min, l.min);
+		lr.max = std::max (lr.max, l.max);
+	}
+	set_latency_range (lr, for_playback);
+}
+
 void DummyPort::setup_random_number_generator ()
 {
 #ifdef PLATFORM_WINDOWS
@@ -1655,13 +1708,19 @@ DummyAudioPort::DummyAudioPort (DummyAudioBackend &b, const std::string& name, P
 	, _gen_count2 (0)
 	, _pass (false)
 	, _rn1 (0)
+	, _ltc (0)
+	, _ltcbuf (0)
 {
 	memset (_buffer, 0, sizeof (_buffer));
 }
 
 DummyAudioPort::~DummyAudioPort () {
 	free(_wavetable);
+	ltc_encoder_free (_ltc);
+	delete _ltcbuf;
 	_wavetable = 0;
+	_ltc = 0;
+	_ltcbuf = 0;
 }
 
 static std::string format_hz (float freq) {
@@ -1793,8 +1852,46 @@ DummyAudioPort::setup_generator (GeneratorType const g, float const samplerate, 
 				}
 			}
 			break;
+		case LTC:
+			switch (c % 4) {
+				case 0:
+					_ltc = ltc_encoder_create (samplerate, 25, LTC_TV_625_50, 0);
+					name = "LTC25";
+					break;
+				case 1:
+					_ltc = ltc_encoder_create (samplerate, 30, LTC_TV_1125_60, 0);
+					name = "LTC30";
+					break;
+				case 2:
+					_ltc = ltc_encoder_create (samplerate, 30001.f / 1001.f, LTC_TV_525_60, 0);
+					name = "LTC29df";
+					break;
+				case 3:
+					_ltc = ltc_encoder_create (samplerate, 24, LTC_TV_FILM_24, 0);
+					name = "LTC24";
+					break;
+			}
+			_ltc_spd = 1.0;
+			_ltc_rand = floor((float)c / 4) * .001f;
+			if (c < 4) {
+					name += " (locked)";
+			} else {
+					name += " (varspd)";
+			}
+			SMPTETimecode tc;
+			tc.years = 0;
+			tc.months = 0;
+			tc.days = 0;
+			tc.hours = (3 * (c / 4)) % 24; // XXX
+			tc.mins = 0;
+			tc.secs = 0;
+			tc.frame = 0;
+			ltc_encoder_set_timecode (_ltc, &tc);
+					name += string_compose ("@%1h", (int)tc.hours);
+			_ltcbuf = new PBD::RingBuffer<Sample> (std::max (DummyAudioBackend::max_buffer_size() * 2.f, samplerate));
+			break;
 		case Loopback:
-			_wavetable = (Sample*) malloc (DummyAudioBackend::max_buffer_size() * sizeof(Sample));
+			_wavetable = (Sample*) calloc (DummyAudioBackend::max_buffer_size(), sizeof(Sample));
 			break;
 	}
 	return name;
@@ -1854,19 +1951,19 @@ float DummyAudioPort::grandf ()
 
 /* inspired by jack-demolition by Steve Harris */
 static const float _demolition[] = {
-	 0.0f,           /* special case - 0dbFS white noise */
-	 0.0f,           /* zero, may cause denomrals following a signal */
-	 0.73 / 1e45,    /* very small - should be denormal when floated */
-	 3.7f,           /* arbitrary number > 0dBFS */
-	-4.3f,           /* arbitrary negative number > 0dBFS */
-	 4294967395.0f,  /* 2^16 + 100 */
+	 0.0f,             /* special case - 0dbFS white noise */
+	 0.0f,             /* zero, may cause denomrals following a signal */
+	 0.73 / 1e45,      /* very small - should be denormal when floated */
+	 3.7f,             /* arbitrary number > 0dBFS */
+	-4.3f,             /* arbitrary negative number > 0dBFS */
+	 4294967395.0f,    /* 2^16 + 100 */
 	-4294967395.0f,
-	 HUGE,           /* Big, non-inf number */
-	 INFINITY,       /* +inf */
-	-INFINITY,       /* -inf */
-	-NAN,            /* -nan */
-	 NAN,            /*  nan */
-	 0.0f,           /* some silence to check for recovery */
+	 3.402823466e+38F, /* HUGE, HUGEVALF, non-inf number */
+	 INFINITY,         /* +inf */
+	-INFINITY,         /* -inf */
+	-NAN,              /* -nan */
+	 NAN,              /*  nan */
+	 0.0f,             /* some silence to check for recovery */
 };
 
 void DummyAudioPort::generate (const pframes_t n_samples)
@@ -1939,7 +2036,8 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 			}
 			break;
 		case Loopback:
-			_gen_period = n_samples; // XXX DummyBackend::_samples_per_period;
+			memcpy((void*)_buffer, (void*)_wavetable, n_samples * sizeof(Sample));
+			break;
 		case SineWave:
 		case SineWaveOctaves:
 		case SineSweep:
@@ -1995,6 +2093,28 @@ void DummyAudioPort::generate (const pframes_t n_samples)
 				_b2 = 0.57000f * _b2 + white * 1.0526913f;
 				_buffer[i] = _b0 + _b1 + _b2 + white * 0.1848f;
 			}
+			break;
+		case LTC:
+			while (_ltcbuf->read_space () < n_samples) {
+				// we should pre-allocate (or add a zero-copy libltc API), whatever.
+				ltcsnd_sample_t* enc_buf = (ltcsnd_sample_t*) malloc (ltc_encoder_get_buffersize (_ltc) * sizeof (ltcsnd_sample_t));
+				for (int byteCnt = 0; byteCnt < 10; byteCnt++) {
+					if (_ltc_rand != 0.f) {
+						_ltc_spd += randf () * _ltc_rand;
+						_ltc_spd = std::min (1.5f, std::max (0.5f, _ltc_spd));
+					}
+					ltc_encoder_encode_byte (_ltc, byteCnt, _ltc_spd);
+					const int len = ltc_encoder_get_buffer (_ltc, enc_buf);
+					for (int i = 0; i < len; ++i) {
+						const float v1 = enc_buf[i] - 128;
+						Sample v = v1 * 0.002;
+						_ltcbuf->write (&v, 1);
+					}
+				}
+				ltc_encoder_inc_timecode (_ltc);
+				free (enc_buf);
+			}
+			_ltcbuf->read (_buffer, n_samples);
 			break;
 	}
 	_gen_cycle = true;
@@ -2134,7 +2254,7 @@ void* DummyMidiPort::get_buffer (pframes_t n_samples)
 				_buffer.push_back (boost::shared_ptr<DummyMidiEvent>(new DummyMidiEvent (**it)));
 			}
 		}
-		std::sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
+		std::stable_sort (_buffer.begin (), _buffer.end (), MidiEventSorter());
 	} else if (is_output () && is_physical () && is_terminal()) {
 		if (!_gen_cycle) {
 			midi_generate(n_samples);

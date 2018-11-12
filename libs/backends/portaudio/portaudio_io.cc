@@ -170,9 +170,9 @@ PortAudioIO::available_sample_rates(int device_id, std::vector<float>& sampleRat
 #ifdef WITH_ASIO
 bool
 PortAudioIO::get_asio_buffer_properties (int device_id,
-                                         long& min_size_frames,
-                                         long& max_size_frames,
-                                         long& preferred_size_frames,
+                                         long& min_size_samples,
+                                         long& max_size_samples,
+                                         long& preferred_size_samples,
                                          long& granularity)
 {
 	// we shouldn't really need all these checks but it shouldn't hurt
@@ -191,9 +191,9 @@ PortAudioIO::get_asio_buffer_properties (int device_id,
 	}
 
 	PaError err = PaAsio_GetAvailableBufferSizes (device_id,
-	                                              &min_size_frames,
-	                                              &max_size_frames,
-	                                              &preferred_size_frames,
+	                                              &min_size_samples,
+	                                              &max_size_samples,
+	                                              &preferred_size_samples,
 	                                              &granularity);
 
 	if (err != paNoError) {
@@ -216,15 +216,15 @@ PortAudioIO::get_asio_buffer_sizes(int device_id,
                                    std::vector<uint32_t>& buffer_sizes,
                                    bool preferred_only)
 {
-	long min_size_frames = 0;
-	long max_size_frames = 0;
-	long preferred_size_frames = 0;
+	long min_size_samples = 0;
+	long max_size_samples = 0;
+	long preferred_size_samples = 0;
 	long granularity = 0;
 
 	if (!get_asio_buffer_properties (device_id,
-	                                 min_size_frames,
-	                                 max_size_frames,
-	                                 preferred_size_frames,
+	                                 min_size_samples,
+	                                 max_size_samples,
+	                                 preferred_size_samples,
 	                                 granularity)) {
 		DEBUG_AUDIO (string_compose (
 		    "Unable to get device buffer properties from device index %1\n", device_id));
@@ -232,58 +232,58 @@ PortAudioIO::get_asio_buffer_sizes(int device_id,
 	}
 
 	DEBUG_AUDIO (string_compose ("ASIO buffer properties for device %1, "
-	                             "min_size_frames: %2, max_size_frames: %3, "
-	                             "preferred_size_frames: %4, granularity: %5\n",
+	                             "min_size_samples: %2, max_size_samples: %3, "
+	                             "preferred_size_samples: %4, granularity: %5\n",
 	                             device_id,
-	                             min_size_frames,
-	                             max_size_frames,
-	                             preferred_size_frames,
+	                             min_size_samples,
+	                             max_size_samples,
+	                             preferred_size_samples,
 	                             granularity));
 
-	bool driver_returns_one_size = (min_size_frames == max_size_frames) &&
-	                               (min_size_frames == preferred_size_frames);
+	bool driver_returns_one_size = (min_size_samples == max_size_samples) &&
+	                               (min_size_samples == preferred_size_samples);
 
 	if (preferred_only || driver_returns_one_size) {
-		buffer_sizes.push_back(preferred_size_frames);
+		buffer_sizes.push_back(preferred_size_samples);
 		return true;
 	}
 
-	long buffer_size = min_size_frames;
+	long buffer_size = min_size_samples;
 
 	// If min size and granularity are power of two then just use values that
 	// are power of 2 even if the granularity allows for more values
 	bool use_power_of_two =
-	    is_power_of_two(min_size_frames) && is_power_of_two(granularity);
+	    is_power_of_two(min_size_samples) && is_power_of_two(granularity);
 
 	if (granularity <= 0 || use_power_of_two) {
 		// driver uses buffer sizes that are power of 2
-		while (buffer_size <= max_size_frames) {
+		while (buffer_size <= max_size_samples) {
 			buffer_sizes.push_back(buffer_size);
 			buffer_size *= 2;
 		}
 	} else {
-		if (min_size_frames == max_size_frames) {
+		if (min_size_samples == max_size_samples) {
 			// The devices I have tested either return the same values for
 			// min/max/preferred and changing buffer size is intended to only be
 			// done via the control dialog or they return a range where min != max
 			// but I guess min == max could happen if a driver only supports a single
 			// buffer size
-			buffer_sizes.push_back(min_size_frames);
+			buffer_sizes.push_back(min_size_samples);
 			return true;
 		}
 
-		// If min_size_frames is not power of 2 use at most 8 of the possible
+		// If min_size_samples is not power of 2 use at most 8 of the possible
 		// buffer sizes spread evenly between min and max
 		long max_values = 8;
-		while (((max_size_frames - min_size_frames) / granularity) > max_values) {
+		while (((max_size_samples - min_size_samples) / granularity) > max_values) {
 			granularity *= 2;
 		}
 
-		while (buffer_size < max_size_frames) {
+		while (buffer_size < max_size_samples) {
 			buffer_sizes.push_back(buffer_size);
 			buffer_size += granularity;
 		}
-		buffer_sizes.push_back(max_size_frames);
+		buffer_sizes.push_back(max_size_samples);
 	}
 	return true;
 }

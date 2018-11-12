@@ -33,13 +33,16 @@ class OSCGlobalObserver
 {
 
   public:
-	OSCGlobalObserver (ARDOUR::Session& s, lo_address addr, uint32_t gainmode, std::bitset<32> feedback);
+	OSCGlobalObserver (ArdourSurface::OSC& o, ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* su);
 	~OSCGlobalObserver ();
 
 	lo_address address() const { return addr; };
 	void tick (void);
+	void clear_observer (void);
+	void jog_mode (uint32_t jogmode);
 
   private:
+	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
 	PBD::ScopedConnectionList session_connections;
@@ -49,17 +52,42 @@ class OSCGlobalObserver
 		Monitor,
 	};
 
-
+	ArdourSurface::OSC::OSCSurface* sur;
+	bool _init;
+	float _last_master_gain;
+	float _last_master_trim;
+	float _last_monitor_gain;
 	lo_address addr;
 	std::string path;
+	std::string mark_text;
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	ARDOUR::Session* session;
-	framepos_t _last_frame;
+	uint32_t _jog_mode;
+	samplepos_t _last_sample;
 	uint32_t _heartbeat;
 	float _last_meter;
 	uint32_t master_timeout;
 	uint32_t monitor_timeout;
+	uint32_t last_punchin;
+	uint32_t last_punchout;
+	uint32_t last_click;
+	samplepos_t prev_mark;
+	samplepos_t next_mark;
+	struct LocationMarker {
+		LocationMarker (const std::string& l, samplepos_t w)
+			: label (l), when (w) {}
+		std::string label;
+		samplepos_t  when;
+	};
+	std::vector<LocationMarker> lm;
+
+	struct LocationMarkerSort {
+		bool operator() (const LocationMarker& a, const LocationMarker& b) {
+			return (a.when < b.when);
+		}
+	};
+
 
 	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
@@ -67,9 +95,12 @@ class OSCGlobalObserver
 	void send_transport_state_changed (void);
 	void send_record_state_changed (void);
 	void solo_active (bool active);
-	void text_message (std::string path, std::string text);
-	void float_message (std::string path, float value);
-	void int_message (std::string path, uint32_t value);
+	void session_name (std::string path, std::string name);
+	void extra_check (void);
+	void marks_changed (void);
+	void mark_update (void);
+	void group_changed (ARDOUR::RouteGroup*);
+	void group_changed (void);
 };
 
 #endif /* __osc_oscglobalobserver_h__ */

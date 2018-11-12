@@ -49,6 +49,9 @@ InstrumentInfo::~InstrumentInfo ()
 void
 InstrumentInfo::set_external_instrument (const string& model, const string& mode)
 {
+	if (external_instrument_model == model && external_instrument_mode == mode && internal_instrument.expired ()) {
+		return;
+	}
 	external_instrument_model = model;
 	external_instrument_mode = mode;
 	internal_instrument.reset ();
@@ -58,10 +61,34 @@ InstrumentInfo::set_external_instrument (const string& model, const string& mode
 void
 InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 {
-	internal_instrument = p;
-	external_instrument_model = (_("Unknown"));
+	bool changed = !external_instrument_mode.empty ();
 	external_instrument_mode = "";
-	Changed(); /* EMIT SIGNAL */
+
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(p);
+	if (pi && pi->plugin ()->has_midnam ()) {
+		/* really back hack, following MidiTimeAxisView::model_changed()
+		 *
+		 * InstrumentInfo::get_plugin_patch_name() needs to be overhauled,
+		 * it limits all PluginInsert to generic-midi or only numbers.
+		 */
+		changed |= !internal_instrument.expired ();
+		changed |= external_instrument_model != pi->plugin ()->midnam_model ();
+
+		internal_instrument.reset ();
+		external_instrument_model = pi->plugin ()->midnam_model ();
+		const std::list<std::string> device_modes = MIDI::Name::MidiPatchManager::instance().custom_device_mode_names_by_model (external_instrument_model);
+		if (device_modes.size() > 0) {
+			changed |= external_instrument_mode != device_modes.front();
+			external_instrument_mode = device_modes.front();
+		}
+	} else {
+		changed |= internal_instrument.lock () != p || external_instrument_model != _("Unknown");
+		internal_instrument = p;
+		external_instrument_model = _("Unknown");
+	}
+	if (changed) {
+		Changed(); /* EMIT SIGNAL */
+	}
 }
 
 string

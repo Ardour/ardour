@@ -367,7 +367,7 @@ keyboard_event_handler(GtkWidget *mk, GdkEventKey *event, gpointer ignored)
 	GdkKeymapKey	kk;
 	PianoKeyboard	*pk = PIANO_KEYBOARD(mk);
 
-        (void) ignored;
+	(void) ignored;
 
 	/* We're not using event->keyval, because we need keyval with level set to 0.
 	   E.g. if user holds Shift and presses '7', we want to get a '7', not '&'. */
@@ -449,7 +449,7 @@ mouse_button_event_handler(PianoKeyboard *pk, GdkEventButton *event, gpointer ig
 
 	int		note = get_note_for_xy(pk, x, y);
 
-        (void) ignored;
+	(void) ignored;
 
 	if (event->button != 1)
 		return TRUE;
@@ -488,7 +488,7 @@ mouse_motion_event_handler(PianoKeyboard *pk, GdkEventMotion *event, gpointer ig
 {
 	int		note;
 
-        (void) ignored;
+	(void) ignored;
 
 	if ((event->state & GDK_BUTTON1_MASK) == 0)
 		return TRUE;
@@ -542,7 +542,7 @@ piano_keyboard_expose(GtkWidget *widget, GdkEventExpose *event)
 static void
 piano_keyboard_size_request(GtkWidget* w, GtkRequisition *requisition)
 {
-        (void) w;
+	(void) w;
 
 	requisition->width = PIANO_KEYBOARD_DEFAULT_WIDTH;
 	requisition->height = PIANO_KEYBOARD_DEFAULT_HEIGHT;
@@ -625,8 +625,8 @@ piano_keyboard_class_init(PianoKeyboardClass *klass)
 		0, NULL, NULL, g_cclosure_marshal_VOID__INT, G_TYPE_NONE, 1, G_TYPE_INT);
 
 	piano_keyboard_signals[REST_SIGNAL] = g_signal_new ("rest",
-                G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
-                0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
+		G_TYPE_FROM_CLASS (klass), (GSignalFlags)(G_SIGNAL_RUN_FIRST | G_SIGNAL_ACTION),
+		0, NULL, NULL, g_cclosure_marshal_VOID__VOID, G_TYPE_NONE, 0);
 
 	widget_klass = (GtkWidgetClass*) klass;
 

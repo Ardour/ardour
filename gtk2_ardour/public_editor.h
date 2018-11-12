@@ -35,18 +35,23 @@
 #include <gtkmm/notebook.h>
 #include <sigc++/signal.h>
 
-#include "evoral/Beats.hpp"
+#include "pbd/statefuldestructible.h"
+
+#include "temporal/beats.h"
+
 #include "evoral/Note.hpp"
 
-#include "pbd/statefuldestructible.h"
+#include "ardour/session_handle.h"
 
 #include "canvas/fwd.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
-#include "gtkmm2ext/tabbable.h"
 #include "gtkmm2ext/visibility_tracker.h"
 
+#include "widgets/tabbable.h"
+
+#include "axis_provider.h"
 #include "editing.h"
 #include "selection.h"
 
@@ -55,9 +60,9 @@ namespace ARDOUR {
 	class Region;
 	class Playlist;
 	class RouteGroup;
-        class Trimmable;
-        class Movable;
-        class Stripable;
+	class Trimmable;
+	class Movable;
+	class Stripable;
 }
 
 namespace Gtk {
@@ -80,6 +85,7 @@ class PluginUIWindow;
 class RegionView;
 class RouteTimeAxisView;
 class Selection;
+class StripableTimeAxisView;
 class TempoCurve;
 class TempoMarker;
 class TimeAxisView;
@@ -95,8 +101,8 @@ bool relay_key_press (GdkEventKey* ev, Gtk::Window* win);
 bool forward_key_press (GdkEventKey* ev);
 }
 
-using ARDOUR::framepos_t;
-using ARDOUR::framecnt_t;
+using ARDOUR::samplepos_t;
+using ARDOUR::samplecnt_t;
 
 /// Representation of the interface of the Editor class
 
@@ -105,8 +111,9 @@ using ARDOUR::framecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public Gtkmm2ext::Tabbable {
-  public:
+class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+{
+public:
 	PublicEditor (Gtk::Widget& content);
 	virtual ~PublicEditor ();
 
@@ -123,15 +130,12 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 */
 	virtual void set_session (ARDOUR::Session* s) = 0;
 
-	/** @return The Session that we are editing, or 0 */
-	virtual ARDOUR::Session* session () const = 0;
-
 	/** Set the snap type.
 	 * @param t Snap type (defined in editing_syms.h)
 	 */
-	virtual void set_snap_to (Editing::SnapType t) = 0;
+	virtual void set_grid_to (Editing::GridType t) = 0;
 
-	virtual Editing::SnapType snap_type () const = 0;
+	virtual Editing::GridType grid_type () const = 0;
 	virtual Editing::SnapMode snap_mode () const = 0;
 
 	/** Set the snap mode.
@@ -139,19 +143,14 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 */
 	virtual void set_snap_mode (Editing::SnapMode m) = 0;
 
-	/** Set the snap threshold.
-	 * @param t Snap threshold in `units'.
-	 */
-	virtual void set_snap_threshold (double t) = 0;
-
 	/**
 	 * Snap a value according to the current snap setting.
 	 * ensure_snap overrides SnapOff and magnetic snap
 	 */
-	virtual void snap_to (ARDOUR::MusicFrame& first,
+	virtual void snap_to (ARDOUR::MusicSample& first,
 	                      ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                      bool                for_mark  = false,
-			      bool                ensure_snap = false) = 0;
+	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
+	                      bool                ensure_snap = false) = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -181,8 +180,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
 
-	/** @return Whether the current mouse mode is an "internal" editing mode.
-	 */
+	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
 	/** Possibly start the audition of a region.  If @param r is 0, or not an AudioRegion
@@ -200,27 +198,32 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void separate_region_from_selection () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual framepos_t pixel_to_sample (double pixel) const = 0;
-	virtual framepos_t playhead_cursor_sample () const = 0;
-	virtual double sample_to_pixel (framepos_t frame) const = 0;
-	virtual double sample_to_pixel_unrounded (framepos_t frame) const = 0;
+	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
+	virtual samplepos_t playhead_cursor_sample () const = 0;
+	virtual double sample_to_pixel (samplepos_t sample) const = 0;
+	virtual double sample_to_pixel_unrounded (samplepos_t sample) const = 0;
+
 	virtual Selection& get_selection () const = 0;
-	virtual bool get_selection_extents (framepos_t &start, framepos_t &end) const = 0;
+	virtual bool get_selection_extents (samplepos_t &start, samplepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
+
+	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
+
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
+	virtual void play_solo_selection(bool restart) = 0;
 	virtual void play_selection () = 0;
 	virtual void play_with_preroll () = 0;
 	virtual void rec_with_preroll () = 0;
-	virtual void maybe_locate_with_edit_preroll (framepos_t location) = 0;
+	virtual void rec_with_count_in () = 0;
+	virtual void maybe_locate_with_edit_preroll (samplepos_t location) = 0;
 	virtual void goto_nth_marker (int nth) = 0;
 	virtual void trigger_script (int nth) = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void set_show_measures (bool yn) = 0;
-	virtual bool show_measures () const = 0;
+	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
-	virtual void set_loop_range (framepos_t start, framepos_t end, std::string cmd) = 0;
-	virtual void set_punch_range (framepos_t start, framepos_t end, std::string cmd) = 0;
+	virtual void set_loop_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
+	virtual void set_punch_range (samplepos_t start, samplepos_t end, std::string cmd) = 0;
 
 	virtual void jump_forward_to_mark () = 0;
 	virtual void jump_backward_to_mark () = 0;
@@ -248,10 +251,10 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
-	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, framepos_t&,
+	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, samplepos_t&,
 	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode,
-	                       framepos_t&,
+	                       samplepos_t&,
 	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument=boost::shared_ptr<ARDOUR::PluginInfo>()) = 0;
 
 	/** Open main export dialog */
@@ -269,8 +272,8 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void register_actions () = 0;
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual framecnt_t get_current_zoom () const = 0;
-	virtual void reset_zoom (framecnt_t) = 0;
+	virtual samplecnt_t get_current_zoom () const = 0;
+	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual PlaylistSelector& playlist_selector() const = 0;
 	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void new_playlists (TimeAxisView*) = 0;
@@ -281,6 +284,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
+	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;
 
 	virtual void set_stationary_playhead (bool yn) = 0;
 	virtual void toggle_stationary_playhead () = 0;
@@ -290,7 +294,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	 * @param yn true to follow playhead, otherwise false.
 	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
 	 */
-	virtual void set_follow_playhead (bool yn, bool catch_up = false) = 0;
+	virtual void set_follow_playhead (bool yn, bool catch_up = true) = 0;
 
 	/** Toggle whether the editor is following the playhead */
 	virtual void toggle_follow_playhead () = 0;
@@ -300,35 +304,38 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
-	virtual framepos_t leftmost_sample() const = 0;
-	virtual framecnt_t current_page_samples() const = 0;
+	virtual samplepos_t leftmost_sample() const = 0;
+	virtual samplecnt_t current_page_samples() const = 0;
 	virtual double visible_canvas_height () const = 0;
 	virtual void temporal_zoom_step (bool coarser) = 0;
-        virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
-        virtual void override_visible_track_count () = 0;
+	virtual void ensure_time_axis_view_is_visible (TimeAxisView const & tav, bool at_top = false) = 0;
+	virtual void override_visible_track_count () = 0;
 	virtual void scroll_tracks_down_line () = 0;
 	virtual void scroll_tracks_up_line () = 0;
-        virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
-        virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
+	virtual bool scroll_down_one_track (bool skip_child_views = false) = 0;
+	virtual bool scroll_up_one_track (bool skip_child_views = false) = 0;
+	virtual void select_topmost_track () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
-	virtual void reset_x_origin (framepos_t frame) = 0;
+	virtual void reset_x_origin (samplepos_t sample) = 0;
 	virtual double get_y_origin () const = 0;
 	virtual void reset_y_origin (double pos) = 0;
+	virtual void set_visible_track_count (int32_t) = 0;
+	virtual void fit_selection () = 0;
 	virtual void remove_last_capture () = 0;
 	virtual void maximise_editing_space () = 0;
 	virtual void restore_editing_space () = 0;
-	virtual framepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
+	virtual samplepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
-	virtual void split_regions_at (ARDOUR::MusicFrame, RegionSelection&, bool snap) = 0;
+	virtual void split_regions_at (ARDOUR::MusicSample, RegionSelection&) = 0;
 	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
-	virtual void mouse_add_new_marker (framepos_t where, bool is_cd=false) = 0;
+	virtual void mouse_add_new_marker (samplepos_t where, bool is_cd=false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
-	virtual framecnt_t get_nudge_distance (framepos_t pos, framecnt_t& next) = 0;
-	virtual framecnt_t get_paste_offset (framepos_t pos, unsigned paste_count, framecnt_t duration) = 0;
-	virtual unsigned get_grid_beat_divisions(framepos_t position) = 0;
-	virtual Evoral::Beats get_grid_type_as_beats (bool& success, framepos_t position) = 0;
+	virtual samplecnt_t get_nudge_distance (samplepos_t pos, samplecnt_t& next) = 0;
+	virtual samplecnt_t get_paste_offset (samplepos_t pos, unsigned paste_count, samplecnt_t duration) = 0;
+	virtual unsigned get_grid_beat_divisions(samplepos_t position) = 0;
+	virtual Temporal::Beats get_grid_type_as_beats (bool& success, samplepos_t position) = 0;
 	virtual int32_t get_grid_music_divisions (uint32_t event_state) = 0;
 	virtual void edit_notes (MidiRegionView*) = 0;
 
@@ -340,17 +347,33 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void set_xjadeo_sensitive (bool onoff) = 0;
 	virtual int  get_videotl_bar_height () const = 0;
 	virtual void set_video_timeline_height (const int h) = 0;
-	virtual void embed_audio_from_video (std::string, framepos_t n = 0, bool lock_position_to_video = true) = 0;
+	virtual void embed_audio_from_video (std::string, samplepos_t n = 0, bool lock_position_to_video = true) = 0;
 
-	virtual RouteTimeAxisView* get_route_view_by_route_id (const PBD::ID& id) const = 0;
+	virtual bool track_selection_change_without_scroll () const = 0;
+
+	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
+
+	virtual TimeAxisView* time_axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable> s) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
+	virtual RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
+	virtual RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
-	sigc::signal<void,framepos_t> UpdateAllTransportClocks;
+	sigc::signal<void,samplepos_t> UpdateAllTransportClocks;
 
-        static sigc::signal<void> DropDownKeys;
+	static sigc::signal<void> DropDownKeys;
+
+	struct RegionAction {
+		Glib::RefPtr<Gtk::Action> action;
+		Editing::RegionActionTarget target;
+
+		RegionAction (Glib::RefPtr<Gtk::Action> a, Editing::RegionActionTarget tgt)
+			: action (a), target (tgt) {}
+	};
+
+	std::map<std::string,RegionAction> region_action_map;
 
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
@@ -370,7 +393,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual bool canvas_fade_out_handle_event (GdkEvent* event, ArdourCanvas::Item*, AudioRegionView*, bool) = 0;
 	virtual bool canvas_region_view_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_wave_view_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
-	virtual bool canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
+	virtual bool canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_highlight_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_region_view_name_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
 	virtual bool canvas_feature_line_event (GdkEvent* event, ArdourCanvas::Item*, RegionView*) = 0;
@@ -398,23 +421,22 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hvscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
+	virtual ArdourCanvas::Container* get_drag_motion_group () const = 0;
 
-        virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
+	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
-	virtual TimeAxisView* axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
+	virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
+	virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
 
-        virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
-        virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
-
-	virtual void center_screen (framepos_t) = 0;
+	virtual void center_screen (samplepos_t) = 0;
 
 	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
-	virtual TrackViewList const & get_track_views () = 0;
+	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual DragManager* drags () const = 0;
-        virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
-        virtual bool autoscroll_active() const = 0;
+	virtual bool autoscroll_active() const = 0;
 
 	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
 	virtual void commit_reversible_selection_op () = 0;
@@ -423,7 +445,8 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual void abort_reversible_command () = 0;
 	virtual void commit_reversible_command () = 0;
 
-	virtual void access_action (std::string,std::string) = 0;
+	virtual void access_action (const std::string&, const std::string&) = 0;
+	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
 	virtual MouseCursors const * cursors () const = 0;
 	virtual VerboseCursor * verbose_cursor () const = 0;
@@ -435,19 +458,24 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker *, bool &) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const &, bool) const = 0;
 
-	virtual void snap_to_with_modifier (ARDOUR::MusicFrame& first,
+	virtual void snap_to_with_modifier (ARDOUR::MusicSample& first,
 	                                    GdkEvent const *    ev,
 	                                    ARDOUR::RoundMode   direction = ARDOUR::RoundNearest,
-	                                    bool                for_mark  = false) = 0;
+	                                    ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual) = 0;
 
-	virtual void get_regions_at (RegionSelection &, framepos_t where, TrackViewList const &) const = 0;
-	virtual void get_regions_after (RegionSelection&, framepos_t where, const TrackViewList& ts) const = 0;
-	virtual RegionSelection get_regions_from_selection_and_mouse (framepos_t) = 0;
+	virtual void set_snapped_cursor_position (samplepos_t pos) = 0;
+
+	virtual void get_regions_at (RegionSelection &, samplepos_t where, TrackViewList const &) const = 0;
+	virtual void get_regions_after (RegionSelection&, samplepos_t where, const TrackViewList& ts) const = 0;
+	virtual RegionSelection get_regions_from_selection_and_mouse (samplepos_t) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
-	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Evoral::Beats> > > > >&) const = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 
-	virtual void mouse_add_new_tempo_event (framepos_t where) = 0;
-	virtual void mouse_add_new_meter_event (framepos_t where) = 0;
+	virtual void build_region_boundary_cache () = 0;
+	virtual void mark_region_boundary_cache_dirty () = 0;
+
+	virtual void mouse_add_new_tempo_event (samplepos_t where) = 0;
+	virtual void mouse_add_new_meter_event (samplepos_t where) = 0;
 	virtual void edit_tempo_section (ARDOUR::TempoSection*) = 0;
 	virtual void edit_meter_section (ARDOUR::MeterSection*) = 0;
 
@@ -463,7 +491,7 @@ class PublicEditor : public Gtkmm2ext::Tabbable {
 
 	Gtkmm2ext::Bindings* bindings;
 
-  protected:
+protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;

@@ -40,7 +40,7 @@ class AutomationRegionView;
 
 class AutomationStreamView : public StreamView
 {
-  public:
+public:
 	AutomationStreamView (AutomationTimeAxisView& tv);
 	~AutomationStreamView ();
 
@@ -60,17 +60,17 @@ class AutomationStreamView : public StreamView
 
 	void clear ();
 
-	void get_selectables (ARDOUR::framepos_t, ARDOUR::framepos_t, double, double, std::list<Selectable*> &, bool within = false);
+	void get_selectables (ARDOUR::samplepos_t, ARDOUR::samplepos_t, double, double, std::list<Selectable*> &, bool within = false);
 	void set_selected_points (PointSelection &);
 
 	std::list<boost::shared_ptr<AutomationLine> > get_lines () const;
 
-	bool paste (framepos_t                                pos,
+	bool paste (samplepos_t                                pos,
 	            unsigned                                  paste_count,
 	            float                                     times,
 	            boost::shared_ptr<ARDOUR::AutomationList> list);
 
-  private:
+private:
 	void setup_rec_box ();
 
 	RegionView* add_region_view_internal (boost::shared_ptr<ARDOUR::Region>, bool wait_for_data, bool recording = false);

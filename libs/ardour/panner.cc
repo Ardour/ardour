@@ -57,19 +57,13 @@ Panner::distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pfram
 
 void
 Panner::distribute_automated (BufferSet& ibufs, BufferSet& obufs,
-                              framepos_t start, framepos_t end, pframes_t nframes, pan_t** buffers)
+                              samplepos_t start, samplepos_t end, pframes_t nframes, pan_t** buffers)
 {
 	uint32_t which = 0;
 
 	for (BufferSet::audio_iterator src = ibufs.audio_begin(); src != ibufs.audio_end(); ++src, ++which) {
 		distribute_one_automated (*src, obufs, start, end, nframes, buffers, which);
 	}
-}
-
-void
-Panner::set_automation_style (AutoStyle style)
-{
-	_pannable->set_automation_style (style);
 }
 
 void
@@ -82,12 +76,6 @@ AutoState
 Panner::automation_state () const
 {
 	return _pannable->automation_state();
-}
-
-AutoStyle
-Panner::automation_style () const
-{
-	return _pannable->automation_style ();
 }
 
 bool

@@ -171,7 +171,7 @@ Editor::track_canvas_button_press_event (GdkEventButton *event)
 		begin_reversible_selection_op (X_("Clear Selection Click (track canvas)"));
 		selection->clear ();
 		commit_reversible_selection_op();
-        }
+	}
 	return false;
 }
 
@@ -179,10 +179,10 @@ bool
 Editor::track_canvas_button_release_event (GdkEventButton *event)
 {
 	if (!Keyboard::is_context_menu_event (event)) {
-                if (_drags->active ()) {
-                        _drags->end_grab ((GdkEvent*) event);
-                }
-        }
+		if (_drags->active ()) {
+			_drags->end_grab ((GdkEvent*) event);
+		}
+	}
 	return false;
 }
 
@@ -198,6 +198,10 @@ Editor::track_canvas_motion_notify_event (GdkEventMotion */*event*/)
 bool
 Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 {
+	if (!session () || session()->loading () || session()->deletion_in_progress ()) {
+		return false;
+	}
+
 	gint ret = FALSE;
 
 	switch (event->type) {
@@ -637,9 +641,9 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 }
 
 struct DescendingRegionLayerSorter {
-    bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
-	    return a->layer() > b->layer();
-    }
+	bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+		return a->layer() > b->layer();
+	}
 };
 
 bool
@@ -793,11 +797,11 @@ Editor::canvas_selection_end_trim_event (GdkEvent *event, ArdourCanvas::Item* it
 }
 
 bool
-Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
+Editor::canvas_sample_handle_event (GdkEvent* event, ArdourCanvas::Item* item, RegionView* rv)
 {
 	bool ret = false;
 
-	/* frame handles are not active when in internal edit mode, because actual notes
+	/* sample handles are not active when in internal edit mode, because actual notes
 	   might be in the area occupied by the handle - we want them to be editable as normal.
 	*/
 
@@ -805,7 +809,7 @@ Editor::canvas_frame_handle_event (GdkEvent* event, ArdourCanvas::Item* item, Re
 		return false;
 	}
 
-	/* NOTE: frame handles pretend to be the colored trim bar from an event handling
+	/* NOTE: sample handles pretend to be the colored trim bar from an event handling
 	   perspective. XXX change this ??
 	*/
 
@@ -1006,7 +1010,7 @@ Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 }
 
 bool
-Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* /*marker*/)
+Editor::canvas_tempo_marker_event (GdkEvent *event, ArdourCanvas::Item* item, TempoMarker* marker)
 {
 	return typed_event (item, event, TempoMarkerItem);
 }
@@ -1074,18 +1078,6 @@ Editor::canvas_ruler_event (GdkEvent *event, ArdourCanvas::Item* item, ItemType 
 			break;
 		}
 		return handled;
-	}
-
-	switch (event->type) {
-	case GDK_BUTTON_PRESS:
-		if (UIConfiguration::instance ().get_use_time_rulers_to_zoom_with_vertical_drag () &&
-		    Keyboard::no_modifier_keys_pressed (&event->button) && event->button.button == 1) {
-			_drags->set(new RulerZoomDrag(this, item), event);
-			return true;
-		}
-		break;
-	default:
-		break;
 	}
 
 	return typed_event (item, event, type);
@@ -1210,8 +1202,8 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 			if (tv.first == 0
 			    && (
-			        boost::dynamic_pointer_cast<AudioRegion> (region) != 0 ||
-			        boost::dynamic_pointer_cast<MidiRegion> (region) != 0
+				boost::dynamic_pointer_cast<AudioRegion> (region) != 0 ||
+				boost::dynamic_pointer_cast<MidiRegion> (region) != 0
 			       )
 			   )
 			{
@@ -1259,9 +1251,9 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 void
 Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
-		      int x, int y,
-		      const SelectionData& /*data*/,
-		      guint /*info*/, guint /*time*/)
+                      int x, int y,
+                      const SelectionData& /*data*/,
+                      guint /*info*/, guint /*time*/)
 {
 	GdkEvent event;
 	double px;
@@ -1272,7 +1264,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.button.y = y;
 	/* assume we're dragging with button 1 */
 	event.motion.state = Gdk::BUTTON1_MASK;
-	framepos_t const pos = window_event_sample (&event, &px, &py);
+	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
 	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
 	if (!region) { return; }
@@ -1291,7 +1283,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				}
 				list<boost::shared_ptr<AudioTrack> > audio_tracks;
 				audio_tracks = session()->new_audio_track (region->n_channels(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
-				rtav = dynamic_cast<RouteTimeAxisView*> (axis_view_from_stripable (audio_tracks.front()));
+				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (audio_tracks.front()));
 			} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
 				ChanCount one_midi_port (DataType::MIDI, 1);
 				list<boost::shared_ptr<MidiTrack> > midi_tracks;
@@ -1300,7 +1292,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 				                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
 				                                         (ARDOUR::Plugin::PresetRecord*) 0,
 				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order);
-				rtav = dynamic_cast<RouteTimeAxisView*> (axis_view_from_stripable (midi_tracks.front()));
+				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (midi_tracks.front()));
 			} else {
 				return;
 			}

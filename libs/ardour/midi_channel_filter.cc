@@ -42,7 +42,7 @@ MidiChannelFilter::filter(BufferSet& bufs)
 	MidiBuffer& buf = bufs.get_midi(0);
 
 	for (MidiBuffer::iterator e = buf.begin(); e != buf.end(); ) {
-		Evoral::Event<framepos_t> ev(*e, false);
+		Evoral::Event<samplepos_t> ev(*e, false);
 
 		if (ev.is_channel_event()) {
 			switch (mode) {

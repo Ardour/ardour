@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+#include <gtkmm/frame.h>
+#include <gtkmm/stock.h>
+#include <gtkmm/table.h>
+
 #include "gtkmm2ext/utils.h"
 
 #include "script_selector.h"
@@ -27,37 +31,35 @@ using namespace ARDOUR;
 
 ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType type)
 	: ArdourDialog (title)
+	, _type_label ("<b>Type:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
 	, _type ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
+	, _author_label ("<b>Author:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
 	, _author ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
 	, _description ("", Gtk::ALIGN_START, Gtk::ALIGN_START)
 	, _scripts (LuaScripting::instance ().scripts (type))
 	, _script_type (type)
 {
-	Gtk::Label* l;
-
 	Table* t = manage (new Table (3, 2));
 	t->set_spacings (6);
 
 	int ty = 0;
 
-	l = manage (new Label (_("<b>Type:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_type, 1, 2, ty, ty+1);
+	_type_label.set_use_markup ();
+	t->attach (_type_label, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	t->attach (_type, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
-	l = manage (new Label (_("<b>Author:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_author, 1, 2, ty, ty+1);
+	_author_label.set_use_markup ();
+	t->attach (_author_label, 0, 1, ty, ty+1, FILL|EXPAND, SHRINK);
+	t->attach (_author, 1, 2, ty, ty+1, FILL|EXPAND, SHRINK);
 	++ty;
 
-	l = manage (new Label (_("<b>Description:</b>"), Gtk::ALIGN_END, Gtk::ALIGN_CENTER, false));
-	l->set_use_markup ();
-	t->attach (*l, 0, 1, ty, ty+1);
-	t->attach (_description, 1, 2, ty, ty+1);
+	Frame* f = manage(new Frame (_("Description")));
+	f->add (_description);
+	t->attach (*f, 0, 2, ty, ty+1);
 	++ty;
 
+	_description.set_padding (5, 5);
 	_description.set_line_wrap();
 
 	get_vbox()->set_spacing (6);
@@ -77,36 +79,80 @@ ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType typ
 
 	setup_list ();
 	show_all ();
+
+	script_combo_changed();
+}
+
+bool
+ScriptSelector::script_separator (const Glib::RefPtr<Gtk::TreeModel> &, const Gtk::TreeModel::iterator &i)
+{
+	_script_combo.set_active (i);
+
+	return _script_combo.get_active_text () == "--separator--";
 }
 
 void
 ScriptSelector::setup_list ()
 {
 	_combocon.block();
+
 	vector<string> script_names;
 	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
-		script_names.push_back ((*s)->name);
+		if ((*s)->name != "Shortcut" || _script_type != LuaScriptInfo::EditorAction) {
+			script_names.push_back ((*s)->name);
+		}
 	}
 
-	Gtkmm2ext::set_popdown_strings (_script_combo, script_names);
-	if (script_names.size() > 0) {
-		_script_combo.set_active(0);
-		script_combo_changed ();
+	_script_combo.clear();
+	_script_combo.set_row_separator_func (sigc::mem_fun (*this, &ScriptSelector::script_separator));
+
+	if (_script_type == LuaScriptInfo::EditorAction) {
+		_script_combo.append_text ("Shortcut");
+		_script_combo.append_text ("--separator--");
 	}
+
+	vector<string>::const_iterator i;
+	for (i = script_names.begin(); i != script_names.end(); ++i) {
+		_script_combo.append_text (*i);
+	}
+
+	_script_combo.set_active(0);
+	script_combo_changed ();
+
 	_combocon.unblock();
 }
 
 void
 ScriptSelector::script_combo_changed ()
 {
-	int i = _script_combo.get_active_row_number();
-	_script = _scripts[i];
+	std::string nm = _script_combo.get_active_text();
 
-	_type.set_text(LuaScriptInfo::type2str (_script->type));
-	_author.set_text (_script->author);
-	_description.set_text (_script->description);
+	for (LuaScriptList::const_iterator s = _scripts.begin(); s != _scripts.end(); ++s) {
+		if ((*s)->name == nm) {
+			_script = (*s);
+		}
+	}
 
-	_add->set_sensitive (Glib::file_test(_script->path, Glib::FILE_TEST_EXISTS));
+	if (_script) {
+
+		if (_script->name == "Shortcut") {
+			_type.hide();
+			_type_label.hide();
+			_author.hide();
+			_author_label.hide();
+			_description.set_text (_script->description);
+		} else {
+			_type.show();
+			_type_label.show();
+			_author.show();
+			_author_label.show();
+			_type.set_text(LuaScriptInfo::type2str (_script->type));
+			_author.set_text (_script->author);
+			_description.set_text (_script->description);
+		}
+
+		_add->set_sensitive (Glib::file_test(_script->path, Glib::FILE_TEST_EXISTS));
+	}
 }
 
 void
@@ -158,6 +204,13 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	t->set_spacings (6);
 
 	_name_entry.set_text (spi->name);
+
+	for (size_t i = 0; i < _lsp.size(); ++i) {
+		if (_lsp[i]->preseeded && _lsp[i]->name == "x-script-name" && !_lsp[i]->value.empty ()) {
+			_name_entry.set_text (_lsp[i]->value);
+		}
+	}
+
 	_name_entry.signal_changed().connect (sigc::mem_fun (*this, &ScriptParameterDialog::update_sensitivity));
 
 	int ty = 0;
@@ -176,17 +229,21 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	}
 
 	for (size_t i = 0; i < _lsp.size (); ++i) {
-		CheckButton* c = manage (new CheckButton (_lsp[i]->title));
 		Entry* e = manage (new Entry());
-		c->set_active (!_lsp[i]->optional); // also if default ??
-		c->set_sensitive (_lsp[i]->optional);
-		e->set_text (_lsp[i]->dflt);
-		e->set_sensitive (c->get_active ());
+		if (_lsp[i]->optional) {
+			CheckButton* c = manage (new CheckButton (_lsp[i]->title));
+			c->set_active (!_lsp[i]->dflt.empty());
+			c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ScriptParameterDialog::active_changed), i, c, e));
+			t->attach (*c, 0, 1, ty, ty+1);
+		} else {
+			Label* l = manage (new Label (_lsp[i]->title, Gtk::ALIGN_LEFT));
+			t->attach (*l, 0, 1, ty, ty+1);
+		}
 
-		c->signal_toggled().connect (sigc::bind (sigc::mem_fun (*this, &ScriptParameterDialog::active_changed), i, c, e));
+		e->set_text (_lsp[i]->dflt);
+		e->set_sensitive (!_lsp[i]->dflt.empty());
 		e->signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &ScriptParameterDialog::value_changed), i, e));
 
-		t->attach (*c, 0, 1, ty, ty+1);
 		t->attach (*e, 1, 2, ty, ty+1);
 		++ty;
 	}
@@ -200,23 +257,40 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 	update_sensitivity ();
 }
 
-void
-ScriptParameterDialog::update_sensitivity ()
+bool
+ScriptParameterDialog::need_interation () const
+{
+	if (!parameters_ok ()) {
+		return true;
+	}
+	for (size_t i = 0; i < _lsp.size(); ++i) {
+		if (!_lsp[i]->optional && !_lsp[i]->preseeded) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool
+ScriptParameterDialog::parameters_ok () const
 {
 	std::string n = _name_entry.get_text ();
 	if (n.empty() || std::find (_existing_names.begin(), _existing_names.end(), n) != _existing_names.end()) {
-		_add->set_sensitive (false);
-		return;
+		return false;
 	}
 
 	for (size_t i = 0; i < _lsp.size(); ++i) {
 		if (!_lsp[i]->optional && _lsp[i]->value.empty()) {
-			_add->set_sensitive (false);
-			return;
+			return false;
 		}
 	}
+	return true;
+}
 
-	_add->set_sensitive (true);
+void
+ScriptParameterDialog::update_sensitivity ()
+{
+	_add->set_sensitive (parameters_ok ());
 }
 
 void

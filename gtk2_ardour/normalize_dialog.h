@@ -37,6 +37,10 @@ public:
 	double target_rms () const;
 	int run ();
 
+	void on_response (int response_id) {
+		Gtk::Dialog::on_response (response_id);
+	}
+
 private:
 	void update_progress_gui (float);
 	void button_clicked (int);
