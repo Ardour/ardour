@@ -96,11 +96,13 @@
 #include "keyeditor.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
+#include "plugin_dspload_window.h"
 #include "rc_option_editor.h"
 #include "route_dialogs.h"
 #include "route_params_ui.h"
 #include "session_option_editor.h"
 #include "speaker_dialog.h"
+#include "transport_masters_dialog.h"
 #else
 class About;
 class AddRouteDialog;
@@ -119,6 +121,8 @@ class SessionOptionEditor;
 class SpeakerDialog;
 class GlobalPortMatrixWindow;
 class IdleOMeter;
+class PluginDSPLoadWindow;
+class TransportMastersWindow;
 #endif
 
 class VideoTimeLine;
@@ -160,6 +164,8 @@ namespace ArdourWidgets {
 	class Prompter;
 	class Tabbable;
 }
+
+#define MAX_LUA_ACTION_SCRIPTS 12
 
 class ARDOUR_UI : public Gtkmm2ext::UI, public ARDOUR::SessionHandlePtr, public TransportControlProvider
 {
@@ -294,7 +300,8 @@ public:
 	void flush_videotimeline_cache (bool localcacheonly=false);
 	void export_video (bool range = false);
 
-	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
+	void session_add_audio_route (bool, int32_t, int32_t, ARDOUR::TrackMode, ARDOUR::RouteGroup *,
+	                              uint32_t, std::string const &, bool, ARDOUR::PresentationInfo::order_t order);
 
 	void session_add_mixed_track (const ARDOUR::ChanCount&, const ARDOUR::ChanCount&, ARDOUR::RouteGroup*,
 	                              uint32_t, std::string const &, bool strict_io,
@@ -308,6 +315,8 @@ public:
 	void session_add_midi_route (bool, ARDOUR::RouteGroup *, uint32_t, std::string const &, bool,
 	                             ARDOUR::PluginInfoPtr, ARDOUR::Plugin::PresetRecord*,
 	                             ARDOUR::PresentationInfo::order_t order);
+
+	void session_add_listen_bus (uint32_t, std::string const &);
 
 	void display_insufficient_ports_message ();
 
@@ -507,7 +516,7 @@ private:
 	ArdourWidgets::ArdourButton feedback_alert_button;
 	ArdourWidgets::ArdourButton error_alert_button;
 
-	ArdourWidgets::ArdourButton action_script_call_btn[10];
+	ArdourWidgets::ArdourButton action_script_call_btn[MAX_LUA_ACTION_SCRIPTS];
 	Gtk::Table action_script_table;
 
 	Gtk::VBox alert_box;
@@ -680,6 +689,8 @@ private:
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
+	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
+	WM::Proxy<TransportMastersWindow> transport_masters_window;
 
 	/* Windows/Dialogs that require a creator method */
 

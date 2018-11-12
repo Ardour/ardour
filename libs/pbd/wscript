@@ -151,8 +151,8 @@ def build(bld):
         obj.defines = [ 'LIBPBD_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libpbd_sources)
-        obj.cxxflags     = [ '-fPIC' ]
-        obj.cflags     = [ '-fPIC' ]
+        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
+        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
     if bld.is_defined('DEBUG_RT_ALLOC'):

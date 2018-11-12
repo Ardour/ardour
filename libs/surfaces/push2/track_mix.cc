@@ -24,7 +24,6 @@
 #include "pbd/debug.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/search_path.h"
 #include "pbd/enumwriter.h"
 
@@ -65,6 +64,8 @@
 #include "push2.h"
 #include "track_mix.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect
@@ -177,7 +178,7 @@ TrackMixLayout::show ()
 	                                    Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8 };
 
 	for (size_t n = 0; n < sizeof (lower_buttons) / sizeof (lower_buttons[0]); ++n) {
-		Push2::Button* b = p2.button_by_id (lower_buttons[n]);
+		boost::shared_ptr<Push2::Button> b = p2.button_by_id (lower_buttons[n]);
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);
 		p2.write (b->state_msg());
@@ -289,7 +290,7 @@ TrackMixLayout::simple_control_change (boost::shared_ptr<AutomationControl> ac, 
 		return;
 	}
 
-	Push2::Button* b = p2.button_by_id (bid);
+	boost::shared_ptr<Push2::Button> b = p2.button_by_id (bid);
 
 	if (!b) {
 		return;
@@ -311,7 +312,7 @@ TrackMixLayout::solo_mute_change ()
 		return;
 	}
 
-	Push2::Button* b = p2.button_by_id (Push2::Lower2);
+	boost::shared_ptr<Push2::Button> b = p2.button_by_id (Push2::Lower2);
 
 	if (b) {
 		boost::shared_ptr<SoloControl> sc = stripable->solo_control();
@@ -402,8 +403,8 @@ TrackMixLayout::monitoring_change ()
 		return;
 	}
 
-	Push2::Button* b1 = p2.button_by_id (Push2::Lower4);
-	Push2::Button* b2 = p2.button_by_id (Push2::Lower5);
+	boost::shared_ptr<Push2::Button> b1 = p2.button_by_id (Push2::Lower4);
+	boost::shared_ptr<Push2::Button> b2 = p2.button_by_id (Push2::Lower5);
 	uint8_t b1_color;
 	uint8_t b2_color;
 

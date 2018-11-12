@@ -40,6 +40,7 @@ PBD::DebugBits PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
 PBD::DebugBits PBD::DEBUG::Destruction = PBD::new_debug_bit ("destruction");
 PBD::DebugBits PBD::DEBUG::MTC = PBD::new_debug_bit ("mtc");
 PBD::DebugBits PBD::DEBUG::LTC = PBD::new_debug_bit ("ltc");
+PBD::DebugBits PBD::DEBUG::TXLTC = PBD::new_debug_bit ("tx-ltc");
 PBD::DebugBits PBD::DEBUG::Transport = PBD::new_debug_bit ("transport");
 PBD::DebugBits PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");
 PBD::DebugBits PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");

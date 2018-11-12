@@ -39,7 +39,7 @@ def build(bld):
         obj = bld(features     = 'c cshlib',
                   source       = 'a-exp.c',
                   name         = 'a-exp',
-                  cflags       = [ '-fPIC',  bld.env['compiler_flags_dict']['c99'] ],
+                  cflags       = [ bld.env['compiler_flags_dict']['pic'],  bld.env['compiler_flags_dict']['c99'] ],
                   includes     = [ '../../ardour', '../shared' ],
                   target       = '../../LV2/%s/a-exp' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,

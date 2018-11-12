@@ -71,19 +71,18 @@ FluidSynth::load_sf2 (const std::string& fn)
 	}
 
 	size_t count;
-	fluid_preset_t preset;
+	fluid_preset_t* preset;
 
-	sfont->iteration_start (sfont);
-	for (count = 0; sfont->iteration_next (sfont, &preset) != 0; ++count) {
+	fluid_sfont_iteration_start (sfont);
+	for (count = 0; (preset = fluid_sfont_iteration_next (sfont)) != 0; ++count) {
 		if (count < 16) {
-			fluid_synth_program_select (_synth, count, _synth_id, preset.get_banknum (&preset), preset.get_num (&preset));
+			fluid_synth_program_select (_synth, count, _synth_id, fluid_preset_get_banknum (preset), fluid_preset_get_num (preset));
 		}
 		_presets.push_back (BankProgram (
-					preset.get_name (&preset),
-					preset.get_banknum (&preset),
-					preset.get_num (&preset)));
+					fluid_preset_get_name (preset),
+					fluid_preset_get_banknum (preset),
+					fluid_preset_get_num (preset)));
 	}
-
 	if (count == 0) {
 		return false;
 	}

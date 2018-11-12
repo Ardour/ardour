@@ -76,7 +76,7 @@ def build(bld):
         obj.defines      = [ 'LIBGTKMM2EXT_DLL_EXPORTS', 'ABSTRACT_UI_EXPORTS' ]
     else:
         obj              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=sources)
-        obj.cxxflags     = [ '-fPIC' ]
+        obj.cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = [ ]
 
     obj.export_includes = ['.']

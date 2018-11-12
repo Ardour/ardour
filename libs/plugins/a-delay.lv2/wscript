@@ -39,7 +39,7 @@ def build(bld):
         obj = bld(features     = 'c cshlib',
                   source       = 'a-delay.c',
                   name         = 'a-delay',
-                  cflags       = [ '-fPIC',  bld.env['compiler_flags_dict']['c99'] ],
+                  cflags       = [ bld.env['compiler_flags_dict']['pic'],  bld.env['compiler_flags_dict']['c99'] ],
                   includes     = [ '../../ardour' ],
                   target       = '../../LV2/%s/a-delay' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,

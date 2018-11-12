@@ -182,6 +182,8 @@ private:
 	void queue_idle_update ();
 	bool idle_update ();
 
+	void error_message_dialog (std::string const&) const;
+
 	uint32_t _n_plugins;
 	ARDOUR::ChanCount _in, _ins, _out;
 	ARDOUR::ChanCount _sinks, _sources;

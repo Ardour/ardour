@@ -113,6 +113,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/session_event.h"
 #include "ardour/source_factory.h"
+#include "ardour/transport_master_manager.h"
 #ifdef LV2_SUPPORT
 #include "ardour/uri_map.h"
 #endif
@@ -443,7 +444,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
 
 	if (!PBD::init()) return false;
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
 	(void) bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
@@ -459,6 +460,7 @@ ARDOUR::init (bool use_windows_vst, bool try_optimization, const char* localedir
         Playlist::make_property_quarks ();
         AudioPlaylist::make_property_quarks ();
         PresentationInfo::make_property_quarks ();
+        TransportMaster::make_property_quarks ();
 
 	/* this is a useful ready to use PropertyChange that many
 	   things need to check. This avoids having to compose
@@ -595,8 +597,21 @@ void
 ARDOUR::init_post_engine ()
 {
 	XMLNode* node;
+
 	if ((node = Config->control_protocol_state()) != 0) {
-		ControlProtocolManager::instance().set_state (*node, Stateful::loading_state_version);
+		ControlProtocolManager::instance().set_state (*node, 0 /* here: global-config state */);
+	}
+
+	if ((node = Config->transport_master_state()) != 0) {
+		if (TransportMasterManager::instance().set_state (*node, Stateful::loading_state_version)) {
+			error << _("Cannot restore transport master manager") << endmsg;
+			/* XXX now what? */
+		}
+	} else {
+		if (TransportMasterManager::instance().set_default_configuration ()) {
+			error << _("Cannot initialize transport master manager") << endmsg;
+			/* XXX now what? */
+		}
 	}
 
 	/* find plugins */
@@ -605,7 +620,7 @@ ARDOUR::init_post_engine ()
 }
 
 void
-ARDOUR::cleanup ()
+	ARDOUR::cleanup ()
 {
 	if (!libardour_initialized) {
 		return;

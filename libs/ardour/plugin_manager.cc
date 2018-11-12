@@ -993,7 +993,6 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 	uint32_t discovered = 0;
 	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
 		VSTInfo* finfo = *x;
-		char buf[32];
 
 		if (!finfo->canProcessReplacing) {
 			warning << string_compose (_("VST plugin %1 does not support processReplacing, and cannot be used in %2 at this time"),
@@ -1002,28 +1001,13 @@ PluginManager::windows_vst_discover (string path, bool cache_only)
 			continue;
 		}
 
-		PluginInfoPtr info (new WindowsVSTPluginInfo);
+		PluginInfoPtr info (new WindowsVSTPluginInfo (finfo));
+		info->path = path;
 
 		/* what a joke freeware VST is */
-
 		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
 			info->name = PBD::basename_nosuffix (path);
-		} else {
-			info->name = finfo->name;
 		}
-
-
-		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
-		info->unique_id = buf;
-		info->category = finfo->Category;
-		info->path = path;
-		info->creator = finfo->creator;
-		info->index = 0;
-		info->n_inputs.set_audio (finfo->numInputs);
-		info->n_outputs.set_audio (finfo->numOutputs);
-		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
-		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
-		info->type = ARDOUR::Windows_VST;
 
 		/* if we don't have any tags for this plugin, make some up. */
 		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
@@ -1140,7 +1124,6 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 	uint32_t discovered = 0;
 	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
 		VSTInfo* finfo = *x;
-		char buf[32];
 
 		if (!finfo->canProcessReplacing) {
 			warning << string_compose (_("Mac VST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
@@ -1149,21 +1132,8 @@ PluginManager::mac_vst_discover (string path, bool cache_only)
 			continue;
 		}
 
-		PluginInfoPtr info (new MacVSTPluginInfo);
-
-		info->name = finfo->name;
-
-		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
-		info->unique_id = buf;
-		info->category = finfo->Category;
+		PluginInfoPtr info (new MacVSTPluginInfo (finfo));
 		info->path = path;
-		info->creator = finfo->creator;
-		info->index = 0;
-		info->n_inputs.set_audio (finfo->numInputs);
-		info->n_outputs.set_audio (finfo->numOutputs);
-		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
-		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
-		info->type = ARDOUR::MacVST;
 
 		/* if we don't have any tags for this plugin, make some up. */
 		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
@@ -1257,7 +1227,6 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 	uint32_t discovered = 0;
 	for (vector<VSTInfo *>::iterator x = finfos->begin(); x != finfos->end(); ++x) {
 		VSTInfo* finfo = *x;
-		char buf[32];
 
 		if (!finfo->canProcessReplacing) {
 			warning << string_compose (_("linuxVST plugin %1 does not support processReplacing, and so cannot be used in %2 at this time"),
@@ -1266,26 +1235,12 @@ PluginManager::lxvst_discover (string path, bool cache_only)
 			continue;
 		}
 
-		PluginInfoPtr info(new LXVSTPluginInfo);
+		PluginInfoPtr info(new LXVSTPluginInfo (finfo));
+		info->path = path;
 
 		if (!strcasecmp ("The Unnamed plugin", finfo->name)) {
 			info->name = PBD::basename_nosuffix (path);
-		} else {
-			info->name = finfo->name;
 		}
-
-
-		snprintf (buf, sizeof (buf), "%d", finfo->UniqueID);
-		info->unique_id = buf;
-		info->category = finfo->Category;
-		info->path = path;
-		info->creator = finfo->creator;
-		info->index = 0;
-		info->n_inputs.set_audio (finfo->numInputs);
-		info->n_outputs.set_audio (finfo->numOutputs);
-		info->n_inputs.set_midi ((finfo->wantMidi&1) ? 1 : 0);
-		info->n_outputs.set_midi ((finfo->wantMidi&2) ? 1 : 0);
-		info->type = ARDOUR::LXVST;
 
 		set_tags (info->type, info->unique_id, info->category, info->name, FromPlug);
 

@@ -63,6 +63,7 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	, _signal_input_fft(0)
 	, _signal_output_fft(0)
 	, _plugin_insert(pluginInsert)
+	, _pointer_in_area_xpos(-1)
 {
 	_signal_analysis_running = false;
 	_samplerate = ARDOUR_UI::instance()->the_session()->sample_rate();
@@ -84,7 +85,6 @@ PluginEqGui::PluginEqGui(boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	_analysis_area->signal_size_allocate().connect( sigc::mem_fun (*this, &PluginEqGui::resize_analysis_area));
 	_analysis_area->signal_motion_notify_event().connect( sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseover));
 	_analysis_area->signal_leave_notify_event().connect( sigc::mem_fun (*this, &PluginEqGui::analysis_area_mouseexit));
-	_analysis_area->signal_button_press_event().connect( sigc::mem_fun (*this, &PluginEqGui::analysis_area_mousedown));
 
 	// dB selection
 	dBScaleModel = Gtk::ListStore::create(dBColumns);
@@ -158,6 +158,12 @@ PluginEqGui::~PluginEqGui()
 	_signal_output_fft = 0;
 
 	// all gui objects are *manage'd by the inherited Table object
+}
+
+static inline float
+power_to_dB(float a)
+{
+	return 10.0 * log10f(a);
 }
 
 void
@@ -448,10 +454,16 @@ PluginEqGui::run_impulse_analysis()
 }
 
 void
-PluginEqGui::update_pointer_info(float x, float y)
+PluginEqGui::update_pointer_info(float x)
 {
-	const int freq = std::max(1, (int) roundf((powf(10, x / _analysis_width * _log_max) - 1) * _samplerate / 2.0 / _log_coeff));
-	const float dB = _max_dB - y / _analysis_height * ( _max_dB - _min_dB );
+	/* find the bin corresponding to x (see plot_impulse_amplitude) */
+	int i = roundf ((powf (10, _log_max * x / _analysis_width) - 1.0) * _impulse_fft->bins() / _log_coeff);
+	float dB = power_to_dB (_impulse_fft->power_at_bin (i));
+	/* calc freq corresponding to bin */
+	const int freq = std::max (1, (int) roundf((float)i / (float)_impulse_fft->bins() * _samplerate / 2.f));
+
+	_pointer_in_area_freq = round (_analysis_width * log10f(1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max);
+
 	std::stringstream ss;
 	ss << std::fixed;
 	if (freq >= 10000) {
@@ -461,15 +473,23 @@ PluginEqGui::update_pointer_info(float x, float y)
 	} else {
 		ss <<  std::setprecision (0) << freq << "Hz";
 	}
-	ss << "  " << std::setw(5) << std::setprecision (1) << std::showpos << dB;
+	ss << " " << std::setw(6) << std::setprecision (1) << std::showpos << dB;
 	ss << std::setw(0) << "dB";
+
+	if (_phase_button->get_active()) {
+		float phase = 180. * _impulse_fft->phase_at_bin (i) / M_PI;
+		ss << " " << std::setw(6) << std::setprecision (1) << std::showpos << phase;
+		ss << std::setw(0) << "\u00B0";
+	}
 	_pointer_info->set_text(ss.str());
 }
 
 bool
 PluginEqGui::analysis_area_mouseover(GdkEventMotion *event)
 {
-	update_pointer_info(event->x, event->y);
+	update_pointer_info(event->x);
+	_pointer_in_area_xpos = event->x;
+	_analysis_area->queue_draw();
 	return true;
 }
 
@@ -477,16 +497,10 @@ bool
 PluginEqGui::analysis_area_mouseexit(GdkEventCrossing *)
 {
 	_pointer_info->set_text("");
+	_pointer_in_area_xpos = -1;
+	_analysis_area->queue_draw();
 	return true;
 }
-
-bool
-PluginEqGui::analysis_area_mousedown(GdkEventButton *event)
-{
-	update_pointer_info(event->x, event->y);
-	return true;
-}
-
 
 bool
 PluginEqGui::expose_analysis_area(GdkEventExpose *)
@@ -535,13 +549,31 @@ PluginEqGui::redraw_analysis_area()
 	cairo_set_source_surface(cr, _analysis_scale_surface, 0.0, 0.0);
 	cairo_paint(cr);
 
+	cairo_set_line_join (cr, CAIRO_LINE_JOIN_ROUND);
+
 	if (_phase_button->get_active()) {
 		plot_impulse_phase(_analysis_area, cr);
 	}
+
 	plot_impulse_amplitude(_analysis_area, cr);
+
+	if (_pointer_in_area_xpos >= 0) {
+		update_pointer_info (_pointer_in_area_xpos);
+	}
 
 	if (_signal_button->get_active()) {
 		plot_signal_amplitude_difference(_analysis_area, cr);
+	}
+
+	if (_pointer_in_area_xpos >= 0 && _pointer_in_area_freq > 0) {
+		const double dashed[] = {0.0, 2.0};
+		cairo_set_dash (cr, dashed, 2, 0);
+		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
+		cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
+		cairo_set_line_width (cr, 1.0);
+		cairo_move_to (cr, _pointer_in_area_freq - .5, -.5);
+		cairo_line_to (cr, _pointer_in_area_freq - .5, _analysis_height - .5);
+		cairo_stroke(cr);
 	}
 
 	cairo_destroy(cr);
@@ -745,12 +777,6 @@ PluginEqGui::draw_scales_power(Gtk::Widget */*w*/, cairo_t *cr)
 
 	cairo_set_dash(cr, 0, 0, 0.0);
 
-}
-
-inline float
-power_to_dB(float a)
-{
-	return 10.0 * log10f(a);
 }
 
 void

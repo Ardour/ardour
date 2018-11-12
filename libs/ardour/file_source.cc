@@ -519,6 +519,7 @@ FileSource::mark_immutable ()
 	/* destructive sources stay writable, and their other flags don't change.  */
 	if (!(_flags & Destructive)) {
 		_flags = Flag (_flags & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy|CanRename));
+		close();
 	}
 }
 

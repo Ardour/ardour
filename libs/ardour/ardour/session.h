@@ -83,6 +83,8 @@ class XMLNode;
 struct _AEffect;
 typedef struct _AEffect AEffect;
 
+class PTFFormat;
+
 namespace MIDI {
 class Port;
 class MachineControl;
@@ -149,11 +151,12 @@ class SceneChanger;
 class SessionDirectory;
 class SessionMetadata;
 class SessionPlaylists;
-class Slave;
 class Source;
 class Speakers;
 class TempoMap;
+class TransportMaster;
 class Track;
+class UI_TransportMaster;
 class VCAManager;
 class WindowsVSTPlugin;
 
@@ -284,7 +287,7 @@ public:
 
 	boost::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 
-	RouteList get_routelist (bool mixer_order = false) const;
+	RouteList get_routelist (bool mixer_order = false, PresentationInfo::Flag fl = PresentationInfo::MixerRoutes) const;
 
 	CoreSelection& selection () { return *_selection; }
 
@@ -295,11 +298,13 @@ public:
 	 * with get_routes()
 	 */
 
-	void get_stripables (StripableList&) const;
+	void get_stripables (StripableList&, PresentationInfo::Flag fl = PresentationInfo::MixerStripables) const;
 	StripableList get_stripables () const;
 	boost::shared_ptr<RouteList> get_tracks() const;
 	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	boost::shared_ptr<RouteList> get_routes_with_regions_at (samplepos_t const) const;
+
+	boost::shared_ptr<AudioTrack> get_nth_audio_track (int nth) const;
 
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }
@@ -358,10 +363,6 @@ public:
 
 	PBD::Signal0<void> IOConnectionsComplete;
 
-	/* Timecode status signals */
-	PBD::Signal1<void, bool> MTCSyncStateChanged;
-	PBD::Signal1<void, bool> LTCSyncStateChanged;
-
 	/* Record status signals */
 
 	PBD::Signal0<void> RecordStateChanged; /* signals changes in recording state (i.e. are we recording) */
@@ -415,8 +416,8 @@ public:
 
 	void request_roll_at_and_return (samplepos_t start, samplepos_t return_to);
 	void request_bounded_roll (samplepos_t start, samplepos_t end);
-	void request_stop (bool abort = false, bool clear_state = false);
-	void request_locate (samplepos_t sample, bool with_roll = false);
+	void request_stop (bool abort = false, bool clear_state = false, TransportRequestSource origin = TRS_UI);
+	void request_locate (samplepos_t sample, bool with_roll = false, TransportRequestSource origin = TRS_UI);
 
 	void request_play_loop (bool yn, bool leave_rolling = false);
 	bool get_play_loop () const { return play_loop; }
@@ -426,8 +427,8 @@ public:
 	void goto_start (bool and_roll = false);
 	void use_rf_shuttle_speed ();
 	void allow_auto_play (bool yn);
-	void request_transport_speed (double speed, bool as_default = true);
-	void request_transport_speed_nonzero (double, bool as_default = true);
+	void request_transport_speed (double speed, bool as_default = true, TransportRequestSource origin = TRS_UI);
+	void request_transport_speed_nonzero (double, bool as_default = true, TransportRequestSource origin = TRS_UI);
 	void request_overwrite_buffer (boost::shared_ptr<Route>);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
@@ -687,6 +688,7 @@ public:
 	samplepos_t requested_return_sample() const { return _requested_return_sample; }
 	void set_requested_return_sample(samplepos_t return_to);
 
+	bool compute_audible_delta (samplepos_t& pos_and_delta) const;
 	samplecnt_t remaining_latency_preroll () const { return _remaining_latency_preroll; }
 
 	enum PullupFormat {
@@ -719,10 +721,8 @@ public:
 	static PBD::Signal1<void, samplepos_t> StartTimeChanged;
 	static PBD::Signal1<void, samplepos_t> EndTimeChanged;
 
-	void   request_sync_source (Slave*);
-	bool   synced_to_engine() const { return _slave && config.get_external_sync() && Config->get_sync_source() == Engine; }
-	bool   synced_to_mtc () const { return config.get_external_sync() && Config->get_sync_source() == MTC && g_atomic_int_get (const_cast<gint*>(&_mtc_active)); }
-	bool   synced_to_ltc () const { return config.get_external_sync() && Config->get_sync_source() == LTC && g_atomic_int_get (const_cast<gint*>(&_ltc_active)); }
+	void   request_sync_source (boost::shared_ptr<TransportMaster>);
+	bool   synced_to_engine() const;
 
 	double engine_speed() const { return _engine_speed; }
 	double actual_speed() const {
@@ -738,6 +738,7 @@ public:
 
 	TempoMap&       tempo_map()       { return *_tempo_map; }
 	const TempoMap& tempo_map() const { return *_tempo_map; }
+	void maybe_update_tempo_from_midiclock_tempo (float bpm);
 
 	unsigned int    get_xrun_count () const {return _xrun_count; }
 	void            reset_xrun_count () {_xrun_count = 0; }
@@ -1104,7 +1105,7 @@ public:
 		PostTransportRoll               = 0x8,
 		PostTransportAbort              = 0x10,
 		PostTransportOverWrite          = 0x20,
-		PostTransportSpeed              = 0x40,
+		/* was ... PostTransportSpeed              = 0x40, */
 		PostTransportAudition           = 0x80,
 		PostTransportReverse            = 0x100,
 		PostTransportInputChange        = 0x200,
@@ -1113,15 +1114,6 @@ public:
 		PostTransportAdjustPlaybackBuffering  = 0x1000,
 		PostTransportAdjustCaptureBuffering   = 0x2000
 	};
-
-	enum SlaveState {
-		Stopped,
-		Waiting,
-		Running
-	};
-
-	SlaveState slave_state() const { return _slave_state; }
-	Slave* slave() const { return _slave; }
 
 	boost::shared_ptr<SessionPlaylists> playlists;
 
@@ -1189,22 +1181,16 @@ public:
 	/* synchronous MIDI ports used for synchronization */
 
 	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
-	boost::shared_ptr<MidiPort> midi_clock_input_port () const;
 	boost::shared_ptr<MidiPort> mtc_output_port () const;
-	boost::shared_ptr<MidiPort> mtc_input_port () const;
-	boost::shared_ptr<Port> ltc_input_port() const;
 	boost::shared_ptr<Port> ltc_output_port() const;
 
-	boost::shared_ptr<IO> ltc_input_io() { return _ltc_input; }
 	boost::shared_ptr<IO> ltc_output_io() { return _ltc_output; }
 
 	MIDI::MachineControl& mmc() { return *_mmc; }
 
 	void reconnect_midi_scene_ports (bool);
-	void reconnect_mtc_ports ();
 	void reconnect_mmc_ports (bool);
 
-	void reconnect_ltc_input ();
 	void reconnect_ltc_output ();
 
 	VCAManager& vca_manager() { return *_vca_manager; }
@@ -1212,6 +1198,12 @@ public:
 
 	void auto_connect_thread_wakeup ();
 
+	double compute_speed_from_master (pframes_t nframes);
+	bool   transport_master_is_external() const;
+	boost::shared_ptr<TransportMaster> transport_master() const;
+
+	void import_pt (PTFFormat& ptf, ImportStatus& status);
+	bool import_sndfile_as_region (std::string path, SrcQuality quality, samplepos_t& pos, SourceList& sources, ImportStatus& status);
 
 protected:
 	friend class AudioEngine;
@@ -1254,7 +1246,6 @@ private:
 	gint                    _seek_counter;
 	Location*               _session_range_location; ///< session range, or 0 if there is nothing in the session yet
 	bool                    _session_range_end_is_free;
-	Slave*                  _slave;
 	bool                    _silent;
 	samplecnt_t             _remaining_latency_preroll;
 
@@ -1267,7 +1258,6 @@ private:
 	double                  _target_transport_speed;
 
 	bool                     auto_play_legal;
-	samplepos_t             _last_slave_transport_sample;
 	samplepos_t             _requested_return_sample;
 	pframes_t                current_block_size;
 	samplecnt_t             _worst_output_latency;
@@ -1285,11 +1275,6 @@ private:
 	unsigned int            _xrun_count;
 
 	std::string             _missing_file_replacement;
-
-	void mtc_status_changed (bool);
-	PBD::ScopedConnection mtc_status_connection;
-	void ltc_status_changed (bool);
-	PBD::ScopedConnection ltc_status_connection;
 
 	void initialize_latencies ();
 	void update_latency (bool playback);
@@ -1317,28 +1302,21 @@ private:
 
 	static const samplecnt_t bounce_chunk_size;
 
-	/* slave tracking */
+	/* Transport master DLL */
 
-	static const int delta_accumulator_size = 25;
-	int delta_accumulator_cnt;
-	int32_t delta_accumulator[delta_accumulator_size];
-	int32_t average_slave_delta;
-	int  average_dir;
-	bool have_first_delta_accumulator;
+	enum TransportMasterState {
+		Stopped, /* no incoming or invalid signal/data for master to run with */
+		Waiting, /* waiting to get full lock on incoming signal/data */
+		Running  /* lock achieved, master is generating meaningful speed & position */
+	};
 
-	SlaveState _slave_state;
-	gint _mtc_active;
-	gint _ltc_active;
-	samplepos_t slave_wait_end;
+	TransportMasterState transport_master_tracking_state;
+	samplepos_t master_wait_end;
+	void track_transport_master (float slave_speed, samplepos_t slave_transport_sample);
+	bool follow_transport_master (pframes_t nframes);
 
+	void sync_source_changed (SyncSource, samplepos_t pos, pframes_t cycle_nframes);
 	void reset_slave_state ();
-	bool follow_slave (pframes_t);
-	void calculate_moving_average_of_slave_delta (int dir, samplecnt_t this_delta);
-	void track_slave_state (float slave_speed, samplepos_t slave_transport_sample, samplecnt_t this_delta);
-
-	void switch_to_sync_source (SyncSource); /* !RT context */
-	void drop_sync_source ();  /* !RT context */
-	void use_sync_source (Slave*); /* RT context */
 
 	bool post_export_sync;
 	samplepos_t post_export_position;
@@ -1562,6 +1540,8 @@ private:
 		ChanCount output_offset;
 	};
 
+	Glib::Threads::Mutex  _update_latency_lock;
+
 	typedef std::queue<AutoConnectRequest> AutoConnectQueue;
 	Glib::Threads::Mutex  _auto_connect_queue_lock;
 	AutoConnectQueue _auto_connect_queue;
@@ -1672,6 +1652,8 @@ private:
 	MidiControlUI* midi_control_ui;
 
 	int           start_midi_thread ();
+
+	bool should_ignore_transport_request (TransportRequestSource, TransportRequestType) const;
 
 	void set_play_loop (bool yn, double speed);
 	void unset_play_loop ();
@@ -2048,7 +2030,6 @@ private:
 
 	MidiClockTicker* midi_clock;
 
-	boost::shared_ptr<IO>   _ltc_input;
 	boost::shared_ptr<IO>   _ltc_output;
 
 	boost::shared_ptr<RTTaskList> _rt_tasklist;

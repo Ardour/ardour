@@ -106,6 +106,17 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	bool           in_process_thread ();
 	uint32_t       process_thread_count ();
 
+	/* internal backends
+	 * -20 : main thread
+	 * -21 : additional I/O threads e.g. MIDI
+	 * -22 : client/process threads
+	 *
+	 * search for
+	 * - pbd_realtime_pthread_create
+	 * - pbd_set_thread_priority
+	 */
+	virtual int    client_real_time_priority () { return -22; }
+
 	int            backend_reset_requested();
 	void           request_backend_reset();
 	void           request_device_list_update();

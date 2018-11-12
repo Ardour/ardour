@@ -44,6 +44,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits Destruction;
 		LIBARDOUR_API extern DebugBits MTC;
 		LIBARDOUR_API extern DebugBits LTC;
+		LIBARDOUR_API extern DebugBits TXLTC;
 		LIBARDOUR_API extern DebugBits Transport;
 		LIBARDOUR_API extern DebugBits Slave;
 		LIBARDOUR_API extern DebugBits SessionEvents;

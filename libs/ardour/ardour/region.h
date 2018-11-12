@@ -201,9 +201,10 @@ public:
 		return Evoral::coverage (first_sample(), last_sample(), start, end);
 	}
 
-	bool equivalent (boost::shared_ptr<const Region>) const;
+	bool exact_equivalent (boost::shared_ptr<const Region>) const;
 	bool size_equivalent (boost::shared_ptr<const Region>) const;
 	bool overlap_equivalent (boost::shared_ptr<const Region>) const;
+	bool enclosed_equivalent (boost::shared_ptr<const Region>) const;
 	bool region_list_equivalent (boost::shared_ptr<const Region>) const;
 	bool source_equivalent (boost::shared_ptr<const Region>) const;
 	bool any_source_equivalent (boost::shared_ptr<const Region>) const;

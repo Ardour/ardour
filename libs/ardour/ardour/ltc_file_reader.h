@@ -38,7 +38,7 @@ public:
 	void write (float const*, samplecnt_t n_samples, samplepos_t pos = -1);
 	void raw_write (ltcsnd_sample_t*, size_t, ltc_off_t);
 
-	bool read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
+	samplepos_t read (uint32_t& hh, uint32_t& mm, uint32_t& ss, uint32_t& ff);
 
 private:
 	LTCDecoder*  _decoder;

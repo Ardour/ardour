@@ -27,6 +27,7 @@
 class PortMatrix;
 class PortMatrixBody;
 class PortMatrixNode;
+class PortMatrixColumnLabels;
 
 namespace ARDOUR {
 	class Bundle;
@@ -41,7 +42,7 @@ namespace Gtk {
 class PortMatrixRowLabels : public PortMatrixLabels
 {
 public:
-	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *);
+	PortMatrixRowLabels (PortMatrix *, PortMatrixBody *, PortMatrixColumnLabels&);
 
 	void button_press (double, double, GdkEventButton *);
 
@@ -68,6 +69,8 @@ private:
 
 	double _longest_port_name;
 	double _longest_bundle_name;
+
+	PortMatrixColumnLabels& _column_labels;
 };
 
 #endif

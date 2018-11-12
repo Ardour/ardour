@@ -78,8 +78,8 @@ def build(bld):
         audiographer.defines      = [ 'LIBAUDIOGRAPHER_DLL_EXPORTS=1' ]
     else:
         audiographer              = bld.stlib(features = 'c cxx cstlib cxxstlib', source=audiographer_sources)
-        audiographer.cxxflags     = [ '-fPIC' ]
-        audiographer.cflags       = [ '-fPIC' ]
+        audiographer.cxxflags     = [  bld.env['compiler_flags_dict']['pic'] ]
+        audiographer.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         audiographer.defines      = []
 
     audiographer.name           = 'libaudiographer'

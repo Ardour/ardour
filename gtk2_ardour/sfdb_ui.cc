@@ -21,8 +21,6 @@
 #include "gtk2ardour-config.h"
 #endif
 
-#include "pbd/i18n.h"
-
 #include <map>
 #include <cerrno>
 #include <sstream>
@@ -72,6 +70,8 @@
 #include "ui_config.h"
 
 #include "sfdb_freesound_mootcher.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -199,7 +199,7 @@ SoundFileBox::SoundFileBox (bool /*persistent*/)
 	table.attach (timecode_clock, 1, 2, 5, 6, FILL, FILL);
 	table.attach (tempomap_value, 1, 2, 6, 7, FILL, FILL);
 
-	length_clock.set_mode (ARDOUR_UI::instance()->secondary_clock->mode());
+	length_clock.set_mode (ARDOUR_UI::instance()->primary_clock->mode());
 	timecode_clock.set_mode (AudioClock::Timecode);
 
 	main_box.pack_start (table, false, false);
@@ -855,6 +855,7 @@ void
 SoundFileBrowser::on_show ()
 {
 	ArdourWindow::on_show ();
+	reset_options ();
 	start_metering ();
 }
 
@@ -2028,13 +2029,15 @@ SoundFileOmega::reset (uint32_t selected_audio_tracks, uint32_t selected_midi_tr
 		chooser.set_filter (audio_and_midi_filter);
 	}
 
-	reset_options ();
+	if (is_visible()) {
+		reset_options ();
+	}
 }
 
 void
 SoundFileOmega::file_selection_changed ()
 {
-	if (resetting_ourselves) {
+	if (resetting_ourselves || !is_visible ()) {
 		return;
 	}
 

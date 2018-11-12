@@ -192,37 +192,51 @@ PortManager::port_is_physical (const std::string& portname) const
 void
 PortManager::filter_midi_ports (vector<string>& ports, MidiPortFlags include, MidiPortFlags exclude)
 {
+
 	if (!include && !exclude) {
 		return;
 	}
 
-	for (vector<string>::iterator si = ports.begin(); si != ports.end(); ) {
+	{
+		Glib::Threads::Mutex::Lock lm (midi_port_info_mutex);
 
-		PortManager::MidiPortInformation mpi = midi_port_information (*si);
+		fill_midi_port_info_locked ();
 
-		if (mpi.pretty_name.empty()) {
-			/* no information !!! */
+		for (vector<string>::iterator si = ports.begin(); si != ports.end(); ) {
+
+			MidiPortInfo::iterator x = midi_port_info.find (*si);
+
+			if (x == midi_port_info.end()) {
+				++si;
+				continue;
+			}
+
+			MidiPortInformation& mpi (x->second);
+
+			if (mpi.pretty_name.empty()) {
+				/* no information !!! */
+				++si;
+				continue;
+			}
+
+			if (include) {
+				if ((mpi.properties & include) != include) {
+					/* properties do not include requested ones */
+					si = ports.erase (si);
+					continue;
+				}
+			}
+
+			if (exclude) {
+				if ((mpi.properties & exclude)) {
+					/* properties include ones to avoid */
+					si = ports.erase (si);
+					continue;
+				}
+			}
+
 			++si;
-			continue;
 		}
-
-		if (include) {
-			if ((mpi.properties & include) != include) {
-				/* properties do not include requested ones */
-				si = ports.erase (si);
-				continue;
-			}
-		}
-
-		if (exclude) {
-			if ((mpi.properties & exclude)) {
-				/* properties include ones to avoid */
-				si = ports.erase (si);
-				continue;
-			}
-		}
-
-		++si;
 	}
 }
 
@@ -654,6 +668,20 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 	x = pr->find (make_port_name_relative (b));
 	if (x != pr->end()) {
 		port_b = x->second;
+	}
+
+	if (conn) {
+		if (port_a && !port_b) {
+			port_a->increment_external_connections ();
+		} else if (port_b && !port_a) {
+			port_b->increment_external_connections ();
+		}
+	} else {
+		if (port_a && !port_b) {
+			port_a->decrement_external_connections ();
+		} else if (port_b && !port_a) {
+			port_b->decrement_external_connections ();
+		}
 	}
 
 	PortConnectedOrDisconnected (
@@ -1260,23 +1288,19 @@ PortManager::fill_midi_port_info_locked ()
 		if (!ph) {
 			/* port info saved from some condition where this port
 			 * existed, but no longer does (i.e. device unplugged
-			 * at present)
+			 * at present). We don't remove it from midi_port_info.
 			 */
 			continue;
 		}
 
-		if (!x->second.pretty_name.empty () && x->second.pretty_name != x->first) {
-			/* name set in port info ... propagate */
-			_backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", x->second.pretty_name, string());
-		} else {
-			/* check with backend for pre-existing pretty name */
-			string value;
-			string type;
-			if (0 == _backend->get_port_property (ph,
-			                                      "http://jackaudio.org/metadata/pretty-name",
-			                                      value, type)) {
-				x->second.pretty_name = value;
-			}
+		/* check with backend for pre-existing pretty name */
+		string value;
+		string type;
+
+		if (0 == _backend->get_port_property (ph,
+		                                      "http://jackaudio.org/metadata/pretty-name",
+		                                      value, type)) {
+			x->second.pretty_name = value;
 		}
 	}
 

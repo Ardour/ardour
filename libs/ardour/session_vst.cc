@@ -299,6 +299,7 @@ intptr_t Session::vst_callback (
 	case audioMasterSetTime:
 		SHOW_CALLBACK ("audioMasterSetTime");
 		// VstTimenfo* in <ptr>, filter in <value>, not supported
+		return 0;
 
 	case audioMasterTempoAt:
 		SHOW_CALLBACK ("audioMasterTempoAt");
@@ -379,6 +380,7 @@ intptr_t Session::vst_callback (
 	case audioMasterGetNextPlug:
 		SHOW_CALLBACK ("audioMasterGetNextPlug");
 		// output pin in <value> (-1: first to come), returns cEffect*
+		return 0;
 
 	case audioMasterWillReplaceOrAccumulate:
 		SHOW_CALLBACK ("audioMasterWillReplaceOrAccumulate");
@@ -497,10 +499,6 @@ intptr_t Session::vst_callback (
 		if (session) {
 			session->set_dirty ();
 		}
-		/* allow plugin UI to update */
-#ifdef WINDOWS_VST_SUPPORT
-		fst_audio_master_idle();
-#endif
 		return 0;
 
 	case audioMasterBeginEdit:

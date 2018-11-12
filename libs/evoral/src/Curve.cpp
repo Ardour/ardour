@@ -438,8 +438,8 @@ Curve::multipoint_eval (double x) const
 					double x2 = x * x;
 					return ev->coeff[0] + (ev->coeff[1] * x) + (ev->coeff[2] * x2) + (ev->coeff[3] * x2 * x);
 				}
-				// no break, fallthru
-			default: // Linear
+				/* fall through */
+			case ControlList::Linear:
 				return before->value + (vdelta * (tdelta / trange));
 		}
 	}

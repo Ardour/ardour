@@ -556,9 +556,8 @@ VideoMonitor::xjadeo_sync_setup ()
 	if (!_session) { return; }
 
 	bool my_manual_seek = true;
-	if (_session->config.get_external_sync()) {
-		if (ARDOUR::Config->get_sync_source() == ARDOUR::Engine)
-			my_manual_seek = false;
+	if (_session->synced_to_engine ()) {
+		my_manual_seek = false;
 	}
 
 	if (my_manual_seek != sync_by_manual_seek) {

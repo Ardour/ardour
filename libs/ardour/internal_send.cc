@@ -91,9 +91,9 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 		_send_to->remove_send_from_internal_return (this);
 	}
 
-        _send_to = sendto;
+	_send_to = sendto;
 
-        _send_to->add_send_to_internal_return (this);
+	_send_to->add_send_to_internal_return (this);
 
 	mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), _session.get_block_size());
 	mixbufs.set_count (_send_to->internal_return()->input_streams());
@@ -104,16 +104,16 @@ InternalSend::use_target (boost::shared_ptr<Route> sendto)
 
 	reset_panner ();
 
-        set_name (sendto->name());
-        _send_to_id = _send_to->id();
+	set_name (sendto->name());
+	_send_to_id = _send_to->id();
 
-        target_connections.drop_connections ();
+	target_connections.drop_connections ();
 
-        _send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
-        _send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
-        _send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
+	_send_to->DropReferences.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_going_away, this));
+	_send_to->PropertyChanged.connect_same_thread (target_connections, boost::bind (&InternalSend::send_to_property_changed, this, _1));
+	_send_to->io_changed.connect_same_thread (target_connections, boost::bind (&InternalSend::target_io_changed, this));
 
-        return 0;
+	return 0;
 }
 
 void
@@ -134,7 +134,7 @@ InternalSend::send_from_going_away ()
 void
 InternalSend::send_to_going_away ()
 {
-        target_connections.drop_connections ();
+	target_connections.drop_connections ();
 	_send_to.reset ();
 	_send_to_id = "0";
 }
@@ -277,7 +277,7 @@ InternalSend::set_block_size (pframes_t nframes)
 		mixbufs.ensure_buffers (_send_to->internal_return()->input_streams(), nframes);
 	}
 
-        return 0;
+	return 0;
 }
 
 void
@@ -349,7 +349,7 @@ InternalSend::connect_when_legal ()
 		return 0;
 	}
 
-        boost::shared_ptr<Route> sendto;
+	boost::shared_ptr<Route> sendto;
 
 	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
 		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name(), _send_to_id) << endmsg;
@@ -357,7 +357,7 @@ InternalSend::connect_when_legal ()
 		return -1;
 	}
 
-        return use_target (sendto);
+	return use_target (sendto);
 }
 
 bool

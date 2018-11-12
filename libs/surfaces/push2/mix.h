@@ -99,7 +99,7 @@ class MixLayout : public Push2Layout
 		Send1, Send2, Send3, Send4, Send5
 	};
 
-	Push2::Button* mode_button;
+	boost::shared_ptr<Push2::Button> mode_button;
 	VPotMode vpot_mode;
 	void show_vpot_mode ();
 

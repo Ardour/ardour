@@ -115,7 +115,9 @@ public:
 	void deselect_all_strip_processors();
 	void delete_processors();
 	void select_none ();
-	void select_all_tracks ();
+
+	void select_next_strip ();
+	void select_prev_strip ();
 
 	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
 	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
@@ -346,6 +348,7 @@ private:
 	bool vca_button_release_event (GdkEventButton*, VCAMasterStrip*);
 
 	Width _strip_width;
+	double _spill_scroll_position;
 
 	void presentation_info_changed (PBD::PropertyChange const &);
 	void sync_treeview_from_presentation_info (PBD::PropertyChange const &);

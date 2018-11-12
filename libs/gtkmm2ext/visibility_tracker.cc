@@ -27,7 +27,7 @@ bool VisibilityTracker::_use_window_manager_visibility = true;
 
 VisibilityTracker::VisibilityTracker (Gtk::Window& win)
 	: _window (win)
-	, _visibility (GdkVisibilityState (0))
+	, _visibility (GDK_VISIBILITY_FULLY_OBSCURED)
 {
 	_window.add_events (Gdk::VISIBILITY_NOTIFY_MASK);
 	_window.signal_visibility_notify_event().connect (sigc::mem_fun (*this, &VisibilityTracker::handle_visibility_notify_event));

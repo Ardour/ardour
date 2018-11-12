@@ -444,62 +444,6 @@ ARDOUR::edit_mode_to_string (EditMode mode)
 	}
 }
 
-SyncSource
-ARDOUR::string_to_sync_source (string str)
-{
-	if (str == _("MIDI Timecode") || str == _("MTC")) {
-		return MTC;
-	}
-
-	if (str == _("MIDI Clock")) {
-		return MIDIClock;
-	}
-
-	if (str == _("JACK")) {
-		return Engine;
-	}
-
-	if (str == _("LTC")) {
-		return LTC;
-	}
-
-	fatal << string_compose (_("programming error: unknown sync source string \"%1\""), str) << endmsg;
-	abort(); /*NOTREACHED*/
-	return Engine;
-}
-
-/** @param sh Return a short version of the string */
-const char*
-ARDOUR::sync_source_to_string (SyncSource src, bool sh)
-{
-	switch (src) {
-	case Engine:
-		/* no other backends offer sync for now ... deal with this if we
-		 * ever have to.
-		 */
-		return S_("SyncSource|JACK");
-
-	case MTC:
-		if (sh) {
-			return S_("SyncSource|MTC");
-		} else {
-			return _("MIDI Timecode");
-		}
-
-	case MIDIClock:
-		if (sh) {
-			return S_("SyncSource|M-Clk");
-		} else {
-			return _("MIDI Clock");
-		}
-
-	case LTC:
-		return S_("SyncSource|LTC");
-	}
-	/* GRRRR .... stupid, stupid gcc - you can't get here from there, all enum values are handled */
-	return S_("SyncSource|JACK");
-}
-
 float
 ARDOUR::meter_falloff_to_float (MeterFalloff falloff)
 {
@@ -624,6 +568,8 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
                 return ".aif";
         case iXML:
                 return ".ixml";
+        case FLAC:
+                return ".flac";
         case RF64:
         case RF64_WAV:
         case MBWF:

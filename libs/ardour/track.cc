@@ -524,12 +524,6 @@ Track::non_realtime_locate (samplepos_t p)
 	Route::non_realtime_locate (p);
 }
 
-void
-Track::non_realtime_speed_change ()
-{
-	_disk_reader->non_realtime_speed_change ();
-}
-
 int
 Track::overwrite_existing_buffers ()
 {

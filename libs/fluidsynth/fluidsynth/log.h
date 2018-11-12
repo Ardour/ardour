@@ -3,16 +3,16 @@
  * Copyright (C) 2003  Peter Hanappe and others.
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
- *  
- * You should have received a copy of the GNU Library General Public
+ * Lesser General Public License for more details.
+ *
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA
@@ -52,13 +52,16 @@ extern "C" {
 /**
  * FluidSynth log levels.
  */
-enum fluid_log_level { 
-  FLUID_PANIC,   /**< The synth can't function correctly any more */
-  FLUID_ERR,     /**< Serious error occurred */
-  FLUID_WARN,    /**< Warning */
-  FLUID_INFO,    /**< Verbose informational messages */
-  FLUID_DBG,     /**< Debugging messages */
-  LAST_LOG_LEVEL
+enum fluid_log_level
+{
+    FLUID_PANIC,   /**< The synth can't function correctly any more */
+    FLUID_ERR,     /**< Serious error occurred */
+    FLUID_WARN,    /**< Warning */
+    FLUID_INFO,    /**< Verbose informational messages */
+    FLUID_DBG,     /**< Debugging messages */
+#ifndef __DOXYGEN__
+    LAST_LOG_LEVEL /**< @warning This symbol is not part of the public API and ABI stability guarantee and may change at any time! */
+#endif
 };
 
 /**
@@ -67,12 +70,12 @@ enum fluid_log_level {
  * @param message Log message text
  * @param data User data pointer supplied to fluid_set_log_function().
  */
-typedef void (*fluid_log_function_t)(int level, char* message, void* data);
+typedef void (*fluid_log_function_t)(int level, const char *message, void *data);
 
-FLUIDSYNTH_API 
-fluid_log_function_t fluid_set_log_function(int level, fluid_log_function_t fun, void* data);
+FLUIDSYNTH_API
+fluid_log_function_t fluid_set_log_function(int level, fluid_log_function_t fun, void *data);
 
-FLUIDSYNTH_API void fluid_default_log_function(int level, char* message, void* data);
+FLUIDSYNTH_API void fluid_default_log_function(int level, const char *message, void *data);
 
 FLUIDSYNTH_API int fluid_log(int level, const char *fmt, ...);
 

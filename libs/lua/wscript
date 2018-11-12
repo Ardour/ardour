@@ -22,12 +22,12 @@ def configure(conf):
 
 def build(bld):
     obj=bld.stlib (source = ['lua.cc', 'luastate.cc'],
-               cflags = [ '-fPIC' ],
-               cxxflags = [ '-fPIC' ],
-               includes = ['.'],
-               export_includes = ['.'],
-               target = 'liblua',
-               uselib = [ 'SIGCPP', 'DL' ]
+                   cflags = [ bld.env['compiler_flags_dict']['pic'] ],
+                   cxxflags = [ bld.env['compiler_flags_dict']['pic'] ],
+                   includes = ['.'],
+                   export_includes = ['.'],
+                   target = 'liblua',
+                   uselib = [ 'SIGCPP', 'DL' ]
                )
     autowaf.ensure_visible_symbols (obj, True)
 

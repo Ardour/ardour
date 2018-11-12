@@ -50,7 +50,6 @@ DiskIOProcessor::DiskIOProcessor (Session& s, string const & str, Flag f)
 	: Processor (s, str)
 	, _flags (f)
 	, i_am_the_modifier (false)
-	, _seek_required (false)
 	, _slaved (false)
 	, in_set_state (false)
 	, playback_sample (0)
@@ -204,21 +203,6 @@ DiskIOProcessor::non_realtime_locate (samplepos_t location)
 	/* now refill channel buffers */
 
 	seek (location, true);
-}
-
-void
-DiskIOProcessor::non_realtime_speed_change ()
-{
-	if (_seek_required) {
-		seek (_session.transport_sample(), true);
-		_seek_required = false;
-	}
-}
-
-bool
-DiskIOProcessor::realtime_speed_change ()
-{
-	return true;
 }
 
 int

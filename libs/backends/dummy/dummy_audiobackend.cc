@@ -678,6 +678,16 @@ DummyAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<DummyPort*>(port)->name ();
 }
 
+PortFlags
+DummyAudioBackend::get_port_flags (PortEngine::PortHandle port) const
+{
+	if (!valid_port (port)) {
+		PBD::error << _("DummyBackend::get_port_flags: Invalid Port(s)") << endmsg;
+		return PortFlags (0);
+	}
+	return static_cast<DummyPort*>(port)->flags ();
+}
+
 int
 DummyAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
@@ -1654,13 +1664,13 @@ void DummyPort::setup_random_number_generator ()
 #ifdef PLATFORM_WINDOWS
 	LARGE_INTEGER Count;
 	if (QueryPerformanceCounter (&Count)) {
-		_rseed = Count.QuadPart % UINT_MAX;
+		_rseed = Count.QuadPart;
 	} else
 #endif
 	{
-	_rseed = g_get_monotonic_time() % UINT_MAX;
+	_rseed = g_get_monotonic_time();
 	}
-	_rseed = (_rseed + (uint64_t)this) % UINT_MAX;
+	_rseed = (_rseed + (uint64_t)this) % INT_MAX;
 	if (_rseed == 0) _rseed = 1;
 }
 

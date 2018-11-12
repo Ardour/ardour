@@ -175,7 +175,7 @@ MixLayout::show ()
 
 
 	for (size_t n = 0; n < sizeof (upper_buttons) / sizeof (upper_buttons[0]); ++n) {
-		Push2::Button* b = p2.button_by_id (upper_buttons[n]);
+		boost::shared_ptr<Push2::Button> b = p2.button_by_id (upper_buttons[n]);
 
 		if (b != mode_button) {
 			b->set_color (Push2::LED::DarkGray);
@@ -200,7 +200,7 @@ MixLayout::render (Rect const& area, Cairo::RefPtr<Cairo::Context> context) cons
 void
 MixLayout::button_upper (uint32_t n)
 {
-	Push2::Button* b;
+	boost::shared_ptr<Push2::Button> b;
 	switch (n) {
 	case 0:
 		vpot_mode = Volume;
@@ -267,7 +267,7 @@ MixLayout::show_vpot_mode ()
 		for (int s = 0; s < 8; ++s) {
 			if (stripable[s]) {
 				gain_meter[s]->knob->set_controllable (stripable[s]->gain_control());
-				boost::shared_ptr<PeakMeter> pm = stripable[s]->peak_meter(); 
+				boost::shared_ptr<PeakMeter> pm = stripable[s]->peak_meter();
 				if (pm) {
 					gain_meter[s]->meter->set_meter (pm.get());
 				} else {
@@ -601,7 +601,7 @@ MixLayout::switch_bank (uint32_t base)
 		}
 
 
-		Push2::Button* b;
+		boost::shared_ptr<Push2::Button> b;
 
 		switch (n) {
 		case 0:
@@ -777,6 +777,8 @@ MixLayout::update_meters ()
 MixLayout::GainMeter::GainMeter (Item* parent, Push2& p2)
 	: Container (parent)
 {
+	/* knob and meter become owned by their parent on the canvas */
+
 	knob = new Push2Knob (p2, this);
 	knob->set_radius (25);
 	/* leave position at (0,0) */
@@ -784,3 +786,4 @@ MixLayout::GainMeter::GainMeter (Item* parent, Push2& p2)
 	meter = new LevelMeter (p2, this, 90, ArdourCanvas::Meter::Vertical);
 	meter->set_position (Duple (40, -60));
 }
+

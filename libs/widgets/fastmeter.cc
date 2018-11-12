@@ -703,7 +703,7 @@ FastMeter::set (float lvl, float peak)
 	if (pixwidth <= 0 || pixheight <=0) return;
 
 	if (peak == -1) {
-		if (lvl >= current_peak) {
+		if (lvl >= current_peak && lvl > 0) {
 			current_peak = lvl;
 			hold_state = hold_cnt;
 		}

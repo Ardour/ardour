@@ -103,6 +103,9 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	// Meter MIDI in to the first n_midi peaks
 	for (uint32_t i = 0; i < n_midi; ++i, ++n) {
 		float val = 0.0f;
+		if (do_reset_dpm) {
+			_peak_power[n] = 0;
+		}
 		const MidiBuffer& buf (bufs.get_midi(i));
 
 		for (MidiBuffer::const_iterator e = buf.begin(); e != buf.end(); ++e) {
@@ -203,6 +206,10 @@ PeakMeter::reset ()
 			_peak_power[i] = -std::numeric_limits<float>::infinity();
 			_peak_buffer[i] = 0;
 		}
+		const uint32_t n_midi = min (current_meters.n_midi(), (uint32_t)_peak_power.size());
+		for (size_t i = 0; i < n_midi; ++i) {
+			_peak_power[i] = 0;
+		}
 	}
 
 	// these are handled async just fine.
@@ -285,7 +292,11 @@ PeakMeter::set_max_channels (const ChanCount& chn)
 
 	while (_peak_power.size() < limit) {
 		_peak_buffer.push_back(0);
-		_peak_power.push_back(-std::numeric_limits<float>::infinity());
+		if (_peak_power.size() < current_meters.n_midi()) {
+			_peak_power.push_back(0);
+		} else {
+			_peak_power.push_back(-std::numeric_limits<float>::infinity());
+		}
 		_max_peak_signal.push_back(0);
 	}
 

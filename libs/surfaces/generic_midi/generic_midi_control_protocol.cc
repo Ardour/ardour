@@ -37,7 +37,6 @@
 #include "pbd/error.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
-#include "pbd/i18n.h"
 #include "pbd/strsplit.h"
 #include "pbd/types_convert.h"
 #include "pbd/xml++.h"
@@ -670,7 +669,10 @@ GenericMidiControlProtocol::set_state (const XMLNode& node, int version)
 	 * <Controls><MidiControllable>...</MidiControllable><Controls> section
 	 */
 
-	{
+	bool load_dynamic_bindings = false;
+	node.get_property ("session-state", load_dynamic_bindings);
+
+	if (load_dynamic_bindings) {
 		Glib::Threads::Mutex::Lock lm2 (controllables_lock);
 		nlist = node.children(); // "Controls"
 

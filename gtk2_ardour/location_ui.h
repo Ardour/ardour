@@ -157,7 +157,6 @@ public:
 	~LocationUI ();
 
 	void set_session (ARDOUR::Session *);
-	void set_clock_mode (AudioClock::Mode);
 
 	void add_new_location();
 	void add_new_range();

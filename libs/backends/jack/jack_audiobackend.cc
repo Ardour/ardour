@@ -926,6 +926,13 @@ JACKAudioBackend::process_thread_count ()
 	return _jack_threads.size();
 }
 
+int
+JACKAudioBackend::client_real_time_priority ()
+{
+	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, 0);
+	return jack_client_real_time_priority (_priv_jack);
+}
+
 void*
 JACKAudioBackend::_start_process_thread (void* arg)
 {

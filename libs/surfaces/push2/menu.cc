@@ -21,8 +21,6 @@
 #include <cairomm/region.h>
 #include <pangomm/layout.h>
 
-#include "pbd/i18n.h"
-
 #include "canvas/text.h"
 #include "canvas/types.h"
 #include "canvas/rectangle.h"
@@ -33,6 +31,8 @@
 #include "push2.h"
 
 #include "menu.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect

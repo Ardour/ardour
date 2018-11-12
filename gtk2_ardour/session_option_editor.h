@@ -31,6 +31,7 @@ class SessionOptionEditor : public OptionEditorWindow
 {
 public:
 	SessionOptionEditor (ARDOUR::Session* s);
+	~SessionOptionEditor ();
 
 private:
 	void parameter_changed (std::string const &);
@@ -41,6 +42,7 @@ private:
 	bool get_use_monitor_section ();
 
 	ComboOption<float>* _vpu;
+	ComboOption<ARDOUR::SampleFormat>* _sf;
 	EntryOption* _take_name;
 
 	void save_defaults ();

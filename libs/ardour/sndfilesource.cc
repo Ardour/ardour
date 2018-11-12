@@ -120,9 +120,9 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 {
 	int fmt = 0;
 
-        init_sndfile ();
+	init_sndfile ();
 
-        assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
+	assert (!Glib::file_test (_path, Glib::FILE_TEST_EXISTS));
 	existence_check ();
 
 	_file_is_new = true;
@@ -131,6 +131,15 @@ SndFileSource::SndFileSource (Session& s, const string& path, const string& orig
 	case CAF:
 		fmt = SF_FORMAT_CAF;
 		_flags = Flag (_flags & ~Broadcast);
+		break;
+
+	case FLAC:
+		fmt = SF_FORMAT_FLAC;
+		if (sfmt == FormatFloat) {
+			sfmt = FormatInt24;
+		}
+		_flags = Flag (_flags & ~Broadcast);
+		_flags = Flag (_flags & ~Destructive); // XXX or force WAV if destructive?
 		break;
 
 	case AIFF:
@@ -384,8 +393,8 @@ SndFileSource::open ()
 	}
 
 	if ((_info.format & SF_FORMAT_TYPEMASK ) == SF_FORMAT_FLAC) {
-		assert (!writable());
-		_sndfile = sf_open_fd (fd, SFM_READ, &_info, true);
+		assert (!destructive());
+		_sndfile = sf_open_fd (fd, writable () ? SFM_WRITE : SFM_READ, &_info, true);
 	} else {
 		_sndfile = sf_open_fd (fd, writable() ? SFM_RDWR : SFM_READ, &_info, true);
 	}

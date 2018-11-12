@@ -58,6 +58,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	: _name (n)
 	, _flags (f)
 	, _last_monitor (false)
+	, _externally_connected (0)
 {
 	_private_playback_latency.min = 0;
 	_private_playback_latency.max = 0;
@@ -82,8 +83,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::drop, this));
 	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
-			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 }
 
 /** Port destructor */
@@ -91,7 +91,6 @@ Port::~Port ()
 {
 	drop ();
 }
-
 
 std::string
 Port::pretty_name(bool fallback_to_name) const
@@ -532,8 +531,7 @@ Port::reestablish ()
 
 	reset ();
 
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection,
-			boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
 	return 0;
 }
 
@@ -581,15 +579,6 @@ Port::physically_connected () const
 	}
 
 	return port_engine.physically_connected (_port_handle);
-}
-
-bool
-Port::externally_connected () const
-{
-	if (!_port_handle) {
-		return false;
-	}
-	return port_engine.externally_connected (_port_handle);
 }
 
 XMLNode&

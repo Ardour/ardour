@@ -5,9 +5,9 @@ import os
 import sys
 
 # Version of this package (even if built as a child)
-MAJOR = '1'
-MINOR = '1'
-MICRO = '6'
+MAJOR = '2'
+MINOR = '0'
+MICRO = '1'
 LIBFLUIDSYNTH_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 
 # Variables for 'waf dist'
@@ -58,10 +58,14 @@ def build(bld):
         'src/fluid_hash.c',
         'src/fluid_list.c',
         'src/fluid_ringbuffer.c',
+        'src/fluid_samplecache.c',
         'src/fluid_settings.c',
+        'src/fluid_sffile.c',
+        'src/fluid_sfont.c',
+        'src/fluid_synth_monopoly.c',
         'src/fluid_sys.c'
         ],
-        cflags = [ '-fPIC', '-fvisibility=hidden' ],
+        cflags = [ bld.env['compiler_flags_dict']['pic'], '-fvisibility=hidden', '-std=gnu99' ],
         includes = ['.', 'src/' ],
                target = 'libfluidsynth',
                use    = 'libfluidsynth_includes',

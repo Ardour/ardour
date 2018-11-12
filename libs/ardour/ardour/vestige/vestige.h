@@ -308,8 +308,8 @@ struct _AEffect
 	void *user;
 	// Id 48-4b
 	int32_t uniqueID;
-	// Don't know 4c-4f
-	char unknown1[4];
+	// Version 4c-4f
+	int32_t version;
 	// processReplacing 50-53
 	void (* processReplacing) (struct _AEffect *, float **, float **, int);
 };

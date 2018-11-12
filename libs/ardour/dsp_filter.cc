@@ -78,7 +78,6 @@ void
 ARDOUR::DSP::process_map (BufferSet* bufs, const ChanMapping& in, const ChanMapping& out, pframes_t nframes, samplecnt_t offset, const DataType& dt)
 {
 	const ChanMapping::Mappings& im (in.mappings());
-	const ChanMapping::Mappings& om (out.mappings());
 
 	for (ChanMapping::Mappings::const_iterator tm = im.begin(); tm != im.end(); ++tm) {
 		if (tm->first != dt) { continue; }

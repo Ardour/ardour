@@ -35,6 +35,8 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 	: ArdourDialog (t, true)
 	, _interthread_info (i)
 {
+	_interthread_info->cancel = false;
+
 	_bar.set_orientation (Gtk::PROGRESS_LEFT_TO_RIGHT);
 
 	set_border_width (12);
@@ -50,8 +52,6 @@ InterthreadProgressWindow::InterthreadProgressWindow (ARDOUR::InterThreadInfo* i
 
 	set_default_size (200, 100);
 	show_all ();
-	hide ();
-	_interthread_info->cancel = false; // override on_hide
 
 	Glib::signal_timeout().connect (sigc::mem_fun (*this, &InterthreadProgressWindow::update), 100);
 }

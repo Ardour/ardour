@@ -120,7 +120,7 @@ MackieControlProtocol::left_press (Button &)
 LedState
 MackieControlProtocol::left_release (Button &)
 {
-	return none;
+	return off;
 }
 
 LedState
@@ -144,13 +144,13 @@ MackieControlProtocol::right_press (Button &)
 		(void) switch_banks (new_initial);
 	}
 
-	return none;
+	return on;
 }
 
 LedState
 MackieControlProtocol::right_release (Button &)
 {
-	return none;
+	return off;
 }
 
 LedState
@@ -588,7 +588,7 @@ MackieControlProtocol::enter_press (Button &)
 	if (main_modifier_state() & MODIFIER_SHIFT) {
 		access_action ("Transport/ToggleFollowEdits");
 	} else {
-		access_action ("Editor/select-all-tracks");
+		access_action ("Common/select-all-tracks");
 	}
 	return none;
 }

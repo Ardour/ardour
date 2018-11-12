@@ -48,6 +48,8 @@ OSCCueObserver::OSCCueObserver (OSC& o, ArdourSurface::OSC::OSCSurface* su)
 
 	_strip = sur->strips[sid];
 	sends = sur->sends;
+	_last_signal = -1;
+	_last_meter = -200;
 	refresh_strip (_strip, sends, true);
 }
 
@@ -118,12 +120,15 @@ OSCCueObserver::tick ()
 	if (now_meter < -120) now_meter = -193;
 	if (_last_meter != now_meter) {
 		float signal;
-		if (now_meter < -40) {
+		if (now_meter < -45) {
 			signal = 0;
 		} else {
 			signal = 1;
 		}
-		_osc.float_message (X_("/cue/signal"), signal, addr);
+		if (_last_signal != signal) {
+			_osc.float_message (X_("/cue/signal"), signal, addr);
+			_last_signal = signal;
+		}
 	}
 	_last_meter = now_meter;
 
@@ -154,7 +159,7 @@ OSCCueObserver::send_init()
 				sends[i]->PropertyChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::name_changed, this, boost::lambda::_1, i + 1), OSC::instance());
 				name_changed (ARDOUR::Properties::name, i + 1);
 			}
-				
+
 
 			if (send->gain_control()) {
 				gain_timeout.push_back (0);
@@ -162,7 +167,7 @@ OSCCueObserver::send_init()
 				send->gain_control()->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_gain_message, this, i + 1, send->gain_control(), false), OSC::instance());
 				send_gain_message (i + 1, send->gain_control(), true);
 			}
-			
+
 			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
 				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc), OSC::instance());
 				send_enabled_message (X_("/cue/send/enable"), i + 1, proc);

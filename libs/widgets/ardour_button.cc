@@ -257,7 +257,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	uint32_t text_color;
 	uint32_t led_color;
 
-	const float corner_radius = std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
+	const float corner_radius = _boxy_buttons ? 0 : std::max(2.f, _corner_radius * UIConfigurationBase::instance().get_ui_scale());
 
 	if (_update_colors) {
 		set_colors ();

@@ -43,12 +43,14 @@
 
 #include "ardour/audio_backend.h"
 #include "ardour/audioengine.h"
-#include "ardour/profile.h"
-#include "ardour/dB.h"
-#include "ardour/rc_configuration.h"
 #include "ardour/control_protocol_manager.h"
+#include "ardour/dB.h"
 #include "ardour/port_manager.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
+#include "ardour/rc_configuration.h"
+#include "ardour/transport_master_manager.h"
+
 #include "control_protocol/control_protocol.h"
 
 #include "waveview/wave_view.h"
@@ -66,6 +68,7 @@
 #include "midi_tracer.h"
 #include "rc_option_editor.h"
 #include "sfdb_ui.h"
+#include "transport_masters_dialog.h"
 #include "ui_config.h"
 #include "utils.h"
 
@@ -136,7 +139,7 @@ public:
 		if (_rc_config->get_click_sound ().empty() &&
 		    _rc_config->get_click_emphasis_sound().empty()) {
 			_use_default_click_check_button.set_active (true);
-			_use_emphasis_on_click_check_button.set_active (true);
+			_use_emphasis_on_click_check_button.set_active (_rc_config->get_use_click_emphasis ());
 
 		} else {
 			_use_default_click_check_button.set_active (false);
@@ -2109,14 +2112,7 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 		return;
 	}
 
-	boost::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance()->current_backend();
-	if (backend) {
-		ARDOUR::PortEngine::PortHandle ph = backend->get_port_by_name ((*iter)[midi_port_columns.name]);
-		if (ph) {
-			backend->set_port_property (ph, "http://jackaudio.org/metadata/pretty-name", new_text, "");
-			(*iter)[midi_port_columns.pretty_name] = new_text;
-		}
-	}
+	AudioEngine::instance()->set_midi_port_pretty_name ((*iter)[midi_port_columns.name], new_text);
 }
 
 /*============*/
@@ -2138,7 +2134,6 @@ RCOptionEditor::RCOptionEditor ()
 
 	uint32_t hwcpus = hardware_concurrency ();
 	BoolOption* bo;
-	BoolComboOption* bco;
 
 	if (hwcpus > 1) {
 		add_option (_("General"), new OptionEditorHeading (_("DSP CPU Utilization")));
@@ -2285,7 +2280,7 @@ RCOptionEditor::RCOptionEditor ()
 		     ));
 
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 
 	add_option (_("General/Translation"), new OptionEditorHeading (_("Internationalization")));
 
@@ -2444,16 +2439,18 @@ RCOptionEditor::RCOptionEditor ()
 
 	add_option (_("Editor"), fadeshape);
 
-	bco = new BoolComboOption (
-		     "use-overlap-equivalency",
-		     _("Regions in edit groups are edited together"),
-		     _("whenever they overlap in time"),
-		     _("only if they have identical length and position"),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_overlap_equivalency),
-		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_overlap_equivalency)
+	ComboOption<RegionEquivalence> *eqv = new ComboOption<RegionEquivalence> (
+		     "region-equivalence",
+		     _("Regions in active edit groups are edited together"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_region_equivalence),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_region_equivalence)
 		     );
 
-	add_option (_("Editor"), bco);
+	eqv->add (Overlap, _("whenever they overlap in time"));
+	eqv->add (Enclosed, _("if either encloses the other"));
+	eqv->add (Exact, _("only if they have identical length, position and origin"));
+
+	add_option (_("Editor"), eqv);
 
 	ComboOption<LayerModel>* lm = new ComboOption<LayerModel> (
 		"layer-model",
@@ -3212,16 +3209,9 @@ RCOptionEditor::RCOptionEditor ()
 
 	/* SYNC */
 
-	add_option (_("Sync"), new OptionEditorHeading (_("External Synchronization")));
+	add_option (_("Sync"), new OptionEditorHeading (_("Transport Masters")));
 
-	_sync_source = new ComboOption<SyncSource> (
-		"sync-source",
-		_("External timecode source"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_sync_source),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_sync_source)
-		);
-
-	add_option (_("Sync"), _sync_source);
+	add_option (_("Sync"), new WidgetOption (X_("foo"), X_("Transport Masters"), _transport_masters_widget));
 
 	_sync_framerate = new BoolOption (
 		     "timecode-sync-frame-rate",
@@ -3238,64 +3228,6 @@ RCOptionEditor::RCOptionEditor ()
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 
 	add_option (_("Sync"), _sync_framerate);
-
-	_sync_genlock = new BoolOption (
-		"timecode-source-is-synced",
-		_("Sync-lock timecode to clock (disable drift compensation)"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_is_synced),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_is_synced)
-		);
-	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_genlock->tip_widget(),
-		 string_compose (_("<b>When enabled</b> %1 will never varispeed when slaved to external timecode. "
-				   "Sync Lock indicates that the selected external timecode source shares clock-sync "
-				   "(Black &amp; Burst, Wordclock, etc) with the audio interface. "
-				   "This option disables drift compensation. The transport speed is fixed at 1.0. "
-				   "Vari-speed LTC will be ignored and cause drift."
-				   "\n\n"
-				   "<b>When disabled</b> %1 will compensate for potential drift, regardless if the "
-				   "timecode sources shares clock sync."
-				  ), PROGRAM_NAME));
-
-
-	add_option (_("Sync"), _sync_genlock);
-
-	_sync_source_2997 = new BoolOption (
-		"timecode-source-2997",
-		_("Lock to 29.9700 fps instead of 30000/1001"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_timecode_source_2997),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_timecode_source_2997)
-		);
-	Gtkmm2ext::UI::instance()->set_tip
-		(_sync_source_2997->tip_widget(),
-		 _("<b>When enabled</b> the external timecode source is assumed to use 29.97 fps instead of 30000/1001.\n"
-			 "SMPTE 12M-1999 specifies 29.97df as 30000/1001. The spec further mentions that "
-			 "drop-sample timecode has an accumulated error of -86ms over a 24-hour period.\n"
-			 "Drop-sample timecode would compensate exactly for a NTSC color frame rate of 30 * 0.9990 (ie 29.970000). "
-			 "That is not the actual rate. However, some vendors use that rate - despite it being against the specs - "
-			 "because the variant of using exactly 29.97 fps has zero timecode drift.\n"
-			 ));
-
-	add_option (_("Sync"), _sync_source_2997);
-
-	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Reader")));
-
-	_ltc_port = new ComboStringOption (
-		"ltc-source-port",
-		_("LTC incoming port"),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::get_ltc_source_port),
-		sigc::mem_fun (*_rc_config, &RCConfiguration::set_ltc_source_port)
-		);
-
-	vector<string> physical_inputs;
-	physical_inputs.push_back (_("None"));
-	AudioEngine::instance()->get_physical_inputs (DataType::AUDIO, physical_inputs);
-	_ltc_port->set_popdown_strings (physical_inputs);
-
-	populate_sync_options ();
-	AudioEngine::instance()->Running.connect (engine_started_connection, MISSING_INVALIDATOR, boost::bind (&RCOptionEditor::populate_sync_options, this), gui_context());
-
-	add_option (_("Sync/LTC"), _ltc_port);
 
 	add_option (_("Sync/LTC"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
@@ -3384,7 +3316,7 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Inbound MMC device ID"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_receive_device_id),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_receive_device_id),
-		     0, 128, 1, 10
+		     0, 127, 1, 10
 		     ));
 
 	add_option (_("Sync/MIDI"),
@@ -3393,7 +3325,7 @@ RCOptionEditor::RCOptionEditor ()
 		     _("Outbound MMC device ID"),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_send_device_id),
 		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_send_device_id),
-		     0, 128, 1, 10
+		     0, 127, 1, 10
 		     ));
 
 
@@ -3459,6 +3391,23 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
+
+	ComboOption<uint32_t>* lna = new ComboOption<uint32_t> (
+		     "limit-n-automatables",
+		     _("Limit automatable parameters per plugin"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_limit_n_automatables),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_limit_n_automatables)
+		     );
+	lna->add (0, _("Unlimited"));
+	lna->add (64,  _("64 parameters"));
+	lna->add (128, _("128 parameters"));
+	lna->add (256, _("256 parameters"));
+	lna->add (512, _("512 parameters"));
+	lna->add (999, _("999 parameters"));
+	add_option (_("Plugins"), lna);
+	Gtkmm2ext::UI::instance()->set_tip (lna->tip_widget(),
+					    _("Some Plugins expose an unreasonable amount of control-inputs. This option limits the number of parameters that can are listed as automatable without restricting the number of total controls.\n\nThis reduces lag in the GUI and shortens excessively long drop-down lists for plugins with a large number of control ports.\n\nNote: This only affects newly added plugins and is applied to plugin on session-reload. Already automated parameters are retained."));
+
 
 #if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
 	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
@@ -3856,6 +3805,19 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_narrow_ms)
 		     ));
 
+	ComboOption<uint32_t>* mic = new ComboOption<uint32_t> (
+		     "max-inline-controls",
+		     _("Limit inline-mixer-strip controls per plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_inline_controls),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_inline_controls)
+		     );
+	mic->add (0, _("Unlimited"));
+	mic->add (16,  _("16 parameters"));
+	mic->add (32,  _("32 parameters"));
+	mic->add (64,  _("64 parameters"));
+	mic->add (128, _("128 parameters"));
+	add_option (_("Appearance/Mixer"), mic);
+
 	add_option (_("Appearance/Mixer"), new OptionEditorBlank ());
 
 	add_option (_("Appearance/Toolbar"), new OptionEditorHeading (_("Main Transport Toolbar Items")));
@@ -3929,6 +3891,13 @@ RCOptionEditor::RCOptionEditor ()
 				_("Draw \"flat\" buttons"),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_flat_buttons),
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_flat_buttons)
+				));
+
+	add_option (_("Appearance/Theme"), new BoolOption (
+				"boxy-buttons",
+				_("Draw \"boxy\" buttons"),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_boxy_buttons),
+				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_boxy_buttons)
 				));
 
 	add_option (_("Appearance/Theme"), new BoolOption (
@@ -4058,6 +4027,13 @@ These settings will only take effect after %1 is restarted.\n\
 }
 
 void
+RCOptionEditor::set_session (Session *s)
+{
+	SessionHandlePtr::set_session (s);
+	_transport_masters_widget.set_session (s);
+}
+
+void
 RCOptionEditor::parameter_changed (string const & p)
 {
 	OptionEditor::parameter_changed (p);
@@ -4071,22 +4047,11 @@ RCOptionEditor::parameter_changed (string const & p)
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
 	} else if (p == "sync-source") {
-		_sync_source->set_sensitive (true);
-		if (_session) {
-			_sync_source->set_sensitive (!_session->config.get_external_sync());
-		}
-		switch(Config->get_sync_source()) {
-		case ARDOUR::MTC:
-		case ARDOUR::LTC:
-			_sync_genlock->set_sensitive (true);
+		boost::shared_ptr<TransportMaster> tm (TransportMasterManager::instance().current());
+		if (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)) {
 			_sync_framerate->set_sensitive (true);
-			_sync_source_2997->set_sensitive (true);
-			break;
-		default:
-			_sync_genlock->set_sensitive (false);
+		} else {
 			_sync_framerate->set_sensitive (false);
-			_sync_source_2997->set_sensitive (false);
-			break;
 		}
 	} else if (p == "send-ltc") {
 		bool const s = Config->get_send_ltc ();
@@ -4161,29 +4126,6 @@ void RCOptionEditor::edit_vst_path () {
 		}
 	}
 	delete pd;
-}
-
-
-void
-RCOptionEditor::populate_sync_options ()
-{
-	vector<SyncSource> sync_opts = ARDOUR::get_available_sync_options ();
-
-	_sync_source->clear ();
-
-	for (vector<SyncSource>::iterator i = sync_opts.begin(); i != sync_opts.end(); ++i) {
-		_sync_source->add (*i, sync_source_to_string (*i));
-	}
-
-	if (sync_opts.empty()) {
-		_sync_source->set_sensitive(false);
-	} else {
-		if (std::find(sync_opts.begin(), sync_opts.end(), _rc_config->get_sync_source()) == sync_opts.end()) {
-			_rc_config->set_sync_source(sync_opts.front());
-		}
-	}
-
-	parameter_changed ("sync-source");
 }
 
 Gtk::Window*

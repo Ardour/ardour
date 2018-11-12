@@ -32,6 +32,8 @@ typedef struct _VSTState VSTState;
 
 #include "ardour/vestige/vestige.h"
 
+struct _VSTInfo;
+
 namespace ARDOUR {
 
 class PluginInsert;
@@ -49,6 +51,7 @@ public:
 	void deactivate ();
 
 	int set_block_size (pframes_t);
+	bool requires_fixed_sized_buffers () const;
 	bool inplace_broken() const { return true; }
 	float default_value (uint32_t port);
 	float get_parameter (uint32_t port) const;
@@ -73,7 +76,7 @@ public:
 
 	int connect_and_run (BufferSet&,
 			samplepos_t start, samplepos_t end, double speed,
-			ChanMapping in, ChanMapping out,
+			ChanMapping const& in, ChanMapping const& out,
 			pframes_t nframes, samplecnt_t offset
 			);
 
@@ -81,8 +84,9 @@ public:
 	const char * label () const;
 	const char * name () const;
 	const char * maker () const;
+	int32_t version () const;
 	uint32_t parameter_count () const;
-        void print_parameter (uint32_t, char*, uint32_t len) const;
+	void print_parameter (uint32_t, char*, uint32_t len) const;
 
 	bool has_editor () const;
 
@@ -130,6 +134,15 @@ protected:
 	float      _transport_speed;
 	mutable std::map <uint32_t, float> _parameter_defaults;
 	bool       _eff_bypassed;
+};
+
+class LIBARDOUR_API VSTPluginInfo : public PluginInfo
+{
+public:
+	VSTPluginInfo (_VSTInfo*);
+	bool is_instrument () const;
+protected:
+	bool _is_instrument;
 };
 
 }

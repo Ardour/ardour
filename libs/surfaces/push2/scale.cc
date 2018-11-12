@@ -15,9 +15,6 @@
   along with this program; if not, write to the Free Software
   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 */
-
-#include "pbd/i18n.h"
-
 #include "gtkmm2ext/gui_thread.h"
 
 #include "gtkmm2ext/colors.h"
@@ -28,6 +25,8 @@
 #include "menu.h"
 #include "push2.h"
 #include "scale.h"
+
+#include "pbd/i18n.h"
 
 #ifdef __APPLE__
 #define Rect ArdourCanvas::Rect
@@ -47,7 +46,6 @@ ScaleLayout::ScaleLayout (Push2& p, Session & s, std::string const & name)
 	: Push2Layout (p, s, name)
 	, last_vpot (-1)
 	, vpot_delta_cnt (0)
-	, root_button (0)
 {
 	Pango::FontDescription fd ("Sans 10");
 
@@ -290,7 +288,7 @@ ScaleLayout::button_right ()
 void
 ScaleLayout::show ()
 {
-	Push2::Button* b;
+	boost::shared_ptr<Push2::Button> b;
 
 	last_vpot = -1;
 
@@ -559,7 +557,7 @@ ScaleLayout::show_root_state ()
 
 	}
 
-	Push2::Button* b = p2.button_by_id (bid);
+	boost::shared_ptr<Push2::Button> b = p2.button_by_id (bid);
 
 	if (b != root_button) {
 		if (root_button) {
@@ -610,7 +608,7 @@ ScaleLayout::menu_rearranged ()
 void
 ScaleLayout::update_cursor_buttons ()
 {
-	Push2::Button* b;
+	boost::shared_ptr<Push2::Button> b;
 	bool change;
 
 	b = p2.button_by_id (Push2::Up);

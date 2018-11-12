@@ -25,14 +25,16 @@
 #include "gtkmm2ext/colors.h"
 #include "utils.h"
 #include "port_matrix_row_labels.h"
+#include "port_matrix_column_labels.h"
 #include "port_matrix.h"
 #include "port_matrix_body.h"
 #include "pbd/i18n.h"
 
 using namespace std;
 
-PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* m, PortMatrixBody* b)
+PortMatrixRowLabels::PortMatrixRowLabels (PortMatrix* m, PortMatrixBody* b, PortMatrixColumnLabels& cols)
 	: PortMatrixLabels (m, b)
+	, _column_labels (cols)
 {
 
 }
@@ -92,6 +94,13 @@ PortMatrixRowLabels::compute_dimensions ()
 	if (!_matrix->show_only_bundles()) {
 		_width += _longest_port_name;
 		_width += name_pad() * 2;
+	}
+
+	uint32_t needed_by_columns = _column_labels.dimensions().second * tan (angle());
+
+	if (_width < needed_by_columns) {
+		_longest_bundle_name += (needed_by_columns - _width);
+		_width = needed_by_columns;
 	}
 }
 

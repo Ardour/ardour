@@ -564,6 +564,14 @@ SessionDialog::open_button_pressed (GdkEventButton* ev)
 	return true;
 }
 
+struct LuaScriptListSorter
+{
+	bool operator() (LuaScriptInfoPtr const a, LuaScriptInfoPtr const b) const {
+		return ARDOUR::cmp_nocase_utf8 (a->name, b->name) < 0;
+	}
+};
+
+
 void
 SessionDialog::populate_session_templates ()
 {
@@ -573,23 +581,21 @@ SessionDialog::populate_session_templates ()
 
 	template_model->clear ();
 
-	/* Add Lua Scripts dedicated to session-setup */
-	LuaScriptList& ms (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
-	for (LuaScriptList::const_iterator s = ms.begin(); s != ms.end(); ++s) {
-		TreeModel::Row row = *(template_model->append ());
-		row[session_template_columns.name] = (*s)->name;
-		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
-		row[session_template_columns.description] = (*s)->description;
-		row[session_template_columns.modified_with_short] = _("{Factory Template}");
-		row[session_template_columns.modified_with_long] = _("{Factory Template}");
-	}
+	/* Get Lua Scripts dedicated to session-setup */
+	LuaScriptList scripts (LuaScripting::instance ().scripts (LuaScriptInfo::SessionInit));
 
 	/* Add Lua Action Scripts which can also be used for session-setup */
 	LuaScriptList& as (LuaScripting::instance ().scripts (LuaScriptInfo::EditorAction));
 	for (LuaScriptList::const_iterator s = as.begin(); s != as.end(); ++s) {
-		if (!((*s)->subtype & LuaScriptInfo::SessionSetup)) {
-			continue;
+		if ((*s)->subtype & LuaScriptInfo::SessionSetup) {
+			scripts.push_back (*s);
 		}
+	}
+
+	LuaScriptListSorter cmp;
+	std::sort (scripts.begin(), scripts.end(), cmp);
+
+	for (LuaScriptList::const_iterator s = scripts.begin(); s != scripts.end(); ++s) {
 		TreeModel::Row row = *(template_model->append ());
 		row[session_template_columns.name] = (*s)->name;
 		row[session_template_columns.path] = "urn:ardour:" + (*s)->path;
@@ -597,7 +603,6 @@ SessionDialog::populate_session_templates ()
 		row[session_template_columns.modified_with_short] = _("{Factory Template}");
 		row[session_template_columns.modified_with_long] = _("{Factory Template}");
 	}
-
 
 	//Add any "template sessions" found in the user's preferences folder
 	for (vector<TemplateInfo>::iterator x = templates.begin(); x != templates.end(); ++x) {
@@ -717,11 +722,13 @@ SessionDialog::setup_new_session_page ()
 #ifdef MIXBUS
 	template_chooser.append_column (_("Modified With"), session_template_columns.modified_with_short);
 #endif
-	template_chooser.set_tooltip_column(4); // modified_with_long
 	template_chooser.set_headers_visible (true);
 	template_chooser.get_selection()->set_mode (SELECTION_SINGLE);
 	template_chooser.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &SessionDialog::template_row_selected));
 	template_chooser.set_sensitive (true);
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		template_chooser.set_tooltip_column(4); // modified_with_long
+	}
 
 	session_new_vbox.pack_start (*template_hbox, true, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
@@ -947,7 +954,9 @@ SessionDialog::redisplay_recent_sessions ()
 		row[recent_session_columns.time_formatted] = gdt.format ("%F %H:%M");
 	}
 
-	recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		recent_session_display.set_tooltip_column(1); // recent_session_columns.tip
+	}
 	recent_session_display.set_model (recent_session_model);
 
 	// custom sort

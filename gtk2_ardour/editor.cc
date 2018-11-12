@@ -2578,7 +2578,7 @@ Editor::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	return LuaInstance::instance()->set_state(node);
+	return 0;
 }
 
 XMLNode&
@@ -2646,8 +2646,6 @@ Editor::get_state ()
 
 	node->set_property ("nudge-clock-value", nudge_clock->current_duration());
 
-	node->add_child_nocopy (LuaInstance::instance()->get_action_state());
-	node->add_child_nocopy (LuaInstance::instance()->get_hook_state());
 	node->add_child_nocopy (_locations->get_state ());
 
 	return *node;
@@ -5942,7 +5940,7 @@ Editor::super_rapid_screen_update ()
 		_last_update_time = 0;
 	}
 
-	if (!_session->transport_rolling ()) {
+	if (!_session->transport_rolling () || _session->is_auditioning ()) {
 		/* Do not interpolate the playhead position; just set it */
 		_last_update_time = 0;
 	}

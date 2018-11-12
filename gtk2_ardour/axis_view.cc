@@ -27,7 +27,6 @@
 
 #include "pbd/error.h"
 #include "pbd/convert.h"
-#include "pbd/i18n.h"
 
 #include <gtkmm2ext/utils.h>
 #include <gtkmm2ext/gtk_ui.h>
@@ -39,6 +38,8 @@
 #include "gui_object.h"
 #include "axis_view.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtk;

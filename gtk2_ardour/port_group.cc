@@ -30,9 +30,11 @@
 #include "ardour/io_processor.h"
 #include "ardour/midi_port.h"
 #include "ardour/midiport_manager.h"
+#include "ardour/plugin_insert.h"
 #include "ardour/port.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
+#include "ardour/sidechain.h"
 #include "ardour/user_bundle.h"
 
 #include "control_protocol/control_protocol.h"
@@ -337,6 +339,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	boost::shared_ptr<PortGroup> bus (new PortGroup (string_compose (_("%1 Busses"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> track (new PortGroup (string_compose (_("%1 Tracks"), PROGRAM_NAME)));
+	boost::shared_ptr<PortGroup> sidechain (new PortGroup (string_compose (_("%1 Sidechains"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> system (new PortGroup (_("Hardware")));
 	boost::shared_ptr<PortGroup> program (new PortGroup (string_compose (_("%1 Misc"), PROGRAM_NAME)));
 	boost::shared_ptr<PortGroup> other (new PortGroup (_("Other")));
@@ -399,6 +402,25 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 				}
 			}
 		}
+
+		/* When on input side, let's look for sidechains in the route's plugins
+		   to display them right next to their route */
+		for (uint32_t n = 0; inputs; ++n) {
+			boost::shared_ptr<Processor> p = (i->route)->nth_plugin (n);
+			if (!p) {
+				break;
+			}
+			boost::shared_ptr<SideChain> sc = boost::static_pointer_cast<PluginInsert> (p)->sidechain ();
+
+			if (sc) {
+				boost::shared_ptr<IO> io = sc->input();
+				if (tv) {
+					sidechain->add_bundle (io->bundle(), io, tv->color ());
+				} else {
+					sidechain->add_bundle (io->bundle(), io);
+				}
+			}
+		}
 	}
 
 	/* Bundles owned by the session; add user bundles first, then normal ones, so
@@ -436,9 +458,10 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			ltc->add_channel (_("LTC Out"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_output_port()->name()));
 			program->add_bundle (ltc);
 		} else {
-			boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
-			ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
-			program->add_bundle (ltc);
+			// XXX TRANSPORTMASTERS
+			//boost::shared_ptr<Bundle> ltc (new Bundle (_("LTC In"), inputs));
+			// ltc->add_channel (_("LTC In"), DataType::AUDIO, session->engine().make_port_name_non_relative (session->ltc_input_port()->name()));
+			// program->add_bundle (ltc);
 		}
 	}
 
@@ -470,12 +493,13 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		AudioEngine* ae = AudioEngine::instance();
 
 		if (inputs) {
-			sync->add_channel (
-				_("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
-				);
-			sync->add_channel (
-				_("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
-				);
+			// XXX TRANSPORTMASTER
+			// sync->add_channel (
+			// _("MTC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mtc_input_port()->name())
+			// );
+			// sync->add_channel (
+			// _("MIDI clock in"), DataType::MIDI, ae->make_port_name_non_relative (session->midi_clock_input_port()->name())
+			//);
 			sync->add_channel (
 				_("MMC in"), DataType::MIDI, ae->make_port_name_non_relative (session->mmc_input_port()->name())
 				);
@@ -526,6 +550,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 			if (!system->has_port(p) &&
 			    !bus->has_port(p) &&
 			    !track->has_port(p) &&
+			    !sidechain->has_port(p) &&
 			    !program->has_port(p) &&
 			    !other->has_port(p)) {
 
@@ -571,12 +596,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 				if (t != DataType::NIL) {
 
-					if (port_has_prefix (p, X_("system:")) ||
-					    port_has_prefix (p, X_("alsa_pcm:")) ||
-					    port_has_prefix (p, X_("alsa_midi:"))) {
-						extra_system[t].push_back (p);
+					PortFlags flags (AudioEngine::instance()->port_engine().get_port_flags (ph));
 
-					} else if (port_has_prefix (p, lpnc)) {
+					if (port_has_prefix (p, lpnc)) {
 
 						/* we own this port (named after the program) */
 
@@ -589,6 +611,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 						}
 
 						extra_program[t].push_back (p);
+
+					} else if (flags & IsPhysical) {
+
+						extra_system[t].push_back (p);
+
 					} else {
 						extra_other[t].push_back (p);
 					}
@@ -642,6 +669,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	add_group_if_not_empty (other);
 	add_group_if_not_empty (bus);
 	add_group_if_not_empty (track);
+	add_group_if_not_empty (sidechain);
 	add_group_if_not_empty (program);
 	add_group_if_not_empty (system);
 

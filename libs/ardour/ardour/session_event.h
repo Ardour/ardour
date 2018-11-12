@@ -33,7 +33,7 @@
 
 namespace ARDOUR {
 
-class Slave;
+class TransportMaster;
 class Region;
 
 class LIBARDOUR_API SessionEvent {
@@ -49,7 +49,6 @@ public:
 		RangeStop,
 		RangeLocate,
 		Overwrite,
-		SetSyncSource,
 		Audition,
 		SetPlayAudioRange,
 		CancelPlayAudioRange,
@@ -58,6 +57,7 @@ public:
 		AdjustCaptureBuffering,
 		SetTimecodeTransmission,
 		Skip,
+		SetTransportMaster,
 
 		/* only one of each of these events can be queued at any one time */
 
@@ -79,11 +79,10 @@ public:
 	double     speed;
 
 	union {
-		void*        ptr;
-		bool         yes_or_no;
-		samplepos_t   target2_sample;
-		Slave*       slave;
-		Route*       route;
+		void*            ptr;
+		bool             yes_or_no;
+		samplepos_t      target2_sample;
+		Route*           route;
 	};
 
 	union {
@@ -109,6 +108,7 @@ public:
 	std::list<MusicRange> music_range;
 
 	boost::shared_ptr<Region> region;
+	boost::shared_ptr<TransportMaster> transport_master;
 
 	SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false);
 

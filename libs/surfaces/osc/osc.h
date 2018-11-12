@@ -193,7 +193,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 		 * [4] - VCAs
 		 * [5] - master
 		 * [6] - Monitor
-		 * [7] - Aux Bus
+		 * [7] - Listen Bus
 		 * [8] - Selected
 		 * [9] - Hidden
 		 * [10] - Use Groups
@@ -343,6 +343,10 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int cue_parse (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int cue_set (uint32_t aux, lo_message msg);
 	int _cue_set (uint32_t aux, lo_address addr);
+	int cue_new_aux (std::string name, std::string dest_1, std::string dest_2, lo_message msg);
+	int cue_new_send (std::string rt_name, lo_message msg);
+	int cue_connect_aux (std::string dest, lo_message msg);
+	int cue_hide (float state, lo_message msg);
 	int cue_next (lo_message msg);
 	int cue_previous (lo_message msg);
 	int cue_send_fader (uint32_t id, float position, lo_message msg);
@@ -527,6 +531,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG_s(name_session,s);
 	PATH_CALLBACK1_MSG_s(sel_rename,s);
 	PATH_CALLBACK1_MSG_s(sel_comment,s);
+	PATH_CALLBACK1_MSG_s(sel_new_personal_send,s);
 	PATH_CALLBACK1_MSG(sel_recenable,i);
 	PATH_CALLBACK1_MSG(sel_recsafe,i);
 	PATH_CALLBACK1_MSG(sel_mute,i);
@@ -798,6 +803,7 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_eq_freq (int id, float val, lo_message msg);
 	int sel_eq_q (int id, float val, lo_message msg);
 	int sel_eq_shape (int id, float val, lo_message msg);
+	int sel_new_personal_send (char *n, lo_message msg);
 	int set_temp_mode (lo_address addr);
 	int parse_sel_group (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);
 	int parse_sel_vca (const char *path, const char* types, lo_arg **argv, int argc, lo_message msg);

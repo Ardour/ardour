@@ -38,7 +38,7 @@ def build(bld):
         obj = bld(features     = 'cxx cshlib',
                   source       = 'a-fluidsynth.cc',
                   name         = 'a-fluidsynth',
-                  cxxflags     = [ '-fPIC' ],
+                  cxxflags     = [ bld.env['compiler_flags_dict']['pic'] ],
                   includes     = [ '../../ardour' ],
                   target       = '../../LV2/%s/a-fluidsynth' % bundle,
                   install_path = '${LV2DIR}/%s' % bundle,

@@ -99,14 +99,13 @@
 #include "ardour/session.h"
 #include "ardour/session_directory.h"
 #include "ardour/session_playlists.h"
-#include "ardour/slave.h"
 #include "ardour/smf_source.h"
-#include "ardour/slave.h"
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
+#include "ardour/transport_master.h"
 #include "ardour/track.h"
 #include "ardour/types_convert.h"
 #include "ardour/user_bundle.h"
@@ -185,7 +184,6 @@ Session::Session (AudioEngine &eng,
 	, _seek_counter (0)
 	, _session_range_location (0)
 	, _session_range_end_is_free (true)
-	, _slave (0)
 	, _silent (false)
 	, _remaining_latency_preroll (0)
 	, _engine_speed (1.0)
@@ -195,7 +193,6 @@ Session::Session (AudioEngine &eng,
 	, _signalled_varispeed (0)
 	, _target_transport_speed (0.0)
 	, auto_play_legal (false)
-	, _last_slave_transport_sample (0)
 	, _requested_return_sample (-1)
 	, current_block_size (0)
 	, _worst_output_latency (0)
@@ -211,13 +208,8 @@ Session::Session (AudioEngine &eng,
 	, _was_seamless (Config->get_seamless_loop ())
 	, _under_nsm_control (false)
 	, _xrun_count (0)
-	, delta_accumulator_cnt (0)
-	, average_slave_delta (1800) // !!! why 1800 ???
-	, average_dir (0)
-	, have_first_delta_accumulator (false)
-	, _slave_state (Stopped)
-	, _mtc_active (false)
-	, _ltc_active (false)
+	, transport_master_tracking_state (Stopped)
+	, master_wait_end (0)
 	, post_export_sync (false)
 	, post_export_position (0)
 	, _exporting (false)
@@ -656,8 +648,6 @@ Session::destroy ()
 	{
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 		ltc_tx_cleanup();
-		delete _slave;
-		_slave = 0;
 	}
 
 	/* disconnect from any and all signals that we are connected to */
@@ -671,7 +661,6 @@ Session::destroy ()
 
 	/* remove I/O objects before unsetting the engine session */
 	_click_io.reset ();
-	_ltc_input.reset ();
 	_ltc_output.reset ();
 
 	ControlProtocolManager::instance().drop_protocols ();
@@ -686,12 +675,6 @@ Session::destroy ()
 #ifdef USE_TRACKS_CODE_FEATURES
 	EngineStateController::instance()->remove_session();
 #endif
-
-	/* drop slave, if any. We don't use use_sync_source (0) because
-	 * there's no reason to do all the other stuff that may happen
-	 * when calling that method.
-	 */
-	delete _slave;
 
 	/* deregister all ports - there will be no process or any other
 	 * callbacks from the engine any more.
@@ -891,20 +874,7 @@ Session::setup_ltc ()
 {
 	XMLNode* child = 0;
 
-	_ltc_input.reset (new IO (*this, X_("LTC In"), IO::Input));
 	_ltc_output.reset (new IO (*this, X_("LTC Out"), IO::Output));
-
-	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC In"))) != 0) {
-		_ltc_input->set_state (*(child->children().front()), Stateful::loading_state_version);
-	} else {
-		{
-			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			_ltc_input->ensure_io (ChanCount (DataType::AUDIO, 1), true, this);
-			// TODO use auto-connect thread somehow (needs a route currently)
-			// see note in Session::auto_connect_thread_run() why process lock is needed.
-			reconnect_ltc_input ();
-		}
-	}
 
 	if (state_tree && (child = find_named_node (*state_tree->root(), X_("LTC Out"))) != 0) {
 		_ltc_output->set_state (*(child->children().front()), Stateful::loading_state_version);
@@ -921,7 +891,6 @@ Session::setup_ltc ()
 	 * IO style of NAME/TYPE-{in,out}N
 	 */
 
-	_ltc_input->nth (0)->set_name (X_("LTC-in"));
 	_ltc_output->nth (0)->set_name (X_("LTC-out"));
 }
 
@@ -1984,24 +1953,27 @@ Session::location_added (Location *location)
 void
 Session::location_removed (Location *location)
 {
-        if (location->is_auto_loop()) {
-	        set_auto_loop_location (0);
-	        set_track_loop (false);
-        }
+	if (location->is_auto_loop()) {
+		set_auto_loop_location (0);
+		if (!play_loop) {
+			set_track_loop (false);
+		}
+		unset_play_loop ();
+	}
 
-        if (location->is_auto_punch()) {
-                set_auto_punch_location (0);
-        }
+	if (location->is_auto_punch()) {
+		set_auto_punch_location (0);
+	}
 
-        if (location->is_session_range()) {
-                /* this is never supposed to happen */
-                error << _("programming error: session range removed!") << endl;
-        }
+	if (location->is_session_range()) {
+		/* this is never supposed to happen */
+		error << _("programming error: session range removed!") << endl;
+	}
 
-        if (location->is_skip()) {
+	if (location->is_skip()) {
 
-                update_skips (location, false);
-        }
+		update_skips (location, false);
+	}
 
 	set_dirty ();
 }
@@ -3004,40 +2976,6 @@ Session::reconnect_midi_scene_ports(bool inputs)
 }
 
 void
-Session::reconnect_mtc_ports ()
-{
-	boost::shared_ptr<MidiPort> mtc_in_ptr = _midi_ports->mtc_input_port();
-
-	if (!mtc_in_ptr) {
-		return;
-	}
-
-	mtc_in_ptr->disconnect_all ();
-
-	std::vector<EngineStateController::MidiPortState> midi_port_states;
-	EngineStateController::instance()->get_physical_midi_input_states (midi_port_states);
-
-	std::vector<EngineStateController::MidiPortState>::iterator state_iter = midi_port_states.begin();
-
-	for (; state_iter != midi_port_states.end(); ++state_iter) {
-		if (state_iter->available && state_iter->mtc_in) {
-			mtc_in_ptr->connect (state_iter->name);
-		}
-	}
-
-	if (!_midi_ports->mtc_input_port ()->connected () &&
-	    config.get_external_sync () &&
-	    (Config->get_sync_source () == MTC) ) {
-		config.set_external_sync (false);
-	}
-
-	if ( ARDOUR::Profile->get_trx () ) {
-		// Tracks need this signal to update timecode_source_dropdown
-		MtcOrLtcInputPortChanged (); //emit signal
-	}
-}
-
-void
 Session::reconnect_mmc_ports(bool inputs)
 {
 	if (inputs ) { // get all enabled midi input ports
@@ -3319,6 +3257,8 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
 			add_routes (ret, false, false, false, order);
+		} else if (flags == PresentationInfo::ListenBus) {
+			add_routes (ret, false, false, true, order); // no autoconnect
 		} else {
 			add_routes (ret, false, true, true, order); // autoconnect // outputs only
 		}
@@ -4295,30 +4235,41 @@ Session::cancel_all_mute ()
 }
 
 void
-Session::get_stripables (StripableList& sl) const
+Session::get_stripables (StripableList& sl, PresentationInfo::Flag fl) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
-	sl.insert (sl.end(), r->begin(), r->end());
+	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
+		if ((*it)->presentation_info ().flags () & fl) {
+			sl.push_back (*it);
+		}
+	}
 
-	VCAList v = _vca_manager->vcas ();
-	sl.insert (sl.end(), v.begin(), v.end());
+	if (fl & PresentationInfo::VCA) {
+		VCAList v = _vca_manager->vcas ();
+		sl.insert (sl.end(), v.begin(), v.end());
+	}
 }
 
 StripableList
 Session::get_stripables () const
 {
+	PresentationInfo::Flag fl = PresentationInfo::AllStripables;
 	StripableList rv;
-	Session::get_stripables (rv);
+	Session::get_stripables (rv, fl);
 	rv.sort (Stripable::Sorter ());
 	return rv;
 }
 
 RouteList
-Session::get_routelist (bool mixer_order) const
+Session::get_routelist (bool mixer_order, PresentationInfo::Flag fl) const
 {
 	boost::shared_ptr<RouteList> r = routes.reader ();
 	RouteList rv;
-	rv.insert (rv.end(), r->begin(), r->end());
+	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
+		if ((*it)->presentation_info ().flags () & fl) {
+			rv.push_back (*it);
+		}
+	}
 	rv.sort (Stripable::Sorter (mixer_order));
 	return rv;
 }
@@ -6522,6 +6473,25 @@ Session::route_removed_from_route_group (RouteGroup* rg, boost::weak_ptr<Route> 
 	}
 }
 
+boost::shared_ptr<AudioTrack>
+Session::get_nth_audio_track (int nth) const
+{
+	boost::shared_ptr<RouteList> rl = routes.reader ();
+	rl->sort (Stripable::Sorter ());
+
+	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
+		if (!boost::dynamic_pointer_cast<AudioTrack> (*r)) {
+			continue;
+		}
+
+		if (--nth > 0) {
+			continue;
+		}
+		return boost::dynamic_pointer_cast<AudioTrack> (*r);
+	}
+	return boost::shared_ptr<AudioTrack> ();
+}
+
 boost::shared_ptr<RouteList>
 Session::get_tracks () const
 {
@@ -6987,6 +6957,17 @@ Session::update_latency_compensation (bool force_whole_graph)
 	if (_state_of_the_state & (InitialConnecting|Deletion)) {
 		return;
 	}
+	/* this lock is not usually contended, but under certain conditions,
+	 * update_latency_compensation may be called concurrently.
+	 * e.g. drag/drop copy a latent plugin while rolling.
+	 * GUI thread (via route_processors_changed) and
+	 * auto_connect_thread_run may race.
+	 */
+	Glib::Threads::Mutex::Lock lx (_update_latency_lock, Glib::Threads::TRY_LOCK);
+	if (!lx.locked()) {
+		/* no need to do this twice */
+		return;
+	}
 
 	bool some_track_latency_changed = update_route_latency (false, false);
 
@@ -7043,36 +7024,9 @@ Session::operation_in_progress (GQuark op) const
 }
 
 boost::shared_ptr<Port>
-Session::ltc_input_port () const
-{
-	assert (_ltc_input);
-	return _ltc_input->nth (0);
-}
-
-boost::shared_ptr<Port>
 Session::ltc_output_port () const
 {
 	return _ltc_output ? _ltc_output->nth (0) : boost::shared_ptr<Port> ();
-}
-
-void
-Session::reconnect_ltc_input ()
-{
-	if (_ltc_input) {
-
-		string src = Config->get_ltc_source_port();
-
-		_ltc_input->disconnect (this);
-
-		if (src != _("None") && !src.empty())  {
-			_ltc_input->nth (0)->connect (src);
-		}
-
-		if ( ARDOUR::Profile->get_trx () ) {
-			// Tracks need this signal to update timecode_source_dropdown
-			MtcOrLtcInputPortChanged (); //emit signal
-		}
-	}
 }
 
 void
@@ -7364,4 +7318,17 @@ Session::cancel_all_solo ()
 
 	set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), 0.0, Controllable::NoGroup);
 	clear_all_solo_state (routes.reader());
+}
+
+void
+Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
+{
+	if (_tempo_map->n_tempos() == 1) {
+		TempoSection& ts (_tempo_map->tempo_section_at_sample (0));
+		if (fabs (ts.note_types_per_minute() - bpm) > (0.01 * ts.note_types_per_minute())) {
+			const Tempo tempo (bpm, 4.0, bpm);
+			std::cerr << "new tempo " << bpm << " old " << ts.note_types_per_minute() << std::endl;
+			_tempo_map->replace_tempo (ts, tempo, 0.0, 0.0, AudioTime);
+		}
+	}
 }

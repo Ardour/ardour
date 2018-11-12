@@ -45,6 +45,11 @@ CONFIG_VARIABLE (bool, strict_io, "strict-io", true)
 /* Naming */
 CONFIG_VARIABLE (TracksAutoNamingRule, tracks_auto_naming, "tracks-auto-naming", UseDefaultNames)
 
+/* Transport Masters (all) */
+
+CONFIG_VARIABLE (bool, transport_masters_just_roll_when_sync_lost, "transport-masters-just-roll-when-sync-lost", false)
+CONFIG_VARIABLE (bool, midi_clock_sets_tempo, "midi-clock-sets-tempo", true)
+
 /* MIDI and MIDI related */
 
 CONFIG_VARIABLE (bool, trace_midi_input, "trace-midi-input", false)
@@ -63,20 +68,13 @@ CONFIG_VARIABLE (bool, midi_input_follows_selection, "midi-input-follows-selecti
 
 /* Timecode and related */
 
+CONFIG_VARIABLE (bool, run_all_transport_masters_always, "run-all-transport-masters-always", true)
+CONFIG_VARIABLE (bool, use_session_timecode_format, "use-session-timecode-format", true)
 CONFIG_VARIABLE (int, mtc_qf_speed_tolerance, "mtc-qf-speed-tolerance", 5)
 CONFIG_VARIABLE (bool, timecode_sync_frame_rate, "timecode-sync-frame-rate", true)
 #ifdef USE_TRACKS_CODE_FEATURES
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", true)
-#else
-CONFIG_VARIABLE (bool, timecode_source_is_synced, "timecode-source-is-synced", false)
-#endif
-CONFIG_VARIABLE (bool, timecode_source_2997, "timecode-source-2997", false)
-#ifdef USE_TRACKS_CODE_FEATURES
 CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", MTC)
-#else
-CONFIG_VARIABLE (SyncSource, sync_source, "sync-source", Engine)
 #endif
-CONFIG_VARIABLE (std::string, ltc_source_port, "ltc-source-port", "system:capture_1")
 CONFIG_VARIABLE (bool, send_ltc, "send-ltc", false)
 CONFIG_VARIABLE (bool, ltc_send_continuously, "ltc-send-continuously", true)
 CONFIG_VARIABLE (std::string, ltc_output_port, "ltc-output-port", "")
@@ -212,7 +210,7 @@ CONFIG_VARIABLE (bool, verify_remove_last_capture, "verify-remove-last-capture",
 CONFIG_VARIABLE (bool, save_history, "save-history", true)
 CONFIG_VARIABLE (int32_t, saved_history_depth, "save-history-depth", 20)
 CONFIG_VARIABLE (int32_t, history_depth, "history-depth", 20)
-CONFIG_VARIABLE (bool, use_overlap_equivalency, "use-overlap-equivalency", false)
+CONFIG_VARIABLE (RegionEquivalence, region_equivalence, "region-equivalence", Enclosed)
 CONFIG_VARIABLE (bool, periodic_safety_backups, "periodic-safety-backups", true)
 CONFIG_VARIABLE (uint32_t, periodic_safety_backup_interval, "periodic-safety-backup-interval", 120)
 CONFIG_VARIABLE (float, automation_interval_msecs, "automation-interval-msecs", 30)
@@ -246,6 +244,7 @@ CONFIG_VARIABLE (int, vst_scan_timeout, "vst-scan-timeout", 1200) /* deciseconds
 CONFIG_VARIABLE (bool, discover_audio_units, "discover-audio-units", false)
 CONFIG_VARIABLE (bool, ask_replace_instrument, "ask-replace-instrument", true)
 CONFIG_VARIABLE (bool, ask_setup_instrument, "ask-setup-instrument", true)
+CONFIG_VARIABLE (uint32_t, limit_n_automatables, "limit-n-automatables", 512)
 
 /* custom user plugin paths */
 CONFIG_VARIABLE (std::string, plugin_path_vst, "plugin-path-vst", "@default@")

@@ -21,7 +21,6 @@
 #include <gtkmm/window.h>
 
 #include "pbd/xml++.h"
-#include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/window_proxy.h"
 #include "gtkmm2ext/visibility_tracker.h"
@@ -236,7 +235,7 @@ WindowProxy::setup ()
 {
 	assert (_window);
 
-	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
+	assert (_window);
 
 	delete_connection = _window->signal_delete_event().connect (sigc::mem_fun (*this, &WindowProxy::delete_event_handler));
 	configure_connection = _window->signal_configure_event().connect (sigc::mem_fun (*this, &WindowProxy::configure_handler), false);
@@ -249,6 +248,7 @@ WindowProxy::setup ()
 void
 WindowProxy::map_handler ()
 {
+	vistracker = new Gtkmm2ext::VisibilityTracker (*_window);
 	/* emit our own signal */
 	signal_map ();
 }

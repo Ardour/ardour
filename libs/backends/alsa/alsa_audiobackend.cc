@@ -1212,6 +1212,16 @@ AlsaAudioBackend::get_port_name (PortEngine::PortHandle port) const
 	return static_cast<AlsaPort*>(port)->name ();
 }
 
+PortFlags
+AlsaAudioBackend::get_port_flags (PortEngine::PortHandle port) const
+{
+	if (!valid_port (port)) {
+		PBD::warning << _("AlsaBackend::get_port_flags: Invalid Port(s)") << endmsg;
+		return PortFlags (0);
+	}
+	return static_cast<AlsaPort*>(port)->flags ();
+}
+
 int
 AlsaAudioBackend::get_port_property (PortHandle port, const std::string& key, std::string& value, std::string& type) const
 {
@@ -1907,7 +1917,7 @@ AlsaAudioBackend::main_process_thread ()
 	uint64_t clock1;
 	_pcmi->pcm_start ();
 	int no_proc_errors = 0;
-	const int bailout = 2 * _samplerate / _samples_per_period;
+	const int bailout = 5 * _samplerate / _samples_per_period;
 
 	manager.registration_callback();
 	manager.graph_order_callback();

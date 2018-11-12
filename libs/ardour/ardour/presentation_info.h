@@ -117,15 +117,19 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		Hidden = 0x100,
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
+		/* bus type for monitor mixes */
+		ListenBus = 0x2000,
 
 		/* special mask to delect out "state" bits */
 		StatusMask = (Hidden),
 		/* special mask to delect select type bits */
-		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner)
+		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|ListenBus)
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
+	static const Flag MixerStripables; /* mask to use for any route or VCA (but not auditioner or Listenbus) */
 	static const Flag AllRoutes; /* mask to use for any route include master+monitor, but not auditioner */
+	static const Flag MixerRoutes; /* mask to use for any route include master+monitor, but not auditioner or ListenBus*/
 	static const Flag Route;     /* mask for any route (bus or track */
 	static const Flag Track;     /* mask to use for any track */
 	static const Flag Bus;       /* mask to use for any bus */

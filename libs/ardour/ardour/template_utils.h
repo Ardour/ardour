@@ -24,6 +24,7 @@
 #include <string>
 #include <vector>
 
+#include "ardour/utils.h"
 #include "ardour/libardour_visibility.h"
 
 namespace ARDOUR {
@@ -39,6 +40,10 @@ namespace ARDOUR {
 		std::string path;
 		std::string description;
 		std::string modified_with;
+
+		bool operator < (const TemplateInfo& other) const {
+			return cmp_nocase_utf8 (name, other.name) < 0;
+		}
 	};
 
 	LIBARDOUR_API void find_route_templates (std::vector<TemplateInfo>& template_names);

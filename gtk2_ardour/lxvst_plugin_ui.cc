@@ -116,7 +116,7 @@ LXVSTPluginUI::forward_key_event (GdkEventKey* gdk_key)
 		mask = KeyPressMask;
 		break;
 	case GDK_KEY_RELEASE:
-		xev.xany.type = KeyPress;
+		xev.xany.type = KeyRelease;
 		mask = KeyReleaseMask;
 		break;
 	default:
@@ -133,19 +133,18 @@ LXVSTPluginUI::forward_key_event (GdkEventKey* gdk_key)
 	xev.xkey.x_root = 0;
 	xev.xkey.y_root = 0;
 	xev.xkey.root = gdk_x11_get_default_root_xwindow();
-	xev.xkey.window = _vst->state()->xid;
+	xev.xkey.window = _vst->state()->linux_plugin_ui_window ? _vst->state()->linux_plugin_ui_window : _vst->state()->xid;
 	xev.xkey.subwindow = None;
 	xev.xkey.time = gdk_key->time;
 
 	xev.xany.serial = 0; /* we don't have one */
 	xev.xany.send_event = true; /* pretend we are using XSendEvent */
 	xev.xany.display = GDK_WINDOW_XDISPLAY (gdk_window->gobj());
-	xev.xany.window = _vst->state()->xid;
 
-	if (!_vst->state()->eventProc) {
-		XSendEvent (xev.xany.display, xev.xany.window, TRUE, mask, &xev);
-	} else {
+	if (_vst->state()->eventProc) {
 		_vst->state()->eventProc (&xev);
+	} else if (!dispatch_effeditkey (gdk_key)) {
+		XSendEvent (xev.xany.display, xev.xany.window, TRUE, mask, &xev);
 	}
 }
 

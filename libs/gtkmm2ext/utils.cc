@@ -44,7 +44,7 @@ using namespace std;
 void
 Gtkmm2ext::init (const char* localedir)
 {
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	(void) bindtextdomain(PACKAGE, localedir);
 	(void) bind_textdomain_codeset (PACKAGE, "UTF-8");
 #endif
@@ -686,7 +686,11 @@ Gtkmm2ext::rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context> context, 
 void
 Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
+	if (r < 1) {
+		cairo_rectangle (cr, x, y, w, h);
+		return;
+	}
 
 	cairo_new_sub_path (cr);
 	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
@@ -699,7 +703,7 @@ Gtkmm2ext::rounded_rectangle (cairo_t* cr, double x, double y, double w, double 
 void
 Gtkmm2ext::rounded_left_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
 	cairo_line_to (cr, x+w, y); // tr
@@ -712,7 +716,7 @@ Gtkmm2ext::rounded_left_half_rectangle (cairo_t* cr, double x, double y, double 
 void
 Gtkmm2ext::rounded_right_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
 	cairo_arc (cr, x + w - r, y + r, r, -90 * degrees, 0 * degrees);  //tr
@@ -725,7 +729,7 @@ Gtkmm2ext::rounded_right_half_rectangle (cairo_t* cr, double x, double y, double
 void
 Gtkmm2ext::rounded_top_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x+w, y+h);
@@ -738,7 +742,7 @@ Gtkmm2ext::rounded_top_half_rectangle (cairo_t* cr, double x, double y, double w
 void
 Gtkmm2ext::rounded_bottom_half_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x, y);
@@ -752,7 +756,7 @@ Gtkmm2ext::rounded_bottom_half_rectangle (cairo_t* cr, double x, double y, doubl
 void
 Gtkmm2ext::rounded_top_rectangle (cairo_t* cr, double x, double y, double w, double h, double r)
 {
-	double degrees = M_PI / 180.0;
+	static const double degrees = M_PI / 180.0;
 
 	cairo_new_sub_path (cr);
 	cairo_move_to (cr, x+w, y+h);
@@ -1110,7 +1114,7 @@ Gtkmm2ext::add_volume_shortcuts (Gtk::FileChooser& c)
 			}
 		}
 	}
-	catch (Glib::FileError& e) {
+	catch (Glib::FileError const& e) {
 		std::cerr << "listing /Volumnes failed: " << e.what() << std::endl;
 	}
 #endif

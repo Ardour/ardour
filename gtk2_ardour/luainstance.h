@@ -100,6 +100,9 @@ public:
 	XMLNode& get_action_state (void);
 	XMLNode& get_hook_state (void);
 
+	int load_state ();
+	int save_state ();
+
 	bool interactive_add (ARDOUR::LuaScriptInfo::ScriptType, int);
 
 	/* actions */
@@ -131,6 +134,7 @@ private:
 	static LuaInstance* _instance;
 
 	void init ();
+	void set_dirty ();
 	void session_going_away ();
 
 	LuaState lua;

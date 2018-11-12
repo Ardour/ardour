@@ -206,10 +206,12 @@ PluginInsert::add_sidechain (uint32_t n_audio, uint32_t n_midi)
 		return false;
 	}
 	std::ostringstream n;
-	if (n_audio > 0 || n_midi > 0) {
-		n << "Sidechain " << Session::next_name_id ();
-	} else {
+	if (n_audio == 0 && n_midi == 0) {
 		n << "TO BE RESET FROM XML";
+	} else if (owner()) {
+		n << "SC " << owner()->name() << "/" << name() << " " << Session::next_name_id ();
+	} else {
+		n << "tobeRenamed";
 	}
 	SideChain *sc = new SideChain (_session, n.str ());
 	_sidechain = boost::shared_ptr<SideChain> (sc);
@@ -235,6 +237,25 @@ PluginInsert::del_sidechain ()
 	_sc_capture_latency = 0;
 	PluginConfigChanged (); /* EMIT SIGNAL */
 	return true;
+}
+
+void
+PluginInsert::update_sidechain_name ()
+{
+	if (!_sidechain) {
+		return;
+	}
+
+	std::ostringstream n;
+
+	n << "SC ";
+	if (owner()) {
+		n << owner()->name() << "/";
+	}
+
+	n << name() << " " << Session::next_name_id ();
+
+	_sidechain->set_name (n.str());
 }
 
 void
@@ -434,6 +455,8 @@ PluginInsert::create_automatable_parameters ()
 	boost::shared_ptr<Plugin> plugin = _plugins.front();
 	set<Evoral::Parameter> a = _plugins.front()->automatable ();
 
+	const uint32_t limit_automatables = Config->get_limit_n_automatables ();
+
 	for (uint32_t i = 0; i < plugin->parameter_count(); ++i) {
 		if (!plugin->parameter_is_control (i)) {
 			continue;
@@ -450,12 +473,9 @@ PluginInsert::create_automatable_parameters ()
 
 		const bool automatable = a.find(param) != a.end();
 
-		if (automatable) {
-			can_automate (param);
-		}
 		boost::shared_ptr<AutomationList> list(new AutomationList(param, desc));
 		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
-		if (!automatable) {
+		if (!automatable || (limit_automatables > 0 && i > limit_automatables)) {
 			c->set_flags (Controllable::Flag ((int)c->flags() | Controllable::NotAutomatable));
 		}
 		add_control (c);
@@ -804,14 +824,14 @@ PluginInsert::inplace_silence_unconnected (BufferSet& bufs, const PinMappings& o
 void
 PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t end, double speed, pframes_t nframes, samplecnt_t offset, bool with_auto)
 {
-	// TODO: atomically copy maps & _no_inplace
-	PinMappings in_map (_in_map);
-	PinMappings out_map (_out_map);
-	ChanMapping thru_map (_thru_map);
-	if (_mapping_changed) { // ToDo use a counters, increment until match.
+	if (_mapping_changed) { // ToDo use a counter, increment until match
 		_no_inplace = check_inplace ();
 		_mapping_changed = false;
 	}
+	// TODO: atomically copy maps & _no_inplace
+	PinMappings in_map (_in_map); // TODO Split case below overrides, use const& in_map
+	PinMappings const& out_map (_out_map);
+	ChanMapping const& thru_map (_thru_map);
 
 	if (_latency_changed) {
 		/* delaylines are configured with the max possible latency (as reported by the plugin)
@@ -840,11 +860,11 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				continue;
 			}
 			bool valid;
-			uint32_t first_idx = in_map[0].get (*t, 0, &valid);
+			uint32_t first_idx = in_map.p(0).get (*t, 0, &valid);
 			assert (valid && first_idx == 0); // check_inplace ensures this
 			/* copy the first stream's buffer contents to the others */
 			for (uint32_t i = 1; i < natural_input_streams ().get (*t); ++i) {
-				uint32_t idx = in_map[0].get (*t, i, &valid);
+				uint32_t idx = in_map.p(0).get (*t, i, &valid);
 				if (valid) {
 					assert (idx == 0);
 					bufs.get (*t, i).read_from (bufs.get (*t, first_idx), nframes, offset, offset);
@@ -862,29 +882,20 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 
 		uint32_t n = 0;
 
-		for (Controls::iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
+		for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li, ++n) {
 
-			boost::shared_ptr<AutomationControl> c
-				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
-
-			if (c->list() && c->automation_playback()) {
+			/* boost::dynamic_pointer_cast<> has significant overhead, since we know that
+			 * all controls are AutomationControl and their lists - if any - are AutomationList,
+			 * we can use static_cast<>. This yields a speedup of 2.8/4.6 over to the
+			 * previous code (measuerd with VeeSeeVSTRack 10k parameters, optimized build) */
+			AutomationControl& c = static_cast<AutomationControl&> (*(li->second));
+			boost::shared_ptr<const Evoral::ControlList> clist (c.list());
+			if (clist && (static_cast<AutomationList const&> (*clist)).automation_playback ()) {
 				bool valid;
-
-				const float val = c->list()->rt_safe_eval (start, valid);
-
+				const float val = c.list()->rt_safe_eval (start, valid);
 				if (valid) {
-					/* This is the ONLY place where we are
-					 *  allowed to call
-					 *  AutomationControl::set_value_unchecked(). We
-					 *  know that the control is in
-					 *  automation playback mode, so no
-					 *  check on writable() is required
-					 *  (which must be done in AutomationControl::set_value()
-					 *
-					 */
-					c->set_value_unchecked(val);
+					c.set_value_unchecked(val);
 				}
-
 			}
 		}
 	}
@@ -939,7 +950,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t out = 0; out < natural_output_streams().get (*t); ++out) {
 					bool valid;
-					uint32_t out_idx = out_map[pc].get (*t, out, &valid);
+					uint32_t out_idx = out_map.p(pc).get (*t, out, &valid);
 					if (valid) {
 						used_outputs.set (*t, out_idx, 1); // mark as used
 					}
@@ -971,14 +982,14 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
 
 			ARDOUR::ChanMapping i_in_map (natural_input_streams());
-			ARDOUR::ChanMapping i_out_map (out_map[pc]);
+			ARDOUR::ChanMapping i_out_map (out_map.p(pc));
 			ARDOUR::ChanCount mapped;
 
 			/* map inputs sequentially */
 			for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 				for (uint32_t in = 0; in < natural_input_streams().get (*t); ++in) {
 					bool valid;
-					uint32_t in_idx = in_map[pc].get (*t, in, &valid);
+					uint32_t in_idx = in_map.p(pc).get (*t, in, &valid);
 					uint32_t m = mapped.get (*t);
 					if (valid) {
 						inplace_bufs.get (*t, m).read_from (bufs.get (*t, in_idx), nframes, offset, offset);
@@ -1024,7 +1035,7 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		/* in-place processing */
 		uint32_t pc = 0;
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
-			if ((*i)->connect_and_run(bufs, start, end, speed, in_map[pc], out_map[pc], nframes, offset)) {
+			if ((*i)->connect_and_run(bufs, start, end, speed, in_map.p(pc), out_map.p(pc), nframes, offset)) {
 				deactivate ();
 			}
 		}
@@ -1070,14 +1081,13 @@ PluginInsert::bypass (BufferSet& bufs, pframes_t nframes)
 	/* bypass the plugin(s) not the whole processor.
 	 * -> use mappings just like connect_and_run
 	 */
-
-	// TODO: atomically copy maps & _no_inplace
-	const ChanMapping in_map (no_sc_input_map ());
-	const ChanMapping out_map (output_map ());
 	if (_mapping_changed) {
 		_no_inplace = check_inplace ();
 		_mapping_changed = false;
 	}
+	// TODO: atomically copy maps & _no_inplace
+	ChanMapping const& in_map (no_sc_input_map ());
+	ChanMapping const& out_map (output_map ());
 
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
@@ -1187,8 +1197,8 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 
 	_delaybuffers.flush ();
 
-	ChanMapping in_map (natural_input_streams ());
-	ChanMapping out_map (natural_output_streams ());
+	const ChanMapping in_map (natural_input_streams ());
+	const ChanMapping out_map (natural_output_streams ());
 	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
@@ -1635,7 +1645,7 @@ PluginInsert::check_inplace ()
 		 *
 		 * but allows     in-port 1 -> sink-pin 2  ||  source-pin 2 -> out port 1
 		 */
-		ChanMapping in_map (input_map ());
+		ChanMapping const& in_map (input_map ());
 		const ChanMapping::Mappings out_m (output_map ().mappings ());
 		for (ChanMapping::Mappings::const_iterator t = out_m.begin (); t != out_m.end () && inplace_ok; ++t) {
 			for (ChanMapping::TypeMapping::const_iterator c = (*t).second.begin (); c != (*t).second.end () ; ++c) {
@@ -2743,10 +2753,16 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		// sidechain is a Processor (IO)
 		if ((*i)->name () ==  Processor::state_node_name) {
 			if (!_sidechain) {
-				add_sidechain (0);
+				if (regenerate_xml_or_string_ids ()) {
+					add_sidechain_from_xml (**i, version);
+				} else {
+					add_sidechain (0);
+				}
 			}
 			if (!regenerate_xml_or_string_ids ()) {
 				_sidechain->set_state (**i, version);
+			} else {
+				update_sidechain_name ();
 			}
 		}
 	}
@@ -3074,6 +3090,42 @@ PluginInsert::add_plugin (boost::shared_ptr<Plugin> plugin)
 #endif
 
 	_plugins.push_back (plugin);
+}
+
+void
+PluginInsert::add_sidechain_from_xml (const XMLNode& node, int version)
+{
+	if (version < 3000) {
+		return;
+	}
+
+	XMLNodeList nlist = node.children();
+
+	if (nlist.size() == 0) {
+		return;
+	}
+
+	uint32_t audio = 0;
+	uint32_t midi = 0;
+
+	XMLNodeConstIterator it = nlist.front()->children().begin();
+	for ( ; it != nlist.front()->children().end(); ++ it) {
+		if ((*it)->name() == "Port") {
+			DataType type(DataType::NIL);
+			(*it)->get_property ("type", type);
+			if (type == DataType::AUDIO) {
+				++audio;
+			} else if (type == DataType::MIDI) {
+				++midi;
+			}
+		}
+	}
+
+	ChanCount in_cc = ChanCount();
+	in_cc.set (DataType::AUDIO, audio);
+	in_cc.set (DataType::MIDI, midi);
+
+	add_sidechain (audio, midi);
 }
 
 bool

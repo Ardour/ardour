@@ -3,16 +3,16 @@
  * Copyright (C) 2003  Peter Hanappe and others.
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA
@@ -22,389 +22,446 @@
 #include "fluid_chan.h"
 #include "fluid_voice.h"
 
-/*
- * fluid_mod_clone
+/**
+ * Clone the modulators destination, sources, flags and amount.
+ * @param mod the modulator to store the copy to
+ * @param src the source modulator to retrieve the information from
+ * @note The \c next member of \c mod will be left unchanged.
  */
 void
-fluid_mod_clone(fluid_mod_t* mod, fluid_mod_t* src)
+fluid_mod_clone(fluid_mod_t *mod, const fluid_mod_t *src)
 {
-  mod->dest = src->dest;
-  mod->src1 = src->src1;
-  mod->flags1 = src->flags1;
-  mod->src2 = src->src2;
-  mod->flags2 = src->flags2;
-  mod->amount = src->amount;
+    mod->dest = src->dest;
+    mod->src1 = src->src1;
+    mod->flags1 = src->flags1;
+    mod->src2 = src->src2;
+    mod->flags2 = src->flags2;
+    mod->amount = src->amount;
 }
 
 /**
  * Set a modulator's primary source controller and flags.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @param src Modulator source (#fluid_mod_src or a MIDI controller number)
  * @param flags Flags determining mapping function and whether the source
  *   controller is a general controller (#FLUID_MOD_GC) or a MIDI CC controller
  *   (#FLUID_MOD_CC), see #fluid_mod_flags.
  */
 void
-fluid_mod_set_source1(fluid_mod_t* mod, int src, int flags)
+fluid_mod_set_source1(fluid_mod_t *mod, int src, int flags)
 {
-  mod->src1 = src;
-  mod->flags1 = flags;
+    mod->src1 = src;
+    mod->flags1 = flags;
 }
 
 /**
  * Set a modulator's secondary source controller and flags.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @param src Modulator source (#fluid_mod_src or a MIDI controller number)
  * @param flags Flags determining mapping function and whether the source
  *   controller is a general controller (#FLUID_MOD_GC) or a MIDI CC controller
  *   (#FLUID_MOD_CC), see #fluid_mod_flags.
  */
 void
-fluid_mod_set_source2(fluid_mod_t* mod, int src, int flags)
+fluid_mod_set_source2(fluid_mod_t *mod, int src, int flags)
 {
-  mod->src2 = src;
-  mod->flags2 = flags;
+    mod->src2 = src;
+    mod->flags2 = flags;
 }
 
 /**
  * Set the destination effect of a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @param dest Destination generator (#fluid_gen_type)
  */
 void
-fluid_mod_set_dest(fluid_mod_t* mod, int dest)
+fluid_mod_set_dest(fluid_mod_t *mod, int dest)
 {
-  mod->dest = dest;
+    mod->dest = dest;
 }
 
 /**
  * Set the scale amount of a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @param amount Scale amount to assign
  */
 void
-fluid_mod_set_amount(fluid_mod_t* mod, double amount)
+fluid_mod_set_amount(fluid_mod_t *mod, double amount)
 {
-  mod->amount = (double) amount;
+    mod->amount = (double) amount;
 }
 
 /**
  * Get the primary source value from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return The primary source value (#fluid_mod_src or a MIDI CC controller value).
  */
 int
-fluid_mod_get_source1(fluid_mod_t* mod)
+fluid_mod_get_source1(const fluid_mod_t *mod)
 {
-  return mod->src1;
+    return mod->src1;
 }
 
 /**
  * Get primary source flags from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return The primary source flags (#fluid_mod_flags).
  */
 int
-fluid_mod_get_flags1(fluid_mod_t* mod)
+fluid_mod_get_flags1(const fluid_mod_t *mod)
 {
-  return mod->flags1;
+    return mod->flags1;
 }
 
 /**
  * Get the secondary source value from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return The secondary source value (#fluid_mod_src or a MIDI CC controller value).
  */
 int
-fluid_mod_get_source2(fluid_mod_t* mod)
+fluid_mod_get_source2(const fluid_mod_t *mod)
 {
-  return mod->src2;
+    return mod->src2;
 }
 
 /**
  * Get secondary source flags from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return The secondary source flags (#fluid_mod_flags).
  */
 int
-fluid_mod_get_flags2(fluid_mod_t* mod)
+fluid_mod_get_flags2(const fluid_mod_t *mod)
 {
-  return mod->flags2;
+    return mod->flags2;
 }
 
 /**
  * Get destination effect from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return Destination generator (#fluid_gen_type)
  */
 int
-fluid_mod_get_dest(fluid_mod_t* mod)
+fluid_mod_get_dest(const fluid_mod_t *mod)
 {
-  return mod->dest;
+    return mod->dest;
 }
 
 /**
  * Get the scale amount from a modulator.
- * @param mod Modulator
+ * @param mod The modulator instance
  * @return Scale amount
  */
 double
-fluid_mod_get_amount(fluid_mod_t* mod)
+fluid_mod_get_amount(const fluid_mod_t *mod)
 {
-  return (fluid_real_t) mod->amount;
+    return (double) mod->amount;
 }
 
+/*
+ * retrieves the initial value from the given source of the modulator
+ */
+static fluid_real_t
+fluid_mod_get_source_value(const unsigned char mod_src,
+                           const unsigned char mod_flags,
+                           fluid_real_t *range,
+                           const fluid_voice_t *voice
+                          )
+{
+    const fluid_channel_t *chan = voice->channel;
+    fluid_real_t val;
+
+    if(mod_flags & FLUID_MOD_CC)
+    {
+        /* From MIDI Recommended Practice (RP-036) Default Pan Formula:
+         * "Since MIDI controller values range from 0 to 127, the exact center
+         * of the range, 63.5, cannot be represented. Therefore, the effective
+         * range for CC#10 is modified to be 1 to 127, and values 0 and 1 both
+         * pan hard left. The recommended method is to subtract 1 from the
+         * value of CC#10, and saturate the result to be non-negative."
+         *
+         * We treat the balance control in exactly the same way, as the same
+         * problem applies here as well.
+         */
+        if(mod_src == PAN_MSB || mod_src == BALANCE_MSB)
+        {
+            *range = 126;
+            val = fluid_channel_get_cc(chan, mod_src) - 1;
+
+            if(val < 0)
+            {
+                val = 0;
+            }
+        }
+        else
+        {
+            val = fluid_channel_get_cc(chan, mod_src);
+        }
+    }
+    else
+    {
+        switch(mod_src)
+        {
+        case FLUID_MOD_NONE:         /* SF 2.01 8.2.1 item 0: src enum=0 => value is 1 */
+            val = *range;
+            break;
+
+        case FLUID_MOD_VELOCITY:
+            val = fluid_voice_get_actual_velocity(voice);
+            break;
+
+        case FLUID_MOD_KEY:
+            val = fluid_voice_get_actual_key(voice);
+            break;
+
+        case FLUID_MOD_KEYPRESSURE:
+            val = fluid_channel_get_key_pressure(chan, voice->key);
+            break;
+
+        case FLUID_MOD_CHANNELPRESSURE:
+            val = fluid_channel_get_channel_pressure(chan);
+            break;
+
+        case FLUID_MOD_PITCHWHEEL:
+            val = fluid_channel_get_pitch_bend(chan);
+            *range = 0x4000;
+            break;
+
+        case FLUID_MOD_PITCHWHEELSENS:
+            val = fluid_channel_get_pitch_wheel_sensitivity(chan);
+            break;
+
+        default:
+            FLUID_LOG(FLUID_ERR, "Unknown modulator source '%d', disabling modulator.", mod_src);
+            val = 0.0;
+        }
+    }
+
+    return val;
+}
+
+/**
+ * transforms the initial value retrieved by \c fluid_mod_get_source_value into [0.0;1.0]
+ */
+static fluid_real_t
+fluid_mod_transform_source_value(fluid_real_t val, unsigned char mod_flags, const fluid_real_t range)
+{
+    /* normalized value, i.e. usually in the range [0;1]
+     *
+     * if val was retrieved from pitch_bend then [-0.5;0.5]
+     */
+    const fluid_real_t val_norm = val / range;
+
+    /* we could also only switch case the lower nibble of mod_flags, however
+     * this would keep us from adding further mod types in the future
+     *
+     * instead just remove the flag(s) we already took care of
+     */
+    mod_flags &= ~FLUID_MOD_CC;
+
+    switch(mod_flags/* & 0x0f*/)
+    {
+    case FLUID_MOD_LINEAR | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* =0 */
+        val = val_norm;
+        break;
+
+    case FLUID_MOD_LINEAR | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* =1 */
+        val = 1.0f - val_norm;
+        break;
+
+    case FLUID_MOD_LINEAR | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* =2 */
+        val = -1.0f + 2.0f * val_norm;
+        break;
+
+    case FLUID_MOD_LINEAR | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* =3 */
+        val = 1.0f - 2.0f * val_norm;
+        break;
+
+    case FLUID_MOD_CONCAVE | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* =4 */
+        val = fluid_concave(127 * (val_norm));
+        break;
+
+    case FLUID_MOD_CONCAVE | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* =5 */
+        val = fluid_concave(127 * (1.0f - val_norm));
+        break;
+
+    case FLUID_MOD_CONCAVE | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* =6 */
+        val = (val_norm > 0.5f) ?  fluid_concave(127 * 2 * (val_norm - 0.5f))
+              : -fluid_concave(127 * 2 * (0.5f - val_norm));
+        break;
+
+    case FLUID_MOD_CONCAVE | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* =7 */
+        val = (val_norm > 0.5f) ? -fluid_concave(127 * 2 * (val_norm - 0.5f))
+              :  fluid_concave(127 * 2 * (0.5f - val_norm));
+        break;
+
+    case FLUID_MOD_CONVEX | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* =8 */
+        val = fluid_convex(127 * (val_norm));
+        break;
+
+    case FLUID_MOD_CONVEX | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* =9 */
+        val = fluid_convex(127 * (1.0f - val_norm));
+        break;
+
+    case FLUID_MOD_CONVEX | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* =10 */
+        val = (val_norm > 0.5f) ?  fluid_convex(127 * 2 * (val_norm - 0.5f))
+              : -fluid_convex(127 * 2 * (0.5f - val_norm));
+        break;
+
+    case FLUID_MOD_CONVEX | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* =11 */
+        val = (val_norm > 0.5f) ? -fluid_convex(127 * 2 * (val_norm - 0.5f))
+              :  fluid_convex(127 * 2 * (0.5f - val_norm));
+        break;
+
+    case FLUID_MOD_SWITCH | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* =12 */
+        val = (val_norm >= 0.5f) ? 1.0f : 0.0f;
+        break;
+
+    case FLUID_MOD_SWITCH | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* =13 */
+        val = (val_norm >= 0.5f) ? 0.0f : 1.0f;
+        break;
+
+    case FLUID_MOD_SWITCH | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* =14 */
+        val = (val_norm >= 0.5f) ? 1.0f : -1.0f;
+        break;
+
+    case FLUID_MOD_SWITCH | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* =15 */
+        val = (val_norm >= 0.5f) ? -1.0f : 1.0f;
+        break;
+
+    /*
+     * MIDI CCs only have a resolution of 7 bits. The closer val_norm gets to 1,
+     * the less will be the resulting change of the sinus. When using this sin()
+     * for scaling the cutoff frequency, there will be no audible difference between
+     * MIDI CCs 118 to 127. To avoid this waste of CCs multiply with 0.87
+     * (at least for unipolar) which makes sin() never get to 1.0 but to 0.98 which
+     * is close enough.
+     */
+    case FLUID_MOD_SIN | FLUID_MOD_UNIPOLAR | FLUID_MOD_POSITIVE: /* custom sin(x) */
+        val = sin(M_PI / 2 * val_norm * 0.87);
+        break;
+
+    case FLUID_MOD_SIN | FLUID_MOD_UNIPOLAR | FLUID_MOD_NEGATIVE: /* custom */
+        val = sin(M_PI / 2 * (1.0f - val_norm) * 0.87);
+        break;
+
+    case FLUID_MOD_SIN | FLUID_MOD_BIPOLAR | FLUID_MOD_POSITIVE: /* custom */
+        val = (val_norm > 0.5f) ?  sin(M_PI / 2 * 2 * (val_norm - 0.5f))
+              : -sin(M_PI / 2 * 2 * (0.5f - val_norm));
+        break;
+
+    case FLUID_MOD_SIN | FLUID_MOD_BIPOLAR | FLUID_MOD_NEGATIVE: /* custom */
+        val = (val_norm > 0.5f) ? -sin(M_PI / 2 * 2 * (val_norm - 0.5f))
+              :  sin(M_PI / 2 * 2 * (0.5f - val_norm));
+        break;
+
+    default:
+        FLUID_LOG(FLUID_ERR, "Unknown modulator type '%d', disabling modulator.", mod_flags);
+        val = 0.0f;
+        break;
+    }
+
+    return val;
+}
 
 /*
  * fluid_mod_get_value
  */
 fluid_real_t
-fluid_mod_get_value(fluid_mod_t* mod, fluid_channel_t* chan, fluid_voice_t* voice)
+fluid_mod_get_value(fluid_mod_t *mod, fluid_voice_t *voice)
 {
-  fluid_real_t v1 = 0.0, v2 = 1.0;
-  fluid_real_t range1 = 127.0, range2 = 127.0;
+    extern fluid_mod_t default_vel2filter_mod;
 
-  if (chan == NULL) {
-    return 0.0f;
-  }
+    fluid_real_t v1 = 0.0, v2 = 1.0;
+    fluid_real_t range1 = 127.0, range2 = 127.0;
 
-  /* 'special treatment' for default controller
-   *
-   *  Reference: SF2.01 section 8.4.2
-   *
-   * The GM default controller 'vel-to-filter cut off' is not clearly
-   * defined: If implemented according to the specs, the filter
-   * frequency jumps between vel=63 and vel=64.  To maintain
-   * compatibility with existing sound fonts, the implementation is
-   * 'hardcoded', it is impossible to implement using only one
-   * modulator otherwise.
-   *
-   * I assume here, that the 'intention' of the paragraph is one
-   * octave (1200 cents) filter frequency shift between vel=127 and
-   * vel=64.  'amount' is (-2400), at least as long as the controller
-   * is set to default.
-   *
-   * Further, the 'appearance' of the modulator (source enumerator,
-   * destination enumerator, flags etc) is different from that
-   * described in section 8.4.2, but it matches the definition used in
-   * several SF2.1 sound fonts (where it is used only to turn it off).
-   * */
-  if ((mod->src2 == FLUID_MOD_VELOCITY) &&
-      (mod->src1 == FLUID_MOD_VELOCITY) &&
-      (mod->flags1 == (FLUID_MOD_GC | FLUID_MOD_UNIPOLAR
-		       | FLUID_MOD_NEGATIVE | FLUID_MOD_LINEAR)) &&
-      (mod->flags2 == (FLUID_MOD_GC | FLUID_MOD_UNIPOLAR
-		       | FLUID_MOD_POSITIVE | FLUID_MOD_SWITCH)) &&
-      (mod->dest == GEN_FILTERFC)) {
+    /* 'special treatment' for default controller
+     *
+     *  Reference: SF2.01 section 8.4.2
+     *
+     * The GM default controller 'vel-to-filter cut off' is not clearly
+     * defined: If implemented according to the specs, the filter
+     * frequency jumps between vel=63 and vel=64.  To maintain
+     * compatibility with existing sound fonts, the implementation is
+     * 'hardcoded', it is impossible to implement using only one
+     * modulator otherwise.
+     *
+     * I assume here, that the 'intention' of the paragraph is one
+     * octave (1200 cents) filter frequency shift between vel=127 and
+     * vel=64.  'amount' is (-2400), at least as long as the controller
+     * is set to default.
+     *
+     * Further, the 'appearance' of the modulator (source enumerator,
+     * destination enumerator, flags etc) is different from that
+     * described in section 8.4.2, but it matches the definition used in
+     * several SF2.1 sound fonts (where it is used only to turn it off).
+     * */
+    if(fluid_mod_test_identity(mod, &default_vel2filter_mod))
+    {
 // S. Christian Collins' mod, to stop forcing velocity based filtering
-/*
-    if (voice->vel < 64){
-      return (fluid_real_t) mod->amount / 2.0;
-    } else {
-      return (fluid_real_t) mod->amount * (127 - voice->vel) / 127;
+        /*
+            if (voice->vel < 64){
+              return (fluid_real_t) mod->amount / 2.0;
+            } else {
+              return (fluid_real_t) mod->amount * (127 - voice->vel) / 127;
+            }
+        */
+        return 0; // (fluid_real_t) mod->amount / 2.0;
     }
-*/
-     return 0; // (fluid_real_t) mod->amount / 2.0;
-  }
+
 // end S. Christian Collins' mod
 
-  /* get the initial value of the first source */
-  if (mod->src1 > 0) {
-    if (mod->flags1 & FLUID_MOD_CC) {
-      v1 = fluid_channel_get_cc(chan, mod->src1);
-    } else {  /* source 1 is one of the direct controllers */
-      switch (mod->src1) {
-      case FLUID_MOD_NONE:         /* SF 2.01 8.2.1 item 0: src enum=0 => value is 1 */
-	v1 = range1;
-	break;
-      case FLUID_MOD_VELOCITY:
-	v1 = voice->vel;
-	break;
-      case FLUID_MOD_KEY:
-	v1 = voice->key;
-	break;
-      case FLUID_MOD_KEYPRESSURE:
-	v1 = fluid_channel_get_key_pressure (chan);
-	break;
-      case FLUID_MOD_CHANNELPRESSURE:
-	v1 = fluid_channel_get_channel_pressure (chan);
-	break;
-      case FLUID_MOD_PITCHWHEEL:
-	v1 = fluid_channel_get_pitch_bend (chan);
-	range1 = 0x4000;
-	break;
-      case FLUID_MOD_PITCHWHEELSENS:
-	v1 = fluid_channel_get_pitch_wheel_sensitivity (chan);
-	break;
-      default:
-	v1 = 0.0;
-      }
+    /* get the initial value of the first source */
+    if(mod->src1 > 0)
+    {
+        v1 = fluid_mod_get_source_value(mod->src1, mod->flags1, &range1, voice);
+
+        /* transform the input value */
+        v1 = fluid_mod_transform_source_value(v1, mod->flags1, range1);
+    }
+    else
+    {
+        return 0.0;
     }
 
-    /* transform the input value */
-    switch (mod->flags1 & 0x0f) {
-    case 0: /* linear, unipolar, positive */
-      v1 /= range1;
-      break;
-    case 1: /* linear, unipolar, negative */
-      v1 = 1.0f - v1 / range1;
-      break;
-    case 2: /* linear, bipolar, positive */
-      v1 = -1.0f + 2.0f * v1 / range1;
-      break;
-    case 3: /* linear, bipolar, negative */
-      v1 = 1.0f - 2.0f * v1 / range1;
-      break;
-    case 4: /* concave, unipolar, positive */
-      v1 = fluid_concave(v1);
-      break;
-    case 5: /* concave, unipolar, negative */
-      v1 = fluid_concave(127 - v1);
-      break;
-    case 6: /* concave, bipolar, positive */
-      v1 = (v1 > 64)? fluid_concave(2 * (v1 - 64)) : -fluid_concave(2 * (64 - v1));
-      break;
-    case 7: /* concave, bipolar, negative */
-      v1 = (v1 > 64)? -fluid_concave(2 * (v1 - 64)) : fluid_concave(2 * (64 - v1));
-      break;
-    case 8: /* convex, unipolar, positive */
-      v1 = fluid_convex(v1);
-      break;
-    case 9: /* convex, unipolar, negative */
-      v1 = fluid_convex(127 - v1);
-      break;
-    case 10: /* convex, bipolar, positive */
-      v1 = (v1 > 64)? fluid_convex(2 * (v1 - 64)) : -fluid_convex(2 * (64 - v1));
-      break;
-    case 11: /* convex, bipolar, negative */
-      v1 = (v1 > 64)? -fluid_convex(2 * (v1 - 64)) : fluid_convex(2 * (64 - v1));
-      break;
-    case 12: /* switch, unipolar, positive */
-      v1 = (v1 >= 64)? 1.0f : 0.0f;
-      break;
-    case 13: /* switch, unipolar, negative */
-      v1 = (v1 >= 64)? 0.0f : 1.0f;
-      break;
-    case 14: /* switch, bipolar, positive */
-      v1 = (v1 >= 64)? 1.0f : -1.0f;
-      break;
-    case 15: /* switch, bipolar, negative */
-      v1 = (v1 >= 64)? -1.0f : 1.0f;
-      break;
-    }
-  } else {
-    return 0.0;
-  }
-
-  /* no need to go further */
-  if (v1 == 0.0f) {
-    return 0.0f;
-  }
-
-  /* get the second input source */
-  if (mod->src2 > 0) {
-    if (mod->flags2 & FLUID_MOD_CC) {
-      v2 = fluid_channel_get_cc(chan, mod->src2);
-    } else {
-      switch (mod->src2) {
-      case FLUID_MOD_NONE:         /* SF 2.01 8.2.1 item 0: src enum=0 => value is 1 */
-	v2 = range2;
-	break;
-      case FLUID_MOD_VELOCITY:
-	v2 = voice->vel;
-	break;
-      case FLUID_MOD_KEY:
-	v2 = voice->key;
-	break;
-      case FLUID_MOD_KEYPRESSURE:
-	v2 = fluid_channel_get_key_pressure (chan);
-	break;
-      case FLUID_MOD_CHANNELPRESSURE:
-	v2 = fluid_channel_get_channel_pressure (chan);
-	break;
-      case FLUID_MOD_PITCHWHEEL:
-	v2 = fluid_channel_get_pitch_bend (chan);
-	break;
-      case FLUID_MOD_PITCHWHEELSENS:
-	v2 = fluid_channel_get_pitch_wheel_sensitivity (chan);
-	break;
-      default:
-	v1 = 0.0f;
-      }
+    /* no need to go further */
+    if(v1 == 0.0f)
+    {
+        return 0.0f;
     }
 
-    /* transform the second input value */
-    switch (mod->flags2 & 0x0f) {
-    case 0: /* linear, unipolar, positive */
-      v2 /= range2;
-      break;
-    case 1: /* linear, unipolar, negative */
-      v2 = 1.0f - v2 / range2;
-      break;
-    case 2: /* linear, bipolar, positive */
-      v2 = -1.0f + 2.0f * v2 / range2;
-      break;
-    case 3: /* linear, bipolar, negative */
-      v2 = -1.0f + 2.0f * v2 / range2;
-      break;
-    case 4: /* concave, unipolar, positive */
-      v2 = fluid_concave(v2);
-      break;
-    case 5: /* concave, unipolar, negative */
-      v2 = fluid_concave(127 - v2);
-      break;
-    case 6: /* concave, bipolar, positive */
-      v2 = (v2 > 64)? fluid_concave(2 * (v2 - 64)) : -fluid_concave(2 * (64 - v2));
-      break;
-    case 7: /* concave, bipolar, negative */
-      v2 = (v2 > 64)? -fluid_concave(2 * (v2 - 64)) : fluid_concave(2 * (64 - v2));
-      break;
-    case 8: /* convex, unipolar, positive */
-      v2 = fluid_convex(v2);
-      break;
-    case 9: /* convex, unipolar, negative */
-      v2 = 1.0f - fluid_convex(v2);
-      break;
-    case 10: /* convex, bipolar, positive */
-      v2 = (v2 > 64)? -fluid_convex(2 * (v2 - 64)) : fluid_convex(2 * (64 - v2));
-      break;
-    case 11: /* convex, bipolar, negative */
-      v2 = (v2 > 64)? -fluid_convex(2 * (v2 - 64)) : fluid_convex(2 * (64 - v2));
-      break;
-    case 12: /* switch, unipolar, positive */
-      v2 = (v2 >= 64)? 1.0f : 0.0f;
-      break;
-    case 13: /* switch, unipolar, negative */
-      v2 = (v2 >= 64)? 0.0f : 1.0f;
-      break;
-    case 14: /* switch, bipolar, positive */
-      v2 = (v2 >= 64)? 1.0f : -1.0f;
-      break;
-    case 15: /* switch, bipolar, negative */
-      v2 = (v2 >= 64)? -1.0f : 1.0f;
-      break;
-    }
-  } else {
-    v2 = 1.0f;
-  }
+    /* get the second input source */
+    if(mod->src2 > 0)
+    {
+        v2 = fluid_mod_get_source_value(mod->src2, mod->flags2, &range2, voice);
 
-  /* it's as simple as that: */
-  return (fluid_real_t) mod->amount * v1 * v2;
+        /* transform the second input value */
+        v2 = fluid_mod_transform_source_value(v2, mod->flags2, range2);
+    }
+    else
+    {
+        v2 = 1.0f;
+    }
+
+    /* it's as simple as that: */
+    return (fluid_real_t) mod->amount * v1 * v2;
 }
 
 /**
  * Create a new uninitialized modulator structure.
  * @return New allocated modulator or NULL if out of memory
  */
-fluid_mod_t*
-fluid_mod_new()
+fluid_mod_t *
+new_fluid_mod()
 {
-  fluid_mod_t* mod = FLUID_NEW (fluid_mod_t);
-  if (mod == NULL) {
-    FLUID_LOG(FLUID_ERR, "Out of memory");
-    return NULL;
-  }
-  return mod;
+    fluid_mod_t *mod = FLUID_NEW(fluid_mod_t);
+
+    if(mod == NULL)
+    {
+        FLUID_LOG(FLUID_ERR, "Out of memory");
+        return NULL;
+    }
+
+    return mod;
 }
 
 /**
@@ -412,9 +469,21 @@ fluid_mod_new()
  * @param mod Modulator to free
  */
 void
-fluid_mod_delete (fluid_mod_t *mod)
+delete_fluid_mod(fluid_mod_t *mod)
 {
-  FLUID_FREE(mod);
+    FLUID_FREE(mod);
+}
+
+/**
+ * Returns the size of the fluid_mod_t structure.
+ *
+ * Useful in low latency scenarios e.g. to allocate a modulator on the stack.
+ *
+ * @return Size of fluid_mod_t in bytes
+ */
+size_t fluid_mod_sizeof()
+{
+    return sizeof(fluid_mod_t);
 }
 
 /**
@@ -426,63 +495,181 @@ fluid_mod_delete (fluid_mod_t *mod)
  * SF2.01 section 9.5.1 page 69, 'bullet' 3 defines 'identical'.
  */
 int
-fluid_mod_test_identity (fluid_mod_t *mod1, fluid_mod_t *mod2)
+fluid_mod_test_identity(const fluid_mod_t *mod1, const fluid_mod_t *mod2)
 {
-  return mod1->dest == mod2->dest
-    && mod1->src1 == mod2->src1
-    && mod1->src2 == mod2->src2
-    && mod1->flags1 == mod2->flags1
-    && mod1->flags2 == mod2->flags2;
+    return mod1->dest == mod2->dest
+           && mod1->src1 == mod2->src1
+           && mod1->src2 == mod2->src2
+           && mod1->flags1 == mod2->flags1
+           && mod1->flags2 == mod2->flags2;
 }
 
+/**
+ * Check if the modulator has the given source.
+ *
+ * @param mod The modulator instance
+ * @param cc Boolean value indicating if ctrl is a CC controller or not
+ * @param ctrl The source to check for (if \c cc == FALSE : a value of type #fluid_mod_src, else the value of the MIDI CC to check for)
+ *
+ * @return TRUE if the modulator has the given source, FALSE otherwise.
+ */
+int fluid_mod_has_source(const fluid_mod_t *mod, int cc, int ctrl)
+{
+    return
+        (
+            (
+                ((mod->src1 == ctrl) && ((mod->flags1 & FLUID_MOD_CC) != 0) && (cc != 0))
+                || ((mod->src1 == ctrl) && ((mod->flags1 & FLUID_MOD_CC) == 0) && (cc == 0))
+            )
+            ||
+            (
+                ((mod->src2 == ctrl) && ((mod->flags2 & FLUID_MOD_CC) != 0) && (cc != 0))
+                || ((mod->src2 == ctrl) && ((mod->flags2 & FLUID_MOD_CC) == 0) && (cc == 0))
+            )
+        );
+}
+
+/**
+ * Check if the modulator has the given destination.
+ * @param mod The modulator instance
+ * @param gen The destination generator of type #fluid_gen_type to check for
+ * @return TRUE if the modulator has the given destination, FALSE otherwise.
+ */
+int fluid_mod_has_dest(const fluid_mod_t *mod, int gen)
+{
+    return mod->dest == gen;
+}
+
+
 /* debug function: Prints the contents of a modulator */
-void fluid_dump_modulator(fluid_mod_t * mod){
-  int src1=mod->src1;
-  int dest=mod->dest;
-  int src2=mod->src2;
-  int flags1=mod->flags1;
-  int flags2=mod->flags2;
-  fluid_real_t amount=(fluid_real_t)mod->amount;
+#ifdef DEBUG
+void fluid_dump_modulator(fluid_mod_t *mod)
+{
+    int src1 = mod->src1;
+    int dest = mod->dest;
+    int src2 = mod->src2;
+    int flags1 = mod->flags1;
+    int flags2 = mod->flags2;
+    fluid_real_t amount = (fluid_real_t)mod->amount;
 
-  printf("Src: ");
-  if (flags1 & FLUID_MOD_CC){
-    printf("MIDI CC=%i",src1);
-  } else {
-    switch(src1){
-	case FLUID_MOD_NONE:
-	  printf("None"); break;
-	case FLUID_MOD_VELOCITY:
-	  printf("note-on velocity"); break;
-	case FLUID_MOD_KEY:
-	  printf("Key nr"); break;
-	  case FLUID_MOD_KEYPRESSURE:
-	    printf("Poly pressure"); break;
-	case FLUID_MOD_CHANNELPRESSURE:
-	  printf("Chan pressure"); break;
-	case FLUID_MOD_PITCHWHEEL:
-	  printf("Pitch Wheel"); break;
-	case FLUID_MOD_PITCHWHEELSENS:
-	  printf("Pitch Wheel sens"); break;
-	default:
-	  printf("(unknown: %i)", src1);
-    }; /* switch src1 */
-  }; /* if not CC */
-  if (flags1 & FLUID_MOD_NEGATIVE){printf("- ");} else {printf("+ ");};
-  if (flags1 & FLUID_MOD_BIPOLAR){printf("bip ");} else {printf("unip ");};
-  printf("-> ");
-  switch(dest){
-      case GEN_FILTERQ: printf("Q"); break;
-      case GEN_FILTERFC: printf("fc"); break;
-      case GEN_VIBLFOTOPITCH: printf("VibLFO-to-pitch"); break;
-      case GEN_MODENVTOPITCH: printf("ModEnv-to-pitch"); break;
-      case GEN_MODLFOTOPITCH: printf("ModLFO-to-pitch"); break;
-      case GEN_CHORUSSEND: printf("Chorus send"); break;
-      case GEN_REVERBSEND: printf("Reverb send"); break;
-      case GEN_PAN: printf("pan"); break;
-      case GEN_ATTENUATION: printf("att"); break;
-      default: printf("dest %i",dest);
-  }; /* switch dest */
-  printf(", amount %f flags %i src2 %i flags2 %i\n",amount, flags1, src2, flags2);
+    printf("Src: ");
+
+    if(flags1 & FLUID_MOD_CC)
+    {
+        printf("MIDI CC=%i", src1);
+    }
+    else
+    {
+        switch(src1)
+        {
+        case FLUID_MOD_NONE:
+            printf("None");
+            break;
+
+        case FLUID_MOD_VELOCITY:
+            printf("note-on velocity");
+            break;
+
+        case FLUID_MOD_KEY:
+            printf("Key nr");
+            break;
+
+        case FLUID_MOD_KEYPRESSURE:
+            printf("Poly pressure");
+            break;
+
+        case FLUID_MOD_CHANNELPRESSURE:
+            printf("Chan pressure");
+            break;
+
+        case FLUID_MOD_PITCHWHEEL:
+            printf("Pitch Wheel");
+            break;
+
+        case FLUID_MOD_PITCHWHEELSENS:
+            printf("Pitch Wheel sens");
+            break;
+
+        default:
+            printf("(unknown: %i)", src1);
+        }; /* switch src1 */
+    }; /* if not CC */
+
+    if(flags1 & FLUID_MOD_NEGATIVE)
+    {
+        printf("- ");
+    }
+    else
+    {
+        printf("+ ");
+    };
+
+    if(flags1 & FLUID_MOD_BIPOLAR)
+    {
+        printf("bip ");
+    }
+    else
+    {
+        printf("unip ");
+    };
+
+    printf("-> ");
+
+    switch(dest)
+    {
+    case GEN_FILTERQ:
+        printf("Q");
+        break;
+
+    case GEN_FILTERFC:
+        printf("fc");
+        break;
+
+    case GEN_CUSTOM_FILTERQ:
+        printf("custom-Q");
+        break;
+
+    case GEN_CUSTOM_FILTERFC:
+        printf("custom-fc");
+        break;
+
+    case GEN_VIBLFOTOPITCH:
+        printf("VibLFO-to-pitch");
+        break;
+
+    case GEN_MODENVTOPITCH:
+        printf("ModEnv-to-pitch");
+        break;
+
+    case GEN_MODLFOTOPITCH:
+        printf("ModLFO-to-pitch");
+        break;
+
+    case GEN_CHORUSSEND:
+        printf("Chorus send");
+        break;
+
+    case GEN_REVERBSEND:
+        printf("Reverb send");
+        break;
+
+    case GEN_PAN:
+        printf("pan");
+        break;
+
+    case GEN_CUSTOM_BALANCE:
+        printf("balance");
+        break;
+
+    case GEN_ATTENUATION:
+        printf("att");
+        break;
+
+    default:
+        printf("dest %i", dest);
+    }; /* switch dest */
+
+    printf(", amount %f flags %i src2 %i flags2 %i\n", amount, flags1, src2, flags2);
 };
-
+#endif
 

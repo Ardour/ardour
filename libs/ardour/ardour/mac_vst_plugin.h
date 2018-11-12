@@ -42,10 +42,10 @@ protected:
 	void open_plugin ();
 };
 
-class LIBARDOUR_API MacVSTPluginInfo : public PluginInfo
+class LIBARDOUR_API MacVSTPluginInfo : public VSTPluginInfo
 {
 public:
-	MacVSTPluginInfo ();
+	MacVSTPluginInfo (_VSTInfo*);
 	~MacVSTPluginInfo () {}
 
 	PluginPtr load (Session& session);

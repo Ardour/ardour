@@ -849,6 +849,11 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 		processor->activate ();
 	}
 
+	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	if (pi) {
+		pi->update_sidechain_name ();
+	}
+
 	return 0;
 }
 
@@ -2168,6 +2173,10 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 bool
 Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
+
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -2230,6 +2239,10 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 bool
 Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
+
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -2276,6 +2289,9 @@ Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
 bool
 Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks)
 {
+	if (_session.actively_recording ()) {
+		return false;
+	}
 	boost::shared_ptr<PluginInsert> pi;
 	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
@@ -3181,6 +3197,44 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
+		}
+
+		add_processor (listener, before);
+
+	} catch (failed_constructor& err) {
+		return -1;
+	}
+
+	return 0;
+}
+
+int
+Route::add_personal_send (boost::shared_ptr<Route> route)
+{
+	assert (route != _session.monitor_out ());
+	boost::shared_ptr<Processor> before = before_processor_for_placement (PreFader);
+
+	{
+		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
+
+		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
+
+			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend> (*x);
+
+			if (d && d->target_route() == route) {
+				/* already listening via the specified IO: do nothing */
+				return 0;
+			}
+		}
+	}
+
+	try {
+
+		boost::shared_ptr<InternalSend> listener;
+
+		{
+			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Personal));
 		}
 
 		add_processor (listener, before);
@@ -4220,6 +4274,14 @@ Route::set_name (const string& str)
 
 	SessionObject::set_name (newname);
 
+	for (uint32_t n = 0 ; ; ++n) {
+		boost::shared_ptr<PluginInsert> pi = boost::static_pointer_cast<PluginInsert> (nth_plugin (n));
+		if (!pi) {
+			break;
+		}
+		pi->update_sidechain_name ();
+	}
+
 	bool ret = (_input->set_name(newname) && _output->set_name(newname));
 
 	if (ret) {
@@ -4656,14 +4718,19 @@ Route::setup_invisible_processors ()
 	 */
 
 	ProcessorList new_processors;
+	ProcessorList personal_sends;
 	ProcessorList::iterator dr;
 	ProcessorList::iterator dw;
 
 	/* find visible processors */
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
+		boost::shared_ptr<Send> auxsnd = boost::dynamic_pointer_cast<Send> ((*i));
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
+		}
+		else if (auxsnd && auxsnd->is_personal ()) {
+			personal_sends.push_back (*i);
 		}
 	}
 
@@ -4714,6 +4781,12 @@ Route::setup_invisible_processors ()
 			++meter_point;
 		}
 		new_processors.insert (meter_point, _meter);
+	}
+
+	/* Personal Sends */
+
+	for (ProcessorList::iterator i = personal_sends.begin(); i != personal_sends.end(); ++i) {
+		new_processors.insert (amp, (*i));
 	}
 
 	/* MONITOR SEND */
@@ -5433,9 +5506,11 @@ boost::shared_ptr<AutomationControl>
 Route::tape_drive_controllable () const
 {
 #ifdef MIXBUS
-
-	if ( _ch_pre && (is_master() || mixbus()) ) {
+	if (_ch_pre && mixbus()) {
 		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_pre->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4)));
+	}
+	if (_ch_pre && is_master()) {
+		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_pre->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
 	}
 #endif
 
@@ -5640,7 +5715,7 @@ Route::send_pan_azi_controllable (uint32_t n) const
 		}
 	}
 #endif
-	
+
 	return boost::shared_ptr<AutomationControl>();
 }
 
@@ -5770,13 +5845,15 @@ boost::shared_ptr<AutomationControl>
 Route::master_send_enable_controllable () const
 {
 #ifdef  MIXBUS
-	boost::shared_ptr<ARDOUR::PluginInsert> plug = ch_post();
+	if (is_master() || is_monitor() || is_auditioner()) {
+		return boost::shared_ptr<AutomationControl>();
+	}
+
+	boost::shared_ptr<ARDOUR::PluginInsert> plug = mixbus() ? ch_pre () : ch_post();
 	if (!plug) {
 		return boost::shared_ptr<AutomationControl>();
 	}
-# undef MIXBUS_PORTS_H
-# include "../../gtk2_ardour/mixbus_ports.h"
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_channel_post_mstr_assign)));
+	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (plug->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, mixbus() ? 3 : 19)));
 #else
 	return boost::shared_ptr<AutomationControl>();
 #endif

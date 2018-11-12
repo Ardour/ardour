@@ -35,13 +35,14 @@ class Parser;
 
 typedef PBD::Signal1<void,Parser&>                   ZeroByteSignal;
 typedef PBD::Signal2<void,Parser&,unsigned short>    BankSignal;
-typedef PBD::Signal2<void,Parser&,samplecnt_t>        TimestampedSignal;
+typedef PBD::Signal2<void,Parser&,samplecnt_t>       TimestampedSignal;
 typedef PBD::Signal2<void,Parser&, byte>             OneByteSignal;
 typedef PBD::Signal2<void,Parser &, EventTwoBytes *> TwoByteSignal;
 typedef PBD::Signal2<void,Parser &, pitchbend_t>     PitchBendSignal;
 typedef PBD::Signal3<void,Parser &, uint16_t, int>   RPNSignal;
 typedef PBD::Signal3<void,Parser &, uint16_t, float> RPNValueSignal;
 typedef PBD::Signal3<void,Parser &, byte *, size_t>  Signal;
+typedef PBD::Signal4<void,Parser &, byte *, size_t, samplecnt_t> AnySignal;
 
 class LIBMIDIPP_API Parser {
  public:
@@ -86,10 +87,10 @@ class LIBMIDIPP_API Parser {
 	Signal                mtc;
 	Signal                raw_preparse;
 	Signal                raw_postparse;
-	Signal                any;
+	AnySignal             any;
 	Signal                sysex;
 	Signal                mmc;
-	Signal                position;
+	AnySignal             position;
 	Signal                song;
 
 	ZeroByteSignal        all_notes_off;
@@ -147,7 +148,7 @@ class LIBMIDIPP_API Parser {
 
 	std::ostream *trace_stream;
 	std::string trace_prefix;
-	void trace_event (Parser &p, byte *msg, size_t len);
+	void trace_event (Parser &p, byte *msg, size_t len, samplecnt_t);
 	PBD::ScopedConnection trace_connection;
 
 	size_t message_counter[256];

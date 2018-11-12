@@ -24,8 +24,10 @@
 #include <sstream>
 
 #include <glibmm/threads.h>
-#include "pbd/xml++.h"
+
+#include "pbd/i18n.h"
 #include "pbd/types_convert.h"
+#include "pbd/xml++.h"
 
 #include "ardour/debug.h"
 #include "ardour/filter.h"
@@ -39,8 +41,6 @@
 #include "ardour/tempo.h"
 #include "ardour/transient_detector.h"
 #include "ardour/types_convert.h"
-
-#include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -183,10 +183,11 @@ Region::register_properties ()
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
 	, _transient_analysis_end (0) \
+	, _soloSelected (false) \
 	, _muted (Properties::muted, false) \
 	, _opaque (Properties::opaque, true) \
 	, _locked (Properties::locked, false) \
-  , _video_locked (Properties::video_locked, false) \
+	, _video_locked (Properties::video_locked, false) \
 	, _automatic (Properties::automatic, false) \
 	, _whole_file (Properties::whole_file, false) \
 	, _import (Properties::import, false) \
@@ -220,7 +221,7 @@ Region::register_properties ()
 	, _muted (Properties::muted, other->_muted)	        \
 	, _opaque (Properties::opaque, other->_opaque)		\
 	, _locked (Properties::locked, other->_locked)		\
-  , _video_locked (Properties::video_locked, other->_video_locked) \
+	, _video_locked (Properties::video_locked, other->_video_locked) \
 	, _automatic (Properties::automatic, other->_automatic)	\
 	, _whole_file (Properties::whole_file, other->_whole_file) \
 	, _import (Properties::import, other->_import)		\
@@ -442,7 +443,7 @@ Region::set_name (const std::string& str)
 void
 Region::set_selected_for_solo(bool yn)
 {
-	if ( _soloSelected != yn) {
+	if (_soloSelected != yn) {
 
 		boost::shared_ptr<Playlist> pl (playlist());
 		if (pl){
@@ -1477,7 +1478,14 @@ Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::equivalent (boost::shared_ptr<const Region> other) const
+Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
+{
+	return (first_sample() >= other->first_sample() && last_sample() <= other->last_sample()) ||
+	       (first_sample() <= other->first_sample() && last_sample() >= other->last_sample()) ;
+}
+
+bool
+Region::exact_equivalent (boost::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&
 		_position == other->_position &&
@@ -1811,7 +1819,7 @@ Region::transients (AnalysisFeatureList& afl)
 	if (!_user_transients.empty ()) {
 		++cnt;
 	}
-	if (cnt > 1 ) {
+	if (cnt > 1) {
 		afl.sort ();
 		// remove exact duplicates
 		TransientDetector::cleanup_transients (afl, _session.sample_rate(), 0);

@@ -27,6 +27,7 @@
 
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
+#include "ardour/transport_master_manager.h"
 
 #include "gtkmm2ext/utils.h"
 #include "waveview/wave_view.h"
@@ -50,14 +51,10 @@ void
 ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {
-		if (_session->config.get_video_pullup() != 0.0f) {
-			if (Config->get_sync_source() == Engine) {
-				MessageDialog msg (
-					_("It is not possible to use JACK as the the sync source\n\
-when the pull up/down setting is non-zero."));
-				msg.run ();
-				return;
-			}
+		if (_session->config.get_video_pullup() != 0.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
+			MessageDialog msg (_("It is not possible to use JACK as the the sync source\n when the pull up/down setting is non-zero."));
+			msg.run ();
+			return;
 		}
 
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
@@ -68,7 +65,7 @@ when the pull up/down setting is non-zero."));
 		 * This is a UI limitation, imposed by audio-clock and
 		 * status displays which combine RC-config & session-properties.
 		 *
-		 * Notficy RCOptionEditor by emitting a signal if the active
+		 * Notify RCOptionEditor by emitting a signal if the active
 		 * status changed:
 		 */
 		Config->ParameterChanged("sync-source");
@@ -349,6 +346,8 @@ ARDOUR_UI::parameter_changed (std::string p)
 {
 	if (p == "external-sync") {
 
+		/* session parameter */
+
 		ActionManager::map_some_state ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
 		if (!_session->config.get_external_sync()) {
@@ -357,17 +356,25 @@ ARDOUR_UI::parameter_changed (std::string p)
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (true);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (true);
 		} else {
-			sync_button.set_text (sync_source_to_string (Config->get_sync_source(), true));
-			if (_session && _session->locations()->auto_loop_location()) {
-				// disable looping with external sync.
-				// This is not necessary because session-transport ignores the loop-state,
-				// but makes it clear to the user that it's disabled.
-				_session->request_play_loop (false, false);
-			}
 			/* XXX we need to make sure that auto-play is off as well as insensitive */
 			ActionManager::get_action ("Transport", "ToggleAutoPlay")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleAutoReturn")->set_sensitive (false);
 			ActionManager::get_action ("Transport", "ToggleFollowEdits")->set_sensitive (false);
+		}
+
+	} else if (p == "sync-source") {
+
+		/* app parameter (RC config) */
+
+		if (_session) {
+			if (!_session->config.get_external_sync()) {
+				sync_button.set_text (S_("SyncSource|Int."));
+			} else {
+				sync_button.set_text (TransportMasterManager::instance().current()->display_name());
+			}
+		} else {
+			/* changing sync source without a session is unlikely/impossible , except during startup */
+			sync_button.set_text (TransportMasterManager::instance().current()->display_name());
 		}
 
 	} else if (p == "follow-edits") {
@@ -500,7 +507,7 @@ ARDOUR_UI::parameter_changed (std::string p)
 		VisibilityTracker::set_use_window_manager_visibility (UIConfiguration::instance().get_use_wm_visibility());
 	} else if (p == "action-table-columns") {
 		const uint32_t cols = UIConfiguration::instance().get_action_table_columns ();
-		for (int i = 0; i < 9; ++i) {
+		for (int i = 0; i < MAX_LUA_ACTION_SCRIPTS; ++i) {
 			const int col = i / 2;
 			if (cols & (1<<col)) {
 				action_script_call_btn[i].show();
@@ -514,6 +521,13 @@ ARDOUR_UI::parameter_changed (std::string p)
 		bool flat = UIConfiguration::instance().get_flat_buttons();
 		if (ArdourButton::flat_buttons () != flat) {
 			ArdourButton::set_flat_buttons (flat);
+			/* force a redraw */
+			gtk_rc_reset_styles (gtk_settings_get_default());
+		}
+	} else if (p == "boxy-buttons") {
+		bool boxy = UIConfiguration::instance().get_boxy_buttons();
+		if (ArdourButton::boxy_buttons () != boxy) {
+			ArdourButton::set_boxy_buttons (boxy);
 			/* force a redraw */
 			gtk_rc_reset_styles (gtk_settings_get_default());
 		}
@@ -578,7 +592,7 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 		act->set_sensitive (true);
 	} else {
 		/* can't sync to JACK if video pullup != 0.0 */
-		if (Config->get_sync_source() == Engine) {
+		if (TransportMasterManager::instance().current()->type() == Engine) {
 			act->set_sensitive (false);
 		} else {
 			act->set_sensitive (true);
@@ -598,4 +612,3 @@ ARDOUR_UI::synchronize_sync_source_and_video_pullup ()
 	}
 
 }
-

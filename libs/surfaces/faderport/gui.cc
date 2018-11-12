@@ -571,6 +571,8 @@ FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 	actions.push_back (make_pair (string("Toggle Roll+Rec"), string(X_("Transport/record-roll"))));
 	actions.push_back (make_pair (string("Toggle Loop"), string(X_("Transport/Loop"))));
 	actions.push_back (make_pair (string("Toggle Click"), string(X_("Transport/ToggleClick"))));
+	actions.push_back (make_pair (string("Record with Pre-Roll"), string(X_("Transport/RecordPreroll"))));
+	actions.push_back (make_pair (string("Record with Count-In"), string(X_("Transport/RecordCountIn"))));
 
 	build_action_combo (cb, actions, FaderPort::Footswitch, bs);
 }

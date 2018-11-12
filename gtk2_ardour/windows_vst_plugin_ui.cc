@@ -114,6 +114,10 @@ WindowsVSTPluginUI::package (Gtk::Window& win)
 void
 WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 {
+	if (dispatch_effeditkey (ev)) {
+		return;
+	}
+#ifndef PLATFORM_WINDOWS /* linux + wine ; libs/fst/vstwin.c */
 	if (ev->type != GDK_KEY_PRESS) {
 		return;
 	}
@@ -156,6 +160,7 @@ WindowsVSTPluginUI::forward_key_event (GdkEventKey* ev)
 	fst->n_pending_keys++;
 
 	pthread_mutex_unlock (&fst->lock);
+#endif
 }
 
 int

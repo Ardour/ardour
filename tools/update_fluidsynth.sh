@@ -23,7 +23,7 @@ cd $TMP
 #git clone git://git.code.sf.net/p/fluidsynth/code-git fs-git
 git clone git://github.com/FluidSynth/fluidsynth.git fs-git
 
-FSR=fs-git/fluidsynth/
+FSR=fs-git/
 
 rsync -auc --info=progress2 \
 	${FSR}src/midi/fluid_midi.c \
@@ -48,18 +48,23 @@ rsync -auc --info=progress2 \
 	${FSR}src/rvoice/fluid_rvoice_mixer.h \
 	${FSR}src/sfloader/fluid_defsfont.c \
 	${FSR}src/sfloader/fluid_defsfont.h \
+	${FSR}src/sfloader/fluid_samplecache.c \
+	${FSR}src/sfloader/fluid_samplecache.h \
+	${FSR}src/sfloader/fluid_sffile.c \
+	${FSR}src/sfloader/fluid_sffile.h \
+	${FSR}src/sfloader/fluid_sfont.c \
 	${FSR}src/sfloader/fluid_sfont.h \
 	${FSR}src/synth/fluid_chan.c \
 	${FSR}src/synth/fluid_chan.h \
 	${FSR}src/synth/fluid_event.c \
-	${FSR}src/synth/fluid_event_priv.h \
-	${FSR}src/synth/fluid_event_queue.h \
+	${FSR}src/synth/fluid_event.h \
 	${FSR}src/synth/fluid_gen.c \
 	${FSR}src/synth/fluid_gen.h \
 	${FSR}src/synth/fluid_mod.c \
 	${FSR}src/synth/fluid_mod.h \
 	${FSR}src/synth/fluid_synth.c \
 	${FSR}src/synth/fluid_synth.h \
+	${FSR}src/synth/fluid_synth_monopoly.c \
 	${FSR}src/synth/fluid_tuning.c \
 	${FSR}src/synth/fluid_tuning.h \
 	${FSR}src/synth/fluid_voice.c \

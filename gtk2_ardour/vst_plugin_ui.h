@@ -50,6 +50,8 @@ protected:
 	Gtk::Socket _socket;
 	virtual void top_box_allocated (Gtk::Allocation&) {}
 
+	bool dispatch_effeditkey (GdkEventKey*);
+
 private:
 
 	bool configure_handler (GdkEventConfigure *);

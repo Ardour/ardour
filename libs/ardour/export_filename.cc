@@ -185,8 +185,7 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 			&& !include_timespan
 			&& !include_channel_config
 			&& !include_channel
-			&& !include_date
-			&& !include_format_name) {
+			&& !include_date) {
 		with_timespan = true;
 	}
 

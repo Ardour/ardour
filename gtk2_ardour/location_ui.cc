@@ -1180,11 +1180,11 @@ LocationUI::clock_mode_from_session_instant_xml ()
 
 	XMLNode* node = _session->instant_xml (_state_node_name);
 	if (!node) {
-		return ARDOUR_UI::instance()->secondary_clock->mode();
+		return ARDOUR_UI::instance()->primary_clock->mode();
 	}
 
 	if (!node->get_property (X_("clock-mode"), _mode)) {
-		return ARDOUR_UI::instance()->secondary_clock->mode();
+		return ARDOUR_UI::instance()->primary_clock->mode();
 	}
 
 	_mode_set = true;

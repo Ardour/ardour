@@ -26,7 +26,6 @@
 
 #include "pbd/file_utils.h"
 #include "pbd/gstdio_compat.h"
-#include "pbd/i18n.h"
 
 #include "ardour/filename_extensions.h"
 #include "ardour/profile.h"
@@ -40,6 +39,8 @@
 #include "editor_snapshots.h"
 #include "ardour_ui.h"
 #include "utils.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace PBD;

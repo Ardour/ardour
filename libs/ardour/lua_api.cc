@@ -681,10 +681,11 @@ LuaTableRef::set (lua_State* L)
 					}
 					// invalid userdata -- fall through
 				}
-				// no break
+				/* fall through */
 			case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
+				/* fall through */
 			case LUA_TTABLE: // no nested tables, sorry.
-			case LUA_TNIL: // fallthrough
+			case LUA_TNIL:
 			default:
 				// invalid value
 				lua_pop (L, 2);

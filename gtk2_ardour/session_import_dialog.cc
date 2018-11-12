@@ -35,6 +35,7 @@
 
 #include "gui_thread.h"
 #include "session_import_dialog.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -76,10 +77,12 @@ SessionImportDialog::SessionImportDialog (ARDOUR::Session* target) :
 	session_browser.set_name ("SessionBrowser");
 	session_browser.append_column (_("Elements"), sb_cols.name);
 	session_browser.append_column_editable (_("Import"), sb_cols.queued);
-	session_browser.set_tooltip_column (3);
 	session_browser.get_column(0)->set_min_width (180);
 	session_browser.get_column(1)->set_min_width (40);
 	session_browser.get_column(1)->set_sizing (TREE_VIEW_COLUMN_AUTOSIZE);
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		session_browser.set_tooltip_column (3);
+	}
 
 	session_scroll.set_policy (POLICY_AUTOMATIC, POLICY_AUTOMATIC);
 	session_scroll.add (session_browser);

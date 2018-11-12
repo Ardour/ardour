@@ -85,7 +85,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 
 	int connect_and_run (BufferSet& bufs,
 			samplepos_t start, samplepos_t end, double speed,
-			ChanMapping in, ChanMapping out,
+			ChanMapping const& in, ChanMapping const& out,
 			pframes_t nframes, samplecnt_t offset);
 	std::set<Evoral::Parameter> automatable() const;
 	std::string describe_parameter (Evoral::Parameter);
@@ -216,7 +216,7 @@ class LIBARDOUR_API AUPlugin : public ARDOUR::Plugin
 	samplecnt_t input_offset;
 	samplecnt_t *cb_offsets;
 	BufferSet* input_buffers;
-	ChanMapping * input_map;
+	ChanMapping const * input_map;
 	samplecnt_t samples_processed;
 	uint32_t   audio_input_cnt;
 

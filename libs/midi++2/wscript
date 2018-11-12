@@ -61,7 +61,7 @@ def build(bld):
         obj.defines      = [ 'LIBMIDIPP_DLL_EXPORTS=1' ]
     else:
         obj              = bld.stlib(features = 'cxx cxxstlib', source=libmidi_sources)
-        obj.cxxflags     = [ '-fPIC' ]
+        obj.cxxflags = [  bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
     # everybody loves JACK

@@ -3,16 +3,16 @@
  * Copyright (C) 2003  Peter Hanappe and others.
  *
  * This library is free software; you can redistribute it and/or
- * modify it under the terms of the GNU Library General Public License
- * as published by the Free Software Foundation; either version 2 of
+ * modify it under the terms of the GNU Lesser General Public License
+ * as published by the Free Software Foundation; either version 2.1 of
  * the License, or (at your option) any later version.
  *
  * This library is distributed in the hope that it will be useful, but
  * WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
- * Library General Public License for more details.
+ * Lesser General Public License for more details.
  *
- * You should have received a copy of the GNU Library General Public
+ * You should have received a copy of the GNU Lesser General Public
  * License along with this library; if not, write to the Free
  * Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA
  * 02110-1301, USA
@@ -23,30 +23,30 @@
 
 #include "fluid_sys.h"
 
-/**
+/*
  * Lockless event queue instance.
  */
 struct _fluid_ringbuffer_t
 {
-  char *array;  /**< Queue array of arbitrary size elements */
-  int totalcount;       /**< Total count of elements in array */
-  int count;            /**< Current count of elements */
-  int in;               /**< Index in queue to store next pushed element */
-  int out;              /**< Index in queue of next popped element */
-  int elementsize;          /**< Size of each element */
-  void* userdata;     
+    char *array;  /**< Queue array of arbitrary size elements */
+    int totalcount;       /**< Total count of elements in array */
+    fluid_atomic_int_t count;            /**< Current count of elements */
+    int in;               /**< Index in queue to store next pushed element */
+    int out;              /**< Index in queue of next popped element */
+    int elementsize;          /**< Size of each element */
+    void *userdata;
 };
 
 typedef struct _fluid_ringbuffer_t fluid_ringbuffer_t;
 
 
-fluid_ringbuffer_t *new_fluid_ringbuffer (int count, int elementsize);
-void delete_fluid_ringbuffer (fluid_ringbuffer_t *queue);
+fluid_ringbuffer_t *new_fluid_ringbuffer(int count, int elementsize);
+void delete_fluid_ringbuffer(fluid_ringbuffer_t *queue);
 
 /**
  * Get pointer to next input array element in queue.
  * @param queue Lockless queue instance
- * @param count Normally zero, or more if you need to push several items at once
+ * @param offset Normally zero, or more if you need to push several items at once
  * @return Pointer to array element in queue to store data to or NULL if queue is full
  *
  * This function along with fluid_ringbuffer_next_inptr() form a queue "push"
@@ -55,11 +55,11 @@ void delete_fluid_ringbuffer (fluid_ringbuffer_t *queue);
  * if the queue has wrapped around.  This can be used to reclaim pointers to
  * allocated memory, etc.
  */
-static FLUID_INLINE void*
-fluid_ringbuffer_get_inptr (fluid_ringbuffer_t *queue, int offset)
+static FLUID_INLINE void *
+fluid_ringbuffer_get_inptr(fluid_ringbuffer_t *queue, int offset)
 {
-  return fluid_atomic_int_get (&queue->count) + offset >= queue->totalcount ? NULL
-    : queue->array + queue->elementsize * ((queue->in + offset) % queue->totalcount);
+    return fluid_atomic_int_get(&queue->count) + offset >= queue->totalcount ? NULL
+           : queue->array + queue->elementsize * ((queue->in + offset) % queue->totalcount);
 }
 
 /**
@@ -71,13 +71,16 @@ fluid_ringbuffer_get_inptr (fluid_ringbuffer_t *queue, int offset)
  * operation and is split into 2 functions to avoid element copy.
  */
 static FLUID_INLINE void
-fluid_ringbuffer_next_inptr (fluid_ringbuffer_t *queue, int count)
+fluid_ringbuffer_next_inptr(fluid_ringbuffer_t *queue, int count)
 {
-  fluid_atomic_int_add (&queue->count, count);
+    fluid_atomic_int_add(&queue->count, count);
 
-  queue->in += count;
-  if (queue->in >= queue->totalcount)
-    queue->in -= queue->totalcount;
+    queue->in += count;
+
+    if(queue->in >= queue->totalcount)
+    {
+        queue->in -= queue->totalcount;
+    }
 }
 
 /**
@@ -86,9 +89,9 @@ fluid_ringbuffer_next_inptr (fluid_ringbuffer_t *queue, int count)
  * @return amount of items currently in queue
  */
 static FLUID_INLINE int
-fluid_ringbuffer_get_count (fluid_ringbuffer_t *queue)
+fluid_ringbuffer_get_count(fluid_ringbuffer_t *queue)
 {
-  return fluid_atomic_int_get (&queue->count);
+    return fluid_atomic_int_get(&queue->count);
 }
 
 
@@ -101,11 +104,11 @@ fluid_ringbuffer_get_count (fluid_ringbuffer_t *queue)
  * This function along with fluid_ringbuffer_next_outptr() form a queue "pop"
  * operation and is split into 2 functions to avoid an element copy.
  */
-static FLUID_INLINE void*
-fluid_ringbuffer_get_outptr (fluid_ringbuffer_t *queue)
+static FLUID_INLINE void *
+fluid_ringbuffer_get_outptr(fluid_ringbuffer_t *queue)
 {
-  return fluid_ringbuffer_get_count(queue) == 0 ? NULL
-    : queue->array + queue->elementsize * queue->out;
+    return fluid_ringbuffer_get_count(queue) == 0 ? NULL
+           : queue->array + queue->elementsize * queue->out;
 }
 
 
@@ -117,12 +120,14 @@ fluid_ringbuffer_get_outptr (fluid_ringbuffer_t *queue)
  * operation and is split into 2 functions to avoid an element copy.
  */
 static FLUID_INLINE void
-fluid_ringbuffer_next_outptr (fluid_ringbuffer_t *queue)
+fluid_ringbuffer_next_outptr(fluid_ringbuffer_t *queue)
 {
-  fluid_atomic_int_add (&queue->count, -1);
+    fluid_atomic_int_add(&queue->count, -1);
 
-  if (++queue->out == queue->totalcount)
-    queue->out = 0;
+    if(++queue->out == queue->totalcount)
+    {
+        queue->out = 0;
+    }
 }
 
 #endif /* _FLUID_ringbuffer_H */

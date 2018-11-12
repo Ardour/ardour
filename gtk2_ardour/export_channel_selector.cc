@@ -112,7 +112,7 @@ void
 PortExportChannelSelector::fill_route_list ()
 {
 	channel_view.clear_routes ();
-	RouteList routes = *_session->get_routes();
+	RouteList routes = _session->get_routelist();
 
 	/* Add master bus and then everything else */
 
@@ -658,7 +658,7 @@ void
 TrackExportChannelSelector::fill_list()
 {
 	track_list->clear();
-	RouteList routes = *_session->get_routes();
+	RouteList routes = _session->get_routelist();
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!boost::dynamic_pointer_cast<Track>(*it)) {
@@ -739,7 +739,11 @@ TrackExportChannelSelector::update_config()
 		}
 
 		if (state) {
-			state->config->set_name (route->name());
+			if (_session->config.get_track_name_number() && route->track_number() > 0) {
+				state->config->set_name (string_compose ("%1-%2", route->track_number(), route->name()));
+			} else {
+				state->config->set_name (route->name());
+			}
 		}
 
 	}

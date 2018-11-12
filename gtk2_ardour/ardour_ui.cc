@@ -105,7 +105,8 @@
 #include "ardour/session_state_utils.h"
 #include "ardour/session_utils.h"
 #include "ardour/source_factory.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
+#include "ardour/transport_master_manager.h"
 #include "ardour/system_exec.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
@@ -166,6 +167,7 @@ typedef uint64_t microseconds_t;
 #include "nsm.h"
 #include "opts.h"
 #include "pingback.h"
+#include "plugin_dspload_window.h"
 #include "processor_box.h"
 #include "public_editor.h"
 #include "rc_option_editor.h"
@@ -185,6 +187,7 @@ typedef uint64_t microseconds_t;
 #include "time_axis_view_item.h"
 #include "time_info_box.h"
 #include "timers.h"
+#include "transport_masters_dialog.h"
 #include "utils.h"
 #include "utils_videotl.h"
 #include "video_server_dialog.h"
@@ -314,6 +317,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, export_video_dialog (X_("video-export"), _("Video Export Dialog"))
 	, lua_script_window (X_("script-manager"), _("Script Manager"))
 	, idleometer (X_("idle-o-meter"), _("Idle'o'Meter"))
+	, plugin_dsp_load_window (X_("plugin-dsp-load"), _("Plugin DSP Load"))
+	, transport_masters_window (X_("transport-masters"), _("Transport Masters"))
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Video"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -473,6 +478,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 		export_video_dialog.set_state (*ui_xml, 0);
 		lua_script_window.set_state (*ui_xml, 0);
 		idleometer.set_state (*ui_xml, 0);
+		plugin_dsp_load_window.set_state (*ui_xml, 0);
+		transport_masters_window.set_state (*ui_xml, 0);
 	}
 
 	/* Separate windows */
@@ -494,6 +501,8 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	WM::Manager::instance().register_window (&audio_port_matrix);
 	WM::Manager::instance().register_window (&midi_port_matrix);
 	WM::Manager::instance().register_window (&idleometer);
+	WM::Manager::instance().register_window (&plugin_dsp_load_window);
+	WM::Manager::instance().register_window (&transport_masters_window);
 
 	/* do not retain position for add route dialog */
 	add_route_dialog.set_state_mask (WindowProxy::Size);
@@ -1652,6 +1661,9 @@ ARDOUR_UI::update_format ()
 	case MBWF:
 		s << _("MBWF");
 		break;
+	case FLAC:
+		s << _("FLAC");
+		break;
 	}
 
 	s << " ";
@@ -1801,11 +1813,11 @@ ARDOUR_UI::update_timecode_format ()
 
 	if (_session) {
 		bool matching;
-		TimecodeSlave* tcslave;
-		SyncSource sync_src = Config->get_sync_source();
+		boost::shared_ptr<TimecodeTransportMaster> tcmaster;
+		boost::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
-		if ((sync_src == LTC || sync_src == MTC) && (tcslave = dynamic_cast<TimecodeSlave*>(_session->slave())) != 0) {
-			matching = (tcslave->apparent_timecode_format() == _session->config.get_timecode_format());
+		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
+			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
 		}
@@ -2111,6 +2123,32 @@ ARDOUR_UI::session_add_audio_route (
 }
 
 void
+ARDOUR_UI::session_add_listen_bus (uint32_t how_many, string const & name_template)
+{
+	RouteList routes;
+
+	assert (_session);
+
+	try {
+		routes = _session->new_audio_route (2, 2, 0, how_many, name_template, PresentationInfo::ListenBus, -1);
+
+		if (routes.size() != how_many) {
+			error << string_compose (P_("could not create %1 new listen bus", "could not create %1 new listen busses", how_many), how_many)
+			      << endmsg;
+		}
+	}
+
+	catch (...) {
+		display_insufficient_ports_message ();
+		return;
+	}
+
+	for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
+		(*i)->set_strict_io (true);
+	}
+}
+
+void
 ARDOUR_UI::display_insufficient_ports_message ()
 {
 	MessageDialog msg (_main_window,
@@ -2295,9 +2333,8 @@ ARDOUR_UI::transport_roll ()
 		return;
 	}
 
-#if 0
 	if (_session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
 		default:
@@ -2305,7 +2342,6 @@ ARDOUR_UI::transport_roll ()
 			return;
 		}
 	}
-#endif
 
 	bool rolling = _session->transport_rolling();
 
@@ -2359,7 +2395,7 @@ ARDOUR_UI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 	}
 
 	if (_session->config.get_external_sync()) {
-		switch (Config->get_sync_source()) {
+		switch (TransportMasterManager::instance().current()->type()) {
 		case Engine:
 			break;
 		default:
@@ -2677,7 +2713,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				// no break
+				/* fall through */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;
@@ -2873,7 +2909,7 @@ If you still wish to proceed, please use the\n\n\
 					msg.run ();
 					return;
 				}
-				// no break
+				/* fall through */
 			case 0:
 				_session->remove_pending_capture_state ();
 				break;
@@ -4390,6 +4426,9 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		break;
 	case AddRouteDialog::VCAMaster:
 		_session->vca_manager().create_vca (count, name_template);
+		break;
+	case AddRouteDialog::ListenBus:
+		session_add_listen_bus (count, name_template);
 		break;
 	}
 }

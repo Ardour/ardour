@@ -110,6 +110,7 @@ class JACKAudioBackend : public AudioBackend {
     int join_process_threads ();
     bool in_process_thread ();
     uint32_t process_thread_count ();
+		int client_real_time_priority ();
 
     void transport_start ();
     void transport_stop ();
@@ -131,6 +132,7 @@ class JACKAudioBackend : public AudioBackend {
 
     int         set_port_name (PortHandle, const std::string&);
     std::string get_port_name (PortHandle) const;
+    PortFlags get_port_flags (PortHandle) const;
     PortHandle  get_port_by_name (const std::string&) const;
     int get_port_property (PortHandle, const std::string& key, std::string& value, std::string& type) const;
     int set_port_property (PortHandle, const std::string& key, const std::string& value, const std::string& type);

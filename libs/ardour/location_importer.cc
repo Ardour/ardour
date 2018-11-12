@@ -49,7 +49,7 @@ LocationImportHandler::LocationImportHandler (XMLTree const & source, Session & 
 	for (XMLNodeList::const_iterator it = locations.begin(); it != locations.end(); ++it) {
 		try {
 			elements.push_back (ElementPtr ( new LocationImporter (source, session, *this, **it)));
-		} catch (failed_constructor err) {
+		} catch (failed_constructor const&) {
 			_dirty = true;
 		}
 	}

@@ -131,6 +131,7 @@ find_session_templates (vector<TemplateInfo>& template_names, bool read_xml)
 
 		template_names.push_back (rti);
 	}
+	std::sort(template_names.begin(), template_names.end());
 }
 
 void

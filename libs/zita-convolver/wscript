@@ -1,0 +1,55 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+from waflib import Options
+from waflib import TaskGen
+import os
+
+# Version of this package (even if built as a child)
+MAJOR = '4'
+MINOR = '0'
+MICRO = '0'
+ZCONVOLVER_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+# Library version (UNIX style major, minor, micro)
+# major increment <=> incompatible changes
+# minor increment <=> compatible changes (additions)
+# micro increment <=> no interface changes
+ZCONVOLVER_LIB_VERSION = '4.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'zita-convolver'
+VERSION = ZCONVOLVER_VERSION
+I18N_PACKAGE = 'libzita-convolver'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'zita-convolver', uselib_store='LIBZCONVOLVER', atleast_version=ZCONVOLVER_LIB_VERSION, mandatory=True)
+    else:
+        conf.load ('compiler_cxx')
+        autowaf.configure(conf)
+        autowaf.check_pkg(conf, 'fftw3f', uselib_store='FFTW3F', mandatory=True)
+
+def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+
+    obj = bld.stlib(features = 'cxx cxxstlib', source = 'zita-convolver.cc')
+    obj.cxxflags        = [ '-fPIC', '-O3', '-ffast-math', '-funroll-loops' ]
+    obj.export_includes = ['.']
+    obj.includes        = ['.']
+    obj.name            = 'zita-convolver'
+    obj.target          = 'zita-convolver'
+    obj.vnum            = ZCONVOLVER_LIB_VERSION
+    obj.install_path    = bld.env['LIBDIR']
+    obj.uselib          = 'FFTW3F'
+    obj.defines         = [ 'PACKAGE="' + I18N_PACKAGE + '"', 'ENABLE_VECTOR_MODE', '_POSIX_PTHREAD_SEMANTICS', '_REENTRANT' ]
+
+def shutdown():
+    autowaf.shutdown()

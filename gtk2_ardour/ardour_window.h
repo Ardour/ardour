@@ -51,7 +51,6 @@ protected:
 	void on_unmap ();
 
 private:
-	WM::ProxyTemporary* proxy;
 	void init ();
 };
 

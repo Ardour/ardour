@@ -127,7 +127,7 @@ run_functor_for_paths (vector<string>& result,
 				}
 			}
 		}
-		catch (Glib::FileError& err)
+		catch (Glib::FileError const& err)
 		{
 			warning << err.what() << endmsg;
 		}

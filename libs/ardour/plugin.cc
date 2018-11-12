@@ -353,7 +353,7 @@ Plugin::write_immediate_event (size_t size, const uint8_t* buf)
 int
 Plugin::connect_and_run (BufferSet& bufs,
 		samplepos_t /*start*/, samplepos_t /*end*/, double /*speed*/,
-		ChanMapping /*in_map*/, ChanMapping /*out_map*/,
+		ChanMapping const& /*in_map*/, ChanMapping const& /*out_map*/,
 		pframes_t nframes, samplecnt_t /*offset*/)
 {
 	if (bufs.count().n_midi() > 0) {

@@ -49,6 +49,8 @@ public:
 	LCXLGUI (LaunchControlXL&);
 	~LCXLGUI ();
 
+	void toggle_fader8master ();
+
 private:
 	LaunchControlXL& lcxl;
 	PBD::ScopedConnectionList lcxl_connections;
@@ -58,6 +60,7 @@ private:
 	Gtk::ComboBox input_combo;
 	Gtk::ComboBox output_combo;
 	Gtk::Image    image;
+	Gtk::CheckButton fader8master_button;
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;

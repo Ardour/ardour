@@ -209,7 +209,7 @@ private:
 
 	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
 
-	typedef boost::unordered_map<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference> RegionRowMap;
+	typedef boost::unordered_map<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator> RegionRowMap;
 	typedef boost::unordered_map<std::string, Gtk::TreeModel::RowReference > RegionSourceMap;
 
 	RegionRowMap region_row_map;

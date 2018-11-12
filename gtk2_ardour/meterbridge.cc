@@ -431,9 +431,7 @@ Meterbridge::set_session (Session* s)
 	_show_master = _session->config.get_show_master_on_meterbridge();
 	_show_midi = _session->config.get_show_midi_on_meterbridge();
 
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-	RouteList copy (*routes);
+	RouteList copy = _session->get_routelist ();
 	copy.sort (Stripable::Sorter (true));
 	add_strips (copy);
 

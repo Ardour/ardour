@@ -62,13 +62,11 @@ class LIBARDOUR_API MidiPortManager {
     boost::shared_ptr<ARDOUR::Port> scene_input_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_in); }
     boost::shared_ptr<ARDOUR::Port> scene_output_port() const { return boost::dynamic_pointer_cast<MidiPort>(_scene_out); }
 
-    /* Ports used for synchronization. These have their I/O handled inside the
+    /* Ports used to send synchronization. These have their output handled inside the
      * process callback.
      */
 
-    boost::shared_ptr<MidiPort> mtc_input_port() const { return _mtc_input_port; }
     boost::shared_ptr<MidiPort> mtc_output_port() const { return _mtc_output_port; }
-    boost::shared_ptr<MidiPort> midi_clock_input_port() const { return _midi_clock_input_port; }
     boost::shared_ptr<MidiPort> midi_clock_output_port() const { return _midi_clock_output_port; }
 
     void set_midi_port_states (const XMLNodeList&);
@@ -86,9 +84,7 @@ class LIBARDOUR_API MidiPortManager {
     boost::shared_ptr<Port> _scene_out;
 
     /* synchronously handled ports: ARDOUR::MidiPort */
-    boost::shared_ptr<MidiPort> _mtc_input_port;
     boost::shared_ptr<MidiPort> _mtc_output_port;
-    boost::shared_ptr<MidiPort> _midi_clock_input_port;
     boost::shared_ptr<MidiPort> _midi_clock_output_port;
 
     void create_ports ();

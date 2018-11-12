@@ -106,6 +106,7 @@ Mixer_UI::Mixer_UI ()
 	, _monitor_section (0)
 	, _plugin_selector (0)
 	, _strip_width (UIConfiguration::instance().get_default_narrow_ms() ? Narrow : Wide)
+	, _spill_scroll_position (0)
 	, ignore_reorder (false)
 	, _in_group_rebuild_or_clear (false)
 	, _route_deletion_in_progress (false)
@@ -230,7 +231,6 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.set_headers_visible (true);
 	favorite_plugins_display.set_rules_hint (true);
 	favorite_plugins_display.set_can_focus (false);
-	favorite_plugins_display.set_tooltip_column (0);
 	favorite_plugins_display.add_object_drag (favorite_plugins_columns.plugin.index(), "PluginFavoritePtr");
 	favorite_plugins_display.set_drag_column (favorite_plugins_columns.name.index());
 	favorite_plugins_display.add_drop_targets (target_list);
@@ -239,6 +239,9 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_display.signal_drop.connect (sigc::mem_fun (*this, &Mixer_UI::plugin_drop));
 	favorite_plugins_display.signal_row_expanded().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
 	favorite_plugins_display.signal_row_collapsed().connect (sigc::mem_fun (*this, &Mixer_UI::save_favorite_ui_state));
+	if (UIConfiguration::instance().get_use_tooltips()) {
+		favorite_plugins_display.set_tooltip_column (0);
+	}
 	favorite_plugins_model->signal_row_has_child_toggled().connect (sigc::mem_fun (*this, &Mixer_UI::sync_treeview_favorite_ui_state));
 
 	favorite_plugins_scroller.add (favorite_plugins_display);
@@ -374,6 +377,16 @@ Mixer_UI::~Mixer_UI ()
 	delete _plugin_selector;
 	delete track_menu;
 }
+
+struct MixerStripSorter {
+	bool operator() (const MixerStrip* ms_a, const MixerStrip* ms_b)
+	{
+		boost::shared_ptr<ARDOUR::Stripable> const& a = ms_a->stripable ();
+		boost::shared_ptr<ARDOUR::Stripable> const& b = ms_b->stripable ();
+		return ARDOUR::Stripable::Sorter(true)(a, b);
+	}
+};
+
 
 void
 Mixer_UI::escape ()
@@ -640,16 +653,24 @@ Mixer_UI::deselect_all_strip_processors ()
 }
 
 void
-Mixer_UI::select_all_tracks ()
-{
-	PublicEditor::instance().select_all_tracks ();
-}
-
-void
 Mixer_UI::select_none ()
 {
 	_selection.clear_routes();
 	deselect_all_strip_processors();
+}
+
+void
+Mixer_UI::select_next_strip ()
+{
+	deselect_all_strip_processors();
+	_session->selection().select_next_stripable (true, false);
+}
+
+void
+Mixer_UI::select_prev_strip ()
+{
+	deselect_all_strip_processors();
+	_session->selection().select_prev_stripable (true, false);
 }
 
 void
@@ -911,15 +932,6 @@ Mixer_UI::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 
 	return 0;
 }
-
-struct MixerStripSorter {
-	bool operator() (const MixerStrip* ms_a, const MixerStrip* ms_b)
-	{
-		boost::shared_ptr<ARDOUR::Stripable> const& a = ms_a->stripable ();
-		boost::shared_ptr<ARDOUR::Stripable> const& b = ms_b->stripable ();
-		return ARDOUR::Stripable::Sorter(true)(a, b);
-	}
-};
 
 bool
 Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
@@ -1441,6 +1453,9 @@ Mixer_UI::redisplay_track_list ()
 	if (ss) {
 		boost::shared_ptr<VCA> sv = boost::dynamic_pointer_cast<VCA> (ss);
 		if (sv) {
+			if (_spill_scroll_position <= 0 && scroller.get_hscrollbar()) {
+				_spill_scroll_position = scroller.get_hscrollbar()->get_adjustment()->get_value();
+			}
 			spill_redisplay (sv);
 			return;
 		}
@@ -1532,6 +1547,13 @@ Mixer_UI::redisplay_track_list ()
 	}
 
 	_group_tabs->set_dirty ();
+
+	if (_spill_scroll_position > 0 && scroller.get_hscrollbar()) {
+		Adjustment* adj = scroller.get_hscrollbar()->get_adjustment();
+		adj->set_value (max (adj->get_lower(), min (adj->get_upper(), _spill_scroll_position)));
+	}
+	_spill_scroll_position = 0;
+
 }
 
 void
@@ -1580,18 +1602,7 @@ void
 Mixer_UI::initial_track_display ()
 {
 	StripableList sl;
-
-	boost::shared_ptr<RouteList> routes = _session->get_routes();
-
-	for (RouteList::iterator r = routes->begin(); r != routes->end(); ++r) {
-		sl.push_back (*r);
-	}
-
-	VCAList vcas = _session->vca_manager().vcas();
-
-	for (VCAList::iterator v = vcas.begin(); v != vcas.end(); ++v) {
-		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
-	}
+	_session->get_stripables (sl);
 
 	sl.sort (PresentationInfoMixerSorter());
 
@@ -1689,10 +1700,10 @@ Mixer_UI::build_track_menu ()
 	items.push_back (MenuElem (_("Hide All"), sigc::mem_fun(*this, &Mixer_UI::hide_all_routes)));
 	items.push_back (MenuElem (_("Show All Audio Tracks"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiotracks)));
 	items.push_back (MenuElem (_("Hide All Audio Tracks"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiotracks)));
-	items.push_back (MenuElem (_("Show All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiobus)));
-	items.push_back (MenuElem (_("Hide All Audio Busses"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
 	items.push_back (MenuElem (_("Show All Midi Tracks"), sigc::mem_fun (*this, &Mixer_UI::show_all_miditracks)));
 	items.push_back (MenuElem (_("Hide All Midi Tracks"), sigc::mem_fun (*this, &Mixer_UI::hide_all_miditracks)));
+	items.push_back (MenuElem (_("Show All Busses"), sigc::mem_fun(*this, &Mixer_UI::show_all_audiobus)));
+	items.push_back (MenuElem (_("Hide All Busses"), sigc::mem_fun(*this, &Mixer_UI::hide_all_audiobus)));
 
 }
 
@@ -3082,7 +3093,9 @@ Mixer_UI::register_actions ()
 	myactions.register_action (group, "toggle-processors", _("Toggle Selected Processors"), sigc::mem_fun (*this, &Mixer_UI::toggle_processors));
 	myactions.register_action (group, "ab-plugins", _("Toggle Selected Plugins"), sigc::mem_fun (*this, &Mixer_UI::ab_plugins));
 	myactions.register_action (group, "select-none", _("Deselect all strips and processors"), sigc::mem_fun (*this, &Mixer_UI::select_none));
-	myactions.register_action (group, "select-all-tracks", _("Select All Tracks"), sigc::mem_fun (*this, &Mixer_UI::select_all_tracks));
+
+	myactions.register_action (group, "select-next-stripable", _("Select Next Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_next_strip));
+	myactions.register_action (group, "select-prev-stripable", _("Scroll Previous Mixer Strip"), sigc::mem_fun (*this, &Mixer_UI::select_prev_strip));
 
 	myactions.register_action (group, "scroll-left", _("Scroll Mixer Window to the left"), sigc::mem_fun (*this, &Mixer_UI::scroll_left));
 	myactions.register_action (group, "scroll-right", _("Scroll Mixer Window to the right"), sigc::mem_fun (*this, &Mixer_UI::scroll_right));

@@ -28,7 +28,7 @@
 
 #include <glib/gstdio.h>
 
-#include "ptfformat.h"
+#include "ptformat/ptfformat.h"
 
 #if 0
 #define verbose_printf(...) printf(__VA_ARGS__)
@@ -76,13 +76,27 @@ hexdump(uint8_t *data, int len)
 	}
 }
 
-PTFFormat::PTFFormat() : version(0), product(NULL) {
+PTFFormat::PTFFormat() : version(0), product(NULL), ptfunxored(NULL) {
 }
 
 PTFFormat::~PTFFormat() {
+	cleanup();
+}
+
+void
+PTFFormat::cleanup(void) {
 	if (ptfunxored) {
 		free(ptfunxored);
+		ptfunxored = NULL;
 	}
+	audiofiles.clear();
+	regions.clear();
+	midiregions.clear();
+	compounds.clear();
+	tracks.clear();
+	miditracks.clear();
+	version = 0;
+	product = NULL;
 }
 
 int64_t
@@ -236,7 +250,10 @@ PTFFormat::unxor(std::string path) {
 			-1           could not parse pt session
 */
 int
-PTFFormat::load(std::string path, int64_t targetsr) {
+PTFFormat::load(std::string ptf, int64_t targetsr) {
+	cleanup();
+	path = ptf;
+
 	if (unxor(path))
 		return -1;
 
@@ -1256,6 +1273,28 @@ PTFFormat::parseaudio(void) {
 	std::reverse(actualwavs.begin(), actualwavs.end());
 	//resort(audiofiles);
 	//resort(actualwavs);
+
+	// Jump to end of wav file list
+	if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\xff\xff\xff\xff", 4))
+		return;
+
+	// Loop through all the sources
+	for (vector<wav_t>::iterator w = audiofiles.begin(); w != audiofiles.end(); ++w) {
+		// Jump to start of source metadata for this source
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x07", 2))
+			return;
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x02", 2))
+			return;
+		k++;
+		if (!jumpto(&k, ptfunxored, len, (const unsigned char *)"\x5a\x02", 2))
+			return;
+
+		w->length = 0;
+		w->length |= (uint32_t)(ptfunxored[k-22]) << 24;
+		w->length |= (uint32_t)(ptfunxored[k-23]) << 16;
+		w->length |= (uint32_t)(ptfunxored[k-24]) << 8;
+		w->length |= (uint32_t)(ptfunxored[k-25]);
+	}
 }
 
 void

@@ -189,6 +189,8 @@ gtk2_ardour_sources = [
         'plugin_setup_dialog.cc',
         'plugin_selector.cc',
         'plugin_ui.cc',
+        'plugin_dspload_ui.cc',
+        'plugin_dspload_window.cc',
         'port_group.cc',
         'port_insert_ui.cc',
         'port_matrix.cc',
@@ -202,6 +204,7 @@ gtk2_ardour_sources = [
         'processor_selection.cc',
         'patch_change_dialog.cc',
         'progress_reporter.cc',
+        'pt_import_selector.cc',
         'public_editor.cc',
         'quantize_dialog.cc',
         'rc_option_editor.cc',
@@ -262,6 +265,7 @@ gtk2_ardour_sources = [
         'transform_dialog.cc',
         'transport_control.cc',
         'transport_control_ui.cc',
+        'transport_masters_dialog.cc',
         'transpose_dialog.cc',
         'ui_config.cc',
         'utils.cc',
@@ -595,7 +599,7 @@ def build(bld):
         obj.includes  = [ '../libs/fst', '.' ]
         obj.name      = 'libgtk2_ardour'
         obj.target    = 'gtk2_ardour'
-        obj.cflags  = [ '-fPIC' ]
+        obj.cflags = [ bld.env['compiler_flags_dict']['pic'] ]
 
     else:
         # just the normal executable version of the GTK GUI
@@ -849,6 +853,7 @@ def build(bld):
                     'ARDOUR_EXEC' : str (bld.env['lwrcase_dirname']),
                     'ARDOUR_ICON' : str (bld.env['lwrcase_dirname']),
                     'VERSION': str (bld.env['VERSION']),
+                    'DATE': str (bld.env['DATE']),
     }
 
     if bld.env['FREEDESKTOP']:

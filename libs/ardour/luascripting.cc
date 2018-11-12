@@ -262,7 +262,7 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 		try {
 			std::string script = Glib::file_get_contents (fn);
 			sha1_write (&s, (const uint8_t *) script.c_str(), script.size ());
-		} catch (Glib::FileError err) {
+		} catch (Glib::FileError const& err) {
 			return LuaScriptInfoPtr();
 		}
 	}

@@ -115,6 +115,8 @@ private:
 
 	Gtk::Label _sources_label;
 	Gtk::ListViewText _sources;
+
+	void set_clock_mode_from_primary ();
 };
 
 #endif /* __gtk_ardour_region_edit_h__ */

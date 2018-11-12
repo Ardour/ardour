@@ -108,7 +108,7 @@ fixup_bundle_environment (int argc, char* argv[], string & localedir)
 
 	bundle_dir = Glib::path_get_dirname (exec_dir);
 
-#ifdef ENABLE_NLS
+#if ENABLE_NLS
 	if (!ARDOUR::translations_are_enabled ()) {
 		localedir = "/this/cannot/exist";
 	} else {

@@ -45,7 +45,7 @@
 #include "ardour/midi_ui.h"
 #include "ardour/profile.h"
 #include "ardour/session.h"
-#include "ardour/slave.h"
+#include "ardour/transport_master.h"
 #include "ardour/ticker.h"
 
 #include "pbd/i18n.h"
@@ -306,9 +306,9 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	   of an MTC slave to become out of date. Catch this.
 	*/
 
-	MTC_Slave* mtcs = dynamic_cast<MTC_Slave*> (_slave);
+	boost::shared_ptr<MTC_TransportMaster> mtcs = boost::dynamic_pointer_cast<MTC_TransportMaster> (transport_master());
 
-	if (mtcs != 0) {
+	if (mtcs) {
 		// cerr << "Locate *with* MTC slave\n";
 		mtcs->handle_locate (mmc_tc);
 	} else {
@@ -402,7 +402,7 @@ Session::send_full_time_code (samplepos_t const t, MIDI::pframes_t nframes)
 	if (_engine.freewheeling() || !Config->get_send_mtc()) {
 		return 0;
 	}
-	if (_slave && !_slave->locked()) {
+	if (!transport_master()->locked()) {
 		return 0;
 	}
 
@@ -486,7 +486,7 @@ Session::send_midi_time_code_for_cycle (samplepos_t start_sample, samplepos_t en
 		// cerr << "(MTC) Not sending MTC\n";
 		return 0;
 	}
-	if (_slave && !_slave->locked()) {
+	if (!transport_master()->locked()) {
 		return 0;
 	}
 
@@ -707,20 +707,11 @@ Session::midi_clock_output_port () const
 	return _midi_ports->midi_clock_output_port ();
 }
 
-boost::shared_ptr<MidiPort>
-Session::midi_clock_input_port () const
-{
-	return _midi_ports->midi_clock_input_port ();
-}
+
 boost::shared_ptr<MidiPort>
 Session::mtc_output_port () const
 {
 	return _midi_ports->mtc_output_port ();
-}
-boost::shared_ptr<MidiPort>
-Session::mtc_input_port () const
-{
-	return _midi_ports->mtc_input_port ();
 }
 
 void
