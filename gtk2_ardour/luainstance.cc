@@ -1095,8 +1095,6 @@ LuaInstance::LuaInstance ()
 {
 	lua.Print.connect (&_lua_print);
 	init ();
-
-	load_state ();
 }
 
 LuaInstance::~LuaInstance ()
@@ -1321,6 +1319,9 @@ LuaInstance::save_state ()
 void
 LuaInstance::set_dirty ()
 {
+	if (!_session || _session->deletion_in_progress()) {
+		return;
+	}
 	save_state ();
 	_session->set_dirty (); // XXX is this reasonable?
 }
@@ -1393,6 +1394,7 @@ LuaInstance::set_state (const XMLNode& node)
 		}
 	}
 
+	assert (_callbacks.empty());
 	if ((child = find_named_node (node, "ActionHooks"))) {
 		for (XMLNodeList::const_iterator n = child->children ().begin (); n != child->children ().end (); ++n) {
 			try {
