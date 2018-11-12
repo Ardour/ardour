@@ -1735,11 +1735,11 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 		_callbacks.insert (std::make_pair(p->id(), p));
 		p->drop_callback.connect (_slotcon, MISSING_INVALIDATOR, boost::bind (&LuaInstance::unregister_lua_slot, this, p->id()), gui_context());
 		SlotChanged (p->id(), p->name(), p->signals()); /* EMIT SIGNAL */
+		set_dirty ();
 		return true;
 	} catch (luabridge::LuaException const& e) {
 		cerr << "LuaException:" << e.what () << endl;
 	} catch (...) { }
-	set_dirty ();
 	return false;
 }
 
@@ -1750,9 +1750,9 @@ LuaInstance::unregister_lua_slot (const PBD::ID& id)
 	if (i != _callbacks.end()) {
 		SlotChanged (id, "", ActionHook()); /* EMIT SIGNAL */
 		_callbacks.erase (i);
+		set_dirty ();
 		return true;
 	}
-	set_dirty ();
 	return false;
 }
 
