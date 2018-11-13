@@ -4294,8 +4294,8 @@ OSC::sel_new_personal_send (char *foldback, lo_message msg)
 	 */
 	string foldbackbus = foldback;
 	string foldback_name = foldbackbus;
-	if (foldbackbus.find ("- monitor") == string::npos) {
-		foldback_name = string_compose ("%1 - monitor", foldbackbus);
+	if (foldbackbus.find ("- FB") == string::npos) {
+		foldback_name = string_compose ("%1 - FB", foldbackbus);
 	}
 	boost::shared_ptr<Route> lsn_rt = session->route_by_name (foldback_name);
 	if (!lsn_rt) {
