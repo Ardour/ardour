@@ -3241,6 +3241,8 @@ Route::add_foldback_send (boost::shared_ptr<Route> route)
 			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Foldback));
 		}
 
+		listener->panner_shell()->set_linked_to_route (false);
+		listener->panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
 		add_processor (listener, before);
 
 	} catch (failed_constructor& err) {
