@@ -2719,7 +2719,7 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 	}
 
 	if (target->is_listenbus ()) {
-		_route->add_personal_send (target);
+		_route->add_foldback_send (target);
 	} else {
 		_session->add_internal_send (target, _placement, _route);
 	}

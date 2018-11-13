@@ -43,7 +43,7 @@ public:
 	uint32_t bit_slot() const { return _bitslot; }
 
 	bool display_to_user() const;
-	bool is_personal () const { return _role == Personal; }
+	bool is_foldback () const { return _role == Foldback; }
 
 	boost::shared_ptr<Amp> amp() const { return _amp; }
 	boost::shared_ptr<PeakMeter> meter() const { return _meter; }

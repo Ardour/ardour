@@ -4318,7 +4318,7 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			bool s_only = true;
 			if (!rt->feeds (lsn_rt, &s_only)) {
 				// create send
-				rt->add_personal_send (lsn_rt);
+				rt->add_foldback_send (lsn_rt);
 				//boost::shared_ptr<Send> snd = rt->internal_send_for (aux);
 				session->dirty ();
 				return 0;
@@ -6607,7 +6607,7 @@ OSC::cue_new_send (string rt_name, lo_message msg)
 				bool s_only = true;
 				if (!rt_send->feeds (aux, &s_only)) {
 					// create send
-					rt_send->add_personal_send (aux);
+					rt_send->add_foldback_send (aux);
 					boost::shared_ptr<Send> snd = rt_send->internal_send_for (aux);
 					session->dirty ();
 					return 0;

@@ -3209,7 +3209,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 }
 
 int
-Route::add_personal_send (boost::shared_ptr<Route> route)
+Route::add_foldback_send (boost::shared_ptr<Route> route)
 {
 	assert (route != _session.monitor_out ());
 	boost::shared_ptr<Processor> before = before_processor_for_placement (PreFader);
@@ -3234,7 +3234,7 @@ Route::add_personal_send (boost::shared_ptr<Route> route)
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Personal));
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Foldback));
 		}
 
 		add_processor (listener, before);
@@ -4718,7 +4718,7 @@ Route::setup_invisible_processors ()
 	 */
 
 	ProcessorList new_processors;
-	ProcessorList personal_sends;
+	ProcessorList foldback_sends;
 	ProcessorList::iterator dr;
 	ProcessorList::iterator dw;
 
@@ -4729,8 +4729,8 @@ Route::setup_invisible_processors ()
 		if ((*i)->display_to_user ()) {
 			new_processors.push_back (*i);
 		}
-		else if (auxsnd && auxsnd->is_personal ()) {
-			personal_sends.push_back (*i);
+		else if (auxsnd && auxsnd->is_foldback ()) {
+			foldback_sends.push_back (*i);
 		}
 	}
 
@@ -4783,9 +4783,9 @@ Route::setup_invisible_processors ()
 		new_processors.insert (meter_point, _meter);
 	}
 
-	/* Personal Sends */
+	/* Foldback Sends */
 
-	for (ProcessorList::iterator i = personal_sends.begin(); i != personal_sends.end(); ++i) {
+	for (ProcessorList::iterator i = foldback_sends.begin(); i != foldback_sends.end(); ++i) {
 		new_processors.insert (amp, (*i));
 	}
 
