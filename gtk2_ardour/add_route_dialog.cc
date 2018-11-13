@@ -172,14 +172,14 @@ You may select:\n \
 ")
 		));
 		builtin_types.push_back (
-			std::pair<string,string>(_("Listen Busses"),   _(" \
-Use the settings, below, to create new Listen Busses.\n \
-Listen Busses are used as master outputs for monitor channels which are fed by\n \
+			std::pair<string,string>(_("Foldback Busses"),   _(" \
+Use the settings, below, to create new Foldback Busses.\n \
+Foldback Busses are used as master outputs for monitor channels which are fed by\n \
 hidden monitor sends.\n \
 \n\n \
 You may select:\n \
-* The number of Listen Busses to add.\n \
-* A name for the new Listen Busses.\n \
+* The number of Foldback Busses to add.\n \
+* A name for the new Foldback Busses.\n \
 ")
 		));
 	}
@@ -580,8 +580,8 @@ AddRouteDialog::type_wanted()
 		return AudioTrack;
 	} else if (str == _("VCA Masters")) {
 		return VCAMaster;
-	} else if (str == _("Listen Busses")) {
-		return ListenBus;
+	} else if (str == _("Foldback Busses")) {
+		return FoldbackBus;
 	} else {
 		assert (0);
 		return AudioTrack;
@@ -609,8 +609,8 @@ AddRouteDialog::maybe_update_name_template_entry ()
 	case MidiBus:
 		name_template_entry.set_text (_("Bus"));
 		break;
-	case ListenBus:
-		name_template_entry.set_text (_("Listener"));
+	case FoldbackBus:
+		name_template_entry.set_text (_("Foldback"));
 		break;
 	case VCAMaster:
 		name_template_entry.set_text (VCA::default_name_template());
@@ -757,7 +757,7 @@ AddRouteDialog::track_type_chosen ()
 		insert_at_combo.set_sensitive (true);
 
 		break;
-	case ListenBus:
+	case FoldbackBus:
 
 		configuration_label.set_sensitive (false);
 		channel_combo.set_sensitive (false);
@@ -878,7 +878,7 @@ AddRouteDialog::channels ()
 		ret.set (DataType::MIDI, 1);
 		break;
 
-	case ListenBus:
+	case FoldbackBus:
 		ret.set (DataType::AUDIO, 2);
 		ret.set (DataType::MIDI, 0);
 		break;

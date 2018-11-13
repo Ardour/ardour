@@ -3257,7 +3257,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 		StateProtector sp (this);
 		if (Profile->get_trx()) {
 			add_routes (ret, false, false, false, order);
-		} else if (flags == PresentationInfo::ListenBus) {
+		} else if (flags == PresentationInfo::FoldbackBus) {
 			add_routes (ret, false, false, true, order); // no autoconnect
 		} else {
 			add_routes (ret, false, true, true, order); // autoconnect // outputs only

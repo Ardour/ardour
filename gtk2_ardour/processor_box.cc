@@ -2034,7 +2034,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2047,7 +2047,7 @@ ProcessorBox::build_possible_aux_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if ((*r)->is_listenbus ()) {
+		if ((*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (_route->internal_send_for (*r)) {
@@ -2070,7 +2070,7 @@ ProcessorBox::build_possible_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2083,7 +2083,7 @@ ProcessorBox::build_possible_listener_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if (!(*r)->is_listenbus ()) {
+		if (!(*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (_route->internal_send_for (*r)) {
@@ -2106,7 +2106,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_listenbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus ()) {
 		return 0;
 	}
 
@@ -2119,7 +2119,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
-		if (!(*r)->is_listenbus ()) {
+		if (!(*r)->is_foldbackbus ()) {
 			continue;
 		}
 		if (!_route->internal_send_for (*r)) {
@@ -2192,8 +2192,8 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
-	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_listenbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
 
 	ProcessorEntry* single_selection = 0;
 	if (processor_display.selection().size() == 1) {
@@ -2718,7 +2718,7 @@ ProcessorBox::choose_aux (boost::weak_ptr<Route> wr)
 		return;
 	}
 
-	if (target->is_listenbus ()) {
+	if (target->is_foldbackbus ()) {
 		_route->add_foldback_send (target);
 	} else {
 		_session->add_internal_send (target, _placement, _route);

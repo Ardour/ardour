@@ -2123,17 +2123,17 @@ ARDOUR_UI::session_add_audio_route (
 }
 
 void
-ARDOUR_UI::session_add_listen_bus (uint32_t how_many, string const & name_template)
+ARDOUR_UI::session_add_foldback_bus (uint32_t how_many, string const & name_template)
 {
 	RouteList routes;
 
 	assert (_session);
 
 	try {
-		routes = _session->new_audio_route (2, 2, 0, how_many, name_template, PresentationInfo::ListenBus, -1);
+		routes = _session->new_audio_route (2, 2, 0, how_many, name_template, PresentationInfo::FoldbackBus, -1);
 
 		if (routes.size() != how_many) {
-			error << string_compose (P_("could not create %1 new listen bus", "could not create %1 new listen busses", how_many), how_many)
+			error << string_compose (P_("could not create %1 new foldback bus", "could not create %1 new foldback busses", how_many), how_many)
 			      << endmsg;
 		}
 	}
@@ -4427,8 +4427,8 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	case AddRouteDialog::VCAMaster:
 		_session->vca_manager().create_vca (count, name_template);
 		break;
-	case AddRouteDialog::ListenBus:
-		session_add_listen_bus (count, name_template);
+	case AddRouteDialog::FoldbackBus:
+		session_add_foldback_bus (count, name_template);
 		break;
 	}
 }

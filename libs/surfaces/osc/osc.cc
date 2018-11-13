@@ -4275,7 +4275,7 @@ OSC::sel_comment (char *newcomment, lo_message msg) {
 }
 
 int
-OSC::sel_new_personal_send (char *listener, lo_message msg)
+OSC::sel_new_personal_send (char *foldback, lo_message msg)
 {
 	OSCSurface *sur = get_surface(get_address (msg));
 	boost::shared_ptr<Stripable> s;
@@ -4288,24 +4288,24 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			return -1;
 		}
 	}
-	/* if a listenbus called listener exists use it
-	 * other wise create create it. Then create a personal send from
+	/* if a foldbackbus called foldback exists use it
+	 * other wise create create it. Then create a foldback send from
 	 * this route to that bus.
 	 */
-	string listenbus = listener;
-	string listen_name = listenbus;
-	if (listenbus.find ("- monitor") == string::npos) {
-		listen_name = string_compose ("%1 - monitor", listenbus);
+	string foldbackbus = foldback;
+	string foldback_name = foldbackbus;
+	if (foldbackbus.find ("- monitor") == string::npos) {
+		foldback_name = string_compose ("%1 - monitor", foldbackbus);
 	}
-	boost::shared_ptr<Route> lsn_rt = session->route_by_name (listen_name);
+	boost::shared_ptr<Route> lsn_rt = session->route_by_name (foldback_name);
 	if (!lsn_rt) {
-		// doesn't exist but check if raw name does and is listenbus
-		boost::shared_ptr<Route> raw_rt = session->route_by_name (listenbus);
-		if (raw_rt && raw_rt->is_listenbus()) {
+		// doesn't exist but check if raw name does and is foldbackbus
+		boost::shared_ptr<Route> raw_rt = session->route_by_name (foldbackbus);
+		if (raw_rt && raw_rt->is_foldbackbus()) {
 			lsn_rt = raw_rt;
 		} else {
-			// create the listenbus
-			RouteList list = session->new_audio_route (2, 2, 0, 1, listen_name, PresentationInfo::ListenBus, (uint32_t) -1);
+			// create the foldbackbus
+			RouteList list = session->new_audio_route (2, 2, 0, 1, foldback_name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 			lsn_rt = *(list.begin());
 			lsn_rt->presentation_info().set_hidden (true);
 			session->set_dirty();
@@ -4329,7 +4329,7 @@ OSC::sel_new_personal_send (char *listener, lo_message msg)
 			PBD::warning << "OSC: new_send - can't send to self." << endmsg;
 		}
 	} else {
-		PBD::warning << "OSC: new_send - no ListenBus to send to." << endmsg;
+		PBD::warning << "OSC: new_send - no FoldbackBus to send to." << endmsg;
 	}
 
 	return -1;
@@ -6349,7 +6349,7 @@ OSC::get_sorted_stripables(std::bitset<32> types, bool cue, uint32_t custom, Sor
 				sorted.push_back (s);
 			} else if (types[4] && boost::dynamic_pointer_cast<VCA>(s)) {
 				sorted.push_back (s);
-			} else  if (s->is_listenbus()) {
+			} else  if (s->is_foldbackbus()) {
 				if (types[7]) {
 					sorted.push_back (s);
 				}
@@ -6570,7 +6570,7 @@ OSC::cue_new_aux (string name, string dest_1, string dest_2, lo_message msg)
 	RouteList list;
 	boost::shared_ptr<Stripable> aux;
 	name = string_compose ("%1 - monitor", name);
-	list = session->new_audio_route (2, 2, 0, 1, name, PresentationInfo::ListenBus, (uint32_t) -1);
+	list = session->new_audio_route (2, 2, 0, 1, name, PresentationInfo::FoldbackBus, (uint32_t) -1);
 	aux = *(list.begin());
 	if (aux) {
 		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(aux);
