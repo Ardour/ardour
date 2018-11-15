@@ -25,6 +25,8 @@
 
 #include <glibmm/threads.h>
 
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
 #include <boost/utility.hpp>
 #include "pbd/statefuldestructible.h"
 
@@ -36,7 +38,8 @@ namespace ARDOUR {
 
 class Session;
 
-class LIBARDOUR_API Source : public SessionObject
+class LIBARDOUR_API Source : public SessionObject,
+		public boost::enable_shared_from_this<ARDOUR::Source>
 {
 public:
 	enum Flag {
@@ -117,25 +120,24 @@ public:
 	uint32_t level() const { return _level; }
 
 	std::string ancestor_name() { return _ancestor_name.empty() ? name() : _ancestor_name; }
-	void        set_ancestor_name(const std::string& name) { _ancestor_name = name; }
+	void set_ancestor_name(const std::string& name) { _ancestor_name = name; }
 
-protected:
-	DataType    _type;
-	Flag        _flags;
-	time_t      _timestamp;
-	std::string _take_id;
-	samplepos_t _timeline_position;
-	bool        _analysed;
+	static PBD::Signal1<void,boost::shared_ptr<ARDOUR::Source> > SourcePropertyChanged;
 
-	mutable Glib::Threads::Mutex _lock;
-	mutable Glib::Threads::Mutex _analysis_lock;
+  protected:
+	DataType            _type;
+	Flag                _flags;
+	time_t              _timestamp;
+	std::string         _take_id;
+	samplepos_t          _timeline_position;
+	bool                _analysed;
+        mutable Glib::Threads::Mutex _lock;
+        mutable Glib::Threads::Mutex _analysis_lock;
+	gint                _use_count; /* atomic */
+	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
+	std::string         _ancestor_name;
 
-	gint        _use_count; /* atomic */
-	uint32_t    _level; /* how deeply nested is this source w.r.t a disk file */
-	std::string _ancestor_name;
-
-private:
-
+  private:
 	void fix_writable_flags ();
 };
 

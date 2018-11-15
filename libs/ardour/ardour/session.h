@@ -1754,7 +1754,19 @@ private:
 	mutable Glib::Threads::Mutex source_lock;
 
 public:
+
+	/* Emited when a new source is added to the session */
+	PBD::Signal1< void, boost::shared_ptr<Source> > SourceAdded;
+	PBD::Signal1< void, boost::shared_ptr<Source> > SourceRemoved;
+
 	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
+
+	void foreach_source (boost::function<void( boost::shared_ptr<Source> )> f) {
+		Glib::Threads::Mutex::Lock ls (source_lock);
+		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
+			f ( (*i).second );
+		}
+	}
 
 private:
 	void reset_write_sources (bool mark_write_complete, bool force = false);
