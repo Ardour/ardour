@@ -27,8 +27,8 @@
 #include "ardour/audio_track.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_region.h"
-#include "ardour/region_factory.h"
 #include "ardour/profile.h"
+#include "ardour/region_factory.h"
 
 #include "canvas/canvas.h"
 #include "canvas/text.h"
@@ -1169,8 +1169,6 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 		return false;
 	}
 
-printf("Paul:  DRAGGING:  track_canvas_drag_motion\n");
-
 	event.type = GDK_MOTION_NOTIFY;
 	event.button.x = x;
 	event.button.y = y;
@@ -1200,8 +1198,10 @@ printf("Paul:  DRAGGING:  track_canvas_drag_motion\n");
 	}
 
 	if (can_drop) {
-		region = _regions->get_dragged_region ();
-		if (!region) {
+
+		if (target == X_("regions")) {
+			region = _regions->get_dragged_region ();
+		} else if (target == X_("sources")) {
 			boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
 			region = RegionFactory::get_whole_region_for_source (src);
 		}
@@ -1261,7 +1261,8 @@ void
 Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
                       int x, int y,
                       const SelectionData& /*data*/,
-                      guint /*info*/, guint /*time*/)
+                      guint /*info*/, guint /*time*/,
+                      bool from_region_list)
 {
 	GdkEvent event;
 	double px;
@@ -1274,10 +1275,15 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	event.motion.state = Gdk::BUTTON1_MASK;
 	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
-	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
-	if (!region) {
+	boost::shared_ptr<Region> region;
+
+	if (from_region_list) {
+		region = _regions->get_dragged_region ();
+	} else {
 		boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
-		region = RegionFactory::get_whole_region_for_source (src);
+		if (src) {
+			region = RegionFactory::get_whole_region_for_source (src);
+		}
 	}
 
 	if (!region) { return; }
@@ -1367,4 +1373,3 @@ Editor::key_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType
 
 	return handled;
 }
-

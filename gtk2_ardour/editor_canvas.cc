@@ -249,9 +249,15 @@ Editor::initialize_canvas ()
 
 	vector<TargetEntry> target_table;
 
+<<<<<<< HEAD
 	// Drag-N-Drop from the region list can generate this target
 	target_table.push_back (TargetEntry ("regions"));
 
+=======
+	target_table.push_back (TargetEntry ("regions")); // DnD from the region list will generate this target
+	target_table.push_back (TargetEntry ("sources")); // DnD from the source list will generate this target
+	target_table.push_back (TargetEntry ("text/plain"));
+>>>>>>> Source list:  Fix drag-n-drop.
 	target_table.push_back (TargetEntry ("text/uri-list"));
 	target_table.push_back (TargetEntry ("text/plain"));
 	target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
@@ -376,8 +382,10 @@ Editor::track_canvas_drag_data_received (const RefPtr<Gdk::DragContext>& context
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return;
 	}
-	if (data.get_target() == "regions") {
-		drop_regions (context, x, y, data, info, time);
+	if (data.get_target() == X_("regions")) {
+		drop_regions (context, x, y, data, info, time, true);
+	} else if (data.get_target() == X_("sources")) {
+		drop_regions (context, x, y, data, info, time, false);
 	} else {
 		drop_paths (context, x, y, data, info, time);
 	}
