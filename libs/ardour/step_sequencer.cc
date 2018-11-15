@@ -155,6 +155,23 @@ Step::set_duration (DurationRatio const & dur)
 }
 
 void
+Step::adjust_offset (double fraction)
+{
+	const Temporal::Beats incr_size = Temporal::Beats::ticks (lrintf (floor (sequencer().step_size().to_ticks() * fraction)));
+	set_offset (_notes[0].offset + incr_size);
+}
+
+void
+Step::set_offset (Temporal::Beats const & b, size_t n)
+{
+	if (_notes[n].offset != b) {
+		_notes[n].offset = b;
+		PropertyChange pc;
+		PropertyChanged (pc);
+	}
+}
+
+void
 Step::adjust_pitch (int amt)
 {
 	Step::Note& note (_notes[0]);
@@ -211,15 +228,18 @@ Step::run (MidiBuffer& buf, bool running, samplepos_t start_sample, samplepos_t 
 
 	if (running) {
 
-		samplepos_t scheduled_samples = sequencer().tempo_map().sample_at_beat (_scheduled_beat.to_double());
+		samplepos_t scheduled_samples = sequencer().tempo_map().sample_at_beat ((_scheduled_beat + _notes[0].offset).to_double());
 
 		if (scheduled_samples >= start_sample && scheduled_samples < end_sample) {
 			/* this step was covered by the run() range, so update its next
-			 *  scheduled time.
+			 * scheduled time.
 			 */
 			_scheduled_beat += sequencer().duration();
+		} else if (scheduled_samples < start_sample) {
+			/* missed it, maybe due to offset: schedule 2 cycles ahead */
+			_scheduled_beat += sequencer().duration();
+			_scheduled_beat += sequencer().duration();
 		}
-
 	}
 
 	return true;
