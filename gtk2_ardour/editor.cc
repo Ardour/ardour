@@ -109,6 +109,7 @@
 #include "editor_route_groups.h"
 #include "editor_routes.h"
 #include "editor_snapshots.h"
+#include "editor_sources.h"
 #include "editor_summary.h"
 #include "enums_convert.h"
 #include "export_report.h"
@@ -639,6 +640,7 @@ Editor::Editor ()
 	_route_groups = new EditorRouteGroups (this);
 	_routes = new EditorRoutes (this);
 	_regions = new EditorRegions (this);
+	_sources = new EditorSources (this);
 	_snapshots = new EditorSnapshots (this);
 	_locations = new EditorLocations (this);
 	_time_info_box = new TimeInfoBox ("EditorTimeInfo", true);
@@ -649,6 +651,7 @@ Editor::Editor ()
 	Location::end_changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 	Location::changed.connect (*this, invalidator (*this), boost::bind (&Editor::location_changed, this, _1), gui_context());
 
+	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
@@ -1334,6 +1337,7 @@ Editor::set_session (Session *t)
 	_group_tabs->set_session (_session);
 	_route_groups->set_session (_session);
 	_regions->set_session (_session);
+	_sources->set_session (_session);
 	_snapshots->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
@@ -6035,6 +6039,7 @@ Editor::session_going_away ()
 	/* rip everything out of the list displays */
 
 	_regions->clear ();
+	_sources->clear ();
 	_routes->clear ();
 	_route_groups->clear ();
 
