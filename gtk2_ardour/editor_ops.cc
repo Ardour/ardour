@@ -5140,6 +5140,95 @@ Editor::remove_last_capture ()
 }
 
 void
+Editor::tag_regions (RegionList regions)
+{
+	ArdourDialog d (_("Tag Last Capture"), true, false);
+	Entry entry;
+	Label label (_("Tag:"));
+	HBox hbox;
+
+	hbox.set_spacing (6);
+	hbox.pack_start (label, false, false);
+	hbox.pack_start (entry, true, true);
+
+	d.get_vbox()->set_border_width (12);
+	d.get_vbox()->pack_start (hbox, false, false);
+
+	d.add_button(Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
+	d.add_button(Gtk::Stock::OK, Gtk::RESPONSE_OK);
+
+	d.set_size_request (300, -1);
+
+	entry.set_text (_("Good"));
+	entry.select_region (0, -1);
+
+	entry.signal_activate().connect (sigc::bind (sigc::mem_fun (d, &Dialog::response), RESPONSE_OK));
+
+	d.show_all ();
+
+	entry.grab_focus();
+
+	int const ret = d.run();
+
+	d.hide ();
+
+	if (ret != RESPONSE_OK) {
+		return;
+	}
+
+	std::string tagstr = entry.get_text();
+	strip_whitespace_edges (tagstr);
+	
+	if (!tagstr.empty()) {
+		for (RegionList::iterator r = regions.begin(); r != regions.end(); r++) {
+			(*r)->set_tags(tagstr);
+		}
+			
+		_regions->redisplay ();
+	}
+}
+
+void
+Editor::tag_selected_region ()
+{
+	std::list<boost::shared_ptr<Region> > rlist;
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+	for (RegionSelection::iterator r = rs.begin(); r != rs.end(); r++) {
+		rlist.push_back((*r)->region());
+	}
+
+	tag_regions(rlist);
+}
+
+void
+Editor::tag_last_capture ()
+{
+	if (!_session) {
+		return;
+	}
+
+	std::list<boost::shared_ptr<Region> > rlist;
+
+	std::list<boost::shared_ptr<Source> > srcs;
+	_session->get_last_capture_sources (srcs);
+	for (std::list<boost::shared_ptr<Source> >::iterator i = srcs.begin(); i != srcs.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Source> source = (*i);
+		if (source) {
+
+			set<boost::shared_ptr<Region> > regions;
+			RegionFactory::get_regions_using_source (source, regions);
+			for (set<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); r++) {
+				rlist.push_back(*r);
+			}
+
+		}
+	}
+	
+	tag_regions(rlist);
+}
+
+void
 Editor::normalize_region ()
 {
 	if (!_session) {
