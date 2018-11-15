@@ -990,7 +990,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 	PBD::PropertyList plist;
 
 	plist.add (ARDOUR::Properties::start, 0);
-	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->timeline_position()));
+	plist.add (ARDOUR::Properties::length, srclist[0]->length(srclist[0]->natural_position()));
 	plist.add (ARDOUR::Properties::name, rname);
 	plist.add (ARDOUR::Properties::layer, 0);
 
