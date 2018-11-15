@@ -76,6 +76,8 @@ public:
          */
         double vertical_fraction (double y) const;
 
+        void set_corner_radius (double d);
+
 	enum What {
 		NOTHING = 0x0,
 		LEFT = 0x1,
@@ -94,6 +96,7 @@ public:
 	 */
 	Rect _rect;
 	What _outline_what;
+	double _corner_radius;
 };
 
 }
