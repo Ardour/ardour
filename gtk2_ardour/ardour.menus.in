@@ -702,26 +702,6 @@
 
   <popup name='RegionListMenu' accelerators='true'>
     <menuitem action='rlAudition'/>
-    <menuitem action='rlHide'/>
-    <menuitem action='rlShow'/>
-    <separator/>
-    <menuitem action='rlShowAll'/>
-    <menuitem action='rlShowAuto'/>
-    <menu name='Sort' action='RegionListSort'>
-      <menuitem action='SortAscending'/>
-      <menuitem action='SortDescending'/>
-      <separator/>
-      <menuitem action='SortByRegionName'/>
-      <menuitem action='SortByRegionLength'/>
-      <menuitem action='SortByRegionPosition'/>
-      <menuitem action='SortByRegionTimestamp'/>
-      <menuitem action='SortByRegionStartinFile'/>
-      <menuitem action='SortByRegionEndinFile'/>
-      <menuitem action='SortBySourceFileName'/>
-      <menuitem action='SortBySourceFileLength'/>
-      <menuitem action='SortBySourceFileCreationDate'/>
-      <menuitem action='SortBySourceFilesystem'/>
-    </menu>
     <separator/>
     <menuitem action='addExternalAudioToRegionList'/>
     <separator/>
