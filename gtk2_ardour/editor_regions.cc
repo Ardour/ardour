@@ -31,6 +31,7 @@
 #include "ardour/silentfilesource.h"
 #include "ardour/region_factory.h"
 #include "ardour/session.h"
+#include "ardour/session_playlist.h"
 #include "ardour/profile.h"
 
 #include "gtkmm2ext/treeutils.h"
@@ -68,6 +69,8 @@ using Gtkmm2ext::Keyboard;
 
 struct ColumnInfo {
 	int         index;
+	int         sort_idx;
+	Gtk::AlignmentEnum al;
 	const char* label;
 	const char* tooltip;
 };
@@ -77,17 +80,13 @@ EditorRegions::EditorRegions (Editor* e)
 	, old_focus (0)
 	, name_editable (0)
 	, _menu (0)
-	, _show_automatic_regions (true)
-	, ignore_region_list_selection_change (false)
-	, ignore_selected_region_change (false)
 	, _no_redisplay (false)
-	, _sort_type ((Editing::RegionListSortType) 0)
-	, expanded (false)
 {
 	_display.set_size_request (100, -1);
 	_display.set_rules_hint (true);
-	_display.set_name ("EditGroupList");
+	_display.set_name ("RegionList");
 	_display.set_fixed_height_mode (true);
+	_display.set_reorderable (false);
 
 	/* Try to prevent single mouse presses from initiating edits.
 	   This relies on a hack in gtktreeview.c:gtk_treeview_button_press()
@@ -95,23 +94,28 @@ EditorRegions::EditorRegions (Editor* e)
 	_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
 
 	_model = TreeStore::create (_columns);
-	_model->set_sort_func (0, sigc::mem_fun (*this, &EditorRegions::sorter));
 	_model->set_sort_column (0, SORT_ASCENDING);
 
 	/* column widths */
-	int bbt_width, check_width, height;
+	int bbt_width, date_width, check_width, height;
 
 	Glib::RefPtr<Pango::Layout> layout = _display.create_pango_layout (X_("000|000|000"));
 	Gtkmm2ext::get_pixel_size (layout, bbt_width, height);
+
+	Glib::RefPtr<Pango::Layout> layout2 = _display.create_pango_layout (X_("2099-10-10 10:10:30"));
+	Gtkmm2ext::get_pixel_size (layout2, date_width, height);
 
 	check_width = 20;
 
 	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
 	col_name->set_fixed_width (120);
 	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
-	TreeViewColumn* col_position = manage (new TreeViewColumn ("", _columns.position));
-	col_position->set_fixed_width (bbt_width);
-	col_position->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_take = manage (new TreeViewColumn ("", _columns.take_id));
+	col_take->set_fixed_width (date_width);
+	col_take->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	TreeViewColumn* col_start = manage (new TreeViewColumn ("", _columns.start));
+	col_start->set_fixed_width (bbt_width);
+	col_start->set_sizing (TREE_VIEW_COLUMN_FIXED);
 	TreeViewColumn* col_end = manage (new TreeViewColumn ("", _columns.end));
 	col_end->set_fixed_width (bbt_width);
 	col_end->set_sizing (TREE_VIEW_COLUMN_FIXED);
@@ -141,47 +145,62 @@ EditorRegions::EditorRegions (Editor* e)
 	col_opaque->set_sizing (TREE_VIEW_COLUMN_FIXED);
 
 	_display.append_column (*col_name);
-	_display.append_column (*col_position);
+	_display.append_column (*col_take);
+	_display.append_column (*col_start);
+	_display.append_column (*col_locked);
+	_display.append_column (*col_glued);
+	_display.append_column (*col_muted);
+	_display.append_column (*col_opaque);
 	_display.append_column (*col_end);
 	_display.append_column (*col_length);
 	_display.append_column (*col_sync);
 	_display.append_column (*col_fadein);
 	_display.append_column (*col_fadeout);
-	_display.append_column (*col_locked);
-	_display.append_column (*col_glued);
-	_display.append_column (*col_muted);
-	_display.append_column (*col_opaque);
 
 	TreeViewColumn* col;
 	Gtk::Label* l;
 
 	ColumnInfo ci[] = {
-		{ 0,   _("Region"),    _("Region name, with number of channels in []'s") },
-		{ 1,   _("Position"),  _("Position of start of region") },
-		{ 2,   _("End"),       _("Position of end of region") },
-		{ 3,   _("Length"),    _("Length of the region") },
-		{ 4,   _("Sync"),      _("Position of region sync point, relative to start of the region") },
-		{ 5,   _("Fade In"),   _("Length of region fade-in (units: secondary clock), () if disabled") },
-		{ 6,   _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
-		{ 7,  S_("Lock|L"),    _("Region position locked?") },
-		{ 8,  S_("Gain|G"),    _("Region position glued to Bars|Beats time?") },
-		{ 9,  S_("Mute|M"),    _("Region muted?") },
-		{ 10, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
-		{ -1, 0, 0 }
+		{ 0,  0,  ALIGN_LEFT,    _("Region"),    _("Region name, with number of channels in []'s") },
+		{ 1,  1,  ALIGN_LEFT,    _("Take"),      _("Take ID (or file creation time)") },
+		{ 2, 15,  ALIGN_RIGHT,   _("Start"),     _("Position of start of region") },
+		{ 3, -1,  ALIGN_CENTER, S_("Lock|L"),    _("Region position locked?") },
+		{ 4, -1,  ALIGN_CENTER, S_("Gain|G"),    _("Region position glued to Bars|Beats time?") },
+		{ 5, -1,  ALIGN_CENTER, S_("Mute|M"),    _("Region muted?") },
+		{ 6, -1,  ALIGN_CENTER, S_("Opaque|O"),  _("Region opaque (blocks regions below it from being heard)?") },
+		{ 7, -1,  ALIGN_RIGHT,  _("End"),       _("Position of end of region") },
+		{ 8, -1,  ALIGN_RIGHT,  _("Length"),    _("Length of the region") },
+		{ 9, -1,  ALIGN_RIGHT,  _("Sync"),      _("Position of region sync point, relative to start of the region") },
+		{ 10,-1,  ALIGN_RIGHT,  _("Fade In"),   _("Length of region fade-in (units: secondary clock), () if disabled") },
+		{ 11,-1,  ALIGN_RIGHT,  _("Fade Out"),  _("Length of region fade-out (units: secondary clock), () if disabled") },
+		{ -1,-1,  ALIGN_CENTER, 0, 0 }
 	};
 
 	for (int i = 0; ci[i].index >= 0; ++i) {
+
 		col = _display.get_column (ci[i].index);
+
+		//add the label
 		l = manage (new Label (ci[i].label));
+		l->set_alignment(ci[i].al);
 		set_tooltip (*l, ci[i].tooltip);
 		col->set_widget (*l);
 		l->show ();
 
-		if (ci[i].index > 6) {
-			col->set_expand (false);
-			col->set_alignment (ALIGN_CENTER);
+		col->set_sort_column(ci[i].sort_idx);
+
+		col->set_expand (false);
+
+		//this sets the alignment of the column header...
+		col->set_alignment (ci[i].al);
+
+		//...and this sets the alignment for the data cells
+		CellRendererText *renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (i));
+		if (renderer) {
+			renderer->property_xalign() = ( ci[i].al == ALIGN_RIGHT ? 1.0 : (ci[i].al == ALIGN_LEFT ? 0.0 : 0.5));
 		}
 	}
+
 	_display.set_model (_model);
 
 	_display.set_headers_visible (true);
@@ -189,15 +208,15 @@ EditorRegions::EditorRegions (Editor* e)
 
 	if (UIConfiguration::instance().get_use_tooltips()) {
 		/* show path as the row tooltip */
-		_display.set_tooltip_column (14); /* path */
+		_display.set_tooltip_column (12); /* path */
 	}
+	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
+	//Region Name:  editable;  and color turns red if source is missing.
 	CellRendererText* region_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	region_name_cell->property_editable() = true;
 	region_name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorRegions::name_edit));
 	region_name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorRegions::name_editing_started));
-
-	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorRegions::selection_filter));
 
 	TreeViewColumn* tv_col = _display.get_column(0);
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
@@ -205,33 +224,21 @@ EditorRegions::EditorRegions (Editor* e)
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
 	tv_col->set_expand (true);
 
-	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (7));
+	CellRendererToggle* locked_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (3));
 	locked_cell->property_activatable() = true;
 	locked_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::locked_changed));
 
-	TreeViewColumn* locked_col = _display.get_column (7);
-	locked_col->add_attribute (locked_cell->property_visible(), _columns.property_toggles_visible);
-
-	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (8));
+	CellRendererToggle* glued_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (4));
 	glued_cell->property_activatable() = true;
 	glued_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::glued_changed));
 
-	TreeViewColumn* glued_col = _display.get_column (8);
-	glued_col->add_attribute (glued_cell->property_visible(), _columns.property_toggles_visible);
-
-	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (9));
+	CellRendererToggle* muted_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (5));
 	muted_cell->property_activatable() = true;
 	muted_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::muted_changed));
 
-	TreeViewColumn* muted_col = _display.get_column (9);
-	muted_col->add_attribute (muted_cell->property_visible(), _columns.property_toggles_visible);
-
-	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (10));
+	CellRendererToggle* opaque_cell = dynamic_cast<CellRendererToggle*> (_display.get_column_cell_renderer (6));
 	opaque_cell->property_activatable() = true;
 	opaque_cell->signal_toggled().connect (sigc::mem_fun (*this, &EditorRegions::opaque_changed));
-
-	TreeViewColumn* opaque_col = _display.get_column (10);
-	opaque_col->add_attribute (opaque_cell->property_visible(), _columns.property_toggles_visible);
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
 	_display.add_object_drag (_columns.region.index(), "regions");
@@ -265,8 +272,6 @@ EditorRegions::EditorRegions (Editor* e)
 
 	//ARDOUR_UI::instance()->secondary_clock.mode_changed.connect (sigc::mem_fun(*this, &Editor::redisplay_regions));
 	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun(*this, &EditorRegions::update_all_rows));
-	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
-	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context());
 
 	e->EditorFreeze.connect (editor_freeze_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::freeze_tree_model, this), gui_context());
 	e->EditorThaw.connect (editor_thaw_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::thaw_tree_model, this), gui_context());
@@ -333,6 +338,10 @@ void
 EditorRegions::set_session (ARDOUR::Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	
+	ARDOUR::Region::RegionPropertyChanged.connect (region_property_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::region_changed, this, _1, _2), gui_context());
+	ARDOUR::RegionFactory::CheckNewRegion.connect (check_new_region_connection, MISSING_INVALIDATOR, boost::bind (&EditorRegions::add_region, this, _1), gui_context());
+
 	redisplay ();
 }
 
@@ -343,154 +352,23 @@ EditorRegions::add_region (boost::shared_ptr<Region> region)
 		return;
 	}
 
-	string str;
-	TreeModel::Row row;
-	Gdk::Color c;
-	bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
-	TreeModel::iterator iter;
-
-	if (!_show_automatic_regions && region->automatic()) {
-		return;
-	}
-
-	if (region->hidden()) {
-
-		iter = _model->get_iter ("0");
-		TreeModel::Row parent;
-
-		if (!iter) {
-			parent = *(_model->append());
-			parent[_columns.name] = _("Hidden");
-			boost::shared_ptr<Region> proxy = parent[_columns.region];
-			proxy.reset ();
-		} else {
-			string s = (*iter)[_columns.name];
-			if (s != _("Hidden")) {
-				parent = *(_model->insert(iter));
-				parent[_columns.name] = _("Hidden");
-				boost::shared_ptr<Region> proxy = parent[_columns.region];
-				proxy.reset ();
-			} else {
-				parent = *iter;
-			}
-		}
-
-		iter = _model->append (parent.children());
-		row = *iter;
-
-	} else if (region->whole_file()) {
-
-		TreeModel::iterator i;
-		TreeModel::Children rows = _model->children();
-
-		for (i = rows.begin(); i != rows.end(); ++i) {
-			boost::shared_ptr<Region> rr = (*i)[_columns.region];
-
-			if (rr && region->region_list_equivalent (rr)) {
-				return;
-			}
-		}
-
-		iter = _model->append();
-		row = *iter;
-
-		if (missing_source) {
-			// c.set_rgb(65535,0,0);     // FIXME: error color from style
-			set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
-
-		} else if (region->automatic()){
-			// c.set_rgb(0,65535,0);     // FIXME: error color from style
-			set_color_from_rgba (c, UIConfiguration::instance().color ("region list automatic"));
-
-		} else {
-			set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
-		}
-
-		row[_columns.color_] = c;
-
-		if (region->source()->name()[0] == '/') { // external file
-
-			if (region->whole_file()) {
-
-				boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource>(region->source());
-				str = ".../";
-
-				if (afs) {
-					str = region_name_from_path (afs->path(), region->n_channels() > 1);
-				} else {
-					str += region->source()->name();
-				}
-
-			} else {
-				str = region->name();
-			}
-
-		} else {
-			str = region->name();
-		}
-
-		populate_row_name (region, row);
-		row[_columns.region] = region;
-		row[_columns.property_toggles_visible] = false;
-
-		if (missing_source) {
-			row[_columns.path] = _("(MISSING) ") + Gtkmm2ext::markup_escape_text (region->source()->name());
-
-		} else {
-			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource>(region->source());
-			if (fs) {
-				row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path());
-			} else {
-				row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source()->name());
-			}
-		}
-
-		region_row_map.insert(pair<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::iterator>(region, iter));
-		parent_regions_sources_map.insert(pair<string, Gtk::TreeModel::RowReference>(region->source_string(), TreeRowReference(_model, TreePath (row))) );
-
-		return;
-
-	} else {
-		// find parent node, add as new child
-		TreeModel::iterator i;
-
-		RegionSourceMap::iterator it;
-
-		it = parent_regions_sources_map.find (region->source_string());
-
-		if (it != parent_regions_sources_map.end()){
-
-			TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
-
-			TreeModel::iterator ii;
-			TreeModel::Children subrows = (*j).children();
-
-			/* XXXX: should we be accounting for all regions? */
-			/*
-			for (ii = subrows.begin(); ii != subrows.end(); ++ii) {
-				boost::shared_ptr<Region> rr = (*ii)[_columns.region];
-
-				if (region->region_list_equivalent (rr)) {
-					return;
-				}
-			}
-			*/
-
-			iter = _model->insert (subrows.end());
-			row = *iter;
-
-		} else {
-			iter = _model->append();
-			row = *iter;
-		}
-
-		row[_columns.property_toggles_visible] = true;
-	}
-
-	row[_columns.region] = region;
-	region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>,Gtk::TreeModel::iterator> (region,iter));
 	PropertyChange pc;
-	populate_row(region, (*row), pc);
+	region_changed(region, pc);
+}
+
+void
+EditorRegions::destroy_region (boost::shared_ptr<ARDOUR::Region> region)
+{
+	//UNTESTED
+	//At the time of writing, the only way to remove regions is "cleanup"
+	//by definition, "cleanup" only removes regions that aren't on the timeline
+	//so this would be a no-op anyway
+	//perhaps someday we will allow users to manually destroy regions.
+	RegionRowMap::iterator map_it = region_row_map.find (region);
+	if ( map_it != region_row_map.end() ) {
+		region_row_map.erase(map_it);
+		_model->erase( map_it->second );
+	}
 }
 
 void
@@ -522,81 +400,44 @@ EditorRegions::remove_unused_regions ()
 void
 EditorRegions::region_changed (boost::shared_ptr<Region> r, const PropertyChange& what_changed)
 {
-	//maybe update the grid here
-	PropertyChange grid_interests;
-	grid_interests.add (ARDOUR::Properties::position);
-	grid_interests.add (ARDOUR::Properties::length);
-	grid_interests.add (ARDOUR::Properties::sync_position);
-	if (what_changed.contains (grid_interests)) {
-		_editor->mark_region_boundary_cache_dirty();
-	}
+	RegionRowMap::iterator map_it = region_row_map.find (r);
 
-	PropertyChange our_interests;
-
-	our_interests.add (ARDOUR::Properties::name);
-	our_interests.add (ARDOUR::Properties::position);
-	our_interests.add (ARDOUR::Properties::length);
-	our_interests.add (ARDOUR::Properties::start);
-	our_interests.add (ARDOUR::Properties::sync_position);
-	our_interests.add (ARDOUR::Properties::locked);
-	our_interests.add (ARDOUR::Properties::position_lock_style);
-	our_interests.add (ARDOUR::Properties::muted);
-	our_interests.add (ARDOUR::Properties::opaque);
-	our_interests.add (ARDOUR::Properties::fade_in);
-	our_interests.add (ARDOUR::Properties::fade_out);
-	our_interests.add (ARDOUR::Properties::fade_in_active);
-	our_interests.add (ARDOUR::Properties::fade_out_active);
-
-	if (what_changed.contains (our_interests)) {
-		if (last_row != 0) {
-
-			TreeModel::iterator j = _model->get_iter (last_row.get_path());
-			boost::shared_ptr<Region> c = (*j)[_columns.region];
-
-			if (c == r) {
-				populate_row (r, (*j), what_changed);
-
-				if (what_changed.contains (ARDOUR::Properties::hidden)) {
-					redisplay ();
-				}
-
-				return;
-			}
+	boost::shared_ptr<ARDOUR::Playlist> pl = r->playlist();
+	if ( !( pl && _session && _session->playlist_is_active(pl) ) ) {
+		//this region is not on an active playlist
+		//maybe it got deleted, or whatever
+		if ( map_it != region_row_map.end() ) {
+			region_row_map.erase(map_it);
+			_model->erase( map_it->second );
 		}
-
-		RegionRowMap::iterator it;
-
-		it = region_row_map.find (r);
-
-		if (it != region_row_map.end()){
-
-			TreeModel::iterator j = it->second;
-			boost::shared_ptr<Region> c = (*j)[_columns.region];
-
-			if (c == r) {
-				populate_row (r, (*j), what_changed);
-
-				if (what_changed.contains (ARDOUR::Properties::hidden)) {
-					redisplay ();
-				}
-
-				return;
-			}
-		}
+		return;
 	}
+		
+	if ( map_it != region_row_map.end() ) {
 
-	if (what_changed.contains (ARDOUR::Properties::hidden)) {
-		redisplay ();
+		//found the region, update its row properties
+		TreeModel::Row row = *(map_it->second);
+		populate_row (r, row, what_changed);
+
+	} else {
+
+		//new region, add it to the list
+		TreeModel::iterator iter = _model->append();
+		TreeModel::Row row = *iter;
+		region_row_map.insert (pair<boost::shared_ptr<ARDOUR::Region>,Gtk::TreeModel::iterator> (r,iter));
+
+		//set the properties that don't change
+		row[_columns.region] = r;
+
+		//now populate the properties that might change...
+		populate_row (r, row, PropertyChange());
+
 	}
 }
 
 void
 EditorRegions::selection_changed ()
 {
-	if (ignore_region_list_selection_change) {
-		return;
-	}
-
 	_editor->_region_selection_change_updates_region_list = false;
 
 	if (_display.get_selection()->count_selected_rows() > 0) {
@@ -657,47 +498,21 @@ EditorRegions::redisplay ()
 		return;
 	}
 
-	bool tree_expanded = false;
-
-	/* If the list was expanded prior to rebuilding, expand it again afterwards */
-	if (toggle_full_action()->get_active()) {
-		tree_expanded = true;
-	}
-
 	_display.set_model (Glib::RefPtr<Gtk::TreeStore>(0));
 	_model->clear ();
 	_model->set_sort_column (-2, SORT_ASCENDING); //Disable sorting to gain performance
 
 	region_row_map.clear();
-	parent_regions_sources_map.clear();
-
-	/* now add everything we have, via a temporary list used to help with sorting */
 
 	const RegionFactory::RegionMap& regions (RegionFactory::regions());
-
 	for (RegionFactory::RegionMap::const_iterator i = regions.begin(); i != regions.end(); ++i) {
-
-		if ( i->second->whole_file()) {
-			/* add automatic regions first so that children can find their parents as we add them */
+		if ( ! i->second->whole_file() ) {
 			add_region (i->second);
-			continue;
 		}
-
-		tmp_region_list.push_front (i->second);
-	}
-
-	for (list<boost::shared_ptr<Region> >::iterator r = tmp_region_list.begin(); r != tmp_region_list.end(); ++r) {
-		add_region (*r);
 	}
 
 	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
 	_display.set_model (_model);
-
-	tmp_region_list.clear();
-
-	if (tree_expanded) {
-		_display.expand_all();
-	}
 }
 
 void
@@ -733,10 +548,8 @@ EditorRegions::update_all_rows ()
 
 		boost::shared_ptr<Region> region = (*j)[_columns.region];
 
-		if (!region->automatic()) {
-			PropertyChange c;
-			populate_row(region, (*j), c);
-		}
+		PropertyChange c;
+		populate_row(region, (*j), c);
 	}
 }
 
@@ -812,40 +625,61 @@ EditorRegions::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 void
 EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row, PBD::PropertyChange const &what_changed)
 {
+	//the grid is most interested in the regions that are *visible* in the editor.  this is a perfect place to flag changes to the grid cache
+	//maybe update the grid here
+	PropertyChange grid_interests;
+	grid_interests.add (ARDOUR::Properties::position);
+	grid_interests.add (ARDOUR::Properties::length);
+	grid_interests.add (ARDOUR::Properties::sync_position);
+	if (what_changed.contains (grid_interests)) {
+		_editor->mark_region_boundary_cache_dirty();
+	}
+
+	//note: do this in populate_row
+	{
+		Gdk::Color c;
+		bool missing_source = boost::dynamic_pointer_cast<SilentFileSource>(region->source()) != NULL;
+		if (missing_source) {
+			// c.set_rgb(65535,0,0);     // FIXME: error color from style
+			set_color_from_rgba (c, UIConfiguration::instance().color ("region list missing source"));
+		} else {
+			set_color_from_rgba (c, UIConfiguration::instance().color ("region list whole file"));
+		}
+
+		row[_columns.color_] = c;
+	}
+	
 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
-	//uint32_t used = _session->playlists->region_use_count (region);
-	/* Presently a region is only used once so let's save on the sequential scan to determine use count */
-	uint32_t used = 1;
 
 	PropertyChange c;
 	const bool all = what_changed == c;
 
 	if (all || what_changed.contains (Properties::position)) {
-		populate_row_position (region, row, used);
+		populate_row_position (region, row);
 	}
 	if (all || what_changed.contains (Properties::start) || what_changed.contains (Properties::sync_position)) {
-		populate_row_sync (region, row, used);
+		populate_row_sync (region, row);
 	}
 	if (all || what_changed.contains (Properties::fade_in)) {
-		populate_row_fade_in (region, row, used, audioregion);
+		populate_row_fade_in (region, row, audioregion);
 	}
 	if (all || what_changed.contains (Properties::fade_out)) {
-		populate_row_fade_out (region, row, used, audioregion);
+		populate_row_fade_out (region, row, audioregion);
 	}
 	if (all || what_changed.contains (Properties::locked)) {
-		populate_row_locked (region, row, used);
+		populate_row_locked (region, row);
 	}
 	if (all || what_changed.contains (Properties::position_lock_style)) {
-		populate_row_glued (region, row, used);
+		populate_row_glued (region, row);
 	}
 	if (all || what_changed.contains (Properties::muted)) {
-		populate_row_muted (region, row, used);
+		populate_row_muted (region, row);
 	}
 	if (all || what_changed.contains (Properties::opaque)) {
-		populate_row_opaque (region, row, used);
+		populate_row_opaque (region, row);
 	}
 	if (all || what_changed.contains (Properties::length)) {
-		populate_row_end (region, row, used);
+		populate_row_end (region, row);
 		populate_row_length (region, row);
 	}
 	if (all) {
@@ -853,9 +687,6 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 	}
 	if (all || what_changed.contains (Properties::name)) {
 		populate_row_name (region, row);
-	}
-	if (all) {
-		populate_row_used (region, row, used);
 	}
 }
 
@@ -891,14 +722,6 @@ EditorRegions::populate_row (boost::shared_ptr<Region> region, TreeModel::Row co
 #endif
 
 void
-EditorRegions::populate_row_used (boost::shared_ptr<Region>, TreeModel::Row const& row, uint32_t used)
-{
-	char buf[8];
-	snprintf (buf, sizeof (buf), "%4d" , used);
-	row[_columns.used] = buf;
-}
-
-void
 EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
 	char buf[16];
@@ -915,13 +738,9 @@ EditorRegions::populate_row_length (boost::shared_ptr<Region> region, TreeModel:
 }
 
 void
-EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-	if (region->whole_file()) {
-		row[_columns.end] = "";
-	} else if (used > 1) {
-		row[_columns.end] = _("Mult.");
-	} else if (region->last_sample() >= region->first_sample()) {
+	if (region->last_sample() >= region->first_sample()) {
 		char buf[16];
 		format_position (region->last_sample(), buf, sizeof (buf));
 		row[_columns.end] = buf;
@@ -931,115 +750,79 @@ EditorRegions::populate_row_end (boost::shared_ptr<Region> region, TreeModel::Ro
 }
 
 void
-EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_position (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-	if (region->whole_file()) {
-		row[_columns.position] = "";
-	} else if (used > 1) {
-		row[_columns.position] = _("Mult.");
+	row[_columns.position] = region->position();
+
+	char buf[16];
+	format_position (region->position(), buf, sizeof (buf));
+	row[_columns.start] = buf;
+}
+
+void
+EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
+	if (region->sync_position() == region->position()) {
+		row[_columns.sync] = _("Start");
+	} else if (region->sync_position() == (region->last_sample())) {
+		row[_columns.sync] = _("End");
 	} else {
 		char buf[16];
-		format_position (region->position(), buf, sizeof (buf));
-		row[_columns.position] = buf;
+		format_position (region->sync_position(), buf, sizeof (buf));
+		row[_columns.sync] = buf;
 	}
 }
 
 void
-EditorRegions::populate_row_sync (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel::Row const &row, boost::shared_ptr<AudioRegion> audioregion)
 {
-	if (region->whole_file()) {
-		row[_columns.sync] = "";
-	} else if (used > 1) {
-		row[_columns.sync] = _("Mult."); /* translators: a short phrase for "multiple" as in "many" */
-	} else {
-		if (region->sync_position() == region->position()) {
-			row[_columns.sync] = _("Start");
-		} else if (region->sync_position() == (region->last_sample())) {
-			row[_columns.sync] = _("End");
-		} else {
-			char buf[16];
-			format_position (region->sync_position(), buf, sizeof (buf));
-			row[_columns.sync] = buf;
-		}
-	}
-}
-
-void
-EditorRegions::populate_row_fade_in (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used, boost::shared_ptr<AudioRegion> audioregion)
-{
-	if (!audioregion || region->whole_file()) {
+	if (!audioregion) {
 		row[_columns.fadein] = "";
 	} else {
-		if (used > 1) {
-			row[_columns.fadein] = _("Multiple");
-		} else {
-			char buf[32];
-			format_position (audioregion->fade_in()->back()->when, buf, sizeof (buf), audioregion->fade_in_active());
-			row[_columns.fadein] = buf;
-		}
+		char buf[32];
+		format_position (audioregion->fade_in()->back()->when, buf, sizeof (buf), audioregion->fade_in_active());
+		row[_columns.fadein] = buf;
 	}
 }
 
 void
-EditorRegions::populate_row_fade_out (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used, boost::shared_ptr<AudioRegion> audioregion)
+EditorRegions::populate_row_fade_out (boost::shared_ptr<Region> region, TreeModel::Row const &row, boost::shared_ptr<AudioRegion> audioregion)
 {
-	if (!audioregion || region->whole_file()) {
+	if (!audioregion) {
 		row[_columns.fadeout] = "";
 	} else {
-		if (used > 1) {
-			row[_columns.fadeout] = _("Multiple");
-		} else {
-			char buf[32];
-			format_position (audioregion->fade_out()->back()->when, buf, sizeof (buf), audioregion->fade_out_active());
-			row[_columns.fadeout] = buf;
-		}
+		char buf[32];
+		format_position (audioregion->fade_out()->back()->when, buf, sizeof (buf), audioregion->fade_out_active());
+		row[_columns.fadeout] = buf;
 	}
 }
 
 void
-EditorRegions::populate_row_locked (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_locked (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-	if (region->whole_file()) {
-		row[_columns.locked] = false;
-	} else if (used > 1) {
-		row[_columns.locked] = false;
+	row[_columns.locked] = region->locked();
+}
+
+void
+EditorRegions::populate_row_glued (boost::shared_ptr<Region> region, TreeModel::Row const &row)
+{
+	if (region->position_lock_style() == MusicTime) {
+		row[_columns.glued] = true;
 	} else {
-		row[_columns.locked] = region->locked();
-	}
-}
-
-void
-EditorRegions::populate_row_glued (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
-{
-	if (region->whole_file() || used > 1) {
 		row[_columns.glued] = false;
-	} else {
-		if (region->position_lock_style() == MusicTime) {
-			row[_columns.glued] = true;
-		} else {
-			row[_columns.glued] = false;
-		}
 	}
 }
 
 void
-EditorRegions::populate_row_muted (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_muted (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-	if (region->whole_file() || used > 1) {
-		row[_columns.muted] = false;
-	} else {
-		row[_columns.muted] = region->muted();
-	}
+	row[_columns.muted] = region->muted();
 }
 
 void
-EditorRegions::populate_row_opaque (boost::shared_ptr<Region> region, TreeModel::Row const &row, uint32_t used)
+EditorRegions::populate_row_opaque (boost::shared_ptr<Region> region, TreeModel::Row const &row)
 {
-	if (region->whole_file() || used > 1) {
-		row[_columns.opaque] = false;
-	} else {
-		row[_columns.opaque] = region->opaque();
-	}
+	row[_columns.opaque] = region->opaque();
 }
 
 void
@@ -1060,31 +843,8 @@ EditorRegions::populate_row_source (boost::shared_ptr<Region> region, TreeModel:
 	} else {
 		row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source()->name());
 	}
-}
 
-void
-EditorRegions::toggle_show_auto_regions ()
-{
-	_show_automatic_regions = toggle_show_auto_regions_action()->get_active();
-	redisplay ();
-}
-
-void
-EditorRegions::toggle_full ()
-{
-	set_full (toggle_full_action()->get_active ());
-}
-
-void
-EditorRegions::set_full (bool f)
-{
-	if (f) {
-		_display.expand_all ();
-		expanded = true;
-	} else {
-		_display.collapse_all ();
-		expanded = false;
-	}
+	row[_columns.take_id] = region->source()->take_id();  //TODO:  what if there is no take-id?  anything else we can use?
 }
 
 void
@@ -1099,27 +859,6 @@ EditorRegions::show_context_menu (int button, int time)
 	} else {
 		ActionManager::set_sensitive (ActionManager::region_list_selection_sensitive_actions, false);
 	}
-
-	/* Enable the "Show" option if any selected regions are hidden, and vice versa for "Hide" */
-
-	bool have_shown = false;
-	bool have_hidden = false;
-
-	TreeView::Selection::ListHandle_Path rows = _display.get_selection()->get_selected_rows ();
-	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
-		TreeIter t = _model->get_iter (*i);
-		boost::shared_ptr<Region> r = (*t)[_columns.region];
-		if (r) {
-			if (r->hidden ()) {
-				have_hidden = true;
-			} else {
-				have_shown = true;
-			}
-		}
-	}
-
-	hide_action()->set_sensitive (have_shown);
-	show_action()->set_sensitive (have_hidden);
 
 	_menu->popup (button, time);
 }
@@ -1186,113 +925,6 @@ EditorRegions::button_press (GdkEventButton *ev)
 	}
 
 	return false;
-}
-
-int
-EditorRegions::sorter (TreeModel::iterator a, TreeModel::iterator b)
-{
-	int cmp = 0;
-
-	boost::shared_ptr<Region> r1 = (*a)[_columns.region];
-	boost::shared_ptr<Region> r2 = (*b)[_columns.region];
-
-	/* handle rows without regions, like "Hidden" */
-
-	if (r1 == 0) {
-		return -1;
-	}
-
-	if (r2 == 0) {
-		return 1;
-	}
-
-	boost::shared_ptr<AudioRegion> region1 = boost::dynamic_pointer_cast<AudioRegion> (r1);
-	boost::shared_ptr<AudioRegion> region2 = boost::dynamic_pointer_cast<AudioRegion> (r2);
-
-	if (region1 == 0 || region2 == 0) {
-		std::string s1;
-		std::string s2;
-		switch (_sort_type) {
-		case ByName:
-			s1 = (*a)[_columns.name];
-			s2 = (*b)[_columns.name];
-			return (s1.compare (s2));
-		default:
-			return 0;
-		}
-	}
-
-	switch (_sort_type) {
-	case ByName:
-		cmp = region1->name().compare(region2->name());
-		break;
-
-	case ByLength:
-		cmp = region1->length() - region2->length();
-		break;
-
-	case ByPosition:
-		cmp = region1->position() - region2->position();
-		break;
-
-	case ByTimestamp:
-		cmp = region1->source()->timestamp() - region2->source()->timestamp();
-		break;
-
-	case ByStartInFile:
-		cmp = region1->start() - region2->start();
-		break;
-
-	case ByEndInFile:
-		// cerr << "Compare " << (region1->start() + region1->length()) << " and " << (region2->start() + region2->length()) << endl;
-		cmp = (region1->start() + region1->length()) - (region2->start() + region2->length());
-		break;
-
-	case BySourceFileName:
-		cmp = region1->source()->name().compare(region2->source()->name());
-		break;
-
-	case BySourceFileLength:
-		cmp = region1->source_length(0) - region2->source_length(0);
-		break;
-
-	case BySourceFileCreationDate:
-		cmp = region1->source()->timestamp() - region2->source()->timestamp();
-		break;
-
-	case BySourceFileFS:
-		if (region1->source()->name() == region2->source()->name()) {
-			cmp = region1->name().compare(region2->name());
-		} else {
-			cmp = region1->source()->name().compare(region2->source()->name());
-		}
-		break;
-	}
-
-	// cerr << "Comparison on " << enum_2_string (_sort_type) << " gives " << cmp << endl;
-
-	if (cmp < 0) {
-		return -1;
-	} else if (cmp > 0) {
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-void
-EditorRegions::reset_sort_type (RegionListSortType type, bool force)
-{
-	if (type != _sort_type || force) {
-		_sort_type = type;
-		_model->set_sort_func (0, (sigc::mem_fun (*this, &EditorRegions::sorter)));
-	}
-}
-
-void
-EditorRegions::reset_sort_direction (bool up)
-{
-	_model->set_sort_column (0, up ? SORT_ASCENDING : SORT_DESCENDING);
 }
 
 void
@@ -1453,7 +1085,6 @@ EditorRegions::clear ()
 
 	/* Clean up the maps */
 	region_row_map.clear();
-	parent_regions_sources_map.clear();
 }
 
 boost::shared_ptr<Region>
@@ -1487,14 +1118,10 @@ EditorRegions::freeze_tree_model (){
 }
 
 void
-EditorRegions::thaw_tree_model (){
-
+EditorRegions::thaw_tree_model ()
+{
 	_model->set_sort_column (0, SORT_ASCENDING); // renabale sorting
 	_display.set_model (_model);
-
-	if (toggle_full_action()->get_active()) {
-		_display.expand_all();
-	}
 }
 
 void
@@ -1554,13 +1181,9 @@ EditorRegions::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("RegionList"));
 
-	node->set_property (X_("sort-type"), _sort_type);
-
-	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
-	bool const ascending = RefPtr<RadioAction>::cast_dynamic(act)->get_active ();
-	node->set_property (X_("sort-ascending"), ascending);
-	node->set_property (X_("show-all"), toggle_full_action()->get_active());
-	node->set_property (X_("show-automatic-regions"), _show_automatic_regions);
+	//TODO
+//	node->set_property (X_("sort-col"), _sort_type);
+//	node->set_property (X_("sort-asc"), _sort_type);
 
 	return *node;
 }
@@ -1574,136 +1197,13 @@ EditorRegions::set_state (const XMLNode & node)
 		return;
 	}
 
-	Editing::RegionListSortType t;
-	if (node.get_property (X_("sort-type"), t)) {
-
-		if (_sort_type != t) {
-			changed = true;
-		}
-
-		reset_sort_type (t, true);
-		RefPtr<RadioAction> ract = sort_type_action (t);
-		ract->set_active ();
-	}
-
-	bool yn;
-	if (node.get_property (X_("sort-ascending"), yn)) {
-		SortType old_sort_type;
-		int old_sort_column;
-
-		_model->get_sort_column_id (old_sort_column, old_sort_type);
-
-		if (old_sort_type != (yn ? SORT_ASCENDING : SORT_DESCENDING)) {
-			changed = true;
-		}
-
-		reset_sort_direction (yn);
-		RefPtr<Action> act;
-
-		if (yn) {
-			act = ActionManager::get_action (X_("RegionList"), X_("SortAscending"));
-		} else {
-			act = ActionManager::get_action (X_("RegionList"), X_("SortDescending"));
-		}
-
-		RefPtr<RadioAction>::cast_dynamic(act)->set_active ();
-	}
-
-	if (node.get_property (X_("show-all"), yn)) {
-		if (expanded != yn) {
-			changed = true;
-		}
-
-		set_full (yn);
-		toggle_full_action()->set_active (yn);
-	}
-
-	if (node.get_property (X_("show-automatic-regions"), yn)) {
-		if (yn != _show_automatic_regions) {
-			_show_automatic_regions = yn;
-			toggle_show_auto_regions_action()->set_active (yn);
-			changed = true;
-		}
-	}
-
 	if (changed) {
 		redisplay ();
 	}
-}
-
-RefPtr<RadioAction>
-EditorRegions::sort_type_action (Editing::RegionListSortType t) const
-{
-	const char* action = 0;
-
-	switch (t) {
-	case Editing::ByName:
-		action = X_("SortByRegionName");
-		break;
-	case Editing::ByLength:
-		action = X_("SortByRegionLength");
-		break;
-	case Editing::ByPosition:
-		action = X_("SortByRegionPosition");
-		break;
-	case Editing::ByTimestamp:
-		action = X_("SortByRegionTimestamp");
-		break;
-	case Editing::ByStartInFile:
-		action = X_("SortByRegionStartinFile");
-		break;
-	case Editing::ByEndInFile:
-		action = X_("SortByRegionEndinFile");
-		break;
-	case Editing::BySourceFileName:
-		action = X_("SortBySourceFileName");
-		break;
-	case Editing::BySourceFileLength:
-		action = X_("SortBySourceFileLength");
-		break;
-	case Editing::BySourceFileCreationDate:
-		action = X_("SortBySourceFileCreationDate");
-		break;
-	case Editing::BySourceFileFS:
-		action = X_("SortBySourceFilesystem");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "EditorRegions: impossible sort type", (int) t) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), action);
-	assert (act);
-
-	return RefPtr<RadioAction>::cast_dynamic (act);
-}
-
-RefPtr<Action>
-EditorRegions::hide_action () const
-{
-	return ActionManager::get_action (X_("RegionList"), X_("rlHide"));
-}
-
-RefPtr<Action>
-EditorRegions::show_action () const
-{
-	return ActionManager::get_action (X_("RegionList"), X_("rlShow"));
 }
 
 RefPtr<Action>
 EditorRegions::remove_unused_regions_action () const
 {
 	return ActionManager::get_action (X_("RegionList"), X_("removeUnusedRegions"));
-}
-
-RefPtr<ToggleAction>
-EditorRegions::toggle_full_action () const
-{
-	return ActionManager::get_toggle_action (X_("RegionList"), X_("rlShowAll"));
-}
-
-RefPtr<ToggleAction>
-EditorRegions::toggle_show_auto_regions_action () const
-{
-	return ActionManager::get_toggle_action (X_("RegionList"), X_("rlShowAuto"));
 }

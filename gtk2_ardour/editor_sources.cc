@@ -77,11 +77,7 @@ struct ColumnInfo {
 EditorSources::EditorSources (Editor* e)
 	: EditorComponent (e)
 	, old_focus (0)
-	, name_editable (0)
 	, _menu (0)
-	, ignore_region_list_selection_change (false)
-	, ignore_selected_region_change (false)
-	, _sort_type ((Editing::RegionListSortType) 0)
 	, _selection (0)
 {
 	_display.set_size_request (100, -1);
@@ -95,7 +91,6 @@ EditorSources::EditorSources (Editor* e)
 	_display.set_data ("mouse-edits-require-mod1", (gpointer) 0x1);
 
 	_model = TreeStore::create (_columns);
-	_model->set_sort_func (0, sigc::mem_fun (*this, &EditorSources::sorter));
 	_model->set_sort_column (0, SORT_ASCENDING);
 
 	/* column widths */
@@ -110,18 +105,22 @@ EditorSources::EditorSources (Editor* e)
 	TreeViewColumn* col_name = manage (new TreeViewColumn ("", _columns.name));
 	col_name->set_fixed_width (bbt_width*2);
 	col_name->set_sizing (TREE_VIEW_COLUMN_FIXED);
-
-	TreeViewColumn* col_nat_pos = manage (new TreeViewColumn ("", _columns.natural_pos));
-	col_nat_pos->set_fixed_width (bbt_width);
-	col_nat_pos->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col_name->set_sort_column(0);
 
 	TreeViewColumn* col_take_id = manage (new TreeViewColumn ("", _columns.take_id));
 	col_take_id->set_fixed_width (date_width);
 	col_take_id->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col_take_id->set_sort_column(1);
+
+	TreeViewColumn* col_nat_pos = manage (new TreeViewColumn ("", _columns.natural_pos));
+	col_nat_pos->set_fixed_width (bbt_width);
+	col_nat_pos->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col_nat_pos->set_sort_column(6);
 
 	TreeViewColumn* col_path = manage (new TreeViewColumn ("", _columns.path));
 	col_path->set_fixed_width (bbt_width);
 	col_path->set_sizing (TREE_VIEW_COLUMN_FIXED);
+	col_path->set_sort_column(3);
 
 	_display.append_column (*col_name);
 	_display.append_column (*col_take_id);
@@ -134,7 +133,7 @@ EditorSources::EditorSources (Editor* e)
 	ColumnInfo ci[] = {
 		{ 0,   _("Source"),    _("Source name, with number of channels in []'s") },
 		{ 1,   _("Take ID"),   _("Take ID") },
-		{ 2,   _("Nat Pos"),   _("Natural Position of the file on timeline") },
+		{ 2,   _("Orig Pos"),  _("Original Position of the file on timeline, when it was recorded") },
 		{ 3,   _("Path"),      _("Path (folder) of the file locationlosition of end of region") },
 		{ -1, 0, 0 }
 	};
@@ -151,11 +150,6 @@ EditorSources::EditorSources (Editor* e)
 	_display.set_headers_visible (true);
 	_display.set_rules_hint ();
 
-	CellRendererText* source_name_cell = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
-	source_name_cell->property_editable() = true;
-	source_name_cell->signal_edited().connect (sigc::mem_fun (*this, &EditorSources::name_edit));
-	source_name_cell->signal_editing_started().connect (sigc::mem_fun (*this, &EditorSources::name_editing_started));
-
 	_display.get_selection()->set_select_function (sigc::mem_fun (*this, &EditorSources::selection_filter));
 
 	//set the color of the name field
@@ -163,7 +157,14 @@ EditorSources::EditorSources (Editor* e)
 	CellRendererText* renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (0));
 	tv_col->add_attribute(renderer->property_text(), _columns.name);
 	tv_col->add_attribute(renderer->property_foreground_gdk(), _columns.color_);
-//	tv_col->set_expand (true);
+
+	//right-align the Natural Pos column
+	TreeViewColumn* nat_col = _display.get_column(2);
+	nat_col->set_alignment (ALIGN_RIGHT);
+	renderer = dynamic_cast<CellRendererText*>(_display.get_column_cell_renderer (2));
+	if (renderer) {
+		renderer->property_xalign() = ( ALIGN_RIGHT );
+	}
 
 	//the PATH field should expand when the pane is opened wider
 	tv_col = _display.get_column(3);
@@ -172,7 +173,7 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->set_expand (true);
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	_display.add_object_drag (_columns.source.index(), "sources");
+	_display.add_object_drag (_columns.source.index(), "regions");
 	_display.set_drag_column (_columns.name.index());
 
 	/* setup DnD handling */
@@ -219,8 +220,6 @@ EditorSources::focus_in (GdkEventFocus*)
 		old_focus = 0;
 	}
 
-	name_editable = 0;
-
 	/* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
 	return true;
 }
@@ -233,18 +232,12 @@ EditorSources::focus_out (GdkEventFocus*)
 		old_focus = 0;
 	}
 
-	name_editable = 0;
-
 	return false;
 }
 
 bool
 EditorSources::enter_notify (GdkEventCrossing*)
 {
-	if (name_editable) {
-		return true;
-	}
-
 	/* arm counter so that ::selection_filter() will deny selecting anything for the
 	   next two attempts to change selection status.
 	*/
@@ -355,8 +348,11 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 
 	row[_columns.take_id] = source->take_id();
 
-	//Natural Position
-	//note:  this format changes to follow master clock.  see  populate_row_position
+
+	//Natural Position (samples, an invisible column for sorting)
+	row[_columns.natural_s] = source->natural_position();
+
+	//Natural Position (text representation)
 	char buf[64];
 	snprintf(buf, 16, "--" );
 	if (source->natural_position() > 0) {
@@ -427,12 +423,7 @@ EditorSources::source_changed (boost::shared_ptr<ARDOUR::Source> source)
 void
 EditorSources::selection_changed ()
 {
-/*
- * 	if (ignore_region_list_selection_change) {
-		return;
-	}
-
-	_editor->_region_selection_change_updates_region_list = false;
+//	_editor->_region_selection_change_updates_region_list = false;
 
 	if (_display.get_selection()->count_selected_rows() > 0) {
 
@@ -445,17 +436,18 @@ EditorSources::selection_changed ()
 
 			if ((iter = _model->get_iter (*i))) {
 
-				boost::shared_ptr<Region> region = (*iter)[_columns.region];
+				boost::shared_ptr<ARDOUR::Source> source = (*iter)[_columns.source];
+				if (source) {
 
-				// they could have clicked on a row that is just a placeholder, like "Hidden"
-				// although that is not allowed by our selection filter. check it anyway
-				// since we need a region ptr.
+					set<boost::shared_ptr<Region> > regions;
+					RegionFactory::get_regions_using_source ( source, regions );
 
-				if (region) {
-
-					_change_connection.block (true);
-					_editor->set_selected_regionview_from_region_list (region, Selection::Add);
-					_change_connection.block (false);
+					for (set<boost::shared_ptr<Region> >::iterator region = regions.begin(); region != regions.end(); region++ ) {
+						_change_connection.block (true);
+						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
+						_change_connection.block (false);
+	
+					}
 				}
 			}
 
@@ -464,46 +456,18 @@ EditorSources::selection_changed ()
 		_editor->get_selection().clear_regions ();
 	}
 
-	_editor->_region_selection_change_updates_region_list = true;
-*/
-}
-
-void
-EditorSources::update_row (boost::shared_ptr<Region> region)
-{
-/*	if (!region || !_session) {
-		return;
-	}
-
-	RegionRowMap::iterator it;
-
-	it = region_row_map.find (region);
-
-	if (it != region_row_map.end()){
-		PropertyChange c;
-		TreeModel::iterator j = _model->get_iter ((*it).second.get_path());
-		populate_row(region, (*j), c);
-	}
-*/
+//	_editor->_region_selection_change_updates_region_list = true;
 }
 
 void
 EditorSources::update_all_rows ()
 {
-/*
- * 	if (!_session) {
-		return;
+	TreeModel::iterator i;
+	TreeModel::Children rows = _model->children();
+	for (i = rows.begin(); i != rows.end(); ++i) {
+		boost::shared_ptr<ARDOUR::Source> ss = (*i)[_columns.source];
+		populate_row(*i, ss);
 	}
-
-	RegionRowMap::iterator i;
-
-	for (i = region_row_map.begin(); i != region_row_map.end(); ++i) {
-
-		TreeModel::iterator j = _model->get_iter ((*i).second.get_path());
-
-		boost::shared_ptr<Region> region = (*j)[_columns.region];
-	}
-	**/
 }
 
 void
@@ -576,110 +540,6 @@ EditorSources::format_position (samplepos_t pos, char* buf, size_t bufsize, bool
 }
 
 void
-EditorSources::populate_row (boost::shared_ptr<Region> region, TreeModel::Row const &row, PBD::PropertyChange const &what_changed)
-{
-/*
- * 	boost::shared_ptr<AudioRegion> audioregion = boost::dynamic_pointer_cast<AudioRegion>(region);
-	//uint32_t used = _session->playlists->region_use_count (region);
-	uint32_t used = 1;
-
-	PropertyChange c;
-	const bool all = what_changed == c;
-
-	if (all || what_changed.contains (Properties::position)) {
-		populate_row_position (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::start) || what_changed.contains (Properties::sync_position)) {
-		populate_row_sync (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::fade_in)) {
-		populate_row_fade_in (region, row, used, audioregion);
-	}
-	if (all || what_changed.contains (Properties::fade_out)) {
-		populate_row_fade_out (region, row, used, audioregion);
-	}
-	if (all || what_changed.contains (Properties::locked)) {
-		populate_row_locked (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::position_lock_style)) {
-		populate_row_glued (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::muted)) {
-		populate_row_muted (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::opaque)) {
-		populate_row_opaque (region, row, used);
-	}
-	if (all || what_changed.contains (Properties::length)) {
-		populate_row_end (region, row, used);
-		populate_row_length (region, row);
-	}
-	if (all) {
-		populate_row_source (region, row);
-	}
-	if (all || what_changed.contains (Properties::name)) {
-		populate_row_name (region, row);
-	}
-	if (all) {
-		populate_row_used (region, row, used);
-	}
-*/
-}
-
-#if 0
-	if (audioRegion && fades_in_seconds) {
-
-		samplepos_t left;
-		int mins;
-		int millisecs;
-
-		left = audioRegion->fade_in()->back()->when;
-		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
-		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
-
-		if (audioRegion->fade_in()->back()->when >= _session->sample_rate()) {
-			sprintf (fadein_str, "%01dM %01dmS", mins, millisecs);
-		} else {
-			sprintf (fadein_str, "%01dmS", millisecs);
-		}
-
-		left = audioRegion->fade_out()->back()->when;
-		mins = (int) floor (left / (_session->sample_rate() * 60.0f));
-		left -= (samplepos_t) floor (mins * _session->sample_rate() * 60.0f);
-		millisecs = (int) floor ((left * 1000.0f) / _session->sample_rate());
-
-		if (audioRegion->fade_out()->back()->when >= _session->sample_rate()) {
-			sprintf (fadeout_str, "%01dM %01dmS", mins, millisecs);
-		} else {
-			sprintf (fadeout_str, "%01dmS", millisecs);
-		}
-	}
-#endif
-
-void
-EditorSources::populate_row_name (boost::shared_ptr<Region> region, TreeModel::Row const &row)
-{
-/*	if (region->n_channels() > 1) {
-		row[_columns.name] = string_compose("%1  [%2]", Gtkmm2ext::markup_escape_text (region->name()), region->n_channels());
-	} else {
-		row[_columns.name] = Gtkmm2ext::markup_escape_text (region->name());
-	}
-*/
-}
-
-void
-EditorSources::populate_row_source (boost::shared_ptr<Region> region, TreeModel::Row const &row)
-{
-/*	if (boost::dynamic_pointer_cast<SilentFileSource>(region->source())) {
-		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (region->source()->name());
-	} else {
-		row[_columns.path] = Gtkmm2ext::markup_escape_text (region->source()->name());
-	}
-*/
-}
-
-void
 EditorSources::show_context_menu (int button, int time)
 {
 
@@ -688,7 +548,7 @@ EditorSources::show_context_menu (int button, int time)
 bool
 EditorSources::key_press (GdkEventKey* ev)
 {
-
+	return false;
 }
 
 bool
@@ -715,23 +575,6 @@ EditorSources::button_press (GdkEventButton *ev)
 	return false;
 }
 
-int
-EditorSources::sorter (TreeModel::iterator a, TreeModel::iterator b)
-{
-
-}
-
-void
-EditorSources::reset_sort_type (RegionListSortType type, bool force)
-{
-
-}
-
-void
-EditorSources::reset_sort_direction (bool up)
-{
-}
-
 void
 EditorSources::selection_mapover (sigc::slot<void,boost::shared_ptr<Region> > sl)
 {
@@ -751,26 +594,23 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 bool
 EditorSources::selection_filter (const RefPtr<TreeModel>& model, const TreeModel::Path& path, bool already_selected)
 {
-
-}
-
-void
-EditorSources::name_editing_started (CellEditable* ce, const Glib::ustring& path)
-{
-
-}
-
-void
-EditorSources::name_edit (const std::string& path, const std::string& new_text)
-{
-
+	return true;
 }
 
 /** @return Region that has been dragged out of the list, or 0 */
-boost::shared_ptr<Region>
-EditorSources::get_dragged_region ()
+boost::shared_ptr<ARDOUR::Source>
+EditorSources::get_dragged_source ()
 {
+	list<boost::shared_ptr<ARDOUR::Source> > sources;
+	TreeView* source;
+	_display.get_object_drag_data (sources, &source);
 
+	if (sources.empty()) {
+		return boost::shared_ptr<ARDOUR::Source> ();
+	}
+
+	assert (sources.size() == 1);
+	return sources.front ();
 }
 
 void
@@ -781,10 +621,26 @@ EditorSources::clear ()
 	_display.set_model (_model);
 }
 
-boost::shared_ptr<Region>
+boost::shared_ptr<ARDOUR::Source>
 EditorSources::get_single_selection ()
 {
+	Glib::RefPtr<TreeSelection> selected = _display.get_selection();
 
+	if (selected->count_selected_rows() != 1) {
+		return boost::shared_ptr<ARDOUR::Source> ();
+	}
+
+	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
+
+	/* only one row selected, so rows.begin() is it */
+
+	TreeIter iter = _model->get_iter (*rows.begin());
+
+	if (!iter) {
+		return boost::shared_ptr<ARDOUR::Source> ();
+	}
+
+	return (*iter)[_columns.source];
 }
 
 void
@@ -806,11 +662,7 @@ EditorSources::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("SourcesList"));
 
-	node->set_property (X_("sort-type"), _sort_type);
-
-	RefPtr<Action> act = ActionManager::get_action (X_("SourcesList"), X_("SortAscending"));
-	bool const ascending = RefPtr<RadioAction>::cast_dynamic(act)->get_active ();
-	node->set_property (X_("sort-ascending"), ascending);
+	//TODO:  save sort state?
 
 	return *node;
 }
@@ -820,105 +672,6 @@ EditorSources::set_state (const XMLNode & node)
 {
 	bool changed = false;
 
-	if (node.name() != X_("SourcesList")) {
-		return;
-	}
-
-	Editing::RegionListSortType t;
-	if (node.get_property (X_("sort-type"), t)) {
-
-		if (_sort_type != t) {
-			changed = true;
-		}
-
-		reset_sort_type (t, true);
-		RefPtr<RadioAction> ract = sort_type_action (t);
-		ract->set_active ();
-	}
-
-	bool yn;
-	if (node.get_property (X_("sort-ascending"), yn)) {
-		SortType old_sort_type;
-		int old_sort_column;
-
-		_model->get_sort_column_id (old_sort_column, old_sort_type);
-
-		if (old_sort_type != (yn ? SORT_ASCENDING : SORT_DESCENDING)) {
-			changed = true;
-		}
-
-		reset_sort_direction (yn);
-		RefPtr<Action> act;
-
-		if (yn) {
-			act = ActionManager::get_action (X_("SourcesList"), X_("SortAscending"));
-		} else {
-			act = ActionManager::get_action (X_("SourcesList"), X_("SortDescending"));
-		}
-
-		RefPtr<RadioAction>::cast_dynamic(act)->set_active ();
-	}
-
-}
-
-RefPtr<RadioAction>
-EditorSources::sort_type_action (Editing::RegionListSortType t) const
-{
-	const char* action = 0;
-
-	switch (t) {
-	case Editing::ByName:
-		action = X_("SortByRegionName");
-		break;
-	case Editing::ByLength:
-		action = X_("SortByRegionLength");
-		break;
-	case Editing::ByPosition:
-		action = X_("SortByRegionPosition");
-		break;
-	case Editing::ByTimestamp:
-		action = X_("SortByRegionTimestamp");
-		break;
-	case Editing::ByStartInFile:
-		action = X_("SortByRegionStartinFile");
-		break;
-	case Editing::ByEndInFile:
-		action = X_("SortByRegionEndinFile");
-		break;
-	case Editing::BySourceFileName:
-		action = X_("SortBySourceFileName");
-		break;
-	case Editing::BySourceFileLength:
-		action = X_("SortBySourceFileLength");
-		break;
-	case Editing::BySourceFileCreationDate:
-		action = X_("SortBySourceFileCreationDate");
-		break;
-	case Editing::BySourceFileFS:
-		action = X_("SortBySourceFilesystem");
-		break;
-	default:
-		fatal << string_compose (_("programming error: %1: %2"), "EditorSources: impossible sort type", (int) t) << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	RefPtr<Action> act = ActionManager::get_action (X_("RegionList"), action);
-	assert (act);
-
-	return RefPtr<RadioAction>::cast_dynamic (act);
-}
-
-RefPtr<Action>
-EditorSources::hide_action () const
-{
-	return ActionManager::get_action (X_("SourcesList"), X_("rlHide"));
-
-}
-
-RefPtr<Action>
-EditorSources::show_action () const
-{
-	return ActionManager::get_action (X_("SourcesList"), X_("rlShow"));
 }
 
 RefPtr<Action>

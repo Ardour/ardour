@@ -48,6 +48,7 @@
 #include "editor_drag.h"
 #include "midi_time_axis.h"
 #include "editor_regions.h"
+#include "editor_sources.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -1114,6 +1115,7 @@ Editor::canvas_note_event (GdkEvent *event, ArdourCanvas::Item* item)
 bool
 Editor::canvas_drop_zone_event (GdkEvent* event)
 {
+printf("canvas_drop_zone_event\n");
 	GdkEventScroll scroll;
 	ArdourCanvas::Duple winpos;
 
@@ -1167,6 +1169,8 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 		return false;
 	}
 
+printf("DRAGGING:  track_canvas_drag_motion\n");
+
 	event.type = GDK_MOTION_NOTIFY;
 	event.button.x = x;
 	event.button.y = y;
@@ -1197,6 +1201,10 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (can_drop) {
 		region = _regions->get_dragged_region ();
+		if (!region) {
+			boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
+			region = RegionFactory::get_whole_region_for_source (src);
+		}
 
 		if (region) {
 
@@ -1267,6 +1275,11 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
 	boost::shared_ptr<Region> region = _regions->get_dragged_region ();
+	if (!region) {
+		boost::shared_ptr<ARDOUR::Source> src = _sources->get_dragged_source ();
+		region = RegionFactory::get_whole_region_for_source (src);
+	}
+
 	if (!region) { return; }
 
 	RouteTimeAxisView* rtav = 0;

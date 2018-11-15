@@ -1283,8 +1283,6 @@ private:
 	void define_one_bar (samplepos_t start, samplepos_t end);
 
 	void audition_region_from_region_list ();
-	void hide_region_from_region_list ();
-	void show_region_in_region_list ();
 
 	void naturalize_region ();
 

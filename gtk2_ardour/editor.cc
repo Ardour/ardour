@@ -2465,14 +2465,8 @@ Editor::set_state (const XMLNode& node, int version)
 		set_stationary_playhead (yn);
 	}
 
-	RegionListSortType sort_type;
-	if (node.get_property ("region-list-sort-type", sort_type)) {
-		_regions->reset_sort_type (sort_type, true);
-	}
+	if (node.get_property ("show-editor-mixer", yn)) {
 
-	yn = false;
-	node.get_property ("show-editor-mixer", yn);
-	{
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
 		/* do it twice to force the change */
 		tact->set_active (!yn);
@@ -2582,7 +2576,6 @@ Editor::get_state ()
 	node->set_property ("maximised", _maximised);
 	node->set_property ("follow-playhead", _follow_playhead);
 	node->set_property ("stationary-playhead", _stationary_playhead);
-	node->set_property ("region-list-sort-type", _regions->sort_type ());
 	node->set_property ("mouse-mode", mouse_mode);
 	node->set_property ("join-object-range", smart_mode_action->get_active ());
 
@@ -5718,18 +5711,6 @@ void
 Editor::audition_region_from_region_list ()
 {
 	_regions->selection_mapover (sigc::mem_fun (*this, &Editor::consider_auditioning));
-}
-
-void
-Editor::hide_region_from_region_list ()
-{
-	_regions->selection_mapover (sigc::mem_fun (*this, &Editor::hide_a_region));
-}
-
-void
-Editor::show_region_in_region_list ()
-{
-	_regions->selection_mapover (sigc::mem_fun (*this, &Editor::show_a_region));
 }
 
 void
