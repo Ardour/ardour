@@ -4204,7 +4204,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 
 		/* convert from session samples to source beats */
 		Temporal::Beats const time_beats = _source_relative_time_converter.from(
-			ev.time() - src->timeline_position() + _region->start());
+			ev.time() - src->natural_position() + _region->start());
 
 		if (ev.type() == MIDI_CMD_NOTE_ON) {
 			boost::shared_ptr<NoteType> note (

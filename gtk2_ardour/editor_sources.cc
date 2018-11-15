@@ -350,12 +350,13 @@ EditorSources::populate_row (TreeModel::Row row, boost::shared_ptr<ARDOUR::Sourc
 	row[_columns.natural_s] = source->natural_position();
 
 	//Natural Position (text representation)
-	char buf[64];
-	snprintf(buf, 16, "--" );
-	if (source->natural_position() > 0) {
+	if (source->have_natural_position()) {
+		char buf[64];
 		format_position (source->natural_position(), buf, sizeof (buf));
+		row[_columns.natural_pos] = buf;
+	} else {
+		row[_columns.natural_pos] = X_("--");
 	}
-	row[_columns.natural_pos] = buf;
 }
 
 void
@@ -380,12 +381,19 @@ EditorSources::source_changed (boost::shared_ptr<ARDOUR::Source> source)
 {
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children();
+	bool found = false;
+
 	for (i = rows.begin(); i != rows.end(); ++i) {
 		boost::shared_ptr<ARDOUR::Source> ss = (*i)[_columns.source];
 		if (source == ss) {
 			populate_row(*i, source);
+			found = true;
 			break;
 		}
+	}
+
+	if (!found) {
+		add_source (source);
 	}
 }
 
