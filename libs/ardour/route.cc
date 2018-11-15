@@ -239,6 +239,9 @@ Route::init ()
 		_monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
 	}
+	if (_presentation_info.flags() & PresentationInfo::FoldbackBus) {
+		panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
+	}
 
 	/* now that we have _meter, its safe to connect to this */
 
