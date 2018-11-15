@@ -24,6 +24,7 @@
 #include "pbd/i18n.h"
 
 #include "ardour/beatbox.h"
+#include "ardour/parameter_descriptor.h"
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 #include "ardour/source_factory.h"
@@ -47,6 +48,7 @@
 #include "gtkmm2ext/colors.h"
 
 #include "beatbox_gui.h"
+#include "floating_text_entry.h"
 #include "timers.h"
 #include "ui_config.h"
 
@@ -105,12 +107,6 @@ BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
 
 BBGUI::~BBGUI ()
 {
-}
-
-void
-BBGUI::mode_clicked (SequencerGrid::Mode m)
-{
-	_sequencer->set_mode (m);
 }
 
 void
@@ -231,73 +227,103 @@ BBGUI::sequencer_changed (PropertyChange const &)
 	const size_t nsequences = bbox->sequencer().nsequences();
 
 	_width = _step_dimen * nsteps;
-	_height = _step_dimen * nsequences;
+	_height = (_step_dimen * (1+nsequences)) + SequencerGrid::mode_button_ydim;
+
+	size_t required_scroll = _height - _canvas_viewport->get_allocation().get_height();
+
+	vertical_adjustment.set_upper (required_scroll);
 
 	/* height is 1 step_dimen larger to accomodate the "step indicator"
 	 * line at the top
 	 */
 
-	_canvas_viewport->set_size_request (250.0 + _width, _height + _step_dimen);
+	_canvas_viewport->set_size_request (SequencerGrid::rhs_xoffset + _width, _height);
 }
 
 /**/
+
+Gtkmm2ext::Color SequencerGrid::current_mode_color = Gtkmm2ext::Color (0);
+Gtkmm2ext::Color SequencerGrid::not_current_mode_color = Gtkmm2ext::Color (0);
+
+double SequencerGrid::rhs_xoffset = 250.0;
+double SequencerGrid::mode_button_width = 110.0;
+double SequencerGrid::mode_button_height = 60.0;
+double SequencerGrid::mode_button_spacing = 10;
+double SequencerGrid::mode_button_xdim = mode_button_width + mode_button_spacing;
+double SequencerGrid::mode_button_ydim = mode_button_height + mode_button_spacing;
+
 
 SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 	: Rectangle (c)
 	, _sequencer (s)
 	, _mode (Velocity)
 {
+	if (current_mode_color == 0) {
+		current_mode_color = UIConfiguration::instance().color ("gtk_lightest");
+		not_current_mode_color = contrasting_text_color (current_mode_color);
+	}
+
+	const Duple mode_button_center (mode_button_width/2.0, mode_button_height/2.0);
+
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
 	step_indicator_box = new ArdourCanvas::Container (no_scroll_group);
-	step_indicator_box->set_position (Duple (250.0, 70.0));
+	step_indicator_box->set_position (Duple (rhs_xoffset, mode_button_height + (mode_button_spacing * 2.0)));
 
 	v_scroll_group = new ScrollGroup (_canvas->root(), ScrollGroup::ScrollsVertically);
 	_canvas->add_scroller (*v_scroll_group);
 	v_scroll_group->add (this);
 
-	ArdourCanvas::Text* label;
-
 	velocity_mode_button = new Rectangle (no_scroll_group);
-	velocity_mode_button->set_position (Duple (250.0 + 10, 10));
-	velocity_mode_button->set (Rect (0, 0, 110, 60));
-	velocity_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
-	label = new Text (velocity_mode_button);
-	label->set_font_description (UIConfiguration::instance().get_NormalFont());
-	label->set_position (Duple (30, 30));
-	label->set (_("Vel"));
-	label->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
+	velocity_mode_button->set_corner_radius (10.0);
+	velocity_mode_button->set_position (Duple (rhs_xoffset, mode_button_spacing));
+	velocity_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	velocity_mode_button->set_fill_color (current_mode_color);
+	velocity_mode_text = new Text (velocity_mode_button);
+	velocity_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	velocity_mode_text->set (_("Velocity"));
+	velocity_mode_text->set_color (contrasting_text_color (velocity_mode_button->fill_color()));
+	velocity_mode_text->set_position (mode_button_center.translate (Duple (-velocity_mode_text->width()/2.0, -velocity_mode_text->height()/2.0)));
 
 	pitch_mode_button = new Rectangle (no_scroll_group);
-	pitch_mode_button->set_position (Duple (250.0 + 110, 10));
-	pitch_mode_button->set (Rect (0, 0, 110, 60));
-	pitch_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
-	label = new Text (pitch_mode_button);
-	label->set_font_description (UIConfiguration::instance().get_NormalFont());
-	label->set_position (Duple (30, 30));
-	label->set (_("Pitch"));
-	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	pitch_mode_button->set_corner_radius (10.0);
+	pitch_mode_button->set_position (Duple (rhs_xoffset + mode_button_xdim, mode_button_spacing));
+	pitch_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	pitch_mode_button->set_fill_color (not_current_mode_color);
+	pitch_mode_text = new Text (pitch_mode_button);
+	pitch_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	pitch_mode_text->set (_("Pitch"));
+	pitch_mode_text->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	pitch_mode_text->set_position (mode_button_center.translate (Duple (-pitch_mode_text->width()/2.0, -pitch_mode_text->height()/2.0)));
 
 	gate_mode_button = new Rectangle (no_scroll_group);
-	gate_mode_button->set_position (Duple (250.0 + 220, 10));
-	gate_mode_button->set (Rect (0, 0, 110, 60));
-	gate_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
-	label = new Text (gate_mode_button);
-	label->set_font_description (UIConfiguration::instance().get_NormalFont());
-	label->set_position (Duple (30, 30));
-	label->set (_("Gate"));
-	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	gate_mode_button->set_corner_radius (10.0);
+	gate_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 2), mode_button_spacing));
+	gate_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	gate_mode_button->set_fill_color (not_current_mode_color);
+	gate_mode_text = new Text (gate_mode_button);
+	gate_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	gate_mode_text->set (_("Gate"));
+	gate_mode_text->set_color (contrasting_text_color (gate_mode_button->fill_color()));
+	gate_mode_text->set_position (mode_button_center.translate (Duple (-gate_mode_text->width()/2.0, -gate_mode_text->height()/2.0)));
 
 	octave_mode_button = new Rectangle (no_scroll_group);
-	octave_mode_button->set_position (Duple (250.0 + 330, 10));
-	octave_mode_button->set (Rect (0, 0, 110, 60));
-	octave_mode_button->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
-	label = new Text (octave_mode_button);
-	label->set_font_description (UIConfiguration::instance().get_NormalFont());
-	label->set_position (Duple (30, 30));
-	label->set (_("Oct"));
-	label->set_color (contrasting_text_color (pitch_mode_button->fill_color()));
+	octave_mode_button->set_corner_radius (10.0);
+	octave_mode_button->set_position (Duple (rhs_xoffset + (mode_button_xdim * 3), mode_button_spacing));
+	octave_mode_button->set (Rect (0, 0, mode_button_width, mode_button_height));
+	octave_mode_button->set_fill_color (not_current_mode_color);
+	octave_mode_text = new Text (octave_mode_button);
+	octave_mode_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	octave_mode_text->set (_("Octave"));
+	octave_mode_text->set_color (contrasting_text_color (octave_mode_button->fill_color()));
+	octave_mode_text->set_position (mode_button_center.translate (Duple (-octave_mode_text->width()/2.0, -octave_mode_text->height()/2.0)));
 
-	set_position (Duple (250, _step_dimen + 70.0));
+	/* place "us", the rectangle that contains/defines/draws the grid */
+	set_position (Duple (rhs_xoffset, _step_dimen + mode_button_ydim + mode_button_spacing));
+
+	octave_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Octave));
+	gate_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Duration));
+	pitch_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Pitch));
+	velocity_mode_button->Event.connect (sigc::bind (sigc::mem_fun (*this, &SequencerGrid::mode_button_event), Velocity));
 
 	_sequencer.PropertyChanged.connect (sequencer_connection, invalidator (*this), boost::bind (&SequencerGrid::sequencer_changed, this, _1), gui_context());
 
@@ -306,6 +332,20 @@ SequencerGrid::SequencerGrid (StepSequencer& s, Canvas* c)
 		PropertyChange pc;
 		sequencer_changed (pc);
 	}
+}
+
+bool
+SequencerGrid::mode_button_event (GdkEvent* ev, Mode m)
+{
+	switch (ev->type) {
+	case GDK_BUTTON_RELEASE:
+		set_mode (m);
+		return true;
+	default:
+		break;
+	}
+
+	return false;
 }
 
 void
@@ -339,6 +379,8 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 	_width = _step_dimen * nsteps;
 	_height = _step_dimen * nsequences;
 
+	set (Rect (0, 0, _width, _height));
+
 	step_indicator_box->clear (true); /* delete all existing step indicators */
 	step_indicators.clear ();
 
@@ -362,13 +404,25 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 	clear (true);
 	step_views.clear ();
 
+	if (nsequences != sequence_headers.size()) {
+		//sequence_headers.clear (true);
+
+		cerr << "Creating " << nsequences << " SH\n";
+
+		for (size_t s = 0; s < nsequences; ++s) {
+			SequenceHeader* sh = new SequenceHeader (*this, _sequencer.sequence (s), v_scroll_group);
+			sh->set_position (Duple (0, (mode_button_ydim + mode_button_spacing) + ((s+1) * _step_dimen)));
+			sh->set (Rect (1, 1, rhs_xoffset - 2, _step_dimen - 2));
+			sh->set_fill_color (UIConfiguration::instance().color ("gtk_bright_color"));
+			sequence_headers.push_back (sh);
+		}
+	}
+
 	for (size_t s = 0; s < nsequences; ++s) {
 		for (size_t n = 0; n < nsteps; ++n) {
-			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), v_scroll_group);
-			/* sequence row is 1-row down ... because of the step indicator row */
-			sv->set_position (Duple (250.0 + (n * _step_dimen), 70.0 + (s+1) * _step_dimen));
+			StepView* sv = new StepView (*this, _sequencer.sequence (s).step (n), this);
+			sv->set_position (Duple (n * _step_dimen, s * _step_dimen));
 			sv->set (Rect (1, 1, _step_dimen - 2, _step_dimen - 2));
-			step_views.push_back (sv);
 			step_views.push_back (sv);
 		}
 	}
@@ -377,7 +431,63 @@ SequencerGrid::sequencer_changed (PropertyChange const &)
 void
 SequencerGrid::set_mode (Mode m)
 {
+	if (_mode == m) {
+		return;
+	}
+
 	_mode = m;
+
+	switch (_mode) {
+	case Octave:
+		octave_mode_button->set_fill_color (current_mode_color);
+		octave_mode_text->set_color (contrasting_text_color (current_mode_color));
+
+		velocity_mode_button->set_fill_color (not_current_mode_color);
+		gate_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
+		gate_mode_text->set_color (pitch_mode_text->color ());
+		velocity_mode_text->set_color (pitch_mode_text->color());
+		break;
+
+	case Duration:
+		gate_mode_button->set_fill_color (current_mode_color);
+		gate_mode_text->set_color (contrasting_text_color (current_mode_color));
+
+		velocity_mode_button->set_fill_color (not_current_mode_color);
+		octave_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
+		octave_mode_text->set_color (pitch_mode_text->color ());
+		velocity_mode_text->set_color (pitch_mode_text->color());
+		break;
+
+	case Pitch:
+		pitch_mode_button->set_fill_color (current_mode_color);
+		pitch_mode_text->set_color (contrasting_text_color (current_mode_color));
+
+		velocity_mode_button->set_fill_color (not_current_mode_color);
+		octave_mode_button->set_fill_color (not_current_mode_color);
+		gate_mode_button->set_fill_color (not_current_mode_color);
+		gate_mode_text->set_color (contrasting_text_color (not_current_mode_color));
+		octave_mode_text->set_color (gate_mode_text->color ());
+		velocity_mode_text->set_color (gate_mode_text->color());
+		break;
+
+	case Velocity:
+		velocity_mode_button->set_fill_color (current_mode_color);
+		velocity_mode_text->set_color (contrasting_text_color (current_mode_color));
+
+		pitch_mode_button->set_fill_color (not_current_mode_color);
+		octave_mode_button->set_fill_color (not_current_mode_color);
+		gate_mode_button->set_fill_color (not_current_mode_color);
+		pitch_mode_text->set_color (contrasting_text_color (not_current_mode_color));
+		octave_mode_text->set_color (pitch_mode_text->color ());
+		gate_mode_text->set_color (pitch_mode_text->color());
+
+	default:
+		break;
+	}
 
 	for (StepViews::iterator s = step_views.begin(); s != step_views.end(); ++s) {
 		(*s)->view_mode_changed ();
@@ -430,6 +540,15 @@ SequencerGrid::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 
 	render_children (area, context);
 }
+
+SequenceHeader&
+SequencerGrid::sequence_header (size_t n) const
+{
+	assert (n < sequence_headers.size());
+	return *sequence_headers[n];
+}
+
+/**/
 
 Gtkmm2ext::Color SequencerStepIndicator::other_color = Gtkmm2ext::Color (0);
 Gtkmm2ext::Color SequencerStepIndicator::current_color = Gtkmm2ext::Color (0);
@@ -872,4 +991,105 @@ void
 StepView::adjust_step_duration (Step::DurationRatio const & amt)
 {
 	_step.adjust_duration (amt);
+}
+
+/**/
+
+SequenceHeader::SequenceHeader (SequencerGrid& sg, StepSequence& sq, Item* parent)
+	: Rectangle (parent)
+	, grid (sg)
+	, sequence (sq)
+{
+	number_display = new Rectangle (this);
+	number_display->set_position (Duple (4.0, 4.0));
+	number_display->set_corner_radius (5);
+
+	number_text = new Text (number_display);
+	number_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+
+	number_text->set ("88"); // likely widest number label
+	number_display->set (Rect (0.0, 0.0, number_text->width() + 8.0, _step_dimen - 8.0));
+
+	number_text->set (string_compose ("%1", sequence.index() + 1));
+	number_text->set_position (Duple ((number_display->width()/2.0) - (number_text->width()/2.0), ((_step_dimen - 8.0) / 2.0) - (number_text->height() / 2.0)));
+	number_text->set_color (contrasting_text_color (number_display->fill_color()));
+
+	name_text = new Text (this);
+	name_text->set (_("Snare"));
+	name_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	name_text->set_position (Duple (number_display->width() + 5.0, (_step_dimen/2.0) - (name_text->height() / 2.0)));
+	name_text->set_color (contrasting_text_color (fill_color()));
+	name_text->Event.connect (sigc::mem_fun (*this, &SequenceHeader::name_text_event));
+	
+	root_display = new Rectangle (this);
+	root_display->set_position (Duple (180, 4.0));
+	root_display->set (Rect (0.0, 0.0, _step_dimen * 1.5, _step_dimen - 8.0));
+	root_display->set_corner_radius (5);
+
+	root_text = new Text (root_display);
+	root_text->set (ParameterDescriptor::midi_note_name (sequence.root()));
+	root_text->set_font_description (UIConfiguration::instance().get_LargeFont());
+	root_text->set_position (Duple (4.0, ((_step_dimen - 8.0) / 2.0) - (root_text->height() / 2.0)));
+	root_text->set_color (contrasting_text_color (root_display->fill_color()));
+
+}
+
+bool
+SequenceHeader::name_text_event (GdkEvent *ev)
+{
+	switch (ev->type) {
+	case GDK_2BUTTON_PRESS:
+		edit_name ();
+		return true;
+	default:
+		break;
+	}
+
+	return false;
+}
+
+void
+SequenceHeader::edit_name ()
+{
+	GtkCanvas* gc = dynamic_cast<GtkCanvas*> (name_text->canvas());
+	assert (gc);
+	Gtk::Window* toplevel = (Gtk::Window*) gc->get_toplevel();
+	assert (toplevel);
+
+	floating_entry = new FloatingTextEntry (toplevel, name_text->text());
+	floating_entry->use_text.connect (sigc::mem_fun (*this, &SequenceHeader::name_edited));
+	floating_entry->set_name (X_("LargeTextEntry"));
+
+	/* move fte top left corner to top left corner of name text */
+
+	Duple wc = name_text->item_to_window (Duple (0,0));
+	int x, y;
+	int wx, wy;
+
+	gc->translate_coordinates (*toplevel, wc.x, wc.y, x, y);
+	toplevel->get_window()->get_origin (wx, wy);
+
+	floating_entry->move (wx + x, wy + y);
+	floating_entry->present ();
+}
+
+void
+SequenceHeader::name_edited (std::string str, int next)
+{
+	name_text->set (str);
+
+	switch (next) {
+	case 0:
+		break;
+	case 1:
+		if (sequence.index() < grid.sequencer().nsequences() - 1) {
+			grid.sequence_header (sequence.index() + 1).edit_name();
+		}
+		break;
+	case -1:
+		if (sequence.index() > 0) {
+			grid.sequence_header (sequence.index() - 1).edit_name();
+		}
+		break;
+	}
 }

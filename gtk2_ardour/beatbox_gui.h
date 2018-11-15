@@ -64,6 +64,30 @@ class BeatBox;
 }
 
 class SequencerGrid;
+class FloatingTextEntry;
+
+class SequenceHeader : public ArdourCanvas::Rectangle
+{
+  public:
+	SequenceHeader (SequencerGrid&, ARDOUR::StepSequence&, ArdourCanvas::Item* parent);
+
+  private:
+	SequencerGrid& grid;
+	ARDOUR::StepSequence& sequence;
+
+	ArdourCanvas::Rectangle* number_display;
+	ArdourCanvas::Rectangle* root_display;
+
+	ArdourCanvas::Text* number_text;
+	ArdourCanvas::Text* name_text;
+	ArdourCanvas::Text* root_text;
+
+	bool name_text_event (GdkEvent*);
+	void edit_name ();
+	void name_edited (std::string, int);
+
+	FloatingTextEntry* floating_entry;
+};
 
 class StepView : public ArdourCanvas::Rectangle, public sigc::trackable {
    public:
@@ -150,11 +174,20 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 
 	ARDOUR::StepSequencer& sequencer() const { return _sequencer; }
 
+	SequenceHeader& sequence_header (size_t n) const;
+
 	Mode mode() const { return _mode; }
 	void set_mode (Mode m);
 
 	void render (ArdourCanvas::Rect const &, Cairo::RefPtr<Cairo::Context>) const;
 	void update ();
+
+	static double rhs_xoffset;
+	static double mode_button_width;
+	static double mode_button_height;
+	static double mode_button_spacing;
+	static double mode_button_xdim;
+	static double mode_button_ydim;
 
   private:
 	ARDOUR::StepSequencer& _sequencer;
@@ -162,6 +195,9 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	StepViews step_views;
 	typedef std::vector<SequencerStepIndicator*> StepIndicators;
 	StepIndicators step_indicators;
+	typedef std::vector<SequenceHeader*> SequenceHeaders;
+	SequenceHeaders sequence_headers;
+
 	double _width;
 	double _height;
 	Mode   _mode;
@@ -175,9 +211,19 @@ class SequencerGrid : public ArdourCanvas::Rectangle, public sigc::trackable {
 	ArdourCanvas::Rectangle* octave_mode_button;
 	ArdourCanvas::Rectangle* gate_mode_button;
 
+	ArdourCanvas::Text* velocity_mode_text;
+	ArdourCanvas::Text* pitch_mode_text;
+	ArdourCanvas::Text* octave_mode_text;
+	ArdourCanvas::Text* gate_mode_text;
+
+	static Gtkmm2ext::Color current_mode_color;
+	static Gtkmm2ext::Color not_current_mode_color;
+
 	void sequencer_changed (PBD::PropertyChange const &);
+	bool mode_button_event (GdkEvent*, SequencerGrid::Mode);
 
 	PBD::ScopedConnection sequencer_connection;
+
 };
 
 class BBGUI : public ArdourDialog {
@@ -228,8 +274,6 @@ class BBGUI : public ArdourDialog {
 	ArdourWidgets::ArdourButton mode_octave_button;
 	ArdourWidgets::ArdourButton mode_group_button;
 	ArdourWidgets::ArdourButton mode_duration_button;
-
-	void mode_clicked (SequencerGrid::Mode);
 
 	PBD::ScopedConnection sequencer_connection;
 };
