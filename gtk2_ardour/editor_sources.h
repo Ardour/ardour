@@ -45,16 +45,10 @@ public:
 
 	void clear ();
 
-	void reset_sort_direction (bool);
-	void reset_sort_type (Editing::RegionListSortType, bool);
 	void selection_mapover (sigc::slot<void,boost::shared_ptr<ARDOUR::Region> >);
 
-	boost::shared_ptr<ARDOUR::Region> get_dragged_region ();
-	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
-
-	Editing::RegionListSortType sort_type () const {
-		return _sort_type;
-	}
+	boost::shared_ptr<ARDOUR::Source> get_dragged_source ();
+	boost::shared_ptr<ARDOUR::Source> get_single_selection ();
 
 	void block_change_connection (bool b) {
 		_change_connection.block (b);
@@ -74,11 +68,12 @@ private:
 	struct Columns : public Gtk::TreeModel::ColumnRecord {
 		Columns () {
 			add (name);
-			add (source);
-			add (color_);
+			add (take_id);
 			add (natural_pos);
 			add (path);
-			add (take_id);
+			add (color_);
+			add (source);
+			add (natural_s);
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
@@ -87,6 +82,7 @@ private:
 		Gtk::TreeModelColumn<std::string> natural_pos;
 		Gtk::TreeModelColumn<std::string> path;
 		Gtk::TreeModelColumn<std::string> take_id;
+		Gtk::TreeModelColumn<samplepos_t> natural_s;
 	};
 
 	Columns _columns;
@@ -104,10 +100,6 @@ private:
 	bool selection_filter (const Glib::RefPtr<Gtk::TreeModel>& model, const Gtk::TreeModel::Path& path, bool yn);
 
 	Gtk::Widget* old_focus;
-	Gtk::CellEditable* name_editable;
-	void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
-
-	void name_edit (const std::string&, const std::string&);
 
 	bool key_press (GdkEventKey *);
 	bool button_press (GdkEventButton *);
@@ -119,52 +111,26 @@ private:
 
 	void show_context_menu (int button, int time);
 
-	int sorter (Gtk::TreeModel::iterator, Gtk::TreeModel::iterator);
-
 	void format_position (ARDOUR::samplepos_t pos, char* buf, size_t bufsize, bool onoff = true);
 
 	void add_source (boost::shared_ptr<ARDOUR::Source>);
 	void remove_source (boost::shared_ptr<ARDOUR::Source>);
 
-	void populate_row (boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::Row const &, PBD::PropertyChange const &);
-	void populate_row_name (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
-	void populate_row_source (boost::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
-
-	void update_row (boost::shared_ptr<ARDOUR::Region>);
 	void update_all_rows ();
-
-	void insert_into_tmp_regionlist (boost::shared_ptr<ARDOUR::Region>);
 
 	void drag_data_received (
 		Glib::RefPtr<Gdk::DragContext> const &, gint, gint, Gtk::SelectionData const &, guint, guint
 		);
 
-	Glib::RefPtr<Gtk::RadioAction> sort_type_action (Editing::RegionListSortType) const;
-
-	Glib::RefPtr<Gtk::Action> hide_action () const;
-	Glib::RefPtr<Gtk::Action> show_action () const;
-	Glib::RefPtr<Gtk::Action> remove_unused_regions_action () const;
+	Glib::RefPtr<Gtk::Action> remove_unused_regions_action () const;  //TODO: what is the equivalent?
 
 	Gtk::Menu* _menu;
 	Gtk::ScrolledWindow _scroller;
 	Gtk::Frame _frame;
 
-	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Region> > _display;
+	Gtkmm2ext::DnDTreeView<boost::shared_ptr<ARDOUR::Source> > _display;  //TODO .. try changing this to region
 
 	Glib::RefPtr<Gtk::TreeStore> _model;
-
-	bool ignore_region_list_selection_change;
-	bool ignore_selected_region_change;
-
-	Editing::RegionListSortType _sort_type;
-
-	std::list<boost::shared_ptr<ARDOUR::Region> > tmp_region_list;
-
-	typedef boost::unordered_map<boost::shared_ptr<ARDOUR::Region>, Gtk::TreeModel::RowReference> RegionRowMap;
-	typedef boost::unordered_map<std::string, Gtk::TreeModel::RowReference > RegionSourceMap;
-
-	RegionRowMap region_row_map;
-	RegionSourceMap parent_regions_sources_map;
 
 	PBD::ScopedConnection source_property_connection;
 
