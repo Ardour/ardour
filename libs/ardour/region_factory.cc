@@ -126,7 +126,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 		ret->apply_changes (plist);
 
 		if (ret->session().config.get_glue_new_regions_to_bars_and_beats() && ret->position_lock_style() != MusicTime) {
-			ret->set_position_lock_style (MusicTime);
+ 			ret->set_position_lock_style (MusicTime);
 		}
 
 		if (announce) {
@@ -639,6 +639,8 @@ RegionFactory::get_whole_region_for_source (boost::shared_ptr<Source> s)
 			return (i->second);
 		}
 	}
+
+	return boost::shared_ptr<Region>();
 }
 
 void
