@@ -1169,7 +1169,7 @@ Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context,
 		return false;
 	}
 
-printf("DRAGGING:  track_canvas_drag_motion\n");
+printf("Paul:  DRAGGING:  track_canvas_drag_motion\n");
 
 	event.type = GDK_MOTION_NOTIFY;
 	event.button.x = x;

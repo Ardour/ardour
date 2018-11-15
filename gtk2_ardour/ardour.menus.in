@@ -234,6 +234,7 @@
         <menuitem action='toggle-region-fade-out'/>
       </menu>
       <separator/>
+      <menuitem action='tag-last-capture'/>
       <menuitem action='remove-last-capture'/>
       <separator/>
       <menu action="EditPointMenu">
@@ -293,6 +294,7 @@
     <menu name='RegionMenu' action='RegionMenu'>
       <menuitem action='insert-region-from-region-list'/>
       <menuitem action='play-selected-regions'/>
+      <menuitem action='tag-selected-regions'/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
@@ -710,6 +712,7 @@
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
+    <menuitem action='tag-selected-regions'/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>
