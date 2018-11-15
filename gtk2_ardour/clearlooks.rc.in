@@ -239,7 +239,7 @@ style "treeview_display" = "small_bold_text"
 	text[ACTIVE] = { 1.0, 1.0, 1.0 }
 }
 
-style "track_header_inactive"  = "larger_text"
+style "track_header_inactive"  = "large_text"
 {
         bg[NORMAL] =      @track_header_inactive
 	bg[ACTIVE] =      @track_header_inactive
@@ -343,9 +343,14 @@ style "bigger_clock"
 	font_name = "@CLOCKFONT@ @FONT_BIGGER@"
 }
 
-style "larger_text"
+style "large_text"
 {
 	font_name = "@FONTFAMILY@ @FONT_LARGE@"
+}
+
+style "large_bold_text"
+{
+	font_name = "bold @FONT_LARGE@"
 }
 
 style "massive_clock"
@@ -609,7 +614,7 @@ style "bright_when_active" = "medium_text"
 	bg[PRELIGHT] = @bright_indicator
 }
 
-style "xrun_warn"  = "larger_bold_text"
+style "xrun_warn"  = "large_bold_text"
 {
 	fg[NORMAL] = @foreground
 	fg[ACTIVE] = @foreground
@@ -1262,3 +1267,5 @@ widget "*Pane" style:highest "pane"
 widget "*Pane.Divider" style:highest "pane"
 widget "*VCALabelBar*" style:highest "vca_label_bar"
 widget "*TextOnBackground" style:highest "text_on_bg"
+widget "*LargeTextEntry" style:highest "large_text"
+widget "*LargeTextEntry*" style:highest "large_text"
