@@ -173,18 +173,18 @@ EditorSources::EditorSources (Editor* e)
 	tv_col->set_expand (true);
 
 	_display.get_selection()->set_mode (SELECTION_MULTIPLE);
-	_display.add_object_drag (_columns.source.index(), "regions");
+	_display.add_object_drag (_columns.source.index(), "sources");
 	_display.set_drag_column (_columns.name.index());
 
 	/* setup DnD handling */
 
-	list<TargetEntry> region_list_target_table;
+	list<TargetEntry> source_list_target_table;
 
-	region_list_target_table.push_back (TargetEntry ("text/plain"));
-	region_list_target_table.push_back (TargetEntry ("text/uri-list"));
-	region_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
+	source_list_target_table.push_back (TargetEntry ("text/plain"));
+	source_list_target_table.push_back (TargetEntry ("text/uri-list"));
+	source_list_target_table.push_back (TargetEntry ("application/x-rootwin-drop"));
 
-	_display.add_drop_targets (region_list_target_table);
+	_display.add_drop_targets (source_list_target_table);
 	_display.signal_drag_data_received().connect (sigc::mem_fun(*this, &EditorSources::drag_data_received));
 
 	_scroller.add (_display);
