@@ -60,8 +60,6 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	int flush_header ();
 	void flush ();
 
-	samplepos_t natural_position () const;
-
 	samplepos_t last_capture_start_sample() const;
 	void mark_capture_start (samplepos_t);
 	void mark_capture_end ();
@@ -81,7 +79,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	void close ();
 
 	void set_path (const std::string& p);
-	void set_header_timeline_position ();
+	void set_header_natural_position ();
 
 	samplecnt_t read_unlocked (Sample *dst, samplepos_t start, samplecnt_t cnt) const;
 	samplecnt_t write_unlocked (Sample *dst, samplecnt_t cnt);
@@ -111,7 +109,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	Sample*        xfade_buf;
 
 	samplecnt_t crossfade (Sample* data, samplecnt_t cnt, int dir);
-	void set_timeline_position (samplepos_t);
+	void set_natural_position (samplepos_t);
 	samplecnt_t destructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	samplecnt_t nondestructive_write_unlocked (Sample *dst, samplecnt_t cnt);
 	void handle_header_position_change ();

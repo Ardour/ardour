@@ -267,7 +267,7 @@ AudioSource::initialize_peakfile (const string& audio_path, const bool in_sessio
 
 		/* we found it in the peaks dir, so check it out */
 
-		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_timeline_position) / _FPP) * sizeof (PeakData)))) {
+		if (statbuf.st_size == 0 || (statbuf.st_size < (off_t) ((length(_natural_position) / _FPP) * sizeof (PeakData)))) {
 			DEBUG_TRACE(DEBUG::Peaks, string_compose("Peakfile %1 is empty\n", _peakpath));
 			_peaks_built = false;
 		} else {
@@ -1066,7 +1066,7 @@ samplecnt_t
 AudioSource::available_peaks (double zoom_factor) const
 {
 	if (zoom_factor < _FPP) {
-		return length(_timeline_position); // peak data will come from the audio file
+		return length(_natural_position); // peak data will come from the audio file
 	}
 
 	/* peak data comes from peakfile, but the filesize might not represent

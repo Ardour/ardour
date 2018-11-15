@@ -59,8 +59,9 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	: SessionObject(s, name)
 	, _type(type)
 	, _flags(flags)
-	, _timeline_position(0)
-        , _use_count (0)
+	, _natural_position(0)
+	, _have_natural_position (false)
+	, _use_count (0)
 	, _level (0)
 {
 	_analysed = false;
@@ -72,7 +73,8 @@ Source::Source (Session& s, const XMLNode& node)
 	: SessionObject(s, "unnamed source")
 	, _type(DataType::AUDIO)
 	, _flags (Flag (Writable|CanRename))
-	, _timeline_position(0)
+	, _natural_position(0)
+	, _have_natural_position (false)
         , _use_count (0)
 	, _level (0)
 {
@@ -111,7 +113,12 @@ Source::get_state ()
 	node->set_property ("id", id());
 
 	if (_timestamp != 0) {
-		node->set_property ("timestamp", (int64_t)_timestamp);
+		int64_t t = _timestamp;
+		node->set_property ("timestamp", t);
+	}
+
+	if (_have_natural_position) {
+		node->set_property ("natural-position", _natural_position);
 	}
 
 	return *node;
@@ -135,13 +142,25 @@ Source::set_state (const XMLNode& node, int version)
 
 	int64_t t;
 	if (node.get_property ("timestamp", t)) {
-		_timestamp = t;
+		_timestamp = (time_t) t;
+	}
+
+	samplepos_t ts;
+	if (node.get_property ("natural-position", ts)) {
+		_natural_position = ts;
+		_have_natural_position = true;
+	} else if (node.get_property ("timeline-position", ts)) {
+		/* some older versions of ardour might have stored this with
+		   this property name.
+		*/
+		_natural_position = ts;
+		_have_natural_position = true;
 	}
 
 	if (!node.get_property (X_("flags"), _flags)) {
 		_flags = Flag (0);
 	}
-	
+
 	if (!node.get_property (X_("take-id"), _take_id)) {
 		_take_id = "";
 	}
@@ -273,9 +292,10 @@ Source::mark_for_remove ()
 }
 
 void
-Source::set_timeline_position (samplepos_t pos)
+Source::set_natural_position (samplepos_t pos)
 {
-	_timeline_position = pos;
+	_natural_position = pos;
+	_have_natural_position = true;
 }
 
 void
@@ -332,4 +352,3 @@ Source::writable () const
 {
         return (_flags & Writable) && _session.writable();
 }
-

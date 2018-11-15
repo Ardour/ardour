@@ -76,7 +76,7 @@ write_bbt_source_to_source (boost::shared_ptr<MidiSource>  bbt_source, boost::sh
 
 	bbt_source->model()->set_percussive (old_percussive);
 	source->mark_streaming_write_completed (source_lock);
-	source->set_timeline_position (bbt_source->timeline_position());
+	source->set_natural_position (bbt_source->natural_position());
 
 	return true;
 }

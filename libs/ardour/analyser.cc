@@ -97,7 +97,7 @@ Analyser::work ()
 
 		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
 
-		if (afs && afs->length(afs->timeline_position())) {
+		if (afs && afs->length(afs->natural_position())) {
 			Glib::Threads::Mutex::Lock lm (analysis_active_lock);
 			analyse_audio_file_source (afs);
 		}

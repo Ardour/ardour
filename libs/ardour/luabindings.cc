@@ -1285,7 +1285,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("writable", &Source::writable)
 		.addFunction ("has_been_analysed", &Source::has_been_analysed)
 		.addFunction ("can_be_analysed", &Source::can_be_analysed)
-		.addFunction ("timeline_position", &Source::timeline_position)
+		.addFunction ("timeline_position", &Source::natural_position) /* duplicate */
 		.addFunction ("use_count", &Source::use_count)
 		.addFunction ("used", &Source::used)
 		.addFunction ("ancestor_name", &Source::ancestor_name)

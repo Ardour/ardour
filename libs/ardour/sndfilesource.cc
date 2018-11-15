@@ -350,7 +350,7 @@ SndFileSource::init_sndfile ()
 
 	if (destructive()) {
 		xfade_buf = new Sample[xfade_samples];
-		_timeline_position = header_position_offset;
+		_natural_position = header_position_offset;
 	}
 
 	AudioFileSource::HeaderPositionOffsetChanged.connect_same_thread (header_position_connection, boost::bind (&SndFileSource::handle_header_position_change, this));
@@ -447,15 +447,22 @@ SndFileSource::open ()
 
 	if (_file_is_new && _length == 0 && writable() && !bwf_info_exists) {
 		/* newly created files will not have a BWF header at this point in time.
-		 * Import will have called Source::set_timeline_position() if one exists
+		 * Import will have called Source::set_natural_position() if one exists
 		 * in the original. */
-		header_position_offset = _timeline_position;
+		header_position_offset = _natural_position;
 	}
 
-	/* Set our timeline position to either the time reference from a BWF header or the current
-	   start of the session.
-	*/
-	set_timeline_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
+	if (destructive()) {
+		/* Set our timeline position to either the time reference from a BWF header or the current
+		   start of the session.
+		*/
+		set_natural_position (bwf_info_exists ? _broadcast_info->get_time_reference() : header_position_offset);
+	} else {
+		/* If a BWF header exists, set our _natural_position from it */
+		if (bwf_info_exists) {
+			set_natural_position (_broadcast_info->get_time_reference());
+		}
+	}
 
 	if (_length != 0 && !bwf_info_exists) {
 		delete _broadcast_info;
@@ -668,7 +675,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, samplecnt_t cnt)
 		_capture_end = false;
 
 		/* move to the correct location place */
-		file_pos = capture_start_sample - _timeline_position;
+		file_pos = capture_start_sample - _natural_position;
 
 		// split cnt in half
 		samplecnt_t subcnt = cnt / 2;
@@ -700,7 +707,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, samplecnt_t cnt)
 		_capture_end = false;
 
 		/* move to the correct location place */
-		file_pos = capture_start_sample - _timeline_position;
+		file_pos = capture_start_sample - _natural_position;
 
 		if (crossfade (data, cnt, 1) != cnt) {
 			return 0;
@@ -742,7 +749,7 @@ SndFileSource::destructive_write_unlocked (Sample* data, samplecnt_t cnt)
 int
 SndFileSource::update_header (samplepos_t when, struct tm& now, time_t tnow)
 {
-	set_timeline_position (when);
+	set_natural_position (when);
 
 	if (_flags & Broadcast) {
 		if (setup_broadcast_info (when, now, tnow)) {
@@ -810,20 +817,20 @@ SndFileSource::setup_broadcast_info (samplepos_t /*when*/, struct tm& now, time_
 
 	/* now update header position taking header offset into account */
 
-	set_header_timeline_position ();
+	set_header_natural_position ();
 
 	return 0;
 }
 
 void
-SndFileSource::set_header_timeline_position ()
+SndFileSource::set_header_natural_position ()
 {
 	if (!(_flags & Broadcast)) {
 		return;
 	}
 	assert (_broadcast_info);
 
-	_broadcast_info->set_time_reference (_timeline_position);
+	_broadcast_info->set_time_reference (_natural_position);
 
 	if (_sndfile == 0 || !_broadcast_info->write_to_file (_sndfile)) {
 		error << string_compose (_("cannot set broadcast info for audio file %1 (%2); dropping broadcast info for this file"),
@@ -855,12 +862,6 @@ SndFileSource::write_float (Sample* data, samplepos_t sample_pos, samplecnt_t cn
 	return cnt;
 }
 
-samplepos_t
-SndFileSource::natural_position() const
-{
-	return _timeline_position;
-}
-
 void
 SndFileSource::clear_capture_marks ()
 {
@@ -873,7 +874,7 @@ void
 SndFileSource::mark_capture_start (samplepos_t pos)
 {
 	if (destructive()) {
-		if (pos < _timeline_position) {
+		if (pos < _natural_position) {
 			_capture_start = false;
 		} else {
 			_capture_start = true;
@@ -1031,8 +1032,8 @@ SndFileSource::handle_header_position_change ()
 			error << string_compose(_("Filesource: start time is already set for existing file (%1): Cannot change start time."), _path ) << endmsg;
 			//in the future, pop up a dialog here that allows user to regenerate file with new start offset
 		} else if (writable()) {
-			_timeline_position = header_position_offset;
-			set_header_timeline_position ();  //this will get flushed if/when the file is recorded to
+			_natural_position = header_position_offset;
+			set_header_natural_position ();  //this will get flushed if/when the file is recorded to
 		}
 	}
 }
@@ -1056,14 +1057,14 @@ SndFileSource::setup_standard_crossfades (Session const & s, samplecnt_t rate)
 }
 
 void
-SndFileSource::set_timeline_position (samplepos_t pos)
+SndFileSource::set_natural_position (samplepos_t pos)
 {
 	// destructive track timeline postion does not change
 	// except at instantion or when header_position_offset
 	// (session start) changes
 
 	if (!destructive()) {
-		AudioFileSource::set_timeline_position (pos);
+		AudioFileSource::set_natural_position (pos);
 	}
 }
 
@@ -1149,4 +1150,3 @@ SndFileSource::set_path (const string& p)
 {
         FileSource::set_path (p);
 }
-

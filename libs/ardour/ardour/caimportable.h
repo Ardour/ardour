@@ -43,7 +43,6 @@ class LIBARDOUR_API CAImportableSource : public ImportableSource {
 	samplecnt_t length() const;
 	samplecnt_t samplerate() const;
 	void      seek (samplepos_t pos);
-	samplepos_t natural_position() const { return 0; }
 	bool clamped_at_unity () const { return false; }
 
    protected:

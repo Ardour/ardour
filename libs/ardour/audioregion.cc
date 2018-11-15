@@ -462,7 +462,7 @@ AudioRegion::master_read_at (Sample *buf, Sample* /*mixdown_buffer*/, float* /*g
 
 	assert (cnt >= 0);
 	return read_from_sources (
-		_master_sources, _master_sources.front()->length (_master_sources.front()->timeline_position()),
+		_master_sources, _master_sources.front()->length (_master_sources.front()->natural_position()),
 		buf, position, cnt, chan_n
 		);
 }

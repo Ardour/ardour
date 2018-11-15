@@ -46,7 +46,7 @@ class LIBARDOUR_API CoreAudioSource : public AudioFileSource {
     uint32_t channel_count () const { return n_channels; }
 
 	int flush_header () {return 0;};
-	void set_header_timeline_position () {};
+	void set_header_natural_position () {};
 	bool clamped_at_unity () const { return false; }
 
 	void flush () {}

@@ -6274,7 +6274,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 					if (!endpoint || for_export) {
 						ev.set_time(ev.time() - position);
 					}
-					ms->append_event_samples(lock, ev, ms->timeline_position());
+					ms->append_event_samples(lock, ev, ms->natural_position());
 				}
 			}
 		}
@@ -6328,7 +6328,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		PropertyList plist;
 
 		plist.add (Properties::start, 0);
-		plist.add (Properties::length, srcs.front()->length(srcs.front()->timeline_position()));
+		plist.add (Properties::length, srcs.front()->length(srcs.front()->natural_position()));
 		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));
 
 		result = RegionFactory::create (srcs, plist);

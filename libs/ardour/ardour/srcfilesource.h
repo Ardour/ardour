@@ -38,7 +38,7 @@ public:
 	int  update_header (samplepos_t /*when*/, struct tm&, time_t) { return 0; }
 	int  flush_header () { return 0; }
 	void flush () { }
-	void set_header_timeline_position () {};
+	void set_header_natural_position () {};
 	void set_length (samplecnt_t /*len*/) {};
 
 	float sample_rate () const { return _session.nominal_sample_rate(); }
