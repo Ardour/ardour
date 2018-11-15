@@ -622,7 +622,8 @@ SMFSource::load_model (const Glib::Threads::Mutex::Lock& lock, bool force_reload
 	}
 
 	if (!_model) {
-		_model = boost::shared_ptr<MidiModel> (new MidiModel (shared_from_this ()));
+		boost::shared_ptr<SMFSource> smf = boost::dynamic_pointer_cast<SMFSource> ( shared_from_this () );
+		_model = boost::shared_ptr<MidiModel> (new MidiModel (smf));
 	} else {
 		_model->clear();
 	}

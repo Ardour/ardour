@@ -1220,6 +1220,8 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 			strftime (buf, sizeof(buf), "%F %H.%M.%S", &when);
 			as->set_take_id ( buf );
 			
+			Source::SourcePropertyChanged(as);
+			
 			if (Config->get_auto_analyse_audio()) {
 				Analyser::queue_source_for_analysis (as, true);
 			}

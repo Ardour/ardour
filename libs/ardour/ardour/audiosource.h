@@ -39,8 +39,7 @@
 namespace ARDOUR {
 
 class LIBARDOUR_API AudioSource : virtual public Source,
-		public ARDOUR::Readable,
-		public boost::enable_shared_from_this<ARDOUR::AudioSource>
+		public ARDOUR::Readable
 {
   public:
 	AudioSource (Session&, const std::string& name);

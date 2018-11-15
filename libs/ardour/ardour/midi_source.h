@@ -43,7 +43,7 @@ class MidiStateTracker;
 template<typename T> class MidiRingBuffer;
 
 /** Source for MIDI data */
-class LIBARDOUR_API MidiSource : virtual public Source, public boost::enable_shared_from_this<MidiSource>
+class LIBARDOUR_API MidiSource : virtual public Source
 {
   public:
 	typedef Temporal::Beats TimeType;
