@@ -194,7 +194,7 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 
 	if ((other = boost::dynamic_pointer_cast<AudioRegion>(region)) != 0) {
 
-		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->timeline_position())
+		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->natural_position())
 
 		ret = boost::shared_ptr<Region> (new AudioRegion (other, srcs));
 

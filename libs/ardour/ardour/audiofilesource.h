@@ -99,7 +99,7 @@ protected:
 
 	int init (const std::string& idstr, bool must_exist);
 
-	virtual void set_header_timeline_position () = 0;
+	virtual void set_header_natural_position () = 0;
 	virtual void handle_header_position_change () {}
 
 	int move_dependents_to_trash();

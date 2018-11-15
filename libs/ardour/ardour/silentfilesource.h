@@ -59,7 +59,7 @@ protected:
 
 	samplecnt_t write_unlocked (Sample */*dst*/, samplecnt_t /*cnt*/) { return 0; }
 
-	void set_header_timeline_position () {}
+	void set_header_natural_position () {}
 
 	int read_peaks_with_fpp (PeakData *peaks, samplecnt_t npeaks, samplepos_t /*start*/, samplecnt_t /*cnt*/,
 				 double /*samples_per_pixel*/, samplecnt_t /*fpp*/) const {

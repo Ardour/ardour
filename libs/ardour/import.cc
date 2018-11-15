@@ -184,7 +184,7 @@ static bool
 create_mono_sources_for_writing (const vector<string>& new_paths,
                                  Session& sess, uint32_t samplerate,
                                  vector<boost::shared_ptr<Source> >& newfiles,
-                                 samplepos_t timeline_position)
+                                 samplepos_t natural_position)
 {
 	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 
@@ -212,7 +212,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 
 		boost::shared_ptr<AudioFileSource> afs;
 		if ((afs = boost::dynamic_pointer_cast<AudioFileSource>(source)) != 0) {
-			afs->set_timeline_position(timeline_position);
+			afs->set_natural_position (natural_position);
 		}
 	}
 	return true;

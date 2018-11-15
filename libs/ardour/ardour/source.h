@@ -74,8 +74,6 @@ public:
 	void                 set_take_id (std::string id) { _take_id =id; }
 	const std::string&   take_id ()        const { return _take_id; }
 
-	virtual samplepos_t natural_position() const { return 0; }
-
 	void mark_for_remove();
 
 	virtual void mark_streaming_write_started (const Lock& lock) {}
@@ -104,8 +102,9 @@ public:
 	std::string get_transients_path() const;
 	int load_transients (const std::string&);
 
-	samplepos_t  timeline_position() const { return _timeline_position; }
-	virtual void set_timeline_position (samplepos_t pos);
+	virtual samplepos_t natural_position() const { return _natural_position; }
+	virtual void set_natural_position (samplepos_t pos);
+	bool have_natural_position() const { return _have_natural_position; }
 
 	void set_allow_remove_if_empty (bool yn);
 
@@ -129,7 +128,8 @@ public:
 	Flag                _flags;
 	time_t              _timestamp;
 	std::string         _take_id;
-	samplepos_t          _timeline_position;
+	samplepos_t          _natural_position;
+	samplepos_t          _have_natural_position;
 	bool                _analysed;
         mutable Glib::Threads::Mutex _lock;
         mutable Glib::Threads::Mutex _analysis_lock;
