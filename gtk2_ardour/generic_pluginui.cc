@@ -209,6 +209,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PluginInsert> pi, bool scrol
 		scroller.set_name ("PluginEditor");
 	} else {
 		scroller.signal_size_request().connect (sigc::mem_fun(*this, &GenericPluginUI::scroller_size_request));
+		scroller.signal_realize().connect (sigc::mem_fun(scroller, &Widget::queue_resize));
 		scroller.set_policy (Gtk::POLICY_AUTOMATIC, Gtk::POLICY_NEVER);
 	}
 
@@ -228,15 +229,15 @@ GenericPluginUI::scroller_size_request (Gtk::Requisition* a)
 {
 	GtkRequisition request = hpacker.size_request();
 
-	Glib::RefPtr<Gdk::Window> window (get_window());
+	Glib::RefPtr<Gdk::Window> window (scroller.get_window());
 	Glib::RefPtr<Gdk::Screen> screen;
 
 	if (window) {
-		screen = get_screen();
+		screen = window->get_screen();
 	}
 
 	if (!screen) {
-		a->width = request.width;
+		a->width = min(1024, request.width);
 		return;
 	}
 
